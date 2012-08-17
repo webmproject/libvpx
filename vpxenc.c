@@ -494,7 +494,7 @@ static void write_ivf_frame_header(FILE *outfile,
         return;
 
     pts = pkt->data.frame.pts;
-    mem_put_le32(header, pkt->data.frame.sz);
+    mem_put_le32(header, (int)pkt->data.frame.sz);
     mem_put_le32(header + 4, pts & 0xFFFFFFFF);
     mem_put_le32(header + 8, pts >> 32);
 
@@ -504,7 +504,7 @@ static void write_ivf_frame_header(FILE *outfile,
 static void write_ivf_frame_size(FILE *outfile, size_t size)
 {
     char             header[4];
-    mem_put_le32(header, size);
+    mem_put_le32(header, (int)size);
     (void) fwrite(header, 1, 4, outfile);
 }
 
@@ -559,7 +559,7 @@ void Ebml_Write(EbmlGlobal *glob, const void *buffer_in, unsigned long len)
 #define WRITE_BUFFER(s) \
 for(i = len-1; i>=0; i--)\
 { \
-    x = *(const s *)buffer_in >> (i * CHAR_BIT); \
+    x = (char)(*(const s *)buffer_in >> (i * CHAR_BIT)); \
     Ebml_Write(glob, &x, 1); \
 }
 void Ebml_Serialize(EbmlGlobal *glob, const void *buffer_in, int buffer_size, unsigned long len)
@@ -698,7 +698,7 @@ write_webm_seek_info(EbmlGlobal *ebml)
         Ebml_StartSubElement(ebml, &startInfo, Info);
         Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
         Ebml_SerializeFloat(ebml, Segment_Duration,
-                            ebml->last_pts_ms + frame_time);
+                            (double)(ebml->last_pts_ms + frame_time));
         Ebml_SerializeString(ebml, 0x4D80, version_string);
         Ebml_SerializeString(ebml, 0x5741, version_string);
         Ebml_EndSubElement(ebml, &startInfo);
@@ -790,7 +790,7 @@ write_webm_block(EbmlGlobal                *glob,
     if(pts_ms - glob->cluster_timecode > SHRT_MAX)
         start_cluster = 1;
     else
-        block_timecode = pts_ms - glob->cluster_timecode;
+        block_timecode = (unsigned short)pts_ms - glob->cluster_timecode;
 
     is_keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY);
     if(start_cluster || is_keyframe)
@@ -801,7 +801,7 @@ write_webm_block(EbmlGlobal                *glob,
         /* Open the new cluster */
         block_timecode = 0;
         glob->cluster_open = 1;
-        glob->cluster_timecode = pts_ms;
+        glob->cluster_timecode = (uint32_t)pts_ms;
         glob->cluster_pos = ftello(glob->stream);
         Ebml_StartSubElement(glob, &glob->startCluster, Cluster); /* cluster */
         Ebml_SerializeUnsigned(glob, Timecode, glob->cluster_timecode);
@@ -828,7 +828,7 @@ write_webm_block(EbmlGlobal                *glob,
     /* Write the Simple Block */
     Ebml_WriteID(glob, SimpleBlock);
 
-    block_length = pkt->data.frame.sz + 4;
+    block_length = (unsigned long)pkt->data.frame.sz + 4;
     block_length |= 0x10000000;
     Ebml_Serialize(glob, &block_length, sizeof(block_length), 4);
 
@@ -845,7 +845,7 @@ write_webm_block(EbmlGlobal                *glob,
         flags |= 0x08;
     Ebml_Write(glob, &flags, 1);
 
-    Ebml_Write(glob, pkt->data.frame.buf, pkt->data.frame.sz);
+    Ebml_Write(glob, pkt->data.frame.buf, (unsigned long)pkt->data.frame.sz);
 }
 
 
@@ -1336,7 +1336,7 @@ static void show_histogram(const struct hist_bucket *bucket,
         int j;
         float pct;
 
-        pct = 100.0 * (float)bucket[i].count / (float)total;
+        pct = (float)(100.0 * bucket[i].count / total);
         len = HIST_BAR_MAX * bucket[i].count / scale;
         if(len < 1)
             len = 1;
@@ -1438,7 +1438,7 @@ static void update_rate_histogram(struct rate_hist          *hist,
 
     idx = hist->frames++ % hist->samples;
     hist->pts[idx] = now;
-    hist->sz[idx] = pkt->data.frame.sz;
+    hist->sz[idx] = (int)pkt->data.frame.sz;
 
     if(now < cfg->rc_buf_initial_sz)
         return;
@@ -1460,15 +1460,15 @@ static void update_rate_histogram(struct rate_hist          *hist,
         return;
 
     avg_bitrate = sum_sz * 8 * 1000 / (now - then);
-    idx = avg_bitrate * (RATE_BINS/2) / (cfg->rc_target_bitrate * 1000);
+    idx = (int)(avg_bitrate * (RATE_BINS/2) / (cfg->rc_target_bitrate * 1000));
     if(idx < 0)
         idx = 0;
     if(idx > RATE_BINS-1)
         idx = RATE_BINS-1;
     if(hist->bucket[idx].low > avg_bitrate)
-        hist->bucket[idx].low = avg_bitrate;
+        hist->bucket[idx].low = (int)avg_bitrate;
     if(hist->bucket[idx].high < avg_bitrate)
-        hist->bucket[idx].high = avg_bitrate;
+        hist->bucket[idx].high = (int)avg_bitrate;
     hist->bucket[idx].count++;
     hist->total++;
 }
@@ -2011,7 +2011,7 @@ static void set_default_kf_interval(struct stream_state  *stream,
     {
         double framerate = (double)global->framerate.num/global->framerate.den;
         if (framerate > 0.0)
-            stream->config.cfg.kf_max_dist = 5.0*framerate;
+            stream->config.cfg.kf_max_dist = (unsigned int)(5.0*framerate);
     }
 }
 
@@ -2191,7 +2191,7 @@ static void encode_frame(struct stream_state  *stream,
                         / cfg->g_timebase.num / global->framerate.num;
     vpx_usec_timer_start(&timer);
     vpx_codec_encode(&stream->encoder, img, frame_start,
-                     next_frame_start - frame_start,
+                     (unsigned long)(next_frame_start - frame_start),
                      0, global->deadline);
     vpx_usec_timer_mark(&timer);
     stream->cx_time += vpx_usec_timer_elapsed(&timer);
@@ -2244,7 +2244,8 @@ static void get_cx_data(struct stream_state  *stream,
                 /* Update the hash */
                 if(!stream->ebml.debug)
                     stream->hash = murmur(pkt->data.frame.buf,
-                                          pkt->data.frame.sz, stream->hash);
+                                          (int)pkt->data.frame.sz,
+                                          stream->hash);
 
                 write_webm_block(&stream->ebml, cfg, pkt);
             }
@@ -2317,8 +2318,8 @@ static void show_psnr(struct stream_state  *stream)
         return;
 
     fprintf(stderr, "Stream %d PSNR (Overall/Avg/Y/U/V)", stream->index);
-    ovpsnr = vp8_mse2psnr(stream->psnr_samples_total, 255.0,
-                          stream->psnr_sse_total);
+    ovpsnr = vp8_mse2psnr((double)stream->psnr_samples_total, 255.0,
+                          (double)stream->psnr_sse_total);
     fprintf(stderr, " %.3f", ovpsnr);
 
     for (i = 0; i < 4; i++)
@@ -2331,7 +2332,7 @@ static void show_psnr(struct stream_state  *stream)
 
 float usec_to_fps(uint64_t usec, unsigned int frames)
 {
-    return usec > 0 ? (float)frames * 1000000.0 / (float)usec : 0;
+    return (float)(usec > 0 ? frames * 1000000.0 / (float)usec : 0);
 }
 
 
@@ -2495,7 +2496,7 @@ int main(int argc, const char **argv_)
                                         frame_avail ? &raw : NULL,
                                         frames_in));
             vpx_usec_timer_mark(&timer);
-            cx_time += vpx_usec_timer_elapsed(&timer);
+            cx_time += (unsigned long)vpx_usec_timer_elapsed(&timer);
 
             FOREACH_STREAM(update_quantizer_histogram(stream));
 

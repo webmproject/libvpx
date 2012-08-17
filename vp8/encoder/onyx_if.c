@@ -1235,7 +1235,7 @@ rescale(int val, int num, int denom)
     int64_t llden = denom;
     int64_t llval = val;
 
-    return llval * llnum / llden;
+    return (int)(llval * llnum / llden);
 }
 
 
@@ -1305,28 +1305,29 @@ static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
             lc->maximum_buffer_size_in_ms   = oxcf->maximum_buffer_size;
 
             lc->starting_buffer_level =
-              rescale(oxcf->starting_buffer_level,
+              rescale((int)(oxcf->starting_buffer_level),
                           lc->target_bandwidth, 1000);
 
             if (oxcf->optimal_buffer_level == 0)
                 lc->optimal_buffer_level = lc->target_bandwidth / 8;
             else
                 lc->optimal_buffer_level =
-                  rescale(oxcf->optimal_buffer_level,
+                  rescale((int)(oxcf->optimal_buffer_level),
                           lc->target_bandwidth, 1000);
 
             if (oxcf->maximum_buffer_size == 0)
                 lc->maximum_buffer_size = lc->target_bandwidth / 8;
             else
                 lc->maximum_buffer_size =
-                  rescale(oxcf->maximum_buffer_size,
+                  rescale((int)oxcf->maximum_buffer_size,
                           lc->target_bandwidth, 1000);
 
             /* Work out the average size of a frame within this layer */
             if (i > 0)
-                lc->avg_frame_size_for_layer = (cpi->oxcf.target_bitrate[i] -
-                    cpi->oxcf.target_bitrate[i-1]) * 1000 /
-                    (lc->frame_rate - prev_layer_frame_rate);
+                lc->avg_frame_size_for_layer =
+                  (int)((cpi->oxcf.target_bitrate[i] -
+                         cpi->oxcf.target_bitrate[i-1]) * 1000 /
+                        (lc->frame_rate - prev_layer_frame_rate));
 
             lc->active_worst_quality         = cpi->oxcf.worst_allowed_q;
             lc->active_best_quality          = cpi->oxcf.best_allowed_q;
@@ -1342,7 +1343,7 @@ static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
             lc->rate_correction_factor            = 1.0;
             lc->key_frame_rate_correction_factor  = 1.0;
             lc->gf_rate_correction_factor         = 1.0;
-            lc->inter_frame_target                = 0.0;
+            lc->inter_frame_target                = 0;
 
             prev_layer_frame_rate = lc->frame_rate;
         }
@@ -1379,28 +1380,29 @@ static void update_layer_contexts (VP8_COMP *cpi)
             lc->target_bandwidth = oxcf->target_bitrate[i] * 1000;
 
             lc->starting_buffer_level = rescale(
-                          oxcf->starting_buffer_level_in_ms,
+                          (int)oxcf->starting_buffer_level_in_ms,
                           lc->target_bandwidth, 1000);
 
             if (oxcf->optimal_buffer_level == 0)
                 lc->optimal_buffer_level = lc->target_bandwidth / 8;
             else
                 lc->optimal_buffer_level = rescale(
-                          oxcf->optimal_buffer_level_in_ms,
+                          (int)oxcf->optimal_buffer_level_in_ms,
                           lc->target_bandwidth, 1000);
 
             if (oxcf->maximum_buffer_size == 0)
                 lc->maximum_buffer_size = lc->target_bandwidth / 8;
             else
                 lc->maximum_buffer_size = rescale(
-                          oxcf->maximum_buffer_size_in_ms,
+                          (int)oxcf->maximum_buffer_size_in_ms,
                           lc->target_bandwidth, 1000);
 
             /* Work out the average size of a frame within this layer */
             if (i > 0)
-                lc->avg_frame_size_for_layer = (oxcf->target_bitrate[i] -
-                    oxcf->target_bitrate[i-1]) * 1000 /
-                    (lc->frame_rate - prev_layer_frame_rate);
+                lc->avg_frame_size_for_layer =
+                   (int)((oxcf->target_bitrate[i] -
+                          oxcf->target_bitrate[i-1]) * 1000 /
+                          (lc->frame_rate - prev_layer_frame_rate));
 
             prev_layer_frame_rate = lc->frame_rate;
         }
@@ -1573,7 +1575,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     cpi->oxcf.target_bandwidth       *= 1000;
 
     cpi->oxcf.starting_buffer_level =
-        rescale(cpi->oxcf.starting_buffer_level,
+        rescale((int)cpi->oxcf.starting_buffer_level,
                 cpi->oxcf.target_bandwidth, 1000);
 
     /* Set or reset optimal and maximum buffer levels. */
@@ -1581,14 +1583,14 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
     else
         cpi->oxcf.optimal_buffer_level =
-            rescale(cpi->oxcf.optimal_buffer_level,
+            rescale((int)cpi->oxcf.optimal_buffer_level,
                     cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.maximum_buffer_size == 0)
         cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
     else
         cpi->oxcf.maximum_buffer_size =
-            rescale(cpi->oxcf.maximum_buffer_size,
+            rescale((int)cpi->oxcf.maximum_buffer_size,
                     cpi->oxcf.target_bandwidth, 1000);
 
     /* Set up frame rate and related parameters rate control values. */
@@ -1924,7 +1926,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     else if (cpi->pass == 2)
     {
         size_t packet_sz = sizeof(FIRSTPASS_STATS);
-        int packets = oxcf->two_pass_stats_in.sz / packet_sz;
+        int packets = (int)(oxcf->two_pass_stats_in.sz / packet_sz);
 
         cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
         cpi->twopass.stats_in = cpi->twopass.stats_in_start;
@@ -2110,7 +2112,7 @@ void vp8_remove_compressor(VP8_COMP **ptr)
 
                     fprintf(f, "Layer\tBitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\t"
                                "GLPsnrP\tVPXSSIM\t\n");
-                    for (i=0; i<cpi->oxcf.number_of_layers; i++)
+                    for (i=0; i<(int)cpi->oxcf.number_of_layers; i++)
                     {
                         double dr = (double)cpi->bytes_in_layer[i] *
                                               8.0 / 1000.0  / time_encoded;
@@ -2161,7 +2163,7 @@ void vp8_remove_compressor(VP8_COMP **ptr)
 
                     fprintf(f, "Layer\tBitRate\tSSIM_Y\tSSIM_U\tSSIM_V\tSSIM_A\t"
                                "Time(us)\n");
-                    for (i=0; i<cpi->oxcf.number_of_layers; i++)
+                    for (i=0; i<(int)cpi->oxcf.number_of_layers; i++)
                     {
                         double dr = (double)cpi->bytes_in_layer[i] *
                                     8.0 / 1000.0  / time_encoded;
@@ -2469,7 +2471,7 @@ static void generate_psnr_packet(VP8_COMP *cpi)
 
     for (i = 0; i < 4; i++)
         pkt.data.psnr.psnr[i] = vp8_mse2psnr(pkt.data.psnr.samples[i], 255.0,
-                                             pkt.data.psnr.sse[i]);
+                                             (double)(pkt.data.psnr.sse[i]));
 
     vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
 }
@@ -3291,7 +3293,8 @@ static void encode_frame_to_data_rate
     int undershoot_seen = 0;
 #endif
 
-    int drop_mark = cpi->oxcf.drop_frames_water_mark * cpi->oxcf.optimal_buffer_level / 100;
+    int drop_mark = (int)(cpi->oxcf.drop_frames_water_mark *
+                          cpi->oxcf.optimal_buffer_level / 100);
     int drop_mark75 = drop_mark * 2 / 3;
     int drop_mark50 = drop_mark / 4;
     int drop_mark25 = drop_mark / 8;
@@ -3327,7 +3330,8 @@ static void encode_frame_to_data_rate
             /* Per frame bit target for the alt ref frame */
             cpi->per_frame_bandwidth = cpi->twopass.gf_bits;
             /* per second target bitrate */
-            cpi->target_bandwidth = cpi->twopass.gf_bits * cpi->output_frame_rate;
+            cpi->target_bandwidth = (int)(cpi->twopass.gf_bits *
+                                          cpi->output_frame_rate);
         }
     }
     else
@@ -3576,10 +3580,16 @@ static void encode_frame_to_data_rate
 
             if (cpi->buffer_level < cpi->oxcf.maximum_buffer_size)
             {
-                buff_lvl_step = (cpi->oxcf.maximum_buffer_size - cpi->oxcf.optimal_buffer_level) / Adjustment;
+                buff_lvl_step = (int)
+                                ((cpi->oxcf.maximum_buffer_size -
+                                  cpi->oxcf.optimal_buffer_level) /
+                                  Adjustment);
 
                 if (buff_lvl_step)
-                    Adjustment = (cpi->buffer_level - cpi->oxcf.optimal_buffer_level) / buff_lvl_step;
+                    Adjustment = (int)
+                                 ((cpi->buffer_level -
+                                 cpi->oxcf.optimal_buffer_level) /
+                                 buff_lvl_step);
                 else
                     Adjustment = 0;
             }
@@ -3700,8 +3710,12 @@ static void encode_frame_to_data_rate
 
             else if (cpi->buffer_level > cpi->oxcf.optimal_buffer_level)
             {
-                int Fraction = ((cpi->buffer_level - cpi->oxcf.optimal_buffer_level) * 128) / (cpi->oxcf.maximum_buffer_size - cpi->oxcf.optimal_buffer_level);
-                int min_qadjustment = ((cpi->active_best_quality - cpi->best_quality) * Fraction) / 128;
+                int Fraction = (int)
+                  (((cpi->buffer_level - cpi->oxcf.optimal_buffer_level) * 128)
+                  / (cpi->oxcf.maximum_buffer_size -
+                  cpi->oxcf.optimal_buffer_level));
+                int min_qadjustment = ((cpi->active_best_quality -
+                                        cpi->best_quality) * Fraction) / 128;
 
                 cpi->active_best_quality -= min_qadjustment;
             }
@@ -4462,8 +4476,9 @@ static void encode_frame_to_data_rate
         for (i=cpi->current_layer+1; i<cpi->oxcf.number_of_layers; i++)
         {
             LAYER_CONTEXT *lc = &cpi->layer_context[i];
-            int bits_off_for_this_layer = lc->target_bandwidth / lc->frame_rate
-                                                - cpi->projected_frame_size;
+            int bits_off_for_this_layer =
+               (int)(lc->target_bandwidth / lc->frame_rate -
+                     cpi->projected_frame_size);
 
             lc->bits_off_target += bits_off_for_this_layer;
 
@@ -5003,7 +5018,8 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                             - cpi->last_time_stamp_seen;
             /* do a step update if the duration changes by 10% */
             if (last_duration)
-                step = ((this_duration - last_duration) * 10 / last_duration);
+                step = (int)(((this_duration - last_duration) *
+                            10 / last_duration));
         }
 
         if (this_duration)
@@ -5018,7 +5034,8 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                  * frame rate. If we haven't seen 1 second yet, then average
                  * over the whole interval seen.
                  */
-                interval = cpi->source->ts_end - cpi->first_time_stamp_ever;
+                interval = (double)(cpi->source->ts_end -
+                                    cpi->first_time_stamp_ever);
                 if(interval > 10000000.0)
                     interval = 10000000;
 
@@ -5150,7 +5167,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
         vpx_usec_timer_mark(&tsctimer);
         vpx_usec_timer_mark(&ticktimer);
 
-        duration = vpx_usec_timer_elapsed(&ticktimer);
+        duration = (int)(vpx_usec_timer_elapsed(&ticktimer));
         duration2 = (unsigned int)((double)duration / 2);
 
         if (cm->frame_type != KEY_FRAME)
@@ -5229,14 +5246,14 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
             if (cpi->b_calculate_psnr)
             {
-                double ye,ue,ve;
+                uint64_t ye,ue,ve;
                 double frame_psnr;
                 YV12_BUFFER_CONFIG      *orig = cpi->Source;
                 YV12_BUFFER_CONFIG      *recon = cpi->common.frame_to_show;
                 int y_samples = orig->y_height * orig->y_width ;
                 int uv_samples = orig->uv_height * orig->uv_width ;
                 int t_samples = y_samples + 2 * uv_samples;
-                int64_t sq_error, sq_error2;
+                double sq_error, sq_error2;
 
                 ye = calc_plane_error(orig->y_buffer, orig->y_stride,
                   recon->y_buffer, recon->y_stride, orig->y_width, orig->y_height);
@@ -5247,13 +5264,13 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
                   recon->v_buffer, recon->uv_stride, orig->uv_width, orig->uv_height);
 
-                sq_error = ye + ue + ve;
+                sq_error = (double)(ye + ue + ve);
 
                 frame_psnr = vp8_mse2psnr(t_samples, 255.0, sq_error);
 
-                cpi->total_y += vp8_mse2psnr(y_samples, 255.0, ye);
-                cpi->total_u += vp8_mse2psnr(uv_samples, 255.0, ue);
-                cpi->total_v += vp8_mse2psnr(uv_samples, 255.0, ve);
+                cpi->total_y += vp8_mse2psnr(y_samples, 255.0, (double)ye);
+                cpi->total_u += vp8_mse2psnr(uv_samples, 255.0, (double)ue);
+                cpi->total_v += vp8_mse2psnr(uv_samples, 255.0, (double)ve);
                 cpi->total_sq_error += sq_error;
                 cpi->total  += frame_psnr;
 #if CONFIG_POSTPROC
@@ -5274,13 +5291,16 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                     ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
                       pp->v_buffer, pp->uv_stride, orig->uv_width, orig->uv_height);
 
-                    sq_error2 = ye + ue + ve;
+                    sq_error2 = (double)(ye + ue + ve);
 
                     frame_psnr2 = vp8_mse2psnr(t_samples, 255.0, sq_error2);
 
-                    cpi->totalp_y += vp8_mse2psnr(y_samples, 255.0, ye);
-                    cpi->totalp_u += vp8_mse2psnr(uv_samples, 255.0, ue);
-                    cpi->totalp_v += vp8_mse2psnr(uv_samples, 255.0, ve);
+                    cpi->totalp_y += vp8_mse2psnr(y_samples,
+                                                  255.0, (double)ye);
+                    cpi->totalp_u += vp8_mse2psnr(uv_samples,
+                                                  255.0, (double)ue);
+                    cpi->totalp_v += vp8_mse2psnr(uv_samples,
+                                                  255.0, (double)ve);
                     cpi->total_sq_error2 += sq_error2;
                     cpi->totalp  += frame_psnr2;
 
@@ -5292,7 +5312,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
                     if (cpi->oxcf.number_of_layers > 1)
                     {
-                         int i;
+                         unsigned int i;
 
                          for (i=cpi->current_layer;
                                        i<cpi->oxcf.number_of_layers; i++)
@@ -5320,7 +5340,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
                 if (cpi->oxcf.number_of_layers > 1)
                 {
-                    int i;
+                    unsigned int i;
 
                     for (i=cpi->current_layer;
                          i<cpi->oxcf.number_of_layers; i++)
@@ -5428,7 +5448,7 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigne
 {
     signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
     int internal_delta_q[MAX_MB_SEGMENTS];
-    const unsigned int range = 63;
+    const int range = 63;
     int i;
 
     // This method is currently incompatible with the cyclic refresh method

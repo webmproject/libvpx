@@ -823,7 +823,8 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
             for (mb_row = 0; mb_row < cm->mb_rows; mb_row ++)
             {
-                cpi->tok_count += cpi->tplist[mb_row].stop - cpi->tplist[mb_row].start;
+                cpi->tok_count += (unsigned int)
+                  (cpi->tplist[mb_row].stop - cpi->tplist[mb_row].start);
             }
 
             if (xd->segmentation_enabled)
@@ -867,7 +868,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
                 x->src.v_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
             }
 
-            cpi->tok_count = tp - cpi->tok;
+            cpi->tok_count = (unsigned int)(tp - cpi->tok);
         }
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING

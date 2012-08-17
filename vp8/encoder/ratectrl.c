@@ -353,7 +353,7 @@ static void calc_iframe_target_size(VP8_COMP *cpi)
 {
     /* boost defaults to half second */
     int kf_boost;
-    unsigned int target;
+    uint64_t target;
 
     /* Clear down mmx registers to allow floating point in what follows */
     vp8_clear_system_state();
@@ -423,7 +423,7 @@ static void calc_iframe_target_size(VP8_COMP *cpi)
             target = max_rate;
     }
 
-    cpi->this_frame_target = target;
+    cpi->this_frame_target = (int)target;
 
     /* TODO: if we separate rate targeting from Q targetting, move this.
      * Reset the active worst quality to the baseline value for key frames.
@@ -747,7 +747,8 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
         /* Adapt target frame size with respect to any buffering constraints: */
         if (cpi->buffered_mode)
         {
-            int one_percent_bits = 1 + cpi->oxcf.optimal_buffer_level / 100;
+            int one_percent_bits = (int)
+                (1 + cpi->oxcf.optimal_buffer_level / 100);
 
             if ((cpi->buffer_level < cpi->oxcf.optimal_buffer_level) ||
                 (cpi->bits_off_target < cpi->oxcf.optimal_buffer_level))
@@ -764,9 +765,9 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
                 if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
                     (cpi->buffer_level < cpi->oxcf.optimal_buffer_level))
                 {
-                    percent_low =
-                        (cpi->oxcf.optimal_buffer_level - cpi->buffer_level) /
-                        one_percent_bits;
+                    percent_low = (int)
+                        ((cpi->oxcf.optimal_buffer_level - cpi->buffer_level) /
+                        one_percent_bits);
                 }
                 /* Are we overshooting the long term clip data rate... */
                 else if (cpi->bits_off_target < 0)
@@ -790,7 +791,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
                  */
                 if (cpi->auto_worst_q && cpi->ni_frames > 150)
                 {
-                    int critical_buffer_level;
+                    int64_t critical_buffer_level;
 
                     /* For streaming applications the most important factor is
                      * cpi->buffer_level as this takes into account the
@@ -841,7 +842,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
                              */
                             cpi->active_worst_quality =
                                 cpi->worst_quality -
-                                ((qadjustment_range * above_base) /
+                                (int)((qadjustment_range * above_base) /
                                  (cpi->oxcf.optimal_buffer_level*3>>2));
                         }
                         else
@@ -866,9 +867,9 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
                 if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
                      && (cpi->buffer_level > cpi->oxcf.optimal_buffer_level))
                 {
-                    percent_high = (cpi->buffer_level
+                    percent_high = (int)((cpi->buffer_level
                                     - cpi->oxcf.optimal_buffer_level)
-                                   / one_percent_bits;
+                                   / one_percent_bits);
                 }
                 else if (cpi->bits_off_target > cpi->oxcf.optimal_buffer_level)
                 {
@@ -956,7 +957,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
             /* Update the buffer level variable. */
             cpi->bits_off_target += cpi->av_per_frame_bandwidth;
             if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size)
-              cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
+              cpi->bits_off_target = (int)cpi->oxcf.maximum_buffer_size;
             cpi->buffer_level = cpi->bits_off_target;
         }
     }

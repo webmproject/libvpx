@@ -503,7 +503,7 @@ nestegg_seek_cb(int64_t offset, int whence, void * userdata)
         case NESTEGG_SEEK_CUR: whence = SEEK_CUR; break;
         case NESTEGG_SEEK_END: whence = SEEK_END; break;
     };
-    return fseek(userdata, offset, whence)? -1 : 0;
+    return fseek(userdata, (long)offset, whence)? -1 : 0;
 }
 
 
@@ -560,7 +560,7 @@ webm_guess_framerate(struct input_ctx *input,
         goto fail;
 
     *fps_num = (i - 1) * 1000000;
-    *fps_den = tstamp / 1000;
+    *fps_den = (unsigned int)(tstamp / 1000);
     return 0;
 fail:
     nestegg_destroy(input->nestegg_ctx);
@@ -963,7 +963,8 @@ int main(int argc, const char **argv_)
           That will have to wait until these tools support WebM natively.*/
         sprintf(buffer, "YUV4MPEG2 C%s W%u H%u F%u:%u I%c\n",
                 "420jpeg", width, height, fps_num, fps_den, 'p');
-        out_put(out, (unsigned char *)buffer, strlen(buffer), do_md5);
+        out_put(out, (unsigned char *)buffer,
+                (unsigned int)strlen(buffer), do_md5);
     }
 
     /* Try to determine the codec from the fourcc. */
@@ -1041,7 +1042,7 @@ int main(int argc, const char **argv_)
 
         vpx_usec_timer_start(&timer);
 
-        if (vpx_codec_decode(&decoder, buf, buf_sz, NULL, 0))
+        if (vpx_codec_decode(&decoder, buf, (unsigned int)buf_sz, NULL, 0))
         {
             const char *detail = vpx_codec_error_detail(&decoder);
             fprintf(stderr, "Failed to decode frame: %s\n", vpx_codec_error(&decoder));
@@ -1053,7 +1054,7 @@ int main(int argc, const char **argv_)
         }
 
         vpx_usec_timer_mark(&timer);
-        dx_time += vpx_usec_timer_elapsed(&timer);
+        dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
 
         ++frame_in;
 

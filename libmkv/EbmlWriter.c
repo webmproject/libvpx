@@ -24,7 +24,7 @@ void Ebml_WriteLen(EbmlGlobal *glob, int64_t val)
     unsigned char size = 8; /* size in bytes to output */
 
     /* mask to compare for byte size */
-    uint64_t minVal = 0xff;
+    int64_t minVal = 0xff;
 
     for (size = 1; size < 8; size ++)
     {
@@ -47,7 +47,7 @@ void Ebml_WriteString(EbmlGlobal *glob, const char *str)
     /* TODO: it's not clear from the spec whether the nul terminator
      * should be serialized too.  For now we omit the null terminator.
      */
-    Ebml_Write(glob, str, size);
+    Ebml_Write(glob, str, (unsigned long)size);
 }
 
 void Ebml_WriteUTF8(EbmlGlobal *glob, const wchar_t *wstr)
@@ -60,7 +60,7 @@ void Ebml_WriteUTF8(EbmlGlobal *glob, const wchar_t *wstr)
     const uint64_t  size = strlen;
 
     Ebml_WriteLen(glob, size);
-    Ebml_Write(glob, wstr, size);
+    Ebml_Write(glob, wstr, (unsigned long)size);
 }
 
 void Ebml_WriteID(EbmlGlobal *glob, unsigned long class_id)

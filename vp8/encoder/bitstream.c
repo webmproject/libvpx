@@ -397,7 +397,7 @@ static void pack_tokens_into_partitions_c(VP8_COMP *cpi, unsigned char *cx_data,
         {
             const TOKENEXTRA *p    = cpi->tplist[mb_row].start;
             const TOKENEXTRA *stop = cpi->tplist[mb_row].stop;
-            int tokens = stop - p;
+            int tokens = (int)(stop - p);
 
             vp8_pack_tokens_c(w, p, tokens);
         }
@@ -416,7 +416,7 @@ static void pack_mb_row_tokens_c(VP8_COMP *cpi, vp8_writer *w)
     {
         const TOKENEXTRA *p    = cpi->tplist[mb_row].start;
         const TOKENEXTRA *stop = cpi->tplist[mb_row].stop;
-        int tokens = stop - p;
+        int tokens = (int)(stop - p);
 
         vp8_pack_tokens_c(w, p, tokens);
     }

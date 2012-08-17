@@ -256,8 +256,9 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         mv_row = x->best_sse_mv.as_mv.row;
 
         if (frame == INTRA_FRAME ||
-            (mv_row *mv_row + mv_col *mv_col <= NOISE_MOTION_THRESHOLD &&
-             sse_diff < SSE_DIFF_THRESHOLD))
+            ((unsigned int)(mv_row *mv_row + mv_col *mv_col)
+              <= NOISE_MOTION_THRESHOLD &&
+             sse_diff < (int)SSE_DIFF_THRESHOLD))
         {
             /*
              * Handle intra blocks as referring to last frame with zero motion

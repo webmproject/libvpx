@@ -509,13 +509,13 @@ static unsigned int read_available_partition_size(
         if (read_is_valid(partition_size_ptr, 3, first_fragment_end))
             partition_size = read_partition_size(partition_size_ptr);
         else if (pbi->ec_active)
-            partition_size = bytes_left;
+            partition_size = (unsigned int)bytes_left;
         else
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated partition size data");
     }
     else
-        partition_size = bytes_left;
+        partition_size = (unsigned int)bytes_left;
 
     /* Validate the calculated partition length. If the buffer
      * described by the partition can't be fully read, then restrict
@@ -524,7 +524,7 @@ static unsigned int read_available_partition_size(
     if (!read_is_valid(fragment_start, partition_size, fragment_end))
     {
         if (pbi->ec_active)
-            partition_size = bytes_left;
+            partition_size = (unsigned int)bytes_left;
         else
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated packet or corrupt partition "
@@ -570,10 +570,10 @@ static void setup_token_decoder(VP8D_COMP *pbi,
             /* Size of first partition + token partition sizes element */
             ptrdiff_t ext_first_part_size = token_part_sizes -
                 pbi->fragments[0] + 3 * (num_token_partitions - 1);
-            fragment_size -= ext_first_part_size;
+            fragment_size -= (unsigned int)ext_first_part_size;
             if (fragment_size > 0)
             {
-                pbi->fragment_sizes[0] = ext_first_part_size;
+                pbi->fragment_sizes[0] = (unsigned int)ext_first_part_size;
                 /* The fragment contains an additional partition. Move to
                  * next. */
                 fragment_idx++;
@@ -592,8 +592,8 @@ static void setup_token_decoder(VP8D_COMP *pbi,
                                                  fragment_end,
                                                  fragment_idx - 1,
                                                  num_token_partitions);
-            pbi->fragment_sizes[fragment_idx] = partition_size;
-            fragment_size -= partition_size;
+            pbi->fragment_sizes[fragment_idx] = (unsigned int)partition_size;
+            fragment_size -= (unsigned int)partition_size;
             assert(fragment_idx <= num_token_partitions);
             if (fragment_size > 0)
             {
@@ -859,7 +859,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     init_frame(pbi);
 
-    if (vp8dx_start_decode(bc, data, data_end - data))
+    if (vp8dx_start_decode(bc, data, (unsigned int)(data_end - data)))
         vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate bool decoder 0");
     if (pc->frame_type == KEY_FRAME) {

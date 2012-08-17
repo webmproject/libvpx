@@ -662,7 +662,7 @@ int y4m_input_open(y4m_input *_y4m,FILE *_fin,char *_skip,int _nskip){
       _nskip--;
     }
     else{
-      ret=fread(buffer+i,1,1,_fin);
+      ret=(int)fread(buffer+i,1,1,_fin);
       if(ret<1)return -1;
     }
     if(buffer[i]=='\n')break;
@@ -818,7 +818,7 @@ int y4m_input_fetch_frame(y4m_input *_y4m,FILE *_fin,vpx_image_t *_img){
   int  c_sz;
   int  ret;
   /*Read and skip the frame header.*/
-  ret=fread(frame,1,6,_fin);
+  ret=(int)fread(frame,1,6,_fin);
   if(ret<6)return 0;
   if(memcmp(frame,"FRAME",5)){
     fprintf(stderr,"Loss of framing in Y4M input data\n");
