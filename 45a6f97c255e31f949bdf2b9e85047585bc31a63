@@ -16,6 +16,24 @@
       "revId": "45a6f97c255e31f949bdf2b9e85047585bc31a63",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///Lg\u003d",
+        "filename": "vp8/common/mvref_common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-08-17T10:28:53Z",
+      "side": 1,
+      "message": "Yes... one of them will go eventually. If we do change the way we reference motion vectors the find near code will be retired. For now though this is a place holder and I wanted to keep the code and functionality separate.",
+      "parentUuid": "AAAAPH//xIc\u003d",
+      "revId": "45a6f97c255e31f949bdf2b9e85047585bc31a63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
