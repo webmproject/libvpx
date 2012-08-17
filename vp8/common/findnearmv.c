@@ -10,6 +10,7 @@
 
 
 #include "findnearmv.h"
+#include "vp8/encoder/variance.h"
 #include <limits.h>
 
 const unsigned char vp8_mbsplit_offset[4][16] = {

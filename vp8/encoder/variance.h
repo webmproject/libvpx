@@ -422,4 +422,19 @@ typedef struct {
 #define SSIMPF_INVOKE(ctx,fn) vp8_ssimpf_##fn
 #endif
 
+#if CONFIG_NEWBESTREFMV
+unsigned int vp8_sad2x16_c(
+  const unsigned char *src_ptr,
+  int  src_stride,
+  const unsigned char *ref_ptr,
+  int  ref_stride,
+  int max_sad);
+unsigned int vp8_sad16x2_c(
+  const unsigned char *src_ptr,
+  int  src_stride,
+  const unsigned char *ref_ptr,
+  int  ref_stride,
+  int max_sad);
+#endif
+
 #endif

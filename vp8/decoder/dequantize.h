@@ -195,4 +195,11 @@ typedef struct {
 #define DEQUANT_INVOKE(ctx,fn) vp8_dequant_##fn
 #endif
 
+#if CONFIG_HYBRIDTRANSFORM8X8
+void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
+                                   unsigned char *pred, unsigned char *dest,
+                                   int pitch, int stride);
+#endif
+
+
 #endif

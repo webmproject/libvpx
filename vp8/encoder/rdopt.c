@@ -2699,7 +2699,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   int best_filter_state;
 #endif
 #if CONFIG_NEWBESTREFMV
-  int_mv ref_mv[MAX_REF_FRAMES] = {0};
+  int_mv ref_mv[MAX_REF_FRAMES] = {{0}};
 #endif
 
 #if CONFIG_SWITCHABLE_INTERP

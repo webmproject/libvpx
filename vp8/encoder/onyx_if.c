@@ -707,14 +707,12 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
 
       sf->thresh_mult[THR_V_PRED   ] = 1000;
       sf->thresh_mult[THR_H_PRED   ] = 1000;
-#if CONFIG_NEWINTRAMODES
       sf->thresh_mult[THR_D45_PRED ] = 1000;
       sf->thresh_mult[THR_D135_PRED] = 1000;
       sf->thresh_mult[THR_D117_PRED] = 1000;
       sf->thresh_mult[THR_D153_PRED] = 1000;
       sf->thresh_mult[THR_D27_PRED ] = 1000;
       sf->thresh_mult[THR_D63_PRED ] = 1000;
-#endif
       sf->thresh_mult[THR_B_PRED   ] = 2000;
       sf->thresh_mult[THR_I8X8_PRED] = 2000;
       sf->thresh_mult[THR_TM       ] = 1000;
