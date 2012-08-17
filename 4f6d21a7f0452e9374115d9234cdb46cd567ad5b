@@ -1,0 +1,650 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//xT8\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "confusing mix of y \u0026 uv?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xTg\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Is the mixture of y \u0026 uv names correct?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xTY\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Is the mixture of y \u0026 uv names correct?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xTA\u003d",
+        "filename": "vp8/common/entropymode.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "mixture of y \u0026 uv names confusing/incorrect?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xSY\u003d",
+        "filename": "vp8/common/onyxc_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "ymode but UV_MODES... confusing/bug?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xRI\u003d",
+        "filename": "vp8/common/reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 781,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length \u003e 80 below?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xNU\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this function be generic, independent of color component, then 2 separate color specific functions call it with tailored parameters? Calling the \"Y\" function from the \"UV\" function seems somewhat confusing.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xP8\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "log2_bsize_minus_1 would be clearer?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xP0\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Is abort appropriate to release code... seems like an extreme response?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xPY\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Not your code I know, but this comment seems irrelevant and should be removed.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xPQ\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length 81 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xPM\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length 81 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xOw\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length 81 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xOs\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length 81 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xOo\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length \u003e 80 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xOk\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Calling Y specific function from UV function seems wrong...see above (Is this a bug?).\nAlso, Line length \u003e 80 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xOg\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length \u003e 80 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xOU\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length \u003e 80 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xOQ\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length \u003e 80 chars? (Also applies to some of the change lines later in the file)",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xLM\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "return vp8_treed_read(bc, vp8_uv_mode_tree, p);\nand change similar cases below (maybe a separate commit)?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xLA\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length \u003e 80?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xKw\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Change as per above comment?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xJc\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Tangential to this review, maybe, but...\ngiven its name I always expect this function to return a MV or ref frame, not a mode! Why not \"read_sb_mode\" (and similar for the non SB variant).",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xJY\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1138,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length \u003e 80?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xHc\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Indent? And line lengths \u003e 80 below.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xHM\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Make xd-\u003emode_info_context a local variable for use here and in what follows?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xHU\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 799,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Line length \u003e 80",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xG8\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "abort() in production code?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX////s\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 987,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Again, the function names here confuse me since they write the mode.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX////E\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1883,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Y mode prob but UV mode tree, confusing.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///+0\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1885,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "j steps through UV modes, but sb_ymode_count is used. Bug?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///58\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 721,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "What commenting style should we use? This line is inconsistent with those that follow later.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///4s\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Delete or put a TODO in the comment line? Similar for cases below.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///4o\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Whitespace :-)",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///Ec\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 832,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Remove the \"+ 0\"",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///EQ\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1069,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Whitespace",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///D0\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1164,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "\"applies to all\"",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///84\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1776,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:11:16Z",
+      "side": 1,
+      "message": "Why 200?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
