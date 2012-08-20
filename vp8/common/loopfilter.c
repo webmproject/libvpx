@@ -325,7 +325,13 @@ void vp8_loop_filter_frame
           lfi.lim = lfi_n->lim[filter_level];
           lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
-          if (mb_col > 0)
+          if (mb_col > 0
+#if CONFIG_SUPERBLOCKS
+              && !((mb_col & 1) && mode_info_context->mbmi.encoded_as_sb &&
+                   mode_info_context[0].mbmi.mb_skip_coeff &&
+                   mode_info_context[-1].mbmi.mb_skip_coeff)
+#endif
+              )
             vp8_loop_filter_mbv_c
             (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
 
@@ -344,7 +350,13 @@ void vp8_loop_filter_frame
           }
 
           /* don't apply across umv border */
-          if (mb_row > 0)
+          if (mb_row > 0
+#if CONFIG_SUPERBLOCKS
+              && !((mb_row & 1) && mode_info_context->mbmi.encoded_as_sb &&
+                   mode_info_context[0].mbmi.mb_skip_coeff &&
+                   mode_info_context[-cm->mode_info_stride].mbmi.mb_skip_coeff)
+#endif
+              )
             vp8_loop_filter_mbh_c
             (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
 
@@ -362,7 +374,13 @@ void vp8_loop_filter_frame
           }
         } else {
           // FIXME: Not 8x8 aware
-          if (mb_col > 0)
+          if (mb_col > 0
+#if CONFIG_SUPERBLOCKS
+              && !((mb_col & 1) && mode_info_context->mbmi.encoded_as_sb &&
+                   mode_info_context[0].mbmi.mb_skip_coeff &&
+                   mode_info_context[-1].mbmi.mb_skip_coeff)
+#endif
+              )
             LF_INVOKE(&cm->rtcd.loopfilter, simple_mb_v)
             (y_ptr, post->y_stride, lfi_n->mblim[filter_level]);
 
@@ -371,7 +389,13 @@ void vp8_loop_filter_frame
             (y_ptr, post->y_stride, lfi_n->blim[filter_level]);
 
           /* don't apply across umv border */
-          if (mb_row > 0)
+          if (mb_row > 0
+#if CONFIG_SUPERBLOCKS
+              && !((mb_row & 1) && mode_info_context->mbmi.encoded_as_sb &&
+                   mode_info_context[0].mbmi.mb_skip_coeff &&
+                   mode_info_context[-cm->mode_info_stride].mbmi.mb_skip_coeff)
+#endif
+              )
             LF_INVOKE(&cm->rtcd.loopfilter, simple_mb_h)
             (y_ptr, post->y_stride, lfi_n->mblim[filter_level]);
 

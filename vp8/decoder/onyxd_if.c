@@ -149,7 +149,7 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf) {
 
   pbi->decoded_key_frame = 0;
 
-  pbi->interleaved_decoding = CONFIG_NEWBESTREFMV;
+  pbi->interleaved_decoding = CONFIG_NEWBESTREFMV || CONFIG_SUPERBLOCKS;
 
   return (VP8D_PTR) pbi;
 }

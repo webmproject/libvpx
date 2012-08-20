@@ -1,3 +1,4 @@
+
 /*
  *  Copyright (c) 2012 The WebM project authors. All Rights Reserved.
  *
@@ -224,10 +225,24 @@ void set_pred_flag(MACROBLOCKD *const xd,
   switch (pred_id) {
     case PRED_SEG_ID:
       xd->mode_info_context->mbmi.seg_id_predicted = pred_flag;
+#if CONFIG_SUPERBLOCKS
+      if (xd->mode_info_context->mbmi.encoded_as_sb) {
+        xd->mode_info_context[1].mbmi.seg_id_predicted = pred_flag;
+        xd->mode_info_context[xd->mode_info_stride].mbmi.seg_id_predicted = pred_flag;
+        xd->mode_info_context[xd->mode_info_stride+1].mbmi.seg_id_predicted = pred_flag;
+      }
+#endif
       break;
 
     case PRED_REF:
       xd->mode_info_context->mbmi.ref_predicted = pred_flag;
+#if CONFIG_SUPERBLOCKS
+      if (xd->mode_info_context->mbmi.encoded_as_sb) {
+        xd->mode_info_context[1].mbmi.ref_predicted = pred_flag;
+        xd->mode_info_context[xd->mode_info_stride].mbmi.ref_predicted = pred_flag;
+        xd->mode_info_context[xd->mode_info_stride+1].mbmi.ref_predicted = pred_flag;
+      }
+#endif
       break;
 
     case PRED_MBSKIP:

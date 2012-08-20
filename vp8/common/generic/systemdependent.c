@@ -47,6 +47,12 @@ void vp8_machine_specific_config(VP8_COMMON *ctx) {
   rtcd->recon.recon4      = vp8_recon4b_c;
   rtcd->recon.recon_mb    = vp8_recon_mb_c;
   rtcd->recon.recon_mby   = vp8_recon_mby_c;
+#if CONFIG_SUPERBLOCKS
+  rtcd->recon.build_intra_predictors_sby_s =
+    vp8_build_intra_predictors_sby_s;
+  rtcd->recon.build_intra_predictors_sbuv_s =
+    vp8_build_intra_predictors_sbuv_s;
+#endif
   rtcd->recon.build_intra_predictors_mby =
     vp8_build_intra_predictors_mby;
 #if CONFIG_COMP_INTRA_PRED

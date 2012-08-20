@@ -148,6 +148,7 @@ typedef enum {
 #define VP8_YMODES  (B_PRED + 1)
 #define VP8_UV_MODES (TM_PRED + 1)
 #define VP8_I8X8_MODES (TM_PRED + 1)
+#define VP8_I32X32_MODES (TM_PRED + 1)
 
 #define VP8_MVREFS (1 + SPLITMV - NEARESTMV)
 
@@ -293,6 +294,11 @@ typedef struct {
     INTERPOLATIONFILTERTYPE interp_filter;
 #endif
 
+#if CONFIG_SUPERBLOCKS
+  // FIXME need a SB array of 4 MB_MODE_INFOs that
+  // only needs one encoded_as_sb.
+  unsigned char encoded_as_sb;
+#endif
 } MB_MODE_INFO;
 
 typedef struct {

@@ -226,12 +226,15 @@ typedef struct VP8Common {
 
   /* Y,U,V,Y2 */
   ENTROPY_CONTEXT_PLANES *above_context;   /* row of context for each plane */
-  ENTROPY_CONTEXT_PLANES left_context;  /* (up to) 4 contexts "" */
+  ENTROPY_CONTEXT_PLANES left_context[2];  /* (up to) 4 contexts "" */
 
   /* keyframe block modes are predicted by their above, left neighbors */
 
   vp8_prob kf_bmode_prob [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES - 1];
   vp8_prob kf_ymode_prob[8][VP8_YMODES - 1]; /* keyframe "" */
+#if CONFIG_SUPERBLOCKS
+  vp8_prob sb_kf_ymode_prob[8][VP8_I32X32_MODES - 1];
+#endif
   int kf_ymode_probs_index;
   int kf_ymode_probs_update;
   vp8_prob kf_uv_mode_prob[VP8_YMODES] [VP8_UV_MODES - 1];
@@ -239,6 +242,9 @@ typedef struct VP8Common {
   vp8_prob prob_intra_coded;
   vp8_prob prob_last_coded;
   vp8_prob prob_gf_coded;
+#if CONFIG_SUPERBLOCKS
+  vp8_prob sb_coded;
+#endif
 
   // Context probabilities when using predictive coding of segment id
   vp8_prob segment_pred_probs[PREDICTION_PROBS];

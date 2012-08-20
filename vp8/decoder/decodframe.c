@@ -175,10 +175,27 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
  */
 static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
+#if CONFIG_SUPERBLOCKS
+    if (xd->mode_info_context->mbmi.encoded_as_sb) {
+      RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_sbuv_s)(xd);
+      RECON_INVOKE(&pbi->common.rtcd.recon,
+                   build_intra_predictors_sby_s)(xd);
+    } else {
+#endif
     RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_mbuv_s)(xd);
     RECON_INVOKE(&pbi->common.rtcd.recon,
                  build_intra_predictors_mby_s)(xd);
+#if CONFIG_SUPERBLOCKS
+    }
+#endif
   } else {
+#if CONFIG_SUPERBLOCKS
+    if (xd->mode_info_context->mbmi.encoded_as_sb) {
+      vp8_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
+                                         xd->dst.u_buffer, xd->dst.v_buffer,
+                                         xd->dst.y_stride, xd->dst.uv_stride);
+    } else {
+#endif
     vp8_build_1st_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
                                            xd->dst.u_buffer, xd->dst.v_buffer,
                                            xd->dst.y_stride, xd->dst.uv_stride);
@@ -188,6 +205,9 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd) {
                                              xd->dst.u_buffer, xd->dst.v_buffer,
                                              xd->dst.y_stride, xd->dst.uv_stride);
     }
+#if CONFIG_SUPERBLOCKS
+    }
+#endif
   }
 #ifdef DEC_DEBUG
   if (dec_debug) {
@@ -204,11 +224,15 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd) {
 
 extern const int vp8_i8x8_block[4];
 static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
-                              unsigned int mb_idx) {
+                              unsigned int mb_col) {
   int eobtotal = 0;
   MB_PREDICTION_MODE mode;
   int i;
   int tx_type;
+#if CONFIG_SUPERBLOCKS
+  VP8_COMMON *pc = &pbi->common;
+  int orig_skip_flag = xd->mode_info_context->mbmi.mb_skip_coeff;
+#endif
 
 #if CONFIG_HYBRIDTRANSFORM
   int QIndex = xd->q_index;
@@ -264,11 +288,25 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     xd->mode_info_context->mbmi.txfm_size = TX_8X8;
   }
 #endif
+#if CONFIG_SUPERBLOCKS
+  if (xd->mode_info_context->mbmi.encoded_as_sb) {
+    xd->mode_info_context->mbmi.txfm_size = TX_8X8;
+  }
+#endif
 
   tx_type = xd->mode_info_context->mbmi.txfm_size;
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
     vp8_reset_mb_tokens_context(xd);
+#if CONFIG_SUPERBLOCKS
+    if (xd->mode_info_context->mbmi.encoded_as_sb) {
+      xd->above_context++;
+      xd->left_context++;
+      vp8_reset_mb_tokens_context(xd);
+      xd->above_context--;
+      xd->left_context--;
+    }
+#endif
   } else if (!vp8dx_bool_error(xd->current_bc)) {
     for (i = 0; i < 25; i++) {
       xd->block[i].eob = 0;
@@ -311,8 +349,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
      * */
     xd->mode_info_context->mbmi.mb_skip_coeff = 1;
 
-    skip_recon_mb(pbi, xd);
-    return;
+#if CONFIG_SUPERBLOCKS
+    if (!xd->mode_info_context->mbmi.encoded_as_sb || orig_skip_flag)
+#endif
+    {
+      skip_recon_mb(pbi, xd);
+      return;
+    }
   }
 
 #ifdef DEC_DEBUG
@@ -343,6 +386,12 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
   /* do prediction */
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
+#if CONFIG_SUPERBLOCKS
+    if (xd->mode_info_context->mbmi.encoded_as_sb) {
+      RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_sby_s)(xd);
+      RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_sbuv_s)(xd);
+    } else
+#endif
     if (mode != I8X8_PRED) {
       RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_mbuv)(xd);
       if (mode != B_PRED) {
@@ -358,6 +407,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 #endif
     }
   } else {
+#if CONFIG_SUPERBLOCKS
+    if (xd->mode_info_context->mbmi.encoded_as_sb) {
+      vp8_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
+                                         xd->dst.u_buffer, xd->dst.v_buffer,
+                                         xd->dst.y_stride, xd->dst.uv_stride);
+    } else
+#endif
     vp8_build_inter_predictors_mb(xd);
   }
 
@@ -481,6 +537,32 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     else
 #endif
     if (tx_type == TX_8X8) {
+#if CONFIG_SUPERBLOCKS
+      void *orig = xd->mode_info_context;
+      int n, num = xd->mode_info_context->mbmi.encoded_as_sb ? 4 : 1;
+      for (n = 0; n < num; n++) {
+        if (n != 0) {
+          for (i = 0; i < 25; i++) {
+            xd->block[i].eob = 0;
+            xd->eobs[i] = 0;
+          }
+          xd->above_context = pc->above_context + mb_col + (n & 1);
+          xd->left_context = pc->left_context + (n >> 1);
+          xd->mode_info_context = orig;
+          xd->mode_info_context += (n & 1);
+          xd->mode_info_context += (n >> 1) * pc->mode_info_stride;
+          if (!orig_skip_flag) {
+            eobtotal = vp8_decode_mb_tokens_8x8(pbi, xd);
+            if (eobtotal == 0) // skip loopfilter
+              xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+          } else {
+            vp8_reset_mb_tokens_context(xd);
+          }
+        }
+
+        if (xd->mode_info_context->mbmi.mb_skip_coeff)
+          continue; // only happens for SBs, which are already in dest buffer
+#endif
       DEQUANT_INVOKE(&pbi->dequant, block_2x2)(b);
 #ifdef DEC_DEBUG
       if (dec_debug) {
@@ -501,10 +583,27 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       ((int *)b->qcoeff)[5] = 0;
       ((int *)b->qcoeff)[6] = 0;
       ((int *)b->qcoeff)[7] = 0;
-      DEQUANT_INVOKE(&pbi->dequant, dc_idct_add_y_block_8x8)
-      (xd->qcoeff, xd->block[0].dequant,
-       xd->predictor, xd->dst.y_buffer,
-       xd->dst.y_stride, xd->eobs, xd->block[24].diff, xd);
+#if CONFIG_SUPERBLOCKS
+      if (xd->mode_info_context->mbmi.encoded_as_sb) {
+        vp8_dequant_dc_idct_add_y_block_8x8_inplace_c(xd->qcoeff,
+          xd->block[0].dequant,
+          xd->dst.y_buffer + (n >> 1) * 16 * xd->dst.y_stride + (n & 1) * 16,
+          xd->dst.y_stride, xd->eobs, xd->block[24].diff, xd);
+        // do UV inline also
+        vp8_dequant_idct_add_uv_block_8x8_inplace_c(xd->qcoeff + 16 * 16,
+          xd->block[16].dequant,
+          xd->dst.u_buffer + (n >> 1) * 8 * xd->dst.uv_stride + (n & 1) * 8,
+          xd->dst.v_buffer + (n >> 1) * 8 * xd->dst.uv_stride + (n & 1) * 8,
+          xd->dst.uv_stride, xd->eobs + 16, xd);
+      } else
+#endif
+        DEQUANT_INVOKE(&pbi->dequant, dc_idct_add_y_block_8x8)(xd->qcoeff,
+          xd->block[0].dequant, xd->predictor, xd->dst.y_buffer,
+          xd->dst.y_stride, xd->eobs, xd->block[24].diff, xd);
+#if CONFIG_SUPERBLOCKS
+      }
+      xd->mode_info_context = orig;
+#endif
     } else {
       DEQUANT_INVOKE(&pbi->dequant, block)(b);
       if (xd->eobs[24] > 1) {
@@ -529,7 +628,10 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
   }
 
-  if (tx_type == TX_8X8
+#if CONFIG_SUPERBLOCKS
+    if (!xd->mode_info_context->mbmi.encoded_as_sb) {
+#endif
+      if (tx_type == TX_8X8
 #if CONFIG_TX16X16
       || tx_type == TX_16X16
 #endif
@@ -543,6 +645,9 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     (xd->qcoeff + 16 * 16, xd->block[16].dequant,
      xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
      xd->dst.uv_stride, xd->eobs + 16);
+#if CONFIG_SUPERBLOCKS
+  }
+#endif
 }
 
 
@@ -582,15 +687,21 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
   int row_delta[4] = { 0, +1,  0, -1};
   int col_delta[4] = { +1, -1, +1, +1};
   int sb_cols = (pc->mb_cols + 1) >> 1;
-  ENTROPY_CONTEXT_PLANES left_context[2];
 
   // For a SB there are 2 left contexts, each pertaining to a MB row within
-  vpx_memset(left_context, 0, sizeof(left_context));
+  vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
 
   mb_row = mbrow;
   mb_col = 0;
 
   for (sb_col = 0; sb_col < sb_cols; sb_col++) {
+    MODE_INFO *mi = xd->mode_info_context;
+
+#if CONFIG_SUPERBLOCKS
+    if (pbi->interleaved_decoding)
+      mi->mbmi.encoded_as_sb = vp8_read(&pbi->bc, pc->sb_coded);
+#endif
+
     // Process the 4 MBs within the SB in the order:
     // top-left, top-right, bottom-left, bottom-right
     for (i = 0; i < 4; i++) {
@@ -598,6 +709,7 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
       int dx = col_delta[i];
       int offset_extended = dy * xd->mode_info_stride + dx;
 
+      mi = xd->mode_info_context;
       if ((mb_row >= pc->mb_rows) || (mb_col >= pc->mb_cols)) {
         // MB lies outside frame, skip on to next
         mb_row += dy;
@@ -610,13 +722,10 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
 #ifdef DEC_DEBUG
       dec_debug = (pc->current_video_frame == 0 && mb_row == 0 && mb_col == 0);
 #endif
-      // Copy in the appropriate left context for this MB row
-      vpx_memcpy(&pc->left_context,
-                 &left_context[i >> 1],
-                 sizeof(ENTROPY_CONTEXT_PLANES));
 
       // Set above context pointer
       xd->above_context = pc->above_context + mb_col;
+      xd->left_context = pc->left_context + (i >> 1);
 
       /* Distance of Mb to the various image edges.
        * These are specified to 8th pel as they are always compared to
@@ -639,6 +748,10 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
       xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
       xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
+#if CONFIG_SUPERBLOCKS
+      if (i)
+        mi->mbmi.encoded_as_sb = 0;
+#endif
       if(pbi->interleaved_decoding)
         vpx_decode_mb_mode_mv(pbi, xd, mb_row, mb_col);
 
@@ -681,15 +794,34 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
         xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
       }
 
-      decode_macroblock(pbi, xd, mb_row * pc->mb_cols + mb_col);
+#if CONFIG_SUPERBLOCKS
+      if (xd->mode_info_context->mbmi.encoded_as_sb) {
+        mi[1] = mi[0];
+        mi[pc->mode_info_stride] = mi[0];
+        mi[pc->mode_info_stride + 1] = mi[0];
+      }
+#endif
+      decode_macroblock(pbi, xd, mb_col);
+#if CONFIG_SUPERBLOCKS
+      if (xd->mode_info_context->mbmi.encoded_as_sb) {
+        mi[1].mbmi.txfm_size = mi[0].mbmi.txfm_size;
+        mi[pc->mode_info_stride].mbmi.txfm_size = mi[0].mbmi.txfm_size;
+        mi[pc->mode_info_stride + 1].mbmi.txfm_size = mi[0].mbmi.txfm_size;
+      }
+#endif
 
       /* check if the boolean decoder has suffered an error */
       xd->corrupted |= vp8dx_bool_error(xd->current_bc);
 
-      // Store the modified left context for the MB row locally
-      vpx_memcpy(&left_context[i >> 1],
-                 &pc->left_context,
-                 sizeof(ENTROPY_CONTEXT_PLANES));
+#if CONFIG_SUPERBLOCKS
+      if (mi->mbmi.encoded_as_sb) {
+        assert(!i);
+        mb_col += 2;
+        xd->mode_info_context += 2;
+        xd->prev_mode_info_context += 2;
+        break;
+      }
+#endif
 
       // skip to next MB
       xd->mode_info_context += offset_extended;
@@ -806,7 +938,6 @@ static void init_frame(VP8D_COMP *pbi) {
     vp8_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }
 
-  xd->left_context = &pc->left_context;
   xd->mode_info_context = pc->mi;
   xd->prev_mode_info_context = pc->prev_mi;
   xd->frame_type = pc->frame_type;
@@ -1150,6 +1281,10 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
         pc->ref_pred_probs[i] = (vp8_prob)vp8_read_literal(bc, 8);
     }
   }
+
+#if CONFIG_SUPERBLOCKS
+  pc->sb_coded = vp8_read_literal(bc, 8);
+#endif
 
   /* Read the loop filter level and type */
   pc->txfm_mode = (TXFM_MODE) vp8_read_bit(bc);

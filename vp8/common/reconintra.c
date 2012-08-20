@@ -207,17 +207,18 @@ void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd,
   }
 }
 
-void vp8_build_intra_predictors_mby_internal(MACROBLOCKD *xd,
-                                             unsigned char *ypred_ptr,
-                                             int y_stride, int mode) {
+void vp8_build_intra_predictors_internal(MACROBLOCKD *xd,
+                                         unsigned char *src, int src_stride,
+                                         unsigned char *ypred_ptr,
+                                         int y_stride, int mode, int bsize) {
 
-  unsigned char *yabove_row = xd->dst.y_buffer - xd->dst.y_stride;
-  unsigned char yleft_col[16];
+  unsigned char *yabove_row = src - src_stride;
+  unsigned char yleft_col[32];
   unsigned char ytop_left = yabove_row[-1];
   int r, c, i;
 
-  for (i = 0; i < 16; i++) {
-    yleft_col[i] = xd->dst.y_buffer [i * xd->dst.y_stride - 1];
+  for (i = 0; i < bsize; i++) {
+    yleft_col[i] = xd->dst.y_buffer [i * src_stride - 1];
   }
 
   /* for Y */
@@ -227,58 +228,58 @@ void vp8_build_intra_predictors_mby_internal(MACROBLOCKD *xd,
       int i;
       int shift;
       int average = 0;
+      int log2_bsize_minus_1;
 
+      assert(bsize == 8 || bsize == 16 || bsize == 32);
+      if (bsize == 8) {
+        log2_bsize_minus_1 = 2;
+      } else if (bsize == 16) {
+        log2_bsize_minus_1 = 3;
+      } else /* bsize == 32 */ {
+        log2_bsize_minus_1 = 4;
+      }
 
       if (xd->up_available || xd->left_available) {
         if (xd->up_available) {
-          for (i = 0; i < 16; i++) {
+          for (i = 0; i < bsize; i++) {
             average += yabove_row[i];
           }
         }
 
         if (xd->left_available) {
-          for (i = 0; i < 16; i++) {
+          for (i = 0; i < bsize; i++) {
             average += yleft_col[i];
           }
         }
-        shift = 3 + xd->up_available + xd->left_available;
+        shift = log2_bsize_minus_1 + xd->up_available + xd->left_available;
         expected_dc = (average + (1 << (shift - 1))) >> shift;
       } else {
         expected_dc = 128;
       }
 
-      for (r = 0; r < 16; r++) {
-        vpx_memset(ypred_ptr, expected_dc, 16);
-        ypred_ptr += y_stride; /*16;*/
+      for (r = 0; r < bsize; r++) {
+        vpx_memset(ypred_ptr, expected_dc, bsize);
+        ypred_ptr += y_stride;
       }
     }
     break;
     case V_PRED: {
-
-      for (r = 0; r < 16; r++) {
-
-        ((int *)ypred_ptr)[0] = ((int *)yabove_row)[0];
-        ((int *)ypred_ptr)[1] = ((int *)yabove_row)[1];
-        ((int *)ypred_ptr)[2] = ((int *)yabove_row)[2];
-        ((int *)ypred_ptr)[3] = ((int *)yabove_row)[3];
+      for (r = 0; r < bsize; r++) {
+        memcpy(ypred_ptr, yabove_row, bsize);
         ypred_ptr += y_stride;
       }
     }
     break;
     case H_PRED: {
-
-      for (r = 0; r < 16; r++) {
-
-        vpx_memset(ypred_ptr, yleft_col[r], 16);
+      for (r = 0; r < bsize; r++) {
+        vpx_memset(ypred_ptr, yleft_col[r], bsize);
         ypred_ptr += y_stride;
       }
-
     }
     break;
     case TM_PRED: {
-
-      for (r = 0; r < 16; r++) {
-        for (c = 0; c < 16; c++) {
+      for (r = 0; r < bsize; r++) {
+        for (c = 0; c < bsize; c++) {
           int pred =  yleft_col[r] + yabove_row[ c] - ytop_left;
 
           if (pred < 0)
@@ -292,31 +293,30 @@ void vp8_build_intra_predictors_mby_internal(MACROBLOCKD *xd,
 
         ypred_ptr += y_stride;
       }
-
     }
     break;
     case D45_PRED: {
-      d45_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+      d45_predictor(ypred_ptr, y_stride, bsize,  yabove_row, yleft_col);
     }
     break;
     case D135_PRED: {
-      d135_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+      d135_predictor(ypred_ptr, y_stride, bsize,  yabove_row, yleft_col);
     }
     break;
     case D117_PRED: {
-      d117_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+      d117_predictor(ypred_ptr, y_stride, bsize,  yabove_row, yleft_col);
     }
     break;
     case D153_PRED: {
-      d153_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+      d153_predictor(ypred_ptr, y_stride, bsize,  yabove_row, yleft_col);
     }
     break;
     case D27_PRED: {
-      d27_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+      d27_predictor(ypred_ptr, y_stride, bsize,  yabove_row, yleft_col);
     }
     break;
     case D63_PRED: {
-      d63_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+      d63_predictor(ypred_ptr, y_stride, bsize,  yabove_row, yleft_col);
     }
     break;
     case I8X8_PRED:
@@ -332,25 +332,36 @@ void vp8_build_intra_predictors_mby_internal(MACROBLOCKD *xd,
 }
 
 void vp8_build_intra_predictors_mby(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_mby_internal(xd, xd->predictor, 16,
-                                          xd->mode_info_context->mbmi.mode);
+  vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
+                                      xd->predictor, 16,
+                                      xd->mode_info_context->mbmi.mode, 16);
 }
 
 void vp8_build_intra_predictors_mby_s(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_mby_internal(xd, xd->dst.y_buffer,
-                                          xd->dst.y_stride,
-                                          xd->mode_info_context->mbmi.mode);
+  vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
+                                      xd->dst.y_buffer, xd->dst.y_stride,
+                                      xd->mode_info_context->mbmi.mode, 16);
 }
+
+#if CONFIG_SUPERBLOCKS
+void vp8_build_intra_predictors_sby_s(MACROBLOCKD *x) {
+  vp8_build_intra_predictors_internal(x, x->dst.y_buffer, x->dst.y_stride,
+                                      x->dst.y_buffer, x->dst.y_stride,
+                                      x->mode_info_context->mbmi.mode, 32);
+}
+#endif
 
 #if CONFIG_COMP_INTRA_PRED
 void vp8_build_comp_intra_predictors_mby(MACROBLOCKD *xd) {
   unsigned char predictor[2][256];
   int i;
 
-  vp8_build_intra_predictors_mby_internal(
-    xd, predictor[0], 16, xd->mode_info_context->mbmi.mode);
-  vp8_build_intra_predictors_mby_internal(
-    xd, predictor[1], 16, xd->mode_info_context->mbmi.second_mode);
+  vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
+                                      predictor[0], 16,
+                                      xd->mode_info_context->mbmi.mode);
+  vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
+                                      predictor[1], 16,
+                                      xd->mode_info_context->mbmi.second_mode);
 
   for (i = 0; i < 256; i++) {
     xd->predictor[i] = (predictor[0][i] + predictor[1][i] + 1) >> 1;
@@ -362,171 +373,36 @@ void vp8_build_intra_predictors_mbuv_internal(MACROBLOCKD *xd,
                                               unsigned char *upred_ptr,
                                               unsigned char *vpred_ptr,
                                               int uv_stride,
-                                              int mode) {
-  YV12_BUFFER_CONFIG * dst = &xd->dst;
-  unsigned char *uabove_row = dst->u_buffer - dst->uv_stride;
-  unsigned char uleft_col[16];
-  unsigned char utop_left = uabove_row[-1];
-  unsigned char *vabove_row = dst->v_buffer - dst->uv_stride;
-  unsigned char vleft_col[20];
-  unsigned char vtop_left = vabove_row[-1];
-
-  int i, j;
-
-  for (i = 0; i < 8; i++) {
-    uleft_col[i] = dst->u_buffer [i * dst->uv_stride - 1];
-    vleft_col[i] = dst->v_buffer [i * dst->uv_stride - 1];
-  }
-
-  switch (mode) {
-    case DC_PRED: {
-      int expected_udc;
-      int expected_vdc;
-      int i;
-      int shift;
-      int Uaverage = 0;
-      int Vaverage = 0;
-
-      if (xd->up_available) {
-        for (i = 0; i < 8; i++) {
-          Uaverage += uabove_row[i];
-          Vaverage += vabove_row[i];
-        }
-      }
-
-      if (xd->left_available) {
-        for (i = 0; i < 8; i++) {
-          Uaverage += uleft_col[i];
-          Vaverage += vleft_col[i];
-        }
-      }
-
-      if (!xd->up_available && !xd->left_available) {
-        expected_udc = 128;
-        expected_vdc = 128;
-      } else {
-        shift = 2 + xd->up_available + xd->left_available;
-        expected_udc = (Uaverage + (1 << (shift - 1))) >> shift;
-        expected_vdc = (Vaverage + (1 << (shift - 1))) >> shift;
-      }
-
-
-      /*vpx_memset(upred_ptr,expected_udc,64);*/
-      /*vpx_memset(vpred_ptr,expected_vdc,64);*/
-      for (i = 0; i < 8; i++) {
-        vpx_memset(upred_ptr, expected_udc, 8);
-        vpx_memset(vpred_ptr, expected_vdc, 8);
-        upred_ptr += uv_stride; /*8;*/
-        vpred_ptr += uv_stride; /*8;*/
-      }
-    }
-    break;
-    case V_PRED: {
-      int i;
-
-      for (i = 0; i < 8; i++) {
-        vpx_memcpy(upred_ptr, uabove_row, 8);
-        vpx_memcpy(vpred_ptr, vabove_row, 8);
-        upred_ptr += uv_stride; /*8;*/
-        vpred_ptr += uv_stride; /*8;*/
-      }
-
-    }
-    break;
-    case H_PRED: {
-      int i;
-
-      for (i = 0; i < 8; i++) {
-        vpx_memset(upred_ptr, uleft_col[i], 8);
-        vpx_memset(vpred_ptr, vleft_col[i], 8);
-        upred_ptr += uv_stride; /*8;*/
-        vpred_ptr += uv_stride; /*8;*/
-      }
-    }
-
-    break;
-    case TM_PRED: {
-      int i;
-
-      for (i = 0; i < 8; i++) {
-        for (j = 0; j < 8; j++) {
-          int predu = uleft_col[i] + uabove_row[j] - utop_left;
-          int predv = vleft_col[i] + vabove_row[j] - vtop_left;
-
-          if (predu < 0)
-            predu = 0;
-
-          if (predu > 255)
-            predu = 255;
-
-          if (predv < 0)
-            predv = 0;
-
-          if (predv > 255)
-            predv = 255;
-
-          upred_ptr[j] = predu;
-          vpred_ptr[j] = predv;
-        }
-
-        upred_ptr += uv_stride; /*8;*/
-        vpred_ptr += uv_stride; /*8;*/
-      }
-
-    }
-    break;
-    case D45_PRED: {
-      d45_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
-      d45_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
-    }
-    break;
-    case D135_PRED: {
-      d135_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
-      d135_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
-    }
-    break;
-    case D117_PRED: {
-      d117_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
-      d117_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
-    }
-    break;
-    case D153_PRED: {
-      d153_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
-      d153_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
-    }
-    break;
-    case D27_PRED: {
-      d27_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
-      d27_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
-    }
-    break;
-    case D63_PRED: {
-      d63_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
-      d63_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
-    }
-    break;
-    case B_PRED:
-    case NEARESTMV:
-    case NEARMV:
-    case ZEROMV:
-    case NEWMV:
-    case SPLITMV:
-    case MB_MODE_COUNT:
-      break;
-  }
+                                              int mode, int bsize) {
+  vp8_build_intra_predictors_internal(xd, xd->dst.u_buffer, xd->dst.uv_stride,
+                                      upred_ptr, uv_stride, mode, bsize);
+  vp8_build_intra_predictors_internal(xd, xd->dst.v_buffer, xd->dst.uv_stride,
+                                      vpred_ptr, uv_stride, mode, bsize);
 }
 
 void vp8_build_intra_predictors_mbuv(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_mbuv_internal(
-    xd, &xd->predictor[256], &xd->predictor[320],
-    8, xd->mode_info_context->mbmi.uv_mode);
+  vp8_build_intra_predictors_mbuv_internal(xd, &xd->predictor[256],
+                                           &xd->predictor[320], 8,
+                                           xd->mode_info_context->mbmi.uv_mode,
+                                           8);
 }
 
 void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_mbuv_internal(
-    xd, xd->dst.u_buffer, xd->dst.v_buffer,
-    xd->dst.uv_stride, xd->mode_info_context->mbmi.uv_mode);
+  vp8_build_intra_predictors_mbuv_internal(xd, xd->dst.u_buffer,
+                                           xd->dst.v_buffer,
+                                           xd->dst.uv_stride,
+                                           xd->mode_info_context->mbmi.uv_mode,
+                                           8);
 }
+
+#if CONFIG_SUPERBLOCKS
+void vp8_build_intra_predictors_sbuv_s(MACROBLOCKD *xd) {
+  vp8_build_intra_predictors_mbuv_internal(xd, xd->dst.u_buffer,
+                                           xd->dst.v_buffer, xd->dst.uv_stride,
+                                           xd->mode_info_context->mbmi.uv_mode,
+                                           16);
+}
+#endif
 
 #if CONFIG_COMP_INTRA_PRED
 void vp8_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
@@ -541,7 +417,8 @@ void vp8_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
     xd->mode_info_context->mbmi.second_uv_mode);
   for (i = 0; i < 64; i++) {
     xd->predictor[256 + i] = (predictor[0][0][i] + predictor[0][1][i] + 1) >> 1;
-    xd->predictor[256 + 64 + i] = (predictor[1][0][i] + predictor[1][1][i] + 1) >> 1;
+    xd->predictor[256 + 64 + i] = (predictor[1][0][i] +
+                                   predictor[1][1][i] + 1) >> 1;
   }
 }
 #endif

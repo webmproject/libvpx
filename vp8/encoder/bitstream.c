@@ -288,6 +288,12 @@ static void kfwrite_ymode(vp8_writer *bc, int m, const vp8_prob *p) {
   vp8_write_token(bc, vp8_kf_ymode_tree, p, vp8_kf_ymode_encodings + m);
 }
 
+#if CONFIG_SUPERBLOCKS
+static void sb_kfwrite_ymode(vp8_writer *bc, int m, const vp8_prob *p) {
+  vp8_write_token(bc, vp8_uv_mode_tree, p, vp8_sb_kf_ymode_encodings + m);
+}
+#endif
+
 static void write_i8x8_mode(vp8_writer *bc, int m, const vp8_prob *p) {
   vp8_write_token(bc, vp8_i8x8_mode_tree, p, vp8_i8x8_mode_encodings + m);
 }
@@ -532,6 +538,16 @@ static void write_mv_ref
   vp8_write_token(w, vp8_mv_ref_tree, p,
                   vp8_mv_ref_encoding_array - NEARESTMV + m);
 }
+
+#if CONFIG_SUPERBLOCKS
+static void write_sb_mv_ref(vp8_writer *w, MB_PREDICTION_MODE m, const vp8_prob *p) {
+#if CONFIG_DEBUG
+  assert(NEARESTMV <= m  &&  m < SPLITMV);
+#endif
+  vp8_write_token(w, vp8_sb_mv_ref_tree, p,
+                  vp8_sb_mv_ref_encoding_array - NEARESTMV + m);
+}
+#endif
 
 static void write_sub_mv_ref
 (
@@ -810,6 +826,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 
       // Process the 4 MBs in the order:
       // top-left, top-right, bottom-left, bottom-right
+#if CONFIG_SUPERBLOCKS
+      vp8_write(w, m->mbmi.encoded_as_sb, pc->sb_coded);
+#endif
       for (i = 0; i < 4; i++) {
         MB_MODE_INFO *mi;
         MV_REFERENCE_FRAME rf;
@@ -872,7 +891,15 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
         if (pc->mb_no_coeff_skip &&
             (!segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
              (get_segdata(xd, segment_id, SEG_LVL_EOB) != 0))) {
-          vp8_encode_bool(w, mi->mb_skip_coeff,
+          int skip_coeff = mi->mb_skip_coeff;
+#if CONFIG_SUPERBLOCKS
+          if (mi->encoded_as_sb) {
+            skip_coeff &= m[1].mbmi.mb_skip_coeff;
+            skip_coeff &= m[mis].mbmi.mb_skip_coeff;
+            skip_coeff &= m[mis + 1].mbmi.mb_skip_coeff;
+          }
+#endif
+          vp8_encode_bool(w, skip_coeff,
                           get_pred_prob(pc, xd, PRED_MBSKIP));
         }
 
@@ -883,6 +910,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 #ifdef ENTROPY_STATS
           active_section = 6;
 #endif
+
+          // TODO(rbultje) write using SB tree structure
 
           if (!segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
             write_ymode(w, mode, pc->fc.ymode_prob);
@@ -949,7 +978,14 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 
           // Is the segment coding of mode enabled
           if (!segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
-            write_mv_ref(w, mode, mv_ref_p);
+#if CONFIG_SUPERBLOCKS
+            if (mi->encoded_as_sb) {
+              write_sb_mv_ref(w, mode, mv_ref_p);
+            } else
+#endif
+            {
+              write_mv_ref(w, mode, mv_ref_p);
+            }
             vp8_accum_mv_refs(&cpi->common, mode, ct);
           }
 
@@ -1085,6 +1121,17 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
           }
         }
 
+#if CONFIG_SUPERBLOCKS
+        if (m->mbmi.encoded_as_sb) {
+          assert(!i);
+          mb_col += 2;
+          m += 2;
+          cpi->mb.partition_info += 2;
+          prev_m += 2;
+          break;
+        }
+#endif
+
         // Next MB
         mb_row += dy;
         mb_col += dx;
@@ -1151,6 +1198,9 @@ static void write_kfmodes(VP8_COMP *cpi) {
 
     mb_col = 0;
     for (col = 0; col < c->mb_cols; col += 2) {
+#if CONFIG_SUPERBLOCKS
+      vp8_write(bc, m->mbmi.encoded_as_sb, c->sb_coded);
+#endif
       // Process the 4 MBs in the order:
       // top-left, top-right, bottom-left, bottom-right
       for (i = 0; i < 4; i++) {
@@ -1181,11 +1231,27 @@ static void write_kfmodes(VP8_COMP *cpi) {
         if (c->mb_no_coeff_skip &&
             (!segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
              (get_segdata(xd, segment_id, SEG_LVL_EOB) != 0))) {
-          vp8_encode_bool(bc, m->mbmi.mb_skip_coeff,
+              int skip_coeff = m->mbmi.mb_skip_coeff;
+#if CONFIG_SUPERBLOCKS
+              if (m->mbmi.encoded_as_sb) {
+                skip_coeff &= m[1].mbmi.mb_skip_coeff;
+                skip_coeff &= m[mis].mbmi.mb_skip_coeff;
+                skip_coeff &= m[mis + 1].mbmi.mb_skip_coeff;
+              }
+#endif
+              vp8_encode_bool(bc, skip_coeff,
                           get_pred_prob(c, xd, PRED_MBSKIP));
         }
-        kfwrite_ymode(bc, ym,
-                      c->kf_ymode_prob[c->kf_ymode_probs_index]);
+#if CONFIG_SUPERBLOCKS
+        if (m->mbmi.encoded_as_sb) {
+          sb_kfwrite_ymode(bc, ym,
+                           c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
+        } else
+#endif
+        {
+          kfwrite_ymode(bc, ym,
+                        c->kf_ymode_prob[c->kf_ymode_probs_index]);
+        }
 
         if (ym == B_PRED) {
           const int mis = c->mode_info_stride;
@@ -1233,6 +1299,14 @@ static void write_kfmodes(VP8_COMP *cpi) {
         } else
           write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 
+#if CONFIG_SUPERBLOCKS
+        if (m->mbmi.encoded_as_sb) {
+          assert(!i);
+          mb_col += 2;
+          m += 2;
+          break;
+        }
+#endif
         // Next MB
         mb_row += dy;
         mb_col += dx;
@@ -1793,7 +1867,7 @@ static void put_delta_q(vp8_writer *bc, int delta_q) {
   } else
     vp8_write_bit(bc, 0);
 }
-extern const unsigned int kf_y_mode_cts[8][VP8_YMODES];
+
 static void decide_kf_ymode_entropy(VP8_COMP *cpi) {
 
   int mode_cost[MB_MODE_COUNT];
@@ -1808,6 +1882,13 @@ static void decide_kf_ymode_entropy(VP8_COMP *cpi) {
     for (j = 0; j < VP8_YMODES; j++) {
       cost += mode_cost[j] * cpi->ymode_count[j];
     }
+#if CONFIG_SUPERBLOCKS
+    vp8_cost_tokens(mode_cost, cpi->common.sb_kf_ymode_prob[i],
+                    vp8_sb_ymode_tree);
+    for (j = 0; j < VP8_I32X32_MODES; j++) {
+      cost += mode_cost[j] * cpi->sb_ymode_count[j];
+    }
+#endif
     if (cost < bestcost) {
       bestindex = i;
       bestcost = cost;
@@ -1905,11 +1986,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     if (xd->update_mb_segmentation_map) {
       // Select the coding strategy (temporal or spatial)
       choose_segmap_coding_method(cpi);
-
-      // Take a copy of the segment map if it changed for
-      // future comparison
-      vpx_memcpy(pc->last_frame_seg_map,
-                 cpi->segmentation_map, pc->MBs);
 
       // Write out the chosen coding method.
       vp8_write_bit(bc, (pc->temporal_update) ? 1 : 0);
@@ -2047,6 +2123,19 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         vp8_write_bit(bc, 0);
     }
   }
+
+#if CONFIG_SUPERBLOCKS
+  {
+    /* sb mode probability */
+    int sb_coded = 256 - (cpi->sb_count << 8) / (((pc->mb_rows + 1) >> 1) * ((pc->mb_cols + 1) >> 1));
+    if (sb_coded <= 0)
+      sb_coded = 1;
+    else if (sb_coded >= 256)
+      sb_coded = 255;
+    pc->sb_coded = sb_coded;
+    vp8_write_literal(bc, pc->sb_coded, 8);
+  }
+#endif
 
   vp8_write_bit(bc, pc->txfm_mode);
 

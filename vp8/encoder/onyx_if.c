@@ -620,6 +620,42 @@ static void print_seg_map(VP8_COMP *cpi) {
   fclose(statsfile);
 }
 
+static void update_reference_segmentation_map(VP8_COMP *cpi) {
+  VP8_COMMON *cm = &cpi->common;
+  int row, col, sb_rows = (cm->mb_rows + 1) >> 1, sb_cols = (cm->mb_cols + 1) >> 1;
+  MODE_INFO *mi = cm->mi;
+  uint8_t *segmap = cpi->segmentation_map;
+  uint8_t *segcache = cm->last_frame_seg_map;
+
+  for (row = 0; row < sb_rows; row++) {
+    for (col = 0; col < sb_cols; col++) {
+      MODE_INFO *miptr = mi + col * 2;
+      uint8_t *seg = segmap + col * 2;
+      uint8_t *cache = segcache + col * 2;
+#if CONFIG_SUPERBLOCKS
+      if (miptr->mbmi.encoded_as_sb) {
+        cache[0] = cache[1] = cache[cm->mb_cols] = cache[cm->mb_cols + 1] =
+          miptr->mbmi.segment_id;
+      } else
+#endif
+      {
+        cache[0] = miptr[0].mbmi.segment_id;
+        if (!(cm->mb_cols & 1) || col < sb_cols - 1)
+          cache[1] = miptr[1].mbmi.segment_id;
+        if (!(cm->mb_rows & 1) || row < sb_rows - 1) {
+          cache[cm->mb_cols] = miptr[cm->mode_info_stride].mbmi.segment_id;
+          if (!(cm->mb_cols & 1) || col < sb_cols - 1)
+            cache[1] = miptr[1].mbmi.segment_id;
+          cache[cm->mb_cols + 1] = miptr[cm->mode_info_stride + 1].mbmi.segment_id;
+        }
+      }
+    }
+    segmap += 2 * cm->mb_cols;
+    segcache += 2 * cm->mb_cols;
+    mi += 2 * cm->mode_info_stride;
+  }
+}
+
 static void set_default_lf_deltas(VP8_COMP *cpi) {
   cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 1;
   cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
@@ -1736,6 +1772,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   cm->prob_last_coded               = 128;
   cm->prob_gf_coded                 = 128;
   cm->prob_intra_coded              = 63;
+#if CONFIG_SUPERBLOCKS
+  cm->sb_coded                      = 200;
+#endif
   for (i = 0; i < COMP_PRED_CONTEXTS; i++)
     cm->prob_comppred[i]         = 128;
 
@@ -1917,6 +1956,18 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
 
 #ifdef ENTROPY_STATS
   init_mv_ref_counts();
+#endif
+
+#if CONFIG_SUPERBLOCKS
+  cpi->fn_ptr[BLOCK_32X32].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad32x32);
+  cpi->fn_ptr[BLOCK_32X32].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var32x32);
+  cpi->fn_ptr[BLOCK_32X32].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar32x32);
+  cpi->fn_ptr[BLOCK_32X32].svf_halfpix_h  = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar32x32_h);
+  cpi->fn_ptr[BLOCK_32X32].svf_halfpix_v  = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar32x32_v);
+  cpi->fn_ptr[BLOCK_32X32].svf_halfpix_hv = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar32x32_hv);
+  cpi->fn_ptr[BLOCK_32X32].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad32x32x3);
+  cpi->fn_ptr[BLOCK_32X32].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad32x32x8);
+  cpi->fn_ptr[BLOCK_32X32].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad32x32x4d);
 #endif
 
   cpi->fn_ptr[BLOCK_16X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16);
@@ -3617,6 +3668,10 @@ static void encode_frame_to_data_rate
   // build the bitstream
   cpi->dummy_packing = 0;
   vp8_pack_bitstream(cpi, dest, size);
+
+  if (cpi->mb.e_mbd.update_mb_segmentation_map) {
+    update_reference_segmentation_map(cpi);
+  }
 
 #if CONFIG_PRED_FILTER
   // Select the prediction filtering mode to use for the

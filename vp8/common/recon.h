@@ -100,6 +100,11 @@ extern prototype_recon_macroblock(vp8_recon_recon_mb);
 #endif
 extern prototype_recon_macroblock(vp8_recon_recon_mby);
 
+#ifndef vp8_recon_build_intra_predictors_sby_s
+#define vp8_recon_build_intra_predictors_sby_s vp8_build_intra_predictors_sby_s
+#endif
+extern prototype_build_intra_predictors(vp8_recon_build_intra_predictors_sby_s);
+
 #ifndef vp8_recon_build_intra_predictors_mby
 #define vp8_recon_build_intra_predictors_mby vp8_build_intra_predictors_mby
 #endif
@@ -125,6 +130,11 @@ extern prototype_build_intra_predictors\
 #endif
 extern prototype_build_intra_predictors\
 (vp8_recon_build_intra_predictors_mby_s);
+
+#ifndef vp8_recon_build_intra_predictors_sbuv_s
+#define vp8_recon_build_intra_predictors_sbuv_s vp8_build_intra_predictors_sbuv_s
+#endif
+extern prototype_build_intra_predictors(vp8_recon_build_intra_predictors_sbuv_s);
 
 #ifndef vp8_recon_build_intra_predictors_mbuv
 #define vp8_recon_build_intra_predictors_mbuv vp8_build_intra_predictors_mbuv
@@ -214,10 +224,16 @@ typedef struct vp8_recon_rtcd_vtable {
   vp8_recon_fn_t       recon4;
   vp8_recon_mb_fn_t    recon_mb;
   vp8_recon_mb_fn_t    recon_mby;
+#if CONFIG_SUPERBLOCKS
+  vp8_build_intra_pred_fn_t  build_intra_predictors_sby_s;
+#endif
   vp8_build_intra_pred_fn_t  build_intra_predictors_mby_s;
   vp8_build_intra_pred_fn_t  build_intra_predictors_mby;
 #if CONFIG_COMP_INTRA_PRED
   vp8_build_intra_pred_fn_t  build_comp_intra_predictors_mby;
+#endif
+#if CONFIG_SUPERBLOCKS
+  vp8_build_intra_pred_fn_t  build_intra_predictors_sbuv_s;
 #endif
   vp8_build_intra_pred_fn_t  build_intra_predictors_mbuv_s;
   vp8_build_intra_pred_fn_t  build_intra_predictors_mbuv;

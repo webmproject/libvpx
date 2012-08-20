@@ -243,7 +243,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int y_stride;
   int offset;
 
-#if ARCH_X86 || ARCH_X86_64
+#if !CONFIG_SUPERBLOCKS && (ARCH_X86 || ARCH_X86_64)
   unsigned char *y0 = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
   unsigned char *y;
   int buf_r1, buf_r2, buf_c1, buf_c2;

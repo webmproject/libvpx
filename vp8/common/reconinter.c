@@ -759,6 +759,56 @@ void vp8_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
   vp8_build_1st_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
 }
 
+#if CONFIG_SUPERBLOCKS
+void vp8_build_inter32x32_predictors_sb(MACROBLOCKD *x,
+                                        unsigned char *dst_y,
+                                        unsigned char *dst_u,
+                                        unsigned char *dst_v,
+                                        int dst_ystride,
+                                        int dst_uvstride) {
+  uint8_t *y1 = x->pre.y_buffer, *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
+  uint8_t *y2 = x->second_pre.y_buffer, *u2 = x->second_pre.u_buffer,
+          *v2 = x->second_pre.v_buffer;
+  int n;
+
+  for (n = 0; n < 4; n++)
+  {
+    const int x_idx = n & 1, y_idx = n >> 1;
+
+    x->pre.y_buffer = y1 + y_idx * 16 * x->pre.y_stride  + x_idx * 16;
+    x->pre.u_buffer = u1 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
+    x->pre.v_buffer = v1 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
+
+    vp8_build_1st_inter16x16_predictors_mb(x,
+      dst_y + y_idx * 16 * dst_ystride  + x_idx * 16,
+      dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
+      dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
+      dst_ystride, dst_uvstride);
+    if (x->mode_info_context->mbmi.second_ref_frame) {
+      x->second_pre.y_buffer = y2 + y_idx * 16 * x->pre.y_stride  + x_idx * 16;
+      x->second_pre.u_buffer = u2 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
+      x->second_pre.v_buffer = v2 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
+
+      vp8_build_2nd_inter16x16_predictors_mb(x,
+        dst_y + y_idx * 16 * dst_ystride  + x_idx * 16,
+        dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
+        dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
+        dst_ystride, dst_uvstride);
+    }
+  }
+
+  x->pre.y_buffer = y1;
+  x->pre.u_buffer = u1;
+  x->pre.v_buffer = v1;
+
+  if (x->mode_info_context->mbmi.second_ref_frame) {
+    x->second_pre.y_buffer = y2;
+    x->second_pre.u_buffer = u2;
+    x->second_pre.v_buffer = v2;
+  }
+}
+#endif
+
 /*
  * The following functions should be called after an initial
  * call to vp8_build_inter16x16_predictors_mb() or _mby()/_mbuv().
