@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9JY\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xT8\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xTg\u003d",
         "filename": "vp8/common/entropymode.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Is the mixture of y \u0026 uv names correct?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9JU\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xTg\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9JQ\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xTY\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xTA\u003d",
         "filename": "vp8/common/entropymode.h",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "mixture of y \u0026 uv names confusing/incorrect?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9JM\u003d",
+        "filename": "vp8/common/entropymode.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xTA\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9JI\u003d",
+        "filename": "vp8/common/onyxc_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xSY\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xRI\u003d",
         "filename": "vp8/common/reconinter.c",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Line length \u003e 80 below?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9EQ\u003d",
+        "filename": "vp8/common/reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 781,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xRI\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9EA\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xNU\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xP8\u003d",
         "filename": "vp8/common/reconintra.c",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "log2_bsize_minus_1 would be clearer?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9Do\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xP8\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9Dk\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xP0\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xPY\u003d",
         "filename": "vp8/common/reconintra.c",
         "patchSetId": 3
@@ -166,6 +328,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Not your code I know, but this comment seems irrelevant and should be removed.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9Dg\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xPY\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9Dc\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xPQ\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xPM\u003d",
         "filename": "vp8/common/reconintra.c",
         "patchSetId": 3
@@ -200,6 +398,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Line length 81 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9DY\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xPM\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9DU\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xOw\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xOs\u003d",
         "filename": "vp8/common/reconintra.c",
         "patchSetId": 3
@@ -234,6 +468,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Line length 81 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9DQ\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xOs\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9DM\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xOo\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xOk\u003d",
         "filename": "vp8/common/reconintra.c",
         "patchSetId": 3
@@ -268,6 +538,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Calling Y specific function from UV function seems wrong...see above (Is this a bug?).\nAlso, Line length \u003e 80 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9DI\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xOk\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9DE\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xOg\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xOU\u003d",
         "filename": "vp8/common/reconintra.c",
         "patchSetId": 3
@@ -302,6 +608,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Line length \u003e 80 chars?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9DA\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xOU\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9C8\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xOQ\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xLM\u003d",
         "filename": "vp8/decoder/decodemv.c",
         "patchSetId": 3
@@ -336,6 +678,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "return vp8_treed_read(bc, vp8_uv_mode_tree, p);\nand change similar cases below (maybe a separate commit)?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9BA\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xLM\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -359,6 +719,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9A8\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xLA\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xKw\u003d",
         "filename": "vp8/decoder/decodemv.c",
         "patchSetId": 3
@@ -370,6 +748,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Change as per above comment?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9A4\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xKw\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -393,6 +789,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9A0\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Well, since Deb/Paul/Yaowu are touching that anyway, this will likely disappear soon, so let\u0027s leave it as-is to make their life easier on rebases.",
+      "parentUuid": "AAAAPH//xJc\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xJY\u003d",
         "filename": "vp8/decoder/decodemv.c",
         "patchSetId": 3
@@ -404,6 +818,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Line length \u003e 80?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//9As\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1138,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xJY\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -427,6 +859,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//9AQ\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xHc\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xHM\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 3
@@ -438,6 +888,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Make xd-\u003emode_info_context a local variable for use here and in what follows?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//8+g\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xHM\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -461,6 +929,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//8/g\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 799,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xHU\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//xG8\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 3
@@ -478,6 +964,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//8+c\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//xG8\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX////s\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 3
@@ -489,6 +993,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Again, the function names here confuse me since they write the mode.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//8+Y\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 987,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Let\u0027s wait for Paul/Yaowu/Deb\u0027s new MV writing code.",
+      "parentUuid": "AAAAPX////s\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -529,6 +1051,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//8+I\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1885,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX///+0\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX///58\u003d",
         "filename": "vp8/encoder/encodeframe.c",
         "patchSetId": 3
@@ -540,6 +1080,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "What commenting style should we use? This line is inconsistent with those that follow later.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//89o\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 721,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "We should use /* .. */, fixed in this function.",
+      "parentUuid": "AAAAPX///58\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -563,6 +1121,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//89g\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX///4s\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX///4o\u003d",
         "filename": "vp8/encoder/encodeframe.c",
         "patchSetId": 3
@@ -574,6 +1150,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Whitespace :-)",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//89U\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX///4o\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -597,6 +1191,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//89I\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 832,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX///Ec\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX///EQ\u003d",
         "filename": "vp8/encoder/encodeframe.c",
         "patchSetId": 3
@@ -608,6 +1220,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Whitespace",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//89E\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1069,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX///EQ\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -631,6 +1261,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//88w\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1164,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX///D0\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX///84\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 3
@@ -642,6 +1290,24 @@
       "writtenOn": "2012-08-17T17:11:16Z",
       "side": 1,
       "message": "Why 200?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//88s\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1776,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Random value to slightly discourage CIF material from using this. Basically random. It\u0027s recalculated on each frame and we\u0027ll move to other mechanisms to code this anyway, so not very important, IMO.",
+      "parentUuid": "AAAAPX///84\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -665,6 +1331,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//88g\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+yg\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+w8\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -676,6 +1360,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "Indent incorrect on lines below",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//88A\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1715,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+w8\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -699,6 +1401,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//878\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1729,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+w4\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+w0\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -710,6 +1430,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "4 space indent used throughout this function",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//87o\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1765,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+w0\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -733,6 +1471,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//87U\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3829,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+ws\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+wk\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -744,6 +1500,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "Is the comment relevant anymore. Should it be changed to TODO?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//87c\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3842,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+wk\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -767,6 +1541,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//87I\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4049,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+wU\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+vg\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -778,6 +1570,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "You can remove 1 level of braces and shift indent for this code block",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//83U\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4054,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+vg\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -801,6 +1611,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//83c\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4119,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+vQ\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+u8\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -812,6 +1640,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "Remove this line",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//83M\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4234,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+u8\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -835,6 +1681,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//83A\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4295,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+uU\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+uE\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -846,6 +1710,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "Previous 2 lines should be indented",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//828\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4323,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+uE\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -869,6 +1751,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//82w\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4356,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+tw\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+tg\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -880,6 +1780,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "Incorrect indent here and on lines below",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//82s\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4441,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+tg\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -903,6 +1821,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//82E\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4445,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+tI\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+s8\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -914,6 +1850,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "Indent incorrect",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//818\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4662,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+s8\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -937,6 +1891,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//810\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4676,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Half of it - the rest I\u0027d like to keep. I\u0027ll add a TODO.",
+      "parentUuid": "AAAAPX//+s0\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+ss\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -948,6 +1920,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "force -\u003e forces",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//81w\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4703,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+ss\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -971,6 +1961,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//81s\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4723,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+so\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+sk\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -988,6 +1996,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX//81o\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4733,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+sk\u003d",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPX//+sc\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 3
@@ -999,6 +2025,24 @@
       "writtenOn": "2012-08-17T17:59:17Z",
       "side": 1,
       "message": "Remove commented out text",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//81k\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4764,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-20T21:44:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPX//+sc\u003d",
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
