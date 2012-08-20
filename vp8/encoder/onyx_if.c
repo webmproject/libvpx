@@ -555,7 +555,12 @@ static void set_default_lf_deltas(VP8_COMP *cpi)
     cpi->mb.e_mbd.ref_lf_deltas[ALTREF_FRAME] = -2;
 
     cpi->mb.e_mbd.mode_lf_deltas[0] = 4;               /* BPRED */
-    cpi->mb.e_mbd.mode_lf_deltas[1] = -2;              /* Zero */
+
+    if(cpi->oxcf.Mode == MODE_REALTIME)
+      cpi->mb.e_mbd.mode_lf_deltas[1] = -12;              /* Zero */
+    else
+      cpi->mb.e_mbd.mode_lf_deltas[1] = -2;              /* Zero */
+
     cpi->mb.e_mbd.mode_lf_deltas[2] = 2;               /* New mv */
     cpi->mb.e_mbd.mode_lf_deltas[3] = 4;               /* Split mv */
 }
