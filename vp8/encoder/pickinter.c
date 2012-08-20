@@ -458,7 +458,15 @@ void get_lower_res_motion_info(VP8_COMP *cpi, MACROBLOCKD *xd, int *dissim,
 
 static void check_for_encode_breakout(unsigned int sse, MACROBLOCK* x)
 {
-    if (sse < x->encode_breakout)
+    MACROBLOCKD *xd = &x->e_mbd;
+
+    unsigned int threshold = (xd->block[0].dequant[1]
+        * xd->block[0].dequant[1] >>4);
+
+    if(threshold < x->encode_breakout)
+        threshold = x->encode_breakout;
+
+    if (sse < threshold )
     {
         /* Check u and v to make sure skip is ok */
         unsigned int sse2 = 0;
