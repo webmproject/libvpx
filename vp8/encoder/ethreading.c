@@ -213,10 +213,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
 #endif
 
-                        /* Count of last ref frame 0,0 usage */
-                        if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
-                            cpi->inter_zz_count++;
-
                         /* Special case code for cyclic refresh
                          * If cyclic update enabled then copy
                          * xd->mbmi.segment_id; (which may have been updated
