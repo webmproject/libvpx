@@ -480,7 +480,8 @@ static void check_for_encode_breakout(unsigned int sse, MACROBLOCK* x)
     }
 }
 
-static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2, VP8_COMP *cpi, MACROBLOCK *x)
+static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2,
+                               VP8_COMP *cpi, MACROBLOCK *x, int rd_adj)
 {
     MB_PREDICTION_MODE this_mode = x->e_mbd.mode_info_context->mbmi.mode;
     int_mv mv = x->e_mbd.mode_info_context->mbmi.mv;
@@ -503,8 +504,61 @@ static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2, V
 
     this_rd = RDCOST(x->rdmult, x->rddiv, rate2, *distortion2);
 
+    /* Adjust rd to bias to ZEROMV */
+    if(this_mode == ZEROMV)
+    {
+        /* Bias to ZEROMV on LAST_FRAME reference when it is available. */
+        if ((cpi->ref_frame_flags & VP8_LAST_FRAME &
+            cpi->common.refresh_last_frame)
+            && x->e_mbd.mode_info_context->mbmi.ref_frame != LAST_FRAME)
+            rd_adj = 100;
+
+        this_rd = this_rd * rd_adj/100;
+    }
+
     check_for_encode_breakout(*sse, x);
     return this_rd;
+}
+
+static void calculate_zeromv_rd_adjustment(VP8_COMP *cpi, MACROBLOCK *x,
+                                    int *rd_adjustment)
+{
+    MODE_INFO *mic = x->e_mbd.mode_info_context;
+    int_mv mv_l, mv_a, mv_al;
+    int local_motion_check = 0;
+
+    if (cpi->lf_zeromv_pct > 40)
+    {
+        /* left mb */
+        mic -= 1;
+        mv_l = mic->mbmi.mv;
+
+        if (mic->mbmi.ref_frame != INTRA_FRAME)
+            if( abs(mv_l.as_mv.row) < 8 && abs(mv_l.as_mv.col) < 8)
+                local_motion_check++;
+
+        /* above-left mb */
+        mic -= x->e_mbd.mode_info_stride;
+        mv_al = mic->mbmi.mv;
+
+        if (mic->mbmi.ref_frame != INTRA_FRAME)
+            if( abs(mv_al.as_mv.row) < 8 && abs(mv_al.as_mv.col) < 8)
+                local_motion_check++;
+
+        /* above mb */
+        mic += 1;
+        mv_a = mic->mbmi.mv;
+
+        if (mic->mbmi.ref_frame != INTRA_FRAME)
+            if( abs(mv_a.as_mv.row) < 8 && abs(mv_a.as_mv.col) < 8)
+                local_motion_check++;
+
+        if (((!x->e_mbd.mb_to_top_edge || !x->e_mbd.mb_to_left_edge)
+            && local_motion_check >0) ||  local_motion_check >2 )
+            *rd_adjustment = 80;
+        else if (local_motion_check > 0)
+            *rd_adjustment = 90;
+    }
 }
 
 void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
@@ -525,6 +579,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int num00;
     int mdcounts[4];
     int best_rd = INT_MAX;
+    int rd_adjustment = 100;
     int best_intra_rd = INT_MAX;
     int mode_index;
     int rate;
@@ -593,6 +648,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     x->skip = 0;
 
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+
+    /* If the frame has big static background and current MB is in low
+     * motion area, its mode decision is biased to ZEROMV mode.
+     */
+    calculate_zeromv_rd_adjustment(cpi, x, &rd_adjustment);
 
     /* if we encode a new mv this is important
      * find the best new motion vector
@@ -981,7 +1041,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
             x->e_mbd.mode_info_context->mbmi.mv.as_int =
                                                     mode_mv[this_mode].as_int;
-            this_rd = evaluate_inter_mode(&sse, rate2, &distortion2, cpi, x);
+            this_rd = evaluate_inter_mode(&sse, rate2, &distortion2, cpi, x,
+                                          rd_adjustment);
 
             break;
         default:
@@ -1119,7 +1180,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             x->e_mbd.mode_info_context->mbmi.mode = ZEROMV;
             x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
             x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
-            this_rd = evaluate_inter_mode(&sse, rate2, &distortion2, cpi, x);
+            this_rd = evaluate_inter_mode(&sse, rate2, &distortion2, cpi, x,
+                                          rd_adjustment);
 
             if (this_rd < best_rd)
             {

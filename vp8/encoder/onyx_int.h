@@ -515,6 +515,9 @@ typedef struct VP8_COMP
      * would be good to update the gf
      */
     int inter_zz_count;
+    /* Count ZEROMV on all reference frames. */
+    int zeromv_count;
+    int lf_zeromv_pct;
     int gf_bad_count;
     int gf_update_recommended;
     int skip_true_count;

@@ -1104,6 +1104,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 
     /* Data used for real time vc mode to see if gf needs refreshing */
     cpi->inter_zz_count = 0;
+    cpi->zeromv_count = 0;
     cpi->gf_bad_count = 0;
     cpi->gf_update_recommended = 0;
 
@@ -4306,6 +4307,7 @@ static void encode_frame_to_data_rate
         MODE_INFO *tmp = cm->mi;
 
         cpi->inter_zz_count = 0;
+        cpi->zeromv_count = 0;
 
         if(cm->frame_type != KEY_FRAME)
         {
@@ -4315,6 +4317,8 @@ static void encode_frame_to_data_rate
                 {
                     if(tmp->mbmi.mode == ZEROMV && tmp->mbmi.ref_frame == LAST_FRAME)
                         cpi->inter_zz_count++;
+                    if(tmp->mbmi.mode == ZEROMV)
+                        cpi->zeromv_count++;
                     tmp++;
                 }
                 tmp++;
@@ -5111,6 +5115,8 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
         vpx_usec_timer_start(&tsctimer);
         vpx_usec_timer_start(&ticktimer);
     }
+
+    cpi->lf_zeromv_pct = (cpi->zeromv_count * 100)/cm->MBs;
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
     {
