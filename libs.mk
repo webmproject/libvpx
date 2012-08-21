@@ -242,8 +242,8 @@ vpx.pc: config.mk libs.mk
 	$(qexec)echo 'Version: $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)' >> $@
 	$(qexec)echo 'Requires:' >> $@
 	$(qexec)echo 'Conflicts:' >> $@
-	$(qexec)echo 'Libs: -L$${libdir} -lvpx -lm' >> $@
-	$(qexec)echo 'Libs.private: -lpthread' >> $@
+	$(qexec)echo 'Libs: -L$${libdir} -lvpx' >> $@
+	$(qexec)echo 'Libs.private: -lm -lpthread' >> $@
 	$(qexec)echo 'Cflags: -I$${includedir}' >> $@
 INSTALL-LIBS-yes += $(LIBSUBDIR)/pkgconfig/vpx.pc
 INSTALL_MAPS += $(LIBSUBDIR)/pkgconfig/%.pc %.pc
