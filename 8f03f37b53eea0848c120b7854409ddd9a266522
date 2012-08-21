@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPX//78Q\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1001793
+      },
+      "writtenOn": "2012-08-21T18:22:21Z",
+      "side": 1,
+      "message": "mark",
+      "revId": "8f03f37b53eea0848c120b7854409ddd9a266522",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
