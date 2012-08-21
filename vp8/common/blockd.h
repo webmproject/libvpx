@@ -233,7 +233,7 @@ static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
 union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
-#if CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
     B_PREDICTION_MODE test;
     TX_TYPE           tx_type;
 #endif
