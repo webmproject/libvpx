@@ -2943,7 +2943,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   int uv_intra_rate_8x8 = 0, uv_intra_distortion_8x8 = 0, uv_intra_rate_tokenonly_8x8 = 0;
   int uv_intra_skippable_8x8 = 0;
   int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
-  int distortion_uv;
+  int distortion_uv = INT_MAX;
   int64_t best_yrd = INT64_MAX;
 #if CONFIG_PRED_FILTER
   int best_filter_state;

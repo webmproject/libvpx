@@ -295,6 +295,7 @@ static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
   const vp8_prob *prob, *coef_probs;
 
   switch (block_type) {
+    default:
     case TX_4X4:
       coef_probs = fc->coef_probs[type][0][0];
       break;
@@ -302,7 +303,7 @@ static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
       coef_probs = fc->coef_probs_8x8[type][0][0];
       break;
 #if CONFIG_TX16X16
-    default:
+    case TX_16X16:
       coef_probs = fc->coef_probs_16x16[type][0][0];
       break;
 #endif
