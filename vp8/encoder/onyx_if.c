@@ -630,7 +630,6 @@ static void update_reference_segmentation_map(VP8_COMP *cpi) {
   for (row = 0; row < sb_rows; row++) {
     for (col = 0; col < sb_cols; col++) {
       MODE_INFO *miptr = mi + col * 2;
-      uint8_t *seg = segmap + col * 2;
       uint8_t *cache = segcache + col * 2;
 #if CONFIG_SUPERBLOCKS
       if (miptr->mbmi.encoded_as_sb) {
