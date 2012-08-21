@@ -21,6 +21,7 @@
 #include "vp8/common/setupintrarecon.h"
 #include "encodeintra.h"
 #include "vp8/common/reconinter.h"
+#include "vp8/common/invtrans.h"
 #include "rdopt.h"
 #include "vp8/common/findnearmv.h"
 #include "vp8/common/reconintra.h"
@@ -76,7 +77,8 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
                                     MACROBLOCK *x,
                                     TOKENEXTRA **t, int mb_col);
 static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x);
-
+extern void vp8_stuff_mb_8x8(VP8_COMP *cpi,
+                             MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 
 #ifdef MODE_STATS
 unsigned int inter_y_modes[MB_MODE_COUNT];
@@ -852,7 +854,6 @@ static void encode_sb(VP8_COMP *cpi,
                       MACROBLOCK  *x,
                       MACROBLOCKD *xd,
                       TOKENEXTRA **tp) {
-  VP8_COMMON *pc = cm;
   int i;
   int map_index;
   int mb_row, mb_col;
@@ -1693,7 +1694,6 @@ static void update_sb_skip_coeff_state(VP8_COMP *cpi,
   // reset pointer, stuff EOBs where necessary
   *tp = t[0];
   for (n = 0; n < 4; n++) {
-    TOKENEXTRA *tbak = *tp;
     if (skip[n]) {
       x->e_mbd.above_context = &ta[n];
       x->e_mbd.left_context  = &tl[n];
@@ -1715,9 +1715,12 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
   int n;
   MACROBLOCKD *xd = &x->e_mbd;
   VP8_COMMON *cm = &cpi->common;
-  const uint8_t *src = x->src.y_buffer, *dst = xd->dst.y_buffer;
-  const uint8_t *usrc = x->src.u_buffer, *udst = xd->dst.u_buffer;
-  const uint8_t *vsrc = x->src.v_buffer, *vdst = xd->dst.v_buffer;
+  const uint8_t *src = x->src.y_buffer;
+  uint8_t *dst = xd->dst.y_buffer;
+  const uint8_t *usrc = x->src.u_buffer;
+  uint8_t *udst = xd->dst.u_buffer;
+  const uint8_t *vsrc = x->src.v_buffer;
+  uint8_t *vdst = xd->dst.v_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
   const VP8_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
@@ -2041,13 +2044,15 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
   const int output_enabled = 1;
   VP8_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
-  const uint8_t *src = x->src.y_buffer, *dst = xd->dst.y_buffer;
-  const uint8_t *usrc = x->src.u_buffer, *udst = xd->dst.u_buffer;
-  const uint8_t *vsrc = x->src.v_buffer, *vdst = xd->dst.v_buffer;
+  const uint8_t *src = x->src.y_buffer;
+  uint8_t *dst = xd->dst.y_buffer;
+  const uint8_t *usrc = x->src.u_buffer;
+  uint8_t *udst = xd->dst.u_buffer;
+  const uint8_t *vsrc = x->src.v_buffer;
+  uint8_t *vdst = xd->dst.v_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
   const VP8_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
-  int mis = xd->mode_info_stride;
   unsigned int segment_id = xd->mode_info_context->mbmi.segment_id;
   int seg_ref_active;
   unsigned char ref_pred_flag;

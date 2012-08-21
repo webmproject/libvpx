@@ -3856,7 +3856,6 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
   int mode16x16;
   int mode8x8[2][4];
   int dist;
-  int rateuv8, rateuv_tokenonly8, distuv8;
 
   mbmi->ref_frame = INTRA_FRAME;
   rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
@@ -3961,7 +3960,6 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
   BLOCKD *d = &xd->block[0];
   MB_PREDICTION_MODE this_mode;
   MV_REFERENCE_FRAME ref_frame;
-  int mis = xd->mode_info_stride;
   unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
   int comp_pred;
   int_mv best_ref_mv, second_best_ref_mv;
@@ -4313,11 +4311,11 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
               if ((sse - var < q2dc *q2dc >> 4) ||
                   (sse / 2 > var && sse - var < 64)) {
                 // Check u and v to make sure skip is ok
-                int sse2, sse3;
-                int var2 = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
+                unsigned int sse2, sse3;
+                var += VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
                                   (x->src.u_buffer, x->src.uv_stride,
                                    xd->dst.u_buffer, xd->dst.uv_stride, &sse2);
-                int var3 = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
+                var += VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
                                   (x->src.v_buffer, x->src.uv_stride,
                                    xd->dst.v_buffer, xd->dst.uv_stride, &sse3);
                 sse2 += sse3;
@@ -4658,7 +4656,6 @@ void vp8cx_pick_mode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
                                       int recon_yoffset,
                                       int recon_uvoffset,
                                       int *totalrate, int *totaldist) {
-  VP8_COMMON *cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   int rate, distortion;

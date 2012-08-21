@@ -132,4 +132,14 @@ void vp8_optimize_mby_16x16(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 
 void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
 
+#if CONFIG_SUPERBLOCKS
+void vp8_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
+                           const unsigned char *vsrc, int src_stride,
+                           const unsigned char *upred,
+                           const unsigned char *vpred, int dst_stride);
+void vp8_subtract_mby_s_c(short *diff, const unsigned char *src,
+                          int src_stride, const unsigned char *pred,
+                          int dst_stride);
+#endif
+
 #endif

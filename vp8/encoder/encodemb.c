@@ -67,8 +67,10 @@ void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   }
 }
 
-void vp8_subtract_mbuv_s_c(short *diff, unsigned char *usrc, unsigned char *vsrc, int src_stride,
-                           unsigned char *upred, unsigned char *vpred, int dst_stride) {
+void vp8_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
+                           const unsigned char *vsrc, int src_stride,
+                           const unsigned char *upred,
+                           const unsigned char *vpred, int dst_stride) {
   short *udiff = diff + 256;
   short *vdiff = diff + 320;
 
@@ -95,14 +97,16 @@ void vp8_subtract_mbuv_s_c(short *diff, unsigned char *usrc, unsigned char *vsrc
   }
 }
 
-void vp8_subtract_mbuv_c(short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride) {
+void vp8_subtract_mbuv_c(short *diff, unsigned char *usrc,
+                         unsigned char *vsrc, unsigned char *pred, int stride) {
   unsigned char *upred = pred + 256;
   unsigned char *vpred = pred + 320;
 
   vp8_subtract_mbuv_s_c(diff, usrc, vsrc, stride, upred, vpred, 8);
 }
 
-void vp8_subtract_mby_s_c(short *diff, unsigned char *src, int src_stride, unsigned char *pred, int dst_stride) {
+void vp8_subtract_mby_s_c(short *diff, const unsigned char *src, int src_stride,
+                          const unsigned char *pred, int dst_stride) {
   int r, c;
 
   for (r = 0; r < 16; r++) {
@@ -116,8 +120,8 @@ void vp8_subtract_mby_s_c(short *diff, unsigned char *src, int src_stride, unsig
   }
 }
 
-void vp8_subtract_mby_c(short *diff, unsigned char *src, unsigned char *pred, int stride)
-{
+void vp8_subtract_mby_c(short *diff, unsigned char *src,
+                        unsigned char *pred, int stride) {
   vp8_subtract_mby_s_c(diff, src, stride, pred, 16);
 }
 

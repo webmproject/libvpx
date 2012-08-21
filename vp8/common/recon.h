@@ -262,4 +262,12 @@ typedef struct vp8_recon_rtcd_vtable {
 
 void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd,
                           MACROBLOCKD *xd);
+
+#if CONFIG_SUPERBLOCKS
+extern void vp8_recon_mby_s_c(const vp8_recon_rtcd_vtable_t *rtcd,
+                              MACROBLOCKD *xd, uint8_t *dst);
+extern void vp8_recon_mbuv_s_c(const vp8_recon_rtcd_vtable_t *rtcd,
+                               MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst);
+#endif
+
 #endif

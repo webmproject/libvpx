@@ -45,6 +45,15 @@ extern void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                                    int dst_ystride,
                                                    int dst_uvstride);
 
+#if CONFIG_SUPERBLOCKS
+extern void vp8_build_inter32x32_predictors_sb(MACROBLOCKD *x,
+                                               unsigned char *dst_y,
+                                               unsigned char *dst_u,
+                                               unsigned char *dst_v,
+                                               int dst_ystride,
+                                               int dst_uvstride);
+#endif
+
 extern void vp8_build_inter_predictors_mb(MACROBLOCKD *xd);
 
 extern void vp8_build_inter_predictors_b(BLOCKD *d, int pitch,

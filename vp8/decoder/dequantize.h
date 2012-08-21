@@ -201,5 +201,16 @@ void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
                                    int pitch, int stride);
 #endif
 
+#if CONFIG_SUPERBLOCKS
+void vp8_dequant_dc_idct_add_y_block_8x8_inplace_c(short *q, short *dq,
+                                                   unsigned char *dst,
+                                                   int stride, char *eobs,
+                                                   short *dc, MACROBLOCKD *xd);
+void vp8_dequant_idct_add_uv_block_8x8_inplace_c(short *q, short *dq,
+                                                 unsigned char *dstu,
+                                                 unsigned char *dstv,
+                                                 int stride, char *eobs,
+                                                 MACROBLOCKD *xd);
+#endif
 
 #endif
