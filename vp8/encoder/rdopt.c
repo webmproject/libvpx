@@ -4144,7 +4144,7 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
             saddone = 1;
           }
 
-          vp8_mv_pred(cpi, xs, xd->mode_info_context, &mvp,
+          vp8_mv_pred(cpi, xd, xd->mode_info_context, &mvp,
                       xd->mode_info_context->mbmi.ref_frame,
                       cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
 
