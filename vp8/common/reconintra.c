@@ -358,10 +358,12 @@ void vp8_build_comp_intra_predictors_mby(MACROBLOCKD *xd) {
 
   vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
                                       predictor[0], 16,
-                                      xd->mode_info_context->mbmi.mode);
+                                      xd->mode_info_context->mbmi.mode,
+                                      16);
   vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
                                       predictor[1], 16,
-                                      xd->mode_info_context->mbmi.second_mode);
+                                      xd->mode_info_context->mbmi.second_mode,
+                                      16);
 
   for (i = 0; i < 256; i++) {
     xd->predictor[i] = (predictor[0][i] + predictor[1][i] + 1) >> 1;
@@ -411,10 +413,10 @@ void vp8_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
 
   vp8_build_intra_predictors_mbuv_internal(
     xd, predictor[0][0], predictor[1][0], 8,
-    xd->mode_info_context->mbmi.uv_mode);
+    xd->mode_info_context->mbmi.uv_mode, 8);
   vp8_build_intra_predictors_mbuv_internal(
     xd, predictor[0][1], predictor[1][1], 8,
-    xd->mode_info_context->mbmi.second_uv_mode);
+    xd->mode_info_context->mbmi.second_uv_mode, 8);
   for (i = 0; i < 64; i++) {
     xd->predictor[256 + i] = (predictor[0][0][i] + predictor[0][1][i] + 1) >> 1;
     xd->predictor[256 + 64 + i] = (predictor[1][0][i] +
