@@ -523,10 +523,6 @@ void encode_mb_row(VP8_COMP *cpi,
 
 #endif
 
-            /* Count of last ref frame 0,0 usage */
-            if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
-                cpi->inter_zz_count ++;
-
             /* Special case code for cyclic refresh
              * If cyclic update enabled then copy xd->mbmi.segment_id; (which
              * may have been updated based on mode during
@@ -720,9 +716,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
         xd->subpixel_predict8x8     = vp8_bilinear_predict8x8;
         xd->subpixel_predict16x16   = vp8_bilinear_predict16x16;
     }
-
-    /* Reset frame count of inter 0,0 motion vector usage. */
-    cpi->inter_zz_count = 0;
 
     cpi->prediction_error = 0;
     cpi->intra_error = 0;
