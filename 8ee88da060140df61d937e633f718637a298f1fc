@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPX//8QQ\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4324,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-08-21T12:59:26Z",
+      "side": 1,
+      "message": "Can\u0027t we just keep around the last frames total count? Why do we have to recalculate?",
+      "revId": "8ee88da060140df61d937e633f718637a298f1fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

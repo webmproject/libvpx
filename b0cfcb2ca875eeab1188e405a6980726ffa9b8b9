@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPX//8QY\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-08-21T12:59:26Z",
+      "side": 0,
+      "message": "Don\u0027t we want all zero_mvs in this?",
+      "revId": "b0cfcb2ca875eeab1188e405a6980726ffa9b8b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//8QU\u003d",
+        "filename": "vp8/encoder/ethreading.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-08-21T12:59:26Z",
+      "side": 0,
+      "message": "Don\u0027t we want all zeromvs?",
+      "revId": "b0cfcb2ca875eeab1188e405a6980726ffa9b8b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
