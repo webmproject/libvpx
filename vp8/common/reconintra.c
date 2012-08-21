@@ -218,7 +218,7 @@ void vp8_build_intra_predictors_internal(MACROBLOCKD *xd,
   int r, c, i;
 
   for (i = 0; i < bsize; i++) {
-    yleft_col[i] = xd->dst.y_buffer [i * src_stride - 1];
+    yleft_col[i] = src[i * src_stride - 1];
   }
 
   /* for Y */
