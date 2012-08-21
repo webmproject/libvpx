@@ -200,42 +200,59 @@ void choose_segmap_coding_method(VP8_COMP *cpi) {
   // in the frame
   xd->mode_info_context = cm->mi;
 
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
-      segment_id = xd->mode_info_context->mbmi.segment_id;
+  for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 2) {
+    for (mb_col = 0; mb_col < cm->mb_cols; mb_col += 2) {
+      for (i = 0; i < 4; i++) {
+        static const int dx[4] = { +1, -1, +1, +1 };
+        static const int dy[4] = {  0, +1,  0, -1 };
+        int x_idx = i & 1, y_idx = i >> 1;
 
-      // Count the number of hits on each segment with no prediction
-      no_pred_segcounts[segment_id]++;
+        if (mb_col + x_idx >= cm->mb_cols ||
+            mb_row + y_idx >= cm->mb_rows) {
+          goto end;
+        }
 
-      // Temporal prediction not allowed on key frames
-      if (cm->frame_type != KEY_FRAME) {
-        // Test to see if the segment id matches the predicted value.
-        int seg_predicted =
-          (segment_id == get_pred_mb_segid(cm, segmap_index));
+        segmap_index = (mb_row + y_idx) * cm->mb_cols + mb_col + x_idx;
+        segment_id = xd->mode_info_context->mbmi.segment_id;
 
-        // Get the segment id prediction context
-        pred_context =
-          get_pred_context(cm, xd, PRED_SEG_ID);
+        // Count the number of hits on each segment with no prediction
+        no_pred_segcounts[segment_id]++;
 
-        // Store the prediction status for this mb and update counts
-        // as appropriate
-        set_pred_flag(xd, PRED_SEG_ID, seg_predicted);
-        temporal_predictor_count[pred_context][seg_predicted]++;
+        // Temporal prediction not allowed on key frames
+        if (cm->frame_type != KEY_FRAME) {
+          // Test to see if the segment id matches the predicted value.
+          int seg_predicted =
+            (segment_id == get_pred_mb_segid(cm, segmap_index));
 
-        if (!seg_predicted)
-          // Update the "unpredicted" segment count
-          t_unpred_seg_counts[segment_id]++;
+          // Get the segment id prediction context
+          pred_context =
+            get_pred_context(cm, xd, PRED_SEG_ID);
+
+          // Store the prediction status for this mb and update counts
+          // as appropriate
+          set_pred_flag(xd, PRED_SEG_ID, seg_predicted);
+          temporal_predictor_count[pred_context][seg_predicted]++;
+
+          if (!seg_predicted)
+            // Update the "unpredicted" segment count
+            t_unpred_seg_counts[segment_id]++;
+        }
+
+#if CONFIG_SUPERBLOCKS
+        if (xd->mode_info_context->mbmi.encoded_as_sb) {
+          assert(!i);
+          xd->mode_info_context += 2;
+          break;
+        }
+#endif
+      end:
+        xd->mode_info_context += dx[i] + dy[i] * cm->mode_info_stride;
       }
-
-      // Step on to the next mb
-      xd->mode_info_context++;
-
-      // Step on to the next entry in the segment maps
-      segmap_index++;
     }
 
     // this is to account for the border in mode_info_context
-    xd->mode_info_context++;
+    xd->mode_info_context -= mb_col;
+    xd->mode_info_context += cm->mode_info_stride * 2;
   }
 
   // Work out probability tree for coding segments without prediction

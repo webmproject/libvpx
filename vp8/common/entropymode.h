@@ -40,21 +40,25 @@ extern const vp8_tree_index vp8_bmode_tree[];
 extern const vp8_tree_index  vp8_ymode_tree[];
 extern const vp8_tree_index  vp8_kf_ymode_tree[];
 extern const vp8_tree_index  vp8_uv_mode_tree[];
+#define vp8_sb_ymode_tree vp8_uv_mode_tree
 extern const vp8_tree_index  vp8_i8x8_mode_tree[];
 extern const vp8_tree_index  vp8_mbsplit_tree[];
 extern const vp8_tree_index  vp8_mv_ref_tree[];
+extern const vp8_tree_index  vp8_sb_mv_ref_tree[];
 extern const vp8_tree_index  vp8_sub_mv_ref_tree[];
 
 extern struct vp8_token_struct vp8_bmode_encodings   [VP8_BINTRAMODES];
 extern struct vp8_token_struct vp8_ymode_encodings   [VP8_YMODES];
+extern struct vp8_token_struct vp8_sb_kf_ymode_encodings [VP8_I32X32_MODES];
 extern struct vp8_token_struct vp8_kf_ymode_encodings [VP8_YMODES];
-extern struct vp8_token_struct vp8_i8x8_mode_encodings  [VP8_UV_MODES];
+extern struct vp8_token_struct vp8_i8x8_mode_encodings  [VP8_I8X8_MODES];
 extern struct vp8_token_struct vp8_uv_mode_encodings  [VP8_UV_MODES];
 extern struct vp8_token_struct vp8_mbsplit_encodings  [VP8_NUMMBSPLITS];
 
 /* Inter mode values do not start at zero */
 
 extern struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
+extern struct vp8_token_struct vp8_sb_mv_ref_encoding_array    [VP8_MVREFS];
 extern struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
 void vp8_entropy_mode_init(void);

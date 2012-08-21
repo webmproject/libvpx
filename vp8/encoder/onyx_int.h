@@ -359,7 +359,9 @@ enum {
   BLOCK_8X8,
   BLOCK_4X4,
   BLOCK_16X16,
-  BLOCK_MAX_SEGMENTS
+  BLOCK_MAX_SEGMENTS,
+  BLOCK_32X32 = BLOCK_MAX_SEGMENTS,
+  BLOCK_MAX_SB_SEGMENTS,
 };
 
 typedef struct VP8_COMP {
@@ -528,6 +530,10 @@ typedef struct VP8_COMP {
 
   int cq_target_quality;
 
+#if CONFIG_SUPERBLOCKS
+  int sb_count;
+  int sb_ymode_count [VP8_I32X32_MODES];
+#endif
   int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
   int bmode_count [VP8_BINTRAMODES];
   int i8x8_mode_count [VP8_I8X8_MODES];
@@ -628,7 +634,7 @@ typedef struct VP8_COMP {
   vp8_full_search_fn_t full_search_sad;
   vp8_refining_search_fn_t refining_search_sad;
   vp8_diamond_search_fn_t diamond_search_sad;
-  vp8_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SEGMENTS];
+  vp8_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SB_SEGMENTS];
   uint64_t time_receive_data;
   uint64_t time_compress_data;
   uint64_t time_pick_lpf;
@@ -731,9 +737,6 @@ typedef struct VP8_COMP {
   int force_next_frame_intra;
 
   int droppable;
-
-  // Global store for SB left contexts, one for each MB row in the SB
-  ENTROPY_CONTEXT_PLANES left_context[2];
 
   // TODO Do we still need this??
   int update_context;

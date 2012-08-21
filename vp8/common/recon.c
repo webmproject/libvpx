@@ -124,6 +124,52 @@ void vp8_recon2b_c
   }
 }
 
+#if CONFIG_SUPERBLOCKS
+void vp8_recon_mby_s_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *xd, uint8_t *dst) {
+  int x, y;
+  BLOCKD *b = &xd->block[0];
+  int stride = b->dst_stride;
+  short *diff = b->diff;
+
+  for (y = 0; y < 16; y++) {
+    for (x = 0; x < 16; x++) {
+      int a = dst[x] + diff[x];
+      if (a < 0)
+        a = 0;
+      else if (a > 255)
+        a = 255;
+      dst[x] = a;
+    }
+    dst += stride;
+    diff += 16;
+  }
+}
+
+void vp8_recon_mbuv_s_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
+  int x, y, i;
+  uint8_t *dst = udst;
+
+  for (i = 0; i < 2; i++, dst = vdst) {
+    BLOCKD *b = &xd->block[16 + 4 * i];
+    int stride = b->dst_stride;
+    short *diff = b->diff;
+
+    for (y = 0; y < 8; y++) {
+      for (x = 0; x < 8; x++) {
+        int a = dst[x] + diff[x];
+        if (a < 0)
+          a = 0;
+        else if (a > 255)
+          a = 255;
+        dst[x] = a;
+      }
+      dst += stride;
+      diff += 8;
+    }
+  }
+}
+#endif
+
 void vp8_recon_mby_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *xd) {
 #if ARCH_ARM
   BLOCKD *b = &xd->block[0];

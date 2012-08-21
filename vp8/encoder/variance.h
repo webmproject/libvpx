@@ -145,7 +145,17 @@ extern prototype_sad(vp8_variance_sad16x8);
 #endif
 extern prototype_sad(vp8_variance_sad16x16);
 
+#ifndef vp8_variance_sad32x32
+#define vp8_variance_sad32x32 vp8_sad32x32_c
+#endif
+extern prototype_sad(vp8_variance_sad32x32);
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+#ifndef vp8_variance_sad32x32x3
+#define vp8_variance_sad32x32x3 vp8_sad32x32x3_c
+#endif
+extern prototype_sad_multi_same_address(vp8_variance_sad32x32x3);
 
 #ifndef vp8_variance_sad16x16x3
 #define vp8_variance_sad16x16x3 vp8_sad16x16x3_c
@@ -171,6 +181,11 @@ extern prototype_sad_multi_same_address(vp8_variance_sad8x16x3);
 #define vp8_variance_sad4x4x3 vp8_sad4x4x3_c
 #endif
 extern prototype_sad_multi_same_address(vp8_variance_sad4x4x3);
+
+#ifndef vp8_variance_sad32x32x8
+#define vp8_variance_sad32x32x8 vp8_sad32x32x8_c
+#endif
+extern prototype_sad_multi_same_address_1(vp8_variance_sad32x32x8);
 
 #ifndef vp8_variance_sad16x16x8
 #define vp8_variance_sad16x16x8 vp8_sad16x16x8_c
@@ -198,6 +213,11 @@ extern prototype_sad_multi_same_address_1(vp8_variance_sad8x16x8);
 extern prototype_sad_multi_same_address_1(vp8_variance_sad4x4x8);
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+#ifndef vp8_variance_sad32x32x4d
+#define vp8_variance_sad32x32x4d vp8_sad32x32x4d_c
+#endif
+extern prototype_sad_multi_dif_address(vp8_variance_sad32x32x4d);
 
 #ifndef vp8_variance_sad16x16x4d
 #define vp8_variance_sad16x16x4d vp8_sad16x16x4d_c
@@ -258,6 +278,11 @@ extern prototype_variance(vp8_variance_var16x8);
 #endif
 extern prototype_variance(vp8_variance_var16x16);
 
+#ifndef vp8_variance_var32x32
+#define vp8_variance_var32x32 vp8_variance32x32_c
+#endif
+extern prototype_variance(vp8_variance_var32x32);
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #ifndef vp8_variance_subpixvar4x4
@@ -285,25 +310,50 @@ extern prototype_subpixvariance(vp8_variance_subpixvar16x8);
 #endif
 extern prototype_subpixvariance(vp8_variance_subpixvar16x16);
 
+#ifndef vp8_variance_subpixvar32x32
+#define vp8_variance_subpixvar32x32 vp8_sub_pixel_variance32x32_c
+#endif
+extern prototype_subpixvariance(vp8_variance_subpixvar32x32);
+
 #ifndef vp8_variance_halfpixvar16x16_h
 #define vp8_variance_halfpixvar16x16_h vp8_variance_halfpixvar16x16_h_c
 #endif
 extern prototype_variance(vp8_variance_halfpixvar16x16_h);
+
+#ifndef vp8_variance_halfpixvar32x32_h
+#define vp8_variance_halfpixvar32x32_h vp8_variance_halfpixvar32x32_h_c
+#endif
+extern prototype_variance(vp8_variance_halfpixvar32x32_h);
 
 #ifndef vp8_variance_halfpixvar16x16_v
 #define vp8_variance_halfpixvar16x16_v vp8_variance_halfpixvar16x16_v_c
 #endif
 extern prototype_variance(vp8_variance_halfpixvar16x16_v);
 
+#ifndef vp8_variance_halfpixvar32x32_v
+#define vp8_variance_halfpixvar32x32_v vp8_variance_halfpixvar32x32_v_c
+#endif
+extern prototype_variance(vp8_variance_halfpixvar32x32_v);
+
 #ifndef vp8_variance_halfpixvar16x16_hv
 #define vp8_variance_halfpixvar16x16_hv vp8_variance_halfpixvar16x16_hv_c
 #endif
 extern prototype_variance(vp8_variance_halfpixvar16x16_hv);
 
+#ifndef vp8_variance_halfpixvar32x32_hv
+#define vp8_variance_halfpixvar32x32_hv vp8_variance_halfpixvar32x32_hv_c
+#endif
+extern prototype_variance(vp8_variance_halfpixvar32x32_hv);
+
 #ifndef vp8_variance_subpixmse16x16
 #define vp8_variance_subpixmse16x16 vp8_sub_pixel_mse16x16_c
 #endif
 extern prototype_subpixvariance(vp8_variance_subpixmse16x16);
+
+#ifndef vp8_variance_subpixmse32x32
+#define vp8_variance_subpixmse32x32 vp8_sub_pixel_mse32x32_c
+#endif
+extern prototype_subpixvariance(vp8_variance_subpixmse32x32);
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -349,38 +399,66 @@ typedef struct {
   vp8_sad_fn_t             sad8x16;
   vp8_sad_fn_t             sad16x8;
   vp8_sad_fn_t             sad16x16;
+#if CONFIG_SUPERBLOCKS
+  vp8_sad_fn_t             sad32x32;
+#endif
 
   vp8_variance_fn_t        var4x4;
   vp8_variance_fn_t        var8x8;
   vp8_variance_fn_t        var8x16;
   vp8_variance_fn_t        var16x8;
   vp8_variance_fn_t        var16x16;
+#if CONFIG_SUPERBLOCKS
+  vp8_variance_fn_t        var32x32;
+#endif
 
   vp8_subpixvariance_fn_t  subpixvar4x4;
   vp8_subpixvariance_fn_t  subpixvar8x8;
   vp8_subpixvariance_fn_t  subpixvar8x16;
   vp8_subpixvariance_fn_t  subpixvar16x8;
   vp8_subpixvariance_fn_t  subpixvar16x16;
+#if CONFIG_SUPERBLOCKS
+  vp8_subpixvariance_fn_t  subpixvar32x32;
+#endif
   vp8_variance_fn_t        halfpixvar16x16_h;
+  vp8_variance_fn_t        halfpixvar32x32_h;
   vp8_variance_fn_t        halfpixvar16x16_v;
+#if CONFIG_SUPERBLOCKS
+  vp8_variance_fn_t        halfpixvar32x32_v;
+#endif
   vp8_variance_fn_t        halfpixvar16x16_hv;
+#if CONFIG_SUPERBLOCKS
+  vp8_variance_fn_t        halfpixvar32x32_hv;
+#endif
   vp8_subpixvariance_fn_t  subpixmse16x16;
+#if CONFIG_SUPERBLOCKS
+  vp8_subpixvariance_fn_t  subpixmse32x32;
+#endif
 
   vp8_getmbss_fn_t         getmbss;
   vp8_variance_fn_t        mse16x16;
 
+#if CONFIG_SUPERBLOCKS
+  vp8_sad_multi_fn_t       sad32x32x3;
+#endif
   vp8_sad_multi_fn_t       sad16x16x3;
   vp8_sad_multi_fn_t       sad16x8x3;
   vp8_sad_multi_fn_t       sad8x16x3;
   vp8_sad_multi_fn_t       sad8x8x3;
   vp8_sad_multi_fn_t       sad4x4x3;
 
+#if CONFIG_SUPERBLOCKS
+  vp8_sad_multi1_fn_t      sad32x32x8;
+#endif
   vp8_sad_multi1_fn_t      sad16x16x8;
   vp8_sad_multi1_fn_t      sad16x8x8;
   vp8_sad_multi1_fn_t      sad8x16x8;
   vp8_sad_multi1_fn_t      sad8x8x8;
   vp8_sad_multi1_fn_t      sad4x4x8;
 
+#if CONFIG_SUPERBLOCKS
+  vp8_sad_multi_d_fn_t     sad32x32x4d;
+#endif
   vp8_sad_multi_d_fn_t     sad16x16x4d;
   vp8_sad_multi_d_fn_t     sad16x8x4d;
   vp8_sad_multi_d_fn_t     sad8x16x4d;

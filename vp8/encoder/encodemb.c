@@ -67,11 +67,10 @@ void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   }
 }
 
-void vp8_subtract_mbuv_c(short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride) {
+void vp8_subtract_mbuv_s_c(short *diff, unsigned char *usrc, unsigned char *vsrc, int src_stride,
+                           unsigned char *upred, unsigned char *vpred, int dst_stride) {
   short *udiff = diff + 256;
   short *vdiff = diff + 320;
-  unsigned char *upred = pred + 256;
-  unsigned char *vpred = pred + 320;
 
   int r, c;
 
@@ -81,8 +80,8 @@ void vp8_subtract_mbuv_c(short *diff, unsigned char *usrc, unsigned char *vsrc, 
     }
 
     udiff += 8;
-    upred += 8;
-    usrc  += stride;
+    upred += dst_stride;
+    usrc  += src_stride;
   }
 
   for (r = 0; r < 8; r++) {
@@ -91,12 +90,19 @@ void vp8_subtract_mbuv_c(short *diff, unsigned char *usrc, unsigned char *vsrc, 
     }
 
     vdiff += 8;
-    vpred += 8;
-    vsrc  += stride;
+    vpred += dst_stride;
+    vsrc  += src_stride;
   }
 }
 
-void vp8_subtract_mby_c(short *diff, unsigned char *src, unsigned char *pred, int stride) {
+void vp8_subtract_mbuv_c(short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride) {
+  unsigned char *upred = pred + 256;
+  unsigned char *vpred = pred + 320;
+
+  vp8_subtract_mbuv_s_c(diff, usrc, vsrc, stride, upred, vpred, 8);
+}
+
+void vp8_subtract_mby_s_c(short *diff, unsigned char *src, int src_stride, unsigned char *pred, int dst_stride) {
   int r, c;
 
   for (r = 0; r < 16; r++) {
@@ -105,9 +111,14 @@ void vp8_subtract_mby_c(short *diff, unsigned char *src, unsigned char *pred, in
     }
 
     diff += 16;
-    pred += 16;
-    src  += stride;
+    pred += dst_stride;
+    src  += src_stride;
   }
+}
+
+void vp8_subtract_mby_c(short *diff, unsigned char *src, unsigned char *pred, int stride)
+{
+  vp8_subtract_mby_s_c(diff, src, stride, pred, 16);
 }
 
 static void vp8_subtract_mb(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {

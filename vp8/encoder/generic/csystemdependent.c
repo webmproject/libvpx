@@ -23,24 +23,36 @@ extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER
 void vp8_cmachine_specific_config(VP8_COMP *cpi) {
 #if CONFIG_RUNTIME_CPU_DETECT
   cpi->rtcd.common                    = &cpi->common.rtcd;
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.sad32x32              = vp8_sad32x32_c;
+#endif
   cpi->rtcd.variance.sad16x16              = vp8_sad16x16_c;
   cpi->rtcd.variance.sad16x8               = vp8_sad16x8_c;
   cpi->rtcd.variance.sad8x16               = vp8_sad8x16_c;
   cpi->rtcd.variance.sad8x8                = vp8_sad8x8_c;
   cpi->rtcd.variance.sad4x4                = vp8_sad4x4_c;
 
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.sad32x32x3            = vp8_sad32x32x3_c;
+#endif
   cpi->rtcd.variance.sad16x16x3            = vp8_sad16x16x3_c;
   cpi->rtcd.variance.sad16x8x3             = vp8_sad16x8x3_c;
   cpi->rtcd.variance.sad8x16x3             = vp8_sad8x16x3_c;
   cpi->rtcd.variance.sad8x8x3              = vp8_sad8x8x3_c;
   cpi->rtcd.variance.sad4x4x3              = vp8_sad4x4x3_c;
 
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.sad32x32x8            = vp8_sad32x32x8_c;
+#endif
   cpi->rtcd.variance.sad16x16x8            = vp8_sad16x16x8_c;
   cpi->rtcd.variance.sad16x8x8             = vp8_sad16x8x8_c;
   cpi->rtcd.variance.sad8x16x8             = vp8_sad8x16x8_c;
   cpi->rtcd.variance.sad8x8x8              = vp8_sad8x8x8_c;
   cpi->rtcd.variance.sad4x4x8              = vp8_sad4x4x8_c;
 
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.sad32x32x4d           = vp8_sad32x32x4d_c;
+#endif
   cpi->rtcd.variance.sad16x16x4d           = vp8_sad16x16x4d_c;
   cpi->rtcd.variance.sad16x8x4d            = vp8_sad16x8x4d_c;
   cpi->rtcd.variance.sad8x16x4d            = vp8_sad8x16x4d_c;
@@ -54,16 +66,34 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi) {
   cpi->rtcd.variance.var8x16               = vp8_variance8x16_c;
   cpi->rtcd.variance.var16x8               = vp8_variance16x8_c;
   cpi->rtcd.variance.var16x16              = vp8_variance16x16_c;
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.var32x32              = vp8_variance32x32_c;
+#endif
 
   cpi->rtcd.variance.subpixvar4x4          = vp8_sub_pixel_variance4x4_c;
   cpi->rtcd.variance.subpixvar8x8          = vp8_sub_pixel_variance8x8_c;
   cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_c;
   cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_c;
   cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_c;
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.subpixvar32x32        = vp8_sub_pixel_variance32x32_c;
+#endif
   cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_c;
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.halfpixvar32x32_h     = vp8_variance_halfpixvar32x32_h_c;
+#endif
   cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_c;
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.halfpixvar32x32_v     = vp8_variance_halfpixvar32x32_v_c;
+#endif
   cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_c;
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.halfpixvar32x32_hv    = vp8_variance_halfpixvar32x32_hv_c;
+#endif
   cpi->rtcd.variance.subpixmse16x16        = vp8_sub_pixel_mse16x16_c;
+#if CONFIG_SUPERBLOCKS
+  cpi->rtcd.variance.subpixmse32x32        = vp8_sub_pixel_mse32x32_c;
+#endif
 
   cpi->rtcd.variance.mse16x16              = vp8_mse16x16_c;
   cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;
