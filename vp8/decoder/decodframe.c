@@ -1217,13 +1217,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     /* vpx_log("Decoder: Frame Decoded, Size Roughly:%d bytes  \n",bc->pos+pbi->bc2.pos); */
 
-    /* If this was a kf or Gf note the Q used */
-    if ((pc->frame_type == KEY_FRAME) ||
-         pc->refresh_golden_frame || pc->refresh_alt_ref_frame)
-    {
-        pc->last_kf_gf_q = pc->base_qindex;
-    }
-
     if (pc->refresh_entropy_probs == 0)
     {
         vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));

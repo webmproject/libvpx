@@ -108,7 +108,6 @@ typedef struct VP8Common
     int full_pixel;
 
     int base_qindex;
-    int last_kf_gf_q;  /* Q used on the last GF or KF */
 
     int y1dc_delta_q;
     int y2dc_delta_q;
