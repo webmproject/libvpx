@@ -33,13 +33,6 @@ typedef struct
     MACROBLOCKD  mbd;
 } MB_ROW_DEC;
 
-typedef struct
-{
-    int64_t time_stamp;
-    int size;
-} DATARATE;
-
-
 typedef struct VP8D_COMP
 {
     DECLARE_ALIGNED(16, MACROBLOCKD, mb);
@@ -87,8 +80,6 @@ typedef struct VP8D_COMP
     vp8_reader *mbc;
     int64_t last_time_stamp;
     int   ready_for_new_data;
-
-    DATARATE dr[16];
 
     vp8_prob prob_intra;
     vp8_prob prob_last;
