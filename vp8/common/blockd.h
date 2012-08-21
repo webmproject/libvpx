@@ -161,7 +161,7 @@ typedef struct
     uint8_t segment_id;                  /* Which set of segmentation parameters should be used for this MB */
 } MB_MODE_INFO;
 
-typedef struct
+typedef struct modeinfo
 {
     MB_MODE_INFO mbmi;
     union b_mode_info bmi[16];

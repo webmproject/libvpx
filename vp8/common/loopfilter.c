@@ -196,6 +196,114 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
     }
 }
 
+
+void vp8_loop_filter_row_normal(VP8_COMMON *cm, MODE_INFO *mode_info_context,
+                         int mb_row, int post_ystride, int post_uvstride,
+                         unsigned char *y_ptr, unsigned char *u_ptr,
+                         unsigned char *v_ptr)
+{
+    int mb_col;
+    int filter_level;
+    loop_filter_info_n *lfi_n = &cm->lf_info;
+    loop_filter_info lfi;
+    FRAME_TYPE frame_type = cm->frame_type;
+
+    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+    {
+        int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+                        mode_info_context->mbmi.mode != SPLITMV &&
+                        mode_info_context->mbmi.mb_skip_coeff);
+
+        const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
+        const int seg = mode_info_context->mbmi.segment_id;
+        const int ref_frame = mode_info_context->mbmi.ref_frame;
+
+        filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
+
+        if (filter_level)
+        {
+            const int hev_index = lfi_n->hev_thr_lut[frame_type][filter_level];
+            lfi.mblim = lfi_n->mblim[filter_level];
+            lfi.blim = lfi_n->blim[filter_level];
+            lfi.lim = lfi_n->lim[filter_level];
+            lfi.hev_thr = lfi_n->hev_thr[hev_index];
+
+            if (mb_col > 0)
+                vp8_loop_filter_mbv
+                (y_ptr, u_ptr, v_ptr, post_ystride, post_uvstride, &lfi);
+
+            if (!skip_lf)
+                vp8_loop_filter_bv
+                (y_ptr, u_ptr, v_ptr, post_ystride, post_uvstride, &lfi);
+
+            /* don't apply across umv border */
+            if (mb_row > 0)
+                vp8_loop_filter_mbh
+                (y_ptr, u_ptr, v_ptr, post_ystride, post_uvstride, &lfi);
+
+            if (!skip_lf)
+                vp8_loop_filter_bh
+                (y_ptr, u_ptr, v_ptr, post_ystride, post_uvstride, &lfi);
+        }
+
+        y_ptr += 16;
+        u_ptr += 8;
+        v_ptr += 8;
+
+        mode_info_context++;     /* step to next MB */
+    }
+
+}
+
+void vp8_loop_filter_row_simple(VP8_COMMON *cm, MODE_INFO *mode_info_context,
+                         int mb_row, int post_ystride, int post_uvstride,
+                         unsigned char *y_ptr, unsigned char *u_ptr,
+                         unsigned char *v_ptr)
+{
+    int mb_col;
+    int filter_level;
+    loop_filter_info_n *lfi_n = &cm->lf_info;
+
+    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+    {
+        int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+                        mode_info_context->mbmi.mode != SPLITMV &&
+                        mode_info_context->mbmi.mb_skip_coeff);
+
+        const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
+        const int seg = mode_info_context->mbmi.segment_id;
+        const int ref_frame = mode_info_context->mbmi.ref_frame;
+
+        filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
+
+        if (filter_level)
+        {
+            if (mb_col > 0)
+                vp8_loop_filter_simple_mbv
+                (y_ptr, post_ystride, lfi_n->mblim[filter_level]);
+
+            if (!skip_lf)
+                vp8_loop_filter_simple_bv
+                (y_ptr, post_ystride, lfi_n->blim[filter_level]);
+
+            /* don't apply across umv border */
+            if (mb_row > 0)
+                vp8_loop_filter_simple_mbh
+                (y_ptr, post_ystride, lfi_n->mblim[filter_level]);
+
+            if (!skip_lf)
+                vp8_loop_filter_simple_bh
+                (y_ptr, post_ystride, lfi_n->blim[filter_level]);
+        }
+
+        y_ptr += 16;
+        u_ptr += 8;
+        v_ptr += 8;
+
+        mode_info_context++;     /* step to next MB */
+    }
+
+}
 void vp8_loop_filter_frame(VP8_COMMON *cm,
                            MACROBLOCKD *mbd,
                            int frame_type)
