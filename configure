@@ -226,7 +226,6 @@ EXPERIMENT_LIST="
     switchable_interp
     tx16x16
     newbestrefmv
-    rotation
 "
 CONFIG_LIST="
     external_build
