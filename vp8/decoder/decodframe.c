@@ -306,6 +306,201 @@ static int get_delta_q(vp8_reader *bc, int prev, int *q_update)
 FILE *vpxlog = 0;
 #endif
 
+static void yv12_extend_frame_top_c(YV12_BUFFER_CONFIG *ybf)
+{
+    int i;
+    unsigned char *src_ptr1;
+    unsigned char *dest_ptr1;
+
+    unsigned int Border;
+    int plane_stride;
+
+    /***********/
+    /* Y Plane */
+    /***********/
+    Border = ybf->border;
+    plane_stride = ybf->y_stride;
+    src_ptr1 = ybf->y_buffer - Border;
+    dest_ptr1 = src_ptr1 - (Border * plane_stride);
+
+    for (i = 0; i < (int)Border; i++)
+    {
+        vpx_memcpy(dest_ptr1, src_ptr1, plane_stride);
+        dest_ptr1 += plane_stride;
+    }
+
+
+    /***********/
+    /* U Plane */
+    /***********/
+    plane_stride = ybf->uv_stride;
+    Border /= 2;
+    src_ptr1 = ybf->u_buffer - Border;
+    dest_ptr1 = src_ptr1 - (Border * plane_stride);
+
+    for (i = 0; i < (int)(Border); i++)
+    {
+        vpx_memcpy(dest_ptr1, src_ptr1, plane_stride);
+        dest_ptr1 += plane_stride;
+    }
+
+    /***********/
+    /* V Plane */
+    /***********/
+
+    src_ptr1 = ybf->v_buffer - Border;
+    dest_ptr1 = src_ptr1 - (Border * plane_stride);
+
+    for (i = 0; i < (int)(Border); i++)
+    {
+        vpx_memcpy(dest_ptr1, src_ptr1, plane_stride);
+        dest_ptr1 += plane_stride;
+    }
+}
+
+static void yv12_extend_frame_bottom_c(YV12_BUFFER_CONFIG *ybf)
+{
+    int i;
+    unsigned char *src_ptr1, *src_ptr2;
+    unsigned char *dest_ptr2;
+
+    unsigned int Border;
+    int plane_stride;
+    int plane_height;
+
+    /***********/
+    /* Y Plane */
+    /***********/
+    Border = ybf->border;
+    plane_stride = ybf->y_stride;
+    plane_height = ybf->y_height;
+
+    src_ptr1 = ybf->y_buffer - Border;
+    src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
+    dest_ptr2 = src_ptr2 + plane_stride;
+
+    for (i = 0; i < (int)Border; i++)
+    {
+        vpx_memcpy(dest_ptr2, src_ptr2, plane_stride);
+        dest_ptr2 += plane_stride;
+    }
+
+
+    /***********/
+    /* U Plane */
+    /***********/
+    plane_stride = ybf->uv_stride;
+    plane_height = ybf->uv_height;
+    Border /= 2;
+
+    src_ptr1 = ybf->u_buffer - Border;
+    src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
+    dest_ptr2 = src_ptr2 + plane_stride;
+
+    for (i = 0; i < (int)(Border); i++)
+    {
+        vpx_memcpy(dest_ptr2, src_ptr2, plane_stride);
+        dest_ptr2 += plane_stride;
+    }
+
+    /***********/
+    /* V Plane */
+    /***********/
+
+    src_ptr1 = ybf->v_buffer - Border;
+    src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
+    dest_ptr2 = src_ptr2 + plane_stride;
+
+    for (i = 0; i < (int)(Border); i++)
+    {
+        vpx_memcpy(dest_ptr2, src_ptr2, plane_stride);
+        dest_ptr2 += plane_stride;
+    }
+}
+
+static void yv12_extend_frame_left_right_c(YV12_BUFFER_CONFIG *ybf,
+                                           unsigned char *y_src,
+                                           unsigned char *u_src,
+                                           unsigned char *v_src)
+{
+    int i;
+    unsigned char *src_ptr1, *src_ptr2;
+    unsigned char *dest_ptr1, *dest_ptr2;
+
+    unsigned int Border;
+    int plane_stride;
+    int plane_height;
+    int plane_width;
+
+    /***********/
+    /* Y Plane */
+    /***********/
+    Border = ybf->border;
+    plane_stride = ybf->y_stride;
+    plane_height = 16;
+    plane_width = ybf->y_width;
+
+    /* copy the left and right most columns out */
+    src_ptr1 = y_src;
+    src_ptr2 = src_ptr1 + plane_width - 1;
+    dest_ptr1 = src_ptr1 - Border;
+    dest_ptr2 = src_ptr2 + 1;
+
+    for (i = 0; i < plane_height; i++)
+    {
+        vpx_memset(dest_ptr1, src_ptr1[0], Border);
+        vpx_memset(dest_ptr2, src_ptr2[0], Border);
+        src_ptr1  += plane_stride;
+        src_ptr2  += plane_stride;
+        dest_ptr1 += plane_stride;
+        dest_ptr2 += plane_stride;
+    }
+
+    /***********/
+    /* U Plane */
+    /***********/
+    plane_stride = ybf->uv_stride;
+    plane_height = 8;
+    plane_width = ybf->uv_width;
+    Border /= 2;
+
+    /* copy the left and right most columns out */
+    src_ptr1 = u_src;
+    src_ptr2 = src_ptr1 + plane_width - 1;
+    dest_ptr1 = src_ptr1 - Border;
+    dest_ptr2 = src_ptr2 + 1;
+
+    for (i = 0; i < plane_height; i++)
+    {
+        vpx_memset(dest_ptr1, src_ptr1[0], Border);
+        vpx_memset(dest_ptr2, src_ptr2[0], Border);
+        src_ptr1  += plane_stride;
+        src_ptr2  += plane_stride;
+        dest_ptr1 += plane_stride;
+        dest_ptr2 += plane_stride;
+    }
+
+    /***********/
+    /* V Plane */
+    /***********/
+
+    /* copy the left and right most columns out */
+    src_ptr1 = v_src;
+    src_ptr2 = src_ptr1 + plane_width - 1;
+    dest_ptr1 = src_ptr1 - Border;
+    dest_ptr2 = src_ptr2 + 1;
+
+    for (i = 0; i < plane_height; i++)
+    {
+        vpx_memset(dest_ptr1, src_ptr1[0], Border);
+        vpx_memset(dest_ptr2, src_ptr2[0], Border);
+        src_ptr1  += plane_stride;
+        src_ptr2  += plane_stride;
+        dest_ptr1 += plane_stride;
+        dest_ptr2 += plane_stride;
+    }
+}
+
 static void decode_mb_rows(VP8D_COMP *pbi)
 {
     VP8_COMMON *const pc = & pbi->common;
@@ -326,6 +521,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
     unsigned char *ref_buffer[MAX_REF_FRAMES][3];
     unsigned char *dst_buffer[3];
     unsigned char *lf_dst[3];
+    unsigned char *eb_dst[3];
     int i;
     int ref_fb_index[MAX_REF_FRAMES];
     int ref_fb_corrupted[MAX_REF_FRAMES];
@@ -346,9 +542,9 @@ static void decode_mb_rows(VP8D_COMP *pbi)
     }
 
     /* Set up the buffer pointers */
-    lf_dst[0] = dst_buffer[0] = pc->yv12_fb[dst_fb_idx].y_buffer;
-    lf_dst[1] = dst_buffer[1] = pc->yv12_fb[dst_fb_idx].u_buffer;
-    lf_dst[2] = dst_buffer[2] = pc->yv12_fb[dst_fb_idx].v_buffer;
+    eb_dst[0] = lf_dst[0] = dst_buffer[0] = pc->yv12_fb[dst_fb_idx].y_buffer;
+    eb_dst[1] = lf_dst[1] = dst_buffer[1] = pc->yv12_fb[dst_fb_idx].u_buffer;
+    eb_dst[2] = lf_dst[2] = dst_buffer[2] = pc->yv12_fb[dst_fb_idx].v_buffer;
 
     xd->up_available = 0;
 
@@ -484,11 +680,46 @@ static void decode_mb_rows(VP8D_COMP *pbi)
                     vp8_loop_filter_row_simple(pc, lf_mic, mb_row-1,
                                                recon_y_stride, recon_uv_stride,
                                                lf_dst[0], lf_dst[1], lf_dst[2]);
+
+                if(mb_row > 1)
+                {
+                    yv12_extend_frame_left_right_c(&pc->yv12_fb[dst_fb_idx],
+                                                   eb_dst[0],
+                                                   eb_dst[1],
+                                                   eb_dst[2]);
+
+                    eb_dst[0] += recon_y_stride  * 16;
+                    eb_dst[1] += recon_uv_stride *  8;
+                    eb_dst[2] += recon_uv_stride *  8;
+
+                    if(mb_row == 2)
+                        yv12_extend_frame_top_c(&pc->yv12_fb[dst_fb_idx]);
+
+                }
+
                 lf_dst[0] += recon_y_stride  * 16;
                 lf_dst[1] += recon_uv_stride *  8;
                 lf_dst[2] += recon_uv_stride *  8;
                 lf_mic += pc->mb_cols;
                 lf_mic++;         /* Skip border mb */
+            }
+        }
+        else
+        {
+            if(mb_row > 0)
+            {
+                /**/
+                yv12_extend_frame_left_right_c(&pc->yv12_fb[dst_fb_idx],
+                                               eb_dst[0],
+                                               eb_dst[1],
+                                               eb_dst[2]);
+
+                eb_dst[0] += recon_y_stride  * 16;
+                eb_dst[1] += recon_uv_stride *  8;
+                eb_dst[2] += recon_uv_stride *  8;
+
+                if(mb_row == 1)
+                    yv12_extend_frame_top_c(&pc->yv12_fb[dst_fb_idx]);
             }
         }
     }
@@ -503,9 +734,21 @@ static void decode_mb_rows(VP8D_COMP *pbi)
             vp8_loop_filter_row_simple(pc, lf_mic, mb_row-1, recon_y_stride,
                                        recon_uv_stride, lf_dst[0], lf_dst[1],
                                        lf_dst[2]);
-    }
 
-    vp8_yv12_extend_frame_borders(&pc->yv12_fb[dst_fb_idx]);
+        yv12_extend_frame_left_right_c(&pc->yv12_fb[dst_fb_idx],
+                                       eb_dst[0],
+                                       eb_dst[1],
+                                       eb_dst[2]);
+        eb_dst[0] += recon_y_stride  * 16;
+        eb_dst[1] += recon_uv_stride *  8;
+        eb_dst[2] += recon_uv_stride *  8;
+    }
+    yv12_extend_frame_left_right_c(&pc->yv12_fb[dst_fb_idx],
+                                   eb_dst[0],
+                                   eb_dst[1],
+                                   eb_dst[2]);
+
+    yv12_extend_frame_bottom_c(&pc->yv12_fb[dst_fb_idx]);
 }
 
 static unsigned int read_partition_size(const unsigned char *cx_size)
