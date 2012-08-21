@@ -361,7 +361,6 @@ LIBVPX_TEST_BINS=./test_libvpx
 LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
                      $(call enabled,LIBVPX_TEST_DATA))
 libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
-BINS-yes += $(LIBVPX_TEST_BINS)
 
 $(LIBVPX_TEST_DATA):
 	@echo "    [DOWNLOAD] $@"
@@ -432,6 +431,7 @@ LIBVPX_TEST_OBJS=$(sort $(call objs,$(LIBVPX_TEST_SRCS)))
 $(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
 $(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
 OBJS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_OBJS)
+BINS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_BINS)
 
 # Install test sources only if codec source is included
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(patsubst $(SRC_PATH_BARE)/%,%,\
