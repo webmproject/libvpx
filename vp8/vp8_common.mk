@@ -77,9 +77,6 @@ VP8_COMMON_SRCS-yes += common/swapyv12buffer.c
 VP8_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/textblit.c
 VP8_COMMON_SRCS-yes += common/treecoder.c
 VP8_COMMON_SRCS-yes += common/implicit_segmentation.c
-VP8_COMMON_SRCS-yes += common/predict_rotated.c
-VP8_COMMON_SRCS-yes += common/rotate.h
-VP8_COMMON_SRCS-yes += common/rotate2.h
 
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/idct_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/subpixel_x86.h
