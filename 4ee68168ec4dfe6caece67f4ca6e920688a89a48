@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn///i4\u003d",
+        "filename": "vp8/common/mvref_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-22T14:03:30Z",
+      "side": 1,
+      "message": "C file is in vp8/common/, so #include \"mvref_common.h\" should be enough",
+      "revId": "4ee68168ec4dfe6caece67f4ca6e920688a89a48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn///i0\u003d",
+        "filename": "vp8/common/mvref_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-22T14:03:30Z",
+      "side": 1,
+      "message": "are these arrays in comments still needed?",
+      "revId": "4ee68168ec4dfe6caece67f4ca6e920688a89a48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn///iw\u003d",
+        "filename": "vp8/common/mvref_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-22T14:03:30Z",
+      "side": 1,
+      "message": "I think style checking script was changing pointers written as \"int_mv * mv1\" to \"int_mv *mv1\"? Maybe worth to run ftfy.sh script again...",
+      "revId": "4ee68168ec4dfe6caece67f4ca6e920688a89a48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn///is\u003d",
+        "filename": "vp8/common/mvref_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-22T14:03:30Z",
+      "side": 1,
+      "message": "adjustment",
+      "revId": "4ee68168ec4dfe6caece67f4ca6e920688a89a48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn///io\u003d",
+        "filename": "vp8/common/mvref_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-22T14:03:30Z",
+      "side": 1,
+      "message": "are these codes in comments going to be used?",
+      "revId": "4ee68168ec4dfe6caece67f4ca6e920688a89a48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn///ik\u003d",
+        "filename": "vp8/common/mvref_common.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-22T14:03:30Z",
+      "side": 1,
+      "message": "#include \"blockd.h\" should be enough here",
+      "revId": "4ee68168ec4dfe6caece67f4ca6e920688a89a48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn///iM\u003d",
+        "filename": "vp8/common/mvref_common.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-22T14:03:30Z",
+      "side": 1,
+      "message": "running ftfy.sh should fix a \"pointer style\"",
+      "revId": "4ee68168ec4dfe6caece67f4ca6e920688a89a48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn///iE\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 3745,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-22T14:03:30Z",
+      "side": 1,
+      "message": "is #if 0 still needed here?",
+      "revId": "4ee68168ec4dfe6caece67f4ca6e920688a89a48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
