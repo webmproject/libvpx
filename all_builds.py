@@ -1,7 +1,11 @@
 #!/usr/bin/python
 
+import getopt
 import subprocess
 import sys
+
+LONG_OPTIONS = ["shard=", "shards="]
+BASE_COMMAND = "./configure --enable-internal-stats --enable-experimental"
 
 def RunCommand(command):
   run = subprocess.Popen(command, shell=True)
@@ -26,12 +30,25 @@ def list_of_experiments():
         experiments.append(experiment)
   return experiments
 
-def main():
-  base_command = "./configure --enable-internal-stats"
-  test_build(base_command)
-  for experiment_name in list_of_experiments():
-    test_build("%s --enable-experimental --enable-%s" % (base_command,
-      experiment_name))
+def main(argv):
+  # Parse arguments
+  options = {"--shard": 0, "--shards": 1}
+  o, _ = getopt.getopt(argv[1:], None, LONG_OPTIONS)
+  options.update(o)
+
+  # Shard experiment list
+  shard = int(options["--shard"])
+  shards = int(options["--shards"])
+  experiments = list_of_experiments()
+  configs = [BASE_COMMAND]
+  configs += ["%s --enable-%s" % (BASE_COMMAND, e) for e in experiments]
+  my_configs = zip(configs, range(len(configs)))
+  my_configs = filter(lambda x: x[1] % shards == shard, my_configs)
+  my_configs = [e[0] for e in my_configs]
+
+  # Run configs for this shard
+  for config in my_configs:
+    test_build(config)
 
 def test_build(configure_command):
   print "\033[34m\033[47mTesting %s\033[0m" % (configure_command)
@@ -40,4 +57,4 @@ def test_build(configure_command):
   RunCommand("make")
 
 if __name__ == "__main__":
-  main()
+  main(sys.argv)
