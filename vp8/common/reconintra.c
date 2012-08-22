@@ -207,10 +207,10 @@ void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd,
   }
 }
 
-void vp8_build_intra_predictors_internal(MACROBLOCKD *xd,
-                                         unsigned char *src, int src_stride,
+void vp8_build_intra_predictors_internal(unsigned char *src, int src_stride,
                                          unsigned char *ypred_ptr,
-                                         int y_stride, int mode, int bsize) {
+                                         int y_stride, int mode, int bsize,
+                                         int up_available, int left_available) {
 
   unsigned char *yabove_row = src - src_stride;
   unsigned char yleft_col[32];
@@ -230,8 +230,10 @@ void vp8_build_intra_predictors_internal(MACROBLOCKD *xd,
       int average = 0;
       int log2_bsize_minus_1;
 
-      assert(bsize == 8 || bsize == 16 || bsize == 32);
-      if (bsize == 8) {
+      assert(bsize == 4 || bsize == 8 || bsize == 16 || bsize == 32);
+      if (bsize == 4) {
+        log2_bsize_minus_1 = 1;
+      } else if (bsize == 8) {
         log2_bsize_minus_1 = 2;
       } else if (bsize == 16) {
         log2_bsize_minus_1 = 3;
@@ -239,19 +241,19 @@ void vp8_build_intra_predictors_internal(MACROBLOCKD *xd,
         log2_bsize_minus_1 = 4;
       }
 
-      if (xd->up_available || xd->left_available) {
-        if (xd->up_available) {
+      if (up_available || left_available) {
+        if (up_available) {
           for (i = 0; i < bsize; i++) {
             average += yabove_row[i];
           }
         }
 
-        if (xd->left_available) {
+        if (left_available) {
           for (i = 0; i < bsize; i++) {
             average += yleft_col[i];
           }
         }
-        shift = log2_bsize_minus_1 + xd->up_available + xd->left_available;
+        shift = log2_bsize_minus_1 + up_available + left_available;
         expected_dc = (average + (1 << (shift - 1))) >> shift;
       } else {
         expected_dc = 128;
@@ -332,22 +334,25 @@ void vp8_build_intra_predictors_internal(MACROBLOCKD *xd,
 }
 
 void vp8_build_intra_predictors_mby(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
+  vp8_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
                                       xd->predictor, 16,
-                                      xd->mode_info_context->mbmi.mode, 16);
+                                      xd->mode_info_context->mbmi.mode, 16,
+                                      xd->up_available, xd->left_available);
 }
 
 void vp8_build_intra_predictors_mby_s(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
+  vp8_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
                                       xd->dst.y_buffer, xd->dst.y_stride,
-                                      xd->mode_info_context->mbmi.mode, 16);
+                                      xd->mode_info_context->mbmi.mode, 16,
+                                      xd->up_available, xd->left_available);
 }
 
 #if CONFIG_SUPERBLOCKS
-void vp8_build_intra_predictors_sby_s(MACROBLOCKD *x) {
-  vp8_build_intra_predictors_internal(x, x->dst.y_buffer, x->dst.y_stride,
-                                      x->dst.y_buffer, x->dst.y_stride,
-                                      x->mode_info_context->mbmi.mode, 32);
+void vp8_build_intra_predictors_sby_s(MACROBLOCKD *xd) {
+  vp8_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
+                                      xd->dst.y_buffer, xd->dst.y_stride,
+                                      xd->mode_info_context->mbmi.mode, 32,
+                                      xd->up_available, xd->left_available);
 }
 #endif
 
@@ -356,14 +361,16 @@ void vp8_build_comp_intra_predictors_mby(MACROBLOCKD *xd) {
   unsigned char predictor[2][256];
   int i;
 
-  vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
+  vp8_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
                                       predictor[0], 16,
                                       xd->mode_info_context->mbmi.mode,
-                                      16);
-  vp8_build_intra_predictors_internal(xd, xd->dst.y_buffer, xd->dst.y_stride,
+                                      16, xd->up_available,
+                                      xd->left_available);
+  vp8_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
                                       predictor[1], 16,
                                       xd->mode_info_context->mbmi.second_mode,
-                                      16);
+                                      16, xd->up_available,
+                                      xd->left_available);
 
   for (i = 0; i < 256; i++) {
     xd->predictor[i] = (predictor[0][i] + predictor[1][i] + 1) >> 1;
@@ -376,10 +383,12 @@ void vp8_build_intra_predictors_mbuv_internal(MACROBLOCKD *xd,
                                               unsigned char *vpred_ptr,
                                               int uv_stride,
                                               int mode, int bsize) {
-  vp8_build_intra_predictors_internal(xd, xd->dst.u_buffer, xd->dst.uv_stride,
-                                      upred_ptr, uv_stride, mode, bsize);
-  vp8_build_intra_predictors_internal(xd, xd->dst.v_buffer, xd->dst.uv_stride,
-                                      vpred_ptr, uv_stride, mode, bsize);
+  vp8_build_intra_predictors_internal(xd->dst.u_buffer, xd->dst.uv_stride,
+                                      upred_ptr, uv_stride, mode, bsize,
+                                      xd->up_available, xd->left_available);
+  vp8_build_intra_predictors_internal(xd->dst.v_buffer, xd->dst.uv_stride,
+                                      vpred_ptr, uv_stride, mode, bsize,
+                                      xd->up_available, xd->left_available);
 }
 
 void vp8_build_intra_predictors_mbuv(MACROBLOCKD *xd) {
@@ -428,95 +437,9 @@ void vp8_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
 void vp8_intra8x8_predict(BLOCKD *xd,
                           int mode,
                           unsigned char *predictor) {
-
-  unsigned char *yabove_row = *(xd->base_dst) + xd->dst - xd->dst_stride;
-  unsigned char yleft_col[8];
-  unsigned char ytop_left = yabove_row[-1];
-  int r, c, i;
-
-  for (i = 0; i < 8; i++) {
-    yleft_col[i] = (*(xd->base_dst))[xd->dst - 1 + i * xd->dst_stride];
-  }
-  switch (mode) {
-    case DC_PRED: {
-      int expected_dc = 0;
-
-      for (i = 0; i < 8; i++) {
-        expected_dc += yabove_row[i];
-        expected_dc += yleft_col[i];
-      }
-      expected_dc = (expected_dc + 8) >> 4;
-
-      for (r = 0; r < 8; r++) {
-        for (c = 0; c < 8; c++) {
-          predictor[c] = expected_dc;
-        }
-        predictor += 16;
-      }
-    }
-    break;
-    case V_PRED: {
-      for (r = 0; r < 8; r++) {
-        for (c = 0; c < 8; c++) {
-          predictor[c] = yabove_row[c];
-        }
-        predictor += 16;
-      }
-
-    }
-    break;
-    case H_PRED: {
-
-      for (r = 0; r < 8; r++) {
-        for (c = 0; c < 8; c++) {
-          predictor[c] = yleft_col[r];
-        }
-        predictor += 16;
-      }
-    }
-    break;
-    case TM_PRED: {
-      /* prediction similar to true_motion prediction */
-      for (r = 0; r < 8; r++) {
-        for (c = 0; c < 8; c++) {
-          int pred = yabove_row[c] - ytop_left + yleft_col[r];
-          if (pred < 0)
-            pred = 0;
-
-          if (pred > 255)
-            pred = 255;
-          predictor[c] = pred;
-        }
-
-        predictor += 16;
-      }
-    }
-    break;
-    case D45_PRED: {
-      d45_predictor(predictor, 16, 8,  yabove_row, yleft_col);
-    }
-    break;
-    case D135_PRED: {
-      d135_predictor(predictor, 16, 8,  yabove_row, yleft_col);
-    }
-    break;
-    case D117_PRED: {
-      d117_predictor(predictor, 16, 8,  yabove_row, yleft_col);
-    }
-    break;
-    case D153_PRED: {
-      d153_predictor(predictor, 16, 8,  yabove_row, yleft_col);
-    }
-    break;
-    case D27_PRED: {
-      d27_predictor(predictor, 16, 8,  yabove_row, yleft_col);
-    }
-    break;
-    case D63_PRED: {
-      d63_predictor(predictor, 16, 8,  yabove_row, yleft_col);
-    }
-    break;
-  }
+  vp8_build_intra_predictors_internal(*(xd->base_dst) + xd->dst,
+                                      xd->dst_stride, predictor, 16,
+                                      mode, 8, 1, 1);
 }
 
 #if CONFIG_COMP_INTRA_PRED
@@ -540,96 +463,9 @@ void vp8_comp_intra8x8_predict(BLOCKD *xd,
 void vp8_intra_uv4x4_predict(BLOCKD *xd,
                              int mode,
                              unsigned char *predictor) {
-
-  unsigned char *above_row = *(xd->base_dst) + xd->dst - xd->dst_stride;
-  unsigned char left_col[4];
-  unsigned char top_left = above_row[-1];
-  int r, c, i;
-
-  for (i = 0; i < 4; i++) {
-    left_col[i] = (*(xd->base_dst))[xd->dst - 1 + i * xd->dst_stride];
-  }
-  switch (mode) {
-    case DC_PRED: {
-      int expected_dc = 0;
-
-      for (i = 0; i < 4; i++) {
-        expected_dc += above_row[i];
-        expected_dc += left_col[i];
-      }
-      expected_dc = (expected_dc + 4) >> 3;
-
-      for (r = 0; r < 4; r++) {
-        for (c = 0; c < 4; c++) {
-          predictor[c] = expected_dc;
-        }
-        predictor += 8;
-      }
-    }
-    break;
-    case V_PRED: {
-      for (r = 0; r < 4; r++) {
-        for (c = 0; c < 4; c++) {
-
-          predictor[c] = above_row[c];
-        }
-        predictor += 8;
-      }
-
-    }
-    break;
-    case H_PRED: {
-
-      for (r = 0; r < 4; r++) {
-        for (c = 0; c < 4; c++) {
-          predictor[c] = left_col[r];
-        }
-        predictor += 8;
-      }
-    }
-    break;
-    case TM_PRED: {
-      /* prediction similar to true_motion prediction */
-      for (r = 0; r < 4; r++) {
-        for (c = 0; c < 4; c++) {
-          int pred = above_row[c] - top_left + left_col[r];
-          if (pred < 0)
-            pred = 0;
-
-          if (pred > 255)
-            pred = 255;
-          predictor[c] = pred;
-        }
-
-        predictor += 8;
-      }
-    }
-    break;
-    case D45_PRED: {
-      d45_predictor(predictor, 8, 4,  above_row, left_col);
-    }
-    break;
-    case D135_PRED: {
-      d135_predictor(predictor, 8, 4,  above_row, left_col);
-    }
-    break;
-    case D117_PRED: {
-      d117_predictor(predictor, 8, 4,  above_row, left_col);
-    }
-    break;
-    case D153_PRED: {
-      d153_predictor(predictor, 8, 4,  above_row, left_col);
-    }
-    break;
-    case D27_PRED: {
-      d27_predictor(predictor, 8, 4,  above_row, left_col);
-    }
-    break;
-    case D63_PRED: {
-      d63_predictor(predictor, 8, 4,  above_row, left_col);
-    }
-    break;
-  }
+  vp8_build_intra_predictors_internal(*(xd->base_dst) + xd->dst,
+                                      xd->dst_stride, predictor, 8,
+                                      mode, 4, 1, 1);
 }
 
 #if CONFIG_COMP_INTRA_PRED
