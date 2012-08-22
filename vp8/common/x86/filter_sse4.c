@@ -25,9 +25,6 @@
 // TODO(cd): Maybe use _mm_maddubs_epi16 if smaller filter coeficients (no sum
 //           of positive above 128), or have higher precision filter
 //           coefficients.
-// TODO(cd): Remove use of _mm_extract_epi32 and _mm_extract_epi64, to not
-//           require SSE4.1
-// TODO(cd): Remove use of _mm_shuffle_epi8 to not require SSSE3
 
 DECLARE_ALIGNED(16, static const unsigned char, mask0123_c[16]) = {
   0x00, 0x01,
