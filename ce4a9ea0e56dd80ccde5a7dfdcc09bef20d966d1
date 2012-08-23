@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//+cs\u003d",
+        "filename": "tools/all_builds.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-23T09:44:22Z",
+      "side": 1,
+      "message": "I had some problems when I tried to run all_build.py on mac...\n\nI tried the following argument parsing:\n  opt_end_index \u003d 1\n  for item in argv:\n    if item[:7] \u003d\u003d \"--shard\":\n     opt_end_index \u003d opt_end_index + 1",
+      "revId": "ce4a9ea0e56dd80ccde5a7dfdcc09bef20d966d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//+co\u003d",
+        "filename": "tools/all_builds.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-23T09:44:22Z",
+      "side": 1,
+      "message": "I changed this to:\nextra_args \u003d argv[opt_end_index:]",
+      "revId": "ce4a9ea0e56dd80ccde5a7dfdcc09bef20d966d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
