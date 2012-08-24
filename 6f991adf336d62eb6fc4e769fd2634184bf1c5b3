@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//87g\u003d",
+        "filename": "vp8/common/mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-24T16:46:10Z",
+      "side": 1,
+      "message": "should we consider (-1, +1) or even (-1, +2)? These two macroblocks, on the right of last row, should be spatially closer than macroblock (-2, -2).",
+      "revId": "6f991adf336d62eb6fc4e769fd2634184bf1c5b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
