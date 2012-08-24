@@ -59,6 +59,13 @@
 
 #define VP8_TEMPORAL_ALT_REF 1
 
+#if CONFIG_NEW_MVREF
+// temp. relate to mv_ref_sum_distance stats
+#define CUR_BEST 0
+#define NEW_BEST 1
+#define BEST_SELECTED 2
+#endif
+
 typedef struct {
   MV_CONTEXT mvc[2];
   int mvcosts[2][MVvals + 1];
@@ -750,6 +757,12 @@ typedef struct VP8_COMP {
 #if CONFIG_SWITCHABLE_INTERP
   unsigned int switchable_interp_count[VP8_SWITCHABLE_FILTERS+1]
                                       [VP8_SWITCHABLE_FILTERS];
+#endif
+
+#if CONFIG_NEW_MVREF
+  // temp stats [REF_FRAME]{REF_METHOD]
+  unsigned int mv_ref_sum_distance[4][3];
+  unsigned int best_ref_index_counts[17];
 #endif
 
 } VP8_COMP;

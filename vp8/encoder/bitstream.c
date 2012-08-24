@@ -28,6 +28,10 @@
 #include "vp8/common/pred_common.h"
 #include "vp8/common/entropy.h"
 
+#if CONFIG_NEW_MVREF
+#include "vp8/common/mvref_common.h"
+#endif
+
 #if defined(SECTIONBITS_OUTPUT)
 unsigned __int64 Sectionbits[500];
 #endif
@@ -1043,12 +1047,30 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                 active_section = 5;
 #endif
 
+#if 0 //CONFIG_NEW_MVREF
+                find_mv_refs(xd, m, prev_m,
+                             m->mbmi.ref_frame,
+                             mi->ref_mvs[rf],
+                             cpi->common.ref_frame_sign_bias );
+
+                pick_best_mv_ref( mi->mv[0], mi->ref_mvs[rf], &best_mv);
+#endif
                 if (xd->allow_high_precision_mv)
                   write_mv_hp(w, &mi->mv[0].as_mv, &best_mv, mvc_hp);
                 else
                   write_mv(w, &mi->mv[0].as_mv, &best_mv, mvc);
 
                 if (mi->second_ref_frame) {
+#if 0 //CONFIG_NEW_MVREF
+                  find_mv_refs(xd, m, prev_m,
+                               m->mbmi.second_ref_frame,
+                               mi->ref_mvs[mi->second_ref_frame],
+                               cpi->common.ref_frame_sign_bias );
+
+                  pick_best_mv_ref( mi->mv[1],
+                                    mi->ref_mvs[mi->second_ref_frame],
+                                    &best_second_mv);
+#endif
                   if (xd->allow_high_precision_mv)
                     write_mv_hp(w, &mi->mv[1].as_mv, &best_second_mv, mvc_hp);
                   else

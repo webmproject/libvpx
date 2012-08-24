@@ -200,6 +200,139 @@ vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
  * above and a number cols of pixels in the left to select the one with best
  * score to use as ref motion vector
  */
+
+#if CONFIG_NEW_MVREF
+
+void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
+                           unsigned char *ref_y_buffer,
+                           int ref_y_stride,
+                           int_mv *best_mv,
+                           int_mv *nearest,
+                           int_mv *near) {
+  int_mv *ref_mv = xd->ref_mv;
+  int i, j;
+  unsigned char *above_src;
+  unsigned char *left_src;
+  unsigned char *above_ref;
+  unsigned char *left_ref;
+  int sad;
+  int sad_scores[MAX_MV_REFS];
+  int_mv sorted_mvs[MAX_MV_REFS];
+  int zero_seen = FALSE;
+
+  // Default all to 0,0 if nothing else available
+  best_mv->as_int = nearest->as_int = near->as_int = 0;
+  vpx_memset(sorted_mvs, 0, sizeof(sorted_mvs));
+
+  above_src = xd->dst.y_buffer - xd->dst.y_stride * 2;
+  left_src  = xd->dst.y_buffer - 2;
+  above_ref = ref_y_buffer - ref_y_stride * 2;
+  left_ref  = ref_y_buffer - 2;
+
+  for(i = 0; i < MAX_MV_REFS; ++i) {
+    int_mv this_mv;
+    int offset=0;
+    int row_offset, col_offset;
+
+    this_mv.as_int = ref_mv[i].as_int;
+
+    // If we see a 0,0 vector for a second time we have reached the end of
+    // the list of valid candidate vectors.
+    if (!this_mv.as_int)
+      if (zero_seen)
+        break;
+      else
+        zero_seen = TRUE;
+
+    vp8_clamp_mv(&this_mv,
+                 xd->mb_to_left_edge - LEFT_TOP_MARGIN + 16,
+                 xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
+                 xd->mb_to_top_edge - LEFT_TOP_MARGIN + 16,
+                 xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
+
+    row_offset = (this_mv.as_mv.row > 0) ?
+      ((this_mv.as_mv.row + 3) >> 3):((this_mv.as_mv.row + 4) >> 3);
+    col_offset = (this_mv.as_mv.col > 0) ?
+      ((this_mv.as_mv.col + 3) >> 3):((this_mv.as_mv.col + 4) >> 3);
+    offset = ref_y_stride * row_offset + col_offset;
+
+    sad = vp8_sad16x2_c(above_src, xd->dst.y_stride,
+                        above_ref + offset, ref_y_stride, INT_MAX);
+
+    sad += vp8_sad2x16_c(left_src, xd->dst.y_stride,
+                         left_ref + offset, ref_y_stride, INT_MAX);
+
+    // Add the entry to our list and then resort the list on score.
+    sad_scores[i] = sad;
+    sorted_mvs[i].as_int = this_mv.as_int;
+    j = i;
+    while (j > 0) {
+      if (sad_scores[j] < sad_scores[j-1]) {
+        sad_scores[j] = sad_scores[j-1];
+        sorted_mvs[j].as_int = sorted_mvs[j-1].as_int;
+        sad_scores[j-1] = sad;
+        sorted_mvs[j-1].as_int = this_mv.as_int;
+        j--;
+      } else
+        break;
+    }
+  }
+
+  // If not see add 0,0 as a possibility
+  /*if ( (i < MAX_MV_REFS) && !zero_seen ) {
+
+    sad = vp8_sad16x2_c(above_src, xd->dst.y_stride,
+                        above_ref, ref_y_stride,
+                        INT_MAX);
+    sad += vp8_sad2x16_c(left_src, xd->dst.y_stride,
+                         left_ref, ref_y_stride,
+                         INT_MAX);
+    this_mv.as_int = 0;
+
+    // Add the entry to our list and then resort the list on score.
+    sad_scores[i] = sad;
+    sorted_mvs[i].as_int = this_mv.as_int;
+    j = i;
+    while (j > 0) {
+      if (sad_scores[j] < sad_scores[j-1]) {
+        sad_scores[j] = sad_scores[j-1];
+        sorted_mvs[j].as_int = sorted_mvs[j-1].as_int;
+        sad_scores[j-1] = sad;
+        sorted_mvs[j-1].as_int = this_mv.as_int;
+        j--;
+      } else
+        break;
+    }
+  }*/
+
+  // Set the best mv to the first entry in the sorted list
+  best_mv->as_int = sorted_mvs[0].as_int;
+
+  // Provided that there are non zero vectors available there will not
+  // be more than one 0,0 entry in the sorted list.
+  // The best ref mv is always set to the first entry (which gave the best
+  // results. The nearest is set to the first non zero vector if available and
+  // near to the second non zero vector if avaialable.
+  // We do not use 0,0 as a nearest or near as 0,0 has its own mode.
+  if ( sorted_mvs[0].as_int ) {
+    nearest->as_int = sorted_mvs[0].as_int;
+    if ( sorted_mvs[1].as_int )
+      near->as_int = sorted_mvs[1].as_int;
+    else
+      near->as_int = sorted_mvs[2].as_int;
+  } else {
+      nearest->as_int = sorted_mvs[1].as_int;
+      near->as_int = sorted_mvs[2].as_int;
+  }
+
+  if (!xd->allow_high_precision_mv)
+    lower_mv_precision(best_mv);
+
+  vp8_clamp_mv2(best_mv, xd);
+}
+
+#else // !CONFIG_NEW_MVREF
+
 void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
@@ -270,5 +403,5 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
     nearest->as_int = best_mv->as_int;
   }
 }
-
-#endif
+#endif  // CONFIG_NEW_MVREF
+#endif  // CONFIG_NEWBESTREFMV

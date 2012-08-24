@@ -40,6 +40,10 @@
 #include "bitstream.h"
 #include "ratectrl.h"
 
+#if CONFIG_NEW_MVREF
+#include "vp8/common/mvref_common.h"
+#endif
+
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
@@ -3789,6 +3793,36 @@ static void encode_frame_to_data_rate
   // Update the skip mb flag probabilities based on the distribution seen
   // in this frame.
   update_base_skip_probs(cpi);
+
+
+#if CONFIG_NEW_MVREF
+#if 0 && CONFIG_INTERNAL_STATS
+  {
+    FILE *f = fopen("mv_ref_dist.stt", "a");
+    unsigned int i;
+    //fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n",
+    fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d",
+            cpi->common.current_video_frame,
+            cpi->mv_ref_sum_distance[1][0],
+            cpi->mv_ref_sum_distance[1][1],
+            cpi->mv_ref_sum_distance[1][2],
+            cpi->mv_ref_sum_distance[2][0],
+            cpi->mv_ref_sum_distance[2][1],
+            cpi->mv_ref_sum_distance[2][2],
+            cpi->mv_ref_sum_distance[3][0],
+            cpi->mv_ref_sum_distance[3][1],
+            cpi->mv_ref_sum_distance[3][2] );
+
+    for (i = 0; i < MAX_MV_REFS; ++i) {
+      fprintf(f, "%10d", cpi->best_ref_index_counts[i] );
+    }
+    fprintf(f, "\n" );
+
+    fclose(f);
+  }
+#endif
+#endif
+
 
 #if 0// 1 && CONFIG_INTERNAL_STATS
   {

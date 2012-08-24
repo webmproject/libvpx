@@ -44,6 +44,9 @@ void vpx_log(const char *format, ...);
 /* Segment Feature Masks */
 #define SEGMENT_DELTADATA   0
 #define SEGMENT_ABSDATA     1
+#if CONFIG_NEW_MVREF
+#define MAX_MV_REFS 10
+#endif
 
 typedef struct {
   int r, c;
@@ -179,6 +182,14 @@ typedef enum {
   B_MODE_COUNT
 } B_PREDICTION_MODE;
 
+#if CONFIG_NEW_MVREF
+// Segment level features.
+typedef enum {
+  FIRST_REF = 0,
+  SECOND_REF = 1
+} MV_REF_TYPE;
+#endif
+
 #if CONFIG_HYBRIDTRANSFORM8X8
 // convert MB_PREDICTION_MODE to B_PREDICTION_MODE
 static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
@@ -268,9 +279,14 @@ typedef struct {
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   TX_SIZE txfm_size;
   int_mv mv[2]; // for each reference frame used
-#if CONFIG_NEWBESTREFMV
+#if CONFIG_NEWBESTREFMV || CONFIG_NEW_MVREF
   int_mv ref_mv, second_ref_mv;
 #endif
+#if CONFIG_NEW_MVREF
+  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REFS];
+  int mv_ref_index[MAX_REF_FRAMES];
+#endif
+
   unsigned char partitioning;
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
   unsigned char need_to_clamp_mvs;
@@ -432,8 +448,13 @@ typedef struct MacroBlockD {
 #endif
 
   int mb_index;   // Index of the MB in the SB (0..3)
+
 #if CONFIG_NEWBESTREFMV
+#if CONFIG_NEW_MVREF
+  int_mv ref_mv[MAX_MV_REFS];
+#else
   int_mv ref_mv[4];
+#endif
 #endif
 
 #if CONFIG_HYBRIDTRANSFORM

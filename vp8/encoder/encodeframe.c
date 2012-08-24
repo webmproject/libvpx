@@ -34,6 +34,10 @@
 #include "vp8/common/pred_common.h"
 
 #define DBG_PRNT_SEGMAP 0
+#if CONFIG_NEW_MVREF
+#include "vp8/common/mvref_common.h"
+#endif
+
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define RTCD(x)     &cpi->common.rtcd.x
@@ -1300,6 +1304,12 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   // prediction fails. These are based on the current general estimates for
   // this frame which may be updated with each iteration of the recode loop.
   compute_mod_refprobs(cm);
+
+#if CONFIG_NEW_MVREF
+  // temp stats reset
+  vp8_zero( cpi->mv_ref_sum_distance );
+  vp8_zero( cpi->best_ref_index_counts );
+#endif
 
 // debug output
 #if DBG_PRNT_SEGMAP
