@@ -107,6 +107,19 @@ TEST(Vp8FdctTest, RoundTripErrorCheck) {
     // to test optimized versions of this function.
     const int pitch = 8;
     vp8_short_fdct4x4_c(test_input_block, test_temp_block, pitch);
+
+    for (int j = 0; j < 16; ++j) {
+        if(test_temp_block[j] > 0) {
+          test_temp_block[j] += 2;
+          test_temp_block[j] /= 4;
+          test_temp_block[j] *= 4;
+        } else {
+          test_temp_block[j] -= 2;
+          test_temp_block[j] /= 4;
+          test_temp_block[j] *= 4;
+        }
+    }
+
     // Because the bitstream is not frozen yet, use the idct in the codebase.
     vp8_short_idct4x4llm_c(test_temp_block, test_output_block, pitch);
 
@@ -118,7 +131,6 @@ TEST(Vp8FdctTest, RoundTripErrorCheck) {
       total_error += error;
     }
   }
-
   EXPECT_GE(1, max_error)
       << "Error: FDCT/IDCT has an individual roundtrip error > 1";
 

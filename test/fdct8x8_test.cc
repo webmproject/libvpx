@@ -101,6 +101,17 @@ TEST(VP8Fdct8x8Test, RoundTripErrorCheck) {
 
     const int pitch = 16;
     vp8_short_fdct8x8_c(test_input_block, test_temp_block, pitch);
+    for (int j = 0; j < 64; ++j){
+        if(test_temp_block[j] > 0) {
+          test_temp_block[j] += 2;
+          test_temp_block[j] /= 4;
+          test_temp_block[j] *= 4;
+        } else {
+          test_temp_block[j] -= 2;
+          test_temp_block[j] /= 4;
+          test_temp_block[j] *= 4;
+        }
+    }
     vp8_short_idct8x8_c(test_temp_block, test_output_block, pitch);
 
     for (int j = 0; j < 64; ++j) {
