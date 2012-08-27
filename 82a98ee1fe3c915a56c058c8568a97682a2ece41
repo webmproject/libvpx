@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//7bs\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1001649
+      },
+      "writtenOn": "2012-08-27T21:32:49Z",
+      "side": 1,
+      "message": "Filter coefficient was also influenced by motion magnitude:\nfilter_coefficient +\u003d filter_coefficient /(3 + motion_magnitude_adjustment);",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//7bo\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1001649
+      },
+      "writtenOn": "2012-08-27T21:32:49Z",
+      "side": 1,
+      "message": "Same as SSE2 version, parameter completely ignored.",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//7bw\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001649
+      },
+      "writtenOn": "2012-08-27T21:32:49Z",
+      "side": 1,
+      "message": "This implementation completely ignores motion_magnitude, it it intentional? If so, remove it from function signature.",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
