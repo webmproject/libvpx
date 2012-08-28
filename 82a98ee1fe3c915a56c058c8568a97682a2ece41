@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//6VM\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-28T21:25:45Z",
+      "side": 1,
+      "message": "I will add it back.",
+      "parentUuid": "AAAAPn//7bs\u003d",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//7bo\u003d",
         "filename": "vp8/encoder/denoising.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2012-08-27T21:32:49Z",
       "side": 1,
       "message": "Same as SSE2 version, parameter completely ignored.",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//6VI\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-28T21:25:45Z",
+      "side": 1,
+      "message": "Yes. Will add it back.",
+      "parentUuid": "AAAAPn//7bo\u003d",
       "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//6VU\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-28T21:25:45Z",
+      "side": 1,
+      "message": "Will add motion_magnitude back.",
+      "parentUuid": "AAAAPn//7bw\u003d",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//63c\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2012-08-28T07:27:04Z",
       "side": 1,
       "message": "Some idea:\n\n* you could use some pavgb(x, k_0) variants to do the (x\u003e\u003e1) on uint8s.\n* you actually don\u0027t need to shift by 1 at all. You just need to change the k_0/k_2/k_3/... etc constants you\u0027re comparing to. This applies to the C-version too.",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//6iE\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-28T21:25:45Z",
+      "side": 1,
+      "message": "I couldn\u0027t use pavgb since it will do rounding.\nif diff \u003d 1, the adjustment is 0. If diff is 2, the adjustment is 2.\nI need shift only without rounding.\n\nI did this shift by 1 just because _mm_cmpgt_epi8 requires signed byte but the diff is 0 ~ 255. Doing that makes optimization easier.",
+      "parentUuid": "AAAAPn//63c\u003d",
       "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//6h4\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-28T21:25:45Z",
+      "side": 1,
+      "message": "_mm_cmpgt_epi8 is \"great than\". \"absdiff \u003c\u003d 3\" is \"absdiff \u003c 4\"",
+      "parentUuid": "AAAAPn//624\u003d",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//63A\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 4
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//6V0\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-28T21:25:45Z",
+      "side": 1,
+      "message": "Right. Jim also mentioned that before. Thanks.",
+      "parentUuid": "AAAAPn//63A\u003d",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//620\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 4
@@ -115,6 +223,24 @@
       "writtenOn": "2012-08-28T07:27:04Z",
       "side": 1,
       "message": "the overall test logic could be rewamped into:\n\nadj \u003d 6;\nif (diff \u003c\u003d 7) adj -\u003d 2;\nif (diff \u003c\u003d 3) adj -\u003d 4;\nif (diff \u003d\u003d 0) adj \u003d 0;\n\n(using simple masking)",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//6Xo\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-28T21:25:45Z",
+      "side": 1,
+      "message": "Will try it.",
+      "parentUuid": "AAAAPn//620\u003d",
       "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
