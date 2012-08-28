@@ -50,6 +50,74 @@
       "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//63c\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-28T07:27:04Z",
+      "side": 1,
+      "message": "Some idea:\n\n* you could use some pavgb(x, k_0) variants to do the (x\u003e\u003e1) on uint8s.\n* you actually don\u0027t need to shift by 1 at all. You just need to change the k_0/k_2/k_3/... etc constants you\u0027re comparing to. This applies to the C-version too.",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//624\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-28T07:27:04Z",
+      "side": 1,
+      "message": "why not k_3 instead of k_4?",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//63A\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-28T07:27:04Z",
+      "side": 1,
+      "message": "why doing the same work on pdiff2 and ndiff2? Why not do the work only once on \u0027pdiff2 | ndiff2\u0027 ?\n(you\u0027ll need a sign mask to restore the sign of adjustment at the end)",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//620\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-28T07:27:04Z",
+      "side": 1,
+      "message": "the overall test logic could be rewamped into:\n\nadj \u003d 6;\nif (diff \u003c\u003d 7) adj -\u003d 2;\nif (diff \u003c\u003d 3) adj -\u003d 4;\nif (diff \u003d\u003d 0) adj \u003d 0;\n\n(using simple masking)",
+      "revId": "82a98ee1fe3c915a56c058c8568a97682a2ece41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
