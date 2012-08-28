@@ -4046,10 +4046,6 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
   int64_t best_yrd = INT64_MAX;
   MB_MODE_INFO best_mbmode;
   int mode_index = 0;
-#if 0
-  PARTITION_INFO best_partition;
-  union b_mode_info best_bmodes[16];
-#endif
   unsigned int ref_costs[MAX_REF_FRAMES];
 
   xd->mode_info_context->mbmi.segment_id = segment_id;
