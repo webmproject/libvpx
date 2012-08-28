@@ -644,7 +644,8 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 #if CONFIG_ERROR_CONCEALMENT
             /* look for corruption. set mvs_corrupt_from_mb to the current
              * mb_num if the frame is corrupt from this macroblock. */
-            if (vp8dx_bool_error(&pbi->bc) && mb_num < pbi->mvs_corrupt_from_mb)
+            if (vp8dx_bool_error(&pbi->bc) && mb_num <
+                (int)pbi->mvs_corrupt_from_mb)
             {
                 pbi->mvs_corrupt_from_mb = mb_num;
                 /* no need to continue since the partition is corrupt from
