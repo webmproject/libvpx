@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//40I\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-29T23:45:47Z",
+      "side": 1,
+      "message": "You are right. I don\u0027t need them. I put l1 l2 l3 here just to make it clear if later someone wants to modify them. Maybe I can put them in header file.",
+      "parentUuid": "AAAAPn//41Y\u003d",
+      "revId": "eb1b6a9afc24ffa2d09008ffc497b4b80c48a295",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//41g\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//4zc\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-29T23:45:47Z",
+      "side": 1,
+      "message": "absdiff is unsigned char, but _mm_cmpgt_epi8 require signed char. \"\u003e\u003e1\" makes it work. Couldn\u0027t think of other ways to use less instructions.",
+      "parentUuid": "AAAAPn//41g\u003d",
+      "revId": "eb1b6a9afc24ffa2d09008ffc497b4b80c48a295",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//41k\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2012-08-29T23:17:31Z",
       "side": 1,
       "message": "you should use another variable name than \u0027adj0\u0027. It\u0027s a mask.",
+      "revId": "eb1b6a9afc24ffa2d09008ffc497b4b80c48a295",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//4zY\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-29T23:45:47Z",
+      "side": 1,
+      "message": "Will change it.",
+      "parentUuid": "AAAAPn//41k\u003d",
       "revId": "eb1b6a9afc24ffa2d09008ffc497b4b80c48a295",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
