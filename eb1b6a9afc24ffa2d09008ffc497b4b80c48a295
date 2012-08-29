@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//41Y\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-29T23:17:31Z",
+      "side": 1,
+      "message": "you only need to adjust the l3 constant. Other constant (l1,l2) are only used through their difference (l3-l2 and l2-l1 at lines 55/56).\nSo: l21 is not affected by the adjustment, only l32.\nYou can get rid of l1/l2, probably.",
+      "revId": "eb1b6a9afc24ffa2d09008ffc497b4b80c48a295",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//41g\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-29T23:17:31Z",
+      "side": 1,
+      "message": "so, what about working with absdiff directly and double the threshold constants? This would save the \"\u003e\u003e1\"",
+      "revId": "eb1b6a9afc24ffa2d09008ffc497b4b80c48a295",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//41k\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-29T23:17:31Z",
+      "side": 1,
+      "message": "you should use another variable name than \u0027adj0\u0027. It\u0027s a mask.",
+      "revId": "eb1b6a9afc24ffa2d09008ffc497b4b80c48a295",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
