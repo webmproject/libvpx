@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//5aw\u003d",
+        "filename": "vp8/encoder/mbgraph.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-08-29T16:36:23Z",
+      "side": 1,
+      "message": "Actually I think it was unpredictable before, since dummy_cost was not initialized. I changed the interface so that the cost is ignored if null.",
+      "parentUuid": "AAAAPn//5hM\u003d",
+      "revId": "1b74ffbef952d291ff5e83188417e053b2b5fa16",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//5hI\u003d",
         "filename": "vp8/encoder/mcomp.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2012-08-29T13:19:01Z",
       "side": 1,
       "message": "Lovely long lines here :)",
+      "revId": "1b74ffbef952d291ff5e83188417e053b2b5fa16",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//5ao\u003d",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-08-29T16:36:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//5hI\u003d",
       "revId": "1b74ffbef952d291ff5e83188417e053b2b5fa16",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
