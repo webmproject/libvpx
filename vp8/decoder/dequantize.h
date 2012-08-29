@@ -145,7 +145,7 @@ extern prototype_dequant_idct_add_y_block_8x8(vp8_dequant_idct_add_y_block_8x8);
 #endif
 extern prototype_dequant_idct_add_uv_block_8x8(vp8_dequant_idct_add_uv_block_8x8);
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 #ifndef vp8_dequant_idct_add_16x16
 #define vp8_dequant_idct_add_16x16 vp8_dequant_idct_add_16x16_c
 #endif
@@ -184,7 +184,7 @@ typedef struct {
   vp8_dequant_dc_idct_add_y_block_fn_t_8x8 dc_idct_add_y_block_8x8;
   vp8_dequant_idct_add_y_block_fn_t_8x8    idct_add_y_block_8x8;
   vp8_dequant_idct_add_uv_block_fn_t_8x8   idct_add_uv_block_8x8;
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_dequant_idct_add_fn_t            idct_add_16x16;
 #endif
 } vp8_dequant_rtcd_vtable_t;
@@ -199,6 +199,12 @@ typedef struct {
 void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
                                    unsigned char *pred, unsigned char *dest,
                                    int pitch, int stride);
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM16X16
+void vp8_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
+                                     unsigned char *pred, unsigned char *dest,
+                                     int pitch, int stride);
 #endif
 
 #if CONFIG_SUPERBLOCKS

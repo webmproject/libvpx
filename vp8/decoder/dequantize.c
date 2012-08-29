@@ -468,7 +468,48 @@ void vp8_dequant_dc_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
 #endif
 }
 
-#if CONFIG_TX16X16
+#if CONFIG_HYBRIDTRANSFORM16X16
+void vp8_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
+                                     unsigned char *pred, unsigned char *dest,
+                                     int pitch, int stride) {
+  short output[256];
+  short *diff_ptr = output;
+  int r, c, i;
+
+  input[0]= input[0] * dq[0];
+
+  // recover quantizer for 4 4x4 blocks
+  for (i = 1; i < 256; i++)
+    input[i] = input[i] * dq[1];
+
+  // inverse hybrid transform
+  vp8_ihtllm_c(input, output, 32, tx_type, 16);
+
+  // the idct halves ( >> 1) the pitch
+  // vp8_short_idct16x16_c(input, output, 32);
+
+  vpx_memset(input, 0, 512);
+
+  for (r = 0; r < 16; r++) {
+    for (c = 0; c < 16; c++) {
+      int a = diff_ptr[c] + pred[c];
+
+      if (a < 0)
+        a = 0;
+      else if (a > 255)
+        a = 255;
+
+      dest[c] = (unsigned char) a;
+    }
+
+    dest += stride;
+    diff_ptr += 16;
+    pred += pitch;
+  }
+}
+#endif
+
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_dequant_idct_add_16x16_c(short *input, short *dq, unsigned char *pred,
                                   unsigned char *dest, int pitch, int stride) {
   short output[256];

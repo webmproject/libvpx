@@ -39,7 +39,7 @@ DECLARE_ALIGNED(16, const int, coef_bands_x_8x8[64]) = {
   7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
 };
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 DECLARE_ALIGNED(16, const int, coef_bands_x_16x16[256]) = {
   0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 4 * OCB_X, 5 * OCB_X, 5 * OCB_X, 3 * OCB_X, 6 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 6 * OCB_X, 6 * OCB_X,
   6 * OCB_X, 5 * OCB_X, 5 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
@@ -105,7 +105,7 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *xd) {
   if ((xd->mode_info_context->mbmi.mode != B_PRED &&
       xd->mode_info_context->mbmi.mode != I8X8_PRED &&
       xd->mode_info_context->mbmi.mode != SPLITMV)
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
       || xd->mode_info_context->mbmi.txfm_size == TX_16X16
 #endif
       ) {
@@ -225,7 +225,7 @@ void static count_tokens_8x8(INT16 *qcoeff_ptr, int block, int type,
   }
 }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 void static count_tokens_16x16(INT16 *qcoeff_ptr, int block, int type,
                                ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                                int eob, int seg_eob, FRAME_CONTEXT *fc) {
@@ -302,7 +302,7 @@ static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
     case TX_8X8:
       coef_probs = fc->coef_probs_8x8[type][0][0];
       break;
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     case TX_16X16:
       coef_probs = fc->coef_probs_16x16[type][0][0];
       break;
@@ -398,14 +398,14 @@ SKIP_START:
   }
   else if (block_type == TX_8X8)
     count_tokens_8x8(qcoeff_ptr, i, type, a, l, c, seg_eob, fc);
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   else
     count_tokens_16x16(qcoeff_ptr, i, type, a, l, c, seg_eob, fc);
 #endif
   return c;
 }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -417,6 +417,7 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
 
   type = PLANE_TYPE_Y_WITH_DC;
+
   if (seg_active)
       seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
   else

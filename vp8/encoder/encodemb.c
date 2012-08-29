@@ -300,7 +300,7 @@ void vp8_transform_mby_8x8(MACROBLOCK *x) {
   }
 }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_transform_mbuv_16x16(MACROBLOCK *x) {
   int i;
 
@@ -880,7 +880,7 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
 
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 void optimize_b_16x16(MACROBLOCK *mb, int i, int type,
                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                       const VP8_ENCODER_RTCD *rtcd) {
@@ -1105,7 +1105,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   vp8_subtract_mb(rtcd, x);
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type == TX_16X16)
     vp8_transform_mb_16x16(x);
   else
@@ -1115,7 +1115,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   else
     transform_mb(x);
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type == TX_16X16)
     vp8_quantize_mb_16x16(x);
   else
@@ -1126,7 +1126,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     vp8_quantize_mb(x);
 
   if (x->optimize) {
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     if (tx_type == TX_16X16)
       optimize_mb_16x16(x, rtcd);
     else
@@ -1137,7 +1137,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
       optimize_mb(x, rtcd);
   }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type == TX_16X16)
     vp8_inverse_transform_mb_16x16(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
   else
@@ -1214,7 +1214,7 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type == TX_16X16)
     vp8_transform_mby_16x16(x);
   else
@@ -1226,7 +1226,7 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   vp8_quantize_mby(x);
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type == TX_16X16)
     vp8_inverse_transform_mby_16x16(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
   else

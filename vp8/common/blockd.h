@@ -133,13 +133,13 @@ typedef enum {
 typedef enum {
   TX_4X4,                      // 4x4 dct transform
   TX_8X8,                      // 8x8 dct transform
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   TX_16X16,                    // 16x16 dct transform
 #endif
   TX_SIZE_MAX                  // Number of different transforms available
 } TX_SIZE;
 
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 typedef enum {
   DCT_DCT   = 0,                      // DCT  in both horizontal and vertical
   ADST_DCT  = 1,                      // ADST in horizontal, DCT in vertical
@@ -155,8 +155,12 @@ typedef enum {
 
 #define VP8_MVREFS (1 + SPLITMV - NEARESTMV)
 
-#if CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 #define ACTIVE_HT 110                // quantization stepsize threshold
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM16X16
+#define ACTIVE_HT16 300
 #endif
 
 typedef enum {
@@ -190,7 +194,7 @@ typedef enum {
 } MV_REF_TYPE;
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
 // convert MB_PREDICTION_MODE to B_PREDICTION_MODE
 static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
   B_PREDICTION_MODE b_mode;
@@ -244,7 +248,7 @@ static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
 union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
     B_PREDICTION_MODE test;
     TX_TYPE           tx_type;
 #endif
@@ -269,7 +273,7 @@ typedef enum {
 
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
-#if CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
   MB_PREDICTION_MODE mode_rdopt;
 #endif
 
@@ -457,15 +461,16 @@ typedef struct MacroBlockD {
 #endif
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
   int q_index;
 #endif
 
 } MACROBLOCKD;
 
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
 // transform mapping
 static void txfm_map(BLOCKD *b, B_PREDICTION_MODE bmode) {
+  // map transform type
   switch (bmode) {
     case B_TM_PRED :
     case B_RD_PRED :

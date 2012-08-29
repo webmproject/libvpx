@@ -33,7 +33,7 @@ void vp8_machine_specific_config(VP8_COMMON *ctx) {
   rtcd->idct.idct8        = vp8_short_idct8x8_c;
   rtcd->idct.idct1_scalar_add_8x8 = vp8_dc_only_idct_add_8x8_c;
   rtcd->idct.ihaar2       = vp8_short_ihaar2x2_c;
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   rtcd->idct.idct16x16    = vp8_short_idct16x16_c;
 #endif
   rtcd->recon.copy16x16   = vp8_copy_mem16x16_c;

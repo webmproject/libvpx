@@ -227,6 +227,7 @@ EXPERIMENT_LIST="
     tx16x16
     newbestrefmv
     new_mvref
+    hybridtransform16x16
 "
 CONFIG_LIST="
     external_build

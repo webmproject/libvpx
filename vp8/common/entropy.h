@@ -67,6 +67,7 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 #else
 #define BLOCK_TYPES_8X8 3
 #endif
+
 #define BLOCK_TYPES_16X16 4
 
 /* Middle dimension is a coarsening of the coefficient's
@@ -75,7 +76,7 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 #define COEF_BANDS 8
 extern DECLARE_ALIGNED(16, const int, vp8_coef_bands[16]);
 extern DECLARE_ALIGNED(64, const int, vp8_coef_bands_8x8[64]);
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 extern DECLARE_ALIGNED(16, const int, vp8_coef_bands_16x16[256]);
 #endif
 
@@ -118,7 +119,7 @@ extern short vp8_default_zig_zag_mask[16];
 extern DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]);
 void vp8_coef_tree_initialize(void);
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 extern DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d_16x16[256]);
 #endif
 void vp8_adapt_coef_probs(struct VP8Common *);

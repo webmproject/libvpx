@@ -26,12 +26,12 @@
 #endif
 
 
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_fht_c(short *input, short *output, int pitch,
                TX_TYPE tx_type, int tx_dim);
 #endif
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 #ifndef vp8_fdct_short16x16
 #define vp8_fdct_short16x16 vp8_short_fdct16x16_c
 #endif
@@ -81,7 +81,7 @@ extern prototype_fdct(vp8_short_walsh4x4_lossless_c);
 
 typedef prototype_fdct(*vp8_fdct_fn_t);
 typedef struct {
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_fdct_fn_t    short16x16;
 #endif
   vp8_fdct_fn_t    short8x8;

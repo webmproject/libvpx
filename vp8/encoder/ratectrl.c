@@ -175,7 +175,7 @@ void vp8_save_coding_context(VP8_COMP *cpi) {
 #if CONFIG_SWITCHABLE_INTERP
   vp8_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
 #endif
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_copy(cc->coef_probs_16x16, cm->fc.coef_probs_16x16);
 #endif
 }
@@ -232,7 +232,7 @@ void vp8_restore_coding_context(VP8_COMP *cpi) {
 #if CONFIG_SWITCHABLE_INTERP
   vp8_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
 #endif
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_copy(cm->fc.coef_probs_16x16, cc->coef_probs_16x16);
 #endif
 }

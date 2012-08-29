@@ -1361,7 +1361,7 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   vp8_zero(cpi->MVcount_hp);
   vp8_zero(cpi->coef_counts);
   vp8_zero(cpi->coef_counts_8x8);
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_zero(cpi->coef_counts_16x16);
 #endif
 
@@ -1825,7 +1825,7 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
   }
 
   /* test code: set transform size based on mode selection */
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (mbmi->mode <= TM_PRED) {
     mbmi->txfm_size = TX_16X16;
     cpi->t16x16_count++;
@@ -1922,7 +1922,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
   set_pred_flag(xd, PRED_REF, ref_pred_flag);
 
   /* test code: set transform size based on mode selection */
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (mbmi->mode <= TM_PRED || mbmi->mode == NEWMV || mbmi->mode == ZEROMV ||
       mbmi->mode == NEARMV ||  mbmi->mode == NEARESTMV) {
     mbmi->txfm_size = TX_16X16;

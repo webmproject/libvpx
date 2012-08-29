@@ -125,7 +125,7 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     xd->block[i].dequant = pc->Y1dequant[QIndex];
   }
 
-#if CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
   xd->q_index = QIndex;
 #endif
 
@@ -234,9 +234,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   int orig_skip_flag = xd->mode_info_context->mbmi.mb_skip_coeff;
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
   int QIndex;
   int active_ht;
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM16X16
+  int active_ht16;
 #endif
 
   // re-initialize macroblock dequantizer before detokenization
@@ -244,7 +248,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     mb_init_dequantizer(pbi, xd);
 
   if (pbi->common.frame_type == KEY_FRAME) {
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     if (xd->mode_info_context->mbmi.mode <= TM_PRED ||
         xd->mode_info_context->mbmi.mode == NEWMV ||
         xd->mode_info_context->mbmi.mode == ZEROMV ||
@@ -263,7 +267,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     else
       xd->mode_info_context->mbmi.txfm_size = TX_4X4;
   } else {
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     if (xd->mode_info_context->mbmi.mode <= TM_PRED ||
         xd->mode_info_context->mbmi.mode == NEWMV ||
         xd->mode_info_context->mbmi.mode == ZEROMV ||
@@ -316,7 +320,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       xd->block[i].eob = 0;
       xd->eobs[i] = 0;
     }
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     if (tx_type == TX_16X16)
       eobtotal = vp8_decode_mb_tokens_16x16(pbi, xd);
     else
@@ -377,7 +381,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 //  if (xd->segmentation_enabled)
 //    mb_init_dequantizer(pbi, xd);
 
-#if CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
   // parse transform types for intra 4x4 mode
   QIndex = xd->q_index;
   active_ht = (QIndex < ACTIVE_HT);
@@ -389,6 +393,10 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         txfm_map(b, b_mode);
     } // loop over 4x4 blocks
   }
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM16X16
+  active_ht16 = (QIndex < ACTIVE_HT16);
 #endif
 
   /* do prediction */
@@ -537,11 +545,28 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   } else {
     BLOCKD *b = &xd->block[24];
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     if (tx_type == TX_16X16) {
+#if CONFIG_HYBRIDTRANSFORM16X16
+      if (mode < I8X8_PRED && active_ht16) {
+        BLOCKD *bd = &xd->block[0];
+        TX_TYPE txfm;
+        txfm_map(bd, pred_mode_conv(mode));
+        txfm = bd->bmi.as_mode.tx_type;
+
+        vp8_ht_dequant_idct_add_16x16_c(txfm, xd->qcoeff,
+                                        xd->block[0].dequant, xd->predictor,
+                                        xd->dst.y_buffer, 16, xd->dst.y_stride);
+      } else {
+        vp8_dequant_idct_add_16x16_c(xd->qcoeff, xd->block[0].dequant,
+                                     xd->predictor, xd->dst.y_buffer,
+                                     16, xd->dst.y_stride);
+      }
+#else
       vp8_dequant_idct_add_16x16_c(xd->qcoeff, xd->block[0].dequant,
                                    xd->predictor, xd->dst.y_buffer,
                                    16, xd->dst.y_stride);
+#endif
     }
     else
 #endif
@@ -641,7 +666,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     if (!xd->mode_info_context->mbmi.encoded_as_sb) {
 #endif
       if (tx_type == TX_8X8
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
       || tx_type == TX_16X16
 #endif
       )
@@ -1047,7 +1072,7 @@ static void read_coef_probs(VP8D_COMP *pbi) {
         }
   }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   // 16x16
   if (vp8_read_bit(bc)) {
     // read coef probability tree
@@ -1430,7 +1455,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 
   vp8_copy(pbi->common.fc.pre_coef_probs, pbi->common.fc.coef_probs);
   vp8_copy(pbi->common.fc.pre_coef_probs_8x8, pbi->common.fc.coef_probs_8x8);
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_copy(pbi->common.fc.pre_coef_probs_16x16, pbi->common.fc.coef_probs_16x16);
 #endif
   vp8_copy(pbi->common.fc.pre_ymode_prob, pbi->common.fc.ymode_prob);
@@ -1443,7 +1468,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   vp8_copy(pbi->common.fc.pre_mvc_hp, pbi->common.fc.mvc_hp);
   vp8_zero(pbi->common.fc.coef_counts);
   vp8_zero(pbi->common.fc.coef_counts_8x8);
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_zero(pbi->common.fc.coef_counts_16x16);
 #endif
   vp8_zero(pbi->common.fc.ymode_counts);

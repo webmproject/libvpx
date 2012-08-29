@@ -13,7 +13,7 @@
    Generated file included by entropy.c */
 #define COEF_UPDATE_PROB 252
 #define COEF_UPDATE_PROB_8X8 252
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 #define COEF_UPDATE_PROB_16X16 252
 #endif
 

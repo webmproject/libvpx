@@ -46,7 +46,7 @@ unsigned int tree_update_hist_8x8 [BLOCK_TYPES_8X8]
                                   [COEF_BANDS]
                                   [PREV_COEF_CONTEXTS]
                                   [ENTROPY_NODES] [2];
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 unsigned int tree_update_hist_16x16 [BLOCK_TYPES_16X16]
                                     [COEF_BANDS]
                                     [PREV_COEF_CONTEXTS]
@@ -1422,7 +1422,7 @@ void build_coeff_contexts(VP8_COMP *cpi) {
     }
   }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   //16x16
   for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
     for (j = 0; j < COEF_BANDS; ++j) {
@@ -1794,7 +1794,7 @@ static void update_coef_probs(VP8_COMP *cpi) {
     }
   }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   // 16x16
   /* dry run to see if update is necessary */
   update[0] = update[1] = 0;
@@ -2304,7 +2304,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
   vp8_copy(cpi->common.fc.pre_coef_probs, cpi->common.fc.coef_probs);
   vp8_copy(cpi->common.fc.pre_coef_probs_8x8, cpi->common.fc.coef_probs_8x8);
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_copy(cpi->common.fc.pre_coef_probs_16x16, cpi->common.fc.coef_probs_16x16);
 #endif
   vp8_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
@@ -2440,7 +2440,7 @@ void print_tree_update_probs() {
     fprintf(f, "  },\n");
   }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   fprintf(f, "const vp8_prob\n"
           "vp8_coef_update_probs_16x16[BLOCK_TYPES_16X16]\n"
           "                           [COEF_BANDS]\n"
@@ -2474,7 +2474,7 @@ void print_tree_update_probs() {
   f = fopen("treeupdate.bin", "wb");
   fwrite(tree_update_hist, sizeof(tree_update_hist), 1, f);
   fwrite(tree_update_hist_8x8, sizeof(tree_update_hist_8x8), 1, f);
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   fwrite(tree_update_hist_16x16, sizeof(tree_update_hist_16x16), 1, f);
 #endif
   fclose(f);

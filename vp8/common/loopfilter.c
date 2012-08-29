@@ -336,7 +336,7 @@ void vp8_loop_filter_frame
             (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
 
           if (!skip_lf
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
               && tx_type != TX_16X16
 #endif
               ) {
@@ -361,7 +361,7 @@ void vp8_loop_filter_frame
             (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
 
           if (!skip_lf
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
               && tx_type != TX_16X16
 #endif
               ) {
@@ -479,7 +479,7 @@ void vp8_loop_filter_frame_yonly
             (y_ptr, 0, 0, post->y_stride, 0, &lfi);
 
           if (!skip_lf
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
               && tx_type != TX_16X16
 #endif
               ) {
@@ -497,7 +497,7 @@ void vp8_loop_filter_frame_yonly
             (y_ptr, 0, 0, post->y_stride, 0, &lfi);
 
           if (!skip_lf
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
               && tx_type != TX_16X16
 #endif
               ) {

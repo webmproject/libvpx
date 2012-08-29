@@ -99,7 +99,7 @@ typedef struct {
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
   vp8_prob coef_probs_8x8[BLOCK_TYPES_8X8]
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_prob coef_probs_16x16[BLOCK_TYPES_16X16]
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 #endif
@@ -399,7 +399,7 @@ typedef struct VP8_COMP {
   DECLARE_ALIGNED(64, short, zrun_zbin_boost_y2_8x8[QINDEX_RANGE][64]);
   DECLARE_ALIGNED(64, short, zrun_zbin_boost_uv_8x8[QINDEX_RANGE][64]);
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   DECLARE_ALIGNED(16, short, Y1zbin_16x16[QINDEX_RANGE][256]);
   DECLARE_ALIGNED(16, short, Y2zbin_16x16[QINDEX_RANGE][256]);
   DECLARE_ALIGNED(16, short, UVzbin_16x16[QINDEX_RANGE][256]);
@@ -560,7 +560,7 @@ typedef struct VP8_COMP {
   unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
   vp8_prob frame_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   unsigned int frame_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   unsigned int coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
   vp8_prob frame_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   unsigned int frame_branch_ct_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
@@ -623,7 +623,7 @@ typedef struct VP8_COMP {
   int skip_false_count[3];
   int t4x4_count;
   int t8x8_count;
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   int t16x16_count;
 #endif
 

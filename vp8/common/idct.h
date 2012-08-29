@@ -43,7 +43,7 @@
 #define Y2_WHT_UPSCALE_FACTOR 2
 #endif
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 #ifndef vp8_idct_idct16x16
 #define vp8_idct_idct16x16 vp8_short_idct16x16_c
 #endif
@@ -111,7 +111,7 @@ extern prototype_second_order(vp8_short_inv_walsh4x4_lossless_c);
 extern prototype_second_order(vp8_short_inv_walsh4x4_1_lossless_c);
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 #include "vp8/common/blockd.h"
 void vp8_ihtllm_c(short *input, short *output, int pitch,
                   TX_TYPE tx_type, int tx_dim);
@@ -136,7 +136,7 @@ typedef struct {
   vp8_idct_fn_t ihaar2;
   vp8_idct_fn_t ihaar2_1;
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_idct_fn_t            idct16x16;
 #endif
 } vp8_idct_rtcd_vtable_t;

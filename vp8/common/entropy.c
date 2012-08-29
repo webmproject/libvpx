@@ -95,7 +95,7 @@ DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]) = {
   58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
 };
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 // Table can be optimized.
 DECLARE_ALIGNED(16, const int, vp8_coef_bands_16x16[256]) = {
     0, 1, 2, 3, 5, 4, 4, 5, 5, 3, 6, 3, 5, 4, 6, 6,
@@ -212,7 +212,7 @@ void vp8_default_coef_probs(VP8_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs_8x8, vp8_default_coef_probs_8x8,
              sizeof(pc->fc.coef_probs_8x8));
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vpx_memcpy(pc->fc.coef_probs_16x16, vp8_default_coef_probs_16x16,
              sizeof(pc->fc.coef_probs_16x16));
 #endif
@@ -335,7 +335,7 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
         }
       }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   for (i = 0; i < BLOCK_TYPES_16X16; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {

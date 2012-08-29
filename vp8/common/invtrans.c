@@ -171,7 +171,7 @@ void vp8_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
 
 }
 
-#if CONFIG_TX16X16
+#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_inverse_transform_b_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
                                    short *input_dqcoeff,
                                    short *output_coeff, int pitch) {
