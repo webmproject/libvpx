@@ -177,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//4Sg\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-30T19:35:02Z",
+      "side": 1,
+      "message": "it\u0027s not that simple, there\u0027s more than just the number of instructions. Pairability and dependency chain also counts.\n\nFor instance, when you compute abshdiff from absdiff, the processor is blocked waiting for absdiff value to be ready.\n\nAlso, without abshdiff, you might free one register.\n\nLastly, if you want to go the subs way, you need to revert the order of thresholding to l0 -\u003e l1 -\u003e l2. The overall logic might be a bit different then...",
+      "parentUuid": "AAAAPn//4TI\u003d",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//4gc\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 7
