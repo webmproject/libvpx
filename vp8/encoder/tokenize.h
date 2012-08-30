@@ -38,6 +38,7 @@ extern int mby_is_skippable_8x8(MACROBLOCKD *xd);
 extern int mbuv_is_skippable_8x8(MACROBLOCKD *xd);
 extern int mb_is_skippable_8x8(MACROBLOCKD *xd);
 extern int mb_is_skippable_16x16(MACROBLOCKD *xd);
+extern int mby_is_skippable_16x16(MACROBLOCKD *xd);
 
 #ifdef ENTROPY_STATS
 void init_context_counters();
