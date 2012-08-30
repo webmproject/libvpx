@@ -7,12 +7,15 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "vpx_config.h"
 #include "test/encode_test_driver.h"
+#if CONFIG_VP8_DECODER
+#include "test/decode_test_driver.h"
+#endif
 #include "test/video_source.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 namespace libvpx_test {
-
 void Encoder::EncodeFrame(VideoSource *video, unsigned long flags) {
   if (video->img())
     EncodeFrameInternal(*video, flags);
@@ -91,8 +94,38 @@ void EncoderTest::SetMode(TestMode mode) {
   else
     passes_ = 1;
 }
+// The function should return "true" most of the time, therefore no early
+// break-out is implemented within the match checking process.
+static bool compare_img(const vpx_image_t *img1,
+                        const vpx_image_t *img2) {
+  bool match = (img1->fmt == img2->fmt) &&
+               (img1->d_w == img2->d_w) &&
+               (img1->d_h == img2->d_h);
+
+  const unsigned int width_y  = img1->d_w;
+  const unsigned int height_y = img1->d_h;
+  unsigned int i;
+  for (i = 0; i < height_y; ++i)
+    match = ( memcmp(img1->planes[VPX_PLANE_Y] + i * img1->stride[VPX_PLANE_Y],
+                     img2->planes[VPX_PLANE_Y] + i * img2->stride[VPX_PLANE_Y],
+                     width_y) == 0) && match;
+  const unsigned int width_uv  = (img1->d_w + 1) >> 1;
+  const unsigned int height_uv = (img1->d_h + 1) >> 1;
+  for (i = 0; i <  height_uv; ++i)
+    match = ( memcmp(img1->planes[VPX_PLANE_U] + i * img1->stride[VPX_PLANE_U],
+                     img2->planes[VPX_PLANE_U] + i * img2->stride[VPX_PLANE_U],
+                     width_uv) == 0) && match;
+  for (i = 0; i < height_uv; ++i)
+    match = ( memcmp(img1->planes[VPX_PLANE_V] + i * img1->stride[VPX_PLANE_V],
+                     img2->planes[VPX_PLANE_V] + i * img2->stride[VPX_PLANE_V],
+                     width_uv) == 0) && match;
+  return match;
+}
 
 void EncoderTest::RunLoop(VideoSource *video) {
+#if CONFIG_VP8_DECODER
+  vpx_codec_dec_cfg_t dec_cfg = {0};
+#endif
   for (unsigned int pass = 0; pass < passes_; pass++) {
     last_pts_ = 0;
 
@@ -105,7 +138,10 @@ void EncoderTest::RunLoop(VideoSource *video) {
 
     BeginPassHook(pass);
     Encoder encoder(cfg_, deadline_, &stats_);
-
+#if CONFIG_VP8_DECODER
+    Decoder decoder(dec_cfg);
+    bool has_cxdata = false;
+#endif
     bool again;
     for (again = true, video->Begin(); again; video->Next()) {
       again = video->img() != NULL;
@@ -121,12 +157,27 @@ void EncoderTest::RunLoop(VideoSource *video) {
 
         if (pkt->kind != VPX_CODEC_CX_FRAME_PKT)
           continue;
-
+#if CONFIG_VP8_DECODER
+        has_cxdata = true;
+        decoder.DecodeFrame((const uint8_t*)pkt->data.frame.buf,
+                            pkt->data.frame.sz);
+#endif
         ASSERT_GE(pkt->data.frame.pts, last_pts_);
         last_pts_ = pkt->data.frame.pts;
         FramePktHook(pkt);
       }
 
+#if CONFIG_VP8_DECODER
+      if (has_cxdata) {
+        const vpx_image_t *img_enc = encoder.GetPreviewFrame();
+        DxDataIterator dec_iter = decoder.GetDxData();
+        const vpx_image_t *img_dec = dec_iter.Next();
+        if(img_enc && img_dec) {
+          const bool res = compare_img(img_enc, img_dec);
+          ASSERT_TRUE(res)<< "Encoder/Decoder mismatch found.";
+        }
+      }
+#endif
       if (!Continue())
         break;
     }
@@ -137,5 +188,4 @@ void EncoderTest::RunLoop(VideoSource *video) {
       break;
   }
 }
-
 }  // namespace libvpx_test

@@ -52,7 +52,6 @@ class CxDataIterator {
   vpx_codec_iter_t  iter_;
 };
 
-
 // Implements an in-memory store for libvpx twopass statistics
 class TwopassStatsStore {
  public:
@@ -92,6 +91,9 @@ class Encoder {
     return CxDataIterator(&encoder_);
   }
 
+  const vpx_image_t *GetPreviewFrame() {
+    return vpx_codec_get_preview_frame(&encoder_);
+  }
   // This is a thin wrapper around vpx_codec_encode(), so refer to
   // vpx_encoder.h for its semantics.
   void EncodeFrame(VideoSource *video, unsigned long flags);
@@ -127,7 +129,6 @@ class Encoder {
   unsigned long        deadline_;
   TwopassStatsStore   *stats_;
 };
-
 
 // Common test functionality for all Encoder tests.
 //
