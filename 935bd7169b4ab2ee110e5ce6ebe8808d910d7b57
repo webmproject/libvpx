@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//4hE\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-30T06:11:24Z",
+      "side": 1,
+      "message": "uses const variables whenever possible:\n\nconst __m128i l3 \u003d _mm_set1_epi8((motion_magnitude \u003c\u003d MOTION_MAGNITUDE_THRESHOLD) ? 7 : 6);\nconst __m128i l32 \u003d _mm_set1_epi8(2);\netc...",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//4hA\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-30T06:11:24Z",
+      "side": 1,
+      "message": "you could gather all constants above, around line 38",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//4g0\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-30T06:11:24Z",
+      "side": 1,
+      "message": "extra spaces before the \u0027(\u0027. And below too. This is inconsistent with the style above (and guidelines, generally speaking).",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//4gs\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-30T06:11:24Z",
+      "side": 1,
+      "message": "why not use _mm_cmpeq_epi8 instead? (and use the opposite convention all the way). You could remove line 73 (and change block 99-101 of course)",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//4gk\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-30T06:11:24Z",
+      "side": 1,
+      "message": "i still think you could replace the _mm_cmpgt_epi8 by some\n_mm_subs_epu8 followed by _mm_cmpeq_epi8 comparison against k_0.",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//4gc\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-30T06:11:24Z",
+      "side": 1,
+      "message": "you can avoid this line by using the \u0027and_not\u0027 instruction _mm_andnot_si128 at line 101.\n\nSame a line 93 and 95",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
