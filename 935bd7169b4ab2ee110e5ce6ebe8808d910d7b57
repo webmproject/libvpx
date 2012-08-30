@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//4V4\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-30T16:55:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//4hE\u003d",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//4hA\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2012-08-30T06:11:24Z",
       "side": 1,
       "message": "you could gather all constants above, around line 38",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//4Vw\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-30T16:55:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//4hA\u003d",
       "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//4Vs\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-30T16:55:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//4g0\u003d",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//4gs\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2012-08-30T06:11:24Z",
       "side": 1,
       "message": "why not use _mm_cmpeq_epi8 instead? (and use the opposite convention all the way). You could remove line 73 (and change block 99-101 of course)",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//4To\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-30T16:55:11Z",
+      "side": 1,
+      "message": "Cool. Done",
+      "parentUuid": "AAAAPn//4gs\u003d",
       "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//4TI\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-30T16:55:11Z",
+      "side": 1,
+      "message": "We can use 2 instructions (subs and cmpeq) to replace 1 cmpgt in order to avoid having abshdiff. There are 3 masks (for 3 levels), and we need 3 extra instructions in this way. But calculating abshdiff needs 2 instructions. So, this change brings no saving. Right?",
+      "parentUuid": "AAAAPn//4gk\u003d",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//4gc\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 7
@@ -98,6 +188,24 @@
       "writtenOn": "2012-08-30T06:11:24Z",
       "side": 1,
       "message": "you can avoid this line by using the \u0027and_not\u0027 instruction _mm_andnot_si128 at line 101.\n\nSame a line 93 and 95",
+      "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//4VQ\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-30T16:55:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//4gc\u003d",
       "revId": "935bd7169b4ab2ee110e5ce6ebe8808d910d7b57",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
