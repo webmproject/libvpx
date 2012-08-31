@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//3CM\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-31T17:23:52Z",
+      "side": 1,
+      "message": "const_cast?",
+      "revId": "38deb0967882b3dcb9eebed68cdba3438a180680",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//3CU\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-31T17:23:52Z",
+      "side": 1,
+      "message": "(d_h+1)/2, same for d_w",
+      "revId": "38deb0967882b3dcb9eebed68cdba3438a180680",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//3CQ\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-31T17:23:52Z",
+      "side": 1,
+      "message": "unnecessary blank lines",
+      "revId": "38deb0967882b3dcb9eebed68cdba3438a180680",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//3DI\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-31T17:23:52Z",
+      "side": 1,
+      "message": "All this decoder stuff should be in a new file pair decoder.{cc,h}. Eventually there will be decoder tests that don\u0027t need the encode stuff, and we\u0027ll want to be able to access these classes without pulling in a false dependency on the encoder.",
+      "revId": "38deb0967882b3dcb9eebed68cdba3438a180680",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//3C8\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-31T17:23:52Z",
+      "side": 1,
+      "message": "I favor not making this controllable until there\u0027s a demonstrated need to control it.",
+      "revId": "38deb0967882b3dcb9eebed68cdba3438a180680",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//3Co\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-31T17:23:52Z",
+      "side": 1,
+      "message": "I don\u0027t think this needs to be a member variable, can be local to RunLoop.",
+      "revId": "38deb0967882b3dcb9eebed68cdba3438a180680",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
