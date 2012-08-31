@@ -17,6 +17,7 @@ extern "C" {
 #include "./vpx_config.h"
 #include "./vpx_rtcd.h"
 #include "vp8/common/blockd.h"
+#include "vpx_mem/vpx_mem.h"
 }
 
 #include "test/acm_random.h"
@@ -34,7 +35,25 @@ using libvpx_test::ACMRandom;
 
 namespace {
 class SADTest : public PARAMS(int, int, sad_m_by_n_fn_t) {
-  protected:
+ public:
+  static void SetUpTestCase() {
+    source_data_ = reinterpret_cast<uint8_t*>(
+        vpx_memalign(kDataAlignment, kDataBufferSize));
+    reference_data_ = reinterpret_cast<uint8_t*>(
+        vpx_memalign(kDataAlignment, kDataBufferSize));
+  }
+
+  static void TearDownTestCase() {
+    vpx_free(source_data_);
+    source_data_ = NULL;
+    vpx_free(reference_data_);
+    reference_data_ = NULL;
+  }
+
+ protected:
+  static const int kDataAlignment = 16;
+  static const int kDataBufferSize = 16 * 32;
+
   virtual void SetUp() {
     sad_fn_ = GET_PARAM(2);
     height_ = GET_PARAM(1);
@@ -100,13 +119,16 @@ class SADTest : public PARAMS(int, int, sad_m_by_n_fn_t) {
 
   // Handle blocks up to 16x16 with stride up to 32
   int height_, width_;
-  DECLARE_ALIGNED(16, uint8_t, source_data_[16*32]);
+  static uint8_t* source_data_;
   int source_stride_;
-  DECLARE_ALIGNED(16, uint8_t, reference_data_[16*32]);
+  static uint8_t* reference_data_;
   int reference_stride_;
 
   ACMRandom rnd_;
 };
+
+uint8_t* SADTest::source_data_ = NULL;
+uint8_t* SADTest::reference_data_ = NULL;
 
 TEST_P(SADTest, MaxRef) {
   FillConstant(source_data_, source_stride_, 0);

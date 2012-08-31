@@ -17,8 +17,8 @@
 extern "C" {
 #include "./vpx_config.h"
 #include "./vpx_rtcd.h"
-#include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_mem/vpx_mem.h"
 }
 
 namespace {
@@ -31,11 +31,30 @@ typedef void (*sixtap_predict_fn_t)(uint8_t *src_ptr,
                                     int  dst_pitch);
 
 class SixtapPredictTest : public PARAMS(int, int, sixtap_predict_fn_t) {
+ public:
+  static void SetUpTestCase() {
+    src_ = reinterpret_cast<uint8_t*>(vpx_memalign(kDataAlignment, kSrcSize));
+    dst_ = reinterpret_cast<uint8_t*>(vpx_memalign(kDataAlignment, kDstSize));
+    dst_c_ = reinterpret_cast<uint8_t*>(vpx_memalign(kDataAlignment, kDstSize));
+  }
+
+  static void TearDownTestCase() {
+    vpx_free(src_);
+    src_ = NULL;
+    vpx_free(dst_);
+    dst_ = NULL;
+    vpx_free(dst_c_);
+    dst_c_ = NULL;
+  }
+
  protected:
   // Make test arrays big enough for 16x16 functions. Six-tap filters
   // need 5 extra pixels outside of the macroblock.
   static const int kSrcStride = 21;
   static const int kDstStride = 16;
+  static const int kDataAlignment = 16;
+  static const int kSrcSize = kSrcStride * kSrcStride + 1;
+  static const int kDstSize = kDstStride * kDstStride;
 
   virtual void SetUp() {
     width_ = GET_PARAM(0);
@@ -52,17 +71,18 @@ class SixtapPredictTest : public PARAMS(int, int, sixtap_predict_fn_t) {
   // The src stores the macroblock we will filter on, and makes it 1 byte larger
   // in order to test unaligned access. The result is stored in dst and dst_c(c
   // reference code result).
-  DECLARE_ALIGNED(16, uint8_t, src_[kSrcStride * kSrcStride + 1]);
-  DECLARE_ALIGNED(16, uint8_t, dst_[kDstStride * kDstStride]);
-  DECLARE_ALIGNED(16, uint8_t, dst_c_[kDstStride * kDstStride]);
+  static uint8_t* src_;
+  static uint8_t* dst_;
+  static uint8_t* dst_c_;
 };
 
-TEST_P(SixtapPredictTest, TestWithPresetData) {
-  const size_t src_size = sizeof(src_) / sizeof(uint8_t);
-  const size_t dst_size = sizeof(dst_) / sizeof(uint8_t);
+uint8_t* SixtapPredictTest::src_ = NULL;
+uint8_t* SixtapPredictTest::dst_ = NULL;
+uint8_t* SixtapPredictTest::dst_c_ = NULL;
 
+TEST_P(SixtapPredictTest, TestWithPresetData) {
   // Test input
-  static const uint8_t test_data[src_size] = {
+  static const uint8_t test_data[kSrcSize] = {
     216, 184, 4, 191, 82, 92, 41, 0, 1, 226, 236, 172, 20, 182, 42, 226, 177,
     79, 94, 77, 179, 203, 206, 198, 22, 192, 19, 75, 17, 192, 44, 233, 120,
     48, 168, 203, 141, 210, 203, 143, 180, 184, 59, 201, 110, 102, 171, 32,
@@ -94,7 +114,7 @@ TEST_P(SixtapPredictTest, TestWithPresetData) {
   };
 
   // Expected result
-  static const uint8_t expected_dst[dst_size] = {
+  static const uint8_t expected_dst[kDstSize] = {
     117, 102, 74, 135, 42, 98, 175, 206, 70, 73, 222, 197, 50, 24, 39, 49, 38,
     105, 90, 47, 169, 40, 171, 215, 200, 73, 109, 141, 53, 85, 177, 164, 79,
     208, 124, 89, 212, 18, 81, 145, 151, 164, 217, 153, 91, 154, 102, 102,
@@ -128,10 +148,8 @@ TEST_P(SixtapPredictTest, TestWithPresetData) {
 using libvpx_test::ACMRandom;
 
 TEST_P(SixtapPredictTest, TestWithRandomData) {
-  const size_t src_size = sizeof(src_) / sizeof(uint8_t);
-
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  for (size_t i = 0; i < src_size; ++i)
+  for (int i = 0; i < kSrcSize; ++i)
     src_[i] = rnd.Rand8();
 
   // Run tests for all possible offsets.
