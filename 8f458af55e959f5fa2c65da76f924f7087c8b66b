@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//3Qo\u003d",
+        "filename": "test/intrapred_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-31T06:52:52Z",
+      "side": 1,
+      "message": "Should IntraPredUVTest class have also TearDownTestCase() to release allocated memory?",
+      "revId": "8f458af55e959f5fa2c65da76f924f7087c8b66b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
