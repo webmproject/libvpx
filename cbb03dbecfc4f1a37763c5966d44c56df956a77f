@@ -16,6 +16,24 @@
       "revId": "cbb03dbecfc4f1a37763c5966d44c56df956a77f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//208\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-31T20:49:26Z",
+      "side": 1,
+      "message": "Right. Thanks.",
+      "parentUuid": "AAAAPn//3AU\u003d",
+      "revId": "cbb03dbecfc4f1a37763c5966d44c56df956a77f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
