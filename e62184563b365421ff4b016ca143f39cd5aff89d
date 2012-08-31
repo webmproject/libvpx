@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//3F0\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-31T16:53:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//3Rg\u003d",
+      "revId": "e62184563b365421ff4b016ca143f39cd5aff89d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//3RY\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 10
@@ -47,6 +65,24 @@
       "writtenOn": "2012-08-31T05:55:10Z",
       "side": 1,
       "message": "instead of paraphrasing what you do at 66, make the comment explain why clamping will give the same result and why you need to clamp.",
+      "revId": "e62184563b365421ff4b016ca143f39cd5aff89d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//3Fw\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-31T16:53:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//3RY\u003d",
       "revId": "e62184563b365421ff4b016ca143f39cd5aff89d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//3Fs\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-31T16:53:43Z",
+      "side": 1,
+      "message": "Right.",
+      "parentUuid": "AAAAPn//3Rk\u003d",
+      "revId": "e62184563b365421ff4b016ca143f39cd5aff89d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//3RU\u003d",
         "filename": "vp8/encoder/x86/denoising_sse2.c",
         "patchSetId": 10
@@ -81,6 +135,24 @@
       "writtenOn": "2012-08-31T05:55:10Z",
       "side": 1,
       "message": "you can break one dependency in the chain by combining adj2 and adj1 first instead of using twice \u0027adj\u0027 (removing one stall).\nSomething like:\n\nadj1 \u003d _mm_add_epi8(adj1, adj2);\nadj \u003d _mm_andnot_si128(mask0, l3);\nadj \u003d _mm_sub_epi8(adj, adj1);\nadj \u003d _mm_or_si128(adj, adj0);\n\nIn this order, you\u0027re only waiting on \u0027adj\u0027 register three times instead of four.",
+      "revId": "e62184563b365421ff4b016ca143f39cd5aff89d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//3FM\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-31T16:53:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//3RU\u003d",
       "revId": "e62184563b365421ff4b016ca143f39cd5aff89d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
