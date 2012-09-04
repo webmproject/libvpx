@@ -742,7 +742,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     if ((flags & VP8D_MFQE) &&
          oci->postproc_state.last_frame_valid &&
          oci->current_video_frame >= 2 &&
-         oci->base_qindex - oci->postproc_state.last_base_qindex >= 10)
+         oci->postproc_state.last_base_qindex < 60 &&
+         oci->base_qindex - oci->postproc_state.last_base_qindex >= 20)
     {
         vp8_multiframe_quality_enhance(oci);
         if (((flags & VP8D_DEBLOCK) || (flags & VP8D_DEMACROBLOCK)) &&

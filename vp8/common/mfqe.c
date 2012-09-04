@@ -185,8 +185,8 @@ static void multiframe_quality_enhance_block
 
     actrisk = (actd > act * 5);
 
-    /* thr = qdiff/8 + log2(act) + log4(qprev) */
-    thr = (qdiff >> 3);
+    /* thr = qdiff/16 + log2(act) + log4(qprev) */
+    thr = (qdiff >> 4);
     while (actd >>= 1) thr++;
     while (qprev >>= 2) thr++;
 
