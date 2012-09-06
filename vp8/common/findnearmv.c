@@ -20,14 +20,19 @@ const unsigned char vp8_mbsplit_offset[4][16] = {
   { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
 };
 
-static void lower_mv_precision(int_mv *mv)
+static void lower_mv_precision(int_mv *mv, int usehp)
 {
-  if (mv->as_mv.row & 1)
-    mv->as_mv.row += (mv->as_mv.row > 0 ? -1 : 1);
-  if (mv->as_mv.col & 1)
-    mv->as_mv.col += (mv->as_mv.col > 0 ? -1 : 1);
+#if CONFIG_NEWMVENTROPY
+  if (!usehp || !vp8_use_nmv_hp(&mv->as_mv)) {
+#else
+  if (!usehp) {
+#endif
+    if (mv->as_mv.row & 1)
+      mv->as_mv.row += (mv->as_mv.row > 0 ? -1 : 1);
+    if (mv->as_mv.col & 1)
+      mv->as_mv.col += (mv->as_mv.col > 0 ? -1 : 1);
+  }
 }
-
 
 /* Predict motion vectors using those from already-decoded nearby blocks.
    Note that we only consider one 4x4 subblock from each candidate 16x16
@@ -173,11 +178,9 @@ void vp8_find_near_mvs
   /* Make sure that the 1/8th bits of the Mvs are zero if high_precision
    * is not being used, by truncating the last bit towards 0
    */
-  if (!xd->allow_high_precision_mv) {
-    lower_mv_precision(best_mv);
-    lower_mv_precision(nearest);
-    lower_mv_precision(nearby);
-  }
+  lower_mv_precision(best_mv, xd->allow_high_precision_mv);
+  lower_mv_precision(nearest, xd->allow_high_precision_mv);
+  lower_mv_precision(nearby, xd->allow_high_precision_mv);
 
   // TODO: move clamp outside findnearmv
   vp8_clamp_mv2(nearest, xd);
@@ -301,9 +304,7 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
 
   // Copy back the re-ordered mv list
   vpx_memcpy(mvlist, sorted_mvs, sizeof(sorted_mvs));
-
-  if (!xd->allow_high_precision_mv)
-    lower_mv_precision(best_mv);
+  lower_mv_precision(best_mv, xd->allow_high_precision_mv);
 
   vp8_clamp_mv2(best_mv, xd);
 }

@@ -21,11 +21,11 @@ struct VP8Common;
 void vp8_entropy_mv_init();
 void vp8_init_mv_probs(struct VP8Common *cm);
 void vp8_adapt_mv_probs(struct VP8Common *cm);
-#if CONFIG_NEWMVENTROPY
-void vp8_adapt_nmv_probs(struct VP8Common *cm, int usehp);
-#endif
 
 #if CONFIG_NEWMVENTROPY
+void vp8_adapt_nmv_probs(struct VP8Common *cm, int usehp);
+void vp8_lower_mv_precision(MV *mv);
+int vp8_use_nmv_hp(const MV *ref);
 
 #define VP8_NMV_UPDATE_PROB  255
 //#define MV_GROUP_UPDATE

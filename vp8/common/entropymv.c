@@ -19,6 +19,9 @@
 #define MV_COUNT_SAT 16
 #define MV_MAX_UPDATE_FACTOR 160
 
+/* Integer pel reference mv threshold for use of high-precision 1/8 mv */
+#define COMPANDED_MVREF_THRESH    8
+
 /* Smooth or bias the mv-counts before prob computation */
 /* #define SMOOTH_MV_COUNTS */
 
@@ -103,6 +106,14 @@ MV_CLASS_TYPE vp8_get_mv_class(int z, int *offset) {
   return c;
 }
 
+int vp8_use_nmv_hp(const MV *ref) {
+  if ((abs(ref->row) >> 3) < COMPANDED_MVREF_THRESH &&
+      (abs(ref->col) >> 3) < COMPANDED_MVREF_THRESH)
+    return 1;
+  else
+    return 0;
+}
+
 int vp8_get_mv_mag(MV_CLASS_TYPE c, int offset) {
   return mv_class_base(c) + offset;
 }
@@ -154,12 +165,6 @@ static void increment_nmv_component(int v,
     } else {
       mvcomp->hp[e] += incr;
     }
-  } else {  /* assume the extra bit is 1 */
-    if (c == MV_CLASS_0) {
-      mvcomp->class0_hp[1] += incr;
-    } else {
-      mvcomp->hp[1] += incr;
-    }
   }
 }
 
@@ -194,6 +199,7 @@ void vp8_increment_nmv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
                        int usehp) {
   MV_JOINT_TYPE j = vp8_get_mv_joint(*mv);
   mvctx->joints[j]++;
+  usehp = usehp && vp8_use_nmv_hp(ref);
   if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
     increment_nmv_component_count(mv->row, &mvctx->comps[0], 1, usehp);
   }

@@ -244,6 +244,7 @@ static void read_nmv(vp8_reader *r, MV *mv, const MV *ref,
 static void read_nmv_fp(vp8_reader *r, MV *mv, const MV *ref,
                         const nmv_context *mvctx, int usehp) {
   MV_JOINT_TYPE j = vp8_get_mv_joint(*mv);
+  usehp = usehp && vp8_use_nmv_hp(ref);
   if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
     mv->row = read_nmv_component_fp(r, mv->row, ref->row, &mvctx->comps[0],
                                     usehp);
@@ -252,6 +253,7 @@ static void read_nmv_fp(vp8_reader *r, MV *mv, const MV *ref,
     mv->col = read_nmv_component_fp(r, mv->col, ref->col, &mvctx->comps[1],
                                     usehp);
   }
+  //printf("  %d: %d %d ref: %d %d\n", usehp, mv->row, mv-> col, ref->row, ref->col);
 }
 
 static void update_nmv(vp8_reader *bc, vp8_prob *const p,

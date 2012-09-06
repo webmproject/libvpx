@@ -276,6 +276,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int maxc, minc, maxr, minr;
   int y_stride;
   int offset;
+  int usehp = xd->allow_high_precision_mv;
 
 #if !CONFIG_SUPERBLOCKS && (ARCH_X86 || ARCH_X86_64)
   unsigned char *y0 = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
@@ -300,7 +301,6 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   unsigned char *y = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
   y_stride = d->pre_stride;
 #endif
-
 
   rr = ref_mv->as_mv.row;
   rc = ref_mv->as_mv.col;
@@ -403,7 +403,15 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     tc = bc;
   }
 
-  if (x->e_mbd.allow_high_precision_mv) {
+#if CONFIG_NEWMVENTROPY
+  if (xd->allow_high_precision_mv) {
+    usehp = vp8_use_nmv_hp(&ref_mv->as_mv);
+  } else {
+    usehp = 0;
+  }
+#endif
+
+  if (usehp) {
     hstep >>= 1;
     while (--eighthiters) {
       CHECK_BETTER(left, tr, tc - hstep);
@@ -471,6 +479,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int thismse;
   int y_stride;
   MACROBLOCKD *xd = &x->e_mbd;
+  int usehp = xd->allow_high_precision_mv;
 
 #if !CONFIG_SUPERBLOCKS && (ARCH_X86 || ARCH_X86_64)
   unsigned char *y0 = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
@@ -762,7 +771,14 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     *sse1 = sse;
   }
 
-  if (!x->e_mbd.allow_high_precision_mv)
+#if CONFIG_NEWMVENTROPY
+  if (x->e_mbd.allow_high_precision_mv) {
+    usehp = vp8_use_nmv_hp(&ref_mv->as_mv);
+  } else {
+    usehp = 0;
+  }
+#endif
+  if (!usehp)
     return bestmse;
 
   /* Now do 1/8th pixel */

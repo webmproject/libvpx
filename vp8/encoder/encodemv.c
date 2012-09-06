@@ -526,6 +526,7 @@ void vp8_encode_nmv(vp8_writer *w, const MV *mv, const MV *ref,
 void vp8_encode_nmv_fp(vp8_writer *w, const MV *mv, const MV *ref,
                        const nmv_context *mvctx, int usehp) {
   MV_JOINT_TYPE j = vp8_get_mv_joint(*mv);
+  usehp = usehp && vp8_use_nmv_hp(ref);
   if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
     encode_nmv_component_fp(w, mv->row, ref->row, &mvctx->comps[0], usehp);
   }
