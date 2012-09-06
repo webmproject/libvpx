@@ -16,6 +16,8 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += i420_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += keyframe_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += resize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += video_source.h
+LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += decode_test_driver.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += decode_test_driver.h
 
 ##
 ## WHITE BOX TESTS
