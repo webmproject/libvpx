@@ -19,10 +19,6 @@
 
 unsigned int mv_distance(int_mv *mv1, int_mv *mv2);
 
-unsigned int pick_best_mv_ref( int_mv target_mv,
-                      int_mv * mv_ref_list,
-                      int_mv * best_ref );
-
 void find_mv_refs(
   MACROBLOCKD *xd,
   MODE_INFO *here,

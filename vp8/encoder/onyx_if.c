@@ -3881,7 +3881,7 @@ static void encode_frame_to_data_rate
     FILE *f = fopen("mv_ref_dist.stt", "a");
     unsigned int i;
     //fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n",
-    fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d",
+    /*fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d",
             cpi->common.current_video_frame,
             cpi->mv_ref_sum_distance[1][0],
             cpi->mv_ref_sum_distance[1][1],
@@ -3891,7 +3891,7 @@ static void encode_frame_to_data_rate
             cpi->mv_ref_sum_distance[2][2],
             cpi->mv_ref_sum_distance[3][0],
             cpi->mv_ref_sum_distance[3][1],
-            cpi->mv_ref_sum_distance[3][2] );
+            cpi->mv_ref_sum_distance[3][2] );*/
 
     for (i = 0; i < MAX_MV_REFS; ++i) {
       fprintf(f, "%10d", cpi->best_ref_index_counts[i] );

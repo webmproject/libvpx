@@ -206,10 +206,10 @@ vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
 void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
+                           int_mv *mvlist,
                            int_mv *best_mv,
                            int_mv *nearest,
                            int_mv *near) {
-  int_mv *ref_mv = xd->ref_mv;
   int i, j;
   unsigned char *above_src;
   unsigned char *left_src;
@@ -229,12 +229,14 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   above_ref = ref_y_buffer - ref_y_stride * 2;
   left_ref  = ref_y_buffer - 2;
 
-  for(i = 0; i < MAX_MV_REFS; ++i) {
+  //for(i = 0; i < MAX_MV_REFS; ++i) {
+  // Limit search to the predicted best 4
+  for(i = 0; i < 4; ++i) {
     int_mv this_mv;
     int offset=0;
     int row_offset, col_offset;
 
-    this_mv.as_int = ref_mv[i].as_int;
+    this_mv.as_int = mvlist[i].as_int;
 
     // If we see a 0,0 vector for a second time we have reached the end of
     // the list of valid candidate vectors.
@@ -278,32 +280,6 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
     }
   }
 
-  // If not see add 0,0 as a possibility
-  /*if ( (i < MAX_MV_REFS) && !zero_seen ) {
-
-    sad = vp8_sad16x2_c(above_src, xd->dst.y_stride,
-                        above_ref, ref_y_stride,
-                        INT_MAX);
-    sad += vp8_sad2x16_c(left_src, xd->dst.y_stride,
-                         left_ref, ref_y_stride,
-                         INT_MAX);
-    this_mv.as_int = 0;
-
-    // Add the entry to our list and then resort the list on score.
-    sad_scores[i] = sad;
-    sorted_mvs[i].as_int = this_mv.as_int;
-    j = i;
-    while (j > 0) {
-      if (sad_scores[j] < sad_scores[j-1]) {
-        sad_scores[j] = sad_scores[j-1];
-        sorted_mvs[j].as_int = sorted_mvs[j-1].as_int;
-        sad_scores[j-1] = sad;
-        sorted_mvs[j-1].as_int = this_mv.as_int;
-        j--;
-      } else
-        break;
-    }
-  }*/
 
   // Set the best mv to the first entry in the sorted list
   best_mv->as_int = sorted_mvs[0].as_int;
@@ -325,6 +301,9 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
       near->as_int = sorted_mvs[2].as_int;
   }
 
+  // Copy back the re-ordered mv list
+  vpx_memcpy(mvlist, sorted_mvs, sizeof(sorted_mvs));
+
   if (!xd->allow_high_precision_mv)
     lower_mv_precision(best_mv);
 
@@ -336,10 +315,10 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
 void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
+                           int_mv *mvlist,
                            int_mv *best_mv,
                            int_mv *nearest,
                            int_mv *near) {
-  int_mv *ref_mv = xd->ref_mv;
   int bestsad = INT_MAX;
   int i;
   unsigned char *above_src;
@@ -362,11 +341,11 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   best_mv->as_int = 0;
 
   for(i = 0; i < 4; ++i) {
-    if (ref_mv[i].as_int) {
+    if (mvlist[i].as_int) {
       int_mv this_mv;
       int offset=0;
       int row_offset, col_offset;
-      this_mv.as_int = ref_mv[i].as_int;
+      this_mv.as_int = mvlist[i].as_int;
       vp8_clamp_mv(&this_mv,
                    xd->mb_to_left_edge - LEFT_TOP_MARGIN + 16,
                    xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,

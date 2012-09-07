@@ -818,11 +818,12 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #if CONFIG_NEWBESTREFMV
     {
       int ref_fb_idx;
+      MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
 
       /* Select the appropriate reference frame for this MB */
-      if (mbmi->ref_frame == LAST_FRAME)
+      if (ref_frame == LAST_FRAME)
         ref_fb_idx = cm->lst_fb_idx;
-      else if (mbmi->ref_frame == GOLDEN_FRAME)
+      else if (ref_frame == GOLDEN_FRAME)
         ref_fb_idx = cm->gld_fb_idx;
       else
         ref_fb_idx = cm->alt_fb_idx;
@@ -841,21 +842,20 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       // Update stats on relative distance of chosen vector to the
       // possible best reference vectors.
       {
-        MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
-
         find_mv_refs(xd, mi, prev_mi,
                      ref_frame, mbmi->ref_mvs[ref_frame],
                      cm->ref_frame_sign_bias );
-
-        // Copy over the candidates.
-        vpx_memcpy(xd->ref_mv, mbmi->ref_mvs[ref_frame],
-                   (MAX_MV_REFS * sizeof(int_mv)) );
       }
 #endif
 
       vp8_find_best_ref_mvs(xd,
                             xd->pre.y_buffer,
                             recon_y_stride,
+#if CONFIG_NEW_MVREF
+                            mbmi->ref_mvs[ref_frame],
+#else
+                            xd->ref_mv,
+#endif
                             &best_mv, &nearest, &nearby);
     }
 #endif
@@ -947,16 +947,17 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           find_mv_refs(xd, mi, prev_mi,
                        ref_frame, mbmi->ref_mvs[ref_frame],
                        cm->ref_frame_sign_bias );
-
-          // Copy over the mv candidates
-          vpx_memcpy(xd->ref_mv, mbmi->ref_mvs[ref_frame],
-                    (MAX_MV_REFS * sizeof(int_mv)) );
         }
 #endif
 
         vp8_find_best_ref_mvs(xd,
                               xd->second_pre.y_buffer,
                               recon_y_stride,
+#if CONFIG_NEW_MVREF
+                              mbmi->ref_mvs[mbmi->second_ref_frame],
+#else
+                              xd->ref_mv,
+#endif
                               &best_mv_second,
                               &nearest_second,
                               &nearby_second);

@@ -26,6 +26,7 @@
 void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
+                           int_mv *mvlist,
                            int_mv *best_mv,
                            int_mv *nearest,
                            int_mv *near);

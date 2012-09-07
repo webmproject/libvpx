@@ -106,6 +106,69 @@ static int prob_diff_update_cost(vp8_prob newp, vp8_prob oldp) {
   return update_bits[delp] * 256;
 }
 
+#if CONFIG_NEW_MVREF
+// Estimate the cost of each coding the vector using each reference candidate
+unsigned int pick_best_mv_ref( MACROBLOCK *x,
+                               int_mv target_mv,
+                               int_mv * mv_ref_list,
+                               int_mv * best_ref ) {
+
+  int i;
+  int best_index = 0;
+  int cost, cost2;
+  int index_cost[MAX_MV_REFS];
+  MACROBLOCKD *xd = &x->e_mbd;
+
+  /*unsigned int distance, distance2;
+
+  distance = mv_distance(&target_mv, &mv_ref_list[0]);
+
+  for (i = 1; i < MAX_MV_REFS; ++i ) {
+    distance2 =
+      mv_distance(&target_mv, &mv_ref_list[i]);
+    if (distance2 < distance) {
+      distance = distance2;
+      best_index = i;
+    }
+  }*/
+
+  // For now estimate the cost of selecting a given ref index
+  // as index * 1 bits (but here 1 bit is scaled to 256)
+  for (i = 0; i < MAX_MV_REFS; ++i ) {
+    index_cost[i] = i << 8;
+  }
+  index_cost[0] = vp8_cost_zero(205);
+  index_cost[1] = vp8_cost_zero(40);
+  index_cost[2] = vp8_cost_zero(8);
+  index_cost[3] = vp8_cost_zero(2);
+
+  cost = index_cost[0] +
+         vp8_mv_bit_cost(&target_mv,
+                         &mv_ref_list[0],
+                         XMVCOST, 96,
+                         xd->allow_high_precision_mv);
+
+
+  //for (i = 1; i < MAX_MV_REFS; ++i ) {
+  for (i = 1; i < 4; ++i ) {
+    cost2 = index_cost[i] +
+            vp8_mv_bit_cost(&target_mv,
+                            &mv_ref_list[i],
+                            XMVCOST, 96,
+                            xd->allow_high_precision_mv);
+
+    if (cost2 < cost) {
+      cost = cost2;
+      best_index = i;
+    }
+  }
+
+  (*best_ref).as_int = mv_ref_list[best_index].as_int;
+
+  return best_index;
+}
+#endif
+
 static void update_mode(
   vp8_writer *const w,
   int n,
@@ -760,6 +823,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
   const MV_CONTEXT *mvc = pc->fc.mvc;
   const MV_CONTEXT_HP *mvc_hp = pc->fc.mvc_hp;
 #endif
+  MACROBLOCK *x = &cpi->mb;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   MODE_INFO *m;
   MODE_INFO *prev_m;
@@ -1075,12 +1139,18 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 #endif
 
 #if 0 //CONFIG_NEW_MVREF
-                find_mv_refs(xd, m, prev_m,
-                             m->mbmi.ref_frame,
-                             mi->ref_mvs[rf],
-                             cpi->common.ref_frame_sign_bias );
+                {
+                  unsigned int best_index;
+                  /*find_mv_refs(xd, m, prev_m,
+                               m->mbmi.ref_frame,
+                               mi->ref_mvs[rf],
+                               cpi->common.ref_frame_sign_bias );*/
 
-                pick_best_mv_ref( mi->mv[0], mi->ref_mvs[rf], &best_mv);
+                  best_index = pick_best_mv_ref(x, mi->mv[0],
+                                                mi->ref_mvs[rf], &best_mv);
+                  cpi->best_ref_index_counts[best_index]++;
+
+                }
 #endif
 #if CONFIG_NEWMVENTROPY
                 write_nmv(w, &mi->mv[0].as_mv, &best_mv,
@@ -1096,14 +1166,18 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 
                 if (mi->second_ref_frame) {
 #if 0 //CONFIG_NEW_MVREF
-                  find_mv_refs(xd, m, prev_m,
+                  unsigned int best_index;
+
+                  /*find_mv_refs(xd, m, prev_m,
                                m->mbmi.second_ref_frame,
                                mi->ref_mvs[mi->second_ref_frame],
-                               cpi->common.ref_frame_sign_bias );
+                               cpi->common.ref_frame_sign_bias );*/
 
-                  pick_best_mv_ref( mi->mv[1],
-                                    mi->ref_mvs[mi->second_ref_frame],
-                                    &best_second_mv);
+                  best_index =
+                    pick_best_mv_ref(x, mi->mv[1],
+                                     mi->ref_mvs[mi->second_ref_frame],
+                                     &best_second_mv);
+                  cpi->best_ref_index_counts[best_index]++;
 #endif
 #if CONFIG_NEWMVENTROPY
                   write_nmv(w, &mi->mv[1].as_mv, &best_second_mv,

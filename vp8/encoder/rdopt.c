@@ -3031,6 +3031,8 @@ void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x, int idx, int frame_type,
                         unsigned char *v_buffer[4]) {
   YV12_BUFFER_CONFIG *yv12 = &cpi->common.yv12_fb[idx];
   MACROBLOCKD *xd = &x->e_mbd;
+  MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
+
 
   vp8_find_near_mvs(xd, xd->mode_info_context,
                     xd->prev_mode_info_context,
@@ -3047,22 +3049,21 @@ void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x, int idx, int frame_type,
   // Update stats on relative distance of chosen vector to the
   // possible best reference vectors.
   {
-    MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
-
     find_mv_refs(xd, xd->mode_info_context,
                  xd->prev_mode_info_context,
                  frame_type,
                  mbmi->ref_mvs[frame_type],
                  cpi->common.ref_frame_sign_bias );
-
-    // Copy over the mv candidates
-    vpx_memcpy(xd->ref_mv, mbmi->ref_mvs[frame_type],
-              (MAX_MV_REFS * sizeof(int_mv)) );
   }
 #endif
 
   vp8_find_best_ref_mvs(xd, y_buffer[frame_type],
                         yv12->y_stride,
+#if CONFIG_NEW_MVREF
+                        mbmi->ref_mvs[frame_type],
+#else
+                        xd->ref_mv,
+#endif
                         &frame_best_ref_mv[frame_type],
                         &frame_nearest_mv[frame_type],
                         &frame_near_mv[frame_type]);
@@ -3573,7 +3574,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             d->bmi.as_mv.first.as_int = tmp_mv.as_int;
             frame_mv[NEWMV][refs[0]].as_int = d->bmi.as_mv.first.as_int;
 
-#if CONFIG_NEW_MVREF
+#if 0 //CONFIG_NEW_MVREF
             // Update stats on relative distance of chosen vector to the
             // possible best reference vectors.
             {
@@ -3596,7 +3597,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                             &mbmi->ref_mvs[ref][0]);
               cpi->mv_ref_sum_distance[ref][NEW_BEST] += distance;
 
-              best_index = pick_best_mv_ref(tmp_mv, mbmi->ref_mvs[ref],
+              best_index = pick_best_mv_ref(x, tmp_mv, mbmi->ref_mvs[ref],
                                             &selected_best_ref);
 
               distance = mv_distance(&tmp_mv, &selected_best_ref);
@@ -3626,6 +3627,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
               flag = 1;
           if (flag)
             continue;
+
         case ZEROMV:
 
         default:

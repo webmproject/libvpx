@@ -47,30 +47,63 @@ unsigned int mv_distance(int_mv *mv1, int_mv *mv2) {
 int get_candidate_mvref(
   const MODE_INFO *candidate_mi,
   MV_REFERENCE_FRAME ref_frame,
-  MV_REFERENCE_FRAME *candidate_ref_frame,
-  int_mv *candidate_mv
+  MV_REFERENCE_FRAME *c_ref_frame,
+  int_mv *c_mv,
+  MV_REFERENCE_FRAME *c2_ref_frame,
+  int_mv *c2_mv
 ) {
 
   int ret_val = FALSE;
+  c2_mv->as_int = 0;
+  *c2_ref_frame = INTRA_FRAME;
 
+  // Target ref frame matches candidate first ref frame
   if (ref_frame == candidate_mi->mbmi.ref_frame) {
-    candidate_mv->as_int = candidate_mi->mbmi.mv[FIRST_REF].as_int;
-    *candidate_ref_frame = ref_frame;
+    c_mv->as_int = candidate_mi->mbmi.mv[FIRST_REF].as_int;
+    *c_ref_frame = ref_frame;
     ret_val = TRUE;
 
+    // Is there a second non zero vector we can use.
+    if ((candidate_mi->mbmi.second_ref_frame != INTRA_FRAME) &&
+        (candidate_mi->mbmi.mv[SECOND_REF].as_int != 0) &&
+        (candidate_mi->mbmi.mv[SECOND_REF].as_int != c_mv->as_int)) {
+      c2_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
+      *c2_ref_frame = candidate_mi->mbmi.second_ref_frame;
+    }
+
+  // Target ref frame matches candidate second ref frame
   } else if (ref_frame == candidate_mi->mbmi.second_ref_frame) {
-    candidate_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
-    *candidate_ref_frame = ref_frame;
+    c_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
+    *c_ref_frame = ref_frame;
     ret_val = TRUE;
 
+    // Is there a second non zero vector we can use.
+    if ((candidate_mi->mbmi.ref_frame != INTRA_FRAME) &&
+        (candidate_mi->mbmi.mv[FIRST_REF].as_int != 0) &&
+        (candidate_mi->mbmi.mv[FIRST_REF].as_int != c_mv->as_int)) {
+      c2_mv->as_int = candidate_mi->mbmi.mv[FIRST_REF].as_int;
+      *c2_ref_frame = candidate_mi->mbmi.ref_frame;
+    }
+
+  // No ref frame matches so use first ref mv as first choice
   } else if (candidate_mi->mbmi.ref_frame != INTRA_FRAME) {
-    candidate_mv->as_int = candidate_mi->mbmi.mv[FIRST_REF].as_int;
-    *candidate_ref_frame = candidate_mi->mbmi.ref_frame;
+    c_mv->as_int = candidate_mi->mbmi.mv[FIRST_REF].as_int;
+    *c_ref_frame = candidate_mi->mbmi.ref_frame;
     ret_val = TRUE;
 
+    // Is there a second non zero vector we can use.
+    if ((candidate_mi->mbmi.second_ref_frame != INTRA_FRAME) &&
+        (candidate_mi->mbmi.mv[SECOND_REF].as_int != 0) &&
+        (candidate_mi->mbmi.mv[SECOND_REF].as_int != c_mv->as_int)) {
+      c2_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
+      *c2_ref_frame = candidate_mi->mbmi.second_ref_frame;
+    }
+
+  // If only the second ref mv is valid:- (Should not trigger in current code
+  // base given current possible compound prediction options).
   } else if (candidate_mi->mbmi.second_ref_frame != INTRA_FRAME) {
-    candidate_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
-    *candidate_ref_frame = candidate_mi->mbmi.second_ref_frame;
+    c_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
+    *c_ref_frame = candidate_mi->mbmi.second_ref_frame;
     ret_val = TRUE;
   }
 
@@ -142,8 +175,10 @@ void addmv_and_shuffle(
   int duplicate_found = FALSE;
 
   // Check for duplicates. If there is one increment its score.
+  // Duplicate defined as being the same full pel vector with rounding.
   while (i > 0) {
     i--;
+
     if (candidate_mv.as_int == mv_list[i].as_int) {
       duplicate_found = TRUE;
       mv_scores[i] += weight;
@@ -175,33 +210,6 @@ void addmv_and_shuffle(
   }
 }
 
-
-// Measure the distance of each reference candidate from the actual
-// residual vector and return the nearest
-unsigned int pick_best_mv_ref( int_mv target_mv,
-                               int_mv * mv_ref_list,
-                               int_mv * best_ref ) {
-
-  int i;
-  int best_index = 0;
-  unsigned int distance, distance2;
-
-  distance = mv_distance(&target_mv, &mv_ref_list[0]);
-
-  for (i = 1; i < MAX_MV_REFS; ++i ) {
-    distance2 =
-      mv_distance(&target_mv, &mv_ref_list[i]);
-    if (distance2 < distance) {
-      distance = distance2;
-      best_index = i;
-    }
-  }
-
-  (*best_ref).as_int = mv_ref_list[best_index].as_int;
-
-  return best_index;
-}
-
 // This function searches the neighbourhood of a given MB/SB and populates a
 // list of candidate reference vectors.
 //
@@ -219,6 +227,8 @@ void find_mv_refs(
   int_mv candidate_mvs[MAX_MV_REFS];
   int_mv c_refmv;
   MV_REFERENCE_FRAME c_ref_frame;
+  int_mv c2_refmv;
+  MV_REFERENCE_FRAME c2_ref_frame;
   int candidate_scores[MAX_MV_REFS];
   int index = 0;
   int ref_weight = 0;
@@ -239,15 +249,27 @@ void find_mv_refs(
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 
       valid_mv_ref = get_candidate_mvref(candidate_mi, ref_frame,
-                                         &c_ref_frame, &c_refmv);
+                                         &c_ref_frame, &c_refmv,
+                                         &c2_ref_frame, &c2_refmv);
 
+      // If there is a valid MV candidate then add it to the list
       if (valid_mv_ref) {
-          scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias );
+        scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias );
+        ref_weight = ref_distance_weight[i] +
+                     ((c_ref_frame == ref_frame) << 4);
+
+        addmv_and_shuffle(candidate_mvs, candidate_scores,
+                          &index, c_refmv, ref_weight);
+
+        // If there is a second valid mv then add it as well.
+        if (c2_ref_frame != INTRA_FRAME) {
+          scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias );
           ref_weight = ref_distance_weight[i] +
-                       ((c_ref_frame == ref_frame) << 3);
+                       ((c2_ref_frame == ref_frame) << 4);
 
           addmv_and_shuffle(candidate_mvs, candidate_scores,
-                            &index, c_refmv, ref_weight);
+                            &index, c2_refmv, ref_weight);
+        }
       }
     }
   }
@@ -255,12 +277,25 @@ void find_mv_refs(
   // Look at the corresponding vector in the last frame
   candidate_mi = lf_here;
   valid_mv_ref = get_candidate_mvref(candidate_mi, ref_frame,
-                                     &c_ref_frame, &c_refmv);
+                                     &c_ref_frame, &c_refmv,
+                                     &c2_ref_frame, &c2_refmv);
+
+  // If there is a valid MV candidate then add it to the list
   if (valid_mv_ref) {
     scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias );
-    ref_weight = 2 + ((c_ref_frame == ref_frame) << 3);
+    ref_weight = 2 + ((c_ref_frame == ref_frame) << 4);
     addmv_and_shuffle(candidate_mvs, candidate_scores,
                       &index, c_refmv, ref_weight);
+
+    // If there is a second valid mv then add it as well.
+    if (c2_ref_frame != INTRA_FRAME) {
+      scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias );
+      ref_weight = ref_distance_weight[i] +
+                   ((c2_ref_frame == ref_frame) << 4);
+
+      addmv_and_shuffle(candidate_mvs, candidate_scores,
+                        &index, c2_refmv, ref_weight);
+    }
   }
 
   // Populate a list with candidate reference vectors from the
@@ -273,15 +308,27 @@ void find_mv_refs(
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 
       valid_mv_ref = get_candidate_mvref(candidate_mi, ref_frame,
-                                         &c_ref_frame, &c_refmv);
+                                         &c_ref_frame, &c_refmv,
+                                         &c2_ref_frame, &c2_refmv);
 
+      // If there is a valid MV candidate then add it to the list
       if (valid_mv_ref) {
-          scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias );
+        scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias );
+        ref_weight = ref_distance_weight[i] +
+                     ((c_ref_frame == ref_frame) << 4);
+
+        addmv_and_shuffle(candidate_mvs, candidate_scores,
+                          &index, c_refmv, ref_weight);
+
+        // If there is a second valid mv then add it as well.
+        if (c2_ref_frame != INTRA_FRAME) {
+          scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias );
           ref_weight = ref_distance_weight[i] +
-                       ((c_ref_frame == ref_frame) << 3);
+                       ((c2_ref_frame == ref_frame) << 4);
 
           addmv_and_shuffle(candidate_mvs, candidate_scores,
-                            &index, c_refmv, ref_weight);
+                            &index, c2_refmv, ref_weight);
+        }
       }
     }
   }
@@ -293,7 +340,7 @@ void find_mv_refs(
   if (i == index) {
     c_refmv.as_int = 0;
     addmv_and_shuffle(candidate_mvs, candidate_scores,
-                      &index, c_refmv, 1);
+                      &index, c_refmv, candidate_scores[3]+1 );
   }
 
   // Copy over the candidate list.
