@@ -59,13 +59,6 @@
 
 #define VP8_TEMPORAL_ALT_REF 1
 
-#if CONFIG_NEW_MVREF
-// temp. relate to mv_ref_sum_distance stats
-#define CUR_BEST 0
-#define NEW_BEST 1
-#define BEST_SELECTED 2
-#endif
-
 typedef struct {
 #if CONFIG_NEWMVENTROPY
   nmv_context nmvc;
@@ -771,9 +764,7 @@ typedef struct VP8_COMP {
 #endif
 
 #if CONFIG_NEW_MVREF
-  // temp stats [REF_FRAME]{REF_METHOD]
-  unsigned int mv_ref_sum_distance[4][3];
-  unsigned int best_ref_index_counts[17];
+  unsigned int best_ref_index_counts[MAX_MV_REFS];
 #endif
 
 } VP8_COMP;

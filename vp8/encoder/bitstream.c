@@ -29,7 +29,7 @@
 #include "vp8/common/entropy.h"
 #include "vp8/encoder/encodemv.h"
 
-#if CONFIG_NEW_MVREF
+#if CONFIG_NEWBESTREFMV
 #include "vp8/common/mvref_common.h"
 #endif
 

@@ -34,7 +34,7 @@
 #include "vp8/common/pred_common.h"
 
 #define DBG_PRNT_SEGMAP 0
-#if CONFIG_NEW_MVREF
+#if CONFIG_NEWBESTREFMV
 #include "vp8/common/mvref_common.h"
 #endif
 
@@ -1304,7 +1304,6 @@ static void encode_frame_internal(VP8_COMP *cpi) {
 
 #if CONFIG_NEW_MVREF
   // temp stats reset
-  vp8_zero( cpi->mv_ref_sum_distance );
   vp8_zero( cpi->best_ref_index_counts );
 #endif
 

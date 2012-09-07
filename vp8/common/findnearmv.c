@@ -201,8 +201,6 @@ vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
  * score to use as ref motion vector
  */
 
-#if CONFIG_NEW_MVREF
-
 void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
@@ -310,77 +308,4 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   vp8_clamp_mv2(best_mv, xd);
 }
 
-#else // !CONFIG_NEW_MVREF
-
-void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
-                           unsigned char *ref_y_buffer,
-                           int ref_y_stride,
-                           int_mv *mvlist,
-                           int_mv *best_mv,
-                           int_mv *nearest,
-                           int_mv *near) {
-  int bestsad = INT_MAX;
-  int i;
-  unsigned char *above_src;
-  unsigned char *left_src;
-  unsigned char *above_ref;
-  unsigned char *left_ref;
-  int sad;
-
-  above_src = xd->dst.y_buffer - xd->dst.y_stride * 2;
-  left_src  = xd->dst.y_buffer - 2;
-  above_ref = ref_y_buffer - ref_y_stride * 2;
-  left_ref  = ref_y_buffer - 2;
-
-  bestsad = vp8_sad16x2_c(above_src, xd->dst.y_stride,
-                          above_ref, ref_y_stride,
-                          INT_MAX);
-  bestsad += vp8_sad2x16_c(left_src, xd->dst.y_stride,
-                           left_ref, ref_y_stride,
-                           INT_MAX);
-  best_mv->as_int = 0;
-
-  for(i = 0; i < 4; ++i) {
-    if (mvlist[i].as_int) {
-      int_mv this_mv;
-      int offset=0;
-      int row_offset, col_offset;
-      this_mv.as_int = mvlist[i].as_int;
-      vp8_clamp_mv(&this_mv,
-                   xd->mb_to_left_edge - LEFT_TOP_MARGIN + 16,
-                   xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
-                   xd->mb_to_top_edge - LEFT_TOP_MARGIN + 16,
-                   xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
-
-      row_offset = (this_mv.as_mv.row > 0) ?
-        ((this_mv.as_mv.row + 3) >> 3):((this_mv.as_mv.row + 4) >> 3);
-      col_offset = (this_mv.as_mv.col > 0) ?
-        ((this_mv.as_mv.col + 3) >> 3):((this_mv.as_mv.col + 4) >> 3);
-      offset = ref_y_stride * row_offset + col_offset;
-
-      sad = vp8_sad16x2_c(above_src, xd->dst.y_stride,
-                          above_ref + offset, ref_y_stride, INT_MAX);
-
-      sad += vp8_sad2x16_c(left_src, xd->dst.y_stride,
-                           left_ref + offset, ref_y_stride, INT_MAX);
-
-      if (sad < bestsad) {
-        bestsad = sad;
-        best_mv->as_int = this_mv.as_int;
-      }
-    }
-  }
-  if (!xd->allow_high_precision_mv)
-    lower_mv_precision(best_mv);
-
-  vp8_clamp_mv2(best_mv, xd);
-
-  if (best_mv->as_int != 0 &&
-      (best_mv->as_mv.row >> 3) != (nearest->as_mv.row >>3 ) &&
-      (best_mv->as_mv.col >> 3) != (nearest->as_mv.col >>3 )) {
-    near->as_int = nearest->as_int;
-    nearest->as_int = best_mv->as_int;
-  }
-}
-#endif  // CONFIG_NEW_MVREF
 #endif  // CONFIG_NEWBESTREFMV

@@ -10,14 +10,13 @@
 
 #include "mvref_common.h"
 
-#if CONFIG_NEW_MVREF
+#if CONFIG_NEWBESTREFMV
 
 #define MVREF_NEIGHBOURS 8
 static int mv_ref_search[MVREF_NEIGHBOURS][2] =
   { {0,-1},{-1,0},{-1,-1},{0,-2},{-2,0},{-1,-2},{-2,-1},{-2,-2} };
 static int ref_distance_weight[MVREF_NEIGHBOURS] =
   { 3,3,2,1,1,1,1,1 };
-  //{ 4,4,2,1,1,1,1,1 };
 
 // clamp_mv
 #define MV_BORDER (16 << 3) // Allow 16 pels in 1/8th pel units
@@ -59,50 +58,50 @@ int get_candidate_mvref(
 
   // Target ref frame matches candidate first ref frame
   if (ref_frame == candidate_mi->mbmi.ref_frame) {
-    c_mv->as_int = candidate_mi->mbmi.mv[FIRST_REF].as_int;
+    c_mv->as_int = candidate_mi->mbmi.mv[0].as_int;
     *c_ref_frame = ref_frame;
     ret_val = TRUE;
 
     // Is there a second non zero vector we can use.
     if ((candidate_mi->mbmi.second_ref_frame != INTRA_FRAME) &&
-        (candidate_mi->mbmi.mv[SECOND_REF].as_int != 0) &&
-        (candidate_mi->mbmi.mv[SECOND_REF].as_int != c_mv->as_int)) {
-      c2_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
+        (candidate_mi->mbmi.mv[1].as_int != 0) &&
+        (candidate_mi->mbmi.mv[1].as_int != c_mv->as_int)) {
+      c2_mv->as_int = candidate_mi->mbmi.mv[1].as_int;
       *c2_ref_frame = candidate_mi->mbmi.second_ref_frame;
     }
 
   // Target ref frame matches candidate second ref frame
   } else if (ref_frame == candidate_mi->mbmi.second_ref_frame) {
-    c_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
+    c_mv->as_int = candidate_mi->mbmi.mv[1].as_int;
     *c_ref_frame = ref_frame;
     ret_val = TRUE;
 
     // Is there a second non zero vector we can use.
     if ((candidate_mi->mbmi.ref_frame != INTRA_FRAME) &&
-        (candidate_mi->mbmi.mv[FIRST_REF].as_int != 0) &&
-        (candidate_mi->mbmi.mv[FIRST_REF].as_int != c_mv->as_int)) {
-      c2_mv->as_int = candidate_mi->mbmi.mv[FIRST_REF].as_int;
+        (candidate_mi->mbmi.mv[0].as_int != 0) &&
+        (candidate_mi->mbmi.mv[0].as_int != c_mv->as_int)) {
+      c2_mv->as_int = candidate_mi->mbmi.mv[0].as_int;
       *c2_ref_frame = candidate_mi->mbmi.ref_frame;
     }
 
   // No ref frame matches so use first ref mv as first choice
   } else if (candidate_mi->mbmi.ref_frame != INTRA_FRAME) {
-    c_mv->as_int = candidate_mi->mbmi.mv[FIRST_REF].as_int;
+    c_mv->as_int = candidate_mi->mbmi.mv[0].as_int;
     *c_ref_frame = candidate_mi->mbmi.ref_frame;
     ret_val = TRUE;
 
     // Is there a second non zero vector we can use.
     if ((candidate_mi->mbmi.second_ref_frame != INTRA_FRAME) &&
-        (candidate_mi->mbmi.mv[SECOND_REF].as_int != 0) &&
-        (candidate_mi->mbmi.mv[SECOND_REF].as_int != c_mv->as_int)) {
-      c2_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
+        (candidate_mi->mbmi.mv[1].as_int != 0) &&
+        (candidate_mi->mbmi.mv[1].as_int != c_mv->as_int)) {
+      c2_mv->as_int = candidate_mi->mbmi.mv[1].as_int;
       *c2_ref_frame = candidate_mi->mbmi.second_ref_frame;
     }
 
   // If only the second ref mv is valid:- (Should not trigger in current code
   // base given current possible compound prediction options).
   } else if (candidate_mi->mbmi.second_ref_frame != INTRA_FRAME) {
-    c_mv->as_int = candidate_mi->mbmi.mv[SECOND_REF].as_int;
+    c_mv->as_int = candidate_mi->mbmi.mv[1].as_int;
     *c_ref_frame = candidate_mi->mbmi.second_ref_frame;
     ret_val = TRUE;
   }

@@ -42,7 +42,7 @@
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
 
-#if CONFIG_NEW_MVREF
+#if CONFIG_NEWBESTREFMV
 #include "vp8/common/mvref_common.h"
 #endif
 
@@ -3045,7 +3045,6 @@ void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x, int idx, int frame_type,
   v_buffer[frame_type] = yv12->v_buffer + recon_uvoffset;
 
 #if CONFIG_NEWBESTREFMV
-#if CONFIG_NEW_MVREF
   // Update stats on relative distance of chosen vector to the
   // possible best reference vectors.
   {
@@ -3055,15 +3054,10 @@ void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x, int idx, int frame_type,
                  mbmi->ref_mvs[frame_type],
                  cpi->common.ref_frame_sign_bias );
   }
-#endif
 
   vp8_find_best_ref_mvs(xd, y_buffer[frame_type],
                         yv12->y_stride,
-#if CONFIG_NEW_MVREF
                         mbmi->ref_mvs[frame_type],
-#else
-                        xd->ref_mv,
-#endif
                         &frame_best_ref_mv[frame_type],
                         &frame_nearest_mv[frame_type],
                         &frame_near_mv[frame_type]);
@@ -3573,43 +3567,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             }
             d->bmi.as_mv.first.as_int = tmp_mv.as_int;
             frame_mv[NEWMV][refs[0]].as_int = d->bmi.as_mv.first.as_int;
-
-#if 0 //CONFIG_NEW_MVREF
-            // Update stats on relative distance of chosen vector to the
-            // possible best reference vectors.
-            {
-              unsigned int distance;
-              MV_REFERENCE_FRAME ref = mbmi->ref_frame;
-              int_mv selected_best_ref;
-              unsigned int best_index = 0;
-
-              find_mv_refs(xd, xd->mode_info_context,
-                           xd->prev_mode_info_context,
-                           ref,
-                           mbmi->ref_mvs[ref],
-                           cpi->common.ref_frame_sign_bias );
-
-              distance = mv_distance(&tmp_mv, &best_ref_mv);
-              cpi->mv_ref_sum_distance[ref][CUR_BEST] += distance;
-
-              distance =
-                mv_distance(&tmp_mv,
-                            &mbmi->ref_mvs[ref][0]);
-              cpi->mv_ref_sum_distance[ref][NEW_BEST] += distance;
-
-              best_index = pick_best_mv_ref(x, tmp_mv, mbmi->ref_mvs[ref],
-                                            &selected_best_ref);
-
-              distance = mv_distance(&tmp_mv, &selected_best_ref);
-              mbmi->mv_ref_index[ref] = best_index;
-              cpi->mv_ref_sum_distance[ref][BEST_SELECTED] += distance;
-              cpi->best_ref_index_counts[best_index]++;
-
-              // Temp
-              //mbmi->mv_ref_index[ref] = 0;
-              //mbmi->ref_mvs[ref][0].as_int = best_ref_mv.as_int;
-            }
-#endif
 
             // Add the new motion vector cost to our rolling cost variable
             rate2 += vp8_mv_bit_cost(&tmp_mv, &best_ref_mv,

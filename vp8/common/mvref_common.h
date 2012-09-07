@@ -12,7 +12,7 @@
 #include "blockd.h"
 
 // MR reference entropy header file.
-#if CONFIG_NEW_MVREF
+#if CONFIG_NEWBESTREFMV
 
 #ifndef __INC_MVREF_COMMON_H
 #define __INC_MVREF_COMMON_H

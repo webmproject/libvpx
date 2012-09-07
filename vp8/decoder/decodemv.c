@@ -838,7 +838,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       xd->pre.u_buffer = cm->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
       xd->pre.v_buffer = cm->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
-#if CONFIG_NEW_MVREF
       // Update stats on relative distance of chosen vector to the
       // possible best reference vectors.
       {
@@ -846,16 +845,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                      ref_frame, mbmi->ref_mvs[ref_frame],
                      cm->ref_frame_sign_bias );
       }
-#endif
 
       vp8_find_best_ref_mvs(xd,
                             xd->pre.y_buffer,
                             recon_y_stride,
-#if CONFIG_NEW_MVREF
                             mbmi->ref_mvs[ref_frame],
-#else
-                            xd->ref_mv,
-#endif
                             &best_mv, &nearest, &nearby);
     }
 #endif
@@ -938,7 +932,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                           mbmi->second_ref_frame,
                           cm->ref_frame_sign_bias);
 
-#if CONFIG_NEW_MVREF
         // Update stats on relative distance of chosen vector to the
         // possible best reference vectors.
         {
@@ -948,16 +941,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                        ref_frame, mbmi->ref_mvs[ref_frame],
                        cm->ref_frame_sign_bias );
         }
-#endif
 
         vp8_find_best_ref_mvs(xd,
                               xd->second_pre.y_buffer,
                               recon_y_stride,
-#if CONFIG_NEW_MVREF
                               mbmi->ref_mvs[mbmi->second_ref_frame],
-#else
-                              xd->ref_mv,
-#endif
                               &best_mv_second,
                               &nearest_second,
                               &nearby_second);
