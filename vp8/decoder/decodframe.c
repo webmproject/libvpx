@@ -1001,8 +1001,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     int corrupt_tokens = 0;
     int prev_independent_partitions = pbi->independent_partitions;
 
-    int frame_size_change = 0;
-
     /* start with no corruption of current frame */
     xd->corrupted = 0;
     pc->yv12_fb[pc->new_fb_idx].corrupted = 0;
@@ -1039,6 +1037,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         data += 3;
 
         vp8_setup_version(pc);
+
 
         if (pc->frame_type == KEY_FRAME)
         {
@@ -1091,6 +1090,18 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                                        "Failed to allocate frame buffers");
 
+                vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
+                vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
+
+#if CONFIG_MULTITHREAD
+                for (i = 0; i < pbi->allocated_decoding_thread_count; i++)
+                {
+                    pbi->mb_row_di[i].mbd.dst = pc->yv12_fb[pc->new_fb_idx];
+                    vp8_build_block_doffsets(&pbi->mb_row_di[i].mbd);
+                }
+#endif
+                vp8_build_block_doffsets(&pbi->mb);
+
                 /* allocate memory for last frame MODE_INFO array */
 #if CONFIG_ERROR_CONCEALMENT
 
@@ -1126,11 +1137,14 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #else
                 (void)prev_mb_rows;
 #endif
-                frame_size_change = 1;
             }
         }
+        else
+        {
+          vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
+          vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
+        }
     }
-
     if ((!pbi->decoded_key_frame && pc->frame_type != KEY_FRAME) ||
         pc->Width == 0 || pc->Height == 0)
     {
@@ -1381,8 +1395,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     }
     }
 
-    vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
-    vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
 
     /* set up frame new frame for intra coded blocks */
 #if CONFIG_MULTITHREAD
@@ -1390,17 +1402,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #endif
         vp8_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
 
-    if(frame_size_change)
-    {
-#if CONFIG_MULTITHREAD
-        for (i = 0; i < pbi->allocated_decoding_thread_count; i++)
-        {
-            pbi->mb_row_di[i].mbd.dst = pc->yv12_fb[pc->new_fb_idx];
-            vp8_build_block_doffsets(&pbi->mb_row_di[i].mbd);
-        }
-#endif
-        vp8_build_block_doffsets(&pbi->mb);
-    }
 
     /* clear out the coeff buffer */
     vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
