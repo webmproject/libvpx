@@ -3048,6 +3048,7 @@ static void encode_frame_to_data_rate
   // Clear down mmx registers to allow floating point in what follows
   vp8_clear_system_state();
 
+
   // For an alt ref frame in 2 pass we skip the call to the second
   // pass function that sets the target bandwidth so must set it here
   if (cpi->common.refresh_alt_ref_frame) {
@@ -3758,9 +3759,19 @@ static void encode_frame_to_data_rate
 
   update_reference_frames(cm);
   vp8_copy(cpi->common.fc.coef_counts, cpi->coef_counts);
+#if CONFIG_HYBRIDTRANSFORM
+  vp8_copy(cpi->common.fc.hybrid_coef_counts, cpi->hybrid_coef_counts);
+#endif
   vp8_copy(cpi->common.fc.coef_counts_8x8, cpi->coef_counts_8x8);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
+#if CONFIG_HYBRIDTRANSFORM8X8
+  vp8_copy(cpi->common.fc.hybrid_coef_counts_8x8, cpi->hybrid_coef_counts_8x8);
+#endif
+#if CONFIG_TX16X16
   vp8_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
+#if CONFIG_HYBRIDTRANSFORM16X16
+  vp8_copy(cpi->common.fc.hybrid_coef_counts_16x16,
+           cpi->hybrid_coef_counts_16x16);
+#endif
 #endif
   vp8_adapt_coef_probs(&cpi->common);
   if (cpi->common.frame_type != KEY_FRAME) {
@@ -4330,8 +4341,9 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     Pass1Encode(cpi, size, dest, frame_flags);
   } else if (cpi->pass == 2) {
     Pass2Encode(cpi, size, dest, frame_flags);
-  } else
+  } else {
     encode_frame_to_data_rate(cpi, size, dest, frame_flags);
+  }
 
   if (cm->refresh_entropy_probs) {
     if (cm->refresh_alt_ref_frame)

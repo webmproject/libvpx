@@ -85,21 +85,21 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
   ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 
 #if CONFIG_HYBRIDTRANSFORM
-    if(active_ht) {
-      b->bmi.as_mode.test = b->bmi.as_mode.first;
-      txfm_map(b, b->bmi.as_mode.first);
-      vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 4);
-      vp8_ht_quantize_b(be, b);
-      vp8_inverse_htransform_b(IF_RTCD(&rtcd->common->idct), b, 32) ;
-    } else {
-      x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32) ;
-      x->quantize_b(be, b) ;
-      vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32) ;
-    }
+  if (active_ht) {
+    b->bmi.as_mode.test = b->bmi.as_mode.first;
+    txfm_map(b, b->bmi.as_mode.first);
+    vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 4);
+    vp8_ht_quantize_b(be, b);
+    vp8_inverse_htransform_b(IF_RTCD(&rtcd->common->idct), b, 32) ;
+  } else {
+    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32) ;
+    x->quantize_b(be, b) ;
+    vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32) ;
+  }
 #else
-    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
-    x->quantize_b(be, b);
-    vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
+  x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+  x->quantize_b(be, b);
+  vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
 #endif
 
   RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
@@ -298,7 +298,6 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
   }
 }
 
-extern const int vp8_i8x8_block[4];
 void vp8_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   int i, ib;
 

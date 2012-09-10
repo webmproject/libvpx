@@ -28,6 +28,8 @@ typedef vp8_prob Prob;
 
 #include "coefupdateprobs.h"
 
+const int vp8_i8x8_block[4] = {0, 2, 8, 10};
+
 DECLARE_ALIGNED(16, const unsigned char, vp8_norm[256]) = {
   0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
@@ -208,13 +210,26 @@ vp8_extra_bit_struct vp8_extra_bits[12] = {
 void vp8_default_coef_probs(VP8_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
              sizeof(pc->fc.coef_probs));
+#if CONFIG_HYBRIDTRANSFORM
+  vpx_memcpy(pc->fc.hybrid_coef_probs, default_hybrid_coef_probs,
+             sizeof(pc->fc.hybrid_coef_probs));
+#endif
 
-  vpx_memcpy(pc->fc.coef_probs_8x8, vp8_default_coef_probs_8x8,
+  vpx_memcpy(pc->fc.coef_probs_8x8, default_coef_probs_8x8,
              sizeof(pc->fc.coef_probs_8x8));
+#if CONFIG_HYBRIDTRANSFORM8X8
+  vpx_memcpy(pc->fc.hybrid_coef_probs_8x8, default_hybrid_coef_probs_8x8,
+             sizeof(pc->fc.hybrid_coef_probs_8x8));
+#endif
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
-  vpx_memcpy(pc->fc.coef_probs_16x16, vp8_default_coef_probs_16x16,
+#if CONFIG_TX16X16
+  vpx_memcpy(pc->fc.coef_probs_16x16, default_coef_probs_16x16,
              sizeof(pc->fc.coef_probs_16x16));
+#if CONFIG_HYBRIDTRANSFORM16X16
+  vpx_memcpy(pc->fc.hybrid_coef_probs_16x16,
+             default_hybrid_coef_probs_16x16,
+             sizeof(pc->fc.hybrid_coef_probs_16x16));
+#endif
 #endif
 }
 
@@ -263,7 +278,8 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
         printf("    {\n");
         for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
           printf("      {");
-          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t) printf("%d, ", cm->fc.coef_counts[i][j][k][t]);
+          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+            printf("%d, ", cm->fc.coef_counts[i][j][k][t]);
           printf("},\n");
         }
         printf("    },\n");
@@ -280,7 +296,26 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
         printf("    {\n");
         for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
           printf("      {");
-          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t) printf("%d, ", cm->fc.coef_counts_8x8[i][j][k][t]);
+          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+            printf("%d, ", cm->fc.coef_counts_8x8[i][j][k][t]);
+          printf("},\n");
+        }
+        printf("    },\n");
+      }
+      printf("  },\n");
+    }
+    printf("};\n");
+    printf("static const unsigned int\nhybrid_coef_counts"
+           "[BLOCK_TYPES] [COEF_BANDS]"
+           "[PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {\n");
+    for (i = 0; i < BLOCK_TYPES; ++i) {
+      printf("  {\n");
+      for (j = 0; j < COEF_BANDS; ++j) {
+        printf("    {\n");
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+          printf("      {");
+          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+            printf("%d, ", cm->fc.hybrid_coef_counts[i][j][k][t]);
           printf("},\n");
         }
         printf("    },\n");
@@ -313,6 +348,30 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
         }
       }
 
+#if CONFIG_HYBRIDTRANSFORM
+  for (i = 0; i < BLOCK_TYPES; ++i)
+    for (j = 0; j < COEF_BANDS; ++j)
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+          continue;
+        vp8_tree_probs_from_distribution(
+          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          coef_probs, branch_ct, cm->fc.hybrid_coef_counts [i][j][k],
+          256, 1);
+        for (t = 0; t < ENTROPY_NODES; ++t) {
+          int prob;
+          count = branch_ct[t][0] + branch_ct[t][1];
+          count = count > count_sat ? count_sat : count;
+          factor = (update_factor * count / count_sat);
+          prob = ((int)cm->fc.pre_hybrid_coef_probs[i][j][k][t] * (256 - factor) +
+                  (int)coef_probs[t] * factor + 128) >> 8;
+          if (prob <= 0) cm->fc.hybrid_coef_probs[i][j][k][t] = 1;
+          else if (prob > 255) cm->fc.hybrid_coef_probs[i][j][k][t] = 255;
+          else cm->fc.hybrid_coef_probs[i][j][k][t] = prob;
+        }
+      }
+#endif
+
   for (i = 0; i < BLOCK_TYPES_8X8; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -335,7 +394,32 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
         }
       }
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
+#if CONFIG_HYBRIDTRANSFORM8X8
+  for (i = 0; i < BLOCK_TYPES_8X8; ++i)
+    for (j = 0; j < COEF_BANDS; ++j)
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+          continue;
+        vp8_tree_probs_from_distribution(
+          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          coef_probs, branch_ct, cm->fc.hybrid_coef_counts_8x8 [i][j][k],
+          256, 1);
+        for (t = 0; t < ENTROPY_NODES; ++t) {
+          int prob;
+          count = branch_ct[t][0] + branch_ct[t][1];
+          count = count > count_sat ? count_sat : count;
+          factor = (update_factor * count / count_sat);
+          prob = ((int)cm->fc.pre_hybrid_coef_probs_8x8[i][j][k][t] *
+                  (256 - factor) +
+                  (int)coef_probs[t] * factor + 128) >> 8;
+          if (prob <= 0) cm->fc.hybrid_coef_probs_8x8[i][j][k][t] = 1;
+          else if (prob > 255) cm->fc.hybrid_coef_probs_8x8[i][j][k][t] = 255;
+          else cm->fc.hybrid_coef_probs_8x8[i][j][k][t] = prob;
+        }
+      }
+#endif
+
+#if CONFIG_TX16X16
   for (i = 0; i < BLOCK_TYPES_16X16; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -349,12 +433,36 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
           count = branch_ct[t][0] + branch_ct[t][1];
           count = count > count_sat ? count_sat : count;
           factor = (update_factor * count / count_sat);
-          prob = ((int)cm->fc.pre_coef_probs_16x16[i][j][k][t] * (256 - factor) +
+          prob = ((int)cm->fc.pre_coef_probs_16x16[i][j][k][t] *
+                  (256 - factor) +
                   (int)coef_probs[t] * factor + 128) >> 8;
           if (prob <= 0) cm->fc.coef_probs_16x16[i][j][k][t] = 1;
           else if (prob > 255) cm->fc.coef_probs_16x16[i][j][k][t] = 255;
           else cm->fc.coef_probs_16x16[i][j][k][t] = prob;
         }
       }
+
+#if CONFIG_HYBRIDTRANSFORM16X16
+  for (i = 0; i < BLOCK_TYPES_16X16; ++i)
+    for (j = 0; j < COEF_BANDS; ++j)
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+          continue;
+        vp8_tree_probs_from_distribution(
+          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          coef_probs, branch_ct, cm->fc.hybrid_coef_counts_16x16[i][j][k], 256, 1);
+        for (t = 0; t < ENTROPY_NODES; ++t) {
+          int prob;
+          count = branch_ct[t][0] + branch_ct[t][1];
+          count = count > count_sat ? count_sat : count;
+          factor = (update_factor * count / count_sat);
+          prob = ((int)cm->fc.pre_hybrid_coef_probs_16x16[i][j][k][t] * (256 - factor) +
+                  (int)coef_probs[t] * factor + 128) >> 8;
+          if (prob <= 0) cm->fc.hybrid_coef_probs_16x16[i][j][k][t] = 1;
+          else if (prob > 255) cm->fc.hybrid_coef_probs_16x16[i][j][k][t] = 255;
+          else cm->fc.hybrid_coef_probs_16x16[i][j][k][t] = prob;
+        }
+      }
+#endif
 #endif
 }

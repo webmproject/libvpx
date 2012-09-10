@@ -1239,4 +1239,3 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   RECON_INVOKE(&rtcd->common->recon, recon_mby)
   (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
-

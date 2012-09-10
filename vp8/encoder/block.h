@@ -167,6 +167,10 @@ typedef struct {
 
   unsigned int token_costs[TX_SIZE_MAX][BLOCK_TYPES][COEF_BANDS]
     [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
+  unsigned int hybrid_token_costs[TX_SIZE_MAX][BLOCK_TYPES][COEF_BANDS]
+    [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
+#endif
 
   int optimize;
   int q_index;

@@ -207,7 +207,6 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   }
 }
 
-extern const int vp8_i8x8_block[4];
 static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                               unsigned int mb_col) {
   int eobtotal = 0;
@@ -931,6 +930,7 @@ static void init_frame(VP8D_COMP *pbi) {
 
 }
 
+#if 0
 static void read_coef_probs2(VP8D_COMP *pbi) {
   const vp8_prob grpupd = 192;
   int i, j, k, l;
@@ -973,6 +973,7 @@ static void read_coef_probs2(VP8D_COMP *pbi) {
     }
   }
 }
+#endif
 
 static void read_coef_probs(VP8D_COMP *pbi) {
   int i, j, k, l;
@@ -998,6 +999,27 @@ static void read_coef_probs(VP8D_COMP *pbi) {
           }
         }
   }
+#if CONFIG_HYBRIDTRANSFORM
+  {
+    if (vp8_read_bit(bc)) {
+      /* read coef probability tree */
+      for (i = 0; i < BLOCK_TYPES; i++)
+        for (j = !i; j < COEF_BANDS; j++)
+          for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
+            if (k >= 3 && ((i == 0 && j == 1) ||
+                           (i > 0 && j == 0)))
+              continue;
+            for (l = 0; l < ENTROPY_NODES; l++) {
+              vp8_prob *const p = pc->fc.hybrid_coef_probs [i][j][k] + l;
+
+              if (vp8_read(bc, COEF_UPDATE_PROB)) {
+                *p = read_prob_diff_update(bc, *p);
+              }
+            }
+          }
+        }
+  }
+#endif
 
   if (pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc)) {
     // read coef probability tree
@@ -1017,8 +1039,28 @@ static void read_coef_probs(VP8D_COMP *pbi) {
           }
         }
   }
+#if CONFIG_HYBRIDTRANSFORM8X8
+  if (pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc)) {
+    // read coef probability tree
+    for (i = 0; i < BLOCK_TYPES_8X8; i++)
+      for (j = !i; j < COEF_BANDS; j++)
+        for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
+          if (k >= 3 && ((i == 0 && j == 1) ||
+                         (i > 0 && j == 0)))
+            continue;
+          for (l = 0; l < ENTROPY_NODES; l++) {
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
+            vp8_prob *const p = pc->fc.hybrid_coef_probs_8x8 [i][j][k] + l;
+
+            if (vp8_read(bc, COEF_UPDATE_PROB_8X8)) {
+              *p = read_prob_diff_update(bc, *p);
+            }
+          }
+        }
+  }
+#endif
+
+#if CONFIG_TX16X16
   // 16x16
   if (vp8_read_bit(bc)) {
     // read coef probability tree
@@ -1038,6 +1080,26 @@ static void read_coef_probs(VP8D_COMP *pbi) {
           }
         }
   }
+#if CONFIG_HYBRIDTRANSFORM16X16
+  if (vp8_read_bit(bc)) {
+    // read coef probability tree
+    for (i = 0; i < BLOCK_TYPES_16X16; ++i)
+      for (j = !i; j < COEF_BANDS; ++j)
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+          if (k >= 3 && ((i == 0 && j == 1) ||
+                         (i > 0 && j == 0)))
+            continue;
+          for (l = 0; l < ENTROPY_NODES; ++l) {
+
+            vp8_prob *const p = pc->fc.hybrid_coef_probs_16x16[i][j][k] + l;
+
+            if (vp8_read(bc, COEF_UPDATE_PROB_16X16)) {
+              *p = read_prob_diff_update(bc, *p);
+            }
+          }
+        }
+  }
+#endif
 #endif
 }
 
@@ -1399,10 +1461,25 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     fclose(z);
   }
 
-  vp8_copy(pbi->common.fc.pre_coef_probs, pbi->common.fc.coef_probs);
-  vp8_copy(pbi->common.fc.pre_coef_probs_8x8, pbi->common.fc.coef_probs_8x8);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
-  vp8_copy(pbi->common.fc.pre_coef_probs_16x16, pbi->common.fc.coef_probs_16x16);
+  vp8_copy(pbi->common.fc.pre_coef_probs,
+           pbi->common.fc.coef_probs);
+#if CONFIG_HYBRIDTRANSFORM
+  vp8_copy(pbi->common.fc.pre_hybrid_coef_probs,
+           pbi->common.fc.hybrid_coef_probs);
+#endif
+  vp8_copy(pbi->common.fc.pre_coef_probs_8x8,
+           pbi->common.fc.coef_probs_8x8);
+#if CONFIG_HYBRIDTRANSFORM8X8
+  vp8_copy(pbi->common.fc.pre_hybrid_coef_probs_8x8,
+           pbi->common.fc.hybrid_coef_probs_8x8);
+#endif
+#if CONFIG_TX16X16
+  vp8_copy(pbi->common.fc.pre_coef_probs_16x16,
+           pbi->common.fc.coef_probs_16x16);
+#if CONFIG_HYBRIDTRANSFORM16X16
+  vp8_copy(pbi->common.fc.pre_hybrid_coef_probs_16x16,
+           pbi->common.fc.hybrid_coef_probs_16x16);
+#endif
 #endif
   vp8_copy(pbi->common.fc.pre_ymode_prob, pbi->common.fc.ymode_prob);
   vp8_copy(pbi->common.fc.pre_uv_mode_prob, pbi->common.fc.uv_mode_prob);
@@ -1417,9 +1494,18 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   vp8_copy(pbi->common.fc.pre_mvc_hp, pbi->common.fc.mvc_hp);
 #endif
   vp8_zero(pbi->common.fc.coef_counts);
+#if CONFIG_HYBRIDTRANSFORM
+  vp8_zero(pbi->common.fc.hybrid_coef_counts);
+#endif
   vp8_zero(pbi->common.fc.coef_counts_8x8);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
+#if CONFIG_HYBRIDTRANSFORM8X8
+  vp8_zero(pbi->common.fc.hybrid_coef_counts_8x8);
+#endif
+#if CONFIG_TX16X16
   vp8_zero(pbi->common.fc.coef_counts_16x16);
+#if CONFIG_HYBRIDTRANSFORM16X16
+  vp8_zero(pbi->common.fc.hybrid_coef_counts_16x16);
+#endif
 #endif
   vp8_zero(pbi->common.fc.ymode_counts);
   vp8_zero(pbi->common.fc.uv_mode_counts);
@@ -1435,11 +1521,8 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 #endif
   vp8_zero(pbi->common.fc.mv_ref_ct);
   vp8_zero(pbi->common.fc.mv_ref_ct_a);
-#if COEFUPDATETYPE == 2
-  read_coef_probs2(pbi);
-#else
+
   read_coef_probs(pbi);
-#endif
 
   vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
   vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));

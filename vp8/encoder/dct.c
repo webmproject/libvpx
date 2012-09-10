@@ -478,10 +478,11 @@ void vp8_fht_c(short *input, short *output, int pitch,
         pfa[i] += pfb[k] * pth[k];
       }
       pth += tx_dim;
-     }
+    }
 
     pfa += tx_dim;
     pfb += tx_dim;
+    // pth -= tx_dim * tx_dim;
 
     switch(tx_type) {
       case ADST_ADST :

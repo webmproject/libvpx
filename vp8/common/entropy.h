@@ -21,6 +21,8 @@
 //#define SUBMVREF_COUNT 5
 //#define VP8_NUMMBSPLITS 4
 
+extern const int vp8_i8x8_block[4];
+
 /* Coefficient token alphabet */
 
 #define ZERO_TOKEN              0       /* 0         Extra Bits 0+0 */
@@ -97,8 +99,6 @@ extern DECLARE_ALIGNED(16, const int, vp8_coef_bands_16x16[256]);
 
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
 #define MODULUS_PARAM               13  /* Modulus parameter */
-#define COEFUPDATETYPE              1   /* coef update type to use (1/2) */
-
 
 extern DECLARE_ALIGNED(16, const unsigned char, vp8_prev_token_class[MAX_ENTROPY_TOKENS]);
 

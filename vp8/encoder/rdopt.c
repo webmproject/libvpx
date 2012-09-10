@@ -41,6 +41,7 @@
 
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
+#include "vp8/common/entropy.h"
 
 #if CONFIG_NEWBESTREFMV
 #include "vp8/common/mvref_common.h"
@@ -358,17 +359,38 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
     cpi->mb.token_costs[TX_4X4],
     (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs,
     BLOCK_TYPES);
+#if CONFIG_HYBRIDTRANSFORM
+  fill_token_costs(
+    cpi->mb.hybrid_token_costs[TX_4X4],
+    (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11])
+    cpi->common.fc.hybrid_coef_probs,
+    BLOCK_TYPES);
+#endif
 
   fill_token_costs(
     cpi->mb.token_costs[TX_8X8],
     (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_8x8,
     BLOCK_TYPES_8X8);
+#if CONFIG_HYBRIDTRANSFORM8X8
+  fill_token_costs(
+    cpi->mb.hybrid_token_costs[TX_8X8],
+    (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11])
+    cpi->common.fc.hybrid_coef_probs_8x8,
+    BLOCK_TYPES_8X8);
+#endif
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
+#if CONFIG_TX16X16
   fill_token_costs(
     cpi->mb.token_costs[TX_16X16],
     (const vp8_prob(*)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_16x16,
     BLOCK_TYPES_16X16);
+#if CONFIG_HYBRIDTRANSFORM16X16
+  fill_token_costs(
+    cpi->mb.hybrid_token_costs[TX_16X16],
+    (const vp8_prob(*)[8][PREV_COEF_CONTEXTS][11])
+    cpi->common.fc.hybrid_coef_probs_16x16,
+    BLOCK_TYPES_16X16);
+#endif
 #endif
 
   /*rough estimate for costing*/
@@ -582,44 +604,44 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
 
 static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                       int tx_type) {
+                       int tx_size) {
   const int eob = b->eob;
   int c = !type;              /* start at coef 0, unless Y with Y2 */
   int cost = 0, default_eob, seg_eob;
   int pt;                     /* surrounding block/prev coef predictor */
   int const *scan, *band;
   short *qcoeff_ptr = b->qcoeff;
-  MB_MODE_INFO * mbmi = &mb->e_mbd.mode_info_context->mbmi;
-
+  MACROBLOCKD *xd = &mb->e_mbd;
+  MB_MODE_INFO *mbmi = &mb->e_mbd.mode_info_context->mbmi;
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
+  TX_TYPE tx_type = DCT_DCT;
+#endif
   int segment_id = mbmi->segment_id;
 
-  switch (tx_type) {
+  switch (tx_size) {
     case TX_4X4:
       scan = vp8_default_zig_zag1d;
       band = vp8_coef_bands;
       default_eob = 16;
 #if CONFIG_HYBRIDTRANSFORM
-      {
-        int active_ht = (mb->q_index < ACTIVE_HT) &&
-                        (mbmi->mode_rdopt == B_PRED);
+      if (type == PLANE_TYPE_Y_WITH_DC &&
+          mb->q_index < ACTIVE_HT &&
+          mbmi->mode_rdopt == B_PRED) {
+        tx_type = b->bmi.as_mode.tx_type;
+        switch (tx_type) {
+          case ADST_DCT:
+            scan = vp8_row_scan;
+            break;
 
-        if((type == PLANE_TYPE_Y_WITH_DC) && active_ht) {
-          switch (b->bmi.as_mode.tx_type) {
-            case ADST_DCT:
-              scan = vp8_row_scan;
-              break;
+          case DCT_ADST:
+            scan = vp8_col_scan;
+            break;
 
-            case DCT_ADST:
-              scan = vp8_col_scan;
-              break;
+          default:
+            scan = vp8_default_zig_zag1d;
+            break;
+        }
 
-            default:
-              scan = vp8_default_zig_zag1d;
-              break;
-          }
-
-        } else
-          scan = vp8_default_zig_zag1d;
       }
 #endif
       break;
@@ -627,12 +649,29 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
       scan = vp8_default_zig_zag1d_8x8;
       band = vp8_coef_bands_8x8;
       default_eob = 64;
+#if CONFIG_HYBRIDTRANSFORM8X8
+      {
+        BLOCKD *bb;
+        int ib = (b - xd->block);
+        if (ib >= 16) tx_type = DCT_DCT;
+        ib = (ib & 8) + ((ib & 4) >> 1);
+        bb = xd->block + ib;
+        if (mbmi->mode_rdopt == I8X8_PRED)
+          tx_type = bb->bmi.as_mode.tx_type;
+      }
+#endif
       break;
 #if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     case TX_16X16:
       scan = vp8_default_zig_zag1d_16x16;
       band = vp8_coef_bands_16x16;
       default_eob = 256;
+#if CONFIG_HYBRIDTRANSFORM16X16
+      if (type == PLANE_TYPE_Y_WITH_DC &&
+          mbmi->mode_rdopt < I8X8_PRED &&
+          mb->q_index < ACTIVE_HT16)
+          tx_type = b->bmi.as_mode.tx_type;
+#endif
       break;
 #endif
     default:
@@ -643,20 +682,36 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
   else
     seg_eob = default_eob;
 
+  //mbmi->mode = mode;
 
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
-  for (; c < eob; c++) {
-    int v = qcoeff_ptr[scan[c]];
-    int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs[tx_type][type][band[c]][pt][t];
-    cost += vp8_dct_value_cost_ptr[v];
-    pt = vp8_prev_token_class[t];
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
+  if (tx_type != DCT_DCT) {
+    for (; c < eob; c++) {
+      int v = qcoeff_ptr[scan[c]];
+      int t = vp8_dct_value_tokens_ptr[v].Token;
+      cost += mb->hybrid_token_costs[tx_size][type][band[c]][pt][t];
+      cost += vp8_dct_value_cost_ptr[v];
+      pt = vp8_prev_token_class[t];
+    }
+    if (c < seg_eob)
+      cost += mb->hybrid_token_costs[tx_size][type][band[c]]
+          [pt][DCT_EOB_TOKEN];
+  } else
+#endif
+  {
+    for (; c < eob; c++) {
+      int v = qcoeff_ptr[scan[c]];
+      int t = vp8_dct_value_tokens_ptr[v].Token;
+      cost += mb->token_costs[tx_size][type][band[c]][pt][t];
+      cost += vp8_dct_value_cost_ptr[v];
+      pt = vp8_prev_token_class[t];
+    }
+    if (c < seg_eob)
+      cost += mb->token_costs[tx_size][type][band[c]]
+          [pt][DCT_EOB_TOKEN];
   }
-
-  if (c < seg_eob)
-    cost += mb->token_costs[tx_type][type][band[c]]
-            [pt][DCT_EOB_TOKEN];
 
   pt = (c != !type); // is eob first coefficient;
   *a = *l = pt;
@@ -816,6 +871,7 @@ static int vp8_rdcost_mby_16x16(MACROBLOCK *mb) {
   cost = cost_coeffs(mb, xd->block, PLANE_TYPE_Y_WITH_DC, ta, tl, TX_16X16);
   return cost;
 }
+
 static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
                                   const VP8_ENCODER_RTCD *rtcd) {
   int d;
@@ -1427,7 +1483,6 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
   return best_rd;
 }
 
-const int vp8_i8x8_block[4] = {0, 2, 8, 10};
 int64_t rd_pick_intra8x8mby_modes(VP8_COMP *cpi, MACROBLOCK *mb,
                                   int *Rate, int *rate_y,
                                   int *Distortion, int64_t best_rd) {
