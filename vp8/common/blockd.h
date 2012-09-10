@@ -479,7 +479,35 @@ static void txfm_map(BLOCKD *b, B_PREDICTION_MODE bmode) {
       break;
   }
 }
+
+static TX_TYPE get_tx_type(MACROBLOCKD *xd, BLOCKD *b) {
+  TX_TYPE tx_type = DCT_DCT;
+#if CONFIG_HYBRIDTRANSFORM16X16
+  if (xd->mode_info_context->mbmi.txfm_size == TX_16X16) {
+    if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
+        xd->q_index < ACTIVE_HT16)
+      tx_type = b->bmi.as_mode.tx_type;
+    return tx_type;
+  }
 #endif
+#if CONFIG_HYBRIDTRANSFORM8X8
+  if (xd->mode_info_context->mbmi.txfm_size  == TX_8X8) {
+    if (xd->mode_info_context->mbmi.mode == I8X8_PRED)
+      tx_type = b->bmi.as_mode.tx_type;
+    return tx_type;
+  }
+#endif
+#if CONFIG_HYBRIDTRANSFORM
+  if (xd->mode_info_context->mbmi.txfm_size  == TX_4X4) {
+    if (xd->mode_info_context->mbmi.mode == B_PRED &&
+        xd->q_index < ACTIVE_HT)
+      tx_type = b->bmi.as_mode.tx_type;
+    return tx_type;
+  }
+#endif
+}
+#endif
+
 
 extern void vp8_build_block_doffsets(MACROBLOCKD *xd);
 extern void vp8_setup_block_dptrs(MACROBLOCKD *xd);
