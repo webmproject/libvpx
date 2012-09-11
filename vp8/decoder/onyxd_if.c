@@ -120,7 +120,6 @@ void vp8dx_remove_decompressor(VP8D_COMP *pbi)
     vp8_de_alloc_overlap_lists(pbi);
 #endif
     vp8_remove_common(&pbi->common);
-    vpx_free(pbi->mbc);
     vpx_free(pbi);
 }
 

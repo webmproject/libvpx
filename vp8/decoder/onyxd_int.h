@@ -77,7 +77,7 @@ typedef struct VP8D_COMP
     /* end of threading data */
 #endif
 
-    vp8_reader *mbc;
+    vp8_reader mbc[8];
     int64_t last_time_stamp;
     int   ready_for_new_data;
 

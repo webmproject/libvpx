@@ -831,9 +831,7 @@ static void setup_token_decoder(VP8D_COMP *pbi,
     num_token_partitions = 1 << pbi->common.multi_token_partition;
     if (num_token_partitions > 1)
     {
-        CHECK_MEM_ERROR(pbi->mbc, vpx_malloc(num_token_partitions *
-                                             sizeof(vp8_reader)));
-        bool_decoder = pbi->mbc;
+        bool_decoder = &pbi->mbc[0];
     }
 
     /* Check for partitions within the fragments and unpack the fragments
@@ -907,16 +905,6 @@ static void setup_token_decoder(VP8D_COMP *pbi,
 #endif
 }
 
-static void stop_token_decoder(VP8D_COMP *pbi)
-{
-    VP8_COMMON *pc = &pbi->common;
-
-    if (pc->multi_token_partition != ONE_PARTITION)
-    {
-        vpx_free(pbi->mbc);
-        pbi->mbc = NULL;
-    }
-}
 
 static void init_frame(VP8D_COMP *pbi)
 {
@@ -1440,8 +1428,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         decode_mb_rows(pbi);
         corrupt_tokens |= xd->corrupted;
     }
-
-    stop_token_decoder(pbi);
 
     /* Collect information about decoder corruption. */
     /* 1. Check first boolean decoder for errors. */
