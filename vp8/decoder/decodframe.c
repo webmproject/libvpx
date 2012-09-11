@@ -40,6 +40,10 @@
 #include <stdio.h>
 
 
+#ifdef DEC_DEBUG
+int dec_debug = 0;
+#endif
+
 #define COEFCOUNT_TESTING
 
 static int merge_index(int v, int n, int modulus) {
@@ -205,6 +209,16 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     }
 #endif
   }
+#ifdef DEC_DEBUG
+  if (dec_debug) {
+    int i, j;
+    printf("Generating predictors\n");
+    for (i = 0; i < 16; i++) {
+      for (j = 0; j < 16; j++) printf("%3d ", xd->dst.y_buffer[i * xd->dst.y_stride + j]);
+      printf("\n");
+    }
+  }
+#endif
 
 }
 
@@ -214,7 +228,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   int eobtotal = 0;
   MB_PREDICTION_MODE mode;
   int i;
-  int tx_size;
+  int tx_type;
 #if CONFIG_SUPERBLOCKS
   VP8_COMMON *pc = &pbi->common;
   int orig_skip_flag = xd->mode_info_context->mbmi.mb_skip_coeff;
@@ -241,10 +255,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         xd->mode_info_context->mbmi.mode == NEARMV ||
         xd->mode_info_context->mbmi.mode == NEARESTMV)
       xd->mode_info_context->mbmi.txfm_size = TX_16X16;
-    else
-#endif
-    if (pbi->common.txfm_mode == ALLOW_8X8 &&
+    else if (pbi->common.txfm_mode == ALLOW_8X8 &&
+        xd->mode_info_context->mbmi.mode != I8X8_PRED &&
         xd->mode_info_context->mbmi.mode != B_PRED)
+#else
+      if (pbi->common.txfm_mode == ALLOW_8X8 &&
+          xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+          xd->mode_info_context->mbmi.mode != B_PRED)
+#endif
       xd->mode_info_context->mbmi.txfm_size = TX_8X8;
     else
       xd->mode_info_context->mbmi.txfm_size = TX_4X4;
@@ -254,61 +272,37 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         xd->mode_info_context->mbmi.mode == NEWMV ||
         xd->mode_info_context->mbmi.mode == ZEROMV ||
         xd->mode_info_context->mbmi.mode == NEARMV ||
-        xd->mode_info_context->mbmi.mode == NEARESTMV)
+        xd->mode_info_context->mbmi.mode == NEARESTMV) {
       xd->mode_info_context->mbmi.txfm_size = TX_16X16;
-    else
-#endif
-    if (pbi->common.txfm_mode == ALLOW_8X8 &&
+    } else if (pbi->common.txfm_mode == ALLOW_8X8 &&
+        xd->mode_info_context->mbmi.mode != I8X8_PRED &&
         xd->mode_info_context->mbmi.mode != B_PRED &&
         xd->mode_info_context->mbmi.mode != SPLITMV) {
+#else
+    if (pbi->common.txfm_mode == ALLOW_8X8 &&
+        xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+        xd->mode_info_context->mbmi.mode != B_PRED &&
+        xd->mode_info_context->mbmi.mode != SPLITMV) {
+#endif
       xd->mode_info_context->mbmi.txfm_size = TX_8X8;
-    } else {
+    }
+    else {
       xd->mode_info_context->mbmi.txfm_size = TX_4X4;
     }
   }
 
+#if CONFIG_HYBRIDTRANSFORM8X8
+  if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+    xd->mode_info_context->mbmi.txfm_size = TX_8X8;
+  }
+#endif
 #if CONFIG_SUPERBLOCKS
   if (xd->mode_info_context->mbmi.encoded_as_sb) {
     xd->mode_info_context->mbmi.txfm_size = TX_8X8;
   }
 #endif
 
-  tx_size = xd->mode_info_context->mbmi.txfm_size;
-  mode = xd->mode_info_context->mbmi.mode;
-
-#if CONFIG_HYBRIDTRANSFORM
-  // parse transform types for intra 4x4 mode
-  QIndex = xd->q_index;
-  active_ht = (QIndex < ACTIVE_HT);
-  if (mode == B_PRED) {
-    for (i = 0; i < 16; i++) {
-      BLOCKD *b = &xd->block[i];
-      int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
-      if(active_ht)
-        txfm_map(b, b_mode);
-    } // loop over 4x4 blocks
-  }
-#endif
-
-#if CONFIG_HYBRIDTRANSFORM8X8
-  if (mode == I8X8_PRED) {
-    for (i = 0; i < 4; i++) {
-      int ib = vp8_i8x8_block[i];
-      BLOCKD *b = &xd->block[ib];
-      int i8x8mode = b->bmi.as_mode.first;
-      txfm_map(b, pred_mode_conv(i8x8mode));
-    }
-  }
-#endif
-
-#if CONFIG_HYBRIDTRANSFORM16X16
-  active_ht16 = (QIndex < ACTIVE_HT16);
-  if (mode < I8X8_PRED) {
-    BLOCKD *b = &xd->block[0];
-    if(active_ht16)
-      txfm_map(b, pred_mode_conv(mode));
-  }
-#endif
+  tx_type = xd->mode_info_context->mbmi.txfm_size;
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
     vp8_reset_mb_tokens_context(xd);
@@ -327,16 +321,27 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       xd->eobs[i] = 0;
     }
 #if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
-    if (tx_size == TX_16X16)
+    if (tx_type == TX_16X16)
       eobtotal = vp8_decode_mb_tokens_16x16(pbi, xd);
     else
 #endif
-    if (tx_size == TX_8X8)
+    if (tx_type == TX_8X8)
       eobtotal = vp8_decode_mb_tokens_8x8(pbi, xd);
     else
       eobtotal = vp8_decode_mb_tokens(pbi, xd);
+#ifdef DEC_DEBUG
+    if (dec_debug) {
+      printf("\nTokens (%d)\n", eobtotal);
+      for (i = 0; i < 400; i++) {
+        printf("%3d ", xd->qcoeff[i]);
+        if (i % 16 == 15) printf("\n");
+      }
+      printf("\n");
+    }
+#endif
   }
 
+  mode = xd->mode_info_context->mbmi.mode;
 #if CONFIG_SWITCHABLE_INTERP
   if (pbi->common.frame_type != KEY_FRAME)
     vp8_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter,
@@ -361,9 +366,38 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
   }
 
+#ifdef DEC_DEBUG
+  if (dec_debug) {
+    int i, j;
+    printf("Generating predictors\n");
+    for (i = 0; i < 16; i++) {
+      for (j = 0; j < 16; j++) printf("%3d ", xd->dst.y_buffer[i * xd->dst.y_stride + j]);
+      printf("\n");
+    }
+  }
+#endif
+
   // moved to be performed before detokenization
 //  if (xd->segmentation_enabled)
 //    mb_init_dequantizer(pbi, xd);
+
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
+  // parse transform types for intra 4x4 mode
+  QIndex = xd->q_index;
+  active_ht = (QIndex < ACTIVE_HT);
+  if (mode == B_PRED) {
+    for (i = 0; i < 16; i++) {
+      BLOCKD *b = &xd->block[i];
+      int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
+      if(active_ht)
+        txfm_map(b, b_mode);
+    } // loop over 4x4 blocks
+  }
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM16X16
+  active_ht16 = (QIndex < ACTIVE_HT16);
+#endif
 
   /* do prediction */
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
@@ -417,6 +451,9 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       unsigned char *pre = xd->block[ib].predictor;
       unsigned char *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
       int stride = xd->dst.y_stride;
+
+      tx_type = TX_4X4;
+      xd->mode_info_context->mbmi.txfm_size = TX_4X4;
 #endif
 
       b = &xd->block[ib];
@@ -425,6 +462,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       (b, i8x8mode, b->predictor);
 
 #if CONFIG_HYBRIDTRANSFORM8X8
+      txfm_map(b, pred_mode_conv(i8x8mode));
       vp8_ht_dequant_idct_add_8x8_c(b->bmi.as_mode.tx_type,
                                     q, dq, pre, dst, 16, stride);
       q += 64;
@@ -508,7 +546,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     BLOCKD *b = &xd->block[24];
 
 #if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
-    if (tx_size == TX_16X16) {
+    if (tx_type == TX_16X16) {
 #if CONFIG_HYBRIDTRANSFORM16X16
       if (mode < I8X8_PRED && active_ht16) {
         BLOCKD *bd = &xd->block[0];
@@ -532,7 +570,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
     else
 #endif
-    if (tx_size == TX_8X8) {
+    if (tx_type == TX_8X8) {
 #if CONFIG_SUPERBLOCKS
       void *orig = xd->mode_info_context;
       int n, num = xd->mode_info_context->mbmi.encoded_as_sb ? 4 : 1;
@@ -560,6 +598,16 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
           continue; // only happens for SBs, which are already in dest buffer
 #endif
       DEQUANT_INVOKE(&pbi->dequant, block_2x2)(b);
+#ifdef DEC_DEBUG
+      if (dec_debug) {
+        int j;
+        printf("DQcoeff Haar\n");
+        for (j = 0; j < 16; j++) {
+          printf("%d ", b->dqcoeff[j]);
+        }
+        printf("\n");
+      }
+#endif
       IDCT_INVOKE(RTCD_VTABLE(idct), ihaar2)(&b->dqcoeff[0], b->diff, 8);
       ((int *)b->qcoeff)[0] = 0;// 2nd order block are set to 0 after inverse transform
       ((int *)b->qcoeff)[1] = 0;
@@ -617,22 +665,20 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 #if CONFIG_SUPERBLOCKS
     if (!xd->mode_info_context->mbmi.encoded_as_sb) {
 #endif
-      if (xd->mode_info_context->mbmi.mode != I8X8_PRED) {
-        if (tx_size == TX_8X8
+      if (tx_type == TX_8X8
 #if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
-            || tx_size == TX_16X16
+      || tx_type == TX_16X16
 #endif
-           )
-          DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block_8x8) //
-              (xd->qcoeff + 16 * 16, xd->block[16].dequant,
-               xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
-               xd->dst.uv_stride, xd->eobs + 16, xd); //
-        else
-          DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block)
-              (xd->qcoeff + 16 * 16, xd->block[16].dequant,
-               xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
-               xd->dst.uv_stride, xd->eobs + 16);
-      }
+      )
+    DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block_8x8) //
+    (xd->qcoeff + 16 * 16, xd->block[16].dequant,
+     xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
+     xd->dst.uv_stride, xd->eobs + 16, xd); //
+  else if (xd->mode_info_context->mbmi.mode != I8X8_PRED)
+    DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block)
+    (xd->qcoeff + 16 * 16, xd->block[16].dequant,
+     xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
+     xd->dst.uv_stride, xd->eobs + 16);
 #if CONFIG_SUPERBLOCKS
   }
 #endif
@@ -706,6 +752,10 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
         xd->prev_mode_info_context += offset_extended;
         continue;
       }
+
+#ifdef DEC_DEBUG
+      dec_debug = (pc->current_video_frame == 0 && mb_row == 0 && mb_col == 0);
+#endif
 
       // Set above context pointer
       xd->above_context = pc->above_context + mb_col;
