@@ -293,25 +293,23 @@ static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
                     blockmv.as_mv.row += best_mv.as_mv.row;
                     blockmv.as_mv.col = read_mvcomponent(bc, &mvc[1]) << 1;
                     blockmv.as_mv.col += best_mv.as_mv.col;
-
-                    mbmi->need_to_clamp_mvs |= vp8_check_mv_bounds(&blockmv,
-                                                              mb_to_left_edge,
-                                                              mb_to_right_edge,
-                                                              mb_to_top_edge,
-                                                              mb_to_bottom_edge);
                 }
             }
             else
             {
                 blockmv.as_int = abovemv.as_int;
-                mbmi->need_to_clamp_mvs |= above_mb->mbmi.need_to_clamp_mvs;
             }
         }
         else
         {
             blockmv.as_int = leftmv.as_int;
-            mbmi->need_to_clamp_mvs |= left_mb->mbmi.need_to_clamp_mvs;
         }
+
+        mbmi->need_to_clamp_mvs |= vp8_check_mv_bounds(&blockmv,
+                                                  mb_to_left_edge,
+                                                  mb_to_right_edge,
+                                                  mb_to_top_edge,
+                                                  mb_to_bottom_edge);
 
         {
             /* Fill (uniform) modes, mvs of jth subset.
