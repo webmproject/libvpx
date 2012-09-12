@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//uvI\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-09-12T18:38:34Z",
+      "side": 1,
+      "message": "The caller needs to pass in the frame level flag as to whether 1/8 pel (high precision) is used at all or not.",
+      "parentUuid": "AAAAPn//uzQ\u003d",
+      "revId": "04cd9ceeba793087cfea7e71cd3c165c0737bd64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//uzM\u003d",
         "filename": "vp8/encoder/encodemv.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-09-12T18:07:30Z",
       "side": 1,
       "message": "can usehp be a local variable instead of a function parameter?",
+      "revId": "04cd9ceeba793087cfea7e71cd3c165c0737bd64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//uvE\u003d",
+        "filename": "vp8/encoder/encodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-09-12T18:38:34Z",
+      "side": 1,
+      "message": "The caller needs to pass in the frame level flag (xd-\u003eallow_high_precision_mv) as to whether 1/8 pel (high precision) is used at all or not.",
+      "parentUuid": "AAAAPn//uzM\u003d",
       "revId": "04cd9ceeba793087cfea7e71cd3c165c0737bd64",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
