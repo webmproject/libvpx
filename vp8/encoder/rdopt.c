@@ -912,7 +912,7 @@ static void super_block_yrd_8x8(MACROBLOCK *x,
     xd->above_context = ta + x_idx;
     xd->left_context = tl + y_idx;
     r += vp8_rdcost_mby_8x8(x, 0);
-    skippable = skippable && mby_is_skippable_8x8(xd);
+    skippable = skippable && mby_is_skippable_8x8(xd, 1);
   }
 
   *distortion = (d >> 2);
@@ -1271,7 +1271,7 @@ static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
 #if CONFIG_TX16X16
         skip = mby_is_skippable_16x16(xd);
 #else
-        skip = mby_is_skippable_8x8(xd);
+        skip = mby_is_skippable_8x8(xd, 1);
 #endif
         mode_selected = mode;
 #if CONFIG_COMP_INTRA_PRED
@@ -3718,7 +3718,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 #if CONFIG_TX16X16
             mb_skippable = mb_is_skippable_16x16(&x->e_mbd);
 #else
-            mb_skippable = mb_is_skippable_8x8(&x->e_mbd);
+            mb_skippable = mb_is_skippable_8x8(&x->e_mbd, has_y2);
 #endif
           } else {
 #if CONFIG_TX16X16
@@ -3726,7 +3726,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                            & mby_is_skippable_16x16(&x->e_mbd);
 #else
             mb_skippable = uv_intra_skippable_8x8
-                           & mby_is_skippable_8x8(&x->e_mbd);
+                           & mby_is_skippable_8x8(&x->e_mbd, has_y2);
 #endif
           }
         } else {

@@ -34,9 +34,10 @@ int rd_cost_mby(MACROBLOCKD *);
 extern int mby_is_skippable(MACROBLOCKD *xd, int has_y2_block);
 extern int mbuv_is_skippable(MACROBLOCKD *xd);
 extern int mb_is_skippable(MACROBLOCKD *xd, int has_y2_block);
-extern int mby_is_skippable_8x8(MACROBLOCKD *xd);
+extern int mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block);
 extern int mbuv_is_skippable_8x8(MACROBLOCKD *xd);
-extern int mb_is_skippable_8x8(MACROBLOCKD *xd);
+extern int mb_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block);
+extern int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd, int has_y2_block);
 extern int mb_is_skippable_16x16(MACROBLOCKD *xd);
 extern int mby_is_skippable_16x16(MACROBLOCKD *xd);
 
