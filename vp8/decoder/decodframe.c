@@ -1394,10 +1394,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     /* clear out the coeff buffer */
     vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
 
-    /* Read the mb_no_coeff_skip flag */
-    pc->mb_no_coeff_skip = (int)vp8_read_bit(bc);
-
-
     vp8_decode_mode_mvs(pbi);
 
 #if CONFIG_ERROR_CONCEALMENT
