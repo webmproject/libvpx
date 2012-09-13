@@ -553,6 +553,8 @@ static void decode_mb_rows(VP8D_COMP *pbi)
     if(pc->filter_level)
         vp8_loop_filter_frame_init(pc, xd, pc->filter_level);
 
+    vp8_setup_intra_recon_top_line(&pc->yv12_fb[dst_fb_idx]);
+
     /* Decode the individual macro block */
     for (mb_row = 0; mb_row < pc->mb_rows; mb_row++)
     {
@@ -592,6 +594,10 @@ static void decode_mb_rows(VP8D_COMP *pbi)
         /* TODO: move to outside row loop */
         xd->recon_left_stride[0] = xd->dst.y_stride;
         xd->recon_left_stride[1] = xd->dst.uv_stride;
+
+        setup_intra_recon_left(xd->recon_left[0], xd->recon_left[1],
+                               xd->recon_left[2], xd->dst.y_stride,
+                               xd->dst.uv_stride);
 
         for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
         {
@@ -1382,14 +1388,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
                     }
     }
-
-
-    /* set up frame new frame for intra coded blocks */
-#if CONFIG_MULTITHREAD
-    if (!(pbi->b_multithreaded_rd) || pc->multi_token_partition == ONE_PARTITION || !(pc->filter_level))
-#endif
-        vp8_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
-
 
     /* clear out the coeff buffer */
     vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));

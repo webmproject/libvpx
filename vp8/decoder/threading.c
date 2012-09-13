@@ -24,6 +24,7 @@
 #include "detokenize.h"
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/reconinter.h"
+#include "vp8/common/setupintrarecon.h"
 #if CONFIG_ERROR_CONCEALMENT
 #include "error_concealment.h"
 #endif
@@ -399,6 +400,10 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row)
           /* TODO: move to outside row loop */
           xd->recon_left_stride[0] = xd->dst.y_stride;
           xd->recon_left_stride[1] = xd->dst.uv_stride;
+
+          setup_intra_recon_left(xd->recon_left[0], xd->recon_left[1],
+                                 xd->recon_left[2], xd->dst.y_stride,
+                                 xd->dst.uv_stride);
        }
 
        for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
@@ -873,9 +878,9 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
     if (filter_level)
     {
         /* Set above_row buffer to 127 for decoding first MB row */
-        vpx_memset(pbi->mt_yabove_row[0] + VP8BORDERINPIXELS-1, 127, pc->yv12_fb[pc->lst_fb_idx].y_width + 5);
-        vpx_memset(pbi->mt_uabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (pc->yv12_fb[pc->lst_fb_idx].y_width>>1) +5);
-        vpx_memset(pbi->mt_vabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (pc->yv12_fb[pc->lst_fb_idx].y_width>>1) +5);
+        vpx_memset(pbi->mt_yabove_row[0] + VP8BORDERINPIXELS-1, 127, pc->yv12_fb[pc->new_fb_idx].y_width + 5);
+        vpx_memset(pbi->mt_uabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (pc->yv12_fb[pc->new_fb_idx].y_width>>1) +5);
+        vpx_memset(pbi->mt_vabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (pc->yv12_fb[pc->new_fb_idx].y_width>>1) +5);
 
         for (j=1; j<pc->mb_rows; j++)
         {
@@ -895,6 +900,8 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
         /* Initialize the loop filter for this frame. */
         vp8_loop_filter_frame_init(pc, &pbi->mb, filter_level);
     }
+    else
+        vp8_setup_intra_recon_top_line(&pc->yv12_fb[pc->new_fb_idx]);
 
     setup_decoding_thread_data(pbi, xd, pbi->mb_row_di, pbi->decoding_thread_count);
 
