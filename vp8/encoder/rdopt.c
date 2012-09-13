@@ -3597,7 +3597,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         vp8_clamp_mv2(&cur_mv[i], xd);
         if (mv_check_bounds(x, &cur_mv[i]))
           flag = 1;
-        mv_check_bounds(x, &cur_mv[i]);
         x->e_mbd.mode_info_context->mbmi.mv[i].as_int = cur_mv[i].as_int;
       }
       if (flag)
