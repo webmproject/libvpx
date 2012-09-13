@@ -310,9 +310,6 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
         vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cpi->common.fc.mvc, flag);
     }
 
-    /* initialize pre_mvc to all zero. */
-    vpx_memset(cpi->common.fc.pre_mvc, 0, sizeof(cpi->common.fc.pre_mvc));
-
     /* Make sure we initialize separate contexts for altref,gold, and normal.
      * TODO shouldn't need 3 different copies of structure to do this!
      */
