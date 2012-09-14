@@ -224,10 +224,9 @@ int main(int argc, char **argv) {
 
        flag_periodicity = cfg.ts_periodicity;
 
-       // Predict from L only.
+       // Update L only.
        layer_flags[0] = VPX_EFLAG_FORCE_KF  |
-                        VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF |
-                        VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF;
+                        VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
        break;
     }
     case 1:
