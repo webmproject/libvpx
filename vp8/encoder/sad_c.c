@@ -98,21 +98,21 @@ unsigned int vp8_sad4x4_c(
 }
 
 #if CONFIG_NEWBESTREFMV
-unsigned int vp8_sad2x16_c(
+unsigned int vp8_sad3x16_c(
   const unsigned char *src_ptr,
   int  src_stride,
   const unsigned char *ref_ptr,
   int  ref_stride,
   int max_sad){
-  return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 2, 16);
+  return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 3, 16);
 }
-unsigned int vp8_sad16x2_c(
+unsigned int vp8_sad16x3_c(
   const unsigned char *src_ptr,
   int  src_stride,
   const unsigned char *ref_ptr,
   int  ref_stride,
   int max_sad){
-  return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 2);
+  return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 3);
 }
 #endif
 
