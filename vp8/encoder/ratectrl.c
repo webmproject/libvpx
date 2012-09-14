@@ -289,15 +289,6 @@ void vp8_setup_key_frame(VP8_COMP *cpi) {
   vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
   vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
 
-  /*
-  vpx_memcpy( cpi->common.fc.vp8_mode_contexts,
-              cpi->common.fc.mode_context,
-              sizeof(cpi->common.fc.mode_context));
-              */
-  vpx_memcpy(cpi->common.fc.vp8_mode_contexts,
-             default_vp8_mode_contexts,
-             sizeof(default_vp8_mode_contexts));
-
 }
 
 void vp8_setup_inter_frame(VP8_COMP *cpi) {
