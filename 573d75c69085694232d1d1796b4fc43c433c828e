@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//r0U\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 961,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-09-16T23:34:01Z",
+      "side": 1,
+      "message": "This seemed like a safety check - that stops a problem with error concealment if we haven\u0027t decoded a keyframe.  Can you add a comment about why its no longer necessary?",
+      "revId": "573d75c69085694232d1d1796b4fc43c433c828e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//r0Q\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1136,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-09-16T23:34:01Z",
+      "side": 1,
+      "message": "I think this might break error concealment.  If not can you explain why its no longer necessary?",
+      "revId": "573d75c69085694232d1d1796b4fc43c433c828e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
