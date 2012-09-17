@@ -427,7 +427,7 @@ int main(int argc, char **argv) {
 
     case 8:
     {
-        /* 2-layers */
+        /* 2-layers, with sync point at first frame of layer 1. */
         int ids[2] = {0,1};
         cfg.ts_number_layers     = 2;
         cfg.ts_periodicity       = 2;
@@ -438,22 +438,40 @@ int main(int argc, char **argv) {
         flag_periodicity = 8;
 
         /* 0=L, 1=GF */
+        // ARF is used as predictor for all frames, and is only updated on
+        // key frame. Sync point every 8 frames.
+
+        // Layer 0: predict from L and ARF, update L and G.
         layer_flags[0] = VPX_EFLAG_FORCE_KF  |
-                         VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
-                         VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
-        layer_flags[1] = VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
-                         VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_ARF;
-        layer_flags[2] =
-        layer_flags[4] =
-        layer_flags[6] = VP8_EFLAG_NO_REF_GF  | VP8_EFLAG_NO_REF_ARF |
-                         VP8_EFLAG_NO_UPD_GF  | VP8_EFLAG_NO_UPD_ARF;
-        layer_flags[3] =
-        layer_flags[5] = VP8_EFLAG_NO_REF_ARF |
-                         VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_LAST;
-        layer_flags[7] = VP8_EFLAG_NO_REF_ARF |
-                         VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
-                         VP8_EFLAG_NO_UPD_ARF |
+                         VP8_EFLAG_NO_REF_GF |
+                         VP8_EFLAG_NO_UPD_ARF;
+
+        // Layer 1: sync point: predict from L and ARF, and update G.
+        layer_flags[1] = VP8_EFLAG_NO_REF_GF |
+                         VP8_EFLAG_NO_UPD_LAST |
+                         VP8_EFLAG_NO_UPD_ARF;
+
+        // Layer 0, predict from L and ARF, update L.
+        layer_flags[2] = VP8_EFLAG_NO_REF_GF  |
+                         VP8_EFLAG_NO_UPD_GF  |
+                         VP8_EFLAG_NO_UPD_ARF;
+
+        // Layer 1: predict from L, G and ARF, and update G.
+        layer_flags[3] = VP8_EFLAG_NO_UPD_ARF |
+                         VP8_EFLAG_NO_UPD_LAST |
                          VP8_EFLAG_NO_UPD_ENTROPY;
+
+        // Layer 0
+        layer_flags[4] = layer_flags[2];
+
+        // Layer 1
+        layer_flags[5] = layer_flags[3];
+
+        // Layer 0
+        layer_flags[6] = layer_flags[4];
+
+        // Layer 1
+        layer_flags[7] = layer_flags[5];
         break;
     }
 
