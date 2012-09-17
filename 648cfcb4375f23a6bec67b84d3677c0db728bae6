@@ -50,6 +50,24 @@
       "revId": "648cfcb4375f23a6bec67b84d3677c0db728bae6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//rN4\u003d",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 881,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-17T23:07:08Z",
+      "side": 1,
+      "message": "Noted.  I think when we remove the borders, all of this code will change.",
+      "parentUuid": "AAAAPn//r0g\u003d",
+      "revId": "648cfcb4375f23a6bec67b84d3677c0db728bae6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
