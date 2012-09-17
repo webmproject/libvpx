@@ -939,36 +939,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     }
 
-#if 0
-    {
-        int cnt = 0;
-        int flag[2] = {0, 0};
-
-        for (cnt = 0; cnt < MVPcount; cnt++)
-        {
-            if (cm->fc.pre_mvc[0][cnt] != cm->fc.mvc[0][cnt])
-            {
-                flag[0] = 1;
-                vpx_memcpy(cm->fc.pre_mvc[0], cm->fc.mvc[0], MVPcount);
-                break;
-            }
-        }
-
-        for (cnt = 0; cnt < MVPcount; cnt++)
-        {
-            if (cm->fc.pre_mvc[1][cnt] != cm->fc.mvc[1][cnt])
-            {
-                flag[1] = 1;
-                vpx_memcpy(cm->fc.pre_mvc[1], cm->fc.mvc[1], MVPcount);
-                break;
-            }
-        }
-
-        if (flag[0] || flag[1])
-            vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cm->fc.mvc, flag);
-    }
-#endif
-
 #if ! CONFIG_REALTIME_ONLY
     /* Adjust the projected reference frame usage probability numbers to
      * reflect what we have just seen. This may be useful when we make
