@@ -159,6 +159,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
      * outside the frame. */
     pbi->mvs_corrupt_from_mb = UINT_MAX;
 #endif
+    /* Read the mb_no_coeff_skip flag */
+    pbi->common.mb_no_coeff_skip = (int)vp8_read_bit(bc);
+
     pbi->prob_skip_false = 0;
     if (pbi->common.mb_no_coeff_skip)
         pbi->prob_skip_false = (vp8_prob)vp8_read_literal(bc, 8);
