@@ -505,6 +505,7 @@ static TX_TYPE get_tx_type(MACROBLOCKD *xd, BLOCKD *b) {
     return tx_type;
   }
 #endif
+  return tx_type;
 }
 #endif
 
