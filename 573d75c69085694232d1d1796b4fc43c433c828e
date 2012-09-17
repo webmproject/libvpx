@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//rY4\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 961,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-17T19:16:15Z",
+      "side": 1,
+      "message": "Because the check is now done in vp8_decode().  We will never get here if the first frame is not a keyframe.  See line 359 in vp8_dx_iface.c",
+      "parentUuid": "AAAAPn//r0U\u003d",
+      "revId": "573d75c69085694232d1d1796b4fc43c433c828e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//r0Q\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-09-16T23:34:01Z",
       "side": 1,
       "message": "I think this might break error concealment.  If not can you explain why its no longer necessary?",
+      "revId": "573d75c69085694232d1d1796b4fc43c433c828e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//rY0\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1136,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-17T19:16:15Z",
+      "side": 1,
+      "message": "Same as above.  This function will never be called unless the first frame is a keyframe.",
+      "parentUuid": "AAAAPn//r0Q\u003d",
       "revId": "573d75c69085694232d1d1796b4fc43c433c828e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
