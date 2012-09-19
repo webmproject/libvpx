@@ -70,7 +70,7 @@ struct vpx_codec_alg_priv
 #endif
     vpx_image_t             img;
     int                     img_setup;
-    int                     img_avail;
+    void                    *user_priv;
 };
 
 static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_t flags)
@@ -345,8 +345,6 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
 {
     vpx_codec_err_t res = VPX_CODEC_OK;
 
-    ctx->img_avail = 0;
-
     /* Determine the stream parameters. Note that we rely on peek_si to
      * validate that we have a buffer that does not wrap around the top
      * of the heap.
@@ -429,6 +427,27 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
 
     if (!res && ctx->pbi)
     {
+        ctx->user_priv = user_priv;
+        if (vp8dx_receive_compressed_data(ctx->pbi, data_sz, data, deadline))
+        {
+            VP8D_COMP *pbi = (VP8D_COMP *)ctx->pbi;
+            res = update_error_state(ctx, &pbi->common.error);
+        }
+    }
+
+    return res;
+}
+
+static vpx_image_t *vp8_get_frame(vpx_codec_alg_priv_t  *ctx,
+                                  vpx_codec_iter_t      *iter)
+{
+    vpx_image_t *img = NULL;
+
+    /* iter acts as a flip flop, so an image is only returned on the first
+     * call to get_frame.
+     */
+    if (!(*iter))
+    {
         YV12_BUFFER_CONFIG sd;
         int64_t time_stamp = 0, time_end_stamp = 0;
         vp8_ppflags_t flags = {0};
@@ -454,34 +473,10 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
 #endif
         }
 
-        if (vp8dx_receive_compressed_data(ctx->pbi, data_sz, data, deadline))
+        if (0 == vp8dx_get_raw_frame(ctx->pbi, &sd, &time_stamp, &time_end_stamp, &flags))
         {
-            VP8D_COMP *pbi = (VP8D_COMP *)ctx->pbi;
-            res = update_error_state(ctx, &pbi->common.error);
-        }
+            yuvconfig2image(&ctx->img, &sd, ctx->user_priv);
 
-        if (!res && 0 == vp8dx_get_raw_frame(ctx->pbi, &sd, &time_stamp, &time_end_stamp, &flags))
-        {
-            yuvconfig2image(&ctx->img, &sd, user_priv);
-            ctx->img_avail = 1;
-        }
-    }
-
-    return res;
-}
-
-static vpx_image_t *vp8_get_frame(vpx_codec_alg_priv_t  *ctx,
-                                  vpx_codec_iter_t      *iter)
-{
-    vpx_image_t *img = NULL;
-
-    if (ctx->img_avail)
-    {
-        /* iter acts as a flip flop, so an image is only returned on the first
-         * call to get_frame.
-         */
-        if (!(*iter))
-        {
             img = &ctx->img;
             *iter = img;
         }

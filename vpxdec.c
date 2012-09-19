@@ -1066,8 +1066,13 @@ int main(int argc, const char **argv_)
         }
         frames_corrupted += corrupted;
 
+        vpx_usec_timer_start(&timer);
+
         if ((img = vpx_codec_get_frame(&decoder, &iter)))
             ++frame_out;
+
+        vpx_usec_timer_mark(&timer);
+        dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
 
         if (progress)
             show_progress(frame_in, frame_out, dx_time);
