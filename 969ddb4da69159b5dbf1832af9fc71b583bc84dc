@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//p/g\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 476,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-19T19:21:55Z",
+      "side": 1,
+      "message": "ok....  will fix.",
+      "parentUuid": "AAAAPn//qBU\u003d",
+      "revId": "969ddb4da69159b5dbf1832af9fc71b583bc84dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//qBI\u003d",
         "filename": "vpxdec.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-09-19T19:13:05Z",
       "side": 1,
       "message": "This 2 lines can be moved down after vpx_codec_get_frame() to avoid to start timer again. Right?",
+      "revId": "969ddb4da69159b5dbf1832af9fc71b583bc84dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//p/w\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1057,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-19T19:21:55Z",
+      "side": 1,
+      "message": "Yes... for this case.  But a future commit is going to change the loop, making it impossible to do your suggestion.",
+      "parentUuid": "AAAAPn//qBI\u003d",
       "revId": "969ddb4da69159b5dbf1832af9fc71b583bc84dc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
