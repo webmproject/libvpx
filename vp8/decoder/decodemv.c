@@ -48,7 +48,7 @@ static MB_PREDICTION_MODE read_uv_mode(vp8_reader *bc, const vp8_prob *p)
 
 static void read_kf_modes(VP8D_COMP *pbi, MODE_INFO *mi)
 {
-    vp8_reader *const bc = & pbi->bc;
+    vp8_reader *const bc = & pbi->mbc[8];
     const int mis = pbi->common.mode_info_stride;
 
     mi->mbmi.ref_frame = INTRA_FRAME;
@@ -150,7 +150,7 @@ static const unsigned char mbsplit_fill_offset[4][16] = {
 
 static void mb_mode_mv_init(VP8D_COMP *pbi)
 {
-    vp8_reader *const bc = & pbi->bc;
+    vp8_reader *const bc = & pbi->mbc[8];
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
 
 #if CONFIG_ERROR_CONCEALMENT
@@ -338,7 +338,7 @@ static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
 
 static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi)
 {
-    vp8_reader *const bc = & pbi->bc;
+    vp8_reader *const bc = & pbi->mbc[8];
     mbmi->ref_frame = (MV_REFERENCE_FRAME) vp8_read(bc, pbi->prob_intra);
     if (mbmi->ref_frame)    /* inter MB */
     {
@@ -596,14 +596,14 @@ static void decode_mb_mode_mvs(VP8D_COMP *pbi, MODE_INFO *mi,
      * By default on a key frame reset all MBs to segment 0
      */
     if (pbi->mb.update_mb_segmentation_map)
-        read_mb_features(&pbi->bc, &mi->mbmi, &pbi->mb);
+        read_mb_features(&pbi->mbc[8], &mi->mbmi, &pbi->mb);
     else if(pbi->common.frame_type == KEY_FRAME)
         mi->mbmi.segment_id = 0;
 
     /* Read the macroblock coeff skip flag if this feature is in use,
      * else default to 0 */
     if (pbi->common.mb_no_coeff_skip)
-        mi->mbmi.mb_skip_coeff = vp8_read(&pbi->bc, pbi->prob_skip_false);
+        mi->mbmi.mb_skip_coeff = vp8_read(&pbi->mbc[8], pbi->prob_skip_false);
     else
         mi->mbmi.mb_skip_coeff = 0;
 
@@ -645,7 +645,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 #if CONFIG_ERROR_CONCEALMENT
             /* look for corruption. set mvs_corrupt_from_mb to the current
              * mb_num if the frame is corrupt from this macroblock. */
-            if (vp8dx_bool_error(&pbi->bc) && mb_num <
+            if (vp8dx_bool_error(&pbi->mbc[8]) && mb_num <
                 (int)pbi->mvs_corrupt_from_mb)
             {
                 pbi->mvs_corrupt_from_mb = mb_num;

@@ -64,7 +64,7 @@ static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
         mbd->mode_ref_lf_delta_enabled    = xd->mode_ref_lf_delta_enabled;
         mbd->mode_ref_lf_delta_update    = xd->mode_ref_lf_delta_update;
 
-        mbd->current_bc = &pbi->bc2;
+        mbd->current_bc = &pbi->mbc[0];
 
         vpx_memcpy(mbd->dequant_y1_dc, xd->dequant_y1_dc, sizeof(xd->dequant_y1_dc));
         vpx_memcpy(mbd->dequant_y1, xd->dequant_y1, sizeof(xd->dequant_y1));
