@@ -1833,9 +1833,6 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
   else
 #endif
   if (cpi->common.txfm_mode == ALLOW_8X8
-#if !CONFIG_HYBRIDTRANSFORM8X8
-      && mbmi->mode != I8X8_PRED
-#endif
       && mbmi->mode != B_PRED) {
     mbmi->txfm_size = TX_8X8;
     cpi->t8x8_count++;
@@ -1852,8 +1849,9 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
   else
     vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
 
-  if (mbmi->mode != I8X8_PRED)
+  if (mbmi->mode != I8X8_PRED) {
     vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+  }
 
   if (output_enabled) {
     // Tokenize
@@ -1932,9 +1930,6 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
   } else
 #endif
   if (cpi->common.txfm_mode == ALLOW_8X8
-#if !CONFIG_HYBRIDTRANSFORM8X8
-      && mbmi->mode != I8X8_PRED
-#endif
       && mbmi->mode != B_PRED
       && mbmi->mode != SPLITMV) {
     mbmi->txfm_size = TX_8X8;
@@ -2115,9 +2110,6 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
 
   /* test code: set transform size based on mode selection */
   if (cpi->common.txfm_mode == ALLOW_8X8
-#if !CONFIG_HYBRIDTRANSFORM8X8
-      && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-#endif
       && x->e_mbd.mode_info_context->mbmi.mode != B_PRED
       && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
     x->e_mbd.mode_info_context->mbmi.txfm_size = TX_8X8;

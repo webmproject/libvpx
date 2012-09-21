@@ -89,10 +89,6 @@ typedef enum
 #endif
 } INTERPOLATIONFILTERTYPE;
 
-#if 0//CONFIG_SWITCHABLE_INTERP
-#define VP8_SWITCHABLE_FILTERS 2 /* number of switchable filters */
-#endif
-
 typedef enum
 {
   DC_PRED,            /* average of above and left pixels */
@@ -478,6 +474,40 @@ static void txfm_map(BLOCKD *b, B_PREDICTION_MODE bmode) {
       b->bmi.as_mode.tx_type = DCT_DCT;
       break;
   }
+}
+
+static TX_TYPE get_tx_type(MACROBLOCKD *xd, const BLOCKD *b) {
+  TX_TYPE tx_type = DCT_DCT;
+  int ib = (b - xd->block);
+  if (ib >= 16) return tx_type;
+#if CONFIG_HYBRIDTRANSFORM16X16
+  if (xd->mode_info_context->mbmi.txfm_size == TX_16X16) {
+    if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
+        xd->q_index < ACTIVE_HT16)
+      tx_type = b->bmi.as_mode.tx_type;
+    return tx_type;
+  }
+#endif
+#if CONFIG_HYBRIDTRANSFORM8X8
+  if (xd->mode_info_context->mbmi.txfm_size  == TX_8X8) {
+    BLOCKD *bb;
+    ib = (ib & 8) + ((ib & 4) >> 1);
+    bb = xd->block + ib;
+    if (xd->mode_info_context->mbmi.mode == I8X8_PRED)
+      tx_type = bb->bmi.as_mode.tx_type;
+    return tx_type;
+  }
+#endif
+#if CONFIG_HYBRIDTRANSFORM
+  if (xd->mode_info_context->mbmi.txfm_size  == TX_4X4) {
+    if (xd->mode_info_context->mbmi.mode == B_PRED &&
+        xd->q_index < ACTIVE_HT) {
+      tx_type = b->bmi.as_mode.tx_type;
+    }
+    return tx_type;
+  }
+#endif
+  return tx_type;
 }
 #endif
 

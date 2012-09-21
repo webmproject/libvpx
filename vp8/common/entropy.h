@@ -62,11 +62,7 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 /* Outside dimension.  0 = Y no DC, 1 = Y2, 2 = UV, 3 = Y with DC */
 #define BLOCK_TYPES 4
 
-#if CONFIG_HYBRIDTRANSFORM8X8
 #define BLOCK_TYPES_8X8 4
-#else
-#define BLOCK_TYPES_8X8 3
-#endif
 
 #define BLOCK_TYPES_16X16 4
 

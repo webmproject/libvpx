@@ -55,12 +55,6 @@ const TOKENVALUE *vp8_dct_value_tokens_ptr;
 static int dct_value_cost[DCT_MAX_VALUE * 2];
 const int *vp8_dct_value_cost_ptr;
 
-#ifdef ENC_DEBUG
-extern int mb_row_debug;
-extern int mb_col_debug;
-extern int enc_debug;
-#endif
-
 static void fill_value_tokens() {
 
   TOKENVALUE *const t = dct_value_tokens + DCT_MAX_VALUE;
@@ -218,12 +212,6 @@ static void tokenize2nd_order_b_8x8
 
     t->skip_eob_node = pt == 0 && ((band > 0 && type > 0) || (band > 1 && type == 0));
 
-#ifdef ENC_DEBUG
-    if (t->skip_eob_node && vp8_coef_encodings[x].Len == 1)
-      printf("Trouble 2 x=%d Len=%d skip=%d eob=%d c=%d band=%d type=%d: [%d %d %d]\n",
-             x, vp8_coef_encodings[x].Len, t->skip_eob_node, eob, c, band, type,
-             cpi->count, mb_row_debug, mb_col_debug);
-#endif
     if (!dry_run)
       ++cpi->coef_counts_8x8       [type] [band] [pt] [x];
   } while (pt = vp8_prev_token_class[x], ++t, c < eob  &&  ++c < seg_eob);

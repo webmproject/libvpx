@@ -22,10 +22,6 @@
 #include "encodeintra.h"
 
 
-#ifdef ENC_DEBUG
-extern int enc_debug;
-#endif
-
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
 #else
@@ -208,39 +204,8 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   else
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-#ifdef ENC_DEBUG
-  if (enc_debug) {
-    int i;
-    printf("Intra qcoeff:\n");
-    printf("%d %d:\n", x->e_mbd.mb_to_left_edge, x->e_mbd.mb_to_top_edge);
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", x->e_mbd.qcoeff[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-    printf("Intra dqcoeff:\n");
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", x->e_mbd.dqcoeff[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-    printf("Intra diff:\n");
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", x->e_mbd.diff[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-    printf("Intra predictor:\n");
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", x->e_mbd.predictor[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-    printf("eobs:\n");
-    for (i = 0; i < 25; i++)
-      printf("%d ", x->e_mbd.block[i].eob);
-    printf("\n");
-  }
-#endif
-
   RECON_INVOKE(&rtcd->common->recon, recon_mby)
-  (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+      (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 
 }
 
@@ -270,37 +235,6 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   else
     vp8_quantize_mbuv(x);
 
-#ifdef ENC_DEBUG
-  if (enc_debug) {
-    int i;
-    printf("vp8_encode_intra16x16mbuv\n");
-    printf("%d %d:\n", x->e_mbd.mb_to_left_edge, x->e_mbd.mb_to_top_edge);
-    printf("qcoeff:\n");
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", x->e_mbd.qcoeff[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-    printf("dqcoeff:\n");
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", x->e_mbd.dqcoeff[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-    printf("diff:\n");
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", x->e_mbd.diff[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-    printf("predictor:\n");
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", x->e_mbd.predictor[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-    printf("eobs:\n");
-    for (i = 0; i < 25; i++)
-      printf("%d ", x->e_mbd.block[i].eob);
-    printf("\n");
-  }
-#endif
   if (x->optimize) {
     if (tx_type == TX_8X8)
       vp8_optimize_mbuv_8x8(x, rtcd);
@@ -335,7 +269,6 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
   }
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8
   {
     MACROBLOCKD *xd = &x->e_mbd;
     int idx = (ib & 0x02) ? (ib + 2) : ib;
@@ -343,12 +276,18 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     // generate residual blocks
     vp8_subtract_4b_c(be, b, 16);
 
+#if CONFIG_HYBRIDTRANSFORM8X8
     txfm_map(b, pred_mode_conv(b->bmi.as_mode.first));
     vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32,
               b->bmi.as_mode.tx_type, 8);
     x->quantize_b_8x8(x->block + idx, xd->block + idx);
     vp8_ihtllm_c(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
                  b->bmi.as_mode.tx_type, 8);
+#else
+    x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+    x->quantize_b_8x8(x->block + idx, xd->block + idx);
+    vp8_idct_idct8(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
+#endif
 
     // reconstruct submacroblock
     for (i = 0; i < 4; i++) {
@@ -357,19 +296,6 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
                     b->dst_stride);
     }
   }
-#else
-  for (i = 0; i < 4; i++) {
-    b = &x->e_mbd.block[ib + iblock[i]];
-    be = &x->block[ib + iblock[i]];
-    ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
-    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
-    x->quantize_b(be, b);
-    vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
-    RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor,
-                                              b->diff, *(b->base_dst) + b->dst,
-                                              b->dst_stride);
-  }
-#endif
 }
 
 extern const int vp8_i8x8_block[4];
@@ -380,7 +306,6 @@ void vp8_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     ib = vp8_i8x8_block[i];
     vp8_encode_intra8x8(rtcd, x, ib);
   }
-
 }
 
 void vp8_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,

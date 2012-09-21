@@ -1332,11 +1332,9 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
   DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16 * 8);
   DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16 * 4);
 
-#if CONFIG_HYBRIDTRANSFORM8X8
   // perform transformation of dimension 8x8
   // note the input and output index mapping
   int idx = (ib & 0x02) ? (ib + 2) : ib;
-#endif
 
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
 #if CONFIG_COMP_INTRA_PRED
@@ -1367,52 +1365,25 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
       txfm_map(b, pred_mode_conv(mode));
       vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32,
                 b->bmi.as_mode.tx_type, 8);
+
+#else
+      x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+#endif
+
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
 
       // compute quantization mse of 8x8 block
       distortion = vp8_block_error_c((x->block + idx)->coeff,
                                      (xd->block + idx)->dqcoeff, 64)>>2;
-
       ta0 = *(a + vp8_block2above_8x8[idx]);
       tl0 = *(l + vp8_block2left_8x8 [idx]);
 
       rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
                            &ta0, &tl0, TX_8X8);
+
       rate += rate_t;
       ta1 = ta0;
       tl1 = tl0;
-#else
-      x->vp8_short_fdct8x4(be->src_diff, be->coeff, 32);
-      x->vp8_short_fdct8x4(be->src_diff + 64, be->coeff + 64, 32);
-
-      x->quantize_b_pair(x->block + ib, x->block + ib + 1,
-                         xd->block + ib, xd->block + ib + 1);
-      x->quantize_b_pair(x->block + ib + 4, x->block + ib + 5,
-                         xd->block + ib + 4, xd->block + ib + 5);
-
-      distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)
-                   ((x->block + ib)->coeff, (xd->block + ib)->dqcoeff, 16) >> 2;
-      distortion += ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)
-                    ((x->block + ib + 1)->coeff, (xd->block + ib + 1)->dqcoeff, 16) >> 2;
-      distortion += ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)
-                    ((x->block + ib + 4)->coeff, (xd->block + ib + 4)->dqcoeff, 16) >> 2;
-      distortion += ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)
-                    ((x->block + ib + 5)->coeff, (xd->block + ib + 5)->dqcoeff, 16) >> 2;
-
-      ta0 = *(a + vp8_block2above[ib]);
-      ta1 = *(a + vp8_block2above[ib + 1]);
-      tl0 = *(l + vp8_block2above[ib]);
-      tl1 = *(l + vp8_block2above[ib + 4]);
-      rate_t = cost_coeffs(x, xd->block + ib, PLANE_TYPE_Y_WITH_DC,
-                           &ta0, &tl0, TX_4X4);
-      rate_t += cost_coeffs(x, xd->block + ib + 1, PLANE_TYPE_Y_WITH_DC,
-                            &ta1, &tl0, TX_4X4);
-      rate_t += cost_coeffs(x, xd->block + ib + 4, PLANE_TYPE_Y_WITH_DC,
-                            &ta0, &tl1, TX_4X4);
-      rate_t += cost_coeffs(x, xd->block + ib + 5, PLANE_TYPE_Y_WITH_DC,
-                            &ta1, &tl1, TX_4X4);
-      rate += rate_t;
-#endif
 
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
       if (this_rd < best_rd) {
