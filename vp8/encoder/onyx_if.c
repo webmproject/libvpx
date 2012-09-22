@@ -450,72 +450,51 @@ static void segmentation_test_function(VP8_COMP *cpi)
 /* A simple function to cyclically refresh the background at a lower Q */
 static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 {
-    unsigned char *seg_map;
+    unsigned char *seg_map = cpi->segmentation_map;
     signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
     int i;
     int block_count = cpi->cyclic_refresh_mode_max_mbs_perframe;
     int mbs_in_frame = cpi->common.mb_rows * cpi->common.mb_cols;
 
-    /* Create a temporary map for segmentation data. */
-    CHECK_MEM_ERROR(seg_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
+    cpi->cyclic_refresh_q = Q / 2;
 
-    cpi->cyclic_refresh_q = Q;
-
-    for (i = Q; i > 0; i--)
-    {
-        if (vp8_bits_per_mb[cpi->common.frame_type][i] >= ((vp8_bits_per_mb[cpi->common.frame_type][Q]*(Q + 128)) / 64))
-        {
-            break;
-        }
-    }
-
-    cpi->cyclic_refresh_q = i;
-
-    /* Only update for inter frames */
     if (cpi->common.frame_type != KEY_FRAME)
     {
+        // set every macroblock to eligible for update
+        vpx_memset(cpi->segmentation_map, 0, mbs_in_frame);
+
         /* Cycle through the macro_block rows */
         /* MB loop to set local segmentation map */
-        for (i = cpi->cyclic_refresh_mode_index; i < mbs_in_frame; i++)
+        i = cpi->cyclic_refresh_mode_index;
+        do
         {
-            /* If the MB is as a candidate for clean up then mark it for
-             * possible boost/refresh (segment 1) The segment id may get
-             * reset to 0 later if the MB gets coded anything other than
-             * last frame 0,0 as only (last frame 0,0) MBs are eligable for
-             * refresh : that is to say Mbs likely to be background blocks.
-             */
-            if (cpi->cyclic_refresh_map[i] == 0)
-            {
-                seg_map[i] = 1;
-            }
-            else
-            {
-                seg_map[i] = 0;
+          /* If the MB is as a candidate for clean up then mark it for
+           * possible boost/refresh (segment 1) The segment id may get
+           * reset to 0 later if the MB gets coded anything other than
+           * last frame 0,0 as only (last frame 0,0) MBs are eligable for
+           * refresh : that is to say Mbs likely to be background blocks.
+           */
+          if (cpi->cyclic_refresh_map[i] == 0)
+          {
+              seg_map[i] = 1;
+              block_count --;
+          }
+          else if (cpi->cyclic_refresh_map[i] < 0)
+              cpi->cyclic_refresh_map[i]++;
 
-                /* Skip blocks that have been refreshed recently anyway. */
-                if (cpi->cyclic_refresh_map[i] < 0)
-                    cpi->cyclic_refresh_map[i]++;
-            }
-
-
-            if (block_count > 0)
-                block_count--;
-            else
-                break;
+          i++;
+          if (i == mbs_in_frame)
+              i = 0;
 
         }
+        while(block_count && i != cpi->cyclic_refresh_mode_index);
 
-        /* If we have gone through the frame reset to the start */
         cpi->cyclic_refresh_mode_index = i;
-
-        if (cpi->cyclic_refresh_mode_index >= mbs_in_frame)
-            cpi->cyclic_refresh_mode_index = 0;
     }
 
-    /* Set the segmentation Map */
-    set_segmentation_map(cpi, seg_map);
-
     /* Activate segmentation. */
+    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+    cpi->mb.e_mbd.update_mb_segmentation_data = 1;
     enable_segmentation(cpi);
 
     /* Set up the quant segment data */
@@ -532,11 +511,6 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 
     /* Initialise the feature data structure */
     set_segment_data(cpi, &feature_data[0][0], SEGMENT_DELTADATA);
-
-    /* Delete sementation map */
-    vpx_free(seg_map);
-
-    seg_map = 0;
 
 }
 
@@ -1828,7 +1802,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
      * Currently this is tied to error resilliant mode
      */
     cpi->cyclic_refresh_mode_enabled = cpi->oxcf.error_resilient_mode;
-    cpi->cyclic_refresh_mode_max_mbs_perframe = (cpi->common.mb_rows * cpi->common.mb_cols) / 40;
+    cpi->cyclic_refresh_mode_max_mbs_perframe = (cpi->common.mb_rows * cpi->common.mb_cols) / 5;
     cpi->cyclic_refresh_mode_index = 0;
     cpi->cyclic_refresh_q = 32;
 
