@@ -48,8 +48,8 @@ static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
         mbd->mode_info_stride  = pc->mode_info_stride;
 
         mbd->frame_type = pc->frame_type;
-        mbd->pre = pc->yv12_fb[pc->lst_fb_idx];
-        mbd->dst = pc->yv12_fb[pc->new_fb_idx];
+        mbd->pre = xd->pre;
+        mbd->dst = xd->dst;
 
         mbd->segmentation_enabled    = xd->segmentation_enabled;
         mbd->mb_segement_abs_delta     = xd->mb_segement_abs_delta;
@@ -304,31 +304,33 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row)
     int num_part = 1 << pbi->common.multi_token_partition;
     int last_mb_row = start_mb_row;
 
-    int dst_fb_idx = pc->new_fb_idx;
+    YV12_BUFFER_CONFIG *yv12_fb_new = pbi->dec_fb_ref[INTRA_FRAME];
+    YV12_BUFFER_CONFIG *yv12_fb_lst = pbi->dec_fb_ref[LAST_FRAME];
+
+    int recon_y_stride = yv12_fb_new->y_stride;
+    int recon_uv_stride = yv12_fb_new->uv_stride;
+
     unsigned char *ref_buffer[MAX_REF_FRAMES][3];
     unsigned char *dst_buffer[3];
     int i;
-    int ref_fb_index[MAX_REF_FRAMES];
     int ref_fb_corrupted[MAX_REF_FRAMES];
 
     ref_fb_corrupted[INTRA_FRAME] = 0;
 
-    ref_fb_index[LAST_FRAME]    = pc->lst_fb_idx;
-    ref_fb_index[GOLDEN_FRAME]  = pc->gld_fb_idx;
-    ref_fb_index[ALTREF_FRAME]  = pc->alt_fb_idx;
-
     for(i = 1; i < MAX_REF_FRAMES; i++)
     {
-        ref_buffer[i][0] = pc->yv12_fb[ref_fb_index[i]].y_buffer;
-        ref_buffer[i][1] = pc->yv12_fb[ref_fb_index[i]].u_buffer;
-        ref_buffer[i][2] = pc->yv12_fb[ref_fb_index[i]].v_buffer;
+        YV12_BUFFER_CONFIG *this_fb = pbi->dec_fb_ref[i];
 
-        ref_fb_corrupted[i] = pc->yv12_fb[ref_fb_index[i]].corrupted;
+        ref_buffer[i][0] = this_fb->y_buffer;
+        ref_buffer[i][1] = this_fb->u_buffer;
+        ref_buffer[i][2] = this_fb->v_buffer;
+
+        ref_fb_corrupted[i] = this_fb->corrupted;
     }
 
-    dst_buffer[0] = pc->yv12_fb[dst_fb_idx].y_buffer;
-    dst_buffer[1] = pc->yv12_fb[dst_fb_idx].u_buffer;
-    dst_buffer[2] = pc->yv12_fb[dst_fb_idx].v_buffer;
+    dst_buffer[0] = yv12_fb_new->y_buffer;
+    dst_buffer[1] = yv12_fb_new->u_buffer;
+    dst_buffer[2] = yv12_fb_new->v_buffer;
 
     xd->up_available = (start_mb_row != 0);
 
@@ -337,11 +339,6 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row)
        int i;
        int recon_yoffset, recon_uvoffset;
        int mb_col;
-       int ref_fb_idx = pc->lst_fb_idx;
-       int dst_fb_idx = pc->new_fb_idx;
-       int recon_y_stride = pc->yv12_fb[ref_fb_idx].y_stride;
-       int recon_uv_stride = pc->yv12_fb[ref_fb_idx].uv_stride;
-
        int filter_level;
        loop_filter_info_n *lfi_n = &pc->lf_info;
 
@@ -589,8 +586,8 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row)
        {
            if(mb_row != pc->mb_rows-1)
            {
-               int lasty = pc->yv12_fb[ref_fb_idx].y_width + VP8BORDERINPIXELS;
-               int lastuv = (pc->yv12_fb[ref_fb_idx].y_width>>1) + (VP8BORDERINPIXELS>>1);
+               int lasty = yv12_fb_lst->y_width + VP8BORDERINPIXELS;
+               int lastuv = (yv12_fb_lst->y_width>>1) + (VP8BORDERINPIXELS>>1);
 
                for (i = 0; i < 4; i++)
                {
@@ -601,7 +598,7 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row)
            }
        }
        else
-           vp8_extend_mb_row(&pc->yv12_fb[dst_fb_idx], xd->dst.y_buffer + 16,
+           vp8_extend_mb_row(yv12_fb_new, xd->dst.y_buffer + 16,
                              xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
 
        /* last MB of row is ready just after extension is done */
@@ -874,13 +871,14 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
     int j;
 
     int filter_level = pc->filter_level;
+    YV12_BUFFER_CONFIG *yv12_fb_new = pbi->dec_fb_ref[INTRA_FRAME];
 
     if (filter_level)
     {
         /* Set above_row buffer to 127 for decoding first MB row */
-        vpx_memset(pbi->mt_yabove_row[0] + VP8BORDERINPIXELS-1, 127, pc->yv12_fb[pc->new_fb_idx].y_width + 5);
-        vpx_memset(pbi->mt_uabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (pc->yv12_fb[pc->new_fb_idx].y_width>>1) +5);
-        vpx_memset(pbi->mt_vabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (pc->yv12_fb[pc->new_fb_idx].y_width>>1) +5);
+        vpx_memset(pbi->mt_yabove_row[0] + VP8BORDERINPIXELS-1, 127, yv12_fb_new->y_width + 5);
+        vpx_memset(pbi->mt_uabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (yv12_fb_new->y_width>>1) +5);
+        vpx_memset(pbi->mt_vabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (yv12_fb_new->y_width>>1) +5);
 
         for (j=1; j<pc->mb_rows; j++)
         {
@@ -901,7 +899,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
         vp8_loop_filter_frame_init(pc, &pbi->mb, filter_level);
     }
     else
-        vp8_setup_intra_recon_top_line(&pc->yv12_fb[pc->new_fb_idx]);
+        vp8_setup_intra_recon_top_line(yv12_fb_new);
 
     setup_decoding_thread_data(pbi, xd, pbi->mb_row_di, pbi->decoding_thread_count);
 
