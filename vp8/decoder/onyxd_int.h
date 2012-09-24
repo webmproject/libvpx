@@ -39,7 +39,8 @@ typedef struct VP8D_COMP
 
     DECLARE_ALIGNED(16, VP8_COMMON, common);
 
-    vp8_reader bc, bc2;
+    /* the last partition will be used for the modes/mvs */
+    vp8_reader mbc[MAX_PARTITIONS];
 
     VP8D_CONFIG oxcf;
 
@@ -77,7 +78,6 @@ typedef struct VP8D_COMP
     /* end of threading data */
 #endif
 
-    vp8_reader mbc[8];
     int64_t last_time_stamp;
     int   ready_for_new_data;
 

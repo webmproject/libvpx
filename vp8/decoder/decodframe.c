@@ -823,7 +823,7 @@ static unsigned int read_available_partition_size(
 static void setup_token_decoder(VP8D_COMP *pbi,
                                 const unsigned char* token_part_sizes)
 {
-    vp8_reader *bool_decoder = &pbi->bc2;
+    vp8_reader *bool_decoder = &pbi->mbc[0];
     unsigned int partition_idx;
     unsigned int fragment_idx;
     unsigned int num_token_partitions;
@@ -831,14 +831,10 @@ static void setup_token_decoder(VP8D_COMP *pbi,
                                           pbi->fragment_sizes[0];
 
     TOKEN_PARTITION multi_token_partition =
-            (TOKEN_PARTITION)vp8_read_literal(&pbi->bc, 2);
-    if (!vp8dx_bool_error(&pbi->bc))
+            (TOKEN_PARTITION)vp8_read_literal(&pbi->mbc[8], 2);
+    if (!vp8dx_bool_error(&pbi->mbc[8]))
         pbi->common.multi_token_partition = multi_token_partition;
     num_token_partitions = 1 << pbi->common.multi_token_partition;
-    if (num_token_partitions > 1)
-    {
-        bool_decoder = &pbi->mbc[0];
-    }
 
     /* Check for partitions within the fragments and unpack the fragments
      * so that each fragment pointer points to its corresponding partition. */
@@ -983,7 +979,7 @@ static void init_frame(VP8D_COMP *pbi)
 
 int vp8_decode_frame(VP8D_COMP *pbi)
 {
-    vp8_reader *const bc = & pbi->bc;
+    vp8_reader *const bc = & pbi->mbc[8];
     VP8_COMMON *const pc = & pbi->common;
     MACROBLOCKD *const xd  = & pbi->mb;
     const unsigned char *data = pbi->fragments[0];
@@ -1256,7 +1252,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     setup_token_decoder(pbi, data + first_partition_length_in_bytes);
 
-    xd->current_bc = &pbi->bc2;
+    xd->current_bc = &pbi->mbc[0];
 
     /* Read the default quantizers. */
     {
