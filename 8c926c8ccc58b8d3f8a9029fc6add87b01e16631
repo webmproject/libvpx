@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//mYo\u003d",
+        "filename": "vp8/decoder/onyxd_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-24T19:17:16Z",
+      "side": 1,
+      "message": "in vp8_decode(), this function will only be called when the following is true:\n    if (!res \u0026\u0026 ctx-\u003epbi)",
+      "parentUuid": "AAAAPn//mZI\u003d",
+      "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//mZM\u003d",
         "filename": "vp8/vp8_dx_iface.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2012-09-24T18:50:55Z",
       "side": 1,
       "message": "why the removal?",
+      "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//mYM\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-24T19:17:16Z",
+      "side": 1,
+      "message": "originally peek was called once to see if the first frame was a keyframe.... now it is being called every frame....  so every frame after a keyframe should not be marked as an error",
+      "parentUuid": "AAAAPn//mZM\u003d",
       "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//mYI\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-24T19:17:16Z",
+      "side": 1,
+      "message": "Noted on the note. ;-)",
+      "parentUuid": "AAAAPn//mls\u003d",
+      "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//mk0\u003d",
         "filename": "vp8/vp8_dx_iface.c",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2012-09-24T18:50:55Z",
       "side": 1,
       "message": "pet peeve : this can be done like this : \n\nxd-\u003epre \u003d pc-\u003eyv12_fb[pc-\u003elst_fb_idx];",
+      "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//mX8\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-24T19:17:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//mk0\u003d",
       "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
