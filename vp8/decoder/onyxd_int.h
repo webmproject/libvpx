@@ -37,6 +37,8 @@ typedef struct VP8D_COMP
 {
     DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
+    YV12_BUFFER_CONFIG *dec_fb_ref[NUM_YV12_BUFFERS];
+
     DECLARE_ALIGNED(16, VP8_COMMON, common);
 
     /* the last partition will be used for the modes/mvs */

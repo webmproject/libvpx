@@ -289,14 +289,6 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
     VP8_COMMON *cm = &pbi->common;
     int retcode = 0;
 
-    /*if(pbi->ready_for_new_data == 0)
-        return -1;*/
-
-    if (pbi == 0)
-    {
-        return -1;
-    }
-
     pbi->common.error.error_code = VPX_CODEC_OK;
 
     if (pbi->num_fragments == 0)
@@ -382,6 +374,12 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
 #endif
 
     cm->new_fb_idx = get_free_fb (cm);
+
+    /* setup reference frames for vp8_decode_frame */
+    pbi->dec_fb_ref[INTRA_FRAME]  = &cm->yv12_fb[cm->new_fb_idx];
+    pbi->dec_fb_ref[LAST_FRAME]   = &cm->yv12_fb[cm->lst_fb_idx];
+    pbi->dec_fb_ref[GOLDEN_FRAME] = &cm->yv12_fb[cm->gld_fb_idx];
+    pbi->dec_fb_ref[ALTREF_FRAME] = &cm->yv12_fb[cm->alt_fb_idx];
 
     if (setjmp(pbi->common.error.jmp))
     {

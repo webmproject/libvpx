@@ -515,37 +515,36 @@ static void decode_mb_rows(VP8D_COMP *pbi)
     int recon_yoffset, recon_uvoffset;
     int mb_row, mb_col;
     int mb_idx = 0;
-    int dst_fb_idx = pc->new_fb_idx;
-    int recon_y_stride = pc->yv12_fb[dst_fb_idx].y_stride;
-    int recon_uv_stride = pc->yv12_fb[dst_fb_idx].uv_stride;
+
+    YV12_BUFFER_CONFIG *yv12_fb_new = pbi->dec_fb_ref[INTRA_FRAME];
+
+    int recon_y_stride = yv12_fb_new->y_stride;
+    int recon_uv_stride = yv12_fb_new->uv_stride;
 
     unsigned char *ref_buffer[MAX_REF_FRAMES][3];
     unsigned char *dst_buffer[3];
     unsigned char *lf_dst[3];
     unsigned char *eb_dst[3];
     int i;
-    int ref_fb_index[MAX_REF_FRAMES];
     int ref_fb_corrupted[MAX_REF_FRAMES];
 
     ref_fb_corrupted[INTRA_FRAME] = 0;
 
-    ref_fb_index[LAST_FRAME]    = pc->lst_fb_idx;
-    ref_fb_index[GOLDEN_FRAME]  = pc->gld_fb_idx;
-    ref_fb_index[ALTREF_FRAME]  = pc->alt_fb_idx;
-
     for(i = 1; i < MAX_REF_FRAMES; i++)
     {
-        ref_buffer[i][0] = pc->yv12_fb[ref_fb_index[i]].y_buffer;
-        ref_buffer[i][1] = pc->yv12_fb[ref_fb_index[i]].u_buffer;
-        ref_buffer[i][2] = pc->yv12_fb[ref_fb_index[i]].v_buffer;
+        YV12_BUFFER_CONFIG *this_fb = pbi->dec_fb_ref[i];
 
-        ref_fb_corrupted[i] = pc->yv12_fb[ref_fb_index[i]].corrupted;
+        ref_buffer[i][0] = this_fb->y_buffer;
+        ref_buffer[i][1] = this_fb->u_buffer;
+        ref_buffer[i][2] = this_fb->v_buffer;
+
+        ref_fb_corrupted[i] = this_fb->corrupted;
     }
 
     /* Set up the buffer pointers */
-    eb_dst[0] = lf_dst[0] = dst_buffer[0] = pc->yv12_fb[dst_fb_idx].y_buffer;
-    eb_dst[1] = lf_dst[1] = dst_buffer[1] = pc->yv12_fb[dst_fb_idx].u_buffer;
-    eb_dst[2] = lf_dst[2] = dst_buffer[2] = pc->yv12_fb[dst_fb_idx].v_buffer;
+    eb_dst[0] = lf_dst[0] = dst_buffer[0] = yv12_fb_new->y_buffer;
+    eb_dst[1] = lf_dst[1] = dst_buffer[1] = yv12_fb_new->u_buffer;
+    eb_dst[2] = lf_dst[2] = dst_buffer[2] = yv12_fb_new->v_buffer;
 
     xd->up_available = 0;
 
@@ -553,7 +552,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
     if(pc->filter_level)
         vp8_loop_filter_frame_init(pc, xd, pc->filter_level);
 
-    vp8_setup_intra_recon_top_line(&pc->yv12_fb[dst_fb_idx]);
+    vp8_setup_intra_recon_top_line(yv12_fb_new);
 
     /* Decode the individual macro block */
     for (mb_row = 0; mb_row < pc->mb_rows; mb_row++)
@@ -669,7 +668,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
         }
 
         /* adjust to the next row of mbs */
-        vp8_extend_mb_row(&pc->yv12_fb[dst_fb_idx], xd->dst.y_buffer + 16,
+        vp8_extend_mb_row(yv12_fb_new, xd->dst.y_buffer + 16,
                           xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
 
         ++xd->mode_info_context;      /* skip prediction column */
@@ -690,7 +689,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
 
                 if(mb_row > 1)
                 {
-                    yv12_extend_frame_left_right_c(&pc->yv12_fb[dst_fb_idx],
+                    yv12_extend_frame_left_right_c(yv12_fb_new,
                                                    eb_dst[0],
                                                    eb_dst[1],
                                                    eb_dst[2]);
@@ -700,7 +699,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
                     eb_dst[2] += recon_uv_stride *  8;
 
                     if(mb_row == 2)
-                        yv12_extend_frame_top_c(&pc->yv12_fb[dst_fb_idx]);
+                        yv12_extend_frame_top_c(yv12_fb_new);
 
                 }
 
@@ -716,7 +715,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
             if(mb_row > 0)
             {
                 /**/
-                yv12_extend_frame_left_right_c(&pc->yv12_fb[dst_fb_idx],
+                yv12_extend_frame_left_right_c(yv12_fb_new,
                                                eb_dst[0],
                                                eb_dst[1],
                                                eb_dst[2]);
@@ -726,7 +725,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
                 eb_dst[2] += recon_uv_stride *  8;
 
                 if(mb_row == 1)
-                    yv12_extend_frame_top_c(&pc->yv12_fb[dst_fb_idx]);
+                    yv12_extend_frame_top_c(yv12_fb_new);
             }
         }
     }
@@ -742,7 +741,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
                                        recon_uv_stride, lf_dst[0], lf_dst[1],
                                        lf_dst[2]);
 
-        yv12_extend_frame_left_right_c(&pc->yv12_fb[dst_fb_idx],
+        yv12_extend_frame_left_right_c(yv12_fb_new,
                                        eb_dst[0],
                                        eb_dst[1],
                                        eb_dst[2]);
@@ -750,12 +749,13 @@ static void decode_mb_rows(VP8D_COMP *pbi)
         eb_dst[1] += recon_uv_stride *  8;
         eb_dst[2] += recon_uv_stride *  8;
     }
-    yv12_extend_frame_left_right_c(&pc->yv12_fb[dst_fb_idx],
+    yv12_extend_frame_left_right_c(yv12_fb_new,
                                    eb_dst[0],
                                    eb_dst[1],
                                    eb_dst[2]);
 
-    yv12_extend_frame_bottom_c(&pc->yv12_fb[dst_fb_idx]);
+    yv12_extend_frame_bottom_c(yv12_fb_new);
+
 }
 
 static unsigned int read_partition_size(const unsigned char *cx_size)
@@ -991,9 +991,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     int corrupt_tokens = 0;
     int prev_independent_partitions = pbi->independent_partitions;
 
+    YV12_BUFFER_CONFIG *yv12_fb_new = pbi->dec_fb_ref[INTRA_FRAME];
+
     /* start with no corruption of current frame */
     xd->corrupted = 0;
-    pc->yv12_fb[pc->new_fb_idx].corrupted = 0;
+    yv12_fb_new->corrupted = 0;
 
     if (data_end - data < 3)
     {
@@ -1031,9 +1033,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
         if (pc->frame_type == KEY_FRAME)
         {
-            const int Width = pc->Width;
-            const int Height = pc->Height;
-
             /* vet via sync code */
             /* When error concealment is enabled we should only check the sync
              * code if we have enough bits available
@@ -1058,85 +1057,14 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             }
             data += 7;
 
-            if (Width != pc->Width  ||  Height != pc->Height)
-            {
-                int prev_mb_rows = pc->mb_rows;
-
-                if (pc->Width <= 0)
-                {
-                    pc->Width = Width;
-                    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                                       "Invalid frame width");
-                }
-
-                if (pc->Height <= 0)
-                {
-                    pc->Height = Height;
-                    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                                       "Invalid frame height");
-                }
-
-                if (vp8_alloc_frame_buffers(pc, pc->Width, pc->Height))
-                    vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
-                                       "Failed to allocate frame buffers");
-
-                vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
-                vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
-
-#if CONFIG_MULTITHREAD
-                for (i = 0; i < pbi->allocated_decoding_thread_count; i++)
-                {
-                    pbi->mb_row_di[i].mbd.dst = pc->yv12_fb[pc->new_fb_idx];
-                    vp8_build_block_doffsets(&pbi->mb_row_di[i].mbd);
-                }
-#endif
-                vp8_build_block_doffsets(&pbi->mb);
-
-                /* allocate memory for last frame MODE_INFO array */
-#if CONFIG_ERROR_CONCEALMENT
-
-                if (pbi->ec_enabled)
-                {
-                    /* old prev_mip was released by vp8_de_alloc_frame_buffers()
-                     * called in vp8_alloc_frame_buffers() */
-                    pc->prev_mip = vpx_calloc(
-                                       (pc->mb_cols + 1) * (pc->mb_rows + 1),
-                                       sizeof(MODE_INFO));
-
-                    if (!pc->prev_mip)
-                    {
-                        vp8_de_alloc_frame_buffers(pc);
-                        vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
-                                           "Failed to allocate"
-                                           "last frame MODE_INFO array");
-                    }
-
-                    pc->prev_mi = pc->prev_mip + pc->mode_info_stride + 1;
-
-                    if (vp8_alloc_overlap_lists(pbi))
-                        vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
-                                           "Failed to allocate overlap lists "
-                                           "for error concealment");
-                }
-
-#endif
-
-#if CONFIG_MULTITHREAD
-                if (pbi->b_multithreaded_rd)
-                    vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
-#else
-                (void)prev_mb_rows;
-#endif
-            }
         }
         else
         {
-          vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
-          vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
+          vpx_memcpy(&xd->pre, yv12_fb_new, sizeof(YV12_BUFFER_CONFIG));
+          vpx_memcpy(&xd->dst, yv12_fb_new, sizeof(YV12_BUFFER_CONFIG));
         }
     }
-    if ((!pbi->decoded_key_frame && pc->frame_type != KEY_FRAME) ||
-        pc->Width == 0 || pc->Height == 0)
+    if ((!pbi->decoded_key_frame && pc->frame_type != KEY_FRAME))
     {
         return -1;
     }
@@ -1408,7 +1336,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     {
         unsigned int i;
         vp8mt_decode_mb_rows(pbi, xd);
-        vp8_yv12_extend_frame_borders(&pc->yv12_fb[pc->new_fb_idx]);    /*cm->frame_to_show);*/
+        vp8_yv12_extend_frame_borders(yv12_fb_new);
         for (i = 0; i < pbi->decoding_thread_count; ++i)
             corrupt_tokens |= pbi->mb_row_di[i].mbd.corrupted;
     }
@@ -1421,14 +1349,14 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     /* Collect information about decoder corruption. */
     /* 1. Check first boolean decoder for errors. */
-    pc->yv12_fb[pc->new_fb_idx].corrupted = vp8dx_bool_error(bc);
+    yv12_fb_new->corrupted = vp8dx_bool_error(bc);
     /* 2. Check the macroblock information */
-    pc->yv12_fb[pc->new_fb_idx].corrupted |= corrupt_tokens;
+    yv12_fb_new->corrupted |= corrupt_tokens;
 
     if (!pbi->decoded_key_frame)
     {
         if (pc->frame_type == KEY_FRAME &&
-            !pc->yv12_fb[pc->new_fb_idx].corrupted)
+            !yv12_fb_new->corrupted)
             pbi->decoded_key_frame = 1;
         else
             vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME,
