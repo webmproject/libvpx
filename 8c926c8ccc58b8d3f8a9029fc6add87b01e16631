@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//mZI\u003d",
+        "filename": "vp8/decoder/onyxd_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-09-24T18:50:55Z",
+      "side": 1,
+      "message": "Seems to me this check is valid?  why remove?",
+      "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//mZM\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-09-24T18:50:55Z",
+      "side": 1,
+      "message": "why the removal?",
+      "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//mls\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-09-24T18:50:55Z",
+      "side": 1,
+      "message": "I\u0027d avoid notes like these - they tend to get left in the code.",
+      "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//mk0\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-09-24T18:50:55Z",
+      "side": 1,
+      "message": "pet peeve : this can be done like this : \n\nxd-\u003epre \u003d pc-\u003eyv12_fb[pc-\u003elst_fb_idx];",
+      "revId": "8c926c8ccc58b8d3f8a9029fc6add87b01e16631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
