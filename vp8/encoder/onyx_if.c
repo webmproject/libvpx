@@ -3777,8 +3777,13 @@ static void encode_frame_to_data_rate
     /* Setup background Q adjustment for error resilient mode.
      * For multi-layer encodes only enable this for the base layer.
      */
-    if (cpi->cyclic_refresh_mode_enabled && (cpi->current_layer==0))
+    if (cpi->cyclic_refresh_mode_enabled)
+    {
+      if (cpi->current_layer==0)
         cyclic_background_refresh(cpi, Q, 0);
+      else
+        disable_segmentation(cpi);
+    }
 
     vp8_compute_frame_size_bounds(cpi, &frame_under_shoot_limit, &frame_over_shoot_limit);
 
@@ -3933,8 +3938,13 @@ static void encode_frame_to_data_rate
                * and background refresh.
                */
               Q = vp8_regulate_q(cpi, cpi->this_frame_target);
-              if (cpi->cyclic_refresh_mode_enabled && (cpi->current_layer==0))
-                cyclic_background_refresh(cpi, Q, 0);
+              if (cpi->cyclic_refresh_mode_enabled)
+              {
+                if (cpi->current_layer==0)
+                  cyclic_background_refresh(cpi, Q, 0);
+                else
+                  disable_segmentation(cpi);
+              }
               vp8_set_quantizer(cpi, Q);
             }
 
