@@ -11,16 +11,7 @@
 #define RTCD_C
 #include "vpx_rtcd.h"
 
-#if CONFIG_MULTITHREAD && HAVE_PTHREAD_H
-#include <pthread.h>
-static void once(void (*func)(void))
-{
-    static pthread_once_t lock = PTHREAD_ONCE_INIT;
-    pthread_once(&lock, func);
-}
-
-
-#elif CONFIG_MULTITHREAD && defined(_WIN32)
+#if CONFIG_MULTITHREAD && defined(_WIN32)
 #include <windows.h>
 static void once(void (*func)(void))
 {
@@ -41,6 +32,15 @@ static void once(void (*func)(void))
     }
 
     LeaveCriticalSection(&lock);
+}
+
+
+#elif CONFIG_MULTITHREAD && HAVE_PTHREAD_H
+#include <pthread.h>
+static void once(void (*func)(void))
+{
+    static pthread_once_t lock = PTHREAD_ONCE_INIT;
+    pthread_once(&lock, func);
 }
 
 
