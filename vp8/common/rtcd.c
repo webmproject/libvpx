@@ -13,17 +13,43 @@
 
 #if CONFIG_MULTITHREAD && defined(_WIN32)
 #include <windows.h>
+#include <stdlib.h>
 static void once(void (*func)(void))
 {
-    /* Using a static initializer here rather than InitializeCriticalSection()
-     * since there's no race-free context in which to execute it. Protecting
-     * it with an atomic op like InterlockedCompareExchangePointer introduces
-     * an x86 dependency, and InitOnceExecuteOnce requires Vista.
-     */
-    static CRITICAL_SECTION lock = {(void *)-1, -1, 0, 0, 0, 0};
+    static CRITICAL_SECTION *lock;
+    static LONG waiters;
     static int done;
+    void *lock_ptr = &lock;
 
-    EnterCriticalSection(&lock);
+    /* If the initialization is complete, return early. This isn't just an
+     * optimization, it prevents races on the destruction of the global
+     * lock.
+     */
+    if(done)
+        return;
+
+    InterlockedIncrement(&waiters);
+
+    /* Get a lock. We create one and try to make it the one-true-lock,
+     * throwing it away if we lost the race.
+     */
+
+    {
+        /* Scope to protect access to new_lock */
+        CRITICAL_SECTION *new_lock = malloc(sizeof(CRITICAL_SECTION));
+        InitializeCriticalSection(new_lock);
+        if (InterlockedCompareExchangePointer(lock_ptr, new_lock, NULL) != NULL)
+        {
+            DeleteCriticalSection(new_lock);
+            free(new_lock);
+        }
+    }
+
+    /* At this point, we have a lock that can be synchronized on. We don't
+     * care which thread actually performed the allocation.
+     */
+
+    EnterCriticalSection(lock);
 
     if (!done)
     {
@@ -31,7 +57,17 @@ static void once(void (*func)(void))
         done = 1;
     }
 
-    LeaveCriticalSection(&lock);
+    LeaveCriticalSection(lock);
+
+    /* Last one out should free resources. The destructed objects are
+     * protected by checking if(done) above.
+     */
+    if(!InterlockedDecrement(&waiters))
+    {
+        DeleteCriticalSection(lock);
+        free(lock);
+        lock = NULL;
+    }
 }
 
 
