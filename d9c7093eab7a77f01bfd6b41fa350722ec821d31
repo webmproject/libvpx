@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//lkg\u003d",
+        "filename": "vp8/common/onyxd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-09-25T19:46:37Z",
+      "side": 1,
+      "message": "having this and max_frame_threads is confusing. Maybe this should just be a flag indicating use_frame_threads?",
+      "revId": "d9c7093eab7a77f01bfd6b41fa350722ec821d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//lkA\u003d",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-09-25T19:46:37Z",
+      "side": 1,
+      "message": "what\u0027s s_?",
+      "revId": "d9c7093eab7a77f01bfd6b41fa350722ec821d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//ljw\u003d",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-09-25T19:46:37Z",
+      "side": 1,
+      "message": "don\u0027t declare a typedef for this, just use struct frame_buffers.",
+      "revId": "d9c7093eab7a77f01bfd6b41fa350722ec821d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//ljo\u003d",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-09-25T19:46:37Z",
+      "side": 1,
+      "message": "use_frame_threads? Alternatively, this might live in the frame_buffers struct.",
+      "revId": "d9c7093eab7a77f01bfd6b41fa350722ec821d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//lkw\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-09-25T19:46:37Z",
+      "side": 1,
+      "message": "tabs. Also, don\u0027t use FRAME_BUFFERS, use struct frame_buffers",
+      "revId": "d9c7093eab7a77f01bfd6b41fa350722ec821d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//lko\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 562,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-09-25T19:46:37Z",
+      "side": 1,
+      "message": "delete",
+      "revId": "d9c7093eab7a77f01bfd6b41fa350722ec821d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//lk0\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-09-25T19:46:37Z",
+      "side": 1,
+      "message": "this should be implemented as a capability flag via VPX_CODEC_CAP_FRAME_THREADING and VPX_CODEC_USE_FRAME_THREADING rather than this variable",
+      "revId": "d9c7093eab7a77f01bfd6b41fa350722ec821d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
