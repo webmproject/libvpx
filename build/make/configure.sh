@@ -989,6 +989,11 @@ process_common_toolchain() {
     x86*)
         bits=32
         enabled x86_64 && bits=64
+        check_cpp <<EOF && bits=x32
+#ifndef __ILP32__
+#error "not x32"
+#endif
+EOF
         soft_enable runtime_cpu_detect
         soft_enable mmx
         soft_enable sse

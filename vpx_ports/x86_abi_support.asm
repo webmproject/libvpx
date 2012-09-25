@@ -88,6 +88,8 @@
 %define sym(x) x
 %elifidn __OUTPUT_FORMAT__,elf64
 %define sym(x) x
+%elifidn __OUTPUT_FORMAT__,elfx32
+%define sym(x) x
 %elifidn __OUTPUT_FORMAT__,x64
 %define sym(x) x
 %else
@@ -109,6 +111,8 @@
   %ifidn   __OUTPUT_FORMAT__,elf32
     %define PRIVATE :hidden
   %elifidn __OUTPUT_FORMAT__,elf64
+    %define PRIVATE :hidden
+  %elifidn __OUTPUT_FORMAT__,elfx32
     %define PRIVATE :hidden
   %elifidn __OUTPUT_FORMAT__,x64
     %define PRIVATE
@@ -221,6 +225,9 @@
   %endmacro
   %define GLOBAL(x) rel x
   %ifidn __OUTPUT_FORMAT__,elf64
+    %define WRT_PLT wrt ..plt
+    %define HIDDEN_DATA(x) x:data hidden
+  %elifidn __OUTPUT_FORMAT__,elfx32
     %define WRT_PLT wrt ..plt
     %define HIDDEN_DATA(x) x:data hidden
   %else
@@ -362,6 +369,9 @@ section .text
 section .note.GNU-stack noalloc noexec nowrite progbits
 section .text
 %elifidn __OUTPUT_FORMAT__,elf64
+section .note.GNU-stack noalloc noexec nowrite progbits
+section .text
+%elifidn __OUTPUT_FORMAT__,elfx32
 section .note.GNU-stack noalloc noexec nowrite progbits
 section .text
 %endif
