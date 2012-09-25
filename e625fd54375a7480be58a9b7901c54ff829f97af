@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//ltI\u003d",
+        "filename": "vp8/common/rtcd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-09-25T17:48:03Z",
+      "side": 1,
+      "message": "It should. Alignment of malloc is guaranteed to be the natural alignment of the largest primitive type.",
+      "parentUuid": "AAAAPn//mIk\u003d",
+      "revId": "e625fd54375a7480be58a9b7901c54ff829f97af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//mIg\u003d",
         "filename": "vp8/common/rtcd.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-09-25T00:56:57Z",
       "side": 1,
       "message": "the first param will warn about incompatible pointer types",
+      "revId": "e625fd54375a7480be58a9b7901c54ff829f97af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//lsw\u003d",
+        "filename": "vp8/common/rtcd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-09-25T17:48:03Z",
+      "side": 1,
+      "message": "will take another cut at this. It\u0027s not warning on mingw, let me know if patch set 2 fixes it.",
+      "parentUuid": "AAAAPn//mIg\u003d",
       "revId": "e625fd54375a7480be58a9b7901c54ff829f97af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
