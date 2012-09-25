@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//mIk\u003d",
+        "filename": "vp8/common/rtcd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-09-25T00:56:57Z",
+      "side": 1,
+      "message": "not sure if this fully satisfies the 32/64-bit alignment requirement",
+      "revId": "e625fd54375a7480be58a9b7901c54ff829f97af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//mIg\u003d",
+        "filename": "vp8/common/rtcd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-09-25T00:56:57Z",
+      "side": 1,
+      "message": "the first param will warn about incompatible pointer types",
+      "revId": "e625fd54375a7480be58a9b7901c54ff829f97af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
