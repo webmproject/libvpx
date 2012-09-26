@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//kk4\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-26T19:36:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//kos\u003d",
+      "revId": "c16f01c57ad7576a1102b6c70cfde3bfb9b8f24a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//knE\u003d",
         "filename": "test/subtract_test.cc",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2012-09-26T18:41:10Z",
       "side": 1,
       "message": "it doesn\u0027t matter here, but you should prefer preincrement",
+      "revId": "c16f01c57ad7576a1102b6c70cfde3bfb9b8f24a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//kkg\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-09-26T19:36:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPn//knE\u003d",
       "revId": "c16f01c57ad7576a1102b6c70cfde3bfb9b8f24a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
