@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//kKM\u003d",
+        "filename": "libmkv/EbmlIDs.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-09-26T23:40:02Z",
+      "side": 1,
+      "message": "This is fine for now, but eventually this should probably be changed to AlphaMode, with 1 being the mode Jeff has.",
+      "revId": "193113254bcf1701de29cb821152330ef39f8b8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPn//kKE\u003d",
+        "filename": "vpx/vpx_image.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-09-26T23:40:02Z",
+      "side": 1,
+      "message": "This isn\u0027t used anywhere. I would remove this until you need it.",
+      "revId": "193113254bcf1701de29cb821152330ef39f8b8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
