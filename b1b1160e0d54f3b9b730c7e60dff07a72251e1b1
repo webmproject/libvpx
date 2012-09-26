@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPn//kis\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-09-26T20:00:00Z",
+      "side": 1,
+      "message": "this should be sorted with the others",
+      "revId": "b1b1160e0d54f3b9b730c7e60dff07a72251e1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
