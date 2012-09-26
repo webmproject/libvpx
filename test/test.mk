@@ -39,6 +39,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
 LIBVPX_TEST_SRCS-yes                   += sad_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += set_roi.cc
 LIBVPX_TEST_SRCS-yes                   += sixtap_predict_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += subtract_test.cc
 
 endif
 
