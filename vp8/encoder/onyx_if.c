@@ -467,6 +467,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
         /* Cycle through the macro_block rows */
         /* MB loop to set local segmentation map */
         i = cpi->cyclic_refresh_mode_index;
+        assert(i < mbs_in_frame);
         do
         {
           /* If the MB is as a candidate for clean up then mark it for
@@ -3915,6 +3916,7 @@ static void encode_frame_to_data_rate
               Q = vp8_regulate_q(cpi, cpi->this_frame_target);
               if (cpi->cyclic_refresh_mode_enabled)
               {
+                cpi->cyclic_refresh_mode_index = 0;
                 if (cpi->current_layer==0)
                   cyclic_background_refresh(cpi, Q, 0);
                 else
