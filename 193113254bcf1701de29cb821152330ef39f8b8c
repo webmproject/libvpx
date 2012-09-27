@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPn//j88\u003d",
+        "filename": "libmkv/EbmlIDs.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-09-27T05:12:10Z",
+      "side": 1,
+      "message": "This was actually the old (broken) StereoMode value. Maybe better to choose one with no history and label it experimental.",
+      "parentUuid": "AAAAPn//kKM\u003d",
+      "revId": "193113254bcf1701de29cb821152330ef39f8b8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPn//kKE\u003d",
         "filename": "vpx/vpx_image.h",
         "patchSetId": 2
