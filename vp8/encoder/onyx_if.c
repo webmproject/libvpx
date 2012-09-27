@@ -1120,6 +1120,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     CHECK_MEM_ERROR(cpi->segmentation_map,
                     vpx_calloc(cm->mb_rows * cm->mb_cols,
                     sizeof(*cpi->segmentation_map)));
+    cpi->cyclic_refresh_mode_index = 0;
     vpx_free(cpi->active_map);
     CHECK_MEM_ERROR(cpi->active_map,
                     vpx_calloc(cm->mb_rows * cm->mb_cols,
@@ -3916,7 +3917,6 @@ static void encode_frame_to_data_rate
               Q = vp8_regulate_q(cpi, cpi->this_frame_target);
               if (cpi->cyclic_refresh_mode_enabled)
               {
-                cpi->cyclic_refresh_mode_index = 0;
                 if (cpi->current_layer==0)
                   cyclic_background_refresh(cpi, Q, 0);
                 else
