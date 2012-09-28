@@ -127,25 +127,24 @@ extern void vp8_blit_text(const char *msg, unsigned char *address, const int pit
 extern void vp8_blit_line(int x0, int x1, int y0, int y1, unsigned char *image, const int pitch);
 /***********************************************************************************************************
  */
-void vp8_post_proc_down_and_across_c
+void vp8_post_proc_down_and_across_mb_row_c
 (
     unsigned char *src_ptr,
     unsigned char *dst_ptr,
     int src_pixels_per_line,
     int dst_pixels_per_line,
-    int rows,
     int cols,
-    int flimit
+    unsigned char *f,
+    int size
 )
 {
     unsigned char *p_src, *p_dst;
     int row;
     int col;
-    int i;
-    int v;
-    unsigned char d[8];
+    unsigned char v;
+    unsigned char d[4];
 
-    for (row = 0; row < rows; row++)
+    for (row = 0; row < size; row++)
     {
         /* post_proc_down for one row */
         p_src = src_ptr;
@@ -153,20 +152,23 @@ void vp8_post_proc_down_and_across_c
 
         for (col = 0; col < cols; col++)
         {
+            unsigned char p_above2 = p_src[col - 2 * src_pixels_per_line];
+            unsigned char p_above1 = p_src[col - src_pixels_per_line];
+            unsigned char p_below1 = p_src[col + src_pixels_per_line];
+            unsigned char p_below2 = p_src[col + 2 * src_pixels_per_line];
 
-            int kernel = 4;
-            int v = p_src[col];
+            v = p_src[col];
 
-            for (i = -2; i <= 2; i++)
+            if ((abs(v - p_above2) < f[col]) && (abs(v - p_above1) < f[col])
+                && (abs(v - p_below1) < f[col]) && (abs(v - p_below2) < f[col]))
             {
-                if (abs(v - p_src[col+i*src_pixels_per_line]) > flimit)
-                    goto down_skip_convolve;
-
-                kernel += kernel5[2+i] * p_src[col+i*src_pixels_per_line];
+                unsigned char k1, k2, k3;
+                k1 = (p_above2 + p_above1 + 1) >> 1;
+                k2 = (p_below2 + p_below1 + 1) >> 1;
+                k3 = (k1 + k2 + 1) >> 1;
+                v = (k3 + v + 1) >> 1;
             }
 
-            v = (kernel >> 3);
-        down_skip_convolve:
             p_dst[col] = v;
         }
 
@@ -174,40 +176,34 @@ void vp8_post_proc_down_and_across_c
         p_src = dst_ptr;
         p_dst = dst_ptr;
 
-        for (i = -8; i<0; i++)
-          p_src[i]=p_src[0];
-
-        for (i = cols; i<cols+8; i++)
-          p_src[i]=p_src[cols-1];
-
-        for (i = 0; i < 8; i++)
-            d[i] = p_src[i];
+        p_src[-2] = p_src[-1] = p_src[0];
+        p_src[cols] = p_src[cols + 1] = p_src[cols - 1];
 
         for (col = 0; col < cols; col++)
         {
-            int kernel = 4;
             v = p_src[col];
 
-            d[col&7] = v;
-
-            for (i = -2; i <= 2; i++)
+            if ((abs(v - p_src[col - 2]) < f[col])
+                && (abs(v - p_src[col - 1]) < f[col])
+                && (abs(v - p_src[col + 1]) < f[col])
+                && (abs(v - p_src[col + 2]) < f[col]))
             {
-                if (abs(v - p_src[col+i]) > flimit)
-                    goto across_skip_convolve;
-
-                kernel += kernel5[2+i] * p_src[col+i];
+                unsigned char k1, k2, k3;
+                k1 = (p_src[col - 2] + p_src[col - 1] + 1) >> 1;
+                k2 = (p_src[col + 2] + p_src[col + 1] + 1) >> 1;
+                k3 = (k1 + k2 + 1) >> 1;
+                v = (k3 + v + 1) >> 1;
             }
 
-            d[col&7] = (kernel >> 3);
-        across_skip_convolve:
+            d[col & 3] = v;
 
             if (col >= 2)
-                p_dst[col-2] = d[(col-2)&7];
+                p_dst[col - 2] = d[(col - 2) & 3];
         }
 
         /* handle the last two pixels */
-        p_dst[col-2] = d[(col-2)&7];
-        p_dst[col-1] = d[(col-1)&7];
+        p_dst[col - 2] = d[(col - 2) & 3];
+        p_dst[col - 1] = d[(col - 1) & 3];
 
         /* next row */
         src_ptr += src_pixels_per_line;
@@ -318,28 +314,17 @@ void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, i
     }
 }
 
-
-static void vp8_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
-        YV12_BUFFER_CONFIG         *post,
-        int                         q,
-        int                         low_var_thresh,
-        int                         flag)
+static void vp8_de_mblock(YV12_BUFFER_CONFIG         *post,
+                          int                         q)
 {
-    double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
-    int ppl = (int)(level + .5);
-    (void) low_var_thresh;
-    (void) flag;
-
-    vp8_post_proc_down_and_across(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,  ppl);
-    vp8_mbpost_proc_across_ip(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
-    vp8_mbpost_proc_down(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
-
-    vp8_post_proc_down_and_across(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
-    vp8_post_proc_down_and_across(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
-
+    vp8_mbpost_proc_across_ip(post->y_buffer, post->y_stride, post->y_height,
+                              post->y_width, q2mbl(q));
+    vp8_mbpost_proc_down(post->y_buffer, post->y_stride, post->y_height,
+                         post->y_width, q2mbl(q));
 }
 
-void vp8_deblock(YV12_BUFFER_CONFIG         *source,
+void vp8_deblock(VP8_COMMON                 *cm,
+                 YV12_BUFFER_CONFIG         *source,
                  YV12_BUFFER_CONFIG         *post,
                  int                         q,
                  int                         low_var_thresh,
@@ -347,12 +332,58 @@ void vp8_deblock(YV12_BUFFER_CONFIG         *source,
 {
     double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
     int ppl = (int)(level + .5);
+
+    const MODE_INFO *mode_info_context = cm->mi;
+    int mbr, mbc;
+
+    /* The pixel thresholds are adjusted according to if or not the macroblock
+     * is a skipped block.  */
+    unsigned char *ylimits = (unsigned char *)vpx_memalign(16, 16 * cm->mb_cols);
+    unsigned char *uvlimits = (unsigned char *)vpx_memalign(16, 8 * cm->mb_cols);
     (void) low_var_thresh;
     (void) flag;
 
-    vp8_post_proc_down_and_across(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,   ppl);
-    vp8_post_proc_down_and_across(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride,  source->uv_height, source->uv_width, ppl);
-    vp8_post_proc_down_and_across(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
+    if (ppl > 0)
+    {
+        for (mbr = 0; mbr < cm->mb_rows; mbr++)
+        {
+            unsigned char *ylptr = ylimits;
+            unsigned char *uvlptr = uvlimits;
+            for (mbc = 0; mbc < cm->mb_cols; mbc++)
+            {
+                unsigned char mb_ppl;
+
+                if (mode_info_context->mbmi.mb_skip_coeff)
+                    mb_ppl = (unsigned char)ppl >> 1;
+                else
+                    mb_ppl = (unsigned char)ppl;
+
+                vpx_memset(ylptr, mb_ppl, 16);
+                vpx_memset(uvlptr, mb_ppl, 8);
+
+                ylptr += 16;
+                uvlptr += 8;
+                mode_info_context++;
+            }
+            mode_info_context++;
+
+            vp8_post_proc_down_and_across_mb_row(
+                source->y_buffer + 16 * mbr * source->y_stride,
+                post->y_buffer + 16 * mbr * post->y_stride, source->y_stride,
+                post->y_stride, source->y_width, ylimits, 16);
+
+            vp8_post_proc_down_and_across_mb_row(
+                source->u_buffer + 8 * mbr * source->uv_stride,
+                post->u_buffer + 8 * mbr * post->uv_stride, source->uv_stride,
+                post->uv_stride, source->uv_width, uvlimits, 8);
+            vp8_post_proc_down_and_across_mb_row(
+                source->v_buffer + 8 * mbr * source->uv_stride,
+                post->v_buffer + 8 * mbr * post->uv_stride, source->uv_stride,
+                post->uv_stride, source->uv_width, uvlimits, 8);
+        }
+    }
+    vpx_free(ylimits);
+    vpx_free(uvlimits);
 }
 
 #if !(CONFIG_TEMPORAL_DENOISING)
@@ -364,33 +395,35 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
 {
     double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
     int ppl = (int)(level + .5);
+    int mb_rows = source->y_width >> 4;
+    int mb_cols = source->y_height >> 4;
+    unsigned char *limits = (unsigned char *)vpx_memalign(16, 16 * mb_cols);
+    int mbr, mbc;
     (void) post;
     (void) low_var_thresh;
     (void) flag;
 
-    vp8_post_proc_down_and_across(
-        source->y_buffer + 2 * source->y_stride + 2,
-        source->y_buffer + 2 * source->y_stride + 2,
-        source->y_stride,
-        source->y_stride,
-        source->y_height - 4,
-        source->y_width - 4,
-        ppl);
-    vp8_post_proc_down_and_across(
-        source->u_buffer + 2 * source->uv_stride + 2,
-        source->u_buffer + 2 * source->uv_stride + 2,
-        source->uv_stride,
-        source->uv_stride,
-        source->uv_height - 4,
-        source->uv_width - 4, ppl);
-    vp8_post_proc_down_and_across(
-        source->v_buffer + 2 * source->uv_stride + 2,
-        source->v_buffer + 2 * source->uv_stride + 2,
-        source->uv_stride,
-        source->uv_stride,
-        source->uv_height - 4,
-        source->uv_width - 4, ppl);
+    /* TODO: The original code don't filter the 2 outer rows and columns. */
+    vpx_memset(limits, (unsigned char)ppl, 16 * mb_cols);
 
+    for (mbr = 0; mbr < mb_rows; mbr++)
+    {
+        vp8_post_proc_down_and_across_mb_row(
+            source->y_buffer + 16 * mbr * source->y_stride,
+            source->y_buffer + 16 * mbr * source->y_stride,
+            source->y_stride, source->y_stride, source->y_width, limits, 16);
+
+        vp8_post_proc_down_and_across_mb_row(
+            source->u_buffer + 8 * mbr * source->uv_stride,
+            source->u_buffer + 8 * mbr * source->uv_stride,
+            source->uv_stride, source->uv_stride, source->uv_width, limits, 8);
+        vp8_post_proc_down_and_across_mb_row(
+            source->v_buffer + 8 * mbr * source->uv_stride,
+            source->v_buffer + 8 * mbr * source->uv_stride,
+            source->uv_stride, source->uv_stride, source->uv_width, limits, 8);
+    }
+
+    vpx_free(limits);
 }
 #endif
 
@@ -752,12 +785,14 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             vp8_yv12_copy_frame(&oci->post_proc_buffer, &oci->post_proc_buffer_int);
             if (flags & VP8D_DEMACROBLOCK)
             {
-                vp8_deblock_and_de_macro_block(&oci->post_proc_buffer_int, &oci->post_proc_buffer,
+                vp8_deblock(oci, &oci->post_proc_buffer_int, &oci->post_proc_buffer,
                                                q + (deblock_level - 5) * 10, 1, 0);
+                vp8_de_mblock(&oci->post_proc_buffer,
+                              q + (deblock_level - 5) * 10);
             }
             else if (flags & VP8D_DEBLOCK)
             {
-                vp8_deblock(&oci->post_proc_buffer_int, &oci->post_proc_buffer,
+                vp8_deblock(oci, &oci->post_proc_buffer_int, &oci->post_proc_buffer,
                             q, 1, 0);
             }
         }
@@ -766,13 +801,15 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     }
     else if (flags & VP8D_DEMACROBLOCK)
     {
-        vp8_deblock_and_de_macro_block(oci->frame_to_show, &oci->post_proc_buffer,
-                                       q + (deblock_level - 5) * 10, 1, 0);
+        vp8_deblock(oci, oci->frame_to_show, &oci->post_proc_buffer,
+                                     q + (deblock_level - 5) * 10, 1, 0);
+        vp8_de_mblock(&oci->post_proc_buffer, q + (deblock_level - 5) * 10);
+
         oci->postproc_state.last_base_qindex = oci->base_qindex;
     }
     else if (flags & VP8D_DEBLOCK)
     {
-        vp8_deblock(oci->frame_to_show, &oci->post_proc_buffer,
+        vp8_deblock(oci, oci->frame_to_show, &oci->post_proc_buffer,
                     q, 1, 0);
         oci->postproc_state.last_base_qindex = oci->base_qindex;
     }

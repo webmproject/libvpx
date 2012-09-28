@@ -19,14 +19,14 @@ void (*vp8_short_idct4x4)(short *input, short *output, int pitch);
 void (*vp8_short_idct4x4_1)(short *input, short *output, int pitch);
 void (*vp8_dc_only_idct)(short input_dc, short *output, int pitch);
 
-extern void (*vp8_post_proc_down_and_across)(
+extern void (*vp8_post_proc_down_and_across_mb_row)(
     unsigned char *src_ptr,
     unsigned char *dst_ptr,
     int src_pixels_per_line,
     int dst_pixels_per_line,
-    int rows,
     int cols,
-    int flimit
+    unsigned char *f,
+    int size
 );
 
 extern void (*vp8_mbpost_proc_down)(unsigned char *dst, int pitch, int rows, int cols, int flimit);
@@ -34,15 +34,15 @@ extern void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int 
 extern void (*vp8_mbpost_proc_across_ip)(unsigned char *src, int pitch, int rows, int cols, int flimit);
 extern void vp8_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int cols, int flimit);
 
-extern void vp8_post_proc_down_and_across_c
+extern void vp8_post_proc_down_and_across_mb_row_c
 (
     unsigned char *src_ptr,
     unsigned char *dst_ptr,
     int src_pixels_per_line,
     int dst_pixels_per_line,
-    int rows,
     int cols,
-    int flimit
+    unsigned char *f,
+    int size
 );
 void vp8_plane_add_noise_c(unsigned char *Start, unsigned int Width, unsigned int Height, int Pitch, int q, int a);
 
@@ -158,7 +158,7 @@ void vp8_machine_specific_config(void)
     vp8_lf_mbhsimple                     = loop_filter_mbhs_ppc;
     vp8_lf_bhsimple                      = loop_filter_bhs_ppc;
 
-    vp8_post_proc_down_and_across           = vp8_post_proc_down_and_across_c;
+    vp8_post_proc_down_and_across_mb_row = vp8_post_proc_down_and_across_mb_row_c;
     vp8_mbpost_proc_down                  = vp8_mbpost_proc_down_c;
     vp8_mbpost_proc_across_ip              = vp8_mbpost_proc_across_ip_c;
     vp8_plane_add_noise                   = vp8_plane_add_noise_c;
