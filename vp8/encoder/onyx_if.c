@@ -3970,18 +3970,12 @@ static void encode_frame_to_data_rate
         /* Test to see if the stats generated for this frame indicate that
          * we should have coded a key frame (assuming that we didn't)!
          */
-        if (cpi->pass != 2 && cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
-        {
-            int key_frame_decision = decide_key_frame(cpi);
 
-            if (cpi->compressor_speed == 2)
-            {
-                /* we don't do re-encoding in realtime mode
-                 * if key frame is decided then we force it on next frame */
-                cpi->force_next_frame_intra = key_frame_decision;
-            }
+        if (cpi->pass != 2 && cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME
+            && cpi->compressor_speed != 2)
+        {
 #if !(CONFIG_REALTIME_ONLY)
-            else if (key_frame_decision)
+            if (decide_key_frame(cpi))
             {
                 /* Reset all our sizing numbers and recode */
                 cm->frame_type = KEY_FRAME;
