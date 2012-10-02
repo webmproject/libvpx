@@ -65,6 +65,10 @@ class TwopassStatsStore {
     return buf;
   }
 
+  void Reset() {
+    buffer_.clear();
+  }
+
  protected:
   std::string  buffer_;
 };
