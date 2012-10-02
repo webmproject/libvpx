@@ -159,16 +159,25 @@ void EncoderTest::RunLoop(VideoSource *video) {
       while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
         again = true;
 
-        if (pkt->kind != VPX_CODEC_CX_FRAME_PKT)
-          continue;
+        switch (pkt->kind) {
+          case VPX_CODEC_CX_FRAME_PKT:
 #if CONFIG_VP8_DECODER
-        has_cxdata = true;
-        decoder.DecodeFrame((const uint8_t*)pkt->data.frame.buf,
-                            pkt->data.frame.sz);
+            has_cxdata = true;
+            decoder.DecodeFrame((const uint8_t*)pkt->data.frame.buf,
+                                pkt->data.frame.sz);
 #endif
-        ASSERT_GE(pkt->data.frame.pts, last_pts_);
-        last_pts_ = pkt->data.frame.pts;
-        FramePktHook(pkt);
+            ASSERT_GE(pkt->data.frame.pts, last_pts_);
+            last_pts_ = pkt->data.frame.pts;
+            FramePktHook(pkt);
+            break;
+
+          case VPX_CODEC_PSNR_PKT:
+            PSNRPktHook(pkt);
+            break;
+
+          default:
+            break;
+        }
       }
 
 #if CONFIG_VP8_DECODER
