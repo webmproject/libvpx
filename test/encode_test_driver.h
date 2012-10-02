@@ -82,8 +82,8 @@ class TwopassStatsStore {
 class Encoder {
  public:
   Encoder(vpx_codec_enc_cfg_t cfg, unsigned long deadline,
-          TwopassStatsStore *stats)
-    : cfg_(cfg), deadline_(deadline), stats_(stats) {
+          const unsigned long init_flags, TwopassStatsStore *stats)
+    : cfg_(cfg), deadline_(deadline), init_flags_(init_flags), stats_(stats) {
     memset(&encoder_, 0, sizeof(encoder_));
   }
 
@@ -100,7 +100,7 @@ class Encoder {
   }
   // This is a thin wrapper around vpx_codec_encode(), so refer to
   // vpx_encoder.h for its semantics.
-  void EncodeFrame(VideoSource *video, unsigned long flags);
+  void EncodeFrame(VideoSource *video, const unsigned long frame_flags);
 
   // Convenience wrapper for EncodeFrame()
   void EncodeFrame(VideoSource *video) {
@@ -123,7 +123,8 @@ class Encoder {
   }
 
   // Encode an image
-  void EncodeFrameInternal(const VideoSource &video, unsigned long flags);
+  void EncodeFrameInternal(const VideoSource &video,
+                           const unsigned long frame_flags);
 
   // Flush the encoder on EOS
   void Flush();
@@ -131,6 +132,7 @@ class Encoder {
   vpx_codec_ctx_t      encoder_;
   vpx_codec_enc_cfg_t  cfg_;
   unsigned long        deadline_;
+  unsigned long        init_flags_;
   TwopassStatsStore   *stats_;
 };
 
@@ -143,7 +145,8 @@ class Encoder {
 // classes directly, so that tests can be parameterized differently.
 class EncoderTest {
  protected:
-  EncoderTest() : abort_(false), flags_(0), last_pts_(0) {}
+  EncoderTest() : abort_(false), init_flags_(0), frame_flags_(0),
+                  last_pts_(0) {}
 
   virtual ~EncoderTest() {}
 
@@ -181,7 +184,8 @@ class EncoderTest {
   unsigned int         passes_;
   unsigned long        deadline_;
   TwopassStatsStore    stats_;
-  unsigned long        flags_;
+  unsigned long        init_flags_;
+  unsigned long        frame_flags_;
   vpx_codec_pts_t      last_pts_;
 };
 
