@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQH//9jM\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-03T01:50:42Z",
+      "side": 1,
+      "message": "the fact that the init happens on the first encode is an implementation detail. init flags would be better in the constructor or an Init()",
+      "revId": "78c42858cd38e5563504a0e31e4538cdbb9ffe94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
