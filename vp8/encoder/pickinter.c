@@ -865,7 +865,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             if (cpi->oxcf.mr_encoder_id && !cpi->mr_low_res_mv_avail)
                 cpi->sf.improved_mv_pred = 0;
 
-            if (cpi->oxcf.mr_encoder_id && cpi->mr_low_res_mv_avail)
+            if (cpi->oxcf.mr_encoder_id && cpi->mr_low_res_mv_avail
+                && parent_ref_frame)
             {
                 /* Use parent MV as predictor. Adjust search range
                  * accordingly.
@@ -911,6 +912,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 #if CONFIG_MULTI_RES_ENCODING
             if (cpi->oxcf.mr_encoder_id && cpi->mr_low_res_mv_avail &&
                 dissim <= 2 &&
+                parent_ref_frame &&
                 MAX(abs(best_ref_mv.as_mv.row - parent_ref_mv.as_mv.row),
                     abs(best_ref_mv.as_mv.col - parent_ref_mv.as_mv.col)) <= 4)
             {
