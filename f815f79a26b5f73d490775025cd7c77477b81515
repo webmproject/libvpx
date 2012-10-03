@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//8uM\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-03T21:50:32Z",
+      "side": 1,
+      "message": "The idea of the test is to ensure that turning the error resilient feature on affects quality by less than 10%. 10% represents a big change in terms of the way the test is implemented here, so any deviation outside this range flags up a serious error. I think this is the intended behavior.",
+      "parentUuid": "AAAAQH//9iM\u003d",
+      "revId": "f815f79a26b5f73d490775025cd7c77477b81515",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//9iI\u003d",
         "filename": "test/error_resilience_test.cc",
         "patchSetId": 2
@@ -81,6 +99,24 @@
       "writtenOn": "2012-10-03T02:02:33Z",
       "side": 1,
       "message": "ditto",
+      "revId": "f815f79a26b5f73d490775025cd7c77477b81515",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//8uI\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-03T21:50:32Z",
+      "side": 1,
+      "message": "see above.",
+      "parentUuid": "AAAAQH//9iI\u003d",
       "revId": "f815f79a26b5f73d490775025cd7c77477b81515",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
