@@ -1327,10 +1327,10 @@ void write_uncompressed_header(VP9_COMP *cpi,
   vp9_wb_write_bit(wb, cm->version);
   vp9_wb_write_bit(wb, 0);
 
+  vp9_wb_write_bit(wb, 0);
   vp9_wb_write_bit(wb, cm->frame_type);
   vp9_wb_write_bit(wb, cm->show_frame);
   vp9_wb_write_bit(wb, scaling_active);
-  vp9_wb_write_bit(wb, 0);
 
   if (cm->frame_type == KEY_FRAME) {
     vp9_wb_write_literal(wb, SYNC_CODE_0, 8);

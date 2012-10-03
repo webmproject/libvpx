@@ -926,10 +926,17 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
   cm->version = vp9_rb_read_bit(rb);
   RESERVED;
 
+  if (vp9_rb_read_bit(rb)) {
+    // show an existing frame directly
+    int frame_to_show = cm->ref_frame_map[vp9_rb_read_literal(rb, 3)];
+    ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->new_fb_idx, frame_to_show);
+    pbi->refresh_frame_flags = 0;
+    cm->filter_level = 0;
+    return 0;
+  }
   cm->frame_type = (FRAME_TYPE) vp9_rb_read_bit(rb);
   cm->show_frame = vp9_rb_read_bit(rb);
   scaling_active = vp9_rb_read_bit(rb);
-  RESERVED;
 
   if (cm->frame_type == KEY_FRAME) {
     if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
@@ -1038,6 +1045,11 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   const int keyframe = pc->frame_type == KEY_FRAME;
   YV12_BUFFER_CONFIG *new_fb = &pc->yv12_fb[pc->new_fb_idx];
 
+  if (!first_partition_size) {
+    // showing a frame directly
+    *p_data_end = data + 1;
+    return 0;
+  }
   data += vp9_rb_bytes_read(&rb);
   xd->corrupted = 0;
   new_fb->corrupted = 0;
