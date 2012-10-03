@@ -126,6 +126,9 @@ void EncoderTest::RunLoop(VideoSource *video) {
 #if CONFIG_VP8_DECODER
   vpx_codec_dec_cfg_t dec_cfg = {0};
 #endif
+
+  stats_.Reset();
+
   for (unsigned int pass = 0; pass < passes_; pass++) {
     last_pts_ = 0;
 
