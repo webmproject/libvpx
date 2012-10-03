@@ -33,15 +33,27 @@ def list_of_experiments():
 def main(argv):
   # Parse arguments
   options = {"--shard": 0, "--shards": 1}
-  o, _ = getopt.getopt(argv[1:], None, LONG_OPTIONS)
+  if "--" in argv:
+    opt_end_index = argv.index("--")
+  else:
+    opt_end_index = len(argv)
+  try:
+    o, _ = getopt.getopt(argv[1:opt_end_index], None, LONG_OPTIONS)
+  except getopt.GetoptError, err:
+    print str(err)
+    print "Usage: %s [--shard=<n> --shards=<n>] -- [configure flag ...]"%argv[0]
+    sys.exit(2)
+
   options.update(o)
+  extra_args = argv[opt_end_index + 1:]
 
   # Shard experiment list
   shard = int(options["--shard"])
   shards = int(options["--shards"])
   experiments = list_of_experiments()
-  configs = [BASE_COMMAND]
-  configs += ["%s --enable-%s" % (BASE_COMMAND, e) for e in experiments]
+  base_command = " ".join([BASE_COMMAND] + extra_args)
+  configs = [base_command]
+  configs += ["%s --enable-%s" % (base_command, e) for e in experiments]
   my_configs = zip(configs, range(len(configs)))
   my_configs = filter(lambda x: x[1] % shards == shard, my_configs)
   my_configs = [e[0] for e in my_configs]
