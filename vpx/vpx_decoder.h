@@ -65,12 +65,17 @@ extern "C" {
    *
    *  The available flags are specified by VPX_CODEC_USE_* defines.
    */
+#define VPX_CODEC_CAP_FRAME_THREADING   0x200000 /**< Can support frame-based
+                                                      multi-threading */
+
 #define VPX_CODEC_USE_POSTPROC   0x10000 /**< Postprocess decoded frame */
 #define VPX_CODEC_USE_ERROR_CONCEALMENT 0x20000 /**< Conceal errors in decoded
   frames */
 #define VPX_CODEC_USE_INPUT_FRAGMENTS   0x40000 /**< The input frame should be
   passed to the decoder one
   fragment at a time */
+#define VPX_CODEC_USE_FRAME_THREADING   0x80000 /**< Enable frame-based
+                                                     multi-threading */
 
   /*!\brief Stream properties
    *
