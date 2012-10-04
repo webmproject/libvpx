@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQH//7ro\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "I don\u0027t think you want this. You probably want to create a personal test data folder and export its path in your .bashrc file. That way you can share the test data across multiple repositories.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7rA\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "this is a little more complicated than needed due to what the encoder needs to do. What about just:\n\n  for (video-\u003eBegin(); cxdata \u003d video-\u003ecxdata(); video-\u003eNext())",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7qQ\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "This name is specific to your test. Make it more generic, like DecompressedFrameHook.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7qM\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "This should be in a new file.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7qE\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "end_of_file shouldn\u0027t be in the constructor. I\u0027m not sure what you\u0027re trying to do with frame, but if you were trying to say skip to frame n at the start, that\u0027s not implemented. Probably just want to initialize both of these to zero.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7qA\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "don\u0027t want to allocate in constructors.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7p8\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "suggest a different name, \"frame buf\" implies uncompressed raw video frames to me.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7p4\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "rather than duplicating this block, suggest refactoring to a common method to open a test data file of a given name.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7pY\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "these functions (AllocCodeBuffer, FillFrame) should be protected. You don\u0027t want other code to call them directly.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7p0\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "reinterpret_cast",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7pQ\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "not virtual",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7no\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "refactor into common utility function",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7k8\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "these 2 calls could be done in 1.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7mM\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "instead of memcmp, use ASSERT_STREQ",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7k4\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "md5_file_ is ok, but these other variables should be on the stack in MD5Hook()",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7pg\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "CompressedVideoSource",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//7po\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-04T21:45:16Z",
+      "side": 1,
+      "message": "accessor functions don\u0027t get MixedCase and aren\u0027t called Get, name them after the underlying variable.\n\nYou may want to return a vpx_fixed_buf_t rather than having two different functions.",
+      "revId": "a31d53a141a0113f0da5b05d36227bd665a720f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
