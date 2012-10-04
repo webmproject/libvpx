@@ -143,7 +143,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
     BeginPassHook(pass);
     Encoder encoder(cfg_, deadline_, init_flags_, &stats_);
 #if CONFIG_VP8_DECODER
-    Decoder decoder(dec_cfg);
+    Decoder decoder(dec_cfg, 0);
     bool has_cxdata = false;
 #endif
     bool again;

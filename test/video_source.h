@@ -10,10 +10,26 @@
 #ifndef TEST_VIDEO_SOURCE_H_
 #define TEST_VIDEO_SOURCE_H_
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
 #include "test/acm_random.h"
 #include "vpx/vpx_encoder.h"
 
 namespace libvpx_test {
+
+static FILE *OpenTestDataFile(const std::string& file_name) {
+  std::string path_to_source = file_name;
+  const char *kDataPath = getenv("LIBVPX_TEST_DATA_PATH");
+
+  if (kDataPath) {
+    path_to_source = kDataPath;
+    path_to_source += "/";
+    path_to_source += file_name;
+  }
+
+  return fopen(path_to_source.c_str(), "rb");
+}
 
 // Abstract base class for test video sources, which provide a stream of
 // vpx_image_t images with associated timestamps and duration.
@@ -126,6 +142,27 @@ class RandomVideoSource : public DummyVideoSource {
 
   ACMRandom rnd_;
   int seed_;
+};
+
+// Abstract base class for test video sources, which provide a stream of
+// decompressed images to the decoder.
+class CompressedVideoSource {
+ public:
+  virtual ~CompressedVideoSource() {}
+
+  virtual void Init() = 0;
+
+  // Prepare the stream for reading, rewind/open as necessary.
+  virtual void Begin() = 0;
+
+  // Advance the cursor to the next frame
+  virtual void Next() = 0;
+
+  virtual const uint8_t *cxdata() const = 0;
+
+  virtual const unsigned int frame_size() const = 0;
+
+  virtual const unsigned int frame_number() const = 0;
 };
 
 }  // namespace libvpx_test
