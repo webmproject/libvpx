@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQH//8WI\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-04T04:56:50Z",
+      "side": 1,
+      "message": "as an aside, this should be reinterpret_cast\u003c\u003e, but not in this cl.",
+      "revId": "e6109dbd41a8680d9a3b4d254dec877f57dccaa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
