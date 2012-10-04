@@ -176,6 +176,9 @@ class EncoderTest {
   // Hook to be called on every compressed data packet.
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {}
 
+  // Hook to be called on every PSNR packet.
+  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {}
+
   // Hook to determine whether the encode loop should continue.
   virtual bool Continue() const { return !abort_; }
 
