@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQH//6s0\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-05T17:30:40Z",
+      "side": 1,
+      "message": "enabling intra-line diffs may help you here. really the solution is to apply the small fix first, then follow with the cosmetics...",
+      "revId": "81c6041922266cc20cf2507365cfee3335eb83d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
