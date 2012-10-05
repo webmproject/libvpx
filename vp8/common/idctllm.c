@@ -24,6 +24,7 @@
  **************************************************************************/
 #include "vpx_ports/config.h"
 #include "vp8/common/idct.h"
+#include "vp8/common/systemdependent.h"
 
 #if CONFIG_HYBRIDTRANSFORM
 #include "vp8/common/blockd.h"
@@ -166,92 +167,71 @@ float iadst_16[256] = {
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_ihtllm_c(short *input, short *output, int pitch,
                   TX_TYPE tx_type, int tx_dim) {
-  int i, j, k;
-  float bufa[256], bufb[256]; // buffers are for floating-point test purpose
-                            // the implementation could be simplified in
-                            // conjunction with integer transform
 
-                            // further notice, since we are thinking to use one
-                            // function for both 4x4 and 8x8 transforms, the
-                            // temporary buffers are simply initialized with 64.
-  short *ip = input;
-  short *op = output;
-  int shortpitch = pitch >> 1;
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  {
+    int i, j, k;
+    float bufa[256], bufb[256]; // buffers are for floating-point test purpose
+                                // the implementation could be simplified in
+                                // conjunction with integer transform
 
-  float *pfa = &bufa[0];
-  float *pfb = &bufb[0];
+                                // further notice, since we are thinking to use
+                                // one function for both 4x4 and 8x8 transforms
+                                // the temporary buffers are simply initialized
+                                // with 64.
+    short *ip = input;
+    short *op = output;
+    int shortpitch = pitch >> 1;
 
-  // pointers to vertical and horizontal transforms
-  float *ptv, *pth;
+    float *pfa = &bufa[0];
+    float *pfb = &bufb[0];
 
-  // load and convert residual array into floating-point
-  for(j = 0; j < tx_dim; j++) {
-    for(i = 0; i < tx_dim; i++) {
-      pfa[i] = (float)ip[i];
-    }
-    pfa += tx_dim;
-    ip  += tx_dim;
-  }
+    // pointers to vertical and horizontal transforms
+    float *ptv, *pth;
 
-  // vertical transformation
-  pfa = &bufa[0];
-  pfb = &bufb[0];
-
-  switch(tx_type) {
-    case ADST_ADST :
-    case ADST_DCT  :
-      ptv = (tx_dim == 4) ? &iadst_4[0] :
-                            ((tx_dim == 8) ? &iadst_8[0] : &iadst_16[0]);
-      break;
-
-    default :
-      ptv = (tx_dim == 4) ? &idct_4[0] :
-                            ((tx_dim == 8) ? &idct_8[0] : &idct_16[0]);
-      break;
-  }
-
-  for(j = 0; j < tx_dim; j++) {
-    for(i = 0; i < tx_dim; i++) {
-      pfb[i] = 0 ;
-      for(k = 0; k < tx_dim; k++) {
-        pfb[i] += ptv[k] * pfa[(k * tx_dim)];
+    // load and convert residual array into floating-point
+    for(j = 0; j < tx_dim; j++) {
+      for(i = 0; i < tx_dim; i++) {
+        pfa[i] = (float)ip[i];
       }
-      pfa += 1;
+      pfa += tx_dim;
+      ip  += tx_dim;
     }
 
-    pfb += tx_dim;
-    ptv += tx_dim;
+    // vertical transformation
     pfa = &bufa[0];
-  }
+    pfb = &bufb[0];
 
-  // horizontal transformation
-  pfa = &bufa[0];
-  pfb = &bufb[0];
+    switch(tx_type) {
+      case ADST_ADST :
+      case ADST_DCT  :
+        ptv = (tx_dim == 4) ? &iadst_4[0] :
+                              ((tx_dim == 8) ? &iadst_8[0] : &iadst_16[0]);
+        break;
 
-  switch(tx_type) {
-    case ADST_ADST :
-    case  DCT_ADST :
-      pth = (tx_dim == 4) ? &iadst_4[0] :
-                            ((tx_dim == 8) ? &iadst_8[0] : &iadst_16[0]);
-      break;
+      default :
+        ptv = (tx_dim == 4) ? &idct_4[0] :
+                              ((tx_dim == 8) ? &idct_8[0] : &idct_16[0]);
+        break;
+    }
 
-    default :
-      pth = (tx_dim == 4) ? &idct_4[0] :
-                            ((tx_dim == 8) ? &idct_8[0] : &idct_16[0]);
-      break;
-  }
-
-  for(j = 0; j < tx_dim; j++) {
-    for(i = 0; i < tx_dim; i++) {
-      pfa[i] = 0;
-      for(k = 0; k < tx_dim; k++) {
-        pfa[i] += pfb[k] * pth[k];
+    for(j = 0; j < tx_dim; j++) {
+      for(i = 0; i < tx_dim; i++) {
+        pfb[i] = 0 ;
+        for(k = 0; k < tx_dim; k++) {
+          pfb[i] += ptv[k] * pfa[(k * tx_dim)];
+        }
+        pfa += 1;
       }
-      pth += tx_dim;
-     }
 
-    pfa += tx_dim;
-    pfb += tx_dim;
+      pfb += tx_dim;
+      ptv += tx_dim;
+      pfa = &bufa[0];
+    }
+
+    // horizontal transformation
+    pfa = &bufa[0];
+    pfb = &bufb[0];
 
     switch(tx_type) {
       case ADST_ADST :
@@ -265,21 +245,48 @@ void vp8_ihtllm_c(short *input, short *output, int pitch,
                               ((tx_dim == 8) ? &idct_8[0] : &idct_16[0]);
         break;
     }
-  }
 
-  // convert to short integer format and load BLOCKD buffer
-  op  = output;
-  pfa = &bufa[0];
+    for(j = 0; j < tx_dim; j++) {
+      for(i = 0; i < tx_dim; i++) {
+        pfa[i] = 0;
+        for(k = 0; k < tx_dim; k++) {
+          pfa[i] += pfb[k] * pth[k];
+        }
+        pth += tx_dim;
+       }
 
-  for(j = 0; j < tx_dim; j++) {
-    for(i = 0; i < tx_dim; i++) {
-      op[i] = (pfa[i] > 0 ) ? (short)( pfa[i] / 8 + 0.49) :
-                             -(short)( - pfa[i] / 8 + 0.49);
+      pfa += tx_dim;
+      pfb += tx_dim;
+
+      switch(tx_type) {
+        case ADST_ADST :
+        case  DCT_ADST :
+          pth = (tx_dim == 4) ? &iadst_4[0] :
+                                ((tx_dim == 8) ? &iadst_8[0] : &iadst_16[0]);
+          break;
+
+        default :
+          pth = (tx_dim == 4) ? &idct_4[0] :
+                                ((tx_dim == 8) ? &idct_8[0] : &idct_16[0]);
+          break;
+      }
     }
 
-    op  += shortpitch;
-    pfa += tx_dim;
+    // convert to short integer format and load BLOCKD buffer
+    op  = output;
+    pfa = &bufa[0];
+
+    for(j = 0; j < tx_dim; j++) {
+      for(i = 0; i < tx_dim; i++) {
+        op[i] = (pfa[i] > 0 ) ? (short)( pfa[i] / 8 + 0.49) :
+                               -(short)( - pfa[i] / 8 + 0.49);
+      }
+
+      op  += shortpitch;
+      pfa += tx_dim;
+    }
   }
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
 #endif
 
@@ -776,25 +783,30 @@ void vp8_short_ihaar2x2_c(short *input, short *output, int pitch) {
 #if 0
 // Keep a really bad float version as reference for now.
 void vp8_short_idct16x16_c(short *input, short *output, int pitch) {
-  double x;
-  const int short_pitch = pitch >> 1;
-  int i, j, k, l;
-  for (l = 0; l < 16; ++l) {
-    for (k = 0; k < 16; ++k) {
-      double s = 0;
-      for (i = 0; i < 16; ++i) {
-        for (j = 0; j < 16; ++j) {
-          x=cos(PI*j*(l+0.5)/16.0)*cos(PI*i*(k+0.5)/16.0)*input[i*16+j]/32;
-          if (i != 0)
-            x *= sqrt(2.0);
-          if (j != 0)
-            x *= sqrt(2.0);
-          s += x;
+
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  {
+    double x;
+    const int short_pitch = pitch >> 1;
+    int i, j, k, l;
+    for (l = 0; l < 16; ++l) {
+      for (k = 0; k < 16; ++k) {
+        double s = 0;
+        for (i = 0; i < 16; ++i) {
+          for (j = 0; j < 16; ++j) {
+            x=cos(PI*j*(l+0.5)/16.0)*cos(PI*i*(k+0.5)/16.0)*input[i*16+j]/32;
+            if (i != 0)
+              x *= sqrt(2.0);
+            if (j != 0)
+              x *= sqrt(2.0);
+            s += x;
+          }
         }
+        output[k*short_pitch+l] = (short)round(s);
       }
-      output[k*short_pitch+l] = (short)round(s);
     }
   }
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
 #endif
 
@@ -816,231 +828,246 @@ static const double C15 = 0.098017140329561;
 
 
 static void butterfly_16x16_idct_1d(double input[16], double output[16]) {
-  double step[16];
-  double intermediate[16];
-  double temp1, temp2;
+
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  {
+    double step[16];
+    double intermediate[16];
+    double temp1, temp2;
 
 
-  // step 1 and 2
-  step[ 0] = input[0] + input[8];
-  step[ 1] = input[0] - input[8];
+    // step 1 and 2
+    step[ 0] = input[0] + input[8];
+    step[ 1] = input[0] - input[8];
 
-  temp1 = input[4]*C12;
-  temp2 = input[12]*C4;
+    temp1 = input[4]*C12;
+    temp2 = input[12]*C4;
 
-  temp1 -= temp2;
-  temp1 *= C8;
+    temp1 -= temp2;
+    temp1 *= C8;
 
-  step[ 2] = 2*(temp1);
+    step[ 2] = 2*(temp1);
 
-  temp1 = input[4]*C4;
-  temp2 = input[12]*C12;
-  temp1 += temp2;
-  temp1 = (temp1);
-  temp1 *= C8;
-  step[ 3] = 2*(temp1);
+    temp1 = input[4]*C4;
+    temp2 = input[12]*C12;
+    temp1 += temp2;
+    temp1 = (temp1);
+    temp1 *= C8;
+    step[ 3] = 2*(temp1);
 
-  temp1 = input[2]*C8;
-  temp1 = 2*(temp1);
-  temp2 = input[6] + input[10];
+    temp1 = input[2]*C8;
+    temp1 = 2*(temp1);
+    temp2 = input[6] + input[10];
 
-  step[ 4] = temp1 + temp2;
-  step[ 5] = temp1 - temp2;
+    step[ 4] = temp1 + temp2;
+    step[ 5] = temp1 - temp2;
 
-  temp1 = input[14]*C8;
-  temp1 = 2*(temp1);
-  temp2 = input[6] - input[10];
+    temp1 = input[14]*C8;
+    temp1 = 2*(temp1);
+    temp2 = input[6] - input[10];
 
-  step[ 6] = temp2 - temp1;
-  step[ 7] = temp2 + temp1;
+    step[ 6] = temp2 - temp1;
+    step[ 7] = temp2 + temp1;
 
-  // for odd input
-  temp1 = input[3]*C12;
-  temp2 = input[13]*C4;
-  temp1 += temp2;
-  temp1 = (temp1);
-  temp1 *= C8;
-  intermediate[ 8] = 2*(temp1);
+    // for odd input
+    temp1 = input[3]*C12;
+    temp2 = input[13]*C4;
+    temp1 += temp2;
+    temp1 = (temp1);
+    temp1 *= C8;
+    intermediate[ 8] = 2*(temp1);
 
-  temp1 = input[3]*C4;
-  temp2 = input[13]*C12;
-  temp2 -= temp1;
-  temp2 = (temp2);
-  temp2 *= C8;
-  intermediate[ 9] = 2*(temp2);
+    temp1 = input[3]*C4;
+    temp2 = input[13]*C12;
+    temp2 -= temp1;
+    temp2 = (temp2);
+    temp2 *= C8;
+    intermediate[ 9] = 2*(temp2);
 
-  intermediate[10] = 2*(input[9]*C8);
-  intermediate[11] = input[15] - input[1];
-  intermediate[12] = input[15] + input[1];
-  intermediate[13] = 2*((input[7]*C8));
+    intermediate[10] = 2*(input[9]*C8);
+    intermediate[11] = input[15] - input[1];
+    intermediate[12] = input[15] + input[1];
+    intermediate[13] = 2*((input[7]*C8));
 
-  temp1 = input[11]*C12;
-  temp2 = input[5]*C4;
-  temp2 -= temp1;
-  temp2 = (temp2);
-  temp2 *= C8;
-  intermediate[14] = 2*(temp2);
+    temp1 = input[11]*C12;
+    temp2 = input[5]*C4;
+    temp2 -= temp1;
+    temp2 = (temp2);
+    temp2 *= C8;
+    intermediate[14] = 2*(temp2);
 
-  temp1 = input[11]*C4;
-  temp2 = input[5]*C12;
-  temp1 += temp2;
-  temp1 = (temp1);
-  temp1 *= C8;
-  intermediate[15] = 2*(temp1);
+    temp1 = input[11]*C4;
+    temp2 = input[5]*C12;
+    temp1 += temp2;
+    temp1 = (temp1);
+    temp1 *= C8;
+    intermediate[15] = 2*(temp1);
 
-  step[ 8] = intermediate[ 8] + intermediate[14];
-  step[ 9] = intermediate[ 9] + intermediate[15];
-  step[10] = intermediate[10] + intermediate[11];
-  step[11] = intermediate[10] - intermediate[11];
-  step[12] = intermediate[12] + intermediate[13];
-  step[13] = intermediate[12] - intermediate[13];
-  step[14] = intermediate[ 8] - intermediate[14];
-  step[15] = intermediate[ 9] - intermediate[15];
+    step[ 8] = intermediate[ 8] + intermediate[14];
+    step[ 9] = intermediate[ 9] + intermediate[15];
+    step[10] = intermediate[10] + intermediate[11];
+    step[11] = intermediate[10] - intermediate[11];
+    step[12] = intermediate[12] + intermediate[13];
+    step[13] = intermediate[12] - intermediate[13];
+    step[14] = intermediate[ 8] - intermediate[14];
+    step[15] = intermediate[ 9] - intermediate[15];
 
-  // step 3
-  output[0] = step[ 0] + step[ 3];
-  output[1] = step[ 1] + step[ 2];
-  output[2] = step[ 1] - step[ 2];
-  output[3] = step[ 0] - step[ 3];
+    // step 3
+    output[0] = step[ 0] + step[ 3];
+    output[1] = step[ 1] + step[ 2];
+    output[2] = step[ 1] - step[ 2];
+    output[3] = step[ 0] - step[ 3];
 
-  temp1 = step[ 4]*C14;
-  temp2 = step[ 7]*C2;
-  temp1 -= temp2;
-  output[4] =  (temp1);
+    temp1 = step[ 4]*C14;
+    temp2 = step[ 7]*C2;
+    temp1 -= temp2;
+    output[4] =  (temp1);
 
-  temp1 = step[ 4]*C2;
-  temp2 = step[ 7]*C14;
-  temp1 += temp2;
-  output[7] =  (temp1);
+    temp1 = step[ 4]*C2;
+    temp2 = step[ 7]*C14;
+    temp1 += temp2;
+    output[7] =  (temp1);
 
-  temp1 = step[ 5]*C10;
-  temp2 = step[ 6]*C6;
-  temp1 -= temp2;
-  output[5] =  (temp1);
+    temp1 = step[ 5]*C10;
+    temp2 = step[ 6]*C6;
+    temp1 -= temp2;
+    output[5] =  (temp1);
 
-  temp1 = step[ 5]*C6;
-  temp2 = step[ 6]*C10;
-  temp1 += temp2;
-  output[6] =  (temp1);
+    temp1 = step[ 5]*C6;
+    temp2 = step[ 6]*C10;
+    temp1 += temp2;
+    output[6] =  (temp1);
 
-  output[8] = step[ 8] + step[11];
-  output[9] = step[ 9] + step[10];
-  output[10] = step[ 9] - step[10];
-  output[11] = step[ 8] - step[11];
-  output[12] = step[12] + step[15];
-  output[13] = step[13] + step[14];
-  output[14] = step[13] - step[14];
-  output[15] = step[12] - step[15];
+    output[8] = step[ 8] + step[11];
+    output[9] = step[ 9] + step[10];
+    output[10] = step[ 9] - step[10];
+    output[11] = step[ 8] - step[11];
+    output[12] = step[12] + step[15];
+    output[13] = step[13] + step[14];
+    output[14] = step[13] - step[14];
+    output[15] = step[12] - step[15];
 
-  // output 4
-  step[ 0] = output[0] + output[7];
-  step[ 1] = output[1] + output[6];
-  step[ 2] = output[2] + output[5];
-  step[ 3] = output[3] + output[4];
-  step[ 4] = output[3] - output[4];
-  step[ 5] = output[2] - output[5];
-  step[ 6] = output[1] - output[6];
-  step[ 7] = output[0] - output[7];
+    // output 4
+    step[ 0] = output[0] + output[7];
+    step[ 1] = output[1] + output[6];
+    step[ 2] = output[2] + output[5];
+    step[ 3] = output[3] + output[4];
+    step[ 4] = output[3] - output[4];
+    step[ 5] = output[2] - output[5];
+    step[ 6] = output[1] - output[6];
+    step[ 7] = output[0] - output[7];
 
-  temp1 = output[8]*C7;
-  temp2 = output[15]*C9;
-  temp1 -= temp2;
-  step[ 8] = (temp1);
+    temp1 = output[8]*C7;
+    temp2 = output[15]*C9;
+    temp1 -= temp2;
+    step[ 8] = (temp1);
 
-  temp1 = output[9]*C11;
-  temp2 = output[14]*C5;
-  temp1 += temp2;
-  step[ 9] = (temp1);
+    temp1 = output[9]*C11;
+    temp2 = output[14]*C5;
+    temp1 += temp2;
+    step[ 9] = (temp1);
 
-  temp1 = output[10]*C3;
-  temp2 = output[13]*C13;
-  temp1 -= temp2;
-  step[10] = (temp1);
+    temp1 = output[10]*C3;
+    temp2 = output[13]*C13;
+    temp1 -= temp2;
+    step[10] = (temp1);
 
-  temp1 = output[11]*C15;
-  temp2 = output[12]*C1;
-  temp1 += temp2;
-  step[11] = (temp1);
+    temp1 = output[11]*C15;
+    temp2 = output[12]*C1;
+    temp1 += temp2;
+    step[11] = (temp1);
 
-  temp1 = output[11]*C1;
-  temp2 = output[12]*C15;
-  temp2 -= temp1;
-  step[12] = (temp2);
+    temp1 = output[11]*C1;
+    temp2 = output[12]*C15;
+    temp2 -= temp1;
+    step[12] = (temp2);
 
-  temp1 = output[10]*C13;
-  temp2 = output[13]*C3;
-  temp1 += temp2;
-  step[13] = (temp1);
+    temp1 = output[10]*C13;
+    temp2 = output[13]*C3;
+    temp1 += temp2;
+    step[13] = (temp1);
 
-  temp1 = output[9]*C5;
-  temp2 = output[14]*C11;
-  temp2 -= temp1;
-  step[14] = (temp2);
+    temp1 = output[9]*C5;
+    temp2 = output[14]*C11;
+    temp2 -= temp1;
+    step[14] = (temp2);
 
-  temp1 = output[8]*C9;
-  temp2 = output[15]*C7;
-  temp1 += temp2;
-  step[15] = (temp1);
+    temp1 = output[8]*C9;
+    temp2 = output[15]*C7;
+    temp1 += temp2;
+    step[15] = (temp1);
 
-  // step 5
-  output[0] = (step[0] + step[15]);
-  output[1] = (step[1] + step[14]);
-  output[2] = (step[2] + step[13]);
-  output[3] = (step[3] + step[12]);
-  output[4] = (step[4] + step[11]);
-  output[5] = (step[5] + step[10]);
-  output[6] = (step[6] + step[ 9]);
-  output[7] = (step[7] + step[ 8]);
+    // step 5
+    output[0] = (step[0] + step[15]);
+    output[1] = (step[1] + step[14]);
+    output[2] = (step[2] + step[13]);
+    output[3] = (step[3] + step[12]);
+    output[4] = (step[4] + step[11]);
+    output[5] = (step[5] + step[10]);
+    output[6] = (step[6] + step[ 9]);
+    output[7] = (step[7] + step[ 8]);
 
-  output[15] = (step[0] - step[15]);
-  output[14] = (step[1] - step[14]);
-  output[13] = (step[2] - step[13]);
-  output[12] = (step[3] - step[12]);
-  output[11] = (step[4] - step[11]);
-  output[10] = (step[5] - step[10]);
-  output[9] = (step[6] - step[ 9]);
-  output[8] = (step[7] - step[ 8]);
+    output[15] = (step[0] - step[15]);
+    output[14] = (step[1] - step[14]);
+    output[13] = (step[2] - step[13]);
+    output[12] = (step[3] - step[12]);
+    output[11] = (step[4] - step[11]);
+    output[10] = (step[5] - step[10]);
+    output[9] = (step[6] - step[ 9]);
+    output[8] = (step[7] - step[ 8]);
+  }
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
 
 // Remove once an int version of iDCT is written
 #if 0
 void reference_16x16_idct_1d(double input[16], double output[16]) {
-  const double kPi = 3.141592653589793238462643383279502884;
-  const double kSqrt2 = 1.414213562373095048801688724209698;
-  for (int k = 0; k < 16; k++) {
-    output[k] = 0.0;
-    for (int n = 0; n < 16; n++) {
-      output[k] += input[n]*cos(kPi*(2*k+1)*n/32.0);
-      if (n == 0)
-        output[k] = output[k]/kSqrt2;
+
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  {
+    const double kPi = 3.141592653589793238462643383279502884;
+    const double kSqrt2 = 1.414213562373095048801688724209698;
+    for (int k = 0; k < 16; k++) {
+      output[k] = 0.0;
+      for (int n = 0; n < 16; n++) {
+        output[k] += input[n]*cos(kPi*(2*k+1)*n/32.0);
+        if (n == 0)
+          output[k] = output[k]/kSqrt2;
+      }
     }
   }
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
 #endif
 
 void vp8_short_idct16x16_c(short *input, short *output, int pitch) {
-  double out[16*16], out2[16*16];
-  const int short_pitch = pitch >> 1;
-  int i, j;
-    // First transform rows
-  for (i = 0; i < 16; ++i) {
-    double temp_in[16], temp_out[16];
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = input[j + i*short_pitch];
-    butterfly_16x16_idct_1d(temp_in, temp_out);
-    for (j = 0; j < 16; ++j)
-      out[j + i*16] = temp_out[j];
+
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  {
+    double out[16*16], out2[16*16];
+    const int short_pitch = pitch >> 1;
+    int i, j;
+      // First transform rows
+    for (i = 0; i < 16; ++i) {
+      double temp_in[16], temp_out[16];
+      for (j = 0; j < 16; ++j)
+        temp_in[j] = input[j + i*short_pitch];
+      butterfly_16x16_idct_1d(temp_in, temp_out);
+      for (j = 0; j < 16; ++j)
+        out[j + i*16] = temp_out[j];
+    }
+    // Then transform columns
+    for (i = 0; i < 16; ++i) {
+      double temp_in[16], temp_out[16];
+      for (j = 0; j < 16; ++j)
+        temp_in[j] = out[j*16 + i];
+      butterfly_16x16_idct_1d(temp_in, temp_out);
+      for (j = 0; j < 16; ++j)
+        out2[j*16 + i] = temp_out[j];
+    }
+    for (i = 0; i < 16*16; ++i)
+      output[i] = round(out2[i]/128);
   }
-  // Then transform columns
-  for (i = 0; i < 16; ++i) {
-    double temp_in[16], temp_out[16];
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j*16 + i];
-    butterfly_16x16_idct_1d(temp_in, temp_out);
-    for (j = 0; j < 16; ++j)
-      out2[j*16 + i] = temp_out[j];
-  }
-  for (i = 0; i < 16*16; ++i)
-    output[i] = round(out2[i]/128);
+  vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
 #endif
