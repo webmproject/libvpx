@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQH//7Mc\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-05T01:55:22Z",
+      "side": 1,
+      "message": "this should be camel-cased (CompareImg, CompareImage, CompareVpxImage, ...)",
+      "revId": "37bdc1f992291cbb183340aef8edb6c05d5ba232",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
