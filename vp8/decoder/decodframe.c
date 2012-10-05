@@ -407,7 +407,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       int i8x8mode;
       BLOCKD *b;
 
-#if CONFIG_HYBRIDTRANSFORM8X8
       int idx = (ib & 0x02) ? (ib + 2) : ib;
 
       short *q  = xd->block[idx].qcoeff;
@@ -415,7 +414,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       unsigned char *pre = xd->block[ib].predictor;
       unsigned char *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
       int stride = xd->dst.y_stride;
-#endif
 
       b = &xd->block[ib];
       i8x8mode = b->bmi.as_mode.first;
@@ -427,19 +425,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                                     q, dq, pre, dst, 16, stride);
       q += 64;
 #else
-      for (j = 0; j < 4; j++) {
-        b = &xd->block[ib + iblock[j]];
-        if (xd->eobs[ib + iblock[j]] > 1) {
-          DEQUANT_INVOKE(&pbi->dequant, idct_add)
-          (b->qcoeff, b->dequant,  b->predictor,
-           *(b->base_dst) + b->dst, 16, b->dst_stride);
-        } else {
-          IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)
-          (b->qcoeff[0] * b->dequant[0], b->predictor,
-           *(b->base_dst) + b->dst, 16, b->dst_stride);
-          ((int *)b->qcoeff)[0] = 0;
-        }
-      }
+      vp8_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
+      q += 64;
 #endif
 
       b = &xd->block[16 + i];
@@ -484,16 +471,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 #else
       if (xd->eobs[i] > 1)
       {
-          DEQUANT_INVOKE(&pbi->dequant, idct_add)
-              (b->qcoeff, b->dequant,  b->predictor,
-              *(b->base_dst) + b->dst, 16, b->dst_stride);
-      }
-      else
-      {
-          IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)
-              (b->qcoeff[0] * b->dequant[0], b->predictor,
-              *(b->base_dst) + b->dst, 16, b->dst_stride);
-          ((int *)b->qcoeff)[0] = 0;
+        DEQUANT_INVOKE(&pbi->dequant, idct_add)
+            (b->qcoeff, b->dequant,  b->predictor,
+             *(b->base_dst) + b->dst, 16, b->dst_stride);
+      } else {
+        IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)
+            (b->qcoeff[0] * b->dequant[0], b->predictor,
+             *(b->base_dst) + b->dst, 16, b->dst_stride);
+        ((int *)b->qcoeff)[0] = 0;
       }
 #endif
     }
@@ -613,23 +598,23 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   }
 
 #if CONFIG_SUPERBLOCKS
-    if (!xd->mode_info_context->mbmi.encoded_as_sb) {
+  if (!xd->mode_info_context->mbmi.encoded_as_sb) {
 #endif
-      if ((tx_type == TX_8X8 &&
-           xd->mode_info_context->mbmi.mode != I8X8_PRED)
+    if ((tx_type == TX_8X8 &&
+         xd->mode_info_context->mbmi.mode != I8X8_PRED)
 #if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
-          || tx_type == TX_16X16
+        || tx_type == TX_16X16
 #endif
-      )
-    DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block_8x8) //
-    (xd->qcoeff + 16 * 16, xd->block[16].dequant,
-     xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
-     xd->dst.uv_stride, xd->eobs + 16, xd); //
-  else if (xd->mode_info_context->mbmi.mode != I8X8_PRED)
-    DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block)
-    (xd->qcoeff + 16 * 16, xd->block[16].dequant,
-     xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
-     xd->dst.uv_stride, xd->eobs + 16);
+       )
+      DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block_8x8) //
+          (xd->qcoeff + 16 * 16, xd->block[16].dequant,
+           xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
+           xd->dst.uv_stride, xd->eobs + 16, xd); //
+    else if (xd->mode_info_context->mbmi.mode != I8X8_PRED)
+      DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block)
+          (xd->qcoeff + 16 * 16, xd->block[16].dequant,
+           xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
+           xd->dst.uv_stride, xd->eobs + 16);
 #if CONFIG_SUPERBLOCKS
   }
 #endif
