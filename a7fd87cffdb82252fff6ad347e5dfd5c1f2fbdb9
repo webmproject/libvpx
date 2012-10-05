@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQH//6nI\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-05T19:16:42Z",
+      "side": 1,
+      "message": "move with the other decoder tests, then sort by filename",
+      "revId": "a7fd87cffdb82252fff6ad347e5dfd5c1f2fbdb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//6nA\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-05T19:16:42Z",
+      "side": 1,
+      "message": "move up above black box tests",
+      "revId": "a7fd87cffdb82252fff6ad347e5dfd5c1f2fbdb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//6mI\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-05T19:16:42Z",
+      "side": 1,
+      "message": "rather than looping over these in one test, another option is to make the test value parameterized, and then INSTANTIATE_TEST_CASE_P with ::testing::Values(\"vp80-00-comprehensive-001.ivf\", ...) (maybe you can use this existing array with ::testing::Values, not sure)\n\nThe biggest advantage to doing it that way is that you\u0027ll get a separate failure for each test vector that fails, rather than bailing after the first one. You could get that with using and EXPECT instead of ASSERT, but then you get failure messages on every frame that fails, which is probably too much detail. It\u0027d also shard the test across multiple machines, though this test runs fast enough on its own that that\u0027s not super important.\n\nAnother nice thing about doing it this way is it\u0027d make it easy to make the test additionally parameterized, for instance run the test vectors with different VPX_SIMD_CAPS, to test all the different assembly code, and straight C.\n\nI don\u0027t feel strongly enough to -1 over only this, but it\u0027s an easy change if you see the value in it too.",
+      "revId": "a7fd87cffdb82252fff6ad347e5dfd5c1f2fbdb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//6mg\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-05T19:16:42Z",
+      "side": 1,
+      "message": "you only use these variables (and i) an loop iterators, can declare them inside the loop:\n\n  for (int plane \u003d 0; ...",
+      "revId": "a7fd87cffdb82252fff6ad347e5dfd5c1f2fbdb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//6mk\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-05T19:16:42Z",
+      "side": 1,
+      "message": "should probably be new/delete vs malloc/free",
+      "revId": "a7fd87cffdb82252fff6ad347e5dfd5c1f2fbdb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//6ms\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-05T19:16:42Z",
+      "side": 1,
+      "message": "should be cstdlib",
+      "revId": "a7fd87cffdb82252fff6ad347e5dfd5c1f2fbdb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
