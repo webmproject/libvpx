@@ -679,7 +679,6 @@ default_coef_probs_8x8[BLOCK_TYPES_8X8]
       { 6, 117, 180, 254, 199, 216, 255, 251, 128, 128, 128}
     }
   },
-#if CONFIG_HYBRIDTRANSFORM8X8
   { /* block Type 3 */
     { /* Coeff Band 0 */
       { 192, 18, 155, 172, 145, 164, 192, 135, 246, 223, 255},
@@ -730,7 +729,6 @@ default_coef_probs_8x8[BLOCK_TYPES_8X8]
       { 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128}
     }
   }
-#endif
 };
 
 #if CONFIG_HYBRIDTRANSFORM8X8

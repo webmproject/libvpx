@@ -548,15 +548,10 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   TX_TYPE tx_type = DCT_DCT;
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8
   int bufthred = (xd->mode_info_context->mbmi.mode == I8X8_PRED) ? 16 : 24;
   if (xd->mode_info_context->mbmi.mode != B_PRED &&
       xd->mode_info_context->mbmi.mode != SPLITMV &&
       xd->mode_info_context->mbmi.mode != I8X8_PRED) {
-#else
-  if (xd->mode_info_context->mbmi.mode != B_PRED &&
-      xd->mode_info_context->mbmi.mode != SPLITMV) {
-#endif
     ENTROPY_CONTEXT *const a = A + vp8_block2above_8x8[24];
     ENTROPY_CONTEXT *const l = L + vp8_block2left_8x8[24];
     const int *const scan = vp8_default_zig_zag1d;
@@ -585,11 +580,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   else
     seg_eob = 64;
 
-#if CONFIG_HYBRIDTRANSFORM8X8
   for (i = 0; i < bufthred ; i += 4) {
-#else
-  for (i = 0; i < 24; i += 4) {
-#endif
     ENTROPY_CONTEXT *const a = A + vp8_block2above_8x8[i];
     ENTROPY_CONTEXT *const l = L + vp8_block2left_8x8[i];
     const int *const scan = vp8_default_zig_zag1d_8x8;
@@ -606,7 +597,6 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     }
 #endif
 
-    //printf("8: %d\n", tx_type);
     c = vp8_decode_coefs(pbi, xd, a, l, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
                          tx_type,
@@ -621,10 +611,11 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     qcoeff_ptr += 64;
   }
 
-#if CONFIG_HYBRIDTRANSFORM8X8
-  if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+  if (bufthred == 16) {
     type = PLANE_TYPE_UV;
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
     tx_type = DCT_DCT;
+#endif
     seg_eob = 16;
 
     // use 4x4 transform for U, V components in I8X8 prediction mode
@@ -645,7 +636,6 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
       qcoeff_ptr += 16;
     }
   }
-#endif
 
   return eobtotal;
 }
