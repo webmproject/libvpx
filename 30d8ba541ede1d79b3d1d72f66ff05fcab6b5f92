@@ -16,6 +16,24 @@
       "revId": "30d8ba541ede1d79b3d1d72f66ff05fcab6b5f92",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//5Yk\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 640,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-08T21:33:11Z",
+      "side": 1,
+      "message": "Setting cpi-\u003emr_low_res_mv_avail \u003d 0 would shut off the lower level for the whole frame, instead of just this MB. Seems like we can still use the lower res search for other MBs as long as the reference is valid.\n\nI think that we can get away from using parent_ref_frame, but I\u0027d rather do it as part of a clean up commit. ie, we could create a local validity flag, like:\n\n  int parent_ref_valid \u003d cpi-\u003eoxcf.mr_encoder_id \u0026\u0026 cpi-\u003emr_low_res_mv_avail;\n\nThat would clean up a bunch of code, and give a convenient thing to invalidate without changing the parent_ref_frame if we ever support forcing intra on child frames. I think it\u0027d touch more than just fixing this bug though. Can I do it as a second commit?\n\nChanging to use ref_frame_map was intentional. Changing the frame search order is the purpose of that extra lookup. This encode may be running at a different speed than its parent, and for instance if the parent chooses the second reference, and this one penalizes or shuts off the second reference, then the pick modes loop won\u0027t run under the old code. My change runs the pick loop using the parent ref frame as the highest priority reference, so it gets the same level of searching regardless of which frame it actually is. There was a small quality improvement with this, iirc.",
+      "parentUuid": "AAAAQH//5a0\u003d",
+      "revId": "30d8ba541ede1d79b3d1d72f66ff05fcab6b5f92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
