@@ -610,8 +610,34 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     MB_PREDICTION_MODE parent_mode = 0;
 
     if (cpi->oxcf.mr_encoder_id && cpi->mr_low_res_mv_avail)
+    {
+        int parent_ref_flag;
+
         get_lower_res_motion_info(cpi, xd, &dissim, &parent_ref_frame,
                                   &parent_mode, &parent_ref_mv, mb_row, mb_col);
+
+        /* TODO(jkoleszar): The references available (ref_frame_flags) to the
+         * lower res encoder should match those available to this encoder, but
+         * there seems to be a situation where this mismatch can happen in the
+         * case of frame dropping and temporal layers. For example,
+         * GOLD being disallowed in ref_frame_flags, but being returned as
+         * parent_ref_frame.
+         *
+         * In this event, take the conservative approach of disabling the
+         * lower res info for this MB.
+         */
+        parent_ref_flag = 0;
+        if (parent_ref_frame == LAST_FRAME)
+            parent_ref_flag = (cpi->ref_frame_flags & VP8_LAST_FRAME);
+        else if (parent_ref_frame == GOLDEN_FRAME)
+            parent_ref_flag = (cpi->ref_frame_flags & VP8_GOLD_FRAME);
+        else if (parent_ref_frame == ALTREF_FRAME)
+            parent_ref_flag = (cpi->ref_frame_flags & VP8_ALTR_FRAME);
+
+        //assert(!parent_ref_frame || parent_ref_flag);
+        if (!parent_ref_flag)
+            parent_ref_frame = 0;
+    }
 #endif
 
     mode_mv = mode_mv_sb[sign_bias];
@@ -620,6 +646,16 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
 
     /* Setup search priorities */
+#if CONFIG_MULTI_RES_ENCODING
+    if (cpi->oxcf.mr_encoder_id && cpi->mr_low_res_mv_avail
+        && parent_ref_frame && dissim < 8)
+    {
+        ref_frame_map[0] = INTRA_FRAME;
+        ref_frame_map[1] = parent_ref_frame;
+        ref_frame_map[2] = -1;
+        ref_frame_map[3] = -1;
+    } else
+#endif
     get_reference_search_order(cpi, ref_frame_map);
 
     /* Check to see if there is at least 1 valid reference frame that we need
@@ -670,25 +706,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             continue;
 
         x->e_mbd.mode_info_context->mbmi.ref_frame = this_ref_frame;
-
-#if CONFIG_MULTI_RES_ENCODING
-        if (cpi->oxcf.mr_encoder_id && cpi->mr_low_res_mv_avail)
-        {
-            /* TODO: If parent MB is intra, child MB is intra. This is removed
-             * now since it cause noticeable quality loss for some test clip.
-             * Will come back to evaluate more.
-             * if (!parent_ref_frame && this_ref_frame)
-             *     continue;
-             */
-
-            /* If parent MB is inter, and it is unlikely there are multiple
-             * objects in parent MB, we use parent ref frame as child MB's
-             * ref frame. */
-            if (parent_ref_frame && dissim < 8
-                && parent_ref_frame != this_ref_frame)
-                continue;
-        }
-#endif
 
         /* everything but intra */
         if (x->e_mbd.mode_info_context->mbmi.ref_frame)
