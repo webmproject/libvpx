@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//5yQ\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-08T17:17:28Z",
+      "side": 1,
+      "message": "Thanks. I will modify it.",
+      "parentUuid": "AAAAQH//6JE\u003d",
+      "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//6JI\u003d",
         "filename": "vp8/common/postproc.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-06T06:44:18Z",
       "side": 1,
       "message": "why commented?",
+      "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//5yM\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-08T17:17:28Z",
+      "side": 1,
+      "message": "I did this only to verify a compiling warning. Will change it back.",
+      "parentUuid": "AAAAQH//6JI\u003d",
       "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//5wk\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-08T17:17:28Z",
+      "side": 1,
+      "message": "Will add it.",
+      "parentUuid": "AAAAQH//6JA\u003d",
+      "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//6I8\u003d",
         "filename": "vp8/common/postproc.c",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2012-10-06T06:44:18Z",
       "side": 1,
       "message": "avoiding the loop looks better and easier to read:\n   p_src[-2] \u003d p_src[-1] \u003d p_src[0];\n\n\n(and below too)",
+      "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//5v4\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-08T17:17:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQH//6I8\u003d",
       "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//5vw\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-08T17:17:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQH//6I4\u003d",
+      "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//6Iw\u003d",
         "filename": "vp8/common/postproc.c",
         "patchSetId": 6
@@ -98,6 +188,24 @@
       "writtenOn": "2012-10-06T06:44:18Z",
       "side": 1,
       "message": "ylimits / uvlimits is constant per-macroblock. You don\u0027t really need to allocate memory for it. Just pass the value to vp8_post_proc_down_and_across_mb_row() directly.",
+      "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//5vQ\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-08T17:17:28Z",
+      "side": 1,
+      "message": "Here, as reference code, c version was implemented the same way as SSE2 code.",
+      "parentUuid": "AAAAQH//6Iw\u003d",
       "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//5uo\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-08T17:17:28Z",
+      "side": 1,
+      "message": "MODE_INFO was allocated one more column and one more row than the actual macroblock columns and rows.",
+      "parentUuid": "AAAAQH//6I0\u003d",
+      "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//6Is\u003d",
         "filename": "vp8/common/postproc.c",
         "patchSetId": 6
@@ -132,6 +258,24 @@
       "writtenOn": "2012-10-06T06:44:18Z",
       "side": 1,
       "message": "why is this function needed? It looks very similar to the one above. This looks like copy-paste (to be avoided)",
+      "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//5uY\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-08T17:17:28Z",
+      "side": 1,
+      "message": "They are for different post-proc levels. I will modify it.",
+      "parentUuid": "AAAAQH//6Is\u003d",
       "revId": "fe1f7c862ba8c946ed325facea32c21aa974dbc9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
