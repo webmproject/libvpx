@@ -650,7 +650,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 #if CONFIG_MULTI_RES_ENCODING
     if (parent_ref_valid && parent_ref_frame && dissim < 8)
     {
-        ref_frame_map[0] = INTRA_FRAME;
+        ref_frame_map[0] = -1;
         ref_frame_map[1] = parent_ref_frame;
         ref_frame_map[2] = -1;
         ref_frame_map[3] = -1;
