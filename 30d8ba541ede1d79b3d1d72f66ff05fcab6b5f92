@@ -69,6 +69,24 @@
       "revId": "30d8ba541ede1d79b3d1d72f66ff05fcab6b5f92",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//5T0\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 658,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-08T22:40:31Z",
+      "side": 1,
+      "message": "ref_frame_map[0] can\u0027t be inter, but you can disable the intra search by setting ref_frame_map[0] \u003d -1. I tried this on one clip (bond) and it hurt quality (approx -0.04dB PSNR, +1.5% filesize). Didn\u0027t make much of a difference on Andrei. The speed impact was ~0.2% on Andrei, negligible on Bond.\n\nI\u0027m ok with turning it off, but let\u0027s do it as a separate patch. This one has been tested to resolve a webrtc bug that we can\u0027t reproduce, and since they\u0027re looking to do a release today I\u0027d like to give them a commit they can pull that matches what they tested functionally. We can experiment with this some more after.",
+      "parentUuid": "AAAAQH//5XM\u003d",
+      "revId": "30d8ba541ede1d79b3d1d72f66ff05fcab6b5f92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
