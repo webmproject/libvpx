@@ -17,6 +17,9 @@
 
 #define SUBMVREF_COUNT 5
 #define VP9_NUMMBSPLITS 4
+#if CONFIG_COMP_INTRA_PRED
+#define DEFAULT_COMP_INTRA_PROB  32
+#endif
 
 typedef const int vp9_mbsplit[16];
 
@@ -32,11 +35,12 @@ extern const vp9_prob vp9_sub_mv_ref_prob[VP9_SUBMVREFS - 1];
 
 extern const vp9_prob vp9_sub_mv_ref_prob2[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
 
-extern const unsigned int vp9_kf_default_bmode_counts[VP9_BINTRAMODES]
-                                                     [VP9_BINTRAMODES]
-                                                     [VP9_BINTRAMODES];
+extern const unsigned int vp9_kf_default_bmode_counts[VP9_KF_BINTRAMODES]
+                                                     [VP9_KF_BINTRAMODES]
+                                                     [VP9_KF_BINTRAMODES];
 
 extern const vp9_tree_index vp9_bmode_tree[];
+extern const vp9_tree_index vp9_kf_bmode_tree[];
 
 extern const vp9_tree_index  vp9_ymode_tree[];
 extern const vp9_tree_index  vp9_kf_ymode_tree[];
@@ -48,7 +52,8 @@ extern const vp9_tree_index  vp9_mv_ref_tree[];
 extern const vp9_tree_index  vp9_sb_mv_ref_tree[];
 extern const vp9_tree_index  vp9_sub_mv_ref_tree[];
 
-extern struct vp9_token_struct vp9_bmode_encodings[VP9_BINTRAMODES];
+extern struct vp9_token_struct vp9_bmode_encodings[VP9_NKF_BINTRAMODES];
+extern struct vp9_token_struct vp9_kf_bmode_encodings[VP9_KF_BINTRAMODES];
 extern struct vp9_token_struct vp9_ymode_encodings[VP9_YMODES];
 extern struct vp9_token_struct vp9_sb_kf_ymode_encodings[VP9_I32X32_MODES];
 extern struct vp9_token_struct vp9_kf_ymode_encodings[VP9_YMODES];
@@ -76,10 +81,11 @@ extern void vp9_accum_mv_refs(struct VP9Common *pc,
                               MB_PREDICTION_MODE m,
                               const int ct[4]);
 
-void vp9_default_bmode_probs(vp9_prob dest[VP9_BINTRAMODES - 1]);
+void vp9_default_bmode_probs(vp9_prob dest[VP9_NKF_BINTRAMODES - 1]);
 
-void vp9_kf_default_bmode_probs(vp9_prob dest[VP9_BINTRAMODES][VP9_BINTRAMODES]
-                                             [VP9_BINTRAMODES - 1]);
+void vp9_kf_default_bmode_probs(vp9_prob dest[VP9_KF_BINTRAMODES]
+                                             [VP9_KF_BINTRAMODES]
+                                             [VP9_KF_BINTRAMODES - 1]);
 
 void vp9_adapt_mode_probs(struct VP9Common *);
 

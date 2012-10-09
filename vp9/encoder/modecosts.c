@@ -18,12 +18,13 @@
 void vp9_init_mode_costs(VP9_COMP *c) {
   VP9_COMMON *x = &c->common;
   const vp9_tree_p T = vp9_bmode_tree;
+  const vp9_tree_p KT = vp9_kf_bmode_tree;
   int i, j;
 
-  for (i = 0; i < VP9_BINTRAMODES; i++) {
-    for (j = 0; j < VP9_BINTRAMODES; j++) {
+  for (i = 0; i < VP9_KF_BINTRAMODES; i++) {
+    for (j = 0; j < VP9_KF_BINTRAMODES; j++) {
       vp9_cost_tokens((int *)c->mb.bmode_costs[i][j],
-                      x->kf_bmode_prob[i][j], T);
+                      x->kf_bmode_prob[i][j], KT);
     }
   }
 

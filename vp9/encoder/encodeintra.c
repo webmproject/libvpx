@@ -57,6 +57,10 @@ void vp9_encode_intra4x4block(const VP9_ENCODER_RTCD *rtcd,
   BLOCK *be = &x->block[ib];
   TX_TYPE tx_type;
 
+#if CONFIG_NEWBINTRAMODES
+  b->bmi.as_mode.context = vp9_find_bpred_context(b);
+#endif
+
 #if CONFIG_COMP_INTRA_PRED
   if (b->bmi.as_mode.second == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
 #endif

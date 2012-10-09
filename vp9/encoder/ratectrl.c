@@ -271,16 +271,16 @@ void vp9_setup_inter_frame(VP9_COMP *cpi) {
     vpx_memcpy(&cpi->common.fc,
                &cpi->common.lfc_a,
                sizeof(cpi->common.fc));
-    vpx_memcpy(cpi->common.fc.vp8_mode_contexts,
+    vpx_memcpy(cpi->common.fc.vp9_mode_contexts,
                cpi->common.fc.mode_context_a,
-               sizeof(cpi->common.fc.vp8_mode_contexts));
+               sizeof(cpi->common.fc.vp9_mode_contexts));
   } else {
     vpx_memcpy(&cpi->common.fc,
                &cpi->common.lfc,
                sizeof(cpi->common.fc));
-    vpx_memcpy(cpi->common.fc.vp8_mode_contexts,
+    vpx_memcpy(cpi->common.fc.vp9_mode_contexts,
                cpi->common.fc.mode_context,
-               sizeof(cpi->common.fc.vp8_mode_contexts));
+               sizeof(cpi->common.fc.vp9_mode_contexts));
   }
 }
 

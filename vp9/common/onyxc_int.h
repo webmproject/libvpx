@@ -44,12 +44,12 @@ void vp9_initialize_common(void);
 #define COMP_PRED_CONTEXTS   2
 
 typedef struct frame_contexts {
-  vp9_prob bmode_prob [VP9_BINTRAMODES - 1];
-  vp9_prob ymode_prob [VP9_YMODES - 1]; /* interframe intra mode probs */
-  vp9_prob uv_mode_prob [VP9_YMODES][VP9_UV_MODES - 1];
-  vp9_prob i8x8_mode_prob [VP9_I8X8_MODES - 1];
-  vp9_prob sub_mv_ref_prob [SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
-  vp9_prob mbsplit_prob [VP9_NUMMBSPLITS - 1];
+  vp9_prob bmode_prob[VP9_NKF_BINTRAMODES - 1];
+  vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
+  vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
+  vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
+  vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
+  vp9_prob mbsplit_prob[VP9_NUMMBSPLITS - 1];
   vp9_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   vp9_prob hybrid_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   vp9_prob coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
@@ -59,18 +59,18 @@ typedef struct frame_contexts {
 
   nmv_context nmvc;
   nmv_context pre_nmvc;
-  vp9_prob pre_bmode_prob [VP9_BINTRAMODES - 1];
-  vp9_prob pre_ymode_prob [VP9_YMODES - 1]; /* interframe intra mode probs */
-  vp9_prob pre_uv_mode_prob [VP9_YMODES][VP9_UV_MODES - 1];
-  vp9_prob pre_i8x8_mode_prob [VP9_I8X8_MODES - 1];
-  vp9_prob pre_sub_mv_ref_prob [SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
-  vp9_prob pre_mbsplit_prob [VP9_NUMMBSPLITS - 1];
-  unsigned int bmode_counts [VP9_BINTRAMODES];
-  unsigned int ymode_counts [VP9_YMODES];   /* interframe intra mode probs */
-  unsigned int uv_mode_counts [VP9_YMODES][VP9_UV_MODES];
-  unsigned int i8x8_mode_counts [VP9_I8X8_MODES];   /* interframe intra mode probs */
-  unsigned int sub_mv_ref_counts [SUBMVREF_COUNT][VP9_SUBMVREFS];
-  unsigned int mbsplit_counts [VP9_NUMMBSPLITS];
+  vp9_prob pre_bmode_prob[VP9_NKF_BINTRAMODES - 1];
+  vp9_prob pre_ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
+  vp9_prob pre_uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
+  vp9_prob pre_i8x8_mode_prob[VP9_I8X8_MODES - 1];
+  vp9_prob pre_sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
+  vp9_prob pre_mbsplit_prob[VP9_NUMMBSPLITS - 1];
+  unsigned int bmode_counts[VP9_NKF_BINTRAMODES];
+  unsigned int ymode_counts[VP9_YMODES];   /* interframe intra mode probs */
+  unsigned int uv_mode_counts[VP9_YMODES][VP9_UV_MODES];
+  unsigned int i8x8_mode_counts[VP9_I8X8_MODES];   /* interframe intra probs */
+  unsigned int sub_mv_ref_counts[SUBMVREF_COUNT][VP9_SUBMVREFS];
+  unsigned int mbsplit_counts[VP9_NUMMBSPLITS];
 
   vp9_prob pre_coef_probs [BLOCK_TYPES] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
@@ -108,7 +108,7 @@ typedef struct frame_contexts {
 
   int mode_context[6][4];
   int mode_context_a[6][4];
-  int vp8_mode_contexts[6][4];
+  int vp9_mode_contexts[6][4];
   int mv_ref_ct[6][4][2];
   int mv_ref_ct_a[6][4][2];
 } FRAME_CONTEXT;
@@ -241,7 +241,9 @@ typedef struct VP9Common {
 
   /* keyframe block modes are predicted by their above, left neighbors */
 
-  vp9_prob kf_bmode_prob [VP9_BINTRAMODES] [VP9_BINTRAMODES] [VP9_BINTRAMODES - 1];
+  vp9_prob kf_bmode_prob[VP9_KF_BINTRAMODES]
+                        [VP9_KF_BINTRAMODES]
+                        [VP9_KF_BINTRAMODES - 1];
   vp9_prob kf_ymode_prob[8][VP9_YMODES - 1]; /* keyframe "" */
 #if CONFIG_SUPERBLOCKS
   vp9_prob sb_kf_ymode_prob[8][VP9_I32X32_MODES - 1];

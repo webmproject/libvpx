@@ -102,12 +102,12 @@ typedef struct {
   vp9_prob hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 
-  vp9_prob ymode_prob [VP9_YMODES - 1]; /* interframe intra mode probs */
-  vp9_prob uv_mode_prob [VP9_YMODES][VP9_UV_MODES - 1];
-  vp9_prob bmode_prob [VP9_BINTRAMODES - 1];
-  vp9_prob i8x8_mode_prob [VP9_I8X8_MODES - 1];
-  vp9_prob sub_mv_ref_prob [SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
-  vp9_prob mbsplit_prob [VP9_NUMMBSPLITS - 1];
+  vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
+  vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
+  vp9_prob bmode_prob[VP9_NKF_BINTRAMODES - 1];
+  vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
+  vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
+  vp9_prob mbsplit_prob[VP9_NUMMBSPLITS - 1];
 
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
@@ -533,12 +533,11 @@ typedef struct VP9_COMP {
   int sb_count;
   int sb_ymode_count [VP9_I32X32_MODES];
 #endif
-  int ymode_count [VP9_YMODES];        /* intra MB type cts this frame */
-  int bmode_count [VP9_BINTRAMODES];
-  int i8x8_mode_count [VP9_I8X8_MODES];
-  int sub_mv_ref_count [SUBMVREF_COUNT][VP9_SUBMVREFS];
-  int mbsplit_count [VP9_NUMMBSPLITS];
-  // int uv_mode_count[VP9_UV_MODES];       /* intra MB type cts this frame */
+  int ymode_count[VP9_YMODES];        /* intra MB type cts this frame */
+  int bmode_count[VP9_NKF_BINTRAMODES];
+  int i8x8_mode_count[VP9_I8X8_MODES];
+  int sub_mv_ref_count[SUBMVREF_COUNT][VP9_SUBMVREFS];
+  int mbsplit_count[VP9_NUMMBSPLITS];
   int y_uv_mode_count[VP9_YMODES][VP9_UV_MODES];
 
   nmv_context_counts NMVcount;

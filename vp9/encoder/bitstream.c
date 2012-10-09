@@ -36,7 +36,9 @@ unsigned __int64 Sectionbits[500];
 #endif
 
 #ifdef ENTROPY_STATS
-int intra_mode_stats [VP9_BINTRAMODES] [VP9_BINTRAMODES] [VP9_BINTRAMODES];
+int intra_mode_stats[VP9_KF_BINTRAMODES]
+                    [VP9_KF_BINTRAMODES]
+                    [VP9_KF_BINTRAMODES];
 unsigned int tree_update_hist [BLOCK_TYPES]
                               [COEF_BANDS]
                               [PREV_COEF_CONTEXTS]
@@ -341,11 +343,20 @@ static void write_uv_mode(vp9_writer *bc, int m, const vp9_prob *p) {
 
 
 static void write_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
+#if CONFIG_NEWBINTRAMODES
+  assert(m < B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS || m == B_CONTEXT_PRED);
+  if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
+#endif
   write_token(bc, vp9_bmode_tree, p, vp9_bmode_encodings + m);
 }
 
+static void write_kf_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
+  write_token(bc, vp9_kf_bmode_tree, p, vp9_kf_bmode_encodings + m);
+}
+
 static void write_split(vp9_writer *bc, int x, const vp9_prob *p) {
-  write_token(bc, vp9_mbsplit_tree, p, vp9_mbsplit_encodings + x);
+  write_token(
+    bc, vp9_mbsplit_tree, p, vp9_mbsplit_encodings + x);
 }
 
 static int prob_update_savings(const unsigned int *ct,
@@ -1005,7 +1016,7 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
             int uses_second =
               m->bmi[0].as_mode.second !=
               (B_PREDICTION_MODE)(B_DC_PRED - 1);
-            vp9_write(bc, uses_second, 128);
+            vp9_write(bc, uses_second, DEFAULT_COMP_INTRA_PROB);
 #endif
             do {
 #if CONFIG_COMP_INTRA_PRED
@@ -1013,14 +1024,6 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
 #endif
               write_bmode(bc, m->bmi[j].as_mode.first,
                           pc->fc.bmode_prob);
-              /*
-              if (!cpi->dummy_packing) {
-                int p;
-                for (p = 0; p < VP9_BINTRAMODES - 1; ++p)
-                  printf(" %d", pc->fc.bmode_prob[p]);
-                printf("\nbmode[%d][%d]: %d\n", pc->current_video_frame, j, m->bmi[j].as_mode.first);
-              }
-              */
 #if CONFIG_COMP_INTRA_PRED
               if (uses_second) {
                 write_bmode(bc, mode2, pc->fc.bmode_prob);
@@ -1344,7 +1347,7 @@ static void write_mb_modes_kf(const VP9_COMMON  *c,
     int uses_second =
       m->bmi[0].as_mode.second !=
       (B_PREDICTION_MODE)(B_DC_PRED - 1);
-    vp9_write(bc, uses_second, 128);
+    vp9_write(bc, uses_second, DEFAULT_COMP_INTRA_PROB);
 #endif
     do {
       const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
@@ -1358,11 +1361,14 @@ static void write_mb_modes_kf(const VP9_COMMON  *c,
       ++intra_mode_stats [A] [L] [bm];
 #endif
 
-      write_bmode(bc, bm, c->kf_bmode_prob [A] [L]);
-      // printf("    mode: %d\n", bm);
+      write_kf_bmode(bc, bm, c->kf_bmode_prob[A][L]);
+#if 0  // CONFIG_NEWBINTRAMODES
+      if (!cpi->dummy_packing)
+        printf("%d: %d %d\n", i, bm, m->bmi[i].as_mode.context);
+#endif
 #if CONFIG_COMP_INTRA_PRED
       if (uses_second) {
-        write_bmode(bc, bm2, c->kf_bmode_prob [A] [L]);
+        write_kf_bmode(bc, bm2, c->kf_bmode_prob[A][L]);
       }
 #endif
     } while (++i < 16);

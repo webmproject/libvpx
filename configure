@@ -245,6 +245,7 @@ EXPERIMENT_LIST="
     subpelrefmv
     new_mvref
     implicit_segmentation
+    newbintramodes
 "
 CONFIG_LIST="
     external_build

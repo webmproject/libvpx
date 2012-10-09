@@ -376,7 +376,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
       eobtotal = vp9_decode_mb_tokens_16x16(pbi, xd, bc);
     } else if (tx_size == TX_8X8) {
       eobtotal = vp9_decode_mb_tokens_8x8(pbi, xd, bc);
-    } else {
+    } else if (mode != B_PRED) {
       eobtotal = vp9_decode_mb_tokens(pbi, xd, bc);
     }
   }
@@ -404,7 +404,9 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
   /* do prediction */
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     if (mode != I8X8_PRED) {
-      vp9_build_intra_predictors_mbuv(xd);
+      if (mode != B_PRED) {
+        vp9_build_intra_predictors_mbuv(xd);
+      }
       if (mode != B_PRED) {
         vp9_build_intra_predictors_mby(xd);
       }
@@ -461,10 +463,20 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
     }
   } else if (mode == B_PRED) {
     for (i = 0; i < 16; i++) {
-      BLOCKD *b = &xd->block[i];
-      int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
+      int b_mode;
 #if CONFIG_COMP_INTRA_PRED
-      int b_mode2 = xd->mode_info_context->bmi[i].as_mode.second;
+      int b_mode2;
+#endif
+      BLOCKD *b = &xd->block[i];
+      b_mode = xd->mode_info_context->bmi[i].as_mode.first;
+#if CONFIG_NEWBINTRAMODES
+      xd->mode_info_context->bmi[i].as_mode.context = b->bmi.as_mode.context =
+          vp9_find_bpred_context(b);
+#endif
+      if (!xd->mode_info_context->mbmi.mb_skip_coeff)
+        eobtotal += vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_Y_WITH_DC, i);
+#if CONFIG_COMP_INTRA_PRED
+      b_mode2 = xd->mode_info_context->bmi[i].as_mode.second;
 
       if (b_mode2 == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
 #endif
@@ -485,6 +497,14 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                *(b->base_dst) + b->dst, 16, b->dst_stride);
       }
     }
+    if (!xd->mode_info_context->mbmi.mb_skip_coeff) {
+      for (i = 16; i < 24; ++i)
+        eobtotal += vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_UV, i);
+    }
+    vp9_build_intra_predictors_mbuv(xd);
+    pbi->idct_add_uv_block(xd->qcoeff + 16 * 16, xd->block[16].dequant,
+                           xd->predictor + 16 * 16, xd->dst.u_buffer,
+                           xd->dst.v_buffer, xd->dst.uv_stride, xd->eobs + 16);
   } else if (mode == SPLITMV) {
     if (tx_size == TX_8X8) {
       vp9_dequant_idct_add_y_block_8x8(xd->qcoeff, xd->block[0].dequant,
@@ -492,8 +512,8 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                          xd->dst.y_stride, xd->eobs, xd);
     } else {
       pbi->idct_add_y_block(xd->qcoeff, xd->block[0].dequant,
-                                       xd->predictor, xd->dst.y_buffer,
-                                       xd->dst.y_stride, xd->eobs);
+                            xd->predictor, xd->dst.y_buffer,
+                            xd->dst.y_stride, xd->eobs);
     }
   } else {
     BLOCKD *b = &xd->block[24];
@@ -556,7 +576,8 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
         (xd->qcoeff + 16 * 16, xd->block[16].dequant,
          xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
          xd->dst.uv_stride, xd->eobs + 16, xd);
-  else if (xd->mode_info_context->mbmi.mode != I8X8_PRED)
+  else if (xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+           xd->mode_info_context->mbmi.mode != B_PRED)
     pbi->idct_add_uv_block(xd->qcoeff + 16 * 16, xd->block[16].dequant,
          xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
          xd->dst.uv_stride, xd->eobs + 16);
@@ -833,7 +854,7 @@ static void init_frame(VP9D_COMP *pbi) {
     vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
     vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
 
-    vpx_memcpy(pbi->common.fc.vp8_mode_contexts,
+    vpx_memcpy(pbi->common.fc.vp9_mode_contexts,
                pbi->common.fc.mode_context,
                sizeof(pbi->common.fc.mode_context));
     vpx_memset(pc->prev_mip, 0,
@@ -1220,14 +1241,14 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
 
     if (pc->refresh_alt_ref_frame) {
       vpx_memcpy(&pc->fc, &pc->lfc_a, sizeof(pc->fc));
-      vpx_memcpy(pc->fc.vp8_mode_contexts,
+      vpx_memcpy(pc->fc.vp9_mode_contexts,
                  pc->fc.mode_context_a,
-                 sizeof(pc->fc.vp8_mode_contexts));
+                 sizeof(pc->fc.vp9_mode_contexts));
     } else {
       vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
-      vpx_memcpy(pc->fc.vp8_mode_contexts,
+      vpx_memcpy(pc->fc.vp9_mode_contexts,
                  pc->fc.mode_context,
-                 sizeof(pc->fc.vp8_mode_contexts));
+                 sizeof(pc->fc.vp9_mode_contexts));
     }
 
     /* Buffer to buffer copy flags. */

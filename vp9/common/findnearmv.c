@@ -159,12 +159,12 @@ void vp9_find_near_mvs
 }
 
 vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
-                           vp9_prob p[VP9_MVREFS - 1], const int near_mv_ref_ct[4]
-                          ) {
-  p[0] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[0]] [0];
-  p[1] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[1]] [1];
-  p[2] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[2]] [2];
-  p[3] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[3]] [3];
+                           vp9_prob p[VP9_MVREFS - 1],
+                           const int near_mv_ref_ct[4]) {
+  p[0] = pc->fc.vp9_mode_contexts[near_mv_ref_ct[0]][0];
+  p[1] = pc->fc.vp9_mode_contexts[near_mv_ref_ct[1]][1];
+  p[2] = pc->fc.vp9_mode_contexts[near_mv_ref_ct[2]][2];
+  p[3] = pc->fc.vp9_mode_contexts[near_mv_ref_ct[3]][3];
   return p;
 }
 

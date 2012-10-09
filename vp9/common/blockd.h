@@ -149,8 +149,8 @@ typedef enum {
   B_DC_PRED,          /* average of above and left pixels */
   B_TM_PRED,
 
-  B_VE_PRED,           /* vertical prediction */
-  B_HE_PRED,           /* horizontal prediction */
+  B_VE_PRED,          /* vertical prediction */
+  B_HE_PRED,          /* horizontal prediction */
 
   B_LD_PRED,
   B_RD_PRED,
@@ -159,6 +159,9 @@ typedef enum {
   B_VL_PRED,
   B_HD_PRED,
   B_HU_PRED,
+#if CONFIG_NEWBINTRAMODES
+  B_CONTEXT_PRED,
+#endif
 
   LEFT4X4,
   ABOVE4X4,
@@ -168,8 +171,18 @@ typedef enum {
   B_MODE_COUNT
 } B_PREDICTION_MODE;
 
-#define VP9_BINTRAMODES (B_HU_PRED + 1)  /* 10 */
+#define VP9_BINTRAMODES (LEFT4X4)
 #define VP9_SUBMVREFS (1 + NEW4X4 - LEFT4X4)
+
+#if CONFIG_NEWBINTRAMODES
+/* The number of B_PRED intra modes that are replaced by B_CONTEXT_PRED */
+#define CONTEXT_PRED_REPLACEMENTS  0
+#define VP9_KF_BINTRAMODES (VP9_BINTRAMODES - 1)
+#define VP9_NKF_BINTRAMODES  (VP9_BINTRAMODES - CONTEXT_PRED_REPLACEMENTS)
+#else
+#define VP9_KF_BINTRAMODES (VP9_BINTRAMODES)   /* 10 */
+#define VP9_NKF_BINTRAMODES (VP9_BINTRAMODES)  /* 10 */
+#endif
 
 typedef enum {
   PARTITIONING_16X8 = 0,
@@ -187,9 +200,11 @@ union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
     TX_TYPE           tx_type;
-
 #if CONFIG_COMP_INTRA_PRED
     B_PREDICTION_MODE second;
+#endif
+#if CONFIG_NEWBINTRAMODES
+    B_PREDICTION_MODE context;
 #endif
   } as_mode;
   struct {
@@ -443,6 +458,12 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
       tx_type = DCT_ADST;
       break;
 
+#if CONFIG_NEWBINTRAMODES
+    case B_CONTEXT_PRED:
+      assert(0);
+      break;
+#endif
+
     default :
       tx_type = DCT_DCT;
       break;
@@ -454,7 +475,11 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
   TX_TYPE tx_type = DCT_DCT;
   if (xd->mode_info_context->mbmi.mode == B_PRED &&
       xd->q_index < ACTIVE_HT) {
-    tx_type = txfm_map(b->bmi.as_mode.first);
+    tx_type = txfm_map(
+#if CONFIG_NEWBINTRAMODES
+        b->bmi.as_mode.first == B_CONTEXT_PRED ? b->bmi.as_mode.context :
+#endif
+        b->bmi.as_mode.first);
   }
   return tx_type;
 }
