@@ -472,6 +472,12 @@ typedef struct VP8_COMP {
   int rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
   int comp_pred_count[COMP_PRED_CONTEXTS];
   int single_pred_count[COMP_PRED_CONTEXTS];
+#if CONFIG_TX_SELECT
+  // FIXME contextualize
+  int txfm_count[TX_SIZE_MAX + 1];
+  int64_t rd_tx_select_diff[NB_TXFM_MODES];
+  int rd_tx_select_threshes[4][NB_TXFM_MODES];
+#endif
 
   int RDMULT;
   int RDDIV;
@@ -654,11 +660,6 @@ typedef struct VP8_COMP {
   int gf_update_recommended;
   int skip_true_count[3];
   int skip_false_count[3];
-  int t4x4_count;
-  int t8x8_count;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
-  int t16x16_count;
-#endif
 
   unsigned char *segmentation_map;
 

@@ -231,39 +231,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   if (xd->segmentation_enabled)
     mb_init_dequantizer(pbi, xd);
 
-  if (pbi->common.frame_type == KEY_FRAME) {
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
-    if (xd->mode_info_context->mbmi.mode <= TM_PRED ||
-        xd->mode_info_context->mbmi.mode == NEWMV ||
-        xd->mode_info_context->mbmi.mode == ZEROMV ||
-        xd->mode_info_context->mbmi.mode == NEARMV ||
-        xd->mode_info_context->mbmi.mode == NEARESTMV)
-      xd->mode_info_context->mbmi.txfm_size = TX_16X16;
-    else
-#endif
-      if (pbi->common.txfm_mode == ALLOW_8X8 &&
-        xd->mode_info_context->mbmi.mode != B_PRED)
-      xd->mode_info_context->mbmi.txfm_size = TX_8X8;
-    else
-      xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-  } else {
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
-    if (xd->mode_info_context->mbmi.mode <= TM_PRED ||
-        xd->mode_info_context->mbmi.mode == NEWMV ||
-        xd->mode_info_context->mbmi.mode == ZEROMV ||
-        xd->mode_info_context->mbmi.mode == NEARMV ||
-        xd->mode_info_context->mbmi.mode == NEARESTMV)
-      xd->mode_info_context->mbmi.txfm_size = TX_16X16;
-    else
-#endif
-      if (pbi->common.txfm_mode == ALLOW_8X8 &&
-        xd->mode_info_context->mbmi.mode != B_PRED &&
-        xd->mode_info_context->mbmi.mode != SPLITMV)
-      xd->mode_info_context->mbmi.txfm_size = TX_8X8;
-    else
-      xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-  }
-
 #if CONFIG_SUPERBLOCKS
   if (xd->mode_info_context->mbmi.encoded_as_sb) {
     xd->mode_info_context->mbmi.txfm_size = TX_8X8;
@@ -1006,7 +973,7 @@ static void read_coef_probs(VP8D_COMP *pbi) {
   }
 #endif
 
-  if (pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc)) {
+  if (pbi->common.txfm_mode != ONLY_4X4 && vp8_read_bit(bc)) {
     // read coef probability tree
     for (i = 0; i < BLOCK_TYPES_8X8; i++)
       for (j = !i; j < COEF_BANDS; j++)
@@ -1025,7 +992,7 @@ static void read_coef_probs(VP8D_COMP *pbi) {
         }
   }
 #if CONFIG_HYBRIDTRANSFORM8X8
-  if (pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc)) {
+  if (pbi->common.txfm_mode != ONLY_4X4 && vp8_read_bit(bc)) {
     // read coef probability tree
     for (i = 0; i < BLOCK_TYPES_8X8; i++)
       for (j = !i; j < COEF_BANDS; j++)
@@ -1047,7 +1014,7 @@ static void read_coef_probs(VP8D_COMP *pbi) {
 
 #if CONFIG_TX16X16
   // 16x16
-  if (vp8_read_bit(bc)) {
+  if (pbi->common.txfm_mode > ALLOW_8X8 && vp8_read_bit(bc)) {
     // read coef probability tree
     for (i = 0; i < BLOCK_TYPES_16X16; ++i)
       for (j = !i; j < COEF_BANDS; ++j)
@@ -1066,7 +1033,7 @@ static void read_coef_probs(VP8D_COMP *pbi) {
         }
   }
 #if CONFIG_HYBRIDTRANSFORM16X16
-  if (vp8_read_bit(bc)) {
+  if (pbi->common.txfm_mode > ALLOW_8X8 && vp8_read_bit(bc)) {
     // read coef probability tree
     for (i = 0; i < BLOCK_TYPES_16X16; ++i)
       for (j = !i; j < COEF_BANDS; ++j)
@@ -1314,7 +1281,27 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 #endif
 
   /* Read the loop filter level and type */
+#if CONFIG_TX_SELECT
+#if CONFIG_TX16X16
+  pc->txfm_mode = vp8_read_literal(bc, 2);
+#else
+  pc->txfm_mode = vp8_read_bit(bc);
+  if (pc->txfm_mode)
+    pc->txfm_mode += vp8_read_bit(bc);
+#endif
+  if (pc->txfm_mode == TX_MODE_SELECT) {
+    pc->prob_tx[0] = vp8_read_literal(bc, 8);
+#if CONFIG_TX16X16
+    pc->prob_tx[1] = vp8_read_literal(bc, 8);
+#endif
+  }
+#else
   pc->txfm_mode = (TXFM_MODE) vp8_read_bit(bc);
+#if CONFIG_TX16X16
+  if (pc->txfm_mode == ALLOW_8X8)
+    pc->txfm_mode = ALLOW_16X16;
+#endif
+#endif
 
   pc->filter_type = (LOOPFILTERTYPE) vp8_read_bit(bc);
   pc->filter_level = vp8_read_literal(bc, 6);

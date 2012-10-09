@@ -1829,6 +1829,10 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
 #endif
   for (i = 0; i < COMP_PRED_CONTEXTS; i++)
     cm->prob_comppred[i]         = 128;
+#if CONFIG_TX_SELECT
+  for (i = 0; i < TX_SIZE_MAX - 1; i++)
+    cm->prob_tx[i]               = 128;
+#endif
 
   // Prime the recent reference frame useage counters.
   // Hereafter they will be maintained as a sort of moving average

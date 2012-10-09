@@ -288,12 +288,6 @@ void vp8_setup_key_frame(VP8_COMP *cpi) {
   }
 #endif
 
-  cpi->common.txfm_mode = ALLOW_8X8;
-
-#if CONFIG_LOSSLESS
-  if (cpi->oxcf.lossless)
-    cpi->common.txfm_mode = ONLY_4X4;
-#endif
   // cpi->common.filter_level = 0;      // Reset every key frame.
   cpi->common.filter_level = cpi->common.base_qindex * 3 / 8;
 
@@ -310,14 +304,6 @@ void vp8_setup_key_frame(VP8_COMP *cpi) {
 }
 
 void vp8_setup_inter_frame(VP8_COMP *cpi) {
-
-  cpi->common.txfm_mode = ALLOW_8X8;
-
-#if CONFIG_LOSSLESS
-  if (cpi->oxcf.lossless)
-    cpi->common.txfm_mode = ONLY_4X4;
-#endif
-
   if (cpi->common.refresh_alt_ref_frame) {
     vpx_memcpy(&cpi->common.fc,
                &cpi->common.lfc_a,

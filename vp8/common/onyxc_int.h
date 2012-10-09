@@ -163,10 +163,16 @@ typedef enum {
   NB_PREDICTION_TYPES    = 3,
 } COMPPREDMODE_TYPE;
 
-/* TODO: allows larger transform */
 typedef enum {
   ONLY_4X4            = 0,
-  ALLOW_8X8           = 1
+  ALLOW_8X8           = 1,
+#if CONFIG_TX16X16
+  ALLOW_16X16         = 2,
+#endif
+#if CONFIG_TX_SELECT
+  TX_MODE_SELECT      = 2 + CONFIG_TX16X16,
+#endif
+  NB_TXFM_MODES       = 2 + CONFIG_TX16X16 + CONFIG_TX_SELECT,
 } TXFM_MODE;
 
 typedef struct VP8_COMMON_RTCD {
@@ -305,6 +311,11 @@ typedef struct VP8Common {
   vp8_prob mod_refprobs[MAX_REF_FRAMES][PREDICTION_PROBS];
 
   vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
+
+#if CONFIG_TX_SELECT
+  // FIXME contextualize
+  vp8_prob prob_tx[TX_SIZE_MAX - 1];
+#endif
 
   vp8_prob mbskip_pred_probs[MBSKIP_CONTEXTS];
 

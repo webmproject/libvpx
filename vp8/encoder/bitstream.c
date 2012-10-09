@@ -1290,6 +1290,23 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
           }
         }
 
+#if CONFIG_TX_SELECT
+        if (((rf == INTRA_FRAME && mode <= TM_PRED) ||
+             (rf != INTRA_FRAME && mode != SPLITMV)) &&
+            pc->txfm_mode == TX_MODE_SELECT &&
+            !((pc->mb_no_coeff_skip && mi->mb_skip_coeff) ||
+              (segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+               get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+          TX_SIZE sz = mi->txfm_size;
+          // FIXME(rbultje) code ternary symbol once all experiments are merged
+          vp8_write(w, sz != TX_4X4, pc->prob_tx[0]);
+#if CONFIG_TX16X16
+          if (sz != TX_4X4)
+            vp8_write(w, sz != TX_8X8, pc->prob_tx[1]);
+#endif
+        }
+#endif
+
 #if CONFIG_SUPERBLOCKS
         if (m->mbmi.encoded_as_sb) {
           assert(!i);
@@ -1411,6 +1428,7 @@ static void write_kfmodes(VP8_COMP *cpi) {
               vp8_encode_bool(bc, skip_coeff,
                           get_pred_prob(c, xd, PRED_MBSKIP));
         }
+
 #if CONFIG_SUPERBLOCKS
         if (m->mbmi.encoded_as_sb) {
           sb_kfwrite_ymode(bc, ym,
@@ -1467,6 +1485,21 @@ static void write_kfmodes(VP8_COMP *cpi) {
           // printf("    mode: %d\n", m->bmi[10].as_mode.first); fflush(stdout);
         } else
           write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
+
+#if CONFIG_TX_SELECT
+        if (ym <= TM_PRED && c->txfm_mode == TX_MODE_SELECT &&
+            !((c->mb_no_coeff_skip && m->mbmi.mb_skip_coeff) ||
+              (segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+               get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+          TX_SIZE sz = m->mbmi.txfm_size;
+          // FIXME(rbultje) code ternary symbol once all experiments are merged
+          vp8_write(bc, sz != TX_4X4, c->prob_tx[0]);
+#if CONFIG_TX16X16
+          if (sz != TX_4X4)
+            vp8_write(bc, sz != TX_8X8, c->prob_tx[1]);
+#endif
+        }
+#endif
 
 #if CONFIG_SUPERBLOCKS
         if (m->mbmi.encoded_as_sb) {
@@ -1564,7 +1597,7 @@ void build_coeff_contexts(VP8_COMP *cpi) {
 #endif
 
 
-  if (cpi->common.txfm_mode == ALLOW_8X8) {
+  if (cpi->common.txfm_mode != ONLY_4X4) {
     for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
       for (j = 0; j < COEF_BANDS; ++j) {
         for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -1618,22 +1651,23 @@ void build_coeff_contexts(VP8_COMP *cpi) {
   }
 
 #if CONFIG_TX16X16
-  //16x16
-  for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
-    for (j = 0; j < COEF_BANDS; ++j) {
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-          continue;
-        vp8_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-          cpi->frame_coef_probs_16x16[i][j][k],
-          cpi->frame_branch_ct_16x16[i][j][k],
-          cpi->coef_counts_16x16[i][j][k], 256, 1);
+  if (cpi->common.txfm_mode > ALLOW_8X8) {
+    for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
+      for (j = 0; j < COEF_BANDS; ++j) {
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+          if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+            continue;
+          vp8_tree_probs_from_distribution(
+            MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+            cpi->frame_coef_probs_16x16[i][j][k],
+            cpi->frame_branch_ct_16x16[i][j][k],
+            cpi->coef_counts_16x16[i][j][k], 256, 1);
 #ifdef ENTROPY_STATS
-        if (!cpi->dummy_packing)
-          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
-            context_counters_16x16[i][j][k][t] += cpi->coef_counts_16x16[i][j][k][t];
+          if (!cpi->dummy_packing)
+            for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+              context_counters_16x16[i][j][k][t] += cpi->coef_counts_16x16[i][j][k][t];
 #endif
+        }
       }
     }
   }
@@ -1746,8 +1780,7 @@ static void update_coef_probs2(VP8_COMP *cpi) {
     }
   }
 
-  if (cpi->common.txfm_mode != ALLOW_8X8) return;
-
+  if (cpi->common.txfm_mode != ONLY_4X4)
   for (t = 0; t < ENTROPY_NODES; ++t) {
     /* dry run to see if there is any udpate at all needed */
     savings = 0;
@@ -2024,7 +2057,7 @@ static void update_coef_probs(VP8_COMP *cpi) {
 #endif
 
   /* do not do this if not even allowed */
-  if (cpi->common.txfm_mode == ALLOW_8X8) {
+  if (cpi->common.txfm_mode != ONLY_4X4) {
     /* dry run to see if update is necessary */
     update[0] = update[1] = 0;
     savings = 0;
@@ -2177,7 +2210,7 @@ static void update_coef_probs(VP8_COMP *cpi) {
   }
 
 #if CONFIG_TX16X16
-  // 16x16
+  if (cpi->common.txfm_mode > ALLOW_8X8) {
   /* dry run to see if update is necessary */
   update[0] = update[1] = 0;
   savings = 0;
@@ -2327,6 +2360,7 @@ static void update_coef_probs(VP8_COMP *cpi) {
     }
   }
 #endif
+  }
 #endif
 }
 
@@ -2616,7 +2650,68 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   }
 #endif
 
-  vp8_write_bit(bc, pc->txfm_mode);
+#if CONFIG_TX_SELECT
+  {
+#if CONFIG_TX16X16
+    int cnt = cpi->txfm_count[0] + cpi->txfm_count[1] + cpi->txfm_count[2];
+    if (cnt && pc->txfm_mode == TX_MODE_SELECT) {
+      int prob = (255 * (cpi->txfm_count[1] + cpi->txfm_count[2]) + (cnt >> 1)) / cnt;
+      if (prob <= 1) {
+        pc->prob_tx[0] = 1;
+      } else if (prob >= 255) {
+        pc->prob_tx[0] = 255;
+      } else {
+        pc->prob_tx[0] = prob;
+      }
+      pc->prob_tx[0] = 256 - pc->prob_tx[0];
+    } else {
+      pc->prob_tx[0] = 128;
+    }
+    cnt -= cpi->txfm_count[0];
+    if (cnt && pc->txfm_mode == TX_MODE_SELECT) {
+      int prob = (255 * cpi->txfm_count[2] + (cnt >> 1)) / cnt;
+      if (prob <= 1) {
+        pc->prob_tx[1] = 1;
+      } else if (prob >= 255) {
+        pc->prob_tx[1] = 255;
+      } else {
+        pc->prob_tx[1] = prob;
+      }
+      pc->prob_tx[1] = 256 - pc->prob_tx[1];
+    } else {
+      pc->prob_tx[1] = 128;
+    }
+    vp8_write_literal(bc, pc->txfm_mode, 2);
+    if (pc->txfm_mode == TX_MODE_SELECT) {
+      vp8_write_literal(bc, pc->prob_tx[0], 8);
+      vp8_write_literal(bc, pc->prob_tx[1], 8);
+    }
+#else
+    int cnt = cpi->txfm_count[0] + cpi->txfm_count[1];
+    if (cnt && pc->txfm_mode == TX_MODE_SELECT) {
+      int prob = (255 * cpi->txfm_count[1] + (cnt >> 1)) / cnt;
+      if (prob <= 1) {
+        pc->prob_tx[0] = 1;
+      } else if (prob >= 255) {
+        pc->prob_tx[0] = 255;
+      } else {
+        pc->prob_tx[0] = prob;
+      }
+      pc->prob_tx[0] = 256 - pc->prob_tx[0];
+    } else {
+      pc->prob_tx[0] = 128;
+    }
+    vp8_write_bit(bc, pc->txfm_mode != 0);
+    if (pc->txfm_mode)
+      vp8_write_bit(bc, pc->txfm_mode - 1);
+    if (pc->txfm_mode == TX_MODE_SELECT) {
+      vp8_write_literal(bc, pc->prob_tx[0], 8);
+    }
+#endif
+  }
+#else
+  vp8_write_bit(bc, !!pc->txfm_mode);
+#endif
 
   // Encode the loop filter level and type
   vp8_write_bit(bc, pc->filter_type);
