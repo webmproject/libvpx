@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//4vQ\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-09T15:49:04Z",
+      "side": 1,
+      "message": "In if (parent_ref_valid) {...} , if parent_ref_frame \u003d\u003d 0, then parent_ref_valid \u003d 0;\nTherefore, parent_ref_valid !\u003d0 already ensures parent_ref_frame !\u003d 0.",
+      "parentUuid": "AAAAQH//4wI\u003d",
+      "revId": "662799f6e290672affc8a4500c8018f796a371e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//5Ig\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 1
