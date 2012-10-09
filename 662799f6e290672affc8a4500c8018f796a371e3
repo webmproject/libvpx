@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//4wI\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-09T15:28:58Z",
+      "side": 1,
+      "message": "If parent_ref_frame \u003d\u003d 0, you don\u0027t want to put 0 in ref_frame_map[1]. You might do something like what you suggest to force intra on the child if you have intra on the parent (put INTRA in map[0] and -1 in map[1]), but that was explicitly commented out for now in the previous code.",
+      "parentUuid": "AAAAQH//5JA\u003d",
+      "revId": "662799f6e290672affc8a4500c8018f796a371e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//5Ig\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//4wA\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 885,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-09T15:28:58Z",
+      "side": 1,
+      "message": "if parent_ref_frame \u003d\u003d 0, then parent_ref_mv is uninitialized. This code (the NEWMV search) does run if parent_ref_frame \u003d\u003d 0 \u0026\u0026 parent_ref_valid, because we go through the normal reference search order, so I think we need to guard this so the improved search only runs if parent_ref_frame is inter.",
+      "parentUuid": "AAAAQH//5Ig\u003d",
+      "revId": "662799f6e290672affc8a4500c8018f796a371e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//5IU\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2012-10-09T00:01:20Z",
       "side": 1,
       "message": "Same as above:  parent_ref_frame can be removed.",
+      "revId": "662799f6e290672affc8a4500c8018f796a371e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//4v8\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 929,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-09T15:28:58Z",
+      "side": 1,
+      "message": "Same as above.",
+      "parentUuid": "AAAAQH//5IU\u003d",
       "revId": "662799f6e290672affc8a4500c8018f796a371e3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
