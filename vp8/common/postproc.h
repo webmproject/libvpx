@@ -36,7 +36,8 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
                   int                         low_var_thresh,
                   int                         flag);
 
-void vp8_deblock(YV12_BUFFER_CONFIG         *source,
+void vp8_deblock(struct VP8Common           *oci,
+                 YV12_BUFFER_CONFIG         *source,
                  YV12_BUFFER_CONFIG         *post,
                  int                         q,
                  int                         low_var_thresh,
