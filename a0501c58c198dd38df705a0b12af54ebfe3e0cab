@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//5Iw\u003d",
+        "filename": "vp8/decoder/onyxd_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002147
+      },
+      "writtenOn": "2012-10-09T00:07:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQH//5K4\u003d",
+      "revId": "a0501c58c198dd38df705a0b12af54ebfe3e0cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//5K0\u003d",
         "filename": "vp8/decoder/onyxd_if.c",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQH//5I0\u003d",
+        "filename": "vp8/decoder/onyxd_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1002147
+      },
+      "writtenOn": "2012-10-09T00:07:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQH//5K0\u003d",
+      "revId": "a0501c58c198dd38df705a0b12af54ebfe3e0cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQH//5LM\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2012-10-08T23:44:12Z",
       "side": 1,
       "message": "once we merge the experiments in, it may be worthwhile defining  one symbol (ternary for now, and 4-ary if we do 32x32 Tx) to code.",
+      "revId": "a0501c58c198dd38df705a0b12af54ebfe3e0cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQH//5IE\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1306,
+      "author": {
+        "id": 1002147
+      },
+      "writtenOn": "2012-10-09T00:07:59Z",
+      "side": 1,
+      "message": "Good point, I\u0027ll add a FIXME to document.",
+      "parentUuid": "AAAAQH//5LM\u003d",
       "revId": "a0501c58c198dd38df705a0b12af54ebfe3e0cab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
