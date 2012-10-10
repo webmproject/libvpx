@@ -1339,6 +1339,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
   }
 }
 
+
 static void write_kfmodes(VP8_COMP *cpi) {
   vp8_writer *const bc = & cpi->bc;
   VP8_COMMON *const c = & cpi->common;
@@ -1348,30 +1349,13 @@ static void write_kfmodes(VP8_COMP *cpi) {
   int i;
   int row, col;
   int mb_row, mb_col;
-  int prob_skip_false[3] = {0, 0, 0};
   int row_delta[4] = { 0, +1,  0, -1};
   int col_delta[4] = { +1, -1, +1, +1};
 
-  // printf("write_kfmodes\n");
   if (c->mb_no_coeff_skip) {
-    // Divide by 0 check. 0 case possible with segment features
-    int k;
-    for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
-      if ((cpi->skip_false_count[k] + cpi->skip_true_count[k])) {
-        prob_skip_false[k] = cpi->skip_false_count[k] * 256 /
-                             (cpi->skip_false_count[k] + cpi->skip_true_count[k]);
-
-        if (prob_skip_false[k] <= 1)
-          prob_skip_false[k] = 1;
-
-        if (prob_skip_false[k] > 255)
-          prob_skip_false[k] = 255;
-      } else
-        prob_skip_false[k] = 255;
-
-      c->mbskip_pred_probs[k] = prob_skip_false[k];
-      vp8_write_literal(bc, prob_skip_false[k], 8);
-    }
+    update_skip_probs(cpi);
+    for (i = 0; i < MBSKIP_CONTEXTS; ++i)
+      vp8_write_literal(bc, c->mbskip_pred_probs[i], 8);
   }
 
   if (!c->kf_ymode_probs_update) {
