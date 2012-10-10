@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQX///XA\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-10T21:16:40Z",
+      "side": 1,
+      "message": "so, the whole codec is aborting in case of error?",
+      "revId": "45ade9da805f06a0f8dde7fe9a6a4ece7f0149e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQX///Wk\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-10T21:16:40Z",
+      "side": 1,
+      "message": "comment should be moved to 425",
+      "revId": "45ade9da805f06a0f8dde7fe9a6a4ece7f0149e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQX///Ws\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-10T21:16:40Z",
+      "side": 1,
+      "message": "it\u0027s better to separate the \"limits \u003d...\" allocation from the the test (\"if (limits \u003d\u003d NULL) ...\")",
+      "revId": "45ade9da805f06a0f8dde7fe9a6a4ece7f0149e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
