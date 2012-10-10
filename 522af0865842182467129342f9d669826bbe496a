@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQX///WA\u003d",
+        "filename": "vp8/common/alloccommon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-10T21:21:46Z",
+      "side": 1,
+      "message": "these repeated cleanup-upon-error lines should be a common error path, with goto:\n\n{\n   if (err1) goto Error;\n   if (err2) goto Error;\n   if (err3) goto Error;\n\n   ...\n   return 0;  // all ok\n Error:\n   vp8_de_alloc_frame_buffers(oci);\n   return 1;\n}",
+      "revId": "522af0865842182467129342f9d669826bbe496a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQX///WI\u003d",
+        "filename": "vp8/common/alloccommon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-10T21:21:46Z",
+      "side": 1,
+      "message": "(\u0026struct)-\u003efield \u003d\u003e struct.field\n\nwould be more readable",
+      "revId": "522af0865842182467129342f9d669826bbe496a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQX///WQ\u003d",
+        "filename": "vp8/common/alloccommon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-10T21:21:46Z",
+      "side": 1,
+      "message": "separate allocation and tests here too.",
+      "revId": "522af0865842182467129342f9d669826bbe496a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
