@@ -36,7 +36,6 @@ void vp8_machine_specific_config(VP8_COMMON *ctx) {
 #if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   rtcd->idct.idct16x16    = vp8_short_idct16x16_c;
 #endif
-  rtcd->recon.copy16x16   = vp8_copy_mem16x16_c;
   rtcd->recon.copy8x8     = vp8_copy_mem8x8_c;
   rtcd->recon.avg16x16    = vp8_avg_mem16x16_c;
   rtcd->recon.avg8x8      = vp8_avg_mem8x8_c;

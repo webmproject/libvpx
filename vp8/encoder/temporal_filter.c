@@ -59,7 +59,7 @@ static void vp8_temporal_filter_predictors_mb_c
     xd->subpixel_predict16x16(yptr, stride,
                              (mv_col & 7) << 1, (mv_row & 7) << 1, &pred[0], 16);
   } else {
-    RECON_INVOKE(&xd->rtcd->recon, copy16x16)(yptr, stride, &pred[0], 16);
+    vp8_copy_mem16x16(yptr, stride, &pred[0], 16);
   }
 
   // U & V
