@@ -20,9 +20,10 @@ show_help(){
     show_help_pre
     cat << EOF
 Advanced options:
-  ${toggle_libs}                  don't build libraries
-  ${toggle_examples}              don't build examples
-  ${toggle_unit_tests}            build unit tests
+  ${toggle_libs}                  libraries
+  ${toggle_examples}              examples
+  ${toggle_docs}                  documentation
+  ${toggle_unit_tests}            unit tests
   --libc=PATH                     path to alternate libc
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
   ${toggle_fast_unaligned}        don't use unaligned accesses, even when
@@ -285,6 +286,7 @@ CMDLINE_SELECT="
 
     libs
     examples
+    docs
     libc
     as
     fast_unaligned
