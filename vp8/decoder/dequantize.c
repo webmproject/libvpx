@@ -509,7 +509,6 @@ void vp8_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
 }
 #endif
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_dequant_idct_add_16x16_c(short *input, short *dq, unsigned char *pred,
                                   unsigned char *dest, int pitch, int stride) {
   short output[256];
@@ -544,4 +543,3 @@ void vp8_dequant_idct_add_16x16_c(short *input, short *dq, unsigned char *pred,
     pred += pitch;
   }
 }
-#endif

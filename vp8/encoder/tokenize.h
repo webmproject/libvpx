@@ -49,10 +49,8 @@ extern INT64 context_counters[BLOCK_TYPES][COEF_BANDS]
                              [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
 extern INT64 context_counters_8x8[BLOCK_TYPES_8X8][COEF_BANDS]
                                  [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 extern INT64 context_counters_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
                                    [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
-#endif
 #endif
 
 extern const int *vp8_dct_value_cost_ptr;

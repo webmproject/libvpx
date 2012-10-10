@@ -1203,16 +1203,12 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
   }
 
   if (cpi->sf.improved_dct) {
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     cpi->mb.vp8_short_fdct16x16 = FDCT_INVOKE(&cpi->rtcd.fdct, short16x16);
-#endif
     cpi->mb.vp8_short_fdct8x8 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x8);
     cpi->mb.vp8_short_fdct8x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x4);
     cpi->mb.vp8_short_fdct4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
   } else {
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     cpi->mb.vp8_short_fdct16x16 = FDCT_INVOKE(&cpi->rtcd.fdct, short16x16);
-#endif
     cpi->mb.vp8_short_fdct8x8 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x8);
     cpi->mb.vp8_short_fdct8x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast8x4);
     cpi->mb.vp8_short_fdct4x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast4x4);
@@ -1225,9 +1221,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
   cpi->mb.quantize_b      = vp8_regular_quantize_b;
   cpi->mb.quantize_b_pair = vp8_regular_quantize_b_pair;
   cpi->mb.quantize_b_8x8  = vp8_regular_quantize_b_8x8;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   cpi->mb.quantize_b_16x16= vp8_regular_quantize_b_16x16;
-#endif
   cpi->mb.quantize_b_2x2  = vp8_regular_quantize_b_2x2;
 
   vp8cx_init_quantizer(cpi);
@@ -3770,12 +3764,10 @@ static void encode_frame_to_data_rate
 #if CONFIG_HYBRIDTRANSFORM8X8
   vp8_copy(cpi->common.fc.hybrid_coef_counts_8x8, cpi->hybrid_coef_counts_8x8);
 #endif
-#if CONFIG_TX16X16
   vp8_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
 #if CONFIG_HYBRIDTRANSFORM16X16
   vp8_copy(cpi->common.fc.hybrid_coef_counts_16x16,
            cpi->hybrid_coef_counts_16x16);
-#endif
 #endif
   vp8_adapt_coef_probs(&cpi->common);
   if (cpi->common.frame_type != KEY_FRAME) {

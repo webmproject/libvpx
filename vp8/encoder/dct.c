@@ -693,7 +693,6 @@ void vp8_short_walsh8x4_x8_c(short *input, short *output, int pitch) {
 }
 #endif
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 static const double C1 = 0.995184726672197;
 static const double C2 = 0.98078528040323;
 static const double C3 = 0.956940335732209;
@@ -900,4 +899,3 @@ void vp8_short_fdct16x16_c(short *input, short *out, int pitch) {
   }
   vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
-#endif

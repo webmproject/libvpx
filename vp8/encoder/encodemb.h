@@ -121,14 +121,12 @@ void vp8_build_dcblock_8x8(MACROBLOCK *b);
 void vp8_optimize_mby_8x8(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_transform_mb_16x16(MACROBLOCK *mb);
 void vp8_transform_mby_16x16(MACROBLOCK *x);
 void vp8_transform_mbuv_16x16(MACROBLOCK *x);
 void vp8_transform_intra_mby_16x16(MACROBLOCK *x);
 void vp8_build_dcblock_16x16(MACROBLOCK *b);
 void vp8_optimize_mby_16x16(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
-#endif
 
 void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
 

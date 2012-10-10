@@ -966,7 +966,6 @@ default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
 };
 #endif
 
-#if CONFIG_TX16X16
 static const vp8_prob
   default_coef_probs_16x16[BLOCK_TYPES_16X16]
                           [COEF_BANDS]
@@ -1381,5 +1380,4 @@ static const vp8_prob
     }
   }
 };
-#endif
 #endif

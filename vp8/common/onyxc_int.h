@@ -59,11 +59,9 @@ typedef struct frame_contexts {
 #if CONFIG_HYBRIDTRANSFORM8X8
   vp8_prob hybrid_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 #endif
-#if CONFIG_TX16X16
   vp8_prob coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 #if CONFIG_HYBRIDTRANSFORM16X16
   vp8_prob hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#endif
 #endif
 
 #if CONFIG_NEWMVENTROPY
@@ -102,13 +100,11 @@ typedef struct frame_contexts {
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 #endif
 
-#if CONFIG_TX16X16
   vp8_prob pre_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 #if CONFIG_HYBRIDTRANSFORM16X16
   vp8_prob pre_hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#endif
 #endif
 
   unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS]
@@ -125,13 +121,11 @@ typedef struct frame_contexts {
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 #endif
 
-#if CONFIG_TX16X16
   unsigned int coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 #if CONFIG_HYBRIDTRANSFORM16X16
   unsigned int hybrid_coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#endif
 #endif
 
 #if CONFIG_NEWMVENTROPY
@@ -167,13 +161,11 @@ typedef enum {
 typedef enum {
   ONLY_4X4            = 0,
   ALLOW_8X8           = 1,
-#if CONFIG_TX16X16
   ALLOW_16X16         = 2,
-#endif
 #if CONFIG_TX_SELECT
-  TX_MODE_SELECT      = 2 + CONFIG_TX16X16,
+  TX_MODE_SELECT      = 3,
 #endif
-  NB_TXFM_MODES       = 2 + CONFIG_TX16X16 + CONFIG_TX_SELECT,
+  NB_TXFM_MODES       = 3 + CONFIG_TX_SELECT,
 } TXFM_MODE;
 
 typedef struct VP8_COMMON_RTCD {

@@ -35,11 +35,9 @@ INT64 context_counters_8x8[BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [M
 INT64 hybrid_context_counters_8x8[BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 #endif
 
-#if CONFIG_TX16X16
 INT64 context_counters_16x16[BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 #if CONFIG_HYBRIDTRANSFORM16X16
 INT64 hybrid_context_counters_16x16[BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#endif
 #endif
 
 extern unsigned int tree_update_hist[BLOCK_TYPES][COEF_BANDS]
@@ -54,25 +52,22 @@ extern unsigned int tree_update_hist_8x8[BLOCK_TYPES_8X8][COEF_BANDS]
 extern unsigned int hybrid_tree_update_hist_8x8[BLOCK_TYPES_8X8][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
 #endif
-#if CONFIG_TX16X16
 extern unsigned int tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
 #if CONFIG_HYBRIDTRANSFORM16X16
 extern unsigned int hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
 #endif
-#endif
-#endif
+#endif  /* ENTROPY_STATS */
+
 void vp8_stuff_mb(VP8_COMP *cpi,
                   MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 void vp8_stuff_mb_8x8(VP8_COMP *cpi,
                       MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi,
                             MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
-#if CONFIG_TX16X16
 void vp8_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
                         TOKENEXTRA **t, int dry_run);
-#endif
 void vp8_fix_contexts(MACROBLOCKD *xd);
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
@@ -133,7 +128,6 @@ static void fill_value_tokens() {
   vp8_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
-#if CONFIG_TX16X16
 static void tokenize1st_order_b_16x16(MACROBLOCKD *xd,
                                       const BLOCKD *const b,
                                       TOKENEXTRA **tp,
@@ -201,7 +195,6 @@ static void tokenize1st_order_b_16x16(MACROBLOCKD *xd,
   pt = (c != !type); /* 0 <-> all coeff data is zero */
   *a = *l = pt;
 }
-#endif
 
 static void tokenize2nd_order_b_8x8
 (
@@ -870,7 +863,6 @@ int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd, int has_y2_block) {
           mbuv_is_skippable(xd));
 }
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 int mby_is_skippable_16x16(MACROBLOCKD *xd) {
   int skip = 1;
   //skip &= (xd->block[0].eob < 2); // I think this should be commented? No second order == DC must be coded
@@ -883,7 +875,6 @@ int mby_is_skippable_16x16(MACROBLOCKD *xd) {
 int mb_is_skippable_16x16(MACROBLOCKD *xd) {
   return (mby_is_skippable_16x16(xd) & mbuv_is_skippable_8x8(xd));
 }
-#endif
 
 void vp8_tokenize_mb(VP8_COMP *cpi,
                      MACROBLOCKD *xd,
@@ -917,16 +908,12 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
   has_y2_block = (xd->mode_info_context->mbmi.mode != B_PRED
                   && xd->mode_info_context->mbmi.mode != I8X8_PRED
                   && xd->mode_info_context->mbmi.mode != SPLITMV);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_size == TX_16X16) has_y2_block = 0; // Because of inter frames
-#endif
 
   switch (tx_size) {
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     case TX_16X16:
       xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_16x16(xd);
       break;
-#endif
     case TX_8X8:
       if (xd->mode_info_context->mbmi.mode == I8X8_PRED)
         xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_8x8_4x4uv(xd, 0);
@@ -943,11 +930,9 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
     if (!dry_run)
       cpi->skip_true_count[mb_skip_context] += skip_inc;
     if (!cpi->common.mb_no_coeff_skip) {
-#if CONFIG_TX16X16 && CONFIG_HYBRIDTRANSFORM16X16
       if (tx_size == TX_16X16)
         vp8_stuff_mb_16x16(cpi, xd, t, dry_run);
       else
-#endif
       if (tx_size == TX_8X8) {
         if (xd->mode_info_context->mbmi.mode == I8X8_PRED)
           vp8_stuff_mb_8x8_4x4uv(cpi, xd, t, dry_run);
@@ -982,7 +967,6 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
     plane_type = 0;
   }
 
-#if CONFIG_TX16X16
   if (tx_size == TX_16X16) {
     ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)xd->above_context;
     ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -1003,9 +987,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
     vpx_memset(&A[8], 0, sizeof(A[8]));
     vpx_memset(&L[8], 0, sizeof(L[8]));
   }
-  else
-#endif
-  if (tx_size == TX_8X8) {
+  else if (tx_size == TX_8X8) {
     ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
     ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
     if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
@@ -1053,15 +1035,11 @@ void init_context_counters(void) {
   if (!f) {
     vpx_memset(context_counters, 0, sizeof(context_counters));
     vpx_memset(context_counters_8x8, 0, sizeof(context_counters_8x8));
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     vpx_memset(context_counters_16x16, 0, sizeof(context_counters_16x16));
-#endif
   } else {
     fread(context_counters, sizeof(context_counters), 1, f);
     fread(context_counters_8x8, sizeof(context_counters_8x8), 1, f);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     fread(context_counters_16x16, sizeof(context_counters_16x16), 1, f);
-#endif
     fclose(f);
   }
 
@@ -1069,15 +1047,11 @@ void init_context_counters(void) {
   if (!f) {
     vpx_memset(tree_update_hist, 0, sizeof(tree_update_hist));
     vpx_memset(tree_update_hist_8x8, 0, sizeof(tree_update_hist_8x8));
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     vpx_memset(tree_update_hist_16x16, 0, sizeof(tree_update_hist_16x16));
-#endif
   } else {
     fread(tree_update_hist, sizeof(tree_update_hist), 1, f);
     fread(tree_update_hist_8x8, sizeof(tree_update_hist_8x8), 1, f);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     fread(tree_update_hist_16x16, sizeof(tree_update_hist_16x16), 1, f);
-#endif
     fclose(f);
   }
 }
@@ -1153,7 +1127,6 @@ void print_context_counters() {
   } while (++type < BLOCK_TYPES_8X8);
   fprintf(f, "\n};\n");
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   fprintf(f, "static const unsigned int\nvp8_default_coef_counts_16x16"
           "[BLOCK_TYPES_16X16] [COEF_BANDS]"
           "[PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {");
@@ -1186,7 +1159,6 @@ void print_context_counters() {
     fprintf(f, "\n  }");
   } while (++type < BLOCK_TYPES_16X16);
   fprintf(f, "\n};\n");
-#endif
 
   fprintf(f, "static const vp8_prob\n"
           "vp8_default_coef_probs[BLOCK_TYPES] [COEF_BANDS] \n"
@@ -1256,7 +1228,6 @@ void print_context_counters() {
   } while (++type < BLOCK_TYPES_8X8);
   fprintf(f, "\n};\n");
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   fprintf(f, "static const vp8_prob\n"
           "vp8_default_coef_probs_16x16[BLOCK_TYPES_16X16] [COEF_BANDS]\n"
           "[PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {");
@@ -1289,16 +1260,13 @@ void print_context_counters() {
     fprintf(f, "\n  }");
   } while (++type < BLOCK_TYPES_16X16);
   fprintf(f, "\n};\n");
-#endif
 
   fclose(f);
 
   f = fopen("context.bin", "wb");
   fwrite(context_counters, sizeof(context_counters), 1, f);
   fwrite(context_counters_8x8, sizeof(context_counters_8x8), 1, f);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   fwrite(context_counters_16x16, sizeof(context_counters_16x16), 1, f);
-#endif
   fclose(f);
 }
 #endif
@@ -1456,7 +1424,6 @@ void vp8_stuff_mb_8x8(VP8_COMP *cpi,
     *t = t_backup;
 }
 
-#if CONFIG_TX16X16
 static __inline
 void stuff1st_order_b_16x16(MACROBLOCKD *xd,
                             const BLOCKD *const b,
@@ -1524,7 +1491,6 @@ void vp8_stuff_mb_16x16(VP8_COMP *cpi,
   if (dry_run)
     *t = t_backup;
 }
-#endif
 
 static __inline void stuff2nd_order_b
 (
@@ -1680,9 +1646,7 @@ void vp8_fix_contexts(MACROBLOCKD *xd) {
   if ((xd->mode_info_context->mbmi.mode != B_PRED
       && xd->mode_info_context->mbmi.mode != I8X8_PRED
       && xd->mode_info_context->mbmi.mode != SPLITMV)
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
       || xd->mode_info_context->mbmi.txfm_size == TX_16X16
-#endif
       ) {
     vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
     vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));

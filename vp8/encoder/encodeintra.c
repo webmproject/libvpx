@@ -138,7 +138,6 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type == TX_16X16)
 #if CONFIG_HYBRIDTRANSFORM16X16
   {
@@ -154,36 +153,27 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 #else
     vp8_transform_intra_mby_16x16(x);
 #endif
-  else
-#endif
-  if (tx_type == TX_8X8)
+  else if (tx_type == TX_8X8)
     vp8_transform_intra_mby_8x8(x);
   else
     vp8_transform_intra_mby(x);
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type == TX_16X16)
     vp8_quantize_mby_16x16(x);
-  else
-#endif
-  if (tx_type == TX_8X8)
+  else if (tx_type == TX_8X8)
     vp8_quantize_mby_8x8(x);
   else
     vp8_quantize_mby(x);
 
   if (x->optimize) {
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     if (tx_type == TX_16X16)
       vp8_optimize_mby_16x16(x, rtcd);
-    else
-#endif
-    if (tx_type == TX_8X8)
+    else if (tx_type == TX_8X8)
       vp8_optimize_mby_8x8(x, rtcd);
     else
       vp8_optimize_mby(x, rtcd);
   }
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type == TX_16X16)
 #if CONFIG_HYBRIDTRANSFORM16X16
   {
@@ -197,9 +187,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 #else
     vp8_inverse_transform_mby_16x16(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 #endif
-  else
-#endif
-  if (tx_type == TX_8X8)
+  else if (tx_type == TX_8X8)
     vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
   else
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
@@ -211,9 +199,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
 void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type == TX_16X16) tx_type = TX_8X8; // 16x16 for U and V should default to 8x8 behavior.
-#endif
 #if CONFIG_COMP_INTRA_PRED
   if (x->e_mbd.mode_info_context->mbmi.second_uv_mode == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
 #endif

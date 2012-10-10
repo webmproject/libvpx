@@ -61,7 +61,6 @@ unsigned int hybrid_tree_update_hist_8x8 [BLOCK_TYPES_8X8]
                                          [PREV_COEF_CONTEXTS]
                                          [ENTROPY_NODES] [2];
 #endif
-#if CONFIG_TX16X16
 unsigned int tree_update_hist_16x16 [BLOCK_TYPES_16X16]
                                     [COEF_BANDS]
                                     [PREV_COEF_CONTEXTS]
@@ -71,7 +70,6 @@ unsigned int hybrid_tree_update_hist_16x16 [BLOCK_TYPES_16X16]
                                            [COEF_BANDS]
                                            [PREV_COEF_CONTEXTS]
                                            [ENTROPY_NODES] [2];
-#endif
 #endif
 
 extern unsigned int active_section;
@@ -1300,10 +1298,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
           TX_SIZE sz = mi->txfm_size;
           // FIXME(rbultje) code ternary symbol once all experiments are merged
           vp8_write(w, sz != TX_4X4, pc->prob_tx[0]);
-#if CONFIG_TX16X16
           if (sz != TX_4X4)
             vp8_write(w, sz != TX_8X8, pc->prob_tx[1]);
-#endif
         }
 #endif
 
@@ -1478,10 +1474,8 @@ static void write_kfmodes(VP8_COMP *cpi) {
           TX_SIZE sz = m->mbmi.txfm_size;
           // FIXME(rbultje) code ternary symbol once all experiments are merged
           vp8_write(bc, sz != TX_4X4, c->prob_tx[0]);
-#if CONFIG_TX16X16
           if (sz != TX_4X4)
             vp8_write(bc, sz != TX_8X8, c->prob_tx[1]);
-#endif
         }
 #endif
 
@@ -1634,7 +1628,6 @@ void build_coeff_contexts(VP8_COMP *cpi) {
 #endif
   }
 
-#if CONFIG_TX16X16
   if (cpi->common.txfm_mode > ALLOW_8X8) {
     for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
       for (j = 0; j < COEF_BANDS; ++j) {
@@ -1674,7 +1667,6 @@ void build_coeff_contexts(VP8_COMP *cpi) {
       }
     }
   }
-#endif
 #endif
 }
 
@@ -2193,7 +2185,6 @@ static void update_coef_probs(VP8_COMP *cpi) {
 #endif
   }
 
-#if CONFIG_TX16X16
   if (cpi->common.txfm_mode > ALLOW_8X8) {
   /* dry run to see if update is necessary */
   update[0] = update[1] = 0;
@@ -2345,7 +2336,6 @@ static void update_coef_probs(VP8_COMP *cpi) {
   }
 #endif
   }
-#endif
 }
 
 #ifdef PACKET_TESTING
@@ -2636,7 +2626,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
 #if CONFIG_TX_SELECT
   {
-#if CONFIG_TX16X16
     int cnt = cpi->txfm_count[0] + cpi->txfm_count[1] + cpi->txfm_count[2];
     if (cnt && pc->txfm_mode == TX_MODE_SELECT) {
       int prob = (255 * (cpi->txfm_count[1] + cpi->txfm_count[2]) + (cnt >> 1)) / cnt;
@@ -2670,28 +2659,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
       vp8_write_literal(bc, pc->prob_tx[0], 8);
       vp8_write_literal(bc, pc->prob_tx[1], 8);
     }
-#else
-    int cnt = cpi->txfm_count[0] + cpi->txfm_count[1];
-    if (cnt && pc->txfm_mode == TX_MODE_SELECT) {
-      int prob = (255 * cpi->txfm_count[1] + (cnt >> 1)) / cnt;
-      if (prob <= 1) {
-        pc->prob_tx[0] = 1;
-      } else if (prob >= 255) {
-        pc->prob_tx[0] = 255;
-      } else {
-        pc->prob_tx[0] = prob;
-      }
-      pc->prob_tx[0] = 256 - pc->prob_tx[0];
-    } else {
-      pc->prob_tx[0] = 128;
-    }
-    vp8_write_bit(bc, pc->txfm_mode != 0);
-    if (pc->txfm_mode)
-      vp8_write_bit(bc, pc->txfm_mode - 1);
-    if (pc->txfm_mode == TX_MODE_SELECT) {
-      vp8_write_literal(bc, pc->prob_tx[0], 8);
-    }
-#endif
   }
 #else
   vp8_write_bit(bc, !!pc->txfm_mode);
@@ -2846,11 +2813,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 #if CONFIG_HYBRIDTRANSFORM8X8
   vp8_copy(cpi->common.fc.pre_hybrid_coef_probs_8x8, cpi->common.fc.hybrid_coef_probs_8x8);
 #endif
-#if CONFIG_TX16X16
   vp8_copy(cpi->common.fc.pre_coef_probs_16x16, cpi->common.fc.coef_probs_16x16);
 #if CONFIG_HYBRIDTRANSFORM16X16
   vp8_copy(cpi->common.fc.pre_hybrid_coef_probs_16x16, cpi->common.fc.hybrid_coef_probs_16x16);
-#endif
 #endif
   vp8_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
   vp8_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
@@ -2986,7 +2951,6 @@ void print_tree_update_probs() {
     fprintf(f, "  },\n");
   }
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   fprintf(f, "const vp8_prob\n"
           "vp8_coef_update_probs_16x16[BLOCK_TYPES_16X16]\n"
           "                           [COEF_BANDS]\n"
@@ -3014,15 +2978,12 @@ void print_tree_update_probs() {
     }
     fprintf(f, "  },\n");
   }
-#endif
 
   fclose(f);
   f = fopen("treeupdate.bin", "wb");
   fwrite(tree_update_hist, sizeof(tree_update_hist), 1, f);
   fwrite(tree_update_hist_8x8, sizeof(tree_update_hist_8x8), 1, f);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   fwrite(tree_update_hist_16x16, sizeof(tree_update_hist_16x16), 1, f);
-#endif
   fclose(f);
 }
 #endif

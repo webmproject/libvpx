@@ -35,14 +35,10 @@ typedef struct {
   unsigned char *quant_shift;
   short *zbin;
   short *zbin_8x8;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   short *zbin_16x16;
-#endif
   short *zrun_zbin_boost;
   short *zrun_zbin_boost_8x8;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   short *zrun_zbin_boost_16x16;
-#endif
   short *round;
 
   // Zbin Over Quant value
@@ -55,9 +51,7 @@ typedef struct {
 
   int eob_max_offset;
   int eob_max_offset_8x8;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   int eob_max_offset_16x16;
-#endif
 } BLOCK;
 
 typedef struct {
@@ -192,13 +186,9 @@ typedef struct {
   void (*quantize_b)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
   void (*vp8_short_fdct8x8)(short *input, short *output, int pitch);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   void (*vp8_short_fdct16x16)(short *input, short *output, int pitch);
-#endif
   void (*short_fhaar2x2)(short *input, short *output, int pitch);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   void (*quantize_b_16x16)(BLOCK *b, BLOCKD *d);
-#endif
   void (*quantize_b_8x8)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_2x2)(BLOCK *b, BLOCKD *d);
 

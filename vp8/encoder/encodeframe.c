@@ -1370,11 +1370,9 @@ static void encode_frame_internal(VP8_COMP *cpi) {
 #if CONFIG_HYBRIDTRANSFORM8X8
   vp8_zero(cpi->hybrid_coef_counts_8x8);
 #endif
-#if CONFIG_TX16X16
   vp8_zero(cpi->coef_counts_16x16);
 #if CONFIG_HYBRIDTRANSFORM16X16
   vp8_zero(cpi->hybrid_coef_counts_16x16);
-#endif
 #endif
 
   vp8cx_frame_init_quantizer(cpi);
@@ -1516,11 +1514,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
      * keyframe's probabilities as an estimate of what the current keyframe's
      * coefficient cost distributions may look like. */
     if (frame_type == 0) {
-#if CONFIG_TX16X16
       txfm_type = ALLOW_16X16;
-#else
-      txfm_type = ALLOW_8X8;
-#endif
     } else
 #if 0
     /* FIXME (rbultje)
@@ -1534,51 +1528,35 @@ void vp8_encode_frame(VP8_COMP *cpi) {
      * progresses. */
     if (cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] >
             cpi->rd_tx_select_threshes[frame_type][ONLY_4X4] &&
-#if CONFIG_TX16X16
         cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] >
             cpi->rd_tx_select_threshes[frame_type][ALLOW_16X16] &&
-#endif
         cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] >
             cpi->rd_tx_select_threshes[frame_type][ALLOW_8X8]) {
       txfm_type = TX_MODE_SELECT;
     } else if (cpi->rd_tx_select_threshes[frame_type][ONLY_4X4] >
                   cpi->rd_tx_select_threshes[frame_type][ALLOW_8X8]
-#if CONFIG_TX16X16
             && cpi->rd_tx_select_threshes[frame_type][ONLY_4X4] >
                   cpi->rd_tx_select_threshes[frame_type][ALLOW_16X16]
-#endif
                ) {
       txfm_type = ONLY_4X4;
-#if CONFIG_TX16X16
     } else if (cpi->rd_tx_select_threshes[frame_type][ALLOW_16X16] >=
                   cpi->rd_tx_select_threshes[frame_type][ALLOW_8X8]) {
       txfm_type = ALLOW_16X16;
-#endif
     } else
       txfm_type = ALLOW_8X8;
 #else
-#if CONFIG_TX16X16
     txfm_type = cpi->rd_tx_select_threshes[frame_type][ALLOW_16X16] >=
                  cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
     ALLOW_16X16 : TX_MODE_SELECT;
-#else
-    txfm_type = cpi->rd_tx_select_threshes[frame_type][ALLOW_8X8] >=
-                cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
-    ALLOW_8X8 : TX_MODE_SELECT;
 #endif
-#endif
-#elif CONFIG_TX16X16
-      txfm_type = ALLOW_16X16;
 #else
-      txfm_type = ALLOW_8X8;
+    txfm_type = ALLOW_16X16;
 #endif // CONFIG_TX_SELECT
     cpi->common.txfm_mode = txfm_type;
 #if CONFIG_TX_SELECT
     if (txfm_type != TX_MODE_SELECT) {
       cpi->common.prob_tx[0] = 128;
-#if CONFIG_TX16X16
       cpi->common.prob_tx[1] = 128;
-#endif
     }
 #endif
     cpi->common.comp_pred_mode = pred_type;
@@ -1622,20 +1600,14 @@ void vp8_encode_frame(VP8_COMP *cpi) {
     if (cpi->common.txfm_mode == TX_MODE_SELECT) {
       const int count4x4 = cpi->txfm_count[TX_4X4];
       const int count8x8 = cpi->txfm_count[TX_8X8];
-#if CONFIG_TX16X16
       const int count16x16 = cpi->txfm_count[TX_16X16];
-#else
-      const int count16x16 = 0;
-#endif
 
       if (count4x4 == 0 && count16x16 == 0) {
         cpi->common.txfm_mode = ALLOW_8X8;
       } else if (count8x8 == 0 && count16x16 == 0) {
         cpi->common.txfm_mode = ONLY_4X4;
-#if CONFIG_TX16X16
       } else if (count8x8 == 0 && count4x4 == 0) {
         cpi->common.txfm_mode = ALLOW_16X16;
-#endif
       }
     }
 #endif
@@ -1977,11 +1949,9 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
       }
     } else
 #endif
-#if CONFIG_TX16X16
     if (cpi->common.txfm_mode >= ALLOW_16X16 && mbmi->mode <= TM_PRED) {
       mbmi->txfm_size = TX_16X16;
     } else
-#endif
     if (cpi->common.txfm_mode >= ALLOW_8X8 && mbmi->mode != B_PRED) {
       mbmi->txfm_size = TX_8X8;
     } else {
@@ -2171,13 +2141,10 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
       }
     } else
 #endif
-#if CONFIG_TX16X16
     if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED &&
         mbmi->mode != SPLITMV && cpi->common.txfm_mode >= ALLOW_16X16) {
       mbmi->txfm_size = TX_16X16;
-    } else
-#endif
-    if (mbmi->mode != B_PRED && mbmi->mode != SPLITMV &&
+    } else if (mbmi->mode != B_PRED && mbmi->mode != SPLITMV &&
         cpi->common.txfm_mode >= ALLOW_8X8) {
       mbmi->txfm_size = TX_8X8;
     } else {

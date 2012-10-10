@@ -49,9 +49,7 @@ typedef struct {
 
   vp8_prob const *coef_probs[BLOCK_TYPES];
   vp8_prob const *coef_probs_8x8[BLOCK_TYPES_8X8];
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   vp8_prob const *coef_probs_16X16[BLOCK_TYPES_16X16];
-#endif
 
   UINT8 eob[25];
 

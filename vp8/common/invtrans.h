@@ -30,12 +30,10 @@ extern void vp8_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MAC
 extern void vp8_inverse_transform_mby_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
 extern void vp8_inverse_transform_mbuv_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 extern void vp8_inverse_transform_b_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
                                           short *input_dqcoeff, short *output_coeff,
                                           int pitch);
 extern void vp8_inverse_transform_mb_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
 extern void vp8_inverse_transform_mby_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
 extern void vp8_inverse_transform_mbuv_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
-#endif
 #endif

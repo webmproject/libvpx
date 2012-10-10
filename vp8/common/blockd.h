@@ -129,9 +129,7 @@ typedef enum {
 typedef enum {
   TX_4X4,                      // 4x4 dct transform
   TX_8X8,                      // 8x8 dct transform
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   TX_16X16,                    // 16x16 dct transform
-#endif
   TX_SIZE_MAX                  // Number of different transforms available
 } TX_SIZE;
 

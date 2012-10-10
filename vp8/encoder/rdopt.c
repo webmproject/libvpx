@@ -379,7 +379,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
     BLOCK_TYPES_8X8);
 #endif
 
-#if CONFIG_TX16X16
   fill_token_costs(
     cpi->mb.token_costs[TX_16X16],
     (const vp8_prob(*)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_16x16,
@@ -390,7 +389,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
     (const vp8_prob(*)[8][PREV_COEF_CONTEXTS][11])
     cpi->common.fc.hybrid_coef_probs_16x16,
     BLOCK_TYPES_16X16);
-#endif
 #endif
 
   /*rough estimate for costing*/
@@ -661,7 +659,6 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
       }
 #endif
       break;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     case TX_16X16:
       scan = vp8_default_zig_zag1d_16x16;
       band = vp8_coef_bands_16x16;
@@ -673,7 +670,6 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
           tx_type = b->bmi.as_mode.tx_type;
 #endif
       break;
-#endif
     default:
       break;
   }
@@ -859,7 +855,6 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
   *skippable = mby_is_skippable_8x8(&mb->e_mbd, 1);
 }
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 static int vp8_rdcost_mby_16x16(MACROBLOCK *mb) {
   int cost;
   MACROBLOCKD *xd = &mb->e_mbd;
@@ -915,7 +910,6 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   *Rate = vp8_rdcost_mby_16x16(mb);
   *skippable = mby_is_skippable_16x16(&mb->e_mbd);
 }
-#endif
 
 static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                             int *distortion, int *skippable,
@@ -931,17 +925,14 @@ static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
   int s0, s1;
   int r4x4, r4x4s, r8x8, r8x8s, d4x4, d8x8, s4x4, s8x8;
   int64_t rd4x4, rd8x8, rd4x4s, rd8x8s;
-#if CONFIG_TX16X16
   int d16x16, r16x16, r16x16s, s16x16;
   int64_t rd16x16, rd16x16s;
-#endif
 
   // FIXME don't do sub x3
   if (skip_prob == 0)
     skip_prob = 1;
   s0 = vp8_cost_bit(skip_prob, 0);
   s1 = vp8_cost_bit(skip_prob, 1);
-#if CONFIG_TX16X16
   macro_block_yrd_16x16(x, &r16x16, &d16x16, IF_RTCD(&cpi->rtcd), &s16x16);
   if (can_skip) {
     if (s16x16) {
@@ -962,7 +953,6 @@ static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
   } else {
     rd16x16s = RDCOST(x->rdmult, x->rddiv, r16x16s, d16x16);
   }
-#endif
   macro_block_yrd_8x8(x, &r8x8, &d8x8, IF_RTCD(&cpi->rtcd), &s8x8);
   if (can_skip) {
     if (s8x8) {
@@ -974,9 +964,7 @@ static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
     rd8x8 = RDCOST(x->rdmult, x->rddiv, r8x8, d8x8);
   }
   r8x8s = r8x8 + vp8_cost_one(cm->prob_tx[0]);
-#if CONFIG_TX16X16
   r8x8s += vp8_cost_zero(cm->prob_tx[1]);
-#endif
   if (can_skip) {
     if (s8x8) {
       rd8x8s = RDCOST(x->rdmult, x->rddiv, s1, d8x8);
@@ -1007,7 +995,6 @@ static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
     rd4x4s = RDCOST(x->rdmult, x->rddiv, r4x4s, d4x4);
   }
 
-#if CONFIG_TX16X16
   if ( cpi->common.txfm_mode == ALLOW_16X16 ||
       (cpi->common.txfm_mode == TX_MODE_SELECT &&
        rd16x16s < rd8x8s && rd16x16s < rd4x4s)) {
@@ -1016,7 +1003,6 @@ static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
     *distortion = d16x16;
     *rate = (cpi->common.txfm_mode == ALLOW_16X16) ? r16x16 : r16x16s;
   } else
-#endif
   if ( cpi->common.txfm_mode == ALLOW_8X8 ||
       (cpi->common.txfm_mode == TX_MODE_SELECT && rd8x8s < rd4x4s)) {
     mbmi->txfm_size = TX_8X8;
@@ -1034,23 +1020,19 @@ static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
   txfm_cache[ONLY_4X4] = rd4x4;
   txfm_cache[ALLOW_8X8] = rd8x8;
-#if CONFIG_TX16X16
   txfm_cache[ALLOW_16X16] = rd16x16;
   if (rd16x16s < rd8x8s && rd16x16s < rd4x4s)
     txfm_cache[TX_MODE_SELECT] = rd16x16s;
   else
-#endif
     txfm_cache[TX_MODE_SELECT] = rd4x4s < rd8x8s ? rd4x4s : rd8x8s;
 
 #else /* CONFIG_TX_SELECT */
 
   switch (cpi->common.txfm_mode) {
-#if CONFIG_TX16X16
     case ALLOW_16X16:
       macro_block_yrd_16x16(x, rate, distortion, IF_RTCD(&cpi->rtcd), skippable);
       mbmi->txfm_size = TX_16X16;
       break;
-#endif
     case ALLOW_8X8:
       macro_block_yrd_8x8(x, rate, distortion, IF_RTCD(&cpi->rtcd), skippable);
       mbmi->txfm_size = TX_8X8;
@@ -4108,11 +4090,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       mbmi->txfm_size = cm->txfm_mode;
     else
 #endif
-#if CONFIG_TX16X16
       mbmi->txfm_size = TX_16X16;
-#else
-      mbmi->txfm_size = TX_8X8;
-#endif
     mbmi->ref_frame = ALTREF_FRAME;
     mbmi->mv[0].as_int = 0;
     mbmi->uv_mode = DC_PRED;

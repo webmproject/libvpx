@@ -311,7 +311,6 @@ void vp8_quantize_mbuv_8x8(MACROBLOCK *x) {
 
 
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_quantize_mby_16x16(MACROBLOCK *x) {
   int i;
   for (i = 0; i < 16; i++)
@@ -385,7 +384,6 @@ void vp8_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
 
   d->eob = eob + 1;
 }
-#endif
 
 
 
@@ -428,7 +426,6 @@ void vp8cx_init_quantizer(VP8_COMP *cpi) {
                                           48, 48, 48, 48, 48, 48, 48, 48,
                                           48, 48, 48, 48, 48, 48, 48, 48
                                         };
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   static const int zbin_boost_16x16[256] = {
      0,  0,  0,  8,  8,  8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28,
     30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 48, 48, 48, 48, 48, 48,
@@ -447,7 +444,6 @@ void vp8cx_init_quantizer(VP8_COMP *cpi) {
     48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48,
   };
-#endif
   int qrounding_factor = 48;
 
 
@@ -469,17 +465,13 @@ void vp8cx_init_quantizer(VP8_COMP *cpi) {
                  cpi->Y1quant_shift[Q] + 0, quant_val);
     cpi->Y1zbin[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
     cpi->Y1zbin_8x8[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     cpi->Y1zbin_16x16[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
-#endif
     cpi->Y1round[Q][0] = (qrounding_factor * quant_val) >> 7;
     cpi->common.Y1dequant[Q][0] = quant_val;
     cpi->zrun_zbin_boost_y1[Q][0] = (quant_val * zbin_boost[0]) >> 7;
     cpi->zrun_zbin_boost_y1_8x8[Q][0] =
       ((quant_val * zbin_boost_8x8[0]) + 64) >> 7;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     cpi->zrun_zbin_boost_y1_16x16[Q][0] = ((quant_val * zbin_boost_16x16[0]) + 64) >> 7;
-#endif
 
 
     quant_val = vp8_dc2quant(Q, cpi->common.y2dc_delta_q);
@@ -487,34 +479,26 @@ void vp8cx_init_quantizer(VP8_COMP *cpi) {
                  cpi->Y2quant_shift[Q] + 0, quant_val);
     cpi->Y2zbin[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
     cpi->Y2zbin_8x8[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     cpi->Y2zbin_16x16[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
-#endif
     cpi->Y2round[Q][0] = (qrounding_factor * quant_val) >> 7;
     cpi->common.Y2dequant[Q][0] = quant_val;
     cpi->zrun_zbin_boost_y2[Q][0] = (quant_val * zbin_boost[0]) >> 7;
     cpi->zrun_zbin_boost_y2_8x8[Q][0] =
       ((quant_val * zbin_boost_8x8[0]) + 64) >> 7;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     cpi->zrun_zbin_boost_y2_16x16[Q][0] = ((quant_val * zbin_boost_16x16[0]) + 64) >> 7;
-#endif
 
     quant_val = vp8_dc_uv_quant(Q, cpi->common.uvdc_delta_q);
     invert_quant(cpi->UVquant[Q] + 0,
                  cpi->UVquant_shift[Q] + 0, quant_val);
     cpi->UVzbin[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
     cpi->UVzbin_8x8[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     cpi->UVzbin_16x16[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
-#endif
     cpi->UVround[Q][0] = (qrounding_factor * quant_val) >> 7;
     cpi->common.UVdequant[Q][0] = quant_val;
     cpi->zrun_zbin_boost_uv[Q][0] = (quant_val * zbin_boost[0]) >> 7;
     cpi->zrun_zbin_boost_uv_8x8[Q][0] =
       ((quant_val * zbin_boost_8x8[0]) + 64) >> 7;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     cpi->zrun_zbin_boost_uv_16x16[Q][0] = ((quant_val * zbin_boost_16x16[0]) + 64) >> 7;
-#endif
 
     // all the 4x4 ac values =;
     for (i = 1; i < 16; i++) {
@@ -570,7 +554,6 @@ void vp8cx_init_quantizer(VP8_COMP *cpi) {
         ((quant_val * zbin_boost_8x8[i]) + 64) >> 7;
     }
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     // 16x16 structures. Same comment above applies.
     for (i = 1; i < 256; i++) {
       int rc = vp8_default_zig_zag1d_16x16[i];
@@ -587,7 +570,6 @@ void vp8cx_init_quantizer(VP8_COMP *cpi) {
       cpi->UVzbin_16x16[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
       cpi->zrun_zbin_boost_uv_16x16[Q][i] = ((quant_val * zbin_boost_16x16[i]) + 64) >> 7;
     }
-#endif
   }
 }
 
@@ -626,16 +608,12 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
     x->block[i].quant_shift = cpi->Y1quant_shift[QIndex];
     x->block[i].zbin = cpi->Y1zbin[QIndex];
     x->block[i].zbin_8x8 = cpi->Y1zbin_8x8[QIndex];
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     x->block[i].zbin_16x16 = cpi->Y1zbin_16x16[QIndex];
-#endif
     x->block[i].round = cpi->Y1round[QIndex];
     x->e_mbd.block[i].dequant = cpi->common.Y1dequant[QIndex];
     x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[QIndex];
     x->block[i].zrun_zbin_boost_8x8 = cpi->zrun_zbin_boost_y1_8x8[QIndex];
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     x->block[i].zrun_zbin_boost_16x16 = cpi->zrun_zbin_boost_y1_16x16[QIndex];
-#endif
     x->block[i].zbin_extra = (short)zbin_extra;
 
     // Segment max eob offset feature.
@@ -644,16 +622,12 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
         get_segdata(xd, segment_id, SEG_LVL_EOB);
       x->block[i].eob_max_offset_8x8 =
         get_segdata(xd, segment_id, SEG_LVL_EOB);
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
       x->block[i].eob_max_offset_16x16 =
         get_segdata(xd, segment_id, SEG_LVL_EOB);
-#endif
     } else {
       x->block[i].eob_max_offset = 16;
       x->block[i].eob_max_offset_8x8 = 64;
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
       x->block[i].eob_max_offset_16x16 = 256;
-#endif
     }
   }
 
@@ -668,16 +642,12 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
     x->block[i].quant_shift = cpi->UVquant_shift[QIndex];
     x->block[i].zbin = cpi->UVzbin[QIndex];
     x->block[i].zbin_8x8 = cpi->UVzbin_8x8[QIndex];
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     x->block[i].zbin_16x16 = cpi->UVzbin_16x16[QIndex];
-#endif
     x->block[i].round = cpi->UVround[QIndex];
     x->e_mbd.block[i].dequant = cpi->common.UVdequant[QIndex];
     x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[QIndex];
     x->block[i].zrun_zbin_boost_8x8 = cpi->zrun_zbin_boost_uv_8x8[QIndex];
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
     x->block[i].zrun_zbin_boost_16x16 = cpi->zrun_zbin_boost_uv_16x16[QIndex];
-#endif
 
     x->block[i].zbin_extra = (short)zbin_extra;
 
@@ -703,16 +673,12 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
   x->block[24].quant_shift = cpi->Y2quant_shift[QIndex];
   x->block[24].zbin = cpi->Y2zbin[QIndex];
   x->block[24].zbin_8x8 = cpi->Y2zbin_8x8[QIndex];
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   x->block[24].zbin_16x16 = cpi->Y2zbin_16x16[QIndex];
-#endif
   x->block[24].round = cpi->Y2round[QIndex];
   x->e_mbd.block[24].dequant = cpi->common.Y2dequant[QIndex];
   x->block[24].zrun_zbin_boost = cpi->zrun_zbin_boost_y2[QIndex];
   x->block[24].zrun_zbin_boost_8x8 = cpi->zrun_zbin_boost_y2_8x8[QIndex];
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
   x->block[24].zrun_zbin_boost_16x16 = cpi->zrun_zbin_boost_y2_16x16[QIndex];
-#endif
   x->block[24].zbin_extra = (short)zbin_extra;
 
   // TBD perhaps not use for Y2

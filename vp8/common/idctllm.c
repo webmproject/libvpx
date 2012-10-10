@@ -779,7 +779,6 @@ void vp8_short_ihaar2x2_c(short *input, short *output, int pitch) {
 }
 
 
-#if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
 #if 0
 // Keep a really bad float version as reference for now.
 void vp8_short_idct16x16_c(short *input, short *output, int pitch) {
@@ -1070,4 +1069,3 @@ void vp8_short_idct16x16_c(short *input, short *output, int pitch) {
   }
   vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
-#endif

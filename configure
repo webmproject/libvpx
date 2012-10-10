@@ -224,7 +224,6 @@ EXPERIMENT_LIST="
     hybridtransform
     hybridtransform8x8
     switchable_interp
-    tx16x16
     newbestrefmv
     new_mvref
     hybridtransform16x16
