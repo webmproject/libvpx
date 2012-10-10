@@ -471,38 +471,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
   pbi->last_time_stamp = time_stamp;
   pbi->source_sz = 0;
 
-#if 0
-  {
-    int i;
-    int64_t earliest_time = pbi->dr[0].time_stamp;
-    int64_t latest_time = pbi->dr[0].time_stamp;
-    int64_t time_diff = 0;
-    int bytes = 0;
-
-    pbi->dr[pbi->common.current_video_frame & 0xf].size = pbi->bc.pos + pbi->bc2.pos + 4;;
-    pbi->dr[pbi->common.current_video_frame & 0xf].time_stamp = time_stamp;
-
-    for (i = 0; i < 16; i++) {
-
-      bytes += pbi->dr[i].size;
-
-      if (pbi->dr[i].time_stamp < earliest_time)
-        earliest_time = pbi->dr[i].time_stamp;
-
-      if (pbi->dr[i].time_stamp > latest_time)
-        latest_time = pbi->dr[i].time_stamp;
-    }
-
-    time_diff = latest_time - earliest_time;
-
-    if (time_diff > 0) {
-      pbi->common.bitrate = 80000.00 * bytes / time_diff;
-      pbi->common.framerate = 160000000.00 / time_diff;
-    }
-
-  }
-#endif
-
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
   if (cm->rtcd.flags & HAS_NEON)

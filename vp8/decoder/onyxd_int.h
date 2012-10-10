@@ -33,11 +33,6 @@ typedef struct {
 } MB_ROW_DEC;
 
 typedef struct {
-  int64_t time_stamp;
-  int size;
-} DATARATE;
-
-typedef struct {
   int const *scan;
   int const *scan_8x8;
   UINT8 const *ptr_block2leftabove;
@@ -78,8 +73,6 @@ typedef struct VP8Decompressor {
   vp8_reader *mbc;
   int64_t last_time_stamp;
   int   ready_for_new_data;
-
-  DATARATE dr[16];
 
   DETOK detoken;
 
