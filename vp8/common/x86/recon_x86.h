@@ -36,9 +36,6 @@ extern prototype_copy_block(vp8_copy_mem16x16_mmx);
 #undef  vp8_recon_copy8x4
 #define vp8_recon_copy8x4 vp8_copy_mem8x4_mmx
 
-#undef  vp8_recon_copy16x16
-#define vp8_recon_copy16x16 vp8_copy_mem16x16_mmx
-
 #endif
 #endif
 

@@ -662,8 +662,7 @@ void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                 (ymv.as_mv.row & 7) << 1,
                                 dst_y, dst_ystride);
     } else {
-      RECON_INVOKE(&xd->rtcd->recon, copy16x16)
-          (ptr, pre_stride, dst_y, dst_ystride);
+      vp8_copy_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
     }
 }
 

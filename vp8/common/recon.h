@@ -44,11 +44,6 @@ struct vp8_recon_rtcd_vtable;
 #include "arm/recon_arm.h"
 #endif
 
-#ifndef vp8_recon_copy16x16
-#define vp8_recon_copy16x16 vp8_copy_mem16x16_c
-#endif
-extern prototype_copy_block(vp8_recon_copy16x16);
-
 #ifndef vp8_recon_copy8x8
 #define vp8_recon_copy8x8 vp8_copy_mem8x8_c
 #endif

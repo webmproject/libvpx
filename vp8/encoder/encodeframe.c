@@ -309,9 +309,7 @@ static void build_activity_map(VP8_COMP *cpi) {
       recon_yoffset += 16;
 #endif
       // Copy current mb to a buffer
-      RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer,
-                                                x->src.y_stride,
-                                                x->thismb, 16);
+      vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
       // measure activity
       mb_activity = mb_activity_measure(cpi, x, mb_row, mb_col);
@@ -591,9 +589,7 @@ static void pick_mb_modes(VP8_COMP *cpi,
     xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
     // Copy current MB to a work buffer
-    RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer,
-                                              x->src.y_stride,
-                                              x->thismb, 16);
+    vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
     x->rddiv = cpi->RDDIV;
     x->rdmult = cpi->RDMULT;
@@ -776,9 +772,7 @@ static void pick_sb_modes (VP8_COMP *cpi,
   xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 #if 0 // FIXME
   /* Copy current MB to a work buffer */
-  RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer,
-                                            x->src.y_stride,
-                                            x->thismb, 16);
+  vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 #endif
   x->rddiv = cpi->RDDIV;
   x->rdmult = cpi->RDMULT;
@@ -976,9 +970,7 @@ static void encode_sb(VP8_COMP *cpi,
     xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
     // Copy current MB to a work buffer
-    RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer,
-                                              x->src.y_stride,
-                                              x->thismb, 16);
+    vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
       vp8_activity_masking(cpi, x);
