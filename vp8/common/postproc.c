@@ -338,8 +338,8 @@ void vp8_deblock(VP8_COMMON                 *cm,
 
     /* The pixel thresholds are adjusted according to if or not the macroblock
      * is a skipped block.  */
-    unsigned char *ylimits = (unsigned char *)vpx_memalign(16, 16 * cm->mb_cols);
-    unsigned char *uvlimits = (unsigned char *)vpx_memalign(16, 8 * cm->mb_cols);
+    unsigned char *ylimits = cm->pp_limits_buffer;
+    unsigned char *uvlimits = cm->pp_limits_buffer + 16 * cm->mb_cols;
     (void) low_var_thresh;
     (void) flag;
 
@@ -381,13 +381,15 @@ void vp8_deblock(VP8_COMMON                 *cm,
                 post->v_buffer + 8 * mbr * post->uv_stride, source->uv_stride,
                 post->uv_stride, source->uv_width, uvlimits, 8);
         }
+    } else
+    {
+        vp8_yv12_copy_frame(source, post);
     }
-    vpx_free(ylimits);
-    vpx_free(uvlimits);
 }
 
 #if !(CONFIG_TEMPORAL_DENOISING)
-void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
+void vp8_de_noise(VP8_COMMON                 *cm,
+                  YV12_BUFFER_CONFIG         *source,
                   YV12_BUFFER_CONFIG         *post,
                   int                         q,
                   int                         low_var_thresh,
@@ -397,15 +399,15 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
     int ppl = (int)(level + .5);
     int mb_rows = source->y_width >> 4;
     int mb_cols = source->y_height >> 4;
-    unsigned char *limits = (unsigned char *)vpx_memalign(16, 16 * mb_cols);
+    unsigned char *limits = cm->pp_limits_buffer;;
     int mbr, mbc;
     (void) post;
     (void) low_var_thresh;
     (void) flag;
 
-    /* TODO: The original code don't filter the 2 outer rows and columns. */
     vpx_memset(limits, (unsigned char)ppl, 16 * mb_cols);
 
+    /* TODO: The original code don't filter the 2 outer rows and columns. */
     for (mbr = 0; mbr < mb_rows; mbr++)
     {
         vp8_post_proc_down_and_across_mb_row(
@@ -422,8 +424,6 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
             source->v_buffer + 8 * mbr * source->uv_stride,
             source->uv_stride, source->uv_stride, source->uv_width, limits, 8);
     }
-
-    vpx_free(limits);
 }
 #endif
 

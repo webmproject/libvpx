@@ -87,6 +87,7 @@ typedef struct VP8Common
     YV12_BUFFER_CONFIG post_proc_buffer;
     YV12_BUFFER_CONFIG post_proc_buffer_int;
     int post_proc_buffer_int_used;
+    unsigned char *pp_limits_buffer;   /* post-processing filter coefficients */
 #endif
 
     FRAME_TYPE last_frame_type;  /* Save last frame's frame type for motion search. */

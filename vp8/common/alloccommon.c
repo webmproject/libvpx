@@ -28,6 +28,9 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
     vp8_yv12_de_alloc_frame_buffer(&oci->post_proc_buffer);
     if (oci->post_proc_buffer_int_used)
         vp8_yv12_de_alloc_frame_buffer(&oci->post_proc_buffer_int);
+
+    vpx_free(oci->pp_limits_buffer);
+    oci->pp_limits_buffer = NULL;
 #endif
 
     vpx_free(oci->above_context);
@@ -82,18 +85,6 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
         return 1;
     }
 
-#if CONFIG_POSTPROC
-    if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer, width, height, VP8BORDERINPIXELS) < 0)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return 1;
-    }
-
-    oci->post_proc_buffer_int_used = 0;
-    vpx_memset(&oci->postproc_state, 0, sizeof(oci->postproc_state));
-    vpx_memset((&oci->post_proc_buffer)->buffer_alloc,128,(&oci->post_proc_buffer)->frame_size);
-#endif
-
     oci->mb_rows = height >> 4;
     oci->mb_cols = width >> 4;
     oci->MBs = oci->mb_rows * oci->mb_cols;
@@ -118,6 +109,27 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
         vp8_de_alloc_frame_buffers(oci);
         return 1;
     }
+
+#if CONFIG_POSTPROC
+    if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer, width, height, VP8BORDERINPIXELS) < 0)
+    {
+        vp8_de_alloc_frame_buffers(oci);
+        return 1;
+    }
+
+    oci->post_proc_buffer_int_used = 0;
+    vpx_memset(&oci->postproc_state, 0, sizeof(oci->postproc_state));
+    vpx_memset(oci->post_proc_buffer.buffer_alloc, 128,
+               oci->post_proc_buffer.frame_size);
+
+    /* Allocate buffer to store post-processing filter coefficients. */
+    oci->pp_limits_buffer = vpx_memalign(16, 24 * oci->mb_cols);
+    if (!oci->pp_limits_buffer)
+    {
+        vp8_de_alloc_frame_buffers(oci);
+        return 1;
+    }
+#endif
 
     return 0;
 }
