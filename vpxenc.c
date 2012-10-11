@@ -2103,12 +2103,26 @@ int main(int argc, const char **argv_) {
   }
 
   if (test_decode) {
+#if CONFIG_INTERNAL_STATS
+    FILE *f = fopen("opsnr.stt", "a");
+#endif
     fprintf(stderr, "\n");
-    if (enc_dec_match)
+    if (enc_dec_match) {
       fprintf(stderr, "No mismatch detected in recon buffers\n");
-    else
+#if CONFIG_INTERNAL_STATS
+      fprintf(f, "No mismatch detected in recon buffers\n");
+#endif
+    } else {
       fprintf(stderr, "First mismatch occurred in frame %d\n",
               first_bad_frame);
+#if CONFIG_INTERNAL_STATS
+      fprintf(f, "First mismatch occurred in frame %d\n",
+              first_bad_frame);
+#endif
+    }
+#if CONFIG_INTERNAL_STATS
+    fclose(f);
+#endif
   }
 
   if (show_q_hist_buckets)
