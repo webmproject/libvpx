@@ -364,10 +364,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   if (mode == I8X8_PRED) {
     for (i = 0; i < 4; i++) {
       int ib = vp8_i8x8_block[i];
-#if !CONFIG_HYBRIDTRANSFORM8X8
       const int iblock[4] = {0, 1, 4, 5};
       int j;
-#endif
       int i8x8mode;
       BLOCKD *b;
 
@@ -381,30 +379,40 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
       b = &xd->block[ib];
       i8x8mode = b->bmi.as_mode.first;
-      RECON_INVOKE(RTCD_VTABLE(recon), intra8x8_predict)
-      (b, i8x8mode, b->predictor);
+      RECON_INVOKE(RTCD_VTABLE(recon), intra8x8_predict)(b, i8x8mode,
+                                                         b->predictor);
 
+      if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
 #if CONFIG_HYBRIDTRANSFORM8X8
-      vp8_ht_dequant_idct_add_8x8_c(b->bmi.as_mode.tx_type,
-                                    q, dq, pre, dst, 16, stride);
-      q += 64;
+        vp8_ht_dequant_idct_add_8x8_c(b->bmi.as_mode.tx_type,
+                                      q, dq, pre, dst, 16, stride);
+        q += 64;
 #else
-      vp8_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
-      q += 64;
+        vp8_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
+        q += 64;
 #endif
+      } else {
+        for (j = 0; j < 4; j++) {
+          b = &xd->block[ib + iblock[j]];
+          vp8_dequant_idct_add_c(b->qcoeff, b->dequant, b->predictor,
+                                 *(b->base_dst) + b->dst, 16, b->dst_stride);
+        }
+      }
 
       b = &xd->block[16 + i];
-      RECON_INVOKE(RTCD_VTABLE(recon), intra_uv4x4_predict)
-      (b, i8x8mode, b->predictor);
-      DEQUANT_INVOKE(&pbi->dequant, idct_add)
-      (b->qcoeff, b->dequant,  b->predictor,
-       *(b->base_dst) + b->dst, 8, b->dst_stride);
+      RECON_INVOKE(RTCD_VTABLE(recon), intra_uv4x4_predict)(b, i8x8mode,
+                                                            b->predictor);
+      DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, b->dequant,
+                                              b->predictor,
+                                              *(b->base_dst) + b->dst, 8,
+                                              b->dst_stride);
       b = &xd->block[20 + i];
-      RECON_INVOKE(RTCD_VTABLE(recon), intra_uv4x4_predict)
-      (b, i8x8mode, b->predictor);
-      DEQUANT_INVOKE(&pbi->dequant, idct_add)
-      (b->qcoeff, b->dequant,  b->predictor,
-       *(b->base_dst) + b->dst, 8, b->dst_stride);
+      RECON_INVOKE(RTCD_VTABLE(recon), intra_uv4x4_predict)(b, i8x8mode,
+                                                            b->predictor);
+      DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, b->dequant,
+                                              b->predictor,
+                                              *(b->base_dst) + b->dst, 8,
+                                              b->dst_stride);
     }
   } else if (mode == B_PRED) {
     for (i = 0; i < 16; i++) {

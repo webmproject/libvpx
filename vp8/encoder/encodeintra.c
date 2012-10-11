@@ -238,7 +238,8 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
 void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
                          MACROBLOCK *x, int ib) {
-  BLOCKD *b = &x->e_mbd.block[ib];
+  MACROBLOCKD *xd = &x->e_mbd;
+  BLOCKD *b = &xd->block[ib];
   BLOCK *be = &x->block[ib];
   const int iblock[4] = {0, 1, 4, 5};
   int i;
@@ -255,8 +256,7 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
   }
 #endif
 
-  {
-    MACROBLOCKD *xd = &x->e_mbd;
+  if (x->e_mbd.mode_info_context->mbmi.txfm_size == TX_8X8) {
     int idx = (ib & 0x02) ? (ib + 2) : ib;
 
     // generate residual blocks
@@ -274,13 +274,22 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     x->quantize_b_8x8(x->block + idx, xd->block + idx);
     vp8_idct_idct8(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
 #endif
-
-    // reconstruct submacroblock
+  } else {
     for (i = 0; i < 4; i++) {
       b = &xd->block[ib + iblock[i]];
-      vp8_recon_b_c(b->predictor, b->diff, *(b->base_dst) + b->dst,
-                    b->dst_stride);
+      be = &x->block[ib + iblock[i]];
+      ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
+      x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+      x->quantize_b(be, b);
+      vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
     }
+  }
+
+  // reconstruct submacroblock
+  for (i = 0; i < 4; i++) {
+    b = &xd->block[ib + iblock[i]];
+    vp8_recon_b_c(b->predictor, b->diff, *(b->base_dst) + b->dst,
+                  b->dst_stride);
   }
 }
 

@@ -1565,30 +1565,63 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
 
       vp8_subtract_4b_c(be, b, 16);
 
+      if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
 #if CONFIG_HYBRIDTRANSFORM8X8
-      txfm_map(b, pred_mode_conv(mode));
-      vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32,
-                b->bmi.as_mode.tx_type, 8);
+        txfm_map(b, pred_mode_conv(mode));
+        vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32,
+                  b->bmi.as_mode.tx_type, 8);
 
 #else
-      x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+        x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
 #endif
+        x->quantize_b_8x8(x->block + idx, xd->block + idx);
 
-      x->quantize_b_8x8(x->block + idx, xd->block + idx);
+        // compute quantization mse of 8x8 block
+        distortion = vp8_block_error_c((x->block + idx)->coeff,
+                                       (xd->block + idx)->dqcoeff, 64);
+        ta0 = *(a + vp8_block2above_8x8[idx]);
+        tl0 = *(l + vp8_block2left_8x8 [idx]);
 
-      // compute quantization mse of 8x8 block
-      distortion = vp8_block_error_c((x->block + idx)->coeff,
-                                     (xd->block + idx)->dqcoeff, 64)>>2;
-      ta0 = *(a + vp8_block2above_8x8[idx]);
-      tl0 = *(l + vp8_block2left_8x8 [idx]);
+        rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
+                             &ta0, &tl0, TX_8X8);
 
-      rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
-                           &ta0, &tl0, TX_8X8);
+        rate += rate_t;
+        ta1 = ta0;
+        tl1 = tl0;
+      } else {
+        x->vp8_short_fdct8x4(be->src_diff, be->coeff, 32);
+        x->vp8_short_fdct8x4((be + 4)->src_diff, (be + 4)->coeff, 32);
 
-      rate += rate_t;
-      ta1 = ta0;
-      tl1 = tl0;
+        x->quantize_b_pair(x->block + ib, x->block + ib + 1,
+                           xd->block + ib, xd->block + ib + 1);
+        x->quantize_b_pair(x->block + ib + 4, x->block + ib + 5,
+                           xd->block + ib + 4, xd->block + ib + 5);
 
+        distortion = vp8_block_error_c((x->block + ib)->coeff,
+                                       (xd->block + ib)->dqcoeff, 16);
+        distortion += vp8_block_error_c((x->block + ib + 1)->coeff,
+                                        (xd->block + ib + 1)->dqcoeff, 16);
+        distortion += vp8_block_error_c((x->block + ib + 4)->coeff,
+                                        (xd->block + ib + 4)->dqcoeff, 16);
+        distortion += vp8_block_error_c((x->block + ib + 5)->coeff,
+                                        (xd->block + ib + 5)->dqcoeff, 16);
+
+        ta0 = *(a + vp8_block2above[ib]);
+        ta1 = *(a + vp8_block2above[ib + 1]);
+        tl0 = *(l + vp8_block2above[ib]);
+        tl1 = *(l + vp8_block2above[ib + 4]);
+        rate_t = cost_coeffs(x, xd->block + ib, PLANE_TYPE_Y_WITH_DC,
+                             &ta0, &tl0, TX_4X4);
+        rate_t += cost_coeffs(x, xd->block + ib + 1, PLANE_TYPE_Y_WITH_DC,
+                              &ta1, &tl0, TX_4X4);
+        rate_t += cost_coeffs(x, xd->block + ib + 4, PLANE_TYPE_Y_WITH_DC,
+                              &ta0, &tl1, TX_4X4);
+        rate_t += cost_coeffs(x, xd->block + ib + 5, PLANE_TYPE_Y_WITH_DC,
+                              &ta1, &tl1, TX_4X4);
+        rate += rate_t;
+      }
+
+      distortion >>= 2;
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
       if (this_rd < best_rd) {
         *bestrate = rate;
@@ -1617,17 +1650,18 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
 #endif
   vp8_encode_intra8x8(IF_RTCD(&cpi->rtcd), x, ib);
 
-#if CONFIG_HYBRIDTRANSFORM8X8
-  *(a + vp8_block2above_8x8[idx])     = besta0;
-  *(a + vp8_block2above_8x8[idx] + 1) = besta1;
-  *(l + vp8_block2left_8x8 [idx])     = bestl0;
-  *(l + vp8_block2left_8x8 [idx] + 1) = bestl1;
-#else
-  *(a + vp8_block2above[ib])   = besta0;
-  *(a + vp8_block2above[ib + 1]) = besta1;
-  *(l + vp8_block2above[ib])   = bestl0;
-  *(l + vp8_block2above[ib + 4]) = bestl1;
-#endif
+  if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
+    *(a + vp8_block2above_8x8[idx])     = besta0;
+    *(a + vp8_block2above_8x8[idx] + 1) = besta1;
+    *(l + vp8_block2left_8x8 [idx])     = bestl0;
+    *(l + vp8_block2left_8x8 [idx] + 1) = bestl1;
+  } else {
+    *(a + vp8_block2above[ib])     = besta0;
+    *(a + vp8_block2above[ib + 1]) = besta1;
+    *(l + vp8_block2above[ib])     = bestl0;
+    *(l + vp8_block2above[ib + 4]) = bestl1;
+  }
+
   return best_rd;
 }
 
@@ -3395,7 +3429,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int other_cost = 0;
     int compmode_cost = 0;
     int mode_excluded = 0;
-    int64_t txfm_cache[NB_TXFM_MODES];
+    int64_t txfm_cache[NB_TXFM_MODES] = { 0 };
 
     // These variables hold are rolling total cost and distortion for this mode
     rate2 = 0;
@@ -3579,13 +3613,16 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         }
         break;
         case I8X8_PRED: {
-          int64_t tmp_rd;
-          mbmi->txfm_size = TX_8X8; // FIXME wrong in case of hybridtransform8x8
-          tmp_rd = rd_pick_intra8x8mby_modes(cpi, x, &rate, &rate_y,
-                                             &distortion, best_yrd);
-          rate2 += rate;
-          distortion2 += distortion;
-
+#if CONFIG_TX_SELECT
+          int cost0 = vp8_cost_bit(cm->prob_tx[0], 0);
+          int cost1 = vp8_cost_bit(cm->prob_tx[0], 1);
+          int64_t tmp_rd_4x4s, tmp_rd_8x8s;
+#endif
+          int64_t tmp_rd_4x4, tmp_rd_8x8, tmp_rd;
+          int r4x4, tok4x4, d4x4, r8x8, tok8x8, d8x8;
+          mbmi->txfm_size = TX_4X4;
+          tmp_rd_4x4 = rd_pick_intra8x8mby_modes(cpi, x, &r4x4, &tok4x4,
+                                                 &d4x4, best_yrd);
           mode8x8[0][0] = x->e_mbd.mode_info_context->bmi[0].as_mode.first;
           mode8x8[0][1] = x->e_mbd.mode_info_context->bmi[2].as_mode.first;
           mode8x8[0][2] = x->e_mbd.mode_info_context->bmi[8].as_mode.first;
@@ -3596,6 +3633,72 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           mode8x8[1][2] = x->e_mbd.mode_info_context->bmi[8].as_mode.second;
           mode8x8[1][3] = x->e_mbd.mode_info_context->bmi[10].as_mode.second;
 #endif
+          mbmi->txfm_size = TX_8X8;
+          tmp_rd_8x8 = rd_pick_intra8x8mby_modes(cpi, x, &r8x8, &tok8x8,
+                                                 &d8x8, best_yrd);
+          txfm_cache[ONLY_4X4]  = tmp_rd_4x4;
+          txfm_cache[ALLOW_8X8] = tmp_rd_8x8;
+#if CONFIG_TX16X16
+          txfm_cache[ALLOW_16X16] = tmp_rd_8x8;
+#endif
+#if CONFIG_TX_SELECT
+          tmp_rd_4x4s = tmp_rd_4x4 + RDCOST(x->rdmult, x->rddiv, cost0, 0);
+          tmp_rd_8x8s = tmp_rd_8x8 + RDCOST(x->rdmult, x->rddiv, cost1, 0);
+          txfm_cache[TX_MODE_SELECT] = tmp_rd_4x4s < tmp_rd_8x8s ? tmp_rd_4x4s : tmp_rd_8x8s;
+          if (cm->txfm_mode == TX_MODE_SELECT) {
+            if (tmp_rd_4x4s < tmp_rd_8x8s) {
+              rate = r4x4 + cost0;
+              rate_y = tok4x4 + cost0;
+              distortion = d4x4;
+              mbmi->txfm_size = TX_4X4;
+              tmp_rd = tmp_rd_4x4s;
+            } else {
+              rate = r8x8 + cost1;
+              rate_y = tok8x8 + cost1;
+              distortion = d8x8;
+              mbmi->txfm_size = TX_8X8;
+              tmp_rd = tmp_rd_8x8s;
+
+              mode8x8[0][0] = x->e_mbd.mode_info_context->bmi[0].as_mode.first;
+              mode8x8[0][1] = x->e_mbd.mode_info_context->bmi[2].as_mode.first;
+              mode8x8[0][2] = x->e_mbd.mode_info_context->bmi[8].as_mode.first;
+              mode8x8[0][3] = x->e_mbd.mode_info_context->bmi[10].as_mode.first;
+#if CONFIG_COMP_INTRA_PRED
+              mode8x8[1][0] = x->e_mbd.mode_info_context->bmi[0].as_mode.second;
+              mode8x8[1][1] = x->e_mbd.mode_info_context->bmi[2].as_mode.second;
+              mode8x8[1][2] = x->e_mbd.mode_info_context->bmi[8].as_mode.second;
+              mode8x8[1][3] = x->e_mbd.mode_info_context->bmi[10].as_mode.second;
+#endif
+            }
+          } else
+#endif
+          if (cm->txfm_mode == ONLY_4X4) {
+            rate = r4x4;
+            rate_y = tok4x4;
+            distortion = d4x4;
+            mbmi->txfm_size = TX_4X4;
+            tmp_rd = tmp_rd_4x4;
+          } else {
+            rate = r8x8;
+            rate_y = tok8x8;
+            distortion = d8x8;
+            mbmi->txfm_size = TX_8X8;
+            tmp_rd = tmp_rd_8x8;
+
+            mode8x8[0][0] = x->e_mbd.mode_info_context->bmi[0].as_mode.first;
+            mode8x8[0][1] = x->e_mbd.mode_info_context->bmi[2].as_mode.first;
+            mode8x8[0][2] = x->e_mbd.mode_info_context->bmi[8].as_mode.first;
+            mode8x8[0][3] = x->e_mbd.mode_info_context->bmi[10].as_mode.first;
+#if CONFIG_COMP_INTRA_PRED
+            mode8x8[1][0] = x->e_mbd.mode_info_context->bmi[0].as_mode.second;
+            mode8x8[1][1] = x->e_mbd.mode_info_context->bmi[2].as_mode.second;
+            mode8x8[1][2] = x->e_mbd.mode_info_context->bmi[8].as_mode.second;
+            mode8x8[1][3] = x->e_mbd.mode_info_context->bmi[10].as_mode.second;
+#endif
+          }
+
+          rate2 += rate;
+          distortion2 += distortion;
 
           /* TODO: uv rate maybe over-estimated here since there is UV intra
                    mode coded in I8X8_PRED prediction */
@@ -4026,8 +4129,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       if (!mode_excluded && this_rd != INT64_MAX) {
         for (i = 0; i < NB_TXFM_MODES; i++) {
           int64_t adj_rd;
-          if (this_mode != B_PRED && this_mode != I8X8_PRED &&
-              this_mode != SPLITMV) {
+          if (this_mode != B_PRED && this_mode != SPLITMV) {
             adj_rd = this_rd + txfm_cache[i] - txfm_cache[cm->txfm_mode];
           } else {
             adj_rd = this_rd;
@@ -4264,6 +4366,8 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
   mbmi->mode_rdopt = I8X8_PRED;
 #endif
 
+  // FIXME(rbultje) support transform-size selection
+  mbmi->txfm_size = (cm->txfm_mode == ONLY_4X4) ? TX_4X4 : TX_8X8;
   error8x8 = rd_pick_intra8x8mby_modes(cpi, x, &rate8x8, &rate8x8_tokenonly,
                                        &dist8x8, error16x16);
   mode8x8[0][0]= xd->mode_info_context->bmi[0].as_mode.first;
@@ -4365,8 +4469,9 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
              sizeof(x->mb_context[xd->mb_index].txfm_rd_diff));
 #endif
     } else {
+      // FIXME(rbultje) support transform-size selection
       mbmi->mode = I8X8_PRED;
-      mbmi->txfm_size = TX_8X8;
+      mbmi->txfm_size = (cm->txfm_mode == ONLY_4X4) ? TX_4X4 : TX_8X8;
       set_i8x8_block_modes(x, mode8x8);
       rate = rate8x8 + rateuv;
       dist = dist8x8 + (distuv >> 2);

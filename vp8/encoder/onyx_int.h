@@ -470,7 +470,8 @@ typedef struct VP8_COMP {
   int single_pred_count[COMP_PRED_CONTEXTS];
 #if CONFIG_TX_SELECT
   // FIXME contextualize
-  int txfm_count[TX_SIZE_MAX + 1];
+  int txfm_count[TX_SIZE_MAX];
+  int txfm_count_8x8p[TX_SIZE_MAX - 1];
   int64_t rd_tx_select_diff[NB_TXFM_MODES];
   int rd_tx_select_threshes[4][NB_TXFM_MODES];
 #endif
