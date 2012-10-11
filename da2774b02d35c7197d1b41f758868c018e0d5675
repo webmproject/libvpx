@@ -16,6 +16,24 @@
       "revId": "da2774b02d35c7197d1b41f758868c018e0d5675",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn///eU\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-11T21:01:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn///g4\u003d",
+      "revId": "da2774b02d35c7197d1b41f758868c018e0d5675",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
