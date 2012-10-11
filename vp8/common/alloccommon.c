@@ -63,10 +63,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
         oci->fb_idx_ref_cnt[i] = 0;
         oci->yv12_fb[i].flags = 0;
         if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i], width, height, VP8BORDERINPIXELS) < 0)
-        {
-            vp8_de_alloc_frame_buffers(oci);
-            return 1;
-        }
+            goto allocation_fail;
     }
 
     oci->new_fb_idx = 0;
@@ -80,10 +77,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     oci->fb_idx_ref_cnt[3] = 1;
 
     if (vp8_yv12_alloc_frame_buffer(&oci->temp_scale_frame,   width, 16, VP8BORDERINPIXELS) < 0)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return 1;
-    }
+        goto allocation_fail;
 
     oci->mb_rows = height >> 4;
     oci->mb_cols = width >> 4;
@@ -92,10 +86,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     oci->mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
 
     if (!oci->mip)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return 1;
-    }
+        goto allocation_fail;
 
     oci->mi = oci->mip + oci->mode_info_stride + 1;
 
@@ -105,17 +96,11 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     oci->above_context = vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * oci->mb_cols, 1);
 
     if (!oci->above_context)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return 1;
-    }
+        goto allocation_fail;
 
 #if CONFIG_POSTPROC
     if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer, width, height, VP8BORDERINPIXELS) < 0)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return 1;
-    }
+        goto allocation_fail;
 
     oci->post_proc_buffer_int_used = 0;
     vpx_memset(&oci->postproc_state, 0, sizeof(oci->postproc_state));
@@ -125,14 +110,16 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     /* Allocate buffer to store post-processing filter coefficients. */
     oci->pp_limits_buffer = vpx_memalign(16, 24 * oci->mb_cols);
     if (!oci->pp_limits_buffer)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return 1;
-    }
+        goto allocation_fail;
 #endif
 
     return 0;
+
+allocation_fail:
+    vp8_de_alloc_frame_buffers(oci);
+    return 1;
 }
+
 void vp8_setup_version(VP8_COMMON *cm)
 {
     switch (cm->version)
