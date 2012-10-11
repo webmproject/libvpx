@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn///14\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-11T16:36:59Z",
+      "side": 1,
+      "message": "30 here and in i-30 below should be made into a constant kDropFrameThreshTestStep, since they need to be kept in sync.",
+      "revId": "f4d94b34a0eaa5c09eb1d5f4505a24de88f64c1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn///1w\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-11T16:36:59Z",
+      "side": 1,
+      "message": "nit: this could probably be just 2 lines",
+      "revId": "f4d94b34a0eaa5c09eb1d5f4505a24de88f64c1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn///1s\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-11T16:36:59Z",
+      "side": 1,
+      "message": "don\u0027t need the newline.",
+      "revId": "f4d94b34a0eaa5c09eb1d5f4505a24de88f64c1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
