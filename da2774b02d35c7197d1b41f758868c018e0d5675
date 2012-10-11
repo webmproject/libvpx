@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn///g4\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-11T20:38:14Z",
+      "side": 1,
+      "message": "now that you\u0027ve eliminated all the other uses of this constant other than in the next line, you can go back to leaving the array implicitly sized, kTestVectors[] \u003d {...}",
+      "revId": "da2774b02d35c7197d1b41f758868c018e0d5675",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
