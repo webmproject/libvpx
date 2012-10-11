@@ -296,6 +296,24 @@
       "revId": "f025231daa4d7087fc2460e993a3e072fefd2551",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn///pA\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-11T19:34:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQX//+yI\u003d",
+      "revId": "f025231daa4d7087fc2460e993a3e072fefd2551",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
