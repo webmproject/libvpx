@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn////U\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2659,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-11T07:41:24Z",
+      "side": 1,
+      "message": "2659-2668, 2674-2681, 2695-2702 should be factorized into one function \"int GetProba(event_count, total_count)\"",
+      "revId": "93b015052b7cbc86e43b9bc489b61e1396c5a8ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn////I\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1599,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-11T07:41:24Z",
+      "side": 1,
+      "message": "put the \"\u003e\u003e2\" on a separate line (like 1626).",
+      "revId": "93b015052b7cbc86e43b9bc489b61e1396c5a8ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn////Q\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1602,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-11T07:41:24Z",
+      "side": 1,
+      "message": "tab",
+      "revId": "93b015052b7cbc86e43b9bc489b61e1396c5a8ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn////M\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1605,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-11T07:41:24Z",
+      "side": 1,
+      "message": "tab",
+      "revId": "93b015052b7cbc86e43b9bc489b61e1396c5a8ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn////E\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1677,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-11T07:41:24Z",
+      "side": 1,
+      "message": "align the \"\u003d\", lie 1672/1674",
+      "revId": "93b015052b7cbc86e43b9bc489b61e1396c5a8ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn////A\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3453,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-11T07:41:24Z",
+      "side": 1,
+      "message": "why not \" \u003d { 0 }\" at line 3450? The compiler might do the right thing there...",
+      "revId": "93b015052b7cbc86e43b9bc489b61e1396c5a8ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn///+8\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3692,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-11T07:41:24Z",
+      "side": 1,
+      "message": "this nesting of #if\u0027s + copy-pasted code, makes the whole very hard to follow...",
+      "revId": "93b015052b7cbc86e43b9bc489b61e1396c5a8ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
