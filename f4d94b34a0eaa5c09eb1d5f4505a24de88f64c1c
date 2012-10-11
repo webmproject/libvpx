@@ -50,6 +50,57 @@
       "revId": "f4d94b34a0eaa5c09eb1d5f4505a24de88f64c1c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn///1A\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-11T16:38:43Z",
+      "side": 1,
+      "message": "need a blank line here",
+      "revId": "f4d94b34a0eaa5c09eb1d5f4505a24de88f64c1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn///1I\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-11T16:38:43Z",
+      "side": 1,
+      "message": "sort",
+      "revId": "f4d94b34a0eaa5c09eb1d5f4505a24de88f64c1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn///1M\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-11T16:38:43Z",
+      "side": 1,
+      "message": "unneeded trailing blank lines",
+      "revId": "f4d94b34a0eaa5c09eb1d5f4505a24de88f64c1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
