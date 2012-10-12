@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//+yw\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1168,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-12T13:25:05Z",
+      "side": 1,
+      "message": "i\u0027d suggest using {}\u0027s around if/else clauses",
+      "revId": "4436f911cc2e4ea5f78645991ea80daf422315ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//+yg\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1170,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-12T13:25:05Z",
+      "side": 1,
+      "message": "maybe put the \"?\" at line above (1169)",
+      "revId": "4436f911cc2e4ea5f78645991ea80daf422315ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//+yo\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2485,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-12T13:25:05Z",
+      "side": 1,
+      "message": "use {}\u0027s to match 2481/2484",
+      "revId": "4436f911cc2e4ea5f78645991ea80daf422315ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//+yk\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2499,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-12T13:25:05Z",
+      "side": 1,
+      "message": "use {}\u0027s to match 2495/2498",
+      "revId": "4436f911cc2e4ea5f78645991ea80daf422315ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
