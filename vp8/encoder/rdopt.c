@@ -3638,9 +3638,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                                  &d8x8, best_yrd);
           txfm_cache[ONLY_4X4]  = tmp_rd_4x4;
           txfm_cache[ALLOW_8X8] = tmp_rd_8x8;
-#if CONFIG_TX16X16
           txfm_cache[ALLOW_16X16] = tmp_rd_8x8;
-#endif
 #if CONFIG_TX_SELECT
           tmp_rd_4x4s = tmp_rd_4x4 + RDCOST(x->rdmult, x->rddiv, cost0, 0);
           tmp_rd_8x8s = tmp_rd_8x8 + RDCOST(x->rdmult, x->rddiv, cost1, 0);
