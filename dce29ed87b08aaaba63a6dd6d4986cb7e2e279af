@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//+1k\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-12T07:41:58Z",
+      "side": 1,
+      "message": "suggest systematic use of {}\u0027s",
+      "revId": "dce29ed87b08aaaba63a6dd6d4986cb7e2e279af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//+10\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-12T07:41:58Z",
+      "side": 1,
+      "message": "space before \"\u003c\u003c\"",
+      "revId": "dce29ed87b08aaaba63a6dd6d4986cb7e2e279af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
