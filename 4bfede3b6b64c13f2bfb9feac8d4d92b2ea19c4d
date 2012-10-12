@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn///OM\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-12T00:24:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn///Os\u003d",
+      "revId": "4bfede3b6b64c13f2bfb9feac8d4d92b2ea19c4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn///Oc\u003d",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 15
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn///No\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-12T00:24:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn///Oc\u003d",
+      "revId": "4bfede3b6b64c13f2bfb9feac8d4d92b2ea19c4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn///Og\u003d",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 15
@@ -47,6 +83,24 @@
       "writtenOn": "2012-10-12T00:16:54Z",
       "side": 1,
       "message": "const",
+      "revId": "4bfede3b6b64c13f2bfb9feac8d4d92b2ea19c4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn///Nk\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-12T00:24:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn///Og\u003d",
       "revId": "4bfede3b6b64c13f2bfb9feac8d4d92b2ea19c4d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
