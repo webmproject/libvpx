@@ -267,10 +267,12 @@ void vp8_restore_coding_context(VP8_COMP *cpi) {
 
 
 void vp8_setup_key_frame(VP8_COMP *cpi) {
+  VP8_COMMON *cm = &cpi->common;
   // Setup for Key frame:
   vp8_default_coef_probs(& cpi->common);
   vp8_kf_default_bmode_probs(cpi->common.kf_bmode_prob);
   vp8_init_mbmode_probs(& cpi->common);
+  vp8_default_bmode_probs(cm->fc.bmode_prob);
 
   vp8_init_mv_probs(& cpi->common);
 #if CONFIG_NEWMVENTROPY == 0
@@ -296,6 +298,15 @@ void vp8_setup_key_frame(VP8_COMP *cpi) {
   vp8_init_mode_contexts(&cpi->common);
   vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
   vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
+
+  vpx_memset(cm->prev_mip, 0,
+    (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+  vpx_memset(cm->mip, 0,
+    (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+
+  update_mode_info_border(cm, cm->mip);
+  update_mode_info_in_image(cm, cm->mi);
+
 
 }
 

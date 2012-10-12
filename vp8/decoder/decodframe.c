@@ -825,6 +825,7 @@ static void init_frame(VP8D_COMP *pbi) {
     vp8_init_mv_probs(pc);
 
     vp8_init_mbmode_probs(pc);
+    vp8_default_bmode_probs(pc->fc.bmode_prob);
 
     vp8_default_coef_probs(pc);
     vp8_kf_default_bmode_probs(pc->kf_bmode_prob);
@@ -858,6 +859,14 @@ static void init_frame(VP8D_COMP *pbi) {
     vpx_memcpy(pbi->common.fc.vp8_mode_contexts,
                pbi->common.fc.mode_context,
                sizeof(pbi->common.fc.mode_context));
+    vpx_memset(pc->prev_mip, 0,
+               (pc->mb_cols + 1) * (pc->mb_rows + 1)* sizeof(MODE_INFO));
+    vpx_memset(pc->mip, 0,
+               (pc->mb_cols + 1) * (pc->mb_rows + 1)* sizeof(MODE_INFO));
+
+    update_mode_info_border(pc, pc->mip);
+    update_mode_info_in_image(pc, pc->mi);
+
   } else {
 
     if (!pc->use_bilinear_mc_filter)
