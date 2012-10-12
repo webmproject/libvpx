@@ -1458,6 +1458,32 @@ static int check_dual_ref_flags(VP8_COMP *cpi) {
   }
 }
 
+#if CONFIG_TX_SELECT
+static void reset_skip_txfm_size(VP8_COMP *cpi, TX_SIZE txfm_max) {
+  VP8_COMMON *cm = &cpi->common;
+  int mb_row, mb_col, mis = cm->mode_info_stride;
+  MODE_INFO *mi, *mi_ptr = cm->mi;
+  MB_MODE_INFO *mbmi;
+  MACROBLOCK *x = &cpi->mb;
+  MACROBLOCKD *xd = &x->e_mbd;
+
+  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++, mi_ptr += mis) {
+    mi = mi_ptr;
+    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++, mi++) {
+      mbmi = &mi->mbmi;
+      if (mbmi->txfm_size > txfm_max) {
+        int segment_id = mbmi->segment_id;
+        xd->mode_info_context = mi;
+        assert((segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+                get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
+               (cm->mb_no_coeff_skip && mbmi->mb_skip_coeff));
+        mbmi->txfm_size = txfm_max;
+      }
+    }
+  }
+}
+#endif
+
 void vp8_encode_frame(VP8_COMP *cpi) {
   if (cpi->sf.RD) {
     int i, frame_type, pred_type;
@@ -1606,8 +1632,10 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 
       if (count4x4 == 0 && count16x16 == 0) {
         cpi->common.txfm_mode = ALLOW_8X8;
+        reset_skip_txfm_size(cpi, TX_8X8);
       } else if (count8x8 == 0 && count16x16 == 0 && count8x8_8x8p == 0) {
         cpi->common.txfm_mode = ONLY_4X4;
+        reset_skip_txfm_size(cpi, TX_4X4);
       } else if (count8x8 == 0 && count4x4 == 0) {
         cpi->common.txfm_mode = ALLOW_16X16;
       }
