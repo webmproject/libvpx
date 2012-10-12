@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//+xU\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2489,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-10-12T14:21:10Z",
+      "side": 1,
+      "message": "Change seems to make sense. It seems to me though it would be nice to have the choice of coding mode (choose_segmap_coding_method()) and the coding of the bit into the bitstream together ? So perhaps move this line up.. not a big deal though as it is not FAR away.",
+      "revId": "17fd972aea132a9867e20bb9e5588969b19669a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
