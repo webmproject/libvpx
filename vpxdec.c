@@ -77,6 +77,8 @@ static const arg_def_t progressarg = ARG_DEF(NULL, "progress", 0,
                                              "Show progress after each frame decodes");
 static const arg_def_t limitarg = ARG_DEF(NULL, "limit", 1,
                                           "Stop decoding after n frames");
+static const arg_def_t skiparg = ARG_DEF(NULL, "skip", 1,
+                                         "Skip the first n input frames");
 static const arg_def_t postprocarg = ARG_DEF(NULL, "postproc", 0,
                                              "Postprocess decoded frames");
 static const arg_def_t summaryarg = ARG_DEF(NULL, "summary", 0,
@@ -94,7 +96,7 @@ static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
 #endif
 static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
-  &progressarg, &limitarg, &postprocarg, &summaryarg, &outputfile,
+  &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
   &threadsarg, &verbosearg,
 #if CONFIG_MD5
   &md5arg,
@@ -666,6 +668,7 @@ int main(int argc, const char **argv_) {
   FILE                  *infile;
   int                    frame_in = 0, frame_out = 0, flipuv = 0, noblit = 0, do_md5 = 0, progress = 0;
   int                    stop_after = 0, postproc = 0, summary = 0, quiet = 1;
+  int                    arg_skip = 0;
   vpx_codec_iface_t       *iface = NULL;
   unsigned int           fourcc;
   unsigned long          dx_time = 0;
@@ -728,6 +731,8 @@ int main(int argc, const char **argv_) {
       progress = 1;
     else if (arg_match(&arg, &limitarg, argi))
       stop_after = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &skiparg, argi))
+      arg_skip = arg_parse_uint(&arg);
     else if (arg_match(&arg, &postprocarg, argi))
       postproc = 1;
     else if (arg_match(&arg, &md5arg, argi))
@@ -936,6 +941,15 @@ int main(int argc, const char **argv_) {
     return EXIT_FAILURE;
   }
 #endif
+
+
+  if(arg_skip)
+    fprintf(stderr, "Skiping first %d frames.\n", arg_skip);
+  while (arg_skip) {
+    if (read_frame(&input, &buf, &buf_sz, &buf_alloc_sz))
+      break;
+    arg_skip--;
+  }
 
   /* Decode file */
   while (!read_frame(&input, &buf, &buf_sz, &buf_alloc_sz)) {
