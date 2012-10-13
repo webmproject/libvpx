@@ -90,7 +90,7 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
     txfm_map(b, b->bmi.as_mode.first);
     vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 4);
     vp8_ht_quantize_b(be, b);
-    vp8_inverse_htransform_b(IF_RTCD(&rtcd->common->idct), b, 32) ;
+    vp8_ihtllm_c(b->dqcoeff, b->diff, 32, b->bmi.as_mode.tx_type, 4);
   } else {
     x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32) ;
     x->quantize_b(be, b) ;
