@@ -1218,11 +1218,11 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
   cpi->mb.short_fhaar2x2 = FDCT_INVOKE(&cpi->rtcd.fdct, haar_short2x2);
 
 
-  cpi->mb.quantize_b      = vp8_regular_quantize_b;
-  cpi->mb.quantize_b_pair = vp8_regular_quantize_b_pair;
-  cpi->mb.quantize_b_8x8  = vp8_regular_quantize_b_8x8;
-  cpi->mb.quantize_b_16x16= vp8_regular_quantize_b_16x16;
-  cpi->mb.quantize_b_2x2  = vp8_regular_quantize_b_2x2;
+  cpi->mb.quantize_b_4x4      = vp8_regular_quantize_b_4x4;
+  cpi->mb.quantize_b_4x4_pair = vp8_regular_quantize_b_4x4_pair;
+  cpi->mb.quantize_b_8x8      = vp8_regular_quantize_b_8x8;
+  cpi->mb.quantize_b_16x16    = vp8_regular_quantize_b_16x16;
+  cpi->mb.quantize_b_2x2      = vp8_regular_quantize_b_2x2;
 
   vp8cx_init_quantizer(cpi);
 

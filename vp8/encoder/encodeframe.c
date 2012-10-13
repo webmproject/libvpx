@@ -52,8 +52,8 @@ int enc_debug = 0;
 int mb_row_debug, mb_col_debug;
 #endif
 
-extern void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd,
-                         TOKENEXTRA **t, int dry_run);
+extern void vp8_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
+                             TOKENEXTRA **t, int dry_run);
 
 extern void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex);
 extern void vp8_auto_select_speed(VP8_COMP *cpi);
@@ -2153,7 +2153,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
         cpi->skip_true_count[mb_skip_context]++;
       vp8_fix_contexts(xd);
     } else {
-      vp8_stuff_mb(cpi, xd, t, !output_enabled);
+      vp8_stuff_mb_4x4(cpi, xd, t, !output_enabled);
       mbmi->mb_skip_coeff = 0;
       if (output_enabled)
         cpi->skip_false_count[mb_skip_context]++;
@@ -2352,7 +2352,7 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
         cpi->skip_true_count[mb_skip_context]++;
         vp8_fix_contexts(xd);
       } else {
-        vp8_stuff_mb(cpi, xd, t, 0);
+        vp8_stuff_mb_4x4(cpi, xd, t, 0);
         xd->mode_info_context->mbmi.mb_skip_coeff = 0;
         cpi->skip_false_count[mb_skip_context]++;
       }

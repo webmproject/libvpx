@@ -31,15 +31,19 @@
 #include "arm/quantize_arm.h"
 #endif
 
-#ifndef vp8_quantize_quantb
-#define vp8_quantize_quantb vp8_regular_quantize_b
+#if CONFIG_HYBRIDTRANSFORM
+extern prototype_quantize_block(vp8_ht_quantize_b_4x4);
 #endif
-extern prototype_quantize_block(vp8_quantize_quantb);
 
-#ifndef vp8_quantize_quantb_pair
-#define vp8_quantize_quantb_pair vp8_regular_quantize_b_pair
+#ifndef vp8_quantize_quantb_4x4
+#define vp8_quantize_quantb_4x4 vp8_regular_quantize_b_4x4
 #endif
-extern prototype_quantize_block_pair(vp8_quantize_quantb_pair);
+extern prototype_quantize_block(vp8_quantize_quantb_4x4);
+
+#ifndef vp8_quantize_quantb_4x4_pair
+#define vp8_quantize_quantb_4x4_pair vp8_regular_quantize_b_4x4_pair
+#endif
+extern prototype_quantize_block_pair(vp8_quantize_quantb_4x4_pair);
 
 #ifndef vp8_quantize_quantb_8x8
 #define vp8_quantize_quantb_8x8 vp8_regular_quantize_b_8x8
@@ -56,21 +60,21 @@ extern prototype_quantize_block(vp8_quantize_quantb_16x16);
 #endif
 extern prototype_quantize_block(vp8_quantize_quantb_2x2);
 
-#ifndef vp8_quantize_mb
-#define vp8_quantize_mb vp8_quantize_mb_c
+#ifndef vp8_quantize_mb_4x4
+#define vp8_quantize_mb_4x4 vp8_quantize_mb_4x4_c
 #endif
-extern prototype_quantize_mb(vp8_quantize_mb);
+extern prototype_quantize_mb(vp8_quantize_mb_4x4);
 void vp8_quantize_mb_8x8(MACROBLOCK *x);
 
-#ifndef vp8_quantize_mbuv
-#define vp8_quantize_mbuv vp8_quantize_mbuv_c
+#ifndef vp8_quantize_mbuv_4x4
+#define vp8_quantize_mbuv_4x4 vp8_quantize_mbuv_4x4_c
 #endif
-extern prototype_quantize_mb(vp8_quantize_mbuv);
+extern prototype_quantize_mb(vp8_quantize_mbuv_4x4);
 
-#ifndef vp8_quantize_mby
-#define vp8_quantize_mby vp8_quantize_mby_c
+#ifndef vp8_quantize_mby_4x4
+#define vp8_quantize_mby_4x4 vp8_quantize_mby_4x4_c
 #endif
-extern prototype_quantize_mb(vp8_quantize_mby);
+extern prototype_quantize_mb(vp8_quantize_mby_4x4);
 
 extern prototype_quantize_mb(vp8_quantize_mby_8x8);
 extern prototype_quantize_mb(vp8_quantize_mbuv_8x8);

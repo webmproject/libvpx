@@ -16,10 +16,10 @@
 #include "idct.h"
 #include "blockd.h"
 
-extern void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int pitch);
-extern void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
-extern void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
-extern void vp8_inverse_transform_mbuv(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
+extern void vp8_inverse_transform_b_4x4(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int pitch);
+extern void vp8_inverse_transform_mb_4x4(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
+extern void vp8_inverse_transform_mby_4x4(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
+extern void vp8_inverse_transform_mbuv_4x4(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
 
 extern void vp8_inverse_transform_b_8x8(const vp8_idct_rtcd_vtable_t *rtcd, short *input_dqcoeff, short *output_coeff, int pitch);
 extern void vp8_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);

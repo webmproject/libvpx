@@ -183,8 +183,8 @@ typedef struct {
   void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
   void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
   void (*short_walsh4x4)(short *input, short *output, int pitch);
-  void (*quantize_b)(BLOCK *b, BLOCKD *d);
-  void (*quantize_b_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
+  void (*quantize_b_4x4)(BLOCK *b, BLOCKD *d);
+  void (*quantize_b_4x4_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
   void (*vp8_short_fdct8x8)(short *input, short *output, int pitch);
   void (*vp8_short_fdct16x16)(short *input, short *output, int pitch);
   void (*short_fhaar2x2)(short *input, short *output, int pitch);

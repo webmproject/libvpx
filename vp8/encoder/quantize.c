@@ -23,7 +23,7 @@ extern int enc_debug;
 #endif
 
 #if CONFIG_HYBRIDTRANSFORM
-void vp8_ht_quantize_b(BLOCK *b, BLOCKD *d) {
+void vp8_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
@@ -88,7 +88,7 @@ void vp8_ht_quantize_b(BLOCK *b, BLOCKD *d) {
 }
 #endif
 
-void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d) {
+void vp8_regular_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
@@ -137,35 +137,35 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d) {
   d->eob = eob + 1;
 }
 
-void vp8_quantize_mby_c(MACROBLOCK *x) {
+void vp8_quantize_mby_4x4_c(MACROBLOCK *x) {
   int i;
   int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
                        && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
                        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
 
   for (i = 0; i < 16; i++)
-    x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
+    x->quantize_b_4x4(&x->block[i], &x->e_mbd.block[i]);
 
   if (has_2nd_order)
-    x->quantize_b(&x->block[24], &x->e_mbd.block[24]);
+    x->quantize_b_4x4(&x->block[24], &x->e_mbd.block[24]);
 }
 
-void vp8_quantize_mb_c(MACROBLOCK *x) {
+void vp8_quantize_mb_4x4_c(MACROBLOCK *x) {
   int i;
   int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
                        && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
                        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
 
   for (i = 0; i < 24 + has_2nd_order; i++)
-    x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
+    x->quantize_b_4x4(&x->block[i], &x->e_mbd.block[i]);
 }
 
 
-void vp8_quantize_mbuv_c(MACROBLOCK *x) {
+void vp8_quantize_mbuv_4x4_c(MACROBLOCK *x) {
   int i;
 
   for (i = 16; i < 24; i++)
-    x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
+    x->quantize_b_4x4(&x->block[i], &x->e_mbd.block[i]);
 }
 
 
@@ -391,9 +391,9 @@ void vp8_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
  * these two C functions if corresponding optimized routine is not available.
  * NEON optimized version implements currently the fast quantization for pair
  * of blocks. */
-void vp8_regular_quantize_b_pair(BLOCK *b1, BLOCK *b2, BLOCKD *d1, BLOCKD *d2) {
-  vp8_regular_quantize_b(b1, d1);
-  vp8_regular_quantize_b(b2, d2);
+void vp8_regular_quantize_b_4x4_pair(BLOCK *b1, BLOCK *b2, BLOCKD *d1, BLOCKD *d2) {
+  vp8_regular_quantize_b_4x4(b1, d1);
+  vp8_regular_quantize_b_4x4(b2, d2);
 }
 
 static void invert_quant(short *quant,

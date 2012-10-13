@@ -56,10 +56,6 @@
 extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
 extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
 
-#if CONFIG_HYBRIDTRANSFORM
-extern void vp8_ht_quantize_b(BLOCK *b, BLOCKD *d);
-#endif
-
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
 
 #define INVALID_MV 0x80008000
@@ -771,11 +767,11 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
 
   // Quantization
   for (b = 0; b < 16; b++) {
-    mb->quantize_b(&mb->block[b], &xd->block[b]);
+    mb->quantize_b_4x4(&mb->block[b], &xd->block[b]);
   }
 
   // DC predication and Quantization of 2nd Order block
-  mb->quantize_b(mb_y2, x_y2);
+  mb->quantize_b_4x4(mb_y2, x_y2);
 
   // Distortion
   d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 1);
@@ -785,7 +781,7 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
   *Distortion = (d >> 2);
   // rate
   *Rate = vp8_rdcost_mby(mb);
-  *skippable = mby_is_skippable(&mb->e_mbd, 1);
+  *skippable = mby_is_skippable_4x4(&mb->e_mbd, 1);
 }
 
 static int vp8_rdcost_mby_8x8(MACROBLOCK *mb, int backup) {
@@ -1206,14 +1202,14 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
         b->bmi.as_mode.test = mode;
         txfm_map(b, mode);
         vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 4);
-        vp8_ht_quantize_b(be, b);
+        vp8_ht_quantize_b_4x4(be, b);
       } else {
         x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
-        x->quantize_b(be, b);
+        x->quantize_b_4x4(be, b);
       }
 #else
         x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
-        x->quantize_b(be, b);
+        x->quantize_b_4x4(be, b);
 #endif
 
         tempa = ta;
@@ -1592,10 +1588,10 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
         x->vp8_short_fdct8x4(be->src_diff, be->coeff, 32);
         x->vp8_short_fdct8x4((be + 4)->src_diff, (be + 4)->coeff, 32);
 
-        x->quantize_b_pair(x->block + ib, x->block + ib + 1,
-                           xd->block + ib, xd->block + ib + 1);
-        x->quantize_b_pair(x->block + ib + 4, x->block + ib + 5,
-                           xd->block + ib + 4, xd->block + ib + 5);
+        x->quantize_b_4x4_pair(x->block + ib, x->block + ib + 1,
+                               xd->block + ib, xd->block + ib + 1);
+        x->quantize_b_4x4_pair(x->block + ib + 4, x->block + ib + 5,
+                               xd->block + ib + 4, xd->block + ib + 5);
 
         distortion = vp8_block_error_c((x->block + ib)->coeff,
                                        (xd->block + ib)->dqcoeff, 16);
@@ -1745,12 +1741,12 @@ static int64_t rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                                                          x->e_mbd.predictor,
                                                          x->src.uv_stride);
 
-  vp8_transform_mbuv(x);
-  vp8_quantize_mbuv(x);
+  vp8_transform_mbuv_4x4(x);
+  vp8_quantize_mbuv_4x4(x);
 
   *rate       = rd_cost_mbuv(x);
   *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
-  *skip       = mbuv_is_skippable(&x->e_mbd);
+  *skip       = mbuv_is_skippable_4x4(&x->e_mbd);
 
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
@@ -1855,8 +1851,8 @@ static int64_t rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
   ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
                                                          x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 
-  vp8_transform_mbuv(x);
-  vp8_quantize_mbuv(x);
+  vp8_transform_mbuv_4x4(x);
+  vp8_quantize_mbuv_4x4(x);
 
   *rate       = rd_cost_mbuv(x);
   *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
@@ -1908,8 +1904,8 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
       ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
                                                              x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor,
                                                              x->src.uv_stride);
-      vp8_transform_mbuv(x);
-      vp8_quantize_mbuv(x);
+      vp8_transform_mbuv_4x4(x);
+      vp8_quantize_mbuv_4x4(x);
 
       rate_to = rd_cost_mbuv(x);
       rate = rate_to
@@ -1920,7 +1916,7 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
       if (this_rd < best_rd) {
-        skip = mbuv_is_skippable(xd);
+        skip = mbuv_is_skippable_4x4(xd);
         best_rd = this_rd;
         d = distortion;
         r = rate;
@@ -2252,7 +2248,7 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x,
 
       // set to 0 no way to account for 2nd order DC so discount
       // be->coeff[0] = 0;
-      x->quantize_b(be, bd);
+      x->quantize_b_4x4(be, bd);
       thisdistortion = ENCODEMB_INVOKE(&rtcd->encodemb, berr)(
                          be->coeff, bd->dqcoeff, 16) / 4;
       distortion += thisdistortion;

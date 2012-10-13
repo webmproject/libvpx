@@ -60,8 +60,8 @@ extern unsigned int hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
 #endif
 #endif  /* ENTROPY_STATS */
 
-void vp8_stuff_mb(VP8_COMP *cpi,
-                  MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
+void vp8_stuff_mb_4x4(VP8_COMP *cpi,
+                      MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 void vp8_stuff_mb_8x8(VP8_COMP *cpi,
                       MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi,
@@ -258,10 +258,10 @@ static void tokenize2nd_order_b_8x8
 
 }
 
-static void tokenize2nd_order_b(MACROBLOCKD *xd,
-                                TOKENEXTRA **tp,
-                                VP8_COMP *cpi,
-                                int dry_run) {
+static void tokenize2nd_order_b_4x4(MACROBLOCKD *xd,
+                                    TOKENEXTRA **tp,
+                                    VP8_COMP *cpi,
+                                    int dry_run) {
   int pt;             /* near block/prev token context index */
   int c;              /* start at DC */
   TOKENEXTRA *t = *tp;/* store tokens starting here */
@@ -424,11 +424,11 @@ static void tokenize1st_order_b_8x8
 }
 
 #if CONFIG_HYBRIDTRANSFORM
-static void tokenize1st_order_ht(   MACROBLOCKD *xd,
-                                    TOKENEXTRA **tp,
-                                    int type,
-                                    VP8_COMP *cpi,
-                                    int dry_run) {
+static void tokenize1st_order_ht_4x4(MACROBLOCKD *xd,
+                                     TOKENEXTRA **tp,
+                                     int type,
+                                     VP8_COMP *cpi,
+                                     int dry_run) {
   unsigned int block;
   const BLOCKD *b;
   int pt;             /* near block/prev token context index */
@@ -603,7 +603,7 @@ static void tokenize1st_order_ht(   MACROBLOCKD *xd,
 #endif
 
 
-static void tokenize1st_order_chroma
+static void tokenize1st_order_chroma_4x4
 (
   MACROBLOCKD *xd,
   TOKENEXTRA **tp,
@@ -682,7 +682,7 @@ static void tokenize1st_order_chroma
   }
 }
 
-static void tokenize1st_order_b
+static void tokenize1st_order_b_4x4
 (
   MACROBLOCKD *xd,
   TOKENEXTRA **tp,
@@ -805,7 +805,7 @@ static void tokenize1st_order_b
 }
 
 
-int mby_is_skippable(MACROBLOCKD *xd, int has_y2_block) {
+int mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
   int skip = 1;
   int i = 0;
 
@@ -820,7 +820,7 @@ int mby_is_skippable(MACROBLOCKD *xd, int has_y2_block) {
   return skip;
 }
 
-int mbuv_is_skippable(MACROBLOCKD *xd) {
+int mbuv_is_skippable_4x4(MACROBLOCKD *xd) {
   int skip = 1;
   int i;
 
@@ -829,9 +829,9 @@ int mbuv_is_skippable(MACROBLOCKD *xd) {
   return skip;
 }
 
-int mb_is_skippable(MACROBLOCKD *xd, int has_y2_block) {
-  return (mby_is_skippable(xd, has_y2_block) &
-          mbuv_is_skippable(xd));
+int mb_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
+  return (mby_is_skippable_4x4(xd, has_y2_block) &
+          mbuv_is_skippable_4x4(xd));
 }
 
 int mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block) {
@@ -860,7 +860,7 @@ int mb_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block) {
 
 int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd, int has_y2_block) {
   return (mby_is_skippable_8x8(xd, has_y2_block) &
-          mbuv_is_skippable(xd));
+          mbuv_is_skippable_4x4(xd));
 }
 
 int mby_is_skippable_16x16(MACROBLOCKD *xd) {
@@ -922,7 +922,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
       break;
 
     default:
-      xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable(xd, has_y2_block);
+      xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_4x4(xd, has_y2_block);
       break;
   }
 
@@ -939,7 +939,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
         else
           vp8_stuff_mb_8x8(cpi, xd, t, dry_run);
       } else
-        vp8_stuff_mb(cpi, xd, t, dry_run);
+        vp8_stuff_mb_4x4(cpi, xd, t, dry_run);
     } else {
       vp8_fix_contexts(xd);
     }
@@ -962,7 +962,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
                               L + vp8_block2left_8x8[24],
                               cpi, dry_run);
     } else
-      tokenize2nd_order_b(xd, t, cpi, dry_run);
+      tokenize2nd_order_b_4x4(xd, t, cpi, dry_run);
 
     plane_type = 0;
   }
@@ -1004,7 +1004,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
       *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b]);
     }
     if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
-      tokenize1st_order_chroma(xd, t, PLANE_TYPE_UV, cpi, dry_run);
+      tokenize1st_order_chroma_4x4(xd, t, PLANE_TYPE_UV, cpi, dry_run);
     } else {
       for (b = 16; b < 24; b += 4) {
         tokenize1st_order_b_8x8(xd,
@@ -1019,10 +1019,10 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
   } else {
 #if CONFIG_HYBRIDTRANSFORM
     if (active_ht)
-      tokenize1st_order_ht(xd, t, plane_type, cpi, dry_run);
+      tokenize1st_order_ht_4x4(xd, t, plane_type, cpi, dry_run);
     else
 #endif
-      tokenize1st_order_b(xd, t, plane_type, cpi, dry_run);
+      tokenize1st_order_b_4x4(xd, t, plane_type, cpi, dry_run);
   }
   if (dry_run)
     *t = t_backup;
@@ -1492,7 +1492,7 @@ void vp8_stuff_mb_16x16(VP8_COMP *cpi,
     *t = t_backup;
 }
 
-static __inline void stuff2nd_order_b
+static __inline void stuff2nd_order_b_4x4
 (
   MACROBLOCKD *xd,
   const BLOCKD *const b,
@@ -1518,13 +1518,13 @@ static __inline void stuff2nd_order_b
 
 }
 
-static __inline void stuff1st_order_b(MACROBLOCKD *xd,
-                                      const BLOCKD *const b,
-                                      TOKENEXTRA **tp,
-                                      ENTROPY_CONTEXT *a,
-                                      ENTROPY_CONTEXT *l,
-                                      VP8_COMP *cpi,
-                                      int dry_run) {
+static __inline void stuff1st_order_b_4x4(MACROBLOCKD *xd,
+                                          const BLOCKD *const b,
+                                          TOKENEXTRA **tp,
+                                          ENTROPY_CONTEXT *a,
+                                          ENTROPY_CONTEXT *l,
+                                          VP8_COMP *cpi,
+                                          int dry_run) {
   int pt; /* near block/prev token context index */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
 #if CONFIG_HYBRIDTRANSFORM
@@ -1555,7 +1555,7 @@ static __inline void stuff1st_order_b(MACROBLOCKD *xd,
 
 }
 static __inline
-void stuff1st_order_buv
+void stuff1st_order_buv_4x4
 (
   MACROBLOCKD *xd,
   const BLOCKD *const b,
@@ -1579,29 +1579,29 @@ void stuff1st_order_buv
   *a = *l = pt;
 }
 
-void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd,
-                  TOKENEXTRA **t, int dry_run) {
+void vp8_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
+                      TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
   int b;
   TOKENEXTRA *t_backup = *t;
 
-  stuff2nd_order_b(xd, xd->block + 24, t,
-                   A + vp8_block2above[24],
-                   L + vp8_block2left[24],
-                   cpi, dry_run);
+  stuff2nd_order_b_4x4(xd, xd->block + 24, t,
+                       A + vp8_block2above[24],
+                       L + vp8_block2left[24],
+                       cpi, dry_run);
 
   for (b = 0; b < 16; b++)
-    stuff1st_order_b(xd, xd->block + b, t,
-                     A + vp8_block2above[b],
-                     L + vp8_block2left[b],
-                     cpi, dry_run);
+    stuff1st_order_b_4x4(xd, xd->block + b, t,
+                         A + vp8_block2above[b],
+                         L + vp8_block2left[b],
+                         cpi, dry_run);
 
   for (b = 16; b < 24; b++)
-    stuff1st_order_buv(xd, xd->block + b, t,
-                       A + vp8_block2above[b],
-                       L + vp8_block2left[b],
-                       cpi, dry_run);
+    stuff1st_order_buv_4x4(xd, xd->block + b, t,
+                           A + vp8_block2above[b],
+                           L + vp8_block2left[b],
+                           cpi, dry_run);
 
   if (dry_run)
     *t = t_backup;
@@ -1632,10 +1632,10 @@ void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi,
   }
 
   for (b = 16; b < 24; b++)
-    stuff1st_order_buv(xd, xd->block + b, t,
-                       A + vp8_block2above[b],
-                       L + vp8_block2left[b],
-                       cpi, dry_run);
+    stuff1st_order_buv_4x4(xd, xd->block + b, t,
+                           A + vp8_block2above[b],
+                           L + vp8_block2left[b],
+                           cpi, dry_run);
 
   if (dry_run)
     *t = t_backup;

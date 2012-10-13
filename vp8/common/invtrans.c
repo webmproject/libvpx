@@ -31,7 +31,7 @@ static void recon_dcblock_8x8(MACROBLOCKD *xd) {
 
 }
 
-void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int pitch) {
+void vp8_inverse_transform_b_4x4(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int pitch) {
   if (b->eob <= 1)
     IDCT_INVOKE(rtcd, idct1)(b->dqcoeff, b->diff, pitch);
   else
@@ -39,8 +39,8 @@ void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int 
 }
 
 
-void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd,
-                               MACROBLOCKD *xd) {
+void vp8_inverse_transform_mby_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
+                                   MACROBLOCKD *xd) {
   int i;
   BLOCKD *blockd = xd->block;
 
@@ -50,24 +50,24 @@ void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd,
   recon_dcblock(xd);
 
   for (i = 0; i < 16; i++) {
-    vp8_inverse_transform_b(rtcd, &blockd[i], 32);
+    vp8_inverse_transform_b_4x4(rtcd, &blockd[i], 32);
   }
 
 }
-void vp8_inverse_transform_mbuv(const vp8_idct_rtcd_vtable_t *rtcd,
-                                MACROBLOCKD *xd) {
+void vp8_inverse_transform_mbuv_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
+                                    MACROBLOCKD *xd) {
   int i;
   BLOCKD *blockd = xd->block;
 
   for (i = 16; i < 24; i++) {
-    vp8_inverse_transform_b(rtcd, &blockd[i], 16);
+    vp8_inverse_transform_b_4x4(rtcd, &blockd[i], 16);
   }
 
 }
 
 
-void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd,
-                              MACROBLOCKD *xd) {
+void vp8_inverse_transform_mb_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
+                                  MACROBLOCKD *xd) {
   int i;
   BLOCKD *blockd = xd->block;
 
@@ -81,12 +81,12 @@ void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd,
   }
 
   for (i = 0; i < 16; i++) {
-    vp8_inverse_transform_b(rtcd, &blockd[i], 32);
+    vp8_inverse_transform_b_4x4(rtcd, &blockd[i], 32);
   }
 
 
   for (i = 16; i < 24; i++) {
-    vp8_inverse_transform_b(rtcd, &blockd[i], 16);
+    vp8_inverse_transform_b_4x4(rtcd, &blockd[i], 16);
   }
 
 }
