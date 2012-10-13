@@ -31,5 +31,4 @@ extern void vp8_inverse_transform_b_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
                                           int pitch);
 extern void vp8_inverse_transform_mb_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
 extern void vp8_inverse_transform_mby_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
-extern void vp8_inverse_transform_mbuv_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *xd);
 #endif
