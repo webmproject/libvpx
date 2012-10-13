@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//9/Q\u003d",
+        "filename": "test/ivf_video_source.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-13T17:58:35Z",
+      "side": 1,
+      "message": "I just noticed this. It\u0027s a bit weird that the class holds the size information, but the buffer is passed in by the user.\n\nReally the allocation could be done by a bool Init() (I think the current encode loop does it on the first frame).",
+      "revId": "8ee3e4284957db0660ac1652812a9dfc53f50cb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
