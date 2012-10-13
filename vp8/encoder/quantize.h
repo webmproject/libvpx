@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef __INC_QUANTIZE_H
 #define __INC_QUANTIZE_H
 
@@ -82,7 +81,6 @@ extern prototype_quantize_mb(vp8_quantize_mbuv_8x8);
 void vp8_quantize_mb_16x16(MACROBLOCK *x);
 extern prototype_quantize_block(vp8_quantize_quantb_16x16);
 extern prototype_quantize_mb(vp8_quantize_mby_16x16);
-extern prototype_quantize_mb(vp8_quantize_mbuv_16x16);
 
 struct VP8_COMP;
 extern void vp8_set_quantizer(struct VP8_COMP *cpi, int Q);

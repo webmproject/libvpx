@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include <math.h>
 #include "vpx_mem/vpx_mem.h"
 
@@ -139,9 +138,7 @@ void vp8_regular_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
 
 void vp8_quantize_mby_4x4_c(MACROBLOCK *x) {
   int i;
-  int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-                       && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-                       && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+  int has_2nd_order = x->e_mbd.mode_info_context->mbmi.mode != SPLITMV;
 
   for (i = 0; i < 16; i++)
     x->quantize_b_4x4(&x->block[i], &x->e_mbd.block[i]);
@@ -150,17 +147,6 @@ void vp8_quantize_mby_4x4_c(MACROBLOCK *x) {
     x->quantize_b_4x4(&x->block[24], &x->e_mbd.block[24]);
 }
 
-void vp8_quantize_mb_4x4_c(MACROBLOCK *x) {
-  int i;
-  int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-                       && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-                       && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
-
-  for (i = 0; i < 24 + has_2nd_order; i++)
-    x->quantize_b_4x4(&x->block[i], &x->e_mbd.block[i]);
-}
-
-
 void vp8_quantize_mbuv_4x4_c(MACROBLOCK *x) {
   int i;
 
@@ -168,8 +154,10 @@ void vp8_quantize_mbuv_4x4_c(MACROBLOCK *x) {
     x->quantize_b_4x4(&x->block[i], &x->e_mbd.block[i]);
 }
 
-
-
+void vp8_quantize_mb_4x4_c(MACROBLOCK *x) {
+  vp8_quantize_mby_4x4_c(x);
+  vp8_quantize_mbuv_4x4_c(x);
+}
 
 void vp8_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d) {
   int i, rc, eob;
@@ -271,28 +259,13 @@ void vp8_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d) {
 
 void vp8_quantize_mby_8x8(MACROBLOCK *x) {
   int i;
-  int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-                       && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+  int has_2nd_order = x->e_mbd.mode_info_context->mbmi.mode != SPLITMV;
+
   for (i = 0; i < 16; i ++) {
     x->e_mbd.block[i].eob = 0;
   }
   x->e_mbd.block[24].eob = 0;
   for (i = 0; i < 16; i += 4)
-    x->quantize_b_8x8(&x->block[i], &x->e_mbd.block[i]);
-
-  if (has_2nd_order)
-    x->quantize_b_2x2(&x->block[24], &x->e_mbd.block[24]);
-
-}
-
-void vp8_quantize_mb_8x8(MACROBLOCK *x) {
-  int i;
-  int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-                       && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
-  for (i = 0; i < 25; i ++) {
-    x->e_mbd.block[i].eob = 0;
-  }
-  for (i = 0; i < 24; i += 4)
     x->quantize_b_8x8(&x->block[i], &x->e_mbd.block[i]);
 
   if (has_2nd_order)
@@ -308,11 +281,14 @@ void vp8_quantize_mbuv_8x8(MACROBLOCK *x) {
     x->quantize_b_8x8(&x->block[i], &x->e_mbd.block[i]);
 }
 
-
-
+void vp8_quantize_mb_8x8(MACROBLOCK *x) {
+  vp8_quantize_mby_8x8(x);
+  vp8_quantize_mbuv_8x8(x);
+}
 
 void vp8_quantize_mby_16x16(MACROBLOCK *x) {
   int i;
+
   for (i = 0; i < 16; i++)
     x->e_mbd.block[i].eob = 0;
   x->e_mbd.block[24].eob = 0;
@@ -320,22 +296,8 @@ void vp8_quantize_mby_16x16(MACROBLOCK *x) {
 }
 
 void vp8_quantize_mb_16x16(MACROBLOCK *x) {
-  int i;
-  for(i = 0; i < 25; i++)
-    x->e_mbd.block[i].eob = 0;
-  x->quantize_b_16x16(&x->block[0], &x->e_mbd.block[0]);
-  for (i = 16; i < 24; i += 4)
-    x->quantize_b_8x8(&x->block[i], &x->e_mbd.block[i]);
-}
-
-// U and V should use 8x8
-void vp8_quantize_mbuv_16x16(MACROBLOCK *x) {
-  int i;
-
-  for(i = 16; i < 24; i++)
-    x->e_mbd.block[i].eob = 0;
-  for (i = 16; i < 24; i += 4)
-    x->quantize_b_8x8(&x->block[i], &x->e_mbd.block[i]);
+  vp8_quantize_mby_16x16(x);
+  vp8_quantize_mbuv_8x8(x);
 }
 
 void vp8_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
@@ -385,8 +347,6 @@ void vp8_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
   d->eob = eob + 1;
 }
 
-
-
 /* quantize_b_pair function pointer in MACROBLOCK structure is set to one of
  * these two C functions if corresponding optimized routine is not available.
  * NEON optimized version implements currently the fast quantization for pair
@@ -407,7 +367,6 @@ static void invert_quant(short *quant,
   *quant = (short)(t - (1 << 16));
   *shift = l;
 }
-
 
 void vp8cx_init_quantizer(VP8_COMP *cpi) {
   int i;
@@ -697,7 +656,6 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
   x->q_index = QIndex;
 }
 
-
 void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x) {
   int i;
   int QIndex = x->q_index;
@@ -731,7 +689,6 @@ void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x) {
   x->block[24].zbin_extra = (short)zbin_extra;
 }
 
-
 void vp8cx_frame_init_quantizer(VP8_COMP *cpi) {
   // Clear Zbin mode boost for default case
   cpi->zbin_mode_boost = 0;
@@ -739,7 +696,6 @@ void vp8cx_frame_init_quantizer(VP8_COMP *cpi) {
   // MB level quantizer setup
   vp8cx_mb_init_quantizer(cpi, &cpi->mb);
 }
-
 
 void vp8_set_quantizer(struct VP8_COMP *cpi, int Q) {
   VP8_COMMON *cm = &cpi->common;
