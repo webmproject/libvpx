@@ -623,6 +623,7 @@ void vp8_first_pass(VP8_COMP *cpi) {
           mv.as_mv.col <<= 3;
           this_error = motion_error;
           vp8_set_mbmode_and_mvs(x, NEWMV, &mv);
+          xd->mode_info_context->mbmi.txfm_size = TX_4X4;
           vp8_encode_inter16x16y(IF_RTCD(&cpi->rtcd), x);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);

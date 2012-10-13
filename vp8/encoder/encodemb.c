@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "vpx_ports/config.h"
 #include "encodemb.h"
 #include "vp8/common/reconinter.h"
@@ -57,6 +56,7 @@ void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   unsigned char *pred_ptr = bd->predictor;
   int src_stride = be->src_stride;
   int r, c;
+
   for (r = 0; r < 8; r++) {
     for (c = 0; c < 8; c++) {
       diff_ptr[c] = src_ptr[c] - pred_ptr[c];
@@ -73,7 +73,6 @@ void vp8_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
                            const unsigned char *vpred, int dst_stride) {
   short *udiff = diff + 256;
   short *vdiff = diff + 320;
-
   int r, c;
 
   for (r = 0; r < 8; r++) {
@@ -141,16 +140,22 @@ static void build_dcblock_4x4(MACROBLOCK *x) {
   }
 }
 
-void vp8_build_dcblock_8x8(MACROBLOCK *x) {
-  short *src_diff_ptr = &x->src_diff[384];
+void vp8_transform_mby_4x4(MACROBLOCK *x) {
   int i;
-  for (i = 0; i < 16; i++) {
-    src_diff_ptr[i] = 0;
+
+  for (i = 0; i < 16; i += 2) {
+    x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+                         &x->block[i].coeff[0], 32);
   }
-  src_diff_ptr[0] = x->coeff[0 * 16];
-  src_diff_ptr[1] = x->coeff[4 * 16];
-  src_diff_ptr[4] = x->coeff[8 * 16];
-  src_diff_ptr[8] = x->coeff[12 * 16];
+
+  if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
+    // build dc block from 16 y dc values
+    build_dcblock_4x4(x);
+
+    // do 2nd order transform on the dc block
+    x->short_walsh4x4(&x->block[24].src_diff[0],
+                      &x->block[24].coeff[0], 8);
+  }
 }
 
 void vp8_transform_mbuv_4x4(MACROBLOCK *x) {
@@ -162,63 +167,42 @@ void vp8_transform_mbuv_4x4(MACROBLOCK *x) {
   }
 }
 
-
-void vp8_transform_intra_mby_4x4(MACROBLOCK *x) {
-  int i;
-
-  for (i = 0; i < 16; i += 2) {
-    x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 32);
-  }
-
-  // build dc block from 16 y dc values
-  build_dcblock_4x4(x);
-
-  // do 2nd order transform on the dc block
-  x->short_walsh4x4(&x->block[24].src_diff[0],
-                    &x->block[24].coeff[0], 8);
-
-}
-
-
 static void transform_mb_4x4(MACROBLOCK *x) {
-  int i;
-  MB_PREDICTION_MODE mode = x->e_mbd.mode_info_context->mbmi.mode;
-
-  for (i = 0; i < 16; i += 2) {
-    x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 32);
-  }
-
-  // build dc block from 16 y dc values
-  if (mode != SPLITMV)
-    build_dcblock_4x4(x);
-
-  for (i = 16; i < 24; i += 2) {
-    x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 16);
-  }
-
-  // do 2nd order transform on the dc block
-  if (mode != SPLITMV)
-    x->short_walsh4x4(&x->block[24].src_diff[0],
-                      &x->block[24].coeff[0], 8);
-
+  vp8_transform_mby_4x4(x);
+  vp8_transform_mbuv_4x4(x);
 }
 
-
-static void transform_mby_4x4(MACROBLOCK *x) {
+void vp8_build_dcblock_8x8(MACROBLOCK *x) {
+  int16_t *src_diff_ptr = x->block[24].src_diff;
   int i;
 
-  for (i = 0; i < 16; i += 2) {
-    x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+  for (i = 0; i < 16; i++) {
+    src_diff_ptr[i] = 0;
+  }
+  src_diff_ptr[0] = x->coeff[0 * 16];
+  src_diff_ptr[1] = x->coeff[4 * 16];
+  src_diff_ptr[4] = x->coeff[8 * 16];
+  src_diff_ptr[8] = x->coeff[12 * 16];
+}
+
+void vp8_transform_mby_8x8(MACROBLOCK *x) {
+  int i;
+
+  for (i = 0; i < 9; i += 8) {
+    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 32);
   }
+  for (i = 2; i < 11; i += 8) {
+    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+                         &x->block[i + 2].coeff[0], 32);
+  }
 
-  // build dc block from 16 y dc values
   if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
-    build_dcblock_4x4(x);
-    x->short_walsh4x4(&x->block[24].src_diff[0],
+    // build dc block from 2x2 y dc values
+    vp8_build_dcblock_8x8(x);
+
+    // do 2nd order transform on the dc block
+    x->short_fhaar2x2(&x->block[24].src_diff[0],
                       &x->block[24].coeff[0], 8);
   }
 }
@@ -232,108 +216,20 @@ void vp8_transform_mbuv_8x8(MACROBLOCK *x) {
   }
 }
 
-
-void vp8_transform_intra_mby_8x8(MACROBLOCK *x) { // changed
-  int i;
-  for (i = 0; i < 9; i += 8) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 32);
-  }
-  for (i = 2; i < 11; i += 8) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
-                         &x->block[i + 2].coeff[0], 32);
-  }
-  // build dc block from 16 y dc values
-  vp8_build_dcblock_8x8(x);
-  // vp8_build_dcblock(x);
-
-  // do 2nd order transform on the dc block
-  x->short_fhaar2x2(&x->block[24].src_diff[0],
-                    &x->block[24].coeff[0], 8);
-
-}
-
-
 void vp8_transform_mb_8x8(MACROBLOCK *x) {
-  int i;
-  MB_PREDICTION_MODE mode = x->e_mbd.mode_info_context->mbmi.mode;
-
-  for (i = 0; i < 9; i += 8) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 32);
-  }
-  for (i = 2; i < 11; i += 8) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
-                         &x->block[i + 2].coeff[0], 32);
-  }
-  // build dc block from 16 y dc values
-  if (mode != B_PRED && mode != SPLITMV)
-    vp8_build_dcblock_8x8(x);
-  // vp8_build_dcblock(x);
-
-  for (i = 16; i < 24; i += 4) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 16);
-  }
-
-  // do 2nd order transform on the dc block
-  if (mode != B_PRED && mode != SPLITMV)
-    x->short_fhaar2x2(&x->block[24].src_diff[0],
-                      &x->block[24].coeff[0], 8);
-}
-
-void vp8_transform_mby_8x8(MACROBLOCK *x) {
-  int i;
-  for (i = 0; i < 9; i += 8) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 32);
-  }
-  for (i = 2; i < 11; i += 8) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
-                         &x->block[i + 2].coeff[0], 32);
-  }
-  // build dc block from 16 y dc values
-  if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
-    // vp8_build_dcblock(x);
-    vp8_build_dcblock_8x8(x);
-    x->short_fhaar2x2(&x->block[24].src_diff[0],
-                      &x->block[24].coeff[0], 8);
-  }
-}
-
-void vp8_transform_mbuv_16x16(MACROBLOCK *x) {
-  int i;
-
-  vp8_clear_system_state();
-  // Default to the 8x8
-  for (i = 16; i < 24; i += 4)
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
-        &x->block[i].coeff[0], 16);
-}
-
-
-void vp8_transform_intra_mby_16x16(MACROBLOCK *x) {
-  vp8_clear_system_state();
-  x->vp8_short_fdct16x16(&x->block[0].src_diff[0],
-      &x->block[0].coeff[0], 32);
-}
-
-
-void vp8_transform_mb_16x16(MACROBLOCK *x) {
-  int i;
-  vp8_clear_system_state();
-  x->vp8_short_fdct16x16(&x->block[0].src_diff[0],
-      &x->block[0].coeff[0], 32);
-
-  for (i = 16; i < 24; i += 4) {
-      x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
-          &x->block[i].coeff[0], 16);
-  }
+  vp8_transform_mby_8x8(x);
+  vp8_transform_mbuv_8x8(x);
 }
 
 void vp8_transform_mby_16x16(MACROBLOCK *x) {
   vp8_clear_system_state();
-  x->vp8_short_fdct16x16(&x->block[0].src_diff[0], &x->block[0].coeff[0], 32);
+  x->vp8_short_fdct16x16(&x->block[0].src_diff[0],
+                         &x->block[0].coeff[0], 32);
+}
+
+void vp8_transform_mb_16x16(MACROBLOCK *x) {
+  vp8_transform_mby_16x16(x);
+  vp8_transform_mbuv_8x8(x);
 }
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
@@ -647,6 +543,7 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *xd, int type,
     *a = *l = (bd->eob != !type);
   }
 }
+
 #define SUM_2ND_COEFF_THRESH_8X8 32
 static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *xd, int type,
                                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
@@ -714,21 +611,16 @@ static void optimize_mb_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 }
 
-
 void vp8_optimize_mby_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   int b;
   int type;
   int has_2nd_order;
-
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
   MB_PREDICTION_MODE mode = x->e_mbd.mode_info_context->mbmi.mode;
 
-  if (!x->e_mbd.above_context)
-    return;
-
-  if (!x->e_mbd.left_context)
+  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
     return;
 
   vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
@@ -745,7 +637,6 @@ void vp8_optimize_mby_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
                ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd, TX_4X4);
   }
 
-
   if (has_2nd_order) {
     b = 24;
     optimize_b(x, b, PLANE_TYPE_Y2,
@@ -761,10 +652,7 @@ void vp8_optimize_mbuv_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
 
-  if (!x->e_mbd.above_context)
-    return;
-
-  if (!x->e_mbd.left_context)
+  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
     return;
 
   vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
@@ -812,22 +700,16 @@ void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   // 8x8 always have 2nd roder haar block
   check_reset_8x8_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
                              ta + vp8_block2above_8x8[24], tl + vp8_block2left_8x8[24]);
-
 }
 
 void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   int b;
   int type;
-
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
 
-
-  if (!x->e_mbd.above_context)
-    return;
-
-  if (!x->e_mbd.left_context)
+  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
     return;
 
   vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
@@ -843,10 +725,10 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
     *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
     *(tl + vp8_block2left_8x8[b] + 1)  = *(tl + vp8_block2left_8x8[b]);
   }
+
   // 8x8 always have 2nd roder haar block
   check_reset_8x8_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
                              ta + vp8_block2above_8x8[24], tl + vp8_block2left_8x8[24]);
-
 }
 
 void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
@@ -855,10 +737,7 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
 
-  if (!x->e_mbd.above_context)
-    return;
-
-  if (!x->e_mbd.left_context)
+  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
     return;
 
   vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
@@ -874,10 +753,7 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
     *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
     *(tl + vp8_block2left_8x8[b] + 1) = *(tl + vp8_block2left_8x8[b]);
   }
-
 }
-
-
 
 void optimize_b_16x16(MACROBLOCK *mb, int i, int type,
                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
@@ -1054,22 +930,20 @@ void optimize_b_16x16(MACROBLOCK *mb, int i, int type,
 }
 
 void vp8_optimize_mby_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
-    ENTROPY_CONTEXT_PLANES t_above, t_left;
-    ENTROPY_CONTEXT *ta, *tl;
+  ENTROPY_CONTEXT_PLANES t_above, t_left;
+  ENTROPY_CONTEXT *ta, *tl;
 
-    if (!x->e_mbd.above_context)
-        return;
-    if (!x->e_mbd.left_context)
-        return;
+  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
+    return;
 
-    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
 
-    ta = (ENTROPY_CONTEXT *)&t_above;
-    tl = (ENTROPY_CONTEXT *)&t_left;
-    optimize_b_16x16(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, rtcd);
-    *(ta + 1) = *ta;
-    *(tl + 1) = *tl;
+  ta = (ENTROPY_CONTEXT *)&t_above;
+  tl = (ENTROPY_CONTEXT *)&t_left;
+  optimize_b_16x16(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, rtcd);
+  *(ta + 1) = *ta;
+  *(tl + 1) = *tl;
 }
 
 void optimize_mb_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
@@ -1097,126 +971,55 @@ void optimize_mb_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 }
 
 void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
-  int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
-  vp8_build_inter_predictors_mb(&x->e_mbd);
+  MACROBLOCKD *xd = &x->e_mbd;
+  TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
+  vp8_build_inter_predictors_mb(xd);
   vp8_subtract_mb(rtcd, x);
 
-  if (tx_type == TX_16X16)
+  if (tx_size == TX_16X16) {
     vp8_transform_mb_16x16(x);
-  else if (tx_type == TX_8X8)
-    vp8_transform_mb_8x8(x);
-  else
-    transform_mb_4x4(x);
-
-  if (tx_type == TX_16X16)
     vp8_quantize_mb_16x16(x);
-  else if (tx_type == TX_8X8)
-    vp8_quantize_mb_8x8(x);
-  else
-    vp8_quantize_mb_4x4(x);
-
-  if (x->optimize) {
-    if (tx_type == TX_16X16)
+    if (x->optimize)
       optimize_mb_16x16(x, rtcd);
-    else if (tx_type == TX_8X8)
+    vp8_inverse_transform_mb_16x16(IF_RTCD(&rtcd->common->idct), xd);
+  } else if (tx_size == TX_8X8) {
+    vp8_transform_mb_8x8(x);
+    vp8_quantize_mb_8x8(x);
+    if (x->optimize)
       optimize_mb_8x8(x, rtcd);
-    else
+    vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), xd);
+  } else {
+    transform_mb_4x4(x);
+    vp8_quantize_mb_4x4(x);
+    if (x->optimize)
       optimize_mb_4x4(x, rtcd);
+    vp8_inverse_transform_mb_4x4(IF_RTCD(&rtcd->common->idct), xd);
   }
 
-  if (tx_type == TX_16X16)
-    vp8_inverse_transform_mb_16x16(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-  else
-  if (tx_type == TX_8X8)
-    vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-  else
-    vp8_inverse_transform_mb_4x4(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-
-  if (tx_type == TX_8X8) {
-#ifdef ENC_DEBUG
-    if (enc_debug) {
-      int i;
-      printf("qcoeff:\n");
-      printf("%d %d:\n", x->e_mbd.mb_to_left_edge, x->e_mbd.mb_to_top_edge);
-      for (i = 0; i < 400; i++) {
-        printf("%3d ", x->e_mbd.qcoeff[i]);
-        if (i % 16 == 15) printf("\n");
-      }
-      printf("dqcoeff:\n");
-      for (i = 0; i < 400; i++) {
-        printf("%3d ", x->e_mbd.dqcoeff[i]);
-        if (i % 16 == 15) printf("\n");
-      }
-      printf("diff:\n");
-      for (i = 0; i < 400; i++) {
-        printf("%3d ", x->e_mbd.diff[i]);
-        if (i % 16 == 15) printf("\n");
-      }
-      printf("predictor:\n");
-      for (i = 0; i < 400; i++) {
-        printf("%3d ", x->e_mbd.predictor[i]);
-        if (i % 16 == 15) printf("\n");
-      }
-      printf("\n");
-    }
-#endif
-  }
-
-  RECON_INVOKE(&rtcd->common->recon, recon_mb)
-  (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
-#ifdef ENC_DEBUG
-  if (enc_debug) {
-    int i, j, k;
-    printf("Final Reconstruction\n");
-    for (i = 0; i < 16; i += 4) {
-      BLOCKD *b = &x->e_mbd.block[i];
-      unsigned char *d = *(b->base_dst) + b->dst;
-      for (k = 0; k < 4; k++) {
-        for (j = 0; j < 16; j++)
-          printf("%3d ", d[j]);
-        printf("\n");
-        d += b->dst_stride;
-      }
-    }
-  }
-#endif
+  RECON_INVOKE(&rtcd->common->recon, recon_mb)(IF_RTCD(&rtcd->common->recon),
+                                               xd);
 }
-
 
 /* this function is used by first pass only */
 void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
-  int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
-
+  MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
 
 #if CONFIG_PRED_FILTER
   // Disable the prediction filter for firstpass
-  x->e_mbd.mode_info_context->mbmi.pred_filter_enabled = 0;
+  xd->mode_info_context->mbmi.pred_filter_enabled = 0;
 #endif
 
-  vp8_build_1st_inter16x16_predictors_mby(&x->e_mbd, x->e_mbd.predictor,
-                                          16, 0);
+  vp8_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
+  ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src),
+                                           xd->predictor, b->src_stride);
 
-  if (tx_type == TX_16X16)
-    vp8_transform_mby_16x16(x);
-  else if (tx_type == TX_8X8)
-    vp8_transform_mby_8x8(x);
-  else
-    transform_mby_4x4(x);
-
+  vp8_transform_mby_4x4(x);
   vp8_quantize_mby_4x4(x);
+  vp8_inverse_transform_mby_4x4(IF_RTCD(&rtcd->common->idct), xd);
 
-  if (tx_type == TX_16X16)
-    vp8_inverse_transform_mby_16x16(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-  else
-  if (tx_type == TX_8X8)
-    vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-  else
-    vp8_inverse_transform_mby_4x4(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-
-  RECON_INVOKE(&rtcd->common->recon, recon_mby)
-  (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+  RECON_INVOKE(&rtcd->common->recon, recon_mby)(IF_RTCD(&rtcd->common->recon),
+                                                xd);
 }

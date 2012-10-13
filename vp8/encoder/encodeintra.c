@@ -144,15 +144,15 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
       txfm_type = bd->bmi.as_mode.tx_type;
       vp8_fht_c(b->src_diff, b->coeff, 32, txfm_type, 16);
     } else
-      vp8_transform_intra_mby_16x16(x);
+      vp8_transform_mby_16x16(x);
   }
 #else
-    vp8_transform_intra_mby_16x16(x);
+    vp8_transform_mby_16x16(x);
 #endif
   else if (tx_type == TX_8X8)
-    vp8_transform_intra_mby_8x8(x);
+    vp8_transform_mby_8x8(x);
   else
-    vp8_transform_intra_mby_4x4(x);
+    vp8_transform_mby_4x4(x);
 
   if (tx_type == TX_16X16)
     vp8_quantize_mby_16x16(x);

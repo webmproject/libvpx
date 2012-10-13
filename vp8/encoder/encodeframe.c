@@ -1903,16 +1903,13 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
                           udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           dst_uv_stride);
-    vp8_transform_intra_mby_8x8(x);
-    vp8_transform_mbuv_8x8(x);
-    vp8_quantize_mby_8x8(x);
-    vp8_quantize_mbuv_8x8(x);
+    vp8_transform_mb_8x8(x);
+    vp8_quantize_mb_8x8(x);
     if (x->optimize) {
       vp8_optimize_mby_8x8(x, rtcd);
       vp8_optimize_mbuv_8x8(x, rtcd);
     }
-    vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-    vp8_inverse_transform_mbuv_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     vp8_recon_mby_s_c(IF_RTCD(&rtcd->common->recon), &x->e_mbd,
                       dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
     vp8_recon_mbuv_s_c(IF_RTCD(&rtcd->common->recon), &x->e_mbd,
@@ -2305,20 +2302,13 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
                           udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           dst_uv_stride);
-    if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-      vp8_transform_intra_mby_8x8(x);
-    } else {
-      vp8_transform_mby_8x8(x);
-    }
-    vp8_transform_mbuv_8x8(x);
-    vp8_quantize_mby_8x8(x);
-    vp8_quantize_mbuv_8x8(x);
+    vp8_transform_mb_8x8(x);
+    vp8_quantize_mb_8x8(x);
     if (x->optimize) {
       vp8_optimize_mby_8x8(x, rtcd);
       vp8_optimize_mbuv_8x8(x, rtcd);
     }
-    vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-    vp8_inverse_transform_mbuv_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     vp8_recon_mby_s_c(IF_RTCD(&rtcd->common->recon), &x->e_mbd,
                       dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
     vp8_recon_mbuv_s_c(IF_RTCD(&rtcd->common->recon), &x->e_mbd,
