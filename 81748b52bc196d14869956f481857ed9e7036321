@@ -220,6 +220,24 @@
       "revId": "81748b52bc196d14869956f481857ed9e7036321",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93A\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T20:15:20Z",
+      "side": 1,
+      "message": "I\u0027m trying to factorize it into one common function, yes. Can\u0027t get it all quite right in a single commit so it\u0027ll be work in progress (and as time permits) for a while.",
+      "parentUuid": "AAAAQn//93Q\u003d",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
