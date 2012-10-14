@@ -1188,12 +1188,10 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
 #if CONFIG_COMP_INTRA_PRED
       if (mode2 == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
 #endif
-        RECON_INVOKE(&cpi->rtcd.common->recon, intra4x4_predict)
-        (b, mode, b->predictor);
+        vp8_intra4x4_predict(b, mode, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
       } else {
-        RECON_INVOKE(&cpi->rtcd.common->recon, comp_intra4x4_predict)
-        (b, mode, mode2, b->predictor);
+        vp8_comp_intra4x4_predict(b, mode, mode2, b->predictor);
         rate += bmode_costs[mode2];
       }
 #endif
@@ -1263,7 +1261,7 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
   IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(best_dqcoeff, b->diff, 32);
 #endif
 
-  RECON_INVOKE(IF_RTCD(&cpi->rtcd.common->recon), recon)(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+  vp8_recon_b(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 
   return best_rd;
 }
@@ -1369,8 +1367,7 @@ static int64_t rd_pick_intra_sby_mode(VP8_COMP *cpi,
   /* Y Search for 32x32 intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     x->e_mbd.mode_info_context->mbmi.mode = mode;
-    RECON_INVOKE(&cpi->common.rtcd.recon,
-                 build_intra_predictors_sby_s)(&x->e_mbd);
+    vp8_build_intra_predictors_sby_s(&x->e_mbd);
 
     super_block_yrd_8x8(x, &this_rate_tokenonly,
                         &this_distortion, IF_RTCD(&cpi->rtcd), &s);
@@ -1436,13 +1433,11 @@ static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
       mbmi->second_mode = mode2;
       if (mode2 == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
 #endif
-        RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
-        (&x->e_mbd);
+        vp8_build_intra_predictors_mby(&x->e_mbd);
 #if CONFIG_COMP_INTRA_PRED
       } else {
         continue; // i.e. disable for now
-        RECON_INVOKE(&cpi->common.rtcd.recon, build_comp_intra_predictors_mby)
-        (&x->e_mbd);
+        vp8_build_comp_intra_predictors_mby(&x->e_mbd);
       }
 #endif
 
@@ -1548,13 +1543,11 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
 #if CONFIG_COMP_INTRA_PRED
       if (mode2 == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
 #endif
-        RECON_INVOKE(&cpi->rtcd.common->recon, intra8x8_predict)
-        (b, mode, b->predictor);
+        vp8_intra8x8_predict(b, mode, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
       } else {
         continue; // i.e. disable for now
-        RECON_INVOKE(&cpi->rtcd.common->recon, comp_intra8x8_predict)
-        (b, mode, mode2, b->predictor);
+        vp8_comp_intra8x8_predict(b, mode, mode2, b->predictor);
       }
 #endif
 
@@ -1891,13 +1884,11 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
       mbmi->second_uv_mode = mode2;
       if (mode2 == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
 #endif
-        RECON_INVOKE(&cpi->rtcd.common->recon, build_intra_predictors_mbuv)
-        (&x->e_mbd);
+        vp8_build_intra_predictors_mbuv(&x->e_mbd);
 #if CONFIG_COMP_INTRA_PRED
       } else {
         continue;
-        RECON_INVOKE(&cpi->rtcd.common->recon, build_comp_intra_predictors_mbuv)
-        (&x->e_mbd);
+        vp8_build_comp_intra_predictors_mbuv(&x->e_mbd);
       }
 #endif
 
@@ -1959,8 +1950,7 @@ static void rd_pick_intra_mbuv_mode_8x8(VP8_COMP *cpi,
     int64_t this_rd;
 
     mbmi->uv_mode = mode;
-    RECON_INVOKE(&cpi->rtcd.common->recon, build_intra_predictors_mbuv)
-    (&x->e_mbd);
+    vp8_build_intra_predictors_mbuv(&x->e_mbd);
     ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
                                                            x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor,
                                                            x->src.uv_stride);
@@ -2053,8 +2043,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP8_COMP *cpi,
 
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
-    RECON_INVOKE(&cpi->rtcd.common->recon,
-                 build_intra_predictors_sbuv_s)(&x->e_mbd);
+    vp8_build_intra_predictors_sbuv_s(&x->e_mbd);
 
     super_block_uvrd_8x8(x, &this_rate_tokenonly,
                          &this_distortion, IF_RTCD(&cpi->rtcd), &s);
@@ -3555,8 +3544,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         case D63_PRED:
           mbmi->ref_frame = INTRA_FRAME;
           // FIXME compound intra prediction
-          RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
-              (&x->e_mbd);
+          vp8_build_intra_predictors_mby(&x->e_mbd);
           macro_block_yrd(cpi, x, &rate_y, &distortion, &skippable, txfm_cache);
 #if CONFIG_HYBRIDTRANSFORM16X16
           rd_txtype = x->e_mbd.block[0].bmi.as_mode.tx_type;

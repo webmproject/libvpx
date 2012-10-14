@@ -10,7 +10,6 @@
 
 
 #include "vpx_ports/config.h"
-#include "vp8/common/recon.h"
 #include "vp8/common/reconintra.h"
 #include "vpx_mem/vpx_mem.h"
 #include "onyxd_int.h"

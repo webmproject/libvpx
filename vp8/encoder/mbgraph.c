@@ -220,7 +220,7 @@ static int find_best_16x16_intra
     unsigned int err;
 
     xd->mode_info_context->mbmi.mode = mode;
-    RECON_INVOKE(&cpi->rtcd.common->recon, build_intra_predictors_mby)(xd);
+    vp8_build_intra_predictors_mby(xd);
     // VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
     err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
           (xd->predictor, 16,
