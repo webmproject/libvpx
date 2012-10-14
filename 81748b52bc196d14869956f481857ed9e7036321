@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//94A\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "strictly speaking, you don\u0027t really need the \u003d1,\u003d2,\u003d3. Just the \u003d0 above is ok.",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//934\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "\u0027const PLANE_TYPE\u0027 is correct, but maybe a bit excessive for a built-in type passed by value",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//938\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "suggest ()\u0027s around the test",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//930\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "good one!",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93w\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "do you need the variable \u0027type\u0027 at all? You could just hardcode PLANE_TYPE_Y_NO_DC at line 655",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93o\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "here too, \u0027const\u0027 is a little excessive for passed-by-value types.... (and below at 128 too)",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93s\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "suggest ()\u0027s around the \u003d\u003d test, for readability.",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93g\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "\u0027const\u0027 is somewhat excessive (and at 300 too)",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93k\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "suggest ()\u0027s around test.",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93c\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "\u0027const\u0027 is somewhat excessive",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93Y\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "suggest ()\u0027s around test",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93U\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "\u0027const\u0027 is somewhat excessive",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//93Q\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2012-10-14T19:56:11Z",
+      "side": 1,
+      "message": "suggest ()\u0027s around test.\n\nBtw, seems there\u0027s quite some copy-pasted functions here around... Might be time to consolidate into some factorized one",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
