@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//91M\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:42:02Z",
+      "side": 1,
+      "message": "Oh, a later patch re-arranges these conditions so that we don\u0027t do the same condition check 3x per function; that patch also adds the brackets. OK to ignore here?",
+      "parentUuid": "AAAAQn//92k\u003d",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//92g\u003d",
         "filename": "vp8/encoder/encodeintra.c",
         "patchSetId": 5
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//91A\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:42:02Z",
+      "side": 1,
+      "message": "yup, x-\u003eblock[24].src_diff, changed.",
+      "parentUuid": "AAAAQn//92c\u003d",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//92Y\u003d",
         "filename": "vp8/encoder/encodemb.c",
         "patchSetId": 5
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//900\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:42:02Z",
+      "side": 1,
+      "message": "These are actually pointers, so the checks are NULL-pointer checks. I don\u0027t know exactly why they are there, to be honest, it seems like it should never trigger. Let me ask around in the office before I make any changes that I might regret later on. :-).",
+      "parentUuid": "AAAAQn//92Y\u003d",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//92U\u003d",
         "filename": "vp8/encoder/encodemb.c",
         "patchSetId": 5
@@ -81,6 +135,24 @@
       "writtenOn": "2012-10-14T21:13:16Z",
       "side": 1,
       "message": "\"ta[1] \u003d ta[0];\" might be more readable.",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//90w\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 945,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:42:02Z",
+      "side": 1,
+      "message": "I remove this in the next patch (as you can see, the result of the assignment is never used), so OK to ignore?",
+      "parentUuid": "AAAAQn//92U\u003d",
       "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
