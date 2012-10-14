@@ -14,6 +14,7 @@
 #include "vp8/common/g_common.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
+#include "vp8/common/recon.h"
 #include "vp8/common/idct.h"
 #include "vp8/common/onyxc_int.h"
 
@@ -33,6 +34,57 @@ void vp8_machine_specific_config(VP8_COMMON *ctx) {
   rtcd->idct.idct1_scalar_add_8x8 = vp8_dc_only_idct_add_8x8_c;
   rtcd->idct.ihaar2       = vp8_short_ihaar2x2_c;
   rtcd->idct.idct16x16    = vp8_short_idct16x16_c;
+  rtcd->recon.copy16x16   = vp8_copy_mem16x16_c;
+  rtcd->recon.copy8x8     = vp8_copy_mem8x8_c;
+  rtcd->recon.avg16x16    = vp8_avg_mem16x16_c;
+  rtcd->recon.avg8x8      = vp8_avg_mem8x8_c;
+  rtcd->recon.copy8x4     = vp8_copy_mem8x4_c;
+  rtcd->recon.recon       = vp8_recon_b_c;
+  rtcd->recon.recon_uv    = vp8_recon_uv_b_c;
+  rtcd->recon.recon2      = vp8_recon2b_c;
+  rtcd->recon.recon4      = vp8_recon4b_c;
+  rtcd->recon.recon_mb    = vp8_recon_mb_c;
+  rtcd->recon.recon_mby   = vp8_recon_mby_c;
+#if CONFIG_SUPERBLOCKS
+  rtcd->recon.build_intra_predictors_sby_s =
+    vp8_build_intra_predictors_sby_s;
+  rtcd->recon.build_intra_predictors_sbuv_s =
+    vp8_build_intra_predictors_sbuv_s;
+#endif
+  rtcd->recon.build_intra_predictors_mby =
+    vp8_build_intra_predictors_mby;
+#if CONFIG_COMP_INTRA_PRED
+  rtcd->recon.build_comp_intra_predictors_mby =
+    vp8_build_comp_intra_predictors_mby;
+#endif
+  rtcd->recon.build_intra_predictors_mby_s =
+    vp8_build_intra_predictors_mby_s;
+  rtcd->recon.build_intra_predictors_mbuv =
+    vp8_build_intra_predictors_mbuv;
+  rtcd->recon.build_intra_predictors_mbuv_s =
+    vp8_build_intra_predictors_mbuv_s;
+#if CONFIG_COMP_INTRA_PRED
+  rtcd->recon.build_comp_intra_predictors_mbuv =
+    vp8_build_comp_intra_predictors_mbuv;
+#endif
+  rtcd->recon.intra4x4_predict =
+    vp8_intra4x4_predict;
+#if CONFIG_COMP_INTRA_PRED
+  rtcd->recon.comp_intra4x4_predict =
+    vp8_comp_intra4x4_predict;
+#endif
+  rtcd->recon.intra8x8_predict =
+    vp8_intra8x8_predict;
+#if CONFIG_COMP_INTRA_PRED
+  rtcd->recon.comp_intra8x8_predict =
+    vp8_comp_intra8x8_predict;
+#endif
+  rtcd->recon.intra_uv4x4_predict =
+    vp8_intra_uv4x4_predict;
+#if CONFIG_COMP_INTRA_PRED
+  rtcd->recon.comp_intra_uv4x4_predict =
+    vp8_comp_intra_uv4x4_predict;
+#endif
 
   rtcd->subpix.eighttap16x16       = vp8_eighttap_predict16x16_c;
   rtcd->subpix.eighttap8x8         = vp8_eighttap_predict8x8_c;

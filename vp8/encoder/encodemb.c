@@ -15,6 +15,7 @@
 #include "quantize.h"
 #include "tokenize.h"
 #include "vp8/common/invtrans.h"
+#include "vp8/common/recon.h"
 #include "vp8/common/reconintra.h"
 #include "dct.h"
 #include "vpx_mem/vpx_mem.h"
@@ -1161,7 +1162,8 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 #endif
   }
 
-  vp8_recon_mb(&x->e_mbd);
+  RECON_INVOKE(&rtcd->common->recon, recon_mb)
+  (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 #ifdef ENC_DEBUG
   if (enc_debug) {
     int i, j, k;
@@ -1214,5 +1216,6 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   else
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-  vp8_recon_mby(&x->e_mbd);
+  RECON_INVOKE(&rtcd->common->recon, recon_mby)
+  (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }

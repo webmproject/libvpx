@@ -42,7 +42,6 @@ extern prototype_fdct(vp8_fdct_short16x16);
 extern prototype_fdct(vp8_fdct_short8x8);
 
 #ifndef vp8_fhaar_short2x2
-#define vp8_fdct_haar_short2x2 vp8_fhaar_short2x2
 #define vp8_fhaar_short2x2  vp8_short_fhaar2x2_c
 #endif
 extern prototype_fdct(vp8_fhaar_short2x2);

@@ -20,6 +20,7 @@
 #include "entropy.h"
 #include "entropymode.h"
 #include "idct.h"
+#include "recon.h"
 #if CONFIG_POSTPROC
 #include "postproc.h"
 #endif
@@ -170,6 +171,7 @@ typedef enum {
 typedef struct VP8_COMMON_RTCD {
 #if CONFIG_RUNTIME_CPU_DETECT
   vp8_idct_rtcd_vtable_t        idct;
+  vp8_recon_rtcd_vtable_t       recon;
   vp8_subpix_rtcd_vtable_t      subpix;
   vp8_loopfilter_rtcd_vtable_t  loopfilter;
 #if CONFIG_POSTPROC

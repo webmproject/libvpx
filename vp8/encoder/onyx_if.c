@@ -4412,9 +4412,8 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         {
           double frame_psnr2, frame_ssim2 = 0;
           double weight = 0;
-#if CONFIG_POSTPROC
+
           vp8_deblock(cm->frame_to_show, &cm->post_proc_buffer, cm->filter_level * 10 / 6, 1, 0, IF_RTCD(&cm->rtcd.postproc));
-#endif
           vp8_clear_system_state();
 
           ye = calc_plane_error(orig->y_buffer, orig->y_stride,

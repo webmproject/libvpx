@@ -13,6 +13,7 @@
 #include "vp8/common/header.h"
 #include "vp8/common/reconintra.h"
 #include "vp8/common/reconintra4x4.h"
+#include "vp8/common/recon.h"
 #include "vp8/common/reconinter.h"
 #include "dequantize.h"
 #include "detokenize.h"
@@ -34,7 +35,6 @@
 
 #include "vp8/common/seg_common.h"
 #include "vp8/common/entropy.h"
-#include "vpx_rtcd.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -173,12 +173,14 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
 #if CONFIG_SUPERBLOCKS
     if (xd->mode_info_context->mbmi.encoded_as_sb) {
-      vp8_build_intra_predictors_sbuv_s(xd);
-      vp8_build_intra_predictors_sby_s(xd);
+      RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_sbuv_s)(xd);
+      RECON_INVOKE(&pbi->common.rtcd.recon,
+                   build_intra_predictors_sby_s)(xd);
     } else {
 #endif
-    vp8_build_intra_predictors_mbuv_s(xd);
-    vp8_build_intra_predictors_mby_s(xd);
+    RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_mbuv_s)(xd);
+    RECON_INVOKE(&pbi->common.rtcd.recon,
+                 build_intra_predictors_mby_s)(xd);
 #if CONFIG_SUPERBLOCKS
     }
 #endif
@@ -329,14 +331,15 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
 #if CONFIG_SUPERBLOCKS
     if (xd->mode_info_context->mbmi.encoded_as_sb) {
-      vp8_build_intra_predictors_sby_s(xd);
-      vp8_build_intra_predictors_sbuv_s(xd);
+      RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_sby_s)(xd);
+      RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_sbuv_s)(xd);
     } else
 #endif
     if (mode != I8X8_PRED) {
-      vp8_build_intra_predictors_mbuv(xd);
+      RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_mbuv)(xd);
       if (mode != B_PRED) {
-        vp8_build_intra_predictors_mby(xd);
+        RECON_INVOKE(&pbi->common.rtcd.recon,
+                     build_intra_predictors_mby)(xd);
       }
 #if 0
       // Intra-modes requiring recon data from top-right
@@ -376,7 +379,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
       b = &xd->block[ib];
       i8x8mode = b->bmi.as_mode.first;
-      vp8_intra8x8_predict(b, i8x8mode, b->predictor);
+      RECON_INVOKE(RTCD_VTABLE(recon), intra8x8_predict)(b, i8x8mode,
+                                                         b->predictor);
 
       if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
 #if CONFIG_HYBRIDTRANSFORM8X8
@@ -396,13 +400,15 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       }
 
       b = &xd->block[16 + i];
-	  vp8_intra_uv4x4_predict(b, i8x8mode, b->predictor);
+      RECON_INVOKE(RTCD_VTABLE(recon), intra_uv4x4_predict)(b, i8x8mode,
+                                                            b->predictor);
       DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, b->dequant,
                                               b->predictor,
                                               *(b->base_dst) + b->dst, 8,
                                               b->dst_stride);
       b = &xd->block[20 + i];
-      vp8_intra_uv4x4_predict(b, i8x8mode, b->predictor);
+      RECON_INVOKE(RTCD_VTABLE(recon), intra_uv4x4_predict)(b, i8x8mode,
+                                                            b->predictor);
       DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, b->dequant,
                                               b->predictor,
                                               *(b->base_dst) + b->dst, 8,
@@ -417,10 +423,12 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
       if (b_mode2 == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
 #endif
-        vp8_intra4x4_predict(b, b_mode, b->predictor);
+        RECON_INVOKE(RTCD_VTABLE(recon), intra4x4_predict)
+        (b, b_mode, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
       } else {
-        vp8_comp_intra4x4_predict(b, b_mode, b_mode2, b->predictor);
+        RECON_INVOKE(RTCD_VTABLE(recon), comp_intra4x4_predict)
+        (b, b_mode, b_mode2, b->predictor);
       }
 #endif
 

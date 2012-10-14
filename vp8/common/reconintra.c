@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "vpx_ports/config.h"
-#include "vpx_rtcd.h"
+#include "recon.h"
 #include "reconintra.h"
 #include "vpx_mem/vpx_mem.h"
 
@@ -196,12 +196,14 @@ void d153_predictor(unsigned char *ypred_ptr, int y_stride, int n,
   }
 }
 
-void vp8_recon_intra_mbuv(MACROBLOCKD *xd) {
+void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd,
+                          MACROBLOCKD *xd) {
   int i;
 
   for (i = 16; i < 24; i += 2) {
     BLOCKD *b = &xd->block[i];
-    vp8_recon2b(b->predictor, b->diff,*(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon2)(b->predictor, b->diff,
+                 *(b->base_dst) + b->dst, b->dst_stride);
   }
 }
 

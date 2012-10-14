@@ -11,6 +11,7 @@
 
 #include "vpx_ports/config.h"
 #include "vpx/vpx_integer.h"
+#include "recon.h"
 #include "subpixel.h"
 #include "blockd.h"
 #include "reconinter.h"
@@ -309,7 +310,8 @@ static void build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
     xd->subpixel_predict8x8(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1,
                             (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
   } else {
-    vp8_copy_mem8x8(ptr, d->pre_stride, pred_ptr, pitch);
+    RECON_INVOKE(&xd->rtcd->recon, copy8x8)
+      (ptr, d->pre_stride, pred_ptr, pitch);
   }
 }
 
@@ -335,7 +337,8 @@ static void build_2nd_inter_predictors4b(MACROBLOCKD *xd,
     xd->subpixel_predict_avg8x8(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1,
                                (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
   } else {
-    vp8_avg_mem8x8(ptr, d->pre_stride, pred_ptr, pitch);
+    RECON_INVOKE(&xd->rtcd->recon, avg8x8)
+                (ptr, d->pre_stride, pred_ptr, pitch);
   }
 }
 
@@ -354,7 +357,7 @@ static void build_inter_predictors2b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
     xd->subpixel_predict8x4(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1,
                            (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
   } else {
-    vp8_copy_mem8x4(ptr, d->pre_stride, pred_ptr, pitch);
+    RECON_INVOKE(&xd->rtcd->recon, copy8x4)(ptr, d->pre_stride, pred_ptr, pitch);
   }
 }
 
@@ -738,8 +741,10 @@ void vp8_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
       xd->subpixel_predict8x8(vptr, pre_stride, _o16x16mv.as_mv.col & 15,
                               _o16x16mv.as_mv.row & 15, dst_v, dst_uvstride);
     } else {
-      vp8_copy_mem8x8(uptr, pre_stride, dst_u, dst_uvstride);
-      vp8_copy_mem8x8(vptr, pre_stride, dst_v, dst_uvstride);
+      RECON_INVOKE(&xd->rtcd->recon, copy8x8)
+                   (uptr, pre_stride, dst_u, dst_uvstride);
+      RECON_INVOKE(&xd->rtcd->recon, copy8x8)
+                   (vptr, pre_stride, dst_v, dst_uvstride);
     }
 }
 
@@ -858,7 +863,8 @@ void vp8_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
     } else {
       // TODO Needs to AVERAGE with the dst_y
       // For now, do not apply the prediction filter in these cases!
-      vp8_avg_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
+      RECON_INVOKE(&xd->rtcd->recon, avg16x16)(ptr, pre_stride, dst_y,
+                                               dst_ystride);
     }
   } else
 #endif  // CONFIG_PRED_FILTER
@@ -867,7 +873,8 @@ void vp8_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
       xd->subpixel_predict_avg16x16(ptr, pre_stride, (mv_col & 7) << 1,
                                     (mv_row & 7) << 1, dst_y, dst_ystride);
     } else {
-      vp8_avg_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
+      RECON_INVOKE(&xd->rtcd->recon, avg16x16)(ptr, pre_stride, dst_y,
+                                               dst_ystride);
     }
   }
 }
@@ -930,7 +937,8 @@ void vp8_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
       } else {
         // TODO Needs to AVERAGE with the dst_[u|v]
         // For now, do not apply the prediction filter here!
-        vp8_avg_mem8x8(pSrc, pre_stride, pDst, dst_uvstride);
+        RECON_INVOKE(&xd->rtcd->recon, avg8x8)(pSrc, pre_stride, pDst,
+                                               dst_uvstride);
       }
 
       // V
@@ -945,8 +953,8 @@ void vp8_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
       xd->subpixel_predict_avg8x8(vptr, pre_stride, omv_col & 15,
                                   omv_row & 15, dst_v, dst_uvstride);
     } else {
-      vp8_avg_mem8x8(uptr, pre_stride, dst_u, dst_uvstride);
-      vp8_avg_mem8x8(vptr, pre_stride, dst_v, dst_uvstride);
+      RECON_INVOKE(&xd->rtcd->recon, avg8x8)(uptr, pre_stride, dst_u, dst_uvstride);
+      RECON_INVOKE(&xd->rtcd->recon, avg8x8)(vptr, pre_stride, dst_v, dst_uvstride);
     }
 }
 

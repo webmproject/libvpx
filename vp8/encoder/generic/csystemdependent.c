@@ -118,18 +118,13 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi) {
   cpi->rtcd.search.refining_search         = vp8_refining_search_sad;
   cpi->rtcd.search.diamond_search          = vp8_diamond_search_sad;
   cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_c;
-  cpi->rtcd.variance.satd16x16             = vp8_satd16x16_c;
-  cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
-  cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
-  cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
-  cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
-  cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
 #if CONFIG_INTERNAL_STATS
   cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_c;
   cpi->rtcd.variance.ssimpf_16x16          = vp8_ssim_parms_16x16_c;
 #endif
 #endif
 
+  cpi->rtcd.variance.satd16x16             = vp8_satd16x16_c;
   vp8_yv12_copy_partial_frame_ptr = vp8_yv12_copy_partial_frame;
 
 #if ARCH_X86 || ARCH_X86_64
@@ -140,5 +135,10 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi) {
   vp8_arch_arm_encoder_init(cpi);
 #endif
 
+  cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
+  cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
+  cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
+  cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
+  cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
 
 }

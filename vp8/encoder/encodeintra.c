@@ -16,10 +16,10 @@
 #include "vp8/common/reconintra4x4.h"
 #include "encodemb.h"
 #include "vp8/common/invtrans.h"
+#include "vp8/common/recon.h"
 #include "dct.h"
 #include "vp8/common/g_common.h"
 #include "encodeintra.h"
-#include "vpx_rtcd.h"
 
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -73,11 +73,12 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
 #if CONFIG_COMP_INTRA_PRED
   if (b->bmi.as_mode.second == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
 #endif
-    vp8_intra4x4_predict(b, b->bmi.as_mode.first, b->predictor);
+    RECON_INVOKE(&rtcd->common->recon, intra4x4_predict)
+    (b, b->bmi.as_mode.first, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
   } else {
-    vp8_comp_intra4x4_predict(b, b->bmi.as_mode.first, b->bmi.as_mode.second,
-                              b->predictor);
+    RECON_INVOKE(&rtcd->common->recon, comp_intra4x4_predict)
+    (b, b->bmi.as_mode.first, b->bmi.as_mode.second, b->predictor);
   }
 #endif
 
@@ -101,7 +102,7 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
   vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
 #endif
 
-  vp8_recon_b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+  RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 }
 
 void vp8_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb) {
@@ -129,10 +130,10 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 #if CONFIG_COMP_INTRA_PRED
   if (x->e_mbd.mode_info_context->mbmi.second_mode == (MB_PREDICTION_MODE)(DC_PRED - 1))
 #endif
-    vp8_build_intra_predictors_mby(&x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mby)(&x->e_mbd);
 #if CONFIG_COMP_INTRA_PRED
   else
-    vp8_build_comp_intra_predictors_mby(&x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, build_comp_intra_predictors_mby)(&x->e_mbd);
 #endif
 
   ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
@@ -191,7 +192,8 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   else
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-  vp8_recon_mby(&x->e_mbd);
+  RECON_INVOKE(&rtcd->common->recon, recon_mby)
+      (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 
 }
 
@@ -201,10 +203,10 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 #if CONFIG_COMP_INTRA_PRED
   if (x->e_mbd.mode_info_context->mbmi.second_uv_mode == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
 #endif
-    vp8_build_intra_predictors_mbuv(&x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mbuv)(&x->e_mbd);
 #if CONFIG_COMP_INTRA_PRED
   } else {
-    vp8_build_comp_intra_predictors_mbuv(&x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, build_comp_intra_predictors_mbuv)(&x->e_mbd);
   }
 #endif
 
@@ -231,7 +233,7 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   else
     vp8_inverse_transform_mbuv(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-  vp8_recon_intra_mbuv(&x->e_mbd);
+  vp8_recon_intra_mbuv(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
 
 void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
@@ -245,11 +247,12 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
 #if CONFIG_COMP_INTRA_PRED
   if (b->bmi.as_mode.second == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
 #endif
-    vp8_intra8x8_predict(b, b->bmi.as_mode.first, b->predictor);
+    RECON_INVOKE(&rtcd->common->recon, intra8x8_predict)
+    (b, b->bmi.as_mode.first, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
   } else {
-    vp8_comp_intra8x8_predict(b, b->bmi.as_mode.first, b->bmi.as_mode.second,
-                              b->predictor);
+    RECON_INVOKE(&rtcd->common->recon, comp_intra8x8_predict)
+    (b, b->bmi.as_mode.first, b->bmi.as_mode.second, b->predictor);
   }
 #endif
 
@@ -308,10 +311,12 @@ void vp8_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
 #if CONFIG_COMP_INTRA_PRED
   if (second == -1) {
 #endif
-    vp8_intra_uv4x4_predict(b, mode, b->predictor);
+    RECON_INVOKE(&rtcd->common->recon, intra_uv4x4_predict)
+    (b, mode, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
   } else {
-    vp8_comp_intra_uv4x4_predict(b, mode, second, b->predictor);
+    RECON_INVOKE(&rtcd->common->recon, comp_intra_uv4x4_predict)
+    (b, mode, second, b->predictor);
   }
 #endif
 
@@ -323,7 +328,8 @@ void vp8_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
 
   vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 16);
 
-  vp8_recon_uv_b_c(b->predictor,b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+  RECON_INVOKE(&rtcd->common->recon, recon_uv)(b->predictor,
+                                               b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 }
 
 
