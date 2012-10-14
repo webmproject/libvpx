@@ -568,9 +568,9 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd) {
 }
 
 static int cost_coeffs_2x2(MACROBLOCK *mb,
-                           BLOCKD *b, int type,
+                           BLOCKD *b, PLANE_TYPE type,
                            ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  int c = !type;              /* start at coef 0, unless Y with Y2 */
+  int c = (type == PLANE_TYPE_Y_NO_DC); /* start at coef 0, unless Y with Y2 */
   int eob = b->eob;
   int pt;    /* surrounding block/prev coef predictor */
   int cost = 0;
@@ -596,11 +596,11 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
   return cost;
 }
 
-static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
+static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        int tx_size) {
   const int eob = b->eob;
-  int c = !type;              /* start at coef 0, unless Y with Y2 */
+  int c = (type == PLANE_TYPE_Y_NO_DC); /* start at coef 0, unless Y with Y2 */
   int cost = 0, default_eob, seg_eob;
   int pt;                     /* surrounding block/prev coef predictor */
   int const *scan, *band;

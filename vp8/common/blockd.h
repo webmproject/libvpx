@@ -52,10 +52,12 @@ typedef struct {
   int r, c;
 } POS;
 
-#define PLANE_TYPE_Y_NO_DC    0
-#define PLANE_TYPE_Y2         1
-#define PLANE_TYPE_UV         2
-#define PLANE_TYPE_Y_WITH_DC  3
+typedef enum PlaneType {
+  PLANE_TYPE_Y_NO_DC = 0,
+  PLANE_TYPE_Y2,
+  PLANE_TYPE_UV,
+  PLANE_TYPE_Y_WITH_DC,
+} PLANE_TYPE;
 
 typedef char ENTROPY_CONTEXT;
 typedef struct {

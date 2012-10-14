@@ -266,7 +266,7 @@ static const int plane_rd_mult[4] = {
   }\
 }
 
-void optimize_b(MACROBLOCK *mb, int i, int type,
+void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
                 ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                 const VP8_ENCODER_RTCD *rtcd, int tx_type) {
   BLOCK *b;
@@ -343,7 +343,7 @@ void optimize_b(MACROBLOCK *mb, int i, int type,
   coeff_ptr = b->coeff;
   qcoeff_ptr = d->qcoeff;
   dqcoeff_ptr = d->dqcoeff;
-  i0 = !type;
+  i0 = (type == PLANE_TYPE_Y_NO_DC);
   eob = d->eob;
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
@@ -517,7 +517,7 @@ fall between -65 and +65.
 **************************************************************************/
 #define SUM_2ND_COEFF_THRESH 65
 
-static void check_reset_2nd_coeffs(MACROBLOCKD *xd, int type,
+static void check_reset_2nd_coeffs(MACROBLOCKD *xd,
                                    ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
   int sum = 0;
   int i;
@@ -540,12 +540,12 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *xd, int type,
       bd->dqcoeff[rc] = 0;
     }
     bd->eob = 0;
-    *a = *l = (bd->eob != !type);
+    *a = *l = (bd->eob != 0);
   }
 }
 
 #define SUM_2ND_COEFF_THRESH_8X8 32
-static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *xd, int type,
+static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *xd,
                                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
   int sum = 0;
   BLOCKD *bd = &xd->block[24];
@@ -570,13 +570,13 @@ static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *xd, int type,
     bd->qcoeff[8] = 0;
     bd->dqcoeff[8] = 0;
     bd->eob = 0;
-    *a = *l = (bd->eob != !type);
+    *a = *l = (bd->eob != 0);
   }
 }
 
 void vp8_optimize_mby_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   int b;
-  int type;
+  PLANE_TYPE type;
   int has_2nd_order;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -604,7 +604,7 @@ void vp8_optimize_mby_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
     b = 24;
     optimize_b(x, b, PLANE_TYPE_Y2,
                ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd, TX_4X4);
-    check_reset_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
+    check_reset_2nd_coeffs(&x->e_mbd,
                            ta + vp8_block2above[b], tl + vp8_block2left[b]);
   }
 }
@@ -637,7 +637,7 @@ static void optimize_mb_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
 void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   int b;
-  int type;
+  PLANE_TYPE type;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
@@ -650,7 +650,7 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
-  type = 0;
+  type = PLANE_TYPE_Y_NO_DC;
   for (b = 0; b < 16; b += 4) {
     optimize_b(x, b, type,
                ta + vp8_block2above[b], tl + vp8_block2left[b],
@@ -660,7 +660,7 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 
   // 8x8 always have 2nd roder haar block
-  check_reset_8x8_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
+  check_reset_8x8_2nd_coeffs(&x->e_mbd,
                              ta + vp8_block2above_8x8[24], tl + vp8_block2left_8x8[24]);
 }
 
@@ -693,7 +693,7 @@ void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   vp8_optimize_mbuv_8x8(x, rtcd);
 }
 
-void optimize_b_16x16(MACROBLOCK *mb, int i, int type,
+void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                       const VP8_ENCODER_RTCD *rtcd) {
   BLOCK *b = &mb->block[i];

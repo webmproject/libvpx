@@ -137,7 +137,7 @@ int get_token(int v) {
 
 #if CONFIG_HYBRIDTRANSFORM
 void static count_tokens_adaptive_scan(const MACROBLOCKD *xd, INT16 *qcoeff_ptr,
-                                       int block, int type,
+                                       int block, PLANE_TYPE type,
                                        TX_TYPE tx_type,
                                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                                        int eob, int seg_eob,
@@ -182,7 +182,7 @@ void static count_tokens_adaptive_scan(const MACROBLOCKD *xd, INT16 *qcoeff_ptr,
 }
 #endif
 
-void static count_tokens(INT16 *qcoeff_ptr, int block, int type,
+void static count_tokens(INT16 *qcoeff_ptr, int block, PLANE_TYPE type,
                          ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                          int eob, int seg_eob, FRAME_CONTEXT *const fc) {
   int c, pt, token, band;
@@ -201,7 +201,7 @@ void static count_tokens(INT16 *qcoeff_ptr, int block, int type,
   }
 }
 
-void static count_tokens_8x8(INT16 *qcoeff_ptr, int block, int type,
+void static count_tokens_8x8(INT16 *qcoeff_ptr, int block, PLANE_TYPE type,
 #if CONFIG_HYBRIDTRANSFORM8X8
                              TX_TYPE tx_type,
 #endif
@@ -233,7 +233,7 @@ void static count_tokens_8x8(INT16 *qcoeff_ptr, int block, int type,
   }
 }
 
-void static count_tokens_16x16(INT16 *qcoeff_ptr, int block, int type,
+void static count_tokens_16x16(INT16 *qcoeff_ptr, int block, PLANE_TYPE type,
 #if CONFIG_HYBRIDTRANSFORM16X16
                                TX_TYPE tx_type,
 #endif
@@ -303,7 +303,8 @@ static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign) {
   } while (0);
 
 static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
-                            ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l, int type,
+                            ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                            PLANE_TYPE type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
                             TX_TYPE tx_type,
 #endif
@@ -312,7 +313,7 @@ static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
                             const int *coef_bands) {
   FRAME_CONTEXT *const fc = &dx->common.fc;
   BOOL_DECODER *br = xd->current_bc;
-  int tmp, c = (type == 0);
+  int tmp, c = (type == PLANE_TYPE_Y_NO_DC);
   const vp8_prob *prob, *coef_probs;
 
   switch (block_type) {
@@ -450,7 +451,8 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
 
   char* const eobs = xd->eobs;
-  int c, i, type, eobtotal = 0, seg_eob;
+  PLANE_TYPE type;
+  int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int seg_active = segfeature_active(xd, segment_id, SEG_LVL_EOB);
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
@@ -471,7 +473,6 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   // Luma block
   {
     const int* const scan = vp8_default_zig_zag1d_16x16;
-    //printf("16: %d\n", tx_type);
     c = vp8_decode_coefs(pbi, xd, A, L, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
                          tx_type,
@@ -502,7 +503,6 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     ENTROPY_CONTEXT* const l = L + vp8_block2left_8x8[i];
     const int* const scan = vp8_default_zig_zag1d_8x8;
 
-    //printf("8: %d\n", tx_type);
     c = vp8_decode_coefs(pbi, xd, a, l, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
                          tx_type,
@@ -526,7 +526,8 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
 
   char *const eobs = xd->eobs;
-  int c, i, type, eobtotal = 0, seg_eob;
+  PLANE_TYPE type;
+  int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int seg_active = segfeature_active(xd, segment_id, SEG_LVL_EOB);
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
@@ -633,8 +634,8 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd) {
 
   char *const eobs = xd->eobs;
   const int *scan = vp8_default_zig_zag1d;
-
-  int c, i, type, eobtotal = 0, seg_eob = 16;
+  PLANE_TYPE type;
+  int c, i, eobtotal = 0, seg_eob = 16;
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
 
   int segment_id = xd->mode_info_context->mbmi.segment_id;
