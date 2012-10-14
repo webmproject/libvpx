@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//910\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:36:18Z",
+      "side": 1,
+      "message": "OK, removed the 1/2/3.",
+      "parentUuid": "AAAAQn//94A\u003d",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//934\u003d",
         "filename": "vp8/encoder/encodemb.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//91U\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:36:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//934\u003d",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//938\u003d",
         "filename": "vp8/encoder/encodemb.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2012-10-14T19:56:11Z",
       "side": 1,
       "message": "suggest ()\u0027s around the test",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//91w\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:36:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//938\u003d",
       "revId": "81748b52bc196d14869956f481857ed9e7036321",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//91s\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:36:18Z",
+      "side": 1,
+      "message": "That\u0027s a good question. I _think_ it would be useful to keep, because a near-future goal is to allow using the 8x8 transform for non-4x4-partition (i.e. 8x8, 8x16, 16x8) splitmv-coded macroblocks. For these, we probably don\u0027t want to use a second-order-DC coding strategy, so they would use this same function, but then type would change to (mode \u003d\u003d SPLITMV) ? PLANE_TYPE_Y_WITH_DC : PLANE_TYPE_Y_NO_DC. If you prefer, I can remove it now and re-add it once we\u0027ve added 8x8 transform support to non-4x4-partition-splitmv.",
+      "parentUuid": "AAAAQn//93w\u003d",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//93o\u003d",
         "filename": "vp8/encoder/tokenize.c",
         "patchSetId": 3
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//91Y\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:36:18Z",
+      "side": 1,
+      "message": "done, also in other places.",
+      "parentUuid": "AAAAQn//93o\u003d",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//93s\u003d",
         "filename": "vp8/encoder/tokenize.c",
         "patchSetId": 3
@@ -115,6 +205,24 @@
       "writtenOn": "2012-10-14T19:56:11Z",
       "side": 1,
       "message": "suggest ()\u0027s around the \u003d\u003d test, for readability.",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//91o\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:36:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//93s\u003d",
       "revId": "81748b52bc196d14869956f481857ed9e7036321",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -149,6 +257,24 @@
       "writtenOn": "2012-10-14T19:56:11Z",
       "side": 1,
       "message": "suggest ()\u0027s around test.",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//91k\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:36:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//93k\u003d",
       "revId": "81748b52bc196d14869956f481857ed9e7036321",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -200,6 +326,24 @@
       "writtenOn": "2012-10-14T19:56:11Z",
       "side": 1,
       "message": "\u0027const\u0027 is somewhat excessive",
+      "revId": "81748b52bc196d14869956f481857ed9e7036321",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//91g\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T22:36:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//93U\u003d",
       "revId": "81748b52bc196d14869956f481857ed9e7036321",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
