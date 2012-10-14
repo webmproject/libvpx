@@ -16,6 +16,24 @@
       "revId": "7ffa6a3edc088e02be59d60ae61266b8e9de6afb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//918\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-14T21:41:15Z",
+      "side": 1,
+      "message": "See line 185 and 243, it\u0027s what we currently use elsewhere. I don\u0027t mind changing it (as long as it\u0027s consistent across the whole file), but the keep_on variable is kind of single-purpose here, so I\u0027d prefer to take the ++t and pt assignment out of the while condition, but keep the c \u003c eob \u0026\u0026 ++c \u003c seg_eob inside the while condition, if that\u0027s OK.",
+      "parentUuid": "AAAAQn//92s\u003d",
+      "revId": "7ffa6a3edc088e02be59d60ae61266b8e9de6afb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
