@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//92k\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-14T21:13:16Z",
+      "side": 1,
+      "message": "use {}\u0027s",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//92g\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-14T21:13:16Z",
+      "side": 1,
+      "message": "use {}\u0027s here too (and below)",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//92c\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-14T21:13:16Z",
+      "side": 1,
+      "message": "isn\u0027t there some constants for \u0027384\u0027 ?\n\nalso: \u0027short\u0027 -\u003e INT16 ? (or int16 / int16_t maybe)",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//92Y\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-14T21:13:16Z",
+      "side": 1,
+      "message": "can\u0027t you compare to some ENTROPY_CONTEXT value \u00270\u0027 instead of using boolean comparison \u0027!\u0027 ?",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//92U\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 945,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-14T21:13:16Z",
+      "side": 1,
+      "message": "\"ta[1] \u003d ta[0];\" might be more readable.",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
