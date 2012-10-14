@@ -79,8 +79,10 @@ VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/ssim.c
 VP8_CX_SRCS-yes += encoder/tokenize.c
 VP8_CX_SRCS-yes += encoder/treewriter.c
 VP8_CX_SRCS-yes += encoder/variance_c.c
+ifeq ($(CONFIG_POSTPROC),yes)
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.h
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
+endif
 VP8_CX_SRCS-yes += encoder/temporal_filter.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.h
 VP8_CX_SRCS-yes += encoder/mbgraph.c

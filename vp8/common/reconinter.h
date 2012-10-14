@@ -12,9 +12,7 @@
 #ifndef __INC_RECONINTER_H
 #define __INC_RECONINTER_H
 
-#if CONFIG_RUNTIME_CPU_DETECT
 #include "onyxc_int.h"
-#endif
 
 extern void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                                     unsigned char *dst_y,

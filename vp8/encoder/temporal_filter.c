@@ -79,8 +79,8 @@ static void vp8_temporal_filter_predictors_mb_c
                            (omv_col & 15), (omv_row & 15), &pred[320], 8);
   }
   else {
-    RECON_INVOKE(&xd->rtcd->recon, copy8x8)(uptr, stride, &pred[256], 8);
-    RECON_INVOKE(&xd->rtcd->recon, copy8x8)(vptr, stride, &pred[320], 8);
+    vp8_copy_mem8x8(uptr, stride, &pred[256], 8);
+    vp8_copy_mem8x8(vptr, stride, &pred[320], 8);
   }
 }
 void vp8_temporal_filter_apply_c

@@ -14,7 +14,6 @@
 #include "vp8/common/g_common.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
-#include "vp8/common/recon.h"
 #include "vp8/common/idct.h"
 #include "vp8/common/pragmas.h"
 #include "vp8/common/onyxc_int.h"
@@ -40,10 +39,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx) {
     rtcd->idct.idct1_scalar_add = vpx_dc_only_idct_add_mmx;
     // rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_mmx;
     // rtcd->idct.iwalsh1     = vp8_short_inv_walsh4x4_1_mmx;
-
-    rtcd->recon.recon       = vp8_recon_b_mmx;
-    rtcd->recon.copy8x8     = vp8_copy_mem8x8_mmx;
-    rtcd->recon.copy8x4     = vp8_copy_mem8x4_mmx;
 
     /* Disabled due to unsupported enhanced interpolation/high_prec mv
     rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_mmx;
@@ -77,15 +72,7 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx) {
 #if HAVE_SSE2
 
   if (flags & HAS_SSE2) {
-    rtcd->recon.recon2      = vp8_recon2b_sse2;
-    rtcd->recon.recon4      = vp8_recon4b_sse2;
 
-    /* these are disable because of unsupported diagonal pred modes
-    rtcd->recon.build_intra_predictors_mbuv =
-      vp8_build_intra_predictors_mbuv_sse2;
-    rtcd->recon.build_intra_predictors_mbuv_s =
-      vp8_build_intra_predictors_mbuv_s_sse2;
-      */
 
     // rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_sse2;
 

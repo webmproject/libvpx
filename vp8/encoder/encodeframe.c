@@ -26,6 +26,7 @@
 #include "vp8/common/findnearmv.h"
 #include "vp8/common/reconintra.h"
 #include "vp8/common/seg_common.h"
+#include "vpx_rtcd.h"
 #include <stdio.h>
 #include <math.h>
 #include <limits.h>
@@ -1880,8 +1881,8 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
     vp8_update_zbin_extra(cpi, x);
   }
 
-  RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_sby_s)(&x->e_mbd);
-  RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_sbuv_s)(&x->e_mbd);
+  vp8_build_intra_predictors_sby_s(&x->e_mbd);
+  vp8_build_intra_predictors_sbuv_s(&x->e_mbd);
 
   assert(x->e_mbd.mode_info_context->mbmi.txfm_size == TX_8X8);
   for (n = 0; n < 4; n++)
@@ -1913,9 +1914,8 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
     }
     vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     vp8_inverse_transform_mbuv_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-    vp8_recon_mby_s_c(IF_RTCD(&rtcd->common->recon), &x->e_mbd,
-                      dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
-    vp8_recon_mbuv_s_c(IF_RTCD(&rtcd->common->recon), &x->e_mbd,
+    vp8_recon_mby_s_c(&x->e_mbd, dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
+    vp8_recon_mbuv_s_c(&x->e_mbd,
                        udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                        vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride);
 
@@ -2249,8 +2249,8 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
   set_pred_flag(xd, PRED_REF, ref_pred_flag);
 
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-    RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_sby_s)(&x->e_mbd);
-    RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_sbuv_s)(&x->e_mbd);
+    vp8_build_intra_predictors_sby_s(&x->e_mbd);
+    vp8_build_intra_predictors_sbuv_s(&x->e_mbd);
   } else {
     int ref_fb_idx;
 
@@ -2319,9 +2319,9 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
     }
     vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     vp8_inverse_transform_mbuv_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-    vp8_recon_mby_s_c(IF_RTCD(&rtcd->common->recon), &x->e_mbd,
+    vp8_recon_mby_s_c( &x->e_mbd,
                       dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
-    vp8_recon_mbuv_s_c(IF_RTCD(&rtcd->common->recon), &x->e_mbd,
+    vp8_recon_mbuv_s_c(&x->e_mbd,
                        udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                        vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride);
 
