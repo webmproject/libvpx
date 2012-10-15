@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//9R4\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 683,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T22:05:03Z",
+      "side": 1,
+      "message": "seems like the only things that differ between the DCT and non-DCT transform is the cost table used in:\n\ncost +\u003d mb-\u003etoken_costs[tx_size][type][band[c]][pt][t];\n\nthis code could be factorized a lot using a cost pointer to mb-\u003etoken_costs[tx_size]",
+      "revId": "1d87f9c14286cf47388d95670cf8355af50e6e6f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
