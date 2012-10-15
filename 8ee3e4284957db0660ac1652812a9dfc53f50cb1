@@ -16,6 +16,24 @@
       "revId": "8ee3e4284957db0660ac1652812a9dfc53f50cb1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9Y4\u003d",
+        "filename": "test/ivf_video_source.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-15T19:39:28Z",
+      "side": 1,
+      "message": "Added comment in code to explain that we allocate the buffer once for whole test. Thanks.",
+      "parentUuid": "AAAAQn//9/Q\u003d",
+      "revId": "8ee3e4284957db0660ac1652812a9dfc53f50cb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
