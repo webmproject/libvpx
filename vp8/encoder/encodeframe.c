@@ -52,9 +52,6 @@ int enc_debug = 0;
 int mb_row_debug, mb_col_debug;
 #endif
 
-extern void vp8_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
-                             TOKENEXTRA **t, int dry_run);
-
 extern void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex);
 extern void vp8_auto_select_speed(VP8_COMP *cpi);
 extern void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
@@ -81,8 +78,6 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
                                     MACROBLOCK *x,
                                     TOKENEXTRA **t, int mb_col);
 static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x);
-extern void vp8_stuff_mb_8x8(VP8_COMP *cpi,
-                             MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 
 #ifdef MODE_STATS
 unsigned int inter_y_modes[MB_MODE_COUNT];
@@ -1843,7 +1838,7 @@ static void update_sb_skip_coeff_state(VP8_COMP *cpi,
     if (skip[n]) {
       x->e_mbd.above_context = &ta[n];
       x->e_mbd.left_context  = &tl[n];
-      vp8_stuff_mb_8x8(cpi, &x->e_mbd, tp, 0);
+      vp8_stuff_mb(cpi, &x->e_mbd, tp, 0);
     } else {
       if (n_tokens[n]) {
         memcpy(*tp, tokens[n], sizeof(*t[0]) * n_tokens[n]);
@@ -2150,7 +2145,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
         cpi->skip_true_count[mb_skip_context]++;
       vp8_fix_contexts(xd);
     } else {
-      vp8_stuff_mb_4x4(cpi, xd, t, !output_enabled);
+      vp8_stuff_mb(cpi, xd, t, !output_enabled);
       mbmi->mb_skip_coeff = 0;
       if (output_enabled)
         cpi->skip_false_count[mb_skip_context]++;
@@ -2342,7 +2337,7 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
         cpi->skip_true_count[mb_skip_context]++;
         vp8_fix_contexts(xd);
       } else {
-        vp8_stuff_mb_4x4(cpi, xd, t, 0);
+        vp8_stuff_mb(cpi, xd, t, 0);
         xd->mode_info_context->mbmi.mb_skip_coeff = 0;
         cpi->skip_false_count[mb_skip_context]++;
       }

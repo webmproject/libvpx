@@ -60,14 +60,7 @@ extern unsigned int hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
 #endif
 #endif  /* ENTROPY_STATS */
 
-void vp8_stuff_mb_4x4(VP8_COMP *cpi,
-                      MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
-void vp8_stuff_mb_8x8(VP8_COMP *cpi,
-                      MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
-void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi,
-                            MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
-void vp8_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
-                        TOKENEXTRA **t, int dry_run);
+void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 void vp8_fix_contexts(MACROBLOCKD *xd);
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
@@ -718,16 +711,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
     if (!dry_run)
       cpi->skip_true_count[mb_skip_context] += skip_inc;
     if (!cpi->common.mb_no_coeff_skip) {
-      if (tx_size == TX_16X16)
-        vp8_stuff_mb_16x16(cpi, xd, t, dry_run);
-      else
-      if (tx_size == TX_8X8) {
-        if (xd->mode_info_context->mbmi.mode == I8X8_PRED)
-          vp8_stuff_mb_8x8_4x4uv(cpi, xd, t, dry_run);
-        else
-          vp8_stuff_mb_8x8(cpi, xd, t, dry_run);
-      } else
-        vp8_stuff_mb_4x4(cpi, xd, t, dry_run);
+      vp8_stuff_mb(cpi, xd, t, dry_run);
     } else {
       vp8_fix_contexts(xd);
     }
@@ -1054,73 +1038,60 @@ void print_context_counters() {
 }
 #endif
 
-
 void vp8_tokenize_initialize() {
   fill_value_tokens();
 }
 
-
-static __inline void stuff2nd_order_b_8x8(
-  MACROBLOCKD *xd,
-  const BLOCKD *const b,
-  TOKENEXTRA **tp,
-  const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
-  const FRAME_TYPE frametype,
-  ENTROPY_CONTEXT *a,
-  ENTROPY_CONTEXT *l,
-  VP8_COMP *cpi,
-  int dry_run) {
+static __inline void stuff2nd_order_b_8x8(MACROBLOCKD *xd,
+                                          const BLOCKD *const b,
+                                          TOKENEXTRA **tp,
+                                          ENTROPY_CONTEXT *a,
+                                          ENTROPY_CONTEXT *l,
+                                          VP8_COMP *cpi,
+                                          int dry_run) {
   int pt; /* near block/prev token context index */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  (void) frametype;
-  (void) type;
   (void) b;
 
   t->Token = DCT_EOB_TOKEN;
-  t->context_tree = cpi->common.fc.coef_probs_8x8 [1] [0] [pt];
+  t->context_tree = cpi->common.fc.coef_probs_8x8[PLANE_TYPE_Y2][0][pt];
   // t->section = 11;
   t->skip_eob_node = 0;
   ++t;
 
   *tp = t;
   if (!dry_run)
-    ++cpi->coef_counts_8x8       [1] [0] [pt] [DCT_EOB_TOKEN];
+    ++cpi->coef_counts_8x8[PLANE_TYPE_Y2][0][pt][DCT_EOB_TOKEN];
   pt = 0;
   *a = *l = pt;
-
 }
 
-static __inline void stuff1st_order_b_8x8
-(
-  MACROBLOCKD *xd,
-  const BLOCKD *const b,
-  TOKENEXTRA **tp,
-  const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
-  const FRAME_TYPE frametype,
-  ENTROPY_CONTEXT *a,
-  ENTROPY_CONTEXT *l,
-  VP8_COMP *cpi,
-  int dry_run) {
+static __inline void stuff1st_order_b_8x8(MACROBLOCKD *xd,
+                                          const BLOCKD *const b,
+                                          TOKENEXTRA **tp,
+                                          PLANE_TYPE type,
+                                          ENTROPY_CONTEXT *a,
+                                          ENTROPY_CONTEXT *l,
+                                          VP8_COMP *cpi,
+                                          int dry_run) {
   int pt; /* near block/prev token context index */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
 #if CONFIG_HYBRIDTRANSFORM8X8
   TX_TYPE tx_type = xd->mode_info_context->mbmi.mode == I8X8_PRED ?
       get_tx_type(xd, b) : DCT_DCT;
 #endif
-
+  const int band = vp8_coef_bands_8x8[(type == PLANE_TYPE_Y_NO_DC) ? 1 : 0];
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  (void) frametype;
-  (void) type;
   (void) b;
 
   t->Token = DCT_EOB_TOKEN;
 #if CONFIG_HYBRIDTRANSFORM8X8
   if (tx_type != DCT_DCT)
-    t->context_tree = cpi->common.fc.hybrid_coef_probs_8x8 [0] [1] [pt];
+    t->context_tree = cpi->common.fc.hybrid_coef_probs_8x8[type][band][pt];
   else
 #endif
-    t->context_tree = cpi->common.fc.coef_probs_8x8 [0] [1] [pt];
+    t->context_tree = cpi->common.fc.coef_probs_8x8[type][band][pt];
   // t->section = 8;
   t->skip_eob_node = 0;
   ++t;
@@ -1128,66 +1099,61 @@ static __inline void stuff1st_order_b_8x8
   if (!dry_run) {
 #if CONFIG_HYBRIDTRANSFORM8X8
     if (tx_type == DCT_DCT)
-      ++cpi->hybrid_coef_counts_8x8[0] [1] [pt] [DCT_EOB_TOKEN];
+      ++cpi->hybrid_coef_counts_8x8[type][band][pt][DCT_EOB_TOKEN];
     else
 #endif
-      ++cpi->coef_counts_8x8[0] [1] [pt] [DCT_EOB_TOKEN];
+      ++cpi->coef_counts_8x8[type][band][pt][DCT_EOB_TOKEN];
   }
   pt = 0; /* 0 <-> all coeff data is zero */
   *a = *l = pt;
-
-
 }
 
-static __inline
-void stuff1st_order_buv_8x8
-(
-  MACROBLOCKD *xd,
-  const BLOCKD *const b,
-  TOKENEXTRA **tp,
-  const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
-  const FRAME_TYPE frametype,
-  ENTROPY_CONTEXT *a,
-  ENTROPY_CONTEXT *l,
-  VP8_COMP *cpi,
-  int dry_run) {
+static __inline void stuff1st_order_buv_8x8(MACROBLOCKD *xd,
+                                            const BLOCKD *const b,
+                                            TOKENEXTRA **tp,
+                                            ENTROPY_CONTEXT *a,
+                                            ENTROPY_CONTEXT *l,
+                                            VP8_COMP *cpi,
+                                            int dry_run) {
   int pt; /* near block/prev token context index */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  (void) frametype;
-  (void) type;
   (void) b;
 
   t->Token = DCT_EOB_TOKEN;
-  t->context_tree = cpi->common.fc.coef_probs_8x8 [2] [0] [pt];
+  t->context_tree = cpi->common.fc.coef_probs_8x8[PLANE_TYPE_UV][0][pt];
   // t->section = 13;
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
   if (!dry_run)
-    ++cpi->coef_counts_8x8[2] [0] [pt] [DCT_EOB_TOKEN];
+    ++cpi->coef_counts_8x8[PLANE_TYPE_UV][0][pt][DCT_EOB_TOKEN];
   pt = 0; /* 0 <-> all coeff data is zero */
   *a = *l = pt;
-
 }
 
-void vp8_stuff_mb_8x8(VP8_COMP *cpi,
-                      MACROBLOCKD *xd,
-                      TOKENEXTRA **t,
-                      int dry_run) {
+static void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
+                             TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
-  int plane_type;
+  PLANE_TYPE plane_type;
   int b;
   TOKENEXTRA *t_backup = *t;
+  const int has_y2_block = (xd->mode_info_context->mbmi.mode != B_PRED
+                            && xd->mode_info_context->mbmi.mode != I8X8_PRED
+                            && xd->mode_info_context->mbmi.mode != SPLITMV);
 
-  stuff2nd_order_b_8x8(xd, xd->block + 24, t, 1, xd->frame_type,
-                       A + vp8_block2above_8x8[24],
-                       L + vp8_block2left_8x8[24], cpi, dry_run);
-  plane_type = 0;
+  if (has_y2_block) {
+    stuff2nd_order_b_8x8(xd, xd->block + 24, t,
+                         A + vp8_block2above_8x8[24],
+                         L + vp8_block2left_8x8[24], cpi, dry_run);
+    plane_type = PLANE_TYPE_Y_NO_DC;
+  } else {
+    plane_type = PLANE_TYPE_Y_WITH_DC;
+  }
 
   for (b = 0; b < 16; b += 4) {
-    stuff1st_order_b_8x8(xd, xd->block + b, t, plane_type, xd->frame_type,
+    stuff1st_order_b_8x8(xd, xd->block + b, t, plane_type,
                          A + vp8_block2above_8x8[b],
                          L + vp8_block2left_8x8[b],
                          cpi, dry_run);
@@ -1196,7 +1162,7 @@ void vp8_stuff_mb_8x8(VP8_COMP *cpi,
   }
 
   for (b = 16; b < 24; b += 4) {
-    stuff1st_order_buv_8x8(xd, xd->block + b, t, 2, xd->frame_type,
+    stuff1st_order_buv_8x8(xd, xd->block + b, t,
                            A + vp8_block2above[b],
                            L + vp8_block2left[b],
                            cpi, dry_run);
@@ -1207,62 +1173,60 @@ void vp8_stuff_mb_8x8(VP8_COMP *cpi,
     *t = t_backup;
 }
 
-static __inline
-void stuff1st_order_b_16x16(MACROBLOCKD *xd,
-                            const BLOCKD *const b,
-                            TOKENEXTRA **tp,
-                            const FRAME_TYPE frametype,
-                            ENTROPY_CONTEXT *a,
-                            ENTROPY_CONTEXT *l,
-                            VP8_COMP *cpi,
-                            int dry_run){
-    int pt; /* near block/prev token context index */
-    TOKENEXTRA *t = *tp;        /* store tokens starting here */
+static __inline void stuff1st_order_b_16x16(MACROBLOCKD *xd,
+                                            const BLOCKD *const b,
+                                            TOKENEXTRA **tp,
+                                            PLANE_TYPE type,
+                                            ENTROPY_CONTEXT *a,
+                                            ENTROPY_CONTEXT *l,
+                                            VP8_COMP *cpi,
+                                            int dry_run) {
+  int pt; /* near block/prev token context index */
+  TOKENEXTRA *t = *tp;        /* store tokens starting here */
 #if CONFIG_HYBRIDTRANSFORM16X16
-    TX_TYPE tx_type = get_tx_type(xd, b);
+  TX_TYPE tx_type = get_tx_type(xd, b);
 #endif
-    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-    (void) frametype;
-    (void) b;
+  const int band = vp8_coef_bands_16x16[(type == PLANE_TYPE_Y_NO_DC) ? 1 : 0];
+  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  (void) b;
 
-    t->Token = DCT_EOB_TOKEN;
+  t->Token = DCT_EOB_TOKEN;
+#if CONFIG_HYBRIDTRANSFORM16X16
+  if (tx_type != DCT_DCT)
+    t->context_tree = cpi->common.fc.hybrid_coef_probs_16x16[type][band][pt];
+  else
+#endif
+    t->context_tree = cpi->common.fc.coef_probs_16x16[type][band][pt];
+  t->skip_eob_node = 0;
+  ++t;
+  *tp = t;
+  if (!dry_run) {
 #if CONFIG_HYBRIDTRANSFORM16X16
     if (tx_type != DCT_DCT)
-      t->context_tree = cpi->common.fc.hybrid_coef_probs_16x16[3][1][pt];
+      ++cpi->hybrid_coef_counts_16x16[type][band][pt][DCT_EOB_TOKEN];
     else
 #endif
-    t->context_tree = cpi->common.fc.coef_probs_16x16[3][1][pt];
-    t->skip_eob_node = 0;
-    ++t;
-    *tp = t;
-    if (!dry_run) {
-#if CONFIG_HYBRIDTRANSFORM16X16
-      if (tx_type != DCT_DCT)
-        ++cpi->hybrid_coef_counts_16x16[3][1][pt][DCT_EOB_TOKEN];
-      else
-#endif
-      ++cpi->coef_counts_16x16[3][1][pt][DCT_EOB_TOKEN];
-    }
-    pt = 0; /* 0 <-> all coeff data is zero */
-    *a = *l = pt;
+      ++cpi->coef_counts_16x16[type][band][pt][DCT_EOB_TOKEN];
+  }
+  pt = 0; /* 0 <-> all coeff data is zero */
+  *a = *l = pt;
 }
 
-void vp8_stuff_mb_16x16(VP8_COMP *cpi,
-                        MACROBLOCKD *xd,
-                        TOKENEXTRA **t,
-                        int dry_run) {
+static void vp8_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
+                               TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)xd->left_context;
   int b, i;
   TOKENEXTRA *t_backup = *t;
 
-  stuff1st_order_b_16x16(xd, xd->block, t, xd->frame_type, A, L, cpi, dry_run);
+  stuff1st_order_b_16x16(xd, xd->block, t, PLANE_TYPE_Y_WITH_DC,
+                         A, L, cpi, dry_run);
   for (i = 1; i < 16; i++) {
     *(A + vp8_block2above[i]) = *(A);
     *(L +  vp8_block2left[i]) = *(L);
   }
   for (b = 16; b < 24; b += 4) {
-    stuff1st_order_buv_8x8(xd, xd->block + b, t, 2, xd->frame_type,
+    stuff1st_order_buv_8x8(xd, xd->block + b, t,
         A + vp8_block2above[b],
         L + vp8_block2left[b],
         cpi, dry_run);
@@ -1275,35 +1239,33 @@ void vp8_stuff_mb_16x16(VP8_COMP *cpi,
     *t = t_backup;
 }
 
-static __inline void stuff2nd_order_b_4x4
-(
-  MACROBLOCKD *xd,
-  const BLOCKD *const b,
-  TOKENEXTRA **tp,
-  ENTROPY_CONTEXT *a,
-  ENTROPY_CONTEXT *l,
-  VP8_COMP *cpi,
-  int dry_run) {
+static __inline void stuff2nd_order_b_4x4(MACROBLOCKD *xd,
+                                          const BLOCKD *const b,
+                                          TOKENEXTRA **tp,
+                                          ENTROPY_CONTEXT *a,
+                                          ENTROPY_CONTEXT *l,
+                                          VP8_COMP *cpi,
+                                          int dry_run) {
   int pt; /* near block/prev token context index */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
   t->Token = DCT_EOB_TOKEN;
-  t->context_tree = cpi->common.fc.coef_probs [1] [0] [pt];
+  t->context_tree = cpi->common.fc.coef_probs[PLANE_TYPE_Y2][0][pt];
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
   if (!dry_run)
-    ++cpi->coef_counts       [1] [0] [pt] [DCT_EOB_TOKEN];
+    ++cpi->coef_counts[PLANE_TYPE_Y2][0][pt] [DCT_EOB_TOKEN];
 
   pt = 0;
   *a = *l = pt;
-
 }
 
 static __inline void stuff1st_order_b_4x4(MACROBLOCKD *xd,
                                           const BLOCKD *const b,
                                           TOKENEXTRA **tp,
+                                          PLANE_TYPE type,
                                           ENTROPY_CONTEXT *a,
                                           ENTROPY_CONTEXT *l,
                                           VP8_COMP *cpi,
@@ -1313,69 +1275,76 @@ static __inline void stuff1st_order_b_4x4(MACROBLOCKD *xd,
 #if CONFIG_HYBRIDTRANSFORM
   TX_TYPE tx_type = get_tx_type(xd, b);
 #endif
+  const int band = vp8_coef_bands[(type == PLANE_TYPE_Y_NO_DC) ? 1 : 0];
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
   t->Token = DCT_EOB_TOKEN;
 #if CONFIG_HYBRIDTRANSFORM
   if (tx_type != DCT_DCT)
-    t->context_tree = cpi->common.fc.hybrid_coef_probs [0] [1] [pt];
+    t->context_tree = cpi->common.fc.hybrid_coef_probs[type][band][pt];
   else
 #endif
-    t->context_tree = cpi->common.fc.coef_probs [0] [1] [pt];
+    t->context_tree = cpi->common.fc.coef_probs[type][band][pt];
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
   if (!dry_run) {
 #if CONFIG_HYBRIDTRANSFORM
     if (tx_type != DCT_DCT)
-      ++cpi->hybrid_coef_counts[0] [1] [pt] [DCT_EOB_TOKEN];
+      ++cpi->hybrid_coef_counts[type][band][pt][DCT_EOB_TOKEN];
     else
 #endif
-      ++cpi->coef_counts[0] [1] [pt] [DCT_EOB_TOKEN];
+      ++cpi->coef_counts[type][band][pt][DCT_EOB_TOKEN];
   }
   pt = 0; /* 0 <-> all coeff data is zero */
   *a = *l = pt;
-
 }
-static __inline
-void stuff1st_order_buv_4x4
-(
-  MACROBLOCKD *xd,
-  const BLOCKD *const b,
-  TOKENEXTRA **tp,
-  ENTROPY_CONTEXT *a,
-  ENTROPY_CONTEXT *l,
-  VP8_COMP *cpi,
-  int dry_run) {
+
+static __inline void stuff1st_order_buv_4x4(MACROBLOCKD *xd,
+                                            const BLOCKD *const b,
+                                            TOKENEXTRA **tp,
+                                            ENTROPY_CONTEXT *a,
+                                            ENTROPY_CONTEXT *l,
+                                            VP8_COMP *cpi,
+                                            int dry_run) {
   int pt; /* near block/prev token context index */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
   t->Token = DCT_EOB_TOKEN;
-  t->context_tree = cpi->common.fc.coef_probs [2] [0] [pt];
+  t->context_tree = cpi->common.fc.coef_probs[PLANE_TYPE_UV][0][pt];
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
   if (!dry_run)
-    ++cpi->coef_counts[2] [0] [pt] [DCT_EOB_TOKEN];
+    ++cpi->coef_counts[PLANE_TYPE_UV][0][pt][DCT_EOB_TOKEN];
   pt = 0; /* 0 <-> all coeff data is zero */
   *a = *l = pt;
 }
 
-void vp8_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
-                      TOKENEXTRA **t, int dry_run) {
+static void vp8_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
+                             TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
   int b;
   TOKENEXTRA *t_backup = *t;
+  PLANE_TYPE plane_type;
+  const int has_y2_block = (xd->mode_info_context->mbmi.mode != B_PRED
+                            && xd->mode_info_context->mbmi.mode != I8X8_PRED
+                            && xd->mode_info_context->mbmi.mode != SPLITMV);
 
-  stuff2nd_order_b_4x4(xd, xd->block + 24, t,
-                       A + vp8_block2above[24],
-                       L + vp8_block2left[24],
-                       cpi, dry_run);
+  if (has_y2_block) {
+    stuff2nd_order_b_4x4(xd, xd->block + 24, t,
+                         A + vp8_block2above[24],
+                         L + vp8_block2left[24],
+                         cpi, dry_run);
+    plane_type = PLANE_TYPE_Y_NO_DC;
+  } else {
+    plane_type = PLANE_TYPE_Y_WITH_DC;
+  }
 
   for (b = 0; b < 16; b++)
-    stuff1st_order_b_4x4(xd, xd->block + b, t,
+    stuff1st_order_b_4x4(xd, xd->block + b, t, plane_type,
                          A + vp8_block2above[b],
                          L + vp8_block2left[b],
                          cpi, dry_run);
@@ -1390,23 +1359,15 @@ void vp8_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
     *t = t_backup;
 }
 
-void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi,
-                            MACROBLOCKD *xd,
-                            TOKENEXTRA **t,
-                            int dry_run) {
+static void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi, MACROBLOCKD *xd,
+                                   TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
-  int plane_type;
   int b;
   TOKENEXTRA *t_backup = *t;
 
-  stuff2nd_order_b_8x8(xd, xd->block + 24, t, 1, xd->frame_type,
-                       A + vp8_block2above_8x8[24],
-                       L + vp8_block2left_8x8[24], cpi, dry_run);
-  plane_type = 3;
-
   for (b = 0; b < 16; b += 4) {
-    stuff1st_order_b_8x8(xd, xd->block + b, t, plane_type, xd->frame_type,
+    stuff1st_order_b_8x8(xd, xd->block + b, t, PLANE_TYPE_Y_WITH_DC,
                          A + vp8_block2above_8x8[b],
                          L + vp8_block2left_8x8[b],
                          cpi, dry_run);
@@ -1422,6 +1383,22 @@ void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi,
 
   if (dry_run)
     *t = t_backup;
+}
+
+void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
+  TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
+
+  if (tx_size == TX_16X16) {
+    vp8_stuff_mb_16x16(cpi, xd, t, dry_run);
+  } else if (tx_size == TX_8X8) {
+    if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+      vp8_stuff_mb_8x8_4x4uv(cpi, xd, t, dry_run);
+    } else {
+      vp8_stuff_mb_8x8(cpi, xd, t, dry_run);
+    }
+  } else {
+    vp8_stuff_mb_4x4(cpi, xd, t, dry_run);
+  }
 }
 
 void vp8_fix_contexts(MACROBLOCKD *xd) {
