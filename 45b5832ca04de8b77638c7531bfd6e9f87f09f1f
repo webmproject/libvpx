@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//9wM\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T07:24:29Z",
+      "side": 1,
+      "message": "const int band \u003d ...",
+      "revId": "45b5832ca04de8b77638c7531bfd6e9f87f09f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9v4\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T07:24:29Z",
+      "side": 1,
+      "message": "const int rc \u003d ...\nconst int v \u003d ...",
+      "revId": "45b5832ca04de8b77638c7531bfd6e9f87f09f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9wI\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T07:24:29Z",
+      "side": 1,
+      "message": "use {}\u0027s",
+      "revId": "45b5832ca04de8b77638c7531bfd6e9f87f09f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9v8\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T07:24:29Z",
+      "side": 1,
+      "message": "remove strange spacing (and below too)(line 302/ ...)",
+      "revId": "45b5832ca04de8b77638c7531bfd6e9f87f09f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9v0\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T07:24:29Z",
+      "side": 1,
+      "message": "const ints...",
+      "revId": "45b5832ca04de8b77638c7531bfd6e9f87f09f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9vw\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T07:24:29Z",
+      "side": 1,
+      "message": "const int tmp1 \u003d ...\n\nconst int tmp2 \u003d ...\n\nconst int16_t* const qcoeff_ptr \u003d ...",
+      "revId": "45b5832ca04de8b77638c7531bfd6e9f87f09f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9vs\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T07:24:29Z",
+      "side": 1,
+      "message": "const int band \u003d ...\n\nconst int rc \u003d ...\n\nconst int v \u003d ...\n\n\n(and below too at 511+. Lot of copy-pasted code, seemingly)",
+      "revId": "45b5832ca04de8b77638c7531bfd6e9f87f09f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
