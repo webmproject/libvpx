@@ -261,10 +261,6 @@ typedef enum {
 
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
-  MB_PREDICTION_MODE mode_rdopt;
-#endif
-
 #if CONFIG_COMP_INTRA_PRED
   MB_PREDICTION_MODE second_mode, second_uv_mode;
 #endif
