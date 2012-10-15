@@ -124,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//9uc\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-10-15T08:33:24Z",
+      "side": 1,
+      "message": "I assume this relates to the boundary (above or left in UMV border) case but it is certainly worth following this through and verifying that it really is necessary and makes sense.",
+      "parentUuid": "AAAAQn//900\u003d",
+      "revId": "895d3a84923b277d9327e4dfb239213e42267c8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//92U\u003d",
         "filename": "vp8/encoder/encodemb.c",
         "patchSetId": 5
