@@ -170,7 +170,6 @@ typedef struct {
 #endif
 
   int optimize;
-  int q_index;
 
   // Structure to hold context for each of the 4 MBs within a SB:
   // when encoded as 4 independent MBs:

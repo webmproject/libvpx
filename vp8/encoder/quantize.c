@@ -22,7 +22,7 @@ extern int enc_debug;
 #endif
 
 #if CONFIG_HYBRIDTRANSFORM
-void vp8_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
+void vp8_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d, TX_TYPE tx_type) {
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
@@ -39,7 +39,7 @@ void vp8_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
 
   int const *pt_scan ;
 
-  switch(d->bmi.as_mode.tx_type) {
+  switch (tx_type) {
     case ADST_DCT :
       pt_scan = vp8_row_scan;
       break;
@@ -653,12 +653,12 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
   }
 
   /* save this macroblock QIndex for vp8_update_zbin_extra() */
-  x->q_index = QIndex;
+  x->e_mbd.q_index = QIndex;
 }
 
 void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x) {
   int i;
-  int QIndex = x->q_index;
+  int QIndex = x->e_mbd.q_index;
   int zbin_extra;
 
   // Y

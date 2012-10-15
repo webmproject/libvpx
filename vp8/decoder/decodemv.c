@@ -1234,6 +1234,14 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
       do {
         mi->bmi[j].as_mode.first = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
+        /*
+        {
+          int p;
+          for (p = 0; p < VP8_BINTRAMODES - 1; ++p)
+            printf(" %d", pbi->common.fc.bmode_prob[p]);
+          printf("\nbmode[%d][%d]: %d\n", pbi->common.current_video_frame, j, mi->bmi[j].as_mode.first);
+        }
+        */
         pbi->common.fc.bmode_counts[mi->bmi[j].as_mode.first]++;
 #if CONFIG_COMP_INTRA_PRED
         if (use_comp_pred) {

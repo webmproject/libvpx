@@ -57,6 +57,9 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
                               MACROBLOCK *x, int ib) {
   BLOCKD *b = &x->e_mbd.block[ib];
   BLOCK *be = &x->block[ib];
+#if CONFIG_HYBRIDTRANSFORM
+  TX_TYPE tx_type;
+#endif
 
 #if CONFIG_COMP_INTRA_PRED
   if (b->bmi.as_mode.second == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
@@ -72,11 +75,11 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
   ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 
 #if CONFIG_HYBRIDTRANSFORM
-  if (x->q_index < ACTIVE_HT) {
-    txfm_map(b, b->bmi.as_mode.first);
-    vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 4);
-    vp8_ht_quantize_b_4x4(be, b);
-    vp8_ihtllm_c(b->dqcoeff, b->diff, 32, b->bmi.as_mode.tx_type, 4);
+  tx_type = get_tx_type(&x->e_mbd, b);
+  if (tx_type != DCT_DCT) {
+    vp8_fht_c(be->src_diff, be->coeff, 32, tx_type, 4);
+    vp8_ht_quantize_b_4x4(be, b, tx_type);
+    vp8_ihtllm_c(b->dqcoeff, b->diff, 32, tx_type, 4);
   } else
 #endif
   {
@@ -91,12 +94,6 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
 void vp8_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb) {
   int i;
 
-#if 0
-  MACROBLOCKD *xd = &mb->e_mbd;
-  // Intra modes requiring top-right MB reconstructed data have been disabled
-  vp8_intra_prediction_down_copy(xd);
-#endif
-
   for (i = 0; i < 16; i++)
     vp8_encode_intra4x4block(rtcd, mb, i);
   return;
@@ -107,7 +104,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   BLOCK *b = &x->block[0];
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 #if CONFIG_HYBRIDTRANSFORM16X16
-  TX_TYPE txfm_type = xd->mode_info_context->bmi[0].as_mode.tx_type;
+  TX_TYPE tx_type;
 #endif
 
 #if CONFIG_COMP_INTRA_PRED
@@ -124,16 +121,14 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   if (tx_size == TX_16X16) {
 #if CONFIG_HYBRIDTRANSFORM16X16
-    if ((xd->mode_info_context->mbmi.mode < I8X8_PRED) &&
-        (x->q_index < ACTIVE_HT16)) {
-      BLOCKD  *bd = &xd->block[0];
-      txfm_map(bd, pred_mode_conv(xd->mode_info_context->mbmi.mode));
-      txfm_type = bd->bmi.as_mode.tx_type;
-      vp8_fht_c(b->src_diff, b->coeff, 32, txfm_type, 16);
+    BLOCKD  *bd = &xd->block[0];
+    tx_type = get_tx_type(xd, bd);
+    if (tx_type != DCT_DCT) {
+      vp8_fht_c(b->src_diff, b->coeff, 32, tx_type, 16);
       vp8_quantize_mby_16x16(x);
       if (x->optimize)
         vp8_optimize_mby_16x16(x, rtcd);
-      vp8_ihtllm_c(bd->dqcoeff, bd->diff, 32, txfm_type, 16);
+      vp8_ihtllm_c(bd->dqcoeff, bd->diff, 32, tx_type, 16);
     } else
 #endif
     {
@@ -201,6 +196,9 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
   BLOCK *be = &x->block[ib];
   const int iblock[4] = {0, 1, 4, 5};
   int i;
+#if CONFIG_HYBRIDTRANSFORM8X8
+  TX_TYPE tx_type;
+#endif
 
 #if CONFIG_COMP_INTRA_PRED
   if (b->bmi.as_mode.second == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
@@ -220,16 +218,20 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     vp8_subtract_4b_c(be, b, 16);
 
 #if CONFIG_HYBRIDTRANSFORM8X8
-    txfm_map(b, pred_mode_conv(b->bmi.as_mode.first));
-    vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32,
-              b->bmi.as_mode.tx_type, 8);
-    x->quantize_b_8x8(x->block + idx, xd->block + idx);
-    vp8_ihtllm_c(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
-                 b->bmi.as_mode.tx_type, 8);
-#else
-    x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
-    x->quantize_b_8x8(x->block + idx, xd->block + idx);
-    vp8_idct_idct8(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
+    tx_type = get_tx_type(xd, &xd->block[idx]);
+    if (tx_type != DCT_DCT) {
+      vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32,
+                tx_type, 8);
+      x->quantize_b_8x8(x->block + idx, xd->block + idx);
+      vp8_ihtllm_c(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
+                   tx_type, 8);
+    } else {
+#endif
+      x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+      x->quantize_b_8x8(x->block + idx, xd->block + idx);
+      vp8_idct_idct8(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
+#if CONFIG_HYBRIDTRANSFORM8X8
+    }
 #endif
   } else {
     for (i = 0; i < 4; i++) {

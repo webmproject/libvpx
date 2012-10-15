@@ -1061,7 +1061,7 @@ static void encode_sb(VP8_COMP *cpi,
       x->partition_info     += 2;
       xd->mode_info_context += 2;
       xd->prev_mode_info_context += 2;
-      
+
       (*tp)->Token = EOSB_TOKEN;
       (*tp)++;
       if (mb_row < cm->mb_rows) cpi->tplist[mb_row].stop = *tp;
@@ -1931,7 +1931,7 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
     update_sb_skip_coeff_state(cpi, x, ta, tl, tp, t, skip);
   }
 }
-#endif
+#endif /* CONFIG_SUPERBLOCKS */
 
 void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
                                     MACROBLOCK *x,
@@ -1942,7 +1942,6 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
     adjust_act_zbin(cpi, x);
     vp8_update_zbin_extra(cpi, x);
   }
-
   if (mbmi->mode == I8X8_PRED) {
     vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
     vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);

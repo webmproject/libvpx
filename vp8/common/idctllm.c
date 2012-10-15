@@ -189,6 +189,7 @@ void vp8_ihtllm_c(short *input, short *output, int pitch,
     // pointers to vertical and horizontal transforms
     float *ptv, *pth;
 
+    assert(tx_type != DCT_DCT);
     // load and convert residual array into floating-point
     for(j = 0; j < tx_dim; j++) {
       for(i = 0; i < tx_dim; i++) {

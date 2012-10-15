@@ -267,7 +267,7 @@ static const int plane_rd_mult[4] = {
 
 void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
                 ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                const VP8_ENCODER_RTCD *rtcd, int tx_type) {
+                const VP8_ENCODER_RTCD *rtcd, int tx_size) {
   BLOCK *b;
   BLOCKD *d;
   vp8_token_state tokens[65][2];
@@ -298,7 +298,7 @@ void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
 
   b = &mb->block[i];
   d = &mb->e_mbd.block[i];
-  switch (tx_type) {
+  switch (tx_size) {
     default:
     case TX_4X4:
       scan = vp8_default_zig_zag1d;
@@ -308,11 +308,9 @@ void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       // TODO: this isn't called (for intra4x4 modes), but will be left in
       // since it could be used later
       {
-        int active_ht = (mb->q_index < ACTIVE_HT) &&
-                        (mb->e_mbd.mode_info_context->mbmi.mode == B_PRED);
-
-        if((type == PLANE_TYPE_Y_WITH_DC) && active_ht) {
-          switch (d->bmi.as_mode.tx_type) {
+        TX_TYPE tx_type = get_tx_type(&mb->e_mbd, d);
+        if (tx_type != DCT_DCT) {
+          switch (tx_type) {
             case ADST_DCT:
               scan = vp8_row_scan;
               break;
@@ -325,9 +323,9 @@ void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
               scan = vp8_default_zig_zag1d;
               break;
           }
-
-        } else
+        } else {
           scan = vp8_default_zig_zag1d;
+        }
       }
 #endif
       break;
@@ -380,9 +378,9 @@ void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
         band = bands[i + 1];
         pt = vp8_prev_token_class[t0];
         rate0 +=
-          mb->token_costs[tx_type][type][band][pt][tokens[next][0].token];
+          mb->token_costs[tx_size][type][band][pt][tokens[next][0].token];
         rate1 +=
-          mb->token_costs[tx_type][type][band][pt][tokens[next][1].token];
+          mb->token_costs[tx_size][type][band][pt][tokens[next][1].token];
       }
       UPDATE_RD_COST();
       /* And pick the best. */
@@ -427,12 +425,12 @@ void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
         band = bands[i + 1];
         if (t0 != DCT_EOB_TOKEN) {
           pt = vp8_prev_token_class[t0];
-          rate0 += mb->token_costs[tx_type][type][band][pt][
+          rate0 += mb->token_costs[tx_size][type][band][pt][
               tokens[next][0].token];
         }
         if (t1 != DCT_EOB_TOKEN) {
           pt = vp8_prev_token_class[t1];
-          rate1 += mb->token_costs[tx_type][type][band][pt][
+          rate1 += mb->token_costs[tx_size][type][band][pt][
               tokens[next][1].token];
         }
       }
@@ -464,11 +462,11 @@ void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
       if (t0 != DCT_EOB_TOKEN) {
-        tokens[next][0].rate += mb->token_costs[tx_type][type][band][0][t0];
+        tokens[next][0].rate += mb->token_costs[tx_size][type][band][0][t0];
         tokens[next][0].token = ZERO_TOKEN;
       }
       if (t1 != DCT_EOB_TOKEN) {
-        tokens[next][1].rate += mb->token_costs[tx_type][type][band][0][t1];
+        tokens[next][1].rate += mb->token_costs[tx_size][type][band][0][t1];
         tokens[next][1].token = ZERO_TOKEN;
       }
       /* Don't update next, because we didn't add a new node. */
@@ -484,8 +482,8 @@ void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   error1 = tokens[next][1].error;
   t0 = tokens[next][0].token;
   t1 = tokens[next][1].token;
-  rate0 += mb->token_costs[tx_type][type][band][pt][t0];
-  rate1 += mb->token_costs[tx_type][type][band][pt][t1];
+  rate0 += mb->token_costs[tx_size][type][band][pt][t0];
+  rate1 += mb->token_costs[tx_size][type][band][pt][t1];
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = i0 - 1;

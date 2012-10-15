@@ -31,7 +31,9 @@
 #endif
 
 #if CONFIG_HYBRIDTRANSFORM
-extern prototype_quantize_block(vp8_ht_quantize_b_4x4);
+#define prototype_quantize_block_type(sym) \
+  void (sym)(BLOCK *b, BLOCKD *d, TX_TYPE type)
+extern prototype_quantize_block_type(vp8_ht_quantize_b_4x4);
 #endif
 
 #ifndef vp8_quantize_quantb_4x4

@@ -578,8 +578,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     if (i == 16)
       type = PLANE_TYPE_UV;
 #if CONFIG_HYBRIDTRANSFORM8X8
-    if (type == PLANE_TYPE_Y_WITH_DC &&
-        xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+    if (type == PLANE_TYPE_Y_WITH_DC) {
       tx_type = get_tx_type(xd, xd->block + i);
     }
 #endif
@@ -673,10 +672,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd) {
       type = PLANE_TYPE_UV;
 
 #if CONFIG_HYBRIDTRANSFORM
-    if (type == PLANE_TYPE_Y_WITH_DC)
-      tx_type = get_tx_type(xd, &xd->block[i]);
-#endif
-#if CONFIG_HYBRIDTRANSFORM
+    tx_type = get_tx_type(xd, &xd->block[i]);
     switch(tx_type) {
       case ADST_DCT :
         scan = vp8_row_scan;

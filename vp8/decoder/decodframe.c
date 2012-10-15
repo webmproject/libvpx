@@ -115,16 +115,12 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     }
   } else
     QIndex = pc->base_qindex;
+  xd->q_index = QIndex;
 
   /* Set up the block level dequant pointers */
   for (i = 0; i < 16; i++) {
     xd->block[i].dequant = pc->Y1dequant[QIndex];
   }
-
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
-  xd->q_index = QIndex;
-#endif
-
 
 #if CONFIG_LOSSLESS
   if (!QIndex) {
@@ -210,19 +206,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   int eobtotal = 0;
   MB_PREDICTION_MODE mode;
   int i;
-  int tx_type;
+  int tx_size;
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || \
+    CONFIG_HYBRIDTRANSFORM16X16
+  TX_TYPE tx_type;
+#endif
 #if CONFIG_SUPERBLOCKS
   VP8_COMMON *pc = &pbi->common;
   int orig_skip_flag = xd->mode_info_context->mbmi.mb_skip_coeff;
-#endif
-
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-  int QIndex;
-  int active_ht;
-#endif
-
-#if CONFIG_HYBRIDTRANSFORM16X16
-  int active_ht16;
 #endif
 
   // re-initialize macroblock dequantizer before detokenization
@@ -235,42 +226,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   }
 #endif
 
-  tx_type = xd->mode_info_context->mbmi.txfm_size;
+  tx_size = xd->mode_info_context->mbmi.txfm_size;
   mode = xd->mode_info_context->mbmi.mode;
-
-#if CONFIG_HYBRIDTRANSFORM
-  // parse transform types for intra 4x4 mode
-  QIndex = xd->q_index;
-  active_ht = (QIndex < ACTIVE_HT);
-  if (mode == B_PRED) {
-    for (i = 0; i < 16; i++) {
-      BLOCKD *b = &xd->block[i];
-      int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
-      if(active_ht)
-        txfm_map(b, b_mode);
-    } // loop over 4x4 blocks
-  }
-#endif
-
-#if CONFIG_HYBRIDTRANSFORM8X8
-  if (mode == I8X8_PRED) {
-    for (i = 0; i < 4; i++) {
-      int ib = vp8_i8x8_block[i];
-      BLOCKD *b = &xd->block[ib];
-      int i8x8mode = b->bmi.as_mode.first;
-      txfm_map(b, pred_mode_conv(i8x8mode));
-    }
-  }
-#endif
-
-#if CONFIG_HYBRIDTRANSFORM16X16
-  active_ht16 = (QIndex < ACTIVE_HT16);
-  if (mode < I8X8_PRED) {
-    BLOCKD *b = &xd->block[0];
-    if(active_ht16)
-      txfm_map(b, pred_mode_conv(mode));
-  }
-#endif
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
     vp8_reset_mb_tokens_context(xd);
@@ -288,12 +245,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       xd->block[i].eob = 0;
       xd->eobs[i] = 0;
     }
-    if (tx_type == TX_16X16)
+    if (tx_size == TX_16X16) {
       eobtotal = vp8_decode_mb_tokens_16x16(pbi, xd);
-    else if (tx_type == TX_8X8)
+    } else if (tx_size == TX_8X8) {
       eobtotal = vp8_decode_mb_tokens_8x8(pbi, xd);
-    else
+    } else {
       eobtotal = vp8_decode_mb_tokens(pbi, xd);
+    }
   }
 
   //mode = xd->mode_info_context->mbmi.mode;
@@ -380,13 +338,17 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
       if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
 #if CONFIG_HYBRIDTRANSFORM8X8
-        vp8_ht_dequant_idct_add_8x8_c(b->bmi.as_mode.tx_type,
-                                      q, dq, pre, dst, 16, stride);
-        q += 64;
+        tx_type = get_tx_type(xd, &xd->block[idx]);
+        if (tx_type != DCT_DCT) {
+          vp8_ht_dequant_idct_add_8x8_c(tx_type,
+                                        q, dq, pre, dst, 16, stride);
+        } else {
+          vp8_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
+        }
 #else
         vp8_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
-        q += 64;
 #endif
+        q += 64;
       } else {
         for (j = 0; j < 4; j++) {
           b = &xd->block[ib + iblock[j]];
@@ -396,7 +358,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       }
 
       b = &xd->block[16 + i];
-	  vp8_intra_uv4x4_predict(b, i8x8mode, b->predictor);
+      vp8_intra_uv4x4_predict(b, i8x8mode, b->predictor);
       DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, b->dequant,
                                               b->predictor,
                                               *(b->base_dst) + b->dst, 8,
@@ -425,16 +387,17 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 #endif
 
 #if CONFIG_HYBRIDTRANSFORM
-      if(active_ht)
-        vp8_ht_dequant_idct_add_c( (TX_TYPE)b->bmi.as_mode.tx_type, b->qcoeff,
-                                   b->dequant, b->predictor,
-                                   *(b->base_dst) + b->dst, 16, b->dst_stride);
-      else
+      tx_type = get_tx_type(xd, b);
+      if (tx_type != DCT_DCT) {
+        vp8_ht_dequant_idct_add_c(tx_type, b->qcoeff,
+                                  b->dequant, b->predictor,
+                                  *(b->base_dst) + b->dst, 16, b->dst_stride);
+      } else {
         vp8_dequant_idct_add_c(b->qcoeff, b->dequant, b->predictor,
                                *(b->base_dst) + b->dst, 16, b->dst_stride);
+      }
 #else
-      if (xd->eobs[i] > 1)
-      {
+      if (xd->eobs[i] > 1) {
         DEQUANT_INVOKE(&pbi->dequant, idct_add)
             (b->qcoeff, b->dequant,  b->predictor,
              *(b->base_dst) + b->dst, 16, b->dst_stride);
@@ -454,15 +417,12 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   } else {
     BLOCKD *b = &xd->block[24];
 
-    if (tx_type == TX_16X16) {
+    if (tx_size == TX_16X16) {
 #if CONFIG_HYBRIDTRANSFORM16X16
-      if (mode < I8X8_PRED && active_ht16) {
-        BLOCKD *bd = &xd->block[0];
-        TX_TYPE txfm;
-        txfm_map(bd, pred_mode_conv(mode));
-        txfm = bd->bmi.as_mode.tx_type;
-
-        vp8_ht_dequant_idct_add_16x16_c(txfm, xd->qcoeff,
+      BLOCKD *bd = &xd->block[0];
+      tx_type = get_tx_type(xd, bd);
+      if (tx_type != DCT_DCT) {
+        vp8_ht_dequant_idct_add_16x16_c(tx_type, xd->qcoeff,
                                         xd->block[0].dequant, xd->predictor,
                                         xd->dst.y_buffer, 16, xd->dst.y_stride);
       } else {
@@ -475,8 +435,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                                    xd->predictor, xd->dst.y_buffer,
                                    16, xd->dst.y_stride);
 #endif
-    }
-    else if (tx_type == TX_8X8) {
+    } else if (tx_size == TX_8X8) {
 #if CONFIG_SUPERBLOCKS
       void *orig = xd->mode_info_context;
       int n, num = xd->mode_info_context->mbmi.encoded_as_sb ? 4 : 1;
@@ -561,10 +520,9 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 #if CONFIG_SUPERBLOCKS
   if (!xd->mode_info_context->mbmi.encoded_as_sb) {
 #endif
-    if ((tx_type == TX_8X8 &&
+    if ((tx_size == TX_8X8 &&
          xd->mode_info_context->mbmi.mode != I8X8_PRED)
-        || tx_type == TX_16X16
-       )
+        || tx_size == TX_16X16)
       DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block_8x8) //
           (xd->qcoeff + 16 * 16, xd->block[16].dequant,
            xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,

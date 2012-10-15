@@ -1363,7 +1363,8 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
 
   vpx_free(cpi->tplist);
 
-  CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cpi->common.mb_rows));
+  CHECK_MEM_ERROR(cpi->tplist,
+                  vpx_malloc(sizeof(TOKENLIST) * (cpi->common.mb_rows)));
 }
 
 

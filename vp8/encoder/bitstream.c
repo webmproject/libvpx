@@ -996,6 +996,14 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 #endif
               write_bmode(w, m->bmi[j].as_mode.first,
                           pc->fc.bmode_prob);
+              /*
+              if (!cpi->dummy_packing) {
+                int p;
+                for (p = 0; p < VP8_BINTRAMODES - 1; ++p)
+                  printf(" %d", pc->fc.bmode_prob[p]);
+                printf("\nbmode[%d][%d]: %d\n", pc->current_video_frame, j, m->bmi[j].as_mode.first);
+              }
+              */
 #if CONFIG_COMP_INTRA_PRED
               if (uses_second) {
                 write_bmode(w, mode2, pc->fc.bmode_prob);

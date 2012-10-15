@@ -151,14 +151,6 @@ typedef enum {
 
 #define VP8_MVREFS (1 + SPLITMV - NEARESTMV)
 
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-#define ACTIVE_HT 110                // quantization stepsize threshold
-#endif
-
-#if CONFIG_HYBRIDTRANSFORM16X16
-#define ACTIVE_HT16 300
-#endif
-
 typedef enum {
   B_DC_PRED,          /* average of above and left pixels */
   B_TM_PRED,
@@ -181,50 +173,6 @@ typedef enum {
 
   B_MODE_COUNT
 } B_PREDICTION_MODE;
-
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
-// convert MB_PREDICTION_MODE to B_PREDICTION_MODE
-static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
-  B_PREDICTION_MODE b_mode;
-  switch (mode) {
-    case DC_PRED:
-      b_mode = B_DC_PRED;
-      break;
-    case V_PRED:
-      b_mode = B_VE_PRED;
-      break;
-    case H_PRED:
-      b_mode = B_HE_PRED;
-      break;
-    case TM_PRED:
-      b_mode = B_TM_PRED;
-      break;
-    case D45_PRED:
-      b_mode = B_LD_PRED;
-      break;
-    case D135_PRED:
-      b_mode = B_RD_PRED;
-      break;
-    case D117_PRED:
-      b_mode = B_VR_PRED;
-      break;
-    case D153_PRED:
-      b_mode = B_HD_PRED;
-      break;
-    case D27_PRED:
-      b_mode = B_VL_PRED;
-      break;
-    case D63_PRED:
-      b_mode = B_HU_PRED;
-      break;
-    default :
-      // for debug purpose, to be removed after full testing
-      assert(0);
-      break;
-  }
-  return b_mode;
-}
-#endif
 
 #define VP8_BINTRAMODES (B_HU_PRED + 1)  /* 10 */
 #define VP8_SUBMVREFS (1 + NEW4X4 - LEFT4X4)
@@ -438,68 +386,150 @@ typedef struct MacroBlockD {
   int_mv ref_mv[MAX_MV_REFS];
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
   int q_index;
-#endif
 
 } MACROBLOCKD;
 
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
+#define ACTIVE_HT 110                // quantization stepsize threshold
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM8X8
+#define ACTIVE_HT8 300
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM16X16
+#define ACTIVE_HT16 300
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
+// convert MB_PREDICTION_MODE to B_PREDICTION_MODE
+static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
+  B_PREDICTION_MODE b_mode;
+  switch (mode) {
+    case DC_PRED:
+      b_mode = B_DC_PRED;
+      break;
+    case V_PRED:
+      b_mode = B_VE_PRED;
+      break;
+    case H_PRED:
+      b_mode = B_HE_PRED;
+      break;
+    case TM_PRED:
+      b_mode = B_TM_PRED;
+      break;
+    case D45_PRED:
+      b_mode = B_LD_PRED;
+      break;
+    case D135_PRED:
+      b_mode = B_RD_PRED;
+      break;
+    case D117_PRED:
+      b_mode = B_VR_PRED;
+      break;
+    case D153_PRED:
+      b_mode = B_HD_PRED;
+      break;
+    case D27_PRED:
+      b_mode = B_HU_PRED;
+      break;
+    case D63_PRED:
+      b_mode = B_VL_PRED;
+      break;
+    default :
+      // for debug purpose, to be removed after full testing
+      assert(0);
+      break;
+  }
+  return b_mode;
+}
+#endif
+
 #if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
 // transform mapping
-static void txfm_map(BLOCKD *b, B_PREDICTION_MODE bmode) {
+static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
   // map transform type
+  TX_TYPE tx_type;
   switch (bmode) {
     case B_TM_PRED :
     case B_RD_PRED :
-      b->bmi.as_mode.tx_type = ADST_ADST;
+      tx_type = ADST_ADST;
       break;
 
     case B_VE_PRED :
     case B_VR_PRED :
-      b->bmi.as_mode.tx_type = ADST_DCT;
+      tx_type = ADST_DCT;
       break;
 
     case B_HE_PRED :
     case B_HD_PRED :
     case B_HU_PRED :
-      b->bmi.as_mode.tx_type = DCT_ADST;
+      tx_type = DCT_ADST;
       break;
 
     default :
-      b->bmi.as_mode.tx_type = DCT_DCT;
+      tx_type = DCT_DCT;
       break;
   }
+  return tx_type;
 }
+#endif
 
-static TX_TYPE get_tx_type(MACROBLOCKD *xd, const BLOCKD *b) {
+#if CONFIG_HYBRIDTRANSFORM
+static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
+  TX_TYPE tx_type = DCT_DCT;
+  if (xd->mode_info_context->mbmi.mode == B_PRED &&
+      xd->q_index < ACTIVE_HT) {
+    tx_type = txfm_map(b->bmi.as_mode.first);
+  }
+  return tx_type;
+}
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM8X8
+static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
+  TX_TYPE tx_type = DCT_DCT;
+  if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
+      xd->q_index < ACTIVE_HT8) {
+    tx_type = txfm_map(pred_mode_conv(b->bmi.as_mode.first));
+  }
+  return tx_type;
+}
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM16X16
+static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
+  TX_TYPE tx_type = DCT_DCT;
+  if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
+      xd->q_index < ACTIVE_HT16) {
+    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+  }
+  return tx_type;
+}
+#endif
+
+#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || \
+    CONFIG_HYBRIDTRANSFORM16X16
+static TX_TYPE get_tx_type(const MACROBLOCKD *xd, const BLOCKD *b) {
   TX_TYPE tx_type = DCT_DCT;
   int ib = (b - xd->block);
-  if (ib >= 16) return tx_type;
+  if (ib >= 16)
+    return tx_type;
 #if CONFIG_HYBRIDTRANSFORM16X16
   if (xd->mode_info_context->mbmi.txfm_size == TX_16X16) {
-    if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
-        xd->q_index < ACTIVE_HT16)
-      tx_type = b->bmi.as_mode.tx_type;
-    return tx_type;
+    tx_type = get_tx_type_16x16(xd, b);
   }
 #endif
 #if CONFIG_HYBRIDTRANSFORM8X8
   if (xd->mode_info_context->mbmi.txfm_size  == TX_8X8) {
-    BLOCKD *bb;
     ib = (ib & 8) + ((ib & 4) >> 1);
-    bb = xd->block + ib;
-    if (xd->mode_info_context->mbmi.mode == I8X8_PRED)
-      tx_type = bb->bmi.as_mode.tx_type;
-    return tx_type;
+    tx_type = get_tx_type_8x8(xd, &xd->block[ib]);
   }
 #endif
 #if CONFIG_HYBRIDTRANSFORM
   if (xd->mode_info_context->mbmi.txfm_size  == TX_4X4) {
-    if (xd->mode_info_context->mbmi.mode == B_PRED &&
-        xd->q_index < ACTIVE_HT) {
-      tx_type = b->bmi.as_mode.tx_type;
-    }
-    return tx_type;
+    tx_type = get_tx_type_4x4(xd, b);
   }
 #endif
   return tx_type;
