@@ -217,7 +217,7 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   unsigned char *above_ref;
   unsigned char *left_ref;
   int sad;
-  int sad_scores[MAX_MV_REFS];
+  int sad_scores[MAX_MV_REFS] = {0};
   int_mv sorted_mvs[MAX_MV_REFS];
   int zero_seen = FALSE;
 
@@ -259,12 +259,13 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
       ((this_mv.as_mv.col + 3) >> 3):((this_mv.as_mv.col + 4) >> 3);
     offset = ref_y_stride * row_offset + col_offset;
 
-    sad = vp8_sad16x3_c(above_src, xd->dst.y_stride,
-                        above_ref + offset, ref_y_stride, INT_MAX);
-
-    sad += vp8_sad3x16_c(left_src, xd->dst.y_stride,
-                         left_ref + offset, ref_y_stride, INT_MAX);
-
+    sad = 0;
+    if (xd->up_available)
+      sad += vp8_sad16x3_c(above_src, xd->dst.y_stride,
+                           above_ref + offset, ref_y_stride, INT_MAX);
+    if (xd->left_available)
+      sad += vp8_sad3x16_c(left_src, xd->dst.y_stride,
+                           left_ref + offset, ref_y_stride, INT_MAX);
     // Add the entry to our list and then resort the list on score.
     sad_scores[i] = sad;
     sorted_mvs[i].as_int = this_mv.as_int;
