@@ -647,11 +647,12 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
       {
         BLOCKD *bb;
         int ib = (b - xd->block);
-        if (ib >= 16) tx_type = DCT_DCT;
-        ib = (ib & 8) + ((ib & 4) >> 1);
-        bb = xd->block + ib;
-        if (mbmi->mode_rdopt == I8X8_PRED)
-          tx_type = bb->bmi.as_mode.tx_type;
+        if (ib < 16) {
+          ib = (ib & 8) + ((ib & 4) >> 1);
+          bb = xd->block + ib;
+          if (mbmi->mode_rdopt == I8X8_PRED)
+            tx_type = bb->bmi.as_mode.tx_type;
+        }
       }
 #endif
       break;
