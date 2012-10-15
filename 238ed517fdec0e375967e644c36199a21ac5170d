@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//9vU\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T07:28:23Z",
+      "side": 1,
+      "message": "could be:\n    int16_t* const src_diff_ptr \u003d ...\n\neven",
+      "revId": "238ed517fdec0e375967e644c36199a21ac5170d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
