@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//9SQ\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T21:59:08Z",
+      "side": 1,
+      "message": "Scott, note that change these to uint8_t will only save space if pragma pack is used, or all fields properly arranged. Otherwise, compiler might use some padding to align to 4 bytes, or similar...",
+      "revId": "66180f228c9b369f920013f93c64b9bd54d88e69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9Sc\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T21:59:08Z",
+      "side": 1,
+      "message": "all \u0027unsigned char\u0027 should be turned into uint8_t, btw",
+      "revId": "66180f228c9b369f920013f93c64b9bd54d88e69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
