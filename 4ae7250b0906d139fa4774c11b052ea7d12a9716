@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//9Yo\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-15T19:45:22Z",
+      "side": 1,
+      "message": "missing #if CONFIG_NEWBINTRAMODES",
+      "revId": "4ae7250b0906d139fa4774c11b052ea7d12a9716",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9Yc\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 605,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-15T19:45:22Z",
+      "side": 1,
+      "message": "are you sure about this? bpred still has its own chroma mode, right?",
+      "revId": "4ae7250b0906d139fa4774c11b052ea7d12a9716",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9YY\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-15T19:45:22Z",
+      "side": 1,
+      "message": "please remove old code, don\u0027t comment it out",
+      "revId": "4ae7250b0906d139fa4774c11b052ea7d12a9716",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9YQ\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-15T19:45:22Z",
+      "side": 1,
+      "message": "debug printfs should be removed.",
+      "revId": "4ae7250b0906d139fa4774c11b052ea7d12a9716",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
