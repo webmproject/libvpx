@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//9dw\u003d",
+        "filename": "vp8/common/invtrans.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-15T18:42:20Z",
+      "side": 1,
+      "message": "some code to remove here too...",
+      "revId": "78bf1029f137b2068d42b9f56cb85cd5b0f48346",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
