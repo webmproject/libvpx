@@ -513,7 +513,8 @@ static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2,
             && x->e_mbd.mode_info_context->mbmi.ref_frame != LAST_FRAME)
             rd_adj = 100;
 
-        this_rd = this_rd * rd_adj/100;
+        // rd_adj <= 100
+        this_rd = ((int64_t)this_rd) * rd_adj / 100;
     }
 
     check_for_encode_breakout(*sse, x);
