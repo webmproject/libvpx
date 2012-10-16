@@ -1149,7 +1149,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 
   init_frame(pbi);
 
-  if (vp8dx_start_decode(bc, data, data_end - data))
+  if (vp8dx_start_decode(bc, data, first_partition_length_in_bytes))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
   if (pc->frame_type == KEY_FRAME) {

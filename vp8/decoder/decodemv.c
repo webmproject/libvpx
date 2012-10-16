@@ -78,7 +78,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
                              int mb_row,
                              int mb_col) {
   VP8_COMMON *const cm = & pbi->common;
-  vp8_reader *const bc = & pbi->bc;
+  vp8_reader *const bc = pbi->mb.current_bc;
   const int mis = pbi->common.mode_info_stride;
   int map_index = mb_row * pbi->common.mb_cols + mb_col;
   MB_PREDICTION_MODE y_mode;
@@ -612,9 +612,8 @@ static void read_switchable_interp_probs(VP8D_COMP *pbi) {
 }
 #endif
 
-static void mb_mode_mv_init(VP8D_COMP *pbi) {
+static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
   VP8_COMMON *const cm = & pbi->common;
-  vp8_reader *const bc = & pbi->bc;
 #if CONFIG_NEWMVENTROPY
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
 #else
@@ -682,9 +681,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi) {
 // value
 static void read_mb_segment_id(VP8D_COMP *pbi,
                                int mb_row, int mb_col) {
-  vp8_reader *const bc = & pbi->bc;
   VP8_COMMON *const cm = & pbi->common;
   MACROBLOCKD *const xd  = & pbi->mb;
+  vp8_reader *const bc = xd->current_bc;
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *mbmi = &mi->mbmi;
   int index = mb_row * pbi->common.mb_cols + mb_col;
@@ -755,7 +754,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                              MODE_INFO *prev_mi,
                              int mb_row, int mb_col) {
   VP8_COMMON *const cm = & pbi->common;
-  vp8_reader *const bc = & pbi->bc;
 #if CONFIG_NEWMVENTROPY
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
 #else
@@ -764,6 +762,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
   const int mis = pbi->common.mode_info_stride;
   MACROBLOCKD *const xd  = & pbi->mb;
+  vp8_reader *const bc = xd->current_bc;
 
   int_mv *const mv = & mbmi->mv;
   int mb_to_left_edge;
@@ -1304,9 +1303,10 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
 void vpx_decode_mode_mvs_init(VP8D_COMP *pbi){
   VP8_COMMON *cm = &pbi->common;
-  mb_mode_mv_init(pbi);
+
+  mb_mode_mv_init(pbi, pbi->mb.current_bc);
   if (cm->frame_type == KEY_FRAME && !cm->kf_ymode_probs_update)
-    cm->kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
+    cm->kf_ymode_probs_index = vp8_read_literal(pbi->mb.current_bc, 3);
 }
 void vpx_decode_mb_mode_mv(VP8D_COMP *pbi,
                            MACROBLOCKD *xd,

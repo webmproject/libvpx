@@ -37,9 +37,9 @@ extern const int vp8_i8x8_block[4];
 #define DCT_VAL_CATEGORY5       9       /* 35-66     Extra Bits 5+1 */
 #define DCT_VAL_CATEGORY6       10      /* 67+       Extra Bits 13+1 */
 #define DCT_EOB_TOKEN           11      /* EOB       Extra Bits 0+0 */
-
 #define MAX_ENTROPY_TOKENS 12
 #define ENTROPY_NODES 11
+#define EOSB_TOKEN              127     /* Not signalled, encoder only */
 
 extern const vp8_tree_index vp8_coef_tree[];
 
