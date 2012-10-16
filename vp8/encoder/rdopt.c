@@ -4379,6 +4379,7 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
   if (cpi->common.mb_no_coeff_skip &&
       y_intra16x16_skippable && uv_intra_skippable_8x8) {
     mbmi->mb_skip_coeff = 1;
+    mbmi->mode = mode16x16;
     mbmi->uv_mode = modeuv;
     rate = rateuv8x8 + rate16x16 - rateuv8x8_tokenonly - rate16x16_tokenonly +
            vp8_cost_bit(get_pred_prob(cm, xd, PRED_MBSKIP), 1);
