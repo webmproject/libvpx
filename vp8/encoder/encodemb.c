@@ -14,7 +14,6 @@
 #include "quantize.h"
 #include "tokenize.h"
 #include "vp8/common/invtrans.h"
-#include "vp8/common/recon.h"
 #include "vp8/common/reconintra.h"
 #include "dct.h"
 #include "vpx_mem/vpx_mem.h"
@@ -914,8 +913,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     vp8_inverse_transform_mb_4x4(IF_RTCD(&rtcd->common->idct), xd);
   }
 
-  RECON_INVOKE(&rtcd->common->recon, recon_mb)(IF_RTCD(&rtcd->common->recon),
-                                               xd);
+  vp8_recon_mb(xd);
 }
 
 /* this function is used by first pass only */
@@ -937,6 +935,5 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   vp8_quantize_mby_4x4(x);
   vp8_inverse_transform_mby_4x4(IF_RTCD(&rtcd->common->idct), xd);
 
-  RECON_INVOKE(&rtcd->common->recon, recon_mby)(IF_RTCD(&rtcd->common->recon),
-                                                xd);
+  vp8_recon_mby(xd);
 }
