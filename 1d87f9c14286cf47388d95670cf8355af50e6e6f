@@ -34,6 +34,24 @@
       "revId": "1d87f9c14286cf47388d95670cf8355af50e6e6f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//9HQ\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 683,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-16T02:49:37Z",
+      "side": 1,
+      "message": "As said, I intend to spend considerable time cleaning up rdopt.c in the near future. But bugfixes should go separate. ;-).",
+      "parentUuid": "AAAAQn//9R4\u003d",
+      "revId": "1d87f9c14286cf47388d95670cf8355af50e6e6f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
