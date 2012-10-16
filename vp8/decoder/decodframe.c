@@ -635,8 +635,7 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
     MODE_INFO *mi = xd->mode_info_context;
 
 #if CONFIG_SUPERBLOCKS
-    if (pbi->interleaved_decoding)
-      mi->mbmi.encoded_as_sb = vp8_read(&pbi->bc, pc->sb_coded);
+    mi->mbmi.encoded_as_sb = vp8_read(&pbi->bc, pc->sb_coded);
 #endif
 
     // Process the 4 MBs within the SB in the order:
@@ -685,8 +684,7 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
       if (i)
         mi->mbmi.encoded_as_sb = 0;
 #endif
-      if(pbi->interleaved_decoding)
-        vpx_decode_mb_mode_mv(pbi, xd, mb_row, mb_col);
+      vpx_decode_mb_mode_mv(pbi, xd, mb_row, mb_col);
 
       update_blockd_bmi(xd);
 
@@ -1510,10 +1508,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   /* Read the mb_no_coeff_skip flag */
   pc->mb_no_coeff_skip = (int)vp8_read_bit(bc);
 
-  if(pbi->interleaved_decoding)
-    vpx_decode_mode_mvs_init(pbi);
-  else
-    vp8_decode_mode_mvs(pbi);
+  vpx_decode_mode_mvs_init(pbi);
 
   vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 
