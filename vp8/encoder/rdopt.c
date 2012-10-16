@@ -620,7 +620,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
 #if CONFIG_HYBRIDTRANSFORM
       if (type == PLANE_TYPE_Y_WITH_DC &&
           mb->q_index < ACTIVE_HT &&
-          mbmi->mode_rdopt == B_PRED) {
+          mbmi->mode == B_PRED) {
         tx_type = b->bmi.as_mode.tx_type;
         switch (tx_type) {
           case ADST_DCT:
@@ -650,7 +650,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
         if (ib < 16) {
           ib = (ib & 8) + ((ib & 4) >> 1);
           bb = xd->block + ib;
-          if (mbmi->mode_rdopt == I8X8_PRED)
+          if (mbmi->mode == I8X8_PRED)
             tx_type = bb->bmi.as_mode.tx_type;
         }
       }
@@ -662,7 +662,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
       default_eob = 256;
 #if CONFIG_HYBRIDTRANSFORM16X16
       if (type == PLANE_TYPE_Y_WITH_DC &&
-          mbmi->mode_rdopt < I8X8_PRED &&
+          mbmi->mode < I8X8_PRED &&
           mb->q_index < ACTIVE_HT16)
           tx_type = b->bmi.as_mode.tx_type;
 #endif
@@ -879,11 +879,11 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
     mb->block[0].src_stride);
 
 #if CONFIG_HYBRIDTRANSFORM16X16
-  if ((mb->e_mbd.mode_info_context->mbmi.mode_rdopt < I8X8_PRED) &&
+  if ((mb->e_mbd.mode_info_context->mbmi.mode < I8X8_PRED) &&
       (mb->q_index < ACTIVE_HT16)) {
     BLOCKD *b  = &mb->e_mbd.block[0];
     BLOCK  *be = &mb->block[0];
-    txfm_map(b, pred_mode_conv(mb->e_mbd.mode_info_context->mbmi.mode_rdopt));
+    txfm_map(b, pred_mode_conv(mb->e_mbd.mode_info_context->mbmi.mode));
     vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 16);
   } else
     vp8_transform_mby_16x16(mb);
@@ -896,7 +896,7 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   // TODO(jingning) is it possible to quickly determine whether to force
   //                trailing coefficients to be zero, instead of running trellis
   //                optimization in the rate-distortion optimization loop?
-  if (mb->e_mbd.mode_info_context->mbmi.mode_rdopt < I8X8_PRED)
+  if (mb->e_mbd.mode_info_context->mbmi.mode < I8X8_PRED)
     vp8_optimize_mby_16x16(mb, rtcd);
 #endif
 
@@ -1300,6 +1300,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rat
   // TODO(agrange)
   // vp8_intra_prediction_down_copy(xd);
 
+  xd->mode_info_context->mbmi.mode = B_PRED;
   bmode_costs = mb->inter_bmode_costs;
 
   for (i = 0; i < 16; i++) {
@@ -1429,9 +1430,6 @@ static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
     int64_t local_txfm_cache[NB_TXFM_MODES];
 
     mbmi->mode = mode;
-#if CONFIG_HYBRIDTRANSFORM16X16
-    mbmi->mode_rdopt = mode;
-#endif
 
 #if CONFIG_COMP_INTRA_PRED
     for (mode2 = DC_PRED - 1; mode2 != TM_PRED + 1; mode2++) {
@@ -1681,6 +1679,7 @@ int64_t rd_pick_intra8x8mby_modes(VP8_COMP *cpi, MACROBLOCK *mb,
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
+  xd->mode_info_context->mbmi.mode = I8X8_PRED;
   i8x8mode_costs  = mb->i8x8_mode_costs;
 
   for (i = 0; i < 4; i++) {
@@ -3466,11 +3465,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       continue;
 
     // current coding mode under rate-distortion optimization test loop
-#if CONFIG_HYBRIDTRANSFORM
-    mbmi->mode_rdopt = this_mode;
-#endif
-
-
 #if CONFIG_COMP_INTRA_PRED
     mbmi->second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
     mbmi->second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
@@ -4343,10 +4337,6 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
   }
 
   // current macroblock under rate-distortion optimization test loop
-#if CONFIG_HYBRIDTRANSFORM
-  mbmi->mode_rdopt = DC_PRED;
-#endif
-
   error16x16 = rd_pick_intra16x16mby_mode(cpi, x, &rate16x16,
                                           &rate16x16_tokenonly, &dist16x16,
                                           &y_intra16x16_skippable, txfm_cache);
@@ -4356,10 +4346,6 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
   xd->mode_info_context->bmi[0].as_mode.tx_type = best_txtype;
 #endif
   txfm_size_16x16 = mbmi->txfm_size;
-
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8
-  mbmi->mode_rdopt = I8X8_PRED;
-#endif
 
   // FIXME(rbultje) support transform-size selection
   mbmi->txfm_size = (cm->txfm_mode == ONLY_4X4) ? TX_4X4 : TX_8X8;
@@ -4374,10 +4360,6 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
   mode8x8[1][1] = xd->mode_info_context->bmi[2].as_mode.second;
   mode8x8[1][2] = xd->mode_info_context->bmi[8].as_mode.second;
   mode8x8[1][3] = xd->mode_info_context->bmi[10].as_mode.second;
-#endif
-
-#if CONFIG_HYBRIDTRANSFORM
-  mbmi->mode_rdopt = B_PRED;
 #endif
 
   error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
