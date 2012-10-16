@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//8oM\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 517,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-16T18:58:33Z",
+      "side": 1,
+      "message": "A more precise version:\n\n  this_rd \u003d ((int64_t)this_rd) * rd_adj / 100;",
+      "revId": "10eb91a4ac253b1823d960fe74670c704f224e61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
