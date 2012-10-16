@@ -1182,6 +1182,7 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
       // Do we need to do this for mode2 also?
       if (mode == B_LD_PRED || mode == B_VL_PRED)
         continue;
+      b->bmi.as_mode.first = mode;
       rate = bmode_costs[mode];
 
 #if CONFIG_COMP_INTRA_PRED
@@ -1200,7 +1201,6 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
 
 #if CONFIG_HYBRIDTRANSFORM
       if (active_ht) {
-        b->bmi.as_mode.test = mode;
         txfm_map(b, mode);
         vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 4);
         vp8_ht_quantize_b_4x4(be, b);

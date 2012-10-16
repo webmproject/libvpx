@@ -74,7 +74,6 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
 
 #if CONFIG_HYBRIDTRANSFORM
   if (x->q_index < ACTIVE_HT) {
-    b->bmi.as_mode.test = b->bmi.as_mode.first;
     txfm_map(b, b->bmi.as_mode.first);
     vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 4);
     vp8_ht_quantize_b_4x4(be, b);

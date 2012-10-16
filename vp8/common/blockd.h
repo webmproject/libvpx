@@ -237,7 +237,6 @@ union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-    B_PREDICTION_MODE test;
     TX_TYPE           tx_type;
 #endif
 
