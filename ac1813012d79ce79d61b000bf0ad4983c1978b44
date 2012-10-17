@@ -34,6 +34,24 @@
       "revId": "ac1813012d79ce79d61b000bf0ad4983c1978b44",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7KM\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 23
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-17T22:29:30Z",
+      "side": 1,
+      "message": "Yes the point I was making that the use of snprintf is meant to use the size of the remaining buffer as an argument. This prevents overwriting the buffer.",
+      "parentUuid": "AAAAQn//7e0\u003d",
+      "revId": "ac1813012d79ce79d61b000bf0ad4983c1978b44",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
