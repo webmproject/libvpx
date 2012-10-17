@@ -16,6 +16,24 @@
       "revId": "47a2154c0e1130a247b7920b0a0c57ada212abc1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7Mk\u003d",
+        "filename": "vp8/encoder/encodemv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1111,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-17T22:09:27Z",
+      "side": 1,
+      "message": "right, the other one applies on top of this one.",
+      "parentUuid": "AAAAQn//7M8\u003d",
+      "revId": "47a2154c0e1130a247b7920b0a0c57ada212abc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
