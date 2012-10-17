@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7Nc\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-17T22:32:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7Rc\u003d",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7e4\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-17T20:05:34Z",
       "side": 1,
       "message": "stray change",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7NM\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2476,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-17T22:32:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7e4\u003d",
       "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7NE\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-17T22:32:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7RM\u003d",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7RI\u003d",
         "filename": "vp8/encoder/encodeintra.c",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2012-10-17T21:36:32Z",
       "side": 1,
       "message": "and here too",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7NA\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-17T22:32:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7RI\u003d",
       "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7Mg\u003d",
+        "filename": "vp8/encoder/quantize.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-17T22:32:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7RA\u003d",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7Q8\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2012-10-17T21:36:32Z",
       "side": 1,
       "message": "just remove (and below too)",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7MU\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-17T22:32:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7Q8\u003d",
       "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7MY\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1253,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-17T22:32:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7Q0\u003d",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7eo\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 4
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7MI\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4342,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-17T22:32:51Z",
+      "side": 1,
+      "message": "Am removing the best_txtype and rd_txtype. Leaving tx_type in b_mode_info for now - since I (or you) may use it shortly.",
+      "parentUuid": "AAAAQn//7eo\u003d",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7ec\u003d",
         "filename": "vp8/encoder/tokenize.c",
         "patchSetId": 4
@@ -149,6 +293,24 @@
       "writtenOn": "2012-10-17T20:05:34Z",
       "side": 1,
       "message": "stray debug change",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7J8\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-17T22:32:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7ec\u003d",
       "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
