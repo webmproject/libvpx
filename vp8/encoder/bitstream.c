@@ -2440,9 +2440,33 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     if (xd->update_mb_segmentation_map) {
       // Select the coding strategy (temporal or spatial)
       choose_segmap_coding_method(cpi);
+      // Send the tree probabilities used to decode unpredicted
+      // macro-block segments
+      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
+        int data = xd->mb_segment_tree_probs[i];
+
+        if (data != 255) {
+          vp8_write_bit(bc, 1);
+          vp8_write_literal(bc, data, 8);
+        } else {
+          vp8_write_bit(bc, 0);
+        }
+      }
 
       // Write out the chosen coding method.
       vp8_write_bit(bc, (pc->temporal_update) ? 1 : 0);
+      if (pc->temporal_update) {
+        for (i = 0; i < PREDICTION_PROBS; i++) {
+          int data = pc->segment_pred_probs[i];
+
+          if (data != 255) {
+            vp8_write_bit(bc, 1);
+            vp8_write_literal(bc, data, 8);
+          } else {
+            vp8_write_bit(bc, 0);
+          }
+        }
+      }
     }
 
     vp8_write_bit(bc, (xd->update_mb_segmentation_data) ? 1 : 0);
@@ -2536,33 +2560,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     save_segment_info(xd);
 #endif
 
-    if (xd->update_mb_segmentation_map) {
-      // Send the tree probabilities used to decode unpredicted
-      // macro-block segments
-      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
-        int Data = xd->mb_segment_tree_probs[i];
-
-        if (Data != 255) {
-          vp8_write_bit(bc, 1);
-          vp8_write_literal(bc, Data, 8);
-        } else
-          vp8_write_bit(bc, 0);
-      }
-
-      // If predictive coding of segment map is enabled send the
-      // prediction probabilities.
-      if (pc->temporal_update) {
-        for (i = 0; i < PREDICTION_PROBS; i++) {
-          int Data = pc->segment_pred_probs[i];
-
-          if (Data != 255) {
-            vp8_write_bit(bc, 1);
-            vp8_write_literal(bc, Data, 8);
-          } else
-            vp8_write_bit(bc, 0);
-        }
-      }
-    }
   }
 
   // Encode the common prediction model status flag probability updates for

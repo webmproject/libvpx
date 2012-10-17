@@ -1158,9 +1158,27 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     xd->update_mb_segmentation_map = (unsigned char)vp8_read_bit(bc);
 
     // If so what method will be used.
-    if (xd->update_mb_segmentation_map)
-      pc->temporal_update = (unsigned char)vp8_read_bit(bc);
+    if (xd->update_mb_segmentation_map) {
+      // Which macro block level features are enabled
 
+      // Read the probs used to decode the segment id for each macro
+      // block.
+      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
+          xd->mb_segment_tree_probs[i] = vp8_read_bit(bc) ?
+              (vp8_prob)vp8_read_literal(bc, 8) : 255;
+      }
+
+      // Read the prediction probs needed to decode the segment id
+      pc->temporal_update = (unsigned char)vp8_read_bit(bc);
+      for (i = 0; i < PREDICTION_PROBS; i++) {
+        if (pc->temporal_update) {
+          pc->segment_pred_probs[i] = vp8_read_bit(bc) ?
+              (vp8_prob)vp8_read_literal(bc, 8) : 255;
+        } else {
+          pc->segment_pred_probs[i] = 255;
+        }
+      }
+    }
     // Is the segment data being updated
     xd->update_mb_segmentation_data = (unsigned char)vp8_read_bit(bc);
 
@@ -1222,38 +1240,6 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 
           set_segdata(xd, i, j, data);
 #endif
-        }
-      }
-    }
-
-    if (xd->update_mb_segmentation_map) {
-      // Which macro block level features are enabled
-      vpx_memset(xd->mb_segment_tree_probs, 255,
-                 sizeof(xd->mb_segment_tree_probs));
-      vpx_memset(pc->segment_pred_probs, 255,
-                 sizeof(pc->segment_pred_probs));
-
-      // Read the probs used to decode the segment id for each macro
-      // block.
-      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
-        // If not explicitly set value is defaulted to 255 by
-        // memset above
-        if (vp8_read_bit(bc))
-          xd->mb_segment_tree_probs[i] =
-            (vp8_prob)vp8_read_literal(bc, 8);
-      }
-
-      // If predictive coding of segment map is enabled read the
-      // prediction probabilities.
-      if (pc->temporal_update) {
-        // Read the prediction probs needed to decode the segment id
-        // when predictive coding enabled
-        for (i = 0; i < PREDICTION_PROBS; i++) {
-          // If not explicitly set value is defaulted to 255 by
-          // memset above
-          if (vp8_read_bit(bc))
-            pc->segment_pred_probs[i] =
-              (vp8_prob)vp8_read_literal(bc, 8);
         }
       }
     }
