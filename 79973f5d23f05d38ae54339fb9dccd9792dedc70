@@ -196,6 +196,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7ME\u003d",
+        "filename": "vp8/encoder/encodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 835,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-17T22:12:22Z",
+      "side": 1,
+      "message": "That\u0027d match bitmasking operations like \u0027x \u0026 0xFF\u0027 though.",
+      "parentUuid": "AAAAQn//7NQ\u003d",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7R0\u003d",
         "filename": "vp8/encoder/encodemv.c",
         "patchSetId": 3
