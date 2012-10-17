@@ -48,7 +48,6 @@ VP8_COMMON_SRCS-yes += common/onyxc_int.h
 VP8_COMMON_SRCS-yes += common/pred_common.h
 VP8_COMMON_SRCS-yes += common/pred_common.c
 VP8_COMMON_SRCS-yes += common/quant_common.h
-VP8_COMMON_SRCS-yes += common/recon.h
 VP8_COMMON_SRCS-yes += common/reconinter.h
 VP8_COMMON_SRCS-yes += common/reconintra.h
 VP8_COMMON_SRCS-yes += common/reconintra4x4.h
@@ -82,7 +81,6 @@ VP8_COMMON_SRCS-yes += common/implicit_segmentation.c
 
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/idct_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/subpixel_x86.h
-VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/recon_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/loopfilter_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/postproc_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/x86_systemdependent.c
