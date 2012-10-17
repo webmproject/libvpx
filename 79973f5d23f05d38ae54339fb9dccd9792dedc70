@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7Nk\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2832,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T22:08:10Z",
+      "side": 1,
+      "message": "it\u0027s not about optim, it\u0027s about stating that if you later modify these values, you\u0027re mostly likely Doing Something Wrong (like: generating a mismatch between the comp_pred_mode and what\u0027s store in the bitstream for instance).",
+      "parentUuid": "AAAAQn//7QU\u003d",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7SQ\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 3
@@ -107,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7Ng\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2842,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T22:08:10Z",
+      "side": 1,
+      "message": "ok.",
+      "parentUuid": "AAAAQn//7P0\u003d",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7R4\u003d",
         "filename": "vp8/encoder/encodemv.c",
         "patchSetId": 3
@@ -136,6 +172,24 @@
       "side": 1,
       "message": "This problem is widespread, I\u0027ll put in a separate CL.\n\n  $ grep -R \u0027\u003d \u0026 \u0027 vp8 | wc -l\n  66",
       "parentUuid": "AAAAQn//7R4\u003d",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7NQ\u003d",
+        "filename": "vp8/encoder/encodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 835,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T22:08:10Z",
+      "side": 1,
+      "message": "ok. Actually, it\u0027s more about searching for \u0027 \u0026 \u0027 constructs i guess",
+      "parentUuid": "AAAAQn//7PY\u003d",
       "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
