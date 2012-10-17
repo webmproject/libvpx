@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//7n4\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2202,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-10-17T18:30:07Z",
+      "side": 1,
+      "message": "Remove the vp8_ prefix for static funtions",
+      "revId": "1087af229e535058b4951bd991f7a557d63a3bcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7nQ\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2227,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-10-17T18:30:07Z",
+      "side": 1,
+      "message": "Optimized version?",
+      "revId": "1087af229e535058b4951bd991f7a557d63a3bcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7n0\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2238,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-10-17T18:30:07Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "1087af229e535058b4951bd991f7a557d63a3bcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
