@@ -171,7 +171,6 @@ typedef struct VP8_COMMON_RTCD {
 #if CONFIG_RUNTIME_CPU_DETECT
   vp8_idct_rtcd_vtable_t        idct;
   vp8_subpix_rtcd_vtable_t      subpix;
-  vp8_loopfilter_rtcd_vtable_t  loopfilter;
 #if CONFIG_POSTPROC
   vp8_postproc_rtcd_vtable_t    postproc;
 #endif

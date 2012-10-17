@@ -120,3 +120,57 @@ specialize vp8_intra_uv4x4_predict;
 
 prototype void vp8_comp_intra_uv4x4_predict "BLOCKD *x, int b_mode, int second_mode, unsigned char *predictor"
 specialize vp8_comp_intra_uv4x4_predict;
+
+#
+# Loopfilter
+#
+prototype void vp8_loop_filter_mbv "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
+specialize vp8_loop_filter_mbv;
+
+prototype void vp8_loop_filter_bv "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
+specialize vp8_loop_filter_bv;
+
+prototype void vp8_loop_filter_bv8x8 "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
+specialize vp8_loop_filter_bv8x8;
+
+prototype void vp8_loop_filter_mbh "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
+specialize vp8_loop_filter_mbh;
+
+prototype void vp8_loop_filter_bh "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
+specialize vp8_loop_filter_bh;
+
+prototype void vp8_loop_filter_bh8x8 "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
+specialize vp8_loop_filter_bh8x8;
+
+prototype void vp8_loop_filter_simple_mbv "unsigned char *y, int ystride, const unsigned char *blimit"
+specialize vp8_loop_filter_simple_mbv mmx sse2 media neon
+vp8_loop_filter_simple_mbv_c=vp8_loop_filter_simple_vertical_edge_c
+vp8_loop_filter_simple_mbv_mmx=vp8_loop_filter_simple_vertical_edge_mmx
+vp8_loop_filter_simple_mbv_sse2=vp8_loop_filter_simple_vertical_edge_sse2
+vp8_loop_filter_simple_mbv_media=vp8_loop_filter_simple_vertical_edge_armv6
+vp8_loop_filter_simple_mbv_neon=vp8_loop_filter_mbvs_neon
+
+prototype void vp8_loop_filter_simple_mbh "unsigned char *y, int ystride, const unsigned char *blimit"
+specialize vp8_loop_filter_simple_mbh mmx sse2 media neon
+vp8_loop_filter_simple_mbh_c=vp8_loop_filter_simple_horizontal_edge_c
+vp8_loop_filter_simple_mbh_mmx=vp8_loop_filter_simple_horizontal_edge_mmx
+vp8_loop_filter_simple_mbh_sse2=vp8_loop_filter_simple_horizontal_edge_sse2
+vp8_loop_filter_simple_mbh_media=vp8_loop_filter_simple_horizontal_edge_armv6
+vp8_loop_filter_simple_mbh_neon=vp8_loop_filter_mbhs_neon
+
+prototype void vp8_loop_filter_simple_bv "unsigned char *y, int ystride, const unsigned char *blimit"
+specialize vp8_loop_filter_simple_bv mmx sse2 media neon
+vp8_loop_filter_simple_bv_c=vp8_loop_filter_bvs_c
+vp8_loop_filter_simple_bv_mmx=vp8_loop_filter_bvs_mmx
+vp8_loop_filter_simple_bv_sse2=vp8_loop_filter_bvs_sse2
+vp8_loop_filter_simple_bv_media=vp8_loop_filter_bvs_armv6
+vp8_loop_filter_simple_bv_neon=vp8_loop_filter_bvs_neon
+
+prototype void vp8_loop_filter_simple_bh "unsigned char *y, int ystride, const unsigned char *blimit"
+specialize vp8_loop_filter_simple_bh mmx sse2 media neon
+vp8_loop_filter_simple_bh_c=vp8_loop_filter_bhs_c
+vp8_loop_filter_simple_bh_mmx=vp8_loop_filter_bhs_mmx
+vp8_loop_filter_simple_bh_sse2=vp8_loop_filter_bhs_sse2
+vp8_loop_filter_simple_bh_media=vp8_loop_filter_bhs_armv6
+vp8_loop_filter_simple_bh_neon=vp8_loop_filter_bhs_neon
+
