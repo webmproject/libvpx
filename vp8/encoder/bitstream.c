@@ -226,7 +226,7 @@ static void update_mode(
 static void update_mbintra_mode_probs(VP8_COMP *cpi) {
   VP8_COMMON *const cm = & cpi->common;
 
-  vp8_writer *const w = & cpi->bc2;
+  vp8_writer *const w = & cpi->bc;
 
   {
     vp8_prob Pnew   [VP8_YMODES - 1];
@@ -880,73 +880,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 
   cpi->mb.partition_info = cpi->mb.pi;
 
-  // Update the probabilities used to encode reference frame data
-  update_ref_probs(cpi);
-
-#ifdef ENTROPY_STATS
-  active_section = 1;
-#endif
-
-  if (pc->mb_no_coeff_skip) {
-    int k;
-
-    update_skip_probs(cpi);
-    for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-      vp8_write_literal(w, pc->mbskip_pred_probs[k], 8);
-  }
-
-#if CONFIG_PRED_FILTER
-  // Write the prediction filter mode used for this frame
-  vp8_write_literal(w, pc->pred_filter_mode, 2);
-
-  // Write prediction filter on/off probability if signaling at MB level
-  if (pc->pred_filter_mode == 2)
-    vp8_write_literal(w, pc->prob_pred_filter_off, 8);
-
-  // printf("pred_filter_mode:%d  prob_pred_filter_off:%d\n",
-  //       pc->pred_filter_mode, pc->prob_pred_filter_off);
-#endif
-#if CONFIG_SWITCHABLE_INTERP
-  if (pc->mcomp_filter_type == SWITCHABLE)
-    update_switchable_interp_probs(cpi);
-#endif
-
-  vp8_write_literal(w, pc->prob_intra_coded, 8);
-  vp8_write_literal(w, pc->prob_last_coded, 8);
-  vp8_write_literal(w, pc->prob_gf_coded, 8);
-
-  if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
-    vp8_write(w, 1, 128);
-    vp8_write(w, 1, 128);
-    for (i = 0; i < COMP_PRED_CONTEXTS; i++) {
-      if (cpi->single_pred_count[i] + cpi->comp_pred_count[i]) {
-        pc->prob_comppred[i] = cpi->single_pred_count[i] * 255 /
-                               (cpi->single_pred_count[i] + cpi->comp_pred_count[i]);
-        if (pc->prob_comppred[i] < 1)
-          pc->prob_comppred[i] = 1;
-      } else {
-        pc->prob_comppred[i] = 128;
-      }
-      vp8_write_literal(w, pc->prob_comppred[i], 8);
-    }
-  } else if (cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY) {
-    vp8_write(w, 0, 128);
-  } else { /* compound prediction only */
-    vp8_write(w, 1, 128);
-    vp8_write(w, 0, 128);
-  }
-
-  update_mbintra_mode_probs(cpi);
-
-#if CONFIG_NEWMVENTROPY
-  vp8_write_nmvprobs(cpi, xd->allow_high_precision_mv);
-#else
-  if (xd->allow_high_precision_mv)
-    vp8_write_mvprobs_hp(cpi);
-  else
-    vp8_write_mvprobs(cpi);
-#endif
-
   mb_row = 0;
   for (row = 0; row < pc->mb_rows; row += 2) {
     m = pc->mi + row * mis;
@@ -1478,16 +1411,6 @@ static void write_kfmodes(VP8_COMP *cpi) {
   int col_delta[4] = { +1, -1, +1, +1};
   TOKENEXTRA *tok = cpi->tok;
   TOKENEXTRA *tok_end = tok + cpi->tok_count;
-
-  if (c->mb_no_coeff_skip) {
-    update_skip_probs(cpi);
-    for (i = 0; i < MBSKIP_CONTEXTS; ++i)
-      vp8_write_literal(bc, c->mbskip_pred_probs[i], 8);
-  }
-
-  if (!c->kf_ymode_probs_update) {
-    vp8_write_literal(bc, c->kf_ymode_probs_index, 3);
-  }
 
   mb_row = 0;
   for (row = 0; row < c->mb_rows; row += 2) {
@@ -2867,6 +2790,81 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
   // Write out the mb_no_coeff_skip flag
   vp8_write_bit(bc, pc->mb_no_coeff_skip);
+  if (pc->mb_no_coeff_skip) {
+    int k;
+
+    update_skip_probs(cpi);
+    for (k = 0; k < MBSKIP_CONTEXTS; ++k)
+      vp8_write_literal(bc, pc->mbskip_pred_probs[k], 8);
+  }
+
+  if (pc->frame_type == KEY_FRAME) {
+    if (!pc->kf_ymode_probs_update) {
+      vp8_write_literal(bc, pc->kf_ymode_probs_index, 3);
+    }
+  } else {
+    // Update the probabilities used to encode reference frame data
+    update_ref_probs(cpi);
+
+#ifdef ENTROPY_STATS
+    active_section = 1;
+#endif
+
+#if CONFIG_PRED_FILTER
+    // Write the prediction filter mode used for this frame
+    vp8_write_literal(bc, pc->pred_filter_mode, 2);
+
+    // Write prediction filter on/off probability if signaling at MB level
+    if (pc->pred_filter_mode == 2)
+      vp8_write_literal(bc, pc->prob_pred_filter_off, 8);
+
+#endif
+#if CONFIG_SWITCHABLE_INTERP
+    if (pc->mcomp_filter_type == SWITCHABLE)
+      update_switchable_interp_probs(cpi);
+#endif
+
+    vp8_write_literal(bc, pc->prob_intra_coded, 8);
+    vp8_write_literal(bc, pc->prob_last_coded, 8);
+    vp8_write_literal(bc, pc->prob_gf_coded, 8);
+
+    {
+      const int comp_pred_mode = cpi->common.comp_pred_mode;
+      const int use_compound_pred = (comp_pred_mode != SINGLE_PREDICTION_ONLY);
+      const int use_hybrid_pred = (comp_pred_mode == HYBRID_PREDICTION);
+
+      vp8_write(bc, use_compound_pred, 128);
+      if (use_compound_pred) {
+        vp8_write(bc, use_hybrid_pred, 128);
+        if (use_hybrid_pred) {
+          for (i = 0; i < COMP_PRED_CONTEXTS; i++) {
+            if (cpi->single_pred_count[i] + cpi->comp_pred_count[i]) {
+              pc->prob_comppred[i] = cpi->single_pred_count[i] * 255 /
+                                     (cpi->single_pred_count[i]
+                                      + cpi->comp_pred_count[i]);
+              if (pc->prob_comppred[i] < 1)
+                pc->prob_comppred[i] = 1;
+            } else {
+              pc->prob_comppred[i] = 128;
+            }
+            vp8_write_literal(bc, pc->prob_comppred[i], 8);
+          }
+        }
+      }
+    }
+
+    update_mbintra_mode_probs(cpi);
+
+#if CONFIG_NEWMVENTROPY
+    vp8_write_nmvprobs(cpi, xd->allow_high_precision_mv);
+#else
+    if (xd->allow_high_precision_mv) {
+      vp8_write_mvprobs_hp(cpi);
+    } else {
+      vp8_write_mvprobs(cpi);
+    }
+#endif
+  }
 
   vp8_stop_encode(bc);
 

@@ -832,7 +832,7 @@ static void write_component_probs(
 }
 
 void vp8_write_mvprobs(VP8_COMP *cpi) {
-  vp8_writer *const w  = & cpi->bc2;
+  vp8_writer *const w  = & cpi->bc;
   MV_CONTEXT *mvc = cpi->common.fc.mvc;
   int flags[2] = {0, 0};
 #ifdef ENTROPY_STATS
@@ -1108,7 +1108,7 @@ static void write_component_probs_hp(
 }
 
 void vp8_write_mvprobs_hp(VP8_COMP *cpi) {
-  vp8_writer *const w  = & cpi->bc2;
+  vp8_writer *const w  = & cpi->bc;
   MV_CONTEXT_HP *mvc = cpi->common.fc.mvc_hp;
   int flags[2] = {0, 0};
 #ifdef ENTROPY_STATS

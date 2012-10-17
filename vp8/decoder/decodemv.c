@@ -622,14 +622,10 @@ static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
 #endif
   MACROBLOCKD *const xd  = & pbi->mb;
 
-  vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
-  if (pbi->common.mb_no_coeff_skip) {
-    int k;
-    for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-      cm->mbskip_pred_probs[k] = (vp8_prob)vp8_read_literal(bc, 8);
-  }
-
-  if (cm->frame_type != KEY_FRAME) {
+  if (cm->frame_type == KEY_FRAME) {
+    if (!cm->kf_ymode_probs_update)
+      cm->kf_ymode_probs_index = vp8_read_literal(bc, 3);
+  } else {
 #if CONFIG_PRED_FILTER
     cm->pred_filter_mode = (vp8_prob)vp8_read_literal(bc, 2);
 
@@ -1304,9 +1300,14 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 void vpx_decode_mode_mvs_init(VP8D_COMP *pbi){
   VP8_COMMON *cm = &pbi->common;
 
-  mb_mode_mv_init(pbi, pbi->mb.current_bc);
-  if (cm->frame_type == KEY_FRAME && !cm->kf_ymode_probs_update)
-    cm->kf_ymode_probs_index = vp8_read_literal(pbi->mb.current_bc, 3);
+  vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
+  if (pbi->common.mb_no_coeff_skip) {
+    int k;
+    for (k = 0; k < MBSKIP_CONTEXTS; ++k)
+      cm->mbskip_pred_probs[k] = (vp8_prob)vp8_read_literal(&pbi->bc, 8);
+  }
+
+  mb_mode_mv_init(pbi, &pbi->bc);
 }
 void vpx_decode_mb_mode_mv(VP8D_COMP *pbi,
                            MACROBLOCKD *xd,
