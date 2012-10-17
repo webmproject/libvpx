@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//7e4\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2476,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-17T20:05:34Z",
+      "side": 1,
+      "message": "stray change",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7eo\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4342,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-17T20:05:34Z",
+      "side": 1,
+      "message": "can we remove best_txtype and rd_txtype (as well as bmi-\u003eas_mode.tx_type), and then remove this code, instead of #if 0\u0027ing all this code?",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7ec\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-17T20:05:34Z",
+      "side": 1,
+      "message": "stray debug change",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
