@@ -161,8 +161,8 @@ static int cost_segmap(MACROBLOCKD *xd,
 }
 
 void choose_segmap_coding_method(VP8_COMP *cpi) {
-  VP8_COMMON *const cm = & cpi->common;
-  MACROBLOCKD *const xd = & cpi->mb.e_mbd;
+  VP8_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   int i;
   int tot_count;

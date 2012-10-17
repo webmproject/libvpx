@@ -77,7 +77,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
                              MODE_INFO *m,
                              int mb_row,
                              int mb_col) {
-  VP8_COMMON *const cm = & pbi->common;
+  VP8_COMMON *const cm = &pbi->common;
   vp8_reader *const bc = pbi->mb.current_bc;
   const int mis = pbi->common.mode_info_stride;
   int map_index = mb_row * pbi->common.mb_cols + mb_col;
@@ -97,7 +97,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
                           m->mbmi.segment_id, SEG_LVL_EOB) ||
        (get_segdata(&pbi->mb,
                     m->mbmi.segment_id, SEG_LVL_EOB) != 0))) {
-    MACROBLOCKD *const xd  = & pbi->mb;
+    MACROBLOCKD *const xd  = &pbi->mb;
     m->mbmi.mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
   } else {
     if (segfeature_active(&pbi->mb,
@@ -458,7 +458,7 @@ static MV_REFERENCE_FRAME read_ref_frame(VP8D_COMP *pbi,
   int seg_ref_active;
   int seg_ref_count = 0;
 
-  VP8_COMMON *const cm = & pbi->common;
+  VP8_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
   seg_ref_active = segfeature_active(xd,
@@ -598,8 +598,8 @@ static const unsigned char mbsplit_fill_offset[4][16] = {
 
 #if CONFIG_SWITCHABLE_INTERP
 static void read_switchable_interp_probs(VP8D_COMP *pbi) {
-  VP8_COMMON *const cm = & pbi->common;
-  vp8_reader *const bc = & pbi->bc;
+  VP8_COMMON *const cm = &pbi->common;
+  vp8_reader *const bc = &pbi->bc;
   int i, j;
   for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
   //for (j = 0; j <= 0; ++j) {
@@ -613,14 +613,14 @@ static void read_switchable_interp_probs(VP8D_COMP *pbi) {
 #endif
 
 static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
-  VP8_COMMON *const cm = & pbi->common;
+  VP8_COMMON *const cm = &pbi->common;
 #if CONFIG_NEWMVENTROPY
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
 #else
   MV_CONTEXT *const mvc = pbi->common.fc.mvc;
   MV_CONTEXT_HP *const mvc_hp = pbi->common.fc.mvc_hp;
 #endif
-  MACROBLOCKD *const xd  = & pbi->mb;
+  MACROBLOCKD *const xd  = &pbi->mb;
 
   if (cm->frame_type == KEY_FRAME) {
     if (!cm->kf_ymode_probs_update)
@@ -677,8 +677,8 @@ static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
 // value
 static void read_mb_segment_id(VP8D_COMP *pbi,
                                int mb_row, int mb_col) {
-  VP8_COMMON *const cm = & pbi->common;
-  MACROBLOCKD *const xd  = & pbi->mb;
+  VP8_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd  = &pbi->mb;
   vp8_reader *const bc = xd->current_bc;
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *mbmi = &mi->mbmi;
@@ -749,7 +749,7 @@ static void read_mb_segment_id(VP8D_COMP *pbi,
 static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                              MODE_INFO *prev_mi,
                              int mb_row, int mb_col) {
-  VP8_COMMON *const cm = & pbi->common;
+  VP8_COMMON *const cm = &pbi->common;
 #if CONFIG_NEWMVENTROPY
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
 #else
@@ -757,10 +757,10 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   MV_CONTEXT_HP *const mvc_hp = pbi->common.fc.mvc_hp;
 #endif
   const int mis = pbi->common.mode_info_stride;
-  MACROBLOCKD *const xd  = & pbi->mb;
+  MACROBLOCKD *const xd  = &pbi->mb;
   vp8_reader *const bc = xd->current_bc;
 
-  int_mv *const mv = & mbmi->mv;
+  int_mv *const mv = &mbmi->mv;
   int mb_to_left_edge;
   int mb_to_right_edge;
   int mb_to_top_edge;

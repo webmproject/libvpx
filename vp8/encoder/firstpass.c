@@ -350,7 +350,7 @@ void vp8_end_first_pass(VP8_COMP *cpi) {
 }
 
 static void zz_motion_search(VP8_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset) {
-  MACROBLOCKD *const xd = & x->e_mbd;
+  MACROBLOCKD *const xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
   BLOCKD *d = &x->e_mbd.block[0];
 
@@ -371,7 +371,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
                                      int_mv *ref_mv, MV *best_mv,
                                      YV12_BUFFER_CONFIG *recon_buffer,
                                      int *best_motion_err, int recon_yoffset) {
-  MACROBLOCKD *const xd = & x->e_mbd;
+  MACROBLOCKD *const xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
   BLOCKD *d = &x->e_mbd.block[0];
   int num00;
@@ -436,9 +436,9 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
 
 void vp8_first_pass(VP8_COMP *cpi) {
   int mb_row, mb_col;
-  MACROBLOCK *const x = & cpi->mb;
-  VP8_COMMON *const cm = & cpi->common;
-  MACROBLOCKD *const xd = & x->e_mbd;
+  MACROBLOCK *const x = &cpi->mb;
+  VP8_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
 
   int recon_yoffset, recon_uvoffset;
   YV12_BUFFER_CONFIG *lst_yv12 = &cm->yv12_fb[cm->lst_fb_idx];
