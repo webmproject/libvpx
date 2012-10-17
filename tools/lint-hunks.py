@@ -21,7 +21,8 @@ SHORT_OPTIONS = "h"
 LONG_OPTIONS = ["help"]
 
 TOPLEVEL_CMD = ["git", "rev-parse", "--show-toplevel"]
-DIFF_CMD = ["git", "diff-index", "-u", "--cached", "HEAD", "--"]
+DIFF_CMD = ["git", "diff"]
+DIFF_INDEX_CMD = ["git", "diff-index", "-u", "--cached", "HEAD", "--"]
 SHOW_CMD = ["git", "show"]
 CPPLINT_FILTERS = ["-readability/casting", "-runtime/int"]
 
@@ -61,7 +62,7 @@ def main(argv=None):
         argv = sys.argv
     try:
         try:
-            opts, _ = getopt.getopt(argv[1:], SHORT_OPTIONS, LONG_OPTIONS)
+            opts, args = getopt.getopt(argv[1:], SHORT_OPTIONS, LONG_OPTIONS)
         except getopt.error, msg:
             raise Usage(msg)
 
@@ -71,9 +72,19 @@ def main(argv=None):
                 print __doc__
                 sys.exit(0)
 
+        if args and len(args) > 1:
+            print __doc__
+            sys.exit(0)
+
         # Find the fully qualified path to the root of the tree
         tl = Subprocess(TOPLEVEL_CMD, stdout=subprocess.PIPE)
         tl = tl.communicate()[0].strip()
+
+        # See if we're working on the index or not.
+        if args:
+            diff_cmd = DIFF_CMD + [args[0] + "^!"]
+        else:
+            diff_cmd = DIFF_INDEX_CMD
 
         # Build the command line to execute cpplint
         cpplint_cmd = [os.path.join(tl, "tools", "cpplint.py"),
@@ -82,7 +93,7 @@ def main(argv=None):
 
         # Get a list of all affected lines
         file_affected_line_map = {}
-        p = Subprocess(DIFF_CMD, stdout=subprocess.PIPE)
+        p = Subprocess(diff_cmd, stdout=subprocess.PIPE)
         stdout = p.communicate()[0]
         for hunk in diff.ParseDiffHunks(StringIO.StringIO(stdout)):
             filename = hunk.right.filename[2:]
