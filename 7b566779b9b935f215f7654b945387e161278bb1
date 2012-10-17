@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//7w0\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2810,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T16:58:28Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "7b566779b9b935f215f7654b945387e161278bb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7w4\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2814,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T16:58:28Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "7b566779b9b935f215f7654b945387e161278bb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7ww\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2822,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T16:58:28Z",
+      "side": 1,
+      "message": "i\u0027d just remove that",
+      "revId": "7b566779b9b935f215f7654b945387e161278bb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7w8\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2825,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T16:58:28Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "7b566779b9b935f215f7654b945387e161278bb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7wc\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2840,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T16:58:28Z",
+      "side": 1,
+      "message": "looks like a candidate for some function CalcProba(countA, countNonA)",
+      "revId": "7b566779b9b935f215f7654b945387e161278bb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7wo\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2849,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T16:58:28Z",
+      "side": 1,
+      "message": "maybe reorder with this case first, so the coded bit patterns follow some logic\n\n(0, 10, 11 for instance)",
+      "revId": "7b566779b9b935f215f7654b945387e161278bb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7wg\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2860,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T16:58:28Z",
+      "side": 1,
+      "message": "suggest {}\u0027s",
+      "revId": "7b566779b9b935f215f7654b945387e161278bb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7xA\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2867,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T16:58:28Z",
+      "side": 1,
+      "message": "trailing spaces",
+      "revId": "7b566779b9b935f215f7654b945387e161278bb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
