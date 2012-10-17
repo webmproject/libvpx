@@ -294,7 +294,7 @@ void vp8_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf
   }
 }
 
-static void build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
+void vp8_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
   unsigned char *ptr_base;
   unsigned char *ptr;
   unsigned char *pred_ptr = d->predictor;
@@ -319,8 +319,8 @@ static void build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
  * come from an earlier call to build_inter_predictors_4b()) with the
  * predictor of the second reference frame / motion vector.
  */
-static void build_2nd_inter_predictors4b(MACROBLOCKD *xd,
-                                         BLOCKD *d, int pitch) {
+void vp8_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
+                                      BLOCKD *d, int pitch) {
   unsigned char *ptr_base;
   unsigned char *ptr;
   unsigned char *pred_ptr = d->predictor;
@@ -985,16 +985,16 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
     }
 
 
-    build_inter_predictors4b(xd, &blockd[ 0], 16);
-    build_inter_predictors4b(xd, &blockd[ 2], 16);
-    build_inter_predictors4b(xd, &blockd[ 8], 16);
-    build_inter_predictors4b(xd, &blockd[10], 16);
+    vp8_build_inter_predictors4b(xd, &blockd[ 0], 16);
+    vp8_build_inter_predictors4b(xd, &blockd[ 2], 16);
+    vp8_build_inter_predictors4b(xd, &blockd[ 8], 16);
+    vp8_build_inter_predictors4b(xd, &blockd[10], 16);
 
     if (mbmi->second_ref_frame) {
-      build_2nd_inter_predictors4b(xd, &blockd[ 0], 16);
-      build_2nd_inter_predictors4b(xd, &blockd[ 2], 16);
-      build_2nd_inter_predictors4b(xd, &blockd[ 8], 16);
-      build_2nd_inter_predictors4b(xd, &blockd[10], 16);
+      vp8_build_2nd_inter_predictors4b(xd, &blockd[ 0], 16);
+      vp8_build_2nd_inter_predictors4b(xd, &blockd[ 2], 16);
+      vp8_build_2nd_inter_predictors4b(xd, &blockd[ 8], 16);
+      vp8_build_2nd_inter_predictors4b(xd, &blockd[10], 16);
     }
   } else {
     for (i = 0; i < 16; i += 2) {

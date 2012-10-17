@@ -59,6 +59,11 @@ extern void vp8_build_inter_predictors_b(BLOCKD *d, int pitch,
 extern void vp8_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
                                              vp8_subpix_fn_t sppf);
 
+extern void vp8_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d,
+                                         int pitch);
+extern void vp8_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
+                                             BLOCKD *d, int pitch);
+
 extern void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd);
 extern void vp8_setup_interp_filters(MACROBLOCKD *xd,
                                      INTERPOLATIONFILTERTYPE filter,

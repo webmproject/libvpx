@@ -2199,30 +2199,19 @@ static int labels2mode(
   return cost;
 }
 
-static int rdcost_mbsegment_y(MACROBLOCK *mb, const int *labels,
-                              int which_label, ENTROPY_CONTEXT *ta,
-                              ENTROPY_CONTEXT *tl) {
-  int b, cost = 0;
-  MACROBLOCKD *xd = &mb->e_mbd;
-
-  for (b = 0; b < 16; b++)
-    if (labels[ b] == which_label)
-      cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_Y_WITH_DC,
-                          ta + vp8_block2above[b],
-                          tl + vp8_block2left[b], TX_4X4);
-
-  return cost;
-
-}
-
-static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x,
-                                                int const *labels,
-                                                int which_label,
-                                                const VP8_ENCODER_RTCD *rtcd) {
+static int64_t encode_inter_mb_segment(MACROBLOCK *x,
+                                       int const *labels,
+                                       int which_label,
+                                       int *labelyrate,
+                                       int *distortion,
+                                       ENTROPY_CONTEXT *ta,
+                                       ENTROPY_CONTEXT *tl,
+                                       const VP8_ENCODER_RTCD *rtcd) {
   int i;
-  unsigned int distortion = 0;
   MACROBLOCKD *xd = &x->e_mbd;
 
+  *labelyrate = 0;
+  *distortion = 0;
   for (i = 0; i < 16; i++) {
     if (labels[i] == which_label) {
       BLOCKD *bd = &x->e_mbd.block[i];
@@ -2234,18 +2223,65 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x,
         vp8_build_2nd_inter_predictors_b(bd, 16, xd->subpixel_predict_avg);
       ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, bd, 16);
       x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
-
-      // set to 0 no way to account for 2nd order DC so discount
-      // be->coeff[0] = 0;
       x->quantize_b_4x4(be, bd);
-      thisdistortion = ENCODEMB_INVOKE(&rtcd->encodemb, berr)(
-                         be->coeff, bd->dqcoeff, 16) / 4;
-      distortion += thisdistortion;
+      thisdistortion = vp8_block_error_c(be->coeff, bd->dqcoeff, 16);
+      *distortion += thisdistortion;
+      *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
+                                 ta + vp8_block2above[i],
+                                 tl + vp8_block2left[i], TX_4X4);
     }
   }
-  return distortion;
+  *distortion >>= 2;
+  return RDCOST(x->rdmult, x->rddiv, *labelyrate, *distortion);
 }
 
+static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
+                                           int const *labels,
+                                           int which_label,
+                                           int *labelyrate,
+                                           int *distortion,
+                                           ENTROPY_CONTEXT *ta,
+                                           ENTROPY_CONTEXT *tl,
+                                           const VP8_ENCODER_RTCD *rtcd) {
+  int i, j;
+  MACROBLOCKD *xd = &x->e_mbd;
+  const int iblock[4] = { 0, 1, 4, 5 };
+
+  *distortion = 0;
+  *labelyrate = 0;
+  for (i = 0; i < 4; i++) {
+    int ib = vp8_i8x8_block[i];
+
+    if (labels[ib] == which_label) {
+      BLOCKD *bd = &xd->block[ib];
+      BLOCK *be = &x->block[ib];
+      int thisdistortion;
+
+      vp8_build_inter_predictors4b(xd, bd, 16);
+      if (xd->mode_info_context->mbmi.second_ref_frame)
+        vp8_build_2nd_inter_predictors4b(xd, bd, 16);
+      vp8_subtract_4b_c(be, bd, 16);
+
+      for (j = 0; j < 4; j += 2) {
+        bd = &xd->block[ib + iblock[j]];
+        be = &x->block[ib + iblock[j]];
+        x->vp8_short_fdct8x4(be->src_diff, be->coeff, 32);
+        x->quantize_b_4x4_pair(be, be + 1, bd, bd + 1);
+        thisdistortion = vp8_block_error_c(be->coeff, bd->dqcoeff, 32);
+        *distortion += thisdistortion;
+        *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
+                                   ta + vp8_block2above[ib + iblock[j]],
+                                   tl + vp8_block2left[ib + iblock[j]], TX_4X4);
+        *labelyrate += cost_coeffs(x, bd + 1, PLANE_TYPE_Y_WITH_DC,
+                                   ta + vp8_block2above[ib + iblock[j] + 1],
+                                   tl + vp8_block2left[ib + iblock[j]],
+                                   TX_4X4);
+      }
+    }
+  }
+  *distortion >>= 2;
+  return RDCOST(x->rdmult, x->rddiv, *labelyrate, *distortion);
+}
 
 static const unsigned int segmentation_to_sseshift[4] = {3, 3, 2, 0};
 
@@ -2454,14 +2490,17 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
           mv_check_bounds(x, &second_mode_mv[this_mode]))
         continue;
 
-      distortion = vp8_encode_inter_mb_segment(
-                     x, labels, i,
-                     IF_RTCD(&cpi->rtcd));
-
-      labelyrate = rdcost_mbsegment_y(x, labels, i, ta_s, tl_s);
+      if (segmentation == BLOCK_4X4) {
+        this_rd = encode_inter_mb_segment(x, labels, i, &labelyrate,
+                                          &distortion,
+                                          ta_s, tl_s, IF_RTCD(&cpi->rtcd));
+      } else {
+        this_rd = encode_inter_mb_segment_8x8(x, labels, i, &labelyrate,
+                                              &distortion, ta_s, tl_s,
+                                              IF_RTCD(&cpi->rtcd));
+      }
+      this_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
       rate += labelyrate;
-
-      this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
       if (this_rd < best_label_rd) {
         sbr = rate;
