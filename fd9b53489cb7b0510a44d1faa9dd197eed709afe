@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7xw\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-17T16:43:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7/Y\u003d",
+      "revId": "fd9b53489cb7b0510a44d1faa9dd197eed709afe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7/w\u003d",
         "filename": "test/ivf_video_source.h",
         "patchSetId": 20
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-17T05:42:05Z",
       "side": 1,
       "message": "these should be sorted",
+      "revId": "fd9b53489cb7b0510a44d1faa9dd197eed709afe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//70U\u003d",
+        "filename": "test/ivf_video_source.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-17T16:43:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7/w\u003d",
       "revId": "fd9b53489cb7b0510a44d1faa9dd197eed709afe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7z8\u003d",
+        "filename": "test/ivf_video_source.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-17T16:43:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7/k\u003d",
+      "revId": "fd9b53489cb7b0510a44d1faa9dd197eed709afe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7/g\u003d",
         "filename": "test/ivf_video_source.h",
         "patchSetId": 20
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7z0\u003d",
+        "filename": "test/ivf_video_source.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-17T16:43:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7/g\u003d",
+      "revId": "fd9b53489cb7b0510a44d1faa9dd197eed709afe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7/c\u003d",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 20
@@ -81,6 +153,24 @@
       "writtenOn": "2012-10-17T05:42:05Z",
       "side": 1,
       "message": "just make this an int",
+      "revId": "fd9b53489cb7b0510a44d1faa9dd197eed709afe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7zw\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 20
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-17T16:43:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7/c\u003d",
       "revId": "fd9b53489cb7b0510a44d1faa9dd197eed709afe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
