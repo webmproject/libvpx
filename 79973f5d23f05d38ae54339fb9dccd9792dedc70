@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7QU\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2832,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-17T21:49:44Z",
+      "side": 1,
+      "message": "ok, but this is mostly useless on primitive/non-pointer types, imo.",
+      "parentUuid": "AAAAQn//7Sc\u003d",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7SQ\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-17T21:30:13Z",
       "side": 1,
       "message": "suggest use of ()\u0027s\n\n(and at 2834 below too)",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7QI\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2833,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-17T21:49:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//7SQ\u003d",
       "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//7P0\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2842,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-17T21:49:44Z",
+      "side": 1,
+      "message": "agree. This is c\u0026p from pack_inter_mode_mvs(), and I\u0027ve got more cleanups coming to make it more clear what functions write to the bitstream and where. Can address this later, there are a dozen of these calcs that are interleaved with bitstream writing.",
+      "parentUuid": "AAAAQn//7SE\u003d",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7R4\u003d",
         "filename": "vp8/encoder/encodemv.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2012-10-17T21:30:13Z",
       "side": 1,
       "message": "extra space after \u0026",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7PY\u003d",
+        "filename": "vp8/encoder/encodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 835,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-17T21:49:44Z",
+      "side": 1,
+      "message": "This problem is widespread, I\u0027ll put in a separate CL.\n\n  $ grep -R \u0027\u003d \u0026 \u0027 vp8 | wc -l\n  66",
+      "parentUuid": "AAAAQn//7R4\u003d",
       "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
