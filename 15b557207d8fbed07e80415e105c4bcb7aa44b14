@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAQn//7Rc\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:36:32Z",
+      "side": 1,
+      "message": "just remove the code instead\n\n\n(and below)",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//7e4\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 4
@@ -13,6 +30,91 @@
       "writtenOn": "2012-10-17T20:05:34Z",
       "side": 1,
       "message": "stray change",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7RM\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:36:32Z",
+      "side": 1,
+      "message": "just remove",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7RI\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:36:32Z",
+      "side": 1,
+      "message": "and here too",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7RA\u003d",
+        "filename": "vp8/encoder/quantize.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:36:32Z",
+      "side": 1,
+      "message": "why not at 34? Doesn\u0027t seem to be used elsewhere...",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7Q8\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:36:32Z",
+      "side": 1,
+      "message": "just remove (and below too)",
+      "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7Q0\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1253,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:36:32Z",
+      "side": 1,
+      "message": "ditto",
       "revId": "15b557207d8fbed07e80415e105c4bcb7aa44b14",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
