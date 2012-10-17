@@ -16,6 +16,24 @@
       "revId": "eab804558bb7ff3fb503a1f9ccaf641d0dbc0120",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7kE\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2277,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-17T18:55:55Z",
+      "side": 1,
+      "message": "Well, this is the context of two horizontally neighbouring blocks. Their above is different, since their horizontal X position is different, but their left is the same, since their vertical Y position is identical (because they\u0027re horizontal neighbours).\n\nSo the result should be identical regardless of whether I add the +1 or not. I can add it for clarity sake...?",
+      "parentUuid": "AAAAQn//7kU\u003d",
+      "revId": "eab804558bb7ff3fb503a1f9ccaf641d0dbc0120",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
