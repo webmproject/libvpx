@@ -1051,9 +1051,6 @@ static void encode_sb(VP8_COMP *cpi,
         cpi->inter_zz_count++;
     }
 
-    // TODO Partitioning is broken!
-    cpi->tplist[mb_row].stop = *tp;
-
 #if CONFIG_SUPERBLOCKS
     if (xd->mode_info_context->mbmi.encoded_as_sb) {
       x->src.y_buffer += 32;
@@ -1065,6 +1062,9 @@ static void encode_sb(VP8_COMP *cpi,
       xd->mode_info_context += 2;
       xd->prev_mode_info_context += 2;
       
+      (*tp)->Token = EOSB_TOKEN;
+      (*tp)++;
+      cpi->tplist[mb_row].stop = *tp;
       break;
     }
 #endif
@@ -1086,6 +1086,9 @@ static void encode_sb(VP8_COMP *cpi,
     assert((xd->prev_mode_info_context - cpi->common.prev_mip) ==
            (xd->mode_info_context - cpi->common.mip));
 #endif
+    (*tp)->Token = EOSB_TOKEN;
+    (*tp)++;
+    cpi->tplist[mb_row].stop = *tp;
   }
 
   // debug output

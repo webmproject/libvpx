@@ -19,7 +19,7 @@ const int vp8_seg_feature_data_bits[SEG_LVL_MAX] =
 // the coding mechanism is still subject to change so these provide a
 // convenient single point of change.
 
-int segfeature_active(MACROBLOCKD *xd,
+int segfeature_active(const MACROBLOCKD *xd,
                       int segment_id,
                       SEG_LVL_FEATURES feature_id) {
   // Return true if mask bit set and segmentation enabled.
@@ -66,7 +66,7 @@ void set_segdata(MACROBLOCKD *xd,
   xd->segment_feature_data[segment_id][feature_id] = seg_data;
 }
 
-int get_segdata(MACROBLOCKD *xd,
+int get_segdata(const MACROBLOCKD *xd,
                 int segment_id,
                 SEG_LVL_FEATURES feature_id) {
   return xd->segment_feature_data[segment_id][feature_id];
@@ -126,7 +126,7 @@ void set_segref(MACROBLOCKD *xd,
     (1 << ref_frame);
 }
 
-int check_segref(MACROBLOCKD *xd,
+int check_segref(const MACROBLOCKD *xd,
                  int segment_id,
                  MV_REFERENCE_FRAME ref_frame) {
   return (xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] &

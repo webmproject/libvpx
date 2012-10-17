@@ -78,7 +78,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
                              int mb_row,
                              int mb_col) {
   VP8_COMMON *const cm = & pbi->common;
-  vp8_reader *const bc = & pbi->bc;
+  vp8_reader *const bc = pbi->mb.current_bc;
   const int mis = pbi->common.mode_info_stride;
   int map_index = mb_row * pbi->common.mb_cols + mb_col;
   MB_PREDICTION_MODE y_mode;
@@ -612,9 +612,8 @@ static void read_switchable_interp_probs(VP8D_COMP *pbi) {
 }
 #endif
 
-static void mb_mode_mv_init(VP8D_COMP *pbi) {
+static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
   VP8_COMMON *const cm = & pbi->common;
-  vp8_reader *const bc = & pbi->bc;
 #if CONFIG_NEWMVENTROPY
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
 #else
@@ -623,14 +622,10 @@ static void mb_mode_mv_init(VP8D_COMP *pbi) {
 #endif
   MACROBLOCKD *const xd  = & pbi->mb;
 
-  vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
-  if (pbi->common.mb_no_coeff_skip) {
-    int k;
-    for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-      cm->mbskip_pred_probs[k] = (vp8_prob)vp8_read_literal(bc, 8);
-  }
-
-  if (cm->frame_type != KEY_FRAME) {
+  if (cm->frame_type == KEY_FRAME) {
+    if (!cm->kf_ymode_probs_update)
+      cm->kf_ymode_probs_index = vp8_read_literal(bc, 3);
+  } else {
 #if CONFIG_PRED_FILTER
     cm->pred_filter_mode = (vp8_prob)vp8_read_literal(bc, 2);
 
@@ -682,9 +677,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi) {
 // value
 static void read_mb_segment_id(VP8D_COMP *pbi,
                                int mb_row, int mb_col) {
-  vp8_reader *const bc = & pbi->bc;
   VP8_COMMON *const cm = & pbi->common;
   MACROBLOCKD *const xd  = & pbi->mb;
+  vp8_reader *const bc = xd->current_bc;
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *mbmi = &mi->mbmi;
   int index = mb_row * pbi->common.mb_cols + mb_col;
@@ -755,7 +750,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                              MODE_INFO *prev_mi,
                              int mb_row, int mb_col) {
   VP8_COMMON *const cm = & pbi->common;
-  vp8_reader *const bc = & pbi->bc;
 #if CONFIG_NEWMVENTROPY
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
 #else
@@ -764,6 +758,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
   const int mis = pbi->common.mode_info_stride;
   MACROBLOCKD *const xd  = & pbi->mb;
+  vp8_reader *const bc = xd->current_bc;
 
   int_mv *const mv = & mbmi->mv;
   int mb_to_left_edge;
@@ -1302,96 +1297,17 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   }
 }
 
-void vp8_decode_mode_mvs(VP8D_COMP *pbi) {
-  int i;
-  VP8_COMMON *cm = &pbi->common;
-  MODE_INFO *mi = cm->mi;
-  MACROBLOCKD *const xd  = &pbi->mb;
-  int sb_row, sb_col;
-  int sb_rows = (cm->mb_rows + 1) >> 1;
-  int sb_cols = (cm->mb_cols + 1) >> 1;
-  int row_delta[4] = { 0, +1,  0, -1};
-  int col_delta[4] = { +1, -1, +1, +1};
-
-  MODE_INFO *prev_mi = cm->prev_mi;
-
-  mb_mode_mv_init(pbi);
-
-  if (cm->frame_type == KEY_FRAME && !cm->kf_ymode_probs_update) {
-    cm->kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
-  }
-
-  for (sb_row = 0; sb_row < sb_rows; sb_row++) {
-    int mb_col = 0;
-    int mb_row = (sb_row << 1);
-
-    for (sb_col = 0; sb_col < sb_cols; sb_col++) {
-#if CONFIG_SUPERBLOCKS
-      mi->mbmi.encoded_as_sb = vp8_read(&pbi->bc, cm->sb_coded);
-#endif
-      for (i = 0; i < 4; i++) {
-
-        int dy = row_delta[i];
-        int dx = col_delta[i];
-        int offset_extended = dy * cm->mode_info_stride + dx;
-
-        if ((mb_row >= cm->mb_rows) || (mb_col >= cm->mb_cols)) {
-          /* next macroblock */
-          mb_row += dy;
-          mb_col += dx;
-          mi += offset_extended;
-          prev_mi += offset_extended;
-          continue;
-        }
-#if CONFIG_SUPERBLOCKS
-        if (i)
-          mi->mbmi.encoded_as_sb = 0;
-#endif
-
-        // Make sure the MacroBlockD mode info pointer is set correctly
-        xd->mode_info_context = mi;
-        xd->prev_mode_info_context = prev_mi;
-
-        pbi->mb.mb_to_top_edge = -((mb_row * 16)) << 3;
-        pbi->mb.mb_to_bottom_edge =
-            ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
-
-        if (cm->frame_type == KEY_FRAME)
-          vp8_kfread_modes(pbi, mi, mb_row, mb_col);
-        else
-          read_mb_modes_mv(pbi, mi, &mi->mbmi, prev_mi, mb_row,
-                           mb_col);
-
-#if CONFIG_SUPERBLOCKS
-        if (mi->mbmi.encoded_as_sb) {
-          assert(!i);
-          mb_col += 2;
-          mi[1] = mi[cm->mode_info_stride] =
-            mi[cm->mode_info_stride + 1] = mi[0];
-          mi += 2;
-          prev_mi += 2;
-          break;
-        }
-#endif
-
-        /* next macroblock */
-        mb_row += dy;
-        mb_col += dx;
-        mi += offset_extended;
-        prev_mi += offset_extended;
-      }
-    }
-
-    mi += cm->mode_info_stride + (1 - (cm->mb_cols & 0x1));
-    prev_mi += cm->mode_info_stride + (1 - (cm->mb_cols & 0x1));
-  }
-}
-
 void vpx_decode_mode_mvs_init(VP8D_COMP *pbi){
   VP8_COMMON *cm = &pbi->common;
-  mb_mode_mv_init(pbi);
-  if (cm->frame_type == KEY_FRAME && !cm->kf_ymode_probs_update)
-    cm->kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
+
+  vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
+  if (pbi->common.mb_no_coeff_skip) {
+    int k;
+    for (k = 0; k < MBSKIP_CONTEXTS; ++k)
+      cm->mbskip_pred_probs[k] = (vp8_prob)vp8_read_literal(&pbi->bc, 8);
+  }
+
+  mb_mode_mv_init(pbi, &pbi->bc);
 }
 void vpx_decode_mb_mode_mv(VP8D_COMP *pbi,
                            MACROBLOCKD *xd,

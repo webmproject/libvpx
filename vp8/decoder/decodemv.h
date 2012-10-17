@@ -11,7 +11,6 @@
 
 #include "onyxd_int.h"
 
-void vp8_decode_mode_mvs(VP8D_COMP *);
 void vpx_decode_mb_mode_mv(VP8D_COMP *pbi,
                            MACROBLOCKD *xd,
                            int mb_row,

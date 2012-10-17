@@ -15,7 +15,7 @@
 #ifndef __INC_SEG_COMMON_H__
 #define __INC_SEG_COMMON_H__ 1
 
-int segfeature_active(MACROBLOCKD *xd,
+int segfeature_active(const MACROBLOCKD *xd,
                       int segment_id,
                       SEG_LVL_FEATURES feature_id);
 
@@ -42,7 +42,7 @@ void set_segdata(MACROBLOCKD *xd,
                  SEG_LVL_FEATURES feature_id,
                  int seg_data);
 
-int get_segdata(MACROBLOCKD *xd,
+int get_segdata(const MACROBLOCKD *xd,
                 int segment_id,
                 SEG_LVL_FEATURES feature_id);
 
@@ -73,7 +73,7 @@ void set_segref(MACROBLOCKD *xd,
                 int segment_id,
                 MV_REFERENCE_FRAME ref_frame);
 
-int check_segref(MACROBLOCKD *xd,
+int check_segref(const MACROBLOCKD *xd,
                  int segment_id,
                  MV_REFERENCE_FRAME ref_frame);
 

@@ -82,8 +82,6 @@ typedef struct VP8Decompressor {
 
   int decoded_key_frame;
 
-  int interleaved_decoding;
-
 } VP8D_COMP;
 
 int vp8_decode_frame(VP8D_COMP *cpi);

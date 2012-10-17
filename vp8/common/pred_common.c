@@ -15,8 +15,8 @@
 // TBD prediction functions for various bitstream signals
 
 // Returns a context number for the given MB prediction signal
-unsigned char get_pred_context(VP8_COMMON *const cm,
-                               MACROBLOCKD *const xd,
+unsigned char get_pred_context(const VP8_COMMON *const cm,
+                               const MACROBLOCKD *const xd,
                                PRED_ID pred_id) {
   int pred_context;
   MODE_INFO *m = xd->mode_info_context;
@@ -106,8 +106,8 @@ unsigned char get_pred_context(VP8_COMMON *const cm,
 
 // This function returns a context probability for coding a given
 // prediction signal
-vp8_prob get_pred_prob(VP8_COMMON *const cm,
-                       MACROBLOCKD *const xd,
+vp8_prob get_pred_prob(const VP8_COMMON *const cm,
+                       const MACROBLOCKD *const xd,
                        PRED_ID pred_id) {
   vp8_prob pred_probability;
   int pred_context;
@@ -146,10 +146,10 @@ vp8_prob get_pred_prob(VP8_COMMON *const cm,
 
 // This function returns a context probability ptr for coding a given
 // prediction signal
-vp8_prob *get_pred_probs(VP8_COMMON *const cm,
-                         MACROBLOCKD *const xd,
+const vp8_prob *get_pred_probs(const VP8_COMMON *const cm,
+                         const MACROBLOCKD *const xd,
                          PRED_ID pred_id) {
-  vp8_prob *pred_probability;
+  const vp8_prob *pred_probability;
   int pred_context;
 
   // Get the appropriate prediction context
@@ -191,7 +191,7 @@ vp8_prob *get_pred_probs(VP8_COMMON *const cm,
 
 // This function returns the status of the given prediction signal.
 // I.e. is the predicted value for the given signal correct.
-unsigned char get_pred_flag(MACROBLOCKD *const xd,
+unsigned char get_pred_flag(const MACROBLOCKD *const xd,
                             PRED_ID pred_id) {
   unsigned char pred_flag = 0;
 
@@ -260,14 +260,14 @@ void set_pred_flag(MACROBLOCKD *const xd,
 // peredict various bitstream signals.
 
 // Macroblock segment id prediction function
-unsigned char get_pred_mb_segid(VP8_COMMON *const cm, int MbIndex) {
+unsigned char get_pred_mb_segid(const VP8_COMMON *const cm, int MbIndex) {
   // Currently the prediction for the macroblock segment ID is
   // the value stored for this macroblock in the previous frame.
   return cm->last_frame_seg_map[MbIndex];
 }
 
-MV_REFERENCE_FRAME get_pred_ref(VP8_COMMON *const cm,
-                                MACROBLOCKD *const xd) {
+MV_REFERENCE_FRAME get_pred_ref(const VP8_COMMON *const cm,
+                                const MACROBLOCKD *const xd) {
   MODE_INFO *m = xd->mode_info_context;
 
   MV_REFERENCE_FRAME left;
