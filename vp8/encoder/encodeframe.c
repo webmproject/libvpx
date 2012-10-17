@@ -221,7 +221,7 @@ static void calc_av_activity(VP8_COMP *cpi, int64_t activity_sum) {
 #if USE_ACT_INDEX
 // Calculate and activity index for each mb
 static void calc_activity_index(VP8_COMP *cpi, MACROBLOCK *x) {
-  VP8_COMMON *const cm = & cpi->common;
+  VP8_COMMON *const cm = &cpi->common;
   int mb_row, mb_col;
 
   int64_t act;
@@ -275,9 +275,9 @@ static void calc_activity_index(VP8_COMP *cpi, MACROBLOCK *x) {
 // Loop through all MBs. Note activity of each, average activity and
 // calculate a normalized activity for each
 static void build_activity_map(VP8_COMP *cpi) {
-  MACROBLOCK *const x = & cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *xd = &x->e_mbd;
-  VP8_COMMON *const cm = & cpi->common;
+  VP8_COMMON *const cm = &cpi->common;
 
 #if ALT_ACT_MEASURE
   YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
@@ -1218,9 +1218,9 @@ void encode_sb_row(VP8_COMP *cpi,
 }
 
 void init_encode_frame_mb_context(VP8_COMP *cpi) {
-  MACROBLOCK *const x = & cpi->mb;
-  VP8_COMMON *const cm = & cpi->common;
-  MACROBLOCKD *const xd = & x->e_mbd;
+  MACROBLOCK *const x = &cpi->mb;
+  VP8_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
 
   // GF active flags data structure
   x->gf_active_ptr = (signed char *)cpi->gf_active_flags;
@@ -1289,9 +1289,9 @@ void init_encode_frame_mb_context(VP8_COMP *cpi) {
 
 static void encode_frame_internal(VP8_COMP *cpi) {
   int mb_row;
-  MACROBLOCK *const x = & cpi->mb;
-  VP8_COMMON *const cm = & cpi->common;
-  MACROBLOCKD *const xd = & x->e_mbd;
+  MACROBLOCK *const x = &cpi->mb;
+  VP8_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
 
   TOKENEXTRA *tp = cpi->tok;
   int totalrate;
@@ -1721,7 +1721,7 @@ void vp8_build_block_offsets(MACROBLOCK *x) {
 }
 
 static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x) {
-  const MACROBLOCKD *xd = & x->e_mbd;
+  const MACROBLOCKD *xd = &x->e_mbd;
   const MB_PREDICTION_MODE m = xd->mode_info_context->mbmi.mode;
   const MB_PREDICTION_MODE uvm = xd->mode_info_context->mbmi.uv_mode;
 

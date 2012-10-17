@@ -77,7 +77,7 @@ static vp8_prob read_prob_diff_update(vp8_reader *const bc, int oldp) {
 void vp8cx_init_de_quantizer(VP8D_COMP *pbi) {
   int i;
   int Q;
-  VP8_COMMON *const pc = & pbi->common;
+  VP8_COMMON *const pc = &pbi->common;
 
   for (Q = 0; Q < QINDEX_RANGE; Q++) {
     pc->Y1dequant[Q][0] = (short)vp8_dc_quant(Q, pc->y1dc_delta_q);
@@ -98,7 +98,7 @@ void vp8cx_init_de_quantizer(VP8D_COMP *pbi) {
 void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   int i;
   int QIndex;
-  VP8_COMMON *const pc = & pbi->common;
+  VP8_COMMON *const pc = &pbi->common;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
   // Set the Q baseline allowing for any segment level adjustment
@@ -815,8 +815,8 @@ static void setup_token_decoder(VP8D_COMP *pbi,
 }
 
 static void init_frame(VP8D_COMP *pbi) {
-  VP8_COMMON *const pc = & pbi->common;
-  MACROBLOCKD *const xd  = & pbi->mb;
+  VP8_COMMON *const pc = &pbi->common;
+  MACROBLOCKD *const xd  = &pbi->mb;
 
   if (pc->frame_type == KEY_FRAME) {
     /* Various keyframe initializations */
@@ -893,8 +893,8 @@ static void init_frame(VP8D_COMP *pbi) {
 static void read_coef_probs2(VP8D_COMP *pbi) {
   const vp8_prob grpupd = 192;
   int i, j, k, l;
-  vp8_reader *const bc = & pbi->bc;
-  VP8_COMMON *const pc = & pbi->common;
+  vp8_reader *const bc = &pbi->bc;
+  VP8_COMMON *const pc = &pbi->common;
   for (l = 0; l < ENTROPY_NODES; l++) {
     if (vp8_read(bc, grpupd)) {
       // printf("Decoding %d\n", l);
@@ -936,8 +936,8 @@ static void read_coef_probs2(VP8D_COMP *pbi) {
 
 static void read_coef_probs(VP8D_COMP *pbi) {
   int i, j, k, l;
-  vp8_reader *const bc = & pbi->bc;
-  VP8_COMMON *const pc = & pbi->common;
+  vp8_reader *const bc = &pbi->bc;
+  VP8_COMMON *const pc = &pbi->common;
 
   {
     if (vp8_read_bit(bc)) {
@@ -1061,9 +1061,9 @@ static void read_coef_probs(VP8D_COMP *pbi) {
 }
 
 int vp8_decode_frame(VP8D_COMP *pbi) {
-  vp8_reader *const bc = & pbi->bc;
-  VP8_COMMON *const pc = & pbi->common;
-  MACROBLOCKD *const xd  = & pbi->mb;
+  vp8_reader *const bc = &pbi->bc;
+  VP8_COMMON *const pc = &pbi->common;
+  MACROBLOCKD *const xd  = &pbi->mb;
   const unsigned char *data = (const unsigned char *)pbi->Source;
   const unsigned char *data_end = data + pbi->source_sz;
   ptrdiff_t first_partition_length_in_bytes = 0;

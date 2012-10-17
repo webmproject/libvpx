@@ -2116,7 +2116,7 @@ static int labels2mode(
   int_mv *best_ref_mv,
   int_mv *second_best_ref_mv,
   DEC_MVCOSTS) {
-  MACROBLOCKD *const xd = & x->e_mbd;
+  MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mode_info_context;
   MB_MODE_INFO * mbmi = &mic->mbmi;
   const int mis = xd->mode_info_stride;

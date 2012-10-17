@@ -224,9 +224,9 @@ static void update_mode(
 }
 
 static void update_mbintra_mode_probs(VP8_COMP *cpi) {
-  VP8_COMMON *const cm = & cpi->common;
+  VP8_COMMON *const cm = &cpi->common;
 
-  vp8_writer *const w = & cpi->bc;
+  vp8_writer *const w = &cpi->bc;
 
   {
     vp8_prob Pnew   [VP8_YMODES - 1];
@@ -252,7 +252,7 @@ static __inline int get_prob(int num, int den) {
 }
 
 void update_skip_probs(VP8_COMP *cpi) {
-  VP8_COMMON *const pc = & cpi->common;
+  VP8_COMMON *const pc = &cpi->common;
   int prob_skip_false[3] = {0, 0, 0};
   int k;
 
@@ -276,8 +276,8 @@ void update_skip_probs(VP8_COMP *cpi) {
 
 #if CONFIG_SWITCHABLE_INTERP
 void update_switchable_interp_probs(VP8_COMP *cpi) {
-  VP8_COMMON *const pc = & cpi->common;
-  vp8_writer *const w = & cpi->bc;
+  VP8_COMMON *const pc = &cpi->common;
+  vp8_writer *const w = &cpi->bc;
   unsigned int branch_ct[32][2];
   int i, j;
   for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
@@ -329,7 +329,7 @@ void update_switchable_interp_probs(VP8_COMP *cpi) {
 
 // This function updates the reference frame prediction stats
 static void update_refpred_stats(VP8_COMP *cpi) {
-  VP8_COMMON *const cm = & cpi->common;
+  VP8_COMMON *const cm = &cpi->common;
   int i;
   int tot_count;
   vp8_prob new_pred_probs[PREDICTION_PROBS];
@@ -818,7 +818,7 @@ static void encode_ref_frame(vp8_writer *const w,
 
 // Update the probabilities used to encode reference frame data
 static void update_ref_probs(VP8_COMP *const cpi) {
-  VP8_COMMON *const cm = & cpi->common;
+  VP8_COMMON *const cm = &cpi->common;
 
   const int *const rfct = cpi->count_mb_ref_frame_usage;
   const int rf_intra = rfct[INTRA_FRAME];
@@ -850,8 +850,8 @@ static void update_ref_probs(VP8_COMP *const cpi) {
 
 static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
   int i;
-  VP8_COMMON *const pc = & cpi->common;
-  vp8_writer *const w = & cpi->bc2;
+  VP8_COMMON *const pc = &cpi->common;
+  vp8_writer *const w = &cpi->bc2;
 #if CONFIG_NEWMVENTROPY
   const nmv_context *nmvc = &pc->fc.nmvc;
 #else
@@ -914,7 +914,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
           continue;
         }
 
-        mi = & m->mbmi;
+        mi = &m->mbmi;
         rf = mi->ref_frame;
         mode = mi->mode;
         segment_id = mi->segment_id;
@@ -1399,8 +1399,8 @@ static void write_mb_modes_kf(const VP8_COMMON  *c,
 }
 
 static void write_kfmodes(VP8_COMP *cpi) {
-  vp8_writer *const bc = & cpi->bc2;
-  VP8_COMMON *const c = & cpi->common;
+  vp8_writer *const bc = &cpi->bc2;
+  VP8_COMMON *const c = &cpi->common;
   const int mis = c->mode_info_stride;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   MODE_INFO *m;
@@ -1641,7 +1641,7 @@ void build_coeff_contexts(VP8_COMP *cpi) {
 static void update_coef_probs2(VP8_COMP *cpi) {
   const vp8_prob grpupd = 192;
   int i, j, k, t;
-  vp8_writer *const w = & cpi->bc;
+  vp8_writer *const w = &cpi->bc;
   int update[2];
   int savings;
 
@@ -1808,7 +1808,7 @@ static void update_coef_probs2(VP8_COMP *cpi) {
 
 static void update_coef_probs(VP8_COMP *cpi) {
   int i, j, k, t;
-  vp8_writer *const w = & cpi->bc;
+  vp8_writer *const w = &cpi->bc;
   int update[2] = {0, 0};
   int savings;
 
@@ -2357,7 +2357,7 @@ static void segment_reference_frames(VP8_COMP *cpi) {
   int ref[MAX_MB_SEGMENTS] = {0};
   int i, j;
   int mb_index = 0;
-  MACROBLOCKD *const xd = & cpi->mb.e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   for (i = 0; i < oci->mb_rows; i++) {
     for (j = 0; j < oci->mb_cols; j++, mb_index++) {
@@ -2374,9 +2374,9 @@ static void segment_reference_frames(VP8_COMP *cpi) {
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size) {
   int i, j;
   VP8_HEADER oh;
-  VP8_COMMON *const pc = & cpi->common;
-  vp8_writer *const bc = & cpi->bc;
-  MACROBLOCKD *const xd = & cpi->mb.e_mbd;
+  VP8_COMMON *const pc = &cpi->common;
+  vp8_writer *const bc = &cpi->bc;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   int extra_bytes_packed = 0;
 
   unsigned char *cx_data = dest;

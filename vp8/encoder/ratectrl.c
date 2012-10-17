@@ -123,7 +123,7 @@ int vp8_bits_per_mb(FRAME_TYPE frame_type, int qindex) {
 
 
 void vp8_save_coding_context(VP8_COMP *cpi) {
-  CODING_CONTEXT *const cc = & cpi->coding_context;
+  CODING_CONTEXT *const cc = &cpi->coding_context;
   VP8_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
@@ -195,7 +195,7 @@ void vp8_save_coding_context(VP8_COMP *cpi) {
 }
 
 void vp8_restore_coding_context(VP8_COMP *cpi) {
-  CODING_CONTEXT *const cc = & cpi->coding_context;
+  CODING_CONTEXT *const cc = &cpi->coding_context;
   VP8_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 

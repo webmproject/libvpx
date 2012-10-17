@@ -608,7 +608,7 @@ static void init_seg_features(VP8_COMP *cpi) {
 
 // DEBUG: Print out the segment id of each MB in the current frame.
 static void print_seg_map(VP8_COMP *cpi) {
-  VP8_COMMON *cm = & cpi->common;
+  VP8_COMMON *cm = &cpi->common;
   int row, col;
   int map_index = 0;
   FILE *statsfile;
@@ -1282,7 +1282,7 @@ static int vp8_alloc_partition_data(VP8_COMP *cpi) {
 }
 
 void vp8_alloc_compressor_data(VP8_COMP *cpi) {
-  VP8_COMMON *cm = & cpi->common;
+  VP8_COMMON *cm = &cpi->common;
 
   int width = cm->Width;
   int height = cm->Height;
