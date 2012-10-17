@@ -111,10 +111,10 @@ static int remap_prob(int v, int m) {
   return i;
 }
 
-static void write_prob_diff_update(vp8_writer *const w,
+static void write_prob_diff_update(vp8_writer *const bc,
                                    vp8_prob newp, vp8_prob oldp) {
   int delp = remap_prob(newp, oldp);
-  vp8_encode_term_subexp(w, delp, SUBEXP_PARAM, 255);
+  vp8_encode_term_subexp(bc, delp, SUBEXP_PARAM, 255);
 }
 
 static int prob_diff_update_cost(vp8_prob newp, vp8_prob oldp) {
@@ -186,7 +186,7 @@ unsigned int pick_best_mv_ref( MACROBLOCK *x,
 #endif
 
 static void update_mode(
-  vp8_writer *const w,
+  vp8_writer *const bc,
   int n,
   vp8_token tok               [/* n */],
   vp8_tree tree,
@@ -212,28 +212,27 @@ static void update_mode(
   if (new_b + (n << 8) < old_b) {
     int i = 0;
 
-    vp8_write_bit(w, 1);
+    vp8_write_bit(bc, 1);
 
     do {
       const vp8_prob p = Pnew[i];
 
-      vp8_write_literal(w, Pcur[i] = p ? p : 1, 8);
+      vp8_write_literal(bc, Pcur[i] = p ? p : 1, 8);
     } while (++i < n);
   } else
-    vp8_write_bit(w, 0);
+    vp8_write_bit(bc, 0);
 }
 
-static void update_mbintra_mode_probs(VP8_COMP *cpi) {
+static void update_mbintra_mode_probs(VP8_COMP* const cpi,
+                                      vp8_writer* const bc) {
   VP8_COMMON *const cm = &cpi->common;
-
-  vp8_writer *const w = &cpi->bc;
 
   {
     vp8_prob Pnew   [VP8_YMODES - 1];
     unsigned int bct [VP8_YMODES - 1] [2];
 
     update_mode(
-      w, VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
+      bc, VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
       Pnew, cm->fc.ymode_prob, bct, (unsigned int *)cpi->ymode_count
     );
   }
@@ -275,9 +274,8 @@ void update_skip_probs(VP8_COMP *cpi) {
 }
 
 #if CONFIG_SWITCHABLE_INTERP
-void update_switchable_interp_probs(VP8_COMP *cpi) {
+void update_switchable_interp_probs(VP8_COMP *cpi, vp8_writer* const bc) {
   VP8_COMMON *const pc = &cpi->common;
-  vp8_writer *const w = &cpi->bc;
   unsigned int branch_ct[32][2];
   int i, j;
   for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
@@ -301,7 +299,7 @@ void update_switchable_interp_probs(VP8_COMP *cpi) {
     for (i = 0; i < VP8_SWITCHABLE_FILTERS - 1; ++i) {
       if (pc->fc.switchable_interp_prob[j][i] < 1)
         pc->fc.switchable_interp_prob[j][i] = 1;
-      vp8_write_literal(w, pc->fc.switchable_interp_prob[j][i], 8);
+      vp8_write_literal(bc, pc->fc.switchable_interp_prob[j][i], 8);
 /*
       if (!cpi->dummy_packing)
 #if VP8_SWITCHABLE_FILTERS == 3
@@ -454,14 +452,14 @@ static int prob_diff_update_savings_search(const unsigned int *ct,
   return bestsavings;
 }
 
-static void pack_mb_tokens(vp8_writer *w,
+static void pack_mb_tokens(vp8_writer* const bc,
                            TOKENEXTRA **tp,
                            const TOKENEXTRA *const stop) {
   unsigned int split;
   unsigned int shift;
-  int count = w->count;
-  unsigned int range = w->range;
-  unsigned int lowvalue = w->lowvalue;
+  int count = bc->count;
+  unsigned int range = bc->range;
+  unsigned int lowvalue = bc->lowvalue;
   TOKENEXTRA *p = *tp;
 
   while (p < stop) {
@@ -505,17 +503,17 @@ static void pack_mb_tokens(vp8_writer *w,
         int offset = shift - count;
 
         if ((lowvalue << (offset - 1)) & 0x80000000) {
-          int x = w->pos - 1;
+          int x = bc->pos - 1;
 
-          while (x >= 0 && w->buffer[x] == 0xff) {
-            w->buffer[x] = (unsigned char)0;
+          while (x >= 0 && bc->buffer[x] == 0xff) {
+            bc->buffer[x] = (unsigned char)0;
             x--;
           }
 
-          w->buffer[x] += 1;
+          bc->buffer[x] += 1;
         }
 
-        w->buffer[w->pos++] = (lowvalue >> (24 - offset));
+        bc->buffer[bc->pos++] = (lowvalue >> (24 - offset));
         lowvalue <<= offset;
         shift = count;
         lowvalue &= 0xffffff;
@@ -555,17 +553,17 @@ static void pack_mb_tokens(vp8_writer *w,
             int offset = shift - count;
 
             if ((lowvalue << (offset - 1)) & 0x80000000) {
-              int x = w->pos - 1;
+              int x = bc->pos - 1;
 
-              while (x >= 0 && w->buffer[x] == 0xff) {
-                w->buffer[x] = (unsigned char)0;
+              while (x >= 0 && bc->buffer[x] == 0xff) {
+                bc->buffer[x] = (unsigned char)0;
                 x--;
               }
 
-              w->buffer[x] += 1;
+              bc->buffer[x] += 1;
             }
 
-            w->buffer[w->pos++] = (lowvalue >> (24 - offset));
+            bc->buffer[bc->pos++] = (lowvalue >> (24 - offset));
             lowvalue <<= offset;
             shift = count;
             lowvalue &= 0xffffff;
@@ -591,14 +589,14 @@ static void pack_mb_tokens(vp8_writer *w,
         range <<= 1;
 
         if ((lowvalue & 0x80000000)) {
-          int x = w->pos - 1;
+          int x = bc->pos - 1;
 
-          while (x >= 0 && w->buffer[x] == 0xff) {
-            w->buffer[x] = (unsigned char)0;
+          while (x >= 0 && bc->buffer[x] == 0xff) {
+            bc->buffer[x] = (unsigned char)0;
             x--;
           }
 
-          w->buffer[x] += 1;
+          bc->buffer[x] += 1;
 
         }
 
@@ -606,7 +604,7 @@ static void pack_mb_tokens(vp8_writer *w,
 
         if (!++count) {
           count = -8;
-          w->buffer[w->pos++] = (lowvalue >> 24);
+          bc->buffer[bc->pos++] = (lowvalue >> 24);
           lowvalue &= 0xffffff;
         }
       }
@@ -615,9 +613,9 @@ static void pack_mb_tokens(vp8_writer *w,
     ++p;
   }
 
-  w->count = count;
-  w->lowvalue = lowvalue;
-  w->range = range;
+  bc->count = count;
+  bc->lowvalue = lowvalue;
+  bc->range = range;
   *tp = p;
 }
 
@@ -635,107 +633,108 @@ static void write_partition_size(unsigned char *cx_data, int size) {
 
 static void write_mv_ref
 (
-  vp8_writer *w, MB_PREDICTION_MODE m, const vp8_prob *p
+  vp8_writer *bc, MB_PREDICTION_MODE m, const vp8_prob *p
 ) {
 #if CONFIG_DEBUG
   assert(NEARESTMV <= m  &&  m <= SPLITMV);
 #endif
-  vp8_write_token(w, vp8_mv_ref_tree, p,
+  vp8_write_token(bc, vp8_mv_ref_tree, p,
                   vp8_mv_ref_encoding_array - NEARESTMV + m);
 }
 
 #if CONFIG_SUPERBLOCKS
-static void write_sb_mv_ref(vp8_writer *w, MB_PREDICTION_MODE m, const vp8_prob *p) {
+static void write_sb_mv_ref(vp8_writer *bc, MB_PREDICTION_MODE m,
+                            const vp8_prob *p) {
 #if CONFIG_DEBUG
   assert(NEARESTMV <= m  &&  m < SPLITMV);
 #endif
-  vp8_write_token(w, vp8_sb_mv_ref_tree, p,
+  vp8_write_token(bc, vp8_sb_mv_ref_tree, p,
                   vp8_sb_mv_ref_encoding_array - NEARESTMV + m);
 }
 #endif
 
 static void write_sub_mv_ref
 (
-  vp8_writer *w, B_PREDICTION_MODE m, const vp8_prob *p
+  vp8_writer *bc, B_PREDICTION_MODE m, const vp8_prob *p
 ) {
 #if CONFIG_DEBUG
   assert(LEFT4X4 <= m  &&  m <= NEW4X4);
 #endif
-  vp8_write_token(w, vp8_sub_mv_ref_tree, p,
+  vp8_write_token(bc, vp8_sub_mv_ref_tree, p,
                   vp8_sub_mv_ref_encoding_array - LEFT4X4 + m);
 }
 
 #if CONFIG_NEWMVENTROPY
-static void write_nmv (vp8_writer *w, const MV *mv, const int_mv *ref,
-                       const nmv_context *nmvc, int usehp) {
+static void write_nmv(vp8_writer *bc, const MV *mv, const int_mv *ref,
+                      const nmv_context *nmvc, int usehp) {
   MV e;
   e.row = mv->row - ref->as_mv.row;
   e.col = mv->col - ref->as_mv.col;
 
-  vp8_encode_nmv(w, &e, &ref->as_mv, nmvc);
-  vp8_encode_nmv_fp(w, &e, &ref->as_mv, nmvc, usehp);
+  vp8_encode_nmv(bc, &e, &ref->as_mv, nmvc);
+  vp8_encode_nmv_fp(bc, &e, &ref->as_mv, nmvc, usehp);
 }
 
 #else
 
 static void write_mv
 (
-  vp8_writer *w, const MV *mv, const int_mv *ref, const MV_CONTEXT *mvc
+  vp8_writer *bc, const MV *mv, const int_mv *ref, const MV_CONTEXT *mvc
 ) {
   MV e;
   e.row = mv->row - ref->as_mv.row;
   e.col = mv->col - ref->as_mv.col;
 
-  vp8_encode_motion_vector(w, &e, mvc);
+  vp8_encode_motion_vector(bc, &e, mvc);
 }
 
 static void write_mv_hp
 (
-  vp8_writer *w, const MV *mv, const int_mv *ref, const MV_CONTEXT_HP *mvc
+  vp8_writer *bc, const MV *mv, const int_mv *ref, const MV_CONTEXT_HP *mvc
 ) {
   MV e;
   e.row = mv->row - ref->as_mv.row;
   e.col = mv->col - ref->as_mv.col;
 
-  vp8_encode_motion_vector_hp(w, &e, mvc);
+  vp8_encode_motion_vector_hp(bc, &e, mvc);
 }
 #endif  /* CONFIG_NEWMVENTROPY */
 
 // This function writes the current macro block's segnment id to the bitstream
 // It should only be called if a segment map update is indicated.
-static void write_mb_segid(vp8_writer *w,
+static void write_mb_segid(vp8_writer *bc,
                            const MB_MODE_INFO *mi, const MACROBLOCKD *xd) {
   // Encode the MB segment id.
   if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
     switch (mi->segment_id) {
       case 0:
-        vp8_write(w, 0, xd->mb_segment_tree_probs[0]);
-        vp8_write(w, 0, xd->mb_segment_tree_probs[1]);
+        vp8_write(bc, 0, xd->mb_segment_tree_probs[0]);
+        vp8_write(bc, 0, xd->mb_segment_tree_probs[1]);
         break;
       case 1:
-        vp8_write(w, 0, xd->mb_segment_tree_probs[0]);
-        vp8_write(w, 1, xd->mb_segment_tree_probs[1]);
+        vp8_write(bc, 0, xd->mb_segment_tree_probs[0]);
+        vp8_write(bc, 1, xd->mb_segment_tree_probs[1]);
         break;
       case 2:
-        vp8_write(w, 1, xd->mb_segment_tree_probs[0]);
-        vp8_write(w, 0, xd->mb_segment_tree_probs[2]);
+        vp8_write(bc, 1, xd->mb_segment_tree_probs[0]);
+        vp8_write(bc, 0, xd->mb_segment_tree_probs[2]);
         break;
       case 3:
-        vp8_write(w, 1, xd->mb_segment_tree_probs[0]);
-        vp8_write(w, 1, xd->mb_segment_tree_probs[2]);
+        vp8_write(bc, 1, xd->mb_segment_tree_probs[0]);
+        vp8_write(bc, 1, xd->mb_segment_tree_probs[2]);
         break;
 
         // TRAP.. This should not happen
       default:
-        vp8_write(w, 0, xd->mb_segment_tree_probs[0]);
-        vp8_write(w, 0, xd->mb_segment_tree_probs[1]);
+        vp8_write(bc, 0, xd->mb_segment_tree_probs[0]);
+        vp8_write(bc, 0, xd->mb_segment_tree_probs[1]);
         break;
     }
   }
 }
 
 // This function encodes the reference frame
-static void encode_ref_frame(vp8_writer *const w,
+static void encode_ref_frame(vp8_writer *const bc,
                              VP8_COMMON *const cm,
                              MACROBLOCKD *xd,
                              int segment_id,
@@ -772,7 +771,7 @@ static void encode_ref_frame(vp8_writer *const w,
       (xd->mode_info_context->mbmi.ref_frame == pred_rf);
 
     set_pred_flag(xd, PRED_REF, prediction_flag);
-    vp8_write(w, prediction_flag, pred_prob);
+    vp8_write(bc, prediction_flag, pred_prob);
 
     // If not predicted correctly then code value explicitly
     if (!prediction_flag) {
@@ -794,18 +793,18 @@ static void encode_ref_frame(vp8_writer *const w,
       }
 
       if (mod_refprobs[0]) {
-        vp8_write(w, (rf != INTRA_FRAME), mod_refprobs[0]);
+        vp8_write(bc, (rf != INTRA_FRAME), mod_refprobs[0]);
       }
 
       // Inter coded
       if (rf != INTRA_FRAME) {
         if (mod_refprobs[1]) {
-          vp8_write(w, (rf != LAST_FRAME), mod_refprobs[1]);
+          vp8_write(bc, (rf != LAST_FRAME), mod_refprobs[1]);
         }
 
         if (rf != LAST_FRAME) {
           if (mod_refprobs[2]) {
-            vp8_write(w, (rf != GOLDEN_FRAME), mod_refprobs[2]);
+            vp8_write(bc, (rf != GOLDEN_FRAME), mod_refprobs[2]);
           }
         }
       }
@@ -848,10 +847,9 @@ static void update_ref_probs(VP8_COMP *const cpi) {
   compute_mod_refprobs(cm);
 }
 
-static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
+static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
   int i;
   VP8_COMMON *const pc = &cpi->common;
-  vp8_writer *const w = &cpi->bc2;
 #if CONFIG_NEWMVENTROPY
   const nmv_context *nmvc = &pc->fc.nmvc;
 #else
@@ -892,7 +890,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
       // Process the 4 MBs in the order:
       // top-left, top-right, bottom-left, bottom-right
 #if CONFIG_SUPERBLOCKS
-      vp8_write(w, m->mbmi.encoded_as_sb, pc->sb_coded);
+      vp8_write(bc, m->mbmi.encoded_as_sb, pc->sb_coded);
 #endif
       for (i = 0; i < 4; i++) {
         MB_MODE_INFO *mi;
@@ -942,14 +940,14 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
             pred_prob = get_pred_prob(pc, xd, PRED_SEG_ID);
 
             // Code the segment id prediction flag for this mb
-            vp8_write(w, prediction_flag, pred_prob);
+            vp8_write(bc, prediction_flag, pred_prob);
 
             // If the mb segment id wasn't predicted code explicitly
             if (!prediction_flag)
-              write_mb_segid(w, mi, &cpi->mb.e_mbd);
+              write_mb_segid(bc, mi, &cpi->mb.e_mbd);
           } else {
             // Normal unpredicted coding
-            write_mb_segid(w, mi, &cpi->mb.e_mbd);
+            write_mb_segid(bc, mi, &cpi->mb.e_mbd);
           }
         }
 
@@ -964,12 +962,12 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
             skip_coeff &= m[mis + 1].mbmi.mb_skip_coeff;
           }
 #endif
-          vp8_encode_bool(w, skip_coeff,
+          vp8_encode_bool(bc, skip_coeff,
                           get_pred_prob(pc, xd, PRED_MBSKIP));
         }
 
         // Encode the reference frame.
-        encode_ref_frame(w, pc, xd, segment_id, rf);
+        encode_ref_frame(bc, pc, xd, segment_id, rf);
 
         if (rf == INTRA_FRAME) {
 #ifdef ENTROPY_STATS
@@ -979,7 +977,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
           // TODO(rbultje) write using SB tree structure
 
           if (!segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
-            write_ymode(w, mode, pc->fc.ymode_prob);
+            write_ymode(bc, mode, pc->fc.ymode_prob);
           }
 
           if (mode == B_PRED) {
@@ -988,13 +986,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
             int uses_second =
               m->bmi[0].as_mode.second !=
               (B_PREDICTION_MODE)(B_DC_PRED - 1);
-            vp8_write(w, uses_second, 128);
+            vp8_write(bc, uses_second, 128);
 #endif
             do {
 #if CONFIG_COMP_INTRA_PRED
               B_PREDICTION_MODE mode2 = m->bmi[j].as_mode.second;
 #endif
-              write_bmode(w, m->bmi[j].as_mode.first,
+              write_bmode(bc, m->bmi[j].as_mode.first,
                           pc->fc.bmode_prob);
               /*
               if (!cpi->dummy_packing) {
@@ -1006,22 +1004,22 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
               */
 #if CONFIG_COMP_INTRA_PRED
               if (uses_second) {
-                write_bmode(w, mode2, pc->fc.bmode_prob);
+                write_bmode(bc, mode2, pc->fc.bmode_prob);
               }
 #endif
             } while (++j < 16);
           }
           if (mode == I8X8_PRED) {
-            write_i8x8_mode(w, m->bmi[0].as_mode.first,
+            write_i8x8_mode(bc, m->bmi[0].as_mode.first,
                             pc->fc.i8x8_mode_prob);
-            write_i8x8_mode(w, m->bmi[2].as_mode.first,
+            write_i8x8_mode(bc, m->bmi[2].as_mode.first,
                             pc->fc.i8x8_mode_prob);
-            write_i8x8_mode(w, m->bmi[8].as_mode.first,
+            write_i8x8_mode(bc, m->bmi[8].as_mode.first,
                             pc->fc.i8x8_mode_prob);
-            write_i8x8_mode(w, m->bmi[10].as_mode.first,
+            write_i8x8_mode(bc, m->bmi[10].as_mode.first,
                             pc->fc.i8x8_mode_prob);
           } else {
-            write_uv_mode(w, mi->uv_mode,
+            write_uv_mode(bc, mi->uv_mode,
                           pc->fc.uv_mode_prob[mode]);
           }
         } else {
@@ -1053,11 +1051,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
           if (!segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
 #if CONFIG_SUPERBLOCKS
             if (mi->encoded_as_sb) {
-              write_sb_mv_ref(w, mode, mv_ref_p);
+              write_sb_mv_ref(bc, mode, mv_ref_p);
             } else
 #endif
             {
-              write_mv_ref(w, mode, mv_ref_p);
+              write_mv_ref(bc, mode, mv_ref_p);
             }
             vp8_accum_mv_refs(&cpi->common, mode, ct);
           }
@@ -1066,7 +1064,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
           // Is the prediction filter enabled
           if (mode >= NEARESTMV && mode < SPLITMV) {
             if (cpi->common.pred_filter_mode == 2)
-              vp8_write(w, mi->pred_filter_enabled,
+              vp8_write(bc, mi->pred_filter_enabled,
                         pc->prob_pred_filter_off);
             else
               assert(mi->pred_filter_enabled ==
@@ -1077,7 +1075,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
           if (mode >= NEARESTMV && mode <= SPLITMV)
           {
             if (cpi->common.mcomp_filter_type == SWITCHABLE) {
-              vp8_write_token(w, vp8_switchable_interp_tree,
+              vp8_write_token(bc, vp8_switchable_interp_tree,
                               get_pred_probs(&cpi->common, xd, PRED_SWITCHABLE_INTERP),
                               vp8_switchable_interp_encodings +
                               vp8_switchable_interp_map[mi->interp_filter]);
@@ -1105,7 +1103,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
           // does the feature use compound prediction or not
           // (if not specified at the frame/segment level)
           if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
-            vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
+            vp8_write(bc, mi->second_ref_frame != INTRA_FRAME,
                       get_pred_prob(pc, xd, PRED_COMP));
           }
 
@@ -1131,14 +1129,14 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                 }
 #endif
 #if CONFIG_NEWMVENTROPY
-                write_nmv(w, &mi->mv[0].as_mv, &best_mv,
+                write_nmv(bc, &mi->mv[0].as_mv, &best_mv,
                           (const nmv_context*) nmvc,
                           xd->allow_high_precision_mv);
 #else
                 if (xd->allow_high_precision_mv) {
-                  write_mv_hp(w, &mi->mv[0].as_mv, &best_mv, mvc_hp);
+                  write_mv_hp(bc, &mi->mv[0].as_mv, &best_mv, mvc_hp);
                 } else {
-                  write_mv(w, &mi->mv[0].as_mv, &best_mv, mvc);
+                  write_mv(bc, &mi->mv[0].as_mv, &best_mv, mvc);
                 }
 #endif
 
@@ -1158,14 +1156,14 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                   cpi->best_ref_index_counts[best_index]++;
 #endif
 #if CONFIG_NEWMVENTROPY
-                  write_nmv(w, &mi->mv[1].as_mv, &best_second_mv,
+                  write_nmv(bc, &mi->mv[1].as_mv, &best_second_mv,
                             (const nmv_context*) nmvc,
                             xd->allow_high_precision_mv);
 #else
                   if (xd->allow_high_precision_mv) {
-                    write_mv_hp(w, &mi->mv[1].as_mv, &best_second_mv, mvc_hp);
+                    write_mv_hp(bc, &mi->mv[1].as_mv, &best_second_mv, mvc_hp);
                   } else {
-                    write_mv(w, &mi->mv[1].as_mv, &best_second_mv, mvc);
+                    write_mv(bc, &mi->mv[1].as_mv, &best_second_mv, mvc);
                   }
 #endif
                 }
@@ -1177,7 +1175,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                 ++count_mb_seg [mi->partitioning];
 #endif
 
-                write_split(w, mi->partitioning, cpi->common.fc.mbsplit_prob);
+                write_split(bc, mi->partitioning, cpi->common.fc.mbsplit_prob);
                 cpi->mbsplit_count[mi->partitioning]++;
 
                 do {
@@ -1202,7 +1200,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                   abovemv.as_int = above_block_mv(m, k, mis);
                   mv_contz = vp8_mv_cont(&leftmv, &abovemv);
 
-                  write_sub_mv_ref(w, blockmode,
+                  write_sub_mv_ref(bc, blockmode,
                                    cpi->common.fc.sub_mv_ref_prob [mv_contz]);
                   cpi->sub_mv_ref_count[mv_contz][blockmode - LEFT4X4]++;
                   if (blockmode == NEW4X4) {
@@ -1210,33 +1208,37 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                     active_section = 11;
 #endif
 #if CONFIG_NEWMVENTROPY
-                    write_nmv(w, &blockmv.as_mv, &best_mv,
+                    write_nmv(bc, &blockmv.as_mv, &best_mv,
                               (const nmv_context*) nmvc,
                               xd->allow_high_precision_mv);
 #else
                     if (xd->allow_high_precision_mv) {
-                      write_mv_hp(w, &blockmv.as_mv, &best_mv,
+                      write_mv_hp(bc, &blockmv.as_mv, &best_mv,
                                   (const MV_CONTEXT_HP *) mvc_hp);
                     } else {
-                      write_mv(w, &blockmv.as_mv, &best_mv,
+                      write_mv(bc, &blockmv.as_mv, &best_mv,
                                (const MV_CONTEXT *) mvc);
                     }
 #endif
 
                     if (mi->second_ref_frame) {
 #if CONFIG_NEWMVENTROPY
-                      write_nmv(w,
+                      write_nmv(bc,
                                 &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
                                 &best_second_mv,
                                 (const nmv_context*) nmvc,
                                 xd->allow_high_precision_mv);
 #else
                       if (xd->allow_high_precision_mv) {
-                        write_mv_hp(w, &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
-                                    &best_second_mv, (const MV_CONTEXT_HP *) mvc_hp);
+                        write_mv_hp(
+                            bc,
+                            &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
+                            &best_second_mv, (const MV_CONTEXT_HP *)mvc_hp);
                       } else {
-                        write_mv(w, &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
-                                 &best_second_mv, (const MV_CONTEXT *) mvc);
+                        write_mv(
+                            bc,
+                            &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
+                            &best_second_mv, (const MV_CONTEXT *) mvc);
                       }
 #endif
                     }
@@ -1259,9 +1261,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
           TX_SIZE sz = mi->txfm_size;
           // FIXME(rbultje) code ternary symbol once all experiments are merged
-          vp8_write(w, sz != TX_4X4, pc->prob_tx[0]);
+          vp8_write(bc, sz != TX_4X4, pc->prob_tx[0]);
           if (sz != TX_4X4 && mode != I8X8_PRED)
-            vp8_write(w, sz != TX_8X8, pc->prob_tx[1]);
+            vp8_write(bc, sz != TX_8X8, pc->prob_tx[1]);
         }
 #endif
 
@@ -1269,7 +1271,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
         active_section = 1;
 #endif
         assert(tok < tok_end);
-        pack_mb_tokens(w, &tok, tok_end);
+        pack_mb_tokens(bc, &tok, tok_end);
 
 #if CONFIG_SUPERBLOCKS
         if (m->mbmi.encoded_as_sb) {
@@ -1406,8 +1408,7 @@ static void write_mb_modes_kf(const VP8_COMMON  *c,
 #endif
 }
 
-static void write_kfmodes(VP8_COMP *cpi) {
-  vp8_writer *const bc = &cpi->bc2;
+static void write_kfmodes(VP8_COMP* const cpi, vp8_writer* const bc) {
   VP8_COMMON *const c = &cpi->common;
   const int mis = c->mode_info_stride;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
@@ -1814,9 +1815,8 @@ static void update_coef_probs2(VP8_COMP *cpi) {
 }
 #endif
 
-static void update_coef_probs(VP8_COMP *cpi) {
+static void update_coef_probs(VP8_COMP* const cpi, vp8_writer* const bc) {
   int i, j, k, t;
-  vp8_writer *const w = &cpi->bc;
   int update[2] = {0, 0};
   int savings;
 
@@ -1869,10 +1869,10 @@ static void update_coef_probs(VP8_COMP *cpi) {
 
   // printf("Update %d %d, savings %d\n", update[0], update[1], savings);
   /* Is coef updated at all */
-  if (update[1] == 0 || savings < 0)
-    vp8_write_bit(w, 0);
-  else {
-    vp8_write_bit(w, 1);
+  if (update[1] == 0 || savings < 0) {
+    vp8_write_bit(bc, 0);
+  } else {
+    vp8_write_bit(bc, 1);
     for (i = 0; i < BLOCK_TYPES; ++i) {
       for (j = !i; j < COEF_BANDS; ++j) {
         int prev_coef_savings[ENTROPY_NODES] = {0};
@@ -1900,14 +1900,14 @@ static void update_coef_probs(VP8_COMP *cpi) {
             if (s > 0)
               u = 1;
 #endif
-            vp8_write(w, u, upd);
+            vp8_write(bc, u, upd);
 #ifdef ENTROPY_STATS
             if (!cpi->dummy_packing)
               ++ tree_update_hist [i][j][k][t] [u];
 #endif
             if (u) {
               /* send/use new probability */
-              write_prob_diff_update(w, newp, *Pold);
+              write_prob_diff_update(bc, newp, *Pold);
               *Pold = newp;
             }
           }
@@ -1959,10 +1959,10 @@ static void update_coef_probs(VP8_COMP *cpi) {
 
   // printf("Update %d %d, savings %d\n", update[0], update[1], savings);
   /* Is coef updated at all */
-  if (update[1] == 0 || savings < 0)
-    vp8_write_bit(w, 0);
-  else {
-    vp8_write_bit(w, 1);
+  if (update[1] == 0 || savings < 0) {
+    vp8_write_bit(bc, 0);
+  } else {
+    vp8_write_bit(bc, 1);
     for (i = 0; i < BLOCK_TYPES; ++i) {
       for (j = !i; j < COEF_BANDS; ++j) {
         int prev_coef_savings[ENTROPY_NODES] = {0};
@@ -1990,14 +1990,14 @@ static void update_coef_probs(VP8_COMP *cpi) {
             if (s > 0)
               u = 1;
 #endif
-            vp8_write(w, u, upd);
+            vp8_write(bc, u, upd);
 #ifdef ENTROPY_STATS
             if (!cpi->dummy_packing)
               ++ hybrid_tree_update_hist [i][j][k][t] [u];
 #endif
             if (u) {
               /* send/use new probability */
-              write_prob_diff_update(w, newp, *Pold);
+              write_prob_diff_update(bc, newp, *Pold);
               *Pold = newp;
             }
           }
@@ -2044,10 +2044,10 @@ static void update_coef_probs(VP8_COMP *cpi) {
       }
     }
 
-    if (update[1] == 0 || savings < 0)
-      vp8_write_bit(w, 0);
-    else {
-      vp8_write_bit(w, 1);
+    if (update[1] == 0 || savings < 0) {
+      vp8_write_bit(bc, 0);
+    } else {
+      vp8_write_bit(bc, 1);
       for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
         for (j = !i; j < COEF_BANDS; ++j) {
           for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -2068,14 +2068,14 @@ static void update_coef_probs(VP8_COMP *cpi) {
               s = prob_update_savings(ct, oldp, newp, upd);
               u = s > 0 ? 1 : 0;
 #endif
-              vp8_write(w, u, upd);
+              vp8_write(bc, u, upd);
 #ifdef ENTROPY_STATS
               if (!cpi->dummy_packing)
                 ++ tree_update_hist_8x8 [i][j][k][t] [u];
 #endif
               if (u) {
                 /* send/use new probability */
-                write_prob_diff_update(w, newp, oldp);
+                write_prob_diff_update(bc, newp, oldp);
                 *Pold = newp;
               }
             }
@@ -2118,10 +2118,10 @@ static void update_coef_probs(VP8_COMP *cpi) {
       }
     }
 
-    if (update[1] == 0 || savings < 0)
-      vp8_write_bit(w, 0);
-    else {
-      vp8_write_bit(w, 1);
+    if (update[1] == 0 || savings < 0) {
+      vp8_write_bit(bc, 0);
+    } else {
+      vp8_write_bit(bc, 1);
       for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
         for (j = !i; j < COEF_BANDS; ++j) {
           for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -2142,14 +2142,14 @@ static void update_coef_probs(VP8_COMP *cpi) {
               s = prob_update_savings(ct, oldp, newp, upd);
               u = s > 0 ? 1 : 0;
 #endif
-              vp8_write(w, u, upd);
+              vp8_write(bc, u, upd);
 #ifdef ENTROPY_STATS
               if (!cpi->dummy_packing)
                 ++ hybrid_tree_update_hist_8x8 [i][j][k][t] [u];
 #endif
               if (u) {
                 /* send/use new probability */
-                write_prob_diff_update(w, newp, oldp);
+                write_prob_diff_update(bc, newp, oldp);
                 *Pold = newp;
               }
             }
@@ -2196,10 +2196,10 @@ static void update_coef_probs(VP8_COMP *cpi) {
     }
   }
 
-  if (update[1] == 0 || savings < 0)
-    vp8_write_bit(w, 0);
-  else {
-    vp8_write_bit(w, 1);
+  if (update[1] == 0 || savings < 0) {
+    vp8_write_bit(bc, 0);
+  } else {
+    vp8_write_bit(bc, 1);
     for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
       for (j = !i; j < COEF_BANDS; ++j) {
         for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -2220,14 +2220,14 @@ static void update_coef_probs(VP8_COMP *cpi) {
             s = prob_update_savings(ct, oldp, newp, upd);
             u = s > 0 ? 1 : 0;
 #endif
-            vp8_write(w, u, upd);
+            vp8_write(bc, u, upd);
 #ifdef ENTROPY_STATS
             if (!cpi->dummy_packing)
               ++tree_update_hist_16x16[i][j][k][t][u];
 #endif
             if (u) {
               /* send/use new probability */
-              write_prob_diff_update(w, newp, oldp);
+              write_prob_diff_update(bc, newp, oldp);
               *Pold = newp;
             }
           }
@@ -2270,10 +2270,10 @@ static void update_coef_probs(VP8_COMP *cpi) {
     }
   }
 
-  if (update[1] == 0 || savings < 0)
-    vp8_write_bit(w, 0);
-  else {
-    vp8_write_bit(w, 1);
+  if (update[1] == 0 || savings < 0) {
+    vp8_write_bit(bc, 0);
+  } else {
+    vp8_write_bit(bc, 1);
     for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
       for (j = !i; j < COEF_BANDS; ++j) {
         for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -2294,14 +2294,14 @@ static void update_coef_probs(VP8_COMP *cpi) {
             s = prob_update_savings(ct, oldp, newp, upd);
             u = s > 0 ? 1 : 0;
 #endif
-            vp8_write(w, u, upd);
+            vp8_write(bc, u, upd);
 #ifdef ENTROPY_STATS
             if (!cpi->dummy_packing)
               ++hybrid_tree_update_hist_16x16[i][j][k][t][u];
 #endif
             if (u) {
               /* send/use new probability */
-              write_prob_diff_update(w, newp, oldp);
+              write_prob_diff_update(bc, newp, oldp);
               *Pold = newp;
             }
           }
@@ -2383,7 +2383,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   int i, j;
   VP8_HEADER oh;
   VP8_COMMON *const pc = &cpi->common;
-  vp8_writer *const bc = &cpi->bc;
+  vp8_writer header_bc, residual_bc;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   int extra_bytes_packed = 0;
 
@@ -2427,22 +2427,23 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     extra_bytes_packed = 7;
     cx_data += extra_bytes_packed;
 
-    vp8_start_encode(bc, cx_data);
+    vp8_start_encode(&header_bc, cx_data);
 
     // signal clr type
-    vp8_write_bit(bc, pc->clr_type);
-    vp8_write_bit(bc, pc->clamp_type);
+    vp8_write_bit(&header_bc, pc->clr_type);
+    vp8_write_bit(&header_bc, pc->clamp_type);
 
-  } else
-    vp8_start_encode(bc, cx_data);
+  } else {
+    vp8_start_encode(&header_bc, cx_data);
+  }
 
   // Signal whether or not Segmentation is enabled
-  vp8_write_bit(bc, (xd->segmentation_enabled) ? 1 : 0);
+  vp8_write_bit(&header_bc, (xd->segmentation_enabled) ? 1 : 0);
 
   // Indicate which features are enabled
   if (xd->segmentation_enabled) {
     // Indicate whether or not the segmentation map is being updated.
-    vp8_write_bit(bc, (xd->update_mb_segmentation_map) ? 1 : 0);
+    vp8_write_bit(&header_bc, (xd->update_mb_segmentation_map) ? 1 : 0);
 
     // If it is, then indicate the method that will be used.
     if (xd->update_mb_segmentation_map) {
@@ -2454,37 +2455,37 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         int data = xd->mb_segment_tree_probs[i];
 
         if (data != 255) {
-          vp8_write_bit(bc, 1);
-          vp8_write_literal(bc, data, 8);
+          vp8_write_bit(&header_bc, 1);
+          vp8_write_literal(&header_bc, data, 8);
         } else {
-          vp8_write_bit(bc, 0);
+          vp8_write_bit(&header_bc, 0);
         }
       }
 
       // Write out the chosen coding method.
-      vp8_write_bit(bc, (pc->temporal_update) ? 1 : 0);
+      vp8_write_bit(&header_bc, (pc->temporal_update) ? 1 : 0);
       if (pc->temporal_update) {
         for (i = 0; i < PREDICTION_PROBS; i++) {
           int data = pc->segment_pred_probs[i];
 
           if (data != 255) {
-            vp8_write_bit(bc, 1);
-            vp8_write_literal(bc, data, 8);
+            vp8_write_bit(&header_bc, 1);
+            vp8_write_literal(&header_bc, data, 8);
           } else {
-            vp8_write_bit(bc, 0);
+            vp8_write_bit(&header_bc, 0);
           }
         }
       }
     }
 
-    vp8_write_bit(bc, (xd->update_mb_segmentation_data) ? 1 : 0);
+    vp8_write_bit(&header_bc, (xd->update_mb_segmentation_data) ? 1 : 0);
 
     // segment_reference_frames(cpi);
 
     if (xd->update_mb_segmentation_data) {
       signed char Data;
 
-      vp8_write_bit(bc, (xd->mb_segment_abs_delta) ? 1 : 0);
+      vp8_write_bit(&header_bc, (xd->mb_segment_abs_delta) ? 1 : 0);
 
       // For each segments id...
       for (i = 0; i < MAX_MB_SEGMENTS; i++) {
@@ -2497,67 +2498,67 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
           // check if there's an update
           if (segfeature_changed(xd, i, j)) {
-            vp8_write_bit(bc, 1);
+            vp8_write_bit(&header_bc, 1);
 
             if (segfeature_active(xd, i, j)) {
               // this bit is to say we are still
               // active/  if we were inactive
               // this is unnecessary
               if (old_segfeature_active(xd, i, j)) {
-                vp8_write_bit(bc, 1);
+                vp8_write_bit(&header_bc, 1);
               }
               // Is the segment data signed..
               if (is_segfeature_signed(j)) {
                 // Encode the relevant feature data
                 if (Data < 0) {
                   Data = - Data;
-                  vp8_write_literal(bc, Data,
+                  vp8_write_literal(&header_bc, Data,
                                     seg_feature_data_bits(j));
-                  vp8_write_bit(bc, 1);
+                  vp8_write_bit(&header_bc, 1);
                 } else {
-                  vp8_write_literal(bc, Data,
+                  vp8_write_literal(&header_bc, Data,
                                     seg_feature_data_bits(j));
-                  vp8_write_bit(bc, 0);
+                  vp8_write_bit(&header_bc, 0);
                 }
               }
               // Unsigned data element so no sign bit needed
               else
-                vp8_write_literal(bc, Data,
+                vp8_write_literal(&header_bc, Data,
                                   seg_feature_data_bits(j));
             }
             // feature is inactive now
             else if (old_segfeature_active(xd, i, j)) {
-              vp8_write_bit(bc, 0);
+              vp8_write_bit(&header_bc, 0);
             }
           } else {
-            vp8_write_bit(bc, 0);
+            vp8_write_bit(&header_bc, 0);
           }
 #else
 
           // If the feature is enabled...
           if (segfeature_active(xd, i, j)) {
-            vp8_write_bit(bc, 1);
+            vp8_write_bit(&header_bc, 1);
 
             // Is the segment data signed..
             if (is_segfeature_signed(j)) {
               // Encode the relevant feature data
               if (Data < 0) {
                 Data = - Data;
-                vp8_write_literal(bc, Data,
+                vp8_write_literal(&header_bc, Data,
                                   seg_feature_data_bits(j));
-                vp8_write_bit(bc, 1);
+                vp8_write_bit(&header_bc, 1);
               } else {
-                vp8_write_literal(bc, Data,
+                vp8_write_literal(&header_bc, Data,
                                   seg_feature_data_bits(j));
-                vp8_write_bit(bc, 0);
+                vp8_write_bit(&header_bc, 0);
               }
             }
             // Unsigned data element so no sign bit needed
             else
-              vp8_write_literal(bc, Data,
+              vp8_write_literal(&header_bc, Data,
                                 seg_feature_data_bits(j));
           } else
-            vp8_write_bit(bc, 0);
+            vp8_write_bit(&header_bc, 0);
 #endif
         }
       }
@@ -2576,10 +2577,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   if (pc->frame_type != KEY_FRAME) {
     for (i = 0; i < PREDICTION_PROBS; i++) {
       if (cpi->ref_pred_probs_update[i]) {
-        vp8_write_bit(bc, 1);
-        vp8_write_literal(bc, pc->ref_pred_probs[i], 8);
-      } else
-        vp8_write_bit(bc, 0);
+        vp8_write_bit(&header_bc, 1);
+        vp8_write_literal(&header_bc, pc->ref_pred_probs[i], 8);
+      } else {
+        vp8_write_bit(&header_bc, 0);
+      }
     }
   }
 
@@ -2592,7 +2594,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     else if (sb_coded >= 256)
       sb_coded = 255;
     pc->sb_coded = sb_coded;
-    vp8_write_literal(bc, pc->sb_coded, 8);
+    vp8_write_literal(&header_bc, pc->sb_coded, 8);
   }
 #endif
 
@@ -2607,29 +2609,29 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
       pc->prob_tx[0] = 128;
       pc->prob_tx[1] = 128;
     }
-    vp8_write_literal(bc, pc->txfm_mode, 2);
+    vp8_write_literal(&header_bc, pc->txfm_mode, 2);
     if (pc->txfm_mode == TX_MODE_SELECT) {
-      vp8_write_literal(bc, pc->prob_tx[0], 8);
-      vp8_write_literal(bc, pc->prob_tx[1], 8);
+      vp8_write_literal(&header_bc, pc->prob_tx[0], 8);
+      vp8_write_literal(&header_bc, pc->prob_tx[1], 8);
     }
   }
 #else
-  vp8_write_bit(bc, !!pc->txfm_mode);
+  vp8_write_bit(&header_bc, !!pc->txfm_mode);
 #endif
 
   // Encode the loop filter level and type
-  vp8_write_bit(bc, pc->filter_type);
-  vp8_write_literal(bc, pc->filter_level, 6);
-  vp8_write_literal(bc, pc->sharpness_level, 3);
+  vp8_write_bit(&header_bc, pc->filter_type);
+  vp8_write_literal(&header_bc, pc->filter_level, 6);
+  vp8_write_literal(&header_bc, pc->sharpness_level, 3);
 
   // Write out loop filter deltas applied at the MB level based on mode or ref frame (if they are enabled).
-  vp8_write_bit(bc, (xd->mode_ref_lf_delta_enabled) ? 1 : 0);
+  vp8_write_bit(&header_bc, (xd->mode_ref_lf_delta_enabled) ? 1 : 0);
 
   if (xd->mode_ref_lf_delta_enabled) {
     // Do the deltas need to be updated
     int send_update = xd->mode_ref_lf_delta_update;
 
-    vp8_write_bit(bc, send_update);
+    vp8_write_bit(&header_bc, send_update);
     if (send_update) {
       int Data;
 
@@ -2640,18 +2642,19 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         // Frame level data
         if (xd->ref_lf_deltas[i] != xd->last_ref_lf_deltas[i]) {
           xd->last_ref_lf_deltas[i] = xd->ref_lf_deltas[i];
-          vp8_write_bit(bc, 1);
+          vp8_write_bit(&header_bc, 1);
 
           if (Data > 0) {
-            vp8_write_literal(bc, (Data & 0x3F), 6);
-            vp8_write_bit(bc, 0);    // sign
+            vp8_write_literal(&header_bc, (Data & 0x3F), 6);
+            vp8_write_bit(&header_bc, 0);    // sign
           } else {
             Data = -Data;
-            vp8_write_literal(bc, (Data & 0x3F), 6);
-            vp8_write_bit(bc, 1);    // sign
+            vp8_write_literal(&header_bc, (Data & 0x3F), 6);
+            vp8_write_bit(&header_bc, 1);    // sign
           }
-        } else
-          vp8_write_bit(bc, 0);
+        } else {
+          vp8_write_bit(&header_bc, 0);
+        }
       }
 
       // Send update
@@ -2660,41 +2663,42 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
         if (xd->mode_lf_deltas[i] != xd->last_mode_lf_deltas[i]) {
           xd->last_mode_lf_deltas[i] = xd->mode_lf_deltas[i];
-          vp8_write_bit(bc, 1);
+          vp8_write_bit(&header_bc, 1);
 
           if (Data > 0) {
-            vp8_write_literal(bc, (Data & 0x3F), 6);
-            vp8_write_bit(bc, 0);    // sign
+            vp8_write_literal(&header_bc, (Data & 0x3F), 6);
+            vp8_write_bit(&header_bc, 0);    // sign
           } else {
             Data = -Data;
-            vp8_write_literal(bc, (Data & 0x3F), 6);
-            vp8_write_bit(bc, 1);    // sign
+            vp8_write_literal(&header_bc, (Data & 0x3F), 6);
+            vp8_write_bit(&header_bc, 1);    // sign
           }
-        } else
-          vp8_write_bit(bc, 0);
+        } else {
+          vp8_write_bit(&header_bc, 0);
+        }
       }
     }
   }
 
   // signal here is multi token partition is enabled
-  // vp8_write_literal(bc, pc->multi_token_partition, 2);
-  vp8_write_literal(bc, 0, 2);
+  // vp8_write_literal(&header_bc, pc->multi_token_partition, 2);
+  vp8_write_literal(&header_bc, 0, 2);
 
   // Frame Q baseline quantizer index
-  vp8_write_literal(bc, pc->base_qindex, QINDEX_BITS);
+  vp8_write_literal(&header_bc, pc->base_qindex, QINDEX_BITS);
 
   // Transmit Dc, Second order and Uv quantizer delta information
-  put_delta_q(bc, pc->y1dc_delta_q);
-  put_delta_q(bc, pc->y2dc_delta_q);
-  put_delta_q(bc, pc->y2ac_delta_q);
-  put_delta_q(bc, pc->uvdc_delta_q);
-  put_delta_q(bc, pc->uvac_delta_q);
+  put_delta_q(&header_bc, pc->y1dc_delta_q);
+  put_delta_q(&header_bc, pc->y2dc_delta_q);
+  put_delta_q(&header_bc, pc->y2ac_delta_q);
+  put_delta_q(&header_bc, pc->uvdc_delta_q);
+  put_delta_q(&header_bc, pc->uvac_delta_q);
 
   // When there is a key frame all reference buffers are updated using the new key frame
   if (pc->frame_type != KEY_FRAME) {
     // Should the GF or ARF be updated using the transmitted frame or buffer
-    vp8_write_bit(bc, pc->refresh_golden_frame);
-    vp8_write_bit(bc, pc->refresh_alt_ref_frame);
+    vp8_write_bit(&header_bc, pc->refresh_golden_frame);
+    vp8_write_bit(&header_bc, pc->refresh_alt_ref_frame);
 
     // For inter frames the current default behavior is that when
     // cm->refresh_golden_frame is set we copy the old GF over to
@@ -2704,17 +2708,17 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
     // If not being updated from current frame should either GF or ARF be updated from another buffer
     if (!pc->refresh_golden_frame)
-      vp8_write_literal(bc, pc->copy_buffer_to_gf, 2);
+      vp8_write_literal(&header_bc, pc->copy_buffer_to_gf, 2);
 
     if (!pc->refresh_alt_ref_frame)
-      vp8_write_literal(bc, pc->copy_buffer_to_arf, 2);
+      vp8_write_literal(&header_bc, pc->copy_buffer_to_arf, 2);
 
     // Indicate reference frame sign bias for Golden and ARF frames (always 0 for last frame buffer)
-    vp8_write_bit(bc, pc->ref_frame_sign_bias[GOLDEN_FRAME]);
-    vp8_write_bit(bc, pc->ref_frame_sign_bias[ALTREF_FRAME]);
+    vp8_write_bit(&header_bc, pc->ref_frame_sign_bias[GOLDEN_FRAME]);
+    vp8_write_bit(&header_bc, pc->ref_frame_sign_bias[ALTREF_FRAME]);
 
     // Signal whether to allow high MV precision
-    vp8_write_bit(bc, (xd->allow_high_precision_mv) ? 1 : 0);
+    vp8_write_bit(&header_bc, (xd->allow_high_precision_mv) ? 1 : 0);
 #if CONFIG_SWITCHABLE_INTERP
     if (pc->mcomp_filter_type == SWITCHABLE) {
       /* Check to see if only one of the filters is actually used */
@@ -2738,16 +2742,16 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
       }
     }
     // Signal the type of subpel filter to use
-    vp8_write_bit(bc, (pc->mcomp_filter_type == SWITCHABLE));
+    vp8_write_bit(&header_bc, (pc->mcomp_filter_type == SWITCHABLE));
     if (pc->mcomp_filter_type != SWITCHABLE)
 #endif  /* CONFIG_SWITCHABLE_INTERP */
-      vp8_write_literal(bc, (pc->mcomp_filter_type), 2);
+      vp8_write_literal(&header_bc, (pc->mcomp_filter_type), 2);
   }
 
-  vp8_write_bit(bc, pc->refresh_entropy_probs);
+  vp8_write_bit(&header_bc, pc->refresh_entropy_probs);
 
   if (pc->frame_type != KEY_FRAME)
-    vp8_write_bit(bc, pc->refresh_last_frame);
+    vp8_write_bit(&header_bc, pc->refresh_last_frame);
 
 #ifdef ENTROPY_STATS
   if (pc->frame_type == INTER_FRAME)
@@ -2787,25 +2791,25 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   vp8_zero(cpi->common.fc.mv_ref_ct)
   vp8_zero(cpi->common.fc.mv_ref_ct_a)
 
-  update_coef_probs(cpi);
+  update_coef_probs(cpi, &header_bc);
 
 #ifdef ENTROPY_STATS
   active_section = 2;
 #endif
 
   // Write out the mb_no_coeff_skip flag
-  vp8_write_bit(bc, pc->mb_no_coeff_skip);
+  vp8_write_bit(&header_bc, pc->mb_no_coeff_skip);
   if (pc->mb_no_coeff_skip) {
     int k;
 
     update_skip_probs(cpi);
     for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-      vp8_write_literal(bc, pc->mbskip_pred_probs[k], 8);
+      vp8_write_literal(&header_bc, pc->mbskip_pred_probs[k], 8);
   }
 
   if (pc->frame_type == KEY_FRAME) {
     if (!pc->kf_ymode_probs_update) {
-      vp8_write_literal(bc, pc->kf_ymode_probs_index, 3);
+      vp8_write_literal(&header_bc, pc->kf_ymode_probs_index, 3);
     }
   } else {
     // Update the probabilities used to encode reference frame data
@@ -2817,30 +2821,30 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
 #if CONFIG_PRED_FILTER
     // Write the prediction filter mode used for this frame
-    vp8_write_literal(bc, pc->pred_filter_mode, 2);
+    vp8_write_literal(&header_bc, pc->pred_filter_mode, 2);
 
     // Write prediction filter on/off probability if signaling at MB level
     if (pc->pred_filter_mode == 2)
-      vp8_write_literal(bc, pc->prob_pred_filter_off, 8);
+      vp8_write_literal(&header_bc, pc->prob_pred_filter_off, 8);
 
 #endif
 #if CONFIG_SWITCHABLE_INTERP
     if (pc->mcomp_filter_type == SWITCHABLE)
-      update_switchable_interp_probs(cpi);
+      update_switchable_interp_probs(cpi, &header_bc);
 #endif
 
-    vp8_write_literal(bc, pc->prob_intra_coded, 8);
-    vp8_write_literal(bc, pc->prob_last_coded, 8);
-    vp8_write_literal(bc, pc->prob_gf_coded, 8);
+    vp8_write_literal(&header_bc, pc->prob_intra_coded, 8);
+    vp8_write_literal(&header_bc, pc->prob_last_coded, 8);
+    vp8_write_literal(&header_bc, pc->prob_gf_coded, 8);
 
     {
       const int comp_pred_mode = cpi->common.comp_pred_mode;
       const int use_compound_pred = (comp_pred_mode != SINGLE_PREDICTION_ONLY);
       const int use_hybrid_pred = (comp_pred_mode == HYBRID_PREDICTION);
 
-      vp8_write(bc, use_compound_pred, 128);
+      vp8_write(&header_bc, use_compound_pred, 128);
       if (use_compound_pred) {
-        vp8_write(bc, use_hybrid_pred, 128);
+        vp8_write(&header_bc, use_hybrid_pred, 128);
         if (use_hybrid_pred) {
           for (i = 0; i < COMP_PRED_CONTEXTS; i++) {
             if (cpi->single_pred_count[i] + cpi->comp_pred_count[i]) {
@@ -2852,28 +2856,28 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
             } else {
               pc->prob_comppred[i] = 128;
             }
-            vp8_write_literal(bc, pc->prob_comppred[i], 8);
+            vp8_write_literal(&header_bc, pc->prob_comppred[i], 8);
           }
         }
       }
     }
 
-    update_mbintra_mode_probs(cpi);
+    update_mbintra_mode_probs(cpi, &header_bc);
 
 #if CONFIG_NEWMVENTROPY
-    vp8_write_nmvprobs(cpi, xd->allow_high_precision_mv);
+    vp8_write_nmvprobs(cpi, xd->allow_high_precision_mv, &header_bc);
 #else
     if (xd->allow_high_precision_mv) {
-      vp8_write_mvprobs_hp(cpi);
+      vp8_write_mvprobs_hp(cpi, &header_bc);
     } else {
-      vp8_write_mvprobs(cpi);
+      vp8_write_mvprobs(cpi, &header_bc);
     }
 #endif
   }
 
-  vp8_stop_encode(bc);
+  vp8_stop_encode(&header_bc);
 
-  oh.first_partition_length_in_bytes = cpi->bc.pos;
+  oh.first_partition_length_in_bytes = header_bc.pos;
 
   /* update frame tag */
   {
@@ -2887,21 +2891,21 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     dest[2] = v >> 16;
   }
 
-  *size = VP8_HEADER_SIZE + extra_bytes_packed + cpi->bc.pos;
-  vp8_start_encode(&cpi->bc2, cx_data + bc->pos);
+  *size = VP8_HEADER_SIZE + extra_bytes_packed + header_bc.pos;
+  vp8_start_encode(&residual_bc, cx_data + header_bc.pos);
 
   if (pc->frame_type == KEY_FRAME) {
     decide_kf_ymode_entropy(cpi);
-    write_kfmodes(cpi);
+    write_kfmodes(cpi, &residual_bc);
   } else {
-    pack_inter_mode_mvs(cpi);
+    pack_inter_mode_mvs(cpi, &residual_bc);
     vp8_update_mode_context(&cpi->common);
   }
 
 
-  vp8_stop_encode(&cpi->bc2);
+  vp8_stop_encode(&residual_bc);
 
-  *size += cpi->bc2.pos;
+  *size += residual_bc.pos;
 
 }
 

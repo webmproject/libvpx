@@ -45,7 +45,6 @@ typedef struct {
   ENTROPY_CONTEXT_PLANES *L;
 
   INT16 *qcoeff_start_ptr;
-  BOOL_DECODER *current_bc;
 
   vp8_prob const *coef_probs[BLOCK_TYPES];
   vp8_prob const *coef_probs_8x8[BLOCK_TYPES_8X8];
@@ -59,8 +58,6 @@ typedef struct VP8Decompressor {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
   DECLARE_ALIGNED(16, VP8_COMMON, common);
-
-  vp8_reader bc, bc2;
 
   VP8D_CONFIG oxcf;
 

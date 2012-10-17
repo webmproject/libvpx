@@ -420,9 +420,6 @@ typedef struct VP8_COMP {
 
   MACROBLOCK mb;
   VP8_COMMON common;
-  vp8_writer bc, bc2;
-  // bool_writer *bc2;
-
   VP8_CONFIG oxcf;
 
   struct lookahead_ctx    *lookahead;

@@ -302,17 +302,17 @@ static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign) {
       val += (UINT16)(1 << bits_count);\
   } while (0);
 
-static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
-                            ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                            PLANE_TYPE type,
+static int decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
+                        BOOL_DECODER* const br,
+                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                        PLANE_TYPE type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-                            TX_TYPE tx_type,
+                        TX_TYPE tx_type,
 #endif
-                            int seg_eob, INT16 *qcoeff_ptr, int i,
-                            const int *const scan, int block_type,
-                            const int *coef_bands) {
+                        int seg_eob, INT16 *qcoeff_ptr, int i,
+                        const int *const scan, int block_type,
+                        const int *coef_bands) {
   FRAME_CONTEXT *const fc = &dx->common.fc;
-  BOOL_DECODER *br = xd->current_bc;
   int tmp, c = (type == PLANE_TYPE_Y_NO_DC);
   const vp8_prob *prob, *coef_probs;
 
@@ -446,7 +446,8 @@ SKIP_START:
   return c;
 }
 
-int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd) {
+int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd,
+                               BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
 
@@ -473,12 +474,12 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   // Luma block
   {
     const int* const scan = vp8_default_zig_zag1d_16x16;
-    c = vp8_decode_coefs(pbi, xd, A, L, type,
+    c = decode_coefs(pbi, xd, bc, A, L, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-                         tx_type,
+                     tx_type,
 #endif
-                         seg_eob, qcoeff_ptr,
-                         0, scan, TX_16X16, coef_bands_x_16x16);
+                     seg_eob, qcoeff_ptr,
+                     0, scan, TX_16X16, coef_bands_x_16x16);
     eobs[0] = c;
     *A = *L = (c != !type);
     for (i = 1; i < 16; i++) {
@@ -503,12 +504,12 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     ENTROPY_CONTEXT* const l = L + vp8_block2left_8x8[i];
     const int* const scan = vp8_default_zig_zag1d_8x8;
 
-    c = vp8_decode_coefs(pbi, xd, a, l, type,
+    c = decode_coefs(pbi, xd, bc, a, l, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-                         tx_type,
+                     tx_type,
 #endif
-                         seg_eob, qcoeff_ptr,
-                         i, scan, TX_8X8, coef_bands_x_8x8);
+                     seg_eob, qcoeff_ptr,
+                     i, scan, TX_8X8, coef_bands_x_8x8);
     a[0] = l[0] = ((eobs[i] = c) != !type);
     a[1] = a[0];
     l[1] = l[0];
@@ -521,7 +522,8 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   return eobtotal;
 }
 
-int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
+int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
+                             BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
 
@@ -548,12 +550,12 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
       seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
     else
       seg_eob = 4;
-    c = vp8_decode_coefs(pbi, xd, a, l, type,
+    c = decode_coefs(pbi, xd, bc, a, l, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-                         tx_type,
+                     tx_type,
 #endif
-                         seg_eob, qcoeff_ptr + 24 * 16,
-                         24, scan, TX_8X8, coef_bands_x);
+                     seg_eob, qcoeff_ptr + 24 * 16,
+                     24, scan, TX_8X8, coef_bands_x);
     a[0] = l[0] = ((eobs[24] = c) != !type);
 
     eobtotal += c - 4;
@@ -583,12 +585,12 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     }
 #endif
 
-    c = vp8_decode_coefs(pbi, xd, a, l, type,
+    c = decode_coefs(pbi, xd, bc, a, l, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-                         tx_type,
+                     tx_type,
 #endif
-                         seg_eob, qcoeff_ptr,
-                         i, scan, TX_8X8, coef_bands_x_8x8);
+                     seg_eob, qcoeff_ptr,
+                     i, scan, TX_8X8, coef_bands_x_8x8);
     a[0] = l[0] = ((eobs[i] = c) != !type);
     a[1] = a[0];
     l[1] = l[0];
@@ -610,12 +612,12 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
       ENTROPY_CONTEXT *const l = L + vp8_block2left[i];
       const int *scan = vp8_default_zig_zag1d;
 
-      c = vp8_decode_coefs(pbi, xd, a, l, type,
+      c = decode_coefs(pbi, xd, bc, a, l, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-                           tx_type,
+                       tx_type,
 #endif
-                           seg_eob, qcoeff_ptr,
-                           i, scan, TX_4X4, coef_bands_x);
+                       seg_eob, qcoeff_ptr,
+                       i, scan, TX_4X4, coef_bands_x);
       a[0] = l[0] = ((eobs[i] = c) != !type);
 
       eobtotal += c;
@@ -627,7 +629,8 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
 }
 
 
-int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd) {
+int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd,
+                         BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
 
@@ -648,12 +651,12 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd) {
     ENTROPY_CONTEXT *const l = L + vp8_block2left[24];
     type = PLANE_TYPE_Y2;
 
-    c = vp8_decode_coefs(dx, xd, a, l, type,
+    c = decode_coefs(dx, xd, bc, a, l, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-                         DCT_DCT,
+                     DCT_DCT,
 #endif
-                         seg_eob, qcoeff_ptr + 24 * 16, 24,
-                         scan, TX_4X4, coef_bands_x);
+                     seg_eob, qcoeff_ptr + 24 * 16, 24,
+                     scan, TX_4X4, coef_bands_x);
     a[0] = l[0] = ((eobs[24] = c) != !type);
     eobtotal += c - 16;
 
@@ -688,12 +691,12 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd) {
     }
 #endif
 
-    c = vp8_decode_coefs(dx, xd, a, l, type,
+    c = decode_coefs(dx, xd, bc, a, l, type,
 #if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
-                         tx_type,
+                     tx_type,
 #endif
-                         seg_eob, qcoeff_ptr,
-                         i, scan, TX_4X4, coef_bands_x);
+                     seg_eob, qcoeff_ptr,
+                     i, scan, TX_4X4, coef_bands_x);
     a[0] = l[0] = ((eobs[i] = c) != !type);
 
     eobtotal += c;

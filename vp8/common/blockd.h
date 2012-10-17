@@ -364,8 +364,6 @@ typedef struct MacroBlockD {
   vp8_subpix_fn_t  subpixel_predict_avg16x16;
   int allow_high_precision_mv;
 
-  void *current_bc;
-
   int corrupted;
 
 #if !CONFIG_SUPERBLOCKS && (ARCH_X86 || ARCH_X86_64)
