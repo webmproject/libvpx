@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//7Sc\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2832,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:30:13Z",
+      "side": 1,
+      "message": "all three variables are const",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7SQ\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2833,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:30:13Z",
+      "side": 1,
+      "message": "suggest use of ()\u0027s\n\n(and at 2834 below too)",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7SE\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2842,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:30:13Z",
+      "side": 1,
+      "message": "btw, shouldn\u0027t this init be done elsewhere, instead of in the middle of a bit-writing function?",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7R4\u003d",
+        "filename": "vp8/encoder/encodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 835,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:30:13Z",
+      "side": 1,
+      "message": "extra space after \u0026",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//7R0\u003d",
+        "filename": "vp8/encoder/encodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1111,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-17T21:30:13Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "79973f5d23f05d38ae54339fb9dccd9792dedc70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
