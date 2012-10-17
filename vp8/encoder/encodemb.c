@@ -652,7 +652,7 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   type = PLANE_TYPE_Y_NO_DC;
   for (b = 0; b < 16; b += 4) {
     optimize_b(x, b, type,
-               ta + vp8_block2above[b], tl + vp8_block2left[b],
+               ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
                rtcd, TX_8X8);
     *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
     *(tl + vp8_block2left_8x8[b] + 1)  = *(tl + vp8_block2left_8x8[b]);
