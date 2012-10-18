@@ -238,7 +238,7 @@ static void update_mbintra_mode_probs(VP8_COMP* const cpi,
   }
 }
 
-static __inline int get_prob(int num, int den) {
+static int get_prob(int num, int den) {
   int p;
   if (den <= 0)
     return 128;
@@ -250,26 +250,18 @@ static __inline int get_prob(int num, int den) {
   return p;
 }
 
+static int get_binary_prob(int n0, int n1) {
+  return get_prob(n0, n0 + n1);
+}
+
 void update_skip_probs(VP8_COMP *cpi) {
   VP8_COMMON *const pc = &cpi->common;
   int prob_skip_false[3] = {0, 0, 0};
   int k;
 
   for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
-    if ((cpi->skip_false_count[k] + cpi->skip_true_count[k])) {
-      prob_skip_false[k] =
-        cpi->skip_false_count[k] * 256 /
-        (cpi->skip_false_count[k] + cpi->skip_true_count[k]);
-
-      if (prob_skip_false[k] <= 1)
-        prob_skip_false[k] = 1;
-
-      if (prob_skip_false[k] > 255)
-        prob_skip_false[k] = 255;
-    } else
-      prob_skip_false[k] = 128;
-
-    pc->mbskip_pred_probs[k] = prob_skip_false[k];
+    pc->mbskip_pred_probs[k] = get_binary_prob(cpi->skip_false_count[k],
+                                               cpi->skip_true_count[k]);
   }
 }
 
@@ -345,15 +337,8 @@ static void update_refpred_stats(VP8_COMP *cpi) {
   } else {
     // From the prediction counts set the probabilities for each context
     for (i = 0; i < PREDICTION_PROBS; i++) {
-      tot_count = cpi->ref_pred_count[i][0] + cpi->ref_pred_count[i][1];
-      if (tot_count) {
-        new_pred_probs[i] =
-          (cpi->ref_pred_count[i][0] * 255 + (tot_count >> 1)) / tot_count;
-
-        // Clamp to minimum allowed value
-        new_pred_probs[i] += !new_pred_probs[i];
-      } else
-        new_pred_probs[i] = 128;
+      new_pred_probs[i] = get_binary_prob(cpi->ref_pred_count[i][0],
+                                          cpi->ref_pred_count[i][1]);
 
       // Decide whether or not to update the reference frame probs.
       // Returned costs are in 1/256 bit units.
@@ -824,23 +809,9 @@ static void update_ref_probs(VP8_COMP *const cpi) {
   const int rf_inter = rfct[LAST_FRAME] +
                        rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
-  cm->prob_intra_coded = (rf_intra + rf_inter)
-                         ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
-
-  if (!cm->prob_intra_coded)
-    cm->prob_intra_coded = 1;
-
-  cm->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
-
-  if (!cm->prob_last_coded)
-    cm->prob_last_coded = 1;
-
-  cm->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                      ? (rfct[GOLDEN_FRAME] * 255) /
-                      (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
-
-  if (!cm->prob_gf_coded)
-    cm->prob_gf_coded = 1;
+  cm->prob_intra_coded = get_binary_prob(rf_intra, rf_inter);
+  cm->prob_last_coded = get_prob(rfct[LAST_FRAME], rf_inter);
+  cm->prob_gf_coded = get_binary_prob(rfct[GOLDEN_FRAME], rfct[ALTREF_FRAME]);
 
   // Compute a modified set of probabilities to use when prediction of the
   // reference frame fails
@@ -2588,12 +2559,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 #if CONFIG_SUPERBLOCKS
   {
     /* sb mode probability */
-    int sb_coded = 256 - (cpi->sb_count << 8) / (((pc->mb_rows + 1) >> 1) * ((pc->mb_cols + 1) >> 1));
-    if (sb_coded <= 0)
-      sb_coded = 1;
-    else if (sb_coded >= 256)
-      sb_coded = 255;
-    pc->sb_coded = sb_coded;
+    const int sb_max = (((pc->mb_rows + 1) >> 1) * ((pc->mb_cols + 1) >> 1));
+
+    pc->sb_coded = get_prob(cpi->sb_count, sb_max);
     vp8_write_literal(&header_bc, pc->sb_coded, 8);
   }
 #endif
@@ -2847,15 +2815,8 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         vp8_write(&header_bc, use_hybrid_pred, 128);
         if (use_hybrid_pred) {
           for (i = 0; i < COMP_PRED_CONTEXTS; i++) {
-            if (cpi->single_pred_count[i] + cpi->comp_pred_count[i]) {
-              pc->prob_comppred[i] = cpi->single_pred_count[i] * 255 /
-                                     (cpi->single_pred_count[i]
-                                      + cpi->comp_pred_count[i]);
-              if (pc->prob_comppred[i] < 1)
-                pc->prob_comppred[i] = 1;
-            } else {
-              pc->prob_comppred[i] = 128;
-            }
+            pc->prob_comppred[i] = get_binary_prob(cpi->single_pred_count[i],
+                                                   cpi->comp_pred_count[i]);
             vp8_write_literal(&header_bc, pc->prob_comppred[i], 8);
           }
         }
@@ -2928,14 +2889,9 @@ void print_tree_update_probs() {
       for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
         fprintf(f, "      {");
         for (l = 0; l < ENTROPY_NODES; l++) {
-          Sum = tree_update_hist[i][j][k][l][0] + tree_update_hist[i][j][k][l][1];
-          if (Sum > 0) {
-            if (((tree_update_hist[i][j][k][l][0] * 255) / Sum) > 0)
-              fprintf(f, "%3ld, ", (tree_update_hist[i][j][k][l][0] * 255) / Sum);
-            else
-              fprintf(f, "%3ld, ", 1);
-          } else
-            fprintf(f, "%3ld, ", 128);
+          fprintf(f, "%3ld, ",
+              get_binary_prob(tree_update_hist[i][j][k][l][0],
+                              tree_update_hist[i][j][k][l][1]));
         }
         fprintf(f, "},\n");
       }
@@ -2957,14 +2913,9 @@ void print_tree_update_probs() {
       for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
         fprintf(f, "      {");
         for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++) {
-          Sum = tree_update_hist_8x8[i][j][k][l][0] + tree_update_hist_8x8[i][j][k][l][1];
-          if (Sum > 0) {
-            if (((tree_update_hist_8x8[i][j][k][l][0] * 255) / Sum) > 0)
-              fprintf(f, "%3ld, ", (tree_update_hist_8x8[i][j][k][l][0] * 255) / Sum);
-            else
-              fprintf(f, "%3ld, ", 1);
-          } else
-            fprintf(f, "%3ld, ", 128);
+          fprintf(f, "%3ld, ",
+              get_binary_prob(tree_update_hist_8x8[i][j][k][l][0],
+                              tree_update_hist_8x8[i][j][k][l][1]));
         }
         fprintf(f, "},\n");
       }
@@ -2985,14 +2936,9 @@ void print_tree_update_probs() {
       for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
         fprintf(f, "      {");
         for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++) {
-          Sum = tree_update_hist_16x16[i][j][k][l][0] + tree_update_hist_16x16[i][j][k][l][1];
-          if (Sum > 0) {
-            if (((tree_update_hist_16x16[i][j][k][l][0] * 255) / Sum) > 0)
-              fprintf(f, "%3ld, ", (tree_update_hist_16x16[i][j][k][l][0] * 255) / Sum);
-            else
-              fprintf(f, "%3ld, ", 1);
-          } else
-            fprintf(f, "%3ld, ", 128);
+          fprintf(f, "%3ld, ",
+              get_binary_prob(tree_update_hist_16x16[i][j][k][l][0],
+                              tree_update_hist_16x16[i][j][k][l][1]));
         }
         fprintf(f, "},\n");
       }
