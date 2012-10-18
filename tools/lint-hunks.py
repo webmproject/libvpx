@@ -111,8 +111,6 @@ def main(argv=None):
             lint = Subprocess(cpplint_cmd, expected_returncode=(0, 1),
                               stdin=show.stdout, stderr=subprocess.PIPE)
             lint_out = lint.communicate()[1]
-            if lint.returncode == 1:
-                lint_failed = True
 
             for line in lint_out.split("\n"):
                 fields = line.split(":")
@@ -122,8 +120,9 @@ def main(argv=None):
                 if warning_line_num in affected_lines:
                     print "%s:%d:%s"%(filename, warning_line_num,
                                       ":".join(fields[2:]))
+                    lint_failed = True
 
-        # Propagate lint's exit status
+        # Set exit code if any relevant lint errors seen
         if lint_failed:
             return 1
 
