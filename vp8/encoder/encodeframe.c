@@ -1064,7 +1064,7 @@ static void encode_sb(VP8_COMP *cpi,
       
       (*tp)->Token = EOSB_TOKEN;
       (*tp)++;
-      cpi->tplist[mb_row].stop = *tp;
+      if (mb_row < cm->mb_rows) cpi->tplist[mb_row].stop = *tp;
       break;
     }
 #endif
@@ -1088,7 +1088,7 @@ static void encode_sb(VP8_COMP *cpi,
 #endif
     (*tp)->Token = EOSB_TOKEN;
     (*tp)++;
-    cpi->tplist[mb_row].stop = *tp;
+    if (mb_row < cm->mb_rows) cpi->tplist[mb_row].stop = *tp;
   }
 
   // debug output
