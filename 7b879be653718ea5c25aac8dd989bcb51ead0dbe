@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//6rE\u003d",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:37:22Z",
+      "side": 1,
+      "message": "shouldn\u0027t it be \u0027ptrdiff_t\u0027 instead of \u0027intptr_t\u0027 ?",
+      "revId": "7b879be653718ea5c25aac8dd989bcb51ead0dbe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
