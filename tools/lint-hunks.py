@@ -22,7 +22,7 @@ LONG_OPTIONS = ["help"]
 
 TOPLEVEL_CMD = ["git", "rev-parse", "--show-toplevel"]
 DIFF_CMD = ["git", "diff"]
-DIFF_INDEX_CMD = ["git", "diff-index", "-u", "--cached", "HEAD", "--"]
+DIFF_INDEX_CMD = ["git", "diff-index", "-u", "HEAD", "--"]
 SHOW_CMD = ["git", "show"]
 CPPLINT_FILTERS = ["-readability/casting", "-runtime/int"]
 
@@ -106,11 +106,20 @@ def main(argv=None):
         for filename, affected_lines in file_affected_line_map.iteritems():
             if filename.split(".")[-1] not in ("c", "h", "cc"):
                 continue
-            show_cmd = SHOW_CMD + [":" + filename]
-            show = Subprocess(show_cmd, stdout=subprocess.PIPE)
-            lint = Subprocess(cpplint_cmd, expected_returncode=(0, 1),
-                              stdin=show.stdout, stderr=subprocess.PIPE)
-            lint_out = lint.communicate()[1]
+
+            if args:
+                # File contents come from git
+                show_cmd = SHOW_CMD + [args[0] + ":" + filename]
+                show = Subprocess(show_cmd, stdout=subprocess.PIPE)
+                lint = Subprocess(cpplint_cmd, expected_returncode=(0, 1),
+                                  stdin=show.stdout, stderr=subprocess.PIPE)
+                lint_out = lint.communicate()[1]
+            else:
+                # File contents come from the working tree
+                lint = Subprocess(cpplint_cmd, expected_returncode=(0, 1),
+                                  stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdin = open(os.path.join(tl, filename)).read()
+                lint_out = lint.communicate(stdin)[1]
 
             for line in lint_out.split("\n"):
                 fields = line.split(":")
