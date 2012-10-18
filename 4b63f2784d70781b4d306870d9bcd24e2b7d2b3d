@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6j8\u003d",
+        "filename": "vp8/decoder/decodemv.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "This usage of const is an implementation detail, it\u0027s not part of the signature in the declaration (much like the variable names listed here). For instance:\n\n  int ipow(int x, int p); // x**p for p\u003e\u003d1\n\n  int ipow(int x, int p) {\n    for(; p; p--) x *\u003d x;\n    return x;\n  }\n\n  int ipow(const int x, const int p) {\n    int i, result \u003d x;\n    for (i\u003dp; i; i--) result *\u003d x;\n    return result;\n  }\n\nBoth implementations of ipow are compatible, becuase x and p are passed by value. Same is true for \u0027BOOL_DECODER* const bc\u0027. If this were \u0027const BOOL_DECODER* bc\u0027 I\u0027d agree, but that\u0027s a different animal (and \u0027const BOOL_DECODER* const bc\u0027 wouldn\u0027t be required in the prototype)",
+      "parentUuid": "AAAAQn//6tE\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6tA\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "\") {\" should be joined with line above, btw",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6j4\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done. Didn\u0027t show up as a lint warning because this line wasn\u0027t touched by by change. Maybe should expand the linter to include say +/- 1 lines of context in its report.",
+      "parentUuid": "AAAAQn//6tA\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6j0\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1054,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "no, I don\u0027t. Will fix.",
+      "parentUuid": "AAAAQn//6s8\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6s4\u003d",
         "filename": "vp8/decoder/detokenize.c",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "* const br",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6jw\u003d",
+        "filename": "vp8/decoder/detokenize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6s4\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6io\u003d",
+        "filename": "vp8/decoder/detokenize.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "as in decodemv.h",
+      "parentUuid": "AAAAQn//6sw\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6ss\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "* const bc\n\nfor coherency",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6jo\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6ss\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6jk\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6so\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6sk\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 5
@@ -132,6 +258,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6jg\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1864,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6sk\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6jc\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1955,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6sg\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6sc\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 5
@@ -166,6 +328,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "ditto",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6jY\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2040,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6sc\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6jU\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2114,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6sY\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6sU\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 5
@@ -200,6 +398,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6ik\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2192,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6sU\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6jQ\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2266,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "you can\u0027t possibly be suggesting refactoring instead of cut and pasting, can you?!? That\u0027s crazy talk.",
+      "parentUuid": "AAAAQn//6sQ\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6rk\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 5
@@ -234,6 +468,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "a piece of warning: what will happen in case of error and early return from this function? You might leak some memory...\n\n(i don\u0027t think there\u0027s any early return or error detection present for now, but... It\u0027s just a heads-up)",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6jM\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2378,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "what allocation are you talking about?",
+      "parentUuid": "AAAAQn//6rk\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6jI\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2428,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6sI\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6sE\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 5
@@ -268,6 +538,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6jE\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2574,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6sE\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6jA\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2646,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6sA\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6r8\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 5
@@ -302,6 +608,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "ditto",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6i8\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2666,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6r8\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -342,6 +666,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6i0\u003d",
+        "filename": "vp8/encoder/encodemv.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6rw\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6rs\u003d",
         "filename": "vp8/encoder/encodemv.h",
         "patchSetId": 5
@@ -359,6 +701,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//6iw\u003d",
+        "filename": "vp8/encoder/encodemv.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "as in decodemv.h",
+      "parentUuid": "AAAAQn//6rs\u003d",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6ro\u003d",
         "filename": "vpxenc.c",
         "patchSetId": 5
@@ -370,6 +730,24 @@
       "writtenOn": "2012-10-18T08:27:50Z",
       "side": 1,
       "message": "hmmm.... probably unrelated\n\n(but, ok)",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6is\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2051,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:04:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//6ro\u003d",
       "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
