@@ -1839,7 +1839,7 @@ static int64_t rd_inter16x16_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
 
 static int64_t rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
-                              int *distortion, int fullpixel) {
+                              int *distortion, int *skippable, int fullpixel) {
   vp8_build_inter4x4_predictors_mbuv(&x->e_mbd);
   ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
                                                          x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
@@ -1849,6 +1849,7 @@ static int64_t rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
   *rate       = rd_cost_mbuv(x);
   *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
+  *skippable  = mbuv_is_skippable_4x4(&x->e_mbd);
 
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
@@ -2320,7 +2321,7 @@ int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
 static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                              BEST_SEG_INFO *bsi, unsigned int segmentation,
                              int_mv seg_mvs[16 /* n_blocks */][MAX_REF_FRAMES - 1]) {
-  int i;
+  int i, j;
   int const *labels;
   int br = 0, bd = 0;
   B_PREDICTION_MODE this_mode;
@@ -2332,6 +2333,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
   int rate = 0;
   int sbr = 0, sbd = 0;
   int segmentyrate = 0;
+  uint8_t best_eobs[16];
 
   vp8_variance_fn_ptr_t *v_fn_ptr;
 
@@ -2508,6 +2510,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
         bestlabelyrate = labelyrate;
         mode_selected = this_mode;
         best_label_rd = this_rd;
+        for (j = 0; j < 16; j++)
+          if (labels[j] == i)
+            best_eobs[j] = x->e_mbd.block[j].eob;
 
         vpx_memcpy(ta_b, ta_s, sizeof(ENTROPY_CONTEXT_PLANES));
         vpx_memcpy(tl_b, tl_s, sizeof(ENTROPY_CONTEXT_PLANES));
@@ -2548,7 +2553,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
       if (mbmi->second_ref_frame)
         bsi->second_mvs[i].as_mv = x->partition_info->bmi[i].second_mv.as_mv;
       bsi->modes[i] = x->partition_info->bmi[i].mode;
-      bsi->eobs[i] = bd->eob;
+      bsi->eobs[i] = best_eobs[i];
     }
   }
 }
@@ -2570,7 +2575,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
                                            int_mv *best_ref_mv, int_mv *second_best_ref_mv, int64_t best_rd,
                                            int *mdcounts, int *returntotrate,
                                            int *returnyrate, int *returndistortion,
-                                           int mvthresh,
+                                           int *skippable, int mvthresh,
                                            int_mv seg_mvs[BLOCK_MAX_SEGMENTS - 1][16 /* n_blocks */][MAX_REF_FRAMES - 1]) {
   int i;
   BEST_SEG_INFO bsi;
@@ -2666,6 +2671,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
   *returntotrate = bsi.r;
   *returndistortion = bsi.d;
   *returnyrate = bsi.segment_yrate;
+  *skippable = mby_is_skippable_4x4(&x->e_mbd, 0);
 
   /* save partitions */
   mbmi->partitioning = bsi.segment_num;
@@ -3748,6 +3754,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
                                                second_ref, best_yrd, mdcounts,
                                                &rate, &rate_y, &distortion,
+                                               &skippable,
                                                this_rd_thresh, seg_mvs);
       rate2 += rate;
       distortion2 += distortion;
@@ -3761,9 +3768,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       // If even the 'Y' rd value of split is higher than best so far
       // then dont bother looking at UV
       if (tmp_rd < best_yrd) {
-        rd_inter4x4_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
+        int uv_skippable;
+
+        rd_inter4x4_uv(cpi, x, &rate_uv, &distortion_uv, &uv_skippable,
+                       cpi->common.full_pixel);
         rate2 += rate_uv;
         distortion2 += distortion_uv;
+        skippable = skippable && uv_skippable;
       } else {
         this_rd = INT64_MAX;
         disable_skip = 1;
