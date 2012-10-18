@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//6lo\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3959,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-18T13:41:52Z",
+      "side": 0,
+      "message": "wasn\u0027t this break almost the whole point of the skip to begin with?",
+      "revId": "b276efd00270be1d1c49b8b03f4eaa319a02583a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
