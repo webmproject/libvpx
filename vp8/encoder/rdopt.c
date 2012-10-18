@@ -3956,22 +3956,22 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
               disable_skip = 1;
               this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-
-              break;
             }
           }
         }
       }
 
-      vp8_build_1st_inter16x16_predictors_mbuv(&x->e_mbd, &xd->predictor[256],
-                                               &xd->predictor[320], 8);
-      if (is_comp_pred)
-        vp8_build_2nd_inter16x16_predictors_mbuv(&x->e_mbd,
-                                                 &xd->predictor[256],
+      if (!x->skip) {
+        vp8_build_1st_inter16x16_predictors_mbuv(&x->e_mbd, &xd->predictor[256],
                                                  &xd->predictor[320], 8);
-      inter_mode_cost(cpi, x, this_mode, &rate2, &distortion2,
-                      &rate_y, &distortion, &rate_uv, &distortion_uv,
-                      &skippable, txfm_cache);
+        if (is_comp_pred)
+          vp8_build_2nd_inter16x16_predictors_mbuv(&x->e_mbd,
+                                                   &xd->predictor[256],
+                                                   &xd->predictor[320], 8);
+        inter_mode_cost(cpi, x, this_mode, &rate2, &distortion2,
+                        &rate_y, &distortion, &rate_uv, &distortion_uv,
+                        &skippable, txfm_cache);
+      }
       if (is_comp_pred)
         mode_excluded = cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY;
       else
