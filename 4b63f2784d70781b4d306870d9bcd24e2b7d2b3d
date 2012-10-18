@@ -1,0 +1,378 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//6tE\u003d",
+        "filename": "vp8/decoder/decodemv.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "signatures don\u0027t match the .c (there\u0027s a missing \u0027const\u0027. Should be: \"BOOL_DECODER* const bc\"). This could be a problem on some compiler/linkers.",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6tA\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "\") {\" should be joined with line above, btw",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6s8\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1054,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "not sure if you really need this alias (residual_bc doesn\u0027t have one...)",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6s4\u003d",
+        "filename": "vp8/decoder/detokenize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "* const br",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sw\u003d",
+        "filename": "vp8/decoder/detokenize.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "here too, not sure if signatures match",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6ss\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "* const bc\n\nfor coherency",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6so\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "vp8_writer* const\n\n(extra space before *)",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sk\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1864,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sg\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1955,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sc\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2040,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sY\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2114,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sU\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2192,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sQ\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2266,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "ditto\n\n\nhmm.... i see some patterns here...",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6rk\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2378,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "a piece of warning: what will happen in case of error and early return from this function? You might leak some memory...\n\n(i don\u0027t think there\u0027s any early return or error detection present for now, but... It\u0027s just a heads-up)",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sI\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2428,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sE\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2574,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6sA\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2646,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "suggest {}\u0027s",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6r8\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2666,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6r0\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2734,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "this is oooh so slippery...l",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6rw\u003d",
+        "filename": "vp8/encoder/encodemv.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "vp8_writer* const bc\n\nfor coherency",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6rs\u003d",
+        "filename": "vp8/encoder/encodemv.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "vp8_writer* const\n\n(and below too)",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6ro\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2051,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:27:50Z",
+      "side": 1,
+      "message": "hmmm.... probably unrelated\n\n(but, ok)",
+      "revId": "4b63f2784d70781b4d306870d9bcd24e2b7d2b3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
