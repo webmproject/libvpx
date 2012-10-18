@@ -110,7 +110,7 @@ extern prototype_second_order(vp8_short_inv_walsh4x4_1_lossless_c);
 #endif
 
 #include "vp8/common/blockd.h"
-void vp8_ihtllm_c(short *input, short *output, int pitch,
+void vp8_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
                   TX_TYPE tx_type, int tx_dim);
 
 typedef prototype_idct((*vp8_idct_fn_t));

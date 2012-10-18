@@ -9,6 +9,7 @@
  */
 
 
+#include <assert.h>
 #include <math.h>
 #include "vpx_ports/config.h"
 #include "vp8/common/idct.h"
@@ -68,6 +69,59 @@ float adst_8[64] = {
  -0.255357107325377,   0.466553967085785,  -0.434217976756762,   0.175227946595736,
   0.175227946595735,  -0.326790388032145,   0.434217976756762,  -0.483002021635509,
   0.466553967085785,  -0.387095214016348,   0.255357107325376,  -0.089131608307532
+};
+
+/* Converted the transforms to integers. */
+const int16_t dct_i4[16] = {
+  16384,  16384,  16384,  16384,
+  21407,   8867,  -8867, -21407,
+  16384, -16384, -16384,  16384,
+   8867, -21407,  21407,  -8867
+};
+
+const int16_t adst_i4[16] = {
+   7472,  14042,  18919,  21513,
+  18919,  18919,      0, -18919,
+  21513,  -7472, -18919,  14042,
+  14042, -21513,  18919,  -7472
+};
+
+const int16_t dct_i8[64] = {
+   11585,  11585,  11585,  11585,
+   11585,  11585,  11585,  11585,
+   16069,  13623,   9102,   3196,
+   -3196,  -9102, -13623, -16069,
+   15137,   6270,  -6270, -15137,
+  -15137,  -6270,   6270,  15137,
+   13623,  -3196, -16069,  -9102,
+    9102,  16069,   3196, -13623,
+   11585, -11585, -11585,  11585,
+   11585, -11585, -11585,  11585,
+    9102, -16069,   3196,  13623,
+  -13623,  -3196,  16069,  -9102,
+    6270, -15137,  15137,  -6270,
+   -6270,  15137, -15137,   6270,
+    3196,  -9102,  13623, -16069,
+   16069, -13623,   9102,  -3196
+};
+
+const int16_t adst_i8[64] = {
+    2921,   5742,   8368,  10708,
+   12684,  14228,  15288,  15827,
+    8368,  14228,  15827,  12684,
+    5742,  -2921, -10708, -15288,
+   12684,  15288,   5742,  -8368,
+  -15827, -10708,   2921,  14228,
+   15288,   8368, -10708, -14228,
+    2921,  15827,   5742, -12684,
+   15827,  -2921, -15288,   5742,
+   14228,  -8368, -12684,  10708,
+   14228, -12684,  -2921,  15288,
+  -10708,  -5742,  15827,  -8368,
+   10708, -15827,  12684,  -2921,
+   -8368,  15288, -14228,   5742,
+    5742, -10708,  14228, -15827,
+   15288, -12684,   8368,  -2921
 };
 
 float dct_16[256] = {
@@ -138,6 +192,77 @@ float adst_16[256] = {
  -0.098087,  0.215215, -0.301511,  0.344612, -0.338341,  0.283599, -0.188227,  0.065889,
   0.065889, -0.129396,  0.188227, -0.240255,  0.283599, -0.316693,  0.338341, -0.347761,
   0.344612, -0.329007,  0.301511, -0.263118,  0.215215, -0.159534,  0.098087, -0.033094
+};
+
+/* Converted the transforms to integers. */
+const int16_t dct_i16[256] = {
+    8192,   8192,   8192,   8192,   8192,   8192,   8192,   8192,
+    8192,   8192,   8192,   8192,   8192,   8192,   8192,   8192,
+   11529,  11086,  10217,   8955,   7350,   5461,   3363,   1136,
+   -1136,  -3363,  -5461,  -7350,  -8955, -10217, -11086, -11529,
+   11363,   9633,   6436,   2260,  -2260,  -6436,  -9633, -11363,
+  -11363,  -9633,  -6436,  -2260,   2260,   6436,   9633,  11363,
+   11086,   7350,   1136,  -5461, -10217, -11529,  -8955,  -3363,
+    3363,   8955,  11529,  10217,   5461,  -1136,  -7350, -11086,
+   10703,   4433,  -4433, -10703, -10703,  -4433,   4433,  10703,
+   10703,   4433,  -4433, -10703, -10703,  -4433,   4433,  10703,
+   10217,   1136,  -8955, -11086,  -3363,   7350,  11529,   5461,
+   -5461, -11529,  -7350,   3363,  11086,   8955,  -1136, -10217,
+    9633,  -2260, -11363,  -6436,   6436,  11363,   2260,  -9633,
+   -9633,   2260,  11363,   6436,  -6436, -11363,  -2260,   9633,
+    8955,  -5461, -11086,   1136,  11529,   3363, -10217,  -7350,
+    7350,  10217,  -3363, -11529,  -1136,  11086,   5461,  -8955,
+    8192,  -8192,  -8192,   8192,   8192,  -8192,  -8192,   8192,
+    8192,  -8192,  -8192,   8192,   8192,  -8192,  -8192,   8192,
+    7350, -10217,  -3363,  11529,  -1136, -11086,   5461,   8955,
+   -8955,  -5461,  11086,   1136, -11529,   3363,  10217,  -7350,
+    6436, -11363,   2260,   9633,  -9633,  -2260,  11363,  -6436,
+   -6436,  11363,  -2260,  -9633,   9633,   2260, -11363,   6436,
+    5461, -11529,   7350,   3363, -11086,   8955,   1136, -10217,
+   10217,  -1136,  -8955,  11086,  -3363,  -7350,  11529,  -5461,
+    4433, -10703,  10703,  -4433,  -4433,  10703, -10703,   4433,
+    4433, -10703,  10703,  -4433,  -4433,  10703, -10703,   4433,
+    3363,  -8955,  11529, -10217,   5461,   1136,  -7350,  11086,
+  -11086,   7350,  -1136,  -5461,  10217, -11529,   8955,  -3363,
+    2260,  -6436,   9633, -11363,  11363,  -9633,   6436,  -2260,
+   -2260,   6436,  -9633,  11363, -11363,   9633,  -6436,   2260,
+    1136,  -3363,   5461,  -7350,   8955, -10217,  11086, -11529,
+   11529, -11086,  10217,  -8955,   7350,  -5461,   3363,  -1136
+};
+
+const int16_t adst_i16[256] = {
+    1084,   2159,   3214,   4240,   5228,   6168,   7052,   7873,
+    8622,   9293,   9880,  10377,  10781,  11087,  11292,  11395,
+    3214,   6168,   8622,  10377,  11292,  11292,  10377,   8622,
+    6168,   3214,      0,  -3214,  -6168,  -8622, -10377, -11292,
+    5228,   9293,  11292,  10781,   7873,   3214,  -2159,  -7052,
+  -10377, -11395,  -9880,  -6168,  -1084,   4240,   8622,  11087,
+    7052,  11087,  10377,   5228,  -2159,  -8622, -11395,  -9293,
+   -3214,   4240,   9880,  11292,   7873,   1084,  -6168, -10781,
+    8622,  11292,   6168,  -3214, -10377, -10377,  -3214,   6168,
+   11292,   8622,      0,  -8622, -11292,  -6168,   3214,  10377,
+    9880,   9880,      0,  -9880,  -9880,      0,   9880,   9880,
+       0,  -9880,  -9880,      0,   9880,   9880,      0,  -9880,
+   10781,   7052,  -6168, -11087,  -1084,  10377,   7873,  -5228,
+  -11292,  -2159,   9880,   8622,  -4240, -11395,  -3214,   9293,
+   11292,   3214, -10377,  -6168,   8622,   8622,  -6168, -10377,
+    3214,  11292,      0, -11292,  -3214,  10377,   6168,  -8622,
+   11395,  -1084, -11292,   2159,  11087,  -3214, -10781,   4240,
+   10377,  -5228,  -9880,   6168,   9293,  -7052,  -8622,   7873,
+   11087,  -5228,  -8622,   9293,   4240, -11292,   1084,  10781,
+   -6168,  -7873,   9880,   3214, -11395,   2159,  10377,  -7052,
+   10377,  -8622,  -3214,  11292,  -6168,  -6168,  11292,  -3214,
+   -8622,  10377,      0, -10377,   8622,   3214, -11292,   6168,
+    9293, -10781,   3214,   7052, -11395,   6168,   4240, -11087,
+    8622,   1084,  -9880,  10377,  -2159,  -7873,  11292,  -5228,
+    7873, -11395,   8622,  -1084,  -7052,  11292,  -9293,   2159,
+    6168, -11087,   9880,  -3214,  -5228,  10781, -10377,   4240,
+    6168, -10377,  11292,  -8622,   3214,   3214,  -8622,  11292,
+  -10377,   6168,      0,  -6168,  10377, -11292,   8622,  -3214,
+    4240,  -7873,  10377, -11395,  10781,  -8622,   5228,  -1084,
+   -3214,   7052,  -9880,  11292, -11087,   9293,  -6168,   2159,
+    2159,  -4240,   6168,  -7873,   9293, -10377,  11087, -11395,
+   11292, -10781,   9880,  -8622,   7052,  -5228,   3214,  -1084
 };
 
 static const int xC1S7 = 16069;
@@ -395,17 +520,24 @@ void vp8_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
 
 }
 
-void vp8_fht_c(short *input, short *output, int pitch,
-               TX_TYPE tx_type, int tx_dim) {
+/* For test */
+#define TEST_INT 1
+#if TEST_INT
+#define vp8_fht_int_c vp8_fht_c
+#else
+#define vp8_fht_float_c vp8_fht_c
+#endif
 
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+void vp8_fht_float_c(const int16_t *input, int pitch, int16_t *output,
+               TX_TYPE tx_type, int tx_dim) {
+  vp8_clear_system_state();  // Make it simd safe : __asm emms;
   {
     int i, j, k;
-    float bufa[256], bufb[256]; // buffers are for floating-point test purpose
-                               // the implementation could be simplified in
-                               // conjunction with integer transform
-    short *ip = input;
-    short *op = output;
+    float bufa[256], bufb[256];  // buffers are for floating-point test purpose
+                                 // the implementation could be simplified in
+                                 // conjunction with integer transform
+    const int16_t *ip = input;
+    int16_t *op = output;
 
     float *pfa = &bufa[0];
     float *pfb = &bufb[0];
@@ -415,8 +547,8 @@ void vp8_fht_c(short *input, short *output, int pitch,
 
     assert(tx_type != DCT_DCT);
     // load and convert residual array into floating-point
-    for(j = 0; j < tx_dim; j++) {
-      for(i = 0; i < tx_dim; i++) {
+    for (j = 0; j < tx_dim; j++) {
+      for (i = 0; i < tx_dim; i++) {
         pfa[i] = (float)ip[i];
       }
       pfa += tx_dim;
@@ -427,7 +559,7 @@ void vp8_fht_c(short *input, short *output, int pitch,
     pfa = &bufa[0];
     pfb = &bufb[0];
 
-    switch(tx_type) {
+    switch (tx_type) {
       case ADST_ADST :
       case ADST_DCT  :
         ptv = (tx_dim == 4) ? &adst_4[0] :
@@ -440,10 +572,10 @@ void vp8_fht_c(short *input, short *output, int pitch,
         break;
     }
 
-    for(j = 0; j < tx_dim; j++) {
-      for(i = 0; i < tx_dim; i++) {
+    for (j = 0; j < tx_dim; j++) {
+      for (i = 0; i < tx_dim; i++) {
         pfb[i] = 0;
-        for(k = 0; k < tx_dim; k++) {
+        for (k = 0; k < tx_dim; k++) {
           pfb[i] += ptv[k] * pfa[(k * tx_dim)];
         }
         pfa += 1;
@@ -457,7 +589,7 @@ void vp8_fht_c(short *input, short *output, int pitch,
     pfa = &bufa[0];
     pfb = &bufb[0];
 
-    switch(tx_type) {
+    switch (tx_type) {
       case ADST_ADST :
       case  DCT_ADST :
         pth = (tx_dim == 4) ? &adst_4[0] :
@@ -470,10 +602,10 @@ void vp8_fht_c(short *input, short *output, int pitch,
         break;
     }
 
-    for(j = 0; j < tx_dim; j++) {
-      for(i = 0; i < tx_dim; i++) {
+    for (j = 0; j < tx_dim; j++) {
+      for (i = 0; i < tx_dim; i++) {
         pfa[i] = 0;
-        for(k = 0; k < tx_dim; k++) {
+        for (k = 0; k < tx_dim; k++) {
           pfa[i] += pfb[k] * pth[k];
         }
         pth += tx_dim;
@@ -483,7 +615,7 @@ void vp8_fht_c(short *input, short *output, int pitch,
       pfb += tx_dim;
       // pth -= tx_dim * tx_dim;
 
-      switch(tx_type) {
+      switch (tx_type) {
         case ADST_ADST :
         case  DCT_ADST :
           pth = (tx_dim == 4) ? &adst_4[0] :
@@ -498,19 +630,102 @@ void vp8_fht_c(short *input, short *output, int pitch,
     }
 
     // convert to short integer format and load BLOCKD buffer
-    op  = output ;
-    pfa = &bufa[0] ;
+    op = output;
+    pfa = &bufa[0];
 
-    for(j = 0; j < tx_dim; j++) {
-      for(i = 0; i < tx_dim; i++) {
-        op[i] = (pfa[i] > 0 ) ? (short)( 8 * pfa[i] + 0.49) :
-                                     -(short)(- 8 * pfa[i] + 0.49);
+    for (j = 0; j < tx_dim; j++) {
+      for (i = 0; i < tx_dim; i++) {
+        op[i] = (pfa[i] > 0 ) ? (int16_t)( 8 * pfa[i] + 0.49) :
+                                     -(int16_t)(- 8 * pfa[i] + 0.49);
       }
       op  += tx_dim;
       pfa += tx_dim;
     }
   }
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp8_clear_system_state();  // Make it simd safe : __asm emms;
+}
+
+/* Converted the transforms to integer form. */
+#define VERTICAL_SHIFT 11
+#define VERTICAL_ROUNDING ((1 << (VERTICAL_SHIFT - 1)) - 1)
+#define HORIZONTAL_SHIFT 16
+#define HORIZONTAL_ROUNDING ((1 << (HORIZONTAL_SHIFT - 1)) - 1)
+void vp8_fht_int_c(const int16_t *input, int pitch, int16_t *output,
+                   TX_TYPE tx_type, int tx_dim) {
+  int i, j, k;
+  int16_t imbuf[256];
+
+  const int16_t *ip = input;
+  int16_t *op = output;
+  int16_t *im = &imbuf[0];
+
+  /* pointers to vertical and horizontal transforms. */
+  const int16_t *ptv = NULL, *pth = NULL;
+
+  switch (tx_type) {
+    case ADST_ADST :
+      ptv = pth = (tx_dim == 4) ? &adst_i4[0]
+                                  : ((tx_dim == 8) ? &adst_i8[0]
+                                                     : &adst_i16[0]);
+      break;
+    case ADST_DCT  :
+      ptv = (tx_dim == 4) ? &adst_i4[0]
+                            : ((tx_dim == 8) ? &adst_i8[0] : &adst_i16[0]);
+      pth = (tx_dim == 4) ? &dct_i4[0]
+                            : ((tx_dim == 8) ? &dct_i8[0] : &dct_i16[0]);
+      break;
+    case  DCT_ADST :
+      ptv = (tx_dim == 4) ? &dct_i4[0]
+                            : ((tx_dim == 8) ? &dct_i8[0] : &dct_i16[0]);
+      pth = (tx_dim == 4) ? &adst_i4[0]
+                            : ((tx_dim == 8) ? &adst_i8[0] : &adst_i16[0]);
+      break;
+    case  DCT_DCT :
+      ptv = pth = (tx_dim == 4) ? &dct_i4[0]
+                                  : ((tx_dim == 8) ? &dct_i8[0] : &dct_i16[0]);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+
+  /* vertical transformation */
+  for (j = 0; j < tx_dim; j++) {
+    for (i = 0; i < tx_dim; i++) {
+      int temp = 0;
+
+      for (k = 0; k < tx_dim; k++) {
+        temp += ptv[k] * ip[(k * (pitch >> 1))];
+      }
+
+      im[i] = (int16_t)((temp + VERTICAL_ROUNDING) >> VERTICAL_SHIFT);
+      ip++;
+    }
+    im += tx_dim;  //16
+    ptv += tx_dim;
+    ip = input;
+  }
+
+  /* horizontal transformation */
+  im = &imbuf[0];
+
+  for (j = 0; j < tx_dim; j++) {
+    const int16_t *pthc = pth;
+
+    for (i = 0; i < tx_dim; i++) {
+      int temp = 0;
+
+      for (k = 0; k < tx_dim; k++) {
+        temp += im[k] * pthc[k];
+      }
+
+      op[i] = (int16_t)((temp + HORIZONTAL_ROUNDING) >> HORIZONTAL_SHIFT);
+      pthc += tx_dim;
+    }
+
+    im += tx_dim;  //16
+    op += tx_dim;
+  }
 }
 
 void vp8_short_fdct4x4_c(short *input, short *output, int pitch) {
