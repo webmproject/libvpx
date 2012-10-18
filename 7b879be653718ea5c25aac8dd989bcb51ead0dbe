@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAQn//6qw\u003d",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-18T08:42:34Z",
+      "side": 1,
+      "message": "also, you might want to prefer:\n\nuint8_t val##_[(n) * sizeof(typ) + (a)];\ntype* val \u003d (typ*)((((ptrdiff_t)val##_) + (a) - 1) \u0026 (ptrdiff_t)(~((a) - 1))));\n\nto avoid the rounding in \"(a)/sizeof(typ)\"",
+      "revId": "7b879be653718ea5c25aac8dd989bcb51ead0dbe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//6rE\u003d",
         "filename": "vpx_ports/mem.h",
         "patchSetId": 1
