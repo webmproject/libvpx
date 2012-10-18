@@ -33,6 +33,24 @@
       "revId": "7b879be653718ea5c25aac8dd989bcb51ead0dbe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6kQ\u003d",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T15:19:48Z",
+      "side": 1,
+      "message": "I don\u0027t think so.. We want the integer representation of a pointer here, not taking a pointer difference.",
+      "parentUuid": "AAAAQn//6rE\u003d",
+      "revId": "7b879be653718ea5c25aac8dd989bcb51ead0dbe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
