@@ -87,6 +87,24 @@
       "revId": "7b879be653718ea5c25aac8dd989bcb51ead0dbe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//6g0\u003d",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-18T16:31:46Z",
+      "side": 1,
+      "message": "I agree with this (in another patch, this one is still the wrong fix) but I still think intptr_t is right (maybe need ((a)-1) there too)",
+      "parentUuid": "AAAAQn//6hk\u003d",
+      "revId": "7b879be653718ea5c25aac8dd989bcb51ead0dbe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
