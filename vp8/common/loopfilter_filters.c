@@ -271,7 +271,6 @@ void vp8_mbloop_filter_horizontal_edge_c
   } while (++i < count * 8);
 
 }
-
 void vp8_mbloop_filter_vertical_edge_c
 (
   unsigned char *s,

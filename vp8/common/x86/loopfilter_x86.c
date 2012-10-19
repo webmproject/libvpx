@@ -13,17 +13,14 @@
 #include "vpx_config.h"
 #include "vp8/common/loopfilter.h"
 
-prototype_loopfilter(vp8_mbloop_filter_vertical_edge_mmx);
 prototype_loopfilter(vp8_loop_filter_vertical_edge_mmx);
 prototype_loopfilter(vp8_loop_filter_horizontal_edge_mmx);
 
 prototype_loopfilter(vp8_loop_filter_vertical_edge_sse2);
 prototype_loopfilter(vp8_loop_filter_horizontal_edge_sse2);
-prototype_loopfilter(vp8_mbloop_filter_vertical_edge_sse2);
 
 extern loop_filter_uvfunction vp8_loop_filter_horizontal_edge_uv_sse2;
 extern loop_filter_uvfunction vp8_loop_filter_vertical_edge_uv_sse2;
-extern loop_filter_uvfunction vp8_mbloop_filter_vertical_edge_uv_sse2;
 
 #if HAVE_MMX
 /* Horizontal MB filtering */
@@ -35,13 +32,6 @@ void vp8_loop_filter_mbh_mmx(unsigned char *y_ptr, unsigned char *u_ptr, unsigne
 /* Vertical MB Filtering */
 void vp8_loop_filter_mbv_mmx(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                              int y_stride, int uv_stride, struct loop_filter_info *lfi) {
-  vp8_mbloop_filter_vertical_edge_mmx(y_ptr, y_stride, lfi->mblim, lfi->lim, lfi->hev_thr, 2);
-
-  if (u_ptr)
-    vp8_mbloop_filter_vertical_edge_mmx(u_ptr, uv_stride, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
-
-  if (v_ptr)
-    vp8_mbloop_filter_vertical_edge_mmx(v_ptr, uv_stride, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 }
 
 
@@ -340,6 +330,107 @@ void vp8_mbloop_filter_horizontal_edge_c_sse2
     }
   }
 }
+static __inline void transpose(unsigned char *src[], int in_p,
+                               unsigned char *dst[], int out_p,
+                               int num_8x8_to_transpose) {
+  int idx8x8 = 0;
+  __m128i x0, x1, x2, x3, x4, x5, x6, x7;
+
+  do {
+    unsigned char *in = src[idx8x8];
+    unsigned char *out = dst[idx8x8];
+
+    x0 = _mm_loadl_epi64((__m128i *)(in + 0*in_p));  // 00 01 02 03 04 05 06 07
+    x1 = _mm_loadl_epi64((__m128i *)(in + 1*in_p));  // 10 11 12 13 14 15 16 17
+    x2 = _mm_loadl_epi64((__m128i *)(in + 2*in_p));  // 20 21 22 23 24 25 26 27
+    x3 = _mm_loadl_epi64((__m128i *)(in + 3*in_p));  // 30 31 32 33 34 35 36 37
+    x4 = _mm_loadl_epi64((__m128i *)(in + 4*in_p));  // 40 41 42 43 44 45 46 47
+    x5 = _mm_loadl_epi64((__m128i *)(in + 5*in_p));  // 50 51 52 53 54 55 56 57
+    x6 = _mm_loadl_epi64((__m128i *)(in + 6*in_p));  // 60 61 62 63 64 65 66 67
+    x7 = _mm_loadl_epi64((__m128i *)(in + 7*in_p));  // 70 71 72 73 74 75 76 77
+    // 00 10 01 11 02 12 03 13 04 14 05 15 06 16 07 17
+    x0 = _mm_unpacklo_epi8(x0, x1);
+    // 20 30 21 31 22 32 23 33 24 34 25 35 26 36 27 37
+    x1 = _mm_unpacklo_epi8(x2, x3);
+    // 40 50 41 51 42 52 43 53 44 54 45 55 46 56 47 57
+    x2 = _mm_unpacklo_epi8(x4, x5);
+    // 60 70 61 71 62 72 63 73 64 74 65 75 66 76 67 77
+    x3 = _mm_unpacklo_epi8(x6, x7);
+    // 00 10 20 30 01 11 21 31 02 12 22 32 03 13 23 33
+    x4 = _mm_unpacklo_epi16(x0, x1);
+    // 40 50 60 70 41 51 61 71 42 52 62 72 43 53 63 73
+    x5 = _mm_unpacklo_epi16(x2, x3);
+    // 00 10 20 30 40 50 60 70 01 11 21 31 41 51 61 71
+    x6 = _mm_unpacklo_epi32(x4, x5);
+    // 02 12 22 32 42 52 62 72 03 13 23 33 43 53 63 73
+    x7 = _mm_unpackhi_epi32(x4, x5);
+
+    _mm_storel_pd((double *)(out + 0*out_p),
+                  (__m128d)x6);  // 00 10 20 30 40 50 60 70
+    _mm_storeh_pd((double *)(out + 1*out_p),
+                  (__m128d)x6);  // 01 11 21 31 41 51 61 71
+    _mm_storel_pd((double *)(out + 2*out_p),
+                  (__m128d)x7);  // 02 12 22 32 42 52 62 72
+    _mm_storeh_pd((double *)(out + 3*out_p),
+                  (__m128d)x7);  // 03 13 23 33 43 53 63 73
+
+    // 04 14 24 34 05 15 25 35 06 16 26 36 07 17 27 37
+    x4 = _mm_unpackhi_epi16(x0, x1);
+    // 44 54 64 74 45 55 65 75 46 56 66 76 47 57 67 77
+    x5 = _mm_unpackhi_epi16(x2, x3);
+    // 04 14 24 34 44 54 64 74 05 15 25 35 45 55 65 75
+    x6 = _mm_unpacklo_epi32(x4, x5);
+    // 06 16 26 36 46 56 66 76 07 17 27 37 47 57 67 77
+    x7 = _mm_unpackhi_epi32(x4, x5);
+
+    _mm_storel_pd((double *)(out + 4*out_p),
+                  (__m128d)x6);  // 04 14 24 34 44 54 64 74
+    _mm_storeh_pd((double *)(out + 5*out_p),
+                  (__m128d)x6);  // 05 15 25 35 45 55 65 75
+    _mm_storel_pd((double *)(out + 6*out_p),
+                  (__m128d)x7);  // 06 16 26 36 46 56 66 76
+    _mm_storeh_pd((double *)(out + 7*out_p),
+                  (__m128d)x7);  // 07 17 27 37 47 57 67 77
+  } while (++idx8x8 < num_8x8_to_transpose);
+}
+void vp8_mbloop_filter_vertical_edge_c_sse2
+(
+  unsigned char *s,
+  int p,
+  const unsigned char *blimit,
+  const unsigned char *limit,
+  const unsigned char *thresh,
+  int count
+) {
+  DECLARE_ALIGNED(16, unsigned char, t_dst[16 * 16]);
+  unsigned char *src[4];
+  unsigned char *dst[4];
+
+  src[0] = s - 5;
+  src[1] = s - 5 + 8;
+  src[2] = s - 5 + p*8;
+  src[3] = s - 5 + p*8 + 8;
+
+  dst[0] = t_dst;
+  dst[1] = t_dst + 16*8;
+  dst[2] = t_dst + 8;
+  dst[3] = t_dst + 16*8 + 8;
+
+  // 16x16->16x16 or 16x8->8x16
+  transpose(src, p, dst, 16, (1 << count));
+
+  vp8_mbloop_filter_horizontal_edge_c_sse2(t_dst + 5*16, 16, blimit, limit,
+                                           thresh, count);
+
+  dst[0] = s - 5;
+  dst[1] = s - 5 + p*8;
+
+  src[0] = t_dst;
+  src[1] = t_dst + 8;
+
+  // 16x8->8x16 or 8x8->8x8
+  transpose(src, 16, dst, p, (1 << (count - 1)));
+}
 
 /* Horizontal MB filtering */
 void vp8_loop_filter_mbh_sse2(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
@@ -366,14 +457,28 @@ void vp8_loop_filter_bh8x8_sse2(unsigned char *y_ptr, unsigned char *u_ptr,
 }
 
 /* Vertical MB Filtering */
-void vp8_loop_filter_mbv_sse2(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                              int y_stride, int uv_stride, struct loop_filter_info *lfi) {
-  vp8_mbloop_filter_vertical_edge_sse2(y_ptr, y_stride, lfi->mblim, lfi->lim, lfi->hev_thr, 2);
+void vp8_loop_filter_mbv_sse2(unsigned char *y_ptr, unsigned char *u_ptr,
+                              unsigned char *v_ptr, int y_stride, int uv_stride,
+                              struct loop_filter_info *lfi) {
+  vp8_mbloop_filter_vertical_edge_c_sse2(y_ptr, y_stride, lfi->mblim, lfi->lim,
+                                         lfi->hev_thr, 2);
 
+  /* TODO: write sse2 version with u,v interleaved */
   if (u_ptr)
-    vp8_mbloop_filter_vertical_edge_uv_sse2(u_ptr, uv_stride, lfi->mblim, lfi->lim, lfi->hev_thr, v_ptr);
+    vp8_mbloop_filter_vertical_edge_c_sse2(u_ptr, uv_stride, lfi->mblim,
+                                           lfi->lim, lfi->hev_thr, 1);
+
+  if (v_ptr)
+    vp8_mbloop_filter_vertical_edge_c_sse2(v_ptr, uv_stride, lfi->mblim,
+                                           lfi->lim, lfi->hev_thr, 1);
 }
 
+void vp8_loop_filter_bv8x8_sse2(unsigned char *y_ptr, unsigned char *u_ptr,
+                             unsigned char *v_ptr, int y_stride, int uv_stride,
+                             struct loop_filter_info *lfi) {
+  vp8_mbloop_filter_vertical_edge_c_sse2(
+    y_ptr + 8, y_stride, lfi->blim, lfi->lim, lfi->hev_thr, 2);
+}
 
 /* Horizontal B Filtering */
 void vp8_loop_filter_bh_sse2(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,

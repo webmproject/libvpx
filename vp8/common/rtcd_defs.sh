@@ -125,13 +125,13 @@ specialize vp8_comp_intra_uv4x4_predict;
 # Loopfilter
 #
 prototype void vp8_loop_filter_mbv "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_mbv;
+specialize vp8_loop_filter_mbv sse2
 
 prototype void vp8_loop_filter_bv "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
 specialize vp8_loop_filter_bv;
 
 prototype void vp8_loop_filter_bv8x8 "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_bv8x8;
+specialize vp8_loop_filter_bv8x8 sse2
 
 prototype void vp8_loop_filter_mbh "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
 specialize vp8_loop_filter_mbh sse2
