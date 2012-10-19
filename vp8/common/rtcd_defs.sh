@@ -128,7 +128,7 @@ prototype void vp8_loop_filter_mbv "unsigned char *y, unsigned char *u, unsigned
 specialize vp8_loop_filter_mbv sse2
 
 prototype void vp8_loop_filter_bv "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_bv;
+specialize vp8_loop_filter_bv sse2
 
 prototype void vp8_loop_filter_bv8x8 "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
 specialize vp8_loop_filter_bv8x8 sse2
@@ -137,7 +137,7 @@ prototype void vp8_loop_filter_mbh "unsigned char *y, unsigned char *u, unsigned
 specialize vp8_loop_filter_mbh sse2
 
 prototype void vp8_loop_filter_bh "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_bh;
+specialize vp8_loop_filter_bh sse2
 
 prototype void vp8_loop_filter_bh8x8 "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
 specialize vp8_loop_filter_bh8x8 sse2
