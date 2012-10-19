@@ -857,122 +857,47 @@ static void read_coef_probs2(VP8D_COMP *pbi) {
 }
 #endif
 
-static void read_coef_probs(VP8D_COMP *pbi, BOOL_DECODER* const bc) {
+static void read_coef_probs_common(
+    BOOL_DECODER* const bc,
+    vp8_prob coef_probs[BLOCK_TYPES][COEF_BANDS]
+                       [PREV_COEF_CONTEXTS][ENTROPY_NODES]) {
   int i, j, k, l;
+
+  if (vp8_read_bit(bc)) {
+    for (i = 0; i < BLOCK_TYPES; i++) {
+      for (j = !i; j < COEF_BANDS; j++) {
+        /* NB: This j loop starts from 1 on block type i == 0 */
+        for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
+          if (k >= 3 && ((i == 0 && j == 1) ||
+                         (i > 0 && j == 0)))
+            continue;
+          for (l = 0; l < ENTROPY_NODES; l++) {
+            vp8_prob *const p = coef_probs[i][j][k] + l;
+
+            if (vp8_read(bc, COEF_UPDATE_PROB)) {
+              *p = read_prob_diff_update(bc, *p);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+static void read_coef_probs(VP8D_COMP *pbi, BOOL_DECODER* const bc) {
   VP8_COMMON *const pc = &pbi->common;
 
-  {
-    if (vp8_read_bit(bc)) {
-      /* read coef probability tree */
-      for (i = 0; i < BLOCK_TYPES; i++)
-        for (j = !i; j < COEF_BANDS; j++)
-          for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-            if (k >= 3 && ((i == 0 && j == 1) ||
-                           (i > 0 && j == 0)))
-              continue;
-            for (l = 0; l < ENTROPY_NODES; l++) {
-              vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
-
-              if (vp8_read(bc, COEF_UPDATE_PROB)) {
-                *p = read_prob_diff_update(bc, *p);
-              }
-            }
-          }
-        }
+  read_coef_probs_common(bc, pc->fc.coef_probs);
+#if CONFIG_HYBRIDTRANSFORM
+  read_coef_probs_common(bc, pc->fc.hybrid_coef_probs);
+#endif
+  if (pbi->common.txfm_mode != ONLY_4X4) {
+    read_coef_probs_common(bc, pc->fc.coef_probs_8x8);
+    read_coef_probs_common(bc, pc->fc.hybrid_coef_probs_8x8);
   }
-  {
-    if (vp8_read_bit(bc)) {
-      /* read coef probability tree */
-      for (i = 0; i < BLOCK_TYPES; i++)
-        for (j = !i; j < COEF_BANDS; j++)
-          for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-            if (k >= 3 && ((i == 0 && j == 1) ||
-                           (i > 0 && j == 0)))
-              continue;
-            for (l = 0; l < ENTROPY_NODES; l++) {
-              vp8_prob *const p = pc->fc.hybrid_coef_probs [i][j][k] + l;
-
-              if (vp8_read(bc, COEF_UPDATE_PROB)) {
-                *p = read_prob_diff_update(bc, *p);
-              }
-            }
-          }
-        }
-  }
-
-  if (pbi->common.txfm_mode != ONLY_4X4 && vp8_read_bit(bc)) {
-    // read coef probability tree
-    for (i = 0; i < BLOCK_TYPES_8X8; i++)
-      for (j = !i; j < COEF_BANDS; j++)
-        for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-          if (k >= 3 && ((i == 0 && j == 1) ||
-                         (i > 0 && j == 0)))
-            continue;
-          for (l = 0; l < ENTROPY_NODES; l++) {
-
-            vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
-
-            if (vp8_read(bc, COEF_UPDATE_PROB_8X8)) {
-              *p = read_prob_diff_update(bc, *p);
-            }
-          }
-        }
-  }
-  if (pbi->common.txfm_mode != ONLY_4X4 && vp8_read_bit(bc)) {
-    // read coef probability tree
-    for (i = 0; i < BLOCK_TYPES_8X8; i++)
-      for (j = !i; j < COEF_BANDS; j++)
-        for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-          if (k >= 3 && ((i == 0 && j == 1) ||
-                         (i > 0 && j == 0)))
-            continue;
-          for (l = 0; l < ENTROPY_NODES; l++) {
-
-            vp8_prob *const p = pc->fc.hybrid_coef_probs_8x8 [i][j][k] + l;
-
-            if (vp8_read(bc, COEF_UPDATE_PROB_8X8)) {
-              *p = read_prob_diff_update(bc, *p);
-            }
-          }
-        }
-  }
-
-  // 16x16
-  if (pbi->common.txfm_mode > ALLOW_8X8 && vp8_read_bit(bc)) {
-    // read coef probability tree
-    for (i = 0; i < BLOCK_TYPES_16X16; ++i)
-      for (j = !i; j < COEF_BANDS; ++j)
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-          if (k >= 3 && ((i == 0 && j == 1) ||
-                         (i > 0 && j == 0)))
-            continue;
-          for (l = 0; l < ENTROPY_NODES; ++l) {
-
-            vp8_prob *const p = pc->fc.coef_probs_16x16[i][j][k] + l;
-
-            if (vp8_read(bc, COEF_UPDATE_PROB_16X16)) {
-              *p = read_prob_diff_update(bc, *p);
-            }
-          }
-        }
-  }
-  if (pbi->common.txfm_mode > ALLOW_8X8 && vp8_read_bit(bc)) {
-    // read coef probability tree
-    for (i = 0; i < BLOCK_TYPES_16X16; ++i)
-      for (j = !i; j < COEF_BANDS; ++j)
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-          if (k >= 3 && ((i == 0 && j == 1) ||
-                         (i > 0 && j == 0)))
-            continue;
-          for (l = 0; l < ENTROPY_NODES; ++l) {
-
-            vp8_prob *const p = pc->fc.hybrid_coef_probs_16x16[i][j][k] + l;
-
-            if (vp8_read(bc, COEF_UPDATE_PROB_16X16)) {
-              *p = read_prob_diff_update(bc, *p);
-            }
-          }
-        }
+  if (pbi->common.txfm_mode > ALLOW_8X8) {
+    read_coef_probs_common(bc, pc->fc.coef_probs_16x16);
+    read_coef_probs_common(bc, pc->fc.hybrid_coef_probs_16x16);
   }
 }
 
