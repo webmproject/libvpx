@@ -218,7 +218,7 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     vp8_subtract_4b_c(be, b, 16);
 
 #if CONFIG_HYBRIDTRANSFORM8X8
-    tx_type = get_tx_type(xd, &xd->block[idx]);
+    tx_type = get_tx_type(xd, xd->block + idx);
     if (tx_type != DCT_DCT) {
       vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32,
                 tx_type, 8);

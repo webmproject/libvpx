@@ -402,7 +402,6 @@ typedef struct MacroBlockD {
 #define ACTIVE_HT16 300
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
 // convert MB_PREDICTION_MODE to B_PREDICTION_MODE
 static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
   B_PREDICTION_MODE b_mode;
@@ -444,7 +443,6 @@ static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
   }
   return b_mode;
 }
-#endif
 
 #if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
 // transform mapping
