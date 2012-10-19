@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//5XY\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-19T19:25:19Z",
+      "side": 1,
+      "message": "Noted for now. These could arguably be added as asserts too. I\u0027ve been thinking about looking at ways we could use the prob\u003d0 case to either make the bool coder return the implicit value without affecting the bool coder state, or manually avoid decoding the bits at all. If I get a chance to look at that I\u0027ll revisit this in that context.",
+      "parentUuid": "AAAAQn//52U\u003d",
+      "revId": "b07be0df0c8ef3ce1ac372664c199e91412b0a7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//52Q\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-19T05:53:01Z",
       "side": 1,
       "message": "const int",
+      "revId": "b07be0df0c8ef3ce1ac372664c199e91412b0a7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5WY\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2554,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-19T19:25:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//52Q\u003d",
       "revId": "b07be0df0c8ef3ce1ac372664c199e91412b0a7d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
