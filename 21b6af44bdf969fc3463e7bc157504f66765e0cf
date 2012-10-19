@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//5k4\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1289,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-10-19T16:41:16Z",
+      "side": 1,
+      "message": "perhaps we should use a meaningfully named define or enum  rather than the magic number 3.. and elsewhere... (BLOCK_4X4 in the encoder but the enum not defined currently in decoder)",
+      "revId": "21b6af44bdf969fc3463e7bc157504f66765e0cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
