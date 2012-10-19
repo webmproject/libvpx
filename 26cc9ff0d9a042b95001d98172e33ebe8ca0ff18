@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//50I\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "use {}\u0027s",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//50A\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "don\u0027t use assignments in tests. Prefer:\ntx_type \u003d get_tx_type(xd, \u0026xd-\u003eblock[idx];\nif (tx_type !\u003d DCT_DCT) { ... }",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5z8\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5z4\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5zs\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "if the order of tests don\u0027t have a preferred order, than try to group the ones acting on the same variable together:\n\nif (tx_size \u003d\u003d TX_8X8 || tx_size \u003d\u003d TX_16X16 || xd-\u003e.... )",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5zo\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "separate var assignments from tests.",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5zk\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5zg\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "ditto\n\n\n(do i see a pattern?)",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5zc\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "separate assignments from tests",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5zY\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 622,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5zU\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 881,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:23:40Z",
+      "side": 1,
+      "message": "etc..",
+      "revId": "26cc9ff0d9a042b95001d98172e33ebe8ca0ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
