@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//5yI\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:55:33Z",
+      "side": 1,
+      "message": "const int16_t ...",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5yE\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:55:33Z",
+      "side": 1,
+      "message": "indentation is strange",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5yU\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:55:33Z",
+      "side": 1,
+      "message": "prefer using int16_t  (or even, an ad-hoc coeff_t special type of your choice)",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5yY\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:55:33Z",
+      "side": 1,
+      "message": "I\u0027m wondering: won\u0027t the 16x16 transform overflow the 16-bit precision?",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5yg\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:55:33Z",
+      "side": 1,
+      "message": "\"10\" and \"11\" below should be a #define instead of magic constants",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5yo\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:55:33Z",
+      "side": 1,
+      "message": "use local variable \"int temp \u003d .... \"",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5yk\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:55:33Z",
+      "side": 1,
+      "message": "space after +",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5yc\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 713,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:55:33Z",
+      "side": 1,
+      "message": "15/16 too.",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5yM\u003d",
+        "filename": "vp8/encoder/dct.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-19T06:55:33Z",
+      "side": 1,
+      "message": "const int16_t* input, int16_t* output.\n\nAlso, prefer putting \"output\" last in the list (side effect: one can tell that \u0027pitch\u0027 is related to input, not output).",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
