@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4n8\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-20T04:41:38Z",
+      "side": 1,
+      "message": "This should use pred_mode_conv() also.",
+      "revId": "399bac4adf77a281e6933e12f089e878a3e63b21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4oA\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-20T04:41:38Z",
+      "side": 1,
+      "message": "For I8X8_PRED, if we\u0027re block 0/4 or 8/12, we want the left block 2 or 10, so that\u0027s (b \u0026 ~4) + 2.",
+      "revId": "399bac4adf77a281e6933e12f089e878a3e63b21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4n4\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-20T04:41:38Z",
+      "side": 1,
+      "message": "Should use pred_mode_conv().",
+      "revId": "399bac4adf77a281e6933e12f089e878a3e63b21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4oE\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-20T04:41:38Z",
+      "side": 1,
+      "message": "If we\u0027re block 0/1 or 2/3, we want the above block 8 or 10, so for I8X8_PRED, that should be (b \u0026 ~1) + 8.",
+      "revId": "399bac4adf77a281e6933e12f089e878a3e63b21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
