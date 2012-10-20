@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4no\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2564,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-20T05:02:57Z",
+      "side": 1,
+      "message": "This isn\u0027t actually correct. This will calculate the probability that the value is 1, but you want the probability that the value is 0. The correct value is 256 - this.",
+      "revId": "91dc8ce70d8071b114c907bf760d65bad83fe072",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
