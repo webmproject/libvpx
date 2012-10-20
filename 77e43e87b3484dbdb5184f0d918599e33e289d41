@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4ko\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-20T16:55:24Z",
+      "side": 1,
+      "message": "This should probably become lowercase now that we\u0027re trying to fix style anyway.",
+      "revId": "77e43e87b3484dbdb5184f0d918599e33e289d41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4kg\u003d",
+        "filename": "vp8/encoder/x86/variance_x86.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-20T16:55:24Z",
+      "side": 1,
+      "message": "So ... shouldn\u0027t all this stuff go? Why do we still need these explicitly declared function prototypes if we have a script that already does that? Shouldn\u0027t we include the script-generated header instead?",
+      "revId": "77e43e87b3484dbdb5184f0d918599e33e289d41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
