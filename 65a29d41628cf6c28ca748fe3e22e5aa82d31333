@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4io\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-20T21:59:00Z",
+      "side": 1,
+      "message": "Aren\u0027t you removing B_PRED handling here now?",
+      "revId": "65a29d41628cf6c28ca748fe3e22e5aa82d31333",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4ik\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-20T21:59:00Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "65a29d41628cf6c28ca748fe3e22e5aa82d31333",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
