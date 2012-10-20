@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//5GE\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-20T00:45:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//5yI\u003d",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//5yE\u003d",
         "filename": "vp8/encoder/dct.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-19T06:55:33Z",
       "side": 1,
       "message": "indentation is strange",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5GA\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-20T00:45:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//5yE\u003d",
       "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//5Fw\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-20T00:45:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//5yU\u003d",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//5yY\u003d",
         "filename": "vp8/encoder/dct.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2012-10-19T06:55:33Z",
       "side": 1,
       "message": "I\u0027m wondering: won\u0027t the 16x16 transform overflow the 16-bit precision?",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//5Ak\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-20T00:45:00Z",
+      "side": 1,
+      "message": "The overflow won\u0027t happen.\nThe input is pixel diff, which is 9 bits. The matrix elements is 15 bits after multiplying 2^15.\nAccording to Debargha, the maximum of 1D transform result will be sqrt(16) times, which added 2 bits.\nThe total bits after vertical transform is 26. To keep the result in short, we need to right shift 10 bits. ( 1 bit less than 11 bits I did in this patch.)",
+      "parentUuid": "AAAAQn//5yY\u003d",
       "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//46U\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-20T00:45:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//5yg\u003d",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//5yo\u003d",
         "filename": "vp8/encoder/dct.c",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2012-10-19T06:55:33Z",
       "side": 1,
       "message": "use local variable \"int temp \u003d .... \"",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//46Q\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-20T00:45:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//5yo\u003d",
       "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//46M\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-20T00:45:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//5yk\u003d",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//5yc\u003d",
         "filename": "vp8/encoder/dct.c",
         "patchSetId": 1
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//46I\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 713,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-20T00:45:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//5yc\u003d",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//5yM\u003d",
         "filename": "vp8/encoder/dct.h",
         "patchSetId": 1
@@ -149,6 +293,24 @@
       "writtenOn": "2012-10-19T06:55:33Z",
       "side": 1,
       "message": "const int16_t* input, int16_t* output.\n\nAlso, prefer putting \"output\" last in the list (side effect: one can tell that \u0027pitch\u0027 is related to input, not output).",
+      "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4yk\u003d",
+        "filename": "vp8/encoder/dct.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-20T00:45:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//5yM\u003d",
       "revId": "20585aa756d093d7e4b45f930f49745b4a56555a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
