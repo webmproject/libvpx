@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4hA\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-21T19:22:18Z",
+      "side": 1,
+      "message": "Please clean up layout while at it:\n\nextern double vp8_calc_ssimg(YV12_BUFFER_CONFIG *source,\n                             YV12_BUFFER_CONFIG *dest,\n                             double *ssim_y, double *ssim_u, double *ssim_v);",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4g8\u003d",
+        "filename": "vp8/encoder/ssim.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-21T19:22:18Z",
+      "side": 1,
+      "message": "Please clean up style here also:\n\ndouble vp8_ssim2(uint8_t *img1, uint8_t *img2,\n                 int stride_img1, int stride_img2, int width, int height) {",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4g4\u003d",
+        "filename": "vp8/encoder/ssim.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-21T19:22:18Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4g0\u003d",
+        "filename": "vp8/encoder/ssim.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-21T19:22:18Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4gw\u003d",
+        "filename": "vp8/encoder/variance.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-21T19:22:18Z",
+      "side": 1,
+      "message": "This copyright notice is repeated twice, the second one can be removed.",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4gs\u003d",
+        "filename": "vp8/encoder/variance.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-21T19:22:18Z",
+      "side": 1,
+      "message": "Please fix indenting here:\n\ntypedef unsigned int (*vp8_sad_fn_t)(const uint8_t *src_ptr,\n                                     int source_stride,\n                                     const uint8_t *ref_ptr,\n                                     int ref_stride,\n                                     insigned int max_sad);\n\nSame for the others below.",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
