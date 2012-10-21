@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4gg\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-21T19:24:03Z",
+      "side": 1,
+      "message": "Remove brackets around variable being returned.",
+      "revId": "57679badf2970455117fb95e766d2ed202eb31bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4gk\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-21T19:24:03Z",
+      "side": 1,
+      "message": "Remove brackets around the variable being returned.",
+      "revId": "57679badf2970455117fb95e766d2ed202eb31bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
