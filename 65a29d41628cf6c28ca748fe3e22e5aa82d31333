@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//4iY\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1002214
+      },
+      "writtenOn": "2012-10-21T01:18:49Z",
+      "side": 1,
+      "message": "Of course - my bad. Forgot the B_PRED.",
+      "parentUuid": "AAAAQn//4io\u003d",
+      "revId": "65a29d41628cf6c28ca748fe3e22e5aa82d31333",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//4ik\u003d",
         "filename": "vp8/common/findnearmv.h",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-20T21:59:00Z",
       "side": 1,
       "message": "Same here.",
+      "revId": "65a29d41628cf6c28ca748fe3e22e5aa82d31333",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4iU\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1002214
+      },
+      "writtenOn": "2012-10-21T01:18:49Z",
+      "side": 1,
+      "message": "ditto",
+      "parentUuid": "AAAAQn//4ik\u003d",
       "revId": "65a29d41628cf6c28ca748fe3e22e5aa82d31333",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
