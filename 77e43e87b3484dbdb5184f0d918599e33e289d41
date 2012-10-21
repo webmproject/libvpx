@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//4hM\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-21T16:22:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//4ko\u003d",
+      "revId": "77e43e87b3484dbdb5184f0d918599e33e289d41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//4kg\u003d",
         "filename": "vp8/encoder/x86/variance_x86.h",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-20T16:55:24Z",
       "side": 1,
       "message": "So ... shouldn\u0027t all this stuff go? Why do we still need these explicitly declared function prototypes if we have a script that already does that? Shouldn\u0027t we include the script-generated header instead?",
+      "revId": "77e43e87b3484dbdb5184f0d918599e33e289d41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4hI\u003d",
+        "filename": "vp8/encoder/x86/variance_x86.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-21T16:22:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//4kg\u003d",
       "revId": "77e43e87b3484dbdb5184f0d918599e33e289d41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
