@@ -1175,11 +1175,6 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
       int64_t this_rd;
       int ratey;
 
-      // TODO Temporarily ignore modes that need the above-right data. SB
-      // encoding means this data is not available for the bottom right MB
-      // Do we need to do this for mode2 also?
-      if (mode == B_LD_PRED || mode == B_VL_PRED)
-        continue;
       b->bmi.as_mode.first = mode;
       rate = bmode_costs[mode];
 
@@ -1293,11 +1288,10 @@ static int64_t rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rat
     tl = (ENTROPY_CONTEXT *)&t_left;
   }
 
-  // TODO(agrange)
-  // vp8_intra_prediction_down_copy(xd);
-
   xd->mode_info_context->mbmi.mode = B_PRED;
   bmode_costs = mb->inter_bmode_costs;
+
+  vp8_intra_prediction_down_copy(xd);
 
   for (i = 0; i < 16; i++) {
     MODE_INFO *const mic = xd->mode_info_context;

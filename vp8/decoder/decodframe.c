@@ -296,13 +296,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       if (mode != B_PRED) {
         vp8_build_intra_predictors_mby(xd);
       }
-#if 0
-      // Intra-modes requiring recon data from top-right
-      // MB have been temporarily disabled.
-      else {
-        vp8_intra_prediction_down_copy(xd);
-      }
-#endif
     }
   } else {
 #if CONFIG_SUPERBLOCKS
@@ -371,6 +364,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                                               b->dst_stride);
     }
   } else if (mode == B_PRED) {
+    vp8_intra_prediction_down_copy(xd);
     for (i = 0; i < 16; i++) {
       BLOCKD *b = &xd->block[i];
       int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
@@ -595,6 +589,8 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd,
       int dy = row_delta[i];
       int dx = col_delta[i];
       int offset_extended = dy * xd->mode_info_stride + dx;
+
+      xd->mb_index = i;
 
       mi = xd->mode_info_context;
       if ((mb_row >= pc->mb_rows) || (mb_col >= pc->mb_cols)) {

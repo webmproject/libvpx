@@ -1945,10 +1945,12 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
   if (mbmi->mode == I8X8_PRED) {
     vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
     vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
-  } else if (mbmi->mode == B_PRED)
+  } else if (mbmi->mode == B_PRED) {
+    vp8_intra_prediction_down_copy(&x->e_mbd);
     vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
-  else
+  } else {
     vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+  }
 
   if (mbmi->mode != I8X8_PRED) {
     vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
@@ -2049,6 +2051,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
 
   if (mbmi->ref_frame == INTRA_FRAME) {
     if (mbmi->mode == B_PRED) {
+      vp8_intra_prediction_down_copy(xd);
       vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
       vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
     } else if (mbmi->mode == I8X8_PRED) {
