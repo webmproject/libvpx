@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4gU\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 668,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-21T20:22:34Z",
+      "side": 1,
+      "message": "no need to initialize to NULL",
+      "revId": "9fe7b91dca7da09bae1a618be960ffd9b8dfdbf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4gM\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-21T20:22:34Z",
+      "side": 1,
+      "message": "can be aligned more readably:\n\nptv \u003d pth \u003d (tx_dim \u003d\u003d 4) ? ...\n               : (tx_dim \u003d\u003d 8) ? ...\n               : ...;",
+      "revId": "9fe7b91dca7da09bae1a618be960ffd9b8dfdbf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4gQ\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-21T20:22:34Z",
+      "side": 1,
+      "message": "should have an \"assert(0)\" or something",
+      "revId": "9fe7b91dca7da09bae1a618be960ffd9b8dfdbf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4gY\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-21T20:22:34Z",
+      "side": 1,
+      "message": "space after \"for\"\n\n(and below too)",
+      "revId": "9fe7b91dca7da09bae1a618be960ffd9b8dfdbf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4gI\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-21T20:22:34Z",
+      "side": 1,
+      "message": "later suggestion: use fixed common stride of \u002716\u0027 for all transforms, instead of \u0027tx_dim\u0027, when storing into \u0027imbuf\u0027 temporary storage.",
+      "revId": "9fe7b91dca7da09bae1a618be960ffd9b8dfdbf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
