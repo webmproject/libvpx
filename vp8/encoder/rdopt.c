@@ -2272,7 +2272,7 @@ typedef struct {
   int_mv mvp;
 
   int64_t segment_rd;
-  int segment_num;
+  SPLITMV_PARTITIONING_TYPE segment_num;
   int r;
   int d;
   int segment_yrate;
@@ -2299,8 +2299,10 @@ int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
 }
 
 static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
-                             BEST_SEG_INFO *bsi, unsigned int segmentation,
-                             int_mv seg_mvs[16 /* n_blocks */][MAX_REF_FRAMES - 1]) {
+                             BEST_SEG_INFO *bsi,
+                             SPLITMV_PARTITIONING_TYPE segmentation,
+                             int_mv seg_mvs[16 /* n_blocks */]
+                                           [MAX_REF_FRAMES - 1]) {
   int i, j;
   int const *labels;
   int br = 0, bd = 0;
@@ -2341,7 +2343,8 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
   label_mv_thresh = 1 * bsi->mvthresh / label_count;
 
   // Segmentation method overheads
-  rate = vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + segmentation);
+  rate = vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs,
+                        vp8_mbsplit_encodings + segmentation);
   rate += vp8_cost_mv_ref(cpi, SPLITMV, bsi->mdcounts);
   this_segment_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
   br += rate;
@@ -2376,7 +2379,8 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
         BLOCK *c;
         BLOCKD *e;
 
-        // Is the best so far sufficiently good that we cant justify doing and new motion search.
+        /* Is the best so far sufficiently good that we cant justify doing
+         * and new motion search. */
         if (best_label_rd < label_mv_thresh)
           break;
 
@@ -2422,7 +2426,8 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
           // Should we do a full search (best quality only)
           if ((cpi->compressor_speed == 0) && (bestsme >> sseshift) > 4000) {
             /* Check if mvp_full is within the range. */
-            vp8_clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+            vp8_clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,
+                         x->mv_row_min, x->mv_row_max);
 
             thissme = cpi->full_search_sad(x, c, e, &mvp_full,
                                            sadpb, 16, v_fn_ptr,
@@ -2432,7 +2437,8 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
               bestsme = thissme;
               mode_mv[NEW4X4].as_int = e->bmi.as_mv.first.as_int;
             } else {
-              // The full search result is actually worse so re-instate the previous best vector
+              /* The full search result is actually worse so re-instate the
+               * previous best vector */
               e->bmi.as_mv.first.as_int = mode_mv[NEW4X4].as_int;
             }
           }
@@ -2442,15 +2448,16 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
           int distortion;
           unsigned int sse;
           cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
-                                       bsi->ref_mv, x->errorperbit, v_fn_ptr, XMVCOST,
-                                       &distortion, &sse);
+                                       bsi->ref_mv, x->errorperbit, v_fn_ptr,
+                                       XMVCOST, &distortion, &sse);
 
           // safe motion search result for use in compound prediction
           seg_mvs[i][mbmi->ref_frame - 1].as_int = mode_mv[NEW4X4].as_int;
         }
       } /* NEW4X4 */
       else if (mbmi->second_ref_frame && this_mode == NEW4X4) {
-        // motion search not completed? Then skip newmv for this block with comppred
+        /* motion search not completed? Then skip newmv for this block with
+         * comppred */
         if (seg_mvs[i][mbmi->second_ref_frame - 1].as_int == INVALID_MV ||
             seg_mvs[i][mbmi->ref_frame        - 1].as_int == INVALID_MV) {
           continue;
@@ -2472,7 +2479,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
           mv_check_bounds(x, &second_mode_mv[this_mode]))
         continue;
 
-      if (segmentation == BLOCK_4X4) {
+      if (segmentation == PARTITIONING_4X4) {
         this_rd = encode_inter_mb_segment(x, labels, i, &labelyrate,
                                           &distortion,
                                           ta_s, tl_s, IF_RTCD(&cpi->rtcd));
@@ -2504,7 +2511,8 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
     vpx_memcpy(tl, tl_b, sizeof(ENTROPY_CONTEXT_PLANES));
 
     labels2mode(x, labels, i, mode_selected, &mode_mv[mode_selected],
-                &second_mode_mv[mode_selected], seg_mvs[i], bsi->ref_mv, bsi->second_ref_mv, XMVCOST);
+                &second_mode_mv[mode_selected], seg_mvs[i], bsi->ref_mv,
+                bsi->second_ref_mv, XMVCOST);
 
     br += sbr;
     bd += sbd;
@@ -2551,12 +2559,18 @@ void vp8_cal_step_param(int sr, int *sp) {
   *sp = MAX_MVSEARCH_STEPS - 1 - step;
 }
 
-static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
-                                           int_mv *best_ref_mv, int_mv *second_best_ref_mv, int64_t best_rd,
-                                           int *mdcounts, int *returntotrate,
-                                           int *returnyrate, int *returndistortion,
-                                           int *skippable, int mvthresh,
-                                           int_mv seg_mvs[BLOCK_MAX_SEGMENTS - 1][16 /* n_blocks */][MAX_REF_FRAMES - 1]) {
+static int rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
+                                       int_mv *best_ref_mv,
+                                       int_mv *second_best_ref_mv,
+                                       int64_t best_rd,
+                                       int *mdcounts,
+                                       int *returntotrate,
+                                       int *returnyrate,
+                                       int *returndistortion,
+                                       int *skippable, int mvthresh,
+                                       int_mv seg_mvs[NB_PARTITIONINGS]
+                                                     [16 /* n_blocks */]
+                                                     [MAX_REF_FRAMES - 1]) {
   int i;
   BEST_SEG_INFO bsi;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
@@ -2576,14 +2590,19 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
   if (cpi->compressor_speed == 0) {
     /* for now, we will keep the original segmentation order
        when in best quality mode */
-    rd_check_segment(cpi, x, &bsi, BLOCK_16X8, seg_mvs[BLOCK_16X8]);
-    rd_check_segment(cpi, x, &bsi, BLOCK_8X16, seg_mvs[BLOCK_8X16]);
-    rd_check_segment(cpi, x, &bsi, BLOCK_8X8,  seg_mvs[BLOCK_8X8]);
-    rd_check_segment(cpi, x, &bsi, BLOCK_4X4,  seg_mvs[BLOCK_4X4]);
+    rd_check_segment(cpi, x, &bsi, PARTITIONING_16X8,
+                     seg_mvs[PARTITIONING_16X8]);
+    rd_check_segment(cpi, x, &bsi, PARTITIONING_8X16,
+                     seg_mvs[PARTITIONING_8X16]);
+    rd_check_segment(cpi, x, &bsi, PARTITIONING_8X8,
+                     seg_mvs[PARTITIONING_8X8]);
+    rd_check_segment(cpi, x, &bsi, PARTITIONING_4X4,
+                     seg_mvs[PARTITIONING_4X4]);
   } else {
     int sr;
 
-    rd_check_segment(cpi, x, &bsi, BLOCK_8X8, seg_mvs[BLOCK_8X8]);
+    rd_check_segment(cpi, x, &bsi, PARTITIONING_8X8,
+                     seg_mvs[PARTITIONING_8X8]);
 
 
     if (bsi.segment_rd < best_rd) {
@@ -2600,34 +2619,37 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
       bsi.sv_mvp[2].as_int = bsi.mvs[8].as_int;
       bsi.sv_mvp[3].as_int = bsi.mvs[10].as_int;
 
-      /* Use 8x8 result as 16x8/8x16's predictor MV. Adjust search range according to the closeness of 2 MV. */
-      /* block 8X16 */
-      {
-        sr = MAXF((abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[2].as_mv.row)) >> 3, (abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[2].as_mv.col)) >> 3);
-        vp8_cal_step_param(sr, &bsi.sv_istep[0]);
+      /* Use 8x8 result as 16x8/8x16's predictor MV. Adjust search range
+       * according to the closeness of 2 MV. */
+      sr = MAXF((abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[2].as_mv.row)) >> 3,
+                (abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[2].as_mv.col)) >> 3);
+      vp8_cal_step_param(sr, &bsi.sv_istep[0]);
 
-        sr = MAXF((abs(bsi.sv_mvp[1].as_mv.row - bsi.sv_mvp[3].as_mv.row)) >> 3, (abs(bsi.sv_mvp[1].as_mv.col - bsi.sv_mvp[3].as_mv.col)) >> 3);
-        vp8_cal_step_param(sr, &bsi.sv_istep[1]);
+      sr = MAXF((abs(bsi.sv_mvp[1].as_mv.row - bsi.sv_mvp[3].as_mv.row)) >> 3,
+                (abs(bsi.sv_mvp[1].as_mv.col - bsi.sv_mvp[3].as_mv.col)) >> 3);
+      vp8_cal_step_param(sr, &bsi.sv_istep[1]);
 
-        rd_check_segment(cpi, x, &bsi, BLOCK_8X16, seg_mvs[BLOCK_8X16]);
-      }
+      rd_check_segment(cpi, x, &bsi, PARTITIONING_8X16,
+                       seg_mvs[PARTITIONING_8X16]);
 
-      /* block 16X8 */
-      {
-        sr = MAXF((abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[1].as_mv.row)) >> 3, (abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[1].as_mv.col)) >> 3);
-        vp8_cal_step_param(sr, &bsi.sv_istep[0]);
+      sr = MAXF((abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[1].as_mv.row)) >> 3,
+                (abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[1].as_mv.col)) >> 3);
+      vp8_cal_step_param(sr, &bsi.sv_istep[0]);
 
-        sr = MAXF((abs(bsi.sv_mvp[2].as_mv.row - bsi.sv_mvp[3].as_mv.row)) >> 3, (abs(bsi.sv_mvp[2].as_mv.col - bsi.sv_mvp[3].as_mv.col)) >> 3);
-        vp8_cal_step_param(sr, &bsi.sv_istep[1]);
+      sr = MAXF((abs(bsi.sv_mvp[2].as_mv.row - bsi.sv_mvp[3].as_mv.row)) >> 3,
+                (abs(bsi.sv_mvp[2].as_mv.col - bsi.sv_mvp[3].as_mv.col)) >> 3);
+      vp8_cal_step_param(sr, &bsi.sv_istep[1]);
 
-        rd_check_segment(cpi, x, &bsi, BLOCK_16X8, seg_mvs[BLOCK_16X8]);
-      }
+      rd_check_segment(cpi, x, &bsi, PARTITIONING_16X8,
+                       seg_mvs[PARTITIONING_16X8]);
 
       /* If 8x8 is better than 16x8/8x16, then do 4x4 search */
       /* Not skip 4x4 if speed=0 (good quality) */
-      if (cpi->sf.no_skip_block4x4_search || bsi.segment_num == BLOCK_8X8) { /* || (sv_segment_rd8x8-bsi.segment_rd) < sv_segment_rd8x8>>5) */
+      if (cpi->sf.no_skip_block4x4_search || bsi.segment_num == BLOCK_8X8) {
+        /* || (sv_segment_rd8x8-bsi.segment_rd) < sv_segment_rd8x8>>5) */
         bsi.mvp.as_int = bsi.sv_mvp[0].as_int;
-        rd_check_segment(cpi, x, &bsi, BLOCK_4X4, seg_mvs[BLOCK_4X4]);
+        rd_check_segment(cpi, x, &bsi, PARTITIONING_4X4,
+                         seg_mvs[PARTITIONING_4X4]);
       }
 
       /* restore UMV window */
@@ -3342,7 +3364,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   unsigned char *y_buffer[4], *u_buffer[4], *v_buffer[4];
 
   unsigned int ref_costs[MAX_REF_FRAMES];
-  int_mv seg_mvs[BLOCK_MAX_SEGMENTS - 1][16 /* n_blocks */][MAX_REF_FRAMES - 1];
+  int_mv seg_mvs[NB_PARTITIONINGS][16 /* n_blocks */][MAX_REF_FRAMES - 1];
 
   vpx_memset(mode8x8, 0, sizeof(mode8x8));
   vpx_memset(&frame_mv, 0, sizeof(frame_mv));
@@ -3357,7 +3379,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   for (i = 0; i < NB_TXFM_MODES; i++)
     best_txfm_rd[i] = INT64_MAX;
 
-  for (i = 0; i < BLOCK_MAX_SEGMENTS - 1; i++) {
+  for (i = 0; i < NB_PARTITIONINGS; i++) {
     int j, k;
 
     for (j = 0; j < 16; j++)
@@ -3724,11 +3746,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           cpi->rd_threshes[THR_NEWG] : this_rd_thresh;
 
       mbmi->txfm_size = TX_4X4; // FIXME use 8x8 in case of 8x8/8x16/16x8
-      tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
-                                               second_ref, best_yrd, mdcounts,
-                                               &rate, &rate_y, &distortion,
-                                               &skippable,
-                                               this_rd_thresh, seg_mvs);
+      tmp_rd = rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
+                                           second_ref, best_yrd, mdcounts,
+                                           &rate, &rate_y, &distortion,
+                                           &skippable,
+                                           this_rd_thresh, seg_mvs);
       rate2 += rate;
       distortion2 += distortion;
 
