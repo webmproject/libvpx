@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4ao\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 888,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-22T08:22:51Z",
+      "side": 1,
+      "message": "variables could be made local, starting at 891",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4ak\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-22T08:22:51Z",
+      "side": 1,
+      "message": "comment can be merge on line 890 above",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4ag\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 893,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-22T08:22:51Z",
+      "side": 1,
+      "message": "avoid mixing bool comparison with 0/1 values.\n\u003d\u003e \"!i\" -\u003e i ? 1 : 0",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4aY\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-22T08:22:51Z",
+      "side": 1,
+      "message": "const vp8_prob*",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4aU\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1794,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-22T08:22:51Z",
+      "side": 1,
+      "message": "isn\u0027t that a lot of memory on stack? (just asking).",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4aQ\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1795,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-22T08:22:51Z",
+      "side": 1,
+      "message": "unsigned int -\u003e uint32_t?",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4aM\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1810,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-22T08:22:51Z",
+      "side": 1,
+      "message": "(TODO(too): avoid capitals in variable names)",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
