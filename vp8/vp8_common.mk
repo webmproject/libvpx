@@ -53,6 +53,7 @@ VP8_COMMON_SRCS-yes += common/reconintra.h
 VP8_COMMON_SRCS-yes += common/reconintra4x4.h
 VP8_COMMON_SRCS-yes += common/rtcd.c
 VP8_COMMON_SRCS-yes += common/rtcd_defs.sh
+VP8_COMMON_SRCS-yes += common/sadmxn.h
 VP8_COMMON_SRCS-yes += common/seg_common.h
 VP8_COMMON_SRCS-yes += common/seg_common.c
 VP8_COMMON_SRCS-yes += common/setupintrarecon.h
