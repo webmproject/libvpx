@@ -51,6 +51,24 @@
       "revId": "6e49faeef720faa8c04d50db957c391f4b4a4aa2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4Ks\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-22T18:29:31Z",
+      "side": 1,
+      "message": "How about SPLITMV_PARTITIONING_TYPE?",
+      "parentUuid": "AAAAQn//4Xk\u003d",
+      "revId": "6e49faeef720faa8c04d50db957c391f4b4a4aa2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
