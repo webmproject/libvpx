@@ -16,6 +16,24 @@
       "revId": "0d4e82aa4e59d6c4d52e6af38baf1dbf15329afd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4OE\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1585,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-22T18:03:21Z",
+      "side": 1,
+      "message": "I\u0027ll try to do a separate pass over the file to change them all at once, yes.",
+      "parentUuid": "AAAAQn//4aE\u003d",
+      "revId": "0d4e82aa4e59d6c4d52e6af38baf1dbf15329afd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
