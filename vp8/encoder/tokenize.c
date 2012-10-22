@@ -619,7 +619,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
       xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_16x16(xd);
       break;
     case TX_8X8:
-      if (xd->mode_info_context->mbmi.mode == I8X8_PRED)
+      if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
+          xd->mode_info_context->mbmi.mode == SPLITMV)
         xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_8x8_4x4uv(xd, 0);
       else
         xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_8x8(xd, has_y2_block);
@@ -695,7 +696,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
       *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
       *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b]);
     }
-    if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+    if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
+        xd->mode_info_context->mbmi.mode == SPLITMV) {
       tokenize1st_order_chroma_4x4(xd, t, cpi, dry_run);
     } else {
       for (b = 16; b < 24; b += 4) {
@@ -1308,7 +1310,8 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
   if (tx_size == TX_16X16) {
     vp8_stuff_mb_16x16(cpi, xd, t, dry_run);
   } else if (tx_size == TX_8X8) {
-    if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+    if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
+        xd->mode_info_context->mbmi.mode == SPLITMV) {
       vp8_stuff_mb_8x8_4x4uv(cpi, xd, t, dry_run);
     } else {
       vp8_stuff_mb_8x8(cpi, xd, t, dry_run);

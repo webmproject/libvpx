@@ -537,7 +537,8 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
   TX_TYPE tx_type = DCT_DCT;
 #endif
 
-  int bufthred = (xd->mode_info_context->mbmi.mode == I8X8_PRED) ? 16 : 24;
+  int bufthred = (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
+                  xd->mode_info_context->mbmi.mode == SPLITMV) ? 16 : 24;
   if (xd->mode_info_context->mbmi.mode != B_PRED &&
       xd->mode_info_context->mbmi.mode != SPLITMV &&
       xd->mode_info_context->mbmi.mode != I8X8_PRED) {

@@ -1285,10 +1285,12 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #if CONFIG_TX_SELECT
   if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= I8X8_PRED) ||
-       (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {
+       (mbmi->ref_frame != INTRA_FRAME && !(mbmi->mode == SPLITMV &&
+                           mbmi->partitioning == PARTITIONING_4X4)))) {
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     mbmi->txfm_size = vp8_read(bc, cm->prob_tx[0]);
-    if (mbmi->txfm_size != TX_4X4 && mbmi->mode != I8X8_PRED)
+    if (mbmi->txfm_size != TX_4X4 && mbmi->mode != I8X8_PRED &&
+        mbmi->mode != SPLITMV)
       mbmi->txfm_size += vp8_read(bc, cm->prob_tx[1]);
   } else
 #endif
@@ -1297,8 +1299,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
        (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {
     mbmi->txfm_size = TX_16X16;
   } else if (cm->txfm_mode >= ALLOW_8X8 &&
-      ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode != B_PRED) ||
-       (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {
+      (!(mbmi->ref_frame == INTRA_FRAME && mbmi->mode == B_PRED) &&
+       !(mbmi->ref_frame != INTRA_FRAME && mbmi->mode == SPLITMV &&
+         mbmi->partitioning == PARTITIONING_4X4))) {
     mbmi->txfm_size = TX_8X8;
   } else {
     mbmi->txfm_size = TX_4X4;

@@ -638,6 +638,7 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
+  int has_2nd_order = x->e_mbd.mode_info_context->mbmi.mode != SPLITMV;
 
   if (!x->e_mbd.above_context || !x->e_mbd.left_context)
     return;
@@ -647,7 +648,7 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
-  type = PLANE_TYPE_Y_NO_DC;
+  type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
   for (b = 0; b < 16; b += 4) {
     optimize_b(x, b, type,
                ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
@@ -657,8 +658,11 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 
   // 8x8 always have 2nd roder haar block
-  check_reset_8x8_2nd_coeffs(&x->e_mbd,
-                             ta + vp8_block2above_8x8[24], tl + vp8_block2left_8x8[24]);
+  if (has_2nd_order) {
+    check_reset_8x8_2nd_coeffs(&x->e_mbd,
+                               ta + vp8_block2above_8x8[24],
+                               tl + vp8_block2left_8x8[24]);
+  }
 }
 
 void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
@@ -898,11 +902,25 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
       optimize_mb_16x16(x, rtcd);
     vp8_inverse_transform_mb_16x16(IF_RTCD(&rtcd->common->idct), xd);
   } else if (tx_size == TX_8X8) {
-    vp8_transform_mb_8x8(x);
-    vp8_quantize_mb_8x8(x);
-    if (x->optimize)
-      optimize_mb_8x8(x, rtcd);
-    vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), xd);
+    if (xd->mode_info_context->mbmi.mode == SPLITMV) {
+      assert(xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4);
+      vp8_transform_mby_8x8(x);
+      vp8_transform_mbuv_4x4(x);
+      vp8_quantize_mby_8x8(x);
+      vp8_quantize_mbuv_4x4(x);
+      if (x->optimize) {
+        vp8_optimize_mby_8x8(x, rtcd);
+        vp8_optimize_mbuv_4x4(x, rtcd);
+      }
+      vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), xd);
+      vp8_inverse_transform_mbuv_4x4(IF_RTCD(&rtcd->common->idct), xd);
+    } else {
+      vp8_transform_mb_8x8(x);
+      vp8_quantize_mb_8x8(x);
+      if (x->optimize)
+        optimize_mb_8x8(x, rtcd);
+      vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), xd);
+    }
   } else {
     transform_mb_4x4(x);
     vp8_quantize_mb_4x4(x);
