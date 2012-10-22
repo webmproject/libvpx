@@ -182,7 +182,7 @@ prototype unsigned int vp8_sad16x3 "const unsigned char *src_ptr, int  src_strid
 specialize vp8_sad16x3 sse2
 
 prototype unsigned int vp8_sad3x16 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
-specialize vp8_sad3x16
+specialize vp8_sad3x16 sse2
 fi
 
 #
