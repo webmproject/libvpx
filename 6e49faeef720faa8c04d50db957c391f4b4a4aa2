@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4a4\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-10-22T07:49:10Z",
+      "side": 1,
+      "message": "did you mean MB_PARTITIONINGS not NB ?\n\nThanks for the clean up though.",
+      "revId": "6e49faeef720faa8c04d50db957c391f4b4a4aa2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
