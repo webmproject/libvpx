@@ -2561,7 +2561,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     /* sb mode probability */
     const int sb_max = (((pc->mb_rows + 1) >> 1) * ((pc->mb_cols + 1) >> 1));
 
-    pc->sb_coded = get_prob(cpi->sb_count, sb_max);
+    pc->sb_coded = get_prob(sb_max - cpi->sb_count, sb_max);
     vp8_write_literal(&header_bc, pc->sb_coded, 8);
   }
 #endif
