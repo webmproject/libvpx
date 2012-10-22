@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4Z8\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2564,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-22T08:26:59Z",
+      "side": 1,
+      "message": "hmm... 255 - get_prob() ?\n\nI think, the most generic way would be:\n\npc-\u003esb_coded \u003d get_prob(sb_max - cpi-\u003esb_count, sb_max);\n\nactually",
+      "revId": "b873556d7bb64fabb6f4638b7f6b3a1e7e4cd9db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
