@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4GA\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-22T19:04:52Z",
+      "side": 1,
+      "message": "Maybe nitpicking, but since we\u0027re no this anyway, aren\u0027t these comments wrong? If we\u0027re using V intra prediction, we\u0027re using ADST_DCT, thus isn\u0027t that ADST in vertical and DCT in horizontal direction? In other words, I think the comments for ADST_DCT and DCT_ADST are inverted.",
+      "revId": "f10465634bbbdc2cd251d8e12d965b91b6cecb83",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
