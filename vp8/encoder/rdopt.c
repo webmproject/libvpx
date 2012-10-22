@@ -1626,8 +1626,8 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
   } else {
     *(a + vp8_block2above[ib])     = besta0;
     *(a + vp8_block2above[ib + 1]) = besta1;
-    *(l + vp8_block2above[ib])     = bestl0;
-    *(l + vp8_block2above[ib + 4]) = bestl1;
+    *(l + vp8_block2left[ib])      = bestl0;
+    *(l + vp8_block2left[ib + 4])  = bestl1;
   }
 
   return best_rd;
