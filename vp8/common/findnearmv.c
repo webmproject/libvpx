@@ -10,7 +10,7 @@
 
 
 #include "findnearmv.h"
-#include "vp8/encoder/variance.h"
+#include "vp8/common/sadmxn.h"
 #include <limits.h>
 
 const unsigned char vp8_mbsplit_offset[4][16] = {
@@ -199,6 +199,23 @@ vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
 }
 
 #if CONFIG_NEWBESTREFMV
+unsigned int vp8_sad3x16_c(
+  const unsigned char *src_ptr,
+  int  src_stride,
+  const unsigned char *ref_ptr,
+  int  ref_stride,
+  int max_sad) {
+  return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 3, 16);
+}
+unsigned int vp8_sad16x3_c(
+  const unsigned char *src_ptr,
+  int  src_stride,
+  const unsigned char *ref_ptr,
+  int  ref_stride,
+  int max_sad) {
+  return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 3);
+}
+
 /* check a list of motion vectors by sad score using a number rows of pixels
  * above and a number cols of pixels in the left to select the one with best
  * score to use as ref motion vector
@@ -261,10 +278,10 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
 
     sad = 0;
     if (xd->up_available)
-      sad += vp8_sad16x3_c(above_src, xd->dst.y_stride,
+      sad += vp8_sad16x3(above_src, xd->dst.y_stride,
                            above_ref + offset, ref_y_stride, INT_MAX);
     if (xd->left_available)
-      sad += vp8_sad3x16_c(left_src, xd->dst.y_stride,
+      sad += vp8_sad3x16(left_src, xd->dst.y_stride,
                            left_ref + offset, ref_y_stride, INT_MAX);
     // Add the entry to our list and then resort the list on score.
     sad_scores[i] = sad;

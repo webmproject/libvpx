@@ -10,32 +10,9 @@
 
 
 #include <stdlib.h>
+#include "vp8/common/sadmxn.h"
 #include "vpx_ports/config.h"
 #include "vpx/vpx_integer.h"
-
-static __inline
-unsigned int sad_mx_n_c(
-  const unsigned char *src_ptr,
-  int  src_stride,
-  const unsigned char *ref_ptr,
-  int  ref_stride,
-  int m,
-  int n) {
-
-  int r, c;
-  unsigned int sad = 0;
-
-  for (r = 0; r < n; r++) {
-    for (c = 0; c < m; c++) {
-      sad += abs(src_ptr[c] - ref_ptr[c]);
-    }
-
-    src_ptr += src_stride;
-    ref_ptr += ref_stride;
-  }
-
-  return sad;
-}
 
 unsigned int vp8_sad32x32_c(const unsigned char *src_ptr,
                             int  src_stride,
@@ -96,25 +73,6 @@ unsigned int vp8_sad4x4_c(
 
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 4, 4);
 }
-
-#if CONFIG_NEWBESTREFMV
-unsigned int vp8_sad3x16_c(
-  const unsigned char *src_ptr,
-  int  src_stride,
-  const unsigned char *ref_ptr,
-  int  ref_stride,
-  int max_sad){
-  return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 3, 16);
-}
-unsigned int vp8_sad16x3_c(
-  const unsigned char *src_ptr,
-  int  src_stride,
-  const unsigned char *ref_ptr,
-  int  ref_stride,
-  int max_sad){
-  return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 3);
-}
-#endif
 
 void vp8_sad32x32x3_c(const unsigned char *src_ptr,
                       int  src_stride,
