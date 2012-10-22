@@ -520,7 +520,7 @@ int vp8_mbuverror_c(MACROBLOCK *mb) {
   return error;
 }
 
-int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd) {
+int vp8_uvsse(MACROBLOCK *x) {
   unsigned char *uptr, *vptr;
   unsigned char *upred_ptr = (*(x->block[16].base_src) + x->block[16].src);
   unsigned char *vpred_ptr = (*(x->block[20].base_src) + x->block[20].src);
@@ -551,16 +551,14 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd) {
   vptr = x->e_mbd.pre.v_buffer + offset;
 
   if ((mv_row | mv_col) & 7) {
-    VARIANCE_INVOKE(rtcd, subpixvar8x8)(uptr, pre_stride,
-                                        (mv_col & 7) << 1, (mv_row & 7) << 1, upred_ptr, uv_stride, &sse2);
-    VARIANCE_INVOKE(rtcd, subpixvar8x8)(vptr, pre_stride,
-                                        (mv_col & 7) << 1, (mv_row & 7) << 1, vpred_ptr, uv_stride, &sse1);
+    vp8_sub_pixel_variance8x8(uptr, pre_stride, (mv_col & 7) << 1,
+                              (mv_row & 7) << 1, upred_ptr, uv_stride, &sse2);
+    vp8_sub_pixel_variance8x8(vptr, pre_stride, (mv_col & 7) << 1,
+                              (mv_row & 7) << 1, vpred_ptr, uv_stride, &sse1);
     sse2 += sse1;
   } else {
-    VARIANCE_INVOKE(rtcd, var8x8)(uptr, pre_stride,
-                                  upred_ptr, uv_stride, &sse2);
-    VARIANCE_INVOKE(rtcd, var8x8)(vptr, pre_stride,
-                                  vpred_ptr, uv_stride, &sse1);
+    vp8_variance8x8(uptr, pre_stride, upred_ptr, uv_stride, &sse2);
+    vp8_variance8x8(vptr, pre_stride, vpred_ptr, uv_stride, &sse1);
     sse2 += sse1;
   }
   return sse2;
@@ -3922,8 +3920,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         if (threshold < x->encode_breakout)
           threshold = x->encode_breakout;
 
-        var = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
-              (*(b->base_src), b->src_stride,
+        var = vp8_variance16x16(*(b->base_src), b->src_stride,
                x->e_mbd.predictor, 16, &sse);
 
         if (sse < threshold) {
@@ -3933,7 +3930,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           if ((sse - var < q2dc *q2dc >> 4) ||
               (sse / 2 > var && sse - var < 64)) {
             // Check u and v to make sure skip is ok
-            int sse2 =  VP8_UVSSE(x, IF_RTCD(&cpi->rtcd.variance));
+            int sse2 =  vp8_uvsse(x);
             if (sse2 * 2 < threshold) {
               x->skip = 1;
               distortion2 = sse + sse2;
@@ -4840,8 +4837,8 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
             if (threshold < x->encode_breakout)
               threshold = x->encode_breakout;
 
-            var = VARIANCE_INVOKE(&cpi->rtcd.variance, var32x32)(*(b->base_src),
-              b->src_stride, xd->dst.y_buffer, xd->dst.y_stride, &sse);
+            var = vp8_variance32x32(*(b->base_src), b->src_stride,
+                                    xd->dst.y_buffer, xd->dst.y_stride, &sse);
 
             if (sse < threshold) {
               unsigned int q2dc = xd->block[24].dequant[0];
@@ -4851,11 +4848,9 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
                   (sse / 2 > var && sse - var < 64)) {
                 // Check u and v to make sure skip is ok
                 unsigned int sse2, sse3;
-                var += VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
-                                  (x->src.u_buffer, x->src.uv_stride,
+                var += vp8_variance16x16(x->src.u_buffer, x->src.uv_stride,
                                    xd->dst.u_buffer, xd->dst.uv_stride, &sse2);
-                var += VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
-                                  (x->src.v_buffer, x->src.uv_stride,
+                var += vp8_variance16x16(x->src.v_buffer, x->src.uv_stride,
                                    xd->dst.v_buffer, xd->dst.uv_stride, &sse3);
                 sse2 += sse3;
                 if (sse2 * 2 < threshold) {

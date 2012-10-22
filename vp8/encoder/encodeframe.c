@@ -120,8 +120,8 @@ static unsigned int tt_activity_measure(VP8_COMP *cpi, MACROBLOCK *x) {
    *  lambda using a non-linear combination (e.g., the smallest, or second
    *  smallest, etc.).
    */
-  act =     VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)(x->src.y_buffer,
-                                                           x->src.y_stride, VP8_VAR_OFFS, 0, &sse);
+  act = vp8_variance16x16(x->src.y_buffer, x->src.y_stride, VP8_VAR_OFFS, 0,
+                          &sse);
   act = act << 4;
 
   /* If the region is flat, lower the activity some more. */
