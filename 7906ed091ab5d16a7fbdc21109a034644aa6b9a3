@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//36U\u003d",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-22T21:25:59Z",
+      "side": 0,
+      "message": "space around \"!\u003d\" and * (whilst you\u0027re in this area of the code?)",
+      "revId": "7906ed091ab5d16a7fbdc21109a034644aa6b9a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//36Q\u003d",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-22T21:25:59Z",
+      "side": 0,
+      "message": "space around \u003e\u003e (ditto)",
+      "revId": "7906ed091ab5d16a7fbdc21109a034644aa6b9a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

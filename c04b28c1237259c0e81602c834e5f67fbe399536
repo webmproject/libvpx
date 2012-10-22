@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//364\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-22T21:25:59Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be in a separate cleanup patch?",
+      "revId": "c04b28c1237259c0e81602c834e5f67fbe399536",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
