@@ -134,13 +134,13 @@ prototype void vp8_loop_filter_bv8x8 "unsigned char *y, unsigned char *u, unsign
 specialize vp8_loop_filter_bv8x8;
 
 prototype void vp8_loop_filter_mbh "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_mbh;
+specialize vp8_loop_filter_mbh sse2
 
 prototype void vp8_loop_filter_bh "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
 specialize vp8_loop_filter_bh;
 
 prototype void vp8_loop_filter_bh8x8 "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_bh8x8;
+specialize vp8_loop_filter_bh8x8 sse2
 
 prototype void vp8_loop_filter_simple_mbv "unsigned char *y, int ystride, const unsigned char *blimit"
 specialize vp8_loop_filter_simple_mbv mmx sse2 media neon

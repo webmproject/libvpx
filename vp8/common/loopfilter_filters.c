@@ -7,8 +7,6 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-
-
 #include <stdlib.h>
 #include "vpx_config.h"
 #include "loopfilter.h"
@@ -94,6 +92,7 @@ static __inline void vp8_filter(signed char mask, uc hev, uc *op1,
   *op1 = u ^ 0x80;
 
 }
+
 void vp8_loop_filter_horizontal_edge_c
 (
   unsigned char *s,
@@ -218,6 +217,7 @@ static __inline void vp8_mbfilter(signed char mask, uc hev, uc flat,
     Filter2 = vp8_signed_char_clamp(vp8_filter + 3);
     Filter1 >>= 3;
     Filter2 >>= 3;
+
     u = vp8_signed_char_clamp(qs0 - Filter1);
     *oq0 = u ^ 0x80;
     u = vp8_signed_char_clamp(ps0 + Filter2);
@@ -271,7 +271,6 @@ void vp8_mbloop_filter_horizontal_edge_c
   } while (++i < count * 8);
 
 }
-
 
 void vp8_mbloop_filter_vertical_edge_c
 (
