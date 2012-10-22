@@ -1146,7 +1146,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
           }
         }
 
-#if CONFIG_TX_SELECT
         if (((rf == INTRA_FRAME && mode <= I8X8_PRED) ||
              (rf != INTRA_FRAME && !(mode == SPLITMV &&
                                      mi->partitioning == PARTITIONING_4X4))) &&
@@ -1160,7 +1159,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
           if (sz != TX_4X4 && mode != I8X8_PRED && mode != SPLITMV)
             vp8_write(bc, sz != TX_8X8, pc->prob_tx[1]);
         }
-#endif
 
 #ifdef ENTROPY_STATS
         active_section = 1;
@@ -1289,7 +1287,6 @@ static void write_mb_modes_kf(const VP8_COMMON  *c,
   } else
     write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 
-#if CONFIG_TX_SELECT
   if (ym <= I8X8_PRED && c->txfm_mode == TX_MODE_SELECT &&
       !((c->mb_no_coeff_skip && m->mbmi.mb_skip_coeff) ||
         (segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
@@ -1300,7 +1297,6 @@ static void write_mb_modes_kf(const VP8_COMMON  *c,
     if (sz != TX_4X4 && ym <= TM_PRED)
       vp8_write(bc, sz != TX_8X8, c->prob_tx[1]);
   }
-#endif
 }
 
 static void write_kfmodes(VP8_COMP* const cpi, vp8_writer* const bc) {
@@ -2477,7 +2473,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   }
 #endif
 
-#if CONFIG_TX_SELECT
   {
     if (pc->txfm_mode == TX_MODE_SELECT) {
       pc->prob_tx[0] = get_prob(cpi->txfm_count[0] + cpi->txfm_count_8x8p[0],
@@ -2494,9 +2489,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
       vp8_write_literal(&header_bc, pc->prob_tx[1], 8);
     }
   }
-#else
-  vp8_write_bit(&header_bc, !!pc->txfm_mode);
-#endif
 
   // Encode the loop filter level and type
   vp8_write_bit(&header_bc, pc->filter_type);

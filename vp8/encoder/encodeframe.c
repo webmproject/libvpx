@@ -411,7 +411,6 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
     mbmi->mv[1].as_int = x->partition_info->bmi[15].second_mv.as_int;
   }
 
-#if CONFIG_TX_SELECT
   {
     int segment_id = mbmi->segment_id;
     if (!segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
@@ -421,7 +420,6 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
       }
     }
   }
-#endif
 
   if (cpi->common.frame_type == KEY_FRAME) {
     // Restore the coding modes to that held in the coding context
@@ -1382,11 +1380,9 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   vpx_memset(cpi->rd_comp_pred_diff, 0, sizeof(cpi->rd_comp_pred_diff));
   vpx_memset(cpi->single_pred_count, 0, sizeof(cpi->single_pred_count));
   vpx_memset(cpi->comp_pred_count, 0, sizeof(cpi->comp_pred_count));
-#if CONFIG_TX_SELECT
   vpx_memset(cpi->txfm_count, 0, sizeof(cpi->txfm_count));
   vpx_memset(cpi->txfm_count_8x8p, 0, sizeof(cpi->txfm_count_8x8p));
   vpx_memset(cpi->rd_tx_select_diff, 0, sizeof(cpi->rd_tx_select_diff));
-#endif
   {
     struct vpx_usec_timer  emr_timer;
     vpx_usec_timer_start(&emr_timer);
@@ -1446,7 +1442,6 @@ static int check_dual_ref_flags(VP8_COMP *cpi) {
   }
 }
 
-#if CONFIG_TX_SELECT
 static void reset_skip_txfm_size(VP8_COMP *cpi, TX_SIZE txfm_max) {
   VP8_COMMON *cm = &cpi->common;
   int mb_row, mb_col, mis = cm->mode_info_stride;
@@ -1470,7 +1465,6 @@ static void reset_skip_txfm_size(VP8_COMP *cpi, TX_SIZE txfm_max) {
     }
   }
 }
-#endif
 
 void vp8_encode_frame(VP8_COMP *cpi) {
   if (cpi->sf.RD) {
@@ -1516,7 +1510,6 @@ void vp8_encode_frame(VP8_COMP *cpi) {
       txfm_type = ONLY_4X4;
     } else
 #endif
-#if CONFIG_TX_SELECT
     /* FIXME (rbultje)
      * this is a hack (no really), basically to work around the complete
      * nonsense coefficient cost prediction for keyframes. The probabilities
@@ -1564,16 +1557,11 @@ void vp8_encode_frame(VP8_COMP *cpi) {
                  cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
     ALLOW_16X16 : TX_MODE_SELECT;
 #endif
-#else
-    txfm_type = ALLOW_16X16;
-#endif // CONFIG_TX_SELECT
     cpi->common.txfm_mode = txfm_type;
-#if CONFIG_TX_SELECT
     if (txfm_type != TX_MODE_SELECT) {
       cpi->common.prob_tx[0] = 128;
       cpi->common.prob_tx[1] = 128;
     }
-#endif
     cpi->common.comp_pred_mode = pred_type;
     encode_frame_internal(cpi);
 
@@ -1583,7 +1571,6 @@ void vp8_encode_frame(VP8_COMP *cpi) {
       cpi->rd_prediction_type_threshes[frame_type][i] >>= 1;
     }
 
-#if CONFIG_TX_SELECT
     for (i = 0; i < NB_TXFM_MODES; ++i) {
       int64_t pd = cpi->rd_tx_select_diff[i];
       int diff;
@@ -1593,7 +1580,6 @@ void vp8_encode_frame(VP8_COMP *cpi) {
       cpi->rd_tx_select_threshes[frame_type][i] += diff;
       cpi->rd_tx_select_threshes[frame_type][i] /= 2;
     }
-#endif
 
     if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
       int single_count_zero = 0;
@@ -1611,7 +1597,6 @@ void vp8_encode_frame(VP8_COMP *cpi) {
       }
     }
 
-#if CONFIG_TX_SELECT
     if (cpi->common.txfm_mode == TX_MODE_SELECT) {
       const int count4x4 = cpi->txfm_count[TX_4X4] + cpi->txfm_count_8x8p[TX_4X4];
       const int count8x8 = cpi->txfm_count[TX_8X8];
@@ -1628,7 +1613,6 @@ void vp8_encode_frame(VP8_COMP *cpi) {
         cpi->common.txfm_mode = ALLOW_16X16;
       }
     }
-#endif
   } else {
     encode_frame_internal(cpi);
   }
@@ -1946,15 +1930,12 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
   }
 
   if (output_enabled) {
-#if CONFIG_TX_SELECT
     int segment_id = mbmi->segment_id;
-#endif
 
     // Tokenize
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t, 0);
 
-#if CONFIG_TX_SELECT
     if (cpi->common.txfm_mode == TX_MODE_SELECT &&
         !((cpi->common.mb_no_coeff_skip && mbmi->mb_skip_coeff) ||
           (segfeature_active(&x->e_mbd, segment_id, SEG_LVL_EOB) &&
@@ -1964,9 +1945,7 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
       } else if (mbmi->mode == I8X8_PRED) {
         cpi->txfm_count_8x8p[mbmi->txfm_size]++;
       }
-    } else
-#endif
-    if (cpi->common.txfm_mode >= ALLOW_16X16 && mbmi->mode <= TM_PRED) {
+    } else if (cpi->common.txfm_mode >= ALLOW_16X16 && mbmi->mode <= TM_PRED) {
       mbmi->txfm_size = TX_16X16;
     } else
     if (cpi->common.txfm_mode >= ALLOW_8X8 && mbmi->mode != B_PRED) {
@@ -2147,7 +2126,6 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
   }
 
   if (output_enabled) {
-#if CONFIG_TX_SELECT
     int segment_id = mbmi->segment_id;
     if (cpi->common.txfm_mode == TX_MODE_SELECT &&
         !((cpi->common.mb_no_coeff_skip && mbmi->mb_skip_coeff) ||
@@ -2161,9 +2139,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
                   mbmi->partitioning != PARTITIONING_4X4)) {
         cpi->txfm_count_8x8p[mbmi->txfm_size]++;
       }
-    } else
-#endif
-    if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED &&
+    } else if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED &&
         mbmi->mode != SPLITMV && cpi->common.txfm_mode >= ALLOW_16X16) {
       mbmi->txfm_size = TX_16X16;
     } else if (mbmi->mode != B_PRED &&

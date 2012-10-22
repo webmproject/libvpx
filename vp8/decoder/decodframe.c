@@ -1190,17 +1190,11 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 #endif
 
   /* Read the loop filter level and type */
-#if CONFIG_TX_SELECT
   pc->txfm_mode = vp8_read_literal(&header_bc, 2);
   if (pc->txfm_mode == TX_MODE_SELECT) {
     pc->prob_tx[0] = vp8_read_literal(&header_bc, 8);
     pc->prob_tx[1] = vp8_read_literal(&header_bc, 8);
   }
-#else
-  pc->txfm_mode = (TXFM_MODE) vp8_read_bit(&header_bc);
-  if (pc->txfm_mode == ALLOW_8X8)
-    pc->txfm_mode = ALLOW_16X16;
-#endif
 
   pc->filter_type = (LOOPFILTERTYPE) vp8_read_bit(&header_bc);
   pc->filter_level = vp8_read_literal(&header_bc, 6);

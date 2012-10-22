@@ -871,8 +871,6 @@ static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
   VP8_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &x->e_mbd.mode_info_context->mbmi;
 
-#if CONFIG_TX_SELECT
-
   MACROBLOCKD *xd = &x->e_mbd;
   int can_skip = cm->mb_no_coeff_skip;
   vp8_prob skip_prob = can_skip ? get_pred_prob(cm, xd, PRED_MBSKIP) : 128;
@@ -980,25 +978,6 @@ static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
   else
     txfm_cache[TX_MODE_SELECT] = rd4x4s < rd8x8s ? rd4x4s : rd8x8s;
 
-#else /* CONFIG_TX_SELECT */
-
-  switch (cpi->common.txfm_mode) {
-    case ALLOW_16X16:
-      macro_block_yrd_16x16(x, rate, distortion, IF_RTCD(&cpi->rtcd), skippable);
-      mbmi->txfm_size = TX_16X16;
-      break;
-    case ALLOW_8X8:
-      macro_block_yrd_8x8(x, rate, distortion, IF_RTCD(&cpi->rtcd), skippable);
-      mbmi->txfm_size = TX_8X8;
-      break;
-    default:
-    case ONLY_4X4:
-      macro_block_yrd_4x4(x, rate, distortion, IF_RTCD(&cpi->rtcd), skippable);
-      mbmi->txfm_size = TX_4X4;
-      break;
-  }
-
-#endif /* CONFIG_TX_SELECT */
 }
 
 static void copy_predictor(unsigned char *dst, const unsigned char *predictor) {
@@ -1349,11 +1328,9 @@ static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
   int64_t this_rd;
   MACROBLOCKD *xd = &x->e_mbd;
 
-#if CONFIG_TX_SELECT
   int i;
   for (i = 0; i < NB_TXFM_MODES; i++)
     txfm_cache[i] = INT64_MAX;
-#endif
 
   // Y Search for 16x16 intra prediction mode
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
@@ -1396,7 +1373,6 @@ static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
         *skippable = skip;
       }
 
-#if CONFIG_TX_SELECT
       for (i = 0; i < NB_TXFM_MODES; i++) {
         int64_t adj_rd = this_rd + local_txfm_cache[i] -
                           local_txfm_cache[cpi->common.txfm_mode];
@@ -1404,7 +1380,6 @@ static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
           txfm_cache[i] = adj_rd;
         }
       }
-#endif
 
 #if CONFIG_COMP_INTRA_PRED
     }
@@ -2570,7 +2545,6 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                              /* 16 = n_blocks */
                              int_mv seg_mvs[16][MAX_REF_FRAMES - 1],
                              int64_t txfm_cache[NB_TXFM_MODES]) {
-#if CONFIG_TX_SELECT
   int i, n, c = vp8_mbsplit_count[segmentation];
 
   if (segmentation == PARTITIONING_4X4) {
@@ -2658,12 +2632,6 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
       }
     }
   }
-#else
-  rd_check_segment_txsize(cpi, x, bsi, segmentation,
-                          (segmentation == PARTITIONING_4X4 ||
-                           cpi->common.txfm_mode == ONLY_4X4) ? TX_4X4 : TX_8X8,
-                          NULL, NULL, NULL, seg_mvs);
-#endif
 }
 
 static __inline
@@ -3280,9 +3248,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                                  int hybrid_pred_diff,
                                  int64_t txfm_size_diff[NB_TXFM_MODES]) {
   MACROBLOCKD *xd = &x->e_mbd;
-#if CONFIG_TX_SELECT
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
-#endif
 
   // Take a snapshot of the coding context so it can be
   // restored if we decide to encode this way
@@ -3302,9 +3268,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   ctx->comp_pred_diff   = comp_pred_diff;
   ctx->hybrid_pred_diff = hybrid_pred_diff;
 
-#if CONFIG_TX_SELECT
   memcpy(ctx->txfm_rd_diff, txfm_size_diff, sizeof(ctx->txfm_rd_diff));
-#endif
 }
 
 static void inter_mode_cost(VP8_COMP *cpi, MACROBLOCK *x, int this_mode,
@@ -3707,11 +3671,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         }
         break;
         case I8X8_PRED: {
-#if CONFIG_TX_SELECT
           int cost0 = vp8_cost_bit(cm->prob_tx[0], 0);
           int cost1 = vp8_cost_bit(cm->prob_tx[0], 1);
           int64_t tmp_rd_4x4s, tmp_rd_8x8s;
-#endif
           int64_t tmp_rd_4x4, tmp_rd_8x8, tmp_rd;
           int r4x4, tok4x4, d4x4, r8x8, tok8x8, d8x8;
           mbmi->txfm_size = TX_4X4;
@@ -3733,7 +3695,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           txfm_cache[ONLY_4X4]  = tmp_rd_4x4;
           txfm_cache[ALLOW_8X8] = tmp_rd_8x8;
           txfm_cache[ALLOW_16X16] = tmp_rd_8x8;
-#if CONFIG_TX_SELECT
           tmp_rd_4x4s = tmp_rd_4x4 + RDCOST(x->rdmult, x->rddiv, cost0, 0);
           tmp_rd_8x8s = tmp_rd_8x8 + RDCOST(x->rdmult, x->rddiv, cost1, 0);
           txfm_cache[TX_MODE_SELECT] = tmp_rd_4x4s < tmp_rd_8x8s ? tmp_rd_4x4s : tmp_rd_8x8s;
@@ -3762,9 +3723,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
               mode8x8[1][3] = x->e_mbd.mode_info_context->bmi[10].as_mode.second;
 #endif
             }
-          } else
-#endif
-          if (cm->txfm_mode == ONLY_4X4) {
+          } else if (cm->txfm_mode == ONLY_4X4) {
             rate = r4x4;
             rate_y = tok4x4;
             distortion = d4x4;
@@ -4279,11 +4238,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       (cpi->oxcf.arnr_max_frames == 0) &&
       (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME)) {
     mbmi->mode = ZEROMV;
-#if CONFIG_TX_SELECT
     if (cm->txfm_mode != TX_MODE_SELECT)
       mbmi->txfm_size = cm->txfm_mode;
     else
-#endif
       mbmi->txfm_size = TX_16X16;
     mbmi->ref_frame = ALTREF_FRAME;
     mbmi->mv[0].as_int = 0;
@@ -4333,7 +4290,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       best_pred_diff[i] = best_rd - best_pred_rd[i];
   }
 
-#if CONFIG_TX_SELECT
   if (!x->skip) {
     for (i = 0; i < NB_TXFM_MODES; i++) {
       if (best_txfm_rd[i] == INT64_MAX)
@@ -4344,7 +4300,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   } else {
     vpx_memset(best_txfm_diff, 0, sizeof(best_txfm_diff));
   }
-#endif
 
 end:
   store_coding_context(x, &x->mb_context[xd->mb_index], best_mode_index, &best_partition,
@@ -4475,10 +4430,8 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
            vp8_cost_bit(get_pred_prob(cm, xd, PRED_MBSKIP), 1);
     dist = dist16x16 + (distuv8x8 >> 2);
     mbmi->txfm_size = txfm_size_16x16;
-#if CONFIG_TX_SELECT
     memset(x->mb_context[xd->mb_index].txfm_rd_diff, 0,
            sizeof(x->mb_context[xd->mb_index].txfm_rd_diff));
-#endif
   } else if (error8x8 > error16x16) {
     if (error4x4 < error16x16) {
       rate = rateuv;
@@ -4495,20 +4448,16 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
       mbmi->mode = B_PRED;
       mbmi->txfm_size = TX_4X4;
       dist = dist4x4 + (distuv >> 2);
-#if CONFIG_TX_SELECT
       memset(x->mb_context[xd->mb_index].txfm_rd_diff, 0,
              sizeof(x->mb_context[xd->mb_index].txfm_rd_diff));
-#endif
     } else {
       mbmi->txfm_size = txfm_size_16x16;
       mbmi->mode = mode16x16;
       rate = rate16x16 + rateuv8x8;
       dist = dist16x16 + (distuv8x8 >> 2);
-#if CONFIG_TX_SELECT
       for (i = 0; i < NB_TXFM_MODES; i++) {
         x->mb_context[xd->mb_index].txfm_rd_diff[i] = error16x16 - txfm_cache[i];
       }
-#endif
     }
     if (cpi->common.mb_no_coeff_skip)
       rate += vp8_cost_bit(get_pred_prob(cm, xd, PRED_MBSKIP), 0);
@@ -4528,10 +4477,8 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
       mbmi->mode = B_PRED;
       mbmi->txfm_size = TX_4X4;
       dist = dist4x4 + (distuv >> 2);
-#if CONFIG_TX_SELECT
       memset(x->mb_context[xd->mb_index].txfm_rd_diff, 0,
              sizeof(x->mb_context[xd->mb_index].txfm_rd_diff));
-#endif
     } else {
       // FIXME(rbultje) support transform-size selection
       mbmi->mode = I8X8_PRED;
@@ -4539,10 +4486,8 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
       set_i8x8_block_modes(x, mode8x8);
       rate = rate8x8 + rateuv;
       dist = dist8x8 + (distuv >> 2);
-#if CONFIG_TX_SELECT
       memset(x->mb_context[xd->mb_index].txfm_rd_diff, 0,
              sizeof(x->mb_context[xd->mb_index].txfm_rd_diff));
-#endif
     }
     if (cpi->common.mb_no_coeff_skip)
       rate += vp8_cost_bit(get_pred_prob(cm, xd, PRED_MBSKIP), 0);

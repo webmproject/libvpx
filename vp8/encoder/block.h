@@ -79,9 +79,7 @@ typedef struct {
   int hybrid_pred_diff;
   int comp_pred_diff;
   int single_pred_diff;
-#if CONFIG_TX_SELECT
   int64_t txfm_rd_diff[NB_TXFM_MODES];
-#endif
 } PICK_MODE_CONTEXT;
 
 typedef struct {

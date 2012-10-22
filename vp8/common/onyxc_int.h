@@ -131,10 +131,8 @@ typedef enum {
   ONLY_4X4            = 0,
   ALLOW_8X8           = 1,
   ALLOW_16X16         = 2,
-#if CONFIG_TX_SELECT
   TX_MODE_SELECT      = 3,
-#endif
-  NB_TXFM_MODES       = 3 + CONFIG_TX_SELECT,
+  NB_TXFM_MODES       = 4,
 } TXFM_MODE;
 
 typedef struct VP8_COMMON_RTCD {
@@ -272,10 +270,8 @@ typedef struct VP8Common {
 
   vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
 
-#if CONFIG_TX_SELECT
   // FIXME contextualize
   vp8_prob prob_tx[TX_SIZE_MAX - 1];
-#endif
 
   vp8_prob mbskip_pred_probs[MBSKIP_CONTEXTS];
 
