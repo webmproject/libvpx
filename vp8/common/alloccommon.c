@@ -107,8 +107,11 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     vpx_memset(oci->post_proc_buffer.buffer_alloc, 128,
                oci->post_proc_buffer.frame_size);
 
-    /* Allocate buffer to store post-processing filter coefficients. */
-    oci->pp_limits_buffer = vpx_memalign(16, 24 * oci->mb_cols);
+    /* Allocate buffer to store post-processing filter coefficients.
+     *
+     * Note: Round up mb_cols to support SIMD reads
+     */
+    oci->pp_limits_buffer = vpx_memalign(16, 24 * ((oci->mb_cols + 1) & ~1));
     if (!oci->pp_limits_buffer)
         goto allocation_fail;
 #endif
