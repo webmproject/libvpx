@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//4EI\u003d",
+        "filename": "test/test-data.sha1",
+        "patchSetId": 24
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-22T20:48:02Z",
+      "side": 1,
+      "message": "It is used to check if the test file is downloaded correctly.",
+      "parentUuid": "AAAAQn//5E4\u003d",
+      "revId": "97e49cee98e4826e89a224199d13e5a9b1d714f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//5AQ\u003d",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 24
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-19T21:29:29Z",
       "side": 1,
       "message": "Why not print out stats regarding what frame the decoder broke on?",
+      "revId": "97e49cee98e4826e89a224199d13e5a9b1d714f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4EE\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 24
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-10-22T20:48:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//5AQ\u003d",
       "revId": "97e49cee98e4826e89a224199d13e5a9b1d714f9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
