@@ -1578,8 +1578,8 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
 
         ta0 = *(a + vp8_block2above[ib]);
         ta1 = *(a + vp8_block2above[ib + 1]);
-        tl0 = *(l + vp8_block2above[ib]);
-        tl1 = *(l + vp8_block2above[ib + 4]);
+        tl0 = *(l + vp8_block2left[ib]);
+        tl1 = *(l + vp8_block2left[ib + 4]);
         rate_t = cost_coeffs(x, xd->block + ib, PLANE_TYPE_Y_WITH_DC,
                              &ta0, &tl0, TX_4X4);
         rate_t += cost_coeffs(x, xd->block + ib + 1, PLANE_TYPE_Y_WITH_DC,
