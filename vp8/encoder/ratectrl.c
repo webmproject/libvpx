@@ -132,17 +132,10 @@ void vp8_save_coding_context(VP8_COMP *cpi) {
   // intended for use in a re-code loop in vp8_compress_frame where the
   // quantizer value is adjusted between loop iterations.
 
-#if CONFIG_NEWMVENTROPY
   cc->nmvc = cm->fc.nmvc;
   vp8_copy(cc->nmvjointcost,  cpi->mb.nmvjointcost);
   vp8_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
   vp8_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
-#else
-  vp8_copy(cc->mvc,      cm->fc.mvc);
-  vp8_copy(cc->mvcosts,  cpi->mb.mvcosts);
-  vp8_copy(cc->mvc_hp,     cm->fc.mvc_hp);
-  vp8_copy(cc->mvcosts_hp,  cpi->mb.mvcosts_hp);
-#endif
 
   vp8_copy(cc->mv_ref_ct, cm->fc.mv_ref_ct);
   vp8_copy(cc->mode_context, cm->fc.mode_context);
@@ -196,17 +189,10 @@ void vp8_restore_coding_context(VP8_COMP *cpi) {
   // Restore key state variables to the snapshot state stored in the
   // previous call to vp8_save_coding_context.
 
-#if CONFIG_NEWMVENTROPY
   cm->fc.nmvc = cc->nmvc;
   vp8_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
   vp8_copy(cpi->mb.nmvcosts, cc->nmvcosts);
   vp8_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
-#else
-  vp8_copy(cm->fc.mvc, cc->mvc);
-  vp8_copy(cpi->mb.mvcosts, cc->mvcosts);
-  vp8_copy(cm->fc.mvc_hp, cc->mvc_hp);
-  vp8_copy(cpi->mb.mvcosts_hp, cc->mvcosts_hp);
-#endif
 
   vp8_copy(cm->fc.mv_ref_ct, cc->mv_ref_ct);
   vp8_copy(cm->fc.mode_context, cc->mode_context);
@@ -263,16 +249,6 @@ void vp8_setup_key_frame(VP8_COMP *cpi) {
   vp8_default_bmode_probs(cm->fc.bmode_prob);
 
   vp8_init_mv_probs(& cpi->common);
-#if CONFIG_NEWMVENTROPY == 0
-  /* this is not really required */
-  {
-    int flag[2] = {1, 1};
-    vp8_build_component_cost_table(
-        cpi->mb.mvcost, (const MV_CONTEXT *) cpi->common.fc.mvc, flag);
-    vp8_build_component_cost_table_hp(
-        cpi->mb.mvcost_hp, (const MV_CONTEXT_HP *) cpi->common.fc.mvc_hp, flag);
-  }
-#endif
 
   // cpi->common.filter_level = 0;      // Reset every key frame.
   cpi->common.filter_level = cpi->common.base_qindex * 3 / 8;

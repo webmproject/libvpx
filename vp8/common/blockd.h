@@ -137,8 +137,8 @@ typedef enum {
 
 typedef enum {
   DCT_DCT   = 0,                      // DCT  in both horizontal and vertical
-  ADST_DCT  = 1,                      // ADST in horizontal, DCT in vertical
-  DCT_ADST  = 2,                      // DCT  in horizontal, ADST in vertical
+  ADST_DCT  = 1,                      // ADST in vertical, DCT in horizontal
+  DCT_ADST  = 2,                      // DCT  in vertical, ADST in horizontal
   ADST_ADST = 3                       // ADST in both directions
 } TX_TYPE;
 

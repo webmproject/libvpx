@@ -188,7 +188,6 @@ static void kfread_modes(VP8D_COMP *pbi,
   }
 }
 
-#if CONFIG_NEWMVENTROPY
 static int read_nmv_component(vp8_reader *r,
                               int rv,
                               const nmv_component *mvcomp) {
@@ -207,7 +206,7 @@ static int read_nmv_component(vp8_reader *r,
   o = d << 3;
 
   z = vp8_get_mv_mag(c, o);
-  v = (s ? -(z + 1) : (z + 1));
+  v = (s ? -(z + 8) : (z + 8));
   return v;
 }
 
@@ -219,6 +218,7 @@ static int read_nmv_component_fp(vp8_reader *r,
   int s, z, c, o, d, e, f;
   s = v < 0;
   z = (s ? -v : v) - 1;       /* magnitude - 1 */
+  z &= ~7;
 
   c = vp8_get_mv_class(z, &o);
   d = o >> 3;
@@ -331,124 +331,6 @@ static void read_nmvprobs(vp8_reader *bc, nmv_context *mvctx,
     }
   }
 }
-
-#else
-
-static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc) {
-  const vp8_prob *const p = (const vp8_prob *) mvc;
-  int x = 0;
-
-  if (vp8_read(r, p [mvpis_short])) { /* Large */
-    int i = 0;
-
-    do {
-      x += vp8_read(r, p [MVPbits + i]) << i;
-    } while (++i < mvnum_short_bits);
-
-    i = mvlong_width - 1;  /* Skip bit 3, which is sometimes implicit */
-
-    do {
-      x += vp8_read(r, p [MVPbits + i]) << i;
-    } while (--i > mvnum_short_bits);
-
-    if (!(x & ~((2 << mvnum_short_bits) - 1))  ||  vp8_read(r, p [MVPbits + mvnum_short_bits]))
-      x += (mvnum_short);
-  } else /* small */
-    x = vp8_treed_read(r, vp8_small_mvtree, p + MVPshort);
-
-  if (x  &&  vp8_read(r, p [MVPsign]))
-    x = -x;
-
-  return x;
-}
-
-static void read_mv(vp8_reader *r, MV *mv, const MV_CONTEXT *mvc) {
-  mv->row = (short)(read_mvcomponent(r,   mvc) << 1);
-  mv->col = (short)(read_mvcomponent(r, ++mvc) << 1);
-#ifdef DEBUG_DEC_MV
-  int i;
-  printf("%d (np): %d %d\n", dec_mvcount++, mv->row, mv->col);
-  // for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[-1])->prob[i]); printf("\n");
-  // for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[0])->prob[i]); printf("\n");
-#endif
-}
-
-static void read_mvcontexts(vp8_reader *bc, MV_CONTEXT *mvc) {
-  int i = 0;
-
-  do {
-    const vp8_prob *up = vp8_mv_update_probs[i].prob;
-    vp8_prob *p = (vp8_prob *)(mvc + i);
-    vp8_prob *const pstop = p + MVPcount;
-
-    do {
-      if (vp8_read(bc, *up++)) {
-        const vp8_prob x = (vp8_prob)vp8_read_literal(bc, 7);
-
-        *p = x ? x << 1 : 1;
-      }
-    } while (++p < pstop);
-  } while (++i < 2);
-}
-
-static int read_mvcomponent_hp(vp8_reader *r, const MV_CONTEXT_HP *mvc) {
-  const vp8_prob *const p = (const vp8_prob *) mvc;
-  int x = 0;
-
-  if (vp8_read(r, p [mvpis_short_hp])) { /* Large */
-    int i = 0;
-
-    do {
-      x += vp8_read(r, p [MVPbits_hp + i]) << i;
-    } while (++i < mvnum_short_bits_hp);
-
-    i = mvlong_width_hp - 1;  /* Skip bit 3, which is sometimes implicit */
-
-    do {
-      x += vp8_read(r, p [MVPbits_hp + i]) << i;
-    } while (--i > mvnum_short_bits_hp);
-
-    if (!(x & ~((2 << mvnum_short_bits_hp) - 1))  ||  vp8_read(r, p [MVPbits_hp + mvnum_short_bits_hp]))
-      x += (mvnum_short_hp);
-  } else /* small */
-    x = vp8_treed_read(r, vp8_small_mvtree_hp, p + MVPshort_hp);
-
-  if (x  &&  vp8_read(r, p [MVPsign_hp]))
-    x = -x;
-
-  return x;
-}
-
-static void read_mv_hp(vp8_reader *r, MV *mv, const MV_CONTEXT_HP *mvc) {
-  mv->row = (short)(read_mvcomponent_hp(r,   mvc));
-  mv->col = (short)(read_mvcomponent_hp(r, ++mvc));
-#ifdef DEBUG_DEC_MV
-  int i;
-  printf("%d (hp): %d %d\n", dec_mvcount++, mv->row, mv->col);
-  // for (i=0; i<MVPcount_hp;++i) printf("  %d", (&mvc[-1])->prob[i]); printf("\n");
-  // for (i=0; i<MVPcount_hp;++i) printf("  %d", (&mvc[0])->prob[i]); printf("\n");
-#endif
-}
-
-static void read_mvcontexts_hp(vp8_reader *bc, MV_CONTEXT_HP *mvc) {
-  int i = 0;
-
-  do {
-    const vp8_prob *up = vp8_mv_update_probs_hp[i].prob;
-    vp8_prob *p = (vp8_prob *)(mvc + i);
-    vp8_prob *const pstop = p + MVPcount_hp;
-
-    do {
-      if (vp8_read(bc, *up++)) {
-        const vp8_prob x = (vp8_prob)vp8_read_literal(bc, 7);
-
-        *p = x ? x << 1 : 1;
-      }
-    } while (++p < pstop);
-  } while (++i < 2);
-}
-
-#endif  /* CONFIG_NEWMVENTROPY */
 
 // Read the referncence frame
 static MV_REFERENCE_FRAME read_ref_frame(VP8D_COMP *pbi,
@@ -614,12 +496,7 @@ static void read_switchable_interp_probs(VP8D_COMP* const pbi,
 
 static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
   VP8_COMMON *const cm = &pbi->common;
-#if CONFIG_NEWMVENTROPY
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
-#else
-  MV_CONTEXT *const mvc = pbi->common.fc.mvc;
-  MV_CONTEXT_HP *const mvc_hp = pbi->common.fc.mvc_hp;
-#endif
   MACROBLOCKD *const xd  = &pbi->mb;
 
   if (cm->frame_type == KEY_FRAME) {
@@ -661,14 +538,7 @@ static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
         cm->fc.ymode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
       } while (++i < VP8_YMODES - 1);
     }
-#if CONFIG_NEWMVENTROPY
     read_nmvprobs(bc, nmvc, xd->allow_high_precision_mv);
-#else
-    if (xd->allow_high_precision_mv)
-      read_mvcontexts_hp(bc, mvc_hp);
-    else
-      read_mvcontexts(bc, mvc);
-#endif
   }
 }
 
@@ -751,12 +621,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                              int mb_row, int mb_col,
                              BOOL_DECODER* const bc) {
   VP8_COMMON *const cm = &pbi->common;
-#if CONFIG_NEWMVENTROPY
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
-#else
-  MV_CONTEXT *const mvc = pbi->common.fc.mvc;
-  MV_CONTEXT_HP *const mvc_hp = pbi->common.fc.mvc_hp;
-#endif
   const int mis = pbi->common.mode_info_stride;
   MACROBLOCKD *const xd  = &pbi->mb;
 
@@ -1005,44 +870,20 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
           switch (blockmode) {
             case NEW4X4:
-#if CONFIG_NEWMVENTROPY
               read_nmv(bc, &blockmv.as_mv, &best_mv.as_mv, nmvc);
               read_nmv_fp(bc, &blockmv.as_mv, &best_mv.as_mv, nmvc,
                           xd->allow_high_precision_mv);
               vp8_increment_nmv(&blockmv.as_mv, &best_mv.as_mv,
                                 &cm->fc.NMVcount, xd->allow_high_precision_mv);
-#else
-              if (xd->allow_high_precision_mv) {
-                read_mv_hp(bc, &blockmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
-                cm->fc.MVcount_hp[0][mv_max_hp + (blockmv.as_mv.row)]++;
-                cm->fc.MVcount_hp[1][mv_max_hp + (blockmv.as_mv.col)]++;
-              } else {
-                read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
-                cm->fc.MVcount[0][mv_max + (blockmv.as_mv.row >> 1)]++;
-                cm->fc.MVcount[1][mv_max + (blockmv.as_mv.col >> 1)]++;
-              }
-#endif  /* CONFIG_NEWMVENTROPY */
               blockmv.as_mv.row += best_mv.as_mv.row;
               blockmv.as_mv.col += best_mv.as_mv.col;
 
               if (mbmi->second_ref_frame) {
-#if CONFIG_NEWMVENTROPY
                 read_nmv(bc, &secondmv.as_mv, &best_mv_second.as_mv, nmvc);
                 read_nmv_fp(bc, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
                             xd->allow_high_precision_mv);
                 vp8_increment_nmv(&secondmv.as_mv, &best_mv_second.as_mv,
                                   &cm->fc.NMVcount, xd->allow_high_precision_mv);
-#else
-                if (xd->allow_high_precision_mv) {
-                  read_mv_hp(bc, &secondmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
-                  cm->fc.MVcount_hp[0][mv_max_hp + (secondmv.as_mv.row)]++;
-                  cm->fc.MVcount_hp[1][mv_max_hp + (secondmv.as_mv.col)]++;
-                } else {
-                  read_mv(bc, &secondmv.as_mv, (const MV_CONTEXT *) mvc);
-                  cm->fc.MVcount[0][mv_max + (secondmv.as_mv.row >> 1)]++;
-                  cm->fc.MVcount[1][mv_max + (secondmv.as_mv.col >> 1)]++;
-                }
-#endif  /* CONFIG_NEWMVENTROPY */
                 secondmv.as_mv.row += best_mv_second.as_mv.row;
                 secondmv.as_mv.col += best_mv_second.as_mv.col;
               }
@@ -1147,23 +988,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         break;
 
       case NEWMV:
-#if CONFIG_NEWMVENTROPY
         read_nmv(bc, &mv->as_mv, &best_mv.as_mv, nmvc);
         read_nmv_fp(bc, &mv->as_mv, &best_mv.as_mv, nmvc,
                     xd->allow_high_precision_mv);
         vp8_increment_nmv(&mv->as_mv, &best_mv.as_mv, &cm->fc.NMVcount,
                           xd->allow_high_precision_mv);
-#else
-        if (xd->allow_high_precision_mv) {
-          read_mv_hp(bc, &mv->as_mv, (const MV_CONTEXT_HP *) mvc_hp);
-          cm->fc.MVcount_hp[0][mv_max_hp + (mv->as_mv.row)]++;
-          cm->fc.MVcount_hp[1][mv_max_hp + (mv->as_mv.col)]++;
-        } else {
-          read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
-          cm->fc.MVcount[0][mv_max + (mv->as_mv.row >> 1)]++;
-          cm->fc.MVcount[1][mv_max + (mv->as_mv.col >> 1)]++;
-        }
-#endif  /* CONFIG_NEWMVENTROPY */
         mv->as_mv.row += best_mv.as_mv.row;
         mv->as_mv.col += best_mv.as_mv.col;
 
@@ -1178,23 +1007,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                       mb_to_top_edge,
                                                       mb_to_bottom_edge);
         if (mbmi->second_ref_frame) {
-#if CONFIG_NEWMVENTROPY
           read_nmv(bc, &mbmi->mv[1].as_mv, &best_mv_second.as_mv, nmvc);
           read_nmv_fp(bc, &mbmi->mv[1].as_mv, &best_mv_second.as_mv, nmvc,
                       xd->allow_high_precision_mv);
           vp8_increment_nmv(&mbmi->mv[1].as_mv, &best_mv_second.as_mv,
                             &cm->fc.NMVcount, xd->allow_high_precision_mv);
-#else
-          if (xd->allow_high_precision_mv) {
-            read_mv_hp(bc, &mbmi->mv[1].as_mv, (const MV_CONTEXT_HP *) mvc_hp);
-            cm->fc.MVcount_hp[0][mv_max_hp + (mbmi->mv[1].as_mv.row)]++;
-            cm->fc.MVcount_hp[1][mv_max_hp + (mbmi->mv[1].as_mv.col)]++;
-          } else {
-            read_mv(bc, &mbmi->mv[1].as_mv, (const MV_CONTEXT *) mvc);
-            cm->fc.MVcount[0][mv_max + (mbmi->mv[1].as_mv.row >> 1)]++;
-            cm->fc.MVcount[1][mv_max + (mbmi->mv[1].as_mv.col >> 1)]++;
-          }
-#endif  /* CONFIG_NEWMVENTROPY */
           mbmi->mv[1].as_mv.row += best_mv_second.as_mv.row;
           mbmi->mv[1].as_mv.col += best_mv_second.as_mv.col;
           mbmi->need_to_clamp_secondmv |=

@@ -224,7 +224,6 @@ EXPERIMENT_LIST="
     switchable_interp
     newbestrefmv
     new_mvref
-    newmventropy
     tx_select
 "
 CONFIG_LIST="

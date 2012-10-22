@@ -387,14 +387,12 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
 
   if (cpi->common.frame_type != KEY_FRAME)
   {
-#if CONFIG_NEWMVENTROPY
     vp8_build_nmv_cost_table(
         cpi->mb.nmvjointcost,
         cpi->mb.e_mbd.allow_high_precision_mv ?
         cpi->mb.nmvcost_hp : cpi->mb.nmvcost,
         &cpi->common.fc.nmvc,
         cpi->mb.e_mbd.allow_high_precision_mv, 1, 1);
-#endif
   }
 }
 
@@ -402,19 +400,6 @@ void vp8_auto_select_speed(VP8_COMP *cpi) {
   int milliseconds_for_compress = (int)(1000000 / cpi->oxcf.frame_rate);
 
   milliseconds_for_compress = milliseconds_for_compress * (16 - cpi->oxcf.cpu_used) / 16;
-
-#if 0
-
-  if (0) {
-    FILE *f;
-
-    f = fopen("speed.stt", "a");
-    fprintf(f, " %8ld %10ld %10ld %10ld\n",
-            cpi->common.current_video_frame, cpi->Speed, milliseconds_for_compress, cpi->avg_pick_mode_time);
-    fclose(f);
-  }
-
-#endif
 
   /*
   // this is done during parameter valid check
@@ -3065,9 +3050,7 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
 void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
                        int_mv *best_ref_mv, int_mv *second_best_ref_mv) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
-#if CONFIG_NEWMVENTROPY
   MV mv;
-#endif
 
   if (mbmi->mode == SPLITMV) {
     int i;
@@ -3075,7 +3058,6 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < x->partition_info->count; i++) {
       if (x->partition_info->bmi[i].mode == NEW4X4) {
         if (x->e_mbd.allow_high_precision_mv) {
-#if CONFIG_NEWMVENTROPY
           mv.row = (x->partition_info->bmi[i].mv.as_mv.row
                     - best_ref_mv->as_mv.row);
           mv.col = (x->partition_info->bmi[i].mv.as_mv.col
@@ -3089,20 +3071,7 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
             vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv,
                               &cpi->NMVcount, 1);
           }
-#else
-          cpi->MVcount_hp[0][mv_max_hp + (x->partition_info->bmi[i].mv.as_mv.row
-                                          - best_ref_mv->as_mv.row)]++;
-          cpi->MVcount_hp[1][mv_max_hp + (x->partition_info->bmi[i].mv.as_mv.col
-                                          - best_ref_mv->as_mv.col)]++;
-          if (mbmi->second_ref_frame) {
-            cpi->MVcount_hp[0][mv_max_hp + (x->partition_info->bmi[i].second_mv.as_mv.row
-                                            - second_best_ref_mv->as_mv.row)]++;
-            cpi->MVcount_hp[1][mv_max_hp + (x->partition_info->bmi[i].second_mv.as_mv.col
-                                            - second_best_ref_mv->as_mv.col)]++;
-          }
-#endif
         } else {
-#if CONFIG_NEWMVENTROPY
           mv.row = (x->partition_info->bmi[i].mv.as_mv.row
                     - best_ref_mv->as_mv.row);
           mv.col = (x->partition_info->bmi[i].mv.as_mv.col
@@ -3116,24 +3085,11 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
             vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv,
                               &cpi->NMVcount, 0);
           }
-#else
-          cpi->MVcount[0][mv_max + ((x->partition_info->bmi[i].mv.as_mv.row
-                                     - best_ref_mv->as_mv.row) >> 1)]++;
-          cpi->MVcount[1][mv_max + ((x->partition_info->bmi[i].mv.as_mv.col
-                                     - best_ref_mv->as_mv.col) >> 1)]++;
-          if (mbmi->second_ref_frame) {
-            cpi->MVcount[0][mv_max + ((x->partition_info->bmi[i].second_mv.as_mv.row
-                                       - second_best_ref_mv->as_mv.row) >> 1)]++;
-            cpi->MVcount[1][mv_max + ((x->partition_info->bmi[i].second_mv.as_mv.col
-                                       - second_best_ref_mv->as_mv.col) >> 1)]++;
-          }
-#endif
         }
       }
     }
   } else if (mbmi->mode == NEWMV) {
     if (x->e_mbd.allow_high_precision_mv) {
-#if CONFIG_NEWMVENTROPY
       mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
       mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
       vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
@@ -3142,20 +3098,7 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
         mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
         vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 1);
       }
-#else
-      cpi->MVcount_hp[0][mv_max_hp + (mbmi->mv[0].as_mv.row
-                                      - best_ref_mv->as_mv.row)]++;
-      cpi->MVcount_hp[1][mv_max_hp + (mbmi->mv[0].as_mv.col
-                                      - best_ref_mv->as_mv.col)]++;
-      if (mbmi->second_ref_frame) {
-        cpi->MVcount_hp[0][mv_max_hp + (mbmi->mv[1].as_mv.row
-                                        - second_best_ref_mv->as_mv.row)]++;
-        cpi->MVcount_hp[1][mv_max_hp + (mbmi->mv[1].as_mv.col
-                                        - second_best_ref_mv->as_mv.col)]++;
-      }
-#endif
     } else {
-#if CONFIG_NEWMVENTROPY
       mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
       mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
       vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
@@ -3164,18 +3107,6 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
         mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
         vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 0);
       }
-#else
-      cpi->MVcount[0][mv_max + ((mbmi->mv[0].as_mv.row
-                                 - best_ref_mv->as_mv.row) >> 1)]++;
-      cpi->MVcount[1][mv_max + ((mbmi->mv[0].as_mv.col
-                                 - best_ref_mv->as_mv.col) >> 1)]++;
-      if (mbmi->second_ref_frame) {
-        cpi->MVcount[0][mv_max + ((mbmi->mv[1].as_mv.row
-                                   - second_best_ref_mv->as_mv.row) >> 1)]++;
-        cpi->MVcount[1][mv_max + ((mbmi->mv[1].as_mv.col
-                                   - second_best_ref_mv->as_mv.col) >> 1)]++;
-      }
-#endif
     }
   }
 }

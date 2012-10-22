@@ -22,11 +22,7 @@ const unsigned char vp8_mbsplit_offset[4][16] = {
 
 static void lower_mv_precision(int_mv *mv, int usehp)
 {
-#if CONFIG_NEWMVENTROPY
   if (!usehp || !vp8_use_nmv_hp(&mv->as_mv)) {
-#else
-  if (!usehp) {
-#endif
     if (mv->as_mv.row & 1)
       mv->as_mv.row += (mv->as_mv.row > 0 ? -1 : 1);
     if (mv->as_mv.col & 1)

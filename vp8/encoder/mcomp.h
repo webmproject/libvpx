@@ -15,21 +15,12 @@
 #include "block.h"
 #include "variance.h"
 
-#if CONFIG_NEWMVENTROPY
 #define MVCOSTS mvjcost, mvcost
 #define MVSADCOSTS mvjsadcost, mvsadcost
 #define DEC_MVCOSTS int *mvjcost, int *mvcost[2]
 #define DEC_MVSADCOSTS int *mvjsadcost, int *mvsadcost[2]
 #define NULLMVCOST NULL, NULL
 #define XMVCOST x->nmvjointcost, (x->e_mbd.allow_high_precision_mv?x->nmvcost_hp:x->nmvcost)
-#else
-#define MVCOSTS mvcost
-#define MVSADCOSTS mvsadcost
-#define DEC_MVCOSTS int *mvcost[2]
-#define DEC_MVSADCOSTS int *mvsadcost[2]
-#define NULLMVCOST NULL
-#define XMVCOST (x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost)
-#endif  /* CONFIG_NEWMVENTROPY */
 
 #ifdef ENTROPY_STATS
 extern void init_mv_ref_counts();

@@ -493,12 +493,7 @@ void vp8_first_pass(VP8_COMP *cpi) {
   {
     int flag[2] = {1, 1};
     vp8_init_mv_probs(cm);
-#if CONFIG_NEWMVENTROPY
     vp8_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
-#else
-    vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cm->fc.mvc, flag);
-    vp8_build_component_cost_table_hp(cpi->mb.mvcost_hp, (const MV_CONTEXT_HP *) cm->fc.mvc_hp, flag);
-#endif
   }
 
   // for each macroblock row in image

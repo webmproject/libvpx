@@ -1355,12 +1355,7 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   xd->mode_info_context = cm->mi;
   xd->prev_mode_info_context = cm->prev_mi;
 
-#if CONFIG_NEWMVENTROPY
   vp8_zero(cpi->NMVcount);
-#else
-  vp8_zero(cpi->MVcount);
-  vp8_zero(cpi->MVcount_hp);
-#endif
   vp8_zero(cpi->coef_counts);
   vp8_zero(cpi->hybrid_coef_counts);
   vp8_zero(cpi->coef_counts_8x8);
