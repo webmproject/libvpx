@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//4T8\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 888,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-22T18:47:24Z",
+      "side": 1,
+      "message": "could be, but I think this hurts readability in this case.",
+      "parentUuid": "AAAAQn//4ao\u003d",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//4ak\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-22T08:22:51Z",
       "side": 1,
       "message": "comment can be merge on line 890 above",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4T0\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-22T18:47:24Z",
+      "side": 1,
+      "message": "removed, doesn\u0027t add any value.",
+      "parentUuid": "AAAAQn//4ak\u003d",
       "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//4Tc\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 893,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-22T18:47:24Z",
+      "side": 1,
+      "message": "the style guide is silent on the issue, is this just personal preference / be consistent? To me, this is overly verbose and documents defined behavior, like writing\n\n  if (x) {\n    if (y) {\n      ...\n\ninstead of\n\n  if (x \u0026\u0026 y) {\n    ...\n\nIn any case, I added a comment here, as the behavior of this loop is definitely unintuitive.",
+      "parentUuid": "AAAAQn//4ag\u003d",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//4aY\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2012-10-22T08:22:51Z",
       "side": 1,
       "message": "const vp8_prob*",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4TY\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-22T18:47:24Z",
+      "side": 1,
+      "message": "*p is written to at line 902.",
+      "parentUuid": "AAAAQn//4aY\u003d",
       "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//4TM\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1794,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-22T18:47:24Z",
+      "side": 1,
+      "message": "Arrays aren\u0027t passed on the stack by copy, they\u0027re passed as pointers.",
+      "parentUuid": "AAAAQn//4aU\u003d",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//4aQ\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 2
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//4S4\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1795,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-22T18:47:24Z",
+      "side": 1,
+      "message": "This change would cascade into a bunch of unrelated places, should be done as a separate commit.",
+      "parentUuid": "AAAAQn//4aQ\u003d",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//4aM\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 2
@@ -115,6 +223,24 @@
       "writtenOn": "2012-10-22T08:22:51Z",
       "side": 1,
       "message": "(TODO(too): avoid capitals in variable names)",
+      "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4JM\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1810,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-22T18:47:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//4aM\u003d",
       "revId": "5979d71e615c599178b371d46fb4cf7f44f999c7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
