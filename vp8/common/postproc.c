@@ -783,7 +783,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 
         if (mi->mbmi.mode == SPLITMV) {
           switch (mi->mbmi.partitioning) {
-            case 0 : {  /* mv_top_bottom */
+            case PARTITIONING_16X8 : {  /* mv_top_bottom */
               union b_mode_info *bmi = &mi->bmi[0];
               MV *mv = &bmi->mv.as_mv;
 
@@ -803,7 +803,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 
               break;
             }
-            case 1 : {  /* mv_left_right */
+            case PARTITIONING_8X16 : {  /* mv_left_right */
               union b_mode_info *bmi = &mi->bmi[0];
               MV *mv = &bmi->mv.as_mv;
 
@@ -823,7 +823,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 
               break;
             }
-            case 2 : {  /* mv_quarters   */
+            case PARTITIONING_8X8 : {  /* mv_quarters   */
               union b_mode_info *bmi = &mi->bmi[0];
               MV *mv = &bmi->mv.as_mv;
 
@@ -858,6 +858,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
               vp8_blit_line(x0 + 12,  x1, y0 + 12,  y1, y_buffer, y_stride);
               break;
             }
+            case PARTITIONING_4X4:
             default : {
               union b_mode_info *bmi = mi->bmi;
               int bx0, by0;

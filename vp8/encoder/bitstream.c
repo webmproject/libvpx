@@ -1219,7 +1219,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
 
 #if CONFIG_TX_SELECT
         if (((rf == INTRA_FRAME && mode <= I8X8_PRED) ||
-             (rf != INTRA_FRAME && mode != SPLITMV)) &&
+             (rf != INTRA_FRAME && !(mode == SPLITMV &&
+                                     mi->partitioning == PARTITIONING_4X4))) &&
             pc->txfm_mode == TX_MODE_SELECT &&
             !((pc->mb_no_coeff_skip && mi->mb_skip_coeff) ||
               (segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
@@ -1227,7 +1228,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
           TX_SIZE sz = mi->txfm_size;
           // FIXME(rbultje) code ternary symbol once all experiments are merged
           vp8_write(bc, sz != TX_4X4, pc->prob_tx[0]);
-          if (sz != TX_4X4 && mode != I8X8_PRED)
+          if (sz != TX_4X4 && mode != I8X8_PRED && mode != SPLITMV)
             vp8_write(bc, sz != TX_8X8, pc->prob_tx[1]);
         }
 #endif

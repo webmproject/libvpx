@@ -384,10 +384,16 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       }
     }
   } else if (mode == SPLITMV) {
-    DEQUANT_INVOKE(&pbi->dequant, idct_add_y_block)
-    (xd->qcoeff, xd->block[0].dequant,
-     xd->predictor, xd->dst.y_buffer,
-     xd->dst.y_stride, xd->eobs);
+    if (tx_size == TX_8X8) {
+      vp8_dequant_idct_add_y_block_8x8_c(xd->qcoeff, xd->block[0].dequant,
+                                         xd->predictor, xd->dst.y_buffer,
+                                         xd->dst.y_stride, xd->eobs, xd);
+    } else {
+      DEQUANT_INVOKE(&pbi->dequant,
+                     idct_add_y_block)(xd->qcoeff, xd->block[0].dequant,
+                                       xd->predictor, xd->dst.y_buffer,
+                                       xd->dst.y_stride, xd->eobs);
+    }
   } else {
     BLOCKD *b = &xd->block[24];
 
@@ -489,8 +495,10 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   if (!xd->mode_info_context->mbmi.encoded_as_sb) {
 #endif
     if ((tx_size == TX_8X8 &&
-         xd->mode_info_context->mbmi.mode != I8X8_PRED)
-        || tx_size == TX_16X16)
+         xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+         xd->mode_info_context->mbmi.mode != SPLITMV)
+        || tx_size == TX_16X16
+       )
       DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block_8x8) //
           (xd->qcoeff + 16 * 16, xd->block[16].dequant,
            xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,

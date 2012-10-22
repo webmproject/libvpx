@@ -2161,7 +2161,9 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
       if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED &&
           mbmi->mode != SPLITMV) {
         cpi->txfm_count[mbmi->txfm_size]++;
-      } else if (mbmi->mode == I8X8_PRED) {
+      } else if (mbmi->mode == I8X8_PRED ||
+                 (mbmi->mode == SPLITMV &&
+                  mbmi->partitioning != PARTITIONING_4X4)) {
         cpi->txfm_count_8x8p[mbmi->txfm_size]++;
       }
     } else
@@ -2169,8 +2171,10 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
     if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED &&
         mbmi->mode != SPLITMV && cpi->common.txfm_mode >= ALLOW_16X16) {
       mbmi->txfm_size = TX_16X16;
-    } else if (mbmi->mode != B_PRED && mbmi->mode != SPLITMV &&
-        cpi->common.txfm_mode >= ALLOW_8X8) {
+    } else if (mbmi->mode != B_PRED &&
+               !(mbmi->mode == SPLITMV &&
+                 mbmi->partitioning == PARTITIONING_4X4) &&
+               cpi->common.txfm_mode >= ALLOW_8X8) {
       mbmi->txfm_size = TX_8X8;
     } else {
       mbmi->txfm_size = TX_4X4;

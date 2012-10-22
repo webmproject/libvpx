@@ -215,9 +215,9 @@ const vp8_tree_index vp8_uv_mode_tree[VP8_UV_MODES * 2 - 2] = {
 };
 
 const vp8_tree_index vp8_mbsplit_tree[6] = {
-  -3, 2,
-  -2, 4,
-  -0, -1
+  -PARTITIONING_4X4,   2,
+  -PARTITIONING_8X8,   4,
+  -PARTITIONING_16X8, -PARTITIONING_8X16,
 };
 
 const vp8_tree_index vp8_mv_ref_tree[8] = {

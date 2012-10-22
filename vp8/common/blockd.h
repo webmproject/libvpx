@@ -175,6 +175,14 @@ typedef enum {
 #define VP8_BINTRAMODES (B_HU_PRED + 1)  /* 10 */
 #define VP8_SUBMVREFS (1 + NEW4X4 - LEFT4X4)
 
+typedef enum {
+  PARTITIONING_16X8 = 0,
+  PARTITIONING_8X16,
+  PARTITIONING_8X8,
+  PARTITIONING_4X4,
+  NB_PARTITIONINGS,
+} SPLITMV_PARTITIONING_TYPE;
+
 /* For keyframes, intra block modes are predicted by the (already decoded)
    modes for the Y blocks to the left and above us; for interframes, there
    is a single probability table. */
@@ -216,7 +224,7 @@ typedef struct {
   int mv_ref_index[MAX_REF_FRAMES];
 #endif
 
-  unsigned char partitioning;
+  SPLITMV_PARTITIONING_TYPE partitioning;
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
   unsigned char need_to_clamp_mvs;
   unsigned char need_to_clamp_secondmv;

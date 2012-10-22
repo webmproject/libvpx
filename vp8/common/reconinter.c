@@ -965,7 +965,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
   BLOCKD *blockd = xd->block;
 
-  if (xd->mode_info_context->mbmi.partitioning < 3) {
+  if (xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4) {
     blockd[ 0].bmi = xd->mode_info_context->bmi[ 0];
     blockd[ 2].bmi = xd->mode_info_context->bmi[ 2];
     blockd[ 8].bmi = xd->mode_info_context->bmi[ 8];
