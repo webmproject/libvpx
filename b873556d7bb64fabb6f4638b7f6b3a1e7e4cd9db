@@ -16,6 +16,24 @@
       "revId": "b873556d7bb64fabb6f4638b7f6b3a1e7e4cd9db",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4N4\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2564,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-22T18:06:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//4Z8\u003d",
+      "revId": "b873556d7bb64fabb6f4638b7f6b3a1e7e4cd9db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
