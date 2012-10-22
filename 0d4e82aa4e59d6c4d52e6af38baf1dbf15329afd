@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//4Xg\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2483,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-22T13:15:27Z",
+      "side": 0,
+      "message": "you might want to remove the definition of BLOCK_4x4 then",
+      "revId": "0d4e82aa4e59d6c4d52e6af38baf1dbf15329afd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
