@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//4fM\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-22T03:48:13Z",
+      "side": 1,
+      "message": "To be honest there\u0027s more to do here...  check out the google style guide on includes and externs.   :) \n\nbut Done",
+      "parentUuid": "AAAAQn//4hA\u003d",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//4g8\u003d",
         "filename": "vp8/encoder/ssim.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-21T19:22:18Z",
       "side": 1,
       "message": "Please clean up style here also:\n\ndouble vp8_ssim2(uint8_t *img1, uint8_t *img2,\n                 int stride_img1, int stride_img2, int width, int height) {",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4e4\u003d",
+        "filename": "vp8/encoder/ssim.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-22T03:48:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//4g8\u003d",
       "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//4e0\u003d",
+        "filename": "vp8/encoder/ssim.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-22T03:48:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//4g0\u003d",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//4gw\u003d",
         "filename": "vp8/encoder/variance.h",
         "patchSetId": 6
@@ -98,6 +152,24 @@
       "writtenOn": "2012-10-21T19:22:18Z",
       "side": 1,
       "message": "Please fix indenting here:\n\ntypedef unsigned int (*vp8_sad_fn_t)(const uint8_t *src_ptr,\n                                     int source_stride,\n                                     const uint8_t *ref_ptr,\n                                     int ref_stride,\n                                     insigned int max_sad);\n\nSame for the others below.",
+      "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//4eg\u003d",
+        "filename": "vp8/encoder/variance.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-22T03:48:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQn//4gs\u003d",
       "revId": "1e8ef705feafd8ce83fb9d07c9cafd876841c14e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
