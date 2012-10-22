@@ -355,37 +355,31 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
     cpi->mb.token_costs[TX_4X4],
     (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs,
     BLOCK_TYPES);
-#if CONFIG_HYBRIDTRANSFORM
   fill_token_costs(
     cpi->mb.hybrid_token_costs[TX_4X4],
     (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11])
     cpi->common.fc.hybrid_coef_probs,
     BLOCK_TYPES);
-#endif
 
   fill_token_costs(
     cpi->mb.token_costs[TX_8X8],
     (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_8x8,
     BLOCK_TYPES_8X8);
-#if CONFIG_HYBRIDTRANSFORM8X8
   fill_token_costs(
     cpi->mb.hybrid_token_costs[TX_8X8],
     (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11])
     cpi->common.fc.hybrid_coef_probs_8x8,
     BLOCK_TYPES_8X8);
-#endif
 
   fill_token_costs(
     cpi->mb.token_costs[TX_16X16],
     (const vp8_prob(*)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_16x16,
     BLOCK_TYPES_16X16);
-#if CONFIG_HYBRIDTRANSFORM16X16
   fill_token_costs(
     cpi->mb.hybrid_token_costs[TX_16X16],
     (const vp8_prob(*)[8][PREV_COEF_CONTEXTS][11])
     cpi->common.fc.hybrid_coef_probs_16x16,
     BLOCK_TYPES_16X16);
-#endif
 
   /*rough estimate for costing*/
   cpi->common.kf_ymode_probs_index = cpi->common.base_qindex >> 4;
@@ -607,9 +601,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
   short *qcoeff_ptr = b->qcoeff;
   MACROBLOCKD *xd = &mb->e_mbd;
   MB_MODE_INFO *mbmi = &mb->e_mbd.mode_info_context->mbmi;
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
   TX_TYPE tx_type = DCT_DCT;
-#endif
   int segment_id = mbmi->segment_id;
 
   switch (tx_size) {
@@ -617,7 +609,6 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
       scan = vp8_default_zig_zag1d;
       band = vp8_coef_bands;
       default_eob = 16;
-#if CONFIG_HYBRIDTRANSFORM
       if (type == PLANE_TYPE_Y_WITH_DC) {
         tx_type = get_tx_type_4x4(xd, b);
         if (tx_type != DCT_DCT) {
@@ -636,14 +627,12 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
           }
         }
       }
-#endif
 
       break;
     case TX_8X8:
       scan = vp8_default_zig_zag1d_8x8;
       band = vp8_coef_bands_8x8;
       default_eob = 64;
-#if CONFIG_HYBRIDTRANSFORM8X8
       if (type == PLANE_TYPE_Y_WITH_DC) {
         BLOCKD *bb;
         int ib = (b - xd->block);
@@ -653,17 +642,14 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
           tx_type = get_tx_type_8x8(xd, bb);
         }
       }
-#endif
       break;
     case TX_16X16:
       scan = vp8_default_zig_zag1d_16x16;
       band = vp8_coef_bands_16x16;
       default_eob = 256;
-#if CONFIG_HYBRIDTRANSFORM16X16
       if (type == PLANE_TYPE_Y_WITH_DC) {
         tx_type = get_tx_type_16x16(xd, b);
       }
-#endif
       break;
     default:
       break;
@@ -675,7 +661,6 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
 
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type != DCT_DCT) {
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
@@ -687,9 +672,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
     if (c < seg_eob)
       cost += mb->hybrid_token_costs[tx_size][type][band[c]]
           [pt][DCT_EOB_TOKEN];
-  } else
-#endif
-  {
+  } else {
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp8_dct_value_tokens_ptr[v].Token;
@@ -870,9 +853,7 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   MACROBLOCKD *xd = &mb->e_mbd;
   BLOCKD *b  = &mb->e_mbd.block[0];
   BLOCK  *be = &mb->block[0];
-#if CONFIG_HYBRIDTRANSFORM16X16
   TX_TYPE tx_type;
-#endif
 
   ENCODEMB_INVOKE(&rtcd->encodemb, submby)(
     mb->src_diff,
@@ -880,24 +861,18 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
     mb->e_mbd.predictor,
     mb->block[0].src_stride);
 
-#if CONFIG_HYBRIDTRANSFORM16X16
   tx_type = get_tx_type_16x16(xd, b);
   if (tx_type != DCT_DCT) {
     vp8_fht_c(be->src_diff, be->coeff, 32, tx_type, 16);
   } else
     vp8_transform_mby_16x16(mb);
-#else
-  vp8_transform_mby_16x16(mb);
-#endif
 
   vp8_quantize_mby_16x16(mb);
-#if CONFIG_HYBRIDTRANSFORM16X16
   // TODO(jingning) is it possible to quickly determine whether to force
   //                trailing coefficients to be zero, instead of running trellis
   //                optimization in the rate-distortion optimization loop?
   if (mb->e_mbd.mode_info_context->mbmi.mode < I8X8_PRED)
     vp8_optimize_mby_16x16(mb, rtcd);
-#endif
 
   d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 0);
 
@@ -1155,10 +1130,8 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
 
   ENTROPY_CONTEXT ta = *a, tempa = *a;
   ENTROPY_CONTEXT tl = *l, templ = *l;
-#if CONFIG_HYBRIDTRANSFORM
   TX_TYPE tx_type = DCT_DCT;
   TX_TYPE best_tx_type = DCT_DCT;
-#endif
   /*
    * The predictor buffer is a 2d buffer with a stride of 16.  Create
    * a temp buffer that meets the stride requirements, but we are only
@@ -1191,7 +1164,6 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
       ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), subb)(be, b, 16);
 
       b->bmi.as_mode.first = mode;
-#if CONFIG_HYBRIDTRANSFORM
       tx_type = get_tx_type_4x4(xd, b);
       if (tx_type != DCT_DCT) {
         vp8_fht_c(be->src_diff, be->coeff, 32, tx_type, 4);
@@ -1200,10 +1172,6 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
         x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
         x->quantize_b_4x4(be, b);
       }
-#else
-      x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
-      x->quantize_b_4x4(be, b);
-#endif
 
       tempa = ta;
       templ = tl;
@@ -1221,9 +1189,7 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
         *bestdistortion = distortion;
         best_rd = this_rd;
         *best_mode = mode;
-#if CONFIG_HYBRIDTRANSFORM
         best_tx_type = tx_type;
-#endif
 
 #if CONFIG_COMP_INTRA_PRED
         *best_second_mode = mode2;
@@ -1242,17 +1208,12 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
   b->bmi.as_mode.second = (B_PREDICTION_MODE)(*best_second_mode);
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM
   // inverse transform
   if (best_tx_type != DCT_DCT)
     vp8_ihtllm_c(best_dqcoeff, b->diff, 32, best_tx_type, 4);
   else
     IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(
         best_dqcoeff, b->diff, 32);
-#else
-  IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(
-      best_dqcoeff, b->diff, 32);
-#endif
 
   vp8_recon_b(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 
@@ -1535,15 +1496,11 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
       vp8_subtract_4b_c(be, b, 16);
 
       if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
-#if CONFIG_HYBRIDTRANSFORM8X8
         TX_TYPE tx_type = get_tx_type_8x8(xd, b);
         if (tx_type != DCT_DCT)
           vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32, tx_type, 8);
         else
           x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
-#else
-        x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
-#endif
         x->quantize_b_8x8(x->block + idx, xd->block + idx);
 
         // compute quantization mse of 8x8 block

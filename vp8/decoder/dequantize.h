@@ -76,7 +76,6 @@ extern prototype_dequant_block(vp8_dequant_block);
 #endif
 extern prototype_dequant_idct_add(vp8_dequant_idct_add);
 
-#if CONFIG_HYBRIDTRANSFORM
 // declare dequantization and inverse transform module of hybrid transform decoder
 #ifndef vp8_ht_dequant_idct_add
 #define vp8_ht_dequant_idct_add vp8_ht_dequant_idct_add_c
@@ -85,7 +84,6 @@ extern void vp8_ht_dequant_idct_add(TX_TYPE tx_type, short *input, short *dq,
                                     unsigned char *pred, unsigned char *dest,
                                     int pitch, int stride);
 
-#endif
 
 #ifndef vp8_dequant_dc_idct_add
 #define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_add_c
@@ -191,17 +189,13 @@ typedef struct {
 #define DEQUANT_INVOKE(ctx,fn) vp8_dequant_##fn
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8
 void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
                                    unsigned char *pred, unsigned char *dest,
                                    int pitch, int stride);
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM16X16
 void vp8_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
                                      unsigned char *pred, unsigned char *dest,
                                      int pitch, int stride);
-#endif
 
 #if CONFIG_SUPERBLOCKS
 void vp8_dequant_dc_idct_add_y_block_8x8_inplace_c(short *q, short *dq,

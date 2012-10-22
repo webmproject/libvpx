@@ -304,7 +304,6 @@ void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       scan = vp8_default_zig_zag1d;
       bands = vp8_coef_bands;
       default_eob = 16;
-#if CONFIG_HYBRIDTRANSFORM
       // TODO: this isn't called (for intra4x4 modes), but will be left in
       // since it could be used later
       {
@@ -327,7 +326,6 @@ void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
           scan = vp8_default_zig_zag1d;
         }
       }
-#endif
       break;
     case TX_8X8:
       scan = vp8_default_zig_zag1d_8x8;

@@ -13,9 +13,9 @@
 
 
 static const vp8_prob default_coef_probs [BLOCK_TYPES]
-[COEF_BANDS]
-[PREV_COEF_CONTEXTS]
-[ENTROPY_NODES] = {
+                                         [COEF_BANDS]
+                                         [PREV_COEF_CONTEXTS]
+                                         [ENTROPY_NODES] = {
   {
     /* Block Type ( 0 ) */
     {
@@ -254,11 +254,10 @@ static const vp8_prob default_coef_probs [BLOCK_TYPES]
   }
 };
 
-#if CONFIG_HYBRIDTRANSFORM
 static const vp8_prob default_hybrid_coef_probs [BLOCK_TYPES]
-[COEF_BANDS]
-[PREV_COEF_CONTEXTS]
-[ENTROPY_NODES] = {
+                                                [COEF_BANDS]
+                                                [PREV_COEF_CONTEXTS]
+                                                [ENTROPY_NODES] = {
   {
     /* Block Type ( 0 ) */
     {
@@ -496,7 +495,6 @@ static const vp8_prob default_hybrid_coef_probs [BLOCK_TYPES]
     }
   }
 };
-#endif
 
 static const vp8_prob
 default_coef_probs_8x8[BLOCK_TYPES_8X8]
@@ -731,12 +729,11 @@ default_coef_probs_8x8[BLOCK_TYPES_8X8]
   }
 };
 
-#if CONFIG_HYBRIDTRANSFORM8X8
 static const vp8_prob
 default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
-                                 [COEF_BANDS]
-                                 [PREV_COEF_CONTEXTS]
-                                 [ENTROPY_NODES] = {
+                             [COEF_BANDS]
+                             [PREV_COEF_CONTEXTS]
+                             [ENTROPY_NODES] = {
   {
     /* block Type 0 */
     {
@@ -964,7 +961,6 @@ default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
     }
   }
 };
-#endif
 
 static const vp8_prob
   default_coef_probs_16x16[BLOCK_TYPES_16X16]
@@ -1173,7 +1169,6 @@ static const vp8_prob
   }
 };
 
-#if CONFIG_HYBRIDTRANSFORM16X16
 static const vp8_prob
   default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
                                  [COEF_BANDS]
@@ -1380,4 +1375,3 @@ static const vp8_prob
     }
   }
 };
-#endif

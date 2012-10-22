@@ -21,7 +21,6 @@
 extern int enc_debug;
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM
 void vp8_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d, TX_TYPE tx_type) {
   int i, rc, eob;
   int zbin;
@@ -85,7 +84,6 @@ void vp8_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d, TX_TYPE tx_type) {
 
   d->eob = eob + 1;
 }
-#endif
 
 void vp8_regular_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
   int i, rc, eob;

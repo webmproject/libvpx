@@ -135,14 +135,12 @@ typedef enum {
   TX_SIZE_MAX                  // Number of different transforms available
 } TX_SIZE;
 
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 typedef enum {
   DCT_DCT   = 0,                      // DCT  in both horizontal and vertical
   ADST_DCT  = 1,                      // ADST in horizontal, DCT in vertical
   DCT_ADST  = 2,                      // DCT  in horizontal, ADST in vertical
   ADST_ADST = 3                       // ADST in both directions
 } TX_TYPE;
-#endif
 
 #define VP8_YMODES  (B_PRED + 1)
 #define VP8_UV_MODES (TM_PRED + 1)
@@ -184,9 +182,7 @@ typedef enum {
 union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
     TX_TYPE           tx_type;
-#endif
 
 #if CONFIG_COMP_INTRA_PRED
     B_PREDICTION_MODE second;
@@ -388,17 +384,11 @@ typedef struct MacroBlockD {
 
 } MACROBLOCKD;
 
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 #define ACTIVE_HT 110                // quantization stepsize threshold
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8
 #define ACTIVE_HT8 300
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM16X16
 #define ACTIVE_HT16 300
-#endif
 
 // convert MB_PREDICTION_MODE to B_PREDICTION_MODE
 static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
@@ -442,7 +432,6 @@ static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
   return b_mode;
 }
 
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
 // transform mapping
 static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
   // map transform type
@@ -470,9 +459,7 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
   }
   return tx_type;
 }
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM
 static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
   TX_TYPE tx_type = DCT_DCT;
   if (xd->mode_info_context->mbmi.mode == B_PRED &&
@@ -481,9 +468,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
   }
   return tx_type;
 }
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8
 static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
   TX_TYPE tx_type = DCT_DCT;
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
@@ -492,9 +477,7 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
   }
   return tx_type;
 }
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM16X16
 static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
   TX_TYPE tx_type = DCT_DCT;
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
@@ -503,34 +486,24 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
   }
   return tx_type;
 }
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || \
-    CONFIG_HYBRIDTRANSFORM16X16
 static TX_TYPE get_tx_type(const MACROBLOCKD *xd, const BLOCKD *b) {
   TX_TYPE tx_type = DCT_DCT;
   int ib = (b - xd->block);
   if (ib >= 16)
     return tx_type;
-#if CONFIG_HYBRIDTRANSFORM16X16
   if (xd->mode_info_context->mbmi.txfm_size == TX_16X16) {
     tx_type = get_tx_type_16x16(xd, b);
   }
-#endif
-#if CONFIG_HYBRIDTRANSFORM8X8
   if (xd->mode_info_context->mbmi.txfm_size  == TX_8X8) {
     ib = (ib & 8) + ((ib & 4) >> 1);
     tx_type = get_tx_type_8x8(xd, &xd->block[ib]);
   }
-#endif
-#if CONFIG_HYBRIDTRANSFORM
   if (xd->mode_info_context->mbmi.txfm_size  == TX_4X4) {
     tx_type = get_tx_type_4x4(xd, b);
   }
-#endif
   return tx_type;
 }
-#endif
 
 extern void vp8_build_block_doffsets(MACROBLOCKD *xd);
 extern void vp8_setup_block_dptrs(MACROBLOCKD *xd);

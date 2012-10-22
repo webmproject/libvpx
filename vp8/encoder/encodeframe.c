@@ -1362,17 +1362,11 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   vp8_zero(cpi->MVcount_hp);
 #endif
   vp8_zero(cpi->coef_counts);
-#if CONFIG_HYBRIDTRANSFORM
   vp8_zero(cpi->hybrid_coef_counts);
-#endif
   vp8_zero(cpi->coef_counts_8x8);
-#if CONFIG_HYBRIDTRANSFORM8X8
   vp8_zero(cpi->hybrid_coef_counts_8x8);
-#endif
   vp8_zero(cpi->coef_counts_16x16);
-#if CONFIG_HYBRIDTRANSFORM16X16
   vp8_zero(cpi->hybrid_coef_counts_16x16);
-#endif
 
   vp8cx_frame_init_quantizer(cpi);
 
