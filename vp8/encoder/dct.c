@@ -14,8 +14,6 @@
 #include "vp8/common/idct.h"
 #include "vp8/common/systemdependent.h"
 
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
-
 #include "vp8/common/blockd.h"
 
 // TODO: these transforms can be converted into integer forms to reduce
@@ -71,9 +69,7 @@ float adst_8[64] = {
   0.175227946595735,  -0.326790388032145,   0.434217976756762,  -0.483002021635509,
   0.466553967085785,  -0.387095214016348,   0.255357107325376,  -0.089131608307532
 };
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM16X16 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8
 float dct_16[256] = {
   0.250000,  0.250000,  0.250000,  0.250000,  0.250000,  0.250000,  0.250000,  0.250000,
   0.250000,  0.250000,  0.250000,  0.250000,  0.250000,  0.250000,  0.250000,  0.250000,
@@ -143,7 +139,6 @@ float adst_16[256] = {
   0.065889, -0.129396,  0.188227, -0.240255,  0.283599, -0.316693,  0.338341, -0.347761,
   0.344612, -0.329007,  0.301511, -0.263118,  0.215215, -0.159534,  0.098087, -0.033094
 };
-#endif
 
 static const int xC1S7 = 16069;
 static const int xC2S6 = 15137;
@@ -400,7 +395,6 @@ void vp8_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
 
 }
 
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_fht_c(short *input, short *output, int pitch,
                TX_TYPE tx_type, int tx_dim) {
 
@@ -518,7 +512,6 @@ void vp8_fht_c(short *input, short *output, int pitch,
   }
   vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
-#endif
 
 void vp8_short_fdct4x4_c(short *input, short *output, int pitch) {
   int i;

@@ -26,38 +26,26 @@
 
 #ifdef ENTROPY_STATS
 INT64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#if CONFIG_HYBRIDTRANSFORM
 INT64 hybrid_context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#endif
 
 INT64 context_counters_8x8[BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#if CONFIG_HYBRIDTRANSFORM8X8
 INT64 hybrid_context_counters_8x8[BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#endif
 
 INT64 context_counters_16x16[BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#if CONFIG_HYBRIDTRANSFORM16X16
 INT64 hybrid_context_counters_16x16[BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#endif
 
 extern unsigned int tree_update_hist[BLOCK_TYPES][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES][2];
-#if CONFIG_HYBRIDTRANSFORM
 extern unsigned int hybrid_tree_update_hist[BLOCK_TYPES][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES][2];
-#endif
 extern unsigned int tree_update_hist_8x8[BLOCK_TYPES_8X8][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
-#if CONFIG_HYBRIDTRANSFORM8X8
 extern unsigned int hybrid_tree_update_hist_8x8[BLOCK_TYPES_8X8][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
-#endif
 extern unsigned int tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
-#if CONFIG_HYBRIDTRANSFORM16X16
 extern unsigned int hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
-#endif
 #endif  /* ENTROPY_STATS */
 
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
@@ -134,9 +122,7 @@ static void tokenize1st_order_b_16x16(MACROBLOCKD *xd,
   const int eob = b->eob;     /* one beyond last nonzero coeff */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   const short *qcoeff_ptr = b->qcoeff;
-#if CONFIG_HYBRIDTRANSFORM16X16
   TX_TYPE tx_type = get_tx_type(xd, b);
-#endif
   int seg_eob = 256;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
@@ -162,22 +148,18 @@ static void tokenize1st_order_b_16x16(MACROBLOCKD *xd,
     }
 
     t->Token = x;
-#if CONFIG_HYBRIDTRANSFORM16X16
     if (tx_type != DCT_DCT)
       t->context_tree = cpi->common.fc.hybrid_coef_probs_16x16[type][band][pt];
     else
-#endif
       t->context_tree = cpi->common.fc.coef_probs_16x16[type][band][pt];
 
     t->skip_eob_node = pt == 0 && ((band > 0 && type != PLANE_TYPE_Y_NO_DC) ||
                                    (band > 1 && type == PLANE_TYPE_Y_NO_DC));
     assert(vp8_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
     if (!dry_run) {
-#if CONFIG_HYBRIDTRANSFORM16X16
       if (tx_type != DCT_DCT)
         ++cpi->hybrid_coef_counts_16x16[type][band][pt][x];
       else
-#endif
         ++cpi->coef_counts_16x16[type][band][pt][x];
     }
     pt = vp8_prev_token_class[x];
@@ -310,9 +292,7 @@ static void tokenize1st_order_b_8x8(MACROBLOCKD *xd,
   int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0; /* start at DC unless type 0 */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   const short *qcoeff_ptr = b->qcoeff;
-#if CONFIG_HYBRIDTRANSFORM8X8
   TX_TYPE tx_type = get_tx_type(xd, b);
-#endif
   const int eob = b->eob;
   int seg_eob = 64;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
@@ -338,11 +318,9 @@ static void tokenize1st_order_b_8x8(MACROBLOCKD *xd,
       x = DCT_EOB_TOKEN;
 
     t->Token = x;
-#if CONFIG_HYBRIDTRANSFORM8X8
     if (tx_type != DCT_DCT)
       t->context_tree = cpi->common.fc.hybrid_coef_probs_8x8[type][band][pt];
     else
-#endif
       t->context_tree = cpi->common.fc.coef_probs_8x8[type][band][pt];
 
     t->skip_eob_node = pt == 0 && ((band > 0 && type != PLANE_TYPE_Y_NO_DC) ||
@@ -350,11 +328,9 @@ static void tokenize1st_order_b_8x8(MACROBLOCKD *xd,
     assert(vp8_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
 
     if (!dry_run) {
-#if CONFIG_HYBRIDTRANSFORM8X8
       if (tx_type != DCT_DCT)
         ++cpi->hybrid_coef_counts_8x8[type][band][pt][x];
       else
-#endif
         ++cpi->coef_counts_8x8[type][band][pt][x];
     }
     pt = vp8_prev_token_class[x];
@@ -451,7 +427,6 @@ static void tokenize1st_order_b_4x4(MACROBLOCKD *xd,
     const int16_t *qcoeff_ptr = b->qcoeff;
     int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0;
 
-#if CONFIG_HYBRIDTRANSFORM
     TX_TYPE tx_type = get_tx_type(xd, &xd->block[block]);
     switch (tx_type) {
       case ADST_DCT:
@@ -464,7 +439,6 @@ static void tokenize1st_order_b_4x4(MACROBLOCKD *xd,
         pt_scan = vp8_default_zig_zag1d;
         break;
     }
-#endif
     a = (ENTROPY_CONTEXT *)xd->above_context + vp8_block2above[block];
     l = (ENTROPY_CONTEXT *)xd->left_context + vp8_block2left[block];
     VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
@@ -485,22 +459,18 @@ static void tokenize1st_order_b_4x4(MACROBLOCKD *xd,
         token = DCT_EOB_TOKEN;
 
       t->Token = token;
-#if CONFIG_HYBRIDTRANSFORM
       if (tx_type != DCT_DCT)
         t->context_tree = cpi->common.fc.hybrid_coef_probs[type][band][pt];
       else
-#endif
         t->context_tree = cpi->common.fc.coef_probs[type][band][pt];
 
       t->skip_eob_node = pt == 0 && ((band > 0 && type != PLANE_TYPE_Y_NO_DC) ||
                                      (band > 1 && type == PLANE_TYPE_Y_NO_DC));
       assert(vp8_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
       if (!dry_run) {
-#if CONFIG_HYBRIDTRANSFORM
         if (tx_type != DCT_DCT)
           ++cpi->hybrid_coef_counts[type][band][pt][token];
         else
-#endif
           ++cpi->coef_counts[type][band][pt][token];
       }
       pt = vp8_prev_token_class[token];
@@ -995,30 +965,24 @@ static __inline void stuff1st_order_b_8x8(MACROBLOCKD *xd,
                                           int dry_run) {
   int pt; /* near block/prev token context index */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
-#if CONFIG_HYBRIDTRANSFORM8X8
   TX_TYPE tx_type = get_tx_type(xd, b);
-#endif
   const int band = vp8_coef_bands_8x8[(type == PLANE_TYPE_Y_NO_DC) ? 1 : 0];
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   (void) b;
 
   t->Token = DCT_EOB_TOKEN;
-#if CONFIG_HYBRIDTRANSFORM8X8
   if (tx_type != DCT_DCT)
     t->context_tree = cpi->common.fc.hybrid_coef_probs_8x8[type][band][pt];
   else
-#endif
     t->context_tree = cpi->common.fc.coef_probs_8x8[type][band][pt];
   // t->section = 8;
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
   if (!dry_run) {
-#if CONFIG_HYBRIDTRANSFORM8X8
     if (tx_type == DCT_DCT)
       ++cpi->hybrid_coef_counts_8x8[type][band][pt][DCT_EOB_TOKEN];
     else
-#endif
       ++cpi->coef_counts_8x8[type][band][pt][DCT_EOB_TOKEN];
   }
   pt = 0; /* 0 <-> all coeff data is zero */
@@ -1100,29 +1064,23 @@ static __inline void stuff1st_order_b_16x16(MACROBLOCKD *xd,
                                             int dry_run) {
   int pt; /* near block/prev token context index */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
-#if CONFIG_HYBRIDTRANSFORM16X16
   TX_TYPE tx_type = get_tx_type(xd, b);
-#endif
   const int band = vp8_coef_bands_16x16[(type == PLANE_TYPE_Y_NO_DC) ? 1 : 0];
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   (void) b;
 
   t->Token = DCT_EOB_TOKEN;
-#if CONFIG_HYBRIDTRANSFORM16X16
   if (tx_type != DCT_DCT)
     t->context_tree = cpi->common.fc.hybrid_coef_probs_16x16[type][band][pt];
   else
-#endif
     t->context_tree = cpi->common.fc.coef_probs_16x16[type][band][pt];
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
   if (!dry_run) {
-#if CONFIG_HYBRIDTRANSFORM16X16
     if (tx_type != DCT_DCT)
       ++cpi->hybrid_coef_counts_16x16[type][band][pt][DCT_EOB_TOKEN];
     else
-#endif
       ++cpi->coef_counts_16x16[type][band][pt][DCT_EOB_TOKEN];
   }
   pt = 0; /* 0 <-> all coeff data is zero */
@@ -1189,28 +1147,22 @@ static __inline void stuff1st_order_b_4x4(MACROBLOCKD *xd,
                                           int dry_run) {
   int pt; /* near block/prev token context index */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
-#if CONFIG_HYBRIDTRANSFORM
   TX_TYPE tx_type = get_tx_type(xd, b);
-#endif
   const int band = vp8_coef_bands[(type == PLANE_TYPE_Y_NO_DC) ? 1 : 0];
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
   t->Token = DCT_EOB_TOKEN;
-#if CONFIG_HYBRIDTRANSFORM
   if (tx_type != DCT_DCT)
     t->context_tree = cpi->common.fc.hybrid_coef_probs[type][band][pt];
   else
-#endif
     t->context_tree = cpi->common.fc.coef_probs[type][band][pt];
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
   if (!dry_run) {
-#if CONFIG_HYBRIDTRANSFORM
     if (tx_type != DCT_DCT)
       ++cpi->hybrid_coef_counts[type][band][pt][DCT_EOB_TOKEN];
     else
-#endif
       ++cpi->coef_counts[type][band][pt][DCT_EOB_TOKEN];
   }
   pt = 0; /* 0 <-> all coeff data is zero */

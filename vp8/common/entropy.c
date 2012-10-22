@@ -64,8 +64,6 @@ DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]) = {
   7, 11, 14, 15,
 };
 
-
-#if CONFIG_HYBRIDTRANSFORM
 DECLARE_ALIGNED(16, const int, vp8_col_scan[16]) = {
   0, 4,  8, 12,
   1, 5,  9, 13,
@@ -78,7 +76,6 @@ DECLARE_ALIGNED(16, const int, vp8_row_scan[16]) = {
   8,   9, 10, 11,
   12, 13, 14, 15
 };
-#endif
 
 
 DECLARE_ALIGNED(64, const int, vp8_coef_bands_8x8[64]) = { 0, 1, 2, 3, 5, 4, 4, 5,
@@ -208,25 +205,19 @@ vp8_extra_bit_struct vp8_extra_bits[12] = {
 void vp8_default_coef_probs(VP8_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
              sizeof(pc->fc.coef_probs));
-#if CONFIG_HYBRIDTRANSFORM
   vpx_memcpy(pc->fc.hybrid_coef_probs, default_hybrid_coef_probs,
              sizeof(pc->fc.hybrid_coef_probs));
-#endif
 
   vpx_memcpy(pc->fc.coef_probs_8x8, default_coef_probs_8x8,
              sizeof(pc->fc.coef_probs_8x8));
-#if CONFIG_HYBRIDTRANSFORM8X8
   vpx_memcpy(pc->fc.hybrid_coef_probs_8x8, default_hybrid_coef_probs_8x8,
              sizeof(pc->fc.hybrid_coef_probs_8x8));
-#endif
 
   vpx_memcpy(pc->fc.coef_probs_16x16, default_coef_probs_16x16,
              sizeof(pc->fc.coef_probs_16x16));
-#if CONFIG_HYBRIDTRANSFORM16X16
   vpx_memcpy(pc->fc.hybrid_coef_probs_16x16,
              default_hybrid_coef_probs_16x16,
              sizeof(pc->fc.hybrid_coef_probs_16x16));
-#endif
 }
 
 void vp8_coef_tree_initialize() {
@@ -344,7 +335,6 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
         }
       }
 
-#if CONFIG_HYBRIDTRANSFORM
   for (i = 0; i < BLOCK_TYPES; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -366,7 +356,6 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
           else cm->fc.hybrid_coef_probs[i][j][k][t] = prob;
         }
       }
-#endif
 
   for (i = 0; i < BLOCK_TYPES_8X8; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
@@ -390,7 +379,6 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
         }
       }
 
-#if CONFIG_HYBRIDTRANSFORM8X8
   for (i = 0; i < BLOCK_TYPES_8X8; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -413,7 +401,6 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
           else cm->fc.hybrid_coef_probs_8x8[i][j][k][t] = prob;
         }
       }
-#endif
 
   for (i = 0; i < BLOCK_TYPES_16X16; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
@@ -437,7 +424,6 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
         }
       }
 
-#if CONFIG_HYBRIDTRANSFORM16X16
   for (i = 0; i < BLOCK_TYPES_16X16; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -458,5 +444,4 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
           else cm->fc.hybrid_coef_probs_16x16[i][j][k][t] = prob;
         }
       }
-#endif
 }

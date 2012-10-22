@@ -42,7 +42,6 @@ void vp8_dequantize_b_c(BLOCKD *d) {
 }
 
 
-#if CONFIG_HYBRIDTRANSFORM
 void vp8_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
                                unsigned char *pred, unsigned char *dest,
                                int pitch, int stride) {
@@ -77,9 +76,7 @@ void vp8_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
       pred += pitch;
   }
 }
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8
 void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
                                    unsigned char *pred, unsigned char *dest,
                                    int pitch, int stride) {
@@ -123,7 +120,6 @@ void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
     pred = origpred + (b + 1) / 2 * 4 * pitch + ((b + 1) % 2) * 4;
   }
 }
-#endif
 
 void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
                             unsigned char *dest, int pitch, int stride) {
@@ -468,7 +464,6 @@ void vp8_dequant_dc_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
 #endif
 }
 
-#if CONFIG_HYBRIDTRANSFORM16X16
 void vp8_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
                                      unsigned char *pred, unsigned char *dest,
                                      int pitch, int stride) {
@@ -507,7 +502,6 @@ void vp8_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
     pred += pitch;
   }
 }
-#endif
 
 void vp8_dequant_idct_add_16x16_c(short *input, short *dq, unsigned char *pred,
                                   unsigned char *dest, int pitch, int stride) {

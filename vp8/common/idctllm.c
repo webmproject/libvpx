@@ -26,9 +26,7 @@
 #include "vp8/common/idct.h"
 #include "vp8/common/systemdependent.h"
 
-#if CONFIG_HYBRIDTRANSFORM
 #include "vp8/common/blockd.h"
-#endif
 
 #include <math.h>
 
@@ -38,7 +36,6 @@ static const int rounding = 0;
 
 // TODO: these transforms can be further converted into integer forms
 //       for complexity optimization
-#if CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM16X16
 float idct_4[16] = {
   0.500000000000000,   0.653281482438188,   0.500000000000000,   0.270598050073099,
   0.500000000000000,   0.270598050073099,  -0.500000000000000,  -0.653281482438188,
@@ -90,9 +87,7 @@ float iadst_8[64] = {
   0.483002021635509,  -0.466553967085785,   0.434217976756762,  -0.387095214016348,
   0.326790388032145,  -0.255357107325375,   0.175227946595736,  -0.089131608307532
 };
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM16X16 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM8X8
 float idct_16[256] = {
   0.250000,  0.351851,  0.346760,  0.338330,  0.326641,  0.311806,  0.293969,  0.273300,
   0.250000,  0.224292,  0.196424,  0.166664,  0.135299,  0.102631,  0.068975,  0.034654,
@@ -162,9 +157,7 @@ float iadst_16[256] = {
   0.347761, -0.344612,  0.338341, -0.329007,  0.316693, -0.301511,  0.283599, -0.263118,
   0.240255, -0.215215,  0.188227, -0.159534,  0.129396, -0.098087,  0.065889, -0.033094
 };
-#endif
 
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_ihtllm_c(short *input, short *output, int pitch,
                   TX_TYPE tx_type, int tx_dim) {
 
@@ -289,7 +282,6 @@ void vp8_ihtllm_c(short *input, short *output, int pitch,
   }
   vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
-#endif
 
 void vp8_short_idct4x4llm_c(short *input, short *output, int pitch) {
   int i;

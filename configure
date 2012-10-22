@@ -221,12 +221,9 @@ EXPERIMENT_LIST="
     superblocks
     pred_filter
     lossless
-    hybridtransform
-    hybridtransform8x8
     switchable_interp
     newbestrefmv
     new_mvref
-    hybridtransform16x16
     newmventropy
     tx_select
 "

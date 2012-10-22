@@ -26,10 +26,8 @@
 #endif
 
 
-#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM || CONFIG_HYBRIDTRANSFORM16X16
 void vp8_fht_c(short *input, short *output, int pitch,
                TX_TYPE tx_type, int tx_dim);
-#endif
 
 #ifndef vp8_fdct_short16x16
 #define vp8_fdct_short16x16 vp8_short_fdct16x16_c

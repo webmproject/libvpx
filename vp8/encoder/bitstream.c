@@ -45,32 +45,26 @@ unsigned int tree_update_hist [BLOCK_TYPES]
                               [COEF_BANDS]
                               [PREV_COEF_CONTEXTS]
                               [ENTROPY_NODES][2];
-#if CONFIG_HYBRIDTRANSFORM
 unsigned int hybrid_tree_update_hist [BLOCK_TYPES]
                                      [COEF_BANDS]
                                      [PREV_COEF_CONTEXTS]
                                      [ENTROPY_NODES][2];
-#endif
 unsigned int tree_update_hist_8x8 [BLOCK_TYPES_8X8]
                                   [COEF_BANDS]
                                   [PREV_COEF_CONTEXTS]
                                   [ENTROPY_NODES] [2];
-#if CONFIG_HYBRIDTRANSFORM8X8
 unsigned int hybrid_tree_update_hist_8x8 [BLOCK_TYPES_8X8]
                                          [COEF_BANDS]
                                          [PREV_COEF_CONTEXTS]
                                          [ENTROPY_NODES] [2];
-#endif
 unsigned int tree_update_hist_16x16 [BLOCK_TYPES_16X16]
                                     [COEF_BANDS]
                                     [PREV_COEF_CONTEXTS]
                                     [ENTROPY_NODES] [2];
-#if CONFIG_HYBRIDTRANSFORM16X16
 unsigned int hybrid_tree_update_hist_16x16 [BLOCK_TYPES_16X16]
                                            [COEF_BANDS]
                                            [PREV_COEF_CONTEXTS]
                                            [ENTROPY_NODES] [2];
-#endif
 
 extern unsigned int active_section;
 #endif
@@ -1498,7 +1492,6 @@ void build_coeff_contexts(VP8_COMP *cpi) {
       }
     }
   }
-#if CONFIG_HYBRIDTRANSFORM
   for (i = 0; i < BLOCK_TYPES; ++i) {
     for (j = 0; j < COEF_BANDS; ++j) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -1519,8 +1512,6 @@ void build_coeff_contexts(VP8_COMP *cpi) {
       }
     }
   }
-#endif
-
 
   if (cpi->common.txfm_mode != ONLY_4X4) {
     for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
@@ -1547,7 +1538,6 @@ void build_coeff_contexts(VP8_COMP *cpi) {
         }
       }
     }
-#if CONFIG_HYBRIDTRANSFORM8X8
     for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
       for (j = 0; j < COEF_BANDS; ++j) {
         for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -1572,7 +1562,6 @@ void build_coeff_contexts(VP8_COMP *cpi) {
         }
       }
     }
-#endif
   }
 
   if (cpi->common.txfm_mode > ALLOW_8X8) {
@@ -1595,7 +1584,6 @@ void build_coeff_contexts(VP8_COMP *cpi) {
       }
     }
   }
-#if CONFIG_HYBRIDTRANSFORM16X16
   for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
     for (j = 0; j < COEF_BANDS; ++j) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
@@ -1614,7 +1602,6 @@ void build_coeff_contexts(VP8_COMP *cpi) {
       }
     }
   }
-#endif
 }
 
 #if 0
@@ -1887,7 +1874,6 @@ static void update_coef_probs(VP8_COMP* const cpi, vp8_writer* const bc) {
     }
   }
 
-#if CONFIG_HYBRIDTRANSFORM
   savings = 0;
   update[0] = update[1] = 0;
   for (i = 0; i < BLOCK_TYPES; ++i) {
@@ -1976,7 +1962,6 @@ static void update_coef_probs(VP8_COMP* const cpi, vp8_writer* const bc) {
       }
     }
   }
-#endif
 
   /* do not do this if not even allowed */
   if (cpi->common.txfm_mode != ONLY_4X4) {
@@ -2054,7 +2039,6 @@ static void update_coef_probs(VP8_COMP* const cpi, vp8_writer* const bc) {
         }
       }
     }
-#if CONFIG_HYBRIDTRANSFORM8X8
     update[0] = update[1] = 0;
     savings = 0;
     for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
@@ -2128,7 +2112,6 @@ static void update_coef_probs(VP8_COMP* const cpi, vp8_writer* const bc) {
         }
       }
     }
-#endif
   }
 
   if (cpi->common.txfm_mode > ALLOW_8X8) {
@@ -2206,7 +2189,6 @@ static void update_coef_probs(VP8_COMP* const cpi, vp8_writer* const bc) {
       }
     }
   }
-#if CONFIG_HYBRIDTRANSFORM16X16
   update[0] = update[1] = 0;
   savings = 0;
   for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
@@ -2280,7 +2262,6 @@ static void update_coef_probs(VP8_COMP* const cpi, vp8_writer* const bc) {
       }
     }
   }
-#endif
   }
 }
 
@@ -2731,17 +2712,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   vp8_clear_system_state();  // __asm emms;
 
   vp8_copy(cpi->common.fc.pre_coef_probs, cpi->common.fc.coef_probs);
-#if CONFIG_HYBRIDTRANSFORM
   vp8_copy(cpi->common.fc.pre_hybrid_coef_probs, cpi->common.fc.hybrid_coef_probs);
-#endif
   vp8_copy(cpi->common.fc.pre_coef_probs_8x8, cpi->common.fc.coef_probs_8x8);
-#if CONFIG_HYBRIDTRANSFORM8X8
   vp8_copy(cpi->common.fc.pre_hybrid_coef_probs_8x8, cpi->common.fc.hybrid_coef_probs_8x8);
-#endif
   vp8_copy(cpi->common.fc.pre_coef_probs_16x16, cpi->common.fc.coef_probs_16x16);
-#if CONFIG_HYBRIDTRANSFORM16X16
   vp8_copy(cpi->common.fc.pre_hybrid_coef_probs_16x16, cpi->common.fc.hybrid_coef_probs_16x16);
-#endif
   vp8_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
   vp8_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
   vp8_copy(cpi->common.fc.pre_bmode_prob, cpi->common.fc.bmode_prob);

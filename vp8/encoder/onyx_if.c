@@ -3712,18 +3712,12 @@ static void encode_frame_to_data_rate
 
   update_reference_frames(cm);
   vp8_copy(cpi->common.fc.coef_counts, cpi->coef_counts);
-#if CONFIG_HYBRIDTRANSFORM
   vp8_copy(cpi->common.fc.hybrid_coef_counts, cpi->hybrid_coef_counts);
-#endif
   vp8_copy(cpi->common.fc.coef_counts_8x8, cpi->coef_counts_8x8);
-#if CONFIG_HYBRIDTRANSFORM8X8
   vp8_copy(cpi->common.fc.hybrid_coef_counts_8x8, cpi->hybrid_coef_counts_8x8);
-#endif
   vp8_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
-#if CONFIG_HYBRIDTRANSFORM16X16
   vp8_copy(cpi->common.fc.hybrid_coef_counts_16x16,
            cpi->hybrid_coef_counts_16x16);
-#endif
   vp8_adapt_coef_probs(&cpi->common);
   if (cpi->common.frame_type != KEY_FRAME) {
     vp8_copy(cpi->common.fc.ymode_counts, cpi->ymode_count);

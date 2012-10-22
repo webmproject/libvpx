@@ -51,17 +51,11 @@ typedef struct frame_contexts {
   vp8_prob sub_mv_ref_prob [SUBMVREF_COUNT][VP8_SUBMVREFS - 1];
   vp8_prob mbsplit_prob [VP8_NUMMBSPLITS - 1];
   vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#if CONFIG_HYBRIDTRANSFORM
   vp8_prob hybrid_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#endif
   vp8_prob coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#if CONFIG_HYBRIDTRANSFORM8X8
   vp8_prob hybrid_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#endif
   vp8_prob coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#if CONFIG_HYBRIDTRANSFORM16X16
   vp8_prob hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#endif
 
 #if CONFIG_NEWMVENTROPY
   nmv_context nmvc;
@@ -87,45 +81,33 @@ typedef struct frame_contexts {
 
   vp8_prob pre_coef_probs [BLOCK_TYPES] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#if CONFIG_HYBRIDTRANSFORM
   vp8_prob pre_hybrid_coef_probs [BLOCK_TYPES] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#endif
 
   vp8_prob pre_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#if CONFIG_HYBRIDTRANSFORM8X8
   vp8_prob pre_hybrid_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#endif
 
   vp8_prob pre_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#if CONFIG_HYBRIDTRANSFORM16X16
   vp8_prob pre_hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#endif
 
   unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#if CONFIG_HYBRIDTRANSFORM
   unsigned int hybrid_coef_counts [BLOCK_TYPES] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#endif
 
   unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#if CONFIG_HYBRIDTRANSFORM8X8
   unsigned int hybrid_coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#endif
 
   unsigned int coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#if CONFIG_HYBRIDTRANSFORM16X16
   unsigned int hybrid_coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#endif
 
 #if CONFIG_NEWMVENTROPY
   nmv_context_counts NMVcount;
