@@ -1340,15 +1340,7 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   cpi->pred_filter_on_count = 0;
   cpi->pred_filter_off_count = 0;
 #endif
-#if CONFIG_SWITCHABLE_INTERP
   vp8_zero(cpi->switchable_interp_count);
-#endif
-
-#if 0
-  // Experimental code
-  cpi->frame_distortion = 0;
-  cpi->last_mb_distortion = 0;
-#endif
 
   xd->mode_info_context = cm->mi;
   xd->prev_mode_info_context = cm->prev_mi;
@@ -1980,9 +1972,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
   assert(!xd->mode_info_context->mbmi.encoded_as_sb);
 #endif
 
-#if CONFIG_SWITCHABLE_INTERP
   vp8_setup_interp_filters(xd, mbmi->interp_filter, cm);
-#endif
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     // Adjust the zbin based on this MB rate.
     adjust_act_zbin(cpi, x);

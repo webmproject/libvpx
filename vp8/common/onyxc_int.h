@@ -103,10 +103,8 @@ typedef struct frame_contexts {
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 
   nmv_context_counts NMVcount;
-#if CONFIG_SWITCHABLE_INTERP
-  vp8_prob switchable_interp_prob[VP8_SWITCHABLE_FILTERS+1]
-                                 [VP8_SWITCHABLE_FILTERS-1];
-#endif
+  vp8_prob switchable_interp_prob[VP8_SWITCHABLE_FILTERS + 1]
+                                 [VP8_SWITCHABLE_FILTERS - 1];
 
   int mode_context[6][4];
   int mode_context_a[6][4];

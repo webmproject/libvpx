@@ -259,57 +259,23 @@ void update_skip_probs(VP8_COMP *cpi) {
   }
 }
 
-#if CONFIG_SWITCHABLE_INTERP
 void update_switchable_interp_probs(VP8_COMP *cpi, vp8_writer* const bc) {
   VP8_COMMON *const pc = &cpi->common;
   unsigned int branch_ct[32][2];
   int i, j;
   for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
-  //for (j = 0; j <= 0; ++j) {
-/*
-    if (!cpi->dummy_packing)
-#if VP8_SWITCHABLE_FILTERS == 3
-      printf("HELLO %d %d %d\n", cpi->switchable_interp_count[j][0],
-             cpi->switchable_interp_count[j][1], cpi->switchable_interp_count[j][2]);
-#else
-      printf("HELLO %d %d\n", cpi->switchable_interp_count[j][0],
-             cpi->switchable_interp_count[j][1]);
-#endif
-*/
     vp8_tree_probs_from_distribution(
         VP8_SWITCHABLE_FILTERS,
         vp8_switchable_interp_encodings, vp8_switchable_interp_tree,
-        pc->fc.switchable_interp_prob[j], branch_ct, cpi->switchable_interp_count[j],
-        256, 1
-        );
+        pc->fc.switchable_interp_prob[j], branch_ct,
+        cpi->switchable_interp_count[j], 256, 1);
     for (i = 0; i < VP8_SWITCHABLE_FILTERS - 1; ++i) {
       if (pc->fc.switchable_interp_prob[j][i] < 1)
         pc->fc.switchable_interp_prob[j][i] = 1;
       vp8_write_literal(bc, pc->fc.switchable_interp_prob[j][i], 8);
-/*
-      if (!cpi->dummy_packing)
-#if VP8_SWITCHABLE_FILTERS == 3
-        printf("Probs %d %d [%d]\n",
-               pc->fc.switchable_interp_prob[j][0],
-               pc->fc.switchable_interp_prob[j][1], pc->frame_type);
-#else
-        printf("Probs %d [%d]\n", pc->fc.switchable_interp_prob[j][0],
-               pc->frame_type);
-#endif
-*/
     }
   }
-  /*
-  if (!cpi->dummy_packing)
-#if VP8_SWITCHABLE_FILTERS == 3
-    printf("Probs %d %d [%d]\n",
-           pc->fc.switchable_interp_prob[0], pc->fc.switchable_interp_prob[1], pc->frame_type);
-#else
-    printf("Probs %d [%d]\n", pc->fc.switchable_interp_prob[0], pc->frame_type);
-#endif
-  */
 }
-#endif
 
 // This function updates the reference frame prediction stats
 static void update_refpred_stats(VP8_COMP *cpi) {
@@ -1005,21 +971,19 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
                      cpi->common.pred_filter_mode);
           }
 #endif
-#if CONFIG_SWITCHABLE_INTERP
           if (mode >= NEARESTMV && mode <= SPLITMV)
           {
             if (cpi->common.mcomp_filter_type == SWITCHABLE) {
               vp8_write_token(bc, vp8_switchable_interp_tree,
-                              get_pred_probs(&cpi->common, xd, PRED_SWITCHABLE_INTERP),
+                              get_pred_probs(&cpi->common, xd,
+                                             PRED_SWITCHABLE_INTERP),
                               vp8_switchable_interp_encodings +
                               vp8_switchable_interp_map[mi->interp_filter]);
-              //if (!cpi->dummy_packing) printf("Reading: %d\n", mi->interp_filter);
             } else {
               assert (mi->interp_filter ==
                       cpi->common.mcomp_filter_type);
             }
           }
-#endif
           if (mi->second_ref_frame &&
               (mode == NEWMV || mode == SPLITMV)) {
             int_mv n1, n2;
@@ -2590,7 +2554,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
     // Signal whether to allow high MV precision
     vp8_write_bit(&header_bc, (xd->allow_high_precision_mv) ? 1 : 0);
-#if CONFIG_SWITCHABLE_INTERP
     if (pc->mcomp_filter_type == SWITCHABLE) {
       /* Check to see if only one of the filters is actually used */
       int count[VP8_SWITCHABLE_FILTERS];
@@ -2615,7 +2578,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     // Signal the type of subpel filter to use
     vp8_write_bit(&header_bc, (pc->mcomp_filter_type == SWITCHABLE));
     if (pc->mcomp_filter_type != SWITCHABLE)
-#endif  /* CONFIG_SWITCHABLE_INTERP */
       vp8_write_literal(&header_bc, (pc->mcomp_filter_type), 2);
   }
 
@@ -2688,10 +2650,8 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
       vp8_write_literal(&header_bc, pc->prob_pred_filter_off, 8);
 
 #endif
-#if CONFIG_SWITCHABLE_INTERP
     if (pc->mcomp_filter_type == SWITCHABLE)
       update_switchable_interp_probs(cpi, &header_bc);
-#endif
 
     vp8_write_literal(&header_bc, pc->prob_intra_coded, 8);
     vp8_write_literal(&header_bc, pc->prob_last_coded, 8);

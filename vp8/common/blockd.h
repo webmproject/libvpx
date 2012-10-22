@@ -86,9 +86,7 @@ typedef enum
   BILINEAR = 1,
   EIGHTTAP = 2,
   EIGHTTAP_SHARP = 3,
-#if CONFIG_SWITCHABLE_INTERP
   SWITCHABLE  /* should be the last one */
-#endif
 } INTERPOLATIONFILTERTYPE;
 
 typedef enum
@@ -243,9 +241,7 @@ typedef struct {
   // Flag to turn prediction signal filter on(1)/off(0 ) at the MB level
   unsigned int pred_filter_enabled;
 #endif
-#if CONFIG_SWITCHABLE_INTERP
     INTERPOLATIONFILTERTYPE interp_filter;
-#endif
 
 #if CONFIG_SUPERBLOCKS
   // FIXME need a SB array of 4 MB_MODE_INFOs that

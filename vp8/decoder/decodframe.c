@@ -253,11 +253,9 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   }
 
   //mode = xd->mode_info_context->mbmi.mode;
-#if CONFIG_SWITCHABLE_INTERP
   if (pbi->common.frame_type != KEY_FRAME)
     vp8_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter,
                              &pbi->common);
-#endif
 
   if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV
       && mode != I8X8_PRED
@@ -1298,12 +1296,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     /* Is high precision mv allowed */
     xd->allow_high_precision_mv = (unsigned char)vp8_read_bit(&header_bc);
     // Read the type of subpel filter to use
-#if CONFIG_SWITCHABLE_INTERP
     if (vp8_read_bit(&header_bc)) {
       pc->mcomp_filter_type = SWITCHABLE;
-    } else
-#endif
-    {
+    } else {
       pc->mcomp_filter_type = vp8_read_literal(&header_bc, 2);
     }
     /* To enable choice of different interploation filters */

@@ -475,13 +475,11 @@ static const unsigned char mbsplit_fill_offset[4][16] = {
   { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
 };
 
-#if CONFIG_SWITCHABLE_INTERP
 static void read_switchable_interp_probs(VP8D_COMP* const pbi,
                                          BOOL_DECODER* const bc) {
   VP8_COMMON *const cm = &pbi->common;
   int i, j;
   for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
-  //for (j = 0; j <= 0; ++j) {
     for (i = 0; i < VP8_SWITCHABLE_FILTERS - 1; ++i) {
       cm->fc.switchable_interp_prob[j][i] = vp8_read_literal(bc, 8);
     }
@@ -489,7 +487,6 @@ static void read_switchable_interp_probs(VP8D_COMP* const pbi,
   //printf("DECODER: %d %d\n", cm->fc.switchable_interp_prob[0],
   //cm->fc.switchable_interp_prob[1]);
 }
-#endif
 
 static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
   VP8_COMMON *const cm = &pbi->common;
@@ -506,10 +503,8 @@ static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
     if (cm->pred_filter_mode == 2)
       cm->prob_pred_filter_off = (vp8_prob)vp8_read_literal(bc, 8);
 #endif
-#if CONFIG_SWITCHABLE_INTERP
     if (cm->mcomp_filter_type == SWITCHABLE)
       read_switchable_interp_probs(pbi, bc);
-#endif
     // Decode the baseline probabilities for decoding reference frame
     cm->prob_intra_coded = (vp8_prob)vp8_read_literal(bc, 8);
     cm->prob_last_coded  = (vp8_prob)vp8_read_literal(bc, 8);
@@ -756,19 +751,16 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         mbmi->pred_filter_enabled = cm->pred_filter_mode;
     }
 #endif
-#if CONFIG_SWITCHABLE_INTERP
     if (mbmi->mode >= NEARESTMV && mbmi->mode <= SPLITMV)
     {
       if (cm->mcomp_filter_type == SWITCHABLE) {
         mbmi->interp_filter = vp8_switchable_interp[
             vp8_treed_read(bc, vp8_switchable_interp_tree,
                            get_pred_probs(cm, xd, PRED_SWITCHABLE_INTERP))];
-        //printf("Reading: %d\n", mbmi->interp_filter);
       } else {
         mbmi->interp_filter = cm->mcomp_filter_type;
       }
     }
-#endif
 
     if (cm->comp_pred_mode == COMP_PREDICTION_ONLY ||
         (cm->comp_pred_mode == HYBRID_PREDICTION &&

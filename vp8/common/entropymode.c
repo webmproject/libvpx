@@ -301,11 +301,8 @@ void vp8_init_mbmode_probs(VP8_COMMON *x) {
 
   vpx_memcpy(x->fc.sub_mv_ref_prob, vp8_sub_mv_ref_prob2, sizeof(vp8_sub_mv_ref_prob2));
   vpx_memcpy(x->fc.mbsplit_prob, vp8_mbsplit_probs, sizeof(vp8_mbsplit_probs));
-#if CONFIG_SWITCHABLE_INTERP
   vpx_memcpy(x->fc.switchable_interp_prob, vp8_switchable_interp_prob,
              sizeof(vp8_switchable_interp_prob));
-#endif
-
 }
 
 
@@ -338,7 +335,6 @@ void vp8_kf_default_bmode_probs(vp8_prob p [VP8_BINTRAMODES] [VP8_BINTRAMODES] [
   } while (++i < VP8_BINTRAMODES);
 }
 
-#if CONFIG_SWITCHABLE_INTERP
 #if VP8_SWITCHABLE_FILTERS == 3
 const vp8_tree_index vp8_switchable_interp_tree[VP8_SWITCHABLE_FILTERS*2-2] = {
   -0, 2,
@@ -363,19 +359,10 @@ const vp8_prob vp8_switchable_interp_prob [VP8_SWITCHABLE_FILTERS+1]
   { 64},
   {192},
 };
-//#define SWITCHABLE_86
-#ifdef SWITCHABLE_86
-const INTERPOLATIONFILTERTYPE vp8_switchable_interp[VP8_SWITCHABLE_FILTERS] = {
-  EIGHTTAP, SIXTAP};
-const int vp8_switchable_interp_map[SWITCHABLE+1] = {1, -1, 0, -1, -1}; //8, 6
-#else
 const INTERPOLATIONFILTERTYPE vp8_switchable_interp[VP8_SWITCHABLE_FILTERS] = {
   EIGHTTAP, EIGHTTAP_SHARP};
 const int vp8_switchable_interp_map[SWITCHABLE+1] = {-1, -1, 0, 1, -1}; //8, 8s
 #endif
-#endif
-#endif
-
 
 void vp8_entropy_mode_init() {
   vp8_tokens_from_tree(vp8_bmode_encodings,   vp8_bmode_tree);
@@ -387,10 +374,8 @@ void vp8_entropy_mode_init() {
   vp8_tokens_from_tree(vp8_uv_mode_encodings,  vp8_uv_mode_tree);
   vp8_tokens_from_tree(vp8_i8x8_mode_encodings,  vp8_i8x8_mode_tree);
   vp8_tokens_from_tree(vp8_mbsplit_encodings, vp8_mbsplit_tree);
-#if CONFIG_SWITCHABLE_INTERP
   vp8_tokens_from_tree(vp8_switchable_interp_encodings,
                        vp8_switchable_interp_tree);
-#endif
 
   vp8_tokens_from_tree_offset(vp8_mv_ref_encoding_array,
                               vp8_mv_ref_tree, NEARESTMV);

@@ -22,11 +22,8 @@ typedef enum {
   PRED_REF = 1,
   PRED_COMP = 2,
   PRED_MBSKIP = 3,
-#if CONFIG_SWITCHABLE_INTERP
-  PRED_SWITCHABLE_INTERP = 4,
-#endif
+  PRED_SWITCHABLE_INTERP = 4
 } PRED_ID;
-
 
 extern unsigned char get_pred_context(const VP8_COMMON *const cm,
                                       const MACROBLOCKD *const xd,

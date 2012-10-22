@@ -60,10 +60,8 @@ extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
 
 #define INVALID_MV 0x80008000
 
-#if CONFIG_SWITCHABLE_INTERP
 /* Factor to weigh the rate for switchable interp filters */
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
-#endif
 
 static const int auto_speed_thresh[17] = {
   1000,
@@ -3385,9 +3383,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   int_mv ref_mv[MAX_REF_FRAMES] = {{0}};
 #endif
 
-#if CONFIG_SWITCHABLE_INTERP
   int switchable_filter_index = 0;
-#endif
 
   MB_PREDICTION_MODE uv_intra_mode;
   MB_PREDICTION_MODE uv_intra_mode_8x8 = 0;
@@ -3484,12 +3480,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   // that depend on the current prediction etc.
   vp8_estimate_ref_frame_costs(cpi, segment_id, ref_costs);
 
-#if CONFIG_SWITCHABLE_INTERP
   for (mode_index = 0; mode_index < MAX_MODES;
        mode_index += (!switchable_filter_index)) {
-#else
-  for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
-#endif
     int64_t this_rd = INT64_MAX;
     int is_comp_pred;
     int disable_skip = 0, skippable = 0;
@@ -3517,19 +3509,16 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 #if CONFIG_PRED_FILTER
     mbmi->pred_filter_enabled = 0;
 #endif
-#if CONFIG_SWITCHABLE_INTERP
     if (cpi->common.mcomp_filter_type == SWITCHABLE &&
         this_mode >= NEARESTMV && this_mode <= SPLITMV) {
       mbmi->interp_filter =
           vp8_switchable_interp[switchable_filter_index++];
       if (switchable_filter_index == VP8_SWITCHABLE_FILTERS)
         switchable_filter_index = 0;
-        //printf("Searching %d (%d)\n", this_mode, switchable_filter_index);
     } else {
       mbmi->interp_filter = cpi->common.mcomp_filter_type;
     }
     vp8_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
-#endif
 
     // Test best rd so far against threshold for trying this mode.
     if (best_rd <= cpi->rd_threshes[mode_index])
@@ -3788,12 +3777,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       rate2 += rate;
       distortion2 += distortion;
 
-#if CONFIG_SWITCHABLE_INTERP
       if (cpi->common.mcomp_filter_type == SWITCHABLE)
         rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
             [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
                 [vp8_switchable_interp_map[mbmi->interp_filter]];
-#endif
       // If even the 'Y' rd value of split is higher than best so far
       // then dont bother looking at UV
       if (tmp_rd < best_yrd) {
@@ -3931,13 +3918,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       rate2 += vp8_cost_bit(cpi->common.prob_pred_filter_off,
                             xd->mode_info_context->mbmi.pred_filter_enabled);
 #endif
-#if CONFIG_SWITCHABLE_INTERP
       if (cpi->common.mcomp_filter_type == SWITCHABLE)
         rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
             [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
             [vp8_switchable_interp_map[
             x->e_mbd.mode_info_context->mbmi.interp_filter]];
-#endif
 
       /* We don't include the cost of the second reference here, because there are only
        * three options: Last/Golden, ARF/Last or Golden/ARF, or in other words if you
@@ -4204,7 +4189,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   else
     ++cpi->pred_filter_off_count;
 #endif
-#if CONFIG_SWITCHABLE_INTERP
   if (cpi->common.mcomp_filter_type == SWITCHABLE &&
       best_mbmode.mode >= NEARESTMV &&
       best_mbmode.mode <= SPLITMV) {
@@ -4212,7 +4196,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
         [vp8_switchable_interp_map[best_mbmode.interp_filter]];
   }
-#endif
 
   // Reduce the activation RD thresholds for the best choice mode
   if ((cpi->rd_baseline_thresh[best_mode_index] > 0) &&

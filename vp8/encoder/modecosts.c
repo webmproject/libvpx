@@ -46,14 +46,11 @@ void vp8_init_mode_costs(VP8_COMP *c) {
   vp8_cost_tokens(c->mb.i8x8_mode_costs,
                   x->fc.i8x8_mode_prob, vp8_i8x8_mode_tree);
 
-#if CONFIG_SWITCHABLE_INTERP
   {
     int i;
     for (i = 0; i <= VP8_SWITCHABLE_FILTERS; ++i)
-    //for (i = 0; i <= 0; ++i)
       vp8_cost_tokens((int *)c->mb.switchable_interp_costs[i],
                       x->fc.switchable_interp_prob[i],
                       vp8_switchable_interp_tree);
   }
-#endif
 }

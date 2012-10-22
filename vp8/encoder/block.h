@@ -129,12 +129,11 @@ typedef struct {
   int bmode_costs[VP8_BINTRAMODES][VP8_BINTRAMODES][VP8_BINTRAMODES];
   int i8x8_mode_costs[MB_MODE_COUNT];
   int inter_bmode_costs[B_MODE_COUNT];
-#if CONFIG_SWITCHABLE_INTERP
-  int switchable_interp_costs[VP8_SWITCHABLE_FILTERS+1]
+  int switchable_interp_costs[VP8_SWITCHABLE_FILTERS + 1]
                              [VP8_SWITCHABLE_FILTERS];
-#endif
 
-  // These define limits to motion vector components to prevent them from extending outside the UMV borders
+  // These define limits to motion vector components to prevent them
+  // from extending outside the UMV borders
   int mv_col_min;
   int mv_col_max;
   int mv_row_min;

@@ -63,7 +63,6 @@ unsigned char get_pred_context(const VP8_COMMON *const cm,
                      (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
       break;
 
-#if CONFIG_SWITCHABLE_INTERP
     case PRED_SWITCHABLE_INTERP:
       {
         int left_in_image = (m - 1)->mbmi.mb_in_image;
@@ -93,7 +92,6 @@ unsigned char get_pred_context(const VP8_COMMON *const cm,
           pred_context = VP8_SWITCHABLE_FILTERS;
       }
       break;
-#endif
 
     default:
       // TODO *** add error trap code.
@@ -175,11 +173,10 @@ const vp8_prob *get_pred_probs(const VP8_COMMON *const cm,
       pred_probability = &cm->mbskip_pred_probs[pred_context];
       break;
 
-#if CONFIG_SWITCHABLE_INTERP
     case PRED_SWITCHABLE_INTERP:
       pred_probability = &cm->fc.switchable_interp_prob[pred_context][0];
       break;
-#endif
+
     default:
       // TODO *** add error trap code.
       pred_probability = NULL;
