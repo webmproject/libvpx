@@ -21,7 +21,8 @@
 #include "vpx_ports/arm.h"
 #endif
 
-extern int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
+extern int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source,
+                           YV12_BUFFER_CONFIG *dest);
 #if HAVE_ARMV7
 extern void vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
 #endif
@@ -71,7 +72,8 @@ vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst
 
   vpx_memcpy(dst_y, src_y, ystride * (linestocopy + 16));
 }
-static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, int Fraction, const vp8_variance_rtcd_vtable_t *rtcd) {
+static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
+                                    YV12_BUFFER_CONFIG *dest, int Fraction) {
   int i, j;
   int Total = 0;
   int srcoffset, dstoffset;
@@ -79,7 +81,6 @@ static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONF
   unsigned char *dst = dest->y_buffer;
 
   int linestocopy = (source->y_height >> (Fraction + 4));
-  (void)rtcd;
 
   if (linestocopy < 1)
     linestocopy = 1;
@@ -97,7 +98,8 @@ static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONF
   for (i = 0; i < linestocopy; i += 16) {
     for (j = 0; j < source->y_width; j += 16) {
       unsigned int sse;
-      Total += VARIANCE_INVOKE(rtcd, mse16x16)(src + j, source->y_stride, dst + j, dest->y_stride, &sse);
+      Total += vp8_mse16x16(src + j, source->y_stride, dst + j, dest->y_stride,
+                            &sse);
     }
 
     src += 16 * source->y_stride;
@@ -179,7 +181,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
   // Get the err using the previous frame's filter value.
   vp8_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
-  best_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3, IF_RTCD(&cpi->rtcd.variance));
+  best_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3);
 
   //  Re-instate the unfiltered frame
   vp8_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
@@ -192,7 +194,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
     vp8_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
     // Get the err for filtered frame
-    filt_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3, IF_RTCD(&cpi->rtcd.variance));
+    filt_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3);
 
     //  Re-instate the unfiltered frame
     vp8_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
@@ -221,7 +223,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
       vp8_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
       // Get the err for filtered frame
-      filt_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3, IF_RTCD(&cpi->rtcd.variance));
+      filt_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3);
 
       //  Re-instate the unfiltered frame
       vp8_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
@@ -308,7 +310,7 @@ void vp8cx_pick_filter_level_sg(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi, int segme
   vp8cx_set_alt_lf_level(cpi, filt_mid);
   vp8_loop_filter_frame_segment(cm, &cpi->mb.e_mbd, filt_mid, segment);
 
-  best_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
+  best_err = vp8_calc_ss_err(sd, cm->frame_to_show);
   filt_best = filt_mid;
 
   //  Re-instate the unfiltered frame
@@ -348,7 +350,7 @@ void vp8cx_pick_filter_level_sg(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi, int segme
       vp8cx_set_alt_lf_level(cpi, filt_low);
       vp8_loop_filter_frame_segment(cm, &cpi->mb.e_mbd, filt_low, segment);
 
-      filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
+      filt_err = vp8_calc_ss_err(sd, cm->frame_to_show);
 
       //  Re-instate the unfiltered frame
 #if HAVE_ARMV7
@@ -383,7 +385,7 @@ void vp8cx_pick_filter_level_sg(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi, int segme
       vp8cx_set_alt_lf_level(cpi, filt_high);
       vp8_loop_filter_frame_segment(cm, &cpi->mb.e_mbd, filt_high, segment);
 
-      filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
+      filt_err = vp8_calc_ss_err(sd, cm->frame_to_show);
 
       //  Re-instate the unfiltered frame
 #if HAVE_ARMV7
@@ -517,7 +519,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
   vp8cx_set_alt_lf_level(cpi, filt_mid);
   vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_mid);
 
-  best_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
+  best_err = vp8_calc_ss_err(sd, cm->frame_to_show);
   filt_best = filt_mid;
 
   //  Re-instate the unfiltered frame
@@ -557,7 +559,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
       vp8cx_set_alt_lf_level(cpi, filt_low);
       vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_low);
 
-      filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
+      filt_err = vp8_calc_ss_err(sd, cm->frame_to_show);
 
       //  Re-instate the unfiltered frame
 #if HAVE_ARMV7
@@ -592,7 +594,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
       vp8cx_set_alt_lf_level(cpi, filt_high);
       vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_high);
 
-      filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
+      filt_err = vp8_calc_ss_err(sd, cm->frame_to_show);
 
       //  Re-instate the unfiltered frame
 #if HAVE_ARMV7

@@ -1479,7 +1479,8 @@ int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         for (t = 0; t < 4; t++)
           block_offset[t] = ss[i + t].offset + best_address;
 
-        fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride, sad_array);
+        fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride,
+                       sad_array);
 
         for (t = 0; t < 4; t++, i++) {
           if (sad_array[t] < bestsad) {
