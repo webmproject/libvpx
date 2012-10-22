@@ -1504,8 +1504,8 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
         // compute quantization mse of 8x8 block
         distortion = vp8_block_error_c((x->block + idx)->coeff,
                                        (xd->block + idx)->dqcoeff, 64);
-        ta0 = *(a + vp8_block2above_8x8[idx]);
-        tl0 = *(l + vp8_block2left_8x8 [idx]);
+        ta0 = a[vp8_block2above_8x8[idx]];
+        tl0 = l[vp8_block2left_8x8[idx]];
 
         rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
                              &ta0, &tl0, TX_8X8);
@@ -1531,10 +1531,10 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
         distortion += vp8_block_error_c((x->block + ib + 5)->coeff,
                                         (xd->block + ib + 5)->dqcoeff, 16);
 
-        ta0 = *(a + vp8_block2above[ib]);
-        ta1 = *(a + vp8_block2above[ib + 1]);
-        tl0 = *(l + vp8_block2left[ib]);
-        tl1 = *(l + vp8_block2left[ib + 4]);
+        ta0 = a[vp8_block2above[ib]];
+        ta1 = a[vp8_block2above[ib + 1]];
+        tl0 = l[vp8_block2left[ib]];
+        tl1 = l[vp8_block2left[ib + 4]];
         rate_t = cost_coeffs(x, xd->block + ib, PLANE_TYPE_Y_WITH_DC,
                              &ta0, &tl0, TX_4X4);
         rate_t += cost_coeffs(x, xd->block + ib + 1, PLANE_TYPE_Y_WITH_DC,
@@ -1576,15 +1576,15 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
   vp8_encode_intra8x8(IF_RTCD(&cpi->rtcd), x, ib);
 
   if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
-    *(a + vp8_block2above_8x8[idx])     = besta0;
-    *(a + vp8_block2above_8x8[idx] + 1) = besta1;
-    *(l + vp8_block2left_8x8 [idx])     = bestl0;
-    *(l + vp8_block2left_8x8 [idx] + 1) = bestl1;
+    a[vp8_block2above_8x8[idx]]     = besta0;
+    a[vp8_block2above_8x8[idx] + 1] = besta1;
+    l[vp8_block2left_8x8[idx]]      = bestl0;
+    l[vp8_block2left_8x8[idx] + 1]  = bestl1;
   } else {
-    *(a + vp8_block2above[ib])     = besta0;
-    *(a + vp8_block2above[ib + 1]) = besta1;
-    *(l + vp8_block2left[ib])      = bestl0;
-    *(l + vp8_block2left[ib + 4])  = bestl1;
+    a[vp8_block2above[ib]]     = besta0;
+    a[vp8_block2above[ib + 1]] = besta1;
+    l[vp8_block2left[ib]]      = bestl0;
+    l[vp8_block2left[ib + 4]]  = bestl1;
   }
 
   return best_rd;

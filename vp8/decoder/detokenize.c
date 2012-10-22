@@ -443,11 +443,9 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd,
                      seg_eob, qcoeff_ptr,
                      0, scan, TX_16X16, coef_bands_x_16x16);
     eobs[0] = c;
-    *A = *L = (c != !type);
-    for (i = 1; i < 16; i++) {
-      *(A + vp8_block2above[i]) = *(A);
-      *(L +  vp8_block2left[i]) = *(L);
-    }
+    A[0] = L[0] = (c != !type);
+    A[1] = A[2] = A[3] = A[0];
+    L[1] = L[2] = L[3] = L[0];
     eobtotal += c;
   }
 

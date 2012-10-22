@@ -651,8 +651,8 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
     optimize_b(x, b, type,
                ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
                rtcd, TX_8X8);
-    *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
-    *(tl + vp8_block2left_8x8[b] + 1)  = *(tl + vp8_block2left_8x8[b]);
+    ta[vp8_block2above_8x8[b] + 1] = ta[vp8_block2above_8x8[b]];
+    tl[vp8_block2left_8x8[b] + 1]  = tl[vp8_block2left_8x8[b]];
   }
 
   // 8x8 always have 2nd roder haar block
@@ -682,8 +682,8 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
     optimize_b(x, b, PLANE_TYPE_UV,
                ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
                rtcd, TX_8X8);
-    *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
-    *(tl + vp8_block2left_8x8[b] + 1) = *(tl + vp8_block2left_8x8[b]);
+    ta[vp8_block2above_8x8[b] + 1] = ta[vp8_block2above_8x8[b]];
+    tl[vp8_block2left_8x8[b] + 1]  = tl[vp8_block2left_8x8[b]];
   }
 }
 
