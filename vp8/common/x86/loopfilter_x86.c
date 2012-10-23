@@ -366,13 +366,13 @@ static __inline void transpose(unsigned char *src[], int in_p,
     x7 = _mm_unpackhi_epi32(x4, x5);
 
     _mm_storel_pd((double *)(out + 0*out_p),
-                  _mm_cvtepi32_pd(x6));  // 00 10 20 30 40 50 60 70
+                  (__m128d)x6);  // 00 10 20 30 40 50 60 70
     _mm_storeh_pd((double *)(out + 1*out_p),
-                  _mm_cvtepi32_pd(x6));  // 01 11 21 31 41 51 61 71
+                  (__m128d)x6);  // 01 11 21 31 41 51 61 71
     _mm_storel_pd((double *)(out + 2*out_p),
-                  _mm_cvtepi32_pd(x7));  // 02 12 22 32 42 52 62 72
+                  (__m128d)x7);  // 02 12 22 32 42 52 62 72
     _mm_storeh_pd((double *)(out + 3*out_p),
-                  _mm_cvtepi32_pd(x7));  // 03 13 23 33 43 53 63 73
+                  (__m128d)x7);  // 03 13 23 33 43 53 63 73
 
     // 04 14 24 34 05 15 25 35 06 16 26 36 07 17 27 37
     x4 = _mm_unpackhi_epi16(x0, x1);
@@ -384,13 +384,13 @@ static __inline void transpose(unsigned char *src[], int in_p,
     x7 = _mm_unpackhi_epi32(x4, x5);
 
     _mm_storel_pd((double *)(out + 4*out_p),
-                  _mm_cvtepi32_pd(x6));  // 04 14 24 34 44 54 64 74
+                  (__m128d)x6);  // 04 14 24 34 44 54 64 74
     _mm_storeh_pd((double *)(out + 5*out_p),
-                  _mm_cvtepi32_pd(x6));  // 05 15 25 35 45 55 65 75
+                  (__m128d)x6);  // 05 15 25 35 45 55 65 75
     _mm_storel_pd((double *)(out + 6*out_p),
-                  _mm_cvtepi32_pd(x7));  // 06 16 26 36 46 56 66 76
+                  (__m128d)x7);  // 06 16 26 36 46 56 66 76
     _mm_storeh_pd((double *)(out + 7*out_p),
-                  _mm_cvtepi32_pd(x7));  // 07 17 27 37 47 57 67 77
+                  (__m128d)x7);  // 07 17 27 37 47 57 67 77
   } while (++idx8x8 < num_8x8_to_transpose);
 }
 void vp8_mbloop_filter_vertical_edge_c_sse2
