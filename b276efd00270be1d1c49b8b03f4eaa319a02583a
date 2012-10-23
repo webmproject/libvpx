@@ -51,6 +51,24 @@
       "revId": "b276efd00270be1d1c49b8b03f4eaa319a02583a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//3GQ\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2515,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-23T16:21:29Z",
+      "side": 1,
+      "message": "Oh sorry, forgot about this one. I\u0027ll make it int, yes. They should never be uninitialized, that is, each of labels[0, 15] has a value of (0, label_count-1), and thus if best_label_rd is initialized to INT64_MAX and the RDCOST() (i.e. this_rd) output is always less than INT64_MAX, then all entries in best_eobs[] will be initialized at the end of the loop.",
+      "parentUuid": "AAAAQn//3QE\u003d",
+      "revId": "b276efd00270be1d1c49b8b03f4eaa319a02583a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
