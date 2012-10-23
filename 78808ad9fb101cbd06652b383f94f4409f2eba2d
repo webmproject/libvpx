@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//3lE\u003d",
+        "filename": "vp8/common/entropymode.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-23T00:30:04Z",
+      "side": 0,
+      "message": "In an ideal world we\u0027d put spaces around the \"+\" here... and similar for the lines below",
+      "revId": "78808ad9fb101cbd06652b383f94f4409f2eba2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//3kg\u003d",
+        "filename": "vp8/common/onyxc_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-23T00:30:04Z",
+      "side": 0,
+      "message": "spaces around \"+\"... don\u0027t know if this is a step too far in this patch (probably is!)",
+      "revId": "78808ad9fb101cbd06652b383f94f4409f2eba2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
