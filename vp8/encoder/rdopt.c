@@ -2249,7 +2249,7 @@ typedef struct {
   int segment_yrate;
   B_PREDICTION_MODE modes[16];
   int_mv mvs[16], second_mvs[16];
-  unsigned char eobs[16];
+  int eobs[16];
 
   int mvthresh;
   int *mdcounts;
@@ -2289,7 +2289,7 @@ static void rd_check_segment_txsize(VP8_COMP *cpi, MACROBLOCK *x,
   int rate = 0;
   int sbr = 0, sbd = 0;
   int segmentyrate = 0;
-  uint8_t best_eobs[16] = { 0 };
+  int best_eobs[16] = { 0 };
 
   vp8_variance_fn_ptr_t *v_fn_ptr;
 
