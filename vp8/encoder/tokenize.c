@@ -639,17 +639,15 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
 
     tokenize1st_order_b_16x16(xd, xd->block, t, PLANE_TYPE_Y_WITH_DC,
                               A, L, cpi, dry_run);
+    A[1] = A[2] = A[3] = A[0];
+    L[1] = L[2] = L[3] = L[0];
 
-    for (b = 1; b < 16; b++) {
-      *(A + vp8_block2above[b]) = *(A);
-      *(L + vp8_block2left[b] ) = *(L);
-    }
     for (b = 16; b < 24; b += 4) {
       tokenize1st_order_b_8x8(xd, xd->block + b, t, PLANE_TYPE_UV,
                               A + vp8_block2above_8x8[b],
                               L + vp8_block2left_8x8[b], cpi, dry_run);
-      *(A + vp8_block2above_8x8[b]+1) = *(A + vp8_block2above_8x8[b]);
-      *(L + vp8_block2left_8x8[b]+1 ) = *(L + vp8_block2left_8x8[b]);
+      A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
+      L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
     }
     vpx_memset(&A[8], 0, sizeof(A[8]));
     vpx_memset(&L[8], 0, sizeof(L[8]));
@@ -663,8 +661,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
                               A + vp8_block2above_8x8[b],
                               L + vp8_block2left_8x8[b],
                               cpi, dry_run);
-      *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
-      *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b]);
+      A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
+      L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
     }
     if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
         xd->mode_info_context->mbmi.mode == SPLITMV) {
@@ -674,8 +672,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
         tokenize1st_order_b_8x8(xd, xd->block + b, t, PLANE_TYPE_UV,
                                 A + vp8_block2above_8x8[b],
                                 L + vp8_block2left_8x8[b], cpi, dry_run);
-        *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
-        *(L + vp8_block2left_8x8[b] + 1) = *(L + vp8_block2left_8x8[b]);
+        A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
+        L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
       }
     }
   } else {
@@ -1040,8 +1038,8 @@ static void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
                          A + vp8_block2above_8x8[b],
                          L + vp8_block2left_8x8[b],
                          cpi, dry_run);
-    *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
-    *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b]);
+    A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
+    L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
   }
 
   for (b = 16; b < 24; b += 4) {
@@ -1049,8 +1047,8 @@ static void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
                            A + vp8_block2above[b],
                            L + vp8_block2left[b],
                            cpi, dry_run);
-    *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
-    *(L + vp8_block2left_8x8[b] + 1) = *(L + vp8_block2left_8x8[b]);
+    A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
+    L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
   }
   if (dry_run)
     *t = t_backup;
@@ -1098,17 +1096,15 @@ static void vp8_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
 
   stuff1st_order_b_16x16(xd, xd->block, t, PLANE_TYPE_Y_WITH_DC,
                          A, L, cpi, dry_run);
-  for (i = 1; i < 16; i++) {
-    *(A + vp8_block2above[i]) = *(A);
-    *(L +  vp8_block2left[i]) = *(L);
-  }
+  A[1] = A[2] = A[3] = A[0];
+  L[1] = L[2] = L[3] = L[0];
   for (b = 16; b < 24; b += 4) {
     stuff1st_order_buv_8x8(xd, xd->block + b, t,
         A + vp8_block2above[b],
         L + vp8_block2left[b],
         cpi, dry_run);
-    *(A + vp8_block2above_8x8[b]+1) = *(A + vp8_block2above_8x8[b]);
-    *(L + vp8_block2left_8x8[b]+1 ) = *(L + vp8_block2left_8x8[b]);
+    A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
+    L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
   }
   vpx_memset(&A[8], 0, sizeof(A[8]));
   vpx_memset(&L[8], 0, sizeof(L[8]));
@@ -1242,8 +1238,8 @@ static void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi, MACROBLOCKD *xd,
                          A + vp8_block2above_8x8[b],
                          L + vp8_block2left_8x8[b],
                          cpi, dry_run);
-    *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
-    *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b]);
+    A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
+    L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
   }
 
   for (b = 16; b < 24; b++)
