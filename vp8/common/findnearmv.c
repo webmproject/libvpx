@@ -254,11 +254,10 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
 
     // If we see a 0,0 vector for a second time we have reached the end of
     // the list of valid candidate vectors.
-    if (!this_mv.as_int)
-      if (zero_seen)
-        break;
-      else
-        zero_seen = TRUE;
+    if (!this_mv.as_int && zero_seen)
+      break;
+
+    zero_seen = zero_seen || !this_mv.as_int;
 
     vp8_clamp_mv(&this_mv,
                  xd->mb_to_left_edge - LEFT_TOP_MARGIN + 16,
