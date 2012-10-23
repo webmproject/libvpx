@@ -140,12 +140,13 @@ sym(vp8_post_proc_down_and_across_mb_row_sse2):
         add         rsi,        16
         add         rdi,        16
 
-        UPDATE_FLIMIT
-
         add         rdx,        16
         cmp         edx,        dword arg(4)     ;cols
-        jl          .nextcol
+        jge         .downdone
+        UPDATE_FLIMIT
+        jmp         .nextcol
 
+.downdone:
         ; done with the all cols, start the across filtering in place
         sub         rsi,        rdx
         sub         rdi,        rdx
@@ -191,12 +192,13 @@ sym(vp8_post_proc_down_and_across_mb_row_sse2):
         psrldq      xmm0,       8
         movdq2q     mm1,        xmm0
 
-        UPDATE_FLIMIT
-
         add         rdx,        16
         cmp         edx,        dword arg(4)     ;cols
-        jl          .acrossnextcol;
+        jge         .acrossdone
+        UPDATE_FLIMIT
+        jmp         .acrossnextcol
 
+.acrossdone
         ; last 16 pixels
         movq        QWORD PTR [rdi+rdx-16], mm0
 
