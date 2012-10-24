@@ -2509,7 +2509,7 @@ static void rd_check_segment_txsize(VP8_COMP *cpi, MACROBLOCK *x,
     if (rds)
       rds[i] = this_segment_rd;
     if (otherrds)
-      rds[i] = other_segment_rd;
+      otherrds[i] = other_segment_rd;
   } /* for each label */
 
   if (this_segment_rd < bsi->segment_rd) {
