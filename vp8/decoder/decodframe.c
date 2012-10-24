@@ -888,9 +888,8 @@ static void read_coef_probs(VP8D_COMP *pbi, BOOL_DECODER* const bc) {
   VP8_COMMON *const pc = &pbi->common;
 
   read_coef_probs_common(bc, pc->fc.coef_probs);
-#if CONFIG_HYBRIDTRANSFORM
   read_coef_probs_common(bc, pc->fc.hybrid_coef_probs);
-#endif
+
   if (pbi->common.txfm_mode != ONLY_4X4) {
     read_coef_probs_common(bc, pc->fc.coef_probs_8x8);
     read_coef_probs_common(bc, pc->fc.hybrid_coef_probs_8x8);
