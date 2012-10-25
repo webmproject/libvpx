@@ -3761,7 +3761,7 @@ static void encode_frame_to_data_rate
     FILE *f = fopen("mv_ref_dist.stt", "a");
     unsigned int i;
     for (i = 0; i < MAX_MV_REFS; ++i) {
-      fprintf(f, "%10d", cpi->best_ref_index_counts[i] );
+      fprintf(f, "%10d", cpi->best_ref_index_counts[0][i]);
     }
     fprintf(f, "\n" );
 
