@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//02A\u003d",
+        "filename": "nestegg/src/nestegg.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1844,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-25T19:05:16Z",
+      "side": 1,
+      "message": "track is a container detail, so it should be here. What an application (and the container) is concerned with is getting a bag of bytes that corresponds to a visible frame to be presented at some timestamp. The details of what\u0027s in those bytes is the domain of the codec.",
+      "parentUuid": "AAAAQn//1BA\u003d",
+      "revId": "d76f99fbc052df725e2000fd8d73a87c0a6efe68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//1WY\u003d",
         "filename": "vpxenc.c",
         "patchSetId": 2
