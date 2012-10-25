@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQn//1BA\u003d",
+        "filename": "nestegg/src/nestegg.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1844,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2012-10-25T18:50:37Z",
+      "side": 1,
+      "message": "I did the parsing here because ne_read_block() function in itself does some parsing already (reading the track number, flag, etc). From what i understand, the container in itself seem to do a little more than just read the partitions and return them. Am i missing something?",
+      "parentUuid": "AAAAQn//1Ws\u003d",
+      "revId": "d76f99fbc052df725e2000fd8d73a87c0a6efe68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQn//1WY\u003d",
         "filename": "vpxenc.c",
         "patchSetId": 2
