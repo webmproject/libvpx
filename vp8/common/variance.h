@@ -12,6 +12,8 @@
 #ifndef VARIANCE_H
 #define VARIANCE_H
 
+#include "vpx_config.h"
+
 typedef unsigned int(*vp8_sad_fn_t)(
     const unsigned char *src_ptr,
     int source_stride,
