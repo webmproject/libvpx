@@ -177,11 +177,13 @@ vp8_loop_filter_simple_bh_neon=vp8_loop_filter_bhs_neon
 #
 # sad 16x3, 3x16
 #
+if [ "$CONFIG_NEWBESTREFMV" = "yes" ]; then
 prototype unsigned int vp8_sad16x3 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
-specialize vp8_sad16x3
+specialize vp8_sad16x3 sse2
 
 prototype unsigned int vp8_sad3x16 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
 specialize vp8_sad3x16
+fi
 
 #
 # Encoder functions below this point.
