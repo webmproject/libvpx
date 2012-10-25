@@ -1212,8 +1212,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rat
   xd->mode_info_context->mbmi.mode = B_PRED;
   bmode_costs = mb->inter_bmode_costs;
 
-  vp8_intra_prediction_down_copy(xd);
-
   for (i = 0; i < 16; i++) {
     MODE_INFO *const mic = xd->mode_info_context;
     const int mis = xd->mode_info_stride;

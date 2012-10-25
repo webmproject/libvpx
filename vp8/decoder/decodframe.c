@@ -202,15 +202,15 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd) {
 }
 
 static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
-                              unsigned int mb_col,
+                              int mb_row, unsigned int mb_col,
                               BOOL_DECODER* const bc) {
   int eobtotal = 0;
   MB_PREDICTION_MODE mode;
   int i;
   int tx_size;
   TX_TYPE tx_type;
-#if CONFIG_SUPERBLOCKS
   VP8_COMMON *pc = &pbi->common;
+#if CONFIG_SUPERBLOCKS
   int orig_skip_flag = xd->mode_info_context->mbmi.mb_skip_coeff;
 #endif
 
@@ -355,7 +355,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                                               b->dst_stride);
     }
   } else if (mode == B_PRED) {
-    vp8_intra_prediction_down_copy(xd);
+    vp8_intra_prediction_down_copy(xd, mb_col == pc->mb_cols - 1 &&
+                                       !(mb_row & 1));
     for (i = 0; i < 16; i++) {
       BLOCKD *b = &xd->block[i];
       int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
@@ -659,7 +660,7 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd,
         mi[pc->mode_info_stride + 1] = mi[0];
       }
 #endif
-      decode_macroblock(pbi, xd, mb_col, bc);
+      decode_macroblock(pbi, xd, mb_row, mb_col, bc);
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb) {
         mi[1].mbmi.txfm_size = mi[0].mbmi.txfm_size;

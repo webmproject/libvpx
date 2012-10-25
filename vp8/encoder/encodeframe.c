@@ -19,6 +19,7 @@
 #include "vp8/common/quant_common.h"
 #include "segmentation.h"
 #include "vp8/common/setupintrarecon.h"
+#include "vp8/common/reconintra4x4.h"
 #include "encodeintra.h"
 #include "vp8/common/reconinter.h"
 #include "vp8/common/invtrans.h"
@@ -613,6 +614,9 @@ static void pick_mb_modes(VP8_COMP *cpi,
 #endif
 
     cpi->update_context = 0;    // TODO Do we need this now??
+
+    vp8_intra_prediction_down_copy(xd, mb_col == cm->mb_cols - 1 &&
+                                       (mb_row & 1) == 0);
 
     // Find best coding mode & reconstruct the MB so it is available
     // as a predictor for MBs that follow in the SB
@@ -1911,7 +1915,6 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
     vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
     vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
   } else if (mbmi->mode == B_PRED) {
-    vp8_intra_prediction_down_copy(&x->e_mbd);
     vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
   } else {
     vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
@@ -2009,7 +2012,6 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
 
   if (mbmi->ref_frame == INTRA_FRAME) {
     if (mbmi->mode == B_PRED) {
-      vp8_intra_prediction_down_copy(xd);
       vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
       vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
     } else if (mbmi->mode == I8X8_PRED) {
