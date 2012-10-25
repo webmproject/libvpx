@@ -2226,7 +2226,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
   }
   *distortion >>= 2;
   if (otherrd) {
-    othercost >>= 2;
+    otherdist >>= 2;
     *otherrd = RDCOST(x->rdmult, x->rddiv, othercost, otherdist);
   }
   return RDCOST(x->rdmult, x->rddiv, *labelyrate, *distortion);
