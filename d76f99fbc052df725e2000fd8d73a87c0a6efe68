@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQn//1W0\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-25T00:57:07Z",
+      "side": 1,
+      "message": "don\u0027t need to update the commit message when amending. Should use a message that looks more like the first one you had. Make sure to write in subject/body format, and wrap your limes at 70 chars or so. The canonical reference for commit message style is http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html",
+      "revId": "d76f99fbc052df725e2000fd8d73a87c0a6efe68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//1Ws\u003d",
+        "filename": "nestegg/src/nestegg.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1844,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-25T00:57:07Z",
+      "side": 1,
+      "message": "hmm.. rather than doing this parsing in the container, I think it should be in the codec.",
+      "revId": "d76f99fbc052df725e2000fd8d73a87c0a6efe68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//1WY\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-25T00:57:07Z",
+      "side": 1,
+      "message": "Let the codec handle the bitstream level stuff -- lengths and control bytes. The application code should look something like:\n\n  start_webm_block()\n  while(vpx_codec_get_cx_data) {\n    write_data()\n    if(frame_is_visible)\n        finalize_webm_block()\n  }\n\nThe container/application doesn\u0027t need to know anything about how the block is packed. In fact, it\u0027s fine if you handle this entirely inside the codec for now, and never return the alt refs to the application directly. (It is useful to get data to the app in a more granular way sometimes, see the USE_OUTPUT_PARTITIONS stuff in vp8)",
+      "revId": "d76f99fbc052df725e2000fd8d73a87c0a6efe68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//1Uo\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-25T00:57:07Z",
+      "side": 1,
+      "message": "Don\u0027t use a fixed length code inside the codec, do something like:\n\n  int write_partition_length(int x) {\n    do {\n        int this_data \u003d x \u0026 0x7F;\n        x\u003e\u003e\u003d7;\n        this_data |\u003d (!!x) \u003c\u003c 7;\n    } while(x);\n  }",
+      "revId": "d76f99fbc052df725e2000fd8d73a87c0a6efe68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
