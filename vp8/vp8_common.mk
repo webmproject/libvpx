@@ -100,6 +100,7 @@ VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/recon_wrapper_sse2.c
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/subpixel_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/iwalsh_sse2.asm
+VP8_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/subpixel_8t_ssse3.asm
 VP8_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/subpixel_ssse3.asm
 ifeq ($(CONFIG_POSTPROC),yes)
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm

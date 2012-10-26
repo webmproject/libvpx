@@ -901,8 +901,7 @@ void vp8_eighttap_predict_avg16x16_c
   unsigned char *dst_ptr,
   int  dst_pitch
 ) {
-  unsigned char tmp[16 * 16];
-
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, tmp, 16 * 16);
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
@@ -921,7 +920,7 @@ void vp8_eighttap_predict_avg16x16_sharp_c
   unsigned char *dst_ptr,
   int  dst_pitch
 ) {
-  unsigned char tmp[16 * 16];
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, tmp, 16 * 16);
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
