@@ -980,6 +980,12 @@ static void encode_sb(VP8_COMP *cpi,
 
     cpi->update_context = 0;
 
+#if CONFIG_SUPERBLOCKS
+    if (!xd->mode_info_context->mbmi.encoded_as_sb)
+#endif
+      vp8_intra_prediction_down_copy(xd, mb_col == cm->mb_cols - 1 &&
+                                     (mb_row & 1) == 0);
+
     if (cm->frame_type == KEY_FRAME) {
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb)
