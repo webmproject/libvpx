@@ -168,6 +168,7 @@ vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
 }
 
 #if CONFIG_NEWBESTREFMV
+#define SP(x) (((x) & 7) << 1)
 unsigned int vp8_sad3x16_c(
   const unsigned char *src_ptr,
   int  src_stride,
@@ -189,7 +190,6 @@ unsigned int vp8_sad16x3_c(
  * above and a number cols of pixels in the left to select the one with best
  * score to use as ref motion vector
  */
-
 void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
@@ -203,6 +203,7 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   unsigned char *above_ref;
   unsigned char *left_ref;
   int sad;
+  int sse;
   int sad_scores[MAX_MV_REFS] = {0};
   int_mv sorted_mvs[MAX_MV_REFS];
   int zero_seen = FALSE;
@@ -211,16 +212,16 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   best_mv->as_int = nearest->as_int = near->as_int = 0;
   vpx_memset(sorted_mvs, 0, sizeof(sorted_mvs));
 
-  above_src = xd->dst.y_buffer - xd->dst.y_stride * 3;
-  left_src  = xd->dst.y_buffer - 3;
-  above_ref = ref_y_buffer - ref_y_stride * 3;
-  left_ref  = ref_y_buffer - 3;
+  above_src = xd->dst.y_buffer - xd->dst.y_stride * 2;
+  left_src  = xd->dst.y_buffer - 2;
+  above_ref = ref_y_buffer - ref_y_stride * 2;
+  left_ref  = ref_y_buffer - 2;
 
   //for(i = 0; i < MAX_MV_REFS; ++i) {
   // Limit search to the predicted best 4
   for(i = 0; i < 4; ++i) {
     int_mv this_mv;
-    int offset=0;
+    int offset = 0;
     int row_offset, col_offset;
 
     this_mv.as_int = mvlist[i].as_int;
@@ -238,19 +239,23 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
                  xd->mb_to_top_edge - LEFT_TOP_MARGIN + 16,
                  xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 
-    row_offset = (this_mv.as_mv.row > 0) ?
-      ((this_mv.as_mv.row + 3) >> 3):((this_mv.as_mv.row + 4) >> 3);
-    col_offset = (this_mv.as_mv.col > 0) ?
-      ((this_mv.as_mv.col + 3) >> 3):((this_mv.as_mv.col + 4) >> 3);
+    row_offset = this_mv.as_mv.row >> 3;
+    col_offset = this_mv.as_mv.col >> 3;
     offset = ref_y_stride * row_offset + col_offset;
 
     sad = 0;
-    if (xd->up_available)
-      sad += vp8_sad16x3(above_src, xd->dst.y_stride,
-                           above_ref + offset, ref_y_stride, INT_MAX);
-    if (xd->left_available)
-      sad += vp8_sad3x16(left_src, xd->dst.y_stride,
-                           left_ref + offset, ref_y_stride, INT_MAX);
+    if (xd->up_available) {
+      vp8_sub_pixel_variance16x2_c(above_ref + offset, ref_y_stride,
+                                   SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
+                                   above_src, xd->dst.y_stride, &sse);
+      sad += sse;
+    }
+    if (xd->left_available) {
+      vp8_sub_pixel_variance2x16_c(left_ref + offset, ref_y_stride,
+                                   SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
+                                   left_src, xd->dst.y_stride, &sse);
+      sad += sse;
+    }
     // Add the entry to our list and then resort the list on score.
     sad_scores[i] = sad;
     sorted_mvs[i].as_int = this_mv.as_int;
@@ -280,7 +285,7 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   // be more than one 0,0 entry in the sorted list.
   // The best ref mv is always set to the first entry (which gave the best
   // results. The nearest is set to the first non zero vector if available and
-  // near to the second non zero vector if avaialable.
+  // near to the second non zero vector if available.
   // We do not use 0,0 as a nearest or near as 0,0 has its own mode.
   if ( sorted_mvs[0].as_int ) {
     nearest->as_int = sorted_mvs[0].as_int;
