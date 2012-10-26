@@ -16,6 +16,41 @@
       "revId": "8f6ef7229463b04f46d4375b7362954a0803c2d1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//0Rs\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 993,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-26T04:06:04Z",
+      "side": 1,
+      "message": "My expectation would be that with this flag and no others, you get no output. If you specify --quiet -v, or --quiet --psnr, or --quiet --q-hist or something, I think it\u0027s fine to print the output that\u0027s protected by those options. It looks to me that this is what you\u0027ve implemented, so I agree with the intent of this patch.",
+      "parentUuid": "AAAAQn//0YA\u003d",
+      "revId": "8f6ef7229463b04f46d4375b7362954a0803c2d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//0RA\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2304,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-26T04:06:04Z",
+      "side": 1,
+      "message": "if(!quiet)",
+      "revId": "8f6ef7229463b04f46d4375b7362954a0803c2d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
