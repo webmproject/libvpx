@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3///1k\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 989,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-10-26T16:19:47Z",
+      "side": 1,
+      "message": "Actually you do not need to send the extend_edges parameter and making the interface complicated.\nIn the vp8_intra_prediction_down_copy(xd) function you can have the check:\n(xd-\u003emb_to_right_edge \u003d\u003d 0 \u0026\u0026 xd-\u003emb_index \u003c 2)",
+      "revId": "6d465faa3430fa4ada389c5f889832e7c5a84ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
