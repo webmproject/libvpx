@@ -768,9 +768,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
         }
     }
 
-#if ARCH_X86||ARCH_X86_64
-    vpx_reset_mmx_state();
-#endif
+    vp8_clear_system_state();
 
     if ((flags & VP8D_MFQE) &&
          oci->postproc_state.last_frame_valid &&
