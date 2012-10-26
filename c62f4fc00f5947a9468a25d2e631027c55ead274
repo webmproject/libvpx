@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3///X0\u003d",
+        "filename": "vp8/encoder/variance_c.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-26T23:09:38Z",
+      "side": 1,
+      "message": "double space between int and variable name should only be 1. Same applies to the three functions below as well.",
+      "revId": "c62f4fc00f5947a9468a25d2e631027c55ead274",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
