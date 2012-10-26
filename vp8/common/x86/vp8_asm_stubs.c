@@ -525,7 +525,99 @@ void vp8_sixtap_predict4x4_ssse3
   } else {
     vp8_filter_block1d4_v6_ssse3(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, dst_ptr, dst_pitch, 4, yoffset);
   }
-
 }
 
+void vp8_filter_block1d16_v8_ssse3(const unsigned char *src_ptr,
+                                   const unsigned int src_pitch,
+                                   unsigned char *output_ptr,
+                                   unsigned int out_pitch,
+                                   unsigned int output_height,
+                                   const short *filter);
+void vp8_filter_block1d16_h8_ssse3(const unsigned char *src_ptr,
+                                   const unsigned int src_pitch,
+                                   unsigned char *output_ptr,
+                                   unsigned int out_pitch,
+                                   unsigned int output_height,
+                                   const short *filter);
+
+void vp8_filter_block2d_16x16_8_ssse3
+(
+  const unsigned char *src_ptr, const unsigned int src_stride,
+  const short *HFilter_aligned16, const short *VFilter_aligned16,
+  unsigned char *dst_ptr, unsigned int dst_stride
+) {
+  if (HFilter_aligned16[3] !=128 && VFilter_aligned16[3] != 128) {
+    DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 23 * 16);
+    vp8_filter_block1d16_h8_ssse3(src_ptr - (3 * src_stride), src_stride,
+                                  FData2, 16, 23, HFilter_aligned16);
+    vp8_filter_block1d16_v8_ssse3(FData2, 16, dst_ptr, dst_stride, 16,
+                                  VFilter_aligned16);
+  } else {
+    if (HFilter_aligned16[3] !=128) {
+      vp8_filter_block1d16_h8_ssse3(src_ptr, src_stride, dst_ptr, dst_stride,
+                                    16, HFilter_aligned16);
+    } else {
+      vp8_filter_block1d16_v8_ssse3(src_ptr - (3 * src_stride), src_stride,
+                                    dst_ptr, dst_stride, 16, VFilter_aligned16);
+    }
+  }
+}
+
+void vp8_filter_block1d8_v8_ssse3(const unsigned char *src_ptr,
+                                   const unsigned int src_pitch,
+                                   unsigned char *output_ptr,
+                                   unsigned int out_pitch,
+                                   unsigned int output_height,
+                                   const short *filter);
+void vp8_filter_block1d8_h8_ssse3(const unsigned char *src_ptr,
+                                   const unsigned int src_pitch,
+                                   unsigned char *output_ptr,
+                                   unsigned int out_pitch,
+                                   unsigned int output_height,
+                                   const short *filter);
+void vp8_filter_block2d_8x8_8_ssse3
+(
+  const unsigned char *src_ptr, const unsigned int src_stride,
+  const short *HFilter_aligned16, const short *VFilter_aligned16,
+  unsigned char *dst_ptr, unsigned int dst_stride
+) {
+  if (HFilter_aligned16[3] !=128 && VFilter_aligned16[3] != 128) {
+    DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 23 * 16);
+    vp8_filter_block1d8_h8_ssse3(src_ptr - (3 * src_stride), src_stride,
+                                 FData2, 16, 15, HFilter_aligned16);
+    vp8_filter_block1d8_v8_ssse3(FData2, 16, dst_ptr, dst_stride, 8,
+                                 VFilter_aligned16);
+  } else {
+    if (HFilter_aligned16[3] !=128) {
+      vp8_filter_block1d8_h8_ssse3(src_ptr, src_stride, dst_ptr, dst_stride, 8,
+                                   HFilter_aligned16);
+    } else {
+      vp8_filter_block1d8_v8_ssse3(src_ptr - (3 * src_stride), src_stride,
+                                   dst_ptr, dst_stride, 8, VFilter_aligned16);
+    }
+  }
+}
+
+void vp8_filter_block2d_8x4_8_ssse3
+(
+  const unsigned char *src_ptr, const unsigned int src_stride,
+  const short *HFilter_aligned16, const short *VFilter_aligned16,
+  unsigned char *dst_ptr, unsigned int dst_stride
+) {
+  if (HFilter_aligned16[3] !=128 && VFilter_aligned16[3] != 128) {
+      DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 23 * 16);
+      vp8_filter_block1d8_h8_ssse3(src_ptr - (3 * src_stride), src_stride,
+                                   FData2, 16, 11, HFilter_aligned16);
+      vp8_filter_block1d8_v8_ssse3(FData2, 16, dst_ptr, dst_stride, 4,
+                                   VFilter_aligned16);
+  } else {
+    if (HFilter_aligned16[3] !=128) {
+      vp8_filter_block1d8_h8_ssse3(src_ptr, src_stride, dst_ptr, dst_stride, 4,
+                                   HFilter_aligned16);
+    } else {
+      vp8_filter_block1d8_v8_ssse3(src_ptr - (3 * src_stride), src_stride,
+                                   dst_ptr, dst_stride, 4, VFilter_aligned16);
+    }
+  }
+}
 #endif
