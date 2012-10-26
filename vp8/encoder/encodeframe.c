@@ -470,8 +470,6 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
     // Note how often each mode chosen as best
     cpi->mode_chosen_counts[mb_mode_index]++;
 
-    rd_update_mvcount(cpi, x, &ctx->best_ref_mv, &ctx->second_best_ref_mv);
-
     cpi->prediction_error += ctx->distortion;
     cpi->intra_error += ctx->intra_error;
 

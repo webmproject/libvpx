@@ -35,9 +35,4 @@ extern void vp8_mv_pred
 extern void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffset, int near_sadidx[]);
 extern void vp8_init_me_luts();
 extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
-extern void rd_update_mvcount(VP8_COMP *cpi,
-                              MACROBLOCK *x,
-                              int_mv *best_ref_mv,
-                              int_mv *second_best_ref_mv);
-
 #endif

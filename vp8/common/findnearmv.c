@@ -54,19 +54,9 @@ void vp8_find_near_mvs
   int             *cntx = cnt;
   enum {CNT_INTRA, CNT_NEAREST, CNT_NEAR, CNT_SPLITMV};
 
-#if CONFIG_NEWBESTREFMV
-  int_mv          *ref_mv = xd->ref_mv;
-#endif
-
   /* Zero accumulators */
   mv[0].as_int = mv[1].as_int = mv[2].as_int = 0;
   cnt[0] = cnt[1] = cnt[2] = cnt[3] = 0;
-#if CONFIG_NEWBESTREFMV
-  ref_mv[0].as_int = ref_mv[1].as_int
-                   = ref_mv[2].as_int
-                   = ref_mv[3].as_int
-                   = 0;
-#endif
 
   /* Process above */
   if (above->mbmi.ref_frame != INTRA_FRAME) {
@@ -75,9 +65,6 @@ void vp8_find_near_mvs
       mv->as_int = above->mbmi.mv[0].as_int;
       mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame],
               refframe, mv, ref_frame_sign_bias);
-#if CONFIG_NEWBESTREFMV
-      ref_mv[0].as_int = mv->as_int;
-#endif
       ++cntx;
     }
     *cntx += 2;
@@ -90,9 +77,7 @@ void vp8_find_near_mvs
       this_mv.as_int = left->mbmi.mv[0].as_int;
       mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame],
               refframe, &this_mv, ref_frame_sign_bias);
-#if CONFIG_NEWBESTREFMV
-      ref_mv[1].as_int = this_mv.as_int;
-#endif
+
       if (this_mv.as_int != mv->as_int) {
         ++ mv;
         mv->as_int = this_mv.as_int;
@@ -107,21 +92,9 @@ void vp8_find_near_mvs
       (lf_here->mbmi.ref_frame == LAST_FRAME && refframe == LAST_FRAME)) {
     if (aboveleft->mbmi.mv[0].as_int) {
       third = aboveleft;
-#if CONFIG_NEWBESTREFMV
-      ref_mv[2].as_int = aboveleft->mbmi.mv[0].as_int;
-      mv_bias(ref_frame_sign_bias[aboveleft->mbmi.ref_frame],
-              refframe, (ref_mv+2), ref_frame_sign_bias);
-#endif
     } else if (lf_here->mbmi.mv[0].as_int) {
       third = lf_here;
     }
-#if CONFIG_NEWBESTREFMV
-    if (lf_here->mbmi.mv[0].as_int) {
-      ref_mv[3].as_int = lf_here->mbmi.mv[0].as_int;
-      mv_bias(ref_frame_sign_bias[lf_here->mbmi.ref_frame],
-              refframe, (ref_mv+3), ref_frame_sign_bias);
-    }
-#endif
     if (third) {
       int_mv this_mv;
       this_mv.as_int = third->mbmi.mv[0].as_int;
@@ -294,6 +267,12 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
     }
   }
 
+  // Make sure all the candidates are properly clamped etc
+  for (i = 0; i < 4; ++i) {
+    lower_mv_precision(&sorted_mvs[i], xd->allow_high_precision_mv);
+    vp8_clamp_mv2(&sorted_mvs[i], xd);
+  }
+
   // Set the best mv to the first entry in the sorted list
   best_mv->as_int = sorted_mvs[0].as_int;
 
@@ -316,9 +295,6 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
 
   // Copy back the re-ordered mv list
   vpx_memcpy(mvlist, sorted_mvs, sizeof(sorted_mvs));
-  lower_mv_precision(best_mv, xd->allow_high_precision_mv);
-
-  vp8_clamp_mv2(best_mv, xd);
 }
 
 #endif  // CONFIG_NEWBESTREFMV

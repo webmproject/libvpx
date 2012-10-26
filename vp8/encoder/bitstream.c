@@ -28,6 +28,7 @@
 #include "vp8/common/pred_common.h"
 #include "vp8/common/entropy.h"
 #include "vp8/encoder/encodemv.h"
+#include "vp8/common/entropymv.h"
 
 #if CONFIG_NEWBESTREFMV
 #include "vp8/common/mvref_common.h"
@@ -115,69 +116,6 @@ static int prob_diff_update_cost(vp8_prob newp, vp8_prob oldp) {
   int delp = remap_prob(newp, oldp);
   return update_bits[delp] * 256;
 }
-
-#if CONFIG_NEW_MVREF
-// Estimate the cost of each coding the vector using each reference candidate
-unsigned int pick_best_mv_ref( MACROBLOCK *x,
-                               int_mv target_mv,
-                               int_mv * mv_ref_list,
-                               int_mv * best_ref ) {
-
-  int i;
-  int best_index = 0;
-  int cost, cost2;
-  int index_cost[MAX_MV_REFS];
-  MACROBLOCKD *xd = &x->e_mbd;
-
-  /*unsigned int distance, distance2;
-
-  distance = mv_distance(&target_mv, &mv_ref_list[0]);
-
-  for (i = 1; i < MAX_MV_REFS; ++i ) {
-    distance2 =
-      mv_distance(&target_mv, &mv_ref_list[i]);
-    if (distance2 < distance) {
-      distance = distance2;
-      best_index = i;
-    }
-  }*/
-
-  // For now estimate the cost of selecting a given ref index
-  // as index * 1 bits (but here 1 bit is scaled to 256)
-  for (i = 0; i < MAX_MV_REFS; ++i ) {
-    index_cost[i] = i << 8;
-  }
-  index_cost[0] = vp8_cost_zero(205);
-  index_cost[1] = vp8_cost_zero(40);
-  index_cost[2] = vp8_cost_zero(8);
-  index_cost[3] = vp8_cost_zero(2);
-
-  cost = index_cost[0] +
-         vp8_mv_bit_cost(&target_mv,
-                         &mv_ref_list[0],
-                         XMVCOST, 96,
-                         xd->allow_high_precision_mv);
-
-
-  //for (i = 1; i < MAX_MV_REFS; ++i ) {
-  for (i = 1; i < 4; ++i ) {
-    cost2 = index_cost[i] +
-            vp8_mv_bit_cost(&target_mv,
-                            &mv_ref_list[i],
-                            XMVCOST, 96,
-                            xd->allow_high_precision_mv);
-
-    if (cost2 < cost) {
-      cost = cost2;
-      best_index = i;
-    }
-  }
-
-  (*best_ref).as_int = mv_ref_list[best_index].as_int;
-
-  return best_index;
-}
-#endif
 
 static void update_mode(
   vp8_writer *const bc,
@@ -317,6 +255,70 @@ static void update_refpred_stats(VP8_COMP *cpi) {
       } else
         cpi->ref_pred_probs_update[i] = 0;
 
+    }
+  }
+}
+
+static void update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
+                           int_mv *best_ref_mv, int_mv *second_best_ref_mv) {
+  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
+  MV mv;
+
+  if (mbmi->mode == SPLITMV) {
+    int i;
+
+    for (i = 0; i < x->partition_info->count; i++) {
+      if (x->partition_info->bmi[i].mode == NEW4X4) {
+        if (x->e_mbd.allow_high_precision_mv) {
+          mv.row = (x->partition_info->bmi[i].mv.as_mv.row
+                    - best_ref_mv->as_mv.row);
+          mv.col = (x->partition_info->bmi[i].mv.as_mv.col
+                    - best_ref_mv->as_mv.col);
+          vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
+          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
+            mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
+                      - second_best_ref_mv->as_mv.row);
+            mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
+                      - second_best_ref_mv->as_mv.col);
+            vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv,
+                              &cpi->NMVcount, 1);
+          }
+        } else {
+          mv.row = (x->partition_info->bmi[i].mv.as_mv.row
+                    - best_ref_mv->as_mv.row);
+          mv.col = (x->partition_info->bmi[i].mv.as_mv.col
+                    - best_ref_mv->as_mv.col);
+          vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
+          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
+            mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
+                      - second_best_ref_mv->as_mv.row);
+            mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
+                      - second_best_ref_mv->as_mv.col);
+            vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv,
+                              &cpi->NMVcount, 0);
+          }
+        }
+      }
+    }
+  } else if (mbmi->mode == NEWMV) {
+    if (x->e_mbd.allow_high_precision_mv) {
+      mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
+      mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
+      vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
+      if (mbmi->second_ref_frame) {
+        mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
+        mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
+        vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 1);
+      }
+    } else {
+      mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
+      mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
+      vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
+      if (mbmi->second_ref_frame) {
+        mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
+        mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
+        vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 0);
+      }
     }
   }
 }
@@ -618,6 +620,124 @@ static void write_nmv(vp8_writer *bc, const MV *mv, const int_mv *ref,
   vp8_encode_nmv(bc, &e, &ref->as_mv, nmvc);
   vp8_encode_nmv_fp(bc, &e, &ref->as_mv, nmvc, usehp);
 }
+
+#if CONFIG_NEW_MVREF
+static int vp8_cost_mv_ref_id(vp8_prob * ref_id_probs, int mv_ref_id) {
+  int cost;
+
+  // Encode the index for the MV reference.
+  switch (mv_ref_id) {
+    case 0:
+      cost = vp8_cost_zero(ref_id_probs[0]);
+      break;
+    case 1:
+      cost = vp8_cost_one(ref_id_probs[0]);
+      cost += vp8_cost_zero(ref_id_probs[1]);
+      break;
+    case 2:
+      cost = vp8_cost_one(ref_id_probs[0]);
+      cost += vp8_cost_one(ref_id_probs[1]);
+      cost += vp8_cost_zero(ref_id_probs[2]);
+      break;
+    case 3:
+      cost = vp8_cost_one(ref_id_probs[0]);
+      cost += vp8_cost_one(ref_id_probs[1]);
+      cost += vp8_cost_one(ref_id_probs[2]);
+      break;
+
+      // TRAP.. This should not happen
+    default:
+      assert(0);
+      break;
+  }
+
+  return cost;
+}
+
+static void vp8_write_mv_ref_id(vp8_writer *w,
+                                vp8_prob * ref_id_probs,
+                                int mv_ref_id) {
+  // Encode the index for the MV reference.
+  switch (mv_ref_id) {
+    case 0:
+      vp8_write(w, 0, ref_id_probs[0]);
+      break;
+    case 1:
+      vp8_write(w, 1, ref_id_probs[0]);
+      vp8_write(w, 0, ref_id_probs[1]);
+      break;
+    case 2:
+      vp8_write(w, 1, ref_id_probs[0]);
+      vp8_write(w, 1, ref_id_probs[1]);
+      vp8_write(w, 0, ref_id_probs[2]);
+      break;
+    case 3:
+      vp8_write(w, 1, ref_id_probs[0]);
+      vp8_write(w, 1, ref_id_probs[1]);
+      vp8_write(w, 1, ref_id_probs[2]);
+      break;
+
+      // TRAP.. This should not happen
+    default:
+      assert(0);
+      break;
+  }
+}
+
+// Estimate the cost of each coding the vector using each reference candidate
+static unsigned int pick_best_mv_ref(MACROBLOCK *x,
+                                     MV_REFERENCE_FRAME ref_frame,
+                                     int_mv target_mv,
+                                     int_mv * mv_ref_list,
+                                     int_mv * best_ref) {
+  int i;
+  int best_index = 0;
+  int cost, cost2;
+  int zero_seen = (mv_ref_list[0].as_int) ? FALSE : TRUE;
+  MACROBLOCKD *xd = &x->e_mbd;
+  int max_mv = MV_MAX;
+
+  cost = vp8_cost_mv_ref_id(xd->mb_mv_ref_id_probs[ref_frame], 0) +
+         vp8_mv_bit_cost(&target_mv,
+                         &mv_ref_list[0],
+                         XMVCOST, 96,
+                         xd->allow_high_precision_mv);
+
+
+  // Use 4 for now : for (i = 1; i < MAX_MV_REFS; ++i ) {
+  for (i = 1; i < 4; ++i) {
+    // If we see a 0,0 reference vector for a second time we have reached
+    // the end of the list of valid candidate vectors.
+    if (!mv_ref_list[i].as_int)
+      if (zero_seen)
+        break;
+      else
+        zero_seen = TRUE;
+
+    // Check for cases where the reference choice would give rise to an
+    // uncodable/out of range residual for row or col.
+    if ((abs(target_mv.as_mv.row - mv_ref_list[i].as_mv.row) > max_mv) ||
+        (abs(target_mv.as_mv.col - mv_ref_list[i].as_mv.col) > max_mv)) {
+      continue;
+    }
+
+    cost2 = vp8_cost_mv_ref_id(xd->mb_mv_ref_id_probs[ref_frame], i) +
+            vp8_mv_bit_cost(&target_mv,
+                            &mv_ref_list[i],
+                            XMVCOST, 96,
+                            xd->allow_high_precision_mv);
+
+    if (cost2 < cost) {
+      cost = cost2;
+      best_index = i;
+    }
+  }
+
+  (*best_ref).as_int = mv_ref_list[best_index].as_int;
+
+  return best_index;
+}
+#endif
 
 // This function writes the current macro block's segnment id to the bitstream
 // It should only be called if a segment map update is indicated.
@@ -931,11 +1051,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
           {
             int_mv n1, n2;
 
+            // Only used for context just now and soon to be deprecated.
             vp8_find_near_mvs(xd, m, prev_m, &n1, &n2, &best_mv, ct,
                               rf, cpi->common.ref_frame_sign_bias);
 #if CONFIG_NEWBESTREFMV
-            best_mv.as_int = mi->ref_mv.as_int;
+            best_mv.as_int = mi->ref_mvs[rf][0].as_int;
 #endif
+
             vp8_mv_ref_probs(&cpi->common, mv_ref_p, ct);
 
 #ifdef ENTROPY_STATS
@@ -988,13 +1110,15 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
               (mode == NEWMV || mode == SPLITMV)) {
             int_mv n1, n2;
 
-            vp8_find_near_mvs(xd, m,
-                              prev_m,
+            // Only used for context just now and soon to be deprecated.
+            vp8_find_near_mvs(xd, m, prev_m,
                               &n1, &n2, &best_second_mv, ct,
                               mi->second_ref_frame,
                               cpi->common.ref_frame_sign_bias);
+
 #if CONFIG_NEWBESTREFMV
-            best_second_mv.as_int = mi->second_ref_mv.as_int;
+            best_second_mv.as_int =
+              mi->ref_mvs[mi->second_ref_frame][0].as_int;
 #endif
           }
 
@@ -1012,38 +1136,43 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
                 active_section = 5;
 #endif
 
-#if 0 //CONFIG_NEW_MVREF
+#if CONFIG_NEW_MVREF
                 {
                   unsigned int best_index;
-                  /*find_mv_refs(xd, m, prev_m,
-                               m->mbmi.ref_frame,
-                               mi->ref_mvs[rf],
-                               cpi->common.ref_frame_sign_bias );*/
 
-                  best_index = pick_best_mv_ref(x, mi->mv[0],
+                  // Choose the best mv reference
+                  best_index = pick_best_mv_ref(x, rf, mi->mv[0],
                                                 mi->ref_mvs[rf], &best_mv);
-                  cpi->best_ref_index_counts[best_index]++;
+
+                  // Encode the index of the choice.
+                  vp8_write_mv_ref_id(bc,
+                                      xd->mb_mv_ref_id_probs[rf], best_index);
+
+                  cpi->best_ref_index_counts[rf][best_index]++;
 
                 }
 #endif
+
                 write_nmv(bc, &mi->mv[0].as_mv, &best_mv,
                           (const nmv_context*) nmvc,
                           xd->allow_high_precision_mv);
 
                 if (mi->second_ref_frame) {
-#if 0 //CONFIG_NEW_MVREF
+#if CONFIG_NEW_MVREF
                   unsigned int best_index;
-
-                  /*find_mv_refs(xd, m, prev_m,
-                               m->mbmi.second_ref_frame,
-                               mi->ref_mvs[mi->second_ref_frame],
-                               cpi->common.ref_frame_sign_bias );*/
+                  MV_REFERENCE_FRAME sec_ref_frame = mi->second_ref_frame;
 
                   best_index =
-                    pick_best_mv_ref(x, mi->mv[1],
-                                     mi->ref_mvs[mi->second_ref_frame],
+                    pick_best_mv_ref(x, sec_ref_frame, mi->mv[1],
+                                     mi->ref_mvs[sec_ref_frame],
                                      &best_second_mv);
-                  cpi->best_ref_index_counts[best_index]++;
+
+                  // Encode the index of the choice.
+                  vp8_write_mv_ref_id(bc,
+                                      xd->mb_mv_ref_id_probs[sec_ref_frame],
+                                      best_index);
+
+                  cpi->best_ref_index_counts[sec_ref_frame][best_index]++;
 #endif
                   write_nmv(bc, &mi->mv[1].as_mv, &best_second_mv,
                             (const nmv_context*) nmvc,
@@ -1107,6 +1236,12 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
               default:
                 break;
             }
+          }
+
+          // Update the mvcounts used to tune mv probs but only if this is
+          // the real pack run.
+          if ( !cpi->dummy_packing ) {
+            update_mvcount(cpi, x, &best_mv, &best_second_mv);
           }
         }
 
@@ -2159,6 +2294,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     }
 
     update_mbintra_mode_probs(cpi, &header_bc);
+
+#if CONFIG_NEW_MVREF
+    // Temp defaults probabilities for ecnoding the MV ref id signal
+    vpx_memset(xd->mb_mv_ref_id_probs, 192, sizeof(xd->mb_mv_ref_id_probs));
+#endif
 
     vp8_write_nmvprobs(cpi, xd->allow_high_precision_mv, &header_bc);
   }
