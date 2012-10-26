@@ -613,8 +613,7 @@ static void pick_mb_modes(VP8_COMP *cpi,
 
     cpi->update_context = 0;    // TODO Do we need this now??
 
-    vp8_intra_prediction_down_copy(xd, mb_col == cm->mb_cols - 1 &&
-                                       (mb_row & 1) == 0);
+    vp8_intra_prediction_down_copy(xd);
 
     // Find best coding mode & reconstruct the MB so it is available
     // as a predictor for MBs that follow in the SB
@@ -983,8 +982,7 @@ static void encode_sb(VP8_COMP *cpi,
 #if CONFIG_SUPERBLOCKS
     if (!xd->mode_info_context->mbmi.encoded_as_sb)
 #endif
-      vp8_intra_prediction_down_copy(xd, mb_col == cm->mb_cols - 1 &&
-                                     (mb_row & 1) == 0);
+      vp8_intra_prediction_down_copy(xd);
 
     if (cm->frame_type == KEY_FRAME) {
 #if CONFIG_SUPERBLOCKS
