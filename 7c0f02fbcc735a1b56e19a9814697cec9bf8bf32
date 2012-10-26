@@ -349,6 +349,24 @@
       "revId": "7c0f02fbcc735a1b56e19a9814697cec9bf8bf32",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQn//0VA\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-26T02:27:15Z",
+      "side": 1,
+      "message": "It will work. outside of a test I\u0027d think an Init/Reset pair would be better. this should be a separate cl that this one is dependent on",
+      "parentUuid": "AAAAQn//0VU\u003d",
+      "revId": "7c0f02fbcc735a1b56e19a9814697cec9bf8bf32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
