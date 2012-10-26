@@ -989,6 +989,8 @@ static const arg_def_t good_dl          = ARG_DEF(NULL, "good", 0,
         "Use Good Quality Deadline");
 static const arg_def_t rt_dl            = ARG_DEF(NULL, "rt", 0,
         "Use Realtime Quality Deadline");
+static const arg_def_t quietarg         = ARG_DEF("q", "quiet", 0,
+        "Do not print encode progress");
 static const arg_def_t verbosearg       = ARG_DEF("v", "verbose", 0,
         "Show encoder parameters");
 static const arg_def_t psnrarg          = ARG_DEF(NULL, "psnr", 0,
@@ -1008,7 +1010,7 @@ static const arg_def_t *main_args[] =
     &debugmode,
     &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline,
     &best_dl, &good_dl, &rt_dl,
-    &verbosearg, &psnrarg, &use_ivf, &out_part, &q_hist_n, &rate_hist_n,
+    &quietarg, &verbosearg, &psnrarg, &use_ivf, &out_part, &q_hist_n, &rate_hist_n,
     NULL
 };
 
@@ -1506,6 +1508,7 @@ struct global_config
     int                       usage;
     int                       deadline;
     int                       use_i420;
+    int                       quiet;
     int                       verbose;
     int                       limit;
     int                       show_psnr;
@@ -1630,6 +1633,8 @@ static void parse_global_config(struct global_config *global, char **argv)
             global->use_i420 = 0;
         else if (arg_match(&arg, &use_i420, argi))
             global->use_i420 = 1;
+        else if (arg_match(&arg, &quietarg, argi))
+            global->quiet = 1;
         else if (arg_match(&arg, &verbosearg, argi))
             global->verbose = 1;
         else if (arg_match(&arg, &limit, argi))
@@ -2235,8 +2240,9 @@ static void get_cx_data(struct stream_state  *stream,
             {
                 stream->frames_out++;
             }
-            fprintf(stderr, " %6luF",
-                    (unsigned long)pkt->data.frame.sz);
+            if (!global->quiet)
+                fprintf(stderr, " %6luF",
+                        (unsigned long)pkt->data.frame.sz);
 
             update_rate_histogram(&stream->rate_hist, cfg, pkt);
             if(stream->config.write_webm)
@@ -2295,7 +2301,8 @@ static void get_cx_data(struct stream_state  *stream,
                 stream->psnr_samples_total += pkt->data.psnr.samples[0];
                 for (i = 0; i < 4; i++)
                 {
-                    fprintf(stderr, "%.3f ", pkt->data.psnr.psnr[i]);
+                    if (!global->quiet)
+                        fprintf(stderr, "%.3f ", pkt->data.psnr.psnr[i]);
                     stream->psnr_totals[i] += pkt->data.psnr.psnr[i];
                 }
                 stream->psnr_count++;
@@ -2474,18 +2481,21 @@ int main(int argc, const char **argv_)
                 if (frame_avail)
                     frames_in++;
 
-                if(stream_cnt == 1)
-                    fprintf(stderr,
-                            "\rPass %d/%d frame %4d/%-4d %7"PRId64"B \033[K",
-                            pass + 1, global.passes, frames_in,
-                            streams->frames_out, (int64_t)streams->nbytes);
-                else
-                    fprintf(stderr,
-                            "\rPass %d/%d frame %4d %7lu %s (%.2f fps)\033[K",
-                            pass + 1, global.passes, frames_in,
-                            cx_time > 9999999 ? cx_time / 1000 : cx_time,
-                            cx_time > 9999999 ? "ms" : "us",
-                            usec_to_fps(cx_time, frames_in));
+                if (!global.quiet)
+                {
+                    if(stream_cnt == 1)
+                        fprintf(stderr,
+                                "\rPass %d/%d frame %4d/%-4d %7"PRId64"B \033[K",
+                                pass + 1, global.passes, frames_in,
+                                streams->frames_out, (int64_t)streams->nbytes);
+                    else
+                        fprintf(stderr,
+                                "\rPass %d/%d frame %4d %7lu %s (%.2f fps)\033[K",
+                                pass + 1, global.passes, frames_in,
+                                cx_time > 9999999 ? cx_time / 1000 : cx_time,
+                                cx_time > 9999999 ? "ms" : "us",
+                                usec_to_fps(cx_time, frames_in));
+                }
 
             }
             else
@@ -2509,20 +2519,21 @@ int main(int argc, const char **argv_)
         if(stream_cnt > 1)
             fprintf(stderr, "\n");
 
-        FOREACH_STREAM(fprintf(
-            stderr,
-            "\rPass %d/%d frame %4d/%-4d %7"PRId64"B %7lub/f %7"PRId64"b/s"
-            " %7"PRId64" %s (%.2f fps)\033[K\n", pass + 1,
-            global.passes, frames_in, stream->frames_out, (int64_t)stream->nbytes,
-            frames_in ? (unsigned long)(stream->nbytes * 8 / frames_in) : 0,
-            frames_in ? (int64_t)stream->nbytes * 8
-                        * (int64_t)global.framerate.num / global.framerate.den
-                        / frames_in
-                      : 0,
-            stream->cx_time > 9999999 ? stream->cx_time / 1000 : stream->cx_time,
-            stream->cx_time > 9999999 ? "ms" : "us",
-            usec_to_fps(stream->cx_time, frames_in));
-        );
+        if (!global.quiet)
+            FOREACH_STREAM(fprintf(
+                stderr,
+                "\rPass %d/%d frame %4d/%-4d %7"PRId64"B %7lub/f %7"PRId64"b/s"
+                " %7"PRId64" %s (%.2f fps)\033[K\n", pass + 1,
+                global.passes, frames_in, stream->frames_out, (int64_t)stream->nbytes,
+                frames_in ? (unsigned long)(stream->nbytes * 8 / frames_in) : 0,
+                frames_in ? (int64_t)stream->nbytes * 8
+                            * (int64_t)global.framerate.num / global.framerate.den
+                            / frames_in
+                          : 0,
+                stream->cx_time > 9999999 ? stream->cx_time / 1000 : stream->cx_time,
+                stream->cx_time > 9999999 ? "ms" : "us",
+                usec_to_fps(stream->cx_time, frames_in));
+            );
 
         if (global.show_psnr)
             FOREACH_STREAM(show_psnr(stream));
