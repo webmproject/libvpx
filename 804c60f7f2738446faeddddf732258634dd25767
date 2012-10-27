@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3///UE\u003d",
+        "filename": "vp8/common/loopfilter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-27T00:49:35Z",
+      "side": 1,
+      "message": "struct macroblockd (no capitals).",
+      "revId": "804c60f7f2738446faeddddf732258634dd25767",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3///UA\u003d",
+        "filename": "vp8/encoder/onyx_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-27T00:49:35Z",
+      "side": 1,
+      "message": "remove, don\u0027t comment.",
+      "revId": "804c60f7f2738446faeddddf732258634dd25767",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
