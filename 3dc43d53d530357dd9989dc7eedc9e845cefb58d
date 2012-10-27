@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3///MY\u003d",
+        "filename": "vp8/encoder/encodemb.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-27T15:01:04Z",
+      "side": 1,
+      "message": "what\u0027s in these files? They should probably go?",
+      "revId": "3dc43d53d530357dd9989dc7eedc9e845cefb58d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3///MU\u003d",
+        "filename": "vp8/encoder/encodemb.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-27T15:01:04Z",
+      "side": 1,
+      "message": "Same.",
+      "revId": "3dc43d53d530357dd9989dc7eedc9e845cefb58d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3///MQ\u003d",
+        "filename": "vp8/encoder/x86/encodemb_x86.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-27T15:01:04Z",
+      "side": 1,
+      "message": "just delete this file, likely same for the arm version.",
+      "revId": "3dc43d53d530357dd9989dc7eedc9e845cefb58d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3///MM\u003d",
+        "filename": "vp8/encoder/x86/x86_csystemdependent.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-27T15:01:04Z",
+      "side": 1,
+      "message": "empty branch, so just remove it.",
+      "revId": "3dc43d53d530357dd9989dc7eedc9e845cefb58d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
