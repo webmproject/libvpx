@@ -57,6 +57,9 @@ class VideoSource {
 
   // Get the current frame counter, starting at 0.
   virtual unsigned int frame() const = 0;
+
+  // Get the current file limit.
+  virtual unsigned int limit() const = 0;
 };
 
 
@@ -93,6 +96,8 @@ class DummyVideoSource : public VideoSource {
   }
 
   virtual unsigned int frame() const { return frame_; }
+
+  virtual unsigned int limit() const { return limit_; }
 
   void SetSize(unsigned int width, unsigned int height) {
     if (width != width_ || height != height_) {

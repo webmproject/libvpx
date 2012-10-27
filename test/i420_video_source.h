@@ -25,6 +25,7 @@ class I420VideoSource : public VideoSource {
                   int rate_numerator, int rate_denominator,
                   unsigned int start, int limit)
       : file_name_(file_name),
+        input_file_(NULL),
         img_(NULL),
         start_(start),
         limit_(limit),
@@ -45,10 +46,11 @@ class I420VideoSource : public VideoSource {
   }
 
   virtual void Begin() {
+    if (input_file_)
+      fclose(input_file_);
     input_file_ = OpenTestDataFile(file_name_);
     ASSERT_TRUE(input_file_) << "Input file open failed. Filename: "
         << file_name_;
-
     if (start_) {
       fseek(input_file_, raw_sz_ * start_, SEEK_SET);
     }
@@ -75,6 +77,8 @@ class I420VideoSource : public VideoSource {
   }
 
   virtual unsigned int frame() const { return frame_; }
+
+  virtual unsigned int limit() const { return limit_; }
 
   void SetSize(unsigned int width, unsigned int height) {
     if (width != width_ || height != height_) {
