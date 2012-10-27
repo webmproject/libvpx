@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3///LQ\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-27T23:22:29Z",
+      "side": 1,
+      "message": "Remove the \"./\".",
+      "revId": "0ecc4c9436b4acf55e3c7bea93a40390a7102c13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3///LM\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-27T23:22:29Z",
+      "side": 1,
+      "message": "Remove the \"./\".",
+      "revId": "0ecc4c9436b4acf55e3c7bea93a40390a7102c13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3///LI\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-27T23:22:29Z",
+      "side": 1,
+      "message": "Remove the \"./\".",
+      "revId": "0ecc4c9436b4acf55e3c7bea93a40390a7102c13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
