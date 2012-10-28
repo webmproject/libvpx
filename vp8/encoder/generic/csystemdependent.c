@@ -32,14 +32,6 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi) {
   cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
   cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
   cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
-
-  cpi->rtcd.encodemb.berr                  = vp8_block_error_c;
-  cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_c;
-  cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_c;
-  cpi->rtcd.encodemb.subb                  = vp8_subtract_b_c;
-  cpi->rtcd.encodemb.submby                = vp8_subtract_mby_c;
-  cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_c;
-
   cpi->rtcd.search.full_search             = vp8_full_search_sad;
   cpi->rtcd.search.refining_search         = vp8_refining_search_sad;
   cpi->rtcd.search.diamond_search          = vp8_diamond_search_sad;

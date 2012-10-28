@@ -24,7 +24,7 @@ typedef struct {
   int offset;
 } search_site;
 
-typedef struct {
+typedef struct block {
   // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
   short *src_diff;
   short *coeff;
@@ -82,7 +82,7 @@ typedef struct {
   int64_t txfm_rd_diff[NB_TXFM_MODES];
 } PICK_MODE_CONTEXT;
 
-typedef struct {
+typedef struct macroblock {
   DECLARE_ALIGNED(16, short, src_diff[400]);  // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
   DECLARE_ALIGNED(16, short, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
   DECLARE_ALIGNED(16, unsigned char, thismb[256]);    // 16x16 Y

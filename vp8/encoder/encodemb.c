@@ -19,6 +19,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "rdopt.h"
 #include "vp8/common/systemdependent.h"
+#include "vpx_rtcd.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
@@ -126,8 +127,10 @@ void vp8_subtract_mby_c(short *diff, unsigned char *src,
 static void vp8_subtract_mb(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   BLOCK *b = &x->block[0];
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
-  ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
+  vp8_subtract_mby(x->src_diff, *(b->base_src), x->e_mbd.predictor,
+                   b->src_stride);
+  vp8_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+                    x->e_mbd.predictor, x->src.uv_stride);
 }
 
 static void build_dcblock_4x4(MACROBLOCK *x) {
@@ -942,8 +945,7 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   vp8_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src),
-                                           xd->predictor, b->src_stride);
+  vp8_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
 
   vp8_transform_mby_4x4(x);
   vp8_quantize_mby_4x4(x);
