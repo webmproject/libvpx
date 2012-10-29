@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Wo\u003d",
+        "filename": "vp8/common/pred_common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "seg_id is not boolean.",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+WQ\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 751,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "seg_id is not boolean.",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Vw\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "this code that propagates copies of the mode info is duplicated in several places and written in at least 2 different ways. Should be made into a function.",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Vo\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1207,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "leftover debug",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+VU\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "seems like a lot of grief could be saved by making the mi arrays sb-aligned, there\u0027s a whole lot of clamping going on.",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Tc\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2944,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "remove vp8_ prefix now that it\u0027s static",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Ug\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2950,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "a const dst pointer is pretty senseless. does this need a better name? (locally, not xd-\u003edst)",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Uc\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2999,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "Can you move this up above near_sad[4]?",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Ts\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4535,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "just delete this dead code rather than fixing it.",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+To\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4540,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Tk\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4692,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "no, delete.",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+TY\u003d",
+        "filename": "vp8/encoder/segmentation.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:32:25Z",
+      "side": 1,
+      "message": "segment id is not boolean. also, this code is duplicated, should be made into a function.",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
