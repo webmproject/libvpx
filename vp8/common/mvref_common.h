@@ -17,9 +17,7 @@
 #ifndef __INC_MVREF_COMMON_H
 #define __INC_MVREF_COMMON_H
 
-unsigned int mv_distance(int_mv *mv1, int_mv *mv2);
-
-void find_mv_refs(
+void vp9_find_mv_refs(
   MACROBLOCKD *xd,
   MODE_INFO *here,
   MODE_INFO *lf_here,

@@ -666,8 +666,8 @@ static void pick_mb_modes(VP8_COMP *cpi,
           check_segref(xd, seg_id, GOLDEN_FRAME) +
           check_segref(xd, seg_id, ALTREF_FRAME) > 1) {
         // Get the prediction context and status
-        int pred_flag = get_pred_flag(xd, PRED_REF);
-        int pred_context = get_pred_context(cm, xd, PRED_REF);
+        int pred_flag = vp9_get_pred_flag(xd, PRED_REF);
+        int pred_context = vp9_get_pred_context(cm, xd, PRED_REF);
 
         // Count prediction success
         cpi->ref_pred_count[pred_context][pred_flag]++;
@@ -1005,7 +1005,7 @@ static void encode_sb(VP8_COMP *cpi,
       if (xd->mode_info_context->mbmi.ref_frame) {
         unsigned char pred_context;
 
-        pred_context = get_pred_context(cm, xd, PRED_COMP);
+        pred_context = vp9_get_pred_context(cm, xd, PRED_COMP);
 
         if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)
           cpi->single_pred_count[pred_context]++;
@@ -1308,7 +1308,7 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   // Compute a modified set of reference frame probabilities to use when
   // prediction fails. These are based on the current general estimates for
   // this frame which may be updated with each iteration of the recode loop.
-  compute_mod_refprobs(cm);
+  vp9_compute_mod_refprobs(cm);
 
 #if CONFIG_NEW_MVREF
   // temp stats reset
@@ -2011,8 +2011,8 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
   // SET VARIOUS PREDICTION FLAGS
 
   // Did the chosen reference frame match its predicted value.
-  ref_pred_flag = ((mbmi->ref_frame == get_pred_ref(cm, xd)));
-  set_pred_flag(xd, PRED_REF, ref_pred_flag);
+  ref_pred_flag = ((mbmi->ref_frame == vp9_get_pred_ref(cm, xd)));
+  vp9_set_pred_flag(xd, PRED_REF, ref_pred_flag);
 
   if (mbmi->ref_frame == INTRA_FRAME) {
     if (mbmi->mode == B_PRED) {
@@ -2207,8 +2207,8 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
 
   // Did the chosen reference frame match its predicted value.
   ref_pred_flag = ((xd->mode_info_context->mbmi.ref_frame ==
-                    get_pred_ref(cm, xd)));
-  set_pred_flag(xd, PRED_REF, ref_pred_flag);
+                    vp9_get_pred_ref(cm, xd)));
+  vp9_set_pred_flag(xd, PRED_REF, ref_pred_flag);
 
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     vp8_build_intra_predictors_sby_s(&x->e_mbd);

@@ -115,7 +115,8 @@ static void kfread_modes(VP8D_COMP *pbi,
        (get_segdata(&pbi->mb,
                     m->mbmi.segment_id, SEG_LVL_EOB) != 0))) {
     MACROBLOCKD *const xd  = &pbi->mb;
-    m->mbmi.mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
+    m->mbmi.mb_skip_coeff =
+      vp8_read(bc, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
   } else {
     if (segfeature_active(&pbi->mb,
                           m->mbmi.segment_id, SEG_LVL_EOB) &&
@@ -379,16 +380,16 @@ static MV_REFERENCE_FRAME read_ref_frame(VP8D_COMP *pbi,
     MV_REFERENCE_FRAME pred_ref;
 
     // Get the context probability the prediction flag
-    pred_prob = get_pred_prob(cm, xd, PRED_REF);
+    pred_prob = vp9_get_pred_prob(cm, xd, PRED_REF);
 
     // Read the prediction status flag
     prediction_flag = (unsigned char)vp8_read(bc, pred_prob);
 
     // Store the prediction flag.
-    set_pred_flag(xd, PRED_REF, prediction_flag);
+    vp9_set_pred_flag(xd, PRED_REF, prediction_flag);
 
     // Get the predicted reference frame.
-    pred_ref = get_pred_ref(cm, xd);
+    pred_ref = vp9_get_pred_ref(cm, xd);
 
     // If correctly predicted then use the predicted value
     if (prediction_flag) {
@@ -453,8 +454,8 @@ static MV_REFERENCE_FRAME read_ref_frame(VP8D_COMP *pbi,
     // The reference frame for the mb is considered as correclty predicted
     // if it is signaled at the segment level for the purposes of the
     // common prediction model
-    set_pred_flag(xd, PRED_REF, 1);
-    ref_frame = get_pred_ref(cm, xd);
+    vp9_set_pred_flag(xd, PRED_REF, 1);
+    ref_frame = vp9_get_pred_ref(cm, xd);
   }
 
   return (MV_REFERENCE_FRAME)ref_frame;
@@ -529,7 +530,7 @@ static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
 
     // Computes a modified set of probabilities for use when reference
     // frame prediction fails.
-    compute_mod_refprobs(cm);
+    vp9_compute_mod_refprobs(cm);
 
     pbi->common.comp_pred_mode = vp8_read(bc, 128);
     if (cm->comp_pred_mode)
@@ -576,19 +577,19 @@ static void read_mb_segment_id(VP8D_COMP *pbi,
         // Get the context based probability for reading the
         // prediction status flag
         vp8_prob pred_prob =
-          get_pred_prob(cm, xd, PRED_SEG_ID);
+          vp9_get_pred_prob(cm, xd, PRED_SEG_ID);
 
         // Read the prediction status flag
         unsigned char seg_pred_flag =
           (unsigned char)vp8_read(bc, pred_prob);
 
         // Store the prediction flag.
-        set_pred_flag(xd, PRED_SEG_ID, seg_pred_flag);
+        vp9_set_pred_flag(xd, PRED_SEG_ID, seg_pred_flag);
 
         // If the value is flagged as correctly predicted
         // then use the predicted value
         if (seg_pred_flag) {
-          mbmi->segment_id = get_pred_mb_segid(cm, index);
+          mbmi->segment_id = vp9_get_pred_mb_segid(cm, index);
         }
         // Else .... decode it explicitly
         else {
@@ -678,7 +679,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
        (get_segdata(xd, mbmi->segment_id, SEG_LVL_EOB) != 0))) {
     // Read the macroblock coeff skip flag if this feature is in use,
     // else default to 0
-    mbmi->mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
+    mbmi->mb_skip_coeff = vp8_read(bc, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
   } else {
     if (segfeature_active(xd,
                           mbmi->segment_id, SEG_LVL_EOB) &&
@@ -731,9 +732,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       xd->pre.u_buffer = cm->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
       xd->pre.v_buffer = cm->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
-      find_mv_refs(xd, mi, prev_mi,
-                   ref_frame, mbmi->ref_mvs[ref_frame],
-                   cm->ref_frame_sign_bias);
+      vp9_find_mv_refs(xd, mi, prev_mi,
+                       ref_frame, mbmi->ref_mvs[ref_frame],
+                       cm->ref_frame_sign_bias);
 
       vp8_find_best_ref_mvs(xd,
                             xd->pre.y_buffer,
@@ -775,7 +776,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       if (cm->mcomp_filter_type == SWITCHABLE) {
         mbmi->interp_filter = vp8_switchable_interp[
             vp8_treed_read(bc, vp8_switchable_interp_tree,
-                           get_pred_probs(cm, xd, PRED_SWITCHABLE_INTERP))];
+                           vp9_get_pred_probs(cm, xd, PRED_SWITCHABLE_INTERP))];
       } else {
         mbmi->interp_filter = cm->mcomp_filter_type;
       }
@@ -783,7 +784,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
     if (cm->comp_pred_mode == COMP_PREDICTION_ONLY ||
         (cm->comp_pred_mode == HYBRID_PREDICTION &&
-         vp8_read(bc, get_pred_prob(cm, xd, PRED_COMP)))) {
+         vp8_read(bc, vp9_get_pred_prob(cm, xd, PRED_COMP)))) {
       /* Since we have 3 reference frames, we can only have 3 unique
        * combinations of combinations of 2 different reference frames
        * (A-G, G-L or A-L). In the bitstream, we use this to simply
@@ -818,10 +819,10 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                           mbmi->second_ref_frame,
                           cm->ref_frame_sign_bias);
 
-        find_mv_refs(xd, mi, prev_mi,
-                     mbmi->second_ref_frame,
-                     mbmi->ref_mvs[mbmi->second_ref_frame],
-                     cm->ref_frame_sign_bias);
+        vp9_find_mv_refs(xd, mi, prev_mi,
+                         mbmi->second_ref_frame,
+                         mbmi->ref_mvs[mbmi->second_ref_frame],
+                         cm->ref_frame_sign_bias);
 
         vp8_find_best_ref_mvs(xd,
                               xd->second_pre.y_buffer,

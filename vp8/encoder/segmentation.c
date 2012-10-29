@@ -222,15 +222,15 @@ void choose_segmap_coding_method(VP8_COMP *cpi) {
         if (cm->frame_type != KEY_FRAME) {
           // Test to see if the segment id matches the predicted value.
           int seg_predicted =
-            (segment_id == get_pred_mb_segid(cm, segmap_index));
+            (segment_id == vp9_get_pred_mb_segid(cm, segmap_index));
 
           // Get the segment id prediction context
           pred_context =
-            get_pred_context(cm, xd, PRED_SEG_ID);
+            vp9_get_pred_context(cm, xd, PRED_SEG_ID);
 
           // Store the prediction status for this mb and update counts
           // as appropriate
-          set_pred_flag(xd, PRED_SEG_ID, seg_predicted);
+          vp9_set_pred_flag(xd, PRED_SEG_ID, seg_predicted);
           temporal_predictor_count[pred_context][seg_predicted]++;
 
           if (!seg_predicted)

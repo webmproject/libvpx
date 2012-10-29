@@ -862,7 +862,7 @@ static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
   MACROBLOCKD *xd = &x->e_mbd;
   int can_skip = cm->mb_no_coeff_skip;
-  vp8_prob skip_prob = can_skip ? get_pred_prob(cm, xd, PRED_MBSKIP) : 128;
+  vp8_prob skip_prob = can_skip ? vp9_get_pred_prob(cm, xd, PRED_MBSKIP) : 128;
   int s0, s1;
   int r4x4, r4x4s, r8x8, r8x8s, d4x4, d8x8, s4x4, s8x8;
   int64_t rd4x4, rd8x8, rd4x4s, rd8x8s;
@@ -3018,7 +3018,7 @@ static void set_i8x8_block_modes(MACROBLOCK *x, int modes[2][4]) {
   }
 }
 
-extern void calc_ref_probs(int *count, vp8_prob *probs);
+extern void vp9_calc_ref_probs(int *count, vp8_prob *probs);
 static void estimate_curframe_refprobs(VP8_COMP *cpi, vp8_prob mod_refprobs[3], int pred_ref) {
   int norm_cnt[MAX_REF_FRAMES];
   const int *const rfct = cpi->count_mb_ref_frame_usage;
@@ -3034,28 +3034,28 @@ static void estimate_curframe_refprobs(VP8_COMP *cpi, vp8_prob mod_refprobs[3], 
     norm_cnt[1] = last_count;
     norm_cnt[2] = gf_count;
     norm_cnt[3] = arf_count;
-    calc_ref_probs(norm_cnt, mod_refprobs);
+    vp9_calc_ref_probs(norm_cnt, mod_refprobs);
     mod_refprobs[0] = 0;    // This branch implicit
   } else if (pred_ref == LAST_FRAME) {
     norm_cnt[0] = intra_count;
     norm_cnt[1] = 0;
     norm_cnt[2] = gf_count;
     norm_cnt[3] = arf_count;
-    calc_ref_probs(norm_cnt, mod_refprobs);
+    vp9_calc_ref_probs(norm_cnt, mod_refprobs);
     mod_refprobs[1] = 0;    // This branch implicit
   } else if (pred_ref == GOLDEN_FRAME) {
     norm_cnt[0] = intra_count;
     norm_cnt[1] = last_count;
     norm_cnt[2] = 0;
     norm_cnt[3] = arf_count;
-    calc_ref_probs(norm_cnt, mod_refprobs);
+    vp9_calc_ref_probs(norm_cnt, mod_refprobs);
     mod_refprobs[2] = 0;  // This branch implicit
   } else {
     norm_cnt[0] = intra_count;
     norm_cnt[1] = last_count;
     norm_cnt[2] = gf_count;
     norm_cnt[3] = 0;
-    calc_ref_probs(norm_cnt, mod_refprobs);
+    vp9_calc_ref_probs(norm_cnt, mod_refprobs);
     mod_refprobs[2] = 0;  // This branch implicit
   }
 }
@@ -3095,13 +3095,13 @@ static void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, int segment_id, unsigned
   }
 
   // Get the predicted reference for this mb
-  pred_ref = get_pred_ref(cm, xd);
+  pred_ref = vp9_get_pred_ref(cm, xd);
 
   // Get the context probability for the prediction flag (based on last frame)
-  pred_prob = get_pred_prob(cm, xd, PRED_REF);
+  pred_prob = vp9_get_pred_prob(cm, xd, PRED_REF);
 
   // Predict probability for current frame based on stats so far
-  pred_ctx = get_pred_context(cm, xd, PRED_REF);
+  pred_ctx = vp9_get_pred_context(cm, xd, PRED_REF);
   tot_count = cpi->ref_pred_count[pred_ctx][0] + cpi->ref_pred_count[pred_ctx][1];
   if (tot_count) {
     new_pred_prob =
@@ -3234,11 +3234,11 @@ void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x, int idx, int frame_type,
   v_buffer[frame_type] = yv12->v_buffer + recon_uvoffset;
 
 #if CONFIG_NEWBESTREFMV
-  find_mv_refs(xd, xd->mode_info_context,
-               xd->prev_mode_info_context,
-               frame_type,
-               mbmi->ref_mvs[frame_type],
-               cpi->common.ref_frame_sign_bias);
+  vp9_find_mv_refs(xd, xd->mode_info_context,
+                   xd->prev_mode_info_context,
+                   frame_type,
+                   mbmi->ref_mvs[frame_type],
+                   cpi->common.ref_frame_sign_bias);
 
   vp8_find_best_ref_mvs(xd, y_buffer[frame_type],
                         yv12->y_stride,
@@ -3670,7 +3670,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
       if (cpi->common.mcomp_filter_type == SWITCHABLE)
         rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
-            [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
+            [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
                 [vp8_switchable_interp_map[mbmi->interp_filter]];
       // If even the 'Y' rd value of split is higher than best so far
       // then dont bother looking at UV
@@ -3693,7 +3693,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         mode_excluded = cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY;
 
       compmode_cost =
-        vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), is_comp_pred);
+        vp8_cost_bit(vp9_get_pred_prob(cm, xd, PRED_COMP), is_comp_pred);
       mbmi->mode = this_mode;
     }
     else {
@@ -3811,14 +3811,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 #endif
       if (cpi->common.mcomp_filter_type == SWITCHABLE)
         rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
-            [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
+            [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
             [vp8_switchable_interp_map[
             xd->mode_info_context->mbmi.interp_filter]];
 
       /* We don't include the cost of the second reference here, because there are only
        * three options: Last/Golden, ARF/Last or Golden/ARF, or in other words if you
        * present them in that order, the second one is always known if the first is known */
-      compmode_cost = vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP),
+      compmode_cost = vp8_cost_bit(vp9_get_pred_prob(cm, xd, PRED_COMP),
                                    is_comp_pred);
       rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
 
@@ -3918,7 +3918,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
             // Cost the skip mb case
             vp8_prob skip_prob =
-              get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP);
+              vp9_get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP);
 
             if (skip_prob) {
               prob_skip_cost = vp8_cost_bit(skip_prob, 1);
@@ -3932,7 +3932,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           mbmi->mb_skip_coeff = 0;
           if (mb_skip_allowed) {
             int prob_skip_cost = vp8_cost_bit(
-                   get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP), 0);
+                   vp9_get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP), 0);
             rate2 += prob_skip_cost;
             other_cost += prob_skip_cost;
           }
@@ -4084,7 +4084,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       best_mbmode.mode >= NEARESTMV &&
       best_mbmode.mode <= SPLITMV) {
     ++cpi->switchable_interp_count
-        [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
+        [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
         [vp8_switchable_interp_map[best_mbmode.interp_filter]];
   }
 
@@ -4200,12 +4200,12 @@ void vp8_rd_pick_intra_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
 
   if (cpi->common.mb_no_coeff_skip && y_skip && uv_skip) {
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
-                  vp8_cost_bit(get_pred_prob(cm, xd, PRED_MBSKIP), 1);
+                  vp8_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 1);
     *returndist = dist_y + (dist_uv >> 2);
   } else {
     *returnrate = rate_y + rate_uv;
     if (cpi->common.mb_no_coeff_skip)
-      *returnrate += vp8_cost_bit(get_pred_prob(cm, xd, PRED_MBSKIP), 0);
+      *returnrate += vp8_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
     *returndist = dist_y + (dist_uv >> 2);
   }
 }
@@ -4297,7 +4297,7 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
     mbmi->mode = mode16x16;
     mbmi->uv_mode = modeuv;
     rate = rateuv8x8 + rate16x16 - rateuv8x8_tokenonly - rate16x16_tokenonly +
-           vp8_cost_bit(get_pred_prob(cm, xd, PRED_MBSKIP), 1);
+           vp8_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 1);
     dist = dist16x16 + (distuv8x8 >> 2);
     mbmi->txfm_size = txfm_size_16x16;
     memset(x->mb_context[xd->mb_index].txfm_rd_diff, 0,
@@ -4330,7 +4330,7 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
       }
     }
     if (cpi->common.mb_no_coeff_skip)
-      rate += vp8_cost_bit(get_pred_prob(cm, xd, PRED_MBSKIP), 0);
+      rate += vp8_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
   } else {
     if (error4x4 < error8x8) {
       rate = rateuv;
@@ -4360,7 +4360,7 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
              sizeof(x->mb_context[xd->mb_index].txfm_rd_diff));
     }
     if (cpi->common.mb_no_coeff_skip)
-      rate += vp8_cost_bit(get_pred_prob(cm, xd, PRED_MBSKIP), 0);
+      rate += vp8_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
   }
 
   *returnrate = rate;
@@ -4701,7 +4701,7 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
                                              xd->dst.uv_stride);
 
           compmode_cost =
-            vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 0);
+            vp8_cost_bit(vp9_get_pred_prob(cm, xd, PRED_COMP), 0);
 
           if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
             x->skip = 1;
@@ -4853,7 +4853,7 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
        * are only three options: Last/Golden, ARF/Last or Golden/ARF, or in
        * other words if you present them in that order, the second one is
        * always known if the first is known */
-      compmode_cost = vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 1);
+      compmode_cost = vp8_cost_bit(vp9_get_pred_prob(cm, xd, PRED_COMP), 1);
     }
 
     if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
@@ -4890,7 +4890,7 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
 
             // Cost the skip mb case
             vp8_prob skip_prob =
-              get_pred_prob(cm, xd, PRED_MBSKIP);
+              vp9_get_pred_prob(cm, xd, PRED_MBSKIP);
 
             if (skip_prob) {
               prob_skip_cost = vp8_cost_bit(skip_prob, 1);
@@ -4901,7 +4901,7 @@ int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
         }
         // Add in the cost of the no skip flag.
         else if (mb_skip_allowed) {
-          int prob_skip_cost = vp8_cost_bit(get_pred_prob(cm, xd,
+          int prob_skip_cost = vp8_cost_bit(vp9_get_pred_prob(cm, xd,
                                                           PRED_MBSKIP), 0);
           rate2 += prob_skip_cost;
           other_cost += prob_skip_cost;

@@ -800,16 +800,16 @@ static void encode_ref_frame(vp8_writer *const bc,
     MV_REFERENCE_FRAME pred_rf;
 
     // Get the context probability the prediction flag
-    pred_prob = get_pred_prob(cm, xd, PRED_REF);
+    pred_prob = vp9_get_pred_prob(cm, xd, PRED_REF);
 
     // Get the predicted value.
-    pred_rf = get_pred_ref(cm, xd);
+    pred_rf = vp9_get_pred_ref(cm, xd);
 
     // Did the chosen reference frame match its predicted value.
     prediction_flag =
       (xd->mode_info_context->mbmi.ref_frame == pred_rf);
 
-    set_pred_flag(xd, PRED_REF, prediction_flag);
+    vp9_set_pred_flag(xd, PRED_REF, prediction_flag);
     vp8_write(bc, prediction_flag, pred_prob);
 
     // If not predicted correctly then code value explicitly
@@ -869,7 +869,7 @@ static void update_ref_probs(VP8_COMP *const cpi) {
 
   // Compute a modified set of probabilities to use when prediction of the
   // reference frame fails
-  compute_mod_refprobs(cm);
+  vp9_compute_mod_refprobs(cm);
 }
 
 static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
@@ -956,8 +956,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
         if (cpi->mb.e_mbd.update_mb_segmentation_map) {
           // Is temporal coding of the segment map enabled
           if (pc->temporal_update) {
-            prediction_flag = get_pred_flag(xd, PRED_SEG_ID);
-            pred_prob = get_pred_prob(pc, xd, PRED_SEG_ID);
+            prediction_flag = vp9_get_pred_flag(xd, PRED_SEG_ID);
+            pred_prob = vp9_get_pred_prob(pc, xd, PRED_SEG_ID);
 
             // Code the segment id prediction flag for this mb
             vp8_write(bc, prediction_flag, pred_prob);
@@ -983,7 +983,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
           }
 #endif
           vp8_encode_bool(bc, skip_coeff,
-                          get_pred_prob(pc, xd, PRED_MBSKIP));
+                          vp9_get_pred_prob(pc, xd, PRED_MBSKIP));
         }
 
         // Encode the reference frame.
@@ -1097,8 +1097,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
           {
             if (cpi->common.mcomp_filter_type == SWITCHABLE) {
               vp8_write_token(bc, vp8_switchable_interp_tree,
-                              get_pred_probs(&cpi->common, xd,
-                                             PRED_SWITCHABLE_INTERP),
+                              vp9_get_pred_probs(&cpi->common, xd,
+                                                 PRED_SWITCHABLE_INTERP),
                               vp8_switchable_interp_encodings +
                               vp8_switchable_interp_map[mi->interp_filter]);
             } else {
@@ -1126,7 +1126,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
           // (if not specified at the frame/segment level)
           if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
             vp8_write(bc, mi->second_ref_frame != INTRA_FRAME,
-                      get_pred_prob(pc, xd, PRED_COMP));
+                      vp9_get_pred_prob(pc, xd, PRED_COMP));
           }
 
           {
@@ -1326,7 +1326,7 @@ static void write_mb_modes_kf(const VP8_COMMON  *c,
         }
 #endif
         vp8_encode_bool(bc, skip_coeff,
-                    get_pred_prob(c, xd, PRED_MBSKIP));
+                    vp9_get_pred_prob(c, xd, PRED_MBSKIP));
   }
 
 #if CONFIG_SUPERBLOCKS

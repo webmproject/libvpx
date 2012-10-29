@@ -15,9 +15,9 @@
 // TBD prediction functions for various bitstream signals
 
 // Returns a context number for the given MB prediction signal
-unsigned char get_pred_context(const VP8_COMMON *const cm,
-                               const MACROBLOCKD *const xd,
-                               PRED_ID pred_id) {
+unsigned char vp9_get_pred_context(const VP8_COMMON *const cm,
+                                   const MACROBLOCKD *const xd,
+                                   PRED_ID pred_id) {
   int pred_context;
   MODE_INFO *m = xd->mode_info_context;
 
@@ -104,14 +104,14 @@ unsigned char get_pred_context(const VP8_COMMON *const cm,
 
 // This function returns a context probability for coding a given
 // prediction signal
-vp8_prob get_pred_prob(const VP8_COMMON *const cm,
-                       const MACROBLOCKD *const xd,
-                       PRED_ID pred_id) {
+vp8_prob vp9_get_pred_prob(const VP8_COMMON *const cm,
+                          const MACROBLOCKD *const xd,
+                          PRED_ID pred_id) {
   vp8_prob pred_probability;
   int pred_context;
 
   // Get the appropriate prediction context
-  pred_context = get_pred_context(cm, xd, pred_id);
+  pred_context = vp9_get_pred_context(cm, xd, pred_id);
 
   switch (pred_id) {
     case PRED_SEG_ID:
@@ -144,14 +144,14 @@ vp8_prob get_pred_prob(const VP8_COMMON *const cm,
 
 // This function returns a context probability ptr for coding a given
 // prediction signal
-const vp8_prob *get_pred_probs(const VP8_COMMON *const cm,
-                         const MACROBLOCKD *const xd,
-                         PRED_ID pred_id) {
+const vp8_prob *vp9_get_pred_probs(const VP8_COMMON *const cm,
+                                   const MACROBLOCKD *const xd,
+                                   PRED_ID pred_id) {
   const vp8_prob *pred_probability;
   int pred_context;
 
   // Get the appropriate prediction context
-  pred_context = get_pred_context(cm, xd, pred_id);
+  pred_context = vp9_get_pred_context(cm, xd, pred_id);
 
   switch (pred_id) {
     case PRED_SEG_ID:
@@ -188,8 +188,8 @@ const vp8_prob *get_pred_probs(const VP8_COMMON *const cm,
 
 // This function returns the status of the given prediction signal.
 // I.e. is the predicted value for the given signal correct.
-unsigned char get_pred_flag(const MACROBLOCKD *const xd,
-                            PRED_ID pred_id) {
+unsigned char vp9_get_pred_flag(const MACROBLOCKD *const xd,
+                                PRED_ID pred_id) {
   unsigned char pred_flag = 0;
 
   switch (pred_id) {
@@ -216,9 +216,9 @@ unsigned char get_pred_flag(const MACROBLOCKD *const xd,
 
 // This function sets the status of the given prediction signal.
 // I.e. is the predicted value for the given signal correct.
-void set_pred_flag(MACROBLOCKD *const xd,
-                   PRED_ID pred_id,
-                   unsigned char pred_flag) {
+void vp9_set_pred_flag(MACROBLOCKD *const xd,
+                       PRED_ID pred_id,
+                       unsigned char pred_flag) {
   switch (pred_id) {
     case PRED_SEG_ID:
       xd->mode_info_context->mbmi.seg_id_predicted = pred_flag;
@@ -257,14 +257,14 @@ void set_pred_flag(MACROBLOCKD *const xd,
 // peredict various bitstream signals.
 
 // Macroblock segment id prediction function
-unsigned char get_pred_mb_segid(const VP8_COMMON *const cm, int MbIndex) {
+unsigned char vp9_get_pred_mb_segid(const VP8_COMMON *const cm, int MbIndex) {
   // Currently the prediction for the macroblock segment ID is
   // the value stored for this macroblock in the previous frame.
   return cm->last_frame_seg_map[MbIndex];
 }
 
-MV_REFERENCE_FRAME get_pred_ref(const VP8_COMMON *const cm,
-                                const MACROBLOCKD *const xd) {
+MV_REFERENCE_FRAME vp9_get_pred_ref(const VP8_COMMON *const cm,
+                                    const MACROBLOCKD *const xd) {
   MODE_INFO *m = xd->mode_info_context;
 
   MV_REFERENCE_FRAME left;
@@ -335,7 +335,7 @@ MV_REFERENCE_FRAME get_pred_ref(const VP8_COMMON *const cm,
 
 // Functions to computes a set of modified reference frame probabilities
 // to use when the prediction of the reference frame value fails
-void calc_ref_probs(int *count, vp8_prob *probs) {
+void vp9_calc_ref_probs(int *count, vp8_prob *probs) {
   int tot_count;
 
   tot_count = count[0] + count[1] + count[2] + count[3];
@@ -365,7 +365,7 @@ void calc_ref_probs(int *count, vp8_prob *probs) {
 // Values willbe set to 0 for reference frame options that are not possible
 // because wither they were predicted and prediction has failed or because
 // they are not allowed for a given segment.
-void compute_mod_refprobs(VP8_COMMON *const cm) {
+void vp9_compute_mod_refprobs(VP8_COMMON *const cm) {
   int norm_cnt[MAX_REF_FRAMES];
   int intra_count;
   int inter_count;
@@ -387,28 +387,28 @@ void compute_mod_refprobs(VP8_COMMON *const cm) {
   norm_cnt[1] = last_count;
   norm_cnt[2] = gf_count;
   norm_cnt[3] = arf_count;
-  calc_ref_probs(norm_cnt, cm->mod_refprobs[INTRA_FRAME]);
+  vp9_calc_ref_probs(norm_cnt, cm->mod_refprobs[INTRA_FRAME]);
   cm->mod_refprobs[INTRA_FRAME][0] = 0;    // This branch implicit
 
   norm_cnt[0] = intra_count;
   norm_cnt[1] = 0;
   norm_cnt[2] = gf_count;
   norm_cnt[3] = arf_count;
-  calc_ref_probs(norm_cnt, cm->mod_refprobs[LAST_FRAME]);
+  vp9_calc_ref_probs(norm_cnt, cm->mod_refprobs[LAST_FRAME]);
   cm->mod_refprobs[LAST_FRAME][1] = 0;    // This branch implicit
 
   norm_cnt[0] = intra_count;
   norm_cnt[1] = last_count;
   norm_cnt[2] = 0;
   norm_cnt[3] = arf_count;
-  calc_ref_probs(norm_cnt, cm->mod_refprobs[GOLDEN_FRAME]);
+  vp9_calc_ref_probs(norm_cnt, cm->mod_refprobs[GOLDEN_FRAME]);
   cm->mod_refprobs[GOLDEN_FRAME][2] = 0;  // This branch implicit
 
   norm_cnt[0] = intra_count;
   norm_cnt[1] = last_count;
   norm_cnt[2] = gf_count;
   norm_cnt[3] = 0;
-  calc_ref_probs(norm_cnt, cm->mod_refprobs[ALTREF_FRAME]);
+  vp9_calc_ref_probs(norm_cnt, cm->mod_refprobs[ALTREF_FRAME]);
   cm->mod_refprobs[ALTREF_FRAME][2] = 0;  // This branch implicit
 
   // Score the reference frames based on overal frequency.
