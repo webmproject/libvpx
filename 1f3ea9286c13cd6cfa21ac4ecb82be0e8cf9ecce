@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+zc\u003d",
+        "filename": "vp8/common/rtcd_defs.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-29T18:27:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+1Q\u003d",
+      "revId": "1f3ea9286c13cd6cfa21ac4ecb82be0e8cf9ecce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+1M\u003d",
         "filename": "vp8/encoder/encodeintra.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+zY\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-29T18:27:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+1M\u003d",
+      "revId": "1f3ea9286c13cd6cfa21ac4ecb82be0e8cf9ecce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+0g\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2012-10-29T18:17:40Z",
       "side": 1,
       "message": "in this mb struct, don\u0027t need the vp8_short_ or short_ prefix on these fields.",
+      "revId": "1f3ea9286c13cd6cfa21ac4ecb82be0e8cf9ecce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+zM\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1191,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-29T18:27:17Z",
+      "side": 1,
+      "message": "Agree but I think thats better done in a separate commit.",
+      "parentUuid": "AAAAQ3//+0g\u003d",
       "revId": "1f3ea9286c13cd6cfa21ac4ecb82be0e8cf9ecce",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
