@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//+lc\u003d",
+        "filename": "vp8/common/pred_common.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-29T22:25:13Z",
+      "side": 1,
+      "message": "This seems to assume that there are only 2 segments and that the predictor is 1 only if all 4 MBs in the SB belong to segment 1? If only 1 MB belongs to segment 0 should the predictor be 0?",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+lI\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-29T22:25:13Z",
+      "side": 1,
+      "message": "Would this diffusion of the flag to the 4 sub-MBs be more readable as a macro? It could take the field name, etc as parameters. This operation is common throughout all of the SB code.",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+iU\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1208,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-29T22:25:13Z",
+      "side": 1,
+      "message": "Declaration should go at top of function, not interspersed with code.",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+iM\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1209,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-29T22:25:13Z",
+      "side": 1,
+      "message": "Remove debug code.",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+gY\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1479,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-29T22:25:13Z",
+      "side": 1,
+      "message": "Indented too far. Ditto line below.",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+hM\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1482,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-10-29T22:25:13Z",
+      "side": 1,
+      "message": "Move the declaration, it shouldn\u0027t be interspersed with code.",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
