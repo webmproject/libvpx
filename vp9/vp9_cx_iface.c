@@ -79,6 +79,8 @@ struct vpx_codec_alg_priv {
   VP9_PTR             cpi;
   unsigned char          *cx_data;
   unsigned int            cx_data_sz;
+  unsigned char           *altref_cx_data;
+  unsigned int            altref_size;
   vpx_image_t             preview_img;
   unsigned int            next_frame_flag;
   vp8_postproc_cfg_t      preview_ppcfg;
@@ -568,6 +570,19 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
   }
 }
 
+static void append_length(unsigned char* cx_data, unsigned long int *cx_size) {
+  unsigned char chunk;
+  unsigned int offset = 0;
+  unsigned long int size = *cx_size;
+  do {
+    chunk = size & 0x7F;
+    size >>= 7;
+    chunk |= (offset == 0) << 7;
+    cx_data[offset] = chunk;
+    offset++;
+  } while (size);
+  *cx_size += offset;
+}
 
 static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                                    const vpx_image_t     *img,
@@ -671,9 +686,15 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
       ctx->next_frame_flag = 0;
     }
 
-    cx_data = ctx->cx_data;
-    cx_data_sz = ctx->cx_data_sz;
     lib_flags = 0;
+
+    if (ctx->altref_size) {
+      cx_data = ctx->altref_cx_data + ctx->altref_size;
+      cx_data_sz = ctx->cx_data_sz - ctx->altref_size;
+    } else {
+      cx_data = ctx->cx_data;
+      cx_data_sz = ctx->cx_data_sz;
+    }
 
     while (cx_data_sz >= ctx->cx_data_sz / 2 &&
            -1 != vp9_get_compressed_data(ctx->cpi, &lib_flags, &size,
@@ -683,6 +704,18 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_pts_t    round, delta;
         vpx_codec_cx_pkt_t pkt;
         VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
+
+        /* TODO(jkoleszar): for now we append lengths to all frames, revisit
+         * this later to ensure if this is necessary */
+        append_length(cx_data + size, &size);
+
+        if (!cpi->common.show_frame) {
+          ctx->altref_cx_data = cx_data;
+          ctx->altref_size = size;
+          cx_data += size;
+          cx_data_sz -= size;
+          continue;
+        }
 
         /* Add the frame packet to the list of returned packets. */
         round = 1000000 * ctx->cfg.g_timebase.num / 2 - 1;
@@ -737,8 +770,15 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         }
         else*/
         {
-          pkt.data.frame.buf = cx_data;
-          pkt.data.frame.sz  = size;
+          if (ctx->altref_size) {
+            pkt.data.frame.sz = ctx->altref_size + size;
+            pkt.data.frame.buf = ctx->altref_cx_data;
+            ctx->altref_size = 0;
+            ctx->altref_cx_data = NULL;
+          } else {
+            pkt.data.frame.buf = cx_data;
+            pkt.data.frame.sz = size;
+          }
           pkt.data.frame.partition_id = -1;
           vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
           cx_data += size;
