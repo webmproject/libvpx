@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+RU\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1208,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-29T23:55:19Z",
+      "side": 1,
+      "message": "Removed.",
+      "parentUuid": "AAAAQ3//+iU\u003d",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+iM\u003d",
         "filename": "vp8/encoder/encodeframe.c",
         "patchSetId": 4
@@ -64,6 +82,24 @@
       "writtenOn": "2012-10-29T22:25:13Z",
       "side": 1,
       "message": "Remove debug code.",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+RM\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1209,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-29T23:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+iM\u003d",
       "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+QI\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1479,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-29T23:55:19Z",
+      "side": 1,
+      "message": "I think it\u0027s fine actually? Look at the position of the opening bracket in the if( above.",
+      "parentUuid": "AAAAQ3//+gY\u003d",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+hM\u003d",
         "filename": "vp8/encoder/encodeframe.c",
         "patchSetId": 4
@@ -98,6 +152,24 @@
       "writtenOn": "2012-10-29T22:25:13Z",
       "side": 1,
       "message": "Move the declaration, it shouldn\u0027t be interspersed with code.",
+      "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Qs\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1482,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-29T23:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+hM\u003d",
       "revId": "21a822c4f4bac03ce90a8d342942809380ecc641",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
