@@ -9,6 +9,7 @@
  */
 
 #include "vpx_ports/config.h"
+#include "vpx_rtcd.h"
 #include "vp8/common/idct.h"
 #include "quantize.h"
 #include "vp8/common/reconintra.h"
@@ -18,7 +19,6 @@
 #include "dct.h"
 #include "vp8/common/g_common.h"
 #include "encodeintra.h"
-#include "vpx_rtcd.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
@@ -70,7 +70,7 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
   }
 #endif
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
+  vp8_subtract_b(be, b, 16);
 
   tx_type = get_tx_type(&x->e_mbd, b);
   if (tx_type != DCT_DCT) {
@@ -109,8 +109,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     vp8_build_comp_intra_predictors_mby(xd);
 #endif
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src),
-                                           xd->predictor, b->src_stride);
+  vp8_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
 
   if (tx_size == TX_16X16) {
     BLOCKD  *bd = &xd->block[0];
@@ -159,9 +158,9 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   }
 #endif
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff,
-                                            x->src.u_buffer, x->src.v_buffer,
-                                            xd->predictor, x->src.uv_stride);
+  vp8_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+                    xd->predictor, x->src.uv_stride);
+
   if (tx_size == TX_4X4) {
     vp8_transform_mbuv_4x4(x);
     vp8_quantize_mbuv_4x4(x);
@@ -221,7 +220,7 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     for (i = 0; i < 4; i++) {
       b = &xd->block[ib + iblock[i]];
       be = &x->block[ib + iblock[i]];
-      ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
+      vp8_subtract_b(be, b, 16);
       x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
       x->quantize_b_4x4(be, b);
       vp8_inverse_transform_b_4x4(IF_RTCD(&rtcd->common->idct), b, 32);
@@ -261,7 +260,7 @@ void vp8_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
   }
 #endif
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 8);
+  vp8_subtract_b(be, b, 8);
 
   x->vp8_short_fdct4x4(be->src_diff, be->coeff, 16);
   x->quantize_b_4x4(be, b);

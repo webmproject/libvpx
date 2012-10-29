@@ -1,8 +1,15 @@
 common_forward_decls() {
 cat <<EOF
-#include "vp8/common/blockd.h"
 
 struct loop_filter_info;
+struct blockd;
+struct macroblockd;
+struct loop_filter_info;
+
+/* Encoder forward decls */
+struct block;
+struct macroblock;
+struct variance_vtable;
 
 /* Encoder forward decls */
 struct variance_vtable;
@@ -70,55 +77,55 @@ specialize vp8_recon2b sse2
 prototype void vp8_recon4b "unsigned char *pred_ptr, short *diff_ptr, unsigned char *dst_ptr, int stride"
 specialize vp8_recon4b sse2
 
-prototype void vp8_recon_mb "MACROBLOCKD *x"
+prototype void vp8_recon_mb "struct macroblockd *x"
 specialize vp8_recon_mb
 
-prototype void vp8_recon_mby "MACROBLOCKD *x"
+prototype void vp8_recon_mby "struct macroblockd *x"
 specialize vp8_recon_mby
 
-prototype void vp8_build_intra_predictors_mby_s "MACROBLOCKD *x"
+prototype void vp8_build_intra_predictors_mby_s "struct macroblockd *x"
 specialize vp8_build_intra_predictors_mby_s
 
-prototype void vp8_build_intra_predictors_sby_s "MACROBLOCKD *x"
+prototype void vp8_build_intra_predictors_sby_s "struct macroblockd *x"
 specialize vp8_build_intra_predictors_sby_s;
 
-prototype void vp8_build_intra_predictors_sbuv_s "MACROBLOCKD *x"
+prototype void vp8_build_intra_predictors_sbuv_s "struct macroblockd *x"
 specialize vp8_build_intra_predictors_sbuv_s;
 
-prototype void vp8_build_intra_predictors_mby "MACROBLOCKD *x"
+prototype void vp8_build_intra_predictors_mby "struct macroblockd *x"
 specialize vp8_build_intra_predictors_mby;
 
-prototype void vp8_build_comp_intra_predictors_mby "MACROBLOCKD *x"
+prototype void vp8_build_comp_intra_predictors_mby "struct macroblockd *x"
 specialize vp8_build_comp_intra_predictors_mby;
 
-prototype void vp8_build_intra_predictors_mby_s "MACROBLOCKD *x"
+prototype void vp8_build_intra_predictors_mby_s "struct macroblockd *x"
 specialize vp8_build_intra_predictors_mby_s;
 
-prototype void vp8_build_intra_predictors_mbuv "MACROBLOCKD *x"
+prototype void vp8_build_intra_predictors_mbuv "struct macroblockd *x"
 specialize vp8_build_intra_predictors_mbuv;
 
-prototype void vp8_build_intra_predictors_mbuv_s "MACROBLOCKD *x"
+prototype void vp8_build_intra_predictors_mbuv_s "struct macroblockd *x"
 specialize vp8_build_intra_predictors_mbuv_s;
 
-prototype void vp8_build_comp_intra_predictors_mbuv "MACROBLOCKD *x"
+prototype void vp8_build_comp_intra_predictors_mbuv "struct macroblockd *x"
 specialize vp8_build_comp_intra_predictors_mbuv;
 
-prototype void vp8_intra4x4_predict "BLOCKD *x, int b_mode, unsigned char *predictor"
+prototype void vp8_intra4x4_predict "struct blockd *x, int b_mode, unsigned char *predictor"
 specialize vp8_intra4x4_predict;
 
-prototype void vp8_comp_intra4x4_predict "BLOCKD *x, int b_mode, int second_mode, unsigned char *predictor"
+prototype void vp8_comp_intra4x4_predict "struct blockd *x, int b_mode, int second_mode, unsigned char *predictor"
 specialize vp8_comp_intra4x4_predict;
 
-prototype void vp8_intra8x8_predict "BLOCKD *x, int b_mode, unsigned char *predictor"
+prototype void vp8_intra8x8_predict "struct blockd *x, int b_mode, unsigned char *predictor"
 specialize vp8_intra8x8_predict;
 
-prototype void vp8_comp_intra8x8_predict "BLOCKD *x, int b_mode, int second_mode, unsigned char *predictor"
+prototype void vp8_comp_intra8x8_predict "struct blockd *x, int b_mode, int second_mode, unsigned char *predictor"
 specialize vp8_comp_intra8x8_predict;
 
-prototype void vp8_intra_uv4x4_predict "BLOCKD *x, int b_mode, unsigned char *predictor"
+prototype void vp8_intra_uv4x4_predict "struct blockd *x, int b_mode, unsigned char *predictor"
 specialize vp8_intra_uv4x4_predict;
 
-prototype void vp8_comp_intra_uv4x4_predict "BLOCKD *x, int b_mode, int second_mode, unsigned char *predictor"
+prototype void vp8_comp_intra_uv4x4_predict "struct blockd *x, int b_mode, int second_mode, unsigned char *predictor"
 specialize vp8_comp_intra_uv4x4_predict;
 
 #
@@ -367,6 +374,30 @@ specialize vp8_sub_pixel_mse32x32
 
 prototype unsigned int vp8_get_mb_ss "const short *"
 specialize vp8_get_mb_ss mmx sse2
+# ENCODEMB INVOKE
+prototype int vp8_mbblock_error "struct macroblock *mb, int dc"
+specialize vp8_mbblock_error mmx sse2
+vp8_mbblock_error_sse2=vp8_mbblock_error_xmm
+
+prototype int vp8_block_error "short *coeff, short *dqcoeff, int block_size"
+specialize vp8_block_error mmx sse2
+vp8_block_error_sse2=vp8_block_error_xmm
+
+prototype void vp8_subtract_b "struct block *be, struct blockd *bd, int pitch"
+specialize vp8_subtract_b mmx sse2
+
+prototype int vp8_mbuverror "struct macroblock *mb"
+specialize vp8_mbuverror mmx sse2
+vp8_mbuverror_sse2=vp8_mbuverror_xmm
+
+prototype void vp8_subtract_b "struct block *be, struct blockd *bd, int pitch"
+specialize vp8_subtract_b mmx sse2
+
+prototype void vp8_subtract_mby "short *diff, unsigned char *src, unsigned char *pred, int stride"
+specialize vp8_subtract_mby mmx sse2
+
+prototype void vp8_subtract_mbuv "short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride"
+specialize vp8_subtract_mbuv mmx sse2
 
 #
 # Structured Similarity (SSIM)

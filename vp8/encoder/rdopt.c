@@ -42,7 +42,7 @@
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
 #include "vp8/common/entropy.h"
-
+#include "vpx_rtcd.h"
 #if CONFIG_NEWBESTREFMV
 #include "vp8/common/mvref_common.h"
 #endif
@@ -710,11 +710,8 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
   BLOCK *beptr;
   int d;
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, submby)(
-    mb->src_diff,
-    *(mb->block[0].base_src),
-    xd->predictor,
-    mb->block[0].src_stride);
+  vp8_subtract_mby(mb->src_diff, *(mb->block[0].base_src), xd->predictor,
+                   mb->block[0].src_stride);
 
   // Fdct and building the 2nd order block
   for (beptr = mb->block; beptr < mb->block + 16; beptr += 2) {
@@ -735,9 +732,9 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
   mb->quantize_b_4x4(mb_y2, x_y2);
 
   // Distortion
-  d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 1);
+  vp8_mbblock_error(mb, 1);
 
-  d += ENCODEMB_INVOKE(&rtcd->encodemb, berr)(mb_y2->coeff, x_y2->dqcoeff, 16);
+  d += vp8_block_error(mb_y2->coeff, x_y2->dqcoeff, 16);
 
   *Distortion = (d >> 2);
   // rate
@@ -784,11 +781,8 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
   BLOCKD *const x_y2  = xd->block + 24;
   int d;
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, submby)(
-    mb->src_diff,
-    *(mb->block[0].base_src),
-    xd->predictor,
-    mb->block[0].src_stride);
+  vp8_subtract_mby(mb->src_diff, *(mb->block[0].base_src), xd->predictor,
+                   mb->block[0].src_stride);
 
   vp8_transform_mby_8x8(mb);
   vp8_quantize_mby_8x8(mb);
@@ -803,8 +797,8 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
   xd->dqcoeff[128] = 0;
   xd->dqcoeff[192] = 0;
 
-  d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 0);
-  d += ENCODEMB_INVOKE(&rtcd->encodemb, berr)(mb_y2->coeff, x_y2->dqcoeff, 16);
+  d = vp8_mbblock_error(mb, 0);
+  d += vp8_block_error(mb_y2->coeff, x_y2->dqcoeff, 16);
 
   *Distortion = (d >> 2);
   // rate
@@ -836,11 +830,8 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   BLOCK  *be = &mb->block[0];
   TX_TYPE tx_type;
 
-  ENCODEMB_INVOKE(&rtcd->encodemb, submby)(
-    mb->src_diff,
-    *(mb->block[0].base_src),
-    mb->e_mbd.predictor,
-    mb->block[0].src_stride);
+  vp8_subtract_mby(mb->src_diff, *(mb->block[0].base_src), mb->e_mbd.predictor,
+                   mb->block[0].src_stride);
 
   tx_type = get_tx_type_16x16(xd, b);
   if (tx_type != DCT_DCT) {
@@ -855,7 +846,7 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   if (mb->e_mbd.mode_info_context->mbmi.mode < I8X8_PRED)
     vp8_optimize_mby_16x16(mb, rtcd);
 
-  d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 0);
+  d = vp8_mbblock_error(mb, 0);
 
   *Distortion = (d >> 2);
   // rate
@@ -1029,8 +1020,8 @@ static void super_block_yrd_8x8(MACROBLOCK *x,
     xd->dqcoeff[128] = 0;
     xd->dqcoeff[192] = 0;
 
-    d += ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(x, 0);
-    d += ENCODEMB_INVOKE(&rtcd->encodemb, berr)(by2->coeff, bdy2->dqcoeff, 16);
+    d += vp8_mbblock_error(x, 0);
+    d += vp8_block_error(by2->coeff, bdy2->dqcoeff, 16);
     xd->above_context = ta + x_idx;
     xd->left_context = tl + y_idx;
     r += vp8_rdcost_mby_8x8(x, 0);
@@ -1121,7 +1112,7 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
         rate += bmode_costs[mode2];
       }
 #endif
-      ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), subb)(be, b, 16);
+      vp8_subtract_b(be, b, 16);
 
       b->bmi.as_mode.first = mode;
       tx_type = get_tx_type_4x4(xd, b);
@@ -1138,8 +1129,7 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
 
       ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ, TX_4X4);
       rate += ratey;
-      distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)(
-          be->coeff, b->dqcoeff, 16) >> 2;
+      distortion = vp8_block_error(be->coeff, b->dqcoeff, 16) >> 2;
 
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
@@ -1621,17 +1611,14 @@ static int rd_cost_mbuv(MACROBLOCK *mb) {
 
 static int64_t rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                                 int *distortion, int fullpixel, int *skip) {
-  ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
-                                                         x->src.u_buffer,
-                                                         x->src.v_buffer,
-                                                         x->e_mbd.predictor,
-                                                         x->src.uv_stride);
+  vp8_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+                    x->e_mbd.predictor, x->src.uv_stride);
 
   vp8_transform_mbuv_4x4(x);
   vp8_quantize_mbuv_4x4(x);
 
   *rate       = rd_cost_mbuv(x);
-  *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
+  *distortion = vp8_mbuverror(x) / 4;
   *skip       = mbuv_is_skippable_4x4(&x->e_mbd);
 
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
@@ -1696,7 +1683,7 @@ static int64_t rd_inter32x32_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
     xd->above_context = ta + x_idx;
     xd->left_context = tl + y_idx;
     r += rd_cost_mbuv_8x8(x, 0);
-    d += ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
+    d += vp8_mbuverror(x) / 4;
     skippable = skippable && mbuv_is_skippable_8x8(xd);
   }
 
@@ -1714,17 +1701,14 @@ static int64_t rd_inter32x32_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
 static int64_t rd_inter16x16_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                                     int *distortion, int fullpixel, int *skip) {
-  ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
-                                                         x->src.u_buffer,
-                                                         x->src.v_buffer,
-                                                         x->e_mbd.predictor,
-                                                         x->src.uv_stride);
+  vp8_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+                    x->e_mbd.predictor, x->src.uv_stride);
 
   vp8_transform_mbuv_8x8(x);
   vp8_quantize_mbuv_8x8(x);
 
   *rate       = rd_cost_mbuv_8x8(x, 1);
-  *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
+  *distortion = vp8_mbuverror(x) / 4;
   *skip       = mbuv_is_skippable_8x8(&x->e_mbd);
 
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
@@ -1734,14 +1718,14 @@ static int64_t rd_inter16x16_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 static int64_t rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                               int *distortion, int *skippable, int fullpixel) {
   vp8_build_inter4x4_predictors_mbuv(&x->e_mbd);
-  ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
-                                                         x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
+  vp8_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+                    x->e_mbd.predictor, x->src.uv_stride);
 
   vp8_transform_mbuv_4x4(x);
   vp8_quantize_mbuv_4x4(x);
 
   *rate       = rd_cost_mbuv(x);
-  *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
+  *distortion = vp8_mbuverror(x) / 4;
   *skippable  = mbuv_is_skippable_4x4(&x->e_mbd);
 
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
@@ -1786,9 +1770,8 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
       }
 #endif
 
-      ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
-                                                             x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor,
-                                                             x->src.uv_stride);
+      vp8_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+                        x->e_mbd.predictor, x->src.uv_stride);
       vp8_transform_mbuv_4x4(x);
       vp8_quantize_mbuv_4x4(x);
 
@@ -1796,7 +1779,7 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
       rate = rate_to
              + x->intra_uv_mode_cost[x->e_mbd.frame_type][mbmi->uv_mode];
 
-      distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
+      distortion = vp8_mbuverror(x) / 4;
 
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
@@ -1845,9 +1828,8 @@ static void rd_pick_intra_mbuv_mode_8x8(VP8_COMP *cpi,
 
     mbmi->uv_mode = mode;
     vp8_build_intra_predictors_mbuv(&x->e_mbd);
-    ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
-                                                           x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor,
-                                                           x->src.uv_stride);
+    vp8_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+                      x->e_mbd.predictor, x->src.uv_stride);
     vp8_transform_mbuv_8x8(x);
 
     vp8_quantize_mbuv_8x8(x);
@@ -1855,7 +1837,7 @@ static void rd_pick_intra_mbuv_mode_8x8(VP8_COMP *cpi,
     rate_to = rd_cost_mbuv_8x8(x, 1);
     rate = rate_to + x->intra_uv_mode_cost[x->e_mbd.frame_type][mbmi->uv_mode];
 
-    distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
+    distortion = vp8_mbuverror(x) / 4;
     this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
     if (this_rd < best_rd) {
@@ -1905,7 +1887,7 @@ static void super_block_uvrd_8x8(MACROBLOCK *x,
     vp8_quantize_mbuv_8x8(x);
     s &= mbuv_is_skippable_8x8(xd);
 
-    d += ENCODEMB_INVOKE(&rtcd->encodemb, mbuverr)(x) >> 2;
+    d += vp8_mbuverror(x) >> 2;
     xd->above_context = ta + x_idx;
     xd->left_context = tl + y_idx;
     r += rd_cost_mbuv_8x8(x, 0);
@@ -2115,10 +2097,10 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
       vp8_build_inter_predictors_b(bd, 16, xd->subpixel_predict);
       if (xd->mode_info_context->mbmi.second_ref_frame)
         vp8_build_2nd_inter_predictors_b(bd, 16, xd->subpixel_predict_avg);
-      ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, bd, 16);
+      vp8_subtract_b(be, bd, 16);
       x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
       x->quantize_b_4x4(be, bd);
-      thisdistortion = vp8_block_error_c(be->coeff, bd->dqcoeff, 16);
+      thisdistortion = vp8_block_error(be->coeff, bd->dqcoeff, 16);
       *distortion += thisdistortion;
       *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
                                  ta + vp8_block2above[i],
