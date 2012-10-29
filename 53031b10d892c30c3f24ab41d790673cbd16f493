@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//+UA\u003d",
+        "filename": "vp8/common/loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-29T23:19:50Z",
+      "side": 1,
+      "message": "you\u0027d get better balance/symmetry averaging together pairs in same co-location:\n\nx0 / x7\n\nx1 / x6\n\nx2 / x5\n\nx3 / x4",
+      "revId": "53031b10d892c30c3f24ab41d790673cbd16f493",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
