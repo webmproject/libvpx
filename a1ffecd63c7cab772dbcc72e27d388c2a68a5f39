@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Sw\u003d",
+        "filename": ".gitignore",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:54:53Z",
+      "side": 1,
+      "message": "should be in a separate commit.",
+      "revId": "a1ffecd63c7cab772dbcc72e27d388c2a68a5f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Sc\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:54:53Z",
+      "side": 1,
+      "message": "this should also get a pointer to the end or length of the overall data buffer, and return an error if you try to read beyond the end.",
+      "revId": "a1ffecd63c7cab772dbcc72e27d388c2a68a5f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Sg\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:54:53Z",
+      "side": 1,
+      "message": "Do while() instead of if(), it\u0027ll simplify this code and support the generic case of multiple altrefs, should we make use of that in the future.",
+      "revId": "a1ffecd63c7cab772dbcc72e27d388c2a68a5f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+SE\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1398,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:54:53Z",
+      "side": 1,
+      "message": "sorry if I wasn\u0027t clear before, I meant this code should be in vp8/vp8_cx_iface.c, like you did for vp8_dx_iface. vpxenc.c should be unchanged.",
+      "revId": "a1ffecd63c7cab772dbcc72e27d388c2a68a5f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+R8\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1400,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:54:53Z",
+      "side": 1,
+      "message": "you never read the value of altref_pkt before clobbering it. suggests that it should be returned from this function rather passed as in input. You\u0027d also be able to refer to it like a local rather than (*altref_pkt)-\u003e",
+      "revId": "a1ffecd63c7cab772dbcc72e27d388c2a68a5f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Qo\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1409,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:54:53Z",
+      "side": 1,
+      "message": "rather than all these memcpys, it\u0027d be better to just copy the whole packet, and selectively replace the fields you want. Should be less brittle if a field is added, for example.",
+      "revId": "a1ffecd63c7cab772dbcc72e27d388c2a68a5f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Rw\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1413,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:54:53Z",
+      "side": 1,
+      "message": "if you move this inside the codec, can use the buffers already allocated for compressed data rather than allocating something new.",
+      "revId": "a1ffecd63c7cab772dbcc72e27d388c2a68a5f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+RQ\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1426,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:54:53Z",
+      "side": 1,
+      "message": "don\u0027t memcpy here, just do data[offset] \u003d chunk",
+      "revId": "a1ffecd63c7cab772dbcc72e27d388c2a68a5f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+RI\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1431,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-29T23:54:53Z",
+      "side": 1,
+      "message": "here and elsewhere, unnecessary to cast with memcpy",
+      "revId": "a1ffecd63c7cab772dbcc72e27d388c2a68a5f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
