@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//+xk\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-29T18:55:18Z",
+      "side": 1,
+      "message": "necessary?",
+      "revId": "526fb979892197e46a61106386db131c40561e5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+ws\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-29T18:55:18Z",
+      "side": 1,
+      "message": "this is done multiple times, could be done above as const int bits_in_current_frame or so.",
+      "revId": "526fb979892197e46a61106386db131c40561e5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+xY\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-29T18:55:18Z",
+      "side": 1,
+      "message": "drop one space before \u0027/\u0027",
+      "revId": "526fb979892197e46a61106386db131c40561e5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+wk\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-29T18:55:18Z",
+      "side": 1,
+      "message": "not needed",
+      "revId": "526fb979892197e46a61106386db131c40561e5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
