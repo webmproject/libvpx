@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+Pg\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2947,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-29T23:59:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+dE\u003d",
+      "revId": "bdf47f73a7cd338208aa5a390cd440f3bd9b24de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+cU\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-29T22:25:21Z",
       "side": 1,
       "message": "Just a suggestion... Naming the enumeration that BLOCK_16x16 is one value and declaring the block_size parameter accordingly would make it clearer that the \"block_size\" is not the physical blocksize but an indicator of it.",
+      "revId": "bdf47f73a7cd338208aa5a390cd440f3bd9b24de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Ps\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2951,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-29T23:59:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+cU\u003d",
       "revId": "bdf47f73a7cd338208aa5a390cd440f3bd9b24de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+Po\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2984,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-29T23:59:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+b0\u003d",
+      "revId": "bdf47f73a7cd338208aa5a390cd440f3bd9b24de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+bM\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2012-10-29T22:25:21Z",
       "side": 1,
       "message": "21 parameters! I assume that this is a temporary intermediate step to cleaning up the code and will ultimately be \"re-engineered\"? (can some of them be const at least?)",
+      "revId": "bdf47f73a7cd338208aa5a390cd440f3bd9b24de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Pk\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3289,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-29T23:59:51Z",
+      "side": 1,
+      "message": "Sort of, yeah. It\u0027s definitely work in progress. The goal of this patch is really to remove the duplicate motion search code between SB/MB. This can certainly be cleaned up further.",
+      "parentUuid": "AAAAQ3//+bM\u003d",
       "revId": "bdf47f73a7cd338208aa5a390cd440f3bd9b24de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
