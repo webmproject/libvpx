@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//+lE\u003d",
+        "filename": "vp8/common/idctllm.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-10-29T21:26:56Z",
+      "side": 1,
+      "message": "can reformat the constants table to align on \",\" for easy read?",
+      "revId": "ff41057bf3bfe754fd61b8895585aaa89aa9e29a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+k8\u003d",
+        "filename": "vp8/common/idctllm.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-10-29T21:26:56Z",
+      "side": 1,
+      "message": "I would either make this a configure option or just completely replace the floating point version.",
+      "revId": "ff41057bf3bfe754fd61b8895585aaa89aa9e29a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
