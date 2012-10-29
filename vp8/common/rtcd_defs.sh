@@ -412,5 +412,33 @@ if [ "$CONFIG_INTERNAL_STATS" = "yes" ]; then
     specialize vp8_ssim_parms_16x16 $sse2_on_x86_64
 fi
 
+# fdct functions
+prototype void vp8_short_fdct8x8 "short *InputData, short *OutputData, int pitch"
+specialize vp8_short_fdct8x8
+
+prototype void vp8_short_fhaar2x2 "short *InputData, short *OutputData, int pitch"
+specialize vp8_short_fhaar2x2
+
+prototype void vp8_short_fdct4x4 "short *InputData, short *OutputData, int pitch"
+specialize vp8_short_fdct4x4
+
+prototype void vp8_short_fdct8x4 "short *InputData, short *OutputData, int pitch"
+specialize vp8_short_fdct8x4
+
+prototype void vp8_short_walsh4x4 "short *InputData, short *OutputData, int pitch"
+specialize vp8_short_walsh4x4
+
+prototype void vp8_short_fdct16x16 "short *InputData, short *OutputData, int pitch"
+specialize vp8_short_fdct16x16
+
+prototype void vp8_short_walsh4x4_lossless "short *InputData, short *OutputData, int pitch"
+specialize vp8_short_walsh4x4_lossless
+
+prototype void vp8_short_walsh4x4_x8 "short *InputData, short *OutputData, int pitch"
+specialize vp8_short_walsh4x4_x8
+
+prototype void vp8_short_walsh8x4_x8 "short *InputData, short *OutputData, int pitch"
+specialize vp8_short_walsh8x4_x8
+
 fi
 # end encoder functions

@@ -15,7 +15,6 @@
 #include "tokenize.h"
 #include "vp8/common/invtrans.h"
 #include "vp8/common/reconintra.h"
-#include "dct.h"
 #include "vpx_mem/vpx_mem.h"
 #include "rdopt.h"
 #include "vp8/common/systemdependent.h"

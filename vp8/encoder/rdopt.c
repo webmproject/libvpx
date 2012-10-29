@@ -35,7 +35,6 @@
 #include "rdopt.h"
 #include "ratectrl.h"
 #include "vpx_mem/vpx_mem.h"
-#include "dct.h"
 #include "vp8/common/systemdependent.h"
 #include "vp8/encoder/encodemv.h"
 

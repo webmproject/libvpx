@@ -167,9 +167,6 @@ extern unsigned int inter_uv_modes[VP8_UV_MODES];
 extern unsigned int inter_b_modes[B_MODE_COUNT];
 #endif
 
-extern void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
-extern void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
-
 extern void vp8cx_init_quantizer(VP8_COMP *cpi);
 
 int vp8cx_base_skip_false_prob[QINDEX_RANGE][3];
@@ -1190,20 +1187,23 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
     vp8_init_dsmotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
   }
 
-  if (cpi->sf.improved_dct) {
-    cpi->mb.vp8_short_fdct16x16 = FDCT_INVOKE(&cpi->rtcd.fdct, short16x16);
-    cpi->mb.vp8_short_fdct8x8 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x8);
-    cpi->mb.vp8_short_fdct8x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x4);
-    cpi->mb.vp8_short_fdct4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
-  } else {
-    cpi->mb.vp8_short_fdct16x16 = FDCT_INVOKE(&cpi->rtcd.fdct, short16x16);
-    cpi->mb.vp8_short_fdct8x8 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x8);
-    cpi->mb.vp8_short_fdct8x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast8x4);
-    cpi->mb.vp8_short_fdct4x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast4x4);
-  }
+  cpi->mb.vp8_short_fdct16x16 = vp8_short_fdct16x16;
+  cpi->mb.vp8_short_fdct8x8 = vp8_short_fdct8x8;
+  cpi->mb.vp8_short_fdct8x4 = vp8_short_fdct8x4;
+  cpi->mb.vp8_short_fdct4x4 = vp8_short_fdct4x4;
+  cpi->mb.short_walsh4x4 = vp8_short_walsh4x4;
+  cpi->mb.short_fhaar2x2 = vp8_short_fhaar2x2;
 
-  cpi->mb.short_walsh4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, walsh_short4x4);
-  cpi->mb.short_fhaar2x2 = FDCT_INVOKE(&cpi->rtcd.fdct, haar_short2x2);
+#if CONFIG_LOSSLESS
+  if (cpi->oxcf.lossless) {
+    cpi->mb.vp8_short_fdct8x4 = vp8_short_walsh8x4_x8;
+    cpi->mb.vp8_short_fdct4x4 = vp8_short_walsh4x4_x8;
+    cpi->mb.short_walsh4x4 = vp8_short_walsh4x4;
+    cpi->mb.short_fhaar2x2 = vp8_short_fhaar2x2;
+    cpi->mb.short_walsh4x4 = vp8_short_walsh4x4_lossless;
+  }
+#endif
+
 
 
   cpi->mb.quantize_b_4x4      = vp8_regular_quantize_b_4x4;
@@ -1524,11 +1524,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
 #if CONFIG_LOSSLESS
   cpi->oxcf.lossless = oxcf->lossless;
   if (cpi->oxcf.lossless) {
-    cpi->rtcd.fdct.short4x4                  = vp8_short_walsh4x4_x8_c;
-    cpi->rtcd.fdct.fast4x4                   = vp8_short_walsh4x4_x8_c;
-    cpi->rtcd.fdct.short8x4                  = vp8_short_walsh8x4_x8_c;
-    cpi->rtcd.fdct.fast8x4                   = vp8_short_walsh8x4_x8_c;
-    cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_lossless_c;
     cpi->common.rtcd.idct.idct1        = vp8_short_inv_walsh4x4_1_x8_c;
     cpi->common.rtcd.idct.idct16       = vp8_short_inv_walsh4x4_x8_c;
     cpi->common.rtcd.idct.idct1_scalar_add  = vp8_dc_only_inv_walsh_add_c;

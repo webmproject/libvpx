@@ -24,23 +24,10 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi) {
 #if CONFIG_RUNTIME_CPU_DETECT
   cpi->rtcd.common                    = &cpi->common.rtcd;
 
-  cpi->rtcd.fdct.short8x8                  = vp8_short_fdct8x8_c;
-  cpi->rtcd.fdct.short16x16                = vp8_short_fdct16x16_c;
-  cpi->rtcd.fdct.haar_short2x2             = vp8_short_fhaar2x2_c;
-  cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
-  cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
-  cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
-  cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
-  cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
   cpi->rtcd.search.full_search             = vp8_full_search_sad;
   cpi->rtcd.search.refining_search         = vp8_refining_search_sad;
   cpi->rtcd.search.diamond_search          = vp8_diamond_search_sad;
   cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_c;
-  cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
-  cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
-  cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
-  cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
-  cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
 #endif
 
   vp8_yv12_copy_partial_frame_ptr = vp8_yv12_copy_partial_frame;
