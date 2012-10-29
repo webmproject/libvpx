@@ -46,7 +46,6 @@ VP8_CX_SRCS-yes += encoder/generic/csystemdependent.c
 VP8_CX_SRCS-yes += encoder/block.h
 VP8_CX_SRCS-yes += encoder/boolhuff.h
 VP8_CX_SRCS-yes += encoder/bitstream.h
-VP8_CX_SRCS-yes += encoder/dct.h
 VP8_CX_SRCS-yes += encoder/encodeintra.h
 VP8_CX_SRCS-yes += encoder/encodemb.h
 VP8_CX_SRCS-yes += encoder/encodemv.h
@@ -89,7 +88,6 @@ VP8_CX_SRCS-yes += encoder/mbgraph.c
 VP8_CX_SRCS-yes += encoder/mbgraph.h
 
 
-VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/dct_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/mcomp_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/temporal_filter_x86.h
