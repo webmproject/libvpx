@@ -732,7 +732,7 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
   mb->quantize_b_4x4(mb_y2, x_y2);
 
   // Distortion
-  vp8_mbblock_error(mb, 1);
+  d = vp8_mbblock_error(mb, 1);
 
   d += vp8_block_error(mb_y2->coeff, x_y2->dqcoeff, 16);
 
