@@ -295,7 +295,8 @@ void vp8_comp_intra4x4_predict_c(BLOCKD *x,
 /* copy 4 bytes from the above right down so that the 4x4 prediction modes using pixels above and
  * to the right prediction have filled in pixels to use.
  */
-void vp8_intra_prediction_down_copy(MACROBLOCKD *xd, int extend_edge) {
+void vp8_intra_prediction_down_copy(MACROBLOCKD *xd) {
+  int extend_edge = (xd->mb_to_right_edge == 0 && xd->mb_index < 2);
   unsigned char *above_right = *(xd->block[0].base_dst) + xd->block[0].dst -
                                xd->block[0].dst_stride + 16;
   unsigned int *src_ptr = (unsigned int *)

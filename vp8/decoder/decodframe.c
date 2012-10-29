@@ -658,8 +658,7 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd,
         mi[pc->mode_info_stride + 1] = mi[0];
       }
 #endif
-      vp8_intra_prediction_down_copy(xd, mb_col == pc->mb_cols - 1 &&
-                                     !(mb_row & 1));
+      vp8_intra_prediction_down_copy(xd);
       decode_macroblock(pbi, xd, mb_col, bc);
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb) {
