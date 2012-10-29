@@ -16,6 +16,24 @@
       "revId": "53031b10d892c30c3f24ab41d790673cbd16f493",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Tw\u003d",
+        "filename": "vp8/common/loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-10-29T23:28:21Z",
+      "side": 1,
+      "message": "we had tested with different combinations, the one with best results was: \n\nunsigned char a \u003d (x0 + x7 + 1) \u003e\u003e 1;\n\nunsigned char b \u003d (x1 + x6 + 1) \u003e\u003e 1;\n\nunsigned char c \u003d (x2 + x5 + 1) \u003e\u003e 1;\n\nunsigned char d \u003d (x3 + x4 + 1) \u003e\u003e 1;\n\nunsigned char e \u003d (a + b) \u003e\u003e 1;\n\nunsigned char f \u003d (c + d) \u003e\u003e 1;\n\nreturn (e + f + 1) \u003e\u003e 1;\n\n\nbut still slightly worse than the filter which it intended to replace",
+      "parentUuid": "AAAAQ3//+UA\u003d",
+      "revId": "53031b10d892c30c3f24ab41d790673cbd16f493",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
