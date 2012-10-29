@@ -297,7 +297,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
   int has_y2_block;
   int b;
   int tx_size = xd->mode_info_context->mbmi.txfm_size;
-  int mb_skip_context = get_pred_context(&cpi->common, xd, PRED_MBSKIP);
+  int mb_skip_context = vp9_get_pred_context(&cpi->common, xd, PRED_MBSKIP);
   TOKENEXTRA *t_backup = *t;
   ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *) xd->above_context;
   ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *) xd->left_context;

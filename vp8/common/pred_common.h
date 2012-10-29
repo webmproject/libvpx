@@ -25,30 +25,31 @@ typedef enum {
   PRED_SWITCHABLE_INTERP = 4
 } PRED_ID;
 
-extern unsigned char get_pred_context(const VP8_COMMON *const cm,
-                                      const MACROBLOCKD *const xd,
-                                      PRED_ID pred_id);
+extern unsigned char vp9_get_pred_context(const VP8_COMMON *const cm,
+                                          const MACROBLOCKD *const xd,
+                                          PRED_ID pred_id);
 
-extern vp8_prob get_pred_prob(const VP8_COMMON *const cm,
-                              const MACROBLOCKD *const xd,
-                              PRED_ID pred_id);
+extern vp8_prob vp9_get_pred_prob(const VP8_COMMON *const cm,
+                                  const MACROBLOCKD *const xd,
+                                  PRED_ID pred_id);
 
-extern const vp8_prob *get_pred_probs(const VP8_COMMON *const cm,
-                                const MACROBLOCKD *const xd,
-                                PRED_ID pred_id);
+extern const vp8_prob *vp9_get_pred_probs(const VP8_COMMON *const cm,
+                                          const MACROBLOCKD *const xd,
+                                          PRED_ID pred_id);
 
-extern unsigned char get_pred_flag(const MACROBLOCKD *const xd,
-                                   PRED_ID pred_id);
+extern unsigned char vp9_get_pred_flag(const MACROBLOCKD *const xd,
+                                       PRED_ID pred_id);
 
-extern void set_pred_flag(MACROBLOCKD *const xd,
-                          PRED_ID pred_id,
-                          unsigned char pred_flag);
+extern void vp9_set_pred_flag(MACROBLOCKD *const xd,
+                              PRED_ID pred_id,
+                              unsigned char pred_flag);
 
 
-extern unsigned char get_pred_mb_segid(const VP8_COMMON *const cm, int MbIndex);
+extern unsigned char vp9_get_pred_mb_segid(const VP8_COMMON *const cm,
+                                           int MbIndex);
 
-extern MV_REFERENCE_FRAME get_pred_ref(const VP8_COMMON *const cm,
+extern MV_REFERENCE_FRAME vp9_get_pred_ref(const VP8_COMMON *const cm,
                                        const MACROBLOCKD *const xd);
-extern void compute_mod_refprobs(VP8_COMMON *const cm);
+extern void vp9_compute_mod_refprobs(VP8_COMMON *const cm);
 
 #endif /* __INC_PRED_COMMON_H__ */

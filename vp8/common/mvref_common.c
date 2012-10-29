@@ -33,17 +33,10 @@ static void clamp_mv(const MACROBLOCKD *xd, int_mv *mv) {
     mv->as_mv.row = xd->mb_to_bottom_edge + MV_BORDER;
 }
 
-// Code for selecting / building and entropy coding a motion vector reference
-// Returns a seperation value for two vectors.
-// This is taken as the sum of the abs x and y difference.
-unsigned int mv_distance(int_mv *mv1, int_mv *mv2) {
-  return (abs(mv1->as_mv.row - mv2->as_mv.row) +
-          abs(mv1->as_mv.col - mv2->as_mv.col));
-}
 
 // Gets a best matching candidate refenence motion vector
 // from the given mode info structure (if available)
-int get_candidate_mvref(
+static int get_candidate_mvref(
   const MODE_INFO *candidate_mi,
   MV_REFERENCE_FRAME ref_frame,
   MV_REFERENCE_FRAME *c_ref_frame,
@@ -111,7 +104,7 @@ int get_candidate_mvref(
 
 // Performs mv adjustment based on reference frame and clamps the MV
 // if it goes off the edge of the buffer.
-void scale_mv(
+static void scale_mv(
   MACROBLOCKD *xd,
   MV_REFERENCE_FRAME this_ref_frame,
   MV_REFERENCE_FRAME candidate_ref_frame,
@@ -162,7 +155,7 @@ void scale_mv(
 // Adds a new candidate reference vector to the list if indeed it is new.
 // If it is not new then the score of the existing candidate that it matches
 // is increased and the list is resorted.
-void addmv_and_shuffle(
+static void addmv_and_shuffle(
   int_mv *mv_list,
   int *mv_scores,
   int *index,
@@ -212,7 +205,7 @@ void addmv_and_shuffle(
 // This function searches the neighbourhood of a given MB/SB and populates a
 // list of candidate reference vectors.
 //
-void find_mv_refs(
+void vp9_find_mv_refs(
   MACROBLOCKD *xd,
   MODE_INFO *here,
   MODE_INFO *lf_here,
