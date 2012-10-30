@@ -357,19 +357,8 @@ static void update_mbgraph_frame_stats
   }
 }
 
-// Test for small magnitude (<= 1 pel mvs)
-int small_mv(MV mv) {
-  if ((abs((int)mv.col) > 2) || (abs((int)mv.row) > 2))
-    return FALSE;
-  else
-    return TRUE;
-}
-
 // void separate_arf_mbs_byzz
-void separate_arf_mbs
-(
-  VP8_COMP *cpi
-) {
+static void separate_arf_mbs(VP8_COMP *cpi) {
   VP8_COMMON *const cm = &cpi->common;
   int mb_col, mb_row, offset, i;
   int ncnt[4];
