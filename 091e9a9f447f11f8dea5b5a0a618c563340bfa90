@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+PY\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1207,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T00:06:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+Vo\u003d",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+VU\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 6
@@ -104,6 +122,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+PM\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2944,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T00:06:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+Tc\u003d",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+Ug\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 6
@@ -115,6 +151,24 @@
       "writtenOn": "2012-10-29T23:32:25Z",
       "side": 1,
       "message": "a const dst pointer is pretty senseless. does this need a better name? (locally, not xd-\u003edst)",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+PI\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2950,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T00:06:51Z",
+      "side": 1,
+      "message": "Well, yeah, I was sort of in doubt about this one. It _is_ the destination buffer, but I agree const *char dst is ... Dubious. :). But it is the destination buffer across the whole encode, it\u0027s just that this particular function doesn\u0027t modify its contents. What do you think? (I.e. how would you name it?)",
+      "parentUuid": "AAAAQ3//+Ug\u003d",
       "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +192,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+PE\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2999,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T00:06:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+Uc\u003d",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+Ts\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 6
@@ -149,6 +221,24 @@
       "writtenOn": "2012-10-29T23:32:25Z",
       "side": 1,
       "message": "just delete this dead code rather than fixing it.",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+O8\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4535,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T00:06:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//+Ts\u003d",
       "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -172,6 +262,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//+O4\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4540,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T00:06:51Z",
+      "side": 1,
+      "message": "Actually this can be fixed - so fixed.",
+      "parentUuid": "AAAAQ3//+To\u003d",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//+Tk\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 6
@@ -183,6 +291,24 @@
       "writtenOn": "2012-10-29T23:32:25Z",
       "side": 1,
       "message": "no, delete.",
+      "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Ow\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4692,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T00:06:51Z",
+      "side": 1,
+      "message": "Hm, well, this is actually a placeholder for intra block handling in the pick_inter_mode_sb(). I haven\u0027t implemented that yet, but will do so in the near future.",
+      "parentUuid": "AAAAQ3//+Tk\u003d",
       "revId": "091e9a9f447f11f8dea5b5a0a618c563340bfa90",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
