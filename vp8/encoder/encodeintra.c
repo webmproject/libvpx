@@ -77,7 +77,7 @@ void vp9_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
     vp9_ht_quantize_b_4x4(be, b, tx_type);
     vp8_ihtllm_c(b->dqcoeff, b->diff, 32, tx_type, 4);
   } else {
-    x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32) ;
+    x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
     x->quantize_b_4x4(be, b) ;
     vp8_inverse_transform_b_4x4(IF_RTCD(&rtcd->common->idct), b, 32) ;
   }

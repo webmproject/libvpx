@@ -650,7 +650,8 @@ void vp9_adjust_key_frame_context(VP8_COMP *cpi) {
 }
 
 
-void vp9_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, int *frame_over_shoot_limit) {
+void vp9_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit,
+                                   int *frame_over_shoot_limit) {
   // Set-up bounds on acceptable frame size:
   if (cpi->oxcf.fixed_q >= 0) {
     // Fixed Q scenario: frame size never outranges target (there is no target!)

@@ -1860,7 +1860,8 @@ static void segment_reference_frames(VP8_COMP *cpi) {
   }
 }
 
-void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size) {
+void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
+                        unsigned long *size) {
   int i, j;
   VP8_HEADER oh;
   VP8_COMMON *const pc = &cpi->common;
@@ -1883,12 +1884,15 @@ void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
   compute_update_table();
 
-  // vp8_kf_default_bmode_probs() is called in vp9_setup_key_frame() once for each
-  // K frame before encode frame. pc->kf_bmode_prob doesn't get changed anywhere
-  // else. No need to call it again here. --yw
-  // vp8_kf_default_bmode_probs( pc->kf_bmode_prob);
+  /* vp8_kf_default_bmode_probs() is called in vp9_setup_key_frame() once
+   * for each K frame before encode frame. pc->kf_bmode_prob doesn't get
+   * changed anywhere else. No need to call it again here. --yw
+   * vp8_kf_default_bmode_probs( pc->kf_bmode_prob);
+   */
 
-  // every keyframe send startcode, width, height, scale factor, clamp and color type
+  /* every keyframe send startcode, width, height, scale factor, clamp
+   * and color type.
+   */
   if (oh.type == KEY_FRAME) {
     int v;
 

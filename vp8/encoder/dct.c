@@ -503,7 +503,7 @@ void vp9_short_fdct8x8_c(short *InputData, short *OutputData, int pitch) {
   }
 }
 
-void vp9_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
+void vp9_short_fhaar2x2_c(short *input, short *output, int pitch) {
   /* [1 1; 1 -1] orthogonal transform */
   /* use position: 0,1, 4, 8 */
   int i;
@@ -517,7 +517,6 @@ void vp9_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
   op1[1] = (ip1[0] - ip1[1] + ip1[4] - ip1[8]) >> 1;
   op1[4] = (ip1[0] + ip1[1] - ip1[4] - ip1[8]) >> 1;
   op1[8] = (ip1[0] - ip1[1] - ip1[4] + ip1[8]) >> 1;
-
 }
 
 /* For test */

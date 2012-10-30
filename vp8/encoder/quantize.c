@@ -349,7 +349,8 @@ void vp9_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
  * these two C functions if corresponding optimized routine is not available.
  * NEON optimized version implements currently the fast quantization for pair
  * of blocks. */
-void vp9_regular_quantize_b_4x4_pair(BLOCK *b1, BLOCK *b2, BLOCKD *d1, BLOCKD *d2) {
+void vp9_regular_quantize_b_4x4_pair(BLOCK *b1, BLOCK *b2,
+                                     BLOCKD *d1, BLOCKD *d2) {
   vp9_regular_quantize_b_4x4(b1, d1);
   vp9_regular_quantize_b_4x4(b2, d2);
 }
@@ -366,7 +367,7 @@ static void invert_quant(short *quant,
   *shift = l;
 }
 
-void vp9cx_init_quantizer(VP8_COMP *cpi) {
+void vp9_init_quantizer(VP8_COMP *cpi) {
   int i;
   int quant_val;
   int Q;
@@ -530,7 +531,7 @@ void vp9cx_init_quantizer(VP8_COMP *cpi) {
   }
 }
 
-void vp9cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
+void vp9_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
   int i;
   int QIndex;
   MACROBLOCKD *xd = &x->e_mbd;
@@ -687,12 +688,12 @@ void vp9_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x) {
   x->block[24].zbin_extra = (short)zbin_extra;
 }
 
-void vp9cx_frame_init_quantizer(VP8_COMP *cpi) {
+void vp9_frame_init_quantizer(VP8_COMP *cpi) {
   // Clear Zbin mode boost for default case
   cpi->zbin_mode_boost = 0;
 
   // MB level quantizer setup
-  vp9cx_mb_init_quantizer(cpi, &cpi->mb);
+  vp9_mb_init_quantizer(cpi, &cpi->mb);
 }
 
 void vp9_set_quantizer(struct VP8_COMP *cpi, int Q) {
@@ -711,5 +712,5 @@ void vp9_set_quantizer(struct VP8_COMP *cpi, int Q) {
   // quantizer has to be reinitialized if any delta_q changes.
   // As there are not any here for now this is inactive code.
   // if(update)
-  //    vp9cx_init_quantizer(cpi);
+  //    vp9_init_quantizer(cpi);
 }

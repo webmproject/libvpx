@@ -757,15 +757,12 @@ typedef struct VP8_COMP {
 
 } VP8_COMP;
 
-void control_data_rate(VP8_COMP *cpi);
-
 void vp9_encode_frame(VP8_COMP *cpi);
 
-void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size);
+void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
+                        unsigned long *size);
 
 void vp9_activity_masking(VP8_COMP *cpi, MACROBLOCK *x);
-
-int rd_cost_intra_mb(MACROBLOCKD *x);
 
 void vp9_tokenize_mb(VP8_COMP *, MACROBLOCKD *, TOKENEXTRA **, int dry_run);
 void vp9_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);

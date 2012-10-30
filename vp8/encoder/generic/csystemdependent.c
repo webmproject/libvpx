@@ -17,8 +17,12 @@
 void vp9_arch_x86_encoder_init(VP8_COMP *cpi);
 void vp8_arch_arm_encoder_init(VP8_COMP *cpi);
 
-void (*vp9_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
-extern void vp9_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
+void (*vp9_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc,
+                                        YV12_BUFFER_CONFIG *dst_ybc,
+                                        int fraction);
+extern void vp9_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
+                                        YV12_BUFFER_CONFIG *dst_ybc,
+                                        int fraction);
 
 void vp9_cmachine_specific_config(VP8_COMP *cpi) {
 #if CONFIG_RUNTIME_CPU_DETECT

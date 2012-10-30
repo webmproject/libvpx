@@ -60,20 +60,34 @@
 #define RTCD(x) NULL
 #endif
 
-extern void vp9cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
-extern void vp9cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
-extern void vp9cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
+extern void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
+
+extern void vp9_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
+
+extern void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 
 extern void vp9_cmachine_specific_config(VP8_COMP *cpi);
-extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *post, int filt_lvl, int low_var_thresh, int flag);
+
+extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source,
+                              YV12_BUFFER_CONFIG *post,
+                              int filt_lvl, int low_var_thresh, int flag);
+
 extern void print_parms(VP8_CONFIG *ocf, char *filenam);
+
 extern unsigned int vp8_get_processor_freq();
+
 extern void print_tree_update_probs();
+
 extern void vp8cx_create_encoder_threads(VP8_COMP *cpi);
+
 extern void vp8cx_remove_encoder_threads(VP8_COMP *cpi);
+
 #if HAVE_ARMV7
-extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
+extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
+                                          YV12_BUFFER_CONFIG *dst_ybc);
+
+extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
+                                              YV12_BUFFER_CONFIG *dst_ybc);
 #endif
 
 int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
@@ -166,7 +180,7 @@ extern unsigned int inter_uv_modes[VP8_UV_MODES];
 extern unsigned int inter_b_modes[B_MODE_COUNT];
 #endif
 
-extern void vp9cx_init_quantizer(VP8_COMP *cpi);
+extern void vp9_init_quantizer(VP8_COMP *cpi);
 
 int vp8cx_base_skip_false_prob[QINDEX_RANGE][3];
 
@@ -306,7 +320,7 @@ static void update_base_skip_probs(VP8_COMP *cpi) {
 
 }
 
-void vp9_initialize() {
+void vp9_initialize_enc() {
   static int init_done = 0;
 
   if (!init_done) {
@@ -1172,9 +1186,11 @@ void vp9_set_speed_features(VP8_COMP *cpi) {
   }
 
   if (cpi->sf.search_method == NSTEP) {
-    vp9_init3smotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
+    vp9_init3smotion_compensation(&cpi->mb,
+                                  cm->yv12_fb[cm->lst_fb_idx].y_stride);
   } else if (cpi->sf.search_method == DIAMOND) {
-    vp9_init_dsmotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
+    vp9_init_dsmotion_compensation(&cpi->mb,
+                                   cm->yv12_fb[cm->lst_fb_idx].y_stride);
   }
 
   cpi->mb.vp9_short_fdct16x16 = vp9_short_fdct16x16;
@@ -1202,7 +1218,7 @@ void vp9_set_speed_features(VP8_COMP *cpi) {
   cpi->mb.quantize_b_16x16    = vp9_regular_quantize_b_16x16;
   cpi->mb.quantize_b_2x2      = vp9_regular_quantize_b_2x2;
 
-  vp9cx_init_quantizer(cpi);
+  vp9_init_quantizer(cpi);
 
 #if CONFIG_RUNTIME_CPU_DETECT
   cpi->mb.e_mbd.rtcd = &cpi->common.rtcd;
@@ -1997,9 +2013,12 @@ VP8_PTR vp9_create_compressor(VP8_CONFIG *oxcf) {
   // make sure frame 1 is okay
   cpi->error_bins[0] = cpi->common.MBs;
 
-  // vp9cx_init_quantizer() is first called here. Add check in vp9cx_frame_init_quantizer() so that vp9cx_init_quantizer is only called later
-  // when needed. This will avoid unnecessary calls of vp9cx_init_quantizer() for every frame.
-  vp9cx_init_quantizer(cpi);
+  /* vp9_init_quantizer() is first called here. Add check in
+   * vp9_frame_init_quantizer() so that vp9_init_quantizer is only
+   * called later when needed. This will avoid unnecessary calls of
+   * vp9_init_quantizer() for every frame.
+   */
+  vp9_init_quantizer(cpi);
 
   vp8_loop_filter_init(cm);
 
@@ -2386,7 +2405,8 @@ int vp9_update_reference(VP8_PTR ptr, int ref_frame_flags) {
   return 0;
 }
 
-int vp9_get_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
+int vp9_get_reference_enc(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag,
+                          YV12_BUFFER_CONFIG *sd) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
   VP8_COMMON *cm = &cpi->common;
   int ref_fb_idx;
@@ -2404,7 +2424,9 @@ int vp9_get_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONF
 
   return 0;
 }
-int vp9_set_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
+
+int vp9_set_reference_enc(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag,
+                          YV12_BUFFER_CONFIG *sd) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
   VP8_COMMON *cm = &cpi->common;
 
@@ -2786,17 +2808,16 @@ static void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
 
     vpx_usec_timer_start(&timer);
     if (cpi->sf.auto_filter == 0)
-      vp9cx_pick_filter_level_fast(cpi->Source, cpi);
-
+      vp9_pick_filter_level_fast(cpi->Source, cpi);
     else
-      vp9cx_pick_filter_level(cpi->Source, cpi);
+      vp9_pick_filter_level(cpi->Source, cpi);
 
     vpx_usec_timer_mark(&timer);
     cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
   }
 
   if (cm->filter_level > 0) {
-    vp9cx_set_alt_lf_level(cpi, cm->filter_level);
+    vp9_set_alt_lf_level(cpi, cm->filter_level);
     vp8_loop_filter_frame(cm, &cpi->mb.e_mbd);
   }
 
@@ -3110,7 +3131,8 @@ static void encode_frame_to_data_rate
   else
     zbin_oq_high = ZBIN_OQ_MAX;
 
-  vp9_compute_frame_size_bounds(cpi, &frame_under_shoot_limit, &frame_over_shoot_limit);
+  vp9_compute_frame_size_bounds(cpi, &frame_under_shoot_limit,
+                                &frame_over_shoot_limit);
 
   // Limit Q range for the adaptive loop.
   bottom_index = cpi->active_best_quality;
@@ -3926,7 +3948,8 @@ static void encode_frame_to_data_rate
   }
 }
 
-static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags) {
+static void Pass2Encode(VP8_COMP *cpi, unsigned long *size,
+                        unsigned char *dest, unsigned int *frame_flags) {
 
   if (!cpi->common.refresh_alt_ref_frame)
     vp9_second_pass(cpi);
@@ -3953,7 +3976,9 @@ extern void vp8_pop_neon(int64_t *store);
 #endif
 
 
-int vp9_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time) {
+int vp9_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags,
+                          YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
+                          int64_t end_time) {
 #if HAVE_ARMV7
   int64_t store_reg[8];
 #endif
@@ -3972,8 +3997,8 @@ int vp9_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
 #endif
 
   vpx_usec_timer_start(&timer);
-  if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
-                         frame_flags, cpi->active_map_enabled ? cpi->active_map : NULL))
+  if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time, frame_flags,
+                         cpi->active_map_enabled ? cpi->active_map : NULL))
     res = -1;
   cm->clr_type = sd->clrtype;
   vpx_usec_timer_mark(&timer);
@@ -4005,7 +4030,9 @@ static int frame_is_reference(const VP8_COMP *cpi) {
 }
 
 
-int vp9_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, int64_t *time_stamp, int64_t *time_end, int flush) {
+int vp9_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags,
+                            unsigned long *size, unsigned char *dest,
+                            int64_t *time_stamp, int64_t *time_end, int flush) {
 #if HAVE_ARMV7
   int64_t store_reg[8];
 #endif
@@ -4321,7 +4348,8 @@ int vp9_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
   return 0;
 }
 
-int vp9_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *flags) {
+int vp9_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest,
+                              vp8_ppflags_t *flags) {
   VP8_COMP *cpi = (VP8_COMP *) comp;
 
   if (cpi->common.refresh_alt_ref_frame)
@@ -4348,7 +4376,9 @@ int vp9_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflag
   }
 }
 
-int vp9_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols, int delta_q[4], int delta_lf[4], unsigned int threshold[4]) {
+int vp9_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows,
+                   unsigned int cols, int delta_q[4], int delta_lf[4],
+                   unsigned int threshold[4]) {
   VP8_COMP *cpi = (VP8_COMP *) comp;
   signed char feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
@@ -4405,7 +4435,8 @@ int vp9_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
   return 0;
 }
 
-int vp9_set_active_map(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols) {
+int vp9_set_active_map(VP8_PTR comp, unsigned char *map,
+                       unsigned int rows, unsigned int cols) {
   VP8_COMP *cpi = (VP8_COMP *) comp;
 
   if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols) {
@@ -4422,7 +4453,8 @@ int vp9_set_active_map(VP8_PTR comp, unsigned char *map, unsigned int rows, unsi
   }
 }
 
-int vp9_set_internal_size(VP8_PTR comp, VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
+int vp9_set_internal_size(VP8_PTR comp,
+                          VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
   VP8_COMP *cpi = (VP8_COMP *) comp;
 
   if (horiz_mode <= ONETWO)

@@ -40,9 +40,14 @@
 #endif
 
 extern void vp9_build_block_offsets(MACROBLOCK *x);
+
 extern void vp9_setup_block_ptrs(MACROBLOCK *x);
-extern void vp9cx_frame_init_quantizer(VP8_COMP *cpi);
-extern void vp9_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
+
+extern void vp9_frame_init_quantizer(VP8_COMP *cpi);
+
+extern void vp9_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb,
+                                   int_mv *mv);
+
 extern void vp9_alloc_compressor_data(VP8_COMP *cpi);
 
 #define IIFACTOR   12.5
@@ -485,7 +490,7 @@ void vp9_first_pass(VP8_COMP *cpi) {
 
   // set up frame new frame for intra coded blocks
   vp8_setup_intra_recon(new_yv12);
-  vp9cx_frame_init_quantizer(cpi);
+  vp9_frame_init_quantizer(cpi);
 
   // Initialise the MV cost table to the defaults
   // if( cm->current_video_frame == 0)
@@ -1138,11 +1143,15 @@ void vp9_init_second_pass(VP8_COMP *cpi) {
   // encoded in the second pass is a guess.  However the sum duration is not.
   // Its calculated based on the actual durations of all frames from the first
   // pass.
-  vp9_new_frame_rate(cpi, 10000000.0 * cpi->twopass.total_stats->count / cpi->twopass.total_stats->duration);
+  vp9_new_frame_rate(cpi,
+                     10000000.0 * cpi->twopass.total_stats->count /
+                     cpi->twopass.total_stats->duration);
 
   cpi->output_frame_rate = cpi->oxcf.frame_rate;
-  cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats->duration * cpi->oxcf.target_bandwidth / 10000000.0);
-  cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats->duration * two_pass_min_rate / 10000000.0);
+  cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats->duration *
+                                     cpi->oxcf.target_bandwidth / 10000000.0);
+  cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats->duration *
+                                      two_pass_min_rate / 10000000.0);
 
   // Calculate a minimum intra value to be used in determining the IIratio
   // scores used in the second pass. We have this minimum to make sure

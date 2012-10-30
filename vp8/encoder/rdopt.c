@@ -52,7 +52,7 @@
 #define IF_RTCD(x)  NULL
 #endif
 
-extern void vp9cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
+extern void vp9_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
 extern void vp9_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
 
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
@@ -217,8 +217,8 @@ const MODE_DEFINITION vp8_mode_order[MAX_MODES] = {
 #endif
 
 static void fill_token_costs(
-  unsigned int (*c)[COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS],
-  const vp8_prob(*p)[COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES],
+  unsigned int (*c)[COEF_BANDS][PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS],
+  const vp8_prob(*p)[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES],
   int block_type_counts) {
   int i, j, k;
 
@@ -226,22 +226,21 @@ static void fill_token_costs(
     for (j = 0; j < COEF_BANDS; j++)
       for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
         if (k == 0 && ((j > 0 && i > 0) || (j > 1 && i == 0)))
-          vp9_cost_tokens_skip((int *)(c [i][j][k]),
-                               p [i][j][k],
+          vp9_cost_tokens_skip((int *)(c[i][j][k]),
+                               p[i][j][k],
                                vp8_coef_tree);
         else
-          vp9_cost_tokens((int *)(c [i][j][k]),
-                          p [i][j][k],
+          vp9_cost_tokens((int *)(c[i][j][k]),
+                          p[i][j][k],
                           vp8_coef_tree);
       }
 }
 
 
-static int rd_iifactor [ 32 ] =  {    4,   4,   3,   2,   1,   0,   0,   0,
-                                      0,   0,   0,   0,   0,   0,   0,   0,
-                                      0,   0,   0,   0,   0,   0,   0,   0,
-                                      0,   0,   0,   0,   0,   0,   0,   0,
-                                 };
+static int rd_iifactor[32] =  { 4, 4, 3, 2, 1, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, };
 
 // 3* dc_qlookup[Q]*dc_qlookup[Q];
 
@@ -269,7 +268,7 @@ static int compute_rd_mult(int qindex) {
   return (11 * q * q) >> 6;
 }
 
-void vp9cx_initialize_me_consts(VP8_COMP *cpi, int QIndex) {
+void vp9_initialize_me_consts(VP8_COMP *cpi, int QIndex) {
   cpi->mb.sadperbit16 =  sad_per_bit16lut[QIndex];
   cpi->mb.sadperbit4  =  sad_per_bit4lut[QIndex];
 }
@@ -3530,8 +3529,10 @@ static int64_t handle_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
   return this_rd;  // if 0, this will be re-calculated by caller
 }
 
-void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
-                            int *returnrate, int *returndistortion, int64_t *returnintra) {
+void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
+                            int recon_yoffset, int recon_uvoffset,
+                            int *returnrate, int *returndistortion,
+                            int64_t *returnintra) {
   VP8_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   union b_mode_info best_bmodes[16];
@@ -4815,10 +4816,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
 }
 #endif
 
-void vp9cx_pick_mode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
-                                      int recon_yoffset,
-                                      int recon_uvoffset,
-                                      int *totalrate, int *totaldist) {
+void vp9_pick_mode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
+                                    int recon_yoffset,
+                                    int recon_uvoffset,
+                                    int *totalrate, int *totaldist) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   int rate, distortion;
