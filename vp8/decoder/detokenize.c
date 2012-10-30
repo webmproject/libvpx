@@ -119,8 +119,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 // #define PREV_CONTEXT_INC(val) (vp8_prev_token_class[(val)])
 #define PREV_CONTEXT_INC(val) (vp8_prev_token_class[(val)>10?10:(val)])
 
-
-int get_token(int v) {
+static int get_token(int v) {
   if (v < 0) v = -v;
   if (v == 0) return ZERO_TOKEN;
   else if (v == 1) return ONE_TOKEN;
