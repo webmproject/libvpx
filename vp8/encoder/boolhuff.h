@@ -44,7 +44,7 @@ extern void vp8_encode_uniform(BOOL_CODER *bc, int v, int n);
 extern void vp8_encode_term_subexp(BOOL_CODER *bc, int v, int k, int n);
 extern int vp8_count_uniform(int v, int n);
 extern int vp8_count_term_subexp(int v, int k, int n);
-extern int recenter_nonneg(int v, int m);
+extern int vp9_recenter_nonneg(int v, int m);
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 

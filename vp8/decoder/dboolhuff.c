@@ -60,7 +60,7 @@ static int get_unsigned_bits(unsigned num_values) {
   return cat;
 }
 
-int inv_recenter_nonneg(int v, int m) {
+int vp9_inv_recenter_nonneg(int v, int m) {
   if (v > (m << 1)) return v;
   else if ((v & 1) == 0) return (v >> 1) + m;
   else return m - ((v + 1) >> 1);
