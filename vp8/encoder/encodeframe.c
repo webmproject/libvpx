@@ -1227,7 +1227,7 @@ void encode_sb_row(VP8_COMP *cpi,
 #endif
 }
 
-void init_encode_frame_mb_context(VP8_COMP *cpi) {
+static void init_encode_frame_mb_context(VP8_COMP *cpi) {
   MACROBLOCK *const x = &cpi->mb;
   VP8_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
