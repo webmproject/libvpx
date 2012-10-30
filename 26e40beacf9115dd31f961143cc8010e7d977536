@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//8+4\u003d",
+        "filename": "vp8/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T23:16:48Z",
+      "side": 1,
+      "message": "Is in common/, so that comes in the last (3rd) batch.",
+      "parentUuid": "AAAAQ3//8/k\u003d",
+      "revId": "26e40beacf9115dd31f961143cc8010e7d977536",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//8/g\u003d",
         "filename": "vp8/decoder/dequantize.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//8+0\u003d",
+        "filename": "vp8/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T23:16:48Z",
+      "side": 1,
+      "message": "Same here.",
+      "parentUuid": "AAAAQ3//8/g\u003d",
+      "revId": "26e40beacf9115dd31f961143cc8010e7d977536",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//8/I\u003d",
         "filename": "vp8/vp8_dx_iface.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2012-10-30T23:12:50Z",
       "side": 1,
       "message": "align with above paren",
+      "revId": "26e40beacf9115dd31f961143cc8010e7d977536",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//8+U\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T23:16:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//8/I\u003d",
       "revId": "26e40beacf9115dd31f961143cc8010e7d977536",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
