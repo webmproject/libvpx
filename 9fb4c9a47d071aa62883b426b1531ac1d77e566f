@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//92s\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-30T13:21:29Z",
+      "side": 1,
+      "message": "Seems kind of ugly to have another ifdef - maybe better in separate debug file... ?",
+      "revId": "9fb4c9a47d071aa62883b426b1531ac1d77e566f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
