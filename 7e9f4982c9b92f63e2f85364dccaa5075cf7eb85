@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//9Bo\u003d",
+        "filename": "vp8/common/onyxd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T23:07:36Z",
+      "side": 1,
+      "message": "vp9_initialize_dec",
+      "revId": "7e9f4982c9b92f63e2f85364dccaa5075cf7eb85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9Bk\u003d",
+        "filename": "vp8/common/onyxd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T23:07:36Z",
+      "side": 1,
+      "message": "vp9dx -\u003e vp9, here and elsewhere",
+      "revId": "7e9f4982c9b92f63e2f85364dccaa5075cf7eb85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9Bg\u003d",
+        "filename": "vp8/common/onyxd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T23:07:36Z",
+      "side": 1,
+      "message": "vp9_get_reference_dec",
+      "revId": "7e9f4982c9b92f63e2f85364dccaa5075cf7eb85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9Bc\u003d",
+        "filename": "vp8/common/onyxd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T23:07:36Z",
+      "side": 1,
+      "message": "vp9_set_reference_dec",
+      "revId": "7e9f4982c9b92f63e2f85364dccaa5075cf7eb85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
