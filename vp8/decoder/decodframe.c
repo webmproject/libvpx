@@ -95,7 +95,7 @@ void vp8cx_init_de_quantizer(VP8D_COMP *pbi) {
   }
 }
 
-void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
+static void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   int i;
   int QIndex;
   VP8_COMMON *const pc = &pbi->common;
