@@ -103,7 +103,7 @@ int vp8_gfboost_qadjust(int qindex) {
   return retval;
 }
 
-int kfboost_qadjust(int qindex) {
+static int kfboost_qadjust(int qindex) {
   int retval;
   double q;
 
