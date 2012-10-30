@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//9DI\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1890,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T22:54:39Z",
+      "side": 1,
+      "message": "Done x2.",
+      "parentUuid": "AAAAQ3//9Gs\u003d",
+      "revId": "a5df5b770107f94a245e85c210f47cc0568cb832",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//9Go\u003d",
         "filename": "vp8/encoder/encodeframe.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2012-10-30T22:32:59Z",
       "side": 1,
       "message": "blank lines between functions",
+      "revId": "a5df5b770107f94a245e85c210f47cc0568cb832",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9DE\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T22:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//9Go\u003d",
       "revId": "a5df5b770107f94a245e85c210f47cc0568cb832",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//9C8\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T22:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//9Gg\u003d",
+      "revId": "a5df5b770107f94a245e85c210f47cc0568cb832",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//9GY\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2012-10-30T22:32:59Z",
       "side": 1,
       "message": "blank lines between prototypes.",
+      "revId": "a5df5b770107f94a245e85c210f47cc0568cb832",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9C0\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T22:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//9GY\u003d",
       "revId": "a5df5b770107f94a245e85c210f47cc0568cb832",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//9Cw\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T22:54:39Z",
+      "side": 1,
+      "message": "Right, unused, so removed.",
+      "parentUuid": "AAAAQ3//9GU\u003d",
+      "revId": "a5df5b770107f94a245e85c210f47cc0568cb832",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//9GI\u003d",
         "filename": "vp8/encoder/quantize.h",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2012-10-30T22:32:59Z",
       "side": 1,
       "message": "blank lines between functions",
+      "revId": "a5df5b770107f94a245e85c210f47cc0568cb832",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9Cs\u003d",
+        "filename": "vp8/encoder/quantize.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T22:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//9GI\u003d",
       "revId": "a5df5b770107f94a245e85c210f47cc0568cb832",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
