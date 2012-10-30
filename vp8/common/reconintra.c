@@ -18,8 +18,8 @@
  * and vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *xd).
  */
 
-void d27_predictor(unsigned char *ypred_ptr, int y_stride, int n,
-                   unsigned char *yabove_row, unsigned char *yleft_col) {
+static void d27_predictor(uint8_t *ypred_ptr, int y_stride, int n,
+                          uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c, h, w, v;
   int a, b;
   r = 0;
@@ -66,8 +66,8 @@ void d27_predictor(unsigned char *ypred_ptr, int y_stride, int n,
   }
 }
 
-void d63_predictor(unsigned char *ypred_ptr, int y_stride, int n,
-                   unsigned char *yabove_row, unsigned char *yleft_col) {
+static void d63_predictor(uint8_t *ypred_ptr, int y_stride, int n,
+                          uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c, h, w, v;
   int a, b;
   c = 0;
@@ -113,8 +113,8 @@ void d63_predictor(unsigned char *ypred_ptr, int y_stride, int n,
   }
 }
 
-void d45_predictor(unsigned char *ypred_ptr, int y_stride, int n,
-                   unsigned char *yabove_row, unsigned char *yleft_col) {
+static void d45_predictor(uint8_t *ypred_ptr, int y_stride, int n,
+                          uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
   for (r = 0; r < n - 1; ++r) {
     for (c = 0; c <= r; ++c) {
@@ -139,8 +139,8 @@ void d45_predictor(unsigned char *ypred_ptr, int y_stride, int n,
   }
 }
 
-void d117_predictor(unsigned char *ypred_ptr, int y_stride, int n,
-                    unsigned char *yabove_row, unsigned char *yleft_col) {
+static void d117_predictor(uint8_t *ypred_ptr, int y_stride, int n,
+                           uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
   for (c = 0; c < n; c++)
     ypred_ptr[c] = (yabove_row[c - 1] + yabove_row[c] + 1) >> 1;
@@ -156,8 +156,8 @@ void d117_predictor(unsigned char *ypred_ptr, int y_stride, int n,
   }
 }
 
-void d135_predictor(unsigned char *ypred_ptr, int y_stride, int n,
-                    unsigned char *yabove_row, unsigned char *yleft_col) {
+static void d135_predictor(uint8_t *ypred_ptr, int y_stride, int n,
+                           uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
   ypred_ptr[0] = yabove_row[-1];
   for (c = 1; c < n; c++)
@@ -174,8 +174,8 @@ void d135_predictor(unsigned char *ypred_ptr, int y_stride, int n,
   }
 }
 
-void d153_predictor(unsigned char *ypred_ptr, int y_stride, int n,
-                    unsigned char *yabove_row, unsigned char *yleft_col) {
+static void d153_predictor(uint8_t *ypred_ptr, int y_stride, int n,
+                           uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
   ypred_ptr[0] = (yabove_row[-1] + yleft_col[0] + 1) >> 1;
   for (r = 1; r < n; r++)
