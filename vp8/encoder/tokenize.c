@@ -218,7 +218,7 @@ static void tokenize_b(VP8_COMP *cpi,
   *a = *l = (c != !type); /* 0 <-> all coeff data is zero */
 }
 
-int mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
+int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
   int skip = 1;
   int i = 0;
 
@@ -233,7 +233,7 @@ int mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
   return skip;
 }
 
-int mbuv_is_skippable_4x4(MACROBLOCKD *xd) {
+int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd) {
   int skip = 1;
   int i;
 
@@ -242,12 +242,12 @@ int mbuv_is_skippable_4x4(MACROBLOCKD *xd) {
   return skip;
 }
 
-int mb_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
-  return (mby_is_skippable_4x4(xd, has_y2_block) &
-          mbuv_is_skippable_4x4(xd));
+static int mb_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
+  return (vp9_mby_is_skippable_4x4(xd, has_y2_block) &
+          vp9_mbuv_is_skippable_4x4(xd));
 }
 
-int mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block) {
+int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block) {
   int skip = 1;
   int i = 0;
 
@@ -262,31 +262,28 @@ int mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block) {
   return skip;
 }
 
-int mbuv_is_skippable_8x8(MACROBLOCKD *xd) {
+int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd) {
   return (!xd->block[16].eob) & (!xd->block[20].eob);
 }
 
-int mb_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block) {
-  return (mby_is_skippable_8x8(xd, has_y2_block) &
-          mbuv_is_skippable_8x8(xd));
+static int mb_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block) {
+  return (vp9_mby_is_skippable_8x8(xd, has_y2_block) &
+          vp9_mbuv_is_skippable_8x8(xd));
 }
 
-int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd, int has_y2_block) {
-  return (mby_is_skippable_8x8(xd, has_y2_block) &
-          mbuv_is_skippable_4x4(xd));
+static int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd, int has_y2_block) {
+  return (vp9_mby_is_skippable_8x8(xd, has_y2_block) &
+          vp9_mbuv_is_skippable_4x4(xd));
 }
 
-int mby_is_skippable_16x16(MACROBLOCKD *xd) {
+int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd) {
   int skip = 1;
-  //skip &= (xd->block[0].eob < 2); // I think this should be commented? No second order == DC must be coded
-  //skip &= (xd->block[0].eob < 1);
-  //skip &= (!xd->block[24].eob);
   skip &= !xd->block[0].eob;
   return skip;
 }
 
-int mb_is_skippable_16x16(MACROBLOCKD *xd) {
-  return (mby_is_skippable_16x16(xd) & mbuv_is_skippable_8x8(xd));
+static int mb_is_skippable_16x16(MACROBLOCKD *xd) {
+  return (vp9_mby_is_skippable_16x16(xd) & vp9_mbuv_is_skippable_8x8(xd));
 }
 
 void vp8_tokenize_mb(VP8_COMP *cpi,
