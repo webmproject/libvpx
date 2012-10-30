@@ -72,50 +72,6 @@ int vp9_get_segdata(const MACROBLOCKD *xd,
   return xd->segment_feature_data[segment_id][feature_id];
 }
 
-#if CONFIG_FEATUREUPDATES
-int vp9_old_segfeature_active(MACROBLOCKD *xd,
-                              int segment_id,
-                              SEG_LVL_FEATURES feature_id) {
-  // Return true if mask bit set and segmentation enabled.
-  return (xd->segmentation_enabled &&
-          (xd->old_segment_feature_mask[segment_id] &
-           (0x01 << feature_id)));
-}
-
-int vp9_get_old_segdata(MACROBLOCKD *xd,
-                        int segment_id,
-                        SEG_LVL_FEATURES feature_id) {
-  return xd->old_segment_feature_data[segment_id][feature_id];
-}
-
-int vp9_segfeature_changed(MACROBLOCKD *xd,
-                           int segment_id,
-                           SEG_LVL_FEATURES feature_id) {
-  // Return true if mask bit or data is different from last time
-  return
-    (xd->segmentation_enabled &&
-     (
-       (xd->old_segment_feature_mask[segment_id] & (1 << feature_id)) !=
-       (xd->segment_feature_mask[segment_id] & (1 << feature_id))
-       ||  xd->old_segment_feature_data[segment_id][feature_id] !=
-       xd->segment_feature_data[segment_id][feature_id]
-     )
-    );
-}
-
-void vp9_save_segment_info(MACROBLOCKD *xd) {
-  int i, j;
-  for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-    xd->old_segment_feature_mask[i] = xd->segment_feature_mask[i];
-
-    // For each segmentation codable feature...
-    for (j = 0; j < SEG_LVL_MAX; j++) {
-      xd->old_segment_feature_data[i][j] = xd->segment_feature_data[i][j];
-
-    }
-  }
-}
-#endif
 void vp9_clear_segref(MACROBLOCKD *xd, int segment_id) {
   xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] = 0;
 }

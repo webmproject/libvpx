@@ -46,27 +46,6 @@ int vp9_get_segdata(const MACROBLOCKD *xd,
                     int segment_id,
                     SEG_LVL_FEATURES feature_id);
 
-#if CONFIG_FEATUREUPDATES
-
-int vp9_old_segfeature_active(MACROBLOCKD *xd,
-                              int segment_id,
-                              SEG_LVL_FEATURES feature_id);
-
-int vp9_get_old_segdata(MACROBLOCKD *xd,
-                        int segment_id,
-                        SEG_LVL_FEATURES feature_id);
-
-void vp9_save_segment_info(MACROBLOCKD *xd);
-
-int vp9_segfeature_changed(MACROBLOCKD *xd,
-                           int segment_id,
-                           SEG_LVL_FEATURES feature_id);
-
-
-
-#endif
-
-
 void vp9_clear_segref(MACROBLOCKD *xd, int segment_id);
 
 void vp9_set_segref(MACROBLOCKD *xd,

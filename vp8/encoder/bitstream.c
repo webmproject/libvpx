@@ -1974,47 +1974,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         for (j = 0; j < SEG_LVL_MAX; j++) {
           Data = vp9_get_segdata(xd, i, j);
 
-
-#if CONFIG_FEATUREUPDATES
-
-          // check if there's an update
-          if (vp9_segfeature_changed(xd, i, j)) {
-            vp8_write_bit(&header_bc, 1);
-
-            if (vp9_segfeature_active(xd, i, j)) {
-              // this bit is to say we are still
-              // active/  if we were inactive
-              // this is unnecessary
-              if (vp9_old_segfeature_active(xd, i, j)) {
-                vp8_write_bit(&header_bc, 1);
-              }
-              // Is the segment data signed..
-              if (vp9_is_segfeature_signed(j)) {
-                // Encode the relevant feature data
-                if (Data < 0) {
-                  Data = - Data;
-                  vp8_write_literal(&header_bc, Data,
-                                    vp9_seg_feature_data_bits(j));
-                  vp8_write_bit(&header_bc, 1);
-                } else {
-                  vp8_write_literal(&header_bc, Data,
-                                    vp9_seg_feature_data_bits(j));
-                  vp8_write_bit(&header_bc, 0);
-                }
-              }
-              // Unsigned data element so no sign bit needed
-              else
-                vp8_write_literal(&header_bc, Data,
-                                  vp9_seg_feature_data_bits(j));
-            } else if (vp9_old_segfeature_active(xd, i, j)) {
-              // feature is inactive now
-              vp8_write_bit(&header_bc, 0);
-            }
-          } else {
-            vp8_write_bit(&header_bc, 0);
-          }
-#else
-
           // If the feature is enabled...
           if (vp9_segfeature_active(xd, i, j)) {
             vp8_write_bit(&header_bc, 1);
@@ -2039,16 +1998,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                                 vp9_seg_feature_data_bits(j));
           } else
             vp8_write_bit(&header_bc, 0);
-#endif
         }
       }
     }
-
-#if CONFIG_FEATUREUPDATES
-    // save the segment info for updates next frame
-    vp9_save_segment_info(xd);
-#endif
-
   }
 
   // Encode the common prediction model status flag probability updates for
