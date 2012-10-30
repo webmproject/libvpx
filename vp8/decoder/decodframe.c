@@ -786,8 +786,8 @@ static void init_frame(VP8D_COMP *pbi) {
     vpx_memset(pc->mip, 0,
                (pc->mb_cols + 1) * (pc->mb_rows + 1)* sizeof(MODE_INFO));
 
-    update_mode_info_border(pc, pc->mip);
-    update_mode_info_in_image(pc, pc->mi);
+    vp9_update_mode_info_border(pc, pc->mip);
+    vp9_update_mode_info_in_image(pc, pc->mi);
 
   } else {
 

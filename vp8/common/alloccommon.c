@@ -21,7 +21,7 @@
 
 extern  void vp8_init_scan_order_mask();
 
-void update_mode_info_border(VP8_COMMON *cpi, MODE_INFO *mi_base) {
+void vp9_update_mode_info_border(VP8_COMMON *cpi, MODE_INFO *mi_base) {
   int stride = cpi->mode_info_stride;
   int i;
 
@@ -33,7 +33,8 @@ void update_mode_info_border(VP8_COMMON *cpi, MODE_INFO *mi_base) {
     vpx_memset(&mi_base[i * stride], 0, sizeof(MODE_INFO));
   }
 }
-void update_mode_info_in_image(VP8_COMMON *cpi, MODE_INFO *mi) {
+
+void vp9_update_mode_info_in_image(VP8_COMMON *cpi, MODE_INFO *mi) {
   int i, j;
 
   // For each in image mode_info element set the in image flag to 1
@@ -139,8 +140,8 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
     return 1;
   }
 
-  update_mode_info_border(oci, oci->mip);
-  update_mode_info_in_image(oci, oci->mi);
+  vp9_update_mode_info_border(oci, oci->mip);
+  vp9_update_mode_info_in_image(oci, oci->mi);
 
   return 0;
 }

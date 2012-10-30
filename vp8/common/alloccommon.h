@@ -20,4 +20,7 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci);
 int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height);
 void vp8_setup_version(VP8_COMMON *oci);
 
+void vp9_update_mode_info_border(VP8_COMMON *cpi, MODE_INFO *mi_base);
+void vp9_update_mode_info_in_image(VP8_COMMON *cpi, MODE_INFO *mi);
+
 #endif
