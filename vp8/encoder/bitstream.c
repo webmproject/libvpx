@@ -98,9 +98,9 @@ static int remap_prob(int v, int m) {
   const int modulus = MODULUS_PARAM;
   int i;
   if ((m << 1) <= n)
-    i = recenter_nonneg(v, m) - 1;
+    i = vp9_recenter_nonneg(v, m) - 1;
   else
-    i = recenter_nonneg(n - 1 - v, n - 1 - m) - 1;
+    i = vp9_recenter_nonneg(n - 1 - v, n - 1 - m) - 1;
 
   i = split_index(i, n - 1, modulus);
   return i;

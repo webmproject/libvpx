@@ -65,7 +65,7 @@ void vp8_encode_value(BOOL_CODER *br, int data, int bits) {
 
 }
 
-int recenter_nonneg(int v, int m) {
+int vp9_recenter_nonneg(int v, int m) {
   if (v > (m << 1)) return v;
   else if (v >= m) return ((v - m) << 1);
   else return ((m - v) << 1) - 1;

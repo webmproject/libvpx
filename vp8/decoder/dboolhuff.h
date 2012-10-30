@@ -43,7 +43,7 @@ void vp8dx_bool_decoder_fill(BOOL_DECODER *br);
 
 int vp8_decode_uniform(BOOL_DECODER *br, int n);
 int vp8_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms);
-int inv_recenter_nonneg(int v, int m);
+int vp9_inv_recenter_nonneg(int v, int m);
 
 /*The refill loop is used in several places, so define it in a macro to make
    sure they're all consistent.
