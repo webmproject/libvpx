@@ -183,8 +183,8 @@ static void tokenize_b(VP8_COMP *cpi,
       break;
   }
 
-  if (segfeature_active(xd, segment_id, SEG_LVL_EOB))
-    seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB))
+    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
 
   do {
     const int band = bands[c];
@@ -305,8 +305,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
   int skip_inc;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
-  if (!segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
-      (get_segdata(xd, segment_id, SEG_LVL_EOB) != 0)) {
+  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
+      (vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) != 0)) {
     skip_inc = 1;
   } else
     skip_inc = 0;

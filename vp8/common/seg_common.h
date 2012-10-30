@@ -15,71 +15,71 @@
 #ifndef __INC_SEG_COMMON_H__
 #define __INC_SEG_COMMON_H__ 1
 
-int segfeature_active(const MACROBLOCKD *xd,
-                      int segment_id,
-                      SEG_LVL_FEATURES feature_id);
-
-void clearall_segfeatures(MACROBLOCKD *xd);
-
-void enable_segfeature(MACROBLOCKD *xd,
-                       int segment_id,
-                       SEG_LVL_FEATURES feature_id);
-
-void disable_segfeature(MACROBLOCKD *xd,
-                        int segment_id,
-                        SEG_LVL_FEATURES feature_id);
-
-int seg_feature_data_bits(SEG_LVL_FEATURES feature_id);
-
-int is_segfeature_signed(SEG_LVL_FEATURES feature_id);
-
-void clear_segdata(MACROBLOCKD *xd,
-                   int segment_id,
-                   SEG_LVL_FEATURES feature_id);
-
-void set_segdata(MACROBLOCKD *xd,
-                 int segment_id,
-                 SEG_LVL_FEATURES feature_id,
-                 int seg_data);
-
-int get_segdata(const MACROBLOCKD *xd,
-                int segment_id,
-                SEG_LVL_FEATURES feature_id);
-
-#if CONFIG_FEATUREUPDATES
-
-int old_segfeature_active(MACROBLOCKD *xd,
+int vp9_segfeature_active(const MACROBLOCKD *xd,
                           int segment_id,
                           SEG_LVL_FEATURES feature_id);
 
-int get_old_segdata(MACROBLOCKD *xd,
+void vp9_clearall_segfeatures(MACROBLOCKD *xd);
+
+void vp9_enable_segfeature(MACROBLOCKD *xd,
+                           int segment_id,
+                           SEG_LVL_FEATURES feature_id);
+
+void vp9_disable_segfeature(MACROBLOCKD *xd,
+                            int segment_id,
+                            SEG_LVL_FEATURES feature_id);
+
+int vp9_seg_feature_data_bits(SEG_LVL_FEATURES feature_id);
+
+int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id);
+
+void vp9_clear_segdata(MACROBLOCKD *xd,
+                       int segment_id,
+                       SEG_LVL_FEATURES feature_id);
+
+void vp9_set_segdata(MACROBLOCKD *xd,
+                     int segment_id,
+                     SEG_LVL_FEATURES feature_id,
+                     int seg_data);
+
+int vp9_get_segdata(const MACROBLOCKD *xd,
                     int segment_id,
                     SEG_LVL_FEATURES feature_id);
 
-void save_segment_info(MACROBLOCKD *xd);
+#if CONFIG_FEATUREUPDATES
 
-int segfeature_changed(MACROBLOCKD *xd,
-                       int segment_id,
-                       SEG_LVL_FEATURES feature_id);
+int vp9_old_segfeature_active(MACROBLOCKD *xd,
+                              int segment_id,
+                              SEG_LVL_FEATURES feature_id);
+
+int vp9_get_old_segdata(MACROBLOCKD *xd,
+                        int segment_id,
+                        SEG_LVL_FEATURES feature_id);
+
+void vp9_save_segment_info(MACROBLOCKD *xd);
+
+int vp9_segfeature_changed(MACROBLOCKD *xd,
+                           int segment_id,
+                           SEG_LVL_FEATURES feature_id);
 
 
 
 #endif
 
 
-void clear_segref(MACROBLOCKD *xd, int segment_id);
+void vp9_clear_segref(MACROBLOCKD *xd, int segment_id);
 
-void set_segref(MACROBLOCKD *xd,
-                int segment_id,
-                MV_REFERENCE_FRAME ref_frame);
+void vp9_set_segref(MACROBLOCKD *xd,
+                    int segment_id,
+                    MV_REFERENCE_FRAME ref_frame);
 
-int check_segref(const MACROBLOCKD *xd,
-                 int segment_id,
-                 MV_REFERENCE_FRAME ref_frame);
+int vp9_check_segref(const MACROBLOCKD *xd,
+                     int segment_id,
+                     MV_REFERENCE_FRAME ref_frame);
 
-int check_segref_inter(MACROBLOCKD *xd, int segment_id);
+int vp9_check_segref_inter(MACROBLOCKD *xd, int segment_id);
 
-int get_seg_tx_type(MACROBLOCKD *xd, int segment_id);
+int vp9_get_seg_tx_type(MACROBLOCKD *xd, int segment_id);
 
 #endif /* __INC_SEG_COMMON_H__ */
 

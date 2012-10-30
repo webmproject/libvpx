@@ -19,77 +19,78 @@ const int vp8_seg_feature_data_bits[SEG_LVL_MAX] =
 // the coding mechanism is still subject to change so these provide a
 // convenient single point of change.
 
-int segfeature_active(const MACROBLOCKD *xd,
-                      int segment_id,
-                      SEG_LVL_FEATURES feature_id) {
+int vp9_segfeature_active(const MACROBLOCKD *xd,
+                          int segment_id,
+                          SEG_LVL_FEATURES feature_id) {
   // Return true if mask bit set and segmentation enabled.
   return (xd->segmentation_enabled &&
           (xd->segment_feature_mask[segment_id] &
            (0x01 << feature_id)));
 }
 
-void clearall_segfeatures(MACROBLOCKD *xd) {
+void vp9_clearall_segfeatures(MACROBLOCKD *xd) {
   vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
   vpx_memset(xd->segment_feature_mask, 0, sizeof(xd->segment_feature_mask));
 }
 
-void enable_segfeature(MACROBLOCKD *xd,
-                       int segment_id,
-                       SEG_LVL_FEATURES feature_id) {
+void vp9_enable_segfeature(MACROBLOCKD *xd,
+                           int segment_id,
+                           SEG_LVL_FEATURES feature_id) {
   xd->segment_feature_mask[segment_id] |= (0x01 << feature_id);
 }
 
-void disable_segfeature(MACROBLOCKD *xd,
-                        int segment_id,
-                        SEG_LVL_FEATURES feature_id) {
+void vp9_disable_segfeature(MACROBLOCKD *xd,
+                            int segment_id,
+                            SEG_LVL_FEATURES feature_id) {
   xd->segment_feature_mask[segment_id] &= ~(1 << feature_id);
 }
 
-int seg_feature_data_bits(SEG_LVL_FEATURES feature_id) {
+int vp9_seg_feature_data_bits(SEG_LVL_FEATURES feature_id) {
   return vp8_seg_feature_data_bits[feature_id];
 }
 
-int is_segfeature_signed(SEG_LVL_FEATURES feature_id) {
+int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id) {
   return (segfeaturedata_signed[feature_id]);
 }
 
-void clear_segdata(MACROBLOCKD *xd,
-                   int segment_id,
-                   SEG_LVL_FEATURES feature_id) {
+void vp9_clear_segdata(MACROBLOCKD *xd,
+                       int segment_id,
+                       SEG_LVL_FEATURES feature_id) {
   xd->segment_feature_data[segment_id][feature_id] = 0;
 }
 
-void set_segdata(MACROBLOCKD *xd,
-                 int segment_id,
-                 SEG_LVL_FEATURES feature_id,
-                 int seg_data) {
+void vp9_set_segdata(MACROBLOCKD *xd,
+                     int segment_id,
+                     SEG_LVL_FEATURES feature_id,
+                     int seg_data) {
   xd->segment_feature_data[segment_id][feature_id] = seg_data;
 }
 
-int get_segdata(const MACROBLOCKD *xd,
-                int segment_id,
-                SEG_LVL_FEATURES feature_id) {
+int vp9_get_segdata(const MACROBLOCKD *xd,
+                    int segment_id,
+                    SEG_LVL_FEATURES feature_id) {
   return xd->segment_feature_data[segment_id][feature_id];
 }
+
 #if CONFIG_FEATUREUPDATES
-int old_segfeature_active(MACROBLOCKD *xd,
-                          int segment_id,
-                          SEG_LVL_FEATURES feature_id) {
+int vp9_old_segfeature_active(MACROBLOCKD *xd,
+                              int segment_id,
+                              SEG_LVL_FEATURES feature_id) {
   // Return true if mask bit set and segmentation enabled.
   return (xd->segmentation_enabled &&
           (xd->old_segment_feature_mask[segment_id] &
            (0x01 << feature_id)));
 }
 
-int get_old_segdata(MACROBLOCKD *xd,
-                    int segment_id,
-                    SEG_LVL_FEATURES feature_id) {
+int vp9_get_old_segdata(MACROBLOCKD *xd,
+                        int segment_id,
+                        SEG_LVL_FEATURES feature_id) {
   return xd->old_segment_feature_data[segment_id][feature_id];
 }
 
-int segfeature_changed(MACROBLOCKD *xd,
-                       int segment_id,
-                       SEG_LVL_FEATURES feature_id) {
+int vp9_segfeature_changed(MACROBLOCKD *xd,
+                           int segment_id,
+                           SEG_LVL_FEATURES feature_id) {
   // Return true if mask bit or data is different from last time
   return
     (xd->segmentation_enabled &&
@@ -102,7 +103,7 @@ int segfeature_changed(MACROBLOCKD *xd,
     );
 }
 
-void save_segment_info(MACROBLOCKD *xd) {
+void vp9_save_segment_info(MACROBLOCKD *xd) {
   int i, j;
   for (i = 0; i < MAX_MB_SEGMENTS; i++) {
     xd->old_segment_feature_mask[i] = xd->segment_feature_mask[i];
@@ -115,32 +116,32 @@ void save_segment_info(MACROBLOCKD *xd) {
   }
 }
 #endif
-void clear_segref(MACROBLOCKD *xd, int segment_id) {
+void vp9_clear_segref(MACROBLOCKD *xd, int segment_id) {
   xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] = 0;
 }
 
-void set_segref(MACROBLOCKD *xd,
-                int segment_id,
-                MV_REFERENCE_FRAME ref_frame) {
+void vp9_set_segref(MACROBLOCKD *xd,
+                    int segment_id,
+                    MV_REFERENCE_FRAME ref_frame) {
   xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] |=
     (1 << ref_frame);
 }
 
-int check_segref(const MACROBLOCKD *xd,
-                 int segment_id,
-                 MV_REFERENCE_FRAME ref_frame) {
+int vp9_check_segref(const MACROBLOCKD *xd,
+                     int segment_id,
+                     MV_REFERENCE_FRAME ref_frame) {
   return (xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] &
           (1 << ref_frame)) ? 1 : 0;
 }
 
-int check_segref_inter(MACROBLOCKD *xd, int segment_id) {
+int vp9_check_segref_inter(MACROBLOCKD *xd, int segment_id) {
   return (xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] &
           ~(1 << INTRA_FRAME)) ? 1 : 0;
 }
 
-int get_seg_tx_type(MACROBLOCKD *xd, int segment_id) {
-  if (segfeature_active(xd, segment_id, SEG_LVL_TRANSFORM))
-    return get_segdata(xd, segment_id, SEG_LVL_TRANSFORM);
+int vp9_get_seg_tx_type(MACROBLOCKD *xd, int segment_id) {
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_TRANSFORM))
+    return vp9_get_segdata(xd, segment_id, SEG_LVL_TRANSFORM);
   else
     return TX_4X4;
 }

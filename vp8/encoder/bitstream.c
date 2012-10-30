@@ -795,15 +795,15 @@ static void encode_ref_frame(vp8_writer *const bc,
                              MV_REFERENCE_FRAME rf) {
   int seg_ref_active;
   int seg_ref_count = 0;
-  seg_ref_active = segfeature_active(xd,
-                                     segment_id,
-                                     SEG_LVL_REF_FRAME);
+  seg_ref_active = vp9_segfeature_active(xd,
+                                         segment_id,
+                                         SEG_LVL_REF_FRAME);
 
   if (seg_ref_active) {
-    seg_ref_count = check_segref(xd, segment_id, INTRA_FRAME) +
-                    check_segref(xd, segment_id, LAST_FRAME) +
-                    check_segref(xd, segment_id, GOLDEN_FRAME) +
-                    check_segref(xd, segment_id, ALTREF_FRAME);
+    seg_ref_count = vp9_check_segref(xd, segment_id, INTRA_FRAME) +
+                    vp9_check_segref(xd, segment_id, LAST_FRAME) +
+                    vp9_check_segref(xd, segment_id, GOLDEN_FRAME) +
+                    vp9_check_segref(xd, segment_id, ALTREF_FRAME);
   }
 
   // If segment level coding of this signal is disabled...
@@ -838,12 +838,12 @@ static void encode_ref_frame(vp8_writer *const bc,
       // setting the branch probability to 0.
       if (seg_ref_active) {
         mod_refprobs[INTRA_FRAME] *=
-          check_segref(xd, segment_id, INTRA_FRAME);
+          vp9_check_segref(xd, segment_id, INTRA_FRAME);
         mod_refprobs[LAST_FRAME] *=
-          check_segref(xd, segment_id, LAST_FRAME);
+          vp9_check_segref(xd, segment_id, LAST_FRAME);
         mod_refprobs[GOLDEN_FRAME] *=
-          (check_segref(xd, segment_id, GOLDEN_FRAME) *
-           check_segref(xd, segment_id, ALTREF_FRAME));
+          (vp9_check_segref(xd, segment_id, GOLDEN_FRAME) *
+           vp9_check_segref(xd, segment_id, ALTREF_FRAME));
       }
 
       if (mod_refprobs[0]) {
@@ -986,8 +986,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
         }
 
         if (pc->mb_no_coeff_skip &&
-            (!segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
-             (get_segdata(xd, segment_id, SEG_LVL_EOB) != 0))) {
+            (!vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
+             (vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) != 0))) {
           int skip_coeff = mi->mb_skip_coeff;
 #if CONFIG_SUPERBLOCKS
           if (mi->encoded_as_sb) {
@@ -1010,7 +1010,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
 
           // TODO(rbultje) write using SB tree structure
 
-          if (!segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
+          if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
             write_ymode(bc, mode, pc->fc.ymode_prob);
           }
 
@@ -1084,7 +1084,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
 #endif
 
           // Is the segment coding of mode enabled
-          if (!segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
+          if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
 #if CONFIG_SUPERBLOCKS
             if (mi->encoded_as_sb) {
               write_sb_mv_ref(bc, mode, mv_ref_p);
@@ -1268,8 +1268,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
                                      mi->partitioning == PARTITIONING_4X4))) &&
             pc->txfm_mode == TX_MODE_SELECT &&
             !((pc->mb_no_coeff_skip && mi->mb_skip_coeff) ||
-              (segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-               get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+              (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+               vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
           TX_SIZE sz = mi->txfm_size;
           // FIXME(rbultje) code ternary symbol once all experiments are merged
           vp8_write(bc, sz != TX_4X4, pc->prob_tx[0]);
@@ -1333,8 +1333,8 @@ static void write_mb_modes_kf(const VP8_COMMON  *c,
   }
 
   if (c->mb_no_coeff_skip &&
-      (!segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
-       (get_segdata(xd, segment_id, SEG_LVL_EOB) != 0))) {
+      (!vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
+       (vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) != 0))) {
         int skip_coeff = m->mbmi.mb_skip_coeff;
 #if CONFIG_SUPERBLOCKS
         if (m->mbmi.encoded_as_sb) {
@@ -1410,8 +1410,8 @@ static void write_mb_modes_kf(const VP8_COMMON  *c,
 #endif
       ym <= I8X8_PRED && c->txfm_mode == TX_MODE_SELECT &&
       !((c->mb_no_coeff_skip && m->mbmi.mb_skip_coeff) ||
-        (segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-         get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+        (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+         vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
     TX_SIZE sz = m->mbmi.txfm_size;
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     vp8_write(bc, sz != TX_4X4, c->prob_tx[0]);
@@ -1855,8 +1855,8 @@ static void segment_reference_frames(VP8_COMP *cpi) {
     mb_index++;
   }
   for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-    enable_segfeature(xd, i, SEG_LVL_REF_FRAME);
-    set_segdata(xd, i, SEG_LVL_REF_FRAME, ref[i]);
+    vp9_enable_segfeature(xd, i, SEG_LVL_REF_FRAME);
+    vp9_set_segdata(xd, i, SEG_LVL_REF_FRAME, ref[i]);
   }
 }
 
@@ -1972,43 +1972,42 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
       for (i = 0; i < MAX_MB_SEGMENTS; i++) {
         // For each segmentation codable feature...
         for (j = 0; j < SEG_LVL_MAX; j++) {
-          Data = get_segdata(xd, i, j);
+          Data = vp9_get_segdata(xd, i, j);
 
 
 #if CONFIG_FEATUREUPDATES
 
           // check if there's an update
-          if (segfeature_changed(xd, i, j)) {
+          if (vp9_segfeature_changed(xd, i, j)) {
             vp8_write_bit(&header_bc, 1);
 
-            if (segfeature_active(xd, i, j)) {
+            if (vp9_segfeature_active(xd, i, j)) {
               // this bit is to say we are still
               // active/  if we were inactive
               // this is unnecessary
-              if (old_segfeature_active(xd, i, j)) {
+              if (vp9_old_segfeature_active(xd, i, j)) {
                 vp8_write_bit(&header_bc, 1);
               }
               // Is the segment data signed..
-              if (is_segfeature_signed(j)) {
+              if (vp9_is_segfeature_signed(j)) {
                 // Encode the relevant feature data
                 if (Data < 0) {
                   Data = - Data;
                   vp8_write_literal(&header_bc, Data,
-                                    seg_feature_data_bits(j));
+                                    vp9_seg_feature_data_bits(j));
                   vp8_write_bit(&header_bc, 1);
                 } else {
                   vp8_write_literal(&header_bc, Data,
-                                    seg_feature_data_bits(j));
+                                    vp9_seg_feature_data_bits(j));
                   vp8_write_bit(&header_bc, 0);
                 }
               }
               // Unsigned data element so no sign bit needed
               else
                 vp8_write_literal(&header_bc, Data,
-                                  seg_feature_data_bits(j));
-            }
-            // feature is inactive now
-            else if (old_segfeature_active(xd, i, j)) {
+                                  vp9_seg_feature_data_bits(j));
+            } else if (vp9_old_segfeature_active(xd, i, j)) {
+              // feature is inactive now
               vp8_write_bit(&header_bc, 0);
             }
           } else {
@@ -2017,27 +2016,27 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 #else
 
           // If the feature is enabled...
-          if (segfeature_active(xd, i, j)) {
+          if (vp9_segfeature_active(xd, i, j)) {
             vp8_write_bit(&header_bc, 1);
 
             // Is the segment data signed..
-            if (is_segfeature_signed(j)) {
+            if (vp9_is_segfeature_signed(j)) {
               // Encode the relevant feature data
               if (Data < 0) {
                 Data = - Data;
                 vp8_write_literal(&header_bc, Data,
-                                  seg_feature_data_bits(j));
+                                  vp9_seg_feature_data_bits(j));
                 vp8_write_bit(&header_bc, 1);
               } else {
                 vp8_write_literal(&header_bc, Data,
-                                  seg_feature_data_bits(j));
+                                  vp9_seg_feature_data_bits(j));
                 vp8_write_bit(&header_bc, 0);
               }
             }
             // Unsigned data element so no sign bit needed
             else
               vp8_write_literal(&header_bc, Data,
-                                seg_feature_data_bits(j));
+                                vp9_seg_feature_data_bits(j));
           } else
             vp8_write_bit(&header_bc, 0);
 #endif
@@ -2047,7 +2046,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
 #if CONFIG_FEATUREUPDATES
     // save the segment info for updates next frame
-    save_segment_info(xd);
+    vp9_save_segment_info(xd);
 #endif
 
   }

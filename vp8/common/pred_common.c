@@ -326,7 +326,7 @@ MV_REFERENCE_FRAME vp9_get_pred_ref(const VP8_COMMON *const cm,
   unsigned char above_left_in_image;
 
   // Is segment coding ennabled
-  seg_ref_active = segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
+  seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
 
   // Special case treatment if segment coding is enabled.
   // Dont allow prediction of a reference frame that the segment
@@ -334,7 +334,7 @@ MV_REFERENCE_FRAME vp9_get_pred_ref(const VP8_COMMON *const cm,
   if (seg_ref_active) {
     for (i = 0; i < MAX_REF_FRAMES; i++) {
       frame_allowed[i] =
-        check_segref(xd, segment_id, i);
+        vp9_check_segref(xd, segment_id, i);
 
       // Score set to 0 if ref frame not allowed
       ref_score[i] = cm->ref_scores[i] * frame_allowed[i];

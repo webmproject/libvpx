@@ -102,15 +102,15 @@ static void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
   // Set the Q baseline allowing for any segment level adjustment
-  if (segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
     /* Abs Value */
     if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
-      QIndex = get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
+      QIndex = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
 
     /* Delta Value */
     else {
       QIndex = pc->base_qindex +
-               get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
+               vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
       QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    /* Clamp to valid range */
     }
   } else
@@ -754,7 +754,7 @@ static void init_frame(VP8D_COMP *pbi) {
 
     // Reset the segment feature data to the default stats:
     // Features disabled, 0, with delta coding (Default state).
-    clearall_segfeatures(xd);
+    vp9_clearall_segfeatures(xd);
 
     xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
 
@@ -1036,7 +1036,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 
       xd->mb_segment_abs_delta = (unsigned char)vp8_read_bit(&header_bc);
 
-      clearall_segfeatures(xd);
+      vp9_clearall_segfeatures(xd);
 
       // For each segmentation...
       for (i = 0; i < MAX_MB_SEGMENTS; i++) {
@@ -1048,46 +1048,46 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
           if (vp8_read_bit(&header_bc)) {
             int active = 1;
 
-            if (segfeature_active(xd, i, j))
+            if (vp9_segfeature_active(xd, i, j))
               active = vp8_read_bit(&header_bc);
 
             // Is the feature enabled
             if (active) {
               // Update the feature data and mask
-              enable_segfeature(xd, i, j);
+              vp9_enable_segfeature(xd, i, j);
 
               data = (signed char)vp8_read_literal(
-                       &header_bc, seg_feature_data_bits(j));
+                       &header_bc, vp9_seg_feature_data_bits(j));
 
               // Is the segment data signed..
-              if (is_segfeature_signed(j)) {
+              if (vp9_is_segfeature_signed(j)) {
                 if (vp8_read_bit(&header_bc))
                   data = - data;
               }
             } else
               data = 0;
 
-            set_segdata(xd, i, j, data);
+            vp9_set_segdata(xd, i, j, data);
           }
 
 #else
           // Is the feature enabled
           if (vp8_read_bit(&header_bc)) {
             // Update the feature data and mask
-            enable_segfeature(xd, i, j);
+            vp9_enable_segfeature(xd, i, j);
 
             data = (signed char)vp8_read_literal(
-                     &header_bc, seg_feature_data_bits(j));
+                     &header_bc, vp9_seg_feature_data_bits(j));
 
             // Is the segment data signed..
-            if (is_segfeature_signed(j)) {
+            if (vp9_is_segfeature_signed(j)) {
               if (vp8_read_bit(&header_bc))
                 data = - data;
             }
           } else
             data = 0;
 
-          set_segdata(xd, i, j, data);
+          vp9_set_segdata(xd, i, j, data);
 #endif
         }
       }
