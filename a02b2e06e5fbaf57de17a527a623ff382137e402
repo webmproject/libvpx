@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Hs\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 17
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-30T01:55:11Z",
+      "side": 1,
+      "message": "move this closer to the first use; probably the wrong type too, you\u0027ll get unsigned to signed warnings...",
+      "revId": "a02b2e06e5fbaf57de17a527a623ff382137e402",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Hw\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 17
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-30T01:55:11Z",
+      "side": 1,
+      "message": "missed one",
+      "revId": "a02b2e06e5fbaf57de17a527a623ff382137e402",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
