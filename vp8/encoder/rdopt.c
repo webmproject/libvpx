@@ -262,7 +262,7 @@ void vp8_init_me_luts() {
   }
 }
 
-int compute_rd_mult(int qindex) {
+static int compute_rd_mult(int qindex) {
   int q;
 
   q = vp8_dc_quant(qindex, 0);
@@ -1535,9 +1535,9 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
   return best_rd;
 }
 
-int64_t rd_pick_intra8x8mby_modes(VP8_COMP *cpi, MACROBLOCK *mb,
-                                  int *Rate, int *rate_y,
-                                  int *Distortion, int64_t best_rd) {
+static int64_t rd_pick_intra8x8mby_modes(VP8_COMP *cpi, MACROBLOCK *mb,
+                                         int *Rate, int *rate_y,
+                                         int *Distortion, int64_t best_rd) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   int i, ib;
   int cost = mb->mbmode_cost [xd->frame_type] [I8X8_PRED];
@@ -3240,13 +3240,16 @@ static void inter_mode_cost(VP8_COMP *cpi, MACROBLOCK *x, int this_mode,
 
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #define MAX(x,y) (((x)>(y))?(x):(y))
-void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x, int idx, int frame_type,
-                        int recon_yoffset, int recon_uvoffset,
-                        int_mv frame_nearest_mv[4], int_mv frame_near_mv[4],
-                        int_mv frame_best_ref_mv[4],
-                        int frame_mdcounts[4][4],
-                        unsigned char *y_buffer[4], unsigned char *u_buffer[4],
-                        unsigned char *v_buffer[4]) {
+static void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x,
+                               int idx, int frame_type,
+                               int recon_yoffset, int recon_uvoffset,
+                               int_mv frame_nearest_mv[4],
+                               int_mv frame_near_mv[4],
+                               int_mv frame_best_ref_mv[4],
+                               int frame_mdcounts[4][4],
+                               unsigned char *y_buffer[4],
+                               unsigned char *u_buffer[4],
+                               unsigned char *v_buffer[4]) {
   YV12_BUFFER_CONFIG *yv12 = &cpi->common.yv12_fb[idx];
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
