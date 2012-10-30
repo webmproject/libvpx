@@ -224,6 +224,7 @@ EXPERIMENT_LIST="
     switchable_interp
     newbestrefmv
     new_mvref
+    implicit_segmentation
 "
 CONFIG_LIST="
     external_build
