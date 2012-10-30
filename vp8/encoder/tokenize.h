@@ -31,15 +31,11 @@ typedef struct {
 
 int rd_cost_mby(MACROBLOCKD *);
 
-extern int mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block);
-extern int mbuv_is_skippable_4x4(MACROBLOCKD *xd);
-extern int mb_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block);
-extern int mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block);
-extern int mbuv_is_skippable_8x8(MACROBLOCKD *xd);
-extern int mb_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block);
-extern int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd, int has_y2_block);
-extern int mb_is_skippable_16x16(MACROBLOCKD *xd);
-extern int mby_is_skippable_16x16(MACROBLOCKD *xd);
+extern int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block);
+extern int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd);
+extern int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block);
+extern int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd);
+extern int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd);
 
 #ifdef ENTROPY_STATS
 void init_context_counters();

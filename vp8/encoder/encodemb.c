@@ -267,9 +267,9 @@ static const int plane_rd_mult[4] = {
   }\
 }
 
-void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
-                ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                const VP8_ENCODER_RTCD *rtcd, int tx_size) {
+static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
+                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                       const VP8_ENCODER_RTCD *rtcd, int tx_size) {
   BLOCK *b;
   BLOCKD *d;
   vp8_token_state tokens[65][2];
@@ -689,14 +689,14 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 }
 
-void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+static void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   vp8_optimize_mby_8x8(x, rtcd);
   vp8_optimize_mbuv_8x8(x, rtcd);
 }
 
-void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
-                      ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                      const VP8_ENCODER_RTCD *rtcd) {
+static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
+                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                             const VP8_ENCODER_RTCD *rtcd) {
   BLOCK *b = &mb->block[i];
   BLOCKD *d = &mb->e_mbd.block[i];
   vp8_token_state tokens[257][2];

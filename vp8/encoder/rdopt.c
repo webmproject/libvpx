@@ -738,7 +738,7 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
   *Distortion = (d >> 2);
   // rate
   *Rate = vp8_rdcost_mby(mb);
-  *skippable = mby_is_skippable_4x4(&mb->e_mbd, 1);
+  *skippable = vp9_mby_is_skippable_4x4(&mb->e_mbd, 1);
 }
 
 static int vp8_rdcost_mby_8x8(MACROBLOCK *mb, int backup) {
@@ -802,7 +802,7 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
   *Distortion = (d >> 2);
   // rate
   *Rate = vp8_rdcost_mby_8x8(mb, 1);
-  *skippable = mby_is_skippable_8x8(&mb->e_mbd, 1);
+  *skippable = vp9_mby_is_skippable_8x8(&mb->e_mbd, 1);
 }
 
 static int vp8_rdcost_mby_16x16(MACROBLOCK *mb) {
@@ -850,7 +850,7 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   *Distortion = (d >> 2);
   // rate
   *Rate = vp8_rdcost_mby_16x16(mb);
-  *skippable = mby_is_skippable_16x16(&mb->e_mbd);
+  *skippable = vp9_mby_is_skippable_16x16(&mb->e_mbd);
 }
 
 static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
@@ -1024,7 +1024,7 @@ static void super_block_yrd_8x8(MACROBLOCK *x,
     xd->above_context = ta + x_idx;
     xd->left_context = tl + y_idx;
     r += vp8_rdcost_mby_8x8(x, 0);
-    skippable = skippable && mby_is_skippable_8x8(xd, 1);
+    skippable = skippable && vp9_mby_is_skippable_8x8(xd, 1);
   }
 
   *distortion = (d >> 2);
@@ -1618,7 +1618,7 @@ static int64_t rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
   *rate       = rd_cost_mbuv(x);
   *distortion = vp8_mbuverror(x) / 4;
-  *skip       = mbuv_is_skippable_4x4(&x->e_mbd);
+  *skip       = vp9_mbuv_is_skippable_4x4(&x->e_mbd);
 
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
@@ -1683,7 +1683,7 @@ static int64_t rd_inter32x32_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
     xd->left_context = tl + y_idx;
     r += rd_cost_mbuv_8x8(x, 0);
     d += vp8_mbuverror(x) / 4;
-    skippable = skippable && mbuv_is_skippable_8x8(xd);
+    skippable = skippable && vp9_mbuv_is_skippable_8x8(xd);
   }
 
   *rate = r;
@@ -1708,7 +1708,7 @@ static int64_t rd_inter16x16_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
   *rate       = rd_cost_mbuv_8x8(x, 1);
   *distortion = vp8_mbuverror(x) / 4;
-  *skip       = mbuv_is_skippable_8x8(&x->e_mbd);
+  *skip       = vp9_mbuv_is_skippable_8x8(&x->e_mbd);
 
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
@@ -1725,7 +1725,7 @@ static int64_t rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
   *rate       = rd_cost_mbuv(x);
   *distortion = vp8_mbuverror(x) / 4;
-  *skippable  = mbuv_is_skippable_4x4(&x->e_mbd);
+  *skippable  = vp9_mbuv_is_skippable_4x4(&x->e_mbd);
 
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
@@ -1783,7 +1783,7 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
       if (this_rd < best_rd) {
-        skip = mbuv_is_skippable_4x4(xd);
+        skip = vp9_mbuv_is_skippable_4x4(xd);
         best_rd = this_rd;
         d = distortion;
         r = rate;
@@ -1840,7 +1840,7 @@ static void rd_pick_intra_mbuv_mode_8x8(VP8_COMP *cpi,
     this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
     if (this_rd < best_rd) {
-      skip = mbuv_is_skippable_8x8(xd);
+      skip = vp9_mbuv_is_skippable_8x8(xd);
       best_rd = this_rd;
       d = distortion;
       r = rate;
@@ -1884,7 +1884,7 @@ static void super_block_uvrd_8x8(MACROBLOCK *x,
                           dst_uv_stride);
     vp8_transform_mbuv_8x8(x);
     vp8_quantize_mbuv_8x8(x);
-    s &= mbuv_is_skippable_8x8(xd);
+    s &= vp9_mbuv_is_skippable_8x8(xd);
 
     d += vp8_mbuverror(x) >> 2;
     xd->above_context = ta + x_idx;
@@ -2745,8 +2745,8 @@ static int rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
   *returndistortion = bsi.d;
   *returnyrate = bsi.segment_yrate;
   *skippable = bsi.txfm_size == TX_4X4 ?
-                    mby_is_skippable_4x4(&x->e_mbd, 0) :
-                    mby_is_skippable_8x8(&x->e_mbd, 0);
+                    vp9_mby_is_skippable_4x4(&x->e_mbd, 0) :
+                    vp9_mby_is_skippable_8x8(&x->e_mbd, 0);
 
   /* save partitions */
   mbmi->txfm_size = bsi.txfm_size;
