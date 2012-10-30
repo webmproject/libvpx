@@ -798,9 +798,10 @@ void vp8_first_pass(VP8_COMP *cpi) {
 //
 
 
-double bitcost(double prob) {
+static double bitcost(double prob) {
   return -(log(prob) / log(2.0));
 }
+
 static long long estimate_modemvcost(VP8_COMP *cpi,
                                      FIRSTPASS_STATS *fpstats) {
   int mv_cost;
@@ -1911,7 +1912,7 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 }
 
 // Make a damped adjustment to the active max q.
-int adjust_active_maxq(int old_maxqi, int new_maxqi) {
+static int adjust_active_maxq(int old_maxqi, int new_maxqi) {
   int i;
   int ret_val = new_maxqi;
   double old_q;
