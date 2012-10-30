@@ -16,6 +16,7 @@
 #include <assert.h>
 
 #include "math.h"
+#include "vp8/common/alloccommon.h"
 #include "vp8/common/common.h"
 #include "ratectrl.h"
 #include "vp8/common/entropymode.h"
@@ -264,10 +265,8 @@ void vp8_setup_key_frame(VP8_COMP *cpi) {
   vpx_memset(cm->mip, 0,
     (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
 
-  update_mode_info_border(cm, cm->mip);
-  update_mode_info_in_image(cm, cm->mi);
-
-
+  vp9_update_mode_info_border(cm, cm->mip);
+  vp9_update_mode_info_in_image(cm, cm->mi);
 }
 
 void vp8_setup_inter_frame(VP8_COMP *cpi) {
