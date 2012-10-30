@@ -78,40 +78,6 @@ static double ssim_8x8(unsigned char *s, int sp, unsigned char *r, int rp) {
   return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 64);
 }
 
-// TODO: (jbb) tried to scale this function such that we may be able to use it
-// for distortion metric in mode selection code ( provided we do a reconstruction)
-long dssim(unsigned char *s, int sp, unsigned char *r, int rp) {
-  unsigned long sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
-  int64_t ssim3;
-  int64_t ssim_n1, ssim_n2;
-  int64_t ssim_d1, ssim_d2;
-  int64_t ssim_t1, ssim_t2;
-  int64_t c1, c2;
-
-  // normalize by 256/64
-  c1 = cc1 * 16;
-  c2 = cc2 * 16;
-
-  vp8_ssim_parms_16x16(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
-                       &sum_sxr);
-  ssim_n1 = (2 * sum_s * sum_r + c1);
-
-  ssim_n2 = ((int64_t) 2 * 256 * sum_sxr - (int64_t) 2 * sum_s * sum_r + c2);
-
-  ssim_d1 = ((int64_t)sum_s * sum_s + (int64_t)sum_r * sum_r + c1);
-
-  ssim_d2 = (256 * (int64_t) sum_sq_s - (int64_t) sum_s * sum_s +
-             (int64_t) 256 * sum_sq_r - (int64_t) sum_r * sum_r + c2);
-
-  ssim_t1 = 256 - 256 * ssim_n1 / ssim_d1;
-  ssim_t2 = 256 - 256 * ssim_n2 / ssim_d2;
-
-  ssim3 = 256 * ssim_t1 * ssim_t2;
-  if (ssim3 < 0)
-    ssim3 = 0;
-  return (long)(ssim3);
-}
-
 // We are using a 8x8 moving window with starting location of each 8x8 window
 // on the 4x4 pixel grid. Such arrangement allows the windows to overlap
 // block boundaries to penalize blocking artifacts.
