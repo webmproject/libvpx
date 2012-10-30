@@ -186,7 +186,7 @@ static int get_binary_prob(int n0, int n1) {
   return get_prob(n0, n0 + n1);
 }
 
-void update_skip_probs(VP8_COMP *cpi) {
+void vp9_update_skip_probs(VP8_COMP *cpi) {
   VP8_COMMON *const pc = &cpi->common;
   int prob_skip_false[3] = {0, 0, 0};
   int k;
@@ -197,7 +197,8 @@ void update_skip_probs(VP8_COMP *cpi) {
   }
 }
 
-void update_switchable_interp_probs(VP8_COMP *cpi, vp8_writer* const bc) {
+static void update_switchable_interp_probs(VP8_COMP *cpi,
+                                           vp8_writer* const bc) {
   VP8_COMMON *const pc = &cpi->common;
   unsigned int branch_ct[32][2];
   int i, j;
@@ -1512,8 +1513,7 @@ static void print_prob_tree(vp8_prob
   fclose(f);
 }
 
-
-void build_coeff_contexts(VP8_COMP *cpi) {
+static void build_coeff_contexts(VP8_COMP *cpi) {
   int i = 0, j, k;
 #ifdef ENTROPY_STATS
   int t = 0;
@@ -2263,7 +2263,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   if (pc->mb_no_coeff_skip) {
     int k;
 
-    update_skip_probs(cpi);
+    vp9_update_skip_probs(cpi);
     for (k = 0; k < MBSKIP_CONTEXTS; ++k)
       vp8_write_literal(&header_bc, pc->mbskip_pred_probs[k], 8);
   }

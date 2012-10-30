@@ -280,7 +280,7 @@ static void update_base_skip_probs(VP8_COMP *cpi) {
   VP8_COMMON *cm = &cpi->common;
 
   if (cm->frame_type != KEY_FRAME) {
-    update_skip_probs(cpi);
+    vp9_update_skip_probs(cpi);
 
     if (cm->refresh_alt_ref_frame) {
       int k;
