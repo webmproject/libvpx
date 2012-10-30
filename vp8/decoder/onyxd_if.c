@@ -34,7 +34,7 @@
 #endif
 
 extern void vp8_init_loop_filter(VP8_COMMON *cm);
-extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
+extern void vp9cx_init_de_quantizer(VP8D_COMP *pbi);
 static int get_free_fb(VP8_COMMON *cm);
 static void ref_cnt_fb(int *buf, int *idx, int new_idx);
 
@@ -104,7 +104,7 @@ void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
 }
 #endif
 
-void vp8dx_initialize() {
+void vp9dx_initialize() {
   static int init_done = 0;
 
   if (!init_done) {
@@ -115,7 +115,7 @@ void vp8dx_initialize() {
   }
 }
 
-VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf) {
+VP8D_PTR vp9dx_create_decompressor(VP8D_CONFIG *oxcf) {
   VP8D_COMP *pbi = vpx_memalign(32, sizeof(VP8D_COMP));
 
   if (!pbi)
@@ -125,22 +125,22 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf) {
 
   if (setjmp(pbi->common.error.jmp)) {
     pbi->common.error.setjmp = 0;
-    vp8dx_remove_decompressor(pbi);
+    vp9dx_remove_decompressor(pbi);
     return 0;
   }
 
   pbi->common.error.setjmp = 1;
-  vp8dx_initialize();
+  vp9dx_initialize();
 
   vp8_create_common(&pbi->common);
 
   pbi->common.current_video_frame = 0;
   pbi->ready_for_new_data = 1;
 
-  /* vp8cx_init_de_quantizer() is first called here. Add check in frame_init_dequantizer() to avoid
+  /* vp9cx_init_de_quantizer() is first called here. Add check in frame_init_dequantizer() to avoid
    *  unnecessary calling of vp8cx_init_de_quantizer() for every frame.
    */
-  vp8cx_init_de_quantizer(pbi);
+  vp9cx_init_de_quantizer(pbi);
 
   vp8_loop_filter_init(&pbi->common);
 
@@ -151,7 +151,7 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf) {
   return (VP8D_PTR) pbi;
 }
 
-void vp8dx_remove_decompressor(VP8D_PTR ptr) {
+void vp9dx_remove_decompressor(VP8D_PTR ptr) {
   VP8D_COMP *pbi = (VP8D_COMP *) ptr;
 
   if (!pbi)
@@ -167,7 +167,7 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr) {
 }
 
 
-vpx_codec_err_t vp8dx_get_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
+vpx_codec_err_t vp9dx_get_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
   VP8D_COMP *pbi = (VP8D_COMP *) ptr;
   VP8_COMMON *cm = &pbi->common;
   int ref_fb_idx;
@@ -197,7 +197,7 @@ vpx_codec_err_t vp8dx_get_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, Y
 }
 
 
-vpx_codec_err_t vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
+vpx_codec_err_t vp9dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
   VP8D_COMP *pbi = (VP8D_COMP *) ptr;
   VP8_COMMON *cm = &pbi->common;
   int *ref_fb_ptr = NULL;
@@ -331,7 +331,7 @@ static void vp8_print_yuv_rec_mb(VP8_COMMON *cm, int mb_row, int mb_col)
 }
 */
 
-int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsigned char *source, int64_t time_stamp) {
+int vp9dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsigned char *source, int64_t time_stamp) {
 #if HAVE_ARMV7
   int64_t dx_store_reg[8];
 #endif
@@ -395,7 +395,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
   pbi->common.error.setjmp = 1;
 
-  retcode = vp8_decode_frame(pbi);
+  retcode = vp9_decode_frame(pbi);
 
   if (retcode < 0) {
 #if HAVE_ARMV7
@@ -479,7 +479,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
   pbi->common.error.setjmp = 0;
   return retcode;
 }
-int vp8dx_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd, int64_t *time_stamp, int64_t *time_end_stamp, vp8_ppflags_t *flags) {
+int vp9dx_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd, int64_t *time_stamp, int64_t *time_end_stamp, vp8_ppflags_t *flags) {
   int ret = -1;
   VP8D_COMP *pbi = (VP8D_COMP *) ptr;
 

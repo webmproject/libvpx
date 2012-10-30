@@ -35,14 +35,14 @@ typedef struct {
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 
-int vp8dx_start_decode(BOOL_DECODER *br,
+int vp9dx_start_decode(BOOL_DECODER *br,
                        const unsigned char *source,
                        unsigned int source_sz);
 
-void vp8dx_bool_decoder_fill(BOOL_DECODER *br);
+void vp9dx_bool_decoder_fill(BOOL_DECODER *br);
 
-int vp8_decode_uniform(BOOL_DECODER *br, int n);
-int vp8_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms);
+int vp9_decode_uniform(BOOL_DECODER *br, int n);
+int vp9_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms);
 int vp9_inv_recenter_nonneg(int v, int m);
 
 /*The refill loop is used in several places, so define it in a macro to make
@@ -87,7 +87,7 @@ static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
   split = 1 + (((br->range - 1) * probability) >> 8);
 
   if (br->count < 0)
-    vp8dx_bool_decoder_fill(br);
+    vp9dx_bool_decoder_fill(br);
 
   value = br->value;
   count = br->count;

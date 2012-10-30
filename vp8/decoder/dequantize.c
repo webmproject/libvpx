@@ -29,7 +29,7 @@ extern void vp8_short_inv_walsh4x4_1_x8_c(short *input, short *output, int pitch
 extern int dec_debug;
 #endif
 
-void vp8_dequantize_b_c(BLOCKD *d) {
+void vp9_dequantize_b_c(BLOCKD *d) {
 
   int i;
   short *DQ  = d->dqcoeff;
@@ -42,7 +42,7 @@ void vp8_dequantize_b_c(BLOCKD *d) {
 }
 
 
-void vp8_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
+void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
                                unsigned char *pred, unsigned char *dest,
                                int pitch, int stride) {
   short output[16];
@@ -77,7 +77,7 @@ void vp8_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
   }
 }
 
-void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
+void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
                                    unsigned char *pred, unsigned char *dest,
                                    int pitch, int stride) {
   short output[64];
@@ -121,7 +121,7 @@ void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
   }
 }
 
-void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
+void vp9_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
                             unsigned char *dest, int pitch, int stride) {
   short output[16];
   short *diff_ptr = output;
@@ -156,7 +156,7 @@ void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
   }
 }
 
-void vp8_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
+void vp9_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
                                unsigned char *dest, int pitch, int stride,
                                int Dc) {
   int i;
@@ -195,7 +195,7 @@ void vp8_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
 }
 
 #if CONFIG_LOSSLESS
-void vp8_dequant_idct_add_lossless_c(short *input, short *dq, unsigned char *pred,
+void vp9_dequant_idct_add_lossless_c(short *input, short *dq, unsigned char *pred,
                                      unsigned char *dest, int pitch, int stride) {
   short output[16];
   short *diff_ptr = output;
@@ -229,7 +229,7 @@ void vp8_dequant_idct_add_lossless_c(short *input, short *dq, unsigned char *pre
   }
 }
 
-void vp8_dequant_dc_idct_add_lossless_c(short *input, short *dq, unsigned char *pred,
+void vp9_dequant_dc_idct_add_lossless_c(short *input, short *dq, unsigned char *pred,
                                         unsigned char *dest, int pitch, int stride,
                                         int Dc) {
   int i;
@@ -266,7 +266,7 @@ void vp8_dequant_dc_idct_add_lossless_c(short *input, short *dq, unsigned char *
 }
 #endif
 
-void vp8_dequantize_b_2x2_c(BLOCKD *d) {
+void vp9_dequantize_b_2x2_c(BLOCKD *d) {
   int i;
   short *DQ  = d->dqcoeff;
   short *Q   = d->qcoeff;
@@ -287,7 +287,7 @@ void vp8_dequantize_b_2x2_c(BLOCKD *d) {
 #endif
 }
 
-void vp8_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
+void vp9_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
                                 unsigned char *dest, int pitch, int stride) { // , MACROBLOCKD *xd, short blk_idx
   short output[64];
   short *diff_ptr = output;
@@ -376,7 +376,7 @@ void vp8_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
 #endif
 }
 
-void vp8_dequant_dc_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
+void vp9_dequant_dc_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
                                    unsigned char *dest, int pitch, int stride,
                                    int Dc) { // Dc for 1st order T in some rear case
   short output[64];
@@ -464,7 +464,7 @@ void vp8_dequant_dc_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
 #endif
 }
 
-void vp8_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
+void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
                                      unsigned char *pred, unsigned char *dest,
                                      int pitch, int stride) {
   short output[256];
@@ -503,7 +503,7 @@ void vp8_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
   }
 }
 
-void vp8_dequant_idct_add_16x16_c(short *input, short *dq, unsigned char *pred,
+void vp9_dequant_idct_add_16x16_c(short *input, short *dq, unsigned char *pred,
                                   unsigned char *dest, int pitch, int stride) {
   short output[256];
   short *diff_ptr = output;

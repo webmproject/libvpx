@@ -43,21 +43,21 @@ extern "C"
     VP8D_OK = 0
   } VP8D_SETTING;
 
-  void vp8dx_initialize(void);
+  void vp9dx_initialize(void);
 
   void vp8dx_set_setting(VP8D_PTR comp, VP8D_SETTING oxst, int x);
 
   int vp8dx_get_setting(VP8D_PTR comp, VP8D_SETTING oxst);
 
-  int vp8dx_receive_compressed_data(VP8D_PTR comp, unsigned long size, const unsigned char *dest, int64_t time_stamp);
-  int vp8dx_get_raw_frame(VP8D_PTR comp, YV12_BUFFER_CONFIG *sd, int64_t *time_stamp, int64_t *time_end_stamp, vp8_ppflags_t *flags);
+  int vp9dx_receive_compressed_data(VP8D_PTR comp, unsigned long size, const unsigned char *dest, int64_t time_stamp);
+  int vp9dx_get_raw_frame(VP8D_PTR comp, YV12_BUFFER_CONFIG *sd, int64_t *time_stamp, int64_t *time_end_stamp, vp8_ppflags_t *flags);
 
-  vpx_codec_err_t vp8dx_get_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
-  vpx_codec_err_t vp8dx_set_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
+  vpx_codec_err_t vp9dx_get_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
+  vpx_codec_err_t vp9dx_set_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
 
-  VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf);
+  VP8D_PTR vp9dx_create_decompressor(VP8D_CONFIG *oxcf);
 
-  void vp8dx_remove_decompressor(VP8D_PTR comp);
+  void vp9dx_remove_decompressor(VP8D_PTR comp);
 
 #ifdef __cplusplus
 }

@@ -37,38 +37,38 @@ fi
 #
 # Dequant
 #
-prototype void vp8_dequantize_b "struct blockd *x"
-specialize vp8_dequantize_b mmx
+prototype void vp9_dequantize_b "struct blockd *x"
+specialize vp9_dequantize_b mmx
 
-prototype void vp8_dequantize_b_2x2 "struct blockd *x"
-specialize vp8_dequantize_b_2x2
+prototype void vp9_dequantize_b_2x2 "struct blockd *x"
+specialize vp9_dequantize_b_2x2
 
-prototype void vp8_dequant_dc_idct_add_y_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs, short *dc, struct macroblockd *xd"
-specialize vp8_dequant_dc_idct_add_y_block_8x8
+prototype void vp9_dequant_dc_idct_add_y_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs, short *dc, struct macroblockd *xd"
+specialize vp9_dequant_dc_idct_add_y_block_8x8
 
-prototype void vp8_dequant_idct_add_y_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs, struct macroblockd *xd"
-specialize vp8_dequant_idct_add_y_block_8x8
+prototype void vp9_dequant_idct_add_y_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs, struct macroblockd *xd"
+specialize vp9_dequant_idct_add_y_block_8x8
 
-prototype void vp8_dequant_idct_add_uv_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dstu, unsigned char *dstv, int stride, char *eobs, struct macroblockd *xd"
-specialize vp8_dequant_idct_add_uv_block_8x8
+prototype void vp9_dequant_idct_add_uv_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dstu, unsigned char *dstv, int stride, char *eobs, struct macroblockd *xd"
+specialize vp9_dequant_idct_add_uv_block_8x8
 
-prototype void vp8_dequant_idct_add_16x16 "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
-specialize vp8_dequant_idct_add_16x16
+prototype void vp9_dequant_idct_add_16x16 "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
+specialize vp9_dequant_idct_add_16x16
 
-prototype void vp8_dequant_idct_add "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
-specialize vp8_dequant_idct_add
+prototype void vp9_dequant_idct_add "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
+specialize vp9_dequant_idct_add
 
-prototype void vp8_dequant_dc_idct_add "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc"
-specialize vp8_dequant_dc_idct_add
+prototype void vp9_dequant_dc_idct_add "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc"
+specialize vp9_dequant_dc_idct_add
 
-prototype void vp8_dequant_dc_idct_add_y_block "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs, short *dc"
-specialize vp8_dequant_dc_idct_add_y_block mmx
+prototype void vp9_dequant_dc_idct_add_y_block "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs, short *dc"
+specialize vp9_dequant_dc_idct_add_y_block mmx
 
-prototype void vp8_dequant_idct_add_y_block "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs"
-specialize vp8_dequant_idct_add_y_block mmx
+prototype void vp9_dequant_idct_add_y_block "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs"
+specialize vp9_dequant_idct_add_y_block mmx
 
-prototype void vp8_dequant_idct_add_uv_block "short *q, short *dq, unsigned char *pre, unsigned char *dstu, unsigned char *dstv, int stride, char *eobs"
-specialize vp8_dequant_idct_add_uv_block mmx
+prototype void vp9_dequant_idct_add_uv_block "short *q, short *dq, unsigned char *pre, unsigned char *dstu, unsigned char *dstv, int stride, char *eobs"
+specialize vp9_dequant_idct_add_uv_block mmx
 
 #
 # RECON

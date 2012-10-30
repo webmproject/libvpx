@@ -34,9 +34,9 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx) {
 #if HAVE_MMX
 // The commented functions need to be re-written for vpx.
   if (flags & HAS_MMX) {
-    rtcd->idct.idct1        = vpx_short_idct4x4llm_1_mmx;
-    rtcd->idct.idct16       = vpx_short_idct4x4llm_mmx;
-    rtcd->idct.idct1_scalar_add = vpx_dc_only_idct_add_mmx;
+    rtcd->idct.idct1        = vp9_short_idct4x4llm_1_mmx;
+    rtcd->idct.idct16       = vp9_short_idct4x4llm_mmx;
+    rtcd->idct.idct1_scalar_add = vp9_dc_only_idct_add_mmx;
     // rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_mmx;
     // rtcd->idct.iwalsh1     = vp8_short_inv_walsh4x4_1_mmx;
 

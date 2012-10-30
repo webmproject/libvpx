@@ -26,7 +26,7 @@ void vp8_idct_dequant_full_2x_sse2
 (short *q, short *dq, unsigned char *pre,
  unsigned char *dst, int dst_stride, int blk_stride);
 
-void vp8_dequant_dc_idct_add_y_block_sse2
+void vp9_dequant_dc_idct_add_y_block_sse2
 (short *q, short *dq, unsigned char *pre,
  unsigned char *dst, int stride, char *eobs, short *dc) {
   int i;
@@ -50,7 +50,7 @@ void vp8_dequant_dc_idct_add_y_block_sse2
   }
 }
 
-void vp8_dequant_idct_add_y_block_sse2
+void vp9_dequant_idct_add_y_block_sse2
 (short *q, short *dq, unsigned char *pre,
  unsigned char *dst, int stride, char *eobs) {
   int i;
@@ -73,7 +73,7 @@ void vp8_dequant_idct_add_y_block_sse2
   }
 }
 
-void vp8_dequant_idct_add_uv_block_sse2
+void vp9_dequant_idct_add_uv_block_sse2
 (short *q, short *dq, unsigned char *pre,
  unsigned char *dstu, unsigned char *dstv, int stride, char *eobs) {
   if (((short *)(eobs))[0] & 0xfefe)

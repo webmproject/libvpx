@@ -193,7 +193,7 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx) {
 static vpx_codec_err_t vp8_destroy(vpx_codec_alg_priv_t *ctx) {
   int i;
 
-  vp8dx_remove_decompressor(ctx->pbi);
+  vp9dx_remove_decompressor(ctx->pbi);
 
   for (i = NELEMENTS(ctx->mmaps) - 1; i >= 0; i--) {
     if (ctx->mmaps[i].dtor)
@@ -353,14 +353,14 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
       VP8D_CONFIG oxcf;
       VP8D_PTR optr;
 
-      vp8dx_initialize();
+      vp9dx_initialize();
 
       oxcf.Width = ctx->si.w;
       oxcf.Height = ctx->si.h;
       oxcf.Version = 9;
       oxcf.postprocess = 0;
       oxcf.max_threads = ctx->cfg.threads;
-      optr = vp8dx_create_decompressor(&oxcf);
+      optr = vp9dx_create_decompressor(&oxcf);
 
       /* If postprocessing was enabled by the application and a
        * configuration has not been provided, default it.
@@ -407,12 +407,12 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
 #endif
     }
 
-    if (vp8dx_receive_compressed_data(ctx->pbi, data_sz, data, deadline)) {
+    if (vp9dx_receive_compressed_data(ctx->pbi, data_sz, data, deadline)) {
       VP8D_COMP *pbi = (VP8D_COMP *)ctx->pbi;
       res = update_error_state(ctx, &pbi->common.error);
     }
 
-    if (!res && 0 == vp8dx_get_raw_frame(ctx->pbi, &sd, &time_stamp, &time_end_stamp, &flags)) {
+    if (!res && 0 == vp9dx_get_raw_frame(ctx->pbi, &sd, &time_stamp, &time_end_stamp, &flags)) {
       yuvconfig2image(&ctx->img, &sd, user_priv);
       ctx->img_avail = 1;
     }
@@ -542,7 +542,7 @@ static vpx_codec_err_t vp9_set_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp8dx_set_reference(ctx->pbi, frame->frame_type, &sd);
+    return vp9dx_set_reference(ctx->pbi, frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 
@@ -560,7 +560,7 @@ static vpx_codec_err_t vp9_get_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp8dx_get_reference(ctx->pbi, frame->frame_type, &sd);
+    return vp9dx_get_reference(ctx->pbi, frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 

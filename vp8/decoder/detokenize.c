@@ -98,7 +98,7 @@ DECLARE_ALIGNED(16, const int, coef_bands_x_16x16[256]) = {
 static const unsigned char cat6_prob[14] =
 { 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0 };
 
-void vp8_reset_mb_tokens_context(MACROBLOCKD *xd) {
+void vp9_reset_mb_tokens_context(MACROBLOCKD *xd) {
   /* Clear entropy contexts for Y2 blocks */
   if ((xd->mode_info_context->mbmi.mode != B_PRED &&
       xd->mode_info_context->mbmi.mode != I8X8_PRED &&
@@ -256,7 +256,7 @@ static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign) {
   int v;
 
   if (br->count < 0)
-    vp8dx_bool_decoder_fill(br);
+    vp9dx_bool_decoder_fill(br);
 
   if (br->value < bigsplit) {
     br->range = split;
@@ -414,7 +414,7 @@ SKIP_START:
   return c;
 }
 
-int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd,
+int vp9_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd,
                                BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -477,7 +477,7 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd,
   return eobtotal;
 }
 
-int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
+int vp9_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
                              BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -571,7 +571,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
 }
 
 
-int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd,
+int vp9_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;

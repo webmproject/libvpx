@@ -71,11 +71,11 @@ typedef struct VP8Decompressor {
 
   DETOK detoken;
 
-  vp8_dequant_idct_add_fn_t            idct_add;
-  vp8_dequant_dc_idct_add_fn_t         dc_idct_add;
-  vp8_dequant_dc_idct_add_y_block_fn_t dc_idct_add_y_block;
-  vp8_dequant_idct_add_y_block_fn_t    idct_add_y_block;
-  vp8_dequant_idct_add_uv_block_fn_t   idct_add_uv_block;
+  vp9_dequant_idct_add_fn_t            idct_add;
+  vp9_dequant_dc_idct_add_fn_t         dc_idct_add;
+  vp9_dequant_dc_idct_add_y_block_fn_t dc_idct_add_y_block;
+  vp9_dequant_idct_add_y_block_fn_t    idct_add_y_block;
+  vp9_dequant_idct_add_uv_block_fn_t   idct_add_uv_block;
 
   vp8_prob prob_skip_false;
 
@@ -83,7 +83,7 @@ typedef struct VP8Decompressor {
 
 } VP8D_COMP;
 
-int vp8_decode_frame(VP8D_COMP *cpi);
+int vp9_decode_frame(VP8D_COMP *cpi);
 
 
 #if CONFIG_DEBUG

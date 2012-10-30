@@ -1174,7 +1174,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   }
 }
 
-void vpx_decode_mode_mvs_init(VP8D_COMP *pbi, BOOL_DECODER* const bc) {
+void vp9_decode_mode_mvs_init(VP8D_COMP *pbi, BOOL_DECODER* const bc) {
   VP8_COMMON *cm = &pbi->common;
 
   vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
@@ -1186,7 +1186,7 @@ void vpx_decode_mode_mvs_init(VP8D_COMP *pbi, BOOL_DECODER* const bc) {
 
   mb_mode_mv_init(pbi, bc);
 }
-void vpx_decode_mb_mode_mv(VP8D_COMP *pbi,
+void vp9_decode_mb_mode_mv(VP8D_COMP *pbi,
                            MACROBLOCKD *xd,
                            int mb_row,
                            int mb_col,

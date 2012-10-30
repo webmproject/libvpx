@@ -13,7 +13,7 @@
 #include "vpx_ports/mem.h"
 #include "vpx_mem/vpx_mem.h"
 
-int vp8dx_start_decode(BOOL_DECODER *br,
+int vp9dx_start_decode(BOOL_DECODER *br,
                        const unsigned char *source,
                        unsigned int source_sz) {
   br->user_buffer_end = source + source_sz;
@@ -26,13 +26,13 @@ int vp8dx_start_decode(BOOL_DECODER *br,
     return 1;
 
   /* Populate the buffer */
-  vp8dx_bool_decoder_fill(br);
+  vp9dx_bool_decoder_fill(br);
 
   return 0;
 }
 
 
-void vp8dx_bool_decoder_fill(BOOL_DECODER *br) {
+void vp9dx_bool_decoder_fill(BOOL_DECODER *br) {
   const unsigned char *bufptr;
   const unsigned char *bufend;
   VP8_BD_VALUE         value;
@@ -66,7 +66,7 @@ int vp9_inv_recenter_nonneg(int v, int m) {
   else return m - ((v + 1) >> 1);
 }
 
-int vp8_decode_uniform(BOOL_DECODER *br, int n) {
+int vp9_decode_uniform(BOOL_DECODER *br, int n) {
   int v;
   int l = get_unsigned_bits(n);
   int m = (1 << l) - n;
@@ -78,13 +78,13 @@ int vp8_decode_uniform(BOOL_DECODER *br, int n) {
     return (v << 1) - m + vp8_decode_value(br, 1);
 }
 
-int vp8_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms) {
+int vp9_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms) {
   int i = 0, mk = 0, word;
   while (1) {
     int b = (i ? k + i - 1 : k);
     int a = (1 << b);
     if (num_syms <= mk + 3 * a) {
-      word = vp8_decode_uniform(br, num_syms - mk) + mk;
+      word = vp9_decode_uniform(br, num_syms - mk) + mk;
       break;
     } else {
       if (vp8_decode_value(br, 1)) {

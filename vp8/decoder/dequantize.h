@@ -14,61 +14,61 @@
 #include "vp8/common/blockd.h"
 
 #if CONFIG_LOSSLESS
-extern void vp8_dequant_idct_add_lossless_c(short *input, short *dq,
+extern void vp9_dequant_idct_add_lossless_c(short *input, short *dq,
                                             unsigned char *pred,
                                             unsigned char *output,
                                             int pitch, int stride);
-extern void vp8_dequant_dc_idct_add_lossless_c(short *input, short *dq,
+extern void vp9_dequant_dc_idct_add_lossless_c(short *input, short *dq,
                                                unsigned char *pred,
                                                unsigned char *output,
                                                int pitch, int stride, int dc);
-extern void vp8_dequant_dc_idct_add_y_block_lossless_c(short *q, short *dq,
+extern void vp9_dequant_dc_idct_add_y_block_lossless_c(short *q, short *dq,
                                                        unsigned char *pre,
                                                        unsigned char *dst,
                                                        int stride, char *eobs,
                                                        short *dc);
-extern void vp8_dequant_idct_add_y_block_lossless_c(short *q, short *dq,
+extern void vp9_dequant_idct_add_y_block_lossless_c(short *q, short *dq,
                                                     unsigned char *pre,
                                                     unsigned char *dst,
                                                     int stride, char *eobs);
-extern void vp8_dequant_idct_add_uv_block_lossless_c(short *q, short *dq,
+extern void vp9_dequant_idct_add_uv_block_lossless_c(short *q, short *dq,
                                                      unsigned char *pre,
                                                      unsigned char *dst_u,
                                                      unsigned char *dst_v,
                                                      int stride, char *eobs);
 #endif
 
-typedef void (*vp8_dequant_idct_add_fn_t)(short *input, short *dq,
+typedef void (*vp9_dequant_idct_add_fn_t)(short *input, short *dq,
     unsigned char *pred, unsigned char *output, int pitch, int stride);
-typedef void(*vp8_dequant_dc_idct_add_fn_t)(short *input, short *dq,
+typedef void(*vp9_dequant_dc_idct_add_fn_t)(short *input, short *dq,
     unsigned char *pred, unsigned char *output, int pitch, int stride, int dc);
 
-typedef void(*vp8_dequant_dc_idct_add_y_block_fn_t)(short *q, short *dq,
+typedef void(*vp9_dequant_dc_idct_add_y_block_fn_t)(short *q, short *dq,
     unsigned char *pre, unsigned char *dst, int stride, char *eobs, short *dc);
-typedef void(*vp8_dequant_idct_add_y_block_fn_t)(short *q, short *dq,
+typedef void(*vp9_dequant_idct_add_y_block_fn_t)(short *q, short *dq,
     unsigned char *pre, unsigned char *dst, int stride, char *eobs);
-typedef void(*vp8_dequant_idct_add_uv_block_fn_t)(short *q, short *dq,
+typedef void(*vp9_dequant_idct_add_uv_block_fn_t)(short *q, short *dq,
     unsigned char *pre, unsigned char *dst_u, unsigned char *dst_v, int stride,
     char *eobs);
 
-void vp8_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
+void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
                                     unsigned char *pred, unsigned char *dest,
                                     int pitch, int stride);
 
-void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
+void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
                                    unsigned char *pred, unsigned char *dest,
                                    int pitch, int stride);
 
-void vp8_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
+void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
                                      unsigned char *pred, unsigned char *dest,
                                      int pitch, int stride);
 
 #if CONFIG_SUPERBLOCKS
-void vp8_dequant_dc_idct_add_y_block_8x8_inplace_c(short *q, short *dq,
+void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(short *q, short *dq,
                                                    unsigned char *dst,
                                                    int stride, char *eobs,
                                                    short *dc, MACROBLOCKD *xd);
-void vp8_dequant_idct_add_uv_block_8x8_inplace_c(short *q, short *dq,
+void vp9_dequant_idct_add_uv_block_8x8_inplace_c(short *q, short *dq,
                                                  unsigned char *dstu,
                                                  unsigned char *dstv,
                                                  int stride, char *eobs,
