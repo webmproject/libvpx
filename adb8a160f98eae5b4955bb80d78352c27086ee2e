@@ -16,6 +16,24 @@
       "revId": "adb8a160f98eae5b4955bb80d78352c27086ee2e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+Ac\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-30T05:06:21Z",
+      "side": 1,
+      "message": "That\u0027s Paul\u0027s preference. We need something other than vp8 so the two can be installed side-by-side, so for lack of something better we chose vp9 for now.",
+      "parentUuid": "AAAAQ3//+Ds\u003d",
+      "revId": "adb8a160f98eae5b4955bb80d78352c27086ee2e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
