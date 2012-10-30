@@ -337,7 +337,7 @@ static void setup_features(VP8_COMP *cpi) {
   xd->update_mb_segmentation_data = 0;
   vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
 
-  clearall_segfeatures(xd);
+  vp9_clearall_segfeatures(xd);
 
   xd->mode_ref_lf_delta_enabled = 0;
   xd->mode_ref_lf_delta_update = 0;
@@ -455,7 +455,7 @@ static void init_seg_features(VP8_COMP *cpi) {
     vp8_disable_segmentation((VP8_PTR)cpi);
 
     // Clear down the segment features.
-    clearall_segfeatures(xd);
+    vp9_clearall_segfeatures(xd);
   }
 
   // If this is an alt ref frame
@@ -468,7 +468,7 @@ static void init_seg_features(VP8_COMP *cpi) {
 
     // Disable segmentation and individual segment features by default
     vp8_disable_segmentation((VP8_PTR)cpi);
-    clearall_segfeatures(xd);
+    vp9_clearall_segfeatures(xd);
 
     // Scan frames from current to arf frame.
     // This function re-enables segmentation if appropriate.
@@ -481,11 +481,11 @@ static void init_seg_features(VP8_COMP *cpi) {
       xd->update_mb_segmentation_data = 1;
 
       qi_delta = compute_qdelta(cpi, cpi->avg_q, (cpi->avg_q * 0.875));
-      set_segdata(xd, 1, SEG_LVL_ALT_Q, (qi_delta - 2));
-      set_segdata(xd, 1, SEG_LVL_ALT_LF, -2);
+      vp9_set_segdata(xd, 1, SEG_LVL_ALT_Q, (qi_delta - 2));
+      vp9_set_segdata(xd, 1, SEG_LVL_ALT_LF, -2);
 
-      enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
-      enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
+      vp9_enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
+      vp9_enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
 
       // Where relevant assume segment data is delta data
       xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
@@ -494,21 +494,6 @@ static void init_seg_features(VP8_COMP *cpi) {
   }
   // All other frames if segmentation has been enabled
   else if (xd->segmentation_enabled) {
-    /*
-            int i;
-
-            // clears prior frame seg lev refs
-            for (i = 0; i < MAX_MB_SEGMENTS; i++)
-            {
-                // only do it if the force drop the background stuff is off
-                if(!segfeature_active(xd, i, SEG_LVL_MODE))
-                {
-                    disable_segfeature(xd,i,SEG_LVL_REF_FRAME);
-                    set_segdata( xd,i, SEG_LVL_REF_FRAME, 0xffffff);
-                }
-            }
-    */
-
     // First normal frame in a valid gf or alt ref group
     if (cpi->common.frames_since_golden == 0) {
       // Set up segment features for normal frames in an af group
@@ -519,25 +504,25 @@ static void init_seg_features(VP8_COMP *cpi) {
 
         qi_delta = compute_qdelta(cpi, cpi->avg_q,
                                   (cpi->avg_q * 1.125));
-        set_segdata(xd, 1, SEG_LVL_ALT_Q, (qi_delta + 2));
-        set_segdata(xd, 1, SEG_LVL_ALT_Q, 0);
-        enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
+        vp9_set_segdata(xd, 1, SEG_LVL_ALT_Q, (qi_delta + 2));
+        vp9_set_segdata(xd, 1, SEG_LVL_ALT_Q, 0);
+        vp9_enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
 
-        set_segdata(xd, 1, SEG_LVL_ALT_LF, -2);
-        enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
+        vp9_set_segdata(xd, 1, SEG_LVL_ALT_LF, -2);
+        vp9_enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
 
         // Segment coding disabled for compred testing
         if (high_q || (cpi->static_mb_pct == 100)) {
           // set_segref(xd, 1, LAST_FRAME);
-          set_segref(xd, 1, ALTREF_FRAME);
-          enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
+          vp9_set_segref(xd, 1, ALTREF_FRAME);
+          vp9_enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
 
-          set_segdata(xd, 1, SEG_LVL_MODE, ZEROMV);
-          enable_segfeature(xd, 1, SEG_LVL_MODE);
+          vp9_set_segdata(xd, 1, SEG_LVL_MODE, ZEROMV);
+          vp9_enable_segfeature(xd, 1, SEG_LVL_MODE);
 
           // EOB segment coding not fixed for 8x8 yet
-          set_segdata(xd, 1, SEG_LVL_EOB, 0);
-          enable_segfeature(xd, 1, SEG_LVL_EOB);
+          vp9_set_segdata(xd, 1, SEG_LVL_EOB, 0);
+          vp9_enable_segfeature(xd, 1, SEG_LVL_EOB);
         }
       }
       // Disable segmentation and clear down features if alt ref
@@ -551,7 +536,7 @@ static void init_seg_features(VP8_COMP *cpi) {
         xd->update_mb_segmentation_map = 0;
         xd->update_mb_segmentation_data = 0;
 
-        clearall_segfeatures(xd);
+        vp9_clearall_segfeatures(xd);
       }
     }
 
@@ -560,25 +545,25 @@ static void init_seg_features(VP8_COMP *cpi) {
     // Segment coding disabled for compred testing
     else if (cpi->is_src_frame_alt_ref) {
       // Enable mode and ref frame features for segment 0 as well
-      enable_segfeature(xd, 0, SEG_LVL_REF_FRAME);
-      enable_segfeature(xd, 0, SEG_LVL_MODE);
-      enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
-      enable_segfeature(xd, 1, SEG_LVL_MODE);
+      vp9_enable_segfeature(xd, 0, SEG_LVL_REF_FRAME);
+      vp9_enable_segfeature(xd, 0, SEG_LVL_MODE);
+      vp9_enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
+      vp9_enable_segfeature(xd, 1, SEG_LVL_MODE);
 
       // All mbs should use ALTREF_FRAME, ZEROMV exclusively
-      clear_segref(xd, 0);
-      set_segref(xd, 0, ALTREF_FRAME);
-      clear_segref(xd, 1);
-      set_segref(xd, 1, ALTREF_FRAME);
-      set_segdata(xd, 0, SEG_LVL_MODE, ZEROMV);
-      set_segdata(xd, 1, SEG_LVL_MODE, ZEROMV);
+      vp9_clear_segref(xd, 0);
+      vp9_set_segref(xd, 0, ALTREF_FRAME);
+      vp9_clear_segref(xd, 1);
+      vp9_set_segref(xd, 1, ALTREF_FRAME);
+      vp9_set_segdata(xd, 0, SEG_LVL_MODE, ZEROMV);
+      vp9_set_segdata(xd, 1, SEG_LVL_MODE, ZEROMV);
 
       // Skip all MBs if high Q
       if (high_q) {
-        enable_segfeature(xd, 0, SEG_LVL_EOB);
-        set_segdata(xd, 0, SEG_LVL_EOB, 0);
-        enable_segfeature(xd, 1, SEG_LVL_EOB);
-        set_segdata(xd, 1, SEG_LVL_EOB, 0);
+        vp9_enable_segfeature(xd, 0, SEG_LVL_EOB);
+        vp9_set_segdata(xd, 0, SEG_LVL_EOB, 0);
+        vp9_enable_segfeature(xd, 1, SEG_LVL_EOB);
+        vp9_set_segdata(xd, 1, SEG_LVL_EOB, 0);
       }
       // Enable data udpate
       xd->update_mb_segmentation_data = 1;
@@ -4405,14 +4390,14 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
   // Enable the loop and quant changes in the feature mask
   for (i = 0; i < 4; i++) {
     if (delta_q[i])
-      enable_segfeature(xd, i, SEG_LVL_ALT_Q);
+      vp9_enable_segfeature(xd, i, SEG_LVL_ALT_Q);
     else
-      disable_segfeature(xd, i, SEG_LVL_ALT_Q);
+      vp9_disable_segfeature(xd, i, SEG_LVL_ALT_Q);
 
     if (delta_lf[i])
-      enable_segfeature(xd, i, SEG_LVL_ALT_LF);
+      vp9_enable_segfeature(xd, i, SEG_LVL_ALT_LF);
     else
-      disable_segfeature(xd, i, SEG_LVL_ALT_LF);
+      vp9_disable_segfeature(xd, i, SEG_LVL_ALT_LF);
   }
 
   // Initialise the feature data structure

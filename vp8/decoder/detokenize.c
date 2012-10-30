@@ -423,14 +423,14 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd,
   PLANE_TYPE type;
   int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int seg_active = segfeature_active(xd, segment_id, SEG_LVL_EOB);
+  const int seg_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB);
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
   TX_TYPE tx_type = get_tx_type(xd, &xd->block[0]);
 
   type = PLANE_TYPE_Y_WITH_DC;
 
   if (seg_active)
-      seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
+      seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
   else
       seg_eob = 256;
 
@@ -453,7 +453,7 @@ int vp8_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd,
   type = PLANE_TYPE_UV;
   tx_type = DCT_DCT;
   if (seg_active)
-    seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
+    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
   else
     seg_eob = 64;
   for (i = 16; i < 24; i += 4) {
@@ -486,7 +486,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
   PLANE_TYPE type;
   int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int seg_active = segfeature_active(xd, segment_id, SEG_LVL_EOB);
+  const int seg_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB);
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
   TX_TYPE tx_type = DCT_DCT;
 
@@ -501,7 +501,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
     type = PLANE_TYPE_Y2;
 
     if (seg_active)
-      seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
+      seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
     else
       seg_eob = 4;
     c = decode_coefs(pbi, xd, bc, a, l, type,
@@ -517,7 +517,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
     type = PLANE_TYPE_Y_WITH_DC;
 
   if (seg_active)
-    seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
+    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
   else
     seg_eob = 64;
 
@@ -583,8 +583,8 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd,
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
 
   int segment_id = xd->mode_info_context->mbmi.segment_id;
-  if (segfeature_active(xd, segment_id, SEG_LVL_EOB))
-    seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB))
+    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
 
   if (xd->mode_info_context->mbmi.mode != B_PRED &&
       xd->mode_info_context->mbmi.mode != I8X8_PRED &&

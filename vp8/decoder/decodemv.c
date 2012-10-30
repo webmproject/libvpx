@@ -110,18 +110,18 @@ static void kfread_modes(VP8D_COMP *pbi,
 
   m->mbmi.mb_skip_coeff = 0;
   if (pbi->common.mb_no_coeff_skip &&
-      (!segfeature_active(&pbi->mb,
-                          m->mbmi.segment_id, SEG_LVL_EOB) ||
-       (get_segdata(&pbi->mb,
-                    m->mbmi.segment_id, SEG_LVL_EOB) != 0))) {
+      (!vp9_segfeature_active(&pbi->mb,
+                              m->mbmi.segment_id, SEG_LVL_EOB) ||
+       (vp9_get_segdata(&pbi->mb,
+                        m->mbmi.segment_id, SEG_LVL_EOB) != 0))) {
     MACROBLOCKD *const xd  = &pbi->mb;
     m->mbmi.mb_skip_coeff =
       vp8_read(bc, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
   } else {
-    if (segfeature_active(&pbi->mb,
-                          m->mbmi.segment_id, SEG_LVL_EOB) &&
-        (get_segdata(&pbi->mb,
-                     m->mbmi.segment_id, SEG_LVL_EOB) == 0)) {
+    if (vp9_segfeature_active(&pbi->mb,
+                              m->mbmi.segment_id, SEG_LVL_EOB) &&
+        (vp9_get_segdata(&pbi->mb,
+                         m->mbmi.segment_id, SEG_LVL_EOB) == 0)) {
       m->mbmi.mb_skip_coeff = 1;
     } else
       m->mbmi.mb_skip_coeff = 0;
@@ -363,17 +363,17 @@ static MV_REFERENCE_FRAME read_ref_frame(VP8D_COMP *pbi,
   VP8_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
-  seg_ref_active = segfeature_active(xd,
-                                     segment_id,
-                                     SEG_LVL_REF_FRAME);
+  seg_ref_active = vp9_segfeature_active(xd,
+                                         segment_id,
+                                         SEG_LVL_REF_FRAME);
 
   // If segment coding enabled does the segment allow for more than one
   // possible reference frame
   if (seg_ref_active) {
-    seg_ref_count = check_segref(xd, segment_id, INTRA_FRAME) +
-                    check_segref(xd, segment_id, LAST_FRAME) +
-                    check_segref(xd, segment_id, GOLDEN_FRAME) +
-                    check_segref(xd, segment_id, ALTREF_FRAME);
+    seg_ref_count = vp9_check_segref(xd, segment_id, INTRA_FRAME) +
+                    vp9_check_segref(xd, segment_id, LAST_FRAME) +
+                    vp9_check_segref(xd, segment_id, GOLDEN_FRAME) +
+                    vp9_check_segref(xd, segment_id, ALTREF_FRAME);
   }
 
   // Segment reference frame features not available or allows for
@@ -410,12 +410,12 @@ static MV_REFERENCE_FRAME read_ref_frame(VP8D_COMP *pbi,
       // setting the branch probability to 0.
       if (seg_ref_active) {
         mod_refprobs[INTRA_FRAME] *=
-          check_segref(xd, segment_id, INTRA_FRAME);
+          vp9_check_segref(xd, segment_id, INTRA_FRAME);
         mod_refprobs[LAST_FRAME] *=
-          check_segref(xd, segment_id, LAST_FRAME);
+          vp9_check_segref(xd, segment_id, LAST_FRAME);
         mod_refprobs[GOLDEN_FRAME] *=
-          (check_segref(xd, segment_id, GOLDEN_FRAME) *
-           check_segref(xd, segment_id, ALTREF_FRAME));
+          (vp9_check_segref(xd, segment_id, GOLDEN_FRAME) *
+           vp9_check_segref(xd, segment_id, ALTREF_FRAME));
       }
 
       // Default to INTRA_FRAME (value 0)
@@ -441,7 +441,7 @@ static MV_REFERENCE_FRAME read_ref_frame(VP8D_COMP *pbi,
           else {
             if (seg_ref_active) {
               if ((pred_ref == GOLDEN_FRAME) ||
-                  !check_segref(xd, segment_id, GOLDEN_FRAME)) {
+                  !vp9_check_segref(xd, segment_id, GOLDEN_FRAME)) {
                 ref_frame = ALTREF_FRAME;
               } else
                 ref_frame = GOLDEN_FRAME;
@@ -689,16 +689,16 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   read_mb_segment_id(pbi, mb_row, mb_col, bc);
 
   if (pbi->common.mb_no_coeff_skip &&
-      (!segfeature_active(xd,
-                          mbmi->segment_id, SEG_LVL_EOB) ||
-       (get_segdata(xd, mbmi->segment_id, SEG_LVL_EOB) != 0))) {
+      (!vp9_segfeature_active(xd,
+                              mbmi->segment_id, SEG_LVL_EOB) ||
+       (vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_EOB) != 0))) {
     // Read the macroblock coeff skip flag if this feature is in use,
     // else default to 0
     mbmi->mb_skip_coeff = vp8_read(bc, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
   } else {
-    if (segfeature_active(xd,
-                          mbmi->segment_id, SEG_LVL_EOB) &&
-        (get_segdata(xd, mbmi->segment_id, SEG_LVL_EOB) == 0)) {
+    if (vp9_segfeature_active(xd,
+                              mbmi->segment_id, SEG_LVL_EOB) &&
+        (vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_EOB) == 0)) {
       mbmi->mb_skip_coeff = 1;
     } else
       mbmi->mb_skip_coeff = 0;
@@ -762,9 +762,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     vp8_mv_ref_probs(&pbi->common, mv_ref_p, rct);
 
     // Is the segment level mode feature enabled for this segment
-    if (segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
+    if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
       mbmi->mode =
-        get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
+        vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
     } else {
 #if CONFIG_SUPERBLOCKS
       if (mbmi->encoded_as_sb) {
@@ -1077,9 +1077,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     /* required for left and above block mv */
     mbmi->mv[0].as_int = 0;
 
-    if (segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE))
+    if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE))
       mbmi->mode = (MB_PREDICTION_MODE)
-                   get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
+                   vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
     else {
       // FIXME write using SB mode tree
       mbmi->mode = (MB_PREDICTION_MODE)

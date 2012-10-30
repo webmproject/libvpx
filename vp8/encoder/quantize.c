@@ -538,15 +538,15 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
   // Select the baseline MB Q index allowing for any segment level change.
-  if (segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
     // Abs Value
     if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
-      QIndex = get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
+      QIndex = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
 
     // Delta Value
     else {
       QIndex = cpi->common.base_qindex +
-               get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
+               vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
 
       // Clamp to valid range
       QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;
@@ -574,13 +574,13 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
     x->block[i].zbin_extra = (short)zbin_extra;
 
     // Segment max eob offset feature.
-    if (segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
+    if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
       x->block[i].eob_max_offset =
-        get_segdata(xd, segment_id, SEG_LVL_EOB);
+        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
       x->block[i].eob_max_offset_8x8 =
-        get_segdata(xd, segment_id, SEG_LVL_EOB);
+        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
       x->block[i].eob_max_offset_16x16 =
-        get_segdata(xd, segment_id, SEG_LVL_EOB);
+        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
     } else {
       x->block[i].eob_max_offset = 16;
       x->block[i].eob_max_offset_8x8 = 64;
@@ -609,11 +609,11 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
     x->block[i].zbin_extra = (short)zbin_extra;
 
     // Segment max eob offset feature.
-    if (segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
+    if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
       x->block[i].eob_max_offset =
-        get_segdata(xd, segment_id, SEG_LVL_EOB);
+        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
       x->block[i].eob_max_offset_8x8 =
-        get_segdata(xd, segment_id, SEG_LVL_EOB);
+        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
     } else {
       x->block[i].eob_max_offset = 16;
       x->block[i].eob_max_offset_8x8 = 64;
@@ -640,11 +640,11 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
 
   // TBD perhaps not use for Y2
   // Segment max eob offset feature.
-  if (segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
     x->block[24].eob_max_offset =
-      get_segdata(xd, segment_id, SEG_LVL_EOB);
+      vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
     x->block[24].eob_max_offset_8x8 =
-      get_segdata(xd, segment_id, SEG_LVL_EOB);
+      vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
   } else {
     x->block[24].eob_max_offset = 16;
     x->block[24].eob_max_offset_8x8 = 4;

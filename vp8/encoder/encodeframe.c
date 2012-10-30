@@ -419,8 +419,8 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
 
   {
     int segment_id = mbmi->segment_id;
-    if (!segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
-        get_segdata(xd, segment_id, SEG_LVL_EOB)) {
+    if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
+        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB)) {
       for (i = 0; i < NB_TXFM_MODES; i++) {
         cpi->rd_tx_select_diff[i] += ctx->txfm_rd_diff[i];
       }
@@ -639,12 +639,12 @@ static void pick_mb_modes(VP8_COMP *cpi,
       int seg_id, r, d;
 
       if (xd->segmentation_enabled && cpi->seg0_cnt > 0 &&
-          !segfeature_active(xd, 0, SEG_LVL_REF_FRAME) &&
-          segfeature_active(xd, 1, SEG_LVL_REF_FRAME) &&
-          check_segref(xd, 1, INTRA_FRAME)  +
-          check_segref(xd, 1, LAST_FRAME)   +
-          check_segref(xd, 1, GOLDEN_FRAME) +
-          check_segref(xd, 1, ALTREF_FRAME) == 1) {
+          !vp9_segfeature_active(xd, 0, SEG_LVL_REF_FRAME) &&
+          vp9_segfeature_active(xd, 1, SEG_LVL_REF_FRAME) &&
+          vp9_check_segref(xd, 1, INTRA_FRAME)  +
+          vp9_check_segref(xd, 1, LAST_FRAME)   +
+          vp9_check_segref(xd, 1, GOLDEN_FRAME) +
+          vp9_check_segref(xd, 1, ALTREF_FRAME) == 1) {
         cpi->seg0_progress = (cpi->seg0_idx << 16) / cpi->seg0_cnt;
       } else {
         cpi->seg0_progress = (((mb_col & ~1) * 2 + (mb_row & ~1) * cm->mb_cols + i) << 16) / cm->MBs;
@@ -664,11 +664,11 @@ static void pick_mb_modes(VP8_COMP *cpi,
         cpi->seg0_idx++;
       }
       if (!xd->segmentation_enabled ||
-          !segfeature_active(xd, seg_id, SEG_LVL_REF_FRAME) ||
-          check_segref(xd, seg_id, INTRA_FRAME)  +
-          check_segref(xd, seg_id, LAST_FRAME)   +
-          check_segref(xd, seg_id, GOLDEN_FRAME) +
-          check_segref(xd, seg_id, ALTREF_FRAME) > 1) {
+          !vp9_segfeature_active(xd, seg_id, SEG_LVL_REF_FRAME) ||
+          vp9_check_segref(xd, seg_id, INTRA_FRAME)  +
+          vp9_check_segref(xd, seg_id, LAST_FRAME)   +
+          vp9_check_segref(xd, seg_id, GOLDEN_FRAME) +
+          vp9_check_segref(xd, seg_id, ALTREF_FRAME) > 1) {
         // Get the prediction context and status
         int pred_flag = vp9_get_pred_flag(xd, PRED_REF);
         int pred_context = vp9_get_pred_context(cm, xd, PRED_REF);
@@ -818,21 +818,16 @@ static void pick_sb_modes (VP8_COMP *cpi,
     /* Save the coding context */
     vpx_memcpy(&x->sb_context[0].mic, xd->mode_info_context,
                sizeof(MODE_INFO));
-  }
-  else
-  {
+  } else {
     if (xd->segmentation_enabled && cpi->seg0_cnt > 0 &&
-        !segfeature_active( xd, 0, SEG_LVL_REF_FRAME ) &&
-        segfeature_active( xd, 1, SEG_LVL_REF_FRAME ) &&
-        check_segref(xd, 1, INTRA_FRAME)  +
-        check_segref(xd, 1, LAST_FRAME)   +
-        check_segref(xd, 1, GOLDEN_FRAME) +
-        check_segref(xd, 1, ALTREF_FRAME) == 1)
-    {
+        !vp9_segfeature_active(xd, 0, SEG_LVL_REF_FRAME) &&
+        vp9_segfeature_active(xd, 1, SEG_LVL_REF_FRAME) &&
+        vp9_check_segref(xd, 1, INTRA_FRAME)  +
+        vp9_check_segref(xd, 1, LAST_FRAME)   +
+        vp9_check_segref(xd, 1, GOLDEN_FRAME) +
+        vp9_check_segref(xd, 1, ALTREF_FRAME) == 1) {
       cpi->seg0_progress = (cpi->seg0_idx << 16) / cpi->seg0_cnt;
-    }
-    else
-    {
+    } else {
       cpi->seg0_progress =
         (((mb_col & ~1) * 2 + (mb_row & ~1) * cm->mb_cols) << 16) / cm->MBs;
     }
@@ -1044,12 +1039,13 @@ static void encode_sb(VP8_COMP *cpi,
       // for the reference frame coding for each segment but this is a
       // possible future action.
       segment_id = &mbmi->segment_id;
-      seg_ref_active = segfeature_active(xd, *segment_id, SEG_LVL_REF_FRAME);
+      seg_ref_active = vp9_segfeature_active(xd, *segment_id,
+                                             SEG_LVL_REF_FRAME);
       if (!seg_ref_active ||
-          ((check_segref(xd, *segment_id, INTRA_FRAME) +
-            check_segref(xd, *segment_id, LAST_FRAME) +
-            check_segref(xd, *segment_id, GOLDEN_FRAME) +
-            check_segref(xd, *segment_id, ALTREF_FRAME)) > 1)) {
+          ((vp9_check_segref(xd, *segment_id, INTRA_FRAME) +
+            vp9_check_segref(xd, *segment_id, LAST_FRAME) +
+            vp9_check_segref(xd, *segment_id, GOLDEN_FRAME) +
+            vp9_check_segref(xd, *segment_id, ALTREF_FRAME)) > 1)) {
         {
           cpi->count_mb_ref_frame_usage[mbmi->ref_frame]++;
         }
@@ -1427,15 +1423,15 @@ static int check_dual_ref_flags(VP8_COMP *cpi) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   int ref_flags = cpi->ref_frame_flags;
 
-  if (segfeature_active(xd, 1, SEG_LVL_REF_FRAME)) {
+  if (vp9_segfeature_active(xd, 1, SEG_LVL_REF_FRAME)) {
     if ((ref_flags & (VP8_LAST_FLAG | VP8_GOLD_FLAG)) == (VP8_LAST_FLAG | VP8_GOLD_FLAG) &&
-        check_segref(xd, 1, LAST_FRAME))
+        vp9_check_segref(xd, 1, LAST_FRAME))
       return 1;
     if ((ref_flags & (VP8_GOLD_FLAG | VP8_ALT_FLAG)) == (VP8_GOLD_FLAG | VP8_ALT_FLAG) &&
-        check_segref(xd, 1, GOLDEN_FRAME))
+        vp9_check_segref(xd, 1, GOLDEN_FRAME))
       return 1;
     if ((ref_flags & (VP8_ALT_FLAG  | VP8_LAST_FLAG)) == (VP8_ALT_FLAG  | VP8_LAST_FLAG) &&
-        check_segref(xd, 1, ALTREF_FRAME))
+        vp9_check_segref(xd, 1, ALTREF_FRAME))
       return 1;
     return 0;
   } else {
@@ -1474,8 +1470,8 @@ static void reset_skip_txfm_size(VP8_COMP *cpi, TX_SIZE txfm_max) {
           mbmi->txfm_size > txfm_max) {
         segment_id = mbmi->segment_id;
         xd->mode_info_context = mi;
-        assert((segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-                get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
+        assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+                vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
                (cm->mb_no_coeff_skip && mbmi->mb_skip_coeff));
         mbmi->txfm_size = txfm_max;
       }
@@ -1961,8 +1957,8 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
 
     if (cpi->common.txfm_mode == TX_MODE_SELECT &&
         !((cpi->common.mb_no_coeff_skip && mbmi->mb_skip_coeff) ||
-          (segfeature_active(&x->e_mbd, segment_id, SEG_LVL_EOB) &&
-           get_segdata(&x->e_mbd, segment_id, SEG_LVL_EOB) == 0))) {
+          (vp9_segfeature_active(&x->e_mbd, segment_id, SEG_LVL_EOB) &&
+           vp9_get_segdata(&x->e_mbd, segment_id, SEG_LVL_EOB) == 0))) {
       if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED) {
         cpi->txfm_count[mbmi->txfm_size]++;
       } else if (mbmi->mode == I8X8_PRED) {
@@ -2030,7 +2026,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
     vp8_update_zbin_extra(cpi, x);
   }
 
-  seg_ref_active = segfeature_active(xd, *segment_id, SEG_LVL_REF_FRAME);
+  seg_ref_active = vp9_segfeature_active(xd, *segment_id, SEG_LVL_REF_FRAME);
 
   // SET VARIOUS PREDICTION FLAGS
 
@@ -2149,8 +2145,8 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
     int segment_id = mbmi->segment_id;
     if (cpi->common.txfm_mode == TX_MODE_SELECT &&
         !((cpi->common.mb_no_coeff_skip && mbmi->mb_skip_coeff) ||
-          (segfeature_active(&x->e_mbd, segment_id, SEG_LVL_EOB) &&
-           get_segdata(&x->e_mbd, segment_id, SEG_LVL_EOB) == 0))) {
+          (vp9_segfeature_active(&x->e_mbd, segment_id, SEG_LVL_EOB) &&
+           vp9_get_segdata(&x->e_mbd, segment_id, SEG_LVL_EOB) == 0))) {
       if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED &&
           mbmi->mode != SPLITMV) {
         cpi->txfm_count[mbmi->txfm_size]++;
@@ -2225,7 +2221,7 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
     vp8_update_zbin_extra(cpi, x);
   }
 
-  seg_ref_active = segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
+  seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
 
   // SET VARIOUS PREDICTION FLAGS
 

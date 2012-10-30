@@ -437,8 +437,8 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
   // pick the loop filter for each segment after segment 0
   for (i = 1; i < MAX_MB_SEGMENTS; i++) {
     // if the segment loop filter is active
-    if (segfeature_active(xd, i, SEG_LVL_ALT_LF)) {
-      set_segdata(xd, i, SEG_LVL_ALT_LF, 0);
+    if (vp9_segfeature_active(xd, i, SEG_LVL_ALT_LF)) {
+      vp9_set_segdata(xd, i, SEG_LVL_ALT_LF, 0);
       vp8cx_pick_filter_level_sg(sd, cpi, i);
       filt_lev[i] = oci->filter_level;
     }
@@ -450,17 +450,17 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
   // TODO : Fix the code if segment 0 is the one with seg_lvl_alt_lf on
   // right now assumes segment 0 gets base loop filter and the rest are
   // deltas off of segment 0.
-  set_segdata(xd, 0, SEG_LVL_ALT_LF, 0);
+  vp9_set_segdata(xd, 0, SEG_LVL_ALT_LF, 0);
   vp8cx_pick_filter_level_sg(sd, cpi, 0);
   filt_lev[0] = oci->filter_level;
 
   // convert the best filter level for the mbs of the segment to
   // a delta from 0
   for (i = 1; i < MAX_MB_SEGMENTS; i++)
-    if (segfeature_active(xd, i, SEG_LVL_ALT_LF)) {
-      set_segdata(xd, i, SEG_LVL_ALT_LF, filt_lev[i] - filt_lev[0]);
+    if (vp9_segfeature_active(xd, i, SEG_LVL_ALT_LF)) {
+      vp9_set_segdata(xd, i, SEG_LVL_ALT_LF, filt_lev[i] - filt_lev[0]);
       xd->update_mb_segmentation_data !=
-      segfeature_changed(xd, i, SEG_LVL_ALT_LF);
+      vp9_segfeature_changed(xd, i, SEG_LVL_ALT_LF);
     }
 }
 #else

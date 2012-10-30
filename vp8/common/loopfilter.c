@@ -122,12 +122,12 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
 
 
     // Set the baseline filter values for each segment
-    if (segfeature_active(xd, seg, SEG_LVL_ALT_LF)) {
+    if (vp9_segfeature_active(xd, seg, SEG_LVL_ALT_LF)) {
       /* Abs value */
       if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA) {
-        lvl_seg = get_segdata(xd, seg, SEG_LVL_ALT_LF);
+        lvl_seg = vp9_get_segdata(xd, seg, SEG_LVL_ALT_LF);
       } else { /* Delta Value */
-        lvl_seg += get_segdata(xd, seg, SEG_LVL_ALT_LF);;
+        lvl_seg += vp9_get_segdata(xd, seg, SEG_LVL_ALT_LF);
         lvl_seg = (lvl_seg > 0) ? ((lvl_seg > 63) ? 63 : lvl_seg) : 0;
       }
     }
@@ -476,7 +476,7 @@ void vp8_loop_filter_frame_segment(VP8_COMMON *cm, MACROBLOCKD *xd,
       // TODO: Make this work for when segment 0 has the alt lv enabled
       if (filter_level
           && (seg == segment
-              || (!segfeature_active(xd, seg, SEG_LVL_ALT_LF)
+              || (!vp9_segfeature_active(xd, seg, SEG_LVL_ALT_LF)
                   && segment == 0))) {
         if (cm->filter_type == NORMAL_LOOPFILTER) {
           const int hev_index =
@@ -576,12 +576,12 @@ void vp8_loop_filter_partial_frame
     for (i = 0; i < MAX_MB_SEGMENTS; i++) {
       /* Abs value */
       if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA) {
-        lvl_seg[i] = get_segdata(xd, i, SEG_LVL_ALT_LF);
+        lvl_seg[i] = vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
       }
       /* Delta Value */
       else {
         lvl_seg[i] = default_filt_lvl +
-                     get_segdata(xd, i, SEG_LVL_ALT_LF);
+                     vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
         lvl_seg[i] = (lvl_seg[i] > 0) ?
                      ((lvl_seg[i] > 63) ? 63 : lvl_seg[i]) : 0;
       }
