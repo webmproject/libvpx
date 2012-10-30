@@ -221,6 +221,7 @@ EXPERIMENT_LIST="
     pred_filter
     lossless
     newbestrefmv
+    subpelrefmv
     new_mvref
     implicit_segmentation
 "

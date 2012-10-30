@@ -202,9 +202,9 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   unsigned char *left_src;
   unsigned char *above_ref;
   unsigned char *left_ref;
-  int sad;
+  int score;
   int sse;
-  int sad_scores[MAX_MV_REFS] = {0};
+  int ref_scores[MAX_MV_REFS] = {0};
   int_mv sorted_mvs[MAX_MV_REFS];
   int zero_seen = FALSE;
 
@@ -212,10 +212,17 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   best_mv->as_int = nearest->as_int = near->as_int = 0;
   vpx_memset(sorted_mvs, 0, sizeof(sorted_mvs));
 
+#if CONFIG_SUBPELREFMV
   above_src = xd->dst.y_buffer - xd->dst.y_stride * 2;
   left_src  = xd->dst.y_buffer - 2;
   above_ref = ref_y_buffer - ref_y_stride * 2;
   left_ref  = ref_y_buffer - 2;
+#else
+  above_src = xd->dst.y_buffer - xd->dst.y_stride * 3;
+  left_src  = xd->dst.y_buffer - 3;
+  above_ref = ref_y_buffer - ref_y_stride * 3;
+  left_ref  = ref_y_buffer - 3;
+#endif
 
   //for(i = 0; i < MAX_MV_REFS; ++i) {
   // Limit search to the predicted best 4
@@ -234,37 +241,52 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
     zero_seen = zero_seen || !this_mv.as_int;
 
     vp8_clamp_mv(&this_mv,
-                 xd->mb_to_left_edge - LEFT_TOP_MARGIN + 16,
+                 xd->mb_to_left_edge - LEFT_TOP_MARGIN + 24,
                  xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
-                 xd->mb_to_top_edge - LEFT_TOP_MARGIN + 16,
+                 xd->mb_to_top_edge - LEFT_TOP_MARGIN + 24,
                  xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
-
+#if CONFIG_SUBPELREFMV
     row_offset = this_mv.as_mv.row >> 3;
     col_offset = this_mv.as_mv.col >> 3;
     offset = ref_y_stride * row_offset + col_offset;
-
-    sad = 0;
+    score = 0;
     if (xd->up_available) {
       vp8_sub_pixel_variance16x2_c(above_ref + offset, ref_y_stride,
                                    SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
                                    above_src, xd->dst.y_stride, &sse);
-      sad += sse;
+      score += sse;
     }
     if (xd->left_available) {
       vp8_sub_pixel_variance2x16_c(left_ref + offset, ref_y_stride,
                                    SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
                                    left_src, xd->dst.y_stride, &sse);
-      sad += sse;
+      score += sse;
     }
+#else
+    row_offset = (this_mv.as_mv.row > 0) ?
+      ((this_mv.as_mv.row + 3) >> 3):((this_mv.as_mv.row + 4) >> 3);
+    col_offset = (this_mv.as_mv.col > 0) ?
+      ((this_mv.as_mv.col + 3) >> 3):((this_mv.as_mv.col + 4) >> 3);
+    offset = ref_y_stride * row_offset + col_offset;
+    score = 0;
+    if (xd->up_available) {
+      score += vp8_sad16x3(above_src, xd->dst.y_stride,
+                           above_ref + offset, ref_y_stride, INT_MAX);
+    }
+    if (xd->left_available) {
+      score += vp8_sad3x16(left_src, xd->dst.y_stride,
+                           left_ref + offset, ref_y_stride, INT_MAX);
+    }
+#endif
     // Add the entry to our list and then resort the list on score.
-    sad_scores[i] = sad;
+    ref_scores[i] = score;
     sorted_mvs[i].as_int = this_mv.as_int;
     j = i;
     while (j > 0) {
-      if (sad_scores[j] < sad_scores[j-1]) {
-        sad_scores[j] = sad_scores[j-1];
+      if (ref_scores[j] < ref_scores[j-1]) {
+        ref_scores[j] = ref_scores[j-1];
         sorted_mvs[j].as_int = sorted_mvs[j-1].as_int;
-        sad_scores[j-1] = sad;
+        ref_scores[j-1] = score;
         sorted_mvs[j-1].as_int = this_mv.as_int;
         j--;
       } else
