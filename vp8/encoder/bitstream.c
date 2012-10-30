@@ -1929,7 +1929,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     // If it is, then indicate the method that will be used.
     if (xd->update_mb_segmentation_map) {
       // Select the coding strategy (temporal or spatial)
-      choose_segmap_coding_method(cpi);
+      vp9_choose_segmap_coding_method(cpi);
       // Send the tree probabilities used to decode unpredicted
       // macro-block segments
       for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {

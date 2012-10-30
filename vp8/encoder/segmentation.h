@@ -38,6 +38,6 @@ extern void vp8_set_segmentation_map(VP8_PTR ptr, unsigned char *segmentation_ma
 //
 extern void vp8_set_segment_data(VP8_PTR ptr, signed char *feature_data, unsigned char abs_delta);
 
-extern void choose_segmap_coding_method(VP8_COMP *cpi);
+extern void vp9_choose_segmap_coding_method(VP8_COMP *cpi);
 
 #endif /* __INC_SEGMENTATION_H__ */
