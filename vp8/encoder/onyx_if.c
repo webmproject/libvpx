@@ -182,8 +182,8 @@ static int inter_minq[QINDEX_RANGE];
 // formulaic approach to facilitate easier adjustment of the Q tables.
 // The formulae were derived from computing a 3rd order polynomial best
 // fit to the original data (after plotting real maxq vs minq (not q index))
-int calculate_minq_index(double maxq,
-                         double x3, double x2, double x, double c) {
+static int calculate_minq_index(double maxq,
+                                double x3, double x2, double x, double c) {
   int i;
   double minqtarget;
   double thisq;
@@ -204,7 +204,7 @@ int calculate_minq_index(double maxq,
   return QINDEX_RANGE - 1;
 }
 
-void init_minq_luts() {
+static void init_minq_luts(void) {
   int i;
   double maxq;
 
@@ -241,7 +241,7 @@ void init_minq_luts() {
   }
 }
 
-void init_base_skip_probs() {
+static void init_base_skip_probs(void) {
   int i;
   double q;
   int skip_prob, t;
@@ -275,7 +275,8 @@ void init_base_skip_probs() {
     vp8cx_base_skip_false_prob[i][0] = skip_prob;
   }
 }
-void update_base_skip_probs(VP8_COMP *cpi) {
+
+static void update_base_skip_probs(VP8_COMP *cpi) {
   VP8_COMMON *cm = &cpi->common;
 
   if (cm->frame_type != KEY_FRAME) {
@@ -2586,7 +2587,7 @@ static void update_golden_frame_stats(VP8_COMP *cpi) {
   }
 }
 
-int find_fp_qindex() {
+static int find_fp_qindex() {
   int i;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
@@ -2610,27 +2611,6 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
   vp8_set_quantizer(cpi, find_fp_qindex());
   vp8_first_pass(cpi);
 }
-
-#if 1
-void write_yuv_frame_to_file(YV12_BUFFER_CONFIG *frame) {
-
-  // write the frame
-  int i;
-  FILE *fp = fopen("encode_recon.yuv", "a");
-
-  for (i = 0; i < frame->y_height; i++)
-    fwrite(frame->y_buffer + i * frame->y_stride,
-           frame->y_width, 1, fp);
-  for (i = 0; i < frame->uv_height; i++)
-    fwrite(frame->u_buffer + i * frame->uv_stride,
-           frame->uv_width, 1, fp);
-  for (i = 0; i < frame->uv_height; i++)
-    fwrite(frame->v_buffer + i * frame->uv_stride,
-           frame->uv_width, 1, fp);
-
-  fclose(fp);
-}
-#endif
 
 #define WRITE_RECON_BUFFER 0
 #if WRITE_RECON_BUFFER
@@ -2737,7 +2717,7 @@ static BOOL recode_loop_test(VP8_COMP *cpi,
   return force_recode;
 }
 
-void update_reference_frames(VP8_COMMON *cm) {
+static void update_reference_frames(VP8_COMMON *cm) {
   YV12_BUFFER_CONFIG *yv12_fb = cm->yv12_fb;
 
   // At this point the new frame has been encoded.
@@ -2807,7 +2787,7 @@ void update_reference_frames(VP8_COMMON *cm) {
   }
 }
 
-void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
+static void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
   if (cm->no_lpf) {
     cm->filter_level = 0;
   }
