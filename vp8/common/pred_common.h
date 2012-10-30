@@ -46,6 +46,7 @@ extern void vp9_set_pred_flag(MACROBLOCKD *const xd,
 
 
 extern unsigned char vp9_get_pred_mb_segid(const VP8_COMMON *const cm,
+                                           const MACROBLOCKD *const xd,
                                            int MbIndex);
 
 extern MV_REFERENCE_FRAME vp9_get_pred_ref(const VP8_COMMON *const cm,

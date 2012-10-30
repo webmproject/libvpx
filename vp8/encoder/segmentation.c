@@ -164,6 +164,7 @@ void choose_segmap_coding_method(VP8_COMP *cpi) {
   VP8_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
+  const int mis = cm->mode_info_stride;
   int i;
   int tot_count;
   int no_pred_cost;
@@ -212,8 +213,27 @@ void choose_segmap_coding_method(VP8_COMP *cpi) {
           goto end;
         }
 
+        xd->mb_to_top_edge = -((mb_row * 16) << 3);
+        xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
+        xd->mb_to_left_edge = -((mb_col * 16) << 3);
+        xd->mb_to_right_edge = ((cm->mb_cols - 1 - mb_row) * 16) << 3;
+
         segmap_index = (mb_row + y_idx) * cm->mb_cols + mb_col + x_idx;
         segment_id = xd->mode_info_context->mbmi.segment_id;
+#if CONFIG_SUPERBLOCKS
+        if (xd->mode_info_context->mbmi.encoded_as_sb) {
+          if (mb_col + 1 < cm->mb_cols)
+            segment_id = segment_id &&
+                         xd->mode_info_context[1].mbmi.segment_id;
+          if (mb_row + 1 < cm->mb_rows) {
+            segment_id = segment_id &&
+                         xd->mode_info_context[mis].mbmi.segment_id;
+            if (mb_col + 1 < cm->mb_cols)
+              segment_id = segment_id &&
+                           xd->mode_info_context[mis + 1].mbmi.segment_id;
+          }
+        }
+#endif
 
         // Count the number of hits on each segment with no prediction
         no_pred_segcounts[segment_id]++;
@@ -222,7 +242,7 @@ void choose_segmap_coding_method(VP8_COMP *cpi) {
         if (cm->frame_type != KEY_FRAME) {
           // Test to see if the segment id matches the predicted value.
           int seg_predicted =
-            (segment_id == vp9_get_pred_mb_segid(cm, segmap_index));
+            (segment_id == vp9_get_pred_mb_segid(cm, xd, segmap_index));
 
           // Get the segment id prediction context
           pred_context =

@@ -202,7 +202,7 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd) {
 }
 
 static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
-                              unsigned int mb_col,
+                              int mb_row, unsigned int mb_col,
                               BOOL_DECODER* const bc) {
   int eobtotal = 0;
   MB_PREDICTION_MODE mode;
@@ -218,24 +218,23 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   if (xd->segmentation_enabled)
     mb_init_dequantizer(pbi, xd);
 
-#if CONFIG_SUPERBLOCKS
-  if (xd->mode_info_context->mbmi.encoded_as_sb) {
-    xd->mode_info_context->mbmi.txfm_size = TX_8X8;
-  }
-#endif
-
   tx_size = xd->mode_info_context->mbmi.txfm_size;
   mode = xd->mode_info_context->mbmi.mode;
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
     vp8_reset_mb_tokens_context(xd);
 #if CONFIG_SUPERBLOCKS
-    if (xd->mode_info_context->mbmi.encoded_as_sb) {
-      xd->above_context++;
-      xd->left_context++;
+    if (xd->mode_info_context->mbmi.encoded_as_sb &&
+        (mb_col < pc->mb_cols - 1 || mb_row < pc->mb_rows - 1)) {
+      if (mb_col < pc->mb_cols - 1)
+        xd->above_context++;
+      if (mb_row < pc->mb_rows - 1)
+        xd->left_context++;
       vp8_reset_mb_tokens_context(xd);
-      xd->above_context--;
-      xd->left_context--;
+      if (mb_col < pc->mb_cols - 1)
+        xd->above_context--;
+      if (mb_row < pc->mb_rows - 1)
+        xd->left_context--;
     }
 #endif
   } else if (!vp8dx_bool_error(bc)) {
@@ -411,6 +410,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       void *orig = xd->mode_info_context;
       int n, num = xd->mode_info_context->mbmi.encoded_as_sb ? 4 : 1;
       for (n = 0; n < num; n++) {
+        int x_idx = n & 1, y_idx = n >> 1;
+        if (num == 4 && (mb_col + x_idx >= pc->mb_cols ||
+                         mb_row + y_idx >= pc->mb_rows))
+          continue;
+
         if (n != 0) {
           for (i = 0; i < 25; i++) {
             xd->block[i].eob = 0;
@@ -653,20 +657,17 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd,
 
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb) {
-        mi[1] = mi[0];
-        mi[pc->mode_info_stride] = mi[0];
-        mi[pc->mode_info_stride + 1] = mi[0];
+        if (mb_col < pc->mb_cols - 1)
+          mi[1] = mi[0];
+        if (mb_row < pc->mb_rows - 1) {
+          mi[pc->mode_info_stride] = mi[0];
+          if (mb_col < pc->mb_cols - 1)
+            mi[pc->mode_info_stride + 1] = mi[0];
+        }
       }
 #endif
       vp8_intra_prediction_down_copy(xd);
-      decode_macroblock(pbi, xd, mb_col, bc);
-#if CONFIG_SUPERBLOCKS
-      if (xd->mode_info_context->mbmi.encoded_as_sb) {
-        mi[1].mbmi.txfm_size = mi[0].mbmi.txfm_size;
-        mi[pc->mode_info_stride].mbmi.txfm_size = mi[0].mbmi.txfm_size;
-        mi[pc->mode_info_stride + 1].mbmi.txfm_size = mi[0].mbmi.txfm_size;
-      }
-#endif
+      decode_macroblock(pbi, xd, mb_row, mb_col, bc);
 
       /* check if the boolean decoder has suffered an error */
       xd->corrupted |= vp8dx_bool_error(bc);
