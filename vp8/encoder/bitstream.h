@@ -24,4 +24,4 @@ void vp8cx_pack_tokens_armv5(vp8_writer *w, const TOKENEXTRA *p, int xcount,
 #endif
 #endif
 
-void update_skip_probs(VP8_COMP *cpi);
+void vp9_update_skip_probs(VP8_COMP *cpi);
