@@ -389,9 +389,14 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   vpx_memcpy(xd->mode_info_context, mi, sizeof(MODE_INFO));
 #if CONFIG_SUPERBLOCKS
   if (mi->mbmi.encoded_as_sb) {
-    vpx_memcpy(xd->mode_info_context + 1, mi, sizeof(MODE_INFO));
-    vpx_memcpy(xd->mode_info_context + cpi->common.mode_info_stride, mi, sizeof(MODE_INFO));
-    vpx_memcpy(xd->mode_info_context + cpi->common.mode_info_stride + 1, mi, sizeof(MODE_INFO));
+    const int mis = cpi->common.mode_info_stride;
+    if (xd->mb_to_right_edge > 0)
+      vpx_memcpy(xd->mode_info_context + 1, mi, sizeof(MODE_INFO));
+    if (xd->mb_to_bottom_edge > 0) {
+      vpx_memcpy(xd->mode_info_context + mis, mi, sizeof(MODE_INFO));
+      if (xd->mb_to_right_edge > 0)
+        vpx_memcpy(xd->mode_info_context + mis + 1, mi, sizeof(MODE_INFO));
+    }
   }
 #endif
 
@@ -1442,25 +1447,47 @@ static int check_dual_ref_flags(VP8_COMP *cpi) {
 
 static void reset_skip_txfm_size(VP8_COMP *cpi, TX_SIZE txfm_max) {
   VP8_COMMON *cm = &cpi->common;
-  int mb_row, mb_col, mis = cm->mode_info_stride;
+  int mb_row, mb_col, mis = cm->mode_info_stride, segment_id;
   MODE_INFO *mi, *mi_ptr = cm->mi;
+#if CONFIG_SUPERBLOCKS
+  MODE_INFO *sb_mi_ptr = cm->mi, *sb_mi;
+  MB_MODE_INFO *sb_mbmi;
+#endif
   MB_MODE_INFO *mbmi;
   MACROBLOCK *x = &cpi->mb;
   MACROBLOCKD *xd = &x->e_mbd;
 
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++, mi_ptr += mis) {
     mi = mi_ptr;
+#if CONFIG_SUPERBLOCKS
+    sb_mi = sb_mi_ptr;
+#endif
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++, mi++) {
       mbmi = &mi->mbmi;
-      if (mbmi->txfm_size > txfm_max) {
-        int segment_id = mbmi->segment_id;
+#if CONFIG_SUPERBLOCKS
+      sb_mbmi = &sb_mi->mbmi;
+#endif
+      if (
+#if CONFIG_SUPERBLOCKS
+          !sb_mbmi->encoded_as_sb &&
+#endif
+          mbmi->txfm_size > txfm_max) {
+        segment_id = mbmi->segment_id;
         xd->mode_info_context = mi;
         assert((segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
                 get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
                (cm->mb_no_coeff_skip && mbmi->mb_skip_coeff));
         mbmi->txfm_size = txfm_max;
       }
+#if CONFIG_SUPERBLOCKS
+      if (mb_col & 1)
+        sb_mi += 2;
+#endif
     }
+#if CONFIG_SUPERBLOCKS
+    if (mb_row & 1)
+      sb_mi_ptr += 2 * mis;
+#endif
   }
 }
 
@@ -1854,8 +1881,7 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
   vp8_build_intra_predictors_sbuv_s(&x->e_mbd);
 
   assert(x->e_mbd.mode_info_context->mbmi.txfm_size == TX_8X8);
-  for (n = 0; n < 4; n++)
-  {
+  for (n = 0; n < 4; n++) {
     int x_idx = n & 1, y_idx = n >> 1;
 
     xd->above_context = cm->above_context + mb_col + (n & 1);
@@ -2249,8 +2275,7 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
   }
 
   assert(x->e_mbd.mode_info_context->mbmi.txfm_size == TX_8X8);
-  for (n = 0; n < 4; n++)
-  {
+  for (n = 0; n < 4; n++) {
     int x_idx = n & 1, y_idx = n >> 1;
 
     vp8_subtract_mby_s_c(x->src_diff,
@@ -2281,7 +2306,7 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
     if (!x->skip) {
       if (output_enabled) {
         xd->left_context = cm->left_context + (n >> 1);
-        xd->above_context = cm->above_context + mb_col + (n >> 1);
+        xd->above_context = cm->above_context + mb_col + (n & 1);
         memcpy(&ta[n], xd->above_context, sizeof(ta[n]));
         memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
         tp[n] = *t;
@@ -2298,7 +2323,7 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
       if (cpi->common.mb_no_coeff_skip) {
         skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff = 1;
         xd->left_context = cm->left_context + (n >> 1);
-        xd->above_context = cm->above_context + mb_col + (n >> 1);
+        xd->above_context = cm->above_context + mb_col + (n & 1);
         memcpy(&ta[n], xd->above_context, sizeof(ta[n]));
         memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
         tp[n] = *t;

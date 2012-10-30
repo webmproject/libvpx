@@ -629,8 +629,14 @@ static void update_reference_segmentation_map(VP8_COMP *cpi) {
       uint8_t *cache = segcache + col * 2;
 #if CONFIG_SUPERBLOCKS
       if (miptr->mbmi.encoded_as_sb) {
-        cache[0] = cache[1] = cache[cm->mb_cols] = cache[cm->mb_cols + 1] =
-          miptr->mbmi.segment_id;
+        cache[0] = miptr->mbmi.segment_id;
+        if (!(cm->mb_cols & 1) || col < sb_cols - 1)
+          cache[1] = miptr->mbmi.segment_id;
+        if (!(cm->mb_rows & 1) || row < sb_rows - 1) {
+          cache[cm->mb_cols] = miptr->mbmi.segment_id;
+          if (!(cm->mb_cols & 1) || col < sb_cols - 1)
+            cache[cm->mb_cols + 1] = miptr->mbmi.segment_id;
+        }
       } else
 #endif
       {

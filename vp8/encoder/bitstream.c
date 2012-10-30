@@ -744,8 +744,22 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
 static void write_mb_segid(vp8_writer *bc,
                            const MB_MODE_INFO *mi, const MACROBLOCKD *xd) {
   // Encode the MB segment id.
+  int seg_id = mi->segment_id;
+#if CONFIG_SUPERBLOCKS
+  if (mi->encoded_as_sb) {
+    if (xd->mb_to_right_edge > 0)
+      seg_id = seg_id && xd->mode_info_context[1].mbmi.segment_id;
+    if (xd->mb_to_bottom_edge > 0) {
+      seg_id = seg_id &&
+               xd->mode_info_context[xd->mode_info_stride].mbmi.segment_id;
+      if (xd->mb_to_right_edge > 0)
+        seg_id = seg_id &&
+                xd->mode_info_context[xd->mode_info_stride + 1].mbmi.segment_id;
+    }
+  }
+#endif
   if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
-    switch (mi->segment_id) {
+    switch (seg_id) {
       case 0:
         vp8_write(bc, 0, xd->mb_segment_tree_probs[0]);
         vp8_write(bc, 0, xd->mb_segment_tree_probs[1]);
@@ -952,7 +966,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
 #ifdef ENTROPY_STATS
         active_section = 9;
 #endif
-
         if (cpi->mb.e_mbd.update_mb_segmentation_map) {
           // Is temporal coding of the segment map enabled
           if (pc->temporal_update) {
@@ -1245,7 +1258,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
           }
         }
 
-        if (((rf == INTRA_FRAME && mode <= I8X8_PRED) ||
+        if (
+#if CONFIG_SUPERBLOCKS
+            !mi->encoded_as_sb &&
+#endif
+            ((rf == INTRA_FRAME && mode <= I8X8_PRED) ||
              (rf != INTRA_FRAME && !(mode == SPLITMV &&
                                      mi->partitioning == PARTITIONING_4X4))) &&
             pc->txfm_mode == TX_MODE_SELECT &&
@@ -1386,7 +1403,11 @@ static void write_mb_modes_kf(const VP8_COMMON  *c,
   } else
     write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 
-  if (ym <= I8X8_PRED && c->txfm_mode == TX_MODE_SELECT &&
+  if (
+#if CONFIG_SUPERBLOCKS
+      !m->mbmi.encoded_as_sb &&
+#endif
+      ym <= I8X8_PRED && c->txfm_mode == TX_MODE_SELECT &&
       !((c->mb_no_coeff_skip && m->mbmi.mb_skip_coeff) ||
         (segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
          get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {

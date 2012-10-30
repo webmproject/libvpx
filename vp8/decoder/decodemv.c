@@ -188,6 +188,11 @@ static void kfread_modes(VP8D_COMP *pbi,
   m->mbmi.second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
 #endif
 
+#if CONFIG_SUPERBLOCKS
+  if (m->mbmi.encoded_as_sb)
+    m->mbmi.txfm_size = TX_8X8;
+  else
+#endif
   if (cm->txfm_mode == TX_MODE_SELECT && m->mbmi.mb_skip_coeff == 0 &&
       m->mbmi.mode <= I8X8_PRED) {
     // FIXME(rbultje) code ternary symbol once all experiments are merged
@@ -589,7 +594,7 @@ static void read_mb_segment_id(VP8D_COMP *pbi,
         // If the value is flagged as correctly predicted
         // then use the predicted value
         if (seg_pred_flag) {
-          mbmi->segment_id = vp9_get_pred_mb_segid(cm, index);
+          mbmi->segment_id = vp9_get_pred_mb_segid(cm, xd, index);
         }
         // Else .... decode it explicitly
         else {
@@ -602,10 +607,14 @@ static void read_mb_segment_id(VP8D_COMP *pbi,
       }
 #if CONFIG_SUPERBLOCKS
       if (mbmi->encoded_as_sb) {
-        cm->last_frame_seg_map[index] =
-        cm->last_frame_seg_map[index + 1] =
-        cm->last_frame_seg_map[index + cm->mb_cols] =
-        cm->last_frame_seg_map[index + cm->mb_cols + 1] = mbmi->segment_id;
+        cm->last_frame_seg_map[index] = mbmi->segment_id;
+        if (mb_col + 1 < cm->mb_cols)
+          cm->last_frame_seg_map[index + 1] = mbmi->segment_id;
+        if (mb_row + 1 < cm->mb_rows) {
+          cm->last_frame_seg_map[index + cm->mb_cols] = mbmi->segment_id;
+          if (mb_col + 1 < cm->mb_cols)
+            cm->last_frame_seg_map[index + cm->mb_cols + 1] = mbmi->segment_id;
+        }
       } else
 #endif
       {
@@ -614,11 +623,17 @@ static void read_mb_segment_id(VP8D_COMP *pbi,
     } else {
 #if CONFIG_SUPERBLOCKS
       if (mbmi->encoded_as_sb) {
-        mbmi->segment_id =
-              cm->last_frame_seg_map[index] &&
-              cm->last_frame_seg_map[index + 1] &&
-              cm->last_frame_seg_map[index + cm->mb_cols] &&
-              cm->last_frame_seg_map[index + cm->mb_cols + 1];
+        mbmi->segment_id = cm->last_frame_seg_map[index];
+        if (mb_col < cm->mb_cols - 1)
+          mbmi->segment_id = mbmi->segment_id &&
+                             cm->last_frame_seg_map[index + 1];
+        if (mb_row < cm->mb_rows - 1) {
+          mbmi->segment_id = mbmi->segment_id &&
+                             cm->last_frame_seg_map[index + cm->mb_cols];
+          if (mb_col < cm->mb_cols - 1)
+            mbmi->segment_id = mbmi->segment_id &&
+                               cm->last_frame_seg_map[index + cm->mb_cols + 1];
+        }
       } else
 #endif
       {
@@ -1131,6 +1146,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
   }
 
+#if CONFIG_SUPERBLOCKS
+  if (mbmi->encoded_as_sb)
+    mbmi->txfm_size = TX_8X8;
+  else
+#endif
   if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= I8X8_PRED) ||
        (mbmi->ref_frame != INTRA_FRAME && !(mbmi->mode == SPLITMV &&

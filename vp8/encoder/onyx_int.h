@@ -353,7 +353,7 @@ typedef struct VP8_ENCODER_RTCD {
   vp8_temporal_rtcd_vtable_t  temporal;
 } VP8_ENCODER_RTCD;
 
-enum {
+enum BlockSize {
   BLOCK_16X8 = PARTITIONING_16X8,
   BLOCK_8X16 = PARTITIONING_8X16,
   BLOCK_8X8 = PARTITIONING_8X8,
