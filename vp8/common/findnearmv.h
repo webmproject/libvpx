@@ -85,7 +85,7 @@ static unsigned int vp8_check_mv_bounds(int_mv *mv,
          (mv->as_mv.row > mb_to_bottom_edge);
 }
 
-void vp8_find_near_mvs
+void vp9_find_near_mvs
 (
   MACROBLOCKD *xd,
   const MODE_INFO *here,
@@ -96,7 +96,7 @@ void vp8_find_near_mvs
   int *ref_frame_sign_bias
 );
 
-vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
+vp8_prob *vp9_mv_ref_probs(VP8_COMMON *pc,
                            vp8_prob p[VP8_MVREFS - 1], const int near_mv_ref_ct[4]
                           );
 

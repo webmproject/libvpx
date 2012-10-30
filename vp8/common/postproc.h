@@ -41,37 +41,37 @@
 #endif
 
 #ifndef vp8_postproc_down
-#define vp8_postproc_down vp8_mbpost_proc_down_c
+#define vp8_postproc_down vp9_mbpost_proc_down_c
 #endif
 extern prototype_postproc_inplace(vp8_postproc_down);
 
 #ifndef vp8_postproc_across
-#define vp8_postproc_across vp8_mbpost_proc_across_ip_c
+#define vp8_postproc_across vp9_mbpost_proc_across_ip_c
 #endif
 extern prototype_postproc_inplace(vp8_postproc_across);
 
 #ifndef vp8_postproc_downacross
-#define vp8_postproc_downacross vp8_post_proc_down_and_across_c
+#define vp8_postproc_downacross vp9_post_proc_down_and_across_c
 #endif
 extern prototype_postproc(vp8_postproc_downacross);
 
 #ifndef vp8_postproc_addnoise
-#define vp8_postproc_addnoise vp8_plane_add_noise_c
+#define vp8_postproc_addnoise vp9_plane_add_noise_c
 #endif
 extern prototype_postproc_addnoise(vp8_postproc_addnoise);
 
 #ifndef vp8_postproc_blend_mb_inner
-#define vp8_postproc_blend_mb_inner vp8_blend_mb_inner_c
+#define vp8_postproc_blend_mb_inner vp9_blend_mb_inner_c
 #endif
 extern prototype_postproc_blend_mb_inner(vp8_postproc_blend_mb_inner);
 
 #ifndef vp8_postproc_blend_mb_outer
-#define vp8_postproc_blend_mb_outer vp8_blend_mb_outer_c
+#define vp8_postproc_blend_mb_outer vp9_blend_mb_outer_c
 #endif
 extern prototype_postproc_blend_mb_outer(vp8_postproc_blend_mb_outer);
 
 #ifndef vp8_postproc_blend_b
-#define vp8_postproc_blend_b vp8_blend_b_c
+#define vp8_postproc_blend_b vp9_blend_b_c
 #endif
 extern prototype_postproc_blend_b(vp8_postproc_blend_b);
 
@@ -108,18 +108,18 @@ struct postproc_state {
 };
 #include "onyxc_int.h"
 #include "ppflags.h"
-int vp8_post_proc_frame(struct VP8Common *oci, YV12_BUFFER_CONFIG *dest,
+int vp9_post_proc_frame(struct VP8Common *oci, YV12_BUFFER_CONFIG *dest,
                         vp8_ppflags_t *flags);
 
 
-void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
+void vp9_de_noise(YV12_BUFFER_CONFIG         *source,
                   YV12_BUFFER_CONFIG         *post,
                   int                         q,
                   int                         low_var_thresh,
                   int                         flag,
                   vp8_postproc_rtcd_vtable_t *rtcd);
 
-void vp8_deblock(YV12_BUFFER_CONFIG         *source,
+void vp9_deblock(YV12_BUFFER_CONFIG         *source,
                  YV12_BUFFER_CONFIG         *post,
                  int                         q,
                  int                         low_var_thresh,

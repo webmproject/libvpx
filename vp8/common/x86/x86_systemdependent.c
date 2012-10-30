@@ -18,7 +18,7 @@
 #include "vp8/common/pragmas.h"
 #include "vp8/common/onyxc_int.h"
 
-void vp8_arch_x86_common_init(VP8_COMMON *ctx) {
+void vp9_arch_x86_common_init(VP8_COMMON *ctx) {
 #if CONFIG_RUNTIME_CPU_DETECT
   VP8_COMMON_RTCD *rtcd = &ctx->rtcd;
   int flags = x86_simd_caps();
@@ -37,25 +37,25 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx) {
     rtcd->idct.idct1        = vp9_short_idct4x4llm_1_mmx;
     rtcd->idct.idct16       = vp9_short_idct4x4llm_mmx;
     rtcd->idct.idct1_scalar_add = vp9_dc_only_idct_add_mmx;
-    // rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_mmx;
-    // rtcd->idct.iwalsh1     = vp8_short_inv_walsh4x4_1_mmx;
+    // rtcd->idct.iwalsh16     = vp9_short_inv_walsh4x4_mmx;
+    // rtcd->idct.iwalsh1     = vp9_short_inv_walsh4x4_1_mmx;
 
     /* Disabled due to unsupported enhanced interpolation/high_prec mv
-    rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_mmx;
-    rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_mmx;
-    rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_mmx;
-    rtcd->subpix.sixtap4x4     = vp8_sixtap_predict4x4_mmx;
+    rtcd->subpix.sixtap16x16   = vp9_sixtap_predict16x16_mmx;
+    rtcd->subpix.sixtap8x8     = vp9_sixtap_predict8x8_mmx;
+    rtcd->subpix.sixtap8x4     = vp9_sixtap_predict8x4_mmx;
+    rtcd->subpix.sixtap4x4     = vp9_sixtap_predict4x4_mmx;
     */
-    rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_mmx;
-    rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_mmx;
-    rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_mmx;
-    rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_mmx;
+    rtcd->subpix.bilinear16x16 = vp9_bilinear_predict16x16_mmx;
+    rtcd->subpix.bilinear8x8   = vp9_bilinear_predict8x8_mmx;
+    rtcd->subpix.bilinear8x4   = vp9_bilinear_predict8x4_mmx;
+    rtcd->subpix.bilinear4x4   = vp9_bilinear_predict4x4_mmx;
 
 #if CONFIG_POSTPROC
-    rtcd->postproc.down        = vp8_mbpost_proc_down_mmx;
-    /*rtcd->postproc.across      = vp8_mbpost_proc_across_ip_c;*/
-    rtcd->postproc.downacross  = vp8_post_proc_down_and_across_mmx;
-    rtcd->postproc.addnoise    = vp8_plane_add_noise_mmx;
+    rtcd->postproc.down        = vp9_mbpost_proc_down_mmx;
+    /*rtcd->postproc.across      = vp9_mbpost_proc_across_ip_c;*/
+    rtcd->postproc.downacross  = vp9_post_proc_down_and_across_mmx;
+    rtcd->postproc.addnoise    = vp9_plane_add_noise_mmx;
 #endif
   }
 
@@ -65,21 +65,21 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx) {
   if (flags & HAS_SSE2) {
 
 
-    // rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_sse2;
+    // rtcd->idct.iwalsh16     = vp9_short_inv_walsh4x4_sse2;
 
     /* Disabled due to unsupported enhanced interpolation/high_prec mv
-    rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_sse2;
-    rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_sse2;
-    rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_sse2;
+    rtcd->subpix.sixtap16x16   = vp9_sixtap_predict16x16_sse2;
+    rtcd->subpix.sixtap8x8     = vp9_sixtap_predict8x8_sse2;
+    rtcd->subpix.sixtap8x4     = vp9_sixtap_predict8x4_sse2;
     */
-    rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_sse2;
-    rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_sse2;
+    rtcd->subpix.bilinear16x16 = vp9_bilinear_predict16x16_sse2;
+    rtcd->subpix.bilinear8x8   = vp9_bilinear_predict8x8_sse2;
 
 #if CONFIG_POSTPROC
-    rtcd->postproc.down        = vp8_mbpost_proc_down_xmm;
-    rtcd->postproc.across      = vp8_mbpost_proc_across_ip_xmm;
-    rtcd->postproc.downacross  = vp8_post_proc_down_and_across_xmm;
-    rtcd->postproc.addnoise    = vp8_plane_add_noise_wmt;
+    rtcd->postproc.down        = vp9_mbpost_proc_down_xmm;
+    rtcd->postproc.across      = vp9_mbpost_proc_across_ip_xmm;
+    rtcd->postproc.downacross  = vp9_post_proc_down_and_across_xmm;
+    rtcd->postproc.addnoise    = vp9_plane_add_noise_wmt;
 #endif
   }
 
@@ -89,19 +89,19 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx) {
 
   if (flags & HAS_SSSE3) {
     /* Disabled due to unsupported enhanced interpolation/high_prec mv
-    rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_ssse3;
-    rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_ssse3;
-    rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_ssse3;
-    rtcd->subpix.sixtap4x4     = vp8_sixtap_predict4x4_ssse3;
-    rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_ssse3;
-    rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_ssse3;
+    rtcd->subpix.sixtap16x16   = vp9_sixtap_predict16x16_ssse3;
+    rtcd->subpix.sixtap8x8     = vp9_sixtap_predict8x8_ssse3;
+    rtcd->subpix.sixtap8x4     = vp9_sixtap_predict8x4_ssse3;
+    rtcd->subpix.sixtap4x4     = vp9_sixtap_predict4x4_ssse3;
+    rtcd->subpix.bilinear16x16 = vp9_bilinear_predict16x16_ssse3;
+    rtcd->subpix.bilinear8x8   = vp9_bilinear_predict8x8_ssse3;
     */
 
     /* these are disable because of unsupported diagonal pred modes
     rtcd->recon.build_intra_predictors_mbuv =
-      vp8_build_intra_predictors_mbuv_ssse3;
+      vp9_build_intra_predictors_mbuv_ssse3;
     rtcd->recon.build_intra_predictors_mbuv_s =
-      vp8_build_intra_predictors_mbuv_s_ssse3;
+      vp9_build_intra_predictors_mbuv_s_ssse3;
       */
   }
 #endif

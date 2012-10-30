@@ -13,7 +13,7 @@
 #include "vpx_rtcd.h"
 #include "blockd.h"
 
-void vp8_recon_b_c
+void vp9_recon_b_c
 (
   unsigned char *pred_ptr,
   short *diff_ptr,
@@ -41,7 +41,7 @@ void vp8_recon_b_c
   }
 }
 
-void vp8_recon_uv_b_c
+void vp9_recon_uv_b_c
 (
   unsigned char *pred_ptr,
   short *diff_ptr,
@@ -68,7 +68,7 @@ void vp8_recon_uv_b_c
     pred_ptr += 8;
   }
 }
-void vp8_recon4b_c
+void vp9_recon4b_c
 (
   unsigned char *pred_ptr,
   short *diff_ptr,
@@ -96,7 +96,7 @@ void vp8_recon4b_c
   }
 }
 
-void vp8_recon2b_c
+void vp9_recon2b_c
 (
   unsigned char *pred_ptr,
   short *diff_ptr,
@@ -125,7 +125,7 @@ void vp8_recon2b_c
 }
 
 #if CONFIG_SUPERBLOCKS
-void vp8_recon_mby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
+void vp9_recon_mby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
   int x, y;
   BLOCKD *b = &xd->block[0];
   int stride = b->dst_stride;
@@ -145,7 +145,7 @@ void vp8_recon_mby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
   }
 }
 
-void vp8_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
+void vp9_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
   int x, y, i;
   uint8_t *dst = udst;
 
@@ -170,28 +170,28 @@ void vp8_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
 }
 #endif
 
-void vp8_recon_mby_c(MACROBLOCKD *xd) {
+void vp9_recon_mby_c(MACROBLOCKD *xd) {
   int i;
 
   for (i = 0; i < 16; i += 4) {
     BLOCKD *b = &xd->block[i];
 
-    vp8_recon4b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    vp9_recon4b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
   }
 }
 
-void vp8_recon_mb_c(MACROBLOCKD *xd) {
+void vp9_recon_mb_c(MACROBLOCKD *xd) {
   int i;
 
   for (i = 0; i < 16; i += 4) {
     BLOCKD *b = &xd->block[i];
 
-    vp8_recon4b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    vp9_recon4b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
   }
 
   for (i = 16; i < 24; i += 2) {
     BLOCKD *b = &xd->block[i];
 
-    vp8_recon2b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    vp9_recon2b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
   }
 }

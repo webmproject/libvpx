@@ -24,8 +24,8 @@ extern prototype_idct(vp9_short_idct4x4llm_1_mmx);
 extern prototype_idct(vp9_short_idct4x4llm_mmx);
 extern prototype_idct_scalar_add(vp9_dc_only_idct_add_mmx);
 
-extern prototype_second_order(vp8_short_inv_walsh4x4_mmx);
-extern prototype_second_order(vp8_short_inv_walsh4x4_1_mmx);
+extern prototype_second_order(vp9_short_inv_walsh4x4_mmx);
+extern prototype_second_order(vp9_short_inv_walsh4x4_1_mmx);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_idct_idct1
@@ -38,22 +38,22 @@ extern prototype_second_order(vp8_short_inv_walsh4x4_1_mmx);
 #define vp8_idct_idct1_scalar_add vp9_dc_only_idct_add_mmx
 
 #undef vp8_idct_iwalsh16
-#define vp8_idct_iwalsh16 vp8_short_inv_walsh4x4_mmx
+#define vp8_idct_iwalsh16 vp9_short_inv_walsh4x4_mmx
 
 #undef vp8_idct_iwalsh1
-#define vp8_idct_iwalsh1 vp8_short_inv_walsh4x4_1_mmx
+#define vp8_idct_iwalsh1 vp9_short_inv_walsh4x4_1_mmx
 
 #endif
 #endif
 
 #if HAVE_SSE2
 
-extern prototype_second_order(vp8_short_inv_walsh4x4_sse2);
+extern prototype_second_order(vp9_short_inv_walsh4x4_sse2);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 
 #undef vp8_idct_iwalsh16
-#define vp8_idct_iwalsh16 vp8_short_inv_walsh4x4_sse2
+#define vp8_idct_iwalsh16 vp9_short_inv_walsh4x4_sse2
 
 #endif
 

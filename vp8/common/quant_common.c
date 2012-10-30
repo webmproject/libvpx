@@ -16,7 +16,7 @@ static int ac_qlookup[QINDEX_RANGE];
 
 #define ACDC_MIN 4
 
-void vp8_init_quant_tables() {
+void vp9_init_quant_tables() {
   int i;
   int current_val = 4;
   int last_val = 4;
@@ -38,7 +38,7 @@ void vp8_init_quant_tables() {
   }
 }
 
-int vp8_dc_quant(int QIndex, int Delta) {
+int vp9_dc_quant(int QIndex, int Delta) {
   int retval;
 
   QIndex = QIndex + Delta;
@@ -52,7 +52,7 @@ int vp8_dc_quant(int QIndex, int Delta) {
   return retval;
 }
 
-int vp8_dc2quant(int QIndex, int Delta) {
+int vp9_dc2quant(int QIndex, int Delta) {
   int retval;
 
   QIndex = QIndex + Delta;
@@ -67,7 +67,7 @@ int vp8_dc2quant(int QIndex, int Delta) {
   return retval;
 
 }
-int vp8_dc_uv_quant(int QIndex, int Delta) {
+int vp9_dc_uv_quant(int QIndex, int Delta) {
   int retval;
 
   QIndex = QIndex + Delta;
@@ -82,7 +82,7 @@ int vp8_dc_uv_quant(int QIndex, int Delta) {
   return retval;
 }
 
-int vp8_ac_yquant(int QIndex) {
+int vp9_ac_yquant(int QIndex) {
   int retval;
 
   if (QIndex > MAXQ)
@@ -94,7 +94,7 @@ int vp8_ac_yquant(int QIndex) {
   return retval;
 }
 
-int vp8_ac2quant(int QIndex, int Delta) {
+int vp9_ac2quant(int QIndex, int Delta) {
   int retval;
 
   QIndex = QIndex + Delta;
@@ -110,7 +110,7 @@ int vp8_ac2quant(int QIndex, int Delta) {
 
   return retval;
 }
-int vp8_ac_uv_quant(int QIndex, int Delta) {
+int vp9_ac_uv_quant(int QIndex, int Delta) {
   int retval;
 
   QIndex = QIndex + Delta;

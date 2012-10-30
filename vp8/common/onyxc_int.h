@@ -30,7 +30,7 @@
 
 /* Create/destroy static data structures. */
 
-void vp8_initialize_common(void);
+void vp9_initialize_common(void);
 
 #define MINQ 0
 

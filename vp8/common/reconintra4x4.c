@@ -14,7 +14,7 @@
 #include "reconintra.h"
 #include "vpx_rtcd.h"
 
-void vp8_intra4x4_predict_c(BLOCKD *x, int b_mode,
+void vp9_intra4x4_predict_c(BLOCKD *x, int b_mode,
                             unsigned char *predictor) {
   int i, r, c;
 
@@ -281,8 +281,8 @@ void vp8_comp_intra4x4_predict_c(BLOCKD *x,
   unsigned char predictor[2][4 * 16];
   int i, j;
 
-  vp8_intra4x4_predict(x, b_mode, predictor[0]);
-  vp8_intra4x4_predict(x, b_mode2, predictor[1]);
+  vp9_intra4x4_predict(x, b_mode, predictor[0]);
+  vp9_intra4x4_predict(x, b_mode2, predictor[1]);
 
   for (i = 0; i < 16 * 4; i += 16) {
     for (j = i; j < i + 4; j++) {
@@ -295,7 +295,7 @@ void vp8_comp_intra4x4_predict_c(BLOCKD *x,
 /* copy 4 bytes from the above right down so that the 4x4 prediction modes using pixels above and
  * to the right prediction have filled in pixels to use.
  */
-void vp8_intra_prediction_down_copy(MACROBLOCKD *xd) {
+void vp9_intra_prediction_down_copy(MACROBLOCKD *xd) {
   int extend_edge = (xd->mb_to_right_edge == 0 && xd->mb_index < 2);
   unsigned char *above_right = *(xd->block[0].base_dst) + xd->block[0].dst -
                                xd->block[0].dst_stride + 16;

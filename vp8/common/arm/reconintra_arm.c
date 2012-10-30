@@ -16,7 +16,7 @@
 #include "vp8/common/recon.h"
 
 #if HAVE_ARMV7
-extern void vp8_build_intra_predictors_mby_neon_func(
+extern void vp9_build_intra_predictors_mby_neon_func(
   unsigned char *y_buffer,
   unsigned char *ypred_ptr,
   int y_stride,
@@ -24,7 +24,7 @@ extern void vp8_build_intra_predictors_mby_neon_func(
   int Up,
   int Left);
 
-void vp8_build_intra_predictors_mby_neon(MACROBLOCKD *xd) {
+void vp9_build_intra_predictors_mby_neon(MACROBLOCKD *xd) {
   unsigned char *y_buffer = xd->dst.y_buffer;
   unsigned char *ypred_ptr = xd->predictor;
   int y_stride = xd->dst.y_stride;
@@ -32,14 +32,14 @@ void vp8_build_intra_predictors_mby_neon(MACROBLOCKD *xd) {
   int Up = xd->up_available;
   int Left = xd->left_available;
 
-  vp8_build_intra_predictors_mby_neon_func(y_buffer, ypred_ptr,
+  vp9_build_intra_predictors_mby_neon_func(y_buffer, ypred_ptr,
                                            y_stride, mode, Up, Left);
 }
 #endif
 
 
 #if HAVE_ARMV7
-extern void vp8_build_intra_predictors_mby_s_neon_func(
+extern void vp9_build_intra_predictors_mby_s_neon_func(
   unsigned char *y_buffer,
   unsigned char *ypred_ptr,
   int y_stride,
@@ -47,7 +47,7 @@ extern void vp8_build_intra_predictors_mby_s_neon_func(
   int Up,
   int Left);
 
-void vp8_build_intra_predictors_mby_s_neon(MACROBLOCKD *xd) {
+void vp9_build_intra_predictors_mby_s_neon(MACROBLOCKD *xd) {
   unsigned char *y_buffer = xd->dst.y_buffer;
   unsigned char *ypred_ptr = xd->predictor;
   int y_stride = xd->dst.y_stride;
@@ -55,7 +55,7 @@ void vp8_build_intra_predictors_mby_s_neon(MACROBLOCKD *xd) {
   int Up = xd->up_available;
   int Left = xd->left_available;
 
-  vp8_build_intra_predictors_mby_s_neon_func(y_buffer, ypred_ptr,
+  vp9_build_intra_predictors_mby_s_neon_func(y_buffer, ypred_ptr,
                                              y_stride, mode, Up, Left);
 }
 

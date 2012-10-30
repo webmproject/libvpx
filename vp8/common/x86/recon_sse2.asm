@@ -10,9 +10,9 @@
 
 
 %include "vpx_ports/x86_abi_support.asm"
-;void vp8_recon2b_sse2(unsigned char *s, short *q, unsigned char *d, int stride)
-global sym(vp8_recon2b_sse2)
-sym(vp8_recon2b_sse2):
+;void vp9_recon2b_sse2(unsigned char *s, short *q, unsigned char *d, int stride)
+global sym(vp9_recon2b_sse2)
+sym(vp9_recon2b_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -61,9 +61,9 @@ sym(vp8_recon2b_sse2):
     ret
 
 
-;void vp8_recon4b_sse2(unsigned char *s, short *q, unsigned char *d, int stride)
-global sym(vp8_recon4b_sse2)
-sym(vp8_recon4b_sse2):
+;void vp9_recon4b_sse2(unsigned char *s, short *q, unsigned char *d, int stride)
+global sym(vp9_recon4b_sse2)
+sym(vp9_recon4b_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -132,8 +132,8 @@ sym(vp8_recon4b_sse2):
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    )
-global sym(vp8_copy_mem16x16_sse2)
-sym(vp8_copy_mem16x16_sse2):
+global sym(vp9_copy_mem16x16_sse2)
+sym(vp9_copy_mem16x16_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -231,14 +231,14 @@ sym(vp8_copy_mem16x16_sse2):
     ret
 
 
-;void vp8_intra_pred_uv_dc_mmx2(
+;void vp9_intra_pred_uv_dc_mmx2(
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp8_intra_pred_uv_dc_mmx2)
-sym(vp8_intra_pred_uv_dc_mmx2):
+global sym(vp9_intra_pred_uv_dc_mmx2)
+sym(vp9_intra_pred_uv_dc_mmx2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -304,14 +304,14 @@ sym(vp8_intra_pred_uv_dc_mmx2):
     pop         rbp
     ret
 
-;void vp8_intra_pred_uv_dctop_mmx2(
+;void vp9_intra_pred_uv_dctop_mmx2(
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp8_intra_pred_uv_dctop_mmx2)
-sym(vp8_intra_pred_uv_dctop_mmx2):
+global sym(vp9_intra_pred_uv_dctop_mmx2)
+sym(vp9_intra_pred_uv_dctop_mmx2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -357,14 +357,14 @@ sym(vp8_intra_pred_uv_dctop_mmx2):
     pop         rbp
     ret
 
-;void vp8_intra_pred_uv_dcleft_mmx2(
+;void vp9_intra_pred_uv_dcleft_mmx2(
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp8_intra_pred_uv_dcleft_mmx2)
-sym(vp8_intra_pred_uv_dcleft_mmx2):
+global sym(vp9_intra_pred_uv_dcleft_mmx2)
+sym(vp9_intra_pred_uv_dcleft_mmx2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -422,14 +422,14 @@ sym(vp8_intra_pred_uv_dcleft_mmx2):
     pop         rbp
     ret
 
-;void vp8_intra_pred_uv_dc128_mmx(
+;void vp9_intra_pred_uv_dc128_mmx(
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp8_intra_pred_uv_dc128_mmx)
-sym(vp8_intra_pred_uv_dc128_mmx):
+global sym(vp9_intra_pred_uv_dc128_mmx)
+sym(vp9_intra_pred_uv_dc128_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -458,15 +458,15 @@ sym(vp8_intra_pred_uv_dc128_mmx):
     pop         rbp
     ret
 
-;void vp8_intra_pred_uv_tm_sse2(
+;void vp9_intra_pred_uv_tm_sse2(
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-%macro vp8_intra_pred_uv_tm 1
-global sym(vp8_intra_pred_uv_tm_%1)
-sym(vp8_intra_pred_uv_tm_%1):
+%macro vp9_intra_pred_uv_tm 1
+global sym(vp9_intra_pred_uv_tm_%1)
+sym(vp9_intra_pred_uv_tm_%1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -503,7 +503,7 @@ sym(vp8_intra_pred_uv_tm_%1):
     mov         rdi,        arg(0) ;dst;
     movsxd      rcx,        dword ptr arg(1) ;dst_stride
 
-.vp8_intra_pred_uv_tm_%1_loop:
+.vp9_intra_pred_uv_tm_%1_loop:
     movd        xmm3,       [rsi]
     movd        xmm5,       [rsi+rax]
 %ifidn %1, sse2
@@ -525,7 +525,7 @@ sym(vp8_intra_pred_uv_tm_%1):
     lea         rsi,        [rsi+rax*2]
     lea         rdi,        [rdi+rcx*2]
     dec         edx
-    jnz .vp8_intra_pred_uv_tm_%1_loop
+    jnz .vp9_intra_pred_uv_tm_%1_loop
 
     ; begin epilog
     pop         rdi
@@ -536,17 +536,17 @@ sym(vp8_intra_pred_uv_tm_%1):
     ret
 %endmacro
 
-vp8_intra_pred_uv_tm sse2
-vp8_intra_pred_uv_tm ssse3
+vp9_intra_pred_uv_tm sse2
+vp9_intra_pred_uv_tm ssse3
 
-;void vp8_intra_pred_uv_ve_mmx(
+;void vp9_intra_pred_uv_ve_mmx(
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp8_intra_pred_uv_ve_mmx)
-sym(vp8_intra_pred_uv_ve_mmx):
+global sym(vp9_intra_pred_uv_ve_mmx)
+sym(vp9_intra_pred_uv_ve_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -578,15 +578,15 @@ sym(vp8_intra_pred_uv_ve_mmx):
     pop         rbp
     ret
 
-;void vp8_intra_pred_uv_ho_mmx2(
+;void vp9_intra_pred_uv_ho_mmx2(
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-%macro vp8_intra_pred_uv_ho 1
-global sym(vp8_intra_pred_uv_ho_%1)
-sym(vp8_intra_pred_uv_ho_%1):
+%macro vp9_intra_pred_uv_ho 1
+global sym(vp9_intra_pred_uv_ho_%1)
+sym(vp9_intra_pred_uv_ho_%1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -615,7 +615,7 @@ sym(vp8_intra_pred_uv_ho_%1):
 %endif
     dec         rsi
 %ifidn %1, mmx2
-.vp8_intra_pred_uv_ho_%1_loop:
+.vp9_intra_pred_uv_ho_%1_loop:
     movd        mm0,        [rsi]
     movd        mm1,        [rsi+rax]
     punpcklbw   mm0,        mm0
@@ -627,7 +627,7 @@ sym(vp8_intra_pred_uv_ho_%1):
     lea         rsi,        [rsi+rax*2]
     lea         rdi,        [rdi+rcx*2]
     dec         edx
-    jnz .vp8_intra_pred_uv_ho_%1_loop
+    jnz .vp9_intra_pred_uv_ho_%1_loop
 %else
     movd        xmm0,       [rsi]
     movd        xmm3,       [rsi+rax]
@@ -671,8 +671,8 @@ sym(vp8_intra_pred_uv_ho_%1):
     ret
 %endmacro
 
-vp8_intra_pred_uv_ho mmx2
-vp8_intra_pred_uv_ho ssse3
+vp9_intra_pred_uv_ho mmx2
+vp9_intra_pred_uv_ho ssse3
 
 SECTION_RODATA
 dc_128:

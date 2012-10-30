@@ -14,7 +14,7 @@
 %define VP8_FILTER_WEIGHT 128
 %define VP8_FILTER_SHIFT  7
 
-;void vp8_post_proc_down_and_across_mmx
+;void vp9_post_proc_down_and_across_mmx
 ;(
 ;    unsigned char *src_ptr,
 ;    unsigned char *dst_ptr,
@@ -24,8 +24,8 @@
 ;    int cols,
 ;    int flimit
 ;)
-global sym(vp8_post_proc_down_and_across_mmx)
-sym(vp8_post_proc_down_and_across_mmx):
+global sym(vp9_post_proc_down_and_across_mmx)
+sym(vp9_post_proc_down_and_across_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -262,11 +262,11 @@ sym(vp8_post_proc_down_and_across_mmx):
 %undef RD
 
 
-;void vp8_mbpost_proc_down_mmx(unsigned char *dst,
+;void vp9_mbpost_proc_down_mmx(unsigned char *dst,
 ;                             int pitch, int rows, int cols,int flimit)
 extern sym(vp8_rv)
-global sym(vp8_mbpost_proc_down_mmx)
-sym(vp8_mbpost_proc_down_mmx):
+global sym(vp9_mbpost_proc_down_mmx)
+sym(vp9_mbpost_proc_down_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -459,14 +459,14 @@ sym(vp8_mbpost_proc_down_mmx):
 %undef flimit2
 
 
-;void vp8_plane_add_noise_mmx (unsigned char *Start, unsigned char *noise,
+;void vp9_plane_add_noise_mmx (unsigned char *Start, unsigned char *noise,
 ;                            unsigned char blackclamp[16],
 ;                            unsigned char whiteclamp[16],
 ;                            unsigned char bothclamp[16],
 ;                            unsigned int Width, unsigned int Height, int Pitch)
 extern sym(rand)
-global sym(vp8_plane_add_noise_mmx)
-sym(vp8_plane_add_noise_mmx):
+global sym(vp9_plane_add_noise_mmx)
+sym(vp9_plane_add_noise_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 8

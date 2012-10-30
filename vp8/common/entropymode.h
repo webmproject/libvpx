@@ -26,7 +26,7 @@ extern const int vp8_mbsplit_count [VP8_NUMMBSPLITS];    /* # of subsets */
 
 extern const vp8_prob vp8_mbsplit_probs [VP8_NUMMBSPLITS - 1];
 
-extern int vp8_mv_cont(const int_mv *l, const int_mv *a);
+extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
 extern const vp8_prob vp8_sub_mv_ref_prob [VP8_SUBMVREFS - 1];
 extern const vp8_prob vp8_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP8_SUBMVREFS - 1];
@@ -61,20 +61,20 @@ extern struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
 extern struct vp8_token_struct vp8_sb_mv_ref_encoding_array    [VP8_MVREFS];
 extern struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
-void vp8_entropy_mode_init(void);
+void vp9_entropy_mode_init(void);
 
 struct VP8Common;
-void vp8_init_mbmode_probs(struct VP8Common *x);
-extern void vp8_init_mode_contexts(struct VP8Common *pc);
-extern void vp8_update_mode_context(struct VP8Common *pc);;
-extern void vp8_accum_mv_refs(struct VP8Common *pc,
+void vp9_init_mbmode_probs(struct VP8Common *x);
+extern void vp9_init_mode_contexts(struct VP8Common *pc);
+extern void vp9_update_mode_context(struct VP8Common *pc);;
+extern void vp9_accum_mv_refs(struct VP8Common *pc,
                               MB_PREDICTION_MODE m,
                               const int ct[4]);
 
-void vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES - 1]);
-void vp8_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES - 1]);
+void vp9_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES - 1]);
+void vp9_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES - 1]);
 
-void vp8_adapt_mode_probs(struct VP8Common *);
+void vp9_adapt_mode_probs(struct VP8Common *);
 
 #define VP8_SWITCHABLE_FILTERS 2 /* number of switchable filters */
 extern const  INTERPOLATIONFILTERTYPE vp8_switchable_interp

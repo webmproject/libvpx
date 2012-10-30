@@ -17,17 +17,17 @@
            const unsigned char *src, int src_stride)
 typedef build_intra_predictors_mbuv_prototype((*build_intra_predictors_mbuv_fn_t));
 
-extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_dc_mmx2);
-extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_dctop_mmx2);
-extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_dcleft_mmx2);
-extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_dc128_mmx);
-extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_ho_mmx2);
-extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_ho_ssse3);
-extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_ve_mmx);
-extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_tm_sse2);
-extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_tm_ssse3);
+extern build_intra_predictors_mbuv_prototype(vp9_intra_pred_uv_dc_mmx2);
+extern build_intra_predictors_mbuv_prototype(vp9_intra_pred_uv_dctop_mmx2);
+extern build_intra_predictors_mbuv_prototype(vp9_intra_pred_uv_dcleft_mmx2);
+extern build_intra_predictors_mbuv_prototype(vp9_intra_pred_uv_dc128_mmx);
+extern build_intra_predictors_mbuv_prototype(vp9_intra_pred_uv_ho_mmx2);
+extern build_intra_predictors_mbuv_prototype(vp9_intra_pred_uv_ho_ssse3);
+extern build_intra_predictors_mbuv_prototype(vp9_intra_pred_uv_ve_mmx);
+extern build_intra_predictors_mbuv_prototype(vp9_intra_pred_uv_tm_sse2);
+extern build_intra_predictors_mbuv_prototype(vp9_intra_pred_uv_tm_ssse3);
 
-static void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *xd,
+static void vp9_build_intra_predictors_mbuv_x86(MACROBLOCKD *xd,
                                                 unsigned char *dst_u,
                                                 unsigned char *dst_v,
                                                 int dst_stride,
@@ -39,7 +39,7 @@ static void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *xd,
 
   switch (mode) {
     case  V_PRED:
-      fn = vp8_intra_pred_uv_ve_mmx;
+      fn = vp9_intra_pred_uv_ve_mmx;
       break;
     case  H_PRED:
       fn = ho_func;
@@ -50,17 +50,17 @@ static void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *xd,
     case DC_PRED:
       if (xd->up_available) {
         if (xd->left_available) {
-          fn = vp8_intra_pred_uv_dc_mmx2;
+          fn = vp9_intra_pred_uv_dc_mmx2;
           break;
         } else {
-          fn = vp8_intra_pred_uv_dctop_mmx2;
+          fn = vp9_intra_pred_uv_dctop_mmx2;
           break;
         }
       } else if (xd->left_available) {
-        fn = vp8_intra_pred_uv_dcleft_mmx2;
+        fn = vp9_intra_pred_uv_dcleft_mmx2;
         break;
       } else {
-        fn = vp8_intra_pred_uv_dc128_mmx;
+        fn = vp9_intra_pred_uv_dc128_mmx;
         break;
       }
       break;
@@ -72,30 +72,30 @@ static void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *xd,
   fn(dst_v, dst_stride, xd->dst.v_buffer, src_stride);
 }
 
-void vp8_build_intra_predictors_mbuv_sse2(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_mbuv_x86(xd, &xd->predictor[256],
+void vp9_build_intra_predictors_mbuv_sse2(MACROBLOCKD *xd) {
+  vp9_build_intra_predictors_mbuv_x86(xd, &xd->predictor[256],
                                       &xd->predictor[320], 8,
-                                      vp8_intra_pred_uv_tm_sse2,
-                                      vp8_intra_pred_uv_ho_mmx2);
+                                      vp9_intra_pred_uv_tm_sse2,
+                                      vp9_intra_pred_uv_ho_mmx2);
 }
 
-void vp8_build_intra_predictors_mbuv_ssse3(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_mbuv_x86(xd, &xd->predictor[256],
+void vp9_build_intra_predictors_mbuv_ssse3(MACROBLOCKD *xd) {
+  vp9_build_intra_predictors_mbuv_x86(xd, &xd->predictor[256],
                                       &xd->predictor[320], 8,
-                                      vp8_intra_pred_uv_tm_ssse3,
-                                      vp8_intra_pred_uv_ho_ssse3);
+                                      vp9_intra_pred_uv_tm_ssse3,
+                                      vp9_intra_pred_uv_ho_ssse3);
 }
 
-void vp8_build_intra_predictors_mbuv_s_sse2(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
+void vp9_build_intra_predictors_mbuv_s_sse2(MACROBLOCKD *xd) {
+  vp9_build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
                                       xd->dst.v_buffer, xd->dst.uv_stride,
-                                      vp8_intra_pred_uv_tm_sse2,
-                                      vp8_intra_pred_uv_ho_mmx2);
+                                      vp9_intra_pred_uv_tm_sse2,
+                                      vp9_intra_pred_uv_ho_mmx2);
 }
 
-void vp8_build_intra_predictors_mbuv_s_ssse3(MACROBLOCKD *xd) {
-  vp8_build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
+void vp9_build_intra_predictors_mbuv_s_ssse3(MACROBLOCKD *xd) {
+  vp9_build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
                                       xd->dst.v_buffer, xd->dst.uv_stride,
-                                      vp8_intra_pred_uv_tm_ssse3,
-                                      vp8_intra_pred_uv_ho_ssse3);
+                                      vp9_intra_pred_uv_tm_ssse3,
+                                      vp9_intra_pred_uv_ho_ssse3);
 }

@@ -87,7 +87,7 @@ extern void vp8_filter_block2d_second_pass_only_armv6
 );
 
 #if HAVE_ARMV6
-void vp8_sixtap_predict_armv6
+void vp9_sixtap_predict_armv6
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -128,7 +128,7 @@ void vp8_sixtap_predict_armv6
   }
 }
 
-void vp8_sixtap_predict8x8_armv6
+void vp9_sixtap_predict8x8_armv6
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -162,7 +162,7 @@ void vp8_sixtap_predict8x8_armv6
 }
 
 
-void vp8_sixtap_predict16x16_armv6
+void vp9_sixtap_predict16x16_armv6
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,

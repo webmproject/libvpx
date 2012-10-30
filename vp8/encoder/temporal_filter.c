@@ -59,7 +59,7 @@ static void vp8_temporal_filter_predictors_mb_c
     xd->subpixel_predict16x16(yptr, stride,
                              (mv_col & 7) << 1, (mv_row & 7) << 1, &pred[0], 16);
   } else {
-    vp8_copy_mem16x16(yptr, stride, &pred[0], 16);
+    vp9_copy_mem16x16(yptr, stride, &pred[0], 16);
   }
 
   // U & V
@@ -79,8 +79,8 @@ static void vp8_temporal_filter_predictors_mb_c
                            (omv_col & 15), (omv_row & 15), &pred[320], 8);
   }
   else {
-    vp8_copy_mem8x8(uptr, stride, &pred[256], 8);
-    vp8_copy_mem8x8(vptr, stride, &pred[320], 8);
+    vp9_copy_mem8x8(uptr, stride, &pred[256], 8);
+    vp9_copy_mem8x8(vptr, stride, &pred[320], 8);
   }
 }
 void vp9_temporal_filter_apply_c

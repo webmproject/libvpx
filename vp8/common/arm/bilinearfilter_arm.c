@@ -35,7 +35,7 @@ void vp8_filter_block2d_bil_armv6
 }
 
 
-void vp8_bilinear_predict4x4_armv6
+void vp9_bilinear_predict4x4_armv6
 (
   unsigned char  *src_ptr,
   int   src_pixels_per_line,
@@ -53,7 +53,7 @@ void vp8_bilinear_predict4x4_armv6
   vp8_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 4, 4);
 }
 
-void vp8_bilinear_predict8x8_armv6
+void vp9_bilinear_predict8x8_armv6
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -71,7 +71,7 @@ void vp8_bilinear_predict8x8_armv6
   vp8_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 8);
 }
 
-void vp8_bilinear_predict8x4_armv6
+void vp9_bilinear_predict8x4_armv6
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -89,7 +89,7 @@ void vp8_bilinear_predict8x4_armv6
   vp8_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 4);
 }
 
-void vp8_bilinear_predict16x16_armv6
+void vp9_bilinear_predict16x16_armv6
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,

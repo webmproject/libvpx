@@ -484,12 +484,12 @@ void vp9_first_pass(VP8_COMP *cpi) {
 
   vp9_build_block_offsets(x);
 
-  vp8_setup_block_dptrs(&x->e_mbd);
+  vp9_setup_block_dptrs(&x->e_mbd);
 
   vp9_setup_block_ptrs(x);
 
   // set up frame new frame for intra coded blocks
-  vp8_setup_intra_recon(new_yv12);
+  vp9_setup_intra_recon(new_yv12);
   vp9_frame_init_quantizer(cpi);
 
   // Initialise the MV cost table to the defaults
@@ -497,7 +497,7 @@ void vp9_first_pass(VP8_COMP *cpi) {
   // if ( 0 )
   {
     int flag[2] = {1, 1};
-    vp8_init_mv_probs(cm);
+    vp9_init_mv_probs(cm);
     vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
   }
 
@@ -529,7 +529,7 @@ void vp9_first_pass(VP8_COMP *cpi) {
       xd->left_available = (mb_col != 0);
 
       // Copy current mb to a buffer
-      vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+      vp9_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
       // do intra 16x16 prediction
       this_error = vp9_encode_intra(cpi, x, use_dc_pred);
@@ -692,7 +692,7 @@ void vp9_first_pass(VP8_COMP *cpi) {
     x->src.v_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
 
     // extend the recon for intra prediction
-    vp8_extend_mb_row(new_yv12, xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
+    vp9_extend_mb_row(new_yv12, xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
     vp8_clear_system_state();  // __asm emms;
   }
 
@@ -769,7 +769,7 @@ void vp9_first_pass(VP8_COMP *cpi) {
     cpi->twopass.sr_update_lag++;
 
   // swap frame pointers so last frame refers to the frame we just compressed
-  vp8_swap_yv12_buffer(lst_yv12, new_yv12);
+  vp9_swap_yv12_buffer(lst_yv12, new_yv12);
   vp8_yv12_extend_frame_borders(lst_yv12);
 
   // Special case for the first frame. Copy into the GF buffer as a second reference.

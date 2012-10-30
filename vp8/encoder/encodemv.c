@@ -36,7 +36,7 @@ static void encode_nmv_component(vp8_writer* const bc,
   vp8_write(bc, s, mvcomp->sign);
   z = (s ? -v : v) - 1;       /* magnitude - 1 */
 
-  c = vp8_get_mv_class(z, &o);
+  c = vp9_get_mv_class(z, &o);
 
   vp8_write_token(bc, vp8_mv_class_tree, mvcomp->classes,
                   vp8_mv_class_encodings + c);
@@ -64,7 +64,7 @@ static void encode_nmv_component_fp(vp8_writer *bc,
   s = v < 0;
   z = (s ? -v : v) - 1;       /* magnitude - 1 */
 
-  c = vp8_get_mv_class(z, &o);
+  c = vp9_get_mv_class(z, &o);
 
   d = (o >> 3);               /* int mv data */
   f = (o >> 1) & 3;           /* fractional pel mv data */
@@ -120,7 +120,7 @@ static void build_nmv_component_cost_table(int *mvcost,
   for (v = 1; v <= MV_MAX; ++v) {
     int z, c, o, d, e, f, cost = 0;
     z = v - 1;
-    c = vp8_get_mv_class(z, &o);
+    c = vp9_get_mv_class(z, &o);
     cost += class_cost[c];
     d = (o >> 3);               /* int mv data */
     f = (o >> 1) & 3;           /* fractional pel mv data */
@@ -227,7 +227,7 @@ void print_nmvstats() {
   unsigned int branch_ct_class0_hp[2][2];
   unsigned int branch_ct_hp[2][2];
   int i, j, k;
-  vp8_counts_to_nmv_context(&tnmvcounts, &prob, 1,
+  vp9_counts_to_nmv_context(&tnmvcounts, &prob, 1,
                             branch_ct_joint, branch_ct_sign, branch_ct_classes,
                             branch_ct_class0, branch_ct_bits,
                             branch_ct_class0_fp, branch_ct_fp,
@@ -374,7 +374,7 @@ void vp9_write_nmvprobs(VP8_COMP* const cpi, int usehp, vp8_writer* const bc) {
   if (!cpi->dummy_packing)
     add_nmvcount(&tnmvcounts, &cpi->NMVcount);
 #endif
-  vp8_counts_to_nmv_context(&cpi->NMVcount, &prob, usehp,
+  vp9_counts_to_nmv_context(&cpi->NMVcount, &prob, usehp,
                             branch_ct_joint, branch_ct_sign, branch_ct_classes,
                             branch_ct_class0, branch_ct_bits,
                             branch_ct_class0_fp, branch_ct_fp,
@@ -510,7 +510,7 @@ void vp9_write_nmvprobs(VP8_COMP* const cpi, int usehp, vp8_writer* const bc) {
 
 void vp9_encode_nmv(vp8_writer* const bc, const MV* const mv,
                     const MV* const ref, const nmv_context* const mvctx) {
-  MV_JOINT_TYPE j = vp8_get_mv_joint(*mv);
+  MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
   vp8_write_token(bc, vp8_mv_joint_tree, mvctx->joints,
                   vp8_mv_joint_encodings + j);
   if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
@@ -524,8 +524,8 @@ void vp9_encode_nmv(vp8_writer* const bc, const MV* const mv,
 void vp9_encode_nmv_fp(vp8_writer* const bc, const MV* const mv,
                        const MV* const ref, const nmv_context* const mvctx,
                        int usehp) {
-  MV_JOINT_TYPE j = vp8_get_mv_joint(*mv);
-  usehp = usehp && vp8_use_nmv_hp(ref);
+  MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
+  usehp = usehp && vp9_use_nmv_hp(ref);
   if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
     encode_nmv_component_fp(bc, mv->row, ref->row, &mvctx->comps[0], usehp);
   }

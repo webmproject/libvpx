@@ -225,7 +225,7 @@ static int read_nmv_component(vp8_reader *r,
   }
   o = d << 3;
 
-  z = vp8_get_mv_mag(c, o);
+  z = vp9_get_mv_mag(c, o);
   v = (s ? -(z + 8) : (z + 8));
   return v;
 }
@@ -240,7 +240,7 @@ static int read_nmv_component_fp(vp8_reader *r,
   z = (s ? -v : v) - 1;       /* magnitude - 1 */
   z &= ~7;
 
-  c = vp8_get_mv_class(z, &o);
+  c = vp9_get_mv_class(z, &o);
   d = o >> 3;
 
   if (c == MV_CLASS_0) {
@@ -260,7 +260,7 @@ static int read_nmv_component_fp(vp8_reader *r,
   } else {
     ++o;  /* Note if hp is not used, the default value of the hp bit is 1 */
   }
-  z = vp8_get_mv_mag(c, o);
+  z = vp9_get_mv_mag(c, o);
   v = (s ? -(z + 1) : (z + 1));
   return v;
 }
@@ -279,8 +279,8 @@ static void read_nmv(vp8_reader *r, MV *mv, const MV *ref,
 
 static void read_nmv_fp(vp8_reader *r, MV *mv, const MV *ref,
                         const nmv_context *mvctx, int usehp) {
-  MV_JOINT_TYPE j = vp8_get_mv_joint(*mv);
-  usehp = usehp && vp8_use_nmv_hp(ref);
+  MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
+  usehp = usehp && vp9_use_nmv_hp(ref);
   if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
     mv->row = read_nmv_component_fp(r, mv->row, ref->row, &mvctx->comps[0],
                                     usehp);
@@ -481,7 +481,7 @@ static B_PREDICTION_MODE sub_mv_ref(vp8_reader *bc, const vp8_prob *p) {
 }
 
 #ifdef VPX_MODE_COUNT
-unsigned int vp8_mv_cont_count[5][4] = {
+unsigned int vp9_mv_cont_count[5][4] = {
   { 0, 0, 0, 0 },
   { 0, 0, 0, 0 },
   { 0, 0, 0, 0 },
@@ -719,7 +719,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     int recon_uv_stride, recon_uvoffset;
 #endif
 
-    vp8_find_near_mvs(xd, mi,
+    vp9_find_near_mvs(xd, mi,
                       prev_mi,
                       &nearest, &nearby, &best_mv, rct,
                       mbmi->ref_frame, cm->ref_frame_sign_bias);
@@ -759,7 +759,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     }
 #endif
 
-    vp8_mv_ref_probs(&pbi->common, mv_ref_p, rct);
+    vp9_mv_ref_probs(&pbi->common, mv_ref_p, rct);
 
     // Is the segment level mode feature enabled for this segment
     if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
@@ -773,7 +773,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
       mbmi->mode = read_mv_ref(bc, mv_ref_p);
 
-      vp8_accum_mv_refs(&pbi->common, mbmi->mode, rct);
+      vp9_accum_mv_refs(&pbi->common, mbmi->mode, rct);
     }
 
 #if CONFIG_PRED_FILTER
@@ -828,7 +828,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           cm->yv12_fb[second_ref_fb_idx].u_buffer + recon_uvoffset;
         xd->second_pre.v_buffer =
           cm->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
-        vp8_find_near_mvs(xd, mi, prev_mi,
+        vp9_find_near_mvs(xd, mi, prev_mi,
                           &nearest_second, &nearby_second, &best_mv_second,
                           rct,
                           mbmi->second_ref_frame,
@@ -848,7 +848,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                               &nearby_second);
       }
 #else
-      vp8_find_near_mvs(xd, mi, prev_mi,
+      vp9_find_near_mvs(xd, mi, prev_mi,
                         &nearest_second, &nearby_second, &best_mv_second,
                         rct,
                         mbmi->second_ref_frame,
@@ -883,7 +883,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             second_leftmv.as_int = left_block_second_mv(mi, k);
             second_abovemv.as_int = above_block_second_mv(mi, k, mis);
           }
-          mv_contz = vp8_mv_cont(&leftmv, &abovemv);
+          mv_contz = vp9_mv_cont(&leftmv, &abovemv);
           blockmode = sub_mv_ref(bc, cm->fc.sub_mv_ref_prob [mv_contz]);
           cm->fc.sub_mv_ref_counts[mv_contz][blockmode - LEFT4X4]++;
 
@@ -892,7 +892,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
               read_nmv(bc, &blockmv.as_mv, &best_mv.as_mv, nmvc);
               read_nmv_fp(bc, &blockmv.as_mv, &best_mv.as_mv, nmvc,
                           xd->allow_high_precision_mv);
-              vp8_increment_nmv(&blockmv.as_mv, &best_mv.as_mv,
+              vp9_increment_nmv(&blockmv.as_mv, &best_mv.as_mv,
                                 &cm->fc.NMVcount, xd->allow_high_precision_mv);
               blockmv.as_mv.row += best_mv.as_mv.row;
               blockmv.as_mv.col += best_mv.as_mv.col;
@@ -901,13 +901,13 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 read_nmv(bc, &secondmv.as_mv, &best_mv_second.as_mv, nmvc);
                 read_nmv_fp(bc, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
                             xd->allow_high_precision_mv);
-                vp8_increment_nmv(&secondmv.as_mv, &best_mv_second.as_mv,
+                vp9_increment_nmv(&secondmv.as_mv, &best_mv_second.as_mv,
                                   &cm->fc.NMVcount, xd->allow_high_precision_mv);
                 secondmv.as_mv.row += best_mv_second.as_mv.row;
                 secondmv.as_mv.col += best_mv_second.as_mv.col;
               }
 #ifdef VPX_MODE_COUNT
-              vp8_mv_cont_count[mv_contz][3]++;
+              vp9_mv_cont_count[mv_contz][3]++;
 #endif
               break;
             case LEFT4X4:
@@ -915,7 +915,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
               if (mbmi->second_ref_frame)
                 secondmv.as_int = second_leftmv.as_int;
 #ifdef VPX_MODE_COUNT
-              vp8_mv_cont_count[mv_contz][0]++;
+              vp9_mv_cont_count[mv_contz][0]++;
 #endif
               break;
             case ABOVE4X4:
@@ -923,7 +923,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
               if (mbmi->second_ref_frame)
                 secondmv.as_int = second_abovemv.as_int;
 #ifdef VPX_MODE_COUNT
-              vp8_mv_cont_count[mv_contz][1]++;
+              vp9_mv_cont_count[mv_contz][1]++;
 #endif
               break;
             case ZERO4X4:
@@ -931,7 +931,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
               if (mbmi->second_ref_frame)
                 secondmv.as_int = 0;
 #ifdef VPX_MODE_COUNT
-              vp8_mv_cont_count[mv_contz][2]++;
+              vp9_mv_cont_count[mv_contz][2]++;
 #endif
               break;
             default:
@@ -1024,7 +1024,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         read_nmv(bc, &mv->as_mv, &best_mv.as_mv, nmvc);
         read_nmv_fp(bc, &mv->as_mv, &best_mv.as_mv, nmvc,
                     xd->allow_high_precision_mv);
-        vp8_increment_nmv(&mv->as_mv, &best_mv.as_mv, &cm->fc.NMVcount,
+        vp9_increment_nmv(&mv->as_mv, &best_mv.as_mv, &cm->fc.NMVcount,
                           xd->allow_high_precision_mv);
 
         mv->as_mv.row += best_mv.as_mv.row;
@@ -1057,7 +1057,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           read_nmv(bc, &mbmi->mv[1].as_mv, &best_mv_second.as_mv, nmvc);
           read_nmv_fp(bc, &mbmi->mv[1].as_mv, &best_mv_second.as_mv, nmvc,
                       xd->allow_high_precision_mv);
-          vp8_increment_nmv(&mbmi->mv[1].as_mv, &best_mv_second.as_mv,
+          vp9_increment_nmv(&mbmi->mv[1].as_mv, &best_mv_second.as_mv,
                             &cm->fc.NMVcount, xd->allow_high_precision_mv);
           mbmi->mv[1].as_mv.row += best_mv_second.as_mv.row;
           mbmi->mv[1].as_mv.col += best_mv_second.as_mv.col;

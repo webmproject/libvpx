@@ -55,7 +55,7 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
 
 }
 
-void vp8_loop_filter_update_sharpness(loop_filter_info_n *lfi,
+void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
                                       int sharpness_lvl) {
   int i;
 
@@ -84,12 +84,12 @@ void vp8_loop_filter_update_sharpness(loop_filter_info_n *lfi,
   }
 }
 
-void vp8_loop_filter_init(VP8_COMMON *cm) {
+void vp9_loop_filter_init(VP8_COMMON *cm) {
   loop_filter_info_n *lfi = &cm->lf_info;
   int i;
 
   /* init limits for given sharpness*/
-  vp8_loop_filter_update_sharpness(lfi, cm->sharpness_level);
+  vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
   cm->last_sharpness_level = cm->sharpness_level;
 
   /* init LUT for lvl  and hev thr picking */
@@ -101,7 +101,7 @@ void vp8_loop_filter_init(VP8_COMMON *cm) {
   }
 }
 
-void vp8_loop_filter_frame_init(VP8_COMMON *cm,
+void vp9_loop_filter_frame_init(VP8_COMMON *cm,
                                 MACROBLOCKD *xd,
                                 int default_filt_lvl) {
   int seg,  /* segment number */
@@ -112,7 +112,7 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
 
   /* update limits if sharpness has changed */
   if (cm->last_sharpness_level != cm->sharpness_level) {
-    vp8_loop_filter_update_sharpness(lfi, cm->sharpness_level);
+    vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
     cm->last_sharpness_level = cm->sharpness_level;
   }
 
@@ -178,7 +178,7 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
   }
 }
 
-void vp8_loop_filter_frame
+void vp9_loop_filter_frame
 (
   VP8_COMMON *cm,
   MACROBLOCKD *xd
@@ -200,7 +200,7 @@ void vp8_loop_filter_frame
   const MODE_INFO *mode_info_context = cm->mi;
 
   /* Initialize the loop filter for this frame. */
-  vp8_loop_filter_frame_init(cm, xd, cm->filter_level);
+  vp9_loop_filter_frame_init(cm, xd, cm->filter_level);
 
   /* Set up the buffer pointers */
   y_ptr = post->y_buffer;
@@ -236,15 +236,15 @@ void vp8_loop_filter_frame
                    mode_info_context[-1].mbmi.mb_skip_coeff)
 #endif
               )
-            vp8_loop_filter_mbv(y_ptr, u_ptr, v_ptr, post->y_stride,
+            vp9_loop_filter_mbv(y_ptr, u_ptr, v_ptr, post->y_stride,
                                 post->uv_stride, &lfi);
 
           if (!skip_lf && tx_type != TX_16X16) {
             if (tx_type == TX_8X8)
-              vp8_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
+              vp9_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
                                     post->uv_stride, &lfi);
             else
-              vp8_loop_filter_bv(y_ptr, u_ptr, v_ptr, post->y_stride,
+              vp9_loop_filter_bv(y_ptr, u_ptr, v_ptr, post->y_stride,
                                  post->uv_stride, &lfi);
 
           }
@@ -257,15 +257,15 @@ void vp8_loop_filter_frame
                    mode_info_context[-cm->mode_info_stride].mbmi.mb_skip_coeff)
 #endif
               )
-            vp8_loop_filter_mbh(y_ptr, u_ptr, v_ptr, post->y_stride,
+            vp9_loop_filter_mbh(y_ptr, u_ptr, v_ptr, post->y_stride,
                                 post->uv_stride, &lfi);
 
           if (!skip_lf && tx_type != TX_16X16) {
             if (tx_type == TX_8X8)
-              vp8_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
+              vp9_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
                                     post->uv_stride, &lfi);
             else
-              vp8_loop_filter_bh(y_ptr, u_ptr, v_ptr, post->y_stride,
+              vp9_loop_filter_bh(y_ptr, u_ptr, v_ptr, post->y_stride,
                                  post->uv_stride, &lfi);
           }
         } else {
@@ -316,7 +316,7 @@ void vp8_loop_filter_frame
   }
 }
 
-void vp8_loop_filter_frame_yonly
+void vp9_loop_filter_frame_yonly
 (
   VP8_COMMON *cm,
   MACROBLOCKD *xd,
@@ -343,7 +343,7 @@ void vp8_loop_filter_frame_yonly
 #endif
 
   /* Initialize the loop filter for this frame. */
-  vp8_loop_filter_frame_init(cm, xd, default_filt_lvl);
+  vp9_loop_filter_frame_init(cm, xd, default_filt_lvl);
 
   /* Set up the buffer pointers */
   y_ptr = post->y_buffer;
@@ -371,24 +371,24 @@ void vp8_loop_filter_frame_yonly
           lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
           if (mb_col > 0)
-            vp8_loop_filter_mbv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+            vp9_loop_filter_mbv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
 
           if (!skip_lf && tx_type != TX_16X16) {
             if (tx_type == TX_8X8)
-              vp8_loop_filter_bv8x8(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+              vp9_loop_filter_bv8x8(y_ptr, 0, 0, post->y_stride, 0, &lfi);
             else
-              vp8_loop_filter_bv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+              vp9_loop_filter_bv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
           }
 
           /* don't apply across umv border */
           if (mb_row > 0)
-            vp8_loop_filter_mbh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+            vp9_loop_filter_mbh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
 
           if (!skip_lf && tx_type != TX_16X16) {
             if (tx_type == TX_8X8)
-              vp8_loop_filter_bh8x8(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+              vp9_loop_filter_bh8x8(y_ptr, 0, 0, post->y_stride, 0, &lfi);
             else
-              vp8_loop_filter_bh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+              vp9_loop_filter_bh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
           }
         } else {
           // FIXME: Not 8x8 aware
@@ -422,7 +422,7 @@ void vp8_loop_filter_frame_yonly
 
 }
 
-void vp8_loop_filter_partial_frame
+void vp9_loop_filter_partial_frame
 (
   VP8_COMMON *cm,
   MACROBLOCKD *xd,
@@ -459,7 +459,7 @@ void vp8_loop_filter_partial_frame
   linestocopy <<= 4;
 
   /* Note the baseline filter values for each segment */
-  /* See vp8_loop_filter_frame_init. Rather than call that for each change
+  /* See vp9_loop_filter_frame_init. Rather than call that for each change
    * to default_filt_lvl, copy the relevant calculation here.
    */
   if (alt_flt_enabled) {
@@ -503,15 +503,15 @@ void vp8_loop_filter_partial_frame
           lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
           if (mb_col > 0)
-            vp8_loop_filter_mbv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+            vp9_loop_filter_mbv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
 
           if (!skip_lf)
-            vp8_loop_filter_bv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+            vp9_loop_filter_bv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
 
-          vp8_loop_filter_mbh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+          vp9_loop_filter_mbh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
 
           if (!skip_lf)
-            vp8_loop_filter_bh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
+            vp9_loop_filter_bh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
         } else {
           if (mb_col > 0)
             vp8_loop_filter_simple_mbv (y_ptr, post->y_stride,

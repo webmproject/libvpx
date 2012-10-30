@@ -82,7 +82,7 @@ static unsigned int do_16x16_motion_iteration
 #endif
 
   vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
-  vp8_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
+  vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
   best_err = vp9_sad16x16(xd->dst.y_buffer, xd->dst.y_stride,
                           xd->predictor, 16, INT_MAX);
 
@@ -213,7 +213,7 @@ static int find_best_16x16_intra
     unsigned int err;
 
     xd->mode_info_context->mbmi.mode = mode;
-    vp8_build_intra_predictors_mby(xd);
+    vp9_build_intra_predictors_mby(xd);
     err = vp9_sad16x16(xd->predictor, 16, buf->y_buffer + mb_y_offset,
                        buf->y_stride, best_err);
     // find best

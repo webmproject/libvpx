@@ -202,7 +202,7 @@ vp8_extra_bit_struct vp8_extra_bits[12] = {
 
 #include "default_coef_probs.h"
 
-void vp8_default_coef_probs(VP8_COMMON *pc) {
+void vp9_default_coef_probs(VP8_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
              sizeof(pc->fc.coef_probs));
   vpx_memcpy(pc->fc.hybrid_coef_probs, default_hybrid_coef_probs,
@@ -220,9 +220,9 @@ void vp8_default_coef_probs(VP8_COMMON *pc) {
              sizeof(pc->fc.hybrid_coef_probs_16x16));
 }
 
-void vp8_coef_tree_initialize() {
+void vp9_coef_tree_initialize() {
   init_bit_trees();
-  vp8_tokens_from_tree(vp8_coef_encodings, vp8_coef_tree);
+  vp9_tokens_from_tree(vp8_coef_encodings, vp8_coef_tree);
 }
 
 // #define COEF_COUNT_TESTING
@@ -234,7 +234,7 @@ void vp8_coef_tree_initialize() {
 #define COEF_COUNT_SAT_AFTER_KEY 24
 #define COEF_MAX_UPDATE_FACTOR_AFTER_KEY 128
 
-void vp8_adapt_coef_probs(VP8_COMMON *cm) {
+void vp9_adapt_coef_probs(VP8_COMMON *cm) {
   int t, i, j, k, count;
   unsigned int branch_ct[ENTROPY_NODES][2];
   vp8_prob coef_probs[ENTROPY_NODES];
@@ -318,7 +318,7 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, cm->fc.coef_counts [i][j][k],
           256, 1);
@@ -340,7 +340,7 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, cm->fc.hybrid_coef_counts [i][j][k],
           256, 1);
@@ -362,7 +362,7 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, cm->fc.coef_counts_8x8 [i][j][k],
           256, 1);
@@ -384,7 +384,7 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, cm->fc.hybrid_coef_counts_8x8 [i][j][k],
           256, 1);
@@ -407,7 +407,7 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, cm->fc.coef_counts_16x16[i][j][k], 256, 1);
         for (t = 0; t < ENTROPY_NODES; ++t) {
@@ -429,7 +429,7 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, cm->fc.hybrid_coef_counts_16x16[i][j][k], 256, 1);
         for (t = 0; t < ENTROPY_NODES; ++t) {

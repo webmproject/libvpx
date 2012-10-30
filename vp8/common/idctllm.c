@@ -283,12 +283,12 @@ const int16_t iadst_i16[256] = {
 /* For test */
 #define TEST_INT 1
 #if TEST_INT
-#define vp8_ihtllm_int_c vp8_ihtllm_c
+#define vp9_ihtllm_int_c vp9_ihtllm_c
 #else
-#define vp8_ihtllm_float_c vp8_ihtllm_c
+#define vp9_ihtllm_float_c vp9_ihtllm_c
 #endif
 
-void vp8_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
+void vp9_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
                   TX_TYPE tx_type, int tx_dim) {
   vp8_clear_system_state();  // Make it simd safe : __asm emms;
   {
@@ -412,7 +412,7 @@ void vp8_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
 #define VERTICAL_ROUNDING ((1 << (VERTICAL_SHIFT - 1)) - 1)
 #define HORIZONTAL_SHIFT 17  // 15
 #define HORIZONTAL_ROUNDING ((1 << (HORIZONTAL_SHIFT - 1)) - 1)
-void vp8_ihtllm_int_c(const int16_t *input, int16_t *output, int pitch,
+void vp9_ihtllm_int_c(const int16_t *input, int16_t *output, int pitch,
                    TX_TYPE tx_type, int tx_dim) {
   int i, j, k;
   int16_t imbuf[256];
@@ -492,7 +492,7 @@ void vp8_ihtllm_int_c(const int16_t *input, int16_t *output, int pitch,
   }
 }
 
-void vp8_short_idct4x4llm_c(short *input, short *output, int pitch) {
+void vp9_short_idct4x4llm_c(short *input, short *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
 
@@ -549,7 +549,7 @@ void vp8_short_idct4x4llm_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp8_short_idct4x4llm_1_c(short *input, short *output, int pitch) {
+void vp9_short_idct4x4llm_1_c(short *input, short *output, int pitch) {
   int i;
   int a1;
   short *op = output;
@@ -564,7 +564,7 @@ void vp8_short_idct4x4llm_1_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp8_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride) {
+void vp9_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride) {
   int a1 = ((input_dc + 16) >> 5);
   int r, c;
 
@@ -587,7 +587,7 @@ void vp8_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr, unsigned ch
 
 }
 
-void vp8_short_inv_walsh4x4_c(short *input, short *output) {
+void vp9_short_inv_walsh4x4_c(short *input, short *output) {
   int i;
   int a1, b1, c1, d1;
   short *ip = input;
@@ -624,7 +624,7 @@ void vp8_short_inv_walsh4x4_c(short *input, short *output) {
   }
 }
 
-void vp8_short_inv_walsh4x4_1_c(short *in, short *out) {
+void vp9_short_inv_walsh4x4_1_c(short *in, short *out) {
   int i;
   short tmp[4];
   short *ip = in;
@@ -644,7 +644,7 @@ void vp8_short_inv_walsh4x4_1_c(short *in, short *out) {
 }
 
 #if CONFIG_LOSSLESS
-void vp8_short_inv_walsh4x4_lossless_c(short *input, short *output) {
+void vp9_short_inv_walsh4x4_lossless_c(short *input, short *output) {
   int i;
   int a1, b1, c1, d1;
   short *ip = input;
@@ -684,7 +684,7 @@ void vp8_short_inv_walsh4x4_lossless_c(short *input, short *output) {
   }
 }
 
-void vp8_short_inv_walsh4x4_1_lossless_c(short *in, short *out) {
+void vp9_short_inv_walsh4x4_1_lossless_c(short *in, short *out) {
   int i;
   short tmp[4];
   short *ip = in;
@@ -703,7 +703,7 @@ void vp8_short_inv_walsh4x4_1_lossless_c(short *in, short *out) {
   }
 }
 
-void vp8_short_inv_walsh4x4_x8_c(short *input, short *output, int pitch) {
+void vp9_short_inv_walsh4x4_x8_c(short *input, short *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
   short *ip = input;
@@ -744,7 +744,7 @@ void vp8_short_inv_walsh4x4_x8_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp8_short_inv_walsh4x4_1_x8_c(short *in, short *out, int pitch) {
+void vp9_short_inv_walsh4x4_1_x8_c(short *in, short *out, int pitch) {
   int i;
   short tmp[4];
   short *ip = in;
@@ -765,10 +765,10 @@ void vp8_short_inv_walsh4x4_1_x8_c(short *in, short *out, int pitch) {
   }
 }
 
-void vp8_dc_only_inv_walsh_add_c(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride) {
+void vp9_dc_only_inv_walsh_add_c(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride) {
   int r, c;
   short tmp[16];
-  vp8_short_inv_walsh4x4_1_x8_c(&input_dc, tmp, 4 << 1);
+  vp9_short_inv_walsh4x4_1_x8_c(&input_dc, tmp, 4 << 1);
 
   for (r = 0; r < 4; r++) {
     for (c = 0; c < 4; c++) {
@@ -788,7 +788,7 @@ void vp8_dc_only_inv_walsh_add_c(short input_dc, unsigned char *pred_ptr, unsign
 }
 #endif
 
-void vp8_dc_only_idct_add_8x8_c(short input_dc,
+void vp9_dc_only_idct_add_8x8_c(short input_dc,
                                 unsigned char *pred_ptr,
                                 unsigned char *dst_ptr,
                                 int pitch, int stride) {
@@ -941,7 +941,7 @@ static void idctcol(int *blk) {
 }
 
 #define TX_DIM 8
-void vp8_short_idct8x8_c(short *coefs, short *block, int pitch) {
+void vp9_short_idct8x8_c(short *coefs, short *block, int pitch) {
   int X[TX_DIM * TX_DIM];
   int i, j;
   int shortpitch = pitch >> 1;
@@ -966,7 +966,7 @@ void vp8_short_idct8x8_c(short *coefs, short *block, int pitch) {
 }
 
 
-void vp8_short_ihaar2x2_c(short *input, short *output, int pitch) {
+void vp9_short_ihaar2x2_c(short *input, short *output, int pitch) {
   int i;
   short *ip = input; // 0,1, 4, 8
   short *op = output;
@@ -983,7 +983,7 @@ void vp8_short_ihaar2x2_c(short *input, short *output, int pitch) {
 
 #if 0
 // Keep a really bad float version as reference for now.
-void vp8_short_idct16x16_c(short *input, short *output, int pitch) {
+void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
 
   vp8_clear_system_state(); // Make it simd safe : __asm emms;
   {
@@ -1241,7 +1241,7 @@ void reference_16x16_idct_1d(double input[16], double output[16]) {
 }
 #endif
 
-void vp8_short_idct16x16_c(short *input, short *output, int pitch) {
+void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
 
   vp8_clear_system_state(); // Make it simd safe : __asm emms;
   {

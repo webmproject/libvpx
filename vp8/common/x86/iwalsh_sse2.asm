@@ -11,9 +11,9 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;void vp8_short_inv_walsh4x4_sse2(short *input, short *output)
-global sym(vp8_short_inv_walsh4x4_sse2)
-sym(vp8_short_inv_walsh4x4_sse2):
+;void vp9_short_inv_walsh4x4_sse2(short *input, short *output)
+global sym(vp9_short_inv_walsh4x4_sse2)
+sym(vp9_short_inv_walsh4x4_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 2

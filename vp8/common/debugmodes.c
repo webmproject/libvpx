@@ -13,7 +13,7 @@
 #include "blockd.h"
 
 
-void vp8_print_modes_and_motion_vectors(MODE_INFO *mi, int rows, int cols, int frame) {
+void vp9_print_modes_and_motion_vectors(MODE_INFO *mi, int rows, int cols, int frame) {
 
   int mb_row;
   int mb_col;

@@ -128,7 +128,7 @@ extern void vp8_blit_text(const char *msg, unsigned char *address, const int pit
 extern void vp8_blit_line(int x0, int x1, int y0, int y1, unsigned char *image, const int pitch);
 /***********************************************************************************************************
  */
-void vp8_post_proc_down_and_across_c
+void vp9_post_proc_down_and_across_c
 (
   unsigned char *src_ptr,
   unsigned char *dst_ptr,
@@ -213,7 +213,7 @@ static int q2mbl(int x) {
   x = 50 + (x - 50) * 10 / 8;
   return x * x / 3;
 }
-void vp8_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int cols, int flimit) {
+void vp9_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int cols, int flimit) {
   int r, c, i;
 
   unsigned char *s = src;
@@ -254,7 +254,7 @@ void vp8_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int co
 
 
 
-void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, int flimit) {
+void vp9_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, int flimit) {
   int r, c, i;
   const short *rv3 = &vp8_rv[63 & rand()];
 
@@ -286,7 +286,7 @@ void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, i
 }
 
 
-static void vp8_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
+static void vp9_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
                                            YV12_BUFFER_CONFIG         *post,
                                            int                         q,
                                            int                         low_var_thresh,
@@ -306,7 +306,7 @@ static void vp8_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
 
 }
 
-void vp8_deblock(YV12_BUFFER_CONFIG         *source,
+void vp9_deblock(YV12_BUFFER_CONFIG         *source,
                  YV12_BUFFER_CONFIG         *post,
                  int                         q,
                  int                         low_var_thresh,
@@ -322,7 +322,7 @@ void vp8_deblock(YV12_BUFFER_CONFIG         *source,
   POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
 }
 
-void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
+void vp9_de_noise(YV12_BUFFER_CONFIG         *source,
                   YV12_BUFFER_CONFIG         *post,
                   int                         q,
                   int                         low_var_thresh,
@@ -359,7 +359,7 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
 
 }
 
-double vp8_gaussian(double sigma, double mu, double x) {
+double vp9_gaussian(double sigma, double mu, double x) {
   return 1 / (sigma * sqrt(2.0 * 3.14159265)) *
          (exp(-(x - mu) * (x - mu) / (2 * sigma * sigma)));
 }
@@ -388,7 +388,7 @@ static void fillrd(struct postproc_state *state, int q, int a) {
     next = 0;
 
     for (i = -32; i < 32; i++) {
-      int a = (int)(.5 + 256 * vp8_gaussian(sigma, 0, i));
+      int a = (int)(.5 + 256 * vp9_gaussian(sigma, 0, i));
 
       if (a) {
         for (j = 0; j < a; j++) {
@@ -440,7 +440,7 @@ static void fillrd(struct postproc_state *state, int q, int a) {
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp8_plane_add_noise_c(unsigned char *Start, char *noise,
+void vp9_plane_add_noise_c(unsigned char *Start, char *noise,
                            char blackclamp[16],
                            char whiteclamp[16],
                            char bothclamp[16],
@@ -467,7 +467,7 @@ void vp8_plane_add_noise_c(unsigned char *Start, char *noise,
  * edges unblended to give distinction to macro blocks in areas
  * filled with the same color block.
  */
-void vp8_blend_mb_inner_c(unsigned char *y, unsigned char *u, unsigned char *v,
+void vp9_blend_mb_inner_c(unsigned char *y, unsigned char *u, unsigned char *v,
                           int y1, int u1, int v1, int alpha, int stride) {
   int i, j;
   int y1_const = y1 * ((1 << 16) - alpha);
@@ -500,7 +500,7 @@ void vp8_blend_mb_inner_c(unsigned char *y, unsigned char *u, unsigned char *v,
 /* Blend only the edge of the macro block.  Leave center
  * unblended to allow for other visualizations to be layered.
  */
-void vp8_blend_mb_outer_c(unsigned char *y, unsigned char *u, unsigned char *v,
+void vp9_blend_mb_outer_c(unsigned char *y, unsigned char *u, unsigned char *v,
                           int y1, int u1, int v1, int alpha, int stride) {
   int i, j;
   int y1_const = y1 * ((1 << 16) - alpha);
@@ -555,7 +555,7 @@ void vp8_blend_mb_outer_c(unsigned char *y, unsigned char *u, unsigned char *v,
   }
 }
 
-void vp8_blend_b_c(unsigned char *y, unsigned char *u, unsigned char *v,
+void vp9_blend_b_c(unsigned char *y, unsigned char *u, unsigned char *v,
                    int y1, int u1, int v1, int alpha, int stride) {
   int i, j;
   int y1_const = y1 * ((1 << 16) - alpha);
@@ -626,7 +626,7 @@ static void constrain_line(int x0, int *x1, int y0, int *y1, int width, int heig
 #define RTCD_VTABLE(oci) NULL
 #endif
 
-int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *ppflags) {
+int vp9_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *ppflags) {
   int q = oci->filter_level * 10 / 6;
   int flags = ppflags->post_proc_flag;
   int deblock_level = ppflags->deblocking_level;
@@ -654,10 +654,10 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 #endif
 
   if (flags & VP8D_DEMACROBLOCK) {
-    vp8_deblock_and_de_macro_block(oci->frame_to_show, &oci->post_proc_buffer,
+    vp9_deblock_and_de_macro_block(oci->frame_to_show, &oci->post_proc_buffer,
                                    q + (deblock_level - 5) * 10, 1, 0, RTCD_VTABLE(oci));
   } else if (flags & VP8D_DEBLOCK) {
-    vp8_deblock(oci->frame_to_show, &oci->post_proc_buffer,
+    vp9_deblock(oci->frame_to_show, &oci->post_proc_buffer,
                 q, 1, 0, RTCD_VTABLE(oci));
   } else {
     vp8_yv12_copy_frame_ptr(oci->frame_to_show, &oci->post_proc_buffer);

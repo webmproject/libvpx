@@ -272,7 +272,7 @@
 %endmacro
 
 
-;void vp8_loop_filter_horizontal_edge_sse2
+;void vp9_loop_filter_horizontal_edge_sse2
 ;(
 ;    unsigned char *src_ptr,
 ;    int            src_pixel_step,
@@ -281,8 +281,8 @@
 ;    const char    *thresh,
 ;    int            count
 ;)
-global sym(vp8_loop_filter_horizontal_edge_sse2)
-sym(vp8_loop_filter_horizontal_edge_sse2):
+global sym(vp9_loop_filter_horizontal_edge_sse2)
+sym(vp9_loop_filter_horizontal_edge_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -322,7 +322,7 @@ sym(vp8_loop_filter_horizontal_edge_sse2):
     ret
 
 
-;void vp8_loop_filter_horizontal_edge_uv_sse2
+;void vp9_loop_filter_horizontal_edge_uv_sse2
 ;(
 ;    unsigned char *src_ptr,
 ;    int            src_pixel_step,
@@ -331,8 +331,8 @@ sym(vp8_loop_filter_horizontal_edge_sse2):
 ;    const char    *thresh,
 ;    int            count
 ;)
-global sym(vp8_loop_filter_horizontal_edge_uv_sse2)
-sym(vp8_loop_filter_horizontal_edge_uv_sse2):
+global sym(vp9_loop_filter_horizontal_edge_uv_sse2)
+sym(vp9_loop_filter_horizontal_edge_uv_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -710,7 +710,7 @@ sym(vp8_loop_filter_horizontal_edge_uv_sse2):
 %endmacro
 
 
-;void vp8_loop_filter_vertical_edge_sse2
+;void vp9_loop_filter_vertical_edge_sse2
 ;(
 ;    unsigned char *src_ptr,
 ;    int            src_pixel_step,
@@ -719,8 +719,8 @@ sym(vp8_loop_filter_horizontal_edge_uv_sse2):
 ;    const char    *thresh,
 ;    int            count
 ;)
-global sym(vp8_loop_filter_vertical_edge_sse2)
-sym(vp8_loop_filter_vertical_edge_sse2):
+global sym(vp9_loop_filter_vertical_edge_sse2)
+sym(vp9_loop_filter_vertical_edge_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -777,7 +777,7 @@ sym(vp8_loop_filter_vertical_edge_sse2):
     ret
 
 
-;void vp8_loop_filter_vertical_edge_uv_sse2
+;void vp9_loop_filter_vertical_edge_uv_sse2
 ;(
 ;    unsigned char *u,
 ;    int            src_pixel_step,
@@ -786,8 +786,8 @@ sym(vp8_loop_filter_vertical_edge_sse2):
 ;    const char    *thresh,
 ;    unsigned char *v
 ;)
-global sym(vp8_loop_filter_vertical_edge_uv_sse2)
-sym(vp8_loop_filter_vertical_edge_uv_sse2):
+global sym(vp9_loop_filter_vertical_edge_uv_sse2)
+sym(vp9_loop_filter_vertical_edge_uv_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -845,14 +845,14 @@ sym(vp8_loop_filter_vertical_edge_uv_sse2):
     pop         rbp
     ret
 
-;void vp8_loop_filter_simple_horizontal_edge_sse2
+;void vp9_loop_filter_simple_horizontal_edge_sse2
 ;(
 ;    unsigned char *src_ptr,
 ;    int  src_pixel_step,
 ;    const char *blimit,
 ;)
-global sym(vp8_loop_filter_simple_horizontal_edge_sse2)
-sym(vp8_loop_filter_simple_horizontal_edge_sse2):
+global sym(vp9_loop_filter_simple_horizontal_edge_sse2)
+sym(vp9_loop_filter_simple_horizontal_edge_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
@@ -954,14 +954,14 @@ sym(vp8_loop_filter_simple_horizontal_edge_sse2):
     ret
 
 
-;void vp8_loop_filter_simple_vertical_edge_sse2
+;void vp9_loop_filter_simple_vertical_edge_sse2
 ;(
 ;    unsigned char *src_ptr,
 ;    int  src_pixel_step,
 ;    const char *blimit,
 ;)
-global sym(vp8_loop_filter_simple_vertical_edge_sse2)
-sym(vp8_loop_filter_simple_vertical_edge_sse2):
+global sym(vp9_loop_filter_simple_vertical_edge_sse2)
+sym(vp9_loop_filter_simple_vertical_edge_sse2):
     push        rbp         ; save old base pointer value.
     mov         rbp, rsp    ; set new base pointer value.
     SHADOW_ARGS_TO_STACK 3

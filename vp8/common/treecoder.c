@@ -39,11 +39,11 @@ static void tree2tok(
   } while (++v & 1);
 }
 
-void vp8_tokens_from_tree(struct vp8_token_struct *p, vp8_tree t) {
+void vp9_tokens_from_tree(struct vp8_token_struct *p, vp8_tree t) {
   tree2tok(p, t, 0, 0, 0);
 }
 
-void vp8_tokens_from_tree_offset(struct vp8_token_struct *p, vp8_tree t,
+void vp9_tokens_from_tree_offset(struct vp8_token_struct *p, vp8_tree t,
                                  int offset) {
   tree2tok(p - offset, t, 0, 0, 0);
 }
@@ -94,7 +94,7 @@ static void branch_counts(
 }
 
 
-void vp8_tree_probs_from_distribution(
+void vp9_tree_probs_from_distribution(
   int n,                      /* n = size of alphabet */
   vp8_token tok               [ /* n */ ],
   vp8_tree tree,
@@ -125,7 +125,7 @@ void vp8_tree_probs_from_distribution(
   } while (++t < tree_len);
 }
 
-vp8_prob vp8_bin_prob_from_distribution(const unsigned int counts[2]) {
+vp8_prob vp9_bin_prob_from_distribution(const unsigned int counts[2]) {
   int tot_count = counts[0] + counts[1];
   vp8_prob prob;
   if (tot_count) {

@@ -22,7 +22,7 @@
 ; even number. This function handles 8 pixels in horizontal direction, calculating ONE
 ; rows each iteration to take advantage of the 128 bits operations.
 ;*************************************************************************************/
-;void vp8_filter_block1d8_h6_sse2
+;void vp9_filter_block1d8_h6_sse2
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned short *output_ptr,
@@ -32,8 +32,8 @@
 ;    unsigned int    output_width,
 ;    short           *vp8_filter
 ;)
-global sym(vp8_filter_block1d8_h6_sse2)
-sym(vp8_filter_block1d8_h6_sse2):
+global sym(vp9_filter_block1d8_h6_sse2)
+sym(vp9_filter_block1d8_h6_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -136,7 +136,7 @@ sym(vp8_filter_block1d8_h6_sse2):
     ret
 
 
-;void vp8_filter_block1d16_h6_sse2
+;void vp9_filter_block1d16_h6_sse2
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned short *output_ptr,
@@ -152,8 +152,8 @@ sym(vp8_filter_block1d8_h6_sse2):
 ; even number. This function handles 8 pixels in horizontal direction, calculating ONE
 ; rows each iteration to take advantage of the 128 bits operations.
 ;*************************************************************************************/
-global sym(vp8_filter_block1d16_h6_sse2)
-sym(vp8_filter_block1d16_h6_sse2):
+global sym(vp9_filter_block1d16_h6_sse2)
+sym(vp9_filter_block1d16_h6_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -313,7 +313,7 @@ sym(vp8_filter_block1d16_h6_sse2):
     ret
 
 
-;void vp8_filter_block1d8_v6_sse2
+;void vp9_filter_block1d8_v6_sse2
 ;(
 ;    short *src_ptr,
 ;    unsigned char *output_ptr,
@@ -328,8 +328,8 @@ sym(vp8_filter_block1d16_h6_sse2):
 ; Notes: filter_block1d8_v6 applies a 6 tap filter vertically to the input pixels. The
 ; input pixel array has output_height rows.
 ;*************************************************************************************/
-global sym(vp8_filter_block1d8_v6_sse2)
-sym(vp8_filter_block1d8_v6_sse2):
+global sym(vp9_filter_block1d8_v6_sse2)
+sym(vp9_filter_block1d8_v6_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 8
@@ -356,7 +356,7 @@ sym(vp8_filter_block1d8_v6_sse2):
         movsxd      r8,         dword ptr arg(2) ; dst_ptich
 %endif
 
-.vp8_filter_block1d8_v6_sse2_loop:
+.vp9_filter_block1d8_v6_sse2_loop:
         movdqa      xmm1,       XMMWORD PTR [rsi]
         pmullw      xmm1,       [rax]
 
@@ -396,7 +396,7 @@ sym(vp8_filter_block1d8_v6_sse2):
         add         rdi,        r8
 %endif
         dec         rcx         ; decrement count
-        jnz         .vp8_filter_block1d8_v6_sse2_loop               ; next row
+        jnz         .vp9_filter_block1d8_v6_sse2_loop               ; next row
 
     ; begin epilog
     pop rdi
@@ -408,7 +408,7 @@ sym(vp8_filter_block1d8_v6_sse2):
     ret
 
 
-;void vp8_filter_block1d16_v6_sse2
+;void vp9_filter_block1d16_v6_sse2
 ;(
 ;    unsigned short *src_ptr,
 ;    unsigned char *output_ptr,
@@ -423,8 +423,8 @@ sym(vp8_filter_block1d8_v6_sse2):
 ; Notes: filter_block1d16_v6 applies a 6 tap filter vertically to the input pixels. The
 ; input pixel array has output_height rows.
 ;*************************************************************************************/
-global sym(vp8_filter_block1d16_v6_sse2)
-sym(vp8_filter_block1d16_v6_sse2):
+global sym(vp9_filter_block1d16_v6_sse2)
+sym(vp9_filter_block1d16_v6_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 8
@@ -448,7 +448,7 @@ sym(vp8_filter_block1d16_v6_sse2):
         movsxd      r8,         dword ptr arg(2) ; dst_ptich
 %endif
 
-.vp8_filter_block1d16_v6_sse2_loop:
+.vp9_filter_block1d16_v6_sse2_loop:
 ; The order for adding 6-tap is 2 5 3 1 4 6. Read in data in that order.
         movdqa      xmm1,       XMMWORD PTR [rsi + rdx]       ; line 2
         movdqa      xmm2,       XMMWORD PTR [rsi + rdx + 16]
@@ -511,7 +511,7 @@ sym(vp8_filter_block1d16_v6_sse2):
         add         rdi,        r8
 %endif
         dec         rcx         ; decrement count
-        jnz         .vp8_filter_block1d16_v6_sse2_loop              ; next row
+        jnz         .vp9_filter_block1d16_v6_sse2_loop              ; next row
 
     ; begin epilog
     pop rdi
@@ -523,7 +523,7 @@ sym(vp8_filter_block1d16_v6_sse2):
     ret
 
 
-;void vp8_filter_block1d8_h6_only_sse2
+;void vp9_filter_block1d8_h6_only_sse2
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned int    src_pixels_per_line,
@@ -533,8 +533,8 @@ sym(vp8_filter_block1d16_v6_sse2):
 ;    const short    *vp8_filter
 ;)
 ; First-pass filter only when yoffset==0
-global sym(vp8_filter_block1d8_h6_only_sse2)
-sym(vp8_filter_block1d8_h6_only_sse2):
+global sym(vp9_filter_block1d8_h6_only_sse2)
+sym(vp9_filter_block1d8_h6_only_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -636,7 +636,7 @@ sym(vp8_filter_block1d8_h6_only_sse2):
     ret
 
 
-;void vp8_filter_block1d16_h6_only_sse2
+;void vp9_filter_block1d16_h6_only_sse2
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned int    src_pixels_per_line,
@@ -646,8 +646,8 @@ sym(vp8_filter_block1d8_h6_only_sse2):
 ;    const short    *vp8_filter
 ;)
 ; First-pass filter only when yoffset==0
-global sym(vp8_filter_block1d16_h6_only_sse2)
-sym(vp8_filter_block1d16_h6_only_sse2):
+global sym(vp9_filter_block1d16_h6_only_sse2)
+sym(vp9_filter_block1d16_h6_only_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -801,7 +801,7 @@ sym(vp8_filter_block1d16_h6_only_sse2):
     ret
 
 
-;void vp8_filter_block1d8_v6_only_sse2
+;void vp9_filter_block1d8_v6_only_sse2
 ;(
 ;    unsigned char *src_ptr,
 ;    unsigned int    src_pixels_per_line,
@@ -811,8 +811,8 @@ sym(vp8_filter_block1d16_h6_only_sse2):
 ;    const short    *vp8_filter
 ;)
 ; Second-pass filter only when xoffset==0
-global sym(vp8_filter_block1d8_v6_only_sse2)
-sym(vp8_filter_block1d8_v6_only_sse2):
+global sym(vp9_filter_block1d8_v6_only_sse2)
+sym(vp9_filter_block1d8_v6_only_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -837,7 +837,7 @@ sym(vp8_filter_block1d8_v6_only_sse2):
         movsxd      r8,         dword ptr arg(3) ; dst_ptich
 %endif
 
-.vp8_filter_block1d8_v6_only_sse2_loop:
+.vp9_filter_block1d8_v6_only_sse2_loop:
         movq        xmm1,       MMWORD PTR [rsi]
         movq        xmm2,       MMWORD PTR [rsi + rdx]
         movq        xmm3,       MMWORD PTR [rsi + rdx * 2]
@@ -883,7 +883,7 @@ sym(vp8_filter_block1d8_v6_only_sse2):
         add         rdi,        r8
 %endif
         dec         rcx         ; decrement count
-        jnz         .vp8_filter_block1d8_v6_only_sse2_loop              ; next row
+        jnz         .vp9_filter_block1d8_v6_only_sse2_loop              ; next row
 
     ; begin epilog
     pop rdi
@@ -895,7 +895,7 @@ sym(vp8_filter_block1d8_v6_only_sse2):
     ret
 
 
-;void vp8_unpack_block1d16_h6_sse2
+;void vp9_unpack_block1d16_h6_sse2
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned short *output_ptr,
@@ -903,8 +903,8 @@ sym(vp8_filter_block1d8_v6_only_sse2):
 ;    unsigned int    output_height,
 ;    unsigned int    output_width
 ;)
-global sym(vp8_unpack_block1d16_h6_sse2)
-sym(vp8_unpack_block1d16_h6_sse2):
+global sym(vp9_unpack_block1d16_h6_sse2)
+sym(vp9_unpack_block1d16_h6_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -952,7 +952,7 @@ sym(vp8_unpack_block1d16_h6_sse2):
     ret
 
 
-;void vp8_bilinear_predict16x16_sse2
+;void vp9_bilinear_predict16x16_sse2
 ;(
 ;    unsigned char  *src_ptr,
 ;    int   src_pixels_per_line,
@@ -961,9 +961,9 @@ sym(vp8_unpack_block1d16_h6_sse2):
 ;    unsigned char *dst_ptr,
 ;    int dst_pitch
 ;)
-extern sym(vp8_bilinear_filters_mmx)
-global sym(vp8_bilinear_predict16x16_sse2)
-sym(vp8_bilinear_predict16x16_sse2):
+extern sym(vp9_bilinear_filters_mmx)
+global sym(vp9_bilinear_predict16x16_sse2)
+sym(vp9_bilinear_predict16x16_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -976,7 +976,7 @@ sym(vp8_bilinear_predict16x16_sse2):
     ;const short *HFilter = bilinear_filters_mmx[xoffset]
     ;const short *VFilter = bilinear_filters_mmx[yoffset]
 
-        lea         rcx,        [GLOBAL(sym(vp8_bilinear_filters_mmx))]
+        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_mmx))]
         movsxd      rax,        dword ptr arg(2) ;xoffset
 
         cmp         rax,        0      ;skip first_pass filter if xoffset=0
@@ -1221,7 +1221,7 @@ sym(vp8_bilinear_predict16x16_sse2):
     ret
 
 
-;void vp8_bilinear_predict8x8_sse2
+;void vp9_bilinear_predict8x8_sse2
 ;(
 ;    unsigned char  *src_ptr,
 ;    int   src_pixels_per_line,
@@ -1230,9 +1230,9 @@ sym(vp8_bilinear_predict16x16_sse2):
 ;    unsigned char *dst_ptr,
 ;    int dst_pitch
 ;)
-extern sym(vp8_bilinear_filters_mmx)
-global sym(vp8_bilinear_predict8x8_sse2)
-sym(vp8_bilinear_predict8x8_sse2):
+extern sym(vp9_bilinear_filters_mmx)
+global sym(vp9_bilinear_predict8x8_sse2)
+sym(vp9_bilinear_predict8x8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -1247,7 +1247,7 @@ sym(vp8_bilinear_predict8x8_sse2):
 
     ;const short *HFilter = bilinear_filters_mmx[xoffset]
     ;const short *VFilter = bilinear_filters_mmx[yoffset]
-        lea         rcx,        [GLOBAL(sym(vp8_bilinear_filters_mmx))]
+        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_mmx))]
 
         mov         rsi,        arg(0) ;src_ptr
         movsxd      rdx,        dword ptr arg(1) ;src_pixels_per_line

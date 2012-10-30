@@ -22,7 +22,7 @@ const unsigned char vp8_mbsplit_offset[4][16] = {
 
 static void lower_mv_precision(int_mv *mv, int usehp)
 {
-  if (!usehp || !vp8_use_nmv_hp(&mv->as_mv)) {
+  if (!usehp || !vp9_use_nmv_hp(&mv->as_mv)) {
     if (mv->as_mv.row & 1)
       mv->as_mv.row += (mv->as_mv.row > 0 ? -1 : 1);
     if (mv->as_mv.col & 1)
@@ -34,7 +34,7 @@ static void lower_mv_precision(int_mv *mv, int usehp)
    Note that we only consider one 4x4 subblock from each candidate 16x16
    macroblock.   */
 
-void vp8_find_near_mvs
+void vp9_find_near_mvs
 (
   MACROBLOCKD *xd,
   const MODE_INFO *here,
@@ -157,7 +157,7 @@ void vp8_find_near_mvs
   vp8_clamp_mv2(best_mv, xd);
 }
 
-vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
+vp8_prob *vp9_mv_ref_probs(VP8_COMMON *pc,
                            vp8_prob p[VP8_MVREFS - 1], const int near_mv_ref_ct[4]
                           ) {
   p[0] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[0]] [0];

@@ -47,7 +47,7 @@ int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, DEC_MVCOSTS,
   MV v;
   v.row = (mv->as_mv.row - ref->as_mv.row);
   v.col = (mv->as_mv.col - ref->as_mv.col);
-  return ((mvjcost[vp8_get_mv_joint(v)] +
+  return ((mvjcost[vp9_get_mv_joint(v)] +
            mvcost[0][v.row] + mvcost[1][v.col]) *
           Weight) >> 7;
 }
@@ -58,7 +58,7 @@ static int mv_err_cost(int_mv *mv, int_mv *ref, DEC_MVCOSTS,
     MV v;
     v.row = (mv->as_mv.row - ref->as_mv.row);
     v.col = (mv->as_mv.col - ref->as_mv.col);
-    return ((mvjcost[vp8_get_mv_joint(v)] +
+    return ((mvjcost[vp9_get_mv_joint(v)] +
              mvcost[0][v.row] + mvcost[1][v.col]) *
             error_per_bit + 128) >> 8;
   }
@@ -72,7 +72,7 @@ static int mvsad_err_cost(int_mv *mv, int_mv *ref, DEC_MVSADCOSTS,
     MV v;
     v.row = (mv->as_mv.row - ref->as_mv.row);
     v.col = (mv->as_mv.col - ref->as_mv.col);
-    return ((mvjsadcost[vp8_get_mv_joint(v)] +
+    return ((mvjsadcost[vp9_get_mv_joint(v)] +
              mvsadcost[0][v.row] + mvsadcost[1][v.col]) *
             error_per_bit + 128) >> 8;
   }
@@ -388,7 +388,7 @@ int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   }
 
   if (xd->allow_high_precision_mv) {
-    usehp = vp8_use_nmv_hp(&ref_mv->as_mv);
+    usehp = vp9_use_nmv_hp(&ref_mv->as_mv);
   } else {
     usehp = 0;
   }
@@ -754,7 +754,7 @@ int vp9_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   }
 
   if (x->e_mbd.allow_high_precision_mv) {
-    usehp = vp8_use_nmv_hp(&ref_mv->as_mv);
+    usehp = vp9_use_nmv_hp(&ref_mv->as_mv);
   } else {
     usehp = 0;
   }

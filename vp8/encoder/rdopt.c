@@ -264,7 +264,7 @@ void vp9_init_me_luts() {
 static int compute_rd_mult(int qindex) {
   int q;
 
-  q = vp8_dc_quant(qindex, 0);
+  q = vp9_dc_quant(qindex, 0);
   return (11 * q * q) >> 6;
 }
 
@@ -313,7 +313,7 @@ void vp9_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
 
   vp9_set_speed_features(cpi);
 
-  q = (int)pow(vp8_dc_quant(QIndex, 0) >> 2, 1.25);
+  q = (int)pow(vp9_dc_quant(QIndex, 0) >> 2, 1.25);
   q = q << 2;
   cpi->RDMULT = cpi->RDMULT << 4;
 
@@ -1103,7 +1103,7 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
 #if CONFIG_COMP_INTRA_PRED
       if (mode2 == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
 #endif
-        vp8_intra4x4_predict(b, mode, b->predictor);
+        vp9_intra4x4_predict(b, mode, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
       } else {
         vp8_comp_intra4x4_predict(b, mode, mode2, b->predictor);
@@ -1158,12 +1158,12 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
 
   // inverse transform
   if (best_tx_type != DCT_DCT)
-    vp8_ihtllm_c(best_dqcoeff, b->diff, 32, best_tx_type, 4);
+    vp9_ihtllm_c(best_dqcoeff, b->diff, 32, best_tx_type, 4);
   else
     IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(
         best_dqcoeff, b->diff, 32);
 
-  vp8_recon_b(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+  vp9_recon_b(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 
   return best_rd;
 }
@@ -1266,7 +1266,7 @@ static int64_t rd_pick_intra_sby_mode(VP8_COMP *cpi,
   /* Y Search for 32x32 intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     x->e_mbd.mode_info_context->mbmi.mode = mode;
-    vp8_build_intra_predictors_sby_s(&x->e_mbd);
+    vp9_build_intra_predictors_sby_s(&x->e_mbd);
 
     super_block_yrd_8x8(x, &this_rate_tokenonly,
                         &this_distortion, IF_RTCD(&cpi->rtcd), &s);
@@ -1327,7 +1327,7 @@ static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
       mbmi->second_mode = mode2;
       if (mode2 == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
 #endif
-        vp8_build_intra_predictors_mby(&x->e_mbd);
+        vp9_build_intra_predictors_mby(&x->e_mbd);
 #if CONFIG_COMP_INTRA_PRED
       } else {
         continue; // i.e. disable for now
@@ -1427,7 +1427,7 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
 #if CONFIG_COMP_INTRA_PRED
       if (mode2 == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
 #endif
-        vp8_intra8x8_predict(b, mode, b->predictor);
+        vp9_intra8x8_predict(b, mode, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
       } else {
         continue; // i.e. disable for now
@@ -1715,7 +1715,7 @@ static int64_t rd_inter16x16_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
 static int64_t rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                               int *distortion, int *skippable, int fullpixel) {
-  vp8_build_inter4x4_predictors_mbuv(&x->e_mbd);
+  vp9_build_inter4x4_predictors_mbuv(&x->e_mbd);
   vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                     x->e_mbd.predictor, x->src.uv_stride);
 
@@ -1760,7 +1760,7 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
       mbmi->second_uv_mode = mode2;
       if (mode2 == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
 #endif
-        vp8_build_intra_predictors_mbuv(&x->e_mbd);
+        vp9_build_intra_predictors_mbuv(&x->e_mbd);
 #if CONFIG_COMP_INTRA_PRED
       } else {
         continue;
@@ -1825,7 +1825,7 @@ static void rd_pick_intra_mbuv_mode_8x8(VP8_COMP *cpi,
     int64_t this_rd;
 
     mbmi->uv_mode = mode;
-    vp8_build_intra_predictors_mbuv(&x->e_mbd);
+    vp9_build_intra_predictors_mbuv(&x->e_mbd);
     vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                       x->e_mbd.predictor, x->src.uv_stride);
     vp9_transform_mbuv_8x8(x);
@@ -1917,7 +1917,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP8_COMP *cpi,
 
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
-    vp8_build_intra_predictors_sbuv_s(&x->e_mbd);
+    vp9_build_intra_predictors_sbuv_s(&x->e_mbd);
 
     super_block_uvrd_8x8(x, &this_rate_tokenonly,
                          &this_distortion, IF_RTCD(&cpi->rtcd), &s);
@@ -1958,7 +1958,7 @@ int vp9_cost_mv_ref(VP8_COMP *cpi,
 
     vp8_prob p [VP8_MVREFS - 1];
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
-    vp8_mv_ref_probs(pc, p, near_mv_ref_ct);
+    vp9_mv_ref_probs(pc, p, near_mv_ref_ct);
     return vp8_cost_token(vp8_mv_ref_tree, p,
                           vp8_mv_ref_encoding_array - NEARESTMV + m);
   } else
@@ -2092,9 +2092,9 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
       BLOCK *be = &x->block[i];
       int thisdistortion;
 
-      vp8_build_inter_predictors_b(bd, 16, xd->subpixel_predict);
+      vp9_build_inter_predictors_b(bd, 16, xd->subpixel_predict);
       if (xd->mode_info_context->mbmi.second_ref_frame)
-        vp8_build_2nd_inter_predictors_b(bd, 16, xd->subpixel_predict_avg);
+        vp9_build_2nd_inter_predictors_b(bd, 16, xd->subpixel_predict_avg);
       vp9_subtract_b(be, bd, 16);
       x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
       x->quantize_b_4x4(be, bd);
@@ -2142,9 +2142,9 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
       BLOCK *be = &x->block[ib], *be2 = &x->block[idx];
       int thisdistortion;
 
-      vp8_build_inter_predictors4b(xd, bd, 16);
+      vp9_build_inter_predictors4b(xd, bd, 16);
       if (xd->mode_info_context->mbmi.second_ref_frame)
-        vp8_build_2nd_inter_predictors4b(xd, bd, 16);
+        vp9_build_2nd_inter_predictors4b(xd, bd, 16);
       vp9_subtract_4b_c(be, bd, 16);
 
       if (xd->mode_info_context->mbmi.txfm_size == TX_4X4) {
@@ -3254,7 +3254,7 @@ static void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
 
 
-  vp8_find_near_mvs(xd, xd->mode_info_context,
+  vp9_find_near_mvs(xd, xd->mode_info_context,
                     xd->prev_mode_info_context,
                     &frame_nearest_mv[frame_type], &frame_near_mv[frame_type],
                     &frame_best_ref_mv[frame_type], frame_mdcounts[frame_type],
@@ -3421,12 +3421,12 @@ static int64_t handle_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
   *rate2 += vp9_cost_mv_ref(cpi, this_mode, mdcounts);
 
   if (block_size == BLOCK_16X16) {
-    vp8_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
+    vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
     if (is_comp_pred)
-      vp8_build_2nd_inter16x16_predictors_mby(xd, xd->predictor, 16);
+      vp9_build_2nd_inter16x16_predictors_mby(xd, xd->predictor, 16);
   } else {
 #if CONFIG_SUPERBLOCKS
-    vp8_build_inter32x32_predictors_sb(xd,
+    vp9_build_inter32x32_predictors_sb(xd,
                                        xd->dst.y_buffer,
                                        xd->dst.u_buffer,
                                        xd->dst.v_buffer,
@@ -3493,10 +3493,10 @@ static int64_t handle_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
 
   if (!x->skip) {
     if (block_size == BLOCK_16X16) {
-      vp8_build_1st_inter16x16_predictors_mbuv(xd, &xd->predictor[256],
+      vp9_build_1st_inter16x16_predictors_mbuv(xd, &xd->predictor[256],
                                                &xd->predictor[320], 8);
       if (is_comp_pred)
-        vp8_build_2nd_inter16x16_predictors_mbuv(xd, &xd->predictor[256],
+        vp9_build_2nd_inter16x16_predictors_mbuv(xd, &xd->predictor[256],
                                                  &xd->predictor[320], 8);
       inter_mode_cost(cpi, x, this_mode, rate2, distortion,
                       rate_y, distortion_y, rate_uv, distortion_uv,
@@ -3685,7 +3685,7 @@ void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
     } else {
       mbmi->interp_filter = cpi->common.mcomp_filter_type;
     }
-    vp8_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
+    vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
     // Test best rd so far against threshold for trying this mode.
     if (best_rd <= cpi->rd_threshes[mode_index])
@@ -3780,7 +3780,7 @@ void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
         case D63_PRED:
           mbmi->ref_frame = INTRA_FRAME;
           // FIXME compound intra prediction
-          vp8_build_intra_predictors_mby(&x->e_mbd);
+          vp9_build_intra_predictors_mby(&x->e_mbd);
           macro_block_yrd(cpi, x, &rate_y, &distortion, &skippable, txfm_cache);
           rate2 += rate_y;
           distortion2 += distortion;

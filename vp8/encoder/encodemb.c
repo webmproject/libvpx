@@ -892,7 +892,7 @@ void vp9_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
-  vp8_build_inter_predictors_mb(xd);
+  vp9_build_inter_predictors_mb(xd);
   vp8_subtract_mb(rtcd, x);
 
   if (tx_size == TX_16X16) {
@@ -900,7 +900,7 @@ void vp9_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     vp9_quantize_mb_16x16(x);
     if (x->optimize)
       optimize_mb_16x16(x, rtcd);
-    vp8_inverse_transform_mb_16x16(IF_RTCD(&rtcd->common->idct), xd);
+    vp9_inverse_transform_mb_16x16(IF_RTCD(&rtcd->common->idct), xd);
   } else if (tx_size == TX_8X8) {
     if (xd->mode_info_context->mbmi.mode == SPLITMV) {
       assert(xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4);
@@ -912,24 +912,24 @@ void vp9_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
         vp9_optimize_mby_8x8(x, rtcd);
         vp9_optimize_mbuv_4x4(x, rtcd);
       }
-      vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), xd);
-      vp8_inverse_transform_mbuv_4x4(IF_RTCD(&rtcd->common->idct), xd);
+      vp9_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), xd);
+      vp9_inverse_transform_mbuv_4x4(IF_RTCD(&rtcd->common->idct), xd);
     } else {
       vp9_transform_mb_8x8(x);
       vp9_quantize_mb_8x8(x);
       if (x->optimize)
         optimize_mb_8x8(x, rtcd);
-      vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), xd);
+      vp9_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), xd);
     }
   } else {
     transform_mb_4x4(x);
     vp9_quantize_mb_4x4(x);
     if (x->optimize)
       optimize_mb_4x4(x, rtcd);
-    vp8_inverse_transform_mb_4x4(IF_RTCD(&rtcd->common->idct), xd);
+    vp9_inverse_transform_mb_4x4(IF_RTCD(&rtcd->common->idct), xd);
   }
 
-  vp8_recon_mb(xd);
+  vp9_recon_mb(xd);
 }
 
 /* this function is used by first pass only */
@@ -942,13 +942,13 @@ void vp9_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   xd->mode_info_context->mbmi.pred_filter_enabled = 0;
 #endif
 
-  vp8_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
+  vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
 
   vp9_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
 
   vp9_transform_mby_4x4(x);
   vp9_quantize_mby_4x4(x);
-  vp8_inverse_transform_mby_4x4(IF_RTCD(&rtcd->common->idct), xd);
+  vp9_inverse_transform_mby_4x4(IF_RTCD(&rtcd->common->idct), xd);
 
-  vp8_recon_mby(xd);
+  vp9_recon_mby(xd);
 }
