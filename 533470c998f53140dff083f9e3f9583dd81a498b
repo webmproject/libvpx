@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//9UI\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 18
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-10-30T20:43:32Z",
+      "side": 1,
+      "message": "no space before \u0027;\u0027",
+      "revId": "533470c998f53140dff083f9e3f9583dd81a498b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
