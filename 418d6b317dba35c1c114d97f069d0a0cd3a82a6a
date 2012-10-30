@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//924\u003d",
+        "filename": "vp8/decoder/detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-30T13:19:18Z",
+      "side": 1,
+      "message": "do these need to be static too?",
+      "revId": "418d6b317dba35c1c114d97f069d0a0cd3a82a6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
