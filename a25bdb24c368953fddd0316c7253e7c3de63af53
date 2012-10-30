@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//9O8\u003d",
+        "filename": "vp8/common/onyx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T21:51:13Z",
+      "side": 1,
+      "message": "a blank line between functions would help readability",
+      "revId": "a25bdb24c368953fddd0316c7253e7c3de63af53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9Ow\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1890,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T21:51:13Z",
+      "side": 1,
+      "message": "weird mixing of /**/ and // here, prefer /**/",
+      "revId": "a25bdb24c368953fddd0316c7253e7c3de63af53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9OI\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1016,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T21:51:13Z",
+      "side": 1,
+      "message": "We haven\u0027t kept up with this vp9/vp9cx/vp9dx convention. suggest using vp9 for everything in a future commit.",
+      "revId": "a25bdb24c368953fddd0316c7253e7c3de63af53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9OU\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T21:51:13Z",
+      "side": 1,
+      "message": "probably a different commit, but while you\u0027re working on this, should remove vp9_ prefix from this struct\u0027s members.",
+      "revId": "a25bdb24c368953fddd0316c7253e7c3de63af53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9OE\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1143,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T21:51:13Z",
+      "side": 1,
+      "message": "should align with above open paren",
+      "revId": "a25bdb24c368953fddd0316c7253e7c3de63af53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9N8\u003d",
+        "filename": "vp8/encoder/generic/csystemdependent.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T21:51:13Z",
+      "side": 1,
+      "message": "avoid caps in variable names",
+      "revId": "a25bdb24c368953fddd0316c7253e7c3de63af53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9Nk\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2005,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T21:51:13Z",
+      "side": 1,
+      "message": "most of the existing code using /**/ puts */ on its own line.",
+      "revId": "a25bdb24c368953fddd0316c7253e7c3de63af53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9NQ\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T21:51:13Z",
+      "side": 1,
+      "message": "later commit -- remove vp8 prefixes from static functions",
+      "revId": "a25bdb24c368953fddd0316c7253e7c3de63af53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//9NA\u003d",
+        "filename": "vp8/encoder/rdopt.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-10-30T21:51:13Z",
+      "side": 1,
+      "message": "blank line between functions in this file",
+      "revId": "a25bdb24c368953fddd0316c7253e7c3de63af53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
