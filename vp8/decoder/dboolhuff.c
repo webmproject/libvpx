@@ -13,9 +13,9 @@
 #include "vpx_ports/mem.h"
 #include "vpx_mem/vpx_mem.h"
 
-int vp9dx_start_decode(BOOL_DECODER *br,
-                       const unsigned char *source,
-                       unsigned int source_sz) {
+int vp9_start_decode(BOOL_DECODER *br,
+                     const unsigned char *source,
+                     unsigned int source_sz) {
   br->user_buffer_end = source + source_sz;
   br->user_buffer     = source;
   br->value    = 0;
@@ -26,13 +26,13 @@ int vp9dx_start_decode(BOOL_DECODER *br,
     return 1;
 
   /* Populate the buffer */
-  vp9dx_bool_decoder_fill(br);
+  vp9_bool_decoder_fill(br);
 
   return 0;
 }
 
 
-void vp9dx_bool_decoder_fill(BOOL_DECODER *br) {
+void vp9_bool_decoder_fill(BOOL_DECODER *br) {
   const unsigned char *bufptr;
   const unsigned char *bufend;
   VP8_BD_VALUE         value;

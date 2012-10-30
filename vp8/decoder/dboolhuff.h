@@ -35,11 +35,11 @@ typedef struct {
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 
-int vp9dx_start_decode(BOOL_DECODER *br,
-                       const unsigned char *source,
-                       unsigned int source_sz);
+int vp9_start_decode(BOOL_DECODER *br,
+                     const unsigned char *source,
+                     unsigned int source_sz);
 
-void vp9dx_bool_decoder_fill(BOOL_DECODER *br);
+void vp9_bool_decoder_fill(BOOL_DECODER *br);
 
 int vp9_decode_uniform(BOOL_DECODER *br, int n);
 int vp9_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms);
@@ -87,7 +87,7 @@ static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
   split = 1 + (((br->range - 1) * probability) >> 8);
 
   if (br->count < 0)
-    vp9dx_bool_decoder_fill(br);
+    vp9_bool_decoder_fill(br);
 
   value = br->value;
   count = br->count;

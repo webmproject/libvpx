@@ -21,8 +21,10 @@ extern void vp8_short_idct8x8_c(short *input, short *output, int pitch);
 extern void vp8_short_idct8x8_1_c(short *input, short *output, int pitch);
 
 #if CONFIG_LOSSLESS
-extern void vp8_short_inv_walsh4x4_x8_c(short *input, short *output, int pitch);
-extern void vp8_short_inv_walsh4x4_1_x8_c(short *input, short *output, int pitch);
+extern void vp8_short_inv_walsh4x4_x8_c(short *input, short *output,
+                                        int pitch);
+extern void vp8_short_inv_walsh4x4_1_x8_c(short *input, short *output,
+                                          int pitch);
 #endif
 
 #ifdef DEC_DEBUG
@@ -195,8 +197,9 @@ void vp9_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
 }
 
 #if CONFIG_LOSSLESS
-void vp9_dequant_idct_add_lossless_c(short *input, short *dq, unsigned char *pred,
-                                     unsigned char *dest, int pitch, int stride) {
+void vp9_dequant_idct_add_lossless_c(short *input, short *dq,
+                                     unsigned char *pred, unsigned char *dest,
+                                     int pitch, int stride) {
   short output[16];
   short *diff_ptr = output;
   int r, c;
@@ -229,15 +232,16 @@ void vp9_dequant_idct_add_lossless_c(short *input, short *dq, unsigned char *pre
   }
 }
 
-void vp9_dequant_dc_idct_add_lossless_c(short *input, short *dq, unsigned char *pred,
-                                        unsigned char *dest, int pitch, int stride,
-                                        int Dc) {
+void vp9_dequant_dc_idct_add_lossless_c(short *input, short *dq,
+                                        unsigned char *pred,
+                                        unsigned char *dest,
+                                        int pitch, int stride, int dc) {
   int i;
   short output[16];
   short *diff_ptr = output;
   int r, c;
 
-  input[0] = (short)Dc;
+  input[0] = (short)dc;
 
   for (i = 1; i < 16; i++) {
     input[i] = dq[i] * input[i];
@@ -288,7 +292,7 @@ void vp9_dequantize_b_2x2_c(BLOCKD *d) {
 }
 
 void vp9_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
-                                unsigned char *dest, int pitch, int stride) { // , MACROBLOCKD *xd, short blk_idx
+                                unsigned char *dest, int pitch, int stride) {
   short output[64];
   short *diff_ptr = output;
   int r, c, b;

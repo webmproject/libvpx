@@ -65,7 +65,8 @@ struct vpx_codec_alg_priv {
   int                     img_avail;
 };
 
-static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_t flags) {
+static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si,
+                                 vpx_codec_flags_t flags) {
   /* Although this declaration is constant, we can't use it in the requested
    * segments list because we want to define the requested segments list
    * before defining the private type (so that the number of memory maps is
@@ -98,8 +99,8 @@ static vpx_codec_err_t vp8_mmap_alloc(vpx_codec_mmap_t *mmap) {
 }
 
 static vpx_codec_err_t vp8_validate_mmaps(const vp8_stream_info_t *si,
-                                          const vpx_codec_mmap_t        *mmaps,
-                                          vpx_codec_flags_t              init_flags) {
+                                          const vpx_codec_mmap_t *mmaps,
+                                          vpx_codec_flags_t init_flags) {
   int i;
   vpx_codec_err_t res = VPX_CODEC_OK;
 
@@ -193,7 +194,7 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx) {
 static vpx_codec_err_t vp8_destroy(vpx_codec_alg_priv_t *ctx) {
   int i;
 
-  vp9dx_remove_decompressor(ctx->pbi);
+  vp9_remove_decompressor(ctx->pbi);
 
   for (i = NELEMENTS(ctx->mmaps) - 1; i >= 0; i--) {
     if (ctx->mmaps[i].dtor)
@@ -353,14 +354,14 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
       VP8D_CONFIG oxcf;
       VP8D_PTR optr;
 
-      vp9dx_initialize();
+      vp9_initialize_dec();
 
       oxcf.Width = ctx->si.w;
       oxcf.Height = ctx->si.h;
       oxcf.Version = 9;
       oxcf.postprocess = 0;
       oxcf.max_threads = ctx->cfg.threads;
-      optr = vp9dx_create_decompressor(&oxcf);
+      optr = vp9_create_decompressor(&oxcf);
 
       /* If postprocessing was enabled by the application and a
        * configuration has not been provided, default it.
@@ -407,12 +408,13 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
 #endif
     }
 
-    if (vp9dx_receive_compressed_data(ctx->pbi, data_sz, data, deadline)) {
+    if (vp9_receive_compressed_data(ctx->pbi, data_sz, data, deadline)) {
       VP8D_COMP *pbi = (VP8D_COMP *)ctx->pbi;
       res = update_error_state(ctx, &pbi->common.error);
     }
 
-    if (!res && 0 == vp9dx_get_raw_frame(ctx->pbi, &sd, &time_stamp, &time_end_stamp, &flags)) {
+    if (!res && 0 == vp9_get_raw_frame(ctx->pbi, &sd, &time_stamp,
+                                       &time_end_stamp, &flags)) {
       yuvconfig2image(&ctx->img, &sd, user_priv);
       ctx->img_avail = 1;
     }
@@ -524,7 +526,8 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
   yv12->uv_stride = img->stride[VPX_PLANE_U];
 
   yv12->border  = (img->stride[VPX_PLANE_Y] - img->d_w) / 2;
-  yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 || img->fmt == VPX_IMG_FMT_VPXYV12);
+  yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 ||
+                   img->fmt == VPX_IMG_FMT_VPXYV12);
 
   return res;
 }
@@ -542,7 +545,7 @@ static vpx_codec_err_t vp9_set_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp9dx_set_reference(ctx->pbi, frame->frame_type, &sd);
+    return vp9_set_reference_dec(ctx->pbi, frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 
@@ -560,7 +563,7 @@ static vpx_codec_err_t vp9_get_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp9dx_get_reference(ctx->pbi, frame->frame_type, &sd);
+    return vp9_get_reference_dec(ctx->pbi, frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 

@@ -72,7 +72,7 @@ static vp8_prob read_prob_diff_update(vp8_reader *const bc, int oldp) {
   return (vp8_prob)inv_remap_prob(delp, oldp);
 }
 
-void vp9cx_init_de_quantizer(VP8D_COMP *pbi) {
+void vp9_init_de_quantizer(VP8D_COMP *pbi) {
   int i;
   int Q;
   VP8_COMMON *const pc = &pbi->common;
@@ -729,7 +729,7 @@ static void setup_token_decoder(VP8D_COMP *pbi,
                        "%d length", 1);
   }
 
-  if (vp9dx_start_decode(bool_decoder, partition, partition_size))
+  if (vp9_start_decode(bool_decoder, partition, partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder %d", 1);
 }
@@ -986,7 +986,7 @@ int vp9_decode_frame(VP8D_COMP *pbi) {
 
   init_frame(pbi);
 
-  if (vp9dx_start_decode(&header_bc, data, first_partition_length_in_bytes))
+  if (vp9_start_decode(&header_bc, data, first_partition_length_in_bytes))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
   if (pc->frame_type == KEY_FRAME) {
@@ -1143,7 +1143,7 @@ int vp9_decode_frame(VP8D_COMP *pbi) {
     pc->uvac_delta_q = get_delta_q(&header_bc, pc->uvac_delta_q, &q_update);
 
     if (q_update)
-      vp9cx_init_de_quantizer(pbi);
+      vp9_init_de_quantizer(pbi);
 
     /* MB level dequantizer setup */
     mb_init_dequantizer(pbi, &pbi->mb);

@@ -256,7 +256,7 @@ static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign) {
   int v;
 
   if (br->count < 0)
-    vp9dx_bool_decoder_fill(br);
+    vp9_bool_decoder_fill(br);
 
   if (br->value < bigsplit) {
     br->range = split;
