@@ -133,7 +133,6 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf) {
   vp8dx_initialize();
 
   vp8_create_common(&pbi->common);
-  vp8_dmachine_specific_config(pbi);
 
   pbi->common.current_video_frame = 0;
   pbi->ready_for_new_data = 1;
