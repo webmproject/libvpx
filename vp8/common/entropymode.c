@@ -465,6 +465,7 @@ void vp8_update_mode_context(VP8_COMMON *pc) {
   }
 }
 
+#ifdef MODE_STATS
 #include "vp8/common/modecont.h"
 void print_mode_contexts(VP8_COMMON *pc) {
   int j, i;
@@ -482,19 +483,8 @@ void print_mode_contexts(VP8_COMMON *pc) {
     }
     printf("\n");
   }
-
 }
-void print_mv_ref_cts(VP8_COMMON *pc) {
-  int j, i;
-  for (j = 0; j < 6; j++) {
-    for (i = 0; i < 4; i++) {
-      printf("(%4d:%4d) ",
-             pc->fc.mv_ref_ct[j][i][0],
-             pc->fc.mv_ref_ct[j][i][1]);
-    }
-    printf("\n");
-  }
-}
+#endif
 
 // #define MODE_COUNT_TESTING
 #define MODE_COUNT_SAT 20
