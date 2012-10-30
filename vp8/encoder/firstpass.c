@@ -39,11 +39,11 @@
 #define IF_RTCD(x) NULL
 #endif
 
-extern void vp8_build_block_offsets(MACROBLOCK *x);
-extern void vp8_setup_block_ptrs(MACROBLOCK *x);
-extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
-extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
-extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
+extern void vp9_build_block_offsets(MACROBLOCK *x);
+extern void vp9_setup_block_ptrs(MACROBLOCK *x);
+extern void vp9cx_frame_init_quantizer(VP8_COMP *cpi);
+extern void vp9_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
+extern void vp9_alloc_compressor_data(VP8_COMP *cpi);
 
 #define IIFACTOR   12.5
 #define IIKFACTOR1 12.5
@@ -66,10 +66,10 @@ static int select_cq_level(int qindex) {
   int ret_val = QINDEX_RANGE - 1;
   int i;
 
-  double target_q = (vp8_convert_qindex_to_q(qindex) * 0.5847) + 1.0;
+  double target_q = (vp9_convert_qindex_to_q(qindex) * 0.5847) + 1.0;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    if (target_q <= vp8_convert_qindex_to_q(i)) {
+    if (target_q <= vp9_convert_qindex_to_q(i)) {
       ret_val = i;
       break;
     }
@@ -341,11 +341,11 @@ static int frame_max_bits(VP8_COMP *cpi) {
   return max_bits;
 }
 
-void vp8_init_first_pass(VP8_COMP *cpi) {
+void vp9_init_first_pass(VP8_COMP *cpi) {
   zero_stats(cpi->twopass.total_stats);
 }
 
-void vp8_end_first_pass(VP8_COMP *cpi) {
+void vp9_end_first_pass(VP8_COMP *cpi) {
   output_stats(cpi, cpi->output_pkt_list, cpi->twopass.total_stats);
 }
 
@@ -364,7 +364,7 @@ static void zz_motion_search(VP8_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *r
 
   ref_ptr = (unsigned char *)(*(d->base_pre) + d->pre);
 
-  vp8_mse16x16(src_ptr, src_stride, ref_ptr, ref_stride,
+  vp9_mse16x16(src_ptr, src_stride, ref_ptr, ref_stride,
                (unsigned int *)(best_motion_err));
 }
 
@@ -388,7 +388,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
   int new_mv_mode_penalty = 256;
 
   // override the default variance function to use MSE
-  v_fn_ptr.vf = vp8_mse16x16;
+  v_fn_ptr.vf = vp9_mse16x16;
 
   // Set up pointers for this macro block recon buffer
   xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
@@ -435,7 +435,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-void vp8_first_pass(VP8_COMP *cpi) {
+void vp9_first_pass(VP8_COMP *cpi) {
   int mb_row, mb_col;
   MACROBLOCK *const x = &cpi->mb;
   VP8_COMMON *const cm = &cpi->common;
@@ -477,15 +477,15 @@ void vp8_first_pass(VP8_COMP *cpi) {
 
   xd->mode_info_context = cm->mi;
 
-  vp8_build_block_offsets(x);
+  vp9_build_block_offsets(x);
 
   vp8_setup_block_dptrs(&x->e_mbd);
 
-  vp8_setup_block_ptrs(x);
+  vp9_setup_block_ptrs(x);
 
   // set up frame new frame for intra coded blocks
   vp8_setup_intra_recon(new_yv12);
-  vp8cx_frame_init_quantizer(cpi);
+  vp9cx_frame_init_quantizer(cpi);
 
   // Initialise the MV cost table to the defaults
   // if( cm->current_video_frame == 0)
@@ -493,7 +493,7 @@ void vp8_first_pass(VP8_COMP *cpi) {
   {
     int flag[2] = {1, 1};
     vp8_init_mv_probs(cm);
-    vp8_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
+    vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
   }
 
   // for each macroblock row in image
@@ -527,7 +527,7 @@ void vp8_first_pass(VP8_COMP *cpi) {
       vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
       // do intra 16x16 prediction
-      this_error = vp8_encode_intra(cpi, x, use_dc_pred);
+      this_error = vp9_encode_intra(cpi, x, use_dc_pred);
 
       // "intrapenalty" below deals with situations where the intra and inter error scores are very low (eg a plain black frame)
       // We do not have special cases in first pass for 0,0 and nearest etc so all inter modes carry an overhead cost estimate fot the mv.
@@ -618,9 +618,9 @@ void vp8_first_pass(VP8_COMP *cpi) {
           mv.as_mv.row <<= 3;
           mv.as_mv.col <<= 3;
           this_error = motion_error;
-          vp8_set_mbmode_and_mvs(x, NEWMV, &mv);
+          vp9_set_mbmode_and_mvs(x, NEWMV, &mv);
           xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-          vp8_encode_inter16x16y(IF_RTCD(&cpi->rtcd), x);
+          vp9_encode_inter16x16y(IF_RTCD(&cpi->rtcd), x);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);
           sum_mvc += mv.as_mv.col;
@@ -820,11 +820,11 @@ static long long estimate_modemvcost(VP8_COMP *cpi,
   intra_cost = bitcost(av_intra);
 
   // Estimate of extra bits per mv overhead for mbs
-  // << 9 is the normalization to the (bits * 512) used in vp8_bits_per_mb
+  // << 9 is the normalization to the (bits * 512) used in vp9_bits_per_mb
   mv_cost = ((int)(fpstats->new_mv_count / fpstats->count) * 8) << 9;
 
   // Crude estimate of overhead cost from modes
-  // << 9 is the normalization to (bits * 512) used in vp8_bits_per_mb
+  // << 9 is the normalization to (bits * 512) used in vp9_bits_per_mb
   mode_cost =
     (int)((((av_pct_inter - av_pct_motion) * zz_cost) +
            (av_pct_motion * motion_cost) +
@@ -845,7 +845,7 @@ static double calc_correction_factor(double err_per_mb,
   double correction_factor;
 
   // Adjustment based on actual quantizer to power term.
-  power_term = (vp8_convert_qindex_to_q(Q) * 0.01) + pt_low;
+  power_term = (vp9_convert_qindex_to_q(Q) * 0.01) + pt_low;
   power_term = (power_term > pt_high) ? pt_high : power_term;
 
   // Adjustments to error term
@@ -875,7 +875,7 @@ static void adjust_maxq_qrange(VP8_COMP *cpi) {
   cpi->twopass.maxq_max_limit = cpi->worst_quality;
   for (i = cpi->best_quality; i <= cpi->worst_quality; i++) {
     cpi->twopass.maxq_max_limit = i;
-    if (vp8_convert_qindex_to_q(i) >= q)
+    if (vp9_convert_qindex_to_q(i) >= q)
       break;
   }
 
@@ -884,7 +884,7 @@ static void adjust_maxq_qrange(VP8_COMP *cpi) {
   cpi->twopass.maxq_min_limit = cpi->best_quality;
   for (i = cpi->worst_quality; i >= cpi->best_quality; i--) {
     cpi->twopass.maxq_min_limit = i;
-    if (vp8_convert_qindex_to_q(i) <= q)
+    if (vp9_convert_qindex_to_q(i) <= q)
       break;
   }
 }
@@ -978,7 +978,7 @@ static int estimate_max_q(VP8_COMP *cpi,
       err_correction_factor = 5.0;
 
     bits_per_mb_at_this_q =
-      vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
+      vp9_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
 
     bits_per_mb_at_this_q = (int)(.5 + err_correction_factor *
                                   (double)bits_per_mb_at_this_q);
@@ -1084,7 +1084,7 @@ static int estimate_cq(VP8_COMP *cpi,
       err_correction_factor = 5.0;
 
     bits_per_mb_at_this_q =
-      vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
+      vp9_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
 
     bits_per_mb_at_this_q = (int)(.5 + err_correction_factor *
                                   (double)bits_per_mb_at_this_q);
@@ -1111,9 +1111,9 @@ static int estimate_cq(VP8_COMP *cpi,
 }
 
 
-extern void vp8_new_frame_rate(VP8_COMP *cpi, double framerate);
+extern void vp9_new_frame_rate(VP8_COMP *cpi, double framerate);
 
-void vp8_init_second_pass(VP8_COMP *cpi) {
+void vp9_init_second_pass(VP8_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS *start_pos;
 
@@ -1138,7 +1138,7 @@ void vp8_init_second_pass(VP8_COMP *cpi) {
   // encoded in the second pass is a guess.  However the sum duration is not.
   // Its calculated based on the actual durations of all frames from the first
   // pass.
-  vp8_new_frame_rate(cpi, 10000000.0 * cpi->twopass.total_stats->count / cpi->twopass.total_stats->duration);
+  vp9_new_frame_rate(cpi, 10000000.0 * cpi->twopass.total_stats->count / cpi->twopass.total_stats->duration);
 
   cpi->output_frame_rate = cpi->oxcf.frame_rate;
   cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats->duration * cpi->oxcf.target_bandwidth / 10000000.0);
@@ -1191,7 +1191,7 @@ void vp8_init_second_pass(VP8_COMP *cpi) {
   }
 }
 
-void vp8_end_second_pass(VP8_COMP *cpi) {
+void vp9_end_second_pass(VP8_COMP *cpi) {
 }
 
 // This function gives and estimate of how badly we believe
@@ -1727,7 +1727,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
     int gf_bits;
 
-    boost = (cpi->gfu_boost * vp8_gfboost_qadjust(Q)) / 100;
+    boost = (cpi->gfu_boost * vp9_gfboost_qadjust(Q)) / 100;
 
     // Set max and minimum boost and hence minimum allocation
     if (boost > ((cpi->baseline_gf_interval + 1) * 200))
@@ -1919,21 +1919,21 @@ static int adjust_active_maxq(int old_maxqi, int new_maxqi) {
   double new_q;
   double target_q;
 
-  old_q = vp8_convert_qindex_to_q(old_maxqi);
-  new_q = vp8_convert_qindex_to_q(new_maxqi);
+  old_q = vp9_convert_qindex_to_q(old_maxqi);
+  new_q = vp9_convert_qindex_to_q(new_maxqi);
 
   target_q = ((old_q * 7.0) + new_q) / 8.0;
 
   if (target_q > old_q) {
     for (i = old_maxqi; i <= new_maxqi; i++) {
-      if (vp8_convert_qindex_to_q(i) >= target_q) {
+      if (vp9_convert_qindex_to_q(i) >= target_q) {
         ret_val = i;
         break;
       }
     }
   } else {
     for (i = old_maxqi; i >= new_maxqi; i--) {
-      if (vp8_convert_qindex_to_q(i) <= target_q) {
+      if (vp9_convert_qindex_to_q(i) <= target_q) {
         ret_val = i;
         break;
       }
@@ -1943,7 +1943,7 @@ static int adjust_active_maxq(int old_maxqi, int new_maxqi) {
   return ret_val;
 }
 
-void vp8_second_pass(VP8_COMP *cpi) {
+void vp9_second_pass(VP8_COMP *cpi) {
   int tmp_q;
   int frames_left = (int)(cpi->twopass.total_stats->count - cpi->common.current_video_frame);
 
@@ -2059,7 +2059,7 @@ void vp8_second_pass(VP8_COMP *cpi) {
 
     cpi->active_worst_quality         = tmp_q;
     cpi->ni_av_qi                     = tmp_q;
-    cpi->avg_q                        = vp8_convert_qindex_to_q(tmp_q);
+    cpi->avg_q                        = vp9_convert_qindex_to_q(tmp_q);
 
     // Limit the maxq value returned subsequently.
     // This increases the risk of overspend or underspend if the initial

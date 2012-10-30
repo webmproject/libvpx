@@ -11,9 +11,9 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;void vp8_short_fdct4x4_mmx(short *input, short *output, int pitch)
-global sym(vp8_short_fdct4x4_mmx)
-sym(vp8_short_fdct4x4_mmx):
+;void vp9_short_fdct4x4_mmx(short *input, short *output, int pitch)
+global sym(vp9_short_fdct4x4_mmx)
+sym(vp9_short_fdct4x4_mmx):
     push        rbp
     mov         rbp,        rsp
     SHADOW_ARGS_TO_STACK 3

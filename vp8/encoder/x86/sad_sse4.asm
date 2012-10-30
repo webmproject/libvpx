@@ -155,14 +155,14 @@
 %endmacro
 
 
-;void vp8_sad16x16x8_sse4(
+;void vp9_sad16x16x8_sse4(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array);
-global sym(vp8_sad16x16x8_sse4)
-sym(vp8_sad16x16x8_sse4):
+global sym(vp9_sad16x16x8_sse4)
+sym(vp9_sad16x16x8_sse4):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -196,15 +196,15 @@ sym(vp8_sad16x16x8_sse4):
     ret
 
 
-;void vp8_sad16x8x8_sse4(
+;void vp9_sad16x8x8_sse4(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array
 ;);
-global sym(vp8_sad16x8x8_sse4)
-sym(vp8_sad16x8x8_sse4):
+global sym(vp9_sad16x8x8_sse4)
+sym(vp9_sad16x8x8_sse4):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -234,15 +234,15 @@ sym(vp8_sad16x8x8_sse4):
     ret
 
 
-;void vp8_sad8x8x8_sse4(
+;void vp9_sad8x8x8_sse4(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array
 ;);
-global sym(vp8_sad8x8x8_sse4)
-sym(vp8_sad8x8x8_sse4):
+global sym(vp9_sad8x8x8_sse4)
+sym(vp9_sad8x8x8_sse4):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -272,15 +272,15 @@ sym(vp8_sad8x8x8_sse4):
     ret
 
 
-;void vp8_sad8x16x8_sse4(
+;void vp9_sad8x16x8_sse4(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array
 ;);
-global sym(vp8_sad8x16x8_sse4)
-sym(vp8_sad8x16x8_sse4):
+global sym(vp9_sad8x16x8_sse4)
+sym(vp9_sad8x16x8_sse4):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -313,15 +313,15 @@ sym(vp8_sad8x16x8_sse4):
     ret
 
 
-;void vp8_sad4x4x8_c(
+;void vp9_sad4x4x8_c(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array
 ;);
-global sym(vp8_sad4x4x8_sse4)
-sym(vp8_sad4x4x8_sse4):
+global sym(vp9_sad4x4x8_sse4)
+sym(vp9_sad4x4x8_sse4):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5

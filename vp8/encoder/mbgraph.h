@@ -11,6 +11,6 @@
 #ifndef __INC_MBGRAPH_H__
 #define __INC_MBGRAPH_H__ 1
 
-extern void vp8_update_mbgraph_stats(VP8_COMP *cpi);
+extern void vp9_update_mbgraph_stats(VP8_COMP *cpi);
 
 #endif /* __INC_MBGRAPH_H__ */

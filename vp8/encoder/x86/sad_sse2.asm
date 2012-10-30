@@ -11,13 +11,13 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;unsigned int vp8_sad16x16_wmt(
+;unsigned int vp9_sad16x16_wmt(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride)
-global sym(vp8_sad16x16_wmt)
-sym(vp8_sad16x16_wmt):
+global sym(vp9_sad16x16_wmt)
+sym(vp9_sad16x16_wmt):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -84,14 +84,14 @@ sym(vp8_sad16x16_wmt):
     pop         rbp
     ret
 
-;unsigned int vp8_sad8x16_wmt(
+;unsigned int vp9_sad8x16_wmt(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  max_err)
-global sym(vp8_sad8x16_wmt)
-sym(vp8_sad8x16_wmt):
+global sym(vp9_sad8x16_wmt)
+sym(vp9_sad8x16_wmt):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -148,13 +148,13 @@ sym(vp8_sad8x16_wmt):
     ret
 
 
-;unsigned int vp8_sad8x8_wmt(
+;unsigned int vp9_sad8x8_wmt(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride)
-global sym(vp8_sad8x8_wmt)
-sym(vp8_sad8x8_wmt):
+global sym(vp9_sad8x8_wmt)
+sym(vp9_sad8x8_wmt):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -201,13 +201,13 @@ sym(vp8_sad8x8_wmt):
     pop         rbp
     ret
 
-;unsigned int vp8_sad4x4_wmt(
+;unsigned int vp9_sad4x4_wmt(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride)
-global sym(vp8_sad4x4_wmt)
-sym(vp8_sad4x4_wmt):
+global sym(vp9_sad4x4_wmt)
+sym(vp9_sad4x4_wmt):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -256,13 +256,13 @@ sym(vp8_sad4x4_wmt):
     ret
 
 
-;unsigned int vp8_sad16x8_wmt(
+;unsigned int vp9_sad16x8_wmt(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride)
-global sym(vp8_sad16x8_wmt)
-sym(vp8_sad16x8_wmt):
+global sym(vp9_sad16x8_wmt)
+sym(vp9_sad16x8_wmt):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -329,14 +329,14 @@ sym(vp8_sad16x8_wmt):
     pop         rbp
     ret
 
-;void vp8_copy32xn_sse2(
+;void vp9_copy32xn_sse2(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *dst_ptr,
 ;    int  dst_stride,
 ;    int height);
-global sym(vp8_copy32xn_sse2)
-sym(vp8_copy32xn_sse2):
+global sym(vp9_copy32xn_sse2)
+sym(vp9_copy32xn_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5

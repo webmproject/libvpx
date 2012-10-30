@@ -60,11 +60,11 @@
 #define RTCD(x) NULL
 #endif
 
-extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
-extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
-extern void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
+extern void vp9cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
+extern void vp9cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
+extern void vp9cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 
-extern void vp8_cmachine_specific_config(VP8_COMP *cpi);
+extern void vp9_cmachine_specific_config(VP8_COMP *cpi);
 extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *post, int filt_lvl, int low_var_thresh, int flag);
 extern void print_parms(VP8_CONFIG *ocf, char *filenam);
 extern unsigned int vp8_get_processor_freq();
@@ -76,9 +76,9 @@ extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFF
 extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
 #endif
 
-int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
+int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
 
-extern void vp8_temporal_filter_prepare_c(VP8_COMP *cpi, int distance);
+extern void vp9_temporal_filter_prepare_c(VP8_COMP *cpi, int distance);
 
 static void set_default_lf_deltas(VP8_COMP *cpi);
 
@@ -101,12 +101,12 @@ extern const int vp8_gf_interval_table[101];
 #if CONFIG_INTERNAL_STATS
 #include "math.h"
 
-extern double vp8_calc_ssim(YV12_BUFFER_CONFIG *source,
+extern double vp9_calc_ssim(YV12_BUFFER_CONFIG *source,
                             YV12_BUFFER_CONFIG *dest, int lumamask,
                             double *weight);
 
 
-extern double vp8_calc_ssimg(YV12_BUFFER_CONFIG *source,
+extern double vp9_calc_ssimg(YV12_BUFFER_CONFIG *source,
                              YV12_BUFFER_CONFIG *dest, double *ssim_y,
                              double *ssim_u, double *ssim_v);
 
@@ -166,7 +166,7 @@ extern unsigned int inter_uv_modes[VP8_UV_MODES];
 extern unsigned int inter_b_modes[B_MODE_COUNT];
 #endif
 
-extern void vp8cx_init_quantizer(VP8_COMP *cpi);
+extern void vp9cx_init_quantizer(VP8_COMP *cpi);
 
 int vp8cx_base_skip_false_prob[QINDEX_RANGE][3];
 
@@ -196,8 +196,8 @@ static int calculate_minq_index(double maxq,
     minqtarget = maxq;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    thisq = vp8_convert_qindex_to_q(i);
-    if (minqtarget <= vp8_convert_qindex_to_q(i))
+    thisq = vp9_convert_qindex_to_q(i);
+    if (minqtarget <= vp9_convert_qindex_to_q(i))
       return i;
   }
   return QINDEX_RANGE - 1;
@@ -208,7 +208,7 @@ static void init_minq_luts(void) {
   double maxq;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    maxq = vp8_convert_qindex_to_q(i);
+    maxq = vp9_convert_qindex_to_q(i);
 
 
     kf_low_motion_minq[i] = calculate_minq_index(maxq,
@@ -246,7 +246,7 @@ static void init_base_skip_probs(void) {
   int skip_prob, t;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    q = vp8_convert_qindex_to_q(i);
+    q = vp9_convert_qindex_to_q(i);
 
     // Exponential decay caluclation of baseline skip prob with clamping
     // Based on crude best fit of old table.
@@ -306,15 +306,15 @@ static void update_base_skip_probs(VP8_COMP *cpi) {
 
 }
 
-void vp8_initialize() {
+void vp9_initialize() {
   static int init_done = 0;
 
   if (!init_done) {
     vp8_scale_machine_specific_config();
     vp8_initialize_common();
-    vp8_tokenize_initialize();
+    vp9_tokenize_initialize();
     vp8_init_quant_tables();
-    vp8_init_me_luts();
+    vp9_init_me_luts();
     init_minq_luts();
     init_base_skip_probs();
     init_done = 1;
@@ -381,7 +381,7 @@ static void dealloc_compressor_data(VP8_COMP *cpi) {
 #if VP8_TEMPORAL_ALT_REF
   vp8_yv12_de_alloc_frame_buffer(&cpi->alt_ref_buffer);
 #endif
-  vp8_lookahead_destroy(cpi->lookahead);
+  vp9_lookahead_destroy(cpi->lookahead);
 
   vpx_free(cpi->tok);
   cpi->tok = 0;
@@ -420,14 +420,14 @@ static int compute_qdelta(VP8_COMP *cpi, double qstart, double qtarget) {
   // Convert the average q value to an index.
   for (i = cpi->best_quality; i < cpi->worst_quality; i++) {
     start_index = i;
-    if (vp8_convert_qindex_to_q(i) >= qstart)
+    if (vp9_convert_qindex_to_q(i) >= qstart)
       break;
   }
 
   // Convert the q target to an index
   for (i = cpi->best_quality; i < cpi->worst_quality; i++) {
     target_index = i;
-    if (vp8_convert_qindex_to_q(i) >= qtarget)
+    if (vp9_convert_qindex_to_q(i) >= qtarget)
       break;
   }
 
@@ -450,7 +450,7 @@ static void init_seg_features(VP8_COMP *cpi) {
     cpi->static_mb_pct = 0;
 
     // Disable segmentation
-    vp8_disable_segmentation((VP8_PTR)cpi);
+    vp9_disable_segmentation((VP8_PTR)cpi);
 
     // Clear down the segment features.
     vp9_clearall_segfeatures(xd);
@@ -465,12 +465,12 @@ static void init_seg_features(VP8_COMP *cpi) {
     cpi->static_mb_pct = 0;
 
     // Disable segmentation and individual segment features by default
-    vp8_disable_segmentation((VP8_PTR)cpi);
+    vp9_disable_segmentation((VP8_PTR)cpi);
     vp9_clearall_segfeatures(xd);
 
     // Scan frames from current to arf frame.
     // This function re-enables segmentation if appropriate.
-    vp8_update_mbgraph_stats(cpi);
+    vp9_update_mbgraph_stats(cpi);
 
     // If segmentation was enabled set those features needed for the
     // arf itself.
@@ -526,7 +526,7 @@ static void init_seg_features(VP8_COMP *cpi) {
       // Disable segmentation and clear down features if alt ref
       // is not active for this group
       else {
-        vp8_disable_segmentation((VP8_PTR)cpi);
+        vp9_disable_segmentation((VP8_PTR)cpi);
 
         vpx_memset(cpi->segmentation_map, 0,
                    (cm->mb_rows * cm->mb_cols));
@@ -660,7 +660,7 @@ static void set_default_lf_deltas(VP8_COMP *cpi) {
   cpi->mb.e_mbd.mode_lf_deltas[3] = 4;               // Split mv
 }
 
-void vp8_set_speed_features(VP8_COMP *cpi) {
+void vp9_set_speed_features(VP8_COMP *cpi) {
   SPEED_FEATURES *sf = &cpi->sf;
   int Mode = cpi->compressor_speed;
   int Speed = cpi->Speed;
@@ -1172,48 +1172,48 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
   }
 
   if (cpi->sf.search_method == NSTEP) {
-    vp8_init3smotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
+    vp9_init3smotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
   } else if (cpi->sf.search_method == DIAMOND) {
-    vp8_init_dsmotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
+    vp9_init_dsmotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
   }
 
-  cpi->mb.vp8_short_fdct16x16 = vp8_short_fdct16x16;
-  cpi->mb.vp8_short_fdct8x8 = vp8_short_fdct8x8;
-  cpi->mb.vp8_short_fdct8x4 = vp8_short_fdct8x4;
-  cpi->mb.vp8_short_fdct4x4 = vp8_short_fdct4x4;
-  cpi->mb.short_walsh4x4 = vp8_short_walsh4x4;
-  cpi->mb.short_fhaar2x2 = vp8_short_fhaar2x2;
+  cpi->mb.vp9_short_fdct16x16 = vp9_short_fdct16x16;
+  cpi->mb.vp9_short_fdct8x8 = vp9_short_fdct8x8;
+  cpi->mb.vp9_short_fdct8x4 = vp9_short_fdct8x4;
+  cpi->mb.vp9_short_fdct4x4 = vp9_short_fdct4x4;
+  cpi->mb.short_walsh4x4 = vp9_short_walsh4x4;
+  cpi->mb.short_fhaar2x2 = vp9_short_fhaar2x2;
 
 #if CONFIG_LOSSLESS
   if (cpi->oxcf.lossless) {
-    cpi->mb.vp8_short_fdct8x4 = vp8_short_walsh8x4_x8;
-    cpi->mb.vp8_short_fdct4x4 = vp8_short_walsh4x4_x8;
-    cpi->mb.short_walsh4x4 = vp8_short_walsh4x4;
-    cpi->mb.short_fhaar2x2 = vp8_short_fhaar2x2;
-    cpi->mb.short_walsh4x4 = vp8_short_walsh4x4_lossless;
+    cpi->mb.vp9_short_fdct8x4 = vp9_short_walsh8x4_x8;
+    cpi->mb.vp9_short_fdct4x4 = vp9_short_walsh4x4_x8;
+    cpi->mb.short_walsh4x4 = vp9_short_walsh4x4;
+    cpi->mb.short_fhaar2x2 = vp9_short_fhaar2x2;
+    cpi->mb.short_walsh4x4 = vp9_short_walsh4x4_lossless;
   }
 #endif
 
 
 
-  cpi->mb.quantize_b_4x4      = vp8_regular_quantize_b_4x4;
-  cpi->mb.quantize_b_4x4_pair = vp8_regular_quantize_b_4x4_pair;
-  cpi->mb.quantize_b_8x8      = vp8_regular_quantize_b_8x8;
-  cpi->mb.quantize_b_16x16    = vp8_regular_quantize_b_16x16;
-  cpi->mb.quantize_b_2x2      = vp8_regular_quantize_b_2x2;
+  cpi->mb.quantize_b_4x4      = vp9_regular_quantize_b_4x4;
+  cpi->mb.quantize_b_4x4_pair = vp9_regular_quantize_b_4x4_pair;
+  cpi->mb.quantize_b_8x8      = vp9_regular_quantize_b_8x8;
+  cpi->mb.quantize_b_16x16    = vp9_regular_quantize_b_16x16;
+  cpi->mb.quantize_b_2x2      = vp9_regular_quantize_b_2x2;
 
-  vp8cx_init_quantizer(cpi);
+  vp9cx_init_quantizer(cpi);
 
 #if CONFIG_RUNTIME_CPU_DETECT
   cpi->mb.e_mbd.rtcd = &cpi->common.rtcd;
 #endif
 
   if (cpi->sf.iterative_sub_pixel == 1) {
-    cpi->find_fractional_mv_step = vp8_find_best_sub_pixel_step_iteratively;
+    cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_step_iteratively;
   } else if (cpi->sf.quarter_pixel_search) {
-    cpi->find_fractional_mv_step = vp8_find_best_sub_pixel_step;
+    cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_step;
   } else if (cpi->sf.half_pixel_search) {
-    cpi->find_fractional_mv_step = vp8_find_best_half_pixel_step;
+    cpi->find_fractional_mv_step = vp9_find_best_half_pixel_step;
   }
 
   if (cpi->sf.optimize_coefficients == 1 && cpi->pass != 1)
@@ -1229,7 +1229,7 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi) {
   int width = (cpi->oxcf.Width + 15) & ~15;
   int height = (cpi->oxcf.Height + 15) & ~15;
 
-  cpi->lookahead = vp8_lookahead_init(cpi->oxcf.Width, cpi->oxcf.Height,
+  cpi->lookahead = vp9_lookahead_init(cpi->oxcf.Width, cpi->oxcf.Height,
                                       cpi->oxcf.lag_in_frames);
   if (!cpi->lookahead)
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
@@ -1259,7 +1259,7 @@ static int vp8_alloc_partition_data(VP8_COMP *cpi) {
   return 0;
 }
 
-void vp8_alloc_compressor_data(VP8_COMP *cpi) {
+void vp9_alloc_compressor_data(VP8_COMP *cpi) {
   VP8_COMMON *cm = &cpi->common;
 
   int width = cm->Width;
@@ -1363,7 +1363,7 @@ static const int q_trans[] = {
   224, 228, 232, 236, 240, 244, 249, 255,
 };
 
-int vp8_reverse_trans(int x) {
+int vp9_reverse_trans(int x) {
   int i;
 
   for (i = 0; i < 64; i++)
@@ -1372,7 +1372,7 @@ int vp8_reverse_trans(int x) {
 
   return 63;
 };
-void vp8_new_frame_rate(VP8_COMP *cpi, double framerate) {
+void vp9_new_frame_rate(VP8_COMP *cpi, double framerate) {
   if (framerate < .1)
     framerate = 30;
 
@@ -1430,7 +1430,7 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
   vp8_setup_version(cm);
 
   // change includes all joint functionality
-  vp8_change_config(ptr, oxcf);
+  vp9_change_config(ptr, oxcf);
 
   // Initialize active best and worst q and average q values.
   cpi->active_worst_quality         = cpi->oxcf.worst_allowed_q;
@@ -1464,7 +1464,7 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
 }
 
 
-void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
+void vp9_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
   VP8_COMMON *cm = &cpi->common;
 
@@ -1576,7 +1576,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
               cpi->oxcf.target_bandwidth, 1000);
 
   // Set up frame rate and related parameters rate control values.
-  vp8_new_frame_rate(cpi, cpi->oxcf.frame_rate);
+  vp9_new_frame_rate(cpi, cpi->oxcf.frame_rate);
 
   // Set absolute upper and lower quality limits
   cpi->worst_quality               = cpi->oxcf.worst_allowed_q;
@@ -1639,7 +1639,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
       cm->yv12_fb[cm->lst_fb_idx].y_height ||
       cm->yv12_fb[cm->lst_fb_idx].y_width == 0) {
     alloc_raw_frame_buffers(cpi);
-    vp8_alloc_compressor_data(cpi);
+    vp9_alloc_compressor_data(cpi);
   }
 
   if (cpi->oxcf.fixed_q >= 0) {
@@ -1710,7 +1710,7 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
   } while (++i <= MV_MAX);
 }
 
-VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
+VP8_PTR vp9_create_compressor(VP8_CONFIG *oxcf) {
   int i;
   volatile union {
     VP8_COMP *cpi;
@@ -1733,7 +1733,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
     VP8_PTR ptr = ctx.ptr;
 
     ctx.cpi->common.error.setjmp = 0;
-    vp8_remove_compressor(&ptr);
+    vp9_remove_compressor(&ptr);
     return 0;
   }
 
@@ -1742,7 +1742,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
 
   vp8_create_common(&cpi->common);
-  vp8_cmachine_specific_config(cpi);
+  vp9_cmachine_specific_config(cpi);
 
   init_config((VP8_PTR)cpi, oxcf);
 
@@ -1883,7 +1883,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   cpi->ni_tot_qi                    = 0;
   cpi->ni_frames                   = 0;
   cpi->tot_q = 0.0;
-  cpi->avg_q = vp8_convert_qindex_to_q(cpi->oxcf.worst_allowed_q);
+  cpi->avg_q = vp9_convert_qindex_to_q(cpi->oxcf.worst_allowed_q);
   cpi->total_byte_count             = 0;
 
   cpi->rate_correction_factor         = 1.0;
@@ -1923,7 +1923,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   cpi->output_pkt_list = oxcf->output_pkt_list;
 
   if (cpi->pass == 1) {
-    vp8_init_first_pass(cpi);
+    vp9_init_first_pass(cpi);
   } else if (cpi->pass == 2) {
     size_t packet_sz = sizeof(FIRSTPASS_STATS);
     int packets = oxcf->two_pass_stats_in.sz / packet_sz;
@@ -1932,10 +1932,10 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
     cpi->twopass.stats_in = cpi->twopass.stats_in_start;
     cpi->twopass.stats_in_end = (void *)((char *)cpi->twopass.stats_in
                                          + (packets - 1) * packet_sz);
-    vp8_init_second_pass(cpi);
+    vp9_init_second_pass(cpi);
   }
 
-  vp8_set_speed_features(cpi);
+  vp9_set_speed_features(cpi);
 
   // Set starting values of RD threshold multipliers (128 = *1)
   for (i = 0; i < MAX_MODES; i++) {
@@ -1959,35 +1959,35 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
 
 
 #if CONFIG_SUPERBLOCKS
-  BFP(BLOCK_32X32, vp8_sad32x32, vp8_variance32x32, vp8_sub_pixel_variance32x32,
-      vp8_variance_halfpixvar32x32_h, vp8_variance_halfpixvar32x32_v,
-      vp8_variance_halfpixvar32x32_hv, vp8_sad32x32x3, vp8_sad32x32x8,
-      vp8_sad32x32x4d)
+  BFP(BLOCK_32X32, vp9_sad32x32, vp9_variance32x32, vp9_sub_pixel_variance32x32,
+      vp9_variance_halfpixvar32x32_h, vp9_variance_halfpixvar32x32_v,
+      vp9_variance_halfpixvar32x32_hv, vp9_sad32x32x3, vp9_sad32x32x8,
+      vp9_sad32x32x4d)
 #endif
 
-  BFP(BLOCK_16X16, vp8_sad16x16, vp8_variance16x16, vp8_sub_pixel_variance16x16,
-       vp8_variance_halfpixvar16x16_h, vp8_variance_halfpixvar16x16_v,
-       vp8_variance_halfpixvar16x16_hv, vp8_sad16x16x3, vp8_sad16x16x8,
-       vp8_sad16x16x4d)
+  BFP(BLOCK_16X16, vp9_sad16x16, vp9_variance16x16, vp9_sub_pixel_variance16x16,
+       vp9_variance_halfpixvar16x16_h, vp9_variance_halfpixvar16x16_v,
+       vp9_variance_halfpixvar16x16_hv, vp9_sad16x16x3, vp9_sad16x16x8,
+       vp9_sad16x16x4d)
 
-  BFP(BLOCK_16X8, vp8_sad16x8, vp8_variance16x8, vp8_sub_pixel_variance16x8,
-      NULL, NULL, NULL, vp8_sad16x8x3, vp8_sad16x8x8, vp8_sad16x8x4d)
+  BFP(BLOCK_16X8, vp9_sad16x8, vp9_variance16x8, vp9_sub_pixel_variance16x8,
+      NULL, NULL, NULL, vp9_sad16x8x3, vp9_sad16x8x8, vp9_sad16x8x4d)
 
-  BFP(BLOCK_8X16, vp8_sad8x16, vp8_variance8x16, vp8_sub_pixel_variance8x16,
-      NULL, NULL, NULL, vp8_sad8x16x3, vp8_sad8x16x8, vp8_sad8x16x4d)
+  BFP(BLOCK_8X16, vp9_sad8x16, vp9_variance8x16, vp9_sub_pixel_variance8x16,
+      NULL, NULL, NULL, vp9_sad8x16x3, vp9_sad8x16x8, vp9_sad8x16x4d)
 
-  BFP(BLOCK_8X8, vp8_sad8x8, vp8_variance8x8, vp8_sub_pixel_variance8x8,
-      NULL, NULL, NULL, vp8_sad8x8x3, vp8_sad8x8x8, vp8_sad8x8x4d)
+  BFP(BLOCK_8X8, vp9_sad8x8, vp9_variance8x8, vp9_sub_pixel_variance8x8,
+      NULL, NULL, NULL, vp9_sad8x8x3, vp9_sad8x8x8, vp9_sad8x8x4d)
 
-  BFP(BLOCK_4X4, vp8_sad4x4, vp8_variance4x4, vp8_sub_pixel_variance4x4,
-      NULL, NULL, NULL, vp8_sad4x4x3, vp8_sad4x4x8, vp8_sad4x4x4d)
+  BFP(BLOCK_4X4, vp9_sad4x4, vp9_variance4x4, vp9_sub_pixel_variance4x4,
+      NULL, NULL, NULL, vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
 #if ARCH_X86 || ARCH_X86_64
-  cpi->fn_ptr[BLOCK_16X16].copymem  = vp8_copy32xn;
-  cpi->fn_ptr[BLOCK_16X8].copymem   = vp8_copy32xn;
-  cpi->fn_ptr[BLOCK_8X16].copymem   = vp8_copy32xn;
-  cpi->fn_ptr[BLOCK_8X8].copymem    = vp8_copy32xn;
-  cpi->fn_ptr[BLOCK_4X4].copymem    = vp8_copy32xn;
+  cpi->fn_ptr[BLOCK_16X16].copymem  = vp9_copy32xn;
+  cpi->fn_ptr[BLOCK_16X8].copymem   = vp9_copy32xn;
+  cpi->fn_ptr[BLOCK_8X16].copymem   = vp9_copy32xn;
+  cpi->fn_ptr[BLOCK_8X8].copymem    = vp9_copy32xn;
+  cpi->fn_ptr[BLOCK_4X4].copymem    = vp9_copy32xn;
 #endif
 
   cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
@@ -1997,9 +1997,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   // make sure frame 1 is okay
   cpi->error_bins[0] = cpi->common.MBs;
 
-  // vp8cx_init_quantizer() is first called here. Add check in vp8cx_frame_init_quantizer() so that vp8cx_init_quantizer is only called later
-  // when needed. This will avoid unnecessary calls of vp8cx_init_quantizer() for every frame.
-  vp8cx_init_quantizer(cpi);
+  // vp9cx_init_quantizer() is first called here. Add check in vp9cx_frame_init_quantizer() so that vp9cx_init_quantizer is only called later
+  // when needed. This will avoid unnecessary calls of vp9cx_init_quantizer() for every frame.
+  vp9cx_init_quantizer(cpi);
 
   vp8_loop_filter_init(cm);
 
@@ -2010,7 +2010,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   return (VP8_PTR) cpi;
 }
 
-void vp8_remove_compressor(VP8_PTR *ptr) {
+void vp9_remove_compressor(VP8_PTR *ptr) {
   VP8_COMP *cpi = (VP8_COMP *)(*ptr);
   int i;
 
@@ -2019,7 +2019,7 @@ void vp8_remove_compressor(VP8_PTR *ptr) {
 
   if (cpi && (cpi->common.current_video_frame > 0)) {
     if (cpi->pass == 2) {
-      vp8_end_second_pass(cpi);
+      vp9_end_second_pass(cpi);
     }
 
 #ifdef ENTROPY_STATS
@@ -2051,8 +2051,8 @@ void vp8_remove_compressor(VP8_PTR *ptr) {
       if (cpi->b_calculate_psnr) {
         YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
         double samples = 3.0 / 2 * cpi->count * lst_yv12->y_width * lst_yv12->y_height;
-        double total_psnr = vp8_mse2psnr(samples, 255.0, cpi->total_sq_error);
-        double total_psnr2 = vp8_mse2psnr(samples, 255.0, cpi->total_sq_error2);
+        double total_psnr = vp9_mse2psnr(samples, 255.0, cpi->total_sq_error);
+        double total_psnr2 = vp9_mse2psnr(samples, 255.0, cpi->total_sq_error2);
         double total_ssim = 100 * pow(cpi->summed_quality / cpi->summed_weights, 8.0);
 
         fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\tVPXSSIM\t  Time(ms)\n");
@@ -2270,7 +2270,7 @@ static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
     for (col = 0; col + 16 <= cols; col += 16) {
       unsigned int sse;
 
-      vp8_mse16x16(orig + col, orig_stride, recon + col, recon_stride, &sse);
+      vp9_mse16x16(orig + col, orig_stride, recon + col, recon_stride, &sse);
       total_sse += sse;
     }
 
@@ -2348,14 +2348,14 @@ static void generate_psnr_packet(VP8_COMP *cpi) {
   pkt.data.psnr.samples[3] = width * height;
 
   for (i = 0; i < 4; i++)
-    pkt.data.psnr.psnr[i] = vp8_mse2psnr(pkt.data.psnr.samples[i], 255.0,
+    pkt.data.psnr.psnr[i] = vp9_mse2psnr(pkt.data.psnr.samples[i], 255.0,
                                          pkt.data.psnr.sse[i]);
 
   vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
 }
 
 
-int vp8_use_as_reference(VP8_PTR ptr, int ref_frame_flags) {
+int vp9_use_as_reference(VP8_PTR ptr, int ref_frame_flags) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
   if (ref_frame_flags > 7)
@@ -2364,7 +2364,7 @@ int vp8_use_as_reference(VP8_PTR ptr, int ref_frame_flags) {
   cpi->ref_frame_flags = ref_frame_flags;
   return 0;
 }
-int vp8_update_reference(VP8_PTR ptr, int ref_frame_flags) {
+int vp9_update_reference(VP8_PTR ptr, int ref_frame_flags) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
   if (ref_frame_flags > 7)
@@ -2386,7 +2386,7 @@ int vp8_update_reference(VP8_PTR ptr, int ref_frame_flags) {
   return 0;
 }
 
-int vp8_get_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
+int vp9_get_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
   VP8_COMMON *cm = &cpi->common;
   int ref_fb_idx;
@@ -2404,7 +2404,7 @@ int vp8_get_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONF
 
   return 0;
 }
-int vp8_set_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
+int vp9_set_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
   VP8_COMMON *cm = &cpi->common;
 
@@ -2423,7 +2423,7 @@ int vp8_set_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONF
 
   return 0;
 }
-int vp8_update_entropy(VP8_PTR comp, int update) {
+int vp9_update_entropy(VP8_PTR comp, int update) {
   VP8_COMP *cpi = (VP8_COMP *) comp;
   VP8_COMMON *cm = &cpi->common;
   cm->refresh_entropy_probs = update;
@@ -2574,7 +2574,7 @@ static int find_fp_qindex() {
   int i;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    if (vp8_convert_qindex_to_q(i) >= 30.0) {
+    if (vp9_convert_qindex_to_q(i) >= 30.0) {
       break;
     }
   }
@@ -2591,8 +2591,8 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
   (void) frame_flags;
 
 
-  vp8_set_quantizer(cpi, find_fp_qindex());
-  vp8_first_pass(cpi);
+  vp9_set_quantizer(cpi, find_fp_qindex());
+  vp9_first_pass(cpi);
 }
 
 #define WRITE_RECON_BUFFER 0
@@ -2786,17 +2786,17 @@ static void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
 
     vpx_usec_timer_start(&timer);
     if (cpi->sf.auto_filter == 0)
-      vp8cx_pick_filter_level_fast(cpi->Source, cpi);
+      vp9cx_pick_filter_level_fast(cpi->Source, cpi);
 
     else
-      vp8cx_pick_filter_level(cpi->Source, cpi);
+      vp9cx_pick_filter_level(cpi->Source, cpi);
 
     vpx_usec_timer_mark(&timer);
     cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
   }
 
   if (cm->filter_level > 0) {
-    vp8cx_set_alt_lf_level(cpi, cm->filter_level);
+    vp9cx_set_alt_lf_level(cpi, cm->filter_level);
     vp8_loop_filter_frame(cm, &cpi->mb.e_mbd);
   }
 
@@ -2981,7 +2981,7 @@ static void encode_frame_to_data_rate
   init_seg_features(cpi);
 
   // Decide how big to make the frame
-  vp8_pick_frame_size(cpi);
+  vp9_pick_frame_size(cpi);
 
   vp8_clear_system_state();
 
@@ -3098,7 +3098,7 @@ static void encode_frame_to_data_rate
     Q = cpi->last_boosted_qindex;
   } else {
     // Determine initial Q to try
-    Q = vp8_regulate_q(cpi, cpi->this_frame_target);
+    Q = vp9_regulate_q(cpi, cpi->this_frame_target);
   }
   last_zbin_oq = cpi->zbin_over_quant;
 
@@ -3110,7 +3110,7 @@ static void encode_frame_to_data_rate
   else
     zbin_oq_high = ZBIN_OQ_MAX;
 
-  vp8_compute_frame_size_bounds(cpi, &frame_under_shoot_limit, &frame_over_shoot_limit);
+  vp9_compute_frame_size_bounds(cpi, &frame_under_shoot_limit, &frame_over_shoot_limit);
 
   // Limit Q range for the adaptive loop.
   bottom_index = cpi->active_best_quality;
@@ -3195,7 +3195,7 @@ static void encode_frame_to_data_rate
   do {
     vp8_clear_system_state();  // __asm emms;
 
-    vp8_set_quantizer(cpi, Q);
+    vp9_set_quantizer(cpi, Q);
     this_q = Q;
 
     if (loop_count == 0) {
@@ -3245,14 +3245,14 @@ static void encode_frame_to_data_rate
 
       // Set up entropy depending on frame type.
       if (cm->frame_type == KEY_FRAME)
-        vp8_setup_key_frame(cpi);
+        vp9_setup_key_frame(cpi);
       else
-        vp8_setup_inter_frame(cpi);
+        vp9_setup_inter_frame(cpi);
     }
 
     // transform / motion compensation build reconstruction frame
 
-    vp8_encode_frame(cpi);
+    vp9_encode_frame(cpi);
 
     // Update the skip mb flag probabilities based on the distribution
     // seen in the last encoder iteration.
@@ -3270,11 +3270,11 @@ static void encode_frame_to_data_rate
     // Dummy pack of the bitstream using up to date stats to get an
     // accurate estimate of output frame size to determine if we need
     // to recode.
-    vp8_save_coding_context(cpi);
+    vp9_save_coding_context(cpi);
     cpi->dummy_packing = 1;
-    vp8_pack_bitstream(cpi, dest, size);
+    vp9_pack_bitstream(cpi, dest, size);
     cpi->projected_frame_size = (*size) << 3;
-    vp8_restore_coding_context(cpi);
+    vp9_restore_coding_context(cpi);
 
     if (frame_over_shoot_limit == 0)
       frame_over_shoot_limit = 1;
@@ -3283,7 +3283,7 @@ static void encode_frame_to_data_rate
     // Special case handling for forced key frames
     if ((cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced) {
       int last_q = Q;
-      int kf_err = vp8_calc_ss_err(cpi->Source,
+      int kf_err = vp9_calc_ss_err(cpi->Source,
                                    &cm->yv12_fb[cm->new_fb_idx]);
 
       int high_err_target = cpi->ambient_err;
@@ -3347,7 +3347,7 @@ static void encode_frame_to_data_rate
         if (undershoot_seen || (loop_count > 1)) {
           // Update rate_correction_factor unless cpi->active_worst_quality has changed.
           if (!active_worst_qchanged)
-            vp8_update_rate_correction_factors(cpi, 1);
+            vp9_update_rate_correction_factors(cpi, 1);
 
           Q = (q_high + q_low + 1) / 2;
 
@@ -3361,13 +3361,13 @@ static void encode_frame_to_data_rate
         } else {
           // Update rate_correction_factor unless cpi->active_worst_quality has changed.
           if (!active_worst_qchanged)
-            vp8_update_rate_correction_factors(cpi, 0);
+            vp9_update_rate_correction_factors(cpi, 0);
 
-          Q = vp8_regulate_q(cpi, cpi->this_frame_target);
+          Q = vp9_regulate_q(cpi, cpi->this_frame_target);
 
           while (((Q < q_low) || (cpi->zbin_over_quant < zbin_oq_low)) && (Retries < 10)) {
-            vp8_update_rate_correction_factors(cpi, 0);
-            Q = vp8_regulate_q(cpi, cpi->this_frame_target);
+            vp9_update_rate_correction_factors(cpi, 0);
+            Q = vp9_regulate_q(cpi, cpi->this_frame_target);
             Retries++;
           }
         }
@@ -3384,7 +3384,7 @@ static void encode_frame_to_data_rate
         if (overshoot_seen || (loop_count > 1)) {
           // Update rate_correction_factor unless cpi->active_worst_quality has changed.
           if (!active_worst_qchanged)
-            vp8_update_rate_correction_factors(cpi, 1);
+            vp9_update_rate_correction_factors(cpi, 1);
 
           Q = (q_high + q_low) / 2;
 
@@ -3396,9 +3396,9 @@ static void encode_frame_to_data_rate
         } else {
           // Update rate_correction_factor unless cpi->active_worst_quality has changed.
           if (!active_worst_qchanged)
-            vp8_update_rate_correction_factors(cpi, 0);
+            vp9_update_rate_correction_factors(cpi, 0);
 
-          Q = vp8_regulate_q(cpi, cpi->this_frame_target);
+          Q = vp9_regulate_q(cpi, cpi->this_frame_target);
 
           // Special case reset for qlow for constrained quality.
           // This should only trigger where there is very substantial
@@ -3410,8 +3410,8 @@ static void encode_frame_to_data_rate
           }
 
           while (((Q > q_high) || (cpi->zbin_over_quant > zbin_oq_high)) && (Retries < 10)) {
-            vp8_update_rate_correction_factors(cpi, 0);
-            Q = vp8_regulate_q(cpi, cpi->this_frame_target);
+            vp9_update_rate_correction_factors(cpi, 0);
+            Q = vp9_regulate_q(cpi, cpi->this_frame_target);
             Retries++;
           }
         }
@@ -3472,7 +3472,7 @@ static void encode_frame_to_data_rate
 
     if (Loop == FALSE && cm->frame_type != KEY_FRAME && sf->search_best_filter) {
       if (mcomp_filter_index < mcomp_filters) {
-        INT64 err = vp8_calc_ss_err(cpi->Source,
+        INT64 err = vp9_calc_ss_err(cpi->Source,
                                     &cm->yv12_fb[cm->new_fb_idx]);
         INT64 rate = cpi->projected_frame_size << 8;
         mcomp_filter_cost[mcomp_filter_index] =
@@ -3534,7 +3534,7 @@ static void encode_frame_to_data_rate
   // fixed interval. Note the reconstruction error if it is the frame before
   // the force key frame
   if (cpi->next_key_frame_forced && (cpi->twopass.frames_to_key == 0)) {
-    cpi->ambient_err = vp8_calc_ss_err(cpi->Source,
+    cpi->ambient_err = vp9_calc_ss_err(cpi->Source,
                                        &cm->yv12_fb[cm->new_fb_idx]);
   }
 
@@ -3564,7 +3564,7 @@ static void encode_frame_to_data_rate
   // Update the GF useage maps.
   // This is done after completing the compression of a frame when all modes
   // etc. are finalized but before loop filter
-  vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
+  vp9_update_gf_useage_maps(cpi, cm, &cpi->mb);
 
   if (cm->frame_type == KEY_FRAME)
     cm->refresh_last_frame = 1;
@@ -3593,7 +3593,7 @@ static void encode_frame_to_data_rate
 
   // build the bitstream
   cpi->dummy_packing = 0;
-  vp8_pack_bitstream(cpi, dest, size);
+  vp9_pack_bitstream(cpi, dest, size);
 
   if (cpi->mb.e_mbd.update_mb_segmentation_map) {
     update_reference_segmentation_map(cpi);
@@ -3641,7 +3641,7 @@ static void encode_frame_to_data_rate
   cpi->projected_frame_size = (*size) << 3;
 
   if (!active_worst_qchanged)
-    vp8_update_rate_correction_factors(cpi, 2);
+    vp9_update_rate_correction_factors(cpi, 2);
 
   cpi->last_q[cm->frame_type] = cm->base_qindex;
 
@@ -3659,7 +3659,7 @@ static void encode_frame_to_data_rate
   }
 
   if (cm->frame_type == KEY_FRAME) {
-    vp8_adjust_key_frame_context(cpi);
+    vp9_adjust_key_frame_context(cpi);
   }
 
   // Keep a record of ambient average Q.
@@ -3669,7 +3669,7 @@ static void encode_frame_to_data_rate
   // Keep a record from which we can calculate the average Q excluding GF updates and key frames
   if ((cm->frame_type != KEY_FRAME) && !cm->refresh_golden_frame && !cm->refresh_alt_ref_frame) {
     cpi->ni_frames++;
-    cpi->tot_q += vp8_convert_qindex_to_q(Q);
+    cpi->tot_q += vp9_convert_qindex_to_q(Q);
     cpi->avg_q = cpi->tot_q / (double)cpi->ni_frames;
 
     // Calculate the average Q for normal inter frames (not key or GFU
@@ -3740,7 +3740,7 @@ static void encode_frame_to_data_rate
 
     vp8_clear_system_state();  // __asm emms;
 
-    recon_err = vp8_calc_ss_err(cpi->Source,
+    recon_err = vp9_calc_ss_err(cpi->Source,
                                 &cm->yv12_fb[cm->new_fb_idx]);
 
     if (cpi->twopass.total_left_stats->coded_error != 0.0)
@@ -3754,13 +3754,13 @@ static void encode_frame_to_data_rate
               (int)cpi->total_target_vs_actual,
               (cpi->oxcf.starting_buffer_level - cpi->bits_off_target),
               (int)cpi->total_actual_bits,
-              vp8_convert_qindex_to_q(cm->base_qindex),
+              vp9_convert_qindex_to_q(cm->base_qindex),
               (double)vp8_dc_quant(cm->base_qindex, 0) / 4.0,
-              vp8_convert_qindex_to_q(cpi->active_best_quality),
-              vp8_convert_qindex_to_q(cpi->active_worst_quality),
+              vp9_convert_qindex_to_q(cpi->active_best_quality),
+              vp9_convert_qindex_to_q(cpi->active_worst_quality),
               cpi->avg_q,
-              vp8_convert_qindex_to_q(cpi->ni_av_qi),
-              vp8_convert_qindex_to_q(cpi->cq_target_quality),
+              vp9_convert_qindex_to_q(cpi->ni_av_qi),
+              vp9_convert_qindex_to_q(cpi->cq_target_quality),
               cpi->zbin_over_quant,
               // cpi->avg_frame_qindex, cpi->zbin_over_quant,
               cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
@@ -3784,13 +3784,13 @@ static void encode_frame_to_data_rate
               (int)cpi->total_target_vs_actual,
               (cpi->oxcf.starting_buffer_level - cpi->bits_off_target),
               (int)cpi->total_actual_bits,
-              vp8_convert_qindex_to_q(cm->base_qindex),
+              vp9_convert_qindex_to_q(cm->base_qindex),
               (double)vp8_dc_quant(cm->base_qindex, 0) / 4.0,
-              vp8_convert_qindex_to_q(cpi->active_best_quality),
-              vp8_convert_qindex_to_q(cpi->active_worst_quality),
+              vp9_convert_qindex_to_q(cpi->active_best_quality),
+              vp9_convert_qindex_to_q(cpi->active_worst_quality),
               cpi->avg_q,
-              vp8_convert_qindex_to_q(cpi->ni_av_qi),
-              vp8_convert_qindex_to_q(cpi->cq_target_quality),
+              vp9_convert_qindex_to_q(cpi->ni_av_qi),
+              vp9_convert_qindex_to_q(cpi->cq_target_quality),
               cpi->zbin_over_quant,
               // cpi->avg_frame_qindex, cpi->zbin_over_quant,
               cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
@@ -3929,7 +3929,7 @@ static void encode_frame_to_data_rate
 static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags) {
 
   if (!cpi->common.refresh_alt_ref_frame)
-    vp8_second_pass(cpi);
+    vp9_second_pass(cpi);
 
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
   cpi->twopass.bits_left -= 8 * *size;
@@ -3953,7 +3953,7 @@ extern void vp8_pop_neon(int64_t *store);
 #endif
 
 
-int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time) {
+int vp9_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time) {
 #if HAVE_ARMV7
   int64_t store_reg[8];
 #endif
@@ -3972,7 +3972,7 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
 #endif
 
   vpx_usec_timer_start(&timer);
-  if (vp8_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
+  if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
                          frame_flags, cpi->active_map_enabled ? cpi->active_map : NULL))
     res = -1;
   cm->clr_type = sd->clrtype;
@@ -4005,7 +4005,7 @@ static int frame_is_reference(const VP8_COMP *cpi) {
 }
 
 
-int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, int64_t *time_stamp, int64_t *time_end, int flush) {
+int vp9_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, int64_t *time_stamp, int64_t *time_end, int flush) {
 #if HAVE_ARMV7
   int64_t store_reg[8];
 #endif
@@ -4034,11 +4034,11 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
   // Should we code an alternate reference frame
   if (cpi->oxcf.play_alternate &&
       cpi->source_alt_ref_pending) {
-    if ((cpi->source = vp8_lookahead_peek(cpi->lookahead,
+    if ((cpi->source = vp9_lookahead_peek(cpi->lookahead,
                                           cpi->frames_till_gf_update_due))) {
       cpi->alt_ref_source = cpi->source;
       if (cpi->oxcf.arnr_max_frames > 0) {
-        vp8_temporal_filter_prepare_c(cpi,
+        vp9_temporal_filter_prepare_c(cpi,
                                       cpi->frames_till_gf_update_due);
         force_src_buffer = &cpi->alt_ref_buffer;
       }
@@ -4053,7 +4053,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
   }
 
   if (!cpi->source) {
-    if ((cpi->source = vp8_lookahead_pop(cpi->lookahead, flush))) {
+    if ((cpi->source = vp9_lookahead_pop(cpi->lookahead, flush))) {
       cm->show_frame = 1;
 
       cpi->is_src_frame_alt_ref = cpi->alt_ref_source
@@ -4073,7 +4073,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
   } else {
     *size = 0;
     if (flush && cpi->pass == 1 && !cpi->twopass.first_pass_done) {
-      vp8_end_first_pass(cpi);    /* get last stats packet */
+      vp9_end_first_pass(cpi);    /* get last stats packet */
       cpi->twopass.first_pass_done = 1;
     }
 
@@ -4114,7 +4114,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     if (this_duration) {
       if (step)
-        vp8_new_frame_rate(cpi, 10000000.0 / this_duration);
+        vp9_new_frame_rate(cpi, 10000000.0 / this_duration);
       else {
         double avg_duration, interval;
 
@@ -4130,7 +4130,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         avg_duration *= (interval - avg_duration + this_duration);
         avg_duration /= interval;
 
-        vp8_new_frame_rate(cpi, 10000000.0 / avg_duration);
+        vp9_new_frame_rate(cpi, 10000000.0 / avg_duration);
       }
     }
 
@@ -4240,11 +4240,11 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
         sq_error = ye + ue + ve;
 
-        frame_psnr = vp8_mse2psnr(t_samples, 255.0, sq_error);
+        frame_psnr = vp9_mse2psnr(t_samples, 255.0, sq_error);
 
-        cpi->total_y += vp8_mse2psnr(y_samples, 255.0, ye);
-        cpi->total_u += vp8_mse2psnr(uv_samples, 255.0, ue);
-        cpi->total_v += vp8_mse2psnr(uv_samples, 255.0, ve);
+        cpi->total_y += vp9_mse2psnr(y_samples, 255.0, ye);
+        cpi->total_u += vp9_mse2psnr(uv_samples, 255.0, ue);
+        cpi->total_v += vp9_mse2psnr(uv_samples, 255.0, ve);
         cpi->total_sq_error += sq_error;
         cpi->total  += frame_psnr;
         {
@@ -4269,15 +4269,15 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
           sq_error = ye + ue + ve;
 
-          frame_psnr2 = vp8_mse2psnr(t_samples, 255.0, sq_error);
+          frame_psnr2 = vp9_mse2psnr(t_samples, 255.0, sq_error);
 
-          cpi->totalp_y += vp8_mse2psnr(y_samples, 255.0, ye);
-          cpi->totalp_u += vp8_mse2psnr(uv_samples, 255.0, ue);
-          cpi->totalp_v += vp8_mse2psnr(uv_samples, 255.0, ve);
+          cpi->totalp_y += vp9_mse2psnr(y_samples, 255.0, ye);
+          cpi->totalp_u += vp9_mse2psnr(uv_samples, 255.0, ue);
+          cpi->totalp_v += vp9_mse2psnr(uv_samples, 255.0, ve);
           cpi->total_sq_error2 += sq_error;
           cpi->totalp  += frame_psnr2;
 
-          frame_ssim2 = vp8_calc_ssim(cpi->Source,
+          frame_ssim2 = vp9_calc_ssim(cpi->Source,
                                       &cm->post_proc_buffer, 1, &weight);
 
           cpi->summed_quality += frame_ssim2 * weight;
@@ -4296,7 +4296,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
       if (cpi->b_calculate_ssimg) {
         double y, u, v, frame_all;
-        frame_all =  vp8_calc_ssimg(cpi->Source, cm->frame_to_show,
+        frame_all =  vp9_calc_ssimg(cpi->Source, cm->frame_to_show,
                                     &y, &u, &v);
         cpi->total_ssimg_y += y;
         cpi->total_ssimg_u += u;
@@ -4321,7 +4321,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
   return 0;
 }
 
-int vp8_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *flags) {
+int vp9_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *flags) {
   VP8_COMP *cpi = (VP8_COMP *) comp;
 
   if (cpi->common.refresh_alt_ref_frame)
@@ -4348,7 +4348,7 @@ int vp8_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflag
   }
 }
 
-int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols, int delta_q[4], int delta_lf[4], unsigned int threshold[4]) {
+int vp9_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols, int delta_q[4], int delta_lf[4], unsigned int threshold[4]) {
   VP8_COMP *cpi = (VP8_COMP *) comp;
   signed char feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
@@ -4358,15 +4358,15 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
     return -1;
 
   if (!map) {
-    vp8_disable_segmentation((VP8_PTR)cpi);
+    vp9_disable_segmentation((VP8_PTR)cpi);
     return 0;
   }
 
   // Set the segmentation Map
-  vp8_set_segmentation_map((VP8_PTR)cpi, map);
+  vp9_set_segmentation_map((VP8_PTR)cpi, map);
 
   // Activate segmentation.
-  vp8_enable_segmentation((VP8_PTR)cpi);
+  vp9_enable_segmentation((VP8_PTR)cpi);
 
   // Set up the quant segment data
   feature_data[SEG_LVL_ALT_Q][0] = delta_q[0];
@@ -4400,12 +4400,12 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
 
   // Initialise the feature data structure
   // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-  vp8_set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
+  vp9_set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
   return 0;
 }
 
-int vp8_set_active_map(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols) {
+int vp9_set_active_map(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols) {
   VP8_COMP *cpi = (VP8_COMP *) comp;
 
   if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols) {
@@ -4422,7 +4422,7 @@ int vp8_set_active_map(VP8_PTR comp, unsigned char *map, unsigned int rows, unsi
   }
 }
 
-int vp8_set_internal_size(VP8_PTR comp, VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
+int vp9_set_internal_size(VP8_PTR comp, VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
   VP8_COMP *cpi = (VP8_COMP *) comp;
 
   if (horiz_mode <= ONETWO)
@@ -4440,7 +4440,7 @@ int vp8_set_internal_size(VP8_PTR comp, VPX_SCALING horiz_mode, VPX_SCALING vert
 
 
 
-int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
+int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
   int i, j;
   int Total = 0;
 
@@ -4451,7 +4451,7 @@ int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
   for (i = 0; i < source->y_height; i += 16) {
     for (j = 0; j < source->y_width; j += 16) {
       unsigned int sse;
-      Total += vp8_mse16x16(src + j, source->y_stride, dst + j, dest->y_stride,
+      Total += vp9_mse16x16(src + j, source->y_stride, dst + j, dest->y_stride,
                             &sse);
     }
 
@@ -4463,7 +4463,7 @@ int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
 }
 
 
-int vp8_get_quantizer(VP8_PTR c) {
+int vp9_get_quantizer(VP8_PTR c) {
   VP8_COMP   *cpi = (VP8_COMP *) c;
   return cpi->common.base_qindex;
 }

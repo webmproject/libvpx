@@ -11,7 +11,7 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-; void vp8_temporal_filter_apply_sse2 | arg
+; void vp9_temporal_filter_apply_sse2 | arg
 ;  (unsigned char  *frame1,           |  0
 ;   unsigned int    stride,           |  1
 ;   unsigned char  *frame2,           |  2
@@ -20,8 +20,8 @@
 ;   int             filter_weight,    |  5
 ;   unsigned int   *accumulator,      |  6
 ;   unsigned short *count)            |  7
-global sym(vp8_temporal_filter_apply_sse2)
-sym(vp8_temporal_filter_apply_sse2):
+global sym(vp9_temporal_filter_apply_sse2)
+sym(vp9_temporal_filter_apply_sse2):
 
     push        rbp
     mov         rbp, rsp

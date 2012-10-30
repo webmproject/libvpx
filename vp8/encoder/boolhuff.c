@@ -39,7 +39,7 @@ const unsigned int vp8_prob_cost[256] = {
   22,   21,   19,   18,   16,   15,   13,   12,   10,    9,    7,    6,    4,    3,    1,   1
 };
 
-void vp8_start_encode(BOOL_CODER *br, unsigned char *source) {
+void vp9_start_encode(BOOL_CODER *br, unsigned char *source) {
 
   br->lowvalue = 0;
   br->range    = 255;
@@ -49,7 +49,7 @@ void vp8_start_encode(BOOL_CODER *br, unsigned char *source) {
   br->pos      = 0;
 }
 
-void vp8_stop_encode(BOOL_CODER *br) {
+void vp9_stop_encode(BOOL_CODER *br) {
   int i;
 
   for (i = 0; i < 32; i++)
@@ -57,7 +57,7 @@ void vp8_stop_encode(BOOL_CODER *br) {
 }
 
 
-void vp8_encode_value(BOOL_CODER *br, int data, int bits) {
+void vp9_encode_value(BOOL_CODER *br, int data, int bits) {
   int bit;
 
   for (bit = bits - 1; bit >= 0; bit--)
@@ -81,20 +81,20 @@ static int get_unsigned_bits(unsigned num_values) {
   return cat;
 }
 
-void vp8_encode_uniform(BOOL_CODER *br, int v, int n) {
+void vp9_encode_uniform(BOOL_CODER *br, int v, int n) {
   int l = get_unsigned_bits(n);
   int m;
   if (l == 0) return;
   m = (1 << l) - n;
   if (v < m)
-    vp8_encode_value(br, v, l - 1);
+    vp9_encode_value(br, v, l - 1);
   else {
-    vp8_encode_value(br, m + ((v - m) >> 1), l - 1);
-    vp8_encode_value(br, (v - m) & 1, 1);
+    vp9_encode_value(br, m + ((v - m) >> 1), l - 1);
+    vp9_encode_value(br, (v - m) & 1, 1);
   }
 }
 
-int vp8_count_uniform(int v, int n) {
+int vp9_count_uniform(int v, int n) {
   int l = get_unsigned_bits(n);
   int m;
   if (l == 0) return 0;
@@ -105,30 +105,30 @@ int vp8_count_uniform(int v, int n) {
     return l;
 }
 
-void vp8_encode_term_subexp(BOOL_CODER *br, int word, int k, int num_syms) {
+void vp9_encode_term_subexp(BOOL_CODER *br, int word, int k, int num_syms) {
   int i = 0;
   int mk = 0;
   while (1) {
     int b = (i ? k + i - 1 : k);
     int a = (1 << b);
     if (num_syms <= mk + 3 * a) {
-      vp8_encode_uniform(br, word - mk, num_syms - mk);
+      vp9_encode_uniform(br, word - mk, num_syms - mk);
       break;
     } else {
       int t = (word >= mk + a);
-      vp8_encode_value(br, t, 1);
+      vp9_encode_value(br, t, 1);
       if (t) {
         i = i + 1;
         mk += a;
       } else {
-        vp8_encode_value(br, word - mk, b);
+        vp9_encode_value(br, word - mk, b);
         break;
       }
     }
   }
 }
 
-int vp8_count_term_subexp(int word, int k, int num_syms) {
+int vp9_count_term_subexp(int word, int k, int num_syms) {
   int count = 0;
   int i = 0;
   int mk = 0;
@@ -136,7 +136,7 @@ int vp8_count_term_subexp(int word, int k, int num_syms) {
     int b = (i ? k + i - 1 : k);
     int a = (1 << b);
     if (num_syms <= mk + 3 * a) {
-      count += vp8_count_uniform(word - mk, num_syms - mk);
+      count += vp9_count_uniform(word - mk, num_syms - mk);
       break;
     } else {
       int t = (word >= mk + a);

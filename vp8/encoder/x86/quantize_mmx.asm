@@ -11,12 +11,12 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;int vp8_fast_quantize_b_impl_mmx(short *coeff_ptr, short *zbin_ptr,
+;int vp9_fast_quantize_b_impl_mmx(short *coeff_ptr, short *zbin_ptr,
 ;                           short *qcoeff_ptr,short *dequant_ptr,
 ;                           short *scan_mask, short *round_ptr,
 ;                           short *quant_ptr, short *dqcoeff_ptr);
-global sym(vp8_fast_quantize_b_impl_mmx)
-sym(vp8_fast_quantize_b_impl_mmx):
+global sym(vp9_fast_quantize_b_impl_mmx)
+sym(vp9_fast_quantize_b_impl_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 8

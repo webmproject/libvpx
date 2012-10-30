@@ -14,44 +14,44 @@
 
 #if HAVE_ARMV6
 
-extern prototype_sad(vp8_sad16x16_armv6);
-extern prototype_variance(vp8_variance16x16_armv6);
-extern prototype_variance(vp8_variance8x8_armv6);
-extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_armv6);
-extern prototype_subpixvariance(vp8_sub_pixel_variance8x8_armv6);
-extern prototype_variance(vp8_variance_halfpixvar16x16_h_armv6);
-extern prototype_variance(vp8_variance_halfpixvar16x16_v_armv6);
-extern prototype_variance(vp8_variance_halfpixvar16x16_hv_armv6);
-extern prototype_variance(vp8_mse16x16_armv6);
+extern prototype_sad(vp9_sad16x16_armv6);
+extern prototype_variance(vp9_variance16x16_armv6);
+extern prototype_variance(vp9_variance8x8_armv6);
+extern prototype_subpixvariance(vp9_sub_pixel_variance16x16_armv6);
+extern prototype_subpixvariance(vp9_sub_pixel_variance8x8_armv6);
+extern prototype_variance(vp9_variance_halfpixvar16x16_h_armv6);
+extern prototype_variance(vp9_variance_halfpixvar16x16_v_armv6);
+extern prototype_variance(vp9_variance_halfpixvar16x16_hv_armv6);
+extern prototype_variance(vp9_mse16x16_armv6);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 
 #undef  vp8_variance_sad16x16
-#define vp8_variance_sad16x16 vp8_sad16x16_armv6
+#define vp8_variance_sad16x16 vp9_sad16x16_armv6
 
 #undef  vp8_variance_subpixvar16x16
-#define vp8_variance_subpixvar16x16 vp8_sub_pixel_variance16x16_armv6
+#define vp8_variance_subpixvar16x16 vp9_sub_pixel_variance16x16_armv6
 
 #undef  vp8_variance_subpixvar8x8
-#define vp8_variance_subpixvar8x8 vp8_sub_pixel_variance8x8_armv6
+#define vp8_variance_subpixvar8x8 vp9_sub_pixel_variance8x8_armv6
 
 #undef  vp8_variance_var16x16
-#define vp8_variance_var16x16 vp8_variance16x16_armv6
+#define vp8_variance_var16x16 vp9_variance16x16_armv6
 
 #undef  vp8_variance_mse16x16
-#define vp8_variance_mse16x16 vp8_mse16x16_armv6
+#define vp8_variance_mse16x16 vp9_mse16x16_armv6
 
 #undef  vp8_variance_var8x8
-#define vp8_variance_var8x8 vp8_variance8x8_armv6
+#define vp8_variance_var8x8 vp9_variance8x8_armv6
 
-#undef  vp8_variance_halfpixvar16x16_h
-#define vp8_variance_halfpixvar16x16_h vp8_variance_halfpixvar16x16_h_armv6
+#undef  vp9_variance_halfpixvar16x16_h
+#define vp9_variance_halfpixvar16x16_h vp9_variance_halfpixvar16x16_h_armv6
 
-#undef  vp8_variance_halfpixvar16x16_v
-#define vp8_variance_halfpixvar16x16_v vp8_variance_halfpixvar16x16_v_armv6
+#undef  vp9_variance_halfpixvar16x16_v
+#define vp9_variance_halfpixvar16x16_v vp9_variance_halfpixvar16x16_v_armv6
 
-#undef  vp8_variance_halfpixvar16x16_hv
-#define vp8_variance_halfpixvar16x16_hv vp8_variance_halfpixvar16x16_hv_armv6
+#undef  vp9_variance_halfpixvar16x16_hv
+#define vp9_variance_halfpixvar16x16_hv vp9_variance_halfpixvar16x16_hv_armv6
 
 #endif /* !CONFIG_RUNTIME_CPU_DETECT */
 
@@ -59,91 +59,91 @@ extern prototype_variance(vp8_mse16x16_armv6);
 
 
 #if HAVE_ARMV7
-extern prototype_sad(vp8_sad4x4_neon);
-extern prototype_sad(vp8_sad8x8_neon);
-extern prototype_sad(vp8_sad8x16_neon);
-extern prototype_sad(vp8_sad16x8_neon);
-extern prototype_sad(vp8_sad16x16_neon);
+extern prototype_sad(vp9_sad4x4_neon);
+extern prototype_sad(vp9_sad8x8_neon);
+extern prototype_sad(vp9_sad8x16_neon);
+extern prototype_sad(vp9_sad16x8_neon);
+extern prototype_sad(vp9_sad16x16_neon);
 
-// extern prototype_variance(vp8_variance4x4_c);
-extern prototype_variance(vp8_variance8x8_neon);
-extern prototype_variance(vp8_variance8x16_neon);
-extern prototype_variance(vp8_variance16x8_neon);
-extern prototype_variance(vp8_variance16x16_neon);
+// extern prototype_variance(vp9_variance4x4_c);
+extern prototype_variance(vp9_variance8x8_neon);
+extern prototype_variance(vp9_variance8x16_neon);
+extern prototype_variance(vp9_variance16x8_neon);
+extern prototype_variance(vp9_variance16x16_neon);
 
-// extern prototype_subpixvariance(vp8_sub_pixel_variance4x4_c);
-extern prototype_subpixvariance(vp8_sub_pixel_variance8x8_neon);
-// extern prototype_subpixvariance(vp8_sub_pixel_variance8x16_c);
-// extern prototype_subpixvariance(vp8_sub_pixel_variance16x8_c);
-extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_neon);
-extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_neon_func);
-extern prototype_variance(vp8_variance_halfpixvar16x16_h_neon);
-extern prototype_variance(vp8_variance_halfpixvar16x16_v_neon);
-extern prototype_variance(vp8_variance_halfpixvar16x16_hv_neon);
+// extern prototype_subpixvariance(vp9_sub_pixel_variance4x4_c);
+extern prototype_subpixvariance(vp9_sub_pixel_variance8x8_neon);
+// extern prototype_subpixvariance(vp9_sub_pixel_variance8x16_c);
+// extern prototype_subpixvariance(vp9_sub_pixel_variance16x8_c);
+extern prototype_subpixvariance(vp9_sub_pixel_variance16x16_neon);
+extern prototype_subpixvariance(vp9_sub_pixel_variance16x16_neon_func);
+extern prototype_variance(vp9_variance_halfpixvar16x16_h_neon);
+extern prototype_variance(vp9_variance_halfpixvar16x16_v_neon);
+extern prototype_variance(vp9_variance_halfpixvar16x16_hv_neon);
 
-// extern prototype_getmbss(vp8_get_mb_ss_c);
-extern prototype_variance(vp8_mse16x16_neon);
+// extern prototype_getmbss(vp9_get_mb_ss_c);
+extern prototype_variance(vp9_mse16x16_neon);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_variance_sad4x4
-#define vp8_variance_sad4x4 vp8_sad4x4_neon
+#define vp8_variance_sad4x4 vp9_sad4x4_neon
 
 #undef  vp8_variance_sad8x8
-#define vp8_variance_sad8x8 vp8_sad8x8_neon
+#define vp8_variance_sad8x8 vp9_sad8x8_neon
 
 #undef  vp8_variance_sad8x16
-#define vp8_variance_sad8x16 vp8_sad8x16_neon
+#define vp8_variance_sad8x16 vp9_sad8x16_neon
 
 #undef  vp8_variance_sad16x8
-#define vp8_variance_sad16x8 vp8_sad16x8_neon
+#define vp8_variance_sad16x8 vp9_sad16x8_neon
 
 #undef  vp8_variance_sad16x16
-#define vp8_variance_sad16x16 vp8_sad16x16_neon
+#define vp8_variance_sad16x16 vp9_sad16x16_neon
 
 // #undef  vp8_variance_var4x4
-// #define vp8_variance_var4x4 vp8_variance4x4_c
+// #define vp8_variance_var4x4 vp9_variance4x4_c
 
 #undef  vp8_variance_var8x8
-#define vp8_variance_var8x8 vp8_variance8x8_neon
+#define vp8_variance_var8x8 vp9_variance8x8_neon
 
 #undef  vp8_variance_var8x16
-#define vp8_variance_var8x16 vp8_variance8x16_neon
+#define vp8_variance_var8x16 vp9_variance8x16_neon
 
 #undef  vp8_variance_var16x8
-#define vp8_variance_var16x8 vp8_variance16x8_neon
+#define vp8_variance_var16x8 vp9_variance16x8_neon
 
 #undef  vp8_variance_var16x16
-#define vp8_variance_var16x16 vp8_variance16x16_neon
+#define vp8_variance_var16x16 vp9_variance16x16_neon
 
 // #undef  vp8_variance_subpixvar4x4
-// #define vp8_variance_subpixvar4x4 vp8_sub_pixel_variance4x4_c
+// #define vp8_variance_subpixvar4x4 vp9_sub_pixel_variance4x4_c
 
 #undef  vp8_variance_subpixvar8x8
-#define vp8_variance_subpixvar8x8 vp8_sub_pixel_variance8x8_neon
+#define vp8_variance_subpixvar8x8 vp9_sub_pixel_variance8x8_neon
 
 // #undef  vp8_variance_subpixvar8x16
-// #define vp8_variance_subpixvar8x16 vp8_sub_pixel_variance8x16_c
+// #define vp8_variance_subpixvar8x16 vp9_sub_pixel_variance8x16_c
 
 // #undef  vp8_variance_subpixvar16x8
-// #define vp8_variance_subpixvar16x8 vp8_sub_pixel_variance16x8_c
+// #define vp8_variance_subpixvar16x8 vp9_sub_pixel_variance16x8_c
 
 #undef  vp8_variance_subpixvar16x16
-#define vp8_variance_subpixvar16x16 vp8_sub_pixel_variance16x16_neon
+#define vp8_variance_subpixvar16x16 vp9_sub_pixel_variance16x16_neon
 
-#undef  vp8_variance_halfpixvar16x16_h
-#define vp8_variance_halfpixvar16x16_h vp8_variance_halfpixvar16x16_h_neon
+#undef  vp9_variance_halfpixvar16x16_h
+#define vp9_variance_halfpixvar16x16_h vp9_variance_halfpixvar16x16_h_neon
 
-#undef  vp8_variance_halfpixvar16x16_v
-#define vp8_variance_halfpixvar16x16_v vp8_variance_halfpixvar16x16_v_neon
+#undef  vp9_variance_halfpixvar16x16_v
+#define vp9_variance_halfpixvar16x16_v vp9_variance_halfpixvar16x16_v_neon
 
-#undef  vp8_variance_halfpixvar16x16_hv
-#define vp8_variance_halfpixvar16x16_hv vp8_variance_halfpixvar16x16_hv_neon
+#undef  vp9_variance_halfpixvar16x16_hv
+#define vp9_variance_halfpixvar16x16_hv vp9_variance_halfpixvar16x16_hv_neon
 
 // #undef  vp8_variance_getmbss
-// #define vp8_variance_getmbss vp8_get_mb_ss_c
+// #define vp8_variance_getmbss vp9_get_mb_ss_c
 
 #undef  vp8_variance_mse16x16
-#define vp8_variance_mse16x16 vp8_mse16x16_neon
+#define vp8_variance_mse16x16 vp9_mse16x16_neon
 
 #endif
 

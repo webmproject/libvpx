@@ -32,20 +32,20 @@ extern void accum_mv_refs(MB_PREDICTION_MODE, const int near_mv_ref_cts[4]);
 #define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS)) - 1)      // Max full pel mv specified in 1 pel units
 #define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))            // Maximum size of the first step in full pel units
 
-extern void vp8_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv);
-extern int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, DEC_MVCOSTS,
+extern void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv);
+extern int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, DEC_MVCOSTS,
                            int Weight, int ishp);
-extern void vp8_init_dsmotion_compensation(MACROBLOCK *x, int stride);
-extern void vp8_init3smotion_compensation(MACROBLOCK *x,  int stride);
+extern void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride);
+extern void vp9_init3smotion_compensation(MACROBLOCK *x,  int stride);
 // Runs sequence of diamond searches in smaller steps for RD
 struct VP8_COMP;
-int vp8_full_pixel_diamond(struct VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
+int vp9_full_pixel_diamond(struct VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
                            BLOCKD *d, int_mv *mvp_full, int step_param,
                            int sadpb, int further_steps, int do_refine,
                            vp8_variance_fn_ptr_t *fn_ptr,
                            int_mv *ref_mv, int_mv *dst_mv);
 
-extern int vp8_hex_search
+extern int vp9_hex_search
 (
   MACROBLOCK *x,
   BLOCK *b,
@@ -64,9 +64,9 @@ typedef int (fractional_mv_step_fp)
 (MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *bestmv, int_mv *ref_mv,
  int error_per_bit, const vp8_variance_fn_ptr_t *vfp, DEC_MVCOSTS,
  int *distortion, unsigned int *sse);
-extern fractional_mv_step_fp vp8_find_best_sub_pixel_step_iteratively;
-extern fractional_mv_step_fp vp8_find_best_sub_pixel_step;
-extern fractional_mv_step_fp vp8_find_best_half_pixel_step;
+extern fractional_mv_step_fp vp9_find_best_sub_pixel_step_iteratively;
+extern fractional_mv_step_fp vp9_find_best_sub_pixel_step;
+extern fractional_mv_step_fp vp9_find_best_half_pixel_step;
 extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
 
 #define prototype_full_search_sad(sym)\
@@ -118,30 +118,30 @@ extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
 #endif
 
 typedef prototype_full_search_sad(*vp8_full_search_fn_t);
-extern prototype_full_search_sad(vp8_full_search_sad);
-extern prototype_full_search_sad(vp8_full_search_sadx3);
-extern prototype_full_search_sad(vp8_full_search_sadx8);
+extern prototype_full_search_sad(vp9_full_search_sad);
+extern prototype_full_search_sad(vp9_full_search_sadx3);
+extern prototype_full_search_sad(vp9_full_search_sadx8);
 
 typedef prototype_refining_search_sad(*vp8_refining_search_fn_t);
-extern prototype_refining_search_sad(vp8_refining_search_sad);
-extern prototype_refining_search_sad(vp8_refining_search_sadx4);
+extern prototype_refining_search_sad(vp9_refining_search_sad);
+extern prototype_refining_search_sad(vp9_refining_search_sadx4);
 
 typedef prototype_diamond_search_sad(*vp8_diamond_search_fn_t);
-extern prototype_diamond_search_sad(vp8_diamond_search_sad);
-extern prototype_diamond_search_sad(vp8_diamond_search_sadx4);
+extern prototype_diamond_search_sad(vp9_diamond_search_sad);
+extern prototype_diamond_search_sad(vp9_diamond_search_sadx4);
 
 #ifndef vp8_search_full_search
-#define vp8_search_full_search vp8_full_search_sad
+#define vp8_search_full_search vp9_full_search_sad
 #endif
 extern prototype_full_search_sad(vp8_search_full_search);
 
 #ifndef vp8_search_refining_search
-#define vp8_search_refining_search vp8_refining_search_sad
+#define vp8_search_refining_search vp9_refining_search_sad
 #endif
 extern prototype_refining_search_sad(vp8_search_refining_search);
 
 #ifndef vp8_search_diamond_search
-#define vp8_search_diamond_search vp8_diamond_search_sad
+#define vp8_search_diamond_search vp9_diamond_search_sad
 #endif
 extern prototype_diamond_search_sad(vp8_search_diamond_search);
 

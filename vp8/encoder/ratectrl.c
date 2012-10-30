@@ -88,16 +88,16 @@ static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] = { 1, 2, 3,
 // These functions use formulaic calculations to make playing with the
 // quantizer tables easier. If necessary they can be replaced by lookup
 // tables if and when things settle down in the experimental bitstream
-double vp8_convert_qindex_to_q(int qindex) {
+double vp9_convert_qindex_to_q(int qindex) {
   // Convert the index to a real Q value (scaled down to match old Q values)
   return (double)vp8_ac_yquant(qindex) / 4.0;
 }
 
-int vp8_gfboost_qadjust(int qindex) {
+int vp9_gfboost_qadjust(int qindex) {
   int retval;
   double q;
 
-  q = vp8_convert_qindex_to_q(qindex);
+  q = vp9_convert_qindex_to_q(qindex);
   retval = (int)((0.00000828 * q * q * q) +
                  (-0.0055 * q * q) +
                  (1.32 * q) + 79.3);
@@ -108,28 +108,28 @@ static int kfboost_qadjust(int qindex) {
   int retval;
   double q;
 
-  q = vp8_convert_qindex_to_q(qindex);
+  q = vp9_convert_qindex_to_q(qindex);
   retval = (int)((0.00000973 * q * q * q) +
                  (-0.00613 * q * q) +
                  (1.316 * q) + 121.2);
   return retval;
 }
 
-int vp8_bits_per_mb(FRAME_TYPE frame_type, int qindex) {
+int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex) {
   if (frame_type == KEY_FRAME)
-    return (int)(4500000 / vp8_convert_qindex_to_q(qindex));
+    return (int)(4500000 / vp9_convert_qindex_to_q(qindex));
   else
-    return (int)(2850000 / vp8_convert_qindex_to_q(qindex));
+    return (int)(2850000 / vp9_convert_qindex_to_q(qindex));
 }
 
 
-void vp8_save_coding_context(VP8_COMP *cpi) {
+void vp9_save_coding_context(VP8_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
   VP8_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   // Stores a snapshot of key state variables which can subsequently be
-  // restored with a call to vp8_restore_coding_context. These functions are
+  // restored with a call to vp9_restore_coding_context. These functions are
   // intended for use in a re-code loop in vp8_compress_frame where the
   // quantizer value is adjusted between loop iterations.
 
@@ -180,13 +180,13 @@ void vp8_save_coding_context(VP8_COMP *cpi) {
   vp8_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
 }
 
-void vp8_restore_coding_context(VP8_COMP *cpi) {
+void vp9_restore_coding_context(VP8_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
   VP8_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   // Restore key state variables to the snapshot state stored in the
-  // previous call to vp8_save_coding_context.
+  // previous call to vp9_save_coding_context.
 
   cm->fc.nmvc = cc->nmvc;
   vp8_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
@@ -237,7 +237,7 @@ void vp8_restore_coding_context(VP8_COMP *cpi) {
 }
 
 
-void vp8_setup_key_frame(VP8_COMP *cpi) {
+void vp9_setup_key_frame(VP8_COMP *cpi) {
   VP8_COMMON *cm = &cpi->common;
   // Setup for Key frame:
   vp8_default_coef_probs(& cpi->common);
@@ -269,7 +269,7 @@ void vp8_setup_key_frame(VP8_COMP *cpi) {
   vp9_update_mode_info_in_image(cm, cm->mi);
 }
 
-void vp8_setup_inter_frame(VP8_COMP *cpi) {
+void vp9_setup_inter_frame(VP8_COMP *cpi) {
   if (cpi->common.refresh_alt_ref_frame) {
     vpx_memcpy(&cpi->common.fc,
                &cpi->common.lfc_a,
@@ -290,7 +290,7 @@ void vp8_setup_inter_frame(VP8_COMP *cpi) {
 
 static int estimate_bits_at_q(int frame_kind, int Q, int MBs,
                               double correction_factor) {
-  int Bpm = (int)(.5 + correction_factor * vp8_bits_per_mb(frame_kind, Q));
+  int Bpm = (int)(.5 + correction_factor * vp9_bits_per_mb(frame_kind, Q));
 
   /* Attempt to retain reasonable accuracy without overflow. The cutoff is
    * chosen such that the maximum product of Bpm and MBs fits 31 bits. The
@@ -408,7 +408,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi) {
 }
 
 
-void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var) {
+void vp9_update_rate_correction_factors(VP8_COMP *cpi, int damp_var) {
   int    Q = cpi->common.base_qindex;
   int    correction_factor = 100;
   double rate_correction_factor;
@@ -432,7 +432,7 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var) {
   // Stay in double to avoid int overflow when values are large
   projected_size_based_on_q =
     (int)(((.5 + rate_correction_factor *
-            vp8_bits_per_mb(cpi->common.frame_type, Q)) *
+            vp9_bits_per_mb(cpi->common.frame_type, Q)) *
            cpi->common.MBs) / (1 << BPER_MB_NORMBITS));
 
   // Make some allowance for cpi->zbin_over_quant
@@ -504,7 +504,7 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var) {
 }
 
 
-int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame) {
+int vp9_regulate_q(VP8_COMP *cpi, int target_bits_per_frame) {
   int Q = cpi->active_worst_quality;
 
   int i;
@@ -537,7 +537,7 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame) {
   do {
     bits_per_mb_at_this_q =
       (int)(.5 + correction_factor *
-            vp8_bits_per_mb(cpi->common.frame_type, i));
+            vp9_bits_per_mb(cpi->common.frame_type, i));
 
     if (bits_per_mb_at_this_q <= target_bits_per_mb) {
       if ((target_bits_per_mb - bits_per_mb_at_this_q) <= last_error)
@@ -641,7 +641,7 @@ static int estimate_keyframe_frequency(VP8_COMP *cpi) {
 }
 
 
-void vp8_adjust_key_frame_context(VP8_COMP *cpi) {
+void vp9_adjust_key_frame_context(VP8_COMP *cpi) {
   // Clear down mmx registers to allow floating point in what follows
   vp8_clear_system_state();
 
@@ -650,7 +650,7 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi) {
 }
 
 
-void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, int *frame_over_shoot_limit) {
+void vp9_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, int *frame_over_shoot_limit) {
   // Set-up bounds on acceptable frame size:
   if (cpi->oxcf.fixed_q >= 0) {
     // Fixed Q scenario: frame size never outranges target (there is no target!)
@@ -688,7 +688,7 @@ void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, 
 
 
 // return of 0 means drop frame
-int vp8_pick_frame_size(VP8_COMP *cpi) {
+int vp9_pick_frame_size(VP8_COMP *cpi) {
   VP8_COMMON *cm = &cpi->common;
 
   if (cm->frame_type == KEY_FRAME)

@@ -12,12 +12,12 @@
 %include "asm_enc_offsets.asm"
 
 
-; void vp8_regular_quantize_b_sse2 | arg
+; void vp9_regular_quantize_b_sse2 | arg
 ;  (BLOCK  *b,                     |  0
 ;   BLOCKD *d)                     |  1
 
-global sym(vp8_regular_quantize_b_sse2)
-sym(vp8_regular_quantize_b_sse2):
+global sym(vp9_regular_quantize_b_sse2)
+sym(vp9_regular_quantize_b_sse2):
     push        rbp
     mov         rbp, rsp
     SAVE_XMM 7
@@ -233,12 +233,12 @@ ZIGZAG_LOOP 15
     pop         rbp
     ret
 
-; void vp8_fast_quantize_b_sse2 | arg
+; void vp9_fast_quantize_b_sse2 | arg
 ;  (BLOCK  *b,                  |  0
 ;   BLOCKD *d)                  |  1
 
-global sym(vp8_fast_quantize_b_sse2)
-sym(vp8_fast_quantize_b_sse2):
+global sym(vp9_fast_quantize_b_sse2)
+sym(vp9_fast_quantize_b_sse2):
     push        rbp
     mov         rbp, rsp
     GET_GOT     rbx

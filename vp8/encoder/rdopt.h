@@ -15,13 +15,13 @@
 #define RDCOST(RM,DM,R,D) ( ((128+((int64_t)R)*(RM)) >> 8) + ((int64_t)DM)*(D) )
 #define RDCOST_8x8(RM,DM,R,D) ( ((128+((int64_t)R)*(RM)) >> 8) + ((int64_t)DM)*(D) )
 
-extern void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue);
-extern void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
+extern void vp9_initialize_rd_consts(VP8_COMP *cpi, int Qvalue);
+extern void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
                                    int *returnrate, int *returndistortion, int64_t *returnintra);
-extern void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *r, int *d);
-extern void vp8_rd_pick_intra_mode_sb(VP8_COMP *cpi, MACROBLOCK *x, int *r, int *d);
+extern void vp9_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *r, int *d);
+extern void vp9_rd_pick_intra_mode_sb(VP8_COMP *cpi, MACROBLOCK *x, int *r, int *d);
 
-extern void vp8_mv_pred
+extern void vp9_mv_pred
 (
   VP8_COMP *cpi,
   MACROBLOCKD *xd,
@@ -32,6 +32,6 @@ extern void vp8_mv_pred
   int *sr,
   int near_sadidx[]
 );
-extern void vp8_init_me_luts();
-extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
+extern void vp9_init_me_luts();
+extern void vp9_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
 #endif

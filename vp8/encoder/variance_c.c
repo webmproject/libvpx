@@ -13,7 +13,7 @@
 #include "vp8/common/filter.h"
 
 
-unsigned int vp8_get_mb_ss_c
+unsigned int vp9_get_mb_ss_c
 (
   const short *src_ptr
 ) {
@@ -56,7 +56,7 @@ static void variance(
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp8_variance32x32_c(const unsigned char *src_ptr,
+unsigned int vp9_variance32x32_c(const unsigned char *src_ptr,
                                  int  source_stride,
                                  const unsigned char *ref_ptr,
                                  int  recon_stride,
@@ -70,7 +70,7 @@ unsigned int vp8_variance32x32_c(const unsigned char *src_ptr,
 }
 #endif
 
-unsigned int vp8_variance16x16_c(
+unsigned int vp9_variance16x16_c(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
@@ -85,7 +85,7 @@ unsigned int vp8_variance16x16_c(
   return (var - ((avg * avg) >> 8));
 }
 
-unsigned int vp8_variance8x16_c(
+unsigned int vp9_variance8x16_c(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
@@ -100,7 +100,7 @@ unsigned int vp8_variance8x16_c(
   return (var - ((avg * avg) >> 7));
 }
 
-unsigned int vp8_variance16x8_c(
+unsigned int vp9_variance16x8_c(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
@@ -116,7 +116,7 @@ unsigned int vp8_variance16x8_c(
 }
 
 
-unsigned int vp8_variance8x8_c(
+unsigned int vp9_variance8x8_c(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
@@ -131,7 +131,7 @@ unsigned int vp8_variance8x8_c(
   return (var - ((avg * avg) >> 6));
 }
 
-unsigned int vp8_variance4x4_c(
+unsigned int vp9_variance4x4_c(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
@@ -147,7 +147,7 @@ unsigned int vp8_variance4x4_c(
 }
 
 
-unsigned int vp8_mse16x16_c(
+unsigned int vp9_mse16x16_c(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
@@ -275,7 +275,7 @@ static void var_filter_block2d_bil_second_pass
 }
 
 
-unsigned int vp8_sub_pixel_variance4x4_c
+unsigned int vp9_sub_pixel_variance4x4_c
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -298,11 +298,11 @@ unsigned int vp8_sub_pixel_variance4x4_c
   // Now filter Verticaly
   var_filter_block2d_bil_second_pass(FData3, temp2, 4,  4,  4,  4, VFilter);
 
-  return vp8_variance4x4_c(temp2, 4, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance4x4_c(temp2, 4, dst_ptr, dst_pixels_per_line, sse);
 }
 
 
-unsigned int vp8_sub_pixel_variance8x8_c
+unsigned int vp9_sub_pixel_variance8x8_c
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -322,10 +322,10 @@ unsigned int vp8_sub_pixel_variance8x8_c
   var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 9, 8, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 8, 8, 8, 8, VFilter);
 
-  return vp8_variance8x8_c(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance8x8_c(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
 }
 
-unsigned int vp8_sub_pixel_variance16x16_c
+unsigned int vp9_sub_pixel_variance16x16_c
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -345,11 +345,11 @@ unsigned int vp8_sub_pixel_variance16x16_c
   var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 17, 16, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 16, 16, 16, 16, VFilter);
 
-  return vp8_variance16x16_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance16x16_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp8_sub_pixel_variance32x32_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance32x32_c(const unsigned char  *src_ptr,
                                            int  src_pixels_per_line,
                                            int  xoffset,
                                            int  yoffset,
@@ -366,75 +366,75 @@ unsigned int vp8_sub_pixel_variance32x32_c(const unsigned char  *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 33, 32, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 32, 32, 32, 32, VFilter);
 
-  return vp8_variance32x32_c(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance32x32_c(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
 }
 #endif
 
-unsigned int vp8_variance_halfpixvar16x16_h_c(
+unsigned int vp9_variance_halfpixvar16x16_h_c(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
   int  recon_stride,
   unsigned int *sse) {
-  return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 8, 0,
+  return vp9_sub_pixel_variance16x16_c(src_ptr, source_stride, 8, 0,
                                        ref_ptr, recon_stride, sse);
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp8_variance_halfpixvar32x32_h_c(const unsigned char *src_ptr,
+unsigned int vp9_variance_halfpixvar32x32_h_c(const unsigned char *src_ptr,
                                               int  source_stride,
                                               const unsigned char *ref_ptr,
                                               int  recon_stride,
                                               unsigned int *sse) {
-  return vp8_sub_pixel_variance32x32_c(src_ptr, source_stride, 8, 0,
+  return vp9_sub_pixel_variance32x32_c(src_ptr, source_stride, 8, 0,
                                        ref_ptr, recon_stride, sse);
 }
 #endif
 
 
-unsigned int vp8_variance_halfpixvar16x16_v_c(const unsigned char *src_ptr,
+unsigned int vp9_variance_halfpixvar16x16_v_c(const unsigned char *src_ptr,
                                               int  source_stride,
                                               const unsigned char *ref_ptr,
                                               int  recon_stride,
                                               unsigned int *sse) {
-  return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 0, 8,
+  return vp9_sub_pixel_variance16x16_c(src_ptr, source_stride, 0, 8,
                                        ref_ptr, recon_stride, sse);
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp8_variance_halfpixvar32x32_v_c(
+unsigned int vp9_variance_halfpixvar32x32_v_c(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
   int  recon_stride,
   unsigned int *sse) {
-  return vp8_sub_pixel_variance32x32_c(src_ptr, source_stride, 0, 8,
+  return vp9_sub_pixel_variance32x32_c(src_ptr, source_stride, 0, 8,
                                        ref_ptr, recon_stride, sse);
 }
 #endif
 
-unsigned int vp8_variance_halfpixvar16x16_hv_c(
+unsigned int vp9_variance_halfpixvar16x16_hv_c(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
   int  recon_stride,
   unsigned int *sse) {
-  return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 8, 8,
+  return vp9_sub_pixel_variance16x16_c(src_ptr, source_stride, 8, 8,
                                        ref_ptr, recon_stride, sse);
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp8_variance_halfpixvar32x32_hv_c(const unsigned char *src_ptr,
+unsigned int vp9_variance_halfpixvar32x32_hv_c(const unsigned char *src_ptr,
                                                int  source_stride,
                                                const unsigned char *ref_ptr,
                                                int  recon_stride,
                                                unsigned int *sse) {
-  return vp8_sub_pixel_variance32x32_c(src_ptr, source_stride, 8, 8,
+  return vp9_sub_pixel_variance32x32_c(src_ptr, source_stride, 8, 8,
                                        ref_ptr, recon_stride, sse);
 }
 #endif
 
-unsigned int vp8_sub_pixel_mse16x16_c
+unsigned int vp9_sub_pixel_mse16x16_c
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -444,24 +444,24 @@ unsigned int vp8_sub_pixel_mse16x16_c
   int dst_pixels_per_line,
   unsigned int *sse
 ) {
-  vp8_sub_pixel_variance16x16_c(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
+  vp9_sub_pixel_variance16x16_c(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
   return *sse;
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp8_sub_pixel_mse32x32_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_mse32x32_c(const unsigned char  *src_ptr,
                                       int  src_pixels_per_line,
                                       int  xoffset,
                                       int  yoffset,
                                       const unsigned char *dst_ptr,
                                       int dst_pixels_per_line,
                                       unsigned int *sse) {
-  vp8_sub_pixel_variance32x32_c(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
+  vp9_sub_pixel_variance32x32_c(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
   return *sse;
 }
 #endif
 
-unsigned int vp8_sub_pixel_variance16x8_c
+unsigned int vp9_sub_pixel_variance16x8_c
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -481,10 +481,10 @@ unsigned int vp8_sub_pixel_variance16x8_c
   var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 9, 16, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 16, 16, 8, 16, VFilter);
 
-  return vp8_variance16x8_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance16x8_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
-unsigned int vp8_sub_pixel_variance8x16_c
+unsigned int vp9_sub_pixel_variance8x16_c
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -506,7 +506,7 @@ unsigned int vp8_sub_pixel_variance8x16_c
   var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 17, 8, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 8, 8, 16, 8, VFilter);
 
-  return vp8_variance8x16_c(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance8x16_c(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
 }
 #if CONFIG_NEWBESTREFMV
 unsigned int vp8_variance2x16_c(

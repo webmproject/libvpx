@@ -236,203 +236,203 @@ if [ "$CONFIG_VP8_ENCODER" = "yes" ]; then
 # variance
 [ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2
 
-prototype unsigned int vp8_variance32x32 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance32x32
+prototype unsigned int vp9_variance32x32 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance32x32
 
-prototype unsigned int vp8_variance16x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance16x16 mmx sse2
-vp8_variance16x16_sse2=vp8_variance16x16_wmt
-vp8_variance16x16_mmx=vp8_variance16x16_mmx
+prototype unsigned int vp9_variance16x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance16x16 mmx sse2
+vp9_variance16x16_sse2=vp9_variance16x16_wmt
+vp9_variance16x16_mmx=vp9_variance16x16_mmx
 
-prototype unsigned int vp8_variance16x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance16x8 mmx sse2
-vp8_variance16x8_sse2=vp8_variance16x8_wmt
-vp8_variance16x8_mmx=vp8_variance16x8_mmx
+prototype unsigned int vp9_variance16x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance16x8 mmx sse2
+vp9_variance16x8_sse2=vp9_variance16x8_wmt
+vp9_variance16x8_mmx=vp9_variance16x8_mmx
 
-prototype unsigned int vp8_variance8x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance8x16 mmx sse2
-vp8_variance8x16_sse2=vp8_variance8x16_wmt
-vp8_variance8x16_mmx=vp8_variance8x16_mmx
+prototype unsigned int vp9_variance8x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance8x16 mmx sse2
+vp9_variance8x16_sse2=vp9_variance8x16_wmt
+vp9_variance8x16_mmx=vp9_variance8x16_mmx
 
-prototype unsigned int vp8_variance8x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance8x8 mmx sse2
-vp8_variance8x8_sse2=vp8_variance8x8_wmt
-vp8_variance8x8_mmx=vp8_variance8x8_mmx
+prototype unsigned int vp9_variance8x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance8x8 mmx sse2
+vp9_variance8x8_sse2=vp9_variance8x8_wmt
+vp9_variance8x8_mmx=vp9_variance8x8_mmx
 
-prototype unsigned int vp8_variance4x4 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance4x4 mmx sse2
-vp8_variance4x4_sse2=vp8_variance4x4_wmt
-vp8_variance4x4_mmx=vp8_variance4x4_mmx
+prototype unsigned int vp9_variance4x4 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance4x4 mmx sse2
+vp9_variance4x4_sse2=vp9_variance4x4_wmt
+vp9_variance4x4_mmx=vp9_variance4x4_mmx
 
-prototype unsigned int vp8_sub_pixel_variance32x32 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
-specialize vp8_sub_pixel_variance32x32
+prototype unsigned int vp9_sub_pixel_variance32x32 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp9_sub_pixel_variance32x32
 
-prototype unsigned int vp8_sub_pixel_variance16x16 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
-specialize vp8_sub_pixel_variance16x16 sse2 mmx ssse3
-vp8_sub_pixel_variance16x16_sse2=vp8_sub_pixel_variance16x16_wmt
+prototype unsigned int vp9_sub_pixel_variance16x16 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp9_sub_pixel_variance16x16 sse2 mmx ssse3
+vp9_sub_pixel_variance16x16_sse2=vp9_sub_pixel_variance16x16_wmt
 
-prototype unsigned int vp8_sub_pixel_variance8x16 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
-specialize vp8_sub_pixel_variance8x16 sse2 mmx
-vp8_sub_pixel_variance8x16_sse2=vp8_sub_pixel_variance8x16_wmt
+prototype unsigned int vp9_sub_pixel_variance8x16 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp9_sub_pixel_variance8x16 sse2 mmx
+vp9_sub_pixel_variance8x16_sse2=vp9_sub_pixel_variance8x16_wmt
 
-prototype unsigned int vp8_sub_pixel_variance16x8 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
-specialize vp8_sub_pixel_variance16x8 sse2 mmx ssse3
-vp8_sub_pixel_variance16x8_sse2=vp8_sub_pixel_variance16x8_ssse3;
-vp8_sub_pixel_variance16x8_sse2=vp8_sub_pixel_variance16x8_wmt
+prototype unsigned int vp9_sub_pixel_variance16x8 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp9_sub_pixel_variance16x8 sse2 mmx ssse3
+vp9_sub_pixel_variance16x8_sse2=vp9_sub_pixel_variance16x8_ssse3;
+vp9_sub_pixel_variance16x8_sse2=vp9_sub_pixel_variance16x8_wmt
 
-prototype unsigned int vp8_sub_pixel_variance8x8 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
-specialize vp8_sub_pixel_variance8x8 sse2 mmx
-vp8_sub_pixel_variance8x8_sse2=vp8_sub_pixel_variance8x8_wmt
+prototype unsigned int vp9_sub_pixel_variance8x8 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp9_sub_pixel_variance8x8 sse2 mmx
+vp9_sub_pixel_variance8x8_sse2=vp9_sub_pixel_variance8x8_wmt
 
-prototype unsigned int vp8_sub_pixel_variance4x4 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
-specialize vp8_sub_pixel_variance4x4 sse2 mmx
-vp8_sub_pixel_variance4x4_sse2=vp8_sub_pixel_variance4x4_wmt
+prototype unsigned int vp9_sub_pixel_variance4x4 "const unsigned char *src_ptr, int source_stride, int xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp9_sub_pixel_variance4x4 sse2 mmx
+vp9_sub_pixel_variance4x4_sse2=vp9_sub_pixel_variance4x4_wmt
 
-prototype unsigned int vp8_sad32x32 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
-specialize vp8_sad32x32
+prototype unsigned int vp9_sad32x32 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
+specialize vp9_sad32x32
 
-prototype unsigned int vp8_sad16x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
-specialize vp8_sad16x16 mmx sse2 sse3
-vp8_sad16x16_sse2=vp8_sad16x16_wmt
+prototype unsigned int vp9_sad16x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
+specialize vp9_sad16x16 mmx sse2 sse3
+vp9_sad16x16_sse2=vp9_sad16x16_wmt
 
-prototype unsigned int vp8_sad16x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
-specialize vp8_sad16x8 mmx sse2
-vp8_sad16x8_sse2=vp8_sad16x8_wmt
+prototype unsigned int vp9_sad16x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
+specialize vp9_sad16x8 mmx sse2
+vp9_sad16x8_sse2=vp9_sad16x8_wmt
 
-prototype unsigned int vp8_sad8x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
-specialize vp8_sad8x16 mmx sse2
-vp8_sad8x16_sse2=vp8_sad8x16_wmt
+prototype unsigned int vp9_sad8x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
+specialize vp9_sad8x16 mmx sse2
+vp9_sad8x16_sse2=vp9_sad8x16_wmt
 
-prototype unsigned int vp8_sad8x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
-specialize vp8_sad8x8 mmx sse2
-vp8_sad8x8_sse2=vp8_sad8x8_wmt
+prototype unsigned int vp9_sad8x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
+specialize vp9_sad8x8 mmx sse2
+vp9_sad8x8_sse2=vp9_sad8x8_wmt
 
-prototype unsigned int vp8_sad4x4 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
-specialize vp8_sad4x4 mmx sse2
-vp8_sad4x4_sse2=vp8_sad4x4_wmt
+prototype unsigned int vp9_sad4x4 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int max_sad"
+specialize vp9_sad4x4 mmx sse2
+vp9_sad4x4_sse2=vp9_sad4x4_wmt
 
-prototype unsigned int vp8_variance_halfpixvar16x16_h "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance_halfpixvar16x16_h mmx sse2
-vp8_variance_halfpixvar16x16_h_sse2=vp8_variance_halfpixvar16x16_h_wmt
+prototype unsigned int vp9_variance_halfpixvar16x16_h "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance_halfpixvar16x16_h mmx sse2
+vp9_variance_halfpixvar16x16_h_sse2=vp9_variance_halfpixvar16x16_h_wmt
 
-prototype unsigned int vp8_variance_halfpixvar16x16_v "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance_halfpixvar16x16_v mmx sse2
-vp8_variance_halfpixvar16x16_v_sse2=vp8_variance_halfpixvar16x16_v_wmt
+prototype unsigned int vp9_variance_halfpixvar16x16_v "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance_halfpixvar16x16_v mmx sse2
+vp9_variance_halfpixvar16x16_v_sse2=vp9_variance_halfpixvar16x16_v_wmt
 
-prototype unsigned int vp8_variance_halfpixvar16x16_hv "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance_halfpixvar16x16_hv mmx sse2
-vp8_variance_halfpixvar16x16_hv_sse2=vp8_variance_halfpixvar16x16_hv_wmt
+prototype unsigned int vp9_variance_halfpixvar16x16_hv "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance_halfpixvar16x16_hv mmx sse2
+vp9_variance_halfpixvar16x16_hv_sse2=vp9_variance_halfpixvar16x16_hv_wmt
 
-prototype unsigned int vp8_variance_halfpixvar32x32_h "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance_halfpixvar32x32_h
+prototype unsigned int vp9_variance_halfpixvar32x32_h "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance_halfpixvar32x32_h
 
-prototype unsigned int vp8_variance_halfpixvar32x32_v "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance_halfpixvar32x32_v
+prototype unsigned int vp9_variance_halfpixvar32x32_v "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance_halfpixvar32x32_v
 
-prototype unsigned int vp8_variance_halfpixvar32x32_hv "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp8_variance_halfpixvar32x32_hv
+prototype unsigned int vp9_variance_halfpixvar32x32_hv "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance_halfpixvar32x32_hv
 
-prototype void vp8_sad32x32x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad32x32x3
+prototype void vp9_sad32x32x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad32x32x3
 
-prototype void vp8_sad16x16x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad16x16x3 sse3 ssse3
+prototype void vp9_sad16x16x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad16x16x3 sse3 ssse3
 
-prototype void vp8_sad16x8x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad16x8x3 sse3 ssse3
+prototype void vp9_sad16x8x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad16x8x3 sse3 ssse3
 
-prototype void vp8_sad8x16x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad8x16x3 sse3
+prototype void vp9_sad8x16x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad8x16x3 sse3
 
-prototype void vp8_sad8x8x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad8x8x3 sse3
+prototype void vp9_sad8x8x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad8x8x3 sse3
 
-prototype void vp8_sad4x4x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad4x4x3 sse3
+prototype void vp9_sad4x4x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad4x4x3 sse3
 
-prototype void vp8_sad32x32x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
-specialize vp8_sad32x32x8
+prototype void vp9_sad32x32x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+specialize vp9_sad32x32x8
 
-prototype void vp8_sad16x16x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
-specialize vp8_sad16x16x8 sse4
+prototype void vp9_sad16x16x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+specialize vp9_sad16x16x8 sse4
 
-prototype void vp8_sad16x8x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
-specialize vp8_sad16x8x8 sse4
+prototype void vp9_sad16x8x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+specialize vp9_sad16x8x8 sse4
 
-prototype void vp8_sad8x16x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
-specialize vp8_sad8x16x8 sse4
+prototype void vp9_sad8x16x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+specialize vp9_sad8x16x8 sse4
 
-prototype void vp8_sad8x8x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
-specialize vp8_sad8x8x8 sse4
+prototype void vp9_sad8x8x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+specialize vp9_sad8x8x8 sse4
 
-prototype void vp8_sad4x4x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
-specialize vp8_sad4x4x8 sse4
+prototype void vp9_sad4x4x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+specialize vp9_sad4x4x8 sse4
 
-prototype void vp8_sad32x32x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad32x32x4d
+prototype void vp9_sad32x32x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad32x32x4d
 
-prototype void vp8_sad16x16x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad16x16x4d sse3
+prototype void vp9_sad16x16x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad16x16x4d sse3
 
-prototype void vp8_sad16x8x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad16x8x4d sse3
+prototype void vp9_sad16x8x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad16x8x4d sse3
 
-prototype void vp8_sad8x16x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad8x16x4d sse3
+prototype void vp9_sad8x16x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad8x16x4d sse3
 
-prototype void vp8_sad8x8x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad8x8x4d sse3
+prototype void vp9_sad8x8x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad8x8x4d sse3
 
-prototype void vp8_sad4x4x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp8_sad4x4x4d sse3
+prototype void vp9_sad4x4x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad4x4x4d sse3
 
 #
 # Block copy
 #
 case $arch in
     x86*)
-    prototype void vp8_copy32xn "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, int n"
-    specialize vp8_copy32xn sse2 sse3
+    prototype void vp9_copy32xn "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, int n"
+    specialize vp9_copy32xn sse2 sse3
     ;;
 esac
 
-prototype unsigned int vp8_sub_pixel_mse16x16 "const unsigned char  *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, const unsigned char *dst_ptr, int dst_pixels_per_line, unsigned int *sse"
-specialize vp8_sub_pixel_mse16x16 sse2 mmx
-vp8_sub_pixel_mse16x16_sse2=vp8_sub_pixel_mse16x16_wmt
+prototype unsigned int vp9_sub_pixel_mse16x16 "const unsigned char  *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, const unsigned char *dst_ptr, int dst_pixels_per_line, unsigned int *sse"
+specialize vp9_sub_pixel_mse16x16 sse2 mmx
+vp9_sub_pixel_mse16x16_sse2=vp9_sub_pixel_mse16x16_wmt
 
-prototype unsigned int vp8_mse16x16 "const unsigned char *src_ptr, int  source_stride, const unsigned char *ref_ptr, int  recon_stride, unsigned int *sse"
-specialize vp8_mse16x16 mmx sse2
-vp8_mse16x16_sse2=vp8_mse16x16_wmt
+prototype unsigned int vp9_mse16x16 "const unsigned char *src_ptr, int  source_stride, const unsigned char *ref_ptr, int  recon_stride, unsigned int *sse"
+specialize vp9_mse16x16 mmx sse2
+vp9_mse16x16_sse2=vp9_mse16x16_wmt
 
-prototype unsigned int vp8_sub_pixel_mse32x32 "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
-specialize vp8_sub_pixel_mse32x32
+prototype unsigned int vp9_sub_pixel_mse32x32 "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp9_sub_pixel_mse32x32
 
-prototype unsigned int vp8_get_mb_ss "const short *"
-specialize vp8_get_mb_ss mmx sse2
+prototype unsigned int vp9_get_mb_ss "const short *"
+specialize vp9_get_mb_ss mmx sse2
 # ENCODEMB INVOKE
-prototype int vp8_mbblock_error "struct macroblock *mb, int dc"
-specialize vp8_mbblock_error mmx sse2
-vp8_mbblock_error_sse2=vp8_mbblock_error_xmm
+prototype int vp9_mbblock_error "struct macroblock *mb, int dc"
+specialize vp9_mbblock_error mmx sse2
+vp9_mbblock_error_sse2=vp9_mbblock_error_xmm
 
-prototype int vp8_block_error "short *coeff, short *dqcoeff, int block_size"
-specialize vp8_block_error mmx sse2
-vp8_block_error_sse2=vp8_block_error_xmm
+prototype int vp9_block_error "short *coeff, short *dqcoeff, int block_size"
+specialize vp9_block_error mmx sse2
+vp9_block_error_sse2=vp9_block_error_xmm
 
-prototype void vp8_subtract_b "struct block *be, struct blockd *bd, int pitch"
-specialize vp8_subtract_b mmx sse2
+prototype void vp9_subtract_b "struct block *be, struct blockd *bd, int pitch"
+specialize vp9_subtract_b mmx sse2
 
-prototype int vp8_mbuverror "struct macroblock *mb"
-specialize vp8_mbuverror mmx sse2
-vp8_mbuverror_sse2=vp8_mbuverror_xmm
+prototype int vp9_mbuverror "struct macroblock *mb"
+specialize vp9_mbuverror mmx sse2
+vp9_mbuverror_sse2=vp9_mbuverror_xmm
 
-prototype void vp8_subtract_b "struct block *be, struct blockd *bd, int pitch"
-specialize vp8_subtract_b mmx sse2
+prototype void vp9_subtract_b "struct block *be, struct blockd *bd, int pitch"
+specialize vp9_subtract_b mmx sse2
 
-prototype void vp8_subtract_mby "short *diff, unsigned char *src, unsigned char *pred, int stride"
-specialize vp8_subtract_mby mmx sse2
+prototype void vp9_subtract_mby "short *diff, unsigned char *src, unsigned char *pred, int stride"
+specialize vp9_subtract_mby mmx sse2
 
-prototype void vp8_subtract_mbuv "short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride"
-specialize vp8_subtract_mbuv mmx sse2
+prototype void vp9_subtract_mbuv "short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride"
+specialize vp9_subtract_mbuv mmx sse2
 
 #
 # Structured Similarity (SSIM)
@@ -440,40 +440,40 @@ specialize vp8_subtract_mbuv mmx sse2
 if [ "$CONFIG_INTERNAL_STATS" = "yes" ]; then
     [ $arch = "x86_64" ] && sse2_on_x86_64=sse2
 
-    prototype void vp8_ssim_parms_8x8 "unsigned char *s, int sp, unsigned char *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr"
-    specialize vp8_ssim_parms_8x8 $sse2_on_x86_64
+    prototype void vp9_ssim_parms_8x8 "unsigned char *s, int sp, unsigned char *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr"
+    specialize vp9_ssim_parms_8x8 $sse2_on_x86_64
 
-    prototype void vp8_ssim_parms_16x16 "unsigned char *s, int sp, unsigned char *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr"
-    specialize vp8_ssim_parms_16x16 $sse2_on_x86_64
+    prototype void vp9_ssim_parms_16x16 "unsigned char *s, int sp, unsigned char *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr"
+    specialize vp9_ssim_parms_16x16 $sse2_on_x86_64
 fi
 
 # fdct functions
-prototype void vp8_short_fdct8x8 "short *InputData, short *OutputData, int pitch"
-specialize vp8_short_fdct8x8
+prototype void vp9_short_fdct8x8 "short *InputData, short *OutputData, int pitch"
+specialize vp9_short_fdct8x8
 
-prototype void vp8_short_fhaar2x2 "short *InputData, short *OutputData, int pitch"
-specialize vp8_short_fhaar2x2
+prototype void vp9_short_fhaar2x2 "short *InputData, short *OutputData, int pitch"
+specialize vp9_short_fhaar2x2
 
-prototype void vp8_short_fdct4x4 "short *InputData, short *OutputData, int pitch"
-specialize vp8_short_fdct4x4
+prototype void vp9_short_fdct4x4 "short *InputData, short *OutputData, int pitch"
+specialize vp9_short_fdct4x4
 
-prototype void vp8_short_fdct8x4 "short *InputData, short *OutputData, int pitch"
-specialize vp8_short_fdct8x4
+prototype void vp9_short_fdct8x4 "short *InputData, short *OutputData, int pitch"
+specialize vp9_short_fdct8x4
 
-prototype void vp8_short_walsh4x4 "short *InputData, short *OutputData, int pitch"
-specialize vp8_short_walsh4x4
+prototype void vp9_short_walsh4x4 "short *InputData, short *OutputData, int pitch"
+specialize vp9_short_walsh4x4
 
-prototype void vp8_short_fdct16x16 "short *InputData, short *OutputData, int pitch"
-specialize vp8_short_fdct16x16
+prototype void vp9_short_fdct16x16 "short *InputData, short *OutputData, int pitch"
+specialize vp9_short_fdct16x16
 
-prototype void vp8_short_walsh4x4_lossless "short *InputData, short *OutputData, int pitch"
-specialize vp8_short_walsh4x4_lossless
+prototype void vp9_short_walsh4x4_lossless "short *InputData, short *OutputData, int pitch"
+specialize vp9_short_walsh4x4_lossless
 
-prototype void vp8_short_walsh4x4_x8 "short *InputData, short *OutputData, int pitch"
-specialize vp8_short_walsh4x4_x8
+prototype void vp9_short_walsh4x4_x8 "short *InputData, short *OutputData, int pitch"
+specialize vp9_short_walsh4x4_x8
 
-prototype void vp8_short_walsh8x4_x8 "short *InputData, short *OutputData, int pitch"
-specialize vp8_short_walsh8x4_x8
+prototype void vp9_short_walsh8x4_x8 "short *InputData, short *OutputData, int pitch"
+specialize vp9_short_walsh8x4_x8
 
 fi
 # end encoder functions

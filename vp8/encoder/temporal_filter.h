@@ -29,10 +29,10 @@
 #include "x86/temporal_filter_x86.h"
 #endif
 
-#ifndef vp8_temporal_filter_apply
-#define vp8_temporal_filter_apply vp8_temporal_filter_apply_c
+#ifndef vp9_temporal_filter_apply
+#define vp9_temporal_filter_apply vp9_temporal_filter_apply_c
 #endif
-extern prototype_apply(vp8_temporal_filter_apply);
+extern prototype_apply(vp9_temporal_filter_apply);
 
 typedef struct {
   prototype_apply(*apply);

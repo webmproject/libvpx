@@ -14,7 +14,7 @@
 #include "segmentation.h"
 #include "vp8/common/pred_common.h"
 
-void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x) {
+void vp9_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x) {
   int mb_row, mb_col;
 
   MODE_INFO *this_mb_mode_info = cm->mi;
@@ -58,7 +58,7 @@ void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x) {
   }
 }
 
-void vp8_enable_segmentation(VP8_PTR ptr) {
+void vp9_enable_segmentation(VP8_PTR ptr) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
   // Set the appropriate feature bit
@@ -67,14 +67,14 @@ void vp8_enable_segmentation(VP8_PTR ptr) {
   cpi->mb.e_mbd.update_mb_segmentation_data = 1;
 }
 
-void vp8_disable_segmentation(VP8_PTR ptr) {
+void vp9_disable_segmentation(VP8_PTR ptr) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
   // Clear the appropriate feature bit
   cpi->mb.e_mbd.segmentation_enabled = 0;
 }
 
-void vp8_set_segmentation_map(VP8_PTR ptr,
+void vp9_set_segmentation_map(VP8_PTR ptr,
                               unsigned char *segmentation_map) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
@@ -87,7 +87,7 @@ void vp8_set_segmentation_map(VP8_PTR ptr,
   cpi->mb.e_mbd.update_mb_segmentation_data = 1;
 }
 
-void vp8_set_segment_data(VP8_PTR ptr,
+void vp9_set_segment_data(VP8_PTR ptr,
                           signed char *feature_data,
                           unsigned char abs_delta) {
   VP8_COMP *cpi = (VP8_COMP *)(ptr);

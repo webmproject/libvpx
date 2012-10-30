@@ -30,10 +30,10 @@ static void cost(
       cost(C, T, P, j, d);
   } while (++i & 1);
 }
-void vp8_cost_tokens(int *c, const vp8_prob *p, vp8_tree t) {
+void vp9_cost_tokens(int *c, const vp8_prob *p, vp8_tree t) {
   cost(c, t, p, 0, 0);
 }
 
-void vp8_cost_tokens_skip(int *c, const vp8_prob *p, vp8_tree t) {
+void vp9_cost_tokens_skip(int *c, const vp8_prob *p, vp8_tree t) {
   cost(c, t, p, 2, 0);
 }

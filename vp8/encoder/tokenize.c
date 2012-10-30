@@ -48,8 +48,8 @@ extern unsigned int hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
 #endif  /* ENTROPY_STATS */
 
-void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
-void vp8_fix_contexts(MACROBLOCKD *xd);
+void vp9_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
+void vp9_fix_contexts(MACROBLOCKD *xd);
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp8_dct_value_tokens_ptr;
@@ -286,7 +286,7 @@ static int mb_is_skippable_16x16(MACROBLOCKD *xd) {
   return (vp9_mby_is_skippable_16x16(xd) & vp9_mbuv_is_skippable_8x8(xd));
 }
 
-void vp8_tokenize_mb(VP8_COMP *cpi,
+void vp9_tokenize_mb(VP8_COMP *cpi,
                      MACROBLOCKD *xd,
                      TOKENEXTRA **t,
                      int dry_run) {
@@ -337,9 +337,9 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
     if (!dry_run)
       cpi->skip_true_count[mb_skip_context] += skip_inc;
     if (!cpi->common.mb_no_coeff_skip) {
-      vp8_stuff_mb(cpi, xd, t, dry_run);
+      vp9_stuff_mb(cpi, xd, t, dry_run);
     } else {
-      vp8_fix_contexts(xd);
+      vp9_fix_contexts(xd);
     }
     if (dry_run)
       *t = t_backup;
@@ -663,7 +663,7 @@ void print_context_counters() {
 }
 #endif
 
-void vp8_tokenize_initialize() {
+void vp9_tokenize_initialize() {
   fill_value_tokens();
 }
 
@@ -730,7 +730,7 @@ static __inline void stuff_b(VP8_COMP *cpi,
   }
 }
 
-static void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
+static void vp9_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
                              TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -765,7 +765,7 @@ static void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
   }
 }
 
-static void vp8_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
+static void vp9_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
                                TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -784,7 +784,7 @@ static void vp8_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
   vpx_memset(&L[8], 0, sizeof(L[8]));
 }
 
-static void vp8_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
+static void vp9_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
                              TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -811,7 +811,7 @@ static void vp8_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
             L + vp8_block2left[b], TX_4X4, dry_run);
 }
 
-static void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi, MACROBLOCKD *xd,
+static void vp9_stuff_mb_8x8_4x4uv(VP8_COMP *cpi, MACROBLOCKD *xd,
                                    TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -830,21 +830,21 @@ static void vp8_stuff_mb_8x8_4x4uv(VP8_COMP *cpi, MACROBLOCKD *xd,
             L + vp8_block2left[b], TX_4X4, dry_run);
 }
 
-void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
+void vp9_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
   TOKENEXTRA * const t_backup = *t;
 
   if (tx_size == TX_16X16) {
-    vp8_stuff_mb_16x16(cpi, xd, t, dry_run);
+    vp9_stuff_mb_16x16(cpi, xd, t, dry_run);
   } else if (tx_size == TX_8X8) {
     if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
         xd->mode_info_context->mbmi.mode == SPLITMV) {
-      vp8_stuff_mb_8x8_4x4uv(cpi, xd, t, dry_run);
+      vp9_stuff_mb_8x8_4x4uv(cpi, xd, t, dry_run);
     } else {
-      vp8_stuff_mb_8x8(cpi, xd, t, dry_run);
+      vp9_stuff_mb_8x8(cpi, xd, t, dry_run);
     }
   } else {
-    vp8_stuff_mb_4x4(cpi, xd, t, dry_run);
+    vp9_stuff_mb_4x4(cpi, xd, t, dry_run);
   }
 
   if (dry_run) {
@@ -852,7 +852,7 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
   }
 }
 
-void vp8_fix_contexts(MACROBLOCKD *xd) {
+void vp9_fix_contexts(MACROBLOCKD *xd) {
   /* Clear entropy contexts for Y2 blocks */
   if ((xd->mode_info_context->mbmi.mode != B_PRED
       && xd->mode_info_context->mbmi.mode != I8X8_PRED

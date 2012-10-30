@@ -11,9 +11,9 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;int vp8_block_error_xmm(short *coeff_ptr,  short *dcoef_ptr)
-global sym(vp8_block_error_xmm)
-sym(vp8_block_error_xmm):
+;int vp9_block_error_xmm(short *coeff_ptr,  short *dcoef_ptr)
+global sym(vp9_block_error_xmm)
+sym(vp9_block_error_xmm):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 2
@@ -59,9 +59,9 @@ sym(vp8_block_error_xmm):
     pop         rbp
     ret
 
-;int vp8_block_error_mmx(short *coeff_ptr,  short *dcoef_ptr)
-global sym(vp8_block_error_mmx)
-sym(vp8_block_error_mmx):
+;int vp9_block_error_mmx(short *coeff_ptr,  short *dcoef_ptr)
+global sym(vp9_block_error_mmx)
+sym(vp9_block_error_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 2
@@ -125,9 +125,9 @@ sym(vp8_block_error_mmx):
     ret
 
 
-;int vp8_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
-global sym(vp8_mbblock_error_mmx_impl)
-sym(vp8_mbblock_error_mmx_impl):
+;int vp9_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
+global sym(vp9_mbblock_error_mmx_impl)
+sym(vp9_mbblock_error_mmx_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
@@ -202,9 +202,9 @@ sym(vp8_mbblock_error_mmx_impl):
     ret
 
 
-;int vp8_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
-global sym(vp8_mbblock_error_xmm_impl)
-sym(vp8_mbblock_error_xmm_impl):
+;int vp9_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
+global sym(vp9_mbblock_error_xmm_impl)
+sym(vp9_mbblock_error_xmm_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
@@ -272,9 +272,9 @@ sym(vp8_mbblock_error_xmm_impl):
     ret
 
 
-;int vp8_mbuverror_mmx_impl(short *s_ptr, short *d_ptr);
-global sym(vp8_mbuverror_mmx_impl)
-sym(vp8_mbuverror_mmx_impl):
+;int vp9_mbuverror_mmx_impl(short *s_ptr, short *d_ptr);
+global sym(vp9_mbuverror_mmx_impl)
+sym(vp9_mbuverror_mmx_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 2
@@ -329,9 +329,9 @@ sym(vp8_mbuverror_mmx_impl):
     ret
 
 
-;int vp8_mbuverror_xmm_impl(short *s_ptr, short *d_ptr);
-global sym(vp8_mbuverror_xmm_impl)
-sym(vp8_mbuverror_xmm_impl):
+;int vp9_mbuverror_xmm_impl(short *s_ptr, short *d_ptr);
+global sym(vp9_mbuverror_xmm_impl)
+sym(vp9_mbuverror_xmm_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 2

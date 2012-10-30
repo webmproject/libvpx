@@ -40,7 +40,7 @@ pop(struct lookahead_ctx *ctx,
 
 
 void
-vp8_lookahead_destroy(struct lookahead_ctx *ctx) {
+vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
   if (ctx) {
     if (ctx->buf) {
       int i;
@@ -55,7 +55,7 @@ vp8_lookahead_destroy(struct lookahead_ctx *ctx) {
 
 
 struct lookahead_ctx *
-vp8_lookahead_init(unsigned int width,
+vp9_lookahead_init(unsigned int width,
                    unsigned int height,
                    unsigned int depth) {
   struct lookahead_ctx *ctx = NULL;
@@ -85,13 +85,13 @@ vp8_lookahead_init(unsigned int width,
   }
   return ctx;
 bail:
-  vp8_lookahead_destroy(ctx);
+  vp9_lookahead_destroy(ctx);
   return NULL;
 }
 
 
 int
-vp8_lookahead_push(struct lookahead_ctx *ctx,
+vp9_lookahead_push(struct lookahead_ctx *ctx,
                    YV12_BUFFER_CONFIG   *src,
                    int64_t               ts_start,
                    int64_t               ts_end,
@@ -157,7 +157,7 @@ vp8_lookahead_push(struct lookahead_ctx *ctx,
 
 
 struct lookahead_entry *
-vp8_lookahead_pop(struct lookahead_ctx *ctx,
+vp9_lookahead_pop(struct lookahead_ctx *ctx,
                   int                   drain) {
   struct lookahead_entry *buf = NULL;
 
@@ -170,7 +170,7 @@ vp8_lookahead_pop(struct lookahead_ctx *ctx,
 
 
 struct lookahead_entry *
-vp8_lookahead_peek(struct lookahead_ctx *ctx,
+vp9_lookahead_peek(struct lookahead_ctx *ctx,
                    int                   index) {
   struct lookahead_entry *buf = NULL;
 
@@ -186,6 +186,6 @@ vp8_lookahead_peek(struct lookahead_ctx *ctx,
 
 
 unsigned int
-vp8_lookahead_depth(struct lookahead_ctx *ctx) {
+vp9_lookahead_depth(struct lookahead_ctx *ctx) {
   return ctx->sz;
 }

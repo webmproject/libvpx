@@ -17,7 +17,7 @@
 
 #if HAVE_ARMV6
 
-unsigned int vp8_sub_pixel_variance8x8_armv6
+unsigned int vp9_sub_pixel_variance8x8_armv6
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -40,11 +40,11 @@ unsigned int vp8_sub_pixel_variance8x8_armv6
   vp8_filter_block2d_bil_second_pass_armv6(first_pass, second_pass,
                                            8, 8, 8, VFilter);
 
-  return vp8_variance8x8_armv6(second_pass, 8, dst_ptr,
+  return vp9_variance8x8_armv6(second_pass, 8, dst_ptr,
                                dst_pixels_per_line, sse);
 }
 
-unsigned int vp8_sub_pixel_variance16x16_armv6
+unsigned int vp9_sub_pixel_variance16x16_armv6
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -60,13 +60,13 @@ unsigned int vp8_sub_pixel_variance16x16_armv6
   unsigned int var;
 
   if (xoffset == HALFNDX && yoffset == 0) {
-    var = vp8_variance_halfpixvar16x16_h_armv6(src_ptr, src_pixels_per_line,
+    var = vp9_variance_halfpixvar16x16_h_armv6(src_ptr, src_pixels_per_line,
                                                dst_ptr, dst_pixels_per_line, sse);
   } else if (xoffset == 0 && yoffset == HALFNDX) {
-    var = vp8_variance_halfpixvar16x16_v_armv6(src_ptr, src_pixels_per_line,
+    var = vp9_variance_halfpixvar16x16_v_armv6(src_ptr, src_pixels_per_line,
                                                dst_ptr, dst_pixels_per_line, sse);
   } else if (xoffset == HALFNDX && yoffset == HALFNDX) {
-    var = vp8_variance_halfpixvar16x16_hv_armv6(src_ptr, src_pixels_per_line,
+    var = vp9_variance_halfpixvar16x16_hv_armv6(src_ptr, src_pixels_per_line,
                                                 dst_ptr, dst_pixels_per_line, sse);
   } else {
     HFilter = vp8_bilinear_filters[xoffset];
@@ -78,7 +78,7 @@ unsigned int vp8_sub_pixel_variance16x16_armv6
     vp8_filter_block2d_bil_second_pass_armv6(first_pass, second_pass,
                                              16, 16, 16, VFilter);
 
-    var = vp8_variance16x16_armv6(second_pass, 16, dst_ptr,
+    var = vp9_variance16x16_armv6(second_pass, 16, dst_ptr,
                                   dst_pixels_per_line, sse);
   }
   return var;
@@ -89,7 +89,7 @@ unsigned int vp8_sub_pixel_variance16x16_armv6
 
 #if HAVE_ARMV7
 
-unsigned int vp8_sub_pixel_variance16x16_neon
+unsigned int vp9_sub_pixel_variance16x16_neon
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -100,13 +100,13 @@ unsigned int vp8_sub_pixel_variance16x16_neon
   unsigned int *sse
 ) {
   if (xoffset == HALFNDX && yoffset == 0)
-    return vp8_variance_halfpixvar16x16_h_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
+    return vp9_variance_halfpixvar16x16_h_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
   else if (xoffset == 0 && yoffset == HALFNDX)
-    return vp8_variance_halfpixvar16x16_v_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
+    return vp9_variance_halfpixvar16x16_v_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
   else if (xoffset == HALFNDX && yoffset == HALFNDX)
-    return vp8_variance_halfpixvar16x16_hv_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
+    return vp9_variance_halfpixvar16x16_hv_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
   else
-    return vp8_sub_pixel_variance16x16_neon_func(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
+    return vp9_sub_pixel_variance16x16_neon_func(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
 }
 
 #endif

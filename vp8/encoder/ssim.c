@@ -11,7 +11,7 @@
 
 #include "onyx_int.h"
 
-void vp8_ssim_parms_16x16_c(unsigned char *s, int sp, unsigned char *r,
+void vp9_ssim_parms_16x16_c(unsigned char *s, int sp, unsigned char *r,
                             int rp, unsigned long *sum_s, unsigned long *sum_r,
                             unsigned long *sum_sq_s, unsigned long *sum_sq_r,
                             unsigned long *sum_sxr) {
@@ -26,7 +26,7 @@ void vp8_ssim_parms_16x16_c(unsigned char *s, int sp, unsigned char *r,
     }
   }
 }
-void vp8_ssim_parms_8x8_c(unsigned char *s, int sp, unsigned char *r, int rp,
+void vp9_ssim_parms_8x8_c(unsigned char *s, int sp, unsigned char *r, int rp,
                           unsigned long *sum_s, unsigned long *sum_r,
                           unsigned long *sum_sq_s, unsigned long *sum_sq_r,
                           unsigned long *sum_sxr) {
@@ -67,13 +67,13 @@ static double similarity(unsigned long sum_s, unsigned long sum_r,
 
 static double ssim_16x16(unsigned char *s, int sp, unsigned char *r, int rp) {
   unsigned long sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
-  vp8_ssim_parms_16x16(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
+  vp9_ssim_parms_16x16(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
                        &sum_sxr);
   return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 256);
 }
 static double ssim_8x8(unsigned char *s, int sp, unsigned char *r, int rp) {
   unsigned long sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
-  vp8_ssim_parms_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
+  vp9_ssim_parms_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
                      &sum_sxr);
   return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 64);
 }
@@ -81,7 +81,7 @@ static double ssim_8x8(unsigned char *s, int sp, unsigned char *r, int rp) {
 // We are using a 8x8 moving window with starting location of each 8x8 window
 // on the 4x4 pixel grid. Such arrangement allows the windows to overlap
 // block boundaries to penalize blocking artifacts.
-double vp8_ssim2(unsigned char *img1, unsigned char *img2, int stride_img1,
+double vp9_ssim2(unsigned char *img1, unsigned char *img2, int stride_img1,
                  int stride_img2, int width, int height) {
   int i, j;
   int samples = 0;
@@ -98,20 +98,20 @@ double vp8_ssim2(unsigned char *img1, unsigned char *img2, int stride_img1,
   ssim_total /= samples;
   return ssim_total;
 }
-double vp8_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
+double vp9_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
                      int lumamask, double *weight) {
   double a, b, c;
   double ssimv;
 
-  a = vp8_ssim2(source->y_buffer, dest->y_buffer,
+  a = vp9_ssim2(source->y_buffer, dest->y_buffer,
                 source->y_stride, dest->y_stride, source->y_width,
                 source->y_height);
 
-  b = vp8_ssim2(source->u_buffer, dest->u_buffer,
+  b = vp9_ssim2(source->u_buffer, dest->u_buffer,
                 source->uv_stride, dest->uv_stride, source->uv_width,
                 source->uv_height);
 
-  c = vp8_ssim2(source->v_buffer, dest->v_buffer,
+  c = vp9_ssim2(source->v_buffer, dest->v_buffer,
                 source->uv_stride, dest->uv_stride, source->uv_width,
                 source->uv_height);
 
@@ -122,20 +122,20 @@ double vp8_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
   return ssimv;
 }
 
-double vp8_calc_ssimg(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
+double vp9_calc_ssimg(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
                       double *ssim_y, double *ssim_u, double *ssim_v) {
   double ssim_all = 0;
   double a, b, c;
 
-  a = vp8_ssim2(source->y_buffer, dest->y_buffer,
+  a = vp9_ssim2(source->y_buffer, dest->y_buffer,
                 source->y_stride, dest->y_stride, source->y_width,
                 source->y_height);
 
-  b = vp8_ssim2(source->u_buffer, dest->u_buffer,
+  b = vp9_ssim2(source->u_buffer, dest->u_buffer,
                 source->uv_stride, dest->uv_stride, source->uv_width,
                 source->uv_height);
 
-  c = vp8_ssim2(source->v_buffer, dest->v_buffer,
+  c = vp9_ssim2(source->v_buffer, dest->v_buffer,
                 source->uv_stride, dest->uv_stride, source->uv_width,
                 source->uv_height);
   *ssim_y = a;

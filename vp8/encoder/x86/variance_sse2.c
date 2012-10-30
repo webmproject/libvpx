@@ -20,7 +20,7 @@ extern void filter_block1d_v6_mmx(const short *src_ptr, unsigned char *output_pt
 extern void filter_block1d8_h6_sse2(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
 extern void filter_block1d8_v6_sse2(const short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
 
-extern void vp8_filter_block2d_bil4x4_var_mmx
+extern void vp9_filter_block2d_bil4x4_var_mmx
 (
   const unsigned char *ref_ptr,
   int ref_pixels_per_line,
@@ -32,7 +32,7 @@ extern void vp8_filter_block2d_bil4x4_var_mmx
   unsigned int *sumsquared
 );
 
-extern unsigned int vp8_get4x4var_mmx
+extern unsigned int vp9_get4x4var_mmx
 (
   const unsigned char *src_ptr,
   int  source_stride,
@@ -42,11 +42,11 @@ extern unsigned int vp8_get4x4var_mmx
   int *Sum
 );
 
-unsigned int vp8_get_mb_ss_sse2
+unsigned int vp9_get_mb_ss_sse2
 (
   const short *src_ptr
 );
-unsigned int vp8_get16x16var_sse2
+unsigned int vp9_get16x16var_sse2
 (
   const unsigned char *src_ptr,
   int source_stride,
@@ -55,7 +55,7 @@ unsigned int vp8_get16x16var_sse2
   unsigned int *SSE,
   int *Sum
 );
-unsigned int vp8_get8x8var_sse2
+unsigned int vp9_get8x8var_sse2
 (
   const unsigned char *src_ptr,
   int source_stride,
@@ -64,7 +64,7 @@ unsigned int vp8_get8x8var_sse2
   unsigned int *SSE,
   int *Sum
 );
-void vp8_filter_block2d_bil_var_sse2
+void vp9_filter_block2d_bil_var_sse2
 (
   const unsigned char *ref_ptr,
   int ref_pixels_per_line,
@@ -76,7 +76,7 @@ void vp8_filter_block2d_bil_var_sse2
   int *sum,
   unsigned int *sumsquared
 );
-void vp8_half_horiz_vert_variance8x_h_sse2
+void vp9_half_horiz_vert_variance8x_h_sse2
 (
   const unsigned char *ref_ptr,
   int ref_pixels_per_line,
@@ -86,7 +86,7 @@ void vp8_half_horiz_vert_variance8x_h_sse2
   int *sum,
   unsigned int *sumsquared
 );
-void vp8_half_horiz_vert_variance16x_h_sse2
+void vp9_half_horiz_vert_variance16x_h_sse2
 (
   const unsigned char *ref_ptr,
   int ref_pixels_per_line,
@@ -96,7 +96,7 @@ void vp8_half_horiz_vert_variance16x_h_sse2
   int *sum,
   unsigned int *sumsquared
 );
-void vp8_half_horiz_variance8x_h_sse2
+void vp9_half_horiz_variance8x_h_sse2
 (
   const unsigned char *ref_ptr,
   int ref_pixels_per_line,
@@ -106,7 +106,7 @@ void vp8_half_horiz_variance8x_h_sse2
   int *sum,
   unsigned int *sumsquared
 );
-void vp8_half_horiz_variance16x_h_sse2
+void vp9_half_horiz_variance16x_h_sse2
 (
   const unsigned char *ref_ptr,
   int ref_pixels_per_line,
@@ -116,7 +116,7 @@ void vp8_half_horiz_variance16x_h_sse2
   int *sum,
   unsigned int *sumsquared
 );
-void vp8_half_vert_variance8x_h_sse2
+void vp9_half_vert_variance8x_h_sse2
 (
   const unsigned char *ref_ptr,
   int ref_pixels_per_line,
@@ -126,7 +126,7 @@ void vp8_half_vert_variance8x_h_sse2
   int *sum,
   unsigned int *sumsquared
 );
-void vp8_half_vert_variance16x_h_sse2
+void vp9_half_vert_variance16x_h_sse2
 (
   const unsigned char *ref_ptr,
   int ref_pixels_per_line,
@@ -139,7 +139,7 @@ void vp8_half_vert_variance16x_h_sse2
 
 DECLARE_ALIGNED(16, extern short, vp8_vp7_bilinear_filters_mmx[16][8]);
 
-unsigned int vp8_variance4x4_wmt(
+unsigned int vp9_variance4x4_wmt(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
@@ -148,13 +148,13 @@ unsigned int vp8_variance4x4_wmt(
   unsigned int var;
   int avg;
 
-  vp8_get4x4var_mmx(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg);
+  vp9_get4x4var_mmx(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg);
   *sse = var;
   return (var - ((avg * avg) >> 4));
 
 }
 
-unsigned int vp8_variance8x8_wmt
+unsigned int vp9_variance8x8_wmt
 (
   const unsigned char *src_ptr,
   int  source_stride,
@@ -164,14 +164,14 @@ unsigned int vp8_variance8x8_wmt
   unsigned int var;
   int avg;
 
-  vp8_get8x8var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg);
+  vp9_get8x8var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg);
   *sse = var;
   return (var - ((avg * avg) >> 6));
 
 }
 
 
-unsigned int vp8_variance16x16_wmt
+unsigned int vp9_variance16x16_wmt
 (
   const unsigned char *src_ptr,
   int  source_stride,
@@ -182,11 +182,11 @@ unsigned int vp8_variance16x16_wmt
   int sum0;
 
 
-  vp8_get16x16var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0);
+  vp9_get16x16var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0);
   *sse = sse0;
   return (sse0 - ((sum0 * sum0) >> 8));
 }
-unsigned int vp8_mse16x16_wmt(
+unsigned int vp9_mse16x16_wmt(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
@@ -195,14 +195,14 @@ unsigned int vp8_mse16x16_wmt(
 
   unsigned int sse0;
   int sum0;
-  vp8_get16x16var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0);
+  vp9_get16x16var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0);
   *sse = sse0;
   return sse0;
 
 }
 
 
-unsigned int vp8_variance16x8_wmt
+unsigned int vp9_variance16x8_wmt
 (
   const unsigned char *src_ptr,
   int  source_stride,
@@ -212,8 +212,8 @@ unsigned int vp8_variance16x8_wmt
   unsigned int sse0, sse1, var;
   int sum0, sum1, avg;
 
-  vp8_get8x8var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0);
-  vp8_get8x8var_sse2(src_ptr + 8, source_stride, ref_ptr + 8, recon_stride, &sse1, &sum1);
+  vp9_get8x8var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0);
+  vp9_get8x8var_sse2(src_ptr + 8, source_stride, ref_ptr + 8, recon_stride, &sse1, &sum1);
 
   var = sse0 + sse1;
   avg = sum0 + sum1;
@@ -222,7 +222,7 @@ unsigned int vp8_variance16x8_wmt
 
 }
 
-unsigned int vp8_variance8x16_wmt
+unsigned int vp9_variance8x16_wmt
 (
   const unsigned char *src_ptr,
   int  source_stride,
@@ -232,8 +232,8 @@ unsigned int vp8_variance8x16_wmt
   unsigned int sse0, sse1, var;
   int sum0, sum1, avg;
 
-  vp8_get8x8var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0);
-  vp8_get8x8var_sse2(src_ptr + 8 * source_stride, source_stride, ref_ptr + 8 * recon_stride, recon_stride, &sse1, &sum1);
+  vp9_get8x8var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0);
+  vp9_get8x8var_sse2(src_ptr + 8 * source_stride, source_stride, ref_ptr + 8 * recon_stride, recon_stride, &sse1, &sum1);
 
   var = sse0 + sse1;
   avg = sum0 + sum1;
@@ -242,7 +242,7 @@ unsigned int vp8_variance8x16_wmt
 
 }
 
-unsigned int vp8_sub_pixel_variance4x4_wmt
+unsigned int vp9_sub_pixel_variance4x4_wmt
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -254,7 +254,7 @@ unsigned int vp8_sub_pixel_variance4x4_wmt
 ) {
   int xsum;
   unsigned int xxsum;
-  vp8_filter_block2d_bil4x4_var_mmx(
+  vp9_filter_block2d_bil4x4_var_mmx(
     src_ptr, src_pixels_per_line,
     dst_ptr, dst_pixels_per_line,
     vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
@@ -265,7 +265,7 @@ unsigned int vp8_sub_pixel_variance4x4_wmt
 }
 
 
-unsigned int vp8_sub_pixel_variance8x8_wmt
+unsigned int vp9_sub_pixel_variance8x8_wmt
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -279,22 +279,22 @@ unsigned int vp8_sub_pixel_variance8x8_wmt
   unsigned int xxsum;
 
   if (xoffset == HALFNDX && yoffset == 0) {
-    vp8_half_horiz_variance8x_h_sse2(
+    vp9_half_horiz_variance8x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 8,
       &xsum, &xxsum);
   } else if (xoffset == 0 && yoffset == HALFNDX) {
-    vp8_half_vert_variance8x_h_sse2(
+    vp9_half_vert_variance8x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 8,
       &xsum, &xxsum);
   } else if (xoffset == HALFNDX && yoffset == HALFNDX) {
-    vp8_half_horiz_vert_variance8x_h_sse2(
+    vp9_half_horiz_vert_variance8x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 8,
       &xsum, &xxsum);
   } else {
-    vp8_filter_block2d_bil_var_sse2(
+    vp9_filter_block2d_bil_var_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 8,
       xoffset, yoffset,
@@ -305,7 +305,7 @@ unsigned int vp8_sub_pixel_variance8x8_wmt
   return (xxsum - ((xsum * xsum) >> 6));
 }
 
-unsigned int vp8_sub_pixel_variance16x16_wmt
+unsigned int vp9_sub_pixel_variance16x16_wmt
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -322,29 +322,29 @@ unsigned int vp8_sub_pixel_variance16x16_wmt
   // note we could avoid these if statements if the calling function
   // just called the appropriate functions inside.
   if (xoffset == HALFNDX && yoffset == 0) {
-    vp8_half_horiz_variance16x_h_sse2(
+    vp9_half_horiz_variance16x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 16,
       &xsum0, &xxsum0);
   } else if (xoffset == 0 && yoffset == HALFNDX) {
-    vp8_half_vert_variance16x_h_sse2(
+    vp9_half_vert_variance16x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 16,
       &xsum0, &xxsum0);
   } else if (xoffset == HALFNDX && yoffset == HALFNDX) {
-    vp8_half_horiz_vert_variance16x_h_sse2(
+    vp9_half_horiz_vert_variance16x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 16,
       &xsum0, &xxsum0);
   } else {
-    vp8_filter_block2d_bil_var_sse2(
+    vp9_filter_block2d_bil_var_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 16,
       xoffset, yoffset,
       &xsum0, &xxsum0
     );
 
-    vp8_filter_block2d_bil_var_sse2(
+    vp9_filter_block2d_bil_var_sse2(
       src_ptr + 8, src_pixels_per_line,
       dst_ptr + 8, dst_pixels_per_line, 16,
       xoffset, yoffset,
@@ -358,7 +358,7 @@ unsigned int vp8_sub_pixel_variance16x16_wmt
   return (xxsum0 - ((xsum0 * xsum0) >> 8));
 }
 
-unsigned int vp8_sub_pixel_mse16x16_wmt(
+unsigned int vp9_sub_pixel_mse16x16_wmt(
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
   int  xoffset,
@@ -367,11 +367,11 @@ unsigned int vp8_sub_pixel_mse16x16_wmt(
   int dst_pixels_per_line,
   unsigned int *sse
 ) {
-  vp8_sub_pixel_variance16x16_wmt(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
+  vp9_sub_pixel_variance16x16_wmt(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
   return *sse;
 }
 
-unsigned int vp8_sub_pixel_variance16x8_wmt
+unsigned int vp9_sub_pixel_variance16x8_wmt
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -386,28 +386,28 @@ unsigned int vp8_sub_pixel_variance16x8_wmt
   unsigned int xxsum0, xxsum1;
 
   if (xoffset == HALFNDX && yoffset == 0) {
-    vp8_half_horiz_variance16x_h_sse2(
+    vp9_half_horiz_variance16x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 8,
       &xsum0, &xxsum0);
   } else if (xoffset == 0 && yoffset == HALFNDX) {
-    vp8_half_vert_variance16x_h_sse2(
+    vp9_half_vert_variance16x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 8,
       &xsum0, &xxsum0);
   } else if (xoffset == HALFNDX && yoffset == HALFNDX) {
-    vp8_half_horiz_vert_variance16x_h_sse2(
+    vp9_half_horiz_vert_variance16x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 8,
       &xsum0, &xxsum0);
   } else {
-    vp8_filter_block2d_bil_var_sse2(
+    vp9_filter_block2d_bil_var_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 8,
       xoffset, yoffset,
       &xsum0, &xxsum0);
 
-    vp8_filter_block2d_bil_var_sse2(
+    vp9_filter_block2d_bil_var_sse2(
       src_ptr + 8, src_pixels_per_line,
       dst_ptr + 8, dst_pixels_per_line, 8,
       xoffset, yoffset,
@@ -420,7 +420,7 @@ unsigned int vp8_sub_pixel_variance16x8_wmt
   return (xxsum0 - ((xsum0 * xsum0) >> 7));
 }
 
-unsigned int vp8_sub_pixel_variance8x16_wmt
+unsigned int vp9_sub_pixel_variance8x16_wmt
 (
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -434,22 +434,22 @@ unsigned int vp8_sub_pixel_variance8x16_wmt
   unsigned int xxsum;
 
   if (xoffset == HALFNDX && yoffset == 0) {
-    vp8_half_horiz_variance8x_h_sse2(
+    vp9_half_horiz_variance8x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 16,
       &xsum, &xxsum);
   } else if (xoffset == 0 && yoffset == HALFNDX) {
-    vp8_half_vert_variance8x_h_sse2(
+    vp9_half_vert_variance8x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 16,
       &xsum, &xxsum);
   } else if (xoffset == HALFNDX && yoffset == HALFNDX) {
-    vp8_half_horiz_vert_variance8x_h_sse2(
+    vp9_half_horiz_vert_variance8x_h_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 16,
       &xsum, &xxsum);
   } else {
-    vp8_filter_block2d_bil_var_sse2(
+    vp9_filter_block2d_bil_var_sse2(
       src_ptr, src_pixels_per_line,
       dst_ptr, dst_pixels_per_line, 16,
       xoffset, yoffset,
@@ -461,7 +461,7 @@ unsigned int vp8_sub_pixel_variance8x16_wmt
 }
 
 
-unsigned int vp8_variance_halfpixvar16x16_h_wmt(
+unsigned int vp9_variance_halfpixvar16x16_h_wmt(
   const unsigned char *src_ptr,
   int  src_pixels_per_line,
   const unsigned char *dst_ptr,
@@ -470,7 +470,7 @@ unsigned int vp8_variance_halfpixvar16x16_h_wmt(
   int xsum0;
   unsigned int xxsum0;
 
-  vp8_half_horiz_variance16x_h_sse2(
+  vp9_half_horiz_variance16x_h_sse2(
     src_ptr, src_pixels_per_line,
     dst_ptr, dst_pixels_per_line, 16,
     &xsum0, &xxsum0);
@@ -480,7 +480,7 @@ unsigned int vp8_variance_halfpixvar16x16_h_wmt(
 }
 
 
-unsigned int vp8_variance_halfpixvar16x16_v_wmt(
+unsigned int vp9_variance_halfpixvar16x16_v_wmt(
   const unsigned char *src_ptr,
   int  src_pixels_per_line,
   const unsigned char *dst_ptr,
@@ -488,7 +488,7 @@ unsigned int vp8_variance_halfpixvar16x16_v_wmt(
   unsigned int *sse) {
   int xsum0;
   unsigned int xxsum0;
-  vp8_half_vert_variance16x_h_sse2(
+  vp9_half_vert_variance16x_h_sse2(
     src_ptr, src_pixels_per_line,
     dst_ptr, dst_pixels_per_line, 16,
     &xsum0, &xxsum0);
@@ -498,7 +498,7 @@ unsigned int vp8_variance_halfpixvar16x16_v_wmt(
 }
 
 
-unsigned int vp8_variance_halfpixvar16x16_hv_wmt(
+unsigned int vp9_variance_halfpixvar16x16_hv_wmt(
   const unsigned char *src_ptr,
   int  src_pixels_per_line,
   const unsigned char *dst_ptr,
@@ -507,7 +507,7 @@ unsigned int vp8_variance_halfpixvar16x16_hv_wmt(
   int xsum0;
   unsigned int xxsum0;
 
-  vp8_half_horiz_vert_variance16x_h_sse2(
+  vp9_half_horiz_vert_variance16x_h_sse2(
     src_ptr, src_pixels_per_line,
     dst_ptr, dst_pixels_per_line, 16,
     &xsum0, &xxsum0);

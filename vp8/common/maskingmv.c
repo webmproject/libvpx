@@ -11,14 +11,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-extern unsigned int vp8_sad16x16_sse3(
+extern unsigned int vp9_sad16x16_sse3(
   unsigned char *src_ptr,
   int  src_stride,
   unsigned char *ref_ptr,
   int  ref_stride,
   int  max_err);
 
-extern void vp8_sad16x16x3_sse3(
+extern void vp9_sad16x16x3_sse3(
   unsigned char *src_ptr,
   int  src_stride,
   unsigned char *ref_ptr,
@@ -43,14 +43,14 @@ extern void vp8_makemask_sse3(
   int ut,
   int vt);
 
-unsigned int vp8_sad16x16_unmasked_wmt(
+unsigned int vp9_sad16x16_unmasked_wmt(
   unsigned char *src_ptr,
   int  src_stride,
   unsigned char *ref_ptr,
   int  ref_stride,
   unsigned char *mask);
 
-unsigned int vp8_sad16x16_masked_wmt(
+unsigned int vp9_sad16x16_masked_wmt(
   unsigned char *src_ptr,
   int  src_stride,
   unsigned char *ref_ptr,
@@ -503,7 +503,7 @@ int fast_masked_motion_search(unsigned char *y, unsigned char *u, unsigned char 
 
       vp8_growmaskmb_sse3(dym, dym2);
 
-      e = vp8_sad16x16_unmasked_wmt(y, yp, dyz + j, dyp, dym2);
+      e = vp9_sad16x16_unmasked_wmt(y, yp, dyz + j, dyp, dym2);
 
       if (e < beste) {
         bui = i;
@@ -529,7 +529,7 @@ int fast_masked_motion_search(unsigned char *y, unsigned char *u, unsigned char 
   for (i = -32; i < 32; i++) {
     unsigned char *dyz = i * dyp + dy;
     for (j = -32; j < 32; j++) {
-      e = vp8_sad16x16_masked_wmt(y, yp, dyz + j, dyp, dym2);
+      e = vp9_sad16x16_masked_wmt(y, yp, dyz + j, dyp, dym2);
       if (e < beste) {
         bmi = i;
         bmj = j;
@@ -581,7 +581,7 @@ int fast_masked_motion_search(unsigned char *y, unsigned char *u, unsigned char 
 
   vp8_growmaskmb_sse3(dym, dym2);
 
-  obeste = vp8_sad16x16_masked_wmt(y, yp, dy + bmi * dyp + bmj, dyp, dym2);
+  obeste = vp9_sad16x16_masked_wmt(y, yp, dy + bmi * dyp + bmj, dyp, dym2);
 
   beste = 0xffffffff;
 
@@ -589,7 +589,7 @@ int fast_masked_motion_search(unsigned char *y, unsigned char *u, unsigned char 
   for (i = -32; i < 32; i++) {
     unsigned char *dyz = i * dyp + dy;
     for (j = -32; j < 32; j++) {
-      e = vp8_sad16x16_unmasked_wmt(y, yp, dyz + j, dyp, dym2);
+      e = vp9_sad16x16_unmasked_wmt(y, yp, dyz + j, dyp, dym2);
 
       if (e < beste) {
         bui = i;
@@ -698,8 +698,8 @@ int mainz(int argc, char *argv[]) {
 
   vp8_growmaskmb_sse3(ym, ym3);
 
-  a = vp8_sad16x16_masked_wmt(str, 16, sts, 16, ym3);
-  b = vp8_sad16x16_unmasked_wmt(str, 16, sts, 16, ym3);
+  a = vp9_sad16x16_masked_wmt(str, 16, sts, 16, ym3);
+  b = vp9_sad16x16_unmasked_wmt(str, 16, sts, 16, ym3);
 
   vp8_masked_predictor_wmt(str, sts, 16, ym, 16, ym3);
 
@@ -738,7 +738,7 @@ int mainz(int argc, char *argv[]) {
         int bmi, bmj, bui, buj, bwm;
         unsigned char ym[256];
 
-        if (vp8_sad16x16_sse3(ys + c, y_stride, yd + c, y_stride, 0xffff) == 0)
+        if (vp9_sad16x16_sse3(ys + c, y_stride, yd + c, y_stride, 0xffff) == 0)
           bmi = bmj = bui = buj = bwm = 0;
         else {
           COLOR_SEG_ELEMENT cs[5];

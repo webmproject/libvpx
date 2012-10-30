@@ -13,9 +13,9 @@
 
 #if HAVE_ARMV6
 
-void vp8_short_fdct8x4_armv6(short *input, short *output, int pitch) {
-  vp8_short_fdct4x4_armv6(input,   output,    pitch);
-  vp8_short_fdct4x4_armv6(input + 4, output + 16, pitch);
+void vp9_short_fdct8x4_armv6(short *input, short *output, int pitch) {
+  vp9_short_fdct4x4_armv6(input,   output,    pitch);
+  vp9_short_fdct4x4_armv6(input + 4, output + 16, pitch);
 }
 
 #endif /* HAVE_ARMV6 */

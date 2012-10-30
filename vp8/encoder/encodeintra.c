@@ -25,7 +25,7 @@
 #define IF_RTCD(x) NULL
 #endif
 
-int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
+int vp9_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   int i;
   int intra_pred_var = 0;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
@@ -39,20 +39,20 @@ int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
     mbmi->uv_mode = DC_PRED;
     mbmi->ref_frame = INTRA_FRAME;
 
-    vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+    vp9_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
   } else {
     for (i = 0; i < 16; i++) {
       x->e_mbd.block[i].bmi.as_mode.first = B_DC_PRED;
-      vp8_encode_intra4x4block(IF_RTCD(&cpi->rtcd), x, i);
+      vp9_encode_intra4x4block(IF_RTCD(&cpi->rtcd), x, i);
     }
   }
 
-  intra_pred_var = vp8_get_mb_ss(x->src_diff);
+  intra_pred_var = vp9_get_mb_ss(x->src_diff);
 
   return intra_pred_var;
 }
 
-void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
+void vp9_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
                               MACROBLOCK *x, int ib) {
   BLOCKD *b = &x->e_mbd.block[ib];
   BLOCK *be = &x->block[ib];
@@ -69,15 +69,15 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
   }
 #endif
 
-  vp8_subtract_b(be, b, 16);
+  vp9_subtract_b(be, b, 16);
 
   tx_type = get_tx_type(&x->e_mbd, b);
   if (tx_type != DCT_DCT) {
-    vp8_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
-    vp8_ht_quantize_b_4x4(be, b, tx_type);
+    vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
+    vp9_ht_quantize_b_4x4(be, b, tx_type);
     vp8_ihtllm_c(b->dqcoeff, b->diff, 32, tx_type, 4);
   } else {
-    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32) ;
+    x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32) ;
     x->quantize_b_4x4(be, b) ;
     vp8_inverse_transform_b_4x4(IF_RTCD(&rtcd->common->idct), b, 32) ;
   }
@@ -85,15 +85,15 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
   vp8_recon_b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 }
 
-void vp8_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb) {
+void vp9_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb) {
   int i;
 
   for (i = 0; i < 16; i++)
-    vp8_encode_intra4x4block(rtcd, mb, i);
+    vp9_encode_intra4x4block(rtcd, mb, i);
   return;
 }
 
-void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
@@ -108,42 +108,42 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     vp8_build_comp_intra_predictors_mby(xd);
 #endif
 
-  vp8_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
+  vp9_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
 
   if (tx_size == TX_16X16) {
     BLOCKD  *bd = &xd->block[0];
     tx_type = get_tx_type(xd, bd);
     if (tx_type != DCT_DCT) {
-      vp8_fht_c(b->src_diff, 32, b->coeff, tx_type, 16);
-      vp8_quantize_mby_16x16(x);
+      vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 16);
+      vp9_quantize_mby_16x16(x);
       if (x->optimize)
-        vp8_optimize_mby_16x16(x, rtcd);
+        vp9_optimize_mby_16x16(x, rtcd);
       vp8_ihtllm_c(bd->dqcoeff, bd->diff, 32, tx_type, 16);
     } else {
-      vp8_transform_mby_16x16(x);
-      vp8_quantize_mby_16x16(x);
+      vp9_transform_mby_16x16(x);
+      vp9_quantize_mby_16x16(x);
       if (x->optimize)
-        vp8_optimize_mby_16x16(x, rtcd);
+        vp9_optimize_mby_16x16(x, rtcd);
       vp8_inverse_transform_mby_16x16(IF_RTCD(&rtcd->common->idct), xd);
     }
   } else if (tx_size == TX_8X8) {
-    vp8_transform_mby_8x8(x);
-    vp8_quantize_mby_8x8(x);
+    vp9_transform_mby_8x8(x);
+    vp9_quantize_mby_8x8(x);
     if (x->optimize)
-      vp8_optimize_mby_8x8(x, rtcd);
+      vp9_optimize_mby_8x8(x, rtcd);
     vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), xd);
   } else {
-    vp8_transform_mby_4x4(x);
-    vp8_quantize_mby_4x4(x);
+    vp9_transform_mby_4x4(x);
+    vp9_quantize_mby_4x4(x);
     if (x->optimize)
-      vp8_optimize_mby_4x4(x, rtcd);
+      vp9_optimize_mby_4x4(x, rtcd);
     vp8_inverse_transform_mby_4x4(IF_RTCD(&rtcd->common->idct), xd);
   }
 
   vp8_recon_mby(xd);
 }
 
-void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
@@ -157,27 +157,27 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   }
 #endif
 
-  vp8_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+  vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                     xd->predictor, x->src.uv_stride);
 
   if (tx_size == TX_4X4) {
-    vp8_transform_mbuv_4x4(x);
-    vp8_quantize_mbuv_4x4(x);
+    vp9_transform_mbuv_4x4(x);
+    vp9_quantize_mbuv_4x4(x);
     if (x->optimize)
-      vp8_optimize_mbuv_4x4(x, rtcd);
+      vp9_optimize_mbuv_4x4(x, rtcd);
     vp8_inverse_transform_mbuv_4x4(IF_RTCD(&rtcd->common->idct), xd);
   } else /* 16x16 or 8x8 */ {
-    vp8_transform_mbuv_8x8(x);
-    vp8_quantize_mbuv_8x8(x);
+    vp9_transform_mbuv_8x8(x);
+    vp9_quantize_mbuv_8x8(x);
     if (x->optimize)
-      vp8_optimize_mbuv_8x8(x, rtcd);
+      vp9_optimize_mbuv_8x8(x, rtcd);
     vp8_inverse_transform_mbuv_8x8(IF_RTCD(&rtcd->common->idct), xd);
   }
 
   vp8_recon_intra_mbuv(xd);
 }
 
-void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
+void vp9_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
                          MACROBLOCK *x, int ib) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCKD *b = &xd->block[ib];
@@ -201,17 +201,17 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     int idx = (ib & 0x02) ? (ib + 2) : ib;
 
     // generate residual blocks
-    vp8_subtract_4b_c(be, b, 16);
+    vp9_subtract_4b_c(be, b, 16);
 
     tx_type = get_tx_type(xd, xd->block + idx);
     if (tx_type != DCT_DCT) {
-      vp8_fht_c(be->src_diff, 32, (x->block + idx)->coeff,
+      vp9_fht_c(be->src_diff, 32, (x->block + idx)->coeff,
                 tx_type, 8);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
       vp8_ihtllm_c(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
                    tx_type, 8);
     } else {
-      x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+      x->vp9_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
       vp8_idct_idct8(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
     }
@@ -219,8 +219,8 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     for (i = 0; i < 4; i++) {
       b = &xd->block[ib + iblock[i]];
       be = &x->block[ib + iblock[i]];
-      vp8_subtract_b(be, b, 16);
-      x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+      vp9_subtract_b(be, b, 16);
+      x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
       x->quantize_b_4x4(be, b);
       vp8_inverse_transform_b_4x4(IF_RTCD(&rtcd->common->idct), b, 32);
     }
@@ -234,16 +234,16 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
   }
 }
 
-void vp8_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   int i, ib;
 
   for (i = 0; i < 4; i++) {
     ib = vp8_i8x8_block[i];
-    vp8_encode_intra8x8(rtcd, x, ib);
+    vp9_encode_intra8x8(rtcd, x, ib);
   }
 }
 
-void vp8_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
+void vp9_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
                             MACROBLOCK *x, int ib,
                             int mode, int second) {
   BLOCKD *b = &x->e_mbd.block[ib];
@@ -259,16 +259,16 @@ void vp8_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
   }
 #endif
 
-  vp8_subtract_b(be, b, 8);
+  vp9_subtract_b(be, b, 8);
 
-  x->vp8_short_fdct4x4(be->src_diff, be->coeff, 16);
+  x->vp9_short_fdct4x4(be->src_diff, be->coeff, 16);
   x->quantize_b_4x4(be, b);
   vp8_inverse_transform_b_4x4(IF_RTCD(&rtcd->common->idct), b, 16);
 
   vp8_recon_uv_b_c(b->predictor,b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 }
 
-void vp8_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   int i, ib, mode, second;
   BLOCKD *b;
 
@@ -282,8 +282,8 @@ void vp8_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     second = -1;
 #endif
     /*u */
-    vp8_encode_intra_uv4x4(rtcd, x, i + 16, mode, second);
+    vp9_encode_intra_uv4x4(rtcd, x, i + 16, mode, second);
     /*v */
-    vp8_encode_intra_uv4x4(rtcd, x, i + 20, mode, second);
+    vp9_encode_intra_uv4x4(rtcd, x, i + 20, mode, second);
   }
 }

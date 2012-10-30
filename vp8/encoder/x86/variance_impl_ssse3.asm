@@ -14,7 +14,7 @@
 %define xmm_filter_shift            7
 
 
-;void vp8_filter_block2d_bil_var_ssse3
+;void vp9_filter_block2d_bil_var_ssse3
 ;(
 ;    unsigned char *ref_ptr,
 ;    int ref_pixels_per_line,
@@ -29,8 +29,8 @@
 ;)
 ;Note: The filter coefficient at offset=0 is 128. Since the second register
 ;for Pmaddubsw is signed bytes, we must calculate zero offset seperately.
-global sym(vp8_filter_block2d_bil_var_ssse3)
-sym(vp8_filter_block2d_bil_var_ssse3):
+global sym(vp9_filter_block2d_bil_var_ssse3)
+sym(vp9_filter_block2d_bil_var_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9

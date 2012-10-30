@@ -374,14 +374,14 @@
 
 %endmacro
 
-;void int vp8_sad16x16x3_sse3(
+;void int vp9_sad16x16x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad16x16x3_sse3)
-sym(vp8_sad16x16x3_sse3):
+global sym(vp9_sad16x16x3_sse3)
+sym(vp9_sad16x16x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -416,14 +416,14 @@ sym(vp8_sad16x16x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vp8_sad16x8x3_sse3(
+;void int vp9_sad16x8x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad16x8x3_sse3)
-sym(vp8_sad16x8x3_sse3):
+global sym(vp9_sad16x8x3_sse3)
+sym(vp9_sad16x8x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -454,14 +454,14 @@ sym(vp8_sad16x8x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vp8_sad8x16x3_sse3(
+;void int vp9_sad8x16x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad8x16x3_sse3)
-sym(vp8_sad8x16x3_sse3):
+global sym(vp9_sad8x16x3_sse3)
+sym(vp9_sad8x16x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -483,14 +483,14 @@ sym(vp8_sad8x16x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vp8_sad8x8x3_sse3(
+;void int vp9_sad8x8x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad8x8x3_sse3)
-sym(vp8_sad8x8x3_sse3):
+global sym(vp9_sad8x8x3_sse3)
+sym(vp9_sad8x8x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -508,14 +508,14 @@ sym(vp8_sad8x8x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vp8_sad4x4x3_sse3(
+;void int vp9_sad4x4x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad4x4x3_sse3)
-sym(vp8_sad4x4x3_sse3):
+global sym(vp9_sad4x4x3_sse3)
+sym(vp9_sad4x4x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -582,22 +582,22 @@ sym(vp8_sad4x4x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;unsigned int vp8_sad16x16_sse3(
+;unsigned int vp9_sad16x16_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  max_err)
 ;%define lddqu movdqu
-global sym(vp8_sad16x16_sse3)
-sym(vp8_sad16x16_sse3):
+global sym(vp9_sad16x16_sse3)
+sym(vp9_sad16x16_sse3):
 
     STACK_FRAME_CREATE_X3
 
         mov             end_ptr,    4
         pxor            xmm7,        xmm7
 
-.vp8_sad16x16_sse3_loop:
+.vp9_sad16x16_sse3_loop:
         movdqa          xmm0,       XMMWORD PTR [src_ptr]
         movdqu          xmm1,       XMMWORD PTR [ref_ptr]
         movdqa          xmm2,       XMMWORD PTR [src_ptr+src_stride]
@@ -627,7 +627,7 @@ sym(vp8_sad16x16_sse3):
         paddw           xmm7,        xmm6
 
         sub             end_ptr,     1
-        jne             .vp8_sad16x16_sse3_loop
+        jne             .vp9_sad16x16_sse3_loop
 
         movq            xmm0,       xmm7
         psrldq          xmm7,       8
@@ -636,14 +636,14 @@ sym(vp8_sad16x16_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void vp8_copy32xn_sse3(
+;void vp9_copy32xn_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *dst_ptr,
 ;    int  dst_stride,
 ;    int height);
-global sym(vp8_copy32xn_sse3)
-sym(vp8_copy32xn_sse3):
+global sym(vp9_copy32xn_sse3)
+sym(vp9_copy32xn_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -697,14 +697,14 @@ sym(vp8_copy32xn_sse3):
 .copy_is_done:
     STACK_FRAME_DESTROY_X3
 
-;void vp8_sad16x16x4d_sse3(
+;void vp9_sad16x16x4d_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr_base,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad16x16x4d_sse3)
-sym(vp8_sad16x16x4d_sse3):
+global sym(vp9_sad16x16x4d_sse3)
+sym(vp9_sad16x16x4d_sse3):
 
     STACK_FRAME_CREATE_X4
 
@@ -748,14 +748,14 @@ sym(vp8_sad16x16x4d_sse3):
 
     STACK_FRAME_DESTROY_X4
 
-;void vp8_sad16x8x4d_sse3(
+;void vp9_sad16x8x4d_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr_base,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad16x8x4d_sse3)
-sym(vp8_sad16x8x4d_sse3):
+global sym(vp9_sad16x8x4d_sse3)
+sym(vp9_sad16x8x4d_sse3):
 
     STACK_FRAME_CREATE_X4
 
@@ -795,14 +795,14 @@ sym(vp8_sad16x8x4d_sse3):
 
     STACK_FRAME_DESTROY_X4
 
-;void int vp8_sad8x16x4d_sse3(
+;void int vp9_sad8x16x4d_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad8x16x4d_sse3)
-sym(vp8_sad8x16x4d_sse3):
+global sym(vp9_sad8x16x4d_sse3)
+sym(vp9_sad8x16x4d_sse3):
 
     STACK_FRAME_CREATE_X4
 
@@ -828,14 +828,14 @@ sym(vp8_sad8x16x4d_sse3):
 
     STACK_FRAME_DESTROY_X4
 
-;void int vp8_sad8x8x4d_sse3(
+;void int vp9_sad8x8x4d_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad8x8x4d_sse3)
-sym(vp8_sad8x8x4d_sse3):
+global sym(vp9_sad8x8x4d_sse3)
+sym(vp9_sad8x8x4d_sse3):
 
     STACK_FRAME_CREATE_X4
 
@@ -857,14 +857,14 @@ sym(vp8_sad8x8x4d_sse3):
 
     STACK_FRAME_DESTROY_X4
 
-;void int vp8_sad4x4x4d_sse3(
+;void int vp9_sad4x4x4d_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad4x4x4d_sse3)
-sym(vp8_sad4x4x4d_sse3):
+global sym(vp9_sad4x4x4d_sse3)
+sym(vp9_sad4x4x4d_sse3):
 
     STACK_FRAME_CREATE_X4
 

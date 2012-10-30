@@ -16,13 +16,13 @@
 #if !CONFIG_RUNTIME_CPU_DETECT
 
 #undef  vp8_search_full_search
-#define vp8_search_full_search vp8_full_search_sadx3
+#define vp8_search_full_search vp9_full_search_sadx3
 
 #undef  vp8_search_refining_search
-#define vp8_search_refining_search vp8_refining_search_sadx4
+#define vp8_search_refining_search vp9_refining_search_sadx4
 
 #undef  vp8_search_diamond_search
-#define vp8_search_diamond_search vp8_diamond_search_sadx4
+#define vp8_search_diamond_search vp9_diamond_search_sadx4
 
 #endif
 #endif
@@ -31,7 +31,7 @@
 #if !CONFIG_RUNTIME_CPU_DETECT
 
 #undef  vp8_search_full_search
-#define vp8_search_full_search vp8_full_search_sadx8
+#define vp8_search_full_search vp9_full_search_sadx8
 
 #endif
 #endif

@@ -357,14 +357,14 @@ static vpx_codec_err_t vp8e_set_config(vpx_codec_alg_priv_t       *ctx,
   if (!res) {
     ctx->cfg = *cfg;
     set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg);
-    vp8_change_config(ctx->cpi, &ctx->oxcf);
+    vp9_change_config(ctx->cpi, &ctx->oxcf);
   }
 
   return res;
 }
 
 
-int vp8_reverse_trans(int);
+int vp9_reverse_trans(int);
 
 
 static vpx_codec_err_t get_param(vpx_codec_alg_priv_t *ctx,
@@ -378,8 +378,8 @@ static vpx_codec_err_t get_param(vpx_codec_alg_priv_t *ctx,
     return VPX_CODEC_INVALID_PARAM;
 
   switch (ctrl_id) {
-      MAP(VP8E_GET_LAST_QUANTIZER, vp8_get_quantizer(ctx->cpi));
-      MAP(VP8E_GET_LAST_QUANTIZER_64, vp8_reverse_trans(vp8_get_quantizer(ctx->cpi)));
+      MAP(VP8E_GET_LAST_QUANTIZER, vp9_get_quantizer(ctx->cpi));
+      MAP(VP8E_GET_LAST_QUANTIZER_64, vp9_reverse_trans(vp9_get_quantizer(ctx->cpi)));
   }
 
   return VPX_CODEC_OK;
@@ -418,7 +418,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
   if (!res) {
     ctx->vp8_cfg = xcfg;
     set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg);
-    vp8_change_config(ctx->cpi, &ctx->oxcf);
+    vp9_change_config(ctx->cpi, &ctx->oxcf);
   }
 
   return res;
@@ -482,7 +482,7 @@ static vpx_codec_err_t vp8e_common_init(vpx_codec_ctx_t *ctx,
 
     priv->deprecated_mode = NO_MODE_SET;
 
-    vp8_initialize();
+    vp9_initialize();
 
     res = validate_config(priv, &priv->cfg, &priv->vp8_cfg);
 
@@ -490,7 +490,7 @@ static vpx_codec_err_t vp8e_common_init(vpx_codec_ctx_t *ctx,
       set_vp8e_config(&ctx->priv->alg_priv->oxcf,
                       ctx->priv->alg_priv->cfg,
                       ctx->priv->alg_priv->vp8_cfg);
-      optr = vp8_create_compressor(&ctx->priv->alg_priv->oxcf);
+      optr = vp9_create_compressor(&ctx->priv->alg_priv->oxcf);
 
       if (!optr)
         res = VPX_CODEC_MEM_ERROR;
@@ -518,7 +518,7 @@ static vpx_codec_err_t vp8e_exp_init(vpx_codec_ctx_t *ctx) {
 static vpx_codec_err_t vp8e_destroy(vpx_codec_alg_priv_t *ctx) {
 
   free(ctx->cx_data);
-  vp8_remove_compressor(&ctx->cpi);
+  vp9_remove_compressor(&ctx->cpi);
   free(ctx);
   return VPX_CODEC_OK;
 }
@@ -563,7 +563,7 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
 
   if (ctx->oxcf.Mode != new_qc) {
     ctx->oxcf.Mode = new_qc;
-    vp8_change_config(ctx->cpi, &ctx->oxcf);
+    vp9_change_config(ctx->cpi, &ctx->oxcf);
   }
 }
 
@@ -602,7 +602,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     if (flags & VP8_EFLAG_NO_REF_ARF)
       ref ^= VP8_ALT_FLAG;
 
-    vp8_use_as_reference(ctx->cpi, ref);
+    vp9_use_as_reference(ctx->cpi, ref);
   }
 
   if (flags & (VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF
@@ -619,11 +619,11 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     if (flags & VP8_EFLAG_NO_UPD_ARF)
       upd ^= VP8_ALT_FLAG;
 
-    vp8_update_reference(ctx->cpi, upd);
+    vp9_update_reference(ctx->cpi, upd);
   }
 
   if (flags & VP8_EFLAG_NO_UPD_ENTROPY) {
-    vp8_update_entropy(ctx->cpi, 0);
+    vp9_update_entropy(ctx->cpi, 0);
   }
 
   /* Handle fixed keyframe intervals */
@@ -660,7 +660,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     if (img != NULL) {
       res = image2yuvconfig(img, &sd);
 
-      if (vp8_receive_raw_frame(ctx->cpi, ctx->next_frame_flag | lib_flags,
+      if (vp9_receive_raw_frame(ctx->cpi, ctx->next_frame_flag | lib_flags,
                                 &sd, dst_time_stamp, dst_end_time_stamp)) {
         VP8_COMP *cpi = (VP8_COMP *)ctx->cpi;
         res = update_error_state(ctx, &cpi->common.error);
@@ -675,7 +675,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     lib_flags = 0;
 
     while (cx_data_sz >= ctx->cx_data_sz / 2
-           && -1 != vp8_get_compressed_data(ctx->cpi, &lib_flags, &size, cx_data, &dst_time_stamp, &dst_end_time_stamp, !img)) {
+           && -1 != vp9_get_compressed_data(ctx->cpi, &lib_flags, &size, cx_data, &dst_time_stamp, &dst_end_time_stamp, !img)) {
       if (size) {
         vpx_codec_pts_t    round, delta;
         vpx_codec_cx_pkt_t pkt;
@@ -766,7 +766,7 @@ static vpx_codec_err_t vp8e_set_reference(vpx_codec_alg_priv_t *ctx,
     YV12_BUFFER_CONFIG sd;
 
     image2yuvconfig(&frame->img, &sd);
-    vp8_set_reference(ctx->cpi, frame->frame_type, &sd);
+    vp9_set_reference(ctx->cpi, frame->frame_type, &sd);
     return VPX_CODEC_OK;
   } else
     return VPX_CODEC_INVALID_PARAM;
@@ -784,7 +784,7 @@ static vpx_codec_err_t vp8e_get_reference(vpx_codec_alg_priv_t *ctx,
     YV12_BUFFER_CONFIG sd;
 
     image2yuvconfig(&frame->img, &sd);
-    vp8_get_reference(ctx->cpi, frame->frame_type, &sd);
+    vp9_get_reference(ctx->cpi, frame->frame_type, &sd);
     return VPX_CODEC_OK;
   } else
     return VPX_CODEC_INVALID_PARAM;
@@ -822,7 +822,7 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx) {
     flags.noise_level           = ctx->preview_ppcfg.noise_level;
   }
 
-  if (0 == vp8_get_preview_raw_frame(ctx->cpi, &sd, &flags)) {
+  if (0 == vp9_get_preview_raw_frame(ctx->cpi, &sd, &flags)) {
 
     /*
     vpx_img_wrap(&ctx->preview_img, VPX_IMG_FMT_YV12,
@@ -865,7 +865,7 @@ static vpx_codec_err_t vp8e_update_entropy(vpx_codec_alg_priv_t *ctx,
                                            int ctr_id,
                                            va_list args) {
   int update = va_arg(args, int);
-  vp8_update_entropy(ctx->cpi, update);
+  vp9_update_entropy(ctx->cpi, update);
   return VPX_CODEC_OK;
 
 }
@@ -874,7 +874,7 @@ static vpx_codec_err_t vp8e_update_reference(vpx_codec_alg_priv_t *ctx,
                                              int ctr_id,
                                              va_list args) {
   int update = va_arg(args, int);
-  vp8_update_reference(ctx->cpi, update);
+  vp9_update_reference(ctx->cpi, update);
   return VPX_CODEC_OK;
 }
 
@@ -882,7 +882,7 @@ static vpx_codec_err_t vp8e_use_reference(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
   int reference_flag = va_arg(args, int);
-  vp8_use_as_reference(ctx->cpi, reference_flag);
+  vp9_use_as_reference(ctx->cpi, reference_flag);
   return VPX_CODEC_OK;
 }
 
@@ -894,7 +894,7 @@ static vpx_codec_err_t vp8e_set_roi_map(vpx_codec_alg_priv_t *ctx,
   if (data) {
     vpx_roi_map_t *roi = (vpx_roi_map_t *)data;
 
-    if (!vp8_set_roimap(ctx->cpi, roi->roi_map, roi->rows, roi->cols, roi->delta_q, roi->delta_lf, roi->static_threshold))
+    if (!vp9_set_roimap(ctx->cpi, roi->roi_map, roi->rows, roi->cols, roi->delta_q, roi->delta_lf, roi->static_threshold))
       return VPX_CODEC_OK;
     else
       return VPX_CODEC_INVALID_PARAM;
@@ -912,7 +912,7 @@ static vpx_codec_err_t vp8e_set_activemap(vpx_codec_alg_priv_t *ctx,
 
     vpx_active_map_t *map = (vpx_active_map_t *)data;
 
-    if (!vp8_set_active_map(ctx->cpi, map->active_map, map->rows, map->cols))
+    if (!vp9_set_active_map(ctx->cpi, map->active_map, map->rows, map->cols))
       return VPX_CODEC_OK;
     else
       return VPX_CODEC_INVALID_PARAM;
@@ -929,7 +929,7 @@ static vpx_codec_err_t vp8e_set_scalemode(vpx_codec_alg_priv_t *ctx,
   if (data) {
     int res;
     vpx_scaling_mode_t scalemode = *(vpx_scaling_mode_t *)data;
-    res = vp8_set_internal_size(ctx->cpi, scalemode.h_scaling_mode, scalemode.v_scaling_mode);
+    res = vp9_set_internal_size(ctx->cpi, scalemode.h_scaling_mode, scalemode.v_scaling_mode);
 
     if (!res) {
       /*force next frame a key frame to effect scaling mode */

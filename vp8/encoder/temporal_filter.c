@@ -83,7 +83,7 @@ static void vp8_temporal_filter_predictors_mb_c
     vp8_copy_mem8x8(vptr, stride, &pred[320], 8);
   }
 }
-void vp8_temporal_filter_apply_c
+void vp9_temporal_filter_apply_c
 (
   unsigned char *frame1,
   unsigned int stride,
@@ -185,7 +185,7 @@ static int vp8_temporal_filter_find_matching_mb_c
   /*cpi->sf.search_method == HEX*/
   // TODO Check that the 16x16 vf & sdf are selected here
   // Ignore mv costing by sending NULL pointer instead of cost arrays
-  bestsme = vp8_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv.first,
+  bestsme = vp9_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv.first,
                            step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
                            NULLMVCOST, NULLMVCOST,
                            &best_ref_mv1);
@@ -410,7 +410,7 @@ static void vp8_temporal_filter_iterate_c
   mbd->pre.v_buffer = v_buffer;
 }
 
-void vp8_temporal_filter_prepare_c
+void vp9_temporal_filter_prepare_c
 (
   VP8_COMP *cpi,
   int distance
@@ -431,7 +431,7 @@ void vp8_temporal_filter_prepare_c
   int max_frames = cpi->active_arnr_frames;
 
   num_frames_backward = distance;
-  num_frames_forward = vp8_lookahead_depth(cpi->lookahead)
+  num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
                        - (num_frames_backward + 1);
 
   switch (blur_type) {
@@ -503,7 +503,7 @@ void vp8_temporal_filter_prepare_c
   vpx_memset(cpi->frames, 0, max_frames * sizeof(YV12_BUFFER_CONFIG *));
   for (frame = 0; frame < frames_to_blur; frame++) {
     int which_buffer =  start_frame - frame;
-    struct lookahead_entry *buf = vp8_lookahead_peek(cpi->lookahead,
+    struct lookahead_entry *buf = vp9_lookahead_peek(cpi->lookahead,
                                                      which_buffer);
     cpi->frames[frames_to_blur - 1 - frame] = &buf->img;
   }

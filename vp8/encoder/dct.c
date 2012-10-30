@@ -281,7 +281,7 @@ static const int xC7S1 =  3196;
 #define IN_SHIFT (FINAL_SHIFT+1)
 
 
-void vp8_short_fdct8x8_c(short *InputData, short *OutputData, int pitch) {
+void vp9_short_fdct8x8_c(short *InputData, short *OutputData, int pitch) {
   int loop;
   int short_pitch = pitch >> 1;
   int is07, is12, is34, is56;
@@ -503,7 +503,7 @@ void vp8_short_fdct8x8_c(short *InputData, short *OutputData, int pitch) {
   }
 }
 
-void vp8_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
+void vp9_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
   /* [1 1; 1 -1] orthogonal transform */
   /* use position: 0,1, 4, 8 */
   int i;
@@ -523,12 +523,12 @@ void vp8_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
 /* For test */
 #define TEST_INT 1
 #if TEST_INT
-#define vp8_fht_int_c vp8_fht_c
+#define vp9_fht_int_c vp9_fht_c
 #else
-#define vp8_fht_float_c vp8_fht_c
+#define vp9_fht_float_c vp9_fht_c
 #endif
 
-void vp8_fht_float_c(const int16_t *input, int pitch, int16_t *output,
+void vp9_fht_float_c(const int16_t *input, int pitch, int16_t *output,
                TX_TYPE tx_type, int tx_dim) {
   vp8_clear_system_state();  // Make it simd safe : __asm emms;
   {
@@ -650,7 +650,7 @@ void vp8_fht_float_c(const int16_t *input, int pitch, int16_t *output,
 #define VERTICAL_ROUNDING ((1 << (VERTICAL_SHIFT - 1)) - 1)
 #define HORIZONTAL_SHIFT 16
 #define HORIZONTAL_ROUNDING ((1 << (HORIZONTAL_SHIFT - 1)) - 1)
-void vp8_fht_int_c(const int16_t *input, int pitch, int16_t *output,
+void vp9_fht_int_c(const int16_t *input, int pitch, int16_t *output,
                    TX_TYPE tx_type, int tx_dim) {
   int i, j, k;
   int16_t imbuf[256];
@@ -728,7 +728,7 @@ void vp8_fht_int_c(const int16_t *input, int pitch, int16_t *output,
   }
 }
 
-void vp8_short_fdct4x4_c(short *input, short *output, int pitch) {
+void vp9_short_fdct4x4_c(short *input, short *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
   short *ip = input;
@@ -769,13 +769,13 @@ void vp8_short_fdct4x4_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp8_short_fdct8x4_c(short *input, short *output, int pitch)
+void vp9_short_fdct8x4_c(short *input, short *output, int pitch)
 {
-    vp8_short_fdct4x4_c(input,   output,    pitch);
-    vp8_short_fdct4x4_c(input + 4, output + 16, pitch);
+    vp9_short_fdct4x4_c(input,   output,    pitch);
+    vp9_short_fdct4x4_c(input + 4, output + 16, pitch);
 }
 
-void vp8_short_walsh4x4_c(short *input, short *output, int pitch) {
+void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
   short *ip = input;
@@ -816,7 +816,7 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch) {
 }
 
 #if CONFIG_LOSSLESS
-void vp8_short_walsh4x4_lossless_c(short *input, short *output, int pitch) {
+void vp9_short_walsh4x4_lossless_c(short *input, short *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
   short *ip = input;
@@ -856,7 +856,7 @@ void vp8_short_walsh4x4_lossless_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp8_short_walsh4x4_x8_c(short *input, short *output, int pitch) {
+void vp9_short_walsh4x4_x8_c(short *input, short *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
   short *ip = input;
@@ -896,9 +896,9 @@ void vp8_short_walsh4x4_x8_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp8_short_walsh8x4_x8_c(short *input, short *output, int pitch) {
-  vp8_short_walsh4x4_x8_c(input,   output,    pitch);
-  vp8_short_walsh4x4_x8_c(input + 4, output + 16, pitch);
+void vp9_short_walsh8x4_x8_c(short *input, short *output, int pitch) {
+  vp9_short_walsh4x4_x8_c(input,   output,    pitch);
+  vp9_short_walsh4x4_x8_c(input + 4, output + 16, pitch);
 }
 #endif
 
@@ -1078,7 +1078,7 @@ static void dct16x16_1d(double input[16], double output[16]) {
   vp8_clear_system_state(); // Make it simd safe : __asm emms;
 }
 
-void vp8_short_fdct16x16_c(short *input, short *out, int pitch) {
+void vp9_short_fdct16x16_c(short *input, short *out, int pitch) {
   vp8_clear_system_state(); // Make it simd safe : __asm emms;
   {
     int shortpitch = pitch >> 1;

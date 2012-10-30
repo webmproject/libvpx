@@ -29,7 +29,7 @@ struct lookahead_ctx;
  *
  *
  */
-struct lookahead_ctx *vp8_lookahead_init(unsigned int width,
+struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
                                          unsigned int height,
                                          unsigned int depth
                                         );
@@ -38,7 +38,7 @@ struct lookahead_ctx *vp8_lookahead_init(unsigned int width,
 /**\brief Destroys the lookahead stage
  *
  */
-void vp8_lookahead_destroy(struct lookahead_ctx *ctx);
+void vp9_lookahead_destroy(struct lookahead_ctx *ctx);
 
 
 /**\brief Enqueue a source buffer
@@ -57,7 +57,7 @@ void vp8_lookahead_destroy(struct lookahead_ctx *ctx);
  * \param[in] active_map  Map that specifies which macroblock is active
  */
 int
-vp8_lookahead_push(struct lookahead_ctx *ctx,
+vp9_lookahead_push(struct lookahead_ctx *ctx,
                    YV12_BUFFER_CONFIG   *src,
                    int64_t               ts_start,
                    int64_t               ts_end,
@@ -77,7 +77,7 @@ vp8_lookahead_push(struct lookahead_ctx *ctx,
  *
  */
 struct lookahead_entry *
-vp8_lookahead_pop(struct lookahead_ctx *ctx,
+vp9_lookahead_pop(struct lookahead_ctx *ctx,
                   int                   drain);
 
 
@@ -90,7 +90,7 @@ vp8_lookahead_pop(struct lookahead_ctx *ctx,
  *
  */
 struct lookahead_entry *
-vp8_lookahead_peek(struct lookahead_ctx *ctx,
+vp9_lookahead_peek(struct lookahead_ctx *ctx,
                    int                   index);
 
 
@@ -99,7 +99,7 @@ vp8_lookahead_peek(struct lookahead_ctx *ctx,
  * \param[in] ctx       Pointer to the lookahead context
  */
 unsigned int
-vp8_lookahead_depth(struct lookahead_ctx *ctx);
+vp9_lookahead_depth(struct lookahead_ctx *ctx);
 
 
 #endif

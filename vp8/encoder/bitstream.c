@@ -83,7 +83,7 @@ static int update_bits[255];
 static void compute_update_table() {
   int i;
   for (i = 0; i < 255; i++)
-    update_bits[i] = vp8_count_term_subexp(i, SUBEXP_PARAM, 255);
+    update_bits[i] = vp9_count_term_subexp(i, SUBEXP_PARAM, 255);
 }
 
 static int split_index(int i, int n, int modulus) {
@@ -109,7 +109,7 @@ static int remap_prob(int v, int m) {
 static void write_prob_diff_update(vp8_writer *const bc,
                                    vp8_prob newp, vp8_prob oldp) {
   int delp = remap_prob(newp, oldp);
-  vp8_encode_term_subexp(bc, delp, SUBEXP_PARAM, 255);
+  vp9_encode_term_subexp(bc, delp, SUBEXP_PARAM, 255);
 }
 
 static int prob_diff_update_cost(vp8_prob newp, vp8_prob oldp) {
@@ -618,12 +618,12 @@ static void write_nmv(vp8_writer *bc, const MV *mv, const int_mv *ref,
   e.row = mv->row - ref->as_mv.row;
   e.col = mv->col - ref->as_mv.col;
 
-  vp8_encode_nmv(bc, &e, &ref->as_mv, nmvc);
-  vp8_encode_nmv_fp(bc, &e, &ref->as_mv, nmvc, usehp);
+  vp9_encode_nmv(bc, &e, &ref->as_mv, nmvc);
+  vp9_encode_nmv_fp(bc, &e, &ref->as_mv, nmvc, usehp);
 }
 
 #if CONFIG_NEW_MVREF
-static int vp8_cost_mv_ref_id(vp8_prob * ref_id_probs, int mv_ref_id) {
+static int vp9_cost_mv_ref_id(vp8_prob * ref_id_probs, int mv_ref_id) {
   int cost;
 
   // Encode the index for the MV reference.
@@ -698,8 +698,8 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   int max_mv = MV_MAX;
 
-  cost = vp8_cost_mv_ref_id(xd->mb_mv_ref_id_probs[ref_frame], 0) +
-         vp8_mv_bit_cost(&target_mv,
+  cost = vp9_cost_mv_ref_id(xd->mb_mv_ref_id_probs[ref_frame], 0) +
+         vp9_mv_bit_cost(&target_mv,
                          &mv_ref_list[0],
                          XMVCOST, 96,
                          xd->allow_high_precision_mv);
@@ -722,8 +722,8 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
       continue;
     }
 
-    cost2 = vp8_cost_mv_ref_id(xd->mb_mv_ref_id_probs[ref_frame], i) +
-            vp8_mv_bit_cost(&target_mv,
+    cost2 = vp9_cost_mv_ref_id(xd->mb_mv_ref_id_probs[ref_frame], i) +
+            vp9_mv_bit_cost(&target_mv,
                             &mv_ref_list[i],
                             XMVCOST, 96,
                             xd->allow_high_precision_mv);
@@ -1820,13 +1820,13 @@ static void decide_kf_ymode_entropy(VP8_COMP *cpi) {
   int i, j;
 
   for (i = 0; i < 8; i++) {
-    vp8_cost_tokens(mode_cost, cpi->common.kf_ymode_prob[i], vp8_kf_ymode_tree);
+    vp9_cost_tokens(mode_cost, cpi->common.kf_ymode_prob[i], vp8_kf_ymode_tree);
     cost = 0;
     for (j = 0; j < VP8_YMODES; j++) {
       cost += mode_cost[j] * cpi->ymode_count[j];
     }
 #if CONFIG_SUPERBLOCKS
-    vp8_cost_tokens(mode_cost, cpi->common.sb_kf_ymode_prob[i],
+    vp9_cost_tokens(mode_cost, cpi->common.sb_kf_ymode_prob[i],
                     vp8_sb_ymode_tree);
     for (j = 0; j < VP8_I32X32_MODES; j++) {
       cost += mode_cost[j] * cpi->sb_ymode_count[j];
@@ -1860,7 +1860,7 @@ static void segment_reference_frames(VP8_COMP *cpi) {
   }
 }
 
-void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size) {
+void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size) {
   int i, j;
   VP8_HEADER oh;
   VP8_COMMON *const pc = &cpi->common;
@@ -1883,7 +1883,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
   compute_update_table();
 
-  // vp8_kf_default_bmode_probs() is called in vp8_setup_key_frame() once for each
+  // vp8_kf_default_bmode_probs() is called in vp9_setup_key_frame() once for each
   // K frame before encode frame. pc->kf_bmode_prob doesn't get changed anywhere
   // else. No need to call it again here. --yw
   // vp8_kf_default_bmode_probs( pc->kf_bmode_prob);
@@ -1908,14 +1908,14 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     extra_bytes_packed = 7;
     cx_data += extra_bytes_packed;
 
-    vp8_start_encode(&header_bc, cx_data);
+    vp9_start_encode(&header_bc, cx_data);
 
     // signal clr type
     vp8_write_bit(&header_bc, pc->clr_type);
     vp8_write_bit(&header_bc, pc->clamp_type);
 
   } else {
-    vp8_start_encode(&header_bc, cx_data);
+    vp9_start_encode(&header_bc, cx_data);
   }
 
   // Signal whether or not Segmentation is enabled
@@ -2272,10 +2272,10 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     vpx_memset(xd->mb_mv_ref_id_probs, 192, sizeof(xd->mb_mv_ref_id_probs));
 #endif
 
-    vp8_write_nmvprobs(cpi, xd->allow_high_precision_mv, &header_bc);
+    vp9_write_nmvprobs(cpi, xd->allow_high_precision_mv, &header_bc);
   }
 
-  vp8_stop_encode(&header_bc);
+  vp9_stop_encode(&header_bc);
 
   oh.first_partition_length_in_bytes = header_bc.pos;
 
@@ -2292,7 +2292,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   }
 
   *size = VP8_HEADER_SIZE + extra_bytes_packed + header_bc.pos;
-  vp8_start_encode(&residual_bc, cx_data + header_bc.pos);
+  vp9_start_encode(&residual_bc, cx_data + header_bc.pos);
 
   if (pc->frame_type == KEY_FRAME) {
     decide_kf_ymode_entropy(cpi);
@@ -2303,7 +2303,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   }
 
 
-  vp8_stop_encode(&residual_bc);
+  vp9_stop_encode(&residual_bc);
 
   *size += residual_bc.pos;
 

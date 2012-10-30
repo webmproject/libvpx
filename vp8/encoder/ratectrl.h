@@ -15,21 +15,21 @@
 
 #define FRAME_OVERHEAD_BITS 200
 
-extern void vp8_save_coding_context(VP8_COMP *cpi);
-extern void vp8_restore_coding_context(VP8_COMP *cpi);
+extern void vp9_save_coding_context(VP8_COMP *cpi);
+extern void vp9_restore_coding_context(VP8_COMP *cpi);
 
-extern void vp8_setup_key_frame(VP8_COMP *cpi);
-extern void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var);
-extern int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame);
-extern void vp8_adjust_key_frame_context(VP8_COMP *cpi);
-extern void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, int *frame_over_shoot_limit);
+extern void vp9_setup_key_frame(VP8_COMP *cpi);
+extern void vp9_update_rate_correction_factors(VP8_COMP *cpi, int damp_var);
+extern int vp9_regulate_q(VP8_COMP *cpi, int target_bits_per_frame);
+extern void vp9_adjust_key_frame_context(VP8_COMP *cpi);
+extern void vp9_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, int *frame_over_shoot_limit);
 
 // return of 0 means drop frame
-extern int vp8_pick_frame_size(VP8_COMP *cpi);
+extern int vp9_pick_frame_size(VP8_COMP *cpi);
 
-extern double vp8_convert_qindex_to_q(int qindex);
-extern int vp8_gfboost_qadjust(int qindex);
-extern int vp8_bits_per_mb(FRAME_TYPE frame_type, int qindex);
-void vp8_setup_inter_frame(VP8_COMP *cpi);
+extern double vp9_convert_qindex_to_q(int qindex);
+extern int vp9_gfboost_qadjust(int qindex);
+extern int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex);
+void vp9_setup_inter_frame(VP8_COMP *cpi);
 
 #endif

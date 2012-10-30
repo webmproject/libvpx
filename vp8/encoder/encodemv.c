@@ -99,16 +99,16 @@ static void build_nmv_component_cost_table(int *mvcost,
 
   sign_cost[0] = vp8_cost_zero(mvcomp->sign);
   sign_cost[1] = vp8_cost_one(mvcomp->sign);
-  vp8_cost_tokens(class_cost, mvcomp->classes, vp8_mv_class_tree);
-  vp8_cost_tokens(class0_cost, mvcomp->class0, vp8_mv_class0_tree);
+  vp9_cost_tokens(class_cost, mvcomp->classes, vp8_mv_class_tree);
+  vp9_cost_tokens(class0_cost, mvcomp->class0, vp8_mv_class0_tree);
   for (i = 0; i < MV_OFFSET_BITS; ++i) {
     bits_cost[i][0] = vp8_cost_zero(mvcomp->bits[i]);
     bits_cost[i][1] = vp8_cost_one(mvcomp->bits[i]);
   }
 
   for (i = 0; i < CLASS0_SIZE; ++i)
-    vp8_cost_tokens(class0_fp_cost[i], mvcomp->class0_fp[i], vp8_mv_fp_tree);
-  vp8_cost_tokens(fp_cost, mvcomp->fp, vp8_mv_fp_tree);
+    vp9_cost_tokens(class0_fp_cost[i], mvcomp->class0_fp[i], vp8_mv_fp_tree);
+  vp9_cost_tokens(fp_cost, mvcomp->fp, vp8_mv_fp_tree);
 
   if (usehp) {
     class0_hp_cost[0] = vp8_cost_zero(mvcomp->class0_hp);
@@ -356,7 +356,7 @@ static void add_nmvcount(nmv_context_counts* const dst,
 }
 #endif
 
-void vp8_write_nmvprobs(VP8_COMP* const cpi, int usehp, vp8_writer* const bc) {
+void vp9_write_nmvprobs(VP8_COMP* const cpi, int usehp, vp8_writer* const bc) {
   int i, j;
   nmv_context prob;
   unsigned int branch_ct_joint[MV_JOINTS - 1][2];
@@ -508,7 +508,7 @@ void vp8_write_nmvprobs(VP8_COMP* const cpi, int usehp, vp8_writer* const bc) {
   }
 }
 
-void vp8_encode_nmv(vp8_writer* const bc, const MV* const mv,
+void vp9_encode_nmv(vp8_writer* const bc, const MV* const mv,
                     const MV* const ref, const nmv_context* const mvctx) {
   MV_JOINT_TYPE j = vp8_get_mv_joint(*mv);
   vp8_write_token(bc, vp8_mv_joint_tree, mvctx->joints,
@@ -521,7 +521,7 @@ void vp8_encode_nmv(vp8_writer* const bc, const MV* const mv,
   }
 }
 
-void vp8_encode_nmv_fp(vp8_writer* const bc, const MV* const mv,
+void vp9_encode_nmv_fp(vp8_writer* const bc, const MV* const mv,
                        const MV* const ref, const nmv_context* const mvctx,
                        int usehp) {
   MV_JOINT_TYPE j = vp8_get_mv_joint(*mv);
@@ -534,14 +534,14 @@ void vp8_encode_nmv_fp(vp8_writer* const bc, const MV* const mv,
   }
 }
 
-void vp8_build_nmv_cost_table(int *mvjoint,
+void vp9_build_nmv_cost_table(int *mvjoint,
                               int *mvcost[2],
                               const nmv_context* const mvctx,
                               int usehp,
                               int mvc_flag_v,
                               int mvc_flag_h) {
   vp8_clear_system_state();
-  vp8_cost_tokens(mvjoint, mvctx->joints, vp8_mv_joint_tree);
+  vp9_cost_tokens(mvjoint, mvctx->joints, vp8_mv_joint_tree);
   if (mvc_flag_v)
     build_nmv_component_cost_table(mvcost[0], &mvctx->comps[0], usehp);
   if (mvc_flag_h)

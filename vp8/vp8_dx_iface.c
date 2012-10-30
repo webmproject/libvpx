@@ -530,7 +530,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
 }
 
 
-static vpx_codec_err_t vp8_set_reference(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9_set_reference(vpx_codec_alg_priv_t *ctx,
                                          int ctr_id,
                                          va_list args) {
 
@@ -548,7 +548,7 @@ static vpx_codec_err_t vp8_set_reference(vpx_codec_alg_priv_t *ctx,
 
 }
 
-static vpx_codec_err_t vp8_get_reference(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9_get_reference(vpx_codec_alg_priv_t *ctx,
                                          int ctr_id,
                                          va_list args) {
 
@@ -639,8 +639,8 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 }
 
 vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] = {
-  {VP8_SET_REFERENCE,             vp8_set_reference},
-  {VP8_COPY_REFERENCE,            vp8_get_reference},
+  {VP8_SET_REFERENCE,             vp9_set_reference},
+  {VP8_COPY_REFERENCE,            vp9_get_reference},
   {VP8_SET_POSTPROC,              vp8_set_postproc},
   {VP8_SET_DBG_COLOR_REF_FRAME,   vp8_set_dbg_options},
   {VP8_SET_DBG_COLOR_MB_MODES,    vp8_set_dbg_options},

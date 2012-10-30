@@ -15,7 +15,7 @@
 
 #define MAX_PSNR 100
 
-double vp8_mse2psnr(double Samples, double Peak, double Mse) {
+double vp9_mse2psnr(double Samples, double Peak, double Mse) {
   double psnr;
 
   if ((double)Mse > 0.0)

@@ -14,13 +14,13 @@
 
 #include "onyx_int.h"
 
-void vp8_write_nmvprobs(VP8_COMP* const, int usehp, vp8_writer* const);
-void vp8_encode_nmv(vp8_writer* const w, const MV* const mv,
+void vp9_write_nmvprobs(VP8_COMP* const, int usehp, vp8_writer* const);
+void vp9_encode_nmv(vp8_writer* const w, const MV* const mv,
                     const MV* const ref, const nmv_context* const mvctx);
-void vp8_encode_nmv_fp(vp8_writer* const w, const MV* const mv,
+void vp9_encode_nmv_fp(vp8_writer* const w, const MV* const mv,
                        const MV* const ref, const nmv_context *mvctx,
                        int usehp);
-void vp8_build_nmv_cost_table(int *mvjoint,
+void vp9_build_nmv_cost_table(int *mvjoint,
                               int *mvcost[2],
                               const nmv_context *mvctx,
                               int usehp,

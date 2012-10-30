@@ -13,12 +13,12 @@
 
 %define xmm_filter_shift            7
 
-;unsigned int vp8_get_mb_ss_sse2
+;unsigned int vp9_get_mb_ss_sse2
 ;(
 ;    short *src_ptr
 ;)
-global sym(vp8_get_mb_ss_sse2)
-sym(vp8_get_mb_ss_sse2):
+global sym(vp9_get_mb_ss_sse2)
+sym(vp9_get_mb_ss_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 1
@@ -71,7 +71,7 @@ sym(vp8_get_mb_ss_sse2):
     ret
 
 
-;unsigned int vp8_get16x16var_sse2
+;unsigned int vp9_get16x16var_sse2
 ;(
 ;    unsigned char   *  src_ptr,
 ;    int             source_stride,
@@ -80,8 +80,8 @@ sym(vp8_get_mb_ss_sse2):
 ;    unsigned int    *  SSE,
 ;    int             *  Sum
 ;)
-global sym(vp8_get16x16var_sse2)
-sym(vp8_get16x16var_sse2):
+global sym(vp9_get16x16var_sse2)
+sym(vp9_get16x16var_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -215,7 +215,7 @@ sym(vp8_get16x16var_sse2):
 
 
 
-;unsigned int vp8_get8x8var_sse2
+;unsigned int vp9_get8x8var_sse2
 ;(
 ;    unsigned char   *  src_ptr,
 ;    int             source_stride,
@@ -224,8 +224,8 @@ sym(vp8_get16x16var_sse2):
 ;    unsigned int    *  SSE,
 ;    int             *  Sum
 ;)
-global sym(vp8_get8x8var_sse2)
-sym(vp8_get8x8var_sse2):
+global sym(vp9_get8x8var_sse2)
+sym(vp9_get8x8var_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -400,7 +400,7 @@ sym(vp8_get8x8var_sse2):
     pop         rbp
     ret
 
-;void vp8_filter_block2d_bil_var_sse2
+;void vp9_filter_block2d_bil_var_sse2
 ;(
 ;    unsigned char *ref_ptr,
 ;    int ref_pixels_per_line,
@@ -413,8 +413,8 @@ sym(vp8_get8x8var_sse2):
 ;    unsigned int *sumsquared;;
 ;
 ;)
-global sym(vp8_filter_block2d_bil_var_sse2)
-sym(vp8_filter_block2d_bil_var_sse2):
+global sym(vp9_filter_block2d_bil_var_sse2)
+sym(vp9_filter_block2d_bil_var_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9
@@ -680,7 +680,7 @@ filter_block2d_bil_variance:
     ret
 
 
-;void vp8_half_horiz_vert_variance8x_h_sse2
+;void vp9_half_horiz_vert_variance8x_h_sse2
 ;(
 ;    unsigned char *ref_ptr,
 ;    int ref_pixels_per_line,
@@ -690,8 +690,8 @@ filter_block2d_bil_variance:
 ;    int *sum,
 ;    unsigned int *sumsquared
 ;)
-global sym(vp8_half_horiz_vert_variance8x_h_sse2)
-sym(vp8_half_horiz_vert_variance8x_h_sse2):
+global sym(vp9_half_horiz_vert_variance8x_h_sse2)
+sym(vp9_half_horiz_vert_variance8x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -802,7 +802,7 @@ vp8_half_horiz_vert_variance8x_h_1:
     pop         rbp
     ret
 
-;void vp8_half_horiz_vert_variance16x_h_sse2
+;void vp9_half_horiz_vert_variance16x_h_sse2
 ;(
 ;    unsigned char *ref_ptr,
 ;    int ref_pixels_per_line,
@@ -812,8 +812,8 @@ vp8_half_horiz_vert_variance8x_h_1:
 ;    int *sum,
 ;    unsigned int *sumsquared
 ;)
-global sym(vp8_half_horiz_vert_variance16x_h_sse2)
-sym(vp8_half_horiz_vert_variance16x_h_sse2):
+global sym(vp9_half_horiz_vert_variance16x_h_sse2)
+sym(vp9_half_horiz_vert_variance16x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -918,7 +918,7 @@ vp8_half_horiz_vert_variance16x_h_1:
     ret
 
 
-;void vp8_half_vert_variance8x_h_sse2
+;void vp9_half_vert_variance8x_h_sse2
 ;(
 ;    unsigned char *ref_ptr,
 ;    int ref_pixels_per_line,
@@ -928,8 +928,8 @@ vp8_half_horiz_vert_variance16x_h_1:
 ;    int *sum,
 ;    unsigned int *sumsquared
 ;)
-global sym(vp8_half_vert_variance8x_h_sse2)
-sym(vp8_half_vert_variance8x_h_sse2):
+global sym(vp9_half_vert_variance8x_h_sse2)
+sym(vp9_half_vert_variance8x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -1025,7 +1025,7 @@ vp8_half_vert_variance8x_h_1:
     pop         rbp
     ret
 
-;void vp8_half_vert_variance16x_h_sse2
+;void vp9_half_vert_variance16x_h_sse2
 ;(
 ;    unsigned char *ref_ptr,
 ;    int ref_pixels_per_line,
@@ -1035,8 +1035,8 @@ vp8_half_vert_variance8x_h_1:
 ;    int *sum,
 ;    unsigned int *sumsquared
 ;)
-global sym(vp8_half_vert_variance16x_h_sse2)
-sym(vp8_half_vert_variance16x_h_sse2):
+global sym(vp9_half_vert_variance16x_h_sse2)
+sym(vp9_half_vert_variance16x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -1133,7 +1133,7 @@ vp8_half_vert_variance16x_h_1:
     ret
 
 
-;void vp8_half_horiz_variance8x_h_sse2
+;void vp9_half_horiz_variance8x_h_sse2
 ;(
 ;    unsigned char *ref_ptr,
 ;    int ref_pixels_per_line,
@@ -1143,8 +1143,8 @@ vp8_half_vert_variance16x_h_1:
 ;    int *sum,
 ;    unsigned int *sumsquared
 ;)
-global sym(vp8_half_horiz_variance8x_h_sse2)
-sym(vp8_half_horiz_variance8x_h_sse2):
+global sym(vp9_half_horiz_variance8x_h_sse2)
+sym(vp9_half_horiz_variance8x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -1238,7 +1238,7 @@ vp8_half_horiz_variance8x_h_1:
     pop         rbp
     ret
 
-;void vp8_half_horiz_variance16x_h_sse2
+;void vp9_half_horiz_variance16x_h_sse2
 ;(
 ;    unsigned char *ref_ptr,
 ;    int ref_pixels_per_line,
@@ -1248,8 +1248,8 @@ vp8_half_horiz_variance8x_h_1:
 ;    int *sum,
 ;    unsigned int *sumsquared
 ;)
-global sym(vp8_half_horiz_variance16x_h_sse2)
-sym(vp8_half_horiz_variance16x_h_sse2):
+global sym(vp9_half_horiz_variance16x_h_sse2)
+sym(vp9_half_horiz_variance16x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7

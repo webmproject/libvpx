@@ -22,7 +22,7 @@
 typedef BOOL_CODER vp8_writer;
 
 #define vp8_write vp8_encode_bool
-#define vp8_write_literal vp8_encode_value
+#define vp8_write_literal vp9_encode_value
 #define vp8_write_bit( W, V) vp8_write( W, V, vp8_prob_half)
 
 #define vp8bc_write vp8bc_write_bool
@@ -113,10 +113,10 @@ static __inline int vp8_cost_token
 
 /* Fill array of costs for all possible token values. */
 
-void vp8_cost_tokens(
+void vp9_cost_tokens(
   int *Costs, const vp8_prob *, vp8_tree
 );
 
-void vp8_cost_tokens_skip(int *c, const vp8_prob *p, vp8_tree t);
+void vp9_cost_tokens_skip(int *c, const vp8_prob *p, vp8_tree t);
 
 #endif

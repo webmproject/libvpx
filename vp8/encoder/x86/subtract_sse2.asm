@@ -11,11 +11,11 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;void vp8_subtract_b_sse2_impl(unsigned char *z,  int src_stride,
+;void vp9_subtract_b_sse2_impl(unsigned char *z,  int src_stride,
 ;                            short *diff, unsigned char *Predictor,
 ;                            int pitch);
-global sym(vp8_subtract_b_sse2_impl)
-sym(vp8_subtract_b_sse2_impl):
+global sym(vp9_subtract_b_sse2_impl)
+sym(vp9_subtract_b_sse2_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -71,9 +71,9 @@ sym(vp8_subtract_b_sse2_impl):
     ret
 
 
-;void vp8_subtract_mby_sse2(short *diff, unsigned char *src, unsigned char *pred, int stride)
-global sym(vp8_subtract_mby_sse2)
-sym(vp8_subtract_mby_sse2):
+;void vp9_subtract_mby_sse2(short *diff, unsigned char *src, unsigned char *pred, int stride)
+global sym(vp9_subtract_mby_sse2)
+sym(vp9_subtract_mby_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -145,9 +145,9 @@ sym(vp8_subtract_mby_sse2):
     ret
 
 
-;void vp8_subtract_mbuv_sse2(short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride)
-global sym(vp8_subtract_mbuv_sse2)
-sym(vp8_subtract_mbuv_sse2):
+;void vp9_subtract_mbuv_sse2(short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride)
+global sym(vp9_subtract_mbuv_sse2)
+sym(vp9_subtract_mbuv_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5

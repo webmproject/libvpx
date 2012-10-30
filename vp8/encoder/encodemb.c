@@ -30,7 +30,7 @@
 extern int enc_debug;
 #endif
 
-void vp8_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
+void vp9_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   unsigned char *src_ptr = (*(be->base_src) + be->src);
   short *diff_ptr = be->src_diff;
   unsigned char *pred_ptr = bd->predictor;
@@ -49,7 +49,7 @@ void vp8_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   }
 }
 
-void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
+void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   unsigned char *src_ptr = (*(be->base_src) + be->src);
   short *diff_ptr = be->src_diff;
   unsigned char *pred_ptr = bd->predictor;
@@ -66,7 +66,7 @@ void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   }
 }
 
-void vp8_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
+void vp9_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
                            const unsigned char *vsrc, int src_stride,
                            const unsigned char *upred,
                            const unsigned char *vpred, int dst_stride) {
@@ -95,15 +95,15 @@ void vp8_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
   }
 }
 
-void vp8_subtract_mbuv_c(short *diff, unsigned char *usrc,
+void vp9_subtract_mbuv_c(short *diff, unsigned char *usrc,
                          unsigned char *vsrc, unsigned char *pred, int stride) {
   unsigned char *upred = pred + 256;
   unsigned char *vpred = pred + 320;
 
-  vp8_subtract_mbuv_s_c(diff, usrc, vsrc, stride, upred, vpred, 8);
+  vp9_subtract_mbuv_s_c(diff, usrc, vsrc, stride, upred, vpred, 8);
 }
 
-void vp8_subtract_mby_s_c(short *diff, const unsigned char *src, int src_stride,
+void vp9_subtract_mby_s_c(short *diff, const unsigned char *src, int src_stride,
                           const unsigned char *pred, int dst_stride) {
   int r, c;
 
@@ -118,17 +118,17 @@ void vp8_subtract_mby_s_c(short *diff, const unsigned char *src, int src_stride,
   }
 }
 
-void vp8_subtract_mby_c(short *diff, unsigned char *src,
+void vp9_subtract_mby_c(short *diff, unsigned char *src,
                         unsigned char *pred, int stride) {
-  vp8_subtract_mby_s_c(diff, src, stride, pred, 16);
+  vp9_subtract_mby_s_c(diff, src, stride, pred, 16);
 }
 
 static void vp8_subtract_mb(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   BLOCK *b = &x->block[0];
 
-  vp8_subtract_mby(x->src_diff, *(b->base_src), x->e_mbd.predictor,
+  vp9_subtract_mby(x->src_diff, *(b->base_src), x->e_mbd.predictor,
                    b->src_stride);
-  vp8_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+  vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                     x->e_mbd.predictor, x->src.uv_stride);
 }
 
@@ -141,11 +141,11 @@ static void build_dcblock_4x4(MACROBLOCK *x) {
   }
 }
 
-void vp8_transform_mby_4x4(MACROBLOCK *x) {
+void vp9_transform_mby_4x4(MACROBLOCK *x) {
   int i;
 
   for (i = 0; i < 16; i += 2) {
-    x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+    x->vp9_short_fdct8x4(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 32);
   }
 
@@ -159,21 +159,21 @@ void vp8_transform_mby_4x4(MACROBLOCK *x) {
   }
 }
 
-void vp8_transform_mbuv_4x4(MACROBLOCK *x) {
+void vp9_transform_mbuv_4x4(MACROBLOCK *x) {
   int i;
 
   for (i = 16; i < 24; i += 2) {
-    x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+    x->vp9_short_fdct8x4(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 16);
   }
 }
 
 static void transform_mb_4x4(MACROBLOCK *x) {
-  vp8_transform_mby_4x4(x);
-  vp8_transform_mbuv_4x4(x);
+  vp9_transform_mby_4x4(x);
+  vp9_transform_mbuv_4x4(x);
 }
 
-void vp8_build_dcblock_8x8(MACROBLOCK *x) {
+void vp9_build_dcblock_8x8(MACROBLOCK *x) {
   int16_t *src_diff_ptr = x->block[24].src_diff;
   int i;
 
@@ -186,21 +186,21 @@ void vp8_build_dcblock_8x8(MACROBLOCK *x) {
   src_diff_ptr[8] = x->coeff[12 * 16];
 }
 
-void vp8_transform_mby_8x8(MACROBLOCK *x) {
+void vp9_transform_mby_8x8(MACROBLOCK *x) {
   int i;
 
   for (i = 0; i < 9; i += 8) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+    x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 32);
   }
   for (i = 2; i < 11; i += 8) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+    x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
                          &x->block[i + 2].coeff[0], 32);
   }
 
   if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
     // build dc block from 2x2 y dc values
-    vp8_build_dcblock_8x8(x);
+    vp9_build_dcblock_8x8(x);
 
     // do 2nd order transform on the dc block
     x->short_fhaar2x2(&x->block[24].src_diff[0],
@@ -208,29 +208,29 @@ void vp8_transform_mby_8x8(MACROBLOCK *x) {
   }
 }
 
-void vp8_transform_mbuv_8x8(MACROBLOCK *x) {
+void vp9_transform_mbuv_8x8(MACROBLOCK *x) {
   int i;
 
   for (i = 16; i < 24; i += 4) {
-    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+    x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 16);
   }
 }
 
-void vp8_transform_mb_8x8(MACROBLOCK *x) {
-  vp8_transform_mby_8x8(x);
-  vp8_transform_mbuv_8x8(x);
+void vp9_transform_mb_8x8(MACROBLOCK *x) {
+  vp9_transform_mby_8x8(x);
+  vp9_transform_mbuv_8x8(x);
 }
 
-void vp8_transform_mby_16x16(MACROBLOCK *x) {
+void vp9_transform_mby_16x16(MACROBLOCK *x) {
   vp8_clear_system_state();
-  x->vp8_short_fdct16x16(&x->block[0].src_diff[0],
+  x->vp9_short_fdct16x16(&x->block[0].src_diff[0],
                          &x->block[0].coeff[0], 32);
 }
 
-void vp8_transform_mb_16x16(MACROBLOCK *x) {
-  vp8_transform_mby_16x16(x);
-  vp8_transform_mbuv_8x8(x);
+void vp9_transform_mb_16x16(MACROBLOCK *x) {
+  vp9_transform_mby_16x16(x);
+  vp9_transform_mbuv_8x8(x);
 }
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
@@ -571,7 +571,7 @@ static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *xd,
   }
 }
 
-void vp8_optimize_mby_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mby_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   int b;
   PLANE_TYPE type;
   int has_2nd_order;
@@ -606,7 +606,7 @@ void vp8_optimize_mby_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 }
 
-void vp8_optimize_mbuv_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mbuv_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   int b;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -628,11 +628,11 @@ void vp8_optimize_mbuv_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 }
 
 static void optimize_mb_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
-  vp8_optimize_mby_4x4(x, rtcd);
-  vp8_optimize_mbuv_4x4(x, rtcd);
+  vp9_optimize_mby_4x4(x, rtcd);
+  vp9_optimize_mbuv_4x4(x, rtcd);
 }
 
-void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   int b;
   PLANE_TYPE type;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
@@ -665,7 +665,7 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 }
 
-void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   int b;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -690,8 +690,8 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 }
 
 static void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
-  vp8_optimize_mby_8x8(x, rtcd);
-  vp8_optimize_mbuv_8x8(x, rtcd);
+  vp9_optimize_mby_8x8(x, rtcd);
+  vp9_optimize_mbuv_8x8(x, rtcd);
 }
 
 static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
@@ -868,7 +868,7 @@ static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
   *a = *l = (d->eob != !type);
 }
 
-void vp8_optimize_mby_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mby_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta, *tl;
 
@@ -884,11 +884,11 @@ void vp8_optimize_mby_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 }
 
 static void optimize_mb_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
-  vp8_optimize_mby_16x16(x, rtcd);
-  vp8_optimize_mbuv_8x8(x, rtcd);
+  vp9_optimize_mby_16x16(x, rtcd);
+  vp9_optimize_mbuv_8x8(x, rtcd);
 }
 
-void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
@@ -896,34 +896,34 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   vp8_subtract_mb(rtcd, x);
 
   if (tx_size == TX_16X16) {
-    vp8_transform_mb_16x16(x);
-    vp8_quantize_mb_16x16(x);
+    vp9_transform_mb_16x16(x);
+    vp9_quantize_mb_16x16(x);
     if (x->optimize)
       optimize_mb_16x16(x, rtcd);
     vp8_inverse_transform_mb_16x16(IF_RTCD(&rtcd->common->idct), xd);
   } else if (tx_size == TX_8X8) {
     if (xd->mode_info_context->mbmi.mode == SPLITMV) {
       assert(xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4);
-      vp8_transform_mby_8x8(x);
-      vp8_transform_mbuv_4x4(x);
-      vp8_quantize_mby_8x8(x);
-      vp8_quantize_mbuv_4x4(x);
+      vp9_transform_mby_8x8(x);
+      vp9_transform_mbuv_4x4(x);
+      vp9_quantize_mby_8x8(x);
+      vp9_quantize_mbuv_4x4(x);
       if (x->optimize) {
-        vp8_optimize_mby_8x8(x, rtcd);
-        vp8_optimize_mbuv_4x4(x, rtcd);
+        vp9_optimize_mby_8x8(x, rtcd);
+        vp9_optimize_mbuv_4x4(x, rtcd);
       }
       vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), xd);
       vp8_inverse_transform_mbuv_4x4(IF_RTCD(&rtcd->common->idct), xd);
     } else {
-      vp8_transform_mb_8x8(x);
-      vp8_quantize_mb_8x8(x);
+      vp9_transform_mb_8x8(x);
+      vp9_quantize_mb_8x8(x);
       if (x->optimize)
         optimize_mb_8x8(x, rtcd);
       vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), xd);
     }
   } else {
     transform_mb_4x4(x);
-    vp8_quantize_mb_4x4(x);
+    vp9_quantize_mb_4x4(x);
     if (x->optimize)
       optimize_mb_4x4(x, rtcd);
     vp8_inverse_transform_mb_4x4(IF_RTCD(&rtcd->common->idct), xd);
@@ -933,7 +933,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 }
 
 /* this function is used by first pass only */
-void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
 
@@ -944,10 +944,10 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   vp8_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
 
-  vp8_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
+  vp9_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
 
-  vp8_transform_mby_4x4(x);
-  vp8_quantize_mby_4x4(x);
+  vp9_transform_mby_4x4(x);
+  vp9_quantize_mby_4x4(x);
   vp8_inverse_transform_mby_4x4(IF_RTCD(&rtcd->common->idct), xd);
 
   vp8_recon_mby(xd);

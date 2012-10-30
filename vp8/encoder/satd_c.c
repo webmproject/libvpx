@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include "vpx_ports/mem.h"
 #include "./vpx_rtcd.h"
-unsigned int vp8_satd16x16_c(const unsigned char *src_ptr,
+unsigned int vp9_satd16x16_c(const unsigned char *src_ptr,
                              int  src_stride,
                              const unsigned char *ref_ptr,
                              int  ref_stride,
@@ -33,7 +33,7 @@ unsigned int vp8_satd16x16_c(const unsigned char *src_ptr,
   in = diff_in;
   for (r = 0; r < 16; r += 4) {
     for (c = 0; c < 16; c += 4) {
-      vp8_short_walsh4x4_c(in + c, diff_out, 32);
+      vp9_short_walsh4x4_c(in + c, diff_out, 32);
       for (i = 0; i < 16; i++)
         satd += abs(diff_out[i]);
     }

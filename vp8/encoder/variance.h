@@ -18,7 +18,7 @@ typedef unsigned int(*vp8_sad_fn_t)(const unsigned char *src_ptr,
                                     int ref_stride,
                                     unsigned int max_sad);
 
-typedef void (*vp8_copy32xn_fn_t)(const unsigned char *src_ptr,
+typedef void (*vp9_copy32xn_fn_t)(const unsigned char *src_ptr,
                                   int source_stride,
                                   const unsigned char *ref_ptr,
                                   int ref_stride,
@@ -78,7 +78,7 @@ typedef struct variance_vtable {
     vp8_sad_multi_fn_t      sdx3f;
     vp8_sad_multi1_fn_t     sdx8f;
     vp8_sad_multi_d_fn_t    sdx4df;
-    vp8_copy32xn_fn_t       copymem;
+    vp9_copy32xn_fn_t       copymem;
 } vp8_variance_fn_ptr_t;
 
 #endif

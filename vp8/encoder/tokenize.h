@@ -15,7 +15,7 @@
 #include "vp8/common/entropy.h"
 #include "block.h"
 
-void vp8_tokenize_initialize();
+void vp9_tokenize_initialize();
 
 typedef struct {
   short Token;

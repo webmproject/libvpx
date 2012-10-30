@@ -54,29 +54,29 @@ int enc_debug = 0;
 int mb_row_debug, mb_col_debug;
 #endif
 
-extern void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex);
-extern void vp8_auto_select_speed(VP8_COMP *cpi);
+extern void vp9cx_initialize_me_consts(VP8_COMP *cpi, int QIndex);
+extern void vp9_auto_select_speed(VP8_COMP *cpi);
 extern void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
                                       MACROBLOCK *x,
                                       MB_ROW_COMP *mbr_ei,
                                       int mb_row,
                                       int count);
-int64_t vp8_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
+int64_t vp9_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
                               int recon_yoffset, int recon_uvoffset,
                               int *returnrate, int *returndistortion);
-extern void vp8cx_pick_mode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
+extern void vp9cx_pick_mode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
                                             int recon_yoffset,
                                             int recon_uvoffset, int *r, int *d);
-void vp8_build_block_offsets(MACROBLOCK *x);
-void vp8_setup_block_ptrs(MACROBLOCK *x);
-void vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
+void vp9_build_block_offsets(MACROBLOCK *x);
+void vp9_setup_block_ptrs(MACROBLOCK *x);
+void vp9cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
                                    int recon_yoffset, int recon_uvoffset,
                                    int output_enabled);
-void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
+void vp9cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
                                    int recon_yoffset, int recon_uvoffset, int mb_col, int mb_row);
-void vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x,
+void vp9cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x,
                                     TOKENEXTRA **t, int output_enabled);
-void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
+void vp9cx_encode_intra_super_block(VP8_COMP *cpi,
                                     MACROBLOCK *x,
                                     TOKENEXTRA **t, int mb_col);
 static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x);
@@ -96,7 +96,7 @@ unsigned int b_modes[B_MODE_COUNT];
 /* activity_avg must be positive, or flat regions could get a zero weight
  *  (infinite lambda), which confounds analysis.
  * This also avoids the need for divide by zero checks in
- *  vp8_activity_masking().
+ *  vp9_activity_masking().
  */
 #define VP8_ACTIVITY_AVG_MIN (64)
 
@@ -121,7 +121,7 @@ static unsigned int tt_activity_measure(VP8_COMP *cpi, MACROBLOCK *x) {
    *  lambda using a non-linear combination (e.g., the smallest, or second
    *  smallest, etc.).
    */
-  act = vp8_variance16x16(x->src.y_buffer, x->src.y_stride, VP8_VAR_OFFS, 0,
+  act = vp9_variance16x16(x->src.y_buffer, x->src.y_stride, VP8_VAR_OFFS, 0,
                           &sse);
   act = act << 4;
 
@@ -135,7 +135,7 @@ static unsigned int tt_activity_measure(VP8_COMP *cpi, MACROBLOCK *x) {
 // Stub for alternative experimental activity measures.
 static unsigned int alt_activity_measure(VP8_COMP *cpi,
                                          MACROBLOCK *x, int use_dc_pred) {
-  return vp8_encode_intra(cpi, x, use_dc_pred);
+  return vp9_encode_intra(cpi, x, use_dc_pred);
 }
 
 
@@ -347,7 +347,7 @@ static void build_activity_map(VP8_COMP *cpi) {
 }
 
 // Macroblock activity masking
-void vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x) {
+void vp9_activity_masking(VP8_COMP *cpi, MACROBLOCK *x) {
 #if USE_ACT_INDEX
   x->rdmult += *(x->mb_activity_ptr) * (x->rdmult >> 2);
   x->errorperbit = x->rdmult * 100 / (110 * x->rddiv);
@@ -593,7 +593,7 @@ static void pick_mb_modes(VP8_COMP *cpi,
     x->rdmult = cpi->RDMULT;
 
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
-      vp8_activity_masking(cpi, x);
+      vp9_activity_masking(cpi, x);
 
     // Is segmentation enabled
     if (xd->segmentation_enabled) {
@@ -605,7 +605,7 @@ static void pick_mb_modes(VP8_COMP *cpi,
       if (mbmi->segment_id > 3)
         mbmi->segment_id = 0;
 
-      vp8cx_mb_init_quantizer(cpi, x);
+      vp9cx_mb_init_quantizer(cpi, x);
     } else
       // Set to Segment 0 by default
       mbmi->segment_id = 0;
@@ -624,12 +624,12 @@ static void pick_mb_modes(VP8_COMP *cpi,
     // as a predictor for MBs that follow in the SB
     if (cm->frame_type == KEY_FRAME) {
       int r, d;
-      vp8_rd_pick_intra_mode(cpi, x, &r, &d);
+      vp9_rd_pick_intra_mode(cpi, x, &r, &d);
       *totalrate += r;
       *totaldist += d;
 
       // Dummy encode, do not do the tokenization
-      vp8cx_encode_intra_macro_block(cpi, x, tp, 0);
+      vp9cx_encode_intra_macro_block(cpi, x, tp, 0);
       // Note the encoder may have changed the segment_id
 
       // Save the coding context
@@ -650,13 +650,13 @@ static void pick_mb_modes(VP8_COMP *cpi,
         cpi->seg0_progress = (((mb_col & ~1) * 2 + (mb_row & ~1) * cm->mb_cols + i) << 16) / cm->MBs;
       }
 
-      vp8cx_pick_mode_inter_macroblock(cpi, x, recon_yoffset,
+      vp9cx_pick_mode_inter_macroblock(cpi, x, recon_yoffset,
                                        recon_uvoffset, &r, &d);
       *totalrate += r;
       *totaldist += d;
 
       // Dummy encode, do not do the tokenization
-      vp8cx_encode_inter_macroblock(cpi, x, tp,
+      vp9cx_encode_inter_macroblock(cpi, x, tp,
                                     recon_yoffset, recon_uvoffset, 0);
 
       seg_id = mbmi->segment_id;
@@ -777,7 +777,7 @@ static void pick_sb_modes (VP8_COMP *cpi,
   x->rddiv = cpi->RDDIV;
   x->rdmult = cpi->RDMULT;
   if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
-    vp8_activity_masking(cpi, x);
+    vp9_activity_masking(cpi, x);
   /* Is segmentation enabled */
   if (xd->segmentation_enabled)
   {
@@ -797,7 +797,7 @@ static void pick_sb_modes (VP8_COMP *cpi,
     if (xd->mode_info_context->mbmi.segment_id > 3)
       xd->mode_info_context->mbmi.segment_id = 0;
 
-    vp8cx_mb_init_quantizer(cpi, x);
+    vp9cx_mb_init_quantizer(cpi, x);
   }
   else
     /* Set to Segment 0 by default */
@@ -811,7 +811,7 @@ static void pick_sb_modes (VP8_COMP *cpi,
    * as a predictor for MBs that follow in the SB */
   if (cm->frame_type == KEY_FRAME)
   {
-    vp8_rd_pick_intra_mode_sb(cpi, x,
+    vp9_rd_pick_intra_mode_sb(cpi, x,
                               totalrate,
                               totaldist);
 
@@ -832,7 +832,7 @@ static void pick_sb_modes (VP8_COMP *cpi,
         (((mb_col & ~1) * 2 + (mb_row & ~1) * cm->mb_cols) << 16) / cm->MBs;
     }
 
-    vp8_rd_pick_inter_mode_sb(cpi, x,
+    vp9_rd_pick_inter_mode_sb(cpi, x,
                               recon_yoffset,
                               recon_uvoffset,
                               totalrate,
@@ -968,11 +968,11 @@ static void encode_sb(VP8_COMP *cpi,
     vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
-      vp8_activity_masking(cpi, x);
+      vp9_activity_masking(cpi, x);
 
     // Is segmentation enabled
     if (xd->segmentation_enabled) {
-      vp8cx_mb_init_quantizer(cpi, x);
+      vp9cx_mb_init_quantizer(cpi, x);
     }
 
     x->active_ptr = cpi->active_map + map_index;
@@ -987,10 +987,10 @@ static void encode_sb(VP8_COMP *cpi,
     if (cm->frame_type == KEY_FRAME) {
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb)
-        vp8cx_encode_intra_super_block(cpi, x, tp, mb_col);
+        vp9cx_encode_intra_super_block(cpi, x, tp, mb_col);
       else
 #endif
-        vp8cx_encode_intra_macro_block(cpi, x, tp, 1);
+        vp9cx_encode_intra_macro_block(cpi, x, tp, 1);
         // Note the encoder may have changed the segment_id
 
 #ifdef MODE_STATS
@@ -1013,10 +1013,10 @@ static void encode_sb(VP8_COMP *cpi,
 
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb)
-        vp8cx_encode_inter_superblock(cpi, x, tp, recon_yoffset, recon_uvoffset, mb_col, mb_row);
+        vp9cx_encode_inter_superblock(cpi, x, tp, recon_yoffset, recon_uvoffset, mb_col, mb_row);
       else
 #endif
-        vp8cx_encode_inter_macroblock(cpi, x, tp,
+        vp9cx_encode_inter_macroblock(cpi, x, tp,
                                       recon_yoffset, recon_uvoffset, 1);
         // Note the encoder may have changed the segment_id
 
@@ -1261,11 +1261,11 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi) {
   // set up frame for intra coded blocks
   vp8_setup_intra_recon(&cm->yv12_fb[cm->new_fb_idx]);
 
-  vp8_build_block_offsets(x);
+  vp9_build_block_offsets(x);
 
   vp8_setup_block_dptrs(&x->e_mbd);
 
-  vp8_setup_block_ptrs(x);
+  vp9_setup_block_ptrs(x);
 
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_context->mbmi.uv_mode = DC_PRED;
@@ -1360,10 +1360,10 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   vp8_zero(cpi->coef_counts_16x16);
   vp8_zero(cpi->hybrid_coef_counts_16x16);
 
-  vp8cx_frame_init_quantizer(cpi);
+  vp9cx_frame_init_quantizer(cpi);
 
-  vp8_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
-  vp8cx_initialize_me_consts(cpi, cm->base_qindex);
+  vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
+  vp9cx_initialize_me_consts(cpi, cm->base_qindex);
 
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     // Initialize encode frame context.
@@ -1487,7 +1487,7 @@ static void reset_skip_txfm_size(VP8_COMP *cpi, TX_SIZE txfm_max) {
   }
 }
 
-void vp8_encode_frame(VP8_COMP *cpi) {
+void vp9_encode_frame(VP8_COMP *cpi) {
   if (cpi->sf.RD) {
     int i, frame_type, pred_type;
     TXFM_MODE txfm_type;
@@ -1640,7 +1640,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 
 }
 
-void vp8_setup_block_ptrs(MACROBLOCK *x) {
+void vp9_setup_block_ptrs(MACROBLOCK *x) {
   int r, c;
   int i;
 
@@ -1671,7 +1671,7 @@ void vp8_setup_block_ptrs(MACROBLOCK *x) {
   }
 }
 
-void vp8_build_block_offsets(MACROBLOCK *x) {
+void vp9_build_block_offsets(MACROBLOCK *x) {
   int block = 0;
   int br, bc;
 
@@ -1836,7 +1836,7 @@ static void update_sb_skip_coeff_state(VP8_COMP *cpi,
     if (skip[n]) {
       x->e_mbd.above_context = &ta[n];
       x->e_mbd.left_context  = &tl[n];
-      vp8_stuff_mb(cpi, &x->e_mbd, tp, 0);
+      vp9_stuff_mb(cpi, &x->e_mbd, tp, 0);
     } else {
       if (n_tokens[n]) {
         memcpy(*tp, tokens[n], sizeof(*t[0]) * n_tokens[n]);
@@ -1846,7 +1846,7 @@ static void update_sb_skip_coeff_state(VP8_COMP *cpi,
   }
 }
 
-void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
+void vp9cx_encode_intra_super_block(VP8_COMP *cpi,
                                     MACROBLOCK *x,
                                     TOKENEXTRA **t,
                                     int mb_col) {
@@ -1870,7 +1870,7 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
 
   if ((cpi->oxcf.tuning == VP8_TUNE_SSIM) && output_enabled) {
     adjust_act_zbin(cpi, x);
-    vp8_update_zbin_extra(cpi, x);
+    vp9_update_zbin_extra(cpi, x);
   }
 
   vp8_build_intra_predictors_sby_s(&x->e_mbd);
@@ -1883,23 +1883,23 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
     xd->above_context = cm->above_context + mb_col + (n & 1);
     xd->left_context = cm->left_context + (n >> 1);
 
-    vp8_subtract_mby_s_c(x->src_diff,
+    vp9_subtract_mby_s_c(x->src_diff,
                          src + x_idx * 16 + y_idx * 16 * src_y_stride,
                          src_y_stride,
                          dst + x_idx * 16 + y_idx * 16 * dst_y_stride,
                          dst_y_stride);
-    vp8_subtract_mbuv_s_c(x->src_diff,
+    vp9_subtract_mbuv_s_c(x->src_diff,
                           usrc + x_idx * 8 + y_idx * 8 * src_uv_stride,
                           vsrc + x_idx * 8 + y_idx * 8 * src_uv_stride,
                           src_uv_stride,
                           udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           dst_uv_stride);
-    vp8_transform_mb_8x8(x);
-    vp8_quantize_mb_8x8(x);
+    vp9_transform_mb_8x8(x);
+    vp9_quantize_mb_8x8(x);
     if (x->optimize) {
-      vp8_optimize_mby_8x8(x, rtcd);
-      vp8_optimize_mbuv_8x8(x, rtcd);
+      vp9_optimize_mby_8x8(x, rtcd);
+      vp9_optimize_mbuv_8x8(x, rtcd);
     }
     vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     vp8_recon_mby_s_c(&x->e_mbd, dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
@@ -1912,7 +1912,7 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
       memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
       tp[n] = *t;
       xd->mode_info_context = mi + x_idx + y_idx * cm->mode_info_stride;
-      vp8_tokenize_mb(cpi, &x->e_mbd, t, 0);
+      vp9_tokenize_mb(cpi, &x->e_mbd, t, 0);
       skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff;
     }
   }
@@ -1926,26 +1926,26 @@ void vp8cx_encode_intra_super_block(VP8_COMP *cpi,
 }
 #endif /* CONFIG_SUPERBLOCKS */
 
-void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
+void vp9cx_encode_intra_macro_block(VP8_COMP *cpi,
                                     MACROBLOCK *x,
                                     TOKENEXTRA **t,
                                     int output_enabled) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   if ((cpi->oxcf.tuning == VP8_TUNE_SSIM) && output_enabled) {
     adjust_act_zbin(cpi, x);
-    vp8_update_zbin_extra(cpi, x);
+    vp9_update_zbin_extra(cpi, x);
   }
   if (mbmi->mode == I8X8_PRED) {
-    vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
-    vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
+    vp9_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
+    vp9_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
   } else if (mbmi->mode == B_PRED) {
-    vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
+    vp9_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
   } else {
-    vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+    vp9_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
   }
 
   if (mbmi->mode != I8X8_PRED) {
-    vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+    vp9_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
   }
 
   if (output_enabled) {
@@ -1953,7 +1953,7 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
 
     // Tokenize
     sum_intra_stats(cpi, x);
-    vp8_tokenize_mb(cpi, &x->e_mbd, t, 0);
+    vp9_tokenize_mb(cpi, &x->e_mbd, t, 0);
 
     if (cpi->common.txfm_mode == TX_MODE_SELECT &&
         !((cpi->common.mb_no_coeff_skip && mbmi->mb_skip_coeff) ||
@@ -1975,16 +1975,16 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
   }
 #if CONFIG_NEWBESTREFMV
   else
-    vp8_tokenize_mb(cpi, &x->e_mbd, t, 1);
+    vp9_tokenize_mb(cpi, &x->e_mbd, t, 1);
 #endif
 }
 #ifdef SPEEDSTATS
 extern int cnt_pm;
 #endif
 
-extern void vp8_fix_contexts(MACROBLOCKD *xd);
+extern void vp9_fix_contexts(MACROBLOCKD *xd);
 
-void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
+void vp9cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
                                     TOKENEXTRA **t, int recon_yoffset,
                                     int recon_uvoffset, int output_enabled) {
   VP8_COMMON *cm = &cpi->common;
@@ -2023,7 +2023,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    vp8_update_zbin_extra(cpi, x);
+    vp9_update_zbin_extra(cpi, x);
   }
 
   seg_ref_active = vp9_segfeature_active(xd, *segment_id, SEG_LVL_REF_FRAME);
@@ -2036,14 +2036,14 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
 
   if (mbmi->ref_frame == INTRA_FRAME) {
     if (mbmi->mode == B_PRED) {
-      vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
-      vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
     } else if (mbmi->mode == I8X8_PRED) {
-      vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
-      vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
     } else {
-      vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
-      vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
     }
 
     if (output_enabled)
@@ -2081,7 +2081,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
     }
 
     if (!x->skip) {
-      vp8_encode_inter16x16(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_inter16x16(IF_RTCD(&cpi->rtcd), x);
 
       // Clear mb_skip_coeff if mb_no_coeff_skip is not set
       if (!cpi->common.mb_no_coeff_skip)
@@ -2114,7 +2114,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
     }
 #endif
 
-    vp8_tokenize_mb(cpi, xd, t, !output_enabled);
+    vp9_tokenize_mb(cpi, xd, t, !output_enabled);
 
 #ifdef ENC_DEBUG
     if (enc_debug) {
@@ -2132,9 +2132,9 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
       mbmi->mb_skip_coeff = 1;
       if (output_enabled)
         cpi->skip_true_count[mb_skip_context]++;
-      vp8_fix_contexts(xd);
+      vp9_fix_contexts(xd);
     } else {
-      vp8_stuff_mb(cpi, xd, t, !output_enabled);
+      vp9_stuff_mb(cpi, xd, t, !output_enabled);
       mbmi->mb_skip_coeff = 0;
       if (output_enabled)
         cpi->skip_false_count[mb_skip_context]++;
@@ -2170,7 +2170,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
 }
 
 #if CONFIG_SUPERBLOCKS
-void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
+void vp9cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
                                    int recon_yoffset, int recon_uvoffset, int mb_col, int mb_row) {
   const int output_enabled = 1;
   VP8_COMMON *cm = &cpi->common;
@@ -2218,7 +2218,7 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
       }
     }
 
-    vp8_update_zbin_extra(cpi, x);
+    vp9_update_zbin_extra(cpi, x);
   }
 
   seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
@@ -2274,23 +2274,23 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
   for (n = 0; n < 4; n++) {
     int x_idx = n & 1, y_idx = n >> 1;
 
-    vp8_subtract_mby_s_c(x->src_diff,
+    vp9_subtract_mby_s_c(x->src_diff,
                          src + x_idx * 16 + y_idx * 16 * src_y_stride,
                          src_y_stride,
                          dst + x_idx * 16 + y_idx * 16 * dst_y_stride,
                          dst_y_stride);
-    vp8_subtract_mbuv_s_c(x->src_diff,
+    vp9_subtract_mbuv_s_c(x->src_diff,
                           usrc + x_idx * 8 + y_idx * 8 * src_uv_stride,
                           vsrc + x_idx * 8 + y_idx * 8 * src_uv_stride,
                           src_uv_stride,
                           udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           dst_uv_stride);
-    vp8_transform_mb_8x8(x);
-    vp8_quantize_mb_8x8(x);
+    vp9_transform_mb_8x8(x);
+    vp9_quantize_mb_8x8(x);
     if (x->optimize) {
-      vp8_optimize_mby_8x8(x, rtcd);
-      vp8_optimize_mbuv_8x8(x, rtcd);
+      vp9_optimize_mby_8x8(x, rtcd);
+      vp9_optimize_mbuv_8x8(x, rtcd);
     }
     vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     vp8_recon_mby_s_c( &x->e_mbd,
@@ -2307,7 +2307,7 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
         memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
         tp[n] = *t;
         xd->mode_info_context = mi + x_idx + y_idx * cm->mode_info_stride;
-        vp8_tokenize_mb(cpi, &x->e_mbd, t, 0);
+        vp9_tokenize_mb(cpi, &x->e_mbd, t, 0);
         skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff;
       }
     } else {
@@ -2324,9 +2324,9 @@ void vp8cx_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
         memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
         tp[n] = *t;
         cpi->skip_true_count[mb_skip_context]++;
-        vp8_fix_contexts(xd);
+        vp9_fix_contexts(xd);
       } else {
-        vp8_stuff_mb(cpi, xd, t, 0);
+        vp9_stuff_mb(cpi, xd, t, 0);
         xd->mode_info_context->mbmi.mb_skip_coeff = 0;
         cpi->skip_false_count[mb_skip_context]++;
       }

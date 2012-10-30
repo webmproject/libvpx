@@ -23,7 +23,7 @@ static int mv_ref_ct [31] [4] [2];
 static int mv_mode_cts [4] [2];
 #endif
 
-void vp8_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
+void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
   int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL +
       ((ref_mv->as_mv.col & 7) ? 1 : 0);
   int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL +
@@ -42,7 +42,7 @@ void vp8_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
     x->mv_row_max = row_max;
 }
 
-int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, DEC_MVCOSTS,
+int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, DEC_MVCOSTS,
                     int Weight, int ishp) {
   MV v;
   v.row = (mv->as_mv.row - ref->as_mv.row);
@@ -79,7 +79,7 @@ static int mvsad_err_cost(int_mv *mv, int_mv *ref, DEC_MVSADCOSTS,
   return 0;
 }
 
-void vp8_init_dsmotion_compensation(MACROBLOCK *x, int stride) {
+void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride) {
   int Len;
   int search_site_count = 0;
 
@@ -125,7 +125,7 @@ void vp8_init_dsmotion_compensation(MACROBLOCK *x, int stride) {
   x->searches_per_step = 4;
 }
 
-void vp8_init3smotion_compensation(MACROBLOCK *x, int stride) {
+void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
   int Len;
   int search_site_count = 0;
 
@@ -244,7 +244,7 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride) {
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #define MAX(x,y) (((x)>(y))?(x):(y))
 
-int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                              int_mv *bestmv, int_mv *ref_mv,
                                              int error_per_bit,
                                              const vp8_variance_fn_ptr_t *vfp,
@@ -443,7 +443,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 #undef MIN
 #undef MAX
 
-int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+int vp9_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                  int_mv *bestmv, int_mv *ref_mv,
                                  int error_per_bit,
                                  const vp8_variance_fn_ptr_t *vfp,
@@ -923,7 +923,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
 #undef SP
 
-int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+int vp9_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                   int_mv *bestmv, int_mv *ref_mv,
                                   int error_per_bit,
                                   const vp8_variance_fn_ptr_t *vfp,
@@ -1099,7 +1099,7 @@ static const MV next_chkpts[6][3] = {
   {{ -1, 2}, { -2, 0}, { -1, -2}}
 };
 
-int vp8_hex_search
+int vp9_hex_search
 (
   MACROBLOCK *x,
   BLOCK *b,
@@ -1255,7 +1255,7 @@ cal_neighbors:
 #undef CHECK_POINT
 #undef CHECK_BETTER
 
-int vp8_diamond_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+int vp9_diamond_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                            int_mv *ref_mv, int_mv *best_mv,
                            int search_param, int sad_per_bit, int *num00,
                            vp8_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
@@ -1364,7 +1364,7 @@ int vp8_diamond_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                   xd->allow_high_precision_mv);
 }
 
-int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+int vp9_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                              int_mv *ref_mv, int_mv *best_mv, int search_param,
                              int sad_per_bit, int *num00,
                              vp8_variance_fn_ptr_t *fn_ptr,
@@ -1512,7 +1512,7 @@ int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
-int vp8_full_pixel_diamond(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
+int vp9_full_pixel_diamond(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
                            BLOCKD *d, int_mv *mvp_full, int step_param,
                            int sadpb, int further_steps,
                            int do_refine, vp8_variance_fn_ptr_t *fn_ptr,
@@ -1568,7 +1568,7 @@ int vp8_full_pixel_diamond(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
   return bestsme;
 }
 
-int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
+int vp9_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                         int sad_per_bit, int distance,
                         vp8_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
                         int_mv *center_mv) {
@@ -1662,7 +1662,7 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     return INT_MAX;
 }
 
-int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
+int vp9_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                           int sad_per_bit, int distance,
                           vp8_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
                           int_mv *center_mv) {
@@ -1789,7 +1789,7 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     return INT_MAX;
 }
 
-int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
+int vp9_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                           int sad_per_bit, int distance,
                           vp8_variance_fn_ptr_t *fn_ptr,
                           DEC_MVCOSTS,
@@ -1943,7 +1943,7 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     return INT_MAX;
 }
 
-int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
+int vp9_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                             int error_per_bit, int search_range,
                             vp8_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
                             int_mv *center_mv) {
@@ -2019,7 +2019,7 @@ int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     return INT_MAX;
 }
 
-int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+int vp9_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                               int_mv *ref_mv, int error_per_bit,
                               int search_range, vp8_variance_fn_ptr_t *fn_ptr,
                               DEC_MVCOSTS, int_mv *center_mv) {

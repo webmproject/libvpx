@@ -47,13 +47,13 @@ static unsigned int do_16x16_motion_iteration
     further_steps = 0;
   }
 
-  vp8_clamp_mv_min_max(x, ref_mv);
+  vp9_clamp_mv_min_max(x, ref_mv);
 
   ref_full.as_mv.col = ref_mv->as_mv.col >> 3;
   ref_full.as_mv.row = ref_mv->as_mv.row >> 3;
 
   /*cpi->sf.search_method == HEX*/
-  best_err = vp8_hex_search(
+  best_err = vp9_hex_search(
       x, b, d,
       &ref_full, dst_mv,
       step_param,
@@ -81,9 +81,9 @@ static unsigned int do_16x16_motion_iteration
   xd->mode_info_context->mbmi.pred_filter_enabled = 0;
 #endif
 
-  vp8_set_mbmode_and_mvs(x, NEWMV, dst_mv);
+  vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
   vp8_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
-  best_err = vp8_sad16x16(xd->dst.y_buffer, xd->dst.y_stride,
+  best_err = vp9_sad16x16(xd->dst.y_buffer, xd->dst.y_stride,
                           xd->predictor, 16, INT_MAX);
 
   /* restore UMV window */
@@ -128,7 +128,7 @@ static int do_16x16_motion_search
   // FIXME should really use something like near/nearest MV and/or MV prediction
   xd->pre.y_buffer = ref->y_buffer + mb_y_offset;
   xd->pre.y_stride = ref->y_stride;
-  err = vp8_sad16x16(ref->y_buffer + mb_y_offset, ref->y_stride,
+  err = vp9_sad16x16(ref->y_buffer + mb_y_offset, ref->y_stride,
                      xd->dst.y_buffer, xd->dst.y_stride, INT_MAX);
   dst_mv->as_int = 0;
 
@@ -188,7 +188,7 @@ static int do_16x16_zerozero_search
   xd->pre.y_buffer = ref->y_buffer + mb_y_offset;
   xd->pre.y_stride = ref->y_stride;
   // VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
-  err = vp8_sad16x16(ref->y_buffer + mb_y_offset, ref->y_stride,
+  err = vp9_sad16x16(ref->y_buffer + mb_y_offset, ref->y_stride,
                      xd->dst.y_buffer, xd->dst.y_stride, INT_MAX);
 
   dst_mv->as_int = 0;
@@ -214,7 +214,7 @@ static int find_best_16x16_intra
 
     xd->mode_info_context->mbmi.mode = mode;
     vp8_build_intra_predictors_mby(xd);
-    err = vp8_sad16x16(xd->predictor, 16, buf->y_buffer + mb_y_offset,
+    err = vp9_sad16x16(xd->predictor, 16, buf->y_buffer + mb_y_offset,
                        buf->y_stride, best_err);
     // find best
     if (err < best_err) {
@@ -428,22 +428,22 @@ static void separate_arf_mbs(VP8_COMP *cpi) {
       cpi->static_mb_pct = 0;
 
     cpi->seg0_cnt = ncnt[0];
-    vp8_enable_segmentation((VP8_PTR) cpi);
+    vp9_enable_segmentation((VP8_PTR) cpi);
   } else {
     cpi->static_mb_pct = 0;
-    vp8_disable_segmentation((VP8_PTR) cpi);
+    vp9_disable_segmentation((VP8_PTR) cpi);
   }
 
   // Free localy allocated storage
   vpx_free(arf_not_zz);
 }
 
-void vp8_update_mbgraph_stats
+void vp9_update_mbgraph_stats
 (
   VP8_COMP *cpi
 ) {
   VP8_COMMON *const cm = &cpi->common;
-  int i, n_frames = vp8_lookahead_depth(cpi->lookahead);
+  int i, n_frames = vp9_lookahead_depth(cpi->lookahead);
   YV12_BUFFER_CONFIG *golden_ref = &cm->yv12_fb[cm->gld_fb_idx];
 
   // we need to look ahead beyond where the ARF transitions into
@@ -469,7 +469,7 @@ void vp8_update_mbgraph_stats
   for (i = 0; i < n_frames; i++) {
     MBGRAPH_FRAME_STATS *frame_stats = &cpi->mbgraph_stats[i];
     struct lookahead_entry *q_cur =
-      vp8_lookahead_peek(cpi->lookahead, i);
+      vp9_lookahead_peek(cpi->lookahead, i);
 
     assert(q_cur != NULL);
 

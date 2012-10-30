@@ -12,12 +12,12 @@
 %include "asm_enc_offsets.asm"
 
 
-; void vp8_regular_quantize_b_sse4 | arg
+; void vp9_regular_quantize_b_sse4 | arg
 ;  (BLOCK  *b,                     |  0
 ;   BLOCKD *d)                     |  1
 
-global sym(vp8_regular_quantize_b_sse4)
-sym(vp8_regular_quantize_b_sse4):
+global sym(vp9_regular_quantize_b_sse4)
+sym(vp9_regular_quantize_b_sse4):
 
 %if ABI_IS_32BIT
     push        rbp

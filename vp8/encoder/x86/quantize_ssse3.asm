@@ -12,13 +12,13 @@
 %include "asm_enc_offsets.asm"
 
 
-; void vp8_fast_quantize_b_ssse3 | arg
+; void vp9_fast_quantize_b_ssse3 | arg
 ;  (BLOCK  *b,                   |  0
 ;   BLOCKD *d)                   |  1
 ;
 
-global sym(vp8_fast_quantize_b_ssse3)
-sym(vp8_fast_quantize_b_ssse3):
+global sym(vp9_fast_quantize_b_ssse3)
+sym(vp9_fast_quantize_b_ssse3):
     push        rbp
     mov         rbp, rsp
     GET_GOT     rbx
