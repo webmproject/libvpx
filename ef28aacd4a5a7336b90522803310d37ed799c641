@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//+EE\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-30T04:09:23Z",
+      "side": 1,
+      "message": "these functions seem to share a lot of common code...",
+      "revId": "ef28aacd4a5a7336b90522803310d37ed799c641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+EA\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-10-30T04:09:23Z",
+      "side": 1,
+      "message": "these should be declared in the .h",
+      "revId": "ef28aacd4a5a7336b90522803310d37ed799c641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
