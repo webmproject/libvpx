@@ -833,7 +833,7 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
 
   tx_type = get_tx_type_16x16(xd, b);
   if (tx_type != DCT_DCT) {
-    vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 16);
+    vp9_fht(be->src_diff, 32, be->coeff, tx_type, 16);
   } else
     vp9_transform_mby_16x16(mb);
 
@@ -1115,7 +1115,7 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
       b->bmi.as_mode.first = mode;
       tx_type = get_tx_type_4x4(xd, b);
       if (tx_type != DCT_DCT) {
-        vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
+        vp9_fht(be->src_diff, 32, be->coeff, tx_type, 4);
         vp9_ht_quantize_b_4x4(be, b, tx_type);
       } else {
         x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
@@ -1440,7 +1440,7 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
       if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
         TX_TYPE tx_type = get_tx_type_8x8(xd, b);
         if (tx_type != DCT_DCT)
-          vp9_fht_c(be->src_diff, 32, (x->block + idx)->coeff, tx_type, 8);
+          vp9_fht(be->src_diff, 32, (x->block + idx)->coeff, tx_type, 8);
         else
           x->vp9_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
         x->quantize_b_8x8(x->block + idx, xd->block + idx);

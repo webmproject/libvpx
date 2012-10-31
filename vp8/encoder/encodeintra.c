@@ -73,7 +73,7 @@ void vp9_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
 
   tx_type = get_tx_type(&x->e_mbd, b);
   if (tx_type != DCT_DCT) {
-    vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
+    vp9_fht(be->src_diff, 32, be->coeff, tx_type, 4);
     vp9_ht_quantize_b_4x4(be, b, tx_type);
     vp8_ihtllm_c(b->dqcoeff, b->diff, 32, tx_type, 4);
   } else {
@@ -114,7 +114,7 @@ void vp9_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     BLOCKD  *bd = &xd->block[0];
     tx_type = get_tx_type(xd, bd);
     if (tx_type != DCT_DCT) {
-      vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 16);
+      vp9_fht(b->src_diff, 32, b->coeff, tx_type, 16);
       vp9_quantize_mby_16x16(x);
       if (x->optimize)
         vp9_optimize_mby_16x16(x, rtcd);
@@ -205,7 +205,7 @@ void vp9_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
 
     tx_type = get_tx_type(xd, xd->block + idx);
     if (tx_type != DCT_DCT) {
-      vp9_fht_c(be->src_diff, 32, (x->block + idx)->coeff,
+      vp9_fht(be->src_diff, 32, (x->block + idx)->coeff,
                 tx_type, 8);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
       vp8_ihtllm_c(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
