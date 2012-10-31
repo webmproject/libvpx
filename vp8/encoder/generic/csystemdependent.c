@@ -15,7 +15,7 @@
 
 
 void vp9_arch_x86_encoder_init(VP9_COMP *cpi);
-void vp8_arch_arm_encoder_init(VP9_COMP *cpi);
+void vp9_arch_arm_encoder_init(VP9_COMP *cpi);
 
 void (*vp9_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc,
                                         YV12_BUFFER_CONFIG *dst_ybc,
@@ -41,7 +41,7 @@ void vp9_cmachine_specific_config(VP9_COMP *cpi) {
 #endif
 
 #if ARCH_ARM
-  vp8_arch_arm_encoder_init(cpi);
+  vp9_arch_arm_encoder_init(cpi);
 #endif
 
 

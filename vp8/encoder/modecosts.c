@@ -17,11 +17,11 @@
 
 void vp9_init_mode_costs(VP9_COMP *c) {
   VP9_COMMON *x = &c->common;
-  const vp8_tree_p T = vp9_bmode_tree;
+  const vp9_tree_p T = vp9_bmode_tree;
   int i, j;
 
-  for (i = 0; i < VP8_BINTRAMODES; i++) {
-    for (j = 0; j < VP8_BINTRAMODES; j++) {
+  for (i = 0; i < VP9_BINTRAMODES; i++) {
+    for (j = 0; j < VP9_BINTRAMODES; j++) {
       vp9_cost_tokens((int *)c->mb.bmode_costs[i][j],
                       x->kf_bmode_prob[i][j], T);
     }
@@ -36,13 +36,13 @@ void vp9_init_mode_costs(VP9_COMP *c) {
                   x->kf_ymode_prob[c->common.kf_ymode_probs_index],
                   vp9_kf_ymode_tree);
   vp9_cost_tokens(c->mb.intra_uv_mode_cost[1],
-                  x->fc.uv_mode_prob[VP8_YMODES - 1], vp9_uv_mode_tree);
+                  x->fc.uv_mode_prob[VP9_YMODES - 1], vp9_uv_mode_tree);
   vp9_cost_tokens(c->mb.intra_uv_mode_cost[0],
-                  x->kf_uv_mode_prob[VP8_YMODES - 1], vp9_uv_mode_tree);
+                  x->kf_uv_mode_prob[VP9_YMODES - 1], vp9_uv_mode_tree);
   vp9_cost_tokens(c->mb.i8x8_mode_costs,
                   x->fc.i8x8_mode_prob, vp9_i8x8_mode_tree);
 
-  for (i = 0; i <= VP8_SWITCHABLE_FILTERS; ++i)
+  for (i = 0; i <= VP9_SWITCHABLE_FILTERS; ++i)
     vp9_cost_tokens((int *)c->mb.switchable_interp_costs[i],
                     x->fc.switchable_interp_prob[i],
                     vp9_switchable_interp_tree);

@@ -10,7 +10,7 @@
 
 
     EXPORT |vp8_start_encode|
-    EXPORT |vp8_encode_bool|
+    EXPORT |vp9_encode_bool|
     EXPORT |vp8_stop_encode|
     EXPORT |vp8_encode_value|
 
@@ -29,26 +29,26 @@
     mov     r12, #0
     mov     r3,  #255
     mvn     r2,  #23
-    str     r12, [r0, #vp8_writer_lowvalue]
-    str     r3,  [r0, #vp8_writer_range]
-    str     r12, [r0, #vp8_writer_value]
-    str     r2,  [r0, #vp8_writer_count]
-    str     r12, [r0, #vp8_writer_pos]
-    str     r1,  [r0, #vp8_writer_buffer]
+    str     r12, [r0, #vp9_writer_lowvalue]
+    str     r3,  [r0, #vp9_writer_range]
+    str     r12, [r0, #vp9_writer_value]
+    str     r2,  [r0, #vp9_writer_count]
+    str     r12, [r0, #vp9_writer_pos]
+    str     r1,  [r0, #vp9_writer_buffer]
     bx      lr
     ENDP
 
 ; r0 BOOL_CODER *br
 ; r1 int bit
 ; r2 int probability
-|vp8_encode_bool| PROC
+|vp9_encode_bool| PROC
     push    {r4-r9, lr}
 
     mov     r4, r2
 
-    ldr     r2, [r0, #vp8_writer_lowvalue]
-    ldr     r5, [r0, #vp8_writer_range]
-    ldr     r3, [r0, #vp8_writer_count]
+    ldr     r2, [r0, #vp9_writer_lowvalue]
+    ldr     r5, [r0, #vp9_writer_range]
+    ldr     r3, [r0, #vp9_writer_count]
 
     sub     r7, r5, #1                  ; range-1
 
@@ -76,7 +76,7 @@
     lsls    r4, r2, r4                  ; if((lowvalue<<(offset-1)) & 0x80000000 )
     bpl     token_high_bit_not_set
 
-    ldr     r4, [r0, #vp8_writer_pos]   ; x
+    ldr     r4, [r0, #vp9_writer_pos]   ; x
     sub     r4, r4, #1                  ; x = w->pos-1
     b       token_zero_while_start
 token_zero_while_loop
@@ -85,34 +85,34 @@ token_zero_while_loop
     sub     r4, r4, #1                  ; x--
 token_zero_while_start
     cmp     r4, #0
-    ldrge   r7, [r0, #vp8_writer_buffer]
+    ldrge   r7, [r0, #vp9_writer_buffer]
     ldrb    r1, [r7, r4]
     cmpge   r1, #0xff
     beq     token_zero_while_loop
 
-    ldr     r7, [r0, #vp8_writer_buffer]
+    ldr     r7, [r0, #vp9_writer_buffer]
     ldrb    r9, [r7, r4]                ; w->buffer[x]
     add     r9, r9, #1
     strb    r9, [r7, r4]                ; w->buffer[x] + 1
 token_high_bit_not_set
     rsb     r4, r6, #24                 ; 24-offset
-    ldr     r9, [r0, #vp8_writer_buffer]
+    ldr     r9, [r0, #vp9_writer_buffer]
     lsr     r7, r2, r4                  ; lowvalue >> (24-offset)
-    ldr     r4, [r0, #vp8_writer_pos]   ; w->pos
+    ldr     r4, [r0, #vp9_writer_pos]   ; w->pos
     lsl     r2, r2, r6                  ; lowvalue <<= offset
     mov     r6, r3                      ; shift = count
     add     r1, r4, #1                  ; w->pos++
     bic     r2, r2, #0xff000000         ; lowvalue &= 0xffffff
-    str     r1, [r0, #vp8_writer_pos]
+    str     r1, [r0, #vp9_writer_pos]
     sub     r3, r3, #8                  ; count -= 8
     strb    r7, [r9, r4]                ; w->buffer[w->pos++]
 
 token_count_lt_zero
     lsl     r2, r2, r6                  ; lowvalue <<= shift
 
-    str     r2, [r0, #vp8_writer_lowvalue]
-    str     r5, [r0, #vp8_writer_range]
-    str     r3, [r0, #vp8_writer_count]
+    str     r2, [r0, #vp9_writer_lowvalue]
+    str     r5, [r0, #vp9_writer_range]
+    str     r3, [r0, #vp9_writer_count]
     pop     {r4-r9, pc}
     ENDP
 
@@ -120,9 +120,9 @@ token_count_lt_zero
 |vp8_stop_encode| PROC
     push    {r4-r10, lr}
 
-    ldr     r2, [r0, #vp8_writer_lowvalue]
-    ldr     r5, [r0, #vp8_writer_range]
-    ldr     r3, [r0, #vp8_writer_count]
+    ldr     r2, [r0, #vp9_writer_lowvalue]
+    ldr     r5, [r0, #vp9_writer_range]
+    ldr     r3, [r0, #vp9_writer_count]
 
     mov     r10, #32
 
@@ -149,7 +149,7 @@ stop_encode_loop
     lsls    r4, r2, r4                  ; if((lowvalue<<(offset-1)) & 0x80000000 )
     bpl     token_high_bit_not_set_se
 
-    ldr     r4, [r0, #vp8_writer_pos]   ; x
+    ldr     r4, [r0, #vp9_writer_pos]   ; x
     sub     r4, r4, #1                  ; x = w->pos-1
     b       token_zero_while_start_se
 token_zero_while_loop_se
@@ -158,25 +158,25 @@ token_zero_while_loop_se
     sub     r4, r4, #1                  ; x--
 token_zero_while_start_se
     cmp     r4, #0
-    ldrge   r7, [r0, #vp8_writer_buffer]
+    ldrge   r7, [r0, #vp9_writer_buffer]
     ldrb    r1, [r7, r4]
     cmpge   r1, #0xff
     beq     token_zero_while_loop_se
 
-    ldr     r7, [r0, #vp8_writer_buffer]
+    ldr     r7, [r0, #vp9_writer_buffer]
     ldrb    r9, [r7, r4]                ; w->buffer[x]
     add     r9, r9, #1
     strb    r9, [r7, r4]                ; w->buffer[x] + 1
 token_high_bit_not_set_se
     rsb     r4, r6, #24                 ; 24-offset
-    ldr     r9, [r0, #vp8_writer_buffer]
+    ldr     r9, [r0, #vp9_writer_buffer]
     lsr     r7, r2, r4                  ; lowvalue >> (24-offset)
-    ldr     r4, [r0, #vp8_writer_pos]   ; w->pos
+    ldr     r4, [r0, #vp9_writer_pos]   ; w->pos
     lsl     r2, r2, r6                  ; lowvalue <<= offset
     mov     r6, r3                      ; shift = count
     add     r1, r4, #1                  ; w->pos++
     bic     r2, r2, #0xff000000         ; lowvalue &= 0xffffff
-    str     r1, [r0, #vp8_writer_pos]
+    str     r1, [r0, #vp9_writer_pos]
     sub     r3, r3, #8                  ; count -= 8
     strb    r7, [r9, r4]                ; w->buffer[w->pos++]
 
@@ -186,9 +186,9 @@ token_count_lt_zero_se
     subs    r10, r10, #1
     bne     stop_encode_loop
 
-    str     r2, [r0, #vp8_writer_lowvalue]
-    str     r5, [r0, #vp8_writer_range]
-    str     r3, [r0, #vp8_writer_count]
+    str     r2, [r0, #vp9_writer_lowvalue]
+    str     r5, [r0, #vp9_writer_range]
+    str     r3, [r0, #vp9_writer_count]
     pop     {r4-r10, pc}
 
     ENDP
@@ -201,9 +201,9 @@ token_count_lt_zero_se
 
     mov     r10, r2
 
-    ldr     r2, [r0, #vp8_writer_lowvalue]
-    ldr     r5, [r0, #vp8_writer_range]
-    ldr     r3, [r0, #vp8_writer_count]
+    ldr     r2, [r0, #vp9_writer_lowvalue]
+    ldr     r5, [r0, #vp9_writer_range]
+    ldr     r3, [r0, #vp9_writer_count]
 
     rsb     r4, r10, #32                 ; 32-n
 
@@ -240,7 +240,7 @@ encode_value_loop
     lsls    r4, r2, r4                  ; if((lowvalue<<(offset-1)) & 0x80000000 )
     bpl     token_high_bit_not_set_ev
 
-    ldr     r4, [r0, #vp8_writer_pos]   ; x
+    ldr     r4, [r0, #vp9_writer_pos]   ; x
     sub     r4, r4, #1                  ; x = w->pos-1
     b       token_zero_while_start_ev
 token_zero_while_loop_ev
@@ -249,25 +249,25 @@ token_zero_while_loop_ev
     sub     r4, r4, #1                  ; x--
 token_zero_while_start_ev
     cmp     r4, #0
-    ldrge   r7, [r0, #vp8_writer_buffer]
+    ldrge   r7, [r0, #vp9_writer_buffer]
     ldrb    r11, [r7, r4]
     cmpge   r11, #0xff
     beq     token_zero_while_loop_ev
 
-    ldr     r7, [r0, #vp8_writer_buffer]
+    ldr     r7, [r0, #vp9_writer_buffer]
     ldrb    r9, [r7, r4]                ; w->buffer[x]
     add     r9, r9, #1
     strb    r9, [r7, r4]                ; w->buffer[x] + 1
 token_high_bit_not_set_ev
     rsb     r4, r6, #24                 ; 24-offset
-    ldr     r9, [r0, #vp8_writer_buffer]
+    ldr     r9, [r0, #vp9_writer_buffer]
     lsr     r7, r2, r4                  ; lowvalue >> (24-offset)
-    ldr     r4, [r0, #vp8_writer_pos]   ; w->pos
+    ldr     r4, [r0, #vp9_writer_pos]   ; w->pos
     lsl     r2, r2, r6                  ; lowvalue <<= offset
     mov     r6, r3                      ; shift = count
     add     r11, r4, #1                 ; w->pos++
     bic     r2, r2, #0xff000000         ; lowvalue &= 0xffffff
-    str     r11, [r0, #vp8_writer_pos]
+    str     r11, [r0, #vp9_writer_pos]
     sub     r3, r3, #8                  ; count -= 8
     strb    r7, [r9, r4]                ; w->buffer[w->pos++]
 
@@ -277,9 +277,9 @@ token_count_lt_zero_ev
     subs    r10, r10, #1
     bne     encode_value_loop
 
-    str     r2, [r0, #vp8_writer_lowvalue]
-    str     r5, [r0, #vp8_writer_range]
-    str     r3, [r0, #vp8_writer_count]
+    str     r2, [r0, #vp9_writer_lowvalue]
+    str     r5, [r0, #vp9_writer_range]
+    str     r3, [r0, #vp9_writer_count]
     pop     {r4-r11, pc}
     ENDP
 

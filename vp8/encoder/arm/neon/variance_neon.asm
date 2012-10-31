@@ -9,10 +9,10 @@
 ;
 
 
-    EXPORT  |vp8_variance16x16_neon|
-    EXPORT  |vp8_variance16x8_neon|
-    EXPORT  |vp8_variance8x16_neon|
-    EXPORT  |vp8_variance8x8_neon|
+    EXPORT  |vp9_variance16x16_neon|
+    EXPORT  |vp9_variance16x8_neon|
+    EXPORT  |vp9_variance8x16_neon|
+    EXPORT  |vp9_variance8x8_neon|
 
     ARM
     REQUIRE8
@@ -25,7 +25,7 @@
 ; r2    unsigned char *ref_ptr
 ; r3    int  recon_stride
 ; stack unsigned int *sse
-|vp8_variance16x16_neon| PROC
+|vp9_variance16x16_neon| PROC
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
     vmov.i8         q10, #0
@@ -92,13 +92,13 @@ variance16x16_neon_loop
     ENDP
 
 ;================================
-;unsigned int vp8_variance16x8_c(
+;unsigned int vp9_variance16x8_c(
 ;    unsigned char *src_ptr,
 ;    int  source_stride,
 ;    unsigned char *ref_ptr,
 ;    int  recon_stride,
 ;   unsigned int *sse)
-|vp8_variance16x8_neon| PROC
+|vp9_variance16x8_neon| PROC
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
     vmov.i8         q10, #0
@@ -154,14 +154,14 @@ variance16x8_neon_loop
     ENDP
 
 ;=================================
-;unsigned int vp8_variance8x16_c(
+;unsigned int vp9_variance8x16_c(
 ;    unsigned char *src_ptr,
 ;    int  source_stride,
 ;    unsigned char *ref_ptr,
 ;    int  recon_stride,
 ;   unsigned int *sse)
 
-|vp8_variance8x16_neon| PROC
+|vp9_variance8x16_neon| PROC
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
     vmov.i8         q10, #0
@@ -214,7 +214,7 @@ variance8x16_neon_loop
 ; r2    unsigned char *ref_ptr
 ; r3    int  recon_stride
 ; stack unsigned int *sse
-|vp8_variance8x8_neon| PROC
+|vp9_variance8x8_neon| PROC
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
     vmov.i8         q10, #0

@@ -43,7 +43,7 @@ sym(vp9_filter_block2d_bil_var_ssse3):
         pxor            xmm6,           xmm6
         pxor            xmm7,           xmm7
 
-        lea             rcx,            [GLOBAL(vp8_bilinear_filters_ssse3)]
+        lea             rcx,            [GLOBAL(bilinear_filters_ssse3)]
         movsxd          rax,            dword ptr arg(5)     ; xoffset
 
         cmp             rax,            0                    ; skip first_pass filter if xoffset=0
@@ -353,7 +353,7 @@ align 16
 xmm_bi_rd:
     times 8 dw 64
 align 16
-vp8_bilinear_filters_ssse3:
+bilinear_filters_ssse3:
     times 8 db 128, 0
     times 8 db 120, 8
     times 8 db 112, 16

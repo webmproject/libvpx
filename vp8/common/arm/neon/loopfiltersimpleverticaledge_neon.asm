@@ -9,9 +9,9 @@
 ;
 
 
-    ;EXPORT  |vp8_loop_filter_simple_vertical_edge_neon|
-    EXPORT |vp8_loop_filter_bvs_neon|
-    EXPORT |vp8_loop_filter_mbvs_neon|
+    ;EXPORT  |vp9_loop_filter_simple_vertical_edge_neon|
+    EXPORT |vp9_loop_filter_bvs_neon|
+    EXPORT |vp9_loop_filter_mbvs_neon|
     ARM
     PRESERVE8
 
@@ -21,7 +21,7 @@
 ; r1    int p, PRESERVE
 ; q1    limit, PRESERVE
 
-|vp8_loop_filter_simple_vertical_edge_neon| PROC
+|vp9_loop_filter_simple_vertical_edge_neon| PROC
     sub         r0, r0, #2                  ; move src pointer down by 2 columns
     add         r12, r1, r1
     add         r3, r0, r1
@@ -47,7 +47,7 @@
     vswp        d7, d10
     vswp        d12, d9
 
-    ;vp8_filter_mask() function
+    ;vp9_filter_mask() function
     ;vp8_hevmask() function
     sub         r0, r0, r1, lsl #4
     vabd.u8     q15, q5, q4                 ; abs(p0 - q0)
@@ -69,7 +69,7 @@
     vsubl.s8    q2, d8, d10                 ; ( qs0 - ps0)
     vsubl.s8    q13, d9, d11
 
-    vqsub.s8    q14, q3, q6                  ; vp8_filter = vp8_signed_char_clamp(ps1-qs1)
+    vqsub.s8    q14, q3, q6                  ; vp9_filter = vp9_signed_char_clamp(ps1-qs1)
 
     vmul.s16    q2, q2, q11                 ;  3 * ( qs0 - ps0)
     vmul.s16    q13, q13, q11
@@ -77,25 +77,25 @@
     vmov.u8     q11, #0x03                  ; 0x03
     vmov.u8     q12, #0x04                  ; 0x04
 
-    vaddw.s8    q2, q2, d28                  ; vp8_filter + 3 * ( qs0 - ps0)
+    vaddw.s8    q2, q2, d28                  ; vp9_filter + 3 * ( qs0 - ps0)
     vaddw.s8    q13, q13, d29
 
-    vqmovn.s16  d28, q2                      ; vp8_filter = vp8_signed_char_clamp(vp8_filter + 3 * ( qs0 - ps0))
+    vqmovn.s16  d28, q2                      ; vp9_filter = vp9_signed_char_clamp(vp9_filter + 3 * ( qs0 - ps0))
     vqmovn.s16  d29, q13
 
     add         r0, r0, #1
     add         r3, r0, r1
 
-    vand        q14, q14, q15                 ; vp8_filter &= mask
+    vand        q14, q14, q15                 ; vp9_filter &= mask
 
-    vqadd.s8    q2, q14, q11                 ; Filter2 = vp8_signed_char_clamp(vp8_filter+3)
-    vqadd.s8    q3, q14, q12                 ; Filter1 = vp8_signed_char_clamp(vp8_filter+4)
+    vqadd.s8    q2, q14, q11                 ; Filter2 = vp9_signed_char_clamp(vp9_filter+3)
+    vqadd.s8    q3, q14, q12                 ; Filter1 = vp9_signed_char_clamp(vp9_filter+4)
     vshr.s8     q2, q2, #3                  ; Filter2 >>= 3
     vshr.s8     q14, q3, #3                  ; Filter1 >>= 3
 
     ;calculate output
-    vqadd.s8    q11, q5, q2                 ; u = vp8_signed_char_clamp(ps0 + Filter2)
-    vqsub.s8    q10, q4, q14                 ; u = vp8_signed_char_clamp(qs0 - Filter1)
+    vqadd.s8    q11, q5, q2                 ; u = vp9_signed_char_clamp(ps0 + Filter2)
+    vqsub.s8    q10, q4, q14                 ; u = vp9_signed_char_clamp(qs0 - Filter1)
 
     veor        q6, q11, q0                 ; *op0 = u^0x80
     veor        q7, q10, q0                 ; *oq0 = u^0x80
@@ -121,34 +121,34 @@
     vst2.8      {d14[7], d15[7]}, [r3]
 
     bx          lr
-    ENDP        ; |vp8_loop_filter_simple_vertical_edge_neon|
+    ENDP        ; |vp9_loop_filter_simple_vertical_edge_neon|
 
 ; r0    unsigned char *y
 ; r1    int ystride
 ; r2    const unsigned char *blimit
 
-|vp8_loop_filter_bvs_neon| PROC
+|vp9_loop_filter_bvs_neon| PROC
     push        {r4, lr}
     ldrb        r3, [r2]                   ; load blim from mem
     mov         r4, r0
     add         r0, r0, #4
     vdup.s8     q1, r3                     ; duplicate blim
-    bl          vp8_loop_filter_simple_vertical_edge_neon
-    ; vp8_loop_filter_simple_vertical_edge_neon preserves  r1 and q1
+    bl          vp9_loop_filter_simple_vertical_edge_neon
+    ; vp9_loop_filter_simple_vertical_edge_neon preserves  r1 and q1
     add         r0, r4, #8
-    bl          vp8_loop_filter_simple_vertical_edge_neon
+    bl          vp9_loop_filter_simple_vertical_edge_neon
     add         r0, r4, #12
     pop         {r4, lr}
-    b           vp8_loop_filter_simple_vertical_edge_neon
-    ENDP        ;|vp8_loop_filter_bvs_neon|
+    b           vp9_loop_filter_simple_vertical_edge_neon
+    ENDP        ;|vp9_loop_filter_bvs_neon|
 
 ; r0    unsigned char *y
 ; r1    int ystride
 ; r2    const unsigned char *blimit
 
-|vp8_loop_filter_mbvs_neon| PROC
+|vp9_loop_filter_mbvs_neon| PROC
     ldrb        r3, [r2]                   ; load mblim from mem
     vdup.s8     q1, r3                     ; duplicate mblim
-    b           vp8_loop_filter_simple_vertical_edge_neon
-    ENDP        ;|vp8_loop_filter_bvs_neon|
+    b           vp9_loop_filter_simple_vertical_edge_neon
+    ENDP        ;|vp9_loop_filter_bvs_neon|
     END

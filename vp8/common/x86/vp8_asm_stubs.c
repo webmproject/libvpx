@@ -24,7 +24,7 @@ extern void vp9_filter_block1d_h6_mmx
   unsigned int    pixel_step,
   unsigned int    output_height,
   unsigned int    output_width,
-  const short      *vp8_filter
+  const short      *vp9_filter
 );
 extern void vp9_filter_block1dc_v6_mmx
 (
@@ -35,7 +35,7 @@ extern void vp9_filter_block1dc_v6_mmx
   unsigned int    pixel_step,
   unsigned int    output_height,
   unsigned int    output_width,
-  const short    *vp8_filter
+  const short    *vp9_filter
 );
 extern void vp9_filter_block1d8_h6_sse2
 (
@@ -45,7 +45,7 @@ extern void vp9_filter_block1d8_h6_sse2
   unsigned int    pixel_step,
   unsigned int    output_height,
   unsigned int    output_width,
-  const short    *vp8_filter
+  const short    *vp9_filter
 );
 extern void vp9_filter_block1d16_h6_sse2
 (
@@ -55,7 +55,7 @@ extern void vp9_filter_block1d16_h6_sse2
   unsigned int    pixel_step,
   unsigned int    output_height,
   unsigned int    output_width,
-  const short    *vp8_filter
+  const short    *vp9_filter
 );
 extern void vp9_filter_block1d8_v6_sse2
 (
@@ -66,7 +66,7 @@ extern void vp9_filter_block1d8_v6_sse2
   unsigned int pixel_step,
   unsigned int output_height,
   unsigned int output_width,
-  const short    *vp8_filter
+  const short    *vp9_filter
 );
 extern void vp9_filter_block1d16_v6_sse2
 (
@@ -77,7 +77,7 @@ extern void vp9_filter_block1d16_v6_sse2
   unsigned int pixel_step,
   unsigned int output_height,
   unsigned int output_width,
-  const short    *vp8_filter
+  const short    *vp9_filter
 );
 extern void vp9_unpack_block1d16_h6_sse2
 (
@@ -94,7 +94,7 @@ extern void vp9_filter_block1d8_h6_only_sse2
   unsigned char  *output_ptr,
   int dst_ptich,
   unsigned int    output_height,
-  const short    *vp8_filter
+  const short    *vp9_filter
 );
 extern void vp9_filter_block1d16_h6_only_sse2
 (
@@ -103,7 +103,7 @@ extern void vp9_filter_block1d16_h6_only_sse2
   unsigned char  *output_ptr,
   int dst_ptich,
   unsigned int    output_height,
-  const short    *vp8_filter
+  const short    *vp9_filter
 );
 extern void vp9_filter_block1d8_v6_only_sse2
 (
@@ -112,7 +112,7 @@ extern void vp9_filter_block1d8_v6_only_sse2
   unsigned char *output_ptr,
   int dst_ptich,
   unsigned int   output_height,
-  const short   *vp8_filter
+  const short   *vp9_filter
 );
 extern prototype_subpixel_predict(vp9_bilinear_predict8x8_mmx);
 
@@ -363,7 +363,7 @@ extern void vp9_filter_block1d8_h6_ssse3
   unsigned char  *output_ptr,
   unsigned int    output_pitch,
   unsigned int    output_height,
-  unsigned int    vp8_filter_index
+  unsigned int    vp9_filter_index
 );
 
 extern void vp9_filter_block1d16_h6_ssse3
@@ -373,7 +373,7 @@ extern void vp9_filter_block1d16_h6_ssse3
   unsigned char  *output_ptr,
   unsigned int    output_pitch,
   unsigned int    output_height,
-  unsigned int    vp8_filter_index
+  unsigned int    vp9_filter_index
 );
 
 extern void vp9_filter_block1d16_v6_ssse3
@@ -383,7 +383,7 @@ extern void vp9_filter_block1d16_v6_ssse3
   unsigned char *output_ptr,
   unsigned int   out_pitch,
   unsigned int   output_height,
-  unsigned int   vp8_filter_index
+  unsigned int   vp9_filter_index
 );
 
 extern void vp9_filter_block1d8_v6_ssse3
@@ -393,7 +393,7 @@ extern void vp9_filter_block1d8_v6_ssse3
   unsigned char *output_ptr,
   unsigned int   out_pitch,
   unsigned int   output_height,
-  unsigned int   vp8_filter_index
+  unsigned int   vp9_filter_index
 );
 
 extern void vp9_filter_block1d4_h6_ssse3
@@ -403,7 +403,7 @@ extern void vp9_filter_block1d4_h6_ssse3
   unsigned char  *output_ptr,
   unsigned int    output_pitch,
   unsigned int    output_height,
-  unsigned int    vp8_filter_index
+  unsigned int    vp9_filter_index
 );
 
 extern void vp9_filter_block1d4_v6_ssse3
@@ -413,7 +413,7 @@ extern void vp9_filter_block1d4_v6_ssse3
   unsigned char *output_ptr,
   unsigned int   out_pitch,
   unsigned int   output_height,
-  unsigned int   vp8_filter_index
+  unsigned int   vp9_filter_index
 );
 
 void vp9_sixtap_predict16x16_ssse3

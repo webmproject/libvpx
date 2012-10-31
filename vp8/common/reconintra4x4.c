@@ -275,7 +275,7 @@ void vp9_intra4x4_predict_c(BLOCKD *x, int b_mode,
 }
 
 #if CONFIG_COMP_INTRA_PRED
-void vp8_comp_intra4x4_predict_c(BLOCKD *x,
+void vp9_comp_intra4x4_predict_c(BLOCKD *x,
                                int b_mode, int b_mode2,
                                unsigned char *out_predictor) {
   unsigned char predictor[2][4 * 16];

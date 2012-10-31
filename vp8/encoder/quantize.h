@@ -34,30 +34,30 @@
   void (sym)(BLOCK *b, BLOCKD *d, TX_TYPE type)
 extern prototype_quantize_block_type(vp9_ht_quantize_b_4x4);
 
-#ifndef vp8_quantize_quantb_4x4
-#define vp8_quantize_quantb_4x4 vp9_regular_quantize_b_4x4
+#ifndef vp9_quantize_quantb_4x4
+#define vp9_quantize_quantb_4x4 vp9_regular_quantize_b_4x4
 #endif
-extern prototype_quantize_block(vp8_quantize_quantb_4x4);
+extern prototype_quantize_block(vp9_quantize_quantb_4x4);
 
-#ifndef vp8_quantize_quantb_4x4_pair
-#define vp8_quantize_quantb_4x4_pair vp9_regular_quantize_b_4x4_pair
+#ifndef vp9_quantize_quantb_4x4_pair
+#define vp9_quantize_quantb_4x4_pair vp9_regular_quantize_b_4x4_pair
 #endif
-extern prototype_quantize_block_pair(vp8_quantize_quantb_4x4_pair);
+extern prototype_quantize_block_pair(vp9_quantize_quantb_4x4_pair);
 
-#ifndef vp8_quantize_quantb_8x8
-#define vp8_quantize_quantb_8x8 vp9_regular_quantize_b_8x8
+#ifndef vp9_quantize_quantb_8x8
+#define vp9_quantize_quantb_8x8 vp9_regular_quantize_b_8x8
 #endif
-extern prototype_quantize_block(vp8_quantize_quantb_8x8);
+extern prototype_quantize_block(vp9_quantize_quantb_8x8);
 
-#ifndef vp8_quantize_quantb_16x16
-#define vp8_quantize_quantb_16x16 vp9_regular_quantize_b_16x16
+#ifndef vp9_quantize_quantb_16x16
+#define vp9_quantize_quantb_16x16 vp9_regular_quantize_b_16x16
 #endif
-extern prototype_quantize_block(vp8_quantize_quantb_16x16);
+extern prototype_quantize_block(vp9_quantize_quantb_16x16);
 
-#ifndef vp8_quantize_quantb_2x2
-#define vp8_quantize_quantb_2x2 vp9_regular_quantize_b_2x2
+#ifndef vp9_quantize_quantb_2x2
+#define vp9_quantize_quantb_2x2 vp9_regular_quantize_b_2x2
 #endif
-extern prototype_quantize_block(vp8_quantize_quantb_2x2);
+extern prototype_quantize_block(vp9_quantize_quantb_2x2);
 
 #ifndef vp9_quantize_mb_4x4
 #define vp9_quantize_mb_4x4 vp9_quantize_mb_4x4_c
@@ -79,7 +79,7 @@ extern prototype_quantize_mb(vp9_quantize_mby_8x8);
 extern prototype_quantize_mb(vp9_quantize_mbuv_8x8);
 
 void vp9_quantize_mb_16x16(MACROBLOCK *x);
-extern prototype_quantize_block(vp8_quantize_quantb_16x16);
+extern prototype_quantize_block(vp9_quantize_quantb_16x16);
 extern prototype_quantize_mb(vp9_quantize_mby_16x16);
 
 struct VP9_COMP;

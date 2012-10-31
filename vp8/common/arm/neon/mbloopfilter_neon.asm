@@ -327,7 +327,7 @@
 
 |vp8_mbloop_filter_neon| PROC
 
-    ; vp8_filter_mask
+    ; vp9_filter_mask
     vabd.u8     q11, q3, q4                 ; abs(p3 - p2)
     vabd.u8     q12, q4, q5                 ; abs(p2 - p1)
     vabd.u8     q13, q5, q6                 ; abs(p1 - p0)
@@ -358,7 +358,7 @@
     vqadd.u8    q12, q12, q12               ; b = abs(p0 - q0) * 2
     vmov.u16    q11, #3                     ; #3
 
-    ; vp8_filter
+    ; vp9_filter
     ; convert to signed
     veor        q7, q7, q0                  ; qs0
     vshr.u8     q1, q1, #1                  ; a = a / 2
@@ -378,26 +378,26 @@
     vsubl.s8    q2, d14, d12                ; qs0 - ps0
     vsubl.s8    q13, d15, d13
 
-    vqsub.s8    q1, q5, q8                  ; vp8_filter = clamp(ps1-qs1)
+    vqsub.s8    q1, q5, q8                  ; vp9_filter = clamp(ps1-qs1)
 
     vmul.i16    q2, q2, q11                 ; 3 * ( qs0 - ps0)
 
-    vand        q15, q15, q12               ; vp8_filter_mask
+    vand        q15, q15, q12               ; vp9_filter_mask
 
     vmul.i16    q13, q13, q11
 
     vmov.u8     q12, #3                     ; #3
 
-    vaddw.s8    q2, q2, d2                  ; vp8_filter + 3 * ( qs0 - ps0)
+    vaddw.s8    q2, q2, d2                  ; vp9_filter + 3 * ( qs0 - ps0)
     vaddw.s8    q13, q13, d3
 
     vmov.u8     q11, #4                     ; #4
 
-    ; vp8_filter = clamp(vp8_filter + 3 * ( qs0 - ps0))
+    ; vp9_filter = clamp(vp9_filter + 3 * ( qs0 - ps0))
     vqmovn.s16  d2, q2
     vqmovn.s16  d3, q13
 
-    vand        q1, q1, q15                 ; vp8_filter &= mask
+    vand        q1, q1, q15                 ; vp9_filter &= mask
 
     vmov.u16    q15, #63                    ; #63
 
@@ -418,7 +418,7 @@
 
     vqadd.s8    q6, q6, q13                 ; ps0 = clamp(ps0 + Filter2)
 
-    vbic        q1, q1, q14                 ; vp8_filter &= ~hev
+    vbic        q1, q1, q14                 ; vp9_filter &= ~hev
 
     ; roughly 1/7th difference across boundary
     ; roughly 2/7th difference across boundary

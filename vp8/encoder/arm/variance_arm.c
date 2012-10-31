@@ -34,10 +34,10 @@ unsigned int vp9_sub_pixel_variance8x8_armv6
   HFilter = vp8_bilinear_filters[xoffset];
   VFilter = vp8_bilinear_filters[yoffset];
 
-  vp8_filter_block2d_bil_first_pass_armv6(src_ptr, first_pass,
+  vp9_filter_block2d_bil_first_pass_armv6(src_ptr, first_pass,
                                           src_pixels_per_line,
                                           9, 8, HFilter);
-  vp8_filter_block2d_bil_second_pass_armv6(first_pass, second_pass,
+  vp9_filter_block2d_bil_second_pass_armv6(first_pass, second_pass,
                                            8, 8, 8, VFilter);
 
   return vp9_variance8x8_armv6(second_pass, 8, dst_ptr,
@@ -72,10 +72,10 @@ unsigned int vp9_sub_pixel_variance16x16_armv6
     HFilter = vp8_bilinear_filters[xoffset];
     VFilter = vp8_bilinear_filters[yoffset];
 
-    vp8_filter_block2d_bil_first_pass_armv6(src_ptr, first_pass,
+    vp9_filter_block2d_bil_first_pass_armv6(src_ptr, first_pass,
                                             src_pixels_per_line,
                                             17, 16, HFilter);
-    vp8_filter_block2d_bil_second_pass_armv6(first_pass, second_pass,
+    vp9_filter_block2d_bil_second_pass_armv6(first_pass, second_pass,
                                              16, 16, 16, VFilter);
 
     var = vp9_variance16x16_armv6(second_pass, 16, dst_ptr,

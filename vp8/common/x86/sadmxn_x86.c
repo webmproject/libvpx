@@ -17,7 +17,7 @@
 
 
 #if HAVE_SSE2
-unsigned int vp8_sad16x3_sse2(
+unsigned int vp9_sad16x3_sse2(
   const unsigned char *src_ptr,
   int  src_stride,
   const unsigned char *ref_ptr,
@@ -45,7 +45,7 @@ unsigned int vp8_sad16x3_sse2(
   return _mm_cvtsi128_si32(sad);
 }
 
-unsigned int vp8_sad3x16_sse2(
+unsigned int vp9_sad3x16_sse2(
   const unsigned char *src_ptr,
   int  src_stride,
   const unsigned char *ref_ptr,

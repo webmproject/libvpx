@@ -72,7 +72,7 @@ extern const unsigned char vp9_block2above[25];
 extern const unsigned char vp9_block2left_8x8[25];
 extern const unsigned char vp9_block2above_8x8[25];
 
-#define VP8_COMBINEENTROPYCONTEXTS( Dest, A, B) \
+#define VP9_COMBINEENTROPYCONTEXTS( Dest, A, B) \
   Dest = ((A)!=0) + ((B)!=0);
 
 typedef enum {
@@ -140,12 +140,12 @@ typedef enum {
   ADST_ADST = 3                       // ADST in both directions
 } TX_TYPE;
 
-#define VP8_YMODES  (B_PRED + 1)
-#define VP8_UV_MODES (TM_PRED + 1)
-#define VP8_I8X8_MODES (TM_PRED + 1)
-#define VP8_I32X32_MODES (TM_PRED + 1)
+#define VP9_YMODES  (B_PRED + 1)
+#define VP9_UV_MODES (TM_PRED + 1)
+#define VP9_I8X8_MODES (TM_PRED + 1)
+#define VP9_I32X32_MODES (TM_PRED + 1)
 
-#define VP8_MVREFS (1 + SPLITMV - NEARESTMV)
+#define VP9_MVREFS (1 + SPLITMV - NEARESTMV)
 
 typedef enum {
   B_DC_PRED,          /* average of above and left pixels */
@@ -170,8 +170,8 @@ typedef enum {
   B_MODE_COUNT
 } B_PREDICTION_MODE;
 
-#define VP8_BINTRAMODES (B_HU_PRED + 1)  /* 10 */
-#define VP8_SUBMVREFS (1 + NEW4X4 - LEFT4X4)
+#define VP9_BINTRAMODES (B_HU_PRED + 1)  /* 10 */
+#define VP9_SUBMVREFS (1 + NEW4X4 - LEFT4X4)
 
 typedef enum {
   PARTITIONING_16X8 = 0,
@@ -321,10 +321,10 @@ typedef struct macroblockd {
   /* are enabled and when enabled the proabilities used to decode the per MB flags in MB_MODE_INFO */
 
   // Probability Tree used to code Segment number
-  vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
+  vp9_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
 
 #if CONFIG_NEW_MVREF
-  vp8_prob mb_mv_ref_id_probs[MAX_REF_FRAMES][3];
+  vp9_prob mb_mv_ref_id_probs[MAX_REF_FRAMES][3];
 #endif
 
   // Segment features
@@ -349,14 +349,14 @@ typedef struct macroblockd {
 
   unsigned int frames_since_golden;
   unsigned int frames_till_alt_ref_frame;
-  vp8_subpix_fn_t  subpixel_predict;
-  vp8_subpix_fn_t  subpixel_predict8x4;
-  vp8_subpix_fn_t  subpixel_predict8x8;
-  vp8_subpix_fn_t  subpixel_predict16x16;
-  vp8_subpix_fn_t  subpixel_predict_avg;
-  vp8_subpix_fn_t  subpixel_predict_avg8x4;
-  vp8_subpix_fn_t  subpixel_predict_avg8x8;
-  vp8_subpix_fn_t  subpixel_predict_avg16x16;
+  vp9_subpix_fn_t  subpixel_predict;
+  vp9_subpix_fn_t  subpixel_predict8x4;
+  vp9_subpix_fn_t  subpixel_predict8x8;
+  vp9_subpix_fn_t  subpixel_predict16x16;
+  vp9_subpix_fn_t  subpixel_predict_avg;
+  vp9_subpix_fn_t  subpixel_predict_avg8x4;
+  vp9_subpix_fn_t  subpixel_predict_avg8x8;
+  vp9_subpix_fn_t  subpixel_predict_avg16x16;
   int allow_high_precision_mv;
 
   int corrupted;

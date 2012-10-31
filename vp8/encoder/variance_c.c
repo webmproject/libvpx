@@ -155,7 +155,7 @@ unsigned int vp9_mse16x16_c(const unsigned char *src_ptr,
  *                  UINT32 pixel_step        : Offset between filter input samples (see notes).
  *                  UINT32 output_height     : Input block height.
  *                  UINT32 output_width      : Input block width.
- *                  INT32  *vp8_filter          : Array of 2 bi-linear filter taps.
+ *                  INT32  *vp9_filter          : Array of 2 bi-linear filter taps.
  *
  *  OUTPUTS       : INT32 *output_ptr        : Pointer to filtered block.
  *
@@ -167,7 +167,7 @@ unsigned int vp9_mse16x16_c(const unsigned char *src_ptr,
  *                  of 2-D separable filter.
  *
  *  SPECIAL NOTES : Produces INT32 output to retain precision for next pass.
- *                  Two filter taps should sum to VP8_FILTER_WEIGHT.
+ *                  Two filter taps should sum to VP9_FILTER_WEIGHT.
  *                  pixel_step defines whether the filter is applied
  *                  horizontally (pixel_step=1) or vertically (pixel_step=stride).
  *                  It defines the offset required to move from one input
@@ -180,15 +180,15 @@ static void var_filter_block2d_bil_first_pass(const unsigned char *src_ptr,
                                               int pixel_step,
                                               unsigned int output_height,
                                               unsigned int output_width,
-                                              const short *vp8_filter) {
+                                              const short *vp9_filter) {
   unsigned int i, j;
 
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
       // Apply bilinear filter
-      output_ptr[j] = (((int)src_ptr[0]          * vp8_filter[0]) +
-                       ((int)src_ptr[pixel_step] * vp8_filter[1]) +
-                       (VP8_FILTER_WEIGHT / 2)) >> VP8_FILTER_SHIFT;
+      output_ptr[j] = (((int)src_ptr[0]          * vp9_filter[0]) +
+                       ((int)src_ptr[pixel_step] * vp9_filter[1]) +
+                       (VP9_FILTER_WEIGHT / 2)) >> VP9_FILTER_SHIFT;
       src_ptr++;
     }
 
@@ -207,7 +207,7 @@ static void var_filter_block2d_bil_first_pass(const unsigned char *src_ptr,
  *                  UINT32 pixel_step        : Offset between filter input samples (see notes).
  *                  UINT32 output_height     : Input block height.
  *                  UINT32 output_width      : Input block width.
- *                  INT32  *vp8_filter          : Array of 2 bi-linear filter taps.
+ *                  INT32  *vp9_filter          : Array of 2 bi-linear filter taps.
  *
  *  OUTPUTS       : UINT16 *output_ptr       : Pointer to filtered block.
  *
@@ -219,7 +219,7 @@ static void var_filter_block2d_bil_first_pass(const unsigned char *src_ptr,
  *                  of 2-D separable filter.
  *
  *  SPECIAL NOTES : Requires 32-bit input as produced by filter_block2d_bil_first_pass.
- *                  Two filter taps should sum to VP8_FILTER_WEIGHT.
+ *                  Two filter taps should sum to VP9_FILTER_WEIGHT.
  *                  pixel_step defines whether the filter is applied
  *                  horizontally (pixel_step=1) or vertically (pixel_step=stride).
  *                  It defines the offset required to move from one input
@@ -232,17 +232,17 @@ static void var_filter_block2d_bil_second_pass(const unsigned short *src_ptr,
                                                unsigned int pixel_step,
                                                unsigned int output_height,
                                                unsigned int output_width,
-                                               const short *vp8_filter) {
+                                               const short *vp9_filter) {
   unsigned int  i, j;
   int  Temp;
 
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
       // Apply filter
-      Temp = ((int)src_ptr[0]         * vp8_filter[0]) +
-             ((int)src_ptr[pixel_step] * vp8_filter[1]) +
-             (VP8_FILTER_WEIGHT / 2);
-      output_ptr[j] = (unsigned int)(Temp >> VP8_FILTER_SHIFT);
+      Temp = ((int)src_ptr[0]         * vp9_filter[0]) +
+             ((int)src_ptr[pixel_step] * vp9_filter[1]) +
+             (VP9_FILTER_WEIGHT / 2);
+      output_ptr[j] = (unsigned int)(Temp >> VP9_FILTER_SHIFT);
       src_ptr++;
     }
 
@@ -470,7 +470,7 @@ unsigned int vp9_sub_pixel_variance8x16_c(const unsigned char  *src_ptr,
 }
 
 #if CONFIG_NEWBESTREFMV
-unsigned int vp8_variance2x16_c(const unsigned char *src_ptr,
+unsigned int vp9_variance2x16_c(const unsigned char *src_ptr,
                                 const int  source_stride,
                                 const unsigned char *ref_ptr,
                                 const int  recon_stride,
@@ -483,7 +483,7 @@ unsigned int vp8_variance2x16_c(const unsigned char *src_ptr,
   return (var - ((avg * avg) >> 5));
 }
 
-unsigned int vp8_variance16x2_c(const unsigned char *src_ptr,
+unsigned int vp9_variance16x2_c(const unsigned char *src_ptr,
                                 const int  source_stride,
                                 const unsigned char *ref_ptr,
                                 const int  recon_stride,
@@ -496,7 +496,7 @@ unsigned int vp8_variance16x2_c(const unsigned char *src_ptr,
   return (var - ((avg * avg) >> 5));
 }
 
-unsigned int vp8_sub_pixel_variance16x2_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance16x2_c(const unsigned char  *src_ptr,
                                           const int  src_pixels_per_line,
                                           const int  xoffset,
                                           const int  yoffset,
@@ -514,10 +514,10 @@ unsigned int vp8_sub_pixel_variance16x2_c(const unsigned char  *src_ptr,
                                     src_pixels_per_line, 1, 3, 16, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 16, 16, 2, 16, VFilter);
 
-  return vp8_variance16x2_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance16x2_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
-unsigned int vp8_sub_pixel_variance2x16_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance2x16_c(const unsigned char  *src_ptr,
                                           const int  src_pixels_per_line,
                                           const int  xoffset,
                                           const int  yoffset,
@@ -535,6 +535,6 @@ unsigned int vp8_sub_pixel_variance2x16_c(const unsigned char  *src_ptr,
                                     src_pixels_per_line, 1, 17, 2, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 2, 2, 16, 2, VFilter);
 
-  return vp8_variance2x16_c(temp2, 2, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance2x16_c(temp2, 2, dst_ptr, dst_pixels_per_line, sse);
 }
 #endif

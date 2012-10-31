@@ -9,13 +9,13 @@
 ;
 
 
-    EXPORT  |vp8_filter_block2d_first_pass_armv6|
-    EXPORT  |vp8_filter_block2d_first_pass_16x16_armv6|
-    EXPORT  |vp8_filter_block2d_first_pass_8x8_armv6|
-    EXPORT  |vp8_filter_block2d_second_pass_armv6|
-    EXPORT  |vp8_filter4_block2d_second_pass_armv6|
-    EXPORT  |vp8_filter_block2d_first_pass_only_armv6|
-    EXPORT  |vp8_filter_block2d_second_pass_only_armv6|
+    EXPORT  |vp9_filter_block2d_first_pass_armv6|
+    EXPORT  |vp9_filter_block2d_first_pass_16x16_armv6|
+    EXPORT  |vp9_filter_block2d_first_pass_8x8_armv6|
+    EXPORT  |vp9_filter_block2d_second_pass_armv6|
+    EXPORT  |vp9_filter4_block2d_second_pass_armv6|
+    EXPORT  |vp9_filter_block2d_first_pass_only_armv6|
+    EXPORT  |vp9_filter_block2d_second_pass_only_armv6|
 
     AREA    |.text|, CODE, READONLY  ; name this block of code
 ;-------------------------------------
@@ -24,14 +24,14 @@
 ; r2    unsigned int src_pixels_per_line
 ; r3    unsigned int output_width
 ; stack unsigned int output_height
-; stack const short *vp8_filter
+; stack const short *vp9_filter
 ;-------------------------------------
-; vp8_filter the input and put in the output array.  Apply the 6 tap FIR filter with
+; vp9_filter the input and put in the output array.  Apply the 6 tap FIR filter with
 ; the output being a 2 byte value and the intput being a 1 byte value.
-|vp8_filter_block2d_first_pass_armv6| PROC
+|vp9_filter_block2d_first_pass_armv6| PROC
     stmdb   sp!, {r4 - r11, lr}
 
-    ldr     r11, [sp, #40]                  ; vp8_filter address
+    ldr     r11, [sp, #40]                  ; vp9_filter address
     ldr     r7, [sp, #36]                   ; output height
 
     sub     r2, r2, r3                      ; inside loop increments input array,
@@ -115,10 +115,10 @@
 ; --------------------------
 ; 16x16 version
 ; -----------------------------
-|vp8_filter_block2d_first_pass_16x16_armv6| PROC
+|vp9_filter_block2d_first_pass_16x16_armv6| PROC
     stmdb   sp!, {r4 - r11, lr}
 
-    ldr     r11, [sp, #40]                  ; vp8_filter address
+    ldr     r11, [sp, #40]                  ; vp9_filter address
     ldr     r7, [sp, #36]                   ; output height
 
     add     r4, r2, #18                     ; preload next low
@@ -208,10 +208,10 @@
 ; --------------------------
 ; 8x8 version
 ; -----------------------------
-|vp8_filter_block2d_first_pass_8x8_armv6| PROC
+|vp9_filter_block2d_first_pass_8x8_armv6| PROC
     stmdb   sp!, {r4 - r11, lr}
 
-    ldr     r11, [sp, #40]                  ; vp8_filter address
+    ldr     r11, [sp, #40]                  ; vp9_filter address
     ldr     r7, [sp, #36]                   ; output height
 
     add     r4, r2, #10                     ; preload next low
@@ -303,12 +303,12 @@
 ; r1    unsigned char *output_ptr,
 ; r2    unsigned int output_pitch,
 ; r3    unsigned int cnt,
-; stack const short *vp8_filter
+; stack const short *vp9_filter
 ;---------------------------------
-|vp8_filter_block2d_second_pass_armv6| PROC
+|vp9_filter_block2d_second_pass_armv6| PROC
     stmdb   sp!, {r4 - r11, lr}
 
-    ldr     r11, [sp, #36]                  ; vp8_filter address
+    ldr     r11, [sp, #36]                  ; vp9_filter address
     sub     sp, sp, #4
     mov     r7, r3, lsl #16                 ; height is top part of counter
     str     r1, [sp]                        ; push destination to stack
@@ -376,12 +376,12 @@
 ; r1    unsigned char *output_ptr,
 ; r2    unsigned int output_pitch,
 ; r3    unsigned int cnt,
-; stack const short *vp8_filter
+; stack const short *vp9_filter
 ;---------------------------------
-|vp8_filter4_block2d_second_pass_armv6| PROC
+|vp9_filter4_block2d_second_pass_armv6| PROC
     stmdb   sp!, {r4 - r11, lr}
 
-    ldr     r11, [sp, #36]                  ; vp8_filter address
+    ldr     r11, [sp, #36]                  ; vp9_filter address
     mov     r7, r3, lsl #16                 ; height is top part of counter
 
     ldr     r4, [r11]                       ; load up packed filter coefficients
@@ -435,9 +435,9 @@
 ; r2    unsigned int src_pixels_per_line
 ; r3    unsigned int cnt,
 ; stack unsigned int output_pitch,
-; stack const short *vp8_filter
+; stack const short *vp9_filter
 ;------------------------------------
-|vp8_filter_block2d_first_pass_only_armv6| PROC
+|vp9_filter_block2d_first_pass_only_armv6| PROC
     stmdb   sp!, {r4 - r11, lr}
 
     add     r7, r2, r3                      ; preload next low
@@ -527,7 +527,7 @@
 
     add     sp, sp, #8
     ldmia   sp!, {r4 - r11, pc}
-    ENDP  ; |vp8_filter_block2d_first_pass_only_armv6|
+    ENDP  ; |vp9_filter_block2d_first_pass_only_armv6|
 
 
 ;------------------------------------
@@ -536,9 +536,9 @@
 ; r2    unsigned int src_pixels_per_line
 ; r3    unsigned int cnt,
 ; stack unsigned int output_pitch,
-; stack const short *vp8_filter
+; stack const short *vp9_filter
 ;------------------------------------
-|vp8_filter_block2d_second_pass_only_armv6| PROC
+|vp9_filter_block2d_second_pass_only_armv6| PROC
     stmdb   sp!, {r4 - r11, lr}
 
     ldr     r11, [sp, #40]                  ; VFilter address
@@ -619,6 +619,6 @@
     add     sp, sp, #8
 
     ldmia   sp!, {r4 - r11, pc}
-    ENDP  ; |vp8_filter_block2d_second_pass_only_armv6|
+    ENDP  ; |vp9_filter_block2d_second_pass_only_armv6|
 
     END

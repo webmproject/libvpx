@@ -55,9 +55,9 @@ extern void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
 extern void vp9_build_inter_predictors_mb(MACROBLOCKD *xd);
 
 extern void vp9_build_inter_predictors_b(BLOCKD *d, int pitch,
-                                         vp8_subpix_fn_t sppf);
+                                         vp9_subpix_fn_t sppf);
 extern void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
-                                             vp8_subpix_fn_t sppf);
+                                             vp9_subpix_fn_t sppf);
 
 extern void vp9_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d,
                                          int pitch);

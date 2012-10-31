@@ -11,8 +11,8 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-%define VP8_FILTER_WEIGHT 128
-%define VP8_FILTER_SHIFT  7
+%define VP9_FILTER_WEIGHT 128
+%define VP9_FILTER_SHIFT  7
 
 ;void vp9_post_proc_down_and_across_mmx
 ;(
@@ -129,7 +129,7 @@ sym(vp9_post_proc_down_and_across_mmx):
 
 
         paddusw     mm3, RD               ; mm3 += round value
-        psraw       mm3, VP8_FILTER_SHIFT     ; mm3 /= 128
+        psraw       mm3, VP9_FILTER_SHIFT     ; mm3 /= 128
 
         pand        mm1, mm7              ; mm1 select vals > thresh from source
         pandn       mm7, mm3              ; mm7 select vals < thresh from blurred result
@@ -225,7 +225,7 @@ sym(vp9_post_proc_down_and_across_mmx):
         por         mm7, mm6              ; accumulate thresholds
 
         paddusw     mm3, RD               ; mm3 += round value
-        psraw       mm3, VP8_FILTER_SHIFT     ; mm3 /= 128
+        psraw       mm3, VP9_FILTER_SHIFT     ; mm3 /= 128
 
         pand        mm1, mm7              ; mm1 select vals > thresh from source
         pandn       mm7, mm3              ; mm7 select vals < thresh from blurred result

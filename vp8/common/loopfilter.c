@@ -207,7 +207,7 @@ void vp9_loop_filter_frame
   u_ptr = post->u_buffer;
   v_ptr = post->v_buffer;
 
-  /* vp8_filter each macro block */
+  /* vp9_filter each macro block */
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
       int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
@@ -277,11 +277,11 @@ void vp9_loop_filter_frame
                    mode_info_context[-1].mbmi.mb_skip_coeff)
 #endif
               )
-            vp8_loop_filter_simple_mbv(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_mbv(y_ptr, post->y_stride,
                                        lfi_n->mblim[filter_level]);
 
           if (!skip_lf)
-            vp8_loop_filter_simple_bv(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_bv(y_ptr, post->y_stride,
                                       lfi_n->blim[filter_level]);
 
           /* don't apply across umv border */
@@ -292,11 +292,11 @@ void vp9_loop_filter_frame
                    mode_info_context[-cm->mode_info_stride].mbmi.mb_skip_coeff)
 #endif
               )
-            vp8_loop_filter_simple_mbh(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_mbh(y_ptr, post->y_stride,
                                        lfi_n->mblim[filter_level]);
 
           if (!skip_lf)
-            vp8_loop_filter_simple_bh(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_bh(y_ptr, post->y_stride,
                                       lfi_n->blim[filter_level]);
         }
       }
@@ -348,7 +348,7 @@ void vp9_loop_filter_frame_yonly
   /* Set up the buffer pointers */
   y_ptr = post->y_buffer;
 
-  /* vp8_filter each macro block */
+  /* vp9_filter each macro block */
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
       int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
@@ -393,20 +393,20 @@ void vp9_loop_filter_frame_yonly
         } else {
           // FIXME: Not 8x8 aware
           if (mb_col > 0)
-            vp8_loop_filter_simple_mbv(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_mbv(y_ptr, post->y_stride,
                                        lfi_n->mblim[filter_level]);
 
           if (!skip_lf)
-            vp8_loop_filter_simple_bv(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_bv(y_ptr, post->y_stride,
                                       lfi_n->blim[filter_level]);
 
           /* don't apply across umv border */
           if (mb_row > 0)
-            vp8_loop_filter_simple_mbh(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_mbh(y_ptr, post->y_stride,
                                        lfi_n->mblim[filter_level]);
 
           if (!skip_lf)
-            vp8_loop_filter_simple_bh(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_bh(y_ptr, post->y_stride,
                                       lfi_n->blim[filter_level]);
         }
       }
@@ -481,7 +481,7 @@ void vp9_loop_filter_partial_frame
   /* Set up the buffer pointers */
   y_ptr = post->y_buffer + (post->y_height >> 5) * 16 * post->y_stride;
 
-  /* vp8_filter each macro block */
+  /* vp9_filter each macro block */
   for (mb_row = 0; mb_row < (linestocopy >> 4); mb_row++) {
     for (mb_col = 0; mb_col < mb_cols; mb_col++) {
       int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
@@ -514,18 +514,18 @@ void vp9_loop_filter_partial_frame
             vp9_loop_filter_bh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
         } else {
           if (mb_col > 0)
-            vp8_loop_filter_simple_mbv (y_ptr, post->y_stride,
+            vp9_loop_filter_simple_mbv (y_ptr, post->y_stride,
                                         lfi_n->mblim[filter_level]);
 
           if (!skip_lf)
-            vp8_loop_filter_simple_bv(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_bv(y_ptr, post->y_stride,
                                       lfi_n->blim[filter_level]);
 
-          vp8_loop_filter_simple_mbh(y_ptr, post->y_stride,
+          vp9_loop_filter_simple_mbh(y_ptr, post->y_stride,
                                      lfi_n->mblim[filter_level]);
 
           if (!skip_lf)
-            vp8_loop_filter_simple_bh(y_ptr, post->y_stride,
+            vp9_loop_filter_simple_bh(y_ptr, post->y_stride,
                                       lfi_n->blim[filter_level]);
         }
       }

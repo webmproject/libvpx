@@ -21,7 +21,7 @@
 ; r3    int  recon_stride
 ; stack unsigned int *sse
 ;
-;note: Based on vp8_variance16x16_armv6. In this function, sum is never used.
+;note: Based on vp9_variance16x16_armv6. In this function, sum is never used.
 ;      So, we can remove this part of calculation.
 
 |vp8_mse16x16_armv6| PROC

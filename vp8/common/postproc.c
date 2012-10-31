@@ -124,8 +124,8 @@ const short vp9_rv[] = {
 };
 
 
-extern void vp8_blit_text(const char *msg, unsigned char *address, const int pitch);
-extern void vp8_blit_line(int x0, int x1, int y0, int y1, unsigned char *image, const int pitch);
+extern void vp9_blit_text(const char *msg, unsigned char *address, const int pitch);
+extern void vp9_blit_line(int x0, int x1, int y0, int y1, unsigned char *image, const int pitch);
 /***********************************************************************************************************
  */
 void vp9_post_proc_down_and_across_c
@@ -285,13 +285,12 @@ void vp9_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, i
   }
 }
 
-
-static void vp9_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
-                                           YV12_BUFFER_CONFIG         *post,
-                                           int                         q,
-                                           int                         low_var_thresh,
-                                           int                         flag,
-                                           vp8_postproc_rtcd_vtable_t *rtcd) {
+static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
+                                       YV12_BUFFER_CONFIG   *post,
+                                       int                   q,
+                                       int                   low_var_thresh,
+                                       int                   flag,
+                                       vp9_postproc_rtcd_vtable_t *rtcd) {
   double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
   int ppl = (int)(level + .5);
   (void) low_var_thresh;
@@ -311,7 +310,7 @@ void vp9_deblock(YV12_BUFFER_CONFIG         *source,
                  int                         q,
                  int                         low_var_thresh,
                  int                         flag,
-                 vp8_postproc_rtcd_vtable_t *rtcd) {
+                 vp9_postproc_rtcd_vtable_t *rtcd) {
   double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
   int ppl = (int)(level + .5);
   (void) low_var_thresh;
@@ -327,7 +326,7 @@ void vp9_de_noise(YV12_BUFFER_CONFIG         *source,
                   int                         q,
                   int                         low_var_thresh,
                   int                         flag,
-                  vp8_postproc_rtcd_vtable_t *rtcd) {
+                  vp9_postproc_rtcd_vtable_t *rtcd) {
   double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
   int ppl = (int)(level + .5);
   (void) post;
@@ -364,7 +363,7 @@ double vp9_gaussian(double sigma, double mu, double x) {
          (exp(-(x - mu) * (x - mu) / (2 * sigma * sigma)));
 }
 
-extern void (*vp8_clear_system_state)(void);
+extern void (*vp9_clear_system_state)(void);
 
 
 static void fillrd(struct postproc_state *state, int q, int a) {
@@ -373,7 +372,7 @@ static void fillrd(struct postproc_state *state, int q, int a) {
   double sigma;
   int ai = a, qi = q, i;
 
-  vp8_clear_system_state();
+  vp9_clear_system_state();
 
 
   sigma = ai + .5 + .6 * (63 - qi) / 63.0;
@@ -626,7 +625,7 @@ static void constrain_line(int x0, int *x1, int y0, int *y1, int width, int heig
 #define RTCD_VTABLE(oci) NULL
 #endif
 
-int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *ppflags) {
+int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t *ppflags) {
   int q = oci->filter_level * 10 / 6;
   int flags = ppflags->post_proc_flag;
   int deblock_level = ppflags->deblocking_level;
@@ -653,17 +652,18 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
   vpx_reset_mmx_state();
 #endif
 
-  if (flags & VP8D_DEMACROBLOCK) {
-    vp9_deblock_and_de_macro_block(oci->frame_to_show, &oci->post_proc_buffer,
-                                   q + (deblock_level - 5) * 10, 1, 0, RTCD_VTABLE(oci));
-  } else if (flags & VP8D_DEBLOCK) {
+  if (flags & VP9D_DEMACROBLOCK) {
+    deblock_and_de_macro_block(oci->frame_to_show, &oci->post_proc_buffer,
+                               q + (deblock_level - 5) * 10, 1, 0,
+                               RTCD_VTABLE(oci));
+  } else if (flags & VP9D_DEBLOCK) {
     vp9_deblock(oci->frame_to_show, &oci->post_proc_buffer,
                 q, 1, 0, RTCD_VTABLE(oci));
   } else {
     vp8_yv12_copy_frame_ptr(oci->frame_to_show, &oci->post_proc_buffer);
   }
 
-  if (flags & VP8D_ADDNOISE) {
+  if (flags & VP9D_ADDNOISE) {
     if (oci->postproc_state.last_q != q
         || oci->postproc_state.last_noise != noise_level) {
       fillrd(&oci->postproc_state, 63 - q, noise_level);
@@ -680,7 +680,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
   }
 
 #if CONFIG_POSTPROC_VISUALIZER
-  if (flags & VP8D_DEBUG_TXT_FRAME_INFO) {
+  if (flags & VP9D_DEBUG_TXT_FRAME_INFO) {
     char message[512];
     sprintf(message, "F%1dG%1dQ%3dF%3dP%d_s%dx%d",
             (oci->frame_type == KEY_FRAME),
@@ -689,10 +689,10 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             oci->filter_level,
             flags,
             oci->mb_cols, oci->mb_rows);
-    vp8_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
+    vp9_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
   }
 
-  if (flags & VP8D_DEBUG_TXT_MBLK_MODES) {
+  if (flags & VP9D_DEBUG_TXT_MBLK_MODES) {
     int i, j;
     unsigned char *y_ptr;
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
@@ -703,14 +703,14 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 
     y_ptr = post->y_buffer + 4 * post->y_stride + 4;
 
-    /* vp8_filter each macro block */
+    /* vp9_filter each macro block */
     for (i = 0; i < mb_rows; i++) {
       for (j = 0; j < mb_cols; j++) {
         char zz[4];
 
         sprintf(zz, "%c", mi[mb_index].mbmi.mode + 'a');
 
-        vp8_blit_text(zz, y_ptr, post->y_stride);
+        vp9_blit_text(zz, y_ptr, post->y_stride);
         mb_index++;
         y_ptr += 16;
       }
@@ -721,7 +721,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     }
   }
 
-  if (flags & VP8D_DEBUG_TXT_DC_DIFF) {
+  if (flags & VP9D_DEBUG_TXT_DC_DIFF) {
     int i, j;
     unsigned char *y_ptr;
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
@@ -732,7 +732,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 
     y_ptr = post->y_buffer + 4 * post->y_stride + 4;
 
-    /* vp8_filter each macro block */
+    /* vp9_filter each macro block */
     for (i = 0; i < mb_rows; i++) {
       for (j = 0; j < mb_cols; j++) {
         char zz[4];
@@ -745,7 +745,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
         else
           sprintf(zz, "%c", dc_diff + '0');
 
-        vp8_blit_text(zz, y_ptr, post->y_stride);
+        vp9_blit_text(zz, y_ptr, post->y_stride);
         mb_index++;
         y_ptr += 16;
       }
@@ -756,14 +756,14 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     }
   }
 
-  if (flags & VP8D_DEBUG_TXT_RATE_INFO) {
+  if (flags & VP9D_DEBUG_TXT_RATE_INFO) {
     char message[512];
     sprintf(message, "Bitrate: %10.2f frame_rate: %10.2f ", oci->bitrate, oci->framerate);
-    vp8_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
+    vp9_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
   }
 
   /* Draw motion vectors */
-  if ((flags & VP8D_DEBUG_DRAW_MV) && ppflags->display_mv_flag) {
+  if ((flags & VP9D_DEBUG_DRAW_MV) && ppflags->display_mv_flag) {
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
     int width  = post->y_width;
     int height = post->y_height;
@@ -791,7 +791,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
               y1 = y0 + 4 + (mv->row >> 3);
 
               constrain_line(x0 + 8, &x1, y0 + 4, &y1, width, height);
-              vp8_blit_line(x0 + 8,  x1, y0 + 4,  y1, y_buffer, y_stride);
+              vp9_blit_line(x0 + 8,  x1, y0 + 4,  y1, y_buffer, y_stride);
 
               bmi = &mi->bmi[8];
 
@@ -799,7 +799,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
               y1 = y0 + 12 + (mv->row >> 3);
 
               constrain_line(x0 + 8, &x1, y0 + 12, &y1, width, height);
-              vp8_blit_line(x0 + 8,  x1, y0 + 12,  y1, y_buffer, y_stride);
+              vp9_blit_line(x0 + 8,  x1, y0 + 12,  y1, y_buffer, y_stride);
 
               break;
             }
@@ -811,7 +811,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
               y1 = y0 + 8 + (mv->row >> 3);
 
               constrain_line(x0 + 4, &x1, y0 + 8, &y1, width, height);
-              vp8_blit_line(x0 + 4,  x1, y0 + 8,  y1, y_buffer, y_stride);
+              vp9_blit_line(x0 + 4,  x1, y0 + 8,  y1, y_buffer, y_stride);
 
               bmi = &mi->bmi[2];
 
@@ -819,7 +819,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
               y1 = y0 + 8 + (mv->row >> 3);
 
               constrain_line(x0 + 12, &x1, y0 + 8, &y1, width, height);
-              vp8_blit_line(x0 + 12,  x1, y0 + 8,  y1, y_buffer, y_stride);
+              vp9_blit_line(x0 + 12,  x1, y0 + 8,  y1, y_buffer, y_stride);
 
               break;
             }
@@ -831,7 +831,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
               y1 = y0 + 4 + (mv->row >> 3);
 
               constrain_line(x0 + 4, &x1, y0 + 4, &y1, width, height);
-              vp8_blit_line(x0 + 4,  x1, y0 + 4,  y1, y_buffer, y_stride);
+              vp9_blit_line(x0 + 4,  x1, y0 + 4,  y1, y_buffer, y_stride);
 
               bmi = &mi->bmi[2];
 
@@ -839,7 +839,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
               y1 = y0 + 4 + (mv->row >> 3);
 
               constrain_line(x0 + 12, &x1, y0 + 4, &y1, width, height);
-              vp8_blit_line(x0 + 12,  x1, y0 + 4,  y1, y_buffer, y_stride);
+              vp9_blit_line(x0 + 12,  x1, y0 + 4,  y1, y_buffer, y_stride);
 
               bmi = &mi->bmi[8];
 
@@ -847,7 +847,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
               y1 = y0 + 12 + (mv->row >> 3);
 
               constrain_line(x0 + 4, &x1, y0 + 12, &y1, width, height);
-              vp8_blit_line(x0 + 4,  x1, y0 + 12,  y1, y_buffer, y_stride);
+              vp9_blit_line(x0 + 4,  x1, y0 + 12,  y1, y_buffer, y_stride);
 
               bmi = &mi->bmi[10];
 
@@ -855,7 +855,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
               y1 = y0 + 12 + (mv->row >> 3);
 
               constrain_line(x0 + 12, &x1, y0 + 12, &y1, width, height);
-              vp8_blit_line(x0 + 12,  x1, y0 + 12,  y1, y_buffer, y_stride);
+              vp9_blit_line(x0 + 12,  x1, y0 + 12,  y1, y_buffer, y_stride);
               break;
             }
             case PARTITIONING_4X4:
@@ -871,7 +871,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
                   y1 = by0 + 2 + (mv->row >> 3);
 
                   constrain_line(bx0 + 2, &x1, by0 + 2, &y1, width, height);
-                  vp8_blit_line(bx0 + 2,  x1, by0 + 2,  y1, y_buffer, y_stride);
+                  vp9_blit_line(bx0 + 2,  x1, by0 + 2,  y1, y_buffer, y_stride);
 
                   bmi++;
                 }
@@ -888,12 +888,12 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 
           if (x1 != lx0 && y1 != ly0) {
             constrain_line(lx0, &x1, ly0 - 1, &y1, width, height);
-            vp8_blit_line(lx0,  x1, ly0 - 1,  y1, y_buffer, y_stride);
+            vp9_blit_line(lx0,  x1, ly0 - 1,  y1, y_buffer, y_stride);
 
             constrain_line(lx0, &x1, ly0 + 1, &y1, width, height);
-            vp8_blit_line(lx0,  x1, ly0 + 1,  y1, y_buffer, y_stride);
+            vp9_blit_line(lx0,  x1, ly0 + 1,  y1, y_buffer, y_stride);
           } else
-            vp8_blit_line(lx0,  x1, ly0,  y1, y_buffer, y_stride);
+            vp9_blit_line(lx0,  x1, ly0,  y1, y_buffer, y_stride);
         }
 
         mi++;
@@ -903,7 +903,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
   }
 
   /* Color in block modes */
-  if ((flags & VP8D_DEBUG_CLR_BLK_MODES)
+  if ((flags & VP9D_DEBUG_CLR_BLK_MODES)
       && (ppflags->display_mb_modes_flag || ppflags->display_b_modes_flag)) {
     int y, x;
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
@@ -967,7 +967,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
   }
 
   /* Color in frame reference blocks */
-  if ((flags & VP8D_DEBUG_CLR_FRM_REF_BLKS) && ppflags->display_ref_frame_flag) {
+  if ((flags & VP9D_DEBUG_CLR_FRM_REF_BLKS) && ppflags->display_ref_frame_flag) {
     int y, x;
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
     int width  = post->y_width;

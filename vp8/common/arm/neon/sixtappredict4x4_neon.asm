@@ -82,7 +82,7 @@ filter4_coeff
 
     vzip.32         d18, d19                ;put 2-line data in 1 register (src_ptr[3])
     vzip.32         d20, d21
-    vmull.u8        q7, d18, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmull.u8        q7, d18, d5             ;(src_ptr[3] * vp9_filter[5])
     vmull.u8        q8, d20, d5
 
     vmov            q4, q3                  ;keep original src data in q4 q6
@@ -92,33 +92,33 @@ filter4_coeff
     vzip.32         d10, d11
     vshr.u64        q9, q4, #8              ;construct src_ptr[-1]
     vshr.u64        q10, q6, #8
-    vmlal.u8        q7, d6, d0              ;+(src_ptr[-2] * vp8_filter[0])
+    vmlal.u8        q7, d6, d0              ;+(src_ptr[-2] * vp9_filter[0])
     vmlal.u8        q8, d10, d0
 
     vzip.32         d18, d19                ;put 2-line data in 1 register (src_ptr[-1])
     vzip.32         d20, d21
     vshr.u64        q3, q4, #32             ;construct src_ptr[2]
     vshr.u64        q5, q6, #32
-    vmlsl.u8        q7, d18, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q7, d18, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q8, d20, d1
 
     vzip.32         d6, d7                  ;put 2-line data in 1 register (src_ptr[2])
     vzip.32         d10, d11
     vshr.u64        q9, q4, #16             ;construct src_ptr[0]
     vshr.u64        q10, q6, #16
-    vmlsl.u8        q7, d6, d4              ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q7, d6, d4              ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q8, d10, d4
 
     vzip.32         d18, d19                ;put 2-line data in 1 register (src_ptr[0])
     vzip.32         d20, d21
     vshr.u64        q3, q4, #24             ;construct src_ptr[1]
     vshr.u64        q5, q6, #24
-    vmlal.u8        q7, d18, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q7, d18, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q8, d20, d2
 
     vzip.32         d6, d7                  ;put 2-line data in 1 register (src_ptr[1])
     vzip.32         d10, d11
-    vmull.u8        q9, d6, d3              ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q9, d6, d3              ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q10, d10, d3
 
     vld1.u8         {q3}, [r0], r1          ;load rest 5-line src data
@@ -147,9 +147,9 @@ filter4_coeff
     vzip.32         d18, d19                ;put 2-line data in 1 register (src_ptr[3])
     vzip.32         d20, d21
     vext.8          d31, d22, d23, #5       ;construct src_ptr[3]
-    vmull.u8        q7, d18, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmull.u8        q7, d18, d5             ;(src_ptr[3] * vp9_filter[5])
     vmull.u8        q8, d20, d5
-    vmull.u8        q12, d31, d5            ;(src_ptr[3] * vp8_filter[5])
+    vmull.u8        q12, d31, d5            ;(src_ptr[3] * vp9_filter[5])
 
     vmov            q4, q3                  ;keep original src data in q4 q6
     vmov            q6, q5
@@ -159,9 +159,9 @@ filter4_coeff
     vshr.u64        q9, q4, #8              ;construct src_ptr[-1]
     vshr.u64        q10, q6, #8
 
-    vmlal.u8        q7, d6, d0              ;+(src_ptr[-2] * vp8_filter[0])
+    vmlal.u8        q7, d6, d0              ;+(src_ptr[-2] * vp9_filter[0])
     vmlal.u8        q8, d10, d0
-    vmlal.u8        q12, d22, d0            ;(src_ptr[-2] * vp8_filter[0])
+    vmlal.u8        q12, d22, d0            ;(src_ptr[-2] * vp9_filter[0])
 
     vzip.32         d18, d19                ;put 2-line data in 1 register (src_ptr[-1])
     vzip.32         d20, d21
@@ -169,9 +169,9 @@ filter4_coeff
     vshr.u64        q5, q6, #32
     vext.8          d31, d22, d23, #1       ;construct src_ptr[-1]
 
-    vmlsl.u8        q7, d18, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q7, d18, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q8, d20, d1
-    vmlsl.u8        q12, d31, d1            ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q12, d31, d1            ;-(src_ptr[-1] * vp9_filter[1])
 
     vzip.32         d6, d7                  ;put 2-line data in 1 register (src_ptr[2])
     vzip.32         d10, d11
@@ -179,9 +179,9 @@ filter4_coeff
     vshr.u64        q10, q6, #16
     vext.8          d31, d22, d23, #4       ;construct src_ptr[2]
 
-    vmlsl.u8        q7, d6, d4              ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q7, d6, d4              ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q8, d10, d4
-    vmlsl.u8        q12, d31, d4            ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q12, d31, d4            ;-(src_ptr[2] * vp9_filter[4])
 
     vzip.32         d18, d19                ;put 2-line data in 1 register (src_ptr[0])
     vzip.32         d20, d21
@@ -189,16 +189,16 @@ filter4_coeff
     vshr.u64        q5, q6, #24
     vext.8          d31, d22, d23, #2       ;construct src_ptr[0]
 
-    vmlal.u8        q7, d18, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q7, d18, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q8, d20, d2
-    vmlal.u8        q12, d31, d2            ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q12, d31, d2            ;(src_ptr[0] * vp9_filter[2])
 
     vzip.32         d6, d7                  ;put 2-line data in 1 register (src_ptr[1])
     vzip.32         d10, d11
     vext.8          d31, d22, d23, #3       ;construct src_ptr[1]
-    vmull.u8        q9, d6, d3              ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q9, d6, d3              ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q10, d10, d3
-    vmull.u8        q11, d31, d3            ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q11, d31, d3            ;(src_ptr[1] * vp9_filter[3])
 
     add             r3, r12, r3, lsl #5
 
@@ -228,22 +228,22 @@ filter4_coeff
     vdup.8          d4, d16[0]
     vdup.8          d5, d16[4]
 
-    vmull.u8        q3, d27, d0             ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q3, d27, d0             ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q4, d28, d0
 
-    vmull.u8        q5, d25, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmull.u8        q5, d25, d5             ;(src_ptr[3] * vp9_filter[5])
     vmull.u8        q6, d26, d5
 
-    vmlsl.u8        q3, d29, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q3, d29, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q4, d30, d4
 
-    vmlsl.u8        q5, d23, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q5, d23, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q6, d24, d1
 
-    vmlal.u8        q3, d28, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q3, d28, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q4, d29, d2
 
-    vmlal.u8        q5, d24, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmlal.u8        q5, d24, d3             ;(src_ptr[1] * vp9_filter[3])
     vmlal.u8        q6, d25, d3
 
     add             r0, r4, lr
@@ -294,7 +294,7 @@ firstpass_filter4x4_only
 
     vzip.32         d18, d19                ;put 2-line data in 1 register (src_ptr[3])
     vzip.32         d20, d21
-    vmull.u8        q7, d18, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmull.u8        q7, d18, d5             ;(src_ptr[3] * vp9_filter[5])
     vmull.u8        q8, d20, d5
 
     vmov            q4, q3                  ;keep original src data in q4 q6
@@ -304,33 +304,33 @@ firstpass_filter4x4_only
     vzip.32         d10, d11
     vshr.u64        q9, q4, #8              ;construct src_ptr[-1]
     vshr.u64        q10, q6, #8
-    vmlal.u8        q7, d6, d0              ;+(src_ptr[-2] * vp8_filter[0])
+    vmlal.u8        q7, d6, d0              ;+(src_ptr[-2] * vp9_filter[0])
     vmlal.u8        q8, d10, d0
 
     vzip.32         d18, d19                ;put 2-line data in 1 register (src_ptr[-1])
     vzip.32         d20, d21
     vshr.u64        q3, q4, #32             ;construct src_ptr[2]
     vshr.u64        q5, q6, #32
-    vmlsl.u8        q7, d18, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q7, d18, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q8, d20, d1
 
     vzip.32         d6, d7                  ;put 2-line data in 1 register (src_ptr[2])
     vzip.32         d10, d11
     vshr.u64        q9, q4, #16             ;construct src_ptr[0]
     vshr.u64        q10, q6, #16
-    vmlsl.u8        q7, d6, d4              ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q7, d6, d4              ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q8, d10, d4
 
     vzip.32         d18, d19                ;put 2-line data in 1 register (src_ptr[0])
     vzip.32         d20, d21
     vshr.u64        q3, q4, #24             ;construct src_ptr[1]
     vshr.u64        q5, q6, #24
-    vmlal.u8        q7, d18, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q7, d18, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q8, d20, d2
 
     vzip.32         d6, d7                  ;put 2-line data in 1 register (src_ptr[1])
     vzip.32         d10, d11
-    vmull.u8        q9, d6, d3              ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q9, d6, d3              ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q10, d10, d3
 
     add             r0, r4, lr
@@ -380,22 +380,22 @@ secondpass_filter4x4_only
     vext.8          d25, d29, d30, #4
     vext.8          d26, d30, d31, #4
 
-    vmull.u8        q3, d27, d0             ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q3, d27, d0             ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q4, d28, d0
 
-    vmull.u8        q5, d25, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmull.u8        q5, d25, d5             ;(src_ptr[3] * vp9_filter[5])
     vmull.u8        q6, d26, d5
 
-    vmlsl.u8        q3, d29, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q3, d29, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q4, d30, d4
 
-    vmlsl.u8        q5, d23, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q5, d23, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q6, d24, d1
 
-    vmlal.u8        q3, d28, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q3, d28, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q4, d29, d2
 
-    vmlal.u8        q5, d24, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmlal.u8        q5, d24, d3             ;(src_ptr[1] * vp9_filter[3])
     vmlal.u8        q6, d25, d3
 
     add             r0, r4, lr

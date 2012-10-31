@@ -12,7 +12,7 @@
 /*Generated file, included by entropy.c*/
 
 
-static const vp8_prob default_coef_probs [BLOCK_TYPES]
+static const vp9_prob default_coef_probs [BLOCK_TYPES]
                                          [COEF_BANDS]
                                          [PREV_COEF_CONTEXTS]
                                          [ENTROPY_NODES] = {
@@ -254,7 +254,7 @@ static const vp8_prob default_coef_probs [BLOCK_TYPES]
   }
 };
 
-static const vp8_prob default_hybrid_coef_probs [BLOCK_TYPES]
+static const vp9_prob default_hybrid_coef_probs [BLOCK_TYPES]
                                                 [COEF_BANDS]
                                                 [PREV_COEF_CONTEXTS]
                                                 [ENTROPY_NODES] = {
@@ -496,7 +496,7 @@ static const vp8_prob default_hybrid_coef_probs [BLOCK_TYPES]
   }
 };
 
-static const vp8_prob
+static const vp9_prob
 default_coef_probs_8x8[BLOCK_TYPES_8X8]
 [COEF_BANDS]
 [PREV_COEF_CONTEXTS]
@@ -729,7 +729,7 @@ default_coef_probs_8x8[BLOCK_TYPES_8X8]
   }
 };
 
-static const vp8_prob
+static const vp9_prob
 default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
                              [COEF_BANDS]
                              [PREV_COEF_CONTEXTS]
@@ -962,7 +962,7 @@ default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
   }
 };
 
-static const vp8_prob
+static const vp9_prob
   default_coef_probs_16x16[BLOCK_TYPES_16X16]
                           [COEF_BANDS]
                           [PREV_COEF_CONTEXTS]
@@ -1169,7 +1169,7 @@ static const vp8_prob
   }
 };
 
-static const vp8_prob
+static const vp9_prob
   default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
                                  [COEF_BANDS]
                                  [PREV_COEF_CONTEXTS]

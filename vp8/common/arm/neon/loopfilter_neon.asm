@@ -9,10 +9,10 @@
 ;
 
 
-    EXPORT  |vp8_loop_filter_horizontal_edge_y_neon|
-    EXPORT  |vp8_loop_filter_horizontal_edge_uv_neon|
-    EXPORT  |vp8_loop_filter_vertical_edge_y_neon|
-    EXPORT  |vp8_loop_filter_vertical_edge_uv_neon|
+    EXPORT  |vp9_loop_filter_horizontal_edge_y_neon|
+    EXPORT  |vp9_loop_filter_horizontal_edge_uv_neon|
+    EXPORT  |vp9_loop_filter_vertical_edge_y_neon|
+    EXPORT  |vp9_loop_filter_vertical_edge_uv_neon|
     ARM
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
@@ -22,7 +22,7 @@
 ; r2    unsigned char blimit
 ; r3    unsigned char limit
 ; sp    unsigned char thresh,
-|vp8_loop_filter_horizontal_edge_y_neon| PROC
+|vp9_loop_filter_horizontal_edge_y_neon| PROC
     push        {lr}
     vdup.u8     q0, r2                     ; duplicate blimit
     vdup.u8     q1, r3                     ; duplicate limit
@@ -45,7 +45,7 @@
     sub         r2, r2, r1, lsl #1
     sub         r12, r12, r1, lsl #1
 
-    bl          vp8_loop_filter_neon
+    bl          vp9_loop_filter_neon
 
     vst1.u8     {q5}, [r2@128], r1              ; store op1
     vst1.u8     {q6}, [r12@128], r1             ; store op0
@@ -53,7 +53,7 @@
     vst1.u8     {q8}, [r12@128], r1             ; store oq1
 
     pop         {pc}
-    ENDP        ; |vp8_loop_filter_horizontal_edge_y_neon|
+    ENDP        ; |vp9_loop_filter_horizontal_edge_y_neon|
 
 
 ; r0    unsigned char *u,
@@ -62,7 +62,7 @@
 ; r3    unsigned char limit
 ; sp    unsigned char thresh,
 ; sp+4  unsigned char *v
-|vp8_loop_filter_horizontal_edge_uv_neon| PROC
+|vp9_loop_filter_horizontal_edge_uv_neon| PROC
     push        {lr}
     vdup.u8     q0, r2                      ; duplicate blimit
     vdup.u8     q1, r3                      ; duplicate limit
@@ -90,7 +90,7 @@
     vld1.u8     {d20}, [r3@64]                 ; q3
     vld1.u8     {d21}, [r12@64]                ; q3
 
-    bl          vp8_loop_filter_neon
+    bl          vp9_loop_filter_neon
 
     sub         r0, r0, r1, lsl #1
     sub         r2, r2, r1, lsl #1
@@ -105,9 +105,9 @@
     vst1.u8     {d17}, [r2@64]                 ; store v oq1
 
     pop         {pc}
-    ENDP        ; |vp8_loop_filter_horizontal_edge_uv_neon|
+    ENDP        ; |vp9_loop_filter_horizontal_edge_uv_neon|
 
-; void vp8_loop_filter_vertical_edge_y_neon(unsigned char *src, int pitch,
+; void vp9_loop_filter_vertical_edge_y_neon(unsigned char *src, int pitch,
 ;                                           const signed char *flimit,
 ;                                           const signed char *limit,
 ;                                           const signed char *thresh,
@@ -118,7 +118,7 @@
 ; r3    unsigned char limit
 ; sp    unsigned char thresh,
 
-|vp8_loop_filter_vertical_edge_y_neon| PROC
+|vp9_loop_filter_vertical_edge_y_neon| PROC
     push        {lr}
     vdup.u8     q0, r2                     ; duplicate blimit
     vdup.u8     q1, r3                     ; duplicate limit
@@ -163,7 +163,7 @@
     vtrn.8      q7, q8
     vtrn.8      q9, q10
 
-    bl          vp8_loop_filter_neon
+    bl          vp9_loop_filter_neon
 
     vswp        d12, d11
     vswp        d16, d13
@@ -195,9 +195,9 @@
     vst4.8      {d14[7], d15[7], d16[7], d17[7]}, [r12]
 
     pop         {pc}
-    ENDP        ; |vp8_loop_filter_vertical_edge_y_neon|
+    ENDP        ; |vp9_loop_filter_vertical_edge_y_neon|
 
-; void vp8_loop_filter_vertical_edge_uv_neon(unsigned char *u, int pitch
+; void vp9_loop_filter_vertical_edge_uv_neon(unsigned char *u, int pitch
 ;                                            const signed char *flimit,
 ;                                            const signed char *limit,
 ;                                            const signed char *thresh,
@@ -208,7 +208,7 @@
 ; r3    unsigned char limit
 ; sp    unsigned char thresh,
 ; sp+4  unsigned char *v
-|vp8_loop_filter_vertical_edge_uv_neon| PROC
+|vp9_loop_filter_vertical_edge_uv_neon| PROC
     push        {lr}
     vdup.u8     q0, r2                      ; duplicate blimit
     sub         r12, r0, #4                 ; move u pointer down by 4 columns
@@ -253,7 +253,7 @@
     vtrn.8      q7, q8
     vtrn.8      q9, q10
 
-    bl          vp8_loop_filter_neon
+    bl          vp9_loop_filter_neon
 
     vswp        d12, d11
     vswp        d16, d13
@@ -282,9 +282,9 @@
     vst4.8      {d14[7], d15[7], d16[7], d17[7]}, [r2]
 
     pop         {pc}
-    ENDP        ; |vp8_loop_filter_vertical_edge_uv_neon|
+    ENDP        ; |vp9_loop_filter_vertical_edge_uv_neon|
 
-; void vp8_loop_filter_neon();
+; void vp9_loop_filter_neon();
 ; This is a helper function for the loopfilters. The invidual functions do the
 ; necessary load, transpose (if necessary) and store.
 
@@ -300,9 +300,9 @@
 ; q8    q1
 ; q9    q2
 ; q10   q3
-|vp8_loop_filter_neon| PROC
+|vp9_loop_filter_neon| PROC
 
-    ; vp8_filter_mask
+    ; vp9_filter_mask
     vabd.u8     q11, q3, q4                 ; abs(p3 - p2)
     vabd.u8     q12, q4, q5                 ; abs(p2 - p1)
     vabd.u8     q13, q5, q6                 ; abs(p1 - p0)
@@ -329,7 +329,7 @@
 
     vcge.u8     q15, q1, q15
 
-    ; vp8_filter() function
+    ; vp9_filter() function
     ; convert to signed
     veor        q7, q7, q10                 ; qs0
     vshr.u8     q2, q2, #1                  ; a = a / 2
@@ -349,27 +349,27 @@
 
     vmovl.u8    q4, d20
 
-    vqsub.s8    q1, q5, q8                  ; vp8_filter = clamp(ps1-qs1)
+    vqsub.s8    q1, q5, q8                  ; vp9_filter = clamp(ps1-qs1)
     vorr        q14, q13, q14               ; vp8_hevmask
 
     vmul.i16    q2, q2, q4                  ; 3 * ( qs0 - ps0)
     vmul.i16    q11, q11, q4
 
-    vand        q1, q1, q14                 ; vp8_filter &= hev
-    vand        q15, q15, q9                ; vp8_filter_mask
+    vand        q1, q1, q14                 ; vp9_filter &= hev
+    vand        q15, q15, q9                ; vp9_filter_mask
 
     vaddw.s8    q2, q2, d2
     vaddw.s8    q11, q11, d3
 
     vmov.u8     q9, #4                      ; #4
 
-    ; vp8_filter = clamp(vp8_filter + 3 * ( qs0 - ps0))
+    ; vp9_filter = clamp(vp9_filter + 3 * ( qs0 - ps0))
     vqmovn.s16  d2, q2
     vqmovn.s16  d3, q11
-    vand        q1, q1, q15                 ; vp8_filter &= mask
+    vand        q1, q1, q15                 ; vp9_filter &= mask
 
-    vqadd.s8    q2, q1, q10                 ; Filter2 = clamp(vp8_filter+3)
-    vqadd.s8    q1, q1, q9                  ; Filter1 = clamp(vp8_filter+4)
+    vqadd.s8    q2, q1, q10                 ; Filter2 = clamp(vp9_filter+3)
+    vqadd.s8    q1, q1, q9                  ; Filter1 = clamp(vp9_filter+4)
     vshr.s8     q2, q2, #3                  ; Filter2 >>= 3
     vshr.s8     q1, q1, #3                  ; Filter1 >>= 3
 
@@ -377,12 +377,12 @@
     vqadd.s8    q11, q6, q2                 ; u = clamp(ps0 + Filter2)
     vqsub.s8    q10, q7, q1                 ; u = clamp(qs0 - Filter1)
 
-    ; outer tap adjustments: ++vp8_filter >> 1
+    ; outer tap adjustments: ++vp9_filter >> 1
     vrshr.s8    q1, q1, #1
-    vbic        q1, q1, q14                 ; vp8_filter &= ~hev
+    vbic        q1, q1, q14                 ; vp9_filter &= ~hev
     vmov.u8     q0, #0x80                   ; 0x80
-    vqadd.s8    q13, q5, q1                 ; u = clamp(ps1 + vp8_filter)
-    vqsub.s8    q12, q8, q1                 ; u = clamp(qs1 - vp8_filter)
+    vqadd.s8    q13, q5, q1                 ; u = clamp(ps1 + vp9_filter)
+    vqsub.s8    q12, q8, q1                 ; u = clamp(qs1 - vp9_filter)
 
     veor        q6, q11, q0                 ; *op0 = u^0x80
     veor        q7, q10, q0                 ; *oq0 = u^0x80
@@ -390,7 +390,7 @@
     veor        q8, q12, q0                 ; *oq1 = u^0x80
 
     bx          lr
-    ENDP        ; |vp8_loop_filter_horizontal_edge_y_neon|
+    ENDP        ; |vp9_loop_filter_horizontal_edge_y_neon|
 
 ;-----------------
 

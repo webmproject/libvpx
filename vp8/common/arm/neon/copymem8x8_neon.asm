@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vp8_copy_mem8x8_neon|
+    EXPORT  |vp9_copy_mem8x8_neon|
     ; ARM
     ; REQUIRE8
     ; PRESERVE8
@@ -17,7 +17,7 @@
     AREA    Block, CODE, READONLY ; name this block of code
 ;void copy_mem8x8_neon( unsigned char *src, int src_stride, unsigned char *dst, int dst_stride)
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-|vp8_copy_mem8x8_neon| PROC
+|vp9_copy_mem8x8_neon| PROC
 
     vld1.u8     {d0}, [r0], r1
     vld1.u8     {d1}, [r0], r1
@@ -38,6 +38,6 @@
 
     mov     pc, lr
 
-    ENDP  ; |vp8_copy_mem8x8_neon|
+    ENDP  ; |vp9_copy_mem8x8_neon|
 
     END

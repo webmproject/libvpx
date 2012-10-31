@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_VP8_TEMPORAL_FILTER_H
-#define __INC_VP8_TEMPORAL_FILTER_H
+#ifndef __INC_TEMPORAL_FILTER_H
+#define __INC_TEMPORAL_FILTER_H
 
 #define prototype_apply(sym)\
   void (sym) \
@@ -36,12 +36,12 @@ extern prototype_apply(vp9_temporal_filter_apply);
 
 typedef struct {
   prototype_apply(*apply);
-} vp8_temporal_rtcd_vtable_t;
+} vp9_temporal_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define TEMPORAL_INVOKE(ctx,fn) (ctx)->fn
 #else
-#define TEMPORAL_INVOKE(ctx,fn) vp8_temporal_filter_##fn
+#define TEMPORAL_INVOKE(ctx,fn) vp9_temporal_filter_##fn
 #endif
 
-#endif // __INC_VP8_TEMPORAL_FILTER_H
+#endif // __INC_TEMPORAL_FILTER_H

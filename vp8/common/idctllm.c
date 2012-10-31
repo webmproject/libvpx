@@ -290,7 +290,7 @@ static const int16_t iadst_i16[256] = {
 
 void vp9_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
                   TX_TYPE tx_type, int tx_dim) {
-  vp8_clear_system_state();  // Make it simd safe : __asm emms;
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
   {
     int i, j, k;
     float bufa[256], bufb[256];  // buffers are for floating-point test purpose
@@ -404,7 +404,7 @@ void vp9_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
       pfa += tx_dim;
     }
   }
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
 }
 
 /* Converted the transforms to integer form. */
@@ -985,7 +985,7 @@ void vp9_short_ihaar2x2_c(short *input, short *output, int pitch) {
 // Keep a really bad float version as reference for now.
 void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
 
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
     double x;
     const int short_pitch = pitch >> 1;
@@ -1007,7 +1007,7 @@ void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
       }
     }
   }
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
 }
 #endif
 
@@ -1030,7 +1030,7 @@ static const double C15 = 0.098017140329561;
 
 static void butterfly_16x16_idct_1d(double input[16], double output[16]) {
 
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
     double step[16];
     double intermediate[16];
@@ -1217,14 +1217,14 @@ static void butterfly_16x16_idct_1d(double input[16], double output[16]) {
     output[9] = (step[6] - step[ 9]);
     output[8] = (step[7] - step[ 8]);
   }
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
 }
 
 // Remove once an int version of iDCT is written
 #if 0
 void reference_16x16_idct_1d(double input[16], double output[16]) {
 
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
     const double kPi = 3.141592653589793238462643383279502884;
     const double kSqrt2 = 1.414213562373095048801688724209698;
@@ -1237,13 +1237,13 @@ void reference_16x16_idct_1d(double input[16], double output[16]) {
       }
     }
   }
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
 }
 #endif
 
 void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
 
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
     double out[16*16], out2[16*16];
     const int short_pitch = pitch >> 1;
@@ -1269,5 +1269,5 @@ void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
     for (i = 0; i < 16*16; ++i)
       output[i] = round(out2[i]/128);
   }
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
 }

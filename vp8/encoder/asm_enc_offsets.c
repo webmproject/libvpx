@@ -43,12 +43,12 @@ DEFINE(vp9_block_src_stride,                    offsetof(BLOCK, src_stride));
 DEFINE(vp9_blockd_predictor,                    offsetof(BLOCKD, predictor));
 
 /* pack tokens */
-DEFINE(vp9_writer_lowvalue,                     offsetof(vp8_writer, lowvalue));
-DEFINE(vp9_writer_range,                        offsetof(vp8_writer, range));
-DEFINE(vp9_writer_value,                        offsetof(vp8_writer, value));
-DEFINE(vp9_writer_count,                        offsetof(vp8_writer, count));
-DEFINE(vp9_writer_pos,                          offsetof(vp8_writer, pos));
-DEFINE(vp9_writer_buffer,                       offsetof(vp8_writer, buffer));
+DEFINE(vp9_writer_lowvalue,                     offsetof(vp9_writer, lowvalue));
+DEFINE(vp9_writer_range,                        offsetof(vp9_writer, range));
+DEFINE(vp9_writer_value,                        offsetof(vp9_writer, value));
+DEFINE(vp9_writer_count,                        offsetof(vp9_writer, count));
+DEFINE(vp9_writer_pos,                          offsetof(vp9_writer, pos));
+DEFINE(vp9_writer_buffer,                       offsetof(vp9_writer, buffer));
 
 DEFINE(tokenextra_token,                        offsetof(TOKENEXTRA, Token));
 DEFINE(tokenextra_extra,                        offsetof(TOKENEXTRA, Extra));
@@ -56,15 +56,15 @@ DEFINE(tokenextra_context_tree,                 offsetof(TOKENEXTRA, context_tre
 DEFINE(tokenextra_skip_eob_node,                offsetof(TOKENEXTRA, skip_eob_node));
 DEFINE(TOKENEXTRA_SZ,                           sizeof(TOKENEXTRA));
 
-DEFINE(vp9_extra_bit_struct_sz,                 sizeof(vp8_extra_bit_struct));
+DEFINE(vp9_extra_bit_struct_sz,                 sizeof(vp9_extra_bit_struct));
 
-DEFINE(vp9_token_value,                         offsetof(vp8_token, value));
-DEFINE(vp9_token_len,                           offsetof(vp8_token, Len));
+DEFINE(vp9_token_value,                         offsetof(vp9_token, value));
+DEFINE(vp9_token_len,                           offsetof(vp9_token, Len));
 
-DEFINE(vp9_extra_bit_struct_tree,               offsetof(vp8_extra_bit_struct, tree));
-DEFINE(vp9_extra_bit_struct_prob,               offsetof(vp8_extra_bit_struct, prob));
-DEFINE(vp9_extra_bit_struct_len,                offsetof(vp8_extra_bit_struct, Len));
-DEFINE(vp9_extra_bit_struct_base_val,           offsetof(vp8_extra_bit_struct, base_val));
+DEFINE(vp9_extra_bit_struct_tree,               offsetof(vp9_extra_bit_struct, tree));
+DEFINE(vp9_extra_bit_struct_prob,               offsetof(vp9_extra_bit_struct, prob));
+DEFINE(vp9_extra_bit_struct_len,                offsetof(vp9_extra_bit_struct, Len));
+DEFINE(vp9_extra_bit_struct_base_val,           offsetof(vp9_extra_bit_struct, base_val));
 
 DEFINE(vp9_comp_tplist,                         offsetof(VP9_COMP, tplist));
 DEFINE(vp9_comp_common,                         offsetof(VP9_COMP, common));
@@ -86,5 +86,5 @@ END
 
 #if HAVE_ARMV5TE
 ct_assert(TOKENEXTRA_SZ, sizeof(TOKENEXTRA) == 8)
-ct_assert(vp9_extra_bit_struct_sz, sizeof(vp8_extra_bit_struct) == 16)
+ct_assert(vp9_extra_bit_struct_sz, sizeof(vp9_extra_bit_struct) == 16)
 #endif

@@ -12,14 +12,11 @@
 #ifndef __INC_TREECODER_H
 #define __INC_TREECODER_H
 
-typedef unsigned char vp8bc_index_t; /* probability index */
+typedef unsigned char vp9_prob;
 
+#define vp9_prob_half ( (vp9_prob) 128)
 
-typedef unsigned char vp8_prob;
-
-#define vp8_prob_half ( (vp8_prob) 128)
-
-typedef signed char vp8_tree_index;
+typedef signed char vp9_tree_index;
 struct bool_coder_spec;
 
 typedef struct bool_coder_spec bool_coder_spec;
@@ -32,28 +29,28 @@ typedef const bool_reader c_bool_reader;
 
 
 
-# define vp8_complement( x) (255 - x)
+# define vp9_complement( x) (255 - x)
 
 
 /* We build coding trees compactly in arrays.
-   Each node of the tree is a pair of vp8_tree_indices.
+   Each node of the tree is a pair of vp9_tree_indices.
    Array index often references a corresponding probability table.
    Index <= 0 means done encoding/decoding and value = -Index,
    Index > 0 means need another bit, specification at index.
    Nonnegative indices are always even;  processing begins at node 0. */
 
-typedef const vp8_tree_index vp8_tree[], *vp8_tree_p;
+typedef const vp9_tree_index vp9_tree[], *vp9_tree_p;
 
 
-typedef const struct vp8_token_struct {
+typedef const struct vp9_token_struct {
   int value;
   int Len;
-} vp8_token;
+} vp9_token;
 
 /* Construct encoding array from tree. */
 
-void vp9_tokens_from_tree(struct vp8_token_struct *, vp8_tree);
-void vp9_tokens_from_tree_offset(struct vp8_token_struct *, vp8_tree,
+void vp9_tokens_from_tree(struct vp9_token_struct *, vp9_tree);
+void vp9_tokens_from_tree_offset(struct vp9_token_struct *, vp9_tree,
                                  int offset);
 
 
@@ -64,27 +61,15 @@ void vp9_tokens_from_tree_offset(struct vp8_token_struct *, vp8_tree,
 
 void vp9_tree_probs_from_distribution(
   int n,                      /* n = size of alphabet */
-  vp8_token tok               [ /* n */ ],
-  vp8_tree tree,
-  vp8_prob probs          [ /* n-1 */ ],
+  vp9_token tok               [ /* n */ ],
+  vp9_tree tree,
+  vp9_prob probs          [ /* n-1 */ ],
   unsigned int branch_ct       [ /* n-1 */ ] [2],
   const unsigned int num_events[ /* n */ ],
   unsigned int Pfactor,
   int Round
 );
 
-/* Variant of above using coder spec rather than hardwired 8-bit probs. */
-
-void vp8bc_tree_probs_from_distribution(
-  int n,                      /* n = size of alphabet */
-  vp8_token tok               [ /* n */ ],
-  vp8_tree tree,
-  vp8_prob probs          [ /* n-1 */ ],
-  unsigned int branch_ct       [ /* n-1 */ ] [2],
-  const unsigned int num_events[ /* n */ ],
-  c_bool_coder_spec *s
-);
-
-vp8_prob vp9_bin_prob_from_distribution(const unsigned int counts[2]);
+vp9_prob vp9_bin_prob_from_distribution(const unsigned int counts[2]);
 
 #endif

@@ -222,7 +222,7 @@ void vp9_copy_mem8x4_c(
 
 
 
-void vp9_build_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf) {
+void vp9_build_inter_predictors_b(BLOCKD *d, int pitch, vp9_subpix_fn_t sppf) {
   int r;
   unsigned char *ptr_base;
   unsigned char *ptr;
@@ -260,7 +260,7 @@ void vp9_build_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf) {
  * come from an earlier call to vp9_build_inter_predictors_b()) with the
  * predictor of the second reference frame / motion vector.
  */
-void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf) {
+void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp9_subpix_fn_t sppf) {
   int r;
   unsigned char *ptr_base;
   unsigned char *ptr;
@@ -800,7 +800,7 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
 
 /*
  * The following functions should be called after an initial
- * call to vp8_build_inter16x16_predictors_mb() or _mby()/_mbuv().
+ * call to vp9_build_1st_inter16x16_predictors_mb() or _mby()/_mbuv().
  * It will run a second sixtap filter on a (different) ref
  * frame and average the result with the output of the
  * first sixtap filter. The second reference frame is stored

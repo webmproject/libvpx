@@ -148,23 +148,23 @@ static void filter_block2d_first_pass_6
   unsigned int pixel_step,
   unsigned int output_height,
   unsigned int output_width,
-  const short *vp8_filter
+  const short *vp9_filter
 ) {
   unsigned int i, j;
   int  Temp;
 
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
-      Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp8_filter[0]) +
-             ((int)src_ptr[-1 * (int)pixel_step] * vp8_filter[1]) +
-             ((int)src_ptr[0]                    * vp8_filter[2]) +
-             ((int)src_ptr[pixel_step]           * vp8_filter[3]) +
-             ((int)src_ptr[2 * pixel_step]       * vp8_filter[4]) +
-             ((int)src_ptr[3 * pixel_step]       * vp8_filter[5]) +
-             (VP8_FILTER_WEIGHT >> 1);      /* Rounding */
+      Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp9_filter[0]) +
+             ((int)src_ptr[-1 * (int)pixel_step] * vp9_filter[1]) +
+             ((int)src_ptr[0]                    * vp9_filter[2]) +
+             ((int)src_ptr[pixel_step]           * vp9_filter[3]) +
+             ((int)src_ptr[2 * pixel_step]       * vp9_filter[4]) +
+             ((int)src_ptr[3 * pixel_step]       * vp9_filter[5]) +
+             (VP9_FILTER_WEIGHT >> 1);      /* Rounding */
 
       /* Normalize back to 0-255 */
-      Temp = Temp >> VP8_FILTER_SHIFT;
+      Temp = Temp >> VP9_FILTER_SHIFT;
 
       if (Temp < 0)
         Temp = 0;
@@ -190,7 +190,7 @@ static void filter_block2d_second_pass_6
   unsigned int pixel_step,
   unsigned int output_height,
   unsigned int output_width,
-  const short *vp8_filter
+  const short *vp9_filter
 ) {
   unsigned int i, j;
   int  Temp;
@@ -198,16 +198,16 @@ static void filter_block2d_second_pass_6
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
       /* Apply filter */
-      Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp8_filter[0]) +
-             ((int)src_ptr[-1 * (int)pixel_step] * vp8_filter[1]) +
-             ((int)src_ptr[0]                    * vp8_filter[2]) +
-             ((int)src_ptr[pixel_step]           * vp8_filter[3]) +
-             ((int)src_ptr[2 * pixel_step]         * vp8_filter[4]) +
-             ((int)src_ptr[3 * pixel_step]         * vp8_filter[5]) +
-             (VP8_FILTER_WEIGHT >> 1);   /* Rounding */
+      Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp9_filter[0]) +
+             ((int)src_ptr[-1 * (int)pixel_step] * vp9_filter[1]) +
+             ((int)src_ptr[0]                    * vp9_filter[2]) +
+             ((int)src_ptr[pixel_step]           * vp9_filter[3]) +
+             ((int)src_ptr[2 * pixel_step]         * vp9_filter[4]) +
+             ((int)src_ptr[3 * pixel_step]         * vp9_filter[5]) +
+             (VP9_FILTER_WEIGHT >> 1);   /* Rounding */
 
       /* Normalize back to 0-255 */
-      Temp = Temp >> VP8_FILTER_SHIFT;
+      Temp = Temp >> VP9_FILTER_SHIFT;
 
       if (Temp < 0)
         Temp = 0;
@@ -241,7 +241,7 @@ static void filter_block2d_second_pass_avg_6
   unsigned int pixel_step,
   unsigned int output_height,
   unsigned int output_width,
-  const short *vp8_filter
+  const short *vp9_filter
 ) {
   unsigned int i, j;
   int  Temp;
@@ -249,16 +249,16 @@ static void filter_block2d_second_pass_avg_6
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
       /* Apply filter */
-      Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp8_filter[0]) +
-             ((int)src_ptr[-1 * (int)pixel_step] * vp8_filter[1]) +
-             ((int)src_ptr[0]                    * vp8_filter[2]) +
-             ((int)src_ptr[pixel_step]           * vp8_filter[3]) +
-             ((int)src_ptr[2 * pixel_step]         * vp8_filter[4]) +
-             ((int)src_ptr[3 * pixel_step]         * vp8_filter[5]) +
-             (VP8_FILTER_WEIGHT >> 1);   /* Rounding */
+      Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp9_filter[0]) +
+             ((int)src_ptr[-1 * (int)pixel_step] * vp9_filter[1]) +
+             ((int)src_ptr[0]                    * vp9_filter[2]) +
+             ((int)src_ptr[pixel_step]           * vp9_filter[3]) +
+             ((int)src_ptr[2 * pixel_step]         * vp9_filter[4]) +
+             ((int)src_ptr[3 * pixel_step]         * vp9_filter[5]) +
+             (VP9_FILTER_WEIGHT >> 1);   /* Rounding */
 
       /* Normalize back to 0-255 */
-      Temp = Temp >> VP8_FILTER_SHIFT;
+      Temp = Temp >> VP9_FILTER_SHIFT;
 
       if (Temp < 0)
         Temp = 0;
@@ -510,13 +510,13 @@ static const unsigned int filter_size_to_wh[][2] = {
 static const unsigned int filter_max_height = 16;
 static const unsigned int filter_max_width = 16;
 
-static void vp8_filter_block2d_8_c
-(
- const unsigned char *src_ptr, const unsigned int   src_stride,
- const short *HFilter, const short *VFilter,
- const filter_size_t filter_size,
- unsigned char *dst_ptr, unsigned int   dst_stride
-) {
+static void filter_block2d_8_c(const unsigned char *src_ptr,
+                               const unsigned int   src_stride,
+                               const short *HFilter,
+                               const short *VFilter,
+                               const filter_size_t filter_size,
+                               unsigned char *dst_ptr,
+                               unsigned int   dst_stride) {
   const unsigned int output_width = filter_size_to_wh[filter_size][0];
   const unsigned int output_height = filter_size_to_wh[filter_size][1];
 
@@ -554,10 +554,10 @@ static void vp8_filter_block2d_8_c
                    ((int)src_ptr[5] * HFilter[5]) +
                    ((int)src_ptr[6] * HFilter[6]) +
                    ((int)src_ptr[7] * HFilter[7]) +
-                   (VP8_FILTER_WEIGHT >> 1); // Rounding
+                   (VP9_FILTER_WEIGHT >> 1); // Rounding
 
         // Normalize back to 0-255...
-        temp >>= VP8_FILTER_SHIFT;
+        temp >>= VP9_FILTER_SHIFT;
         if (temp < 0) {
           temp = 0;
         } else if (temp > 255) {
@@ -588,10 +588,10 @@ static void vp8_filter_block2d_8_c
                    ((int)src_ptr[5] * VFilter[5]) +
                    ((int)src_ptr[6] * VFilter[6]) +
                    ((int)src_ptr[7] * VFilter[7]) +
-                   (VP8_FILTER_WEIGHT >> 1); // Rounding
+                   (VP9_FILTER_WEIGHT >> 1); // Rounding
 
         // Normalize back to 0-255...
-        temp >>= VP8_FILTER_SHIFT;
+        temp >>= VP9_FILTER_SHIFT;
         if (temp < 0) {
           temp = 0;
         } else if (temp > 255) {
@@ -607,58 +607,55 @@ static void vp8_filter_block2d_8_c
   }
 }
 
-void vp9_filter_block2d_4x4_8_c
-(
- const unsigned char *src_ptr, const unsigned int src_stride,
- const short *HFilter_aligned16, const short *VFilter_aligned16,
- unsigned char *dst_ptr, unsigned int dst_stride
-) {
-  vp8_filter_block2d_8_c(src_ptr, src_stride,
-                         HFilter_aligned16, VFilter_aligned16,
-                         VPX_FILTER_4x4, dst_ptr, dst_stride);
+void vp9_filter_block2d_4x4_8_c(const unsigned char *src_ptr,
+                                const unsigned int src_stride,
+                                const short *HFilter_aligned16,
+                                const short *VFilter_aligned16,
+                                unsigned char *dst_ptr,
+                                unsigned int dst_stride) {
+  filter_block2d_8_c(src_ptr, src_stride,
+                     HFilter_aligned16, VFilter_aligned16,
+                     VPX_FILTER_4x4, dst_ptr, dst_stride);
 }
 
-void vp9_filter_block2d_8x4_8_c
-(
- const unsigned char *src_ptr, const unsigned int src_stride,
- const short *HFilter_aligned16, const short *VFilter_aligned16,
- unsigned char *dst_ptr, unsigned int dst_stride
-) {
-  vp8_filter_block2d_8_c(src_ptr, src_stride,
-                         HFilter_aligned16, VFilter_aligned16,
-                         VPX_FILTER_8x4, dst_ptr, dst_stride);
+void vp9_filter_block2d_8x4_8_c(const unsigned char *src_ptr,
+                                const unsigned int src_stride,
+                                const short *HFilter_aligned16,
+                                const short *VFilter_aligned16,
+                                unsigned char *dst_ptr,
+                                unsigned int dst_stride) {
+  filter_block2d_8_c(src_ptr, src_stride,
+                     HFilter_aligned16, VFilter_aligned16,
+                     VPX_FILTER_8x4, dst_ptr, dst_stride);
 }
 
-void vp9_filter_block2d_8x8_8_c
-(
- const unsigned char *src_ptr, const unsigned int src_stride,
- const short *HFilter_aligned16, const short *VFilter_aligned16,
- unsigned char *dst_ptr, unsigned int dst_stride
-) {
-  vp8_filter_block2d_8_c(src_ptr, src_stride,
-                         HFilter_aligned16, VFilter_aligned16,
-                         VPX_FILTER_8x8, dst_ptr, dst_stride);
+void vp9_filter_block2d_8x8_8_c(const unsigned char *src_ptr,
+                                const unsigned int src_stride,
+                                const short *HFilter_aligned16,
+                                const short *VFilter_aligned16,
+                                unsigned char *dst_ptr,
+                                unsigned int dst_stride) {
+  filter_block2d_8_c(src_ptr, src_stride,
+                     HFilter_aligned16, VFilter_aligned16,
+                     VPX_FILTER_8x8, dst_ptr, dst_stride);
 }
 
-void vp9_filter_block2d_16x16_8_c
-(
- const unsigned char *src_ptr, const unsigned int src_stride,
- const short *HFilter_aligned16, const short *VFilter_aligned16,
- unsigned char *dst_ptr, unsigned int dst_stride
-) {
-  vp8_filter_block2d_8_c(src_ptr, src_stride,
-                         HFilter_aligned16, VFilter_aligned16,
-                         VPX_FILTER_16x16, dst_ptr, dst_stride);
+void vp9_filter_block2d_16x16_8_c(const unsigned char *src_ptr,
+                                  const unsigned int src_stride,
+                                  const short *HFilter_aligned16,
+                                  const short *VFilter_aligned16,
+                                  unsigned char *dst_ptr,
+                                  unsigned int dst_stride) {
+  filter_block2d_8_c(src_ptr, src_stride,
+                     HFilter_aligned16, VFilter_aligned16,
+                     VPX_FILTER_16x16, dst_ptr, dst_stride);
 }
 
-static void vp8_block2d_average_c
-(
-  unsigned char *src,
-  unsigned int   src_stride,
-  unsigned char *output_ptr,
-  unsigned int output_stride,
-  const filter_size_t filter_size
-) {
+static void block2d_average_c(unsigned char *src,
+                              unsigned int   src_stride,
+                              unsigned char *output_ptr,
+                              unsigned int output_stride,
+                              const filter_size_t filter_size) {
   const unsigned int output_width = filter_size_to_wh[filter_size][0];
   const unsigned int output_height = filter_size_to_wh[filter_size][1];
 
@@ -671,7 +668,7 @@ static void vp8_block2d_average_c
   }
 }
 
-#define vp8_block2d_average vp8_block2d_average_c
+#define block2d_average block2d_average_c
 
 void vp9_eighttap_predict_c
 (
@@ -709,7 +706,7 @@ void vp9_eighttap_predict_avg4x4_c
   vp9_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            tmp, 4);
-  vp8_block2d_average(tmp, 4, dst_ptr, dst_pitch, VPX_FILTER_4x4);
+  block2d_average(tmp, 4, dst_ptr, dst_pitch, VPX_FILTER_4x4);
 }
 
 void vp9_eighttap_predict_sharp_c
@@ -748,7 +745,7 @@ void vp9_eighttap_predict_avg4x4_sharp_c
   vp9_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            tmp, 4);
-  vp8_block2d_average(tmp, 4, dst_ptr, dst_pitch, VPX_FILTER_4x4);
+  block2d_average(tmp, 4, dst_ptr, dst_pitch, VPX_FILTER_4x4);
 }
 
 void vp9_eighttap_predict8x8_c
@@ -801,7 +798,7 @@ void vp9_eighttap_predict_avg8x8_c
   vp9_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            tmp, 8);
-  vp8_block2d_average(tmp, 8, dst_ptr, dst_pitch, VPX_FILTER_8x8);
+  block2d_average(tmp, 8, dst_ptr, dst_pitch, VPX_FILTER_8x8);
 }
 
 void vp9_eighttap_predict_avg8x8_sharp_c
@@ -820,7 +817,7 @@ void vp9_eighttap_predict_avg8x8_sharp_c
   vp9_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            tmp, 8);
-  vp8_block2d_average(tmp, 8, dst_ptr, dst_pitch, VPX_FILTER_8x8);
+  block2d_average(tmp, 8, dst_ptr, dst_pitch, VPX_FILTER_8x8);
 }
 
 void vp9_eighttap_predict8x4_c
@@ -908,7 +905,7 @@ void vp9_eighttap_predict_avg16x16_c
   vp9_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
                        HFilter, VFilter,
                        tmp, 16);
-  vp8_block2d_average(tmp, 16, dst_ptr, dst_pitch, VPX_FILTER_16x16);
+  block2d_average(tmp, 16, dst_ptr, dst_pitch, VPX_FILTER_16x16);
 }
 
 void vp9_eighttap_predict_avg16x16_sharp_c
@@ -927,7 +924,7 @@ void vp9_eighttap_predict_avg16x16_sharp_c
   vp9_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
                        HFilter, VFilter,
                        tmp, 16);
-  vp8_block2d_average(tmp, 16, dst_ptr, dst_pitch, VPX_FILTER_16x16);
+  block2d_average(tmp, 16, dst_ptr, dst_pitch, VPX_FILTER_16x16);
 }
 
 /****************************************************************************
@@ -938,7 +935,7 @@ void vp9_eighttap_predict_avg16x16_sharp_c
  *                  UINT32  src_stride : Stride of source block.
  *                  UINT32  height     : Block height.
  *                  UINT32  width      : Block width.
- *                  INT32  *vp8_filter : Array of 2 bi-linear filter taps.
+ *                  INT32  *vp9_filter : Array of 2 bi-linear filter taps.
  *
  *  OUTPUTS       : INT32  *dst_ptr    : Pointer to filtered block.
  *
@@ -949,7 +946,7 @@ void vp9_eighttap_predict_avg16x16_sharp_c
  *                  block. Used to implement first-pass of 2-D separable filter.
  *
  *  SPECIAL NOTES : Produces INT32 output to retain precision for next pass.
- *                  Two filter taps should sum to VP8_FILTER_WEIGHT.
+ *                  Two filter taps should sum to VP9_FILTER_WEIGHT.
  *
  ****************************************************************************/
 static void filter_block2d_bil_first_pass
@@ -959,16 +956,16 @@ static void filter_block2d_bil_first_pass
   unsigned int    src_stride,
   unsigned int    height,
   unsigned int    width,
-  const short    *vp8_filter
+  const short    *vp9_filter
 ) {
   unsigned int i, j;
 
   for (i = 0; i < height; i++) {
     for (j = 0; j < width; j++) {
       /* Apply bilinear filter */
-      dst_ptr[j] = (((int)src_ptr[0] * vp8_filter[0]) +
-                    ((int)src_ptr[1] * vp8_filter[1]) +
-                    (VP8_FILTER_WEIGHT / 2)) >> VP8_FILTER_SHIFT;
+      dst_ptr[j] = (((int)src_ptr[0] * vp9_filter[0]) +
+                    ((int)src_ptr[1] * vp9_filter[1]) +
+                    (VP9_FILTER_WEIGHT / 2)) >> VP9_FILTER_SHIFT;
       src_ptr++;
     }
 
@@ -986,7 +983,7 @@ static void filter_block2d_bil_first_pass
  *                  UINT32  dst_pitch  : Destination block pitch.
  *                  UINT32  height     : Block height.
  *                  UINT32  width      : Block width.
- *                  INT32  *vp8_filter : Array of 2 bi-linear filter taps.
+ *                  INT32  *vp9_filter : Array of 2 bi-linear filter taps.
  *
  *  OUTPUTS       : UINT16 *dst_ptr    : Pointer to filtered block.
  *
@@ -997,7 +994,7 @@ static void filter_block2d_bil_first_pass
  *                  block. Used to implement second-pass of 2-D separable filter.
  *
  *  SPECIAL NOTES : Requires 32-bit input as produced by filter_block2d_bil_first_pass.
- *                  Two filter taps should sum to VP8_FILTER_WEIGHT.
+ *                  Two filter taps should sum to VP9_FILTER_WEIGHT.
  *
  ****************************************************************************/
 static void filter_block2d_bil_second_pass
@@ -1007,7 +1004,7 @@ static void filter_block2d_bil_second_pass
   int             dst_pitch,
   unsigned int    height,
   unsigned int    width,
-  const short    *vp8_filter
+  const short    *vp9_filter
 ) {
   unsigned int  i, j;
   int  Temp;
@@ -1015,10 +1012,10 @@ static void filter_block2d_bil_second_pass
   for (i = 0; i < height; i++) {
     for (j = 0; j < width; j++) {
       /* Apply filter */
-      Temp = ((int)src_ptr[0]     * vp8_filter[0]) +
-             ((int)src_ptr[width] * vp8_filter[1]) +
-             (VP8_FILTER_WEIGHT / 2);
-      dst_ptr[j] = (unsigned int)(Temp >> VP8_FILTER_SHIFT);
+      Temp = ((int)src_ptr[0]     * vp9_filter[0]) +
+             ((int)src_ptr[width] * vp9_filter[1]) +
+             (VP9_FILTER_WEIGHT / 2);
+      dst_ptr[j] = (unsigned int)(Temp >> VP9_FILTER_SHIFT);
       src_ptr++;
     }
 
@@ -1043,7 +1040,7 @@ static void filter_block2d_bil_second_pass_avg
   int             dst_pitch,
   unsigned int    height,
   unsigned int    width,
-  const short    *vp8_filter
+  const short    *vp9_filter
 ) {
   unsigned int  i, j;
   int  Temp;
@@ -1051,10 +1048,10 @@ static void filter_block2d_bil_second_pass_avg
   for (i = 0; i < height; i++) {
     for (j = 0; j < width; j++) {
       /* Apply filter */
-      Temp = ((int)src_ptr[0]     * vp8_filter[0]) +
-             ((int)src_ptr[width] * vp8_filter[1]) +
-             (VP8_FILTER_WEIGHT / 2);
-      dst_ptr[j] = (unsigned int)(((Temp >> VP8_FILTER_SHIFT) + dst_ptr[j] + 1) >> 1);
+      Temp = ((int)src_ptr[0]     * vp9_filter[0]) +
+             ((int)src_ptr[width] * vp9_filter[1]) +
+             (VP9_FILTER_WEIGHT / 2);
+      dst_ptr[j] = (unsigned int)(((Temp >> VP9_FILTER_SHIFT) + dst_ptr[j] + 1) >> 1);
       src_ptr++;
     }
 

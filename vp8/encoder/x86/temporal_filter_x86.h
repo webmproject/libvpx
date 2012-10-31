@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_VP8_TEMPORAL_FILTER_X86_H
-#define __INC_VP8_TEMPORAL_FILTER_X86_H
+#ifndef __INC_TEMPORAL_FILTER_X86_H
+#define __INC_TEMPORAL_FILTER_X86_H
 
 #if HAVE_SSE2
 extern prototype_apply(vp9_temporal_filter_apply_sse2);
@@ -24,4 +24,4 @@ extern prototype_apply(vp9_temporal_filter_apply_sse2);
 
 #endif
 
-#endif // __INC_VP8_TEMPORAL_FILTER_X86_H
+#endif // __INC_TEMPORAL_FILTER_X86_H

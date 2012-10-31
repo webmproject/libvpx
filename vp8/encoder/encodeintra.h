@@ -14,14 +14,14 @@
 #include "onyx_int.h"
 
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred);
-void vp9_encode_intra16x16mby(const VP8_ENCODER_RTCD *, MACROBLOCK *x);
-void vp9_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *, MACROBLOCK *x);
-void vp9_encode_intra4x4mby(const VP8_ENCODER_RTCD *, MACROBLOCK *mb);
-void vp9_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
+void vp9_encode_intra16x16mby(const VP9_ENCODER_RTCD *, MACROBLOCK *x);
+void vp9_encode_intra16x16mbuv(const VP9_ENCODER_RTCD *, MACROBLOCK *x);
+void vp9_encode_intra4x4mby(const VP9_ENCODER_RTCD *, MACROBLOCK *mb);
+void vp9_encode_intra4x4block(const VP9_ENCODER_RTCD *rtcd,
                               MACROBLOCK *x, int ib);
-void vp9_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
-void vp9_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
-void vp9_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
+void vp9_encode_intra8x8mby(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x);
+void vp9_encode_intra8x8mbuv(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x);
+void vp9_encode_intra8x8(const VP9_ENCODER_RTCD *rtcd,
                          MACROBLOCK *x, int ib);
 
 #endif

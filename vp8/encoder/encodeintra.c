@@ -52,7 +52,7 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   return intra_pred_var;
 }
 
-void vp9_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
+void vp9_encode_intra4x4block(const VP9_ENCODER_RTCD *rtcd,
                               MACROBLOCK *x, int ib) {
   BLOCKD *b = &x->e_mbd.block[ib];
   BLOCK *be = &x->block[ib];
@@ -64,7 +64,7 @@ void vp9_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
     vp9_intra4x4_predict(b, b->bmi.as_mode.first, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
   } else {
-    vp8_comp_intra4x4_predict(b, b->bmi.as_mode.first, b->bmi.as_mode.second,
+    vp9_comp_intra4x4_predict(b, b->bmi.as_mode.first, b->bmi.as_mode.second,
                               b->predictor);
   }
 #endif
@@ -85,7 +85,7 @@ void vp9_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
   vp9_recon_b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 }
 
-void vp9_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb) {
+void vp9_encode_intra4x4mby(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *mb) {
   int i;
 
   for (i = 0; i < 16; i++)
@@ -93,7 +93,7 @@ void vp9_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb) {
   return;
 }
 
-void vp9_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_intra16x16mby(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
@@ -105,7 +105,7 @@ void vp9_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     vp9_build_intra_predictors_mby(xd);
 #if CONFIG_COMP_INTRA_PRED
   else
-    vp8_build_comp_intra_predictors_mby(xd);
+    vp9_build_comp_intra_predictors_mby(xd);
 #endif
 
   vp9_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
@@ -143,7 +143,7 @@ void vp9_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   vp9_recon_mby(xd);
 }
 
-void vp9_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_intra16x16mbuv(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
@@ -153,7 +153,7 @@ void vp9_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
     vp9_build_intra_predictors_mbuv(xd);
 #if CONFIG_COMP_INTRA_PRED
   } else {
-    vp8_build_comp_intra_predictors_mbuv(xd);
+    vp9_build_comp_intra_predictors_mbuv(xd);
   }
 #endif
 
@@ -177,7 +177,7 @@ void vp9_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   vp9_recon_intra_mbuv(xd);
 }
 
-void vp9_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
+void vp9_encode_intra8x8(const VP9_ENCODER_RTCD *rtcd,
                          MACROBLOCK *x, int ib) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCKD *b = &xd->block[ib];
@@ -192,7 +192,7 @@ void vp9_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     vp9_intra8x8_predict(b, b->bmi.as_mode.first, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
   } else {
-    vp8_comp_intra8x8_predict(b, b->bmi.as_mode.first, b->bmi.as_mode.second,
+    vp9_comp_intra8x8_predict(b, b->bmi.as_mode.first, b->bmi.as_mode.second,
                               b->predictor);
   }
 #endif
@@ -213,7 +213,7 @@ void vp9_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     } else {
       x->vp9_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
-      vp8_idct_idct8(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
+      vp9_idct_idct8(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
     }
   } else {
     for (i = 0; i < 4; i++) {
@@ -234,7 +234,7 @@ void vp9_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
   }
 }
 
-void vp9_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_intra8x8mby(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   int i, ib;
 
   for (i = 0; i < 4; i++) {
@@ -243,7 +243,7 @@ void vp9_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   }
 }
 
-void vp9_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
+void vp9_encode_intra_uv4x4(const VP9_ENCODER_RTCD *rtcd,
                             MACROBLOCK *x, int ib,
                             int mode, int second) {
   BLOCKD *b = &x->e_mbd.block[ib];
@@ -255,7 +255,7 @@ void vp9_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
     vp9_intra_uv4x4_predict(b, mode, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
   } else {
-    vp8_comp_intra_uv4x4_predict(b, mode, second, b->predictor);
+    vp9_comp_intra_uv4x4_predict(b, mode, second, b->predictor);
   }
 #endif
 
@@ -268,7 +268,7 @@ void vp9_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
   vp9_recon_uv_b_c(b->predictor,b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 }
 
-void vp9_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_intra8x8mbuv(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   int i, ib, mode, second;
   BLOCKD *b;
 

@@ -17,10 +17,6 @@
 #include "common.h"
 #include "coefupdateprobs.h"
 
-
-//#define SUBMVREF_COUNT 5
-//#define VP8_NUMMBSPLITS 4
-
 extern const int vp9_i8x8_block[4];
 
 /* Coefficient token alphabet */
@@ -41,18 +37,18 @@ extern const int vp9_i8x8_block[4];
 #define ENTROPY_NODES 11
 #define EOSB_TOKEN              127     /* Not signalled, encoder only */
 
-extern const vp8_tree_index vp9_coef_tree[];
+extern const vp9_tree_index vp9_coef_tree[];
 
-extern struct vp8_token_struct vp9_coef_encodings[MAX_ENTROPY_TOKENS];
+extern struct vp9_token_struct vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 typedef struct {
-  vp8_tree_p tree;
-  const vp8_prob *prob;
+  vp9_tree_p tree;
+  const vp9_prob *prob;
   int Len;
   int base_val;
-} vp8_extra_bit_struct;
+} vp9_extra_bit_struct;
 
-extern vp8_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
+extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 
 #define PROB_UPDATE_BASELINE_COST   7
 
@@ -107,7 +103,6 @@ extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d[16]);
 extern DECLARE_ALIGNED(16, const int, vp9_col_scan[16]);
 extern DECLARE_ALIGNED(16, const int, vp9_row_scan[16]);
 
-extern short vp8_default_zig_zag_mask[16];
 extern DECLARE_ALIGNED(64, const int, vp9_default_zig_zag1d_8x8[64]);
 void vp9_coef_tree_initialize(void);
 

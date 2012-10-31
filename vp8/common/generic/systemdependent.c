@@ -18,7 +18,7 @@
 #include "vp8/common/onyxc_int.h"
 
 extern void vp9_arch_x86_common_init(VP9_COMMON *ctx);
-extern void vp8_arch_arm_common_init(VP9_COMMON *ctx);
+extern void vp9_arch_arm_common_init(VP9_COMMON *ctx);
 
 void vp9_machine_specific_config(VP9_COMMON *ctx) {
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -82,7 +82,7 @@ void vp9_machine_specific_config(VP9_COMMON *ctx) {
 
 
 #if ARCH_ARM
-  vp8_arch_arm_common_init(ctx);
+  vp9_arch_arm_common_init(ctx);
 #endif
 
   vpx_rtcd();

@@ -247,7 +247,7 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
 int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                              int_mv *bestmv, int_mv *ref_mv,
                                              int error_per_bit,
-                                             const vp8_variance_fn_ptr_t *vfp,
+                                             const vp9_variance_fn_ptr_t *vfp,
                                              DEC_MVCOSTS,
                                              int *distortion,
                                              unsigned int *sse1) {
@@ -446,7 +446,7 @@ int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 int vp9_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                  int_mv *bestmv, int_mv *ref_mv,
                                  int error_per_bit,
-                                 const vp8_variance_fn_ptr_t *vfp,
+                                 const vp9_variance_fn_ptr_t *vfp,
                                  DEC_MVCOSTS, int *distortion,
                                  unsigned int *sse1) {
   int bestmse = INT_MAX;
@@ -926,7 +926,7 @@ int vp9_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 int vp9_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                   int_mv *bestmv, int_mv *ref_mv,
                                   int error_per_bit,
-                                  const vp8_variance_fn_ptr_t *vfp,
+                                  const vp9_variance_fn_ptr_t *vfp,
                                   DEC_MVCOSTS,
                                   int *distortion,
                                   unsigned int *sse1) {
@@ -1108,7 +1108,7 @@ int vp9_hex_search
   int_mv *best_mv,
   int search_param,
   int sad_per_bit,
-  const vp8_variance_fn_ptr_t *vfp,
+  const vp9_variance_fn_ptr_t *vfp,
   DEC_MVSADCOSTS,
   DEC_MVCOSTS,
   int_mv *center_mv
@@ -1135,7 +1135,7 @@ int vp9_hex_search
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
   // adjust ref_mv to make sure it is within MV range
-  vp8_clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
   br = ref_mv->as_mv.row;
   bc = ref_mv->as_mv.col;
 
@@ -1258,7 +1258,7 @@ cal_neighbors:
 int vp9_diamond_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                            int_mv *ref_mv, int_mv *best_mv,
                            int search_param, int sad_per_bit, int *num00,
-                           vp8_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
+                           vp9_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
                            int_mv *center_mv) {
   int i, j, step;
 
@@ -1290,7 +1290,7 @@ int vp9_diamond_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
-  vp8_clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
   ref_row = ref_mv->as_mv.row;
   ref_col = ref_mv->as_mv.col;
   *num00 = 0;
@@ -1367,7 +1367,7 @@ int vp9_diamond_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 int vp9_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                              int_mv *ref_mv, int_mv *best_mv, int search_param,
                              int sad_per_bit, int *num00,
-                             vp8_variance_fn_ptr_t *fn_ptr,
+                             vp9_variance_fn_ptr_t *fn_ptr,
                              DEC_MVCOSTS, int_mv *center_mv) {
   int i, j, step;
 
@@ -1401,7 +1401,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
-  vp8_clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
   ref_row = ref_mv->as_mv.row;
   ref_col = ref_mv->as_mv.col;
   *num00 = 0;
@@ -1515,7 +1515,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *b,
                            BLOCKD *d, int_mv *mvp_full, int step_param,
                            int sadpb, int further_steps,
-                           int do_refine, vp8_variance_fn_ptr_t *fn_ptr,
+                           int do_refine, vp9_variance_fn_ptr_t *fn_ptr,
                            int_mv *ref_mv, int_mv *dst_mv) {
   int_mv temp_mv;
   int thissme, n, num00;
@@ -1570,7 +1570,7 @@ int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *b,
 
 int vp9_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                         int sad_per_bit, int distance,
-                        vp8_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
+                        vp9_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
                         int_mv *center_mv) {
   unsigned char *what = (*(b->base_src) + b->src);
   int what_stride = b->src_stride;
@@ -1664,7 +1664,7 @@ int vp9_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
 int vp9_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                           int sad_per_bit, int distance,
-                          vp8_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
+                          vp9_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
                           int_mv *center_mv) {
   unsigned char *what = (*(b->base_src) + b->src);
   int what_stride = b->src_stride;
@@ -1791,7 +1791,7 @@ int vp9_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
 int vp9_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                           int sad_per_bit, int distance,
-                          vp8_variance_fn_ptr_t *fn_ptr,
+                          vp9_variance_fn_ptr_t *fn_ptr,
                           DEC_MVCOSTS,
                           int_mv *center_mv) {
   unsigned char *what = (*(b->base_src) + b->src);
@@ -1945,7 +1945,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
 int vp9_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                             int error_per_bit, int search_range,
-                            vp8_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
+                            vp9_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
                             int_mv *center_mv) {
   MV neighbors[4] = {{ -1, 0}, {0, -1}, {0, 1}, {1, 0}};
   int i, j;
@@ -2021,7 +2021,7 @@ int vp9_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
 int vp9_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                               int_mv *ref_mv, int error_per_bit,
-                              int search_range, vp8_variance_fn_ptr_t *fn_ptr,
+                              int search_range, vp9_variance_fn_ptr_t *fn_ptr,
                               DEC_MVCOSTS, int_mv *center_mv) {
   MV neighbors[4] = {{ -1, 0}, {0, -1}, {0, 1}, {1, 0}};
   int i, j;
@@ -2133,7 +2133,7 @@ void print_mode_context(void) {
   int i, j;
 
   fprintf(f, "#include \"entropy.h\"\n");
-  fprintf(f, "const int vp8_mode_contexts[6][4] =");
+  fprintf(f, "const int vp9_mode_contexts[6][4] =");
   fprintf(f, "{\n");
   for (j = 0; j < 6; j++) {
     fprintf(f, "  {/* %d */ ", j);

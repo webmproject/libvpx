@@ -53,7 +53,7 @@ void vp9_stop_encode(BOOL_CODER *br) {
   int i;
 
   for (i = 0; i < 32; i++)
-    vp8_encode_bool(br, 0, 128);
+    encode_bool(br, 0, 128);
 }
 
 
@@ -61,8 +61,7 @@ void vp9_encode_value(BOOL_CODER *br, int data, int bits) {
   int bit;
 
   for (bit = bits - 1; bit >= 0; bit--)
-    vp8_encode_bool(br, (1 & (data >> bit)), 0x80);
-
+    encode_bool(br, (1 & (data >> bit)), 0x80);
 }
 
 int vp9_recenter_nonneg(int v, int m) {

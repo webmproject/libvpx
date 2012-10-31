@@ -49,7 +49,7 @@ extern int vp9_recenter_nonneg(int v, int m);
 DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
 
 
-static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability) {
+static void encode_bool(BOOL_CODER *br, int bit, int probability) {
   unsigned int split;
   int count = br->count;
   unsigned int range = br->range;

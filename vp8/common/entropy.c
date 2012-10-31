@@ -24,7 +24,7 @@
 typedef const uchar cuchar;
 typedef const uint cuint;
 
-typedef vp8_prob Prob;
+typedef vp9_prob Prob;
 
 #include "coefupdateprobs.h"
 
@@ -135,7 +135,7 @@ DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]) = {
 
 /* Array indices are identical to previously-existing CONTEXT_NODE indices */
 
-const vp8_tree_index vp9_coef_tree[ 22] =     /* corresponding _CONTEXT_NODEs */
+const vp9_tree_index vp9_coef_tree[ 22] =     /* corresponding _CONTEXT_NODEs */
 {
   -DCT_EOB_TOKEN, 2,                             /* 0 = EOB */
   -ZERO_TOKEN, 4,                               /* 1 = ZERO */
@@ -150,7 +150,7 @@ const vp8_tree_index vp9_coef_tree[ 22] =     /* corresponding _CONTEXT_NODEs */
   -DCT_VAL_CATEGORY5, -DCT_VAL_CATEGORY6   /* 10 = CAT_FIVE */
 };
 
-struct vp8_token_struct vp9_coef_encodings[MAX_ENTROPY_TOKENS];
+struct vp9_token_struct vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 /* Trees for extra bits.  Probabilities are constant and
    do not depend on previously encoded bits */
@@ -163,9 +163,9 @@ static const Prob Pcat5[] = { 180, 157, 141, 134, 130};
 static const Prob Pcat6[] =
 { 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129};
 
-static vp8_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[26];
+static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[26];
 
-static void init_bit_tree(vp8_tree_index *p, int n) {
+static void init_bit_tree(vp9_tree_index *p, int n) {
   int i = 0;
 
   while (++i < n) {
@@ -185,7 +185,7 @@ static void init_bit_trees() {
   init_bit_tree(cat6, 13);
 }
 
-vp8_extra_bit_struct vp9_extra_bits[12] = {
+vp9_extra_bit_struct vp9_extra_bits[12] = {
   { 0, 0, 0, 0},
   { 0, 0, 0, 1},
   { 0, 0, 0, 2},
@@ -237,7 +237,7 @@ void vp9_coef_tree_initialize() {
 void vp9_adapt_coef_probs(VP9_COMMON *cm) {
   int t, i, j, k, count;
   unsigned int branch_ct[ENTROPY_NODES][2];
-  vp8_prob coef_probs[ENTROPY_NODES];
+  vp9_prob coef_probs[ENTROPY_NODES];
   int update_factor; /* denominator 256 */
   int factor;
   int count_sat;

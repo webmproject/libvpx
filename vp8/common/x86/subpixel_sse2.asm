@@ -12,8 +12,8 @@
 %include "vpx_ports/x86_abi_support.asm"
 
 %define BLOCK_HEIGHT_WIDTH 4
-%define VP8_FILTER_WEIGHT 128
-%define VP8_FILTER_SHIFT  7
+%define VP9_FILTER_WEIGHT 128
+%define VP9_FILTER_SHIFT  7
 
 
 ;/************************************************************************************
@@ -30,7 +30,7 @@
 ;    unsigned int    pixel_step,
 ;    unsigned int    output_height,
 ;    unsigned int    output_width,
-;    short           *vp8_filter
+;    short           *vp9_filter
 ;)
 global sym(vp9_filter_block1d8_h6_sse2)
 sym(vp9_filter_block1d8_h6_sse2):
@@ -43,7 +43,7 @@ sym(vp9_filter_block1d8_h6_sse2):
     push        rdi
     ; end prolog
 
-        mov         rdx,        arg(6) ;vp8_filter
+        mov         rdx,        arg(6) ;vp9_filter
         mov         rsi,        arg(0) ;src_ptr
 
         mov         rdi,        arg(1) ;output_ptr
@@ -144,7 +144,7 @@ sym(vp9_filter_block1d8_h6_sse2):
 ;    unsigned int    pixel_step,
 ;    unsigned int    output_height,
 ;    unsigned int    output_width,
-;    short           *vp8_filter
+;    short           *vp9_filter
 ;)
 ;/************************************************************************************
 ; Notes: filter_block1d_h6 applies a 6 tap filter horizontally to the input pixels. The
@@ -163,7 +163,7 @@ sym(vp9_filter_block1d16_h6_sse2):
     push        rdi
     ; end prolog
 
-        mov         rdx,        arg(6) ;vp8_filter
+        mov         rdx,        arg(6) ;vp9_filter
         mov         rsi,        arg(0) ;src_ptr
 
         mov         rdi,        arg(1) ;output_ptr
@@ -322,7 +322,7 @@ sym(vp9_filter_block1d16_h6_sse2):
 ;    unsigned int pixel_step,
 ;    unsigned int output_height,
 ;    unsigned int output_width,
-;    short * vp8_filter
+;    short * vp9_filter
 ;)
 ;/************************************************************************************
 ; Notes: filter_block1d8_v6 applies a 6 tap filter vertically to the input pixels. The
@@ -339,7 +339,7 @@ sym(vp9_filter_block1d8_v6_sse2):
     push        rdi
     ; end prolog
 
-        mov         rax,        arg(7) ;vp8_filter
+        mov         rax,        arg(7) ;vp9_filter
         movsxd      rdx,        dword ptr arg(3) ;pixels_per_line
 
         mov         rdi,        arg(1) ;output_ptr
@@ -417,7 +417,7 @@ sym(vp9_filter_block1d8_v6_sse2):
 ;    unsigned int pixel_step,
 ;    unsigned int output_height,
 ;    unsigned int output_width,
-;    const short    *vp8_filter
+;    const short    *vp9_filter
 ;)
 ;/************************************************************************************
 ; Notes: filter_block1d16_v6 applies a 6 tap filter vertically to the input pixels. The
@@ -434,7 +434,7 @@ sym(vp9_filter_block1d16_v6_sse2):
     push        rdi
     ; end prolog
 
-        mov         rax,        arg(7) ;vp8_filter
+        mov         rax,        arg(7) ;vp9_filter
         movsxd      rdx,        dword ptr arg(3) ;pixels_per_line
 
         mov         rdi,        arg(1) ;output_ptr
@@ -530,7 +530,7 @@ sym(vp9_filter_block1d16_v6_sse2):
 ;    unsigned char  *output_ptr,
 ;    int dst_ptich,
 ;    unsigned int    output_height,
-;    const short    *vp8_filter
+;    const short    *vp9_filter
 ;)
 ; First-pass filter only when yoffset==0
 global sym(vp9_filter_block1d8_h6_only_sse2)
@@ -544,7 +544,7 @@ sym(vp9_filter_block1d8_h6_only_sse2):
     push        rdi
     ; end prolog
 
-        mov         rdx,        arg(5) ;vp8_filter
+        mov         rdx,        arg(5) ;vp9_filter
         mov         rsi,        arg(0) ;src_ptr
 
         mov         rdi,        arg(2) ;output_ptr
@@ -643,7 +643,7 @@ sym(vp9_filter_block1d8_h6_only_sse2):
 ;    unsigned char  *output_ptr,
 ;    int dst_ptich,
 ;    unsigned int    output_height,
-;    const short    *vp8_filter
+;    const short    *vp9_filter
 ;)
 ; First-pass filter only when yoffset==0
 global sym(vp9_filter_block1d16_h6_only_sse2)
@@ -657,7 +657,7 @@ sym(vp9_filter_block1d16_h6_only_sse2):
     push        rdi
     ; end prolog
 
-        mov         rdx,        arg(5) ;vp8_filter
+        mov         rdx,        arg(5) ;vp9_filter
         mov         rsi,        arg(0) ;src_ptr
 
         mov         rdi,        arg(2) ;output_ptr
@@ -808,7 +808,7 @@ sym(vp9_filter_block1d16_h6_only_sse2):
 ;    unsigned char *output_ptr,
 ;    int dst_ptich,
 ;    unsigned int output_height,
-;    const short    *vp8_filter
+;    const short    *vp9_filter
 ;)
 ; Second-pass filter only when xoffset==0
 global sym(vp9_filter_block1d8_v6_only_sse2)
@@ -828,7 +828,7 @@ sym(vp9_filter_block1d8_v6_only_sse2):
         movsxd      rcx,        dword ptr arg(4) ;output_height
         movsxd      rdx,        dword ptr arg(1) ;src_pixels_per_line
 
-        mov         rax,        arg(5) ;vp8_filter
+        mov         rax,        arg(5) ;vp9_filter
 
         pxor        xmm0,       xmm0                        ; clear xmm0
 
@@ -1032,10 +1032,10 @@ sym(vp9_bilinear_predict16x16_sse2):
         paddw       xmm4,       xmm6
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT        ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT        ; xmm3 /= 128
 
         paddw       xmm4,       [GLOBAL(rd)]
-        psraw       xmm4,       VP8_FILTER_SHIFT
+        psraw       xmm4,       VP9_FILTER_SHIFT
 
         movdqa      xmm7,       xmm3
         packuswb    xmm7,       xmm4
@@ -1073,10 +1073,10 @@ sym(vp9_bilinear_predict16x16_sse2):
         pmullw      xmm6,       [rax]
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT        ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT        ; xmm3 /= 128
 
         paddw       xmm4,       [GLOBAL(rd)]
-        psraw       xmm4,       VP8_FILTER_SHIFT
+        psraw       xmm4,       VP9_FILTER_SHIFT
 
         movdqa      xmm7,       xmm3
         packuswb    xmm7,       xmm4
@@ -1088,10 +1088,10 @@ sym(vp9_bilinear_predict16x16_sse2):
         paddw       xmm4,       xmm6
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT        ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT        ; xmm3 /= 128
 
         paddw       xmm4,       [GLOBAL(rd)]
-        psraw       xmm4,       VP8_FILTER_SHIFT
+        psraw       xmm4,       VP9_FILTER_SHIFT
 
         packuswb    xmm3,       xmm4
         movdqa      [rdi],      xmm3                 ; store the results in the destination
@@ -1153,10 +1153,10 @@ sym(vp9_bilinear_predict16x16_sse2):
         paddw       xmm4,       xmm6
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT        ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT        ; xmm3 /= 128
 
         paddw       xmm4,       [GLOBAL(rd)]
-        psraw       xmm4,       VP8_FILTER_SHIFT
+        psraw       xmm4,       VP9_FILTER_SHIFT
 
         packuswb    xmm3,       xmm4
         movdqa      [rdi],      xmm3                 ; store the results in the destination
@@ -1197,10 +1197,10 @@ sym(vp9_bilinear_predict16x16_sse2):
         paddw       xmm4,       xmm6
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT        ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT        ; xmm3 /= 128
 
         paddw       xmm4,       [GLOBAL(rd)]
-        psraw       xmm4,       VP8_FILTER_SHIFT
+        psraw       xmm4,       VP9_FILTER_SHIFT
 
         packuswb    xmm3,       xmm4
         movdqa      [rdi],      xmm3                 ; store the results in the destination
@@ -1314,7 +1314,7 @@ sym(vp9_bilinear_predict8x8_sse2):
         paddw       xmm3,       xmm4
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT        ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT        ; xmm3 /= 128
 
         movdqa      xmm7,       xmm3
         add         rsp,        16                 ; next line
@@ -1333,7 +1333,7 @@ sym(vp9_bilinear_predict8x8_sse2):
         pmullw      xmm7,       xmm5
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT        ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT        ; xmm3 /= 128
 
         movdqa      xmm4,       xmm3
 
@@ -1343,7 +1343,7 @@ sym(vp9_bilinear_predict8x8_sse2):
         movdqa      xmm7,       xmm4
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT        ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT        ; xmm3 /= 128
 
         packuswb    xmm3,       xmm0
         movq        [rdi],      xmm3                 ; store the results in the destination

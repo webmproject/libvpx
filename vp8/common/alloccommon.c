@@ -19,8 +19,6 @@
 #include "systemdependent.h"
 
 
-extern  void vp8_init_scan_order_mask();
-
 void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi_base) {
   int stride = cpi->mode_info_stride;
   int i;

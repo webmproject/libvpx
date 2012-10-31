@@ -12,11 +12,11 @@
     .globl vp8_get8x8var_ppc
     .globl vp8_get16x16var_ppc
     .globl vp8_mse16x16_ppc
-    .globl vp8_variance16x16_ppc
-    .globl vp8_variance16x8_ppc
-    .globl vp8_variance8x16_ppc
-    .globl vp8_variance8x8_ppc
-    .globl vp8_variance4x4_ppc
+    .globl vp9_variance16x16_ppc
+    .globl vp9_variance16x8_ppc
+    .globl vp9_variance8x16_ppc
+    .globl vp9_variance8x8_ppc
+    .globl vp9_variance4x4_ppc
 
 .macro load_aligned_16 V R O
     lvsl    v3,  0, \R          ;# permutate value for alignment
@@ -242,7 +242,7 @@ mse16x16_loop:
 ;# r7 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_variance16x16_ppc:
+vp9_variance16x16_ppc:
 
     prologue
 
@@ -262,7 +262,7 @@ vp8_variance16x16_ppc:
 ;# r7 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_variance16x8_ppc:
+vp9_variance16x8_ppc:
 
     prologue
 
@@ -283,7 +283,7 @@ vp8_variance16x8_ppc:
 ;# r7 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_variance8x16_ppc:
+vp9_variance8x16_ppc:
 
     prologue
 
@@ -304,7 +304,7 @@ vp8_variance8x16_ppc:
 ;# r7 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_variance8x8_ppc:
+vp9_variance8x8_ppc:
 
     prologue
 
@@ -343,7 +343,7 @@ vp8_variance8x8_ppc:
 ;# r7 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_variance4x4_ppc:
+vp9_variance4x4_ppc:
 
     prologue
 

@@ -18,7 +18,7 @@ extern void (*vp9_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc, YV12
 extern void vp9_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
 extern void vpxyv12_copy_partial_frame_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
 
-void vp8_arch_arm_encoder_init(VP9_COMP *cpi) {
+void vp9_arch_arm_encoder_init(VP9_COMP *cpi) {
 #if CONFIG_RUNTIME_CPU_DETECT
   int flags = cpi->common.rtcd.flags;
 

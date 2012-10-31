@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vp8_variance16x16_armv6|
+    EXPORT  |vp9_variance16x16_armv6|
 
     ARM
     REQUIRE8
@@ -22,7 +22,7 @@
 ; r2    unsigned char *ref_ptr
 ; r3    int  recon_stride
 ; stack unsigned int *sse
-|vp8_variance16x16_armv6| PROC
+|vp9_variance16x16_armv6| PROC
 
     stmfd   sp!, {r4-r12, lr}
 

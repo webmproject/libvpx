@@ -9,11 +9,11 @@
 ;
 
 
-    .globl vp8_sub_pixel_variance4x4_ppc
-    .globl vp8_sub_pixel_variance8x8_ppc
-    .globl vp8_sub_pixel_variance8x16_ppc
-    .globl vp8_sub_pixel_variance16x8_ppc
-    .globl vp8_sub_pixel_variance16x16_ppc
+    .globl vp9_sub_pixel_variance4x4_ppc
+    .globl vp9_sub_pixel_variance8x8_ppc
+    .globl vp9_sub_pixel_variance8x16_ppc
+    .globl vp9_sub_pixel_variance16x8_ppc
+    .globl vp9_sub_pixel_variance16x16_ppc
 
 .macro load_c V, LABEL, OFF, R0, R1
     lis     \R0, \LABEL@ha
@@ -191,7 +191,7 @@
 ;# r9 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_sub_pixel_variance4x4_ppc:
+vp9_sub_pixel_variance4x4_ppc:
     mfspr   r11, 256            ;# get old VRSAVE
     oris    r12, r11, 0xf830
     ori     r12, r12, 0xfff8
@@ -282,7 +282,7 @@ compute_sum_sse_4x4_b:
 ;# r9 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_sub_pixel_variance8x8_ppc:
+vp9_sub_pixel_variance8x8_ppc:
     mfspr   r11, 256            ;# get old VRSAVE
     oris    r12, r11, 0xfff0
     ori     r12, r12, 0xffff
@@ -392,7 +392,7 @@ compute_sum_sse_8x8_b:
 ;# r9 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_sub_pixel_variance8x16_ppc:
+vp9_sub_pixel_variance8x16_ppc:
     mfspr   r11, 256            ;# get old VRSAVE
     oris    r12, r11, 0xffff
     ori     r12, r12, 0xfffc
@@ -609,7 +609,7 @@ compute_sum_sse_8x16_b:
 ;# r9 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_sub_pixel_variance16x8_ppc:
+vp9_sub_pixel_variance16x8_ppc:
     mfspr   r11, 256            ;# get old VRSAVE
     oris    r12, r11, 0xffff
     ori     r12, r12, 0xfff8
@@ -702,7 +702,7 @@ compute_sum_sse_16x8_b:
 ;# r9 unsigned int *sse
 ;#
 ;# r3 return value
-vp8_sub_pixel_variance16x16_ppc:
+vp9_sub_pixel_variance16x16_ppc:
     mfspr   r11, 256            ;# get old VRSAVE
     oris    r12, r11, 0xffff
     ori     r12, r12, 0xfff8

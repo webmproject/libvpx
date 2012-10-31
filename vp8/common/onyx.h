@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_VP8_H
-#define __INC_VP8_H
+#ifndef __INC_ONYX_H
+#define __INC_ONYX_H
 
 #ifdef __cplusplus
 extern "C"
@@ -35,10 +35,10 @@ extern "C"
   } VPX_SCALING;
 
   typedef enum {
-    VP8_LAST_FLAG = 1,
-    VP8_GOLD_FLAG = 2,
-    VP8_ALT_FLAG = 4
-  } VP8_REFFRAME;
+    VP9_LAST_FLAG = 1,
+    VP9_GOLD_FLAG = 2,
+    VP9_ALT_FLAG = 4
+  } VP9_REFFRAME;
 
 
   typedef enum {
@@ -169,16 +169,15 @@ extern "C"
     struct vpx_codec_pkt_list  *output_pkt_list;
 
     vp8e_tuning tuning;
-  } VP8_CONFIG;
+  } VP9_CONFIG;
 
 
   void vp9_initialize_enc();
 
-  VP9_PTR vp9_create_compressor(VP8_CONFIG *oxcf);
+  VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf);
   void vp9_remove_compressor(VP9_PTR *comp);
 
-  void vp8_init_config(VP9_PTR onyx, VP8_CONFIG *oxcf);
-  void vp9_change_config(VP9_PTR onyx, VP8_CONFIG *oxcf);
+  void vp9_change_config(VP9_PTR onyx, VP9_CONFIG *oxcf);
 
 // receive a frames worth of data caller can assume that a copy of this frame is made
 // and not just a copy of the pointer..
@@ -192,16 +191,16 @@ extern "C"
                               int flush);
 
   int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
-                                vp8_ppflags_t *flags);
+                                vp9_ppflags_t *flags);
 
   int vp9_use_as_reference(VP9_PTR comp, int ref_frame_flags);
 
   int vp9_update_reference(VP9_PTR comp, int ref_frame_flags);
 
-  int vp9_get_reference_enc(VP9_PTR comp, VP8_REFFRAME ref_frame_flag,
+  int vp9_get_reference_enc(VP9_PTR comp, VP9_REFFRAME ref_frame_flag,
                             YV12_BUFFER_CONFIG *sd);
 
-  int vp9_set_reference_enc(VP9_PTR comp, VP8_REFFRAME ref_frame_flag,
+  int vp9_set_reference_enc(VP9_PTR comp, VP9_REFFRAME ref_frame_flag,
                             YV12_BUFFER_CONFIG *sd);
 
   int vp9_update_entropy(VP9_PTR comp, int update);
@@ -223,4 +222,4 @@ extern "C"
 }
 #endif
 
-#endif
+#endif  // __INC_ONYX_H

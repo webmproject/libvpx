@@ -11,7 +11,7 @@
 
 #include "vpx_scale/yv12config.h"
 #include "math.h"
-#include "vp8/common/systemdependent.h" /* for vp8_clear_system_state() */
+#include "vp8/common/systemdependent.h" /* for vp9_clear_system_state() */
 
 #define MAX_PSNR 100
 

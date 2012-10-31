@@ -529,7 +529,7 @@ void vp9_short_fhaar2x2_c(short *input, short *output, int pitch) {
 
 void vp9_fht_float_c(const int16_t *input, int pitch, int16_t *output,
                TX_TYPE tx_type, int tx_dim) {
-  vp8_clear_system_state();  // Make it simd safe : __asm emms;
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
   {
     int i, j, k;
     float bufa[256], bufb[256];  // buffers are for floating-point test purpose
@@ -641,7 +641,7 @@ void vp9_fht_float_c(const int16_t *input, int pitch, int16_t *output,
       pfa += tx_dim;
     }
   }
-  vp8_clear_system_state();  // Make it simd safe : __asm emms;
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
 /* Converted the transforms to integer form. */
@@ -918,7 +918,7 @@ static const double C14 = 0.195090322016128;
 static const double C15 = 0.098017140329561;
 
 static void dct16x16_1d(double input[16], double output[16]) {
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
     double step[16];
     double intermediate[16];
@@ -1074,11 +1074,11 @@ static void dct16x16_1d(double input[16], double output[16]) {
     temp1 = temp2 + temp1;
     output[ 5] = 2*(temp1*C8);
   }
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
 }
 
 void vp9_short_fdct16x16_c(short *input, short *out, int pitch) {
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
     int shortpitch = pitch >> 1;
     int i, j;
@@ -1105,5 +1105,5 @@ void vp9_short_fdct16x16_c(short *input, short *out, int pitch) {
     for (i = 0; i < 256; i++)
         out[i] = (short)round(output[i]/2);
   }
-  vp8_clear_system_state(); // Make it simd safe : __asm emms;
+  vp9_clear_system_state(); // Make it simd safe : __asm emms;
 }

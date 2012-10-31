@@ -25,10 +25,10 @@
 //           coefficients.
 
 DECLARE_ALIGNED(16, static const unsigned int, rounding_c[4]) = {
-  VP8_FILTER_WEIGHT >> 1,
-  VP8_FILTER_WEIGHT >> 1,
-  VP8_FILTER_WEIGHT >> 1,
-  VP8_FILTER_WEIGHT >> 1,
+  VP9_FILTER_WEIGHT >> 1,
+  VP9_FILTER_WEIGHT >> 1,
+  VP9_FILTER_WEIGHT >> 1,
+  VP9_FILTER_WEIGHT >> 1,
 };
 
 // Creating a macro to do more than four pixels at once to hide instruction
@@ -62,7 +62,7 @@ DECLARE_ALIGNED(16, static const unsigned int, rounding_c[4]) = {
   const __m128i mad4567 = _mm_add_epi32(mad45, mad67);                         \
   __m128i mad_all = _mm_add_epi32(mad0123, mad4567);                           \
   mad_all = _mm_add_epi32(mad_all, rounding);                                  \
-  result = _mm_srai_epi32(mad_all, VP8_FILTER_SHIFT);                          \
+  result = _mm_srai_epi32(mad_all, VP9_FILTER_SHIFT);                          \
   }
 
 void vp9_filter_block2d_4x4_8_sse2

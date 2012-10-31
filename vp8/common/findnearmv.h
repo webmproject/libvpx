@@ -23,7 +23,7 @@
  * above and a number cols of pixels in the left to select the one with best
  * score to use as ref motion vector
  */
-void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
+void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
                            int_mv *mvlist,
@@ -47,13 +47,11 @@ static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, co
 #define LEFT_TOP_MARGIN (16 << 3)
 #define RIGHT_BOTTOM_MARGIN (16 << 3)
 
-
-
-static void vp8_clamp_mv(int_mv *mv,
-                         int mb_to_left_edge,
-                         int mb_to_right_edge,
-                         int mb_to_top_edge,
-                         int mb_to_bottom_edge) {
+static void clamp_mv(int_mv *mv,
+                     int mb_to_left_edge,
+                     int mb_to_right_edge,
+                     int mb_to_top_edge,
+                     int mb_to_bottom_edge) {
   mv->as_mv.col = (mv->as_mv.col < mb_to_left_edge) ?
                   mb_to_left_edge : mv->as_mv.col;
   mv->as_mv.col = (mv->as_mv.col > mb_to_right_edge) ?
@@ -64,21 +62,19 @@ static void vp8_clamp_mv(int_mv *mv,
                   mb_to_bottom_edge : mv->as_mv.row;
 }
 
-static void vp8_clamp_mv2(int_mv *mv, const MACROBLOCKD *xd) {
-  vp8_clamp_mv(mv,
-              xd->mb_to_left_edge - LEFT_TOP_MARGIN,
-              xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
-              xd->mb_to_top_edge - LEFT_TOP_MARGIN,
-              xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
+static void clamp_mv2(int_mv *mv, const MACROBLOCKD *xd) {
+  clamp_mv(mv,
+           xd->mb_to_left_edge - LEFT_TOP_MARGIN,
+           xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
+           xd->mb_to_top_edge - LEFT_TOP_MARGIN,
+           xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 }
 
-
-
-static unsigned int vp8_check_mv_bounds(int_mv *mv,
-                                        int mb_to_left_edge,
-                                        int mb_to_right_edge,
-                                        int mb_to_top_edge,
-                                        int mb_to_bottom_edge) {
+static unsigned int check_mv_bounds(int_mv *mv,
+                                    int mb_to_left_edge,
+                                    int mb_to_right_edge,
+                                    int mb_to_top_edge,
+                                    int mb_to_bottom_edge) {
   return (mv->as_mv.col < mb_to_left_edge) ||
          (mv->as_mv.col > mb_to_right_edge) ||
          (mv->as_mv.row < mb_to_top_edge) ||
@@ -96,8 +92,8 @@ void vp9_find_near_mvs
   int *ref_frame_sign_bias
 );
 
-vp8_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
-                           vp8_prob p[VP8_MVREFS - 1], const int near_mv_ref_ct[4]
+vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
+                           vp9_prob p[VP9_MVREFS - 1], const int near_mv_ref_ct[4]
                           );
 
 extern const unsigned char vp9_mbsplit_offset[4][16];

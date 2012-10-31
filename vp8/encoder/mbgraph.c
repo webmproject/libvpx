@@ -28,7 +28,7 @@ static unsigned int do_16x16_motion_iteration
   MACROBLOCKD *const xd = &x->e_mbd;
   BLOCK *b  = &x->block[0];
   BLOCKD *d = &xd->block[0];
-  vp8_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
+  vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
   unsigned int best_err;
   int step_param, further_steps;
 
@@ -477,7 +477,7 @@ void vp9_update_mbgraph_stats
                                golden_ref, cpi->Source);
   }
 
-  vp8_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();  // __asm emms;
 
   separate_arf_mbs(cpi);
 }

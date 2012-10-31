@@ -9,10 +9,10 @@
 ;
 
 
-    EXPORT |vp8_loop_filter_horizontal_edge_armv6|
-    EXPORT |vp8_mbloop_filter_horizontal_edge_armv6|
-    EXPORT |vp8_loop_filter_vertical_edge_armv6|
-    EXPORT |vp8_mbloop_filter_vertical_edge_armv6|
+    EXPORT |vp9_loop_filter_horizontal_edge_armv6|
+    EXPORT |vp9_mbloop_filter_horizontal_edge_armv6|
+    EXPORT |vp9_loop_filter_vertical_edge_armv6|
+    EXPORT |vp9_mbloop_filter_vertical_edge_armv6|
 
     AREA    |.text|, CODE, READONLY  ; name this block of code
 
@@ -59,7 +59,7 @@ count       RN  r5
 ;stack  int  count
 
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-|vp8_loop_filter_horizontal_edge_armv6| PROC
+|vp9_loop_filter_horizontal_edge_armv6| PROC
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     stmdb       sp!, {r4 - r11, lr}
 
@@ -83,7 +83,7 @@ count       RN  r5
     orr         r3, r3, r3, lsl #16
 
 |Hnext8|
-    ; vp8_filter_mask() function
+    ; vp9_filter_mask() function
     ; calculate breakout conditions
     ldr         r12, [src], pstep           ; p0
 
@@ -94,7 +94,7 @@ count       RN  r5
 
     orr         r6, r6, r7                  ; abs (p3-p2)
     orr         r8, r8, r10                 ; abs (p2-p1)
-    uqsub8      lr, r6, r2                  ; compare to limit. lr: vp8_filter_mask
+    uqsub8      lr, r6, r2                  ; compare to limit. lr: vp9_filter_mask
     uqsub8      r8, r8, r2                  ; compare to limit
     uqsub8      r6, r11, r12                ; p1 - p0
     orr         lr, lr, r8
@@ -163,7 +163,7 @@ count       RN  r5
     usub8       r10, r12, r10               ; use usub8 instead of ssub8
     sel         r6, r12, r11                ; obtain vp8_hevmask: r6
 
-    ;vp8_filter() function
+    ;vp9_filter() function
     ldr         r8, [src], pstep            ; p0
     ldr         r12, c0x80808080
     ldr         r9, [src], pstep            ; q0
@@ -179,10 +179,10 @@ count       RN  r5
     str         r10, [sp, #8]               ; store qs1 temporarily
     str         r7, [sp, #12]               ; store ps1 temporarily
 
-    qsub8       r7, r7, r10                 ; vp8_signed_char_clamp(ps1-qs1)
-    qsub8       r8, r9, r8                  ; vp8_signed_char_clamp(vp8_filter + 3 * ( qs0 - ps0))
+    qsub8       r7, r7, r10                 ; vp9_signed_char_clamp(ps1-qs1)
+    qsub8       r8, r9, r8                  ; vp9_signed_char_clamp(vp9_filter + 3 * ( qs0 - ps0))
 
-    and         r7, r7, r6                  ; vp8_filter (r7) &= hev
+    and         r7, r7, r6                  ; vp9_filter (r7) &= hev
 
     qadd8       r7, r7, r8
     ldr         r9, c0x03030303             ; r9 = 3 --modified for vp8
@@ -191,15 +191,15 @@ count       RN  r5
     ldr         r10, c0x04040404
 
     qadd8       r7, r7, r8
-    and         r7, r7, lr                  ; vp8_filter &= mask;
+    and         r7, r7, lr                  ; vp9_filter &= mask;
 
-    ;modify code for vp8 -- Filter1 = vp8_filter (r7)
-    qadd8       r8 , r7 , r9                ; Filter2 (r8) = vp8_signed_char_clamp(vp8_filter+3)
-    qadd8       r7 , r7 , r10               ; vp8_filter = vp8_signed_char_clamp(vp8_filter+4)
+    ;modify code for vp8 -- Filter1 = vp9_filter (r7)
+    qadd8       r8 , r7 , r9                ; Filter2 (r8) = vp9_signed_char_clamp(vp9_filter+3)
+    qadd8       r7 , r7 , r10               ; vp9_filter = vp9_signed_char_clamp(vp9_filter+4)
 
     mov         r9, #0
     shadd8      r8 , r8 , r9                ; Filter2 >>= 3
-    shadd8      r7 , r7 , r9                ; vp8_filter >>= 3
+    shadd8      r7 , r7 , r9                ; vp9_filter >>= 3
     shadd8      r8 , r8 , r9
     shadd8      r7 , r7 , r9
     shadd8      lr , r8 , r9                ; lr: Filter2
@@ -212,30 +212,30 @@ count       RN  r5
     ;and        r8, r8, lr                  ; -1 for each element that equals 4
 
     ;calculate output
-    ;qadd8      lr, r8, r7                  ; u = vp8_signed_char_clamp(s + vp8_filter)
+    ;qadd8      lr, r8, r7                  ; u = vp9_signed_char_clamp(s + vp9_filter)
 
     ldr         r8, [sp]                    ; load qs0
     ldr         r9, [sp, #4]                ; load ps0
 
     ldr         r10, c0x01010101
 
-    qsub8       r8 ,r8, r7                  ; u = vp8_signed_char_clamp(qs0 - vp8_filter)
-    qadd8       r9, r9, lr                  ; u = vp8_signed_char_clamp(ps0 + Filter2)
+    qsub8       r8 ,r8, r7                  ; u = vp9_signed_char_clamp(qs0 - vp9_filter)
+    qadd8       r9, r9, lr                  ; u = vp9_signed_char_clamp(ps0 + Filter2)
 
     ;end of modification for vp8
 
     mov         lr, #0
-    sadd8       r7, r7 , r10                ; vp8_filter += 1
-    shadd8      r7, r7, lr                  ; vp8_filter >>= 1
+    sadd8       r7, r7 , r10                ; vp9_filter += 1
+    shadd8      r7, r7, lr                  ; vp9_filter >>= 1
 
     ldr         r11, [sp, #12]              ; load ps1
     ldr         r10, [sp, #8]               ; load qs1
 
-    bic         r7, r7, r6                  ; vp8_filter &= ~hev
+    bic         r7, r7, r6                  ; vp9_filter &= ~hev
     sub         src, src, pstep, lsl #2
 
-    qadd8       r11, r11, r7                ; u = vp8_signed_char_clamp(ps1 + vp8_filter)
-    qsub8       r10, r10,r7                 ; u = vp8_signed_char_clamp(qs1 - vp8_filter)
+    qadd8       r11, r11, r7                ; u = vp9_signed_char_clamp(ps1 + vp9_filter)
+    qsub8       r10, r10,r7                 ; u = vp9_signed_char_clamp(qs1 - vp9_filter)
 
     eor         r11, r11, r12               ; *op1 = u^0x80
     str         r11, [src], pstep           ; store op1
@@ -262,7 +262,7 @@ count       RN  r5
 
     add         sp, sp, #16
     ldmia       sp!, {r4 - r11, pc}
-    ENDP        ; |vp8_loop_filter_horizontal_edge_armv6|
+    ENDP        ; |vp9_loop_filter_horizontal_edge_armv6|
 
 
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -291,7 +291,7 @@ count       RN  r5
 
 |MBHnext8|
 
-    ; vp8_filter_mask() function
+    ; vp9_filter_mask() function
     ; calculate breakout conditions
     ldr         r12, [src], pstep           ; p0
 
@@ -302,7 +302,7 @@ count       RN  r5
 
     orr         r6, r6, r7                  ; abs (p3-p2)
     orr         r8, r8, r10                 ; abs (p2-p1)
-    uqsub8      lr, r6, r2                  ; compare to limit. lr: vp8_filter_mask
+    uqsub8      lr, r6, r2                  ; compare to limit. lr: vp9_filter_mask
     uqsub8      r8, r8, r2                  ; compare to limit
 
     uqsub8      r6, r11, r12                ; p1 - p0
@@ -385,28 +385,28 @@ count       RN  r5
     eor         r9, r9, r12                 ; qs0
     eor         r10, r10, r12               ; qs1
 
-    qsub8       r12, r9, r8                 ; vp8_signed_char_clamp(vp8_filter + 3 * ( qs0 - ps0))
+    qsub8       r12, r9, r8                 ; vp9_signed_char_clamp(vp9_filter + 3 * ( qs0 - ps0))
     str         r7, [sp, #12]               ; store ps1 temporarily
-    qsub8       r7, r7, r10                 ; vp8_signed_char_clamp(ps1-qs1)
+    qsub8       r7, r7, r10                 ; vp9_signed_char_clamp(ps1-qs1)
     str         r10, [sp, #8]               ; store qs1 temporarily
     qadd8       r7, r7, r12
     str         r9, [sp]                    ; store qs0 temporarily
     qadd8       r7, r7, r12
     str         r8, [sp, #4]                ; store ps0 temporarily
-    qadd8       r7, r7, r12                 ; vp8_filter: r7
+    qadd8       r7, r7, r12                 ; vp9_filter: r7
 
     ldr         r10, c0x03030303            ; r10 = 3 --modified for vp8
     ldr         r9, c0x04040404
 
-    and         r7, r7, lr                  ; vp8_filter &= mask (lr is free)
+    and         r7, r7, lr                  ; vp9_filter &= mask (lr is free)
 
     mov         r12, r7                     ; Filter2: r12
     and         r12, r12, r6                ; Filter2 &= hev
 
     ;modify code for vp8
     ;save bottom 3 bits so that we round one side +4 and the other +3
-    qadd8       r8 , r12 , r9               ; Filter1 (r8) = vp8_signed_char_clamp(Filter2+4)
-    qadd8       r12 , r12 , r10             ; Filter2 (r12) = vp8_signed_char_clamp(Filter2+3)
+    qadd8       r8 , r12 , r9               ; Filter1 (r8) = vp9_signed_char_clamp(Filter2+4)
+    qadd8       r12 , r12 , r10             ; Filter2 (r12) = vp9_signed_char_clamp(Filter2+3)
 
     mov         r10, #0
     shadd8      r8 , r8 , r10               ; Filter1 >>= 3
@@ -419,12 +419,12 @@ count       RN  r5
     ldr         r9, [sp]                    ; load qs0
     ldr         r11, [sp, #4]               ; load ps0
 
-    qsub8       r9 , r9, r8                 ; qs0 = vp8_signed_char_clamp(qs0 - Filter1)
-    qadd8       r11, r11, r12               ; ps0 = vp8_signed_char_clamp(ps0 + Filter2)
+    qsub8       r9 , r9, r8                 ; qs0 = vp9_signed_char_clamp(qs0 - Filter1)
+    qadd8       r11, r11, r12               ; ps0 = vp9_signed_char_clamp(ps0 + Filter2)
 
     ;save bottom 3 bits so that we round one side +4 and the other +3
     ;and            r8, r12, r10                ; s = Filter2 & 7 (s: r8)
-    ;qadd8      r12 , r12 , r9              ; Filter2 = vp8_signed_char_clamp(Filter2+4)
+    ;qadd8      r12 , r12 , r9              ; Filter2 = vp9_signed_char_clamp(Filter2+4)
     ;mov            r10, #0
     ;shadd8     r12 , r12 , r10             ; Filter2 >>= 3
     ;usub8      lr, r8, r9                  ; s = (s==4)*-1
@@ -436,13 +436,13 @@ count       RN  r5
     ;ldr            r11, [sp, #4]               ; load ps0
     ;shadd8     r12 , r12 , r10
     ;and            r8, r8, lr                  ; -1 for each element that equals 4
-    ;qadd8      r10, r8, r12                ; u = vp8_signed_char_clamp(s + Filter2)
-    ;qsub8      r9 , r9, r12                ; qs0 = vp8_signed_char_clamp(qs0 - Filter2)
-    ;qadd8      r11, r11, r10               ; ps0 = vp8_signed_char_clamp(ps0 + u)
+    ;qadd8      r10, r8, r12                ; u = vp9_signed_char_clamp(s + Filter2)
+    ;qsub8      r9 , r9, r12                ; qs0 = vp9_signed_char_clamp(qs0 - Filter2)
+    ;qadd8      r11, r11, r10               ; ps0 = vp9_signed_char_clamp(ps0 + u)
 
     ;end of modification for vp8
 
-    bic         r12, r7, r6                 ; vp8_filter &= ~hev    ( r6 is free)
+    bic         r12, r7, r6                 ; vp9_filter &= ~hev    ( r6 is free)
     ;mov        r12, r7
 
     ;roughly 3/7th difference across boundary
@@ -470,10 +470,10 @@ count       RN  r5
 
     sub         src, src, pstep
 
-    orr         r10, r6, r10, lsl #8        ; u = vp8_signed_char_clamp((63 + Filter2 * 27)>>7)
+    orr         r10, r6, r10, lsl #8        ; u = vp9_signed_char_clamp((63 + Filter2 * 27)>>7)
 
-    qsub8       r8, r9, r10                 ; s = vp8_signed_char_clamp(qs0 - u)
-    qadd8       r10, r11, r10               ; s = vp8_signed_char_clamp(ps0 + u)
+    qsub8       r8, r9, r10                 ; s = vp9_signed_char_clamp(qs0 - u)
+    qadd8       r10, r11, r10               ; s = vp9_signed_char_clamp(ps0 + u)
     eor         r8, r8, lr                  ; *oq0 = s^0x80
     str         r8, [src]                   ; store *oq0
     sub         src, src, pstep
@@ -508,10 +508,10 @@ count       RN  r5
 
     sub         src, src, pstep
 
-    orr         r10, r6, r10, lsl #8        ; u = vp8_signed_char_clamp((63 + Filter2 * 18)>>7)
+    orr         r10, r6, r10, lsl #8        ; u = vp9_signed_char_clamp((63 + Filter2 * 18)>>7)
 
-    qadd8       r11, r11, r10               ; s = vp8_signed_char_clamp(ps1 + u)
-    qsub8       r8, r9, r10                 ; s = vp8_signed_char_clamp(qs1 - u)
+    qadd8       r11, r11, r10               ; s = vp9_signed_char_clamp(ps1 + u)
+    qsub8       r8, r9, r10                 ; s = vp9_signed_char_clamp(qs1 - u)
     eor         r11, r11, lr                ; *op1 = s^0x80
     str         r11, [src], pstep           ; store *op1
     eor         r8, r8, lr                  ; *oq1 = s^0x80
@@ -552,10 +552,10 @@ count       RN  r5
     eor         r9, r9, lr
     eor         r11, r11, lr
 
-    orr         r10, r6, r10, lsl #8        ; u = vp8_signed_char_clamp((63 + Filter2 * 9)>>7)
+    orr         r10, r6, r10, lsl #8        ; u = vp9_signed_char_clamp((63 + Filter2 * 9)>>7)
 
-    qadd8       r8, r11, r10                ; s = vp8_signed_char_clamp(ps2 + u)
-    qsub8       r10, r9, r10                ; s = vp8_signed_char_clamp(qs2 - u)
+    qadd8       r8, r11, r10                ; s = vp9_signed_char_clamp(ps2 + u)
+    qsub8       r10, r9, r10                ; s = vp9_signed_char_clamp(qs2 - u)
     eor         r8, r8, lr                  ; *op2 = s^0x80
     str         r8, [src], pstep, lsl #2    ; store *op2
     add         src, src, pstep
@@ -579,7 +579,7 @@ count       RN  r5
 
 
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-|vp8_loop_filter_vertical_edge_armv6| PROC
+|vp9_loop_filter_vertical_edge_armv6| PROC
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     stmdb       sp!, {r4 - r11, lr}
 
@@ -605,7 +605,7 @@ count       RN  r5
 
 |Vnext8|
 
-    ; vp8_filter_mask() function
+    ; vp9_filter_mask() function
     ; calculate breakout conditions
     ; transpose the source data for 4-in-parallel operation
     TRANSPOSE_MATRIX r6, r7, r8, lr, r9, r10, r11, r12
@@ -616,7 +616,7 @@ count       RN  r5
     uqsub8      r10, r11, r10               ; p1 - p2
     orr         r7, r7, r8                  ; abs (p3-p2)
     orr         r10, r9, r10                ; abs (p2-p1)
-    uqsub8      lr, r7, r2                  ; compare to limit. lr: vp8_filter_mask
+    uqsub8      lr, r7, r2                  ; compare to limit. lr: vp9_filter_mask
     uqsub8      r10, r10, r2                ; compare to limit
 
     sub         src, src, pstep, lsl #2     ; move src pointer down by 4 lines
@@ -702,7 +702,7 @@ count       RN  r5
     usub8       r9, r12, r9
     sel         r6, r12, r11                ; hev mask: r6
 
-    ;vp8_filter() function
+    ;vp9_filter() function
     ; load soure data to r6, r11, r12, lr
     ldrh        r9, [src, #-2]
     ldrh        r10, [src], pstep
@@ -742,10 +742,10 @@ count       RN  r5
     str         r10, [sp, #8]               ; store qs1 temporarily
     str         r7, [sp, #12]               ; store ps1 temporarily
 
-    qsub8       r7, r7, r10                 ; vp8_signed_char_clamp(ps1-qs1)
-    qsub8       r8, r9, r8                  ; vp8_signed_char_clamp(vp8_filter + 3 * ( qs0 - ps0))
+    qsub8       r7, r7, r10                 ; vp9_signed_char_clamp(ps1-qs1)
+    qsub8       r8, r9, r8                  ; vp9_signed_char_clamp(vp9_filter + 3 * ( qs0 - ps0))
 
-    and         r7, r7, r6                  ;  vp8_filter (r7) &= hev (r7 : filter)
+    and         r7, r7, r6                  ;  vp9_filter (r7) &= hev (r7 : filter)
 
     qadd8       r7, r7, r8
     ldr         r9, c0x03030303             ; r9 = 3 --modified for vp8
@@ -756,15 +756,15 @@ count       RN  r5
     qadd8       r7, r7, r8
     ;mvn         r11, #0                     ; r11 == -1
 
-    and         r7, r7, lr                  ; vp8_filter &= mask
+    and         r7, r7, lr                  ; vp9_filter &= mask
 
-    ;modify code for vp8 -- Filter1 = vp8_filter (r7)
-    qadd8       r8 , r7 , r9                ; Filter2 (r8) = vp8_signed_char_clamp(vp8_filter+3)
-    qadd8       r7 , r7 , r10               ; vp8_filter = vp8_signed_char_clamp(vp8_filter+4)
+    ;modify code for vp8 -- Filter1 = vp9_filter (r7)
+    qadd8       r8 , r7 , r9                ; Filter2 (r8) = vp9_signed_char_clamp(vp9_filter+3)
+    qadd8       r7 , r7 , r10               ; vp9_filter = vp9_signed_char_clamp(vp9_filter+4)
 
     mov         r9, #0
     shadd8      r8 , r8 , r9                ; Filter2 >>= 3
-    shadd8      r7 , r7 , r9                ; vp8_filter >>= 3
+    shadd8      r7 , r7 , r9                ; vp9_filter >>= 3
     shadd8      r8 , r8 , r9
     shadd8      r7 , r7 , r9
     shadd8      lr , r8 , r9                ; lr: filter2
@@ -777,15 +777,15 @@ count       RN  r5
     ;and            r8, r8, lr                  ; -1 for each element that equals 4 -- r8: s
 
     ;calculate output
-    ;qadd8      lr, r8, r7                  ; u = vp8_signed_char_clamp(s + vp8_filter)
+    ;qadd8      lr, r8, r7                  ; u = vp9_signed_char_clamp(s + vp9_filter)
 
     ldr         r8, [sp]                    ; load qs0
     ldr         r9, [sp, #4]                ; load ps0
 
     ldr         r10, c0x01010101
 
-    qsub8       r8, r8, r7                  ; u = vp8_signed_char_clamp(qs0 - vp8_filter)
-    qadd8       r9, r9, lr                  ; u = vp8_signed_char_clamp(ps0 + Filter2)
+    qsub8       r8, r8, r7                  ; u = vp9_signed_char_clamp(qs0 - vp9_filter)
+    qadd8       r9, r9, lr                  ; u = vp9_signed_char_clamp(ps0 + Filter2)
     ;end of modification for vp8
 
     eor         r8, r8, r12
@@ -799,10 +799,10 @@ count       RN  r5
     ldr         r10, [sp, #8]               ; load qs1
     ldr         r11, [sp, #12]              ; load ps1
 
-    bic         r7, r7, r6                  ; r7: vp8_filter
+    bic         r7, r7, r6                  ; r7: vp9_filter
 
-    qsub8       r10 , r10, r7               ; u = vp8_signed_char_clamp(qs1 - vp8_filter)
-    qadd8       r11, r11, r7                ; u = vp8_signed_char_clamp(ps1 + vp8_filter)
+    qsub8       r10 , r10, r7               ; u = vp9_signed_char_clamp(qs1 - vp9_filter)
+    qadd8       r11, r11, r7                ; u = vp9_signed_char_clamp(ps1 + vp9_filter)
     eor         r10, r10, r12
     eor         r11, r11, r12
 
@@ -848,7 +848,7 @@ count       RN  r5
     add         sp, sp, #16
 
     ldmia       sp!, {r4 - r11, pc}
-    ENDP        ; |vp8_loop_filter_vertical_edge_armv6|
+    ENDP        ; |vp9_loop_filter_vertical_edge_armv6|
 
 
 
@@ -882,7 +882,7 @@ count       RN  r5
     orr         r3, r3, r3, lsl #16
 
 |MBVnext8|
-    ; vp8_filter_mask() function
+    ; vp9_filter_mask() function
     ; calculate breakout conditions
     ; transpose the source data for 4-in-parallel operation
     TRANSPOSE_MATRIX r6, r7, r8, lr, r9, r10, r11, r12
@@ -893,7 +893,7 @@ count       RN  r5
     uqsub8      r10, r11, r10               ; p1 - p2
     orr         r7, r7, r8                  ; abs (p3-p2)
     orr         r10, r9, r10                ; abs (p2-p1)
-    uqsub8      lr, r7, r2                  ; compare to limit. lr: vp8_filter_mask
+    uqsub8      lr, r7, r2                  ; compare to limit. lr: vp9_filter_mask
     uqsub8      r10, r10, r2                ; compare to limit
 
     sub         src, src, pstep, lsl #2     ; move src pointer down by 4 lines
@@ -1019,29 +1019,29 @@ count       RN  r5
     eor         r9, r9, r12                 ; qs0
     eor         r10, r10, r12               ; qs1
 
-    qsub8       r12, r9, r8                 ; vp8_signed_char_clamp(vp8_filter + 3 * ( qs0 - ps0))
+    qsub8       r12, r9, r8                 ; vp9_signed_char_clamp(vp9_filter + 3 * ( qs0 - ps0))
     str         r7, [sp, #12]               ; store ps1 temporarily
-    qsub8       r7, r7, r10                 ; vp8_signed_char_clamp(ps1-qs1)
+    qsub8       r7, r7, r10                 ; vp9_signed_char_clamp(ps1-qs1)
     str         r10, [sp, #8]               ; store qs1 temporarily
     qadd8       r7, r7, r12
     str         r9, [sp]                    ; store qs0 temporarily
     qadd8       r7, r7, r12
     str         r8, [sp, #4]                ; store ps0 temporarily
-    qadd8       r7, r7, r12                 ; vp8_filter: r7
+    qadd8       r7, r7, r12                 ; vp9_filter: r7
 
     ldr         r10, c0x03030303            ; r10 = 3 --modified for vp8
     ldr         r9, c0x04040404
     ;mvn         r11, #0                     ; r11 == -1
 
-    and         r7, r7, lr                  ; vp8_filter &= mask (lr is free)
+    and         r7, r7, lr                  ; vp9_filter &= mask (lr is free)
 
     mov         r12, r7                     ; Filter2: r12
     and         r12, r12, r6                ; Filter2 &= hev
 
     ;modify code for vp8
     ;save bottom 3 bits so that we round one side +4 and the other +3
-    qadd8       r8 , r12 , r9               ; Filter1 (r8) = vp8_signed_char_clamp(Filter2+4)
-    qadd8       r12 , r12 , r10             ; Filter2 (r12) = vp8_signed_char_clamp(Filter2+3)
+    qadd8       r8 , r12 , r9               ; Filter1 (r8) = vp9_signed_char_clamp(Filter2+4)
+    qadd8       r12 , r12 , r10             ; Filter2 (r12) = vp9_signed_char_clamp(Filter2+3)
 
     mov         r10, #0
     shadd8      r8 , r8 , r10               ; Filter1 >>= 3
@@ -1054,12 +1054,12 @@ count       RN  r5
     ldr         r9, [sp]                    ; load qs0
     ldr         r11, [sp, #4]               ; load ps0
 
-    qsub8       r9 , r9, r8                 ; qs0 = vp8_signed_char_clamp(qs0 - Filter1)
-    qadd8       r11, r11, r12               ; ps0 = vp8_signed_char_clamp(ps0 + Filter2)
+    qsub8       r9 , r9, r8                 ; qs0 = vp9_signed_char_clamp(qs0 - Filter1)
+    qadd8       r11, r11, r12               ; ps0 = vp9_signed_char_clamp(ps0 + Filter2)
 
     ;save bottom 3 bits so that we round one side +4 and the other +3
     ;and            r8, r12, r10                ; s = Filter2 & 7 (s: r8)
-    ;qadd8      r12 , r12 , r9              ; Filter2 = vp8_signed_char_clamp(Filter2+4)
+    ;qadd8      r12 , r12 , r9              ; Filter2 = vp9_signed_char_clamp(Filter2+4)
     ;mov            r10, #0
     ;shadd8     r12 , r12 , r10             ; Filter2 >>= 3
     ;usub8      lr, r8, r9                  ; s = (s==4)*-1
@@ -1071,13 +1071,13 @@ count       RN  r5
     ;ldr            r11, [sp, #4]               ; load ps0
     ;shadd8     r12 , r12 , r10
     ;and            r8, r8, lr                  ; -1 for each element that equals 4
-    ;qadd8      r10, r8, r12                ; u = vp8_signed_char_clamp(s + Filter2)
-    ;qsub8      r9 , r9, r12                ; qs0 = vp8_signed_char_clamp(qs0 - Filter2)
-    ;qadd8      r11, r11, r10               ; ps0 = vp8_signed_char_clamp(ps0 + u)
+    ;qadd8      r10, r8, r12                ; u = vp9_signed_char_clamp(s + Filter2)
+    ;qsub8      r9 , r9, r12                ; qs0 = vp9_signed_char_clamp(qs0 - Filter2)
+    ;qadd8      r11, r11, r10               ; ps0 = vp9_signed_char_clamp(ps0 + u)
 
     ;end of modification for vp8
 
-    bic         r12, r7, r6                 ;vp8_filter &= ~hev    ( r6 is free)
+    bic         r12, r7, r6                 ;vp9_filter &= ~hev    ( r6 is free)
     ;mov            r12, r7
 
     ;roughly 3/7th difference across boundary
@@ -1105,10 +1105,10 @@ count       RN  r5
 
     sub         src, src, pstep, lsl #2     ; move src pointer down by 4 lines
 
-    orr         r10, r6, r10, lsl #8        ; u = vp8_signed_char_clamp((63 + Filter2 * 27)>>7)
+    orr         r10, r6, r10, lsl #8        ; u = vp9_signed_char_clamp((63 + Filter2 * 27)>>7)
 
-    qsub8       r8, r9, r10                 ; s = vp8_signed_char_clamp(qs0 - u)
-    qadd8       r10, r11, r10               ; s = vp8_signed_char_clamp(ps0 + u)
+    qsub8       r8, r9, r10                 ; s = vp9_signed_char_clamp(qs0 - u)
+    qadd8       r10, r11, r10               ; s = vp9_signed_char_clamp(ps0 + u)
     eor         r8, r8, lr                  ; *oq0 = s^0x80
     eor         r10, r10, lr                ; *op0 = s^0x80
 
@@ -1157,10 +1157,10 @@ count       RN  r5
 
     add         src, src, #2
 
-    orr         r10, r6, r10, lsl #8        ; u = vp8_signed_char_clamp((63 + Filter2 * 18)>>7)
+    orr         r10, r6, r10, lsl #8        ; u = vp9_signed_char_clamp((63 + Filter2 * 18)>>7)
 
-    qsub8       r8, r9, r10                 ; s = vp8_signed_char_clamp(qs1 - u)
-    qadd8       r10, r11, r10               ; s = vp8_signed_char_clamp(ps1 + u)
+    qsub8       r8, r9, r10                 ; s = vp9_signed_char_clamp(qs1 - u)
+    qadd8       r10, r11, r10               ; s = vp9_signed_char_clamp(ps1 + u)
     eor         r8, r8, lr                  ; *oq1 = s^0x80
     eor         r10, r10, lr                ; *op1 = s^0x80
 
@@ -1227,10 +1227,10 @@ count       RN  r5
 
     ldr         lr, c0x80808080
 
-    orr         r10, r6, r10, lsl #8        ; u = vp8_signed_char_clamp((63 + Filter2 * 9)>>7)
+    orr         r10, r6, r10, lsl #8        ; u = vp9_signed_char_clamp((63 + Filter2 * 9)>>7)
 
-    qadd8       r8, r11, r10                ; s = vp8_signed_char_clamp(ps2 + u)
-    qsub8       r10, r9, r10                ; s = vp8_signed_char_clamp(qs2 - u)
+    qadd8       r8, r11, r10                ; s = vp9_signed_char_clamp(ps2 + u)
+    qsub8       r10, r9, r10                ; s = vp9_signed_char_clamp(qs2 - u)
     eor         r8, r8, lr                  ; *op2 = s^0x80
     eor         r10, r10, lr                ; *oq2 = s^0x80
 

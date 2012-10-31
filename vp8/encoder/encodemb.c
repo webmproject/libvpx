@@ -26,10 +26,6 @@
 #define IF_RTCD(x) NULL
 #endif
 
-#ifdef ENC_DEBUG
-extern int enc_debug;
-#endif
-
 void vp9_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   unsigned char *src_ptr = (*(be->base_src) + be->src);
   short *diff_ptr = be->src_diff;
@@ -123,7 +119,7 @@ void vp9_subtract_mby_c(short *diff, unsigned char *src,
   vp9_subtract_mby_s_c(diff, src, stride, pred, 16);
 }
 
-static void vp8_subtract_mb(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+static void subtract_mb(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   BLOCK *b = &x->block[0];
 
   vp9_subtract_mby(x->src_diff, *(b->base_src), x->e_mbd.predictor,
@@ -173,7 +169,7 @@ static void transform_mb_4x4(MACROBLOCK *x) {
   vp9_transform_mbuv_4x4(x);
 }
 
-void vp9_build_dcblock_8x8(MACROBLOCK *x) {
+static void build_dcblock_8x8(MACROBLOCK *x) {
   int16_t *src_diff_ptr = x->block[24].src_diff;
   int i;
 
@@ -200,7 +196,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
 
   if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
     // build dc block from 2x2 y dc values
-    vp9_build_dcblock_8x8(x);
+    build_dcblock_8x8(x);
 
     // do 2nd order transform on the dc block
     x->short_fhaar2x2(&x->block[24].src_diff[0],
@@ -223,7 +219,7 @@ void vp9_transform_mb_8x8(MACROBLOCK *x) {
 }
 
 void vp9_transform_mby_16x16(MACROBLOCK *x) {
-  vp8_clear_system_state();
+  vp9_clear_system_state();
   x->vp9_short_fdct16x16(&x->block[0].src_diff[0],
                          &x->block[0].coeff[0], 32);
 }
@@ -235,9 +231,9 @@ void vp9_transform_mb_16x16(MACROBLOCK *x) {
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 #define RDTRUNC_8x8(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
-typedef struct vp8_token_state vp8_token_state;
+typedef struct vp9_token_state vp9_token_state;
 
-struct vp8_token_state {
+struct vp9_token_state {
   int           rate;
   int           error;
   int           next;
@@ -269,10 +265,10 @@ static const int plane_rd_mult[4] = {
 
 static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                       const VP8_ENCODER_RTCD *rtcd, int tx_size) {
+                       const VP9_ENCODER_RTCD *rtcd, int tx_size) {
   BLOCK *b;
   BLOCKD *d;
-  vp8_token_state tokens[65][2];
+  vp9_token_state tokens[65][2];
   uint64_t best_mask[2];
   const short *dequant_ptr;
   const short *coeff_ptr;
@@ -475,7 +471,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
 
   /* Now pick the best path through the whole trellis. */
   band = bands[i + 1];
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   rate0 = tokens[next][0].rate;
   rate1 = tokens[next][1].rate;
   error0 = tokens[next][0].error;
@@ -571,7 +567,7 @@ static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *xd,
   }
 }
 
-void vp9_optimize_mby_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mby_4x4(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   int b;
   PLANE_TYPE type;
   int has_2nd_order;
@@ -606,7 +602,7 @@ void vp9_optimize_mby_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 }
 
-void vp9_optimize_mbuv_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mbuv_4x4(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   int b;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -627,12 +623,12 @@ void vp9_optimize_mbuv_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 }
 
-static void optimize_mb_4x4(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+static void optimize_mb_4x4(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   vp9_optimize_mby_4x4(x, rtcd);
   vp9_optimize_mbuv_4x4(x, rtcd);
 }
 
-void vp9_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mby_8x8(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   int b;
   PLANE_TYPE type;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
@@ -665,7 +661,7 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 }
 
-void vp9_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mbuv_8x8(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   int b;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -689,17 +685,17 @@ void vp9_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   }
 }
 
-static void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+static void optimize_mb_8x8(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   vp9_optimize_mby_8x8(x, rtcd);
   vp9_optimize_mbuv_8x8(x, rtcd);
 }
 
 static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
                              ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                             const VP8_ENCODER_RTCD *rtcd) {
+                             const VP9_ENCODER_RTCD *rtcd) {
   BLOCK *b = &mb->block[i];
   BLOCKD *d = &mb->e_mbd.block[i];
-  vp8_token_state tokens[257][2];
+  vp9_token_state tokens[257][2];
   unsigned best_index[257][2];
   const short *dequant_ptr = d->dequant, *coeff_ptr = b->coeff;
   short *qcoeff_ptr = qcoeff_ptr = d->qcoeff;
@@ -838,7 +834,7 @@ static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
 
   /* Now pick the best path through the whole trellis. */
   band = vp9_coef_bands_16x16[i + 1];
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   rate0 = tokens[next][0].rate;
   rate1 = tokens[next][1].rate;
   error0 = tokens[next][0].error;
@@ -868,7 +864,7 @@ static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
   *a = *l = (d->eob != !type);
 }
 
-void vp9_optimize_mby_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mby_16x16(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta, *tl;
 
@@ -883,17 +879,17 @@ void vp9_optimize_mby_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   optimize_b_16x16(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, rtcd);
 }
 
-static void optimize_mb_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+static void optimize_mb_16x16(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   vp9_optimize_mby_16x16(x, rtcd);
   vp9_optimize_mbuv_8x8(x, rtcd);
 }
 
-void vp9_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_inter16x16(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
   vp9_build_inter_predictors_mb(xd);
-  vp8_subtract_mb(rtcd, x);
+  subtract_mb(rtcd, x);
 
   if (tx_size == TX_16X16) {
     vp9_transform_mb_16x16(x);
@@ -933,7 +929,7 @@ void vp9_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 }
 
 /* this function is used by first pass only */
-void vp9_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_inter16x16y(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
 

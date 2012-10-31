@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_VP8_INT_H
-#define __INC_VP8_INT_H
+#ifndef __INC_ONYX_INT_H
+#define __INC_ONYX_INT_H
 
 #include <stdio.h>
 #include "vpx_ports/config.h"
@@ -56,7 +56,7 @@
 #define MV_ZBIN_BOOST        4
 #define ZBIN_OQ_MAX 192
 
-#define VP8_TEMPORAL_ALT_REF 1
+#define VP9_TEMPORAL_ALT_REF 1
 
 typedef struct {
   nmv_context nmvc;
@@ -66,19 +66,19 @@ typedef struct {
 
 #ifdef MODE_STATS
   // Stats
-  int y_modes[VP8_YMODES];
-  int uv_modes[VP8_UV_MODES];
-  int i8x8_modes[VP8_I8X8_MODES];
+  int y_modes[VP9_YMODES];
+  int uv_modes[VP9_UV_MODES];
+  int i8x8_modes[VP9_I8X8_MODES];
   int b_modes[B_MODE_COUNT];
   int inter_y_modes[MB_MODE_COUNT];
-  int inter_uv_modes[VP8_UV_MODES];
+  int inter_uv_modes[VP9_UV_MODES];
   int inter_b_modes[B_MODE_COUNT];
 #endif
 
-  vp8_prob segment_pred_probs[PREDICTION_PROBS];
+  vp9_prob segment_pred_probs[PREDICTION_PROBS];
   unsigned char ref_pred_probs_update[PREDICTION_PROBS];
-  vp8_prob ref_pred_probs[PREDICTION_PROBS];
-  vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
+  vp9_prob ref_pred_probs[PREDICTION_PROBS];
+  vp9_prob prob_comppred[COMP_PRED_CONTEXTS];
 
   unsigned char *last_frame_seg_map_copy;
 
@@ -87,30 +87,30 @@ typedef struct {
   // 0 = BPRED, ZERO_MV, MV, SPLIT
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
-  vp8_prob coef_probs[BLOCK_TYPES]
+  vp9_prob coef_probs[BLOCK_TYPES]
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  vp8_prob hybrid_coef_probs[BLOCK_TYPES]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-
-  vp8_prob coef_probs_8x8[BLOCK_TYPES_8X8]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  vp8_prob hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
+  vp9_prob hybrid_coef_probs[BLOCK_TYPES]
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 
-  vp8_prob coef_probs_16x16[BLOCK_TYPES_16X16]
+  vp9_prob coef_probs_8x8[BLOCK_TYPES_8X8]
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  vp8_prob hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
+  vp9_prob hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 
-  vp8_prob ymode_prob [VP8_YMODES - 1]; /* interframe intra mode probs */
-  vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES - 1];
-  vp8_prob bmode_prob [VP8_BINTRAMODES - 1];
-  vp8_prob i8x8_mode_prob [VP8_I8X8_MODES - 1];
-  vp8_prob sub_mv_ref_prob [SUBMVREF_COUNT][VP8_SUBMVREFS - 1];
-  vp8_prob mbsplit_prob [VP8_NUMMBSPLITS - 1];
+  vp9_prob coef_probs_16x16[BLOCK_TYPES_16X16]
+      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+  vp9_prob hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
+      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 
-  vp8_prob switchable_interp_prob[VP8_SWITCHABLE_FILTERS + 1]
-                                 [VP8_SWITCHABLE_FILTERS - 1];
+  vp9_prob ymode_prob [VP9_YMODES - 1]; /* interframe intra mode probs */
+  vp9_prob uv_mode_prob [VP9_YMODES][VP9_UV_MODES - 1];
+  vp9_prob bmode_prob [VP9_BINTRAMODES - 1];
+  vp9_prob i8x8_mode_prob [VP9_I8X8_MODES - 1];
+  vp9_prob sub_mv_ref_prob [SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
+  vp9_prob mbsplit_prob [VP9_NUMMBSPLITS - 1];
+
+  vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
+                                 [VP9_SWITCHABLE_FILTERS - 1];
 
   int mv_ref_ct[6][4][2];
   int mode_context[6][4];
@@ -347,11 +347,11 @@ typedef struct {
 } LPFTHREAD_DATA;
 
 
-typedef struct VP8_ENCODER_RTCD {
+typedef struct VP9_ENCODER_RTCD {
   VP9_COMMON_RTCD            *common;
-  vp8_search_rtcd_vtable_t    search;
-  vp8_temporal_rtcd_vtable_t  temporal;
-} VP8_ENCODER_RTCD;
+  vp9_search_rtcd_vtable_t    search;
+  vp9_temporal_rtcd_vtable_t  temporal;
+} VP9_ENCODER_RTCD;
 
 enum BlockSize {
   BLOCK_16X8 = PARTITIONING_16X8,
@@ -401,7 +401,7 @@ typedef struct VP9_COMP {
 
   MACROBLOCK mb;
   VP9_COMMON common;
-  VP8_CONFIG oxcf;
+  VP9_CONFIG oxcf;
 
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *source;
@@ -532,37 +532,37 @@ typedef struct VP9_COMP {
 
 #if CONFIG_SUPERBLOCKS
   int sb_count;
-  int sb_ymode_count [VP8_I32X32_MODES];
+  int sb_ymode_count [VP9_I32X32_MODES];
 #endif
-  int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
-  int bmode_count [VP8_BINTRAMODES];
-  int i8x8_mode_count [VP8_I8X8_MODES];
-  int sub_mv_ref_count [SUBMVREF_COUNT][VP8_SUBMVREFS];
-  int mbsplit_count [VP8_NUMMBSPLITS];
-  // int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
-  int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];
+  int ymode_count [VP9_YMODES];        /* intra MB type cts this frame */
+  int bmode_count [VP9_BINTRAMODES];
+  int i8x8_mode_count [VP9_I8X8_MODES];
+  int sub_mv_ref_count [SUBMVREF_COUNT][VP9_SUBMVREFS];
+  int mbsplit_count [VP9_NUMMBSPLITS];
+  // int uv_mode_count[VP9_UV_MODES];       /* intra MB type cts this frame */
+  int y_uv_mode_count[VP9_YMODES][VP9_UV_MODES];
 
   nmv_context_counts NMVcount;
 
   unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+  vp9_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
   unsigned int hybrid_coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp8_prob frame_hybrid_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+  vp9_prob frame_hybrid_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   unsigned int frame_hybrid_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
 
   unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp8_prob frame_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+  vp9_prob frame_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   unsigned int frame_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
   unsigned int hybrid_coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp8_prob frame_hybrid_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+  vp9_prob frame_hybrid_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   unsigned int frame_hybrid_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
 
   unsigned int coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp8_prob frame_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+  vp9_prob frame_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   unsigned int frame_branch_ct_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
   unsigned int hybrid_coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp8_prob frame_hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+  vp9_prob frame_hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   unsigned int frame_hybrid_branch_ct_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
 
   int gfu_boost;
@@ -602,7 +602,7 @@ typedef struct VP9_COMP {
   int vert_scale;
   int pass;
 
-  vp8_prob last_skip_false_probs[3][MBSKIP_CONTEXTS];
+  vp9_prob last_skip_false_probs[3][MBSKIP_CONTEXTS];
   int last_skip_probs_q[3];
 
   int recent_ref_frame_usage[MAX_REF_FRAMES];
@@ -632,10 +632,10 @@ typedef struct VP9_COMP {
   TOKENLIST *tplist;
 
   fractional_mv_step_fp *find_fractional_mv_step;
-  vp8_full_search_fn_t full_search_sad;
-  vp8_refining_search_fn_t refining_search_sad;
-  vp8_diamond_search_fn_t diamond_search_sad;
-  vp8_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SB_SEGMENTS];
+  vp9_full_search_fn_t full_search_sad;
+  vp9_refining_search_fn_t refining_search_sad;
+  vp9_diamond_search_fn_t diamond_search_sad;
+  vp9_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SB_SEGMENTS];
   uint64_t time_receive_data;
   uint64_t time_compress_data;
   uint64_t time_pick_lpf;
@@ -682,9 +682,9 @@ typedef struct VP9_COMP {
   } twopass;
 
 #if CONFIG_RUNTIME_CPU_DETECT
-  VP8_ENCODER_RTCD            rtcd;
+  VP9_ENCODER_RTCD            rtcd;
 #endif
-#if VP8_TEMPORAL_ALT_REF
+#if VP9_TEMPORAL_ALT_REF
   YV12_BUFFER_CONFIG alt_ref_buffer;
   YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
   int fixed_divide[512];
@@ -748,8 +748,8 @@ typedef struct VP9_COMP {
   int pred_filter_on_count;
   int pred_filter_off_count;
 #endif
-  unsigned int switchable_interp_count[VP8_SWITCHABLE_FILTERS + 1]
-                                      [VP8_SWITCHABLE_FILTERS];
+  unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
+                                      [VP9_SWITCHABLE_FILTERS];
 
 #if CONFIG_NEW_MVREF
   unsigned int best_ref_index_counts[MAX_REF_FRAMES][MAX_MV_REFS];
@@ -785,4 +785,4 @@ void vp9_set_speed_features(VP9_COMP *cpi);
                          "Failed to allocate "#lval);\
   } while(0)
 #endif
-#endif
+#endif  // __INC_ONYX_INT_H

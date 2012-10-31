@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vp8_variance8x8_armv6|
+    EXPORT  |vp9_variance8x8_armv6|
 
     ARM
 
@@ -20,7 +20,7 @@
 ; r2    unsigned char *ref_ptr
 ; r3    int  recon_stride
 ; stack unsigned int *sse
-|vp8_variance8x8_armv6| PROC
+|vp9_variance8x8_armv6| PROC
 
     push    {r4-r10, lr}
 

@@ -28,34 +28,32 @@ typedef struct {
 #if CONFIG_RUNTIME_CPU_DETECT
 #define ENCODEMB_INVOKE(ctx,fn) (ctx)->fn
 #else
-#define ENCODEMB_INVOKE(ctx,fn) vp8_encodemb_##fn
+#define ENCODEMB_INVOKE(ctx,fn) vp9_encodemb_##fn
 #endif
 
 
 
 #include "onyx_int.h"
-struct VP8_ENCODER_RTCD;
-void vp9_encode_inter16x16(const struct VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
+struct VP9_ENCODER_RTCD;
+void vp9_encode_inter16x16(const struct VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x);
 
-void vp8_build_dcblock(MACROBLOCK *b);
-void vp8_transform_mb_4x4(MACROBLOCK *mb);
 void vp9_transform_mbuv_4x4(MACROBLOCK *x);
 void vp9_transform_mby_4x4(MACROBLOCK *x);
 
-void vp9_optimize_mby_4x4(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
-void vp9_optimize_mbuv_4x4(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
-void vp9_encode_inter16x16y(const struct VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
+void vp9_optimize_mby_4x4(MACROBLOCK *x, const struct VP9_ENCODER_RTCD *rtcd);
+void vp9_optimize_mbuv_4x4(MACROBLOCK *x, const struct VP9_ENCODER_RTCD *rtcd);
+void vp9_encode_inter16x16y(const struct VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x);
 
 void vp9_transform_mb_8x8(MACROBLOCK *mb);
 void vp9_transform_mby_8x8(MACROBLOCK *x);
 void vp9_transform_mbuv_8x8(MACROBLOCK *x);
 void vp9_build_dcblock_8x8(MACROBLOCK *b);
-void vp9_optimize_mby_8x8(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
-void vp9_optimize_mbuv_8x8(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
+void vp9_optimize_mby_8x8(MACROBLOCK *x, const struct VP9_ENCODER_RTCD *rtcd);
+void vp9_optimize_mbuv_8x8(MACROBLOCK *x, const struct VP9_ENCODER_RTCD *rtcd);
 
 void vp9_transform_mb_16x16(MACROBLOCK *mb);
 void vp9_transform_mby_16x16(MACROBLOCK *x);
-void vp9_optimize_mby_16x16(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
+void vp9_optimize_mby_16x16(MACROBLOCK *x, const struct VP9_ENCODER_RTCD *rtcd);
 
 void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
 

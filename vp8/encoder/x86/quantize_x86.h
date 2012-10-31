@@ -26,8 +26,8 @@
 extern prototype_quantize_block(vp9_regular_quantize_b_sse2);
 #if !CONFIG_RUNTIME_CPU_DETECT
 
-#undef vp8_quantize_quantb
-#define vp8_quantize_quantb vp9_regular_quantize_b_sse2
+#undef vp9_quantize_quantb
+#define vp9_quantize_quantb vp9_regular_quantize_b_sse2
 #endif /* !CONFIG_RUNTIME_CPU_DETECT */
 
 #endif /* HAVE_SSE2 */
@@ -38,8 +38,8 @@ extern prototype_quantize_block(vp9_regular_quantize_b_sse4);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 
-#undef vp8_quantize_quantb
-#define vp8_quantize_quantb vp9_regular_quantize_b_sse4
+#undef vp9_quantize_quantb
+#define vp9_quantize_quantb vp9_regular_quantize_b_sse4
 
 #endif /* !CONFIG_RUNTIME_CPU_DETECT */
 

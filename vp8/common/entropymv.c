@@ -28,14 +28,14 @@
 /* Smooth or bias the mv-counts before prob computation */
 /* #define SMOOTH_MV_COUNTS */
 
-const vp8_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2] = {
+const vp9_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2] = {
   -MV_JOINT_ZERO, 2,
   -MV_JOINT_HNZVZ, 4,
   -MV_JOINT_HZVNZ, -MV_JOINT_HNZVNZ
 };
-struct vp8_token_struct vp9_mv_joint_encodings[MV_JOINTS];
+struct vp9_token_struct vp9_mv_joint_encodings[MV_JOINTS];
 
-const vp8_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
+const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
   -MV_CLASS_0, 2,
   -MV_CLASS_1, 4,
   6, 8,
@@ -44,19 +44,19 @@ const vp8_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
   -MV_CLASS_4, -MV_CLASS_5,
   -MV_CLASS_6, -MV_CLASS_7,
 };
-struct vp8_token_struct vp9_mv_class_encodings[MV_CLASSES];
+struct vp9_token_struct vp9_mv_class_encodings[MV_CLASSES];
 
-const vp8_tree_index vp9_mv_class0_tree [2 * CLASS0_SIZE - 2] = {
+const vp9_tree_index vp9_mv_class0_tree [2 * CLASS0_SIZE - 2] = {
   -0, -1,
 };
-struct vp8_token_struct vp9_mv_class0_encodings[CLASS0_SIZE];
+struct vp9_token_struct vp9_mv_class0_encodings[CLASS0_SIZE];
 
-const vp8_tree_index vp9_mv_fp_tree [2 * 4 - 2] = {
+const vp9_tree_index vp9_mv_fp_tree [2 * 4 - 2] = {
   -0, 2,
   -1, 4,
   -2, -3
 };
-struct vp8_token_struct vp9_mv_fp_encodings[4];
+struct vp9_token_struct vp9_mv_fp_encodings[4];
 
 const nmv_context vp9_default_nmv_context = {
   {32, 64, 96},
@@ -211,7 +211,7 @@ void vp9_increment_nmv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
   }
 }
 
-static void adapt_prob(vp8_prob *dest, vp8_prob prep, vp8_prob newp,
+static void adapt_prob(vp9_prob *dest, vp9_prob prep, vp9_prob newp,
                        unsigned int ct[2]) {
   int factor;
   int prob;

@@ -105,7 +105,7 @@ void vp9_set_segment_data(VP9_PTR ptr,
 // Based on set of segment counts calculate a probability tree
 static void calc_segtree_probs(MACROBLOCKD *xd,
                                int *segcounts,
-                               vp8_prob *segment_tree_probs) {
+                               vp9_prob *segment_tree_probs) {
   int count1, count2;
   int tot_count;
   int i;
@@ -137,24 +137,24 @@ static void calc_segtree_probs(MACROBLOCKD *xd,
 // Based on set of segment counts and probabilities calculate a cost estimate
 static int cost_segmap(MACROBLOCKD *xd,
                        int *segcounts,
-                       vp8_prob *probs) {
+                       vp9_prob *probs) {
   int cost;
   int count1, count2;
 
   // Cost the top node of the tree
   count1 = segcounts[0] + segcounts[1];
   count2 = segcounts[2] + segcounts[3];
-  cost = count1 * vp8_cost_zero(probs[0]) +
-         count2 * vp8_cost_one(probs[0]);
+  cost = count1 * vp9_cost_zero(probs[0]) +
+         count2 * vp9_cost_one(probs[0]);
 
   // Now add the cost of each individual segment branch
   if (count1 > 0)
-    cost += segcounts[0] * vp8_cost_zero(probs[1]) +
-            segcounts[1] * vp8_cost_one(probs[1]);
+    cost += segcounts[0] * vp9_cost_zero(probs[1]) +
+            segcounts[1] * vp9_cost_one(probs[1]);
 
   if (count2 > 0)
-    cost += segcounts[2] * vp8_cost_zero(probs[2]) +
-            segcounts[3] * vp8_cost_one(probs[2]);
+    cost += segcounts[2] * vp9_cost_zero(probs[2]) +
+            segcounts[3] * vp9_cost_one(probs[2]);
 
   return cost;
 
@@ -179,9 +179,9 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   int no_pred_segcounts[MAX_MB_SEGMENTS];
   int t_unpred_seg_counts[MAX_MB_SEGMENTS];
 
-  vp8_prob no_pred_tree[MB_FEATURE_TREE_PROBS];
-  vp8_prob t_pred_tree[MB_FEATURE_TREE_PROBS];
-  vp8_prob t_nopred_prob[PREDICTION_PROBS];
+  vp9_prob no_pred_tree[MB_FEATURE_TREE_PROBS];
+  vp9_prob t_pred_tree[MB_FEATURE_TREE_PROBS];
+  vp9_prob t_nopred_prob[PREDICTION_PROBS];
 
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities
@@ -306,9 +306,9 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
       // Add in the predictor signaling cost
       t_pred_cost += (temporal_predictor_count[i][0] *
-                      vp8_cost_zero(t_nopred_prob[i])) +
+                      vp9_cost_zero(t_nopred_prob[i])) +
                      (temporal_predictor_count[i][1] *
-                      vp8_cost_one(t_nopred_prob[i]));
+                      vp9_cost_one(t_nopred_prob[i]));
     }
   }
 

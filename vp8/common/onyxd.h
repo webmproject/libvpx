@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_VP8D_H
-#define __INC_VP8D_H
+#ifndef __INC_ONYXD_H
+#define __INC_ONYXD_H
 
 
 /* Create/destroy static data structures. */
@@ -24,7 +24,7 @@ extern "C"
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_codec.h"
 
-  typedef void   *VP8D_PTR;
+  typedef void   *VP9D_PTR;
   typedef struct {
     int     Width;
     int     Height;
@@ -32,42 +32,37 @@ extern "C"
     int     postprocess;
     int     max_threads;
     int     input_partition;
-  } VP8D_CONFIG;
+  } VP9D_CONFIG;
   typedef enum {
-    VP8_LAST_FLAG = 1,
-    VP8_GOLD_FLAG = 2,
-    VP8_ALT_FLAG = 4
-  } VP8_REFFRAME;
-
-  typedef enum {
-    VP8D_OK = 0
-  } VP8D_SETTING;
+    VP9_LAST_FLAG = 1,
+    VP9_GOLD_FLAG = 2,
+    VP9_ALT_FLAG = 4
+  } VP9_REFFRAME;
 
   void vp9_initialize_dec(void);
 
-  int vp9_receive_compressed_data(VP8D_PTR comp, unsigned long size,
+  int vp9_receive_compressed_data(VP9D_PTR comp, unsigned long size,
                                   const unsigned char *dest,
                                   int64_t time_stamp);
 
-  int vp9_get_raw_frame(VP8D_PTR comp, YV12_BUFFER_CONFIG *sd,
+  int vp9_get_raw_frame(VP9D_PTR comp, YV12_BUFFER_CONFIG *sd,
                         int64_t *time_stamp, int64_t *time_end_stamp,
-                        vp8_ppflags_t *flags);
+                        vp9_ppflags_t *flags);
 
-  vpx_codec_err_t vp9_get_reference_dec(VP8D_PTR comp,
-                                        VP8_REFFRAME ref_frame_flag,
+  vpx_codec_err_t vp9_get_reference_dec(VP9D_PTR comp,
+                                        VP9_REFFRAME ref_frame_flag,
                                         YV12_BUFFER_CONFIG *sd);
 
-  vpx_codec_err_t vp9_set_reference_dec(VP8D_PTR comp,
-                                        VP8_REFFRAME ref_frame_flag,
+  vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR comp,
+                                        VP9_REFFRAME ref_frame_flag,
                                         YV12_BUFFER_CONFIG *sd);
 
-  VP8D_PTR vp9_create_decompressor(VP8D_CONFIG *oxcf);
+  VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf);
 
-  void vp9_remove_decompressor(VP8D_PTR comp);
+  void vp9_remove_decompressor(VP9D_PTR comp);
 
 #ifdef __cplusplus
 }
 #endif
 
-
-#endif
+#endif  // __INC_ONYXD_H

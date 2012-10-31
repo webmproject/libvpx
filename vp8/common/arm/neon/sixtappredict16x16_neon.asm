@@ -86,7 +86,7 @@ filt_blk2d_fp16x16_loop_neon
     pld             [r0, r1]
     pld             [r0, r1, lsl #1]
 
-    vmull.u8        q8, d6, d0              ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q8, d6, d0              ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q9, d7, d0
     vmull.u8        q10, d9, d0
     vmull.u8        q11, d10, d0
@@ -97,7 +97,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d29, d9, d10, #1
     vext.8          d30, d12, d13, #1
 
-    vmlsl.u8        q8, d28, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q8, d28, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q10, d29, d1
     vmlsl.u8        q12, d30, d1
 
@@ -105,7 +105,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d29, d10, d11, #1
     vext.8          d30, d13, d14, #1
 
-    vmlsl.u8        q9, d28, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q9, d28, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q11, d29, d1
     vmlsl.u8        q13, d30, d1
 
@@ -113,7 +113,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d29, d9, d10, #4
     vext.8          d30, d12, d13, #4
 
-    vmlsl.u8        q8, d28, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q8, d28, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q10, d29, d4
     vmlsl.u8        q12, d30, d4
 
@@ -121,7 +121,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d29, d10, d11, #4
     vext.8          d30, d13, d14, #4
 
-    vmlsl.u8        q9, d28, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q9, d28, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q11, d29, d4
     vmlsl.u8        q13, d30, d4
 
@@ -129,7 +129,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d29, d9, d10, #5
     vext.8          d30, d12, d13, #5
 
-    vmlal.u8        q8, d28, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q8, d28, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q10, d29, d5
     vmlal.u8        q12, d30, d5
 
@@ -137,7 +137,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d29, d10, d11, #5
     vext.8          d30, d13, d14, #5
 
-    vmlal.u8        q9, d28, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q9, d28, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q11, d29, d5
     vmlal.u8        q13, d30, d5
 
@@ -145,7 +145,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d29, d9, d10, #2
     vext.8          d30, d12, d13, #2
 
-    vmlal.u8        q8, d28, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q8, d28, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q10, d29, d2
     vmlal.u8        q12, d30, d2
 
@@ -153,7 +153,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d29, d10, d11, #2
     vext.8          d30, d13, d14, #2
 
-    vmlal.u8        q9, d28, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q9, d28, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q11, d29, d2
     vmlal.u8        q13, d30, d2
 
@@ -165,7 +165,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d31, d10, d11, #3
     vext.8          d6, d13, d14, #3
 
-    vmull.u8        q4, d28, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q4, d28, d3             ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q5, d29, d3
     vmull.u8        q6, d30, d3
 
@@ -173,7 +173,7 @@ filt_blk2d_fp16x16_loop_neon
     vqadd.s16       q10, q5
     vqadd.s16       q12, q6
 
-    vmull.u8        q6, d15, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q6, d15, d3             ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q7, d31, d3
     vmull.u8        q3, d6, d3
 
@@ -229,32 +229,32 @@ secondpass_inner_loop_neon
     vld1.u8         {d25}, [lr], r2
     vld1.u8         {d26}, [lr], r2
 
-    vmull.u8        q3, d18, d0             ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q3, d18, d0             ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q4, d19, d0
     vmull.u8        q5, d20, d0
     vmull.u8        q6, d21, d0
 
-    vmlsl.u8        q3, d19, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q3, d19, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q4, d20, d1
     vmlsl.u8        q5, d21, d1
     vmlsl.u8        q6, d22, d1
 
-    vmlsl.u8        q3, d22, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q3, d22, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q4, d23, d4
     vmlsl.u8        q5, d24, d4
     vmlsl.u8        q6, d25, d4
 
-    vmlal.u8        q3, d20, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q3, d20, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q4, d21, d2
     vmlal.u8        q5, d22, d2
     vmlal.u8        q6, d23, d2
 
-    vmlal.u8        q3, d23, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q3, d23, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q4, d24, d5
     vmlal.u8        q5, d25, d5
     vmlal.u8        q6, d26, d5
 
-    vmull.u8        q7, d21, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q7, d21, d3             ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q8, d22, d3
     vmull.u8        q9, d23, d3
     vmull.u8        q10, d24, d3
@@ -316,7 +316,7 @@ filt_blk2d_fpo16x16_loop_neon
     pld             [r0]
     pld             [r0, r1]
 
-    vmull.u8        q6, d6, d0              ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q6, d6, d0              ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q7, d7, d0
     vmull.u8        q8, d9, d0
     vmull.u8        q9, d10, d0
@@ -332,15 +332,15 @@ filt_blk2d_fpo16x16_loop_neon
     vext.8          d28, d6, d7, #5         ;construct src_ptr[3]
     vext.8          d29, d9, d10, #5
 
-    vmlsl.u8        q6, d20, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q6, d20, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q8, d21, d1
-    vmlsl.u8        q7, d22, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q7, d22, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q9, d23, d1
-    vmlsl.u8        q6, d24, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q6, d24, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q8, d25, d4
-    vmlsl.u8        q7, d26, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q7, d26, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q9, d27, d4
-    vmlal.u8        q6, d28, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q6, d28, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q8, d29, d5
 
     vext.8          d20, d7, d8, #5
@@ -355,16 +355,16 @@ filt_blk2d_fpo16x16_loop_neon
     vext.8          d28, d7, d8, #3
     vext.8          d29, d10, d11, #3
 
-    vmlal.u8        q7, d20, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q7, d20, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q9, d21, d5
-    vmlal.u8        q6, d22, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q6, d22, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q8, d23, d2
-    vmlal.u8        q7, d24, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q7, d24, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q9, d25, d2
 
-    vmull.u8        q10, d26, d3            ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q10, d26, d3            ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q11, d27, d3
-    vmull.u8        q12, d28, d3            ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q12, d28, d3            ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q15, d29, d3
 
     vqadd.s16       q6, q10                 ;sum of all (src_data*filter_parameters)
@@ -419,32 +419,32 @@ secondpass_only_inner_loop_neon
     vld1.u8         {d25}, [r0], r1
     vld1.u8         {d26}, [r0], r1
 
-    vmull.u8        q3, d18, d0             ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q3, d18, d0             ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q4, d19, d0
     vmull.u8        q5, d20, d0
     vmull.u8        q6, d21, d0
 
-    vmlsl.u8        q3, d19, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q3, d19, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q4, d20, d1
     vmlsl.u8        q5, d21, d1
     vmlsl.u8        q6, d22, d1
 
-    vmlsl.u8        q3, d22, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q3, d22, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q4, d23, d4
     vmlsl.u8        q5, d24, d4
     vmlsl.u8        q6, d25, d4
 
-    vmlal.u8        q3, d20, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q3, d20, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q4, d21, d2
     vmlal.u8        q5, d22, d2
     vmlal.u8        q6, d23, d2
 
-    vmlal.u8        q3, d23, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q3, d23, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q4, d24, d5
     vmlal.u8        q5, d25, d5
     vmlal.u8        q6, d26, d5
 
-    vmull.u8        q7, d21, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q7, d21, d3             ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q8, d22, d3
     vmull.u8        q9, d23, d3
     vmull.u8        q10, d24, d3

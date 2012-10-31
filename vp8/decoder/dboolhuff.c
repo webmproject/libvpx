@@ -35,14 +35,14 @@ int vp9_start_decode(BOOL_DECODER *br,
 void vp9_bool_decoder_fill(BOOL_DECODER *br) {
   const unsigned char *bufptr;
   const unsigned char *bufend;
-  VP8_BD_VALUE         value;
+  VP9_BD_VALUE         value;
   int                  count;
   bufend = br->user_buffer_end;
   bufptr = br->user_buffer;
   value = br->value;
   count = br->count;
 
-  VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
+  VP9DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
 
   br->user_buffer = bufptr;
   br->value = value;
@@ -71,11 +71,11 @@ int vp9_decode_uniform(BOOL_DECODER *br, int n) {
   int l = get_unsigned_bits(n);
   int m = (1 << l) - n;
   if (!l) return 0;
-  v = vp8_decode_value(br, l - 1);
+  v = decode_value(br, l - 1);
   if (v < m)
     return v;
   else
-    return (v << 1) - m + vp8_decode_value(br, 1);
+    return (v << 1) - m + decode_value(br, 1);
 }
 
 int vp9_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms) {
@@ -87,11 +87,11 @@ int vp9_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms) {
       word = vp9_decode_uniform(br, num_syms - mk) + mk;
       break;
     } else {
-      if (vp8_decode_value(br, 1)) {
+      if (decode_value(br, 1)) {
         i++;
         mk += a;
       } else {
-        word = vp8_decode_value(br, b) + mk;
+        word = decode_value(br, b) + mk;
         break;
       }
     }

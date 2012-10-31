@@ -75,7 +75,7 @@ struct vpx_codec_alg_priv {
   vpx_codec_priv_t        base;
   vpx_codec_enc_cfg_t     cfg;
   struct vp8_extracfg     vp8_cfg;
-  VP8_CONFIG              oxcf;
+  VP9_CONFIG              oxcf;
   VP9_PTR             cpi;
   unsigned char          *cx_data;
   unsigned int            cx_data_sz;
@@ -216,7 +216,7 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
 }
 
 
-static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
+static vpx_codec_err_t set_vp8e_config(VP9_CONFIG *oxcf,
                                        vpx_codec_enc_cfg_t cfg,
                                        struct vp8_extracfg vp8_cfg) {
   oxcf->Version               = cfg.g_profile;
@@ -595,13 +595,13 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     int ref = 7;
 
     if (flags & VP8_EFLAG_NO_REF_LAST)
-      ref ^= VP8_LAST_FLAG;
+      ref ^= VP9_LAST_FLAG;
 
     if (flags & VP8_EFLAG_NO_REF_GF)
-      ref ^= VP8_GOLD_FLAG;
+      ref ^= VP9_GOLD_FLAG;
 
     if (flags & VP8_EFLAG_NO_REF_ARF)
-      ref ^= VP8_ALT_FLAG;
+      ref ^= VP9_ALT_FLAG;
 
     vp9_use_as_reference(ctx->cpi, ref);
   }
@@ -612,13 +612,13 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     int upd = 7;
 
     if (flags & VP8_EFLAG_NO_UPD_LAST)
-      upd ^= VP8_LAST_FLAG;
+      upd ^= VP9_LAST_FLAG;
 
     if (flags & VP8_EFLAG_NO_UPD_GF)
-      upd ^= VP8_GOLD_FLAG;
+      upd ^= VP9_GOLD_FLAG;
 
     if (flags & VP8_EFLAG_NO_UPD_ARF)
-      upd ^= VP8_ALT_FLAG;
+      upd ^= VP9_ALT_FLAG;
 
     vp9_update_reference(ctx->cpi, upd);
   }
@@ -817,7 +817,7 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
 static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx) {
 
   YV12_BUFFER_CONFIG sd;
-  vp8_ppflags_t flags = {0};
+  vp9_ppflags_t flags = {0};
 
   if (ctx->preview_ppcfg.post_proc_flag) {
     flags.post_proc_flag        = ctx->preview_ppcfg.post_proc_flag;

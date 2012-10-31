@@ -45,63 +45,63 @@
 #define Y2_WHT_UPSCALE_FACTOR 2
 #endif
 
-#ifndef vp8_idct_idct16x16
-#define vp8_idct_idct16x16 vp9_short_idct16x16_c
+#ifndef vp9_idct_idct16x16
+#define vp9_idct_idct16x16 vp9_short_idct16x16_c
 #endif
-extern prototype_idct(vp8_idct_idct16x16);
+extern prototype_idct(vp9_idct_idct16x16);
 
-#ifndef vp8_idct_idct8
-#define vp8_idct_idct8 vp9_short_idct8x8_c
+#ifndef vp9_idct_idct8
+#define vp9_idct_idct8 vp9_short_idct8x8_c
 #endif
-extern prototype_idct(vp8_idct_idct8);
+extern prototype_idct(vp9_idct_idct8);
 
-#ifndef vp8_idct_idct8_1
-#define vp8_idct_idct8_1 vp9_short_idct8x8_1_c
+#ifndef vp9_idct_idct8_1
+#define vp9_idct_idct8_1 vp9_short_idct8x8_1_c
 #endif
-extern prototype_idct(vp8_idct_idct8_1);
+extern prototype_idct(vp9_idct_idct8_1);
 
-#ifndef vp8_idct_ihaar2
-#define vp8_idct_ihaar2 vp9_short_ihaar2x2_c
+#ifndef vp9_idct_ihaar2
+#define vp9_idct_ihaar2 vp9_short_ihaar2x2_c
 #endif
-extern prototype_idct(vp8_idct_ihaar2);
+extern prototype_idct(vp9_idct_ihaar2);
 
-#ifndef vp8_idct_ihaar2_1
-#define vp8_idct_ihaar2_1 vp9_short_ihaar2x2_1_c
+#ifndef vp9_idct_ihaar2_1
+#define vp9_idct_ihaar2_1 vp9_short_ihaar2x2_1_c
 #endif
-extern prototype_idct(vp8_idct_ihaar2_1);
+extern prototype_idct(vp9_idct_ihaar2_1);
 
-#ifndef vp8_idct_idct1_scalar_add_8x8
-#define vp8_idct_idct1_scalar_add_8x8 vp9_dc_only_idct_add_8x8_c
+#ifndef vp9_idct_idct1_scalar_add_8x8
+#define vp9_idct_idct1_scalar_add_8x8 vp9_dc_only_idct_add_8x8_c
 #endif
-extern prototype_idct_scalar_add(vp8_idct_idct1_scalar_add_8x8);
+extern prototype_idct_scalar_add(vp9_idct_idct1_scalar_add_8x8);
 
 
 
-#ifndef vp8_idct_idct1
-#define vp8_idct_idct1 vp9_short_idct4x4llm_1_c
+#ifndef vp9_idct_idct1
+#define vp9_idct_idct1 vp9_short_idct4x4llm_1_c
 #endif
-extern prototype_idct(vp8_idct_idct1);
+extern prototype_idct(vp9_idct_idct1);
 
-#ifndef vp8_idct_idct16
-#define vp8_idct_idct16 vp9_short_idct4x4llm_c
+#ifndef vp9_idct_idct16
+#define vp9_idct_idct16 vp9_short_idct4x4llm_c
 #endif
-extern prototype_idct(vp8_idct_idct16);
+extern prototype_idct(vp9_idct_idct16);
 
-#ifndef vp8_idct_idct1_scalar_add
-#define vp8_idct_idct1_scalar_add vp9_dc_only_idct_add_c
+#ifndef vp9_idct_idct1_scalar_add
+#define vp9_idct_idct1_scalar_add vp9_dc_only_idct_add_c
 #endif
-extern prototype_idct_scalar_add(vp8_idct_idct1_scalar_add);
+extern prototype_idct_scalar_add(vp9_idct_idct1_scalar_add);
 
 
-#ifndef vp8_idct_iwalsh1
-#define vp8_idct_iwalsh1 vp9_short_inv_walsh4x4_1_c
+#ifndef vp9_idct_iwalsh1
+#define vp9_idct_iwalsh1 vp9_short_inv_walsh4x4_1_c
 #endif
-extern prototype_second_order(vp8_idct_iwalsh1);
+extern prototype_second_order(vp9_idct_iwalsh1);
 
-#ifndef vp8_idct_iwalsh16
-#define vp8_idct_iwalsh16 vp9_short_inv_walsh4x4_c
+#ifndef vp9_idct_iwalsh16
+#define vp9_idct_iwalsh16 vp9_short_inv_walsh4x4_c
 #endif
-extern prototype_second_order(vp8_idct_iwalsh16);
+extern prototype_second_order(vp9_idct_iwalsh16);
 
 #if CONFIG_LOSSLESS
 extern prototype_idct(vp9_short_inv_walsh4x4_x8_c);
@@ -114,31 +114,31 @@ extern prototype_second_order(vp9_short_inv_walsh4x4_1_lossless_c);
 void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
                   TX_TYPE tx_type, int tx_dim);
 
-typedef prototype_idct((*vp8_idct_fn_t));
-typedef prototype_idct_scalar_add((*vp8_idct_scalar_add_fn_t));
-typedef prototype_second_order((*vp8_second_order_fn_t));
+typedef prototype_idct((*vp9_idct_fn_t));
+typedef prototype_idct_scalar_add((*vp9_idct_scalar_add_fn_t));
+typedef prototype_second_order((*vp9_second_order_fn_t));
 
 typedef struct {
-  vp8_idct_fn_t            idct1;
-  vp8_idct_fn_t            idct16;
-  vp8_idct_scalar_add_fn_t idct1_scalar_add;
+  vp9_idct_fn_t            idct1;
+  vp9_idct_fn_t            idct16;
+  vp9_idct_scalar_add_fn_t idct1_scalar_add;
 
-  vp8_second_order_fn_t iwalsh1;
-  vp8_second_order_fn_t iwalsh16;
+  vp9_second_order_fn_t iwalsh1;
+  vp9_second_order_fn_t iwalsh16;
 
-  vp8_idct_fn_t            idct8;
-  vp8_idct_fn_t            idct8_1;
-  vp8_idct_scalar_add_fn_t idct1_scalar_add_8x8;
-  vp8_idct_fn_t ihaar2;
-  vp8_idct_fn_t ihaar2_1;
+  vp9_idct_fn_t            idct8;
+  vp9_idct_fn_t            idct8_1;
+  vp9_idct_scalar_add_fn_t idct1_scalar_add_8x8;
+  vp9_idct_fn_t ihaar2;
+  vp9_idct_fn_t ihaar2_1;
 
-  vp8_idct_fn_t            idct16x16;
-} vp8_idct_rtcd_vtable_t;
+  vp9_idct_fn_t            idct16x16;
+} vp9_idct_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IDCT_INVOKE(ctx,fn) (ctx)->fn
 #else
-#define IDCT_INVOKE(ctx,fn) vp8_idct_##fn
+#define IDCT_INVOKE(ctx,fn) vp9_idct_##fn
 #endif
 
 #endif

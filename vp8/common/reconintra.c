@@ -355,7 +355,7 @@ void vp9_build_intra_predictors_sby_s(MACROBLOCKD *xd) {
 #endif
 
 #if CONFIG_COMP_INTRA_PRED
-void vp8_build_comp_intra_predictors_mby(MACROBLOCKD *xd) {
+void vp9_build_comp_intra_predictors_mby(MACROBLOCKD *xd) {
   unsigned char predictor[2][256];
   int i;
 
@@ -414,7 +414,7 @@ void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd) {
 #endif
 
 #if CONFIG_COMP_INTRA_PRED
-void vp8_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
+void vp9_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
   unsigned char predictor[2][2][64];
   int i;
 
@@ -441,7 +441,7 @@ void vp9_intra8x8_predict(BLOCKD *xd,
 }
 
 #if CONFIG_COMP_INTRA_PRED
-void vp8_comp_intra8x8_predict(BLOCKD *xd,
+void vp9_comp_intra8x8_predict(BLOCKD *xd,
                                int mode, int second_mode,
                                unsigned char *out_predictor) {
   unsigned char predictor[2][8 * 16];
@@ -467,7 +467,7 @@ void vp9_intra_uv4x4_predict(BLOCKD *xd,
 }
 
 #if CONFIG_COMP_INTRA_PRED
-void vp8_comp_intra_uv4x4_predict(BLOCKD *xd,
+void vp9_comp_intra_uv4x4_predict(BLOCKD *xd,
                                   int mode, int mode2,
                                   unsigned char *out_predictor) {
   unsigned char predictor[2][8 * 4];

@@ -54,11 +54,11 @@
     vzip.32         d8, d9                  ;put 2-line data in 1 register (src_ptr[1])
     vzip.32         d10, d11
 
-    vmull.u8        q7, d2, d0              ;(src_ptr[0] * vp8_filter[0])
+    vmull.u8        q7, d2, d0              ;(src_ptr[0] * vp9_filter[0])
     vmull.u8        q8, d4, d0
     vmull.u8        q9, d6, d0
 
-    vmlal.u8        q7, d8, d1              ;(src_ptr[1] * vp8_filter[1])
+    vmlal.u8        q7, d8, d1              ;(src_ptr[1] * vp9_filter[1])
     vmlal.u8        q8, d10, d1
     vmlal.u8        q9, d12, d1
 

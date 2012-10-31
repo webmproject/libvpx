@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vp8_sub_pixel_variance8x8_neon|
+    EXPORT  |vp9_sub_pixel_variance8x8_neon|
     ARM
     REQUIRE8
     PRESERVE8
@@ -22,9 +22,9 @@
 ; stack(r4) unsigned char *dst_ptr,
 ; stack(r5) int dst_pixels_per_line,
 ; stack(r6) unsigned int *sse
-;note: most of the code is copied from bilinear_predict8x8_neon and vp8_variance8x8_neon.
+;note: most of the code is copied from bilinear_predict8x8_neon and vp9_variance8x8_neon.
 
-|vp8_sub_pixel_variance8x8_neon| PROC
+|vp9_sub_pixel_variance8x8_neon| PROC
     push            {r4-r5, lr}
 
     ldr             r12, _BilinearTaps_coeff_
@@ -154,7 +154,7 @@ skip_firstpass_filter
     b               secondpass_filter
 
 ;----------------------
-;vp8_variance8x8_neon
+;vp9_variance8x8_neon
 sub_pixel_variance8x8_neon
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse

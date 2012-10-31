@@ -33,13 +33,12 @@
 #include "vpx_ports/arm.h"
 #endif
 
-extern void vp8_init_loop_filter(VP9_COMMON *cm);
 extern void vp9_init_de_quantizer(VP9D_COMP *pbi);
 static int get_free_fb(VP9_COMMON *cm);
 static void ref_cnt_fb(int *buf, int *idx, int new_idx);
 
 #if CONFIG_DEBUG
-void vp8_recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s) {
+static void recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s) {
   FILE *yuv_file = fopen((char *)name, "ab");
   unsigned char *src = s->y_buffer;
   int h = s->y_height;
@@ -115,7 +114,7 @@ void vp9_initialize_dec(void) {
   }
 }
 
-VP8D_PTR vp9_create_decompressor(VP8D_CONFIG *oxcf) {
+VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   VP9D_COMP *pbi = vpx_memalign(32, sizeof(VP9D_COMP));
 
   if (!pbi)
@@ -149,10 +148,10 @@ VP8D_PTR vp9_create_decompressor(VP8D_CONFIG *oxcf) {
 
   pbi->decoded_key_frame = 0;
 
-  return (VP8D_PTR) pbi;
+  return (VP9D_PTR) pbi;
 }
 
-void vp9_remove_decompressor(VP8D_PTR ptr) {
+void vp9_remove_decompressor(VP9D_PTR ptr) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
 
   if (!pbi)
@@ -168,17 +167,17 @@ void vp9_remove_decompressor(VP8D_PTR ptr) {
 }
 
 
-vpx_codec_err_t vp9_get_reference_dec(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag,
+vpx_codec_err_t vp9_get_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
   int ref_fb_idx;
 
-  if (ref_frame_flag == VP8_LAST_FLAG)
+  if (ref_frame_flag == VP9_LAST_FLAG)
     ref_fb_idx = cm->lst_fb_idx;
-  else if (ref_frame_flag == VP8_GOLD_FLAG)
+  else if (ref_frame_flag == VP9_GOLD_FLAG)
     ref_fb_idx = cm->gld_fb_idx;
-  else if (ref_frame_flag == VP8_ALT_FLAG)
+  else if (ref_frame_flag == VP9_ALT_FLAG)
     ref_fb_idx = cm->alt_fb_idx;
   else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
@@ -199,18 +198,18 @@ vpx_codec_err_t vp9_get_reference_dec(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag,
 }
 
 
-vpx_codec_err_t vp9_set_reference_dec(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag,
+vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
   int *ref_fb_ptr = NULL;
   int free_fb;
 
-  if (ref_frame_flag == VP8_LAST_FLAG)
+  if (ref_frame_flag == VP9_LAST_FLAG)
     ref_fb_ptr = &cm->lst_fb_idx;
-  else if (ref_frame_flag == VP8_GOLD_FLAG)
+  else if (ref_frame_flag == VP9_GOLD_FLAG)
     ref_fb_ptr = &cm->gld_fb_idx;
-  else if (ref_frame_flag == VP8_ALT_FLAG)
+  else if (ref_frame_flag == VP9_ALT_FLAG)
     ref_fb_ptr = &cm->alt_fb_idx;
   else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
@@ -241,8 +240,8 @@ vpx_codec_err_t vp9_set_reference_dec(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag,
 
 /*For ARM NEON, d8-d15 are callee-saved registers, and need to be saved by us.*/
 #if HAVE_ARMV7
-extern void vp8_push_neon(int64_t *store);
-extern void vp8_pop_neon(int64_t *store);
+extern void vp9_push_neon(int64_t *store);
+extern void vp9_pop_neon(int64_t *store);
 #endif
 
 static int get_free_fb(VP9_COMMON *cm) {
@@ -318,23 +317,7 @@ static int swap_frame_buffers(VP9_COMMON *cm) {
   return err;
 }
 
-/*
-static void vp8_print_yuv_rec_mb(VP9_COMMON *cm, int mb_row, int mb_col)
-{
-  YV12_BUFFER_CONFIG *s = cm->frame_to_show;
-  unsigned char *src = s->y_buffer;
-  int i, j;
-
-  printf("After loop filter\n");
-  for (i=0;i<16;i++) {
-    for (j=0;j<16;j++)
-      printf("%3d ", src[(mb_row*16+i)*s->y_stride + mb_col*16+j]);
-    printf("\n");
-  }
-}
-*/
-
-int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
+int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
                                 const unsigned char *source,
                                 int64_t time_stamp) {
 #if HAVE_ARMV7
@@ -370,7 +353,7 @@ int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
   if (cm->rtcd.flags & HAS_NEON)
 #endif
   {
-    vp8_push_neon(dx_store_reg);
+    vp9_push_neon(dx_store_reg);
   }
 #endif
 
@@ -382,7 +365,7 @@ int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
     if (cm->rtcd.flags & HAS_NEON)
 #endif
     {
-      vp8_pop_neon(dx_store_reg);
+      vp9_pop_neon(dx_store_reg);
     }
 #endif
     pbi->common.error.setjmp = 0;
@@ -408,7 +391,7 @@ int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
     if (cm->rtcd.flags & HAS_NEON)
 #endif
     {
-      vp8_pop_neon(dx_store_reg);
+      vp9_pop_neon(dx_store_reg);
     }
 #endif
     pbi->common.error.error_code = VPX_CODEC_ERROR;
@@ -425,7 +408,7 @@ int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
       if (cm->rtcd.flags & HAS_NEON)
 #endif
       {
-        vp8_pop_neon(dx_store_reg);
+        vp9_pop_neon(dx_store_reg);
       }
 #endif
       pbi->common.error.error_code = VPX_CODEC_ERROR;
@@ -451,10 +434,10 @@ int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
 
 #if CONFIG_DEBUG
   if (cm->show_frame)
-    vp8_recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
+    recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
 #endif
 
-  vp8_clear_system_state();
+  vp9_clear_system_state();
 
   if (cm->show_frame) {
     vpx_memcpy(cm->prev_mip, cm->mip,
@@ -479,16 +462,16 @@ int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
   if (cm->rtcd.flags & HAS_NEON)
 #endif
   {
-    vp8_pop_neon(dx_store_reg);
+    vp9_pop_neon(dx_store_reg);
   }
 #endif
   pbi->common.error.setjmp = 0;
   return retcode;
 }
 
-int vp9_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd,
+int vp9_get_raw_frame(VP9D_PTR ptr, YV12_BUFFER_CONFIG *sd,
                       int64_t *time_stamp, int64_t *time_end_stamp,
-                      vp8_ppflags_t *flags) {
+                      vp9_ppflags_t *flags) {
   int ret = -1;
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
 
@@ -519,6 +502,6 @@ int vp9_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd,
   }
 
 #endif /*!CONFIG_POSTPROC*/
-  vp8_clear_system_state();
+  vp9_clear_system_state();
   return ret;
 }

@@ -23,7 +23,7 @@ typedef struct {
 } TOKENVALUE;
 
 typedef struct {
-  const vp8_prob *context_tree;
+  const vp9_prob *context_tree;
   short           Extra;
   unsigned char   Token;
   unsigned char   skip_eob_node;

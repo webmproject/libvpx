@@ -67,9 +67,9 @@ static int inv_remap_prob(int v, int m) {
   return i;
 }
 
-static vp8_prob read_prob_diff_update(vp8_reader *const bc, int oldp) {
+static vp9_prob read_prob_diff_update(vp9_reader *const bc, int oldp) {
   int delp = vp9_decode_term_subexp(bc, SUBEXP_PARAM, 255);
-  return (vp8_prob)inv_remap_prob(delp, oldp);
+  return (vp9_prob)inv_remap_prob(delp, oldp);
 }
 
 void vp9_init_de_quantizer(VP9D_COMP *pbi) {
@@ -241,7 +241,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
         xd->left_context--;
     }
 #endif
-  } else if (!vp8dx_bool_error(bc)) {
+  } else if (!bool_error(bc)) {
     for (i = 0; i < 25; i++) {
       xd->block[i].eob = 0;
       xd->eobs[i] = 0;
@@ -262,7 +262,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
 
   if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV
       && mode != I8X8_PRED
-      && !vp8dx_bool_error(bc)) {
+      && !bool_error(bc)) {
     /* Special case:  Force the loopfilter to skip when eobtotal and
      * mb_skip_coeff are zero.
      * */
@@ -364,7 +364,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
         vp9_intra4x4_predict(b, b_mode, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
       } else {
-        vp8_comp_intra4x4_predict(b, b_mode, b_mode2, b->predictor);
+        vp9_comp_intra4x4_predict(b, b_mode, b_mode2, b->predictor);
       }
 #endif
 
@@ -511,13 +511,13 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
 }
 
 
-static int get_delta_q(vp8_reader *bc, int prev, int *q_update) {
+static int get_delta_q(vp9_reader *bc, int prev, int *q_update) {
   int ret_val = 0;
 
-  if (vp8_read_bit(bc)) {
-    ret_val = vp8_read_literal(bc, 4);
+  if (vp9_read_bit(bc)) {
+    ret_val = vp9_read_literal(bc, 4);
 
-    if (vp8_read_bit(bc))
+    if (vp9_read_bit(bc))
       ret_val = -ret_val;
   }
 
@@ -559,7 +559,7 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
     MODE_INFO *mi = xd->mode_info_context;
 
 #if CONFIG_SUPERBLOCKS
-    mi->mbmi.encoded_as_sb = vp8_read(bc, pc->sb_coded);
+    mi->mbmi.encoded_as_sb = vp9_read(bc, pc->sb_coded);
 #endif
 
     // Process the 4 MBs within the SB in the order:
@@ -666,7 +666,7 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
       decode_macroblock(pbi, xd, mb_row, mb_col, bc);
 
       /* check if the boolean decoder has suffered an error */
-      xd->corrupted |= vp8dx_bool_error(bc);
+      xd->corrupted |= bool_error(bc);
 
 #if CONFIG_SUPERBLOCKS
       if (mi->mbmi.encoded_as_sb) {
@@ -811,12 +811,12 @@ static void init_frame(VP9D_COMP *pbi) {
 
 #if 0
 static void read_coef_probs2(VP9D_COMP *pbi) {
-  const vp8_prob grpupd = 192;
+  const vp9_prob grpupd = 192;
   int i, j, k, l;
-  vp8_reader *const bc = &pbi->bc;
+  vp9_reader *const bc = &pbi->bc;
   VP9_COMMON *const pc = &pbi->common;
   for (l = 0; l < ENTROPY_NODES; l++) {
-    if (vp8_read(bc, grpupd)) {
+    if (vp9_read(bc, grpupd)) {
       // printf("Decoding %d\n", l);
       for (i = 0; i < BLOCK_TYPES; i++)
         for (j = !i; j < COEF_BANDS; j++)
@@ -825,8 +825,8 @@ static void read_coef_probs2(VP9D_COMP *pbi) {
                            (i > 0 && j == 0)))
               continue;
             {
-              vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
-              int u = vp8_read(bc, COEF_UPDATE_PROB);
+              vp9_prob *const p = pc->fc.coef_probs [i][j][k] + l;
+              int u = vp9_read(bc, COEF_UPDATE_PROB);
               if (u) *p = read_prob_diff_update(bc, *p);
             }
           }
@@ -834,7 +834,7 @@ static void read_coef_probs2(VP9D_COMP *pbi) {
   }
   if (pbi->common.txfm_mode == ALLOW_8X8) {
     for (l = 0; l < ENTROPY_NODES; l++) {
-      if (vp8_read(bc, grpupd)) {
+      if (vp9_read(bc, grpupd)) {
         for (i = 0; i < BLOCK_TYPES_8X8; i++)
           for (j = !i; j < COEF_BANDS; j++)
             for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
@@ -842,9 +842,9 @@ static void read_coef_probs2(VP9D_COMP *pbi) {
                              (i > 0 && j == 0)))
                 continue;
               {
-                vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
+                vp9_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
 
-                int u = vp8_read(bc, COEF_UPDATE_PROB_8X8);
+                int u = vp9_read(bc, COEF_UPDATE_PROB_8X8);
                 if (u) *p = read_prob_diff_update(bc, *p);
               }
             }
@@ -856,11 +856,11 @@ static void read_coef_probs2(VP9D_COMP *pbi) {
 
 static void read_coef_probs_common(
     BOOL_DECODER* const bc,
-    vp8_prob coef_probs[BLOCK_TYPES][COEF_BANDS]
+    vp9_prob coef_probs[BLOCK_TYPES][COEF_BANDS]
                        [PREV_COEF_CONTEXTS][ENTROPY_NODES]) {
   int i, j, k, l;
 
-  if (vp8_read_bit(bc)) {
+  if (vp9_read_bit(bc)) {
     for (i = 0; i < BLOCK_TYPES; i++) {
       for (j = !i; j < COEF_BANDS; j++) {
         /* NB: This j loop starts from 1 on block type i == 0 */
@@ -869,9 +869,9 @@ static void read_coef_probs_common(
                          (i > 0 && j == 0)))
             continue;
           for (l = 0; l < ENTROPY_NODES; l++) {
-            vp8_prob *const p = coef_probs[i][j][k] + l;
+            vp9_prob *const p = coef_probs[i][j][k] + l;
 
-            if (vp8_read(bc, COEF_UPDATE_PROB)) {
+            if (vp9_read(bc, COEF_UPDATE_PROB)) {
               *p = read_prob_diff_update(bc, *p);
             }
           }
@@ -990,17 +990,17 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
   if (pc->frame_type == KEY_FRAME) {
-    pc->clr_type    = (YUV_TYPE)vp8_read_bit(&header_bc);
-    pc->clamp_type  = (CLAMP_TYPE)vp8_read_bit(&header_bc);
+    pc->clr_type    = (YUV_TYPE)vp9_read_bit(&header_bc);
+    pc->clamp_type  = (CLAMP_TYPE)vp9_read_bit(&header_bc);
   }
 
   /* Is segmentation enabled */
-  xd->segmentation_enabled = (unsigned char)vp8_read_bit(&header_bc);
+  xd->segmentation_enabled = (unsigned char)vp9_read_bit(&header_bc);
 
   if (xd->segmentation_enabled) {
     // Read whether or not the segmentation map is being explicitly
     // updated this frame.
-    xd->update_mb_segmentation_map = (unsigned char)vp8_read_bit(&header_bc);
+    xd->update_mb_segmentation_map = (unsigned char)vp9_read_bit(&header_bc);
 
     // If so what method will be used.
     if (xd->update_mb_segmentation_map) {
@@ -1009,28 +1009,28 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
       // Read the probs used to decode the segment id for each macro
       // block.
       for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
-          xd->mb_segment_tree_probs[i] = vp8_read_bit(&header_bc) ?
-              (vp8_prob)vp8_read_literal(&header_bc, 8) : 255;
+          xd->mb_segment_tree_probs[i] = vp9_read_bit(&header_bc) ?
+              (vp9_prob)vp9_read_literal(&header_bc, 8) : 255;
       }
 
       // Read the prediction probs needed to decode the segment id
-      pc->temporal_update = (unsigned char)vp8_read_bit(&header_bc);
+      pc->temporal_update = (unsigned char)vp9_read_bit(&header_bc);
       for (i = 0; i < PREDICTION_PROBS; i++) {
         if (pc->temporal_update) {
-          pc->segment_pred_probs[i] = vp8_read_bit(&header_bc) ?
-              (vp8_prob)vp8_read_literal(&header_bc, 8) : 255;
+          pc->segment_pred_probs[i] = vp9_read_bit(&header_bc) ?
+              (vp9_prob)vp9_read_literal(&header_bc, 8) : 255;
         } else {
           pc->segment_pred_probs[i] = 255;
         }
       }
     }
     // Is the segment data being updated
-    xd->update_mb_segmentation_data = (unsigned char)vp8_read_bit(&header_bc);
+    xd->update_mb_segmentation_data = (unsigned char)vp9_read_bit(&header_bc);
 
     if (xd->update_mb_segmentation_data) {
       int data;
 
-      xd->mb_segment_abs_delta = (unsigned char)vp8_read_bit(&header_bc);
+      xd->mb_segment_abs_delta = (unsigned char)vp9_read_bit(&header_bc);
 
       vp9_clearall_segfeatures(xd);
 
@@ -1039,16 +1039,16 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
         // For each of the segments features...
         for (j = 0; j < SEG_LVL_MAX; j++) {
           // Is the feature enabled
-          if (vp8_read_bit(&header_bc)) {
+          if (vp9_read_bit(&header_bc)) {
             // Update the feature data and mask
             vp9_enable_segfeature(xd, i, j);
 
-            data = (signed char)vp8_read_literal(
+            data = (signed char)vp9_read_literal(
                      &header_bc, vp9_seg_feature_data_bits(j));
 
             // Is the segment data signed..
             if (vp9_is_segfeature_signed(j)) {
-              if (vp8_read_bit(&header_bc))
+              if (vp9_read_bit(&header_bc))
                 data = - data;
             }
           } else
@@ -1069,53 +1069,53 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
     pc->ref_pred_probs[2] = 40;
   } else {
     for (i = 0; i < PREDICTION_PROBS; i++) {
-      if (vp8_read_bit(&header_bc))
-        pc->ref_pred_probs[i] = (vp8_prob)vp8_read_literal(&header_bc, 8);
+      if (vp9_read_bit(&header_bc))
+        pc->ref_pred_probs[i] = (vp9_prob)vp9_read_literal(&header_bc, 8);
     }
   }
 
 #if CONFIG_SUPERBLOCKS
-  pc->sb_coded = vp8_read_literal(&header_bc, 8);
+  pc->sb_coded = vp9_read_literal(&header_bc, 8);
 #endif
 
   /* Read the loop filter level and type */
-  pc->txfm_mode = vp8_read_literal(&header_bc, 2);
+  pc->txfm_mode = vp9_read_literal(&header_bc, 2);
   if (pc->txfm_mode == TX_MODE_SELECT) {
-    pc->prob_tx[0] = vp8_read_literal(&header_bc, 8);
-    pc->prob_tx[1] = vp8_read_literal(&header_bc, 8);
+    pc->prob_tx[0] = vp9_read_literal(&header_bc, 8);
+    pc->prob_tx[1] = vp9_read_literal(&header_bc, 8);
   }
 
-  pc->filter_type = (LOOPFILTERTYPE) vp8_read_bit(&header_bc);
-  pc->filter_level = vp8_read_literal(&header_bc, 6);
-  pc->sharpness_level = vp8_read_literal(&header_bc, 3);
+  pc->filter_type = (LOOPFILTERTYPE) vp9_read_bit(&header_bc);
+  pc->filter_level = vp9_read_literal(&header_bc, 6);
+  pc->sharpness_level = vp9_read_literal(&header_bc, 3);
 
   /* Read in loop filter deltas applied at the MB level based on mode or ref frame. */
   xd->mode_ref_lf_delta_update = 0;
-  xd->mode_ref_lf_delta_enabled = (unsigned char)vp8_read_bit(&header_bc);
+  xd->mode_ref_lf_delta_enabled = (unsigned char)vp9_read_bit(&header_bc);
 
   if (xd->mode_ref_lf_delta_enabled) {
     /* Do the deltas need to be updated */
-    xd->mode_ref_lf_delta_update = (unsigned char)vp8_read_bit(&header_bc);
+    xd->mode_ref_lf_delta_update = (unsigned char)vp9_read_bit(&header_bc);
 
     if (xd->mode_ref_lf_delta_update) {
       /* Send update */
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
-        if (vp8_read_bit(&header_bc)) {
-          /*sign = vp8_read_bit( &header_bc );*/
-          xd->ref_lf_deltas[i] = (signed char)vp8_read_literal(&header_bc, 6);
+        if (vp9_read_bit(&header_bc)) {
+          /*sign = vp9_read_bit( &header_bc );*/
+          xd->ref_lf_deltas[i] = (signed char)vp9_read_literal(&header_bc, 6);
 
-          if (vp8_read_bit(&header_bc))        /* Apply sign */
+          if (vp9_read_bit(&header_bc))        /* Apply sign */
             xd->ref_lf_deltas[i] = xd->ref_lf_deltas[i] * -1;
         }
       }
 
       /* Send update */
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
-        if (vp8_read_bit(&header_bc)) {
-          /*sign = vp8_read_bit( &header_bc );*/
-          xd->mode_lf_deltas[i] = (signed char)vp8_read_literal(&header_bc, 6);
+        if (vp9_read_bit(&header_bc)) {
+          /*sign = vp9_read_bit( &header_bc );*/
+          xd->mode_lf_deltas[i] = (signed char)vp9_read_literal(&header_bc, 6);
 
-          if (vp8_read_bit(&header_bc))        /* Apply sign */
+          if (vp9_read_bit(&header_bc))        /* Apply sign */
             xd->mode_lf_deltas[i] = xd->mode_lf_deltas[i] * -1;
         }
       }
@@ -1123,7 +1123,7 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
   }
 
   // Dummy read for now
-  vp8_read_literal(&header_bc, 2);
+  vp9_read_literal(&header_bc, 2);
 
   setup_token_decoder(pbi, data + first_partition_length_in_bytes,
                       &residual_bc);
@@ -1132,7 +1132,7 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
   {
     int Q, q_update;
 
-    Q = vp8_read_literal(&header_bc, QINDEX_BITS);
+    Q = vp9_read_literal(&header_bc, QINDEX_BITS);
     pc->base_qindex = Q;
     q_update = 0;
     /* AC 1st order Q = default */
@@ -1155,8 +1155,8 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
    */
   if (pc->frame_type != KEY_FRAME) {
     /* Should the GF or ARF be updated from the current frame */
-    pc->refresh_golden_frame = vp8_read_bit(&header_bc);
-    pc->refresh_alt_ref_frame = vp8_read_bit(&header_bc);
+    pc->refresh_golden_frame = vp9_read_bit(&header_bc);
+    pc->refresh_alt_ref_frame = vp9_read_bit(&header_bc);
 
     if (pc->refresh_alt_ref_frame) {
       vpx_memcpy(&pc->fc, &pc->lfc_a, sizeof(pc->fc));
@@ -1174,35 +1174,35 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
     pc->copy_buffer_to_gf = 0;
 
     if (!pc->refresh_golden_frame)
-      pc->copy_buffer_to_gf = vp8_read_literal(&header_bc, 2);
+      pc->copy_buffer_to_gf = vp9_read_literal(&header_bc, 2);
 
     pc->copy_buffer_to_arf = 0;
 
     if (!pc->refresh_alt_ref_frame)
-      pc->copy_buffer_to_arf = vp8_read_literal(&header_bc, 2);
+      pc->copy_buffer_to_arf = vp9_read_literal(&header_bc, 2);
 
-    pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp8_read_bit(&header_bc);
-    pc->ref_frame_sign_bias[ALTREF_FRAME] = vp8_read_bit(&header_bc);
+    pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp9_read_bit(&header_bc);
+    pc->ref_frame_sign_bias[ALTREF_FRAME] = vp9_read_bit(&header_bc);
 
     /* Is high precision mv allowed */
-    xd->allow_high_precision_mv = (unsigned char)vp8_read_bit(&header_bc);
+    xd->allow_high_precision_mv = (unsigned char)vp9_read_bit(&header_bc);
     // Read the type of subpel filter to use
-    if (vp8_read_bit(&header_bc)) {
+    if (vp9_read_bit(&header_bc)) {
       pc->mcomp_filter_type = SWITCHABLE;
     } else {
-      pc->mcomp_filter_type = vp8_read_literal(&header_bc, 2);
+      pc->mcomp_filter_type = vp9_read_literal(&header_bc, 2);
     }
     /* To enable choice of different interploation filters */
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }
 
-  pc->refresh_entropy_probs = vp8_read_bit(&header_bc);
+  pc->refresh_entropy_probs = vp9_read_bit(&header_bc);
   if (pc->refresh_entropy_probs == 0) {
     vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
   }
 
   pc->refresh_last_frame = (pc->frame_type == KEY_FRAME)
-                           || vp8_read_bit(&header_bc);
+                           || vp9_read_bit(&header_bc);
 
   if (0) {
     FILE *z = fopen("decodestats.stt", "a");
@@ -1216,40 +1216,40 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
     fclose(z);
   }
 
-  vp8_copy(pbi->common.fc.pre_coef_probs,
+  vp9_copy(pbi->common.fc.pre_coef_probs,
            pbi->common.fc.coef_probs);
-  vp8_copy(pbi->common.fc.pre_hybrid_coef_probs,
+  vp9_copy(pbi->common.fc.pre_hybrid_coef_probs,
            pbi->common.fc.hybrid_coef_probs);
-  vp8_copy(pbi->common.fc.pre_coef_probs_8x8,
+  vp9_copy(pbi->common.fc.pre_coef_probs_8x8,
            pbi->common.fc.coef_probs_8x8);
-  vp8_copy(pbi->common.fc.pre_hybrid_coef_probs_8x8,
+  vp9_copy(pbi->common.fc.pre_hybrid_coef_probs_8x8,
            pbi->common.fc.hybrid_coef_probs_8x8);
-  vp8_copy(pbi->common.fc.pre_coef_probs_16x16,
+  vp9_copy(pbi->common.fc.pre_coef_probs_16x16,
            pbi->common.fc.coef_probs_16x16);
-  vp8_copy(pbi->common.fc.pre_hybrid_coef_probs_16x16,
+  vp9_copy(pbi->common.fc.pre_hybrid_coef_probs_16x16,
            pbi->common.fc.hybrid_coef_probs_16x16);
-  vp8_copy(pbi->common.fc.pre_ymode_prob, pbi->common.fc.ymode_prob);
-  vp8_copy(pbi->common.fc.pre_uv_mode_prob, pbi->common.fc.uv_mode_prob);
-  vp8_copy(pbi->common.fc.pre_bmode_prob, pbi->common.fc.bmode_prob);
-  vp8_copy(pbi->common.fc.pre_i8x8_mode_prob, pbi->common.fc.i8x8_mode_prob);
-  vp8_copy(pbi->common.fc.pre_sub_mv_ref_prob, pbi->common.fc.sub_mv_ref_prob);
-  vp8_copy(pbi->common.fc.pre_mbsplit_prob, pbi->common.fc.mbsplit_prob);
+  vp9_copy(pbi->common.fc.pre_ymode_prob, pbi->common.fc.ymode_prob);
+  vp9_copy(pbi->common.fc.pre_uv_mode_prob, pbi->common.fc.uv_mode_prob);
+  vp9_copy(pbi->common.fc.pre_bmode_prob, pbi->common.fc.bmode_prob);
+  vp9_copy(pbi->common.fc.pre_i8x8_mode_prob, pbi->common.fc.i8x8_mode_prob);
+  vp9_copy(pbi->common.fc.pre_sub_mv_ref_prob, pbi->common.fc.sub_mv_ref_prob);
+  vp9_copy(pbi->common.fc.pre_mbsplit_prob, pbi->common.fc.mbsplit_prob);
   pbi->common.fc.pre_nmvc = pbi->common.fc.nmvc;
-  vp8_zero(pbi->common.fc.coef_counts);
-  vp8_zero(pbi->common.fc.hybrid_coef_counts);
-  vp8_zero(pbi->common.fc.coef_counts_8x8);
-  vp8_zero(pbi->common.fc.hybrid_coef_counts_8x8);
-  vp8_zero(pbi->common.fc.coef_counts_16x16);
-  vp8_zero(pbi->common.fc.hybrid_coef_counts_16x16);
-  vp8_zero(pbi->common.fc.ymode_counts);
-  vp8_zero(pbi->common.fc.uv_mode_counts);
-  vp8_zero(pbi->common.fc.bmode_counts);
-  vp8_zero(pbi->common.fc.i8x8_mode_counts);
-  vp8_zero(pbi->common.fc.sub_mv_ref_counts);
-  vp8_zero(pbi->common.fc.mbsplit_counts);
-  vp8_zero(pbi->common.fc.NMVcount);
-  vp8_zero(pbi->common.fc.mv_ref_ct);
-  vp8_zero(pbi->common.fc.mv_ref_ct_a);
+  vp9_zero(pbi->common.fc.coef_counts);
+  vp9_zero(pbi->common.fc.hybrid_coef_counts);
+  vp9_zero(pbi->common.fc.coef_counts_8x8);
+  vp9_zero(pbi->common.fc.hybrid_coef_counts_8x8);
+  vp9_zero(pbi->common.fc.coef_counts_16x16);
+  vp9_zero(pbi->common.fc.hybrid_coef_counts_16x16);
+  vp9_zero(pbi->common.fc.ymode_counts);
+  vp9_zero(pbi->common.fc.uv_mode_counts);
+  vp9_zero(pbi->common.fc.bmode_counts);
+  vp9_zero(pbi->common.fc.i8x8_mode_counts);
+  vp9_zero(pbi->common.fc.sub_mv_ref_counts);
+  vp9_zero(pbi->common.fc.mbsplit_counts);
+  vp9_zero(pbi->common.fc.NMVcount);
+  vp9_zero(pbi->common.fc.mv_ref_ct);
+  vp9_zero(pbi->common.fc.mv_ref_ct_a);
 
   read_coef_probs(pbi, &header_bc);
 
@@ -1272,7 +1272,7 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
   vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
 
   /* Read the mb_no_coeff_skip flag */
-  pc->mb_no_coeff_skip = (int)vp8_read_bit(&header_bc);
+  pc->mb_no_coeff_skip = (int)vp9_read_bit(&header_bc);
 
   vp9_decode_mode_mvs_init(pbi, &header_bc);
 
@@ -1290,7 +1290,7 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
 
   /* Collect information about decoder corruption. */
   /* 1. Check first boolean decoder for errors. */
-  pc->yv12_fb[pc->new_fb_idx].corrupted = vp8dx_bool_error(&header_bc);
+  pc->yv12_fb[pc->new_fb_idx].corrupted = bool_error(&header_bc);
   /* 2. Check the macroblock information */
   pc->yv12_fb[pc->new_fb_idx].corrupted |= corrupt_tokens;
 

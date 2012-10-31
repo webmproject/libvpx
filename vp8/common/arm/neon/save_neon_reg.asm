@@ -9,8 +9,8 @@
 ;
 
 
-    EXPORT  |vp8_push_neon|
-    EXPORT  |vp8_pop_neon|
+    EXPORT  |vp9_push_neon|
+    EXPORT  |vp9_pop_neon|
 
     ARM
     REQUIRE8
@@ -18,14 +18,14 @@
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-|vp8_push_neon| PROC
+|vp9_push_neon| PROC
     vst1.i64            {d8, d9, d10, d11}, [r0]!
     vst1.i64            {d12, d13, d14, d15}, [r0]!
     bx              lr
 
     ENDP
 
-|vp8_pop_neon| PROC
+|vp9_pop_neon| PROC
     vld1.i64            {d8, d9, d10, d11}, [r0]!
     vld1.i64            {d12, d13, d14, d15}, [r0]!
     bx              lr

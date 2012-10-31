@@ -64,8 +64,8 @@ void vp9_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
   vpx_memcpy(dst_y, src_y, ystride * (linestocopy + 16));
 }
 
-static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
-                                    YV12_BUFFER_CONFIG *dest, int Fraction) {
+static int calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
+                                YV12_BUFFER_CONFIG *dest, int Fraction) {
   int i, j;
   int Total = 0;
   int srcoffset, dstoffset;
@@ -173,7 +173,7 @@ void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   // Get the err using the previous frame's filter value.
   vp9_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
-  best_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3);
+  best_err = calc_partial_ssl_err(sd, cm->frame_to_show, 3);
 
   //  Re-instate the unfiltered frame
   vp9_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
@@ -186,7 +186,7 @@ void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
     vp9_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
     // Get the err for filtered frame
-    filt_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3);
+    filt_err = calc_partial_ssl_err(sd, cm->frame_to_show, 3);
 
     //  Re-instate the unfiltered frame
     vp9_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
@@ -215,7 +215,7 @@ void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
       vp9_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
       // Get the err for filtered frame
-      filt_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3);
+      filt_err = calc_partial_ssl_err(sd, cm->frame_to_show, 3);
 
       //  Re-instate the unfiltered frame
       vp9_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf,

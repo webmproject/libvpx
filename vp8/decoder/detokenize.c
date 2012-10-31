@@ -157,7 +157,7 @@ void static count_tokens_adaptive_scan(const MACROBLOCKD *xd, INT16 *qcoeff_ptr,
       break;
   }
 
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   for (c = !type; c < eob; ++c) {
     int rc = scan[c];
     int v = qcoeff_ptr[rc];
@@ -183,7 +183,7 @@ void static count_tokens(INT16 *qcoeff_ptr, int block, PLANE_TYPE type,
                          ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                          int eob, int seg_eob, FRAME_CONTEXT *const fc) {
   int c, pt, token, band;
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   for (c = !type; c < eob; ++c) {
     int rc = vp9_default_zig_zag1d[c];
     int v = qcoeff_ptr[rc];
@@ -203,7 +203,7 @@ void static count_tokens_8x8(INT16 *qcoeff_ptr, int block, PLANE_TYPE type,
                              ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                              int eob, int seg_eob, FRAME_CONTEXT *fc) {
   int c, pt, token, band;
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   for (c = !type; c < eob; ++c) {
     int rc = (type == 1 ? vp9_default_zig_zag1d[c] : vp9_default_zig_zag1d_8x8[c]);
     int v = qcoeff_ptr[rc];
@@ -229,7 +229,7 @@ void static count_tokens_16x16(INT16 *qcoeff_ptr, int block, PLANE_TYPE type,
                                ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                                int eob, int seg_eob, FRAME_CONTEXT *fc) {
   int c, pt, token;
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   for (c = !type; c < eob; ++c) {
     int rc = vp9_default_zig_zag1d_16x16[c];
     int v = qcoeff_ptr[rc];
@@ -250,9 +250,9 @@ void static count_tokens_16x16(INT16 *qcoeff_ptr, int block, PLANE_TYPE type,
   }
 }
 
-static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign) {
+static int get_signed(BOOL_DECODER *br, int value_to_sign) {
   const int split = (br->range + 1) >> 1;
-  const VP8_BD_VALUE bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8);
+  const VP9_BD_VALUE bigsplit = (VP9_BD_VALUE)split << (VP9_BD_VALUE_SIZE - 8);
   int v;
 
   if (br->count < 0)
@@ -276,14 +276,14 @@ static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign) {
 #define WRITE_COEF_CONTINUE(val)                              \
   {                                                           \
     prob = coef_probs + (ENTROPY_NODES*PREV_CONTEXT_INC(val));\
-    qcoeff_ptr[scan[c]] = (INT16) vp8_get_signed(br, val);    \
+    qcoeff_ptr[scan[c]] = (INT16) get_signed(br, val);        \
     c++;                                                      \
     continue;                                                 \
   }
 
 #define ADJUST_COEF(prob, bits_count)  \
   do {                                 \
-    if (vp8_read(br, prob))            \
+    if (vp9_read(br, prob))            \
       val += (UINT16)(1 << bits_count);\
   } while (0);
 
@@ -297,7 +297,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
                         const int *coef_bands) {
   FRAME_CONTEXT *const fc = &dx->common.fc;
   int tmp, c = (type == PLANE_TYPE_Y_NO_DC);
-  const vp8_prob *prob, *coef_probs;
+  const vp9_prob *prob, *coef_probs;
 
   switch (block_type) {
     default:
@@ -318,7 +318,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       break;
   }
 
-  VP8_COMBINEENTROPYCONTEXTS(tmp, *a, *l);
+  VP9_COMBINEENTROPYCONTEXTS(tmp, *a, *l);
   prob = coef_probs + tmp * ENTROPY_NODES;
 
   while (1) {
@@ -326,35 +326,35 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     const uint8_t *cat6 = cat6_prob;
     if (c == seg_eob) break;
     prob += coef_bands[c];
-    if (!vp8_read(br, prob[EOB_CONTEXT_NODE]))
+    if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
       break;
 SKIP_START:
     if (c == seg_eob) break;
-    if (!vp8_read(br, prob[ZERO_CONTEXT_NODE])) {
+    if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
       ++c;
       prob = coef_probs + coef_bands[c];
       goto SKIP_START;
     }
     // ONE_CONTEXT_NODE_0_
-    if (!vp8_read(br, prob[ONE_CONTEXT_NODE])) {
+    if (!vp9_read(br, prob[ONE_CONTEXT_NODE])) {
       prob = coef_probs + ENTROPY_NODES;
-      qcoeff_ptr[scan[c]] = (INT16) vp8_get_signed(br, 1);
+      qcoeff_ptr[scan[c]] = (INT16) get_signed(br, 1);
       ++c;
       continue;
     }
     // LOW_VAL_CONTEXT_NODE_0_
-    if (!vp8_read(br, prob[LOW_VAL_CONTEXT_NODE])) {
-      if (!vp8_read(br, prob[TWO_CONTEXT_NODE])) {
+    if (!vp9_read(br, prob[LOW_VAL_CONTEXT_NODE])) {
+      if (!vp9_read(br, prob[TWO_CONTEXT_NODE])) {
         WRITE_COEF_CONTINUE(2);
       }
-      if (!vp8_read(br, prob[THREE_CONTEXT_NODE])) {
+      if (!vp9_read(br, prob[THREE_CONTEXT_NODE])) {
         WRITE_COEF_CONTINUE(3);
       }
       WRITE_COEF_CONTINUE(4);
     }
     // HIGH_LOW_CONTEXT_NODE_0_
-    if (!vp8_read(br, prob[HIGH_LOW_CONTEXT_NODE])) {
-      if (!vp8_read(br, prob[CAT_ONE_CONTEXT_NODE])) {
+    if (!vp9_read(br, prob[HIGH_LOW_CONTEXT_NODE])) {
+      if (!vp9_read(br, prob[CAT_ONE_CONTEXT_NODE])) {
         val = CAT1_MIN_VAL;
         ADJUST_COEF(CAT1_PROB0, 0);
         WRITE_COEF_CONTINUE(val);
@@ -365,8 +365,8 @@ SKIP_START:
       WRITE_COEF_CONTINUE(val);
     }
     // CAT_THREEFOUR_CONTEXT_NODE_0_
-    if (!vp8_read(br, prob[CAT_THREEFOUR_CONTEXT_NODE])) {
-      if (!vp8_read(br, prob[CAT_THREE_CONTEXT_NODE])) {
+    if (!vp9_read(br, prob[CAT_THREEFOUR_CONTEXT_NODE])) {
+      if (!vp9_read(br, prob[CAT_THREE_CONTEXT_NODE])) {
         val = CAT3_MIN_VAL;
         ADJUST_COEF(CAT3_PROB2, 2);
         ADJUST_COEF(CAT3_PROB1, 1);
@@ -381,7 +381,7 @@ SKIP_START:
       WRITE_COEF_CONTINUE(val);
     }
     // CAT_FIVE_CONTEXT_NODE_0_:
-    if (!vp8_read(br, prob[CAT_FIVE_CONTEXT_NODE])) {
+    if (!vp9_read(br, prob[CAT_FIVE_CONTEXT_NODE])) {
       val = CAT5_MIN_VAL;
       ADJUST_COEF(CAT5_PROB4, 4);
       ADJUST_COEF(CAT5_PROB3, 3);
@@ -392,7 +392,7 @@ SKIP_START:
     }
     val = 0;
     while (*cat6) {
-      val = (val << 1) | vp8_read(br, *cat6++);
+      val = (val << 1) | vp9_read(br, *cat6++);
     }
     val += CAT6_MIN_VAL;
     WRITE_COEF_CONTINUE(val);

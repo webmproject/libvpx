@@ -11,7 +11,7 @@
 
 #include "entropymode.h"
 
-const unsigned int vp9_kf_default_bmode_counts[VP8_BINTRAMODES][VP8_BINTRAMODES][VP8_BINTRAMODES] = {
+const unsigned int vp9_kf_default_bmode_counts[VP9_BINTRAMODES][VP9_BINTRAMODES][VP9_BINTRAMODES] = {
   {
     /*Above Mode :  0*/
     { 43438,   2195,    470,    316,    615,    171,    217,    412,    124,    160, }, /* left_mode 0 */

@@ -65,18 +65,18 @@
     pkhbt       r9, r9, r10, lsl #16        ; r10 | r9
 
 |first_pass_wloop_v6|
-    smuad       r11, r6, r3                 ; vp8_filter[0], vp8_filter[1]
+    smuad       r11, r6, r3                 ; vp9_filter[0], vp9_filter[1]
     smuad       r12, r7, r3
 
     ldrb        r6, [r0], #1
 
-    smlad       r11, r8, r4, r11            ; vp8_filter[2], vp8_filter[3]
+    smlad       r11, r8, r4, r11            ; vp9_filter[2], vp9_filter[3]
     ldrb        r7, [r0], #1
     smlad       r12, r9, r4, r12
 
     pkhbt       r10, r10, r6, lsl #16       ; r10 | r9
     pkhbt       r6, r6, r7, lsl #16         ; r11 | r10
-    smlad       r11, r10, r5, r11           ; vp8_filter[4], vp8_filter[5]
+    smlad       r11, r10, r5, r11           ; vp9_filter[4], vp9_filter[5]
     smlad       r12, r6, r5, r12
 
     sub         r2, r2, #1

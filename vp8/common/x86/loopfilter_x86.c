@@ -238,20 +238,20 @@ void vp9_mbloop_filter_horizontal_edge_c_sse2
                                       t80);
     const __m128i qs1 = _mm_xor_si128(_mm_loadu_si128((__m128i *)(s + 1 * p)),
                                       t80);
-    __m128i vp8_filt;
+    __m128i filt;
     __m128i work_a;
     __m128i filter1, filter2;
 
-    vp8_filt = _mm_and_si128(_mm_subs_epi8(ps1, qs1), hev);
+    filt = _mm_and_si128(_mm_subs_epi8(ps1, qs1), hev);
     work_a = _mm_subs_epi8(qs0, ps0);
-    vp8_filt = _mm_adds_epi8(vp8_filt, work_a);
-    vp8_filt = _mm_adds_epi8(vp8_filt, work_a);
-    vp8_filt = _mm_adds_epi8(vp8_filt, work_a);
-    /* (vp8_filter + 3 * (qs0 - ps0)) & mask */
-    vp8_filt = _mm_and_si128(vp8_filt, mask);
+    filt = _mm_adds_epi8(filt, work_a);
+    filt = _mm_adds_epi8(filt, work_a);
+    filt = _mm_adds_epi8(filt, work_a);
+    /* (vp9_filter + 3 * (qs0 - ps0)) & mask */
+    filt = _mm_and_si128(filt, mask);
 
-    filter1 = _mm_adds_epi8(vp8_filt, t4);
-    filter2 = _mm_adds_epi8(vp8_filt, t3);
+    filter1 = _mm_adds_epi8(filt, t4);
+    filter2 = _mm_adds_epi8(filt, t3);
 
     /* Filter1 >> 3 */
     work_a = _mm_cmpgt_epi8(zero, filter1);
@@ -267,15 +267,15 @@ void vp9_mbloop_filter_horizontal_edge_c_sse2
     filter2 = _mm_and_si128(filter2, t1f);
     filter2 = _mm_or_si128(filter2, work_a);
 
-    /* vp8_filt >> 1 */
-    vp8_filt = _mm_adds_epi8(filter1, t1);
-    work_a = _mm_cmpgt_epi8(zero, vp8_filt);
-    vp8_filt = _mm_srli_epi16(vp8_filt, 1);
+    /* filt >> 1 */
+    filt = _mm_adds_epi8(filter1, t1);
+    work_a = _mm_cmpgt_epi8(zero, filt);
+    filt = _mm_srli_epi16(filt, 1);
     work_a = _mm_and_si128(work_a, t80);
-    vp8_filt = _mm_and_si128(vp8_filt, t7f);
-    vp8_filt = _mm_or_si128(vp8_filt, work_a);
+    filt = _mm_and_si128(filt, t7f);
+    filt = _mm_or_si128(filt, work_a);
 
-    vp8_filt = _mm_andnot_si128(hev, vp8_filt);
+    filt = _mm_andnot_si128(hev, filt);
 
     work_a = _mm_xor_si128(_mm_subs_epi8(qs0, filter1), t80);
     q0 = _mm_load_si128((__m128i *)flat_oq0);
@@ -283,7 +283,7 @@ void vp9_mbloop_filter_horizontal_edge_c_sse2
     q0 = _mm_and_si128(flat, q0);
     q0 = _mm_or_si128(work_a, q0);
 
-    work_a = _mm_xor_si128(_mm_subs_epi8(qs1, vp8_filt), t80);
+    work_a = _mm_xor_si128(_mm_subs_epi8(qs1, filt), t80);
     q1 = _mm_load_si128((__m128i *)flat_oq1);
     work_a = _mm_andnot_si128(flat, work_a);
     q1 = _mm_and_si128(flat, q1);
@@ -301,7 +301,7 @@ void vp9_mbloop_filter_horizontal_edge_c_sse2
     p0 = _mm_and_si128(flat, p0);
     p0 = _mm_or_si128(work_a, p0);
 
-    work_a = _mm_xor_si128(_mm_adds_epi8(ps1, vp8_filt), t80);
+    work_a = _mm_xor_si128(_mm_adds_epi8(ps1, filt), t80);
     p1 = _mm_load_si128((__m128i *)flat_op1);
     work_a = _mm_andnot_si128(flat, work_a);
     p1 = _mm_and_si128(flat, p1);

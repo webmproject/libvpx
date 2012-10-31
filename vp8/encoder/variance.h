@@ -12,7 +12,7 @@
 #ifndef VARIANCE_H
 #define VARIANCE_H
 
-typedef unsigned int(*vp8_sad_fn_t)(const unsigned char *src_ptr,
+typedef unsigned int(*vp9_sad_fn_t)(const unsigned char *src_ptr,
                                     int source_stride,
                                     const unsigned char *ref_ptr,
                                     int ref_stride,
@@ -24,30 +24,30 @@ typedef void (*vp9_copy32xn_fn_t)(const unsigned char *src_ptr,
                                   int ref_stride,
                                   int n);
 
-typedef void (*vp8_sad_multi_fn_t)(const unsigned char *src_ptr,
+typedef void (*vp9_sad_multi_fn_t)(const unsigned char *src_ptr,
                                    int source_stride,
                                    const unsigned char *ref_ptr,
                                    int  ref_stride,
                                    unsigned int *sad_array);
 
-typedef void (*vp8_sad_multi1_fn_t)(const unsigned char *src_ptr,
+typedef void (*vp9_sad_multi1_fn_t)(const unsigned char *src_ptr,
                                     int source_stride,
                                     const unsigned char *ref_ptr,
                                     int  ref_stride,
                                     unsigned short *sad_array);
 
-typedef void (*vp8_sad_multi_d_fn_t)(const unsigned char *src_ptr,
+typedef void (*vp9_sad_multi_d_fn_t)(const unsigned char *src_ptr,
                                      int source_stride,
                                      const unsigned char * const ref_ptr[],
                                      int  ref_stride, unsigned int *sad_array);
 
-typedef unsigned int (*vp8_variance_fn_t)(const unsigned char *src_ptr,
+typedef unsigned int (*vp9_variance_fn_t)(const unsigned char *src_ptr,
                                           int source_stride,
                                           const unsigned char *ref_ptr,
                                           int ref_stride,
                                           unsigned int *sse);
 
-typedef unsigned int (*vp8_subpixvariance_fn_t)(const unsigned char  *src_ptr,
+typedef unsigned int (*vp9_subpixvariance_fn_t)(const unsigned char  *src_ptr,
                                                 int source_stride,
                                                 int xoffset,
                                                 int yoffset,
@@ -55,30 +55,30 @@ typedef unsigned int (*vp8_subpixvariance_fn_t)(const unsigned char  *src_ptr,
                                                 int Refstride,
                                                 unsigned int *sse);
 
-typedef void (*vp8_ssimpf_fn_t)(unsigned char *s, int sp, unsigned char *r,
+typedef void (*vp9_ssimpf_fn_t)(unsigned char *s, int sp, unsigned char *r,
                                 int rp, unsigned long *sum_s,
                                 unsigned long *sum_r, unsigned long *sum_sq_s,
                                 unsigned long *sum_sq_r,
                                 unsigned long *sum_sxr);
 
-typedef unsigned int (*vp8_getmbss_fn_t)(const short *);
+typedef unsigned int (*vp9_getmbss_fn_t)(const short *);
 
-typedef unsigned int (*vp8_get16x16prederror_fn_t)(const unsigned char *src_ptr,
+typedef unsigned int (*vp9_get16x16prederror_fn_t)(const unsigned char *src_ptr,
                                                    int source_stride,
                                                    const unsigned char *ref_ptr,
                                                    int  ref_stride);
 
 typedef struct variance_vtable {
-    vp8_sad_fn_t            sdf;
-    vp8_variance_fn_t       vf;
-    vp8_subpixvariance_fn_t svf;
-    vp8_variance_fn_t       svf_halfpix_h;
-    vp8_variance_fn_t       svf_halfpix_v;
-    vp8_variance_fn_t       svf_halfpix_hv;
-    vp8_sad_multi_fn_t      sdx3f;
-    vp8_sad_multi1_fn_t     sdx8f;
-    vp8_sad_multi_d_fn_t    sdx4df;
+    vp9_sad_fn_t            sdf;
+    vp9_variance_fn_t       vf;
+    vp9_subpixvariance_fn_t svf;
+    vp9_variance_fn_t       svf_halfpix_h;
+    vp9_variance_fn_t       svf_halfpix_v;
+    vp9_variance_fn_t       svf_halfpix_hv;
+    vp9_sad_multi_fn_t      sdx3f;
+    vp9_sad_multi1_fn_t     sdx8f;
+    vp9_sad_multi_d_fn_t    sdx4df;
     vp9_copy32xn_fn_t       copymem;
-} vp8_variance_fn_ptr_t;
+} vp9_variance_fn_ptr_t;
 
 #endif

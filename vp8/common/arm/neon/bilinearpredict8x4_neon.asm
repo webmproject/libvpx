@@ -43,7 +43,7 @@
     vdup.8          d1, d31[4]
     vld1.u8         {q4}, [r0], r1
 
-    vmull.u8        q6, d2, d0              ;(src_ptr[0] * vp8_filter[0])
+    vmull.u8        q6, d2, d0              ;(src_ptr[0] * vp9_filter[0])
     vld1.u8         {q5}, [r0], r1
     vmull.u8        q7, d4, d0
     vmull.u8        q8, d6, d0
@@ -56,7 +56,7 @@
     vext.8          d9, d8, d9, #1
     vext.8          d11, d10, d11, #1
 
-    vmlal.u8        q6, d3, d1              ;(src_ptr[1] * vp8_filter[1])
+    vmlal.u8        q6, d3, d1              ;(src_ptr[1] * vp9_filter[1])
     vmlal.u8        q7, d5, d1
     vmlal.u8        q8, d7, d1
     vmlal.u8        q9, d9, d1
@@ -82,12 +82,12 @@ secondpass_filter
     vdup.8          d0, d31[0]              ;second_pass filter parameters (d0 d1)
     vdup.8          d1, d31[4]
 
-    vmull.u8        q1, d22, d0             ;(src_ptr[0] * vp8_filter[0])
+    vmull.u8        q1, d22, d0             ;(src_ptr[0] * vp9_filter[0])
     vmull.u8        q2, d23, d0
     vmull.u8        q3, d24, d0
     vmull.u8        q4, d25, d0
 
-    vmlal.u8        q1, d23, d1             ;(src_ptr[pixel_step] * vp8_filter[1])
+    vmlal.u8        q1, d23, d1             ;(src_ptr[pixel_step] * vp9_filter[1])
     vmlal.u8        q2, d24, d1
     vmlal.u8        q3, d25, d1
     vmlal.u8        q4, d26, d1

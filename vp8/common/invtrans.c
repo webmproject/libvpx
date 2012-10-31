@@ -28,7 +28,7 @@ static void recon_dcblock_8x8(MACROBLOCKD *xd) {
   xd->block[12].dqcoeff[0] = b->diff[8];
 }
 
-void vp9_inverse_transform_b_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_b_4x4(const vp9_idct_rtcd_vtable_t *rtcd,
                                  BLOCKD *b, int pitch) {
   if (b->eob <= 1)
     IDCT_INVOKE(rtcd, idct1)(b->dqcoeff, b->diff, pitch);
@@ -36,7 +36,7 @@ void vp9_inverse_transform_b_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
     IDCT_INVOKE(rtcd, idct16)(b->dqcoeff, b->diff, pitch);
 }
 
-void vp9_inverse_transform_mby_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_mby_4x4(const vp9_idct_rtcd_vtable_t *rtcd,
                                    MACROBLOCKD *xd) {
   int i;
   BLOCKD *blockd = xd->block;
@@ -52,7 +52,7 @@ void vp9_inverse_transform_mby_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
   }
 }
 
-void vp9_inverse_transform_mbuv_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_mbuv_4x4(const vp9_idct_rtcd_vtable_t *rtcd,
                                     MACROBLOCKD *xd) {
   int i;
   BLOCKD *blockd = xd->block;
@@ -62,13 +62,13 @@ void vp9_inverse_transform_mbuv_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
   }
 }
 
-void vp9_inverse_transform_mb_4x4(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_mb_4x4(const vp9_idct_rtcd_vtable_t *rtcd,
                                   MACROBLOCKD *xd) {
   vp9_inverse_transform_mby_4x4(rtcd, xd);
   vp9_inverse_transform_mbuv_4x4(rtcd, xd);
 }
 
-void vp9_inverse_transform_b_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_b_8x8(const vp9_idct_rtcd_vtable_t *rtcd,
                                  short *input_dqcoeff, short *output_coeff,
                                  int pitch) {
   // int b,i;
@@ -78,7 +78,7 @@ void vp9_inverse_transform_b_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
   // IDCT_INVOKE(rtcd, idct8_1)(b->dqcoeff, b->diff, pitch);//pitch
 }
 
-void vp9_inverse_transform_mby_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_mby_8x8(const vp9_idct_rtcd_vtable_t *rtcd,
                                    MACROBLOCKD *xd) {
   int i;
   BLOCKD *blockd = xd->block;
@@ -99,7 +99,7 @@ void vp9_inverse_transform_mby_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
   }
 }
 
-void vp9_inverse_transform_mbuv_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_mbuv_8x8(const vp9_idct_rtcd_vtable_t *rtcd,
                                     MACROBLOCKD *xd) {
   int i;
   BLOCKD *blockd = xd->block;
@@ -110,25 +110,25 @@ void vp9_inverse_transform_mbuv_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
   }
 }
 
-void vp9_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_mb_8x8(const vp9_idct_rtcd_vtable_t *rtcd,
                                   MACROBLOCKD *xd) {
   vp9_inverse_transform_mby_8x8(rtcd, xd);
   vp9_inverse_transform_mbuv_8x8(rtcd, xd);
 }
 
-void vp9_inverse_transform_b_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_b_16x16(const vp9_idct_rtcd_vtable_t *rtcd,
                                    short *input_dqcoeff,
                                    short *output_coeff, int pitch) {
   IDCT_INVOKE(rtcd, idct16x16)(input_dqcoeff, output_coeff, pitch);
 }
 
-void vp9_inverse_transform_mby_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_mby_16x16(const vp9_idct_rtcd_vtable_t *rtcd,
                                      MACROBLOCKD *xd) {
   vp9_inverse_transform_b_16x16(rtcd, &xd->block[0].dqcoeff[0],
                                 &xd->block[0].diff[0], 32);
 }
 
-void vp9_inverse_transform_mb_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
+void vp9_inverse_transform_mb_16x16(const vp9_idct_rtcd_vtable_t *rtcd,
                                     MACROBLOCKD *xd) {
   vp9_inverse_transform_mby_16x16(rtcd, xd);
   vp9_inverse_transform_mbuv_8x8(rtcd, xd);

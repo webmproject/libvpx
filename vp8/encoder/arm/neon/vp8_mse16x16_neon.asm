@@ -24,7 +24,7 @@
 ; r3    int  recon_stride
 ; stack unsigned int *sse
 ;note: in this function, sum is never used. So, we can remove this part of calculation
-;from vp8_variance().
+;from vp9_variance().
 
 |vp8_mse16x16_neon| PROC
     vmov.i8         q7, #0                      ;q7, q8, q9, q10 - sse

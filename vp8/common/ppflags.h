@@ -12,17 +12,17 @@
 #ifndef __INC_PPFLAGS_H
 #define __INC_PPFLAGS_H
 enum {
-  VP8D_NOFILTERING            = 0,
-  VP8D_DEBLOCK                = 1 << 0,
-  VP8D_DEMACROBLOCK           = 1 << 1,
-  VP8D_ADDNOISE               = 1 << 2,
-  VP8D_DEBUG_TXT_FRAME_INFO   = 1 << 3,
-  VP8D_DEBUG_TXT_MBLK_MODES   = 1 << 4,
-  VP8D_DEBUG_TXT_DC_DIFF      = 1 << 5,
-  VP8D_DEBUG_TXT_RATE_INFO    = 1 << 6,
-  VP8D_DEBUG_DRAW_MV          = 1 << 7,
-  VP8D_DEBUG_CLR_BLK_MODES    = 1 << 8,
-  VP8D_DEBUG_CLR_FRM_REF_BLKS = 1 << 9
+  VP9D_NOFILTERING            = 0,
+  VP9D_DEBLOCK                = 1 << 0,
+  VP9D_DEMACROBLOCK           = 1 << 1,
+  VP9D_ADDNOISE               = 1 << 2,
+  VP9D_DEBUG_TXT_FRAME_INFO   = 1 << 3,
+  VP9D_DEBUG_TXT_MBLK_MODES   = 1 << 4,
+  VP9D_DEBUG_TXT_DC_DIFF      = 1 << 5,
+  VP9D_DEBUG_TXT_RATE_INFO    = 1 << 6,
+  VP9D_DEBUG_DRAW_MV          = 1 << 7,
+  VP9D_DEBUG_CLR_BLK_MODES    = 1 << 8,
+  VP9D_DEBUG_CLR_FRM_REF_BLKS = 1 << 9
 };
 
 typedef struct {
@@ -33,6 +33,6 @@ typedef struct {
   int display_mb_modes_flag;
   int display_b_modes_flag;
   int display_mv_flag;
-} vp8_ppflags_t;
+} vp9_ppflags_t;
 
 #endif

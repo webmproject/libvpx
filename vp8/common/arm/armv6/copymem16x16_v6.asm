@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vp8_copy_mem16x16_v6|
+    EXPORT  |vp9_copy_mem16x16_v6|
     ; ARM
     ; REQUIRE8
     ; PRESERVE8
@@ -17,7 +17,7 @@
     AREA    Block, CODE, READONLY ; name this block of code
 ;void copy_mem16x16_v6( unsigned char *src, int src_stride, unsigned char *dst, int dst_stride)
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-|vp8_copy_mem16x16_v6| PROC
+|vp9_copy_mem16x16_v6| PROC
     stmdb       sp!, {r4 - r7}
     ;push   {r4-r7}
 
@@ -181,6 +181,6 @@ copy_mem16x16_fast_loop
     ;pop        {r4-r7}
     mov     pc, lr
 
-    ENDP  ; |vp8_copy_mem16x16_v6|
+    ENDP  ; |vp9_copy_mem16x16_v6|
 
     END

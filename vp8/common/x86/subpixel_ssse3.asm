@@ -12,8 +12,8 @@
 %include "vpx_ports/x86_abi_support.asm"
 
 %define BLOCK_HEIGHT_WIDTH 4
-%define VP8_FILTER_WEIGHT 128
-%define VP8_FILTER_SHIFT  7
+%define VP9_FILTER_WEIGHT 128
+%define VP9_FILTER_SHIFT  7
 
 
 ;/************************************************************************************
@@ -32,7 +32,7 @@
 ;    unsigned char *output_ptr,
 ;    unsigned int    output_pitch,
 ;    unsigned int    output_height,
-;    unsigned int    vp8_filter_index
+;    unsigned int    vp9_filter_index
 ;)
 global sym(vp9_filter_block1d8_h6_ssse3)
 sym(vp9_filter_block1d8_h6_ssse3):
@@ -56,7 +56,7 @@ sym(vp9_filter_block1d8_h6_ssse3):
     mov         rdi, arg(2)             ;output_ptr
 
     cmp         esi, DWORD PTR [rax]
-    je          vp8_filter_block1d8_h4_ssse3
+    je          vp9_filter_block1d8_h4_ssse3
 
     movdqa      xmm4, XMMWORD PTR [rax]         ;k0_k5
     movdqa      xmm5, XMMWORD PTR [rax+256]     ;k2_k4
@@ -113,7 +113,7 @@ sym(vp9_filter_block1d8_h6_ssse3):
     pop         rbp
     ret
 
-vp8_filter_block1d8_h4_ssse3:
+vp9_filter_block1d8_h4_ssse3:
     movdqa      xmm5, XMMWORD PTR [rax+256]     ;k2_k4
     movdqa      xmm6, XMMWORD PTR [rax+128]     ;k1_k3
 
@@ -175,7 +175,7 @@ vp8_filter_block1d8_h4_ssse3:
 ;    unsigned char  *output_ptr,
 ;    unsigned int    output_pitch,
 ;    unsigned int    output_height,
-;    unsigned int    vp8_filter_index
+;    unsigned int    vp9_filter_index
 ;)
 global sym(vp9_filter_block1d16_h6_ssse3)
 sym(vp9_filter_block1d16_h6_ssse3):
@@ -282,7 +282,7 @@ sym(vp9_filter_block1d16_h6_ssse3):
 ;    unsigned char  *output_ptr,
 ;    unsigned int    output_pitch,
 ;    unsigned int    output_height,
-;    unsigned int    vp8_filter_index
+;    unsigned int    vp9_filter_index
 ;)
 global sym(vp9_filter_block1d4_h6_ssse3)
 sym(vp9_filter_block1d4_h6_ssse3):
@@ -304,7 +304,7 @@ sym(vp9_filter_block1d4_h6_ssse3):
     movdqa      xmm7, [GLOBAL(rd)]
 
     cmp         esi, DWORD PTR [rax]
-    je          .vp8_filter_block1d4_h4_ssse3
+    je          .vp9_filter_block1d4_h4_ssse3
 
     movdqa      xmm4, XMMWORD PTR [rax]         ;k0_k5
     movdqa      xmm5, XMMWORD PTR [rax+256]     ;k2_k4
@@ -356,7 +356,7 @@ sym(vp9_filter_block1d4_h6_ssse3):
     pop         rbp
     ret
 
-.vp8_filter_block1d4_h4_ssse3:
+.vp9_filter_block1d4_h4_ssse3:
     movdqa      xmm5, XMMWORD PTR [rax+256]     ;k2_k4
     movdqa      xmm6, XMMWORD PTR [rax+128]     ;k1_k3
     movdqa      xmm0, XMMWORD PTR [GLOBAL(shuf2b)]
@@ -411,7 +411,7 @@ sym(vp9_filter_block1d4_h6_ssse3):
 ;    unsigned char *output_ptr,
 ;    unsigned int   out_pitch,
 ;    unsigned int   output_height,
-;    unsigned int   vp8_filter_index
+;    unsigned int   vp9_filter_index
 ;)
 global sym(vp9_filter_block1d16_v6_ssse3)
 sym(vp9_filter_block1d16_v6_ssse3):
@@ -432,7 +432,7 @@ sym(vp9_filter_block1d16_v6_ssse3):
     add         rax, rdx
 
     cmp         esi, DWORD PTR [rax]
-    je          .vp8_filter_block1d16_v4_ssse3
+    je          .vp9_filter_block1d16_v4_ssse3
 
     movdqa      xmm5, XMMWORD PTR [rax]         ;k0_k5
     movdqa      xmm6, XMMWORD PTR [rax+256]     ;k2_k4
@@ -519,7 +519,7 @@ sym(vp9_filter_block1d16_v6_ssse3):
     pop         rbp
     ret
 
-.vp8_filter_block1d16_v4_ssse3:
+.vp9_filter_block1d16_v4_ssse3:
     movdqa      xmm6, XMMWORD PTR [rax+256]     ;k2_k4
     movdqa      xmm7, XMMWORD PTR [rax+128]     ;k1_k3
 
@@ -534,7 +534,7 @@ sym(vp9_filter_block1d16_v6_ssse3):
     movsxd      rcx, DWORD PTR arg(4)   ;output_height
     add         rax, rdx
 
-.vp8_filter_block1d16_v4_ssse3_loop:
+.vp9_filter_block1d16_v4_ssse3_loop:
     movq        xmm2, MMWORD PTR [rsi + rdx]            ;B
     movq        xmm3, MMWORD PTR [rsi + rdx * 2]        ;C
     movq        xmm4, MMWORD PTR [rax + rdx * 2]        ;D
@@ -581,7 +581,7 @@ sym(vp9_filter_block1d16_v6_ssse3):
     add         rdi,        r8
 %endif
     dec         rcx
-    jnz         .vp8_filter_block1d16_v4_ssse3_loop
+    jnz         .vp9_filter_block1d16_v4_ssse3_loop
 
     ; begin epilog
     pop rdi
@@ -599,7 +599,7 @@ sym(vp9_filter_block1d16_v6_ssse3):
 ;    unsigned char *output_ptr,
 ;    unsigned int   out_pitch,
 ;    unsigned int   output_height,
-;    unsigned int   vp8_filter_index
+;    unsigned int   vp9_filter_index
 ;)
 global sym(vp9_filter_block1d8_v6_ssse3)
 sym(vp9_filter_block1d8_v6_ssse3):
@@ -627,7 +627,7 @@ sym(vp9_filter_block1d8_v6_ssse3):
     movsxd      rcx, DWORD PTR arg(4)   ;[output_height]
 
     cmp         esi, DWORD PTR [rax]
-    je          .vp8_filter_block1d8_v4_ssse3
+    je          .vp9_filter_block1d8_v4_ssse3
 
     movdqa      xmm5, XMMWORD PTR [rax]         ;k0_k5
     movdqa      xmm6, XMMWORD PTR [rax+256]     ;k2_k4
@@ -684,7 +684,7 @@ sym(vp9_filter_block1d8_v6_ssse3):
     pop         rbp
     ret
 
-.vp8_filter_block1d8_v4_ssse3:
+.vp9_filter_block1d8_v4_ssse3:
     movdqa      xmm6, XMMWORD PTR [rax+256]     ;k2_k4
     movdqa      xmm7, XMMWORD PTR [rax+128]     ;k1_k3
     movdqa      xmm5, [GLOBAL(rd)]
@@ -694,7 +694,7 @@ sym(vp9_filter_block1d8_v6_ssse3):
     mov         rax, rsi
     add         rax, rdx
 
-.vp8_filter_block1d8_v4_ssse3_loop:
+.vp9_filter_block1d8_v4_ssse3_loop:
     movq        xmm2, MMWORD PTR [rsi + rdx]            ;B
     movq        xmm3, MMWORD PTR [rsi + rdx * 2]        ;C
     movq        xmm4, MMWORD PTR [rax + rdx * 2]        ;D
@@ -722,7 +722,7 @@ sym(vp9_filter_block1d8_v6_ssse3):
     add         rdi,        r8
 %endif
     dec         rcx
-    jnz         .vp8_filter_block1d8_v4_ssse3_loop
+    jnz         .vp9_filter_block1d8_v4_ssse3_loop
 
     ; begin epilog
     pop rdi
@@ -739,7 +739,7 @@ sym(vp9_filter_block1d8_v6_ssse3):
 ;    unsigned char *output_ptr,
 ;    unsigned int   out_pitch,
 ;    unsigned int   output_height,
-;    unsigned int   vp8_filter_index
+;    unsigned int   vp9_filter_index
 ;)
 global sym(vp9_filter_block1d4_v6_ssse3)
 sym(vp9_filter_block1d4_v6_ssse3):
@@ -766,7 +766,7 @@ sym(vp9_filter_block1d4_v6_ssse3):
     movsxd      rcx, DWORD PTR arg(4)   ;[output_height]
 
     cmp         esi, DWORD PTR [rax]
-    je          .vp8_filter_block1d4_v4_ssse3
+    je          .vp9_filter_block1d4_v4_ssse3
 
     movq        mm5, MMWORD PTR [rax]         ;k0_k5
     movq        mm6, MMWORD PTR [rax+256]     ;k2_k4
@@ -823,7 +823,7 @@ sym(vp9_filter_block1d4_v6_ssse3):
     pop         rbp
     ret
 
-.vp8_filter_block1d4_v4_ssse3:
+.vp9_filter_block1d4_v4_ssse3:
     movq        mm6, MMWORD PTR [rax+256]     ;k2_k4
     movq        mm7, MMWORD PTR [rax+128]     ;k1_k3
     movq        mm5, MMWORD PTR [GLOBAL(rd)]
@@ -833,7 +833,7 @@ sym(vp9_filter_block1d4_v6_ssse3):
     mov         rax, rsi
     add         rax, rdx
 
-.vp8_filter_block1d4_v4_ssse3_loop:
+.vp9_filter_block1d4_v4_ssse3_loop:
     movd        mm2, DWORD PTR [rsi + rdx]            ;B
     movd        mm3, DWORD PTR [rsi + rdx * 2]        ;C
     movd        mm4, DWORD PTR [rax + rdx * 2]        ;D
@@ -861,7 +861,7 @@ sym(vp9_filter_block1d4_v6_ssse3):
     add         rdi,        r8
 %endif
     dec         rcx
-    jnz         .vp8_filter_block1d4_v4_ssse3_loop
+    jnz         .vp9_filter_block1d4_v4_ssse3_loop
 
     ; begin epilog
     pop rdi
@@ -891,7 +891,7 @@ sym(vp9_bilinear_predict16x16_ssse3):
     push        rdi
     ; end prolog
 
-        lea         rcx,        [GLOBAL(vp8_bilinear_filters_ssse3)]
+        lea         rcx,        [GLOBAL(bilinear_filters_ssse3)]
         movsxd      rax,        dword ptr arg(2)    ; xoffset
 
         cmp         rax,        0                   ; skip first_pass filter if xoffset=0
@@ -939,10 +939,10 @@ sym(vp9_bilinear_predict16x16_ssse3):
         pmaddubsw   xmm4,       xmm1                ; 01 03 05 07 09 11 13 15
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT    ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT    ; xmm3 /= 128
 
         paddw       xmm4,       [GLOBAL(rd)]        ; xmm4 += round value
-        psraw       xmm4,       VP8_FILTER_SHIFT    ; xmm4 /= 128
+        psraw       xmm4,       VP9_FILTER_SHIFT    ; xmm4 /= 128
 
         movdqa      xmm7,       xmm3
         packuswb    xmm7,       xmm4                ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
@@ -963,10 +963,10 @@ sym(vp9_bilinear_predict16x16_ssse3):
         pmaddubsw   xmm4,       xmm1
 
         paddw       xmm6,       [GLOBAL(rd)]        ; xmm6 += round value
-        psraw       xmm6,       VP8_FILTER_SHIFT    ; xmm6 /= 128
+        psraw       xmm6,       VP9_FILTER_SHIFT    ; xmm6 /= 128
 
         paddw       xmm4,       [GLOBAL(rd)]        ; xmm4 += round value
-        psraw       xmm4,       VP8_FILTER_SHIFT    ; xmm4 /= 128
+        psraw       xmm4,       VP9_FILTER_SHIFT    ; xmm4 /= 128
 
         packuswb    xmm6,       xmm4
         movdqa      xmm5,       xmm7
@@ -978,10 +978,10 @@ sym(vp9_bilinear_predict16x16_ssse3):
         pmaddubsw   xmm7,       xmm2
 
         paddw       xmm5,       [GLOBAL(rd)]        ; xmm5 += round value
-        psraw       xmm5,       VP8_FILTER_SHIFT    ; xmm5 /= 128
+        psraw       xmm5,       VP9_FILTER_SHIFT    ; xmm5 /= 128
 
         paddw       xmm7,       [GLOBAL(rd)]        ; xmm7 += round value
-        psraw       xmm7,       VP8_FILTER_SHIFT    ; xmm7 /= 128
+        psraw       xmm7,       VP9_FILTER_SHIFT    ; xmm7 /= 128
 
         packuswb    xmm5,       xmm7
         movdqa      xmm7,       xmm6
@@ -1040,8 +1040,8 @@ sym(vp9_bilinear_predict16x16_ssse3):
         pmaddubsw   xmm5,       xmm1
         paddw       xmm2,       [GLOBAL(rd)]
 
-        psraw       xmm4,       VP8_FILTER_SHIFT
-        psraw       xmm2,       VP8_FILTER_SHIFT
+        psraw       xmm4,       VP9_FILTER_SHIFT
+        psraw       xmm2,       VP9_FILTER_SHIFT
 
         packuswb    xmm4,       xmm2
         paddw       xmm3,       [GLOBAL(rd)]
@@ -1049,8 +1049,8 @@ sym(vp9_bilinear_predict16x16_ssse3):
         movdqa      [rdi],      xmm4                ; store row 0
         paddw       xmm5,       [GLOBAL(rd)]
 
-        psraw       xmm3,       VP8_FILTER_SHIFT
-        psraw       xmm5,       VP8_FILTER_SHIFT
+        psraw       xmm3,       VP9_FILTER_SHIFT
+        psraw       xmm5,       VP9_FILTER_SHIFT
 
         packuswb    xmm3,       xmm5
         movdqa      xmm4,       xmm7
@@ -1091,7 +1091,7 @@ sym(vp9_bilinear_predict16x16_ssse3):
         movq        xmm7,       [rsi+1]
 
         movq        xmm6,       [rsi+8]
-        psraw       xmm2,       VP8_FILTER_SHIFT
+        psraw       xmm2,       VP9_FILTER_SHIFT
 
         punpcklbw   xmm5,       xmm7
         movq        xmm7,       [rsi+9]
@@ -1099,7 +1099,7 @@ sym(vp9_bilinear_predict16x16_ssse3):
         paddw       xmm3,       [GLOBAL(rd)]
         pmaddubsw   xmm5,       xmm1
 
-        psraw       xmm3,       VP8_FILTER_SHIFT
+        psraw       xmm3,       VP9_FILTER_SHIFT
         punpcklbw   xmm6,       xmm7
 
         packuswb    xmm2,       xmm3
@@ -1109,10 +1109,10 @@ sym(vp9_bilinear_predict16x16_ssse3):
         paddw       xmm5,       [GLOBAL(rd)]
 
         lea         rdi,        [rdi + rdx]         ; dst_pitch
-        psraw       xmm5,       VP8_FILTER_SHIFT
+        psraw       xmm5,       VP9_FILTER_SHIFT
 
         paddw       xmm6,       [GLOBAL(rd)]
-        psraw       xmm6,       VP8_FILTER_SHIFT
+        psraw       xmm6,       VP9_FILTER_SHIFT
 
         packuswb    xmm5,       xmm6
         lea         rsi,        [rsi + rax]         ; next line
@@ -1157,7 +1157,7 @@ sym(vp9_bilinear_predict8x8_ssse3):
     ALIGN_STACK 16, rax
     sub         rsp, 144                         ; reserve 144 bytes
 
-        lea         rcx,        [GLOBAL(vp8_bilinear_filters_ssse3)]
+        lea         rcx,        [GLOBAL(bilinear_filters_ssse3)]
 
         mov         rsi,        arg(0) ;src_ptr
         movsxd      rdx,        dword ptr arg(1) ;src_pixels_per_line
@@ -1223,7 +1223,7 @@ sym(vp9_bilinear_predict8x8_ssse3):
         pmaddubsw   xmm3,       xmm0                ; 00 02 04 06 08 10 12 14
 
         paddw       xmm3,       [GLOBAL(rd)]        ; xmm3 += round value
-        psraw       xmm3,       VP8_FILTER_SHIFT    ; xmm3 /= 128
+        psraw       xmm3,       VP9_FILTER_SHIFT    ; xmm3 /= 128
 
         movdqa      xmm7,       xmm3
         packuswb    xmm7,       xmm7                ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
@@ -1240,7 +1240,7 @@ sym(vp9_bilinear_predict8x8_ssse3):
         pmaddubsw   xmm6,       xmm0
 
         paddw       xmm6,       [GLOBAL(rd)]        ; xmm6 += round value
-        psraw       xmm6,       VP8_FILTER_SHIFT    ; xmm6 /= 128
+        psraw       xmm6,       VP9_FILTER_SHIFT    ; xmm6 /= 128
 
         packuswb    xmm6,       xmm6
 
@@ -1248,7 +1248,7 @@ sym(vp9_bilinear_predict8x8_ssse3):
         pmaddubsw   xmm7,       xmm1
 
         paddw       xmm7,       [GLOBAL(rd)]        ; xmm7 += round value
-        psraw       xmm7,       VP8_FILTER_SHIFT    ; xmm7 /= 128
+        psraw       xmm7,       VP9_FILTER_SHIFT    ; xmm7 /= 128
 
         packuswb    xmm7,       xmm7
 
@@ -1303,21 +1303,21 @@ sym(vp9_bilinear_predict8x8_ssse3):
         paddw       xmm1,       [GLOBAL(rd)]
 
         paddw       xmm2,       [GLOBAL(rd)]
-        psraw       xmm1,       VP8_FILTER_SHIFT
+        psraw       xmm1,       VP9_FILTER_SHIFT
 
         paddw       xmm3,       [GLOBAL(rd)]
-        psraw       xmm2,       VP8_FILTER_SHIFT
+        psraw       xmm2,       VP9_FILTER_SHIFT
 
         paddw       xmm4,       [GLOBAL(rd)]
-        psraw       xmm3,       VP8_FILTER_SHIFT
+        psraw       xmm3,       VP9_FILTER_SHIFT
 
         paddw       xmm5,       [GLOBAL(rd)]
-        psraw       xmm4,       VP8_FILTER_SHIFT
+        psraw       xmm4,       VP9_FILTER_SHIFT
 
         paddw       xmm6,       [GLOBAL(rd)]
-        psraw       xmm5,       VP8_FILTER_SHIFT
+        psraw       xmm5,       VP9_FILTER_SHIFT
 
-        psraw       xmm6,       VP8_FILTER_SHIFT
+        psraw       xmm6,       VP9_FILTER_SHIFT
         packuswb    xmm1,       xmm1
 
         packuswb    xmm2,       xmm2
@@ -1350,10 +1350,10 @@ sym(vp9_bilinear_predict8x8_ssse3):
         pmaddubsw   xmm1,       xmm0
         paddw       xmm7,       [GLOBAL(rd)]
 
-        psraw       xmm7,       VP8_FILTER_SHIFT
+        psraw       xmm7,       VP9_FILTER_SHIFT
         paddw       xmm1,       [GLOBAL(rd)]
 
-        psraw       xmm1,       VP8_FILTER_SHIFT
+        psraw       xmm1,       VP9_FILTER_SHIFT
         packuswb    xmm7,       xmm7
 
         packuswb    xmm1,       xmm1
@@ -1401,16 +1401,16 @@ sym(vp9_bilinear_predict8x8_ssse3):
         pmaddubsw   xmm7,       xmm0
 
         paddw       xmm1,       [GLOBAL(rd)]
-        psraw       xmm1,       VP8_FILTER_SHIFT
+        psraw       xmm1,       VP9_FILTER_SHIFT
 
         paddw       xmm3,       [GLOBAL(rd)]
-        psraw       xmm3,       VP8_FILTER_SHIFT
+        psraw       xmm3,       VP9_FILTER_SHIFT
 
         paddw       xmm5,       [GLOBAL(rd)]
-        psraw       xmm5,       VP8_FILTER_SHIFT
+        psraw       xmm5,       VP9_FILTER_SHIFT
 
         paddw       xmm7,       [GLOBAL(rd)]
-        psraw       xmm7,       VP8_FILTER_SHIFT
+        psraw       xmm7,       VP9_FILTER_SHIFT
 
         packuswb    xmm1,       xmm1
         packuswb    xmm3,       xmm3
@@ -1495,7 +1495,7 @@ k2_k4:
     times 8 db  36,  -11
     times 8 db  12,   -6
 align 16
-vp8_bilinear_filters_ssse3:
+bilinear_filters_ssse3:
     times 8 db 128, 0
     times 8 db 120, 8
     times 8 db 112, 16

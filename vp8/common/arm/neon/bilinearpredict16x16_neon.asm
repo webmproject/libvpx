@@ -59,7 +59,7 @@ filt_blk2d_fp16x16_loop_neon
     pld             [r0, r1]
     pld             [r0, r1, lsl #1]
 
-    vmull.u8        q7, d2, d0              ;(src_ptr[0] * vp8_filter[0])
+    vmull.u8        q7, d2, d0              ;(src_ptr[0] * vp9_filter[0])
     vmull.u8        q8, d3, d0
     vmull.u8        q9, d5, d0
     vmull.u8        q10, d6, d0
@@ -73,7 +73,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d8, d8, d9, #1
     vext.8          d11, d11, d12, #1
 
-    vmlal.u8        q7, d2, d1              ;(src_ptr[0] * vp8_filter[1])
+    vmlal.u8        q7, d2, d1              ;(src_ptr[0] * vp9_filter[1])
     vmlal.u8        q9, d5, d1
     vmlal.u8        q11, d8, d1
     vmlal.u8        q13, d11, d1
@@ -83,7 +83,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d9, d9, d10, #1
     vext.8          d12, d12, d13, #1
 
-    vmlal.u8        q8, d3, d1              ;(src_ptr[0] * vp8_filter[1])
+    vmlal.u8        q8, d3, d1              ;(src_ptr[0] * vp9_filter[1])
     vmlal.u8        q10, d6, d1
     vmlal.u8        q12, d9, d1
     vmlal.u8        q14, d12, d1
@@ -112,7 +112,7 @@ filt_blk2d_fp16x16_loop_neon
 ;First-pass filtering for rest 5 lines
     vld1.u8         {d14, d15, d16}, [r0], r1
 
-    vmull.u8        q9, d2, d0              ;(src_ptr[0] * vp8_filter[0])
+    vmull.u8        q9, d2, d0              ;(src_ptr[0] * vp9_filter[0])
     vmull.u8        q10, d3, d0
     vmull.u8        q11, d5, d0
     vmull.u8        q12, d6, d0
@@ -123,7 +123,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d5, d5, d6, #1
     vext.8          d8, d8, d9, #1
 
-    vmlal.u8        q9, d2, d1              ;(src_ptr[0] * vp8_filter[1])
+    vmlal.u8        q9, d2, d1              ;(src_ptr[0] * vp9_filter[1])
     vmlal.u8        q11, d5, d1
     vmlal.u8        q13, d8, d1
 
@@ -131,7 +131,7 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d6, d6, d7, #1
     vext.8          d9, d9, d10, #1
 
-    vmlal.u8        q10, d3, d1             ;(src_ptr[0] * vp8_filter[1])
+    vmlal.u8        q10, d3, d1             ;(src_ptr[0] * vp9_filter[1])
     vmlal.u8        q12, d6, d1
     vmlal.u8        q14, d9, d1
 
@@ -143,13 +143,13 @@ filt_blk2d_fp16x16_loop_neon
     vext.8          d11, d11, d12, #1       ;construct src_ptr[1]
     vext.8          d14, d14, d15, #1
 
-    vmlal.u8        q1, d11, d1             ;(src_ptr[0] * vp8_filter[1])
+    vmlal.u8        q1, d11, d1             ;(src_ptr[0] * vp9_filter[1])
     vmlal.u8        q3, d14, d1
 
     vext.8          d12, d12, d13, #1
     vext.8          d15, d15, d16, #1
 
-    vmlal.u8        q2, d12, d1             ;(src_ptr[0] * vp8_filter[1])
+    vmlal.u8        q2, d12, d1             ;(src_ptr[0] * vp9_filter[1])
     vmlal.u8        q4, d15, d1
 
     vqrshrn.u16    d10, q9, #7              ;shift/round/saturate to u8
@@ -182,7 +182,7 @@ filt_blk2d_fp16x16_loop_neon
 
 filt_blk2d_sp16x16_loop_neon
     vld1.u8         {d24, d25}, [lr]!
-    vmull.u8        q1, d22, d0             ;(src_ptr[0] * vp8_filter[0])
+    vmull.u8        q1, d22, d0             ;(src_ptr[0] * vp9_filter[0])
     vld1.u8         {d26, d27}, [lr]!
     vmull.u8        q2, d23, d0
     vld1.u8         {d28, d29}, [lr]!
@@ -195,7 +195,7 @@ filt_blk2d_sp16x16_loop_neon
     vmull.u8        q7, d28, d0
     vmull.u8        q8, d29, d0
 
-    vmlal.u8        q1, d24, d1             ;(src_ptr[pixel_step] * vp8_filter[1])
+    vmlal.u8        q1, d24, d1             ;(src_ptr[pixel_step] * vp9_filter[1])
     vmlal.u8        q2, d25, d1
     vmlal.u8        q3, d26, d1
     vmlal.u8        q4, d27, d1
@@ -244,7 +244,7 @@ filt_blk2d_fpo16x16_loop_neon
     pld             [r0, r1]
     pld             [r0, r1, lsl #1]
 
-    vmull.u8        q7, d2, d0              ;(src_ptr[0] * vp8_filter[0])
+    vmull.u8        q7, d2, d0              ;(src_ptr[0] * vp9_filter[0])
     vmull.u8        q8, d3, d0
     vmull.u8        q9, d5, d0
     vmull.u8        q10, d6, d0
@@ -258,7 +258,7 @@ filt_blk2d_fpo16x16_loop_neon
     vext.8          d8, d8, d9, #1
     vext.8          d11, d11, d12, #1
 
-    vmlal.u8        q7, d2, d1              ;(src_ptr[0] * vp8_filter[1])
+    vmlal.u8        q7, d2, d1              ;(src_ptr[0] * vp9_filter[1])
     vmlal.u8        q9, d5, d1
     vmlal.u8        q11, d8, d1
     vmlal.u8        q13, d11, d1
@@ -268,7 +268,7 @@ filt_blk2d_fpo16x16_loop_neon
     vext.8          d9, d9, d10, #1
     vext.8          d12, d12, d13, #1
 
-    vmlal.u8        q8, d3, d1              ;(src_ptr[0] * vp8_filter[1])
+    vmlal.u8        q8, d3, d1              ;(src_ptr[0] * vp9_filter[1])
     vmlal.u8        q10, d6, d1
     vmlal.u8        q12, d9, d1
     vmlal.u8        q14, d12, d1
@@ -306,7 +306,7 @@ secondpass_bfilter16x16_only
 
 filt_blk2d_spo16x16_loop_neon
     vld1.u8         {d24, d25}, [r0], r1
-    vmull.u8        q1, d22, d0             ;(src_ptr[0] * vp8_filter[0])
+    vmull.u8        q1, d22, d0             ;(src_ptr[0] * vp9_filter[0])
     vld1.u8         {d26, d27}, [r0], r1
     vmull.u8        q2, d23, d0
     vld1.u8         {d28, d29}, [r0], r1
@@ -319,7 +319,7 @@ filt_blk2d_spo16x16_loop_neon
     vmull.u8        q7, d28, d0
     vmull.u8        q8, d29, d0
 
-    vmlal.u8        q1, d24, d1             ;(src_ptr[pixel_step] * vp8_filter[1])
+    vmlal.u8        q1, d24, d1             ;(src_ptr[pixel_step] * vp9_filter[1])
     vmlal.u8        q2, d25, d1
     vmlal.u8        q3, d26, d1
     vmlal.u8        q4, d27, d1

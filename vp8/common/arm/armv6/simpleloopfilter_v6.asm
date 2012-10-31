@@ -9,8 +9,8 @@
 ;
 
 
-    EXPORT |vp8_loop_filter_simple_horizontal_edge_armv6|
-    EXPORT |vp8_loop_filter_simple_vertical_edge_armv6|
+    EXPORT |vp9_loop_filter_simple_horizontal_edge_armv6|
+    EXPORT |vp9_loop_filter_simple_vertical_edge_armv6|
 
     AREA    |.text|, CODE, READONLY  ; name this block of code
 
@@ -54,7 +54,7 @@ pstep       RN  r1
 ;r2     const char *blimit
 
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-|vp8_loop_filter_simple_horizontal_edge_armv6| PROC
+|vp9_loop_filter_simple_horizontal_edge_armv6| PROC
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     stmdb       sp!, {r4 - r11, lr}
 
@@ -94,18 +94,18 @@ pstep       RN  r1
     eor         r4, r4, r2                  ; p0 offset to convert to a signed value
     eor         r5, r5, r2                  ; q0 offset to convert to a signed value
 
-    qsub8       r3, r3, r6                  ; vp8_filter = p1 - q1
+    qsub8       r3, r3, r6                  ; vp9_filter = p1 - q1
     qsub8       r6, r5, r4                  ; q0 - p0
     qadd8       r3, r3, r6                  ; += q0 - p0
     ldr         r7, c0x04040404
     qadd8       r3, r3, r6                  ; += q0 - p0
     ldr         r8, c0x03030303
-    qadd8       r3, r3, r6                  ; vp8_filter = p1-q1 + 3*(q0-p0))
+    qadd8       r3, r3, r6                  ; vp9_filter = p1-q1 + 3*(q0-p0))
     ;STALL
-    and         r3, r3, r10                 ; vp8_filter &= mask
+    and         r3, r3, r10                 ; vp9_filter &= mask
 
-    qadd8       r7 , r3 , r7                ; Filter1 = vp8_filter + 4
-    qadd8       r8 , r3 , r8                ; Filter2 = vp8_filter + 3
+    qadd8       r7 , r3 , r7                ; Filter1 = vp9_filter + 4
+    qadd8       r8 , r3 , r8                ; Filter2 = vp9_filter + 3
 
     shadd8      r7 , r7 , lr
     shadd8      r8 , r8 , lr
@@ -133,11 +133,11 @@ pstep       RN  r1
     bne         simple_hnext8
 
     ldmia       sp!, {r4 - r11, pc}
-    ENDP        ; |vp8_loop_filter_simple_horizontal_edge_armv6|
+    ENDP        ; |vp9_loop_filter_simple_horizontal_edge_armv6|
 
 
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-|vp8_loop_filter_simple_vertical_edge_armv6| PROC
+|vp9_loop_filter_simple_vertical_edge_armv6| PROC
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     stmdb       sp!, {r4 - r11, lr}
 
@@ -200,21 +200,21 @@ pstep       RN  r1
     eor         r4, r4, r2                  ; p0 offset to convert to a signed value
     eor         r5, r5, r2                  ; q0 offset to convert to a signed value
 
-    qsub8       r3, r3, r6                  ; vp8_filter = p1 - q1
+    qsub8       r3, r3, r6                  ; vp9_filter = p1 - q1
     qsub8       r6, r5, r4                  ; q0 - p0
 
-    qadd8       r3, r3, r6                  ; vp8_filter += q0 - p0
+    qadd8       r3, r3, r6                  ; vp9_filter += q0 - p0
     ldr         r9, c0x03030303             ; r9 = 3
 
-    qadd8       r3, r3, r6                  ; vp8_filter += q0 - p0
+    qadd8       r3, r3, r6                  ; vp9_filter += q0 - p0
     ldr         r7, c0x04040404
 
-    qadd8       r3, r3, r6                  ; vp8_filter = p1-q1 + 3*(q0-p0))
+    qadd8       r3, r3, r6                  ; vp9_filter = p1-q1 + 3*(q0-p0))
     ;STALL
-    and         r3, r3, lr                  ; vp8_filter &= mask
+    and         r3, r3, lr                  ; vp9_filter &= mask
 
-    qadd8       r9 , r3 , r9                ; Filter2 = vp8_filter + 3
-    qadd8       r3 , r3 , r7                ; Filter1 = vp8_filter + 4
+    qadd8       r9 , r3 , r9                ; Filter2 = vp9_filter + 3
+    qadd8       r3 , r3 , r7                ; Filter1 = vp9_filter + 4
 
     shadd8      r9 , r9 , r8
     shadd8      r3 , r3 , r8
@@ -276,7 +276,7 @@ pstep       RN  r1
     bne         simple_vnext8
 
     ldmia       sp!, {r4 - r11, pc}
-    ENDP        ; |vp8_loop_filter_simple_vertical_edge_armv6|
+    ENDP        ; |vp9_loop_filter_simple_vertical_edge_armv6|
 
 ; Constant Pool
 c0x80808080 DCD     0x80808080

@@ -19,8 +19,8 @@
 #include "treecoder.h"
 
 static void tree2tok(
-  struct vp8_token_struct *const p,
-  vp8_tree t,
+  struct vp9_token_struct *const p,
+  vp9_tree t,
   int i,
   int v,
   int L
@@ -29,7 +29,7 @@ static void tree2tok(
   ++L;
 
   do {
-    const vp8_tree_index j = t[i++];
+    const vp9_tree_index j = t[i++];
 
     if (j <= 0) {
       p[-j].value = v;
@@ -39,19 +39,19 @@ static void tree2tok(
   } while (++v & 1);
 }
 
-void vp9_tokens_from_tree(struct vp8_token_struct *p, vp8_tree t) {
+void vp9_tokens_from_tree(struct vp9_token_struct *p, vp9_tree t) {
   tree2tok(p, t, 0, 0, 0);
 }
 
-void vp9_tokens_from_tree_offset(struct vp8_token_struct *p, vp8_tree t,
+void vp9_tokens_from_tree_offset(struct vp9_token_struct *p, vp9_tree t,
                                  int offset) {
   tree2tok(p - offset, t, 0, 0, 0);
 }
 
 static void branch_counts(
   int n,                      /* n = size of alphabet */
-  vp8_token tok               [ /* n */ ],
-  vp8_tree tree,
+  vp9_token tok               [ /* n */ ],
+  vp9_tree tree,
   unsigned int branch_ct       [ /* n-1 */ ] [2],
   const unsigned int num_events[ /* n */ ]
 ) {
@@ -73,7 +73,7 @@ static void branch_counts(
     const int enc = tok[t].value;
     const unsigned int ct = num_events[t];
 
-    vp8_tree_index i = 0;
+    vp9_tree_index i = 0;
 
     do {
       const int b = (enc >> --L) & 1;
@@ -96,9 +96,9 @@ static void branch_counts(
 
 void vp9_tree_probs_from_distribution(
   int n,                      /* n = size of alphabet */
-  vp8_token tok               [ /* n */ ],
-  vp8_tree tree,
-  vp8_prob probs          [ /* n-1 */ ],
+  vp9_token tok               [ /* n */ ],
+  vp9_tree tree,
+  vp9_prob probs          [ /* n-1 */ ],
   unsigned int branch_ct       [ /* n-1 */ ] [2],
   const unsigned int num_events[ /* n */ ],
   unsigned int Pfac,
@@ -121,13 +121,13 @@ void vp9_tree_probs_from_distribution(
       const unsigned int p = ((c[0] * Pfac) + (rd ? tot >> 1 : 0)) / tot;
       probs[t] = p < 256 ? (p ? p : 1) : 255; /* agree w/old version for now */
     } else
-      probs[t] = vp8_prob_half;
+      probs[t] = vp9_prob_half;
   } while (++t < tree_len);
 }
 
-vp8_prob vp9_bin_prob_from_distribution(const unsigned int counts[2]) {
+vp9_prob vp9_bin_prob_from_distribution(const unsigned int counts[2]) {
   int tot_count = counts[0] + counts[1];
-  vp8_prob prob;
+  vp9_prob prob;
   if (tot_count) {
     prob = (counts[0] * 255 + (tot_count >> 1)) / tot_count;
     prob += !prob;

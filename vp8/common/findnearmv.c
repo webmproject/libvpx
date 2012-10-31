@@ -152,13 +152,13 @@ void vp9_find_near_mvs
   lower_mv_precision(nearby, xd->allow_high_precision_mv);
 
   // TODO: move clamp outside findnearmv
-  vp8_clamp_mv2(nearest, xd);
-  vp8_clamp_mv2(nearby, xd);
-  vp8_clamp_mv2(best_mv, xd);
+  clamp_mv2(nearest, xd);
+  clamp_mv2(nearby, xd);
+  clamp_mv2(best_mv, xd);
 }
 
-vp8_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
-                           vp8_prob p[VP8_MVREFS - 1], const int near_mv_ref_ct[4]
+vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
+                           vp9_prob p[VP9_MVREFS - 1], const int near_mv_ref_ct[4]
                           ) {
   p[0] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[0]] [0];
   p[1] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[1]] [1];
@@ -169,7 +169,7 @@ vp8_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
 
 #if CONFIG_NEWBESTREFMV
 #define SP(x) (((x) & 7) << 1)
-unsigned int vp8_sad3x16_c(
+unsigned int vp9_sad3x16_c(
   const unsigned char *src_ptr,
   int  src_stride,
   const unsigned char *ref_ptr,
@@ -177,7 +177,7 @@ unsigned int vp8_sad3x16_c(
   int max_sad) {
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 3, 16);
 }
-unsigned int vp8_sad16x3_c(
+unsigned int vp9_sad16x3_c(
   const unsigned char *src_ptr,
   int  src_stride,
   const unsigned char *ref_ptr,
@@ -190,7 +190,7 @@ unsigned int vp8_sad16x3_c(
  * above and a number cols of pixels in the left to select the one with best
  * score to use as ref motion vector
  */
-void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
+void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
                            int_mv *mvlist,
@@ -240,24 +240,24 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
 
     zero_seen = zero_seen || !this_mv.as_int;
 
-    vp8_clamp_mv(&this_mv,
-                 xd->mb_to_left_edge - LEFT_TOP_MARGIN + 24,
-                 xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
-                 xd->mb_to_top_edge - LEFT_TOP_MARGIN + 24,
-                 xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
+    clamp_mv(&this_mv,
+             xd->mb_to_left_edge - LEFT_TOP_MARGIN + 24,
+             xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
+             xd->mb_to_top_edge - LEFT_TOP_MARGIN + 24,
+             xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 #if CONFIG_SUBPELREFMV
     row_offset = this_mv.as_mv.row >> 3;
     col_offset = this_mv.as_mv.col >> 3;
     offset = ref_y_stride * row_offset + col_offset;
     score = 0;
     if (xd->up_available) {
-      vp8_sub_pixel_variance16x2_c(above_ref + offset, ref_y_stride,
+      vp9_sub_pixel_variance16x2_c(above_ref + offset, ref_y_stride,
                                    SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
                                    above_src, xd->dst.y_stride, &sse);
       score += sse;
     }
     if (xd->left_available) {
-      vp8_sub_pixel_variance2x16_c(left_ref + offset, ref_y_stride,
+      vp9_sub_pixel_variance2x16_c(left_ref + offset, ref_y_stride,
                                    SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
                                    left_src, xd->dst.y_stride, &sse);
       score += sse;
@@ -270,11 +270,11 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
     offset = ref_y_stride * row_offset + col_offset;
     score = 0;
     if (xd->up_available) {
-      score += vp8_sad16x3(above_src, xd->dst.y_stride,
+      score += vp9_sad16x3(above_src, xd->dst.y_stride,
                            above_ref + offset, ref_y_stride, INT_MAX);
     }
     if (xd->left_available) {
-      score += vp8_sad3x16(left_src, xd->dst.y_stride,
+      score += vp9_sad3x16(left_src, xd->dst.y_stride,
                            left_ref + offset, ref_y_stride, INT_MAX);
     }
 #endif
@@ -297,7 +297,7 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < 4; ++i) {
     lower_mv_precision(&sorted_mvs[i], xd->allow_high_precision_mv);
-    vp8_clamp_mv2(&sorted_mvs[i], xd);
+    clamp_mv2(&sorted_mvs[i], xd);
   }
 
   // Set the best mv to the first entry in the sorted list

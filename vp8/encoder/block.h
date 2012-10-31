@@ -129,11 +129,11 @@ typedef struct macroblock {
 
   int mbmode_cost[2][MB_MODE_COUNT];
   int intra_uv_mode_cost[2][MB_MODE_COUNT];
-  int bmode_costs[VP8_BINTRAMODES][VP8_BINTRAMODES][VP8_BINTRAMODES];
+  int bmode_costs[VP9_BINTRAMODES][VP9_BINTRAMODES][VP9_BINTRAMODES];
   int i8x8_mode_costs[MB_MODE_COUNT];
   int inter_bmode_costs[B_MODE_COUNT];
-  int switchable_interp_costs[VP8_SWITCHABLE_FILTERS + 1]
-                             [VP8_SWITCHABLE_FILTERS];
+  int switchable_interp_costs[VP9_SWITCHABLE_FILTERS + 1]
+                             [VP9_SWITCHABLE_FILTERS];
 
   // These define limits to motion vector components to prevent them
   // from extending outside the UMV borders

@@ -88,12 +88,12 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
 
 #ifdef MODE_STATS
 unsigned int inter_y_modes[MB_MODE_COUNT];
-unsigned int inter_uv_modes[VP8_UV_MODES];
+unsigned int inter_uv_modes[VP9_UV_MODES];
 unsigned int inter_b_modes[B_MODE_COUNT];
-unsigned int y_modes[VP8_YMODES];
-unsigned int i8x8_modes[VP8_I8X8_MODES];
-unsigned int uv_modes[VP8_UV_MODES];
-unsigned int uv_modes_y[VP8_YMODES][VP8_UV_MODES];
+unsigned int y_modes[VP9_YMODES];
+unsigned int i8x8_modes[VP9_I8X8_MODES];
+unsigned int uv_modes[VP9_UV_MODES];
+unsigned int uv_modes_y[VP9_YMODES][VP9_UV_MODES];
 unsigned int b_modes[B_MODE_COUNT];
 #endif
 
@@ -103,14 +103,14 @@ unsigned int b_modes[B_MODE_COUNT];
  * This also avoids the need for divide by zero checks in
  *  vp9_activity_masking().
  */
-#define VP8_ACTIVITY_AVG_MIN (64)
+#define VP9_ACTIVITY_AVG_MIN (64)
 
 /* This is used as a reference when computing the source variance for the
  *  purposes of activity masking.
  * Eventually this should be replaced by custom no-reference routines,
  *  which will be faster.
  */
-static const unsigned char VP8_VAR_OFFS[16] = {
+static const unsigned char VP9_VAR_OFFS[16] = {
   128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128
 };
 
@@ -126,7 +126,7 @@ static unsigned int tt_activity_measure(VP9_COMP *cpi, MACROBLOCK *x) {
    *  lambda using a non-linear combination (e.g., the smallest, or second
    *  smallest, etc.).
    */
-  act = vp9_variance16x16(x->src.y_buffer, x->src.y_stride, VP8_VAR_OFFS, 0,
+  act = vp9_variance16x16(x->src.y_buffer, x->src.y_stride, VP9_VAR_OFFS, 0,
                           &sse);
   act = act << 4;
 
@@ -161,8 +161,8 @@ static unsigned int mb_activity_measure(VP9_COMP *cpi, MACROBLOCK *x,
     mb_activity = tt_activity_measure(cpi, x);
   }
 
-  if (mb_activity < VP8_ACTIVITY_AVG_MIN)
-    mb_activity = VP8_ACTIVITY_AVG_MIN;
+  if (mb_activity < VP9_ACTIVITY_AVG_MIN)
+    mb_activity = VP9_ACTIVITY_AVG_MIN;
 
   return mb_activity;
 }
@@ -214,8 +214,8 @@ static void calc_av_activity(VP9_COMP *cpi, int64_t activity_sum) {
   cpi->activity_avg = (unsigned int)(activity_sum / cpi->common.MBs);
 #endif
 
-  if (cpi->activity_avg < VP8_ACTIVITY_AVG_MIN)
-    cpi->activity_avg = VP8_ACTIVITY_AVG_MIN;
+  if (cpi->activity_avg < VP9_ACTIVITY_AVG_MIN)
+    cpi->activity_avg = VP9_ACTIVITY_AVG_MIN;
 
   // Experimental code: return fixed value normalized for several clips
   if (ALT_ACT_MEASURE)
@@ -1149,7 +1149,7 @@ void encode_sb_row(VP9_COMP *cpi,
 #endif
     pick_mb_modes(cpi, cm, mb_row, mb_col, x, xd, tp, &mb_rate, &mb_dist);
 #if CONFIG_SUPERBLOCKS
-    mb_rate += vp8_cost_bit(cm->sb_coded, 0);
+    mb_rate += vp9_cost_bit(cm->sb_coded, 0);
 #endif
 
     x->src.y_buffer -= 32;
@@ -1176,7 +1176,7 @@ void encode_sb_row(VP9_COMP *cpi,
       /* Pick a mode assuming that it applies to all 4 of the MBs in the SB */
       xd->mode_info_context->mbmi.encoded_as_sb = 1;
       pick_sb_modes(cpi, cm, mb_row, mb_col, x, xd, tp, &sb_rate, &sb_dist);
-      sb_rate += vp8_cost_bit(cm->sb_coded, 1);
+      sb_rate += vp9_cost_bit(cm->sb_coded, 1);
     }
 
     /* Decide whether to encode as a SB or 4xMBs */
@@ -1276,20 +1276,19 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_context->mbmi.uv_mode = DC_PRED;
 
-  vp8_zero(cpi->count_mb_ref_frame_usage)
-  vp8_zero(cpi->bmode_count)
-  vp8_zero(cpi->ymode_count)
-  vp8_zero(cpi->i8x8_mode_count)
-  vp8_zero(cpi->y_uv_mode_count)
-  vp8_zero(cpi->sub_mv_ref_count)
-  vp8_zero(cpi->mbsplit_count)
-  vp8_zero(cpi->common.fc.mv_ref_ct)
-  vp8_zero(cpi->common.fc.mv_ref_ct_a)
+  vp9_zero(cpi->count_mb_ref_frame_usage)
+  vp9_zero(cpi->bmode_count)
+  vp9_zero(cpi->ymode_count)
+  vp9_zero(cpi->i8x8_mode_count)
+  vp9_zero(cpi->y_uv_mode_count)
+  vp9_zero(cpi->sub_mv_ref_count)
+  vp9_zero(cpi->mbsplit_count)
+  vp9_zero(cpi->common.fc.mv_ref_ct)
+  vp9_zero(cpi->common.fc.mv_ref_ct_a)
 #if CONFIG_SUPERBLOCKS
-  vp8_zero(cpi->sb_ymode_count)
+  vp9_zero(cpi->sb_ymode_count)
   cpi->sb_count = 0;
 #endif
-  // vp8_zero(cpi->uv_mode_count)
 
   vpx_memset(cm->above_context, 0,
              sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
@@ -1317,7 +1316,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
 #if CONFIG_NEW_MVREF
   // temp stats reset
-  vp8_zero( cpi->best_ref_index_counts );
+  vp9_zero( cpi->best_ref_index_counts );
 #endif
 
 // debug output
@@ -1353,18 +1352,18 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   cpi->pred_filter_on_count = 0;
   cpi->pred_filter_off_count = 0;
 #endif
-  vp8_zero(cpi->switchable_interp_count);
+  vp9_zero(cpi->switchable_interp_count);
 
   xd->mode_info_context = cm->mi;
   xd->prev_mode_info_context = cm->prev_mi;
 
-  vp8_zero(cpi->NMVcount);
-  vp8_zero(cpi->coef_counts);
-  vp8_zero(cpi->hybrid_coef_counts);
-  vp8_zero(cpi->coef_counts_8x8);
-  vp8_zero(cpi->hybrid_coef_counts_8x8);
-  vp8_zero(cpi->coef_counts_16x16);
-  vp8_zero(cpi->hybrid_coef_counts_16x16);
+  vp9_zero(cpi->NMVcount);
+  vp9_zero(cpi->coef_counts);
+  vp9_zero(cpi->hybrid_coef_counts);
+  vp9_zero(cpi->coef_counts_8x8);
+  vp9_zero(cpi->hybrid_coef_counts_8x8);
+  vp9_zero(cpi->coef_counts_16x16);
+  vp9_zero(cpi->hybrid_coef_counts_16x16);
 
   vp9_frame_init_quantizer(cpi);
 
@@ -1430,20 +1429,20 @@ static int check_dual_ref_flags(VP9_COMP *cpi) {
   int ref_flags = cpi->ref_frame_flags;
 
   if (vp9_segfeature_active(xd, 1, SEG_LVL_REF_FRAME)) {
-    if ((ref_flags & (VP8_LAST_FLAG | VP8_GOLD_FLAG)) == (VP8_LAST_FLAG | VP8_GOLD_FLAG) &&
+    if ((ref_flags & (VP9_LAST_FLAG | VP9_GOLD_FLAG)) == (VP9_LAST_FLAG | VP9_GOLD_FLAG) &&
         vp9_check_segref(xd, 1, LAST_FRAME))
       return 1;
-    if ((ref_flags & (VP8_GOLD_FLAG | VP8_ALT_FLAG)) == (VP8_GOLD_FLAG | VP8_ALT_FLAG) &&
+    if ((ref_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) == (VP9_GOLD_FLAG | VP9_ALT_FLAG) &&
         vp9_check_segref(xd, 1, GOLDEN_FRAME))
       return 1;
-    if ((ref_flags & (VP8_ALT_FLAG  | VP8_LAST_FLAG)) == (VP8_ALT_FLAG  | VP8_LAST_FLAG) &&
+    if ((ref_flags & (VP9_ALT_FLAG  | VP9_LAST_FLAG)) == (VP9_ALT_FLAG  | VP9_LAST_FLAG) &&
         vp9_check_segref(xd, 1, ALTREF_FRAME))
       return 1;
     return 0;
   } else {
-    return (!!(ref_flags & VP8_GOLD_FLAG) +
-            !!(ref_flags & VP8_LAST_FLAG) +
-            !!(ref_flags & VP8_ALT_FLAG)) >= 2;
+    return (!!(ref_flags & VP9_GOLD_FLAG) +
+            !!(ref_flags & VP9_LAST_FLAG) +
+            !!(ref_flags & VP9_ALT_FLAG)) >= 2;
   }
 }
 
@@ -1868,7 +1867,7 @@ void vp9_encode_intra_super_block(VP9_COMP *cpi,
   uint8_t *vdst = xd->dst.v_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
-  const VP8_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
+  const VP9_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
   TOKENEXTRA *tp[4];
   int skip[4];
   MODE_INFO *mi = x->e_mbd.mode_info_context;
@@ -1984,9 +1983,6 @@ void vp9_encode_intra_macro_block(VP9_COMP *cpi,
     vp9_tokenize_mb(cpi, &x->e_mbd, t, 1);
 #endif
 }
-#ifdef SPEEDSTATS
-extern int cnt_pm;
-#endif
 
 extern void vp9_fix_contexts(MACROBLOCKD *xd);
 
@@ -2190,7 +2186,7 @@ void vp9_encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
   uint8_t *vdst = xd->dst.v_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
-  const VP8_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
+  const VP9_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
   unsigned int segment_id = xd->mode_info_context->mbmi.segment_id;
   int seg_ref_active;
   unsigned char ref_pred_flag;

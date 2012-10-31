@@ -9,7 +9,7 @@
  */
 
 
-extern void (*vp8_clear_system_state)(void);
+extern void (*vp9_clear_system_state)(void);
 extern void (*vp9_plane_add_noise)(unsigned char *Start, unsigned int Width, unsigned int Height, int Pitch, int DPitch, int q);
 extern void (*de_interlace)
 (

@@ -47,10 +47,10 @@ DECLARE_ALIGNED(16, static const unsigned char, mask4567_c[16]) = {
   0x09, 0x0A,
 };
 DECLARE_ALIGNED(16, static const unsigned int, rounding_c[4]) = {
-  VP8_FILTER_WEIGHT >> 1,
-  VP8_FILTER_WEIGHT >> 1,
-  VP8_FILTER_WEIGHT >> 1,
-  VP8_FILTER_WEIGHT >> 1,
+  VP9_FILTER_WEIGHT >> 1,
+  VP9_FILTER_WEIGHT >> 1,
+  VP9_FILTER_WEIGHT >> 1,
+  VP9_FILTER_WEIGHT >> 1,
 };
 DECLARE_ALIGNED(16, static const unsigned char, transpose_c[16]) = {
   0, 4,  8, 12,
@@ -81,7 +81,7 @@ DECLARE_ALIGNED(16, static const unsigned char, transpose_c[16]) = {
   __m128i mad4567 = _mm_add_epi32(mad45, mad67);                               \
   __m128i mad_all = _mm_add_epi32(mad0123, mad4567);                           \
   mad_all = _mm_add_epi32(mad_all, rounding);                                  \
-  result = _mm_srai_epi32(mad_all, VP8_FILTER_SHIFT);                          \
+  result = _mm_srai_epi32(mad_all, VP9_FILTER_SHIFT);                          \
   }
 
 void vp9_filter_block2d_4x4_8_sse4_1
@@ -219,7 +219,7 @@ void vp9_filter_block2d_4x4_8_sse4_1
         __m128i mad4567 = _mm_add_epi32(mad45, mad67);
         __m128i mad_all = _mm_add_epi32(mad0123, mad4567);
         mad_all = _mm_add_epi32(mad_all, rounding);
-        mad_all = _mm_srai_epi32(mad_all, VP8_FILTER_SHIFT);
+        mad_all = _mm_srai_epi32(mad_all, VP9_FILTER_SHIFT);
         mad_all = _mm_packs_epi32(mad_all, mad_all);
         col0 = _mm_packus_epi16(mad_all, mad_all);
       }
@@ -242,7 +242,7 @@ void vp9_filter_block2d_4x4_8_sse4_1
         __m128i mad4567 = _mm_add_epi32(mad45, mad67);
         __m128i mad_all = _mm_add_epi32(mad0123, mad4567);
         mad_all = _mm_add_epi32(mad_all, rounding);
-        mad_all = _mm_srai_epi32(mad_all, VP8_FILTER_SHIFT);
+        mad_all = _mm_srai_epi32(mad_all, VP9_FILTER_SHIFT);
         mad_all = _mm_packs_epi32(mad_all, mad_all);
         col1 = _mm_packus_epi16(mad_all, mad_all);
       }
@@ -265,7 +265,7 @@ void vp9_filter_block2d_4x4_8_sse4_1
         __m128i mad4567 = _mm_add_epi32(mad45, mad67);
         __m128i mad_all = _mm_add_epi32(mad0123, mad4567);
         mad_all = _mm_add_epi32(mad_all, rounding);
-        mad_all = _mm_srai_epi32(mad_all, VP8_FILTER_SHIFT);
+        mad_all = _mm_srai_epi32(mad_all, VP9_FILTER_SHIFT);
         mad_all = _mm_packs_epi32(mad_all, mad_all);
         col2 = _mm_packus_epi16(mad_all, mad_all);
       }
@@ -288,7 +288,7 @@ void vp9_filter_block2d_4x4_8_sse4_1
         __m128i mad4567 = _mm_add_epi32(mad45, mad67);
         __m128i mad_all = _mm_add_epi32(mad0123, mad4567);
         mad_all = _mm_add_epi32(mad_all, rounding);
-        mad_all = _mm_srai_epi32(mad_all, VP8_FILTER_SHIFT);
+        mad_all = _mm_srai_epi32(mad_all, VP9_FILTER_SHIFT);
         mad_all = _mm_packs_epi32(mad_all, mad_all);
         col3 = _mm_packus_epi16(mad_all, mad_all);
       }

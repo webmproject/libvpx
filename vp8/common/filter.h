@@ -15,8 +15,8 @@
 #include "vpx_scale/yv12config.h"
 
 #define BLOCK_HEIGHT_WIDTH 4
-#define VP8_FILTER_WEIGHT 128
-#define VP8_FILTER_SHIFT  7
+#define VP9_FILTER_WEIGHT 128
+#define VP9_FILTER_SHIFT  7
 
 #define SUBPEL_SHIFTS 16
 

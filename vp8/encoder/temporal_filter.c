@@ -34,10 +34,10 @@
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
 #define ALT_REF_SUBPEL_ENABLED 1 // dis/enable subpel in MC AltRef filtering
 
-#if VP8_TEMPORAL_ALT_REF
+#if VP9_TEMPORAL_ALT_REF
 
 
-static void vp8_temporal_filter_predictors_mb_c
+static void temporal_filter_predictors_mb_c
 (
   MACROBLOCKD *xd,
   unsigned char *y_mb_ptr,
@@ -131,7 +131,7 @@ void vp9_temporal_filter_apply_c
 
 #if ALT_REF_MC_ENABLED
 
-static int vp8_temporal_filter_find_matching_mb_c
+static int temporal_filter_find_matching_mb_c
 (
   VP9_COMP *cpi,
   YV12_BUFFER_CONFIG *arf_frame,
@@ -218,7 +218,7 @@ static int vp8_temporal_filter_find_matching_mb_c
 }
 #endif
 
-static void vp8_temporal_filter_iterate_c
+static void temporal_filter_iterate_c
 (
   VP9_COMP *cpi,
   int frame_count,
@@ -291,7 +291,7 @@ static void vp8_temporal_filter_iterate_c
 #define THRESH_HIGH  20000
 
           // Find best match in this frame by MC
-          err = vp8_temporal_filter_find_matching_mb_c
+          err = temporal_filter_find_matching_mb_c
                 (cpi,
                  cpi->frames[alt_ref_index],
                  cpi->frames[frame],
@@ -307,7 +307,7 @@ static void vp8_temporal_filter_iterate_c
 
         if (filter_weight != 0) {
           // Construct the predictors
-          vp8_temporal_filter_predictors_mb_c
+          temporal_filter_predictors_mb_c
           (mbd,
            cpi->frames[frame]->y_buffer + mb_y_offset,
            cpi->frames[frame]->u_buffer + mb_uv_offset,
@@ -508,7 +508,7 @@ void vp9_temporal_filter_prepare_c
     cpi->frames[frames_to_blur - 1 - frame] = &buf->img;
   }
 
-  vp8_temporal_filter_iterate_c(
+  temporal_filter_iterate_c(
     cpi,
     frames_to_blur,
     frames_to_blur_backward,

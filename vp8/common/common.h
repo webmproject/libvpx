@@ -22,20 +22,20 @@
 
 /* Only need this for fixed-size arrays, for structs just assign. */
 
-#define vp8_copy( Dest, Src) { \
+#define vp9_copy( Dest, Src) { \
     assert( sizeof( Dest) == sizeof( Src)); \
     vpx_memcpy( Dest, Src, sizeof( Src)); \
   }
 
 /* Use this for variably-sized arrays. */
 
-#define vp8_copy_array( Dest, Src, N) { \
+#define vp9_copy_array( Dest, Src, N) { \
     assert( sizeof( *Dest) == sizeof( *Src)); \
     vpx_memcpy( Dest, Src, N * sizeof( *Src)); \
   }
 
-#define vp8_zero( Dest)  vpx_memset( &Dest, 0, sizeof( Dest));
+#define vp9_zero( Dest)  vpx_memset( &Dest, 0, sizeof( Dest));
 
-#define vp8_zero_array( Dest, N)  vpx_memset( Dest, 0, N * sizeof( *Dest));
+#define vp9_zero_array( Dest, N)  vpx_memset( Dest, 0, N * sizeof( *Dest));
 
 #endif  /* common_h */

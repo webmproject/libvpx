@@ -14,7 +14,7 @@
 #include "vp8/common/subpixel.h"
 #include "bilinearfilter_arm.h"
 
-void vp8_filter_block2d_bil_armv6
+void vp9_filter_block2d_bil_armv6
 (
   unsigned char *src_ptr,
   unsigned char *dst_ptr,
@@ -28,10 +28,10 @@ void vp8_filter_block2d_bil_armv6
   unsigned short FData[36 * 16]; /* Temp data buffer used in filtering */
 
   /* First filter 1-D horizontally... */
-  vp8_filter_block2d_bil_first_pass_armv6(src_ptr, FData, src_pitch, Height + 1, Width, HFilter);
+  vp9_filter_block2d_bil_first_pass_armv6(src_ptr, FData, src_pitch, Height + 1, Width, HFilter);
 
   /* then 1-D vertically... */
-  vp8_filter_block2d_bil_second_pass_armv6(FData, dst_ptr, dst_pitch, Height, Width, VFilter);
+  vp9_filter_block2d_bil_second_pass_armv6(FData, dst_ptr, dst_pitch, Height, Width, VFilter);
 }
 
 
@@ -50,7 +50,7 @@ void vp9_bilinear_predict4x4_armv6
   HFilter = vp8_bilinear_filters[xoffset];
   VFilter = vp8_bilinear_filters[yoffset];
 
-  vp8_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 4, 4);
+  vp9_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 4, 4);
 }
 
 void vp9_bilinear_predict8x8_armv6
@@ -68,7 +68,7 @@ void vp9_bilinear_predict8x8_armv6
   HFilter = vp8_bilinear_filters[xoffset];
   VFilter = vp8_bilinear_filters[yoffset];
 
-  vp8_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 8);
+  vp9_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 8);
 }
 
 void vp9_bilinear_predict8x4_armv6
@@ -86,7 +86,7 @@ void vp9_bilinear_predict8x4_armv6
   HFilter = vp8_bilinear_filters[xoffset];
   VFilter = vp8_bilinear_filters[yoffset];
 
-  vp8_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 4);
+  vp9_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 4);
 }
 
 void vp9_bilinear_predict16x16_armv6
@@ -104,5 +104,5 @@ void vp9_bilinear_predict16x16_armv6
   HFilter = vp8_bilinear_filters[xoffset];
   VFilter = vp8_bilinear_filters[yoffset];
 
-  vp8_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 16, 16);
+  vp9_filter_block2d_bil_armv6(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 16, 16);
 }

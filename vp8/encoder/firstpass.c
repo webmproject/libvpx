@@ -389,7 +389,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int step_param = 3;
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
   int n;
-  vp8_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
+  vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
   int new_mv_mode_penalty = 256;
 
   // override the default variance function to use MSE
@@ -472,7 +472,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   zero_ref_mv.as_int = 0;
 
-  vp8_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();  // __asm emms;
 
   x->src = * cpi->Source;
   xd->pre = *lst_yv12;
@@ -693,10 +693,10 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
     // extend the recon for intra prediction
     vp9_extend_mb_row(new_yv12, xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
-    vp8_clear_system_state();  // __asm emms;
+    vp9_clear_system_state();  // __asm emms;
   }
 
-  vp8_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();  // __asm emms;
   {
     double weight = 0.0;
 
@@ -1555,7 +1555,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   cpi->twopass.gf_group_bits = 0;
 
-  vp8_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();  // __asm emms;
 
   start_pos = cpi->twopass.stats_in;
 
@@ -1971,7 +1971,7 @@ void vp9_second_pass(VP9_COMP *cpi) {
     return;
   }
 
-  vp8_clear_system_state();
+  vp9_clear_system_state();
 
   vpx_memset(&this_frame, 0, sizeof(FIRSTPASS_STATS));
 
@@ -2211,7 +2211,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   vpx_memset(&next_frame, 0, sizeof(next_frame)); // assure clean
 
-  vp8_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();  // __asm emms;
   start_position = cpi->twopass.stats_in;
 
   cpi->common.frame_type = KEY_FRAME;

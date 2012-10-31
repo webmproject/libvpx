@@ -29,11 +29,11 @@ extern unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
                                           const MACROBLOCKD *const xd,
                                           PRED_ID pred_id);
 
-extern vp8_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
+extern vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
                                   const MACROBLOCKD *const xd,
                                   PRED_ID pred_id);
 
-extern const vp8_prob *vp9_get_pred_probs(const VP9_COMMON *const cm,
+extern const vp9_prob *vp9_get_pred_probs(const VP9_COMMON *const cm,
                                           const MACROBLOCKD *const xd,
                                           PRED_ID pred_id);
 

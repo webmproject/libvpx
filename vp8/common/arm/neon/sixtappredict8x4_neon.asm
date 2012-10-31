@@ -76,7 +76,7 @@ filter8_coeff
     pld             [r0, r1]
     pld             [r0, r1, lsl #1]
 
-    vmull.u8        q7, d6, d0              ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q7, d6, d0              ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q8, d8, d0
     vmull.u8        q9, d10, d0
     vmull.u8        q10, d12, d0
@@ -86,7 +86,7 @@ filter8_coeff
     vext.8          d30, d10, d11, #1
     vext.8          d31, d12, d13, #1
 
-    vmlsl.u8        q7, d28, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q7, d28, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q8, d29, d1
     vmlsl.u8        q9, d30, d1
     vmlsl.u8        q10, d31, d1
@@ -96,7 +96,7 @@ filter8_coeff
     vext.8          d30, d10, d11, #4
     vext.8          d31, d12, d13, #4
 
-    vmlsl.u8        q7, d28, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q7, d28, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q8, d29, d4
     vmlsl.u8        q9, d30, d4
     vmlsl.u8        q10, d31, d4
@@ -106,7 +106,7 @@ filter8_coeff
     vext.8          d30, d10, d11, #2
     vext.8          d31, d12, d13, #2
 
-    vmlal.u8        q7, d28, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q7, d28, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q8, d29, d2
     vmlal.u8        q9, d30, d2
     vmlal.u8        q10, d31, d2
@@ -116,7 +116,7 @@ filter8_coeff
     vext.8          d30, d10, d11, #5
     vext.8          d31, d12, d13, #5
 
-    vmlal.u8        q7, d28, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q7, d28, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q8, d29, d5
     vmlal.u8        q9, d30, d5
     vmlal.u8        q10, d31, d5
@@ -126,7 +126,7 @@ filter8_coeff
     vext.8          d30, d10, d11, #3
     vext.8          d31, d12, d13, #3
 
-    vmull.u8        q3, d28, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q3, d28, d3             ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q4, d29, d3
     vmull.u8        q5, d30, d3
     vmull.u8        q6, d31, d3
@@ -153,7 +153,7 @@ filter8_coeff
     vst1.u8         {d25}, [lr]!
 
     ;first_pass filtering on the rest 5-line data
-    vmull.u8        q8, d6, d0              ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q8, d6, d0              ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q9, d8, d0
     vmull.u8        q10, d10, d0
     vmull.u8        q11, d12, d0
@@ -165,7 +165,7 @@ filter8_coeff
     vext.8          d30, d12, d13, #1
     vext.8          d31, d14, d15, #1
 
-    vmlsl.u8        q8, d27, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q8, d27, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q9, d28, d1
     vmlsl.u8        q10, d29, d1
     vmlsl.u8        q11, d30, d1
@@ -177,7 +177,7 @@ filter8_coeff
     vext.8          d30, d12, d13, #4
     vext.8          d31, d14, d15, #4
 
-    vmlsl.u8        q8, d27, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q8, d27, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q9, d28, d4
     vmlsl.u8        q10, d29, d4
     vmlsl.u8        q11, d30, d4
@@ -189,7 +189,7 @@ filter8_coeff
     vext.8          d30, d12, d13, #2
     vext.8          d31, d14, d15, #2
 
-    vmlal.u8        q8, d27, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q8, d27, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q9, d28, d2
     vmlal.u8        q10, d29, d2
     vmlal.u8        q11, d30, d2
@@ -201,7 +201,7 @@ filter8_coeff
     vext.8          d30, d12, d13, #5
     vext.8          d31, d14, d15, #5
 
-    vmlal.u8        q8, d27, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q8, d27, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q9, d28, d5
     vmlal.u8        q10, d29, d5
     vmlal.u8        q11, d30, d5
@@ -213,7 +213,7 @@ filter8_coeff
     vext.8          d30, d12, d13, #3
     vext.8          d31, d14, d15, #3
 
-    vmull.u8        q3, d27, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q3, d27, d3             ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q4, d28, d3
     vmull.u8        q5, d29, d3
     vmull.u8        q6, d30, d3
@@ -251,32 +251,32 @@ filter8_coeff
     vdup.8          d4, d16[0]
     vdup.8          d5, d16[4]
 
-    vmull.u8        q3, d22, d0             ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q3, d22, d0             ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q4, d23, d0
     vmull.u8        q5, d24, d0
     vmull.u8        q6, d25, d0
 
-    vmlsl.u8        q3, d23, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q3, d23, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q4, d24, d1
     vmlsl.u8        q5, d25, d1
     vmlsl.u8        q6, d26, d1
 
-    vmlsl.u8        q3, d26, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q3, d26, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q4, d27, d4
     vmlsl.u8        q5, d28, d4
     vmlsl.u8        q6, d29, d4
 
-    vmlal.u8        q3, d24, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q3, d24, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q4, d25, d2
     vmlal.u8        q5, d26, d2
     vmlal.u8        q6, d27, d2
 
-    vmlal.u8        q3, d27, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q3, d27, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q4, d28, d5
     vmlal.u8        q5, d29, d5
     vmlal.u8        q6, d30, d5
 
-    vmull.u8        q7, d25, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q7, d25, d3             ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q8, d26, d3
     vmull.u8        q9, d27, d3
     vmull.u8        q10, d28, d3
@@ -322,7 +322,7 @@ firstpass_filter8x4_only
     pld             [r0, r1]
     pld             [r0, r1, lsl #1]
 
-    vmull.u8        q7, d6, d0              ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q7, d6, d0              ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q8, d8, d0
     vmull.u8        q9, d10, d0
     vmull.u8        q10, d12, d0
@@ -332,7 +332,7 @@ firstpass_filter8x4_only
     vext.8          d30, d10, d11, #1
     vext.8          d31, d12, d13, #1
 
-    vmlsl.u8        q7, d28, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q7, d28, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q8, d29, d1
     vmlsl.u8        q9, d30, d1
     vmlsl.u8        q10, d31, d1
@@ -342,7 +342,7 @@ firstpass_filter8x4_only
     vext.8          d30, d10, d11, #4
     vext.8          d31, d12, d13, #4
 
-    vmlsl.u8        q7, d28, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q7, d28, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q8, d29, d4
     vmlsl.u8        q9, d30, d4
     vmlsl.u8        q10, d31, d4
@@ -352,7 +352,7 @@ firstpass_filter8x4_only
     vext.8          d30, d10, d11, #2
     vext.8          d31, d12, d13, #2
 
-    vmlal.u8        q7, d28, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q7, d28, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q8, d29, d2
     vmlal.u8        q9, d30, d2
     vmlal.u8        q10, d31, d2
@@ -362,7 +362,7 @@ firstpass_filter8x4_only
     vext.8          d30, d10, d11, #5
     vext.8          d31, d12, d13, #5
 
-    vmlal.u8        q7, d28, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q7, d28, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q8, d29, d5
     vmlal.u8        q9, d30, d5
     vmlal.u8        q10, d31, d5
@@ -372,7 +372,7 @@ firstpass_filter8x4_only
     vext.8          d30, d10, d11, #3
     vext.8          d31, d12, d13, #3
 
-    vmull.u8        q3, d28, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q3, d28, d3             ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q4, d29, d3
     vmull.u8        q5, d30, d3
     vmull.u8        q6, d31, d3
@@ -419,32 +419,32 @@ secondpass_filter8x4_only
     vdup.8          d5, d16[4]
     vld1.u8         {d30}, [r0], r1
 
-    vmull.u8        q3, d22, d0             ;(src_ptr[-2] * vp8_filter[0])
+    vmull.u8        q3, d22, d0             ;(src_ptr[-2] * vp9_filter[0])
     vmull.u8        q4, d23, d0
     vmull.u8        q5, d24, d0
     vmull.u8        q6, d25, d0
 
-    vmlsl.u8        q3, d23, d1             ;-(src_ptr[-1] * vp8_filter[1])
+    vmlsl.u8        q3, d23, d1             ;-(src_ptr[-1] * vp9_filter[1])
     vmlsl.u8        q4, d24, d1
     vmlsl.u8        q5, d25, d1
     vmlsl.u8        q6, d26, d1
 
-    vmlsl.u8        q3, d26, d4             ;-(src_ptr[2] * vp8_filter[4])
+    vmlsl.u8        q3, d26, d4             ;-(src_ptr[2] * vp9_filter[4])
     vmlsl.u8        q4, d27, d4
     vmlsl.u8        q5, d28, d4
     vmlsl.u8        q6, d29, d4
 
-    vmlal.u8        q3, d24, d2             ;(src_ptr[0] * vp8_filter[2])
+    vmlal.u8        q3, d24, d2             ;(src_ptr[0] * vp9_filter[2])
     vmlal.u8        q4, d25, d2
     vmlal.u8        q5, d26, d2
     vmlal.u8        q6, d27, d2
 
-    vmlal.u8        q3, d27, d5             ;(src_ptr[3] * vp8_filter[5])
+    vmlal.u8        q3, d27, d5             ;(src_ptr[3] * vp9_filter[5])
     vmlal.u8        q4, d28, d5
     vmlal.u8        q5, d29, d5
     vmlal.u8        q6, d30, d5
 
-    vmull.u8        q7, d25, d3             ;(src_ptr[1] * vp8_filter[3])
+    vmull.u8        q7, d25, d3             ;(src_ptr[1] * vp9_filter[3])
     vmull.u8        q8, d26, d3
     vmull.u8        q9, d27, d3
     vmull.u8        q10, d28, d3

@@ -30,12 +30,12 @@ typedef struct {
   unsigned int uses_last: 1;
 #endif
 
-} VP8_HEADER;
+} VP9_HEADER;
 
 #ifdef PACKET_TESTING
-#define VP8_HEADER_SIZE 8
+#define VP9_HEADER_SIZE 8
 #else
-#define VP8_HEADER_SIZE 3
+#define VP9_HEADER_SIZE 3
 #endif
 
 

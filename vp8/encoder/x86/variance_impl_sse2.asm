@@ -431,7 +431,7 @@ sym(vp9_filter_block2d_bil_var_sse2):
         lea             rsi,            [GLOBAL(xmm_bi_rd)]  ; rounding
         movdqa          xmm4,           XMMWORD PTR [rsi]
 
-        lea             rcx,            [GLOBAL(vp8_bilinear_filters_sse2)]
+        lea             rcx,            [GLOBAL(bilinear_filters_sse2)]
         movsxd          rax,            dword ptr arg(5)     ; xoffset
 
         cmp             rax,            0                    ; skip first_pass filter if xoffset=0
@@ -726,7 +726,7 @@ sym(vp9_half_horiz_vert_variance8x_h_sse2):
         add             rsi, r8
 %endif
 
-vp8_half_horiz_vert_variance8x_h_1:
+.half_horiz_vert_variance8x_h_1:
 
         movq            xmm1,           QWORD PTR [rsi]     ;
         movq            xmm2,           QWORD PTR [rsi+1]   ;
@@ -754,7 +754,7 @@ vp8_half_horiz_vert_variance8x_h_1:
 %endif
 
         sub             rcx,            1                   ;
-        jnz             vp8_half_horiz_vert_variance8x_h_1     ;
+        jnz             .half_horiz_vert_variance8x_h_1     ;
 
         movdq2q         mm6,            xmm6                ;
         movdq2q         mm7,            xmm7                ;
@@ -840,7 +840,7 @@ sym(vp9_half_horiz_vert_variance16x_h_sse2):
 
         lea             rsi,            [rsi + rax]
 
-vp8_half_horiz_vert_variance16x_h_1:
+.half_horiz_vert_variance16x_h_1:
         movdqu          xmm1,           XMMWORD PTR [rsi]     ;
         movdqu          xmm2,           XMMWORD PTR [rsi+1]   ;
         pavgb           xmm1,           xmm2                ;  xmm1 = avg(xmm1,xmm3) horizontal line i+1
@@ -872,7 +872,7 @@ vp8_half_horiz_vert_variance16x_h_1:
         lea             rdi,            [rdi + rdx]
 
         sub             rcx,            1                   ;
-        jnz             vp8_half_horiz_vert_variance16x_h_1     ;
+        jnz             .half_horiz_vert_variance16x_h_1    ;
 
         pxor        xmm1,           xmm1
         pxor        xmm5,           xmm5
@@ -953,7 +953,7 @@ sym(vp9_half_vert_variance8x_h_sse2):
         movsxd          rax,            dword ptr arg(1) ;ref_pixels_per_line
 
         pxor            xmm0,           xmm0                ;
-vp8_half_vert_variance8x_h_1:
+.half_vert_variance8x_h_1:
         movq            xmm5,           QWORD PTR [rsi]     ;  xmm5 = s0,s1,s2..s8
         movq            xmm3,           QWORD PTR [rsi+rax] ;  xmm3 = s1,s2,s3..s9
 
@@ -977,7 +977,7 @@ vp8_half_vert_variance8x_h_1:
 %endif
 
         sub             rcx,            1                   ;
-        jnz             vp8_half_vert_variance8x_h_1          ;
+        jnz             .half_vert_variance8x_h_1          ;
 
         movdq2q         mm6,            xmm6                ;
         movdq2q         mm7,            xmm7                ;
@@ -1059,7 +1059,7 @@ sym(vp9_half_vert_variance16x_h_sse2):
         lea             rsi,            [rsi + rax          ]
         pxor            xmm0,           xmm0
 
-vp8_half_vert_variance16x_h_1:
+.half_vert_variance16x_h_1:
         movdqu          xmm3,           XMMWORD PTR [rsi]
 
         pavgb           xmm5,           xmm3                ;  xmm5 = avg(xmm1,xmm3)
@@ -1087,7 +1087,7 @@ vp8_half_vert_variance16x_h_1:
         lea             rdi,            [rdi + rdx]
 
         sub             rcx,            1
-        jnz             vp8_half_vert_variance16x_h_1
+        jnz             .half_vert_variance16x_h_1
 
         pxor        xmm1,           xmm1
         pxor        xmm5,           xmm5
@@ -1167,7 +1167,7 @@ sym(vp9_half_horiz_variance8x_h_sse2):
         movsxd          rcx,            dword ptr arg(4) ;Height              ;
 
         pxor            xmm0,           xmm0                ;
-vp8_half_horiz_variance8x_h_1:
+.half_horiz_variance8x_h_1:
         movq            xmm5,           QWORD PTR [rsi]     ;  xmm5 = s0,s1,s2..s8
         movq            xmm3,           QWORD PTR [rsi+1]   ;  xmm3 = s1,s2,s3..s9
 
@@ -1190,7 +1190,7 @@ vp8_half_horiz_variance8x_h_1:
         add             rdi, r9
 %endif
         sub             rcx,            1                   ;
-        jnz             vp8_half_horiz_variance8x_h_1        ;
+        jnz             .half_horiz_variance8x_h_1          ;
 
         movdq2q         mm6,            xmm6                ;
         movdq2q         mm7,            xmm7                ;
@@ -1270,7 +1270,7 @@ sym(vp9_half_horiz_variance16x_h_sse2):
 
         pxor            xmm0,           xmm0                ;
 
-vp8_half_horiz_variance16x_h_1:
+.half_horiz_variance16x_h_1:
         movdqu          xmm5,           XMMWORD PTR [rsi]     ;  xmm5 = s0,s1,s2..s15
         movdqu          xmm3,           XMMWORD PTR [rsi+1]   ;  xmm3 = s1,s2,s3..s16
 
@@ -1297,7 +1297,7 @@ vp8_half_horiz_variance16x_h_1:
         lea             rdi,            [rdi + rdx]
 
         sub             rcx,            1                   ;
-        jnz             vp8_half_horiz_variance16x_h_1        ;
+        jnz             .half_horiz_variance16x_h_1         ;
 
         pxor        xmm1,           xmm1
         pxor        xmm5,           xmm5
@@ -1348,7 +1348,7 @@ align 16
 xmm_bi_rd:
     times 8 dw 64
 align 16
-vp8_bilinear_filters_sse2:
+bilinear_filters_sse2:
     dw 128, 128, 128, 128, 128, 128, 128, 128,  0,  0,  0,  0,  0,  0,  0,  0
     dw 120, 120, 120, 120, 120, 120, 120, 120,  8,  8,  8,  8,  8,  8,  8,  8
     dw 112, 112, 112, 112, 112, 112, 112, 112, 16, 16, 16, 16, 16, 16, 16, 16

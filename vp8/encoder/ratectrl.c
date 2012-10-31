@@ -29,12 +29,12 @@
 #define MAX_BPB_FACTOR          50
 
 #ifdef MODE_STATS
-extern unsigned int y_modes[VP8_YMODES];
-extern unsigned int uv_modes[VP8_UV_MODES];
+extern unsigned int y_modes[VP9_YMODES];
+extern unsigned int uv_modes[VP9_UV_MODES];
 extern unsigned int b_modes[B_MODE_COUNT];
 
 extern unsigned int inter_y_modes[MB_MODE_COUNT];
-extern unsigned int inter_uv_modes[VP8_UV_MODES];
+extern unsigned int inter_uv_modes[VP9_UV_MODES];
 extern unsigned int inter_b_modes[B_MODE_COUNT];
 #endif
 
@@ -127,54 +127,54 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
 
   // Stores a snapshot of key state variables which can subsequently be
   // restored with a call to vp9_restore_coding_context. These functions are
-  // intended for use in a re-code loop in vp8_compress_frame where the
+  // intended for use in a re-code loop in vp9_compress_frame where the
   // quantizer value is adjusted between loop iterations.
 
   cc->nmvc = cm->fc.nmvc;
-  vp8_copy(cc->nmvjointcost,  cpi->mb.nmvjointcost);
-  vp8_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
-  vp8_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
+  vp9_copy(cc->nmvjointcost,  cpi->mb.nmvjointcost);
+  vp9_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
+  vp9_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
 
-  vp8_copy(cc->mv_ref_ct, cm->fc.mv_ref_ct);
-  vp8_copy(cc->mode_context, cm->fc.mode_context);
-  vp8_copy(cc->mv_ref_ct_a, cm->fc.mv_ref_ct_a);
-  vp8_copy(cc->mode_context_a, cm->fc.mode_context_a);
+  vp9_copy(cc->mv_ref_ct, cm->fc.mv_ref_ct);
+  vp9_copy(cc->mode_context, cm->fc.mode_context);
+  vp9_copy(cc->mv_ref_ct_a, cm->fc.mv_ref_ct_a);
+  vp9_copy(cc->mode_context_a, cm->fc.mode_context_a);
 
-  vp8_copy(cc->ymode_prob, cm->fc.ymode_prob);
-  vp8_copy(cc->bmode_prob, cm->fc.bmode_prob);
-  vp8_copy(cc->uv_mode_prob, cm->fc.uv_mode_prob);
-  vp8_copy(cc->i8x8_mode_prob, cm->fc.i8x8_mode_prob);
-  vp8_copy(cc->sub_mv_ref_prob, cm->fc.sub_mv_ref_prob);
-  vp8_copy(cc->mbsplit_prob, cm->fc.mbsplit_prob);
+  vp9_copy(cc->ymode_prob, cm->fc.ymode_prob);
+  vp9_copy(cc->bmode_prob, cm->fc.bmode_prob);
+  vp9_copy(cc->uv_mode_prob, cm->fc.uv_mode_prob);
+  vp9_copy(cc->i8x8_mode_prob, cm->fc.i8x8_mode_prob);
+  vp9_copy(cc->sub_mv_ref_prob, cm->fc.sub_mv_ref_prob);
+  vp9_copy(cc->mbsplit_prob, cm->fc.mbsplit_prob);
 
   // Stats
 #ifdef MODE_STATS
-  vp8_copy(cc->y_modes,       y_modes);
-  vp8_copy(cc->uv_modes,      uv_modes);
-  vp8_copy(cc->b_modes,       b_modes);
-  vp8_copy(cc->inter_y_modes,  inter_y_modes);
-  vp8_copy(cc->inter_uv_modes, inter_uv_modes);
-  vp8_copy(cc->inter_b_modes,  inter_b_modes);
+  vp9_copy(cc->y_modes,       y_modes);
+  vp9_copy(cc->uv_modes,      uv_modes);
+  vp9_copy(cc->b_modes,       b_modes);
+  vp9_copy(cc->inter_y_modes,  inter_y_modes);
+  vp9_copy(cc->inter_uv_modes, inter_uv_modes);
+  vp9_copy(cc->inter_b_modes,  inter_b_modes);
 #endif
 
-  vp8_copy(cc->segment_pred_probs, cm->segment_pred_probs);
-  vp8_copy(cc->ref_pred_probs_update, cpi->ref_pred_probs_update);
-  vp8_copy(cc->ref_pred_probs, cm->ref_pred_probs);
-  vp8_copy(cc->prob_comppred, cm->prob_comppred);
+  vp9_copy(cc->segment_pred_probs, cm->segment_pred_probs);
+  vp9_copy(cc->ref_pred_probs_update, cpi->ref_pred_probs_update);
+  vp9_copy(cc->ref_pred_probs, cm->ref_pred_probs);
+  vp9_copy(cc->prob_comppred, cm->prob_comppred);
 
   vpx_memcpy(cpi->coding_context.last_frame_seg_map_copy,
              cm->last_frame_seg_map, (cm->mb_rows * cm->mb_cols));
 
-  vp8_copy(cc->last_ref_lf_deltas, xd->last_ref_lf_deltas);
-  vp8_copy(cc->last_mode_lf_deltas, xd->last_mode_lf_deltas);
+  vp9_copy(cc->last_ref_lf_deltas, xd->last_ref_lf_deltas);
+  vp9_copy(cc->last_mode_lf_deltas, xd->last_mode_lf_deltas);
 
-  vp8_copy(cc->coef_probs, cm->fc.coef_probs);
-  vp8_copy(cc->hybrid_coef_probs, cm->fc.hybrid_coef_probs);
-  vp8_copy(cc->coef_probs_8x8, cm->fc.coef_probs_8x8);
-  vp8_copy(cc->hybrid_coef_probs_8x8, cm->fc.hybrid_coef_probs_8x8);
-  vp8_copy(cc->coef_probs_16x16, cm->fc.coef_probs_16x16);
-  vp8_copy(cc->hybrid_coef_probs_16x16, cm->fc.hybrid_coef_probs_16x16);
-  vp8_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
+  vp9_copy(cc->coef_probs, cm->fc.coef_probs);
+  vp9_copy(cc->hybrid_coef_probs, cm->fc.hybrid_coef_probs);
+  vp9_copy(cc->coef_probs_8x8, cm->fc.coef_probs_8x8);
+  vp9_copy(cc->hybrid_coef_probs_8x8, cm->fc.hybrid_coef_probs_8x8);
+  vp9_copy(cc->coef_probs_16x16, cm->fc.coef_probs_16x16);
+  vp9_copy(cc->hybrid_coef_probs_16x16, cm->fc.hybrid_coef_probs_16x16);
+  vp9_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
 }
 
 void vp9_restore_coding_context(VP9_COMP *cpi) {
@@ -186,51 +186,51 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   // previous call to vp9_save_coding_context.
 
   cm->fc.nmvc = cc->nmvc;
-  vp8_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
-  vp8_copy(cpi->mb.nmvcosts, cc->nmvcosts);
-  vp8_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
+  vp9_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
+  vp9_copy(cpi->mb.nmvcosts, cc->nmvcosts);
+  vp9_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
 
-  vp8_copy(cm->fc.mv_ref_ct, cc->mv_ref_ct);
-  vp8_copy(cm->fc.mode_context, cc->mode_context);
-  vp8_copy(cm->fc.mv_ref_ct_a, cc->mv_ref_ct_a);
-  vp8_copy(cm->fc.mode_context_a, cc->mode_context_a);
+  vp9_copy(cm->fc.mv_ref_ct, cc->mv_ref_ct);
+  vp9_copy(cm->fc.mode_context, cc->mode_context);
+  vp9_copy(cm->fc.mv_ref_ct_a, cc->mv_ref_ct_a);
+  vp9_copy(cm->fc.mode_context_a, cc->mode_context_a);
 
-  vp8_copy(cm->fc.ymode_prob, cc->ymode_prob);
-  vp8_copy(cm->fc.bmode_prob, cc->bmode_prob);
-  vp8_copy(cm->fc.i8x8_mode_prob, cc->i8x8_mode_prob);
-  vp8_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
-  vp8_copy(cm->fc.sub_mv_ref_prob, cc->sub_mv_ref_prob);
-  vp8_copy(cm->fc.mbsplit_prob, cc->mbsplit_prob);
+  vp9_copy(cm->fc.ymode_prob, cc->ymode_prob);
+  vp9_copy(cm->fc.bmode_prob, cc->bmode_prob);
+  vp9_copy(cm->fc.i8x8_mode_prob, cc->i8x8_mode_prob);
+  vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
+  vp9_copy(cm->fc.sub_mv_ref_prob, cc->sub_mv_ref_prob);
+  vp9_copy(cm->fc.mbsplit_prob, cc->mbsplit_prob);
 
   // Stats
 #ifdef MODE_STATS
-  vp8_copy(y_modes, cc->y_modes);
-  vp8_copy(uv_modes, cc->uv_modes);
-  vp8_copy(b_modes, cc->b_modes);
-  vp8_copy(inter_y_modes, cc->inter_y_modes);
-  vp8_copy(inter_uv_modes, cc->inter_uv_modes);
-  vp8_copy(inter_b_modes, cc->inter_b_modes);
+  vp9_copy(y_modes, cc->y_modes);
+  vp9_copy(uv_modes, cc->uv_modes);
+  vp9_copy(b_modes, cc->b_modes);
+  vp9_copy(inter_y_modes, cc->inter_y_modes);
+  vp9_copy(inter_uv_modes, cc->inter_uv_modes);
+  vp9_copy(inter_b_modes, cc->inter_b_modes);
 #endif
 
-  vp8_copy(cm->segment_pred_probs, cc->segment_pred_probs);
-  vp8_copy(cpi->ref_pred_probs_update, cc->ref_pred_probs_update);
-  vp8_copy(cm->ref_pred_probs, cc->ref_pred_probs);
-  vp8_copy(cm->prob_comppred, cc->prob_comppred);
+  vp9_copy(cm->segment_pred_probs, cc->segment_pred_probs);
+  vp9_copy(cpi->ref_pred_probs_update, cc->ref_pred_probs_update);
+  vp9_copy(cm->ref_pred_probs, cc->ref_pred_probs);
+  vp9_copy(cm->prob_comppred, cc->prob_comppred);
 
   vpx_memcpy(cm->last_frame_seg_map,
              cpi->coding_context.last_frame_seg_map_copy,
              (cm->mb_rows * cm->mb_cols));
 
-  vp8_copy(xd->last_ref_lf_deltas, cc->last_ref_lf_deltas);
-  vp8_copy(xd->last_mode_lf_deltas, cc->last_mode_lf_deltas);
+  vp9_copy(xd->last_ref_lf_deltas, cc->last_ref_lf_deltas);
+  vp9_copy(xd->last_mode_lf_deltas, cc->last_mode_lf_deltas);
 
-  vp8_copy(cm->fc.coef_probs, cc->coef_probs);
-  vp8_copy(cm->fc.hybrid_coef_probs, cc->hybrid_coef_probs);
-  vp8_copy(cm->fc.coef_probs_8x8, cc->coef_probs_8x8);
-  vp8_copy(cm->fc.hybrid_coef_probs_8x8, cc->hybrid_coef_probs_8x8);
-  vp8_copy(cm->fc.coef_probs_16x16, cc->coef_probs_16x16);
-  vp8_copy(cm->fc.hybrid_coef_probs_16x16, cc->hybrid_coef_probs_16x16);
-  vp8_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
+  vp9_copy(cm->fc.coef_probs, cc->coef_probs);
+  vp9_copy(cm->fc.hybrid_coef_probs, cc->hybrid_coef_probs);
+  vp9_copy(cm->fc.coef_probs_8x8, cc->coef_probs_8x8);
+  vp9_copy(cm->fc.hybrid_coef_probs_8x8, cc->hybrid_coef_probs_8x8);
+  vp9_copy(cm->fc.coef_probs_16x16, cc->coef_probs_16x16);
+  vp9_copy(cm->fc.hybrid_coef_probs_16x16, cc->hybrid_coef_probs_16x16);
+  vp9_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
 }
 
 
@@ -305,7 +305,7 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
   int target;
 
   // Clear down mmx registers to allow floating point in what follows
-  vp8_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();  // __asm emms;
 
   // New Two pass RC
   target = cpi->per_frame_bandwidth;
@@ -414,7 +414,7 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   int    projected_size_based_on_q = 0;
 
   // Clear down mmx registers to allow floating point in what follows
-  vp8_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();  // __asm emms;
 
   if (cpi->common.frame_type == KEY_FRAME) {
     rate_correction_factor = cpi->key_frame_rate_correction_factor;
@@ -640,7 +640,7 @@ static int estimate_keyframe_frequency(VP9_COMP *cpi) {
 
 void vp9_adjust_key_frame_context(VP9_COMP *cpi) {
   // Clear down mmx registers to allow floating point in what follows
-  vp8_clear_system_state();
+  vp9_clear_system_state();
 
   cpi->frames_since_key = 0;
   cpi->key_frame_count++;

@@ -50,7 +50,7 @@ struct vpx_codec_alg_priv {
   vp8_stream_info_t       si;
   int                     defer_alloc;
   int                     decoder_init;
-  VP8D_PTR                pbi;
+  VP9D_PTR                pbi;
   int                     postproc_cfg_set;
   vp8_postproc_cfg_t      postproc_cfg;
 #if CONFIG_POSTPROC_VISUALIZER
@@ -351,8 +351,8 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     res = vp8_validate_mmaps(&ctx->si, ctx->mmaps, ctx->base.init_flags);
 
     if (!res) {
-      VP8D_CONFIG oxcf;
-      VP8D_PTR optr;
+      VP9D_CONFIG oxcf;
+      VP9D_PTR optr;
 
       vp9_initialize_dec();
 
@@ -386,16 +386,16 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
   if (!res && ctx->pbi) {
     YV12_BUFFER_CONFIG sd;
     int64_t time_stamp = 0, time_end_stamp = 0;
-    vp8_ppflags_t flags = {0};
+    vp9_ppflags_t flags = {0};
 
     if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC) {
       flags.post_proc_flag = ctx->postproc_cfg.post_proc_flag
 #if CONFIG_POSTPROC_VISUALIZER
 
-                             | ((ctx->dbg_color_ref_frame_flag != 0) ? VP8D_DEBUG_CLR_FRM_REF_BLKS : 0)
-                             | ((ctx->dbg_color_mb_modes_flag != 0) ? VP8D_DEBUG_CLR_BLK_MODES : 0)
-                             | ((ctx->dbg_color_b_modes_flag != 0) ? VP8D_DEBUG_CLR_BLK_MODES : 0)
-                             | ((ctx->dbg_display_mv_flag != 0) ? VP8D_DEBUG_DRAW_MV : 0)
+                             | ((ctx->dbg_color_ref_frame_flag != 0) ? VP9D_DEBUG_CLR_FRM_REF_BLKS : 0)
+                             | ((ctx->dbg_color_mb_modes_flag != 0) ? VP9D_DEBUG_CLR_BLK_MODES : 0)
+                             | ((ctx->dbg_color_b_modes_flag != 0) ? VP9D_DEBUG_CLR_BLK_MODES : 0)
+                             | ((ctx->dbg_display_mv_flag != 0) ? VP9D_DEBUG_DRAW_MV : 0)
 #endif
 ;
       flags.deblocking_level      = ctx->postproc_cfg.deblocking_level;
