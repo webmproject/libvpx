@@ -52,14 +52,14 @@ void vp9_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 void vp9_fix_contexts(MACROBLOCKD *xd);
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
-const TOKENVALUE *vp8_dct_value_tokens_ptr;
+const TOKENVALUE *vp9_dct_value_tokens_ptr;
 static int dct_value_cost[DCT_MAX_VALUE * 2];
-const int *vp8_dct_value_cost_ptr;
+const int *vp9_dct_value_cost_ptr;
 
 static void fill_value_tokens() {
 
   TOKENVALUE *const t = dct_value_tokens + DCT_MAX_VALUE;
-  vp8_extra_bit_struct *const e = vp8_extra_bits;
+  vp8_extra_bit_struct *const e = vp9_extra_bits;
 
   int i = -DCT_MAX_VALUE;
   int sign = 1;
@@ -88,7 +88,7 @@ static void fill_value_tokens() {
     // initialize the cost for extra bits for all possible coefficient value.
     {
       int cost = 0;
-      vp8_extra_bit_struct *p = vp8_extra_bits + t[i].Token;
+      vp8_extra_bit_struct *p = vp9_extra_bits + t[i].Token;
 
       if (p->base_val) {
         const int extra = t[i].Extra;
@@ -105,8 +105,8 @@ static void fill_value_tokens() {
 
   } while (++i < DCT_MAX_VALUE);
 
-  vp8_dct_value_tokens_ptr = dct_value_tokens + DCT_MAX_VALUE;
-  vp8_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
+  vp9_dct_value_tokens_ptr = dct_value_tokens + DCT_MAX_VALUE;
+  vp9_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
 static void tokenize_b(VP8_COMP *cpi,
@@ -136,15 +136,15 @@ static void tokenize_b(VP8_COMP *cpi,
     default:
     case TX_4X4:
       seg_eob = 16;
-      bands = vp8_coef_bands;
-      scan = vp8_default_zig_zag1d;
+      bands = vp9_coef_bands;
+      scan = vp9_default_zig_zag1d;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts;
         probs = cpi->common.fc.hybrid_coef_probs;
         if (tx_type == ADST_DCT) {
-          scan = vp8_row_scan;
+          scan = vp9_row_scan;
         } else if (tx_type == DCT_ADST) {
-          scan = vp8_col_scan;
+          scan = vp9_col_scan;
         }
       } else {
         counts = cpi->coef_counts;
@@ -154,12 +154,12 @@ static void tokenize_b(VP8_COMP *cpi,
     case TX_8X8:
       if (type == PLANE_TYPE_Y2) {
         seg_eob = 4;
-        bands = vp8_coef_bands;
-        scan = vp8_default_zig_zag1d;
+        bands = vp9_coef_bands;
+        scan = vp9_default_zig_zag1d;
       } else {
         seg_eob = 64;
-        bands = vp8_coef_bands_8x8;
-        scan = vp8_default_zig_zag1d_8x8;
+        bands = vp9_coef_bands_8x8;
+        scan = vp9_default_zig_zag1d_8x8;
       }
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_8x8;
@@ -171,8 +171,8 @@ static void tokenize_b(VP8_COMP *cpi,
       break;
     case TX_16X16:
       seg_eob = 256;
-      bands = vp8_coef_bands_16x16;
-      scan = vp8_default_zig_zag1d_16x16;
+      bands = vp9_coef_bands_16x16;
+      scan = vp9_default_zig_zag1d_16x16;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_16x16;
         probs = cpi->common.fc.hybrid_coef_probs_16x16;
@@ -196,8 +196,8 @@ static void tokenize_b(VP8_COMP *cpi,
 
       assert(-DCT_MAX_VALUE <= v  &&  v < DCT_MAX_VALUE);
 
-      t->Extra = vp8_dct_value_tokens_ptr[v].Extra;
-      token    = vp8_dct_value_tokens_ptr[v].Token;
+      t->Extra = vp9_dct_value_tokens_ptr[v].Extra;
+      token    = vp9_dct_value_tokens_ptr[v].Token;
     } else {
       token = DCT_EOB_TOKEN;
     }
@@ -206,11 +206,11 @@ static void tokenize_b(VP8_COMP *cpi,
     t->context_tree = probs[type][band][pt];
     t->skip_eob_node = (pt == 0) && ((band > 0 && type != PLANE_TYPE_Y_NO_DC) ||
                                      (band > 1 && type == PLANE_TYPE_Y_NO_DC));
-    assert(vp8_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
+    assert(vp9_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
     if (!dry_run) {
       ++counts[type][band][pt][token];
     }
-    pt = vp8_prev_token_class[token];
+    pt = vp9_prev_token_class[token];
     ++t;
   } while (c < eob && ++c < seg_eob);
 
@@ -352,11 +352,11 @@ void vp9_tokenize_mb(VP8_COMP *cpi,
   if (has_y2_block) {
     if (tx_size == TX_8X8) {
       tokenize_b(cpi, xd, xd->block + 24, t, PLANE_TYPE_Y2,
-                 A + vp8_block2above_8x8[24], L + vp8_block2left_8x8[24],
+                 A + vp9_block2above_8x8[24], L + vp9_block2left_8x8[24],
                  TX_8X8, dry_run);
     } else {
       tokenize_b(cpi, xd, xd->block + 24, t, PLANE_TYPE_Y2,
-                 A + vp8_block2above[24], L + vp8_block2left[24],
+                 A + vp9_block2above[24], L + vp9_block2left[24],
                  TX_4X4, dry_run);
     }
 
@@ -372,47 +372,47 @@ void vp9_tokenize_mb(VP8_COMP *cpi,
 
     for (b = 16; b < 24; b += 4) {
       tokenize_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
-                 A + vp8_block2above_8x8[b], L + vp8_block2left_8x8[b],
+                 A + vp9_block2above_8x8[b], L + vp9_block2left_8x8[b],
                  TX_8X8, dry_run);
-      A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
-      L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
+      A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
+      L[vp9_block2left_8x8[b] + 1]  = L[vp9_block2left_8x8[b]];
     }
     vpx_memset(&A[8], 0, sizeof(A[8]));
     vpx_memset(&L[8], 0, sizeof(L[8]));
   } else if (tx_size == TX_8X8) {
     for (b = 0; b < 16; b += 4) {
       tokenize_b(cpi, xd, xd->block + b, t, plane_type,
-                 A + vp8_block2above_8x8[b], L + vp8_block2left_8x8[b],
+                 A + vp9_block2above_8x8[b], L + vp9_block2left_8x8[b],
                  TX_8X8, dry_run);
-      A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
-      L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
+      A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
+      L[vp9_block2left_8x8[b] + 1]  = L[vp9_block2left_8x8[b]];
     }
     if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
         xd->mode_info_context->mbmi.mode == SPLITMV) {
       for (b = 16; b < 24; b++) {
         tokenize_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
-                   A + vp8_block2above[b], L + vp8_block2left[b],
+                   A + vp9_block2above[b], L + vp9_block2left[b],
                    TX_4X4, dry_run);
       }
     } else {
       for (b = 16; b < 24; b += 4) {
         tokenize_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
-                   A + vp8_block2above_8x8[b], L + vp8_block2left_8x8[b],
+                   A + vp9_block2above_8x8[b], L + vp9_block2left_8x8[b],
                    TX_8X8, dry_run);
-        A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
-        L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
+        A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
+        L[vp9_block2left_8x8[b] + 1]  = L[vp9_block2left_8x8[b]];
       }
     }
   } else {
     for (b = 0; b < 16; b++) {
       tokenize_b(cpi, xd, xd->block + b, t, plane_type,
-                 A + vp8_block2above[b], L + vp8_block2left[b],
+                 A + vp9_block2above[b], L + vp9_block2left[b],
                  TX_4X4, dry_run);
     }
 
     for (b = 16; b < 24; b++) {
       tokenize_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
-                 A + vp8_block2above[b], L + vp8_block2left[b],
+                 A + vp9_block2above[b], L + vp9_block2left[b],
                  TX_4X4, dry_run);
     }
   }
@@ -569,7 +569,7 @@ void print_context_counters() {
         for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
           coef_counts[t] = context_counters [type] [band] [pt] [t];
         vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
           coef_probs, branch_ct, coef_counts, 256, 1);
         fprintf(f, "%s\n      {", Comma(pt));
 
@@ -604,7 +604,7 @@ void print_context_counters() {
         for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
           coef_counts[t] = context_counters_8x8[type] [band] [pt] [t];
         vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
           coef_probs, branch_ct, coef_counts, 256, 1);
         fprintf(f, "%s\n      {", Comma(pt));
 
@@ -637,7 +637,7 @@ void print_context_counters() {
         for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
           coef_counts[t] = context_counters_16x16[type] [band] [pt] [t];
         vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
           coef_probs, branch_ct, coef_counts, 256, 1);
         fprintf(f, "%s\n      {", Comma(pt));
 
@@ -688,7 +688,7 @@ static __inline void stuff_b(VP8_COMP *cpi,
   switch (tx_size) {
     default:
     case TX_4X4:
-      bands = vp8_coef_bands;
+      bands = vp9_coef_bands;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts;
         probs = cpi->common.fc.hybrid_coef_probs;
@@ -698,7 +698,7 @@ static __inline void stuff_b(VP8_COMP *cpi,
       }
       break;
     case TX_8X8:
-      bands = vp8_coef_bands_8x8;
+      bands = vp9_coef_bands_8x8;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_8x8;
         probs = cpi->common.fc.hybrid_coef_probs_8x8;
@@ -708,7 +708,7 @@ static __inline void stuff_b(VP8_COMP *cpi,
       }
       break;
     case TX_16X16:
-      bands = vp8_coef_bands_16x16;
+      bands = vp9_coef_bands_16x16;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_16x16;
         probs = cpi->common.fc.hybrid_coef_probs_16x16;
@@ -742,7 +742,7 @@ static void vp9_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
 
   if (has_y2_block) {
     stuff_b(cpi, xd, xd->block + 24, t, PLANE_TYPE_Y2,
-            A + vp8_block2above_8x8[24], L + vp8_block2left_8x8[24],
+            A + vp9_block2above_8x8[24], L + vp9_block2left_8x8[24],
             TX_8X8, dry_run);
     plane_type = PLANE_TYPE_Y_NO_DC;
   } else {
@@ -750,18 +750,18 @@ static void vp9_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
   }
 
   for (b = 0; b < 16; b += 4) {
-    stuff_b(cpi, xd, xd->block + b, t, plane_type, A + vp8_block2above_8x8[b],
-            L + vp8_block2left_8x8[b], TX_8X8, dry_run);
-    A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
-    L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
+    stuff_b(cpi, xd, xd->block + b, t, plane_type, A + vp9_block2above_8x8[b],
+            L + vp9_block2left_8x8[b], TX_8X8, dry_run);
+    A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
+    L[vp9_block2left_8x8[b] + 1]  = L[vp9_block2left_8x8[b]];
   }
 
   for (b = 16; b < 24; b += 4) {
     stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
-            A + vp8_block2above_8x8[b], L + vp8_block2left_8x8[b],
+            A + vp9_block2above_8x8[b], L + vp9_block2left_8x8[b],
             TX_8X8, dry_run);
-    A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
-    L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
+    A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
+    L[vp9_block2left_8x8[b] + 1]  = L[vp9_block2left_8x8[b]];
   }
 }
 
@@ -775,10 +775,10 @@ static void vp9_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
   A[1] = A[2] = A[3] = A[0];
   L[1] = L[2] = L[3] = L[0];
   for (b = 16; b < 24; b += 4) {
-    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV, A + vp8_block2above[b],
-            L + vp8_block2above_8x8[b], TX_8X8, dry_run);
-    A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
-    L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
+    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV, A + vp9_block2above[b],
+            L + vp9_block2above_8x8[b], TX_8X8, dry_run);
+    A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
+    L[vp9_block2left_8x8[b] + 1]  = L[vp9_block2left_8x8[b]];
   }
   vpx_memset(&A[8], 0, sizeof(A[8]));
   vpx_memset(&L[8], 0, sizeof(L[8]));
@@ -795,20 +795,20 @@ static void vp9_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
                             xd->mode_info_context->mbmi.mode != SPLITMV);
 
   if (has_y2_block) {
-    stuff_b(cpi, xd, xd->block + 24, t, PLANE_TYPE_Y2, A + vp8_block2above[24],
-            L + vp8_block2left[24], TX_4X4, dry_run);
+    stuff_b(cpi, xd, xd->block + 24, t, PLANE_TYPE_Y2, A + vp9_block2above[24],
+            L + vp9_block2left[24], TX_4X4, dry_run);
     plane_type = PLANE_TYPE_Y_NO_DC;
   } else {
     plane_type = PLANE_TYPE_Y_WITH_DC;
   }
 
   for (b = 0; b < 16; b++)
-    stuff_b(cpi, xd, xd->block + b, t, plane_type, A + vp8_block2above[b],
-            L + vp8_block2left[b], TX_4X4, dry_run);
+    stuff_b(cpi, xd, xd->block + b, t, plane_type, A + vp9_block2above[b],
+            L + vp9_block2left[b], TX_4X4, dry_run);
 
   for (b = 16; b < 24; b++)
-    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV, A + vp8_block2above[b],
-            L + vp8_block2left[b], TX_4X4, dry_run);
+    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV, A + vp9_block2above[b],
+            L + vp9_block2left[b], TX_4X4, dry_run);
 }
 
 static void vp9_stuff_mb_8x8_4x4uv(VP8_COMP *cpi, MACROBLOCKD *xd,
@@ -819,15 +819,15 @@ static void vp9_stuff_mb_8x8_4x4uv(VP8_COMP *cpi, MACROBLOCKD *xd,
 
   for (b = 0; b < 16; b += 4) {
     stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_Y_WITH_DC,
-            A + vp8_block2above_8x8[b], L + vp8_block2left_8x8[b],
+            A + vp9_block2above_8x8[b], L + vp9_block2left_8x8[b],
             TX_8X8, dry_run);
-    A[vp8_block2above_8x8[b] + 1] = A[vp8_block2above_8x8[b]];
-    L[vp8_block2left_8x8[b] + 1]  = L[vp8_block2left_8x8[b]];
+    A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
+    L[vp9_block2left_8x8[b] + 1]  = L[vp9_block2left_8x8[b]];
   }
 
   for (b = 16; b < 24; b++)
-    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV, A + vp8_block2above[b],
-            L + vp8_block2left[b], TX_4X4, dry_run);
+    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV, A + vp9_block2above[b],
+            L + vp9_block2left[b], TX_4X4, dry_run);
 }
 
 void vp9_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {

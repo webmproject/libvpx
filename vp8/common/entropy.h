@@ -21,7 +21,7 @@
 //#define SUBMVREF_COUNT 5
 //#define VP8_NUMMBSPLITS 4
 
-extern const int vp8_i8x8_block[4];
+extern const int vp9_i8x8_block[4];
 
 /* Coefficient token alphabet */
 
@@ -41,9 +41,9 @@ extern const int vp8_i8x8_block[4];
 #define ENTROPY_NODES 11
 #define EOSB_TOKEN              127     /* Not signalled, encoder only */
 
-extern const vp8_tree_index vp8_coef_tree[];
+extern const vp8_tree_index vp9_coef_tree[];
 
-extern struct vp8_token_struct vp8_coef_encodings[MAX_ENTROPY_TOKENS];
+extern struct vp8_token_struct vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 typedef struct {
   vp8_tree_p tree;
@@ -52,7 +52,7 @@ typedef struct {
   int base_val;
 } vp8_extra_bit_struct;
 
-extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
+extern vp8_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 
 #define PROB_UPDATE_BASELINE_COST   7
 
@@ -72,9 +72,9 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
    position within the 4x4 DCT. */
 
 #define COEF_BANDS 8
-extern DECLARE_ALIGNED(16, const int, vp8_coef_bands[16]);
-extern DECLARE_ALIGNED(64, const int, vp8_coef_bands_8x8[64]);
-extern DECLARE_ALIGNED(16, const int, vp8_coef_bands_16x16[256]);
+extern DECLARE_ALIGNED(16, const int, vp9_coef_bands[16]);
+extern DECLARE_ALIGNED(64, const int, vp9_coef_bands_8x8[64]);
+extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_16x16[256]);
 
 /* Inside dimension is 3-valued measure of nearby complexity, that is,
    the extent to which nearby coefficients are nonzero.  For the first
@@ -98,20 +98,20 @@ extern DECLARE_ALIGNED(16, const int, vp8_coef_bands_16x16[256]);
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
 #define MODULUS_PARAM               13  /* Modulus parameter */
 
-extern DECLARE_ALIGNED(16, const unsigned char, vp8_prev_token_class[MAX_ENTROPY_TOKENS]);
+extern DECLARE_ALIGNED(16, const unsigned char, vp9_prev_token_class[MAX_ENTROPY_TOKENS]);
 
 struct VP8Common;
 void vp9_default_coef_probs(struct VP8Common *);
-extern DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d[16]);
 
-extern DECLARE_ALIGNED(16, const int, vp8_col_scan[16]);
-extern DECLARE_ALIGNED(16, const int, vp8_row_scan[16]);
+extern DECLARE_ALIGNED(16, const int, vp9_col_scan[16]);
+extern DECLARE_ALIGNED(16, const int, vp9_row_scan[16]);
 
 extern short vp8_default_zig_zag_mask[16];
-extern DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]);
+extern DECLARE_ALIGNED(64, const int, vp9_default_zig_zag1d_8x8[64]);
 void vp9_coef_tree_initialize(void);
 
-extern DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d_16x16[256]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]);
 void vp9_adapt_coef_probs(struct VP8Common *);
 
 #endif

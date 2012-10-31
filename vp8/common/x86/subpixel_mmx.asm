@@ -229,7 +229,7 @@ sym(vp9_bilinear_predict8x8_mmx):
         mov         rdi,        arg(4) ;dst_ptr           ;
 
         shl         rax,        5 ; offset * 32
-        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_mmx))]
+        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_8x_mmx))]
 
         add         rax,        rcx ; HFilter
         mov         rsi,        arg(0) ;src_ptr              ;
@@ -385,7 +385,7 @@ sym(vp9_bilinear_predict8x4_mmx):
         movsxd      rax,        dword ptr arg(2) ;xoffset
         mov         rdi,        arg(4) ;dst_ptr           ;
 
-        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_mmx))]
+        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_8x_mmx))]
         shl         rax,        5
 
         mov         rsi,        arg(0) ;src_ptr              ;
@@ -540,7 +540,7 @@ sym(vp9_bilinear_predict4x4_mmx):
         movsxd      rax,        dword ptr arg(2) ;xoffset
         mov         rdi,        arg(4) ;dst_ptr           ;
 
-        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_mmx))]
+        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_8x_mmx))]
         shl         rax,        5
 
         add         rax,        rcx ; HFilter
@@ -700,8 +700,8 @@ sym(vp9_six_tap_mmx):
 
 
 align 16
-global HIDDEN_DATA(sym(vp9_bilinear_filters_mmx))
-sym(vp9_bilinear_filters_mmx):
+global HIDDEN_DATA(sym(vp9_bilinear_filters_8x_mmx))
+sym(vp9_bilinear_filters_8x_mmx):
     times 8 dw 128
     times 8 dw 0
 

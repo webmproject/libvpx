@@ -36,7 +36,7 @@ typedef struct {
   int const *scan;
   int const *scan_8x8;
   UINT8 const *ptr_block2leftabove;
-  vp8_tree_index const *vp8_coef_tree_ptr;
+  vp8_tree_index const *vp9_coef_tree_ptr;
   unsigned char *norm_ptr;
   UINT8 *ptr_coef_bands_x;
   UINT8 *ptr_coef_bands_x_8x8;

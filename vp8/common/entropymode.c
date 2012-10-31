@@ -14,7 +14,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 
-const unsigned int kf_y_mode_cts[8][VP8_YMODES] = {
+static const unsigned int kf_y_mode_cts[8][VP8_YMODES] = {
   /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 BPRED */
   {12,  6,  5,  5,  5,  5,  5,  5,  5,  2, 22, 200},
   {25, 13, 13,  7,  7,  7,  7,  7,  7,  6, 27, 160},
@@ -101,9 +101,9 @@ int vp9_mv_cont(const int_mv *l, const int_mv *a) {
   return SUBMVREF_NORMAL;
 }
 
-const vp8_prob vp8_sub_mv_ref_prob [VP8_SUBMVREFS - 1] = { 180, 162, 25};
+const vp8_prob vp9_sub_mv_ref_prob [VP8_SUBMVREFS - 1] = { 180, 162, 25};
 
-const vp8_prob vp8_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP8_SUBMVREFS - 1] = {
+const vp8_prob vp9_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP8_SUBMVREFS - 1] = {
   { 147, 136, 18 },
   { 106, 145, 1  },
   { 179, 121, 1  },
@@ -113,7 +113,7 @@ const vp8_prob vp8_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP8_SUBMVREFS - 1] = {
 
 
 
-vp8_mbsplit vp8_mbsplits [VP8_NUMMBSPLITS] = {
+vp9_mbsplit vp9_mbsplits [VP8_NUMMBSPLITS] = {
   {
     0,  0,  0,  0,
     0,  0,  0,  0,
@@ -140,14 +140,14 @@ vp8_mbsplit vp8_mbsplits [VP8_NUMMBSPLITS] = {
   },
 };
 
-const int vp8_mbsplit_count [VP8_NUMMBSPLITS] = { 2, 2, 4, 16};
+const int vp9_mbsplit_count [VP8_NUMMBSPLITS] = { 2, 2, 4, 16};
 
-const vp8_prob vp8_mbsplit_probs [VP8_NUMMBSPLITS - 1] = { 110, 111, 150};
+const vp8_prob vp9_mbsplit_probs [VP8_NUMMBSPLITS - 1] = { 110, 111, 150};
 
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 
-const vp8_tree_index vp8_bmode_tree[VP8_BINTRAMODES * 2 - 2] = /* INTRAMODECONTEXTNODE value */
+const vp8_tree_index vp9_bmode_tree[VP8_BINTRAMODES * 2 - 2] = /* INTRAMODECONTEXTNODE value */
 {
   -B_DC_PRED, 2,                             /* 0 = DC_NODE */
   -B_TM_PRED, 4,                            /* 1 = TM_NODE */
@@ -162,7 +162,7 @@ const vp8_tree_index vp8_bmode_tree[VP8_BINTRAMODES * 2 - 2] = /* INTRAMODECONTE
 
 /* Again, these trees use the same probability indices as their
    explicitly-programmed predecessors. */
-const vp8_tree_index vp8_ymode_tree[VP8_YMODES * 2 - 2] = {
+const vp8_tree_index vp9_ymode_tree[VP8_YMODES * 2 - 2] = {
   2, 14,
   -DC_PRED, 4,
   6, 8,
@@ -176,7 +176,7 @@ const vp8_tree_index vp8_ymode_tree[VP8_YMODES * 2 - 2] = {
   -B_PRED, -I8X8_PRED
 };
 
-const vp8_tree_index vp8_kf_ymode_tree[VP8_YMODES * 2 - 2] = {
+const vp8_tree_index vp9_kf_ymode_tree[VP8_YMODES * 2 - 2] = {
   2, 14,
   -DC_PRED, 4,
   6, 8,
@@ -190,7 +190,7 @@ const vp8_tree_index vp8_kf_ymode_tree[VP8_YMODES * 2 - 2] = {
   -B_PRED, -I8X8_PRED
 };
 
-const vp8_tree_index vp8_i8x8_mode_tree[VP8_I8X8_MODES * 2 - 2] = {
+const vp8_tree_index vp9_i8x8_mode_tree[VP8_I8X8_MODES * 2 - 2] = {
   2, 14,
   -DC_PRED, 4,
   6, 8,
@@ -202,7 +202,7 @@ const vp8_tree_index vp8_i8x8_mode_tree[VP8_I8X8_MODES * 2 - 2] = {
   -H_PRED, -TM_PRED
 };
 
-const vp8_tree_index vp8_uv_mode_tree[VP8_UV_MODES * 2 - 2] = {
+const vp8_tree_index vp9_uv_mode_tree[VP8_UV_MODES * 2 - 2] = {
   2, 14,
   -DC_PRED, 4,
   6, 8,
@@ -214,13 +214,13 @@ const vp8_tree_index vp8_uv_mode_tree[VP8_UV_MODES * 2 - 2] = {
   -H_PRED, -TM_PRED
 };
 
-const vp8_tree_index vp8_mbsplit_tree[6] = {
+const vp8_tree_index vp9_mbsplit_tree[6] = {
   -PARTITIONING_4X4,   2,
   -PARTITIONING_8X8,   4,
   -PARTITIONING_16X8, -PARTITIONING_8X16,
 };
 
-const vp8_tree_index vp8_mv_ref_tree[8] = {
+const vp8_tree_index vp9_mv_ref_tree[8] = {
   -ZEROMV, 2,
   -NEARESTMV, 4,
   -NEARMV, 6,
@@ -228,53 +228,53 @@ const vp8_tree_index vp8_mv_ref_tree[8] = {
 };
 
 #if CONFIG_SUPERBLOCKS
-const vp8_tree_index vp8_sb_mv_ref_tree[6] = {
+const vp8_tree_index vp9_sb_mv_ref_tree[6] = {
   -ZEROMV, 2,
   -NEARESTMV, 4,
   -NEARMV, -NEWMV
 };
 #endif
 
-const vp8_tree_index vp8_sub_mv_ref_tree[6] = {
+const vp8_tree_index vp9_sub_mv_ref_tree[6] = {
   -LEFT4X4, 2,
   -ABOVE4X4, 4,
   -ZERO4X4, -NEW4X4
 };
 
 
-struct vp8_token_struct vp8_bmode_encodings   [VP8_BINTRAMODES];
-struct vp8_token_struct vp8_ymode_encodings   [VP8_YMODES];
+struct vp8_token_struct vp9_bmode_encodings   [VP8_BINTRAMODES];
+struct vp8_token_struct vp9_ymode_encodings   [VP8_YMODES];
 #if CONFIG_SUPERBLOCKS
-struct vp8_token_struct vp8_sb_kf_ymode_encodings [VP8_I32X32_MODES];
+struct vp8_token_struct vp9_sb_kf_ymode_encodings [VP8_I32X32_MODES];
 #endif
-struct vp8_token_struct vp8_kf_ymode_encodings [VP8_YMODES];
-struct vp8_token_struct vp8_uv_mode_encodings  [VP8_UV_MODES];
-struct vp8_token_struct vp8_i8x8_mode_encodings  [VP8_I8X8_MODES];
-struct vp8_token_struct vp8_mbsplit_encodings [VP8_NUMMBSPLITS];
+struct vp8_token_struct vp9_kf_ymode_encodings [VP8_YMODES];
+struct vp8_token_struct vp9_uv_mode_encodings  [VP8_UV_MODES];
+struct vp8_token_struct vp9_i8x8_mode_encodings  [VP8_I8X8_MODES];
+struct vp8_token_struct vp9_mbsplit_encodings [VP8_NUMMBSPLITS];
 
-struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
+struct vp8_token_struct vp9_mv_ref_encoding_array    [VP8_MVREFS];
 #if CONFIG_SUPERBLOCKS
-struct vp8_token_struct vp8_sb_mv_ref_encoding_array  [VP8_MVREFS];
+struct vp8_token_struct vp9_sb_mv_ref_encoding_array  [VP8_MVREFS];
 #endif
-struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
+struct vp8_token_struct vp9_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
 
 
 void vp9_init_mbmode_probs(VP8_COMMON *x) {
   unsigned int bct [VP8_YMODES] [2];      /* num Ymodes > num UV modes */
 
-  vp9_tree_probs_from_distribution(VP8_YMODES, vp8_ymode_encodings,
-    vp8_ymode_tree, x->fc.ymode_prob, bct, y_mode_cts, 256, 1);
+  vp9_tree_probs_from_distribution(VP8_YMODES, vp9_ymode_encodings,
+    vp9_ymode_tree, x->fc.ymode_prob, bct, y_mode_cts, 256, 1);
   {
     int i;
     for (i = 0; i < 8; i++) {
       vp9_tree_probs_from_distribution(
-        VP8_YMODES, vp8_kf_ymode_encodings, vp8_kf_ymode_tree,
+        VP8_YMODES, vp9_kf_ymode_encodings, vp9_kf_ymode_tree,
         x->kf_ymode_prob[i], bct, kf_y_mode_cts[i],
         256, 1);
 #if CONFIG_SUPERBLOCKS
       vp9_tree_probs_from_distribution(
-        VP8_I32X32_MODES, vp8_sb_kf_ymode_encodings, vp8_sb_ymode_tree,
+        VP8_I32X32_MODES, vp9_sb_kf_ymode_encodings, vp8_sb_ymode_tree,
         x->sb_kf_ymode_prob[i], bct, kf_y_mode_cts[i],
         256, 1);
 #endif
@@ -284,25 +284,25 @@ void vp9_init_mbmode_probs(VP8_COMMON *x) {
     int i;
     for (i = 0; i < VP8_YMODES; i++) {
       vp9_tree_probs_from_distribution(
-        VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
+        VP8_UV_MODES, vp9_uv_mode_encodings, vp9_uv_mode_tree,
         x->kf_uv_mode_prob[i], bct, kf_uv_mode_cts[i],
         256, 1);
       vp9_tree_probs_from_distribution(
-        VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
+        VP8_UV_MODES, vp9_uv_mode_encodings, vp9_uv_mode_tree,
         x->fc.uv_mode_prob[i], bct, uv_mode_cts[i],
         256, 1);
     }
   }
 
   vp9_tree_probs_from_distribution(
-    VP8_I8X8_MODES, vp8_i8x8_mode_encodings, vp8_i8x8_mode_tree,
+    VP8_I8X8_MODES, vp9_i8x8_mode_encodings, vp9_i8x8_mode_tree,
     x->fc.i8x8_mode_prob, bct, i8x8_mode_cts,
     256, 1);
 
-  vpx_memcpy(x->fc.sub_mv_ref_prob, vp8_sub_mv_ref_prob2, sizeof(vp8_sub_mv_ref_prob2));
-  vpx_memcpy(x->fc.mbsplit_prob, vp8_mbsplit_probs, sizeof(vp8_mbsplit_probs));
-  vpx_memcpy(x->fc.switchable_interp_prob, vp8_switchable_interp_prob,
-             sizeof(vp8_switchable_interp_prob));
+  vpx_memcpy(x->fc.sub_mv_ref_prob, vp9_sub_mv_ref_prob2, sizeof(vp9_sub_mv_ref_prob2));
+  vpx_memcpy(x->fc.mbsplit_prob, vp9_mbsplit_probs, sizeof(vp9_mbsplit_probs));
+  vpx_memcpy(x->fc.switchable_interp_prob, vp9_switchable_interp_prob,
+             sizeof(vp9_switchable_interp_prob));
 }
 
 
@@ -310,8 +310,8 @@ static void intra_bmode_probs_from_distribution(
   vp8_prob p [VP8_BINTRAMODES - 1],
   unsigned int branch_ct [VP8_BINTRAMODES - 1] [2],
   const unsigned int events [VP8_BINTRAMODES]) {
-  vp9_tree_probs_from_distribution(VP8_BINTRAMODES, vp8_bmode_encodings,
-    vp8_bmode_tree, p, branch_ct, events, 256, 1);
+  vp9_tree_probs_from_distribution(VP8_BINTRAMODES, vp9_bmode_encodings,
+    vp9_bmode_tree, p, branch_ct, events, 256, 1);
 }
 
 void vp9_default_bmode_probs(vp8_prob p [VP8_BINTRAMODES - 1]) {
@@ -329,62 +329,62 @@ void vp9_kf_default_bmode_probs(vp8_prob p [VP8_BINTRAMODES] [VP8_BINTRAMODES] [
 
     do {
       intra_bmode_probs_from_distribution(
-        p[i][j], branch_ct, vp8_kf_default_bmode_counts[i][j]);
+        p[i][j], branch_ct, vp9_kf_default_bmode_counts[i][j]);
 
     } while (++j < VP8_BINTRAMODES);
   } while (++i < VP8_BINTRAMODES);
 }
 
 #if VP8_SWITCHABLE_FILTERS == 3
-const vp8_tree_index vp8_switchable_interp_tree[VP8_SWITCHABLE_FILTERS*2-2] = {
+const vp8_tree_index vp9_switchable_interp_tree[VP8_SWITCHABLE_FILTERS*2-2] = {
   -0, 2,
   -1, -2
 };
-struct vp8_token_struct vp8_switchable_interp_encodings[VP8_SWITCHABLE_FILTERS];
-const INTERPOLATIONFILTERTYPE vp8_switchable_interp[VP8_SWITCHABLE_FILTERS] = {
+struct vp8_token_struct vp9_switchable_interp_encodings[VP8_SWITCHABLE_FILTERS];
+const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP8_SWITCHABLE_FILTERS] = {
   EIGHTTAP, SIXTAP, EIGHTTAP_SHARP};
-const int vp8_switchable_interp_map[SWITCHABLE+1] = {1, -1, 0, 2, -1};
-const vp8_prob vp8_switchable_interp_prob [VP8_SWITCHABLE_FILTERS+1]
+const int vp9_switchable_interp_map[SWITCHABLE+1] = {1, -1, 0, 2, -1};
+const vp8_prob vp9_switchable_interp_prob [VP8_SWITCHABLE_FILTERS+1]
                                           [VP8_SWITCHABLE_FILTERS-1] = {
   {248, 192}, { 32, 248}, { 32,  32}, {192, 160}
 };
 #elif VP8_SWITCHABLE_FILTERS == 2
-const vp8_tree_index vp8_switchable_interp_tree[VP8_SWITCHABLE_FILTERS*2-2] = {
+const vp8_tree_index vp9_switchable_interp_tree[VP8_SWITCHABLE_FILTERS*2-2] = {
   -0, -1,
 };
-struct vp8_token_struct vp8_switchable_interp_encodings[VP8_SWITCHABLE_FILTERS];
-const vp8_prob vp8_switchable_interp_prob [VP8_SWITCHABLE_FILTERS+1]
+struct vp8_token_struct vp9_switchable_interp_encodings[VP8_SWITCHABLE_FILTERS];
+const vp8_prob vp9_switchable_interp_prob [VP8_SWITCHABLE_FILTERS+1]
                                           [VP8_SWITCHABLE_FILTERS-1] = {
   {248},
   { 64},
   {192},
 };
-const INTERPOLATIONFILTERTYPE vp8_switchable_interp[VP8_SWITCHABLE_FILTERS] = {
+const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP8_SWITCHABLE_FILTERS] = {
   EIGHTTAP, EIGHTTAP_SHARP};
-const int vp8_switchable_interp_map[SWITCHABLE+1] = {-1, -1, 0, 1, -1}; //8, 8s
+const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, -1, 0, 1, -1}; //8, 8s
 #endif
 
 void vp9_entropy_mode_init() {
-  vp9_tokens_from_tree(vp8_bmode_encodings,   vp8_bmode_tree);
-  vp9_tokens_from_tree(vp8_ymode_encodings,   vp8_ymode_tree);
-  vp9_tokens_from_tree(vp8_kf_ymode_encodings, vp8_kf_ymode_tree);
+  vp9_tokens_from_tree(vp9_bmode_encodings,   vp9_bmode_tree);
+  vp9_tokens_from_tree(vp9_ymode_encodings,   vp9_ymode_tree);
+  vp9_tokens_from_tree(vp9_kf_ymode_encodings, vp9_kf_ymode_tree);
 #if CONFIG_SUPERBLOCKS
-  vp9_tokens_from_tree(vp8_sb_kf_ymode_encodings, vp8_sb_ymode_tree);
+  vp9_tokens_from_tree(vp9_sb_kf_ymode_encodings, vp8_sb_ymode_tree);
 #endif
-  vp9_tokens_from_tree(vp8_uv_mode_encodings,  vp8_uv_mode_tree);
-  vp9_tokens_from_tree(vp8_i8x8_mode_encodings,  vp8_i8x8_mode_tree);
-  vp9_tokens_from_tree(vp8_mbsplit_encodings, vp8_mbsplit_tree);
-  vp9_tokens_from_tree(vp8_switchable_interp_encodings,
-                       vp8_switchable_interp_tree);
+  vp9_tokens_from_tree(vp9_uv_mode_encodings,  vp9_uv_mode_tree);
+  vp9_tokens_from_tree(vp9_i8x8_mode_encodings,  vp9_i8x8_mode_tree);
+  vp9_tokens_from_tree(vp9_mbsplit_encodings, vp9_mbsplit_tree);
+  vp9_tokens_from_tree(vp9_switchable_interp_encodings,
+                       vp9_switchable_interp_tree);
 
-  vp9_tokens_from_tree_offset(vp8_mv_ref_encoding_array,
-                              vp8_mv_ref_tree, NEARESTMV);
+  vp9_tokens_from_tree_offset(vp9_mv_ref_encoding_array,
+                              vp9_mv_ref_tree, NEARESTMV);
 #if CONFIG_SUPERBLOCKS
-  vp9_tokens_from_tree_offset(vp8_sb_mv_ref_encoding_array,
-                              vp8_sb_mv_ref_tree, NEARESTMV);
+  vp9_tokens_from_tree_offset(vp9_sb_mv_ref_encoding_array,
+                              vp9_sb_mv_ref_tree, NEARESTMV);
 #endif
-  vp9_tokens_from_tree_offset(vp8_sub_mv_ref_encoding_array,
-                              vp8_sub_mv_ref_tree, LEFT4X4);
+  vp9_tokens_from_tree_offset(vp9_sub_mv_ref_encoding_array,
+                              vp9_sub_mv_ref_tree, LEFT4X4);
 }
 
 void vp9_init_mode_contexts(VP8_COMMON *pc) {
@@ -392,10 +392,10 @@ void vp9_init_mode_contexts(VP8_COMMON *pc) {
   vpx_memset(pc->fc.mv_ref_ct_a, 0, sizeof(pc->fc.mv_ref_ct_a));
 
   vpx_memcpy(pc->fc.mode_context,
-             default_vp8_mode_contexts,
+             vp9_default_mode_contexts,
              sizeof(pc->fc.mode_context));
   vpx_memcpy(pc->fc.mode_context_a,
-             default_vp8_mode_contexts,
+             vp9_default_mode_contexts_a,
              sizeof(pc->fc.mode_context_a));
 
 }
@@ -533,7 +533,7 @@ void vp9_adapt_mode_probs(VP8_COMMON *cm) {
   printf("};\n");
 #endif
   vp9_tree_probs_from_distribution(
-    VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
+    VP8_YMODES, vp9_ymode_encodings, vp9_ymode_tree,
     ymode_probs, branch_ct, cm->fc.ymode_counts,
     256, 1);
   for (t = 0; t < VP8_YMODES - 1; ++t) {
@@ -549,7 +549,7 @@ void vp9_adapt_mode_probs(VP8_COMMON *cm) {
   }
   for (i = 0; i < VP8_YMODES; ++i) {
     vp9_tree_probs_from_distribution(
-      VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
+      VP8_UV_MODES, vp9_uv_mode_encodings, vp9_uv_mode_tree,
       uvmode_probs, branch_ct, cm->fc.uv_mode_counts[i],
       256, 1);
     for (t = 0; t < VP8_UV_MODES - 1; ++t) {
@@ -565,7 +565,7 @@ void vp9_adapt_mode_probs(VP8_COMMON *cm) {
     }
   }
   vp9_tree_probs_from_distribution(
-    VP8_BINTRAMODES, vp8_bmode_encodings, vp8_bmode_tree,
+    VP8_BINTRAMODES, vp9_bmode_encodings, vp9_bmode_tree,
     bmode_probs, branch_ct, cm->fc.bmode_counts,
     256, 1);
   for (t = 0; t < VP8_BINTRAMODES - 1; ++t) {
@@ -580,7 +580,7 @@ void vp9_adapt_mode_probs(VP8_COMMON *cm) {
     else cm->fc.bmode_prob[t] = prob;
   }
   vp9_tree_probs_from_distribution(
-    VP8_I8X8_MODES, vp8_i8x8_mode_encodings, vp8_i8x8_mode_tree,
+    VP8_I8X8_MODES, vp9_i8x8_mode_encodings, vp9_i8x8_mode_tree,
     i8x8_mode_probs, branch_ct, cm->fc.i8x8_mode_counts,
     256, 1);
   for (t = 0; t < VP8_I8X8_MODES - 1; ++t) {
@@ -596,7 +596,7 @@ void vp9_adapt_mode_probs(VP8_COMMON *cm) {
   }
   for (i = 0; i < SUBMVREF_COUNT; ++i) {
     vp9_tree_probs_from_distribution(
-      VP8_SUBMVREFS, vp8_sub_mv_ref_encoding_array, vp8_sub_mv_ref_tree,
+      VP8_SUBMVREFS, vp9_sub_mv_ref_encoding_array, vp9_sub_mv_ref_tree,
       sub_mv_ref_probs, branch_ct, cm->fc.sub_mv_ref_counts[i],
       256, 1);
     for (t = 0; t < VP8_SUBMVREFS - 1; ++t) {
@@ -612,7 +612,7 @@ void vp9_adapt_mode_probs(VP8_COMMON *cm) {
     }
   }
   vp9_tree_probs_from_distribution(
-    VP8_NUMMBSPLITS, vp8_mbsplit_encodings, vp8_mbsplit_tree,
+    VP8_NUMMBSPLITS, vp9_mbsplit_encodings, vp9_mbsplit_tree,
     mbsplit_probs, branch_ct, cm->fc.mbsplit_counts,
     256, 1);
   for (t = 0; t < VP8_NUMMBSPLITS - 1; ++t) {

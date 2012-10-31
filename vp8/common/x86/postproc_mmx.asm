@@ -264,7 +264,7 @@ sym(vp9_post_proc_down_and_across_mmx):
 
 ;void vp9_mbpost_proc_down_mmx(unsigned char *dst,
 ;                             int pitch, int rows, int cols,int flimit)
-extern sym(vp8_rv)
+extern sym(vp9_rv)
 global sym(vp9_mbpost_proc_down_mmx)
 sym(vp9_mbpost_proc_down_mmx):
     push        rbp
@@ -286,7 +286,7 @@ sym(vp9_mbpost_proc_down_mmx):
 %define flimit2 [rsp+128]
 
 %if ABI_IS_32BIT=0
-    lea         r8,       [GLOBAL(sym(vp8_rv))]
+    lea         r8,       [GLOBAL(sym(vp9_rv))]
 %endif
 
     ;rows +=8;
@@ -404,13 +404,13 @@ sym(vp9_mbpost_proc_down_mmx):
             and         rcx,        127
 %if ABI_IS_32BIT=1 && CONFIG_PIC=1
             push        rax
-            lea         rax,        [GLOBAL(sym(vp8_rv))]
-            movq        mm4,        [rax + rcx*2] ;vp8_rv[rcx*2]
+            lea         rax,        [GLOBAL(sym(vp9_rv))]
+            movq        mm4,        [rax + rcx*2] ;vp9_rv[rcx*2]
             pop         rax
 %elif ABI_IS_32BIT=0
-            movq        mm4,        [r8 + rcx*2] ;vp8_rv[rcx*2]
+            movq        mm4,        [r8 + rcx*2] ;vp9_rv[rcx*2]
 %else
-            movq        mm4,        [sym(vp8_rv) + rcx*2]
+            movq        mm4,        [sym(vp9_rv) + rcx*2]
 %endif
             paddw       mm1,        mm4
             ;paddw     xmm1,       eight8s

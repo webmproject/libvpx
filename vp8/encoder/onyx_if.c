@@ -182,7 +182,7 @@ extern unsigned int inter_b_modes[B_MODE_COUNT];
 
 extern void vp9_init_quantizer(VP8_COMP *cpi);
 
-int vp8cx_base_skip_false_prob[QINDEX_RANGE][3];
+static int base_skip_false_prob[QINDEX_RANGE][3];
 
 // Tables relating active max Q to active min Q
 static int kf_low_motion_minq[QINDEX_RANGE];
@@ -271,21 +271,21 @@ static void init_base_skip_probs(void) {
       skip_prob = 1;
     else if (skip_prob > 255)
       skip_prob = 255;
-    vp8cx_base_skip_false_prob[i][1] = skip_prob;
+    base_skip_false_prob[i][1] = skip_prob;
 
     skip_prob = t * 0.75;
     if (skip_prob < 1)
       skip_prob = 1;
     else if (skip_prob > 255)
       skip_prob = 255;
-    vp8cx_base_skip_false_prob[i][2] = skip_prob;
+    base_skip_false_prob[i][2] = skip_prob;
 
     skip_prob = t * 1.25;
     if (skip_prob < 1)
       skip_prob = 1;
     else if (skip_prob > 255)
       skip_prob = 255;
-    vp8cx_base_skip_false_prob[i][0] = skip_prob;
+    base_skip_false_prob[i][0] = skip_prob;
   }
 }
 
@@ -1762,7 +1762,7 @@ VP8_PTR vp9_create_compressor(VP8_CONFIG *oxcf) {
 
   init_config((VP8_PTR)cpi, oxcf);
 
-  memcpy(cpi->base_skip_false_prob, vp8cx_base_skip_false_prob, sizeof(vp8cx_base_skip_false_prob));
+  memcpy(cpi->base_skip_false_prob, base_skip_false_prob, sizeof(base_skip_false_prob));
   cpi->common.current_video_frame   = 0;
   cpi->kf_overspend_bits            = 0;
   cpi->kf_bitrate_adjustment        = 0;
@@ -3484,7 +3484,7 @@ static void encode_frame_to_data_rate
         /* Mostly one filter is used. So set the filter at frame level */
         for (i = 0; i < VP8_SWITCHABLE_FILTERS; ++i) {
           if (count[i]) {
-            cm->mcomp_filter_type = vp8_switchable_interp[i];
+            cm->mcomp_filter_type = vp9_switchable_interp[i];
             Loop = TRUE;  /* Make sure to loop since the filter changed */
             break;
           }

@@ -33,7 +33,7 @@ typedef struct {
   unsigned int         range;
 } BOOL_DECODER;
 
-DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
+DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
 
 int vp9_start_decode(BOOL_DECODER *br,
                      const unsigned char *source,
@@ -103,7 +103,7 @@ static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
   }
 
   {
-    register unsigned int shift = vp8_norm[range];
+    register unsigned int shift = vp9_norm[range];
     range <<= shift;
     value <<= shift;
     count -= shift;

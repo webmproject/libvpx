@@ -238,7 +238,7 @@ void vp9_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   int i, ib;
 
   for (i = 0; i < 4; i++) {
-    ib = vp8_i8x8_block[i];
+    ib = vp9_i8x8_block[i];
     vp9_encode_intra8x8(rtcd, x, ib);
   }
 }
@@ -273,7 +273,7 @@ void vp9_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   BLOCKD *b;
 
   for (i = 0; i < 4; i++) {
-    ib = vp8_i8x8_block[i];
+    ib = vp9_i8x8_block[i];
     b = &x->e_mbd.block[ib];
     mode = b->bmi.as_mode.first;
 #if CONFIG_COMP_INTRA_PRED

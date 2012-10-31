@@ -14,7 +14,7 @@
 #include "vp8/common/subpixel.h"
 
 extern const short vp9_six_tap_mmx[16][6 * 8];
-extern const short vp9_bilinear_filters_mmx[16][2 * 8];
+extern const short vp9_bilinear_filters_8x_mmx[16][2 * 8];
 
 extern void vp9_filter_block1d_h6_mmx
 (

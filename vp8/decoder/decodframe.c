@@ -84,7 +84,7 @@ void vp9_init_de_quantizer(VP8D_COMP *pbi) {
 
     /* all the ac values =; */
     for (i = 1; i < 16; i++) {
-      int rc = vp8_default_zig_zag1d[i];
+      int rc = vp9_default_zig_zag1d[i];
 
       pc->Y1dequant[Q][rc] = (short)vp9_ac_yquant(Q);
       pc->Y2dequant[Q][rc] = (short)vp9_ac2quant(Q, pc->y2ac_delta_q);
@@ -309,7 +309,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   /* dequantization and idct */
   if (mode == I8X8_PRED) {
     for (i = 0; i < 4; i++) {
-      int ib = vp8_i8x8_block[i];
+      int ib = vp9_i8x8_block[i];
       const int iblock[4] = {0, 1, 4, 5};
       int j;
       int i8x8mode;

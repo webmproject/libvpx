@@ -12,16 +12,6 @@
 #ifndef __INC_BITSTREAM_H
 #define __INC_BITSTREAM_H
 
-#if HAVE_ARMV5TE
-void vp8cx_pack_tokens_armv5(vp8_writer *w, const TOKENEXTRA *p, int xcount,
-                             vp8_token *,
-                             vp8_extra_bit_struct *,
-                             const vp8_tree_index *);
-# define pack_tokens(a,b,c)                  \
-  vp8cx_pack_tokens_armv5(a,b,c,vp8_coef_encodings,vp8_extra_bits,vp8_coef_tree)
-#else
-# define pack_tokens(a,b,c)                  pack_tokens_c(a,b,c)
-#endif
-#endif
-
 void vp9_update_skip_probs(VP8_COMP *cpi);
+
+#endif

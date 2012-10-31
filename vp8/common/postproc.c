@@ -76,7 +76,7 @@ static const short kernel5[] = {
   1, 1, 4, 1, 1
 };
 
-const short vp8_rv[] = {
+const short vp9_rv[] = {
   8, 5, 2, 2, 8, 12, 4, 9, 8, 3,
   0, 3, 9, 0, 0, 0, 8, 3, 14, 4,
   10, 1, 11, 14, 1, 14, 9, 6, 12, 11,
@@ -256,7 +256,7 @@ void vp9_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int co
 
 void vp9_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, int flimit) {
   int r, c, i;
-  const short *rv3 = &vp8_rv[63 & rand()];
+  const short *rv3 = &vp9_rv[63 & rand()];
 
   for (c = 0; c < cols; c++) {
     unsigned char *s = &dst[c];

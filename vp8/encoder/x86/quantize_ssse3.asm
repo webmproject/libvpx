@@ -47,9 +47,9 @@ sym(vp9_fast_quantize_b_ssse3):
   %endif
 %endif
 
-    mov         rax, [rdi + vp8_block_coeff]
-    mov         rcx, [rdi + vp8_block_round]
-    mov         rdx, [rdi + vp8_block_quant_fast]
+    mov         rax, [rdi + vp9_block_coeff]
+    mov         rcx, [rdi + vp9_block_round]
+    mov         rdx, [rdi + vp9_block_quant_fast]
 
     ; coeff
     movdqa      xmm0, [rax]
@@ -76,9 +76,9 @@ sym(vp9_fast_quantize_b_ssse3):
     pmulhw      xmm1, [rdx]
     pmulhw      xmm5, [rdx + 16]
 
-    mov         rax, [rsi + vp8_blockd_qcoeff]
-    mov         rdi, [rsi + vp8_blockd_dequant]
-    mov         rcx, [rsi + vp8_blockd_dqcoeff]
+    mov         rax, [rsi + vp9_blockd_qcoeff]
+    mov         rdi, [rsi + vp9_blockd_dequant]
+    mov         rcx, [rsi + vp9_blockd_dqcoeff]
 
     pxor        xmm1, xmm0
     pxor        xmm5, xmm4
@@ -115,7 +115,7 @@ sym(vp9_fast_quantize_b_ssse3):
     add         eax, 1
     and         eax, edi                    ;if the bit mask was all zero,
                                             ;then eob = 0
-    mov         [rsi + vp8_blockd_eob], eax
+    mov         [rsi + vp9_blockd_eob], eax
 
     ; begin epilog
 %if ABI_IS_32BIT

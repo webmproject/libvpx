@@ -164,7 +164,7 @@ static void update_mbintra_mode_probs(VP8_COMP* const cpi,
     unsigned int bct [VP8_YMODES - 1] [2];
 
     update_mode(
-      bc, VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
+      bc, VP8_YMODES, vp9_ymode_encodings, vp9_ymode_tree,
       Pnew, cm->fc.ymode_prob, bct, (unsigned int *)cpi->ymode_count
     );
   }
@@ -205,7 +205,7 @@ static void update_switchable_interp_probs(VP8_COMP *cpi,
   for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
     vp9_tree_probs_from_distribution(
         VP8_SWITCHABLE_FILTERS,
-        vp8_switchable_interp_encodings, vp8_switchable_interp_tree,
+        vp9_switchable_interp_encodings, vp9_switchable_interp_tree,
         pc->fc.switchable_interp_prob[j], branch_ct,
         cpi->switchable_interp_count[j], 256, 1);
     for (i = 0; i < VP8_SWITCHABLE_FILTERS - 1; ++i) {
@@ -325,35 +325,35 @@ static void update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
 }
 
 static void write_ymode(vp8_writer *bc, int m, const vp8_prob *p) {
-  vp8_write_token(bc, vp8_ymode_tree, p, vp8_ymode_encodings + m);
+  vp8_write_token(bc, vp9_ymode_tree, p, vp9_ymode_encodings + m);
 }
 
 static void kfwrite_ymode(vp8_writer *bc, int m, const vp8_prob *p) {
-  vp8_write_token(bc, vp8_kf_ymode_tree, p, vp8_kf_ymode_encodings + m);
+  vp8_write_token(bc, vp9_kf_ymode_tree, p, vp9_kf_ymode_encodings + m);
 }
 
 #if CONFIG_SUPERBLOCKS
 static void sb_kfwrite_ymode(vp8_writer *bc, int m, const vp8_prob *p) {
-  vp8_write_token(bc, vp8_uv_mode_tree, p, vp8_sb_kf_ymode_encodings + m);
+  vp8_write_token(bc, vp9_uv_mode_tree, p, vp9_sb_kf_ymode_encodings + m);
 }
 #endif
 
 static void write_i8x8_mode(vp8_writer *bc, int m, const vp8_prob *p) {
-  vp8_write_token(bc, vp8_i8x8_mode_tree, p, vp8_i8x8_mode_encodings + m);
+  vp8_write_token(bc, vp9_i8x8_mode_tree, p, vp9_i8x8_mode_encodings + m);
 }
 
 static void write_uv_mode(vp8_writer *bc, int m, const vp8_prob *p) {
-  vp8_write_token(bc, vp8_uv_mode_tree, p, vp8_uv_mode_encodings + m);
+  vp8_write_token(bc, vp9_uv_mode_tree, p, vp9_uv_mode_encodings + m);
 }
 
 
 static void write_bmode(vp8_writer *bc, int m, const vp8_prob *p) {
-  vp8_write_token(bc, vp8_bmode_tree, p, vp8_bmode_encodings + m);
+  vp8_write_token(bc, vp9_bmode_tree, p, vp9_bmode_encodings + m);
 }
 
 static void write_split(vp8_writer *bc, int x, const vp8_prob *p) {
   vp8_write_token(
-    bc, vp8_mbsplit_tree, p, vp8_mbsplit_encodings + x
+    bc, vp9_mbsplit_tree, p, vp9_mbsplit_encodings + x
   );
 }
 
@@ -412,8 +412,8 @@ static void pack_mb_tokens(vp8_writer* const bc,
 
   while (p < stop) {
     const int t = p->Token;
-    vp8_token *const a = vp8_coef_encodings + t;
-    const vp8_extra_bit_struct *const b = vp8_extra_bits + t;
+    vp8_token *const a = vp9_coef_encodings + t;
+    const vp8_extra_bit_struct *const b = vp9_extra_bits + t;
     int i = 0;
     const unsigned char *pp = p->context_tree;
     int v = a->value;
@@ -434,7 +434,7 @@ static void pack_mb_tokens(vp8_writer* const bc,
     do {
       const int bb = (v >> --n) & 1;
       split = 1 + (((range - 1) * pp[i >> 1]) >> 8);
-      i = vp8_coef_tree[i + bb];
+      i = vp9_coef_tree[i + bb];
 
       if (bb) {
         lowvalue += split;
@@ -443,7 +443,7 @@ static void pack_mb_tokens(vp8_writer* const bc,
         range = split;
       }
 
-      shift = vp8_norm[range];
+      shift = vp9_norm[range];
       range <<= shift;
       count += shift;
 
@@ -493,7 +493,7 @@ static void pack_mb_tokens(vp8_writer* const bc,
             range = split;
           }
 
-          shift = vp8_norm[range];
+          shift = vp9_norm[range];
           range <<= shift;
           count += shift;
 
@@ -586,8 +586,8 @@ static void write_mv_ref
 #if CONFIG_DEBUG
   assert(NEARESTMV <= m  &&  m <= SPLITMV);
 #endif
-  vp8_write_token(bc, vp8_mv_ref_tree, p,
-                  vp8_mv_ref_encoding_array - NEARESTMV + m);
+  vp8_write_token(bc, vp9_mv_ref_tree, p,
+                  vp9_mv_ref_encoding_array - NEARESTMV + m);
 }
 
 #if CONFIG_SUPERBLOCKS
@@ -596,8 +596,8 @@ static void write_sb_mv_ref(vp8_writer *bc, MB_PREDICTION_MODE m,
 #if CONFIG_DEBUG
   assert(NEARESTMV <= m  &&  m < SPLITMV);
 #endif
-  vp8_write_token(bc, vp8_sb_mv_ref_tree, p,
-                  vp8_sb_mv_ref_encoding_array - NEARESTMV + m);
+  vp8_write_token(bc, vp9_sb_mv_ref_tree, p,
+                  vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
 }
 #endif
 
@@ -608,8 +608,8 @@ static void write_sub_mv_ref
 #if CONFIG_DEBUG
   assert(LEFT4X4 <= m  &&  m <= NEW4X4);
 #endif
-  vp8_write_token(bc, vp8_sub_mv_ref_tree, p,
-                  vp8_sub_mv_ref_encoding_array - LEFT4X4 + m);
+  vp8_write_token(bc, vp9_sub_mv_ref_tree, p,
+                  vp9_sub_mv_ref_encoding_array - LEFT4X4 + m);
 }
 
 static void write_nmv(vp8_writer *bc, const MV *mv, const int_mv *ref,
@@ -1110,11 +1110,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
           if (mode >= NEARESTMV && mode <= SPLITMV)
           {
             if (cpi->common.mcomp_filter_type == SWITCHABLE) {
-              vp8_write_token(bc, vp8_switchable_interp_tree,
+              vp8_write_token(bc, vp9_switchable_interp_tree,
                               vp9_get_pred_probs(&cpi->common, xd,
                                                  PRED_SWITCHABLE_INTERP),
-                              vp8_switchable_interp_encodings +
-                              vp8_switchable_interp_map[mi->interp_filter]);
+                              vp9_switchable_interp_encodings +
+                              vp9_switchable_interp_map[mi->interp_filter]);
             } else {
               assert (mi->interp_filter ==
                       cpi->common.mcomp_filter_type);
@@ -1207,7 +1207,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
                   B_PREDICTION_MODE blockmode;
                   int_mv blockmv;
                   const int *const  L =
-                    vp8_mbsplits [mi->partitioning];
+                    vp9_mbsplits [mi->partitioning];
                   int k = -1;  /* first block in subset j */
                   int mv_contz;
                   int_mv leftmv, abovemv;
@@ -1524,7 +1524,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
         vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
           cpi->frame_coef_probs [i][j][k],
           cpi->frame_branch_ct [i][j][k],
           cpi->coef_counts [i][j][k],
@@ -1544,7 +1544,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
         vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
           cpi->frame_hybrid_coef_probs [i][j][k],
           cpi->frame_hybrid_branch_ct [i][j][k],
           cpi->hybrid_coef_counts [i][j][k],
@@ -1570,7 +1570,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
           if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
             continue;
           vp9_tree_probs_from_distribution(
-            MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+            MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
             cpi->frame_coef_probs_8x8 [i][j][k],
             cpi->frame_branch_ct_8x8 [i][j][k],
             cpi->coef_counts_8x8 [i][j][k],
@@ -1594,7 +1594,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
           if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
             continue;
           vp9_tree_probs_from_distribution(
-            MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+            MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
             cpi->frame_hybrid_coef_probs_8x8 [i][j][k],
             cpi->frame_hybrid_branch_ct_8x8 [i][j][k],
             cpi->hybrid_coef_counts_8x8 [i][j][k],
@@ -1617,7 +1617,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
           if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
             continue;
           vp9_tree_probs_from_distribution(
-            MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+            MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
             cpi->frame_coef_probs_16x16[i][j][k],
             cpi->frame_branch_ct_16x16[i][j][k],
             cpi->coef_counts_16x16[i][j][k], 256, 1);
@@ -1636,7 +1636,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
         vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
           cpi->frame_hybrid_coef_probs_16x16[i][j][k],
           cpi->frame_hybrid_branch_ct_16x16[i][j][k],
           cpi->hybrid_coef_counts_16x16[i][j][k], 256, 1);
@@ -1820,7 +1820,7 @@ static void decide_kf_ymode_entropy(VP8_COMP *cpi) {
   int i, j;
 
   for (i = 0; i < 8; i++) {
-    vp9_cost_tokens(mode_cost, cpi->common.kf_ymode_prob[i], vp8_kf_ymode_tree);
+    vp9_cost_tokens(mode_cost, cpi->common.kf_ymode_prob[i], vp9_kf_ymode_tree);
     cost = 0;
     for (j = 0; j < VP8_YMODES; j++) {
       cost += mode_cost[j] * cpi->ymode_count[j];
@@ -2163,7 +2163,7 @@ void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
         /* Only one filter is used. So set the filter at frame level */
         for (i = 0; i < VP8_SWITCHABLE_FILTERS; ++i) {
           if (count[i]) {
-            pc->mcomp_filter_type = vp8_switchable_interp[i];
+            pc->mcomp_filter_type = vp9_switchable_interp[i];
             break;
           }
         }

@@ -52,10 +52,10 @@ sym(vp9_regular_quantize_b_sse4):
   %endif
 %endif
 
-    mov         rax, [rdi + vp8_block_coeff]
-    mov         rcx, [rdi + vp8_block_zbin]
-    mov         rdx, [rdi + vp8_block_round]
-    movd        xmm7, [rdi + vp8_block_zbin_extra]
+    mov         rax, [rdi + vp9_block_coeff]
+    mov         rcx, [rdi + vp9_block_zbin]
+    mov         rdx, [rdi + vp9_block_round]
+    movd        xmm7, [rdi + vp9_block_zbin_extra]
 
     ; z
     movdqa      xmm0, [rax]
@@ -99,9 +99,9 @@ sym(vp9_regular_quantize_b_sse4):
     movdqa      xmm4, [rdx]
     movdqa      xmm5, [rdx + 16]
 
-    mov         rax, [rdi + vp8_block_quant_shift]
-    mov         rcx, [rdi + vp8_block_quant]
-    mov         rdx, [rdi + vp8_block_zrun_zbin_boost]
+    mov         rax, [rdi + vp9_block_quant_shift]
+    mov         rcx, [rdi + vp9_block_quant]
+    mov         rdx, [rdi + vp9_block_zrun_zbin_boost]
 
     ; x + round
     paddw       xmm2, xmm4
@@ -156,7 +156,7 @@ sym(vp9_regular_quantize_b_sse4):
     mov         rdx, rax                    ; reset to b->zrun_zbin_boost
 .rq_zigzag_loop_%1:
 %endmacro
-; in vp8_default_zig_zag1d order: see vp8/common/entropy.c
+; in vp9_default_zig_zag1d order: see vp8/common/entropy.c
 ZIGZAG_LOOP  0, 0, xmm2, xmm6, xmm4
 ZIGZAG_LOOP  1, 1, xmm2, xmm6, xmm4
 ZIGZAG_LOOP  4, 4, xmm2, xmm6, xmm4
@@ -174,8 +174,8 @@ ZIGZAG_LOOP 11, 3, xmm3, xmm7, xmm8
 ZIGZAG_LOOP 14, 6, xmm3, xmm7, xmm8
 ZIGZAG_LOOP 15, 7, xmm3, xmm7, xmm8
 
-    mov         rcx, [rsi + vp8_blockd_dequant]
-    mov         rdi, [rsi + vp8_blockd_dqcoeff]
+    mov         rcx, [rsi + vp9_blockd_dequant]
+    mov         rdi, [rsi + vp9_blockd_dqcoeff]
 
 %if ABI_IS_32BIT
     movdqa      xmm4, [rsp + qcoeff]
@@ -195,7 +195,7 @@ ZIGZAG_LOOP 15, 7, xmm3, xmm7, xmm8
     movdqa      xmm0, [rcx]
     movdqa      xmm1, [rcx + 16]
 
-    mov         rcx, [rsi + vp8_blockd_qcoeff]
+    mov         rcx, [rsi + vp9_blockd_qcoeff]
 
     pmullw      xmm0, xmm4
     pmullw      xmm1, xmm5
@@ -225,7 +225,7 @@ ZIGZAG_LOOP 15, 7, xmm3, xmm7, xmm8
     add         eax, 1
     and         eax, edi
 
-    mov         [rsi + vp8_blockd_eob], eax
+    mov         [rsi + vp9_blockd_eob], eax
 
     ; begin epilog
 %if ABI_IS_32BIT
@@ -249,6 +249,6 @@ ZIGZAG_LOOP 15, 7, xmm3, xmm7, xmm8
 
 SECTION_RODATA
 align 16
-; vp8/common/entropy.c: vp8_default_zig_zag1d
+; vp8/common/entropy.c: vp9_default_zig_zag1d
 zig_zag1d:
     db 0, 1, 4, 8, 5, 2, 3, 6, 9, 12, 13, 10, 7, 11, 14, 15

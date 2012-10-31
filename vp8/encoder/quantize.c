@@ -40,15 +40,15 @@ void vp9_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d, TX_TYPE tx_type) {
 
   switch (tx_type) {
     case ADST_DCT :
-      pt_scan = vp8_row_scan;
+      pt_scan = vp9_row_scan;
       break;
 
     case DCT_ADST :
-      pt_scan = vp8_col_scan;
+      pt_scan = vp9_col_scan;
       break;
 
     default :
-      pt_scan = vp8_default_zig_zag1d;
+      pt_scan = vp9_default_zig_zag1d;
       break;
   }
 
@@ -106,7 +106,7 @@ void vp9_regular_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
   eob = -1;
 
   for (i = 0; i < b->eob_max_offset; i++) {
-    rc   = vp8_default_zig_zag1d[i];
+    rc   = vp9_default_zig_zag1d[i];
     z    = coeff_ptr[rc];
 
     zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
@@ -179,7 +179,7 @@ void vp9_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d) {
   eob = -1;
 
   for (i = 0; i < b->eob_max_offset_8x8; i++) {
-    rc   = vp8_default_zig_zag1d[i];
+    rc   = vp9_default_zig_zag1d[i];
     z    = coeff_ptr[rc];
 
     zbin_boost_ptr = &b->zrun_zbin_boost[zbin_zrun_index];
@@ -228,7 +228,7 @@ void vp9_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d) {
   eob = -1;
 
   for (i = 0; i < b->eob_max_offset_8x8; i++) {
-    rc   = vp8_default_zig_zag1d_8x8[i];
+    rc   = vp9_default_zig_zag1d_8x8[i];
     z    = coeff_ptr[rc];
 
     zbin = (zbin_ptr[rc != 0] + *zbin_boost_ptr + zbin_oq_value);
@@ -318,7 +318,7 @@ void vp9_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
 
   eob = -1;
   for (i = 0; i < b->eob_max_offset_16x16; i++) {
-    rc   = vp8_default_zig_zag1d_16x16[i];
+    rc   = vp9_default_zig_zag1d_16x16[i];
     z    = coeff_ptr[rc];
 
     zbin = (zbin_ptr[rc!=0] + *zbin_boost_ptr + zbin_oq_value);
@@ -460,7 +460,7 @@ void vp9_init_quantizer(VP8_COMP *cpi) {
 
     // all the 4x4 ac values =;
     for (i = 1; i < 16; i++) {
-      int rc = vp8_default_zig_zag1d[i];
+      int rc = vp9_default_zig_zag1d[i];
 
       quant_val = vp9_ac_yquant(Q);
       invert_quant(cpi->Y1quant[Q] + rc,
@@ -494,7 +494,7 @@ void vp9_init_quantizer(VP8_COMP *cpi) {
     // This needs cleaning up for 8x8 especially if we are to add
     // support for non flat Q matices
     for (i = 1; i < 64; i++) {
-      int rc = vp8_default_zig_zag1d_8x8[i];
+      int rc = vp9_default_zig_zag1d_8x8[i];
 
       quant_val = vp9_ac_yquant(Q);
       cpi->Y1zbin_8x8[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
@@ -514,7 +514,7 @@ void vp9_init_quantizer(VP8_COMP *cpi) {
 
     // 16x16 structures. Same comment above applies.
     for (i = 1; i < 256; i++) {
-      int rc = vp8_default_zig_zag1d_16x16[i];
+      int rc = vp9_default_zig_zag1d_16x16[i];
 
       quant_val = vp9_ac_yquant(Q);
       cpi->Y1zbin_16x16[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;

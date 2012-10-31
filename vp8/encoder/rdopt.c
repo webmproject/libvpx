@@ -83,7 +83,7 @@ static const int auto_speed_thresh[17] = {
 };
 
 #if CONFIG_PRED_FILTER
-const MODE_DEFINITION vp8_mode_order[MAX_MODES] = {
+const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {ZEROMV,    LAST_FRAME,   0,  0},
   {ZEROMV,    LAST_FRAME,   0,  1},
   {DC_PRED,   INTRA_FRAME,  0,  0},
@@ -155,7 +155,7 @@ const MODE_DEFINITION vp8_mode_order[MAX_MODES] = {
   {SPLITMV,   GOLDEN_FRAME, ALTREF_FRAME, 0}
 };
 #else
-const MODE_DEFINITION vp8_mode_order[MAX_MODES] = {
+const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {ZEROMV,    LAST_FRAME,   0},
   {DC_PRED,   INTRA_FRAME,  0},
 
@@ -228,11 +228,11 @@ static void fill_token_costs(
         if (k == 0 && ((j > 0 && i > 0) || (j > 1 && i == 0)))
           vp9_cost_tokens_skip((int *)(c[i][j][k]),
                                p[i][j][k],
-                               vp8_coef_tree);
+                               vp9_coef_tree);
         else
           vp9_cost_tokens((int *)(c[i][j][k]),
                           p[i][j][k],
-                          vp8_coef_tree);
+                          vp9_coef_tree);
       }
 }
 
@@ -553,15 +553,15 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
   assert(eob <= 4);
 
   for (; c < eob; c++) {
-    int v = qcoeff_ptr[vp8_default_zig_zag1d[c]];
-    int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs[TX_8X8][type][vp8_coef_bands[c]][pt][t];
-    cost += vp8_dct_value_cost_ptr[v];
-    pt = vp8_prev_token_class[t];
+    int v = qcoeff_ptr[vp9_default_zig_zag1d[c]];
+    int t = vp9_dct_value_tokens_ptr[v].Token;
+    cost += mb->token_costs[TX_8X8][type][vp9_coef_bands[c]][pt][t];
+    cost += vp9_dct_value_cost_ptr[v];
+    pt = vp9_prev_token_class[t];
   }
 
   if (c < 4)
-    cost += mb->token_costs[TX_8X8][type][vp8_coef_bands[c]]
+    cost += mb->token_costs[TX_8X8][type][vp9_coef_bands[c]]
             [pt] [DCT_EOB_TOKEN];
 
   pt = (c != !type); // is eob first coefficient;
@@ -585,23 +585,23 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
 
   switch (tx_size) {
     case TX_4X4:
-      scan = vp8_default_zig_zag1d;
-      band = vp8_coef_bands;
+      scan = vp9_default_zig_zag1d;
+      band = vp9_coef_bands;
       default_eob = 16;
       if (type == PLANE_TYPE_Y_WITH_DC) {
         tx_type = get_tx_type_4x4(xd, b);
         if (tx_type != DCT_DCT) {
           switch (tx_type) {
             case ADST_DCT:
-              scan = vp8_row_scan;
+              scan = vp9_row_scan;
               break;
 
             case DCT_ADST:
-              scan = vp8_col_scan;
+              scan = vp9_col_scan;
               break;
 
             default:
-              scan = vp8_default_zig_zag1d;
+              scan = vp9_default_zig_zag1d;
               break;
           }
         }
@@ -609,8 +609,8 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
 
       break;
     case TX_8X8:
-      scan = vp8_default_zig_zag1d_8x8;
-      band = vp8_coef_bands_8x8;
+      scan = vp9_default_zig_zag1d_8x8;
+      band = vp9_coef_bands_8x8;
       default_eob = 64;
       if (type == PLANE_TYPE_Y_WITH_DC) {
         BLOCKD *bb;
@@ -623,8 +623,8 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
       }
       break;
     case TX_16X16:
-      scan = vp8_default_zig_zag1d_16x16;
-      band = vp8_coef_bands_16x16;
+      scan = vp9_default_zig_zag1d_16x16;
+      band = vp9_coef_bands_16x16;
       default_eob = 256;
       if (type == PLANE_TYPE_Y_WITH_DC) {
         tx_type = get_tx_type_16x16(xd, b);
@@ -643,10 +643,10 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
   if (tx_type != DCT_DCT) {
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
-      int t = vp8_dct_value_tokens_ptr[v].Token;
+      int t = vp9_dct_value_tokens_ptr[v].Token;
       cost += mb->hybrid_token_costs[tx_size][type][band[c]][pt][t];
-      cost += vp8_dct_value_cost_ptr[v];
-      pt = vp8_prev_token_class[t];
+      cost += vp9_dct_value_cost_ptr[v];
+      pt = vp9_prev_token_class[t];
     }
     if (c < seg_eob)
       cost += mb->hybrid_token_costs[tx_size][type][band[c]]
@@ -654,10 +654,10 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
   } else {
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
-      int t = vp8_dct_value_tokens_ptr[v].Token;
+      int t = vp9_dct_value_tokens_ptr[v].Token;
       cost += mb->token_costs[tx_size][type][band[c]][pt][t];
-      cost += vp8_dct_value_cost_ptr[v];
-      pt = vp8_prev_token_class[t];
+      cost += vp9_dct_value_cost_ptr[v];
+      pt = vp9_prev_token_class[t];
     }
     if (c < seg_eob)
       cost += mb->token_costs[tx_size][type][band[c]]
@@ -685,11 +685,11 @@ static int vp8_rdcost_mby(MACROBLOCK *mb) {
 
   for (b = 0; b < 16; b++)
     cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_Y_NO_DC,
-                        ta + vp8_block2above[b], tl + vp8_block2left[b],
+                        ta + vp9_block2above[b], tl + vp9_block2left[b],
                         TX_4X4);
 
   cost += cost_coeffs(mb, xd->block + 24, PLANE_TYPE_Y2,
-                      ta + vp8_block2above[24], tl + vp8_block2left[24],
+                      ta + vp9_block2above[24], tl + vp9_block2left[24],
                       TX_4X4);
 
   return cost;
@@ -761,11 +761,11 @@ static int vp8_rdcost_mby_8x8(MACROBLOCK *mb, int backup) {
 
   for (b = 0; b < 16; b += 4)
     cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_Y_NO_DC,
-                        ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
+                        ta + vp9_block2above_8x8[b], tl + vp9_block2left_8x8[b],
                         TX_8X8);
 
   cost += cost_coeffs_2x2(mb, xd->block + 24, PLANE_TYPE_Y2,
-                          ta + vp8_block2above[24], tl + vp8_block2left[24]);
+                          ta + vp9_block2above[24], tl + vp9_block2left[24]);
   return cost;
 }
 
@@ -1221,8 +1221,8 @@ static int64_t rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rat
 #if CONFIG_COMP_INTRA_PRED
                   & best_second_mode, allow_comp,
 #endif
-                  bmode_costs, ta + vp8_block2above[i],
-                  tl + vp8_block2left[i], &r, &ry, &d);
+                  bmode_costs, ta + vp9_block2above[i],
+                  tl + vp9_block2left[i], &r, &ry, &d);
 
     cost += r;
     distortion += d;
@@ -1448,8 +1448,8 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
         // compute quantization mse of 8x8 block
         distortion = vp9_block_error_c((x->block + idx)->coeff,
                                        (xd->block + idx)->dqcoeff, 64);
-        ta0 = a[vp8_block2above_8x8[idx]];
-        tl0 = l[vp8_block2left_8x8[idx]];
+        ta0 = a[vp9_block2above_8x8[idx]];
+        tl0 = l[vp9_block2left_8x8[idx]];
 
         rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
                              &ta0, &tl0, TX_8X8);
@@ -1475,10 +1475,10 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
         distortion += vp9_block_error_c((x->block + ib + 5)->coeff,
                                         (xd->block + ib + 5)->dqcoeff, 16);
 
-        ta0 = a[vp8_block2above[ib]];
-        ta1 = a[vp8_block2above[ib + 1]];
-        tl0 = l[vp8_block2left[ib]];
-        tl1 = l[vp8_block2left[ib + 4]];
+        ta0 = a[vp9_block2above[ib]];
+        ta1 = a[vp9_block2above[ib + 1]];
+        tl0 = l[vp9_block2left[ib]];
+        tl1 = l[vp9_block2left[ib + 4]];
         rate_t = cost_coeffs(x, xd->block + ib, PLANE_TYPE_Y_WITH_DC,
                              &ta0, &tl0, TX_4X4);
         rate_t += cost_coeffs(x, xd->block + ib + 1, PLANE_TYPE_Y_WITH_DC,
@@ -1520,15 +1520,15 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
   vp9_encode_intra8x8(IF_RTCD(&cpi->rtcd), x, ib);
 
   if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
-    a[vp8_block2above_8x8[idx]]     = besta0;
-    a[vp8_block2above_8x8[idx] + 1] = besta1;
-    l[vp8_block2left_8x8[idx]]      = bestl0;
-    l[vp8_block2left_8x8[idx] + 1]  = bestl1;
+    a[vp9_block2above_8x8[idx]]     = besta0;
+    a[vp9_block2above_8x8[idx] + 1] = besta1;
+    l[vp9_block2left_8x8[idx]]      = bestl0;
+    l[vp9_block2left_8x8[idx] + 1]  = bestl1;
   } else {
-    a[vp8_block2above[ib]]     = besta0;
-    a[vp8_block2above[ib + 1]] = besta1;
-    l[vp8_block2left[ib]]      = bestl0;
-    l[vp8_block2left[ib + 4]]  = bestl1;
+    a[vp9_block2above[ib]]     = besta0;
+    a[vp9_block2above[ib + 1]] = besta1;
+    l[vp9_block2left[ib]]      = bestl0;
+    l[vp9_block2left[ib + 4]]  = bestl1;
   }
 
   return best_rd;
@@ -1564,7 +1564,7 @@ static int64_t rd_pick_intra8x8mby_modes(VP8_COMP *cpi, MACROBLOCK *mb,
 #endif
     int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry), UNINITIALIZED_IS_SAFE(d);
 
-    ib = vp8_i8x8_block[i];
+    ib = vp9_i8x8_block[i];
     total_rd += rd_pick_intra8x8block(
                   cpi, mb, ib, &best_mode,
 #if CONFIG_COMP_INTRA_PRED
@@ -1600,7 +1600,7 @@ static int rd_cost_mbuv(MACROBLOCK *mb) {
 
   for (b = 16; b < 24; b++)
     cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_UV,
-                        ta + vp8_block2above[b], tl + vp8_block2left[b],
+                        ta + vp9_block2above[b], tl + vp9_block2left[b],
                         TX_4X4);
 
   return cost;
@@ -1642,8 +1642,8 @@ static int rd_cost_mbuv_8x8(MACROBLOCK *mb, int backup) {
 
   for (b = 16; b < 24; b += 4)
     cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_UV,
-                        ta + vp8_block2above_8x8[b],
-                        tl + vp8_block2left_8x8[b], TX_8X8);
+                        ta + vp9_block2above_8x8[b],
+                        tl + vp9_block2left_8x8[b], TX_8X8);
 
   return cost;
 }
@@ -1959,8 +1959,8 @@ int vp9_cost_mv_ref(VP8_COMP *cpi,
     vp8_prob p [VP8_MVREFS - 1];
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
     vp9_mv_ref_probs(pc, p, near_mv_ref_ct);
-    return vp8_cost_token(vp8_mv_ref_tree, p,
-                          vp8_mv_ref_encoding_array - NEARESTMV + m);
+    return vp8_cost_token(vp9_mv_ref_tree, p,
+                          vp9_mv_ref_encoding_array - NEARESTMV + m);
   } else
     return 0;
 }
@@ -2101,8 +2101,8 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
       thisdistortion = vp9_block_error(be->coeff, bd->dqcoeff, 16);
       *distortion += thisdistortion;
       *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
-                                 ta + vp8_block2above[i],
-                                 tl + vp8_block2left[i], TX_4X4);
+                                 ta + vp9_block2above[i],
+                                 tl + vp9_block2left[i], TX_4X4);
     }
   }
   *distortion >>= 2;
@@ -2134,7 +2134,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
   *distortion = 0;
   *labelyrate = 0;
   for (i = 0; i < 4; i++) {
-    int ib = vp8_i8x8_block[i];
+    int ib = vp9_i8x8_block[i];
 
     if (labels[ib] == which_label) {
       int idx = (ib & 8) + ((ib & 2) << 1);
@@ -2154,8 +2154,8 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
           thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
           otherdist += thisdistortion;
           othercost += cost_coeffs(x, bd2, PLANE_TYPE_Y_WITH_DC,
-                                     tacp + vp8_block2above_8x8[idx],
-                                     tlcp + vp8_block2left_8x8[idx], TX_8X8);
+                                     tacp + vp9_block2above_8x8[idx],
+                                     tlcp + vp9_block2left_8x8[idx], TX_8X8);
         }
         for (j = 0; j < 4; j += 2) {
           bd = &xd->block[ib + iblock[j]];
@@ -2165,12 +2165,12 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
           thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
           *distortion += thisdistortion;
           *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
-                                     ta + vp8_block2above[ib + iblock[j]],
-                                     tl + vp8_block2left[ib + iblock[j]],
+                                     ta + vp9_block2above[ib + iblock[j]],
+                                     tl + vp9_block2left[ib + iblock[j]],
                                      TX_4X4);
           *labelyrate += cost_coeffs(x, bd + 1, PLANE_TYPE_Y_WITH_DC,
-                                     ta + vp8_block2above[ib + iblock[j] + 1],
-                                     tl + vp8_block2left[ib + iblock[j]],
+                                     ta + vp9_block2above[ib + iblock[j] + 1],
+                                     tl + vp9_block2left[ib + iblock[j]],
                                      TX_4X4);
         }
       } else /* 8x8 */ {
@@ -2183,12 +2183,12 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
             thisdistortion = vp9_block_error_c(be3->coeff, bd3->dqcoeff, 32);
             otherdist += thisdistortion;
             othercost += cost_coeffs(x, bd3, PLANE_TYPE_Y_WITH_DC,
-                                     tacp + vp8_block2above[ib + iblock[j]],
-                                     tlcp + vp8_block2left[ib + iblock[j]],
+                                     tacp + vp9_block2above[ib + iblock[j]],
+                                     tlcp + vp9_block2left[ib + iblock[j]],
                                      TX_4X4);
             othercost += cost_coeffs(x, bd3 + 1, PLANE_TYPE_Y_WITH_DC,
-                                     tacp + vp8_block2above[ib + iblock[j] + 1],
-                                     tlcp + vp8_block2left[ib + iblock[j]],
+                                     tacp + vp9_block2above[ib + iblock[j] + 1],
+                                     tlcp + vp9_block2left[ib + iblock[j]],
                                      TX_4X4);
           }
         }
@@ -2197,8 +2197,8 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
         thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
         *distortion += thisdistortion;
         *labelyrate += cost_coeffs(x, bd2, PLANE_TYPE_Y_WITH_DC,
-                                   ta + vp8_block2above_8x8[idx],
-                                   tl + vp8_block2left_8x8[idx], TX_8X8);
+                                   ta + vp9_block2above_8x8[idx],
+                                   tl + vp9_block2left_8x8[idx], TX_8X8);
       }
     }
   }
@@ -2283,8 +2283,8 @@ static void rd_check_segment_txsize(VP8_COMP *cpi, MACROBLOCK *x,
   tl_b = (ENTROPY_CONTEXT *)&t_left_b;
 
   v_fn_ptr = &cpi->fn_ptr[segmentation];
-  labels = vp8_mbsplits[segmentation];
-  label_count = vp8_mbsplit_count[segmentation];
+  labels = vp9_mbsplits[segmentation];
+  label_count = vp9_mbsplit_count[segmentation];
 
   // 64 makes this threshold really big effectively
   // making it so that we very rarely check mvs on
@@ -2293,8 +2293,8 @@ static void rd_check_segment_txsize(VP8_COMP *cpi, MACROBLOCK *x,
   label_mv_thresh = 1 * bsi->mvthresh / label_count;
 
   // Segmentation method overheads
-  rate = vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs,
-                        vp8_mbsplit_encodings + segmentation);
+  rate = vp8_cost_token(vp9_mbsplit_tree, vp9_mbsplit_probs,
+                        vp9_mbsplit_encodings + segmentation);
   rate += vp9_cost_mv_ref(cpi, SPLITMV, bsi->mdcounts);
   this_segment_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
   br += rate;
@@ -2365,7 +2365,7 @@ static void rd_check_segment_txsize(VP8_COMP *cpi, MACROBLOCK *x,
           mvp_full.as_mv.col = bsi->mvp.as_mv.col >> 3;
 
           // find first label
-          n = vp8_mbsplit_offset[segmentation][i];
+          n = vp9_mbsplit_offset[segmentation][i];
 
           c = &x->block[n];
           e = &x->e_mbd.block[n];
@@ -2457,7 +2457,7 @@ static void rd_check_segment_txsize(VP8_COMP *cpi, MACROBLOCK *x,
               best_eobs[j] = x->e_mbd.block[j].eob;
         } else {
           for (j = 0; j < 4; j++) {
-            int ib = vp8_i8x8_block[j], idx = j * 4;
+            int ib = vp9_i8x8_block[j], idx = j * 4;
 
             if (labels[ib] == i)
               best_eobs[idx] = x->e_mbd.block[idx].eob;
@@ -2521,7 +2521,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                              /* 16 = n_blocks */
                              int_mv seg_mvs[16][MAX_REF_FRAMES - 1],
                              int64_t txfm_cache[NB_TXFM_MODES]) {
-  int i, n, c = vp8_mbsplit_count[segmentation];
+  int i, n, c = vp9_mbsplit_count[segmentation];
 
   if (segmentation == PARTITIONING_4X4) {
     int64_t rd[16];
@@ -2750,12 +2750,12 @@ static int rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
   /* save partitions */
   mbmi->txfm_size = bsi.txfm_size;
   mbmi->partitioning = bsi.segment_num;
-  x->partition_info->count = vp8_mbsplit_count[bsi.segment_num];
+  x->partition_info->count = vp9_mbsplit_count[bsi.segment_num];
 
   for (i = 0; i < x->partition_info->count; i++) {
     int j;
 
-    j = vp8_mbsplit_offset[bsi.segment_num][i];
+    j = vp9_mbsplit_offset[bsi.segment_num][i];
 
     x->partition_info->bmi[i].mode = bsi.modes[j];
     x->partition_info->bmi[i].mv.as_mv = bsi.mvs[j].as_mv;
@@ -3021,7 +3021,7 @@ static void set_i8x8_block_modes(MACROBLOCK *x, int modes[2][4]) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
   for (i = 0; i < 4; i++) {
-    int ib = vp8_i8x8_block[i];
+    int ib = vp9_i8x8_block[i];
     xd->mode_info_context->bmi[ib + 0].as_mode.first = modes[0][i];
     xd->mode_info_context->bmi[ib + 1].as_mode.first = modes[0][i];
     xd->mode_info_context->bmi[ib + 4].as_mode.first = modes[0][i];
@@ -3402,13 +3402,13 @@ static int64_t handle_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_PRED_FILTER
   // Filtered prediction:
-  mbmi->pred_filter_enabled = vp8_mode_order[mode_index].pred_filter_flag;
+  mbmi->pred_filter_enabled = vp9_mode_order[mode_index].pred_filter_flag;
   *rate2 += vp8_cost_bit(cpi->common.prob_pred_filter_off,
                          mbmi->pred_filter_enabled);
 #endif
   if (cpi->common.mcomp_filter_type == SWITCHABLE) {
     const int c = vp9_get_pred_context(cm, xd, PRED_SWITCHABLE_INTERP);
-    const int m = vp8_switchable_interp_map[mbmi->interp_filter];
+    const int m = vp9_switchable_interp_map[mbmi->interp_filter];
     *rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs[c][m];
   }
 
@@ -3668,18 +3668,18 @@ void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
     rate_y = 0;
     rate_uv = 0;
 
-    this_mode = vp8_mode_order[mode_index].mode;
+    this_mode = vp9_mode_order[mode_index].mode;
     mbmi->mode = this_mode;
     mbmi->uv_mode = DC_PRED;
-    mbmi->ref_frame = vp8_mode_order[mode_index].ref_frame;
-    mbmi->second_ref_frame = vp8_mode_order[mode_index].second_ref_frame;
+    mbmi->ref_frame = vp9_mode_order[mode_index].ref_frame;
+    mbmi->second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
 #if CONFIG_PRED_FILTER
     mbmi->pred_filter_enabled = 0;
 #endif
     if (cpi->common.mcomp_filter_type == SWITCHABLE &&
         this_mode >= NEARESTMV && this_mode <= SPLITMV) {
       mbmi->interp_filter =
-          vp8_switchable_interp[switchable_filter_index++];
+          vp9_switchable_interp[switchable_filter_index++];
       if (switchable_filter_index == VP8_SWITCHABLE_FILTERS)
         switchable_filter_index = 0;
     } else {
@@ -3747,15 +3747,15 @@ void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
     // Experimental code. Special case for gf and arf zeromv modes.
     // Increase zbin size to suppress noise
     if (cpi->zbin_mode_boost_enabled) {
-      if (vp8_mode_order[mode_index].ref_frame == INTRA_FRAME)
+      if (vp9_mode_order[mode_index].ref_frame == INTRA_FRAME)
         cpi->zbin_mode_boost = 0;
       else {
-        if (vp8_mode_order[mode_index].mode == ZEROMV) {
-          if (vp8_mode_order[mode_index].ref_frame != LAST_FRAME)
+        if (vp9_mode_order[mode_index].mode == ZEROMV) {
+          if (vp9_mode_order[mode_index].ref_frame != LAST_FRAME)
             cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
           else
             cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
-        } else if (vp8_mode_order[mode_index].mode == SPLITMV)
+        } else if (vp9_mode_order[mode_index].mode == SPLITMV)
           cpi->zbin_mode_boost = 0;
         else
           cpi->zbin_mode_boost = MV_ZBIN_BOOST;
@@ -3946,7 +3946,7 @@ void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
       if (cpi->common.mcomp_filter_type == SWITCHABLE)
         rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
             [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
-                [vp8_switchable_interp_map[mbmi->interp_filter]];
+                [vp9_switchable_interp_map[mbmi->interp_filter]];
       // If even the 'Y' rd value of split is higher than best so far
       // then dont bother looking at UV
       if (tmp_rd < best_yrd) {
@@ -4183,7 +4183,7 @@ void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
       best_mbmode.mode <= SPLITMV) {
     ++cpi->switchable_interp_count
         [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
-        [vp8_switchable_interp_map[best_mbmode.interp_filter]];
+        [vp9_switchable_interp_map[best_mbmode.interp_filter]];
   }
 
   // Reduce the activation RD thresholds for the best choice mode
@@ -4530,10 +4530,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
       continue;
     }
 
-    this_mode = vp8_mode_order[mode_index].mode;
-    ref_frame = vp8_mode_order[mode_index].ref_frame;
+    this_mode = vp9_mode_order[mode_index].mode;
+    ref_frame = vp9_mode_order[mode_index].ref_frame;
     mbmi->ref_frame = ref_frame;
-    comp_pred = vp8_mode_order[mode_index].second_ref_frame != INTRA_FRAME;
+    comp_pred = vp9_mode_order[mode_index].second_ref_frame != INTRA_FRAME;
     mbmi->mode = this_mode;
     mbmi->uv_mode = DC_PRED;
 #if CONFIG_COMP_INTRA_PRED

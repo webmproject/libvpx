@@ -100,7 +100,7 @@ vp8_prob *vp9_mv_ref_probs(VP8_COMMON *pc,
                            vp8_prob p[VP8_MVREFS - 1], const int near_mv_ref_ct[4]
                           );
 
-extern const unsigned char vp8_mbsplit_offset[4][16];
+extern const unsigned char vp9_mbsplit_offset[4][16];
 
 
 static int left_block_mv(const MODE_INFO *cur_mb, int b) {

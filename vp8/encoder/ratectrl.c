@@ -28,9 +28,6 @@
 #define MIN_BPB_FACTOR          0.005
 #define MAX_BPB_FACTOR          50
 
-extern const MODE_DEFINITION vp8_mode_order[MAX_MODES];
-
-
 #ifdef MODE_STATS
 extern unsigned int y_modes[VP8_YMODES];
 extern unsigned int uv_modes[VP8_UV_MODES];

@@ -224,7 +224,7 @@ const int default_contexts[vp8_coef_counter_dimen] = {
 };
 
 // Update probabilities for the nodes in the token entropy tree.
-const vp8_prob tree_update_probs[vp8_coef_tree_dimen] = {
+const vp8_prob tree_update_probs[vp9_coef_tree_dimen] = {
   {
     {
       {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, },

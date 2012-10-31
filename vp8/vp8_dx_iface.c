@@ -641,7 +641,7 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 
 }
 
-vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] = {
+static vpx_codec_ctrl_fn_map_t ctf_maps[] = {
   {VP8_SET_REFERENCE,             vp9_set_reference},
   {VP8_COPY_REFERENCE,            vp9_get_reference},
   {VP8_SET_POSTPROC,              vp8_set_postproc},
@@ -666,7 +666,7 @@ CODEC_INTERFACE(vpx_codec_vp8_dx) = {
   /* vpx_codec_caps_t          caps; */
   vp8_init,         /* vpx_codec_init_fn_t       init; */
   vp8_destroy,      /* vpx_codec_destroy_fn_t    destroy; */
-  vp8_ctf_maps,     /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
+  ctf_maps,         /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
   vp8_xma_get_mmap, /* vpx_codec_get_mmap_fn_t   get_mmap; */
   vp8_xma_set_mmap, /* vpx_codec_set_mmap_fn_t   set_mmap; */
   {
@@ -696,7 +696,7 @@ vpx_codec_iface_t vpx_codec_vp8_algo = {
   /* vpx_codec_caps_t          caps; */
   vp8_init,         /* vpx_codec_init_fn_t       init; */
   vp8_destroy,      /* vpx_codec_destroy_fn_t    destroy; */
-  vp8_ctf_maps,     /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
+  ctf_maps,         /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
   vp8_xma_get_mmap, /* vpx_codec_get_mmap_fn_t   get_mmap; */
   vp8_xma_set_mmap, /* vpx_codec_set_mmap_fn_t   set_mmap; */
   {

@@ -49,11 +49,11 @@ extern INT64 context_counters_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
                                    [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
 #endif
 
-extern const int *vp8_dct_value_cost_ptr;
+extern const int *vp9_dct_value_cost_ptr;
 /* TODO: The Token field should be broken out into a separate char array to
  *  improve cache locality, since it's needed for costing when the rest of the
  *  fields are not.
  */
-extern const TOKENVALUE *vp8_dct_value_tokens_ptr;
+extern const TOKENVALUE *vp9_dct_value_tokens_ptr;
 
 #endif  /* tokenize_h */

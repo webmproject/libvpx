@@ -13,7 +13,7 @@
 #include "vp8/common/sadmxn.h"
 #include <limits.h>
 
-const unsigned char vp8_mbsplit_offset[4][16] = {
+const unsigned char vp9_mbsplit_offset[4][16] = {
   { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
   { 0,  2,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
   { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},

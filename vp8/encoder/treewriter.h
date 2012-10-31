@@ -32,7 +32,7 @@ typedef BOOL_CODER vp8_writer;
 
 /* Approximate length of an encoded bool in 256ths of a bit at given prob */
 
-#define vp8_cost_zero( x) ( vp8_prob_cost[x])
+#define vp8_cost_zero( x) ( vp9_prob_cost[x])
 #define vp8_cost_one( x)  vp8_cost_zero( vp8_complement(x))
 
 #define vp8_cost_bit( x, b) vp8_cost_zero( (b)?  vp8_complement(x) : (x) )

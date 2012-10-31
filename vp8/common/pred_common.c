@@ -71,11 +71,11 @@ unsigned char vp9_get_pred_context(const VP8_COMMON *const cm,
         int above_mode = (m - cm->mode_info_stride)->mbmi.mode;
         int left_interp, above_interp;
         if (left_in_image && left_mode >= NEARESTMV && left_mode <= SPLITMV)
-          left_interp = vp8_switchable_interp_map[(m - 1)->mbmi.interp_filter];
+          left_interp = vp9_switchable_interp_map[(m - 1)->mbmi.interp_filter];
         else
           left_interp = VP8_SWITCHABLE_FILTERS;
         if (above_in_image && above_mode >= NEARESTMV && above_mode <= SPLITMV)
-          above_interp = vp8_switchable_interp_map[
+          above_interp = vp9_switchable_interp_map[
               (m - cm->mode_info_stride)->mbmi.interp_filter];
         else
           above_interp = VP8_SWITCHABLE_FILTERS;

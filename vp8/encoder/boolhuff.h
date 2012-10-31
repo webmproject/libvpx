@@ -38,7 +38,7 @@ extern void vp9_start_encode(BOOL_CODER *bc, unsigned char *buffer);
 
 extern void vp9_encode_value(BOOL_CODER *br, int data, int bits);
 extern void vp9_stop_encode(BOOL_CODER *bc);
-extern const unsigned int vp8_prob_cost[256];
+extern const unsigned int vp9_prob_cost[256];
 
 extern void vp9_encode_uniform(BOOL_CODER *bc, int v, int n);
 extern void vp9_encode_term_subexp(BOOL_CODER *bc, int v, int k, int n);
@@ -46,7 +46,7 @@ extern int vp9_count_uniform(int v, int n);
 extern int vp9_count_term_subexp(int v, int k, int n);
 extern int vp9_recenter_nonneg(int v, int m);
 
-DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
+DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
 
 
 static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability) {
@@ -60,9 +60,9 @@ static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability) {
 #if defined(SECTIONBITS_OUTPUT)
 
   if (bit)
-    Sectionbits[active_section] += vp8_prob_cost[255 - probability];
+    Sectionbits[active_section] += vp9_prob_cost[255 - probability];
   else
-    Sectionbits[active_section] += vp8_prob_cost[probability];
+    Sectionbits[active_section] += vp9_prob_cost[probability];
 
 #endif
 #endif
@@ -76,7 +76,7 @@ static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability) {
     range = br->range - split;
   }
 
-  shift = vp8_norm[range];
+  shift = vp9_norm[range];
 
   range <<= shift;
   count += shift;

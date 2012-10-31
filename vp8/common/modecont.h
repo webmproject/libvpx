@@ -12,6 +12,6 @@
 #ifndef __INC_MODECONT_H
 #define __INC_MODECONT_H
 
-extern const int default_vp8_mode_contexts[6][4];
-extern const int default_vp8_mode_contexts_a[6][4];
+extern const int vp9_default_mode_contexts[6][4];
+extern const int vp9_default_mode_contexts_a[6][4];
 #endif

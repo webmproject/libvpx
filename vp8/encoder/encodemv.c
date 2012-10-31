@@ -38,14 +38,14 @@ static void encode_nmv_component(vp8_writer* const bc,
 
   c = vp9_get_mv_class(z, &o);
 
-  vp8_write_token(bc, vp8_mv_class_tree, mvcomp->classes,
-                  vp8_mv_class_encodings + c);
+  vp8_write_token(bc, vp9_mv_class_tree, mvcomp->classes,
+                  vp9_mv_class_encodings + c);
 
   d = (o >> 3);               /* int mv data */
 
   if (c == MV_CLASS_0) {
-    vp8_write_token(bc, vp8_mv_class0_tree, mvcomp->class0,
-                    vp8_mv_class0_encodings + d);
+    vp8_write_token(bc, vp9_mv_class0_tree, mvcomp->class0,
+                    vp9_mv_class0_encodings + d);
   } else {
     int i, b;
     b = c + CLASS0_BITS - 1;  /* number of bits */
@@ -72,11 +72,11 @@ static void encode_nmv_component_fp(vp8_writer *bc,
 
   /* Code the fractional pel bits */
   if (c == MV_CLASS_0) {
-    vp8_write_token(bc, vp8_mv_fp_tree, mvcomp->class0_fp[d],
-                    vp8_mv_fp_encodings + f);
+    vp8_write_token(bc, vp9_mv_fp_tree, mvcomp->class0_fp[d],
+                    vp9_mv_fp_encodings + f);
   } else {
-    vp8_write_token(bc, vp8_mv_fp_tree, mvcomp->fp,
-                    vp8_mv_fp_encodings + f);
+    vp8_write_token(bc, vp9_mv_fp_tree, mvcomp->fp,
+                    vp9_mv_fp_encodings + f);
   }
   /* Code the high precision bit */
   if (usehp) {
@@ -99,16 +99,16 @@ static void build_nmv_component_cost_table(int *mvcost,
 
   sign_cost[0] = vp8_cost_zero(mvcomp->sign);
   sign_cost[1] = vp8_cost_one(mvcomp->sign);
-  vp9_cost_tokens(class_cost, mvcomp->classes, vp8_mv_class_tree);
-  vp9_cost_tokens(class0_cost, mvcomp->class0, vp8_mv_class0_tree);
+  vp9_cost_tokens(class_cost, mvcomp->classes, vp9_mv_class_tree);
+  vp9_cost_tokens(class0_cost, mvcomp->class0, vp9_mv_class0_tree);
   for (i = 0; i < MV_OFFSET_BITS; ++i) {
     bits_cost[i][0] = vp8_cost_zero(mvcomp->bits[i]);
     bits_cost[i][1] = vp8_cost_one(mvcomp->bits[i]);
   }
 
   for (i = 0; i < CLASS0_SIZE; ++i)
-    vp9_cost_tokens(class0_fp_cost[i], mvcomp->class0_fp[i], vp8_mv_fp_tree);
-  vp9_cost_tokens(fp_cost, mvcomp->fp, vp8_mv_fp_tree);
+    vp9_cost_tokens(class0_fp_cost[i], mvcomp->class0_fp[i], vp9_mv_fp_tree);
+  vp9_cost_tokens(fp_cost, mvcomp->fp, vp9_mv_fp_tree);
 
   if (usehp) {
     class0_hp_cost[0] = vp8_cost_zero(mvcomp->class0_hp);
@@ -511,8 +511,8 @@ void vp9_write_nmvprobs(VP8_COMP* const cpi, int usehp, vp8_writer* const bc) {
 void vp9_encode_nmv(vp8_writer* const bc, const MV* const mv,
                     const MV* const ref, const nmv_context* const mvctx) {
   MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
-  vp8_write_token(bc, vp8_mv_joint_tree, mvctx->joints,
-                  vp8_mv_joint_encodings + j);
+  vp8_write_token(bc, vp9_mv_joint_tree, mvctx->joints,
+                  vp9_mv_joint_encodings + j);
   if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
     encode_nmv_component(bc, mv->row, ref->col, &mvctx->comps[0]);
   }
@@ -541,7 +541,7 @@ void vp9_build_nmv_cost_table(int *mvjoint,
                               int mvc_flag_v,
                               int mvc_flag_h) {
   vp8_clear_system_state();
-  vp9_cost_tokens(mvjoint, mvctx->joints, vp8_mv_joint_tree);
+  vp9_cost_tokens(mvjoint, mvctx->joints, vp9_mv_joint_tree);
   if (mvc_flag_v)
     build_nmv_component_cost_table(mvcost[0], &mvctx->comps[0], usehp);
   if (mvc_flag_h)

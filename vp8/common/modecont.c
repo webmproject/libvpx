@@ -10,7 +10,7 @@
 
 
 #include "entropy.h"
-const int default_vp8_mode_contexts[6][4] = {
+const int vp9_default_mode_contexts[6][4] = {
   {
     /* 0 */
     7,     1,     1,   183
@@ -36,7 +36,7 @@ const int default_vp8_mode_contexts[6][4] = {
     234,   188,   128,   28
   },
 };
-const int default_vp8_mode_contexts_a[6][4] = {
+const int vp9_default_mode_contexts_a[6][4] = {
   {
     /* 0 */
     4,     1,    1,   143

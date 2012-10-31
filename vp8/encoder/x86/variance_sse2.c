@@ -137,7 +137,7 @@ void vp9_half_vert_variance16x_h_sse2
   unsigned int *sumsquared
 );
 
-DECLARE_ALIGNED(16, extern short, vp8_vp7_bilinear_filters_mmx[16][8]);
+DECLARE_ALIGNED(16, extern short, vp9_bilinear_filters_mmx[16][8]);
 
 unsigned int vp9_variance4x4_wmt(
   const unsigned char *src_ptr,
@@ -257,7 +257,7 @@ unsigned int vp9_sub_pixel_variance4x4_wmt
   vp9_filter_block2d_bil4x4_var_mmx(
     src_ptr, src_pixels_per_line,
     dst_ptr, dst_pixels_per_line,
-    vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
+    vp9_bilinear_filters_mmx[xoffset], vp9_bilinear_filters_mmx[yoffset],
     &xsum, &xxsum
   );
   *sse = xxsum;

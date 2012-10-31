@@ -28,14 +28,14 @@
 /* Smooth or bias the mv-counts before prob computation */
 /* #define SMOOTH_MV_COUNTS */
 
-const vp8_tree_index vp8_mv_joint_tree[2 * MV_JOINTS - 2] = {
+const vp8_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2] = {
   -MV_JOINT_ZERO, 2,
   -MV_JOINT_HNZVZ, 4,
   -MV_JOINT_HZVNZ, -MV_JOINT_HNZVNZ
 };
-struct vp8_token_struct vp8_mv_joint_encodings[MV_JOINTS];
+struct vp8_token_struct vp9_mv_joint_encodings[MV_JOINTS];
 
-const vp8_tree_index vp8_mv_class_tree[2 * MV_CLASSES - 2] = {
+const vp8_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
   -MV_CLASS_0, 2,
   -MV_CLASS_1, 4,
   6, 8,
@@ -44,21 +44,21 @@ const vp8_tree_index vp8_mv_class_tree[2 * MV_CLASSES - 2] = {
   -MV_CLASS_4, -MV_CLASS_5,
   -MV_CLASS_6, -MV_CLASS_7,
 };
-struct vp8_token_struct vp8_mv_class_encodings[MV_CLASSES];
+struct vp8_token_struct vp9_mv_class_encodings[MV_CLASSES];
 
-const vp8_tree_index vp8_mv_class0_tree [2 * CLASS0_SIZE - 2] = {
+const vp8_tree_index vp9_mv_class0_tree [2 * CLASS0_SIZE - 2] = {
   -0, -1,
 };
-struct vp8_token_struct vp8_mv_class0_encodings[CLASS0_SIZE];
+struct vp8_token_struct vp9_mv_class0_encodings[CLASS0_SIZE];
 
-const vp8_tree_index vp8_mv_fp_tree [2 * 4 - 2] = {
+const vp8_tree_index vp9_mv_fp_tree [2 * 4 - 2] = {
   -0, 2,
   -1, 4,
   -2, -3
 };
-struct vp8_token_struct vp8_mv_fp_encodings[4];
+struct vp8_token_struct vp9_mv_fp_encodings[4];
 
-const nmv_context vp8_default_nmv_context = {
+const nmv_context vp9_default_nmv_context = {
   {32, 64, 96},
   {
     { /* vert component */
@@ -243,8 +243,8 @@ void vp9_counts_to_nmv_context(
   counts_to_context(&NMVcount->comps[0], usehp);
   counts_to_context(&NMVcount->comps[1], usehp);
   vp9_tree_probs_from_distribution(MV_JOINTS,
-                                   vp8_mv_joint_encodings,
-                                   vp8_mv_joint_tree,
+                                   vp9_mv_joint_encodings,
+                                   vp9_mv_joint_tree,
                                    prob->joints,
                                    branch_ct_joint,
                                    NMVcount->joints,
@@ -255,15 +255,15 @@ void vp9_counts_to_nmv_context(
     branch_ct_sign[i][0] = NMVcount->comps[i].sign[0];
     branch_ct_sign[i][1] = NMVcount->comps[i].sign[1];
     vp9_tree_probs_from_distribution(MV_CLASSES,
-                                     vp8_mv_class_encodings,
-                                     vp8_mv_class_tree,
+                                     vp9_mv_class_encodings,
+                                     vp9_mv_class_tree,
                                      prob->comps[i].classes,
                                      branch_ct_classes[i],
                                      NMVcount->comps[i].classes,
                                      256, 1);
     vp9_tree_probs_from_distribution(CLASS0_SIZE,
-                                     vp8_mv_class0_encodings,
-                                     vp8_mv_class0_tree,
+                                     vp9_mv_class0_encodings,
+                                     vp9_mv_class0_tree,
                                      prob->comps[i].class0,
                                      branch_ct_class0[i],
                                      NMVcount->comps[i].class0,
@@ -278,16 +278,16 @@ void vp9_counts_to_nmv_context(
   for (i = 0; i < 2; ++i) {
     for (k = 0; k < CLASS0_SIZE; ++k) {
       vp9_tree_probs_from_distribution(4,
-                                       vp8_mv_fp_encodings,
-                                       vp8_mv_fp_tree,
+                                       vp9_mv_fp_encodings,
+                                       vp9_mv_fp_tree,
                                        prob->comps[i].class0_fp[k],
                                        branch_ct_class0_fp[i][k],
                                        NMVcount->comps[i].class0_fp[k],
                                        256, 1);
     }
     vp9_tree_probs_from_distribution(4,
-                                     vp8_mv_fp_encodings,
-                                     vp8_mv_fp_tree,
+                                     vp9_mv_fp_encodings,
+                                     vp9_mv_fp_tree,
                                      prob->comps[i].fp,
                                      branch_ct_fp[i],
                                      NMVcount->comps[i].fp,
@@ -454,12 +454,12 @@ void vp9_adapt_nmv_probs(VP8_COMMON *cm, int usehp) {
 }
 
 void vp9_entropy_mv_init() {
-  vp9_tokens_from_tree(vp8_mv_joint_encodings, vp8_mv_joint_tree);
-  vp9_tokens_from_tree(vp8_mv_class_encodings, vp8_mv_class_tree);
-  vp9_tokens_from_tree(vp8_mv_class0_encodings, vp8_mv_class0_tree);
-  vp9_tokens_from_tree(vp8_mv_fp_encodings, vp8_mv_fp_tree);
+  vp9_tokens_from_tree(vp9_mv_joint_encodings, vp9_mv_joint_tree);
+  vp9_tokens_from_tree(vp9_mv_class_encodings, vp9_mv_class_tree);
+  vp9_tokens_from_tree(vp9_mv_class0_encodings, vp9_mv_class0_tree);
+  vp9_tokens_from_tree(vp9_mv_fp_encodings, vp9_mv_fp_tree);
 }
 
 void vp9_init_mv_probs(VP8_COMMON *cm) {
-  vpx_memcpy(&cm->fc.nmvc, &vp8_default_nmv_context, sizeof(nmv_context));
+  vpx_memcpy(&cm->fc.nmvc, &vp9_default_nmv_context, sizeof(nmv_context));
 }
