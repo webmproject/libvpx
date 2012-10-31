@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//8b0\u003d",
+        "filename": "vp8/common/rtcd_defs.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-10-31T13:42:39Z",
+      "side": 1,
+      "message": "I think this causes a circular dependency chain and seems to be just about tx_type.   \n\nCheck with Jkoleszar.",
+      "revId": "db79e64ca8806d77c6be87850df6d60cd2e8a43b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
