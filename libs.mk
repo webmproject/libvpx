@@ -24,20 +24,20 @@ endif
 ifeq ($(filter icc gcc,$(TGT_CC)), $(TGT_CC))
 OFFSET_PATTERN:='^[a-zA-Z0-9_]* EQU'
 define asm_offsets_template
-$$(BUILD_PFX)$(1): $$(BUILD_PFX)$(2).S
+$$(BUILD_PFX)$(1): $$(BUILD_PFX)$(call xform_obj_path,$(2)).S
 	@echo "    [CREATE] $$@"
 	$$(qexec)LC_ALL=C grep $$(OFFSET_PATTERN) $$< | tr -d '$$$$\#' $$(ADS2GAS) > $$@
-$$(BUILD_PFX)$(2).S: $(2)
-CLEAN-OBJS += $$(BUILD_PFX)$(1) $(2).S
+$$(BUILD_PFX)$(call xform_obj_path,$(2)).S: $(2)
+CLEAN-OBJS += $$(BUILD_PFX)$(1) $(call xform_obj_path,$(2)).S
 endef
 else
   ifeq ($(filter rvct,$(TGT_CC)), $(TGT_CC))
 define asm_offsets_template
 $$(BUILD_PFX)$(1): obj_int_extract
-$$(BUILD_PFX)$(1): $$(BUILD_PFX)$(2).o
+$$(BUILD_PFX)$(1): $$(BUILD_PFX)$(call xform_obj_path,$(2)).o
 	@echo "    [CREATE] $$@"
 	$$(qexec)./obj_int_extract rvds $$< $$(ADS2GAS) > $$@
-OBJS-yes += $$(BUILD_PFX)$(2).o
+OBJS-yes += $$(BUILD_PFX)$(call xform_obj_path,$(2)).o
 CLEAN-OBJS += $$(BUILD_PFX)$(1)
 $$(filter %$$(ASM).o,$$(OBJS-yes)): $$(BUILD_PFX)$(1)
 endef
@@ -387,6 +387,9 @@ LIBVPX_TEST_DATA_PATH ?= .
 
 include $(SRC_PATH_BARE)/test/test.mk
 LIBVPX_TEST_SRCS=$(addprefix test/,$(call enabled,LIBVPX_TEST_SRCS))
+ifeq ($(CONFIG_VP8_DECODER),yes)
+LIBVPX_TEST_SRCS += md5_utils.h md5_utils.c
+endif
 LIBVPX_TEST_BINS=./test_libvpx
 LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
                      $(call enabled,LIBVPX_TEST_DATA))
@@ -500,3 +503,6 @@ libs.doxy: $(CODEC_DOC_SRCS)
 
 ## Generate vpx_rtcd.h for all objects
 $(OBJS-yes:.o=.d): $(BUILD_PFX)vpx_rtcd.h
+
+## Update the global src list
+SRCS += $(CODEC_SRCS) $(LIBVPX_TEST_SRCS) $(GTEST_SRCS)

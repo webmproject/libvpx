@@ -103,55 +103,60 @@ test::
 .PHONY: testdata
 testdata::
 
-$(BUILD_PFX)%.c.d: %.c
-	$(if $(quiet),@echo "    [DEP] $@")
-	$(qexec)mkdir -p $(dir $@)
-	$(qexec)$(CC) $(INTERNAL_CFLAGS) $(CFLAGS) -M $< | $(fmt_deps) > $@
+xform_obj_prefix:=.objs/$(TOOLCHAIN)/
+xform_obj_path=$(if $(1),$(addprefix $(xform_obj_prefix),$(subst /,_,$(1))),$(xform_obj_prefix))
+xform_obj_path_o_d=$(call xform_obj_path,$(1).o) $(call xform_obj_path,$(1).d)
+define obj_rules_template
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.c.d: $(1)%.c
+	$(if $(quiet),@echo "    [DEP] $$@")
+	$(qexec)mkdir -p $$(dir $$@)
+	$(qexec)$(CC) $$(INTERNAL_CFLAGS) $$(CFLAGS) -M $$< | $(fmt_deps) > $$@
 
-$(BUILD_PFX)%.c.o: %.c
-	$(if $(quiet),@echo "    [CC] $@")
-	$(qexec)$(CC) $(INTERNAL_CFLAGS) $(CFLAGS) -c -o $@ $<
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.c.o: $(1)%.c
+	$(if $(quiet),@echo "    [CC] $$@")
+	$(qexec)$(CC) $$(INTERNAL_CFLAGS) $$(CFLAGS) -c -o $$@ $$<
 
-$(BUILD_PFX)%.cc.d: %.cc
-	$(if $(quiet),@echo "    [DEP] $@")
-	$(qexec)mkdir -p $(dir $@)
-	$(qexec)$(CXX) $(INTERNAL_CFLAGS) $(CXXFLAGS) -M $< | $(fmt_deps) > $@
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.cc.d: $(1)%.cc
+	$(if $(quiet),@echo "    [DEP] $$@")
+	$(qexec)mkdir -p $$(dir $$@)
+	$(qexec)$(CXX) $$(INTERNAL_CFLAGS) $$(CXXFLAGS) -M $$< | $(fmt_deps) > $$@
 
-$(BUILD_PFX)%.cc.o: %.cc
-	$(if $(quiet),@echo "    [CXX] $@")
-	$(qexec)$(CXX) $(INTERNAL_CFLAGS) $(CXXFLAGS) -c -o $@ $<
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.cc.o: $(1)%.cc
+	$(if $(quiet),@echo "    [CXX] $$@")
+	$(qexec)$(CXX) $$(INTERNAL_CFLAGS) $$(CXXFLAGS) -c -o $$@ $$<
 
-$(BUILD_PFX)%.asm.d: %.asm
-	$(if $(quiet),@echo "    [DEP] $@")
-	$(qexec)mkdir -p $(dir $@)
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.asm.d: $(1)%.asm
+	$(if $(quiet),@echo "    [DEP] $$@")
+	$(qexec)mkdir -p $$(dir $$@)
 	$(qexec)$(SRC_PATH_BARE)/build/make/gen_asm_deps.sh \
-            --build-pfx=$(BUILD_PFX) --depfile=$@ $(ASFLAGS) $< > $@
+            --build-pfx=$(BUILD_PFX) --depfile=$$@ $$(ASFLAGS) $$< > $$@
 
-$(BUILD_PFX)%.asm.o: %.asm
-	$(if $(quiet),@echo "    [AS] $@")
-	$(qexec)$(AS) $(ASFLAGS) -o $@ $<
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.asm.o: $(1)%.asm
+	$(if $(quiet),@echo "    [AS] $$@")
+	$(qexec)$(AS) $$(ASFLAGS) -o $$@ $$<
 
-$(BUILD_PFX)%.s.d: %.s
-	$(if $(quiet),@echo "    [DEP] $@")
-	$(qexec)mkdir -p $(dir $@)
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.s.d: $(1)%.s
+	$(if $(quiet),@echo "    [DEP] $$@")
+	$(qexec)mkdir -p $$(dir $$@)
 	$(qexec)$(SRC_PATH_BARE)/build/make/gen_asm_deps.sh \
-            --build-pfx=$(BUILD_PFX) --depfile=$@ $(ASFLAGS) $< > $@
+            --build-pfx=$(BUILD_PFX) --depfile=$$@ $$(ASFLAGS) $$< > $$@
 
-$(BUILD_PFX)%.s.o: %.s
-	$(if $(quiet),@echo "    [AS] $@")
-	$(qexec)$(AS) $(ASFLAGS) -o $@ $<
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.s.o: $(1)%.s
+	$(if $(quiet),@echo "    [AS] $$@")
+	$(qexec)$(AS) $$(ASFLAGS) -o $$@ $$<
 
 .PRECIOUS: %.c.S
 %.c.S: CFLAGS += -DINLINE_ASM
-$(BUILD_PFX)%.c.S: %.c
-	$(if $(quiet),@echo "    [GEN] $@")
-	$(qexec)$(CC) -S $(CFLAGS) -o $@ $<
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.c.S: $(1)%.c
+	$(if $(quiet),@echo "    [GEN] $$@")
+	$(qexec)$(CC) -S $$(CFLAGS) -o $$@ $$<
 
 .PRECIOUS: %.asm.s
-$(BUILD_PFX)%.asm.s: %.asm
-	$(if $(quiet),@echo "    [ASM CONVERSION] $@")
-	$(qexec)mkdir -p $(dir $@)
-	$(qexec)$(ASM_CONVERSION) <$< >$@
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.asm.s: $(1)%.asm
+	$(if $(quiet),@echo "    [ASM CONVERSION] $$@")
+	$(qexec)mkdir -p $$(dir $$@)
+	$(qexec)$(ASM_CONVERSION) <$$< >$$@
+endef
 
 # If we're in debug mode, pretend we don't have GNU strip, to fall back to
 # the copy implementation
@@ -193,7 +198,7 @@ cond_enabled=$(if $(filter yes,$($(1))), $(call enabled,$(2)))
 find_file1=$(word 1,$(wildcard $(subst //,/,$(addsuffix /$(1),$(2)))))
 find_file=$(foreach f,$(1),$(call find_file1,$(strip $(f)),$(strip $(2))) )
 obj_pats=.c=.c.o $(AS_SFX)=$(AS_SFX).o .cc=.cc.o
-objs=$(addprefix $(BUILD_PFX),$(foreach p,$(obj_pats),$(filter %.o,$(1:$(p))) ))
+objs=$(addprefix $(BUILD_PFX),$(call xform_obj_path,$(foreach p,$(obj_pats),$(filter %.o,$(1:$(p))) )))
 
 install_map_templates=$(eval $(call install_map_template,$(1),$(2)))
 
@@ -301,6 +306,10 @@ endif
 #
 # Configuration dependent rules
 #
+SRC_DIRS:=$(patsubst %/,%,$(sort $(dir $(SRCS))))
+$(foreach d,$(SRC_DIRS), $(eval $(call obj_rules_template,$(d)/)))
+$(eval $(call obj_rules_template)) # for ./
+
 $(call pairmap,install_map_templates,$(INSTALL_MAPS))
 
 DOCS=$(call cond_enabled,CONFIG_INSTALL_DOCS,DOCS)
