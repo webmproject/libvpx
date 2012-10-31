@@ -22,14 +22,13 @@
  * so
  *         x * sqrt(2) * cos (pi/8) = x + x * (sqrt(2) *cos(pi/8)-1).
  **************************************************************************/
+#include <assert.h>
+#include <math.h>
 #include "vpx_ports/config.h"
 #include "vp8/common/idct.h"
 #include "vp8/common/systemdependent.h"
 
 #include "vp8/common/blockd.h"
-
-#include <assert.h>
-#include <math.h>
 
 static const int cospi8sqrt2minus1 = 20091;
 static const int sinpi8sqrt2      = 35468;
@@ -401,7 +400,7 @@ void vp8_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
                                -(int16_t)( - pfa[i] / 8 + 0.49);
       }
 
-      op  += shortpitch;
+      op += shortpitch;
       pfa += tx_dim;
     }
   }
@@ -409,9 +408,9 @@ void vp8_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
 }
 
 /* Converted the transforms to integer form. */
-#define VERTICAL_SHIFT 14  //16
+#define VERTICAL_SHIFT 14  // 16
 #define VERTICAL_ROUNDING ((1 << (VERTICAL_SHIFT - 1)) - 1)
-#define HORIZONTAL_SHIFT 17  //15
+#define HORIZONTAL_SHIFT 17  // 15
 #define HORIZONTAL_ROUNDING ((1 << (HORIZONTAL_SHIFT - 1)) - 1)
 void vp8_ihtllm_int_c(const int16_t *input, int16_t *output, int pitch,
                    TX_TYPE tx_type, int tx_dim) {
@@ -446,7 +445,8 @@ void vp8_ihtllm_int_c(const int16_t *input, int16_t *output, int pitch,
       break;
     case  DCT_DCT :
       ptv = pth = (tx_dim == 4) ? &idct_i4[0]
-                                  : ((tx_dim == 8) ? &idct_i8[0] : &idct_i16[0]);
+                                  : ((tx_dim == 8) ? &idct_i8[0]
+                                                     : &idct_i16[0]);
       break;
     default:
       assert(0);
@@ -465,7 +465,7 @@ void vp8_ihtllm_int_c(const int16_t *input, int16_t *output, int pitch,
       im[i] = (int16_t)((temp + VERTICAL_ROUNDING) >> VERTICAL_SHIFT);
       ip++;
     }
-    im += tx_dim;  //16
+    im += tx_dim;  // 16
     ptv += tx_dim;
     ip = input;
   }
@@ -487,7 +487,7 @@ void vp8_ihtllm_int_c(const int16_t *input, int16_t *output, int pitch,
       pthc += tx_dim;
     }
 
-    im += tx_dim;  //16
+    im += tx_dim;  // 16
     op += shortpitch;
   }
 }

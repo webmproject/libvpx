@@ -701,7 +701,7 @@ void vp8_fht_int_c(const int16_t *input, int pitch, int16_t *output,
       im[i] = (int16_t)((temp + VERTICAL_ROUNDING) >> VERTICAL_SHIFT);
       ip++;
     }
-    im += tx_dim;  //16
+    im += tx_dim;  // 16
     ptv += tx_dim;
     ip = input;
   }
@@ -723,7 +723,7 @@ void vp8_fht_int_c(const int16_t *input, int pitch, int16_t *output,
       pthc += tx_dim;
     }
 
-    im += tx_dim;  //16
+    im += tx_dim;  // 16
     op += tx_dim;
   }
 }
