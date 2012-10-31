@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef __INC_RECONINTER_H
 #define __INC_RECONINTER_H
 
@@ -18,10 +17,12 @@ extern void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                                     unsigned char *dst_y,
                                                     int dst_ystride,
                                                     int clamp_mvs);
+
 extern void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
                                                      unsigned char *dst_u,
                                                      unsigned char *dst_v,
                                                      int dst_uvstride);
+
 extern void vp9_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                                    unsigned char *dst_y,
                                                    unsigned char *dst_u,
@@ -32,10 +33,12 @@ extern void vp9_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
 extern void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                                     unsigned char *dst_y,
                                                     int dst_ystride);
+
 extern void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
                                                      unsigned char *dst_u,
                                                      unsigned char *dst_v,
                                                      int dst_uvstride);
+
 extern void vp9_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                                    unsigned char *dst_y,
                                                    unsigned char *dst_u,
@@ -56,17 +59,20 @@ extern void vp9_build_inter_predictors_mb(MACROBLOCKD *xd);
 
 extern void vp9_build_inter_predictors_b(BLOCKD *d, int pitch,
                                          vp9_subpix_fn_t sppf);
+
 extern void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
                                              vp9_subpix_fn_t sppf);
 
 extern void vp9_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d,
                                          int pitch);
+
 extern void vp9_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
                                              BLOCKD *d, int pitch);
 
 extern void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd);
+
 extern void vp9_setup_interp_filters(MACROBLOCKD *xd,
                                      INTERPOLATIONFILTERTYPE filter,
                                      VP9_COMMON *cm);
 
-#endif
+#endif  // __INC_RECONINTER_H

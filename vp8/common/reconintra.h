@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef __INC_RECONINTRA_H
 #define __INC_RECONINTRA_H
 
@@ -16,4 +15,4 @@
 
 extern void init_intra_left_above_pixels(MACROBLOCKD *xd);
 
-#endif
+#endif  // __INC_RECONINTRA_H

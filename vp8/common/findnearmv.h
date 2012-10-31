@@ -81,23 +81,19 @@ static unsigned int check_mv_bounds(int_mv *mv,
          (mv->as_mv.row > mb_to_bottom_edge);
 }
 
-void vp9_find_near_mvs
-(
-  MACROBLOCKD *xd,
-  const MODE_INFO *here,
-  const MODE_INFO *lfhere,
-  int_mv *nearest, int_mv *nearby, int_mv *best,
-  int near_mv_ref_cts[4],
-  int refframe,
-  int *ref_frame_sign_bias
-);
+void vp9_find_near_mvs(MACROBLOCKD *xd,
+                       const MODE_INFO *here,
+                       const MODE_INFO *lfhere,
+                       int_mv *nearest, int_mv *nearby, int_mv *best,
+                       int near_mv_ref_cts[4],
+                       int refframe,
+                       int *ref_frame_sign_bias);
 
 vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
-                           vp9_prob p[VP9_MVREFS - 1], const int near_mv_ref_ct[4]
-                          );
+                           vp9_prob p[VP9_MVREFS - 1],
+                           const int near_mv_ref_ct[4]);
 
 extern const unsigned char vp9_mbsplit_offset[4][16];
-
 
 static int left_block_mv(const MODE_INFO *cur_mb, int b) {
   if (!(b & 3)) {

@@ -8,10 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "vpx_config.h"
 #include "vpx_ports/x86.h"
-#include "vp8/common/g_common.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/idct.h"

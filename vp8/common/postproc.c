@@ -20,10 +20,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define RGB_TO_YUV(t)                                                                       \
-  ( (0.257*(float)(t>>16)) + (0.504*(float)(t>>8&0xff)) + (0.098*(float)(t&0xff)) + 16),  \
-  (-(0.148*(float)(t>>16)) - (0.291*(float)(t>>8&0xff)) + (0.439*(float)(t&0xff)) + 128), \
-  ( (0.439*(float)(t>>16)) - (0.368*(float)(t>>8&0xff)) - (0.071*(float)(t&0xff)) + 128)
+#define RGB_TO_YUV(t)                                            \
+  ( (0.257*(float)(t >> 16))  + (0.504*(float)(t >> 8 & 0xff)) + \
+    (0.098*(float)(t & 0xff)) + 16),                             \
+  (-(0.148*(float)(t >> 16))  - (0.291*(float)(t >> 8 & 0xff)) + \
+    (0.439*(float)(t & 0xff)) + 128),                            \
+  ( (0.439*(float)(t >> 16))  - (0.368*(float)(t >> 8 & 0xff)) - \
+    (0.071*(float)(t & 0xff)) + 128)
 
 /* global constants */
 #if CONFIG_POSTPROC_VISUALIZER
@@ -124,20 +127,19 @@ const short vp9_rv[] = {
 };
 
 
-extern void vp9_blit_text(const char *msg, unsigned char *address, const int pitch);
-extern void vp9_blit_line(int x0, int x1, int y0, int y1, unsigned char *image, const int pitch);
-/***********************************************************************************************************
+extern void vp9_blit_text(const char *msg, unsigned char *address,
+                          const int pitch);
+extern void vp9_blit_line(int x0, int x1, int y0, int y1,
+                          unsigned char *image, const int pitch);
+/****************************************************************************
  */
-void vp9_post_proc_down_and_across_c
-(
-  unsigned char *src_ptr,
-  unsigned char *dst_ptr,
-  int src_pixels_per_line,
-  int dst_pixels_per_line,
-  int rows,
-  int cols,
-  int flimit
-) {
+void vp9_post_proc_down_and_across_c(unsigned char *src_ptr,
+                                     unsigned char *dst_ptr,
+                                     int src_pixels_per_line,
+                                     int dst_pixels_per_line,
+                                     int rows,
+                                     int cols,
+                                     int flimit) {
   unsigned char *p_src, *p_dst;
   int row;
   int col;
@@ -213,7 +215,9 @@ static int q2mbl(int x) {
   x = 50 + (x - 50) * 10 / 8;
   return x * x / 3;
 }
-void vp9_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int cols, int flimit) {
+
+void vp9_mbpost_proc_across_ip_c(unsigned char *src, int pitch,
+                                 int rows, int cols, int flimit) {
   int r, c, i;
 
   unsigned char *s = src;
@@ -250,11 +254,8 @@ void vp9_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int co
   }
 }
 
-
-
-
-
-void vp9_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, int flimit) {
+void vp9_mbpost_proc_down_c(unsigned char *dst, int pitch,
+                            int rows, int cols, int flimit) {
   int r, c, i;
   const short *rv3 = &vp9_rv[63 & rand()];
 
@@ -296,13 +297,20 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
   (void) low_var_thresh;
   (void) flag;
 
-  POSTPROC_INVOKE(rtcd, downacross)(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,  ppl);
-  POSTPROC_INVOKE(rtcd, across)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
-  POSTPROC_INVOKE(rtcd, down)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
+  POSTPROC_INVOKE(rtcd, downacross)(source->y_buffer, post->y_buffer,
+                                    source->y_stride,  post->y_stride,
+                                    source->y_height, source->y_width,  ppl);
+  POSTPROC_INVOKE(rtcd, across)(post->y_buffer, post->y_stride,
+                                post->y_height, post->y_width, q2mbl(q));
+  POSTPROC_INVOKE(rtcd, down)(post->y_buffer, post->y_stride,
+                              post->y_height, post->y_width, q2mbl(q));
 
-  POSTPROC_INVOKE(rtcd, downacross)(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
-  POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
-
+  POSTPROC_INVOKE(rtcd, downacross)(source->u_buffer, post->u_buffer,
+                                    source->uv_stride, post->uv_stride,
+                                    source->uv_height, source->uv_width, ppl);
+  POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer,
+                                    source->uv_stride, post->uv_stride,
+                                    source->uv_height, source->uv_width, ppl);
 }
 
 void vp9_deblock(YV12_BUFFER_CONFIG         *source,
@@ -316,12 +324,18 @@ void vp9_deblock(YV12_BUFFER_CONFIG         *source,
   (void) low_var_thresh;
   (void) flag;
 
-  POSTPROC_INVOKE(rtcd, downacross)(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,   ppl);
-  POSTPROC_INVOKE(rtcd, downacross)(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride,  source->uv_height, source->uv_width, ppl);
-  POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
+  POSTPROC_INVOKE(rtcd, downacross)(source->y_buffer, post->y_buffer,
+                                    source->y_stride,  post->y_stride,
+                                    source->y_height, source->y_width,   ppl);
+  POSTPROC_INVOKE(rtcd, downacross)(source->u_buffer, post->u_buffer,
+                                    source->uv_stride, post->uv_stride,
+                                    source->uv_height, source->uv_width, ppl);
+  POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer,
+                                    source->uv_stride, post->uv_stride,
+                                    source->uv_height, source->uv_width, ppl);
 }
 
-void vp9_de_noise(YV12_BUFFER_CONFIG         *source,
+void vp9_de_noise(YV12_BUFFER_CONFIG         *src,
                   YV12_BUFFER_CONFIG         *post,
                   int                         q,
                   int                         low_var_thresh,
@@ -333,38 +347,31 @@ void vp9_de_noise(YV12_BUFFER_CONFIG         *source,
   (void) low_var_thresh;
   (void) flag;
 
-  POSTPROC_INVOKE(rtcd, downacross)(
-    source->y_buffer + 2 * source->y_stride + 2,
-    source->y_buffer + 2 * source->y_stride + 2,
-    source->y_stride,
-    source->y_stride,
-    source->y_height - 4,
-    source->y_width - 4,
-    ppl);
-  POSTPROC_INVOKE(rtcd, downacross)(
-    source->u_buffer + 2 * source->uv_stride + 2,
-    source->u_buffer + 2 * source->uv_stride + 2,
-    source->uv_stride,
-    source->uv_stride,
-    source->uv_height - 4,
-    source->uv_width - 4, ppl);
-  POSTPROC_INVOKE(rtcd, downacross)(
-    source->v_buffer + 2 * source->uv_stride + 2,
-    source->v_buffer + 2 * source->uv_stride + 2,
-    source->uv_stride,
-    source->uv_stride,
-    source->uv_height - 4,
-    source->uv_width - 4, ppl);
-
+  POSTPROC_INVOKE(rtcd, downacross)(src->y_buffer + 2 * src->y_stride + 2,
+                                    src->y_buffer + 2 * src->y_stride + 2,
+                                    src->y_stride,
+                                    src->y_stride,
+                                    src->y_height - 4,
+                                    src->y_width - 4,
+                                    ppl);
+  POSTPROC_INVOKE(rtcd, downacross)(src->u_buffer + 2 * src->uv_stride + 2,
+                                    src->u_buffer + 2 * src->uv_stride + 2,
+                                    src->uv_stride,
+                                    src->uv_stride,
+                                    src->uv_height - 4,
+                                    src->uv_width - 4, ppl);
+  POSTPROC_INVOKE(rtcd, downacross)(src->v_buffer + 2 * src->uv_stride + 2,
+                                    src->v_buffer + 2 * src->uv_stride + 2,
+                                    src->uv_stride,
+                                    src->uv_stride,
+                                    src->uv_height - 4,
+                                    src->uv_width - 4, ppl);
 }
 
 double vp9_gaussian(double sigma, double mu, double x) {
   return 1 / (sigma * sqrt(2.0 * 3.14159265)) *
          (exp(-(x - mu) * (x - mu) / (2 * sigma * sigma)));
 }
-
-extern void (*vp9_clear_system_state)(void);
-
 
 static void fillrd(struct postproc_state *state, int q, int a) {
   char char_dist[300];
@@ -373,7 +380,6 @@ static void fillrd(struct postproc_state *state, int q, int a) {
   int ai = a, qi = q, i;
 
   vp9_clear_system_state();
-
 
   sigma = ai + .5 + .6 * (63 - qi) / 63.0;
 
@@ -401,7 +407,6 @@ static void fillrd(struct postproc_state *state, int q, int a) {
 
     for (next = next; next < 256; next++)
       char_dist[next] = 0;
-
   }
 
   for (i = 0; i < 3072; i++) {
@@ -422,8 +427,8 @@ static void fillrd(struct postproc_state *state, int q, int a) {
  *
  *  ROUTINE       : plane_add_noise_c
  *
- *  INPUTS        : unsigned char *Start    starting address of buffer to add gaussian
- *                                  noise to
+ *  INPUTS        : unsigned char *Start  starting address of buffer to
+ *                                        add gaussian noise to
  *                  unsigned int Width    width of plane
  *                  unsigned int Height   height of plane
  *                  int  Pitch    distance between subsequent lines of frame
@@ -580,7 +585,8 @@ void vp9_blend_b_c(unsigned char *y, unsigned char *u, unsigned char *v,
   }
 }
 
-static void constrain_line(int x0, int *x1, int y0, int *y1, int width, int height) {
+static void constrain_line(int x0, int *x1, int y0, int *y1,
+                           int width, int height) {
   int dx;
   int dy;
 
@@ -625,7 +631,8 @@ static void constrain_line(int x0, int *x1, int y0, int *y1, int width, int heig
 #define RTCD_VTABLE(oci) NULL
 #endif
 
-int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t *ppflags) {
+int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
+                        vp9_ppflags_t *ppflags) {
   int q = oci->filter_level * 10 / 6;
   int flags = ppflags->post_proc_flag;
   int deblock_level = ppflags->deblocking_level;
@@ -669,14 +676,14 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t
       fillrd(&oci->postproc_state, 63 - q, noise_level);
     }
 
-    POSTPROC_INVOKE(RTCD_VTABLE(oci), addnoise)
-    (oci->post_proc_buffer.y_buffer,
-     oci->postproc_state.noise,
-     oci->postproc_state.blackclamp,
-     oci->postproc_state.whiteclamp,
-     oci->postproc_state.bothclamp,
-     oci->post_proc_buffer.y_width, oci->post_proc_buffer.y_height,
-     oci->post_proc_buffer.y_stride);
+    POSTPROC_INVOKE(RTCD_VTABLE(oci), addnoise)(oci->post_proc_buffer.y_buffer,
+                                                oci->postproc_state.noise,
+                                                oci->postproc_state.blackclamp,
+                                                oci->postproc_state.whiteclamp,
+                                                oci->postproc_state.bothclamp,
+                                                oci->post_proc_buffer.y_width,
+                                                oci->post_proc_buffer.y_height,
+                                                oci->post_proc_buffer.y_stride);
   }
 
 #if CONFIG_POSTPROC_VISUALIZER
@@ -689,7 +696,8 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t
             oci->filter_level,
             flags,
             oci->mb_cols, oci->mb_rows);
-    vp9_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
+    vp9_blit_text(message, oci->post_proc_buffer.y_buffer,
+                  oci->post_proc_buffer.y_stride);
   }
 
   if (flags & VP9D_DEBUG_TXT_MBLK_MODES) {
@@ -758,8 +766,11 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t
 
   if (flags & VP9D_DEBUG_TXT_RATE_INFO) {
     char message[512];
-    sprintf(message, "Bitrate: %10.2f frame_rate: %10.2f ", oci->bitrate, oci->framerate);
-    vp9_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
+    snprintf(message, sizeof(message),
+             "Bitrate: %10.2f frame_rate: %10.2f ",
+             oci->bitrate, oci->framerate);
+    vp9_blit_text(message, oci->post_proc_buffer.y_buffer,
+                  oci->post_proc_buffer.y_stride);
   }
 
   /* Draw motion vectors */
@@ -920,7 +931,8 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t
         int Y = 0, U = 0, V = 0;
 
         if (mi->mbmi.mode == B_PRED &&
-            ((ppflags->display_mb_modes_flag & B_PRED) || ppflags->display_b_modes_flag)) {
+            ((ppflags->display_mb_modes_flag & B_PRED) ||
+             ppflags->display_b_modes_flag)) {
           int by, bx;
           unsigned char *yl, *ul, *vl;
           union b_mode_info *bmi = mi->bmi;
@@ -937,8 +949,11 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t
                 U = B_PREDICTION_MODE_colors[bmi->as_mode.first][1];
                 V = B_PREDICTION_MODE_colors[bmi->as_mode.first][2];
 
-                POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_b)
-                (yl + bx, ul + (bx >> 1), vl + (bx >> 1), Y, U, V, 0xc000, y_stride);
+                POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_b)(yl + bx,
+                                                           ul + (bx >> 1),
+                                                           vl + (bx >> 1),
+                                                           Y, U, V,
+                                                           0xc000, y_stride);
               }
               bmi++;
             }
@@ -952,8 +967,11 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t
           U = MB_PREDICTION_MODE_colors[mi->mbmi.mode][1];
           V = MB_PREDICTION_MODE_colors[mi->mbmi.mode][2];
 
-          POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb_inner)
-          (y_ptr + x, u_ptr + (x >> 1), v_ptr + (x >> 1), Y, U, V, 0xc000, y_stride);
+          POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb_inner)(y_ptr + x,
+                                                            u_ptr + (x >> 1),
+                                                            v_ptr + (x >> 1),
+                                                            Y, U, V,
+                                                            0xc000, y_stride);
         }
 
         mi++;
@@ -967,7 +985,8 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t
   }
 
   /* Color in frame reference blocks */
-  if ((flags & VP9D_DEBUG_CLR_FRM_REF_BLKS) && ppflags->display_ref_frame_flag) {
+  if ((flags & VP9D_DEBUG_CLR_FRM_REF_BLKS) &&
+      ppflags->display_ref_frame_flag) {
     int y, x;
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
     int width  = post->y_width;
@@ -987,8 +1006,11 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t
           U = MV_REFERENCE_FRAME_colors[mi->mbmi.ref_frame][1];
           V = MV_REFERENCE_FRAME_colors[mi->mbmi.ref_frame][2];
 
-          POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb_outer)
-          (y_ptr + x, u_ptr + (x >> 1), v_ptr + (x >> 1), Y, U, V, 0xc000, y_stride);
+          POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb_outer)(y_ptr + x,
+                                                            u_ptr + (x >> 1),
+                                                            v_ptr + (x >> 1),
+                                                            Y, U, V,
+                                                            0xc000, y_stride);
         }
 
         mi++;
@@ -1008,5 +1030,6 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp9_ppflags_t
   dest->y_width = oci->Width;
   dest->y_height = oci->Height;
   dest->uv_height = dest->y_height / 2;
+
   return 0;
 }

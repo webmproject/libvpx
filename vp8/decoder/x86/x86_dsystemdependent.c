@@ -8,11 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "vpx_ports/config.h"
 #include "vpx_ports/x86.h"
 #include "vp8/decoder/onyxd_int.h"
-
 
 #if HAVE_MMX
 void vp9_dequantize_b_impl_mmx(short *sq, short *dq, short *q);

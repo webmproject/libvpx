@@ -8,9 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef __ENCODEINTRA_H_
+#define __ENCODEINTRA_H_
 
-#ifndef _ENCODEINTRA_H_
-#define _ENCODEINTRA_H_
 #include "onyx_int.h"
 
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred);
@@ -24,4 +24,4 @@ void vp9_encode_intra8x8mbuv(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x);
 void vp9_encode_intra8x8(const VP9_ENCODER_RTCD *rtcd,
                          MACROBLOCK *x, int ib);
 
-#endif
+#endif  // __ENCODEINTRA_H_

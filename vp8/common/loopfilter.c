@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "vpx_config.h"
 #include "loopfilter.h"
 #include "onyxc_int.h"
@@ -52,7 +51,6 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[NEARMV] = 2;
   lfi->mode_lf_lut[NEWMV] = 2;
   lfi->mode_lf_lut[SPLITMV] = 3;
-
 }
 
 void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
@@ -178,11 +176,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
   }
 }
 
-void vp9_loop_filter_frame
-(
-  VP9_COMMON *cm,
-  MACROBLOCKD *xd
-) {
+void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd) {
   YV12_BUFFER_CONFIG *post = cm->frame_to_show;
   loop_filter_info_n *lfi_n = &cm->lf_info;
   struct loop_filter_info lfi;
@@ -316,12 +310,8 @@ void vp9_loop_filter_frame
   }
 }
 
-void vp9_loop_filter_frame_yonly
-(
-  VP9_COMMON *cm,
-  MACROBLOCKD *xd,
-  int default_filt_lvl
-) {
+void vp9_loop_filter_frame_yonly(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                 int default_filt_lvl) {
   YV12_BUFFER_CONFIG *post = cm->frame_to_show;
 
   unsigned char *y_ptr;
@@ -413,21 +403,15 @@ void vp9_loop_filter_frame_yonly
 
       y_ptr += 16;
       mode_info_context++;        /* step to next MB */
-
     }
 
     y_ptr += post->y_stride  * 16 - post->y_width;
     mode_info_context++;            /* Skip border mb */
   }
-
 }
 
-void vp9_loop_filter_partial_frame
-(
-  VP9_COMMON *cm,
-  MACROBLOCKD *xd,
-  int default_filt_lvl
-) {
+void vp9_loop_filter_partial_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                   int default_filt_lvl) {
   YV12_BUFFER_CONFIG *post = cm->frame_to_show;
 
   unsigned char *y_ptr;

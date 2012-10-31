@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "swapyv12buffer.h"
 
-void vp9_swap_yv12_buffer(YV12_BUFFER_CONFIG *new_frame, YV12_BUFFER_CONFIG *last_frame) {
+void vp9_swap_yv12_buffer(YV12_BUFFER_CONFIG *new_frame,
+                          YV12_BUFFER_CONFIG *last_frame) {
   unsigned char *temp;
 
   temp = last_frame->buffer_alloc;
@@ -29,5 +29,4 @@ void vp9_swap_yv12_buffer(YV12_BUFFER_CONFIG *new_frame, YV12_BUFFER_CONFIG *las
   temp = last_frame->v_buffer;
   last_frame->v_buffer = new_frame->v_buffer;
   new_frame->v_buffer = temp;
-
 }

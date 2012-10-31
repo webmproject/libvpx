@@ -18,12 +18,9 @@
 #include <vpx_mem/vpx_mem.h>
 #include <vp8/encoder/segmentation.h>
 
-static unsigned int do_16x16_motion_iteration
-(
-  VP9_COMP *cpi,
-  int_mv *ref_mv,
-  int_mv *dst_mv
-) {
+static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
+                                              int_mv *ref_mv,
+                                              int_mv *dst_mv) {
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   BLOCK *b  = &x->block[0];

@@ -85,12 +85,10 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
   }
 }
 
-void vp9_copy_mem16x16_c(
-  unsigned char *src,
-  int src_stride,
-  unsigned char *dst,
-  int dst_stride) {
-
+void vp9_copy_mem16x16_c(unsigned char *src,
+                         int src_stride,
+                         unsigned char *dst,
+                         int dst_stride) {
   int r;
 
   for (r = 0; r < 16; r++) {
@@ -121,16 +119,13 @@ void vp9_copy_mem16x16_c(
 #endif
     src += src_stride;
     dst += dst_stride;
-
   }
-
 }
 
-void vp9_avg_mem16x16_c(
-  unsigned char *src,
-  int src_stride,
-  unsigned char *dst,
-  int dst_stride) {
+void vp9_avg_mem16x16_c(unsigned char *src,
+                        int src_stride,
+                        unsigned char *dst,
+                        int dst_stride) {
   int r;
 
   for (r = 0; r < 16; r++) {
@@ -145,11 +140,10 @@ void vp9_avg_mem16x16_c(
   }
 }
 
-void vp9_copy_mem8x8_c(
-  unsigned char *src,
-  int src_stride,
-  unsigned char *dst,
-  int dst_stride) {
+void vp9_copy_mem8x8_c(unsigned char *src,
+                       int src_stride,
+                       unsigned char *dst,
+                       int dst_stride) {
   int r;
 
   for (r = 0; r < 8; r++) {
@@ -168,16 +162,13 @@ void vp9_copy_mem8x8_c(
 #endif
     src += src_stride;
     dst += dst_stride;
-
   }
-
 }
 
-void vp9_avg_mem8x8_c(
-  unsigned char *src,
-  int src_stride,
-  unsigned char *dst,
-  int dst_stride) {
+void vp9_avg_mem8x8_c(unsigned char *src,
+                      int src_stride,
+                      unsigned char *dst,
+                      int dst_stride) {
   int r;
 
   for (r = 0; r < 8; r++) {
@@ -192,11 +183,10 @@ void vp9_avg_mem8x8_c(
   }
 }
 
-void vp9_copy_mem8x4_c(
-  unsigned char *src,
-  int src_stride,
-  unsigned char *dst,
-  int dst_stride) {
+void vp9_copy_mem8x4_c(unsigned char *src,
+                       int src_stride,
+                       unsigned char *dst,
+                       int dst_stride) {
   int r;
 
   for (r = 0; r < 4; r++) {
@@ -215,12 +205,8 @@ void vp9_copy_mem8x4_c(
 #endif
     src += src_stride;
     dst += dst_stride;
-
   }
-
 }
-
-
 
 void vp9_build_inter_predictors_b(BLOCKD *d, int pitch, vp9_subpix_fn_t sppf) {
   int r;
@@ -233,10 +219,13 @@ void vp9_build_inter_predictors_b(BLOCKD *d, int pitch, vp9_subpix_fn_t sppf) {
   mv.as_int = d->bmi.as_mv.first.as_int;
 
   if (mv.as_mv.row & 7 || mv.as_mv.col & 7) {
-    ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride + (mv.as_mv.col >> 3);
-    sppf(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1, (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
+    ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
+          (mv.as_mv.col >> 3);
+    sppf(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1, (mv.as_mv.row & 7) << 1,
+         pred_ptr, pitch);
   } else {
-    ptr_base += d->pre + (mv.as_mv.row >> 3) * d->pre_stride + (mv.as_mv.col >> 3);
+    ptr_base += d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
+                (mv.as_mv.col >> 3);
     ptr = ptr_base;
 
     for (r = 0; r < 4; r++) {
@@ -260,7 +249,8 @@ void vp9_build_inter_predictors_b(BLOCKD *d, int pitch, vp9_subpix_fn_t sppf) {
  * come from an earlier call to vp9_build_inter_predictors_b()) with the
  * predictor of the second reference frame / motion vector.
  */
-void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp9_subpix_fn_t sppf) {
+void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
+                                      vp9_subpix_fn_t sppf) {
   int r;
   unsigned char *ptr_base;
   unsigned char *ptr;
@@ -271,10 +261,13 @@ void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp9_subpix_fn_t sppf
   mv.as_int = d->bmi.as_mv.second.as_int;
 
   if (mv.as_mv.row & 7 || mv.as_mv.col & 7) {
-    ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride + (mv.as_mv.col >> 3);
-    sppf(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1, (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
+    ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
+          (mv.as_mv.col >> 3);
+    sppf(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1, (mv.as_mv.row & 7) << 1,
+         pred_ptr, pitch);
   } else {
-    ptr_base += d->pre + (mv.as_mv.row >> 3) * d->pre_stride + (mv.as_mv.col >> 3);
+    ptr_base += d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
+                (mv.as_mv.col >> 3);
     ptr = ptr_base;
 
     for (r = 0; r < 4; r++) {

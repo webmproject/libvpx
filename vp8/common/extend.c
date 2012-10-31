@@ -8,24 +8,19 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "extend.h"
 #include "vpx_mem/vpx_mem.h"
 
-
-static void copy_and_extend_plane
-(
-  unsigned char *s, /* source */
-  int sp,           /* source pitch */
-  unsigned char *d, /* destination */
-  int dp,           /* destination pitch */
-  int h,            /* height */
-  int w,            /* width */
-  int et,           /* extend top border */
-  int el,           /* extend left border */
-  int eb,           /* extend bottom border */
-  int er            /* extend right border */
-) {
+static void copy_and_extend_plane(unsigned char *s, /* source */
+                                  int sp,           /* source pitch */
+                                  unsigned char *d, /* destination */
+                                  int dp,           /* destination pitch */
+                                  int h,            /* height */
+                                  int w,            /* width */
+                                  int et,           /* extend top border */
+                                  int el,           /* extend left border */
+                                  int eb,           /* extend bottom border */
+                                  int er) {         /* extend right border */
   int i;
   unsigned char *src_ptr1, *src_ptr2;
   unsigned char *dest_ptr1, *dest_ptr2;
@@ -67,7 +62,6 @@ static void copy_and_extend_plane
   }
 }
 
-
 void vp9_copy_and_extend_frame(YV12_BUFFER_CONFIG *src,
                                YV12_BUFFER_CONFIG *dst) {
   int et = dst->border;
@@ -95,7 +89,6 @@ void vp9_copy_and_extend_frame(YV12_BUFFER_CONFIG *src,
                         src->uv_height, src->uv_width,
                         et, el, eb, er);
 }
-
 
 void vp9_copy_and_extend_frame_with_rect(YV12_BUFFER_CONFIG *src,
                                          YV12_BUFFER_CONFIG *dst,
@@ -149,9 +142,9 @@ void vp9_copy_and_extend_frame_with_rect(YV12_BUFFER_CONFIG *src,
                         et, el, eb, er);
 }
 
-
 /* note the extension is only for the last row, for intra prediction purpose */
-void vp9_extend_mb_row(YV12_BUFFER_CONFIG *ybf, unsigned char *YPtr, unsigned char *UPtr, unsigned char *VPtr) {
+void vp9_extend_mb_row(YV12_BUFFER_CONFIG *ybf, unsigned char *YPtr,
+                       unsigned char *UPtr, unsigned char *VPtr) {
   int i;
 
   YPtr += ybf->y_stride * 14;

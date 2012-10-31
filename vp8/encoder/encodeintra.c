@@ -16,7 +16,6 @@
 #include "vp8/common/reconintra4x4.h"
 #include "encodemb.h"
 #include "vp8/common/invtrans.h"
-#include "vp8/common/g_common.h"
 #include "encodeintra.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -79,7 +78,7 @@ void vp9_encode_intra4x4block(const VP9_ENCODER_RTCD *rtcd,
   } else {
     x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
     x->quantize_b_4x4(be, b) ;
-    vp9_inverse_transform_b_4x4(IF_RTCD(&rtcd->common->idct), b, 32) ;
+    vp9_inverse_transform_b_4x4(IF_RTCD(&rtcd->common->idct), b, 32);
   }
 
   vp9_recon_b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
@@ -265,7 +264,8 @@ void vp9_encode_intra_uv4x4(const VP9_ENCODER_RTCD *rtcd,
   x->quantize_b_4x4(be, b);
   vp9_inverse_transform_b_4x4(IF_RTCD(&rtcd->common->idct), b, 16);
 
-  vp9_recon_uv_b_c(b->predictor,b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+  vp9_recon_uv_b_c(b->predictor, b->diff, *(b->base_dst) + b->dst,
+                   b->dst_stride);
 }
 
 void vp9_encode_intra8x8mbuv(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {

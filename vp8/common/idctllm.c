@@ -413,7 +413,7 @@ void vp9_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
 #define HORIZONTAL_SHIFT 17  // 15
 #define HORIZONTAL_ROUNDING ((1 << (HORIZONTAL_SHIFT - 1)) - 1)
 void vp9_ihtllm_int_c(const int16_t *input, int16_t *output, int pitch,
-                   TX_TYPE tx_type, int tx_dim) {
+                      TX_TYPE tx_type, int tx_dim) {
   int i, j, k;
   int16_t imbuf[256];
 
@@ -564,7 +564,8 @@ void vp9_short_idct4x4llm_1_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp9_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride) {
+void vp9_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr,
+                            unsigned char *dst_ptr, int pitch, int stride) {
   int a1 = ((input_dc + 16) >> 5);
   int r, c;
 
@@ -584,7 +585,6 @@ void vp9_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr, unsigned ch
     dst_ptr += stride;
     pred_ptr += pitch;
   }
-
 }
 
 void vp9_short_inv_walsh4x4_c(short *input, short *output) {
@@ -765,7 +765,9 @@ void vp9_short_inv_walsh4x4_1_x8_c(short *in, short *out, int pitch) {
   }
 }
 
-void vp9_dc_only_inv_walsh_add_c(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride) {
+void vp9_dc_only_inv_walsh_add_c(short input_dc, unsigned char *pred_ptr,
+                                 unsigned char *dst_ptr,
+                                 int pitch, int stride) {
   int r, c;
   short tmp[16];
   vp9_short_inv_walsh4x4_1_x8_c(&input_dc, tmp, 4 << 1);

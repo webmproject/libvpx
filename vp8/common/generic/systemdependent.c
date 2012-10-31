@@ -11,7 +11,6 @@
 
 #include "vpx_ports/config.h"
 #include "vpx_rtcd.h"
-#include "vp8/common/g_common.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/idct.h"
@@ -41,13 +40,13 @@ void vp9_machine_specific_config(VP9_COMMON *ctx) {
   rtcd->subpix.eighttap_avg4x4     = vp9_eighttap_predict_avg4x4_c;
   rtcd->subpix.eighttap8x4         = vp9_eighttap_predict8x4_c;
   rtcd->subpix.eighttap4x4         = vp9_eighttap_predict_c;
-  rtcd->subpix.eighttap16x16_sharp       = vp9_eighttap_predict16x16_sharp_c;
-  rtcd->subpix.eighttap8x8_sharp         = vp9_eighttap_predict8x8_sharp_c;
-  rtcd->subpix.eighttap_avg16x16_sharp   = vp9_eighttap_predict_avg16x16_sharp_c;
-  rtcd->subpix.eighttap_avg8x8_sharp     = vp9_eighttap_predict_avg8x8_sharp_c;
-  rtcd->subpix.eighttap_avg4x4_sharp     = vp9_eighttap_predict_avg4x4_sharp_c;
-  rtcd->subpix.eighttap8x4_sharp         = vp9_eighttap_predict8x4_sharp_c;
-  rtcd->subpix.eighttap4x4_sharp         = vp9_eighttap_predict_sharp_c;
+  rtcd->subpix.eighttap16x16_sharp     = vp9_eighttap_predict16x16_sharp_c;
+  rtcd->subpix.eighttap8x8_sharp       = vp9_eighttap_predict8x8_sharp_c;
+  rtcd->subpix.eighttap_avg16x16_sharp = vp9_eighttap_predict_avg16x16_sharp_c;
+  rtcd->subpix.eighttap_avg8x8_sharp   = vp9_eighttap_predict_avg8x8_sharp_c;
+  rtcd->subpix.eighttap_avg4x4_sharp   = vp9_eighttap_predict_avg4x4_sharp_c;
+  rtcd->subpix.eighttap8x4_sharp       = vp9_eighttap_predict8x4_sharp_c;
+  rtcd->subpix.eighttap4x4_sharp       = vp9_eighttap_predict_sharp_c;
 
   rtcd->subpix.sixtap16x16       = vp9_sixtap_predict16x16_c;
   rtcd->subpix.sixtap8x8         = vp9_sixtap_predict8x8_c;
@@ -79,7 +78,6 @@ void vp9_machine_specific_config(VP9_COMMON *ctx) {
 #if ARCH_X86 || ARCH_X86_64
   vp9_arch_x86_common_init(ctx);
 #endif
-
 
 #if ARCH_ARM
   vp9_arch_arm_common_init(ctx);

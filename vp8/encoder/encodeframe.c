@@ -2296,7 +2296,7 @@ void vp9_encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
       vp9_optimize_mbuv_8x8(x, rtcd);
     }
     vp9_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-    vp9_recon_mby_s_c( &x->e_mbd,
+    vp9_recon_mby_s_c(&x->e_mbd,
                       dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
     vp9_recon_mbuv_s_c(&x->e_mbd,
                        udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,

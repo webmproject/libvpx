@@ -8,8 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-#include "g_common.h"
 #include "subpixel.h"
 #include "loopfilter.h"
 #include "recon.h"

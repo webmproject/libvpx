@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef loopfilter_h
 #define loopfilter_h
 
@@ -33,10 +32,14 @@ typedef enum {
  * passed it can be loaded into vector registers.
  */
 typedef struct {
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, mblim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, blim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, hev_thr[4][SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+                  mblim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+                  blim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+                  lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+                  hev_thr[4][SIMD_WIDTH]);
   unsigned char lvl[4][4][4];
   unsigned char hev_thr_lut[2][MAX_LOOP_FILTER + 1];
   unsigned char mode_lf_lut[MB_MODE_COUNT];
@@ -48,7 +51,6 @@ struct loop_filter_info {
   const unsigned char *lim;
   const unsigned char *hev_thr;
 };
-
 
 #define prototype_loopfilter(sym) \
   void sym(unsigned char *src, int pitch, const unsigned char *blimit,\
@@ -69,15 +71,12 @@ struct loop_filter_info {
 #include "arm/loopfilter_arm.h"
 #endif
 
-typedef void loop_filter_uvfunction
-(
-  unsigned char *u,   /* source pointer */
-  int p,              /* pitch */
-  const unsigned char *blimit,
-  const unsigned char *limit,
-  const unsigned char *thresh,
-  unsigned char *v
-);
+typedef void loop_filter_uvfunction(unsigned char *u,   /* source pointer */
+                                    int p,              /* pitch */
+                                    const unsigned char *blimit,
+                                    const unsigned char *limit,
+                                    const unsigned char *thresh,
+                                    unsigned char *v);
 
 /* assorted loopfilter functions which get used elsewhere */
 struct VP9Common;
@@ -102,4 +101,4 @@ void vp9_loop_filter_frame_yonly(struct VP9Common *cm,
 void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
                                       int sharpness_lvl);
 
-#endif
+#endif  // loopfilter_h
