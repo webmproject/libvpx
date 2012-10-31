@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//82U\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-10-31T00:34:26Z",
+      "side": 1,
+      "message": "Note for Yaowu: yes, I actually found where the table should have been used. This looks like a typo, so I reverted it back to what I suppose it should have been.",
+      "revId": "5bd8ede4d897470b85e5d598948f462c350ce80c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
