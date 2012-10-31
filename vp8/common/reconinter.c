@@ -20,7 +20,7 @@
 
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,
-                              VP8_COMMON *cm) {
+                              VP9_COMMON *cm) {
   if (mcomp_filter_type == SIXTAP) {
     xd->subpixel_predict        = SUBPIX_INVOKE(
         &cm->rtcd.subpix, sixtap4x4);

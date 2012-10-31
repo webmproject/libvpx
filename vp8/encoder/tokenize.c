@@ -48,7 +48,7 @@ extern unsigned int hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
 #endif  /* ENTROPY_STATS */
 
-void vp9_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
+void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 void vp9_fix_contexts(MACROBLOCKD *xd);
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
@@ -109,7 +109,7 @@ static void fill_value_tokens() {
   vp9_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
-static void tokenize_b(VP8_COMP *cpi,
+static void tokenize_b(VP9_COMP *cpi,
                        MACROBLOCKD *xd,
                        const BLOCKD * const b,
                        TOKENEXTRA **tp,
@@ -286,7 +286,7 @@ static int mb_is_skippable_16x16(MACROBLOCKD *xd) {
   return (vp9_mby_is_skippable_16x16(xd) & vp9_mbuv_is_skippable_8x8(xd));
 }
 
-void vp9_tokenize_mb(VP8_COMP *cpi,
+void vp9_tokenize_mb(VP9_COMP *cpi,
                      MACROBLOCKD *xd,
                      TOKENEXTRA **t,
                      int dry_run) {
@@ -667,7 +667,7 @@ void vp9_tokenize_initialize() {
   fill_value_tokens();
 }
 
-static __inline void stuff_b(VP8_COMP *cpi,
+static __inline void stuff_b(VP9_COMP *cpi,
                              MACROBLOCKD *xd,
                              const BLOCKD * const b,
                              TOKENEXTRA **tp,
@@ -730,7 +730,7 @@ static __inline void stuff_b(VP8_COMP *cpi,
   }
 }
 
-static void vp9_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
+static void vp9_stuff_mb_8x8(VP9_COMP *cpi, MACROBLOCKD *xd,
                              TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -765,7 +765,7 @@ static void vp9_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *xd,
   }
 }
 
-static void vp9_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
+static void vp9_stuff_mb_16x16(VP9_COMP *cpi, MACROBLOCKD *xd,
                                TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -784,7 +784,7 @@ static void vp9_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
   vpx_memset(&L[8], 0, sizeof(L[8]));
 }
 
-static void vp9_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
+static void vp9_stuff_mb_4x4(VP9_COMP *cpi, MACROBLOCKD *xd,
                              TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -811,7 +811,7 @@ static void vp9_stuff_mb_4x4(VP8_COMP *cpi, MACROBLOCKD *xd,
             L + vp9_block2left[b], TX_4X4, dry_run);
 }
 
-static void vp9_stuff_mb_8x8_4x4uv(VP8_COMP *cpi, MACROBLOCKD *xd,
+static void vp9_stuff_mb_8x8_4x4uv(VP9_COMP *cpi, MACROBLOCKD *xd,
                                    TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -830,7 +830,7 @@ static void vp9_stuff_mb_8x8_4x4uv(VP8_COMP *cpi, MACROBLOCKD *xd,
             L + vp9_block2left[b], TX_4X4, dry_run);
 }
 
-void vp9_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
+void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
   TOKENEXTRA * const t_backup = *t;
 

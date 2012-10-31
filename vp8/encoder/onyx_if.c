@@ -60,13 +60,13 @@
 #define RTCD(x) NULL
 #endif
 
-extern void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
+extern void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi);
 
-extern void vp9_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
+extern void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val);
 
-extern void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
+extern void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi);
 
-extern void vp9_cmachine_specific_config(VP8_COMP *cpi);
+extern void vp9_cmachine_specific_config(VP9_COMP *cpi);
 
 extern void vp9_deblock_frame(YV12_BUFFER_CONFIG *source,
                               YV12_BUFFER_CONFIG *post,
@@ -78,9 +78,9 @@ extern unsigned int vp8_get_processor_freq();
 
 extern void print_tree_update_probs();
 
-extern void vp8cx_create_encoder_threads(VP8_COMP *cpi);
+extern void vp8cx_create_encoder_threads(VP9_COMP *cpi);
 
-extern void vp8cx_remove_encoder_threads(VP8_COMP *cpi);
+extern void vp8cx_remove_encoder_threads(VP9_COMP *cpi);
 
 #if HAVE_ARMV7
 extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
@@ -92,9 +92,9 @@ extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
 
 int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
 
-extern void vp9_temporal_filter_prepare_c(VP8_COMP *cpi, int distance);
+extern void vp9_temporal_filter_prepare_c(VP9_COMP *cpi, int distance);
 
-static void set_default_lf_deltas(VP8_COMP *cpi);
+static void set_default_lf_deltas(VP9_COMP *cpi);
 
 extern const int vp8_gf_interval_table[101];
 
@@ -180,7 +180,7 @@ extern unsigned int inter_uv_modes[VP8_UV_MODES];
 extern unsigned int inter_b_modes[B_MODE_COUNT];
 #endif
 
-extern void vp9_init_quantizer(VP8_COMP *cpi);
+extern void vp9_init_quantizer(VP9_COMP *cpi);
 
 static int base_skip_false_prob[QINDEX_RANGE][3];
 
@@ -289,8 +289,8 @@ static void init_base_skip_probs(void) {
   }
 }
 
-static void update_base_skip_probs(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+static void update_base_skip_probs(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
 
   if (cm->frame_type != KEY_FRAME) {
     vp9_update_skip_probs(cpi);
@@ -338,7 +338,7 @@ void vp9_initialize_enc() {
 extern FILE *vpxlogc;
 #endif
 
-static void setup_features(VP8_COMP *cpi) {
+static void setup_features(VP9_COMP *cpi) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   // Set up default state for MB feature flags
@@ -363,7 +363,7 @@ static void setup_features(VP8_COMP *cpi) {
 }
 
 
-static void dealloc_compressor_data(VP8_COMP *cpi) {
+static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->tplist);
   cpi->tplist = NULL;
 
@@ -426,7 +426,7 @@ static void dealloc_compressor_data(VP8_COMP *cpi) {
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a target value
 // target q value
-static int compute_qdelta(VP8_COMP *cpi, double qstart, double qtarget) {
+static int compute_qdelta(VP9_COMP *cpi, double qstart, double qtarget) {
   int i;
   int start_index = cpi->worst_quality;
   int target_index = cpi->worst_quality;
@@ -448,8 +448,8 @@ static int compute_qdelta(VP8_COMP *cpi, double qstart, double qtarget) {
   return target_index - start_index;
 }
 
-static void init_seg_features(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+static void init_seg_features(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   int high_q = (int)(cpi->avg_q > 48.0);
@@ -464,7 +464,7 @@ static void init_seg_features(VP8_COMP *cpi) {
     cpi->static_mb_pct = 0;
 
     // Disable segmentation
-    vp9_disable_segmentation((VP8_PTR)cpi);
+    vp9_disable_segmentation((VP9_PTR)cpi);
 
     // Clear down the segment features.
     vp9_clearall_segfeatures(xd);
@@ -479,7 +479,7 @@ static void init_seg_features(VP8_COMP *cpi) {
     cpi->static_mb_pct = 0;
 
     // Disable segmentation and individual segment features by default
-    vp9_disable_segmentation((VP8_PTR)cpi);
+    vp9_disable_segmentation((VP9_PTR)cpi);
     vp9_clearall_segfeatures(xd);
 
     // Scan frames from current to arf frame.
@@ -540,7 +540,7 @@ static void init_seg_features(VP8_COMP *cpi) {
       // Disable segmentation and clear down features if alt ref
       // is not active for this group
       else {
-        vp9_disable_segmentation((VP8_PTR)cpi);
+        vp9_disable_segmentation((VP9_PTR)cpi);
 
         vpx_memset(cpi->segmentation_map, 0,
                    (cm->mb_rows * cm->mb_cols));
@@ -590,8 +590,8 @@ static void init_seg_features(VP8_COMP *cpi) {
 }
 
 // DEBUG: Print out the segment id of each MB in the current frame.
-static void print_seg_map(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+static void print_seg_map(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
   int row, col;
   int map_index = 0;
   FILE *statsfile;
@@ -614,8 +614,8 @@ static void print_seg_map(VP8_COMP *cpi) {
   fclose(statsfile);
 }
 
-static void update_reference_segmentation_map(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+static void update_reference_segmentation_map(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
   int row, col, sb_rows = (cm->mb_rows + 1) >> 1, sb_cols = (cm->mb_cols + 1) >> 1;
   MODE_INFO *mi = cm->mi;
   uint8_t *segmap = cpi->segmentation_map;
@@ -655,7 +655,7 @@ static void update_reference_segmentation_map(VP8_COMP *cpi) {
   }
 }
 
-static void set_default_lf_deltas(VP8_COMP *cpi) {
+static void set_default_lf_deltas(VP9_COMP *cpi) {
   cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 1;
   cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
 
@@ -674,12 +674,12 @@ static void set_default_lf_deltas(VP8_COMP *cpi) {
   cpi->mb.e_mbd.mode_lf_deltas[3] = 4;               // Split mv
 }
 
-void vp9_set_speed_features(VP8_COMP *cpi) {
+void vp9_set_speed_features(VP9_COMP *cpi) {
   SPEED_FEATURES *sf = &cpi->sf;
   int Mode = cpi->compressor_speed;
   int Speed = cpi->Speed;
   int i;
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
 
   // Only modes 0 and 1 supported for now in experimental code basae
   if (Mode > 1)
@@ -1241,7 +1241,7 @@ void vp9_set_speed_features(VP8_COMP *cpi) {
   frames_at_speed[cpi->Speed]++;
 #endif
 }
-static void alloc_raw_frame_buffers(VP8_COMP *cpi) {
+static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
   int width = (cpi->oxcf.Width + 15) & ~15;
   int height = (cpi->oxcf.Height + 15) & ~15;
 
@@ -1261,7 +1261,7 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi) {
 #endif
 }
 
-static int vp8_alloc_partition_data(VP8_COMP *cpi) {
+static int vp8_alloc_partition_data(VP9_COMP *cpi) {
   vpx_free(cpi->mb.pip);
 
   cpi->mb.pip = vpx_calloc((cpi->common.mb_cols + 1) *
@@ -1275,8 +1275,8 @@ static int vp8_alloc_partition_data(VP8_COMP *cpi) {
   return 0;
 }
 
-void vp9_alloc_compressor_data(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+void vp9_alloc_compressor_data(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
 
   int width = cm->Width;
   int height = cm->Height;
@@ -1388,7 +1388,7 @@ int vp9_reverse_trans(int x) {
 
   return 63;
 };
-void vp9_new_frame_rate(VP8_COMP *cpi, double framerate) {
+void vp9_new_frame_rate(VP9_COMP *cpi, double framerate) {
   if (framerate < .1)
     framerate = 30;
 
@@ -1434,9 +1434,9 @@ rescale(int val, int num, int denom) {
 }
 
 
-static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
-  VP8_COMMON *cm = &cpi->common;
+static void init_config(VP9_PTR ptr, VP8_CONFIG *oxcf) {
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+  VP9_COMMON *cm = &cpi->common;
 
   cpi->oxcf = *oxcf;
 
@@ -1480,9 +1480,9 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
 }
 
 
-void vp9_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
-  VP8_COMMON *cm = &cpi->common;
+void vp9_change_config(VP9_PTR ptr, VP8_CONFIG *oxcf) {
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+  VP9_COMMON *cm = &cpi->common;
 
   if (!cpi)
     return;
@@ -1726,27 +1726,27 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
   } while (++i <= MV_MAX);
 }
 
-VP8_PTR vp9_create_compressor(VP8_CONFIG *oxcf) {
+VP9_PTR vp9_create_compressor(VP8_CONFIG *oxcf) {
   int i;
   volatile union {
-    VP8_COMP *cpi;
-    VP8_PTR   ptr;
+    VP9_COMP *cpi;
+    VP9_PTR   ptr;
   } ctx;
 
-  VP8_COMP *cpi;
-  VP8_COMMON *cm;
+  VP9_COMP *cpi;
+  VP9_COMMON *cm;
 
-  cpi = ctx.cpi = vpx_memalign(32, sizeof(VP8_COMP));
+  cpi = ctx.cpi = vpx_memalign(32, sizeof(VP9_COMP));
   // Check that the CPI instance is valid
   if (!cpi)
     return 0;
 
   cm = &cpi->common;
 
-  vpx_memset(cpi, 0, sizeof(VP8_COMP));
+  vpx_memset(cpi, 0, sizeof(VP9_COMP));
 
   if (setjmp(cm->error.jmp)) {
-    VP8_PTR ptr = ctx.ptr;
+    VP9_PTR ptr = ctx.ptr;
 
     ctx.cpi->common.error.setjmp = 0;
     vp9_remove_compressor(&ptr);
@@ -1760,7 +1760,7 @@ VP8_PTR vp9_create_compressor(VP8_CONFIG *oxcf) {
   vp9_create_common(&cpi->common);
   vp9_cmachine_specific_config(cpi);
 
-  init_config((VP8_PTR)cpi, oxcf);
+  init_config((VP9_PTR)cpi, oxcf);
 
   memcpy(cpi->base_skip_false_prob, base_skip_false_prob, sizeof(base_skip_false_prob));
   cpi->common.current_video_frame   = 0;
@@ -2026,11 +2026,11 @@ VP8_PTR vp9_create_compressor(VP8_CONFIG *oxcf) {
 
   vp8_zero(cpi->y_uv_mode_count)
 
-  return (VP8_PTR) cpi;
+  return (VP9_PTR) cpi;
 }
 
-void vp9_remove_compressor(VP8_PTR *ptr) {
-  VP8_COMP *cpi = (VP8_COMP *)(*ptr);
+void vp9_remove_compressor(VP9_PTR *ptr) {
+  VP9_COMP *cpi = (VP9_COMP *)(*ptr);
   int i;
 
   if (!cpi)
@@ -2329,7 +2329,7 @@ static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
 }
 
 
-static void generate_psnr_packet(VP8_COMP *cpi) {
+static void generate_psnr_packet(VP9_COMP *cpi) {
   YV12_BUFFER_CONFIG      *orig = cpi->Source;
   YV12_BUFFER_CONFIG      *recon = cpi->common.frame_to_show;
   struct vpx_codec_cx_pkt  pkt;
@@ -2374,8 +2374,8 @@ static void generate_psnr_packet(VP8_COMP *cpi) {
 }
 
 
-int vp9_use_as_reference(VP8_PTR ptr, int ref_frame_flags) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
+int vp9_use_as_reference(VP9_PTR ptr, int ref_frame_flags) {
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
 
   if (ref_frame_flags > 7)
     return -1;
@@ -2383,8 +2383,8 @@ int vp9_use_as_reference(VP8_PTR ptr, int ref_frame_flags) {
   cpi->ref_frame_flags = ref_frame_flags;
   return 0;
 }
-int vp9_update_reference(VP8_PTR ptr, int ref_frame_flags) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
+int vp9_update_reference(VP9_PTR ptr, int ref_frame_flags) {
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
 
   if (ref_frame_flags > 7)
     return -1;
@@ -2405,10 +2405,10 @@ int vp9_update_reference(VP8_PTR ptr, int ref_frame_flags) {
   return 0;
 }
 
-int vp9_get_reference_enc(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag,
+int vp9_get_reference_enc(VP9_PTR ptr, VP8_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+  VP9_COMMON *cm = &cpi->common;
   int ref_fb_idx;
 
   if (ref_frame_flag == VP8_LAST_FLAG)
@@ -2425,10 +2425,10 @@ int vp9_get_reference_enc(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag,
   return 0;
 }
 
-int vp9_set_reference_enc(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag,
+int vp9_set_reference_enc(VP9_PTR ptr, VP8_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+  VP9_COMMON *cm = &cpi->common;
 
   int ref_fb_idx;
 
@@ -2445,9 +2445,9 @@ int vp9_set_reference_enc(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag,
 
   return 0;
 }
-int vp9_update_entropy(VP8_PTR comp, int update) {
-  VP8_COMP *cpi = (VP8_COMP *) comp;
-  VP8_COMMON *cm = &cpi->common;
+int vp9_update_entropy(VP9_PTR comp, int update) {
+  VP9_COMP *cpi = (VP9_COMP *) comp;
+  VP9_COMMON *cm = &cpi->common;
   cm->refresh_entropy_probs = update;
 
   return 0;
@@ -2483,7 +2483,7 @@ void vp8_write_yuv_frame(YV12_BUFFER_CONFIG *s) {
 #endif
 
 #ifdef OUTPUT_YUV_REC
-void vp8_write_yuv_rec_frame(VP8_COMMON *cm) {
+void vp8_write_yuv_rec_frame(VP9_COMMON *cm) {
   YV12_BUFFER_CONFIG *s = cm->frame_to_show;
   unsigned char *src = s->y_buffer;
   int h = cm->Height;
@@ -2511,8 +2511,8 @@ void vp8_write_yuv_rec_frame(VP8_COMMON *cm) {
 }
 #endif
 
-static void update_alt_ref_frame_stats(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
 
   // Update data structure that monitors level of reference to last GF
   vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
@@ -2529,8 +2529,8 @@ static void update_alt_ref_frame_stats(VP8_COMP *cpi) {
 
 
 }
-static void update_golden_frame_stats(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+static void update_golden_frame_stats(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
 
   // Update the Golden frame usage counts.
   if (cm->refresh_golden_frame) {
@@ -2607,7 +2607,7 @@ static int find_fp_qindex() {
   return i;
 }
 
-static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags) {
+static void Pass1Encode(VP9_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags) {
   (void) size;
   (void) dest;
   (void) frame_flags;
@@ -2682,11 +2682,11 @@ static double compute_edge_pixel_proportion(YV12_BUFFER_CONFIG *frame) {
 
 // Function to test for conditions that indicate we should loop
 // back and recode a frame.
-static BOOL recode_loop_test(VP8_COMP *cpi,
+static BOOL recode_loop_test(VP9_COMP *cpi,
                              int high_limit, int low_limit,
                              int q, int maxq, int minq) {
   BOOL    force_recode = FALSE;
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
 
   // Is frame recode allowed at all
   // Yes if either recode mode 1 is selected or mode two is selcted
@@ -2722,7 +2722,7 @@ static BOOL recode_loop_test(VP8_COMP *cpi,
   return force_recode;
 }
 
-static void update_reference_frames(VP8_COMMON *cm) {
+static void update_reference_frames(VP9_COMMON *cm) {
   YV12_BUFFER_CONFIG *yv12_fb = cm->yv12_fb;
 
   // At this point the new frame has been encoded.
@@ -2792,7 +2792,7 @@ static void update_reference_frames(VP8_COMMON *cm) {
   }
 }
 
-static void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
+static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   if (cm->no_lpf) {
     cm->filter_level = 0;
   }
@@ -2826,8 +2826,8 @@ static void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
 }
 
 #if CONFIG_PRED_FILTER
-void select_pred_filter_mode(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+void select_pred_filter_mode(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
 
   int prob_pred_filter_off = cm->prob_pred_filter_off;
 
@@ -2840,8 +2840,8 @@ void select_pred_filter_mode(VP8_COMP *cpi) {
     cm->pred_filter_mode = 2;   // Selectable at the MB level
 }
 
-void update_pred_filt_prob(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+void update_pred_filt_prob(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
   int prob_pred_filter_off;
 
   // Based on the selection in the previous frame determine what mode
@@ -2872,12 +2872,12 @@ void update_pred_filt_prob(VP8_COMP *cpi) {
 
 static void encode_frame_to_data_rate
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   unsigned long *size,
   unsigned char *dest,
   unsigned int *frame_flags
 ) {
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   int Q;
@@ -3948,7 +3948,7 @@ static void encode_frame_to_data_rate
   }
 }
 
-static void Pass2Encode(VP8_COMP *cpi, unsigned long *size,
+static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
                         unsigned char *dest, unsigned int *frame_flags) {
 
   if (!cpi->common.refresh_alt_ref_frame)
@@ -3976,14 +3976,14 @@ extern void vp8_pop_neon(int64_t *store);
 #endif
 
 
-int vp9_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags,
+int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
 #if HAVE_ARMV7
   int64_t store_reg[8];
 #endif
-  VP8_COMP              *cpi = (VP8_COMP *) ptr;
-  VP8_COMMON            *cm = &cpi->common;
+  VP9_COMP              *cpi = (VP9_COMP *) ptr;
+  VP9_COMMON            *cm = &cpi->common;
   struct vpx_usec_timer  timer;
   int                    res = 0;
 
@@ -4017,8 +4017,8 @@ int vp9_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags,
 }
 
 
-static int frame_is_reference(const VP8_COMP *cpi) {
-  const VP8_COMMON *cm = &cpi->common;
+static int frame_is_reference(const VP9_COMP *cpi) {
+  const VP9_COMMON *cm = &cpi->common;
   const MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   return cm->frame_type == KEY_FRAME || cm->refresh_last_frame
@@ -4030,14 +4030,14 @@ static int frame_is_reference(const VP8_COMP *cpi) {
 }
 
 
-int vp9_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags,
+int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                             unsigned long *size, unsigned char *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
 #if HAVE_ARMV7
   int64_t store_reg[8];
 #endif
-  VP8_COMP *cpi = (VP8_COMP *) ptr;
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMP *cpi = (VP9_COMP *) ptr;
+  VP9_COMMON *cm = &cpi->common;
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG    *force_src_buffer = NULL;
 
@@ -4348,9 +4348,9 @@ int vp9_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags,
   return 0;
 }
 
-int vp9_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest,
+int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
                               vp8_ppflags_t *flags) {
-  VP8_COMP *cpi = (VP8_COMP *) comp;
+  VP9_COMP *cpi = (VP9_COMP *) comp;
 
   if (cpi->common.refresh_alt_ref_frame)
     return -1;
@@ -4376,10 +4376,10 @@ int vp9_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest,
   }
 }
 
-int vp9_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows,
+int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
                    unsigned int cols, int delta_q[4], int delta_lf[4],
                    unsigned int threshold[4]) {
-  VP8_COMP *cpi = (VP8_COMP *) comp;
+  VP9_COMP *cpi = (VP9_COMP *) comp;
   signed char feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   int i;
@@ -4388,15 +4388,15 @@ int vp9_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows,
     return -1;
 
   if (!map) {
-    vp9_disable_segmentation((VP8_PTR)cpi);
+    vp9_disable_segmentation((VP9_PTR)cpi);
     return 0;
   }
 
   // Set the segmentation Map
-  vp9_set_segmentation_map((VP8_PTR)cpi, map);
+  vp9_set_segmentation_map((VP9_PTR)cpi, map);
 
   // Activate segmentation.
-  vp9_enable_segmentation((VP8_PTR)cpi);
+  vp9_enable_segmentation((VP9_PTR)cpi);
 
   // Set up the quant segment data
   feature_data[SEG_LVL_ALT_Q][0] = delta_q[0];
@@ -4430,14 +4430,14 @@ int vp9_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows,
 
   // Initialise the feature data structure
   // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-  vp9_set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
+  vp9_set_segment_data((VP9_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
   return 0;
 }
 
-int vp9_set_active_map(VP8_PTR comp, unsigned char *map,
+int vp9_set_active_map(VP9_PTR comp, unsigned char *map,
                        unsigned int rows, unsigned int cols) {
-  VP8_COMP *cpi = (VP8_COMP *) comp;
+  VP9_COMP *cpi = (VP9_COMP *) comp;
 
   if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols) {
     if (map) {
@@ -4453,9 +4453,9 @@ int vp9_set_active_map(VP8_PTR comp, unsigned char *map,
   }
 }
 
-int vp9_set_internal_size(VP8_PTR comp,
+int vp9_set_internal_size(VP9_PTR comp,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
-  VP8_COMP *cpi = (VP8_COMP *) comp;
+  VP9_COMP *cpi = (VP9_COMP *) comp;
 
   if (horiz_mode <= ONETWO)
     cpi->common.horiz_scale = horiz_mode;
@@ -4495,7 +4495,7 @@ int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
 }
 
 
-int vp9_get_quantizer(VP8_PTR c) {
-  VP8_COMP   *cpi = (VP8_COMP *) c;
+int vp9_get_quantizer(VP9_PTR c) {
+  VP9_COMP   *cpi = (VP9_COMP *) c;
   return cpi->common.base_qindex;
 }

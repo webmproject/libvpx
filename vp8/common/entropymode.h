@@ -63,18 +63,18 @@ extern struct vp8_token_struct vp9_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
 void vp9_entropy_mode_init(void);
 
-struct VP8Common;
-void vp9_init_mbmode_probs(struct VP8Common *x);
-extern void vp9_init_mode_contexts(struct VP8Common *pc);
-extern void vp9_update_mode_context(struct VP8Common *pc);;
-extern void vp9_accum_mv_refs(struct VP8Common *pc,
+struct VP9Common;
+void vp9_init_mbmode_probs(struct VP9Common *x);
+extern void vp9_init_mode_contexts(struct VP9Common *pc);
+extern void vp9_update_mode_context(struct VP9Common *pc);;
+extern void vp9_accum_mv_refs(struct VP9Common *pc,
                               MB_PREDICTION_MODE m,
                               const int ct[4]);
 
 void vp9_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES - 1]);
 void vp9_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES - 1]);
 
-void vp9_adapt_mode_probs(struct VP8Common *);
+void vp9_adapt_mode_probs(struct VP9Common *);
 
 #define VP8_SWITCHABLE_FILTERS 2 /* number of switchable filters */
 extern const  INTERPOLATIONFILTERTYPE vp9_switchable_interp

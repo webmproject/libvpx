@@ -90,12 +90,12 @@ int vp8_read_mv_ref_id(vp8_reader *r,
 #endif
 
 extern const int vp9_i8x8_block[4];
-static void kfread_modes(VP8D_COMP *pbi,
+static void kfread_modes(VP9D_COMP *pbi,
                          MODE_INFO *m,
                          int mb_row,
                          int mb_col,
                          BOOL_DECODER* const bc) {
-  VP8_COMMON *const cm = &pbi->common;
+  VP9_COMMON *const cm = &pbi->common;
   const int mis = pbi->common.mode_info_stride;
   int map_index = mb_row * pbi->common.mb_cols + mb_col;
   MB_PREDICTION_MODE y_mode;
@@ -353,14 +353,14 @@ static void read_nmvprobs(vp8_reader *bc, nmv_context *mvctx,
 }
 
 // Read the referncence frame
-static MV_REFERENCE_FRAME read_ref_frame(VP8D_COMP *pbi,
+static MV_REFERENCE_FRAME read_ref_frame(VP9D_COMP *pbi,
                                          vp8_reader *const bc,
                                          unsigned char segment_id) {
   MV_REFERENCE_FRAME ref_frame;
   int seg_ref_active;
   int seg_ref_count = 0;
 
-  VP8_COMMON *const cm = &pbi->common;
+  VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
   seg_ref_active = vp9_segfeature_active(xd,
@@ -498,9 +498,9 @@ static const unsigned char mbsplit_fill_offset[4][16] = {
   { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
 };
 
-static void read_switchable_interp_probs(VP8D_COMP* const pbi,
+static void read_switchable_interp_probs(VP9D_COMP* const pbi,
                                          BOOL_DECODER* const bc) {
-  VP8_COMMON *const cm = &pbi->common;
+  VP9_COMMON *const cm = &pbi->common;
   int i, j;
   for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
     for (i = 0; i < VP8_SWITCHABLE_FILTERS - 1; ++i) {
@@ -511,8 +511,8 @@ static void read_switchable_interp_probs(VP8D_COMP* const pbi,
   //cm->fc.switchable_interp_prob[1]);
 }
 
-static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
-  VP8_COMMON *const cm = &pbi->common;
+static void mb_mode_mv_init(VP9D_COMP *pbi, vp8_reader *bc) {
+  VP9_COMMON *const cm = &pbi->common;
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
   MACROBLOCKD *const xd  = &pbi->mb;
 
@@ -566,10 +566,10 @@ static void mb_mode_mv_init(VP8D_COMP *pbi, vp8_reader *bc) {
 // This function either reads the segment id for the current macroblock from
 // the bitstream or if the value is temporally predicted asserts the predicted
 // value
-static void read_mb_segment_id(VP8D_COMP *pbi,
+static void read_mb_segment_id(VP9D_COMP *pbi,
                                int mb_row, int mb_col,
                                BOOL_DECODER* const bc) {
-  VP8_COMMON *const cm = &pbi->common;
+  VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd  = &pbi->mb;
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *mbmi = &mi->mbmi;
@@ -647,11 +647,11 @@ static void read_mb_segment_id(VP8D_COMP *pbi,
   }
 }
 
-static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
+static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                              MODE_INFO *prev_mi,
                              int mb_row, int mb_col,
                              BOOL_DECODER* const bc) {
-  VP8_COMMON *const cm = &pbi->common;
+  VP9_COMMON *const cm = &pbi->common;
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
   const int mis = pbi->common.mode_info_stride;
   MACROBLOCKD *const xd  = &pbi->mb;
@@ -1174,8 +1174,8 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   }
 }
 
-void vp9_decode_mode_mvs_init(VP8D_COMP *pbi, BOOL_DECODER* const bc) {
-  VP8_COMMON *cm = &pbi->common;
+void vp9_decode_mode_mvs_init(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
+  VP9_COMMON *cm = &pbi->common;
 
   vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
   if (pbi->common.mb_no_coeff_skip) {
@@ -1186,7 +1186,7 @@ void vp9_decode_mode_mvs_init(VP8D_COMP *pbi, BOOL_DECODER* const bc) {
 
   mb_mode_mv_init(pbi, bc);
 }
-void vp9_decode_mb_mode_mv(VP8D_COMP *pbi,
+void vp9_decode_mb_mode_mv(VP9D_COMP *pbi,
                            MACROBLOCKD *xd,
                            int mb_row,
                            int mb_col,

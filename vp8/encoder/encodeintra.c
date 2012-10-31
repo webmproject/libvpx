@@ -25,7 +25,7 @@
 #define IF_RTCD(x) NULL
 #endif
 
-int vp9_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
+int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   int i;
   int intra_pred_var = 0;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;

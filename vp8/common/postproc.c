@@ -626,7 +626,7 @@ static void constrain_line(int x0, int *x1, int y0, int *y1, int width, int heig
 #define RTCD_VTABLE(oci) NULL
 #endif
 
-int vp9_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *ppflags) {
+int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *ppflags) {
   int q = oci->filter_level * 10 / 6;
   int flags = ppflags->post_proc_flag;
   int deblock_level = ppflags->deblocking_level;

@@ -67,6 +67,6 @@ extern void vp9_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
 extern void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd);
 extern void vp9_setup_interp_filters(MACROBLOCKD *xd,
                                      INTERPOLATIONFILTERTYPE filter,
-                                     VP8_COMMON *cm);
+                                     VP9_COMMON *cm);
 
 #endif

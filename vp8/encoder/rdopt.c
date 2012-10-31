@@ -52,8 +52,8 @@
 #define IF_RTCD(x)  NULL
 #endif
 
-extern void vp9_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
-extern void vp9_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
+extern void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x);
+extern void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x);
 
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
 
@@ -268,13 +268,13 @@ static int compute_rd_mult(int qindex) {
   return (11 * q * q) >> 6;
 }
 
-void vp9_initialize_me_consts(VP8_COMP *cpi, int QIndex) {
+void vp9_initialize_me_consts(VP9_COMP *cpi, int QIndex) {
   cpi->mb.sadperbit16 =  sad_per_bit16lut[QIndex];
   cpi->mb.sadperbit4  =  sad_per_bit4lut[QIndex];
 }
 
 
-void vp9_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
+void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
   int q, i;
 
   vp8_clear_system_state();  // __asm emms;
@@ -392,7 +392,7 @@ void vp9_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
   }
 }
 
-void vp9_auto_select_speed(VP8_COMP *cpi) {
+void vp9_auto_select_speed(VP9_COMP *cpi) {
   int milliseconds_for_compress = (int)(1000000 / cpi->oxcf.frame_rate);
 
   milliseconds_for_compress = milliseconds_for_compress * (16 - cpi->oxcf.cpu_used) / 16;
@@ -852,10 +852,10 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   *skippable = vp9_mby_is_skippable_16x16(&mb->e_mbd);
 }
 
-static void macro_block_yrd(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
+static void macro_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                             int *distortion, int *skippable,
                             int64_t txfm_cache[NB_TXFM_MODES]) {
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &x->e_mbd.mode_info_context->mbmi;
 
   MACROBLOCKD *xd = &x->e_mbd;
@@ -1057,7 +1057,7 @@ static void copy_predictor_8x8(unsigned char *dst, const unsigned char *predicto
   d[29] = p[29];
 }
 
-static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
+static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
                                      BLOCKD *b, B_PREDICTION_MODE *best_mode,
 #if CONFIG_COMP_INTRA_PRED
                                      B_PREDICTION_MODE *best_second_mode,
@@ -1168,7 +1168,7 @@ static int64_t rd_pick_intra4x4block(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *be,
   return best_rd;
 }
 
-static int64_t rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
+static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rate,
                                      int *rate_y, int *Distortion, int64_t best_rd,
 #if CONFIG_COMP_INTRA_PRED
                                      int allow_comp,
@@ -1251,7 +1251,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rat
 }
 
 #if CONFIG_SUPERBLOCKS
-static int64_t rd_pick_intra_sby_mode(VP8_COMP *cpi,
+static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi,
                                       MACROBLOCK *x,
                                       int *rate,
                                       int *rate_tokenonly,
@@ -1291,7 +1291,7 @@ static int64_t rd_pick_intra_sby_mode(VP8_COMP *cpi,
 }
 #endif
 
-static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
+static int64_t rd_pick_intra16x16mby_mode(VP9_COMP *cpi,
                                           MACROBLOCK *x,
                                           int *Rate,
                                           int *rate_y,
@@ -1380,7 +1380,7 @@ static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
 }
 
 
-static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
+static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                      B_PREDICTION_MODE *best_mode,
 #if CONFIG_COMP_INTRA_PRED
                                      B_PREDICTION_MODE *best_second_mode,
@@ -1534,7 +1534,7 @@ static int64_t rd_pick_intra8x8block(VP8_COMP *cpi, MACROBLOCK *x, int ib,
   return best_rd;
 }
 
-static int64_t rd_pick_intra8x8mby_modes(VP8_COMP *cpi, MACROBLOCK *mb,
+static int64_t rd_pick_intra8x8mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
                                          int *Rate, int *rate_y,
                                          int *Distortion, int64_t best_rd) {
   MACROBLOCKD *const xd = &mb->e_mbd;
@@ -1607,7 +1607,7 @@ static int rd_cost_mbuv(MACROBLOCK *mb) {
 }
 
 
-static int64_t rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
+static int64_t rd_inter16x16_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                                 int *distortion, int fullpixel, int *skip) {
   vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                     x->e_mbd.predictor, x->src.uv_stride);
@@ -1649,7 +1649,7 @@ static int rd_cost_mbuv_8x8(MACROBLOCK *mb, int backup) {
 }
 
 #if CONFIG_SUPERBLOCKS
-static int64_t rd_inter32x32_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
+static int64_t rd_inter32x32_uv_8x8(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                                 int *distortion, int fullpixel, int *skip) {
   MACROBLOCKD *xd = &x->e_mbd;
   int n, r = 0, d = 0;
@@ -1697,7 +1697,7 @@ static int64_t rd_inter32x32_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 }
 #endif
 
-static int64_t rd_inter16x16_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
+static int64_t rd_inter16x16_uv_8x8(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                                     int *distortion, int fullpixel, int *skip) {
   vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                     x->e_mbd.predictor, x->src.uv_stride);
@@ -1713,7 +1713,7 @@ static int64_t rd_inter16x16_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 }
 
 
-static int64_t rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
+static int64_t rd_inter4x4_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                               int *distortion, int *skippable, int fullpixel) {
   vp9_build_inter4x4_predictors_mbuv(&x->e_mbd);
   vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
@@ -1729,7 +1729,7 @@ static int64_t rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
 
-static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
+static void rd_pick_intra_mbuv_mode(VP9_COMP *cpi,
                                     MACROBLOCK *x,
                                     int *rate,
                                     int *rate_tokenonly,
@@ -1805,7 +1805,7 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
 #endif
 }
 
-static void rd_pick_intra_mbuv_mode_8x8(VP8_COMP *cpi,
+static void rd_pick_intra_mbuv_mode_8x8(VP9_COMP *cpi,
                                         MACROBLOCK *x,
                                         int *rate,
                                         int *rate_tokenonly,
@@ -1903,7 +1903,7 @@ static void super_block_uvrd_8x8(MACROBLOCK *x,
   memcpy(xd->left_context,  t_left,  sizeof(t_left));
 }
 
-static int64_t rd_pick_intra_sbuv_mode(VP8_COMP *cpi,
+static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi,
                                        MACROBLOCK *x,
                                        int *rate,
                                        int *rate_tokenonly,
@@ -1942,7 +1942,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP8_COMP *cpi,
 }
 #endif
 
-int vp9_cost_mv_ref(VP8_COMP *cpi,
+int vp9_cost_mv_ref(VP9_COMP *cpi,
                     MB_PREDICTION_MODE m,
                     const int near_mv_ref_ct[4]) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
@@ -1954,7 +1954,7 @@ int vp9_cost_mv_ref(VP8_COMP *cpi,
   // to multiple mode masks as per reference frame coding we will need
   // to do something different here.
   if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
-    VP8_COMMON *pc = &cpi->common;
+    VP9_COMMON *pc = &cpi->common;
 
     vp8_prob p [VP8_MVREFS - 1];
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
@@ -2245,7 +2245,7 @@ int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
   return r;
 }
 
-static void rd_check_segment_txsize(VP8_COMP *cpi, MACROBLOCK *x,
+static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                     BEST_SEG_INFO *bsi,
                                     SPLITMV_PARTITIONING_TYPE segmentation,
                                     TX_SIZE tx_size, int64_t *otherrds,
@@ -2515,7 +2515,7 @@ static void rd_check_segment_txsize(VP8_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
+static void rd_check_segment(VP9_COMP *cpi, MACROBLOCK *x,
                              BEST_SEG_INFO *bsi,
                              unsigned int segmentation,
                              /* 16 = n_blocks */
@@ -2623,7 +2623,7 @@ void vp8_cal_step_param(int sr, int *sp) {
   *sp = MAX_MVSEARCH_STEPS - 1 - step;
 }
 
-static int rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
+static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
                                        int_mv *best_ref_mv,
                                        int_mv *second_best_ref_mv,
                                        int64_t best_rd,
@@ -2816,7 +2816,7 @@ static void insertsortsad(int arr[], int idx[], int len) {
 }
 
 // The improved MV prediction
-void vp9_mv_pred(VP8_COMP *cpi, MACROBLOCKD *xd, const MODE_INFO *here,
+void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCKD *xd, const MODE_INFO *here,
                  int_mv *mvp, int refframe, int *ref_frame_sign_bias,
                  int *sr, int near_sadidx[]) {
   const MODE_INFO *above = here - xd->mode_info_stride;
@@ -2940,7 +2940,7 @@ void vp9_mv_pred(VP8_COMP *cpi, MACROBLOCKD *xd, const MODE_INFO *here,
   vp8_clamp_mv2(mvp, xd);
 }
 
-static void cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x,
+static void cal_sad(VP9_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x,
                     int recon_yoffset, int near_sadidx[],
                     enum BlockSize block_size) {
   /* 0-cf above, 1-cf left, 2-cf aboveleft, 3-lf current, 4-lf above,
@@ -3043,7 +3043,7 @@ static void set_i8x8_block_modes(MACROBLOCK *x, int modes[2][4]) {
 }
 
 extern void vp9_calc_ref_probs(int *count, vp8_prob *probs);
-static void estimate_curframe_refprobs(VP8_COMP *cpi, vp8_prob mod_refprobs[3], int pred_ref) {
+static void estimate_curframe_refprobs(VP9_COMP *cpi, vp8_prob mod_refprobs[3], int pred_ref) {
   int norm_cnt[MAX_REF_FRAMES];
   const int *const rfct = cpi->count_mb_ref_frame_usage;
   int intra_count = rfct[INTRA_FRAME];
@@ -3092,8 +3092,8 @@ static __inline unsigned weighted_cost(vp8_prob *tab0, vp8_prob *tab1, int idx, 
   return (0x8000 + weight * cost1 + (0x10000 - weight) * cost0) >> 16;
 }
 
-static void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, int segment_id, unsigned int *ref_costs) {
-  VP8_COMMON *cm = &cpi->common;
+static void vp8_estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id, unsigned int *ref_costs) {
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   vp8_prob *mod_refprobs;
 
@@ -3213,7 +3213,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   }
 }
 
-static void inter_mode_cost(VP8_COMP *cpi, MACROBLOCK *x, int this_mode,
+static void inter_mode_cost(VP9_COMP *cpi, MACROBLOCK *x, int this_mode,
                             int *rate2, int *distortion2, int *rate_y,
                             int *distortion, int* rate_uv, int *distortion_uv,
                             int *skippable, int64_t txfm_cache[NB_TXFM_MODES]) {
@@ -3239,7 +3239,7 @@ static void inter_mode_cost(VP8_COMP *cpi, MACROBLOCK *x, int this_mode,
 
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #define MAX(x,y) (((x)>(y))?(x):(y))
-static void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x,
+static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                int idx, int frame_type,
                                int recon_yoffset, int recon_uvoffset,
                                int_mv frame_nearest_mv[4],
@@ -3280,7 +3280,7 @@ static void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x,
 #endif
 }
 
-static int64_t handle_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
+static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  enum BlockSize block_size,
                                  int *saddone, int near_sadidx[],
                                  int mdcounts[4], int64_t txfm_cache[],
@@ -3292,7 +3292,7 @@ static int64_t handle_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
                                  int recon_yoffset, int mode_index,
                                  int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
                                  int_mv frame_best_ref_mv[4]) {
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   BLOCK *b = &x->block[0];
@@ -3529,11 +3529,11 @@ static int64_t handle_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
   return this_rd;  // if 0, this will be re-calculated by caller
 }
 
-void vp9_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
+void vp9_rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             int recon_yoffset, int recon_uvoffset,
                             int *returnrate, int *returndistortion,
                             int64_t *returnintra) {
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   union b_mode_info best_bmodes[16];
   MB_MODE_INFO best_mbmode;
@@ -4278,10 +4278,10 @@ end:
 }
 
 #if CONFIG_SUPERBLOCKS
-void vp9_rd_pick_intra_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
+void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *returnrate,
                                int *returndist) {
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   int rate_y, rate_uv;
   int rate_y_tokenonly, rate_uv_tokenonly;
@@ -4309,9 +4309,9 @@ void vp9_rd_pick_intra_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
 }
 #endif
 
-void vp9_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
+void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             int *returnrate, int *returndist) {
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   int64_t error4x4, error16x16;
@@ -4466,10 +4466,10 @@ void vp9_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x,
 }
 
 #if CONFIG_SUPERBLOCKS
-int64_t vp9_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
+int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   int recon_yoffset, int recon_uvoffset,
                                   int *returnrate, int *returndistortion) {
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   MB_PREDICTION_MODE this_mode;
@@ -4816,7 +4816,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
 }
 #endif
 
-void vp9_pick_mode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
+void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
                                     int recon_yoffset,
                                     int recon_uvoffset,
                                     int *totalrate, int *totaldist) {

@@ -33,9 +33,9 @@
 #include "vpx_ports/arm.h"
 #endif
 
-extern void vp8_init_loop_filter(VP8_COMMON *cm);
-extern void vp9_init_de_quantizer(VP8D_COMP *pbi);
-static int get_free_fb(VP8_COMMON *cm);
+extern void vp8_init_loop_filter(VP9_COMMON *cm);
+extern void vp9_init_de_quantizer(VP9D_COMP *pbi);
+static int get_free_fb(VP9_COMMON *cm);
 static void ref_cnt_fb(int *buf, int *idx, int new_idx);
 
 #if CONFIG_DEBUG
@@ -116,12 +116,12 @@ void vp9_initialize_dec(void) {
 }
 
 VP8D_PTR vp9_create_decompressor(VP8D_CONFIG *oxcf) {
-  VP8D_COMP *pbi = vpx_memalign(32, sizeof(VP8D_COMP));
+  VP9D_COMP *pbi = vpx_memalign(32, sizeof(VP9D_COMP));
 
   if (!pbi)
     return NULL;
 
-  vpx_memset(pbi, 0, sizeof(VP8D_COMP));
+  vpx_memset(pbi, 0, sizeof(VP9D_COMP));
 
   if (setjmp(pbi->common.error.jmp)) {
     pbi->common.error.setjmp = 0;
@@ -153,7 +153,7 @@ VP8D_PTR vp9_create_decompressor(VP8D_CONFIG *oxcf) {
 }
 
 void vp9_remove_decompressor(VP8D_PTR ptr) {
-  VP8D_COMP *pbi = (VP8D_COMP *) ptr;
+  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
 
   if (!pbi)
     return;
@@ -170,8 +170,8 @@ void vp9_remove_decompressor(VP8D_PTR ptr) {
 
 vpx_codec_err_t vp9_get_reference_dec(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
-  VP8D_COMP *pbi = (VP8D_COMP *) ptr;
-  VP8_COMMON *cm = &pbi->common;
+  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
+  VP9_COMMON *cm = &pbi->common;
   int ref_fb_idx;
 
   if (ref_frame_flag == VP8_LAST_FLAG)
@@ -201,8 +201,8 @@ vpx_codec_err_t vp9_get_reference_dec(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag,
 
 vpx_codec_err_t vp9_set_reference_dec(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
-  VP8D_COMP *pbi = (VP8D_COMP *) ptr;
-  VP8_COMMON *cm = &pbi->common;
+  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
+  VP9_COMMON *cm = &pbi->common;
   int *ref_fb_ptr = NULL;
   int free_fb;
 
@@ -245,7 +245,7 @@ extern void vp8_push_neon(int64_t *store);
 extern void vp8_pop_neon(int64_t *store);
 #endif
 
-static int get_free_fb(VP8_COMMON *cm) {
+static int get_free_fb(VP9_COMMON *cm) {
   int i;
   for (i = 0; i < NUM_YV12_BUFFERS; i++)
     if (cm->fb_idx_ref_cnt[i] == 0)
@@ -266,7 +266,7 @@ static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
 }
 
 /* If any buffer copy / swapping is signalled it should be done here. */
-static int swap_frame_buffers(VP8_COMMON *cm) {
+static int swap_frame_buffers(VP9_COMMON *cm) {
   int err = 0;
 
   /* The alternate reference frame or golden frame can be updated
@@ -319,7 +319,7 @@ static int swap_frame_buffers(VP8_COMMON *cm) {
 }
 
 /*
-static void vp8_print_yuv_rec_mb(VP8_COMMON *cm, int mb_row, int mb_col)
+static void vp8_print_yuv_rec_mb(VP9_COMMON *cm, int mb_row, int mb_col)
 {
   YV12_BUFFER_CONFIG *s = cm->frame_to_show;
   unsigned char *src = s->y_buffer;
@@ -340,8 +340,8 @@ int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
 #if HAVE_ARMV7
   int64_t dx_store_reg[8];
 #endif
-  VP8D_COMP *pbi = (VP8D_COMP *) ptr;
-  VP8_COMMON *cm = &pbi->common;
+  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
+  VP9_COMMON *cm = &pbi->common;
   int retcode = 0;
 
   /*if(pbi->ready_for_new_data == 0)
@@ -490,7 +490,7 @@ int vp9_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd,
                       int64_t *time_stamp, int64_t *time_end_stamp,
                       vp8_ppflags_t *flags) {
   int ret = -1;
-  VP8D_COMP *pbi = (VP8D_COMP *) ptr;
+  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
 
   if (pbi->ready_for_new_data == 1)
     return ret;

@@ -14,7 +14,7 @@
 #include "segmentation.h"
 #include "vp8/common/pred_common.h"
 
-void vp9_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x) {
+void vp9_update_gf_useage_maps(VP9_COMP *cpi, VP9_COMMON *cm, MACROBLOCK *x) {
   int mb_row, mb_col;
 
   MODE_INFO *this_mb_mode_info = cm->mi;
@@ -58,8 +58,8 @@ void vp9_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x) {
   }
 }
 
-void vp9_enable_segmentation(VP8_PTR ptr) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
+void vp9_enable_segmentation(VP9_PTR ptr) {
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
 
   // Set the appropriate feature bit
   cpi->mb.e_mbd.segmentation_enabled = 1;
@@ -67,16 +67,16 @@ void vp9_enable_segmentation(VP8_PTR ptr) {
   cpi->mb.e_mbd.update_mb_segmentation_data = 1;
 }
 
-void vp9_disable_segmentation(VP8_PTR ptr) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
+void vp9_disable_segmentation(VP9_PTR ptr) {
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
 
   // Clear the appropriate feature bit
   cpi->mb.e_mbd.segmentation_enabled = 0;
 }
 
-void vp9_set_segmentation_map(VP8_PTR ptr,
+void vp9_set_segmentation_map(VP9_PTR ptr,
                               unsigned char *segmentation_map) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
 
   // Copy in the new segmentation map
   vpx_memcpy(cpi->segmentation_map, segmentation_map,
@@ -87,10 +87,10 @@ void vp9_set_segmentation_map(VP8_PTR ptr,
   cpi->mb.e_mbd.update_mb_segmentation_data = 1;
 }
 
-void vp9_set_segment_data(VP8_PTR ptr,
+void vp9_set_segment_data(VP9_PTR ptr,
                           signed char *feature_data,
                           unsigned char abs_delta) {
-  VP8_COMP *cpi = (VP8_COMP *)(ptr);
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
 
   cpi->mb.e_mbd.mb_segment_abs_delta = abs_delta;
 
@@ -160,8 +160,8 @@ static int cost_segmap(MACROBLOCKD *xd,
 
 }
 
-void vp9_choose_segmap_coding_method(VP8_COMP *cpi) {
-  VP8_COMMON *const cm = &cpi->common;
+void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   const int mis = cm->mode_info_stride;

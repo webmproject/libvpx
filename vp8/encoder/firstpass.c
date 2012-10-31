@@ -43,12 +43,12 @@ extern void vp9_build_block_offsets(MACROBLOCK *x);
 
 extern void vp9_setup_block_ptrs(MACROBLOCK *x);
 
-extern void vp9_frame_init_quantizer(VP8_COMP *cpi);
+extern void vp9_frame_init_quantizer(VP9_COMP *cpi);
 
 extern void vp9_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb,
                                    int_mv *mv);
 
-extern void vp9_alloc_compressor_data(VP8_COMP *cpi);
+extern void vp9_alloc_compressor_data(VP9_COMP *cpi);
 
 #define IIFACTOR   12.5
 #define IIKFACTOR1 12.5
@@ -65,7 +65,7 @@ extern void vp9_alloc_compressor_data(VP8_COMP *cpi);
 #define POW1 (double)cpi->oxcf.two_pass_vbrbias/100.0
 #define POW2 (double)cpi->oxcf.two_pass_vbrbias/100.0
 
-static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
+static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame);
 
 static int select_cq_level(int qindex) {
   int ret_val = QINDEX_RANGE - 1;
@@ -85,11 +85,11 @@ static int select_cq_level(int qindex) {
 
 
 // Resets the first pass file to the given position using a relative seek from the current position
-static void reset_fpf_position(VP8_COMP *cpi, FIRSTPASS_STATS *Position) {
+static void reset_fpf_position(VP9_COMP *cpi, FIRSTPASS_STATS *Position) {
   cpi->twopass.stats_in = Position;
 }
 
-static int lookup_next_frame_stats(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame) {
+static int lookup_next_frame_stats(VP9_COMP *cpi, FIRSTPASS_STATS *next_frame) {
   if (cpi->twopass.stats_in >= cpi->twopass.stats_in_end)
     return EOF;
 
@@ -98,7 +98,7 @@ static int lookup_next_frame_stats(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame) {
 }
 
 // Read frame stats at an offset from the current position
-static int read_frame_stats(VP8_COMP *cpi,
+static int read_frame_stats(VP9_COMP *cpi,
                             FIRSTPASS_STATS *frame_stats,
                             int offset) {
   FIRSTPASS_STATS *fps_ptr = cpi->twopass.stats_in;
@@ -116,7 +116,7 @@ static int read_frame_stats(VP8_COMP *cpi,
   return 1;
 }
 
-static int input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps) {
+static int input_stats(VP9_COMP *cpi, FIRSTPASS_STATS *fps) {
   if (cpi->twopass.stats_in >= cpi->twopass.stats_in_end)
     return EOF;
 
@@ -126,7 +126,7 @@ static int input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps) {
   return 1;
 }
 
-static void output_stats(const VP8_COMP            *cpi,
+static void output_stats(const VP9_COMP            *cpi,
                          struct vpx_codec_pkt_list *pktlist,
                          FIRSTPASS_STATS            *stats) {
   struct vpx_codec_cx_pkt pkt;
@@ -258,7 +258,7 @@ static void avg_stats(FIRSTPASS_STATS *section) {
 }
 
 // Calculate a modified Error used in distributing bits between easier and harder frames
-static double calculate_modified_err(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static double calculate_modified_err(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double av_err = (cpi->twopass.total_stats->ssim_weighted_pred_err /
                    cpi->twopass.total_stats->count);
   double this_err = this_frame->ssim_weighted_pred_err;
@@ -332,7 +332,7 @@ static double simple_weight(YV12_BUFFER_CONFIG *source) {
 
 
 // This function returns the current per frame maximum bitrate target
-static int frame_max_bits(VP8_COMP *cpi) {
+static int frame_max_bits(VP9_COMP *cpi) {
   // Max allocation for a single frame based on the max section guidelines passed in and how many bits are left
   int max_bits;
 
@@ -346,15 +346,15 @@ static int frame_max_bits(VP8_COMP *cpi) {
   return max_bits;
 }
 
-void vp9_init_first_pass(VP8_COMP *cpi) {
+void vp9_init_first_pass(VP9_COMP *cpi) {
   zero_stats(cpi->twopass.total_stats);
 }
 
-void vp9_end_first_pass(VP8_COMP *cpi) {
+void vp9_end_first_pass(VP9_COMP *cpi) {
   output_stats(cpi, cpi->output_pkt_list, cpi->twopass.total_stats);
 }
 
-static void zz_motion_search(VP8_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset) {
+static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset) {
   MACROBLOCKD *const xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
   BLOCKD *d = &x->e_mbd.block[0];
@@ -373,7 +373,7 @@ static void zz_motion_search(VP8_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *r
                (unsigned int *)(best_motion_err));
 }
 
-static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
+static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                      int_mv *ref_mv, MV *best_mv,
                                      YV12_BUFFER_CONFIG *recon_buffer,
                                      int *best_motion_err, int recon_yoffset) {
@@ -440,10 +440,10 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-void vp9_first_pass(VP8_COMP *cpi) {
+void vp9_first_pass(VP9_COMP *cpi) {
   int mb_row, mb_col;
   MACROBLOCK *const x = &cpi->mb;
-  VP8_COMMON *const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
 
   int recon_yoffset, recon_uvoffset;
@@ -807,7 +807,7 @@ static double bitcost(double prob) {
   return -(log(prob) / log(2.0));
 }
 
-static long long estimate_modemvcost(VP8_COMP *cpi,
+static long long estimate_modemvcost(VP9_COMP *cpi,
                                      FIRSTPASS_STATS *fpstats) {
   int mv_cost;
   int mode_cost;
@@ -871,7 +871,7 @@ static double calc_correction_factor(double err_per_mb,
 // PGW TODO..
 // This code removes direct dependency on QIndex to determin the range
 // (now uses the actual quantizer) but has not been tuned.
-static void adjust_maxq_qrange(VP8_COMP *cpi) {
+static void adjust_maxq_qrange(VP9_COMP *cpi) {
   int i;
   double q;
 
@@ -894,7 +894,7 @@ static void adjust_maxq_qrange(VP8_COMP *cpi) {
   }
 }
 
-static int estimate_max_q(VP8_COMP *cpi,
+static int estimate_max_q(VP9_COMP *cpi,
                           FIRSTPASS_STATS *fpstats,
                           int section_target_bandwitdh,
                           int overhead_bits) {
@@ -1020,7 +1020,7 @@ static int estimate_max_q(VP8_COMP *cpi,
 
 // For cq mode estimate a cq level that matches the observed
 // complexity and data rate.
-static int estimate_cq(VP8_COMP *cpi,
+static int estimate_cq(VP9_COMP *cpi,
                        FIRSTPASS_STATS *fpstats,
                        int section_target_bandwitdh,
                        int overhead_bits) {
@@ -1116,9 +1116,9 @@ static int estimate_cq(VP8_COMP *cpi,
 }
 
 
-extern void vp9_new_frame_rate(VP8_COMP *cpi, double framerate);
+extern void vp9_new_frame_rate(VP9_COMP *cpi, double framerate);
 
-void vp9_init_second_pass(VP8_COMP *cpi) {
+void vp9_init_second_pass(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS *start_pos;
 
@@ -1200,12 +1200,12 @@ void vp9_init_second_pass(VP8_COMP *cpi) {
   }
 }
 
-void vp9_end_second_pass(VP8_COMP *cpi) {
+void vp9_end_second_pass(VP9_COMP *cpi) {
 }
 
 // This function gives and estimate of how badly we believe
 // the prediction quality is decaying from frame to frame.
-static double get_prediction_decay_rate(VP8_COMP *cpi,
+static double get_prediction_decay_rate(VP9_COMP *cpi,
                                         FIRSTPASS_STATS *next_frame) {
   double prediction_decay_rate;
   double second_ref_decay;
@@ -1236,7 +1236,7 @@ static double get_prediction_decay_rate(VP8_COMP *cpi,
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
 static int detect_transition_to_still(
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   int frame_interval,
   int still_interval,
   double loop_decay_rate,
@@ -1279,7 +1279,7 @@ static int detect_transition_to_still(
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
 // reflect this
-static BOOL detect_flash(VP8_COMP *cpi, int offset) {
+static BOOL detect_flash(VP9_COMP *cpi, int offset) {
   FIRSTPASS_STATS next_frame;
 
   BOOL flash_detected = FALSE;
@@ -1303,7 +1303,7 @@ static BOOL detect_flash(VP8_COMP *cpi, int offset) {
 
 // Update the motion related elements to the GF arf boost calculation
 static void accumulate_frame_motion_stats(
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   FIRSTPASS_STATS *this_frame,
   double *this_frame_mv_in_out,
   double *mv_in_out_accumulator,
@@ -1347,7 +1347,7 @@ static void accumulate_frame_motion_stats(
 
 // Calculate a baseline boost number for the current frame.
 static double calc_frame_boost(
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   FIRSTPASS_STATS *this_frame,
   double this_frame_mv_in_out) {
   double frame_boost;
@@ -1378,7 +1378,7 @@ static double calc_frame_boost(
 }
 
 static int calc_arf_boost(
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   int offset,
   int f_frames,
   int b_frames,
@@ -1471,7 +1471,7 @@ static int calc_arf_boost(
   return arf_boost;
 }
 
-static void configure_arnr_filter(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static void configure_arnr_filter(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int half_gf_int;
   int frames_after_arf;
   int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
@@ -1523,7 +1523,7 @@ static void configure_arnr_filter(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 }
 
 // Analyse and define a gf/arf group .
-static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   FIRSTPASS_STATS next_frame;
   FIRSTPASS_STATS *start_pos;
   int i;
@@ -1879,7 +1879,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 }
 
 // Allocate bits to a normal frame that is neither a gf an arf or a key frame.
-static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int    target_frame_size;                                                             // gf_group_error_left
 
   double modified_err;
@@ -1952,7 +1952,7 @@ static int adjust_active_maxq(int old_maxqi, int new_maxqi) {
   return ret_val;
 }
 
-void vp9_second_pass(VP8_COMP *cpi) {
+void vp9_second_pass(VP9_COMP *cpi) {
   int tmp_q;
   int frames_left = (int)(cpi->twopass.total_stats->count - cpi->common.current_video_frame);
 
@@ -2107,7 +2107,7 @@ void vp9_second_pass(VP8_COMP *cpi) {
 }
 
 
-static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRSTPASS_STATS *this_frame, FIRSTPASS_STATS *next_frame) {
+static BOOL test_candidate_kf(VP9_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRSTPASS_STATS *this_frame, FIRSTPASS_STATS *next_frame) {
   BOOL is_viable_kf = FALSE;
 
   // Does the frame satisfy the primary criteria of a key frame
@@ -2190,7 +2190,7 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
 
   return is_viable_kf;
 }
-static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int i, j;
   FIRSTPASS_STATS last_frame;
   FIRSTPASS_STATS first_frame;

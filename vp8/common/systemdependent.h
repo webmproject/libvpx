@@ -17,5 +17,5 @@ void vpx_reset_mmx_state(void);
 #define vp8_clear_system_state()
 #endif
 
-struct VP8Common;
-void vp9_machine_specific_config(struct VP8Common *);
+struct VP9Common;
+void vp9_machine_specific_config(struct VP9Common *);

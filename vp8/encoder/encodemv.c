@@ -356,7 +356,7 @@ static void add_nmvcount(nmv_context_counts* const dst,
 }
 #endif
 
-void vp9_write_nmvprobs(VP8_COMP* const cpi, int usehp, vp8_writer* const bc) {
+void vp9_write_nmvprobs(VP9_COMP* const cpi, int usehp, vp8_writer* const bc) {
   int i, j;
   nmv_context prob;
   unsigned int branch_ct_joint[MV_JOINTS - 1][2];

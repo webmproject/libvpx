@@ -54,10 +54,10 @@ typedef struct {
 
 } DETOK;
 
-typedef struct VP8Decompressor {
+typedef struct VP9Decompressor {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
-  DECLARE_ALIGNED(16, VP8_COMMON, common);
+  DECLARE_ALIGNED(16, VP9_COMMON, common);
 
   VP8D_CONFIG oxcf;
 
@@ -81,9 +81,9 @@ typedef struct VP8Decompressor {
 
   int decoded_key_frame;
 
-} VP8D_COMP;
+} VP9D_COMP;
 
-int vp9_decode_frame(VP8D_COMP *cpi);
+int vp9_decode_frame(VP9D_COMP *cpi);
 
 
 #if CONFIG_DEBUG

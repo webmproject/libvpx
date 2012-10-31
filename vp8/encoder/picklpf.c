@@ -102,7 +102,7 @@ static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
 }
 
 // Enforce a minimum filter level based upon baseline Q
-static int get_min_filter_level(VP8_COMP *cpi, int base_qindex) {
+static int get_min_filter_level(VP9_COMP *cpi, int base_qindex) {
   int min_filter_level;
   /*int q = (int) vp9_convert_qindex_to_q(base_qindex);
 
@@ -124,7 +124,7 @@ static int get_min_filter_level(VP8_COMP *cpi, int base_qindex) {
 }
 
 // Enforce a maximum filter level based upon baseline Q
-static int get_max_filter_level(VP8_COMP *cpi, int base_qindex) {
+static int get_max_filter_level(VP9_COMP *cpi, int base_qindex) {
   // PGW August 2006: Highest filter values almost always a bad idea
 
   // jbb chg: 20100118 - not so any more with this overquant stuff allow high values
@@ -138,8 +138,8 @@ static int get_max_filter_level(VP8_COMP *cpi, int base_qindex) {
   return max_filter_level;
 }
 
-void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
 
   int best_err = 0;
   int filt_err = 0;
@@ -245,11 +245,11 @@ void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
 }
 
 // Stub function for now Alt LF not used
-void vp9_set_alt_lf_level(VP8_COMP *cpi, int filt_val) {
+void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
 }
 
-void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
 
   int best_err = 0;
   int filt_err = 0;

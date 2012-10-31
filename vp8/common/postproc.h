@@ -108,7 +108,7 @@ struct postproc_state {
 };
 #include "onyxc_int.h"
 #include "ppflags.h"
-int vp9_post_proc_frame(struct VP8Common *oci, YV12_BUFFER_CONFIG *dest,
+int vp9_post_proc_frame(struct VP9Common *oci, YV12_BUFFER_CONFIG *dest,
                         vp8_ppflags_t *flags);
 
 

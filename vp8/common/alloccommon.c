@@ -21,7 +21,7 @@
 
 extern  void vp8_init_scan_order_mask();
 
-void vp9_update_mode_info_border(VP8_COMMON *cpi, MODE_INFO *mi_base) {
+void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi_base) {
   int stride = cpi->mode_info_stride;
   int i;
 
@@ -34,7 +34,7 @@ void vp9_update_mode_info_border(VP8_COMMON *cpi, MODE_INFO *mi_base) {
   }
 }
 
-void vp9_update_mode_info_in_image(VP8_COMMON *cpi, MODE_INFO *mi) {
+void vp9_update_mode_info_in_image(VP9_COMMON *cpi, MODE_INFO *mi) {
   int i, j;
 
   // For each in image mode_info element set the in image flag to 1
@@ -48,7 +48,7 @@ void vp9_update_mode_info_in_image(VP8_COMMON *cpi, MODE_INFO *mi) {
   }
 }
 
-void vp9_de_alloc_frame_buffers(VP8_COMMON *oci) {
+void vp9_de_alloc_frame_buffers(VP9_COMMON *oci) {
   int i;
 
   for (i = 0; i < NUM_YV12_BUFFERS; i++)
@@ -67,7 +67,7 @@ void vp9_de_alloc_frame_buffers(VP8_COMMON *oci) {
 
 }
 
-int vp9_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
+int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   int i;
 
   vp9_de_alloc_frame_buffers(oci);
@@ -145,7 +145,7 @@ int vp9_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
 
   return 0;
 }
-void vp9_setup_version(VP8_COMMON *cm) {
+void vp9_setup_version(VP9_COMMON *cm) {
   if (cm->version & 0x4) {
     if (!CONFIG_EXPERIMENTAL)
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
@@ -183,7 +183,7 @@ void vp9_setup_version(VP8_COMMON *cm) {
       //    break;
   }
 }
-void vp9_create_common(VP8_COMMON *oci) {
+void vp9_create_common(VP9_COMMON *oci) {
   vp9_machine_specific_config(oci);
 
   vp9_init_mbmode_probs(oci);
@@ -209,7 +209,7 @@ void vp9_create_common(VP8_COMMON *oci) {
   oci->kf_ymode_probs_update = 0;
 }
 
-void vp9_remove_common(VP8_COMMON *oci) {
+void vp9_remove_common(VP9_COMMON *oci) {
   vp9_de_alloc_frame_buffers(oci);
 }
 

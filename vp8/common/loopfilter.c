@@ -84,7 +84,7 @@ void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
   }
 }
 
-void vp9_loop_filter_init(VP8_COMMON *cm) {
+void vp9_loop_filter_init(VP9_COMMON *cm) {
   loop_filter_info_n *lfi = &cm->lf_info;
   int i;
 
@@ -101,7 +101,7 @@ void vp9_loop_filter_init(VP8_COMMON *cm) {
   }
 }
 
-void vp9_loop_filter_frame_init(VP8_COMMON *cm,
+void vp9_loop_filter_frame_init(VP9_COMMON *cm,
                                 MACROBLOCKD *xd,
                                 int default_filt_lvl) {
   int seg,  /* segment number */
@@ -180,7 +180,7 @@ void vp9_loop_filter_frame_init(VP8_COMMON *cm,
 
 void vp9_loop_filter_frame
 (
-  VP8_COMMON *cm,
+  VP9_COMMON *cm,
   MACROBLOCKD *xd
 ) {
   YV12_BUFFER_CONFIG *post = cm->frame_to_show;
@@ -318,7 +318,7 @@ void vp9_loop_filter_frame
 
 void vp9_loop_filter_frame_yonly
 (
-  VP8_COMMON *cm,
+  VP9_COMMON *cm,
   MACROBLOCKD *xd,
   int default_filt_lvl
 ) {
@@ -424,7 +424,7 @@ void vp9_loop_filter_frame_yonly
 
 void vp9_loop_filter_partial_frame
 (
-  VP8_COMMON *cm,
+  VP9_COMMON *cm,
   MACROBLOCKD *xd,
   int default_filt_lvl
 ) {

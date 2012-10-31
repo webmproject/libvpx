@@ -17,12 +17,12 @@
 #include "vp8/common/idct.h"
 #include "vp8/common/onyxc_int.h"
 
-extern void vp9_arch_x86_common_init(VP8_COMMON *ctx);
-extern void vp8_arch_arm_common_init(VP8_COMMON *ctx);
+extern void vp9_arch_x86_common_init(VP9_COMMON *ctx);
+extern void vp8_arch_arm_common_init(VP9_COMMON *ctx);
 
-void vp9_machine_specific_config(VP8_COMMON *ctx) {
+void vp9_machine_specific_config(VP9_COMMON *ctx) {
 #if CONFIG_RUNTIME_CPU_DETECT
-  VP8_COMMON_RTCD *rtcd = &ctx->rtcd;
+  VP9_COMMON_RTCD *rtcd = &ctx->rtcd;
 
   rtcd->idct.idct1        = vp9_short_idct4x4llm_1_c;
   rtcd->idct.idct16       = vp9_short_idct4x4llm_c;

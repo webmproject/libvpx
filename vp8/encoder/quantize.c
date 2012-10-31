@@ -367,7 +367,7 @@ static void invert_quant(short *quant,
   *shift = l;
 }
 
-void vp9_init_quantizer(VP8_COMP *cpi) {
+void vp9_init_quantizer(VP9_COMP *cpi) {
   int i;
   int quant_val;
   int Q;
@@ -531,7 +531,7 @@ void vp9_init_quantizer(VP8_COMP *cpi) {
   }
 }
 
-void vp9_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
+void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   int i;
   int QIndex;
   MACROBLOCKD *xd = &x->e_mbd;
@@ -655,7 +655,7 @@ void vp9_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x) {
   x->e_mbd.q_index = QIndex;
 }
 
-void vp9_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x) {
+void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x) {
   int i;
   int QIndex = x->e_mbd.q_index;
   int zbin_extra;
@@ -688,7 +688,7 @@ void vp9_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x) {
   x->block[24].zbin_extra = (short)zbin_extra;
 }
 
-void vp9_frame_init_quantizer(VP8_COMP *cpi) {
+void vp9_frame_init_quantizer(VP9_COMP *cpi) {
   // Clear Zbin mode boost for default case
   cpi->zbin_mode_boost = 0;
 
@@ -696,8 +696,8 @@ void vp9_frame_init_quantizer(VP8_COMP *cpi) {
   vp9_mb_init_quantizer(cpi, &cpi->mb);
 }
 
-void vp9_set_quantizer(struct VP8_COMP *cpi, int Q) {
-  VP8_COMMON *cm = &cpi->common;
+void vp9_set_quantizer(struct VP9_COMP *cpi, int Q) {
+  VP9_COMMON *cm = &cpi->common;
 
   cm->base_qindex = Q;
 

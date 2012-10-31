@@ -66,14 +66,14 @@ DEFINE(vp9_extra_bit_struct_prob,               offsetof(vp8_extra_bit_struct, p
 DEFINE(vp9_extra_bit_struct_len,                offsetof(vp8_extra_bit_struct, Len));
 DEFINE(vp9_extra_bit_struct_base_val,           offsetof(vp8_extra_bit_struct, base_val));
 
-DEFINE(vp9_comp_tplist,                         offsetof(VP8_COMP, tplist));
-DEFINE(vp9_comp_common,                         offsetof(VP8_COMP, common));
+DEFINE(vp9_comp_tplist,                         offsetof(VP9_COMP, tplist));
+DEFINE(vp9_comp_common,                         offsetof(VP9_COMP, common));
 
 DEFINE(tokenlist_start,                         offsetof(TOKENLIST, start));
 DEFINE(tokenlist_stop,                          offsetof(TOKENLIST, stop));
 DEFINE(TOKENLIST_SZ,                            sizeof(TOKENLIST));
 
-DEFINE(vp9_common_mb_rows,                      offsetof(VP8_COMMON, mb_rows));
+DEFINE(vp9_common_mb_rows,                      offsetof(VP9_COMMON, mb_rows));
 
 END
 

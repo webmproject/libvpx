@@ -260,7 +260,7 @@ struct vp8_token_struct vp9_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
 
 
-void vp9_init_mbmode_probs(VP8_COMMON *x) {
+void vp9_init_mbmode_probs(VP9_COMMON *x) {
   unsigned int bct [VP8_YMODES] [2];      /* num Ymodes > num UV modes */
 
   vp9_tree_probs_from_distribution(VP8_YMODES, vp9_ymode_encodings,
@@ -387,7 +387,7 @@ void vp9_entropy_mode_init() {
                               vp9_sub_mv_ref_tree, LEFT4X4);
 }
 
-void vp9_init_mode_contexts(VP8_COMMON *pc) {
+void vp9_init_mode_contexts(VP9_COMMON *pc) {
   vpx_memset(pc->fc.mv_ref_ct, 0, sizeof(pc->fc.mv_ref_ct));
   vpx_memset(pc->fc.mv_ref_ct_a, 0, sizeof(pc->fc.mv_ref_ct_a));
 
@@ -400,7 +400,7 @@ void vp9_init_mode_contexts(VP8_COMMON *pc) {
 
 }
 
-void vp9_accum_mv_refs(VP8_COMMON *pc,
+void vp9_accum_mv_refs(VP9_COMMON *pc,
                        MB_PREDICTION_MODE m,
                        const int ct[4]) {
   int (*mv_ref_ct)[4][2];
@@ -434,7 +434,7 @@ void vp9_accum_mv_refs(VP8_COMMON *pc,
 
 #define MVREF_COUNT_SAT 20
 #define MVREF_MAX_UPDATE_FACTOR 144
-void vp9_update_mode_context(VP8_COMMON *pc) {
+void vp9_update_mode_context(VP9_COMMON *pc) {
   int i, j;
   int (*mv_ref_ct)[4][2];
   int (*mode_context)[4];
@@ -467,7 +467,7 @@ void vp9_update_mode_context(VP8_COMMON *pc) {
 
 #ifdef MODE_STATS
 #include "vp8/common/modecont.h"
-void print_mode_contexts(VP8_COMMON *pc) {
+void print_mode_contexts(VP9_COMMON *pc) {
   int j, i;
   printf("\n====================\n");
   for (j = 0; j < 6; j++) {
@@ -489,7 +489,7 @@ void print_mode_contexts(VP8_COMMON *pc) {
 // #define MODE_COUNT_TESTING
 #define MODE_COUNT_SAT 20
 #define MODE_MAX_UPDATE_FACTOR 144
-void vp9_adapt_mode_probs(VP8_COMMON *cm) {
+void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   int i, t, count, factor;
   unsigned int branch_ct[32][2];
   vp8_prob ymode_probs[VP8_YMODES - 1];

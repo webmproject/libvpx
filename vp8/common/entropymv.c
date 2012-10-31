@@ -308,7 +308,7 @@ void vp9_counts_to_nmv_context(
   }
 }
 
-void vp9_adapt_nmv_probs(VP8_COMMON *cm, int usehp) {
+void vp9_adapt_nmv_probs(VP9_COMMON *cm, int usehp) {
   int i, j, k;
   nmv_context prob;
   unsigned int branch_ct_joint[MV_JOINTS - 1][2];
@@ -460,6 +460,6 @@ void vp9_entropy_mv_init() {
   vp9_tokens_from_tree(vp9_mv_fp_encodings, vp9_mv_fp_tree);
 }
 
-void vp9_init_mv_probs(VP8_COMMON *cm) {
+void vp9_init_mv_probs(VP9_COMMON *cm) {
   vpx_memcpy(&cm->fc.nmvc, &vp9_default_nmv_context, sizeof(nmv_context));
 }

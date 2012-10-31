@@ -202,7 +202,7 @@ vp8_extra_bit_struct vp9_extra_bits[12] = {
 
 #include "default_coef_probs.h"
 
-void vp9_default_coef_probs(VP8_COMMON *pc) {
+void vp9_default_coef_probs(VP9_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
              sizeof(pc->fc.coef_probs));
   vpx_memcpy(pc->fc.hybrid_coef_probs, default_hybrid_coef_probs,
@@ -234,7 +234,7 @@ void vp9_coef_tree_initialize() {
 #define COEF_COUNT_SAT_AFTER_KEY 24
 #define COEF_MAX_UPDATE_FACTOR_AFTER_KEY 128
 
-void vp9_adapt_coef_probs(VP8_COMMON *cm) {
+void vp9_adapt_coef_probs(VP9_COMMON *cm) {
   int t, i, j, k, count;
   unsigned int branch_ct[ENTROPY_NODES][2];
   vp8_prob coef_probs[ENTROPY_NODES];

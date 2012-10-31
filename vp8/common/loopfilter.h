@@ -80,22 +80,22 @@ typedef void loop_filter_uvfunction
 );
 
 /* assorted loopfilter functions which get used elsewhere */
-struct VP8Common;
+struct VP9Common;
 struct macroblockd;
 
-void vp9_loop_filter_init(struct VP8Common *cm);
+void vp9_loop_filter_init(struct VP9Common *cm);
 
-void vp9_loop_filter_frame_init(struct VP8Common *cm,
+void vp9_loop_filter_frame_init(struct VP9Common *cm,
                                 struct macroblockd *mbd,
                                 int default_filt_lvl);
 
-void vp9_loop_filter_frame(struct VP8Common *cm, struct macroblockd *mbd);
+void vp9_loop_filter_frame(struct VP9Common *cm, struct macroblockd *mbd);
 
-void vp9_loop_filter_partial_frame(struct VP8Common *cm,
+void vp9_loop_filter_partial_frame(struct VP9Common *cm,
                                    struct macroblockd *mbd,
                                    int default_filt_lvl);
 
-void vp9_loop_filter_frame_yonly(struct VP8Common *cm,
+void vp9_loop_filter_frame_yonly(struct VP9Common *cm,
                                  struct macroblockd *mbd,
                                  int default_filt_lvl);
 

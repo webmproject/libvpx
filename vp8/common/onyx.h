@@ -22,7 +22,7 @@ extern "C"
 #include "vpx_scale/yv12config.h"
 #include "type_aliases.h"
 #include "ppflags.h"
-  typedef int *VP8_PTR;
+  typedef int *VP9_PTR;
 
   /* Create/destroy static data structures. */
 
@@ -174,50 +174,50 @@ extern "C"
 
   void vp9_initialize_enc();
 
-  VP8_PTR vp9_create_compressor(VP8_CONFIG *oxcf);
-  void vp9_remove_compressor(VP8_PTR *comp);
+  VP9_PTR vp9_create_compressor(VP8_CONFIG *oxcf);
+  void vp9_remove_compressor(VP9_PTR *comp);
 
-  void vp8_init_config(VP8_PTR onyx, VP8_CONFIG *oxcf);
-  void vp9_change_config(VP8_PTR onyx, VP8_CONFIG *oxcf);
+  void vp8_init_config(VP9_PTR onyx, VP8_CONFIG *oxcf);
+  void vp9_change_config(VP9_PTR onyx, VP8_CONFIG *oxcf);
 
 // receive a frames worth of data caller can assume that a copy of this frame is made
 // and not just a copy of the pointer..
-  int vp9_receive_raw_frame(VP8_PTR comp, unsigned int frame_flags,
+  int vp9_receive_raw_frame(VP9_PTR comp, unsigned int frame_flags,
                             YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                             int64_t end_time_stamp);
 
-  int vp9_get_compressed_data(VP8_PTR comp, unsigned int *frame_flags,
+  int vp9_get_compressed_data(VP9_PTR comp, unsigned int *frame_flags,
                               unsigned long *size, unsigned char *dest,
                               int64_t *time_stamp, int64_t *time_end,
                               int flush);
 
-  int vp9_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest,
+  int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
                                 vp8_ppflags_t *flags);
 
-  int vp9_use_as_reference(VP8_PTR comp, int ref_frame_flags);
+  int vp9_use_as_reference(VP9_PTR comp, int ref_frame_flags);
 
-  int vp9_update_reference(VP8_PTR comp, int ref_frame_flags);
+  int vp9_update_reference(VP9_PTR comp, int ref_frame_flags);
 
-  int vp9_get_reference_enc(VP8_PTR comp, VP8_REFFRAME ref_frame_flag,
+  int vp9_get_reference_enc(VP9_PTR comp, VP8_REFFRAME ref_frame_flag,
                             YV12_BUFFER_CONFIG *sd);
 
-  int vp9_set_reference_enc(VP8_PTR comp, VP8_REFFRAME ref_frame_flag,
+  int vp9_set_reference_enc(VP9_PTR comp, VP8_REFFRAME ref_frame_flag,
                             YV12_BUFFER_CONFIG *sd);
 
-  int vp9_update_entropy(VP8_PTR comp, int update);
+  int vp9_update_entropy(VP9_PTR comp, int update);
 
-  int vp9_set_roimap(VP8_PTR comp, unsigned char *map,
+  int vp9_set_roimap(VP9_PTR comp, unsigned char *map,
                      unsigned int rows, unsigned int cols,
                      int delta_q[4], int delta_lf[4],
                      unsigned int threshold[4]);
 
-  int vp9_set_active_map(VP8_PTR comp, unsigned char *map,
+  int vp9_set_active_map(VP9_PTR comp, unsigned char *map,
                          unsigned int rows, unsigned int cols);
 
-  int vp9_set_internal_size(VP8_PTR comp,
+  int vp9_set_internal_size(VP9_PTR comp,
                             VPX_SCALING horiz_mode, VPX_SCALING vert_mode);
 
-  int vp9_get_quantizer(VP8_PTR c);
+  int vp9_get_quantizer(VP9_PTR c);
 
 #ifdef __cplusplus
 }

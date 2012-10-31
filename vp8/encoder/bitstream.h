@@ -12,6 +12,6 @@
 #ifndef __INC_BITSTREAM_H
 #define __INC_BITSTREAM_H
 
-void vp9_update_skip_probs(VP8_COMP *cpi);
+void vp9_update_skip_probs(VP9_COMP *cpi);
 
 #endif

@@ -16,13 +16,13 @@
 #include "vpx_config.h"
 #include "blockd.h"
 
-struct VP8Common;
+struct VP9Common;
 
 void vp9_entropy_mv_init();
-void vp9_init_mv_probs(struct VP8Common *cm);
-void vp8_adapt_mv_probs(struct VP8Common *cm);
+void vp9_init_mv_probs(struct VP9Common *cm);
+void vp8_adapt_mv_probs(struct VP9Common *cm);
 
-void vp9_adapt_nmv_probs(struct VP8Common *cm, int usehp);
+void vp9_adapt_nmv_probs(struct VP9Common *cm, int usehp);
 void vp8_lower_mv_precision(MV *mv);
 int vp9_use_nmv_hp(const MV *ref);
 

@@ -16,15 +16,15 @@
 #ifndef __INC_SEGMENTATION_H__
 #define __INC_SEGMENTATION_H__ 1
 
-extern void vp9_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm,
+extern void vp9_update_gf_useage_maps(VP9_COMP *cpi, VP9_COMMON *cm,
                                       MACROBLOCK *x);
 
-extern void vp9_enable_segmentation(VP8_PTR ptr);
-extern void vp9_disable_segmentation(VP8_PTR ptr);
+extern void vp9_enable_segmentation(VP9_PTR ptr);
+extern void vp9_disable_segmentation(VP9_PTR ptr);
 
 // Valid values for a segment are 0 to 3
 // Segmentation map is arrange as [Rows][Columns]
-extern void vp9_set_segmentation_map(VP8_PTR ptr,
+extern void vp9_set_segmentation_map(VP9_PTR ptr,
                                      unsigned char *segmentation_map);
 
 // The values given for each segment can be either deltas (from the default
@@ -38,9 +38,9 @@ extern void vp9_set_segmentation_map(VP8_PTR ptr,
 // abs_delta = SEGMENT_DELTADATA (deltas) abs_delta = SEGMENT_ABSDATA (use
 // the absolute values given).
 //
-extern void vp9_set_segment_data(VP8_PTR ptr, signed char *feature_data,
+extern void vp9_set_segment_data(VP9_PTR ptr, signed char *feature_data,
                                  unsigned char abs_delta);
 
-extern void vp9_choose_segmap_coding_method(VP8_COMP *cpi);
+extern void vp9_choose_segmap_coding_method(VP9_COMP *cpi);
 
 #endif /* __INC_SEGMENTATION_H__ */

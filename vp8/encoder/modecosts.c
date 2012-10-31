@@ -15,8 +15,8 @@
 #include "vp8/common/entropymode.h"
 
 
-void vp9_init_mode_costs(VP8_COMP *c) {
-  VP8_COMMON *x = &c->common;
+void vp9_init_mode_costs(VP9_COMP *c) {
+  VP9_COMMON *x = &c->common;
   const vp8_tree_p T = vp9_bmode_tree;
   int i, j;
 

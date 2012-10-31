@@ -19,9 +19,9 @@
 #include "vp8/common/idct.h"
 #include "vp8/common/onyxc_int.h"
 
-void vp8_arch_arm_common_init(VP8_COMMON *ctx) {
+void vp8_arch_arm_common_init(VP9_COMMON *ctx) {
 #if CONFIG_RUNTIME_CPU_DETECT
-  VP8_COMMON_RTCD *rtcd = &ctx->rtcd;
+  VP9_COMMON_RTCD *rtcd = &ctx->rtcd;
   int flags = arm_cpu_caps();
   rtcd->flags = flags;
 

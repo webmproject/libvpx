@@ -287,7 +287,7 @@ static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign) {
       val += (UINT16)(1 << bits_count);\
   } while (0);
 
-static int decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
+static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
                         BOOL_DECODER* const br,
                         ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                         PLANE_TYPE type,
@@ -414,7 +414,7 @@ SKIP_START:
   return c;
 }
 
-int vp9_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd,
+int vp9_decode_mb_tokens_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -477,7 +477,7 @@ int vp9_decode_mb_tokens_16x16(VP8D_COMP *pbi, MACROBLOCKD *xd,
   return eobtotal;
 }
 
-int vp9_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
+int vp9_decode_mb_tokens_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
                              BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
@@ -571,7 +571,7 @@ int vp9_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd,
 }
 
 
-int vp9_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd,
+int vp9_decode_mb_tokens(VP9D_COMP *dx, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;

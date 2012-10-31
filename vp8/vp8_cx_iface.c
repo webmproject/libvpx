@@ -76,7 +76,7 @@ struct vpx_codec_alg_priv {
   vpx_codec_enc_cfg_t     cfg;
   struct vp8_extracfg     vp8_cfg;
   VP8_CONFIG              oxcf;
-  VP8_PTR             cpi;
+  VP9_PTR             cpi;
   unsigned char          *cx_data;
   unsigned int            cx_data_sz;
   vpx_image_t             preview_img;
@@ -434,7 +434,7 @@ static vpx_codec_err_t vp8e_common_init(vpx_codec_ctx_t *ctx,
   vpx_codec_enc_cfg_t       *cfg;
   unsigned int               i;
 
-  VP8_PTR optr;
+  VP9_PTR optr;
 
   if (!ctx->priv) {
     priv = calloc(1, sizeof(struct vpx_codec_alg_priv));
@@ -646,10 +646,10 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
 
     /* Set up internal flags */
     if (ctx->base.init_flags & VPX_CODEC_USE_PSNR)
-      ((VP8_COMP *)ctx->cpi)->b_calculate_psnr = 1;
+      ((VP9_COMP *)ctx->cpi)->b_calculate_psnr = 1;
 
     // if (ctx->base.init_flags & VPX_CODEC_USE_OUTPUT_PARTITION)
-    //    ((VP8_COMP *)ctx->cpi)->output_partition = 1;
+    //    ((VP9_COMP *)ctx->cpi)->output_partition = 1;
 
     /* Convert API flags to internal codec lib flags */
     lib_flags = (flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
@@ -663,7 +663,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
 
       if (vp9_receive_raw_frame(ctx->cpi, ctx->next_frame_flag | lib_flags,
                                 &sd, dst_time_stamp, dst_end_time_stamp)) {
-        VP8_COMP *cpi = (VP8_COMP *)ctx->cpi;
+        VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
         res = update_error_state(ctx, &cpi->common.error);
       }
 
@@ -682,7 +682,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
       if (size) {
         vpx_codec_pts_t    round, delta;
         vpx_codec_cx_pkt_t pkt;
-        VP8_COMP *cpi = (VP8_COMP *)ctx->cpi;
+        VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
 
         /* Add the frame packet to the list of returned packets. */
         round = 1000000 * ctx->cfg.g_timebase.num / 2 - 1;

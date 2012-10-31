@@ -133,7 +133,7 @@ void vp9_temporal_filter_apply_c
 
 static int vp8_temporal_filter_find_matching_mb_c
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   YV12_BUFFER_CONFIG *arf_frame,
   YV12_BUFFER_CONFIG *frame_ptr,
   int mb_offset,
@@ -220,7 +220,7 @@ static int vp8_temporal_filter_find_matching_mb_c
 
 static void vp8_temporal_filter_iterate_c
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   int frame_count,
   int alt_ref_index,
   int strength
@@ -412,7 +412,7 @@ static void vp8_temporal_filter_iterate_c
 
 void vp9_temporal_filter_prepare_c
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   int distance
 ) {
   int frame = 0;

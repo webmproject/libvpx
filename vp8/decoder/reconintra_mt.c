@@ -18,7 +18,7 @@
  * and vp9_build_intra_predictors_mbuv_s(MACROBLOCKD *xd).
  */
 
-void vp8mt_build_intra_predictors_mby(VP8D_COMP *pbi, MACROBLOCKD *xd,
+void vp8mt_build_intra_predictors_mby(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                       int mb_row, int mb_col) {
   unsigned char *yabove_row;    /* = xd->dst.y_buffer - xd->dst.y_stride; */
   unsigned char *yleft_col;
@@ -128,7 +128,7 @@ void vp8mt_build_intra_predictors_mby(VP8D_COMP *pbi, MACROBLOCKD *xd,
   }
 }
 
-void vp8mt_build_intra_predictors_mby_s(VP8D_COMP *pbi, MACROBLOCKD *xd,
+void vp8mt_build_intra_predictors_mby_s(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                         int mb_row, int mb_col) {
   unsigned char *yabove_row;    /* = xd->dst.y_buffer - xd->dst.y_stride; */
   unsigned char *yleft_col;
@@ -245,7 +245,7 @@ void vp8mt_build_intra_predictors_mby_s(VP8D_COMP *pbi, MACROBLOCKD *xd,
   }
 }
 
-void vp8mt_build_intra_predictors_mbuv(VP8D_COMP *pbi, MACROBLOCKD *xd,
+void vp8mt_build_intra_predictors_mbuv(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                        int mb_row, int mb_col) {
   unsigned char *uabove_row;   /* = xd->dst.u_buffer - xd->dst.uv_stride; */
   unsigned char *uleft_col;    /*[16];*/
@@ -382,7 +382,7 @@ void vp8mt_build_intra_predictors_mbuv(VP8D_COMP *pbi, MACROBLOCKD *xd,
   }
 }
 
-void vp8mt_build_intra_predictors_mbuv_s(VP8D_COMP *pbi, MACROBLOCKD *xd,
+void vp8mt_build_intra_predictors_mbuv_s(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                          int mb_row, int mb_col) {
   unsigned char *uabove_row;  /* = xd->dst.u_buffer - xd->dst.uv_stride; */
   unsigned char *uleft_col;   /*[16];*/
@@ -525,7 +525,7 @@ void vp8mt_build_intra_predictors_mbuv_s(VP8D_COMP *pbi, MACROBLOCKD *xd,
 }
 
 
-void vp8mt_predict_intra4x4(VP8D_COMP *pbi,
+void vp8mt_predict_intra4x4(VP9D_COMP *pbi,
                             MACROBLOCKD *xd,
                             int b_mode,
                             unsigned char *predictor,
@@ -811,7 +811,7 @@ void vp8mt_predict_intra4x4(VP8D_COMP *pbi,
 /* copy 4 bytes from the above right down so that the 4x4 prediction modes using pixels above and
  * to the right prediction have filled in pixels to use.
  */
-void vp8mt_intra_prediction_down_copy(VP8D_COMP *pbi, MACROBLOCKD *xd,
+void vp8mt_intra_prediction_down_copy(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                       int mb_row, int mb_col) {
   unsigned char *above_right;   // = *(xd->block[0].base_dst) +
                                 //     xd->block[0].dst -

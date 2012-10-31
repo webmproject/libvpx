@@ -13,7 +13,7 @@
 #define _ENCODEINTRA_H_
 #include "onyx_int.h"
 
-int vp9_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_16x16_pred);
+int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred);
 void vp9_encode_intra16x16mby(const VP8_ENCODER_RTCD *, MACROBLOCK *x);
 void vp9_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *, MACROBLOCK *x);
 void vp9_encode_intra4x4mby(const VP8_ENCODER_RTCD *, MACROBLOCK *mb);

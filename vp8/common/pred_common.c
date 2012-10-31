@@ -15,7 +15,7 @@
 // TBD prediction functions for various bitstream signals
 
 // Returns a context number for the given MB prediction signal
-unsigned char vp9_get_pred_context(const VP8_COMMON *const cm,
+unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
                                    const MACROBLOCKD *const xd,
                                    PRED_ID pred_id) {
   int pred_context;
@@ -104,7 +104,7 @@ unsigned char vp9_get_pred_context(const VP8_COMMON *const cm,
 
 // This function returns a context probability for coding a given
 // prediction signal
-vp8_prob vp9_get_pred_prob(const VP8_COMMON *const cm,
+vp8_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
                           const MACROBLOCKD *const xd,
                           PRED_ID pred_id) {
   vp8_prob pred_probability;
@@ -144,7 +144,7 @@ vp8_prob vp9_get_pred_prob(const VP8_COMMON *const cm,
 
 // This function returns a context probability ptr for coding a given
 // prediction signal
-const vp8_prob *vp9_get_pred_probs(const VP8_COMMON *const cm,
+const vp8_prob *vp9_get_pred_probs(const VP9_COMMON *const cm,
                                    const MACROBLOCKD *const xd,
                                    PRED_ID pred_id) {
   const vp8_prob *pred_probability;
@@ -280,7 +280,7 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
 // peredict various bitstream signals.
 
 // Macroblock segment id prediction function
-unsigned char vp9_get_pred_mb_segid(const VP8_COMMON *const cm,
+unsigned char vp9_get_pred_mb_segid(const VP9_COMMON *const cm,
                                     const MACROBLOCKD *const xd, int MbIndex) {
   // Currently the prediction for the macroblock segment ID is
   // the value stored for this macroblock in the previous frame.
@@ -305,7 +305,7 @@ unsigned char vp9_get_pred_mb_segid(const VP8_COMMON *const cm,
 #endif
 }
 
-MV_REFERENCE_FRAME vp9_get_pred_ref(const VP8_COMMON *const cm,
+MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
                                     const MACROBLOCKD *const xd) {
   MODE_INFO *m = xd->mode_info_context;
 
@@ -407,7 +407,7 @@ void vp9_calc_ref_probs(int *count, vp8_prob *probs) {
 // Values willbe set to 0 for reference frame options that are not possible
 // because wither they were predicted and prediction has failed or because
 // they are not allowed for a given segment.
-void vp9_compute_mod_refprobs(VP8_COMMON *const cm) {
+void vp9_compute_mod_refprobs(VP9_COMMON *const cm) {
   int norm_cnt[MAX_REF_FRAMES];
   int intra_count;
   int inter_count;

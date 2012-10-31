@@ -157,7 +157,7 @@ void vp9_find_near_mvs
   vp8_clamp_mv2(best_mv, xd);
 }
 
-vp8_prob *vp9_mv_ref_probs(VP8_COMMON *pc,
+vp8_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
                            vp8_prob p[VP8_MVREFS - 1], const int near_mv_ref_ct[4]
                           ) {
   p[0] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[0]] [0];

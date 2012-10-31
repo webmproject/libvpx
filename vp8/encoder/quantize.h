@@ -82,16 +82,16 @@ void vp9_quantize_mb_16x16(MACROBLOCK *x);
 extern prototype_quantize_block(vp8_quantize_quantb_16x16);
 extern prototype_quantize_mb(vp9_quantize_mby_16x16);
 
-struct VP8_COMP;
+struct VP9_COMP;
 
-extern void vp9_set_quantizer(struct VP8_COMP *cpi, int Q);
+extern void vp9_set_quantizer(struct VP9_COMP *cpi, int Q);
 
-extern void vp9_frame_init_quantizer(struct VP8_COMP *cpi);
+extern void vp9_frame_init_quantizer(struct VP9_COMP *cpi);
 
-extern void vp9_update_zbin_extra(struct VP8_COMP *cpi, MACROBLOCK *x);
+extern void vp9_update_zbin_extra(struct VP9_COMP *cpi, MACROBLOCK *x);
 
-extern void vp9_mb_init_quantizer(struct VP8_COMP *cpi, MACROBLOCK *x);
+extern void vp9_mb_init_quantizer(struct VP9_COMP *cpi, MACROBLOCK *x);
 
-extern void vp9_init_quantizer(struct VP8_COMP *cpi);
+extern void vp9_init_quantizer(struct VP9_COMP *cpi);
 
 #endif

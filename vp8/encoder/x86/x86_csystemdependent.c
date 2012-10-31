@@ -76,7 +76,7 @@ void vp9_subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch) {
 
 #endif
 
-void vp9_arch_x86_encoder_init(VP8_COMP *cpi) {
+void vp9_arch_x86_encoder_init(VP9_COMP *cpi) {
 #if CONFIG_RUNTIME_CPU_DETECT
   int flags = x86_simd_caps();
 

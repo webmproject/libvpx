@@ -18,9 +18,9 @@
 #include "vp8/common/pragmas.h"
 #include "vp8/common/onyxc_int.h"
 
-void vp9_arch_x86_common_init(VP8_COMMON *ctx) {
+void vp9_arch_x86_common_init(VP9_COMMON *ctx) {
 #if CONFIG_RUNTIME_CPU_DETECT
-  VP8_COMMON_RTCD *rtcd = &ctx->rtcd;
+  VP9_COMMON_RTCD *rtcd = &ctx->rtcd;
   int flags = x86_simd_caps();
 
   /* Note:

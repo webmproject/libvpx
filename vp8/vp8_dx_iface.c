@@ -409,7 +409,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     }
 
     if (vp9_receive_compressed_data(ctx->pbi, data_sz, data, deadline)) {
-      VP8D_COMP *pbi = (VP8D_COMP *)ctx->pbi;
+      VP9D_COMP *pbi = (VP9D_COMP *)ctx->pbi;
       res = update_error_state(ctx, &pbi->common.error);
     }
 
@@ -612,7 +612,7 @@ static vpx_codec_err_t vp8_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
                                                 int ctrl_id,
                                                 va_list args) {
   int *update_info = va_arg(args, int *);
-  VP8D_COMP *pbi = (VP8D_COMP *)ctx->pbi;
+  VP9D_COMP *pbi = (VP9D_COMP *)ctx->pbi;
 
   if (update_info) {
     *update_info = pbi->common.refresh_alt_ref_frame * (int) VP8_ALTR_FRAME
@@ -632,7 +632,7 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
   int *corrupted = va_arg(args, int *);
 
   if (corrupted) {
-    VP8D_COMP *pbi = (VP8D_COMP *)ctx->pbi;
+    VP9D_COMP *pbi = (VP9D_COMP *)ctx->pbi;
     *corrupted = pbi->common.frame_to_show->corrupted;
 
     return VPX_CODEC_OK;

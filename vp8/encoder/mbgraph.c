@@ -20,7 +20,7 @@
 
 static unsigned int do_16x16_motion_iteration
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   int_mv *ref_mv,
   int_mv *dst_mv
 ) {
@@ -97,7 +97,7 @@ static unsigned int do_16x16_motion_iteration
 
 static int do_16x16_motion_search
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   int_mv *ref_mv,
   int_mv *dst_mv,
   YV12_BUFFER_CONFIG *buf,
@@ -158,7 +158,7 @@ static int do_16x16_motion_search
 
 static int do_16x16_zerozero_search
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   int_mv *dst_mv,
   YV12_BUFFER_CONFIG *buf,
   int buf_mb_y_offset,
@@ -197,7 +197,7 @@ static int do_16x16_zerozero_search
 }
 static int find_best_16x16_intra
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   YV12_BUFFER_CONFIG *buf,
   int mb_y_offset,
   MB_PREDICTION_MODE *pbest_mode
@@ -231,7 +231,7 @@ static int find_best_16x16_intra
 
 static void update_mbgraph_mb_stats
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   MBGRAPH_MB_STATS *stats,
   YV12_BUFFER_CONFIG *buf,
   int mb_y_offset,
@@ -289,14 +289,14 @@ static void update_mbgraph_mb_stats
 
 static void update_mbgraph_frame_stats
 (
-  VP8_COMP *cpi,
+  VP9_COMP *cpi,
   MBGRAPH_FRAME_STATS *stats,
   YV12_BUFFER_CONFIG *buf,
   YV12_BUFFER_CONFIG *golden_ref,
   YV12_BUFFER_CONFIG *alt_ref
 ) {
   MACROBLOCK   *const x  = &cpi->mb;
-  VP8_COMMON   *const cm = &cpi->common;
+  VP9_COMMON   *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   int mb_col, mb_row, offset = 0;
   int mb_y_offset = 0, arf_y_offset = 0, gld_y_offset = 0;
@@ -358,8 +358,8 @@ static void update_mbgraph_frame_stats
 }
 
 // void separate_arf_mbs_byzz
-static void separate_arf_mbs(VP8_COMP *cpi) {
-  VP8_COMMON *const cm = &cpi->common;
+static void separate_arf_mbs(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
   int mb_col, mb_row, offset, i;
   int ncnt[4];
   int n_frames = cpi->mbgraph_n_frames;
@@ -428,10 +428,10 @@ static void separate_arf_mbs(VP8_COMP *cpi) {
       cpi->static_mb_pct = 0;
 
     cpi->seg0_cnt = ncnt[0];
-    vp9_enable_segmentation((VP8_PTR) cpi);
+    vp9_enable_segmentation((VP9_PTR) cpi);
   } else {
     cpi->static_mb_pct = 0;
-    vp9_disable_segmentation((VP8_PTR) cpi);
+    vp9_disable_segmentation((VP9_PTR) cpi);
   }
 
   // Free localy allocated storage
@@ -440,9 +440,9 @@ static void separate_arf_mbs(VP8_COMP *cpi) {
 
 void vp9_update_mbgraph_stats
 (
-  VP8_COMP *cpi
+  VP9_COMP *cpi
 ) {
-  VP8_COMMON *const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   int i, n_frames = vp9_lookahead_depth(cpi->lookahead);
   YV12_BUFFER_CONFIG *golden_ref = &cm->yv12_fb[cm->gld_fb_idx];
 

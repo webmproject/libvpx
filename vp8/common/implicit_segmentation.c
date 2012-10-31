@@ -94,7 +94,7 @@ void merge(item *labels, int u, int v) {
 
 }
 
-void segment_via_mode_info(VP8_COMMON *oci, int how) {
+void segment_via_mode_info(VP9_COMMON *oci, int how) {
   MODE_INFO *mi = oci->mi;
   int i, j;
   int mb_index = 0;

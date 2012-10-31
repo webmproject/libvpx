@@ -155,9 +155,9 @@ static void update_mode(
     vp8_write_bit(bc, 0);
 }
 
-static void update_mbintra_mode_probs(VP8_COMP* const cpi,
+static void update_mbintra_mode_probs(VP9_COMP* const cpi,
                                       vp8_writer* const bc) {
-  VP8_COMMON *const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
 
   {
     vp8_prob Pnew   [VP8_YMODES - 1];
@@ -186,8 +186,8 @@ static int get_binary_prob(int n0, int n1) {
   return get_prob(n0, n0 + n1);
 }
 
-void vp9_update_skip_probs(VP8_COMP *cpi) {
-  VP8_COMMON *const pc = &cpi->common;
+void vp9_update_skip_probs(VP9_COMP *cpi) {
+  VP9_COMMON *const pc = &cpi->common;
   int prob_skip_false[3] = {0, 0, 0};
   int k;
 
@@ -197,9 +197,9 @@ void vp9_update_skip_probs(VP8_COMP *cpi) {
   }
 }
 
-static void update_switchable_interp_probs(VP8_COMP *cpi,
+static void update_switchable_interp_probs(VP9_COMP *cpi,
                                            vp8_writer* const bc) {
-  VP8_COMMON *const pc = &cpi->common;
+  VP9_COMMON *const pc = &cpi->common;
   unsigned int branch_ct[32][2];
   int i, j;
   for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
@@ -217,8 +217,8 @@ static void update_switchable_interp_probs(VP8_COMP *cpi,
 }
 
 // This function updates the reference frame prediction stats
-static void update_refpred_stats(VP8_COMP *cpi) {
-  VP8_COMMON *const cm = &cpi->common;
+static void update_refpred_stats(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
   int i;
   int tot_count;
   vp8_prob new_pred_probs[PREDICTION_PROBS];
@@ -260,7 +260,7 @@ static void update_refpred_stats(VP8_COMP *cpi) {
   }
 }
 
-static void update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
+static void update_mvcount(VP9_COMP *cpi, MACROBLOCK *x,
                            int_mv *best_ref_mv, int_mv *second_best_ref_mv) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   MV mv;
@@ -789,7 +789,7 @@ static void write_mb_segid(vp8_writer *bc,
 
 // This function encodes the reference frame
 static void encode_ref_frame(vp8_writer *const bc,
-                             VP8_COMMON *const cm,
+                             VP9_COMMON *const cm,
                              MACROBLOCKD *xd,
                              int segment_id,
                              MV_REFERENCE_FRAME rf) {
@@ -870,8 +870,8 @@ static void encode_ref_frame(vp8_writer *const bc,
 }
 
 // Update the probabilities used to encode reference frame data
-static void update_ref_probs(VP8_COMP *const cpi) {
-  VP8_COMMON *const cm = &cpi->common;
+static void update_ref_probs(VP9_COMP *const cpi) {
+  VP9_COMMON *const cm = &cpi->common;
 
   const int *const rfct = cpi->count_mb_ref_frame_usage;
   const int rf_intra = rfct[INTRA_FRAME];
@@ -887,9 +887,9 @@ static void update_ref_probs(VP8_COMP *const cpi) {
   vp9_compute_mod_refprobs(cm);
 }
 
-static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
+static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp8_writer *const bc) {
   int i;
-  VP8_COMMON *const pc = &cpi->common;
+  VP9_COMMON *const pc = &cpi->common;
   const nmv_context *nmvc = &pc->fc.nmvc;
   MACROBLOCK *x = &cpi->mb;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
@@ -1316,7 +1316,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
 }
 
 
-static void write_mb_modes_kf(const VP8_COMMON  *c,
+static void write_mb_modes_kf(const VP9_COMMON  *c,
                               const MACROBLOCKD *xd,
                               const MODE_INFO   *m,
                               int                mode_info_stride,
@@ -1420,8 +1420,8 @@ static void write_mb_modes_kf(const VP8_COMMON  *c,
   }
 }
 
-static void write_kfmodes(VP8_COMP* const cpi, vp8_writer* const bc) {
-  VP8_COMMON *const c = &cpi->common;
+static void write_kfmodes(VP9_COMP* const cpi, vp8_writer* const bc) {
+  VP9_COMMON *const c = &cpi->common;
   const int mis = c->mode_info_stride;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   MODE_INFO *m;
@@ -1513,7 +1513,7 @@ static void print_prob_tree(vp8_prob
   fclose(f);
 }
 
-static void build_coeff_contexts(VP8_COMP *cpi) {
+static void build_coeff_contexts(VP9_COMP *cpi) {
   int i = 0, j, k;
 #ifdef ENTROPY_STATS
   int t = 0;
@@ -1753,7 +1753,7 @@ static void update_coef_probs_common(
   }
 }
 
-static void update_coef_probs(VP8_COMP* const cpi, vp8_writer* const bc) {
+static void update_coef_probs(VP9_COMP* const cpi, vp8_writer* const bc) {
   vp8_clear_system_state();
 
   // Build the cofficient contexts based on counts collected in encode loop
@@ -1811,7 +1811,7 @@ static void put_delta_q(vp8_writer *bc, int delta_q) {
     vp8_write_bit(bc, 0);
 }
 
-static void decide_kf_ymode_entropy(VP8_COMP *cpi) {
+static void decide_kf_ymode_entropy(VP9_COMP *cpi) {
 
   int mode_cost[MB_MODE_COUNT];
   int cost;
@@ -1840,8 +1840,8 @@ static void decide_kf_ymode_entropy(VP8_COMP *cpi) {
   cpi->common.kf_ymode_probs_index = bestindex;
 
 }
-static void segment_reference_frames(VP8_COMP *cpi) {
-  VP8_COMMON *oci = &cpi->common;
+static void segment_reference_frames(VP9_COMP *cpi) {
+  VP9_COMMON *oci = &cpi->common;
   MODE_INFO *mi = oci->mi;
   int ref[MAX_MB_SEGMENTS] = {0};
   int i, j;
@@ -1860,11 +1860,11 @@ static void segment_reference_frames(VP8_COMP *cpi) {
   }
 }
 
-void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
+void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
                         unsigned long *size) {
   int i, j;
   VP8_HEADER oh;
-  VP8_COMMON *const pc = &cpi->common;
+  VP9_COMMON *const pc = &cpi->common;
   vp8_writer header_bc, residual_bc;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   int extra_bytes_packed = 0;

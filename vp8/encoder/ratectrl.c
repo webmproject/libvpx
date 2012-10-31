@@ -120,9 +120,9 @@ int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex) {
 }
 
 
-void vp9_save_coding_context(VP8_COMP *cpi) {
+void vp9_save_coding_context(VP9_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   // Stores a snapshot of key state variables which can subsequently be
@@ -177,9 +177,9 @@ void vp9_save_coding_context(VP8_COMP *cpi) {
   vp8_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
 }
 
-void vp9_restore_coding_context(VP8_COMP *cpi) {
+void vp9_restore_coding_context(VP9_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   // Restore key state variables to the snapshot state stored in the
@@ -234,8 +234,8 @@ void vp9_restore_coding_context(VP8_COMP *cpi) {
 }
 
 
-void vp9_setup_key_frame(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+void vp9_setup_key_frame(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
   // Setup for Key frame:
   vp9_default_coef_probs(& cpi->common);
   vp9_kf_default_bmode_probs(cpi->common.kf_bmode_prob);
@@ -266,7 +266,7 @@ void vp9_setup_key_frame(VP8_COMP *cpi) {
   vp9_update_mode_info_in_image(cm, cm->mi);
 }
 
-void vp9_setup_inter_frame(VP8_COMP *cpi) {
+void vp9_setup_inter_frame(VP9_COMP *cpi) {
   if (cpi->common.refresh_alt_ref_frame) {
     vpx_memcpy(&cpi->common.fc,
                &cpi->common.lfc_a,
@@ -300,7 +300,7 @@ static int estimate_bits_at_q(int frame_kind, int Q, int MBs,
 }
 
 
-static void calc_iframe_target_size(VP8_COMP *cpi) {
+static void calc_iframe_target_size(VP9_COMP *cpi) {
   // boost defaults to half second
   int target;
 
@@ -328,13 +328,13 @@ static void calc_iframe_target_size(VP8_COMP *cpi) {
 //
 //  In this experimental code only two pass is supported
 //  so we just use the interval determined in the two pass code.
-static void calc_gf_params(VP8_COMP *cpi) {
+static void calc_gf_params(VP9_COMP *cpi) {
   // Set the gf interval
   cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
 }
 
 
-static void calc_pframe_target_size(VP8_COMP *cpi) {
+static void calc_pframe_target_size(VP9_COMP *cpi) {
   int min_frame_target;
 
   min_frame_target = 0;
@@ -405,7 +405,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi) {
 }
 
 
-void vp9_update_rate_correction_factors(VP8_COMP *cpi, int damp_var) {
+void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   int    Q = cpi->common.base_qindex;
   int    correction_factor = 100;
   double rate_correction_factor;
@@ -501,7 +501,7 @@ void vp9_update_rate_correction_factors(VP8_COMP *cpi, int damp_var) {
 }
 
 
-int vp9_regulate_q(VP8_COMP *cpi, int target_bits_per_frame) {
+int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
   int Q = cpi->active_worst_quality;
 
   int i;
@@ -590,7 +590,7 @@ int vp9_regulate_q(VP8_COMP *cpi, int target_bits_per_frame) {
 }
 
 
-static int estimate_keyframe_frequency(VP8_COMP *cpi) {
+static int estimate_keyframe_frequency(VP9_COMP *cpi) {
   int i;
 
   // Average key frame frequency
@@ -638,7 +638,7 @@ static int estimate_keyframe_frequency(VP8_COMP *cpi) {
 }
 
 
-void vp9_adjust_key_frame_context(VP8_COMP *cpi) {
+void vp9_adjust_key_frame_context(VP9_COMP *cpi) {
   // Clear down mmx registers to allow floating point in what follows
   vp8_clear_system_state();
 
@@ -647,7 +647,7 @@ void vp9_adjust_key_frame_context(VP8_COMP *cpi) {
 }
 
 
-void vp9_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit,
+void vp9_compute_frame_size_bounds(VP9_COMP *cpi, int *frame_under_shoot_limit,
                                    int *frame_over_shoot_limit) {
   // Set-up bounds on acceptable frame size:
   if (cpi->oxcf.fixed_q >= 0) {
@@ -686,8 +686,8 @@ void vp9_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit,
 
 
 // return of 0 means drop frame
-int vp9_pick_frame_size(VP8_COMP *cpi) {
-  VP8_COMMON *cm = &cpi->common;
+int vp9_pick_frame_size(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
 
   if (cm->frame_type == KEY_FRAME)
     calc_iframe_target_size(cpi);

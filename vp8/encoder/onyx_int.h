@@ -348,7 +348,7 @@ typedef struct {
 
 
 typedef struct VP8_ENCODER_RTCD {
-  VP8_COMMON_RTCD            *common;
+  VP9_COMMON_RTCD            *common;
   vp8_search_rtcd_vtable_t    search;
   vp8_temporal_rtcd_vtable_t  temporal;
 } VP8_ENCODER_RTCD;
@@ -364,7 +364,7 @@ enum BlockSize {
   BLOCK_MAX_SB_SEGMENTS,
 };
 
-typedef struct VP8_COMP {
+typedef struct VP9_COMP {
 
   DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][16]);
   DECLARE_ALIGNED(16, unsigned char, Y1quant_shift[QINDEX_RANGE][16]);
@@ -400,7 +400,7 @@ typedef struct VP8_COMP {
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv_16x16[QINDEX_RANGE][256]);
 
   MACROBLOCK mb;
-  VP8_COMMON common;
+  VP9_COMMON common;
   VP8_CONFIG oxcf;
 
   struct lookahead_ctx    *lookahead;
@@ -755,19 +755,19 @@ typedef struct VP8_COMP {
   unsigned int best_ref_index_counts[MAX_REF_FRAMES][MAX_MV_REFS];
 #endif
 
-} VP8_COMP;
+} VP9_COMP;
 
-void vp9_encode_frame(VP8_COMP *cpi);
+void vp9_encode_frame(VP9_COMP *cpi);
 
-void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
+void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
                         unsigned long *size);
 
-void vp9_activity_masking(VP8_COMP *cpi, MACROBLOCK *x);
+void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x);
 
-void vp9_tokenize_mb(VP8_COMP *, MACROBLOCKD *, TOKENEXTRA **, int dry_run);
-void vp9_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
+void vp9_tokenize_mb(VP9_COMP *, MACROBLOCKD *, TOKENEXTRA **, int dry_run);
+void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 
-void vp9_set_speed_features(VP8_COMP *cpi);
+void vp9_set_speed_features(VP9_COMP *cpi);
 
 #if CONFIG_DEBUG
 #define CHECK_MEM_ERROR(lval,expr) do {\

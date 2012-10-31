@@ -370,7 +370,7 @@ typedef struct macroblockd {
 #endif
 
 #if CONFIG_RUNTIME_CPU_DETECT
-  struct VP8_COMMON_RTCD  *rtcd;
+  struct VP9_COMMON_RTCD  *rtcd;
 #endif
 
   int mb_index;   // Index of the MB in the SB (0..3)

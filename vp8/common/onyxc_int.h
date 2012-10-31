@@ -133,7 +133,7 @@ typedef enum {
   NB_TXFM_MODES       = 4,
 } TXFM_MODE;
 
-typedef struct VP8_COMMON_RTCD {
+typedef struct VP9_COMMON_RTCD {
 #if CONFIG_RUNTIME_CPU_DETECT
   vp8_idct_rtcd_vtable_t        idct;
   vp8_subpix_rtcd_vtable_t      subpix;
@@ -144,9 +144,9 @@ typedef struct VP8_COMMON_RTCD {
 #else
   int unused;
 #endif
-} VP8_COMMON_RTCD;
+} VP9_COMMON_RTCD;
 
-typedef struct VP8Common {
+typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
   DECLARE_ALIGNED(16, short, Y1dequant[QINDEX_RANGE][16]);
@@ -294,7 +294,7 @@ typedef struct VP8Common {
   double framerate;
 
 #if CONFIG_RUNTIME_CPU_DETECT
-  VP8_COMMON_RTCD rtcd;
+  VP9_COMMON_RTCD rtcd;
 #endif
 
 #if CONFIG_POSTPROC
@@ -309,6 +309,6 @@ typedef struct VP8Common {
   vp8_prob prob_pred_filter_off;
 #endif
 
-} VP8_COMMON;
+} VP9_COMMON;
 
 #endif

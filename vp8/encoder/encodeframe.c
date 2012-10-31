@@ -54,15 +54,15 @@ int enc_debug = 0;
 int mb_row_debug, mb_col_debug;
 #endif
 
-extern void vp9_initialize_me_consts(VP8_COMP *cpi, int QIndex);
+extern void vp9_initialize_me_consts(VP9_COMP *cpi, int QIndex);
 
-extern void vp9_auto_select_speed(VP8_COMP *cpi);
+extern void vp9_auto_select_speed(VP9_COMP *cpi);
 
-int64_t vp9_rd_pick_inter_mode_sb(VP8_COMP *cpi, MACROBLOCK *x,
+int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                               int recon_yoffset, int recon_uvoffset,
                               int *returnrate, int *returndistortion);
 
-extern void vp9_pick_mode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
+extern void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
                                            int recon_yoffset,
                                            int recon_uvoffset, int *r, int *d);
 
@@ -70,21 +70,21 @@ void vp9_build_block_offsets(MACROBLOCK *x);
 
 void vp9_setup_block_ptrs(MACROBLOCK *x);
 
-void vp9_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
+void vp9_encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
                                  int recon_yoffset, int recon_uvoffset,
                                  int output_enabled);
 
-void vp9_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
+void vp9_encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
                                  int recon_yoffset, int recon_uvoffset,
                                  int mb_col, int mb_row);
 
-void vp9_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x,
+void vp9_encode_intra_macro_block(VP9_COMP *cpi, MACROBLOCK *x,
                                   TOKENEXTRA **t, int output_enabled);
 
-void vp9_encode_intra_super_block(VP8_COMP *cpi, MACROBLOCK *x,
+void vp9_encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
                                   TOKENEXTRA **t, int mb_col);
 
-static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x);
+static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
 
 #ifdef MODE_STATS
 unsigned int inter_y_modes[MB_MODE_COUNT];
@@ -116,7 +116,7 @@ static const unsigned char VP8_VAR_OFFS[16] = {
 
 
 // Original activity measure from Tim T's code.
-static unsigned int tt_activity_measure(VP8_COMP *cpi, MACROBLOCK *x) {
+static unsigned int tt_activity_measure(VP9_COMP *cpi, MACROBLOCK *x) {
   unsigned int act;
   unsigned int sse;
   /* TODO: This could also be done over smaller areas (8x8), but that would
@@ -138,7 +138,7 @@ static unsigned int tt_activity_measure(VP8_COMP *cpi, MACROBLOCK *x) {
 }
 
 // Stub for alternative experimental activity measures.
-static unsigned int alt_activity_measure(VP8_COMP *cpi,
+static unsigned int alt_activity_measure(VP9_COMP *cpi,
                                          MACROBLOCK *x, int use_dc_pred) {
   return vp9_encode_intra(cpi, x, use_dc_pred);
 }
@@ -147,7 +147,7 @@ static unsigned int alt_activity_measure(VP8_COMP *cpi,
 // Measure the activity of the current macroblock
 // What we measure here is TBD so abstracted to this function
 #define ALT_ACT_MEASURE 1
-static unsigned int mb_activity_measure(VP8_COMP *cpi, MACROBLOCK *x,
+static unsigned int mb_activity_measure(VP9_COMP *cpi, MACROBLOCK *x,
                                         int mb_row, int mb_col) {
   unsigned int mb_activity;
 
@@ -169,7 +169,7 @@ static unsigned int mb_activity_measure(VP8_COMP *cpi, MACROBLOCK *x,
 
 // Calculate an "average" mb activity value for the frame
 #define ACT_MEDIAN 0
-static void calc_av_activity(VP8_COMP *cpi, int64_t activity_sum) {
+static void calc_av_activity(VP9_COMP *cpi, int64_t activity_sum) {
 #if ACT_MEDIAN
   // Find median: Simple n^2 algorithm for experimentation
   {
@@ -227,8 +227,8 @@ static void calc_av_activity(VP8_COMP *cpi, int64_t activity_sum) {
 
 #if USE_ACT_INDEX
 // Calculate and activity index for each mb
-static void calc_activity_index(VP8_COMP *cpi, MACROBLOCK *x) {
-  VP8_COMMON *const cm = &cpi->common;
+static void calc_activity_index(VP9_COMP *cpi, MACROBLOCK *x) {
+  VP9_COMMON *const cm = &cpi->common;
   int mb_row, mb_col;
 
   int64_t act;
@@ -281,10 +281,10 @@ static void calc_activity_index(VP8_COMP *cpi, MACROBLOCK *x) {
 
 // Loop through all MBs. Note activity of each, average activity and
 // calculate a normalized activity for each
-static void build_activity_map(VP8_COMP *cpi) {
+static void build_activity_map(VP9_COMP *cpi) {
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *xd = &x->e_mbd;
-  VP8_COMMON *const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
 
 #if ALT_ACT_MEASURE
   YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
@@ -352,7 +352,7 @@ static void build_activity_map(VP8_COMP *cpi) {
 }
 
 // Macroblock activity masking
-void vp9_activity_masking(VP8_COMP *cpi, MACROBLOCK *x) {
+void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x) {
 #if USE_ACT_INDEX
   x->rdmult += *(x->mb_activity_ptr) * (x->rdmult >> 2);
   x->errorperbit = x->rdmult * 100 / (110 * x->rddiv);
@@ -375,7 +375,7 @@ void vp9_activity_masking(VP8_COMP *cpi, MACROBLOCK *x) {
   adjust_act_zbin(cpi, x);
 }
 
-static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
+static void update_state(VP9_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
   MODE_INFO *mi = &ctx->mic;
@@ -489,8 +489,8 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   }
 }
 
-static void pick_mb_modes(VP8_COMP *cpi,
-                          VP8_COMMON *cm,
+static void pick_mb_modes(VP9_COMP *cpi,
+                          VP9_COMMON *cm,
                           int mb_row,
                           int mb_col,
                           MACROBLOCK  *x,
@@ -712,8 +712,8 @@ static void pick_mb_modes(VP8_COMP *cpi,
 }
 
 #if CONFIG_SUPERBLOCKS
-static void pick_sb_modes (VP8_COMP *cpi,
-                           VP8_COMMON *cm,
+static void pick_sb_modes (VP9_COMP *cpi,
+                           VP9_COMMON *cm,
                            int mb_row,
                            int mb_col,
                            MACROBLOCK  *x,
@@ -854,8 +854,8 @@ static void pick_sb_modes (VP8_COMP *cpi,
 }
 #endif
 
-static void encode_sb(VP8_COMP *cpi,
-                      VP8_COMMON *cm,
+static void encode_sb(VP9_COMP *cpi,
+                      VP9_COMMON *cm,
                       int mbrow,
                       int mbcol,
                       MACROBLOCK  *x,
@@ -1114,8 +1114,8 @@ static void encode_sb(VP8_COMP *cpi,
 }
 
 static
-void encode_sb_row(VP8_COMP *cpi,
-                   VP8_COMMON *cm,
+void encode_sb_row(VP9_COMP *cpi,
+                   VP9_COMMON *cm,
                    int mb_row,
                    MACROBLOCK  *x,
                    MACROBLOCKD *xd,
@@ -1229,9 +1229,9 @@ void encode_sb_row(VP8_COMP *cpi,
 #endif
 }
 
-static void init_encode_frame_mb_context(VP8_COMP *cpi) {
+static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   MACROBLOCK *const x = &cpi->mb;
-  VP8_COMMON *const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
 
   // GF active flags data structure
@@ -1299,10 +1299,10 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi) {
     xd->fullpixel_mask = 0xfffffff8;
 }
 
-static void encode_frame_internal(VP8_COMP *cpi) {
+static void encode_frame_internal(VP9_COMP *cpi) {
   int mb_row;
   MACROBLOCK *const x = &cpi->mb;
-  VP8_COMMON *const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
 
   TOKENEXTRA *tp = cpi->tok;
@@ -1425,7 +1425,7 @@ static void encode_frame_internal(VP8_COMP *cpi) {
 
 }
 
-static int check_dual_ref_flags(VP8_COMP *cpi) {
+static int check_dual_ref_flags(VP9_COMP *cpi) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   int ref_flags = cpi->ref_frame_flags;
 
@@ -1447,8 +1447,8 @@ static int check_dual_ref_flags(VP8_COMP *cpi) {
   }
 }
 
-static void reset_skip_txfm_size(VP8_COMP *cpi, TX_SIZE txfm_max) {
-  VP8_COMMON *cm = &cpi->common;
+static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
+  VP9_COMMON *cm = &cpi->common;
   int mb_row, mb_col, mis = cm->mode_info_stride, segment_id;
   MODE_INFO *mi, *mi_ptr = cm->mi;
 #if CONFIG_SUPERBLOCKS
@@ -1493,7 +1493,7 @@ static void reset_skip_txfm_size(VP8_COMP *cpi, TX_SIZE txfm_max) {
   }
 }
 
-void vp9_encode_frame(VP8_COMP *cpi) {
+void vp9_encode_frame(VP9_COMP *cpi) {
   if (cpi->sf.RD) {
     int i, frame_type, pred_type;
     TXFM_MODE txfm_type;
@@ -1721,7 +1721,7 @@ void vp9_build_block_offsets(MACROBLOCK *x) {
   }
 }
 
-static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x) {
+static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
   const MACROBLOCKD *xd = &x->e_mbd;
   const MB_PREDICTION_MODE m = xd->mode_info_context->mbmi.mode;
   const MB_PREDICTION_MODE uvm = xd->mode_info_context->mbmi.uv_mode;
@@ -1774,7 +1774,7 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x) {
 
 // Experimental stub function to create a per MB zbin adjustment based on
 // some previously calculated measure of MB activity.
-static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x) {
+static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x) {
 #if USE_ACT_INDEX
   x->act_zbin_adj = *(x->mb_activity_ptr);
 #else
@@ -1794,7 +1794,7 @@ static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x) {
 }
 
 #if CONFIG_SUPERBLOCKS
-static void update_sb_skip_coeff_state(VP8_COMP *cpi,
+static void update_sb_skip_coeff_state(VP9_COMP *cpi,
                                        MACROBLOCK *x,
                                        ENTROPY_CONTEXT_PLANES ta[4],
                                        ENTROPY_CONTEXT_PLANES tl[4],
@@ -1852,14 +1852,14 @@ static void update_sb_skip_coeff_state(VP8_COMP *cpi,
   }
 }
 
-void vp9_encode_intra_super_block(VP8_COMP *cpi,
+void vp9_encode_intra_super_block(VP9_COMP *cpi,
                                   MACROBLOCK *x,
                                   TOKENEXTRA **t,
                                   int mb_col) {
   const int output_enabled = 1;
   int n;
   MACROBLOCKD *xd = &x->e_mbd;
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   const uint8_t *src = x->src.y_buffer;
   uint8_t *dst = xd->dst.y_buffer;
   const uint8_t *usrc = x->src.u_buffer;
@@ -1932,7 +1932,7 @@ void vp9_encode_intra_super_block(VP8_COMP *cpi,
 }
 #endif /* CONFIG_SUPERBLOCKS */
 
-void vp9_encode_intra_macro_block(VP8_COMP *cpi,
+void vp9_encode_intra_macro_block(VP9_COMP *cpi,
                                   MACROBLOCK *x,
                                   TOKENEXTRA **t,
                                   int output_enabled) {
@@ -1990,10 +1990,10 @@ extern int cnt_pm;
 
 extern void vp9_fix_contexts(MACROBLOCKD *xd);
 
-void vp9_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
+void vp9_encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
                                  TOKENEXTRA **t, int recon_yoffset,
                                  int recon_uvoffset, int output_enabled) {
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
   unsigned char *segment_id = &mbmi->segment_id;
@@ -2176,11 +2176,11 @@ void vp9_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
 }
 
 #if CONFIG_SUPERBLOCKS
-void vp9_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
+void vp9_encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
                                  int recon_yoffset, int recon_uvoffset,
                                  int mb_col, int mb_row) {
   const int output_enabled = 1;
-  VP8_COMMON *cm = &cpi->common;
+  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   const uint8_t *src = x->src.y_buffer;
   uint8_t *dst = xd->dst.y_buffer;
