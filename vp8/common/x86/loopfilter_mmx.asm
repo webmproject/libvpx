@@ -12,7 +12,7 @@
 %include "vpx_ports/x86_abi_support.asm"
 
 
-;void vp8_loop_filter_horizontal_edge_mmx
+;void vp9_loop_filter_horizontal_edge_mmx
 ;(
 ;    unsigned char *src_ptr,
 ;    int src_pixel_step,
@@ -21,8 +21,8 @@
 ;    const char *thresh,
 ;    int  count
 ;)
-global sym(vp8_loop_filter_horizontal_edge_mmx)
-sym(vp8_loop_filter_horizontal_edge_mmx):
+global sym(vp9_loop_filter_horizontal_edge_mmx)
+sym(vp9_loop_filter_horizontal_edge_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -224,7 +224,7 @@ sym(vp8_loop_filter_horizontal_edge_mmx):
     ret
 
 
-;void vp8_loop_filter_vertical_edge_mmx
+;void vp9_loop_filter_vertical_edge_mmx
 ;(
 ;    unsigned char *src_ptr,
 ;    int  src_pixel_step,
@@ -233,8 +233,8 @@ sym(vp8_loop_filter_horizontal_edge_mmx):
 ;    const char *thresh,
 ;    int count
 ;)
-global sym(vp8_loop_filter_vertical_edge_mmx)
-sym(vp8_loop_filter_vertical_edge_mmx):
+global sym(vp9_loop_filter_vertical_edge_mmx)
+sym(vp9_loop_filter_vertical_edge_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -594,14 +594,14 @@ sym(vp8_loop_filter_vertical_edge_mmx):
     ret
 
 
-;void vp8_loop_filter_simple_horizontal_edge_mmx
+;void vp9_loop_filter_simple_horizontal_edge_mmx
 ;(
 ;    unsigned char *src_ptr,
 ;    int  src_pixel_step,
 ;    const char *blimit
 ;)
-global sym(vp8_loop_filter_simple_horizontal_edge_mmx)
-sym(vp8_loop_filter_simple_horizontal_edge_mmx):
+global sym(vp9_loop_filter_simple_horizontal_edge_mmx)
+sym(vp9_loop_filter_simple_horizontal_edge_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
@@ -710,14 +710,14 @@ sym(vp8_loop_filter_simple_horizontal_edge_mmx):
     ret
 
 
-;void vp8_loop_filter_simple_vertical_edge_mmx
+;void vp9_loop_filter_simple_vertical_edge_mmx
 ;(
 ;    unsigned char *src_ptr,
 ;    int  src_pixel_step,
 ;    const char *blimit
 ;)
-global sym(vp8_loop_filter_simple_vertical_edge_mmx)
-sym(vp8_loop_filter_simple_vertical_edge_mmx):
+global sym(vp9_loop_filter_simple_vertical_edge_mmx)
+sym(vp9_loop_filter_simple_vertical_edge_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
@@ -931,9 +931,9 @@ sym(vp8_loop_filter_simple_vertical_edge_mmx):
 ;{
 ;
 ;
-;    vp8_loop_filter_simple_vertical_edge_mmx(y_ptr+4, y_stride, lfi->flim,lfi->lim,lfi->thr,2);
-;    vp8_loop_filter_simple_vertical_edge_mmx(y_ptr+8, y_stride, lfi->flim,lfi->lim,lfi->thr,2);
-;    vp8_loop_filter_simple_vertical_edge_mmx(y_ptr+12, y_stride, lfi->flim,lfi->lim,lfi->thr,2);
+;    vp9_loop_filter_simple_vertical_edge_mmx(y_ptr+4, y_stride, lfi->flim,lfi->lim,lfi->thr,2);
+;    vp9_loop_filter_simple_vertical_edge_mmx(y_ptr+8, y_stride, lfi->flim,lfi->lim,lfi->thr,2);
+;    vp9_loop_filter_simple_vertical_edge_mmx(y_ptr+12, y_stride, lfi->flim,lfi->lim,lfi->thr,2);
 ;}
 
 SECTION_RODATA

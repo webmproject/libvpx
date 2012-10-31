@@ -14,29 +14,29 @@
 
 #include "onyxc_int.h"
 
-extern void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
+extern void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                                     unsigned char *dst_y,
                                                     int dst_ystride,
                                                     int clamp_mvs);
-extern void vp8_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
+extern void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
                                                      unsigned char *dst_u,
                                                      unsigned char *dst_v,
                                                      int dst_uvstride);
-extern void vp8_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
+extern void vp9_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                                    unsigned char *dst_y,
                                                    unsigned char *dst_u,
                                                    unsigned char *dst_v,
                                                    int dst_ystride,
                                                    int dst_uvstride);
 
-extern void vp8_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
+extern void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                                     unsigned char *dst_y,
                                                     int dst_ystride);
-extern void vp8_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
+extern void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
                                                      unsigned char *dst_u,
                                                      unsigned char *dst_v,
                                                      int dst_uvstride);
-extern void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
+extern void vp9_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                                    unsigned char *dst_y,
                                                    unsigned char *dst_u,
                                                    unsigned char *dst_v,
@@ -44,7 +44,7 @@ extern void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                                    int dst_uvstride);
 
 #if CONFIG_SUPERBLOCKS
-extern void vp8_build_inter32x32_predictors_sb(MACROBLOCKD *x,
+extern void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
                                                unsigned char *dst_y,
                                                unsigned char *dst_u,
                                                unsigned char *dst_v,
@@ -52,20 +52,20 @@ extern void vp8_build_inter32x32_predictors_sb(MACROBLOCKD *x,
                                                int dst_uvstride);
 #endif
 
-extern void vp8_build_inter_predictors_mb(MACROBLOCKD *xd);
+extern void vp9_build_inter_predictors_mb(MACROBLOCKD *xd);
 
-extern void vp8_build_inter_predictors_b(BLOCKD *d, int pitch,
+extern void vp9_build_inter_predictors_b(BLOCKD *d, int pitch,
                                          vp8_subpix_fn_t sppf);
-extern void vp8_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
+extern void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
                                              vp8_subpix_fn_t sppf);
 
-extern void vp8_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d,
+extern void vp9_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d,
                                          int pitch);
-extern void vp8_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
+extern void vp9_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
                                              BLOCKD *d, int pitch);
 
-extern void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd);
-extern void vp8_setup_interp_filters(MACROBLOCKD *xd,
+extern void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd);
+extern void vp9_setup_interp_filters(MACROBLOCKD *xd,
                                      INTERPOLATIONFILTERTYPE filter,
                                      VP8_COMMON *cm);
 

@@ -12,6 +12,8 @@
 #ifndef __INC_IDCT_H
 #define __INC_IDCT_H
 
+#include "vp8/common/blockd.h"
+
 #define prototype_second_order(sym) \
   void sym(short *input, short *output)
 
@@ -44,73 +46,72 @@
 #endif
 
 #ifndef vp8_idct_idct16x16
-#define vp8_idct_idct16x16 vp8_short_idct16x16_c
+#define vp8_idct_idct16x16 vp9_short_idct16x16_c
 #endif
 extern prototype_idct(vp8_idct_idct16x16);
 
 #ifndef vp8_idct_idct8
-#define vp8_idct_idct8 vp8_short_idct8x8_c
+#define vp8_idct_idct8 vp9_short_idct8x8_c
 #endif
 extern prototype_idct(vp8_idct_idct8);
 
 #ifndef vp8_idct_idct8_1
-#define vp8_idct_idct8_1 vp8_short_idct8x8_1_c
+#define vp8_idct_idct8_1 vp9_short_idct8x8_1_c
 #endif
 extern prototype_idct(vp8_idct_idct8_1);
 
 #ifndef vp8_idct_ihaar2
-#define vp8_idct_ihaar2 vp8_short_ihaar2x2_c
+#define vp8_idct_ihaar2 vp9_short_ihaar2x2_c
 #endif
 extern prototype_idct(vp8_idct_ihaar2);
 
 #ifndef vp8_idct_ihaar2_1
-#define vp8_idct_ihaar2_1 vp8_short_ihaar2x2_1_c
+#define vp8_idct_ihaar2_1 vp9_short_ihaar2x2_1_c
 #endif
 extern prototype_idct(vp8_idct_ihaar2_1);
 
 #ifndef vp8_idct_idct1_scalar_add_8x8
-#define vp8_idct_idct1_scalar_add_8x8 vp8_dc_only_idct_add_8x8_c
+#define vp8_idct_idct1_scalar_add_8x8 vp9_dc_only_idct_add_8x8_c
 #endif
 extern prototype_idct_scalar_add(vp8_idct_idct1_scalar_add_8x8);
 
 
 
 #ifndef vp8_idct_idct1
-#define vp8_idct_idct1 vp8_short_idct4x4llm_1_c
+#define vp8_idct_idct1 vp9_short_idct4x4llm_1_c
 #endif
 extern prototype_idct(vp8_idct_idct1);
 
 #ifndef vp8_idct_idct16
-#define vp8_idct_idct16 vp8_short_idct4x4llm_c
+#define vp8_idct_idct16 vp9_short_idct4x4llm_c
 #endif
 extern prototype_idct(vp8_idct_idct16);
 
 #ifndef vp8_idct_idct1_scalar_add
-#define vp8_idct_idct1_scalar_add vp8_dc_only_idct_add_c
+#define vp8_idct_idct1_scalar_add vp9_dc_only_idct_add_c
 #endif
 extern prototype_idct_scalar_add(vp8_idct_idct1_scalar_add);
 
 
 #ifndef vp8_idct_iwalsh1
-#define vp8_idct_iwalsh1 vp8_short_inv_walsh4x4_1_c
+#define vp8_idct_iwalsh1 vp9_short_inv_walsh4x4_1_c
 #endif
 extern prototype_second_order(vp8_idct_iwalsh1);
 
 #ifndef vp8_idct_iwalsh16
-#define vp8_idct_iwalsh16 vp8_short_inv_walsh4x4_c
+#define vp8_idct_iwalsh16 vp9_short_inv_walsh4x4_c
 #endif
 extern prototype_second_order(vp8_idct_iwalsh16);
 
 #if CONFIG_LOSSLESS
-extern prototype_idct(vp8_short_inv_walsh4x4_x8_c);
-extern prototype_idct(vp8_short_inv_walsh4x4_1_x8_c);
-extern prototype_idct_scalar_add(vp8_dc_only_inv_walsh_add_c);
-extern prototype_second_order(vp8_short_inv_walsh4x4_lossless_c);
-extern prototype_second_order(vp8_short_inv_walsh4x4_1_lossless_c);
+extern prototype_idct(vp9_short_inv_walsh4x4_x8_c);
+extern prototype_idct(vp9_short_inv_walsh4x4_1_x8_c);
+extern prototype_idct_scalar_add(vp9_dc_only_inv_walsh_add_c);
+extern prototype_second_order(vp9_short_inv_walsh4x4_lossless_c);
+extern prototype_second_order(vp9_short_inv_walsh4x4_1_lossless_c);
 #endif
 
-#include "vp8/common/blockd.h"
-void vp8_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
+void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
                   TX_TYPE tx_type, int tx_dim);
 
 typedef prototype_idct((*vp8_idct_fn_t));

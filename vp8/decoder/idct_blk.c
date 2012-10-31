@@ -17,13 +17,13 @@ void vp9_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
                                int Dc);
 void vp9_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
                             unsigned char *dest, int pitch, int stride);
-void vp8_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr,
+void vp9_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr,
                             unsigned char *dst_ptr, int pitch, int stride);
 #if CONFIG_LOSSLESS
 void vp9_dequant_idct_add_lossless_c(short *input, short *dq,
                                      unsigned char *pred, unsigned char *dest,
                                      int pitch, int stride);
-void vp8_dc_only_idct_add_lossless_c(short input_dc, unsigned char *pred_ptr,
+void vp9_dc_only_idct_add_lossless_c(short input_dc, unsigned char *pred_ptr,
                                      unsigned char *dst_ptr,
                                      int pitch, int stride);
 #endif
@@ -40,7 +40,7 @@ void vp9_dequant_dc_idct_add_y_block_c(short *q, short *dq,
       if (*eobs++ > 1)
         vp9_dequant_dc_idct_add_c(q, dq, pre, dst, 16, stride, dc[0]);
       else
-        vp8_dc_only_idct_add_c(dc[0], pre, dst, 16, stride);
+        vp9_dc_only_idct_add_c(dc[0], pre, dst, 16, stride);
 
       q   += 16;
       pre += 4;
@@ -64,7 +64,7 @@ void vp9_dequant_idct_add_y_block_c(short *q, short *dq,
       if (*eobs++ > 1)
         vp9_dequant_idct_add_c(q, dq, pre, dst, 16, stride);
       else {
-        vp8_dc_only_idct_add_c(q[0]*dq[0], pre, dst, 16, stride);
+        vp9_dc_only_idct_add_c(q[0]*dq[0], pre, dst, 16, stride);
         ((int *)q)[0] = 0;
       }
 
@@ -88,7 +88,7 @@ void vp9_dequant_idct_add_uv_block_c(short *q, short *dq, unsigned char *pre,
       if (*eobs++ > 1)
         vp9_dequant_idct_add_c(q, dq, pre, dstu, 8, stride);
       else {
-        vp8_dc_only_idct_add_c(q[0]*dq[0], pre, dstu, 8, stride);
+        vp9_dc_only_idct_add_c(q[0]*dq[0], pre, dstu, 8, stride);
         ((int *)q)[0] = 0;
       }
 
@@ -106,7 +106,7 @@ void vp9_dequant_idct_add_uv_block_c(short *q, short *dq, unsigned char *pre,
       if (*eobs++ > 1)
         vp9_dequant_idct_add_c(q, dq, pre, dstv, 8, stride);
       else {
-        vp8_dc_only_idct_add_c(q[0]*dq[0], pre, dstv, 8, stride);
+        vp9_dc_only_idct_add_c(q[0]*dq[0], pre, dstv, 8, stride);
         ((int *)q)[0] = 0;
       }
 
@@ -207,7 +207,7 @@ void vp9_dequant_dc_idct_add_y_block_lossless_c(short *q, short *dq,
       if (*eobs++ > 1)
         vp9_dequant_dc_idct_add_lossless_c(q, dq, pre, dst, 16, stride, dc[0]);
       else
-        vp8_dc_only_inv_walsh_add_c(dc[0], pre, dst, 16, stride);
+        vp9_dc_only_inv_walsh_add_c(dc[0], pre, dst, 16, stride);
 
       q   += 16;
       pre += 4;
@@ -231,7 +231,7 @@ void vp9_dequant_idct_add_y_block_lossless_c(short *q, short *dq,
       if (*eobs++ > 1)
         vp9_dequant_idct_add_lossless_c(q, dq, pre, dst, 16, stride);
       else {
-        vp8_dc_only_inv_walsh_add_c(q[0]*dq[0], pre, dst, 16, stride);
+        vp9_dc_only_inv_walsh_add_c(q[0]*dq[0], pre, dst, 16, stride);
         ((int *)q)[0] = 0;
       }
 
@@ -257,7 +257,7 @@ void vp9_dequant_idct_add_uv_block_lossless_c(short *q, short *dq,
       if (*eobs++ > 1)
         vp9_dequant_idct_add_lossless_c(q, dq, pre, dstu, 8, stride);
       else {
-        vp8_dc_only_inv_walsh_add_c(q[0]*dq[0], pre, dstu, 8, stride);
+        vp9_dc_only_inv_walsh_add_c(q[0]*dq[0], pre, dstu, 8, stride);
         ((int *)q)[0] = 0;
       }
 
@@ -275,7 +275,7 @@ void vp9_dequant_idct_add_uv_block_lossless_c(short *q, short *dq,
       if (*eobs++ > 1)
         vp9_dequant_idct_add_lossless_c(q, dq, pre, dstv, 8, stride);
       else {
-        vp8_dc_only_inv_walsh_add_c(q[0]*dq[0], pre, dstv, 8, stride);
+        vp9_dc_only_inv_walsh_add_c(q[0]*dq[0], pre, dstv, 8, stride);
         ((int *)q)[0] = 0;
       }
 

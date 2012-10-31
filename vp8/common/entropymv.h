@@ -18,13 +18,13 @@
 
 struct VP8Common;
 
-void vp8_entropy_mv_init();
-void vp8_init_mv_probs(struct VP8Common *cm);
+void vp9_entropy_mv_init();
+void vp9_init_mv_probs(struct VP8Common *cm);
 void vp8_adapt_mv_probs(struct VP8Common *cm);
 
-void vp8_adapt_nmv_probs(struct VP8Common *cm, int usehp);
+void vp9_adapt_nmv_probs(struct VP8Common *cm, int usehp);
 void vp8_lower_mv_precision(MV *mv);
-int vp8_use_nmv_hp(const MV *ref);
+int vp9_use_nmv_hp(const MV *ref);
 
 #define VP8_NMV_UPDATE_PROB  255
 //#define MV_GROUP_UPDATE
@@ -89,9 +89,9 @@ typedef struct {
   nmv_component comps[2];
 } nmv_context;
 
-MV_JOINT_TYPE vp8_get_mv_joint(MV mv);
-MV_CLASS_TYPE vp8_get_mv_class(int z, int *offset);
-int vp8_get_mv_mag(MV_CLASS_TYPE c, int offset);
+MV_JOINT_TYPE vp9_get_mv_joint(MV mv);
+MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset);
+int vp9_get_mv_mag(MV_CLASS_TYPE c, int offset);
 
 
 typedef struct {
@@ -111,10 +111,10 @@ typedef struct {
   nmv_component_counts comps[2];
 } nmv_context_counts;
 
-void vp8_increment_nmv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
+void vp9_increment_nmv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
                        int usehp);
 extern const nmv_context vp8_default_nmv_context;
-void vp8_counts_to_nmv_context(
+void vp9_counts_to_nmv_context(
     nmv_context_counts *NMVcount,
     nmv_context *prob,
     int usehp,

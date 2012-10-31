@@ -14,8 +14,8 @@
 #include "vpx_mem/vpx_mem.h"
 #include "onyxd_int.h"
 
-/* For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *xd)
- * and vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *xd).
+/* For skip_recon_mb(), add vp9_build_intra_predictors_mby_s(MACROBLOCKD *xd)
+ * and vp9_build_intra_predictors_mbuv_s(MACROBLOCKD *xd).
  */
 
 void vp8mt_build_intra_predictors_mby(VP8D_COMP *pbi, MACROBLOCKD *xd,

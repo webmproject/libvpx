@@ -499,8 +499,8 @@ static TX_TYPE get_tx_type(const MACROBLOCKD *xd, const BLOCKD *b) {
   return tx_type;
 }
 
-extern void vp8_build_block_doffsets(MACROBLOCKD *xd);
-extern void vp8_setup_block_dptrs(MACROBLOCKD *xd);
+extern void vp9_build_block_doffsets(MACROBLOCKD *xd);
+extern void vp9_setup_block_dptrs(MACROBLOCKD *xd);
 
 static void update_blockd_bmi(MACROBLOCKD *xd) {
   int i;

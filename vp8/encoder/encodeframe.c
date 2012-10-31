@@ -311,7 +311,7 @@ static void build_activity_map(VP8_COMP *cpi) {
       recon_yoffset += 16;
 #endif
       // Copy current mb to a buffer
-      vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+      vp9_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
       // measure activity
       mb_activity = mb_activity_measure(cpi, x, mb_row, mb_col);
@@ -335,7 +335,7 @@ static void build_activity_map(VP8_COMP *cpi) {
 
 #if ALT_ACT_MEASURE
     // extend the recon for intra prediction
-    vp8_extend_mb_row(new_yv12, xd->dst.y_buffer + 16,
+    vp9_extend_mb_row(new_yv12, xd->dst.y_buffer + 16,
                       xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
 #endif
 
@@ -592,7 +592,7 @@ static void pick_mb_modes(VP8_COMP *cpi,
     xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
     // Copy current MB to a work buffer
-    vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+    vp9_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
     x->rddiv = cpi->RDDIV;
     x->rdmult = cpi->RDMULT;
@@ -623,7 +623,7 @@ static void pick_mb_modes(VP8_COMP *cpi,
 
     cpi->update_context = 0;    // TODO Do we need this now??
 
-    vp8_intra_prediction_down_copy(xd);
+    vp9_intra_prediction_down_copy(xd);
 
     // Find best coding mode & reconstruct the MB so it is available
     // as a predictor for MBs that follow in the SB
@@ -777,7 +777,7 @@ static void pick_sb_modes (VP8_COMP *cpi,
   xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 #if 0 // FIXME
   /* Copy current MB to a work buffer */
-  vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+  vp9_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 #endif
   x->rddiv = cpi->RDDIV;
   x->rdmult = cpi->RDMULT;
@@ -970,7 +970,7 @@ static void encode_sb(VP8_COMP *cpi,
     xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
     // Copy current MB to a work buffer
-    vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+    vp9_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
       vp9_activity_masking(cpi, x);
@@ -987,7 +987,7 @@ static void encode_sb(VP8_COMP *cpi,
 #if CONFIG_SUPERBLOCKS
     if (!xd->mode_info_context->mbmi.encoded_as_sb)
 #endif
-      vp8_intra_prediction_down_copy(xd);
+      vp9_intra_prediction_down_copy(xd);
 
     if (cm->frame_type == KEY_FRAME) {
 #if CONFIG_SUPERBLOCKS
@@ -1257,7 +1257,7 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi) {
 
   // reset intra mode contexts
   if (cm->frame_type == KEY_FRAME)
-    vp8_init_mbmode_probs(cm);
+    vp9_init_mbmode_probs(cm);
 
   // Copy data over into macro block data structures.
   x->src = * cpi->Source;
@@ -1265,11 +1265,11 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi) {
   xd->dst = cm->yv12_fb[cm->new_fb_idx];
 
   // set up frame for intra coded blocks
-  vp8_setup_intra_recon(&cm->yv12_fb[cm->new_fb_idx]);
+  vp9_setup_intra_recon(&cm->yv12_fb[cm->new_fb_idx]);
 
   vp9_build_block_offsets(x);
 
-  vp8_setup_block_dptrs(&x->e_mbd);
+  vp9_setup_block_dptrs(&x->e_mbd);
 
   vp9_setup_block_ptrs(x);
 
@@ -1333,7 +1333,7 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   totalrate = 0;
 
   // Functions setup for all frame types so we can use MC in AltRef
-  vp8_setup_interp_filters(xd, cm->mcomp_filter_type, cm);
+  vp9_setup_interp_filters(xd, cm->mcomp_filter_type, cm);
 
   // Reset frame count of inter 0,0 motion vector usage.
   cpi->inter_zz_count = 0;
@@ -1681,7 +1681,7 @@ void vp9_build_block_offsets(MACROBLOCK *x) {
   int block = 0;
   int br, bc;
 
-  vp8_build_block_doffsets(&x->e_mbd);
+  vp9_build_block_doffsets(&x->e_mbd);
 
   // y blocks
   x->thismb_ptr = &x->thismb[0];
@@ -1879,8 +1879,8 @@ void vp9_encode_intra_super_block(VP8_COMP *cpi,
     vp9_update_zbin_extra(cpi, x);
   }
 
-  vp8_build_intra_predictors_sby_s(&x->e_mbd);
-  vp8_build_intra_predictors_sbuv_s(&x->e_mbd);
+  vp9_build_intra_predictors_sby_s(&x->e_mbd);
+  vp9_build_intra_predictors_sbuv_s(&x->e_mbd);
 
   assert(x->e_mbd.mode_info_context->mbmi.txfm_size == TX_8X8);
   for (n = 0; n < 4; n++) {
@@ -1907,9 +1907,9 @@ void vp9_encode_intra_super_block(VP8_COMP *cpi,
       vp9_optimize_mby_8x8(x, rtcd);
       vp9_optimize_mbuv_8x8(x, rtcd);
     }
-    vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-    vp8_recon_mby_s_c(&x->e_mbd, dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
-    vp8_recon_mbuv_s_c(&x->e_mbd,
+    vp9_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    vp9_recon_mby_s_c(&x->e_mbd, dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
+    vp9_recon_mbuv_s_c(&x->e_mbd,
                        udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                        vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride);
 
@@ -2005,7 +2005,7 @@ void vp9_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
   assert(!xd->mode_info_context->mbmi.encoded_as_sb);
 #endif
 
-  vp8_setup_interp_filters(xd, mbmi->interp_filter, cm);
+  vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     // Adjust the zbin based on this MB rate.
     adjust_act_zbin(cpi, x);
@@ -2094,7 +2094,7 @@ void vp9_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
         mbmi->mb_skip_coeff = 0;
 
     } else {
-      vp8_build_1st_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
+      vp9_build_1st_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
                                              xd->dst.u_buffer, xd->dst.v_buffer,
                                              xd->dst.y_stride,
                                              xd->dst.uv_stride);
@@ -2238,8 +2238,8 @@ void vp9_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
   vp9_set_pred_flag(xd, PRED_REF, ref_pred_flag);
 
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-    vp8_build_intra_predictors_sby_s(&x->e_mbd);
-    vp8_build_intra_predictors_sbuv_s(&x->e_mbd);
+    vp9_build_intra_predictors_sby_s(&x->e_mbd);
+    vp9_build_intra_predictors_sbuv_s(&x->e_mbd);
   } else {
     int ref_fb_idx;
 
@@ -2272,7 +2272,7 @@ void vp9_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
                                     recon_uvoffset;
     }
 
-    vp8_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
+    vp9_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
                                        xd->dst.u_buffer, xd->dst.v_buffer,
                                        xd->dst.y_stride, xd->dst.uv_stride);
   }
@@ -2299,10 +2299,10 @@ void vp9_encode_inter_superblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
       vp9_optimize_mby_8x8(x, rtcd);
       vp9_optimize_mbuv_8x8(x, rtcd);
     }
-    vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-    vp8_recon_mby_s_c( &x->e_mbd,
+    vp9_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    vp9_recon_mby_s_c( &x->e_mbd,
                       dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
-    vp8_recon_mbuv_s_c(&x->e_mbd,
+    vp9_recon_mbuv_s_c(&x->e_mbd,
                        udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                        vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride);
 

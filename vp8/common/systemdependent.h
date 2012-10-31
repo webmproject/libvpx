@@ -18,4 +18,4 @@ void vpx_reset_mmx_state(void);
 #endif
 
 struct VP8Common;
-void vp8_machine_specific_config(struct VP8Common *);
+void vp9_machine_specific_config(struct VP8Common *);

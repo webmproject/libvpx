@@ -101,7 +101,7 @@ extern DECLARE_ALIGNED(16, const int, vp8_coef_bands_16x16[256]);
 extern DECLARE_ALIGNED(16, const unsigned char, vp8_prev_token_class[MAX_ENTROPY_TOKENS]);
 
 struct VP8Common;
-void vp8_default_coef_probs(struct VP8Common *);
+void vp9_default_coef_probs(struct VP8Common *);
 extern DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]);
 
 extern DECLARE_ALIGNED(16, const int, vp8_col_scan[16]);
@@ -109,9 +109,9 @@ extern DECLARE_ALIGNED(16, const int, vp8_row_scan[16]);
 
 extern short vp8_default_zig_zag_mask[16];
 extern DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]);
-void vp8_coef_tree_initialize(void);
+void vp9_coef_tree_initialize(void);
 
 extern DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d_16x16[256]);
-void vp8_adapt_coef_probs(struct VP8Common *);
+void vp9_adapt_coef_probs(struct VP8Common *);
 
 #endif

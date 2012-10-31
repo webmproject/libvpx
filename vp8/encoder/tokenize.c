@@ -553,7 +553,7 @@ void print_context_counters() {
   fprintf(f, "\n};\n");
 
   fprintf(f, "static const vp8_prob\n"
-          "vp8_default_coef_probs[BLOCK_TYPES] [COEF_BANDS] \n"
+          "vp9_default_coef_probs[BLOCK_TYPES] [COEF_BANDS] \n"
           "[PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {");
   type = 0;
   do {
@@ -568,7 +568,7 @@ void print_context_counters() {
         vp8_prob coef_probs[ENTROPY_NODES];
         for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
           coef_counts[t] = context_counters [type] [band] [pt] [t];
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, coef_counts, 256, 1);
         fprintf(f, "%s\n      {", Comma(pt));
@@ -588,7 +588,7 @@ void print_context_counters() {
   fprintf(f, "\n};\n");
 
   fprintf(f, "static const vp8_prob\n"
-          "vp8_default_coef_probs_8x8[BLOCK_TYPES_8X8] [COEF_BANDS]\n"
+          "vp9_default_coef_probs_8x8[BLOCK_TYPES_8X8] [COEF_BANDS]\n"
           "[PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {");
   type = 0;
   do {
@@ -603,7 +603,7 @@ void print_context_counters() {
         vp8_prob coef_probs[ENTROPY_NODES];
         for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
           coef_counts[t] = context_counters_8x8[type] [band] [pt] [t];
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, coef_counts, 256, 1);
         fprintf(f, "%s\n      {", Comma(pt));
@@ -621,7 +621,7 @@ void print_context_counters() {
   fprintf(f, "\n};\n");
 
   fprintf(f, "static const vp8_prob\n"
-          "vp8_default_coef_probs_16x16[BLOCK_TYPES_16X16] [COEF_BANDS]\n"
+          "vp9_default_coef_probs_16x16[BLOCK_TYPES_16X16] [COEF_BANDS]\n"
           "[PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {");
   type = 0;
   do {
@@ -636,7 +636,7 @@ void print_context_counters() {
         vp8_prob coef_probs[ENTROPY_NODES];
         for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
           coef_counts[t] = context_counters_16x16[type] [band] [pt] [t];
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, coef_counts, 256, 1);
         fprintf(f, "%s\n      {", Comma(pt));

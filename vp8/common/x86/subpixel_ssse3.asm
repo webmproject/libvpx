@@ -25,7 +25,7 @@
 ; This is an implementation of some of the SSE optimizations first seen in ffvp8
 ;
 ;*************************************************************************************/
-;void vp8_filter_block1d8_h6_ssse3
+;void vp9_filter_block1d8_h6_ssse3
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned int    src_pixels_per_line,
@@ -34,8 +34,8 @@
 ;    unsigned int    output_height,
 ;    unsigned int    vp8_filter_index
 ;)
-global sym(vp8_filter_block1d8_h6_ssse3)
-sym(vp8_filter_block1d8_h6_ssse3):
+global sym(vp9_filter_block1d8_h6_ssse3)
+sym(vp9_filter_block1d8_h6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -168,7 +168,7 @@ vp8_filter_block1d8_h4_ssse3:
     UNSHADOW_ARGS
     pop         rbp
     ret
-;void vp8_filter_block1d16_h6_ssse3
+;void vp9_filter_block1d16_h6_ssse3
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned int    src_pixels_per_line,
@@ -177,8 +177,8 @@ vp8_filter_block1d8_h4_ssse3:
 ;    unsigned int    output_height,
 ;    unsigned int    vp8_filter_index
 ;)
-global sym(vp8_filter_block1d16_h6_ssse3)
-sym(vp8_filter_block1d16_h6_ssse3):
+global sym(vp9_filter_block1d16_h6_ssse3)
+sym(vp9_filter_block1d16_h6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -275,7 +275,7 @@ sym(vp8_filter_block1d16_h6_ssse3):
     pop         rbp
     ret
 
-;void vp8_filter_block1d4_h6_ssse3
+;void vp9_filter_block1d4_h6_ssse3
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned int    src_pixels_per_line,
@@ -284,8 +284,8 @@ sym(vp8_filter_block1d16_h6_ssse3):
 ;    unsigned int    output_height,
 ;    unsigned int    vp8_filter_index
 ;)
-global sym(vp8_filter_block1d4_h6_ssse3)
-sym(vp8_filter_block1d4_h6_ssse3):
+global sym(vp9_filter_block1d4_h6_ssse3)
+sym(vp9_filter_block1d4_h6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -404,7 +404,7 @@ sym(vp8_filter_block1d4_h6_ssse3):
 
 
 
-;void vp8_filter_block1d16_v6_ssse3
+;void vp9_filter_block1d16_v6_ssse3
 ;(
 ;    unsigned char *src_ptr,
 ;    unsigned int   src_pitch,
@@ -413,8 +413,8 @@ sym(vp8_filter_block1d4_h6_ssse3):
 ;    unsigned int   output_height,
 ;    unsigned int   vp8_filter_index
 ;)
-global sym(vp8_filter_block1d16_v6_ssse3)
-sym(vp8_filter_block1d16_v6_ssse3):
+global sym(vp9_filter_block1d16_v6_ssse3)
+sym(vp9_filter_block1d16_v6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -450,7 +450,7 @@ sym(vp8_filter_block1d16_v6_ssse3):
     add         rax, rdx
 
 
-.vp8_filter_block1d16_v6_ssse3_loop:
+.vp9_filter_block1d16_v6_ssse3_loop:
     movq        xmm1, MMWORD PTR [rsi]                  ;A
     movq        xmm2, MMWORD PTR [rsi + rdx]            ;B
     movq        xmm3, MMWORD PTR [rsi + rdx * 2]        ;C
@@ -508,7 +508,7 @@ sym(vp8_filter_block1d16_v6_ssse3):
     add         rdi,        r8
 %endif
     dec         rcx
-    jnz         .vp8_filter_block1d16_v6_ssse3_loop
+    jnz         .vp9_filter_block1d16_v6_ssse3_loop
 
     ; begin epilog
     pop rdi
@@ -592,7 +592,7 @@ sym(vp8_filter_block1d16_v6_ssse3):
     pop         rbp
     ret
 
-;void vp8_filter_block1d8_v6_ssse3
+;void vp9_filter_block1d8_v6_ssse3
 ;(
 ;    unsigned char *src_ptr,
 ;    unsigned int   src_pitch,
@@ -601,8 +601,8 @@ sym(vp8_filter_block1d16_v6_ssse3):
 ;    unsigned int   output_height,
 ;    unsigned int   vp8_filter_index
 ;)
-global sym(vp8_filter_block1d8_v6_ssse3)
-sym(vp8_filter_block1d8_v6_ssse3):
+global sym(vp9_filter_block1d8_v6_ssse3)
+sym(vp9_filter_block1d8_v6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -638,7 +638,7 @@ sym(vp8_filter_block1d8_v6_ssse3):
     mov         rax, rsi
     add         rax, rdx
 
-.vp8_filter_block1d8_v6_ssse3_loop:
+.vp9_filter_block1d8_v6_ssse3_loop:
     movq        xmm1, MMWORD PTR [rsi]                  ;A
     movq        xmm2, MMWORD PTR [rsi + rdx]            ;B
     movq        xmm3, MMWORD PTR [rsi + rdx * 2]        ;C
@@ -673,7 +673,7 @@ sym(vp8_filter_block1d8_v6_ssse3):
     add         rdi,        r8
 %endif
     dec         rcx
-    jnz         .vp8_filter_block1d8_v6_ssse3_loop
+    jnz         .vp9_filter_block1d8_v6_ssse3_loop
 
     ; begin epilog
     pop rdi
@@ -732,7 +732,7 @@ sym(vp8_filter_block1d8_v6_ssse3):
     UNSHADOW_ARGS
     pop         rbp
     ret
-;void vp8_filter_block1d4_v6_ssse3
+;void vp9_filter_block1d4_v6_ssse3
 ;(
 ;    unsigned char *src_ptr,
 ;    unsigned int   src_pitch,
@@ -741,8 +741,8 @@ sym(vp8_filter_block1d8_v6_ssse3):
 ;    unsigned int   output_height,
 ;    unsigned int   vp8_filter_index
 ;)
-global sym(vp8_filter_block1d4_v6_ssse3)
-sym(vp8_filter_block1d4_v6_ssse3):
+global sym(vp9_filter_block1d4_v6_ssse3)
+sym(vp9_filter_block1d4_v6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -777,7 +777,7 @@ sym(vp8_filter_block1d4_v6_ssse3):
     mov         rax, rsi
     add         rax, rdx
 
-.vp8_filter_block1d4_v6_ssse3_loop:
+.vp9_filter_block1d4_v6_ssse3_loop:
     movd        mm1, DWORD PTR [rsi]                  ;A
     movd        mm2, DWORD PTR [rsi + rdx]            ;B
     movd        mm3, DWORD PTR [rsi + rdx * 2]        ;C
@@ -813,7 +813,7 @@ sym(vp8_filter_block1d4_v6_ssse3):
     add         rdi,        r8
 %endif
     dec         rcx
-    jnz         .vp8_filter_block1d4_v6_ssse3_loop
+    jnz         .vp9_filter_block1d4_v6_ssse3_loop
 
     ; begin epilog
     pop rdi
@@ -871,7 +871,7 @@ sym(vp8_filter_block1d4_v6_ssse3):
     pop         rbp
     ret
 
-;void vp8_bilinear_predict16x16_ssse3
+;void vp9_bilinear_predict16x16_ssse3
 ;(
 ;    unsigned char  *src_ptr,
 ;    int   src_pixels_per_line,
@@ -880,8 +880,8 @@ sym(vp8_filter_block1d4_v6_ssse3):
 ;    unsigned char *dst_ptr,
 ;    int dst_pitch
 ;)
-global sym(vp8_bilinear_predict16x16_ssse3)
-sym(vp8_bilinear_predict16x16_ssse3):
+global sym(vp9_bilinear_predict16x16_ssse3)
+sym(vp9_bilinear_predict16x16_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -1134,7 +1134,7 @@ sym(vp8_bilinear_predict16x16_ssse3):
     pop         rbp
     ret
 
-;void vp8_bilinear_predict8x8_ssse3
+;void vp9_bilinear_predict8x8_ssse3
 ;(
 ;    unsigned char  *src_ptr,
 ;    int   src_pixels_per_line,
@@ -1143,8 +1143,8 @@ sym(vp8_bilinear_predict16x16_ssse3):
 ;    unsigned char *dst_ptr,
 ;    int dst_pitch
 ;)
-global sym(vp8_bilinear_predict8x8_ssse3)
-sym(vp8_bilinear_predict8x8_ssse3):
+global sym(vp9_bilinear_predict8x8_ssse3)
+sym(vp9_bilinear_predict8x8_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6

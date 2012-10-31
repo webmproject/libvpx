@@ -130,7 +130,7 @@ static void update_mode(
   unsigned int new_b = 0, old_b = 0;
   int i = 0;
 
-  vp8_tree_probs_from_distribution(
+  vp9_tree_probs_from_distribution(
     n--, tok, tree,
     Pnew, bct, num_events,
     256, 1
@@ -203,7 +203,7 @@ static void update_switchable_interp_probs(VP8_COMP *cpi,
   unsigned int branch_ct[32][2];
   int i, j;
   for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
-    vp8_tree_probs_from_distribution(
+    vp9_tree_probs_from_distribution(
         VP8_SWITCHABLE_FILTERS,
         vp8_switchable_interp_encodings, vp8_switchable_interp_tree,
         pc->fc.switchable_interp_prob[j], branch_ct,
@@ -275,13 +275,13 @@ static void update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
                     - best_ref_mv->as_mv.row);
           mv.col = (x->partition_info->bmi[i].mv.as_mv.col
                     - best_ref_mv->as_mv.col);
-          vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
+          vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
           if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
             mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
                       - second_best_ref_mv->as_mv.row);
             mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
                       - second_best_ref_mv->as_mv.col);
-            vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv,
+            vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv,
                               &cpi->NMVcount, 1);
           }
         } else {
@@ -289,13 +289,13 @@ static void update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
                     - best_ref_mv->as_mv.row);
           mv.col = (x->partition_info->bmi[i].mv.as_mv.col
                     - best_ref_mv->as_mv.col);
-          vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
+          vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
           if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
             mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
                       - second_best_ref_mv->as_mv.row);
             mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
                       - second_best_ref_mv->as_mv.col);
-            vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv,
+            vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv,
                               &cpi->NMVcount, 0);
           }
         }
@@ -305,20 +305,20 @@ static void update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
     if (x->e_mbd.allow_high_precision_mv) {
       mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
       mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
-      vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
+      vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
       if (mbmi->second_ref_frame) {
         mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
         mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
-        vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 1);
+        vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 1);
       }
     } else {
       mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
       mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
-      vp8_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
+      vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
       if (mbmi->second_ref_frame) {
         mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
         mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
-        vp8_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 0);
+        vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 0);
       }
     }
   }
@@ -1066,13 +1066,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
             int_mv n1, n2;
 
             // Only used for context just now and soon to be deprecated.
-            vp8_find_near_mvs(xd, m, prev_m, &n1, &n2, &best_mv, ct,
+            vp9_find_near_mvs(xd, m, prev_m, &n1, &n2, &best_mv, ct,
                               rf, cpi->common.ref_frame_sign_bias);
 #if CONFIG_NEWBESTREFMV
             best_mv.as_int = mi->ref_mvs[rf][0].as_int;
 #endif
 
-            vp8_mv_ref_probs(&cpi->common, mv_ref_p, ct);
+            vp9_mv_ref_probs(&cpi->common, mv_ref_p, ct);
 
 #ifdef ENTROPY_STATS
             accum_mv_refs(mode, ct);
@@ -1093,7 +1093,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
             {
               write_mv_ref(bc, mode, mv_ref_p);
             }
-            vp8_accum_mv_refs(&cpi->common, mode, ct);
+            vp9_accum_mv_refs(&cpi->common, mode, ct);
           }
 
 #if CONFIG_PRED_FILTER
@@ -1125,7 +1125,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
             int_mv n1, n2;
 
             // Only used for context just now and soon to be deprecated.
-            vp8_find_near_mvs(xd, m, prev_m,
+            vp9_find_near_mvs(xd, m, prev_m,
                               &n1, &n2, &best_second_mv, ct,
                               mi->second_ref_frame,
                               cpi->common.ref_frame_sign_bias);
@@ -1223,7 +1223,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi, vp8_writer *const bc) {
 #endif
                   leftmv.as_int = left_block_mv(m, k);
                   abovemv.as_int = above_block_mv(m, k, mis);
-                  mv_contz = vp8_mv_cont(&leftmv, &abovemv);
+                  mv_contz = vp9_mv_cont(&leftmv, &abovemv);
 
                   write_sub_mv_ref(bc, blockmode,
                                    cpi->common.fc.sub_mv_ref_prob [mv_contz]);
@@ -1523,7 +1523,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           cpi->frame_coef_probs [i][j][k],
           cpi->frame_branch_ct [i][j][k],
@@ -1543,7 +1543,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           cpi->frame_hybrid_coef_probs [i][j][k],
           cpi->frame_hybrid_branch_ct [i][j][k],
@@ -1569,7 +1569,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
           // unsigned int branch_ct   [ENTROPY_NODES] [2];
           if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
             continue;
-          vp8_tree_probs_from_distribution(
+          vp9_tree_probs_from_distribution(
             MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
             cpi->frame_coef_probs_8x8 [i][j][k],
             cpi->frame_branch_ct_8x8 [i][j][k],
@@ -1593,7 +1593,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
           // unsigned int branch_ct   [ENTROPY_NODES] [2];
           if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
             continue;
-          vp8_tree_probs_from_distribution(
+          vp9_tree_probs_from_distribution(
             MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
             cpi->frame_hybrid_coef_probs_8x8 [i][j][k],
             cpi->frame_hybrid_branch_ct_8x8 [i][j][k],
@@ -1616,7 +1616,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
         for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
           if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
             continue;
-          vp8_tree_probs_from_distribution(
+          vp9_tree_probs_from_distribution(
             MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
             cpi->frame_coef_probs_16x16[i][j][k],
             cpi->frame_branch_ct_16x16[i][j][k],
@@ -1635,7 +1635,7 @@ static void build_coeff_contexts(VP8_COMP *cpi) {
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-        vp8_tree_probs_from_distribution(
+        vp9_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           cpi->frame_hybrid_coef_probs_16x16[i][j][k],
           cpi->frame_hybrid_branch_ct_16x16[i][j][k],
@@ -1884,10 +1884,10 @@ void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 
   compute_update_table();
 
-  /* vp8_kf_default_bmode_probs() is called in vp9_setup_key_frame() once
+  /* vp9_kf_default_bmode_probs() is called in vp9_setup_key_frame() once
    * for each K frame before encode frame. pc->kf_bmode_prob doesn't get
    * changed anywhere else. No need to call it again here. --yw
-   * vp8_kf_default_bmode_probs( pc->kf_bmode_prob);
+   * vp9_kf_default_bmode_probs( pc->kf_bmode_prob);
    */
 
   /* every keyframe send startcode, width, height, scale factor, clamp
@@ -2303,7 +2303,7 @@ void vp9_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
     write_kfmodes(cpi, &residual_bc);
   } else {
     pack_inter_mode_mvs(cpi, &residual_bc);
-    vp8_update_mode_context(&cpi->common);
+    vp9_update_mode_context(&cpi->common);
   }
 
 

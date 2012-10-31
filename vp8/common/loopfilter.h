@@ -83,23 +83,23 @@ typedef void loop_filter_uvfunction
 struct VP8Common;
 struct macroblockd;
 
-void vp8_loop_filter_init(struct VP8Common *cm);
+void vp9_loop_filter_init(struct VP8Common *cm);
 
-void vp8_loop_filter_frame_init(struct VP8Common *cm,
+void vp9_loop_filter_frame_init(struct VP8Common *cm,
                                 struct macroblockd *mbd,
                                 int default_filt_lvl);
 
-void vp8_loop_filter_frame(struct VP8Common *cm, struct macroblockd *mbd);
+void vp9_loop_filter_frame(struct VP8Common *cm, struct macroblockd *mbd);
 
-void vp8_loop_filter_partial_frame(struct VP8Common *cm,
+void vp9_loop_filter_partial_frame(struct VP8Common *cm,
                                    struct macroblockd *mbd,
                                    int default_filt_lvl);
 
-void vp8_loop_filter_frame_yonly(struct VP8Common *cm,
+void vp9_loop_filter_frame_yonly(struct VP8Common *cm,
                                  struct macroblockd *mbd,
                                  int default_filt_lvl);
 
-void vp8_loop_filter_update_sharpness(loop_filter_info_n *lfi,
+void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
                                       int sharpness_lvl);
 
 #endif

@@ -18,7 +18,7 @@
 #include "onyxc_int.h"
 #endif
 
-void vp8_setup_interp_filters(MACROBLOCKD *xd,
+void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,
                               VP8_COMMON *cm) {
   if (mcomp_filter_type == SIXTAP) {
@@ -85,7 +85,7 @@ void vp8_setup_interp_filters(MACROBLOCKD *xd,
   }
 }
 
-void vp8_copy_mem16x16_c(
+void vp9_copy_mem16x16_c(
   unsigned char *src,
   int src_stride,
   unsigned char *dst,
@@ -126,7 +126,7 @@ void vp8_copy_mem16x16_c(
 
 }
 
-void vp8_avg_mem16x16_c(
+void vp9_avg_mem16x16_c(
   unsigned char *src,
   int src_stride,
   unsigned char *dst,
@@ -145,7 +145,7 @@ void vp8_avg_mem16x16_c(
   }
 }
 
-void vp8_copy_mem8x8_c(
+void vp9_copy_mem8x8_c(
   unsigned char *src,
   int src_stride,
   unsigned char *dst,
@@ -173,7 +173,7 @@ void vp8_copy_mem8x8_c(
 
 }
 
-void vp8_avg_mem8x8_c(
+void vp9_avg_mem8x8_c(
   unsigned char *src,
   int src_stride,
   unsigned char *dst,
@@ -192,7 +192,7 @@ void vp8_avg_mem8x8_c(
   }
 }
 
-void vp8_copy_mem8x4_c(
+void vp9_copy_mem8x4_c(
   unsigned char *src,
   int src_stride,
   unsigned char *dst,
@@ -222,7 +222,7 @@ void vp8_copy_mem8x4_c(
 
 
 
-void vp8_build_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf) {
+void vp9_build_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf) {
   int r;
   unsigned char *ptr_base;
   unsigned char *ptr;
@@ -255,12 +255,12 @@ void vp8_build_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf) {
 }
 
 /*
- * Similar to vp8_build_inter_predictors_b(), but instead of storing the
+ * Similar to vp9_build_inter_predictors_b(), but instead of storing the
  * results in d->predictor, we average the contents of d->predictor (which
- * come from an earlier call to vp8_build_inter_predictors_b()) with the
+ * come from an earlier call to vp9_build_inter_predictors_b()) with the
  * predictor of the second reference frame / motion vector.
  */
-void vp8_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf) {
+void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf) {
   int r;
   unsigned char *ptr_base;
   unsigned char *ptr;
@@ -288,7 +288,7 @@ void vp8_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf
   }
 }
 
-void vp8_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
+void vp9_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
   unsigned char *ptr_base;
   unsigned char *ptr;
   unsigned char *pred_ptr = d->predictor;
@@ -303,7 +303,7 @@ void vp8_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
     xd->subpixel_predict8x8(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1,
                             (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
   } else {
-    vp8_copy_mem8x8(ptr, d->pre_stride, pred_ptr, pitch);
+    vp9_copy_mem8x8(ptr, d->pre_stride, pred_ptr, pitch);
   }
 }
 
@@ -313,7 +313,7 @@ void vp8_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
  * come from an earlier call to build_inter_predictors_4b()) with the
  * predictor of the second reference frame / motion vector.
  */
-void vp8_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
+void vp9_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
                                       BLOCKD *d, int pitch) {
   unsigned char *ptr_base;
   unsigned char *ptr;
@@ -329,7 +329,7 @@ void vp8_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
     xd->subpixel_predict_avg8x8(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1,
                                (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
   } else {
-    vp8_avg_mem8x8(ptr, d->pre_stride, pred_ptr, pitch);
+    vp9_avg_mem8x8(ptr, d->pre_stride, pred_ptr, pitch);
   }
 }
 
@@ -348,7 +348,7 @@ static void build_inter_predictors2b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
     xd->subpixel_predict8x4(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1,
                            (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
   } else {
-    vp8_copy_mem8x4(ptr, d->pre_stride, pred_ptr, pitch);
+    vp9_copy_mem8x4(ptr, d->pre_stride, pred_ptr, pitch);
   }
 }
 
@@ -403,7 +403,7 @@ void filter_mb(unsigned char *src, int src_stride,
   }
 }
 #else
-// Based on vp8_post_proc_down_and_across_c (postproc.c)
+// Based on vp9_post_proc_down_and_across_c (postproc.c)
 void filter_mb(unsigned char *src, int src_stride,
                unsigned char *dst, int dst_stride,
                int width, int height) {
@@ -479,7 +479,7 @@ void filter_mb(unsigned char *src, int src_stride,
 #endif  // CONFIG_PRED_FILTER
 
 /*encoder only*/
-void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd) {
+void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd) {
   int i, j;
   BLOCKD *blockd = xd->block;
 
@@ -562,13 +562,13 @@ void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd) {
     if (d0->bmi.as_mv.first.as_int == d1->bmi.as_mv.first.as_int)
       build_inter_predictors2b(xd, d0, 8);
     else {
-      vp8_build_inter_predictors_b(d0, 8, xd->subpixel_predict);
-      vp8_build_inter_predictors_b(d1, 8, xd->subpixel_predict);
+      vp9_build_inter_predictors_b(d0, 8, xd->subpixel_predict);
+      vp9_build_inter_predictors_b(d1, 8, xd->subpixel_predict);
     }
 
     if (xd->mode_info_context->mbmi.second_ref_frame) {
-      vp8_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg);
-      vp8_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg);
+      vp9_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg);
+      vp9_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg);
     }
   }
 }
@@ -608,7 +608,7 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
 }
 
 /*encoder only*/
-void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
+void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                              unsigned char *dst_y,
                                              int dst_ystride,
                                              int clamp_mvs) {
@@ -653,11 +653,11 @@ void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                 (ymv.as_mv.row & 7) << 1,
                                 dst_y, dst_ystride);
     } else {
-      vp8_copy_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
+      vp9_copy_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
     }
 }
 
-void vp8_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
+void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
                                               unsigned char *dst_u,
                                               unsigned char *dst_v,
                                               int dst_uvstride) {
@@ -732,24 +732,24 @@ void vp8_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
       xd->subpixel_predict8x8(vptr, pre_stride, _o16x16mv.as_mv.col & 15,
                               _o16x16mv.as_mv.row & 15, dst_v, dst_uvstride);
     } else {
-      vp8_copy_mem8x8(uptr, pre_stride, dst_u, dst_uvstride);
-      vp8_copy_mem8x8(vptr, pre_stride, dst_v, dst_uvstride);
+      vp9_copy_mem8x8(uptr, pre_stride, dst_u, dst_uvstride);
+      vp9_copy_mem8x8(vptr, pre_stride, dst_v, dst_uvstride);
     }
 }
 
 
-void vp8_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
+void vp9_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                             unsigned char *dst_y,
                                             unsigned char *dst_u,
                                             unsigned char *dst_v,
                                             int dst_ystride, int dst_uvstride) {
-  vp8_build_1st_inter16x16_predictors_mby(xd, dst_y, dst_ystride,
+  vp9_build_1st_inter16x16_predictors_mby(xd, dst_y, dst_ystride,
       xd->mode_info_context->mbmi.need_to_clamp_mvs);
-  vp8_build_1st_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
+  vp9_build_1st_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
 }
 
 #if CONFIG_SUPERBLOCKS
-void vp8_build_inter32x32_predictors_sb(MACROBLOCKD *x,
+void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
                                         unsigned char *dst_y,
                                         unsigned char *dst_u,
                                         unsigned char *dst_v,
@@ -768,7 +768,7 @@ void vp8_build_inter32x32_predictors_sb(MACROBLOCKD *x,
     x->pre.u_buffer = u1 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
     x->pre.v_buffer = v1 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
 
-    vp8_build_1st_inter16x16_predictors_mb(x,
+    vp9_build_1st_inter16x16_predictors_mb(x,
       dst_y + y_idx * 16 * dst_ystride  + x_idx * 16,
       dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
       dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
@@ -778,7 +778,7 @@ void vp8_build_inter32x32_predictors_sb(MACROBLOCKD *x,
       x->second_pre.u_buffer = u2 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
       x->second_pre.v_buffer = v2 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
 
-      vp8_build_2nd_inter16x16_predictors_mb(x,
+      vp9_build_2nd_inter16x16_predictors_mb(x,
         dst_y + y_idx * 16 * dst_ystride  + x_idx * 16,
         dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
         dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
@@ -812,7 +812,7 @@ void vp8_build_inter32x32_predictors_sb(MACROBLOCKD *x,
  * which sometimes leads to better prediction than from a
  * single reference framer.
  */
-void vp8_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
+void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                              unsigned char *dst_y,
                                              int dst_ystride) {
   unsigned char *ptr;
@@ -852,7 +852,7 @@ void vp8_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
     } else {
       // TODO Needs to AVERAGE with the dst_y
       // For now, do not apply the prediction filter in these cases!
-      vp8_avg_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
+      vp9_avg_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
     }
   } else
 #endif  // CONFIG_PRED_FILTER
@@ -861,12 +861,12 @@ void vp8_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
       xd->subpixel_predict_avg16x16(ptr, pre_stride, (mv_col & 7) << 1,
                                     (mv_row & 7) << 1, dst_y, dst_ystride);
     } else {
-      vp8_avg_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
+      vp9_avg_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
     }
   }
 }
 
-void vp8_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
+void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
                                               unsigned char *dst_u,
                                               unsigned char *dst_v,
                                               int dst_uvstride) {
@@ -924,7 +924,7 @@ void vp8_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
       } else {
         // TODO Needs to AVERAGE with the dst_[u|v]
         // For now, do not apply the prediction filter here!
-        vp8_avg_mem8x8(pSrc, pre_stride, pDst, dst_uvstride);
+        vp9_avg_mem8x8(pSrc, pre_stride, pDst, dst_uvstride);
       }
 
       // V
@@ -939,19 +939,19 @@ void vp8_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
       xd->subpixel_predict_avg8x8(vptr, pre_stride, omv_col & 15,
                                   omv_row & 15, dst_v, dst_uvstride);
     } else {
-      vp8_avg_mem8x8(uptr, pre_stride, dst_u, dst_uvstride);
-      vp8_avg_mem8x8(vptr, pre_stride, dst_v, dst_uvstride);
+      vp9_avg_mem8x8(uptr, pre_stride, dst_u, dst_uvstride);
+      vp9_avg_mem8x8(vptr, pre_stride, dst_v, dst_uvstride);
     }
 }
 
-void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
+void vp9_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                             unsigned char *dst_y,
                                             unsigned char *dst_u,
                                             unsigned char *dst_v,
                                             int dst_ystride,
                                             int dst_uvstride) {
-  vp8_build_2nd_inter16x16_predictors_mby(xd, dst_y, dst_ystride);
-  vp8_build_2nd_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
+  vp9_build_2nd_inter16x16_predictors_mby(xd, dst_y, dst_ystride);
+  vp9_build_2nd_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
 }
 
 static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
@@ -979,16 +979,16 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
     }
 
 
-    vp8_build_inter_predictors4b(xd, &blockd[ 0], 16);
-    vp8_build_inter_predictors4b(xd, &blockd[ 2], 16);
-    vp8_build_inter_predictors4b(xd, &blockd[ 8], 16);
-    vp8_build_inter_predictors4b(xd, &blockd[10], 16);
+    vp9_build_inter_predictors4b(xd, &blockd[ 0], 16);
+    vp9_build_inter_predictors4b(xd, &blockd[ 2], 16);
+    vp9_build_inter_predictors4b(xd, &blockd[ 8], 16);
+    vp9_build_inter_predictors4b(xd, &blockd[10], 16);
 
     if (mbmi->second_ref_frame) {
-      vp8_build_2nd_inter_predictors4b(xd, &blockd[ 0], 16);
-      vp8_build_2nd_inter_predictors4b(xd, &blockd[ 2], 16);
-      vp8_build_2nd_inter_predictors4b(xd, &blockd[ 8], 16);
-      vp8_build_2nd_inter_predictors4b(xd, &blockd[10], 16);
+      vp9_build_2nd_inter_predictors4b(xd, &blockd[ 0], 16);
+      vp9_build_2nd_inter_predictors4b(xd, &blockd[ 2], 16);
+      vp9_build_2nd_inter_predictors4b(xd, &blockd[ 8], 16);
+      vp9_build_2nd_inter_predictors4b(xd, &blockd[10], 16);
     }
   } else {
     for (i = 0; i < 16; i += 2) {
@@ -1010,13 +1010,13 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
       if (d0->bmi.as_mv.first.as_int == d1->bmi.as_mv.first.as_int)
         build_inter_predictors2b(xd, d0, 16);
       else {
-        vp8_build_inter_predictors_b(d0, 16, xd->subpixel_predict);
-        vp8_build_inter_predictors_b(d1, 16, xd->subpixel_predict);
+        vp9_build_inter_predictors_b(d0, 16, xd->subpixel_predict);
+        vp9_build_inter_predictors_b(d1, 16, xd->subpixel_predict);
       }
 
       if (mbmi->second_ref_frame) {
-        vp8_build_2nd_inter_predictors_b(d0, 16, xd->subpixel_predict_avg);
-        vp8_build_2nd_inter_predictors_b(d1, 16, xd->subpixel_predict_avg);
+        vp9_build_2nd_inter_predictors_b(d0, 16, xd->subpixel_predict_avg);
+        vp9_build_2nd_inter_predictors_b(d1, 16, xd->subpixel_predict_avg);
       }
     }
   }
@@ -1028,13 +1028,13 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
     if (d0->bmi.as_mv.first.as_int == d1->bmi.as_mv.first.as_int)
       build_inter_predictors2b(xd, d0, 8);
     else {
-      vp8_build_inter_predictors_b(d0, 8, xd->subpixel_predict);
-      vp8_build_inter_predictors_b(d1, 8, xd->subpixel_predict);
+      vp9_build_inter_predictors_b(d0, 8, xd->subpixel_predict);
+      vp9_build_inter_predictors_b(d1, 8, xd->subpixel_predict);
     }
 
     if (mbmi->second_ref_frame) {
-      vp8_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg);
-      vp8_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg);
+      vp9_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg);
+      vp9_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg);
     }
   }
 }
@@ -1131,9 +1131,9 @@ void build_4x4uvmvs(MACROBLOCKD *xd) {
   }
 }
 
-void vp8_build_inter_predictors_mb(MACROBLOCKD *xd) {
+void vp9_build_inter_predictors_mb(MACROBLOCKD *xd) {
   if (xd->mode_info_context->mbmi.mode != SPLITMV) {
-    vp8_build_1st_inter16x16_predictors_mb(xd, xd->predictor,
+    vp9_build_1st_inter16x16_predictors_mb(xd, xd->predictor,
                                            &xd->predictor[256],
                                            &xd->predictor[320], 16, 8);
 
@@ -1141,7 +1141,7 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *xd) {
       /* 256 = offset of U plane in Y+U+V buffer;
        * 320 = offset of V plane in Y+U+V buffer.
        * (256=16x16, 320=16x16+8x8). */
-      vp8_build_2nd_inter16x16_predictors_mb(xd, xd->predictor,
+      vp9_build_2nd_inter16x16_predictors_mb(xd, xd->predictor,
                                              &xd->predictor[256],
                                              &xd->predictor[320], 16, 8);
     }

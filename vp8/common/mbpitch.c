@@ -79,7 +79,7 @@ static void setup_macroblock(MACROBLOCKD *xd, BLOCKSET bs) {
   }
 }
 
-void vp8_setup_block_dptrs(MACROBLOCKD *xd) {
+void vp9_setup_block_dptrs(MACROBLOCKD *xd) {
   int r, c;
   BLOCKD *blockd = xd->block;
 
@@ -116,7 +116,7 @@ void vp8_setup_block_dptrs(MACROBLOCKD *xd) {
   }
 }
 
-void vp8_build_block_doffsets(MACROBLOCKD *xd) {
+void vp9_build_block_doffsets(MACROBLOCKD *xd) {
 
   /* handle the destination pitch features */
   setup_macroblock(xd, DEST);

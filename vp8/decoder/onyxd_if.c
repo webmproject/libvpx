@@ -108,8 +108,8 @@ void vp9_initialize_dec(void) {
   static int init_done = 0;
 
   if (!init_done) {
-    vp8_initialize_common();
-    vp8_init_quant_tables();
+    vp9_initialize_common();
+    vp9_init_quant_tables();
     vp8_scale_machine_specific_config();
     init_done = 1;
   }
@@ -132,7 +132,7 @@ VP8D_PTR vp9_create_decompressor(VP8D_CONFIG *oxcf) {
   pbi->common.error.setjmp = 1;
   vp9_initialize_dec();
 
-  vp8_create_common(&pbi->common);
+  vp9_create_common(&pbi->common);
 
   pbi->common.current_video_frame = 0;
   pbi->ready_for_new_data = 1;
@@ -143,7 +143,7 @@ VP8D_PTR vp9_create_decompressor(VP8D_CONFIG *oxcf) {
    */
   vp9_init_de_quantizer(pbi);
 
-  vp8_loop_filter_init(&pbi->common);
+  vp9_loop_filter_init(&pbi->common);
 
   pbi->common.error.setjmp = 0;
 
@@ -162,7 +162,7 @@ void vp9_remove_decompressor(VP8D_PTR ptr) {
   if (pbi->common.last_frame_seg_map != 0)
     vpx_free(pbi->common.last_frame_seg_map);
 
-  vp8_remove_common(&pbi->common);
+  vp9_remove_common(&pbi->common);
   vpx_free(pbi->mbc);
   vpx_free(pbi);
 }
@@ -444,7 +444,7 @@ int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
 
     if (cm->filter_level) {
       /* Apply the loop filter if appropriate. */
-      vp8_loop_filter_frame(cm, &pbi->mb);
+      vp9_loop_filter_frame(cm, &pbi->mb);
     }
     vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
   }
@@ -464,7 +464,7 @@ int vp9_receive_compressed_data(VP8D_PTR ptr, unsigned long size,
                (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
   }
 
-  /*vp8_print_modes_and_motion_vectors(cm->mi, cm->mb_rows,cm->mb_cols,
+  /*vp9_print_modes_and_motion_vectors(cm->mi, cm->mb_rows,cm->mb_cols,
                                        cm->current_video_frame);*/
 
   if (cm->show_frame)
@@ -505,7 +505,7 @@ int vp9_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd,
 
   sd->clrtype = pbi->common.clr_type;
 #if CONFIG_POSTPROC
-  ret = vp8_post_proc_frame(&pbi->common, sd, flags);
+  ret = vp9_post_proc_frame(&pbi->common, sd, flags);
 #else
 
   if (pbi->common.frame_to_show) {

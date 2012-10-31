@@ -12,7 +12,7 @@
 #include "setupintrarecon.h"
 #include "vpx_mem/vpx_mem.h"
 
-void vp8_setup_intra_recon(YV12_BUFFER_CONFIG *ybf) {
+void vp9_setup_intra_recon(YV12_BUFFER_CONFIG *ybf) {
   int i;
 
   /* set up frame new frame for intra coded blocks */

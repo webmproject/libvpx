@@ -135,7 +135,7 @@ vp9_lookahead_push(struct lookahead_ctx *ctx,
         }
 
         // Only copy this active region.
-        vp8_copy_and_extend_frame_with_rect(src, &buf->img,
+        vp9_copy_and_extend_frame_with_rect(src, &buf->img,
                                             row << 4,
                                             col << 4, 16,
                                             (active_end - col) << 4);
@@ -147,7 +147,7 @@ vp9_lookahead_push(struct lookahead_ctx *ctx,
       active_map += mb_cols;
     }
   } else {
-    vp8_copy_and_extend_frame(src, &buf->img);
+    vp9_copy_and_extend_frame(src, &buf->img);
   }
   buf->ts_start = ts_start;
   buf->ts_end = ts_end;

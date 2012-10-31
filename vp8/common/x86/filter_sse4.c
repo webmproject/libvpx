@@ -84,7 +84,7 @@ DECLARE_ALIGNED(16, static const unsigned char, transpose_c[16]) = {
   result = _mm_srai_epi32(mad_all, VP8_FILTER_SHIFT);                          \
   }
 
-void vp8_filter_block2d_4x4_8_sse4_1
+void vp9_filter_block2d_4x4_8_sse4_1
 (
  const unsigned char *src_ptr, const unsigned int src_stride,
  const short *HFilter_aligned16, const short *VFilter_aligned16,
@@ -315,7 +315,7 @@ void vp8_filter_block2d_4x4_8_sse4_1
   }
 }
 
-void vp8_filter_block2d_8x4_8_sse4_1
+void vp9_filter_block2d_8x4_8_sse4_1
 (
  const unsigned char *src_ptr, const unsigned int src_stride,
  const short *HFilter_aligned16, const short *VFilter_aligned16,
@@ -323,13 +323,13 @@ void vp8_filter_block2d_8x4_8_sse4_1
 ) {
   int j;
   for (j=0; j<8; j+=4) {
-    vp8_filter_block2d_4x4_8_sse4_1(src_ptr + j, src_stride,
+    vp9_filter_block2d_4x4_8_sse4_1(src_ptr + j, src_stride,
                                     HFilter_aligned16, VFilter_aligned16,
                                     dst_ptr + j, dst_stride);
   }
 }
 
-void vp8_filter_block2d_8x8_8_sse4_1
+void vp9_filter_block2d_8x8_8_sse4_1
 (
  const unsigned char *src_ptr, const unsigned int src_stride,
  const short *HFilter_aligned16, const short *VFilter_aligned16,
@@ -338,14 +338,14 @@ void vp8_filter_block2d_8x8_8_sse4_1
   int i, j;
   for (i=0; i<8; i+=4) {
     for (j=0; j<8; j+=4) {
-      vp8_filter_block2d_4x4_8_sse4_1(src_ptr + j + i*src_stride, src_stride,
+      vp9_filter_block2d_4x4_8_sse4_1(src_ptr + j + i*src_stride, src_stride,
                                       HFilter_aligned16, VFilter_aligned16,
                                       dst_ptr + j + i*dst_stride, dst_stride);
     }
   }
 }
 
-void vp8_filter_block2d_16x16_8_sse4_1
+void vp9_filter_block2d_16x16_8_sse4_1
 (
  const unsigned char *src_ptr, const unsigned int src_stride,
  const short *HFilter_aligned16, const short *VFilter_aligned16,
@@ -354,7 +354,7 @@ void vp8_filter_block2d_16x16_8_sse4_1
   int i, j;
   for (i=0; i<16; i+=4) {
     for (j=0; j<16; j+=4) {
-      vp8_filter_block2d_4x4_8_sse4_1(src_ptr + j + i*src_stride, src_stride,
+      vp9_filter_block2d_4x4_8_sse4_1(src_ptr + j + i*src_stride, src_stride,
                                       HFilter_aligned16, VFilter_aligned16,
                                       dst_ptr + j + i*dst_stride, dst_stride);
     }

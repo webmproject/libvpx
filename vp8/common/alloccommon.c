@@ -48,7 +48,7 @@ void vp9_update_mode_info_in_image(VP8_COMMON *cpi, MODE_INFO *mi) {
   }
 }
 
-void vp8_de_alloc_frame_buffers(VP8_COMMON *oci) {
+void vp9_de_alloc_frame_buffers(VP8_COMMON *oci) {
   int i;
 
   for (i = 0; i < NUM_YV12_BUFFERS; i++)
@@ -67,10 +67,10 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci) {
 
 }
 
-int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
+int vp9_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
   int i;
 
-  vp8_de_alloc_frame_buffers(oci);
+  vp9_de_alloc_frame_buffers(oci);
 
   /* our internal buffers are always multiples of 16 */
   if ((width & 0xf) != 0)
@@ -84,7 +84,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
     oci->fb_idx_ref_cnt[i] = 0;
     oci->yv12_fb[i].flags = 0;
     if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i], width, height, VP8BORDERINPIXELS) < 0) {
-      vp8_de_alloc_frame_buffers(oci);
+      vp9_de_alloc_frame_buffers(oci);
       return 1;
     }
   }
@@ -100,12 +100,12 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
   oci->fb_idx_ref_cnt[3] = 1;
 
   if (vp8_yv12_alloc_frame_buffer(&oci->temp_scale_frame,   width, 16, VP8BORDERINPIXELS) < 0) {
-    vp8_de_alloc_frame_buffers(oci);
+    vp9_de_alloc_frame_buffers(oci);
     return 1;
   }
 
   if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer, width, height, VP8BORDERINPIXELS) < 0) {
-    vp8_de_alloc_frame_buffers(oci);
+    vp9_de_alloc_frame_buffers(oci);
     return 1;
   }
 
@@ -116,7 +116,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
   oci->mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
 
   if (!oci->mip) {
-    vp8_de_alloc_frame_buffers(oci);
+    vp9_de_alloc_frame_buffers(oci);
     return 1;
   }
 
@@ -127,7 +127,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
   oci->prev_mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
 
   if (!oci->prev_mip) {
-    vp8_de_alloc_frame_buffers(oci);
+    vp9_de_alloc_frame_buffers(oci);
     return 1;
   }
 
@@ -136,7 +136,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
   oci->above_context = vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * oci->mb_cols, 1);
 
   if (!oci->above_context) {
-    vp8_de_alloc_frame_buffers(oci);
+    vp9_de_alloc_frame_buffers(oci);
     return 1;
   }
 
@@ -145,7 +145,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height) {
 
   return 0;
 }
-void vp8_setup_version(VP8_COMMON *cm) {
+void vp9_setup_version(VP8_COMMON *cm) {
   if (cm->version & 0x4) {
     if (!CONFIG_EXPERIMENTAL)
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
@@ -183,12 +183,12 @@ void vp8_setup_version(VP8_COMMON *cm) {
       //    break;
   }
 }
-void vp8_create_common(VP8_COMMON *oci) {
-  vp8_machine_specific_config(oci);
+void vp9_create_common(VP8_COMMON *oci) {
+  vp9_machine_specific_config(oci);
 
-  vp8_init_mbmode_probs(oci);
+  vp9_init_mbmode_probs(oci);
 
-  vp8_default_bmode_probs(oci->fc.bmode_prob);
+  vp9_default_bmode_probs(oci->fc.bmode_prob);
 
   oci->txfm_mode = ONLY_4X4;
   oci->mb_no_coeff_skip = 1;
@@ -209,14 +209,14 @@ void vp8_create_common(VP8_COMMON *oci) {
   oci->kf_ymode_probs_update = 0;
 }
 
-void vp8_remove_common(VP8_COMMON *oci) {
-  vp8_de_alloc_frame_buffers(oci);
+void vp9_remove_common(VP8_COMMON *oci) {
+  vp9_de_alloc_frame_buffers(oci);
 }
 
-void vp8_initialize_common() {
-  vp8_coef_tree_initialize();
+void vp9_initialize_common() {
+  vp9_coef_tree_initialize();
 
-  vp8_entropy_mode_init();
+  vp9_entropy_mode_init();
 
-  vp8_entropy_mv_init();
+  vp9_entropy_mv_init();
 }

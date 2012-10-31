@@ -21,7 +21,7 @@
 ;
 ;*************************************************************************************/
 
-;void vp8_filter_block1d8_v8_ssse3
+;void vp9_filter_block1d8_v8_ssse3
 ;(
 ;    unsigned char *src_ptr,
 ;    unsigned int   src_pitch,
@@ -30,8 +30,8 @@
 ;    unsigned int   output_height,
 ;    short *filter
 ;)
-global sym(vp8_filter_block1d8_v8_ssse3)
-sym(vp8_filter_block1d8_v8_ssse3):
+global sym(vp9_filter_block1d8_v8_ssse3)
+sym(vp9_filter_block1d8_v8_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -86,7 +86,7 @@ sym(vp8_filter_block1d8_v8_ssse3):
     lea         rbx, [rdx + rdx*4]
     add         rbx, rdx                    ;pitch * 6
 
-.vp8_filter_block1d8_v8_ssse3_loop:
+.vp9_filter_block1d8_v8_ssse3_loop:
     movq        xmm0, [rsi]                 ;A
     movq        xmm1, [rsi + rdx]           ;B
     movq        xmm2, [rsi + rdx * 2]       ;C
@@ -126,7 +126,7 @@ sym(vp8_filter_block1d8_v8_ssse3):
     add         rdi, r8
 %endif
     dec         rcx
-    jnz         .vp8_filter_block1d8_v8_ssse3_loop
+    jnz         .vp9_filter_block1d8_v8_ssse3_loop
 
     add rsp, 16*5
     pop rsp
@@ -139,7 +139,7 @@ sym(vp8_filter_block1d8_v8_ssse3):
     pop         rbp
     ret
 
-;void vp8_filter_block1d16_v8_ssse3
+;void vp9_filter_block1d16_v8_ssse3
 ;(
 ;    unsigned char *src_ptr,
 ;    unsigned int   src_pitch,
@@ -148,8 +148,8 @@ sym(vp8_filter_block1d8_v8_ssse3):
 ;    unsigned int   output_height,
 ;    short *filter
 ;)
-global sym(vp8_filter_block1d16_v8_ssse3)
-sym(vp8_filter_block1d16_v8_ssse3):
+global sym(vp9_filter_block1d16_v8_ssse3)
+sym(vp9_filter_block1d16_v8_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -204,7 +204,7 @@ sym(vp8_filter_block1d16_v8_ssse3):
     lea         rbx, [rdx + rdx*4]
     add         rbx, rdx                    ;pitch * 6
 
-.vp8_filter_block1d16_v8_ssse3_loop:
+.vp9_filter_block1d16_v8_ssse3_loop:
     movq        xmm0, [rsi]                 ;A
     movq        xmm1, [rsi + rdx]           ;B
     movq        xmm2, [rsi + rdx * 2]       ;C
@@ -276,7 +276,7 @@ sym(vp8_filter_block1d16_v8_ssse3):
     add         rdi, r8
 %endif
     dec         rcx
-    jnz         .vp8_filter_block1d16_v8_ssse3_loop
+    jnz         .vp9_filter_block1d16_v8_ssse3_loop
 
     add rsp, 16*5
     pop rsp
@@ -289,7 +289,7 @@ sym(vp8_filter_block1d16_v8_ssse3):
     pop         rbp
     ret
 
-;void vp8_filter_block1d8_h8_ssse3
+;void vp9_filter_block1d8_h8_ssse3
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned int    src_pixels_per_line,
@@ -298,8 +298,8 @@ sym(vp8_filter_block1d16_v8_ssse3):
 ;    unsigned int    output_height,
 ;    short *filter
 ;)
-global sym(vp8_filter_block1d8_h8_ssse3)
-sym(vp8_filter_block1d8_h8_ssse3):
+global sym(vp9_filter_block1d8_h8_ssse3)
+sym(vp9_filter_block1d8_h8_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -396,7 +396,7 @@ sym(vp8_filter_block1d8_h8_ssse3):
     pop         rbp
     ret
 
-;void vp8_filter_block1d16_h8_ssse3
+;void vp9_filter_block1d16_h8_ssse3
 ;(
 ;    unsigned char  *src_ptr,
 ;    unsigned int    src_pixels_per_line,
@@ -405,8 +405,8 @@ sym(vp8_filter_block1d8_h8_ssse3):
 ;    unsigned int    output_height,
 ;    short *filter
 ;)
-global sym(vp8_filter_block1d16_h8_ssse3)
-sym(vp8_filter_block1d16_h8_ssse3):
+global sym(vp9_filter_block1d16_h8_ssse3)
+sym(vp9_filter_block1d16_h8_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6

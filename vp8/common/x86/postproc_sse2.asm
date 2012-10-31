@@ -11,7 +11,7 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;void vp8_post_proc_down_and_across_xmm
+;void vp9_post_proc_down_and_across_xmm
 ;(
 ;    unsigned char *src_ptr,
 ;    unsigned char *dst_ptr,
@@ -21,8 +21,8 @@
 ;    int cols,
 ;    int flimit
 ;)
-global sym(vp8_post_proc_down_and_across_xmm)
-sym(vp8_post_proc_down_and_across_xmm):
+global sym(vp9_post_proc_down_and_across_xmm)
+sym(vp9_post_proc_down_and_across_xmm):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -248,11 +248,11 @@ sym(vp8_post_proc_down_and_across_xmm):
 %undef RD42
 
 
-;void vp8_mbpost_proc_down_xmm(unsigned char *dst,
+;void vp9_mbpost_proc_down_xmm(unsigned char *dst,
 ;                            int pitch, int rows, int cols,int flimit)
 extern sym(vp8_rv)
-global sym(vp8_mbpost_proc_down_xmm)
-sym(vp8_mbpost_proc_down_xmm):
+global sym(vp9_mbpost_proc_down_xmm)
+sym(vp9_mbpost_proc_down_xmm):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -449,10 +449,10 @@ sym(vp8_mbpost_proc_down_xmm):
 %undef flimit4
 
 
-;void vp8_mbpost_proc_across_ip_xmm(unsigned char *src,
+;void vp9_mbpost_proc_across_ip_xmm(unsigned char *src,
 ;                                int pitch, int rows, int cols,int flimit)
-global sym(vp8_mbpost_proc_across_ip_xmm)
-sym(vp8_mbpost_proc_across_ip_xmm):
+global sym(vp9_mbpost_proc_across_ip_xmm)
+sym(vp9_mbpost_proc_across_ip_xmm):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -624,14 +624,14 @@ sym(vp8_mbpost_proc_across_ip_xmm):
 %undef flimit4
 
 
-;void vp8_plane_add_noise_wmt (unsigned char *Start, unsigned char *noise,
+;void vp9_plane_add_noise_wmt (unsigned char *Start, unsigned char *noise,
 ;                            unsigned char blackclamp[16],
 ;                            unsigned char whiteclamp[16],
 ;                            unsigned char bothclamp[16],
 ;                            unsigned int Width, unsigned int Height, int Pitch)
 extern sym(rand)
-global sym(vp8_plane_add_noise_wmt)
-sym(vp8_plane_add_noise_wmt):
+global sym(vp9_plane_add_noise_wmt)
+sym(vp9_plane_add_noise_wmt):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 8

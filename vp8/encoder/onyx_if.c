@@ -68,7 +68,7 @@ extern void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 
 extern void vp9_cmachine_specific_config(VP8_COMP *cpi);
 
-extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source,
+extern void vp9_deblock_frame(YV12_BUFFER_CONFIG *source,
                               YV12_BUFFER_CONFIG *post,
                               int filt_lvl, int low_var_thresh, int flag);
 
@@ -325,9 +325,9 @@ void vp9_initialize_enc() {
 
   if (!init_done) {
     vp8_scale_machine_specific_config();
-    vp8_initialize_common();
+    vp9_initialize_common();
     vp9_tokenize_initialize();
-    vp8_init_quant_tables();
+    vp9_init_quant_tables();
     vp9_init_me_luts();
     init_minq_luts();
     init_base_skip_probs();
@@ -388,7 +388,7 @@ static void dealloc_compressor_data(VP8_COMP *cpi) {
   vpx_free(cpi->active_map);
   cpi->active_map = 0;
 
-  vp8_de_alloc_frame_buffers(&cpi->common);
+  vp9_de_alloc_frame_buffers(&cpi->common);
 
   vp8_yv12_de_alloc_frame_buffer(&cpi->last_frame_uf);
   vp8_yv12_de_alloc_frame_buffer(&cpi->scaled_source);
@@ -1281,7 +1281,7 @@ void vp9_alloc_compressor_data(VP8_COMP *cpi) {
   int width = cm->Width;
   int height = cm->Height;
 
-  if (vp8_alloc_frame_buffers(cm, width, height))
+  if (vp9_alloc_frame_buffers(cm, width, height))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffers");
 
@@ -1443,7 +1443,7 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
   cpi->goldfreq = 7;
 
   cm->version = oxcf->Version;
-  vp8_setup_version(cm);
+  vp9_setup_version(cm);
 
   // change includes all joint functionality
   vp9_change_config(ptr, oxcf);
@@ -1492,7 +1492,7 @@ void vp9_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
 
   if (cm->version != oxcf->Version) {
     cm->version = oxcf->Version;
-    vp8_setup_version(cm);
+    vp9_setup_version(cm);
   }
 
   cpi->oxcf = *oxcf;
@@ -1530,11 +1530,11 @@ void vp9_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
 #if CONFIG_LOSSLESS
   cpi->oxcf.lossless = oxcf->lossless;
   if (cpi->oxcf.lossless) {
-    cpi->common.rtcd.idct.idct1        = vp8_short_inv_walsh4x4_1_x8_c;
-    cpi->common.rtcd.idct.idct16       = vp8_short_inv_walsh4x4_x8_c;
-    cpi->common.rtcd.idct.idct1_scalar_add  = vp8_dc_only_inv_walsh_add_c;
-    cpi->common.rtcd.idct.iwalsh1      = vp8_short_inv_walsh4x4_1_c;
-    cpi->common.rtcd.idct.iwalsh16     = vp8_short_inv_walsh4x4_lossless_c;
+    cpi->common.rtcd.idct.idct1        = vp9_short_inv_walsh4x4_1_x8_c;
+    cpi->common.rtcd.idct.idct16       = vp9_short_inv_walsh4x4_x8_c;
+    cpi->common.rtcd.idct.idct1_scalar_add  = vp9_dc_only_inv_walsh_add_c;
+    cpi->common.rtcd.idct.iwalsh1      = vp9_short_inv_walsh4x4_1_c;
+    cpi->common.rtcd.idct.iwalsh16     = vp9_short_inv_walsh4x4_lossless_c;
   }
 #endif
 
@@ -1757,7 +1757,7 @@ VP8_PTR vp9_create_compressor(VP8_CONFIG *oxcf) {
 
   CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
 
-  vp8_create_common(&cpi->common);
+  vp9_create_common(&cpi->common);
   vp9_cmachine_specific_config(cpi);
 
   init_config((VP8_PTR)cpi, oxcf);
@@ -2020,7 +2020,7 @@ VP8_PTR vp9_create_compressor(VP8_CONFIG *oxcf) {
    */
   vp9_init_quantizer(cpi);
 
-  vp8_loop_filter_init(cm);
+  vp9_loop_filter_init(cm);
 
   cpi->common.error.setjmp = 0;
 
@@ -2251,7 +2251,7 @@ void vp9_remove_compressor(VP8_PTR *ptr) {
     vpx_free(cpi->mbgraph_stats[i].mb_stats);
   }
 
-  vp8_remove_common(&cpi->common);
+  vp9_remove_common(&cpi->common);
   vpx_free(cpi);
   *ptr = 0;
 
@@ -2818,7 +2818,7 @@ static void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
 
   if (cm->filter_level > 0) {
     vp9_set_alt_lf_level(cpi, cm->filter_level);
-    vp8_loop_filter_frame(cm, &cpi->mb.e_mbd);
+    vp9_loop_filter_frame(cm, &cpi->mb.e_mbd);
   }
 
   vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
@@ -3182,9 +3182,9 @@ static void encode_frame_to_data_rate
 
 
     if (cm->frame_type == KEY_FRAME) {
-      vp8_de_noise(cpi->Source, cpi->Source, l, 1,  0, RTCD(postproc));
+      vp9_de_noise(cpi->Source, cpi->Source, l, 1,  0, RTCD(postproc));
     } else {
-      vp8_de_noise(cpi->Source, cpi->Source, l, 1,  0, RTCD(postproc));
+      vp9_de_noise(cpi->Source, cpi->Source, l, 1,  0, RTCD(postproc));
 
       src = cpi->Source->y_buffer;
 
@@ -3636,7 +3636,7 @@ static void encode_frame_to_data_rate
   vp8_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
   vp8_copy(cpi->common.fc.hybrid_coef_counts_16x16,
            cpi->hybrid_coef_counts_16x16);
-  vp8_adapt_coef_probs(&cpi->common);
+  vp9_adapt_coef_probs(&cpi->common);
   if (cpi->common.frame_type != KEY_FRAME) {
     vp8_copy(cpi->common.fc.ymode_counts, cpi->ymode_count);
     vp8_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
@@ -3644,11 +3644,11 @@ static void encode_frame_to_data_rate
     vp8_copy(cpi->common.fc.i8x8_mode_counts, cpi->i8x8_mode_count);
     vp8_copy(cpi->common.fc.sub_mv_ref_counts, cpi->sub_mv_ref_count);
     vp8_copy(cpi->common.fc.mbsplit_counts, cpi->mbsplit_count);
-    vp8_adapt_mode_probs(&cpi->common);
+    vp9_adapt_mode_probs(&cpi->common);
 
     cpi->common.fc.NMVcount = cpi->NMVcount;
-    vp8_adapt_nmv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
-    vp8_update_mode_context(&cpi->common);
+    vp9_adapt_nmv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
+    vp9_update_mode_context(&cpi->common);
   }
 
   /* Move storing frame_type out of the above loop since it is also
@@ -3777,7 +3777,7 @@ static void encode_frame_to_data_rate
               (cpi->oxcf.starting_buffer_level - cpi->bits_off_target),
               (int)cpi->total_actual_bits,
               vp9_convert_qindex_to_q(cm->base_qindex),
-              (double)vp8_dc_quant(cm->base_qindex, 0) / 4.0,
+              (double)vp9_dc_quant(cm->base_qindex, 0) / 4.0,
               vp9_convert_qindex_to_q(cpi->active_best_quality),
               vp9_convert_qindex_to_q(cpi->active_worst_quality),
               cpi->avg_q,
@@ -3807,7 +3807,7 @@ static void encode_frame_to_data_rate
               (cpi->oxcf.starting_buffer_level - cpi->bits_off_target),
               (int)cpi->total_actual_bits,
               vp9_convert_qindex_to_q(cm->base_qindex),
-              (double)vp8_dc_quant(cm->base_qindex, 0) / 4.0,
+              (double)vp9_dc_quant(cm->base_qindex, 0) / 4.0,
               vp9_convert_qindex_to_q(cpi->active_best_quality),
               vp9_convert_qindex_to_q(cpi->active_worst_quality),
               cpi->avg_q,
@@ -4278,7 +4278,7 @@ int vp9_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags,
           double frame_psnr2, frame_ssim2 = 0;
           double weight = 0;
 #if CONFIG_POSTPROC
-          vp8_deblock(cm->frame_to_show, &cm->post_proc_buffer, cm->filter_level * 10 / 6, 1, 0, IF_RTCD(&cm->rtcd.postproc));
+          vp9_deblock(cm->frame_to_show, &cm->post_proc_buffer, cm->filter_level * 10 / 6, 1, 0, IF_RTCD(&cm->rtcd.postproc));
 #endif
           vp8_clear_system_state();
 
@@ -4357,7 +4357,7 @@ int vp9_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest,
   else {
     int ret;
 #if CONFIG_POSTPROC
-    ret = vp8_post_proc_frame(&cpi->common, dest, flags);
+    ret = vp9_post_proc_frame(&cpi->common, dest, flags);
 #else
 
     if (cpi->common.frame_to_show) {

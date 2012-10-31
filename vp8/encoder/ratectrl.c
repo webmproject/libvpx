@@ -90,7 +90,7 @@ static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] = { 1, 2, 3,
 // tables if and when things settle down in the experimental bitstream
 double vp9_convert_qindex_to_q(int qindex) {
   // Convert the index to a real Q value (scaled down to match old Q values)
-  return (double)vp8_ac_yquant(qindex) / 4.0;
+  return (double)vp9_ac_yquant(qindex) / 4.0;
 }
 
 int vp9_gfboost_qadjust(int qindex) {
@@ -240,12 +240,12 @@ void vp9_restore_coding_context(VP8_COMP *cpi) {
 void vp9_setup_key_frame(VP8_COMP *cpi) {
   VP8_COMMON *cm = &cpi->common;
   // Setup for Key frame:
-  vp8_default_coef_probs(& cpi->common);
-  vp8_kf_default_bmode_probs(cpi->common.kf_bmode_prob);
-  vp8_init_mbmode_probs(& cpi->common);
-  vp8_default_bmode_probs(cm->fc.bmode_prob);
+  vp9_default_coef_probs(& cpi->common);
+  vp9_kf_default_bmode_probs(cpi->common.kf_bmode_prob);
+  vp9_init_mbmode_probs(& cpi->common);
+  vp9_default_bmode_probs(cm->fc.bmode_prob);
 
-  vp8_init_mv_probs(& cpi->common);
+  vp9_init_mv_probs(& cpi->common);
 
   // cpi->common.filter_level = 0;      // Reset every key frame.
   cpi->common.filter_level = cpi->common.base_qindex * 3 / 8;
@@ -256,7 +256,7 @@ void vp9_setup_key_frame(VP8_COMP *cpi) {
   cpi->common.refresh_golden_frame = TRUE;
   cpi->common.refresh_alt_ref_frame = TRUE;
 
-  vp8_init_mode_contexts(&cpi->common);
+  vp9_init_mode_contexts(&cpi->common);
   vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
   vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
 

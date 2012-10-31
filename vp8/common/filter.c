@@ -296,7 +296,7 @@ static void filter_block2d_6
 }
 
 
-void vp8_sixtap_predict_c
+void vp9_sixtap_predict_c
 (
   unsigned char  *src_ptr,
   int   src_pixels_per_line,
@@ -342,7 +342,7 @@ static void filter_block2d_avg_6
                                    output_pitch, 4, 4, 4, 4, VFilter);
 }
 
-void vp8_sixtap_predict_avg_c
+void vp9_sixtap_predict_avg_c
 (
   unsigned char  *src_ptr,
   int   src_pixels_per_line,
@@ -361,7 +361,7 @@ void vp8_sixtap_predict_avg_c
                        dst_pitch, HFilter, VFilter);
 }
 
-void vp8_sixtap_predict8x8_c
+void vp9_sixtap_predict8x8_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -388,7 +388,7 @@ void vp8_sixtap_predict8x8_c
 
 }
 
-void vp8_sixtap_predict_avg8x8_c
+void vp9_sixtap_predict_avg8x8_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -413,7 +413,7 @@ void vp8_sixtap_predict_avg8x8_c
   filter_block2d_second_pass_avg_6(FData + 8 * (Interp_Extend - 1), dst_ptr, dst_pitch, 8, 8, 8, 8, VFilter);
 }
 
-void vp8_sixtap_predict8x4_c
+void vp9_sixtap_predict8x4_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -440,7 +440,7 @@ void vp8_sixtap_predict8x4_c
 
 }
 
-void vp8_sixtap_predict16x16_c
+void vp9_sixtap_predict16x16_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -467,7 +467,7 @@ void vp8_sixtap_predict16x16_c
 
 }
 
-void vp8_sixtap_predict_avg16x16_c
+void vp9_sixtap_predict_avg16x16_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -607,7 +607,7 @@ static void vp8_filter_block2d_8_c
   }
 }
 
-void vp8_filter_block2d_4x4_8_c
+void vp9_filter_block2d_4x4_8_c
 (
  const unsigned char *src_ptr, const unsigned int src_stride,
  const short *HFilter_aligned16, const short *VFilter_aligned16,
@@ -618,7 +618,7 @@ void vp8_filter_block2d_4x4_8_c
                          VPX_FILTER_4x4, dst_ptr, dst_stride);
 }
 
-void vp8_filter_block2d_8x4_8_c
+void vp9_filter_block2d_8x4_8_c
 (
  const unsigned char *src_ptr, const unsigned int src_stride,
  const short *HFilter_aligned16, const short *VFilter_aligned16,
@@ -629,7 +629,7 @@ void vp8_filter_block2d_8x4_8_c
                          VPX_FILTER_8x4, dst_ptr, dst_stride);
 }
 
-void vp8_filter_block2d_8x8_8_c
+void vp9_filter_block2d_8x8_8_c
 (
  const unsigned char *src_ptr, const unsigned int src_stride,
  const short *HFilter_aligned16, const short *VFilter_aligned16,
@@ -640,7 +640,7 @@ void vp8_filter_block2d_8x8_8_c
                          VPX_FILTER_8x8, dst_ptr, dst_stride);
 }
 
-void vp8_filter_block2d_16x16_8_c
+void vp9_filter_block2d_16x16_8_c
 (
  const unsigned char *src_ptr, const unsigned int src_stride,
  const short *HFilter_aligned16, const short *VFilter_aligned16,
@@ -673,7 +673,7 @@ static void vp8_block2d_average_c
 
 #define vp8_block2d_average vp8_block2d_average_c
 
-void vp8_eighttap_predict_c
+void vp9_eighttap_predict_c
 (
   unsigned char  *src_ptr,
   int   src_pixels_per_line,
@@ -688,12 +688,12 @@ void vp8_eighttap_predict_c
   HFilter = vp8_sub_pel_filters_8[xoffset];
   VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            dst_ptr, dst_pitch);
 }
 
-void vp8_eighttap_predict_avg4x4_c
+void vp9_eighttap_predict_avg4x4_c
 (
   unsigned char  *src_ptr,
   int   src_pixels_per_line,
@@ -706,13 +706,13 @@ void vp8_eighttap_predict_avg4x4_c
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
   unsigned char tmp[4 * 4];
 
-  vp8_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            tmp, 4);
   vp8_block2d_average(tmp, 4, dst_ptr, dst_pitch, VPX_FILTER_4x4);
 }
 
-void vp8_eighttap_predict_sharp_c
+void vp9_eighttap_predict_sharp_c
 (
   unsigned char  *src_ptr,
   int   src_pixels_per_line,
@@ -727,12 +727,12 @@ void vp8_eighttap_predict_sharp_c
   HFilter = vp8_sub_pel_filters_8s[xoffset];
   VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            dst_ptr, dst_pitch);
 }
 
-void vp8_eighttap_predict_avg4x4_sharp_c
+void vp9_eighttap_predict_avg4x4_sharp_c
 (
   unsigned char  *src_ptr,
   int   src_pixels_per_line,
@@ -745,13 +745,13 @@ void vp8_eighttap_predict_avg4x4_sharp_c
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
   unsigned char tmp[4 * 4];
 
-  vp8_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            tmp, 4);
   vp8_block2d_average(tmp, 4, dst_ptr, dst_pitch, VPX_FILTER_4x4);
 }
 
-void vp8_eighttap_predict8x8_c
+void vp9_eighttap_predict8x8_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -763,12 +763,12 @@ void vp8_eighttap_predict8x8_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            dst_ptr, dst_pitch);
 }
 
-void vp8_eighttap_predict8x8_sharp_c
+void vp9_eighttap_predict8x8_sharp_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -780,12 +780,12 @@ void vp8_eighttap_predict8x8_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            dst_ptr, dst_pitch);
 }
 
-void vp8_eighttap_predict_avg8x8_c
+void vp9_eighttap_predict_avg8x8_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -798,13 +798,13 @@ void vp8_eighttap_predict_avg8x8_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            tmp, 8);
   vp8_block2d_average(tmp, 8, dst_ptr, dst_pitch, VPX_FILTER_8x8);
 }
 
-void vp8_eighttap_predict_avg8x8_sharp_c
+void vp9_eighttap_predict_avg8x8_sharp_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -817,13 +817,13 @@ void vp8_eighttap_predict_avg8x8_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            tmp, 8);
   vp8_block2d_average(tmp, 8, dst_ptr, dst_pitch, VPX_FILTER_8x8);
 }
 
-void vp8_eighttap_predict8x4_c
+void vp9_eighttap_predict8x4_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -836,12 +836,12 @@ void vp8_eighttap_predict8x4_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_8x4_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_8x4_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            dst_ptr, dst_pitch);
 }
 
-void vp8_eighttap_predict8x4_sharp_c
+void vp9_eighttap_predict8x4_sharp_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -853,12 +853,12 @@ void vp8_eighttap_predict8x4_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_8x4_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_8x4_8(src_ptr, src_pixels_per_line,
                            HFilter, VFilter,
                            dst_ptr, dst_pitch);
 }
 
-void vp8_eighttap_predict16x16_c
+void vp9_eighttap_predict16x16_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -870,12 +870,12 @@ void vp8_eighttap_predict16x16_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
                        HFilter, VFilter,
                        dst_ptr, dst_pitch);
 }
 
-void vp8_eighttap_predict16x16_sharp_c
+void vp9_eighttap_predict16x16_sharp_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -887,12 +887,12 @@ void vp8_eighttap_predict16x16_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
                        HFilter, VFilter,
                        dst_ptr, dst_pitch);
 }
 
-void vp8_eighttap_predict_avg16x16_c
+void vp9_eighttap_predict_avg16x16_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -905,13 +905,13 @@ void vp8_eighttap_predict_avg16x16_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
                        HFilter, VFilter,
                        tmp, 16);
   vp8_block2d_average(tmp, 16, dst_ptr, dst_pitch, VPX_FILTER_16x16);
 }
 
-void vp8_eighttap_predict_avg16x16_sharp_c
+void vp9_eighttap_predict_avg16x16_sharp_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -924,7 +924,7 @@ void vp8_eighttap_predict_avg16x16_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
+  vp9_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
                        HFilter, VFilter,
                        tmp, 16);
   vp8_block2d_average(tmp, 16, dst_ptr, dst_pitch, VPX_FILTER_16x16);
@@ -1127,7 +1127,7 @@ static void filter_block2d_bil_avg
   filter_block2d_bil_second_pass_avg(FData, dst_ptr, dst_pitch, Height, Width, VFilter);
 }
 
-void vp8_bilinear_predict4x4_c
+void vp9_bilinear_predict4x4_c
 (
   unsigned char  *src_ptr,
   int   src_pixels_per_line,
@@ -1162,7 +1162,7 @@ void vp8_bilinear_predict4x4_c
 
 }
 
-void vp8_bilinear_predict_avg4x4_c
+void vp9_bilinear_predict_avg4x4_c
 (
   unsigned char  *src_ptr,
   int   src_pixels_per_line,
@@ -1181,7 +1181,7 @@ void vp8_bilinear_predict_avg4x4_c
                          dst_pitch, HFilter, VFilter, 4, 4);
 }
 
-void vp8_bilinear_predict8x8_c
+void vp9_bilinear_predict8x8_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -1200,7 +1200,7 @@ void vp8_bilinear_predict8x8_c
 
 }
 
-void vp8_bilinear_predict_avg8x8_c
+void vp9_bilinear_predict_avg8x8_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -1219,7 +1219,7 @@ void vp8_bilinear_predict_avg8x8_c
                          dst_pitch, HFilter, VFilter, 8, 8);
 }
 
-void vp8_bilinear_predict8x4_c
+void vp9_bilinear_predict8x4_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -1238,7 +1238,7 @@ void vp8_bilinear_predict8x4_c
 
 }
 
-void vp8_bilinear_predict16x16_c
+void vp9_bilinear_predict16x16_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,
@@ -1256,7 +1256,7 @@ void vp8_bilinear_predict16x16_c
   filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 16, 16);
 }
 
-void vp8_bilinear_predict_avg16x16_c
+void vp9_bilinear_predict_avg16x16_c
 (
   unsigned char  *src_ptr,
   int  src_pixels_per_line,

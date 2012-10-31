@@ -10,9 +10,9 @@
 
 
 %include "vpx_ports/x86_abi_support.asm"
-;void vp8_recon_b_mmx(unsigned char *s, short *q, unsigned char *d, int stride)
-global sym(vp8_recon_b_mmx)
-sym(vp8_recon_b_mmx):
+;void vp9_recon_b_mmx(unsigned char *s, short *q, unsigned char *d, int stride)
+global sym(vp9_recon_b_mmx)
+sym(vp9_recon_b_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -65,8 +65,8 @@ sym(vp8_recon_b_mmx):
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    )
-global sym(vp8_copy_mem8x8_mmx)
-sym(vp8_copy_mem8x8_mmx):
+global sym(vp9_copy_mem8x8_mmx)
+sym(vp9_copy_mem8x8_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -128,8 +128,8 @@ sym(vp8_copy_mem8x8_mmx):
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    )
-global sym(vp8_copy_mem8x4_mmx)
-sym(vp8_copy_mem8x4_mmx):
+global sym(vp9_copy_mem8x4_mmx)
+sym(vp9_copy_mem8x4_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
@@ -172,8 +172,8 @@ sym(vp8_copy_mem8x4_mmx):
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    )
-global sym(vp8_copy_mem16x16_mmx)
-sym(vp8_copy_mem16x16_mmx):
+global sym(vp9_copy_mem16x16_mmx)
+sym(vp9_copy_mem16x16_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4

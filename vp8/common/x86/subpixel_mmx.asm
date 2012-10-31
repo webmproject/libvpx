@@ -17,7 +17,7 @@
 %define VP8_FILTER_SHIFT  7
 
 
-;void vp8_filter_block1d_h6_mmx
+;void vp9_filter_block1d_h6_mmx
 ;(
 ;    unsigned char   *src_ptr,
 ;    unsigned short  *output_ptr,
@@ -27,8 +27,8 @@
 ;    unsigned int    output_width,
 ;    short           * vp8_filter
 ;)
-global sym(vp8_filter_block1d_h6_mmx)
-sym(vp8_filter_block1d_h6_mmx):
+global sym(vp9_filter_block1d_h6_mmx)
+sym(vp9_filter_block1d_h6_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -113,7 +113,7 @@ sym(vp8_filter_block1d_h6_mmx):
     ret
 
 
-;void vp8_filter_block1dc_v6_mmx
+;void vp9_filter_block1dc_v6_mmx
 ;(
 ;   short *src_ptr,
 ;   unsigned char *output_ptr,
@@ -124,8 +124,8 @@ sym(vp8_filter_block1d_h6_mmx):
 ;   unsigned int output_width,
 ;   short * vp8_filter
 ;)
-global sym(vp8_filter_block1dc_v6_mmx)
-sym(vp8_filter_block1dc_v6_mmx):
+global sym(vp9_filter_block1dc_v6_mmx)
+sym(vp9_filter_block1dc_v6_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 8
@@ -212,8 +212,8 @@ sym(vp8_filter_block1dc_v6_mmx):
 ;   unsigned char *dst_ptr,
 ;    int dst_pitch
 ;)
-global sym(vp8_bilinear_predict8x8_mmx)
-sym(vp8_bilinear_predict8x8_mmx):
+global sym(vp9_bilinear_predict8x8_mmx)
+sym(vp9_bilinear_predict8x8_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -229,7 +229,7 @@ sym(vp8_bilinear_predict8x8_mmx):
         mov         rdi,        arg(4) ;dst_ptr           ;
 
         shl         rax,        5 ; offset * 32
-        lea         rcx,        [GLOBAL(sym(vp8_bilinear_filters_mmx))]
+        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_mmx))]
 
         add         rax,        rcx ; HFilter
         mov         rsi,        arg(0) ;src_ptr              ;
@@ -369,8 +369,8 @@ sym(vp8_bilinear_predict8x8_mmx):
 ;    unsigned char *dst_ptr,
 ;    int dst_pitch
 ;)
-global sym(vp8_bilinear_predict8x4_mmx)
-sym(vp8_bilinear_predict8x4_mmx):
+global sym(vp9_bilinear_predict8x4_mmx)
+sym(vp9_bilinear_predict8x4_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -385,7 +385,7 @@ sym(vp8_bilinear_predict8x4_mmx):
         movsxd      rax,        dword ptr arg(2) ;xoffset
         mov         rdi,        arg(4) ;dst_ptr           ;
 
-        lea         rcx,        [GLOBAL(sym(vp8_bilinear_filters_mmx))]
+        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_mmx))]
         shl         rax,        5
 
         mov         rsi,        arg(0) ;src_ptr              ;
@@ -524,8 +524,8 @@ sym(vp8_bilinear_predict8x4_mmx):
 ;    unsigned char *dst_ptr,
 ;    int dst_pitch
 ;)
-global sym(vp8_bilinear_predict4x4_mmx)
-sym(vp8_bilinear_predict4x4_mmx):
+global sym(vp9_bilinear_predict4x4_mmx)
+sym(vp9_bilinear_predict4x4_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -540,7 +540,7 @@ sym(vp8_bilinear_predict4x4_mmx):
         movsxd      rax,        dword ptr arg(2) ;xoffset
         mov         rdi,        arg(4) ;dst_ptr           ;
 
-        lea         rcx,        [GLOBAL(sym(vp8_bilinear_filters_mmx))]
+        lea         rcx,        [GLOBAL(sym(vp9_bilinear_filters_mmx))]
         shl         rax,        5
 
         add         rax,        rcx ; HFilter
@@ -640,8 +640,8 @@ rd:
     times 4 dw 0x40
 
 align 16
-global HIDDEN_DATA(sym(vp8_six_tap_mmx))
-sym(vp8_six_tap_mmx):
+global HIDDEN_DATA(sym(vp9_six_tap_mmx))
+sym(vp9_six_tap_mmx):
     times 8 dw 0
     times 8 dw 0
     times 8 dw 128
@@ -700,8 +700,8 @@ sym(vp8_six_tap_mmx):
 
 
 align 16
-global HIDDEN_DATA(sym(vp8_bilinear_filters_mmx))
-sym(vp8_bilinear_filters_mmx):
+global HIDDEN_DATA(sym(vp9_bilinear_filters_mmx))
+sym(vp9_bilinear_filters_mmx):
     times 8 dw 128
     times 8 dw 0
 

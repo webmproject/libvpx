@@ -52,8 +52,8 @@ typedef const struct vp8_token_struct {
 
 /* Construct encoding array from tree. */
 
-void vp8_tokens_from_tree(struct vp8_token_struct *, vp8_tree);
-void vp8_tokens_from_tree_offset(struct vp8_token_struct *, vp8_tree,
+void vp9_tokens_from_tree(struct vp8_token_struct *, vp8_tree);
+void vp9_tokens_from_tree_offset(struct vp8_token_struct *, vp8_tree,
                                  int offset);
 
 
@@ -62,7 +62,7 @@ void vp8_tokens_from_tree_offset(struct vp8_token_struct *, vp8_tree,
    taken for each node on the tree; this facilitiates decisions as to
    probability updates. */
 
-void vp8_tree_probs_from_distribution(
+void vp9_tree_probs_from_distribution(
   int n,                      /* n = size of alphabet */
   vp8_token tok               [ /* n */ ],
   vp8_tree tree,
@@ -85,6 +85,6 @@ void vp8bc_tree_probs_from_distribution(
   c_bool_coder_spec *s
 );
 
-vp8_prob vp8_bin_prob_from_distribution(const unsigned int counts[2]);
+vp8_prob vp9_bin_prob_from_distribution(const unsigned int counts[2]);
 
 #endif
