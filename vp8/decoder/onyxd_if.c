@@ -281,13 +281,15 @@ static int swap_frame_buffers (VP8_COMMON *cm)
     return err;
 }
 
-int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsigned char *source, int64_t time_stamp)
+int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
+                                  const uint8_t *source,
+                                  int64_t time_stamp)
 {
 #if HAVE_NEON
     int64_t dx_store_reg[8];
 #endif
     VP8_COMMON *cm = &pbi->common;
-    int retcode = 0;
+    int retcode = -1;
 
     pbi->common.error.error_code = VPX_CODEC_OK;
 
@@ -383,18 +385,6 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
 
     if (setjmp(pbi->common.error.jmp))
     {
-#if HAVE_NEON
-#if CONFIG_RUNTIME_CPU_DETECT
-        if (cm->cpu_caps & HAS_NEON)
-#endif
-        {
-            vp8_pop_neon(dx_store_reg);
-        }
-#endif
-        pbi->common.error.setjmp = 0;
-
-        pbi->num_fragments = 0;
-
        /* We do not know if the missing frame(s) was supposed to update
         * any of the reference buffers, but we act conservative and
         * mark only the last buffer as corrupted.
@@ -403,7 +393,8 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
 
         if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
           cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
-        return -1;
+
+        goto decode_exit;
     }
 
     pbi->common.error.setjmp = 1;
@@ -412,58 +403,17 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
 
     if (retcode < 0)
     {
-#if HAVE_NEON
-#if CONFIG_RUNTIME_CPU_DETECT
-        if (cm->cpu_caps & HAS_NEON)
-#endif
-        {
-            vp8_pop_neon(dx_store_reg);
-        }
-#endif
-        pbi->common.error.error_code = VPX_CODEC_ERROR;
-        pbi->common.error.setjmp = 0;
-        pbi->num_fragments = 0;
         if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
           cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
-        return retcode;
+
+        pbi->common.error.error_code = VPX_CODEC_ERROR;
+        goto decode_exit;
     }
 
-#if CONFIG_MULTITHREAD
-    if (pbi->b_multithreaded_rd && cm->multi_token_partition != ONE_PARTITION)
+    if (swap_frame_buffers (cm))
     {
-        if (swap_frame_buffers (cm))
-        {
-#if HAVE_NEON
-#if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->cpu_caps & HAS_NEON)
-#endif
-            {
-                vp8_pop_neon(dx_store_reg);
-            }
-#endif
-            pbi->common.error.error_code = VPX_CODEC_ERROR;
-            pbi->common.error.setjmp = 0;
-            pbi->num_fragments = 0;
-            return -1;
-        }
-    } else
-#endif
-    {
-        if (swap_frame_buffers (cm))
-        {
-#if HAVE_NEON
-#if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->cpu_caps & HAS_NEON)
-#endif
-            {
-                vp8_pop_neon(dx_store_reg);
-            }
-#endif
-            pbi->common.error.error_code = VPX_CODEC_ERROR;
-            pbi->common.error.setjmp = 0;
-            pbi->num_fragments = 0;
-            return -1;
-        }
+        pbi->common.error.error_code = VPX_CODEC_ERROR;
+        goto decode_exit;
     }
 
     vp8_clear_system_state();
@@ -490,16 +440,13 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
     }
 #endif
 
-    /*vp8_print_modes_and_motion_vectors( cm->mi, cm->mb_rows,cm->mb_cols, cm->current_video_frame);*/
-
     if (cm->show_frame)
         cm->current_video_frame++;
 
     pbi->ready_for_new_data = 0;
     pbi->last_time_stamp = time_stamp;
-    pbi->num_fragments = 0;
 
-
+decode_exit:
 #if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
     if (cm->cpu_caps & HAS_NEON)
@@ -508,7 +455,9 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
         vp8_pop_neon(dx_store_reg);
     }
 #endif
+
     pbi->common.error.setjmp = 0;
+    pbi->num_fragments = 0;
     return retcode;
 }
 int vp8dx_get_raw_frame(VP8D_COMP *pbi, YV12_BUFFER_CONFIG *sd, int64_t *time_stamp, int64_t *time_end_stamp, vp8_ppflags_t *flags)
