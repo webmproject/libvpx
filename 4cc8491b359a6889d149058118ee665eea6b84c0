@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//7eo\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-01T00:26:05Z",
+      "side": 1,
+      "message": "local functions should be marked with \"static\".",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7dQ\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-01T00:26:05Z",
+      "side": 1,
+      "message": "Local functions should be marked with \"static\".",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7dg\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-01T00:26:05Z",
+      "side": 1,
+      "message": "This can overflow if max_length\u003d\u003d0.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7d0\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-01T00:26:05Z",
+      "side": 1,
+      "message": "data_size - offset.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7dk\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-01T00:26:05Z",
+      "side": 1,
+      "message": "data_sz - offset. This loops until there\u0027s a control byte of 0, why not make this a do{}while loop?\n\nint control_byte;\ndo {\n  control_byte \u003d ..;\n  ..\n} while (control_byte \u0026 1);\n\nThen you don\u0027t need duplicate code within and outside the loop.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7dU\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-01T00:26:05Z",
+      "side": 1,
+      "message": "So, why would the last (non-altref) packet need a length-field? Don\u0027t we already know the length through data_sz - offset? Same goes for the encoder. This means you don\u0027t need a length field for the common case of a single P-frame, meaning much less overhead.\n\nYou also need error-checking here to make sure the frame length for each alt-ref frame isn\u0027t greater than data_sz, that would lead to overflows \u003d security bugs.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
