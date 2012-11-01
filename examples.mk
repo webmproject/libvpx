@@ -81,13 +81,13 @@ GEN_EXAMPLES-$(CONFIG_ENCODERS) += error_resilient.c
 error_resilient.GUID             = DF5837B9-4145-4F92-A031-44E4F832E00C
 error_resilient.DESCRIPTION      = Error Resiliency Feature
 
-GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += vp8_scalable_patterns.c
+GEN_EXAMPLES-$(CONFIG_VP9_ENCODER) += vp8_scalable_patterns.c
 vp8_scalable_patterns.GUID          = 0D6A210B-F482-4D6F-8570-4A9C01ACC88C
 vp8_scalable_patterns.DESCRIPTION   = VP8 Scalable Bitstream Patterns
-GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += vp8_set_maps.c
+GEN_EXAMPLES-$(CONFIG_VP9_ENCODER) += vp8_set_maps.c
 vp8_set_maps.GUID                   = ECB2D24D-98B8-4015-A465-A4AF3DCC145F
 vp8_set_maps.DESCRIPTION            = VP8 set active and ROI maps
-GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += vp8cx_set_ref.c
+GEN_EXAMPLES-$(CONFIG_VP9_ENCODER) += vp8cx_set_ref.c
 vp8cx_set_ref.GUID                  = C5E31F7F-96F6-48BD-BD3E-10EBF6E8057A
 vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
@@ -97,10 +97,10 @@ vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 # We should not link to math library (libm) on RVCT
 # when building for bare-metal targets
 ifeq ($(CONFIG_OS_SUPPORT), yes)
-CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
+CODEC_EXTRA_LIBS-$(CONFIG_VP9)         += m
 else
     ifeq ($(CONFIG_GCC), yes)
-    CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
+    CODEC_EXTRA_LIBS-$(CONFIG_VP9)         += m
     endif
 endif
 #
@@ -117,8 +117,8 @@ ifeq ($(HAVE_ALT_TREE_LAYOUT),yes)
     INC_PATH := $(SRC_PATH_BARE)/../include
 else
     LIB_PATH-yes                     += $(if $(BUILD_PFX),$(BUILD_PFX),.)
-    INC_PATH-$(CONFIG_VP8_DECODER)   += $(SRC_PATH_BARE)/vp8
-    INC_PATH-$(CONFIG_VP8_ENCODER)   += $(SRC_PATH_BARE)/vp8
+    INC_PATH-$(CONFIG_VP9_DECODER)   += $(SRC_PATH_BARE)/vp9
+    INC_PATH-$(CONFIG_VP9_ENCODER)   += $(SRC_PATH_BARE)/vp9
     LIB_PATH := $(call enabled,LIB_PATH)
     INC_PATH := $(call enabled,INC_PATH)
 endif

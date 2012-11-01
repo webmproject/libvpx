@@ -31,7 +31,7 @@ Advanced options:
   ${toggle_debug_libs}            in/exclude debug version of libraries
   ${toggle_md5}                   support for output of checksum data
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
-  ${toggle_vp8}                   VP8 codec support
+  ${toggle_vp9}                   VP9 codec support
   ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
   ${toggle_mem_tracker}           track memory usage
   ${toggle_postproc}              postprocessing
@@ -161,17 +161,17 @@ enable spatial_resampling
 enable os_support
 
 [ -d ${source_path}/../include ] && enable alt_tree_layout
-for d in vp8; do
+for d in vp9; do
     [ -d ${source_path}/${d} ] && disable alt_tree_layout;
 done
 
 if ! enabled alt_tree_layout; then
 # development environment
-[ -d ${source_path}/vp8 ] && CODECS="${CODECS} vp8_encoder vp8_decoder"
+[ -d ${source_path}/vp9 ] && CODECS="${CODECS} vp9_encoder vp9_decoder"
 else
 # customer environment
-[ -f ${source_path}/../include/vpx/vp8cx.h ] && CODECS="${CODECS} vp8_encoder"
-[ -f ${source_path}/../include/vpx/vp8dx.h ] && CODECS="${CODECS} vp8_decoder"
+[ -f ${source_path}/../include/vpx/vp8cx.h ] && CODECS="${CODECS} vp9_encoder"
+[ -f ${source_path}/../include/vpx/vp8dx.h ] && CODECS="${CODECS} vp9_decoder"
 
 [ -f ${source_path}/../lib/*/*mt.lib ] && soft_enable static_msvcrt
 fi

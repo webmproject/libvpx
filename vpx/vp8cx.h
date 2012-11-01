@@ -20,8 +20,8 @@
  * \brief Provides definitions for using the VP8 encoder algorithm within the
  *        vpx Codec Interface.
  */
-#ifndef VP8CX_H
-#define VP8CX_H
+#ifndef VP9CX_H
+#define VP9CX_H
 #include "vpx_config.h"
 #include "vpx_codec_impl_top.h"
 

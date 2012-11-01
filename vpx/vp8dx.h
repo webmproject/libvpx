@@ -20,8 +20,8 @@
  * \brief Provides definitions for using the VP8 algorithm within the vpx Decoder
  *        interface.
  */
-#ifndef VP8DX_H
-#define VP8DX_H
+#ifndef VP9DX_H
+#define VP9DX_H
 #include "vpx_codec_impl_top.h"
 
 /*!\name Algorithm interface for VP8

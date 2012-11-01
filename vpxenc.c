@@ -82,8 +82,8 @@ static const struct {
   unsigned int             fourcc;
   unsigned int             fourcc_mask;
 } ifaces[] = {
-#if CONFIG_VP8_DECODER
-  {"vp8",  &vpx_codec_vp8_dx,   VP8_FOURCC, 0x00FFFFFF},
+#if CONFIG_VP9_DECODER
+  {"vp9",  &vpx_codec_vp8_dx,   VP8_FOURCC, 0x00FFFFFF},
 #endif
 };
 
@@ -93,8 +93,8 @@ static const struct codec_item {
   unsigned int             fourcc;
   unsigned int             fourcc_mask;
 } codecs[] = {
-#if CONFIG_VP8_ENCODER
-  {"vp8",  vpx_codec_vp8x_cx,   VP8_FOURCC, 0x00FFFFFF},
+#if CONFIG_VP9_ENCODER
+  {"vp9",  vpx_codec_vp8x_cx,   VP8_FOURCC, 0x00FFFFFF},
 #endif
 };
 
@@ -1011,7 +1011,7 @@ static const arg_def_t *kf_args[] = {
 };
 
 
-#if CONFIG_VP8_ENCODER
+#if CONFIG_VP9_ENCODER
 static const arg_def_t noise_sens = ARG_DEF(NULL, "noise-sensitivity", 1,
                                             "Noise sensitivity (frames to blur)");
 static const arg_def_t sharpness = ARG_DEF(NULL, "sharpness", 1,
@@ -1020,13 +1020,13 @@ static const arg_def_t static_thresh = ARG_DEF(NULL, "static-thresh", 1,
                                                "Motion detection threshold");
 #endif
 
-#if CONFIG_VP8_ENCODER
+#if CONFIG_VP9_ENCODER
 static const arg_def_t cpu_used = ARG_DEF(NULL, "cpu-used", 1,
                                           "CPU Used (-16..16)");
 #endif
 
 
-#if CONFIG_VP8_ENCODER
+#if CONFIG_VP9_ENCODER
 static const arg_def_t token_parts = ARG_DEF(NULL, "token-parts", 1,
                                              "Number of token partitions to use, log2");
 static const arg_def_t auto_altref = ARG_DEF(NULL, "auto-alt-ref", 1,
@@ -1081,7 +1081,7 @@ static void usage_exit() {
   arg_show_usage(stdout, rc_twopass_args);
   fprintf(stderr, "\nKeyframe Placement Options:\n");
   arg_show_usage(stdout, kf_args);
-#if CONFIG_VP8_ENCODER
+#if CONFIG_VP9_ENCODER
   fprintf(stderr, "\nVP8 Specific Options:\n");
   arg_show_usage(stdout, vp8_args);
 #endif
@@ -1659,7 +1659,7 @@ int main(int argc, const char **argv_) {
 #endif
 
   /* Handle codec specific options */
-#if CONFIG_VP8_ENCODER
+#if CONFIG_VP9_ENCODER
 
   if (codec->fourcc == VP8_FOURCC) {
     ctrl_args = vp8_args;

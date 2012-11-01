@@ -15,8 +15,8 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 extern "C" {
-#include "vp8/encoder/dct.h"
-#include "vp8/common/idct.h"
+#include "vp9/encoder/dct.h"
+#include "vp9/common/idct.h"
 }
 
 #include "acm_random.h"

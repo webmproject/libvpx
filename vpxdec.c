@@ -22,7 +22,7 @@
 #include "vpx_config.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx_ports/vpx_timer.h"
-#if CONFIG_VP8_DECODER
+#if CONFIG_VP9_DECODER
 #include "vpx/vp8dx.h"
 #endif
 #if CONFIG_MD5
@@ -56,8 +56,8 @@ static const struct {
    unsigned int             fourcc;
    unsigned int             fourcc_mask;
 } ifaces[] = {
-#if CONFIG_VP8_DECODER
-  {"vp8",  vpx_codec_vp8_dx,   VP8_FOURCC, 0x00FFFFFF},
+#if CONFIG_VP9_DECODER
+  {"vp9",  vpx_codec_vp8_dx,   VP8_FOURCC, 0x00FFFFFF},
 #endif
 };
 
@@ -104,7 +104,7 @@ static const arg_def_t *all_args[] = {
   NULL
 };
 
-#if CONFIG_VP8_DECODER
+#if CONFIG_VP9_DECODER
 static const arg_def_t addnoise_level = ARG_DEF(NULL, "noise-level", 1,
                                                 "Enable VP8 postproc add noise");
 static const arg_def_t deblock = ARG_DEF(NULL, "deblock", 0,
@@ -135,7 +135,7 @@ static void usage_exit() {
   fprintf(stderr, "Usage: %s <options> filename\n\n"
           "Options:\n", exec_name);
   arg_show_usage(stderr, all_args);
-#if CONFIG_VP8_DECODER
+#if CONFIG_VP9_DECODER
   fprintf(stderr, "\nVP8 Postprocessing Options:\n");
   arg_show_usage(stderr, vp8_pp_args);
 #endif
@@ -684,7 +684,7 @@ int main(int argc, const char **argv_) {
   unsigned int            fps_num;
   void                   *out = NULL;
   vpx_codec_dec_cfg_t     cfg = {0};
-#if CONFIG_VP8_DECODER
+#if CONFIG_VP9_DECODER
   vp8_postproc_cfg_t      vp8_pp_cfg = {0};
   int                     vp8_dbg_color_ref_frame = 0;
   int                     vp8_dbg_color_mb_modes = 0;
@@ -744,7 +744,7 @@ int main(int argc, const char **argv_) {
     else if (arg_match(&arg, &verbosearg, argi))
       quiet = 0;
 
-#if CONFIG_VP8_DECODER
+#if CONFIG_VP9_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
       postproc = 1;
       vp8_pp_cfg.post_proc_flag |= VP8_ADDNOISE;
@@ -909,7 +909,7 @@ int main(int argc, const char **argv_) {
   if (!quiet)
     fprintf(stderr, "%s\n", decoder.name);
 
-#if CONFIG_VP8_DECODER
+#if CONFIG_VP9_DECODER
 
   if (vp8_pp_cfg.post_proc_flag
       && vpx_codec_control(&decoder, VP8_SET_POSTPROC, &vp8_pp_cfg)) {

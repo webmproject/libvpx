@@ -28,8 +28,8 @@
 /*!\file
  * \brief Provides controls common to both the VP8 encoder and decoder.
  */
-#ifndef VP8_H
-#define VP8_H
+#ifndef VP9_H
+#define VP9_H
 #include "vpx_codec_impl_top.h"
 
 /*!\brief Control functions

@@ -21,7 +21,7 @@ CODEC_DOX :=    mainpage.dox \
 		usage_dx.dox \
 
 # Other doxy files sourced in Markdown
-TXT_DOX-$(CONFIG_VP8)          += vp8_api1_migration.dox
+TXT_DOX-$(CONFIG_VP9)          += vp8_api1_migration.dox
 vp8_api1_migration.dox.DESC     = VP8 API 1.x Migration
 
 TXT_DOX = $(call enabled,TXT_DOX)

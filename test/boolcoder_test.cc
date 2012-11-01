@@ -15,8 +15,8 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 extern "C" {
-#include "vp8/encoder/boolhuff.h"
-#include "vp8/decoder/dboolhuff.h"
+#include "vp9/encoder/boolhuff.h"
+#include "vp9/decoder/dboolhuff.h"
 }
 
 #include "acm_random.h"

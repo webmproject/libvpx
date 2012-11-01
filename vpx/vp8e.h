@@ -12,8 +12,8 @@
 /* This file contains backwards compatibility stubs for applications using
  * the VP8 version 1.0 API.
  */
-#ifndef VP8E_H
-#define VP8E_H
+#ifndef VP9E_H
+#define VP9E_H
 #include "vpx_codec_impl_top.h"
 
 #if defined(VPX_CODEC_DISABLE_COMPAT) && VPX_CODEC_DISABLE_COMPAT

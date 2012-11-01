@@ -15,9 +15,9 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 extern "C" {
-#include "vp8/common/entropy.h"
-#include "vp8/common/idct.h"
-#include "vp8/encoder/dct.h"
+#include "vp9/common/entropy.h"
+#include "vp9/common/idct.h"
+#include "vp9/encoder/dct.h"
 }
 
 #include "acm_random.h"
