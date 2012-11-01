@@ -36,6 +36,57 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//7CA\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-01T17:22:25Z",
+      "side": 1,
+      "message": "Is there somewhere we put magic numbers? If not you could add a local const to drive home what 9 is. I.e.\n\nconst size_t MAX_PACKED_FRAME_HEADER \u003d 9;\nunsigned char *data \u003d malloc(*cx_size + MAX_PACKED_FRAME_HEADER);",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7Bo\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-01T17:22:25Z",
+      "side": 1,
+      "message": "you can initialize length and size here.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7Bs\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 591,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-01T17:22:25Z",
+      "side": 1,
+      "message": "I don\u0027t think you need length you can just add offset to cx_size.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//7Is\u003d",
         "filename": "vp8/vp8_cx_iface.c",
         "patchSetId": 6
@@ -47,6 +98,40 @@
       "writtenOn": "2012-11-01T15:48:30Z",
       "side": 1,
       "message": "can\u0027t use static data here, this function needs to be reentrant.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6+Y\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 771,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-01T17:22:25Z",
+      "side": 1,
+      "message": "You could add the check for altref_size here and allocate the total size needed. The pass that memory with offsets into your functions. You should be able to eliminate an allocation and a copy.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6+k\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-01T17:22:25Z",
+      "side": 1,
+      "message": "I think this data may never be freed, but I\u0027m not as familiar with the code.",
       "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -98,6 +183,23 @@
       "writtenOn": "2012-11-01T15:48:30Z",
       "side": 1,
       "message": "validate i before using it value. starting the loop from -1 just to increment to 0 is a little weird, suggest starting from 0 and incrementing at the bottom of the loop.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6+0\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-01T17:22:25Z",
+      "side": 1,
+      "message": "I don\u0027t think you need both altref_ and pkt_ variables. Just name them frame_.",
       "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
