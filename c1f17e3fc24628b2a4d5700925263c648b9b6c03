@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//6r4\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2058,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-01T21:59:07Z",
+      "side": 1,
+      "message": "is reporting a mismatch on every frame that useful? Usually I just put a break statement after line 2050 when I\u0027m debugging these rather than wasting time with further frames. Up to you.\n\nAlso, it\u0027d be helpful if we exited with EXIT_FAILURE if there was a mismatch, so we can detect this from a script.",
+      "revId": "c1f17e3fc24628b2a4d5700925263c648b9b6c03",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
