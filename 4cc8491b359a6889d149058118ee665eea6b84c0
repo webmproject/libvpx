@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAQ3//7Iw\u003d",
+        "filename": ".gitignore",
+        "patchSetId": 6
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-01T15:48:30Z",
+      "side": 1,
+      "message": "This should be in a different commit",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//7eo\u003d",
         "filename": "vp8/vp8_cx_iface.c",
         "patchSetId": 6
@@ -13,6 +30,23 @@
       "writtenOn": "2012-11-01T00:26:05Z",
       "side": 1,
       "message": "local functions should be marked with \"static\".",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7Is\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 669,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-01T15:48:30Z",
+      "side": 1,
+      "message": "can\u0027t use static data here, this function needs to be reentrant.",
       "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -47,6 +81,23 @@
       "writtenOn": "2012-11-01T00:26:05Z",
       "side": 1,
       "message": "This can overflow if max_length\u003d\u003d0.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7II\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-01T15:48:30Z",
+      "side": 1,
+      "message": "validate i before using it value. starting the loop from -1 just to increment to 0 is a little weird, suggest starting from 0 and incrementing at the bottom of the loop.",
       "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -98,6 +149,24 @@
       "writtenOn": "2012-11-01T00:26:05Z",
       "side": 1,
       "message": "So, why would the last (non-altref) packet need a length-field? Don\u0027t we already know the length through data_sz - offset? Same goes for the encoder. This means you don\u0027t need a length field for the common case of a single P-frame, meaning much less overhead.\n\nYou also need error-checking here to make sure the frame length for each alt-ref frame isn\u0027t greater than data_sz, that would lead to overflows \u003d security bugs.",
+      "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//7IA\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-01T15:48:30Z",
+      "side": 1,
+      "message": "There\u0027s been a lot of requests to make the bitstream self framing, and the current implementation gives us that. In any case, I want to move towards a common way of specifying these lengths and offsets, ie, packing frames is just like packing partitions. Even a single p-frame has lengths associated with it.\n\nOn the other hand, there\u0027s an argument for giving up on being self framing (or implement it with a frame start code), and moving these lengths to be appended rather than prepended, since we don\u0027t no a priori what the length of a frame/partition is going to be. I\u0027m not wild about all the memcpy and realloc in the encoder, and while I can think of ways to get around it in the common case, it\u0027s necessary if you want to pack the frames optimally in the packed case.\n\nGoing to give this a little thought, will reply again a little later this AM.",
+      "parentUuid": "AAAAQ3//7dU\u003d",
       "revId": "4cc8491b359a6889d149058118ee665eea6b84c0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
