@@ -12,7 +12,7 @@
 #ifndef __VPXTYPES_H__
 #define __VPXTYPES_H__
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 
 // #include <sys/types.h>
 #ifdef _MSC_VER
@@ -96,11 +96,6 @@ typedef unsigned __int64 vpxu64;
 # define PRId64 "lld"
 # define VPX64 PRId64
 typedef long vpxs64;
-#elif defined(__SYMBIAN32__)
-# undef  PRId64
-# define PRId64 "u"
-# define VPX64 PRId64
-typedef unsigned int vpxs64;
 #else
 # error "64 bit integer type undefined for this platform!"
 #endif

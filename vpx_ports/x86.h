@@ -12,7 +12,7 @@
 #ifndef VPX_PORTS_X86_H
 #define VPX_PORTS_X86_H
 #include <stdlib.h>
-#include "config.h"
+#include "vpx_config.h"
 
 typedef enum {
   VPX_CPU_UNKNOWN = -1,
@@ -48,6 +48,26 @@ typedef enum {
                         "xchg %%edi, %%ebx  \n\t" \
                         : "=a" (ax), "=D" (bx), "=c" (cx), "=d" (dx) \
                         : "a" (func));
+#endif
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+#if ARCH_X86_64
+#define cpuid(func,ax,bx,cx,dx)\
+  asm volatile (\
+                "xchg %rsi, %rbx \n\t" \
+                "cpuid           \n\t" \
+                "movl %ebx, %edi \n\t" \
+                "xchg %rsi, %rbx \n\t" \
+                : "=a" (ax), "=D" (bx), "=c" (cx), "=d" (dx) \
+                : "a"  (func));
+#else
+#define cpuid(func,ax,bx,cx,dx)\
+  asm volatile (\
+                "pushl %ebx       \n\t" \
+                "cpuid            \n\t" \
+                "movl %ebx, %edi  \n\t" \
+                "popl %ebx        \n\t" \
+                : "=a" (ax), "=D" (bx), "=c" (cx), "=d" (dx) \
+                : "a" (func));
 #endif
 #else
 #if ARCH_X86_64
@@ -133,9 +153,13 @@ x86_readtsc(void) {
   unsigned int tsc;
   __asm__ __volatile__("rdtsc\n\t":"=a"(tsc):);
   return tsc;
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+  unsigned int tsc;
+  asm volatile("rdtsc\n\t":"=a"(tsc):);
+  return tsc;
 #else
 #if ARCH_X86_64
-  return __rdtsc();
+  return (unsigned int)__rdtsc();
 #else
   __asm  rdtsc;
 #endif
@@ -146,6 +170,9 @@ x86_readtsc(void) {
 #if defined(__GNUC__) && __GNUC__
 #define x86_pause_hint()\
   __asm__ __volatile__ ("pause \n\t")
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+#define x86_pause_hint()\
+  asm volatile ("pause \n\t")
 #else
 #if ARCH_X86_64
 #define x86_pause_hint()\
@@ -165,6 +192,17 @@ static unsigned short
 x87_get_control_word(void) {
   unsigned short mode;
   __asm__ __volatile__("fstcw %0\n\t":"=m"( *&mode):);
+  return mode;
+}
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+static void
+x87_set_control_word(unsigned short mode) {
+  asm volatile("fldcw %0" : : "m"( *&mode));
+}
+static unsigned short
+x87_get_control_word(void) {
+  unsigned short mode;
+  asm volatile("fstcw %0\n\t":"=m"( *&mode):);
   return mode;
 }
 #elif ARCH_X86_64

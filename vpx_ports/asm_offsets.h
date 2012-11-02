@@ -18,12 +18,12 @@
   static void assert_##name(void) UNUSED;\
   static void assert_##name(void) {switch(0){case 0:case !!(cond):;}}
 
-#if defined(INLINE_ASM) && INLINE_ASM
-#define DEFINE(sym, val) asm("\n" #sym " EQU %0" : : "i" (val));
+#if INLINE_ASM
+#define DEFINE(sym, val) asm("\n" #sym " EQU %0" : : "i" (val))
 #define BEGIN int main(void) {
 #define END return 0; }
 #else
-#define DEFINE(sym, val) int sym = val;
+#define DEFINE(sym, val) const int sym = val
 #define BEGIN
 #define END
 #endif
