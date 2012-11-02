@@ -674,6 +674,38 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi)
     xd->fullpixel_mask = 0xffffffff;
     if(cm->full_pixel)
         xd->fullpixel_mask = 0xfffffff8;
+
+    vp8_zero(x->coef_counts);
+}
+
+static void sum_coef_counts(MACROBLOCK *x, MACROBLOCK *x_thread)
+{
+    int i = 0;
+    do
+    {
+        int j = 0;
+        do
+        {
+            int k = 0;
+            do
+            {
+                /* at every context */
+
+                /* calc probs and branch cts for this frame only */
+                int t = 0;      /* token/prob index */
+
+                do
+                {
+                    x->coef_counts [i][j][k][t] +=
+                        x_thread->coef_counts [i][j][k][t];
+                }
+                while (++t < ENTROPY_NODES);
+            }
+            while (++k < PREV_COEF_CONTEXTS);
+        }
+        while (++j < COEF_BANDS);
+    }
+    while (++i < BLOCK_TYPES);
 }
 
 void vp8_encode_frame(VP8_COMP *cpi)
@@ -731,8 +763,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
     xd->mode_info_context = cm->mi;
 
     vp8_zero(cpi->MVcount);
-
-    vp8_zero(cpi->coef_counts);
 
     vp8cx_frame_init_quantizer(cpi);
 
@@ -838,12 +868,16 @@ void vp8_encode_frame(VP8_COMP *cpi)
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {
                 totalrate += cpi->mb_row_ei[i].totalrate;
+
+                /* add up counts for each thread */
+                sum_coef_counts(x, &cpi->mb_row_ei[i].mb);
             }
 
         }
         else
 #endif
         {
+
             /* for each macroblock row in image */
             for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
             {
@@ -1119,7 +1153,7 @@ int vp8cx_encode_intra_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
 
     sum_intra_stats(cpi, x);
 
-    vp8_tokenize_mb(cpi, &x->e_mbd, t);
+    vp8_tokenize_mb(cpi, x, t);
 
     if (xd->mode_info_context->mbmi.mode != B_PRED)
         vp8_inverse_transform_mby(xd);
@@ -1305,7 +1339,7 @@ int vp8cx_encode_inter_macroblock
 
     if (!x->skip)
     {
-        vp8_tokenize_mb(cpi, xd, t);
+        vp8_tokenize_mb(cpi, x, t);
 
         if (xd->mode_info_context->mbmi.mode != B_PRED)
             vp8_inverse_transform_mby(xd);

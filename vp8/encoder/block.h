@@ -127,6 +127,7 @@ typedef struct macroblock
     unsigned char need_to_clamp_best_mvs;
 #endif
 
+    unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 
 
     void (*short_fdct4x4)(short *input, short *output, int pitch);

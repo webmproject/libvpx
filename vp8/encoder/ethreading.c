@@ -471,6 +471,8 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mbd->fullpixel_mask = 0xffffffff;
         if(cm->full_pixel)
             mbd->fullpixel_mask = 0xfffffff8;
+
+        vp8_zero(mb->coef_counts);
     }
 }
 

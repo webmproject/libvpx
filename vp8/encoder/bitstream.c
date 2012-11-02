@@ -851,6 +851,7 @@ static int prob_update_savings(const unsigned int *ct,
 
 static int independent_coef_context_savings(VP8_COMP *cpi)
 {
+    MACROBLOCK *const x = & cpi->mb;
     int savings = 0;
     int i = 0;
     do
@@ -867,7 +868,7 @@ static int independent_coef_context_savings(VP8_COMP *cpi)
              */
 
             probs = (const unsigned int (*)[MAX_ENTROPY_TOKENS])
-                                                    cpi->coef_counts[i][j];
+                x->coef_counts[i][j];
 
             /* Reset to default probabilities at key frames */
             if (cpi->common.frame_type == KEY_FRAME)
@@ -926,6 +927,7 @@ static int independent_coef_context_savings(VP8_COMP *cpi)
 
 static int default_coef_context_savings(VP8_COMP *cpi)
 {
+    MACROBLOCK *const x = & cpi->mb;
     int savings = 0;
     int i = 0;
     do
@@ -945,7 +947,7 @@ static int default_coef_context_savings(VP8_COMP *cpi)
                     MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                     cpi->frame_coef_probs [i][j][k],
                     cpi->frame_branch_ct [i][j][k],
-                    cpi->coef_counts [i][j][k],
+                    x->coef_counts [i][j][k],
                     256, 1
                 );
 
