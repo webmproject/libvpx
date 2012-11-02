@@ -14,7 +14,7 @@
 void vp9_dequant_dc_idct_add_y_block_c(short *q, short *dq,
                                        unsigned char *pre,
                                        unsigned char *dst,
-                                       int stride, char *eobs,
+                                       int stride, unsigned short *eobs,
                                        short *dc) {
   int i, j;
 
@@ -39,7 +39,7 @@ void vp9_dequant_dc_idct_add_y_block_c(short *q, short *dq,
 void vp9_dequant_idct_add_y_block_c(short *q, short *dq,
                                     unsigned char *pre,
                                     unsigned char *dst,
-                                    int stride, char *eobs) {
+                                    int stride, unsigned short *eobs) {
   int i, j;
 
   for (i = 0; i < 4; i++) {
@@ -63,7 +63,7 @@ void vp9_dequant_idct_add_y_block_c(short *q, short *dq,
 
 void vp9_dequant_idct_add_uv_block_c(short *q, short *dq, unsigned char *pre,
                                      unsigned char *dstu, unsigned char *dstv,
-                                     int stride, char *eobs) {
+                                     int stride, unsigned short *eobs) {
   int i, j;
 
   for (i = 0; i < 2; i++) {
@@ -107,7 +107,8 @@ void vp9_dequant_idct_add_uv_block_c(short *q, short *dq, unsigned char *pre,
 void vp9_dequant_dc_idct_add_y_block_8x8_c(short *q, short *dq,
                                            unsigned char *pre,
                                            unsigned char *dst,
-                                           int stride, char *eobs, short *dc,
+                                           int stride, unsigned short *eobs,
+                                           short *dc,
                                            MACROBLOCKD *xd) {
   vp9_dequant_dc_idct_add_8x8_c(q, dq, pre, dst, 16, stride, dc[0]);
   vp9_dequant_dc_idct_add_8x8_c(&q[64], dq, pre + 8, dst + 8, 16, stride, dc[1]);
@@ -120,7 +121,8 @@ void vp9_dequant_dc_idct_add_y_block_8x8_c(short *q, short *dq,
 #if CONFIG_SUPERBLOCKS
 void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(short *q, short *dq,
                                                    unsigned char *dst,
-                                                   int stride, char *eobs,
+                                                   int stride,
+                                                   unsigned short *eobs,
                                                    short *dc, MACROBLOCKD *xd) {
   vp9_dequant_dc_idct_add_8x8_c(q, dq, dst, dst, stride, stride, dc[0]);
   vp9_dequant_dc_idct_add_8x8_c(&q[64], dq, dst + 8,
@@ -135,7 +137,7 @@ void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(short *q, short *dq,
 void vp9_dequant_idct_add_y_block_8x8_c(short *q, short *dq,
                                         unsigned char *pre,
                                         unsigned char *dst,
-                                        int stride, char *eobs,
+                                        int stride, unsigned short *eobs,
                                         MACROBLOCKD *xd) {
   unsigned char *origdest = dst;
   unsigned char *origpred = pre;
@@ -153,7 +155,7 @@ void vp9_dequant_idct_add_uv_block_8x8_c(short *q, short *dq,
                                          unsigned char *pre,
                                          unsigned char *dstu,
                                          unsigned char *dstv,
-                                         int stride, char *eobs,
+                                         int stride, unsigned short *eobs,
                                          MACROBLOCKD *xd) {
   vp9_dequant_idct_add_8x8_c(q, dq, pre, dstu, 8, stride);
 
@@ -167,7 +169,8 @@ void vp9_dequant_idct_add_uv_block_8x8_c(short *q, short *dq,
 void vp9_dequant_idct_add_uv_block_8x8_inplace_c(short *q, short *dq,
                                                  unsigned char *dstu,
                                                  unsigned char *dstv,
-                                                 int stride, char *eobs,
+                                                 int stride,
+                                                 unsigned short *eobs,
                                                  MACROBLOCKD *xd) {
   vp9_dequant_idct_add_8x8_c(q, dq, dstu, dstu, stride, stride);
 
@@ -181,7 +184,8 @@ void vp9_dequant_idct_add_uv_block_8x8_inplace_c(short *q, short *dq,
 void vp9_dequant_dc_idct_add_y_block_lossless_c(short *q, short *dq,
                                                 unsigned char *pre,
                                                 unsigned char *dst,
-                                                int stride, char *eobs,
+                                                int stride,
+                                                unsigned short *eobs,
                                                 short *dc) {
   int i, j;
 
@@ -206,7 +210,7 @@ void vp9_dequant_dc_idct_add_y_block_lossless_c(short *q, short *dq,
 void vp9_dequant_idct_add_y_block_lossless_c(short *q, short *dq,
                                              unsigned char *pre,
                                              unsigned char *dst,
-                                             int stride, char *eobs) {
+                                             int stride, unsigned short *eobs) {
   int i, j;
 
   for (i = 0; i < 4; i++) {
@@ -232,7 +236,8 @@ void vp9_dequant_idct_add_uv_block_lossless_c(short *q, short *dq,
                                               unsigned char *pre,
                                               unsigned char *dstu,
                                               unsigned char *dstv,
-                                              int stride, char *eobs) {
+                                              int stride,
+                                              unsigned short *eobs) {
   int i, j;
 
   for (i = 0; i < 2; i++) {
