@@ -21,6 +21,7 @@ all: .DEFAULT
 clean:: .DEFAULT
 install:: .DEFAULT
 test:: .DEFAULT
+testdata:: .DEFAULT
 
 
 # Note: md5sum is not installed on OS X, but openssl is. Openssl may not be
@@ -66,6 +67,7 @@ endif
 BUILD_ROOT?=.
 VPATH=$(SRC_PATH_BARE)
 CFLAGS+=-I$(BUILD_PFX)$(BUILD_ROOT) -I$(SRC_PATH)
+CXXFLAGS+=-I$(BUILD_PFX)$(BUILD_ROOT) -I$(SRC_PATH)
 ASFLAGS+=-I$(BUILD_PFX)$(BUILD_ROOT)/ -I$(SRC_PATH)/
 DIST_DIR?=dist
 HOSTCC?=gcc
@@ -98,6 +100,8 @@ dist:
 install::
 .PHONY: test
 test::
+.PHONY: testdata
+testdata::
 
 $(BUILD_PFX)%.c.d: %.c
 	$(if $(quiet),@echo "    [DEP] $@")
@@ -111,11 +115,11 @@ $(BUILD_PFX)%.c.o: %.c
 $(BUILD_PFX)%.cc.d: %.cc
 	$(if $(quiet),@echo "    [DEP] $@")
 	$(qexec)mkdir -p $(dir $@)
-	$(qexec)g++ $(INTERNAL_CFLAGS) $(CFLAGS) -M $< | $(fmt_deps) > $@
+	$(qexec)$(CXX) $(INTERNAL_CFLAGS) $(CXXFLAGS) -M $< | $(fmt_deps) > $@
 
 $(BUILD_PFX)%.cc.o: %.cc
 	$(if $(quiet),@echo "    [CXX] $@")
-	$(qexec)g++ $(INTERNAL_CFLAGS) $(CFLAGS) -c -o $@ $<
+	$(qexec)$(CXX) $(INTERNAL_CFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD_PFX)%.asm.d: %.asm
 	$(if $(quiet),@echo "    [DEP] $@")
@@ -213,7 +217,7 @@ define linkerxx_template
 $(1): $(filter-out -%,$(2))
 $(1):
 	$(if $(quiet),@echo    "    [LD] $$@")
-	$(qexec)g++ $$(strip $$(INTERNAL_LDFLAGS) $$(LDFLAGS) -o $$@ $(2) $(3) $$(extralibs))
+	$(qexec)$$(CXX) $$(strip $$(INTERNAL_LDFLAGS) $$(LDFLAGS) -o $$@ $(2) $(3) $$(extralibs))
 endef
 # make-3.80 has a bug with expanding large input strings to the eval function,
 # which was triggered in some cases by the following component of

@@ -26,11 +26,21 @@ print "\t.equ DO1STROUNDING, 0\n";
 
 while (<STDIN>)
 {
+    undef $comment;
+    undef $line;
+    $comment_char = ";";
+    $comment_sub = "@";
+
+    # Handle comments.
+    if (/$comment_char/)
+    {
+      $comment = "";
+      ($line, $comment) = /(.*?)$comment_char(.*)/;
+      $_ = $line;
+    }
+
     # Load and store alignment
     s/@/,:/g;
-
-    # Comment character
-    s/;/@/g;
 
     # Hexadecimal constants prefaced by 0x
     s/#&/#0x/g;
@@ -61,6 +71,17 @@ while (<STDIN>)
 
     # Convert LTORG to .ltorg
     s/LTORG/.ltorg/g;
+
+    # Convert endfunc to nothing.
+    s/endfunc//ig;
+
+    # Convert FUNCTION to nothing.
+    s/FUNCTION//g;
+    s/function//g;
+
+    s/ENTRY//g;
+    s/MSARMASM/0/g;
+    s/^\s+end\s+$//g;
 
     # Convert IF :DEF:to .if
     # gcc doesn't have the ability to do a conditional
@@ -106,6 +127,7 @@ while (<STDIN>)
     if (s/RN\s+([Rr]\d+|lr)/.req $1/)
     {
         print;
+        print "$comment_sub$comment\n" if defined $comment;
         next;
     }
 
@@ -113,6 +135,9 @@ while (<STDIN>)
     # prepended underscore
     s/EXPORT\s+\|([\$\w]*)\|/.global $1 \n\t.type $1, function/;
     s/IMPORT\s+\|([\$\w]*)\|/.global $1/;
+
+    s/EXPORT\s+([\$\w]*)/.global $1/;
+    s/export\s+([\$\w]*)/.global $1/;
 
     # No vertical bars required; make additional symbol with prepended
     # underscore
@@ -126,15 +151,21 @@ while (<STDIN>)
     # ALIGN directive
     s/ALIGN/.balign/g;
 
-    # Strip ARM
-    s/\sARM/@ ARM/g;
+    # ARM code
+    s/\sARM/.arm/g;
 
-    # Strip REQUIRE8
-    #s/\sREQUIRE8/@ REQUIRE8/g;
-    s/\sREQUIRE8/@ /g;      #EQU cause problem
+    # NEON code
+    s/(vld1.\d+\s+)(q\d+)/$1\{$2\}/g;
+    s/(vtbl.\d+\s+[^,]+),([^,]+)/$1,\{$2\}/g;
 
-    # Strip PRESERVE8
-    s/\sPRESERVE8/@ PRESERVE8/g;
+    # eabi_attributes numerical equivalents can be found in the
+    # "ARM IHI 0045C" document.
+
+    # REQUIRE8 Stack is required to be 8-byte aligned
+    s/\sREQUIRE8/.eabi_attribute 24, 1 \@Tag_ABI_align_needed/g;
+
+    # PRESERVE8 Stack 8-byte align is preserved
+    s/\sPRESERVE8/.eabi_attribute 25, 1 \@Tag_ABI_align_preserved/g;
 
     # Use PROC and ENDP to give the symbols a .size directive.
     # This makes them show up properly in debugging tools like gdb and valgrind.
@@ -155,7 +186,7 @@ while (<STDIN>)
     }
 
     # EQU directive
-    s/(.*)EQU(.*)/.equ $1, $2/;
+    s/(\S+\s+)EQU(\s+\S+)/.equ $1, $2/;
 
     # Begin macro definition
     if (/MACRO/) {
@@ -170,6 +201,7 @@ while (<STDIN>)
     s/MEND/.endm/;              # No need to tell it where to stop assembling
     next if /^\s*END\s*$/;
     print;
+    print "$comment_sub$comment\n" if defined $comment;
 }
 
 # Mark that this object doesn't need an executable stack.
