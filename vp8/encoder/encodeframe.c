@@ -1093,15 +1093,16 @@ static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x )
 #endif
 }
 
-int vp8cx_encode_intra_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
+int vp8cx_encode_intra_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
+                                  TOKENEXTRA **t)
 {
     MACROBLOCKD *xd = &x->e_mbd;
     int rate;
 
     if (cpi->sf.RD && cpi->compressor_speed != 2)
-        vp8_rd_pick_intra_mode(cpi, x, &rate);
+        vp8_rd_pick_intra_mode(x, &rate);
     else
-        vp8_pick_intra_mode(cpi, x, &rate);
+        vp8_pick_intra_mode(x, &rate);
 
     if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
     {

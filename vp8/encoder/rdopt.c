@@ -625,7 +625,6 @@ static void copy_predictor(unsigned char *dst, const unsigned char *predictor)
     d[12] = p[12];
 }
 static int rd_pick_intra4x4block(
-    VP8_COMP *cpi,
     MACROBLOCK *x,
     BLOCK *be,
     BLOCKD *b,
@@ -701,7 +700,7 @@ static int rd_pick_intra4x4block(
     return best_rd;
 }
 
-static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
+static int rd_pick_intra4x4mby_modes(MACROBLOCK *mb, int *Rate,
                                      int *rate_y, int *Distortion, int best_rd)
 {
     MACROBLOCKD *const xd = &mb->e_mbd;
@@ -741,7 +740,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
         }
 
         total_rd += rd_pick_intra4x4block(
-            cpi, mb, mb->block + i, xd->block + i, &best_mode, bmode_costs,
+            mb, mb->block + i, xd->block + i, &best_mode, bmode_costs,
             ta + vp8_block2above[i],
             tl + vp8_block2left[i], &r, &ry, &d);
 
@@ -766,8 +765,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
 }
 
 
-static int rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
-                                      MACROBLOCK *x,
+static int rd_pick_intra16x16mby_mode(MACROBLOCK *x,
                                       int *Rate,
                                       int *rate_y,
                                       int *Distortion)
@@ -869,7 +867,8 @@ static int rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
     return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
 
-static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *rate_tokenonly, int *distortion)
+static void rd_pick_intra_mbuv_mode(MACROBLOCK *x, int *rate,
+                                    int *rate_tokenonly, int *distortion)
 {
     MB_PREDICTION_MODE mode;
     MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
@@ -2120,7 +2119,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
         if(!uv_intra_done && this_ref_frame == INTRA_FRAME)
         {
-            rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate,
+            rd_pick_intra_mbuv_mode(x, &uv_intra_rate,
                                     &uv_intra_rate_tokenonly,
                                     &uv_intra_distortion);
             uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
@@ -2146,7 +2145,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
              * coding the BPRED mode: x->mbmode_cost[x->e_mbd.frame_type][BPRED]
              */
             int distortion;
-            tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rd.rate_y, &distortion, best_mode.yrd);
+            tmp_rd = rd_pick_intra4x4mby_modes(x, &rate, &rd.rate_y, &distortion, best_mode.yrd);
             rd.rate2 += rate;
             rd.distortion2 += distortion;
 
@@ -2595,7 +2594,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     rd_update_mvcount(cpi, x, &best_ref_mv);
 }
 
-void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
+void vp8_rd_pick_intra_mode(MACROBLOCK *x, int *rate_)
 {
     int error4x4, error16x16;
     int rate4x4, rate16x16 = 0, rateuv;
@@ -2607,15 +2606,13 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
-    rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
+    rd_pick_intra_mbuv_mode(x, &rateuv, &rateuv_tokenonly, &distuv);
     rate = rateuv;
 
-    error16x16 = rd_pick_intra16x16mby_mode(cpi, x,
-                                            &rate16x16, &rate16x16_tokenonly,
+    error16x16 = rd_pick_intra16x16mby_mode(x, &rate16x16, &rate16x16_tokenonly,
                                             &dist16x16);
 
-    error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
-                                         &rate4x4, &rate4x4_tokenonly,
+    error4x4 = rd_pick_intra4x4mby_modes(x, &rate4x4, &rate4x4_tokenonly,
                                          &dist4x4, error16x16);
 
     if (error4x4 < error16x16)
