@@ -34,6 +34,24 @@
       "revId": "53031b10d892c30c3f24ab41d790673cbd16f493",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//+RY\u003d",
+        "filename": "vp8/common/loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-02T13:04:21Z",
+      "side": 1,
+      "message": "you can maybe replace the e/f part by:\n\n  k \u003d (a + b + c + d + 2) \u003e\u003e 2\n\nis equivalent to computing:\n\n  k \u003d (e + f + 1) \u003e\u003e1  - ((a^d) | (b^c)) \u0026 (e^f) \u0026 1\n\n where e \u003d (a + d + 1) \u003e\u003e1 and f \u003d (b + c + 1) \u003e\u003e1\n\nThere\u0027s similar bit trickery for 8-points average, but it gets pretty steep on the instruction count...",
+      "parentUuid": "AAAAQ3//+Tw\u003d",
+      "revId": "53031b10d892c30c3f24ab41d790673cbd16f493",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
