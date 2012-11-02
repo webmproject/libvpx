@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//6GE\u003d",
+        "filename": "vp9/common/textblit.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-02T17:27:52Z",
+      "side": 1,
+      "message": "stdlib unneeded here (if it\u0027s needed in textblit.c, put it there, but it doesn\u0027t appear to be)",
+      "revId": "642e66c0887393a234f59ee570c4c4a66c0d5f75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6Fg\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-02T17:27:52Z",
+      "side": 1,
+      "message": "probably want to include vpx_rtcd here, that file should declare the prototypes for functions defined in this file.",
+      "revId": "642e66c0887393a234f59ee570c4c4a66c0d5f75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6Fk\u003d",
+        "filename": "vp9/decoder/dequantize.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-02T17:27:52Z",
+      "side": 1,
+      "message": "_c functions should not be prototyped, they should be included from vpx_rtcd.h",
+      "revId": "642e66c0887393a234f59ee570c4c4a66c0d5f75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6Fc\u003d",
+        "filename": "vp9/decoder/idct_blk.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-02T17:27:52Z",
+      "side": 1,
+      "message": "include vpx_rtcd.h",
+      "revId": "642e66c0887393a234f59ee570c4c4a66c0d5f75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6FE\u003d",
+        "filename": "vp9/encoder/encodeframe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-02T17:27:52Z",
+      "side": 1,
+      "message": "if MACROBLOCK is not an anonymous struct, better to declare these as fn(struct macroblock *x) to avoid including block.h",
+      "revId": "642e66c0887393a234f59ee570c4c4a66c0d5f75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6E8\u003d",
+        "filename": "vp9/encoder/picklpf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-02T17:27:52Z",
+      "side": 1,
+      "message": "better to declare this as struct YV12_BUFFER_CONFIG to avoid including yv12config.h",
+      "revId": "642e66c0887393a234f59ee570c4c4a66c0d5f75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6E0\u003d",
+        "filename": "vp9/encoder/rdopt.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-02T17:27:52Z",
+      "side": 1,
+      "message": "extern",
+      "revId": "642e66c0887393a234f59ee570c4c4a66c0d5f75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//6Es\u003d",
+        "filename": "vp9/encoder/tokenize.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-02T17:27:52Z",
+      "side": 1,
+      "message": "extern, for consistency",
+      "revId": "642e66c0887393a234f59ee570c4c4a66c0d5f75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
