@@ -419,7 +419,7 @@ int vp9_decode_mb_tokens_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
   ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
 
-  char* const eobs = xd->eobs;
+  unsigned short* const eobs = xd->eobs;
   PLANE_TYPE type;
   int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
@@ -482,7 +482,7 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
 
-  char *const eobs = xd->eobs;
+  unsigned short *const eobs = xd->eobs;
   PLANE_TYPE type;
   int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
@@ -576,7 +576,7 @@ int vp9_decode_mb_tokens(VP9D_COMP *dx, MACROBLOCKD *xd,
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
 
-  char *const eobs = xd->eobs;
+  unsigned short *const eobs = xd->eobs;
   const int *scan = vp9_default_zig_zag1d;
   PLANE_TYPE type;
   int c, i, eobtotal = 0, seg_eob = 16;

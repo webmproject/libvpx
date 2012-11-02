@@ -25,17 +25,20 @@ extern void vp9_dequant_dc_idct_add_lossless_c(short *input, short *dq,
 extern void vp9_dequant_dc_idct_add_y_block_lossless_c(short *q, short *dq,
                                                        unsigned char *pre,
                                                        unsigned char *dst,
-                                                       int stride, char *eobs,
+                                                       int stride,
+                                                       unsigned short *eobs,
                                                        short *dc);
 extern void vp9_dequant_idct_add_y_block_lossless_c(short *q, short *dq,
                                                     unsigned char *pre,
                                                     unsigned char *dst,
-                                                    int stride, char *eobs);
+                                                    int stride,
+                                                    unsigned short *eobs);
 extern void vp9_dequant_idct_add_uv_block_lossless_c(short *q, short *dq,
                                                      unsigned char *pre,
                                                      unsigned char *dst_u,
                                                      unsigned char *dst_v,
-                                                     int stride, char *eobs);
+                                                     int stride,
+                                                     unsigned short *eobs);
 #endif
 
 typedef void (*vp9_dequant_idct_add_fn_t)(short *input, short *dq,
@@ -44,12 +47,13 @@ typedef void(*vp9_dequant_dc_idct_add_fn_t)(short *input, short *dq,
     unsigned char *pred, unsigned char *output, int pitch, int stride, int dc);
 
 typedef void(*vp9_dequant_dc_idct_add_y_block_fn_t)(short *q, short *dq,
-    unsigned char *pre, unsigned char *dst, int stride, char *eobs, short *dc);
+    unsigned char *pre, unsigned char *dst, int stride, unsigned short *eobs,
+    short *dc);
 typedef void(*vp9_dequant_idct_add_y_block_fn_t)(short *q, short *dq,
-    unsigned char *pre, unsigned char *dst, int stride, char *eobs);
+    unsigned char *pre, unsigned char *dst, int stride, unsigned short *eobs);
 typedef void(*vp9_dequant_idct_add_uv_block_fn_t)(short *q, short *dq,
     unsigned char *pre, unsigned char *dst_u, unsigned char *dst_v, int stride,
-    char *eobs);
+    unsigned short *eobs);
 
 void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
                                     unsigned char *pred, unsigned char *dest,
@@ -66,12 +70,14 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
 #if CONFIG_SUPERBLOCKS
 void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(short *q, short *dq,
                                                    unsigned char *dst,
-                                                   int stride, char *eobs,
+                                                   int stride,
+                                                   unsigned short *eobs,
                                                    short *dc, MACROBLOCKD *xd);
 void vp9_dequant_idct_add_uv_block_8x8_inplace_c(short *q, short *dq,
                                                  unsigned char *dstu,
                                                  unsigned char *dstv,
-                                                 int stride, char *eobs,
+                                                 int stride,
+                                                 unsigned short *eobs,
                                                  MACROBLOCKD *xd);
 #endif
 
