@@ -14,33 +14,32 @@
 
 #include "vpx_scale/yv12config.h"
 
-typedef struct
-{
-    int in_width;
-    int in_height;
+typedef struct {
+  int in_width;
+  int in_height;
 
-    int out_width;
-    int out_height;
-    int max_usable_out_width;
+  int out_width;
+  int out_height;
+  int max_usable_out_width;
 
-    // numerator for the width and height
-    int nw;
-    int nh;
-    int nh_uv;
+  // numerator for the width and height
+  int nw;
+  int nh;
+  int nh_uv;
 
-    // output to input correspondance array
-    short *l_w;
-    short *l_h;
-    short *l_h_uv;
+  // output to input correspondance array
+  short *l_w;
+  short *l_h;
+  short *l_h_uv;
 
-    // polyphase coefficients
-    short *c_w;
-    short *c_h;
-    short *c_h_uv;
+  // polyphase coefficients
+  short *c_w;
+  short *c_h;
+  short *c_h_uv;
 
-    // buffer for horizontal filtering.
-    unsigned char *hbuf;
-    unsigned char *hbuf_uv;
+  // buffer for horizontal filtering.
+  unsigned char *hbuf;
+  unsigned char *hbuf_uv;
 } BICUBIC_SCALER_STRUCT;
 
 int bicubic_coefficient_setup(int in_width, int in_height, int out_width, int out_height);
