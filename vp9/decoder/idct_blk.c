@@ -8,25 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vpx_ports/config.h"
+#include "vpx_rtcd.h"
 #include "vp9/common/idct.h"
-#include "dequantize.h"
-
-void vp9_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
-                               unsigned char *dest, int pitch, int stride,
-                               int Dc);
-void vp9_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
-                            unsigned char *dest, int pitch, int stride);
-void vp9_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr,
-                            unsigned char *dst_ptr, int pitch, int stride);
-#if CONFIG_LOSSLESS
-void vp9_dequant_idct_add_lossless_c(short *input, short *dq,
-                                     unsigned char *pred, unsigned char *dest,
-                                     int pitch, int stride);
-void vp9_dc_only_idct_add_lossless_c(short input_dc, unsigned char *pred_ptr,
-                                     unsigned char *dst_ptr,
-                                     int pitch, int stride);
-#endif
 
 void vp9_dequant_dc_idct_add_y_block_c(short *q, short *dq,
                                        unsigned char *pre,

@@ -51,9 +51,6 @@
 #define IF_RTCD(x)  NULL
 #endif
 
-extern void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x);
-extern void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x);
-
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
 
 #define INVALID_MV 0x80008000
@@ -388,59 +385,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
         cpi->mb.nmvcost_hp : cpi->mb.nmvcost,
         &cpi->common.fc.nmvc,
         cpi->mb.e_mbd.allow_high_precision_mv, 1, 1);
-  }
-}
-
-void vp9_auto_select_speed(VP9_COMP *cpi) {
-  int milliseconds_for_compress = (int)(1000000 / cpi->oxcf.frame_rate);
-
-  milliseconds_for_compress = milliseconds_for_compress * (16 - cpi->oxcf.cpu_used) / 16;
-
-  /*
-  // this is done during parameter valid check
-  if( cpi->oxcf.cpu_used > 16)
-      cpi->oxcf.cpu_used = 16;
-  if( cpi->oxcf.cpu_used < -16)
-      cpi->oxcf.cpu_used = -16;
-  */
-
-  if (cpi->avg_pick_mode_time < milliseconds_for_compress &&
-      (cpi->avg_encode_time - cpi->avg_pick_mode_time) <
-      milliseconds_for_compress) {
-    if (cpi->avg_pick_mode_time == 0) {
-      cpi->Speed = 4;
-    } else {
-      if (milliseconds_for_compress * 100 < cpi->avg_encode_time * 95) {
-        cpi->Speed          += 2;
-        cpi->avg_pick_mode_time = 0;
-        cpi->avg_encode_time = 0;
-
-        if (cpi->Speed > 16) {
-          cpi->Speed = 16;
-        }
-      }
-
-      if (milliseconds_for_compress * 100 >
-          cpi->avg_encode_time * auto_speed_thresh[cpi->Speed]) {
-        cpi->Speed          -= 1;
-        cpi->avg_pick_mode_time = 0;
-        cpi->avg_encode_time = 0;
-
-        // In real-time mode, cpi->speed is in [4, 16].
-        if (cpi->Speed < 4) {      // if ( cpi->Speed < 0 )
-          cpi->Speed = 4;        // cpi->Speed = 0;
-        }
-      }
-    }
-  } else {
-    cpi->Speed += 4;
-
-    if (cpi->Speed > 16)
-      cpi->Speed = 16;
-
-
-    cpi->avg_pick_mode_time = 0;
-    cpi->avg_encode_time = 0;
   }
 }
 
@@ -3527,10 +3471,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return this_rd;  // if 0, this will be re-calculated by caller
 }
 
-void vp9_rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                            int recon_yoffset, int recon_uvoffset,
-                            int *returnrate, int *returndistortion,
-                            int64_t *returnintra) {
+static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
+                               int recon_yoffset, int recon_uvoffset,
+                               int *returnrate, int *returndistortion,
+                               int64_t *returnintra) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   union b_mode_info best_bmodes[16];
@@ -4834,8 +4778,8 @@ void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
   {
     int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
 
-    vp9_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
-                           &distortion, &intra_error);
+    rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
+                       &distortion, &intra_error);
 
     /* restore cpi->zbin_mode_boost_enabled */
     cpi->zbin_mode_boost_enabled = zbin_mode_boost_enabled;

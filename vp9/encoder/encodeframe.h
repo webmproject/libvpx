@@ -8,11 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_RECONINTRA_H
-#define __INC_RECONINTRA_H
 
-#include "blockd.h"
+#ifndef __INC_ENCODEFRAME_H
+#define __INC_ENCODEFRAME_H
 
-extern void vp9_recon_intra_mbuv(MACROBLOCKD *xd);
+struct macroblock;
 
-#endif  // __INC_RECONINTRA_H
+extern void vp9_build_block_offsets(struct macroblock *x);
+
+extern void vp9_setup_block_ptrs(struct macroblock *x);
+
+#endif  // __INC_ENCODEFRAME_H

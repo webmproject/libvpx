@@ -14,6 +14,7 @@
 #include "vp9/common/reconintra.h"
 #include "vp9/common/reconintra4x4.h"
 #include "vp9/common/reconinter.h"
+#include "vp9/decoder/decodframe.h"
 #include "detokenize.h"
 #include "vp9/common/invtrans.h"
 #include "vp9/common/alloccommon.h"

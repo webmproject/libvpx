@@ -12,6 +12,7 @@
 #include "vpx_ports/config.h"
 #include "vpx_scale/yv12config.h"
 #include "postproc.h"
+#include "vp9/common/textblit.h"
 #include "vpx_scale/vpxscale.h"
 #include "systemdependent.h"
 
@@ -126,10 +127,6 @@ const short vp9_rv[] = {
 };
 
 
-extern void vp9_blit_text(const char *msg, unsigned char *address,
-                          const int pitch);
-extern void vp9_blit_line(int x0, int x1, int y0, int y1,
-                          unsigned char *image, const int pitch);
 /****************************************************************************
  */
 void vp9_post_proc_down_and_across_c(unsigned char *src_ptr,

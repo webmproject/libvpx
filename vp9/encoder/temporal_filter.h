@@ -44,4 +44,8 @@ typedef struct {
 #define TEMPORAL_INVOKE(ctx,fn) vp9_temporal_filter_##fn
 #endif
 
+struct VP9_COMP;
+
+extern void vp9_temporal_filter_prepare_c(struct VP9_COMP *cpi, int distance);
+
 #endif // __INC_TEMPORAL_FILTER_H

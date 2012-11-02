@@ -36,6 +36,7 @@
 #include "vp9/common/pred_common.h"
 #include "vp9/encoder/rdopt.h"
 #include "bitstream.h"
+#include "vp9/encoder/picklpf.h"
 #include "ratectrl.h"
 
 #if CONFIG_NEWBESTREFMV
@@ -58,17 +59,7 @@
 #define RTCD(x) NULL
 #endif
 
-extern void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi);
-
-extern void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val);
-
-extern void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi);
-
 extern void vp9_cmachine_specific_config(VP9_COMP *cpi);
-
-extern void vp9_deblock_frame(YV12_BUFFER_CONFIG *source,
-                              YV12_BUFFER_CONFIG *post,
-                              int filt_lvl, int low_var_thresh, int flag);
 
 extern void print_tree_update_probs();
 
@@ -79,10 +70,6 @@ extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
 extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
                                               YV12_BUFFER_CONFIG *dst_ybc);
 #endif
-
-int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
-
-extern void vp9_temporal_filter_prepare_c(VP9_COMP *cpi, int distance);
 
 static void set_default_lf_deltas(VP9_COMP *cpi);
 

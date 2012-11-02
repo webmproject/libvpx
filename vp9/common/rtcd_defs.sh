@@ -55,6 +55,12 @@ specialize vp9_dequant_idct_add_uv_block_8x8
 prototype void vp9_dequant_idct_add_16x16 "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
 specialize vp9_dequant_idct_add_16x16
 
+prototype void vp9_dequant_idct_add_8x8 "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
+specialize vp9_dequant_idct_add_8x8
+
+prototype void vp9_dequant_dc_idct_add_8x8 "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc"
+specialize vp9_dequant_dc_idct_add_8x8
+
 prototype void vp9_dequant_idct_add "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
 specialize vp9_dequant_idct_add
 

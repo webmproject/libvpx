@@ -10,6 +10,7 @@
 
 
 #include "vpx_ports/config.h"
+#include "vp9/encoder/encodeframe.h"
 #include "encodemb.h"
 #include "encodemv.h"
 #include "vp9/common/common.h"
@@ -27,6 +28,7 @@
 #include "vp9/common/findnearmv.h"
 #include "vp9/common/reconintra.h"
 #include "vp9/common/seg_common.h"
+#include "vp9/encoder/tokenize.h"
 #include "vpx_rtcd.h"
 #include <stdio.h>
 #include <math.h>
@@ -54,35 +56,19 @@ int enc_debug = 0;
 int mb_row_debug, mb_col_debug;
 #endif
 
-extern void vp9_initialize_me_consts(VP9_COMP *cpi, int QIndex);
+static void encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
+                                    TOKENEXTRA **t, int recon_yoffset,
+                                    int recon_uvoffset, int output_enabled);
 
-extern void vp9_auto_select_speed(VP9_COMP *cpi);
+static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
+                                    TOKENEXTRA **t, int recon_yoffset,
+                                    int recon_uvoffset, int mb_col, int mb_row);
 
-int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
-                              int recon_yoffset, int recon_uvoffset,
-                              int *returnrate, int *returndistortion);
+static void encode_intra_macro_block(VP9_COMP *cpi, MACROBLOCK *x,
+                                     TOKENEXTRA **t, int output_enabled);
 
-extern void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
-                                           int recon_yoffset,
-                                           int recon_uvoffset, int *r, int *d);
-
-void vp9_build_block_offsets(MACROBLOCK *x);
-
-void vp9_setup_block_ptrs(MACROBLOCK *x);
-
-void vp9_encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
-                                 int recon_yoffset, int recon_uvoffset,
-                                 int output_enabled);
-
-void vp9_encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
-                                 int recon_yoffset, int recon_uvoffset,
-                                 int mb_col, int mb_row);
-
-void vp9_encode_intra_macro_block(VP9_COMP *cpi, MACROBLOCK *x,
-                                  TOKENEXTRA **t, int output_enabled);
-
-void vp9_encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
-                                  TOKENEXTRA **t, int mb_col);
+static void encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
+                                     TOKENEXTRA **t, int mb_col);
 
 static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
 
@@ -634,7 +620,7 @@ static void pick_mb_modes(VP9_COMP *cpi,
       *totaldist += d;
 
       // Dummy encode, do not do the tokenization
-      vp9_encode_intra_macro_block(cpi, x, tp, 0);
+      encode_intra_macro_block(cpi, x, tp, 0);
       // Note the encoder may have changed the segment_id
 
       // Save the coding context
@@ -661,8 +647,8 @@ static void pick_mb_modes(VP9_COMP *cpi,
       *totaldist += d;
 
       // Dummy encode, do not do the tokenization
-      vp9_encode_inter_macroblock(cpi, x, tp,
-                                  recon_yoffset, recon_uvoffset, 0);
+      encode_inter_macroblock(cpi, x, tp,
+                              recon_yoffset, recon_uvoffset, 0);
 
       seg_id = mbmi->segment_id;
       if (cpi->mb.e_mbd.segmentation_enabled && seg_id == 0) {
@@ -992,10 +978,10 @@ static void encode_sb(VP9_COMP *cpi,
     if (cm->frame_type == KEY_FRAME) {
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb)
-        vp9_encode_intra_super_block(cpi, x, tp, mb_col);
+        encode_intra_super_block(cpi, x, tp, mb_col);
       else
 #endif
-        vp9_encode_intra_macro_block(cpi, x, tp, 1);
+        encode_intra_macro_block(cpi, x, tp, 1);
         // Note the encoder may have changed the segment_id
 
 #ifdef MODE_STATS
@@ -1018,12 +1004,12 @@ static void encode_sb(VP9_COMP *cpi,
 
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb)
-        vp9_encode_inter_superblock(cpi, x, tp, recon_yoffset, recon_uvoffset,
-                                    mb_col, mb_row);
+        encode_inter_superblock(cpi, x, tp, recon_yoffset, recon_uvoffset,
+                                mb_col, mb_row);
       else
 #endif
-        vp9_encode_inter_macroblock(cpi, x, tp,
-                                    recon_yoffset, recon_uvoffset, 1);
+        encode_inter_macroblock(cpi, x, tp,
+                                recon_yoffset, recon_uvoffset, 1);
         // Note the encoder may have changed the segment_id
 
 #ifdef MODE_STATS
@@ -1851,10 +1837,8 @@ static void update_sb_skip_coeff_state(VP9_COMP *cpi,
   }
 }
 
-void vp9_encode_intra_super_block(VP9_COMP *cpi,
-                                  MACROBLOCK *x,
-                                  TOKENEXTRA **t,
-                                  int mb_col) {
+static void encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
+                                     TOKENEXTRA **t, int mb_col) {
   const int output_enabled = 1;
   int n;
   MACROBLOCKD *xd = &x->e_mbd;
@@ -1931,10 +1915,8 @@ void vp9_encode_intra_super_block(VP9_COMP *cpi,
 }
 #endif /* CONFIG_SUPERBLOCKS */
 
-void vp9_encode_intra_macro_block(VP9_COMP *cpi,
-                                  MACROBLOCK *x,
-                                  TOKENEXTRA **t,
-                                  int output_enabled) {
+static void encode_intra_macro_block(VP9_COMP *cpi, MACROBLOCK *x,
+                                     TOKENEXTRA **t, int output_enabled) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   if ((cpi->oxcf.tuning == VP8_TUNE_SSIM) && output_enabled) {
     adjust_act_zbin(cpi, x);
@@ -1984,11 +1966,9 @@ void vp9_encode_intra_macro_block(VP9_COMP *cpi,
 #endif
 }
 
-extern void vp9_fix_contexts(MACROBLOCKD *xd);
-
-void vp9_encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
-                                 TOKENEXTRA **t, int recon_yoffset,
-                                 int recon_uvoffset, int output_enabled) {
+static void encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
+                                    TOKENEXTRA **t, int recon_yoffset,
+                                    int recon_uvoffset, int output_enabled) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
@@ -2172,9 +2152,10 @@ void vp9_encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 #if CONFIG_SUPERBLOCKS
-void vp9_encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
-                                 int recon_yoffset, int recon_uvoffset,
-                                 int mb_col, int mb_row) {
+static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
+                                    TOKENEXTRA **t, int recon_yoffset,
+                                    int recon_uvoffset,
+                                    int mb_col, int mb_row) {
   const int output_enabled = 1;
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;

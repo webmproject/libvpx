@@ -764,10 +764,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
 void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x);
 
-void vp9_tokenize_mb(VP9_COMP *, MACROBLOCKD *, TOKENEXTRA **, int dry_run);
-void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
-
 void vp9_set_speed_features(VP9_COMP *cpi);
+
+extern int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source,
+                           YV12_BUFFER_CONFIG *dest);
+
+extern void vp9_alloc_compressor_data(VP9_COMP *cpi);
 
 #if CONFIG_DEBUG
 #define CHECK_MEM_ERROR(lval,expr) do {\

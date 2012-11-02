@@ -8,11 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_RECONINTRA_H
-#define __INC_RECONINTRA_H
 
-#include "blockd.h"
+#ifndef __INC_DECODFRAME_H
+#define __INC_DECODFRAME_H
 
-extern void vp9_recon_intra_mbuv(MACROBLOCKD *xd);
+struct VP9Decompressor;
 
-#endif  // __INC_RECONINTRA_H
+extern void vp9_init_de_quantizer(struct VP9Decompressor *pbi);
+
+#endif  // __INC_DECODFRAME_H
