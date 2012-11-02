@@ -27,7 +27,7 @@ DEFINE(yv12_buffer_config_y_buffer,             offsetof(YV12_BUFFER_CONFIG, y_b
 DEFINE(yv12_buffer_config_u_buffer,             offsetof(YV12_BUFFER_CONFIG, u_buffer));
 DEFINE(yv12_buffer_config_v_buffer,             offsetof(YV12_BUFFER_CONFIG, v_buffer));
 DEFINE(yv12_buffer_config_border,               offsetof(YV12_BUFFER_CONFIG, border));
-DEFINE(VP8BORDERINPIXELS_VAL,                   VP8BORDERINPIXELS);
+DEFINE(VP9BORDERINPIXELS_VAL,                   VP9BORDERINPIXELS);
 
 END
 
@@ -36,5 +36,5 @@ END
 
 #if HAVE_ARMV7
 /* vp8_yv12_extend_frame_borders_neon makes several assumptions based on this */
-ct_assert(VP8BORDERINPIXELS_VAL, VP8BORDERINPIXELS == 32)
+ct_assert(VP9BORDERINPIXELS_VAL, VP9BORDERINPIXELS == 32)
 #endif

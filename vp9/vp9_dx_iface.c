@@ -282,7 +282,7 @@ static void yuvconfig2image(vpx_image_t               *img,
   img->fmt = yv12->clrtype == REG_YUV ?
              VPX_IMG_FMT_I420 : VPX_IMG_FMT_VPXI420;
   img->w = yv12->y_stride;
-  img->h = (yv12->y_height + 2 * VP8BORDERINPIXELS + 15) & ~15;
+  img->h = (yv12->y_height + 2 * VP9BORDERINPIXELS + 15) & ~15;
   img->d_w = yv12->y_width;
   img->d_h = yv12->y_height;
   img->x_chroma_shift = 1;

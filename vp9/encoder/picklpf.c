@@ -13,7 +13,6 @@
 #include "onyx_int.h"
 #include "quantize.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_scale/yv12extend.h"
 #include "vpx_scale/vpxscale.h"
 #include "vp9/common/alloccommon.h"
 #include "vp9/common/loopfilter.h"
@@ -279,7 +278,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
 #endif
 #if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
   {
-    vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cpi->last_frame_uf);
+    vp8_yv12_copy_frame(cm->frame_to_show, &cpi->last_frame_uf);
   }
 #endif
 
@@ -320,7 +319,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
 #endif
 #if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
   {
-    vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+    vp8_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
   }
 #endif
 
@@ -359,7 +358,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
 #endif
 #if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
       {
-        vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+        vp8_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
       }
 #endif
 
@@ -394,7 +393,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
 #endif
 #if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
       {
-        vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+        vp8_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
       }
 #endif
 

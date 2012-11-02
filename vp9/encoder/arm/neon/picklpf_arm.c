@@ -13,7 +13,6 @@
 #include "vp9/encoder/onyx_int.h"
 #include "vp9/encoder/quantize.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_scale/yv12extend.h"
 #include "vpx_scale/vpxscale.h"
 #include "vp9/common/alloccommon.h"
 

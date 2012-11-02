@@ -12,7 +12,6 @@
 #include "vpx_ports/config.h"
 #include "vpx_scale/yv12config.h"
 #include "postproc.h"
-#include "vpx_scale/yv12extend.h"
 #include "vpx_scale/vpxscale.h"
 #include "systemdependent.h"
 
@@ -667,7 +666,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
     vp9_deblock(oci->frame_to_show, &oci->post_proc_buffer,
                 q, 1, 0, RTCD_VTABLE(oci));
   } else {
-    vp8_yv12_copy_frame_ptr(oci->frame_to_show, &oci->post_proc_buffer);
+    vp8_yv12_copy_frame(oci->frame_to_show, &oci->post_proc_buffer);
   }
 
   if (flags & VP9D_ADDNOISE) {

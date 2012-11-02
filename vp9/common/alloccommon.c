@@ -81,7 +81,8 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   for (i = 0; i < NUM_YV12_BUFFERS; i++) {
     oci->fb_idx_ref_cnt[i] = 0;
     oci->yv12_fb[i].flags = 0;
-    if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i], width, height, VP8BORDERINPIXELS) < 0) {
+    if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i], width, height,
+                                    VP9BORDERINPIXELS) < 0) {
       vp9_de_alloc_frame_buffers(oci);
       return 1;
     }
@@ -97,12 +98,14 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   oci->fb_idx_ref_cnt[2] = 1;
   oci->fb_idx_ref_cnt[3] = 1;
 
-  if (vp8_yv12_alloc_frame_buffer(&oci->temp_scale_frame,   width, 16, VP8BORDERINPIXELS) < 0) {
+  if (vp8_yv12_alloc_frame_buffer(&oci->temp_scale_frame, width, 16,
+                                  VP9BORDERINPIXELS) < 0) {
     vp9_de_alloc_frame_buffers(oci);
     return 1;
   }
 
-  if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer, width, height, VP8BORDERINPIXELS) < 0) {
+  if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer, width, height,
+                                  VP9BORDERINPIXELS) < 0) {
     vp9_de_alloc_frame_buffers(oci);
     return 1;
   }

@@ -23,7 +23,6 @@
 #include "ratectrl.h"
 #include "vp9/common/quant_common.h"
 #include "segmentation.h"
-#include "vpx_scale/yv12extend.h"
 #if CONFIG_POSTPROC
 #include "vp9/common/postproc.h"
 #endif
@@ -309,7 +308,6 @@ void vp9_initialize_enc() {
   static int init_done = 0;
 
   if (!init_done) {
-    vp8_scale_machine_specific_config();
     vp9_initialize_common();
     vp9_tokenize_initialize();
     vp9_init_quant_tables();
@@ -1239,7 +1237,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
 #if VP9_TEMPORAL_ALT_REF
 
   if (vp8_yv12_alloc_frame_buffer(&cpi->alt_ref_buffer,
-                                  width, height, VP8BORDERINPIXELS))
+                                  width, height, VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
 
@@ -1283,12 +1281,12 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 
 
   if (vp8_yv12_alloc_frame_buffer(&cpi->last_frame_uf,
-                                  width, height, VP8BORDERINPIXELS))
+                                  width, height, VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
 
   if (vp8_yv12_alloc_frame_buffer(&cpi->scaled_source,
-                                  width, height, VP8BORDERINPIXELS))
+                                  width, height, VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
@@ -2405,7 +2403,7 @@ int vp9_get_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
   else
     return -1;
 
-  vp8_yv12_copy_frame_ptr(&cm->yv12_fb[ref_fb_idx], sd);
+  vp8_yv12_copy_frame(&cm->yv12_fb[ref_fb_idx], sd);
 
   return 0;
 }
@@ -2426,7 +2424,7 @@ int vp9_set_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
   else
     return -1;
 
-  vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[ref_fb_idx]);
+  vp8_yv12_copy_frame(sd, &cm->yv12_fb[ref_fb_idx]);
 
   return 0;
 }
@@ -2806,7 +2804,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
     vp9_loop_filter_frame(cm, &cpi->mb.e_mbd);
   }
 
-  vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
+  vp8_yv12_extend_frame_borders(cm->frame_to_show);
 
 }
 

@@ -576,27 +576,29 @@ static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
    * filtering. The bottom and right edges use 16 pixels plus 2 pixels
    * left of the central pixel when filtering.
    */
-  if (mv->col < (xd->mb_to_left_edge - ((16 + INTERP_EXTEND) << 3)))
+  if (mv->col < (xd->mb_to_left_edge - ((16 + VP9_INTERP_EXTEND) << 3)))
     mv->col = xd->mb_to_left_edge - (16 << 3);
-  else if (mv->col > xd->mb_to_right_edge + ((15 + INTERP_EXTEND) << 3))
+  else if (mv->col > xd->mb_to_right_edge + ((15 + VP9_INTERP_EXTEND) << 3))
     mv->col = xd->mb_to_right_edge + (16 << 3);
 
-  if (mv->row < (xd->mb_to_top_edge - ((16 + INTERP_EXTEND) << 3)))
+  if (mv->row < (xd->mb_to_top_edge - ((16 + VP9_INTERP_EXTEND) << 3)))
     mv->row = xd->mb_to_top_edge - (16 << 3);
-  else if (mv->row > xd->mb_to_bottom_edge + ((15 + INTERP_EXTEND) << 3))
+  else if (mv->row > xd->mb_to_bottom_edge + ((15 + VP9_INTERP_EXTEND) << 3))
     mv->row = xd->mb_to_bottom_edge + (16 << 3);
 }
 
 /* A version of the above function for chroma block MVs.*/
 static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
-  mv->col = (2 * mv->col < (xd->mb_to_left_edge - ((16 + INTERP_EXTEND) << 3))) ?
+  const int extend = VP9_INTERP_EXTEND;
+
+  mv->col = (2 * mv->col < (xd->mb_to_left_edge - ((16 + extend) << 3))) ?
             (xd->mb_to_left_edge - (16 << 3)) >> 1 : mv->col;
-  mv->col = (2 * mv->col > xd->mb_to_right_edge + ((15 + INTERP_EXTEND) << 3)) ?
+  mv->col = (2 * mv->col > xd->mb_to_right_edge + ((15 + extend) << 3)) ?
             (xd->mb_to_right_edge + (16 << 3)) >> 1 : mv->col;
 
-  mv->row = (2 * mv->row < (xd->mb_to_top_edge - ((16 + INTERP_EXTEND) << 3))) ?
+  mv->row = (2 * mv->row < (xd->mb_to_top_edge - ((16 + extend) << 3))) ?
             (xd->mb_to_top_edge - (16 << 3)) >> 1 : mv->row;
-  mv->row = (2 * mv->row > xd->mb_to_bottom_edge + ((15 + INTERP_EXTEND) << 3)) ?
+  mv->row = (2 * mv->row > xd->mb_to_bottom_edge + ((15 + extend) << 3)) ?
             (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
 }
 
@@ -621,12 +623,12 @@ void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
   if (xd->mode_info_context->mbmi.pred_filter_enabled) {
     if ((ymv.as_mv.row | ymv.as_mv.col) & 7) {
       // Sub-pel filter needs extended input
-      int len = 15 + (INTERP_EXTEND << 1);
+      int len = 15 + (VP9_INTERP_EXTEND << 1);
       unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-      unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
+      unsigned char *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
 
       // Copy extended MB into Temp array, applying the spatial filter
-      filter_mb(ptr - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
+      filter_mb(ptr - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                 Temp, len, len, len);
 
       // Sub-pel interpolation
@@ -693,15 +695,15 @@ void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
     int i;
     unsigned char *pSrc = uptr;
     unsigned char *pDst = dst_u;
-    int len = 7 + (INTERP_EXTEND << 1);
+    int len = 7 + (VP9_INTERP_EXTEND << 1);
     unsigned char Temp[32 * 32]; // Data required by the sub-pel filter
-    unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
+    unsigned char *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
 
     // U & V
     for (i = 0; i < 2; i++) {
       if (_o16x16mv.as_int & 0x000f000f) {
         // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
+        filter_mb(pSrc - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                   Temp, len, len, len);
 
         // Sub-pel filter
@@ -831,12 +833,12 @@ void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
   if (xd->mode_info_context->mbmi.pred_filter_enabled) {
     if ((mv_row | mv_col) & 7) {
       // Sub-pel filter needs extended input
-      int len = 15 + (INTERP_EXTEND << 1);
+      int len = 15 + (VP9_INTERP_EXTEND << 1);
       unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-      unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
+      unsigned char *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
 
       // Copy extended MB into Temp array, applying the spatial filter
-      filter_mb(ptr - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
+      filter_mb(ptr - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                 Temp, len, len, len);
 
       // Sub-pel filter
@@ -898,9 +900,9 @@ void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
 #if CONFIG_PRED_FILTER
   if (xd->mode_info_context->mbmi.pred_filter_enabled) {
     int i;
-    int len = 7 + (INTERP_EXTEND << 1);
+    int len = 7 + (VP9_INTERP_EXTEND << 1);
     unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-    unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
+    unsigned char *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
     unsigned char *pSrc = uptr;
     unsigned char *pDst = dst_u;
 
@@ -908,7 +910,7 @@ void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
     for (i = 0; i < 2; i++) {
       if ((omv_row | omv_col) & 15) {
         // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
+        filter_mb(pSrc - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                   Temp, len, len, len);
 
         // Sub-pel filter

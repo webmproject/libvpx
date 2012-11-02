@@ -17,7 +17,6 @@
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/alloccommon.h"
-#include "vpx_scale/yv12extend.h"
 #include "vp9/common/loopfilter.h"
 #include "vp9/common/swapyv12buffer.h"
 #include <stdio.h>
@@ -108,7 +107,6 @@ void vp9_initialize_dec(void) {
   if (!init_done) {
     vp9_initialize_common();
     vp9_init_quant_tables();
-    vp8_scale_machine_specific_config();
     init_done = 1;
   }
 }
@@ -191,7 +189,7 @@ vpx_codec_err_t vp9_get_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Incorrect buffer dimensions");
   } else
-    vp8_yv12_copy_frame_ptr(&cm->yv12_fb[ref_fb_idx], sd);
+    vp8_yv12_copy_frame(&cm->yv12_fb[ref_fb_idx], sd);
 
   return pbi->common.error.error_code;
 }
@@ -231,7 +229,7 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
 
     /* Manage the reference counters and copy image. */
     ref_cnt_fb(cm->fb_idx_ref_cnt, ref_fb_ptr, free_fb);
-    vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[*ref_fb_ptr]);
+    vp8_yv12_copy_frame(sd, &cm->yv12_fb[*ref_fb_ptr]);
   }
 
   return pbi->common.error.error_code;
@@ -428,7 +426,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
       /* Apply the loop filter if appropriate. */
       vp9_loop_filter_frame(cm, &pbi->mb);
     }
-    vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
+    vp8_yv12_extend_frame_borders(cm->frame_to_show);
   }
 
 #if CONFIG_DEBUG

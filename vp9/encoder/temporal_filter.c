@@ -22,7 +22,6 @@
 #include "ratectrl.h"
 #include "vp9/common/quant_common.h"
 #include "segmentation.h"
-#include "vpx_scale/yv12extend.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/swapyv12buffer.h"
 #include "vpx_ports/vpx_timer.h"
@@ -247,18 +246,19 @@ static void temporal_filter_iterate_c
   for (mb_row = 0; mb_row < mb_rows; mb_row++) {
 #if ALT_REF_MC_ENABLED
     // Source frames are extended to 16 pixels.  This is different than
-    //  L/A/G reference frames that have a border of 32 (VP8BORDERINPIXELS)
+    //  L/A/G reference frames that have a border of 32 (VP9BORDERINPIXELS)
     // A 6/8 tap filter is used for motion search.  This requires 2 pixels
     //  before and 3 pixels after.  So the largest Y mv on a border would
-    //  then be 16 - INTERP_EXTEND. The UV blocks are half the size of the Y and
-    //  therefore only extended by 8.  The largest mv that a UV block
-    //  can support is 8 - INTERP_EXTEND.  A UV mv is half of a Y mv.
-    //  (16 - INTERP_EXTEND) >> 1 which is greater than 8 - INTERP_EXTEND.
+    //  then be 16 - VP9_INTERP_EXTEND. The UV blocks are half the size of the
+    //  Y and therefore only extended by 8.  The largest mv that a UV block
+    //  can support is 8 - VP9_INTERP_EXTEND.  A UV mv is half of a Y mv.
+    //  (16 - VP9_INTERP_EXTEND) >> 1 which is greater than
+    //  8 - VP9_INTERP_EXTEND.
     // To keep the mv in play for both Y and UV planes the max that it
-    //  can be on a border is therefore 16 - (2*INTERP_EXTEND+1).
-    cpi->mb.mv_row_min = -((mb_row * 16) + (17 - 2 * INTERP_EXTEND));
+    //  can be on a border is therefore 16 - (2*VP9_INTERP_EXTEND+1).
+    cpi->mb.mv_row_min = -((mb_row * 16) + (17 - 2 * VP9_INTERP_EXTEND));
     cpi->mb.mv_row_max = ((cpi->common.mb_rows - 1 - mb_row) * 16)
-                         + (17 - 2 * INTERP_EXTEND);
+                         + (17 - 2 * VP9_INTERP_EXTEND);
 #endif
 
     for (mb_col = 0; mb_col < mb_cols; mb_col++) {
@@ -269,9 +269,9 @@ static void temporal_filter_iterate_c
       vpx_memset(count, 0, 384 * sizeof(unsigned short));
 
 #if ALT_REF_MC_ENABLED
-      cpi->mb.mv_col_min = -((mb_col * 16) + (17 - 2 * INTERP_EXTEND));
+      cpi->mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
       cpi->mb.mv_col_max = ((cpi->common.mb_cols - 1 - mb_col) * 16)
-                           + (17 - 2 * INTERP_EXTEND);
+                           + (17 - 2 * VP9_INTERP_EXTEND);
 #endif
 
       for (frame = 0; frame < frame_count; frame++) {

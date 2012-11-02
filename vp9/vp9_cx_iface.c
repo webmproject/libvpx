@@ -829,12 +829,12 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx) {
 
     /*
     vpx_img_wrap(&ctx->preview_img, VPX_IMG_FMT_YV12,
-        sd.y_width + 2*VP8BORDERINPIXELS,
-        sd.y_height + 2*VP8BORDERINPIXELS,
+        sd.y_width + 2*VP9BORDERINPIXELS,
+        sd.y_height + 2*VP9BORDERINPIXELS,
         1,
         sd.buffer_alloc);
     vpx_img_set_rect(&ctx->preview_img,
-        VP8BORDERINPIXELS, VP8BORDERINPIXELS,
+        VP9BORDERINPIXELS, VP9BORDERINPIXELS,
         sd.y_width, sd.y_height);
         */
 
