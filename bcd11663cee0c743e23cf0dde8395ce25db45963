@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//5gY\u003d",
+        "filename": "vp8/common/x86/loopfilter_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-03T02:39:07Z",
+      "side": 1,
+      "message": "you can get the same effect in less lines of code (or less code change) by just appending each 0x01010101 with a \"u\" to make it unsigned.",
+      "revId": "bcd11663cee0c743e23cf0dde8395ce25db45963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
