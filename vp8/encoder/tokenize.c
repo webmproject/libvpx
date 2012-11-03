@@ -396,7 +396,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         else
         {
             vp8_fix_contexts(xd);
-            cpi->skip_true_count++;
+            x->skip_true_count++;
         }
 
         return;

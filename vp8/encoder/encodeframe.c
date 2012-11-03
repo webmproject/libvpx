@@ -751,7 +751,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     cpi->prediction_error = 0;
     cpi->intra_error = 0;
-    cpi->skip_true_count = 0;
+    cpi->mb.skip_true_count = 0;
     cpi->tok_count = 0;
 
 #if 0
@@ -868,6 +868,8 @@ void vp8_encode_frame(VP8_COMP *cpi)
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {
                 totalrate += cpi->mb_row_ei[i].totalrate;
+
+                cpi->mb.skip_true_count += cpi->mb_row_ei[i].mb.skip_true_count;
 
                 /* add up counts for each thread */
                 sum_coef_counts(x, &cpi->mb_row_ei[i].mb);
@@ -1356,7 +1358,7 @@ int vp8cx_encode_inter_macroblock
 
         if (cpi->common.mb_no_coeff_skip)
         {
-            cpi->skip_true_count ++;
+            x->skip_true_count ++;
             vp8_fix_contexts(xd);
         }
         else
