@@ -97,13 +97,17 @@ void vp9_mbloop_filter_horizontal_edge_c_sse2(unsigned char *s,
   DECLARE_ALIGNED(16, unsigned char, flat_oq1[16]);
   DECLARE_ALIGNED(16, unsigned char, flat_oq0[16]);
   __m128i mask, hev, flat;
-  __m128i thresh, limit, blimit;
   const __m128i zero = _mm_set1_epi16(0);
   __m128i p4, p3, p2, p1, p0, q0, q1, q2, q3, q4;
-
-  thresh = _mm_shuffle_epi32(_mm_cvtsi32_si128(_thresh[0] * 0x01010101), 0);
-  limit = _mm_shuffle_epi32(_mm_cvtsi32_si128(_limit[0] * 0x01010101), 0);
-  blimit = _mm_shuffle_epi32(_mm_cvtsi32_si128(_blimit[0] * 0x01010101), 0);
+  const unsigned int extended_thresh = _thresh[0] * 0x01010101u;
+  const unsigned int extended_limit  = _limit[0]  * 0x01010101u;
+  const unsigned int extended_blimit = _blimit[0] * 0x01010101u;
+  const __m128i thresh =
+      _mm_shuffle_epi32(_mm_cvtsi32_si128((int)extended_thresh), 0);
+  const __m128i limit =
+      _mm_shuffle_epi32(_mm_cvtsi32_si128((int)extended_limit), 0);
+  const __m128i blimit =
+      _mm_shuffle_epi32(_mm_cvtsi32_si128((int)extended_blimit), 0);
 
   p4 = _mm_loadu_si128((__m128i *)(s - 5 * p));
   p3 = _mm_loadu_si128((__m128i *)(s - 4 * p));
