@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//5cs\u003d",
+        "filename": "vp8/common/x86/loopfilter_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-11-03T16:40:34Z",
+      "side": 1,
+      "message": "that was my first reaction. the local style of this file (and the entire directory actually) eschews them though; so this is more consistent unfortunately.",
+      "parentUuid": "AAAAQ3//5eA\u003d",
+      "revId": "bcd11663cee0c743e23cf0dde8395ce25db45963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//5d8\u003d",
         "filename": "vp8/common/x86/loopfilter_x86.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-03T06:43:03Z",
       "side": 1,
       "message": "you might as well align the \u0027*\u0027 too",
+      "revId": "bcd11663cee0c743e23cf0dde8395ce25db45963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//5cw\u003d",
+        "filename": "vp8/common/x86/loopfilter_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-11-03T16:40:34Z",
+      "side": 1,
+      "message": "done, looks less ragged now.",
+      "parentUuid": "AAAAQ3//5d8\u003d",
       "revId": "bcd11663cee0c743e23cf0dde8395ce25db45963",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
