@@ -52,6 +52,24 @@
       "revId": "53031b10d892c30c3f24ab41d790673cbd16f493",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//5ZA\u003d",
+        "filename": "vp8/common/loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-11-04T23:31:38Z",
+      "side": 1,
+      "message": "I like your idea, it is definitely worth a try.  \nThe main motivation was to keep the computations in 8 bits for better SIMD usage. the previous version had an advantage of being able to use \"pavgb\" for (a+b+1)\u003e\u003e1.",
+      "parentUuid": "AAAAQ3//+RY\u003d",
+      "revId": "53031b10d892c30c3f24ab41d790673cbd16f493",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
