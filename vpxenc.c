@@ -1052,14 +1052,22 @@ static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
 static const arg_def_t *vp8_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
-  &tune_ssim, &cq_level, &max_intra_rate_pct, NULL
+  &tune_ssim, &cq_level, &max_intra_rate_pct,
+#if CONFIG_LOSSLESS
+  &lossless_enabled,
+#endif
+  NULL
 };
 static const int vp8_arg_ctrl_map[] = {
   VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
   VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
   VP8E_SET_TOKEN_PARTITIONS,
   VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
-  VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT, 0
+  VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
+#if CONFIG_LOSSLESS
+  VP9E_SET_LOSSLESS,
+#endif
+  0
 };
 #endif
 
@@ -1563,10 +1571,6 @@ int main(int argc, const char **argv_) {
   cfg.g_w = 0;
   cfg.g_h = 0;
 
-#if CONFIG_LOSSLESS
-  cfg.lossless = 0;
-#endif
-
   /* Now parse the remainder of the parameters. */
   for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {
     arg.argv_step = 1;
@@ -1643,20 +1647,9 @@ int main(int argc, const char **argv_) {
       cfg.kf_max_dist = arg_parse_uint(&arg);
     else if (arg_match(&arg, &kf_disabled, argi))
       cfg.kf_mode = VPX_KF_DISABLED;
-#if CONFIG_LOSSLESS
-    else if (arg_match(&arg, &lossless_enabled, argi))
-      cfg.lossless = 1;
-#endif
     else
       argj++;
   }
-
-#if CONFIG_LOSSLESS
-  if (cfg.lossless) {
-    cfg.rc_min_quantizer = 0;
-    cfg.rc_max_quantizer = 0;
-  }
-#endif
 
   /* Handle codec specific options */
 #if CONFIG_VP9_ENCODER
@@ -1807,9 +1800,6 @@ int main(int argc, const char **argv_) {
       SHOW(kf_mode);
       SHOW(kf_min_dist);
       SHOW(kf_max_dist);
-#if CONFIG_LOSSLESS
-      SHOW(lossless);
-#endif
     }
 
     if (pass == (one_pass_only ? one_pass_only - 1 : 0)) {

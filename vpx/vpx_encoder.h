@@ -32,6 +32,19 @@ extern "C" {
 #define VPX_ENCODER_H
 #include "vpx_codec.h"
 
+  /*! Temporal Scalability: Maximum length of the sequence defining frame
+   * layer membership
+   */
+#define VPX_TS_MAX_PERIODICITY 16
+
+  /*! Temporal Scalability: Maximum number of coding layers */
+#define VPX_TS_MAX_LAYERS       5
+
+  /*!\deprecated Use #VPX_TS_MAX_PERIODICITY instead. */
+#define MAX_PERIODICITY VPX_TS_MAX_PERIODICITY
+
+  /*!\deprecated Use #VPX_TS_MAX_LAYERS instead. */
+#define MAX_LAYERS      VPX_TS_MAX_LAYERS
 
   /*!\brief Current ABI version number
    *
@@ -41,7 +54,7 @@ extern "C" {
    * types, removing or reassigning enums, adding/removing/rearranging
    * fields to structures
    */
-#define VPX_ENCODER_ABI_VERSION (2 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
+#define VPX_ENCODER_ABI_VERSION (3 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
 
 
   /*! \brief Encoder capabilities bitfield
@@ -581,12 +594,46 @@ extern "C" {
      */
     unsigned int           kf_max_dist;
 
-
-    /*!\brief Enable lossless compression mode
-     *
-     * If this flag is set, the decoder will be in lossless compression mode.
+    /*
+     * Temporal scalability settings (ts)
      */
-    unsigned int           lossless;
+
+    /*!\brief Number of coding layers
+     *
+     * This value specifies the number of coding layers to be used.
+     */
+    unsigned int           ts_number_layers;
+
+    /*!\brief Target bitrate for each layer
+     *
+     * These values specify the target coding bitrate for each coding layer.
+     */
+    unsigned int           ts_target_bitrate[VPX_TS_MAX_LAYERS];
+
+    /*!\brief Frame rate decimation factor for each layer
+     *
+     * These values specify the frame rate decimation factors to apply
+     * to each layer.
+     */
+    unsigned int           ts_rate_decimator[VPX_TS_MAX_LAYERS];
+
+    /*!\brief Length of the sequence defining frame layer membership
+     *
+     * This value specifies the length of the sequence that defines the
+     * membership of frames to layers. For example, if ts_periodicity=8 then
+     * frames are assigned to coding layers with a repeated sequence of
+     * length 8.
+     */
+    unsigned int           ts_periodicity;
+
+    /*!\brief Template defining the membership of frames to coding layers
+     *
+     * This array defines the membership of frames to coding layers. For a
+     * 2-layer encoding that assigns even numbered frames to one layer (0)
+     * and odd numbered frames to a second layer (1) with ts_periodicity=8,
+     * then ts_layer_id = (0,1,0,1,0,1,0,1).
+     */
+    unsigned int           ts_layer_id[VPX_TS_MAX_PERIODICITY];
   } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
 
 
@@ -596,6 +643,10 @@ extern "C" {
    * should call the vpx_codec_enc_init convenience macro instead of this
    * function directly, to ensure that the ABI version number parameter
    * is properly initialized.
+   *
+   * If the library was configured with --disable-multithread, this call
+   * is not thread safe and should be guarded with a lock if being used
+   * in a multithreaded context.
    *
    * In XMA mode (activated by setting VPX_CODEC_USE_XMA in the flags
    * parameter), the storage pointed to by the cfg parameter must be
@@ -625,6 +676,48 @@ extern "C" {
    */
 #define vpx_codec_enc_init(ctx, iface, cfg, flags) \
   vpx_codec_enc_init_ver(ctx, iface, cfg, flags, VPX_ENCODER_ABI_VERSION)
+
+
+  /*!\brief Initialize multi-encoder instance
+   *
+   * Initializes multi-encoder context using the given interface.
+   * Applications should call the vpx_codec_enc_init_multi convenience macro
+   * instead of this function directly, to ensure that the ABI version number
+   * parameter is properly initialized.
+   *
+   * In XMA mode (activated by setting VPX_CODEC_USE_XMA in the flags
+   * parameter), the storage pointed to by the cfg parameter must be
+   * kept readable and stable until all memory maps have been set.
+   *
+   * \param[in]    ctx     Pointer to this instance's context.
+   * \param[in]    iface   Pointer to the algorithm interface to use.
+   * \param[in]    cfg     Configuration to use, if known. May be NULL.
+   * \param[in]    num_enc Total number of encoders.
+   * \param[in]    flags   Bitfield of VPX_CODEC_USE_* flags
+   * \param[in]    dsf     Pointer to down-sampling factors.
+   * \param[in]    ver     ABI version number. Must be set to
+   *                       VPX_ENCODER_ABI_VERSION
+   * \retval #VPX_CODEC_OK
+   *     The decoder algorithm initialized.
+   * \retval #VPX_CODEC_MEM_ERROR
+   *     Memory allocation failed.
+   */
+  vpx_codec_err_t vpx_codec_enc_init_multi_ver(vpx_codec_ctx_t      *ctx,
+                                               vpx_codec_iface_t    *iface,
+                                               vpx_codec_enc_cfg_t  *cfg,
+                                               int                   num_enc,
+                                               vpx_codec_flags_t     flags,
+                                               vpx_rational_t       *dsf,
+                                               int                   ver);
+
+
+  /*!\brief Convenience macro for vpx_codec_enc_init_multi_ver()
+   *
+   * Ensures the ABI version parameter is properly set.
+   */
+#define vpx_codec_enc_init_multi(ctx, iface, cfg, num_enc, flags, dsf) \
+  vpx_codec_enc_init_multi_ver(ctx, iface, cfg, num_enc, flags, dsf, \
+                               VPX_ENCODER_ABI_VERSION)
 
 
   /*!\brief Get a default configuration
@@ -731,7 +824,6 @@ extern "C" {
                                     unsigned long               duration,
                                     vpx_enc_frame_flags_t       flags,
                                     unsigned long               deadline);
-
 
   /*!\brief Set compressed data output buffer
    *

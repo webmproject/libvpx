@@ -20,8 +20,8 @@
  * \brief Provides definitions for using the VP8 algorithm within the vpx Decoder
  *        interface.
  */
-#ifndef VP9DX_H
-#define VP9DX_H
+#ifndef VP8DX_H
+#define VP8DX_H
 #include "vpx_codec_impl_top.h"
 
 /*!\name Algorithm interface for VP8
@@ -54,6 +54,11 @@ enum vp8_dec_control_id {
   /** check if the indicated frame is corrupted */
   VP8D_GET_FRAME_CORRUPTED,
 
+  /** control function to get info on which reference frames were used
+   *  by the last decode
+   */
+  VP8D_GET_LAST_REF_USED,
+
   VP8_DECODER_CTRL_ID_MAX
 };
 
@@ -68,7 +73,7 @@ enum vp8_dec_control_id {
 
 VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_UPDATES,   int *)
 VPX_CTRL_USE_TYPE(VP8D_GET_FRAME_CORRUPTED,    int *)
-
+VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_USED,      int *)
 
 /*! @} - end defgroup vp8_decoder */
 
