@@ -1180,7 +1180,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rat
   cost += vp9_cost_bit(128, allow_comp);
 #endif
   *Rate = cost;
-  *rate_y += tot_rate_y;
+  *rate_y = tot_rate_y;
   *Distortion = distortion;
 
   return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
@@ -1516,7 +1516,7 @@ static int64_t rd_pick_intra8x8mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
 #endif
   }
   *Rate = cost;
-  *rate_y += tot_rate_y;
+  *rate_y = tot_rate_y;
   *Distortion = distortion;
   return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
 }
