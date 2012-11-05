@@ -127,20 +127,6 @@ vpx_cpu_t vpx_x86_vendor(void);
 unsigned __int64 __rdtsc(void);
 #pragma intrinsic(__rdtsc)
 #endif
-static unsigned int
-x86_readtsc(void) {
-#if defined(__GNUC__) && __GNUC__
-  unsigned int tsc;
-  __asm__ __volatile__("rdtsc\n\t":"=a"(tsc):);
-  return tsc;
-#else
-#if ARCH_X86_64
-  return __rdtsc();
-#else
-  __asm  rdtsc;
-#endif
-#endif
-}
 
 
 #if defined(__GNUC__) && __GNUC__

@@ -557,7 +557,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
       default_eob = 64;
       if (type == PLANE_TYPE_Y_WITH_DC) {
         BLOCKD *bb;
-        int ib = (b - xd->block);
+        int ib = (int)(b - xd->block);
         if (ib < 16) {
           ib = (ib & 8) + ((ib & 4) >> 1);
           bb = xd->block + ib;
@@ -1516,7 +1516,7 @@ static int64_t rd_pick_intra8x8mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
 #endif
   }
   *Rate = cost;
-  *rate_y += tot_rate_y;
+  *rate_y = tot_rate_y;
   *Distortion = distortion;
   return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
 }
@@ -2704,7 +2704,7 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   if (mbmi->second_ref_frame)
     x->partition_info->bmi[15].second_mv.as_int = bsi.second_mvs[15].as_int;
 
-  return bsi.segment_rd;
+  return (int)(bsi.segment_rd);
 }
 
 /* Order arr in increasing order, original position stored in idx */
@@ -3390,7 +3390,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
     }
 
-    if (sse < threshold) {
+    if ((int)sse < threshold) {
       unsigned int q2dc = xd->block[24].dequant[0];
       /* If there is no codeable 2nd order dc
        or a very small uniform pixel change change */
@@ -3873,7 +3873,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                            second_ref, best_yrd, mdcounts,
                                            &rate, &rate_y, &distortion,
                                            &skippable,
-                                           this_rd_thresh, seg_mvs,
+                                           (int)this_rd_thresh, seg_mvs,
                                            txfm_cache);
       rate2 += rate;
       distortion2 += distortion;
@@ -4205,11 +4205,12 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
 end:
-  store_coding_context(x, &x->mb_context[xd->mb_index], best_mode_index, &best_partition,
-                       &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame],
-                       &frame_best_ref_mv[xd->mode_info_context->mbmi.second_ref_frame],
-                       best_pred_diff[0], best_pred_diff[1], best_pred_diff[2],
-                       best_txfm_diff);
+  store_coding_context(x, &x->mb_context[xd->mb_index],
+    best_mode_index, &best_partition,
+    &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame],
+    &frame_best_ref_mv[xd->mode_info_context->mbmi.second_ref_frame],
+    (int)best_pred_diff[0], (int)best_pred_diff[1], (int)best_pred_diff[2],
+    best_txfm_diff);
 }
 
 #if CONFIG_SUPERBLOCKS

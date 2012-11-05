@@ -665,7 +665,8 @@ typedef struct VP9_COMP {
     int maxq_min_limit;
     int static_scene_max_gf_interval;
     int kf_bits;
-    int gf_group_error_left;           // Remaining error from uncoded frames in a gf group. Two pass use only
+    // Remaining error from uncoded frames in a gf group. Two pass use only
+    int64_t gf_group_error_left;
 
     // Projected total bits available for a key frame group of frames
     int64_t kf_group_bits;
@@ -673,8 +674,10 @@ typedef struct VP9_COMP {
     // Error score of frames still to be coded in kf group
     int64_t kf_group_error_left;
 
-    int gf_group_bits;                // Projected Bits available for a group of frames including 1 GF or ARF
-    int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
+    // Projected Bits available for a group of frames including 1 GF or ARF
+    int64_t gf_group_bits;
+    // Bits for the golden frame or ARF - 2 pass only
+    int gf_bits;
     int alt_extra_bits;
 
     int sr_update_lag;

@@ -483,7 +483,7 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
 
 static TX_TYPE get_tx_type(const MACROBLOCKD *xd, const BLOCKD *b) {
   TX_TYPE tx_type = DCT_DCT;
-  int ib = (b - xd->block);
+  int ib = (int)(b - xd->block);
   if (ib >= 16)
     return tx_type;
   if (xd->mode_info_context->mbmi.txfm_size == TX_16X16) {

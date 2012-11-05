@@ -168,7 +168,7 @@ static int update_nmv_savings(const unsigned int ct[2],
   if (cur_b - mod_b - cost > 0) {
     return cur_b - mod_b - cost;
   } else {
-    return -vp9_cost_zero(upd_p);
+    return 0 - vp9_cost_zero(upd_p);
   }
 }
 

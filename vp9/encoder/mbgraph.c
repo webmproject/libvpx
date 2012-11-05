@@ -139,7 +139,7 @@ static int do_16x16_motion_search
 
   // If the current best reference mv is not centred on 0,0 then do a 0,0 based search as well
   if (ref_mv->as_int) {
-    int tmp_err;
+    unsigned int tmp_err;
     int_mv zero_ref_mv, tmp_mv;
 
     zero_ref_mv.as_int = 0;
@@ -202,7 +202,7 @@ static int find_best_16x16_intra
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_PREDICTION_MODE best_mode = -1, mode;
-  int best_err = INT_MAX;
+  unsigned int best_err = INT_MAX;
 
   // calculate SATD for each intra prediction mode;
   // we're intentionally not doing 4x4, we just want a rough estimate
@@ -449,7 +449,7 @@ void vp9_update_mbgraph_stats
   // being a GF - so exit if we don't look ahead beyond that
   if (n_frames <= cpi->frames_till_gf_update_due)
     return;
-  if (n_frames > cpi->common.frames_till_alt_ref_frame)
+  if (n_frames > (int)cpi->common.frames_till_alt_ref_frame)
     n_frames = cpi->common.frames_till_alt_ref_frame;
   if (n_frames > MAX_LAG_BUFFERS)
     n_frames = MAX_LAG_BUFFERS;

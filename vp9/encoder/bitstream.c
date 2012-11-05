@@ -218,7 +218,6 @@ static void update_switchable_interp_probs(VP9_COMP *cpi,
 static void update_refpred_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int i;
-  int tot_count;
   vp9_prob new_pred_probs[PREDICTION_PROBS];
   int old_cost, new_cost;
 
@@ -884,7 +883,6 @@ static void update_ref_probs(VP9_COMP *const cpi) {
 }
 
 static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
-  int i;
   VP9_COMMON *const pc = &cpi->common;
   const nmv_context *nmvc = &pc->fc.nmvc;
   MACROBLOCK *x = &cpi->mb;

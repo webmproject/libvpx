@@ -56,7 +56,7 @@ int vp9_inv_recenter_nonneg(int v, int m);
   { \
     int shift = VP9_BD_VALUE_SIZE - 8 - ((_count) + 8); \
     int loop_end, x; \
-    size_t bits_left = ((_bufend)-(_bufptr))*CHAR_BIT; \
+    int bits_left = (int)(((_bufend)-(_bufptr))*CHAR_BIT); \
     \
     x = shift + CHAR_BIT - bits_left; \
     loop_end = 0; \

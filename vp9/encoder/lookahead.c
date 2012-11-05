@@ -43,7 +43,7 @@ void
 vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
   if (ctx) {
     if (ctx->buf) {
-      int i;
+      unsigned int i;
 
       for (i = 0; i < ctx->max_sz; i++)
         vp8_yv12_de_alloc_frame_buffer(&ctx->buf[i].img);
@@ -59,7 +59,6 @@ vp9_lookahead_init(unsigned int width,
                    unsigned int height,
                    unsigned int depth) {
   struct lookahead_ctx *ctx = NULL;
-  int i;
 
   /* Clamp the lookahead queue depth */
   if (depth < 1)
@@ -74,6 +73,7 @@ vp9_lookahead_init(unsigned int width,
   /* Allocate the lookahead structures */
   ctx = calloc(1, sizeof(*ctx));
   if (ctx) {
+    unsigned int i;
     ctx->max_sz = depth;
     ctx->buf = calloc(depth, sizeof(*ctx->buf));
     if (!ctx->buf)
@@ -175,9 +175,9 @@ vp9_lookahead_peek(struct lookahead_ctx *ctx,
   struct lookahead_entry *buf = NULL;
 
   assert(index < ctx->max_sz);
-  if (index < ctx->sz) {
+  if (index < (int)ctx->sz) {
     index += ctx->read_idx;
-    if (index >= ctx->max_sz)
+    if (index >= (int)ctx->max_sz)
       index -= ctx->max_sz;
     buf = ctx->buf + index;
   }

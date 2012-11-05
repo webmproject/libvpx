@@ -1390,7 +1390,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
         x->src.v_buffer += 16 * x->src.uv_stride - 8 * offset;
       }
 
-      cpi->tok_count = tp - cpi->tok;
+      cpi->tok_count = (unsigned int)(tp - cpi->tok);
     }
 
     vpx_usec_timer_mark(&emr_timer);
@@ -1578,7 +1578,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     encode_frame_internal(cpi);
 
     for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
-      const int diff = cpi->rd_comp_pred_diff[i] / cpi->common.MBs;
+      const int diff = (int)(cpi->rd_comp_pred_diff[i] / cpi->common.MBs);
       cpi->rd_prediction_type_threshes[frame_type][i] += diff;
       cpi->rd_prediction_type_threshes[frame_type][i] >>= 1;
     }
@@ -1588,7 +1588,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       int diff;
       if (i == TX_MODE_SELECT)
         pd -= RDCOST(cpi->mb.rdmult, cpi->mb.rddiv, 2048 * (TX_SIZE_MAX - 1), 0);
-      diff = pd / cpi->common.MBs;
+      diff = (int)(pd / cpi->common.MBs);
       cpi->rd_tx_select_threshes[frame_type][i] += diff;
       cpi->rd_tx_select_threshes[frame_type][i] /= 2;
     }
