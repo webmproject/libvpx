@@ -651,9 +651,6 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
   BLOCK *beptr;
   int d;
 
-  vp9_subtract_mby(mb->src_diff, *(mb->block[0].base_src), xd->predictor,
-                   mb->block[0].src_stride);
-
   // Fdct and building the 2nd order block
   for (beptr = mb->block; beptr < mb->block + 16; beptr += 2) {
     mb->vp9_short_fdct8x4(beptr->src_diff, beptr->coeff, 32);
@@ -722,9 +719,6 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
   BLOCKD *const x_y2  = xd->block + 24;
   int d;
 
-  vp9_subtract_mby(mb->src_diff, *(mb->block[0].base_src), xd->predictor,
-                   mb->block[0].src_stride);
-
   vp9_transform_mby_8x8(mb);
   vp9_quantize_mby_8x8(mb);
 
@@ -771,9 +765,6 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   BLOCK  *be = &mb->block[0];
   TX_TYPE tx_type;
 
-  vp9_subtract_mby(mb->src_diff, *(mb->block[0].base_src), mb->e_mbd.predictor,
-                   mb->block[0].src_stride);
-
   tx_type = get_tx_type_16x16(xd, b);
   if (tx_type != DCT_DCT) {
     vp9_fht(be->src_diff, 32, be->coeff, tx_type, 16);
@@ -810,7 +801,9 @@ static void macro_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   int d16x16, r16x16, r16x16s, s16x16;
   int64_t rd16x16, rd16x16s;
 
-  // FIXME don't do sub x3
+  vp9_subtract_mby(x->src_diff, *(x->block[0].base_src), xd->predictor,
+                   x->block[0].src_stride);
+
   if (skip_prob == 0)
     skip_prob = 1;
   s0 = vp9_cost_bit(skip_prob, 0);
