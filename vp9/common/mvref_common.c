@@ -290,7 +290,7 @@ void vp9_find_mv_refs(
 
   // Populate a list with candidate reference vectors from the
   // spatial neighbours.
-  for (i = 2; i < MVREF_NEIGHBOURS; ++i) {
+  for (i = 2; (i < MVREF_NEIGHBOURS) && (index < (MAX_MV_REFS - 2)); ++i) {
     if (((mv_ref_search[i][0] << 7) >= xd->mb_to_left_edge) &&
         ((mv_ref_search[i][1] << 7) >= xd->mb_to_top_edge)) {
 
@@ -321,6 +321,11 @@ void vp9_find_mv_refs(
         }
       }
     }
+  }
+
+  // Make sure we are able to add 0,0
+  if (index > (MAX_MV_REFS - 1)) {
+    index = (MAX_MV_REFS - 1);
   }
 
   // 0,0 is always a valid reference.

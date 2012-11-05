@@ -44,7 +44,7 @@ void vpx_log(const char *format, ...);
 /* Segment Feature Masks */
 #define SEGMENT_DELTADATA   0
 #define SEGMENT_ABSDATA     1
-#define MAX_MV_REFS 19
+#define MAX_MV_REFS 9
 
 typedef struct {
   int r, c;
