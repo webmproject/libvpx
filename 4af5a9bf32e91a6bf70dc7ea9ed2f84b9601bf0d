@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//4/A\u003d",
+        "filename": "vpx/vp8.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-05T20:46:02Z",
+      "side": 1,
+      "message": "This is on purpose right? (Just checking, no objection.)",
+      "revId": "4af5a9bf32e91a6bf70dc7ea9ed2f84b9601bf0d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//4+8\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-05T20:46:02Z",
+      "side": 1,
+      "message": "Same Q.",
+      "revId": "4af5a9bf32e91a6bf70dc7ea9ed2f84b9601bf0d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//4+0\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-05T20:46:02Z",
+      "side": 1,
+      "message": "Same Q.",
+      "revId": "4af5a9bf32e91a6bf70dc7ea9ed2f84b9601bf0d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
