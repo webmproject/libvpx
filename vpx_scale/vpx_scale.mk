@@ -5,7 +5,6 @@ SCALE_SRCS-yes += vpxscale.h
 SCALE_SRCS-yes += generic/vpxscale.c
 SCALE_SRCS-yes += generic/yv12config.c
 SCALE_SRCS-yes += generic/yv12extend.c
-SCALE_SRCS-yes += generic/yv12extend_generic.h
 SCALE_SRCS-$(CONFIG_SPATIAL_RESAMPLING) += generic/gen_scalers.c
 
 #neon
