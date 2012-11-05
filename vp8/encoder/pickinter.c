@@ -1244,7 +1244,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 }
 
 
-void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
+void vp8_pick_intra_mode(MACROBLOCK *x, int *rate_)
 {
     int error4x4, error16x16 = INT_MAX;
     int rate, best_rate = 0, distortion, best_sse;
