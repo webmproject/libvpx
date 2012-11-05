@@ -1738,18 +1738,18 @@ static void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
         {
             if (x->partition_info->bmi[i].mode == NEW4X4)
             {
-                cpi->MVcount[0][mv_max+((x->partition_info->bmi[i].mv.as_mv.row
+                x->MVcount[0][mv_max+((x->partition_info->bmi[i].mv.as_mv.row
                                           - best_ref_mv->as_mv.row) >> 1)]++;
-                cpi->MVcount[1][mv_max+((x->partition_info->bmi[i].mv.as_mv.col
+                x->MVcount[1][mv_max+((x->partition_info->bmi[i].mv.as_mv.col
                                           - best_ref_mv->as_mv.col) >> 1)]++;
             }
         }
     }
     else if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV)
     {
-        cpi->MVcount[0][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.row
+        x->MVcount[0][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.row
                                           - best_ref_mv->as_mv.row) >> 1)]++;
-        cpi->MVcount[1][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
+        x->MVcount[1][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
                                           - best_ref_mv->as_mv.col) >> 1)]++;
     }
 }

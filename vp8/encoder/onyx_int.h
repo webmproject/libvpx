@@ -452,8 +452,6 @@ typedef struct VP8_COMP
     int drop_frames_allowed; /* Are we permitted to drop frames? */
     int drop_frame;          /* Drop this frame? */
 
-    unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
-
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     char update_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 

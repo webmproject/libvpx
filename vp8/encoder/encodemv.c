@@ -363,10 +363,12 @@ void vp8_write_mvprobs(VP8_COMP *cpi)
     active_section = 4;
 #endif
     write_component_probs(
-        w, &mvc[0], &vp8_default_mv_context[0], &vp8_mv_update_probs[0], cpi->MVcount[0], 0, &flags[0]
+        w, &mvc[0], &vp8_default_mv_context[0], &vp8_mv_update_probs[0],
+        cpi->mb.MVcount[0], 0, &flags[0]
     );
     write_component_probs(
-        w, &mvc[1], &vp8_default_mv_context[1], &vp8_mv_update_probs[1], cpi->MVcount[1], 1, &flags[1]
+        w, &mvc[1], &vp8_default_mv_context[1], &vp8_mv_update_probs[1],
+        cpi->mb.MVcount[1], 1, &flags[1]
     );
 
     if (flags[0] || flags[1])

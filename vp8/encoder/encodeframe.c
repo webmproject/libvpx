@@ -762,7 +762,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     xd->mode_info_context = cm->mi;
 
-    vp8_zero(cpi->MVcount);
+    vp8_zero(cpi->mb.MVcount);
 
     vp8cx_frame_init_quantizer(cpi);
 
@@ -868,6 +868,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {
                 int mode_count;
+                int mv_vals;
                 totalrate += cpi->mb_row_ei[i].totalrate;
 
                 cpi->mb.skip_true_count += cpi->mb_row_ei[i].mb.skip_true_count;
@@ -880,6 +881,13 @@ void vp8_encode_frame(VP8_COMP *cpi)
                     cpi->mb.uv_mode_count[mode_count] +=
                         cpi->mb_row_ei[i].mb.uv_mode_count[mode_count];
 
+                for(mv_vals = 0; mv_vals < MVvals; mv_vals++)
+                {
+                    cpi->mb.MVcount[0][mv_vals] +=
+                        cpi->mb_row_ei[i].mb.MVcount[0][mv_vals];
+                    cpi->mb.MVcount[1][mv_vals] +=
+                        cpi->mb_row_ei[i].mb.MVcount[1][mv_vals];
+                }
 
                 /* add up counts for each thread */
                 sum_coef_counts(x, &cpi->mb_row_ei[i].mb);
