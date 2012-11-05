@@ -118,7 +118,7 @@ static void update_mbintra_mode_probs(VP8_COMP *cpi)
 
         update_mode(
             w, VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
-            Pnew, x->fc.ymode_prob, bct, (unsigned int *)cpi->ymode_count
+            Pnew, x->fc.ymode_prob, bct, (unsigned int *)cpi->mb.ymode_count
         );
     }
     {
@@ -127,7 +127,7 @@ static void update_mbintra_mode_probs(VP8_COMP *cpi)
 
         update_mode(
             w, VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
-            Pnew, x->fc.uv_mode_prob, bct, (unsigned int *)cpi->uv_mode_count
+            Pnew, x->fc.uv_mode_prob, bct, (unsigned int *)cpi->mb.uv_mode_count
         );
     }
 }

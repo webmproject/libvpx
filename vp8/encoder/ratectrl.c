@@ -242,8 +242,8 @@ void vp8_save_coding_context(VP8_COMP *cpi)
     vp8_copy(cc->ymode_prob,   cpi->common.fc.ymode_prob);
     vp8_copy(cc->uv_mode_prob,  cpi->common.fc.uv_mode_prob);
 
-    vp8_copy(cc->ymode_count, cpi->ymode_count);
-    vp8_copy(cc->uv_mode_count, cpi->uv_mode_count);
+    vp8_copy(cc->ymode_count, cpi->mb.ymode_count);
+    vp8_copy(cc->uv_mode_count, cpi->mb.uv_mode_count);
 
 
     /* Stats */
@@ -280,8 +280,8 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
     vp8_copy(cpi->common.fc.ymode_prob,   cc->ymode_prob);
     vp8_copy(cpi->common.fc.uv_mode_prob,  cc->uv_mode_prob);
 
-    vp8_copy(cpi->ymode_count, cc->ymode_count);
-    vp8_copy(cpi->uv_mode_count, cc->uv_mode_count);
+    vp8_copy(cpi->mb.ymode_count, cc->ymode_count);
+    vp8_copy(cpi->mb.uv_mode_count, cc->uv_mode_count);
 
     /* Stats */
 #ifdef MODE_STATS

@@ -643,8 +643,6 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi)
     xd->left_context = &cm->left_context;
 
     vp8_zero(cpi->count_mb_ref_frame_usage)
-    vp8_zero(cpi->ymode_count)
-    vp8_zero(cpi->uv_mode_count)
 
     x->mvc = cm->fc.mvc;
 
@@ -676,6 +674,8 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi)
         xd->fullpixel_mask = 0xfffffff8;
 
     vp8_zero(x->coef_counts);
+    vp8_zero(x->ymode_count);
+    vp8_zero(x->uv_mode_count)
 }
 
 static void sum_coef_counts(MACROBLOCK *x, MACROBLOCK *x_thread)
@@ -867,9 +867,19 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {
+                int mode_count;
                 totalrate += cpi->mb_row_ei[i].totalrate;
 
                 cpi->mb.skip_true_count += cpi->mb_row_ei[i].mb.skip_true_count;
+
+                for(mode_count = 0; mode_count < VP8_YMODES; mode_count++)
+                    cpi->mb.ymode_count[mode_count] +=
+                        cpi->mb_row_ei[i].mb.ymode_count[mode_count];
+
+                for(mode_count = 0; mode_count < VP8_UV_MODES; mode_count++)
+                    cpi->mb.uv_mode_count[mode_count] +=
+                        cpi->mb_row_ei[i].mb.uv_mode_count[mode_count];
+
 
                 /* add up counts for each thread */
                 sum_coef_counts(x, &cpi->mb_row_ei[i].mb);
@@ -1101,8 +1111,8 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
 
 #endif
 
-    ++cpi->ymode_count[m];
-    ++cpi->uv_mode_count[uvm];
+    ++x->ymode_count[m];
+    ++x->uv_mode_count[uvm];
 
 }
 
