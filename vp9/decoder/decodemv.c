@@ -654,7 +654,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   const int mis = pbi->common.mode_info_stride;
   MACROBLOCKD *const xd  = &pbi->mb;
 
-  int_mv *const mv = &mbmi->mv;
+  int_mv *const mv = &mbmi->mv[0];
   int mb_to_left_edge;
   int mb_to_right_edge;
   int mb_to_top_edge;
@@ -1172,7 +1172,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   }
 }
 
-void vp9_decode_mode_mvs_init(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
+void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, BOOL_DECODER* const bc) {
   VP9_COMMON *cm = &pbi->common;
 
   vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
@@ -1184,8 +1184,8 @@ void vp9_decode_mode_mvs_init(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
 
   mb_mode_mv_init(pbi, bc);
 }
-void vp9_decode_mb_mode_mv(VP9D_COMP *pbi,
-                           MACROBLOCKD *xd,
+void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
+                           MACROBLOCKD* const xd,
                            int mb_row,
                            int mb_col,
                            BOOL_DECODER* const bc) {

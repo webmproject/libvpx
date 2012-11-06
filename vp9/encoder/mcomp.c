@@ -1380,7 +1380,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int tot_steps;
   int_mv this_mv;
 
-  int bestsad = INT_MAX;
+  unsigned int bestsad = INT_MAX;
   int best_site = 0;
   int last_site = 0;
 
@@ -1674,7 +1674,7 @@ int vp9_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   unsigned char *bestaddress;
   int_mv *best_mv = &d->bmi.as_mv.first;
   int_mv this_mv;
-  int bestsad = INT_MAX;
+  unsigned int bestsad = INT_MAX;
   int r, c;
 
   unsigned char *check_here;
@@ -1802,7 +1802,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   unsigned char *bestaddress;
   int_mv *best_mv = &d->bmi.as_mv.first;
   int_mv this_mv;
-  int bestsad = INT_MAX;
+  unsigned int bestsad = INT_MAX;
   int r, c;
 
   unsigned char *check_here;

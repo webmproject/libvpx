@@ -30,9 +30,9 @@ void vp9_init_quant_tables() {
     last_val = current_val;
 
     ac_val = ac_qlookup[i];
-    dc_qlookup[i] = (0.000000305 * ac_val * ac_val * ac_val) +
-                    (-0.00065 * ac_val * ac_val) +
-                    (0.9 * ac_val) + 0.5;
+    dc_qlookup[i] = (int)((0.000000305 * ac_val * ac_val * ac_val) +
+                          (-0.00065 * ac_val * ac_val) +
+                          (0.9 * ac_val) + 0.5);
     if (dc_qlookup[i] < ACDC_MIN)
       dc_qlookup[i] = ACDC_MIN;
   }

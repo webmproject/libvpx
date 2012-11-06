@@ -729,7 +729,8 @@ static void setup_token_decoder(VP9D_COMP *pbi,
                        "%d length", 1);
   }
 
-  if (vp9_start_decode(bool_decoder, partition, partition_size))
+  if (vp9_start_decode(bool_decoder,
+                       partition, (unsigned int)partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder %d", 1);
 }
@@ -986,7 +987,8 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
 
   init_frame(pbi);
 
-  if (vp9_start_decode(&header_bc, data, first_partition_length_in_bytes))
+  if (vp9_start_decode(&header_bc, data,
+                       (unsigned int)first_partition_length_in_bytes))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
   if (pc->frame_type == KEY_FRAME) {
