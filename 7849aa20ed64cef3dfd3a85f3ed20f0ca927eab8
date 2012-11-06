@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//4t4\u003d",
+        "filename": "vp9/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1981,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-06T01:22:32Z",
+      "side": 1,
+      "message": "So, feel free to ignore this and deal with it later, since it\u0027s not really relevant for what you\u0027re doing here, but do we still need these function pointers in cpi at this point? It seems kind of unnecessary.",
+      "revId": "7849aa20ed64cef3dfd3a85f3ed20f0ca927eab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
