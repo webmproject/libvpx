@@ -18,9 +18,9 @@ typedef struct {
   short col;
 } MV;
 
-typedef union {
-  uint32_t  as_int;
-  MV        as_mv;
-} int_mv;        /* facilitates faster equality tests and copies */
+typedef union int_mv {
+  uint32_t as_int;
+  MV as_mv;
+} int_mv; /* facilitates faster equality tests and copies */
 
 #endif
