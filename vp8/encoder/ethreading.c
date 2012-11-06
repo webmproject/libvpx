@@ -476,6 +476,8 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         vp8_zero(x->ymode_count);
         mb->skip_true_count = 0;
         vp8_zero(mb->MVcount);
+        mb->prediction_error = 0;
+        mb->intra_error = 0;
     }
 }
 

@@ -2864,38 +2864,17 @@ static int decide_key_frame(VP8_COMP *cpi)
 
     if ((cpi->compressor_speed == 2) && (cpi->Speed >= 5) && (cpi->sf.RD == 0))
     {
-        double change = 1.0 * abs((int)(cpi->intra_error - cpi->last_intra_error)) / (1 + cpi->last_intra_error);
-        double change2 = 1.0 * abs((int)(cpi->prediction_error - cpi->last_prediction_error)) / (1 + cpi->last_prediction_error);
+        double change = 1.0 * abs((int)(cpi->mb.intra_error -
+            cpi->last_intra_error)) / (1 + cpi->last_intra_error);
+        double change2 = 1.0 * abs((int)(cpi->mb.prediction_error -
+            cpi->last_prediction_error)) / (1 + cpi->last_prediction_error);
         double minerror = cm->MBs * 256;
 
-#if 0
+        cpi->last_intra_error = cpi->mb.intra_error;
+        cpi->last_prediction_error = cpi->mb.prediction_error;
 
-        if (10 * cpi->intra_error / (1 + cpi->prediction_error) < 15
-            && cpi->prediction_error > minerror
-            && (change > .25 || change2 > .25))
-        {
-            FILE *f = fopen("intra_inter.stt", "a");
-
-            if (cpi->prediction_error <= 0)
-                cpi->prediction_error = 1;
-
-            fprintf(f, "%d %d %d %d %14.4f\n",
-                    cm->current_video_frame,
-                    (int) cpi->prediction_error,
-                    (int) cpi->intra_error,
-                    (int)((10 * cpi->intra_error) / cpi->prediction_error),
-                    change);
-
-            fclose(f);
-        }
-
-#endif
-
-        cpi->last_intra_error = cpi->intra_error;
-        cpi->last_prediction_error = cpi->prediction_error;
-
-        if (10 * cpi->intra_error / (1 + cpi->prediction_error) < 15
-            && cpi->prediction_error > minerror
+        if (10 * cpi->mb.intra_error / (1 + cpi->mb.prediction_error) < 15
+            && cpi->mb.prediction_error > minerror
             && (change > .25 || change2 > .25))
         {
             /*(change > 1.4 || change < .75)&& cpi->this_frame_percent_intra > cpi->last_frame_percent_intra + 3*/

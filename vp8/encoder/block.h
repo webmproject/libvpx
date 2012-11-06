@@ -130,10 +130,10 @@ typedef struct macroblock
     int skip_true_count;
     unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
     unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
-
     int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
     int uv_mode_count[VP8_UV_MODES];     /* intra MB type cts this frame */
-
+    int64_t prediction_error;
+    int64_t intra_error;
 
 
     void (*short_fdct4x4)(short *input, short *output, int pitch);

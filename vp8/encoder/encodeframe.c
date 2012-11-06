@@ -676,6 +676,8 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi)
     vp8_zero(x->coef_counts);
     vp8_zero(x->ymode_count);
     vp8_zero(x->uv_mode_count)
+    x->prediction_error = 0;
+    x->intra_error = 0;
 }
 
 static void sum_coef_counts(MACROBLOCK *x, MACROBLOCK *x_thread)
@@ -749,8 +751,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
         xd->subpixel_predict16x16   = vp8_bilinear_predict16x16;
     }
 
-    cpi->prediction_error = 0;
-    cpi->intra_error = 0;
     cpi->mb.skip_true_count = 0;
     cpi->tok_count = 0;
 
@@ -888,6 +888,10 @@ void vp8_encode_frame(VP8_COMP *cpi)
                     cpi->mb.MVcount[1][mv_vals] +=
                         cpi->mb_row_ei[i].mb.MVcount[1][mv_vals];
                 }
+
+                cpi->mb.prediction_error +=
+                    cpi->mb_row_ei[i].mb.prediction_error;
+                cpi->mb.intra_error += cpi->mb_row_ei[i].mb.intra_error;
 
                 /* add up counts for each thread */
                 sum_coef_counts(x, &cpi->mb_row_ei[i].mb);
@@ -1252,8 +1256,8 @@ int vp8cx_encode_inter_macroblock
                             &distortion, &intra_error, mb_row, mb_col);
     }
 
-    cpi->prediction_error += distortion;
-    cpi->intra_error += intra_error;
+    x->prediction_error += distortion;
+    x->intra_error += intra_error;
 
     if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
     {

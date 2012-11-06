@@ -363,9 +363,7 @@ typedef struct VP8_COMP
     CODING_CONTEXT coding_context;
 
     /* Rate targetting variables */
-    int64_t prediction_error;
     int64_t last_prediction_error;
-    int64_t intra_error;
     int64_t last_intra_error;
 
     int this_frame_target;
