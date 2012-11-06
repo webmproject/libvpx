@@ -376,22 +376,22 @@ specialize vp9_sad8x8x8 sse4
 prototype void vp9_sad4x4x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
 specialize vp9_sad4x4x8 sse4
 
-prototype void vp9_sad32x32x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad32x32x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad32x32x4d
 
-prototype void vp9_sad16x16x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad16x16x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad16x16x4d sse3
 
-prototype void vp9_sad16x8x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad16x8x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad16x8x4d sse3
 
-prototype void vp9_sad8x16x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad8x16x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad8x16x4d sse3
 
-prototype void vp9_sad8x8x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad8x8x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad8x8x4d sse3
 
-prototype void vp9_sad4x4x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad4x4x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad4x4x4d sse3
 
 #
