@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//4TU\u003d",
+        "filename": "vp9/common/idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1272,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-11-06T17:13:04Z",
+      "side": 1,
+      "message": "since this will be removed shortly, I will leave it as it was for now.",
+      "revId": "8a336b0d0dc49009f4289d4e80c06c28c5321965",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//4TM\u003d",
+        "filename": "vp9/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1393,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-11-06T17:13:04Z",
+      "side": 1,
+      "message": "done",
+      "revId": "8a336b0d0dc49009f4289d4e80c06c28c5321965",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//4TI\u003d",
+        "filename": "vp9/encoder/onyx_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 675,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-11-06T17:13:04Z",
+      "side": 1,
+      "message": "done. changed to int64_t",
+      "revId": "8a336b0d0dc49009f4289d4e80c06c28c5321965",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//4S8\u003d",
+        "filename": "vp9/encoder/x86/x86_csystemdependent.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-11-06T17:13:04Z",
+      "side": 1,
+      "message": "done",
+      "revId": "8a336b0d0dc49009f4289d4e80c06c28c5321965",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
