@@ -9,14 +9,20 @@
  */
 #include <stdio.h>
 #include "tools_common.h"
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__OS2__)
 #include <io.h>
 #include <fcntl.h>
+
+#ifdef __OS2__
+#define _setmode    setmode
+#define _fileno     fileno
+#define _O_BINARY   O_BINARY
+#endif
 #endif
 
 FILE *set_binary_mode(FILE *stream) {
   (void)stream;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__OS2__)
   _setmode(_fileno(stream), _O_BINARY);
 #endif
   return stream;
