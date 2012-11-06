@@ -32,7 +32,7 @@
 #include "nestegg/include/nestegg/nestegg.h"
 
 #if CONFIG_OS_SUPPORT
-#if defined(_WIN32)
+#if defined(_MSC_VER)
 #include <io.h>
 #define snprintf _snprintf
 #define isatty   _isatty
@@ -49,18 +49,16 @@
 static const char *exec_name;
 
 #define VP8_FOURCC (0x00385056)
-
 static const struct {
-   char const *name;
-   const vpx_codec_iface_t *(*iface)(void);
-   unsigned int             fourcc;
-   unsigned int             fourcc_mask;
+  char const *name;
+  const vpx_codec_iface_t *(*iface)(void);
+  unsigned int             fourcc;
+  unsigned int             fourcc_mask;
 } ifaces[] = {
 #if CONFIG_VP9_DECODER
   {"vp9",  vpx_codec_vp8_dx,   VP8_FOURCC, 0x00FFFFFF},
 #endif
 };
-
 
 #include "args.h"
 static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
@@ -89,6 +87,9 @@ static const arg_def_t threadsarg = ARG_DEF("t", "threads", 1,
                                             "Max threads to use");
 static const arg_def_t verbosearg = ARG_DEF("v", "verbose", 0,
                                             "Show version string");
+static const arg_def_t error_concealment = ARG_DEF(NULL, "error-concealment", 0,
+                                                   "Enable decoder error-concealment");
+
 
 #if CONFIG_MD5
 static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
@@ -101,6 +102,7 @@ static const arg_def_t *all_args[] = {
 #if CONFIG_MD5
   &md5arg,
 #endif
+  &error_concealment,
   NULL
 };
 
@@ -121,10 +123,12 @@ static const arg_def_t pp_disp_b_modes = ARG_DEF(NULL, "pp-dbg-b-modes", 1,
                                                  "Display only selected block modes");
 static const arg_def_t pp_disp_mvs = ARG_DEF(NULL, "pp-dbg-mvs", 1,
                                              "Draw only selected motion vectors");
+static const arg_def_t mfqe = ARG_DEF(NULL, "mfqe", 0,
+                                      "Enable multiframe quality enhancement");
 
 static const arg_def_t *vp8_pp_args[] = {
   &addnoise_level, &deblock, &demacroblock_level, &pp_debug_info,
-  &pp_disp_ref_frame, &pp_disp_mb_modes, &pp_disp_b_modes, &pp_disp_mvs,
+  &pp_disp_ref_frame, &pp_disp_mb_modes, &pp_disp_b_modes, &pp_disp_mvs, &mfqe,
   NULL
 };
 #endif
@@ -145,7 +149,8 @@ static void usage_exit() {
           "write to. If the\n  argument does not include any escape "
           "characters, the output will be\n  written to a single file. "
           "Otherwise, the filename will be calculated by\n  expanding "
-          "the following escape characters:\n"
+          "the following escape characters:\n");
+  fprintf(stderr,
           "\n\t%%w   - Frame width"
           "\n\t%%h   - Frame height"
           "\n\t%%<n> - Frame number, zero padded to <n> places (1..9)"
@@ -281,7 +286,7 @@ static int read_frame(struct input_ctx      *input,
 
   *buf_sz = new_buf_sz;
 
-  if (*buf_sz) {
+  if (!feof(infile)) {
     if (fread(*buf, 1, *buf_sz, infile) != *buf_sz) {
       fprintf(stderr, "Failed to read full frame\n");
       return 1;
@@ -321,7 +326,7 @@ void out_put(void *out, const uint8_t *buf, unsigned int len, int do_md5) {
     MD5Update(out, buf, len);
 #endif
   } else {
-    if (fwrite(buf, 1, len, out));
+    (void) fwrite(buf, 1, len, out);
   }
 }
 
@@ -457,7 +462,7 @@ nestegg_seek_cb(int64_t offset, int whence, void *userdata) {
       whence = SEEK_END;
       break;
   };
-  return fseek(userdata, offset, whence) ? -1 : 0;
+  return fseek(userdata, (long)offset, whence) ? -1 : 0;
 }
 
 
@@ -509,7 +514,7 @@ webm_guess_framerate(struct input_ctx *input,
     goto fail;
 
   *fps_num = (i - 1) * 1000000;
-  *fps_den = tstamp / 1000;
+  *fps_den = (unsigned int)(tstamp / 1000);
   return 0;
 fail:
   nestegg_destroy(input->nestegg_ctx);
@@ -529,11 +534,10 @@ file_is_webm(struct input_ctx *input,
   unsigned int i, n;
   int          track_type = -1;
 
-  nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb,
-                   input->infile
-                  };
+  nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb, 0};
   nestegg_video_params params;
 
+  io.userdata = input->infile;
   if (nestegg_init(&input->nestegg_ctx, io, NULL))
     goto fail;
 
@@ -591,7 +595,7 @@ void generate_filename(const char *pattern, char *out, size_t q_len,
     if (p == next_pat) {
       size_t pat_len;
 
-      // parse the pattern
+      /* parse the pattern */
       q[q_len - 1] = '\0';
       switch (p[1]) {
         case 'w':
@@ -640,7 +644,7 @@ void generate_filename(const char *pattern, char *out, size_t q_len,
     } else {
       size_t copy_len;
 
-      // copy the next segment
+      /* copy the next segment */
       if (!next_pat)
         copy_len = strlen(p);
       else
@@ -669,6 +673,7 @@ int main(int argc, const char **argv_) {
   int                    frame_in = 0, frame_out = 0, flipuv = 0, noblit = 0, do_md5 = 0, progress = 0;
   int                    stop_after = 0, postproc = 0, summary = 0, quiet = 1;
   int                    arg_skip = 0;
+  int                    ec_enabled = 0;
   vpx_codec_iface_t       *iface = NULL;
   unsigned int           fourcc;
   unsigned long          dx_time = 0;
@@ -756,6 +761,9 @@ int main(int argc, const char **argv_) {
     } else if (arg_match(&arg, &deblock, argi)) {
       postproc = 1;
       vp8_pp_cfg.post_proc_flag |= VP8_DEBLOCK;
+    } else if (arg_match(&arg, &mfqe, argi)) {
+      postproc = 1;
+      vp8_pp_cfg.post_proc_flag |= VP8_MFQE;
     } else if (arg_match(&arg, &pp_debug_info, argi)) {
       unsigned int level = arg_parse_uint(&arg);
 
@@ -788,6 +796,8 @@ int main(int argc, const char **argv_) {
         postproc = 1;
         vp8_dbg_display_mv = flags;
       }
+    } else if (arg_match(&arg, &error_concealment, argi)) {
+      ec_enabled = 1;
     }
 
 #endif
@@ -846,7 +856,7 @@ int main(int argc, const char **argv_) {
     do {
       p = strchr(p, '%');
       if (p && p[1] >= '1' && p[1] <= '9') {
-        // pattern contains sequence number, so it's not unique.
+        /* pattern contains sequence number, so it's not unique. */
         single_file = 0;
         break;
       }
@@ -882,7 +892,8 @@ int main(int argc, const char **argv_) {
       That will have to wait until these tools support WebM natively.*/
     sprintf(buffer, "YUV4MPEG2 C%s W%u H%u F%u:%u I%c\n",
             "420jpeg", width, height, fps_num, fps_den, 'p');
-    out_put(out, (unsigned char *)buffer, strlen(buffer), do_md5);
+    out_put(out, (unsigned char *)buffer,
+            (unsigned int)strlen(buffer), do_md5);
   }
 
   /* Try to determine the codec from the fourcc. */
@@ -899,7 +910,8 @@ int main(int argc, const char **argv_) {
       break;
     }
 
-  dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0);
+  dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0) |
+              (ec_enabled ? VPX_CODEC_USE_ERROR_CONCEALMENT : 0);
   if (vpx_codec_dec_init(&decoder, iface ? iface :  ifaces[0].iface(), &cfg,
                          dec_flags)) {
     fprintf(stderr, "Failed to initialize decoder: %s\n", vpx_codec_error(&decoder));
@@ -960,7 +972,7 @@ int main(int argc, const char **argv_) {
 
     vpx_usec_timer_start(&timer);
 
-    if (vpx_codec_decode(&decoder, buf, buf_sz, NULL, 0)) {
+    if (vpx_codec_decode(&decoder, buf, (unsigned int)buf_sz, NULL, 0)) {
       const char *detail = vpx_codec_error_detail(&decoder);
       fprintf(stderr, "Failed to decode frame: %s\n", vpx_codec_error(&decoder));
 
@@ -971,7 +983,7 @@ int main(int argc, const char **argv_) {
     }
 
     vpx_usec_timer_mark(&timer);
-    dx_time += vpx_usec_timer_elapsed(&timer);
+    dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
 
     ++frame_in;
 
@@ -982,8 +994,13 @@ int main(int argc, const char **argv_) {
     }
     frames_corrupted += corrupted;
 
+    vpx_usec_timer_start(&timer);
+
     if ((img = vpx_codec_get_frame(&decoder, &iter)))
       ++frame_out;
+
+    vpx_usec_timer_mark(&timer);
+    dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
 
     if (progress)
       show_progress(frame_in, frame_out, dx_time);
