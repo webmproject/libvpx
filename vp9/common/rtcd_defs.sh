@@ -11,6 +11,8 @@ struct block;
 struct macroblock;
 struct variance_vtable;
 
+#define DEC_MVCOSTS int *mvjcost, int *mvcost[2]
+
 /* Encoder forward decls */
 struct variance_vtable;
 union int_mv;
@@ -483,6 +485,21 @@ specialize vp9_short_walsh4x4_x8
 
 prototype void vp9_short_walsh8x4_x8 "short *InputData, short *OutputData, int pitch"
 specialize vp9_short_walsh8x4_x8
+
+#
+# Motion search
+#
+prototype int vp9_full_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+specialize vp9_full_search_sad sse3 sse4_1
+vp9_full_search_sad_sse3=vp9_full_search_sadx3
+vp9_full_search_sad_sse4_1=vp9_full_search_sadx8
+
+prototype int vp9_refining_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+specialize vp9_refining_search_sad sse3
+vp9_refining_search_sad_sse3=vp9_refining_search_sadx4
+
+prototype int vp9_diamond_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+vp9_diamond_search_sad_sse3=vp9_diamond_search_sadx4
 
 fi
 # end encoder functions

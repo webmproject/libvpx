@@ -95,20 +95,6 @@ void vp9_arch_x86_encoder_init(VP9_COMP *cpi) {
   }
 #endif
 
-#if HAVE_SSE3
-  if (flags & HAS_SSE3) {
-    cpi->rtcd.search.full_search             = vp9_full_search_sadx3;
-    cpi->rtcd.search.diamond_search          = vp9_diamond_search_sadx4;
-    cpi->rtcd.search.refining_search         = vp9_refining_search_sadx4;
-  }
-#endif
-
-
-#if HAVE_SSE4_1
-  if (flags & HAS_SSE4_1) {
-    cpi->rtcd.search.full_search             = vp9_full_search_sadx8;
-  }
-#endif
 
 #endif
 }

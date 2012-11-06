@@ -1976,9 +1976,9 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->fn_ptr[BLOCK_4X4].copymem    = vp9_copy32xn;
 #endif
 
-  cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
-  cpi->diamond_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, diamond_search);
-  cpi->refining_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, refining_search);
+  cpi->full_search_sad = vp9_full_search_sad;
+  cpi->diamond_search_sad = vp9_diamond_search_sad;
+  cpi->refining_search_sad = vp9_refining_search_sad;
 
   // make sure frame 1 is okay
   cpi->error_bins[0] = cpi->common.MBs;
