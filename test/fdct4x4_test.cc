@@ -16,7 +16,7 @@
 
 extern "C" {
 #include "vp9/common/idct.h"
-#include "vp9/encoder/dct.h"
+#include "vpx_rtcd.h"
 }
 
 #include "acm_random.h"
@@ -26,7 +26,7 @@ using libvpx_test::ACMRandom;
 
 namespace {
 
-TEST(Vp8FdctTest, SignBiasCheck) {
+TEST(Vp9FdctTest, SignBiasCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int16_t test_input_block[16];
   int16_t test_output_block[16];
@@ -43,7 +43,7 @@ TEST(Vp8FdctTest, SignBiasCheck) {
 
     // TODO(Yaowu): this should be converted to a parameterized test
     // to test optimized versions of this function.
-    vp8_short_fdct4x4_c(test_input_block, test_output_block, pitch);
+    vp9_short_fdct4x4_c(test_input_block, test_output_block, pitch);
 
     for (int j = 0; j < 16; ++j) {
       if (test_output_block[j] < 0)
@@ -70,7 +70,7 @@ TEST(Vp8FdctTest, SignBiasCheck) {
 
     // TODO(Yaowu): this should be converted to a parameterized test
     // to test optimized versions of this function.
-    vp8_short_fdct4x4_c(test_input_block, test_output_block, pitch);
+    vp9_short_fdct4x4_c(test_input_block, test_output_block, pitch);
 
     for (int j = 0; j < 16; ++j) {
       if (test_output_block[j] < 0)
@@ -89,7 +89,7 @@ TEST(Vp8FdctTest, SignBiasCheck) {
   }
 };
 
-TEST(Vp8FdctTest, RoundTripErrorCheck) {
+TEST(Vp9FdctTest, RoundTripErrorCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int max_error = 0;
   double total_error = 0;
@@ -106,7 +106,7 @@ TEST(Vp8FdctTest, RoundTripErrorCheck) {
     // TODO(Yaowu): this should be converted to a parameterized test
     // to test optimized versions of this function.
     const int pitch = 8;
-    vp8_short_fdct4x4_c(test_input_block, test_temp_block, pitch);
+    vp9_short_fdct4x4_c(test_input_block, test_temp_block, pitch);
 
     for (int j = 0; j < 16; ++j) {
         if(test_temp_block[j] > 0) {
@@ -121,7 +121,7 @@ TEST(Vp8FdctTest, RoundTripErrorCheck) {
     }
 
     // Because the bitstream is not frozen yet, use the idct in the codebase.
-    vp8_short_idct4x4llm_c(test_temp_block, test_output_block, pitch);
+    vp9_short_idct4x4llm_c(test_temp_block, test_output_block, pitch);
 
     for (int j = 0; j < 16; ++j) {
       const int diff = test_input_block[j] - test_output_block[j];
