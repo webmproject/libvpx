@@ -4090,7 +4090,9 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         for (i = 0; i < NB_TXFM_MODES; i++) {
           int64_t adj_rd;
           if (this_mode != B_PRED) {
-            adj_rd = this_rd + txfm_cache[i] - txfm_cache[cm->txfm_mode];
+            const int64_t txfm_mode_diff =
+                txfm_cache[i] - txfm_cache[cm->txfm_mode];
+            adj_rd = this_rd + txfm_mode_diff;
           } else {
             adj_rd = this_rd;
           }
