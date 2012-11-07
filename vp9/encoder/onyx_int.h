@@ -43,9 +43,17 @@
 #define ARF_DECAY_THRESH 12
 
 #if CONFIG_PRED_FILTER
+#if CONFIG_COMP_INTERINTRA_PRED
+#define MAX_MODES 66
+#else
 #define MAX_MODES 54
+#endif
 #else  // CONFIG_PRED_FILTER
+#if CONFIG_COMP_INTERINTRA_PRED
+#define MAX_MODES 54
+#else
 #define MAX_MODES 42
+#endif
 #endif  // CONFIG_PRED_FILTER
 
 #define MIN_THRESHMULT  32
@@ -111,6 +119,9 @@ typedef struct {
 
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
+#if CONFIG_COMP_INTERINTRA_PRED
+  vp9_prob interintra_prob;
+#endif
 
   int mv_ref_ct[6][4][2];
   int mode_context[6][4];
@@ -238,6 +249,22 @@ typedef enum {
   THR_COMP_SPLITLG,
   THR_COMP_SPLITLA,
   THR_COMP_SPLITGA,
+#if CONFIG_COMP_INTERINTRA_PRED
+  THR_COMP_INTERINTRA_ZEROL,
+  THR_COMP_INTERINTRA_NEARESTL,
+  THR_COMP_INTERINTRA_NEARL,
+  THR_COMP_INTERINTRA_NEWL,
+
+  THR_COMP_INTERINTRA_ZEROG,
+  THR_COMP_INTERINTRA_NEARESTG,
+  THR_COMP_INTERINTRA_NEARG,
+  THR_COMP_INTERINTRA_NEWG,
+
+  THR_COMP_INTERINTRA_ZEROA,
+  THR_COMP_INTERINTRA_NEARESTA,
+  THR_COMP_INTERINTRA_NEARA,
+  THR_COMP_INTERINTRA_NEWA,
+#endif
 }
 THR_MODES;
 #else
@@ -296,7 +323,23 @@ typedef enum {
 
   THR_COMP_SPLITLG,
   THR_COMP_SPLITLA,
-  THR_COMP_SPLITGA
+  THR_COMP_SPLITGA,
+#if CONFIG_COMP_INTERINTRA_PRED
+  THR_COMP_INTERINTRA_ZEROL,
+  THR_COMP_INTERINTRA_NEARESTL,
+  THR_COMP_INTERINTRA_NEARL,
+  THR_COMP_INTERINTRA_NEWL,
+
+  THR_COMP_INTERINTRA_ZEROG,
+  THR_COMP_INTERINTRA_NEARESTG,
+  THR_COMP_INTERINTRA_NEARG,
+  THR_COMP_INTERINTRA_NEWG,
+
+  THR_COMP_INTERINTRA_ZEROA,
+  THR_COMP_INTERINTRA_NEARESTA,
+  THR_COMP_INTERINTRA_NEARA,
+  THR_COMP_INTERINTRA_NEWA,
+#endif
 }
 THR_MODES;
 #endif
@@ -539,6 +582,10 @@ typedef struct VP9_COMP {
   int sub_mv_ref_count[SUBMVREF_COUNT][VP9_SUBMVREFS];
   int mbsplit_count[VP9_NUMMBSPLITS];
   int y_uv_mode_count[VP9_YMODES][VP9_UV_MODES];
+#if CONFIG_COMP_INTERINTRA_PRED
+  int interintra_count[2];
+  int interintra_select_count[2];
+#endif
 
   nmv_context_counts NMVcount;
 
@@ -751,7 +798,6 @@ typedef struct VP9_COMP {
 #endif
   unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
                                       [VP9_SWITCHABLE_FILTERS];
-
 #if CONFIG_NEW_MVREF
   unsigned int best_ref_index_counts[MAX_REF_FRAMES][MAX_MV_REFS];
 #endif

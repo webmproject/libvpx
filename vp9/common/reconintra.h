@@ -17,5 +17,20 @@ extern void vp9_recon_intra_mbuv(MACROBLOCKD *xd);
 extern B_PREDICTION_MODE vp9_find_dominant_direction(unsigned char *ptr,
                                                      int stride, int n);
 extern B_PREDICTION_MODE vp9_find_bpred_context(BLOCKD *x);
+#if CONFIG_COMP_INTERINTRA_PRED
+extern void vp9_build_interintra_16x16_predictors_mb(MACROBLOCKD *xd,
+                                                     unsigned char *ypred,
+                                                     unsigned char *upred,
+                                                     unsigned char *vpred,
+                                                     int ystride,
+                                                     int uvstride);
+extern void vp9_build_interintra_16x16_predictors_mby(MACROBLOCKD *xd,
+                                                      unsigned char *ypred,
+                                                      int ystride);
+extern void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
+                                                       unsigned char *upred,
+                                                       unsigned char *vpred,
+                                                       int uvstride);
+#endif
 
 #endif  // __INC_RECONINTRA_H

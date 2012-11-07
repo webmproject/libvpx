@@ -610,7 +610,7 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
           mv.col = (x->partition_info->bmi[i].mv.as_mv.col
                     - best_ref_mv->as_mv.col);
           vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
-          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
+          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame > 0) {
             mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
                       - second_best_ref_mv->as_mv.row);
             mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
@@ -624,7 +624,7 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
           mv.col = (x->partition_info->bmi[i].mv.as_mv.col
                     - best_ref_mv->as_mv.col);
           vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
-          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
+          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame > 0) {
             mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
                       - second_best_ref_mv->as_mv.row);
             mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
@@ -640,7 +640,7 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
       mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
       mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
       vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
-      if (mbmi->second_ref_frame) {
+      if (mbmi->second_ref_frame > 0) {
         mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
         mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
         vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 1);
@@ -649,7 +649,7 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
       mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
       mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
       vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
-      if (mbmi->second_ref_frame) {
+      if (mbmi->second_ref_frame > 0) {
         mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
         mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
         vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 0);

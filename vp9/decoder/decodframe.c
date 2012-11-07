@@ -185,20 +185,39 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd) {
   } else {
 #if CONFIG_SUPERBLOCKS
     if (xd->mode_info_context->mbmi.encoded_as_sb) {
-      vp9_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
-                                         xd->dst.u_buffer, xd->dst.v_buffer,
-                                         xd->dst.y_stride, xd->dst.uv_stride);
+      vp9_build_inter32x32_predictors_sb(xd,
+                                         xd->dst.y_buffer,
+                                         xd->dst.u_buffer,
+                                         xd->dst.v_buffer,
+                                         xd->dst.y_stride,
+                                         xd->dst.uv_stride);
     } else {
 #endif
-    vp9_build_1st_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
-                                           xd->dst.u_buffer, xd->dst.v_buffer,
-                                           xd->dst.y_stride, xd->dst.uv_stride);
+    vp9_build_1st_inter16x16_predictors_mb(xd,
+                                           xd->dst.y_buffer,
+                                           xd->dst.u_buffer,
+                                           xd->dst.v_buffer,
+                                           xd->dst.y_stride,
+                                           xd->dst.uv_stride);
 
-    if (xd->mode_info_context->mbmi.second_ref_frame) {
-      vp9_build_2nd_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
-                                             xd->dst.u_buffer, xd->dst.v_buffer,
-                                             xd->dst.y_stride, xd->dst.uv_stride);
+    if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
+      vp9_build_2nd_inter16x16_predictors_mb(xd,
+                                             xd->dst.y_buffer,
+                                             xd->dst.u_buffer,
+                                             xd->dst.v_buffer,
+                                             xd->dst.y_stride,
+                                             xd->dst.uv_stride);
     }
+#if CONFIG_COMP_INTERINTRA_PRED
+    else if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+      vp9_build_interintra_16x16_predictors_mb(xd,
+                                               xd->dst.y_buffer,
+                                               xd->dst.u_buffer,
+                                               xd->dst.v_buffer,
+                                               xd->dst.y_stride,
+                                               xd->dst.uv_stride);
+    }
+#endif
 #if CONFIG_SUPERBLOCKS
     }
 #endif
@@ -707,7 +726,7 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
       xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
       xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
-      if (xd->mode_info_context->mbmi.second_ref_frame) {
+      if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
         int second_ref_fb_idx;
 
         /* Select the appropriate reference frame for this MB */
@@ -1281,6 +1300,9 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
     } else {
       pc->mcomp_filter_type = vp9_read_literal(&header_bc, 2);
     }
+#if CONFIG_COMP_INTERINTRA_PRED
+    pc->use_interintra = vp9_read_bit(&header_bc);
+#endif
     /* To enable choice of different interploation filters */
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }
@@ -1323,6 +1345,9 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
   vp9_copy(pbi->common.fc.pre_i8x8_mode_prob, pbi->common.fc.i8x8_mode_prob);
   vp9_copy(pbi->common.fc.pre_sub_mv_ref_prob, pbi->common.fc.sub_mv_ref_prob);
   vp9_copy(pbi->common.fc.pre_mbsplit_prob, pbi->common.fc.mbsplit_prob);
+#if CONFIG_COMP_INTERINTRA_PRED
+  pbi->common.fc.pre_interintra_prob = pbi->common.fc.interintra_prob;
+#endif
   pbi->common.fc.pre_nmvc = pbi->common.fc.nmvc;
   vp9_zero(pbi->common.fc.coef_counts);
   vp9_zero(pbi->common.fc.hybrid_coef_counts);
@@ -1339,6 +1364,9 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
   vp9_zero(pbi->common.fc.NMVcount);
   vp9_zero(pbi->common.fc.mv_ref_ct);
   vp9_zero(pbi->common.fc.mv_ref_ct_a);
+#if CONFIG_COMP_INTERINTRA_PRED
+  vp9_zero(pbi->common.fc.interintra_counts);
+#endif
 
   read_coef_probs(pbi, &header_bc);
 
