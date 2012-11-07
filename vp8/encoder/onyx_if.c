@@ -1076,10 +1076,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     }
 
     /* Data used for real time vc mode to see if gf needs refreshing */
-    cpi->inter_zz_count = 0;
     cpi->zeromv_count = 0;
-    cpi->gf_bad_count = 0;
-    cpi->gf_update_recommended = 0;
 
 
     /* Structures used to monitor GF usage */
@@ -4266,7 +4263,6 @@ static void encode_frame_to_data_rate
         /* Point to beginning of MODE_INFO arrays. */
         MODE_INFO *tmp = cm->mi;
 
-        cpi->inter_zz_count = 0;
         cpi->zeromv_count = 0;
 
         if(cm->frame_type != KEY_FRAME)
@@ -4275,8 +4271,6 @@ static void encode_frame_to_data_rate
             {
                 for (mb_col = 0; mb_col < cm->mb_cols; mb_col ++)
                 {
-                    if(tmp->mbmi.mode == ZEROMV && tmp->mbmi.ref_frame == LAST_FRAME)
-                        cpi->inter_zz_count++;
                     if(tmp->mbmi.mode == ZEROMV)
                         cpi->zeromv_count++;
                     tmp++;
@@ -4706,69 +4700,6 @@ static void encode_frame_to_data_rate
 
 
 }
-
-
-static void check_gf_quality(VP8_COMP *cpi)
-{
-    VP8_COMMON *cm = &cpi->common;
-    int gf_active_pct = (100 * cpi->gf_active_count) / (cm->mb_rows * cm->mb_cols);
-    int gf_ref_usage_pct =
-        (cpi->mb.count_mb_ref_frame_usage[GOLDEN_FRAME] * 100) /
-        (cm->mb_rows * cm->mb_cols);
-    int last_ref_zz_useage = (cpi->inter_zz_count * 100) / (cm->mb_rows * cm->mb_cols);
-
-    /* Gf refresh is not currently being signalled */
-    if (cpi->gf_update_recommended == 0)
-    {
-        if (cpi->common.frames_since_golden > 7)
-        {
-            /* Low use of gf */
-            if ((gf_active_pct < 10) || ((gf_active_pct + gf_ref_usage_pct) < 15))
-            {
-                /* ...but last frame zero zero usage is reasonbable so a
-                 * new gf might be appropriate
-                 */
-                if (last_ref_zz_useage >= 25)
-                {
-                    cpi->gf_bad_count ++;
-
-                    /* Check that the condition is stable */
-                    if (cpi->gf_bad_count >= 8)
-                    {
-                        cpi->gf_update_recommended = 1;
-                        cpi->gf_bad_count = 0;
-                    }
-                }
-                else
-                    /* Restart count as the background is not stable enough */
-                    cpi->gf_bad_count = 0;
-            }
-            else
-                /* Gf useage has picked up so reset count */
-                cpi->gf_bad_count = 0;
-        }
-    }
-    /* If the signal is set but has not been read should we cancel it. */
-    else if (last_ref_zz_useage < 15)
-    {
-        cpi->gf_update_recommended = 0;
-        cpi->gf_bad_count = 0;
-    }
-
-#if 0
-    {
-        FILE *f = fopen("gfneeded.stt", "a");
-        fprintf(f, "%10d %10d %10d %10d %10ld \n",
-                cm->current_video_frame,
-                cpi->common.frames_since_golden,
-                gf_active_pct, gf_ref_usage_pct,
-                cpi->gf_update_recommended);
-        fclose(f);
-    }
-
-#endif
-}
-
 #if !(CONFIG_REALTIME_ONLY)
 static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned char * dest_end, unsigned int *frame_flags)
 {
@@ -5072,8 +5003,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
     if (cpi->compressor_speed == 2)
     {
-        if (cpi->oxcf.number_of_layers == 1)
-            check_gf_quality(cpi);
         vpx_usec_timer_start(&tsctimer);
         vpx_usec_timer_start(&ticktimer);
     }

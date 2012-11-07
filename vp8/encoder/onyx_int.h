@@ -473,7 +473,6 @@ typedef struct VP8_COMP
     int Speed;
     int compressor_speed;
 
-    int interquantizer;
     int auto_gold;
     int auto_adjust_gold_quantizer;
     int auto_worst_q;
@@ -497,15 +496,9 @@ typedef struct VP8_COMP
     SPEED_FEATURES sf;
     int error_bins[1024];
 
-    /* Data used for real time conferencing mode to help determine if it
-     * would be good to update the gf
-     */
-    int inter_zz_count;
     /* Count ZEROMV on all reference frames. */
     int zeromv_count;
     int lf_zeromv_pct;
-    int gf_bad_count;
-    int gf_update_recommended;
 
     unsigned char *segmentation_map;
     signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
@@ -707,11 +700,8 @@ typedef struct VP8_COMP
     } rd_costs;
 } VP8_COMP;
 
-void control_data_rate(VP8_COMP *cpi);
-
-void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char *dest_end, unsigned long *size);
-
-int rd_cost_intra_mb(MACROBLOCKD *x);
+void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
+                        unsigned char *dest_end, unsigned long *size);
 
 void vp8_tokenize_mb(VP8_COMP *, MACROBLOCK *, TOKENEXTRA **);
 
