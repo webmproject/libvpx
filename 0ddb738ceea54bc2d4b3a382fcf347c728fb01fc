@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//3ZQ\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-07T17:57:45Z",
+      "side": 1,
+      "message": "nit: I don\u0027t like offset name as it really is the length in bytes of the frame size.",
+      "revId": "0ddb738ceea54bc2d4b3a382fcf347c728fb01fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3ZM\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-07T17:57:45Z",
+      "side": 1,
+      "message": "Move the index down one scope.",
+      "revId": "0ddb738ceea54bc2d4b3a382fcf347c728fb01fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3YM\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-07T17:57:45Z",
+      "side": 1,
+      "message": "You could also get rid of the i variable and use size and index to check when the first frame\u0027s length has been parsed.",
+      "revId": "0ddb738ceea54bc2d4b3a382fcf347c728fb01fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3Yg\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-07T17:57:45Z",
+      "side": 1,
+      "message": "You can explicitly set the index in the above scope and decrement in the check.",
+      "revId": "0ddb738ceea54bc2d4b3a382fcf347c728fb01fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3YI\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2012-11-07T17:57:45Z",
+      "side": 1,
+      "message": "Add curly braces.\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml?showone\u003dConditionals#Conditionals",
+      "revId": "0ddb738ceea54bc2d4b3a382fcf347c728fb01fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
