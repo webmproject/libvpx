@@ -150,7 +150,7 @@ unsigned int vp9_variance4x4_wmt(
 
   vp9_get4x4var_mmx(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 4));
+  return (var - (((unsigned int)avg * avg) >> 4));
 
 }
 
@@ -166,7 +166,7 @@ unsigned int vp9_variance8x8_wmt
 
   vp9_get8x8var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 6));
+  return (var - (((unsigned int)avg * avg) >> 6));
 
 }
 
@@ -184,7 +184,7 @@ unsigned int vp9_variance16x16_wmt
 
   vp9_get16x16var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0);
   *sse = sse0;
-  return (sse0 - ((sum0 * sum0) >> 8));
+  return (sse0 - (((unsigned int)sum0 * sum0) >> 8));
 }
 unsigned int vp9_mse16x16_wmt(
   const unsigned char *src_ptr,
@@ -218,7 +218,7 @@ unsigned int vp9_variance16x8_wmt
   var = sse0 + sse1;
   avg = sum0 + sum1;
   *sse = var;
-  return (var - ((avg * avg) >> 7));
+  return (var - (((unsigned int)avg * avg) >> 7));
 
 }
 
@@ -238,7 +238,7 @@ unsigned int vp9_variance8x16_wmt
   var = sse0 + sse1;
   avg = sum0 + sum1;
   *sse = var;
-  return (var - ((avg * avg) >> 7));
+  return (var - (((unsigned int)avg * avg) >> 7));
 
 }
 
@@ -261,7 +261,7 @@ unsigned int vp9_sub_pixel_variance4x4_wmt
     &xsum, &xxsum
   );
   *sse = xxsum;
-  return (xxsum - ((xsum * xsum) >> 4));
+  return (xxsum - (((unsigned int)xsum * xsum) >> 4));
 }
 
 
@@ -302,7 +302,7 @@ unsigned int vp9_sub_pixel_variance8x8_wmt
   }
 
   *sse = xxsum;
-  return (xxsum - ((xsum * xsum) >> 6));
+  return (xxsum - (((unsigned int)xsum * xsum) >> 6));
 }
 
 unsigned int vp9_sub_pixel_variance16x16_wmt
@@ -355,7 +355,7 @@ unsigned int vp9_sub_pixel_variance16x16_wmt
   }
 
   *sse = xxsum0;
-  return (xxsum0 - ((xsum0 * xsum0) >> 8));
+  return (xxsum0 - (((unsigned int)xsum0 * xsum0) >> 8));
 }
 
 unsigned int vp9_sub_pixel_mse16x16_wmt(
@@ -417,7 +417,7 @@ unsigned int vp9_sub_pixel_variance16x8_wmt
   }
 
   *sse = xxsum0;
-  return (xxsum0 - ((xsum0 * xsum0) >> 7));
+  return (xxsum0 - (((unsigned int)xsum0 * xsum0) >> 7));
 }
 
 unsigned int vp9_sub_pixel_variance8x16_wmt
@@ -457,7 +457,7 @@ unsigned int vp9_sub_pixel_variance8x16_wmt
   }
 
   *sse = xxsum;
-  return (xxsum - ((xsum * xsum) >> 7));
+  return (xxsum - (((unsigned int)xsum * xsum) >> 7));
 }
 
 
@@ -476,7 +476,7 @@ unsigned int vp9_variance_halfpixvar16x16_h_wmt(
     &xsum0, &xxsum0);
 
   *sse = xxsum0;
-  return (xxsum0 - ((xsum0 * xsum0) >> 8));
+  return (xxsum0 - (((unsigned int)xsum0 * xsum0) >> 8));
 }
 
 
@@ -494,7 +494,7 @@ unsigned int vp9_variance_halfpixvar16x16_v_wmt(
     &xsum0, &xxsum0);
 
   *sse = xxsum0;
-  return (xxsum0 - ((xsum0 * xsum0) >> 8));
+  return (xxsum0 - (((unsigned int)xsum0 * xsum0) >> 8));
 }
 
 
@@ -513,5 +513,5 @@ unsigned int vp9_variance_halfpixvar16x16_hv_wmt(
     &xsum0, &xxsum0);
 
   *sse = xxsum0;
-  return (xxsum0 - ((xsum0 * xsum0) >> 8));
+  return (xxsum0 - (((unsigned int)xsum0 * xsum0) >> 8));
 }
