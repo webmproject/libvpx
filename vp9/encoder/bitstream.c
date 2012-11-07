@@ -29,10 +29,7 @@
 #include "vp9/common/entropy.h"
 #include "vp9/encoder/encodemv.h"
 #include "vp9/common/entropymv.h"
-
-#if CONFIG_NEWBESTREFMV
 #include "vp9/common/mvref_common.h"
-#endif
 
 #if defined(SECTIONBITS_OUTPUT)
 unsigned __int64 Sectionbits[500];
@@ -186,7 +183,6 @@ static int get_binary_prob(int n0, int n1) {
 
 void vp9_update_skip_probs(VP9_COMP *cpi) {
   VP9_COMMON *const pc = &cpi->common;
-  int prob_skip_false[3] = {0, 0, 0};
   int k;
 
   for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
@@ -218,7 +214,6 @@ static void update_switchable_interp_probs(VP9_COMP *cpi,
 static void update_refpred_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int i;
-  int tot_count;
   vp9_prob new_pred_probs[PREDICTION_PROBS];
   int old_cost, new_cost;
 
@@ -884,7 +879,6 @@ static void update_ref_probs(VP9_COMP *const cpi) {
 }
 
 static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
-  int i;
   VP9_COMMON *const pc = &cpi->common;
   const nmv_context *nmvc = &pc->fc.nmvc;
   MACROBLOCK *x = &cpi->mb;
@@ -1062,9 +1056,8 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
             // Only used for context just now and soon to be deprecated.
             vp9_find_near_mvs(xd, m, prev_m, &n1, &n2, &best_mv, ct,
                               rf, cpi->common.ref_frame_sign_bias);
-#if CONFIG_NEWBESTREFMV
+
             best_mv.as_int = mi->ref_mvs[rf][0].as_int;
-#endif
 
             vp9_mv_ref_probs(&cpi->common, mv_ref_p, ct);
 
@@ -1124,10 +1117,8 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
                               mi->second_ref_frame,
                               cpi->common.ref_frame_sign_bias);
 
-#if CONFIG_NEWBESTREFMV
             best_second_mv.as_int =
               mi->ref_mvs[mi->second_ref_frame][0].as_int;
-#endif
           }
 
           // does the feature use compound prediction or not
@@ -1315,7 +1306,6 @@ static void write_mb_modes_kf(const VP9_COMMON  *c,
                               const MODE_INFO   *m,
                               int                mode_info_stride,
                               vp9_writer *const  bc) {
-  const int mis = mode_info_stride;
   int ym;
   int segment_id;
 
@@ -1331,6 +1321,7 @@ static void write_mb_modes_kf(const VP9_COMMON  *c,
        (vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) != 0))) {
         int skip_coeff = m->mbmi.mb_skip_coeff;
 #if CONFIG_SUPERBLOCKS
+        const int mis = mode_info_stride;
         if (m->mbmi.encoded_as_sb) {
           skip_coeff &= m[1].mbmi.mb_skip_coeff;
           skip_coeff &= m[mis].mbmi.mb_skip_coeff;

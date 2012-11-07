@@ -242,7 +242,6 @@ EXPERIMENT_LIST="
     superblocks
     pred_filter
     lossless
-    newbestrefmv
     subpelrefmv
     new_mvref
     implicit_segmentation

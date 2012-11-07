@@ -311,8 +311,8 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
   target = cpi->per_frame_bandwidth;
 
   if (cpi->oxcf.rc_max_intra_bitrate_pct) {
-    unsigned int max_rate = cpi->per_frame_bandwidth
-                            * cpi->oxcf.rc_max_intra_bitrate_pct / 100;
+    int max_rate = cpi->per_frame_bandwidth
+                 * cpi->oxcf.rc_max_intra_bitrate_pct / 100;
 
     if (target > max_rate)
       target = max_rate;

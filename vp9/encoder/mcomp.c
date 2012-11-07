@@ -1255,11 +1255,11 @@ cal_neighbors:
 #undef CHECK_POINT
 #undef CHECK_BETTER
 
-int vp9_diamond_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
-                           int_mv *ref_mv, int_mv *best_mv,
-                           int search_param, int sad_per_bit, int *num00,
-                           vp9_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
-                           int_mv *center_mv) {
+int vp9_diamond_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+                             int_mv *ref_mv, int_mv *best_mv,
+                             int search_param, int sad_per_bit, int *num00,
+                             vp9_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
+                             int_mv *center_mv) {
   int i, j, step;
 
   unsigned char *what = (*(b->base_src) + b->src);
@@ -1380,7 +1380,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int tot_steps;
   int_mv this_mv;
 
-  int bestsad = INT_MAX;
+  unsigned int bestsad = INT_MAX;
   int best_site = 0;
   int last_site = 0;
 
@@ -1568,10 +1568,10 @@ int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *b,
   return bestsme;
 }
 
-int vp9_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
-                        int sad_per_bit, int distance,
-                        vp9_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
-                        int_mv *center_mv) {
+int vp9_full_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
+                          int sad_per_bit, int distance,
+                          vp9_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
+                          int_mv *center_mv) {
   unsigned char *what = (*(b->base_src) + b->src);
   int what_stride = b->src_stride;
   unsigned char *in_what;
@@ -1674,7 +1674,7 @@ int vp9_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   unsigned char *bestaddress;
   int_mv *best_mv = &d->bmi.as_mv.first;
   int_mv this_mv;
-  int bestsad = INT_MAX;
+  unsigned int bestsad = INT_MAX;
   int r, c;
 
   unsigned char *check_here;
@@ -1802,7 +1802,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   unsigned char *bestaddress;
   int_mv *best_mv = &d->bmi.as_mv.first;
   int_mv this_mv;
-  int bestsad = INT_MAX;
+  unsigned int bestsad = INT_MAX;
   int r, c;
 
   unsigned char *check_here;
@@ -1942,11 +1942,10 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   else
     return INT_MAX;
 }
-
-int vp9_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
-                            int error_per_bit, int search_range,
-                            vp9_variance_fn_ptr_t *fn_ptr, DEC_MVCOSTS,
-                            int_mv *center_mv) {
+int vp9_refining_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+                              int_mv *ref_mv, int error_per_bit,
+                              int search_range, vp9_variance_fn_ptr_t *fn_ptr,
+                              DEC_MVCOSTS, int_mv *center_mv) {
   MV neighbors[4] = {{ -1, 0}, {0, -1}, {0, 1}, {1, 0}};
   int i, j;
   short this_row_offset, this_col_offset;

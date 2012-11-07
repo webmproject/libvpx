@@ -41,18 +41,13 @@
 #include "vp9/common/pred_common.h"
 #include "vp9/common/entropy.h"
 #include "vpx_rtcd.h"
-#if CONFIG_NEWBESTREFMV
 #include "vp9/common/mvref_common.h"
-#endif
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x)  (x)
 #else
 #define IF_RTCD(x)  NULL
 #endif
-
-extern void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x);
-extern void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x);
 
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
 
@@ -391,59 +386,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
   }
 }
 
-void vp9_auto_select_speed(VP9_COMP *cpi) {
-  int milliseconds_for_compress = (int)(1000000 / cpi->oxcf.frame_rate);
-
-  milliseconds_for_compress = milliseconds_for_compress * (16 - cpi->oxcf.cpu_used) / 16;
-
-  /*
-  // this is done during parameter valid check
-  if( cpi->oxcf.cpu_used > 16)
-      cpi->oxcf.cpu_used = 16;
-  if( cpi->oxcf.cpu_used < -16)
-      cpi->oxcf.cpu_used = -16;
-  */
-
-  if (cpi->avg_pick_mode_time < milliseconds_for_compress &&
-      (cpi->avg_encode_time - cpi->avg_pick_mode_time) <
-      milliseconds_for_compress) {
-    if (cpi->avg_pick_mode_time == 0) {
-      cpi->Speed = 4;
-    } else {
-      if (milliseconds_for_compress * 100 < cpi->avg_encode_time * 95) {
-        cpi->Speed          += 2;
-        cpi->avg_pick_mode_time = 0;
-        cpi->avg_encode_time = 0;
-
-        if (cpi->Speed > 16) {
-          cpi->Speed = 16;
-        }
-      }
-
-      if (milliseconds_for_compress * 100 >
-          cpi->avg_encode_time * auto_speed_thresh[cpi->Speed]) {
-        cpi->Speed          -= 1;
-        cpi->avg_pick_mode_time = 0;
-        cpi->avg_encode_time = 0;
-
-        // In real-time mode, cpi->speed is in [4, 16].
-        if (cpi->Speed < 4) {      // if ( cpi->Speed < 0 )
-          cpi->Speed = 4;        // cpi->Speed = 0;
-        }
-      }
-    }
-  } else {
-    cpi->Speed += 4;
-
-    if (cpi->Speed > 16)
-      cpi->Speed = 16;
-
-
-    cpi->avg_pick_mode_time = 0;
-    cpi->avg_encode_time = 0;
-  }
-}
-
 int vp9_block_error_c(short *coeff, short *dqcoeff, int block_size) {
   int i, error = 0;
 
@@ -613,7 +555,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
       default_eob = 64;
       if (type == PLANE_TYPE_Y_WITH_DC) {
         BLOCKD *bb;
-        int ib = (b - xd->block);
+        int ib = (int)(b - xd->block);
         if (ib < 16) {
           ib = (ib & 8) + ((ib & 4) >> 1);
           bb = xd->block + ib;
@@ -707,9 +649,6 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
   BLOCK *beptr;
   int d;
 
-  vp9_subtract_mby(mb->src_diff, *(mb->block[0].base_src), xd->predictor,
-                   mb->block[0].src_stride);
-
   // Fdct and building the 2nd order block
   for (beptr = mb->block; beptr < mb->block + 16; beptr += 2) {
     mb->vp9_short_fdct8x4(beptr->src_diff, beptr->coeff, 32);
@@ -778,9 +717,6 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
   BLOCKD *const x_y2  = xd->block + 24;
   int d;
 
-  vp9_subtract_mby(mb->src_diff, *(mb->block[0].base_src), xd->predictor,
-                   mb->block[0].src_stride);
-
   vp9_transform_mby_8x8(mb);
   vp9_quantize_mby_8x8(mb);
 
@@ -827,9 +763,6 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   BLOCK  *be = &mb->block[0];
   TX_TYPE tx_type;
 
-  vp9_subtract_mby(mb->src_diff, *(mb->block[0].base_src), mb->e_mbd.predictor,
-                   mb->block[0].src_stride);
-
   tx_type = get_tx_type_16x16(xd, b);
   if (tx_type != DCT_DCT) {
     vp9_fht(be->src_diff, 32, be->coeff, tx_type, 16);
@@ -866,7 +799,9 @@ static void macro_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   int d16x16, r16x16, r16x16s, s16x16;
   int64_t rd16x16, rd16x16s;
 
-  // FIXME don't do sub x3
+  vp9_subtract_mby(x->src_diff, *(x->block[0].base_src), xd->predictor,
+                   x->block[0].src_stride);
+
   if (skip_prob == 0)
     skip_prob = 1;
   s0 = vp9_cost_bit(skip_prob, 0);
@@ -1243,7 +1178,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rat
   cost += vp9_cost_bit(128, allow_comp);
 #endif
   *Rate = cost;
-  *rate_y += tot_rate_y;
+  *rate_y = tot_rate_y;
   *Distortion = distortion;
 
   return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
@@ -1579,7 +1514,7 @@ static int64_t rd_pick_intra8x8mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
 #endif
   }
   *Rate = cost;
-  *rate_y += tot_rate_y;
+  *rate_y = tot_rate_y;
   *Distortion = distortion;
   return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
 }
@@ -2767,7 +2702,7 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   if (mbmi->second_ref_frame)
     x->partition_info->bmi[15].second_mv.as_int = bsi.second_mvs[15].as_int;
 
-  return bsi.segment_rd;
+  return (int)(bsi.segment_rd);
 }
 
 /* Order arr in increasing order, original position stored in idx */
@@ -3251,7 +3186,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
 
-
   vp9_find_near_mvs(xd, xd->mode_info_context,
                     xd->prev_mode_info_context,
                     &frame_nearest_mv[frame_type], &frame_near_mv[frame_type],
@@ -3262,7 +3196,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   u_buffer[frame_type] = yv12->u_buffer + recon_uvoffset;
   v_buffer[frame_type] = yv12->v_buffer + recon_uvoffset;
 
-#if CONFIG_NEWBESTREFMV
   vp9_find_mv_refs(xd, xd->mode_info_context,
                    xd->prev_mode_info_context,
                    frame_type,
@@ -3275,7 +3208,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                         &frame_best_ref_mv[frame_type],
                         &frame_nearest_mv[frame_type],
                         &frame_near_mv[frame_type]);
-#endif
 }
 
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -3453,7 +3385,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
     }
 
-    if (sse < threshold) {
+    if ((int)sse < threshold) {
       unsigned int q2dc = xd->block[24].dequant[0];
       /* If there is no codeable 2nd order dc
        or a very small uniform pixel change change */
@@ -3527,10 +3459,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return this_rd;  // if 0, this will be re-calculated by caller
 }
 
-void vp9_rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                            int recon_yoffset, int recon_uvoffset,
-                            int *returnrate, int *returndistortion,
-                            int64_t *returnintra) {
+static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
+                               int recon_yoffset, int recon_uvoffset,
+                               int *returnrate, int *returndistortion,
+                               int64_t *returnintra) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   union b_mode_info best_bmodes[16];
@@ -3936,7 +3868,7 @@ void vp9_rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                            second_ref, best_yrd, mdcounts,
                                            &rate, &rate_y, &distortion,
                                            &skippable,
-                                           this_rd_thresh, seg_mvs,
+                                           (int)this_rd_thresh, seg_mvs,
                                            txfm_cache);
       rate2 += rate;
       distortion2 += distortion;
@@ -4153,7 +4085,9 @@ void vp9_rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         for (i = 0; i < NB_TXFM_MODES; i++) {
           int64_t adj_rd;
           if (this_mode != B_PRED) {
-            adj_rd = this_rd + txfm_cache[i] - txfm_cache[cm->txfm_mode];
+            const int64_t txfm_mode_diff =
+                txfm_cache[i] - txfm_cache[cm->txfm_mode];
+            adj_rd = this_rd + txfm_mode_diff;
           } else {
             adj_rd = this_rd;
           }
@@ -4268,11 +4202,12 @@ void vp9_rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
 end:
-  store_coding_context(x, &x->mb_context[xd->mb_index], best_mode_index, &best_partition,
-                       &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame],
-                       &frame_best_ref_mv[xd->mode_info_context->mbmi.second_ref_frame],
-                       best_pred_diff[0], best_pred_diff[1], best_pred_diff[2],
-                       best_txfm_diff);
+  store_coding_context(x, &x->mb_context[xd->mb_index],
+    best_mode_index, &best_partition,
+    &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame],
+    &frame_best_ref_mv[xd->mode_info_context->mbmi.second_ref_frame],
+    (int)best_pred_diff[0], (int)best_pred_diff[1], (int)best_pred_diff[2],
+    best_txfm_diff);
 }
 
 #if CONFIG_SUPERBLOCKS
@@ -4834,8 +4769,8 @@ void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
   {
     int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
 
-    vp9_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
-                           &distortion, &intra_error);
+    rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
+                       &distortion, &intra_error);
 
     /* restore cpi->zbin_mode_boost_enabled */
     cpi->zbin_mode_boost_enabled = zbin_mode_boost_enabled;

@@ -48,9 +48,6 @@ extern unsigned int hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
                     [PREV_COEF_CONTEXTS][ENTROPY_NODES] [2];
 #endif  /* ENTROPY_STATS */
 
-void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
-void vp9_fix_contexts(MACROBLOCKD *xd);
-
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp9_dct_value_tokens_ptr;
 static int dct_value_cost[DCT_MAX_VALUE * 2];

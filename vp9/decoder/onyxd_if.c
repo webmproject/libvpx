@@ -26,12 +26,12 @@
 #include "vpx_scale/vpxscale.h"
 #include "vp9/common/systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
+#include "vp9/decoder/decodframe.h"
 #include "detokenize.h"
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
 
-extern void vp9_init_de_quantizer(VP9D_COMP *pbi);
 static int get_free_fb(VP9_COMMON *cm);
 static void ref_cnt_fb(int *buf, int *idx, int new_idx);
 

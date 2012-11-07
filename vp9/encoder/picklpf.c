@@ -11,6 +11,7 @@
 
 #include "vp9/common/onyxc_int.h"
 #include "onyx_int.h"
+#include "vp9/encoder/picklpf.h"
 #include "quantize.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/vpxscale.h"
@@ -20,8 +21,6 @@
 #include "vpx_ports/arm.h"
 #endif
 
-extern int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source,
-                           YV12_BUFFER_CONFIG *dest);
 #if HAVE_ARMV7
 extern void vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
 #endif

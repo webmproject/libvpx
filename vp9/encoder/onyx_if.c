@@ -36,11 +36,10 @@
 #include "vp9/common/pred_common.h"
 #include "vp9/encoder/rdopt.h"
 #include "bitstream.h"
+#include "vp9/encoder/picklpf.h"
 #include "ratectrl.h"
-
-#if CONFIG_NEWBESTREFMV
 #include "vp9/common/mvref_common.h"
-#endif
+
 
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
@@ -58,17 +57,7 @@
 #define RTCD(x) NULL
 #endif
 
-extern void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi);
-
-extern void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val);
-
-extern void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi);
-
 extern void vp9_cmachine_specific_config(VP9_COMP *cpi);
-
-extern void vp9_deblock_frame(YV12_BUFFER_CONFIG *source,
-                              YV12_BUFFER_CONFIG *post,
-                              int filt_lvl, int low_var_thresh, int flag);
 
 extern void print_tree_update_probs();
 
@@ -79,10 +68,6 @@ extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
 extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
                                               YV12_BUFFER_CONFIG *dst_ybc);
 #endif
-
-int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
-
-extern void vp9_temporal_filter_prepare_c(VP9_COMP *cpi, int distance);
 
 static void set_default_lf_deltas(VP9_COMP *cpi);
 
@@ -257,14 +242,14 @@ static void init_base_skip_probs(void) {
       skip_prob = 255;
     base_skip_false_prob[i][1] = skip_prob;
 
-    skip_prob = t * 0.75;
+    skip_prob = t * 3 / 4;
     if (skip_prob < 1)
       skip_prob = 1;
     else if (skip_prob > 255)
       skip_prob = 255;
     base_skip_false_prob[i][2] = skip_prob;
 
-    skip_prob = t * 1.25;
+    skip_prob = t * 5 / 4;
     if (skip_prob < 1)
       skip_prob = 1;
     else if (skip_prob > 255)
@@ -1413,7 +1398,7 @@ rescale(int val, int num, int denom) {
   int64_t llden = denom;
   int64_t llval = val;
 
-  return llval * llnum / llden;
+  return (int)(llval * llnum / llden);
 }
 
 
@@ -1925,7 +1910,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
     vp9_init_first_pass(cpi);
   } else if (cpi->pass == 2) {
     size_t packet_sz = sizeof(FIRSTPASS_STATS);
-    int packets = oxcf->two_pass_stats_in.sz / packet_sz;
+    int packets = (int)(oxcf->two_pass_stats_in.sz / packet_sz);
 
     cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
     cpi->twopass.stats_in = cpi->twopass.stats_in_start;
@@ -1989,9 +1974,9 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->fn_ptr[BLOCK_4X4].copymem    = vp9_copy32xn;
 #endif
 
-  cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
-  cpi->diamond_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, diamond_search);
-  cpi->refining_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, refining_search);
+  cpi->full_search_sad = vp9_full_search_sad;
+  cpi->diamond_search_sad = vp9_diamond_search_sad;
+  cpi->refining_search_sad = vp9_refining_search_sad;
 
   // make sure frame 1 is okay
   cpi->error_bins[0] = cpi->common.MBs;
@@ -2351,7 +2336,7 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
 
   for (i = 0; i < 4; i++)
     pkt.data.psnr.psnr[i] = vp9_mse2psnr(pkt.data.psnr.samples[i], 255.0,
-                                         pkt.data.psnr.sse[i]);
+                                         (double)pkt.data.psnr.sse[i]);
 
   vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
 }
@@ -2917,7 +2902,9 @@ static void encode_frame_to_data_rate
   // pass function that sets the target bandwidth so must set it here
   if (cpi->common.refresh_alt_ref_frame) {
     cpi->per_frame_bandwidth = cpi->twopass.gf_bits;                           // Per frame bit target for the alt ref frame
-    cpi->target_bandwidth = cpi->twopass.gf_bits * cpi->output_frame_rate;      // per second target bitrate
+    // per second target bitrate
+    cpi->target_bandwidth = (int)(cpi->twopass.gf_bits *
+                                  cpi->output_frame_rate);
   }
 
   // Default turn off buffer to buffer copying
@@ -4119,7 +4106,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                       - cpi->last_time_stamp_seen;
       // do a step update if the duration changes by 10%
       if (last_duration)
-        step = ((this_duration - last_duration) * 10 / last_duration);
+        step = (int)((this_duration - last_duration) * 10 / last_duration);
     }
 
     if (this_duration) {
@@ -4132,7 +4119,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
          * frame rate. If we haven't seen 1 second yet, then average
          * over the whole interval seen.
          */
-        interval = cpi->source->ts_end - cpi->first_time_stamp_ever;
+        interval = (double)(cpi->source->ts_end
+                            - cpi->first_time_stamp_ever);
         if (interval > 10000000.0)
           interval = 10000000;
 
@@ -4234,17 +4222,17 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
         int y_samples = orig->y_height * orig->y_width;
         int uv_samples = orig->uv_height * orig->uv_width;
         int t_samples = y_samples + 2 * uv_samples;
-        int64_t sq_error;
+        double sq_error;
 
-        ye = calc_plane_error(orig->y_buffer, orig->y_stride,
+        ye = (double)calc_plane_error(orig->y_buffer, orig->y_stride,
                               recon->y_buffer, recon->y_stride, orig->y_width,
                               orig->y_height);
 
-        ue = calc_plane_error(orig->u_buffer, orig->uv_stride,
+        ue = (double)calc_plane_error(orig->u_buffer, orig->uv_stride,
                               recon->u_buffer, recon->uv_stride, orig->uv_width,
                               orig->uv_height);
 
-        ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
+        ve = (double)calc_plane_error(orig->v_buffer, orig->uv_stride,
                               recon->v_buffer, recon->uv_stride, orig->uv_width,
                               orig->uv_height);
 
@@ -4265,15 +4253,15 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 #endif
           vp9_clear_system_state();
 
-          ye = calc_plane_error(orig->y_buffer, orig->y_stride,
+          ye = (double)calc_plane_error(orig->y_buffer, orig->y_stride,
                                 pp->y_buffer, pp->y_stride, orig->y_width,
                                 orig->y_height);
 
-          ue = calc_plane_error(orig->u_buffer, orig->uv_stride,
+          ue = (double)calc_plane_error(orig->u_buffer, orig->uv_stride,
                                 pp->u_buffer, pp->uv_stride, orig->uv_width,
                                 orig->uv_height);
 
-          ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
+          ve = (double)calc_plane_error(orig->v_buffer, orig->uv_stride,
                                 pp->v_buffer, pp->uv_stride, orig->uv_width,
                                 orig->uv_height);
 

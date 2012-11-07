@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -8,21 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "onyxc_int.h"
-#include "blockd.h"
 
+#ifndef __INC_DECODFRAME_H
+#define __INC_DECODFRAME_H
 
-#ifndef __INC_MVREF_COMMON_H
-#define __INC_MVREF_COMMON_H
+struct VP9Decompressor;
 
-void vp9_find_mv_refs(
-  MACROBLOCKD *xd,
-  MODE_INFO *here,
-  MODE_INFO *lf_here,
-  MV_REFERENCE_FRAME ref_frame,
-  int_mv * mv_ref_list,
-  int *ref_sign_bias
-);
+extern void vp9_init_de_quantizer(struct VP9Decompressor *pbi);
 
-#endif
-
+#endif  // __INC_DECODFRAME_H

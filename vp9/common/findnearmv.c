@@ -11,6 +11,7 @@
 
 #include "findnearmv.h"
 #include "vp9/common/sadmxn.h"
+#include "vp9/common/subpelvar.h"
 #include <limits.h>
 
 const unsigned char vp9_mbsplit_offset[4][16] = {
@@ -167,7 +168,6 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
   return p;
 }
 
-#if CONFIG_NEWBESTREFMV
 #define SP(x) (((x) & 7) << 1)
 unsigned int vp9_sad3x16_c(
   const unsigned char *src_ptr,
@@ -185,6 +185,76 @@ unsigned int vp9_sad16x3_c(
   int max_sad) {
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 3);
 }
+
+#if CONFIG_SUBPELREFMV
+unsigned int vp9_variance2x16_c(const unsigned char *src_ptr,
+                                const int  source_stride,
+                                const unsigned char *ref_ptr,
+                                const int  recon_stride,
+                                unsigned int *sse) {
+  unsigned int var;
+  int avg;
+
+  variance(src_ptr, source_stride, ref_ptr, recon_stride, 2, 16, &var, &avg);
+  *sse = var;
+  return (var - ((avg * avg) >> 5));
+}
+
+unsigned int vp9_variance16x2_c(const unsigned char *src_ptr,
+                                const int  source_stride,
+                                const unsigned char *ref_ptr,
+                                const int  recon_stride,
+                                unsigned int *sse) {
+  unsigned int var;
+  int avg;
+
+  variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 2, &var, &avg);
+  *sse = var;
+  return (var - ((avg * avg) >> 5));
+}
+
+unsigned int vp9_sub_pixel_variance16x2_c(const unsigned char  *src_ptr,
+                                          const int  src_pixels_per_line,
+                                          const int  xoffset,
+                                          const int  yoffset,
+                                          const unsigned char *dst_ptr,
+                                          const int dst_pixels_per_line,
+                                          unsigned int *sse) {
+  unsigned short FData3[16 * 3];  // Temp data bufffer used in filtering
+  unsigned char  temp2[20 * 16];
+  const short *HFilter, *VFilter;
+
+  HFilter = vp9_bilinear_filters[xoffset];
+  VFilter = vp9_bilinear_filters[yoffset];
+
+  var_filter_block2d_bil_first_pass(src_ptr, FData3,
+                                    src_pixels_per_line, 1, 3, 16, HFilter);
+  var_filter_block2d_bil_second_pass(FData3, temp2, 16, 16, 2, 16, VFilter);
+
+  return vp9_variance16x2_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
+}
+
+unsigned int vp9_sub_pixel_variance2x16_c(const unsigned char  *src_ptr,
+                                          const int  src_pixels_per_line,
+                                          const int  xoffset,
+                                          const int  yoffset,
+                                          const unsigned char *dst_ptr,
+                                          const int dst_pixels_per_line,
+                                          unsigned int *sse) {
+  unsigned short FData3[2 * 17];  // Temp data bufffer used in filtering
+  unsigned char  temp2[2 * 16];
+  const short *HFilter, *VFilter;
+
+  HFilter = vp9_bilinear_filters[xoffset];
+  VFilter = vp9_bilinear_filters[yoffset];
+
+  var_filter_block2d_bil_first_pass(src_ptr, FData3,
+                                    src_pixels_per_line, 1, 17, 2, HFilter);
+  var_filter_block2d_bil_second_pass(FData3, temp2, 2, 2, 16, 2, VFilter);
+
+  return vp9_variance2x16_c(temp2, 2, dst_ptr, dst_pixels_per_line, sse);
+}
+#endif
 
 /* check a list of motion vectors by sad score using a number rows of pixels
  * above and a number cols of pixels in the left to select the one with best
@@ -323,5 +393,3 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   // Copy back the re-ordered mv list
   vpx_memcpy(mvlist, sorted_mvs, sizeof(sorted_mvs));
 }
-
-#endif  // CONFIG_NEWBESTREFMV

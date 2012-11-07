@@ -68,87 +68,24 @@ extern fractional_mv_step_fp vp9_find_best_sub_pixel_step_iteratively;
 extern fractional_mv_step_fp vp9_find_best_sub_pixel_step;
 extern fractional_mv_step_fp vp9_find_best_half_pixel_step;
 
-#define prototype_full_search_sad(sym)\
-  int (sym)\
-  (\
-   MACROBLOCK *x, \
-   BLOCK *b, \
-   BLOCKD *d, \
-   int_mv *ref_mv, \
-   int sad_per_bit, \
-   int distance, \
-   vp9_variance_fn_ptr_t *fn_ptr, \
-   DEC_MVSADCOSTS, \
-   int_mv *center_mv \
-  )
+typedef int (*vp9_full_search_fn_t)(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+                                    int_mv *ref_mv, int sad_per_bit,
+                                    int distance, vp9_variance_fn_ptr_t *fn_ptr,
+                                    DEC_MVCOSTS, int_mv *center_mv);
 
-#define prototype_refining_search_sad(sym)\
-  int (sym)\
-  (\
-   MACROBLOCK *x, \
-   BLOCK *b, \
-   BLOCKD *d, \
-   int_mv *ref_mv, \
-   int sad_per_bit, \
-   int distance, \
-   vp9_variance_fn_ptr_t *fn_ptr, \
-   DEC_MVSADCOSTS, \
-   int_mv *center_mv \
-  )
+typedef int (*vp9_refining_search_fn_t)(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+                                        int_mv *ref_mv, int sad_per_bit,
+                                        int distance,
+                                        vp9_variance_fn_ptr_t *fn_ptr,
+                                        DEC_MVCOSTS, int_mv *center_mv);
 
-#define prototype_diamond_search_sad(sym)\
-  int (sym)\
-  (\
-   MACROBLOCK *x, \
-   BLOCK *b, \
-   BLOCKD *d, \
-   int_mv *ref_mv, \
-   int_mv *best_mv, \
-   int search_param, \
-   int sad_per_bit, \
-   int *num00, \
-   vp9_variance_fn_ptr_t *fn_ptr, \
-   DEC_MVSADCOSTS, \
-   int_mv *center_mv \
-  )
+typedef int (*vp9_diamond_search_fn_t)(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+                                       int_mv *ref_mv, int_mv *best_mv,
+                                       int search_param, int sad_per_bit,
+                                       int *num00,
+                                       vp9_variance_fn_ptr_t *fn_ptr,
+                                       DEC_MVCOSTS, int_mv *center_mv);
 
-#if ARCH_X86 || ARCH_X86_64
-#include "x86/mcomp_x86.h"
-#endif
-
-typedef prototype_full_search_sad(*vp9_full_search_fn_t);
-extern prototype_full_search_sad(vp9_full_search_sad);
-extern prototype_full_search_sad(vp9_full_search_sadx3);
-extern prototype_full_search_sad(vp9_full_search_sadx8);
-
-typedef prototype_refining_search_sad(*vp9_refining_search_fn_t);
-extern prototype_refining_search_sad(vp9_refining_search_sad);
-extern prototype_refining_search_sad(vp9_refining_search_sadx4);
-
-typedef prototype_diamond_search_sad(*vp9_diamond_search_fn_t);
-extern prototype_diamond_search_sad(vp9_diamond_search_sad);
-extern prototype_diamond_search_sad(vp9_diamond_search_sadx4);
-
-#ifndef vp9_search_full_search
-#define vp9_search_full_search vp9_full_search_sad
-#endif
-extern prototype_full_search_sad(vp9_search_full_search);
-
-#ifndef vp9_search_refining_search
-#define vp9_search_refining_search vp9_refining_search_sad
-#endif
-extern prototype_refining_search_sad(vp9_search_refining_search);
-
-#ifndef vp9_search_diamond_search
-#define vp9_search_diamond_search vp9_diamond_search_sad
-#endif
-extern prototype_diamond_search_sad(vp9_search_diamond_search);
-
-typedef struct {
-  prototype_full_search_sad(*full_search);
-  prototype_refining_search_sad(*refining_search);
-  prototype_diamond_search_sad(*diamond_search);
-} vp9_search_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define SEARCH_INVOKE(ctx,fn) (ctx)->fn

@@ -11,6 +11,8 @@ struct block;
 struct macroblock;
 struct variance_vtable;
 
+#define DEC_MVCOSTS int *mvjcost, int *mvcost[2]
+
 /* Encoder forward decls */
 struct variance_vtable;
 union int_mv;
@@ -43,17 +45,23 @@ specialize vp9_dequantize_b mmx
 prototype void vp9_dequantize_b_2x2 "struct blockd *x"
 specialize vp9_dequantize_b_2x2
 
-prototype void vp9_dequant_dc_idct_add_y_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs, short *dc, struct macroblockd *xd"
+prototype void vp9_dequant_dc_idct_add_y_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, unsigned short *eobs, short *dc, struct macroblockd *xd"
 specialize vp9_dequant_dc_idct_add_y_block_8x8
 
-prototype void vp9_dequant_idct_add_y_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs, struct macroblockd *xd"
+prototype void vp9_dequant_idct_add_y_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, unsigned short *eobs, struct macroblockd *xd"
 specialize vp9_dequant_idct_add_y_block_8x8
 
-prototype void vp9_dequant_idct_add_uv_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dstu, unsigned char *dstv, int stride, char *eobs, struct macroblockd *xd"
+prototype void vp9_dequant_idct_add_uv_block_8x8 "short *q, short *dq, unsigned char *pre, unsigned char *dstu, unsigned char *dstv, int stride, unsigned short *eobs, struct macroblockd *xd"
 specialize vp9_dequant_idct_add_uv_block_8x8
 
 prototype void vp9_dequant_idct_add_16x16 "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
 specialize vp9_dequant_idct_add_16x16
+
+prototype void vp9_dequant_idct_add_8x8 "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
+specialize vp9_dequant_idct_add_8x8
+
+prototype void vp9_dequant_dc_idct_add_8x8 "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc"
+specialize vp9_dequant_dc_idct_add_8x8
 
 prototype void vp9_dequant_idct_add "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride"
 specialize vp9_dequant_idct_add
@@ -61,13 +69,13 @@ specialize vp9_dequant_idct_add
 prototype void vp9_dequant_dc_idct_add "short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc"
 specialize vp9_dequant_dc_idct_add
 
-prototype void vp9_dequant_dc_idct_add_y_block "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs, short *dc"
+prototype void vp9_dequant_dc_idct_add_y_block "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, unsigned short *eobs, short *dc"
 specialize vp9_dequant_dc_idct_add_y_block mmx
 
-prototype void vp9_dequant_idct_add_y_block "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, char *eobs"
+prototype void vp9_dequant_idct_add_y_block "short *q, short *dq, unsigned char *pre, unsigned char *dst, int stride, unsigned short *eobs"
 specialize vp9_dequant_idct_add_y_block mmx
 
-prototype void vp9_dequant_idct_add_uv_block "short *q, short *dq, unsigned char *pre, unsigned char *dstu, unsigned char *dstv, int stride, char *eobs"
+prototype void vp9_dequant_idct_add_uv_block "short *q, short *dq, unsigned char *pre, unsigned char *dstu, unsigned char *dstv, int stride, unsigned short *eobs"
 specialize vp9_dequant_idct_add_uv_block mmx
 
 #
@@ -219,13 +227,11 @@ vp9_loop_filter_simple_bh_neon=vp9_loop_filter_bhs_neon
 #
 # sad 16x3, 3x16
 #
-if [ "$CONFIG_NEWBESTREFMV" = "yes" ]; then
 prototype unsigned int vp9_sad16x3 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
 specialize vp9_sad16x3 sse2
 
 prototype unsigned int vp9_sad3x16 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
 specialize vp9_sad3x16 sse2
-fi
 
 #
 # Encoder functions below this point.
@@ -368,22 +374,22 @@ specialize vp9_sad8x8x8 sse4
 prototype void vp9_sad4x4x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
 specialize vp9_sad4x4x8 sse4
 
-prototype void vp9_sad32x32x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad32x32x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad32x32x4d
 
-prototype void vp9_sad16x16x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad16x16x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad16x16x4d sse3
 
-prototype void vp9_sad16x8x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad16x8x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad16x8x4d sse3
 
-prototype void vp9_sad8x16x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad8x16x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad8x16x4d sse3
 
-prototype void vp9_sad8x8x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad8x8x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad8x8x4d sse3
 
-prototype void vp9_sad4x4x4d "const unsigned char *src_ptr, int  src_stride, unsigned char *ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad4x4x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad4x4x4d sse3
 
 #
@@ -477,6 +483,21 @@ specialize vp9_short_walsh4x4_x8
 
 prototype void vp9_short_walsh8x4_x8 "short *InputData, short *OutputData, int pitch"
 specialize vp9_short_walsh8x4_x8
+
+#
+# Motion search
+#
+prototype int vp9_full_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+specialize vp9_full_search_sad sse3 sse4_1
+vp9_full_search_sad_sse3=vp9_full_search_sadx3
+vp9_full_search_sad_sse4_1=vp9_full_search_sadx8
+
+prototype int vp9_refining_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+specialize vp9_refining_search_sad sse3
+vp9_refining_search_sad_sse3=vp9_refining_search_sadx4
+
+prototype int vp9_diamond_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+vp9_diamond_search_sad_sse3=vp9_diamond_search_sadx4
 
 fi
 # end encoder functions

@@ -53,6 +53,7 @@ VP9_COMMON_SRCS-yes += common/reconintra4x4.h
 VP9_COMMON_SRCS-yes += common/rtcd.c
 VP9_COMMON_SRCS-yes += common/rtcd_defs.sh
 VP9_COMMON_SRCS-yes += common/sadmxn.h
+VP9_COMMON_SRCS-yes += common/subpelvar.h
 VP9_COMMON_SRCS-yes += common/seg_common.h
 VP9_COMMON_SRCS-yes += common/seg_common.c
 VP9_COMMON_SRCS-yes += common/setupintrarecon.h

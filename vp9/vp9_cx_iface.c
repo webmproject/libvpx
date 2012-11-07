@@ -179,7 +179,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
   if (cfg->g_pass == VPX_RC_LAST_PASS) {
     size_t           packet_sz = sizeof(FIRSTPASS_STATS);
-    int              n_packets = cfg->rc_twopass_stats_in.sz / packet_sz;
+    int              n_packets = (int)(cfg->rc_twopass_stats_in.sz / packet_sz);
     FIRSTPASS_STATS *stats;
 
     if (!cfg->rc_twopass_stats_in.buf)
@@ -698,9 +698,9 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         pkt.data.frame.pts =
           (dst_time_stamp * ctx->cfg.g_timebase.den + round)
           / ctx->cfg.g_timebase.num / 10000000;
-        pkt.data.frame.duration =
-          (delta * ctx->cfg.g_timebase.den + round)
-          / ctx->cfg.g_timebase.num / 10000000;
+        pkt.data.frame.duration = (unsigned long)
+          ((delta * ctx->cfg.g_timebase.den + round)
+          / ctx->cfg.g_timebase.num / 10000000);
         pkt.data.frame.flags = lib_flags << 16;
 
         if (lib_flags & FRAMEFLAGS_KEY)

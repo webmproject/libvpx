@@ -9,23 +9,11 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "vpx_rtcd.h"
 #include "dequantize.h"
 #include "vp9/common/idct.h"
 #include "vpx_mem/vpx_mem.h"
 #include "onyxd_int.h"
-
-extern void vp9_short_idct4x4llm_c(short *input, short *output, int pitch);
-extern void vp9_short_idct4x4llm_1_c(short *input, short *output, int pitch);
-extern void vp9_short_idct8x8_c(short *input, short *output, int pitch);
-extern void vp9_short_idct8x8_1_c(short *input, short *output, int pitch);
-
-#if CONFIG_LOSSLESS
-extern void vp9_short_inv_walsh4x4_x8_c(short *input, short *output,
-                                        int pitch);
-extern void vp9_short_inv_walsh4x4_1_x8_c(short *input, short *output,
-                                          int pitch);
-#endif
 
 #ifdef DEC_DEBUG
 extern int dec_debug;

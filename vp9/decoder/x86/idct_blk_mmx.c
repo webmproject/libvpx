@@ -15,7 +15,8 @@
 void vp9_dequant_dc_idct_add_y_block_mmx(short *q, short *dq,
                                          unsigned char *pre,
                                          unsigned char *dst,
-                                         int stride, char *eobs, short *dc) {
+                                         int stride, unsigned short *eobs,
+                                         short *dc) {
   int i;
 
   for (i = 0; i < 4; i++) {
@@ -53,7 +54,7 @@ void vp9_dequant_dc_idct_add_y_block_mmx(short *q, short *dq,
 void vp9_dequant_idct_add_y_block_mmx(short *q, short *dq,
                                       unsigned char *pre,
                                       unsigned char *dst,
-                                      int stride, char *eobs) {
+                                      int stride, unsigned short *eobs) {
   int i;
 
   for (i = 0; i < 4; i++) {
@@ -96,7 +97,7 @@ void vp9_dequant_idct_add_uv_block_mmx(short *q, short *dq,
                                        unsigned char *pre,
                                        unsigned char *dstu,
                                        unsigned char *dstv,
-                                       int stride, char *eobs) {
+                                       int stride, unsigned short *eobs) {
   int i;
 
   for (i = 0; i < 2; i++) {

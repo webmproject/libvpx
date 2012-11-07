@@ -17,7 +17,7 @@
 extern "C" {
 #include "vp9/common/entropy.h"
 #include "vp9/common/idct.h"
-#include "vp9/encoder/dct.h"
+#include "vpx_rtcd.h"
 }
 
 #include "acm_random.h"
@@ -256,7 +256,7 @@ void reference_16x16_dct_2d(int16_t input[16*16], double output[16*16]) {
 }
 
 
-TEST(VP8Idct16x16Test, AccuracyCheck) {
+TEST(VP9Idct16x16Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 1000;
   for (int i = 0; i < count_test_block; ++i) {
@@ -271,7 +271,7 @@ TEST(VP8Idct16x16Test, AccuracyCheck) {
     reference_16x16_dct_2d(in, out_r);
     for (int j = 0; j < 256; j++)
       coeff[j] = round(out_r[j]);
-    vp8_short_idct16x16_c(coeff, out_c, 32);
+    vp9_short_idct16x16_c(coeff, out_c, 32);
     for (int j = 0; j < 256; ++j) {
       const int diff = out_c[j] - in[j];
       const int error = diff * diff;
@@ -280,7 +280,7 @@ TEST(VP8Idct16x16Test, AccuracyCheck) {
           << " at index " << j;
     }
 
-    vp8_short_fdct16x16_c(in, out_c, 32);
+    vp9_short_fdct16x16_c(in, out_c, 32);
     for (int j = 0; j < 256; ++j) {
       const double diff = coeff[j] - out_c[j];
       const double error = diff * diff;
@@ -291,7 +291,7 @@ TEST(VP8Idct16x16Test, AccuracyCheck) {
   }
 }
 
-TEST(VP8Fdct16x16Test, AccuracyCheck) {
+TEST(VP9Fdct16x16Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int max_error = 0;
   double total_error = 0;
@@ -306,8 +306,8 @@ TEST(VP8Fdct16x16Test, AccuracyCheck) {
       test_input_block[j] = rnd.Rand8() - rnd.Rand8();
 
     const int pitch = 32;
-    vp8_short_fdct16x16_c(test_input_block, test_temp_block, pitch);
-    vp8_short_idct16x16_c(test_temp_block, test_output_block, pitch);
+    vp9_short_fdct16x16_c(test_input_block, test_temp_block, pitch);
+    vp9_short_idct16x16_c(test_temp_block, test_output_block, pitch);
 
     for (int j = 0; j < 256; ++j) {
       const int diff = test_input_block[j] - test_output_block[j];
@@ -325,7 +325,7 @@ TEST(VP8Fdct16x16Test, AccuracyCheck) {
       << "Error: 16x16 FDCT/IDCT has average roundtrip error > 1/10 per block";
 }
 
-TEST(VP8Fdct16x16Test, CoeffSizeCheck) {
+TEST(VP9Fdct16x16Test, CoeffSizeCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 1000;
   for (int i = 0; i < count_test_block; ++i) {
@@ -342,8 +342,8 @@ TEST(VP8Fdct16x16Test, CoeffSizeCheck) {
         input_extreme_block[j] = 255;
 
     const int pitch = 32;
-    vp8_short_fdct16x16_c(input_block, output_block, pitch);
-    vp8_short_fdct16x16_c(input_extreme_block, output_extreme_block, pitch);
+    vp9_short_fdct16x16_c(input_block, output_block, pitch);
+    vp9_short_fdct16x16_c(input_extreme_block, output_extreme_block, pitch);
 
     // The minimum quant value is 4.
     for (int j = 0; j < 256; ++j) {
