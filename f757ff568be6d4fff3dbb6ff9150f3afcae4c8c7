@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//3Cc\u003d",
+        "filename": "vp9/common/entropymode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-07T22:09:23Z",
+      "side": 1,
+      "message": "so, we recently added get_binary_prob() to bitstream.c, can we use that here too (probably move it to some header file as a static function in common/ then)? I feel it would greatly simplify this code.",
+      "revId": "f757ff568be6d4fff3dbb6ff9150f3afcae4c8c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3CM\u003d",
+        "filename": "vp9/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-07T22:09:23Z",
+      "side": 1,
+      "message": "the tmpred is probably confusing for people looking at this for the first time, can you add a small comment here to make the intention clear?",
+      "revId": "f757ff568be6d4fff3dbb6ff9150f3afcae4c8c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3CE\u003d",
+        "filename": "vp9/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2316,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-07T22:09:23Z",
+      "side": 1,
+      "message": "remove debug printf",
+      "revId": "f757ff568be6d4fff3dbb6ff9150f3afcae4c8c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3BU\u003d",
+        "filename": "vp9/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4371,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-07T22:09:23Z",
+      "side": 1,
+      "message": "let\u0027s fix this for real and just store the modes and restore them here rather than rerunning the whole rd. this was always kind of hacky, no reason to keep it.",
+      "revId": "f757ff568be6d4fff3dbb6ff9150f3afcae4c8c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3BQ\u003d",
+        "filename": "vp9/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4400,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-07T22:09:23Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "f757ff568be6d4fff3dbb6ff9150f3afcae4c8c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
