@@ -37,7 +37,8 @@ unsigned int vp9_variance32x32_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 32, 32, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 10));
+  // TODO(rbultje): in extreme cases these products will rollover.
+  return (var - (((unsigned int)avg * avg) >> 10));
 }
 #endif
 
@@ -51,7 +52,7 @@ unsigned int vp9_variance16x16_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 16, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 8));
+  return (var - (((unsigned int)avg * avg) >> 8));
 }
 
 unsigned int vp9_variance8x16_c(const unsigned char *src_ptr,
@@ -64,7 +65,7 @@ unsigned int vp9_variance8x16_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 16, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 7));
+  return (var - (((unsigned int)avg * avg) >> 7));
 }
 
 unsigned int vp9_variance16x8_c(const unsigned char *src_ptr,
@@ -77,7 +78,7 @@ unsigned int vp9_variance16x8_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 8, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 7));
+  return (var - (((unsigned int)avg * avg) >> 7));
 }
 
 
@@ -91,7 +92,7 @@ unsigned int vp9_variance8x8_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 8, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 6));
+  return (var - (((unsigned int)avg * avg) >> 6));
 }
 
 unsigned int vp9_variance4x4_c(const unsigned char *src_ptr,
@@ -104,7 +105,7 @@ unsigned int vp9_variance4x4_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 4, 4, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 4));
+  return (var - (((unsigned int)avg * avg) >> 4));
 }
 
 
