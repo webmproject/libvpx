@@ -16,7 +16,7 @@ UTILS-$(CONFIG_DECODERS)    += vpxdec.c
 vpxdec.SRCS                 += md5_utils.c md5_utils.h
 vpxdec.SRCS                 += vpx_ports/vpx_timer.h
 vpxdec.SRCS                 += vpx/vpx_integer.h
-vpxdec.SRCS                 += args.c args.h vpx_ports/config.h
+vpxdec.SRCS                 += args.c args.h
 vpxdec.SRCS                 += tools_common.c tools_common.h
 vpxdec.SRCS                 += nestegg/halloc/halloc.h
 vpxdec.SRCS                 += nestegg/halloc/src/align.h
@@ -30,13 +30,17 @@ vpxdec.DESCRIPTION           = Full featured decoder
 UTILS-$(CONFIG_ENCODERS)    += vpxenc.c
 vpxenc.SRCS                 += args.c args.h y4minput.c y4minput.h
 vpxenc.SRCS                 += tools_common.c tools_common.h
-vpxenc.SRCS                 += vpx_ports/config.h vpx_ports/mem_ops.h
+vpxenc.SRCS                 += vpx_ports/mem_ops.h
 vpxenc.SRCS                 += vpx_ports/mem_ops_aligned.h
+vpxenc.SRCS                 += vpx_ports/vpx_timer.h
 vpxenc.SRCS                 += libmkv/EbmlIDs.h
 vpxenc.SRCS                 += libmkv/EbmlWriter.c
 vpxenc.SRCS                 += libmkv/EbmlWriter.h
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
+UTILS-$(CONFIG_ENCODERS)    += vp8_scalable_patterns.c
+vp8_scalable_patterns.GUID   = 0D6A210B-F482-4D6F-8570-4A9C01ACC88C
+vp8_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
 
 # Clean up old ivfenc, ivfdec binaries.
 ifeq ($(CONFIG_MSVS),yes)
@@ -77,29 +81,44 @@ GEN_EXAMPLES-$(CONFIG_ENCODERS) += decode_with_drops.c
 endif
 decode_with_drops.GUID           = CE5C53C4-8DDA-438A-86ED-0DDD3CDB8D26
 decode_with_drops.DESCRIPTION    = Drops frames while decoding
+ifeq ($(CONFIG_DECODERS),yes)
+GEN_EXAMPLES-$(CONFIG_ERROR_CONCEALMENT) += decode_with_partial_drops.c
+endif
+decode_with_partial_drops.GUID           = 61C2D026-5754-46AC-916F-1343ECC5537E
+decode_with_partial_drops.DESCRIPTION    = Drops parts of frames while decoding
 GEN_EXAMPLES-$(CONFIG_ENCODERS) += error_resilient.c
 error_resilient.GUID             = DF5837B9-4145-4F92-A031-44E4F832E00C
 error_resilient.DESCRIPTION      = Error Resiliency Feature
 
-GEN_EXAMPLES-$(CONFIG_VP9_ENCODER) += vp8_scalable_patterns.c
-vp8_scalable_patterns.GUID          = 0D6A210B-F482-4D6F-8570-4A9C01ACC88C
-vp8_scalable_patterns.DESCRIPTION   = VP8 Scalable Bitstream Patterns
-GEN_EXAMPLES-$(CONFIG_VP9_ENCODER) += vp8_set_maps.c
+GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += vp8_set_maps.c
 vp8_set_maps.GUID                   = ECB2D24D-98B8-4015-A465-A4AF3DCC145F
 vp8_set_maps.DESCRIPTION            = VP8 set active and ROI maps
-GEN_EXAMPLES-$(CONFIG_VP9_ENCODER) += vp8cx_set_ref.c
+GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += vp8cx_set_ref.c
 vp8cx_set_ref.GUID                  = C5E31F7F-96F6-48BD-BD3E-10EBF6E8057A
 vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
+# C file is provided, not generated automatically.
+UTILS-$(CONFIG_MULTI_RES_ENCODING) += vp8_multi_resolution_encoder.c
+vp8_multi_resolution_encoder.SRCS  \
+                         += third_party/libyuv/include/libyuv/basic_types.h  \
+                            third_party/libyuv/include/libyuv/cpu_id.h  \
+                            third_party/libyuv/include/libyuv/scale.h  \
+                            third_party/libyuv/source/row.h \
+                            third_party/libyuv/source/scale.c  \
+                            third_party/libyuv/source/cpu_id.c
+vp8_multi_resolution_encoder.GUID         = 04f8738e-63c8-423b-90fa-7c2703a374de
+vp8_multi_resolution_encoder.DESCRIPTION  = VP8 Multiple-resolution Encoding
 
 # Handle extra library flags depending on codec configuration
 
 # We should not link to math library (libm) on RVCT
 # when building for bare-metal targets
 ifeq ($(CONFIG_OS_SUPPORT), yes)
+CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
 CODEC_EXTRA_LIBS-$(CONFIG_VP9)         += m
 else
     ifeq ($(CONFIG_GCC), yes)
+    CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
     CODEC_EXTRA_LIBS-$(CONFIG_VP9)         += m
     endif
 endif
@@ -117,6 +136,8 @@ ifeq ($(HAVE_ALT_TREE_LAYOUT),yes)
     INC_PATH := $(SRC_PATH_BARE)/../include
 else
     LIB_PATH-yes                     += $(if $(BUILD_PFX),$(BUILD_PFX),.)
+    INC_PATH-$(CONFIG_VP8_DECODER)   += $(SRC_PATH_BARE)/vp8
+    INC_PATH-$(CONFIG_VP8_ENCODER)   += $(SRC_PATH_BARE)/vp8
     INC_PATH-$(CONFIG_VP9_DECODER)   += $(SRC_PATH_BARE)/vp9
     INC_PATH-$(CONFIG_VP9_ENCODER)   += $(SRC_PATH_BARE)/vp9
     LIB_PATH := $(call enabled,LIB_PATH)
@@ -152,12 +173,12 @@ $(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_OBJS,BUILD_OBJS):=yes)
 # Create build/install dependencies for all examples. The common case
 # is handled here. The MSVS case is handled below.
 NOT_MSVS = $(if $(CONFIG_MSVS),,yes)
-DIST-BINS-$(NOT_MSVS)      += $(addprefix bin/,$(ALL_EXAMPLES:.c=))
-INSTALL-BINS-$(NOT_MSVS)   += $(addprefix bin/,$(UTILS:.c=))
+DIST-BINS-$(NOT_MSVS)      += $(addprefix bin/,$(ALL_EXAMPLES:.c=$(EXE_SFX)))
+INSTALL-BINS-$(NOT_MSVS)   += $(addprefix bin/,$(UTILS:.c=$(EXE_SFX)))
 DIST-SRCS-yes              += $(ALL_SRCS)
 INSTALL-SRCS-yes           += $(UTIL_SRCS)
 OBJS-$(NOT_MSVS)           += $(if $(BUILD_OBJS),$(call objs,$(ALL_SRCS)))
-BINS-$(NOT_MSVS)           += $(addprefix $(BUILD_PFX),$(ALL_EXAMPLES:.c=))
+BINS-$(NOT_MSVS)           += $(addprefix $(BUILD_PFX),$(ALL_EXAMPLES:.c=$(EXE_SFX)))
 
 
 # Instantiate linker template for all examples.
@@ -168,7 +189,7 @@ $(foreach bin,$(BINS-yes),\
     $(if $(BUILD_OBJS),$(eval $(bin):\
         $(LIB_PATH)/lib$(CODEC_LIB)$(CODEC_LIB_SUF)))\
     $(if $(BUILD_OBJS),$(eval $(call linker_template,$(bin),\
-        $(call objs,$($(notdir $(bin)).SRCS)) \
+        $(call objs,$($(notdir $(bin:$(EXE_SFX)=)).SRCS)) \
         -l$(CODEC_LIB) $(addprefix -l,$(CODEC_EXTRA_LIBS))\
         )))\
     $(if $(LIPO_OBJS),$(eval $(call lipo_bin_template,$(bin))))\

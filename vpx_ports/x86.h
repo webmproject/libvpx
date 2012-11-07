@@ -192,6 +192,19 @@ static unsigned short
 x87_get_control_word(void) {
   unsigned short mode;
   __asm__ __volatile__("fstcw %0\n\t":"=m"( *&mode):);
+    return mode;
+}
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+static void
+x87_set_control_word(unsigned short mode)
+{
+    asm volatile("fldcw %0" : : "m"(*&mode));
+}
+static unsigned short
+x87_get_control_word(void)
+{
+    unsigned short mode;
+    asm volatile("fstcw %0\n\t":"=m"(*&mode):);
   return mode;
 }
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)

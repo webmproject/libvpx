@@ -11,7 +11,7 @@
 
     EXPORT |vp8cx_pack_mb_row_tokens_armv5|
 
-    INCLUDE asm_enc_offsets.asm
+    INCLUDE vp9_asm_enc_offsets.asm
 
     ARM
     REQUIRE8

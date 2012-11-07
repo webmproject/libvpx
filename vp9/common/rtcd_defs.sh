@@ -482,7 +482,7 @@ fi
 # end encoder functions
 
 # Scaler functions
-if [ "CONFIG_SPATIAL_RESAMPLING" != "yes" ]; then
+if [ "$CONFIG_SPATIAL_RESAMPLING" = "yes" ]; then
     prototype void vp8_horizontal_line_4_5_scale "const unsigned char *source, unsigned int source_width, unsigned char *dest, unsigned int dest_width"
     prototype void vp8_vertical_band_4_5_scale "unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width"
     prototype void vp8_last_vertical_band_4_5_scale "unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width"

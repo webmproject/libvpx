@@ -1,6 +1,6 @@
 /*!\page usage Usage
 
-    The vpx Multi-Format codec SDK provides a unified interface amongst its
+    The vpx multi-format codec SDK provides a unified interface amongst its
     supported codecs. This abstraction allows applications using this SDK to
     easily support multiple video formats with minimal code duplication or
     "special casing." This section describes the interface common to all codecs.
@@ -14,8 +14,12 @@
 
     Fore more information on decoder and encoder specific usage, see the
     following pages:
-    \if decoder - \subpage usage_decode \endif
-    \if decoder - \subpage usage_encode \endif
+    \if decoder
+    - \subpage usage_decode
+    \endif
+    \if decoder
+    - \subpage usage_encode
+    \endif
 
     \section usage_types Important Data Types
     There are two important data structures to consider in this interface.
@@ -82,6 +86,7 @@
 
     The available initialization methods are:
     \if encoder - #vpx_codec_enc_init (calls vpx_codec_enc_init_ver()) \endif
+    \if multi-encoder - #vpx_codec_enc_init_multi (calls vpx_codec_enc_init_multi_ver()) \endif
     \if decoder - #vpx_codec_dec_init (calls vpx_codec_dec_init_ver()) \endif
 
 

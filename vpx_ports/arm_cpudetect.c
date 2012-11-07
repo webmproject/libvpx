@@ -54,6 +54,8 @@ int arm_cpu_caps(void) {
 }
 
 #elif defined(_MSC_VER) /* end !CONFIG_RUNTIME_CPU_DETECT */
+
+#elif defined(_MSC_VER) /* end !CONFIG_RUNTIME_CPU_DETECT */
 /*For GetExceptionCode() and EXCEPTION_ILLEGAL_INSTRUCTION.*/
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
@@ -131,6 +133,8 @@ int arm_cpu_caps(void) {
 #endif /* HAVE_NEON */
   return flags & mask;
 }
+
+#elif defined(__linux__) /* end __ANDROID__ */
 
 #elif defined(__linux__) /* end __ANDROID__ */
 #include <stdio.h>

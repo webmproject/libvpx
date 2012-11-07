@@ -1,3 +1,143 @@
+2012-05-09 v1.1.0 "Eider"
+  This introduces a number of enhancements, mostly focused on real-time
+  encoding. In addition, it fixes a decoder bug (first introduced in
+  Duclair) so all users of that release are encouraged to upgrade.
+
+  - Upgrading:
+    This release is ABI and API compatible with Duclair (v1.0.0). Users
+    of older releases should refer to the Upgrading notes in this
+    document for that release.
+
+    This release introduces a new temporal denoiser, controlled by the
+    VP8E_SET_NOISE_SENSITIVITY control. The temporal denoiser does not
+    currently take a strength parameter, so the control is effectively
+    a boolean - zero (off) or non-zero (on). For compatibility with
+    existing applications, the values accepted are the same as those
+    for the spatial denoiser (0-6). The temporal denoiser is enabled
+    by default, and the older spatial denoiser may be restored by
+    configuring with --disable-temporal-denoising. The temporal denoiser
+    is more computationally intensive than the spatial one.
+
+    This release removes support for a legacy, decode only API that was
+    supported, but deprecated, at the initial release of libvpx
+    (v0.9.0). This is not expected to have any impact. If you are
+    impacted, you can apply a reversion to commit 2bf8fb58 locally.
+    Please update to the latest libvpx API if you are affected.
+
+  - Enhancements:
+      Adds a motion compensated temporal denoiser to the encoder, which
+      gives higher quality than the older spatial denoiser. (See above
+      for notes on upgrading).
+
+      In addition, support for new compilers and platforms were added,
+      including:
+        improved support for XCode
+        Android x86 NDK build
+        OS/2 support
+        SunCC support
+
+      Changing resolution with vpx_codec_enc_config_set() is now
+      supported. Previously, reinitializing the codec was required to
+      change the input resolution.
+
+      The vpxenc application has initial support for producing multiple
+      encodes from the same input in one call. Resizing is not yet
+      supported, but varying other codec parameters is. Use -- to
+      delineate output streams. Options persist from one stream to the
+      next.
+
+      Also, the vpxenc application will now use a keyframe interval of
+      5 seconds by default. Use the --kf-max-dist option to override.
+
+  - Speed:
+      Decoder performance improved 2.5% versus Duclair. Encoder speed is
+      consistent with Duclair for most material. Two pass encoding of
+      slideshow-like material will see significant improvements.
+
+      Large realtime encoding speed gains at a small quality expense are
+      possible by configuring the on-the-fly bitpacking experiment with
+      --enable-onthefly-bitpacking. Realtime encoder can be up to 13%
+      faster (ARM) depending on the number of threads and bitrate
+      settings. This technique sees constant gain over the 5-16 speed
+      range. For VC style input the loss seen is up to 0.2dB. See commit
+      52cf4dca for further details.
+
+  - Quality:
+      On the whole, quality is consistent with the Duclair release. Some
+      tweaks:
+
+        Reduced blockiness in easy sections by applying a penalty to
+        intra modes.
+
+        Improved quality of static sections (like slideshows) with
+        two pass encoding.
+
+        Improved keyframe sizing with multiple temporal layers
+
+  - Bug Fixes:
+      Corrected alt-ref contribution to frame rate for visible updates
+      to the alt-ref buffer. This affected applications making manual
+      usage of the frame reference flags, or temporal layers.
+
+      Additional constraints were added to disable multi-frame quality
+      enhancement (MFQE) in sections of the frame where there is motion.
+      (#392)
+
+      Fixed corruption issues when vpx_codec_enc_config_set() was called
+      with spatial resampling enabled.
+
+      Fixed a decoder error introduced in Duclair where the segmentation
+      map was not being reinitialized on keyframes (#378)
+
+
+2012-01-27 v1.0.0 "Duclair"
+  Our fourth named release, focused on performance and features related to
+  real-time encoding. It also fixes a decoder crash bug introduced in
+  v0.9.7, so all users of that release are encouraged to upgrade.
+
+  - Upgrading:
+      This release is ABI incompatible with prior releases of libvpx, so the
+      "major" version number has been bumped to 1. You must recompile your
+      applications against the latest version of the libvpx headers. The
+      API remains compatible, and this should not require code changes in most
+      applications.
+
+  - Enhancements:
+      This release introduces several substantial new features to the encoder,
+      of particular interest to real time streaming applications.
+
+      Temporal scalability allows the encoder to produce a stream that can
+      be decimated to different frame rates, with independent rate targetting
+      for each substream.
+
+      Multiframe quality enhancement postprocessing can make visual quality
+      more consistent in the presence of frames that are substantially
+      different quality than the surrounding frames, as in the temporal
+      scalability case and in some forced keyframe scenarios.
+
+      Multiple-resolution encoding support allows the encoding of the
+      same content at different resolutions faster than encoding them
+      separately.
+
+  - Speed:
+      Optimization targets for this release included the decoder and the real-
+      time modes of the encoder. Decoder speed on x86 has improved 10.5% with
+      this release. Encoder improvements followed a curve where speeds 1-3
+      improved 4.0%-1.5%, speeds 4-8 improved <1%, and speeds 9-16 improved
+      1.5% to 10.5%, respectively. "Best" mode speed is consistent with the
+      Cayuga release.
+
+  - Quality:
+      Encoder quality in the single stream case is consistent with the Cayuga
+      release.
+
+  - Bug Fixes:
+      This release fixes an OOB read decoder crash bug present in v0.9.7
+      related to the clamping of motion vectors in SPLITMV blocks. This
+      behavior could be triggered by corrupt input or by starting
+      decoding from a P-frame.
+
+
 2011-08-15 v0.9.7-p1 "Cayuga" patch 1
   This is an incremental bugfix release against Cayuga. All users of that
   release are strongly encouraged to upgrade.

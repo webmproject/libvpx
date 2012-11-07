@@ -8,9 +8,6 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 
-
-include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9_common.mk
-
 VP9_DX_EXPORTS += exports_dec
 
 VP9_DX_SRCS-yes += $(VP9_COMMON_SRCS-yes)
@@ -69,3 +66,6 @@ VP9_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/x86_dsystemdependent.c
 VP9_DX_SRCS-$(HAVE_MMX) += decoder/x86/dequantize_mmx.asm
 VP9_DX_SRCS-$(HAVE_MMX) += decoder/x86/idct_blk_mmx.c
 VP9_DX_SRCS-$(HAVE_SSE2) += decoder/x86/idct_blk_sse2.c
+
+$(eval $(call asm_offsets_template,\
+         vp9_asm_dec_offsets.asm, $(VP9_PREFIX)decoder/asm_dec_offsets.c))

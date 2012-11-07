@@ -9,7 +9,7 @@
 
 
 %include "vpx_ports/x86_abi_support.asm"
-%include "asm_enc_offsets.asm"
+%include "vp9_asm_enc_offsets.asm"
 
 
 ; void vp9_fast_quantize_b_ssse3 | arg

@@ -32,10 +32,10 @@
 #include <unistd.h>
 #endif
 
-#if CONFIG_VP9_ENCODER
+#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 #include "vpx/vp8cx.h"
 #endif
-#if CONFIG_VP9_DECODER
+#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER
 #include "vpx/vp8dx.h"
 #endif
 
@@ -92,10 +92,14 @@ static const struct codec_item {
   const vpx_codec_iface_t *(*dx_iface)(void);
   unsigned int             fourcc;
 } codecs[] = {
+#if CONFIG_VP8_ENCODER && CONFIG_VP8_DECODER
+  {"vp8", &vpx_codec_vp8_cx, &vpx_codec_vp8_dx, 0x30385056},
+#elif CONFIG_VP9_ENCODER && !CONFIG_VP9_DECODER
+  {"vp8", &vpx_codec_vp8_cx, NULL, 0x30385056},
+#endif
 #if CONFIG_VP9_ENCODER && CONFIG_VP9_DECODER
   {"vp9", &vpx_codec_vp8_cx, &vpx_codec_vp8_dx, 0x30385056},
-#endif
-#if CONFIG_VP9_ENCODER && !CONFIG_VP9_DECODER
+#elif CONFIG_VP9_ENCODER && !CONFIG_VP9_DECODER
   {"vp9", &vpx_codec_vp8_cx, NULL, 0x30385056},
 #endif
 };
@@ -1054,7 +1058,7 @@ static const arg_def_t *kf_args[] = {
 };
 
 
-#if CONFIG_VP9_ENCODER
+#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 static const arg_def_t noise_sens = ARG_DEF(NULL, "noise-sensitivity", 1,
                                             "Noise sensitivity (frames to blur)");
 static const arg_def_t sharpness = ARG_DEF(NULL, "sharpness", 1,
@@ -1063,13 +1067,13 @@ static const arg_def_t static_thresh = ARG_DEF(NULL, "static-thresh", 1,
                                                "Motion detection threshold");
 #endif
 
-#if CONFIG_VP9_ENCODER
+#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 static const arg_def_t cpu_used = ARG_DEF(NULL, "cpu-used", 1,
                                           "CPU Used (-16..16)");
 #endif
 
 
-#if CONFIG_VP9_ENCODER
+#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 static const arg_def_t token_parts = ARG_DEF(NULL, "token-parts", 1,
                                              "Number of token partitions to use, log2");
 static const arg_def_t auto_altref = ARG_DEF(NULL, "auto-alt-ref", 1,
@@ -1135,7 +1139,7 @@ static void usage_exit() {
   arg_show_usage(stdout, rc_twopass_args);
   fprintf(stderr, "\nKeyframe Placement Options:\n");
   arg_show_usage(stdout, kf_args);
-#if CONFIG_VP9_ENCODER
+#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
   fprintf(stderr, "\nVP8 Specific Options:\n");
   arg_show_usage(stdout, vp8_args);
 #endif
@@ -1734,7 +1738,7 @@ static int parse_stream_params(struct global_config *global,
   int                      eos_mark_found = 0;
 
   /* Handle codec specific options */
-  if (global->codec->iface == vpx_codec_vp8x_cx) {
+  if (global->codec->iface == vpx_codec_vp8_cx) {
     ctrl_args = vp8_args;
     ctrl_args_map = vp8_arg_ctrl_map;
   }

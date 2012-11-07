@@ -58,7 +58,7 @@ if(frame_cnt%30 == 1) {
     if(vpx_codec_control(&codec, VP8_SET_POSTPROC, &pp))
         die_codec(&codec, "Failed to turn off postproc");
 } else if(frame_cnt%30 == 16) {
-    vp8_postproc_cfg_t  pp = {VP8_DEBLOCK | VP8_DEMACROBLOCK, 4, 0};
+    vp8_postproc_cfg_t  pp = {VP8_DEBLOCK | VP8_DEMACROBLOCK | VP8_MFQE, 4, 0};
 
     if(vpx_codec_control(&codec, VP8_SET_POSTPROC, &pp))
         die_codec(&codec, "Failed to turn on postproc");

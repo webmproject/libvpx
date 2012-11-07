@@ -60,7 +60,7 @@ void SetUseReferenceImpl(int use) {
 
 #if defined(__ARM_NEON__) && !defined(YUV_DISABLE_ASM)
 #define HAS_SCALEROWDOWN2_NEON
-void ScaleRowDown2_NEON(const uint8* src_ptr, int /* src_stride */,
+void ScaleRowDown2_NEON(const uint8* src_ptr, int  src_stride,
                         uint8* dst, int dst_width) {
   asm volatile (
     "1:                                        \n"
@@ -102,7 +102,7 @@ void ScaleRowDown2Int_NEON(const uint8* src_ptr, int src_stride,
 }
 
 #define HAS_SCALEROWDOWN4_NEON
-static void ScaleRowDown4_NEON(const uint8* src_ptr, int /* src_stride */,
+static void ScaleRowDown4_NEON(const uint8* src_ptr, int src_stride,
                                uint8* dst_ptr, int dst_width) {
   asm volatile (
     "1:                                        \n"
@@ -160,7 +160,7 @@ static void ScaleRowDown4Int_NEON(const uint8* src_ptr, int src_stride,
 // Down scale from 4 to 3 pixels.  Use the neon multilane read/write
 //  to load up the every 4th pixel into a 4 different registers.
 // Point samples 32 pixels to 24 pixels.
-static void ScaleRowDown34_NEON(const uint8* src_ptr, int /* src_stride */,
+static void ScaleRowDown34_NEON(const uint8* src_ptr, int src_stride,
                                 uint8* dst_ptr, int dst_width) {
   asm volatile (
     "1:                                        \n"
@@ -284,7 +284,7 @@ const unsigned short mult38_div9[8] __attribute__ ((aligned(16))) =
     65536 / 18, 65536 / 18, 65536 / 18, 65536 / 18 };
 
 // 32 -> 12
-static void ScaleRowDown38_NEON(const uint8* src_ptr, int,
+static void ScaleRowDown38_NEON(const uint8* src_ptr, int src_stride,
                                 uint8* dst_ptr, int dst_width) {
   asm volatile (
     "vld1.u8      {q3}, [%3]                   \n"

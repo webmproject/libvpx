@@ -8,9 +8,6 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 
-
-include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9_common.mk
-
 VP9_CX_EXPORTS += exports_enc
 
 VP9_CX_SRCS-yes += $(VP9_COMMON_SRCS-yes)
@@ -118,3 +115,6 @@ VP9_CX_SRCS-$(ARCH_X86_64) += encoder/x86/ssim_opt.asm
 
 
 VP9_CX_SRCS-yes := $(filter-out $(VP9_CX_SRCS_REMOVE-yes),$(VP9_CX_SRCS-yes))
+
+$(eval $(call asm_offsets_template,\
+         vp9_asm_enc_offsets.asm, $(VP9_PREFIX)encoder/asm_enc_offsets.c))

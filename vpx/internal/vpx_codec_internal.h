@@ -357,11 +357,12 @@ struct vpx_codec_priv {
 /*
  * Multi-resolution encoding internal configuration
  */
-struct vpx_codec_priv_enc_mr_cfg {
-  unsigned int           mr_total_resolutions;
-  unsigned int           mr_encoder_id;
-  struct vpx_rational    mr_down_sampling_factor;
-  void                  *mr_low_res_mode_info;
+struct vpx_codec_priv_enc_mr_cfg
+{
+    unsigned int           mr_total_resolutions;
+    unsigned int           mr_encoder_id;
+    struct vpx_rational    mr_down_sampling_factor;
+    void*                  mr_low_res_mode_info;
 };
 
 #undef VPX_CTRL_USE_TYPE

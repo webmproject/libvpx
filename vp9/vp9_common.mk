@@ -177,3 +177,7 @@ VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon16x16mb_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/buildintrapredictorsmby_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/save_neon_reg$(ASM)
 VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon_neon.c
+
+
+$(eval $(call asm_offsets_template,\
+         vp9_asm_com_offsets.asm, $(VP9_PREFIX)common/asm_com_offsets.c))

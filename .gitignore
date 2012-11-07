@@ -32,6 +32,8 @@
 /ivfdec.dox
 /ivfenc
 /ivfenc.dox
+/libvpx.so*
+/libvpx.ver
 /obj_int_extract
 /postproc
 /postproc.c
@@ -43,12 +45,12 @@
 /simple_encoder
 /simple_encoder.c
 /simple_encoder.dox
+/test_libvpx
 /twopass_encoder
 /twopass_encoder.c
 /twopass_encoder.dox
 /vp8_api1_migration.dox
 /vp8_scalable_patterns
-/vp8_scalable_patterns.c
 /vp8_scalable_patterns.dox
 /vp8_set_maps
 /vp8_set_maps.c
@@ -56,7 +58,14 @@
 /vp8cx_set_ref
 /vp8cx_set_ref.c
 /vp8cx_set_ref.dox
+/vpx.pc
 /vpx_config.c
 /vpx_config.h
+/vpx_rtcd.h
 /vpx_version.h
+/vpxdec
+/vpxenc
 TAGS
+.cproject
+.project
+.settings
