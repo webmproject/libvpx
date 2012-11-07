@@ -197,7 +197,7 @@ unsigned int vp9_variance2x16_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 2, 16, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 5));
+  return (var - (((unsigned int)avg * avg) >> 5));
 }
 
 unsigned int vp9_variance16x2_c(const unsigned char *src_ptr,
@@ -210,7 +210,7 @@ unsigned int vp9_variance16x2_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 2, &var, &avg);
   *sse = var;
-  return (var - ((avg * avg) >> 5));
+  return (var - (((unsigned int)avg * avg) >> 5));
 }
 
 unsigned int vp9_sub_pixel_variance16x2_c(const unsigned char  *src_ptr,

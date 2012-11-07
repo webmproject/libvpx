@@ -1,5 +1,6 @@
-LIBVPX_TEST_SRCS-yes += acm_random.h
 LIBVPX_TEST_SRCS-yes += test.mk
+LIBVPX_TEST_SRCS-yes += acm_random.h
+
 LIBVPX_TEST_SRCS-yes += test_libvpx.cc
 LIBVPX_TEST_SRCS-yes += util.h
 LIBVPX_TEST_SRCS-yes += video_source.h
@@ -64,6 +65,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
 #LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
 LIBVPX_TEST_SRCS-yes += idct8x8_test.cc
+LIBVPX_TEST_SRCS-yes += variance_test.cc
 endif # VP9
 
 
