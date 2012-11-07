@@ -642,8 +642,6 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi)
 
     xd->left_context = &cm->left_context;
 
-    vp8_zero(cpi->count_mb_ref_frame_usage)
-
     x->mvc = cm->fc.mvc;
 
     vpx_memset(cm->above_context, 0,
@@ -678,6 +676,7 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi)
     vp8_zero(x->uv_mode_count)
     x->prediction_error = 0;
     x->intra_error = 0;
+    vp8_zero(x->count_mb_ref_frame_usage);
 }
 
 static void sum_coef_counts(MACROBLOCK *x, MACROBLOCK *x_thread)
@@ -868,7 +867,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {
                 int mode_count;
-                int mv_vals;
+                int c_idx;
                 totalrate += cpi->mb_row_ei[i].totalrate;
 
                 cpi->mb.skip_true_count += cpi->mb_row_ei[i].mb.skip_true_count;
@@ -881,17 +880,21 @@ void vp8_encode_frame(VP8_COMP *cpi)
                     cpi->mb.uv_mode_count[mode_count] +=
                         cpi->mb_row_ei[i].mb.uv_mode_count[mode_count];
 
-                for(mv_vals = 0; mv_vals < MVvals; mv_vals++)
+                for(c_idx = 0; c_idx < MVvals; c_idx++)
                 {
-                    cpi->mb.MVcount[0][mv_vals] +=
-                        cpi->mb_row_ei[i].mb.MVcount[0][mv_vals];
-                    cpi->mb.MVcount[1][mv_vals] +=
-                        cpi->mb_row_ei[i].mb.MVcount[1][mv_vals];
+                    cpi->mb.MVcount[0][c_idx] +=
+                        cpi->mb_row_ei[i].mb.MVcount[0][c_idx];
+                    cpi->mb.MVcount[1][c_idx] +=
+                        cpi->mb_row_ei[i].mb.MVcount[1][c_idx];
                 }
 
                 cpi->mb.prediction_error +=
                     cpi->mb_row_ei[i].mb.prediction_error;
                 cpi->mb.intra_error += cpi->mb_row_ei[i].mb.intra_error;
+
+                for(c_idx = 0; c_idx < MAX_REF_FRAMES; c_idx++)
+                    cpi->mb.count_mb_ref_frame_usage[c_idx] +=
+                        x->count_mb_ref_frame_usage[c_idx];
 
                 /* add up counts for each thread */
                 sum_coef_counts(x, &cpi->mb_row_ei[i].mb);
@@ -987,13 +990,14 @@ void vp8_encode_frame(VP8_COMP *cpi)
     {
         int tot_modes;
 
-        tot_modes = cpi->count_mb_ref_frame_usage[INTRA_FRAME]
-                    + cpi->count_mb_ref_frame_usage[LAST_FRAME]
-                    + cpi->count_mb_ref_frame_usage[GOLDEN_FRAME]
-                    + cpi->count_mb_ref_frame_usage[ALTREF_FRAME];
+        tot_modes = cpi->mb.count_mb_ref_frame_usage[INTRA_FRAME]
+                    + cpi->mb.count_mb_ref_frame_usage[LAST_FRAME]
+                    + cpi->mb.count_mb_ref_frame_usage[GOLDEN_FRAME]
+                    + cpi->mb.count_mb_ref_frame_usage[ALTREF_FRAME];
 
         if (tot_modes)
-            cpi->this_frame_percent_intra = cpi->count_mb_ref_frame_usage[INTRA_FRAME] * 100 / tot_modes;
+            cpi->this_frame_percent_intra =
+                cpi->mb.count_mb_ref_frame_usage[INTRA_FRAME] * 100 / tot_modes;
 
     }
 
@@ -1318,7 +1322,7 @@ int vp8cx_encode_inter_macroblock
             vp8_update_zbin_extra(cpi, x);
     }
 
-    cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;
+    x->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;
 
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {

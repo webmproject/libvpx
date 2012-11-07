@@ -493,7 +493,7 @@ static void write_mb_features(vp8_writer *w, const MB_MODE_INFO *mi, const MACRO
 }
 void vp8_convert_rfct_to_prob(VP8_COMP *const cpi)
 {
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
+    const int *const rfct = cpi->mb.count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
@@ -996,7 +996,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 {
     int savings = 0;
 
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
+    const int *const rfct = cpi->mb.count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
     int new_intra, new_last, new_garf, oldtotal, newtotal;

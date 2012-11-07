@@ -246,8 +246,8 @@ static void save_layer_context(VP8_COMP *cpi)
     lc->last_frame_percent_intra         = cpi->last_frame_percent_intra;
 
     memcpy (lc->count_mb_ref_frame_usage,
-            cpi->count_mb_ref_frame_usage,
-            sizeof(cpi->count_mb_ref_frame_usage));
+            cpi->mb.count_mb_ref_frame_usage,
+            sizeof(cpi->mb.count_mb_ref_frame_usage));
 }
 
 static void restore_layer_context(VP8_COMP *cpi, const int layer)
@@ -283,9 +283,9 @@ static void restore_layer_context(VP8_COMP *cpi, const int layer)
 
     cpi->last_frame_percent_intra         = lc->last_frame_percent_intra;
 
-    memcpy (cpi->count_mb_ref_frame_usage,
+    memcpy (cpi->mb.count_mb_ref_frame_usage,
             lc->count_mb_ref_frame_usage,
-            sizeof(cpi->count_mb_ref_frame_usage));
+            sizeof(cpi->mb.count_mb_ref_frame_usage));
 }
 
 static void setup_features(VP8_COMP *cpi)
@@ -2775,10 +2775,14 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
 
         if (cpi->common.frames_since_golden > 1)
         {
-            cpi->recent_ref_frame_usage[INTRA_FRAME] += cpi->count_mb_ref_frame_usage[INTRA_FRAME];
-            cpi->recent_ref_frame_usage[LAST_FRAME] += cpi->count_mb_ref_frame_usage[LAST_FRAME];
-            cpi->recent_ref_frame_usage[GOLDEN_FRAME] += cpi->count_mb_ref_frame_usage[GOLDEN_FRAME];
-            cpi->recent_ref_frame_usage[ALTREF_FRAME] += cpi->count_mb_ref_frame_usage[ALTREF_FRAME];
+            cpi->recent_ref_frame_usage[INTRA_FRAME] +=
+                cpi->mb.count_mb_ref_frame_usage[INTRA_FRAME];
+            cpi->recent_ref_frame_usage[LAST_FRAME] +=
+                cpi->mb.count_mb_ref_frame_usage[LAST_FRAME];
+            cpi->recent_ref_frame_usage[GOLDEN_FRAME] +=
+                cpi->mb.count_mb_ref_frame_usage[GOLDEN_FRAME];
+            cpi->recent_ref_frame_usage[ALTREF_FRAME] +=
+                cpi->mb.count_mb_ref_frame_usage[ALTREF_FRAME];
         }
     }
 }
@@ -2790,7 +2794,7 @@ static void update_rd_ref_frame_probs(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
 
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
+    const int *const rfct = cpi->mb.count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
@@ -4709,7 +4713,9 @@ static void check_gf_quality(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
     int gf_active_pct = (100 * cpi->gf_active_count) / (cm->mb_rows * cm->mb_cols);
-    int gf_ref_usage_pct = (cpi->count_mb_ref_frame_usage[GOLDEN_FRAME] * 100) / (cm->mb_rows * cm->mb_cols);
+    int gf_ref_usage_pct =
+        (cpi->mb.count_mb_ref_frame_usage[GOLDEN_FRAME] * 100) /
+        (cm->mb_rows * cm->mb_cols);
     int last_ref_zz_useage = (cpi->inter_zz_count * 100) / (cm->mb_rows * cm->mb_cols);
 
     /* Gf refresh is not currently being signalled */

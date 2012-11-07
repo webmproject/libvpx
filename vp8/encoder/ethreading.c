@@ -478,6 +478,8 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         vp8_zero(mb->MVcount);
         mb->prediction_error = 0;
         mb->intra_error = 0;
+        vp8_zero(mb->count_mb_ref_frame_usage);
+
     }
 }
 

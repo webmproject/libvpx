@@ -493,7 +493,6 @@ typedef struct VP8_COMP
     int last_skip_probs_q[3];
     int recent_ref_frame_usage[MAX_REF_FRAMES];
 
-    int count_mb_ref_frame_usage[MAX_REF_FRAMES];
     int this_frame_percent_intra;
     int last_frame_percent_intra;
 
