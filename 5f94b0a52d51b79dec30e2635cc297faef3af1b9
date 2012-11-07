@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//3XU\u003d",
+        "filename": "vp9/common/idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1643,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-07T18:26:19Z",
+      "side": 1,
+      "message": "This function is called when the non-zero coefficients are only in upper-left 4x4 area. Then, we only need to calculate first 4 rows instead of 16 rows.",
+      "parentUuid": "AAAAQ3//3sQ\u003d",
+      "revId": "5f94b0a52d51b79dec30e2635cc297faef3af1b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//3sg\u003d",
         "filename": "vp9/decoder/dequantize.c",
         "patchSetId": 1
@@ -47,6 +65,24 @@
       "writtenOn": "2012-11-07T02:20:00Z",
       "side": 1,
       "message": "eobs should simply be \u0027int\u0027",
+      "revId": "5f94b0a52d51b79dec30e2635cc297faef3af1b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3WQ\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-07T18:26:19Z",
+      "side": 1,
+      "message": "Eobs is used to count the non-zero tokens, which fits in unsigned 16bits. Is there good reason to use int?",
+      "parentUuid": "AAAAQ3//3sg\u003d",
       "revId": "5f94b0a52d51b79dec30e2635cc297faef3af1b9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//3WI\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-07T18:26:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//3sU\u003d",
+      "revId": "5f94b0a52d51b79dec30e2635cc297faef3af1b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//3sY\u003d",
         "filename": "vp9/decoder/dequantize.c",
         "patchSetId": 1
@@ -81,6 +135,24 @@
       "writtenOn": "2012-11-07T02:20:00Z",
       "side": 1,
       "message": "this 520-530 block is repeated a lot of time. Should be a function (and in SSE2, later).",
+      "revId": "5f94b0a52d51b79dec30e2635cc297faef3af1b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//3V4\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-07T18:26:19Z",
+      "side": 1,
+      "message": "Will change it.",
+      "parentUuid": "AAAAQ3//3sY\u003d",
       "revId": "5f94b0a52d51b79dec30e2635cc297faef3af1b9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
