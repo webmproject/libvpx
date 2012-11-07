@@ -355,8 +355,6 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
     /* Activity mask based per mb zbin adjustments */
     vpx_free(cpi->mb_activity_map);
     cpi->mb_activity_map = 0;
-    vpx_free(cpi->mb_norm_activity_map);
-    cpi->mb_norm_activity_map = 0;
 
     vpx_free(cpi->mb.pip);
     cpi->mb.pip = 0;
@@ -1095,11 +1093,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     vpx_free(cpi->mb_activity_map);
     CHECK_MEM_ERROR(cpi->mb_activity_map,
                     vpx_calloc(sizeof(*cpi->mb_activity_map),
-                    cm->mb_rows * cm->mb_cols));
-
-    vpx_free(cpi->mb_norm_activity_map);
-    CHECK_MEM_ERROR(cpi->mb_norm_activity_map,
-                    vpx_calloc(sizeof(*cpi->mb_norm_activity_map),
                     cm->mb_rows * cm->mb_cols));
 
     /* allocate memory for storing last frame's MVs for MV prediction. */

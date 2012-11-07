@@ -649,7 +649,6 @@ typedef struct VP8_COMP
     /* Per MB activity measurement */
     unsigned int activity_avg;
     unsigned int * mb_activity_map;
-    int * mb_norm_activity_map;
 
     /* Record of which MBs still refer to last golden frame either
      * directly or through 0,0
