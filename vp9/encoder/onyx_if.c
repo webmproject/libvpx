@@ -38,10 +38,8 @@
 #include "bitstream.h"
 #include "vp9/encoder/picklpf.h"
 #include "ratectrl.h"
-
-#if CONFIG_NEWBESTREFMV
 #include "vp9/common/mvref_common.h"
-#endif
+
 
 #if ARCH_ARM
 #include "vpx_ports/arm.h"

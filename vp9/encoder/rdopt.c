@@ -41,9 +41,7 @@
 #include "vp9/common/pred_common.h"
 #include "vp9/common/entropy.h"
 #include "vpx_rtcd.h"
-#if CONFIG_NEWBESTREFMV
 #include "vp9/common/mvref_common.h"
-#endif
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x)  (x)
@@ -3188,7 +3186,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
 
-
   vp9_find_near_mvs(xd, xd->mode_info_context,
                     xd->prev_mode_info_context,
                     &frame_nearest_mv[frame_type], &frame_near_mv[frame_type],
@@ -3199,7 +3196,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   u_buffer[frame_type] = yv12->u_buffer + recon_uvoffset;
   v_buffer[frame_type] = yv12->v_buffer + recon_uvoffset;
 
-#if CONFIG_NEWBESTREFMV
   vp9_find_mv_refs(xd, xd->mode_info_context,
                    xd->prev_mode_info_context,
                    frame_type,
@@ -3212,7 +3208,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                         &frame_best_ref_mv[frame_type],
                         &frame_nearest_mv[frame_type],
                         &frame_near_mv[frame_type]);
-#endif
 }
 
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,

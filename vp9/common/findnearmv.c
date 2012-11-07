@@ -168,7 +168,6 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
   return p;
 }
 
-#if CONFIG_NEWBESTREFMV
 #define SP(x) (((x) & 7) << 1)
 unsigned int vp9_sad3x16_c(
   const unsigned char *src_ptr,
@@ -394,5 +393,3 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   // Copy back the re-ordered mv list
   vpx_memcpy(mvlist, sorted_mvs, sizeof(sorted_mvs));
 }
-
-#endif  // CONFIG_NEWBESTREFMV

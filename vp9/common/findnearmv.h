@@ -18,7 +18,6 @@
 #include "treecoder.h"
 #include "onyxc_int.h"
 
-#if CONFIG_NEWBESTREFMV
 /* check a list of motion vectors by sad score using a number rows of pixels
  * above and a number cols of pixels in the left to select the one with best
  * score to use as ref motion vector
@@ -30,7 +29,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            int_mv *best_mv,
                            int_mv *nearest,
                            int_mv *near);
-#endif
 
 static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, const int *ref_frame_sign_bias) {
   MV xmv;

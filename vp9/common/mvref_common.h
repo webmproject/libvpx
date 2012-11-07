@@ -11,8 +11,6 @@
 #include "onyxc_int.h"
 #include "blockd.h"
 
-// MR reference entropy header file.
-#if CONFIG_NEWBESTREFMV
 
 #ifndef __INC_MVREF_COMMON_H
 #define __INC_MVREF_COMMON_H
@@ -28,4 +26,3 @@ void vp9_find_mv_refs(
 
 #endif
 
-#endif

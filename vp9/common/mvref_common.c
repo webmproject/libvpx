@@ -10,8 +10,6 @@
 
 #include "mvref_common.h"
 
-#if CONFIG_NEWBESTREFMV
-
 #define MVREF_NEIGHBOURS 8
 static int mv_ref_search[MVREF_NEIGHBOURS][2] =
   { {0,-1},{-1,0},{-1,-1},{0,-2},{-2,0},{-1,-2},{-2,-1},{-2,-2} };
@@ -338,5 +336,3 @@ void vp9_find_mv_refs(
   // Copy over the candidate list.
   vpx_memcpy(mv_ref_list, candidate_mvs, sizeof(candidate_mvs));
 }
-
-#endif

@@ -29,10 +29,7 @@
 #include "vp9/common/entropy.h"
 #include "vp9/encoder/encodemv.h"
 #include "vp9/common/entropymv.h"
-
-#if CONFIG_NEWBESTREFMV
 #include "vp9/common/mvref_common.h"
-#endif
 
 #if defined(SECTIONBITS_OUTPUT)
 unsigned __int64 Sectionbits[500];
@@ -1059,9 +1056,8 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
             // Only used for context just now and soon to be deprecated.
             vp9_find_near_mvs(xd, m, prev_m, &n1, &n2, &best_mv, ct,
                               rf, cpi->common.ref_frame_sign_bias);
-#if CONFIG_NEWBESTREFMV
+
             best_mv.as_int = mi->ref_mvs[rf][0].as_int;
-#endif
 
             vp9_mv_ref_probs(&cpi->common, mv_ref_p, ct);
 
@@ -1121,10 +1117,8 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
                               mi->second_ref_frame,
                               cpi->common.ref_frame_sign_bias);
 
-#if CONFIG_NEWBESTREFMV
             best_second_mv.as_int =
               mi->ref_mvs[mi->second_ref_frame][0].as_int;
-#endif
           }
 
           // does the feature use compound prediction or not

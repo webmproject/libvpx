@@ -36,12 +36,9 @@
 #include "vp9/common/subpixel.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vp9/common/pred_common.h"
+#include "vp9/common/mvref_common.h"
 
 #define DBG_PRNT_SEGMAP 0
-#if CONFIG_NEWBESTREFMV
-#include "vp9/common/mvref_common.h"
-#endif
-
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define RTCD(x)     &cpi->common.rtcd.x
@@ -1959,13 +1956,10 @@ static void encode_intra_macro_block(VP9_COMP *cpi, MACROBLOCK *x,
     } else {
       mbmi->txfm_size = TX_4X4;
     }
-  }
-#if CONFIG_NEWBESTREFMV
-  else
+  } else {
     vp9_tokenize_mb(cpi, &x->e_mbd, t, 1);
-#endif
+  }
 }
-
 static void encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
                                     TOKENEXTRA **t, int recon_yoffset,
                                     int recon_uvoffset, int output_enabled) {

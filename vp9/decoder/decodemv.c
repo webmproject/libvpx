@@ -712,17 +712,13 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     int_mv nearest_second, nearby_second, best_mv_second;
     vp9_prob mv_ref_p [VP9_MVREFS - 1];
 
-#if CONFIG_NEWBESTREFMV
     int recon_y_stride, recon_yoffset;
     int recon_uv_stride, recon_uvoffset;
-#endif
 
     vp9_find_near_mvs(xd, mi,
                       prev_mi,
                       &nearest, &nearby, &best_mv, rct,
                       mbmi->ref_frame, cm->ref_frame_sign_bias);
-
-#if CONFIG_NEWBESTREFMV
     {
       int ref_fb_idx;
       MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
@@ -755,7 +751,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                             mbmi->ref_mvs[ref_frame],
                             &best_mv, &nearest, &nearby);
     }
-#endif
 
     vp9_mv_ref_probs(&pbi->common, mv_ref_p, rct);
 
@@ -808,7 +803,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       mbmi->second_ref_frame = mbmi->ref_frame + 1;
       if (mbmi->second_ref_frame == 4)
         mbmi->second_ref_frame = 1;
-#if CONFIG_NEWBESTREFMV
       if (mbmi->second_ref_frame) {
         int second_ref_fb_idx;
         /* Select the appropriate reference frame for this MB */
@@ -845,13 +839,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                               &nearest_second,
                               &nearby_second);
       }
-#else
-      vp9_find_near_mvs(xd, mi, prev_mi,
-                        &nearest_second, &nearby_second, &best_mv_second,
-                        rct,
-                        mbmi->second_ref_frame,
-                        pbi->common.ref_frame_sign_bias);
-#endif
+
     } else {
       mbmi->second_ref_frame = 0;
     }

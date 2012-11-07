@@ -44,9 +44,7 @@ void vpx_log(const char *format, ...);
 /* Segment Feature Masks */
 #define SEGMENT_DELTADATA   0
 #define SEGMENT_ABSDATA     1
-#if CONFIG_NEWBESTREFMV || CONFIG_NEW_MVREF
 #define MAX_MV_REFS 19
-#endif
 
 typedef struct {
   int r, c;
@@ -216,9 +214,7 @@ typedef struct {
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   TX_SIZE txfm_size;
   int_mv mv[2]; // for each reference frame used
-#if CONFIG_NEWBESTREFMV || CONFIG_NEW_MVREF
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REFS];
-#endif
 
   SPLITMV_PARTITIONING_TYPE partitioning;
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */

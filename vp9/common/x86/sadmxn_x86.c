@@ -13,9 +13,6 @@
 #include "./vpx_rtcd.h"
 
 
-#if CONFIG_NEWBESTREFMV
-
-
 #if HAVE_SSE2
 unsigned int vp9_sad16x3_sse2(
   const unsigned char *src_ptr,
@@ -89,4 +86,3 @@ unsigned int vp9_sad3x16_sse2(
 #endif
 
 
-#endif  // CONFIG_NEWBESTREFMV
