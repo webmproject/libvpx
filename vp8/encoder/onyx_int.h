@@ -43,7 +43,7 @@
 #define AF_THRESH   25
 #define AF_THRESH2  100
 #define ARF_DECAY_THRESH 12
-#define MAX_MODES 20
+
 
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
@@ -353,9 +353,7 @@ typedef struct VP8_COMP
     unsigned int mode_chosen_counts[MAX_MODES];
     unsigned int mbs_tested_so_far;
 
-    int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
-    int rd_threshes[MAX_MODES];
 
     int RDMULT;
     int RDDIV ;

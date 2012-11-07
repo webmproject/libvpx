@@ -65,7 +65,7 @@ static void insertsortsad(int arr[],int idx[], int len)
     }
 }
 
-extern void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue);
+extern void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue);
 extern void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra);
 extern void vp8_rd_pick_intra_mode(MACROBLOCK *x, int *rate);
 

@@ -416,13 +416,17 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
             zd->block[i].dequant = zd->dequant_uv;
         zd->block[24].dequant = zd->dequant_y2;
 #endif
+
+
+        vpx_memcpy(z->rd_threshes, x->rd_threshes, sizeof(x->rd_threshes));
+        vpx_memcpy(z->rd_thresh_mult, x->rd_thresh_mult,
+                   sizeof(x->rd_thresh_mult));
     }
 }
 
 void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
                                MACROBLOCK *x,
                                MB_ROW_COMP *mbr_ei,
-                               int mb_row,
                                int count
                               )
 {
@@ -430,7 +434,6 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
     VP8_COMMON *const cm = & cpi->common;
     MACROBLOCKD *const xd = & x->e_mbd;
     int i;
-    (void) mb_row;
 
     for (i = 0; i < count; i++)
     {
