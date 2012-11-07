@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//3Vs\u003d",
+        "filename": "vp9/common/idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1643,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-07T18:26:45Z",
+      "side": 1,
+      "message": "oh, i understand now. You go from 0 to 4 because there\u0027s only 10 non-zero coeffs at max, which is a 4x4 block given the zigzag you use. Definitely worth a comment.",
+      "parentUuid": "AAAAQ3//3sQ\u003d",
+      "revId": "5f94b0a52d51b79dec30e2635cc297faef3af1b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//3sg\u003d",
         "filename": "vp9/decoder/dequantize.c",
         "patchSetId": 1
