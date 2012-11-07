@@ -401,7 +401,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
       } else {
         vp9_dequant_idct_add_16x16(xd->qcoeff, xd->block[0].dequant,
                                      xd->predictor, xd->dst.y_buffer,
-                                     16, xd->dst.y_stride);
+                                     16, xd->dst.y_stride, xd->eobs[0]);
       }
     } else if (tx_size == TX_8X8) {
 #if CONFIG_SUPERBLOCKS
