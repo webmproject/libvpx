@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//32w\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1519,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-07T00:09:16Z",
+      "side": 0,
+      "message": "rather than removing, maybe these need to happen for first frame initialization in init_config instead?",
+      "revId": "01824d1848c1feeb727ea7dfd6522f8966133953",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
