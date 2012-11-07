@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//3zA\u003d",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-07T00:41:14Z",
+      "side": 1,
+      "message": "Well strictly speaking memset() has nothing to do with alignment or not, it\u0027s just that they happen to coincide at this particular use, that may not be the case later...",
+      "revId": "0a3eec86e50f8b534e64a67883ea26958c39c8bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
