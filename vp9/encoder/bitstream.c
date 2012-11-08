@@ -690,10 +690,8 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
   int max_mv = MV_MAX;
 
   cost = vp9_cost_mv_ref_id(xd->mb_mv_ref_id_probs[ref_frame], 0) +
-         vp9_mv_bit_cost(&target_mv,
-                         &mv_ref_list[0],
-                         XMVCOST, 96,
-                         xd->allow_high_precision_mv);
+         vp9_mv_bit_cost(&target_mv, &mv_ref_list[0], x->nmvjointcost,
+                         x->mvcost, 96, xd->allow_high_precision_mv);
 
 
   // Use 4 for now : for (i = 1; i < MAX_MV_REFS; ++i ) {
@@ -714,10 +712,8 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
     }
 
     cost2 = vp9_cost_mv_ref_id(xd->mb_mv_ref_id_probs[ref_frame], i) +
-            vp9_mv_bit_cost(&target_mv,
-                            &mv_ref_list[i],
-                            XMVCOST, 96,
-                            xd->allow_high_precision_mv);
+            vp9_mv_bit_cost(&target_mv, &mv_ref_list[i], x->nmvjointcost,
+                            x->mvcost, 96, xd->allow_high_precision_mv);
 
     if (cost2 < cost) {
       cost = cost2;

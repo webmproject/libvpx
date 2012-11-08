@@ -56,8 +56,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
       step_param,
       x->errorperbit,
       &v_fn_ptr,
-      NULLMVCOST,
-      NULLMVCOST,
+      NULL, NULL,
+      NULL, NULL,
       ref_mv);
 
   // Try sub-pixel MC
@@ -69,7 +69,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
         x, b, d,
         dst_mv, ref_mv,
         x->errorperbit, &v_fn_ptr,
-        NULLMVCOST,
+        NULL, NULL,
         & distortion, &sse);
   }
 

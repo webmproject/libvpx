@@ -185,7 +185,7 @@ static int temporal_filter_find_matching_mb_c
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   bestsme = vp9_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv.first,
                            step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
-                           NULLMVCOST, NULLMVCOST,
+                           NULL, NULL, NULL, NULL,
                            &best_ref_mv1);
 
 #if ALT_REF_SUBPEL_ENABLED
@@ -199,7 +199,7 @@ static int temporal_filter_find_matching_mb_c
                                            &best_ref_mv1,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],
-                                           NULLMVCOST,
+                                           NULL, NULL,
                                            &distortion, &sse);
   }
 #endif
