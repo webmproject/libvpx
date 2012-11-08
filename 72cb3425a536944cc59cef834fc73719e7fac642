@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//2HM\u003d",
+        "filename": "vp9/encoder/block.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-08T23:40:34Z",
+      "side": 1,
+      "message": "**mvcost, so you only have to initialize it once.",
+      "revId": "72cb3425a536944cc59cef834fc73719e7fac642",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//2HI\u003d",
+        "filename": "vp9/encoder/block.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-08T23:40:34Z",
+      "side": 1,
+      "message": "**mvsadcost, so you only have to initialize it once.",
+      "revId": "72cb3425a536944cc59cef834fc73719e7fac642",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//2Gk\u003d",
+        "filename": "vp9/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-08T23:40:34Z",
+      "side": 1,
+      "message": "Remove separate init of [0]/[1] here.",
+      "revId": "72cb3425a536944cc59cef834fc73719e7fac642",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//2Gg\u003d",
+        "filename": "vp9/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-08T23:40:34Z",
+      "side": 1,
+      "message": "Same.",
+      "revId": "72cb3425a536944cc59cef834fc73719e7fac642",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
