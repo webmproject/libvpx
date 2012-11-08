@@ -1912,7 +1912,7 @@ static int labels2mode(
   int_mv seg_mvs[MAX_REF_FRAMES - 1],
   int_mv *best_ref_mv,
   int_mv *second_best_ref_mv,
-  DEC_MVCOSTS) {
+  int *mvjcost, int *mvcost[2]) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mode_info_context;
   MB_MODE_INFO * mbmi = &mic->mbmi;
@@ -1947,11 +1947,11 @@ static int labels2mode(
               seg_mvs[mbmi->second_ref_frame - 1].as_int;
           }
 
-          thismvcost  = vp9_mv_bit_cost(this_mv, best_ref_mv, MVCOSTS,
+          thismvcost  = vp9_mv_bit_cost(this_mv, best_ref_mv, mvjcost, mvcost,
                                         102, xd->allow_high_precision_mv);
           if (mbmi->second_ref_frame) {
             thismvcost += vp9_mv_bit_cost(this_second_mv, second_best_ref_mv,
-                                          MVCOSTS, 102,
+                                          mvjcost, mvcost, 102,
                                           xd->allow_high_precision_mv);
           }
           break;
@@ -2318,7 +2318,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
             thissme = cpi->full_search_sad(x, c, e, &mvp_full,
                                            sadpb, 16, v_fn_ptr,
-                                           XMVCOST, bsi->ref_mv);
+                                           x->nmvjointcost, x->mvcost,
+                                           bsi->ref_mv);
 
             if (thissme < bestsme) {
               bestsme = thissme;
@@ -2336,7 +2337,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           unsigned int sse;
           cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
                                        bsi->ref_mv, x->errorperbit, v_fn_ptr,
-                                       XMVCOST, &distortion, &sse);
+                                       x->nmvjointcost, x->mvcost,
+                                       &distortion, &sse);
 
           // safe motion search result for use in compound prediction
           seg_mvs[i][mbmi->ref_frame - 1].as_int = mode_mv[NEW4X4].as_int;
@@ -2353,7 +2355,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
       rate = labels2mode(x, labels, i, this_mode, &mode_mv[this_mode],
                          &second_mode_mv[this_mode], seg_mvs[i],
-                         bsi->ref_mv, bsi->second_ref_mv, XMVCOST);
+                         bsi->ref_mv, bsi->second_ref_mv, x->nmvjointcost,
+                         x->mvcost);
 
       // Trap vectors that reach beyond the UMV borders
       if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) ||
@@ -2411,7 +2414,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
     labels2mode(x, labels, i, mode_selected, &mode_mv[mode_selected],
                 &second_mode_mv[mode_selected], seg_mvs[i],
-                bsi->ref_mv, bsi->second_ref_mv, XMVCOST);
+                bsi->ref_mv, bsi->second_ref_mv, x->nmvjointcost, x->mvcost);
 
     br += sbr;
     bd += sbd;
@@ -3244,11 +3247,11 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           return INT64_MAX;
         *rate2 += vp9_mv_bit_cost(&frame_mv[NEWMV][refs[0]],
                                   &frame_best_ref_mv[refs[0]],
-                                  XMVCOST, 96,
+                                  x->nmvjointcost, x->mvcost, 96,
                                   x->e_mbd.allow_high_precision_mv);
         *rate2 += vp9_mv_bit_cost(&frame_mv[NEWMV][refs[1]],
                                   &frame_best_ref_mv[refs[1]],
-                                  XMVCOST, 96,
+                                  x->nmvjointcost, x->mvcost, 96,
                                   x->e_mbd.allow_high_precision_mv);
       } else {
         int bestsme = INT_MAX;
@@ -3300,14 +3303,16 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        &frame_best_ref_mv[refs[0]],
                                        x->errorperbit,
                                        &cpi->fn_ptr[block_size],
-                                       XMVCOST, &dis, &sse);
+                                       x->nmvjointcost, x->mvcost,
+                                       &dis, &sse);
         }
         d->bmi.as_mv.first.as_int = tmp_mv.as_int;
         frame_mv[NEWMV][refs[0]].as_int = d->bmi.as_mv.first.as_int;
 
         // Add the new motion vector cost to our rolling cost variable
         *rate2 += vp9_mv_bit_cost(&tmp_mv, &frame_best_ref_mv[refs[0]],
-                                  XMVCOST, 96, xd->allow_high_precision_mv);
+                                  x->nmvjointcost, x->mvcost,
+                                  96, xd->allow_high_precision_mv);
       }
       break;
     case NEARESTMV:

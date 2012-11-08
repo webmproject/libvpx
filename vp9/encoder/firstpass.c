@@ -394,7 +394,8 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   ref_mv_full.as_mv.row = ref_mv->as_mv.row >> 3;
   tmp_err = cpi->diamond_search_sad(x, b, d, &ref_mv_full, &tmp_mv, step_param,
                                     x->sadperbit16, &num00, &v_fn_ptr,
-                                    XMVCOST, ref_mv);
+                                    x->nmvjointcost,
+                                    x->mvcost, ref_mv);
   if (tmp_err < INT_MAX - new_mv_mode_penalty)
     tmp_err += new_mv_mode_penalty;
 
@@ -417,7 +418,8 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       tmp_err = cpi->diamond_search_sad(x, b, d, &ref_mv_full, &tmp_mv,
                                         step_param + n, x->sadperbit16,
                                         &num00, &v_fn_ptr,
-                                        XMVCOST, ref_mv);
+                                        x->nmvjointcost,
+                                        x->mvcost, ref_mv);
       if (tmp_err < INT_MAX - new_mv_mode_penalty)
         tmp_err += new_mv_mode_penalty;
 

@@ -222,7 +222,16 @@ static void init_minq_luts(void) {
 
   }
 }
+static void set_mvcost(MACROBLOCK *mb) {
+  if (mb->e_mbd.allow_high_precision_mv) {
+    mb->mvcost = mb->nmvcost_hp;
+    mb->mvsadcost = mb->nmvsadcost_hp;
 
+  } else {
+    mb->mvcost = mb->nmvcost;
+    mb->mvsadcost = mb->nmvsadcost;
+  }
+}
 static void init_base_skip_probs(void) {
   int i;
   double q;
@@ -1518,6 +1527,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   setup_features(cpi);
   cpi->mb.e_mbd.allow_high_precision_mv = 0;   // Default mv precision adaptation
+  set_mvcost(&cpi->mb);
 
   {
     int i;
@@ -3122,6 +3132,7 @@ static void encode_frame_to_data_rate
     }
     /* TODO: Decide this more intelligently */
     xd->allow_high_precision_mv = (Q < HIGH_PRECISION_MV_QTHRESH);
+    set_mvcost(&cpi->mb);
   }
 
 #if CONFIG_POSTPROC
@@ -4028,6 +4039,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   cpi->source = NULL;
 
   cpi->mb.e_mbd.allow_high_precision_mv = ALTREF_HIGH_PRECISION_MV;
+  set_mvcost(&cpi->mb);
+
   // Should we code an alternate reference frame
   if (cpi->oxcf.play_alternate &&
       cpi->source_alt_ref_pending) {
