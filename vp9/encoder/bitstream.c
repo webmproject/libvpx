@@ -919,7 +919,7 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
         MB_MODE_INFO *mi;
         MV_REFERENCE_FRAME rf;
         MB_PREDICTION_MODE mode;
-        int segment_id;
+        int segment_id, skip_coeff;
 
         int dy = row_delta[i];
         int dx = col_delta[i];
@@ -973,10 +973,11 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
           }
         }
 
+        skip_coeff = 1;
         if (pc->mb_no_coeff_skip &&
             (!vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
              (vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) != 0))) {
-          int skip_coeff = mi->mb_skip_coeff;
+          skip_coeff = mi->mb_skip_coeff;
 #if CONFIG_SUPERBLOCKS
           if (mi->encoded_as_sb) {
             skip_coeff &= m[1].mbmi.mb_skip_coeff;
@@ -1107,6 +1108,7 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
                       cpi->common.mcomp_filter_type);
             }
           }
+
           if (mi->second_ref_frame &&
               (mode == NEWMV || mode == SPLITMV)) {
             int_mv n1, n2;
@@ -1244,15 +1246,11 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
           }
         }
 
-        if (
-#if CONFIG_SUPERBLOCKS
-            !mi->encoded_as_sb &&
-#endif
-            ((rf == INTRA_FRAME && mode <= I8X8_PRED) ||
+        if (((rf == INTRA_FRAME && mode <= I8X8_PRED) ||
              (rf != INTRA_FRAME && !(mode == SPLITMV &&
                                      mi->partitioning == PARTITIONING_4X4))) &&
             pc->txfm_mode == TX_MODE_SELECT &&
-            !((pc->mb_no_coeff_skip && mi->mb_skip_coeff) ||
+            !((pc->mb_no_coeff_skip && skip_coeff) ||
               (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
                vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
           TX_SIZE sz = mi->txfm_size;
@@ -1389,11 +1387,7 @@ static void write_mb_modes_kf(const VP9_COMMON  *c,
   } else
     write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 
-  if (
-#if CONFIG_SUPERBLOCKS
-      !m->mbmi.encoded_as_sb &&
-#endif
-      ym <= I8X8_PRED && c->txfm_mode == TX_MODE_SELECT &&
+  if (ym <= I8X8_PRED && c->txfm_mode == TX_MODE_SELECT &&
       !((c->mb_no_coeff_skip && m->mbmi.mb_skip_coeff) ||
         (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
          vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {

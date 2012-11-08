@@ -884,12 +884,9 @@ static void optimize_mb_16x16(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   vp9_optimize_mbuv_8x8(x, rtcd);
 }
 
-void vp9_encode_inter16x16(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
-  MACROBLOCKD *xd = &x->e_mbd;
+void vp9_fidct_mb(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
-
-  vp9_build_inter_predictors_mb(xd);
-  subtract_mb(rtcd, x);
 
   if (tx_size == TX_16X16) {
     vp9_transform_mb_16x16(x);
@@ -924,7 +921,14 @@ void vp9_encode_inter16x16(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
       optimize_mb_4x4(x, rtcd);
     vp9_inverse_transform_mb_4x4(IF_RTCD(&rtcd->common->idct), xd);
   }
+}
 
+void vp9_encode_inter16x16(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+
+  vp9_build_inter_predictors_mb(xd);
+  subtract_mb(rtcd, x);
+  vp9_fidct_mb(x, rtcd);
   vp9_recon_mb(xd);
 }
 

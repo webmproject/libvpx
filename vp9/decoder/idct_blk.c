@@ -36,6 +36,30 @@ void vp9_dequant_dc_idct_add_y_block_c(short *q, short *dq,
   }
 }
 
+#if CONFIG_SUPERBLOCKS
+void vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(short *q, short *dq,
+                                                   unsigned char *dst,
+                                                   int stride, char *eobs,
+                                                   short *dc, MACROBLOCKD *xd) {
+  int i, j;
+
+  for (i = 0; i < 4; i++) {
+    for (j = 0; j < 4; j++) {
+      if (*eobs++ > 1)
+        vp9_dequant_dc_idct_add_c(q, dq, dst, dst, stride, stride, dc[0]);
+      else
+        vp9_dc_only_idct_add_c(dc[0], dst, dst, stride, stride);
+
+      q   += 16;
+      dst += 4;
+      dc++;
+    }
+
+    dst += 4 * stride - 16;
+  }
+}
+#endif
+
 void vp9_dequant_idct_add_y_block_c(short *q, short *dq,
                                     unsigned char *pre,
                                     unsigned char *dst,
@@ -103,6 +127,47 @@ void vp9_dequant_idct_add_uv_block_c(short *q, short *dq, unsigned char *pre,
   }
 }
 
+#if CONFIG_SUPERBLOCKS
+void vp9_dequant_idct_add_uv_block_4x4_inplace_c(short *q, short *dq,
+                                                 unsigned char *dstu,
+                                                 unsigned char *dstv,
+                                                 int stride, char *eobs,
+                                                 MACROBLOCKD *xd) {
+  int i, j;
+
+  for (i = 0; i < 2; i++) {
+    for (j = 0; j < 2; j++) {
+      if (*eobs++ > 1) {
+        vp9_dequant_idct_add_c(q, dq, dstu, dstu, stride, stride);
+      } else {
+        vp9_dc_only_idct_add_c(q[0]*dq[0], dstu, dstu, stride, stride);
+        ((int *)q)[0] = 0;
+      }
+
+      q    += 16;
+      dstu += 4;
+    }
+
+    dstu += 4 * stride - 8;
+  }
+
+  for (i = 0; i < 2; i++) {
+    for (j = 0; j < 2; j++) {
+      if (*eobs++ > 1) {
+        vp9_dequant_idct_add_c(q, dq, dstv, dstv, stride, stride);
+      } else {
+        vp9_dc_only_idct_add_c(q[0]*dq[0], dstv, dstv, stride, stride);
+        ((int *)q)[0] = 0;
+      }
+
+      q    += 16;
+      dstv += 4;
+    }
+
+    dstv += 4 * stride - 8;
+  }
+}
+#endif
 
 void vp9_dequant_dc_idct_add_y_block_8x8_c(short *q, short *dq,
                                            unsigned char *pre,

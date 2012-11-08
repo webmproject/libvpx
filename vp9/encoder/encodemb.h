@@ -55,6 +55,8 @@ void vp9_transform_mb_16x16(MACROBLOCK *mb);
 void vp9_transform_mby_16x16(MACROBLOCK *x);
 void vp9_optimize_mby_16x16(MACROBLOCK *x, const struct VP9_ENCODER_RTCD *rtcd);
 
+void vp9_fidct_mb(MACROBLOCK *x, const struct VP9_ENCODER_RTCD *rtcd);
+
 void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
 
 #if CONFIG_SUPERBLOCKS

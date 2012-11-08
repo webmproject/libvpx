@@ -55,7 +55,8 @@ int mb_row_debug, mb_col_debug;
 
 static void encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
                                     TOKENEXTRA **t, int recon_yoffset,
-                                    int recon_uvoffset, int output_enabled);
+                                    int recon_uvoffset, int output_enabled,
+                                    int mb_col, int mb_row);
 
 static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
                                     TOKENEXTRA **t, int recon_yoffset,
@@ -65,7 +66,7 @@ static void encode_intra_macro_block(VP9_COMP *cpi, MACROBLOCK *x,
                                      TOKENEXTRA **t, int output_enabled);
 
 static void encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
-                                     TOKENEXTRA **t, int mb_col);
+                                     TOKENEXTRA **t, int mb_col, int mb_row);
 
 static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
 
@@ -466,9 +467,9 @@ static void update_state(VP9_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
     cpi->prediction_error += ctx->distortion;
     cpi->intra_error += ctx->intra_error;
 
-    cpi->rd_comp_pred_diff[0] += ctx->single_pred_diff;
-    cpi->rd_comp_pred_diff[1] += ctx->comp_pred_diff;
-    cpi->rd_comp_pred_diff[2] += ctx->hybrid_pred_diff;
+    cpi->rd_comp_pred_diff[SINGLE_PREDICTION_ONLY] += ctx->single_pred_diff;
+    cpi->rd_comp_pred_diff[COMP_PREDICTION_ONLY]   += ctx->comp_pred_diff;
+    cpi->rd_comp_pred_diff[HYBRID_PREDICTION]      += ctx->hybrid_pred_diff;
   }
 }
 
@@ -645,7 +646,7 @@ static void pick_mb_modes(VP9_COMP *cpi,
 
       // Dummy encode, do not do the tokenization
       encode_inter_macroblock(cpi, x, tp,
-                              recon_yoffset, recon_uvoffset, 0);
+                              recon_yoffset, recon_uvoffset, 0, mb_col, mb_row);
 
       seg_id = mbmi->segment_id;
       if (cpi->mb.e_mbd.segmentation_enabled && seg_id == 0) {
@@ -975,7 +976,7 @@ static void encode_sb(VP9_COMP *cpi,
     if (cm->frame_type == KEY_FRAME) {
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb)
-        encode_intra_super_block(cpi, x, tp, mb_col);
+        encode_intra_super_block(cpi, x, tp, mb_col, mb_row);
       else
 #endif
         encode_intra_macro_block(cpi, x, tp, 1);
@@ -1005,8 +1006,8 @@ static void encode_sb(VP9_COMP *cpi,
                                 mb_col, mb_row);
       else
 #endif
-        encode_inter_macroblock(cpi, x, tp,
-                                recon_yoffset, recon_uvoffset, 1);
+        encode_inter_macroblock(cpi, x, tp, recon_yoffset, recon_uvoffset, 1,
+                                mb_col, mb_row);
         // Note the encoder may have changed the segment_id
 
 #ifdef MODE_STATS
@@ -1431,7 +1432,7 @@ static int check_dual_ref_flags(VP9_COMP *cpi) {
 
 static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
   VP9_COMMON *cm = &cpi->common;
-  int mb_row, mb_col, mis = cm->mode_info_stride, segment_id;
+  int mb_row, mb_col, mis = cm->mode_info_stride, segment_id, skip;
   MODE_INFO *mi, *mi_ptr = cm->mi;
 #if CONFIG_SUPERBLOCKS
   MODE_INFO *sb_mi_ptr = cm->mi, *sb_mi;
@@ -1451,17 +1452,45 @@ static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
 #if CONFIG_SUPERBLOCKS
       sb_mbmi = &sb_mi->mbmi;
 #endif
-      if (
+      if (mbmi->txfm_size > txfm_max) {
 #if CONFIG_SUPERBLOCKS
-          !sb_mbmi->encoded_as_sb &&
+        if (sb_mbmi->encoded_as_sb) {
+          if (!((mb_col & 1) || (mb_row & 1))) {
+            segment_id = mbmi->segment_id;
+            skip = mbmi->mb_skip_coeff;
+            if (mb_col < cm->mb_cols - 1) {
+              segment_id = segment_id && mi[1].mbmi.segment_id;
+              skip = skip && mi[1].mbmi.mb_skip_coeff;
+            }
+            if (mb_row < cm->mb_rows - 1) {
+              segment_id = segment_id &&
+                           mi[cm->mode_info_stride].mbmi.segment_id;
+              skip = skip && mi[cm->mode_info_stride].mbmi.mb_skip_coeff;
+              if (mb_col < cm->mb_cols - 1) {
+                segment_id = segment_id &&
+                             mi[cm->mode_info_stride + 1].mbmi.segment_id;
+                skip = skip && mi[cm->mode_info_stride + 1].mbmi.mb_skip_coeff;
+              }
+            }
+            xd->mode_info_context = mi;
+            assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+                    vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
+                   (cm->mb_no_coeff_skip && skip));
+            mbmi->txfm_size = txfm_max;
+          } else {
+            mbmi->txfm_size = sb_mbmi->txfm_size;
+          }
+        } else {
 #endif
-          mbmi->txfm_size > txfm_max) {
-        segment_id = mbmi->segment_id;
-        xd->mode_info_context = mi;
-        assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-                vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
-               (cm->mb_no_coeff_skip && mbmi->mb_skip_coeff));
-        mbmi->txfm_size = txfm_max;
+          segment_id = mbmi->segment_id;
+          xd->mode_info_context = mi;
+          assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+                  vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
+                 (cm->mb_no_coeff_skip && mbmi->mb_skip_coeff));
+          mbmi->txfm_size = txfm_max;
+#if CONFIG_SUPERBLOCKS
+        }
+#endif
       }
 #if CONFIG_SUPERBLOCKS
       if (mb_col & 1)
@@ -1835,7 +1864,7 @@ static void update_sb_skip_coeff_state(VP9_COMP *cpi,
 }
 
 static void encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
-                                     TOKENEXTRA **t, int mb_col) {
+                                     TOKENEXTRA **t, int mb_col, int mb_row) {
   const int output_enabled = 1;
   int n;
   MACROBLOCKD *xd = &x->e_mbd;
@@ -1851,7 +1880,7 @@ static void encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
   const VP9_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
   TOKENEXTRA *tp[4];
   int skip[4];
-  MODE_INFO *mi = x->e_mbd.mode_info_context;
+  MODE_INFO *mi = xd->mode_info_context;
   ENTROPY_CONTEXT_PLANES ta[4], tl[4];
 
   if ((cpi->oxcf.tuning == VP8_TUNE_SSIM) && output_enabled) {
@@ -1862,7 +1891,6 @@ static void encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_build_intra_predictors_sby_s(&x->e_mbd);
   vp9_build_intra_predictors_sbuv_s(&x->e_mbd);
 
-  assert(x->e_mbd.mode_info_context->mbmi.txfm_size == TX_8X8);
   for (n = 0; n < 4; n++) {
     int x_idx = n & 1, y_idx = n >> 1;
 
@@ -1881,15 +1909,9 @@ static void encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
                           udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           dst_uv_stride);
-    vp9_transform_mb_8x8(x);
-    vp9_quantize_mb_8x8(x);
-    if (x->optimize) {
-      vp9_optimize_mby_8x8(x, rtcd);
-      vp9_optimize_mbuv_8x8(x, rtcd);
-    }
-    vp9_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-    vp9_recon_mby_s_c(&x->e_mbd, dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
-    vp9_recon_mbuv_s_c(&x->e_mbd,
+    vp9_fidct_mb(x, rtcd);
+    vp9_recon_mby_s_c(xd, dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
+    vp9_recon_mbuv_s_c(xd,
                        udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                        vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride);
 
@@ -1898,16 +1920,35 @@ static void encode_intra_super_block(VP9_COMP *cpi, MACROBLOCK *x,
       memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
       tp[n] = *t;
       xd->mode_info_context = mi + x_idx + y_idx * cm->mode_info_stride;
-      vp9_tokenize_mb(cpi, &x->e_mbd, t, 0);
+      vp9_tokenize_mb(cpi, xd, t, 0);
       skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff;
     }
   }
 
   if (output_enabled) {
+    int segment_id;
+
     // Tokenize
     xd->mode_info_context = mi;
+    segment_id = mi->mbmi.segment_id;
     sum_intra_stats(cpi, x);
     update_sb_skip_coeff_state(cpi, x, ta, tl, tp, t, skip);
+    if (cm->txfm_mode == TX_MODE_SELECT &&
+        !((cm->mb_no_coeff_skip && skip[0] && skip[1] && skip[2] && skip[3]) ||
+          (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+           vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+      cpi->txfm_count[mi->mbmi.txfm_size]++;
+    } else {
+      TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ? TX_16X16 : cm->txfm_mode;
+      mi->mbmi.txfm_size = sz;
+      if (mb_col < cm->mb_cols - 1)
+        mi[1].mbmi.txfm_size = sz;
+      if (mb_row < cm->mb_rows - 1) {
+        mi[cm->mode_info_stride].mbmi.txfm_size = sz;
+        if (mb_col < cm->mb_cols - 1)
+          mi[cm->mode_info_stride + 1].mbmi.txfm_size = sz;
+      }
+    }
   }
 }
 #endif /* CONFIG_SUPERBLOCKS */
@@ -1962,7 +2003,8 @@ static void encode_intra_macro_block(VP9_COMP *cpi, MACROBLOCK *x,
 }
 static void encode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
                                     TOKENEXTRA **t, int recon_yoffset,
-                                    int recon_uvoffset, int output_enabled) {
+                                    int recon_uvoffset, int output_enabled,
+                                    int mb_col, int mb_row) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
@@ -2151,8 +2193,8 @@ static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
                                     int recon_uvoffset,
                                     int mb_col, int mb_row) {
   const int output_enabled = 1;
-  VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &x->e_mbd;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *src = x->src.y_buffer;
   uint8_t *dst = xd->dst.y_buffer;
   const uint8_t *usrc = x->src.u_buffer;
@@ -2162,13 +2204,13 @@ static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
   const VP9_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
-  unsigned int segment_id = xd->mode_info_context->mbmi.segment_id;
   int seg_ref_active;
   unsigned char ref_pred_flag;
   int n;
   TOKENEXTRA *tp[4];
   int skip[4];
   MODE_INFO *mi = x->e_mbd.mode_info_context;
+  unsigned int segment_id = mi->mbmi.segment_id;
   ENTROPY_CONTEXT_PLANES ta[4], tl[4];
 
   x->skip = 0;
@@ -2248,7 +2290,6 @@ static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
                                        xd->dst.y_stride, xd->dst.uv_stride);
   }
 
-  assert(x->e_mbd.mode_info_context->mbmi.txfm_size == TX_8X8);
   for (n = 0; n < 4; n++) {
     int x_idx = n & 1, y_idx = n >> 1;
 
@@ -2264,13 +2305,7 @@ static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
                           udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           dst_uv_stride);
-    vp9_transform_mb_8x8(x);
-    vp9_quantize_mb_8x8(x);
-    if (x->optimize) {
-      vp9_optimize_mby_8x8(x, rtcd);
-      vp9_optimize_mbuv_8x8(x, rtcd);
-    }
-    vp9_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    vp9_fidct_mb(x, rtcd);
     vp9_recon_mby_s_c(&x->e_mbd,
                       dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
     vp9_recon_mbuv_s_c(&x->e_mbd,
@@ -2313,5 +2348,21 @@ static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
 
   xd->mode_info_context = mi;
   update_sb_skip_coeff_state(cpi, x, ta, tl, tp, t, skip);
+  if (cm->txfm_mode == TX_MODE_SELECT &&
+      !((cm->mb_no_coeff_skip && skip[0] && skip[1] && skip[2] && skip[3]) ||
+        (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
+         vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+    cpi->txfm_count[mi->mbmi.txfm_size]++;
+  } else {
+    TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ? TX_16X16 : cm->txfm_mode;
+    mi->mbmi.txfm_size = sz;
+    if (mb_col < cm->mb_cols - 1)
+      mi[1].mbmi.txfm_size = sz;
+    if (mb_row < cm->mb_rows - 1) {
+      mi[cm->mode_info_stride].mbmi.txfm_size = sz;
+      if (mb_col < cm->mb_cols - 1)
+        mi[cm->mode_info_stride + 1].mbmi.txfm_size = sz;
+    }
+  }
 }
 #endif

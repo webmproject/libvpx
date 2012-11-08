@@ -186,11 +186,6 @@ static void kfread_modes(VP9D_COMP *pbi,
   m->mbmi.second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
 #endif
 
-#if CONFIG_SUPERBLOCKS
-  if (m->mbmi.encoded_as_sb)
-    m->mbmi.txfm_size = TX_8X8;
-  else
-#endif
   if (cm->txfm_mode == TX_MODE_SELECT && m->mbmi.mb_skip_coeff == 0 &&
       m->mbmi.mode <= I8X8_PRED) {
     // FIXME(rbultje) code ternary symbol once all experiments are merged
@@ -1132,11 +1127,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
   }
 
-#if CONFIG_SUPERBLOCKS
-  if (mbmi->encoded_as_sb)
-    mbmi->txfm_size = TX_8X8;
-  else
-#endif
   if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= I8X8_PRED) ||
        (mbmi->ref_frame != INTRA_FRAME && !(mbmi->mode == SPLITMV &&
