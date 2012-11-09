@@ -2418,7 +2418,7 @@ int main(int argc, const char **argv_) {
         got_data = 0;
         FOREACH_STREAM(get_cx_data(stream, &global, &got_data));
 
-        if (global.test_decode)
+        if (got_data && global.test_decode)
           FOREACH_STREAM(test_decode(stream, frames_in));
       }
 
