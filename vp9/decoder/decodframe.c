@@ -284,7 +284,7 @@ static void decode_superblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
       vp9_dequant_idct_add_16x16(xd->qcoeff, xd->block[0].dequant,
           xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
           xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-          xd->dst.y_stride, xd->dst.y_stride);
+          xd->dst.y_stride, xd->dst.y_stride, xd->eobs[0]);
       vp9_dequant_idct_add_uv_block_8x8_inplace_c(xd->qcoeff + 16 * 16,
           xd->block[16].dequant,
           xd->dst.u_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
