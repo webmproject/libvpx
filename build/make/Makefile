@@ -105,14 +105,14 @@ testdata::
 
 xform_obj_prefix:=.objs/$(TOOLCHAIN)/
 xform_obj_path=$(if $(1),$(addprefix $(xform_obj_prefix),$(subst /,_,$(1))),$(xform_obj_prefix))
-xform_obj_path_o_d=$(call xform_obj_path,$(1).o) $(call xform_obj_path,$(1).d)
+xform_obj_path_o_d=$(call xform_obj_path,$(1)).o $(call xform_obj_path,$(1)).d
 define obj_rules_template
 $(BUILD_PFX)$(call xform_obj_path,$(1))%.c.d: $(1)%.c
 	$(if $(quiet),@echo "    [DEP] $$@")
 	$(qexec)mkdir -p $$(dir $$@)
 	$(qexec)$(CC) $$(INTERNAL_CFLAGS) $$(CFLAGS) -M $$< | $(fmt_deps) > $$@
 
-$(BUILD_PFX)$(call xform_obj_path,$(1))%.c.o: $(1)%.c
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.c.o: $(1)%.c $(BUILD_PFX)$(call xform_obj_path,$(1))%.c.d
 	$(if $(quiet),@echo "    [CC] $$@")
 	$(qexec)$(CC) $$(INTERNAL_CFLAGS) $$(CFLAGS) -c -o $$@ $$<
 

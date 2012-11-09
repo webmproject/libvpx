@@ -29,7 +29,7 @@
 #include "vp9/common/reconintra.h"
 #include "vp9/common/seg_common.h"
 #include "vp9/encoder/tokenize.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 #include <stdio.h>
 #include <math.h>
 #include <limits.h>

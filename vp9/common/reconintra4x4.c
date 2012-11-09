@@ -12,7 +12,7 @@
 #include "vpx_ports/config.h"
 #include "vpx_mem/vpx_mem.h"
 #include "reconintra.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 
 #if CONFIG_NEWBINTRAMODES
 static int find_grad_measure(unsigned char *x, int stride, int n, int t,

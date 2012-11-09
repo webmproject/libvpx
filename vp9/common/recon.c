@@ -10,7 +10,7 @@
 
 
 #include "vpx_ports/config.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 #include "blockd.h"
 
 void vp9_recon_b_c

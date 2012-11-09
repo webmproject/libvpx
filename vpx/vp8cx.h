@@ -34,8 +34,10 @@ extern vpx_codec_iface_t  vpx_codec_vp8_cx_algo;
 extern vpx_codec_iface_t *vpx_codec_vp8_cx(void);
 
 /* TODO(jkoleszar): These move to VP9 in a later patch set. */
-extern vpx_codec_iface_t  vpx_codec_vp8x_cx_algo;
-extern vpx_codec_iface_t *vpx_codec_vp8x_cx(void);
+extern vpx_codec_iface_t  vpx_codec_vp9_cx_algo;
+extern vpx_codec_iface_t *vpx_codec_vp9_cx(void);
+extern vpx_codec_iface_t  vpx_codec_vp9x_cx_algo;
+extern vpx_codec_iface_t *vpx_codec_vp9x_cx(void);
 
 /*!@} - end algorithm interface member group*/
 

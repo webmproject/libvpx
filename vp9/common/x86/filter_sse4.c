@@ -12,7 +12,7 @@
 #include <smmintrin.h> // SSE4.1
 #include "vp9/common/filter.h"
 #include "vpx_ports/mem.h" // for DECLARE_ALIGNED
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 
 // TODO(cd): After cleanup, commit faster versions for non 4x4 size. This is
 //           just a quick partial snapshot so that other can already use some

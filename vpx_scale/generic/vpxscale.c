@@ -20,7 +20,7 @@
 /****************************************************************************
 *  Header Files
 ****************************************************************************/
-#include "./vpx_rtcd.h"
+#include "./vpx_scale_rtcd.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/yv12config.h"
 #include "vpx_scale/scale_mode.h"

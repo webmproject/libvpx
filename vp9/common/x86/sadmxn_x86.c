@@ -10,7 +10,7 @@
 
 #include <emmintrin.h>  // SSE2
 #include "./vpx_config.h"
-#include "./vpx_rtcd.h"
+#include "./vp9_rtcd.h"
 
 
 #if HAVE_SSE2

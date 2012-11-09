@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 #include "vp9/common/idct.h"
 
 void vp9_dequant_dc_idct_add_y_block_c(short *q, short *dq,

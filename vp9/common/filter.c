@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include "filter.h"
 #include "vpx_ports/mem.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 
 DECLARE_ALIGNED(16, const short, vp9_bilinear_filters[SUBPEL_SHIFTS][2]) = {
   { 128,   0 },

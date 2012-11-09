@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 #include "dequantize.h"
 #include "vp9/common/idct.h"
 #include "vpx_mem/vpx_mem.h"

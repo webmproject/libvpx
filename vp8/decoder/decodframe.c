@@ -10,7 +10,8 @@
 
 
 #include "vpx_config.h"
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
+#include "./vpx_scale_rtcd.h"
 #include "onyxd_int.h"
 #include "vp8/common/header.h"
 #include "vp8/common/reconintra4x4.h"

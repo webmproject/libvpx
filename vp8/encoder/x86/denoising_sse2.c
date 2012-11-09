@@ -12,7 +12,7 @@
 #include "vp8/common/reconinter.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 
 #include <emmintrin.h>
 

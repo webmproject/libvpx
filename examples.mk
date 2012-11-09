@@ -38,7 +38,7 @@ vpxenc.SRCS                 += libmkv/EbmlWriter.c
 vpxenc.SRCS                 += libmkv/EbmlWriter.h
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
-UTILS-$(CONFIG_ENCODERS)    += vp8_scalable_patterns.c
+UTILS-$(CONFIG_VP8_ENCODER)    += vp8_scalable_patterns.c
 vp8_scalable_patterns.GUID   = 0D6A210B-F482-4D6F-8570-4A9C01ACC88C
 vp8_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
 
@@ -56,37 +56,37 @@ endif
 #example_xma.GUID             = A955FC4A-73F1-44F7-135E-30D84D32F022
 #example_xma.DESCRIPTION      = External Memory Allocation mode usage
 
-GEN_EXAMPLES-$(CONFIG_DECODERS) += simple_decoder.c
+GEN_EXAMPLES-$(CONFIG_VP8_DECODER) += simple_decoder.c
 simple_decoder.GUID              = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
 simple_decoder.DESCRIPTION       = Simplified decoder loop
-GEN_EXAMPLES-$(CONFIG_DECODERS) += postproc.c
+GEN_EXAMPLES-$(CONFIG_VP8_DECODER) += postproc.c
 postproc.GUID                    = 65E33355-F35E-4088-884D-3FD4905881D7
 postproc.DESCRIPTION             = Decoder postprocessor control
-GEN_EXAMPLES-$(CONFIG_DECODERS) += decode_to_md5.c
+GEN_EXAMPLES-$(CONFIG_VP8_DECODER) += decode_to_md5.c
 decode_to_md5.SRCS              += md5_utils.h md5_utils.c
 decode_to_md5.GUID               = 59120B9B-2735-4BFE-B022-146CA340FE42
 decode_to_md5.DESCRIPTION        = Frame by frame MD5 checksum
 
-GEN_EXAMPLES-$(CONFIG_ENCODERS) += simple_encoder.c
+GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += simple_encoder.c
 simple_encoder.GUID              = 4607D299-8A71-4D2C-9B1D-071899B6FBFD
 simple_encoder.DESCRIPTION       = Simplified encoder loop
-GEN_EXAMPLES-$(CONFIG_ENCODERS) += twopass_encoder.c
+GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += twopass_encoder.c
 twopass_encoder.GUID             = 73494FA6-4AF9-4763-8FBB-265C92402FD8
 twopass_encoder.DESCRIPTION      = Two-pass encoder loop
-GEN_EXAMPLES-$(CONFIG_ENCODERS) += force_keyframe.c
+GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += force_keyframe.c
 force_keyframe.GUID              = 3C67CADF-029F-4C86-81F5-D6D4F51177F0
 force_keyframe.DESCRIPTION       = Force generation of keyframes
 ifeq ($(CONFIG_DECODERS),yes)
-GEN_EXAMPLES-$(CONFIG_ENCODERS) += decode_with_drops.c
+GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += decode_with_drops.c
 endif
 decode_with_drops.GUID           = CE5C53C4-8DDA-438A-86ED-0DDD3CDB8D26
 decode_with_drops.DESCRIPTION    = Drops frames while decoding
-ifeq ($(CONFIG_DECODERS),yes)
+ifeq ($(CONFIG_VP8_DECODER),yes)
 GEN_EXAMPLES-$(CONFIG_ERROR_CONCEALMENT) += decode_with_partial_drops.c
 endif
 decode_with_partial_drops.GUID           = 61C2D026-5754-46AC-916F-1343ECC5537E
 decode_with_partial_drops.DESCRIPTION    = Drops parts of frames while decoding
-GEN_EXAMPLES-$(CONFIG_ENCODERS) += error_resilient.c
+GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += error_resilient.c
 error_resilient.GUID             = DF5837B9-4145-4F92-A031-44E4F832E00C
 error_resilient.DESCRIPTION      = Error Resiliency Feature
 

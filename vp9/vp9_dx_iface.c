@@ -659,8 +659,8 @@ static vpx_codec_ctrl_fn_map_t ctf_maps[] = {
 #ifndef VERSION_STRING
 #define VERSION_STRING
 #endif
-CODEC_INTERFACE(vpx_codec_vp8_dx) = {
-  "WebM Project VP8 Decoder" VERSION_STRING,
+CODEC_INTERFACE(vpx_codec_vp9_dx) = {
+  "WebM Project VP9 Decoder" VERSION_STRING,
   VPX_CODEC_INTERNAL_ABI_VERSION,
   VPX_CODEC_CAP_DECODER | VP8_CAP_POSTPROC,
   /* vpx_codec_caps_t          caps; */

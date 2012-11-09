@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 
 #if HAVE_DSPR2
 #define CROP_WIDTH 256

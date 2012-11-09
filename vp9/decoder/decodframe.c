@@ -32,7 +32,7 @@
 
 #include "vp9/common/seg_common.h"
 #include "vp9/common/entropy.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 
 #include <assert.h>
 #include <stdio.h>

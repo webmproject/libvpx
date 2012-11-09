@@ -182,3 +182,5 @@ VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon_neon.c
 
 $(eval $(call asm_offsets_template,\
          vp9_asm_com_offsets.asm, $(VP9_PREFIX)common/asm_com_offsets.c))
+
+$(eval $(call rtcd_h_template,vp9_rtcd,vp9/common/rtcd_defs.sh))

@@ -16,7 +16,7 @@
 extern "C" {
 #include "vp9/encoder/variance.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 }
 
 namespace {

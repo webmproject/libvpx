@@ -9,7 +9,7 @@
  */
 
 #include "vpx_config.h"
-#include "./vpx_rtcd.h"
+#include "./vp9_rtcd.h"
 
 #if HAVE_ARMV6
 

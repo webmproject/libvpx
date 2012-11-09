@@ -9,7 +9,7 @@
  */
 
 #include "vpx_ports/config.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 #include "vp9/common/idct.h"
 #include "quantize.h"
 #include "vp9/common/reconintra.h"

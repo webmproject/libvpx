@@ -143,7 +143,9 @@ generate_filter() {
             if [ "${f##*.}" == "$pat" ]; then
                 unset file_list[i]
 
+                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,/,_,g')
                 open_tag File RelativePath="./$f"
+
                 if [ "$pat" == "asm" ] && $asm_use_custom_step; then
                     for plat in "${platforms[@]}"; do
                         for cfg in Debug Release; do
@@ -154,13 +156,26 @@ generate_filter() {
                                 Name="VCCustomBuildTool" \
                                 Description="Assembling \$(InputFileName)" \
                                 CommandLine="$(eval echo \$asm_${cfg}_cmdline)" \
-                                Outputs="\$(InputName).obj" \
+                                Outputs="\$(IntDir)$objf" \
 
                             close_tag FileConfiguration
                         done
                     done
                 fi
+                if [ "$pat" == "c" ] || [ "$pat" == "cc" ] ; then
+                    for plat in "${platforms[@]}"; do
+                        for cfg in Debug Release; do
+                            open_tag FileConfiguration \
+                                Name="${cfg}|${plat}" \
 
+                            tag Tool \
+                                Name="VCCLCompilerTool" \
+                                ObjectFile="\$(IntDir)$objf" \
+
+                            close_tag FileConfiguration
+                        done
+                    done
+                fi
                 close_tag File
 
                 break

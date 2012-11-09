@@ -44,6 +44,19 @@ endef
 endif # rvct
 endif # !gcc
 
+#
+# Rule to generate runtime cpu detection files
+#
+define rtcd_h_template
+$$(BUILD_PFX)$(1).h: $$(SRC_PATH_BARE)/$(2)
+	@echo "    [CREATE] $$@"
+	$$(qexec)$$(SRC_PATH_BARE)/build/make/rtcd.sh --arch=$$(TGT_ISA) \
+          --sym=$(1) \
+          --config=$$(target)$$(if $$(FAT_ARCHS),,-$$(TOOLCHAIN)).mk \
+          $$(RTCD_OPTIONS) $$^ > $$@
+CLEAN-OBJS += $$(BUILD_PFX)$(1).h
+RTCD += $$(BUILD_PFX)$(1).h
+endef
 
 CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
@@ -190,7 +203,8 @@ INSTALL-LIBS-$(CONFIG_STATIC) += $(LIBSUBDIR)/libvpx.a
 INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(LIBSUBDIR)/libvpx_g.a
 endif
 
-CODEC_SRCS=$(filter-out %_test.cc,$(call enabled,CODEC_SRCS))
+CODEC_SRCS=$(filter-out %_offsets.c,\
+           $(filter-out %_test.cc,$(call enabled,CODEC_SRCS)))
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(CODEC_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 
@@ -245,7 +259,7 @@ vpx.vcproj: $(CODEC_SRCS) vpx.def
 PROJECTS-$(BUILD_LIBVPX) += vpx.vcproj
 
 vpx.vcproj: vpx_config.asm
-vpx.vcproj: vpx_rtcd.h
+vpx.vcproj: $(RTCD)
 
 endif
 else
@@ -361,18 +375,6 @@ $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 
 $(shell $(SRC_PATH_BARE)/build/make/version.sh "$(SRC_PATH_BARE)" $(BUILD_PFX)vpx_version.h)
 CLEAN-OBJS += $(BUILD_PFX)vpx_version.h
-
-#
-# Rule to generate runtime cpu detection files
-#
-$(BUILD_PFX)vpx_rtcd.h: $(SRC_PATH_BARE)/$(sort $(filter %rtcd_defs.sh,$(CODEC_SRCS)))
-	@echo "    [CREATE] $@"
-	$(qexec)$(SRC_PATH_BARE)/build/make/rtcd.sh --arch=$(TGT_ISA) \
-          --sym=vpx_rtcd \
-          --config=$(target)$(if $(FAT_ARCHS),,-$(TOOLCHAIN)).mk \
-          $(RTCD_OPTIONS) $^ > $@
-CLEAN-OBJS += $(BUILD_PFX)vpx_rtcd.h
-
 
 CODEC_DOC_SRCS += vpx/vpx_codec.h \
                   vpx/vpx_decoder.h \
@@ -501,8 +503,8 @@ libs.doxy: $(CODEC_DOC_SRCS)
 	@echo "INCLUDE_PATH += ." >> $@;
 	@echo "ENABLED_SECTIONS += $(sort $(CODEC_DOC_SECTIONS))" >> $@
 
-## Generate vpx_rtcd.h for all objects
-$(OBJS-yes:.o=.d): $(BUILD_PFX)vpx_rtcd.h
+## Generate rtcd.h for all objects
+$(OBJS-yes:.o=.d): $(RTCD)
 
 ## Update the global src list
 SRCS += $(CODEC_SRCS) $(LIBVPX_TEST_SRCS) $(GTEST_SRCS)

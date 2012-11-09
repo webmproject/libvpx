@@ -16,7 +16,7 @@
 
 extern "C" {
 #include "vp9/common/idct.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 }
 
 #include "acm_random.h"

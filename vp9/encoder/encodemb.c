@@ -18,7 +18,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "rdopt.h"
 #include "vp9/common/systemdependent.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)

@@ -10,7 +10,7 @@
 
 
 #include "vpx_ports/config.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 #include "vp9/common/subpixel.h"
 #include "vp9/common/loopfilter.h"
 #include "vp9/common/idct.h"
@@ -84,5 +84,5 @@ void vp9_machine_specific_config(VP9_COMMON *ctx) {
   vp9_arch_arm_common_init(ctx);
 #endif
 
-  vpx_rtcd();
+  vp9_rtcd();
 }

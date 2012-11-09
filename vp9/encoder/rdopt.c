@@ -40,7 +40,7 @@
 #include "vp9/common/seg_common.h"
 #include "vp9/common/pred_common.h"
 #include "vp9/common/entropy.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 #include "vp9/common/mvref_common.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT

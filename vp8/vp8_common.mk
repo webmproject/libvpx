@@ -194,3 +194,5 @@ VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/vp8_subpixelvariance16x16s_neon
 
 $(eval $(call asm_offsets_template,\
          vp8_asm_com_offsets.asm, $(VP8_PREFIX)common/asm_com_offsets.c))
+
+$(eval $(call rtcd_h_template,vp8_rtcd,vp8/common/rtcd_defs.sh))

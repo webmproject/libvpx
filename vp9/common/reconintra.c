@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "vpx_ports/config.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 #include "reconintra.h"
 #include "vpx_mem/vpx_mem.h"
 

@@ -14,7 +14,7 @@
 
 #include "vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
-#include "vpx_rtcd.h"
+#include "vp9_rtcd.h"
 #include "loopfilter.h"
 #include "entropymv.h"
 #include "entropy.h"

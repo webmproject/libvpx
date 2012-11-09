@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 #include "vpx_ports/mem.h"
-#include "./vpx_rtcd.h"
+#include "./vp9_rtcd.h"
 unsigned int vp9_satd16x16_c(const unsigned char *src_ptr,
                              int  src_stride,
                              const unsigned char *ref_ptr,

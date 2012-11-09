@@ -94,13 +94,13 @@ static const struct codec_item {
 } codecs[] = {
 #if CONFIG_VP8_ENCODER && CONFIG_VP8_DECODER
   {"vp8", &vpx_codec_vp8_cx, &vpx_codec_vp8_dx, 0x30385056},
-#elif CONFIG_VP9_ENCODER && !CONFIG_VP9_DECODER
+#elif CONFIG_VP8_ENCODER && !CONFIG_VP8_DECODER
   {"vp8", &vpx_codec_vp8_cx, NULL, 0x30385056},
 #endif
 #if CONFIG_VP9_ENCODER && CONFIG_VP9_DECODER
-  {"vp9", &vpx_codec_vp8_cx, &vpx_codec_vp8_dx, 0x30385056},
+  {"vp9", &vpx_codec_vp9_cx, &vpx_codec_vp9_dx, 0x30395056},
 #elif CONFIG_VP9_ENCODER && !CONFIG_VP9_DECODER
-  {"vp9", &vpx_codec_vp8_cx, NULL, 0x30385056},
+  {"vp9", &vpx_codec_vp9_cx, NULL, 0x30395056},
 #endif
 };
 
@@ -1058,22 +1058,14 @@ static const arg_def_t *kf_args[] = {
 };
 
 
-#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 static const arg_def_t noise_sens = ARG_DEF(NULL, "noise-sensitivity", 1,
                                             "Noise sensitivity (frames to blur)");
 static const arg_def_t sharpness = ARG_DEF(NULL, "sharpness", 1,
                                            "Filter sharpness (0-7)");
 static const arg_def_t static_thresh = ARG_DEF(NULL, "static-thresh", 1,
                                                "Motion detection threshold");
-#endif
-
-#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 static const arg_def_t cpu_used = ARG_DEF(NULL, "cpu-used", 1,
                                           "CPU Used (-16..16)");
-#endif
-
-
-#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 static const arg_def_t token_parts = ARG_DEF(NULL, "token-parts", 1,
                                              "Number of token partitions to use, log2");
 static const arg_def_t auto_altref = ARG_DEF(NULL, "auto-alt-ref", 1,
@@ -1099,7 +1091,25 @@ static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
 static const arg_def_t lossless = ARG_DEF(NULL, "lossless", 1, "Lossless mode");
 #endif
 
+#if CONFIG_VP8_ENCODER
 static const arg_def_t *vp8_args[] = {
+  &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
+  &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
+  &tune_ssim, &cq_level, &max_intra_rate_pct,
+  NULL
+};
+static const int vp8_arg_ctrl_map[] = {
+  VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
+  VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
+  VP8E_SET_TOKEN_PARTITIONS,
+  VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
+  VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
+  0
+};
+#endif
+
+#if CONFIG_VP9_ENCODER
+static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
   &tune_ssim, &cq_level, &max_intra_rate_pct,
@@ -1108,7 +1118,7 @@ static const arg_def_t *vp8_args[] = {
 #endif
   NULL
 };
-static const int vp8_arg_ctrl_map[] = {
+static const int vp9_arg_ctrl_map[] = {
   VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
   VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
   VP8E_SET_TOKEN_PARTITIONS,
@@ -1139,9 +1149,13 @@ static void usage_exit() {
   arg_show_usage(stdout, rc_twopass_args);
   fprintf(stderr, "\nKeyframe Placement Options:\n");
   arg_show_usage(stdout, kf_args);
-#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
+#if CONFIG_VP8_ENCODER
   fprintf(stderr, "\nVP8 Specific Options:\n");
   arg_show_usage(stdout, vp8_args);
+#endif
+#if CONFIG_VP9_ENCODER
+  fprintf(stderr, "\nVP9 Specific Options:\n");
+  arg_show_usage(stdout, vp9_args);
 #endif
   fprintf(stderr, "\nStream timebase (--timebase):\n"
           "  The desired precision of timestamps in the output, expressed\n"
@@ -1456,8 +1470,15 @@ static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
 
 
 #define NELEMENTS(x) (sizeof(x)/sizeof(x[0]))
+#define MAX(x,y) ((x)>(y)?(x):(y))
+#if CONFIG_VP8_ENCODER && !CONFIG_VP9_ENCODER
 #define ARG_CTRL_CNT_MAX NELEMENTS(vp8_arg_ctrl_map)
-
+#elif !CONFIG_VP8_ENCODER && CONFIG_VP9_ENCODER
+#define ARG_CTRL_CNT_MAX NELEMENTS(vp9_arg_ctrl_map)
+#else
+#define ARG_CTRL_CNT_MAX MAX(NELEMENTS(vp8_arg_ctrl_map), \
+                             NELEMENTS(vp9_arg_ctrl_map))
+#endif
 
 /* Configuration elements common to all streams */
 struct global_config {
@@ -1738,9 +1759,17 @@ static int parse_stream_params(struct global_config *global,
   int                      eos_mark_found = 0;
 
   /* Handle codec specific options */
-  if (global->codec->iface == vpx_codec_vp8_cx) {
+  if (0) {
+#if CONFIG_VP8_ENCODER
+  } else if (global->codec->iface == vpx_codec_vp8_cx) {
     ctrl_args = vp8_args;
     ctrl_args_map = vp8_arg_ctrl_map;
+#endif
+#if CONFIG_VP9_ENCODER
+  } else if (global->codec->iface == vpx_codec_vp9_cx) {
+    ctrl_args = vp9_args;
+    ctrl_args_map = vp9_arg_ctrl_map;
+#endif
   }
 
   for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {

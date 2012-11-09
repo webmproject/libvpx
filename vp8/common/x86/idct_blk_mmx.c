@@ -9,7 +9,7 @@
  */
 
 #include "vpx_config.h"
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 #include "vp8/common/blockd.h"
 
 extern void vp8_dequantize_b_impl_mmx(short *sq, short *dq, short *q);

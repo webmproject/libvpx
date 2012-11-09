@@ -1,5 +1,8 @@
-common_forward_decls() {
+vp9_common_forward_decls() {
 cat <<EOF
+/*
+ * VP9
+ */
 
 struct loop_filter_info;
 struct blockd;
@@ -12,14 +15,11 @@ struct macroblock;
 struct variance_vtable;
 
 #define DEC_MVCOSTS int *mvjcost, int *mvcost[2]
-
-/* Encoder forward decls */
-struct variance_vtable;
 union int_mv;
 struct yv12_buffer_config;
 EOF
 }
-forward_decls common_forward_decls
+forward_decls vp9_common_forward_decls
 
 prototype void vp9_filter_block2d_4x4_8 "const unsigned char *src_ptr, const unsigned int src_stride, const short *HFilter_aligned16, const short *VFilter_aligned16, unsigned char *dst_ptr, unsigned int dst_stride"
 prototype void vp9_filter_block2d_8x4_8 "const unsigned char *src_ptr, const unsigned int src_stride, const short *HFilter_aligned16, const short *VFilter_aligned16, unsigned char *dst_ptr, unsigned int dst_stride"
@@ -93,9 +93,6 @@ vp9_copy_mem8x8_dspr2=vp9_copy_mem8x8_dspr2
 
 prototype void vp9_copy_mem8x4 "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch"
 specialize vp9_copy_mem8x4 mmx
-
-prototype void vp9_intra4x4_predict "unsigned char *Above, unsigned char *yleft, int left_stride, B_PREDICTION_MODE b_mode, unsigned char *dst, int dst_stride, unsigned char top_left"
-specialize vp9_intra4x4_predict
 
 prototype void vp9_avg_mem16x16 "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch"
 specialize vp9_avg_mem16x16
