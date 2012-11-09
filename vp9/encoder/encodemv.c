@@ -208,6 +208,54 @@ static int update_nmv(
   }
 }
 
+void print_nmvcounts(nmv_context_counts tnmvcounts) {
+  int i, j, k;
+  printf("\nCounts =\n  { ");
+  for (j = 0; j < MV_JOINTS; ++j)
+    printf("%d, ", tnmvcounts.joints[j]);
+  printf("},\n");
+  for (i = 0; i < 2; ++i) {
+    printf("  {\n");
+    printf("    %d/%d,\n", tnmvcounts.comps[i].sign[0],
+                           tnmvcounts.comps[i].sign[1]);
+    printf("    { ");
+    for (j = 0; j < MV_CLASSES; ++j)
+      printf("%d, ", tnmvcounts.comps[i].classes[j]);
+    printf("},\n");
+    printf("    { ");
+    for (j = 0; j < CLASS0_SIZE; ++j)
+      printf("%d, ", tnmvcounts.comps[i].class0[j]);
+    printf("},\n");
+    printf("    { ");
+    for (j = 0; j < MV_OFFSET_BITS; ++j)
+      printf("%d/%d, ", tnmvcounts.comps[i].bits[j][0],
+                        tnmvcounts.comps[i].bits[j][1]);
+    printf("},\n");
+
+    printf("    {");
+    for (j = 0; j < CLASS0_SIZE; ++j) {
+      printf("{");
+      for (k = 0; k < 4; ++k)
+        printf("%d, ", tnmvcounts.comps[i].class0_fp[j][k]);
+      printf("}, ");
+    }
+    printf("},\n");
+
+    printf("    { ");
+    for (j = 0; j < 4; ++j)
+      printf("%d, ", tnmvcounts.comps[i].fp[j]);
+    printf("},\n");
+
+    printf("    %d/%d,\n",
+           tnmvcounts.comps[i].class0_hp[0],
+           tnmvcounts.comps[i].class0_hp[1]);
+    printf("    %d/%d,\n",
+           tnmvcounts.comps[i].hp[0],
+           tnmvcounts.comps[i].hp[1]);
+    printf("  },\n");
+  }
+}
+
 #ifdef NMV_STATS
 void init_nmvstats() {
   vp9_zero(tnmvcounts);
@@ -235,7 +283,7 @@ void print_nmvstats() {
   for (j = 0; j < MV_JOINTS; ++j)
     printf("%d, ", tnmvcounts.joints[j]);
   printf("},\n");
-  for (i=0; i< 2; ++i) {
+  for (i = 0; i < 2; ++i) {
     printf("  {\n");
     printf("    %d/%d,\n", tnmvcounts.comps[i].sign[0],
                            tnmvcounts.comps[i].sign[1]);
@@ -354,7 +402,7 @@ static void add_nmvcount(nmv_context_counts* const dst,
 }
 #endif
 
-void vp9_write_nmvprobs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
+void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
   int i, j;
   nmv_context prob;
   unsigned int branch_ct_joint[MV_JOINTS - 1][2];
@@ -544,4 +592,68 @@ void vp9_build_nmv_cost_table(int *mvjoint,
     build_nmv_component_cost_table(mvcost[0], &mvctx->comps[0], usehp);
   if (mvc_flag_h)
     build_nmv_component_cost_table(mvcost[1], &mvctx->comps[1], usehp);
+}
+
+void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
+                         int_mv *best_ref_mv, int_mv *second_best_ref_mv) {
+  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
+  MV mv;
+
+  if (mbmi->mode == SPLITMV) {
+    int i;
+
+    for (i = 0; i < x->partition_info->count; i++) {
+      if (x->partition_info->bmi[i].mode == NEW4X4) {
+        if (x->e_mbd.allow_high_precision_mv) {
+          mv.row = (x->partition_info->bmi[i].mv.as_mv.row
+                    - best_ref_mv->as_mv.row);
+          mv.col = (x->partition_info->bmi[i].mv.as_mv.col
+                    - best_ref_mv->as_mv.col);
+          vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
+          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
+            mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
+                      - second_best_ref_mv->as_mv.row);
+            mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
+                      - second_best_ref_mv->as_mv.col);
+            vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv,
+                              &cpi->NMVcount, 1);
+          }
+        } else {
+          mv.row = (x->partition_info->bmi[i].mv.as_mv.row
+                    - best_ref_mv->as_mv.row);
+          mv.col = (x->partition_info->bmi[i].mv.as_mv.col
+                    - best_ref_mv->as_mv.col);
+          vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
+          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
+            mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
+                      - second_best_ref_mv->as_mv.row);
+            mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
+                      - second_best_ref_mv->as_mv.col);
+            vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv,
+                              &cpi->NMVcount, 0);
+          }
+        }
+      }
+    }
+  } else if (mbmi->mode == NEWMV) {
+    if (x->e_mbd.allow_high_precision_mv) {
+      mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
+      mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
+      vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
+      if (mbmi->second_ref_frame) {
+        mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
+        mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
+        vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 1);
+      }
+    } else {
+      mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
+      mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
+      vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
+      if (mbmi->second_ref_frame) {
+        mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
+        mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
+        vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 0);
+      }
+    }
+  }
 }

@@ -125,5 +125,5 @@ void vp9_counts_to_nmv_context(
     unsigned int (*branch_ct_fp)[4 - 1][2],
     unsigned int (*branch_ct_class0_hp)[2],
     unsigned int (*branch_ct_hp)[2]);
-
+void vp9_counts_process(nmv_context_counts *NMVcount, int usehp);
 #endif

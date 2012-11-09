@@ -14,7 +14,7 @@
 
 #include "onyx_int.h"
 
-void vp9_write_nmvprobs(VP9_COMP* const, int usehp, vp9_writer* const);
+void vp9_write_nmv_probs(VP9_COMP* const, int usehp, vp9_writer* const);
 void vp9_encode_nmv(vp9_writer* const w, const MV* const mv,
                     const MV* const ref, const nmv_context* const mvctx);
 void vp9_encode_nmv_fp(vp9_writer* const w, const MV* const mv,
@@ -26,5 +26,8 @@ void vp9_build_nmv_cost_table(int *mvjoint,
                               int usehp,
                               int mvc_flag_v,
                               int mvc_flag_h);
+void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
+                          int_mv *best_ref_mv, int_mv *second_best_ref_mv);
 
+void print_nmvcounts(nmv_context_counts tnmvcounts);
 #endif

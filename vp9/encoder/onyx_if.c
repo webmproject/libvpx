@@ -2959,6 +2959,12 @@ static void encode_frame_to_data_rate
   // Set default state for segment based loop filter update flags
   xd->mode_ref_lf_delta_update = 0;
 
+#if CONFIG_NEW_MVREF
+  // Temp defaults probabilities for ecnoding the MV ref id signal
+  vpx_memset(xd->mb_mv_ref_id_probs, 192,
+             sizeof(xd->mb_mv_ref_id_probs));
+#endif
+
   // Set various flags etc to special state if it is a key frame
   if (cm->frame_type == KEY_FRAME) {
     int i;
@@ -3631,6 +3637,10 @@ static void encode_frame_to_data_rate
     vp9_adapt_mode_probs(&cpi->common);
 
     cpi->common.fc.NMVcount = cpi->NMVcount;
+    /*
+    printf("2: %d %d %d %d\n", cpi->NMVcount.joints[0], cpi->NMVcount.joints[1],
+                      cpi->NMVcount.joints[2], cpi->NMVcount.joints[3]);
+                      */
     vp9_adapt_nmv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
     vp9_update_mode_context(&cpi->common);
   }

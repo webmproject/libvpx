@@ -226,6 +226,11 @@ static void adapt_prob(vp9_prob *dest, vp9_prob prep, vp9_prob newp,
   }
 }
 
+void vp9_counts_process(nmv_context_counts *NMVcount, int usehp) {
+  counts_to_context(&NMVcount->comps[0], usehp);
+  counts_to_context(&NMVcount->comps[1], usehp);
+}
+
 void vp9_counts_to_nmv_context(
     nmv_context_counts *NMVcount,
     nmv_context *prob,
@@ -240,8 +245,7 @@ void vp9_counts_to_nmv_context(
     unsigned int (*branch_ct_class0_hp)[2],
     unsigned int (*branch_ct_hp)[2]) {
   int i, j, k;
-  counts_to_context(&NMVcount->comps[0], usehp);
-  counts_to_context(&NMVcount->comps[1], usehp);
+  vp9_counts_process(NMVcount, usehp);
   vp9_tree_probs_from_distribution(MV_JOINTS,
                                    vp9_mv_joint_encodings,
                                    vp9_mv_joint_tree,

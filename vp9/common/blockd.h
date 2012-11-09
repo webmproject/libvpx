@@ -230,6 +230,10 @@ typedef struct {
   TX_SIZE txfm_size;
   int_mv mv[2]; // for each reference frame used
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REFS];
+  int_mv best_mv, best_second_mv;
+#if CONFIG_NEW_MVREF
+  int best_index, best_second_index;
+#endif
 
   int mb_mode_context[MAX_REF_FRAMES];
 
