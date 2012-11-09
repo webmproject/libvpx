@@ -50,6 +50,11 @@
 #endif
 extern prototype_idct(vp9_idct_idct16x16);
 
+#ifndef vp9_idct_idct10_16x16
+#define vp9_idct_idct10_16x16 vp9_short_idct10_16x16_c
+#endif
+extern prototype_idct(vp9_idct_idct10_16x16);
+
 #ifndef vp9_idct_idct8
 #define vp9_idct_idct8 vp9_short_idct8x8_c
 #endif
@@ -133,6 +138,7 @@ typedef struct {
   vp9_idct_fn_t ihaar2_1;
 
   vp9_idct_fn_t            idct16x16;
+  vp9_idct_fn_t            idct10_16x16;
 } vp9_idct_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

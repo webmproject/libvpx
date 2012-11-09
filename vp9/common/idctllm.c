@@ -1502,6 +1502,161 @@ void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
         output[j * 16 + i] = temp_out[j];
     }
 }
+
+/* The following function is called when we know the maximum number of non-zero
+ * dct coefficients is less or equal 10.
+ */
+static void butterfly_16x16_idct10_1d(int16_t input[16], int16_t output[16],
+                                      int last_shift_bits) {
+    int16_t step[16] = {0};
+    int intermediate[16] = {0};
+    int temp1, temp2;
+    int last_rounding = 0;
+
+    if (last_shift_bits > 0)
+      last_rounding = 1 << (last_shift_bits - 1);
+
+    // step 1 and 2
+    step[ 0] = (input[0] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+    step[ 1] = (input[0] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+
+    temp1 = (2 * (input[2] * C8) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+    step[ 4] = (temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+    step[ 5] = (temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+
+    // for odd input
+    temp1 = (input[3] * C12 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+    temp1 *= C8;
+    intermediate[ 8] = (2 * (temp1) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = (-input[3] * C4 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+    temp1 *= C8;
+    intermediate[ 9] = (2 * (temp1) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    step[ 8] = (intermediate[ 8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+    step[ 9] = (intermediate[ 9] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+    step[10] = (-input[1] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+    step[11] = (input[1] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+    step[12] = (input[1] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+    step[13] = (input[1] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+    step[14] = (intermediate[ 8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+    step[15] = (intermediate[ 9] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+
+    // step 3
+    output[0] = step[ 0];
+    output[1] = step[ 1];
+    output[2] = step[ 1];
+    output[3] = step[ 0];
+
+    temp1 = step[ 4] * C14;
+    output[4] =  (temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = step[ 4] * C2;
+    output[7] =  (temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = step[ 5] * C10;
+    output[5] =  (temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = step[ 5] * C6;
+    output[6] =  (temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    output[8] = step[ 8] + step[11];
+    output[9] = step[ 9] + step[10];
+    output[10] = step[ 9] - step[10];
+    output[11] = step[ 8] - step[11];
+    output[12] = step[12] + step[15];
+    output[13] = step[13] + step[14];
+    output[14] = step[13] - step[14];
+    output[15] = step[12] - step[15];
+
+    // output 4
+    step[ 0] = output[0] + output[7];
+    step[ 1] = output[1] + output[6];
+    step[ 2] = output[2] + output[5];
+    step[ 3] = output[3] + output[4];
+    step[ 4] = output[3] - output[4];
+    step[ 5] = output[2] - output[5];
+    step[ 6] = output[1] - output[6];
+    step[ 7] = output[0] - output[7];
+
+    temp1 = output[8] * C7;
+    temp2 = output[15] * C9;
+    step[ 8] = (temp1 - temp2 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = output[9] * C11;
+    temp2 = output[14] * C5;
+    step[ 9] = (temp1 + temp2 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = output[10] * C3;
+    temp2 = output[13] * C13;
+    step[10] = (temp1 - temp2 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = output[11] * C15;
+    temp2 = output[12] * C1;
+    step[11] = (temp1 + temp2 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = output[11] * C1;
+    temp2 = output[12] * C15;
+    step[12] = (temp2 - temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = output[10] * C13;
+    temp2 = output[13] * C3;
+    step[13] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = output[9] * C5;
+    temp2 = output[14] * C11;
+    step[14] = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    temp1 = output[8] * C9;
+    temp2 = output[15] * C7;
+    step[15] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+
+    // step 5
+    output[0] = (step[0] + step[15] + last_rounding) >> last_shift_bits;
+    output[1] = (step[1] + step[14] + last_rounding) >> last_shift_bits;
+    output[2] = (step[2] + step[13] + last_rounding) >> last_shift_bits;
+    output[3] = (step[3] + step[12] + last_rounding) >> last_shift_bits;
+    output[4] = (step[4] + step[11] + last_rounding) >> last_shift_bits;
+    output[5] = (step[5] + step[10] + last_rounding) >> last_shift_bits;
+    output[6] = (step[6] + step[ 9] + last_rounding) >> last_shift_bits;
+    output[7] = (step[7] + step[ 8] + last_rounding) >> last_shift_bits;
+
+    output[15] = (step[0] - step[15] + last_rounding) >> last_shift_bits;
+    output[14] = (step[1] - step[14] + last_rounding) >> last_shift_bits;
+    output[13] = (step[2] - step[13] + last_rounding) >> last_shift_bits;
+    output[12] = (step[3] - step[12] + last_rounding) >> last_shift_bits;
+    output[11] = (step[4] - step[11] + last_rounding) >> last_shift_bits;
+    output[10] = (step[5] - step[10] + last_rounding) >> last_shift_bits;
+    output[9] = (step[6] - step[ 9] + last_rounding) >> last_shift_bits;
+    output[8] = (step[7] - step[ 8] + last_rounding) >> last_shift_bits;
+}
+
+void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
+    int16_t out[16 * 16];
+    int16_t *outptr = &out[0];
+    const int short_pitch = pitch >> 1;
+    int i, j;
+    int16_t temp_in[16], temp_out[16];
+
+    /* First transform rows. Since all non-zero dct coefficients are in
+     * upper-left 4x4 area, we only need to calculate first 4 rows here.
+     */
+    vpx_memset(out, 0, sizeof(out));
+    for (i = 0; i < 4; ++i) {
+      butterfly_16x16_idct10_1d(input, outptr, 0);
+      input += short_pitch;
+      outptr += 16;
+    }
+
+    // Then transform columns
+    for (i = 0; i < 16; ++i) {
+      for (j = 0; j < 16; ++j)
+        temp_in[j] = out[j*16 + i];
+      butterfly_16x16_idct10_1d(temp_in, temp_out, 3);
+      for (j = 0; j < 16; ++j)
+        output[j*16 + i] = temp_out[j];
+    }
+}
 #undef INITIAL_SHIFT
 #undef INITIAL_ROUNDING
 #undef RIGHT_SHIFT
