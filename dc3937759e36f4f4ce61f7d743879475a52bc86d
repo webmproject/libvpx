@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//1+c\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-11-09T01:47:39Z",
+      "side": 1,
+      "message": "this could be simply expanded (:\u003d)",
+      "revId": "dc3937759e36f4f4ce61f7d743879475a52bc86d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//19k\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-11-09T01:47:39Z",
+      "side": 1,
+      "message": "note this will pick up .git and other undesirables.\n\nadditionally, this does seem to get called with SRC_PATH_BASE\u003d\u003d\u0027\u0027 which won\u0027t go over well with BSD find",
+      "revId": "dc3937759e36f4f4ce61f7d743879475a52bc86d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//18w\u003d",
+        "filename": "vp9/vp9_common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-11-09T01:47:39Z",
+      "side": 1,
+      "message": "this isn\u0027t new to this change, but note that for proper dependency generation this should be enabled for .c.d as well.",
+      "revId": "dc3937759e36f4f4ce61f7d743879475a52bc86d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
