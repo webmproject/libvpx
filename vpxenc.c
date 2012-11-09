@@ -2132,11 +2132,10 @@ static void get_cx_data(struct stream_state  *stream,
   const struct vpx_codec_enc_cfg *cfg = &stream->config.cfg;
   vpx_codec_iter_t iter = NULL;
 
+  *got_data = 0;
   while ((pkt = vpx_codec_get_cx_data(&stream->encoder, &iter))) {
     static size_t fsize = 0;
     static off_t ivf_header_pos = 0;
-
-    *got_data = 1;
 
     switch (pkt->kind) {
       case VPX_CODEC_CX_FRAME_PKT:
@@ -2178,6 +2177,7 @@ static void get_cx_data(struct stream_state  *stream,
         }
         stream->nbytes += pkt->data.raw.sz;
 
+        *got_data = 1;
         if (global->test_decode) {
           vpx_codec_decode(&stream->decoder, pkt->data.frame.buf,
                            pkt->data.frame.sz, NULL, 0);
