@@ -2318,6 +2318,13 @@ static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
   for (n = 0; n < 4; n++) {
     int x_idx = n & 1, y_idx = n >> 1;
 
+    xd->left_context = cm->left_context + y_idx;
+    xd->above_context = cm->above_context + mb_col + x_idx;
+    memcpy(&ta[n], xd->above_context, sizeof(ta[n]));
+    memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
+    tp[n] = *t;
+    xd->mode_info_context = mi + x_idx + y_idx * cm->mode_info_stride;
+
     vp9_subtract_mby_s_c(x->src_diff,
                          src + x_idx * 16 + y_idx * 16 * src_y_stride,
                          src_y_stride,
@@ -2339,12 +2346,6 @@ static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (!x->skip) {
       if (output_enabled) {
-        xd->left_context = cm->left_context + (n >> 1);
-        xd->above_context = cm->above_context + mb_col + (n & 1);
-        memcpy(&ta[n], xd->above_context, sizeof(ta[n]));
-        memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
-        tp[n] = *t;
-        xd->mode_info_context = mi + x_idx + y_idx * cm->mode_info_stride;
         vp9_tokenize_mb(cpi, &x->e_mbd, t, 0);
         skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff;
       }
@@ -2354,18 +2355,14 @@ static void encode_inter_superblock(VP9_COMP *cpi, MACROBLOCK *x,
           (x->e_mbd.mode_info_context - 1)->mbmi.mb_skip_coeff +
             (x->e_mbd.mode_info_context - cpi->common.mode_info_stride)->mbmi.mb_skip_coeff :
           0;
+      xd->mode_info_context->mbmi.mb_skip_coeff = skip[n] = 1;
       if (cpi->common.mb_no_coeff_skip) {
-        skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff = 1;
-        xd->left_context = cm->left_context + (n >> 1);
-        xd->above_context = cm->above_context + mb_col + (n & 1);
-        memcpy(&ta[n], xd->above_context, sizeof(ta[n]));
-        memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
-        tp[n] = *t;
+        // TODO(rbultje) this should be done per-sb instead of per-mb?
         cpi->skip_true_count[mb_skip_context]++;
         vp9_fix_contexts(xd);
       } else {
         vp9_stuff_mb(cpi, xd, t, 0);
-        xd->mode_info_context->mbmi.mb_skip_coeff = 0;
+        // TODO(rbultje) this should be done per-sb instead of per-mb?
         cpi->skip_false_count[mb_skip_context]++;
       }
     }
