@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//1G0\u003d",
+        "filename": "vp9/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-10T14:54:06Z",
+      "side": 1,
+      "message": "moved it to encodeframe.c",
+      "parentUuid": "AAAAQ3//1dc\u003d",
+      "revId": "ec65880a829ac9a22481a848e416c25bd14bf7fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//1d4\u003d",
         "filename": "vp9/encoder/encodeframe.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-09T22:20:31Z",
       "side": 1,
       "message": "if  pick_best_mv_ref() no longer static it needs vp9_ prefix",
+      "revId": "ec65880a829ac9a22481a848e416c25bd14bf7fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1G4\u003d",
+        "filename": "vp9/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-10T14:54:06Z",
+      "side": 1,
+      "message": "Moved it to encodeframe.c",
+      "parentUuid": "AAAAQ3//1d4\u003d",
       "revId": "ec65880a829ac9a22481a848e416c25bd14bf7fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
