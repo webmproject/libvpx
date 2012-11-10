@@ -19,8 +19,8 @@
 extern int dec_debug;
 #endif
 
-static void recon(int16_t *diff, uint8_t *pred, int pitch, uint8_t *dest,
-                  int stride, int width, int height) {
+static void add_residual(const int16_t *diff, const uint8_t *pred, int pitch,
+                         uint8_t *dest, int stride, int width, int height) {
   int r, c;
 
   for (r = 0; r < height; r++) {
@@ -41,12 +41,34 @@ static void recon(int16_t *diff, uint8_t *pred, int pitch, uint8_t *dest,
   }
 }
 
+static void add_constant_residual(const int16_t diff, const uint8_t *pred,
+                                  int pitch, uint8_t *dest, int stride,
+                                  int width, int height) {
+  int r, c;
+
+  for (r = 0; r < height; r++) {
+    for (c = 0; c < width; c++) {
+      int a = diff + pred[c];
+
+      if (a < 0)
+        a = 0;
+      else if (a > 255)
+        a = 255;
+
+      dest[c] = (uint8_t) a;
+    }
+
+    dest += stride;
+    pred += pitch;
+  }
+}
+
 void vp9_dequantize_b_c(BLOCKD *d) {
 
   int i;
-  short *DQ  = d->dqcoeff;
-  short *Q   = d->qcoeff;
-  short *DQC = d->dequant;
+  int16_t *DQ  = d->dqcoeff;
+  int16_t *Q   = d->qcoeff;
+  int16_t *DQC = d->dequant;
 
   for (i = 0; i < 16; i++) {
     DQ[i] = Q[i] * DQC[i];
@@ -54,11 +76,11 @@ void vp9_dequantize_b_c(BLOCKD *d) {
 }
 
 
-void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
-                               unsigned char *pred, unsigned char *dest,
+void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input, int16_t *dq,
+                               uint8_t *pred, uint8_t *dest,
                                int pitch, int stride) {
-  short output[16];
-  short *diff_ptr = output;
+  int16_t output[16];
+  int16_t *diff_ptr = output;
   int i;
 
   for (i = 0; i < 16; i++) {
@@ -69,18 +91,15 @@ void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
 
   vpx_memset(input, 0, 32);
 
-  recon(diff_ptr, pred, pitch, dest, stride, 4, 4);
+  add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
 
-void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
-                                   unsigned char *pred, unsigned char *dest,
+void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input, int16_t *dq,
+                                   uint8_t *pred, uint8_t *dest,
                                    int pitch, int stride) {
-  short output[64];
-  short *diff_ptr = output;
-  int b, r, c;
+  int16_t output[64];
+  int16_t *diff_ptr = output;
   int i;
-  unsigned char *origdest = dest;
-  unsigned char *origpred = pred;
 
   input[0] = dq[0] * input[0];
   for (i = 1; i < 64; i++) {
@@ -91,35 +110,13 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
 
   vpx_memset(input, 0, 128);
 
-  for (b = 0; b < 4; b++) {
-    for (r = 0; r < 4; r++) {
-      for (c = 0; c < 4; c++) {
-        int a = diff_ptr[c] + pred[c];
-
-        if (a < 0)
-          a = 0;
-
-        if (a > 255)
-          a = 255;
-
-        dest[c] = (unsigned char) a;
-      }
-
-      dest += stride;
-      diff_ptr += 8;
-      pred += pitch;
-    }
-    // shift buffer pointers to next 4x4 block in the submacroblock
-    diff_ptr = output + (b + 1) / 2 * 4 * 8 + ((b + 1) % 2) * 4;
-    dest = origdest + (b + 1) / 2 * 4 * stride + ((b + 1) % 2) * 4;
-    pred = origpred + (b + 1) / 2 * 4 * pitch + ((b + 1) % 2) * 4;
-  }
+  add_residual(diff_ptr, pred, pitch, dest, stride, 8, 8);
 }
 
-void vp9_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
-                            unsigned char *dest, int pitch, int stride) {
-  short output[16];
-  short *diff_ptr = output;
+void vp9_dequant_idct_add_c(int16_t *input, int16_t *dq, uint8_t *pred,
+                            uint8_t *dest, int pitch, int stride) {
+  int16_t output[16];
+  int16_t *diff_ptr = output;
   int i;
 
   for (i = 0; i < 16; i++) {
@@ -131,17 +128,17 @@ void vp9_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
 
   vpx_memset(input, 0, 32);
 
-  recon(diff_ptr, pred, pitch, dest, stride, 4, 4);
+  add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
 
-void vp9_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
-                               unsigned char *dest, int pitch, int stride,
+void vp9_dequant_dc_idct_add_c(int16_t *input, int16_t *dq, uint8_t *pred,
+                               uint8_t *dest, int pitch, int stride,
                                int Dc) {
   int i;
-  short output[16];
-  short *diff_ptr = output;
+  int16_t output[16];
+  int16_t *diff_ptr = output;
 
-  input[0] = (short)Dc;
+  input[0] = (int16_t)Dc;
 
   for (i = 1; i < 16; i++) {
     input[i] = dq[i] * input[i];
@@ -152,15 +149,15 @@ void vp9_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
 
   vpx_memset(input, 0, 32);
 
-  recon(diff_ptr, pred, pitch, dest, stride, 4, 4);
+  add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
 
 #if CONFIG_LOSSLESS
-void vp9_dequant_idct_add_lossless_c(short *input, short *dq,
-                                     unsigned char *pred, unsigned char *dest,
+void vp9_dequant_idct_add_lossless_c(int16_t *input, int16_t *dq,
+                                     uint8_t *pred, uint8_t *dest,
                                      int pitch, int stride) {
-  short output[16];
-  short *diff_ptr = output;
+  int16_t output[16];
+  int16_t *diff_ptr = output;
   int i;
 
   for (i = 0; i < 16; i++) {
@@ -171,18 +168,18 @@ void vp9_dequant_idct_add_lossless_c(short *input, short *dq,
 
   vpx_memset(input, 0, 32);
 
-  recon(diff_ptr, pred, pitch, dest, stride, 4, 4);
+  add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
 
-void vp9_dequant_dc_idct_add_lossless_c(short *input, short *dq,
-                                        unsigned char *pred,
-                                        unsigned char *dest,
+void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, int16_t *dq,
+                                        uint8_t *pred,
+                                        uint8_t *dest,
                                         int pitch, int stride, int dc) {
   int i;
-  short output[16];
-  short *diff_ptr = output;
+  int16_t output[16];
+  int16_t *diff_ptr = output;
 
-  input[0] = (short)dc;
+  input[0] = (int16_t)dc;
 
   for (i = 1; i < 16; i++) {
     input[i] = dq[i] * input[i];
@@ -191,18 +188,18 @@ void vp9_dequant_dc_idct_add_lossless_c(short *input, short *dq,
   vp9_short_inv_walsh4x4_x8_c(input, output, 4 << 1);
   vpx_memset(input, 0, 32);
 
-  recon(diff_ptr, pred, pitch, dest, stride, 4, 4);
+  add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
 #endif
 
 void vp9_dequantize_b_2x2_c(BLOCKD *d) {
   int i;
-  short *DQ  = d->dqcoeff;
-  short *Q   = d->qcoeff;
-  short *DQC = d->dequant;
+  int16_t *DQ  = d->dqcoeff;
+  int16_t *Q   = d->qcoeff;
+  int16_t *DQC = d->dequant;
 
   for (i = 0; i < 16; i++) {
-    DQ[i] = (short)((Q[i] * DQC[i]));
+    DQ[i] = (int16_t)((Q[i] * DQC[i]));
   }
 #ifdef DEC_DEBUG
   if (dec_debug) {
@@ -216,14 +213,12 @@ void vp9_dequantize_b_2x2_c(BLOCKD *d) {
 #endif
 }
 
-void vp9_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
-                                unsigned char *dest, int pitch, int stride) {
-  short output[64];
-  short *diff_ptr = output;
-  int r, c, b;
+void vp9_dequant_idct_add_8x8_c(int16_t *input, int16_t *dq, uint8_t *pred,
+                                uint8_t *dest, int pitch, int stride,
+                                int dc, uint16_t eobs) {
+  int16_t output[64];
+  int16_t *diff_ptr = output;
   int i;
-  unsigned char *origdest = dest;
-  unsigned char *origpred = pred;
 
 #ifdef DEC_DEBUG
   if (dec_debug) {
@@ -236,12 +231,57 @@ void vp9_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
   }
 #endif
 
-  input[0] = input[0] * dq[0];
+  /* If dc is 1, then input[0] is the reconstructed value, do not need
+   * dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
+   */
+  if (!dc)
+    input[0] *= dq[0];
 
-  // recover quantizer for 4 4x4 blocks
-  for (i = 1; i < 64; i++) {
-    input[i] = input[i] * dq[1];
-  }
+  /* The calculation can be simplified if there are not many non-zero dct
+   * coefficients. Use eobs to decide what to do.
+   * TODO(yunqingwang): "eobs = 1" case is also handled in vp9_short_idct8x8_c.
+   * Combine that with code here.
+   */
+  if (eobs == 0) {
+    /* All 0 DCT coefficient */
+    vp9_copy_mem8x8(pred, pitch, dest, stride);
+  } else if (eobs == 1) {
+    /* DC only DCT coefficient. */
+    int16_t out;
+
+    /* Note: the idct1 will need to be modified accordingly whenever
+     * vp9_short_idct8x8_c() is modified. */
+    out = (input[0] + 1 + (input[0] < 0)) >> 2;
+    out = out << 3;
+    out = (out + 32) >> 7;
+
+    input[0] = 0;
+
+    add_constant_residual(out, pred, pitch, dest, stride, 8, 8);
+  } else if (eobs <= 10) {
+    input[1] = input[1] * dq[1];
+    input[2] = input[2] * dq[1];
+    input[3] = input[3] * dq[1];
+    input[8] = input[8] * dq[1];
+    input[9] = input[9] * dq[1];
+    input[10] = input[10] * dq[1];
+    input[16] = input[16] * dq[1];
+    input[17] = input[17] * dq[1];
+    input[24] = input[24] * dq[1];
+
+    vp9_short_idct10_8x8_c(input, output, 16);
+
+    input[0] = input[1] = input[2] = input[3] = 0;
+    input[8] = input[9] = input[10] = 0;
+    input[16] = input[17] = 0;
+    input[24] = 0;
+
+    add_residual(diff_ptr, pred, pitch, dest, stride, 8, 8);
+  } else {
+    // recover quantizer for 4 4x4 blocks
+    for (i = 1; i < 64; i++) {
+      input[i] = input[i] * dq[1];
+    }
 #ifdef DEC_DEBUG
   if (dec_debug) {
     int j;
@@ -253,8 +293,8 @@ void vp9_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
   }
 #endif
 
-  // the idct halves ( >> 1) the pitch
-  vp9_short_idct8x8_c(input, output, 16);
+    // the idct halves ( >> 1) the pitch
+    vp9_short_idct8x8_c(input, output, 16);
 #ifdef DEC_DEBUG
   if (dec_debug) {
     int j;
@@ -266,30 +306,10 @@ void vp9_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
   }
 #endif
 
-  vpx_memset(input, 0, 128);// test what should i put here
+    vpx_memset(input, 0, 128);
 
-  for (b = 0; b < 4; b++) {
-    for (r = 0; r < 4; r++) {
-      for (c = 0; c < 4; c++) {
-        int a = diff_ptr[c] + pred[c];
+    add_residual(diff_ptr, pred, pitch, dest, stride, 8, 8);
 
-        if (a < 0)
-          a = 0;
-
-        if (a > 255)
-          a = 255;
-
-        dest[c] = (unsigned char) a;
-      }
-
-      dest += stride;
-      diff_ptr += 8;
-      pred += pitch;
-    }
-    diff_ptr = output + (b + 1) / 2 * 4 * 8 + (b + 1) % 2 * 4;
-    dest = origdest + (b + 1) / 2 * 4 * stride + (b + 1) % 2 * 4;
-    pred = origpred + (b + 1) / 2 * 4 * pitch + (b + 1) % 2 * 4;
-  }
 #ifdef DEC_DEBUG
   if (dec_debug) {
     int k, j;
@@ -303,101 +323,14 @@ void vp9_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
     }
   }
 #endif
+  }
 }
 
-void vp9_dequant_dc_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
-                                   unsigned char *dest, int pitch, int stride,
-                                   int Dc) { // Dc for 1st order T in some rear case
-  short output[64];
-  short *diff_ptr = output;
-  int r, c, b;
-  int i;
-  unsigned char *origdest = dest;
-  unsigned char *origpred = pred;
-
-  input[0] = (short)Dc;// Dc is the reconstructed value, do not need dequantization
-  // dc value is recovered after dequantization, since dc need not quantization
-#ifdef DEC_DEBUG
-  if (dec_debug) {
-    int j;
-    printf("Input 8x8\n");
-    for (j = 0; j < 64; j++) {
-      printf("%d ", input[j]);
-      if (j % 8 == 7) printf("\n");
-    }
-  }
-#endif
-  for (i = 1; i < 64; i++) {
-    input[i] = input[i] * dq[1];
-  }
-
-#ifdef DEC_DEBUG
-  if (dec_debug) {
-    int j;
-    printf("Input DQ 8x8\n");
-    for (j = 0; j < 64; j++) {
-      printf("%d ", input[j]);
-      if (j % 8 == 7) printf("\n");
-    }
-  }
-#endif
-
-  // the idct halves ( >> 1) the pitch
-  vp9_short_idct8x8_c(input, output, 16);
-#ifdef DEC_DEBUG
-  if (dec_debug) {
-    int j;
-    printf("Output 8x8\n");
-    for (j = 0; j < 64; j++) {
-      printf("%d ", output[j]);
-      if (j % 8 == 7) printf("\n");
-    }
-  }
-#endif
-  vpx_memset(input, 0, 128);
-
-  for (b = 0; b < 4; b++) {
-    for (r = 0; r < 4; r++) {
-      for (c = 0; c < 4; c++) {
-        int a = diff_ptr[c] + pred[c];
-
-        if (a < 0)
-          a = 0;
-
-        if (a > 255)
-          a = 255;
-
-        dest[c] = (unsigned char) a;
-      }
-
-      dest += stride;
-      diff_ptr += 8;
-      pred += pitch;
-    }
-    diff_ptr = output + (b + 1) / 2 * 4 * 8 + (b + 1) % 2 * 4;
-    dest = origdest + (b + 1) / 2 * 4 * stride + (b + 1) % 2 * 4;
-    pred = origpred + (b + 1) / 2 * 4 * pitch + (b + 1) % 2 * 4;
-  }
-#ifdef DEC_DEBUG
-  if (dec_debug) {
-    int k, j;
-    printf("Final 8x8\n");
-    for (j = 0; j < 8; j++) {
-      for (k = 0; k < 8; k++) {
-        printf("%d ", origdest[k]);
-      }
-      printf("\n");
-      origdest += stride;
-    }
-  }
-#endif
-}
-
-void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
-                                     unsigned char *pred, unsigned char *dest,
+void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
+                                     int16_t *dq, uint8_t *pred, uint8_t *dest,
                                      int pitch, int stride) {
-  short output[256];
-  short *diff_ptr = output;
+  int16_t output[256];
+  int16_t *diff_ptr = output;
   int i;
 
   input[0]= input[0] * dq[0];
@@ -414,7 +347,7 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input, short *dq,
 
   vpx_memset(input, 0, 512);
 
-  recon(diff_ptr, pred, pitch, dest, stride, 16, 16);
+  add_residual(diff_ptr, pred, pitch, dest, stride, 16, 16);
 }
 
 void vp9_dequant_idct_add_16x16_c(int16_t *input, int16_t *dq, uint8_t *pred,
@@ -422,7 +355,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, int16_t *dq, uint8_t *pred,
                                   uint16_t eobs) {
   int16_t output[256];
   int16_t *diff_ptr = output;
-  int r, c, i;
+  int i;
 
   /* The calculation can be simplified if there are not many non-zero dct
    * coefficients. Use eobs to separate different cases. */
@@ -433,28 +366,15 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, int16_t *dq, uint8_t *pred,
     /* DC only DCT coefficient. */
     int16_t out;
 
+    /* Note: the idct1 will need to be modified accordingly whenever
+     * vp9_short_idct16x16_c() is modified. */
     out = (input[0] * dq[0] + 2) >> 2;
     out = (out + 2) >> 2;
     out = (out + 4) >> 3;
 
     input[0] = 0;
 
-    for (r = 0; r < 16; r++) {
-      for (c = 0; c < 16; c++) {
-        int a = out + pred[c];
-
-        if (a < 0)
-          a = 0;
-        else if (a > 255)
-          a = 255;
-
-        dest[c] = (uint8_t) a;
-      }
-
-      dest += stride;
-      pred += pitch;
-    }
-
+    add_constant_residual(out, pred, pitch, dest, stride, 16, 16);
   } else if (eobs <= 10) {
     input[0]= input[0] * dq[0];
     input[1] = input[1] * dq[1];
@@ -475,7 +395,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, int16_t *dq, uint8_t *pred,
     input[32] = input[33] = 0;
     input[48] = 0;
 
-    recon(diff_ptr, pred, pitch, dest, stride, 16, 16);
+    add_residual(diff_ptr, pred, pitch, dest, stride, 16, 16);
   } else {
     input[0]= input[0] * dq[0];
 
@@ -488,6 +408,6 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, int16_t *dq, uint8_t *pred,
 
     vpx_memset(input, 0, 512);
 
-    recon(diff_ptr, pred, pitch, dest, stride, 16, 16);
+    add_residual(diff_ptr, pred, pitch, dest, stride, 16, 16);
   }
 }

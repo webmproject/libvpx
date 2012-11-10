@@ -29,10 +29,11 @@ void vp9_machine_specific_config(VP9_COMMON *ctx) {
   rtcd->idct.iwalsh1      = vp9_short_inv_walsh4x4_1_c;
   rtcd->idct.iwalsh16     = vp9_short_inv_walsh4x4_c;
   rtcd->idct.idct8        = vp9_short_idct8x8_c;
+  rtcd->idct.idct10_8     = vp9_short_idct10_8x8_c;
   rtcd->idct.idct1_scalar_add_8x8 = vp9_dc_only_idct_add_8x8_c;
   rtcd->idct.ihaar2       = vp9_short_ihaar2x2_c;
   rtcd->idct.idct16x16    = vp9_short_idct16x16_c;
-  rtcd->idct.idct10_16x16    = vp9_short_idct10_16x16_c;
+  rtcd->idct.idct10_16x16 = vp9_short_idct10_16x16_c;
 
   rtcd->subpix.eighttap16x16       = vp9_eighttap_predict16x16_c;
   rtcd->subpix.eighttap8x8         = vp9_eighttap_predict8x8_c;

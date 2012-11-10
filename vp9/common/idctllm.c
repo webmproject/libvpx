@@ -967,6 +967,127 @@ void vp9_short_idct8x8_c(short *coefs, short *block, int pitch) {
   }
 }
 
+/* Row IDCT when only first 4 coefficients are non-zero. */
+static void idctrow10(int *blk) {
+  int x0, x1, x2, x3, x4, x5, x6, x7, x8;
+
+  /* shortcut */
+  if (!((x1 = blk[4] << 11) | (x2 = blk[6]) | (x3 = blk[2]) |
+        (x4 = blk[1]) | (x5 = blk[7]) | (x6 = blk[5]) | (x7 = blk[3]))) {
+    blk[0] = blk[1] = blk[2] = blk[3] = blk[4]
+           = blk[5] = blk[6] = blk[7] = blk[0] << 3;
+    return;
+  }
+
+  x0 = (blk[0] << 11) + 128;    /* for proper rounding in the fourth stage */
+  /* first stage */
+  x5 = W7 * x4;
+  x4 = W1 * x4;
+  x6 = W3 * x7;
+  x7 = -W5 * x7;
+
+  /* second stage */
+  x2 = W6 * x3;
+  x3 = W2 * x3;
+  x1 = x4 + x6;
+  x4 -= x6;
+  x6 = x5 + x7;
+  x5 -= x7;
+
+  /* third stage */
+  x7 = x0 + x3;
+  x8 = x0 - x3;
+  x3 = x0 + x2;
+  x0 -= x2;
+  x2 = (181 * (x4 + x5) + 128) >> 8;
+  x4 = (181 * (x4 - x5) + 128) >> 8;
+
+  /* fourth stage */
+  blk[0] = (x7 + x1) >> 8;
+  blk[1] = (x3 + x2) >> 8;
+  blk[2] = (x0 + x4) >> 8;
+  blk[3] = (x8 + x6) >> 8;
+  blk[4] = (x8 - x6) >> 8;
+  blk[5] = (x0 - x4) >> 8;
+  blk[6] = (x3 - x2) >> 8;
+  blk[7] = (x7 - x1) >> 8;
+}
+
+/* Column (vertical) IDCT when only first 4 coefficients are non-zero. */
+static void idctcol10(int *blk) {
+  int x0, x1, x2, x3, x4, x5, x6, x7, x8;
+
+  /* shortcut */
+  if (!((x1 = (blk[8 * 4] << 8)) | (x2 = blk[8 * 6]) | (x3 = blk[8 * 2]) |
+        (x4 = blk[8 * 1]) | (x5 = blk[8 * 7]) | (x6 = blk[8 * 5]) |
+        (x7 = blk[8 * 3]))) {
+    blk[8 * 0] = blk[8 * 1] = blk[8 * 2] = blk[8 * 3]
+        = blk[8 * 4] = blk[8 * 5] = blk[8 * 6]
+        = blk[8 * 7] = ((blk[8 * 0] + 32) >> 6);
+    return;
+  }
+
+  x0 = (blk[8 * 0] << 8) + 16384;
+
+  /* first stage */
+  x5 = (W7 * x4 + 4) >> 3;
+  x4 = (W1 * x4 + 4) >> 3;
+  x6 = (W3 * x7 + 4) >> 3;
+  x7 = (-W5 * x7 + 4) >> 3;
+
+  /* second stage */
+  x2 = (W6 * x3 + 4) >> 3;
+  x3 = (W2 * x3 + 4) >> 3;
+  x1 = x4 + x6;
+  x4 -= x6;
+  x6 = x5 + x7;
+  x5 -= x7;
+
+  /* third stage */
+  x7 = x0 + x3;
+  x8 = x0 - x3;
+  x3 = x0 + x2;
+  x0 -= x2;
+  x2 = (181 * (x4 + x5) + 128) >> 8;
+  x4 = (181 * (x4 - x5) + 128) >> 8;
+
+  /* fourth stage */
+  blk[8 * 0] = (x7 + x1) >> 14;
+  blk[8 * 1] = (x3 + x2) >> 14;
+  blk[8 * 2] = (x0 + x4) >> 14;
+  blk[8 * 3] = (x8 + x6) >> 14;
+  blk[8 * 4] = (x8 - x6) >> 14;
+  blk[8 * 5] = (x0 - x4) >> 14;
+  blk[8 * 6] = (x3 - x2) >> 14;
+  blk[8 * 7] = (x7 - x1) >> 14;
+}
+
+void vp9_short_idct10_8x8_c(short *coefs, short *block, int pitch) {
+  int X[TX_DIM * TX_DIM];
+  int i, j;
+  int shortpitch = pitch >> 1;
+
+  for (i = 0; i < TX_DIM; i++) {
+    for (j = 0; j < TX_DIM; j++) {
+      X[i * TX_DIM + j] = (int)(coefs[i * TX_DIM + j] + 1
+                                + (coefs[i * TX_DIM + j] < 0)) >> 2;
+    }
+  }
+
+  /* Do first 4 row idct only since non-zero dct coefficients are all in
+   *  upper-left 4x4 area. */
+  for (i = 0; i < 4; i++)
+    idctrow10(X + 8 * i);
+
+  for (i = 0; i < 8; i++)
+    idctcol10(X + i);
+
+  for (i = 0; i < TX_DIM; i++) {
+    for (j = 0; j < TX_DIM; j++) {
+      block[i * shortpitch + j]  = X[i * TX_DIM + j] >> 1;
+    }
+  }
+}
 
 void vp9_short_ihaar2x2_c(short *input, short *output, int pitch) {
   int i;

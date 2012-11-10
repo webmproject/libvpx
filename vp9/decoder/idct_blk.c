@@ -177,12 +177,21 @@ void vp9_dequant_dc_idct_add_y_block_8x8_c(short *q, short *dq,
                                            int stride, unsigned short *eobs,
                                            short *dc,
                                            MACROBLOCKD *xd) {
-  vp9_dequant_dc_idct_add_8x8_c(q, dq, pre, dst, 16, stride, dc[0]);
-  vp9_dequant_dc_idct_add_8x8_c(&q[64], dq, pre + 8, dst + 8, 16, stride, dc[1]);
-  vp9_dequant_dc_idct_add_8x8_c(&q[128], dq, pre + 8 * 16,
-                                dst + 8 * stride, 16, stride, dc[4]);
-  vp9_dequant_dc_idct_add_8x8_c(&q[192], dq, pre + 8 * 16 + 8,
-                                dst + 8 * stride + 8, 16, stride, dc[8]);
+  q[0] = dc[0];
+  vp9_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride, 1, xd->eobs[0]);
+
+  q[64] = dc[1];
+  vp9_dequant_idct_add_8x8_c(&q[64], dq, pre + 8, dst + 8, 16, stride, 1,
+                             xd->eobs[4]);
+
+  q[128] = dc[4];
+  vp9_dequant_idct_add_8x8_c(&q[128], dq, pre + 8 * 16,
+                                dst + 8 * stride, 16, stride, 1, xd->eobs[8]);
+
+  q[192] = dc[8];
+  vp9_dequant_idct_add_8x8_c(&q[192], dq, pre + 8 * 16 + 8,
+                                dst + 8 * stride + 8, 16, stride, 1,
+                                xd->eobs[12]);
 }
 
 #if CONFIG_SUPERBLOCKS
@@ -191,13 +200,22 @@ void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(short *q, short *dq,
                                                    int stride,
                                                    unsigned short *eobs,
                                                    short *dc, MACROBLOCKD *xd) {
-  vp9_dequant_dc_idct_add_8x8_c(q, dq, dst, dst, stride, stride, dc[0]);
-  vp9_dequant_dc_idct_add_8x8_c(&q[64], dq, dst + 8,
-                                dst + 8, stride, stride, dc[1]);
-  vp9_dequant_dc_idct_add_8x8_c(&q[128], dq, dst + 8 * stride,
-                                dst + 8 * stride, stride, stride, dc[4]);
-  vp9_dequant_dc_idct_add_8x8_c(&q[192], dq, dst + 8 * stride + 8,
-                                dst + 8 * stride + 8, stride, stride, dc[8]);
+  q[0] = dc[0];
+  vp9_dequant_idct_add_8x8_c(q, dq, dst, dst, stride, stride, 1, xd->eobs[0]);
+
+  q[64] = dc[1];
+  vp9_dequant_idct_add_8x8_c(&q[64], dq, dst + 8,
+                                dst + 8, stride, stride, 1, xd->eobs[4]);
+
+  q[128] = dc[4];
+  vp9_dequant_idct_add_8x8_c(&q[128], dq, dst + 8 * stride,
+                                dst + 8 * stride, stride, stride, 1,
+                                xd->eobs[8]);
+
+  q[192] = dc[8];
+  vp9_dequant_idct_add_8x8_c(&q[192], dq, dst + 8 * stride + 8,
+                                dst + 8 * stride + 8, stride, stride, 1,
+                                xd->eobs[12]);
 }
 #endif
 
@@ -209,13 +227,14 @@ void vp9_dequant_idct_add_y_block_8x8_c(short *q, short *dq,
   unsigned char *origdest = dst;
   unsigned char *origpred = pre;
 
-  vp9_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
+  vp9_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride, 0, xd->eobs[0]);
   vp9_dequant_idct_add_8x8_c(&q[64], dq, origpred + 8,
-                             origdest + 8, 16, stride);
+                             origdest + 8, 16, stride, 0, xd->eobs[4]);
   vp9_dequant_idct_add_8x8_c(&q[128], dq, origpred + 8 * 16,
-                             origdest + 8 * stride, 16, stride);
+                             origdest + 8 * stride, 16, stride, 0, xd->eobs[8]);
   vp9_dequant_idct_add_8x8_c(&q[192], dq, origpred + 8 * 16 + 8,
-                             origdest + 8 * stride + 8, 16, stride);
+                             origdest + 8 * stride + 8, 16, stride, 0,
+                             xd->eobs[12]);
 }
 
 void vp9_dequant_idct_add_uv_block_8x8_c(short *q, short *dq,
@@ -224,12 +243,12 @@ void vp9_dequant_idct_add_uv_block_8x8_c(short *q, short *dq,
                                          unsigned char *dstv,
                                          int stride, unsigned short *eobs,
                                          MACROBLOCKD *xd) {
-  vp9_dequant_idct_add_8x8_c(q, dq, pre, dstu, 8, stride);
+  vp9_dequant_idct_add_8x8_c(q, dq, pre, dstu, 8, stride, 0, xd->eobs[16]);
 
   q    += 64;
   pre  += 64;
 
-  vp9_dequant_idct_add_8x8_c(q, dq, pre, dstv, 8, stride);
+  vp9_dequant_idct_add_8x8_c(q, dq, pre, dstv, 8, stride, 0, xd->eobs[20]);
 }
 
 #if CONFIG_SUPERBLOCKS
@@ -239,11 +258,12 @@ void vp9_dequant_idct_add_uv_block_8x8_inplace_c(short *q, short *dq,
                                                  int stride,
                                                  unsigned short *eobs,
                                                  MACROBLOCKD *xd) {
-  vp9_dequant_idct_add_8x8_c(q, dq, dstu, dstu, stride, stride);
+  vp9_dequant_idct_add_8x8_c(q, dq, dstu, dstu, stride, stride, 0,
+                             xd->eobs[16]);
 
-  q    += 64;
-
-  vp9_dequant_idct_add_8x8_c(q, dq, dstv, dstv, stride, stride);
+  q += 64;
+  vp9_dequant_idct_add_8x8_c(q, dq, dstv, dstv, stride, stride, 0,
+                             xd->eobs[20]);
 }
 #endif
 

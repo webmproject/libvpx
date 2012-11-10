@@ -442,7 +442,8 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
           vp9_ht_dequant_idct_add_8x8_c(tx_type,
                                         q, dq, pre, dst, 16, stride);
         } else {
-          vp9_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
+          vp9_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride, 0,
+                                     xd->eobs[idx]);
         }
         q += 64;
       } else {
