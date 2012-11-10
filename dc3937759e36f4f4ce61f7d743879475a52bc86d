@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//1tk\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-10T00:45:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//1+c\u003d",
+      "revId": "dc3937759e36f4f4ce61f7d743879475a52bc86d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//19k\u003d",
         "filename": "build/make/Makefile",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//1Vg\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-10T00:45:17Z",
+      "side": 1,
+      "message": "Moved away from the shell to generate a directory list from the source list.",
+      "parentUuid": "AAAAQ3//19k\u003d",
+      "revId": "dc3937759e36f4f4ce61f7d743879475a52bc86d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//18w\u003d",
         "filename": "vp9/vp9_common.mk",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2012-11-09T01:47:39Z",
       "side": 1,
       "message": "this isn\u0027t new to this change, but note that for proper dependency generation this should be enabled for .c.d as well.",
+      "revId": "dc3937759e36f4f4ce61f7d743879475a52bc86d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1Vc\u003d",
+        "filename": "vp9/vp9_common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-10T00:45:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//18w\u003d",
       "revId": "dc3937759e36f4f4ce61f7d743879475a52bc86d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
