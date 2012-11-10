@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//1Kw\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:02:49Z",
+      "side": 1,
+      "message": "note: \u0027recon\u0027 is not very evocative. \"add_residual()\" ?",
+      "revId": "6c17c9fae0f54942abe480414b4c0db7b2476412",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1Ks\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:02:49Z",
+      "side": 1,
+      "message": "const uint16_t* diff, const uint8_t* pred",
+      "revId": "6c17c9fae0f54942abe480414b4c0db7b2476412",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1Ko\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:02:49Z",
+      "side": 1,
+      "message": "good candidate for a future \"add_constant_residual()\" function i guess.",
+      "revId": "6c17c9fae0f54942abe480414b4c0db7b2476412",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
