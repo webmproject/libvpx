@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//1Kg\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:07:50Z",
+      "side": 1,
+      "message": "just remove",
+      "revId": "df40703fcf7b69d403fea48fedd73a12e7eacfa5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1Kc\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:07:50Z",
+      "side": 1,
+      "message": "add_constant_residual()",
+      "revId": "df40703fcf7b69d403fea48fedd73a12e7eacfa5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1KY\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:07:50Z",
+      "side": 1,
+      "message": "add_residual()",
+      "revId": "df40703fcf7b69d403fea48fedd73a12e7eacfa5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1KU\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:07:50Z",
+      "side": 1,
+      "message": "comment is cryptic",
+      "revId": "df40703fcf7b69d403fea48fedd73a12e7eacfa5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1KQ\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:07:50Z",
+      "side": 1,
+      "message": "add_residual()",
+      "revId": "df40703fcf7b69d403fea48fedd73a12e7eacfa5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1KM\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:07:50Z",
+      "side": 1,
+      "message": "why are these lines needed?",
+      "revId": "df40703fcf7b69d403fea48fedd73a12e7eacfa5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//1KI\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-10T04:07:50Z",
+      "side": 1,
+      "message": "all these debug/printing code should be factored out in a common function (print_block() for instance)",
+      "revId": "df40703fcf7b69d403fea48fedd73a12e7eacfa5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
