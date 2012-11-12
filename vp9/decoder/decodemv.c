@@ -679,8 +679,17 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mb_to_left_edge = -((mb_col * 16) << 3);
   mb_to_left_edge -= LEFT_TOP_MARGIN;
 
-  xd->mb_to_right_edge =
-    mb_to_right_edge = ((pbi->common.mb_cols - 1 - mb_col) * 16) << 3;
+#if CONFIG_SUPERBLOCKS
+  if (mi->mbmi.encoded_as_sb) {
+    xd->mb_to_right_edge =
+      mb_to_right_edge = ((pbi->common.mb_cols - 2 - mb_col) * 16) << 3;
+  } else {
+#endif
+    xd->mb_to_right_edge =
+      mb_to_right_edge = ((pbi->common.mb_cols - 1 - mb_col) * 16) << 3;
+#if CONFIG_SUPERBLOCKS
+  }
+#endif
   mb_to_right_edge += RIGHT_BOTTOM_MARGIN;
 
   // Make sure the MACROBLOCKD mode info pointer is pointed at the

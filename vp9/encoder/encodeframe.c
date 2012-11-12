@@ -381,11 +381,11 @@ static void update_state(VP9_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
 #if CONFIG_SUPERBLOCKS
   if (mi->mbmi.encoded_as_sb) {
     const int mis = cpi->common.mode_info_stride;
-    if (xd->mb_to_right_edge > 0)
+    if (xd->mb_to_right_edge >= 0)
       vpx_memcpy(xd->mode_info_context + 1, mi, sizeof(MODE_INFO));
-    if (xd->mb_to_bottom_edge > 0) {
+    if (xd->mb_to_bottom_edge >= 0) {
       vpx_memcpy(xd->mode_info_context + mis, mi, sizeof(MODE_INFO));
-      if (xd->mb_to_right_edge > 0)
+      if (xd->mb_to_right_edge >= 0)
         vpx_memcpy(xd->mode_info_context + mis + 1, mi, sizeof(MODE_INFO));
     }
   }
@@ -742,8 +742,8 @@ static void pick_sb_modes (VP9_COMP *cpi,
   // Set up distance of MB to edge of frame in 1/8th pel units
   xd->mb_to_top_edge    = -((mb_row * 16) << 3);
   xd->mb_to_left_edge   = -((mb_col * 16) << 3);
-  xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
-  xd->mb_to_right_edge  = ((cm->mb_cols - 1 - mb_col) * 16) << 3;
+  xd->mb_to_bottom_edge = ((cm->mb_rows - 2 - mb_row) * 16) << 3;
+  xd->mb_to_right_edge  = ((cm->mb_cols - 2 - mb_col) * 16) << 3;
 
   /* Set up limit values for MV components to prevent them from
    * extending beyond the UMV borders assuming 16x16 block size */
@@ -918,31 +918,32 @@ static void encode_sb(VP9_COMP *cpi,
     xd->left_context  = cm->left_context + (i >> 1);
 
     // Set up distance of MB to edge of the frame in 1/8th pel units
+    // Set up limit values for MV components to prevent them from
+    // extending beyond the UMV borders assuming 32x32 block size
+    x->mv_row_min = -((mb_row * 16) + VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
+    x->mv_col_min = -((mb_col * 16) + VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
+
     xd->mb_to_top_edge    = -((mb_row * 16) << 3);
     xd->mb_to_left_edge   = -((mb_col * 16) << 3);
-    xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
-    xd->mb_to_right_edge  = ((cm->mb_cols - 1 - mb_col) * 16) << 3;
 
 #if CONFIG_SUPERBLOCKS
     if (xd->mode_info_context->mbmi.encoded_as_sb) {
-      // Set up limit values for MV components to prevent them from
-      // extending beyond the UMV borders assuming 32x32 block size
-      x->mv_row_min = -((mb_row * 16) + VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
-      x->mv_col_min = -((mb_col * 16) + VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
       x->mv_row_max = ((cm->mb_rows - mb_row) * 16 +
                        (VP9BORDERINPIXELS - 32 - VP9_INTERP_EXTEND));
       x->mv_col_max = ((cm->mb_cols - mb_col) * 16 +
                        (VP9BORDERINPIXELS - 32 - VP9_INTERP_EXTEND));
+
+      xd->mb_to_bottom_edge = ((cm->mb_rows - 2 - mb_row) * 16) << 3;
+      xd->mb_to_right_edge  = ((cm->mb_cols - 2 - mb_col) * 16) << 3;
     } else {
 #endif
-      // Set up limit values for MV components to prevent them from
-      // extending beyond the UMV borders assuming 16x16 block size
-      x->mv_row_min = -((mb_row * 16) + VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
-      x->mv_col_min = -((mb_col * 16) + VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
       x->mv_row_max = ((cm->mb_rows - mb_row) * 16 +
                        (VP9BORDERINPIXELS - 16 - VP9_INTERP_EXTEND));
       x->mv_col_max = ((cm->mb_cols - mb_col) * 16 +
                        (VP9BORDERINPIXELS - 16 - VP9_INTERP_EXTEND));
+
+      xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
+      xd->mb_to_right_edge  = ((cm->mb_cols - 1 - mb_col) * 16) << 3;
 #if CONFIG_SUPERBLOCKS
     }
 #endif

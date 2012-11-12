@@ -746,12 +746,12 @@ static void write_mb_segid(vp9_writer *bc,
   int seg_id = mi->segment_id;
 #if CONFIG_SUPERBLOCKS
   if (mi->encoded_as_sb) {
-    if (xd->mb_to_right_edge > 0)
+    if (xd->mb_to_right_edge >= 0)
       seg_id = seg_id && xd->mode_info_context[1].mbmi.segment_id;
-    if (xd->mb_to_bottom_edge > 0) {
+    if (xd->mb_to_bottom_edge >= 0) {
       seg_id = seg_id &&
                xd->mode_info_context[xd->mode_info_stride].mbmi.segment_id;
-      if (xd->mb_to_right_edge > 0)
+      if (xd->mb_to_right_edge >= 0)
         seg_id = seg_id &&
                 xd->mode_info_context[xd->mode_info_stride + 1].mbmi.segment_id;
     }
@@ -951,9 +951,19 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
         // These specified to 8th pel as they are always compared to MV
         // values that are in 1/8th pel units
         xd->mb_to_left_edge = -((mb_col * 16) << 3);
-        xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
         xd->mb_to_top_edge = -((mb_row * 16)) << 3;
-        xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
+
+#if CONFIG_SUPERBLOCKS
+        if (mi->encoded_as_sb) {
+          xd->mb_to_right_edge = ((pc->mb_cols - 2 - mb_col) * 16) << 3;
+          xd->mb_to_bottom_edge = ((pc->mb_rows - 2 - mb_row) * 16) << 3;
+        } else {
+#endif
+          xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
+          xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
+#if CONFIG_SUPERBLOCKS
+        }
+#endif
 
         // Make sure the MacroBlockD mode info pointer is set correctly
         xd->mode_info_context = m;

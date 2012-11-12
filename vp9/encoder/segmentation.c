@@ -214,9 +214,7 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
         }
 
         xd->mb_to_top_edge = -((mb_row * 16) << 3);
-        xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
         xd->mb_to_left_edge = -((mb_col * 16) << 3);
-        xd->mb_to_right_edge = ((cm->mb_cols - 1 - mb_row) * 16) << 3;
 
         segmap_index = (mb_row + y_idx) * cm->mb_cols + mb_col + x_idx;
         segment_id = xd->mode_info_context->mbmi.segment_id;
@@ -232,6 +230,13 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
               segment_id = segment_id &&
                            xd->mode_info_context[mis + 1].mbmi.segment_id;
           }
+          xd->mb_to_bottom_edge = ((cm->mb_rows - 2 - mb_row) * 16) << 3;
+          xd->mb_to_right_edge  = ((cm->mb_cols - 2 - mb_col) * 16) << 3;
+        } else {
+#endif
+          xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
+          xd->mb_to_right_edge  = ((cm->mb_cols - 1 - mb_col) * 16) << 3;
+#if CONFIG_SUPERBLOCKS
         }
 #endif
 
