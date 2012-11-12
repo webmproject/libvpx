@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//0pw\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-12T19:39:54Z",
+      "side": 1,
+      "message": "vp8_decoder_remove_threads() will remove all threads and turn off multi-threading thereafter. I doubt that is what you want.",
+      "revId": "da3a1ea2aa8b4ed08c45b569e887e7a66b61c138",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
