@@ -615,7 +615,8 @@ int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
   return c;
 }
 
-int vp9_decode_mb_tokens(VP9D_COMP *dx, MACROBLOCKD *xd,
+int vp9_decode_mb_tokens(VP9D_COMP* const dx,
+                         MACROBLOCKD* const xd,
                          BOOL_DECODER* const bc) {
   int i, type, eobtotal = 0;
 

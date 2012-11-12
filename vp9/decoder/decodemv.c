@@ -19,6 +19,7 @@
 #include "vp9/common/pred_common.h"
 #include "vp9/common/entropy.h"
 #include "vp9/decoder/decodemv.h"
+#include "vp9/common/mvref_common.h"
 #if CONFIG_DEBUG
 #include <assert.h>
 #endif
@@ -721,7 +722,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
   // If reference frame is an Inter frame
   if (mbmi->ref_frame) {
-    int rct[4];
     int_mv nearest, nearby, best_mv;
     int_mv nearest_second, nearby_second, best_mv_second;
     vp9_prob mv_ref_p [VP9_MVREFS - 1];

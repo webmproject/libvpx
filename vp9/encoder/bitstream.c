@@ -912,13 +912,10 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
           }
         } else {
           int_mv best_mv, best_second_mv;
-          int ct[4];
 
           vp9_prob mv_ref_p [VP9_MVREFS - 1];
 
           {
-            int_mv n1, n2;
-
             best_mv.as_int = mi->ref_mvs[rf][0].as_int;
 
             vp9_mv_ref_probs(&cpi->common, mv_ref_p, mi->mb_mode_context[rf]);
@@ -972,7 +969,6 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
 
           if (mi->second_ref_frame &&
               (mode == NEWMV || mode == SPLITMV)) {
-            int_mv n1, n2;
 
             best_second_mv.as_int =
               mi->ref_mvs[mi->second_ref_frame][0].as_int;

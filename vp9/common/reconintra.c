@@ -199,7 +199,7 @@ static void d153_predictor(uint8_t *ypred_ptr, int y_stride, int n,
 static void corner_predictor(unsigned char *ypred_ptr, int y_stride, int n,
                              unsigned char *yabove_row,
                              unsigned char *yleft_col) {
-  int h[32], v[32], mh, mv, maxgradh, maxgradv, x, y, nx, ny;
+  int mh, mv, maxgradh, maxgradv, x, y, nx, ny;
   int i, j;
   int top_left = yabove_row[-1];
   mh = mv = 0;
