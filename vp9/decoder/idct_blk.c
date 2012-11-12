@@ -39,7 +39,8 @@ void vp9_dequant_dc_idct_add_y_block_c(short *q, short *dq,
 #if CONFIG_SUPERBLOCKS
 void vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(short *q, short *dq,
                                                    unsigned char *dst,
-                                                   int stride, char *eobs,
+                                                   int stride,
+                                                   unsigned short *eobs,
                                                    short *dc, MACROBLOCKD *xd) {
   int i, j;
 
@@ -131,7 +132,8 @@ void vp9_dequant_idct_add_uv_block_c(short *q, short *dq, unsigned char *pre,
 void vp9_dequant_idct_add_uv_block_4x4_inplace_c(short *q, short *dq,
                                                  unsigned char *dstu,
                                                  unsigned char *dstv,
-                                                 int stride, char *eobs,
+                                                 int stride,
+                                                 unsigned short *eobs,
                                                  MACROBLOCKD *xd) {
   int i, j;
 
