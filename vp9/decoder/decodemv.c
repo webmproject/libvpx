@@ -720,10 +720,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     int recon_y_stride, recon_yoffset;
     int recon_uv_stride, recon_uvoffset;
 
-    vp9_find_near_mvs(xd, mi,
-                      prev_mi,
-                      &nearest, &nearby, &best_mv, rct,
-                      mbmi->ref_frame, cm->ref_frame_sign_bias);
     {
       int ref_fb_idx;
       MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
@@ -755,9 +751,10 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                             recon_y_stride,
                             mbmi->ref_mvs[ref_frame],
                             &best_mv, &nearest, &nearby);
-    }
 
-    vp9_mv_ref_probs(&pbi->common, mv_ref_p, rct);
+      vp9_mv_ref_probs(&pbi->common, mv_ref_p,
+                       mbmi->mb_mode_context[ref_frame]);
+    }
 
     // Is the segment level mode feature enabled for this segment
     if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
@@ -771,7 +768,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
       mbmi->mode = read_mv_ref(bc, mv_ref_p);
 
-      vp9_accum_mv_refs(&pbi->common, mbmi->mode, rct);
+      vp9_accum_mv_refs(&pbi->common, mbmi->mode,
+                        mbmi->mb_mode_context[mbmi->ref_frame]);
     }
 
 #if CONFIG_PRED_FILTER
@@ -825,11 +823,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           cm->yv12_fb[second_ref_fb_idx].u_buffer + recon_uvoffset;
         xd->second_pre.v_buffer =
           cm->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
-        vp9_find_near_mvs(xd, mi, prev_mi,
-                          &nearest_second, &nearby_second, &best_mv_second,
-                          rct,
-                          mbmi->second_ref_frame,
-                          cm->ref_frame_sign_bias);
 
         vp9_find_mv_refs(xd, mi, prev_mi,
                          mbmi->second_ref_frame,

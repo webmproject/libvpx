@@ -79,7 +79,7 @@ extern void vp9_update_mode_context(struct VP9Common *pc);
 
 extern void vp9_accum_mv_refs(struct VP9Common *pc,
                               MB_PREDICTION_MODE m,
-                              const int ct[4]);
+                              const int context);
 
 void vp9_default_bmode_probs(vp9_prob dest[VP9_NKF_BINTRAMODES - 1]);
 

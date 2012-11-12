@@ -214,6 +214,7 @@ void vp9_find_mv_refs(
 
   int i;
   MODE_INFO *candidate_mi;
+  MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
   int_mv candidate_mvs[MAX_MV_REFS];
   int_mv c_refmv;
   MV_REFERENCE_FRAME c_ref_frame;
@@ -326,6 +327,31 @@ void vp9_find_mv_refs(
   // Make sure we are able to add 0,0
   if (index > (MAX_MV_REFS - 1)) {
     index = (MAX_MV_REFS - 1);
+  }
+
+  if (candidate_mvs[0].as_int == 0) {
+    // 0,0 was best
+    if (index == 0) {
+      // No reference candidates
+      mbmi->mb_mode_context[ref_frame] = 0;
+    } else if (index == 1) {
+      // 0,0 was only candidate
+      mbmi->mb_mode_context[ref_frame] = 1;
+    } else {
+      // Other candidates available
+      mbmi->mb_mode_context[ref_frame] = 2;
+    }
+  } else if (candidate_scores[0] >= 32) {
+    if (candidate_scores[1] >= 16) {
+      // Strong primary and strong or moderate secondary candidate
+      mbmi->mb_mode_context[ref_frame] = 3;
+    } else {
+      // Strong primary but weak secondary candidate
+      mbmi->mb_mode_context[ref_frame] = 4;
+    }
+  } else {
+    // Weak or moderate candidates
+    mbmi->mb_mode_context[ref_frame] = 5;
   }
 
   // 0,0 is always a valid reference.

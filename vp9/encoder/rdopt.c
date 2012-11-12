@@ -1897,7 +1897,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi,
 
 int vp9_cost_mv_ref(VP9_COMP *cpi,
                     MB_PREDICTION_MODE m,
-                    const int near_mv_ref_ct[4]) {
+                    const int mode_context) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
@@ -1911,7 +1911,7 @@ int vp9_cost_mv_ref(VP9_COMP *cpi,
 
     vp9_prob p [VP9_MVREFS - 1];
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
-    vp9_mv_ref_probs(pc, p, near_mv_ref_ct);
+    vp9_mv_ref_probs(pc, p, mode_context);
     return cost_token(vp9_mv_ref_tree, p,
                       vp9_mv_ref_encoding_array - NEARESTMV + m);
   } else
@@ -2253,7 +2253,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   // Segmentation method overheads
   rate = cost_token(vp9_mbsplit_tree, vp9_mbsplit_probs,
                     vp9_mbsplit_encodings + segmentation);
-  rate += vp9_cost_mv_ref(cpi, SPLITMV, bsi->mdcounts);
+  rate += vp9_cost_mv_ref(cpi, SPLITMV,
+                          mbmi->mb_mode_context[mbmi->ref_frame]);
   this_segment_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
   br += rate;
   other_segment_rd = this_segment_rd;
@@ -3207,12 +3208,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
-  vp9_find_near_mvs(xd, xd->mode_info_context,
-                    xd->prev_mode_info_context,
-                    &frame_nearest_mv[frame_type], &frame_near_mv[frame_type],
-                    &frame_best_ref_mv[frame_type], frame_mdcounts[frame_type],
-                    frame_type, cpi->common.ref_frame_sign_bias);
-
   y_buffer[frame_type] = yv12->y_buffer + recon_yoffset;
   u_buffer[frame_type] = yv12->u_buffer + recon_uvoffset;
   v_buffer[frame_type] = yv12->v_buffer + recon_uvoffset;
@@ -3371,7 +3366,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
    * if the first is known */
   *compmode_cost = vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_COMP),
                                 is_comp_pred);
-  *rate2 += vp9_cost_mv_ref(cpi, this_mode, mdcounts);
+  *rate2 += vp9_cost_mv_ref(cpi, this_mode,
+                            mbmi->mb_mode_context[mbmi->ref_frame]);
 
   if (block_size == BLOCK_16X16) {
     vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);

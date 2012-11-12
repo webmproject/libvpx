@@ -451,7 +451,7 @@ void vp9_init_mode_contexts(VP9_COMMON *pc) {
 
 void vp9_accum_mv_refs(VP9_COMMON *pc,
                        MB_PREDICTION_MODE m,
-                       const int ct[4]) {
+                       const int context) {
   int (*mv_ref_ct)[4][2];
 
   if (pc->refresh_alt_ref_frame)
@@ -460,21 +460,21 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
     mv_ref_ct = pc->fc.mv_ref_ct;
 
   if (m == ZEROMV) {
-    ++mv_ref_ct [ct[0]] [0] [0];
+    ++mv_ref_ct[context][0][0];
   } else {
-    ++mv_ref_ct [ct[0]] [0] [1];
+    ++mv_ref_ct[context][0][1];
     if (m == NEARESTMV) {
-      ++mv_ref_ct [ct[1]] [1] [0];
+      ++mv_ref_ct[context][1][0];
     } else {
-      ++mv_ref_ct [ct[1]] [1] [1];
+      ++mv_ref_ct[context][1][1];
       if (m == NEARMV) {
-        ++mv_ref_ct [ct[2]] [2] [0];
+        ++mv_ref_ct[context][2][0];
       } else {
-        ++mv_ref_ct [ct[2]] [2] [1];
+        ++mv_ref_ct[context][2][1];
         if (m == NEWMV) {
-          ++mv_ref_ct [ct[3]] [3] [0];
+          ++mv_ref_ct[context][3][0];
         } else {
-          ++mv_ref_ct [ct[3]] [3] [1];
+          ++mv_ref_ct[context][3][1];
         }
       }
     }
@@ -496,7 +496,7 @@ void vp9_update_mode_context(VP9_COMMON *pc) {
     mode_context = pc->fc.mode_context;
   }
 
-  for (j = 0; j < 6; j++) {
+  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     for (i = 0; i < 4; i++) {
       int this_prob;
       int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1];
