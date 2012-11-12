@@ -231,6 +231,8 @@ typedef struct {
   int_mv mv[2]; // for each reference frame used
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REFS];
 
+  int mb_mode_context[MAX_REF_FRAMES];
+
   SPLITMV_PARTITIONING_TYPE partitioning;
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
   unsigned char need_to_clamp_mvs;

@@ -1053,13 +1053,9 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
           {
             int_mv n1, n2;
 
-            // Only used for context just now and soon to be deprecated.
-            vp9_find_near_mvs(xd, m, prev_m, &n1, &n2, &best_mv, ct,
-                              rf, cpi->common.ref_frame_sign_bias);
-
             best_mv.as_int = mi->ref_mvs[rf][0].as_int;
 
-            vp9_mv_ref_probs(&cpi->common, mv_ref_p, ct);
+            vp9_mv_ref_probs(&cpi->common, mv_ref_p, mi->mb_mode_context[rf]);
 
 #ifdef ENTROPY_STATS
             accum_mv_refs(mode, ct);
@@ -1080,7 +1076,7 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
             {
               write_mv_ref(bc, mode, mv_ref_p);
             }
-            vp9_accum_mv_refs(&cpi->common, mode, ct);
+            vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
           }
 
 #if CONFIG_PRED_FILTER
@@ -1111,12 +1107,6 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
           if (mi->second_ref_frame &&
               (mode == NEWMV || mode == SPLITMV)) {
             int_mv n1, n2;
-
-            // Only used for context just now and soon to be deprecated.
-            vp9_find_near_mvs(xd, m, prev_m,
-                              &n1, &n2, &best_second_mv, ct,
-                              mi->second_ref_frame,
-                              cpi->common.ref_frame_sign_bias);
 
             best_second_mv.as_int =
               mi->ref_mvs[mi->second_ref_frame][0].as_int;
@@ -2287,11 +2277,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     vp9_update_mode_context(&cpi->common);
   }
 
-
   vp9_stop_encode(&residual_bc);
 
   *size += residual_bc.pos;
-
 }
 
 #ifdef ENTROPY_STATS

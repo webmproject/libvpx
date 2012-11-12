@@ -42,6 +42,7 @@ void vp9_initialize_common(void);
 #define NUM_YV12_BUFFERS 4
 
 #define COMP_PRED_CONTEXTS   2
+#define INTER_MODE_CONTEXTS 6
 
 typedef struct frame_contexts {
   vp9_prob bmode_prob[VP9_NKF_BINTRAMODES - 1];
@@ -106,11 +107,11 @@ typedef struct frame_contexts {
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
 
-  int mode_context[6][4];
-  int mode_context_a[6][4];
-  int vp9_mode_contexts[6][4];
-  int mv_ref_ct[6][4][2];
-  int mv_ref_ct_a[6][4][2];
+  int mode_context[INTER_MODE_CONTEXTS][4];
+  int mode_context_a[INTER_MODE_CONTEXTS][4];
+  int vp9_mode_contexts[INTER_MODE_CONTEXTS][4];
+  int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
+  int mv_ref_ct_a[INTER_MODE_CONTEXTS][4][2];
 } FRAME_CONTEXT;
 
 typedef enum {
