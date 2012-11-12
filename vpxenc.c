@@ -2240,7 +2240,7 @@ float usec_to_fps(uint64_t usec, unsigned int frames) {
 }
 
 
-static void test_decode(struct stream_state  *stream, unsigned int frames_in) {
+static void test_decode(struct stream_state  *stream) {
   vpx_codec_control(&stream->encoder, VP8_COPY_REFERENCE, &stream->ref_enc);
   ctx_exit_on_error(&stream->encoder, "Failed to get encoder reference frame");
   vpx_codec_control(&stream->decoder, VP8_COPY_REFERENCE, &stream->ref_dec);
@@ -2250,8 +2250,8 @@ static void test_decode(struct stream_state  *stream, unsigned int frames_in) {
       && !compare_img(&stream->ref_enc.img, &stream->ref_dec.img)) {
     /* TODO(jkoleszar): make fatal. */
     warn("Stream %d: Encode/decode mismatch on frame %d",
-         stream->index, frames_in);
-    stream->mismatch_seen = frames_in;
+         stream->index, stream->frames_out);
+    stream->mismatch_seen = stream->frames_out;
   }
 }
 
@@ -2419,7 +2419,7 @@ int main(int argc, const char **argv_) {
         FOREACH_STREAM(get_cx_data(stream, &global, &got_data));
 
         if (got_data && global.test_decode)
-          FOREACH_STREAM(test_decode(stream, frames_in));
+          FOREACH_STREAM(test_decode(stream));
       }
 
       fflush(stdout);
