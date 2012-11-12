@@ -294,8 +294,10 @@ static void build_activity_map(VP9_COMP *cpi) {
       xd->left_available = (mb_col != 0);
       recon_yoffset += 16;
 #endif
+#if !CONFIG_SUPERBLOCKS
       // Copy current mb to a buffer
       vp9_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+#endif
 
       // measure activity
       mb_activity = mb_activity_measure(cpi, x, mb_row, mb_col);
@@ -575,8 +577,10 @@ static void pick_mb_modes(VP9_COMP *cpi,
     xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
     xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
+#if !CONFIG_SUPERBLOCKS
     // Copy current MB to a work buffer
     vp9_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+#endif
 
     x->rddiv = cpi->RDDIV;
     x->rdmult = cpi->RDMULT;
@@ -953,8 +957,10 @@ static void encode_sb(VP9_COMP *cpi,
     xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
     xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
+#if !CONFIG_SUPERBLOCKS
     // Copy current MB to a work buffer
     vp9_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+#endif
 
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
       vp9_activity_masking(cpi, x);
@@ -1694,6 +1700,7 @@ void vp9_build_block_offsets(MACROBLOCK *x) {
 
   vp9_build_block_doffsets(&x->e_mbd);
 
+#if !CONFIG_SUPERBLOCKS
   // y blocks
   x->thismb_ptr = &x->thismb[0];
   for (br = 0; br < 4; br++) {
@@ -1708,6 +1715,20 @@ void vp9_build_block_offsets(MACROBLOCK *x) {
       ++block;
     }
   }
+#else
+  for (br = 0; br < 4; br++) {
+    for (bc = 0; bc < 4; bc++) {
+      BLOCK *this_block = &x->block[block];
+      // this_block->base_src = &x->src.y_buffer;
+      // this_block->src_stride = x->src.y_stride;
+      // this_block->src = 4 * br * this_block->src_stride + 4 * bc;
+      this_block->base_src = &x->src.y_buffer;
+      this_block->src_stride = x->src.y_stride;
+      this_block->src = 4 * br * this_block->src_stride + 4 * bc;
+      ++block;
+    }
+  }
+#endif
 
   // u blocks
   for (br = 0; br < 2; br++) {
