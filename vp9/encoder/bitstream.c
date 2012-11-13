@@ -863,7 +863,12 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
         }
 
         // Encode the reference frame.
-        encode_ref_frame(bc, pc, xd, segment_id, rf);
+        if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)
+            || vp9_get_segdata(xd, segment_id, SEG_LVL_MODE) >= NEARESTMV) {
+          encode_ref_frame(bc, pc, xd, segment_id, rf);
+        } else {
+          assert(rf == INTRA_FRAME);
+        }
 
         if (rf == INTRA_FRAME) {
 #ifdef ENTROPY_STATS

@@ -717,7 +717,11 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   }
 
   // Read the reference frame
-  mbmi->ref_frame = read_ref_frame(pbi, bc, mbmi->segment_id);
+  if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)
+      && vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE) < NEARESTMV)
+    mbmi->ref_frame = INTRA_FRAME;
+  else
+    mbmi->ref_frame = read_ref_frame(pbi, bc, mbmi->segment_id);
 
   // If reference frame is an Inter frame
   if (mbmi->ref_frame) {
