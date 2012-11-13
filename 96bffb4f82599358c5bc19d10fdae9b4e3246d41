@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//0Nk\u003d",
+        "filename": "vp9/encoder/segmentation.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-13T01:07:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//0PE\u003d",
+      "revId": "96bffb4f82599358c5bc19d10fdae9b4e3246d41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//0PA\u003d",
         "filename": "vp9/encoder/segmentation.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-13T01:01:04Z",
       "side": 1,
       "message": "here too",
+      "revId": "96bffb4f82599358c5bc19d10fdae9b4e3246d41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//0Ng\u003d",
+        "filename": "vp9/encoder/segmentation.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-13T01:07:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//0PA\u003d",
       "revId": "96bffb4f82599358c5bc19d10fdae9b4e3246d41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
