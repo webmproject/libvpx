@@ -155,7 +155,7 @@ unsigned int vp9_variance2x32_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 2, 32, &var, &avg);
   *sse = var;
-  return (var - (((unsigned int)avg * avg) >> 5));
+  return (var - (((unsigned int)avg * avg) >> 6));
 }
 
 unsigned int vp9_variance32x2_c(const unsigned char *src_ptr,
@@ -168,7 +168,7 @@ unsigned int vp9_variance32x2_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 32, 2, &var, &avg);
   *sse = var;
-  return (var - (((unsigned int)avg * avg) >> 5));
+  return (var - (((unsigned int)avg * avg) >> 6));
 }
 
 unsigned int vp9_sub_pixel_variance32x2_c(const unsigned char  *src_ptr,
@@ -189,10 +189,10 @@ unsigned int vp9_sub_pixel_variance32x2_c(const unsigned char  *src_ptr,
                                     src_pixels_per_line, 1, 3, 32, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 32, 32, 2, 32, VFilter);
 
-  return vp9_variance16x2_c(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance32x2_c(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
 }
 
-unsigned int vp9_sub_pixel_variance2x16_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance2x32_c(const unsigned char  *src_ptr,
                                           const int  src_pixels_per_line,
                                           const int  xoffset,
                                           const int  yoffset,
@@ -210,7 +210,7 @@ unsigned int vp9_sub_pixel_variance2x16_c(const unsigned char  *src_ptr,
                                     src_pixels_per_line, 1, 33, 2, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 2, 2, 32, 2, VFilter);
 
-  return vp9_variance2x16_c(temp2, 2, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance2x32_c(temp2, 2, dst_ptr, dst_pixels_per_line, sse);
 }
 #endif
 #endif
