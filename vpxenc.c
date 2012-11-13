@@ -86,6 +86,8 @@ static size_t wrap_fwrite(const void *ptr, size_t size, size_t nmemb,
 
 static const char *exec_name;
 
+#define VP8_FOURCC (0x00385056)
+#define VP9_FOURCC (0x00395056)
 static const struct codec_item {
   char const              *name;
   const vpx_codec_iface_t *(*iface)(void);
@@ -93,14 +95,14 @@ static const struct codec_item {
   unsigned int             fourcc;
 } codecs[] = {
 #if CONFIG_VP8_ENCODER && CONFIG_VP8_DECODER
-  {"vp8", &vpx_codec_vp8_cx, &vpx_codec_vp8_dx, 0x30385056},
+  {"vp8", &vpx_codec_vp8_cx, &vpx_codec_vp8_dx, VP8_FOURCC},
 #elif CONFIG_VP8_ENCODER && !CONFIG_VP8_DECODER
-  {"vp8", &vpx_codec_vp8_cx, NULL, 0x30385056},
+  {"vp8", &vpx_codec_vp8_cx, NULL, VP8_FOURCC},
 #endif
 #if CONFIG_VP9_ENCODER && CONFIG_VP9_DECODER
-  {"vp9", &vpx_codec_vp9_cx, &vpx_codec_vp9_dx, 0x30395056},
+  {"vp9", &vpx_codec_vp9_cx, &vpx_codec_vp9_dx, VP9_FOURCC},
 #elif CONFIG_VP9_ENCODER && !CONFIG_VP9_DECODER
-  {"vp9", &vpx_codec_vp9_cx, NULL, 0x30395056},
+  {"vp9", &vpx_codec_vp9_cx, NULL, VP9_FOURCC},
 #endif
 };
 
@@ -663,7 +665,8 @@ static void
 write_webm_file_header(EbmlGlobal                *glob,
                        const vpx_codec_enc_cfg_t *cfg,
                        const struct vpx_rational *fps,
-                       stereo_format_t            stereo_fmt) {
+                       stereo_format_t            stereo_fmt,
+                       unsigned int               fourcc) {
   {
     EbmlLoc start;
     Ebml_StartSubElement(glob, &start, EBML);
@@ -696,7 +699,8 @@ write_webm_file_header(EbmlGlobal                *glob,
         glob->track_id_pos = ftello(glob->stream);
         Ebml_SerializeUnsigned32(glob, TrackUID, trackID);
         Ebml_SerializeUnsigned(glob, TrackType, 1);
-        Ebml_SerializeString(glob, CodecID, "V_VP8");
+        Ebml_SerializeString(glob, CodecID,
+                             fourcc == VP8_FOURCC ? "V_VP8" : "V_VP9");
         {
           unsigned int pixelWidth = cfg->g_w;
           unsigned int pixelHeight = cfg->g_h;
@@ -2028,7 +2032,8 @@ static void open_output_file(struct stream_state *stream,
     stream->ebml.stream = stream->file;
     write_webm_file_header(&stream->ebml, &stream->config.cfg,
                            &global->framerate,
-                           stream->config.stereo_fmt);
+                           stream->config.stereo_fmt,
+                           global->codec->fourcc);
   } else
     write_ivf_file_header(stream->file, &stream->config.cfg,
                           global->codec->fourcc, 0);

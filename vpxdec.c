@@ -537,6 +537,7 @@ file_is_webm(struct input_ctx *input,
              unsigned int     *fps_num) {
   unsigned int i, n;
   int          track_type = -1;
+  int          codec_id;
 
   nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb, 0};
   nestegg_video_params params;
@@ -557,8 +558,13 @@ file_is_webm(struct input_ctx *input,
       goto fail;
   }
 
-  if (nestegg_track_codec_id(input->nestegg_ctx, i) != NESTEGG_CODEC_VP8) {
-    fprintf(stderr, "Not VP8 video, quitting.\n");
+  codec_id = nestegg_track_codec_id(input->nestegg_ctx, i);
+  if (codec_id == NESTEGG_CODEC_VP8) {
+    *fourcc = VP8_FOURCC;
+  } else if (codec_id == NESTEGG_CODEC_VP9) {
+    *fourcc = VP9_FOURCC;
+  } else {
+    fprintf(stderr, "Not VPx video, quitting.\n");
     exit(1);
   }
 
@@ -569,7 +575,6 @@ file_is_webm(struct input_ctx *input,
 
   *fps_den = 0;
   *fps_num = 0;
-  *fourcc = VP8_FOURCC;
   *width = params.width;
   *height = params.height;
   return 1;

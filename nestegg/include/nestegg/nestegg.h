@@ -67,6 +67,7 @@ extern "C" {
 
 #define NESTEGG_CODEC_VP8    0 /**< Track uses Google On2 VP8 codec. */
 #define NESTEGG_CODEC_VORBIS 1 /**< Track uses Xiph Vorbis codec. */
+#define NESTEGG_CODEC_VP9    2 /**< Track uses Google On2 VP9 codec. */
 
 #define NESTEGG_SEEK_SET 0 /**< Seek offset relative to beginning of stream. */
 #define NESTEGG_SEEK_CUR 1 /**< Seek offset relative to current position in stream. */
