@@ -16,6 +16,24 @@
       "revId": "fd00a27d321d4d8f1f289110cc2b03a491ede668",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//0Sw\u003d",
+        "filename": "vp9/common/reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 756,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-13T00:07:01Z",
+      "side": 1,
+      "message": "I thought c89 allowed this as long as its in the variable declaration? MSVC supports this, if that\u0027s what you worry about.",
+      "parentUuid": "AAAAQ3//0TY\u003d",
+      "revId": "fd00a27d321d4d8f1f289110cc2b03a491ede668",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
