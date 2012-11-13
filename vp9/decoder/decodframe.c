@@ -653,6 +653,10 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
         xd->prev_mode_info_context += offset_extended;
         continue;
       }
+#if CONFIG_SUPERBLOCKS
+      if (i)
+        mi->mbmi.encoded_as_sb = 0;
+#endif
 
       // Set above context pointer
       xd->above_context = pc->above_context + mb_col;
@@ -663,10 +667,18 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
        * values that are in 1/8th pel units
        */
       xd->mb_to_top_edge = -((mb_row * 16)) << 3;
-      xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
-
       xd->mb_to_left_edge = -((mb_col * 16) << 3);
-      xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
+#if CONFIG_SUPERBLOCKS
+      if (mi->mbmi.encoded_as_sb) {
+        xd->mb_to_bottom_edge = ((pc->mb_rows - 2 - mb_row) * 16) << 3;
+        xd->mb_to_right_edge = ((pc->mb_cols - 2 - mb_col) * 16) << 3;
+      } else {
+#endif
+        xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
+        xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
+#if CONFIG_SUPERBLOCKS
+      }
+#endif
 
       xd->up_available = (mb_row != 0);
       xd->left_available = (mb_col != 0);
@@ -679,10 +691,6 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
       xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
       xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
-#if CONFIG_SUPERBLOCKS
-      if (i)
-        mi->mbmi.encoded_as_sb = 0;
-#endif
       vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, bc);
 
       update_blockd_bmi(xd);
