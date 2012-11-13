@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//0SQ\u003d",
+        "filename": "vp9/exports_enc",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-13T00:17:23Z",
+      "side": 1,
+      "message": "do we still need the vp9 vs. vp9x? (this can be handled in a later commit, of course).",
+      "revId": "9cc7f0e7cb9c6e85461ea74e365e0b6ed627228b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
