@@ -34,6 +34,24 @@
       "revId": "fd00a27d321d4d8f1f289110cc2b03a491ede668",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//0R8\u003d",
+        "filename": "vp9/common/reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 756,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-13T00:22:21Z",
+      "side": 1,
+      "message": "No, it\u0027s not allowed in C89. I can\u0027t find a link to a free copy of the C89 spec, but this quote is from the C99 rationale:\n\nThe C89 Committee considered proposals for permitting automatic aggregate initializers to consist of a brace-enclosed series of arbitrary execution-time expressions, instead of just those usable for a translation-time static initializer. Rather than determine a set of rules which would avoid pathological cases and yet not seem too arbitrary, the C89 Committee elected to permit only static initializers. This was reconsidered and execution-time expressions are valid in C99.",
+      "parentUuid": "AAAAQ3//0Sw\u003d",
+      "revId": "fd00a27d321d4d8f1f289110cc2b03a491ede668",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
