@@ -12,7 +12,7 @@
 #include "variance.h"
 #include "vp9/common/filter.h"
 #include "vp9/common/subpelvar.h"
-
+#include "vpx/vpx_integer.h"
 
 unsigned int vp9_get_mb_ss_c(const short *src_ptr) {
   unsigned int i, sum = 0;
@@ -37,8 +37,7 @@ unsigned int vp9_variance32x32_c(const unsigned char *src_ptr,
 
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 32, 32, &var, &avg);
   *sse = var;
-  // TODO(rbultje): in extreme cases these products will rollover.
-  return (var - (((unsigned int)avg * avg) >> 10));
+  return (var - (((int64_t)avg * avg) >> 10));
 }
 #endif
 
