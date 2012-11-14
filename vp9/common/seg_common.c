@@ -12,7 +12,7 @@
 
 static const int segfeaturedata_signed[SEG_LVL_MAX] = { 1, 1, 0, 0, 0, 0 };
 static const int seg_feature_data_bits[SEG_LVL_MAX] =
-                 { QINDEX_BITS, 6, 4, 5, 6, 2 };
+                 { QINDEX_BITS, 6, 4, 5, 8, 2 };
 
 // These functions provide access to new segment level features.
 // Eventually these function may be "optimized out" but for the moment,

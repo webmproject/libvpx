@@ -324,12 +324,12 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   while (1) {
     int val;
     const uint8_t *cat6 = cat6_prob;
-    if (c == seg_eob) break;
+    if (c >= seg_eob) break;
     prob += coef_bands[c];
     if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
       break;
 SKIP_START:
-    if (c == seg_eob) break;
+    if (c >= seg_eob) break;
     if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
       ++c;
       prob = coef_probs + coef_bands[c];
@@ -414,6 +414,17 @@ SKIP_START:
   return c;
 }
 
+
+int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
+  int active = vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB);
+  int eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+
+  if (!active || eob > eob_max)
+    eob = eob_max;
+  return eob;
+}
+
+
 int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
                                MACROBLOCKD* const xd,
                                BOOL_DECODER* const bc) {
@@ -424,16 +435,11 @@ int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
   PLANE_TYPE type;
   int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int seg_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB);
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
   TX_TYPE tx_type = get_tx_type(xd, &xd->block[0]);
 
   type = PLANE_TYPE_Y_WITH_DC;
-
-  if (seg_active)
-      seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-  else
-      seg_eob = 256;
+  seg_eob = get_eob(xd, segment_id, 256);
 
   // Luma block
   {
@@ -453,10 +459,7 @@ int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
   qcoeff_ptr += 256;
   type = PLANE_TYPE_UV;
   tx_type = DCT_DCT;
-  if (seg_active)
-    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-  else
-    seg_eob = 64;
+  seg_eob = get_eob(xd, segment_id, 64);
   for (i = 16; i < 24; i += 4) {
     ENTROPY_CONTEXT* const a = A + vp9_block2above_8x8[i];
     ENTROPY_CONTEXT* const l = L + vp9_block2left_8x8[i];
@@ -488,7 +491,6 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
   PLANE_TYPE type;
   int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int seg_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB);
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
   TX_TYPE tx_type = DCT_DCT;
 
@@ -502,10 +504,7 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
     const int *const scan = vp9_default_zig_zag1d;
     type = PLANE_TYPE_Y2;
 
-    if (seg_active)
-      seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-    else
-      seg_eob = 4;
+    seg_eob = get_eob(xd, segment_id, 4);
     c = decode_coefs(pbi, xd, bc, a, l, type,
                      tx_type,
                      seg_eob, qcoeff_ptr + 24 * 16,
@@ -518,10 +517,7 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
   } else
     type = PLANE_TYPE_Y_WITH_DC;
 
-  if (seg_active)
-    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-  else
-    seg_eob = 64;
+  seg_eob = get_eob(xd, segment_id, 64);
 
   for (i = 0; i < bufthred ; i += 4) {
     ENTROPY_CONTEXT *const a = A + vp9_block2above_8x8[i];
@@ -550,7 +546,7 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
   if (bufthred == 16) {
     type = PLANE_TYPE_UV;
     tx_type = DCT_DCT;
-    seg_eob = 16;
+    seg_eob = get_eob(xd, segment_id, 16);
 
     // use 4x4 transform for U, V components in I8X8 prediction mode
     for (i = 16; i < 24; i++) {
@@ -581,11 +577,11 @@ int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
   const int *scan = vp9_default_zig_zag1d;
   unsigned short *const eobs = xd->eobs;
-  int c, seg_eob = 16;
+  int c, seg_eob;
   TX_TYPE tx_type = DCT_DCT;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB))
-    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+
+  seg_eob = get_eob(xd, segment_id, 16);
 
   if (i == 24)
     type = PLANE_TYPE_Y2;
