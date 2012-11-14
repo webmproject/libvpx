@@ -505,6 +505,9 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
 static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
   TX_TYPE tx_type = DCT_DCT;
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
+#if CONFIG_SUPERBLOCKS
+      !xd->mode_info_context->mbmi.encoded_as_sb &&
+#endif
       xd->q_index < ACTIVE_HT16) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
   }
