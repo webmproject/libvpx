@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//y9Q\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t*",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y9M\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t*",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y9I\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* dq",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y9E\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* dq",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y9A\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* dq",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y88\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* dq",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y84\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "all these functions are modifying the input[] array, which is sort of non-intuitive. Not sure what to do here. Probably nothing at this level, it\u0027s need to be fixed upstream the call tree...",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y80\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* dq",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y8w\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* dq\n\nLooks like we have a pattern here... Factorization?",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y8s\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* Q",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y8o\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* DQC",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y8k\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* dq",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y8g\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* dq",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//y8c\u003d",
+        "filename": "vp9/decoder/idct_blk.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-14T08:30:40Z",
+      "side": 1,
+      "message": "const int16_t* dc (and below too)",
+      "revId": "e60478d46d9a692e2e7b90b35355660682bfe58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
