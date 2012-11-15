@@ -155,7 +155,7 @@ generate_filter() {
                             tag Tool \
                                 Name="VCCustomBuildTool" \
                                 Description="Assembling \$(InputFileName)" \
-                                CommandLine="$(eval echo \$asm_${cfg}_cmdline)" \
+                                CommandLine="$(eval echo \$asm_${cfg}_cmdline) -o \$(IntDir)$objf" \
                                 Outputs="\$(IntDir)$objf" \
 
                             close_tag FileConfiguration
@@ -262,8 +262,10 @@ case "${vs_ver:-8}" in
        asm_use_custom_step=$uses_asm
     ;;
     8) vs_ver_id="8.00"
+       asm_use_custom_step=$uses_asm
     ;;
     9) vs_ver_id="9.00"
+       asm_use_custom_step=$uses_asm
     ;;
 esac
 
@@ -302,10 +304,11 @@ esac
 case "$target" in
     x86_64*)
         platforms[0]="x64"
+        asm_Debug_cmdline="yasm -Xvc -g cv8 -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
+        asm_Release_cmdline="yasm -Xvc -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
     ;;
     x86*)
         platforms[0]="Win32"
-        # these are only used by vs7
         asm_Debug_cmdline="yasm -Xvc -g cv8 -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
         asm_Release_cmdline="yasm -Xvc -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
     ;;
