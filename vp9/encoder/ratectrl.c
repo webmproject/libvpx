@@ -139,6 +139,9 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->mode_context_a, cm->fc.mode_context_a);
 
   vp9_copy(cc->ymode_prob, cm->fc.ymode_prob);
+#if CONFIG_SUPERBLOCKS
+  vp9_copy(cc->sb_ymode_prob, cm->fc.sb_ymode_prob);
+#endif
   vp9_copy(cc->bmode_prob, cm->fc.bmode_prob);
   vp9_copy(cc->uv_mode_prob, cm->fc.uv_mode_prob);
   vp9_copy(cc->i8x8_mode_prob, cm->fc.i8x8_mode_prob);
@@ -195,6 +198,9 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.mode_context_a, cc->mode_context_a);
 
   vp9_copy(cm->fc.ymode_prob, cc->ymode_prob);
+#if CONFIG_SUPERBLOCKS
+  vp9_copy(cm->fc.sb_ymode_prob, cc->sb_ymode_prob);
+#endif
   vp9_copy(cm->fc.bmode_prob, cc->bmode_prob);
   vp9_copy(cm->fc.i8x8_mode_prob, cc->i8x8_mode_prob);
   vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);

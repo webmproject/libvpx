@@ -48,6 +48,10 @@ static int read_ymode(vp9_reader *bc, const vp9_prob *p) {
 }
 
 #if CONFIG_SUPERBLOCKS
+static int read_sb_ymode(vp9_reader *bc, const vp9_prob *p) {
+  return treed_read(bc, vp9_sb_ymode_tree, p);
+}
+
 static int read_kf_sb_ymode(vp9_reader *bc, const vp9_prob *p) {
   return treed_read(bc, vp9_uv_mode_tree, p);
 }
@@ -563,6 +567,16 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
         cm->fc.ymode_prob[i] = (vp9_prob) vp9_read_literal(bc, 8);
       } while (++i < VP9_YMODES - 1);
     }
+
+#if CONFIG_SUPERBLOCKS
+    if (vp9_read_bit(bc)) {
+      int i = 0;
+
+      do {
+        cm->fc.sb_ymode_prob[i] = (vp9_prob) vp9_read_literal(bc, 8);
+      } while (++i < VP9_I32X32_MODES - 1);
+    }
+#endif
 
 #if CONFIG_NEW_MVREF
   // Temp defaults probabilities for ecnoding the MV ref id signal
@@ -1106,11 +1120,16 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     /* required for left and above block mv */
     mbmi->mv[0].as_int = 0;
 
-    if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE))
+    if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
       mbmi->mode = (MB_PREDICTION_MODE)
                    vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
-    else {
-      // FIXME write using SB mode tree
+#if CONFIG_SUPERBLOCKS
+    } else if (mbmi->encoded_as_sb) {
+      mbmi->mode = (MB_PREDICTION_MODE)
+                   read_sb_ymode(bc, pbi->common.fc.sb_ymode_prob);
+      pbi->common.fc.sb_ymode_counts[mbmi->mode]++;
+#endif
+    } else {
       mbmi->mode = (MB_PREDICTION_MODE)
                    read_ymode(bc, pbi->common.fc.ymode_prob);
       pbi->common.fc.ymode_counts[mbmi->mode]++;

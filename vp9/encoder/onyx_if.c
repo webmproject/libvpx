@@ -3725,6 +3725,9 @@ static void encode_frame_to_data_rate
            cpi->hybrid_coef_counts_16x16);
   vp9_adapt_coef_probs(&cpi->common);
   if (cpi->common.frame_type != KEY_FRAME) {
+#if CONFIG_SUPERBLOCKS
+    vp9_copy(cpi->common.fc.sb_ymode_counts, cpi->sb_ymode_count);
+#endif
     vp9_copy(cpi->common.fc.ymode_counts, cpi->ymode_count);
     vp9_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
     vp9_copy(cpi->common.fc.bmode_counts, cpi->bmode_count);

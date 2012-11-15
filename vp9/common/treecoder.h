@@ -70,6 +70,14 @@ void vp9_tree_probs_from_distribution(
   int Round
 );
 
+static __inline int clip_prob(int p) {
+  if (p > 255)
+    return 255;
+  else if (p < 1)
+    return 1;
+  return p;
+}
+
 vp9_prob vp9_bin_prob_from_distribution(const unsigned int counts[2]);
 
 #endif

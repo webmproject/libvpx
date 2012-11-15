@@ -46,6 +46,9 @@ void vp9_initialize_common(void);
 typedef struct frame_contexts {
   vp9_prob bmode_prob[VP9_NKF_BINTRAMODES - 1];
   vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
+#if CONFIG_SUPERBLOCKS
+  vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
+#endif
   vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
   vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
@@ -61,12 +64,18 @@ typedef struct frame_contexts {
   nmv_context pre_nmvc;
   vp9_prob pre_bmode_prob[VP9_NKF_BINTRAMODES - 1];
   vp9_prob pre_ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
+#if CONFIG_SUPERBLOCKS
+  vp9_prob pre_sb_ymode_prob[VP9_I32X32_MODES - 1];
+#endif
   vp9_prob pre_uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
   vp9_prob pre_i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob pre_sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob pre_mbsplit_prob[VP9_NUMMBSPLITS - 1];
   unsigned int bmode_counts[VP9_NKF_BINTRAMODES];
   unsigned int ymode_counts[VP9_YMODES];   /* interframe intra mode probs */
+#if CONFIG_SUPERBLOCKS
+  unsigned int sb_ymode_counts[VP9_I32X32_MODES];
+#endif
   unsigned int uv_mode_counts[VP9_YMODES][VP9_UV_MODES];
   unsigned int i8x8_mode_counts[VP9_I8X8_MODES];   /* interframe intra probs */
   unsigned int sub_mv_ref_counts[SUBMVREF_COUNT][VP9_SUBMVREFS];

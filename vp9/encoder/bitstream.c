@@ -164,6 +164,11 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
       bc, VP9_YMODES, vp9_ymode_encodings, vp9_ymode_tree,
       Pnew, cm->fc.ymode_prob, bct, (unsigned int *)cpi->ymode_count
     );
+#if CONFIG_SUPERBLOCKS
+    update_mode(bc, VP9_I32X32_MODES, vp9_sb_ymode_encodings,
+                vp9_sb_ymode_tree, Pnew, cm->fc.sb_ymode_prob, bct,
+                (unsigned int *)cpi->sb_ymode_count);
+#endif
   }
 }
 
@@ -172,11 +177,7 @@ static int get_prob(int num, int den) {
   if (den <= 0)
     return 128;
   p = (num * 255 + (den >> 1)) / den;
-  if (p > 255)
-    return 255;
-  else if (p < 1)
-    return 1;
-  return p;
+  return clip_prob(p);
 }
 
 static int get_binary_prob(int n0, int n1) {
@@ -300,6 +301,10 @@ static void kfwrite_ymode(vp9_writer *bc, int m, const vp9_prob *p) {
 }
 
 #if CONFIG_SUPERBLOCKS
+static void write_sb_ymode(vp9_writer *bc, int m, const vp9_prob *p) {
+  write_token(bc, vp9_sb_ymode_tree, p, vp9_sb_ymode_encodings + m);
+}
+
 static void sb_kfwrite_ymode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_uv_mode_tree, p, vp9_sb_kf_ymode_encodings + m);
 }
@@ -926,9 +931,12 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
           active_section = 6;
 #endif
 
-          // TODO(rbultje) write using SB tree structure
-
           if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
+#if CONFIG_SUPERBLOCKS
+            if (m->mbmi.encoded_as_sb)
+              write_sb_ymode(bc, mode, pc->fc.sb_ymode_prob);
+            else
+#endif
             write_ymode(bc, mode, pc->fc.ymode_prob);
           }
 
@@ -2144,6 +2152,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   vp9_copy(cpi->common.fc.pre_hybrid_coef_probs_8x8, cpi->common.fc.hybrid_coef_probs_8x8);
   vp9_copy(cpi->common.fc.pre_coef_probs_16x16, cpi->common.fc.coef_probs_16x16);
   vp9_copy(cpi->common.fc.pre_hybrid_coef_probs_16x16, cpi->common.fc.hybrid_coef_probs_16x16);
+#if CONFIG_SUPERBLOCKS
+  vp9_copy(cpi->common.fc.pre_sb_ymode_prob, cpi->common.fc.sb_ymode_prob);
+#endif
   vp9_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
   vp9_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
   vp9_copy(cpi->common.fc.pre_bmode_prob, cpi->common.fc.bmode_prob);

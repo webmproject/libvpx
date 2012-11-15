@@ -1353,6 +1353,9 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
   vp9_copy(pbi->common.fc.pre_hybrid_coef_probs_16x16,
            pbi->common.fc.hybrid_coef_probs_16x16);
   vp9_copy(pbi->common.fc.pre_ymode_prob, pbi->common.fc.ymode_prob);
+#if CONFIG_SUPERBLOCKS
+  vp9_copy(pbi->common.fc.pre_sb_ymode_prob, pbi->common.fc.sb_ymode_prob);
+#endif
   vp9_copy(pbi->common.fc.pre_uv_mode_prob, pbi->common.fc.uv_mode_prob);
   vp9_copy(pbi->common.fc.pre_bmode_prob, pbi->common.fc.bmode_prob);
   vp9_copy(pbi->common.fc.pre_i8x8_mode_prob, pbi->common.fc.i8x8_mode_prob);
@@ -1369,6 +1372,9 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
   vp9_zero(pbi->common.fc.coef_counts_16x16);
   vp9_zero(pbi->common.fc.hybrid_coef_counts_16x16);
   vp9_zero(pbi->common.fc.ymode_counts);
+#if CONFIG_SUPERBLOCKS
+  vp9_zero(pbi->common.fc.sb_ymode_counts);
+#endif
   vp9_zero(pbi->common.fc.uv_mode_counts);
   vp9_zero(pbi->common.fc.bmode_counts);
   vp9_zero(pbi->common.fc.i8x8_mode_counts);

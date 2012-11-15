@@ -2139,10 +2139,6 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  if (output_enabled && cm->frame_type == KEY_FRAME) {
-    sum_intra_stats(cpi, x);
-  }
-
   if (!x->skip) {
 #ifdef ENC_DEBUG
     if (enc_debug) {
@@ -2286,6 +2282,7 @@ static void encode_superblock(VP9_COMP *cpi, MACROBLOCK *x,
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     vp9_build_intra_predictors_sby_s(&x->e_mbd);
     vp9_build_intra_predictors_sbuv_s(&x->e_mbd);
+    sum_intra_stats(cpi, x);
   } else {
     int ref_fb_idx;
 
@@ -2374,10 +2371,6 @@ static void encode_superblock(VP9_COMP *cpi, MACROBLOCK *x,
         cpi->skip_false_count[mb_skip_context]++;
       }
     }
-  }
-
-  if (cm->frame_type == KEY_FRAME) {
-    sum_intra_stats(cpi, x);
   }
 
   xd->mode_info_context = mi;

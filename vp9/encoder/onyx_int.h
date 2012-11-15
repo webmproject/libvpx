@@ -110,6 +110,9 @@ typedef struct {
   vp9_prob hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 
+#if CONFIG_SUPERBLOCKS
+  vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
+#endif
   vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
   vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
   vp9_prob bmode_prob[VP9_NKF_BINTRAMODES - 1];
