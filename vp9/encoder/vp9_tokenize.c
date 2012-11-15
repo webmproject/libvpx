@@ -215,11 +215,11 @@ static void tokenize_b(VP9_COMP *cpi,
   *a = *l = (c != !type); /* 0 <-> all coeff data is zero */
 }
 
-int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
+int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd, int has_2nd_order) {
   int skip = 1;
   int i = 0;
 
-  if (has_y2_block) {
+  if (has_2nd_order) {
     for (i = 0; i < 16; i++)
       skip &= (xd->block[i].eob < 2);
     skip &= (!xd->block[24].eob);
@@ -239,16 +239,16 @@ int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd) {
   return skip;
 }
 
-static int mb_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
-  return (vp9_mby_is_skippable_4x4(xd, has_y2_block) &
+static int mb_is_skippable_4x4(MACROBLOCKD *xd, int has_2nd_order) {
+  return (vp9_mby_is_skippable_4x4(xd, has_2nd_order) &
           vp9_mbuv_is_skippable_4x4(xd));
 }
 
-int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block) {
+int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd, int has_2nd_order) {
   int skip = 1;
   int i = 0;
 
-  if (has_y2_block) {
+  if (has_2nd_order) {
     for (i = 0; i < 16; i += 4)
       skip &= (xd->block[i].eob < 2);
     skip &= (!xd->block[24].eob);
@@ -263,13 +263,13 @@ int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd) {
   return (!xd->block[16].eob) & (!xd->block[20].eob);
 }
 
-static int mb_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block) {
-  return (vp9_mby_is_skippable_8x8(xd, has_y2_block) &
+static int mb_is_skippable_8x8(MACROBLOCKD *xd, int has_2nd_order) {
+  return (vp9_mby_is_skippable_8x8(xd, has_2nd_order) &
           vp9_mbuv_is_skippable_8x8(xd));
 }
 
-static int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd, int has_y2_block) {
-  return (vp9_mby_is_skippable_8x8(xd, has_y2_block) &
+static int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd, int has_2nd_order) {
+  return (vp9_mby_is_skippable_8x8(xd, has_2nd_order) &
           vp9_mbuv_is_skippable_4x4(xd));
 }
 
@@ -288,7 +288,7 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
                      TOKENEXTRA **t,
                      int dry_run) {
   PLANE_TYPE plane_type;
-  int has_y2_block;
+  int has_2nd_order;
   int b;
   int tx_size = xd->mode_info_context->mbmi.txfm_size;
   int mb_skip_context = vp9_get_pred_context(&cpi->common, xd, PRED_MBSKIP);
@@ -308,10 +308,7 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
   } else
     skip_inc = 0;
 
-  has_y2_block = (tx_size != TX_16X16
-                  && xd->mode_info_context->mbmi.mode != B_PRED
-                  && xd->mode_info_context->mbmi.mode != I8X8_PRED
-                  && xd->mode_info_context->mbmi.mode != SPLITMV);
+  has_2nd_order = get_2nd_order_usage(xd);
 
   switch (tx_size) {
     case TX_16X16:
@@ -320,13 +317,16 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
     case TX_8X8:
       if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
           xd->mode_info_context->mbmi.mode == SPLITMV)
-        xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_8x8_4x4uv(xd, 0);
+        xd->mode_info_context->mbmi.mb_skip_coeff =
+            mb_is_skippable_8x8_4x4uv(xd, 0);
       else
-        xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_8x8(xd, has_y2_block);
+        xd->mode_info_context->mbmi.mb_skip_coeff =
+            mb_is_skippable_8x8(xd, has_2nd_order);
       break;
 
     default:
-      xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_4x4(xd, has_y2_block);
+      xd->mode_info_context->mbmi.mb_skip_coeff =
+          mb_is_skippable_4x4(xd, has_2nd_order);
       break;
   }
 
@@ -346,7 +346,7 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
   if (!dry_run)
     cpi->skip_false_count[mb_skip_context] += skip_inc;
 
-  if (has_y2_block) {
+  if (has_2nd_order) {
     if (tx_size == TX_8X8) {
       tokenize_b(cpi, xd, xd->block + 24, t, PLANE_TYPE_Y2,
                  A + vp9_block2above_8x8[24], L + vp9_block2left_8x8[24],
@@ -736,11 +736,9 @@ static void stuff_mb_8x8(VP9_COMP *cpi, MACROBLOCKD *xd,
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
   PLANE_TYPE plane_type;
   int b;
-  const int has_y2_block = (xd->mode_info_context->mbmi.mode != B_PRED &&
-                            xd->mode_info_context->mbmi.mode != I8X8_PRED &&
-                            xd->mode_info_context->mbmi.mode != SPLITMV);
+  int has_2nd_order = get_2nd_order_usage(xd);
 
-  if (has_y2_block) {
+  if (has_2nd_order) {
     stuff_b(cpi, xd, xd->block + 24, t, PLANE_TYPE_Y2,
             A + vp9_block2above_8x8[24], L + vp9_block2left_8x8[24],
             TX_8X8, dry_run);
@@ -792,11 +790,13 @@ static void stuff_mb_4x4(VP9_COMP *cpi, MACROBLOCKD *xd,
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
   int b;
   PLANE_TYPE plane_type;
-  const int has_y2_block = (xd->mode_info_context->mbmi.mode != B_PRED &&
-                            xd->mode_info_context->mbmi.mode != I8X8_PRED &&
-                            xd->mode_info_context->mbmi.mode != SPLITMV);
+  int has_2nd_order = (xd->mode_info_context->mbmi.mode != B_PRED &&
+                      xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+                      xd->mode_info_context->mbmi.mode != SPLITMV);
+  if (has_2nd_order && get_tx_type(xd, &xd->block[0]) != DCT_DCT)
+    has_2nd_order = 0;
 
-  if (has_y2_block) {
+  if (has_2nd_order) {
     stuff_b(cpi, xd, xd->block + 24, t, PLANE_TYPE_Y2, A + vp9_block2above[24],
             L + vp9_block2left[24], TX_4X4, dry_run);
     plane_type = PLANE_TYPE_Y_NO_DC;
@@ -819,10 +819,21 @@ static void stuff_mb_8x8_4x4uv(VP9_COMP *cpi, MACROBLOCKD *xd,
                                TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
+  PLANE_TYPE plane_type;
   int b;
 
+  int has_2nd_order = get_2nd_order_usage(xd);
+  if (has_2nd_order) {
+    stuff_b(cpi, xd, xd->block + 24, t, PLANE_TYPE_Y2,
+            A + vp9_block2above_8x8[24], L + vp9_block2left_8x8[24],
+            TX_8X8, dry_run);
+    plane_type = PLANE_TYPE_Y_NO_DC;
+  } else {
+    plane_type = PLANE_TYPE_Y_WITH_DC;
+  }
+
   for (b = 0; b < 16; b += 4) {
-    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_Y_WITH_DC,
+    stuff_b(cpi, xd, xd->block + b, t, plane_type,
             A + vp9_block2above_8x8[b], L + vp9_block2left_8x8[b],
             TX_8X8, dry_run);
     A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
@@ -859,10 +870,10 @@ void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
 }
 
 void vp9_fix_contexts(MACROBLOCKD *xd) {
-  /* Clear entropy contexts for Y2 blocks */
+  /* Clear entropy contexts for blocks */
   if ((xd->mode_info_context->mbmi.mode != B_PRED
-      && xd->mode_info_context->mbmi.mode != I8X8_PRED
-      && xd->mode_info_context->mbmi.mode != SPLITMV)
+       && xd->mode_info_context->mbmi.mode != I8X8_PRED
+       && xd->mode_info_context->mbmi.mode != SPLITMV)
       || xd->mode_info_context->mbmi.txfm_size == TX_16X16
       ) {
     vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));

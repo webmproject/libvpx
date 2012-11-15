@@ -382,8 +382,8 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
   // TODO(debargha): Explore different ways of combining predictors
   //                 or designing the tables below
   static const int scale_bits = 8;
-  static const int scale_max = 1 << scale_bits;
-  static const int scale_round = (1 << scale_bits) - 1;
+  static const int scale_max = 256;     // 1 << scale_bits;
+  static const int scale_round = 127;   // (1 << (scale_bits - 1));
   // This table is a function A + B*exp(-kx), where x is hor. index
   static const int weights1d[32] = {
     128, 122, 116, 111, 107, 103,  99,  96,

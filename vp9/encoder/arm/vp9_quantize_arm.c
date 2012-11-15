@@ -23,8 +23,7 @@
  * the regular quantize_b function pointer */
 void vp8_quantize_mby_neon(MACROBLOCK *x) {
   int i;
-  int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-                       && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+  int has_2nd_order = get_2nd_order_usage(xd);
 
   for (i = 0; i < 16; i += 2)
     x->quantize_b_pair(&x->block[i], &x->block[i + 1],
@@ -36,8 +35,7 @@ void vp8_quantize_mby_neon(MACROBLOCK *x) {
 
 void vp8_quantize_mb_neon(MACROBLOCK *x) {
   int i;
-  int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-                       && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+  int has_2nd_order = get_2nd_order_usage(xd);
 
   for (i = 0; i < 24; i += 2)
     x->quantize_b_pair(&x->block[i], &x->block[i + 1],

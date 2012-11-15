@@ -128,24 +128,36 @@ static void build_dcblock_4x4(MACROBLOCK *x) {
 
   for (i = 0; i < 16; i++) {
     src_diff_ptr[i] = x->coeff[i * 16];
+    x->coeff[i * 16] = 0;
   }
 }
 
 void vp9_transform_mby_4x4(MACROBLOCK *x) {
   int i;
+  MACROBLOCKD *xd = &x->e_mbd;
+  int has_2nd_order = get_2nd_order_usage(xd);
 
-  for (i = 0; i < 16; i += 2) {
-    x->vp9_short_fdct8x4(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 32);
+  for (i = 0; i < 16; i++) {
+    BLOCK *b = &x->block[i];
+    TX_TYPE tx_type = get_tx_type_4x4(xd, &xd->block[i]);
+    if (tx_type != DCT_DCT) {
+      assert(has_2nd_order == 0);
+      vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 4);
+    } else {
+      x->vp9_short_fdct4x4(&x->block[i].src_diff[0],
+                           &x->block[i].coeff[0], 32);
+    }
   }
 
-  if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
+  if (has_2nd_order) {
     // build dc block from 16 y dc values
     build_dcblock_4x4(x);
 
     // do 2nd order transform on the dc block
     x->short_walsh4x4(&x->block[24].src_diff[0],
                       &x->block[24].coeff[0], 8);
+  } else {
+    vpx_memset(x->block[24].coeff, 0, 16 * sizeof(x->block[24].coeff[0]));
   }
 }
 
@@ -174,27 +186,50 @@ static void build_dcblock_8x8(MACROBLOCK *x) {
   src_diff_ptr[1] = x->coeff[4 * 16];
   src_diff_ptr[4] = x->coeff[8 * 16];
   src_diff_ptr[8] = x->coeff[12 * 16];
+  x->coeff[0 * 16] = 0;
+  x->coeff[4 * 16] = 0;
+  x->coeff[8 * 16] = 0;
+  x->coeff[12 * 16] = 0;
 }
 
 void vp9_transform_mby_8x8(MACROBLOCK *x) {
   int i;
+  MACROBLOCKD *xd = &x->e_mbd;
+  TX_TYPE tx_type;
+  int has_2nd_order = get_2nd_order_usage(xd);
 
   for (i = 0; i < 9; i += 8) {
-    x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 32);
+    BLOCK *b = &x->block[i];
+    tx_type = get_tx_type_8x8(xd, &xd->block[i]);
+    if (tx_type != DCT_DCT) {
+      assert(has_2nd_order == 0);
+      vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 8);
+    } else {
+      x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
+                           &x->block[i].coeff[0], 32);
+    }
   }
   for (i = 2; i < 11; i += 8) {
-    x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
-                         &x->block[i + 2].coeff[0], 32);
+    BLOCK *b = &x->block[i];
+    tx_type = get_tx_type_8x8(xd, &xd->block[i]);
+    if (tx_type != DCT_DCT) {
+      assert(has_2nd_order == 0);
+      vp9_fht_c(b->src_diff, 32, (b + 2)->coeff, tx_type, 8);
+    } else {
+      x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
+                           &x->block[i + 2].coeff[0], 32);
+    }
   }
 
-  if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
+  if (has_2nd_order) {
     // build dc block from 2x2 y dc values
     build_dcblock_8x8(x);
 
     // do 2nd order transform on the dc block
     x->short_fhaar2x2(&x->block[24].src_diff[0],
                       &x->block[24].coeff[0], 8);
+  } else {
+    vpx_memset(x->block[24].coeff, 0, 16 * sizeof(x->block[24].coeff[0]));
   }
 }
 
@@ -213,9 +248,16 @@ void vp9_transform_mb_8x8(MACROBLOCK *x) {
 }
 
 void vp9_transform_mby_16x16(MACROBLOCK *x) {
+  MACROBLOCKD *xd = &x->e_mbd;
+  BLOCK *b = &x->block[0];
+  TX_TYPE tx_type = get_tx_type_16x16(xd, &xd->block[0]);
   vp9_clear_system_state();
-  x->vp9_short_fdct16x16(&x->block[0].src_diff[0],
-                         &x->block[0].coeff[0], 32);
+  if (tx_type != DCT_DCT) {
+    vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 16);
+  } else {
+    x->vp9_short_fdct16x16(&x->block[0].src_diff[0],
+                           &x->block[0].coeff[0], 32);
+  }
 }
 
 void vp9_transform_mb_16x16(MACROBLOCK *x) {
@@ -299,7 +341,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       // TODO: this isn't called (for intra4x4 modes), but will be left in
       // since it could be used later
       {
-        TX_TYPE tx_type = get_tx_type(&mb->e_mbd, d);
+        TX_TYPE tx_type = get_tx_type_4x4(&mb->e_mbd, d);
         if (tx_type != DCT_DCT) {
           switch (tx_type) {
             case ADST_DCT:
@@ -579,7 +621,8 @@ void vp9_optimize_mby_4x4(MACROBLOCK *x) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  has_2nd_order = (mode != B_PRED && mode != I8X8_PRED && mode != SPLITMV);
+  has_2nd_order = get_2nd_order_usage(&x->e_mbd);
+
   type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
 
   for (b = 0; b < 16; b++) {
@@ -628,7 +671,7 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
-  int has_2nd_order = x->e_mbd.mode_info_context->mbmi.mode != SPLITMV;
+  int has_2nd_order = get_2nd_order_usage(&x->e_mbd);
 
   if (!x->e_mbd.above_context || !x->e_mbd.left_context)
     return;

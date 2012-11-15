@@ -14,10 +14,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 
-#ifdef DEC_DEBUG
-extern int dec_debug;
-#endif
-
 static void add_residual(const int16_t *diff, const uint8_t *pred, int pitch,
                          uint8_t *dest, int stride, int width, int height) {
   int r, c;
@@ -201,16 +197,6 @@ void vp9_dequantize_b_2x2_c(BLOCKD *d) {
   for (i = 0; i < 16; i++) {
     DQ[i] = (int16_t)((Q[i] * DQC[i]));
   }
-#ifdef DEC_DEBUG
-  if (dec_debug) {
-    int j;
-    printf("Dequantize 2x2\n");
-    for (j = 0; j < 16; j++) printf("%d ", Q[j]);
-    printf("\n");
-    for (j = 0; j < 16; j++) printf("%d ", DQ[j]);
-    printf("\n");
-  }
-#endif
 }
 
 void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
@@ -219,17 +205,6 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
   int16_t output[64];
   int16_t *diff_ptr = output;
   int i;
-
-#ifdef DEC_DEBUG
-  if (dec_debug) {
-    int j;
-    printf("Input 8x8\n");
-    for (j = 0; j < 64; j++) {
-      printf("%d ", input[j]);
-      if (j % 8 == 7) printf("\n");
-    }
-  }
-#endif
 
   /* If dc is 1, then input[0] is the reconstructed value, do not need
    * dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
@@ -282,47 +257,13 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
     for (i = 1; i < 64; i++) {
       input[i] = input[i] * dq[1];
     }
-#ifdef DEC_DEBUG
-  if (dec_debug) {
-    int j;
-    printf("Input DQ 8x8\n");
-    for (j = 0; j < 64; j++) {
-      printf("%d ", input[j]);
-      if (j % 8 == 7) printf("\n");
-    }
-  }
-#endif
-
     // the idct halves ( >> 1) the pitch
     vp9_short_idct8x8_c(input, output, 16);
-#ifdef DEC_DEBUG
-  if (dec_debug) {
-    int j;
-    printf("Output 8x8\n");
-    for (j = 0; j < 64; j++) {
-      printf("%d ", output[j]);
-      if (j % 8 == 7) printf("\n");
-    }
-  }
-#endif
 
     vpx_memset(input, 0, 128);
 
     add_residual(diff_ptr, pred, pitch, dest, stride, 8, 8);
 
-#ifdef DEC_DEBUG
-  if (dec_debug) {
-    int k, j;
-    printf("Final 8x8\n");
-    for (j = 0; j < 8; j++) {
-      for (k = 0; k < 8; k++) {
-        printf("%d ", origdest[k]);
-      }
-      printf("\n");
-      origdest += stride;
-    }
-  }
-#endif
   }
 }
 

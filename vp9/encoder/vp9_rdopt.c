@@ -432,6 +432,25 @@ int vp9_block_error_c(short *coeff, short *dqcoeff, int block_size) {
   return error;
 }
 
+int vp9_mbblock_error_8x8_c(MACROBLOCK *mb, int dc) {
+  BLOCK  *be;
+  BLOCKD *bd;
+  int i, j;
+  int berror, error = 0;
+
+  for (i = 0; i < 16; i+=4) {
+    be = &mb->block[i];
+    bd = &mb->e_mbd.block[i];
+    berror = 0;
+    for (j = dc; j < 64; j++) {
+      int this_diff = be->coeff[j] - bd->dqcoeff[j];
+      berror += this_diff * this_diff;
+    }
+    error += berror;
+  }
+  return error;
+}
+
 int vp9_mbblock_error_c(MACROBLOCK *mb, int dc) {
   BLOCK  *be;
   BLOCKD *bd;
@@ -441,17 +460,13 @@ int vp9_mbblock_error_c(MACROBLOCK *mb, int dc) {
   for (i = 0; i < 16; i++) {
     be = &mb->block[i];
     bd = &mb->e_mbd.block[i];
-
     berror = 0;
-
     for (j = dc; j < 16; j++) {
       int this_diff = be->coeff[j] - bd->dqcoeff[j];
       berror += this_diff * this_diff;
     }
-
     error += berror;
   }
-
   return error;
 }
 
@@ -645,7 +660,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
   return cost;
 }
 
-static int rdcost_mby_4x4(MACROBLOCK *mb, int backup) {
+static int rdcost_mby_4x4(MACROBLOCK *mb, int has_2nd_order, int backup) {
   int cost = 0;
   int b;
   MACROBLOCKD *xd = &mb->e_mbd;
@@ -665,13 +680,16 @@ static int rdcost_mby_4x4(MACROBLOCK *mb, int backup) {
   }
 
   for (b = 0; b < 16; b++)
-    cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_Y_NO_DC,
+    cost += cost_coeffs(mb, xd->block + b,
+                        (has_2nd_order ?
+                         PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC),
                         ta + vp9_block2above[b], tl + vp9_block2left[b],
                         TX_4X4);
 
-  cost += cost_coeffs(mb, xd->block + 24, PLANE_TYPE_Y2,
-                      ta + vp9_block2above[24], tl + vp9_block2left[24],
-                      TX_4X4);
+  if (has_2nd_order)
+    cost += cost_coeffs(mb, xd->block + 24, PLANE_TYPE_Y2,
+                        ta + vp9_block2above[24], tl + vp9_block2left[24],
+                        TX_4X4);
 
   return cost;
 }
@@ -686,38 +704,24 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
   BLOCKD *const x_y2  = xd->block + 24;
   short *Y2DCPtr = mb_y2->src_diff;
   BLOCK *beptr;
-  int d;
+  int d, i, has_2nd_order;
 
+  xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+  has_2nd_order = get_2nd_order_usage(xd);
   // Fdct and building the 2nd order block
-  for (beptr = mb->block; beptr < mb->block + 16; beptr += 2) {
-    mb->vp9_short_fdct8x4(beptr->src_diff, beptr->coeff, 32);
-    *Y2DCPtr++ = beptr->coeff[0];
-    *Y2DCPtr++ = beptr->coeff[16];
-  }
-
-  // 2nd order fdct
-  mb->short_walsh4x4(mb_y2->src_diff, mb_y2->coeff, 8);
-
-  // Quantization
-  for (b = 0; b < 16; b++) {
-    mb->quantize_b_4x4(&mb->block[b], &xd->block[b]);
-  }
-
-  // DC predication and Quantization of 2nd Order block
-  mb->quantize_b_4x4(mb_y2, x_y2);
-
-  // Distortion
-  d = vp9_mbblock_error(mb, 1);
-
-  d += vp9_block_error(mb_y2->coeff, x_y2->dqcoeff, 16);
+  vp9_transform_mby_4x4(mb);
+  vp9_quantize_mby_4x4(mb);
+  d = vp9_mbblock_error(mb, has_2nd_order);
+  if (has_2nd_order)
+    d += vp9_block_error(mb_y2->coeff, x_y2->dqcoeff, 16);
 
   *Distortion = (d >> 2);
   // rate
-  *Rate = rdcost_mby_4x4(mb, backup);
-  *skippable = vp9_mby_is_skippable_4x4(&mb->e_mbd, 1);
+  *Rate = rdcost_mby_4x4(mb, has_2nd_order, backup);
+  *skippable = vp9_mby_is_skippable_4x4(&mb->e_mbd, has_2nd_order);
 }
 
-static int rdcost_mby_8x8(MACROBLOCK *mb, int backup) {
+static int rdcost_mby_8x8(MACROBLOCK *mb, int has_2nd_order, int backup) {
   int cost = 0;
   int b;
   MACROBLOCKD *xd = &mb->e_mbd;
@@ -737,12 +741,15 @@ static int rdcost_mby_8x8(MACROBLOCK *mb, int backup) {
   }
 
   for (b = 0; b < 16; b += 4)
-    cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_Y_NO_DC,
+    cost += cost_coeffs(mb, xd->block + b,
+                        (has_2nd_order ?
+                         PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC),
                         ta + vp9_block2above_8x8[b], tl + vp9_block2left_8x8[b],
                         TX_8X8);
 
-  cost += cost_coeffs_2x2(mb, xd->block + 24, PLANE_TYPE_Y2,
-                          ta + vp9_block2above[24], tl + vp9_block2left[24]);
+  if (has_2nd_order)
+    cost += cost_coeffs_2x2(mb, xd->block + 24, PLANE_TYPE_Y2,
+                            ta + vp9_block2above[24], tl + vp9_block2left[24]);
   return cost;
 }
 
@@ -753,28 +760,21 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
   MACROBLOCKD *const xd = &mb->e_mbd;
   BLOCK   *const mb_y2 = mb->block + 24;
   BLOCKD *const x_y2  = xd->block + 24;
-  int d;
+  int d, has_2nd_order;
+
+  xd->mode_info_context->mbmi.txfm_size = TX_8X8;
 
   vp9_transform_mby_8x8(mb);
   vp9_quantize_mby_8x8(mb);
-
-  /* remove 1st order dc to properly combine 1st/2nd order distortion */
-  mb->coeff[0] = 0;
-  mb->coeff[64] = 0;
-  mb->coeff[128] = 0;
-  mb->coeff[192] = 0;
-  xd->dqcoeff[0] = 0;
-  xd->dqcoeff[64] = 0;
-  xd->dqcoeff[128] = 0;
-  xd->dqcoeff[192] = 0;
-
-  d = vp9_mbblock_error(mb, 0);
-  d += vp9_block_error(mb_y2->coeff, x_y2->dqcoeff, 16);
+  has_2nd_order = get_2nd_order_usage(xd);
+  d = vp9_mbblock_error_8x8_c(mb, has_2nd_order);
+  if (has_2nd_order)
+    d += vp9_block_error(mb_y2->coeff, x_y2->dqcoeff, 16);
 
   *Distortion = (d >> 2);
   // rate
-  *Rate = rdcost_mby_8x8(mb, backup);
-  *skippable = vp9_mby_is_skippable_8x8(&mb->e_mbd, 1);
+  *Rate = rdcost_mby_8x8(mb, has_2nd_order, backup);
+  *skippable = vp9_mby_is_skippable_8x8(&mb->e_mbd, has_2nd_order);
 }
 
 static int rdcost_mby_16x16(MACROBLOCK *mb, int backup) {
@@ -806,12 +806,8 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   BLOCK  *be = &mb->block[0];
   TX_TYPE tx_type;
 
-  tx_type = get_tx_type_16x16(xd, b);
-  if (tx_type != DCT_DCT) {
-    vp9_fht(be->src_diff, 32, be->coeff, tx_type, 16);
-  } else
-    vp9_transform_mby_16x16(mb);
-
+  xd->mode_info_context->mbmi.txfm_size = TX_16X16;
+  vp9_transform_mby_16x16(mb);
   vp9_quantize_mby_16x16(mb);
   // TODO(jingning) is it possible to quickly determine whether to force
   //                trailing coefficients to be zero, instead of running trellis
@@ -1379,7 +1375,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 #endif
   MACROBLOCKD *xd = &x->e_mbd;
   int64_t best_rd = INT64_MAX;
-  int distortion, rate = 0;
+  int distortion = 0, rate = 0;
   BLOCK  *be = x->block + ib;
   BLOCKD *b = xd->block + ib;
   ENTROPY_CONTEXT ta0, ta1, besta0 = 0, besta1 = 0;
@@ -1402,7 +1398,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     for (mode2 = DC_PRED - 1; mode2 != TM_PRED + 1; mode2++) {
 #endif
       int64_t this_rd;
-      int rate_t;
+      int rate_t = 0;
 
       // FIXME rate for compound mode and second intrapred mode
       rate = mode_costs[mode];
@@ -1421,6 +1417,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
       vp9_subtract_4b_c(be, b, 16);
 
+      assert(get_2nd_order_usage(xd) == 0);
       if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
         TX_TYPE tx_type = get_tx_type_8x8(xd, b);
         if (tx_type != DCT_DCT)
@@ -1442,35 +1439,32 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         ta1 = ta0;
         tl1 = tl0;
       } else {
-        x->vp9_short_fdct8x4(be->src_diff, be->coeff, 32);
-        x->vp9_short_fdct8x4((be + 4)->src_diff, (be + 4)->coeff, 32);
-
-        x->quantize_b_4x4_pair(x->block + ib, x->block + ib + 1,
-                               xd->block + ib, xd->block + ib + 1);
-        x->quantize_b_4x4_pair(x->block + ib + 4, x->block + ib + 5,
-                               xd->block + ib + 4, xd->block + ib + 5);
-
-        distortion = vp9_block_error_c((x->block + ib)->coeff,
-                                       (xd->block + ib)->dqcoeff, 16);
-        distortion += vp9_block_error_c((x->block + ib + 1)->coeff,
-                                        (xd->block + ib + 1)->dqcoeff, 16);
-        distortion += vp9_block_error_c((x->block + ib + 4)->coeff,
-                                        (xd->block + ib + 4)->dqcoeff, 16);
-        distortion += vp9_block_error_c((x->block + ib + 5)->coeff,
-                                        (xd->block + ib + 5)->dqcoeff, 16);
-
+        static const int iblock[4] = {0, 1, 4, 5};
+        TX_TYPE tx_type;
+        int i;
         ta0 = a[vp9_block2above[ib]];
         ta1 = a[vp9_block2above[ib + 1]];
         tl0 = l[vp9_block2left[ib]];
         tl1 = l[vp9_block2left[ib + 4]];
-        rate_t = cost_coeffs(x, xd->block + ib, PLANE_TYPE_Y_WITH_DC,
-                             &ta0, &tl0, TX_4X4);
-        rate_t += cost_coeffs(x, xd->block + ib + 1, PLANE_TYPE_Y_WITH_DC,
-                              &ta1, &tl0, TX_4X4);
-        rate_t += cost_coeffs(x, xd->block + ib + 4, PLANE_TYPE_Y_WITH_DC,
-                              &ta0, &tl1, TX_4X4);
-        rate_t += cost_coeffs(x, xd->block + ib + 5, PLANE_TYPE_Y_WITH_DC,
-                              &ta1, &tl1, TX_4X4);
+        distortion = 0;
+        rate_t = 0;
+        for (i = 0; i < 4; ++i) {
+          b = &xd->block[ib + iblock[i]];
+          be = &x->block[ib + iblock[i]];
+          tx_type = get_tx_type_4x4(xd, b);
+          if (tx_type != DCT_DCT) {
+            vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
+            vp9_ht_quantize_b_4x4(be, b, tx_type);
+          } else {
+            x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
+            x->quantize_b_4x4(be, b);
+          }
+          distortion += vp9_block_error_c(be->coeff, b->dqcoeff, 16);
+          rate_t += cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC,
+                                // i&1 ? &ta1 : &ta0, i&2 ? &tl1 : &tl0,
+                                &ta0, &tl0,
+                                TX_4X4);
+        }
         rate += rate_t;
       }
 
@@ -2158,17 +2152,17 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
       } else /* 8x8 */ {
         if (otherrd) {
           for (j = 0; j < 4; j += 2) {
-            BLOCKD *bd3 = &xd->block[ib + iblock[j]];
-            BLOCK *be3 = &x->block[ib + iblock[j]];
-            x->vp9_short_fdct8x4(be3->src_diff, be3->coeff, 32);
-            x->quantize_b_4x4_pair(be3, be3 + 1, bd3, bd3 + 1);
-            thisdistortion = vp9_block_error_c(be3->coeff, bd3->dqcoeff, 32);
+            BLOCKD *bd = &xd->block[ib + iblock[j]];
+            BLOCK *be = &x->block[ib + iblock[j]];
+            x->vp9_short_fdct8x4(be->src_diff, be->coeff, 32);
+            x->quantize_b_4x4_pair(be, be + 1, bd, bd + 1);
+            thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
             otherdist += thisdistortion;
-            othercost += cost_coeffs(x, bd3, PLANE_TYPE_Y_WITH_DC,
+            othercost += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
                                      tacp + vp9_block2above[ib + iblock[j]],
                                      tlcp + vp9_block2left[ib + iblock[j]],
                                      TX_4X4);
-            othercost += cost_coeffs(x, bd3 + 1, PLANE_TYPE_Y_WITH_DC,
+            othercost += cost_coeffs(x, bd + 1, PLANE_TYPE_Y_WITH_DC,
                                      tacp + vp9_block2above[ib + iblock[j] + 1],
                                      tlcp + vp9_block2left[ib + iblock[j]],
                                      TX_4X4);
@@ -4445,8 +4439,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame;
-    assert(ref_frame == INTRA_FRAME ||
-           (cpi->ref_frame_flags & flag_list[ref_frame]));
+    if (!(ref_frame == INTRA_FRAME ||
+          (cpi->ref_frame_flags & flag_list[ref_frame]))) {
+      continue;
+    }
     mbmi->ref_frame = ref_frame;
     comp_pred = vp9_mode_order[mode_index].second_ref_frame > INTRA_FRAME;
     mbmi->mode = this_mode;
