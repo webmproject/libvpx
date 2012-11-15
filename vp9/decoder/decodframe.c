@@ -985,7 +985,7 @@ static void read_coef_probs(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
   }
 }
 
-int vp9_decode_frame(VP9D_COMP *pbi) {
+int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   BOOL_DECODER header_bc, residual_bc;
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd  = &pbi->mb;
@@ -1422,5 +1422,12 @@ int vp9_decode_frame(VP9D_COMP *pbi) {
 #endif
   // printf("Frame %d Done\n", frame_count++);
 
+  /* Find the end of the coded buffer */
+  while (residual_bc.count > CHAR_BIT
+         && residual_bc.count < VP9_BD_VALUE_SIZE) {
+    residual_bc.count -= CHAR_BIT;
+    residual_bc.user_buffer--;
+  }
+  *p_data_end = residual_bc.user_buffer;
   return 0;
 }

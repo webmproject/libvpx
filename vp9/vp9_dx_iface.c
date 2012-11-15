@@ -303,11 +303,11 @@ static void yuvconfig2image(vpx_image_t               *img,
   img->self_allocd = 0;
 }
 
-static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
-                                  const uint8_t         *data,
-                                  unsigned int            data_sz,
-                                  void                    *user_priv,
-                                  long                    deadline) {
+static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
+                                  const uint8_t        **data,
+                                  unsigned int           data_sz,
+                                  void                  *user_priv,
+                                  long                   deadline) {
   vpx_codec_err_t res = VPX_CODEC_OK;
 
   ctx->img_avail = 0;
@@ -317,7 +317,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
    * of the heap.
    */
   if (!ctx->si.h)
-    res = ctx->base.iface->dec.peek_si(data, data_sz, &ctx->si);
+    res = ctx->base.iface->dec.peek_si(*data, data_sz, &ctx->si);
 
 
   /* Perform deferred allocations, if required */
@@ -421,6 +421,33 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     }
   }
 
+  return res;
+}
+
+static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
+                                  const uint8_t         *data,
+                                  unsigned int           data_sz,
+                                  void                  *user_priv,
+                                  long                   deadline) {
+  const uint8_t *data_start = data;
+  const uint8_t *data_end = data + data_sz;
+  vpx_codec_err_t res;
+
+  do {
+    res = decode_one(ctx, &data_start, data_sz, user_priv, deadline);
+    assert(data_start >= data);
+    assert(data_start <= data_end);
+
+    /* Early exit if there was a decode error */
+    if (res)
+      break;
+
+    /* Account for suboptimal termination by the encoder. */
+    while (data_start < data_end && *data_start == 0)
+      data_start++;
+
+    data_sz = data_end - data_start;
+  } while (data_start < data_end);
   return res;
 }
 
@@ -672,7 +699,7 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
   {
     vp8_peek_si,      /* vpx_codec_peek_si_fn_t    peek_si; */
     vp8_get_si,       /* vpx_codec_get_si_fn_t     get_si; */
-    vp8_decode,       /* vpx_codec_decode_fn_t     decode; */
+    vp9_decode,       /* vpx_codec_decode_fn_t     decode; */
     vp8_get_frame,    /* vpx_codec_frame_get_fn_t  frame_get; */
   },
   {

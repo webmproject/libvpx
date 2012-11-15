@@ -315,13 +315,14 @@ static int swap_frame_buffers(VP9_COMMON *cm) {
 }
 
 int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
-                                const unsigned char *source,
+                                const unsigned char **psource,
                                 int64_t time_stamp) {
 #if HAVE_ARMV7
   int64_t dx_store_reg[8];
 #endif
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
+  const unsigned char *source = *psource;
   int retcode = 0;
 
   /*if(pbi->ready_for_new_data == 0)
@@ -380,7 +381,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 
   pbi->common.error.setjmp = 1;
 
-  retcode = vp9_decode_frame(pbi);
+  retcode = vp9_decode_frame(pbi, psource);
 
   if (retcode < 0) {
 #if HAVE_ARMV7

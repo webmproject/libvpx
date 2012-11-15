@@ -83,7 +83,7 @@ typedef struct VP9Decompressor {
 
 } VP9D_COMP;
 
-int vp9_decode_frame(VP9D_COMP *cpi);
+int vp9_decode_frame(VP9D_COMP *cpi, const unsigned char **p_data_end);
 
 
 #if CONFIG_DEBUG
