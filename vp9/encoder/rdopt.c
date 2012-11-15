@@ -1875,8 +1875,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi,
     super_block_uvrd_8x8(x, &this_rate_tokenonly,
                          &this_distortion, IF_RTCD(&cpi->rtcd), &s);
     this_rate = this_rate_tokenonly +
-                x->mbmode_cost[x->e_mbd.frame_type]
-                              [x->e_mbd.mode_info_context->mbmi.mode];
+                x->intra_uv_mode_cost[x->e_mbd.frame_type][mode];
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
     if (this_rd < best_rd) {
