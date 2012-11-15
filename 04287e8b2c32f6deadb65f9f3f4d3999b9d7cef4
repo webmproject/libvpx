@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//x4k\u003d",
+        "filename": "vp9/common/findnearmv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-11-15T11:50:09Z",
+      "side": 1,
+      "message": "Slightly confusing calling variable sse if we are using variance.",
+      "revId": "04287e8b2c32f6deadb65f9f3f4d3999b9d7cef4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
