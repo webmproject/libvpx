@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//wlA\u003d",
+        "filename": "vp9/decoder/dequantize.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-16T20:18:35Z",
+      "side": 1,
+      "message": "note: short should be replaced by int16_t at some point...\n\n(or coeff_t, typedef\u0027d to int16_t)",
+      "revId": "47d9d48fa4a7c1f7ff09e09464a4c2ea1758f706",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
