@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//xF8\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-16T04:46:39Z",
+      "side": 1,
+      "message": "static const int weights1d[32] \u003d {\n\nsame below for weights2d.",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//xFw\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-16T04:46:39Z",
+      "side": 1,
+      "message": "this looks very much derived like a 2d [a*stride+b] \u003d weights1d[a] * weights1d[b] \u003e\u003e 7; can we calculate it inline as such to prevent having the big table here? Or can we at least document what the tables values mean?",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//xFs\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-16T04:46:39Z",
+      "side": 1,
+      "message": "unnecessary brackets. same for the others below.",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//xFk\u003d",
+        "filename": "vp9/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-16T04:46:39Z",
+      "side": 1,
+      "message": "this seems a little redundant, i.e. if comp_pred_mode \u003d\u003d TRUE (that is, we\u0027re already using a second inter reference frame), then this can\u0027t ever be true, thus you don\u0027t need to code the symbol.\n\nAlternatively, we might want to reconsider how we\u0027re coding the comp_pred_mode flag itself (it\u0027s kind of hacky and prevents us from having \u003e3 ref frames in its current form), i.e. maybe we actually want to write a full second reference (without allowing it to be the same as the first reference, and preventing the redundant combinations A+B vs. B+A).",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//xFg\u003d",
+        "filename": "vp9/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1020,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-16T04:46:39Z",
+      "side": 1,
+      "message": "write_ymode seems wrong here, since that can be i8x8 or b_pred, and you can only have a 16x16 intra pred mode here.",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//xFc\u003d",
+        "filename": "vp9/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2066,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-16T04:46:39Z",
+      "side": 1,
+      "message": "newline",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//xFo\u003d",
+        "filename": "vp9/encoder/onyx_if.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2935,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-16T04:46:39Z",
+      "side": 1,
+      "message": "add a FIXME to make this RD-based later on (can be done after march).",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
