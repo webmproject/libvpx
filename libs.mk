@@ -29,6 +29,7 @@ $(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
 
 include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
 CODEC_SRCS-yes += $(addprefix vpx/,$(call enabled,API_SRCS))
+CODEC_DOC_SRCS += $(addprefix vpx/,$(call enabled,API_DOC_SRCS))
 
 include $(SRC_PATH_BARE)/vpx_mem/vpx_mem.mk
 CODEC_SRCS-yes += $(addprefix vpx_mem/,$(call enabled,MEM_SRCS))
@@ -47,7 +48,6 @@ ifeq ($(CONFIG_VP8_ENCODER),yes)
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
-  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
   CODEC_DOC_SECTIONS += vp8 vp8_encoder
 endif
 
@@ -58,7 +58,6 @@ ifeq ($(CONFIG_VP8_DECODER),yes)
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_DX_EXPORTS))
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
-  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8dx.h
   CODEC_DOC_SECTIONS += vp8 vp8_decoder
 endif
 
@@ -331,11 +330,6 @@ $(BUILD_PFX)vpx_rtcd.h: $(SRC_PATH_BARE)/$(sort $(filter %rtcd_defs.sh,$(CODEC_S
           --config=$(target)$(if $(FAT_ARCHS),,-$(TOOLCHAIN)).mk \
           $(RTCD_OPTIONS) $^ > $@
 CLEAN-OBJS += $(BUILD_PFX)vpx_rtcd.h
-
-CODEC_DOC_SRCS += vpx/vpx_codec.h \
-                  vpx/vpx_decoder.h \
-                  vpx/vpx_encoder.h \
-                  vpx/vpx_image.h
 
 ##
 ## libvpx test directives
