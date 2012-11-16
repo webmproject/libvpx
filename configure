@@ -246,6 +246,7 @@ EXPERIMENT_LIST="
     new_mvref
     implicit_segmentation
     newbintramodes
+    comp_interintra_pred
 "
 CONFIG_LIST="
     external_build

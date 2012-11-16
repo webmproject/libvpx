@@ -372,6 +372,294 @@ void vp9_build_intra_predictors_internal(unsigned char *src, int src_stride,
   }
 }
 
+#if CONFIG_COMP_INTERINTRA_PRED
+static void combine_interintra(MB_PREDICTION_MODE mode,
+                               unsigned char *interpred,
+                               int interstride,
+                               unsigned char *intrapred,
+                               int intrastride,
+                               int size) {
+  // TODO(debargha): Explore different ways of combining predictors
+  //                 or designing the tables below
+  static const int scale_bits = 8;
+  static const int scale_max = 1 << scale_bits;
+  static const int scale_round = (1 << scale_bits) - 1;
+  // This table is a function A + B*exp(-kx), where x is hor. index
+  static const int weights1d[32] = {
+    128, 122, 116, 111, 107, 103,  99,  96,
+    93, 90, 88, 85, 83, 81, 80, 78,
+    77, 76, 75, 74, 73, 72, 71, 70,
+    70, 69, 69, 68, 68, 68, 67, 67,
+  };
+  // This table is a function A + B*exp(-k.sqrt(xy)), where x, y are
+  // hor. and vert. indices
+  static const int weights2d[1024] = {
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 122, 120, 118, 116, 115, 114, 113,
+    112, 111, 111, 110, 109, 109, 108, 107,
+    107, 106, 106, 105, 105, 104, 104, 104,
+    103, 103, 102, 102, 102, 101, 101, 101,
+    128, 120, 116, 114, 112, 111, 109, 108,
+    107, 106, 105, 104, 103, 102, 102, 101,
+    100, 100,  99,  99,  98,  97,  97,  96,
+    96,  96,  95,  95,  94,  94,  93,  93,
+    128, 118, 114, 111, 109, 107, 106, 104,
+    103, 102, 101, 100,  99,  98,  97,  97,
+    96,  95,  95,  94,  93,  93,  92,  92,
+    91,  91,  90,  90,  90,  89,  89,  88,
+    128, 116, 112, 109, 107, 105, 103, 102,
+    100,  99,  98,  97,  96,  95,  94,  93,
+    93,  92,  91,  91,  90,  90,  89,  89,
+    88,  88,  87,  87,  86,  86,  85,  85,
+    128, 115, 111, 107, 105, 103, 101,  99,
+    98,  97,  96,  94,  93,  93,  92,  91,
+    90,  89,  89,  88,  88,  87,  86,  86,
+    85,  85,  84,  84,  84,  83,  83,  82,
+    128, 114, 109, 106, 103, 101,  99,  97,
+    96,  95,  93,  92,  91,  90,  90,  89,
+    88,  87,  87,  86,  85,  85,  84,  84,
+    83,  83,  82,  82,  82,  81,  81,  80,
+    128, 113, 108, 104, 102,  99,  97,  96,
+    94,  93,  92,  91,  90,  89,  88,  87,
+    86,  85,  85,  84,  84,  83,  83,  82,
+    82,  81,  81,  80,  80,  79,  79,  79,
+    128, 112, 107, 103, 100,  98,  96,  94,
+    93,  91,  90,  89,  88,  87,  86,  85,
+    85,  84,  83,  83,  82,  82,  81,  80,
+    80,  80,  79,  79,  78,  78,  78,  77,
+    128, 111, 106, 102,  99,  97,  95,  93,
+    91,  90,  89,  88,  87,  86,  85,  84,
+    83,  83,  82,  81,  81,  80,  80,  79,
+    79,  78,  78,  77,  77,  77,  76,  76,
+    128, 111, 105, 101,  98,  96,  93,  92,
+    90,  89,  88,  86,  85,  84,  84,  83,
+    82,  81,  81,  80,  80,  79,  79,  78,
+    78,  77,  77,  76,  76,  76,  75,  75,
+    128, 110, 104, 100,  97,  94,  92,  91,
+    89,  88,  86,  85,  84,  83,  83,  82,
+    81,  80,  80,  79,  79,  78,  78,  77,
+    77,  76,  76,  75,  75,  75,  74,  74,
+    128, 109, 103,  99,  96,  93,  91,  90,
+    88,  87,  85,  84,  83,  82,  82,  81,
+    80,  79,  79,  78,  78,  77,  77,  76,
+    76,  75,  75,  75,  74,  74,  74,  73,
+    128, 109, 102,  98,  95,  93,  90,  89,
+    87,  86,  84,  83,  82,  81,  81,  80,
+    79,  78,  78,  77,  77,  76,  76,  75,
+    75,  75,  74,  74,  73,  73,  73,  73,
+    128, 108, 102,  97,  94,  92,  90,  88,
+    86,  85,  84,  83,  82,  81,  80,  79,
+    78,  78,  77,  77,  76,  76,  75,  75,
+    74,  74,  73,  73,  73,  73,  72,  72,
+    128, 107, 101,  97,  93,  91,  89,  87,
+    85,  84,  83,  82,  81,  80,  79,  78,
+    78,  77,  76,  76,  75,  75,  74,  74,
+    74,  73,  73,  73,  72,  72,  72,  71,
+    128, 107, 100,  96,  93,  90,  88,  86,
+    85,  83,  82,  81,  80,  79,  78,  78,
+    77,  76,  76,  75,  75,  74,  74,  73,
+    73,  73,  72,  72,  72,  71,  71,  71,
+    128, 106, 100,  95,  92,  89,  87,  85,
+    84,  83,  81,  80,  79,  78,  78,  77,
+    76,  76,  75,  75,  74,  74,  73,  73,
+    72,  72,  72,  72,  71,  71,  71,  70,
+    128, 106,  99,  95,  91,  89,  87,  85,
+    83,  82,  81,  80,  79,  78,  77,  76,
+    76,  75,  75,  74,  74,  73,  73,  72,
+    72,  72,  71,  71,  71,  71,  70,  70,
+    128, 105,  99,  94,  91,  88,  86,  84,
+    83,  81,  80,  79,  78,  77,  77,  76,
+    75,  75,  74,  74,  73,  73,  72,  72,
+    72,  71,  71,  71,  70,  70,  70,  70,
+    128, 105,  98,  93,  90,  88,  85,  84,
+    82,  81,  80,  79,  78,  77,  76,  75,
+    75,  74,  74,  73,  73,  72,  72,  71,
+    71,  71,  71,  70,  70,  70,  70,  69,
+    128, 104,  97,  93,  90,  87,  85,  83,
+    82,  80,  79,  78,  77,  76,  76,  75,
+    74,  74,  73,  73,  72,  72,  71,  71,
+    71,  70,  70,  70,  70,  69,  69,  69,
+    128, 104,  97,  92,  89,  86,  84,  83,
+    81,  80,  79,  78,  77,  76,  75,  74,
+    74,  73,  73,  72,  72,  71,  71,  71,
+    70,  70,  70,  70,  69,  69,  69,  69,
+    128, 104,  96,  92,  89,  86,  84,  82,
+    80,  79,  78,  77,  76,  75,  75,  74,
+    73,  73,  72,  72,  71,  71,  71,  70,
+    70,  70,  70,  69,  69,  69,  69,  68,
+    128, 103,  96,  91,  88,  85,  83,  82,
+    80,  79,  78,  77,  76,  75,  74,  74,
+    73,  72,  72,  72,  71,  71,  70,  70,
+    70,  70,  69,  69,  69,  69,  68,  68,
+    128, 103,  96,  91,  88,  85,  83,  81,
+    80,  78,  77,  76,  75,  75,  74,  73,
+    73,  72,  72,  71,  71,  70,  70,  70,
+    70,  69,  69,  69,  69,  68,  68,  68,
+    128, 102,  95,  90,  87,  84,  82,  81,
+    79,  78,  77,  76,  75,  74,  73,  73,
+    72,  72,  71,  71,  71,  70,  70,  70,
+    69,  69,  69,  69,  68,  68,  68,  68,
+    128, 102,  95,  90,  87,  84,  82,  80,
+    79,  77,  76,  75,  75,  74,  73,  73,
+    72,  72,  71,  71,  70,  70,  70,  69,
+    69,  69,  69,  68,  68,  68,  68,  68,
+    128, 102,  94,  90,  86,  84,  82,  80,
+    78,  77,  76,  75,  74,  73,  73,  72,
+    72,  71,  71,  70,  70,  70,  69,  69,
+    69,  69,  68,  68,  68,  68,  68,  67,
+    128, 101,  94,  89,  86,  83,  81,  79,
+    78,  77,  76,  75,  74,  73,  73,  72,
+    71,  71,  71,  70,  70,  69,  69,  69,
+    69,  68,  68,  68,  68,  68,  67,  67,
+    128, 101,  93,  89,  85,  83,  81,  79,
+    78,  76,  75,  74,  74,  73,  72,  72,
+    71,  71,  70,  70,  70,  69,  69,  69,
+    68,  68,  68,  68,  68,  67,  67,  67,
+    128, 101,  93,  88,  85,  82,  80,  79,
+    77,  76,  75,  74,  73,  73,  72,  71,
+    71,  70,  70,  70,  69,  69,  69,  68,
+    68,  68,  68,  68,  67,  67,  67,  67,
+  };
+  int size_scale = (size == 32 ? 1 :
+                    size == 16 ? 2 :
+                    size == 8  ? 4 : 8);
+  int i, j;
+  switch (mode) {
+    case V_PRED:
+      for (i = 0; i < size; ++i) {
+        for (j = 0; j < size; ++j) {
+          int k = i * interstride + j;
+          int scale = weights1d[i * size_scale];
+          interpred[k] =
+              ((scale_max - scale) * interpred[k] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+              >> scale_bits;
+        }
+      }
+      break;
+
+    case H_PRED:
+      for (i = 0; i < size; ++i) {
+        for (j = 0; j < size; ++j) {
+          int k = i * interstride + j;
+          int scale = weights1d[j * size_scale];
+          interpred[k] =
+              ((scale_max - scale) * interpred[k] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+              >> scale_bits;
+        }
+      }
+      break;
+
+    case D63_PRED:
+    case D117_PRED:
+      for (i = 0; i < size; ++i) {
+        for (j = 0; j < size; ++j) {
+          int k = i * interstride + j;
+          int scale = (weights2d[i * size_scale * 32 + j * size_scale] +
+                       weights1d[i * size_scale]) >> 1;
+          interpred[k] =
+              ((scale_max - scale) * interpred[k] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+              >> scale_bits;
+        }
+      }
+      break;
+
+    case D27_PRED:
+    case D153_PRED:
+      for (i = 0; i < size; ++i) {
+        for (j = 0; j < size; ++j) {
+          int k = i * interstride + j;
+          int scale = (weights2d[i * size_scale * 32 + j * size_scale] +
+                       weights1d[j * size_scale]) >> 1;
+          interpred[k] =
+              ((scale_max - scale) * interpred[k] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+              >> scale_bits;
+        }
+      }
+      break;
+
+    case D135_PRED:
+      for (i = 0; i < size; ++i) {
+        for (j = 0; j < size; ++j) {
+          int k = i * interstride + j;
+          int scale = weights2d[i * size_scale * 32 + j * size_scale];
+          interpred[k] =
+              ((scale_max - scale) * interpred[k] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+              >> scale_bits;
+        }
+      }
+      break;
+
+    case D45_PRED:
+    case DC_PRED:
+    case TM_PRED:
+    default:
+      // simple average
+      for (i = 0; i < size; ++i) {
+        for (j = 0; j < size; ++j) {
+          int k = i * interstride + j;
+          interpred[k] = (interpred[k] + intrapred[i * intrastride + j]) >> 1;
+        }
+      }
+      break;
+  }
+}
+
+void vp9_build_interintra_16x16_predictors_mb(MACROBLOCKD *xd,
+                                              unsigned char *ypred,
+                                              unsigned char *upred,
+                                              unsigned char *vpred,
+                                              int ystride, int uvstride) {
+  vp9_build_interintra_16x16_predictors_mby(xd, ypred, ystride);
+  vp9_build_interintra_16x16_predictors_mbuv(xd, upred, vpred, uvstride);
+}
+
+void vp9_build_interintra_16x16_predictors_mby(MACROBLOCKD *xd,
+                                               unsigned char *ypred,
+                                               int ystride) {
+  static const int scale_bits = 6;
+  unsigned char intrapredictor[256];
+  int i, j;
+  vp9_build_intra_predictors_internal(
+      xd->dst.y_buffer, xd->dst.y_stride,
+      intrapredictor, 16,
+      xd->mode_info_context->mbmi.interintra_mode, 16,
+      xd->up_available, xd->left_available);
+  combine_interintra(xd->mode_info_context->mbmi.interintra_mode,
+                     ypred, ystride, intrapredictor, 16, 16);
+}
+
+void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
+                                                unsigned char *upred,
+                                                unsigned char *vpred,
+                                                int uvstride) {
+  int i, j;
+  unsigned char uintrapredictor[64];
+  unsigned char vintrapredictor[64];
+  vp9_build_intra_predictors_internal(
+      xd->dst.u_buffer, xd->dst.uv_stride,
+      uintrapredictor, 8,
+      xd->mode_info_context->mbmi.interintra_uv_mode, 8,
+      xd->up_available, xd->left_available);
+  vp9_build_intra_predictors_internal(
+      xd->dst.v_buffer, xd->dst.uv_stride,
+      vintrapredictor, 8,
+      xd->mode_info_context->mbmi.interintra_uv_mode, 8,
+      xd->up_available, xd->left_available);
+  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
+                     upred, uvstride, uintrapredictor, 8, 8);
+  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
+                     vpred, uvstride, vintrapredictor, 8, 8);
+}
+#endif
+
 void vp9_build_intra_predictors_mby(MACROBLOCKD *xd) {
   vp9_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
                                       xd->predictor, 16,
@@ -460,11 +748,11 @@ void vp9_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
   int i;
 
   vp9_build_intra_predictors_mbuv_internal(
-    xd, predictor[0][0], predictor[1][0], 8,
-    xd->mode_info_context->mbmi.uv_mode, 8);
+      xd, predictor[0][0], predictor[1][0], 8,
+      xd->mode_info_context->mbmi.uv_mode, 8);
   vp9_build_intra_predictors_mbuv_internal(
-    xd, predictor[0][1], predictor[1][1], 8,
-    xd->mode_info_context->mbmi.second_uv_mode, 8);
+      xd, predictor[0][1], predictor[1][1], 8,
+      xd->mode_info_context->mbmi.second_uv_mode, 8);
   for (i = 0; i < 64; i++) {
     xd->predictor[256 + i] = (predictor[0][0][i] + predictor[0][1][i] + 1) >> 1;
     xd->predictor[256 + 64 + i] = (predictor[1][0][i] +
@@ -526,6 +814,6 @@ void vp9_comp_intra_uv4x4_predict(BLOCKD *xd,
 #endif
 
 /* TODO: try different ways of use Y-UV mode correlation
- Current code assumes that a uv 4x4 block use same mode
- as corresponding Y 8x8 area
- */
+   Current code assumes that a uv 4x4 block use same mode
+   as corresponding Y 8x8 area
+   */

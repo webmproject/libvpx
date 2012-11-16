@@ -14,6 +14,7 @@
 #include "subpixel.h"
 #include "blockd.h"
 #include "reconinter.h"
+#include "vp9/common/reconintra.h"
 #if CONFIG_RUNTIME_CPU_DETECT
 #include "onyxc_int.h"
 #endif
@@ -511,7 +512,7 @@ void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd) {
       blockd[voffset].bmi.as_mv.first.as_mv.col =
         blockd[uoffset].bmi.as_mv.first.as_mv.col;
 
-      if (xd->mode_info_context->mbmi.second_ref_frame) {
+      if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
         temp = blockd[yoffset  ].bmi.as_mv.second.as_mv.row
                + blockd[yoffset + 1].bmi.as_mv.second.as_mv.row
                + blockd[yoffset + 4].bmi.as_mv.second.as_mv.row
@@ -559,7 +560,7 @@ void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd) {
       vp9_build_inter_predictors_b(d1, 8, xd->subpixel_predict);
     }
 
-    if (xd->mode_info_context->mbmi.second_ref_frame) {
+    if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
       vp9_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg);
       vp9_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg);
     }
@@ -777,7 +778,7 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
       dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
       dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
       dst_ystride, dst_uvstride);
-    if (x->mode_info_context->mbmi.second_ref_frame) {
+    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
       x->second_pre.y_buffer = y2 + y_idx * 16 * x->pre.y_stride  + x_idx * 16;
       x->second_pre.u_buffer = u2 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
       x->second_pre.v_buffer = v2 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
@@ -799,7 +800,7 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
   x->pre.u_buffer = u1;
   x->pre.v_buffer = v1;
 
-  if (x->mode_info_context->mbmi.second_ref_frame) {
+  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
     x->second_pre.y_buffer = y2;
     x->second_pre.u_buffer = u2;
     x->second_pre.v_buffer = v2;
@@ -979,7 +980,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
       clamp_mv_to_umv_border(&blockd[ 2].bmi.as_mv.first.as_mv, xd);
       clamp_mv_to_umv_border(&blockd[ 8].bmi.as_mv.first.as_mv, xd);
       clamp_mv_to_umv_border(&blockd[10].bmi.as_mv.first.as_mv, xd);
-      if (mbmi->second_ref_frame) {
+      if (mbmi->second_ref_frame > 0) {
         clamp_mv_to_umv_border(&blockd[ 0].bmi.as_mv.second.as_mv, xd);
         clamp_mv_to_umv_border(&blockd[ 2].bmi.as_mv.second.as_mv, xd);
         clamp_mv_to_umv_border(&blockd[ 8].bmi.as_mv.second.as_mv, xd);
@@ -993,7 +994,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
     vp9_build_inter_predictors4b(xd, &blockd[ 8], 16);
     vp9_build_inter_predictors4b(xd, &blockd[10], 16);
 
-    if (mbmi->second_ref_frame) {
+    if (mbmi->second_ref_frame > 0) {
       vp9_build_2nd_inter_predictors4b(xd, &blockd[ 0], 16);
       vp9_build_2nd_inter_predictors4b(xd, &blockd[ 2], 16);
       vp9_build_2nd_inter_predictors4b(xd, &blockd[ 8], 16);
@@ -1010,7 +1011,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
       if (mbmi->need_to_clamp_mvs) {
         clamp_mv_to_umv_border(&blockd[i + 0].bmi.as_mv.first.as_mv, xd);
         clamp_mv_to_umv_border(&blockd[i + 1].bmi.as_mv.first.as_mv, xd);
-        if (mbmi->second_ref_frame) {
+        if (mbmi->second_ref_frame > 0) {
           clamp_mv_to_umv_border(&blockd[i + 0].bmi.as_mv.second.as_mv, xd);
           clamp_mv_to_umv_border(&blockd[i + 1].bmi.as_mv.second.as_mv, xd);
         }
@@ -1023,7 +1024,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
         vp9_build_inter_predictors_b(d1, 16, xd->subpixel_predict);
       }
 
-      if (mbmi->second_ref_frame) {
+      if (mbmi->second_ref_frame > 0) {
         vp9_build_2nd_inter_predictors_b(d0, 16, xd->subpixel_predict_avg);
         vp9_build_2nd_inter_predictors_b(d1, 16, xd->subpixel_predict_avg);
       }
@@ -1041,7 +1042,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
       vp9_build_inter_predictors_b(d1, 8, xd->subpixel_predict);
     }
 
-    if (mbmi->second_ref_frame) {
+    if (mbmi->second_ref_frame > 0) {
       vp9_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg);
       vp9_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg);
     }
@@ -1094,7 +1095,7 @@ void build_4x4uvmvs(MACROBLOCKD *xd) {
       blockd[voffset].bmi.as_mv.first.as_mv.col =
         blockd[uoffset].bmi.as_mv.first.as_mv.col;
 
-      if (xd->mode_info_context->mbmi.second_ref_frame) {
+      if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
         temp = xd->mode_info_context->bmi[yoffset + 0].as_mv.second.as_mv.row
                + xd->mode_info_context->bmi[yoffset + 1].as_mv.second.as_mv.row
                + xd->mode_info_context->bmi[yoffset + 4].as_mv.second.as_mv.row
@@ -1146,7 +1147,7 @@ void vp9_build_inter_predictors_mb(MACROBLOCKD *xd) {
                                            &xd->predictor[256],
                                            &xd->predictor[320], 16, 8);
 
-    if (xd->mode_info_context->mbmi.second_ref_frame) {
+    if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
       /* 256 = offset of U plane in Y+U+V buffer;
        * 320 = offset of V plane in Y+U+V buffer.
        * (256=16x16, 320=16x16+8x8). */
@@ -1154,6 +1155,13 @@ void vp9_build_inter_predictors_mb(MACROBLOCKD *xd) {
                                              &xd->predictor[256],
                                              &xd->predictor[320], 16, 8);
     }
+#if CONFIG_COMP_INTERINTRA_PRED
+    else if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+      vp9_build_interintra_16x16_predictors_mb(xd, xd->predictor,
+                                               &xd->predictor[256],
+                                               &xd->predictor[320], 16, 8);
+    }
+#endif
   } else {
     build_4x4uvmvs(xd);
     build_inter4x4_predictors_mb(xd);

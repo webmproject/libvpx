@@ -106,6 +106,11 @@ typedef struct frame_contexts {
   nmv_context_counts NMVcount;
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
+#if CONFIG_COMP_INTERINTRA_PRED
+  unsigned int interintra_counts[2];
+  vp9_prob interintra_prob;
+  vp9_prob pre_interintra_prob;
+#endif
 
   int mode_context[INTER_MODE_CONTEXTS][4];
   int mode_context_a[INTER_MODE_CONTEXTS][4];
@@ -310,6 +315,9 @@ typedef struct VP9Common {
   // 1=enabled at the frame level (all MB filtered)
   // 2=specified per MB (1=filtered, 0=non-filtered)
   vp9_prob prob_pred_filter_off;
+#endif
+#if CONFIG_COMP_INTERINTRA_PRED
+  int use_interintra;
 #endif
 
 } VP9_COMMON;

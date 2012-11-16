@@ -40,8 +40,8 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
     case PRED_COMP:
       // Context based on use of comp pred flag by neighbours
       // pred_context =
-      //   ((m - 1)->mbmi.second_ref_frame != INTRA_FRAME) +
-      //    ((m - cm->mode_info_stride)->mbmi.second_ref_frame != INTRA_FRAME);
+      //   ((m - 1)->mbmi.second_ref_frame > INTRA_FRAME) +
+      //    ((m - cm->mode_info_stride)->mbmi.second_ref_frame > INTRA_FRAME);
 
       // Context based on mode and reference frame
       // if ( m->mbmi.ref_frame == LAST_FRAME )

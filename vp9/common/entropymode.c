@@ -345,6 +345,9 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
   vpx_memcpy(x->fc.mbsplit_prob, vp9_mbsplit_probs, sizeof(vp9_mbsplit_probs));
   vpx_memcpy(x->fc.switchable_interp_prob, vp9_switchable_interp_prob,
              sizeof(vp9_switchable_interp_prob));
+#if CONFIG_COMP_INTERINTRA_PRED
+  x->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
+#endif
 }
 
 
@@ -547,6 +550,9 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   vp9_prob i8x8_mode_probs[VP9_I8X8_MODES - 1];
   vp9_prob sub_mv_ref_probs[VP9_SUBMVREFS - 1];
   vp9_prob mbsplit_probs[VP9_NUMMBSPLITS - 1];
+#if CONFIG_COMP_INTERINTRA_PRED
+  vp9_prob interintra_prob;
+#endif
 #ifdef MODE_COUNT_TESTING
   printf("static const unsigned int\nymode_counts"
          "[VP9_YMODES] = {\n");
@@ -581,6 +587,12 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
          "[VP9_NUMMBSPLITS] = {\n");
   for (t = 0; t < VP9_NUMMBSPLITS; ++t) printf("%d, ", cm->fc.mbsplit_counts[t]);
   printf("};\n");
+#if CONFIG_COMP_INTERINTRA_PRED
+  printf("static const unsigned int\ninterintra_counts"
+         "[2] = {\n");
+  for (t = 0; t < 2; ++t) printf("%d, ", cm->fc.interintra_counts[t]);
+  printf("};\n");
+#endif
 #endif
   vp9_tree_probs_from_distribution(
     VP9_YMODES, vp9_ymode_encodings, vp9_ymode_tree,
@@ -673,4 +685,21 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     else if (prob > 255) cm->fc.mbsplit_prob[t] = 255;
     else cm->fc.mbsplit_prob[t] = prob;
   }
+#if CONFIG_COMP_INTERINTRA_PRED
+  if (cm->use_interintra) {
+    int prob;
+    interintra_prob = vp9_bin_prob_from_distribution(cm->fc.interintra_counts);
+    count = cm->fc.interintra_counts[0] + cm->fc.interintra_counts[1];
+    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+    prob = ((int)cm->fc.pre_interintra_prob * (256 - factor) +
+            (int)interintra_prob * factor + 128) >> 8;
+    if (prob <= 0)
+      cm->fc.interintra_prob = 1;
+    else if (prob > 255)
+      cm->fc.interintra_prob = 255;
+    else
+      cm->fc.interintra_prob = prob;
+  }
+#endif
 }

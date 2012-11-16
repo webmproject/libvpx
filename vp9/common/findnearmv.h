@@ -104,11 +104,14 @@ static int left_block_second_mv(const MODE_INFO *cur_mb, int b) {
     --cur_mb;
 
     if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.second_ref_frame ? cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
+      return cur_mb->mbmi.second_ref_frame > 0 ?
+          cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
     b += 4;
   }
 
-  return cur_mb->mbmi.second_ref_frame ? (cur_mb->bmi + b - 1)->as_mv.second.as_int : (cur_mb->bmi + b - 1)->as_mv.first.as_int;
+  return cur_mb->mbmi.second_ref_frame > 0 ?
+      (cur_mb->bmi + b - 1)->as_mv.second.as_int :
+      (cur_mb->bmi + b - 1)->as_mv.first.as_int;
 }
 
 static int above_block_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
@@ -130,11 +133,14 @@ static int above_block_second_mv(const MODE_INFO *cur_mb, int b, int mi_stride) 
     cur_mb -= mi_stride;
 
     if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.second_ref_frame ? cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
+      return cur_mb->mbmi.second_ref_frame > 0 ?
+          cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
     b += 16;
   }
 
-  return cur_mb->mbmi.second_ref_frame ? (cur_mb->bmi + b - 4)->as_mv.second.as_int : (cur_mb->bmi + b - 4)->as_mv.first.as_int;
+  return cur_mb->mbmi.second_ref_frame > 0 ?
+      (cur_mb->bmi + b - 4)->as_mv.second.as_int :
+      (cur_mb->bmi + b - 4)->as_mv.first.as_int;
 }
 
 static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {

@@ -338,6 +338,21 @@ static int prob_diff_update_savings_search(const unsigned int *ct,
   return bestsavings;
 }
 
+static void vp9_cond_prob_update(vp9_writer *bc, vp9_prob *oldp, vp9_prob upd,
+                                 unsigned int *ct) {
+  vp9_prob newp;
+  int savings;
+  newp = get_binary_prob(ct[0], ct[1]);
+  savings = prob_update_savings(ct, *oldp, newp, upd);
+  if (savings > 0) {
+    vp9_write(bc, 1, upd);
+    vp9_write_literal(bc, newp, 8);
+    *oldp = newp;
+  } else {
+    vp9_write(bc, 0, upd);
+  }
+}
+
 static void pack_mb_tokens(vp9_writer* const bc,
                            TOKENEXTRA **tp,
                            const TOKENEXTRA *const stop) {
@@ -972,7 +987,7 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
             }
           }
 
-          if (mi->second_ref_frame &&
+          if (mi->second_ref_frame > 0 &&
               (mode == NEWMV || mode == SPLITMV)) {
 
             best_second_mv.as_int =
@@ -982,9 +997,30 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
           // does the feature use compound prediction or not
           // (if not specified at the frame/segment level)
           if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
-            vp9_write(bc, mi->second_ref_frame != INTRA_FRAME,
+            vp9_write(bc, mi->second_ref_frame > INTRA_FRAME,
                       vp9_get_pred_prob(pc, xd, PRED_COMP));
           }
+#if CONFIG_COMP_INTERINTRA_PRED
+          if (cpi->common.use_interintra &&
+              mode >= NEARESTMV && mode < SPLITMV &&
+              mi->second_ref_frame <= INTRA_FRAME) {
+            vp9_write(bc, mi->second_ref_frame == INTRA_FRAME,
+                      pc->fc.interintra_prob);
+            // if (!cpi->dummy_packing)
+            //   printf("-- %d (%d)\n", mi->second_ref_frame == INTRA_FRAME,
+            //          pc->fc.interintra_prob);
+            if (mi->second_ref_frame == INTRA_FRAME) {
+              // if (!cpi->dummy_packing)
+              //   printf("** %d %d\n", mi->interintra_mode,
+                       // mi->interintra_uv_mode);
+              write_ymode(bc, mi->interintra_mode, pc->fc.ymode_prob);
+#if SEPARATE_INTERINTRA_UV
+              write_uv_mode(bc, mi->interintra_uv_mode,
+                            pc->fc.uv_mode_prob[mi->interintra_mode]);
+#endif
+            }
+          }
+#endif
 
           {
             switch (mode) { /* new, split require MVs */
@@ -1020,7 +1056,7 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
                           (const nmv_context*) nmvc,
                           xd->allow_high_precision_mv);
 
-                if (mi->second_ref_frame) {
+                if (mi->second_ref_frame > 0) {
 #if CONFIG_NEW_MVREF
                   unsigned int best_index;
                   sec_ref_frame = mi->second_ref_frame;
@@ -1091,7 +1127,7 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
                               (const nmv_context*) nmvc,
                               xd->allow_high_precision_mv);
 
-                    if (mi->second_ref_frame) {
+                    if (mi->second_ref_frame > 0) {
                       write_nmv(bc,
                                 &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
                                 &best_second_mv,
@@ -2017,6 +2053,15 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     vp9_write_bit(&header_bc, (pc->mcomp_filter_type == SWITCHABLE));
     if (pc->mcomp_filter_type != SWITCHABLE)
       vp9_write_literal(&header_bc, (pc->mcomp_filter_type), 2);
+#if CONFIG_COMP_INTERINTRA_PRED
+    //  printf("Counts: %d %d\n", cpi->interintra_count[0],
+    //         cpi->interintra_count[1]);
+    if (!cpi->dummy_packing && pc->use_interintra)
+      pc->use_interintra = (cpi->interintra_count[1] > 0);
+    vp9_write_bit(&header_bc, pc->use_interintra);
+    if (!pc->use_interintra)
+      vp9_zero(cpi->interintra_count);
+#endif
   }
 
   vp9_write_bit(&header_bc, pc->refresh_entropy_probs);
@@ -2046,6 +2091,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   vp9_copy(cpi->common.fc.pre_mbsplit_prob, cpi->common.fc.mbsplit_prob);
   vp9_copy(cpi->common.fc.pre_i8x8_mode_prob, cpi->common.fc.i8x8_mode_prob);
   cpi->common.fc.pre_nmvc = cpi->common.fc.nmvc;
+#if CONFIG_COMP_INTERINTRA_PRED
+  cpi->common.fc.pre_interintra_prob = cpi->common.fc.interintra_prob;
+#endif
   vp9_zero(cpi->sub_mv_ref_count);
   vp9_zero(cpi->mbsplit_count);
   vp9_zero(cpi->common.fc.mv_ref_ct)
@@ -2090,6 +2138,14 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 #endif
     if (pc->mcomp_filter_type == SWITCHABLE)
       update_switchable_interp_probs(cpi, &header_bc);
+#if CONFIG_COMP_INTERINTRA_PRED
+    if (pc->use_interintra) {
+      vp9_cond_prob_update(&header_bc,
+                           &pc->fc.interintra_prob,
+                           VP9_UPD_INTERINTRA_PROB,
+                           cpi->interintra_count);
+    }
+#endif
 
     vp9_write_literal(&header_bc, pc->prob_intra_coded, 8);
     vp9_write_literal(&header_bc, pc->prob_last_coded, 8);
@@ -2112,7 +2168,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
         }
       }
     }
-
     update_mbintra_mode_probs(cpi, &header_bc);
 
     vp9_write_nmv_probs(cpi, xd->allow_high_precision_mv, &header_bc);

@@ -214,6 +214,7 @@ union b_mode_info {
 };
 
 typedef enum {
+  NONE = -1,
   INTRA_FRAME = 0,
   LAST_FRAME = 1,
   GOLDEN_FRAME = 2,
@@ -225,6 +226,9 @@ typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
 #if CONFIG_COMP_INTRA_PRED
   MB_PREDICTION_MODE second_mode, second_uv_mode;
+#endif
+#if CONFIG_COMP_INTERINTRA_PRED
+  MB_PREDICTION_MODE interintra_mode, interintra_uv_mode;
 #endif
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   TX_SIZE txfm_size;
