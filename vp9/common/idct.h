@@ -60,6 +60,11 @@ extern prototype_idct(vp9_idct_idct10_16x16);
 #endif
 extern prototype_idct(vp9_idct_idct8);
 
+#ifndef vp9_idct_idct10_8
+#define vp9_idct_idct10_8 vp9_short_idct10_8x8_c
+#endif
+extern prototype_idct(vp9_idct_idct10_8);
+
 #ifndef vp9_idct_idct8_1
 #define vp9_idct_idct8_1 vp9_short_idct8x8_1_c
 #endif
@@ -132,6 +137,7 @@ typedef struct {
   vp9_second_order_fn_t iwalsh16;
 
   vp9_idct_fn_t            idct8;
+  vp9_idct_fn_t            idct10_8;
   vp9_idct_fn_t            idct8_1;
   vp9_idct_scalar_add_fn_t idct1_scalar_add_8x8;
   vp9_idct_fn_t ihaar2;
