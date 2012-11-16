@@ -35,7 +35,8 @@
 static int get_free_fb(VP9_COMMON *cm);
 static void ref_cnt_fb(int *buf, int *idx, int new_idx);
 
-#if CONFIG_DEBUG
+#define WRITE_RECON_BUFFER 0
+#if WRITE_RECON_BUFFER == 1
 static void recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s) {
   FILE *yuv_file = fopen((char *)name, "ab");
   unsigned char *src = s->y_buffer;
@@ -65,8 +66,7 @@ static void recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s) {
   fclose(yuv_file);
 }
 #endif
-#define WRITE_RECON_BUFFER 0
-#if WRITE_RECON_BUFFER
+#if WRITE_RECON_BUFFER == 2
 void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
 
   // write the frame
@@ -413,7 +413,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
       return -1;
     }
 
-#if WRITE_RECON_BUFFER
+#if WRITE_RECON_BUFFER == 2
     if (cm->show_frame)
       write_dx_frame_to_file(cm->frame_to_show,
                              cm->current_video_frame);
@@ -429,7 +429,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
     vp8_yv12_extend_frame_borders(cm->frame_to_show);
   }
 
-#if CONFIG_DEBUG
+#if WRITE_RECON_BUFFER == 1
   if (cm->show_frame)
     recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
 #endif
