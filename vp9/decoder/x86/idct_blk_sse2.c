@@ -12,27 +12,27 @@
 #include "vp9/common/idct.h"
 #include "vp9/decoder/dequantize.h"
 
-void vp9_idct_dequant_dc_0_2x_sse2(short *q, short *dq,
+void vp9_idct_dequant_dc_0_2x_sse2(short *q, const short *dq,
                                    unsigned char *pre, unsigned char *dst,
-                                   int dst_stride, short *dc);
+                                   int dst_stride, const short *dc);
 
-void vp9_idct_dequant_dc_full_2x_sse2(short *q, short *dq,
+void vp9_idct_dequant_dc_full_2x_sse2(short *q, const short *dq,
                                       unsigned char *pre, unsigned char *dst,
-                                      int dst_stride, short *dc);
+                                      int dst_stride, const short *dc);
 
-void vp9_idct_dequant_0_2x_sse2(short *q, short *dq,
+void vp9_idct_dequant_0_2x_sse2(short *q, const short *dq,
                                 unsigned char *pre, unsigned char *dst,
                                 int dst_stride, int blk_stride);
 
-void vp9_idct_dequant_full_2x_sse2(short *q, short *dq,
+void vp9_idct_dequant_full_2x_sse2(short *q, const short *dq,
                                    unsigned char *pre, unsigned char *dst,
                                    int dst_stride, int blk_stride);
 
-void vp9_dequant_dc_idct_add_y_block_sse2(short *q, short *dq,
+void vp9_dequant_dc_idct_add_y_block_sse2(short *q, const short *dq,
                                           unsigned char *pre,
                                           unsigned char *dst,
                                           int stride, unsigned short *eobs,
-                                          short *dc) {
+                                          const short *dc) {
   int i;
 
   for (i = 0; i < 4; i++) {
@@ -56,7 +56,7 @@ void vp9_dequant_dc_idct_add_y_block_sse2(short *q, short *dq,
   }
 }
 
-void vp9_dequant_idct_add_y_block_sse2(short *q, short *dq,
+void vp9_dequant_idct_add_y_block_sse2(short *q, const short *dq,
                                        unsigned char *pre, unsigned char *dst,
                                        int stride, unsigned short *eobs) {
   int i;
@@ -79,7 +79,7 @@ void vp9_dequant_idct_add_y_block_sse2(short *q, short *dq,
   }
 }
 
-void vp9_dequant_idct_add_uv_block_sse2(short *q, short *dq,
+void vp9_dequant_idct_add_uv_block_sse2(short *q, const short *dq,
                                         unsigned char *pre,
                                         unsigned char *dstu,
                                         unsigned char *dstv,
