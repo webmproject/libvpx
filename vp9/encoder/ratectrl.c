@@ -135,9 +135,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
   vp9_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
 
-  vp9_copy(cc->mv_ref_ct, cm->fc.mv_ref_ct);
   vp9_copy(cc->mode_context, cm->fc.mode_context);
-  vp9_copy(cc->mv_ref_ct_a, cm->fc.mv_ref_ct_a);
   vp9_copy(cc->mode_context_a, cm->fc.mode_context_a);
 
   vp9_copy(cc->ymode_prob, cm->fc.ymode_prob);
@@ -193,9 +191,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cpi->mb.nmvcosts, cc->nmvcosts);
   vp9_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
 
-  vp9_copy(cm->fc.mv_ref_ct, cc->mv_ref_ct);
   vp9_copy(cm->fc.mode_context, cc->mode_context);
-  vp9_copy(cm->fc.mv_ref_ct_a, cc->mv_ref_ct_a);
   vp9_copy(cm->fc.mode_context_a, cc->mode_context_a);
 
   vp9_copy(cm->fc.ymode_prob, cc->ymode_prob);

@@ -1399,7 +1399,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->sub_mv_ref_count)
   vp9_zero(cpi->mbsplit_count)
   vp9_zero(cpi->common.fc.mv_ref_ct)
-  vp9_zero(cpi->common.fc.mv_ref_ct_a)
 #if CONFIG_SUPERBLOCKS
   vp9_zero(cpi->sb_ymode_count)
   cpi->sb_count = 0;

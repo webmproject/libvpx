@@ -14,7 +14,6 @@
 
 #include "mv.h"
 #include "blockd.h"
-#include "modecont.h"
 #include "treecoder.h"
 #include "onyxc_int.h"
 

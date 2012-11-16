@@ -123,10 +123,9 @@ typedef struct {
   vp9_prob interintra_prob;
 #endif
 
-  int mv_ref_ct[6][4][2];
-  int mode_context[6][4];
-  int mv_ref_ct_a[6][4][2];
-  int mode_context_a[6][4];
+  int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
+  int mode_context[INTER_MODE_CONTEXTS][4];
+  int mode_context_a[INTER_MODE_CONTEXTS][4];
 
 } CODING_CONTEXT;
 

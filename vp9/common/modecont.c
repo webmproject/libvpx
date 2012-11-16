@@ -11,19 +11,21 @@
 
 #include "entropy.h"
 
-const int vp9_default_mode_contexts[6][4] = {
-  {117,     1,     1,    141},
-  {234,     1,     1,    213},
-  {128,     90,    22,   145},
-  {30,      104,   61,   159},
-  {13,      169,   18,   206},
-  {15,      76,    24,   166}
+const int vp9_default_mode_contexts[INTER_MODE_CONTEXTS][4] = {
+  {223,     1,     1,    237},  // 0,0 best: Only candidate
+  {87,      166,   26,   219},  // 0,0 best: non zero candidates
+  {89,      67,    18,   125},  // 0,0 best: non zero candidates, split
+  {16,      141,   69,   226},  // strong nz candidate(s), no split
+  {35,      122,   14,   227},  // weak nz candidate(s), no split
+  {14,      122,   22,   164},  // strong nz candidate(s), split
+  {16,      70,    9,    183},  // weak nz candidate(s), split
 };
-const int vp9_default_mode_contexts_a[6][4] = {
-  {117,     1,     1,    141},
-  {234,     1,     1,    213},
-  {128,     90,    22,   145},
-  {30,      104,   61,   159},
-  {13,      169,   18,   206},
-  {15,      76,    24,   166}
+const int vp9_default_mode_contexts_a[INTER_MODE_CONTEXTS][4] = {
+  {204,     1,     1,    213},  // 0,0 best: Only candidate
+  {106,     139,   22,   203},  // 0,0 best: non zero candidates
+  {75,      52,    15,   118},  // 0,0 best: non zero candidates, split
+  {12,      148,   61,   211},  // strong nz candidate(s), no split
+  {18,      98,    17,   199},  // weak nz candidate(s), no split
+  {11,      91,    25,   148},  // strong nz candidate(s), split
+  {10,      53,    9,    145},  // weak nz candidate(s), split
 };

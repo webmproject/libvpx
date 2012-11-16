@@ -231,6 +231,7 @@ void vp9_find_mv_refs(
   MV_REFERENCE_FRAME c2_ref_frame;
   int candidate_scores[MAX_MV_REFS];
   int index = 0;
+  int split_count = 0;
   int ref_weight = 0;
   int valid_mv_ref;
   int (*mv_ref_search)[2];
@@ -271,6 +272,7 @@ void vp9_find_mv_refs(
         scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias );
         ref_weight = ref_distance_weight[i] +
                      ((c_ref_frame == ref_frame) << 4);
+        split_count += (candidate_mi->mbmi.mode == SPLITMV);
 
         addmv_and_shuffle(candidate_mvs, candidate_scores,
                           &index, c_refmv, ref_weight);
@@ -352,35 +354,39 @@ void vp9_find_mv_refs(
     index = (MAX_MV_REFS - 1);
   }
 
+  // Define inter mode coding context.
+  // 0,0 was best
   if (candidate_mvs[0].as_int == 0) {
-    // 0,0 was best
-    if (index == 0) {
-      // No reference candidates
+    // 0,0 is only candidate
+    if (index <= 1) {
       mbmi->mb_mode_context[ref_frame] = 0;
-    } else if (index == 1) {
-      // 0,0 was only candidate
+    // non zero candidates candidates available
+    } else if (split_count == 0) {
       mbmi->mb_mode_context[ref_frame] = 1;
     } else {
-      // Other candidates available
       mbmi->mb_mode_context[ref_frame] = 2;
     }
-  } else if (candidate_scores[0] >= 32) {
-    if (candidate_scores[1] >= 16) {
-      // Strong primary and strong or moderate secondary candidate
+  // Non zero best, No Split MV cases
+  } else if (split_count == 0) {
+    if (candidate_scores[0] >= 32) {
       mbmi->mb_mode_context[ref_frame] = 3;
     } else {
-      // Strong primary but weak secondary candidate
       mbmi->mb_mode_context[ref_frame] = 4;
     }
+  // Non zero best, some split mv
   } else {
-    // Weak or moderate candidates
-    mbmi->mb_mode_context[ref_frame] = 5;
+    if (candidate_scores[0] >= 32) {
+      mbmi->mb_mode_context[ref_frame] = 5;
+    } else {
+      mbmi->mb_mode_context[ref_frame] = 6;
+    }
   }
 
   // 0,0 is always a valid reference.
-  for (i = 0; i < index; ++i)
+  for (i = 0; i < index; ++i) {
     if (candidate_mvs[i].as_int == 0)
       break;
+  }
   if (i == index) {
     c_refmv.as_int = 0;
     addmv_and_shuffle(candidate_mvs, candidate_scores,

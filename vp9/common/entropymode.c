@@ -441,7 +441,6 @@ void vp9_entropy_mode_init() {
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
   vpx_memset(pc->fc.mv_ref_ct, 0, sizeof(pc->fc.mv_ref_ct));
-  vpx_memset(pc->fc.mv_ref_ct_a, 0, sizeof(pc->fc.mv_ref_ct_a));
 
   vpx_memcpy(pc->fc.mode_context,
              vp9_default_mode_contexts,
@@ -457,10 +456,7 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
                        const int context) {
   int (*mv_ref_ct)[4][2];
 
-  if (pc->refresh_alt_ref_frame)
-    mv_ref_ct = pc->fc.mv_ref_ct_a;
-  else
-    mv_ref_ct = pc->fc.mv_ref_ct;
+  mv_ref_ct = pc->fc.mv_ref_ct;
 
   if (m == ZEROMV) {
     ++mv_ref_ct[context][0][0];
@@ -485,19 +481,18 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 }
 
 #define MVREF_COUNT_SAT 20
-#define MVREF_MAX_UPDATE_FACTOR 144
+#define MVREF_MAX_UPDATE_FACTOR 128
 void vp9_update_mode_context(VP9_COMMON *pc) {
   int i, j;
   int (*mv_ref_ct)[4][2];
   int (*mode_context)[4];
 
   if (pc->refresh_alt_ref_frame) {
-    mv_ref_ct = pc->fc.mv_ref_ct_a;
     mode_context = pc->fc.mode_context_a;
   } else {
-    mv_ref_ct = pc->fc.mv_ref_ct;
     mode_context = pc->fc.mode_context;
   }
+  mv_ref_ct = pc->fc.mv_ref_ct;
 
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     for (i = 0; i < 4; i++) {
@@ -522,14 +517,14 @@ void vp9_update_mode_context(VP9_COMMON *pc) {
 void print_mode_contexts(VP9_COMMON *pc) {
   int j, i;
   printf("\n====================\n");
-  for (j = 0; j < 6; j++) {
+  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     for (i = 0; i < 4; i++) {
       printf("%4d ", pc->fc.mode_context[j][i]);
     }
     printf("\n");
   }
   printf("====================\n");
-  for (j = 0; j < 6; j++) {
+  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     for (i = 0; i < 4; i++) {
       printf("%4d ", pc->fc.mode_context_a[j][i]);
     }
