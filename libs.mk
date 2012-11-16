@@ -20,6 +20,13 @@ endif
 CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
 
+# If this is a universal (fat) binary, then all the subarchitectures have
+# already been built and our job is to stitch them together. The
+# BUILD_LIBVPX variable indicates whether we should be building
+# (compiling, linking) the library. The LIPO_LIBVPX variable indicates
+# that we're stitching.
+$(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
+
 include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
 CODEC_SRCS-yes += $(addprefix vpx/,$(call enabled,API_SRCS))
 
@@ -28,6 +35,9 @@ CODEC_SRCS-yes += $(addprefix vpx_mem/,$(call enabled,MEM_SRCS))
 
 include $(SRC_PATH_BARE)/vpx_scale/vpx_scale.mk
 CODEC_SRCS-yes += $(addprefix vpx_scale/,$(call enabled,SCALE_SRCS))
+
+include $(SRC_PATH_BARE)/vpx_ports/vpx_ports.mk
+CODEC_SRCS-yes += $(addprefix vpx_ports/,$(call enabled,PORTS_SRCS))
 
 
 ifeq ($(CONFIG_VP8_ENCODER),yes)
@@ -83,29 +93,11 @@ INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/%  $(p)/Release/%)
 INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/%  $(p)/Debug/%)
 endif
 
-# If this is a universal (fat) binary, then all the subarchitectures have
-# already been built and our job is to stitch them together. The
-# BUILD_LIBVPX variable indicates whether we should be building
-# (compiling, linking) the library. The LIPO_LIBVPX variable indicates
-# that we're stitching.
-$(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
-
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/rtcd.sh
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx/vpx_integer.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/asm_offsets.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_timer.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/mem.h
 CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
 INSTALL-SRCS-no += $(BUILD_PFX)vpx_config.c
-ifeq ($(ARCH_X86)$(ARCH_X86_64),yes)
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emms.asm
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_abi_support.asm
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_cpuid.c
-endif
-CODEC_SRCS-$(ARCH_ARM) += vpx_ports/arm_cpudetect.c
-CODEC_SRCS-$(ARCH_ARM) += vpx_ports/arm.h
 CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
