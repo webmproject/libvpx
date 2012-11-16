@@ -60,26 +60,7 @@ static const vp9_prob cat6_prob[15] = {
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
 static int get_signed(BOOL_DECODER *br, int value_to_sign) {
-  const int split = (br->range + 1) >> 1;
-  const VP9_BD_VALUE bigsplit = (VP9_BD_VALUE)split << (VP9_BD_VALUE_SIZE - 8);
-  int v;
-
-  if (br->count < 0)
-    vp9_bool_decoder_fill(br);
-
-  if (br->value < bigsplit) {
-    br->range = split;
-    v = value_to_sign;
-  } else {
-    br->range = br->range - split;
-    br->value = br->value - bigsplit;
-    v = -value_to_sign;
-  }
-  br->range += br->range;
-  br->value += br->value;
-  --br->count;
-
-  return v;
+  return decode_bool(br, 128) ? -value_to_sign : value_to_sign;
 }
 
 #define INCREMENT_COUNT(token)                     \

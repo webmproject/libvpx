@@ -364,11 +364,6 @@ static void vp9_cond_prob_update(vp9_writer *bc, vp9_prob *oldp, vp9_prob upd,
 static void pack_mb_tokens(vp9_writer* const bc,
                            TOKENEXTRA **tp,
                            const TOKENEXTRA *const stop) {
-  unsigned int split;
-  unsigned int shift;
-  int count = bc->count;
-  unsigned int range = bc->range;
-  unsigned int lowvalue = bc->lowvalue;
   TOKENEXTRA *p = *tp;
 
   while (p < stop) {
@@ -394,42 +389,8 @@ static void pack_mb_tokens(vp9_writer* const bc,
 
     do {
       const int bb = (v >> --n) & 1;
-      split = 1 + (((range - 1) * pp[i >> 1]) >> 8);
+      encode_bool(bc, bb, pp[i >> 1]);
       i = vp9_coef_tree[i + bb];
-
-      if (bb) {
-        lowvalue += split;
-        range = range - split;
-      } else {
-        range = split;
-      }
-
-      shift = vp9_norm[range];
-      range <<= shift;
-      count += shift;
-
-      if (count >= 0) {
-        int offset = shift - count;
-
-        if ((lowvalue << (offset - 1)) & 0x80000000) {
-          int x = bc->pos - 1;
-
-          while (x >= 0 && bc->buffer[x] == 0xff) {
-            bc->buffer[x] = (unsigned char)0;
-            x--;
-          }
-
-          bc->buffer[x] += 1;
-        }
-
-        bc->buffer[bc->pos++] = (lowvalue >> (24 - offset));
-        lowvalue <<= offset;
-        shift = count;
-        lowvalue &= 0xffffff;
-        count -= 8;
-      }
-
-      lowvalue <<= shift;
     } while (n);
 
 
@@ -444,87 +405,16 @@ static void pack_mb_tokens(vp9_writer* const bc,
 
         do {
           const int bb = (v >> --n) & 1;
-          split = 1 + (((range - 1) * pp[i >> 1]) >> 8);
+          encode_bool(bc, bb, pp[i >> 1]);
           i = b->tree[i + bb];
-
-          if (bb) {
-            lowvalue += split;
-            range = range - split;
-          } else {
-            range = split;
-          }
-
-          shift = vp9_norm[range];
-          range <<= shift;
-          count += shift;
-
-          if (count >= 0) {
-            int offset = shift - count;
-
-            if ((lowvalue << (offset - 1)) & 0x80000000) {
-              int x = bc->pos - 1;
-
-              while (x >= 0 && bc->buffer[x] == 0xff) {
-                bc->buffer[x] = (unsigned char)0;
-                x--;
-              }
-
-              bc->buffer[x] += 1;
-            }
-
-            bc->buffer[bc->pos++] = (lowvalue >> (24 - offset));
-            lowvalue <<= offset;
-            shift = count;
-            lowvalue &= 0xffffff;
-            count -= 8;
-          }
-
-          lowvalue <<= shift;
         } while (n);
       }
 
-
-      {
-
-        split = (range + 1) >> 1;
-
-        if (e & 1) {
-          lowvalue += split;
-          range = range - split;
-        } else {
-          range = split;
-        }
-
-        range <<= 1;
-
-        if ((lowvalue & 0x80000000)) {
-          int x = bc->pos - 1;
-
-          while (x >= 0 && bc->buffer[x] == 0xff) {
-            bc->buffer[x] = (unsigned char)0;
-            x--;
-          }
-
-          bc->buffer[x] += 1;
-
-        }
-
-        lowvalue  <<= 1;
-
-        if (!++count) {
-          count = -8;
-          bc->buffer[bc->pos++] = (lowvalue >> 24);
-          lowvalue &= 0xffffff;
-        }
-      }
-
+      encode_bool(bc, e & 1, 128);
     }
     ++p;
   }
 
-  bc->count = count;
-  bc->lowvalue = lowvalue;
-  bc->range = range;
   *tp = p;
 }
 
