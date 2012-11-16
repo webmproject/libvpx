@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//w64\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-16T14:59:16Z",
+      "side": 1,
+      "message": "According to google\u0027s C++ guide consts are preferred over macros.",
+      "parentUuid": "AAAAQ3//w9w\u003d",
+      "revId": "19a1a0f460bce12869fa10aba062715071849a5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//w9o\u003d",
         "filename": "vp9/common/reconintra.c",
         "patchSetId": 12
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-16T11:11:18Z",
       "side": 1,
       "message": "re. i * interstride + j. is it worth pulling this out as a local in the loop as it is done 3 times. Perhaps 1 \u003c\u003c scale_bits could also just be a constant  or #define as it is constant.  Compiler may well optimize I guess.",
+      "revId": "19a1a0f460bce12869fa10aba062715071849a5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//w6M\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 537,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-16T14:59:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//w9o\u003d",
       "revId": "19a1a0f460bce12869fa10aba062715071849a5a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
