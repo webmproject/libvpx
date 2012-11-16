@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//xCo\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-16T07:27:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//xF8\u003d",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//xFw\u003d",
         "filename": "vp9/common/reconintra.c",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-16T04:46:39Z",
       "side": 1,
       "message": "this looks very much derived like a 2d [a*stride+b] \u003d weights1d[a] * weights1d[b] \u003e\u003e 7; can we calculate it inline as such to prevent having the big table here? Or can we at least document what the tables values mean?",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//xCk\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-16T07:27:03Z",
+      "side": 1,
+      "message": "Documented. Trying to generate the 2d weights with a single 1d table could be an optimization.",
+      "parentUuid": "AAAAQ3//xFw\u003d",
       "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//xCg\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-16T07:27:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//xFs\u003d",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//xFk\u003d",
         "filename": "vp9/encoder/bitstream.c",
         "patchSetId": 11
@@ -64,6 +118,24 @@
       "writtenOn": "2012-11-16T04:46:39Z",
       "side": 1,
       "message": "this seems a little redundant, i.e. if comp_pred_mode \u003d\u003d TRUE (that is, we\u0027re already using a second inter reference frame), then this can\u0027t ever be true, thus you don\u0027t need to code the symbol.\n\nAlternatively, we might want to reconsider how we\u0027re coding the comp_pred_mode flag itself (it\u0027s kind of hacky and prevents us from having \u003e3 ref frames in its current form), i.e. maybe we actually want to write a full second reference (without allowing it to be the same as the first reference, and preventing the redundant combinations A+B vs. B+A).",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//xCc\u003d",
+        "filename": "vp9/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-16T07:27:03Z",
+      "side": 1,
+      "message": "If comp_pred_mode \u003d\u003d TRUE then mi-\u003esecond_ref_frame \u003e 0. So the condition will not be satisfied.",
+      "parentUuid": "AAAAQ3//xFk\u003d",
       "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//xCE\u003d",
+        "filename": "vp9/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1020,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-16T07:27:03Z",
+      "side": 1,
+      "message": "That\u0027s right. There is a little inefficiency here since we can eliminate the I8x8 and BPRED modes from the alphabet. However, I would leave this open for now, since we may not even in fact use all the Intra16 modes but a smaller subset.",
+      "parentUuid": "AAAAQ3//xFg\u003d",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//xFc\u003d",
         "filename": "vp9/encoder/bitstream.c",
         "patchSetId": 11
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//xB8\u003d",
+        "filename": "vp9/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2066,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-16T07:27:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//xFc\u003d",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//xFo\u003d",
         "filename": "vp9/encoder/onyx_if.c",
         "patchSetId": 11
@@ -115,6 +223,24 @@
       "writtenOn": "2012-11-16T04:46:39Z",
       "side": 1,
       "message": "add a FIXME to make this RD-based later on (can be done after march).",
+      "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//xBs\u003d",
+        "filename": "vp9/encoder/onyx_if.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2935,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-16T07:27:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//xFo\u003d",
       "revId": "c981fc51d967a16e50ce5c37bb1f73bfb7c72ab2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
