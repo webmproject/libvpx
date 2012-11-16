@@ -341,13 +341,6 @@ generate_vcproj() {
     done
     close_tag Platforms
 
-    open_tag ToolFiles
-    case "$target" in
-        x86*) $uses_asm && tag ToolFile RelativePath="$self_dirname/../x86-msvs/yasm.rules"
-        ;;
-    esac
-    close_tag ToolFiles
-
     open_tag Configurations
     for plat in "${platforms[@]}"; do
         plat_no_ws=`echo $plat | sed 's/[^A-Za-z0-9_]/_/g'`
