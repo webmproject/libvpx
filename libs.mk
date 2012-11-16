@@ -45,8 +45,6 @@ ifeq ($(CONFIG_VP8_ENCODER),yes)
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8cx.mk
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_CX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
-  CODEC_SRCS-yes += $(VP8_PREFIX)vp8cx.mk vpx/vp8.h vpx/vp8cx.h
-  CODEC_SRCS-$(ARCH_ARM) += $(VP8_PREFIX)vp8cx_arm.mk
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
@@ -58,7 +56,6 @@ ifeq ($(CONFIG_VP8_DECODER),yes)
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8dx.mk
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_DX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_DX_EXPORTS))
-  CODEC_SRCS-yes += $(VP8_PREFIX)vp8dx.mk vpx/vp8.h vpx/vp8dx.h
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8dx.h
@@ -95,7 +92,6 @@ endif
 
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/rtcd.sh
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx/vpx_integer.h
 CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
 INSTALL-SRCS-no += $(BUILD_PFX)vpx_config.c
 CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com

@@ -18,6 +18,8 @@ VP8_DX_SRCS-no  += $(VP8_COMMON_SRCS-no)
 VP8_DX_SRCS_REMOVE-yes += $(VP8_COMMON_SRCS_REMOVE-yes)
 VP8_DX_SRCS_REMOVE-no  += $(VP8_COMMON_SRCS_REMOVE-no)
 
+VP8_DX_SRCS-yes += vp8dx.mk
+
 VP8_DX_SRCS-yes += vp8_dx_iface.c
 
 # common
