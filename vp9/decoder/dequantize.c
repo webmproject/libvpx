@@ -67,8 +67,8 @@ void vp9_dequantize_b_c(BLOCKD *d) {
 
   int i;
   int16_t *DQ  = d->dqcoeff;
-  int16_t *Q   = d->qcoeff;
-  int16_t *DQC = d->dequant;
+  const int16_t *Q   = d->qcoeff;
+  const int16_t *DQC = d->dequant;
 
   for (i = 0; i < 16; i++) {
     DQ[i] = Q[i] * DQC[i];
@@ -76,7 +76,8 @@ void vp9_dequantize_b_c(BLOCKD *d) {
 }
 
 
-void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input, int16_t *dq,
+void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
+                               const int16_t *dq,
                                uint8_t *pred, uint8_t *dest,
                                int pitch, int stride) {
   int16_t output[16];
@@ -94,7 +95,8 @@ void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input, int16_t *dq,
   add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
 
-void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input, int16_t *dq,
+void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
+                                   const int16_t *dq,
                                    uint8_t *pred, uint8_t *dest,
                                    int pitch, int stride) {
   int16_t output[64];
@@ -113,7 +115,7 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input, int16_t *dq,
   add_residual(diff_ptr, pred, pitch, dest, stride, 8, 8);
 }
 
-void vp9_dequant_idct_add_c(int16_t *input, int16_t *dq, uint8_t *pred,
+void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
                             uint8_t *dest, int pitch, int stride) {
   int16_t output[16];
   int16_t *diff_ptr = output;
@@ -131,9 +133,8 @@ void vp9_dequant_idct_add_c(int16_t *input, int16_t *dq, uint8_t *pred,
   add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
 
-void vp9_dequant_dc_idct_add_c(int16_t *input, int16_t *dq, uint8_t *pred,
-                               uint8_t *dest, int pitch, int stride,
-                               int Dc) {
+void vp9_dequant_dc_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
+                               uint8_t *dest, int pitch, int stride, int Dc) {
   int i;
   int16_t output[16];
   int16_t *diff_ptr = output;
@@ -153,7 +154,7 @@ void vp9_dequant_dc_idct_add_c(int16_t *input, int16_t *dq, uint8_t *pred,
 }
 
 #if CONFIG_LOSSLESS
-void vp9_dequant_idct_add_lossless_c(int16_t *input, int16_t *dq,
+void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
                                      uint8_t *pred, uint8_t *dest,
                                      int pitch, int stride) {
   int16_t output[16];
@@ -171,7 +172,7 @@ void vp9_dequant_idct_add_lossless_c(int16_t *input, int16_t *dq,
   add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
 
-void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, int16_t *dq,
+void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
                                         uint8_t *pred,
                                         uint8_t *dest,
                                         int pitch, int stride, int dc) {
@@ -195,8 +196,8 @@ void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, int16_t *dq,
 void vp9_dequantize_b_2x2_c(BLOCKD *d) {
   int i;
   int16_t *DQ  = d->dqcoeff;
-  int16_t *Q   = d->qcoeff;
-  int16_t *DQC = d->dequant;
+  const int16_t *Q   = d->qcoeff;
+  const int16_t *DQC = d->dequant;
 
   for (i = 0; i < 16; i++) {
     DQ[i] = (int16_t)((Q[i] * DQC[i]));
@@ -213,9 +214,9 @@ void vp9_dequantize_b_2x2_c(BLOCKD *d) {
 #endif
 }
 
-void vp9_dequant_idct_add_8x8_c(int16_t *input, int16_t *dq, uint8_t *pred,
-                                uint8_t *dest, int pitch, int stride,
-                                int dc, uint16_t eobs) {
+void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
+                                uint8_t *pred, uint8_t *dest, int pitch,
+                                int stride, int dc, uint16_t eobs) {
   int16_t output[64];
   int16_t *diff_ptr = output;
   int i;
@@ -327,8 +328,8 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, int16_t *dq, uint8_t *pred,
 }
 
 void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
-                                     int16_t *dq, uint8_t *pred, uint8_t *dest,
-                                     int pitch, int stride) {
+                                     const int16_t *dq, uint8_t *pred,
+                                     uint8_t *dest, int pitch, int stride) {
   int16_t output[256];
   int16_t *diff_ptr = output;
   int i;
@@ -350,9 +351,9 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
   add_residual(diff_ptr, pred, pitch, dest, stride, 16, 16);
 }
 
-void vp9_dequant_idct_add_16x16_c(int16_t *input, int16_t *dq, uint8_t *pred,
-                                  uint8_t *dest, int pitch, int stride,
-                                  uint16_t eobs) {
+void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
+                                  uint8_t *pred, uint8_t *dest, int pitch,
+                                  int stride, uint16_t eobs) {
   int16_t output[256];
   int16_t *diff_ptr = output;
   int i;
