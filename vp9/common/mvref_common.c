@@ -11,11 +11,20 @@
 #include "mvref_common.h"
 
 #define MVREF_NEIGHBOURS 8
-static int mv_ref_search[MVREF_NEIGHBOURS][2] =
-  { {0,-1},{-1,0},{-1,-1},{0,-2},{-2,0},{-1,-2},{-2,-1},{-2,-2} };
-static int ref_distance_weight[MVREF_NEIGHBOURS] =
-  { 3,3,2,1,1,1,1,1 };
-
+static int mb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
+    {0, -1}, {-1, 0}, {-1, -1}, {0, -2},
+    {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}
+};
+static int mb_ref_distance_weight[MVREF_NEIGHBOURS] =
+  { 3, 3, 2, 1, 1, 1, 1, 1 };
+#if CONFIG_SUPERBLOCKS
+static int sb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
+    {0, -1}, {-1, 0}, {1, -1}, {-1, 1},
+    {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}
+};
+static int sb_ref_distance_weight[MVREF_NEIGHBOURS] =
+  { 3, 3, 2, 2, 2, 1, 1, 1 };
+#endif
 // clamp_mv
 #define MV_BORDER (16 << 3) // Allow 16 pels in 1/8th pel units
 static void clamp_mv(const MACROBLOCKD *xd, int_mv *mv) {
@@ -224,12 +233,26 @@ void vp9_find_mv_refs(
   int index = 0;
   int ref_weight = 0;
   int valid_mv_ref;
+  int (*mv_ref_search)[2];
+  int *ref_distance_weight;
 
   // Blank the reference vector lists and other local structures.
   vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REFS);
   vpx_memset(candidate_mvs, 0, sizeof(int_mv) * MAX_MV_REFS);
   vpx_memset(candidate_scores, 0, sizeof(candidate_scores));
 
+#if CONFIG_SUPERBLOCKS
+  if (mbmi->encoded_as_sb) {
+    mv_ref_search = sb_mv_ref_search;
+    ref_distance_weight = sb_ref_distance_weight;
+  } else {
+    mv_ref_search = mb_mv_ref_search;
+    ref_distance_weight = mb_ref_distance_weight;
+  }
+#else
+  mv_ref_search = mb_mv_ref_search;
+  ref_distance_weight = mb_ref_distance_weight;
+#endif
   // Populate a list with candidate reference vectors from the
   // spatial neighbours.
   for (i = 0; i < 2; ++i) {
