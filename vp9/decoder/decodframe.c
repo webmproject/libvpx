@@ -292,7 +292,7 @@ static void decode_superblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
     } else if (tx_size == TX_8X8) {
       eobtotal = vp9_decode_mb_tokens_8x8(pbi, xd, bc);
     } else {
-      eobtotal = vp9_decode_mb_tokens(pbi, xd, bc);
+      eobtotal = vp9_decode_mb_tokens_4x4(pbi, xd, bc);
     }
     if (eobtotal == 0) {  // skip loopfilter
       xd->mode_info_context->mbmi.mb_skip_coeff = 1;
@@ -395,8 +395,8 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
       eobtotal = vp9_decode_mb_tokens_16x16(pbi, xd, bc);
     } else if (tx_size == TX_8X8) {
       eobtotal = vp9_decode_mb_tokens_8x8(pbi, xd, bc);
-    } else if (mode != B_PRED) {
-      eobtotal = vp9_decode_mb_tokens(pbi, xd, bc);
+    } else {
+      eobtotal = vp9_decode_mb_tokens_4x4(pbi, xd, bc);
     }
   }
 
@@ -423,9 +423,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
   /* do prediction */
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     if (mode != I8X8_PRED) {
-      if (mode != B_PRED) {
-        vp9_build_intra_predictors_mbuv(xd);
-      }
+      vp9_build_intra_predictors_mbuv(xd);
       if (mode != B_PRED) {
         vp9_build_intra_predictors_mby(xd);
       }
@@ -493,8 +491,6 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
       xd->mode_info_context->bmi[i].as_mode.context = b->bmi.as_mode.context =
           vp9_find_bpred_context(b);
 #endif
-      if (!xd->mode_info_context->mbmi.mb_skip_coeff)
-        eobtotal += vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_Y_WITH_DC, i);
 #if CONFIG_COMP_INTRA_PRED
       b_mode2 = xd->mode_info_context->bmi[i].as_mode.second;
 
@@ -517,14 +513,6 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                *(b->base_dst) + b->dst, 16, b->dst_stride);
       }
     }
-    if (!xd->mode_info_context->mbmi.mb_skip_coeff) {
-      for (i = 16; i < 24; ++i)
-        eobtotal += vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_UV, i);
-    }
-    vp9_build_intra_predictors_mbuv(xd);
-    pbi->idct_add_uv_block(xd->qcoeff + 16 * 16, xd->block[16].dequant,
-                           xd->predictor + 16 * 16, xd->dst.u_buffer,
-                           xd->dst.v_buffer, xd->dst.uv_stride, xd->eobs + 16);
   } else if (mode == SPLITMV) {
     if (tx_size == TX_8X8) {
       vp9_dequant_idct_add_y_block_8x8(xd->qcoeff, xd->block[0].dequant,
@@ -596,8 +584,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
         (xd->qcoeff + 16 * 16, xd->block[16].dequant,
          xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
          xd->dst.uv_stride, xd->eobs + 16, xd);
-  else if (xd->mode_info_context->mbmi.mode != I8X8_PRED &&
-           xd->mode_info_context->mbmi.mode != B_PRED)
+  else if (xd->mode_info_context->mbmi.mode != I8X8_PRED)
     pbi->idct_add_uv_block(xd->qcoeff + 16 * 16, xd->block[16].dequant,
          xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
          xd->dst.uv_stride, xd->eobs + 16);

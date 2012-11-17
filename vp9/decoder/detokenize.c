@@ -568,8 +568,9 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
   return eobtotal;
 }
 
-int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
-                         BOOL_DECODER* const bc, int type, int i) {
+static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
+                            BOOL_DECODER* const bc,
+                            PLANE_TYPE type, int i) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
   ENTROPY_CONTEXT *const a = A + vp9_block2above[i];
@@ -577,16 +578,9 @@ int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
   const int *scan = vp9_default_zig_zag1d;
   unsigned short *const eobs = xd->eobs;
-  int c, seg_eob;
-  TX_TYPE tx_type = DCT_DCT;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
-
-  seg_eob = get_eob(xd, segment_id, 16);
-
-  if (i == 24)
-    type = PLANE_TYPE_Y2;
-  else if (i >= 16)
-    type = PLANE_TYPE_UV;
+  int c, seg_eob = get_eob(xd, segment_id, 16);
+  TX_TYPE tx_type = DCT_DCT;
 
   if (type == PLANE_TYPE_Y_WITH_DC)
     tx_type = get_tx_type(xd, &xd->block[i]);
@@ -611,24 +605,26 @@ int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
   return c;
 }
 
-int vp9_decode_mb_tokens(VP9D_COMP* const dx,
-                         MACROBLOCKD* const xd,
-                         BOOL_DECODER* const bc) {
-  int i, type, eobtotal = 0;
+int vp9_decode_mb_tokens_4x4(VP9D_COMP* const dx,
+                             MACROBLOCKD* const xd,
+                             BOOL_DECODER* const bc) {
+  int i, eobtotal = 0;
+  PLANE_TYPE type;
 
   if (xd->mode_info_context->mbmi.mode != B_PRED &&
       xd->mode_info_context->mbmi.mode != I8X8_PRED &&
       xd->mode_info_context->mbmi.mode != SPLITMV) {
-
-    eobtotal += vp9_decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_Y2, 24) - 16;
-
+    eobtotal += decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_Y2, 24) - 16;
     type = PLANE_TYPE_Y_NO_DC;
   } else {
     type = PLANE_TYPE_Y_WITH_DC;
   }
 
-  for (i = 0; i < 24; ++i) {
-    eobtotal += vp9_decode_coefs_4x4(dx, xd, bc, type, i);
+  for (i = 0; i < 16; ++i) {
+    eobtotal += decode_coefs_4x4(dx, xd, bc, type, i);
   }
+  do {
+    eobtotal += decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_UV, i);
+  } while (++i < 24);
   return eobtotal;
 }
