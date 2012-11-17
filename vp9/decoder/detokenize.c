@@ -18,46 +18,6 @@
 
 #include "vp9/common/seg_common.h"
 
-#define BOOL_DATA UINT8
-
-#define OCB_X PREV_COEF_CONTEXTS * ENTROPY_NODES
-
-DECLARE_ALIGNED(16, static const int, coef_bands_x[16]) = {
-  0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X,
-  6 * OCB_X, 4 * OCB_X, 5 * OCB_X, 6 * OCB_X,
-  6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
-  6 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X
-};
-DECLARE_ALIGNED(16, static const int, coef_bands_x_8x8[64]) = {
-  0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 4 * OCB_X, 5 * OCB_X,
-  5 * OCB_X, 3 * OCB_X, 6 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 6 * OCB_X, 6 * OCB_X,
-  6 * OCB_X, 5 * OCB_X, 5 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
-  6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
-  6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-};
-
-DECLARE_ALIGNED(16, static const int, coef_bands_x_16x16[256]) = {
-  0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 4 * OCB_X, 5 * OCB_X, 5 * OCB_X, 3 * OCB_X, 6 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 6 * OCB_X, 6 * OCB_X,
-  6 * OCB_X, 5 * OCB_X, 5 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
-  6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
-  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X
-};
-
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1
 #define ONE_CONTEXT_NODE            2
@@ -115,10 +75,6 @@ void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
 
-// #define PREV_CONTEXT_INC(val) (2+((val)>2))
-// #define PREV_CONTEXT_INC(val) (vp9_prev_token_class[(val)])
-#define PREV_CONTEXT_INC(val) (vp9_prev_token_class[(val)>10?10:(val)])
-
 static int get_signed(BOOL_DECODER *br, int value_to_sign) {
   const int split = (br->range + 1) >> 1;
   const VP9_BD_VALUE bigsplit = (VP9_BD_VALUE)split << (VP9_BD_VALUE_SIZE - 8);
@@ -150,7 +106,6 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
 
 #define WRITE_COEF_CONTINUE(val, token)                       \
   {                                                           \
-    prob = coef_probs + (ENTROPY_NODES*PREV_CONTEXT_INC(val));\
     qcoeff_ptr[scan[c]] = (INT16) get_signed(br, val);        \
     INCREMENT_COUNT(token);                                   \
     c++;                                                      \
@@ -170,52 +125,49 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
                         TX_TYPE tx_type,
                         int seg_eob, INT16 *qcoeff_ptr, int i,
                         const int *const scan, int block_type,
-                        const int *coef_bands_x,
                         const int *coef_bands) {
   FRAME_CONTEXT *const fc = &dx->common.fc;
   int pt, c = (type == PLANE_TYPE_Y_NO_DC);
-  const vp9_prob *prob, *coef_probs;
+  vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][ENTROPY_NODES], *prob;
   unsigned int (*coef_counts)[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
 
   switch (block_type) {
     default:
     case TX_4X4:
       if (tx_type == DCT_DCT) {
-        coef_probs  = fc->coef_probs[type][0][0];
+        coef_probs  = fc->coef_probs[type];
         coef_counts = fc->coef_counts[type];
       } else {
-        coef_probs  = fc->hybrid_coef_probs[type][0][0];
+        coef_probs  = fc->hybrid_coef_probs[type];
         coef_counts = fc->hybrid_coef_counts[type];
       }
       break;
     case TX_8X8:
       if (tx_type == DCT_DCT) {
-        coef_probs  = fc->coef_probs_8x8[type][0][0];
+        coef_probs  = fc->coef_probs_8x8[type];
         coef_counts = fc->coef_counts_8x8[type];
       } else {
-        coef_probs  = fc->hybrid_coef_probs_8x8[type][0][0];
+        coef_probs  = fc->hybrid_coef_probs_8x8[type];
         coef_counts = fc->hybrid_coef_counts_8x8[type];
       }
       break;
     case TX_16X16:
       if (tx_type == DCT_DCT) {
-        coef_probs  = fc->coef_probs_16x16[type][0][0];
+        coef_probs  = fc->coef_probs_16x16[type];
         coef_counts = fc->coef_counts_16x16[type];
       } else {
-        coef_probs  = fc->hybrid_coef_probs_16x16[type][0][0];
+        coef_probs  = fc->hybrid_coef_probs_16x16[type];
         coef_counts = fc->hybrid_coef_counts_16x16[type];
       }
       break;
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  prob = coef_probs + pt * ENTROPY_NODES;
-
   while (1) {
     int val;
     const uint8_t *cat6 = cat6_prob;
     if (c >= seg_eob) break;
-    prob += coef_bands_x[c];
+    prob = coef_probs[coef_bands[c]][pt];
     if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
       break;
 SKIP_START:
@@ -223,16 +175,12 @@ SKIP_START:
     if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
-      prob = coef_probs + coef_bands_x[c];
+      prob = coef_probs[coef_bands[c]][pt];
       goto SKIP_START;
     }
     // ONE_CONTEXT_NODE_0_
     if (!vp9_read(br, prob[ONE_CONTEXT_NODE])) {
-      prob = coef_probs + ENTROPY_NODES;
-      qcoeff_ptr[scan[c]] = (INT16) get_signed(br, 1);
-      INCREMENT_COUNT(ONE_TOKEN);
-      ++c;
-      continue;
+      WRITE_COEF_CONTINUE(1, ONE_TOKEN);
     }
     // LOW_VAL_CONTEXT_NODE_0_
     if (!vp9_read(br, prob[LOW_VAL_CONTEXT_NODE])) {
@@ -329,8 +277,7 @@ int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
     c = decode_coefs(pbi, xd, bc, A, L, type,
                      tx_type,
                      seg_eob, qcoeff_ptr,
-                     0, scan, TX_16X16, coef_bands_x_16x16,
-                     vp9_coef_bands_16x16);
+                     0, scan, TX_16X16, vp9_coef_bands_16x16);
     eobs[0] = c;
     A[0] = L[0] = (c != !type);
     A[1] = A[2] = A[3] = A[0];
@@ -351,8 +298,7 @@ int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
     c = decode_coefs(pbi, xd, bc, a, l, type,
                      tx_type,
                      seg_eob, qcoeff_ptr,
-                     i, scan, TX_8X8, coef_bands_x_8x8,
-                     vp9_coef_bands_8x8);
+                     i, scan, TX_8X8, vp9_coef_bands_8x8);
     a[0] = l[0] = ((eobs[i] = c) != !type);
     a[1] = a[0];
     l[1] = l[0];
@@ -392,8 +338,7 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
     c = decode_coefs(pbi, xd, bc, a, l, type,
                      tx_type,
                      seg_eob, qcoeff_ptr + 24 * 16,
-                     24, scan, TX_8X8, coef_bands_x,
-                     vp9_coef_bands);
+                     24, scan, TX_8X8, vp9_coef_bands);
     a[0] = l[0] = ((eobs[24] = c) != !type);
 
     eobtotal += c - 4;
@@ -419,8 +364,7 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
     c = decode_coefs(pbi, xd, bc, a, l, type,
                      tx_type,
                      seg_eob, qcoeff_ptr,
-                     i, scan, TX_8X8, coef_bands_x_8x8,
-                     vp9_coef_bands_8x8);
+                     i, scan, TX_8X8, vp9_coef_bands_8x8);
     a[0] = l[0] = ((eobs[i] = c) != !type);
     a[1] = a[0];
     l[1] = l[0];
@@ -443,8 +387,7 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
       c = decode_coefs(pbi, xd, bc, a, l, type,
                        tx_type,
                        seg_eob, qcoeff_ptr,
-                       i, scan, TX_4X4, coef_bands_x,
-                       vp9_coef_bands);
+                       i, scan, TX_4X4, vp9_coef_bands);
       a[0] = l[0] = ((eobs[i] = c) != !type);
 
       eobtotal += c;
@@ -487,7 +430,7 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
   c = decode_coefs(dx, xd, bc, a, l, type,
                    tx_type,
                    seg_eob, qcoeff_ptr + i * 16,
-                   i, scan, TX_4X4, coef_bands_x, vp9_coef_bands);
+                   i, scan, TX_4X4, vp9_coef_bands);
   a[0] = l[0] = ((eobs[i] = c) != !type);
   return c;
 }
