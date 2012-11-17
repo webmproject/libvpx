@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//wBo\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-17T16:38:07Z",
+      "side": 0,
+      "message": "rather than eliminating this, it\u0027d be better to make it generic enough to handle the 8x8 and 16x16 and adaptive_scan cases, rather tha duplicating this loop all over the place.",
+      "revId": "f19a1cafed9e3aac536d04773ec20b808b91cd50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
