@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//wB0\u003d",
+        "filename": "vp9/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-17T16:32:09Z",
+      "side": 1,
+      "message": "this switch on transform size to detokenize happens in two places. It\u0027d be better to have a single vp9_decode_mb_tokens function and make the specialized versions static.",
+      "revId": "f19a1cafed9e3aac536d04773ec20b808b91cd50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
