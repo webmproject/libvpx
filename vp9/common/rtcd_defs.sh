@@ -501,7 +501,12 @@ specialize vp9_refining_search_sad sse3
 vp9_refining_search_sad_sse3=vp9_refining_search_sadx4
 
 prototype int vp9_diamond_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+specialize vp9_diamond_search_sad sse3
 vp9_diamond_search_sad_sse3=vp9_diamond_search_sadx4
+
+prototype void vp9_temporal_filter_apply "unsigned char *frame1, unsigned int stride, unsigned char *frame2, unsigned int block_size, int strength, int filter_weight, unsigned int *accumulator, unsigned short *count"
+specialize vp9_temporal_filter_apply sse2
+
 
 fi
 # end encoder functions
