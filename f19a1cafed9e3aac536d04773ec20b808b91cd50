@@ -16,6 +16,24 @@
       "revId": "f19a1cafed9e3aac536d04773ec20b808b91cd50",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//wBQ\u003d",
+        "filename": "vp9/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-17T17:04:15Z",
+      "side": 1,
+      "message": "Yup, that\u0027s exactly my goal.",
+      "parentUuid": "AAAAQ3//wB0\u003d",
+      "revId": "f19a1cafed9e3aac536d04773ec20b808b91cd50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
