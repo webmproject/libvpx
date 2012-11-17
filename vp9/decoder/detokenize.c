@@ -179,25 +179,6 @@ void static count_tokens_adaptive_scan(const MACROBLOCKD *xd, INT16 *qcoeff_ptr,
   }
 }
 
-void static count_tokens(INT16 *qcoeff_ptr, int block, PLANE_TYPE type,
-                         ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                         int eob, int seg_eob, FRAME_CONTEXT *const fc) {
-  int c, pt, token, band;
-  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  for (c = !type; c < eob; ++c) {
-    int rc = vp9_default_zig_zag1d[c];
-    int v = qcoeff_ptr[rc];
-    band = vp9_coef_bands[c];
-    token = get_token(v);
-    fc->coef_counts[type][band][pt][token]++;
-    pt = vp9_prev_token_class[token];
-  }
-  if (eob < seg_eob) {
-    band = vp9_coef_bands[c];
-    fc->coef_counts[type][band][pt][DCT_EOB_TOKEN]++;
-  }
-}
-
 void static count_tokens_8x8(INT16 *qcoeff_ptr, int block, PLANE_TYPE type,
                              TX_TYPE tx_type,
                              ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
