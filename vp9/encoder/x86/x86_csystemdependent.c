@@ -90,8 +90,6 @@ void vp9_arch_x86_encoder_init(VP9_COMP *cpi) {
   /* Override default functions with fastest ones for this CPU. */
 #if HAVE_SSE2
   if (flags & HAS_SSE2) {
-    cpi->rtcd.temporal.apply                 = vp9_temporal_filter_apply_sse2;
-
   }
 #endif
 
