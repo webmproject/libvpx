@@ -119,45 +119,6 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
 // #define PREV_CONTEXT_INC(val) (vp9_prev_token_class[(val)])
 #define PREV_CONTEXT_INC(val) (vp9_prev_token_class[(val)>10?10:(val)])
 
-static int get_token(int v) {
-  if (v < 0) v = -v;
-  if (v == 0) return ZERO_TOKEN;
-  else if (v == 1) return ONE_TOKEN;
-  else if (v == 2) return TWO_TOKEN;
-  else if (v == 3) return THREE_TOKEN;
-  else if (v == 4) return FOUR_TOKEN;
-  else if (v <= 6) return DCT_VAL_CATEGORY1;
-  else if (v <= 10) return DCT_VAL_CATEGORY2;
-  else if (v <= 18) return DCT_VAL_CATEGORY3;
-  else if (v <= 34) return DCT_VAL_CATEGORY4;
-  else if (v <= 66) return DCT_VAL_CATEGORY5;
-  else return DCT_VAL_CATEGORY6;
-}
-
-static void count_tokens(INT16 *qcoeff_ptr, PLANE_TYPE type,
-                         ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                         int eob, int seg_eob,
-                         const int *scan, const int *bands,
-                         unsigned int (*coef_counts)[PREV_COEF_CONTEXTS]
-                                                    [MAX_ENTROPY_TOKENS]) {
-  int c, pt, token, band;
-
-  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  for (c = !type; c < eob; ++c) {
-    int rc = scan[c];
-    int v = qcoeff_ptr[rc];
-    band = bands[c];
-    token = get_token(v);
-    coef_counts[band][pt][token]++;
-    pt = vp9_prev_token_class[token];
-  }
-
-  if (eob < seg_eob) {
-    band = bands[c];
-    coef_counts[band][pt][DCT_EOB_TOKEN]++;
-  }
-}
-
 static int get_signed(BOOL_DECODER *br, int value_to_sign) {
   const int split = (br->range + 1) >> 1;
   const VP9_BD_VALUE bigsplit = (VP9_BD_VALUE)split << (VP9_BD_VALUE_SIZE - 8);
@@ -181,10 +142,17 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
   return v;
 }
 
-#define WRITE_COEF_CONTINUE(val)                              \
+#define INCREMENT_COUNT(token)               \
+  do {                                       \
+    coef_counts[coef_bands[c]][pt][token]++; \
+    pt = vp9_prev_token_class[token];        \
+  } while (0)
+
+#define WRITE_COEF_CONTINUE(val, token)                       \
   {                                                           \
     prob = coef_probs + (ENTROPY_NODES*PREV_CONTEXT_INC(val));\
     qcoeff_ptr[scan[c]] = (INT16) get_signed(br, val);        \
+    INCREMENT_COUNT(token);                                   \
     c++;                                                      \
     continue;                                                 \
   }
@@ -205,7 +173,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
                         const int *coef_bands_x,
                         const int *coef_bands) {
   FRAME_CONTEXT *const fc = &dx->common.fc;
-  int tmp, c = (type == PLANE_TYPE_Y_NO_DC);
+  int pt, c = (type == PLANE_TYPE_Y_NO_DC);
   const vp9_prob *prob, *coef_probs;
   unsigned int (*coef_counts)[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
 
@@ -240,8 +208,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       break;
   }
 
-  VP9_COMBINEENTROPYCONTEXTS(tmp, *a, *l);
-  prob = coef_probs + tmp * ENTROPY_NODES;
+  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  prob = coef_probs + pt * ENTROPY_NODES;
 
   while (1) {
     int val;
@@ -253,6 +221,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
 SKIP_START:
     if (c >= seg_eob) break;
     if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
+      INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
       prob = coef_probs + coef_bands_x[c];
       goto SKIP_START;
@@ -261,30 +230,31 @@ SKIP_START:
     if (!vp9_read(br, prob[ONE_CONTEXT_NODE])) {
       prob = coef_probs + ENTROPY_NODES;
       qcoeff_ptr[scan[c]] = (INT16) get_signed(br, 1);
+      INCREMENT_COUNT(ONE_TOKEN);
       ++c;
       continue;
     }
     // LOW_VAL_CONTEXT_NODE_0_
     if (!vp9_read(br, prob[LOW_VAL_CONTEXT_NODE])) {
       if (!vp9_read(br, prob[TWO_CONTEXT_NODE])) {
-        WRITE_COEF_CONTINUE(2);
+        WRITE_COEF_CONTINUE(2, TWO_TOKEN);
       }
       if (!vp9_read(br, prob[THREE_CONTEXT_NODE])) {
-        WRITE_COEF_CONTINUE(3);
+        WRITE_COEF_CONTINUE(3, THREE_TOKEN);
       }
-      WRITE_COEF_CONTINUE(4);
+      WRITE_COEF_CONTINUE(4, FOUR_TOKEN);
     }
     // HIGH_LOW_CONTEXT_NODE_0_
     if (!vp9_read(br, prob[HIGH_LOW_CONTEXT_NODE])) {
       if (!vp9_read(br, prob[CAT_ONE_CONTEXT_NODE])) {
         val = CAT1_MIN_VAL;
         ADJUST_COEF(CAT1_PROB0, 0);
-        WRITE_COEF_CONTINUE(val);
+        WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY1);
       }
       val = CAT2_MIN_VAL;
       ADJUST_COEF(CAT2_PROB1, 1);
       ADJUST_COEF(CAT2_PROB0, 0);
-      WRITE_COEF_CONTINUE(val);
+      WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY2);
     }
     // CAT_THREEFOUR_CONTEXT_NODE_0_
     if (!vp9_read(br, prob[CAT_THREEFOUR_CONTEXT_NODE])) {
@@ -293,14 +263,14 @@ SKIP_START:
         ADJUST_COEF(CAT3_PROB2, 2);
         ADJUST_COEF(CAT3_PROB1, 1);
         ADJUST_COEF(CAT3_PROB0, 0);
-        WRITE_COEF_CONTINUE(val);
+        WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY3);
       }
       val = CAT4_MIN_VAL;
       ADJUST_COEF(CAT4_PROB3, 3);
       ADJUST_COEF(CAT4_PROB2, 2);
       ADJUST_COEF(CAT4_PROB1, 1);
       ADJUST_COEF(CAT4_PROB0, 0);
-      WRITE_COEF_CONTINUE(val);
+      WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY4);
     }
     // CAT_FIVE_CONTEXT_NODE_0_:
     if (!vp9_read(br, prob[CAT_FIVE_CONTEXT_NODE])) {
@@ -310,18 +280,18 @@ SKIP_START:
       ADJUST_COEF(CAT5_PROB2, 2);
       ADJUST_COEF(CAT5_PROB1, 1);
       ADJUST_COEF(CAT5_PROB0, 0);
-      WRITE_COEF_CONTINUE(val);
+      WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY5);
     }
     val = 0;
     while (*cat6) {
       val = (val << 1) | vp9_read(br, *cat6++);
     }
     val += CAT6_MIN_VAL;
-    WRITE_COEF_CONTINUE(val);
+    WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY6);
   }
 
-  count_tokens(qcoeff_ptr, type, a, l, c, seg_eob, scan,
-               coef_bands, coef_counts);
+  if (c < seg_eob)
+    coef_counts[coef_bands[c]][pt][DCT_EOB_TOKEN]++;
 
   return c;
 }
