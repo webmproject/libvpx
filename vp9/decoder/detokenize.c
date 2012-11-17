@@ -123,7 +123,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
                         ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                         PLANE_TYPE type,
                         TX_TYPE tx_type,
-                        int seg_eob, INT16 *qcoeff_ptr, int i,
+                        int seg_eob, INT16 *qcoeff_ptr,
                         const int *const scan, int block_type,
                         const int *coef_bands) {
   FRAME_CONTEXT *const fc = &dx->common.fc;
@@ -275,9 +275,8 @@ int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
   {
     const int* const scan = vp9_default_zig_zag1d_16x16;
     c = decode_coefs(pbi, xd, bc, A, L, type,
-                     tx_type,
-                     seg_eob, qcoeff_ptr,
-                     0, scan, TX_16X16, vp9_coef_bands_16x16);
+                     tx_type, seg_eob, qcoeff_ptr,
+                     scan, TX_16X16, vp9_coef_bands_16x16);
     eobs[0] = c;
     A[0] = L[0] = (c != !type);
     A[1] = A[2] = A[3] = A[0];
@@ -296,9 +295,8 @@ int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
     const int* const scan = vp9_default_zig_zag1d_8x8;
 
     c = decode_coefs(pbi, xd, bc, a, l, type,
-                     tx_type,
-                     seg_eob, qcoeff_ptr,
-                     i, scan, TX_8X8, vp9_coef_bands_8x8);
+                     tx_type, seg_eob, qcoeff_ptr,
+                     scan, TX_8X8, vp9_coef_bands_8x8);
     a[0] = l[0] = ((eobs[i] = c) != !type);
     a[1] = a[0];
     l[1] = l[0];
@@ -336,9 +334,8 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
 
     seg_eob = get_eob(xd, segment_id, 4);
     c = decode_coefs(pbi, xd, bc, a, l, type,
-                     tx_type,
-                     seg_eob, qcoeff_ptr + 24 * 16,
-                     24, scan, TX_8X8, vp9_coef_bands);
+                     tx_type, seg_eob, qcoeff_ptr + 24 * 16,
+                     scan, TX_8X8, vp9_coef_bands);
     a[0] = l[0] = ((eobs[24] = c) != !type);
 
     eobtotal += c - 4;
@@ -362,9 +359,8 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
     }
 
     c = decode_coefs(pbi, xd, bc, a, l, type,
-                     tx_type,
-                     seg_eob, qcoeff_ptr,
-                     i, scan, TX_8X8, vp9_coef_bands_8x8);
+                     tx_type, seg_eob, qcoeff_ptr,
+                     scan, TX_8X8, vp9_coef_bands_8x8);
     a[0] = l[0] = ((eobs[i] = c) != !type);
     a[1] = a[0];
     l[1] = l[0];
@@ -385,9 +381,8 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
       const int *scan = vp9_default_zig_zag1d;
 
       c = decode_coefs(pbi, xd, bc, a, l, type,
-                       tx_type,
-                       seg_eob, qcoeff_ptr,
-                       i, scan, TX_4X4, vp9_coef_bands);
+                       tx_type, seg_eob, qcoeff_ptr,
+                       scan, TX_4X4, vp9_coef_bands);
       a[0] = l[0] = ((eobs[i] = c) != !type);
 
       eobtotal += c;
@@ -428,9 +423,8 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
       break;
   }
   c = decode_coefs(dx, xd, bc, a, l, type,
-                   tx_type,
-                   seg_eob, qcoeff_ptr + i * 16,
-                   i, scan, TX_4X4, vp9_coef_bands);
+                   tx_type, seg_eob, qcoeff_ptr + i * 16,
+                   scan, TX_4X4, vp9_coef_bands);
   a[0] = l[0] = ((eobs[i] = c) != !type);
   return c;
 }
