@@ -378,22 +378,22 @@ specialize vp9_sad8x8x8 sse4
 prototype void vp9_sad4x4x8 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
 specialize vp9_sad4x4x8 sse4
 
-prototype void vp9_sad32x32x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad32x32x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char **ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad32x32x4d
 
-prototype void vp9_sad16x16x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad16x16x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char **ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad16x16x4d sse3
 
-prototype void vp9_sad16x8x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad16x8x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char **ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad16x8x4d sse3
 
-prototype void vp9_sad8x16x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad8x16x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char **ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad8x16x4d sse3
 
-prototype void vp9_sad8x8x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad8x8x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char **ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad8x8x4d sse3
 
-prototype void vp9_sad4x4x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad4x4x4d "const unsigned char *src_ptr, int  src_stride, const unsigned char **ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad4x4x4d sse3
 
 #
@@ -506,6 +506,9 @@ vp9_diamond_search_sad_sse3=vp9_diamond_search_sadx4
 
 prototype void vp9_temporal_filter_apply "unsigned char *frame1, unsigned int stride, unsigned char *frame2, unsigned int block_size, int strength, int filter_weight, unsigned int *accumulator, unsigned short *count"
 specialize vp9_temporal_filter_apply sse2
+
+prototype void vp9_yv12_copy_partial_frame "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc, int fraction"
+specialize vp9_yv12_copy_partial_frame neon
 
 
 fi

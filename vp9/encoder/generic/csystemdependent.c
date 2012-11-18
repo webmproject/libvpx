@@ -14,30 +14,8 @@
 #include "vp9/encoder/onyx_int.h"
 
 
-void vp9_arch_x86_encoder_init(VP9_COMP *cpi);
-void vp9_arch_arm_encoder_init(VP9_COMP *cpi);
-
-void (*vp9_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc,
-                                        YV12_BUFFER_CONFIG *dst_ybc,
-                                        int fraction);
-extern void vp9_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
-                                        YV12_BUFFER_CONFIG *dst_ybc,
-                                        int fraction);
-
 void vp9_cmachine_specific_config(VP9_COMP *cpi) {
 #if CONFIG_RUNTIME_CPU_DETECT
   cpi->rtcd.common                    = &cpi->common.rtcd;
 #endif
-
-  vp9_yv12_copy_partial_frame_ptr = vp9_yv12_copy_partial_frame;
-
-#if ARCH_X86 || ARCH_X86_64
-  vp9_arch_x86_encoder_init(cpi);
-#endif
-
-#if ARCH_ARM
-  vp9_arch_arm_encoder_init(cpi);
-#endif
-
-
 }

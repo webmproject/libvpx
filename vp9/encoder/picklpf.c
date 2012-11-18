@@ -31,12 +31,8 @@ extern void vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(YV12_BUFFER_C
 #define IF_RTCD(x) NULL
 #endif
 
-extern void(*vp9_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc,
-                                              YV12_BUFFER_CONFIG *dst_ybc,
-                                              int fraction);
-
-void vp9_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
-                                 YV12_BUFFER_CONFIG *dst_ybc, int Fraction) {
+void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
+                                   YV12_BUFFER_CONFIG *dst_ybc, int Fraction) {
   unsigned char *src_y, *dst_y;
   int yheight;
   int ystride;
@@ -147,7 +143,7 @@ void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   int best_filt_val = cm->filter_level;
 
   //  Make a copy of the unfiltered / processed recon buffer
-  vp9_yv12_copy_partial_frame_ptr(cm->frame_to_show, &cpi->last_frame_uf, 3);
+  vp9_yv12_copy_partial_frame(cm->frame_to_show, &cpi->last_frame_uf, 3);
 
   if (cm->frame_type == KEY_FRAME)
     cm->sharpness_level = 0;
@@ -174,7 +170,7 @@ void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   best_err = calc_partial_ssl_err(sd, cm->frame_to_show, 3);
 
   //  Re-instate the unfiltered frame
-  vp9_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
+  vp9_yv12_copy_partial_frame(&cpi->last_frame_uf, cm->frame_to_show, 3);
 
   filt_val -= (1 + ((filt_val > 10) ? 1 : 0));
 
@@ -187,7 +183,7 @@ void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
     filt_err = calc_partial_ssl_err(sd, cm->frame_to_show, 3);
 
     //  Re-instate the unfiltered frame
-    vp9_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
+    vp9_yv12_copy_partial_frame(&cpi->last_frame_uf, cm->frame_to_show, 3);
 
 
     // Update the best case record or exit loop.
@@ -216,7 +212,7 @@ void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
       filt_err = calc_partial_ssl_err(sd, cm->frame_to_show, 3);
 
       //  Re-instate the unfiltered frame
-      vp9_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf,
+      vp9_yv12_copy_partial_frame(&cpi->last_frame_uf,
                                       cm->frame_to_show, 3);
 
       // Update the best case record or exit loop.

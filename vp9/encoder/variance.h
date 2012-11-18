@@ -38,7 +38,7 @@ typedef void (*vp9_sad_multi1_fn_t)(const unsigned char *src_ptr,
 
 typedef void (*vp9_sad_multi_d_fn_t)(const unsigned char *src_ptr,
                                      int source_stride,
-                                     const unsigned char * const ref_ptr[],
+                                     const unsigned char ** ref_ptr,
                                      int  ref_stride, unsigned int *sad_array);
 
 typedef unsigned int (*vp9_variance_fn_t)(const unsigned char *src_ptr,
