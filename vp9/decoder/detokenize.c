@@ -124,14 +124,14 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
                         PLANE_TYPE type,
                         TX_TYPE tx_type,
                         int seg_eob, INT16 *qcoeff_ptr,
-                        const int *const scan, int block_type,
+                        const int *const scan, TX_SIZE txfm_size,
                         const int *coef_bands) {
   FRAME_CONTEXT *const fc = &dx->common.fc;
   int pt, c = (type == PLANE_TYPE_Y_NO_DC);
   vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][ENTROPY_NODES], *prob;
   unsigned int (*coef_counts)[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
 
-  switch (block_type) {
+  switch (txfm_size) {
     default:
     case TX_4X4:
       if (tx_type == DCT_DCT) {
