@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//vik\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-11-19T19:06:35Z",
+      "side": 1,
+      "message": "${@:.d\u003d.o} should do.",
+      "revId": "52dcf91b35349e20d4a528e5805ee393f1c56dbf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
