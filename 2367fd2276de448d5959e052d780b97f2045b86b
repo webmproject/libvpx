@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//vvo\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-11-19T15:03:01Z",
+      "side": 1,
+      "message": "Are these calculations safe in terms of overflowing the uint_8 type before the \u003e\u003e 1. I guess the carry bit should take care of it?",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
