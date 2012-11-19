@@ -34,6 +34,24 @@
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//vu4\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-19T15:51:19Z",
+      "side": 1,
+      "message": "Yes, they\u0027re promoted to int before the math, then truncated on store.",
+      "parentUuid": "AAAAQ3//vvY\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
