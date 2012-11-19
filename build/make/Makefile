@@ -112,7 +112,7 @@ $(BUILD_PFX)$(call xform_obj_path,$(1))%.c.d: $(1)%.c
 	$(qexec)mkdir -p $$(dir $$@)
 	$(qexec)$(CC) $$(INTERNAL_CFLAGS) $$(CFLAGS) -M $$< | $(fmt_deps) > $$@
 
-$(BUILD_PFX)$(call xform_obj_path,$(1))%.c.o: $(1)%.c $(BUILD_PFX)$(call xform_obj_path,$(1))%.c.d
+$(BUILD_PFX)$(call xform_obj_path,$(1))%.c.o: $(1)%.c
 	$(if $(quiet),@echo "    [CC] $$@")
 	$(qexec)$(CC) $$(INTERNAL_CFLAGS) $$(CFLAGS) -c -o $$@ $$<
 
