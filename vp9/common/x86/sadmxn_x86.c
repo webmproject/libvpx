@@ -30,9 +30,9 @@ unsigned int vp9_sad16x3_sse2(
   s1 = _mm_loadu_si128((const __m128i *)(src_ptr + 1 * src_stride));
   s2 = _mm_loadu_si128((const __m128i *)(src_ptr + 2 * src_stride));
 
-  r0 = _mm_loadu_si128((const __m128i *)(ref_ptr + 0 * src_stride));
-  r1 = _mm_loadu_si128((const __m128i *)(ref_ptr + 1 * src_stride));
-  r2 = _mm_loadu_si128((const __m128i *)(ref_ptr + 2 * src_stride));
+  r0 = _mm_loadu_si128((const __m128i *)(ref_ptr + 0 * ref_stride));
+  r1 = _mm_loadu_si128((const __m128i *)(ref_ptr + 1 * ref_stride));
+  r2 = _mm_loadu_si128((const __m128i *)(ref_ptr + 2 * ref_stride));
 
   sad = _mm_sad_epu8(s0, r0);
   sad = _mm_add_epi16(sad,  _mm_sad_epu8(s1, r1));
@@ -57,10 +57,10 @@ unsigned int vp9_sad3x16_sse2(
     s1 = _mm_cvtsi32_si128 (*(const int *)(src_ptr + 1 * src_stride));
     s2 = _mm_cvtsi32_si128 (*(const int *)(src_ptr + 2 * src_stride));
     s3 = _mm_cvtsi32_si128 (*(const int *)(src_ptr + 3 * src_stride));
-    r0 = _mm_cvtsi32_si128 (*(const int *)(ref_ptr + 0 * src_stride));
-    r1 = _mm_cvtsi32_si128 (*(const int *)(ref_ptr + 1 * src_stride));
-    r2 = _mm_cvtsi32_si128 (*(const int *)(ref_ptr + 2 * src_stride));
-    r3 = _mm_cvtsi32_si128 (*(const int *)(ref_ptr + 3 * src_stride));
+    r0 = _mm_cvtsi32_si128 (*(const int *)(ref_ptr + 0 * ref_stride));
+    r1 = _mm_cvtsi32_si128 (*(const int *)(ref_ptr + 1 * ref_stride));
+    r2 = _mm_cvtsi32_si128 (*(const int *)(ref_ptr + 2 * ref_stride));
+    r3 = _mm_cvtsi32_si128 (*(const int *)(ref_ptr + 3 * ref_stride));
 
     s0 = _mm_unpacklo_epi8(s0, s1);
     r0 = _mm_unpacklo_epi8(r0, r1);
