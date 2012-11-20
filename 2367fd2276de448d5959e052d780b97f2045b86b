@@ -2,6 +2,278 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAQ3//uys\u003d",
+        "filename": "vp9/common/common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "uint8_t ?",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uyo\u003d",
+        "filename": "vp9/common/common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "return (val \u003e 255) ? 255u : (val \u003c 0) ? 0u : val;",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uyk\u003d",
+        "filename": "vp9/common/entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "note that the calculation of \u0027prob\u0027 itself could be blended into a function of it self.\n\ncm-\u003efc.coef_probs_8x8[i][j][k][t] \u003d calc_prob(\n    cm-\u003efc.pre_coef_probs_8x8[i][j][k][t],\n    coef_probs[t],\n    factor);",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uyg\u003d",
+        "filename": "vp9/common/entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "ditto. calc_prob()\n\n(and below)",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uyY\u003d",
+        "filename": "vp9/common/entropymv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "ditto. calc_prob(prep, newp, factor).",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxs\u003d",
+        "filename": "vp9/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "const uint8_t* src_ptr",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//ux4\u003d",
+        "filename": "vp9/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "no need for \u0027unsigned\u0027.",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uyA\u003d",
+        "filename": "vp9/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "use lower case variable.\nextra space.",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uyI\u003d",
+        "filename": "vp9/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "note that the shit by VP9_FILTER_SHIFT could be blended in the function itself:\n\nreturn (val \u003e (255 \u003c\u003c VP9_FILTER_SHIFT)) ? 255 : (val \u003c 0) ? 0u : (val \u003e\u003e VP9_FILTER_SHIFT);\n\n\nto save few shifts sometimes.\n\nAlso, why clip since output is \u0027int\u0027 ? Can the clipping be delayed to a later stage?",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxw\u003d",
+        "filename": "vp9/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "const uint8_t* src_ptr",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxo\u003d",
+        "filename": "vp9/common/idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "const uint8_t* pred_ptr",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxk\u003d",
+        "filename": "vp9/common/idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "uint8_t* dst\n\n(later)",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxg\u003d",
+        "filename": "vp9/common/recon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "const uint8_t* pred_ptr etc...",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxQ\u003d",
+        "filename": "vp9/common/reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "use lower case naming.",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxM\u003d",
+        "filename": "vp9/common/reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "const uint8_t* pSrc",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxU\u003d",
+        "filename": "vp9/common/reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "pred_filter[] only has positive values, and is normalized to 4 bits (filt_shift). So, no need to clip the sum.",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//vvo\u003d",
         "filename": "vp9/common/reconintra.c",
         "patchSetId": 1
@@ -49,6 +321,75 @@
       "side": 1,
       "message": "Yes, they\u0027re promoted to int before the math, then truncated on store.",
       "parentUuid": "AAAAQ3//vvY\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uy0\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "you could use local variable to make it clearer (and break long line):\n\nconst int a \u003d ypred_ptr[(r - 1) * y_stride + c];\nconst int b \u003d ypred_ptr[r * y_stride + c - 1]\nypred_ptr[r * y_stride + c] \u003d (a + b + 1) \u003e\u003e 1;",
+      "parentUuid": "AAAAQ3//vu4\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uyw\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "extra space after \u0027[\u0027 and before \u0027c\u0027",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxI\u003d",
+        "filename": "vp9/common/reconintra4x4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "lower case naming ...",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//uxE\u003d",
+        "filename": "vp9/common/treecoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-20T16:06:43Z",
+      "side": 1,
+      "message": "do you really need to clip, in practice? Won\u0027t num be always less or equal to den?",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
