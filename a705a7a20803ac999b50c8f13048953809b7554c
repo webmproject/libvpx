@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//tgA\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T21:19:29Z",
+      "side": 1,
+      "message": "const int",
+      "revId": "a705a7a20803ac999b50c8f13048953809b7554c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//tfE\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T21:19:29Z",
+      "side": 1,
+      "message": "the method i was thinking of was to replace the _mm_unpacklo_epi64 at line 79-80 by _mm_unpacklo_epi8.\nThen all the discardable bytes would be in the same uint32 higher qword.\n\nThen, you could use some _mm_shuffle_pd() to shuffle the higher qword of r0 into s0, giving a neutral combination to the SAD operation.",
+      "revId": "a705a7a20803ac999b50c8f13048953809b7554c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
