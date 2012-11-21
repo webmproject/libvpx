@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//toY\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T20:17:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//tro\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//tr4\u003d",
         "filename": "vp9/common/x86/sadmxn_x86.c",
         "patchSetId": 1
@@ -208,6 +226,24 @@
       "side": 1,
       "message": "I will try to see which is faster.\nFor ref, the offset can be any - that is why I only aligned src.",
       "parentUuid": "AAAAQ3//tr8\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//tlI\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T20:17:34Z",
+      "side": 1,
+      "message": "Reading in 16 bytes didn\u0027t give better performance. Here is the related code for reference:\n\n  int offset \u003d (uintptr_t)src_ptr \u0026 3;\n\n  if (offset \u003d\u003d 1)\n    src_ptr -\u003d 13;\n\n  for (r \u003d 0; r \u003c 16; r +\u003d 4) {\n    s0 \u003d _mm_loadu_si128 ((__m128i *)(src_ptr + 0 * src_stride));\n    s1 \u003d _mm_loadu_si128 ((__m128i *)(src_ptr + 1 * src_stride));\n    s2 \u003d _mm_loadu_si128 ((__m128i *)(src_ptr + 2 * src_stride));\n    s3 \u003d _mm_loadu_si128 ((__m128i *)(src_ptr + 3 * src_stride));\n    r0 \u003d _mm_loadu_si128 ((__m128i *)(ref_ptr + 0 * ref_stride));\n    r1 \u003d _mm_loadu_si128 ((__m128i *)(ref_ptr + 1 * ref_stride));\n    r2 \u003d _mm_loadu_si128 ((__m128i *)(ref_ptr + 2 * ref_stride));\n    r3 \u003d _mm_loadu_si128 ((__m128i *)(ref_ptr + 3 * ref_stride));\n\n    s0 \u003d _mm_unpackhi_epi8(s0, s1);\n    r0 \u003d _mm_unpacklo_epi8(r0, r1);\n    s2 \u003d _mm_unpackhi_epi8(s2, s3);\n    r2 \u003d _mm_unpacklo_epi8(r2, r3);\n    s0 \u003d _mm_unpackhi_epi64(s0, s2);\n    r0 \u003d _mm_unpacklo_epi64(r0, r2);\n\n    // throw out extra byte\n    if (offset \u003d\u003d 1)\n      s0 \u003d _mm_srli_epi64(s0, 16);\n    s0 \u003d _mm_slli_epi64(s0, 16);\n    r0 \u003d _mm_slli_epi64(r0, 16);",
+      "parentUuid": "AAAAQ3//trU\u003d",
       "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
