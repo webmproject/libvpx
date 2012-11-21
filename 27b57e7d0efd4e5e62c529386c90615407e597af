@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//tuI\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T16:44:13Z",
+      "side": 1,
+      "message": "which x86 platform did you test on? I\u0027m not sure it\u0027s still true for Core2 and up...",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//tuE\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T16:44:13Z",
+      "side": 1,
+      "message": "i\u0027m also surprised the offset\u003d3 case doesn\u0027t show slowdown, too, similar to the offset\u003d1 case.",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//tuU\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T16:44:13Z",
+      "side": 1,
+      "message": "is src_stride always guarantied to be 16-byte (or 4-byte at least) aligned?",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//tuA\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T16:44:13Z",
+      "side": 1,
+      "message": "use some pshufw instead for block 82-\u003e85?",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
