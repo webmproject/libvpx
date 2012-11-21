@@ -389,9 +389,9 @@ int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
   return eobtotal;
 }
 
-static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
-                            BOOL_DECODER* const bc,
-                            PLANE_TYPE type, int i) {
+int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
+                         BOOL_DECODER* const bc,
+                         PLANE_TYPE type, int i) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
   ENTROPY_CONTEXT *const a = A + vp9_block2above[i];
@@ -424,6 +424,17 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
   return c;
 }
 
+int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx,
+                                MACROBLOCKD* const xd,
+                                BOOL_DECODER* const bc) {
+  int eobtotal = 0, i;
+
+  for (i = 16; i < 24; i++)
+    eobtotal += vp9_decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_UV, i);
+
+  return eobtotal;
+}
+
 int vp9_decode_mb_tokens_4x4(VP9D_COMP* const dx,
                              MACROBLOCKD* const xd,
                              BOOL_DECODER* const bc) {
@@ -433,17 +444,15 @@ int vp9_decode_mb_tokens_4x4(VP9D_COMP* const dx,
   if (xd->mode_info_context->mbmi.mode != B_PRED &&
       xd->mode_info_context->mbmi.mode != I8X8_PRED &&
       xd->mode_info_context->mbmi.mode != SPLITMV) {
-    eobtotal += decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_Y2, 24) - 16;
+    eobtotal += vp9_decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_Y2, 24) - 16;
     type = PLANE_TYPE_Y_NO_DC;
   } else {
     type = PLANE_TYPE_Y_WITH_DC;
   }
 
   for (i = 0; i < 16; ++i) {
-    eobtotal += decode_coefs_4x4(dx, xd, bc, type, i);
+    eobtotal += vp9_decode_coefs_4x4(dx, xd, bc, type, i);
   }
-  do {
-    eobtotal += decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_UV, i);
-  } while (++i < 24);
-  return eobtotal;
+
+  return eobtotal + vp9_decode_mb_tokens_4x4_uv(dx, xd, bc);
 }
