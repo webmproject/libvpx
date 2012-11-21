@@ -10,7 +10,6 @@
 
 #include "vpx_config.h"
 #include "vpx_ports/x86.h"
-#include "vp9/common/subpixel.h"
 #include "vp9/common/loopfilter.h"
 #include "vp9/common/idct.h"
 #include "vp9/common/pragmas.h"
@@ -38,17 +37,6 @@ void vp9_arch_x86_common_init(VP9_COMMON *ctx) {
     // rtcd->idct.iwalsh16     = vp9_short_inv_walsh4x4_mmx;
     // rtcd->idct.iwalsh1     = vp9_short_inv_walsh4x4_1_mmx;
 
-    /* Disabled due to unsupported enhanced interpolation/high_prec mv
-    rtcd->subpix.sixtap16x16   = vp9_sixtap_predict16x16_mmx;
-    rtcd->subpix.sixtap8x8     = vp9_sixtap_predict8x8_mmx;
-    rtcd->subpix.sixtap8x4     = vp9_sixtap_predict8x4_mmx;
-    rtcd->subpix.sixtap4x4     = vp9_sixtap_predict4x4_mmx;
-    */
-    rtcd->subpix.bilinear16x16 = vp9_bilinear_predict16x16_mmx;
-    rtcd->subpix.bilinear8x8   = vp9_bilinear_predict8x8_mmx;
-    rtcd->subpix.bilinear8x4   = vp9_bilinear_predict8x4_mmx;
-    rtcd->subpix.bilinear4x4   = vp9_bilinear_predict4x4_mmx;
-
 #if CONFIG_POSTPROC
     rtcd->postproc.down        = vp9_mbpost_proc_down_mmx;
     /*rtcd->postproc.across      = vp9_mbpost_proc_across_ip_c;*/
@@ -65,14 +53,6 @@ void vp9_arch_x86_common_init(VP9_COMMON *ctx) {
 
     // rtcd->idct.iwalsh16     = vp9_short_inv_walsh4x4_sse2;
 
-    /* Disabled due to unsupported enhanced interpolation/high_prec mv
-    rtcd->subpix.sixtap16x16   = vp9_sixtap_predict16x16_sse2;
-    rtcd->subpix.sixtap8x8     = vp9_sixtap_predict8x8_sse2;
-    rtcd->subpix.sixtap8x4     = vp9_sixtap_predict8x4_sse2;
-    */
-    rtcd->subpix.bilinear16x16 = vp9_bilinear_predict16x16_sse2;
-    rtcd->subpix.bilinear8x8   = vp9_bilinear_predict8x8_sse2;
-
 #if CONFIG_POSTPROC
     rtcd->postproc.down        = vp9_mbpost_proc_down_xmm;
     rtcd->postproc.across      = vp9_mbpost_proc_across_ip_xmm;
@@ -86,14 +66,6 @@ void vp9_arch_x86_common_init(VP9_COMMON *ctx) {
 #if HAVE_SSSE3
 
   if (flags & HAS_SSSE3) {
-    /* Disabled due to unsupported enhanced interpolation/high_prec mv
-    rtcd->subpix.sixtap16x16   = vp9_sixtap_predict16x16_ssse3;
-    rtcd->subpix.sixtap8x8     = vp9_sixtap_predict8x8_ssse3;
-    rtcd->subpix.sixtap8x4     = vp9_sixtap_predict8x4_ssse3;
-    rtcd->subpix.sixtap4x4     = vp9_sixtap_predict4x4_ssse3;
-    rtcd->subpix.bilinear16x16 = vp9_bilinear_predict16x16_ssse3;
-    rtcd->subpix.bilinear8x8   = vp9_bilinear_predict8x8_ssse3;
-    */
 
     /* these are disable because of unsupported diagonal pred modes
     rtcd->recon.build_intra_predictors_mbuv =

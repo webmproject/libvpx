@@ -35,36 +35,6 @@ void vp9_machine_specific_config(VP9_COMMON *ctx) {
   rtcd->idct.idct16x16    = vp9_short_idct16x16_c;
   rtcd->idct.idct10_16x16 = vp9_short_idct10_16x16_c;
 
-  rtcd->subpix.eighttap16x16       = vp9_eighttap_predict16x16_c;
-  rtcd->subpix.eighttap8x8         = vp9_eighttap_predict8x8_c;
-  rtcd->subpix.eighttap_avg16x16   = vp9_eighttap_predict_avg16x16_c;
-  rtcd->subpix.eighttap_avg8x8     = vp9_eighttap_predict_avg8x8_c;
-  rtcd->subpix.eighttap_avg4x4     = vp9_eighttap_predict_avg4x4_c;
-  rtcd->subpix.eighttap8x4         = vp9_eighttap_predict8x4_c;
-  rtcd->subpix.eighttap4x4         = vp9_eighttap_predict_c;
-  rtcd->subpix.eighttap16x16_sharp     = vp9_eighttap_predict16x16_sharp_c;
-  rtcd->subpix.eighttap8x8_sharp       = vp9_eighttap_predict8x8_sharp_c;
-  rtcd->subpix.eighttap_avg16x16_sharp = vp9_eighttap_predict_avg16x16_sharp_c;
-  rtcd->subpix.eighttap_avg8x8_sharp   = vp9_eighttap_predict_avg8x8_sharp_c;
-  rtcd->subpix.eighttap_avg4x4_sharp   = vp9_eighttap_predict_avg4x4_sharp_c;
-  rtcd->subpix.eighttap8x4_sharp       = vp9_eighttap_predict8x4_sharp_c;
-  rtcd->subpix.eighttap4x4_sharp       = vp9_eighttap_predict_sharp_c;
-
-  rtcd->subpix.sixtap16x16       = vp9_sixtap_predict16x16_c;
-  rtcd->subpix.sixtap8x8         = vp9_sixtap_predict8x8_c;
-  rtcd->subpix.sixtap_avg16x16   = vp9_sixtap_predict_avg16x16_c;
-  rtcd->subpix.sixtap_avg8x8     = vp9_sixtap_predict_avg8x8_c;
-  rtcd->subpix.sixtap8x4         = vp9_sixtap_predict8x4_c;
-  rtcd->subpix.sixtap4x4         = vp9_sixtap_predict_c;
-  rtcd->subpix.sixtap_avg4x4     = vp9_sixtap_predict_avg_c;
-  rtcd->subpix.bilinear16x16     = vp9_bilinear_predict16x16_c;
-  rtcd->subpix.bilinear8x8       = vp9_bilinear_predict8x8_c;
-  rtcd->subpix.bilinear_avg16x16 = vp9_bilinear_predict_avg16x16_c;
-  rtcd->subpix.bilinear_avg8x8   = vp9_bilinear_predict_avg8x8_c;
-  rtcd->subpix.bilinear8x4       = vp9_bilinear_predict8x4_c;
-  rtcd->subpix.bilinear4x4       = vp9_bilinear_predict4x4_c;
-  rtcd->subpix.bilinear_avg4x4   = vp9_bilinear_predict_avg4x4_c;
-
 #if CONFIG_POSTPROC || (CONFIG_VP9_ENCODER && CONFIG_INTERNAL_STATS)
   rtcd->postproc.down             = vp9_mbpost_proc_down_c;
   rtcd->postproc.across           = vp9_mbpost_proc_across_ip_c;

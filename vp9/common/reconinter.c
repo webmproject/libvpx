@@ -11,7 +11,6 @@
 
 #include "vpx_ports/config.h"
 #include "vpx/vpx_integer.h"
-#include "subpixel.h"
 #include "blockd.h"
 #include "reconinter.h"
 #include "vp9/common/reconintra.h"
@@ -23,66 +22,38 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,
                               VP9_COMMON *cm) {
   if (mcomp_filter_type == SIXTAP) {
-    xd->subpixel_predict        = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, sixtap4x4);
-    xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, sixtap8x4);
-    xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, sixtap8x8);
-    xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, sixtap16x16);
-    xd->subpixel_predict_avg    = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, sixtap_avg4x4);
-    xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, sixtap_avg8x8);
-    xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, sixtap_avg16x16);
+    xd->subpixel_predict        = vp9_sixtap_predict;
+    xd->subpixel_predict8x4     = vp9_sixtap_predict8x4;
+    xd->subpixel_predict8x8     = vp9_sixtap_predict8x8;
+    xd->subpixel_predict16x16   = vp9_sixtap_predict16x16;
+    xd->subpixel_predict_avg    = vp9_sixtap_predict_avg;
+    xd->subpixel_predict_avg8x8 = vp9_sixtap_predict_avg8x8;
+    xd->subpixel_predict_avg16x16 = vp9_sixtap_predict_avg16x16;
   } else if (mcomp_filter_type == EIGHTTAP || mcomp_filter_type == SWITCHABLE) {
-    xd->subpixel_predict        = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap4x4);
-    xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap8x4);
-    xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap8x8);
-    xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap16x16);
-    xd->subpixel_predict_avg    = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap_avg4x4);
-    xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap_avg8x8);
-    xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap_avg16x16);
+    xd->subpixel_predict        = vp9_eighttap_predict;
+    xd->subpixel_predict8x4     = vp9_eighttap_predict8x4;
+    xd->subpixel_predict8x8     = vp9_eighttap_predict8x8;
+    xd->subpixel_predict16x16   = vp9_eighttap_predict16x16;
+    xd->subpixel_predict_avg    = vp9_eighttap_predict_avg4x4;
+    xd->subpixel_predict_avg8x8 = vp9_eighttap_predict_avg8x8;
+    xd->subpixel_predict_avg16x16 = vp9_eighttap_predict_avg16x16;
   } else if (mcomp_filter_type == EIGHTTAP_SHARP) {
-    xd->subpixel_predict        = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap4x4_sharp);
-    xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap8x4_sharp);
-    xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap8x8_sharp);
-    xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap16x16_sharp);
-    xd->subpixel_predict_avg    = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap_avg4x4_sharp);
-    xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap_avg8x8_sharp);
-    xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, eighttap_avg16x16_sharp);
+    xd->subpixel_predict        = vp9_eighttap_predict_sharp;
+    xd->subpixel_predict8x4     = vp9_eighttap_predict8x4_sharp;
+    xd->subpixel_predict8x8     = vp9_eighttap_predict8x8_sharp;
+    xd->subpixel_predict16x16   = vp9_eighttap_predict16x16_sharp;
+    xd->subpixel_predict_avg    = vp9_eighttap_predict_avg4x4_sharp;
+    xd->subpixel_predict_avg8x8 = vp9_eighttap_predict_avg8x8_sharp;
+    xd->subpixel_predict_avg16x16 = vp9_eighttap_predict_avg16x16_sharp_c;
   }
   else {
-    xd->subpixel_predict        = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, bilinear4x4);
-    xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, bilinear8x4);
-    xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, bilinear8x8);
-    xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, bilinear16x16);
-    xd->subpixel_predict_avg    = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, bilinear_avg4x4);
-    xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, bilinear_avg8x8);
-    xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-        &cm->rtcd.subpix, bilinear_avg16x16);
+    xd->subpixel_predict        = vp9_bilinear_predict4x4;
+    xd->subpixel_predict8x4     = vp9_bilinear_predict8x4;
+    xd->subpixel_predict8x8     = vp9_bilinear_predict8x8;
+    xd->subpixel_predict16x16   = vp9_bilinear_predict16x16;
+    xd->subpixel_predict_avg    = vp9_bilinear_predict_avg4x4;
+    xd->subpixel_predict_avg8x8 = vp9_bilinear_predict_avg8x8;
+    xd->subpixel_predict_avg16x16 = vp9_bilinear_predict_avg16x16;
   }
 }
 

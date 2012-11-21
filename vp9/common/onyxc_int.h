@@ -149,7 +149,6 @@ typedef enum {
 typedef struct VP9_COMMON_RTCD {
 #if CONFIG_RUNTIME_CPU_DETECT
   vp9_idct_rtcd_vtable_t        idct;
-  vp9_subpix_rtcd_vtable_t      subpix;
 #if CONFIG_POSTPROC
   vp9_postproc_rtcd_vtable_t    postproc;
 #endif
