@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//tro\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T18:02:54Z",
+      "side": 1,
+      "message": "Yes. Will add \n(void)max_sad;\nIn some mmx sad code, max_sad is used to check for an early exit.\nI will see if we can remove it since it is not used here.",
+      "parentUuid": "AAAAQ3//tsI\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//tr4\u003d",
         "filename": "vp9/common/x86/sadmxn_x86.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-21T17:37:13Z",
       "side": 1,
       "message": "_mm_setzero_si128()",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//trk\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T18:02:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//tr4\u003d",
       "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -89,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//trg\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T18:02:54Z",
+      "side": 1,
+      "message": "Will look at that later. Thanks.",
+      "parentUuid": "AAAAQ3//tsM\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//tuE\u003d",
         "filename": "vp9/common/x86/sadmxn_x86.c",
         "patchSetId": 1
@@ -136,6 +190,24 @@
       "side": 1,
       "message": "oh, i see. You should make it clear in the comment at line 58-59.\n\nBtw, maybe loading the full 16 pixels (instead of partially 4 bytes) is faster. The memory for bytes 4..15 is valid in both src_ptr/ref_pref, so that\u0027s ok.\n\n_mm_loadu_si128 could be faster than _mm_cvtsi32_si128, not sure.",
       "parentUuid": "AAAAQ3//ttw\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//trU\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T18:02:54Z",
+      "side": 1,
+      "message": "I will try to see which is faster.\nFor ref, the offset can be any - that is why I only aligned src.",
+      "parentUuid": "AAAAQ3//tr8\u003d",
       "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +295,24 @@
       "writtenOn": "2012-11-21T17:37:13Z",
       "side": 1,
       "message": "note: since you\u0027re taking the SAD between s0 and r0, you don\u0027t need to shift both. You could just move the low-byte from r0 to s0.\nThen the partial SAD would be zero and wouldn\u0027t contribute to the total SAD.",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//tqs\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T18:02:54Z",
+      "side": 1,
+      "message": "Could you explain how to do it? (Now we only use 2 shift instructions.)",
+      "parentUuid": "AAAAQ3//ts0\u003d",
       "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
