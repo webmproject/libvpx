@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAQ3//tsI\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T17:37:13Z",
+      "side": 1,
+      "message": "note, max_sad is not used (and in  vp9_sad16x3_sse2 above, too)",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//tr4\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T17:37:13Z",
+      "side": 1,
+      "message": "_mm_setzero_si128()",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//tuI\u003d",
         "filename": "vp9/common/x86/sadmxn_x86.c",
         "patchSetId": 1
@@ -37,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//tsM\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T17:37:13Z",
+      "side": 1,
+      "message": "speaking of which, you should pass the number of lines to be processed (16 or 32) as a parameter, instead of calling twice this function from findnearmv.c",
+      "parentUuid": "AAAAQ3//tt0\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//tuE\u003d",
         "filename": "vp9/common/x86/sadmxn_x86.c",
         "patchSetId": 1
@@ -66,6 +118,24 @@
       "side": 1,
       "message": "As mentioned above, we only have 2 offset cases: 1 or 2. There is no offset\u003d3 in our use case.",
       "parentUuid": "AAAAQ3//tuE\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//tr8\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T17:37:13Z",
+      "side": 1,
+      "message": "oh, i see. You should make it clear in the comment at line 58-59.\n\nBtw, maybe loading the full 16 pixels (instead of partially 4 bytes) is faster. The memory for bytes 4..15 is valid in both src_ptr/ref_pref, so that\u0027s ok.\n\n_mm_loadu_si128 could be faster than _mm_cvtsi32_si128, not sure.",
+      "parentUuid": "AAAAQ3//ttw\u003d",
       "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -136,6 +206,23 @@
       "side": 1,
       "message": "Will try it. Thanks.",
       "parentUuid": "AAAAQ3//tuA\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//ts0\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-11-21T17:37:13Z",
+      "side": 1,
+      "message": "note: since you\u0027re taking the SAD between s0 and r0, you don\u0027t need to shift both. You could just move the low-byte from r0 to s0.\nThen the partial SAD would be zero and wouldn\u0027t contribute to the total SAD.",
       "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
