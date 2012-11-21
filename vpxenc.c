@@ -2284,8 +2284,9 @@ static void get_cx_data(struct stream_state  *stream,
             break;
         case VPX_CODEC_STATS_PKT:
             stream->frames_out++;
-            fprintf(stderr, " %6luS",
-                   (unsigned long)pkt->data.twopass_stats.sz);
+            if (!global->quiet)
+                fprintf(stderr, " %6luS",
+                       (unsigned long)pkt->data.twopass_stats.sz);
             stats_write(&stream->stats,
                         pkt->data.twopass_stats.buf,
                         pkt->data.twopass_stats.sz);
