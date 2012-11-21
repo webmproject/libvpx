@@ -1442,7 +1442,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
       unsigned int sad_array[4];
 
       for (j = 0; j < x->searches_per_step; j += 4) {
-        const unsigned char *block_offset[4];
+        unsigned char const *block_offset[4];
 
         for (t = 0; t < 4; t++)
           block_offset[t] = ss[i + t].offset + best_address;
