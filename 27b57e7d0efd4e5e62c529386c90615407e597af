@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//tt0\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T17:14:03Z",
+      "side": 1,
+      "message": "This function is called 2 places. With CONFIG_SUBPELREFMV on, the unaligned offset of src_ptr \u003d 2, otherwise, the offset \u003d 1.\nFor offset\u003d1, it is easy to do an aligned read and throw the least byte, which is what this change is for. I didn\u0027t do anything for offset\u003d2 since I will need to do 2 4-byte aligned reads to be able to get all 3-bytes we want.\n\nI am testing on my desktop. Not sure I understand your question.",
+      "parentUuid": "AAAAQ3//tuI\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//tuE\u003d",
         "filename": "vp9/common/x86/sadmxn_x86.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-21T16:44:13Z",
       "side": 1,
       "message": "i\u0027m also surprised the offset\u003d3 case doesn\u0027t show slowdown, too, similar to the offset\u003d1 case.",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//ttw\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T17:14:03Z",
+      "side": 1,
+      "message": "As mentioned above, we only have 2 offset cases: 1 or 2. There is no offset\u003d3 in our use case.",
+      "parentUuid": "AAAAQ3//tuE\u003d",
       "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//tts\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T17:14:03Z",
+      "side": 1,
+      "message": "16-byte aligned.",
+      "parentUuid": "AAAAQ3//tuU\u003d",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//tuA\u003d",
         "filename": "vp9/common/x86/sadmxn_x86.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2012-11-21T16:44:13Z",
       "side": 1,
       "message": "use some pshufw instead for block 82-\u003e85?",
+      "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//ttg\u003d",
+        "filename": "vp9/common/x86/sadmxn_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-11-21T17:14:03Z",
+      "side": 1,
+      "message": "Will try it. Thanks.",
+      "parentUuid": "AAAAQ3//tuA\u003d",
       "revId": "27b57e7d0efd4e5e62c529386c90615407e597af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
