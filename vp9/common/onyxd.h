@@ -42,7 +42,7 @@ extern "C"
   void vp9_initialize_dec(void);
 
   int vp9_receive_compressed_data(VP9D_PTR comp, unsigned long size,
-                                  const unsigned char *dest,
+                                  const unsigned char **dest,
                                   int64_t time_stamp);
 
   int vp9_get_raw_frame(VP9D_PTR comp, YV12_BUFFER_CONFIG *sd,

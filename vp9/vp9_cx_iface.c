@@ -77,8 +77,8 @@ struct vpx_codec_alg_priv {
   VP9_PTR             cpi;
   unsigned char          *cx_data;
   unsigned int            cx_data_sz;
-  unsigned char           *altref_cx_data;
-  unsigned int            altref_size;
+  unsigned char          *pending_cx_data;
+  unsigned int            pending_cx_data_sz;
   vpx_image_t             preview_img;
   unsigned int            next_frame_flag;
   vp8_postproc_cfg_t      preview_ppcfg;
@@ -577,19 +577,6 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
   }
 }
 
-static void append_length(unsigned char* cx_data, unsigned long int *cx_size) {
-  unsigned char chunk;
-  unsigned int offset = 0;
-  unsigned long int size = *cx_size;
-  do {
-    chunk = size & 0x7F;
-    size >>= 7;
-    chunk |= (offset == 0) << 7;
-    cx_data[offset] = chunk;
-    offset++;
-  } while (size);
-  *cx_size += offset;
-}
 
 static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                                    const vpx_image_t     *img,
@@ -693,14 +680,24 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
       ctx->next_frame_flag = 0;
     }
 
+    cx_data = ctx->cx_data;
+    cx_data_sz = ctx->cx_data_sz;
     lib_flags = 0;
 
-    if (ctx->altref_size) {
-      cx_data = ctx->altref_cx_data + ctx->altref_size;
-      cx_data_sz = ctx->cx_data_sz - ctx->altref_size;
-    } else {
-      cx_data = ctx->cx_data;
-      cx_data_sz = ctx->cx_data_sz;
+    /* Any pending invisible frames? */
+    if (ctx->pending_cx_data) {
+      memmove(cx_data, ctx->pending_cx_data, ctx->pending_cx_data_sz);
+      ctx->pending_cx_data = cx_data;
+      cx_data += ctx->pending_cx_data_sz;
+      cx_data_sz -= ctx->pending_cx_data_sz;
+
+      /* TODO: this is a minimal check, the underlying codec doesn't respect
+       * the buffer size anyway.
+       */
+      if (cx_data_sz < ctx->cx_data_sz / 2) {
+        ctx->base.err_detail = "Compressed data buffer too small";
+        return VPX_CODEC_ERROR;
+      }
     }
 
     while (cx_data_sz >= ctx->cx_data_sz / 2 &&
@@ -712,13 +709,11 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_cx_pkt_t pkt;
         VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
 
-        /* TODO(jkoleszar): for now we append lengths to all frames, revisit
-         * this later to ensure if this is necessary */
-        append_length(cx_data + size, &size);
-
+        /* Pack invisible frames with the next visisble frame */
         if (!cpi->common.show_frame) {
-          ctx->altref_cx_data = cx_data;
-          ctx->altref_size = size;
+          if (!ctx->pending_cx_data)
+            ctx->pending_cx_data = cx_data;
+          ctx->pending_cx_data_sz += size;
           cx_data += size;
           cx_data_sz -= size;
           continue;
@@ -777,14 +772,14 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         }
         else*/
         {
-          if (ctx->altref_size) {
-            pkt.data.frame.sz = ctx->altref_size + size;
-            pkt.data.frame.buf = ctx->altref_cx_data;
-            ctx->altref_size = 0;
-            ctx->altref_cx_data = NULL;
+          if (ctx->pending_cx_data) {
+            pkt.data.frame.buf = ctx->pending_cx_data;
+            pkt.data.frame.sz  = ctx->pending_cx_data_sz + size;
+            ctx->pending_cx_data = NULL;
+            ctx->pending_cx_data_sz = 0;
           } else {
             pkt.data.frame.buf = cx_data;
-            pkt.data.frame.sz = size;
+            pkt.data.frame.sz  = size;
           }
           pkt.data.frame.partition_id = -1;
           vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
