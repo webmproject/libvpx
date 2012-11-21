@@ -14,7 +14,8 @@
 #include "vp9/encoder/variance.h"
 #include "vp9/encoder/onyx_int.h"
 
-
+// TODO(jimbankoski) Consider rewriting the c to take the same values rather
+// than going through these pointer conversions
 #if HAVE_MMX
 void vp9_short_fdct8x4_mmx(short *input, short *output, int pitch) {
   vp9_short_fdct4x4_mmx(input,   output,    pitch);
@@ -75,24 +76,3 @@ void vp9_subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch) {
 }
 
 #endif
-
-void vp9_arch_x86_encoder_init(VP9_COMP *cpi) {
-#if CONFIG_RUNTIME_CPU_DETECT
-  int flags = x86_simd_caps();
-
-  /* Note:
-   *
-   * This platform can be built without runtime CPU detection as well. If
-   * you modify any of the function mappings present in this file, be sure
-   * to also update them in static mapings (<arch>/filename_<arch>.h)
-   */
-
-  /* Override default functions with fastest ones for this CPU. */
-#if HAVE_SSE2
-  if (flags & HAS_SSE2) {
-  }
-#endif
-
-
-#endif
-}
