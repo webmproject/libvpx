@@ -227,6 +227,90 @@ specialize vp9_sad16x3 sse2
 prototype unsigned int vp9_sad3x16 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
 specialize vp9_sad3x16 sse2
 
+prototype void vp9_eighttap_predict16x16 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict16x16
+
+prototype void vp9_eighttap_predict8x8 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict8x8
+
+prototype void vp9_eighttap_predict_avg16x16 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_avg16x16
+
+prototype void vp9_eighttap_predict_avg8x8 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_avg8x8
+
+prototype void vp9_eighttap_predict_avg4x4 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_avg4x4
+
+prototype void vp9_eighttap_predict8x4 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict8x4
+
+prototype void vp9_eighttap_predict "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict
+
+prototype void vp9_eighttap_predict16x16_sharp "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict16x16_sharp
+
+prototype void vp9_eighttap_predict8x8_sharp "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict8x8_sharp
+
+prototype void vp9_eighttap_predict_avg16x16_sharp "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_avg16x16_sharp
+
+prototype void vp9_eighttap_predict_avg8x8_sharp "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_avg8x8_sharp
+
+prototype void vp9_eighttap_predict_avg4x4_sharp "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_avg4x4_sharp
+
+prototype void vp9_eighttap_predict8x4_sharp "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict8x4_sharp
+
+prototype void vp9_eighttap_predict_sharp "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_sharp
+
+prototype void vp9_sixtap_predict16x16 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_sixtap_predict16x16
+
+prototype void vp9_sixtap_predict8x8 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_sixtap_predict8x8
+
+prototype void vp9_sixtap_predict_avg16x16 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_sixtap_predict_avg16x16
+
+prototype void vp9_sixtap_predict_avg8x8 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_sixtap_predict_avg8x8
+
+prototype void vp9_sixtap_predict8x4 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_sixtap_predict8x4
+
+prototype void vp9_sixtap_predict "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_sixtap_predict
+
+prototype void vp9_sixtap_predict_avg "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_sixtap_predict_avg
+
+prototype void vp9_bilinear_predict16x16 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_bilinear_predict16x16 mmx sse2
+
+prototype void vp9_bilinear_predict8x8 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_bilinear_predict8x8 mmx sse2
+
+prototype void vp9_bilinear_predict_avg16x16 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_bilinear_predict_avg16x16
+
+prototype void vp9_bilinear_predict_avg8x8 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_bilinear_predict_avg8x8
+
+prototype void vp9_bilinear_predict8x4 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_bilinear_predict8x4 mmx
+
+prototype void vp9_bilinear_predict4x4 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_bilinear_predict4x4 mmx
+
+prototype void vp9_bilinear_predict_avg4x4 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
+specialize vp9_bilinear_predict_avg4x4
+
 if [ "$CONFIG_SUPERBLOCKS" = "yes" ]; then
 
 prototype unsigned int vp9_sad32x3 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"

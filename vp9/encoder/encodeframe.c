@@ -33,7 +33,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <limits.h>
-#include "vp9/common/subpixel.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vp9/common/pred_common.h"
 #include "vp9/common/mvref_common.h"
