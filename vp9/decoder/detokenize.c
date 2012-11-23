@@ -261,49 +261,39 @@ int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
                                BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
-
   unsigned short* const eobs = xd->eobs;
-  PLANE_TYPE type;
-  int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  INT16 *qcoeff_ptr = &xd->qcoeff[0];
-  TX_TYPE tx_type = get_tx_type(xd, &xd->block[0]);
-
-  type = PLANE_TYPE_Y_WITH_DC;
-  seg_eob = get_eob(xd, segment_id, 256);
+  int c, i, eobtotal = 0, seg_eob;
 
   // Luma block
-  {
-    const int* const scan = vp9_default_zig_zag1d_16x16;
-    eobs[0] = c = decode_coefs(pbi, xd, bc, A, L, type,
-                               tx_type, seg_eob, qcoeff_ptr,
-                               scan, TX_16X16, vp9_coef_bands_16x16);
-    A[1] = A[2] = A[3] = A[0];
-    L[1] = L[2] = L[3] = L[0];
-    eobtotal += c;
-  }
+  eobs[0] = c = decode_coefs(pbi, xd, bc, A, L, PLANE_TYPE_Y_WITH_DC,
+                             get_tx_type(xd, &xd->block[0]),
+                             get_eob(xd, segment_id, 256),
+                             xd->qcoeff, vp9_default_zig_zag1d_16x16,
+                             TX_16X16, vp9_coef_bands_16x16);
+  A[1] = A[2] = A[3] = A[0];
+  L[1] = L[2] = L[3] = L[0];
+  eobtotal += c;
 
   // 8x8 chroma blocks
-  qcoeff_ptr += 256;
-  type = PLANE_TYPE_UV;
-  tx_type = DCT_DCT;
   seg_eob = get_eob(xd, segment_id, 64);
   for (i = 16; i < 24; i += 4) {
     ENTROPY_CONTEXT* const a = A + vp9_block2above_8x8[i];
     ENTROPY_CONTEXT* const l = L + vp9_block2left_8x8[i];
-    const int* const scan = vp9_default_zig_zag1d_8x8;
 
-    eobs[i] = c = decode_coefs(pbi, xd, bc, a, l, type,
-                               tx_type, seg_eob, qcoeff_ptr,
-                               scan, TX_8X8, vp9_coef_bands_8x8);
+    eobs[i] = c = decode_coefs(pbi, xd, bc, a, l, PLANE_TYPE_UV,
+                               DCT_DCT, seg_eob, xd->block[i].qcoeff,
+                               vp9_default_zig_zag1d_8x8,
+                               TX_8X8, vp9_coef_bands_8x8);
     a[1] = a[0];
     l[1] = l[0];
-
     eobtotal += c;
-    qcoeff_ptr += 64;
   }
+
+  // no Y2 block
   vpx_memset(&A[8], 0, sizeof(A[8]));
   vpx_memset(&L[8], 0, sizeof(L[8]));
+
   return eobtotal;
 }
 
