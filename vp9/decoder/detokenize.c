@@ -256,9 +256,9 @@ static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
 }
 
 
-int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
-                               MACROBLOCKD* const xd,
-                               BOOL_DECODER* const bc) {
+static int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
+                                      MACROBLOCKD* const xd,
+                                      BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
   unsigned short* const eobs = xd->eobs;
@@ -297,9 +297,9 @@ int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
   return eobtotal;
 }
 
-int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
-                             MACROBLOCKD* const xd,
-                             BOOL_DECODER* const bc) {
+static int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
+                                    MACROBLOCKD* const xd,
+                                    BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
   unsigned short *const eobs = xd->eobs;
@@ -419,9 +419,9 @@ int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx,
   return eobtotal;
 }
 
-int vp9_decode_mb_tokens_4x4(VP9D_COMP* const dx,
-                             MACROBLOCKD* const xd,
-                             BOOL_DECODER* const bc) {
+static int vp9_decode_mb_tokens_4x4(VP9D_COMP* const dx,
+                                    MACROBLOCKD* const xd,
+                                    BOOL_DECODER* const bc) {
   int i, eobtotal = 0;
   PLANE_TYPE type;
 
@@ -439,4 +439,22 @@ int vp9_decode_mb_tokens_4x4(VP9D_COMP* const dx,
   }
 
   return eobtotal + vp9_decode_mb_tokens_4x4_uv(dx, xd, bc);
+}
+
+int vp9_decode_mb_tokens(VP9D_COMP* const dx,
+                         MACROBLOCKD* const xd,
+                         BOOL_DECODER* const bc) {
+  const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
+  int eobtotal;
+
+  if (tx_size == TX_16X16) {
+    eobtotal = vp9_decode_mb_tokens_16x16(dx, xd, bc);
+  } else if (tx_size == TX_8X8) {
+    eobtotal = vp9_decode_mb_tokens_8x8(dx, xd, bc);
+  } else {
+    assert(tx_size == TX_4X4);
+    eobtotal = vp9_decode_mb_tokens_4x4(dx, xd, bc);
+  }
+
+  return eobtotal;
 }

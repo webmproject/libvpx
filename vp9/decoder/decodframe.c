@@ -287,13 +287,7 @@ static void decode_superblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
       xd->eobs[i] = 0;
     }
 
-    if (tx_size == TX_16X16) {
-      eobtotal = vp9_decode_mb_tokens_16x16(pbi, xd, bc);
-    } else if (tx_size == TX_8X8) {
-      eobtotal = vp9_decode_mb_tokens_8x8(pbi, xd, bc);
-    } else {
-      eobtotal = vp9_decode_mb_tokens_4x4(pbi, xd, bc);
-    }
+    eobtotal = vp9_decode_mb_tokens(pbi, xd, bc);
     if (eobtotal == 0) {  // skip loopfilter
       xd->mode_info_context->mbmi.mb_skip_coeff = 1;
       continue;
@@ -391,12 +385,8 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
       xd->block[i].eob = 0;
       xd->eobs[i] = 0;
     }
-    if (tx_size == TX_16X16) {
-      eobtotal = vp9_decode_mb_tokens_16x16(pbi, xd, bc);
-    } else if (tx_size == TX_8X8) {
-      eobtotal = vp9_decode_mb_tokens_8x8(pbi, xd, bc);
-    } else if (mode != B_PRED) {
-      eobtotal = vp9_decode_mb_tokens_4x4(pbi, xd, bc);
+    if (mode != B_PRED) {
+      eobtotal = vp9_decode_mb_tokens(pbi, xd, bc);
     }
   }
 

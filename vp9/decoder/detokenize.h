@@ -20,16 +20,10 @@ int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc,
                          PLANE_TYPE type, int i);
 
-int vp9_decode_mb_tokens_4x4(VP9D_COMP* const, MACROBLOCKD* const,
-                             BOOL_DECODER* const);
+int vp9_decode_mb_tokens(VP9D_COMP* const, MACROBLOCKD* const,
+                         BOOL_DECODER* const);
 
 int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx, MACROBLOCKD* const xd,
                                 BOOL_DECODER* const bc);
-
-int vp9_decode_mb_tokens_8x8(VP9D_COMP* const, MACROBLOCKD* const,
-                             BOOL_DECODER* const);
-
-int vp9_decode_mb_tokens_16x16(VP9D_COMP* const, MACROBLOCKD* const,
-                               BOOL_DECODER* const);
 
 #endif /* DETOKENIZE_H */
