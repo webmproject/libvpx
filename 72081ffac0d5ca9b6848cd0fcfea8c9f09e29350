@@ -16,6 +16,24 @@
       "revId": "72081ffac0d5ca9b6848cd0fcfea8c9f09e29350",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//stw\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-23T16:57:00Z",
+      "side": 1,
+      "message": "I don\u0027t think it\u0027ll be anything significant. The bigger issue I\u0027m trying to address here is that in the future, the distance between luma and chroma coefficients may change (e.g. b/c we change the buffers to hold coeffs for a 32x32 block), and then this change allows us to go with fewer code changes all around.",
+      "parentUuid": "AAAAQ3//tgQ\u003d",
+      "revId": "72081ffac0d5ca9b6848cd0fcfea8c9f09e29350",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
