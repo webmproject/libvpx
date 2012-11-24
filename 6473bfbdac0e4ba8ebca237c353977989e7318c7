@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//sos\u003d",
+        "filename": "vp8/common/ppc/systemdependent.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-24T22:51:25Z",
+      "side": 1,
+      "message": "I honestly don\u0027t mind if you leave ppc/ alone. It\u0027s broken, so we should just kill the whole subdir. We know it doesn\u0027t work in vp8/master branch either.",
+      "revId": "6473bfbdac0e4ba8ebca237c353977989e7318c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//sok\u003d",
+        "filename": "vp9/common/blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-24T22:51:25Z",
+      "side": 1,
+      "message": "why inv_1/lossless as names? decodframe.c line 120-150 uses regular walsh_4x4/idct_4x4 as names for this. If lossless, they are both walsh (lossless), else the first is walsh (2nd order) and the other is a \"true\"/regular DCT (better compression). These names are slightly confusing, since the inv_4x4 can still be lossless if CONFIG_LOSSLESS is set and we\u0027re encoding losslessly.\n\nI\u0027d prefer something like:\ninv_dct_4x4\ninv_dct_4x4_1\ninv_walsh_4x4\ninv_walsh_4x4_1",
+      "revId": "6473bfbdac0e4ba8ebca237c353977989e7318c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//soo\u003d",
+        "filename": "vp9/encoder/dct.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-24T22:51:25Z",
+      "side": 1,
+      "message": "duplicate from idctllm.c.",
+      "revId": "6473bfbdac0e4ba8ebca237c353977989e7318c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
