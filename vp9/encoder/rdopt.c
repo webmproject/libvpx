@@ -4632,7 +4632,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
 
     // Test best rd so far against threshold for trying this mode.
-    if (best_rd <= cpi->rd_threshes[mode_index]) {
+    if (best_rd <= cpi->rd_threshes[mode_index] ||
+        cpi->rd_threshes[mode_index] == INT_MAX) {
       continue;
     }
 
