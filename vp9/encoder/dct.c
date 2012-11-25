@@ -12,7 +12,6 @@
 #include <assert.h>
 #include <math.h>
 #include "vpx_ports/config.h"
-#include "vp9/common/idct.h"
 #include "vp9/common/systemdependent.h"
 
 #include "vp9/common/blockd.h"

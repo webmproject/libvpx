@@ -12,12 +12,7 @@
 #include "subpixel.h"
 #include "loopfilter.h"
 #include "recon.h"
-#include "idct.h"
 #include "onyxc_int.h"
-
-void (*vp8_short_idct4x4)(short *input, short *output, int pitch);
-void (*vp8_short_idct4x4_1)(short *input, short *output, int pitch);
-void (*vp8_dc_only_idct)(short input_dc, short *output, int pitch);
 
 extern void (*vp8_post_proc_down_and_across_mb_row)(
     unsigned char *src_ptr,

@@ -11,7 +11,6 @@
 #include "subpixel.h"
 #include "loopfilter.h"
 #include "recon.h"
-#include "idct.h"
 #include "onyxc_int.h"
 
 void (*vp8_short_idct4x4)(short *input, short *output, int pitch);

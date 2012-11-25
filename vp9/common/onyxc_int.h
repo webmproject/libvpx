@@ -19,7 +19,6 @@
 #include "entropymv.h"
 #include "entropy.h"
 #include "entropymode.h"
-#include "idct.h"
 #if CONFIG_POSTPROC
 #include "postproc.h"
 #endif
@@ -148,7 +147,6 @@ typedef enum {
 
 typedef struct VP9_COMMON_RTCD {
 #if CONFIG_RUNTIME_CPU_DETECT
-  vp9_idct_rtcd_vtable_t        idct;
 #if CONFIG_POSTPROC
   vp9_postproc_rtcd_vtable_t    postproc;
 #endif

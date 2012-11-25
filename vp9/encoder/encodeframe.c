@@ -2077,14 +2077,14 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (mbmi->ref_frame == INTRA_FRAME) {
     if (mbmi->mode == B_PRED) {
-      vp9_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
-      vp9_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_intra16x16mbuv(x);
+      vp9_encode_intra4x4mby(x);
     } else if (mbmi->mode == I8X8_PRED) {
-      vp9_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
-      vp9_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_intra8x8mby(x);
+      vp9_encode_intra8x8mbuv(x);
     } else {
-      vp9_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
-      vp9_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_intra16x16mbuv(x);
+      vp9_encode_intra16x16mby(x);
     }
 
     if (output_enabled)
@@ -2124,7 +2124,7 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (!x->skip) {
-      vp9_encode_inter16x16(IF_RTCD(&cpi->rtcd), x);
+      vp9_encode_inter16x16(x);
 
       // Clear mb_skip_coeff if mb_no_coeff_skip is not set
       if (!cpi->common.mb_no_coeff_skip)
@@ -2226,7 +2226,6 @@ static void encode_superblock(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *vdst = xd->dst.v_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
-  const VP9_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
   int seg_ref_active;
   unsigned char ref_pred_flag;
   int n;
@@ -2343,7 +2342,7 @@ static void encode_superblock(VP9_COMP *cpi, MACROBLOCK *x,
                           udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
                           dst_uv_stride);
-    vp9_fidct_mb(x, rtcd);
+    vp9_fidct_mb(x);
     vp9_recon_mby_s_c(&x->e_mbd,
                       dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
     vp9_recon_mbuv_s_c(&x->e_mbd,

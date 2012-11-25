@@ -23,6 +23,7 @@
 #include "ratectrl.h"
 #include "vp9/common/quant_common.h"
 #include "segmentation.h"
+#include "./vp9_rtcd.h"
 #if CONFIG_POSTPROC
 #include "vp9/common/postproc.h"
 #endif
@@ -1267,8 +1268,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   }
 #endif
 
-
-
   cpi->mb.quantize_b_4x4      = vp9_regular_quantize_b_4x4;
   cpi->mb.quantize_b_4x4_pair = vp9_regular_quantize_b_4x4_pair;
   cpi->mb.quantize_b_8x8      = vp9_regular_quantize_b_8x8;
@@ -1584,14 +1583,18 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->oxcf.best_allowed_q = q_trans[oxcf->best_allowed_q];
   cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
 
+  cpi->mb.e_mbd.inv_xform4x4_1_x8     = vp9_short_idct4x4llm_1;
+  cpi->mb.e_mbd.inv_xform4x4_x8       = vp9_short_idct4x4llm;
+  cpi->mb.e_mbd.inv_walsh4x4_1        = vp9_short_inv_walsh4x4_1;
+  cpi->mb.e_mbd.inv_walsh4x4_lossless = vp9_short_inv_walsh4x4;
+
 #if CONFIG_LOSSLESS
   cpi->oxcf.lossless = oxcf->lossless;
   if (cpi->oxcf.lossless) {
-    cpi->common.rtcd.idct.idct1        = vp9_short_inv_walsh4x4_1_x8_c;
-    cpi->common.rtcd.idct.idct16       = vp9_short_inv_walsh4x4_x8_c;
-    cpi->common.rtcd.idct.idct1_scalar_add  = vp9_dc_only_inv_walsh_add_c;
-    cpi->common.rtcd.idct.iwalsh1      = vp9_short_inv_walsh4x4_1_c;
-    cpi->common.rtcd.idct.iwalsh16     = vp9_short_inv_walsh4x4_lossless_c;
+    cpi->mb.e_mbd.inv_xform4x4_1_x8     = vp9_short_inv_walsh4x4_1_x8;
+    cpi->mb.e_mbd.inv_xform4x4_x8       = vp9_short_inv_walsh4x4_x8;
+    cpi->mb.e_mbd.inv_walsh4x4_1        = vp9_short_inv_walsh4x4_1_lossless;
+    cpi->mb.e_mbd.inv_walsh4x4_lossless = vp9_short_inv_walsh4x4_lossless;
   }
 #endif
 

@@ -28,7 +28,6 @@
 #include "vp9/common/quant_common.h"
 #include "encodemb.h"
 #include "quantize.h"
-#include "vp9/common/idct.h"
 #include "variance.h"
 #include "mcomp.h"
 #include "rdopt.h"
@@ -680,7 +679,6 @@ static int rdcost_mby_4x4(MACROBLOCK *mb, int backup) {
 static void macro_block_yrd_4x4(MACROBLOCK *mb,
                                 int *Rate,
                                 int *Distortion,
-                                const VP9_ENCODER_RTCD *rtcd,
                                 int *skippable, int backup) {
   int b;
   MACROBLOCKD *const xd = &mb->e_mbd;
@@ -751,7 +749,6 @@ static int rdcost_mby_8x8(MACROBLOCK *mb, int backup) {
 static void macro_block_yrd_8x8(MACROBLOCK *mb,
                                 int *Rate,
                                 int *Distortion,
-                                const VP9_ENCODER_RTCD *rtcd,
                                 int *skippable, int backup) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   BLOCK   *const mb_y2 = mb->block + 24;
@@ -802,8 +799,7 @@ static int rdcost_mby_16x16(MACROBLOCK *mb, int backup) {
 }
 
 static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
-                                  const VP9_ENCODER_RTCD *rtcd, int *skippable,
-                                  int backup) {
+                                  int *skippable, int backup) {
   int d;
   MACROBLOCKD *xd = &mb->e_mbd;
   BLOCKD *b  = &mb->e_mbd.block[0];
@@ -821,7 +817,7 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   //                trailing coefficients to be zero, instead of running trellis
   //                optimization in the rate-distortion optimization loop?
   if (mb->e_mbd.mode_info_context->mbmi.mode < I8X8_PRED)
-    vp9_optimize_mby_16x16(mb, rtcd);
+    vp9_optimize_mby_16x16(mb);
 
   d = vp9_mbblock_error(mb, 0);
 
@@ -902,7 +898,6 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
 static void macro_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                             int *distortion, int *skippable,
                             int64_t txfm_cache[NB_TXFM_MODES]) {
-  VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   int r[2][TX_SIZE_MAX], d[TX_SIZE_MAX], s[TX_SIZE_MAX];
 
@@ -910,11 +905,9 @@ static void macro_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                    x->block[0].src_stride);
 
   macro_block_yrd_16x16(x, &r[0][TX_16X16], &d[TX_16X16],
-                        IF_RTCD(&cpi->rtcd), &s[TX_16X16], 1);
-  macro_block_yrd_8x8(x, &r[0][TX_8X8], &d[TX_8X8],
-                      IF_RTCD(&cpi->rtcd), &s[TX_8X8], 1);
-  macro_block_yrd_4x4(x, &r[0][TX_4X4], &d[TX_4X4],
-                      IF_RTCD(&cpi->rtcd), &s[TX_4X4], 1);
+                        &s[TX_16X16], 1);
+  macro_block_yrd_8x8(x, &r[0][TX_8X8], &d[TX_8X8], &s[TX_8X8], 1);
+  macro_block_yrd_4x4(x, &r[0][TX_4X4], &d[TX_4X4], &s[TX_4X4], 1);
 
   choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s, skippable,
                            txfm_cache);
@@ -932,7 +925,7 @@ static void copy_predictor(unsigned char *dst, const unsigned char *predictor) {
 #if CONFIG_SUPERBLOCKS
 static void super_block_yrd(VP9_COMP *cpi,
                             MACROBLOCK *x, int *rate, int *distortion,
-                            const VP9_ENCODER_RTCD *rtcd, int *skip,
+                            int *skip,
                             int64_t txfm_cache[NB_TXFM_MODES]) {
   MACROBLOCKD *const xd = &x->e_mbd;
   int r[2][TX_SIZE_MAX], d[TX_SIZE_MAX], s[TX_SIZE_MAX], n;
@@ -961,21 +954,21 @@ static void super_block_yrd(VP9_COMP *cpi,
 
     xd->above_context = &t_above[TX_16X16][x_idx];
     xd->left_context = &t_left[TX_16X16][y_idx];
-    macro_block_yrd_16x16(x, &r_tmp, &d_tmp, IF_RTCD(&cpi->rtcd), &s_tmp, 0);
+    macro_block_yrd_16x16(x, &r_tmp, &d_tmp, &s_tmp, 0);
     d[TX_16X16] += d_tmp;
     r[0][TX_16X16] += r_tmp;
     s[TX_16X16] = s[TX_16X16] && s_tmp;
 
     xd->above_context = &t_above[TX_4X4][x_idx];
     xd->left_context = &t_left[TX_4X4][y_idx];
-    macro_block_yrd_4x4(x, &r_tmp, &d_tmp, IF_RTCD(&cpi->rtcd), &s_tmp, 0);
+    macro_block_yrd_4x4(x, &r_tmp, &d_tmp, &s_tmp, 0);
     d[TX_4X4] += d_tmp;
     r[0][TX_4X4] += r_tmp;
     s[TX_4X4] = s[TX_4X4] && s_tmp;
 
     xd->above_context = &t_above[TX_8X8][x_idx];
     xd->left_context = &t_left[TX_8X8][y_idx];
-    macro_block_yrd_8x8(x, &r_tmp, &d_tmp, IF_RTCD(&cpi->rtcd), &s_tmp, 0);
+    macro_block_yrd_8x8(x, &r_tmp, &d_tmp, &s_tmp, 0);
     d[TX_8X8] += d_tmp;
     r[0][TX_8X8] += r_tmp;
     s[TX_8X8] = s[TX_8X8] && s_tmp;
@@ -1144,8 +1137,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
   if (best_tx_type != DCT_DCT)
     vp9_ihtllm_c(best_dqcoeff, b->diff, 32, best_tx_type, 4);
   else
-    IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(
-        best_dqcoeff, b->diff, 32);
+    xd->inv_xform4x4_x8(best_dqcoeff, b->diff, 32);
 
   vp9_recon_b(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 
@@ -1261,7 +1253,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi,
     vp9_build_intra_predictors_sby_s(&x->e_mbd);
 
     super_block_yrd(cpi, x, &this_rate_tokenonly,
-                    &this_distortion, IF_RTCD(&cpi->rtcd), &s, txfm_cache);
+                    &this_distortion, &s, txfm_cache);
     this_rate = this_rate_tokenonly +
                 x->mbmode_cost[x->e_mbd.frame_type]
                               [x->e_mbd.mode_info_context->mbmi.mode];
@@ -1509,7 +1501,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 #if CONFIG_COMP_INTRA_PRED
   b->bmi.as_mode.second = (*best_second_mode);
 #endif
-  vp9_encode_intra8x8(IF_RTCD(&cpi->rtcd), x, ib);
+  vp9_encode_intra8x8(x, ib);
 
   if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
     a[vp9_block2above_8x8[idx]]     = besta0;
@@ -1846,7 +1838,6 @@ static void rd_pick_intra_mbuv_mode_8x8(VP9_COMP *cpi,
 static void super_block_uvrd_8x8(MACROBLOCK *x,
                                  int *rate,
                                  int *distortion,
-                                 const VP9_ENCODER_RTCD *rtcd,
                                  int *skippable) {
   MACROBLOCKD *const xd = &x->e_mbd;
   int d = 0, r = 0, n, s = 1;
@@ -1909,7 +1900,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi,
     vp9_build_intra_predictors_sbuv_s(&x->e_mbd);
 
     super_block_uvrd_8x8(x, &this_rate_tokenonly,
-                         &this_distortion, IF_RTCD(&cpi->rtcd), &s);
+                         &this_distortion, &s);
     this_rate = this_rate_tokenonly +
                 x->intra_uv_mode_cost[x->e_mbd.frame_type][mode];
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
@@ -2072,8 +2063,7 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
                                        int *labelyrate,
                                        int *distortion,
                                        ENTROPY_CONTEXT *ta,
-                                       ENTROPY_CONTEXT *tl,
-                                       const VP9_ENCODER_RTCD *rtcd) {
+                                       ENTROPY_CONTEXT *tl) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
 
@@ -2109,8 +2099,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
                                            int *distortion,
                                            int64_t *otherrd,
                                            ENTROPY_CONTEXT *ta,
-                                           ENTROPY_CONTEXT *tl,
-                                           const VP9_ENCODER_RTCD *rtcd) {
+                                           ENTROPY_CONTEXT *tl) {
   int i, j;
   MACROBLOCKD *xd = &x->e_mbd;
   const int iblock[4] = { 0, 1, 4, 5 };
@@ -2431,13 +2420,12 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (segmentation == PARTITIONING_4X4) {
         this_rd = encode_inter_mb_segment(x, labels, i, &labelyrate,
-                                          &distortion,
-                                          ta_s, tl_s, IF_RTCD(&cpi->rtcd));
+                                          &distortion, ta_s, tl_s);
         other_rd = this_rd;
       } else {
         this_rd = encode_inter_mb_segment_8x8(x, labels, i, &labelyrate,
                                               &distortion, &other_rd,
-                                              ta_s, tl_s, IF_RTCD(&cpi->rtcd));
+                                              ta_s, tl_s);
       }
       this_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
       rate += labelyrate;
@@ -3532,7 +3520,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       // Y cost and distortion
       super_block_yrd(cpi, x, rate_y, distortion_y,
-                      IF_RTCD(&cpi->rtcd), &skippable_y, txfm_cache);
+                      &skippable_y, txfm_cache);
       *rate2 += *rate_y;
       *distortion += *distortion_y;
 
@@ -4712,7 +4700,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (ref_frame == INTRA_FRAME) {
       vp9_build_intra_predictors_sby_s(xd);
       super_block_yrd(cpi, x, &rate_y, &distortion_y,
-                      IF_RTCD(&cpi->rtcd), &skippable, txfm_cache);
+                      &skippable, txfm_cache);
       if (mbmi->txfm_size == TX_4X4) {
         rate_uv = rate_uv_4x4;
         distortion_uv = dist_uv_4x4;

@@ -15,7 +15,6 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 extern "C" {
-#include "vp9/common/idct.h"
 #include "vp9_rtcd.h"
 }
 

@@ -9,7 +9,7 @@
  */
 
 #include "vp9_rtcd.h"
-#include "vp9/common/idct.h"
+#include "vp9/common/blockd.h"
 
 void vp9_dequant_dc_idct_add_y_block_c(short *q, const short *dq,
                                        unsigned char *pre,

@@ -13,7 +13,6 @@
 #include "vp9_rtcd.h"
 #include "vp9/common/subpixel.h"
 #include "vp9/common/loopfilter.h"
-#include "vp9/common/idct.h"
 #include "vp9/common/onyxc_int.h"
 
 extern void vp9_arch_x86_common_init(VP9_COMMON *ctx);
@@ -22,18 +21,6 @@ extern void vp9_arch_arm_common_init(VP9_COMMON *ctx);
 void vp9_machine_specific_config(VP9_COMMON *ctx) {
 #if CONFIG_RUNTIME_CPU_DETECT
   VP9_COMMON_RTCD *rtcd = &ctx->rtcd;
-
-  rtcd->idct.idct1        = vp9_short_idct4x4llm_1_c;
-  rtcd->idct.idct16       = vp9_short_idct4x4llm_c;
-  rtcd->idct.idct1_scalar_add = vp9_dc_only_idct_add_c;
-  rtcd->idct.iwalsh1      = vp9_short_inv_walsh4x4_1_c;
-  rtcd->idct.iwalsh16     = vp9_short_inv_walsh4x4_c;
-  rtcd->idct.idct8        = vp9_short_idct8x8_c;
-  rtcd->idct.idct10_8     = vp9_short_idct10_8x8_c;
-  rtcd->idct.idct1_scalar_add_8x8 = vp9_dc_only_idct_add_8x8_c;
-  rtcd->idct.ihaar2       = vp9_short_ihaar2x2_c;
-  rtcd->idct.idct16x16    = vp9_short_idct16x16_c;
-  rtcd->idct.idct10_16x16 = vp9_short_idct10_16x16_c;
 
 #if CONFIG_POSTPROC || (CONFIG_VP9_ENCODER && CONFIG_INTERNAL_STATS)
   rtcd->postproc.down             = vp9_mbpost_proc_down_c;

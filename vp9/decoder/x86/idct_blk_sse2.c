@@ -9,7 +9,7 @@
  */
 
 #include "vpx_ports/config.h"
-#include "vp9/common/idct.h"
+#include "vp9/common/blockd.h"
 #include "vp9/decoder/dequantize.h"
 
 void vp9_idct_dequant_dc_0_2x_sse2(short *q, const short *dq,

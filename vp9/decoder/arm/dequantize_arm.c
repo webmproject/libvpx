@@ -11,7 +11,7 @@
 
 #include "vpx_ports/config.h"
 #include "vp9/decoder/dequantize.h"
-#include "vp9/common/idct.h"
+#include "vp9/common/blockd.h"
 #include "vpx_mem/vpx_mem.h"
 
 #if HAVE_ARMV7

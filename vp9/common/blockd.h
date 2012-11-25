@@ -145,6 +145,11 @@ typedef enum {
 
 #define VP9_MVREFS (1 + SPLITMV - NEARESTMV)
 
+#if CONFIG_LOSSLESS
+#define WHT_UPSCALE_FACTOR 3
+#define Y2_WHT_UPSCALE_FACTOR 2
+#endif
+
 typedef enum {
   B_DC_PRED,          /* average of above and left pixels */
   B_TM_PRED,
@@ -370,6 +375,14 @@ typedef struct macroblockd {
 
   unsigned int frames_since_golden;
   unsigned int frames_till_alt_ref_frame;
+
+  /* Inverse transform function pointers. */
+  void (*inv_xform4x4_1_x8)(short *input, short *output, int pitch);
+  void (*inv_xform4x4_x8)(short *input, short *output, int pitch);
+  void (*inv_walsh4x4_1)(short *in, short *out);
+  void (*inv_walsh4x4_lossless)(short *in, short *out);
+
+
   vp9_subpix_fn_t  subpixel_predict;
   vp9_subpix_fn_t  subpixel_predict8x4;
   vp9_subpix_fn_t  subpixel_predict8x8;

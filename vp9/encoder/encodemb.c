@@ -20,12 +20,6 @@
 #include "vp9/common/systemdependent.h"
 #include "vp9_rtcd.h"
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#else
-#define IF_RTCD(x) NULL
-#endif
-
 void vp9_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   unsigned char *src_ptr = (*(be->base_src) + be->src);
   short *diff_ptr = be->src_diff;
@@ -119,7 +113,7 @@ void vp9_subtract_mby_c(short *diff, unsigned char *src,
   vp9_subtract_mby_s_c(diff, src, stride, pred, 16);
 }
 
-static void subtract_mb(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+static void subtract_mb(MACROBLOCK *x) {
   BLOCK *b = &x->block[0];
 
   vp9_subtract_mby(x->src_diff, *(b->base_src), x->e_mbd.predictor,
@@ -265,7 +259,7 @@ static const int plane_rd_mult[4] = {
 
 static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                       const VP9_ENCODER_RTCD *rtcd, int tx_size) {
+                       int tx_size) {
   BLOCK *b;
   BLOCKD *d;
   vp9_token_state tokens[65][2];
@@ -567,7 +561,7 @@ static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *xd,
   }
 }
 
-void vp9_optimize_mby_4x4(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mby_4x4(MACROBLOCK *x) {
   int b;
   PLANE_TYPE type;
   int has_2nd_order;
@@ -590,19 +584,19 @@ void vp9_optimize_mby_4x4(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
 
   for (b = 0; b < 16; b++) {
     optimize_b(x, b, type,
-               ta + vp9_block2above[b], tl + vp9_block2left[b], rtcd, TX_4X4);
+               ta + vp9_block2above[b], tl + vp9_block2left[b], TX_4X4);
   }
 
   if (has_2nd_order) {
     b = 24;
     optimize_b(x, b, PLANE_TYPE_Y2,
-               ta + vp9_block2above[b], tl + vp9_block2left[b], rtcd, TX_4X4);
+               ta + vp9_block2above[b], tl + vp9_block2left[b], TX_4X4);
     check_reset_2nd_coeffs(&x->e_mbd,
                            ta + vp9_block2above[b], tl + vp9_block2left[b]);
   }
 }
 
-void vp9_optimize_mbuv_4x4(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mbuv_4x4(MACROBLOCK *x) {
   int b;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -619,16 +613,16 @@ void vp9_optimize_mbuv_4x4(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
 
   for (b = 16; b < 24; b++) {
     optimize_b(x, b, PLANE_TYPE_UV,
-               ta + vp9_block2above[b], tl + vp9_block2left[b], rtcd, TX_4X4);
+               ta + vp9_block2above[b], tl + vp9_block2left[b], TX_4X4);
   }
 }
 
-static void optimize_mb_4x4(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
-  vp9_optimize_mby_4x4(x, rtcd);
-  vp9_optimize_mbuv_4x4(x, rtcd);
+static void optimize_mb_4x4(MACROBLOCK *x) {
+  vp9_optimize_mby_4x4(x);
+  vp9_optimize_mbuv_4x4(x);
 }
 
-void vp9_optimize_mby_8x8(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mby_8x8(MACROBLOCK *x) {
   int b;
   PLANE_TYPE type;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
@@ -648,7 +642,7 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   for (b = 0; b < 16; b += 4) {
     optimize_b(x, b, type,
                ta + vp9_block2above_8x8[b], tl + vp9_block2left_8x8[b],
-               rtcd, TX_8X8);
+               TX_8X8);
     ta[vp9_block2above_8x8[b] + 1] = ta[vp9_block2above_8x8[b]];
     tl[vp9_block2left_8x8[b] + 1]  = tl[vp9_block2left_8x8[b]];
   }
@@ -661,7 +655,7 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   }
 }
 
-void vp9_optimize_mbuv_8x8(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mbuv_8x8(MACROBLOCK *x) {
   int b;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -679,20 +673,19 @@ void vp9_optimize_mbuv_8x8(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
   for (b = 16; b < 24; b += 4) {
     optimize_b(x, b, PLANE_TYPE_UV,
                ta + vp9_block2above_8x8[b], tl + vp9_block2left_8x8[b],
-               rtcd, TX_8X8);
+               TX_8X8);
     ta[vp9_block2above_8x8[b] + 1] = ta[vp9_block2above_8x8[b]];
     tl[vp9_block2left_8x8[b] + 1]  = tl[vp9_block2left_8x8[b]];
   }
 }
 
-static void optimize_mb_8x8(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
-  vp9_optimize_mby_8x8(x, rtcd);
-  vp9_optimize_mbuv_8x8(x, rtcd);
+static void optimize_mb_8x8(MACROBLOCK *x) {
+  vp9_optimize_mby_8x8(x);
+  vp9_optimize_mbuv_8x8(x);
 }
 
 static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
-                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                             const VP9_ENCODER_RTCD *rtcd) {
+                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
   BLOCK *b = &mb->block[i];
   BLOCKD *d = &mb->e_mbd.block[i];
   vp9_token_state tokens[257][2];
@@ -864,7 +857,7 @@ static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
   *a = *l = (d->eob != !type);
 }
 
-void vp9_optimize_mby_16x16(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
+void vp9_optimize_mby_16x16(MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta, *tl;
 
@@ -876,15 +869,15 @@ void vp9_optimize_mby_16x16(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
 
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
-  optimize_b_16x16(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, rtcd);
+  optimize_b_16x16(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl);
 }
 
-static void optimize_mb_16x16(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
-  vp9_optimize_mby_16x16(x, rtcd);
-  vp9_optimize_mbuv_8x8(x, rtcd);
+static void optimize_mb_16x16(MACROBLOCK *x) {
+  vp9_optimize_mby_16x16(x);
+  vp9_optimize_mbuv_8x8(x);
 }
 
-void vp9_fidct_mb(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
+void vp9_fidct_mb(MACROBLOCK *x) {
   MACROBLOCKD *const xd = &x->e_mbd;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
@@ -892,8 +885,8 @@ void vp9_fidct_mb(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
     vp9_transform_mb_16x16(x);
     vp9_quantize_mb_16x16(x);
     if (x->optimize)
-      optimize_mb_16x16(x, rtcd);
-    vp9_inverse_transform_mb_16x16(IF_RTCD(&rtcd->common->idct), xd);
+      optimize_mb_16x16(x);
+    vp9_inverse_transform_mb_16x16(xd);
   } else if (tx_size == TX_8X8) {
     if (xd->mode_info_context->mbmi.mode == SPLITMV) {
       assert(xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4);
@@ -902,38 +895,38 @@ void vp9_fidct_mb(MACROBLOCK *x, const VP9_ENCODER_RTCD *rtcd) {
       vp9_quantize_mby_8x8(x);
       vp9_quantize_mbuv_4x4(x);
       if (x->optimize) {
-        vp9_optimize_mby_8x8(x, rtcd);
-        vp9_optimize_mbuv_4x4(x, rtcd);
+        vp9_optimize_mby_8x8(x);
+        vp9_optimize_mbuv_4x4(x);
       }
-      vp9_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), xd);
-      vp9_inverse_transform_mbuv_4x4(IF_RTCD(&rtcd->common->idct), xd);
+      vp9_inverse_transform_mby_8x8(xd);
+      vp9_inverse_transform_mbuv_4x4(xd);
     } else {
       vp9_transform_mb_8x8(x);
       vp9_quantize_mb_8x8(x);
       if (x->optimize)
-        optimize_mb_8x8(x, rtcd);
-      vp9_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), xd);
+        optimize_mb_8x8(x);
+      vp9_inverse_transform_mb_8x8(xd);
     }
   } else {
     transform_mb_4x4(x);
     vp9_quantize_mb_4x4(x);
     if (x->optimize)
-      optimize_mb_4x4(x, rtcd);
-    vp9_inverse_transform_mb_4x4(IF_RTCD(&rtcd->common->idct), xd);
+      optimize_mb_4x4(x);
+    vp9_inverse_transform_mb_4x4(xd);
   }
 }
 
-void vp9_encode_inter16x16(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_inter16x16(MACROBLOCK *x) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
   vp9_build_inter_predictors_mb(xd);
-  subtract_mb(rtcd, x);
-  vp9_fidct_mb(x, rtcd);
+  subtract_mb(x);
+  vp9_fidct_mb(x);
   vp9_recon_mb(xd);
 }
 
 /* this function is used by first pass only */
-void vp9_encode_inter16x16y(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
+void vp9_encode_inter16x16y(MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
 
@@ -948,7 +941,7 @@ void vp9_encode_inter16x16y(const VP9_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   vp9_transform_mby_4x4(x);
   vp9_quantize_mby_4x4(x);
-  vp9_inverse_transform_mby_4x4(IF_RTCD(&rtcd->common->idct), xd);
+  vp9_inverse_transform_mby_4x4(xd);
 
   vp9_recon_mby(xd);
 }
