@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAQ3//snc\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-11-25T03:46:18Z",
+      "side": 1,
+      "message": "Seems to me this should be 4, 8x8 blocks,  this whole construct is more confusing than it should be but I recognize this isn\u0027t your fault and that its a much bigger issue than just this..",
+      "revId": "9970d8b66203b4cb50902ea59b083aa28a5c1f7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
