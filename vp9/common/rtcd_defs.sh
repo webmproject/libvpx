@@ -227,6 +227,9 @@ specialize vp9_sad16x3 sse2
 prototype unsigned int vp9_sad3x16 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
 specialize vp9_sad3x16 sse2
 
+#
+# Sub Pixel Filters
+#
 prototype void vp9_eighttap_predict16x16 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
 specialize vp9_eighttap_predict16x16
 
@@ -310,6 +313,57 @@ specialize vp9_bilinear_predict4x4 mmx
 
 prototype void vp9_bilinear_predict_avg4x4 "unsigned char *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, unsigned char *dst_ptr, int  dst_pitch"
 specialize vp9_bilinear_predict_avg4x4
+
+#
+# dct
+#
+prototype void vp9_short_idct4x4llm_1 "short *input, short *output, int pitch"
+specialize vp9_short_idct4x4llm_1 mmx
+
+prototype void vp9_short_idct4x4llm "short *input, short *output, int pitch"
+specialize vp9_short_idct4x4llm mmx
+
+prototype void vp9_short_idct8x8 "short *input, short *output, int pitch"
+specialize vp9_short_idct8x8
+
+prototype void vp9_short_idct10_8x8 "short *input, short *output, int pitch"
+specialize vp9_short_idct10_8x8
+
+prototype void vp9_short_ihaar2x2 "short *input, short *output, int pitch"
+specialize vp9_short_ihaar2x2
+
+prototype void vp9_short_idct16x16 "short *input, short *output, int pitch"
+specialize vp9_short_idct16x16
+
+prototype void vp9_short_idct10_16x16 "short *input, short *output, int pitch"
+specialize vp9_short_idct10_16x16
+
+#
+# 2nd order
+#
+prototype void vp9_short_inv_walsh4x4_1 "short *in, short *out"
+specialize vp9_short_inv_walsh4x4_1
+
+prototype void vp9_short_inv_walsh4x4 "short *in, short *out"
+specialize vp9_short_inv_walsh4x4_
+
+
+# dct and add
+prototype void vp9_dc_only_idct_add_8x8 "short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride"
+specialize vp9_dc_only_idct_add_8x8
+
+prototype void vp9_dc_only_idct_add "short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride"
+specialize vp9_dc_only_idct_add
+
+if [ "$CONFIG_LOSSLESS" = "yes" ]; then
+prototype void vp9_short_inv_walsh4x4_1_x8 "short *input, short *output, int pitch"
+prototype void vp9_short_inv_walsh4x4_x8 "short *input, short *output, int pitch"
+prototype void vp9_dc_only_inv_walsh_add "short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride"
+prototype void vp9_short_inv_walsh4x4_1_lossless "short *in, short *out"
+prototype void vp9_short_inv_walsh4x4_lossless "short *in, short *out"
+fi
+
+
 
 if [ "$CONFIG_SUPERBLOCKS" = "yes" ]; then
 

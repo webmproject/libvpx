@@ -15,7 +15,6 @@
 #include "vp9/common/subpixel.h"
 #include "vp9/common/loopfilter.h"
 #include "vp9/common/recon.h"
-#include "vp9/common/idct.h"
 #include "vp9/common/onyxc_int.h"
 
 void vp9_arch_arm_common_init(VP9_COMMON *ctx) {

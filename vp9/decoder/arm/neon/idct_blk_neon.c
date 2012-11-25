@@ -9,7 +9,7 @@
  */
 
 #include "vpx_ports/config.h"
-#include "vp9/common/idct.h"
+#include "vp9/common/blockd.h"
 #include "vp9/decoder/dequantize.h"
 
 /* place these declarations here because we don't want to maintain them

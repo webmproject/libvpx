@@ -11,7 +11,6 @@
 #include "vpx_config.h"
 #include "vpx_ports/x86.h"
 #include "vp9/common/loopfilter.h"
-#include "vp9/common/idct.h"
 #include "vp9/common/pragmas.h"
 #include "vp9/common/onyxc_int.h"
 
@@ -31,11 +30,6 @@ void vp9_arch_x86_common_init(VP9_COMMON *ctx) {
 #if HAVE_MMX
 // The commented functions need to be re-written for vpx.
   if (flags & HAS_MMX) {
-    rtcd->idct.idct1        = vp9_short_idct4x4llm_1_mmx;
-    rtcd->idct.idct16       = vp9_short_idct4x4llm_mmx;
-    rtcd->idct.idct1_scalar_add = vp9_dc_only_idct_add_mmx;
-    // rtcd->idct.iwalsh16     = vp9_short_inv_walsh4x4_mmx;
-    // rtcd->idct.iwalsh1     = vp9_short_inv_walsh4x4_1_mmx;
 
 #if CONFIG_POSTPROC
     rtcd->postproc.down        = vp9_mbpost_proc_down_mmx;
