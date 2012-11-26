@@ -16,7 +16,6 @@
 
 extern "C" {
 #include "vp9/common/entropy.h"
-#include "vp9/common/idct.h"
 #include "vp9_rtcd.h"
 }
 
