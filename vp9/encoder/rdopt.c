@@ -2766,249 +2766,54 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   return (int)(bsi.segment_rd);
 }
 
-/* Order arr in increasing order, original position stored in idx */
-static void insertsortmv(int arr[], int len) {
-  int i, j, k;
+static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
+                    unsigned char *ref_y_buffer, int ref_y_stride,
+                    int_mv *mvp, int ref_frame, enum BlockSize block_size ) {
+  MACROBLOCKD *xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  int_mv this_mv;
+  int i;
+  int zero_seen = FALSE;
+  int best_index;
+  int best_sad = INT_MAX;
+  int this_sad = INT_MAX;
+  int this_sad2 = INT_MAX;
 
-  for (i = 1; i <= len - 1; i++) {
-    for (j = 0; j < i; j++) {
-      if (arr[j] > arr[i]) {
-        int temp;
-
-        temp = arr[i];
-
-        for (k = i; k > j; k--)
-          arr[k] = arr[k - 1];
-
-        arr[j] = temp;
-      }
-    }
-  }
-}
-
-static void insertsortsad(int arr[], int idx[], int len) {
-  int i, j, k;
-
-  for (i = 1; i <= len - 1; i++) {
-    for (j = 0; j < i; j++) {
-      if (arr[j] > arr[i]) {
-        int temp, tempi;
-
-        temp = arr[i];
-        tempi = idx[i];
-
-        for (k = i; k > j; k--) {
-          arr[k] = arr[k - 1];
-          idx[k] = idx[k - 1];
-        }
-
-        arr[j] = temp;
-        idx[j] = tempi;
-      }
-    }
-  }
-}
-
-// The improved MV prediction
-void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCKD *xd, const MODE_INFO *here,
-                 int_mv *mvp, int refframe, int *ref_frame_sign_bias,
-                 int *sr, int near_sadidx[]) {
-  const MODE_INFO *above = here - xd->mode_info_stride;
-  const MODE_INFO *left = here - 1;
-  const MODE_INFO *aboveleft = above - 1;
-  int_mv           near_mvs[8];
-  int              near_ref[8];
-  int_mv           mv;
-  int              vcnt = 0;
-  int              find = 0;
-  int              mb_offset;
-
-  int              mvx[8];
-  int              mvy[8];
-  int              i;
-
-  mv.as_int = 0;
-
-  if (here->mbmi.ref_frame != INTRA_FRAME) {
-    near_mvs[0].as_int = near_mvs[1].as_int = near_mvs[2].as_int = near_mvs[3].as_int = near_mvs[4].as_int = near_mvs[5].as_int = near_mvs[6].as_int = near_mvs[7].as_int = 0;
-    near_ref[0] = near_ref[1] = near_ref[2] = near_ref[3] = near_ref[4] = near_ref[5] = near_ref[6] = near_ref[7] = 0;
-
-    // read in 3 nearby block's MVs from current frame as prediction candidates.
-    if (above->mbmi.ref_frame != INTRA_FRAME) {
-      near_mvs[vcnt].as_int = above->mbmi.mv[0].as_int;
-      mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-      near_ref[vcnt] =  above->mbmi.ref_frame;
-    }
-    vcnt++;
-    if (left->mbmi.ref_frame != INTRA_FRAME) {
-      near_mvs[vcnt].as_int = left->mbmi.mv[0].as_int;
-      mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-      near_ref[vcnt] =  left->mbmi.ref_frame;
-    }
-    vcnt++;
-    if (aboveleft->mbmi.ref_frame != INTRA_FRAME) {
-      near_mvs[vcnt].as_int = aboveleft->mbmi.mv[0].as_int;
-      mv_bias(ref_frame_sign_bias[aboveleft->mbmi.ref_frame], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-      near_ref[vcnt] =  aboveleft->mbmi.ref_frame;
-    }
-    vcnt++;
-
-    // read in 5 nearby block's MVs from last frame.
-    if (cpi->common.last_frame_type != KEY_FRAME) {
-      mb_offset = (-xd->mb_to_top_edge / 128 + 1) * (xd->mode_info_stride + 1) + (-xd->mb_to_left_edge / 128 + 1);
-
-      // current in last frame
-      if (cpi->lf_ref_frame[mb_offset] != INTRA_FRAME) {
-        near_mvs[vcnt].as_int = cpi->lfmv[mb_offset].as_int;
-        mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-        near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset];
-      }
-      vcnt++;
-
-      // above in last frame
-      if (cpi->lf_ref_frame[mb_offset - xd->mode_info_stride - 1] != INTRA_FRAME) {
-        near_mvs[vcnt].as_int = cpi->lfmv[mb_offset - xd->mode_info_stride - 1].as_int;
-        mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset - xd->mode_info_stride - 1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-        near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset - xd->mode_info_stride - 1];
-      }
-      vcnt++;
-
-      // left in last frame
-      if (cpi->lf_ref_frame[mb_offset - 1] != INTRA_FRAME) {
-        near_mvs[vcnt].as_int = cpi->lfmv[mb_offset - 1].as_int;
-        mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset - 1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-        near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset - 1];
-      }
-      vcnt++;
-
-      // right in last frame
-      if (cpi->lf_ref_frame[mb_offset + 1] != INTRA_FRAME) {
-        near_mvs[vcnt].as_int = cpi->lfmv[mb_offset + 1].as_int;
-        mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset + 1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-        near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset + 1];
-      }
-      vcnt++;
-
-      // below in last frame
-      if (cpi->lf_ref_frame[mb_offset + xd->mode_info_stride + 1] != INTRA_FRAME) {
-        near_mvs[vcnt].as_int = cpi->lfmv[mb_offset + xd->mode_info_stride + 1].as_int;
-        mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset + xd->mode_info_stride + 1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-        near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset + xd->mode_info_stride + 1];
-      }
-      vcnt++;
-    }
-
-    for (i = 0; i < vcnt; i++) {
-      if (near_ref[near_sadidx[i]] != INTRA_FRAME) {
-        if (here->mbmi.ref_frame == near_ref[near_sadidx[i]]) {
-          mv.as_int = near_mvs[near_sadidx[i]].as_int;
-          find = 1;
-          if (i < 3)
-            *sr = 3;
-          else
-            *sr = 2;
-          break;
-        }
-      }
-    }
-
-    if (!find) {
-      for (i = 0; i < vcnt; i++) {
-        mvx[i] = near_mvs[i].as_mv.row;
-        mvy[i] = near_mvs[i].as_mv.col;
-      }
-
-      insertsortmv(mvx, vcnt);
-      insertsortmv(mvy, vcnt);
-      mv.as_mv.row = mvx[vcnt / 2];
-      mv.as_mv.col = mvy[vcnt / 2];
-
-      find = 1;
-      // sr is set to 0 to allow calling function to decide the search range.
-      *sr = 0;
-    }
-  }
-
-  /* Set up return values */
-  mvp->as_int = mv.as_int;
-  clamp_mv2(mvp, xd);
-}
-
-static void cal_sad(VP9_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x,
-                    int recon_yoffset, int near_sadidx[],
-                    enum BlockSize block_size) {
-  /* 0-cf above, 1-cf left, 2-cf aboveleft, 3-lf current, 4-lf above,
-   * 5-lf left, 6-lf right, 7-lf below */
-  int near_sad[8] = {0};
   BLOCK *b = &x->block[0];
   unsigned char *src_y_ptr = *(b->base_src);
-  const unsigned char *dst_y_ptr = xd->dst.y_buffer;
+  unsigned char *ref_y_ptr;
+  const unsigned char *dst_y_ptr;
   const int bs = (block_size == BLOCK_16X16) ? 16 : 32;
-  const int dst_y_str = xd->dst.y_stride;
+  int offset, row_offset, col_offset;
 
-  // calculate sad for current frame 3 nearby MBs.
-  if (xd->mb_to_top_edge == 0 && xd->mb_to_left_edge == 0) {
-    near_sad[0] = near_sad[1] = near_sad[2] = INT_MAX;
-  } else if (xd->mb_to_top_edge == 0) {
-    // only has left MB for sad calculation.
-    near_sad[0] = near_sad[2] = INT_MAX;
-    near_sad[1] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                              dst_y_ptr - bs,
-                                              dst_y_str, 0x7fffffff);
-  } else if (xd->mb_to_left_edge == 0) {
-    // only has left MB for sad calculation.
-    near_sad[1] = near_sad[2] = INT_MAX;
-    near_sad[0] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                              dst_y_ptr - dst_y_str * bs,
-                                              dst_y_str, 0x7fffffff);
-  } else {
-    near_sad[0] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                              dst_y_ptr - dst_y_str * bs,
-                                              dst_y_str, 0x7fffffff);
-    near_sad[1] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                              dst_y_ptr - bs,
-                                              dst_y_str, 0x7fffffff);
-    near_sad[2] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                              dst_y_ptr - dst_y_str * bs - bs,
-                                              dst_y_str, 0x7fffffff);
+  // Get the sad for each candidate reference mv
+  for (i = 0; i < 4; i++) {
+    this_mv.as_int = mbmi->ref_mvs[ref_frame][i].as_int;
+
+    // The list is at an end if we see 0 for a second time.
+    if (!this_mv.as_int && zero_seen)
+      break;
+    zero_seen = zero_seen || !this_mv.as_int;
+
+    row_offset = this_mv.as_mv.row >> 3;
+    col_offset = this_mv.as_mv.col >> 3;
+    ref_y_ptr = ref_y_buffer + (ref_y_stride * row_offset) + col_offset;
+
+    // Find sad for current vector.
+    this_sad = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
+                                           ref_y_ptr, ref_y_stride,
+                                           0x7fffffff);
+
+    // Note if it is the best so far.
+    if (this_sad < best_sad) {
+      best_sad = this_sad;
+      best_index = i;
+    }
   }
 
-  if (cpi->common.last_frame_type != KEY_FRAME) {
-    // calculate sad for last frame 5 nearby MBs.
-    unsigned char *pre_y_buffer = cpi->common.yv12_fb[cpi->common.lst_fb_idx].y_buffer + recon_yoffset;
-    const int pre_y_str = cpi->common.yv12_fb[cpi->common.lst_fb_idx].y_stride;
-
-    if (xd->mb_to_top_edge == 0) near_sad[4] = INT_MAX;
-    if (xd->mb_to_left_edge == 0) near_sad[5] = INT_MAX;
-    if (xd->mb_to_right_edge == 0) near_sad[6] = INT_MAX;
-    if (xd->mb_to_bottom_edge == 0) near_sad[7] = INT_MAX;
-
-    near_sad[3] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                              pre_y_buffer,
-                                              pre_y_str, 0x7fffffff);
-    if (near_sad[4] != INT_MAX)
-      near_sad[4] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                                pre_y_buffer - pre_y_str * bs,
-                                                pre_y_str, 0x7fffffff);
-    if (near_sad[5] != INT_MAX)
-      near_sad[5] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                                pre_y_buffer - bs,
-                                                pre_y_str, 0x7fffffff);
-    if (near_sad[6] != INT_MAX)
-      near_sad[6] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                                pre_y_buffer + bs,
-                                                pre_y_str, 0x7fffffff);
-    if (near_sad[7] != INT_MAX)
-      near_sad[7] = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
-                                                pre_y_buffer + pre_y_str * bs,
-                                                pre_y_str, 0x7fffffff);
-  }
-
-  if (cpi->common.last_frame_type != KEY_FRAME) {
-    insertsortsad(near_sad, near_sadidx, 8);
-  } else {
-    insertsortsad(near_sad, near_sadidx, 3);
-  }
+  // Return the mv that had the best sad for use in the motion search.
+  mvp->as_int = mbmi->ref_mvs[ref_frame][best_index].as_int;
+  clamp_mv2(mvp, xd);
 }
 
 static void set_i8x8_block_modes(MACROBLOCK *x, int modes[2][4]) {
@@ -3230,11 +3035,13 @@ static void inter_mode_cost(VP9_COMP *cpi, MACROBLOCK *x,
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #define MAX(x,y) (((x)>(y))?(x):(y))
 static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
-                               int idx, int frame_type,
+                               int idx, MV_REFERENCE_FRAME frame_type,
+                               int block_size,
                                int recon_yoffset, int recon_uvoffset,
-                               int_mv frame_nearest_mv[4],
-                               int_mv frame_near_mv[4],
-                               int_mv frame_best_ref_mv[4],
+                               int_mv frame_nearest_mv[MAX_REF_FRAMES],
+                               int_mv frame_near_mv[MAX_REF_FRAMES],
+                               int_mv frame_best_ref_mv[MAX_REF_FRAMES],
+                               int_mv mv_search_ref[MAX_REF_FRAMES],
                                int frame_mdcounts[4][4],
                                unsigned char *y_buffer[4],
                                unsigned char *u_buffer[4],
@@ -3247,18 +3054,32 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   u_buffer[frame_type] = yv12->u_buffer + recon_uvoffset;
   v_buffer[frame_type] = yv12->v_buffer + recon_uvoffset;
 
+  // Gets an initial list of candidate vectors from neighbours and orders them
   vp9_find_mv_refs(xd, xd->mode_info_context,
                    xd->prev_mode_info_context,
                    frame_type,
                    mbmi->ref_mvs[frame_type],
                    cpi->common.ref_frame_sign_bias);
 
+  // Candidate refinement carried out at encoder and decoder
   vp9_find_best_ref_mvs(xd, y_buffer[frame_type],
                         yv12->y_stride,
                         mbmi->ref_mvs[frame_type],
                         &frame_best_ref_mv[frame_type],
                         &frame_nearest_mv[frame_type],
                         &frame_near_mv[frame_type]);
+
+
+  // Further refinement that is encode side only to test the top few candidates
+  // in full and choose the best as the centre point for subsequent searches.
+  mv_pred(cpi, x, y_buffer[frame_type], yv12->y_stride,
+          &mv_search_ref[frame_type], frame_type, block_size);
+
+#if CONFIG_NEW_MVREF
+  // TODO(paulwilkins): Final choice of which of the best 4 candidates from
+  // above gives lowest error score when used in isolation. This stage encoder
+  // and sets the reference MV
+#endif
 }
 
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -3275,7 +3096,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *mode_excluded, int *disable_skip,
                                  int recon_yoffset, int mode_index,
                                  int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
-                                 int_mv frame_best_ref_mv[4]) {
+                                 int_mv frame_best_ref_mv[MAX_REF_FRAMES],
+                                 int_mv mv_search_ref[MAX_REF_FRAMES]) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
@@ -3313,7 +3135,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int further_steps, step_param = cpi->sf.first_step;
         int sadpb = x->sadperbit16;
         int_mv mvp_full, tmp_mv;
-        // search range got from mv_pred(). It uses step_param levels. (0-7)
         int sr = 0;
 
         int tmp_col_min = x->mv_col_min;
@@ -3323,17 +3144,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         vp9_clamp_mv_min_max(x, &frame_best_ref_mv[refs[0]]);
 
-        if (!*saddone) {
-          cal_sad(cpi, xd, x, recon_yoffset, &near_sadidx[0], block_size);
-          *saddone = 1;
-        }
-
-        vp9_mv_pred(cpi, &x->e_mbd, x->e_mbd.mode_info_context, &mvp,
-                    mbmi->ref_frame, cpi->common.ref_frame_sign_bias,
-                    &sr, &near_sadidx[0]);
-
-        mvp_full.as_mv.col = mvp.as_mv.col >> 3;
-        mvp_full.as_mv.row = mvp.as_mv.row >> 3;
+        mvp_full.as_mv.col = mv_search_ref[mbmi->ref_frame].as_mv.col >> 3;
+        mvp_full.as_mv.row = mv_search_ref[mbmi->ref_frame].as_mv.row >> 3;
 
         // adjust search range according to sr from mv prediction
         step_param = MAX(step_param, sr);
@@ -3598,7 +3410,8 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int saddone = 0;
 
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
-  int_mv frame_best_ref_mv[4];
+  int_mv frame_best_ref_mv[MAX_REF_FRAMES];
+  int_mv mv_search_ref[MAX_REF_FRAMES];
   int frame_mdcounts[4][4];
   unsigned char *y_buffer[4], *u_buffer[4], *v_buffer[4];
 
@@ -3628,23 +3441,26 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
     setup_buffer_inter(cpi, x, cpi->common.lst_fb_idx, LAST_FRAME,
-                       recon_yoffset, recon_uvoffset, frame_mv[NEARESTMV],
-                       frame_mv[NEARMV], frame_best_ref_mv,
-                       frame_mdcounts, y_buffer, u_buffer, v_buffer);
+                       BLOCK_16X16, recon_yoffset, recon_uvoffset,
+                       frame_mv[NEARESTMV], frame_mv[NEARMV], frame_best_ref_mv,
+                       mv_search_ref, frame_mdcounts,
+                       y_buffer, u_buffer, v_buffer);
   }
 
   if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
     setup_buffer_inter(cpi, x, cpi->common.gld_fb_idx, GOLDEN_FRAME,
-                       recon_yoffset, recon_uvoffset, frame_mv[NEARESTMV],
-                       frame_mv[NEARMV], frame_best_ref_mv,
-                       frame_mdcounts, y_buffer, u_buffer, v_buffer);
+                       BLOCK_16X16, recon_yoffset, recon_uvoffset,
+                       frame_mv[NEARESTMV], frame_mv[NEARMV], frame_best_ref_mv,
+                       mv_search_ref, frame_mdcounts,
+                       y_buffer, u_buffer, v_buffer);
   }
 
   if (cpi->ref_frame_flags & VP9_ALT_FLAG) {
     setup_buffer_inter(cpi, x, cpi->common.alt_fb_idx, ALTREF_FRAME,
-                       recon_yoffset, recon_uvoffset, frame_mv[NEARESTMV],
-                       frame_mv[NEARMV], frame_best_ref_mv,
-                       frame_mdcounts, y_buffer, u_buffer, v_buffer);
+                       BLOCK_16X16, recon_yoffset, recon_uvoffset,
+                       frame_mv[NEARESTMV], frame_mv[NEARMV], frame_best_ref_mv,
+                       mv_search_ref, frame_mdcounts,
+                       y_buffer, u_buffer, v_buffer);
   }
 
   *returnintra = INT64_MAX;
@@ -4022,7 +3838,8 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_y, &distortion,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip, recon_yoffset,
-                                  mode_index, frame_mv, frame_best_ref_mv);
+                                  mode_index, frame_mv, frame_best_ref_mv,
+                                  mv_search_ref);
       if (this_rd == INT64_MAX)
         continue;
     }
@@ -4552,7 +4369,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
   int comp_pred, i;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
-  int_mv frame_best_ref_mv[4];
+  int_mv frame_best_ref_mv[MAX_REF_FRAMES];
+  int_mv mv_search_ref[MAX_REF_FRAMES];
   int frame_mdcounts[4][4];
   unsigned char *y_buffer[4];
   unsigned char *u_buffer[4];
@@ -4594,9 +4412,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, idx_list[ref_frame], ref_frame,
+      setup_buffer_inter(cpi, x, idx_list[ref_frame], ref_frame, BLOCK_32X32,
                          recon_yoffset, recon_uvoffset, frame_mv[NEARESTMV],
-                         frame_mv[NEARMV], frame_best_ref_mv,
+                         frame_mv[NEARMV], frame_best_ref_mv, mv_search_ref,
                          frame_mdcounts, y_buffer, u_buffer, v_buffer);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
@@ -4738,7 +4556,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_y, &distortion_y,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip, recon_yoffset,
-                                  mode_index, frame_mv, frame_best_ref_mv);
+                                  mode_index, frame_mv, frame_best_ref_mv,
+                                  mv_search_ref);
       if (this_rd == INT64_MAX)
         continue;
     }
