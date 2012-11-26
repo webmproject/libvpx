@@ -890,6 +890,7 @@ sym(vp8_intra_pred_y_tm_%1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
+    SAVE_XMM 7
     push        rsi
     push        rdi
     GET_GOT     rbx
@@ -957,6 +958,7 @@ vp8_intra_pred_y_tm_%1_loop:
     RESTORE_GOT
     pop         rdi
     pop         rsi
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
