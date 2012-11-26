@@ -1109,7 +1109,9 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var)
     }
     else
     {
-        if (cpi->common.refresh_alt_ref_frame || cpi->common.refresh_golden_frame)
+        if (cpi->oxcf.number_of_layers == 1 &&
+           (cpi->common.refresh_alt_ref_frame ||
+            cpi->common.refresh_golden_frame))
             rate_correction_factor = cpi->gf_rate_correction_factor;
         else
             rate_correction_factor = cpi->rate_correction_factor;
@@ -1186,7 +1188,9 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var)
         cpi->key_frame_rate_correction_factor = rate_correction_factor;
     else
     {
-        if (cpi->common.refresh_alt_ref_frame || cpi->common.refresh_golden_frame)
+        if (cpi->oxcf.number_of_layers == 1 &&
+           (cpi->common.refresh_alt_ref_frame ||
+            cpi->common.refresh_golden_frame))
             cpi->gf_rate_correction_factor = rate_correction_factor;
         else
             cpi->rate_correction_factor = rate_correction_factor;
@@ -1209,11 +1213,13 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
         {
             Q = cpi->oxcf.key_q;
         }
-        else if (cpi->common.refresh_alt_ref_frame)
+        else if (cpi->oxcf.number_of_layers == 1 &&
+            cpi->common.refresh_alt_ref_frame)
         {
             Q = cpi->oxcf.alt_q;
         }
-        else if (cpi->common.refresh_golden_frame)
+        else if (cpi->oxcf.number_of_layers == 1  &&
+            cpi->common.refresh_golden_frame)
         {
             Q = cpi->oxcf.gold_q;
         }
@@ -1232,7 +1238,9 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
             correction_factor = cpi->key_frame_rate_correction_factor;
         else
         {
-            if (cpi->common.refresh_alt_ref_frame || cpi->common.refresh_golden_frame)
+            if (cpi->oxcf.number_of_layers == 1 &&
+               (cpi->common.refresh_alt_ref_frame ||
+                cpi->common.refresh_golden_frame))
                 correction_factor = cpi->gf_rate_correction_factor;
             else
                 correction_factor = cpi->rate_correction_factor;
@@ -1281,7 +1289,10 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
 
             if (cpi->common.frame_type == KEY_FRAME)
                 zbin_oqmax = 0;
-            else if (cpi->common.refresh_alt_ref_frame || (cpi->common.refresh_golden_frame && !cpi->source_alt_ref_active))
+            else if (cpi->oxcf.number_of_layers == 1 &&
+                (cpi->common.refresh_alt_ref_frame ||
+                (cpi->common.refresh_golden_frame &&
+                 !cpi->source_alt_ref_active)))
                 zbin_oqmax = 16;
             else
                 zbin_oqmax = ZBIN_OQ_MAX;
