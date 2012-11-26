@@ -33,11 +33,6 @@ extern int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                          int recon_yoffset, int recon_uvoffset,
                                          int *returnrate, int *returndist);
 
-extern void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCKD *xd,
-                        const MODE_INFO *here, int_mv *mvp,
-                        int refframe, int *ref_frame_sign_bias,
-                        int *sr, int near_sadidx[]);
-
 extern void vp9_init_me_luts();
 
 extern void vp9_set_mbmode_and_mvs(MACROBLOCK *x,
