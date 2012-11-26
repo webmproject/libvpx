@@ -45,15 +45,13 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
 unsigned int vp9_sad3x16_c(const unsigned char *src_ptr,
                            int  src_stride,
                            const unsigned char *ref_ptr,
-                           int  ref_stride,
-                           int max_sad) {
+                           int  ref_stride) {
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 3, 16);
 }
 unsigned int vp9_sad16x3_c(const unsigned char *src_ptr,
                            int  src_stride,
                            const unsigned char *ref_ptr,
-                           int  ref_stride,
-                           int max_sad) {
+                           int  ref_stride) {
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 3);
 }
 
@@ -230,23 +228,23 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
     score = 0;
     if (xd->up_available) {
       score += vp9_sad16x3(above_src, xd->dst.y_stride,
-                           above_ref + offset, ref_y_stride, INT_MAX);
+                           above_ref + offset, ref_y_stride);
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb) {
         score += vp9_sad16x3(above_src + 16, xd->dst.y_stride,
-                             above_ref + offset + 16, ref_y_stride, INT_MAX);
+                             above_ref + offset + 16, ref_y_stride);
       }
 #endif
     }
     if (xd->left_available) {
       score += vp9_sad3x16(left_src, xd->dst.y_stride,
-                           left_ref + offset, ref_y_stride, INT_MAX);
+                           left_ref + offset, ref_y_stride);
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.encoded_as_sb) {
         score += vp9_sad3x16(left_src + xd->dst.y_stride * 16,
                              xd->dst.y_stride,
                              left_ref + offset + ref_y_stride * 16,
-                             ref_y_stride, INT_MAX);
+                             ref_y_stride);
       }
 #endif
     }
