@@ -14,7 +14,7 @@
 
 #include "vpx_config.h"
 extern "C" {
-#include "vp9/encoder/variance.h"
+#include "vp9/encoder/vp9_variance.h"
 #include "vpx/vpx_integer.h"
 #include "vp9_rtcd.h"
 }

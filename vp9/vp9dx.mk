@@ -45,27 +45,27 @@ VP9_DX_SRCS-yes += vp9_dx_iface.c
 #INCLUDES += common
 #INCLUDES += decoder
 
-VP9_DX_SRCS-yes += decoder/asm_dec_offsets.c
-VP9_DX_SRCS-yes += decoder/dboolhuff.c
-VP9_DX_SRCS-yes += decoder/decodemv.c
-VP9_DX_SRCS-yes += decoder/decodframe.c
-VP9_DX_SRCS-yes += decoder/dequantize.c
-VP9_DX_SRCS-yes += decoder/detokenize.c
-VP9_DX_SRCS-yes += decoder/dboolhuff.h
-VP9_DX_SRCS-yes += decoder/decodemv.h
-VP9_DX_SRCS-yes += decoder/dequantize.h
-VP9_DX_SRCS-yes += decoder/detokenize.h
-VP9_DX_SRCS-yes += decoder/onyxd_int.h
-VP9_DX_SRCS-yes += decoder/treereader.h
-VP9_DX_SRCS-yes += decoder/onyxd_if.c
-VP9_DX_SRCS-yes += decoder/idct_blk.c
+VP9_DX_SRCS-yes += decoder/vp9_asm_dec_offsets.c
+VP9_DX_SRCS-yes += decoder/vp9_dboolhuff.c
+VP9_DX_SRCS-yes += decoder/vp9_decodemv.c
+VP9_DX_SRCS-yes += decoder/vp9_decodframe.c
+VP9_DX_SRCS-yes += decoder/vp9_dequantize.c
+VP9_DX_SRCS-yes += decoder/vp9_detokenize.c
+VP9_DX_SRCS-yes += decoder/vp9_dboolhuff.h
+VP9_DX_SRCS-yes += decoder/vp9_decodemv.h
+VP9_DX_SRCS-yes += decoder/vp9_dequantize.h
+VP9_DX_SRCS-yes += decoder/vp9_detokenize.h
+VP9_DX_SRCS-yes += decoder/vp9_onyxd_int.h
+VP9_DX_SRCS-yes += decoder/vp9_treereader.h
+VP9_DX_SRCS-yes += decoder/vp9_onyxd_if.c
+VP9_DX_SRCS-yes += decoder/vp9_idct_blk.c
 
 VP9_DX_SRCS-yes := $(filter-out $(VP9_DX_SRCS_REMOVE-yes),$(VP9_DX_SRCS-yes))
 
-VP9_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/x86_dsystemdependent.c
-VP9_DX_SRCS-$(HAVE_MMX) += decoder/x86/dequantize_mmx.asm
-VP9_DX_SRCS-$(HAVE_MMX) += decoder/x86/idct_blk_mmx.c
-VP9_DX_SRCS-$(HAVE_SSE2) += decoder/x86/idct_blk_sse2.c
+VP9_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/vp9_x86_dsystemdependent.c
+VP9_DX_SRCS-$(HAVE_MMX) += decoder/x86/vp9_dequantize_mmx.asm
+VP9_DX_SRCS-$(HAVE_MMX) += decoder/x86/vp9_idct_blk_mmx.c
+VP9_DX_SRCS-$(HAVE_SSE2) += decoder/x86/vp9_idct_blk_sse2.c
 
 $(eval $(call asm_offsets_template,\
-         vp9_asm_dec_offsets.asm, $(VP9_PREFIX)decoder/asm_dec_offsets.c))
+         vp9_asm_dec_offsets.asm, $(VP9_PREFIX)decoder/vp9_asm_dec_offsets.c))

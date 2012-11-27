@@ -12,10 +12,10 @@
 #include "vpx/vpx_codec.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
-#include "vp9/encoder/onyx_int.h"
+#include "vp9/encoder/vp9_onyx_int.h"
 #include "vpx/vp8cx.h"
-#include "vp9/encoder/firstpass.h"
-#include "vp9/common/onyx.h"
+#include "vp9/encoder/vp9_firstpass.h"
+#include "vp9/common/vp9_onyx.h"
 #include <stdlib.h>
 #include <string.h>
 

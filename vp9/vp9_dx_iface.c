@@ -15,8 +15,8 @@
 #include "vpx/vp8dx.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
-#include "common/onyxd.h"
-#include "decoder/onyxd_int.h"
+#include "common/vp9_onyxd.h"
+#include "decoder/vp9_onyxd_int.h"
 
 #define VP8_CAP_POSTPROC (CONFIG_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
 typedef vpx_codec_stream_info_t  vp8_stream_info_t;

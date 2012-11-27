@@ -13,20 +13,20 @@
 
 #File list for arm
 # encoder
-VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/arm_csystemdependent.c
+VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/vp9_arm_csystemdependent.c
 
-VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/dct_arm.c
-VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/dct_arm.h
-VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/encodemb_arm.h
-VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.c
-VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.h
-VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/variance_arm.c
-VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/variance_arm.h
+VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/vp9_dct_arm.c
+VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/vp9_dct_arm.h
+VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/vp9_encodemb_arm.h
+VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/vp9_quantize_arm.c
+VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/vp9_quantize_arm.h
+VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/vp9_variance_arm.c
+VP9_CX_SRCS-$(ARCH_ARM)  += encoder/arm/vp9_variance_arm.h
 
 #File list for armv5te
 # encoder
-VP9_CX_SRCS-$(HAVE_ARMV5TE) += encoder/arm/boolhuff_arm.c
-VP9_CX_SRCS_REMOVE-$(HAVE_ARMV5TE)  += encoder/boolhuff.c
+VP9_CX_SRCS-$(HAVE_ARMV5TE) += encoder/arm/vp9_boolhuff_arm.c
+VP9_CX_SRCS_REMOVE-$(HAVE_ARMV5TE)  += encoder/vp9_boolhuff.c
 VP9_CX_SRCS-$(HAVE_ARMV5TE)  += encoder/arm/armv5te/boolhuff_armv5te$(ASM)
 VP9_CX_SRCS-$(HAVE_ARMV5TE)  += encoder/arm/armv5te/vp8_packtokens_armv5$(ASM)
 VP9_CX_SRCS-$(HAVE_ARMV5TE)  += encoder/arm/armv5te/vp8_packtokens_mbrow_armv5$(ASM)
@@ -49,7 +49,7 @@ VP9_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/walsh_v6$(ASM)
 #File list for neon
 # encoder
 VP9_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/fastquantizeb_neon$(ASM)
-VP9_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/picklpf_arm.c
+VP9_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/vp9_picklpf_arm.c
 VP9_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/sad8_neon$(ASM)
 VP9_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/sad16_neon$(ASM)
 VP9_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/shortfdct_neon$(ASM)
