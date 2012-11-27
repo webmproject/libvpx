@@ -17,6 +17,7 @@
 
 #include "math.h"
 #include "vp9/common/vp9_alloccommon.h"
+#include "vp9/common/vp9_modecont.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9_ratectrl.h"
 #include "vp9/common/vp9_entropymode.h"
@@ -135,8 +136,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
   vp9_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
 
-  vp9_copy(cc->mode_context, cm->fc.mode_context);
-  vp9_copy(cc->mode_context_a, cm->fc.mode_context_a);
+  vp9_copy(cc->vp9_mode_contexts, cm->fc.vp9_mode_contexts);
 
   vp9_copy(cc->ymode_prob, cm->fc.ymode_prob);
 #if CONFIG_SUPERBLOCKS
@@ -194,8 +194,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cpi->mb.nmvcosts, cc->nmvcosts);
   vp9_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
 
-  vp9_copy(cm->fc.mode_context, cc->mode_context);
-  vp9_copy(cm->fc.mode_context_a, cc->mode_context_a);
+  vp9_copy(cm->fc.vp9_mode_contexts, cc->vp9_mode_contexts);
 
   vp9_copy(cm->fc.ymode_prob, cc->ymode_prob);
 #if CONFIG_SUPERBLOCKS
@@ -262,8 +261,15 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
   cpi->common.refresh_alt_ref_frame = TRUE;
 
   vp9_init_mode_contexts(&cpi->common);
+  vpx_memcpy(cpi->common.fc.vp9_mode_contexts,
+             vp9_default_mode_contexts,
+             sizeof(vp9_default_mode_contexts));
   vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
   vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
+
+  vpx_memcpy(cpi->common.lfc.vp9_mode_contexts,
+             vp9_default_mode_contexts_a,
+             sizeof(vp9_default_mode_contexts_a));
 
   vpx_memset(cm->prev_mip, 0,
     (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
@@ -279,16 +285,10 @@ void vp9_setup_inter_frame(VP9_COMP *cpi) {
     vpx_memcpy(&cpi->common.fc,
                &cpi->common.lfc_a,
                sizeof(cpi->common.fc));
-    vpx_memcpy(cpi->common.fc.vp9_mode_contexts,
-               cpi->common.fc.mode_context_a,
-               sizeof(cpi->common.fc.vp9_mode_contexts));
   } else {
     vpx_memcpy(&cpi->common.fc,
                &cpi->common.lfc,
                sizeof(cpi->common.fc));
-    vpx_memcpy(cpi->common.fc.vp9_mode_contexts,
-               cpi->common.fc.mode_context,
-               sizeof(cpi->common.fc.vp9_mode_contexts));
   }
 }
 

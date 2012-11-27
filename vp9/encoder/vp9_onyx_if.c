@@ -3748,7 +3748,6 @@ static void encode_frame_to_data_rate
                       cpi->NMVcount.joints[2], cpi->NMVcount.joints[3]);
                       */
     vp9_adapt_nmv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
-    vp9_update_mode_context(&cpi->common);
   }
 #if CONFIG_COMP_INTERINTRA_PRED
   if (cm->frame_type != KEY_FRAME)

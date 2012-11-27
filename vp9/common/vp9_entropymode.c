@@ -448,14 +448,6 @@ void vp9_entropy_mode_init() {
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
   vpx_memset(pc->fc.mv_ref_ct, 0, sizeof(pc->fc.mv_ref_ct));
-
-  vpx_memcpy(pc->fc.mode_context,
-             vp9_default_mode_contexts,
-             sizeof(pc->fc.mode_context));
-  vpx_memcpy(pc->fc.mode_context_a,
-             vp9_default_mode_contexts_a,
-             sizeof(pc->fc.mode_context_a));
-
 }
 
 void vp9_accum_mv_refs(VP9_COMMON *pc,
@@ -494,11 +486,8 @@ void vp9_update_mode_context(VP9_COMMON *pc) {
   int (*mv_ref_ct)[4][2];
   int (*mode_context)[4];
 
-  if (pc->refresh_alt_ref_frame) {
-    mode_context = pc->fc.mode_context_a;
-  } else {
-    mode_context = pc->fc.mode_context;
-  }
+  mode_context = pc->fc.vp9_mode_contexts;
+
   mv_ref_ct = pc->fc.mv_ref_ct;
 
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {

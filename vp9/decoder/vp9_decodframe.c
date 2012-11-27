@@ -861,12 +861,17 @@ static void init_frame(VP9D_COMP *pbi) {
     pc->ref_frame_sign_bias[ALTREF_FRAME] = 0;
 
     vp9_init_mode_contexts(&pbi->common);
+    vpx_memcpy(pbi->common.fc.vp9_mode_contexts,
+               vp9_default_mode_contexts,
+               sizeof(vp9_default_mode_contexts));
+
     vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
     vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
 
-    vpx_memcpy(pbi->common.fc.vp9_mode_contexts,
-               pbi->common.fc.mode_context,
-               sizeof(pbi->common.fc.mode_context));
+    vpx_memcpy(pbi->common.lfc.vp9_mode_contexts,
+               vp9_default_mode_contexts_a,
+               sizeof(vp9_default_mode_contexts_a));
+
     vpx_memset(pc->prev_mip, 0,
                (pc->mb_cols + 1) * (pc->mb_rows + 1)* sizeof(MODE_INFO));
     vpx_memset(pc->mip, 0,
@@ -1251,14 +1256,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
     if (pc->refresh_alt_ref_frame) {
       vpx_memcpy(&pc->fc, &pc->lfc_a, sizeof(pc->fc));
-      vpx_memcpy(pc->fc.vp9_mode_contexts,
-                 pc->fc.mode_context_a,
-                 sizeof(pc->fc.vp9_mode_contexts));
     } else {
       vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
-      vpx_memcpy(pc->fc.vp9_mode_contexts,
-                 pc->fc.mode_context,
-                 sizeof(pc->fc.vp9_mode_contexts));
     }
 
     /* Buffer to buffer copy flags. */

@@ -119,8 +119,6 @@ typedef struct frame_contexts {
   vp9_prob pre_interintra_prob;
 #endif
 
-  int mode_context[INTER_MODE_CONTEXTS][4];
-  int mode_context_a[INTER_MODE_CONTEXTS][4];
   int vp9_mode_contexts[INTER_MODE_CONTEXTS][4];
   int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
 } FRAME_CONTEXT;
