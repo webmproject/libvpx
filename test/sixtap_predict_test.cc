@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "test/acm_random.h"
+#include "test/register_state_check.h"
 #include "test/util.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 extern "C" {
@@ -136,8 +137,8 @@ TEST_P(SixtapPredictTest, TestWithPresetData) {
 
   uint8_t *src = const_cast<uint8_t*>(test_data);
 
-  sixtap_predict_(&src[kSrcStride * 2 + 2 + 1], kSrcStride,
-                  2, 2, dst_, kDstStride);
+  REGISTER_STATE_CHECK(sixtap_predict_(&src[kSrcStride * 2 + 2 + 1], kSrcStride,
+                                       2, 2, dst_, kDstStride));
 
   for (int i = 0; i < height_; ++i)
     for (int j = 0; j < width_; ++j)
@@ -162,8 +163,9 @@ TEST_P(SixtapPredictTest, TestWithRandomData) {
                                 xoffset, yoffset, dst_c_, kDstStride);
 
       // Run test.
-      sixtap_predict_(&src_[kSrcStride * 2 + 2 + 1], kSrcStride,
-                      xoffset, yoffset, dst_, kDstStride);
+      REGISTER_STATE_CHECK(
+          sixtap_predict_(&src_[kSrcStride * 2 + 2 + 1], kSrcStride,
+                          xoffset, yoffset, dst_, kDstStride));
 
       for (int i = 0; i < height_; ++i)
         for (int j = 0; j < width_; ++j)

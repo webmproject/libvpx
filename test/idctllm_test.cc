@@ -13,6 +13,7 @@ extern "C" {
 #include "vpx_config.h"
 #include "vpx_rtcd.h"
 }
+#include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 typedef void (*idct_fn_t)(short *input, unsigned char *pred_ptr,
@@ -54,7 +55,7 @@ TEST_P(IDCTTest, TestAllZeros)
 {
     int i;
 
-    UUT(input, output, 16, output, 16);
+    REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
 
     for(i=0; i<256; i++)
         if((i&0xF) < 4 && i<64)
@@ -68,7 +69,7 @@ TEST_P(IDCTTest, TestAllOnes)
     int i;
 
     input[0] = 4;
-    UUT(input, output, 16, output, 16);
+    REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
 
     for(i=0; i<256; i++)
         if((i&0xF) < 4 && i<64)
@@ -85,7 +86,7 @@ TEST_P(IDCTTest, TestAddOne)
         predict[i] = i;
 
     input[0] = 4;
-    UUT(input, predict, 16, output, 16);
+    REGISTER_STATE_CHECK(UUT(input, predict, 16, output, 16));
 
     for(i=0; i<256; i++)
         if((i&0xF) < 4 && i<64)
@@ -101,7 +102,7 @@ TEST_P(IDCTTest, TestWithData)
     for(i=0; i<16; i++)
         input[i] = i;
 
-    UUT(input, output, 16, output, 16);
+    REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
 
     for(i=0; i<256; i++)
         if((i&0xF) > 3 || i>63)

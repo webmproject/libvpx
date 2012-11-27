@@ -12,6 +12,7 @@
 #if CONFIG_VP8_DECODER
 #include "test/decode_test_driver.h"
 #endif
+#include "test/register_state_check.h"
 #include "test/video_source.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -58,9 +59,10 @@ void Encoder::EncodeFrameInternal(const VideoSource &video,
   }
 
   // Encode the frame
-  res = vpx_codec_encode(&encoder_,
-                         video.img(), video.pts(), video.duration(),
-                         frame_flags, deadline_);
+  REGISTER_STATE_CHECK(
+      res = vpx_codec_encode(&encoder_,
+                             video.img(), video.pts(), video.duration(),
+                             frame_flags, deadline_));
   ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
 }
 
