@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//rfQ\u003d",
+        "filename": "vp9/common/blockd.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//r3U\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r3Q\u003d",
         "filename": "vp9/common/invtrans.c",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-27T01:10:51Z",
       "side": 1,
       "message": "remove commented code.",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//rfM\u003d",
+        "filename": "vp9/common/invtrans.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//r3Q\u003d",
       "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//rfI\u003d",
+        "filename": "vp9/common/invtrans.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//r3M\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r28\u003d",
         "filename": "vp9/common/reconintra.c",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2012-11-27T01:10:51Z",
       "side": 1,
       "message": "Unrelated?",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//rfE\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Yes.",
+      "parentUuid": "AAAAQ3//r28\u003d",
       "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//rfA\u003d",
+        "filename": "vp9/decoder/decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//r24\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r2g\u003d",
         "filename": "vp9/decoder/decodframe.c",
         "patchSetId": 7
@@ -98,6 +188,24 @@
       "writtenOn": "2012-11-27T01:10:51Z",
       "side": 1,
       "message": "remove debug code?",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//re4\u003d",
+        "filename": "vp9/decoder/decodframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "I would prefer to leave the debug code in encodeframe and decodeframe until the superblock ADST is tested.",
+      "parentUuid": "AAAAQ3//r2g\u003d",
       "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//re0\u003d",
+        "filename": "vp9/decoder/decodframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Will refactor the superblock stuff next. We cannot use decode_16x16 directly, but I was planning to make another set like decode_16x16_sb, etc.",
+      "parentUuid": "AAAAQ3//r2U\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r2Q\u003d",
         "filename": "vp9/decoder/decodframe.c",
         "patchSetId": 7
@@ -132,6 +258,24 @@
       "writtenOn": "2012-11-27T01:10:51Z",
       "side": 1,
       "message": "remove debug code.",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//reo\u003d",
+        "filename": "vp9/decoder/decodframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Leaving it for now.",
+      "parentUuid": "AAAAQ3//r2Q\u003d",
       "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//rek\u003d",
+        "filename": "vp9/decoder/decodframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "ditto.",
+      "parentUuid": "AAAAQ3//r2M\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r2E\u003d",
         "filename": "vp9/decoder/dequantize.c",
         "patchSetId": 7
@@ -166,6 +328,24 @@
       "writtenOn": "2012-11-27T01:10:51Z",
       "side": 1,
       "message": "remove debug code.",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//reg\u003d",
+        "filename": "vp9/decoder/dequantize.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//r2E\u003d",
       "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//reU\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "I ended up making everything zero irrespective of any mode condition. There is an unexplained mismatch with the tx_type condiiton in - probably because of ambiguity for skip mbs.",
+      "parentUuid": "AAAAQ3//r2A\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r18\u003d",
         "filename": "vp9/encoder/bitstream.c",
         "patchSetId": 7
@@ -200,6 +398,24 @@
       "writtenOn": "2012-11-27T01:10:51Z",
       "side": 1,
       "message": "remove debug code.",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//reM\u003d",
+        "filename": "vp9/encoder/bitstream.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 945,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//r18\u003d",
       "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//reI\u003d",
+        "filename": "vp9/encoder/encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Prefer to leave it until the superblock stuff is handled.",
+      "parentUuid": "AAAAQ3//r14\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r04\u003d",
         "filename": "vp9/encoder/rdopt.c",
         "patchSetId": 7
@@ -234,6 +468,24 @@
       "writtenOn": "2012-11-27T01:10:51Z",
       "side": 1,
       "message": "remove #if 1 and all code under #else.",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//reE\u003d",
+        "filename": "vp9/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//r04\u003d",
       "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//reA\u003d",
+        "filename": "vp9/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 798,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//r00\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r0s\u003d",
         "filename": "vp9/encoder/rdopt.c",
         "patchSetId": 7
@@ -268,6 +538,24 @@
       "writtenOn": "2012-11-27T01:10:51Z",
       "side": 1,
       "message": "this isn\u0027t good :). This calculates the RD for the 8x8 in case we\u0027re using the 4x4. Same below. So this is intentional.",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//rd0\u003d",
+        "filename": "vp9/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2185,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "okay - I misunderstood what this was doing. Reverted.",
+      "parentUuid": "AAAAQ3//r0s\u003d",
       "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//rdw\u003d",
+        "filename": "vp9/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2219,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "ditto.",
+      "parentUuid": "AAAAQ3//r0k\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r0g\u003d",
         "filename": "vp9/encoder/tokenize.c",
         "patchSetId": 7
@@ -308,6 +614,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAQ3//rdo\u003d",
+        "filename": "vp9/encoder/tokenize.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 826,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//r0g\u003d",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//r0c\u003d",
         "filename": "vp9/encoder/tokenize.c",
         "patchSetId": 7
@@ -319,6 +643,24 @@
       "writtenOn": "2012-11-27T01:10:51Z",
       "side": 1,
       "message": "get_2nd_order_usage()? Or just always do the 9 byte cleanup.",
+      "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAQ3//rdk\u003d",
+        "filename": "vp9/encoder/tokenize.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 881,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-11-27T16:29:32Z",
+      "side": 1,
+      "message": "Ended up zeroing out everything irrespective of modes.",
+      "parentUuid": "AAAAQ3//r0c\u003d",
       "revId": "9e17ca6889fb65ad06704c5610cfd99726cf1ccb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
