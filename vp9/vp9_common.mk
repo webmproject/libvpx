@@ -114,15 +114,15 @@ endif
 
 VP9_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp9_filter_sse4.c
 ifeq ($(HAVE_SSE4_1),yes)
-$(call xform_obj_path_o_d,vp9/common/x86/vp9_filter_sse4.c): CFLAGS += -msse4
+vp9/common/x86/vp9_filter_sse4.c.o: CFLAGS += -msse4
 endif
 
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_filter_sse2.c
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_sadmxn_x86.c
 ifeq ($(HAVE_SSE2),yes)
-$(call xform_obj_path_o_d,vp9/common/x86/vp9_filter_sse2.c): CFLAGS += -msse2
-$(call xform_obj_path_o_d,vp9/common/x86/vp9_loopfilter_x86.c): CFLAGS += -msse2
-$(call xform_obj_path_o_d,vp9/common/x86/vp9_sadmxn_x86.c): CFLAGS += -msse2
+vp9/common/x86/vp9_filter_sse2.c.o: CFLAGS += -msse2
+vp9/common/x86/vp9_loopfilter_x86.c.o: CFLAGS += -msse2
+vp9/common/x86/vp9_sadmxn_x86.c.o: CFLAGS += -msse2
 endif
 
 VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_arm_systemdependent.c

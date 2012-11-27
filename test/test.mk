@@ -21,6 +21,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += i420_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += keyframe_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += resize_test.cc
 
+LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += ../md5_utils.h ../md5_utils.c
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += decode_test_driver.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += decode_test_driver.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += ivf_video_source.h
