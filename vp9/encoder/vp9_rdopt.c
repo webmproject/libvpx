@@ -513,29 +513,48 @@ int vp9_uvsse(MACROBLOCK *x) {
 
 }
 
+#if CONFIG_NEWCOEFCONTEXT
+#define PT pn
+#else
+#define PT pt
+#endif
+
 static int cost_coeffs_2x2(MACROBLOCK *mb,
                            BLOCKD *b, PLANE_TYPE type,
                            ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  int c = (type == PLANE_TYPE_Y_NO_DC); /* start at coef 0, unless Y with Y2 */
+  int nodc = (type == PLANE_TYPE_Y_NO_DC);
+  int c = nodc; /* start at coef 0, unless Y with Y2 */
   int eob = b->eob;
   int pt;    /* surrounding block/prev coef predictor */
   int cost = 0;
   int16_t *qcoeff_ptr = b->qcoeff;
+#if CONFIG_NEWCOEFCONTEXT
+  const int *neighbors = vp9_default_zig_zag1d_4x4_neighbors;
+  int pn;
+#endif
 
   VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   assert(eob <= 4);
 
+#if CONFIG_NEWCOEFCONTEXT
+  pn = pt;
+#endif
   for (; c < eob; c++) {
     int v = qcoeff_ptr[vp9_default_zig_zag1d_4x4[c]];
     int t = vp9_dct_value_tokens_ptr[v].Token;
     cost += mb->token_costs[TX_8X8][type][vp9_coef_bands_4x4[c]][pt][t];
     cost += vp9_dct_value_cost_ptr[v];
     pt = vp9_prev_token_class[t];
+#if CONFIG_NEWCOEFCONTEXT
+    if (c < 4 - 1)
+      pn = vp9_get_coef_neighbor_context(
+           qcoeff_ptr, nodc, neighbors, vp9_default_zig_zag1d_4x4[c + 1]);
+#endif
   }
 
   if (c < 4)
     cost += mb->token_costs[TX_8X8][type][vp9_coef_bands_4x4[c]]
-            [pt] [DCT_EOB_TOKEN];
+        [PT][DCT_EOB_TOKEN];
   // is eob first coefficient;
   pt = (c > !type);
   *a = *l = pt;
@@ -546,7 +565,8 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        TX_SIZE tx_size) {
   const int eob = b->eob;
-  int c = (type == PLANE_TYPE_Y_NO_DC); /* start at coef 0, unless Y with Y2 */
+  int nodc = (type == PLANE_TYPE_Y_NO_DC);
+  int c = nodc; /* start at coef 0, unless Y with Y2 */
   int cost = 0, default_eob, seg_eob;
   int pt;                     /* surrounding block/prev coef predictor */
   int const *scan, *band;
@@ -555,6 +575,10 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
   MB_MODE_INFO *mbmi = &mb->e_mbd.mode_info_context->mbmi;
   TX_TYPE tx_type = DCT_DCT;
   int segment_id = mbmi->segment_id;
+#if CONFIG_NEWCOEFCONTEXT
+  const int *neighbors;
+  int pn;
+#endif
   scan = vp9_default_zig_zag1d_4x4;
   band = vp9_coef_bands_4x4;
   default_eob = 16;
@@ -628,17 +652,28 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
 
   VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
+#if CONFIG_NEWCOEFCONTEXT
+  neighbors = vp9_get_coef_neighbors_handle(scan);
+  pn = pt;
+#endif
   if (tx_type != DCT_DCT) {
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
-      cost += mb->hybrid_token_costs[tx_size][type][band[c]][pt][t];
+      cost += mb->hybrid_token_costs[tx_size][type][band[c]][PT][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_prev_token_class[t];
+#if CONFIG_NEWCOEFCONTEXT
+      if (c < seg_eob - 1 && NEWCOEFCONTEXT_BAND_COND(band[c + 1]))
+        pn = vp9_get_coef_neighbor_context(
+            qcoeff_ptr, nodc, neighbors, scan[c + 1]);
+      else
+        pn = pt;
+#endif
     }
     if (c < seg_eob)
       cost += mb->hybrid_token_costs[tx_size][type][band[c]]
-          [pt][DCT_EOB_TOKEN];
+          [PT][DCT_EOB_TOKEN];
   } else {
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
@@ -646,10 +681,17 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
       cost += mb->token_costs[tx_size][type][band[c]][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_prev_token_class[t];
+#if CONFIG_NEWCOEFCONTEXT
+      if (c < seg_eob - 1 && NEWCOEFCONTEXT_BAND_COND(band[c + 1]))
+        pn = vp9_get_coef_neighbor_context(
+            qcoeff_ptr, nodc, neighbors, scan[c + 1]);
+      else
+        pn = pt;
+#endif
     }
     if (c < seg_eob)
       cost += mb->token_costs[tx_size][type][band[c]]
-          [pt][DCT_EOB_TOKEN];
+          [PT][DCT_EOB_TOKEN];
   }
 
   // is eob first coefficient;

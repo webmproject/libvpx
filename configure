@@ -250,6 +250,7 @@ EXPERIMENT_LIST="
     tx32x32
     dwt32x32hybrid
     cnvcontext
+    newcoefcontext
 "
 CONFIG_LIST="
     external_build

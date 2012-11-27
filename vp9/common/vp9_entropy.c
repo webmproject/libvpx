@@ -62,6 +62,7 @@ DECLARE_ALIGNED(16, const int, vp9_col_scan_4x4[16]) = {
   2, 6, 10, 14,
   3, 7, 11, 15
 };
+
 DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]) = {
   0,   1,  2,  3,
   4,   5,  6,  7,
@@ -69,16 +70,16 @@ DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]) = {
   12, 13, 14, 15
 };
 
-
 DECLARE_ALIGNED(64, const int, vp9_coef_bands_8x8[64]) = { 0, 1, 2, 3, 5, 4, 4, 5,
-                                                           5, 3, 6, 3, 5, 4, 6, 6,
-                                                           6, 5, 5, 6, 6, 6, 6, 6,
-                                                           6, 6, 6, 6, 6, 6, 6, 6,
-                                                           6, 6, 6, 6, 7, 7, 7, 7,
-                                                           7, 7, 7, 7, 7, 7, 7, 7,
-                                                           7, 7, 7, 7, 7, 7, 7, 7,
-                                                           7, 7, 7, 7, 7, 7, 7, 7
-                                                         };
+  5, 3, 6, 3, 5, 4, 6, 6,
+  6, 5, 5, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7
+};
+
 DECLARE_ALIGNED(64, const int, vp9_default_zig_zag1d_8x8[64]) = {
   0,  1,  8, 16,  9,  2,  3, 10, 17, 24, 32, 25, 18, 11,  4,  5,
   12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13,  6,  7, 14, 21, 28,
@@ -118,17 +119,17 @@ DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]) = {
   25,  10,  11,  26,  41,  56,  71,  86,
   101, 116, 131, 146, 161, 176, 192, 177,
   162, 147, 132, 117, 102,  87,  72,  57,
-  42,  27,  12,  13,  28,  43,  58,  73,
+  42,  27,  12,  13,  28,  43,  58, 73,
   88, 103, 118, 133, 148, 163, 178, 193,
   208, 224, 209, 194, 179, 164, 149, 134,
   119, 104,  89,  74,  59,  44,  29,  14,
-  15,  30,  45,  60,  75,  90, 105, 120,
+  15,  30, 45,  60,  75,  90, 105, 120,
   135, 150, 165, 180, 195, 210, 225, 240,
   241, 226, 211, 196, 181, 166, 151, 136,
   121, 106,  91,  76,  61,  46,  31,  47,
-  62,  77,  92, 107, 122, 137, 152, 167,
+  62,  77, 92, 107, 122, 137, 152, 167,
   182, 197, 212, 227, 242, 243, 228, 213,
-  198, 183, 168, 153, 138, 123, 108,  93,
+  198, 183, 168, 153, 138, 123, 108, 93,
   78,  63,  79,  94, 109, 124, 139, 154,
   169, 184, 199, 214, 229, 244, 245, 230,
   215, 200, 185, 170, 155, 140, 125, 110,
@@ -530,6 +531,152 @@ vp9_extra_bit_struct vp9_extra_bits[12] = {
 
 #include "vp9/common/vp9_default_coef_probs.h"
 
+#if CONFIG_NEWCOEFCONTEXT
+
+// Neighborhood 5-tuples for various scans and blocksizes,
+// in {top, left, topleft, topright, bottomleft} order
+// for each position in raster scan order.
+// -1 indicates the neighbor does not exist.
+DECLARE_ALIGNED(16, int,
+                vp9_default_zig_zag1d_4x4_neighbors[16 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int,
+                vp9_col_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int,
+                vp9_row_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int,
+                vp9_default_zig_zag1d_8x8_neighbors[64 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int,
+                vp9_default_zig_zag1d_16x16_neighbors[256 * MAX_NEIGHBORS]);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+DECLARE_ALIGNED(16, int,
+                vp9_default_zig_zag1d_32x32_neighbors[1024 * MAX_NEIGHBORS]);
+#endif
+
+static int find_in_scan(const int *scan, int l, int m) {
+  int i, l2 = l * l;
+  for (i = 0; i < l2; ++i) {
+    if (scan[i] == m)
+      return i;
+  }
+  return -1;
+}
+
+static void init_scan_neighbors(const int *scan, int l, int *neighbors) {
+  int l2 = l * l;
+  int m, n, i, j, k;
+  for (n = 0; n < l2; ++n) {
+    int locn = find_in_scan(scan, l, n);
+    int z = -1;
+    i = n / l;
+    j = n % l;
+    for (k = 0; k < MAX_NEIGHBORS; ++k)
+      neighbors[MAX_NEIGHBORS * n + k] = -1;
+    if (i - 1 >= 0) {
+      m = (i - 1) * l + j;
+      if (find_in_scan(scan, l, m) < locn) {
+        neighbors[MAX_NEIGHBORS * n] = m;
+        if (m == 0) z = 0;
+      }
+    }
+    if (j - 1 >= 0) {
+      m = i * l + j - 1;
+      if (find_in_scan(scan, l, m) < locn) {
+        neighbors[MAX_NEIGHBORS * n + 1] = m;
+        if (m == 0) z = 1;
+      }
+    }
+    if (i - 1 >= 0 && j - 1 >= 0) {
+      m = (i - 1) * l + j - 1;
+      if (find_in_scan(scan, l, m) < locn) {
+        neighbors[MAX_NEIGHBORS * n + 2] = m;
+        if (m == 0) z = 2;
+      }
+    }
+    if (i - 1 >= 0 && j + 1 < l) {
+      m = (i - 1) * l + j + 1;
+      if (find_in_scan(scan, l, m) < locn) {
+        neighbors[MAX_NEIGHBORS * n + 3] = m;
+        if (m == 0) z = 3;
+      }
+    }
+    if (i + 1 < l && j - 1 >= 0) {
+       m = (i + 1) * l + j - 1;
+      if (find_in_scan(scan, l, m) < locn) {
+        neighbors[MAX_NEIGHBORS * n + 4] = m;
+        if (m == 0) z = 4;
+      }
+    }
+    if (z != -1) {  // zero exists
+      int v = 0;
+      for (k = 0; k < MAX_NEIGHBORS; ++k)
+        v += (neighbors[MAX_NEIGHBORS * n + k] > 0);
+      if (v) {
+        neighbors[MAX_NEIGHBORS * n + z] = -1;
+      }
+    }
+  }
+}
+
+void vp9_init_neighbors() {
+  init_scan_neighbors(vp9_default_zig_zag1d_4x4, 4,
+                      vp9_default_zig_zag1d_4x4_neighbors);
+  init_scan_neighbors(vp9_row_scan_4x4, 4,
+                      vp9_row_scan_4x4_neighbors);
+  init_scan_neighbors(vp9_col_scan_4x4, 4,
+                      vp9_col_scan_4x4_neighbors);
+  init_scan_neighbors(vp9_default_zig_zag1d_8x8, 8,
+                      vp9_default_zig_zag1d_8x8_neighbors);
+  init_scan_neighbors(vp9_default_zig_zag1d_16x16, 16,
+                      vp9_default_zig_zag1d_16x16_neighbors);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  init_scan_neighbors(vp9_default_zig_zag1d_32x32, 32,
+                      vp9_default_zig_zag1d_32x32_neighbors);
+#endif
+}
+
+const int *vp9_get_coef_neighbors_handle(const int *scan) {
+  if (scan == vp9_default_zig_zag1d_4x4) {
+    return vp9_default_zig_zag1d_4x4_neighbors;
+  } else if (scan == vp9_row_scan_4x4) {
+    return vp9_row_scan_4x4_neighbors;
+  } else if (scan == vp9_col_scan_4x4) {
+    return vp9_col_scan_4x4_neighbors;
+  } else if (scan == vp9_default_zig_zag1d_8x8) {
+    return vp9_default_zig_zag1d_8x8_neighbors;
+  } else if (scan == vp9_default_zig_zag1d_16x16) {
+    return vp9_default_zig_zag1d_16x16_neighbors;
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  } else if (scan == vp9_default_zig_zag1d_32x32) {
+    return vp9_default_zig_zag1d_32x32_neighbors;
+#endif
+  }
+  return vp9_default_zig_zag1d_4x4_neighbors;
+}
+
+int vp9_get_coef_neighbor_context(const short int *qcoeff_ptr, int nodc,
+                                  const int *neigbor_handle, int rc) {
+  static int neighbors_used = MAX_NEIGHBORS;   // maximum is MAX_NEIGHBORS
+  const int *nb = neigbor_handle + rc * MAX_NEIGHBORS;
+  int i, v, val = 0, n = 0;
+  for (i = 0; i < neighbors_used; ++i) {
+    if (nb[i] == -1 || (nb[i] == 0 && nodc)) {
+      continue;
+    }
+    v = abs(qcoeff_ptr[nb[i]]);
+    val = (v > val ? v : val);
+    n++;
+  }
+  if (n == 0)
+    return 0;
+  else if (val <= 1)
+    return val;
+  else if (val < 4)
+    return 2;
+  else
+    return 3;
+}
+#endif  /* CONFIG_NEWCOEFCONTEXT */
+
 void vp9_default_coef_probs(VP9_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs_4x4, default_coef_probs_4x4,
              sizeof(pc->fc.coef_probs_4x4));
@@ -546,7 +693,6 @@ void vp9_default_coef_probs(VP9_COMMON *pc) {
   vpx_memcpy(pc->fc.hybrid_coef_probs_16x16,
              default_hybrid_coef_probs_16x16,
              sizeof(pc->fc.hybrid_coef_probs_16x16));
-
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
   vpx_memcpy(pc->fc.coef_probs_32x32, default_coef_probs_32x32,
              sizeof(pc->fc.coef_probs_32x32));

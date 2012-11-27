@@ -98,7 +98,7 @@ extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_32x32[1024]);
    distinct bands). */
 
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
-#define PREV_COEF_CONTEXTS       4
+#define PREV_COEF_CONTEXTS          4
 
 typedef unsigned int vp9_coeff_count[COEF_BANDS][PREV_COEF_CONTEXTS]
                                     [MAX_ENTROPY_TOKENS];
@@ -127,13 +127,36 @@ extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]);
 #endif
 
 void vp9_coef_tree_initialize(void);
-
 void vp9_adapt_coef_probs(struct VP9Common *);
 
 static void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
   /* Clear entropy contexts */
-    vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
 }
 
+#if CONFIG_NEWCOEFCONTEXT
+
+#define MAX_NEIGHBORS 5
+#define NEWCOEFCONTEXT_BAND_COND(b)   ((b) >= 1)
+void vp9_init_neighbors(void);
+
+const int *vp9_get_coef_neighbors_handle(const int *scan);
+int vp9_get_coef_neighbor_context(const short int *qcoeff_ptr, int nodc,
+                                  const int *neigbor_handle, int rc);
+extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_4x4_neighbors[
+                       16 * MAX_NEIGHBORS]);
+extern DECLARE_ALIGNED(16, int, vp9_row_scan_4x4_neighbors[
+                       16 * MAX_NEIGHBORS]);
+extern DECLARE_ALIGNED(16, int, vp9_col_scan_4x4_neighbors[
+                       16 * MAX_NEIGHBORS]);
+extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_8x8_neighbors[
+                       64 * MAX_NEIGHBORS]);
+extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_16x16_neighbors[
+                       256 * MAX_NEIGHBORS]);
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_32x32_neighbors[
+                       1024 * MAX_NEIGHBORS]);
+#endif
+#endif  // CONFIG_NEWCOEFCONTEXT
 #endif  // VP9_COMMON_VP9_ENTROPY_H_
