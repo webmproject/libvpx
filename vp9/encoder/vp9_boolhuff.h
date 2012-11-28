@@ -37,6 +37,7 @@ typedef struct {
 extern void vp9_start_encode(BOOL_CODER *bc, unsigned char *buffer);
 
 extern void vp9_encode_value(BOOL_CODER *br, int data, int bits);
+extern void vp9_encode_unsigned_max(BOOL_CODER *br, int data, int max);
 extern void vp9_stop_encode(BOOL_CODER *bc);
 extern const unsigned int vp9_prob_cost[256];
 

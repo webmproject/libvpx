@@ -98,3 +98,15 @@ int vp9_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms) {
   }
   return word;
 }
+
+int vp9_decode_unsigned_max(BOOL_DECODER *br, int max) {
+  int data = 0, bit = 0, lmax = max;
+
+  while (lmax) {
+    data |= decode_bool(br, 128) << bit++;
+    lmax >>= 1;
+  }
+  if (data > max)
+    return max;
+  return data;
+}

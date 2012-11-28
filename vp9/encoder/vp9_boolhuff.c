@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include <assert.h>
 #include "vp9_boolhuff.h"
 
 #if defined(SECTIONBITS_OUTPUT)
@@ -62,6 +62,15 @@ void vp9_encode_value(BOOL_CODER *br, int data, int bits) {
 
   for (bit = bits - 1; bit >= 0; bit--)
     encode_bool(br, (1 & (data >> bit)), 0x80);
+}
+
+void vp9_encode_unsigned_max(BOOL_CODER *br, int data, int max) {
+  assert(data <= max);
+  while (max) {
+    encode_bool(br, data & 1, 128);
+    data >>= 1;
+    max >>= 1;
+  }
 }
 
 int vp9_recenter_nonneg(int v, int m) {

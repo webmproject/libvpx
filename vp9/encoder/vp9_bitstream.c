@@ -1911,19 +1911,19 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
               // Encode the relevant feature data
               if (Data < 0) {
                 Data = - Data;
-                vp9_write_literal(&header_bc, Data,
-                                  vp9_seg_feature_data_bits(j));
+                vp9_encode_unsigned_max(&header_bc, Data,
+                                        vp9_seg_feature_data_max(j));
                 vp9_write_bit(&header_bc, 1);
               } else {
-                vp9_write_literal(&header_bc, Data,
-                                  vp9_seg_feature_data_bits(j));
+                vp9_encode_unsigned_max(&header_bc, Data,
+                                        vp9_seg_feature_data_max(j));
                 vp9_write_bit(&header_bc, 0);
               }
             }
             // Unsigned data element so no sign bit needed
             else
-              vp9_write_literal(&header_bc, Data,
-                                vp9_seg_feature_data_bits(j));
+              vp9_encode_unsigned_max(&header_bc, Data,
+                                      vp9_seg_feature_data_max(j));
           } else
             vp9_write_bit(&header_bc, 0);
         }

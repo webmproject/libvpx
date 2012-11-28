@@ -29,7 +29,7 @@ void vp9_disable_segfeature(MACROBLOCKD *xd,
                             int segment_id,
                             SEG_LVL_FEATURES feature_id);
 
-int vp9_seg_feature_data_bits(SEG_LVL_FEATURES feature_id);
+int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id);
 
 int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id);
 

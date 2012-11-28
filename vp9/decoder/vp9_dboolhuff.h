@@ -150,4 +150,6 @@ static int bool_error(BOOL_DECODER *br) {
   return 0;
 }
 
+extern int vp9_decode_unsigned_max(BOOL_DECODER *br, int max);
+
 #endif

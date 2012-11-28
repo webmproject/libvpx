@@ -8,11 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
+#include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_seg_common.h"
 
 static const int segfeaturedata_signed[SEG_LVL_MAX] = { 1, 1, 0, 0, 0, 0 };
-static const int seg_feature_data_bits[SEG_LVL_MAX] =
-                 { QINDEX_BITS, 6, 4, 5, 8, 2 };
+static const int seg_feature_data_max[SEG_LVL_MAX] =
+                 { MAXQ, 63, 0xf, MB_MODE_COUNT - 1, 255, TX_SIZE_MAX - 1};
 
 // These functions provide access to new segment level features.
 // Eventually these function may be "optimized out" but for the moment,
@@ -45,8 +47,8 @@ void vp9_disable_segfeature(MACROBLOCKD *xd,
   xd->segment_feature_mask[segment_id] &= ~(1 << feature_id);
 }
 
-int vp9_seg_feature_data_bits(SEG_LVL_FEATURES feature_id) {
-  return seg_feature_data_bits[feature_id];
+int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id) {
+  return seg_feature_data_max[feature_id];
 }
 
 int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id) {
@@ -63,6 +65,12 @@ void vp9_set_segdata(MACROBLOCKD *xd,
                      int segment_id,
                      SEG_LVL_FEATURES feature_id,
                      int seg_data) {
+  assert(seg_data <= seg_feature_data_max[feature_id]);
+  if (seg_data < 0) {
+    assert(segfeaturedata_signed[feature_id]);
+    assert(-seg_data <= seg_feature_data_max[feature_id]);
+  }
+
   xd->segment_feature_data[segment_id][feature_id] = seg_data;
 }
 

@@ -1141,13 +1141,13 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
             // Update the feature data and mask
             vp9_enable_segfeature(xd, i, j);
 
-            data = (signed char)vp9_read_literal(
-                     &header_bc, vp9_seg_feature_data_bits(j));
+            data = vp9_decode_unsigned_max(&header_bc,
+                                           vp9_seg_feature_data_max(j));
 
             // Is the segment data signed..
             if (vp9_is_segfeature_signed(j)) {
               if (vp9_read_bit(&header_bc))
-                data = - data;
+                data = -data;
             }
           } else
             data = 0;
