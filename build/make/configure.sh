@@ -767,6 +767,7 @@ process_common_toolchain() {
             ;;
         armv5te)
             soft_enable edsp
+            disable fast_unaligned
             ;;
         esac
 
