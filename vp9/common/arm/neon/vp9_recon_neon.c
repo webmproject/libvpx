@@ -15,7 +15,7 @@
 
 extern void vp8_recon16x16mb_neon(unsigned char *pred_ptr, short *diff_ptr, unsigned char *dst_ptr, int ystride, unsigned char *udst_ptr, unsigned char *vdst_ptr);
 
-void vp8_recon_mb_neon(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *xd) {
+void vp8_recon_mb_neon(MACROBLOCKD *xd) {
   unsigned char *pred_ptr = &xd->predictor[0];
   short *diff_ptr = &xd->diff[0];
   unsigned char *dst_ptr = xd->dst.y_buffer;

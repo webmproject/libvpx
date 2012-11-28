@@ -26,7 +26,6 @@
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vp9_mcomp.h"
-#include "vp9_temporal_filter.h"
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9_lookahead.h"
 
@@ -393,7 +392,6 @@ typedef struct {
 
 typedef struct VP9_ENCODER_RTCD {
   VP9_COMMON_RTCD            *common;
-  vp9_temporal_rtcd_vtable_t  temporal;
 } VP9_ENCODER_RTCD;
 
 enum BlockSize {

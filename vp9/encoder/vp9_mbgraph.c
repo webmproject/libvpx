@@ -184,7 +184,6 @@ static int do_16x16_zerozero_search
   // FIXME should really use something like near/nearest MV and/or MV prediction
   xd->pre.y_buffer = ref->y_buffer + mb_y_offset;
   xd->pre.y_stride = ref->y_stride;
-  // VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
   err = vp9_sad16x16(ref->y_buffer + mb_y_offset, ref->y_stride,
                      xd->dst.y_buffer, xd->dst.y_stride, INT_MAX);
 

@@ -219,6 +219,34 @@ vp9_loop_filter_simple_bh_media=vp9_loop_filter_bhs_armv6
 vp9_loop_filter_simple_bh_neon=vp9_loop_filter_bhs_neon
 
 #
+# post proc
+#
+prototype void vp9_mbpost_proc_down "unsigned char *dst, int pitch, int rows, int cols, int flimit"
+specialize vp9_mbpost_proc_down mmx sse2
+vp9_mbpost_proc_down_sse2=vp9_mbpost_proc_down_xmm
+
+prototype void vp9_mbpost_proc_across_ip "unsigned char *src, int pitch, int rows, int cols, int flimit"
+specialize vp9_mbpost_proc_across_ip sse2
+vp9_mbpost_proc_across_ip_sse2=vp9_mbpost_proc_across_ip_xmm
+
+prototype void vp9_post_proc_down_and_across "unsigned char *src_ptr, unsigned char *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit"
+specialize vp9_post_proc_down_and_across mmx sse2
+vp9_post_proc_down_and_across_sse2=vp9_post_proc_down_and_across_xmm
+
+prototype void vp9_plane_add_noise "unsigned char *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch"
+specialize vp9_plane_add_noise mmx sse2
+vp9_plane_add_noise_sse2=vp9_plane_add_noise_wmt
+
+prototype void vp9_blend_mb_inner "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride"
+specialize vp9_blend_mb_inner
+
+prototype void vp9_blend_mb_outer "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride"
+specialize vp9_blend_mb_outer
+
+prototype void vp9_blend_b "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride"
+specialize vp9_blend_b
+
+#
 # sad 16x3, 3x16
 #
 prototype unsigned int vp9_sad16x3 "const unsigned char *src_ptr, int  src_stride, const unsigned char *ref_ptr, int ref_stride"

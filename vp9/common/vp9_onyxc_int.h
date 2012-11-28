@@ -145,9 +145,6 @@ typedef enum {
 
 typedef struct VP9_COMMON_RTCD {
 #if CONFIG_RUNTIME_CPU_DETECT
-#if CONFIG_POSTPROC
-  vp9_postproc_rtcd_vtable_t    postproc;
-#endif
   int                           flags;
 #else
   int unused;

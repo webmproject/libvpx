@@ -25,14 +25,6 @@ typedef struct {
 } MODE_DEFINITION;
 
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define ENCODEMB_INVOKE(ctx,fn) (ctx)->fn
-#else
-#define ENCODEMB_INVOKE(ctx,fn) vp9_encodemb_##fn
-#endif
-
-
-
 #include "vp9_onyx_int.h"
 struct VP9_ENCODER_RTCD;
 void vp9_encode_inter16x16(MACROBLOCK *x);

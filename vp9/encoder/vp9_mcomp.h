@@ -82,10 +82,4 @@ typedef int (*vp9_diamond_search_fn_t)(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                        int_mv *center_mv);
 
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define SEARCH_INVOKE(ctx,fn) (ctx)->fn
-#else
-#define SEARCH_INVOKE(ctx,fn) vp9_search_##fn
-#endif
-
 #endif
