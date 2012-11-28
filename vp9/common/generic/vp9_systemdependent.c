@@ -22,16 +22,6 @@ void vp9_machine_specific_config(VP9_COMMON *ctx) {
 #if CONFIG_RUNTIME_CPU_DETECT
   VP9_COMMON_RTCD *rtcd = &ctx->rtcd;
 
-#if CONFIG_POSTPROC || (CONFIG_VP9_ENCODER && CONFIG_INTERNAL_STATS)
-  rtcd->postproc.down             = vp9_mbpost_proc_down_c;
-  rtcd->postproc.across           = vp9_mbpost_proc_across_ip_c;
-  rtcd->postproc.downacross       = vp9_post_proc_down_and_across_c;
-  rtcd->postproc.addnoise         = vp9_plane_add_noise_c;
-  rtcd->postproc.blend_mb_inner   = vp9_blend_mb_inner_c;
-  rtcd->postproc.blend_mb_outer   = vp9_blend_mb_outer_c;
-  rtcd->postproc.blend_b          = vp9_blend_b_c;
-#endif
-
 #endif
 
 #if ARCH_X86 || ARCH_X86_64

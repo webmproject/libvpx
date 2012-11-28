@@ -31,12 +31,6 @@ void vp9_arch_x86_common_init(VP9_COMMON *ctx) {
 // The commented functions need to be re-written for vpx.
   if (flags & HAS_MMX) {
 
-#if CONFIG_POSTPROC
-    rtcd->postproc.down        = vp9_mbpost_proc_down_mmx;
-    /*rtcd->postproc.across      = vp9_mbpost_proc_across_ip_c;*/
-    rtcd->postproc.downacross  = vp9_post_proc_down_and_across_mmx;
-    rtcd->postproc.addnoise    = vp9_plane_add_noise_mmx;
-#endif
   }
 
 #endif
@@ -47,12 +41,6 @@ void vp9_arch_x86_common_init(VP9_COMMON *ctx) {
 
     // rtcd->idct.iwalsh16     = vp9_short_inv_walsh4x4_sse2;
 
-#if CONFIG_POSTPROC
-    rtcd->postproc.down        = vp9_mbpost_proc_down_xmm;
-    rtcd->postproc.across      = vp9_mbpost_proc_across_ip_xmm;
-    rtcd->postproc.downacross  = vp9_post_proc_down_and_across_xmm;
-    rtcd->postproc.addnoise    = vp9_plane_add_noise_wmt;
-#endif
   }
 
 #endif
