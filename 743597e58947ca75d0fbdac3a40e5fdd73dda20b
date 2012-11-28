@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARH///H8\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-28T17:13:48Z",
+      "side": 1,
+      "message": "can this struct and VP9_COMMON_RTCD go now?",
+      "revId": "743597e58947ca75d0fbdac3a40e5fdd73dda20b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARH///Ho\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-28T17:13:48Z",
+      "side": 1,
+      "message": "where is this prototype?",
+      "revId": "743597e58947ca75d0fbdac3a40e5fdd73dda20b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARH///Hs\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-28T17:13:48Z",
+      "side": 1,
+      "message": "looks rtcdish, can probably move these prototypes to rtcd_defs and get rid of this file, or put both prototypes here and get rid of the _c suffixes since there are no specializations.",
+      "revId": "743597e58947ca75d0fbdac3a40e5fdd73dda20b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARH///H0\u003d",
+        "filename": "vp9/encoder/x86/vp9_temporal_filter_x86.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-28T17:13:48Z",
+      "side": 1,
+      "message": "delete this file",
+      "revId": "743597e58947ca75d0fbdac3a40e5fdd73dda20b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
