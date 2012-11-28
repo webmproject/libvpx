@@ -505,6 +505,8 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
         vp9_dequant_idct_add(b->qcoeff, b->dequant, b->predictor,
                                *(b->base_dst) + b->dst, 16, b->dst_stride);
       }
+      xd->above_context->y2 = 1;
+      xd->left_context->y2 = 1;
     }
     if (!xd->mode_info_context->mbmi.mb_skip_coeff)
       vp9_decode_mb_tokens_4x4_uv(pbi, xd, bc);

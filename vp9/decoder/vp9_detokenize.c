@@ -70,6 +70,8 @@ void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
   } else {
     vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
     vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
+    xd->above_context->y2 = 1;
+    xd->left_context->y2 = 1;
   }
 }
 
@@ -321,6 +323,8 @@ static int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
     eobtotal += c - 4;
     type = PLANE_TYPE_Y_NO_DC;
   } else {
+    xd->above_context->y2 = 1;
+    xd->left_context->y2 = 1;
     type = PLANE_TYPE_Y_WITH_DC;
   }
 
@@ -431,6 +435,8 @@ static int vp9_decode_mb_tokens_4x4(VP9D_COMP* const dx,
     eobtotal += vp9_decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_Y2, 24) - 16;
     type = PLANE_TYPE_Y_NO_DC;
   } else {
+    xd->above_context->y2 = 1;
+    xd->left_context->y2 = 1;
     type = PLANE_TYPE_Y_WITH_DC;
   }
 
