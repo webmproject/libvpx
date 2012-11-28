@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9_mvref_common.h"
+#include "vp9/common/vp9_mvref_common.h"
 
 #define MVREF_NEIGHBOURS 8
 static int mb_mv_ref_search[MVREF_NEIGHBOURS][2] = {

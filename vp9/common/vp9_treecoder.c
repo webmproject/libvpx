@@ -16,7 +16,7 @@
 #endif
 #include <stdio.h>
 
-#include "vp9_treecoder.h"
+#include "vp9/common/vp9_treecoder.h"
 
 static void tree2tok(
   struct vp9_token_struct *const p,

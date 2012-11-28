@@ -11,10 +11,10 @@
 
 #include "vp9/common/vp9_type_aliases.h"
 #include "vp9/common/vp9_blockd.h"
-#include "vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
-#include "vp9_detokenize.h"
+#include "vp9/decoder/vp9_detokenize.h"
 
 #include "vp9/common/vp9_seg_common.h"
 

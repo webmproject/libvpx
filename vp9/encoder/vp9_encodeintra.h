@@ -11,7 +11,7 @@
 #ifndef __ENCODEINTRA_H_
 #define __ENCODEINTRA_H_
 
-#include "vp9_onyx_int.h"
+#include "vp9/encoder/vp9_onyx_int.h"
 
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred);
 void vp9_encode_intra16x16mby(MACROBLOCK *x);

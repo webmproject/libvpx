@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_variance.h"
+#include "vp9/encoder/vp9_variance.h"
 #include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_subpelvar.h"
 #include "vpx/vpx_integer.h"

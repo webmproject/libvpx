@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "vpx_config.h"
-#include "vp9_lookahead.h"
+#include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/common/vp9_extend.h"
 
 #define MAX_LAG_BUFFERS 25

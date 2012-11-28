@@ -11,11 +11,11 @@
 
 #include "vpx_ports/asm_offsets.h"
 #include "vpx_config.h"
-#include "vp9_block.h"
+#include "vp9/encoder/vp9_block.h"
 #include "vp9/common/vp9_blockd.h"
-#include "vp9_onyx_int.h"
-#include "vp9_treewriter.h"
-#include "vp9_tokenize.h"
+#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_treewriter.h"
+#include "vp9/encoder/vp9_tokenize.h"
 
 BEGIN
 

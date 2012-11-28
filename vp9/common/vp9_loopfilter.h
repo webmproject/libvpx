@@ -13,7 +13,7 @@
 
 #include "vpx_ports/mem.h"
 #include "vpx_config.h"
-#include "vp9_blockd.h"
+#include "vp9/common/vp9_blockd.h"
 
 #define MAX_LOOP_FILTER 63
 

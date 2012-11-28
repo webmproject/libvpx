@@ -9,8 +9,8 @@
  */
 
 
-#include "vp9_onyxc_int.h"
-#include "vp9_entropymv.h"
+#include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_entropymv.h"
 
 //#define MV_COUNT_TESTING
 

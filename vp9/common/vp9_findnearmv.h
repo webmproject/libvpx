@@ -12,10 +12,10 @@
 #ifndef __INC_FINDNEARMV_H
 #define __INC_FINDNEARMV_H
 
-#include "vp9_mv.h"
-#include "vp9_blockd.h"
-#include "vp9_treecoder.h"
-#include "vp9_onyxc_int.h"
+#include "vp9/common/vp9_mv.h"
+#include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_treecoder.h"
+#include "vp9/common/vp9_onyxc_int.h"
 
 /* check a list of motion vectors by sad score using a number rows of pixels
  * above and a number cols of pixels in the left to select the one with best

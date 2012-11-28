@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_blockd.h"
+#include "vp9/common/vp9_blockd.h"
 #include "vpx_mem/vpx_mem.h"
 
 

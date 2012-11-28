@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_quant_common.h"
+#include "vp9/common/vp9_quant_common.h"
 
 static int dc_qlookup[QINDEX_RANGE];
 static int ac_qlookup[QINDEX_RANGE];

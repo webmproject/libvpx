@@ -11,7 +11,7 @@
 #ifndef __INC_RECONINTER_H
 #define __INC_RECONINTER_H
 
-#include "vp9_onyxc_int.h"
+#include "vp9/common/vp9_onyxc_int.h"
 
 extern void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                                     unsigned char *dst_y,

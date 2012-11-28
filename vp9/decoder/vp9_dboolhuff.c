@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_dboolhuff.h"
+#include "vp9/decoder/vp9_dboolhuff.h"
 #include "vpx_ports/mem.h"
 #include "vpx_mem/vpx_mem.h"
 

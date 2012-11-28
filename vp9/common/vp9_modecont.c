@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_entropy.h"
+#include "vp9/common/vp9_entropy.h"
 
 const int vp9_default_mode_contexts[INTER_MODE_CONTEXTS][4] = {
   {223,     1,     1,    237},  // 0,0 best: Only candidate

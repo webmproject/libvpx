@@ -18,7 +18,7 @@
 
 #include "vpx_mem/vpx_mem.h"
 
-#include "vp9_common_types.h"
+#include "vp9/common/vp9_common_types.h"
 
 /* Only need this for fixed-size arrays, for structs just assign. */
 

@@ -11,7 +11,7 @@
 #ifndef __INC_RECONINTRA_H
 #define __INC_RECONINTRA_H
 
-#include "vp9_blockd.h"
+#include "vp9/common/vp9_blockd.h"
 
 extern void vp9_recon_intra_mbuv(MACROBLOCKD *xd);
 extern B_PREDICTION_MODE vp9_find_dominant_direction(unsigned char *ptr,

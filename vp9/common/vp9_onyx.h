@@ -20,8 +20,8 @@ extern "C"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vp8cx.h"
 #include "vpx_scale/yv12config.h"
-#include "vp9_type_aliases.h"
-#include "vp9_ppflags.h"
+#include "vp9/common/vp9_type_aliases.h"
+#include "vp9/common/vp9_ppflags.h"
   typedef int *VP9_PTR;
 
   /* Create/destroy static data structures. */

@@ -12,8 +12,8 @@
 #ifndef __INC_MCOMP_H
 #define __INC_MCOMP_H
 
-#include "vp9_block.h"
-#include "vp9_variance.h"
+#include "vp9/encoder/vp9_block.h"
+#include "vp9/encoder/vp9_variance.h"
 
 #ifdef ENTROPY_STATS
 extern void init_mv_ref_counts();

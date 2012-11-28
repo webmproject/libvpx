@@ -9,10 +9,10 @@
  */
 
 
-#include "vp9_treereader.h"
+#include "vp9/decoder/vp9_treereader.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropymode.h"
-#include "vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/common/vp9_findnearmv.h"
 
 #include "vp9/common/vp9_seg_common.h"

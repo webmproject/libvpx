@@ -12,7 +12,7 @@
 #ifndef __INC_ALLOCCOMMON_H
 #define __INC_ALLOCCOMMON_H
 
-#include "vp9_onyxc_int.h"
+#include "vp9/common/vp9_onyxc_int.h"
 
 void vp9_create_common(VP9_COMMON *oci);
 void vp9_remove_common(VP9_COMMON *oci);

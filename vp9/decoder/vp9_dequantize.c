@@ -10,9 +10,9 @@
 
 
 #include "vp9_rtcd.h"
-#include "vp9_dequantize.h"
+#include "vp9/decoder/vp9_dequantize.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
 
 #ifdef DEC_DEBUG
 extern int dec_debug;

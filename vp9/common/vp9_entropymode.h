@@ -12,8 +12,8 @@
 #ifndef __INC_ENTROPYMODE_H
 #define __INC_ENTROPYMODE_H
 
-#include "vp9_blockd.h"
-#include "vp9_treecoder.h"
+#include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_treecoder.h"
 
 #define SUBMVREF_COUNT 5
 #define VP9_NUMMBSPLITS 4

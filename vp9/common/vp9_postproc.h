@@ -21,8 +21,8 @@ struct postproc_state {
   DECLARE_ALIGNED(16, char, whiteclamp[16]);
   DECLARE_ALIGNED(16, char, bothclamp[16]);
 };
-#include "vp9_onyxc_int.h"
-#include "vp9_ppflags.h"
+#include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_ppflags.h"
 int vp9_post_proc_frame(struct VP9Common *oci, YV12_BUFFER_CONFIG *dest,
                         vp9_ppflags_t *flags);
 

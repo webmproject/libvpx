@@ -9,7 +9,7 @@
  */
 
 #include <assert.h>
-#include "vp9_boolhuff.h"
+#include "vp9/encoder/vp9_boolhuff.h"
 
 #if defined(SECTIONBITS_OUTPUT)
 unsigned __int64 Sectionbits[500];

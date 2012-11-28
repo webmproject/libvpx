@@ -9,13 +9,13 @@
  */
 
 
-#include "vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/common/vp9_header.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_reconintra4x4.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/decoder/vp9_decodframe.h"
-#include "vp9_detokenize.h"
+#include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/common/vp9_invtrans.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_entropymode.h"
@@ -23,11 +23,11 @@
 #include "vpx_scale/vpxscale.h"
 #include "vp9/common/vp9_setupintrarecon.h"
 
-#include "vp9_decodemv.h"
+#include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/common/vp9_extend.h"
 #include "vp9/common/vp9_modecont.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9_dboolhuff.h"
+#include "vp9/decoder/vp9_dboolhuff.h"
 
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_entropy.h"

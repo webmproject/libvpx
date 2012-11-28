@@ -13,8 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "vp9_onyx_int.h"
-#include "vp9_tokenize.h"
+#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_tokenize.h"
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_pred_common.h"

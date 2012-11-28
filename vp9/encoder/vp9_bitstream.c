@@ -10,10 +10,10 @@
 
 
 #include "vp9/common/vp9_header.h"
-#include "vp9_encodemv.h"
+#include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_findnearmv.h"
-#include "vp9_mcomp.h"
+#include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include <assert.h>
 #include <stdio.h>
@@ -21,8 +21,8 @@
 #include "vp9/common/vp9_pragmas.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9_bitstream.h"
-#include "vp9_segmentation.h"
+#include "vp9/encoder/vp9_bitstream.h"
+#include "vp9/encoder/vp9_segmentation.h"
 
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_pred_common.h"

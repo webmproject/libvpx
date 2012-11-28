@@ -11,8 +11,8 @@
 #include <math.h>
 #include "vpx_mem/vpx_mem.h"
 
-#include "vp9_onyx_int.h"
-#include "vp9_quantize.h"
+#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_quantize.h"
 #include "vp9/common/vp9_quant_common.h"
 
 #include "vp9/common/vp9_seg_common.h"

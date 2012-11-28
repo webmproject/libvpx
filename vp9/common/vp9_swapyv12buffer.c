@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9_swapyv12buffer.h"
+#include "vp9/common/vp9_swapyv12buffer.h"
 
 void vp9_swap_yv12_buffer(YV12_BUFFER_CONFIG *new_frame,
                           YV12_BUFFER_CONFIG *last_frame) {

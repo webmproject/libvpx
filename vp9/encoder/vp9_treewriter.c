@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_treewriter.h"
+#include "vp9/encoder/vp9_treewriter.h"
 
 static void cost(
   int *const C,

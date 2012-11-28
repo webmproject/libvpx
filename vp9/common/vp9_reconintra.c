@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "vpx_ports/config.h"
 #include "vp9_rtcd.h"
-#include "vp9_reconintra.h"
+#include "vp9/common/vp9_reconintra.h"
 #include "vpx_mem/vpx_mem.h"
 
 /* For skip_recon_mb(), add vp9_build_intra_predictors_mby_s(MACROBLOCKD *xd)

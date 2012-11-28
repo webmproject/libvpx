@@ -13,9 +13,9 @@
 #define __INC_ONYXD_INT_H
 #include "vpx_ports/config.h"
 #include "vp9/common/vp9_onyxd.h"
-#include "vp9_treereader.h"
+#include "vp9/decoder/vp9_treereader.h"
 #include "vp9/common/vp9_onyxc_int.h"
-#include "vp9_dequantize.h"
+#include "vp9/decoder/vp9_dequantize.h"
 
 // #define DEC_DEBUG
 

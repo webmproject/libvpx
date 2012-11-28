@@ -12,9 +12,9 @@
 #ifndef __INC_ENTROPYMV_H
 #define __INC_ENTROPYMV_H
 
-#include "vp9_treecoder.h"
+#include "vp9/common/vp9_treecoder.h"
 #include "vpx_config.h"
-#include "vp9_blockd.h"
+#include "vp9/common/vp9_blockd.h"
 
 struct VP9Common;
 

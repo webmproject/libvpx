@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9_invtrans.h"
+#include "vp9/common/vp9_invtrans.h"
 #include "./vp9_rtcd.h"
 
 static void recon_dcblock(MACROBLOCKD *xd) {

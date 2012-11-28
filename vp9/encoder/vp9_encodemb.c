@@ -9,14 +9,14 @@
  */
 
 #include "vpx_ports/config.h"
-#include "vp9_encodemb.h"
+#include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/common/vp9_reconinter.h"
-#include "vp9_quantize.h"
-#include "vp9_tokenize.h"
+#include "vp9/encoder/vp9_quantize.h"
+#include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/common/vp9_invtrans.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9_rdopt.h"
+#include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9_rtcd.h"
 

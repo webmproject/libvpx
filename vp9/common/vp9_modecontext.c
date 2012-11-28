@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_entropymode.h"
+#include "vp9/common/vp9_entropymode.h"
 
 const unsigned int vp9_kf_default_bmode_counts[VP9_KF_BINTRAMODES]
                                               [VP9_KF_BINTRAMODES]

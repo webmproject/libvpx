@@ -11,7 +11,7 @@
 
 #if !defined __INC_RATECTRL_H
 
-#include "vp9_onyx_int.h"
+#include "vp9/encoder/vp9_onyx_int.h"
 
 #define FRAME_OVERHEAD_BITS 200
 

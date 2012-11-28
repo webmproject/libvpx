@@ -14,7 +14,7 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 #include "vp9/common/vp9_onyxd.h"
-#include "vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"
@@ -27,7 +27,7 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vp9/decoder/vp9_decodframe.h"
-#include "vp9_detokenize.h"
+#include "vp9/decoder/vp9_detokenize.h"
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif

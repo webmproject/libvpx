@@ -10,12 +10,12 @@
 
 #include "vpx_ports/config.h"
 #include "vp9_rtcd.h"
-#include "vp9_quantize.h"
+#include "vp9/encoder/vp9_quantize.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_reconintra4x4.h"
-#include "vp9_encodemb.h"
+#include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/common/vp9_invtrans.h"
-#include "vp9_encodeintra.h"
+#include "vp9/encoder/vp9_encodeintra.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)

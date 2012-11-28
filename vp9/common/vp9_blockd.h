@@ -16,11 +16,11 @@ void vpx_log(const char *format, ...);
 
 #include "vpx_ports/config.h"
 #include "vpx_scale/yv12config.h"
-#include "vp9_mv.h"
-#include "vp9_treecoder.h"
-#include "vp9_subpixel.h"
+#include "vp9/common/vp9_mv.h"
+#include "vp9/common/vp9_treecoder.h"
+#include "vp9/common/vp9_subpixel.h"
 #include "vpx_ports/mem.h"
-#include "vp9_common.h"
+#include "vp9/common/vp9_common.h"
 
 #define TRUE    1
 #define FALSE   0

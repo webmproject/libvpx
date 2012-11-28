@@ -10,7 +10,7 @@
 
 
 #include "vpx_ports/asm_offsets.h"
-#include "vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
 
 BEGIN
 

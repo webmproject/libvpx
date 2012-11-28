@@ -12,10 +12,10 @@
 #ifndef __INC_ENTROPY_H
 #define __INC_ENTROPY_H
 
-#include "vp9_treecoder.h"
-#include "vp9_blockd.h"
-#include "vp9_common.h"
-#include "vp9_coefupdateprobs.h"
+#include "vp9/common/vp9_treecoder.h"
+#include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_coefupdateprobs.h"
 
 extern const int vp9_i8x8_block[4];
 

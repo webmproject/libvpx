@@ -11,7 +11,7 @@
 
 #include "string.h"
 #include "vp9/common/vp9_blockd.h"
-#include "vp9_onyx_int.h"
+#include "vp9/encoder/vp9_onyx_int.h"
 
 #ifndef __INC_SEGMENTATION_H__
 #define __INC_SEGMENTATION_H__ 1

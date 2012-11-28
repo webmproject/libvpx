@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_onyx_int.h"
+#include "vp9/encoder/vp9_onyx_int.h"
 
 void vp9_ssim_parms_16x16_c(unsigned char *s, int sp, unsigned char *r,
                             int rp, unsigned long *sum_s, unsigned long *sum_r,

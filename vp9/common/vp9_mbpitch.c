@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_blockd.h"
+#include "vp9/common/vp9_blockd.h"
 
 typedef enum {
   PRED = 0,

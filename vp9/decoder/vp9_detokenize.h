@@ -12,7 +12,7 @@
 #ifndef DETOKENIZE_H
 #define DETOKENIZE_H
 
-#include "vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
 
 void vp9_reset_mb_tokens_context(MACROBLOCKD* const);
 

@@ -9,7 +9,7 @@
  */
 
 #include <stdio.h>
-#include "vp9_blockd.h"
+#include "vp9/common/vp9_blockd.h"
 
 void vp9_print_modes_and_motion_vectors(MODE_INFO *mi, int rows, int cols,
                                         int frame) {

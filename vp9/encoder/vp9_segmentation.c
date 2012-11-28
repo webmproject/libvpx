@@ -11,7 +11,7 @@
 
 #include "limits.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9_segmentation.h"
+#include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/common/vp9_pred_common.h"
 
 void vp9_update_gf_useage_maps(VP9_COMP *cpi, VP9_COMMON *cm, MACROBLOCK *x) {

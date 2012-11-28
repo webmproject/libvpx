@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9_type_aliases.h"
-#include "vp9_onyxc_int.h"
+#include "vp9/common/vp9_type_aliases.h"
+#include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_blockd.h"
 
 #ifndef __INC_SEG_COMMON_H__

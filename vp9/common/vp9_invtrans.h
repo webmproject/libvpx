@@ -12,7 +12,7 @@
 #define __INC_INVTRANS_H
 
 #include "vpx_ports/config.h"
-#include "vp9_blockd.h"
+#include "vp9/common/vp9_blockd.h"
 
 extern void vp9_inverse_transform_b_4x4(MACROBLOCKD *xd, int block, int pitch);
 

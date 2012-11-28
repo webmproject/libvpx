@@ -11,11 +11,11 @@
 
 #include "vpx_ports/config.h"
 #include "vpx/vpx_integer.h"
-#include "vp9_blockd.h"
-#include "vp9_reconinter.h"
+#include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
 #if CONFIG_RUNTIME_CPU_DETECT
-#include "vp9_onyxc_int.h"
+#include "vp9/common/vp9_onyxc_int.h"
 #endif
 
 void vp9_setup_interp_filters(MACROBLOCKD *xd,

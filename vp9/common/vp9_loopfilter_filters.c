@@ -10,8 +10,8 @@
 
 #include <stdlib.h>
 #include "vpx_config.h"
-#include "vp9_loopfilter.h"
-#include "vp9_onyxc_int.h"
+#include "vp9/common/vp9_loopfilter.h"
+#include "vp9/common/vp9_onyxc_int.h"
 
 typedef unsigned char uc;
 

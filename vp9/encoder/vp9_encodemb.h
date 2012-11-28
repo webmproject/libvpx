@@ -13,7 +13,7 @@
 #define __INC_ENCODEMB_H
 
 #include "vpx_ports/config.h"
-#include "vp9_block.h"
+#include "vp9/encoder/vp9_block.h"
 
 typedef struct {
   MB_PREDICTION_MODE mode;
@@ -25,7 +25,7 @@ typedef struct {
 } MODE_DEFINITION;
 
 
-#include "vp9_onyx_int.h"
+#include "vp9/encoder/vp9_onyx_int.h"
 struct VP9_ENCODER_RTCD;
 void vp9_encode_inter16x16(MACROBLOCK *x);
 

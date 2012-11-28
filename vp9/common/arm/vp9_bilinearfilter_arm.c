@@ -12,7 +12,7 @@
 #include <math.h>
 #include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_subpixel.h"
-#include "vp9_bilinearfilter_arm.h"
+#include "vp9/common/arm/vp9_bilinearfilter_arm.h"
 
 void vp9_filter_block2d_bil_armv6
 (

@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9_subpixel.h"
-#include "vp9_loopfilter.h"
+#include "vp9/common/vp9_subpixel.h"
+#include "vp9/common/vp9_loopfilter.h"
 #include "recon.h"
-#include "vp9_onyxc_int.h"
+#include "vp9/common/vp9_onyxc_int.h"
 
 void (*vp8_short_idct4x4)(short *input, short *output, int pitch);
 void (*vp8_short_idct4x4_1)(short *input, short *output, int pitch);

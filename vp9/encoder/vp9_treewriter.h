@@ -17,7 +17,7 @@
 
 #include "vp9/common/vp9_treecoder.h"
 
-#include "vp9_boolhuff.h"       /* for now */
+#include "vp9/encoder/vp9_boolhuff.h"       /* for now */
 
 typedef BOOL_CODER vp9_writer;
 

@@ -15,19 +15,19 @@
 #include <stdio.h>
 #include "vpx_ports/config.h"
 #include "vp9/common/vp9_onyx.h"
-#include "vp9_treewriter.h"
-#include "vp9_tokenize.h"
+#include "vp9/encoder/vp9_treewriter.h"
+#include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/common/vp9_onyxc_int.h"
-#include "vp9_variance.h"
-#include "vp9_encodemb.h"
-#include "vp9_quantize.h"
+#include "vp9/encoder/vp9_variance.h"
+#include "vp9/encoder/vp9_encodemb.h"
+#include "vp9/encoder/vp9_quantize.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
-#include "vp9_mcomp.h"
+#include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/common/vp9_findnearmv.h"
-#include "vp9_lookahead.h"
+#include "vp9/encoder/vp9_lookahead.h"
 
 // #define SPEEDSTATS 1
 #define MIN_GF_INTERVAL             4

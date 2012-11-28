@@ -10,8 +10,8 @@
 
 
 #include "string.h"
-#include "vp9_blockd.h"
-#include "vp9_onyxc_int.h"
+#include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_onyxc_int.h"
 
 extern void vp9_init_quant_tables();
 extern int vp9_ac_yquant(int QIndex);

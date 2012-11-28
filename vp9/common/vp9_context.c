@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_entropy.h"
+#include "vp9/common/vp9_entropy.h"
 
 /* *** GENERATED FILE: DO NOT EDIT *** */
 

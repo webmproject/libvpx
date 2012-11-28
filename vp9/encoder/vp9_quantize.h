@@ -11,7 +11,7 @@
 #ifndef __INC_QUANTIZE_H
 #define __INC_QUANTIZE_H
 
-#include "vp9_block.h"
+#include "vp9/encoder/vp9_block.h"
 
 #define prototype_quantize_block(sym) \
   void (sym)(BLOCK *b,BLOCKD *d)

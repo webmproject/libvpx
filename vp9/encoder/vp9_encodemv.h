@@ -12,7 +12,7 @@
 #ifndef __INC_ENCODEMV_H
 #define __INC_ENCODEMV_H
 
-#include "vp9_onyx_int.h"
+#include "vp9/encoder/vp9_onyx_int.h"
 
 void vp9_write_nmv_probs(VP9_COMP* const, int usehp, vp9_writer* const);
 void vp9_encode_nmv(vp9_writer* const w, const MV* const mv,

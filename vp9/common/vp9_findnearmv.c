@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_findnearmv.h"
+#include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_sadmxn.h"
 #include "vp9/common/vp9_subpelvar.h"
 #include <limits.h>

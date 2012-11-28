@@ -10,13 +10,13 @@
 
 
 #include "vpx_ports/config.h"
-#include "vp9_blockd.h"
+#include "vp9/common/vp9_blockd.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9_onyxc_int.h"
-#include "vp9_findnearmv.h"
-#include "vp9_entropymode.h"
-#include "vp9_entropymv.h"
-#include "vp9_systemdependent.h"
+#include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_findnearmv.h"
+#include "vp9/common/vp9_entropymode.h"
+#include "vp9/common/vp9_entropymv.h"
+#include "vp9/common/vp9_systemdependent.h"
 
 
 void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi_base) {

@@ -15,16 +15,16 @@
 #include "vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vp9_rtcd.h"
-#include "vp9_loopfilter.h"
-#include "vp9_entropymv.h"
-#include "vp9_entropy.h"
-#include "vp9_entropymode.h"
+#include "vp9/common/vp9_loopfilter.h"
+#include "vp9/common/vp9_entropymv.h"
+#include "vp9/common/vp9_entropy.h"
+#include "vp9/common/vp9_entropymode.h"
 #if CONFIG_POSTPROC
-#include "vp9_postproc.h"
+#include "vp9/common/vp9_postproc.h"
 #endif
 
 /*#ifdef PACKET_TESTING*/
-#include "vp9_header.h"
+#include "vp9/common/vp9_header.h"
 /*#endif*/
 
 /* Create/destroy static data structures. */

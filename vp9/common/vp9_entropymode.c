@@ -9,8 +9,8 @@
  */
 
 
-#include "vp9_onyxc_int.h"
-#include "vp9_modecont.h"
+#include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_modecont.h"
 #include "vpx_mem/vpx_mem.h"
 
 

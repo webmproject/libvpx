@@ -11,11 +11,11 @@
 
 #include <stdio.h>
 
-#include "vp9_entropy.h"
+#include "vp9/common/vp9_entropy.h"
 #include "string.h"
-#include "vp9_blockd.h"
-#include "vp9_onyxc_int.h"
-#include "vp9_entropymode.h"
+#include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_entropymode.h"
 #include "vpx_mem/vpx_mem.h"
 
 #define uchar unsigned char     /* typedefs can clash */
@@ -26,7 +26,7 @@ typedef const uint cuint;
 
 typedef vp9_prob Prob;
 
-#include "vp9_coefupdateprobs.h"
+#include "vp9/common/vp9_coefupdateprobs.h"
 
 const int vp9_i8x8_block[4] = {0, 2, 8, 10};
 
@@ -200,7 +200,7 @@ vp9_extra_bit_struct vp9_extra_bits[12] = {
   { 0, 0, 0, 0}
 };
 
-#include "vp9_default_coef_probs.h"
+#include "vp9/common/vp9_default_coef_probs.h"
 
 void vp9_default_coef_probs(VP9_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs, default_coef_probs,

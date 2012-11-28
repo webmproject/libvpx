@@ -19,11 +19,11 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_modecont.h"
 #include "vp9/common/vp9_common.h"
-#include "vp9_ratectrl.h"
+#include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_systemdependent.h"
-#include "vp9_encodemv.h"
+#include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/common/vp9_quant_common.h"
 
 #define MIN_BPB_FACTOR          0.005

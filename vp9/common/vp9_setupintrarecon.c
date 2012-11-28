@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9_setupintrarecon.h"
+#include "vp9/common/vp9_setupintrarecon.h"
 #include "vpx_mem/vpx_mem.h"
 
 void vp9_setup_intra_recon(YV12_BUFFER_CONFIG *ybf) {

@@ -11,7 +11,7 @@
 
 #include "vpx_ports/config.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9_reconintra.h"
+#include "vp9/common/vp9_reconintra.h"
 #include "vp9_rtcd.h"
 
 #if CONFIG_NEWBINTRAMODES

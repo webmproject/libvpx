@@ -13,7 +13,7 @@
 #define tokenize_h
 
 #include "vp9/common/vp9_entropy.h"
-#include "vp9_block.h"
+#include "vp9/encoder/vp9_block.h"
 
 void vp9_tokenize_initialize();
 
