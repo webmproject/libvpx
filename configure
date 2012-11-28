@@ -249,6 +249,7 @@ EXPERIMENT_LIST="
     comp_interintra_pred
     tx32x32
     dwt32x32hybrid
+    cnvcontext
 "
 CONFIG_LIST="
     external_build

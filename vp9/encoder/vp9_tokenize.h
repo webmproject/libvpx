@@ -56,11 +56,9 @@ extern void vp9_stuff_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
                          TOKENEXTRA **t, int dry_run);
 #endif
 
-extern void vp9_fix_contexts(MACROBLOCKD *xd);
 #if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
 extern void vp9_fix_contexts_sb(MACROBLOCKD *xd);
 #endif
-
 #ifdef ENTROPY_STATS
 void init_context_counters();
 void print_context_counters();

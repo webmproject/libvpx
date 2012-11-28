@@ -102,13 +102,11 @@ typedef enum
   TM_PRED,            /* Truemotion prediction */
   I8X8_PRED,          /* 8x8 based prediction, each 8x8 has its own prediction mode */
   B_PRED,             /* block based prediction, each block has its own prediction mode */
-
   NEARESTMV,
   NEARMV,
   ZEROMV,
   NEWMV,
   SPLITMV,
-
   MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 

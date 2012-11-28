@@ -16,6 +16,7 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/common/vp9_extend.h"
+#include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/encoder/vp9_segmentation.h"
@@ -2287,7 +2288,7 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
       mbmi->mb_skip_coeff = 1;
       if (output_enabled)
         cpi->skip_true_count[mb_skip_context]++;
-      vp9_fix_contexts(xd);
+      vp9_reset_mb_tokens_context(xd);
     } else {
       vp9_stuff_mb(cpi, xd, t, !output_enabled);
       mbmi->mb_skip_coeff = 0;
@@ -2525,7 +2526,7 @@ static void encode_superblock(VP9_COMP *cpi, MACROBLOCK *x,
       if (cpi->common.mb_no_coeff_skip) {
         // TODO(rbultje) this should be done per-sb instead of per-mb?
         cpi->skip_true_count[mb_skip_context]++;
-        vp9_fix_contexts(xd);
+        vp9_reset_mb_tokens_context(xd);
       } else {
         vp9_stuff_mb(cpi, xd, t, 0);
         // TODO(rbultje) this should be done per-sb instead of per-mb?
