@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARH//+kk\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-28T23:30:35Z",
+      "side": 1,
+      "message": "please comment what this does; also, for now, it should probably return DCT_DCT if you intend to disable this by default (i.e. have it be an experiment)?",
+      "revId": "6d48a23433860e7a173a34107c8edc3201a2f3fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARH//+j8\u003d",
+        "filename": "vp9/common/vp9_invtrans.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-28T23:30:35Z",
+      "side": 1,
+      "message": "merge conflict? remove this code.",
+      "revId": "6d48a23433860e7a173a34107c8edc3201a2f3fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARH//+j0\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-28T23:30:35Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be reverted? this looks wrong.",
+      "revId": "6d48a23433860e7a173a34107c8edc3201a2f3fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARH//+jA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 4443,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-28T23:30:35Z",
+      "side": 1,
+      "message": "I fixed this assert triggering a few days ago, it should be save to remove.",
+      "revId": "6d48a23433860e7a173a34107c8edc3201a2f3fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
