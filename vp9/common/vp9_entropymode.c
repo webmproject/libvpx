@@ -448,6 +448,9 @@ void vp9_entropy_mode_init() {
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
   vpx_memset(pc->fc.mv_ref_ct, 0, sizeof(pc->fc.mv_ref_ct));
+  vpx_memcpy(pc->fc.vp9_mode_contexts,
+             vp9_default_mode_contexts,
+             sizeof(vp9_default_mode_contexts));
 }
 
 void vp9_accum_mv_refs(VP9_COMMON *pc,

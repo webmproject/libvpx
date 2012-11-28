@@ -261,15 +261,8 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
   cpi->common.refresh_alt_ref_frame = TRUE;
 
   vp9_init_mode_contexts(&cpi->common);
-  vpx_memcpy(cpi->common.fc.vp9_mode_contexts,
-             vp9_default_mode_contexts,
-             sizeof(vp9_default_mode_contexts));
   vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
   vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
-
-  vpx_memcpy(cpi->common.lfc.vp9_mode_contexts,
-             vp9_default_mode_contexts_a,
-             sizeof(vp9_default_mode_contexts_a));
 
   vpx_memset(cm->prev_mip, 0,
     (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));

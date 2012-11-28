@@ -13,5 +13,4 @@
 #define __INC_MODECONT_H
 
 extern const int vp9_default_mode_contexts[INTER_MODE_CONTEXTS][4];
-extern const int vp9_default_mode_contexts_a[INTER_MODE_CONTEXTS][4];
 #endif
