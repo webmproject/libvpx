@@ -863,16 +863,8 @@ static void init_frame(VP9D_COMP *pbi) {
     pc->ref_frame_sign_bias[ALTREF_FRAME] = 0;
 
     vp9_init_mode_contexts(&pbi->common);
-    vpx_memcpy(pbi->common.fc.vp9_mode_contexts,
-               vp9_default_mode_contexts,
-               sizeof(vp9_default_mode_contexts));
-
     vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
     vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
-
-    vpx_memcpy(pbi->common.lfc.vp9_mode_contexts,
-               vp9_default_mode_contexts_a,
-               sizeof(vp9_default_mode_contexts_a));
 
     vpx_memset(pc->prev_mip, 0,
                (pc->mb_cols + 1) * (pc->mb_rows + 1)* sizeof(MODE_INFO));
