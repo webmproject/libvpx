@@ -798,7 +798,6 @@ static void update_ref_probs(VP9_COMP *const cpi) {
 static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
   VP9_COMMON *const pc = &cpi->common;
   const nmv_context *nmvc = &pc->fc.nmvc;
-  MACROBLOCK *x = &cpi->mb;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   MODE_INFO *m;
   MODE_INFO *prev_m;
