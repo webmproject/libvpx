@@ -242,7 +242,7 @@ SKIP_START:
   if (c < seg_eob)
     coef_counts[coef_bands[c]][pt][DCT_EOB_TOKEN]++;
 
-  a[0] = l[0] = (c != !type);
+  a[0] = l[0] = (c > !type);
 
   return c;
 }
@@ -290,11 +290,8 @@ static int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
     l[1] = l[0];
     eobtotal += c;
   }
-
-  // no Y2 block
-  vpx_memset(&A[8], 0, sizeof(A[8]));
-  vpx_memset(&L[8], 0, sizeof(L[8]));
-
+  A[8] = 0;
+  L[8] = 0;
   return eobtotal;
 }
 
