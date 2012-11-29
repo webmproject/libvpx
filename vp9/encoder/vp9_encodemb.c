@@ -491,7 +491,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   final_eob++;
 
   d->eob = final_eob;
-  *a = *l = (d->eob != !type);
+  *a = *l = (d->eob > !type);
 }
 
 /**************************************************************************
@@ -854,7 +854,7 @@ static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
   final_eob++;
 
   d->eob = final_eob;
-  *a = *l = (d->eob != !type);
+  *a = *l = (d->eob > !type);
 }
 
 void vp9_optimize_mby_16x16(MACROBLOCK *x) {

@@ -212,7 +212,7 @@ static void tokenize_b(VP9_COMP *cpi,
   } while (c < eob && ++c < seg_eob);
 
   *tp = t;
-  *a = *l = (c != !type); /* 0 <-> all coeff data is zero */
+  *a = *l = (c > !type); /* 0 <-> all coeff data is zero */
 }
 
 int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block) {
@@ -377,8 +377,8 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
       A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
       L[vp9_block2left_8x8[b] + 1]  = L[vp9_block2left_8x8[b]];
     }
-    vpx_memset(&A[8], 0, sizeof(A[8]));
-    vpx_memset(&L[8], 0, sizeof(L[8]));
+    A[8] = 0;
+    L[8] = 0;
   } else if (tx_size == TX_8X8) {
     for (b = 0; b < 16; b += 4) {
       tokenize_b(cpi, xd, xd->block + b, t, plane_type,
