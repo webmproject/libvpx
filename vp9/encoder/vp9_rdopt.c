@@ -567,12 +567,12 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
   MB_MODE_INFO *mbmi = &mb->e_mbd.mode_info_context->mbmi;
   TX_TYPE tx_type = DCT_DCT;
   int segment_id = mbmi->segment_id;
+  scan = vp9_default_zig_zag1d;
+  band = vp9_coef_bands;
+  default_eob = 16;
 
   switch (tx_size) {
     case TX_4X4:
-      scan = vp9_default_zig_zag1d;
-      band = vp9_coef_bands;
-      default_eob = 16;
       if (type == PLANE_TYPE_Y_WITH_DC) {
         tx_type = get_tx_type_4x4(xd, b);
         if (tx_type != DCT_DCT) {
@@ -693,13 +693,10 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
                                 int *Rate,
                                 int *Distortion,
                                 int *skippable, int backup) {
-  int b;
   MACROBLOCKD *const xd = &mb->e_mbd;
   BLOCK   *const mb_y2 = mb->block + 24;
   BLOCKD *const x_y2  = xd->block + 24;
-  short *Y2DCPtr = mb_y2->src_diff;
-  BLOCK *beptr;
-  int d, i, has_2nd_order;
+  int d, has_2nd_order;
 
   xd->mode_info_context->mbmi.txfm_size = TX_4X4;
   has_2nd_order = get_2nd_order_usage(xd);
@@ -797,9 +794,6 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
                                   int *skippable, int backup) {
   int d;
   MACROBLOCKD *xd = &mb->e_mbd;
-  BLOCKD *b  = &mb->e_mbd.block[0];
-  BLOCK  *be = &mb->block[0];
-  TX_TYPE tx_type;
 
   xd->mode_info_context->mbmi.txfm_size = TX_16X16;
   vp9_transform_mby_16x16(mb);
@@ -2751,17 +2745,14 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv this_mv;
   int i;
   int zero_seen = FALSE;
-  int best_index;
+  int best_index = 0;
   int best_sad = INT_MAX;
   int this_sad = INT_MAX;
-  int this_sad2 = INT_MAX;
 
   BLOCK *b = &x->block[0];
   unsigned char *src_y_ptr = *(b->base_src);
   unsigned char *ref_y_ptr;
-  const unsigned char *dst_y_ptr;
-  const int bs = (block_size == BLOCK_16X16) ? 16 : 32;
-  int offset, row_offset, col_offset;
+  int row_offset, col_offset;
 
   // Get the sad for each candidate reference mv
   for (i = 0; i < 4; i++) {
@@ -3090,7 +3081,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int refs[2] = { mbmi->ref_frame,
                   (mbmi->second_ref_frame < 0 ? 0 : mbmi->second_ref_frame) };
   int_mv cur_mv[2];
-  int_mv mvp;
   int64_t this_rd = 0;
 
   switch (this_mode) {
