@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vp9_variance16x16_armv6|
+    EXPORT  |vp9_variance_halfpixvar16x16_v_armv6|
 
     ARM
     REQUIRE8
@@ -22,7 +22,7 @@
 ; r2    unsigned char *ref_ptr
 ; r3    int  recon_stride
 ; stack unsigned int *sse
-|vp9_variance16x16_armv6| PROC
+|vp9_variance_halfpixvar16x16_v_armv6| PROC
 
     stmfd   sp!, {r4-r12, lr}
 
@@ -30,22 +30,28 @@
     pld     [r2, r3, lsl #0]
 
     mov     r8, #0              ; initialize sum = 0
+    ldr     r10, c80808080
     mov     r11, #0             ; initialize sse = 0
     mov     r12, #16            ; set loop counter to 16 (=block height)
-
+    mov     lr, #0              ; constant zero
 loop
+    add     r9, r0, r1          ; set src pointer to next row
     ; 1st 4 pixels
     ldr     r4, [r0, #0]        ; load 4 src pixels
+    ldr     r6, [r9, #0]        ; load 4 src pixels from next row
     ldr     r5, [r2, #0]        ; load 4 ref pixels
 
-    mov     lr, #0              ; constant zero
+    ; bilinear interpolation
+    mvn     r6, r6
+    uhsub8  r4, r4, r6
+    eor     r4, r4, r10
 
     usub8   r6, r4, r5          ; calculate difference
     pld     [r0, r1, lsl #1]
     sel     r7, r6, lr          ; select bytes with positive difference
-    usub8   r9, r5, r4          ; calculate difference with reversed operands
+    usub8   r6, r5, r4          ; calculate difference with reversed operands
     pld     [r2, r3, lsl #1]
-    sel     r6, r9, lr          ; select bytes with negative difference
+    sel     r6, r6, lr          ; select bytes with negative difference
 
     ; calculate partial sums
     usad8   r4, r7, lr          ; calculate sum of positive differences
@@ -57,18 +63,25 @@ loop
 
     ; calculate sse
     uxtb16  r5, r6              ; byte (two pixels) to halfwords
-    uxtb16  r10, r6, ror #8     ; another two pixels to halfwords
+    uxtb16  r7, r6, ror #8      ; another two pixels to halfwords
     smlad   r11, r5, r5, r11    ; dual signed multiply, add and accumulate (1)
 
     ; 2nd 4 pixels
     ldr     r4, [r0, #4]        ; load 4 src pixels
+    ldr     r6, [r9, #4]        ; load 4 src pixels from next row
     ldr     r5, [r2, #4]        ; load 4 ref pixels
-    smlad   r11, r10, r10, r11  ; dual signed multiply, add and accumulate (2)
+
+    ; bilinear interpolation
+    mvn     r6, r6
+    uhsub8  r4, r4, r6
+    eor     r4, r4, r10
+
+    smlad   r11, r7, r7, r11    ; dual signed multiply, add and accumulate (2)
 
     usub8   r6, r4, r5          ; calculate difference
     sel     r7, r6, lr          ; select bytes with positive difference
-    usub8   r9, r5, r4          ; calculate difference with reversed operands
-    sel     r6, r9, lr          ; select bytes with negative difference
+    usub8   r6, r5, r4          ; calculate difference with reversed operands
+    sel     r6, r6, lr          ; select bytes with negative difference
 
     ; calculate partial sums
     usad8   r4, r7, lr          ; calculate sum of positive differences
@@ -81,18 +94,25 @@ loop
 
     ; calculate sse
     uxtb16  r5, r6              ; byte (two pixels) to halfwords
-    uxtb16  r10, r6, ror #8     ; another two pixels to halfwords
+    uxtb16  r7, r6, ror #8      ; another two pixels to halfwords
     smlad   r11, r5, r5, r11    ; dual signed multiply, add and accumulate (1)
 
     ; 3rd 4 pixels
     ldr     r4, [r0, #8]        ; load 4 src pixels
+    ldr     r6, [r9, #8]        ; load 4 src pixels from next row
     ldr     r5, [r2, #8]        ; load 4 ref pixels
-    smlad   r11, r10, r10, r11  ; dual signed multiply, add and accumulate (2)
+
+    ; bilinear interpolation
+    mvn     r6, r6
+    uhsub8  r4, r4, r6
+    eor     r4, r4, r10
+
+    smlad   r11, r7, r7, r11    ; dual signed multiply, add and accumulate (2)
 
     usub8   r6, r4, r5          ; calculate difference
     sel     r7, r6, lr          ; select bytes with positive difference
-    usub8   r9, r5, r4          ; calculate difference with reversed operands
-    sel     r6, r9, lr          ; select bytes with negative difference
+    usub8   r6, r5, r4          ; calculate difference with reversed operands
+    sel     r6, r6, lr          ; select bytes with negative difference
 
     ; calculate partial sums
     usad8   r4, r7, lr          ; calculate sum of positive differences
@@ -105,20 +125,27 @@ loop
 
     ; calculate sse
     uxtb16  r5, r6              ; byte (two pixels) to halfwords
-    uxtb16  r10, r6, ror #8     ; another two pixels to halfwords
+    uxtb16  r7, r6, ror #8      ; another two pixels to halfwords
     smlad   r11, r5, r5, r11    ; dual signed multiply, add and accumulate (1)
 
     ; 4th 4 pixels
     ldr     r4, [r0, #12]       ; load 4 src pixels
+    ldr     r6, [r9, #12]       ; load 4 src pixels from next row
     ldr     r5, [r2, #12]       ; load 4 ref pixels
-    smlad   r11, r10, r10, r11  ; dual signed multiply, add and accumulate (2)
+
+    ; bilinear interpolation
+    mvn     r6, r6
+    uhsub8  r4, r4, r6
+    eor     r4, r4, r10
+
+    smlad   r11, r7, r7, r11    ; dual signed multiply, add and accumulate (2)
 
     usub8   r6, r4, r5          ; calculate difference
     add     r0, r0, r1          ; set src_ptr to next row
     sel     r7, r6, lr          ; select bytes with positive difference
-    usub8   r9, r5, r4          ; calculate difference with reversed operands
+    usub8   r6, r5, r4          ; calculate difference with reversed operands
     add     r2, r2, r3          ; set dst_ptr to next row
-    sel     r6, r9, lr          ; select bytes with negative difference
+    sel     r6, r6, lr          ; select bytes with negative difference
 
     ; calculate partial sums
     usad8   r4, r7, lr          ; calculate sum of positive differences
@@ -131,9 +158,9 @@ loop
 
     ; calculate sse
     uxtb16  r5, r6              ; byte (two pixels) to halfwords
-    uxtb16  r10, r6, ror #8     ; another two pixels to halfwords
+    uxtb16  r7, r6, ror #8      ; another two pixels to halfwords
     smlad   r11, r5, r5, r11    ; dual signed multiply, add and accumulate (1)
-    smlad   r11, r10, r10, r11  ; dual signed multiply, add and accumulate (2)
+    smlad   r11, r7, r7, r11    ; dual signed multiply, add and accumulate (2)
 
 
     subs    r12, r12, #1
@@ -150,5 +177,7 @@ loop
 
     ENDP
 
-    END
+c80808080
+    DCD     0x80808080
 
+    END
