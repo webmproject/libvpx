@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARH//+Bw\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-29T16:56:31Z",
+      "side": 1,
+      "message": "bitwise or?",
+      "revId": "560e9946d57e349f8097afbc41d330d9f747273a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARH//+B4\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-29T16:56:31Z",
+      "side": 1,
+      "message": "can we eliminate this separate 8x8 lookup? seems that:\n\n  for i in {16, 20}, and both left and above, \n  vp9_block2left[i] \u003d\u003d vp9_block2left_8x8[i]\n  vp9_block2left[i+1] \u003d\u003d vp9_block2left_8x8[i]+1",
+      "revId": "560e9946d57e349f8097afbc41d330d9f747273a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
