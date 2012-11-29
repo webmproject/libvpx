@@ -13,6 +13,7 @@
 #include "vpx_ports/x86.h"
 #include "vp9/encoder/vp9_variance.h"
 #include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/x86/vp9_dct_mmx.h"
 
 // TODO(jimbankoski) Consider rewriting the c to take the same values rather
 // than going through these pointer conversions
