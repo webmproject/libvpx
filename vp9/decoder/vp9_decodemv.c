@@ -937,6 +937,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
           leftmv.as_int = left_block_mv(mi, k);
           abovemv.as_int = above_block_mv(mi, k, mis);
+          second_leftmv.as_int = 0;
+          second_abovemv.as_int = 0;
           if (mbmi->second_ref_frame > 0) {
             second_leftmv.as_int = left_block_second_mv(mi, k);
             second_abovemv.as_int = above_block_second_mv(mi, k, mis);

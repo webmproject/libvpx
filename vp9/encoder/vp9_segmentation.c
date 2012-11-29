@@ -164,7 +164,6 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
-  const int mis = cm->mode_info_stride;
   int i;
   int tot_count;
   int no_pred_cost;
@@ -182,6 +181,10 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   vp9_prob no_pred_tree[MB_FEATURE_TREE_PROBS];
   vp9_prob t_pred_tree[MB_FEATURE_TREE_PROBS];
   vp9_prob t_nopred_prob[PREDICTION_PROBS];
+
+#if CONFIG_SUPERBLOCKS
+  const int mis = cm->mode_info_stride;
+#endif
 
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities

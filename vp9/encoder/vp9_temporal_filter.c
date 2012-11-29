@@ -391,7 +391,7 @@ static void temporal_filter_iterate_c
   mbd->pre.v_buffer = v_buffer;
 }
 
-void vp9_temporal_filter_prepare_c
+void vp9_temporal_filter_prepare
 (
   VP9_COMP *cpi,
   int distance
