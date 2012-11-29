@@ -610,7 +610,6 @@ void vp9_optimize_mby_4x4(MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
-  MB_PREDICTION_MODE mode = x->e_mbd.mode_info_context->mbmi.mode;
 
   if (!x->e_mbd.above_context || !x->e_mbd.left_context)
     return;

@@ -414,7 +414,9 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
   unsigned int branch_ct_fp[2][4 - 1][2];
   unsigned int branch_ct_class0_hp[2][2];
   unsigned int branch_ct_hp[2][2];
+#ifdef MV_GROUP_UPDATE
   int savings = 0;
+#endif
 
 #ifdef NMV_STATS
   if (!cpi->dummy_packing)
