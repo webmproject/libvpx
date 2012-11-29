@@ -4153,8 +4153,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                                           cpi->frames_till_gf_update_due))) {
       cpi->alt_ref_source = cpi->source;
       if (cpi->oxcf.arnr_max_frames > 0) {
-        vp9_temporal_filter_prepare_c(cpi,
-                                      cpi->frames_till_gf_update_due);
+        vp9_temporal_filter_prepare_c(cpi, cpi->frames_till_gf_update_due);
         force_src_buffer = &cpi->alt_ref_buffer;
       }
       cm->frames_till_alt_ref_frame = cpi->frames_till_gf_update_due;

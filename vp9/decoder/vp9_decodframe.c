@@ -281,7 +281,6 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
     assert(get_2nd_order_usage(xd) == 0);
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
-      const int iblock[4] = {0, 1, 4, 5};
       int idx = (ib & 0x02) ? (ib + 2) : ib;
       short *q  = xd->block[idx].qcoeff;
       short *dq = xd->block[0].dequant;
@@ -310,8 +309,8 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                      xd->dst.y_stride,
                                      xd->eobs, xd);
   } else {
-    assert(get_2nd_order_usage(xd) == 1);
     BLOCKD *b = &xd->block[24];
+    assert(get_2nd_order_usage(xd) == 1);
     vp9_dequantize_b_2x2(b);
     vp9_short_ihaar2x2(&b->dqcoeff[0], b->diff, 8);
     ((int *)b->qcoeff)[0] = 0;  // 2nd order block are set to 0 after idct
@@ -384,12 +383,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       int j;
       int i8x8mode;
       BLOCKD *b;
-      int idx = (ib & 0x02) ? (ib + 2) : ib;
-      short *q  = xd->block[idx].qcoeff;
-      short *dq = xd->block[0].dequant;
-      unsigned char *pre = xd->block[ib].predictor;
-      unsigned char *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
-      int stride = xd->dst.y_stride;
       b = &xd->block[ib];
       i8x8mode = b->bmi.as_mode.first;
       vp9_intra8x8_predict(b, i8x8mode, b->predictor);
@@ -514,8 +507,8 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
         }
       }
     } else {
-      assert(get_2nd_order_usage(xd) == 1);
       BLOCKD *b = &xd->block[24];
+      assert(get_2nd_order_usage(xd) == 1);
       vp9_dequantize_b(b);
       if (xd->eobs[24] > 1) {
         vp9_short_inv_walsh4x4(&b->dqcoeff[0], b->diff);
@@ -766,7 +759,6 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
   MB_PREDICTION_MODE mode;
   int i;
   int tx_size;
-  TX_TYPE tx_type;
 
 #if CONFIG_SUPERBLOCKS
   assert(!xd->mode_info_context->mbmi.encoded_as_sb);
