@@ -11,6 +11,7 @@
 #include "vpx_ports/config.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/decoder/vp9_dequantize.h"
+#include "vp9/decoder/x86/vp9_idct_mmx.h"
 
 void vp9_dequant_dc_idct_add_y_block_mmx(short *q, const short *dq,
                                          unsigned char *pre,
