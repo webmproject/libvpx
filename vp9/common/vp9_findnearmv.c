@@ -136,7 +136,9 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   unsigned char *above_ref;
   unsigned char *left_ref;
   unsigned int score;
+#if CONFIG_SUBPELREFMV
   unsigned int sse;
+#endif
   unsigned int ref_scores[MAX_MV_REFS] = {0};
   int_mv sorted_mvs[MAX_MV_REFS];
   int zero_seen = FALSE;

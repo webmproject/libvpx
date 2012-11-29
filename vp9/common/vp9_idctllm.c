@@ -279,14 +279,6 @@ static const int16_t iadst_i16[256] = {
    3936, -3526,  3084, -2614,  2120, -1607,  1080,  -542
 };
 
-/* For test */
-#define TEST_INT 1
-#if TEST_INT
-#define vp9_ihtllm_int_c vp9_ihtllm_c
-#else
-#define vp9_ihtllm_float_c vp9_ihtllm_c
-#endif
-
 void vp9_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
                   TX_TYPE tx_type, int tx_dim) {
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
@@ -411,7 +403,7 @@ void vp9_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
 #define VERTICAL_ROUNDING ((1 << (VERTICAL_SHIFT - 1)) - 1)
 #define HORIZONTAL_SHIFT 17  // 15
 #define HORIZONTAL_ROUNDING ((1 << (HORIZONTAL_SHIFT - 1)) - 1)
-void vp9_ihtllm_int_c(const int16_t *input, int16_t *output, int pitch,
+void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
                       TX_TYPE tx_type, int tx_dim) {
   int i, j, k;
   int16_t imbuf[256];

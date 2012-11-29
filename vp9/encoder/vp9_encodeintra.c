@@ -70,7 +70,7 @@ void vp9_encode_intra4x4block(MACROBLOCK *x, int ib) {
   if (tx_type != DCT_DCT) {
     vp9_fht(be->src_diff, 32, be->coeff, tx_type, 4);
     vp9_ht_quantize_b_4x4(be, b, tx_type);
-    vp9_ihtllm_c(b->dqcoeff, b->diff, 32, tx_type, 4);
+    vp9_ihtllm(b->dqcoeff, b->diff, 32, tx_type, 4);
   } else {
     x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
     x->quantize_b_4x4(be, b) ;
@@ -191,7 +191,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
       vp9_fht(be->src_diff, 32, (x->block + idx)->coeff,
                 tx_type, 8);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
-      vp9_ihtllm_c(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
+      vp9_ihtllm(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
                    tx_type, 8);
     } else {
       x->vp9_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
@@ -206,7 +206,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
       if (tx_type != DCT_DCT) {
         vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
         vp9_ht_quantize_b_4x4(be, b, tx_type);
-        vp9_ihtllm_c(b->dqcoeff, b->diff, 32, tx_type, 4);
+        vp9_ihtllm(b->dqcoeff, b->diff, 32, tx_type, 4);
       } else {
         x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
         x->quantize_b_4x4(be, b);
