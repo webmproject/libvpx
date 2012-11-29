@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARH//+XI\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-11-29T01:53:44Z",
+      "side": 1,
+      "message": "Its not clear to me that eob position for 16x16 transform, is the best second order context for a 4x4.   Maybe just the dc coefficient would be better.   \n\nI think its worth exploring.\n\nI grant that this is probably better than setting the context to 0.",
+      "revId": "899e7c27ab4fbe59e69d9db7bf447d5ac42e0dc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
