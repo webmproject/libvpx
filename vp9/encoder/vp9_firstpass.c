@@ -482,7 +482,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
   // if( cm->current_video_frame == 0)
   // if ( 0 )
   {
-    int flag[2] = {1, 1};
     vp9_init_mv_probs(cm);
     vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
   }

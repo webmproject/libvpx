@@ -534,11 +534,12 @@ static void update_state(VP9_COMP *cpi, MACROBLOCK *x,
     // Note how often each mode chosen as best
     cpi->mode_chosen_counts[mb_mode_index]++;
     if (mbmi->mode == SPLITMV || mbmi->mode == NEWMV) {
-      static int testcount = 0;
       int_mv best_mv, best_second_mv;
-      unsigned int best_index;
       MV_REFERENCE_FRAME rf = mbmi->ref_frame;
+#if CONFIG_NEW_MVREF
+      unsigned int best_index;
       MV_REFERENCE_FRAME sec_ref_frame = mbmi->second_ref_frame;
+#endif
       best_mv.as_int = ctx->best_ref_mv.as_int;
       best_second_mv.as_int = ctx->second_best_ref_mv.as_int;
       if (mbmi->mode == NEWMV) {
