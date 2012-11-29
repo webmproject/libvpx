@@ -1444,6 +1444,72 @@ static void show_rate_histogram(struct rate_hist          *hist,
   show_histogram(hist->bucket, buckets, hist->total, scale);
 }
 
+#define mmin(a, b)  ((a) < (b) ? (a) : (b))
+static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
+                          int yloc[2], int uloc[2], int vloc[2]) {
+  int match = 1;
+  int i, j;
+  yloc[0] = yloc[1] = -1;
+  for (i = 0, match = 1; match && i < img1->d_h; i+=32) {
+    for (j = 0; match && j < img1->d_w; j+=32) {
+      int k, l;
+      int si = mmin(i + 32, img1->d_h) - i;
+      int sj = mmin(j + 32, img1->d_w) - j;
+      for (k = 0; match && k < si; k++)
+        for (l = 0; match && l < sj; l++) {
+          if (*(img1->planes[VPX_PLANE_Y] +
+                (i + k) * img1->stride[VPX_PLANE_Y] + j + l) !=
+              *(img2->planes[VPX_PLANE_Y] +
+                (i + k) * img2->stride[VPX_PLANE_Y] + j + l)) {
+            yloc[0] = i + k;
+            yloc[1] = j + l;
+            match = 0;
+            break;
+          }
+        }
+    }
+  }
+  uloc[0] = uloc[1] = -1;
+  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i+=16) {
+    for (j = 0; j < match && (img1->d_w + 1) / 2; j+=16) {
+      int k, l;
+      int si = mmin(i + 16, (img1->d_h + 1) / 2) - i;
+      int sj = mmin(j + 16, (img1->d_w + 1) / 2) - j;
+      for (k = 0; match && k < si; k++)
+        for (l = 0; match && l < sj; l++) {
+          if (*(img1->planes[VPX_PLANE_U] +
+                (i + k) * img1->stride[VPX_PLANE_U] + j + l) !=
+              *(img2->planes[VPX_PLANE_U] +
+                (i + k) * img2->stride[VPX_PLANE_U] + j + l)) {
+            uloc[0] = i + k;
+            uloc[1] = j + l;
+            match = 0;
+            break;
+          }
+        }
+    }
+  }
+  vloc[0] = vloc[1] = -1;
+  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i+=16) {
+    for (j = 0; j < match && (img1->d_w + 1) / 2; j+=16) {
+      int k, l;
+      int si = mmin(i + 16, (img1->d_h + 1) / 2) - i;
+      int sj = mmin(j + 16, (img1->d_w + 1) / 2) - j;
+      for (k = 0; match && k < si; k++)
+        for (l = 0; match && l < sj; l++) {
+          if (*(img1->planes[VPX_PLANE_V] +
+                (i + k) * img1->stride[VPX_PLANE_V] + j + l) !=
+              *(img2->planes[VPX_PLANE_V] +
+                (i + k) * img2->stride[VPX_PLANE_V] + j + l)) {
+            vloc[0] = i + k;
+            vloc[1] = j + l;
+            match = 0;
+            break;
+          }
+        }
+    }
+  }
+}
 
 static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
 {
@@ -2283,8 +2349,13 @@ static void test_decode(struct stream_state  *stream) {
   if (!stream->mismatch_seen
       && !compare_img(&stream->ref_enc.img, &stream->ref_dec.img)) {
     /* TODO(jkoleszar): make fatal. */
-    warn("Stream %d: Encode/decode mismatch on frame %d",
-         stream->index, stream->frames_out);
+    int y[2], u[2], v[2];
+    find_mismatch(&stream->ref_enc.img, &stream->ref_dec.img,
+                  y, u, v);
+    warn("Stream %d: Encode/decode mismatch on frame %d"
+         " at Y[%d, %d], U[%d, %d], V[%d, %d]",
+         stream->index, stream->frames_out,
+         y[0], y[1], u[0], u[1], v[0], v[1]);
     stream->mismatch_seen = stream->frames_out;
   }
 }

@@ -28,6 +28,10 @@
 #ifdef DEBUG_DEC_MV
 int dec_mvcount = 0;
 #endif
+// #define DEC_DEBUG
+#ifdef DEC_DEBUG
+extern int dec_debug;
+#endif
 
 static int read_bmode(vp9_reader *bc, const vp9_prob *p) {
   B_PREDICTION_MODE m = treed_read(bc, vp9_bmode_tree, p);
@@ -775,6 +779,11 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       xd->pre.u_buffer = cm->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
       xd->pre.v_buffer = cm->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
+#ifdef DEC_DEBUG
+      if (dec_debug)
+        printf("%d %d\n", xd->mode_info_context->mbmi.mv[0].as_mv.row,
+               xd->mode_info_context->mbmi.mv[0].as_mv.col);
+#endif
       vp9_find_mv_refs(xd, mi, prev_mi,
                        ref_frame, mbmi->ref_mvs[ref_frame],
                        cm->ref_frame_sign_bias);
@@ -787,6 +796,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
       vp9_mv_ref_probs(&pbi->common, mv_ref_p,
                        mbmi->mb_mode_context[ref_frame]);
+#ifdef DEC_DEBUG
+      if (dec_debug)
+        printf("[D %d %d] %d %d %d %d\n", ref_frame,
+               mbmi->mb_mode_context[ref_frame],
+               mv_ref_p[0], mv_ref_p[1], mv_ref_p[2], mv_ref_p[3]);
+#endif
     }
 
     // Is the segment level mode feature enabled for this segment

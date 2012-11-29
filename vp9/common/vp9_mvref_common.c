@@ -278,7 +278,7 @@ void vp9_find_mv_refs(
                           &index, c_refmv, ref_weight);
 
         // If there is a second valid mv then add it as well.
-        if (c2_ref_frame != INTRA_FRAME) {
+        if (c2_ref_frame > INTRA_FRAME) {
           scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias );
           ref_weight = ref_distance_weight[i] +
                        ((c2_ref_frame == ref_frame) << 4);
@@ -304,7 +304,7 @@ void vp9_find_mv_refs(
                       &index, c_refmv, ref_weight);
 
     // If there is a second valid mv then add it as well.
-    if (c2_ref_frame != INTRA_FRAME) {
+    if (c2_ref_frame > INTRA_FRAME) {
       scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias );
       ref_weight = ref_distance_weight[i] +
                    ((c2_ref_frame == ref_frame) << 4);
@@ -337,7 +337,7 @@ void vp9_find_mv_refs(
                           &index, c_refmv, ref_weight);
 
         // If there is a second valid mv then add it as well.
-        if (c2_ref_frame != INTRA_FRAME) {
+        if (c2_ref_frame > INTRA_FRAME) {
           scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias );
           ref_weight = ref_distance_weight[i] +
                        ((c2_ref_frame == ref_frame) << 4);

@@ -47,9 +47,9 @@
 #define IF_RTCD(x)  NULL
 #endif
 
+// #define ENC_DEBUG
 #ifdef ENC_DEBUG
 int enc_debug = 0;
-int mb_row_debug, mb_col_debug;
 #endif
 
 static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
@@ -557,7 +557,7 @@ static void update_state(VP9_COMP *cpi, MACROBLOCK *x,
                                       mbmi->ref_mvs[rf], &best_mv);
         mbmi->best_index = best_index;
 
-        if (mbmi->second_ref_frame) {
+        if (mbmi->second_ref_frame > 0) {
           unsigned int best_index;
           best_index =
               pick_best_mv_ref(x, sec_ref_frame, mbmi->mv[1],
@@ -764,6 +764,12 @@ static void pick_mb_modes(VP9_COMP *cpi,
         cpi->seg0_progress = (((mb_col & ~1) * 2 + (mb_row & ~1) * cm->mb_cols + i) << 16) / cm->MBs;
       }
 
+#ifdef ENC_DEBUG
+      enc_debug = (cpi->common.current_video_frame == 73 &&
+                   mb_row == 4 && mb_col == 13);
+      if (enc_debug)
+        printf("pick_mb_modes %d %d\n", mb_row, mb_col);
+#endif
       vp9_pick_mode_inter_macroblock(cpi, x, recon_yoffset,
                                      recon_uvoffset, &r, &d);
       *totalrate += r;
@@ -1014,13 +1020,6 @@ static void encode_sb(VP9_COMP *cpi,
     }
 
     xd->mb_index = i;
-
-#ifdef ENC_DEBUG
-    enc_debug = (cpi->common.current_video_frame == 0 &&
-                 mb_row == 0 && mb_col == 0);
-    mb_col_debug = mb_col;
-    mb_row_debug = mb_row;
-#endif
 
     // Restore MB state to that when it was picked
 #if CONFIG_SUPERBLOCKS
@@ -1424,7 +1423,8 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   TOKENEXTRA *tp = cpi->tok;
   int totalrate;
 
-  //printf("encode_frame_internal\n");
+  // printf("encode_frame_internal frame %d (%d)\n",
+  //        cpi->common.current_video_frame, cpi->common.show_frame);
 
   // Compute a modified set of reference frame probabilities to use when
   // prediction fails. These are based on the current general estimates for
@@ -2033,6 +2033,12 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
   assert(!xd->mode_info_context->mbmi.encoded_as_sb);
 #endif
 
+#ifdef ENC_DEBUG
+  enc_debug = (cpi->common.current_video_frame == 73 &&
+               mb_row == 4 && mb_col == 13);
+  if (enc_debug)
+    printf("Encode MB %d %d output %d\n", mb_row, mb_col, output_enabled);
+#endif
   if (cm->frame_type == KEY_FRAME) {
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM && output_enabled) {
       // Adjust the zbin based on this MB rate.
@@ -2076,6 +2082,12 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (mbmi->ref_frame == INTRA_FRAME) {
+#ifdef ENC_DEBUG
+    if (enc_debug) {
+      printf("Mode %d skip %d tx_size %d\n", mbmi->mode, x->skip,
+             mbmi->txfm_size);
+    }
+#endif
     if (mbmi->mode == B_PRED) {
       vp9_encode_intra16x16mbuv(x);
       vp9_encode_intra4x4mby(x);
@@ -2091,6 +2103,13 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
       sum_intra_stats(cpi, x);
   } else {
     int ref_fb_idx;
+#ifdef ENC_DEBUG
+    if (enc_debug)
+      printf("Mode %d skip %d tx_size %d ref %d ref2 %d mv %d %d\n",
+             mbmi->mode, x->skip, mbmi->txfm_size,
+             mbmi->ref_frame, mbmi->second_ref_frame,
+             mbmi->mv[0].as_mv.row, mbmi->mv[0].as_mv.col);
+#endif
 
     assert(cm->frame_type != KEY_FRAME);
 
@@ -2131,40 +2150,88 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->mb_skip_coeff = 0;
 
     } else {
-      vp9_build_1st_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
-                                             xd->dst.u_buffer, xd->dst.v_buffer,
+      vp9_build_1st_inter16x16_predictors_mb(xd,
+                                             xd->dst.y_buffer,
+                                             xd->dst.u_buffer,
+                                             xd->dst.v_buffer,
                                              xd->dst.y_stride,
                                              xd->dst.uv_stride);
+      if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
+        vp9_build_2nd_inter16x16_predictors_mb(xd,
+                                               xd->dst.y_buffer,
+                                               xd->dst.u_buffer,
+                                               xd->dst.v_buffer,
+                                               xd->dst.y_stride,
+                                               xd->dst.uv_stride);
+      }
+#if CONFIG_COMP_INTERINTRA_PRED
+      else if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+        vp9_build_interintra_16x16_predictors_mb(xd,
+                                                 xd->dst.y_buffer,
+                                                 xd->dst.u_buffer,
+                                                 xd->dst.v_buffer,
+                                                 xd->dst.y_stride,
+                                                 xd->dst.uv_stride);
+      }
+#endif
     }
   }
 
   if (!x->skip) {
 #ifdef ENC_DEBUG
     if (enc_debug) {
-      int i;
-      printf("Segment=%d [%d, %d]: %d %d:\n", mbmi->segment_id, mb_col_debug,
-             mb_row_debug, xd->mb_to_left_edge, xd->mb_to_top_edge);
+      int i, j;
+      printf("\n");
+      printf("qcoeff\n");
       for (i = 0; i < 400; i++) {
         printf("%3d ", xd->qcoeff[i]);
         if (i % 16 == 15) printf("\n");
       }
       printf("\n");
-      printf("eobs = ");
-      for (i = 0; i < 25; i++)
-        printf("%d:%d ", i, xd->block[i].eob);
+      printf("predictor\n");
+      for (i = 0; i < 384; i++) {
+        printf("%3d ", xd->predictor[i]);
+        if (i % 16 == 15) printf("\n");
+      }
       printf("\n");
+      printf("src_diff\n");
+      for (i = 0; i < 384; i++) {
+        printf("%3d ", x->src_diff[i]);
+        if (i % 16 == 15) printf("\n");
+      }
+      printf("\n");
+      printf("diff\n");
+      for (i = 0; i < 384; i++) {
+        printf("%3d ", xd->block[0].diff[i]);
+        if (i % 16 == 15) printf("\n");
+      }
+      printf("\n");
+      printf("final y\n");
+      for (i = 0; i < 16; i++) {
+        for (j = 0; j < 16; j++)
+          printf("%3d ", xd->dst.y_buffer[i * xd->dst.y_stride + j]);
+        printf("\n");
+      }
+      printf("\n");
+      printf("final u\n");
+      for (i = 0; i < 8; i++) {
+        for (j = 0; j < 8; j++)
+          printf("%3d ", xd->dst.u_buffer[i * xd->dst.uv_stride + j]);
+        printf("\n");
+      }
+      printf("\n");
+      printf("final v\n");
+      for (i = 0; i < 8; i++) {
+        for (j = 0; j < 8; j++)
+          printf("%3d ", xd->dst.v_buffer[i * xd->dst.uv_stride + j]);
+        printf("\n");
+      }
       fflush(stdout);
     }
 #endif
 
     vp9_tokenize_mb(cpi, xd, t, !output_enabled);
 
-#ifdef ENC_DEBUG
-    if (enc_debug) {
-      printf("Tokenized\n");
-      fflush(stdout);
-    }
-#endif
   } else {
     int mb_skip_context =
       cpi->common.mb_no_coeff_skip ?

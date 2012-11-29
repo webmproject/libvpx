@@ -939,7 +939,6 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
 #endif
             write_ymode(bc, mode, pc->fc.ymode_prob);
           }
-
           if (mode == B_PRED) {
             int j = 0;
 #if CONFIG_COMP_INTRA_PRED
