@@ -102,6 +102,7 @@ ifeq ($(CONFIG_TEMPORAL_DENOISING),yes)
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/denoising_sse2.c
 ifeq ($(HAVE_SSE2),yes)
 vp8/encoder/x86/denoising_sse2.c.o: CFLAGS += -msse2
+vp8/encoder/x86/denoising_sse2.c.d: CFLAGS += -msse2
 endif
 endif
 
