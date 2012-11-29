@@ -42,12 +42,6 @@
 #include "vp9_rtcd.h"
 #include "vp9/common/vp9_mvref_common.h"
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x)  (x)
-#else
-#define IF_RTCD(x)  NULL
-#endif
-
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
 
 #define INVALID_MV 0x80008000

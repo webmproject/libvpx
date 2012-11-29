@@ -165,12 +165,6 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
 
 }
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define RTCD_VTABLE(x) (&(pbi)->common.rtcd.x)
-#else
-#define RTCD_VTABLE(x) NULL
-#endif
-
 /* skip_recon_mb() is Modified: Instead of writing the result to predictor buffer and then copying it
  *  to dst buffer, we can write the result directly to dst buffer. This eliminates unnecessary copy.
  */

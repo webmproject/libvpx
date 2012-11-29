@@ -14,9 +14,6 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
-#if CONFIG_RUNTIME_CPU_DETECT
-#include "vp9/common/vp9_onyxc_int.h"
-#endif
 
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,

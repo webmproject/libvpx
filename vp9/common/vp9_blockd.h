@@ -403,10 +403,6 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(32, unsigned char, y_buf[22 * 32]);
 #endif
 
-#if CONFIG_RUNTIME_CPU_DETECT
-  struct VP9_COMMON_RTCD  *rtcd;
-#endif
-
   int mb_index;   // Index of the MB in the SB (0..3)
   int q_index;
 

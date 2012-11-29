@@ -389,11 +389,6 @@ typedef struct {
   void *ptr1;
 } LPFTHREAD_DATA;
 
-
-typedef struct VP9_ENCODER_RTCD {
-  VP9_COMMON_RTCD            *common;
-} VP9_ENCODER_RTCD;
-
 enum BlockSize {
   BLOCK_16X8 = PARTITIONING_16X8,
   BLOCK_8X16 = PARTITIONING_8X16,
@@ -728,9 +723,6 @@ typedef struct VP9_COMP {
     double est_max_qcorrection_factor;
   } twopass;
 
-#if CONFIG_RUNTIME_CPU_DETECT
-  VP9_ENCODER_RTCD            rtcd;
-#endif
 #if VP9_TEMPORAL_ALT_REF
   YV12_BUFFER_CONFIG alt_ref_buffer;
   YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];

@@ -34,12 +34,6 @@
 
 #define OUTPUT_FPF 0
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#else
-#define IF_RTCD(x) NULL
-#endif
-
 #define IIFACTOR   12.5
 #define IIKFACTOR1 12.5
 #define IIKFACTOR2 15.0

@@ -48,16 +48,6 @@
 #include <stdio.h>
 #include <limits.h>
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#define RTCD(x) &cpi->common.rtcd.x
-#else
-#define IF_RTCD(x) NULL
-#define RTCD(x) NULL
-#endif
-
-extern void vp9_cmachine_specific_config(VP9_COMP *cpi);
-
 extern void print_tree_update_probs();
 
 #if HAVE_ARMV7
@@ -1274,10 +1264,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   vp9_init_quantizer(cpi);
 
-#if CONFIG_RUNTIME_CPU_DETECT
-  cpi->mb.e_mbd.rtcd = &cpi->common.rtcd;
-#endif
-
   if (cpi->sf.iterative_sub_pixel == 1) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_step_iteratively;
   } else if (cpi->sf.quarter_pixel_search) {
@@ -1817,7 +1803,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
 
   vp9_create_common(&cpi->common);
-  vp9_cmachine_specific_config(cpi);
 
   init_config((VP9_PTR)cpi, oxcf);
 

@@ -25,12 +25,6 @@
 extern void vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
 #endif
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#else
-#define IF_RTCD(x) NULL
-#endif
-
 void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
                                    YV12_BUFFER_CONFIG *dst_ybc, int Fraction) {
   unsigned char *src_y, *dst_y;

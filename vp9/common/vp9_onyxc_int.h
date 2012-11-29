@@ -143,14 +143,6 @@ typedef enum {
   NB_TXFM_MODES       = 4,
 } TXFM_MODE;
 
-typedef struct VP9_COMMON_RTCD {
-#if CONFIG_RUNTIME_CPU_DETECT
-  int                           flags;
-#else
-  int unused;
-#endif
-} VP9_COMMON_RTCD;
-
 typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
@@ -293,10 +285,6 @@ typedef struct VP9Common {
 #endif
   double bitrate;
   double framerate;
-
-#if CONFIG_RUNTIME_CPU_DETECT
-  VP9_COMMON_RTCD rtcd;
-#endif
 
 #if CONFIG_POSTPROC
   struct postproc_state  postproc_state;

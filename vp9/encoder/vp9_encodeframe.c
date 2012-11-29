@@ -39,14 +39,6 @@
 
 #define DBG_PRNT_SEGMAP 0
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define RTCD(x)     &cpi->common.rtcd.x
-#define IF_RTCD(x)  (x)
-#else
-#define RTCD(x)     NULL
-#define IF_RTCD(x)  NULL
-#endif
-
 // #define ENC_DEBUG
 #ifdef ENC_DEBUG
 int enc_debug = 0;

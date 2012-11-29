@@ -17,12 +17,6 @@
 #include "vp9/common/vp9_invtrans.h"
 #include "vp9/encoder/vp9_encodeintra.h"
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#else
-#define IF_RTCD(x) NULL
-#endif
-
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   int i;
   int intra_pred_var = 0;
