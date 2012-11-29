@@ -265,7 +265,7 @@ static void update_refpred_stats(VP9_COMP *cpi) {
 static void update_mode_probs(VP9_COMMON *cm,
                               int mode_context[INTER_MODE_CONTEXTS][4]) {
   int i, j;
-  int (*mv_ref_ct)[4][2];
+  unsigned int (*mv_ref_ct)[4][2];
 
   vpx_memcpy(mode_context, cm->fc.vp9_mode_contexts,
              sizeof(cm->fc.vp9_mode_contexts));

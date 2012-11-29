@@ -120,7 +120,7 @@ typedef struct frame_contexts {
 #endif
 
   int vp9_mode_contexts[INTER_MODE_CONTEXTS][4];
-  int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
+  unsigned int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
 } FRAME_CONTEXT;
 
 typedef enum {
