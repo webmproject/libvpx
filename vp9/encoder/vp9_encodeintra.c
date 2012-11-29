@@ -92,7 +92,6 @@ void vp9_encode_intra16x16mby(MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
-  TX_TYPE tx_type;
 
 #if CONFIG_COMP_INTRA_PRED
   if (xd->mode_info_context->mbmi.second_mode == (MB_PREDICTION_MODE)(DC_PRED - 1))
