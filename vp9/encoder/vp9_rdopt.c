@@ -4356,6 +4356,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_intra16_rd = INT64_MAX;
   int best_intra16_mode = DC_PRED, best_intra16_uv_mode = DC_PRED;
 #endif
+  int64_t best_overall_rd = INT64_MAX;
   int rate_uv_4x4 = 0, rate_uv_8x8 = 0, rate_uv_tokenonly_4x4 = 0,
       rate_uv_tokenonly_8x8 = 0;
   int dist_uv_4x4 = 0, dist_uv_8x8 = 0, uv_skip_4x4 = 0, uv_skip_8x8 = 0;
@@ -4425,12 +4426,17 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
     }
     mbmi->ref_frame = ref_frame;
-    comp_pred = vp9_mode_order[mode_index].second_ref_frame > INTRA_FRAME;
+    mbmi->second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
+    comp_pred = mbmi->second_ref_frame > INTRA_FRAME;
     mbmi->mode = this_mode;
     mbmi->uv_mode = DC_PRED;
 #if CONFIG_COMP_INTRA_PRED
     mbmi->second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
     mbmi->second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
+#endif
+#if CONFIG_COMP_INTERINTRA_PRED
+    mbmi->interintra_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
+    mbmi->interintra_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
 #endif
     if (cpi->common.mcomp_filter_type == SWITCHABLE &&
         this_mode >= NEARESTMV && this_mode <= SPLITMV) {
@@ -4443,13 +4449,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
     vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
-    if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
-      continue;
+    // if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
+    //  continue;
 
-    // TODO(debargha): intra/inter encoding at SB level
-    if (this_mode == I8X8_PRED || this_mode == B_PRED || this_mode == SPLITMV ||
-        vp9_mode_order[mode_index].second_ref_frame == INTRA_FRAME)
+    if (this_mode == I8X8_PRED || this_mode == B_PRED || this_mode == SPLITMV)
       continue;
+    //  if (vp9_mode_order[mode_index].second_ref_frame == INTRA_FRAME)
+    //  continue;
 
     if (comp_pred) {
       int second_ref;
@@ -4468,9 +4474,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       xd->second_pre.v_buffer = v_buffer[second_ref];
       mode_excluded = cm->comp_pred_mode == SINGLE_PREDICTION_ONLY;
     } else {
-      mbmi->second_ref_frame = NONE;
-      if (ref_frame != INTRA_FRAME)
-        mode_excluded = cm->comp_pred_mode == COMP_PREDICTION_ONLY;
+      // mbmi->second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
+      if (ref_frame != INTRA_FRAME) {
+        if (mbmi->second_ref_frame != INTRA_FRAME)
+          mode_excluded = cm->comp_pred_mode == COMP_PREDICTION_ONLY;
+#if CONFIG_COMP_INTERINTRA_PRED
+        else
+          mode_excluded = !cm->use_interintra;
+#endif
+      }
     }
 
     xd->pre.y_buffer = y_buffer[ref_frame];
@@ -4522,6 +4534,17 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       rate2 = rate_y + x->mbmode_cost[cm->frame_type][mbmi->mode] + rate_uv;
       distortion2 = distortion_y + distortion_uv;
     } else {
+#if CONFIG_COMP_INTERINTRA_PRED
+      if (mbmi->second_ref_frame == INTRA_FRAME) {
+        if (best_intra16_mode == DC_PRED - 1) continue;
+        mbmi->interintra_mode = best_intra16_mode;
+#if SEPARATE_INTERINTRA_UV
+        mbmi->interintra_uv_mode = best_intra16_uv_mode;
+#else
+        mbmi->interintra_uv_mode = best_intra16_mode;
+#endif
+      }
+#endif
       this_rd = handle_inter_mode(cpi, x, BLOCK_32X32,
                                   &saddone, near_sadidx, mdcounts, txfm_cache,
                                   &rate2, &distortion2, &skippable,
@@ -4538,6 +4561,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
     }
 
+#if CONFIG_COMP_INTERINTRA_PRED
+    if (cpi->common.use_interintra) {
+      rate2 += compmode_interintra_cost;
+    }
+#endif
     if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
       rate2 += compmode_cost;
     }
@@ -4600,10 +4628,27 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       *returnintra = distortion2;
     }
 #endif
+#if CONFIG_COMP_INTERINTRA_PRED
+    if ((mbmi->ref_frame == INTRA_FRAME) &&
+        (this_mode <= TM_PRED) &&
+        (this_rd < best_intra16_rd)) {
+      best_intra16_rd = this_rd;
+      best_intra16_mode = this_mode;
+      best_intra16_uv_mode = (mbmi->txfm_size != TX_4X4 ?
+                              mode_uv_8x8 : mode_uv_4x4);
+    }
+#endif
 
     if (!disable_skip && mbmi->ref_frame == INTRA_FRAME)
       for (i = 0; i < NB_PREDICTION_TYPES; ++i)
         best_pred_rd[i] = MIN(best_pred_rd[i], this_rd);
+
+    if (this_rd < best_overall_rd) {
+      best_overall_rd = this_rd;
+#if CONFIG_COMP_INTERINTRA_PRED
+      is_best_interintra = (mbmi->second_ref_frame == INTRA_FRAME);
+#endif
+    }
 
     // Did this mode help.. i.e. is it the new best mode
     if (this_rd < best_rd || x->skip) {
@@ -4688,6 +4733,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (x->skip && !mode_excluded)
       break;
   }
+
+#if CONFIG_COMP_INTERINTRA_PRED
+  ++cpi->interintra_select_count[is_best_interintra];
+  // if (is_best_interintra)  printf("best_interintra\n");
+#endif
 
   // TODO(rbultje) integrate with RD thresholding
 #if 0

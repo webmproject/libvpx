@@ -31,6 +31,14 @@ extern void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
                                                        unsigned char *upred,
                                                        unsigned char *vpred,
                                                        int uvstride);
+#if CONFIG_SUPERBLOCKS
+extern void vp9_build_interintra_32x32_predictors_sb(MACROBLOCKD *xd,
+                                                     unsigned char *ypred,
+                                                     unsigned char *upred,
+                                                     unsigned char *vpred,
+                                                     int ystride,
+                                                     int uvstride);
+#endif
 #endif
 
 #endif  // __INC_RECONINTRA_H

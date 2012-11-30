@@ -655,6 +655,53 @@ void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
   combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
                      vpred, uvstride, vintrapredictor, 8, 8);
 }
+
+#if CONFIG_SUPERBLOCKS
+void vp9_build_interintra_32x32_predictors_sby(MACROBLOCKD *xd,
+                                               unsigned char *ypred,
+                                               int ystride) {
+  unsigned char intrapredictor[1024];
+  vp9_build_intra_predictors_internal(
+      xd->dst.y_buffer, xd->dst.y_stride,
+      intrapredictor, 32,
+      xd->mode_info_context->mbmi.interintra_mode, 32,
+      xd->up_available, xd->left_available);
+  combine_interintra(xd->mode_info_context->mbmi.interintra_mode,
+                     ypred, ystride, intrapredictor, 32, 32);
+}
+
+void vp9_build_interintra_32x32_predictors_sbuv(MACROBLOCKD *xd,
+                                                unsigned char *upred,
+                                                unsigned char *vpred,
+                                                int uvstride) {
+  unsigned char uintrapredictor[256];
+  unsigned char vintrapredictor[256];
+  vp9_build_intra_predictors_internal(
+      xd->dst.u_buffer, xd->dst.uv_stride,
+      uintrapredictor, 16,
+      xd->mode_info_context->mbmi.interintra_uv_mode, 16,
+      xd->up_available, xd->left_available);
+  vp9_build_intra_predictors_internal(
+      xd->dst.v_buffer, xd->dst.uv_stride,
+      vintrapredictor, 16,
+      xd->mode_info_context->mbmi.interintra_uv_mode, 16,
+      xd->up_available, xd->left_available);
+  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
+                     upred, uvstride, uintrapredictor, 16, 16);
+  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
+                     vpred, uvstride, vintrapredictor, 16, 16);
+}
+
+void vp9_build_interintra_32x32_predictors_sb(MACROBLOCKD *xd,
+                                              unsigned char *ypred,
+                                              unsigned char *upred,
+                                              unsigned char *vpred,
+                                              int ystride,
+                                              int uvstride) {
+  vp9_build_interintra_32x32_predictors_sby(xd, ypred, ystride);
+  vp9_build_interintra_32x32_predictors_sbuv(xd, upred, vpred, uvstride);
+}
+#endif
 #endif
 
 void vp9_build_intra_predictors_mby(MACROBLOCKD *xd) {

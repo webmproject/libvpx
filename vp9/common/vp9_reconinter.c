@@ -773,6 +773,13 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
     x->second_pre.u_buffer = u2;
     x->second_pre.v_buffer = v2;
   }
+
+#if CONFIG_COMP_INTERINTRA_PRED
+  if (x->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+    vp9_build_interintra_32x32_predictors_sb(
+        x, dst_y, dst_u, dst_v, dst_ystride, dst_uvstride);
+  }
+#endif
 }
 #endif
 
