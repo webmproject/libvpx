@@ -17,4 +17,7 @@ SCALE_SRCS-$(HAVE_NEON)  += arm/neon/yv12extend_arm.c
 
 SCALE_SRCS-no += $(SCALE_SRCS_REMOVE-yes)
 
+$(eval $(call asm_offsets_template,\
+	         vpx_scale_asm_offsets.asm, vpx_scale/vpx_scale_asm_offsets.c))
+
 $(eval $(call rtcd_h_template,vpx_scale_rtcd,vpx_scale/vpx_scale_rtcd.sh))
