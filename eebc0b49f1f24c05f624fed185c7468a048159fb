@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARX///g8\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2284,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-11-30T04:57:44Z",
+      "side": 0,
+      "message": "I think in general exiting on the first error is the best thing to do and should be the default. No objection if you want to introduce an option to continue in the presence of errors -- I\u0027d combine it with updating the mismatch check at 2354 to be fatal by default, consistent with this check, unless the option (--continue?) is given. In either case, the program should exit with an error when it finishes.",
+      "revId": "eebc0b49f1f24c05f624fed185c7468a048159fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
