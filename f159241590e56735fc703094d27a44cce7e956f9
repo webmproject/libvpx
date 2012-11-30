@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARX///so\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4702,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-11-30T01:20:39Z",
+      "side": 1,
+      "message": "shouldn\u0027t this move to update_state() in encodeframe.c? Right now, if SB chooses a particular interpolation mode, but we\u0027re using non-SB coding, this counter is increased. Same for the same piece of code in the MB pick_mode_inter().",
+      "revId": "f159241590e56735fc703094d27a44cce7e956f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
