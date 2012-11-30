@@ -120,6 +120,12 @@ specialize vp9_recon_mb
 prototype void vp9_recon_mby "struct macroblockd *x"
 specialize vp9_recon_mby
 
+prototype void vp9_recon_mby_s "struct macroblockd *x, unsigned char *dst"
+specialize vp9_recon_mby_s
+
+prototype void vp9_recon_mbuv_s "struct macroblockd *x, unsigned char *udst, unsigned char *vdst"
+specialize void vp9_recon_mbuv_s
+
 prototype void vp9_build_intra_predictors_mby_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_mby_s
 

@@ -546,7 +546,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
 #if CONFIG_SUPERBLOCKS
 static void decode_16x16_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
                             BOOL_DECODER* const bc, int n) {
-  BLOCKD *b = &xd->block[24];
   int x_idx = n & 1, y_idx = n >> 1;
   TX_TYPE tx_type = get_tx_type_16x16(xd, &xd->block[0]);
   if (tx_type != DCT_DCT) {
@@ -579,14 +578,9 @@ static void decode_8x8_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     int i;
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
-      const int iblock[4] = {0, 1, 4, 5};
-      const int ioffset[4] = {0, 1, 0, 1};
       int idx = (ib & 0x02) ? (ib + 2) : ib;
-      int i8x8mode = -1;
       short *q  = xd->block[idx].qcoeff;
       short *dq = xd->block[0].dequant;
-      unsigned char *pre = xd->block[ib].predictor;
-      unsigned char *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
       int stride = xd->dst.y_stride;
       BLOCKD *b = &xd->block[ib];
       tx_type = get_tx_type_8x8(xd, &xd->block[ib]);

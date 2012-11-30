@@ -3366,7 +3366,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int distortion_uv = INT_MAX;
   int64_t best_yrd = INT64_MAX;
 #if CONFIG_PRED_FILTER
-  int best_filter_state;
+  int best_filter_state = 0;
 #endif
   int switchable_filter_index = 0;
 
@@ -3882,7 +3882,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 #if CONFIG_COMP_INTERINTRA_PRED
     if ((mbmi->ref_frame == INTRA_FRAME) &&
-        (this_mode >= DC_PRED && this_mode <= TM_PRED) &&
+        (this_mode <= TM_PRED) &&
         (this_rd < best_intra16_rd)) {
       best_intra16_rd = this_rd;
       best_intra16_mode = this_mode;
@@ -4179,7 +4179,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int rate4x4d, dist4x4d;
 #endif
   int rate4x4, rate16x16 = 0, rateuv, rateuv8x8;
-  int dist4x4, dist16x16, distuv, distuv8x8;
+  int dist4x4 = 0, dist16x16 = 0, distuv = 0, distuv8x8 = 0;
   int rate;
   int rate4x4_tokenonly = 0;
   int rate16x16_tokenonly = 0;
@@ -4191,7 +4191,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int mode8x8[2][4];
   int dist;
   int modeuv, modeuv8x8, uv_intra_skippable, uv_intra_skippable_8x8;
-  int y_intra16x16_skippable;
+  int y_intra16x16_skippable = 0;
   int64_t txfm_cache[NB_TXFM_MODES];
   TX_SIZE txfm_size_16x16;
   int i;
@@ -4356,16 +4356,17 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_pred_diff[NB_PREDICTION_TYPES];
   int64_t best_pred_rd[NB_PREDICTION_TYPES];
   MB_MODE_INFO best_mbmode;
-  int mode_index, best_mode_index;
+  int mode_index, best_mode_index = 0;
   unsigned int ref_costs[MAX_REF_FRAMES];
 #if CONFIG_COMP_INTERINTRA_PRED
   int is_best_interintra = 0;
   int64_t best_intra16_rd = INT64_MAX;
   int best_intra16_mode = DC_PRED, best_intra16_uv_mode = DC_PRED;
 #endif
-  int rate_uv_4x4, rate_uv_8x8, rate_uv_tokenonly_4x4, rate_uv_tokenonly_8x8;
-  int dist_uv_4x4, dist_uv_8x8, uv_skip_4x4, uv_skip_8x8;
-  MB_PREDICTION_MODE mode_uv_4x4, mode_uv_8x8;
+  int rate_uv_4x4 = 0, rate_uv_8x8 = 0, rate_uv_tokenonly_4x4 = 0,
+      rate_uv_tokenonly_8x8 = 0;
+  int dist_uv_4x4 = 0, dist_uv_8x8 = 0, uv_skip_4x4 = 0, uv_skip_8x8 = 0;
+  MB_PREDICTION_MODE mode_uv_4x4 = NEARESTMV, mode_uv_8x8 = NEARESTMV;
 
   x->skip = 0;
   xd->mode_info_context->mbmi.segment_id = segment_id;

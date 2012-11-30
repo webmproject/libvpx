@@ -2206,7 +2206,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 #endif
     if (pc->mcomp_filter_type == SWITCHABLE)
       update_switchable_interp_probs(cpi, &header_bc);
-#if CONFIG_COMP_INTERINTRA_PRED
+
+    #if CONFIG_COMP_INTERINTRA_PRED
     if (pc->use_interintra) {
       vp9_cond_prob_update(&header_bc,
                            &pc->fc.interintra_prob,

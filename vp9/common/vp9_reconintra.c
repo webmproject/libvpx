@@ -624,9 +624,7 @@ void vp9_build_interintra_16x16_predictors_mb(MACROBLOCKD *xd,
 void vp9_build_interintra_16x16_predictors_mby(MACROBLOCKD *xd,
                                                unsigned char *ypred,
                                                int ystride) {
-  static const int scale_bits = 6;
   unsigned char intrapredictor[256];
-  int i, j;
   vp9_build_intra_predictors_internal(
       xd->dst.y_buffer, xd->dst.y_stride,
       intrapredictor, 16,
@@ -640,7 +638,6 @@ void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
                                                 unsigned char *upred,
                                                 unsigned char *vpred,
                                                 int uvstride) {
-  int i, j;
   unsigned char uintrapredictor[64];
   unsigned char vintrapredictor[64];
   vp9_build_intra_predictors_internal(

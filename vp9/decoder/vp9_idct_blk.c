@@ -10,6 +10,9 @@
 
 #include "vp9_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
+#if CONFIG_LOSSLESS
+#include "vp9/decoder/vp9_dequantize.h"
+#endif
 
 void vp9_dequant_dc_idct_add_y_block_c(short *q, const short *dq,
                                        unsigned char *pre,

@@ -105,7 +105,7 @@ B_PREDICTION_MODE vp9_find_dominant_direction(
 #elif CONTEXT_PRED_REPLACEMENTS == 0
 B_PREDICTION_MODE vp9_find_dominant_direction(
     unsigned char *ptr, int stride, int n) {
-  int g[8], i, imin, imin2, imax;
+  int g[8], i, imin, imax;
   g[0] = find_grad_measure(ptr, stride, n, 4,  1, 0);
   g[1] = find_grad_measure(ptr, stride, n, 4,  2, 1);
   g[2] = find_grad_measure(ptr, stride, n, 4,  1, 1);

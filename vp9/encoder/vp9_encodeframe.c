@@ -399,11 +399,12 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
   for (i = 1; i < 4; ++i) {
     // If we see a 0,0 reference vector for a second time we have reached
     // the end of the list of valid candidate vectors.
-    if (!mv_ref_list[i].as_int)
+    if (!mv_ref_list[i].as_int) {
       if (zero_seen)
         break;
       else
         zero_seen = TRUE;
+    }
 
     // Check for cases where the reference choice would give rise to an
     // uncodable/out of range residual for row or col.

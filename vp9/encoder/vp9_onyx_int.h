@@ -577,8 +577,8 @@ typedef struct VP9_COMP {
   int mbsplit_count[VP9_NUMMBSPLITS];
   int y_uv_mode_count[VP9_YMODES][VP9_UV_MODES];
 #if CONFIG_COMP_INTERINTRA_PRED
-  int interintra_count[2];
-  int interintra_select_count[2];
+  unsigned int interintra_count[2];
+  unsigned int interintra_select_count[2];
 #endif
 
   nmv_context_counts NMVcount;
