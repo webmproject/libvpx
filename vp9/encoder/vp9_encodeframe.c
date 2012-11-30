@@ -578,6 +578,13 @@ static void update_state(VP9_COMP *cpi, MACROBLOCK *x,
         ++cpi->interintra_count[0];
       }
     }
+    if (cpi->common.mcomp_filter_type == SWITCHABLE &&
+        mbmi->mode >= NEARESTMV &&
+        mbmi->mode <= SPLITMV) {
+      ++cpi->switchable_interp_count
+          [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
+          [vp9_switchable_interp_map[mbmi->interp_filter]];
+    }
 #endif
 
     cpi->prediction_error += ctx->distortion;
@@ -727,10 +734,18 @@ static void pick_mb_modes(VP9_COMP *cpi,
 
     vp9_intra_prediction_down_copy(xd);
 
+#ifdef ENC_DEBUG
+      enc_debug = (cpi->common.current_video_frame == 46 &&
+                   mb_row == 5 && mb_col == 2);
+#endif
     // Find best coding mode & reconstruct the MB so it is available
     // as a predictor for MBs that follow in the SB
     if (cm->frame_type == KEY_FRAME) {
       int r, d;
+#ifdef ENC_DEBUG
+      if (enc_debug)
+        printf("intra pick_mb_modes %d %d\n", mb_row, mb_col);
+#endif
       vp9_rd_pick_intra_mode(cpi, x, &r, &d);
       *totalrate += r;
       *totaldist += d;
@@ -759,10 +774,8 @@ static void pick_mb_modes(VP9_COMP *cpi,
       }
 
 #ifdef ENC_DEBUG
-      enc_debug = (cpi->common.current_video_frame == 73 &&
-                   mb_row == 4 && mb_col == 13);
       if (enc_debug)
-        printf("pick_mb_modes %d %d\n", mb_row, mb_col);
+        printf("inter pick_mb_modes %d %d\n", mb_row, mb_col);
 #endif
       vp9_pick_mode_inter_macroblock(cpi, x, recon_yoffset,
                                      recon_uvoffset, &r, &d);
@@ -2028,8 +2041,8 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
 
 #ifdef ENC_DEBUG
-  enc_debug = (cpi->common.current_video_frame == 73 &&
-               mb_row == 4 && mb_col == 13);
+  enc_debug = (cpi->common.current_video_frame == 46 &&
+               mb_row == 5 && mb_col == 2);
   if (enc_debug)
     printf("Encode MB %d %d output %d\n", mb_row, mb_col, output_enabled);
 #endif
@@ -2099,10 +2112,11 @@ static void encode_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
     int ref_fb_idx;
 #ifdef ENC_DEBUG
     if (enc_debug)
-      printf("Mode %d skip %d tx_size %d ref %d ref2 %d mv %d %d\n",
+      printf("Mode %d skip %d tx_size %d ref %d ref2 %d mv %d %d interp %d\n",
              mbmi->mode, x->skip, mbmi->txfm_size,
              mbmi->ref_frame, mbmi->second_ref_frame,
-             mbmi->mv[0].as_mv.row, mbmi->mv[0].as_mv.col);
+             mbmi->mv[0].as_mv.row, mbmi->mv[0].as_mv.col,
+             mbmi->interp_filter);
 #endif
 
     assert(cm->frame_type != KEY_FRAME);
@@ -2304,6 +2318,8 @@ static void encode_superblock(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_update_zbin_extra(cpi, x);
     }
   } else {
+    vp9_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter, cm);
+
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
       // Adjust the zbin based on this MB rate.
       adjust_act_zbin(cpi, x);
@@ -2337,6 +2353,7 @@ static void encode_superblock(VP9_COMP *cpi, MACROBLOCK *x,
                       vp9_get_pred_ref(cm, xd)));
     vp9_set_pred_flag(xd, PRED_REF, ref_pred_flag);
   }
+
 
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     vp9_build_intra_predictors_sby_s(&x->e_mbd);

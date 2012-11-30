@@ -74,11 +74,13 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
           left_interp = vp9_switchable_interp_map[(m - 1)->mbmi.interp_filter];
         else
           left_interp = VP9_SWITCHABLE_FILTERS;
+        assert(left_interp != -1);
         if (above_in_image && above_mode >= NEARESTMV && above_mode <= SPLITMV)
           above_interp = vp9_switchable_interp_map[
               (m - cm->mode_info_stride)->mbmi.interp_filter];
         else
           above_interp = VP9_SWITCHABLE_FILTERS;
+        assert(above_interp != -1);
 
         if (left_interp == above_interp)
           pred_context = left_interp;

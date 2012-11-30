@@ -4035,13 +4035,6 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_COMP_INTERINTRA_PRED
   ++cpi->interintra_select_count[is_best_interintra];
 #endif
-  if (cpi->common.mcomp_filter_type == SWITCHABLE &&
-      best_mbmode.mode >= NEARESTMV &&
-      best_mbmode.mode <= SPLITMV) {
-    ++cpi->switchable_interp_count
-        [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
-        [vp9_switchable_interp_map[best_mbmode.interp_filter]];
-  }
 
   // Reduce the activation RD thresholds for the best choice mode
   if ((cpi->rd_baseline_thresh[best_mode_index] > 0) &&
@@ -4367,6 +4360,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       rate_uv_tokenonly_8x8 = 0;
   int dist_uv_4x4 = 0, dist_uv_8x8 = 0, uv_skip_4x4 = 0, uv_skip_8x8 = 0;
   MB_PREDICTION_MODE mode_uv_4x4 = NEARESTMV, mode_uv_8x8 = NEARESTMV;
+  int switchable_filter_index = 0;
 
   x->skip = 0;
   xd->mode_info_context->mbmi.segment_id = segment_id;
@@ -4403,7 +4397,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mode_uv_8x8 = mbmi->uv_mode;
   }
 
-  for (mode_index = 0; mode_index < MAX_MODES; mode_index++) {
+  for (mode_index = 0; mode_index < MAX_MODES;
+       mode_index += (!switchable_filter_index)) {
     int mode_excluded = 0;
     int64_t this_rd = INT64_MAX;
     int disable_skip = 0;
@@ -4437,6 +4432,16 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
     mbmi->second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
 #endif
+    if (cpi->common.mcomp_filter_type == SWITCHABLE &&
+        this_mode >= NEARESTMV && this_mode <= SPLITMV) {
+      mbmi->interp_filter =
+          vp9_switchable_interp[switchable_filter_index++];
+      if (switchable_filter_index == VP9_SWITCHABLE_FILTERS)
+        switchable_filter_index = 0;
+    } else {
+      mbmi->interp_filter = cpi->common.mcomp_filter_type;
+    }
+    vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
     if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
       continue;

@@ -696,12 +696,12 @@ static void decode_superblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
 
   assert(xd->mode_info_context->mbmi.encoded_as_sb);
 
+  if (pbi->common.frame_type != KEY_FRAME)
+    vp9_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter, pc);
+
   // re-initialize macroblock dequantizer before detokenization
   if (xd->segmentation_enabled)
     mb_init_dequantizer(pbi, xd);
-
-  if (pbi->common.frame_type != KEY_FRAME)
-    vp9_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter, pc);
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
     vp9_reset_mb_tokens_context(xd);
@@ -738,6 +738,7 @@ static void decode_superblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
 
     if (mb_col + x_idx >= pc->mb_cols || mb_row + y_idx >= pc->mb_rows)
       continue;
+
 
     xd->above_context = pc->above_context + mb_col + x_idx;
     xd->left_context = pc->left_context + y_idx;
@@ -832,6 +833,12 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
       }
     }
   } else {
+#ifdef DEC_DEBUG
+  if (dec_debug)
+    printf("Decoding mb:  %d %d interp %d\n",
+           xd->mode_info_context->mbmi.mode, tx_size,
+           xd->mode_info_context->mbmi.interp_filter);
+#endif
     vp9_build_inter_predictors_mb(xd);
   }
 
@@ -859,7 +866,6 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
         printf("%3d ", xd->dst.u_buffer[i * xd->dst.uv_stride + j]);
       printf("\n");
     }
-  } else {
     printf("\n");
     printf("final v\n");
     for (i = 0; i < 8; i++) {
@@ -969,8 +975,8 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
       }
 #endif
 #ifdef DEC_DEBUG
-      dec_debug = (pbi->common.current_video_frame == 73 &&
-                   mb_row == 4 && mb_col == 13);
+      dec_debug = (pbi->common.current_video_frame == 46 &&
+                   mb_row == 5 && mb_col == 2);
       if (dec_debug)
 #if CONFIG_SUPERBLOCKS
         printf("Enter Debug %d %d sb %d\n", mb_row, mb_col,
@@ -993,6 +999,10 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
       vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, bc);
 
       update_blockd_bmi(xd);
+#ifdef DEC_DEBUG
+      if (dec_debug)
+        printf("Hello\n");
+#endif
 
       /* Select the appropriate reference frame for this MB */
       if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)

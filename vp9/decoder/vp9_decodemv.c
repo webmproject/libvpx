@@ -998,6 +998,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
               break;
           }
 
+          /*  Commenting this section out, not sure why this was needed, and
+           *  there are mismatches with this section in rare cases since it is
+           *  not done in the encoder at all.
           mbmi->need_to_clamp_mvs |= check_mv_bounds(&blockmv,
                                                      mb_to_left_edge,
                                                      mb_to_right_edge,
@@ -1010,6 +1013,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                        mb_to_top_edge,
                                                        mb_to_bottom_edge);
           }
+          */
 
           {
             /* Fill (uniform) modes, mvs of jth subset.
