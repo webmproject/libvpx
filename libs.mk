@@ -80,7 +80,7 @@ ifeq ($(CONFIG_VP8_ENCODER),yes)
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_CX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
   CODEC_SRCS-yes += $(VP8_PREFIX)vp8cx.mk vpx/vp8.h vpx/vp8cx.h
-  CODEC_SRCS-$(ARCH_ARM) += $(VP8_PREFIX)vp88cx_arm.mk
+  CODEC_SRCS-$(ARCH_ARM) += $(VP8_PREFIX)vp8cx_arm.mk
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
