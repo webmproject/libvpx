@@ -9,8 +9,8 @@
  */
 
 
-#ifndef SUBPIXEL_X86_H
-#define SUBPIXEL_X86_H
+#ifndef VP9_COMMON_X86_VP9_SUBPIXEL_X86_H_
+#define VP9_COMMON_X86_VP9_SUBPIXEL_X86_H_
 
 /* Note:
  *

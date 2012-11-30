@@ -9,8 +9,8 @@
  */
 
 
-#ifndef POSTPROC_H
-#define POSTPROC_H
+#ifndef VP9_COMMON_VP9_POSTPROC_H_
+#define VP9_COMMON_VP9_POSTPROC_H_
 
 #include "vpx_ports/mem.h"
 struct postproc_state {

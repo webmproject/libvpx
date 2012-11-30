@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __ENCODEINTRA_H_
-#define __ENCODEINTRA_H_
+#ifndef VP9_ENCODER_VP9_ENCODEINTRA_H_
+#define VP9_ENCODER_VP9_ENCODEINTRA_H_
 
 #include "vp9/encoder/vp9_onyx_int.h"
 

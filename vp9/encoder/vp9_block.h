@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_BLOCK_H
-#define __INC_BLOCK_H
+#ifndef VP9_ENCODER_VP9_BLOCK_H_
+#define VP9_ENCODER_VP9_BLOCK_H_
 
 #include "vp9/common/vp9_onyx.h"
 #include "vp9/common/vp9_entropymv.h"

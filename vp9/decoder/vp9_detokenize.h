@@ -9,8 +9,8 @@
  */
 
 
-#ifndef DETOKENIZE_H
-#define DETOKENIZE_H
+#ifndef VP9_DECODER_VP9_DETOKENIZE_H_
+#define VP9_DECODER_VP9_DETOKENIZE_H_
 
 #include "vp9/decoder/vp9_onyxd_int.h"
 

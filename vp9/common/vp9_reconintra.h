@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_RECONINTRA_H
-#define __INC_RECONINTRA_H
+#ifndef VP9_COMMON_VP9_RECONINTRA_H_
+#define VP9_COMMON_VP9_RECONINTRA_H_
 
 #include "vp9/common/vp9_blockd.h"
 

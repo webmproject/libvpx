@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ONYXD_H
-#define __INC_ONYXD_H
+#ifndef VP9_COMMON_VP9_ONYXD_H_
+#define VP9_COMMON_VP9_ONYXD_H_
 
 
 /* Create/destroy static data structures. */

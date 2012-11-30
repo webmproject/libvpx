@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef FILTER_H
-#define FILTER_H
+#ifndef VP9_COMMON_VP9_FILTER_H_
+#define VP9_COMMON_VP9_FILTER_H_
 
 #include "vpx_config.h"
 #include "vpx_scale/yv12config.h"

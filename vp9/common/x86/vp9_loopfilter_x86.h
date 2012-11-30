@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef LOOPFILTER_X86_H
-#define LOOPFILTER_X86_H
+#ifndef VP9_COMMON_X86_VP9_LOOPFILTER_X86_H_
+#define VP9_COMMON_X86_VP9_LOOPFILTER_X86_H_
 
 /* Note:
  *

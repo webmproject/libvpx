@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_FINDNEARMV_H
-#define __INC_FINDNEARMV_H
+#ifndef VP9_COMMON_VP9_FINDNEARMV_H_
+#define VP9_COMMON_VP9_FINDNEARMV_H_
 
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_blockd.h"

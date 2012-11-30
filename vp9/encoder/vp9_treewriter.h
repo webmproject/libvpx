@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_TREEWRITER_H
-#define __INC_TREEWRITER_H
+#ifndef VP9_ENCODER_VP9_TREEWRITER_H_
+#define VP9_ENCODER_VP9_TREEWRITER_H_
 
 /* Trees map alphabets into huffman-like codes suitable for an arithmetic
    bit coder.  Timothy S Murphy  11 October 2004 */

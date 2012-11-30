@@ -9,8 +9,8 @@
  */
 
 
-#ifndef SUBPIXEL_ARM_H
-#define SUBPIXEL_ARM_H
+#ifndef VP9_COMMON_ARM_VP9_SUBPIXEL_ARM_H_
+#define VP9_COMMON_ARM_VP9_SUBPIXEL_ARM_H_
 
 #if HAVE_ARMV6
 extern prototype_subpixel_predict(vp9_sixtap_predict16x16_armv6);

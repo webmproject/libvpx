@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_PICKLPF_H
-#define __INC_PICKLPF_H
+#ifndef VP9_ENCODER_VP9_PICKLPF_H_
+#define VP9_ENCODER_VP9_PICKLPF_H_
 
 struct yv12_buffer_config;
 struct VP9_COMP;

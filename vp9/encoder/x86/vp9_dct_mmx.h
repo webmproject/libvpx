@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_VP9_DCT_MMX_H_
-#define __INC_VP9_DCT_MMX_H_
+#ifndef VP9_ENCODER_X86_VP9_DCT_MMX_H_
+#define VP9_ENCODER_X86_VP9_DCT_MMX_H_
 
 extern void vp9_short_fdct4x4_mmx(short *input, short *output, int pitch);
 

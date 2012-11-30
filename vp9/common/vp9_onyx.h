@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ONYX_H
-#define __INC_ONYX_H
+#ifndef VP9_COMMON_VP9_ONYX_H_
+#define VP9_COMMON_VP9_ONYX_H_
 
 #ifdef __cplusplus
 extern "C"

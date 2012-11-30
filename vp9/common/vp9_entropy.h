@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ENTROPY_H
-#define __INC_ENTROPY_H
+#ifndef VP9_COMMON_VP9_ENTROPY_H_
+#define VP9_COMMON_VP9_ENTROPY_H_
 
 #include "vp9/common/vp9_treecoder.h"
 #include "vp9/common/vp9_blockd.h"

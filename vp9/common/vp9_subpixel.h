@@ -9,8 +9,8 @@
  */
 
 
-#ifndef SUBPIXEL_H
-#define SUBPIXEL_H
+#ifndef VP9_COMMON_VP9_SUBPIXEL_H_
+#define VP9_COMMON_VP9_SUBPIXEL_H_
 
 #define prototype_subpixel_predict(sym) \
   void sym(unsigned char *src, int src_pitch, int xofst, int yofst, \

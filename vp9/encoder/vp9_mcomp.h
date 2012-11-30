@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_MCOMP_H
-#define __INC_MCOMP_H
+#ifndef VP9_ENCODER_VP9_MCOMP_H_
+#define VP9_ENCODER_VP9_MCOMP_H_
 
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_variance.h"

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_MODECONT_H
-#define __INC_MODECONT_H
+#ifndef VP9_COMMON_VP9_MODECONT_H_
+#define VP9_COMMON_VP9_MODECONT_H_
 
 extern const int vp9_default_mode_contexts[INTER_MODE_CONTEXTS][4];
 #endif

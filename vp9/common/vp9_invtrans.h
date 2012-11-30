@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_INVTRANS_H
-#define __INC_INVTRANS_H
+#ifndef VP9_COMMON_VP9_INVTRANS_H_
+#define VP9_COMMON_VP9_INVTRANS_H_
 
 #include "vpx_ports/config.h"
 #include "vp9/common/vp9_blockd.h"

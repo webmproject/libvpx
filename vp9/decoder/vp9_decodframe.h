@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_DECODFRAME_H
-#define __INC_DECODFRAME_H
+#ifndef VP9_DECODER_VP9_DECODFRAME_H_
+#define VP9_DECODER_VP9_DECODFRAME_H_
 
 struct VP9Decompressor;
 

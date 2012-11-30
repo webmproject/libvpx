@@ -10,7 +10,7 @@
 
 
 #if !defined __INC_FIRSTPASS_H
-#define      __INC_FIRSTPASS_H
+#define VP9_ENCODER_VP9_FIRSTPASS_H_
 
 extern void vp9_init_first_pass(VP9_COMP *cpi);
 extern void vp9_first_pass(VP9_COMP *cpi);

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef DCT_ARM_H
-#define DCT_ARM_H
+#ifndef VP9_ENCODER_ARM_VP9_DCT_ARM_H_
+#define VP9_ENCODER_ARM_VP9_DCT_ARM_H_
 
 #if HAVE_ARMV6
 extern prototype_fdct(vp9_short_walsh4x4_armv6);

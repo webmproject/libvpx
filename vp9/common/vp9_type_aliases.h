@@ -16,8 +16,8 @@
 *   Description  :     Standard type aliases
 *
 ****************************************************************************/
-#ifndef __INC_TYPE_ALIASES_H
-#define __INC_TYPE_ALIASES_H
+#ifndef VP9_COMMON_VP9_TYPE_ALIASES_H_
+#define VP9_COMMON_VP9_TYPE_ALIASES_H_
 
 /****************************************************************************
 * Macros

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef ENCODEMB_ARM_H
-#define ENCODEMB_ARM_H
+#ifndef VP9_ENCODER_ARM_VP9_ENCODEMB_ARM_H_
+#define VP9_ENCODER_ARM_VP9_ENCODEMB_ARM_H_
 
 #if HAVE_ARMV6
 extern prototype_subb(vp9_subtract_b_armv6);

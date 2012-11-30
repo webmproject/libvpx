@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ONYXD_INT_H
-#define __INC_ONYXD_INT_H
+#ifndef VP9_DECODER_VP9_ONYXD_INT_H_
+#define VP9_DECODER_VP9_ONYXD_INT_H_
 #include "vpx_ports/config.h"
 #include "vp9/common/vp9_onyxd.h"
 #include "vp9/decoder/vp9_treereader.h"

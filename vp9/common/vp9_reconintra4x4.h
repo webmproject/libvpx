@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_RECONINTRA4x4_H
-#define __INC_RECONINTRA4x4_H
+#ifndef VP9_COMMON_VP9_RECONINTRA4X4_H_
+#define VP9_COMMON_VP9_RECONINTRA4X4_H_
 
 extern void vp9_intra_prediction_down_copy(MACROBLOCKD *xd);
 

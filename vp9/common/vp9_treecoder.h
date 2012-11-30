@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_TREECODER_H
-#define __INC_TREECODER_H
+#ifndef VP9_COMMON_VP9_TREECODER_H_
+#define VP9_COMMON_VP9_TREECODER_H_
 
 typedef unsigned char vp9_prob;
 

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef RECON_ARM_H
-#define RECON_ARM_H
+#ifndef VP9_COMMON_ARM_VP9_RECON_ARM_H_
+#define VP9_COMMON_ARM_VP9_RECON_ARM_H_
 
 #if HAVE_ARMV6
 extern prototype_recon_block(vp9_recon_b_armv6);

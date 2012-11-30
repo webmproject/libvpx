@@ -9,8 +9,8 @@
  */
 
 
-#ifndef common_h
-#define common_h 1
+#ifndef VP9_COMMON_VP9_COMMON_H_
+#define VP9_COMMON_VP9_COMMON_H_
 
 #include <assert.h>
 #include "vpx_config.h"

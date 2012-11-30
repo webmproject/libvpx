@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ALLOCCOMMON_H
-#define __INC_ALLOCCOMMON_H
+#ifndef VP9_COMMON_VP9_ALLOCCOMMON_H_
+#define VP9_COMMON_VP9_ALLOCCOMMON_H_
 
 #include "vp9/common/vp9_onyxc_int.h"
 

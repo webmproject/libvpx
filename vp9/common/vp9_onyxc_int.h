@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ONYXC_INT_H
-#define __INC_ONYXC_INT_H
+#ifndef VP9_COMMON_VP9_ONYXC_INT_H_
+#define VP9_COMMON_VP9_ONYXC_INT_H_
 
 #include "vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"

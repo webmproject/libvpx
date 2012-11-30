@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_BLOCKD_H
-#define __INC_BLOCKD_H
+#ifndef VP9_COMMON_VP9_BLOCKD_H_
+#define VP9_COMMON_VP9_BLOCKD_H_
 
 void vpx_log(const char *format, ...);
 

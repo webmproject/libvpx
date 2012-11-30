@@ -13,8 +13,8 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 
-#ifndef __INC_SEGMENTATION_H__
-#define __INC_SEGMENTATION_H__ 1
+#ifndef VP9_ENCODER_VP9_SEGMENTATION_H_
+#define VP9_ENCODER_VP9_SEGMENTATION_H_
 
 extern void vp9_update_gf_useage_maps(VP9_COMP *cpi, VP9_COMMON *cm,
                                       MACROBLOCK *x);

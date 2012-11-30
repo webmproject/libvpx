@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ENCODEMV_H
-#define __INC_ENCODEMV_H
+#ifndef VP9_ENCODER_VP9_ENCODEMV_H_
+#define VP9_ENCODER_VP9_ENCODEMV_H_
 
 #include "vp9/encoder/vp9_onyx_int.h"
 

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef LOOPFILTER_ARM_H
-#define LOOPFILTER_ARM_H
+#ifndef VP9_COMMON_ARM_VP9_LOOPFILTER_ARM_H_
+#define VP9_COMMON_ARM_VP9_LOOPFILTER_ARM_H_
 
 #include "vpx_config.h"
 

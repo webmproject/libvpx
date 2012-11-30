@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_RDOPT_H
-#define __INC_RDOPT_H
+#ifndef VP9_ENCODER_VP9_RDOPT_H_
+#define VP9_ENCODER_VP9_RDOPT_H_
 
 #define RDCOST(RM,DM,R,D) ( ((128+((int64_t)R)*(RM)) >> 8) + ((int64_t)DM)*(D) )
 #define RDCOST_8x8(RM,DM,R,D) ( ((128+((int64_t)R)*(RM)) >> 8) + ((int64_t)DM)*(D) )

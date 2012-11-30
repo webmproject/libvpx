@@ -9,8 +9,8 @@
  */
 
 
-#ifndef IDCT_X86_H
-#define IDCT_X86_H
+#ifndef VP9_COMMON_X86_VP9_IDCT_X86_H_
+#define VP9_COMMON_X86_VP9_IDCT_X86_H_
 
 /* Note:
  *

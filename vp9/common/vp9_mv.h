@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_MV_H
-#define __INC_MV_H
+#ifndef VP9_COMMON_VP9_MV_H_
+#define VP9_COMMON_VP9_MV_H_
 #include "vpx/vpx_integer.h"
 
 typedef struct {

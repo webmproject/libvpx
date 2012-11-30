@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ENCODEFRAME_H
-#define __INC_ENCODEFRAME_H
+#ifndef VP9_ENCODER_VP9_ENCODEFRAME_H_
+#define VP9_ENCODER_VP9_ENCODEFRAME_H_
 
 struct macroblock;
 

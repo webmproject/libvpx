@@ -9,8 +9,8 @@
  */
 
 
-#ifndef IDCT_ARM_H
-#define IDCT_ARM_H
+#ifndef VP9_COMMON_ARM_VP9_IDCT_ARM_H_
+#define VP9_COMMON_ARM_VP9_IDCT_ARM_H_
 
 #if HAVE_ARMV6
 extern prototype_idct(vp9_short_idct4x4llm_1_v6);

@@ -9,7 +9,8 @@
  */
 
 
-#if !defined __INC_RATECTRL_H
+#ifndef VP9_ENCODER_VP9_RATECTRL_H_
+#define VP9_ENCODER_VP9_RATECTRL_H_
 
 #include "vp9/encoder/vp9_onyx_int.h"
 

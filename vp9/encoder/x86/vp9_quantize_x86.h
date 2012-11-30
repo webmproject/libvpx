@@ -7,8 +7,8 @@
  *  file in the root of the source tree.
  */
 
-#ifndef QUANTIZE_X86_H
-#define QUANTIZE_X86_H
+#ifndef VP9_ENCODER_X86_VP9_QUANTIZE_X86_H_
+#define VP9_ENCODER_X86_VP9_QUANTIZE_X86_H_
 
 
 /* Note:

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef tree_reader_h
-#define tree_reader_h 1
+#ifndef VP9_DECODER_VP9_TREEREADER_H_
+#define VP9_DECODER_VP9_TREEREADER_H_
 
 #include "vp9/common/vp9_treecoder.h"
 

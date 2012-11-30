@@ -9,7 +9,7 @@
  */
 
 
-#ifndef __INC_RECONINTRA_MT_H
-#define __INC_RECONINTRA_MT_H
+#ifndef VP9_DECODER_VP9_RECONINTRA_MT_H_
+#define VP9_DECODER_VP9_RECONINTRA_MT_H_
 
 #endif

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef BILINEARFILTER_ARM_H
-#define BILINEARFILTER_ARM_H
+#ifndef VP9_COMMON_ARM_VP9_BILINEARFILTER_ARM_H_
+#define VP9_COMMON_ARM_VP9_BILINEARFILTER_ARM_H_
 
 extern void vp9_filter_block2d_bil_first_pass_armv6
 (

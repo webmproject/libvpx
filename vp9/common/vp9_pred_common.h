@@ -12,8 +12,8 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_blockd.h"
 
-#ifndef __INC_PRED_COMMON_H__
-#define __INC_PRED_COMMON_H__ 1
+#ifndef VP9_COMMON_VP9_PRED_COMMON_H_
+#define VP9_COMMON_VP9_PRED_COMMON_H_
 
 
 // Predicted items

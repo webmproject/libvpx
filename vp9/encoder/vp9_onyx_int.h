@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ONYX_INT_H
-#define __INC_ONYX_INT_H
+#ifndef VP9_ENCODER_VP9_ONYX_INT_H_
+#define VP9_ENCODER_VP9_ONYX_INT_H_
 
 #include <stdio.h>
 #include "vpx_ports/config.h"

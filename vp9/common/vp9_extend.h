@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_EXTEND_H
-#define __INC_EXTEND_H
+#ifndef VP9_COMMON_VP9_EXTEND_H_
+#define VP9_COMMON_VP9_EXTEND_H_
 
 #include "vpx_scale/yv12config.h"
 

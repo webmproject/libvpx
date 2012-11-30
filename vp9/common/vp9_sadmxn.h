@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_SAD_H
-#define __INC_SAD_H
+#ifndef VP9_COMMON_VP9_SADMXN_H_
+#define VP9_COMMON_VP9_SADMXN_H_
 
 static __inline
 unsigned int sad_mx_n_c(

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_COMMON_TYPES
-#define __INC_COMMON_TYPES
+#ifndef VP9_COMMON_VP9_COMMON_TYPES_H_
+#define VP9_COMMON_VP9_COMMON_TYPES_H_
 
 #define TRUE    1
 #define FALSE   0

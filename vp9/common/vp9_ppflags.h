@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_PPFLAGS_H
-#define __INC_PPFLAGS_H
+#ifndef VP9_COMMON_VP9_PPFLAGS_H_
+#define VP9_COMMON_VP9_PPFLAGS_H_
 enum {
   VP9D_NOFILTERING            = 0,
   VP9D_DEBLOCK                = 1 << 0,

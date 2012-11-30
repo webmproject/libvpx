@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __SWAPYV12_BUFFER_H
-#define __SWAPYV12_BUFFER_H
+#ifndef VP9_COMMON_VP9_SWAPYV12BUFFER_H_
+#define VP9_COMMON_VP9_SWAPYV12BUFFER_H_
 
 #include "vpx_scale/yv12config.h"
 

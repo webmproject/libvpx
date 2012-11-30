@@ -9,8 +9,8 @@
  */
 
 
-#ifndef DEQUANTIZE_H
-#define DEQUANTIZE_H
+#ifndef VP9_DECODER_VP9_DEQUANTIZE_H_
+#define VP9_DECODER_VP9_DEQUANTIZE_H_
 #include "vp9/common/vp9_blockd.h"
 
 #if CONFIG_LOSSLESS

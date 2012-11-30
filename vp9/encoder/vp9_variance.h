@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VARIANCE_H
-#define VARIANCE_H
+#ifndef VP9_ENCODER_VP9_VARIANCE_H_
+#define VP9_ENCODER_VP9_VARIANCE_H_
 
 typedef unsigned int(*vp9_sad_fn_t)(const unsigned char *src_ptr,
                                     int source_stride,

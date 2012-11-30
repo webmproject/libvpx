@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_RECONINTER_H
-#define __INC_RECONINTER_H
+#ifndef VP9_COMMON_VP9_RECONINTER_H_
+#define VP9_COMMON_VP9_RECONINTER_H_
 
 #include "vp9/common/vp9_onyxc_int.h"
 

@@ -12,8 +12,8 @@
 #include "vp9/common/vp9_blockd.h"
 
 
-#ifndef __INC_MVREF_COMMON_H
-#define __INC_MVREF_COMMON_H
+#ifndef VP9_COMMON_VP9_MVREF_COMMON_H_
+#define VP9_COMMON_VP9_MVREF_COMMON_H_
 
 void vp9_find_mv_refs(
   MACROBLOCKD *xd,

@@ -16,8 +16,8 @@
 *   Description  :     Bool Coder header file.
 *
 ****************************************************************************/
-#ifndef __INC_BOOLHUFF_H
-#define __INC_BOOLHUFF_H
+#ifndef VP9_ENCODER_VP9_BOOLHUFF_H_
+#define VP9_ENCODER_VP9_BOOLHUFF_H_
 
 #include "vpx_ports/mem.h"
 

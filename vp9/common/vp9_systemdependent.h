@@ -7,7 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-
+#ifndef VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
+#define VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
 
 #include "vpx_ports/config.h"
 #if ARCH_X86 || ARCH_X86_64
@@ -19,3 +20,4 @@ void vpx_reset_mmx_state(void);
 
 struct VP9Common;
 void vp9_machine_specific_config(struct VP9Common *);
+#endif

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_IDCT_MMX_H_
-#define __INC_IDCT_MMX_H_
+#ifndef VP9_DECODER_X86_VP9_IDCT_MMX_H_
+#define VP9_DECODER_X86_VP9_IDCT_MMX_H_
 
 
 void vp9_dequant_dc_idct_add_mmx(short *input, const short *dq,

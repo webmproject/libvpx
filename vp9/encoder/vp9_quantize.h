@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef __INC_QUANTIZE_H
-#define __INC_QUANTIZE_H
+#ifndef VP9_ENCODER_VP9_QUANTIZE_H_
+#define VP9_ENCODER_VP9_QUANTIZE_H_
 
 #include "vp9/encoder/vp9_block.h"
 
