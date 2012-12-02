@@ -79,12 +79,4 @@ END
 
 /* add asserts for any offset that is not supported by assembly code
  * add asserts for any size that is not supported by assembly code
-
- * These are used in vp8cx_pack_tokens.  They are hard coded so if their sizes
- * change they will have to be adjusted.
  */
-
-#if HAVE_ARMV5TE
-ct_assert(TOKENEXTRA_SZ, sizeof(TOKENEXTRA) == 8)
-ct_assert(vp9_extra_bit_struct_sz, sizeof(vp9_extra_bit_struct) == 16)
-#endif

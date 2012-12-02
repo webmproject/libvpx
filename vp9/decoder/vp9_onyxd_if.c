@@ -28,9 +28,6 @@
 #include "vpx_ports/vpx_timer.h"
 #include "vp9/decoder/vp9_decodframe.h"
 #include "vp9/decoder/vp9_detokenize.h"
-#if ARCH_ARM
-#include "vpx_ports/arm.h"
-#endif
 
 static int get_free_fb(VP9_COMMON *cm);
 static void ref_cnt_fb(int *buf, int *idx, int new_idx);
@@ -235,11 +232,6 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
   return pbi->common.error.error_code;
 }
 
-/*For ARM NEON, d8-d15 are callee-saved registers, and need to be saved by us.*/
-#if HAVE_ARMV7
-extern void vp9_push_neon(int64_t *store);
-extern void vp9_pop_neon(int64_t *store);
-#endif
 
 static int get_free_fb(VP9_COMMON *cm) {
   int i;
@@ -317,9 +309,6 @@ static int swap_frame_buffers(VP9_COMMON *cm) {
 int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
                                 const unsigned char **psource,
                                 int64_t time_stamp) {
-#if HAVE_ARMV7
-  int64_t dx_store_reg[8];
-#endif
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
   const unsigned char *source = *psource;
@@ -346,26 +335,9 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
     cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
   }
 
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-  if (cm->rtcd.flags & HAS_NEON)
-#endif
-  {
-    vp9_push_neon(dx_store_reg);
-  }
-#endif
-
   cm->new_fb_idx = get_free_fb(cm);
 
   if (setjmp(pbi->common.error.jmp)) {
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->rtcd.flags & HAS_NEON)
-#endif
-    {
-      vp9_pop_neon(dx_store_reg);
-    }
-#endif
     pbi->common.error.setjmp = 0;
 
     /* We do not know if the missing frame(s) was supposed to update
@@ -384,14 +356,6 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
   retcode = vp9_decode_frame(pbi, psource);
 
   if (retcode < 0) {
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->rtcd.flags & HAS_NEON)
-#endif
-    {
-      vp9_pop_neon(dx_store_reg);
-    }
-#endif
     pbi->common.error.error_code = VPX_CODEC_ERROR;
     pbi->common.error.setjmp = 0;
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
@@ -401,14 +365,6 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 
   {
     if (swap_frame_buffers(cm)) {
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-      if (cm->rtcd.flags & HAS_NEON)
-#endif
-      {
-        vp9_pop_neon(dx_store_reg);
-      }
-#endif
       pbi->common.error.error_code = VPX_CODEC_ERROR;
       pbi->common.error.setjmp = 0;
       return -1;
@@ -455,14 +411,6 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
   pbi->last_time_stamp = time_stamp;
   pbi->source_sz = 0;
 
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-  if (cm->rtcd.flags & HAS_NEON)
-#endif
-  {
-    vp9_pop_neon(dx_store_reg);
-  }
-#endif
   pbi->common.error.setjmp = 0;
   return retcode;
 }
