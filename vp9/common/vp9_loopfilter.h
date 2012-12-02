@@ -22,11 +22,7 @@ typedef enum {
   SIMPLE_LOOPFILTER = 1
 } LOOPFILTERTYPE;
 
-#if ARCH_ARM
-#define SIMD_WIDTH 1
-#else
 #define SIMD_WIDTH 16
-#endif
 
 /* Need to align this structure so when it is declared and
  * passed it can be loaded into vector registers.
@@ -65,10 +61,6 @@ struct loop_filter_info {
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/vp9_loopfilter_x86.h"
-#endif
-
-#if ARCH_ARM
-#include "arm/vp9_loopfilter_arm.h"
 #endif
 
 typedef void loop_filter_uvfunction(unsigned char *u,   /* source pointer */

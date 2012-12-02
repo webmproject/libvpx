@@ -79,13 +79,11 @@ specialize vp9_dequant_idct_add_uv_block mmx
 # RECON
 #
 prototype void vp9_copy_mem16x16 "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch"
-specialize vp9_copy_mem16x16 mmx sse2 media neon dspr2
-vp9_copy_mem16x16_media=vp9_copy_mem16x16_v6
+specialize vp9_copy_mem16x16 mmx sse2 dspr2
 vp9_copy_mem16x16_dspr2=vp9_copy_mem16x16_dspr2
 
 prototype void vp9_copy_mem8x8 "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch"
-specialize vp9_copy_mem8x8 mmx media neon dspr2
-vp9_copy_mem8x8_media=vp9_copy_mem8x8_v6
+specialize vp9_copy_mem8x8 mmx dspr2
 vp9_copy_mem8x8_dspr2=vp9_copy_mem8x8_dspr2
 
 prototype void vp9_copy_mem8x4 "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch"
@@ -98,8 +96,7 @@ prototype void vp9_avg_mem8x8 "unsigned char *src, int src_pitch, unsigned char 
 specialize vp9_avg_mem8x8
 
 prototype void vp9_copy_mem8x4 "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch"
-specialize vp9_copy_mem8x4 mmx media neon dspr2
-vp9_copy_mem8x4_media=vp9_copy_mem8x4_v6
+specialize vp9_copy_mem8x4 mmx dspr2
 vp9_copy_mem8x4_dspr2=vp9_copy_mem8x4_dspr2
 
 prototype void vp9_recon_b "unsigned char *pred_ptr, short *diff_ptr, unsigned char *dst_ptr, int stride"
@@ -193,36 +190,28 @@ prototype void vp9_loop_filter_bh8x8 "unsigned char *y, unsigned char *u, unsign
 specialize vp9_loop_filter_bh8x8 sse2
 
 prototype void vp9_loop_filter_simple_mbv "unsigned char *y, int ystride, const unsigned char *blimit"
-specialize vp9_loop_filter_simple_mbv mmx sse2 media neon
+specialize vp9_loop_filter_simple_mbv mmx sse2
 vp9_loop_filter_simple_mbv_c=vp9_loop_filter_simple_vertical_edge_c
 vp9_loop_filter_simple_mbv_mmx=vp9_loop_filter_simple_vertical_edge_mmx
 vp9_loop_filter_simple_mbv_sse2=vp9_loop_filter_simple_vertical_edge_sse2
-vp9_loop_filter_simple_mbv_media=vp9_loop_filter_simple_vertical_edge_armv6
-vp9_loop_filter_simple_mbv_neon=vp9_loop_filter_mbvs_neon
 
 prototype void vp9_loop_filter_simple_mbh "unsigned char *y, int ystride, const unsigned char *blimit"
-specialize vp9_loop_filter_simple_mbh mmx sse2 media neon
+specialize vp9_loop_filter_simple_mbh mmx sse2
 vp9_loop_filter_simple_mbh_c=vp9_loop_filter_simple_horizontal_edge_c
 vp9_loop_filter_simple_mbh_mmx=vp9_loop_filter_simple_horizontal_edge_mmx
 vp9_loop_filter_simple_mbh_sse2=vp9_loop_filter_simple_horizontal_edge_sse2
-vp9_loop_filter_simple_mbh_media=vp9_loop_filter_simple_horizontal_edge_armv6
-vp9_loop_filter_simple_mbh_neon=vp9_loop_filter_mbhs_neon
 
 prototype void vp9_loop_filter_simple_bv "unsigned char *y, int ystride, const unsigned char *blimit"
-specialize vp9_loop_filter_simple_bv mmx sse2 media neon
+specialize vp9_loop_filter_simple_bv mmx sse2
 vp9_loop_filter_simple_bv_c=vp9_loop_filter_bvs_c
 vp9_loop_filter_simple_bv_mmx=vp9_loop_filter_bvs_mmx
 vp9_loop_filter_simple_bv_sse2=vp9_loop_filter_bvs_sse2
-vp9_loop_filter_simple_bv_media=vp9_loop_filter_bvs_armv6
-vp9_loop_filter_simple_bv_neon=vp9_loop_filter_bvs_neon
 
 prototype void vp9_loop_filter_simple_bh "unsigned char *y, int ystride, const unsigned char *blimit"
-specialize vp9_loop_filter_simple_bh mmx sse2 media neon
+specialize vp9_loop_filter_simple_bh mmx sse2
 vp9_loop_filter_simple_bh_c=vp9_loop_filter_bhs_c
 vp9_loop_filter_simple_bh_mmx=vp9_loop_filter_bhs_mmx
 vp9_loop_filter_simple_bh_sse2=vp9_loop_filter_bhs_sse2
-vp9_loop_filter_simple_bh_media=vp9_loop_filter_bhs_armv6
-vp9_loop_filter_simple_bh_neon=vp9_loop_filter_bhs_neon
 
 #
 # post proc
@@ -683,7 +672,7 @@ prototype void vp9_temporal_filter_apply "unsigned char *frame1, unsigned int st
 specialize vp9_temporal_filter_apply sse2
 
 prototype void vp9_yv12_copy_partial_frame "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc, int fraction"
-specialize vp9_yv12_copy_partial_frame neon
+specialize vp9_yv12_copy_partial_frame
 
 
 fi
@@ -716,11 +705,11 @@ if [ "$CONFIG_SPATIAL_RESAMPLING" = "yes" ]; then
 fi
 
 prototype void vp8_yv12_extend_frame_borders "struct yv12_buffer_config *ybf"
-specialize vp8_yv12_extend_frame_borders neon
+specialize vp8_yv12_extend_frame_borders
 
 prototype void vp8_yv12_copy_frame "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc"
-specialize vp8_yv12_copy_frame neon
+specialize vp8_yv12_copy_frame
 
 prototype void vp8_yv12_copy_y "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc"
-specialize vp8_yv12_copy_y neon
+specialize vp8_yv12_copy_y
 
