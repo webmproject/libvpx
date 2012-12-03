@@ -302,36 +302,23 @@ static const int plane_rd_mult[4] = {
 static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        int tx_size) {
-  BLOCK *b;
-  BLOCKD *d;
-  vp9_token_state tokens[65][2];
-  uint64_t best_mask[2];
-  const short *dequant_ptr;
-  const short *coeff_ptr;
-  short *qcoeff_ptr;
-  short *dqcoeff_ptr;
-  int eob;
-  int i0;
-  int rc;
-  int x;
-  int sz = 0;
-  int next;
-  int rdmult;
-  int rddiv;
-  int final_eob;
-  int64_t rd_cost0, rd_cost1;
-  int rate0, rate1;
-  int error0, error1;
-  int t0, t1;
-  int best;
-  int band;
-  int pt;
+  BLOCK *b = &mb->block[i];
+  BLOCKD *d = &mb->e_mbd.block[i];
+  vp9_token_state tokens[257][2];
+  unsigned best_index[257][2];
+  const short *dequant_ptr = d->dequant, *coeff_ptr = b->coeff;
+  short *qcoeff_ptr = d->qcoeff;
+  short *dqcoeff_ptr = d->dqcoeff;
+  int eob = d->eob, final_eob, sz = 0;
+  int i0 = (type == PLANE_TYPE_Y_NO_DC);
+  int rc, x, next;
+  int64_t rdmult, rddiv, rd_cost0, rd_cost1;
+  int rate0, rate1, error0, error1, t0, t1;
+  int best, band, pt;
   int err_mult = plane_rd_mult[type];
   int default_eob;
   int const *scan, *bands;
 
-  b = &mb->block[i];
-  d = &mb->e_mbd.block[i];
   switch (tx_size) {
     default:
     case TX_4X4:
@@ -366,21 +353,19 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       bands = vp9_coef_bands_8x8;
       default_eob = 64;
       break;
+    case TX_16X16:
+      scan = vp9_default_zig_zag1d_16x16;
+      bands = vp9_coef_bands_16x16;
+      default_eob = 256;
+      break;
   }
-
-  dequant_ptr = d->dequant;
-  coeff_ptr = b->coeff;
-  qcoeff_ptr = d->qcoeff;
-  dqcoeff_ptr = d->dqcoeff;
-  i0 = (type == PLANE_TYPE_Y_NO_DC);
-  eob = d->eob;
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   rdmult = mb->rdmult * err_mult;
   if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     rdmult = (rdmult * 9) >> 4;
   rddiv = mb->rddiv;
-  best_mask[0] = best_mask[1] = 0;
+  memset(best_index, 0, sizeof(best_index));
   /* Initialize the sentinel node of the trellis. */
   tokens[eob][0].rate = 0;
   tokens[eob][0].error = 0;
@@ -390,9 +375,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   *(tokens[eob] + 1) = *(tokens[eob] + 0);
   next = eob;
   for (i = eob; i-- > i0;) {
-    int base_bits;
-    int d2;
-    int dx;
+    int base_bits, d2, dx;
 
     rc = scan[i];
     x = qcoeff_ptr[rc];
@@ -425,7 +408,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       tokens[i][0].next = next;
       tokens[i][0].token = t0;
       tokens[i][0].qc = x;
-      best_mask[0] |= best << i;
+      best_index[i][0] = best;
       /* Evaluate the second possibility for this state. */
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
@@ -481,7 +464,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       tokens[i][1].next = next;
       tokens[i][1].token = best ? t1 : t0;
       tokens[i][1].qc = x;
-      best_mask[1] |= best << i;
+      best_index[i][1] = best;
       /* Finally, make this the new head of the trellis. */
       next = i;
     }
@@ -528,7 +511,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
     dqcoeff_ptr[rc] = (x * dequant_ptr[rc != 0]);
 
     next = tokens[i][best].next;
-    best = (best_mask[best] >> i) & 1;
+    best = best_index[i][best];
   }
   final_eob++;
 
@@ -726,179 +709,6 @@ static void optimize_mb_8x8(MACROBLOCK *x) {
   vp9_optimize_mbuv_8x8(x);
 }
 
-static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
-                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  BLOCK *b = &mb->block[i];
-  BLOCKD *d = &mb->e_mbd.block[i];
-  vp9_token_state tokens[257][2];
-  unsigned best_index[257][2];
-  const short *dequant_ptr = d->dequant, *coeff_ptr = b->coeff;
-  short *qcoeff_ptr = qcoeff_ptr = d->qcoeff;
-  short *dqcoeff_ptr = dqcoeff_ptr = d->dqcoeff;
-  int eob = d->eob, final_eob, sz = 0;
-  int rc, x, next;
-  int64_t rdmult, rddiv, rd_cost0, rd_cost1;
-  int rate0, rate1, error0, error1, t0, t1;
-  int best, band, pt;
-  int err_mult = plane_rd_mult[type];
-
-  /* Now set up a Viterbi trellis to evaluate alternative roundings. */
-  rdmult = mb->rdmult * err_mult;
-  if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
-      rdmult = (rdmult * 9)>>4;
-  rddiv = mb->rddiv;
-  memset(best_index, 0, sizeof(best_index));
-  /* Initialize the sentinel node of the trellis. */
-  tokens[eob][0].rate = 0;
-  tokens[eob][0].error = 0;
-  tokens[eob][0].next = 256;
-  tokens[eob][0].token = DCT_EOB_TOKEN;
-  tokens[eob][0].qc = 0;
-  *(tokens[eob] + 1) = *(tokens[eob] + 0);
-  next = eob;
-  for (i = eob; i-- > 0;) {
-    int base_bits, d2, dx;
-
-    rc = vp9_default_zig_zag1d_16x16[i];
-    x = qcoeff_ptr[rc];
-    /* Only add a trellis state for non-zero coefficients. */
-    if (x) {
-      int shortcut = 0;
-      error0 = tokens[next][0].error;
-      error1 = tokens[next][1].error;
-      /* Evaluate the first possibility for this state. */
-      rate0 = tokens[next][0].rate;
-      rate1 = tokens[next][1].rate;
-      t0 = (vp9_dct_value_tokens_ptr + x)->Token;
-      /* Consider both possible successor states. */
-      if (next < 256) {
-        band = vp9_coef_bands_16x16[i + 1];
-        pt = vp9_prev_token_class[t0];
-        rate0 += mb->token_costs[TX_16X16][type][band][pt][tokens[next][0].token];
-        rate1 += mb->token_costs[TX_16X16][type][band][pt][tokens[next][1].token];
-      }
-      UPDATE_RD_COST();
-      /* And pick the best. */
-      best = rd_cost1 < rd_cost0;
-      base_bits = *(vp9_dct_value_cost_ptr + x);
-      dx = dqcoeff_ptr[rc] - coeff_ptr[rc];
-      d2 = dx*dx;
-      tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
-      tokens[i][0].error = d2 + (best ? error1 : error0);
-      tokens[i][0].next = next;
-      tokens[i][0].token = t0;
-      tokens[i][0].qc = x;
-      best_index[i][0] = best;
-      /* Evaluate the second possibility for this state. */
-      rate0 = tokens[next][0].rate;
-      rate1 = tokens[next][1].rate;
-
-      if((abs(x)*dequant_ptr[rc!=0]>abs(coeff_ptr[rc])) &&
-         (abs(x)*dequant_ptr[rc!=0]<abs(coeff_ptr[rc])+dequant_ptr[rc!=0]))
-        shortcut = 1;
-      else
-        shortcut = 0;
-
-      if (shortcut) {
-        sz = -(x < 0);
-        x -= 2*sz + 1;
-      }
-
-      /* Consider both possible successor states. */
-      if (!x) {
-        /* If we reduced this coefficient to zero, check to see if
-         *  we need to move the EOB back here.
-         */
-        t0 = tokens[next][0].token == DCT_EOB_TOKEN ?
-             DCT_EOB_TOKEN : ZERO_TOKEN;
-        t1 = tokens[next][1].token == DCT_EOB_TOKEN ?
-             DCT_EOB_TOKEN : ZERO_TOKEN;
-      }
-      else
-        t0=t1 = (vp9_dct_value_tokens_ptr + x)->Token;
-      if (next < 256) {
-        band = vp9_coef_bands_16x16[i + 1];
-        if (t0 != DCT_EOB_TOKEN) {
-            pt = vp9_prev_token_class[t0];
-            rate0 += mb->token_costs[TX_16X16][type][band][pt]
-                [tokens[next][0].token];
-        }
-        if (t1!=DCT_EOB_TOKEN) {
-            pt = vp9_prev_token_class[t1];
-            rate1 += mb->token_costs[TX_16X16][type][band][pt]
-                [tokens[next][1].token];
-        }
-      }
-      UPDATE_RD_COST();
-      /* And pick the best. */
-      best = rd_cost1 < rd_cost0;
-      base_bits = *(vp9_dct_value_cost_ptr + x);
-
-      if(shortcut) {
-        dx -= (dequant_ptr[rc!=0] + sz) ^ sz;
-        d2 = dx*dx;
-      }
-      tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
-      tokens[i][1].error = d2 + (best ? error1 : error0);
-      tokens[i][1].next = next;
-      tokens[i][1].token = best ? t1 : t0;
-      tokens[i][1].qc = x;
-      best_index[i][1] = best;
-      /* Finally, make this the new head of the trellis. */
-      next = i;
-    }
-    /* There's no choice to make for a zero coefficient, so we don't
-     *  add a new trellis node, but we do need to update the costs.
-     */
-    else {
-      band = vp9_coef_bands_16x16[i + 1];
-      t0 = tokens[next][0].token;
-      t1 = tokens[next][1].token;
-      /* Update the cost of each path if we're past the EOB token. */
-      if (t0 != DCT_EOB_TOKEN) {
-        tokens[next][0].rate += mb->token_costs[TX_16X16][type][band][0][t0];
-        tokens[next][0].token = ZERO_TOKEN;
-      }
-      if (t1 != DCT_EOB_TOKEN) {
-        tokens[next][1].rate += mb->token_costs[TX_16X16][type][band][0][t1];
-        tokens[next][1].token = ZERO_TOKEN;
-      }
-      /* Don't update next, because we didn't add a new node. */
-    }
-  }
-
-  /* Now pick the best path through the whole trellis. */
-  band = vp9_coef_bands_16x16[i + 1];
-  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  rate0 = tokens[next][0].rate;
-  rate1 = tokens[next][1].rate;
-  error0 = tokens[next][0].error;
-  error1 = tokens[next][1].error;
-  t0 = tokens[next][0].token;
-  t1 = tokens[next][1].token;
-  rate0 += mb->token_costs[TX_16X16][type][band][pt][t0];
-  rate1 += mb->token_costs[TX_16X16][type][band][pt][t1];
-  UPDATE_RD_COST();
-  best = rd_cost1 < rd_cost0;
-  final_eob = -1;
-
-  for (i = next; i < eob; i = next) {
-    x = tokens[i][best].qc;
-    if (x)
-      final_eob = i;
-    rc = vp9_default_zig_zag1d_16x16[i];
-    qcoeff_ptr[rc] = x;
-    dqcoeff_ptr[rc] = (x * dequant_ptr[rc!=0]);
-
-    next = tokens[i][best].next;
-    best = best_index[i][best];
-  }
-  final_eob++;
-
-  d->eob = final_eob;
-  *a = *l = (d->eob > !type);
-}
-
 void vp9_optimize_mby_16x16(MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta, *tl;
@@ -911,7 +721,7 @@ void vp9_optimize_mby_16x16(MACROBLOCK *x) {
 
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
-  optimize_b_16x16(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl);
+  optimize_b(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, TX_16X16);
 }
 
 static void optimize_mb_16x16(MACROBLOCK *x) {
