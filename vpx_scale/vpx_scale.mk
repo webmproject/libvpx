@@ -1,5 +1,4 @@
 SCALE_SRCS-yes += vpx_scale.mk
-SCALE_SRCS-yes += scale_mode.h
 SCALE_SRCS-yes += yv12config.h
 SCALE_SRCS-yes += vpxscale.h
 SCALE_SRCS-yes += generic/vpxscale.c
