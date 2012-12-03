@@ -18,6 +18,8 @@
 #include "vp8/common/entropy.h"
 #include "vpx_ports/mem.h"
 
+#define MAX_MODES 20
+
 /* motion search site */
 typedef struct
 {
@@ -135,6 +137,9 @@ typedef struct macroblock
     int64_t prediction_error;
     int64_t intra_error;
     int count_mb_ref_frame_usage[MAX_REF_FRAMES];
+
+    int rd_thresh_mult[MAX_MODES];
+    int rd_threshes[MAX_MODES];
 
 
     void (*short_fdct4x4)(short *input, short *output, int pitch);

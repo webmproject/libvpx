@@ -223,7 +223,7 @@ void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex)
     cpi->mb.sadperbit4  =  sad_per_bit4lut[QIndex];
 }
 
-void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
+void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue)
 {
     int q;
     int i;
@@ -279,14 +279,14 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
         {
             if (cpi->sf.thresh_mult[i] < INT_MAX)
             {
-                cpi->rd_threshes[i] = cpi->sf.thresh_mult[i] * q / 100;
+                x->rd_threshes[i] = cpi->sf.thresh_mult[i] * q / 100;
             }
             else
             {
-                cpi->rd_threshes[i] = INT_MAX;
+                x->rd_threshes[i] = INT_MAX;
             }
 
-            cpi->rd_baseline_thresh[i] = cpi->rd_threshes[i];
+            cpi->rd_baseline_thresh[i] = x->rd_threshes[i];
         }
     }
     else
@@ -297,14 +297,14 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
         {
             if (cpi->sf.thresh_mult[i] < (INT_MAX / q))
             {
-                cpi->rd_threshes[i] = cpi->sf.thresh_mult[i] * q;
+                x->rd_threshes[i] = cpi->sf.thresh_mult[i] * q;
             }
             else
             {
-                cpi->rd_threshes[i] = INT_MAX;
+                x->rd_threshes[i] = INT_MAX;
             }
 
-            cpi->rd_baseline_thresh[i] = cpi->rd_threshes[i];
+            cpi->rd_baseline_thresh[i] = x->rd_threshes[i];
         }
     }
 
@@ -2022,7 +2022,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         int this_ref_frame = ref_frame_map[vp8_ref_frame_order[mode_index]];
 
         /* Test best rd so far against threshold for trying this mode. */
-        if (best_mode.rd <= cpi->rd_threshes[mode_index])
+        if (best_mode.rd <= x->rd_threshes[mode_index])
             continue;
 
         if (this_ref_frame < 0)
@@ -2075,12 +2075,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 /* Increase the threshold for coding this mode to make it
                  * less likely to be chosen
                  */
-                cpi->rd_thresh_mult[mode_index] += 4;
+                x->rd_thresh_mult[mode_index] += 4;
 
-                if (cpi->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
-                    cpi->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
+                if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
+                    x->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
 
-                cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
+                x->rd_threshes[mode_index] =
+                    (cpi->rd_baseline_thresh[mode_index] >> 7) *
+                    x->rd_thresh_mult[mode_index];
 
                 continue;
             }
@@ -2170,8 +2172,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             int this_rd_thresh;
             int distortion;
 
-            this_rd_thresh = (vp8_ref_frame_order[mode_index] == 1) ? cpi->rd_threshes[THR_NEW1] : cpi->rd_threshes[THR_NEW3];
-            this_rd_thresh = (vp8_ref_frame_order[mode_index] == 2) ? cpi->rd_threshes[THR_NEW2] : this_rd_thresh;
+            this_rd_thresh = (vp8_ref_frame_order[mode_index] == 1) ?
+                x->rd_threshes[THR_NEW1] : x->rd_threshes[THR_NEW3];
+            this_rd_thresh = (vp8_ref_frame_order[mode_index] == 2) ?
+                x->rd_threshes[THR_NEW2] : this_rd_thresh;
 
             tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
                                                      best_mode.yrd, mdcounts,
@@ -2464,8 +2468,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             /* Testing this mode gave rise to an improvement in best error
              * score. Lower threshold a bit for next time
              */
-            cpi->rd_thresh_mult[mode_index] = (cpi->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ? cpi->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
-            cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
+            x->rd_thresh_mult[mode_index] =
+                (x->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ?
+                    x->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
         }
 
         /* If the mode did not help improve the best error case then raise
@@ -2473,13 +2478,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
          */
         else
         {
-            cpi->rd_thresh_mult[mode_index] += 4;
+            x->rd_thresh_mult[mode_index] += 4;
 
-            if (cpi->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
-                cpi->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
-
-            cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
+            if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
+                x->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
         }
+        x->rd_threshes[mode_index] =
+            (cpi->rd_baseline_thresh[mode_index] >> 7) *
+                x->rd_thresh_mult[mode_index];
 
         if (x->skip)
             break;
@@ -2489,10 +2495,16 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     /* Reduce the activation RD thresholds for the best choice mode */
     if ((cpi->rd_baseline_thresh[best_mode_index] > 0) && (cpi->rd_baseline_thresh[best_mode_index] < (INT_MAX >> 2)))
     {
-        int best_adjustment = (cpi->rd_thresh_mult[best_mode_index] >> 2);
+        int best_adjustment = (x->rd_thresh_mult[best_mode_index] >> 2);
 
-        cpi->rd_thresh_mult[best_mode_index] = (cpi->rd_thresh_mult[best_mode_index] >= (MIN_THRESHMULT + best_adjustment)) ? cpi->rd_thresh_mult[best_mode_index] - best_adjustment : MIN_THRESHMULT;
-        cpi->rd_threshes[best_mode_index] = (cpi->rd_baseline_thresh[best_mode_index] >> 7) * cpi->rd_thresh_mult[best_mode_index];
+        x->rd_thresh_mult[best_mode_index] =
+            (x->rd_thresh_mult[best_mode_index] >=
+                (MIN_THRESHMULT + best_adjustment)) ?
+                    x->rd_thresh_mult[best_mode_index] - best_adjustment :
+                    MIN_THRESHMULT;
+        x->rd_threshes[best_mode_index] =
+            (cpi->rd_baseline_thresh[best_mode_index] >> 7) *
+                x->rd_thresh_mult[best_mode_index];
     }
 
     /* Note how often each mode chosen as best */

@@ -45,7 +45,6 @@ extern void vp8_auto_select_speed(VP8_COMP *cpi);
 extern void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
                                       MACROBLOCK *x,
                                       MB_ROW_COMP *mbr_ei,
-                                      int mb_row,
                                       int count);
 static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x );
 
@@ -765,7 +764,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     vp8cx_frame_init_quantizer(cpi);
 
-    vp8_initialize_rd_consts(cpi,
+    vp8_initialize_rd_consts(cpi, x,
                              vp8_dc_quant(cm->base_qindex, cm->y1dc_delta_q));
 
     vp8cx_initialize_me_consts(cpi, cm->base_qindex);
@@ -804,7 +803,8 @@ void vp8_encode_frame(VP8_COMP *cpi)
         {
             int i;
 
-            vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei, 1,  cpi->encoding_thread_count);
+            vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei,
+                                      cpi->encoding_thread_count);
 
             for (i = 0; i < cm->mb_rows; i++)
                 cpi->mt_current_mb_col[i] = -1;

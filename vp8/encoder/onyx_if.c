@@ -1924,7 +1924,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     /* Set starting values of RD threshold multipliers (128 = *1) */
     for (i = 0; i < MAX_MODES; i++)
     {
-        cpi->rd_thresh_mult[i] = 128;
+        cpi->mb.rd_thresh_mult[i] = 128;
     }
 
 #ifdef ENTROPY_STATS
@@ -3385,7 +3385,7 @@ static void encode_frame_to_data_rate
         /* Reset the RD threshold multipliers to default of * 1 (128) */
         for (i = 0; i < MAX_MODES; i++)
         {
-            cpi->rd_thresh_mult[i] = 128;
+            cpi->mb.rd_thresh_mult[i] = 128;
         }
     }
 
