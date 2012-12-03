@@ -31,6 +31,7 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/encoder/vp9_encodemv.h"
+#include "./vpx_scale_rtcd.h"
 
 #define OUTPUT_FPF 0
 

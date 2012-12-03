@@ -28,6 +28,7 @@
 #include "vpx_ports/vpx_timer.h"
 #include "vp9/decoder/vp9_decodframe.h"
 #include "vp9/decoder/vp9_detokenize.h"
+#include "./vpx_scale_rtcd.h"
 
 static int get_free_fb(VP9_COMMON *cm);
 static void ref_cnt_fb(int *buf, int *idx, int new_idx);
