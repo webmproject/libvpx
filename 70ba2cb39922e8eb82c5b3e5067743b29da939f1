@@ -34,6 +34,24 @@
       "revId": "70ba2cb39922e8eb82c5b3e5067743b29da939f1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///9w\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-03T21:00:06Z",
+      "side": 1,
+      "message": "They\u0027re technically (and overzealously) reserved by POSIX, not ANSI, and only in translation units that use POSIX headers. IMO, it\u0027s more useful to have the disambiguation, so provided that the rest of the name is sufficiently complex and unlikely to collide, I ignore POSIX on this issue, and elect to fix the collision should it ever happen in the future.\n\nvp9_prob should be changed too, among a bunch of other useless vp9 prefixes.\n\nDo whatever you want. Just wanted to make the comment.",
+      "parentUuid": "AAAARn///+s\u003d",
+      "revId": "70ba2cb39922e8eb82c5b3e5067743b29da939f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
