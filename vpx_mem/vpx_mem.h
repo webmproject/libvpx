@@ -101,14 +101,7 @@ extern "C" {
   /* some defines for backward compatibility */
 #define DMEM_GENERAL 0
 
-#define duck_memalign(X,Y,Z) vpx_memalign(X,Y)
-#define duck_malloc(X,Y) vpx_malloc(X)
-#define duck_calloc(X,Y,Z) vpx_calloc(X,Y)
-#define duck_realloc  vpx_realloc
-#define duck_free     vpx_free
-#define duck_memcpy   vpx_memcpy
-#define duck_memmove  vpx_memmove
-#define duck_memset   vpx_memset
+// (*)<
 
 #if REPLACE_BUILTIN_FUNCTIONS
 # ifndef __VPX_MEM_C__
