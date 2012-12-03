@@ -16,6 +16,24 @@
       "revId": "70ba2cb39922e8eb82c5b3e5067743b29da939f1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///+s\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-03T20:43:04Z",
+      "side": 1,
+      "message": "_t suffix is reserved for C standard types, I thought? Also, vp9_prob has a vp9_ prefix...",
+      "parentUuid": "AAAARn////M\u003d",
+      "revId": "70ba2cb39922e8eb82c5b3e5067743b29da939f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
