@@ -16,6 +16,24 @@
       "revId": "d1be2e7c86eaa85d0969a5c2ba3e1d6ff5be8890",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARX//+dg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4254,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-12-03T18:21:30Z",
+      "side": 1,
+      "message": "The distortion value is not used currently. So the change does not do anything. However the code should not divide uv distortion by 4 as far as I can see.",
+      "parentUuid": "AAAARX//+dw\u003d",
+      "revId": "d1be2e7c86eaa85d0969a5c2ba3e1d6ff5be8890",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
