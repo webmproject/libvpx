@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vpx_rtcd.h"
+#include "./vpx_scale_rtcd.h"
 
 extern void vp8_yv12_copy_frame_func_neon(struct yv12_buffer_config *src_ybc,
                                           struct yv12_buffer_config *dst_ybc);
