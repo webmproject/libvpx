@@ -134,6 +134,7 @@ typedef struct macroblock
     int uv_mode_count[VP8_UV_MODES];     /* intra MB type cts this frame */
     int64_t prediction_error;
     int64_t intra_error;
+    int count_mb_ref_frame_usage[MAX_REF_FRAMES];
 
 
     void (*short_fdct4x4)(short *input, short *output, int pitch);
