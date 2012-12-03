@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vpx_mem/vpx_mem.h"
 /****************************************************************************
 *  Imports

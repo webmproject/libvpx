@@ -15,7 +15,7 @@
 #include "vpx_scale/yv12config.h"
 #include "postproc.h"
 #include "common.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "systemdependent.h"
 
 #include <limits.h>

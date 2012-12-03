@@ -23,7 +23,7 @@
 ****************************************************************************/
 __declspec(align(16)) const static unsigned short round_values[] = { 128, 128, 128, 128 };
 
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vpx_mem/vpx_mem.h"
 
 __declspec(align(16)) const static unsigned short const54_2[] = {  0,  64, 128, 192 };

@@ -20,7 +20,7 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_setupintrarecon.h"
 
 #include "vp9/decoder/vp9_decodemv.h"

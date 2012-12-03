@@ -11,7 +11,7 @@
 
 #include "vpx_scale/yv12config.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 
 /****************************************************************************
 *  Exports

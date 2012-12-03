@@ -23,7 +23,7 @@
 #include <assert.h>
 
 #include "vp9/common/vp9_quant_common.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vp9/decoder/vp9_decodframe.h"

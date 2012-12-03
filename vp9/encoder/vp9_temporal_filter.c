@@ -17,7 +17,7 @@
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_psnr.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_extend.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/common/vp9_quant_common.h"

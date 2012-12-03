@@ -26,7 +26,7 @@
 
 #include "vp8/common/quant_common.h"
 #include "./vpx_scale_rtcd.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp8/common/systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
 #include "detokenize.h"

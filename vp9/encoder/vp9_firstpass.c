@@ -17,7 +17,7 @@
 #include "vp9/common/vp9_setupintrarecon.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_firstpass.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/common/vp9_extend.h"

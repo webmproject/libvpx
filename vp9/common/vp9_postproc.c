@@ -13,7 +13,7 @@
 #include "vpx_scale/yv12config.h"
 #include "vp9/common/vp9_postproc.h"
 #include "vp9/common/vp9_textblit.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
