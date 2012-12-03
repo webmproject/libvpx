@@ -15,35 +15,7 @@ VP9_DX_SRCS-no  += $(VP9_COMMON_SRCS-no)
 VP9_DX_SRCS_REMOVE-yes += $(VP9_COMMON_SRCS_REMOVE-yes)
 VP9_DX_SRCS_REMOVE-no  += $(VP9_COMMON_SRCS_REMOVE-no)
 
-ifeq ($(ARCH_ARM),yes)
-  include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9dx_arm.mk
-endif
-
 VP9_DX_SRCS-yes += vp9_dx_iface.c
-
-# common
-#define ARM
-#define DISABLE_THREAD
-
-#INCLUDES += algo/vpx_common/vpx_mem/include
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += decoder
-
-
-
-# decoder
-#define ARM
-#define DISABLE_THREAD
-
-#INCLUDES += algo/vpx_common/vpx_mem/include
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += decoder
 
 VP9_DX_SRCS-yes += decoder/vp9_asm_dec_offsets.c
 VP9_DX_SRCS-yes += decoder/vp9_dboolhuff.c

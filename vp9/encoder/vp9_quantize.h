@@ -26,10 +26,6 @@
 #include "x86/vp9_quantize_x86.h"
 #endif
 
-#if ARCH_ARM
-#include "arm/vp9_quantize_arm.h"
-#endif
-
 #define prototype_quantize_block_type(sym) \
   void (sym)(BLOCK *b, BLOCKD *d, TX_TYPE type)
 extern prototype_quantize_block_type(vp9_ht_quantize_b_4x4);

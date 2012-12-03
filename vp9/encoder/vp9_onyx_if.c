@@ -40,23 +40,11 @@
 #include "vp9/common/vp9_mvref_common.h"
 #include "vp9/encoder/vp9_temporal_filter.h"
 
-#if ARCH_ARM
-#include "vpx_ports/arm.h"
-#endif
-
 #include <math.h>
 #include <stdio.h>
 #include <limits.h>
 
 extern void print_tree_update_probs();
-
-#if HAVE_ARMV7
-extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
-                                          YV12_BUFFER_CONFIG *dst_ybc);
-
-extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
-                                              YV12_BUFFER_CONFIG *dst_ybc);
-#endif
 
 static void set_default_lf_deltas(VP9_COMP *cpi);
 
@@ -4055,32 +4043,14 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
   }
 }
 
-// For ARM NEON, d8-d15 are callee-saved registers, and need to be saved by us.
-#if HAVE_ARMV7
-extern void vp9_push_neon(int64_t *store);
-extern void vp9_pop_neon(int64_t *store);
-#endif
-
 
 int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
-#if HAVE_ARMV7
-  int64_t store_reg[8];
-#endif
   VP9_COMP              *cpi = (VP9_COMP *) ptr;
   VP9_COMMON            *cm = &cpi->common;
   struct vpx_usec_timer  timer;
   int                    res = 0;
-
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-  if (cm->rtcd.flags & HAS_NEON)
-#endif
-  {
-    vp9_push_neon(store_reg);
-  }
-#endif
 
   vpx_usec_timer_start(&timer);
   if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time, frame_flags,
@@ -4089,15 +4059,6 @@ int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
   cm->clr_type = sd->clrtype;
   vpx_usec_timer_mark(&timer);
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
-
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-  if (cm->rtcd.flags & HAS_NEON)
-#endif
-  {
-    vp9_pop_neon(store_reg);
-  }
-#endif
 
   return res;
 }
@@ -4119,9 +4080,6 @@ static int frame_is_reference(const VP9_COMP *cpi) {
 int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                             unsigned long *size, unsigned char *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
-#if HAVE_ARMV7
-  int64_t store_reg[8];
-#endif
   VP9_COMP *cpi = (VP9_COMP *) ptr;
   VP9_COMMON *cm = &cpi->common;
   struct vpx_usec_timer  cmptimer;
@@ -4129,15 +4087,6 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
   if (!cpi)
     return -1;
-
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-  if (cm->rtcd.flags & HAS_NEON)
-#endif
-  {
-    vp9_push_neon(store_reg);
-  }
-#endif
 
   vpx_usec_timer_start(&cmptimer);
 
@@ -4191,14 +4140,6 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
       cpi->twopass.first_pass_done = 1;
     }
 
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->rtcd.flags & HAS_NEON)
-#endif
-    {
-      vp9_pop_neon(store_reg);
-    }
-#endif
     return -1;
   }
 
@@ -4423,15 +4364,6 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
     }
   }
 
-#endif
-
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-  if (cm->rtcd.flags & HAS_NEON)
-#endif
-  {
-    vp9_pop_neon(store_reg);
-  }
 #endif
 
   return 0;

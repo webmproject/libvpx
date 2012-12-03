@@ -109,7 +109,6 @@ ifeq ($(CONFIG_VP9_ENCODER),yes)
   CODEC_SRCS-yes += $(addprefix $(VP9_PREFIX),$(call enabled,VP9_CX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP9_PREFIX),$(VP9_CX_EXPORTS))
   CODEC_SRCS-yes += $(VP9_PREFIX)vp9cx.mk vpx/vp8.h vpx/vp8cx.h
-  CODEC_SRCS-$(ARCH_ARM) += $(VP9_PREFIX)vp98cx_arm.mk
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP9_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h

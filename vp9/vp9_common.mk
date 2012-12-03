@@ -128,60 +128,6 @@ vp9/common/x86/vp9_loopfilter_x86.c.d: CFLAGS += -msse2
 vp9/common/x86/vp9_sadmxn_x86.c.d: CFLAGS += -msse2
 endif
 
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_arm_systemdependent.c
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_bilinearfilter_arm.c
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_bilinearfilter_arm.h
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_filter_arm.c
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_idct_arm.h
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_loopfilter_arm.c
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_loopfilter_arm.h
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_recon_arm.h
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_reconintra_arm.c
-VP9_COMMON_SRCS-$(ARCH_ARM)  += common/arm/vp9_subpixel_arm.h
-
-# common (armv6)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/bilinearfilter_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/copymem8x4_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/copymem8x8_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/copymem16x16_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/dc_only_idct_add_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/iwalsh_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/filter_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/idct_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/loopfilter_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/recon_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/simpleloopfilter_v6$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/sixtappredict8x4_v6$(ASM)
-
-# common (neon)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/bilinearpredict4x4_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/bilinearpredict8x4_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/bilinearpredict8x8_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/bilinearpredict16x16_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/copymem8x4_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/copymem8x8_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/copymem16x16_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/dc_only_idct_add_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/iwalsh_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/loopfilter_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/loopfiltersimplehorizontaledge_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/loopfiltersimpleverticaledge_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/mbloopfilter_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon2b_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon4b_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/reconb_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/shortidct4x4llm_1_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/shortidct4x4llm_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/sixtappredict4x4_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/sixtappredict8x4_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/sixtappredict8x8_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/sixtappredict16x16_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon16x16mb_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/buildintrapredictorsmby_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/save_neon_reg$(ASM)
-VP9_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/vp9_recon_neon.c
-
-
 $(eval $(call asm_offsets_template,\
          vp9_asm_com_offsets.asm, $(VP9_PREFIX)common/vp9_asm_com_offsets.c))
 
