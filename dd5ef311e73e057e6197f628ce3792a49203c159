@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAARn///NA\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "remove whitespace",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///L8\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "combine the two definitions of pi.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///MM\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "TODO rather than FIXME?",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///LA\u003d",
         "filename": "vp9/common/vp9_blockd.h",
         "patchSetId": 9
@@ -36,6 +87,23 @@
     },
     {
       "key": {
+        "uuid": "AAAARn///Lc\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 556,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "combine this with the 16x16 variant.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///Ks\u003d",
         "filename": "vp9/common/vp9_entropy.h",
         "patchSetId": 9
@@ -53,6 +121,57 @@
     },
     {
       "key": {
+        "uuid": "AAAARn///LM\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1799,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "whitespace (and on several lines below)",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///KU\u003d",
+        "filename": "vp9/common/vp9_recon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "use a clipn macro here",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///KM\u003d",
+        "filename": "vp9/common/vp9_recon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "use a clip macro.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///J8\u003d",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 9
@@ -64,6 +183,23 @@
       "writtenOn": "2012-12-04T17:11:59Z",
       "side": 1,
       "message": "blank line with space",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///Ic\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1586,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "generalise this and use for 16x16 \u0026 32x32 variants.",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +291,91 @@
     },
     {
       "key": {
+        "uuid": "AAAARn///Bg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2443,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "is this line \u003e 80 chars?",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///Bk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2460,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "Remove this block",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///Bc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2558,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "\"splat\"?! Something more descriptive maybe :)",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///BU\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "roll this function up with the 16x16 variant to reduce code.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///BY\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "whitespace (\u0026 one further below)",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///Ko\u003d",
         "filename": "vp9/encoder/vp9_quantize.h",
         "patchSetId": 9
@@ -166,6 +387,91 @@
       "writtenOn": "2012-12-04T17:11:59Z",
       "side": 1,
       "message": "CONFIG macro",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///Aw\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "remove commented-out code.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///As\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "combine with 16x16 etc size variants? And combine uv \u0026 y variants?",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///Ao\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 815,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "remove commented out text.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///Ak\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 985,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///Ag\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-04T19:07:52Z",
+      "side": 1,
+      "message": "These functions seem to have common functionality, can they all be combined into one?",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
