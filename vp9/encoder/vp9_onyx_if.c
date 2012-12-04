@@ -24,6 +24,7 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "./vp9_rtcd.h"
+#include "./vpx_scale_rtcd.h"
 #if CONFIG_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif

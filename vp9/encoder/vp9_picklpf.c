@@ -17,6 +17,7 @@
 #include "vpx_scale/vpxscale.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"
+#include "./vpx_scale_rtcd.h"
 
 void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
                                    YV12_BUFFER_CONFIG *dst_ybc, int Fraction) {
