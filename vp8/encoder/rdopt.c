@@ -1728,7 +1728,7 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
     }
 }
 
-static void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
+static void rd_update_mvcount(MACROBLOCK *x, int_mv *best_ref_mv)
 {
     if (x->e_mbd.mode_info_context->mbmi.mode == SPLITMV)
     {
@@ -2603,7 +2603,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         != cpi->common.ref_frame_sign_bias[xd->mode_info_context->mbmi.ref_frame])
         best_ref_mv.as_int = best_ref_mv_sb[!sign_bias].as_int;
 
-    rd_update_mvcount(cpi, x, &best_ref_mv);
+    rd_update_mvcount(x, &best_ref_mv);
 }
 
 void vp8_rd_pick_intra_mode(MACROBLOCK *x, int *rate_)

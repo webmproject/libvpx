@@ -389,7 +389,7 @@ static void pick_intra_mbuv_mode(MACROBLOCK *mb)
 
 }
 
-static void update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
+static void update_mvcount(MACROBLOCK *x, int_mv *best_ref_mv)
 {
     MACROBLOCKD *xd = &x->e_mbd;
     /* Split MV modes currently not supported when RD is nopt enabled,
@@ -1241,7 +1241,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
       != cpi->common.ref_frame_sign_bias[xd->mode_info_context->mbmi.ref_frame])
         best_ref_mv.as_int = best_ref_mv_sb[!sign_bias].as_int;
 
-    update_mvcount(cpi, x, &best_ref_mv);
+    update_mvcount(x, &best_ref_mv);
 }
 
 
