@@ -425,6 +425,7 @@ gtest.vcproj: $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
             --proj-guid=EC00E1EC-AF68-4D92-A255-181690D1C9B1 \
             --ver=$(CONFIG_VS_VERSION) \
             --src-path-bare="$(SRC_PATH_BARE)" \
+            -D_VARIADIC_MAX=10 \
             --out=gtest.vcproj $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" -I"$(SRC_PATH_BARE)/third_party/googletest/src"
 
@@ -436,6 +437,7 @@ test_libvpx.vcproj: $(LIBVPX_TEST_SRCS)
             --exe \
             --target=$(TOOLCHAIN) \
             --name=test_libvpx \
+            -D_VARIADIC_MAX=10 \
             --proj-guid=CD837F5F-52D8-4314-A370-895D614166A7 \
             --ver=$(CONFIG_VS_VERSION) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \

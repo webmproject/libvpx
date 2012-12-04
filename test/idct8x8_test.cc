@@ -25,6 +25,15 @@ using libvpx_test::ACMRandom;
 
 namespace {
 
+#ifdef _MSC_VER
+static int round(double x) {
+  if(x < 0)
+    return (int)ceil(x - 0.5);
+  else
+    return (int)floor(x + 0.5);
+}
+#endif
+
 void reference_dct_1d(double input[8], double output[8]) {
   const double kPi = 3.141592653589793238462643383279502884;
   const double kInvSqrt2 = 0.707106781186547524400844362104;
