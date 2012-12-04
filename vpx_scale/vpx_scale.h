@@ -14,7 +14,7 @@
 
 #include "vpx_scale/yv12config.h"
 
-extern void vp8_scale_frame(YV12_BUFFER_CONFIG *src,
+extern void vpx_scale_frame(YV12_BUFFER_CONFIG *src,
                             YV12_BUFFER_CONFIG *dst,
                             unsigned char *temp_area,
                             unsigned char temp_height,

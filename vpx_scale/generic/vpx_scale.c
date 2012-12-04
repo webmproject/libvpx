@@ -453,7 +453,7 @@ void Scale2D
 
 /****************************************************************************
  *
- *  ROUTINE       :
+ *  ROUTINE       : vpx_scale_frame
  *
  *  INPUTS        : YV12_BUFFER_CONFIG *src       : Pointer to frame to be scaled.
  *                  YV12_BUFFER_CONFIG *dst       : Pointer to buffer to hold scaled frame.
@@ -475,7 +475,7 @@ void Scale2D
  *                  caching.
  *
  ****************************************************************************/
-void vp8_scale_frame
+void vpx_scale_frame
 (
   YV12_BUFFER_CONFIG *src,
   YV12_BUFFER_CONFIG *dst,
