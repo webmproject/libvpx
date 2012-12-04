@@ -463,7 +463,7 @@ static void update_state(VP9_COMP *cpi, MACROBLOCK *x,
   if (mb_mode == B_PRED) {
     for (i = 0; i < 16; i++) {
       xd->block[i].bmi.as_mode = xd->mode_info_context->bmi[i].as_mode;
-      assert(xd->block[i].bmi.as_mode.first < MB_MODE_COUNT);
+      assert(xd->block[i].bmi.as_mode.first < B_MODE_COUNT);
     }
   } else if (mb_mode == I8X8_PRED) {
     for (i = 0; i < 16; i++) {
@@ -931,7 +931,7 @@ static void pick_sb_modes (VP9_COMP *cpi,
     xd->mode_info_context->mbmi.segment_id = 0;
 
   x->active_ptr = cpi->active_map + map_index;
-  
+
   cpi->update_context = 0;    // TODO Do we need this now??
 
   /* Find best coding mode & reconstruct the MB so it is available
