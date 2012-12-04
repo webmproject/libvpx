@@ -170,14 +170,20 @@ static void addmv_and_shuffle(
   int weight
 ) {
 
-  int i = *index;
+  int i;
+  int insert_point;
   int duplicate_found = FALSE;
 
-  // Check for duplicates. If there is one increment its score.
-  // Duplicate defined as being the same full pel vector with rounding.
+  // Check for duplicates. If there is one increase its score.
+  // We only compare vs the current top candidates.
+  insert_point = (*index < (MAX_MV_REF_CANDIDATES - 1))
+                 ? *index : (MAX_MV_REF_CANDIDATES - 1);
+
+  i = insert_point;
+  if (*index > i)
+    i++;
   while (i > 0) {
     i--;
-
     if (candidate_mv.as_int == mv_list[i].as_int) {
       duplicate_found = TRUE;
       mv_scores[i] += weight;
@@ -185,11 +191,13 @@ static void addmv_and_shuffle(
     }
   }
 
-  // If no duplicate was found add the new vector and give it a weight
-  if (!duplicate_found) {
-    mv_list[*index].as_int = candidate_mv.as_int;
-    mv_scores[*index] = weight;
-    i = *index;
+  // If no duplicate and the new candidate is good enough then add it.
+  if (!duplicate_found ) {
+    if (weight > mv_scores[insert_point]) {
+      mv_list[insert_point].as_int = candidate_mv.as_int;
+      mv_scores[insert_point] = weight;
+      i = insert_point;
+    }
     (*index)++;
   }
 
@@ -224,12 +232,12 @@ void vp9_find_mv_refs(
   int i;
   MODE_INFO *candidate_mi;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
-  int_mv candidate_mvs[MAX_MV_REFS];
+  int_mv candidate_mvs[MAX_MV_REF_CANDIDATES];
   int_mv c_refmv;
-  MV_REFERENCE_FRAME c_ref_frame;
   int_mv c2_refmv;
+  MV_REFERENCE_FRAME c_ref_frame;
   MV_REFERENCE_FRAME c2_ref_frame;
-  int candidate_scores[MAX_MV_REFS];
+  int candidate_scores[MAX_MV_REF_CANDIDATES];
   int index = 0;
   int split_count = 0;
   int ref_weight = 0;
@@ -238,8 +246,8 @@ void vp9_find_mv_refs(
   int *ref_distance_weight;
 
   // Blank the reference vector lists and other local structures.
-  vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REFS);
-  vpx_memset(candidate_mvs, 0, sizeof(int_mv) * MAX_MV_REFS);
+  vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
+  vpx_memset(candidate_mvs, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
   vpx_memset(candidate_scores, 0, sizeof(candidate_scores));
 
 #if CONFIG_SUPERBLOCKS
@@ -349,11 +357,6 @@ void vp9_find_mv_refs(
     }
   }
 
-  // Make sure we are able to add 0,0
-  if (index > (MAX_MV_REFS - 1)) {
-    index = (MAX_MV_REFS - 1);
-  }
-
   // Define inter mode coding context.
   // 0,0 was best
   if (candidate_mvs[0].as_int == 0) {
@@ -383,14 +386,12 @@ void vp9_find_mv_refs(
   }
 
   // 0,0 is always a valid reference.
-  for (i = 0; i < index; ++i) {
+  for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
     if (candidate_mvs[i].as_int == 0)
       break;
   }
-  if (i == index) {
-    c_refmv.as_int = 0;
-    addmv_and_shuffle(candidate_mvs, candidate_scores,
-                      &index, c_refmv, candidate_scores[3]+1 );
+  if (i == MAX_MV_REF_CANDIDATES) {
+    candidate_mvs[MAX_MV_REF_CANDIDATES-1].as_int = 0;
   }
 
   // Copy over the candidate list.

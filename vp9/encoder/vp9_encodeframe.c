@@ -395,8 +395,7 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
          vp9_mv_bit_cost(&target_mv, &mv_ref_list[0], x->nmvjointcost,
                          x->mvcost, 96, xd->allow_high_precision_mv);
 
-  // Use 4 for now : for (i = 1; i < MAX_MV_REFS; ++i ) {
-  for (i = 1; i < 4; ++i) {
+  for (i = 1; i < MAX_MV_REF_CANDIDATES; ++i) {
     // If we see a 0,0 reference vector for a second time we have reached
     // the end of the list of valid candidate vectors.
     if (!mv_ref_list[i].as_int) {

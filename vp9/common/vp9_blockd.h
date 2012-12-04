@@ -45,6 +45,7 @@ void vpx_log(const char *format, ...);
 #define SEGMENT_DELTADATA   0
 #define SEGMENT_ABSDATA     1
 #define MAX_MV_REFS 9
+#define MAX_MV_REF_CANDIDATES 4
 
 typedef struct {
   int r, c;
@@ -238,7 +239,7 @@ typedef struct {
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   TX_SIZE txfm_size;
   int_mv mv[2]; // for each reference frame used
-  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REFS];
+  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int_mv best_mv, best_second_mv;
 #if CONFIG_NEW_MVREF
   int best_index, best_second_index;

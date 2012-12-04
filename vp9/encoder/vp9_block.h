@@ -70,7 +70,7 @@ typedef struct {
   PARTITION_INFO partition_info;
   int_mv best_ref_mv;
   int_mv second_best_ref_mv;
-  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REFS];
+  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int rate;
   int distortion;
   int64_t intra_error;
