@@ -16,6 +16,24 @@
       "revId": "202db0f88ebaf6e469c5045a5b0df704a72066cb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///t0\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 968,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-04T00:40:20Z",
+      "side": 1,
+      "message": "I think \"ct\" was removed along with the find_near_mv() code, so this doesn\u0027t compile. I don\u0027t know what to replace the reference to \"ct\" with.",
+      "parentUuid": "AAAARn///1Q\u003d",
+      "revId": "202db0f88ebaf6e469c5045a5b0df704a72066cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
