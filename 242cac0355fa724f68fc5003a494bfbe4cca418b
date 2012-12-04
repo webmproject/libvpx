@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARn///cg\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-04T06:21:51Z",
+      "side": 1,
+      "message": "1 statement per line.\n\nconst int c \u003d decode_coefs( ... )\neobs[i] \u003d c;\nreturn c;\n\nor just:\neobs[i] \u003d ...\nreturn eobs[i];",
+      "revId": "242cac0355fa724f68fc5003a494bfbe4cca418b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///cQ\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-04T06:21:51Z",
+      "side": 1,
+      "message": "you could initialize eobtotal \u003d 0 here too\n\nfor (eobtotal \u003d 0, i \u003d 16; ...)",
+      "revId": "242cac0355fa724f68fc5003a494bfbe4cca418b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn///cI\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-04T06:21:51Z",
+      "side": 1,
+      "message": "avoid calling a function during return. Prefer:\n\neobtotal +\u003d decode_mb_tokens_4x4_uv(dx, xd, bc, seg_eob);\n\nreturn eobtotal;",
+      "revId": "242cac0355fa724f68fc5003a494bfbe4cca418b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
