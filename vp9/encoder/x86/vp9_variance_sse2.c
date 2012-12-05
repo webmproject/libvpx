@@ -137,7 +137,7 @@ void vp9_half_vert_variance16x_h_sse2
   unsigned int *sumsquared
 );
 
-DECLARE_ALIGNED(16, extern short, vp9_bilinear_filters_mmx[16][8]);
+DECLARE_ALIGNED(16, extern const short, vp9_bilinear_filters_mmx[16][8]);
 
 unsigned int vp9_variance4x4_wmt(
   const unsigned char *src_ptr,
