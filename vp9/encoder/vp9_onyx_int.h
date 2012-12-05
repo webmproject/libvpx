@@ -790,7 +790,7 @@ typedef struct VP9_COMP {
   unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
                                       [VP9_SWITCHABLE_FILTERS];
 #if CONFIG_NEW_MVREF
-  unsigned int best_ref_index_counts[MAX_REF_FRAMES][MAX_MV_REFS];
+  unsigned int best_ref_index_counts[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
 #endif
 
 } VP9_COMP;

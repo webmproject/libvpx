@@ -139,8 +139,8 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
 #if CONFIG_SUBPELREFMV
   unsigned int sse;
 #endif
-  unsigned int ref_scores[MAX_MV_REFS] = {0};
-  int_mv sorted_mvs[MAX_MV_REFS];
+  unsigned int ref_scores[MAX_MV_REF_CANDIDATES] = {0};
+  int_mv sorted_mvs[MAX_MV_REF_CANDIDATES];
   int zero_seen = FALSE;
 
   // Default all to 0,0 if nothing else available
@@ -159,9 +159,8 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   left_ref  = ref_y_buffer - 3;
 #endif
 
-  //for(i = 0; i < MAX_MV_REFS; ++i) {
-  // Limit search to the predicted best 4
-  for(i = 0; i < 4; ++i) {
+  // Limit search to the predicted best few candidates
+  for(i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
     int_mv this_mv;
     int offset = 0;
     int row_offset, col_offset;
@@ -268,7 +267,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   }
 
   // Make sure all the candidates are properly clamped etc
-  for (i = 0; i < 4; ++i) {
+  for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
     lower_mv_precision(&sorted_mvs[i], xd->allow_high_precision_mv);
     clamp_mv2(&sorted_mvs[i], xd);
   }
