@@ -422,6 +422,7 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
     }
   }
 
+  // best_index = x->mv_best_ref_index[ref_frame];
   best_ref->as_int = mv_ref_list[best_index].as_int;
 
   return best_index;

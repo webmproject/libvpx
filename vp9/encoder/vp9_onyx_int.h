@@ -359,7 +359,6 @@ typedef struct {
   int first_step;
   int optimize_coefficients;
   int no_skip_block4x4_search;
-  int improved_mv_pred;
   int search_best_filter;
 
 } SPEED_FEATURES;

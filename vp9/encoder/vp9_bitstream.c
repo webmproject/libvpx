@@ -956,21 +956,14 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
                           pc->fc.uv_mode_prob[mode]);
           }
         } else {
-          int_mv best_mv, best_second_mv;
-
           vp9_prob mv_ref_p [VP9_MVREFS - 1];
 
-          {
-            best_mv.as_int = mi->ref_mvs[rf][0].as_int;
+          vp9_mv_ref_probs(&cpi->common, mv_ref_p, mi->mb_mode_context[rf]);
 
-            vp9_mv_ref_probs(&cpi->common, mv_ref_p, mi->mb_mode_context[rf]);
 
 // #ifdef ENTROPY_STATS
-//             accum_mv_refs(mode, ct);
-// #endif
-          }
-
 #ifdef ENTROPY_STATS
+          accum_mv_refs(mode, ct);
           active_section = 3;
 #endif
 
@@ -1012,13 +1005,6 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
             }
           }
 
-          if (mi->second_ref_frame > 0 &&
-              (mode == NEWMV || mode == SPLITMV)) {
-
-            best_second_mv.as_int =
-              mi->ref_mvs[mi->second_ref_frame][0].as_int;
-          }
-
           // does the feature use compound prediction or not
           // (if not specified at the frame/segment level)
           if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
@@ -1047,64 +1033,37 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
           }
 #endif
 
+#if CONFIG_NEW_MVREF
+          // if ((mode == NEWMV) || (mode == SPLITMV)) {
+          if (mode == NEWMV) {
+            // Encode the index of the choice.
+            vp9_write_mv_ref_id(bc,
+                                xd->mb_mv_ref_id_probs[rf], mi->best_index);
+            cpi->best_ref_index_counts[rf][mi->best_index]++;
+
+            if (mi->second_ref_frame > 0) {
+              // Encode the index of the choice.
+              vp9_write_mv_ref_id(
+                bc, xd->mb_mv_ref_id_probs[mi->second_ref_frame],
+                mi->best_second_index);
+
+              cpi->best_ref_index_counts[mi->second_ref_frame]
+                                        [mi->best_second_index]++;
+            }
+          }
+#endif
           {
             switch (mode) { /* new, split require MVs */
               case NEWMV:
 #ifdef ENTROPY_STATS
                 active_section = 5;
 #endif
-
-#if CONFIG_NEW_MVREF
-                {
-                  unsigned int best_index;
-
-                  // Choose the best mv reference
-                  /*
-                  best_index = pick_best_mv_ref(x, rf, mi->mv[0],
-                                                mi->ref_mvs[rf], &best_mv);
-                  assert(best_index == mi->best_index);
-                  assert(best_mv.as_int == mi->best_mv.as_int);
-                  */
-                  best_index = mi->best_index;
-                  best_mv.as_int = mi->best_mv.as_int;
-
-                  // Encode the index of the choice.
-                  vp9_write_mv_ref_id(bc,
-                                      xd->mb_mv_ref_id_probs[rf], best_index);
-
-                  cpi->best_ref_index_counts[rf][best_index]++;
-
-                }
-#endif
-
-                write_nmv(bc, &mi->mv[0].as_mv, &best_mv,
+                write_nmv(bc, &mi->mv[0].as_mv, &mi->best_mv,
                           (const nmv_context*) nmvc,
                           xd->allow_high_precision_mv);
 
                 if (mi->second_ref_frame > 0) {
-#if CONFIG_NEW_MVREF
-                  unsigned int best_index;
-                  sec_ref_frame = mi->second_ref_frame;
-
-                  /*
-                  best_index =
-                    pick_best_mv_ref(x, sec_ref_frame, mi->mv[1],
-                                     mi->ref_mvs[sec_ref_frame],
-                                     &best_second_mv);
-                  assert(best_index == mi->best_second_index);
-                  assert(best_second_mv.as_int == mi->best_second_mv.as_int);
-                  */
-                  best_index = mi->best_second_index;
-                  best_second_mv.as_int = mi->best_second_mv.as_int;
-
-                  // Encode the index of the choice.
-                  vp9_write_mv_ref_id(bc,
-                                      xd->mb_mv_ref_id_probs[sec_ref_frame],
-                                      best_index);
-
-                  cpi->best_ref_index_counts[sec_ref_frame][best_index]++;
-#endif
-                  write_nmv(bc, &mi->mv[1].as_mv, &best_second_mv,
+                  write_nmv(bc, &mi->mv[1].as_mv, &mi->best_second_mv,
                             (const nmv_context*) nmvc,
                             xd->allow_high_precision_mv);
                 }
@@ -1148,14 +1107,14 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
 #ifdef ENTROPY_STATS
                     active_section = 11;
 #endif
-                    write_nmv(bc, &blockmv.as_mv, &best_mv,
+                    write_nmv(bc, &blockmv.as_mv, &mi->best_mv,
                               (const nmv_context*) nmvc,
                               xd->allow_high_precision_mv);
 
                     if (mi->second_ref_frame > 0) {
                       write_nmv(bc,
                                 &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
-                                &best_second_mv,
+                                &mi->best_second_mv,
                                 (const nmv_context*) nmvc,
                                 xd->allow_high_precision_mv);
                     }
@@ -1167,10 +1126,6 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
                 break;
             }
           }
-          /* This is not required if the counts in cpi are consistent with the
-           * final packing pass */
-          // if (!cpi->dummy_packing)
-          //   vp9_update_nmv_count(cpi, x, &best_mv, &best_second_mv);
         }
 
         if (((rf == INTRA_FRAME && mode <= I8X8_PRED) ||

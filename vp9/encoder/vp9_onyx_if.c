@@ -668,7 +668,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   sf->first_step = 0;
   sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
-  sf->improved_mv_pred = 1;
 
   // default thresholds to 0
   for (i = 0; i < MAX_MODES; i++)

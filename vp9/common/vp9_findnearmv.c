@@ -127,7 +127,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
                            int_mv *mvlist,
-                           int_mv *best_mv,
                            int_mv *nearest,
                            int_mv *near) {
   int i, j;
@@ -144,7 +143,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   int zero_seen = FALSE;
 
   // Default all to 0,0 if nothing else available
-  best_mv->as_int = nearest->as_int = near->as_int = 0;
+  nearest->as_int = near->as_int = 0;
   vpx_memset(sorted_mvs, 0, sizeof(sorted_mvs));
 
 #if CONFIG_SUBPELREFMV
@@ -271,9 +270,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
     lower_mv_precision(&sorted_mvs[i], xd->allow_high_precision_mv);
     clamp_mv2(&sorted_mvs[i], xd);
   }
-
-  // Set the best mv to the first entry in the sorted list
-  best_mv->as_int = sorted_mvs[0].as_int;
 
   // Provided that there are non zero vectors available there will not
   // be more than one 0,0 entry in the sorted list.

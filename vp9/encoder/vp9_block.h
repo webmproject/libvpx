@@ -135,6 +135,8 @@ typedef struct macroblock {
   int *mb_norm_activity_ptr;
   signed int act_zbin_adj;
 
+  int mv_best_ref_index[MAX_REF_FRAMES];
+
   int nmvjointcost[MV_JOINTS];
   int nmvcosts[2][MV_VALS];
   int *nmvcost[2];
