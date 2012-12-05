@@ -214,7 +214,9 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                          * vp8cx_encode_inter_macroblock()) back into the
                          * global segmentation map
                          */
-                        if (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled)
+                        if ((cpi->current_layer == 0) &&
+                            (cpi->cyclic_refresh_mode_enabled &&
+                             xd->segmentation_enabled))
                         {
                             const MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
                             cpi->segmentation_map[map_index + mb_col] = mbmi->segment_id;

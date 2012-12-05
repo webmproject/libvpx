@@ -529,7 +529,8 @@ void encode_mb_row(VP8_COMP *cpi,
              * segmentation map
              */
             if ((cpi->current_layer == 0) &&
-                (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled))
+                (cpi->cyclic_refresh_mode_enabled &&
+                 xd->segmentation_enabled))
             {
                 cpi->segmentation_map[map_index+mb_col] = xd->mode_info_context->mbmi.segment_id;
 
