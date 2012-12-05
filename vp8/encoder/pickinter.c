@@ -680,7 +680,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     get_predictor_pointers(cpi, plane, recon_yoffset, recon_uvoffset);
 
     /* Count of the number of MBs tested so far this frame */
-    cpi->mbs_tested_so_far++;
+    x->mbs_tested_so_far++;
 
     *returnintra = INT_MAX;
     x->skip = 0;
@@ -746,11 +746,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         /* Check to see if the testing frequency for this mode is at its max
          * If so then prevent it from being tested and increase the threshold
          * for its testing */
-        if (cpi->mode_test_hit_counts[mode_index] &&
+        if (x->mode_test_hit_counts[mode_index] &&
                                          (cpi->mode_check_freq[mode_index] > 1))
         {
-            if (cpi->mbs_tested_so_far <= (cpi->mode_check_freq[mode_index] *
-                                         cpi->mode_test_hit_counts[mode_index]))
+            if (x->mbs_tested_so_far <= (cpi->mode_check_freq[mode_index] *
+                                         x->mode_test_hit_counts[mode_index]))
             {
                 /* Increase the threshold for coding this mode to make it less
                  * likely to be chosen */
@@ -769,7 +769,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         /* We have now reached the point where we are going to test the current
          * mode so increment the counter for the number of times it has been
          * tested */
-        cpi->mode_test_hit_counts[mode_index] ++;
+        x->mode_test_hit_counts[mode_index] ++;
 
         rate2 = 0;
         distortion2 = 0;

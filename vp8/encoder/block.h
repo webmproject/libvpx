@@ -140,6 +140,8 @@ typedef struct macroblock
 
     int rd_thresh_mult[MAX_MODES];
     int rd_threshes[MAX_MODES];
+    unsigned int mbs_tested_so_far;
+    unsigned int mode_test_hit_counts[MAX_MODES];
 
 
     void (*short_fdct4x4)(short *input, short *output, int pitch);

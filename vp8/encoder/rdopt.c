@@ -265,6 +265,11 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue)
 
     vp8_set_speed_features(cpi);
 
+    for (i = 0; i < MAX_MODES; i++)
+    {
+        x->mode_test_hit_counts[i] = 0;
+    }
+
     q = (int)pow(Qvalue, 1.25);
 
     if (q < 8)
@@ -2010,7 +2015,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
     *returnintra = INT_MAX;
     /* Count of the number of MBs tested so far this frame */
-    cpi->mbs_tested_so_far++;
+    x->mbs_tested_so_far++;
 
     x->skip = 0;
 
@@ -2068,9 +2073,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
          * max If so then prevent it from being tested and increase the
          * threshold for its testing
          */
-        if (cpi->mode_test_hit_counts[mode_index] && (cpi->mode_check_freq[mode_index] > 1))
+        if (x->mode_test_hit_counts[mode_index] && (cpi->mode_check_freq[mode_index] > 1))
         {
-            if (cpi->mbs_tested_so_far  <= cpi->mode_check_freq[mode_index] * cpi->mode_test_hit_counts[mode_index])
+            if (x->mbs_tested_so_far  <= cpi->mode_check_freq[mode_index] * x->mode_test_hit_counts[mode_index])
             {
                 /* Increase the threshold for coding this mode to make it
                  * less likely to be chosen
@@ -2092,7 +2097,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
          * current mode so increment the counter for the number of times
          * it has been tested
          */
-        cpi->mode_test_hit_counts[mode_index] ++;
+        x->mode_test_hit_counts[mode_index] ++;
 
         /* Experimental code. Special case for gf and arf zeromv modes.
          * Increase zbin size to supress noise

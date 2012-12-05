@@ -482,7 +482,7 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mb->prediction_error = 0;
         mb->intra_error = 0;
         vp8_zero(mb->count_mb_ref_frame_usage);
-
+        mb->mbs_tested_so_far = 0;
     }
 }
 

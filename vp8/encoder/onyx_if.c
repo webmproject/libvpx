@@ -640,11 +640,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     for (i = 0; i < MAX_MODES; i ++)
     {
         cpi->mode_check_freq[i] = 0;
-        cpi->mode_test_hit_counts[i] = 0;
         cpi->mode_chosen_counts[i] = 0;
     }
 
-    cpi->mbs_tested_so_far = 0;
+    cpi->mb.mbs_tested_so_far = 0;
 
     /* best quality defaults */
     sf->RD = 1;
