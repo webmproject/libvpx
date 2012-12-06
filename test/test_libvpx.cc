@@ -12,6 +12,12 @@
 #if ARCH_X86 || ARCH_X86_64
 extern "C" {
 #include "vpx_ports/x86.h"
+#if CONFIG_VP8
+extern void vp8_rtcd();
+#endif
+#if CONFIG_VP9
+extern void vp9_rtcd();
+#endif
 }
 #endif
 #include "third_party/googletest/src/include/gtest/gtest.h"
@@ -39,6 +45,13 @@ int main(int argc, char **argv) {
     append_gtest_filter(":-SSSE3/*");
   if (!(simd_caps & HAS_SSE4_1))
     append_gtest_filter(":-SSE4_1/*");
+#endif
+
+#if CONFIG_VP8
+  vp8_rtcd();
+#endif
+#if CONFIG_VP9
+  vp9_rtcd();
 #endif
 
   return RUN_ALL_TESTS();
