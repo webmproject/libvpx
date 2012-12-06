@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9K8\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-12-06T21:35:10Z",
+      "side": 1,
+      "message": "done, and did one step further to simplify this in patch 10.",
+      "parentUuid": "AAAARn///tM\u003d",
+      "revId": "3a6ee3c1e82aaa9e22e8c7cbd76afe3fba70e2d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///tA\u003d",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2012-12-04T00:52:06Z",
       "side": 1,
       "message": "You\u0027re now repeating this code in each caller of decode_coefs() (same in encoder). Isn\u0027t it less code if we merge this in the VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l) macro inside decode_coefs()? I.e. add a TX_SIZE argument to that macro, and handle it inside, or make a macro for each transform size (i.e. VP9_COMBINEENTROPYCONTEXTS4X4, etc.) which does what you do here. Overall, that would be far less code.",
+      "revId": "3a6ee3c1e82aaa9e22e8c7cbd76afe3fba70e2d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9Kw\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-12-06T21:35:10Z",
+      "side": 1,
+      "message": "will address this in a follow-up commit to simplify all code around tokenize_mb/stuff_mb.",
+      "parentUuid": "AAAARn///tA\u003d",
       "revId": "3a6ee3c1e82aaa9e22e8c7cbd76afe3fba70e2d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9Ks\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 694,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-12-06T21:35:10Z",
+      "side": 1,
+      "message": "will address in a follow-up commit that is dedicated to code clean/tidy up.",
+      "parentUuid": "AAAARn///s8\u003d",
+      "revId": "3a6ee3c1e82aaa9e22e8c7cbd76afe3fba70e2d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///s4\u003d",
         "filename": "vp9/encoder/vp9_tokenize.c",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2012-12-04T00:52:06Z",
       "side": 1,
       "message": "and here, do the magic inside tokenize_b().",
+      "revId": "3a6ee3c1e82aaa9e22e8c7cbd76afe3fba70e2d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9Ko\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-12-06T21:35:10Z",
+      "side": 1,
+      "message": "will do in a follow up commit.",
+      "parentUuid": "AAAARn///s4\u003d",
       "revId": "3a6ee3c1e82aaa9e22e8c7cbd76afe3fba70e2d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
