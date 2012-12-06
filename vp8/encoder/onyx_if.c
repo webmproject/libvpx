@@ -3177,8 +3177,6 @@ void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity)
     {
-
-
         /* we shouldn't have to keep multiple copies as we know in advance which
          * buffer we should start - for now to get something up and running
          * I've chosen to copy the buffers
@@ -3195,25 +3193,31 @@ void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 
             for (i = 2; i < MAX_REF_FRAMES - 1; i++)
                 vp8_yv12_copy_frame(
-                        cpi->Source,
+                        &cpi->denoiser.yv12_running_avg[LAST_FRAME],
                         &cpi->denoiser.yv12_running_avg[i]);
         }
         else /* For non key frames */
         {
             vp8_yv12_extend_frame_borders(
-                    &cpi->denoiser.yv12_running_avg[LAST_FRAME]);
+                    &cpi->denoiser.yv12_running_avg[INTRA_FRAME]);
 
             if (cm->refresh_alt_ref_frame || cm->copy_buffer_to_arf)
             {
                 vp8_yv12_copy_frame(
-                        &cpi->denoiser.yv12_running_avg[LAST_FRAME],
+                        &cpi->denoiser.yv12_running_avg[INTRA_FRAME],
                         &cpi->denoiser.yv12_running_avg[ALTREF_FRAME]);
             }
             if (cm->refresh_golden_frame || cm->copy_buffer_to_gf)
             {
                 vp8_yv12_copy_frame(
-                        &cpi->denoiser.yv12_running_avg[LAST_FRAME],
+                        &cpi->denoiser.yv12_running_avg[INTRA_FRAME],
                         &cpi->denoiser.yv12_running_avg[GOLDEN_FRAME]);
+            }
+            if(cm->refresh_last_frame)
+            {
+                vp8_yv12_copy_frame(
+                        &cpi->denoiser.yv12_running_avg[INTRA_FRAME],
+                        &cpi->denoiser.yv12_running_avg[LAST_FRAME]);
             }
         }
 
