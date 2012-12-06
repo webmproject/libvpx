@@ -66,11 +66,6 @@ typedef struct {
   ENTROPY_CONTEXT y2;
 } ENTROPY_CONTEXT_PLANES;
 
-extern const unsigned char vp9_block2left[25];
-extern const unsigned char vp9_block2above[25];
-extern const unsigned char vp9_block2left_8x8[25];
-extern const unsigned char vp9_block2above_8x8[25];
-
 #define VP9_COMBINEENTROPYCONTEXTS( Dest, A, B) \
   Dest = ((A)!=0) + ((B)!=0);
 
@@ -119,18 +114,17 @@ typedef enum {
   SEG_LVL_EOB = 4,                 // EOB end stop marker.
   SEG_LVL_TRANSFORM = 5,           // Block transform size.
   SEG_LVL_MAX = 6                  // Number of MB level features supported
-
 } SEG_LVL_FEATURES;
 
 // Segment level features.
 typedef enum {
-  TX_4X4,                      // 4x4 dct transform
-  TX_8X8,                      // 8x8 dct transform
-  TX_16X16,                    // 16x16 dct transform
-  TX_SIZE_MAX_MB,              // Number of transforms available to MBs
+  TX_4X4 = 0,                      // 4x4 dct transform
+  TX_8X8 = 1,                      // 8x8 dct transform
+  TX_16X16 = 2,                    // 16x16 dct transform
+  TX_SIZE_MAX_MB = 3,              // Number of different transforms available
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
-  TX_32X32 = TX_SIZE_MAX_MB,   // 32x32 dct transform
-  TX_SIZE_MAX_SB,              // Number of transforms available to SBs
+  TX_32X32 = TX_SIZE_MAX_MB,       // 32x32 dct transform
+  TX_SIZE_MAX_SB,                  // Number of transforms available to SBs
 #else
   TX_SIZE_MAX_SB = TX_SIZE_MAX_MB,
 #endif
@@ -507,6 +501,9 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
   }
   return tx_type;
 }
+
+extern const unsigned char vp9_block2left[TX_SIZE_MAX_SB][25];
+extern const unsigned char vp9_block2above[TX_SIZE_MAX_SB][25];
 
 #define USE_ADST_FOR_I16X16_8X8   0
 #define USE_ADST_FOR_I16X16_4X4   0

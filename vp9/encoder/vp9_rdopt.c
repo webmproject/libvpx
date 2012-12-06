@@ -681,12 +681,14 @@ static int rdcost_mby_4x4(MACROBLOCK *mb, int has_2nd_order, int backup) {
     cost += cost_coeffs(mb, xd->block + b,
                         (has_2nd_order ?
                          PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC),
-                        ta + vp9_block2above[b], tl + vp9_block2left[b],
+                        ta + vp9_block2above[TX_4X4][b],
+                        tl + vp9_block2left[TX_4X4][b],
                         TX_4X4);
 
   if (has_2nd_order)
     cost += cost_coeffs(mb, xd->block + 24, PLANE_TYPE_Y2,
-                        ta + vp9_block2above[24], tl + vp9_block2left[24],
+                        ta + vp9_block2above[TX_4X4][24],
+                        tl + vp9_block2left[TX_4X4][24],
                         TX_4X4);
 
   return cost;
@@ -739,12 +741,14 @@ static int rdcost_mby_8x8(MACROBLOCK *mb, int has_2nd_order, int backup) {
     cost += cost_coeffs(mb, xd->block + b,
                         (has_2nd_order ?
                          PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC),
-                        ta + vp9_block2above_8x8[b], tl + vp9_block2left_8x8[b],
+                        ta + vp9_block2above[TX_8X8][b],
+                        tl + vp9_block2left[TX_8X8][b],
                         TX_8X8);
 
   if (has_2nd_order)
     cost += cost_coeffs_2x2(mb, xd->block + 24, PLANE_TYPE_Y2,
-                            ta + vp9_block2above[24], tl + vp9_block2left[24]);
+                            ta + vp9_block2above[TX_8X8][24],
+                            tl + vp9_block2left[TX_8X8][24]);
   return cost;
 }
 
@@ -1294,8 +1298,8 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rat
 #if CONFIG_COMP_INTRA_PRED
                   & best_second_mode, allow_comp,
 #endif
-                  bmode_costs, ta + vp9_block2above[i],
-                  tl + vp9_block2left[i], &r, &ry, &d);
+                  bmode_costs, ta + vp9_block2above[TX_4X4][i],
+                  tl + vp9_block2left[TX_4X4][i], &r, &ry, &d);
 
     cost += r;
     distortion += d;
@@ -1527,8 +1531,8 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         // compute quantization mse of 8x8 block
         distortion = vp9_block_error_c((x->block + idx)->coeff,
                                        (xd->block + idx)->dqcoeff, 64);
-        ta0 = a[vp9_block2above_8x8[idx]];
-        tl0 = l[vp9_block2left_8x8[idx]];
+        ta0 = a[vp9_block2above[TX_8X8][idx]];
+        tl0 = l[vp9_block2left[TX_8X8][idx]];
 
         rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
                              &ta0, &tl0, TX_8X8);
@@ -1540,10 +1544,10 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         static const int iblock[4] = {0, 1, 4, 5};
         TX_TYPE tx_type;
         int i;
-        ta0 = a[vp9_block2above[ib]];
-        ta1 = a[vp9_block2above[ib + 1]];
-        tl0 = l[vp9_block2left[ib]];
-        tl1 = l[vp9_block2left[ib + 4]];
+        ta0 = a[vp9_block2above[TX_4X4][ib]];
+        ta1 = a[vp9_block2above[TX_4X4][ib + 1]];
+        tl0 = l[vp9_block2left[TX_4X4][ib]];
+        tl1 = l[vp9_block2left[TX_4X4][ib + 4]];
         distortion = 0;
         rate_t = 0;
         for (i = 0; i < 4; ++i) {
@@ -1596,15 +1600,15 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   vp9_encode_intra8x8(x, ib);
 
   if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
-    a[vp9_block2above_8x8[idx]]     = besta0;
-    a[vp9_block2above_8x8[idx] + 1] = besta1;
-    l[vp9_block2left_8x8[idx]]      = bestl0;
-    l[vp9_block2left_8x8[idx] + 1]  = bestl1;
+    a[vp9_block2above[TX_8X8][idx]]     = besta0;
+    a[vp9_block2above[TX_8X8][idx] + 1] = besta1;
+    l[vp9_block2left[TX_8X8][idx]]      = bestl0;
+    l[vp9_block2left[TX_8X8][idx] + 1]  = bestl1;
   } else {
-    a[vp9_block2above[ib]]     = besta0;
-    a[vp9_block2above[ib + 1]] = besta1;
-    l[vp9_block2left[ib]]      = bestl0;
-    l[vp9_block2left[ib + 4]]  = bestl1;
+    a[vp9_block2above[TX_4X4][ib]]     = besta0;
+    a[vp9_block2above[TX_4X4][ib + 1]] = besta1;
+    l[vp9_block2left[TX_4X4][ib]]      = bestl0;
+    l[vp9_block2left[TX_4X4][ib + 4]]  = bestl1;
   }
 
   return best_rd;
@@ -1681,7 +1685,8 @@ static int rd_cost_mbuv_4x4(MACROBLOCK *mb, int backup) {
 
   for (b = 16; b < 24; b++)
     cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_UV,
-                        ta + vp9_block2above[b], tl + vp9_block2left[b],
+                        ta + vp9_block2above[TX_4X4][b],
+                        tl + vp9_block2left[TX_4X4][b],
                         TX_4X4);
 
   return cost;
@@ -1721,8 +1726,8 @@ static int rd_cost_mbuv_8x8(MACROBLOCK *mb, int backup) {
 
   for (b = 16; b < 24; b += 4)
     cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_UV,
-                        ta + vp9_block2above_8x8[b],
-                        tl + vp9_block2left_8x8[b], TX_8X8);
+                        ta + vp9_block2above[TX_8X8][b],
+                        tl + vp9_block2left[TX_8X8][b], TX_8X8);
 
   return cost;
 }
@@ -2244,8 +2249,8 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
       thisdistortion = vp9_block_error(be->coeff, bd->dqcoeff, 16);
       *distortion += thisdistortion;
       *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
-                                 ta + vp9_block2above[i],
-                                 tl + vp9_block2left[i], TX_4X4);
+                                 ta + vp9_block2above[TX_4X4][i],
+                                 tl + vp9_block2left[TX_4X4][i], TX_4X4);
     }
   }
   *distortion >>= 2;
@@ -2296,8 +2301,9 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
           thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
           otherdist += thisdistortion;
           othercost += cost_coeffs(x, bd2, PLANE_TYPE_Y_WITH_DC,
-                                     tacp + vp9_block2above_8x8[idx],
-                                     tlcp + vp9_block2left_8x8[idx], TX_8X8);
+                                     tacp + vp9_block2above[TX_8X8][idx],
+                                     tlcp + vp9_block2left[TX_8X8][idx],
+                                     TX_8X8);
         }
         for (j = 0; j < 4; j += 2) {
           bd = &xd->block[ib + iblock[j]];
@@ -2307,13 +2313,13 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
           thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
           *distortion += thisdistortion;
           *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
-                                     ta + vp9_block2above[ib + iblock[j]],
-                                     tl + vp9_block2left[ib + iblock[j]],
-                                     TX_4X4);
+                           ta + vp9_block2above[TX_4X4][ib + iblock[j]],
+                           tl + vp9_block2left[TX_4X4][ib + iblock[j]],
+                           TX_4X4);
           *labelyrate += cost_coeffs(x, bd + 1, PLANE_TYPE_Y_WITH_DC,
-                                     ta + vp9_block2above[ib + iblock[j] + 1],
-                                     tl + vp9_block2left[ib + iblock[j]],
-                                     TX_4X4);
+                           ta + vp9_block2above[TX_4X4][ib + iblock[j] + 1],
+                           tl + vp9_block2left[TX_4X4][ib + iblock[j]],
+                           TX_4X4);
         }
       } else /* 8x8 */ {
         if (otherrd) {
@@ -2325,13 +2331,13 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
             thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
             otherdist += thisdistortion;
             othercost += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
-                                     tacp + vp9_block2above[ib + iblock[j]],
-                                     tlcp + vp9_block2left[ib + iblock[j]],
-                                     TX_4X4);
+                           tacp + vp9_block2above[TX_4X4][ib + iblock[j]],
+                           tlcp + vp9_block2left[TX_4X4][ib + iblock[j]],
+                           TX_4X4);
             othercost += cost_coeffs(x, bd + 1, PLANE_TYPE_Y_WITH_DC,
-                                     tacp + vp9_block2above[ib + iblock[j] + 1],
-                                     tlcp + vp9_block2left[ib + iblock[j]],
-                                     TX_4X4);
+                           tacp + vp9_block2above[TX_4X4][ib + iblock[j] + 1],
+                           tlcp + vp9_block2left[TX_4X4][ib + iblock[j]],
+                           TX_4X4);
           }
         }
         x->vp9_short_fdct8x8(be->src_diff, be2->coeff, 32);
@@ -2339,8 +2345,8 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
         thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
         *distortion += thisdistortion;
         *labelyrate += cost_coeffs(x, bd2, PLANE_TYPE_Y_WITH_DC,
-                                   ta + vp9_block2above_8x8[idx],
-                                   tl + vp9_block2left_8x8[idx], TX_8X8);
+                                   ta + vp9_block2above[TX_8X8][idx],
+                                   tl + vp9_block2left[TX_8X8][idx], TX_8X8);
       }
     }
   }
