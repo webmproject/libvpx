@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9QA\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///NA\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///L8\u003d",
         "filename": "test/dct32x32_test.cc",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "combine the two definitions of pi.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9P8\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///L8\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9P4\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///MM\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///LA\u003d",
         "filename": "vp9/common/vp9_blockd.h",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2012-12-04T17:11:59Z",
       "side": 1,
       "message": "CONFIG macro?",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9Po\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///LA\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9Pk\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///K8\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///Lc\u003d",
         "filename": "vp9/common/vp9_entropy.c",
         "patchSetId": 9
@@ -98,6 +188,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "combine this with the 16x16 variant.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9Pg\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 556,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Will do in a subsequent commit.",
+      "parentUuid": "AAAARn///Lc\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9Pc\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///Ks\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///LM\u003d",
         "filename": "vp9/common/vp9_idctllm.c",
         "patchSetId": 9
@@ -132,6 +258,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "whitespace (and on several lines below)",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9PY\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1799,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///LM\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9PM\u003d",
+        "filename": "vp9/common/vp9_recon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "I have another patch-in-progress that addresses this, so I\u0027ll punt this until that patch is accepted.",
+      "parentUuid": "AAAARn///KU\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///KM\u003d",
         "filename": "vp9/common/vp9_recon.c",
         "patchSetId": 9
@@ -166,6 +328,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "use a clip macro.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9PI\u003d",
+        "filename": "vp9/common/vp9_recon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Same.",
+      "parentUuid": "AAAARn///KM\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9PE\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///J8\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///Ic\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 9
@@ -200,6 +398,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "generalise this and use for 16x16 \u0026 32x32 variants.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9PA\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1586,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Another commit does that, so punting here.",
+      "parentUuid": "AAAARn///Ic\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9O8\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///LQ\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///LI\u003d",
         "filename": "vp9/encoder/vp9_block.h",
         "patchSetId": 9
@@ -234,6 +468,24 @@
       "writtenOn": "2012-12-04T17:11:59Z",
       "side": 1,
       "message": "ditto",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9O4\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///LI\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9Os\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1335,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "I added a configure experiment dwt32x32hybrid.",
+      "parentUuid": "AAAARn///MA\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///MQ\u003d",
         "filename": "vp9/encoder/vp9_dct.c",
         "patchSetId": 9
@@ -268,6 +538,24 @@
       "writtenOn": "2012-12-04T17:11:59Z",
       "side": 1,
       "message": "Spaces on blank lines not allowed as per style guide.\nA number of such lines below.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9Oo\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1369,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///MQ\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9Ok\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1518,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "No, this is actually the transform counter in 32x32 predicted blocks, not for the 32x32 transform.",
+      "parentUuid": "AAAARn///Kg\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///Bg\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 9
@@ -302,6 +608,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "is this line \u003e 80 chars?",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9Oc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2443,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Removed.",
+      "parentUuid": "AAAARn///Bg\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9OY\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2460,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///Bk\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///Bc\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 9
@@ -336,6 +678,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "\"splat\"?! Something more descriptive maybe :)",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9OU\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2558,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///Bc\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -359,6 +719,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9OE\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "That should be done across the whole file, I\u0027ll do that in a separate commit.",
+      "parentUuid": "AAAARn///BU\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///BY\u003d",
         "filename": "vp9/encoder/vp9_encodemb.c",
         "patchSetId": 9
@@ -370,6 +748,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "whitespace (\u0026 one further below)",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9OA\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///BY\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -393,6 +789,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9N4\u003d",
+        "filename": "vp9/encoder/vp9_quantize.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///Ko\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///Aw\u003d",
         "filename": "vp9/encoder/vp9_tokenize.c",
         "patchSetId": 9
@@ -404,6 +818,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "remove commented-out code.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9Ng\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///Aw\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -427,6 +859,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9NY\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "They\u0027re generally called separately (see rdopt.c).",
+      "parentUuid": "AAAARn///As\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///Ao\u003d",
         "filename": "vp9/encoder/vp9_tokenize.c",
         "patchSetId": 9
@@ -438,6 +888,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "remove commented out text.",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9NU\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 815,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///Ao\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -461,6 +929,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//9NQ\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 985,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///Ak\u003d",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///Ag\u003d",
         "filename": "vp9/encoder/vp9_tokenize.h",
         "patchSetId": 9
@@ -472,6 +958,24 @@
       "writtenOn": "2012-12-04T19:07:52Z",
       "side": 1,
       "message": "These functions seem to have common functionality, can they all be combined into one?",
+      "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//9NI\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-06T20:57:04Z",
+      "side": 1,
+      "message": "Well, yeah, maybe, but generally they\u0027re called in a block where the transform size is known (see rdopt.c), so we\u0027d end up duplicating a branch.",
+      "parentUuid": "AAAARn///Ag\u003d",
       "revId": "dd5ef311e73e057e6197f628ce3792a49203c159",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
