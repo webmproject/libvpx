@@ -16,6 +16,24 @@
       "revId": "eec0bc4f1e70818e517fff3074d27ec946defbbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//8Rk\u003d",
+        "filename": "vp9/common/vp9_findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-07T23:48:26Z",
+      "side": 1,
+      "message": "As I\u0027ve told both James and Frank previously, the type is a B mode but the value is a MB mode. I don\u0027t think we want to redo that at this point; really, eventually we should merge the two types.\n\nThe patch itself is correct.",
+      "parentUuid": "AAAARn//8TU\u003d",
+      "revId": "eec0bc4f1e70818e517fff3074d27ec946defbbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
