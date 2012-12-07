@@ -1774,3 +1774,465 @@ void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
 #undef RIGHT_SHIFT
 #undef RIGHT_ROUNDING
 #endif
+
+#if CONFIG_TX32X32
+#if !CONFIG_DWT32X32HYBRID
+#define DownshiftMultiplyBy2(x) x * 2
+#define DownshiftMultiply(x) x
+static void idct16(double *input, double *output, int stride) {
+  static const double C1 = 0.995184726672197;
+  static const double C2 = 0.98078528040323;
+  static const double C3 = 0.956940335732209;
+  static const double C4 = 0.923879532511287;
+  static const double C5 = 0.881921264348355;
+  static const double C6 = 0.831469612302545;
+  static const double C7 = 0.773010453362737;
+  static const double C8 = 0.707106781186548;
+  static const double C9 = 0.634393284163646;
+  static const double C10 = 0.555570233019602;
+  static const double C11 = 0.471396736825998;
+  static const double C12 = 0.38268343236509;
+  static const double C13 = 0.290284677254462;
+  static const double C14 = 0.195090322016128;
+  static const double C15 = 0.098017140329561;
+
+  double step[16];
+  double intermediate[16];
+  double temp1, temp2;
+
+  // step 1 and 2
+  step[ 0] = input[stride*0] + input[stride*8];
+  step[ 1] = input[stride*0] - input[stride*8];
+
+  temp1 = input[stride*4]*C12;
+  temp2 = input[stride*12]*C4;
+
+  temp1 -= temp2;
+  temp1 = DownshiftMultiply(temp1);
+  temp1 *= C8;
+
+  step[ 2] = DownshiftMultiplyBy2(temp1);
+
+  temp1 = input[stride*4]*C4;
+  temp2 = input[stride*12]*C12;
+  temp1 += temp2;
+  temp1 = DownshiftMultiply(temp1);
+  temp1 *= C8;
+  step[ 3] = DownshiftMultiplyBy2(temp1);
+
+  temp1 = input[stride*2]*C8;
+  temp1 = DownshiftMultiplyBy2(temp1);
+  temp2 = input[stride*6] + input[stride*10];
+
+  step[ 4] = temp1 + temp2;
+  step[ 5] = temp1 - temp2;
+
+  temp1 = input[stride*14]*C8;
+  temp1 = DownshiftMultiplyBy2(temp1);
+  temp2 = input[stride*6] - input[stride*10];
+
+  step[ 6] = temp2 - temp1;
+  step[ 7] = temp2 + temp1;
+
+  // for odd input
+  temp1 = input[stride*3]*C12;
+  temp2 = input[stride*13]*C4;
+  temp1 += temp2;
+  temp1 = DownshiftMultiply(temp1);
+  temp1 *= C8;
+  intermediate[ 8] = DownshiftMultiplyBy2(temp1);
+
+  temp1 = input[stride*3]*C4;
+  temp2 = input[stride*13]*C12;
+  temp2 -= temp1;
+  temp2 = DownshiftMultiply(temp2);
+  temp2 *= C8;
+  intermediate[ 9] = DownshiftMultiplyBy2(temp2);
+
+  intermediate[10] = DownshiftMultiplyBy2(input[stride*9]*C8);
+  intermediate[11] = input[stride*15] - input[stride*1];
+  intermediate[12] = input[stride*15] + input[stride*1];
+  intermediate[13] = DownshiftMultiplyBy2((input[stride*7]*C8));
+
+  temp1 = input[stride*11]*C12;
+  temp2 = input[stride*5]*C4;
+  temp2 -= temp1;
+  temp2 = DownshiftMultiply(temp2);
+  temp2 *= C8;
+  intermediate[14] = DownshiftMultiplyBy2(temp2);
+
+  temp1 = input[stride*11]*C4;
+  temp2 = input[stride*5]*C12;
+  temp1 += temp2;
+  temp1 = DownshiftMultiply(temp1);
+  temp1 *= C8;
+  intermediate[15] = DownshiftMultiplyBy2(temp1);
+
+  step[ 8] = intermediate[ 8] + intermediate[14];
+  step[ 9] = intermediate[ 9] + intermediate[15];
+  step[10] = intermediate[10] + intermediate[11];
+  step[11] = intermediate[10] - intermediate[11];
+  step[12] = intermediate[12] + intermediate[13];
+  step[13] = intermediate[12] - intermediate[13];
+  step[14] = intermediate[ 8] - intermediate[14];
+  step[15] = intermediate[ 9] - intermediate[15];
+
+  // step 3
+  output[stride*0] = step[ 0] + step[ 3];
+  output[stride*1] = step[ 1] + step[ 2];
+  output[stride*2] = step[ 1] - step[ 2];
+  output[stride*3] = step[ 0] - step[ 3];
+
+  temp1 = step[ 4]*C14;
+  temp2 = step[ 7]*C2;
+  temp1 -= temp2;
+  output[stride*4] =  DownshiftMultiply(temp1);
+
+  temp1 = step[ 4]*C2;
+  temp2 = step[ 7]*C14;
+  temp1 += temp2;
+  output[stride*7] =  DownshiftMultiply(temp1);
+
+  temp1 = step[ 5]*C10;
+  temp2 = step[ 6]*C6;
+  temp1 -= temp2;
+  output[stride*5] =  DownshiftMultiply(temp1);
+
+  temp1 = step[ 5]*C6;
+  temp2 = step[ 6]*C10;
+  temp1 += temp2;
+  output[stride*6] =  DownshiftMultiply(temp1);
+
+  output[stride*8] = step[ 8] + step[11];
+  output[stride*9] = step[ 9] + step[10];
+  output[stride*10] = step[ 9] - step[10];
+  output[stride*11] = step[ 8] - step[11];
+  output[stride*12] = step[12] + step[15];
+  output[stride*13] = step[13] + step[14];
+  output[stride*14] = step[13] - step[14];
+  output[stride*15] = step[12] - step[15];
+
+  // output 4
+  step[ 0] = output[stride*0] + output[stride*7];
+  step[ 1] = output[stride*1] + output[stride*6];
+  step[ 2] = output[stride*2] + output[stride*5];
+  step[ 3] = output[stride*3] + output[stride*4];
+  step[ 4] = output[stride*3] - output[stride*4];
+  step[ 5] = output[stride*2] - output[stride*5];
+  step[ 6] = output[stride*1] - output[stride*6];
+  step[ 7] = output[stride*0] - output[stride*7];
+
+  temp1 = output[stride*8]*C7;
+  temp2 = output[stride*15]*C9;
+  temp1 -= temp2;
+  step[ 8] = DownshiftMultiply(temp1);
+
+  temp1 = output[stride*9]*C11;
+  temp2 = output[stride*14]*C5;
+  temp1 += temp2;
+  step[ 9] = DownshiftMultiply(temp1);
+
+  temp1 = output[stride*10]*C3;
+  temp2 = output[stride*13]*C13;
+  temp1 -= temp2;
+  step[10] = DownshiftMultiply(temp1);
+
+  temp1 = output[stride*11]*C15;
+  temp2 = output[stride*12]*C1;
+  temp1 += temp2;
+  step[11] = DownshiftMultiply(temp1);
+
+  temp1 = output[stride*11]*C1;
+  temp2 = output[stride*12]*C15;
+  temp2 -= temp1;
+  step[12] = DownshiftMultiply(temp2);
+
+  temp1 = output[stride*10]*C13;
+  temp2 = output[stride*13]*C3;
+  temp1 += temp2;
+  step[13] = DownshiftMultiply(temp1);
+
+  temp1 = output[stride*9]*C5;
+  temp2 = output[stride*14]*C11;
+  temp2 -= temp1;
+  step[14] = DownshiftMultiply(temp2);
+
+  temp1 = output[stride*8]*C9;
+  temp2 = output[stride*15]*C7;
+  temp1 += temp2;
+  step[15] = DownshiftMultiply(temp1);
+
+  // step 5
+  output[stride*0] = step[0] + step[15];
+  output[stride*1] = step[1] + step[14];
+  output[stride*2] = step[2] + step[13];
+  output[stride*3] = step[3] + step[12];
+  output[stride*4] = step[4] + step[11];
+  output[stride*5] = step[5] + step[10];
+  output[stride*6] = step[6] + step[ 9];
+  output[stride*7] = step[7] + step[ 8];
+
+  output[stride*15] = step[0] - step[15];
+  output[stride*14] = step[1] - step[14];
+  output[stride*13] = step[2] - step[13];
+  output[stride*12] = step[3] - step[12];
+  output[stride*11] = step[4] - step[11];
+  output[stride*10] = step[5] - step[10];
+  output[stride*9] = step[6] - step[ 9];
+  output[stride*8] = step[7] - step[ 8];
+}
+static void butterfly_32_idct_1d(double *input, double *output, int stride) {
+  static const double C1 = 0.998795456205;  // cos(pi * 1 / 64)
+  static const double C3 = 0.989176509965;  // cos(pi * 3 / 64)
+  static const double C5 = 0.970031253195;  // cos(pi * 5 / 64)
+  static const double C7 = 0.941544065183;  // cos(pi * 7 / 64)
+  static const double C9 = 0.903989293123;  // cos(pi * 9 / 64)
+  static const double C11 = 0.857728610000;  // cos(pi * 11 / 64)
+  static const double C13 = 0.803207531481;  // cos(pi * 13 / 64)
+  static const double C15 = 0.740951125355;  // cos(pi * 15 / 64)
+  static const double C16 = 0.707106781187;  // cos(pi * 16 / 64)
+  static const double C17 = 0.671558954847;  // cos(pi * 17 / 64)
+  static const double C19 = 0.595699304492;  // cos(pi * 19 / 64)
+  static const double C21 = 0.514102744193;  // cos(pi * 21 / 64)
+  static const double C23 = 0.427555093430;  // cos(pi * 23 / 64)
+  static const double C25 = 0.336889853392;  // cos(pi * 25 / 64)
+  static const double C27 = 0.242980179903;  // cos(pi * 27 / 64)
+  static const double C29 = 0.146730474455;  // cos(pi * 29 / 64)
+  static const double C31 = 0.049067674327;  // cos(pi * 31 / 64)
+
+  double step1[32];
+  double step2[32];
+
+  step1[ 0] = input[stride*0];
+  step1[ 1] = input[stride*2];
+  step1[ 2] = input[stride*4];
+  step1[ 3] = input[stride*6];
+  step1[ 4] = input[stride*8];
+  step1[ 5] = input[stride*10];
+  step1[ 6] = input[stride*12];
+  step1[ 7] = input[stride*14];
+  step1[ 8] = input[stride*16];
+  step1[ 9] = input[stride*18];
+  step1[10] = input[stride*20];
+  step1[11] = input[stride*22];
+  step1[12] = input[stride*24];
+  step1[13] = input[stride*26];
+  step1[14] = input[stride*28];
+  step1[15] = input[stride*30];
+
+  step1[16] = DownshiftMultiplyBy2(input[stride*1]*C16);
+  step1[17] = (input[stride*3] + input[stride*1]);
+  step1[18] = (input[stride*5] + input[stride*3]);
+  step1[19] = (input[stride*7] + input[stride*5]);
+  step1[20] = (input[stride*9] + input[stride*7]);
+  step1[21] = (input[stride*11] + input[stride*9]);
+  step1[22] = (input[stride*13] + input[stride*11]);
+  step1[23] = (input[stride*15] + input[stride*13]);
+  step1[24] = (input[stride*17] + input[stride*15]);
+  step1[25] = (input[stride*19] + input[stride*17]);
+  step1[26] = (input[stride*21] + input[stride*19]);
+  step1[27] = (input[stride*23] + input[stride*21]);
+  step1[28] = (input[stride*25] + input[stride*23]);
+  step1[29] = (input[stride*27] + input[stride*25]);
+  step1[30] = (input[stride*29] + input[stride*27]);
+  step1[31] = (input[stride*31] + input[stride*29]);
+
+  idct16(step1, step2, 1);
+  idct16(step1 + 16, step2 + 16, 1);
+
+  step2[16] = DownshiftMultiply(step2[16] / (2*C1));
+  step2[17] = DownshiftMultiply(step2[17] / (2*C3));
+  step2[18] = DownshiftMultiply(step2[18] / (2*C5));
+  step2[19] = DownshiftMultiply(step2[19] / (2*C7));
+  step2[20] = DownshiftMultiply(step2[20] / (2*C9));
+  step2[21] = DownshiftMultiply(step2[21] / (2*C11));
+  step2[22] = DownshiftMultiply(step2[22] / (2*C13));
+  step2[23] = DownshiftMultiply(step2[23] / (2*C15));
+  step2[24] = DownshiftMultiply(step2[24] / (2*C17));
+  step2[25] = DownshiftMultiply(step2[25] / (2*C19));
+  step2[26] = DownshiftMultiply(step2[26] / (2*C21));
+  step2[27] = DownshiftMultiply(step2[27] / (2*C23));
+  step2[28] = DownshiftMultiply(step2[28] / (2*C25));
+  step2[29] = DownshiftMultiply(step2[29] / (2*C27));
+  step2[30] = DownshiftMultiply(step2[30] / (2*C29));
+  step2[31] = DownshiftMultiply(step2[31] / (2*C31));
+
+  output[stride* 0] = step2[ 0] + step2[16];
+  output[stride* 1] = step2[ 1] + step2[17];
+  output[stride* 2] = step2[ 2] + step2[18];
+  output[stride* 3] = step2[ 3] + step2[19];
+  output[stride* 4] = step2[ 4] + step2[20];
+  output[stride* 5] = step2[ 5] + step2[21];
+  output[stride* 6] = step2[ 6] + step2[22];
+  output[stride* 7] = step2[ 7] + step2[23];
+  output[stride* 8] = step2[ 8] + step2[24];
+  output[stride* 9] = step2[ 9] + step2[25];
+  output[stride*10] = step2[10] + step2[26];
+  output[stride*11] = step2[11] + step2[27];
+  output[stride*12] = step2[12] + step2[28];
+  output[stride*13] = step2[13] + step2[29];
+  output[stride*14] = step2[14] + step2[30];
+  output[stride*15] = step2[15] + step2[31];
+  output[stride*16] = step2[15] - step2[(31 - 0)];
+  output[stride*17] = step2[14] - step2[(31 - 1)];
+  output[stride*18] = step2[13] - step2[(31 - 2)];
+  output[stride*19] = step2[12] - step2[(31 - 3)];
+  output[stride*20] = step2[11] - step2[(31 - 4)];
+  output[stride*21] = step2[10] - step2[(31 - 5)];
+  output[stride*22] = step2[ 9] - step2[(31 - 6)];
+  output[stride*23] = step2[ 8] - step2[(31 - 7)];
+  output[stride*24] = step2[ 7] - step2[(31 - 8)];
+  output[stride*25] = step2[ 6] - step2[(31 - 9)];
+  output[stride*26] = step2[ 5] - step2[(31 - 10)];
+  output[stride*27] = step2[ 4] - step2[(31 - 11)];
+  output[stride*28] = step2[ 3] - step2[(31 - 12)];
+  output[stride*29] = step2[ 2] - step2[(31 - 13)];
+  output[stride*30] = step2[ 1] - step2[(31 - 14)];
+  output[stride*31] = step2[ 0] - step2[(31 - 15)];
+}
+
+void vp9_short_idct32x32_c(short *input, short *output, int pitch) {
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+  {
+    double out[32*32], out2[32*32];
+    const int short_pitch = pitch >> 1;
+    int i, j;
+    // First transform rows
+    for (i = 0; i < 32; ++i) {
+      double temp_in[32], temp_out[32];
+      for (j = 0; j < 32; ++j)
+        temp_in[j] = input[j + i*short_pitch];
+      butterfly_32_idct_1d(temp_in, temp_out, 1);
+      for (j = 0; j < 32; ++j)
+        out[j + i*32] = temp_out[j];
+    }
+    // Then transform columns
+    for (i = 0; i < 32; ++i) {
+      double temp_in[32], temp_out[32];
+      for (j = 0; j < 32; ++j)
+        temp_in[j] = out[j*32 + i];
+      butterfly_32_idct_1d(temp_in, temp_out, 1);
+      for (j = 0; j < 32; ++j)
+        out2[j*32 + i] = temp_out[j];
+    }
+    for (i = 0; i < 32*32; ++i)
+      output[i] = round(out2[i]/128);
+  }
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+}
+#else  // CONFIG_DWT32X32HYBRID
+
+#define MAX_BLOCK_LENGTH   64
+#define ENH_PRECISION_BITS 1
+#define ENH_PRECISION_RND ((1 << ENH_PRECISION_BITS) / 2)
+
+// Note: block length must be even for this implementation
+static void synthesis_53_row(int length, short *lowpass, short *highpass,
+                             short *x) {
+  short r, * a, * b;
+  int n;
+
+  n = length >> 1;
+  b = highpass;
+  a = lowpass;
+  r = *highpass;
+  while (n--) {
+    *a++ -= (r + (*b) + 1) >> 1;
+    r = *b++;
+  }
+
+  n = length >> 1;
+  b = highpass;
+  a = lowpass;
+  while (--n) {
+    *x++ = ((r = *a++) + 1) >> 1;
+    *x++ = *b++ + ((r + (*a) + 2) >> 2);
+  }
+  *x++ = ((r = *a) + 1)>>1;
+  *x++ = *b + ((r+1)>>1);
+}
+
+static void synthesis_53_col(int length, short *lowpass, short *highpass,
+                             short *x) {
+  short r, * a, * b;
+  int n;
+
+  n = length >> 1;
+  b = highpass;
+  a = lowpass;
+  r = *highpass;
+  while (n--) {
+    *a++ -= (r + (*b) + 1) >> 1;
+    r = *b++;
+  }
+
+  n = length >> 1;
+  b = highpass;
+  a = lowpass;
+  while (--n) {
+    *x++ = r = *a++;
+    *x++ = ((*b++) << 1) + ((r + (*a) + 1) >> 1);
+  }
+  *x++ = r = *a;
+  *x++ = ((*b) << 1) + r;
+}
+
+// NOTE: Using a 5/3 integer wavelet for now. Explore using a wavelet
+// with a better response later
+void dyadic_synthesize(int levels, int width, int height, short *c, int pitch_c,
+                       short *x, int pitch_x) {
+  int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
+  short buffer[2 * MAX_BLOCK_LENGTH];
+
+  th[0] = hh;
+  tw[0] = hw;
+  for (i = 1; i <= levels; i++) {
+    th[i] = (th[i - 1] + 1) >> 1;
+    tw[i] = (tw[i - 1] + 1) >> 1;
+  }
+  for (lv = levels - 1; lv >= 0; lv--) {
+    nh = th[lv];
+    nw = tw[lv];
+    hh = th[lv + 1];
+    hw = tw[lv + 1];
+    if ((nh < 2) || (nw < 2)) continue;
+    for (j = 0; j < nw; j++) {
+      for (i = 0; i < nh; i++)
+        buffer[i] = c[i * pitch_c + j];
+      synthesis_53_col(nh, buffer, buffer + hh, buffer + nh);
+      for (i = 0; i < nh; i++)
+        c[i * pitch_c + j] = buffer[i + nh];
+    }
+    for (i = 0; i < nh; i++) {
+      memcpy(buffer, &c[i * pitch_c], nw * sizeof(short));
+      synthesis_53_row(nw, buffer, buffer + hw, &c[i * pitch_c]);
+    }
+  }
+  for (i = 0; i < height; i++)
+    for (j = 0; j < width; j++)
+      x[i * pitch_x + j] = (c[i * pitch_c + j] + ENH_PRECISION_RND) >>
+      ENH_PRECISION_BITS;
+}
+
+void vp9_short_idct32x32_c(short *input, short *output, int pitch) {
+  // assume out is a 32x32 buffer
+  short buffer[16 * 16];
+  short buffer2[32 * 32];
+  const int short_pitch = pitch >> 1;
+  int i;
+  // TODO(debargha): Implement more efficiently by adding output pitch
+  // argument to the idct16x16 function
+  vp9_short_idct16x16_c(input, buffer, pitch);
+  for (i = 0; i < 16; ++i) {
+    vpx_memcpy(buffer2 + i * 32, buffer + i * 16, sizeof(short) * 16);
+    vpx_memcpy(buffer2 + i * 32 + 16, input + i * short_pitch + 16,
+               sizeof(short) * 16);
+  }
+  for (; i < 32; ++i) {
+    vpx_memcpy(buffer2 + i * 32, input + i * short_pitch,
+               sizeof(short) * 32);
+  }
+  dyadic_synthesize(1, 32, 32, buffer2, 32, output, 32);
+}
+#endif  // CONFIG_DWT32X32HYBRID
+#endif  // CONFIG_TX32X32

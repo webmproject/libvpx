@@ -143,3 +143,16 @@ void vp9_inverse_transform_mb_16x16(MACROBLOCKD *xd) {
   vp9_inverse_transform_mby_16x16(xd);
   vp9_inverse_transform_mbuv_8x8(xd);
 }
+
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+void vp9_inverse_transform_sby_32x32(SUPERBLOCKD *xd_sb) {
+  vp9_short_idct32x32(xd_sb->dqcoeff, xd_sb->diff, 64);
+}
+
+void vp9_inverse_transform_sbuv_16x16(SUPERBLOCKD *xd_sb) {
+  vp9_inverse_transform_b_16x16(xd_sb->dqcoeff + 1024,
+                                xd_sb->diff + 1024, 32);
+  vp9_inverse_transform_b_16x16(xd_sb->dqcoeff + 1280,
+                                xd_sb->diff + 1280, 32);
+}
+#endif

@@ -117,7 +117,7 @@ static void tokenize_b(VP9_COMP *cpi,
                        int dry_run) {
   int pt; /* near block/prev token context index */
   int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0;
-  const int eob = b->eob;     /* one beyond last nonzero coeff */
+  int eob = b->eob;     /* one beyond last nonzero coeff */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   const short *qcoeff_ptr = b->qcoeff;
   int seg_eob;
@@ -177,7 +177,23 @@ static void tokenize_b(VP9_COMP *cpi,
         counts = cpi->coef_counts_16x16;
         probs = cpi->common.fc.coef_probs_16x16;
       }
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+      if (type == PLANE_TYPE_UV) {
+        int uv_idx = (((int) (b - xd->block)) - 16) >> 2;
+        qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 256 * uv_idx;
+      }
+#endif
       break;
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+    case TX_32X32:
+      seg_eob = 1024;
+      bands = vp9_coef_bands_32x32;
+      scan = vp9_default_zig_zag1d_32x32;
+      counts = cpi->coef_counts_32x32;
+      probs = cpi->common.fc.coef_probs_32x32;
+      qcoeff_ptr = xd->sb_coeff_data.qcoeff;
+      break;
+#endif
   }
 
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB))
@@ -282,6 +298,79 @@ int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd) {
 static int mb_is_skippable_16x16(MACROBLOCKD *xd) {
   return (vp9_mby_is_skippable_16x16(xd) & vp9_mbuv_is_skippable_8x8(xd));
 }
+
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd) {
+  int skip = 1;
+  skip &= !xd->block[0].eob;
+  return skip;
+}
+
+int vp9_sbuv_is_skippable_16x16(MACROBLOCKD *xd) {
+  return (!xd->block[16].eob) & (!xd->block[20].eob);
+}
+
+static int sb_is_skippable_32x32(MACROBLOCKD *xd) {
+  return vp9_sby_is_skippable_32x32(xd) &&
+         vp9_sbuv_is_skippable_16x16(xd);
+}
+
+void vp9_tokenize_sb(VP9_COMP *cpi,
+                     MACROBLOCKD *xd,
+                     TOKENEXTRA **t,
+                     int dry_run) {
+  VP9_COMMON * const cm = &cpi->common;
+  MB_MODE_INFO * const mbmi = &xd->mode_info_context->mbmi;
+  TOKENEXTRA *t_backup = *t;
+  ENTROPY_CONTEXT *A[2] = { (ENTROPY_CONTEXT *) (xd->above_context + 0),
+                            (ENTROPY_CONTEXT *) (xd->above_context + 1), };
+  ENTROPY_CONTEXT *L[2] = { (ENTROPY_CONTEXT *) (xd->left_context + 0),
+                            (ENTROPY_CONTEXT *) (xd->left_context + 1), };
+  const int mb_skip_context = vp9_get_pred_context(cm, xd, PRED_MBSKIP);
+  const int segment_id = mbmi->segment_id;
+  const int skip_inc =  !vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
+                        (vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) != 0);
+  int b;
+
+  mbmi->mb_skip_coeff = sb_is_skippable_32x32(xd);
+
+  if (mbmi->mb_skip_coeff) {
+    if (!dry_run)
+      cpi->skip_true_count[mb_skip_context] += skip_inc;
+    if (!cm->mb_no_coeff_skip) {
+      vp9_stuff_sb(cpi, xd, t, dry_run);
+    } else {
+      vp9_fix_contexts_sb(xd);
+    }
+    if (dry_run)
+      *t = t_backup;
+    return;
+  }
+
+  if (!dry_run)
+    cpi->skip_false_count[mb_skip_context] += skip_inc;
+
+  tokenize_b(cpi, xd, xd->block, t, PLANE_TYPE_Y_WITH_DC,
+             A[0], L[0], TX_32X32, dry_run);
+  A[0][1] = A[0][2] = A[0][3] = A[0][0];
+  L[0][1] = L[0][2] = L[0][3] = L[0][0];
+
+  for (b = 16; b < 24; b += 4) {
+    tokenize_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
+               A[0] + vp9_block2above_8x8[b], L[0] + vp9_block2left_8x8[b],
+               TX_16X16, dry_run);
+    A[0][vp9_block2above_8x8[b] + 1] = A[0][vp9_block2above_8x8[b]];
+    L[0][vp9_block2left_8x8[b] + 1]  = L[0][vp9_block2left_8x8[b]];
+  }
+  vpx_memset(&A[0][8], 0, sizeof(A[0][8]));
+  vpx_memset(&L[0][8], 0, sizeof(L[0][8]));
+  vpx_memcpy(A[1], A[0], sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memcpy(L[1], L[0], sizeof(ENTROPY_CONTEXT_PLANES));
+
+  if (dry_run)
+    *t = t_backup;
+}
+#endif
 
 void vp9_tokenize_mb(VP9_COMP *cpi,
                      MACROBLOCKD *xd,
@@ -717,6 +806,13 @@ static __inline void stuff_b(VP9_COMP *cpi,
         probs = cpi->common.fc.coef_probs_16x16;
       }
       break;
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+    case TX_32X32:
+      bands = vp9_coef_bands_32x32;
+      counts = cpi->coef_counts_32x32;
+      probs = cpi->common.fc.coef_probs_32x32;
+      break;
+#endif
   }
   band = bands[(type == PLANE_TYPE_Y_NO_DC) ? 1 : 0];
   t->Token = DCT_EOB_TOKEN;
@@ -775,7 +871,8 @@ static void stuff_mb_16x16(VP9_COMP *cpi, MACROBLOCKD *xd,
   A[1] = A[2] = A[3] = A[0];
   L[1] = L[2] = L[3] = L[0];
   for (b = 16; b < 24; b += 4) {
-    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV, A + vp9_block2above[b],
+    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
+            A + vp9_block2above_8x8[b],
             L + vp9_block2above_8x8[b], TX_8X8, dry_run);
     A[vp9_block2above_8x8[b] + 1] = A[vp9_block2above_8x8[b]];
     L[vp9_block2left_8x8[b] + 1]  = L[vp9_block2left_8x8[b]];
@@ -869,6 +966,43 @@ void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
   }
 }
 
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+static void stuff_sb_32x32(VP9_COMP *cpi, MACROBLOCKD *xd,
+                               TOKENEXTRA **t, int dry_run) {
+  ENTROPY_CONTEXT *A[2] = { (ENTROPY_CONTEXT *) (xd->above_context + 0),
+                            (ENTROPY_CONTEXT *) (xd->above_context + 1), };
+  ENTROPY_CONTEXT *L[2] = { (ENTROPY_CONTEXT *) (xd->left_context + 0),
+                            (ENTROPY_CONTEXT *) (xd->left_context + 1), };
+  int b;
+
+  stuff_b(cpi, xd, xd->block, t, PLANE_TYPE_Y_WITH_DC,
+          A[0], L[0], TX_32X32, dry_run);
+  A[0][1] = A[0][2] = A[0][3] = A[0][0];
+  L[0][1] = L[0][2] = L[0][3] = L[0][0];
+  for (b = 16; b < 24; b += 4) {
+    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
+            A[0] + vp9_block2above_8x8[b],
+            L[0] + vp9_block2above_8x8[b], TX_16X16, dry_run);
+    A[0][vp9_block2above_8x8[b] + 1] = A[0][vp9_block2above_8x8[b]];
+    L[0][vp9_block2left_8x8[b] + 1]  = L[0][vp9_block2left_8x8[b]];
+  }
+  vpx_memset(&A[0][8], 0, sizeof(A[0][8]));
+  vpx_memset(&L[0][8], 0, sizeof(L[0][8]));
+  vpx_memcpy(A[1], A[0], sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memcpy(L[1], L[0], sizeof(ENTROPY_CONTEXT_PLANES));
+}
+
+void vp9_stuff_sb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
+  TOKENEXTRA * const t_backup = *t;
+
+  stuff_sb_32x32(cpi, xd, t, dry_run);
+
+  if (dry_run) {
+    *t = t_backup;
+  }
+}
+#endif
+
 void vp9_fix_contexts(MACROBLOCKD *xd) {
   /* Clear entropy contexts for blocks */
   if ((xd->mode_info_context->mbmi.mode != B_PRED
@@ -885,3 +1019,10 @@ void vp9_fix_contexts(MACROBLOCKD *xd) {
     xd->left_context->y2 = 1;
   }
 }
+
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+void vp9_fix_contexts_sb(MACROBLOCKD *xd) {
+  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
+  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
+}
+#endif

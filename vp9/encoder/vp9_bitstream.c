@@ -1200,8 +1200,13 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
           TX_SIZE sz = mi->txfm_size;
           // FIXME(rbultje) code ternary symbol once all experiments are merged
           vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
-          if (sz != TX_4X4 && mode != I8X8_PRED && mode != SPLITMV)
+          if (sz != TX_4X4 && mode != I8X8_PRED && mode != SPLITMV) {
             vp9_write(bc, sz != TX_8X8, pc->prob_tx[1]);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+            if (mi->encoded_as_sb && sz != TX_8X8)
+              vp9_write(bc, sz != TX_16X16, pc->prob_tx[2]);
+#endif
+          }
         }
 
 #ifdef ENTROPY_STATS
@@ -1337,8 +1342,13 @@ static void write_mb_modes_kf(const VP9_COMMON  *c,
     TX_SIZE sz = m->mbmi.txfm_size;
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
-    if (sz != TX_4X4 && ym <= TM_PRED)
+    if (sz != TX_4X4 && ym <= TM_PRED) {
       vp9_write(bc, sz != TX_8X8, c->prob_tx[1]);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+      if (m->mbmi.encoded_as_sb && sz != TX_8X8)
+        vp9_write(bc, sz != TX_16X16, c->prob_tx[2]);
+#endif
+    }
   }
 }
 
@@ -1551,25 +1561,50 @@ static void build_coeff_contexts(VP9_COMP *cpi) {
         }
       }
     }
-  }
-  for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
-    for (j = 0; j < COEF_BANDS; ++j) {
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-          continue;
-        vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
-          cpi->frame_hybrid_coef_probs_16x16[i][j][k],
-          cpi->frame_hybrid_branch_ct_16x16[i][j][k],
-          cpi->hybrid_coef_counts_16x16[i][j][k], 256, 1);
+    for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
+      for (j = 0; j < COEF_BANDS; ++j) {
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+          if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+            continue;
+          vp9_tree_probs_from_distribution(
+            MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
+            cpi->frame_hybrid_coef_probs_16x16[i][j][k],
+            cpi->frame_hybrid_branch_ct_16x16[i][j][k],
+            cpi->hybrid_coef_counts_16x16[i][j][k], 256, 1);
 #ifdef ENTROPY_STATS
-        if (!cpi->dummy_packing)
-          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
-            hybrid_context_counters_16x16[i][j][k][t] += cpi->hybrid_coef_counts_16x16[i][j][k][t];
+          if (!cpi->dummy_packing)
+            for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+              hybrid_context_counters_16x16[i][j][k][t] +=
+                cpi->hybrid_coef_counts_16x16[i][j][k][t];
 #endif
+        }
       }
     }
   }
+
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  if (cpi->common.txfm_mode > ALLOW_16X16) {
+    for (i = 0; i < BLOCK_TYPES_32X32; ++i) {
+      for (j = 0; j < COEF_BANDS; ++j) {
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+          if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+            continue;
+          vp9_tree_probs_from_distribution(
+            MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
+            cpi->frame_coef_probs_32x32[i][j][k],
+            cpi->frame_branch_ct_32x32[i][j][k],
+            cpi->coef_counts_32x32[i][j][k], 256, 1);
+#ifdef ENTROPY_STATS
+          if (!cpi->dummy_packing)
+            for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+              context_counters_32x32[i][j][k][t] +=
+                cpi->coef_counts_32x32[i][j][k][t];
+#endif
+        }
+      }
+    }
+  }
+#endif
 }
 
 static void update_coef_probs_common(
@@ -1714,6 +1749,15 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
                              cpi->common.fc.hybrid_coef_probs_16x16,
                              cpi->frame_hybrid_branch_ct_16x16);
   }
+
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  if (cpi->common.txfm_mode > ALLOW_16X16) {
+    update_coef_probs_common(bc,
+                             cpi->frame_coef_probs_32x32,
+                             cpi->common.fc.coef_probs_32x32,
+                             cpi->frame_branch_ct_32x32);
+  }
+#endif
 }
 
 #ifdef PACKET_TESTING
@@ -1955,18 +1999,53 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
   {
     if (pc->txfm_mode == TX_MODE_SELECT) {
-      pc->prob_tx[0] = get_prob(cpi->txfm_count[0] + cpi->txfm_count_8x8p[0],
-                                cpi->txfm_count[0] + cpi->txfm_count[1] + cpi->txfm_count[2] +
-                                cpi->txfm_count_8x8p[0] + cpi->txfm_count_8x8p[1]);
-      pc->prob_tx[1] = get_prob(cpi->txfm_count[1], cpi->txfm_count[1] + cpi->txfm_count[2]);
+      pc->prob_tx[0] = get_prob(cpi->txfm_count_32x32p[TX_4X4] +
+                                cpi->txfm_count_16x16p[TX_4X4] +
+                                cpi->txfm_count_8x8p[TX_4X4],
+                                cpi->txfm_count_32x32p[TX_4X4] +
+                                cpi->txfm_count_32x32p[TX_8X8] +
+                                cpi->txfm_count_32x32p[TX_16X16] +
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+                                cpi->txfm_count_32x32p[TX_32X32] +
+#endif
+                                cpi->txfm_count_16x16p[TX_4X4] +
+                                cpi->txfm_count_16x16p[TX_8X8] +
+                                cpi->txfm_count_16x16p[TX_16X16] +
+                                cpi->txfm_count_8x8p[TX_4X4] +
+                                cpi->txfm_count_8x8p[TX_8X8]);
+      pc->prob_tx[1] = get_prob(cpi->txfm_count_32x32p[TX_8X8] +
+                                cpi->txfm_count_16x16p[TX_8X8],
+                                cpi->txfm_count_32x32p[TX_8X8] +
+                                cpi->txfm_count_32x32p[TX_16X16] +
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+                                cpi->txfm_count_32x32p[TX_32X32] +
+#endif
+                                cpi->txfm_count_16x16p[TX_8X8] +
+                                cpi->txfm_count_16x16p[TX_16X16]);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+      pc->prob_tx[2] = get_prob(cpi->txfm_count_32x32p[TX_16X16],
+                                cpi->txfm_count_32x32p[TX_16X16] +
+                                cpi->txfm_count_32x32p[TX_32X32]);
+#endif
     } else {
       pc->prob_tx[0] = 128;
       pc->prob_tx[1] = 128;
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+      pc->prob_tx[2] = 128;
+#endif
     }
-    vp9_write_literal(&header_bc, pc->txfm_mode, 2);
+    vp9_write_literal(&header_bc, pc->txfm_mode <= 3 ? pc->txfm_mode : 3, 2);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+    if (pc->txfm_mode > ALLOW_16X16) {
+      vp9_write_bit(&header_bc, pc->txfm_mode == TX_MODE_SELECT);
+    }
+#endif
     if (pc->txfm_mode == TX_MODE_SELECT) {
       vp9_write_literal(&header_bc, pc->prob_tx[0], 8);
       vp9_write_literal(&header_bc, pc->prob_tx[1], 8);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+      vp9_write_literal(&header_bc, pc->prob_tx[2], 8);
+#endif
     }
   }
 
@@ -2150,6 +2229,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   vp9_copy(cpi->common.fc.pre_hybrid_coef_probs_8x8, cpi->common.fc.hybrid_coef_probs_8x8);
   vp9_copy(cpi->common.fc.pre_coef_probs_16x16, cpi->common.fc.coef_probs_16x16);
   vp9_copy(cpi->common.fc.pre_hybrid_coef_probs_16x16, cpi->common.fc.hybrid_coef_probs_16x16);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  vp9_copy(cpi->common.fc.pre_coef_probs_32x32,
+           cpi->common.fc.coef_probs_32x32);
+#endif
 #if CONFIG_SUPERBLOCKS
   vp9_copy(cpi->common.fc.pre_sb_ymode_prob, cpi->common.fc.sb_ymode_prob);
 #endif

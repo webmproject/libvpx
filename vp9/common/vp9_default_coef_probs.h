@@ -1375,3 +1375,5 @@ static const vp9_prob
     }
   }
 };
+
+#define default_coef_probs_32x32 default_coef_probs_16x16

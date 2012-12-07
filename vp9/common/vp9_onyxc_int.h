@@ -58,6 +58,9 @@ typedef struct frame_contexts {
   vp9_prob hybrid_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   vp9_prob coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   vp9_prob hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  vp9_prob coef_probs_32x32 [BLOCK_TYPES_32X32] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+#endif
 
   nmv_context nmvc;
   nmv_context pre_nmvc;
@@ -95,6 +98,11 @@ typedef struct frame_contexts {
   vp9_prob pre_hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  vp9_prob pre_coef_probs_32x32 [BLOCK_TYPES_32X32] [COEF_BANDS]
+      [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+#endif
+
   unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
   unsigned int hybrid_coef_counts [BLOCK_TYPES] [COEF_BANDS]
@@ -109,6 +117,11 @@ typedef struct frame_contexts {
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
   unsigned int hybrid_coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  unsigned int coef_counts_32x32 [BLOCK_TYPES_32X32] [COEF_BANDS]
+      [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+#endif
 
   nmv_context_counts NMVcount;
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
@@ -139,8 +152,11 @@ typedef enum {
   ONLY_4X4            = 0,
   ALLOW_8X8           = 1,
   ALLOW_16X16         = 2,
-  TX_MODE_SELECT      = 3,
-  NB_TXFM_MODES       = 4,
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  ALLOW_32X32         = 3,
+#endif
+  TX_MODE_SELECT      = 3 + (CONFIG_TX32X32 && CONFIG_SUPERBLOCKS),
+  NB_TXFM_MODES       = 4 + (CONFIG_TX32X32 && CONFIG_SUPERBLOCKS),
 } TXFM_MODE;
 
 typedef struct VP9Common {
@@ -268,7 +284,7 @@ typedef struct VP9Common {
   vp9_prob prob_comppred[COMP_PRED_CONTEXTS];
 
   // FIXME contextualize
-  vp9_prob prob_tx[TX_SIZE_MAX - 1];
+  vp9_prob prob_tx[TX_SIZE_MAX_SB - 1];
 
   vp9_prob mbskip_pred_probs[MBSKIP_CONTEXTS];
 

@@ -168,6 +168,53 @@ void vp9_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
     }
   }
 }
+
+#if CONFIG_TX32X32
+void vp9_recon_sby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
+  int x, y, stride = xd->block[0].dst_stride;
+  short *diff = xd->sb_coeff_data.diff;
+
+  for (y = 0; y < 32; y++) {
+    for (x = 0; x < 32; x++) {
+      int a = dst[x] + diff[x];
+      if (a < 0)
+        a = 0;
+      else if (a > 255)
+        a = 255;
+      dst[x] = a;
+    }
+    dst += stride;
+    diff += 32;
+  }
+}
+
+void vp9_recon_sbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
+  int x, y, stride = xd->block[16].dst_stride;
+  short *udiff = xd->sb_coeff_data.diff + 1024;
+  short *vdiff = xd->sb_coeff_data.diff + 1280;
+
+  for (y = 0; y < 16; y++) {
+    for (x = 0; x < 16; x++) {
+      int u = udst[x] + udiff[x];
+      int v = vdst[x] + vdiff[x];
+      if (u < 0)
+        u = 0;
+      else if (u > 255)
+        u = 255;
+      if (v < 0)
+        v = 0;
+      else if (v > 255)
+        v = 255;
+      udst[x] = u;
+      vdst[x] = v;
+    }
+    udst += stride;
+    vdst += stride;
+    udiff += 16;
+    vdiff += 16;
+  }
+}
+#endif
 #endif
 
 void vp9_recon_mby_c(MACROBLOCKD *xd) {

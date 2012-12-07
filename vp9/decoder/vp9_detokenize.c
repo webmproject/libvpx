@@ -55,8 +55,9 @@
 #define CAT5_PROB3 157
 #define CAT5_PROB4 180
 
-static const unsigned char cat6_prob[14] =
-{ 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0 };
+static const unsigned char cat6_prob[15] = {
+  254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0
+};
 
 void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
   /* Clear entropy contexts */
@@ -161,6 +162,12 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
         coef_counts = fc->hybrid_coef_counts_16x16[type];
       }
       break;
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+    case TX_32X32:
+      coef_probs = fc->coef_probs_32x32[type];
+      coef_counts = fc->coef_counts_32x32[type];
+      break;
+#endif
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
@@ -256,6 +263,54 @@ static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
   return eob;
 }
 
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
+                         MACROBLOCKD* const xd,
+                         BOOL_DECODER* const bc) {
+  ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
+  ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
+  unsigned short* const eobs = xd->eobs;
+  const int segment_id = xd->mode_info_context->mbmi.segment_id;
+  int c, i, eobtotal = 0, seg_eob;
+
+  // Luma block
+  eobs[0] = c = decode_coefs(pbi, xd, bc, A, L, PLANE_TYPE_Y_WITH_DC,
+                             DCT_DCT, get_eob(xd, segment_id, 1024),
+                             xd->sb_coeff_data.qcoeff,
+                             vp9_default_zig_zag1d_32x32,
+                             TX_32X32, vp9_coef_bands_32x32);
+  A[1] = A[2] = A[3] = A[0];
+  L[1] = L[2] = L[3] = L[0];
+  eobtotal += c;
+
+  // 16x16 chroma blocks
+  seg_eob = get_eob(xd, segment_id, 256);
+  for (i = 16; i < 24; i += 4) {
+    ENTROPY_CONTEXT* const a = A + vp9_block2above_8x8[i];
+    ENTROPY_CONTEXT* const l = L + vp9_block2left_8x8[i];
+
+    eobs[i] = c = decode_coefs(pbi, xd, bc, a, l, PLANE_TYPE_UV,
+                               DCT_DCT, seg_eob,
+                               xd->sb_coeff_data.qcoeff + 1024 + (i - 16) * 64,
+                               vp9_default_zig_zag1d_16x16,
+                               TX_16X16, vp9_coef_bands_16x16);
+    a[1] = a[0];
+    l[1] = l[0];
+    eobtotal += c;
+  }
+
+  // no Y2 block
+  vpx_memset(&A[8], 0, sizeof(A[8]));
+  vpx_memset(&L[8], 0, sizeof(L[8]));
+
+  vpx_memcpy(xd->above_context + 1, xd->above_context,
+             sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memcpy(xd->left_context + 1, xd->left_context,
+             sizeof(ENTROPY_CONTEXT_PLANES));
+
+  return eobtotal;
+}
+#endif
 
 static int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
                                       MACROBLOCKD* const xd,

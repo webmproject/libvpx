@@ -109,6 +109,11 @@ typedef struct {
   vp9_prob hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  vp9_prob coef_probs_32x32[BLOCK_TYPES_32X32]
+      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+#endif
+
 #if CONFIG_SUPERBLOCKS
   vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
 #endif
@@ -435,6 +440,15 @@ typedef struct VP9_COMP {
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2_16x16[QINDEX_RANGE][256]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv_16x16[QINDEX_RANGE][256]);
 
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  DECLARE_ALIGNED(16, short, Y1zbin_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, Y2zbin_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, UVzbin_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv_32x32[QINDEX_RANGE][1024]);
+#endif
+
   MACROBLOCK mb;
   VP9_COMMON common;
   VP9_CONFIG oxcf;
@@ -483,8 +497,9 @@ typedef struct VP9_COMP {
   int comp_pred_count[COMP_PRED_CONTEXTS];
   int single_pred_count[COMP_PRED_CONTEXTS];
   // FIXME contextualize
-  int txfm_count[TX_SIZE_MAX];
-  int txfm_count_8x8p[TX_SIZE_MAX - 1];
+  int txfm_count_32x32p[TX_SIZE_MAX_SB];
+  int txfm_count_16x16p[TX_SIZE_MAX_MB];
+  int txfm_count_8x8p[TX_SIZE_MAX_MB - 1];
   int64_t rd_tx_select_diff[NB_TXFM_MODES];
   int rd_tx_select_threshes[4][NB_TXFM_MODES];
 
@@ -603,6 +618,12 @@ typedef struct VP9_COMP {
   unsigned int hybrid_coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
   vp9_prob frame_hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   unsigned int frame_hybrid_branch_ct_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+  unsigned int coef_counts_32x32 [BLOCK_TYPES_32X32] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
+  vp9_prob frame_coef_probs_32x32 [BLOCK_TYPES_32X32] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+  unsigned int frame_branch_ct_32x32 [BLOCK_TYPES_32X32] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+#endif
 
   int gfu_boost;
   int last_boost;

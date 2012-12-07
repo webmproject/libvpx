@@ -34,16 +34,29 @@ extern int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd);
 extern int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block);
 extern int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd);
 extern int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd);
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+extern int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd);
+extern int vp9_sbuv_is_skippable_16x16(MACROBLOCKD *xd);
+#endif
 
 struct VP9_COMP;
 
 extern void vp9_tokenize_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
                             TOKENEXTRA **t, int dry_run);
+extern void vp9_tokenize_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
+                            TOKENEXTRA **t, int dry_run);
 
 extern void vp9_stuff_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
                          TOKENEXTRA **t, int dry_run);
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+extern void vp9_stuff_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
+                         TOKENEXTRA **t, int dry_run);
+#endif
 
 extern void vp9_fix_contexts(MACROBLOCKD *xd);
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+extern void vp9_fix_contexts_sb(MACROBLOCKD *xd);
+#endif
 
 #ifdef ENTROPY_STATS
 void init_context_counters();

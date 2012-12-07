@@ -352,3 +352,30 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
     add_residual(diff_ptr, pred, pitch, dest, stride, 16, 16);
   }
 }
+
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+void vp9_dequant_idct_add_32x32(int16_t *input, const int16_t *dq,
+                                uint8_t *pred, uint8_t *dest, int pitch,
+                                int stride, uint16_t eobs) {
+  short output[1024];
+  int i;
+
+  input[0]= input[0] * dq[0] / 2;
+  for (i = 1; i < 1024; i++)
+    input[i] = input[i] * dq[1] / 2;
+  vp9_short_idct32x32_c(input, output, 64);
+  vpx_memset(input, 0, 2048);
+
+  add_residual(output, pred, pitch, dest, stride, 32, 32);
+}
+
+void vp9_dequant_idct_add_uv_block_16x16_c(short *q, const short *dq,
+                                           unsigned char *dstu,
+                                           unsigned char *dstv,
+                                           int stride,
+                                           unsigned short *eobs) {
+  vp9_dequant_idct_add_16x16_c(q, dq, dstu, dstu, stride, stride, eobs[0]);
+  vp9_dequant_idct_add_16x16_c(q + 256, dq,
+                               dstv, dstv, stride, stride, eobs[4]);
+}
+#endif

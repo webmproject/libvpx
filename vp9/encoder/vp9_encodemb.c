@@ -108,6 +108,52 @@ void vp9_subtract_mby_s_c(short *diff, const unsigned char *src, int src_stride,
   }
 }
 
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+void vp9_subtract_sby_s_c(short *diff, const unsigned char *src, int src_stride,
+                          const unsigned char *pred, int dst_stride) {
+  int r, c;
+
+  for (r = 0; r < 32; r++) {
+    for (c = 0; c < 32; c++) {
+      diff[c] = src[c] - pred[c];
+    }
+
+    diff += 32;
+    pred += dst_stride;
+    src  += src_stride;
+  }
+}
+
+void vp9_subtract_sbuv_s_c(short *diff, const unsigned char *usrc,
+                           const unsigned char *vsrc, int src_stride,
+                           const unsigned char *upred,
+                           const unsigned char *vpred, int dst_stride) {
+  short *udiff = diff + 1024;
+  short *vdiff = diff + 1024 + 256;
+  int r, c;
+
+  for (r = 0; r < 16; r++) {
+    for (c = 0; c < 16; c++) {
+      udiff[c] = usrc[c] - upred[c];
+    }
+
+    udiff += 16;
+    upred += dst_stride;
+    usrc  += src_stride;
+  }
+
+  for (r = 0; r < 16; r++) {
+    for (c = 0; c < 16; c++) {
+      vdiff[c] = vsrc[c] - vpred[c];
+    }
+
+    vdiff += 16;
+    vpred += dst_stride;
+    vsrc  += src_stride;
+  }
+}
+#endif
+
 void vp9_subtract_mby_c(short *diff, unsigned char *src,
                         unsigned char *pred, int stride) {
   vp9_subtract_mby_s_c(diff, src, stride, pred, 16);
@@ -264,6 +310,22 @@ void vp9_transform_mb_16x16(MACROBLOCK *x) {
   vp9_transform_mby_16x16(x);
   vp9_transform_mbuv_8x8(x);
 }
+
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+void vp9_transform_sby_32x32(MACROBLOCK *x) {
+  SUPERBLOCK * const x_sb = &x->sb_coeff_data;
+  vp9_short_fdct32x32(x_sb->src_diff, x_sb->coeff, 64);
+}
+
+void vp9_transform_sbuv_16x16(MACROBLOCK *x) {
+  SUPERBLOCK * const x_sb = &x->sb_coeff_data;
+  vp9_clear_system_state();
+  x->vp9_short_fdct16x16(x_sb->src_diff + 1024,
+                         x_sb->coeff + 1024, 32);
+  x->vp9_short_fdct16x16(x_sb->src_diff + 1280,
+                         x_sb->coeff + 1280, 32);
+}
+#endif
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 #define RDTRUNC_8x8(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )

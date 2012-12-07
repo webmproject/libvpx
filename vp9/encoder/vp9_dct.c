@@ -1330,3 +1330,461 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *out, int pitch) {
 #undef RIGHT_SHIFT
 #undef ROUNDING
 #endif
+
+#if CONFIG_TX32X32
+#if !CONFIG_DWT32X32HYBRID
+static void dct32_1d(double *input, double *output, int stride) {
+  static const double C1 = 0.998795456205;  // cos(pi * 1 / 64)
+  static const double C2 = 0.995184726672;  // cos(pi * 2 / 64)
+  static const double C3 = 0.989176509965;  // cos(pi * 3 / 64)
+  static const double C4 = 0.980785280403;  // cos(pi * 4 / 64)
+  static const double C5 = 0.970031253195;  // cos(pi * 5 / 64)
+  static const double C6 = 0.956940335732;  // cos(pi * 6 / 64)
+  static const double C7 = 0.941544065183;  // cos(pi * 7 / 64)
+  static const double C8 = 0.923879532511;  // cos(pi * 8 / 64)
+  static const double C9 = 0.903989293123;  // cos(pi * 9 / 64)
+  static const double C10 = 0.881921264348;  // cos(pi * 10 / 64)
+  static const double C11 = 0.857728610000;  // cos(pi * 11 / 64)
+  static const double C12 = 0.831469612303;  // cos(pi * 12 / 64)
+  static const double C13 = 0.803207531481;  // cos(pi * 13 / 64)
+  static const double C14 = 0.773010453363;  // cos(pi * 14 / 64)
+  static const double C15 = 0.740951125355;  // cos(pi * 15 / 64)
+  static const double C16 = 0.707106781187;  // cos(pi * 16 / 64)
+  static const double C17 = 0.671558954847;  // cos(pi * 17 / 64)
+  static const double C18 = 0.634393284164;  // cos(pi * 18 / 64)
+  static const double C19 = 0.595699304492;  // cos(pi * 19 / 64)
+  static const double C20 = 0.555570233020;  // cos(pi * 20 / 64)
+  static const double C21 = 0.514102744193;  // cos(pi * 21 / 64)
+  static const double C22 = 0.471396736826;  // cos(pi * 22 / 64)
+  static const double C23 = 0.427555093430;  // cos(pi * 23 / 64)
+  static const double C24 = 0.382683432365;  // cos(pi * 24 / 64)
+  static const double C25 = 0.336889853392;  // cos(pi * 25 / 64)
+  static const double C26 = 0.290284677254;  // cos(pi * 26 / 64)
+  static const double C27 = 0.242980179903;  // cos(pi * 27 / 64)
+  static const double C28 = 0.195090322016;  // cos(pi * 28 / 64)
+  static const double C29 = 0.146730474455;  // cos(pi * 29 / 64)
+  static const double C30 = 0.098017140330;  // cos(pi * 30 / 64)
+  static const double C31 = 0.049067674327;  // cos(pi * 31 / 64)
+
+  double step[32];
+
+  // Stage 1
+  step[0] = input[stride*0] + input[stride*(32 - 1)];
+  step[1] = input[stride*1] + input[stride*(32 - 2)];
+  step[2] = input[stride*2] + input[stride*(32 - 3)];
+  step[3] = input[stride*3] + input[stride*(32 - 4)];
+  step[4] = input[stride*4] + input[stride*(32 - 5)];
+  step[5] = input[stride*5] + input[stride*(32 - 6)];
+  step[6] = input[stride*6] + input[stride*(32 - 7)];
+  step[7] = input[stride*7] + input[stride*(32 - 8)];
+  step[8] = input[stride*8] + input[stride*(32 - 9)];
+  step[9] = input[stride*9] + input[stride*(32 - 10)];
+  step[10] = input[stride*10] + input[stride*(32 - 11)];
+  step[11] = input[stride*11] + input[stride*(32 - 12)];
+  step[12] = input[stride*12] + input[stride*(32 - 13)];
+  step[13] = input[stride*13] + input[stride*(32 - 14)];
+  step[14] = input[stride*14] + input[stride*(32 - 15)];
+  step[15] = input[stride*15] + input[stride*(32 - 16)];
+  step[16] = -input[stride*16] + input[stride*(32 - 17)];
+  step[17] = -input[stride*17] + input[stride*(32 - 18)];
+  step[18] = -input[stride*18] + input[stride*(32 - 19)];
+  step[19] = -input[stride*19] + input[stride*(32 - 20)];
+  step[20] = -input[stride*20] + input[stride*(32 - 21)];
+  step[21] = -input[stride*21] + input[stride*(32 - 22)];
+  step[22] = -input[stride*22] + input[stride*(32 - 23)];
+  step[23] = -input[stride*23] + input[stride*(32 - 24)];
+  step[24] = -input[stride*24] + input[stride*(32 - 25)];
+  step[25] = -input[stride*25] + input[stride*(32 - 26)];
+  step[26] = -input[stride*26] + input[stride*(32 - 27)];
+  step[27] = -input[stride*27] + input[stride*(32 - 28)];
+  step[28] = -input[stride*28] + input[stride*(32 - 29)];
+  step[29] = -input[stride*29] + input[stride*(32 - 30)];
+  step[30] = -input[stride*30] + input[stride*(32 - 31)];
+  step[31] = -input[stride*31] + input[stride*(32 - 32)];
+
+  // Stage 2
+  output[stride*0] = step[0] + step[16 - 1];
+  output[stride*1] = step[1] + step[16 - 2];
+  output[stride*2] = step[2] + step[16 - 3];
+  output[stride*3] = step[3] + step[16 - 4];
+  output[stride*4] = step[4] + step[16 - 5];
+  output[stride*5] = step[5] + step[16 - 6];
+  output[stride*6] = step[6] + step[16 - 7];
+  output[stride*7] = step[7] + step[16 - 8];
+  output[stride*8] = -step[8] + step[16 - 9];
+  output[stride*9] = -step[9] + step[16 - 10];
+  output[stride*10] = -step[10] + step[16 - 11];
+  output[stride*11] = -step[11] + step[16 - 12];
+  output[stride*12] = -step[12] + step[16 - 13];
+  output[stride*13] = -step[13] + step[16 - 14];
+  output[stride*14] = -step[14] + step[16 - 15];
+  output[stride*15] = -step[15] + step[16 - 16];
+
+  output[stride*16] = step[16];
+  output[stride*17] = step[17];
+  output[stride*18] = step[18];
+  output[stride*19] = step[19];
+
+  output[stride*20] = (-step[20] + step[27])*C16;
+  output[stride*21] = (-step[21] + step[26])*C16;
+  output[stride*22] = (-step[22] + step[25])*C16;
+  output[stride*23] = (-step[23] + step[24])*C16;
+
+  output[stride*24] = (step[24] + step[23])*C16;
+  output[stride*25] = (step[25] + step[22])*C16;
+  output[stride*26] = (step[26] + step[21])*C16;
+  output[stride*27] = (step[27] + step[20])*C16;
+
+  output[stride*28] = step[28];
+  output[stride*29] = step[29];
+  output[stride*30] = step[30];
+  output[stride*31] = step[31];
+
+  // Stage 3
+  step[0] = output[stride*0] + output[stride*(8 - 1)];
+  step[1] = output[stride*1] + output[stride*(8 - 2)];
+  step[2] = output[stride*2] + output[stride*(8 - 3)];
+  step[3] = output[stride*3] + output[stride*(8 - 4)];
+  step[4] = -output[stride*4] + output[stride*(8 - 5)];
+  step[5] = -output[stride*5] + output[stride*(8 - 6)];
+  step[6] = -output[stride*6] + output[stride*(8 - 7)];
+  step[7] = -output[stride*7] + output[stride*(8 - 8)];
+  step[8] = output[stride*8];
+  step[9] = output[stride*9];
+  step[10] = (-output[stride*10] + output[stride*13])*C16;
+  step[11] = (-output[stride*11] + output[stride*12])*C16;
+  step[12] = (output[stride*12] + output[stride*11])*C16;
+  step[13] = (output[stride*13] + output[stride*10])*C16;
+  step[14] = output[stride*14];
+  step[15] = output[stride*15];
+
+  step[16] = output[stride*16] + output[stride*23];
+  step[17] = output[stride*17] + output[stride*22];
+  step[18] = output[stride*18] + output[stride*21];
+  step[19] = output[stride*19] + output[stride*20];
+  step[20] = -output[stride*20] + output[stride*19];
+  step[21] = -output[stride*21] + output[stride*18];
+  step[22] = -output[stride*22] + output[stride*17];
+  step[23] = -output[stride*23] + output[stride*16];
+  step[24] = -output[stride*24] + output[stride*31];
+  step[25] = -output[stride*25] + output[stride*30];
+  step[26] = -output[stride*26] + output[stride*29];
+  step[27] = -output[stride*27] + output[stride*28];
+  step[28] = output[stride*28] + output[stride*27];
+  step[29] = output[stride*29] + output[stride*26];
+  step[30] = output[stride*30] + output[stride*25];
+  step[31] = output[stride*31] + output[stride*24];
+
+  // Stage 4
+  output[stride*0] = step[0] + step[3];
+  output[stride*1] = step[1] + step[2];
+  output[stride*2] = -step[2] + step[1];
+  output[stride*3] = -step[3] + step[0];
+  output[stride*4] = step[4];
+  output[stride*5] = (-step[5] + step[6])*C16;
+  output[stride*6] = (step[6] + step[5])*C16;
+  output[stride*7] = step[7];
+  output[stride*8] = step[8] + step[11];
+  output[stride*9] = step[9] + step[10];
+  output[stride*10] = -step[10] + step[9];
+  output[stride*11] = -step[11] + step[8];
+  output[stride*12] = -step[12] + step[15];
+  output[stride*13] = -step[13] + step[14];
+  output[stride*14] = step[14] + step[13];
+  output[stride*15] = step[15] + step[12];
+
+  output[stride*16] = step[16];
+  output[stride*17] = step[17];
+  output[stride*18] = step[18]*-C8 + step[29]*C24;
+  output[stride*19] = step[19]*-C8 + step[28]*C24;
+  output[stride*20] = step[20]*-C24 + step[27]*-C8;
+  output[stride*21] = step[21]*-C24 + step[26]*-C8;
+  output[stride*22] = step[22];
+  output[stride*23] = step[23];
+  output[stride*24] = step[24];
+  output[stride*25] = step[25];
+  output[stride*26] = step[26]*C24 + step[21]*-C8;
+  output[stride*27] = step[27]*C24 + step[20]*-C8;
+  output[stride*28] = step[28]*C8 + step[19]*C24;
+  output[stride*29] = step[29]*C8 + step[18]*C24;
+  output[stride*30] = step[30];
+  output[stride*31] = step[31];
+
+  // Stage 5
+  step[0] = (output[stride*0] + output[stride*1]) * C16;
+  step[1] = (-output[stride*1] + output[stride*0]) * C16;
+  step[2] = output[stride*2]*C24 + output[stride*3] * C8;
+  step[3] = output[stride*3]*C24 - output[stride*2] * C8;
+  step[4] = output[stride*4] + output[stride*5];
+  step[5] = -output[stride*5] + output[stride*4];
+  step[6] = -output[stride*6] + output[stride*7];
+  step[7] = output[stride*7] + output[stride*6];
+  step[8] = output[stride*8];
+  step[9] = output[stride*9]*-C8 + output[stride*14]*C24;
+  step[10] = output[stride*10]*-C24 + output[stride*13]*-C8;
+  step[11] = output[stride*11];
+  step[12] = output[stride*12];
+  step[13] = output[stride*13]*C24 + output[stride*10]*-C8;
+  step[14] = output[stride*14]*C8 + output[stride*9]*C24;
+  step[15] = output[stride*15];
+
+  step[16] = output[stride*16] + output[stride*19];
+  step[17] = output[stride*17] + output[stride*18];
+  step[18] = -output[stride*18] + output[stride*17];
+  step[19] = -output[stride*19] + output[stride*16];
+  step[20] = -output[stride*20] + output[stride*23];
+  step[21] = -output[stride*21] + output[stride*22];
+  step[22] = output[stride*22] + output[stride*21];
+  step[23] = output[stride*23] + output[stride*20];
+  step[24] = output[stride*24] + output[stride*27];
+  step[25] = output[stride*25] + output[stride*26];
+  step[26] = -output[stride*26] + output[stride*25];
+  step[27] = -output[stride*27] + output[stride*24];
+  step[28] = -output[stride*28] + output[stride*31];
+  step[29] = -output[stride*29] + output[stride*30];
+  step[30] = output[stride*30] + output[stride*29];
+  step[31] = output[stride*31] + output[stride*28];
+
+  // Stage 6
+  output[stride*0] = step[0];
+  output[stride*1] = step[1];
+  output[stride*2] = step[2];
+  output[stride*3] = step[3];
+  output[stride*4] = step[4]*C28 + step[7]*C4;
+  output[stride*5] = step[5]*C12 + step[6]*C20;
+  output[stride*6] = step[6]*C12 + step[5]*-C20;
+  output[stride*7] = step[7]*C28 + step[4]*-C4;
+  output[stride*8] = step[8] + step[9];
+  output[stride*9] = -step[9] + step[8];
+  output[stride*10] = -step[10] + step[11];
+  output[stride*11] = step[11] + step[10];
+  output[stride*12] = step[12] + step[13];
+  output[stride*13] = -step[13] + step[12];
+  output[stride*14] = -step[14] + step[15];
+  output[stride*15] = step[15] + step[14];
+
+  output[stride*16] = step[16];
+  output[stride*17] = step[17]*-C4 + step[30]*C28;
+  output[stride*18] = step[18]*-C28 + step[29]*-C4;
+  output[stride*19] = step[19];
+  output[stride*20] = step[20];
+  output[stride*21] = step[21]*-C20 + step[26]*C12;
+  output[stride*22] = step[22]*-C12 + step[25]*-C20;
+  output[stride*23] = step[23];
+  output[stride*24] = step[24];
+  output[stride*25] = step[25]*C12 + step[22]*-C20;
+  output[stride*26] = step[26]*C20 + step[21]*C12;
+  output[stride*27] = step[27];
+  output[stride*28] = step[28];
+  output[stride*29] = step[29]*C28 + step[18]*-C4;
+  output[stride*30] = step[30]*C4 + step[17]*C28;
+  output[stride*31] = step[31];
+
+  // Stage 7
+  step[0] = output[stride*0];
+  step[1] = output[stride*1];
+  step[2] = output[stride*2];
+  step[3] = output[stride*3];
+  step[4] = output[stride*4];
+  step[5] = output[stride*5];
+  step[6] = output[stride*6];
+  step[7] = output[stride*7];
+  step[8] = output[stride*8]*C30 + output[stride*15]*C2;
+  step[9] = output[stride*9]*C14 + output[stride*14]*C18;
+  step[10] = output[stride*10]*C22 + output[stride*13]*C10;
+  step[11] = output[stride*11]*C6 + output[stride*12]*C26;
+  step[12] = output[stride*12]*C6 + output[stride*11]*-C26;
+  step[13] = output[stride*13]*C22 + output[stride*10]*-C10;
+  step[14] = output[stride*14]*C14 + output[stride*9]*-C18;
+  step[15] = output[stride*15]*C30 + output[stride*8]*-C2;
+
+  step[16] = output[stride*16] + output[stride*17];
+  step[17] = -output[stride*17] + output[stride*16];
+  step[18] = -output[stride*18] + output[stride*19];
+  step[19] = output[stride*19] + output[stride*18];
+  step[20] = output[stride*20] + output[stride*21];
+  step[21] = -output[stride*21] + output[stride*20];
+  step[22] = -output[stride*22] + output[stride*23];
+  step[23] = output[stride*23] + output[stride*22];
+  step[24] = output[stride*24] + output[stride*25];
+  step[25] = -output[stride*25] + output[stride*24];
+  step[26] = -output[stride*26] + output[stride*27];
+  step[27] = output[stride*27] + output[stride*26];
+  step[28] = output[stride*28] + output[stride*29];
+  step[29] = -output[stride*29] + output[stride*28];
+  step[30] = -output[stride*30] + output[stride*31];
+  step[31] = output[stride*31] + output[stride*30];
+
+  // Final stage --- outputs indices are bit-reversed.
+  output[stride*0] = step[0];
+  output[stride*16] = step[1];
+  output[stride*8] = step[2];
+  output[stride*24] = step[3];
+  output[stride*4] = step[4];
+  output[stride*20] = step[5];
+  output[stride*12] = step[6];
+  output[stride*28] = step[7];
+  output[stride*2] = step[8];
+  output[stride*18] = step[9];
+  output[stride*10] = step[10];
+  output[stride*26] = step[11];
+  output[stride*6] = step[12];
+  output[stride*22] = step[13];
+  output[stride*14] = step[14];
+  output[stride*30] = step[15];
+
+  output[stride*1] = step[16]*C31 + step[31]*C1;
+  output[stride*17] = step[17]*C15 + step[30]*C17;
+  output[stride*9] = step[18]*C23 + step[29]*C9;
+  output[stride*25] = step[19]*C7 + step[28]*C25;
+  output[stride*5] = step[20]*C27 + step[27]*C5;
+  output[stride*21] = step[21]*C11 + step[26]*C21;
+  output[stride*13] = step[22]*C19 + step[25]*C13;
+  output[stride*29] = step[23]*C3 + step[24]*C29;
+  output[stride*3] = step[24]*C3 + step[23]*-C29;
+  output[stride*19] = step[25]*C19 + step[22]*-C13;
+  output[stride*11] = step[26]*C11 + step[21]*-C21;
+  output[stride*27] = step[27]*C27 + step[20]*-C5;
+  output[stride*7] = step[28]*C7 + step[19]*-C25;
+  output[stride*23] = step[29]*C23 + step[18]*-C9;
+  output[stride*15] = step[30]*C15 + step[17]*-C17;
+  output[stride*31] = step[31]*C31 + step[16]*-C1;
+}
+
+void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+  {
+    int shortpitch = pitch >> 1;
+    int i, j;
+    double output[1024];
+    // First transform columns
+    for (i = 0; i < 32; i++) {
+      double temp_in[32], temp_out[32];
+      for (j = 0; j < 32; j++)
+        temp_in[j] = input[j*shortpitch + i];
+      dct32_1d(temp_in, temp_out, 1);
+      for (j = 0; j < 32; j++)
+        output[j*32 + i] = temp_out[j];
+    }
+    // Then transform rows
+    for (i = 0; i < 32; ++i) {
+      double temp_in[32], temp_out[32];
+      for (j = 0; j < 32; ++j)
+        temp_in[j] = output[j + i*32];
+      dct32_1d(temp_in, temp_out, 1);
+      for (j = 0; j < 32; ++j)
+        output[j + i*32] = temp_out[j];
+    }
+    // Scale by some magic number
+    for (i = 0; i < 1024; i++) {
+      out[i] = (short)round(output[i]/4);
+    }
+  }
+
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+}
+
+#else  // CONFIG_DWT32X32HYBRID
+
+#define MAX_BLOCK_LENGTH   64
+#define ENH_PRECISION_BITS 1
+#define ENH_PRECISION_RND ((1 << ENH_PRECISION_BITS) / 2)
+
+// Note: block length must be even for this implementation
+static void analysis_53_row(int length, short *x,
+                            short *lowpass, short *highpass) {
+  int n;
+  short r, * a, * b;
+
+  n = length >> 1;
+  b = highpass;
+  a = lowpass;
+  while (--n) {
+    *a++ = (r = *x++) << 1;
+    *b++ = *x - ((r + x[1] + 1) >> 1);
+    x++;
+  }
+  *a = (r = *x++) << 1;
+  *b = *x - r;
+
+  n = length >> 1;
+  b = highpass;
+  a = lowpass;
+  r = *highpass;
+  while (n--) {
+    *a++ += (r + (*b) + 1) >> 1;
+    r = *b++;
+  }
+}
+
+static void analysis_53_col(int length, short *x,
+                            short *lowpass, short *highpass) {
+  int n;
+  short r, * a, * b;
+
+  n = length >> 1;
+  b = highpass;
+  a = lowpass;
+  while (--n) {
+    *a++ = (r = *x++);
+    *b++ = (((*x) << 1) - (r + x[1]) + 2) >> 2;
+    x++;
+  }
+  *a = (r = *x++);
+  *b = (*x - r + 1) >> 1;
+
+  n = length >> 1;
+  b = highpass;
+  a = lowpass;
+  r = *highpass;
+  while (n--) {
+    *a++ += (r + (*b) + 1) >> 1;
+    r = *b++;
+  }
+}
+
+// NOTE: Using a 5/3 integer wavelet for now. Explore using a wavelet
+// with a better response later
+static void dyadic_analyze(int levels, int width, int height,
+                           short *x, int pitch_x, short *c, int pitch_c) {
+  int lv, i, j, nh, nw, hh = height, hw = width;
+  short buffer[2 * MAX_BLOCK_LENGTH];
+  for (i = 0; i < height; i++) {
+    for (j = 0; j < width; j++) {
+      c[i * pitch_c + j] = x[i * pitch_x + j] << ENH_PRECISION_BITS;
+    }
+  }
+  for (lv = 0; lv < levels; lv++) {
+    nh = hh;
+    hh = (hh + 1) >> 1;
+    nw = hw;
+    hw = (hw + 1) >> 1;
+    if ((nh < 2) || (nw < 2)) return;
+    for (i = 0; i < nh; i++) {
+      memcpy(buffer, &c[i * pitch_c], nw * sizeof(short));
+      analysis_53_row(nw, buffer, &c[i * pitch_c], &c[i * pitch_c] + hw);
+    }
+    for (j = 0; j < nw; j++) {
+      for (i = 0; i < nh; i++)
+        buffer[i + nh] = c[i * pitch_c + j];
+      analysis_53_col(nh, buffer + nh, buffer, buffer + hh);
+      for (i = 0; i < nh; i++)
+        c[i * pitch_c + j] = buffer[i];
+    }
+  }
+}
+
+void vp9_short_fdct32x32_c(short *input, short *out, int pitch) {
+  // assume out is a 32x32 buffer
+  short buffer[16 * 16];
+  int i;
+  const int short_pitch = pitch >> 1;
+  dyadic_analyze(1, 32, 32, input, short_pitch, out, 32);
+  // TODO(debargha): Implement more efficiently by adding output pitch
+  // argument to the dct16x16 function
+  vp9_short_fdct16x16_c(out, buffer, 64);
+  for (i = 0; i < 16; ++i)
+    vpx_memcpy(out + i * 32, buffer + i * 16, sizeof(short) * 16);
+}
+#endif  // CONFIG_DWT32X32HYBRID
+#endif  // CONFIG_TX32X32

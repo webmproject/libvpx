@@ -1810,7 +1810,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 #endif
   for (i = 0; i < COMP_PRED_CONTEXTS; i++)
     cm->prob_comppred[i]         = 128;
-  for (i = 0; i < TX_SIZE_MAX - 1; i++)
+  for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
     cm->prob_tx[i]               = 128;
 
   // Prime the recent reference frame useage counters.
@@ -3698,6 +3698,9 @@ static void encode_frame_to_data_rate
   vp9_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
   vp9_copy(cpi->common.fc.hybrid_coef_counts_16x16,
            cpi->hybrid_coef_counts_16x16);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  vp9_copy(cpi->common.fc.coef_counts_32x32, cpi->coef_counts_32x32);
+#endif
   vp9_adapt_coef_probs(&cpi->common);
   if (cpi->common.frame_type != KEY_FRAME) {
 #if CONFIG_SUPERBLOCKS

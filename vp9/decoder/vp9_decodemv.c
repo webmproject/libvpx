@@ -209,8 +209,17 @@ static void kfread_modes(VP9D_COMP *pbi,
       m->mbmi.mode <= I8X8_PRED) {
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     m->mbmi.txfm_size = vp9_read(bc, cm->prob_tx[0]);
-    if (m->mbmi.txfm_size != TX_4X4 && m->mbmi.mode != I8X8_PRED)
+    if (m->mbmi.txfm_size != TX_4X4 && m->mbmi.mode != I8X8_PRED) {
       m->mbmi.txfm_size += vp9_read(bc, cm->prob_tx[1]);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+      if (m->mbmi.txfm_size != TX_8X8 && m->mbmi.encoded_as_sb)
+        m->mbmi.txfm_size += vp9_read(bc, cm->prob_tx[2]);
+#endif
+    }
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  } else if (cm->txfm_mode >= ALLOW_32X32 && m->mbmi.encoded_as_sb) {
+    m->mbmi.txfm_size = TX_32X32;
+#endif
   } else if (cm->txfm_mode >= ALLOW_16X16 && m->mbmi.mode <= TM_PRED) {
     m->mbmi.txfm_size = TX_16X16;
   } else if (cm->txfm_mode >= ALLOW_8X8 && m->mbmi.mode != B_PRED) {
@@ -1219,8 +1228,17 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     mbmi->txfm_size = vp9_read(bc, cm->prob_tx[0]);
     if (mbmi->txfm_size != TX_4X4 && mbmi->mode != I8X8_PRED &&
-        mbmi->mode != SPLITMV)
+        mbmi->mode != SPLITMV) {
       mbmi->txfm_size += vp9_read(bc, cm->prob_tx[1]);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+      if (mbmi->encoded_as_sb && mbmi->txfm_size != TX_8X8)
+        mbmi->txfm_size += vp9_read(bc, cm->prob_tx[2]);
+#endif
+    }
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  } else if (mbmi->encoded_as_sb && cm->txfm_mode >= ALLOW_32X32) {
+    mbmi->txfm_size = TX_32X32;
+#endif
   } else if (cm->txfm_mode >= ALLOW_16X16 &&
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= TM_PRED) ||
        (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {

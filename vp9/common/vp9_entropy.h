@@ -55,7 +55,7 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 #define PROB_UPDATE_BASELINE_COST   7
 
 #define MAX_PROB                255
-#define DCT_MAX_VALUE           8192
+#define DCT_MAX_VALUE           16384
 
 /* Coefficients are predicted via a 3-dimensional probability table. */
 
@@ -66,6 +66,10 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 
 #define BLOCK_TYPES_16X16 4
 
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#define BLOCK_TYPES_32X32 4
+#endif
+
 /* Middle dimension is a coarsening of the coefficient's
    position within the 4x4 DCT. */
 
@@ -73,6 +77,9 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 extern DECLARE_ALIGNED(16, const int, vp9_coef_bands[16]);
 extern DECLARE_ALIGNED(64, const int, vp9_coef_bands_8x8[64]);
 extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_16x16[256]);
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_32x32[1024]);
+#endif
 
 /* Inside dimension is 3-valued measure of nearby complexity, that is,
    the extent to which nearby coefficients are nonzero.  For the first
@@ -106,9 +113,13 @@ extern DECLARE_ALIGNED(16, const int, vp9_col_scan[16]);
 extern DECLARE_ALIGNED(16, const int, vp9_row_scan[16]);
 
 extern DECLARE_ALIGNED(64, const int, vp9_default_zig_zag1d_8x8[64]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]);
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]);
+#endif
+
 void vp9_coef_tree_initialize(void);
 
-extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]);
 void vp9_adapt_coef_probs(struct VP9Common *);
 
 #endif
