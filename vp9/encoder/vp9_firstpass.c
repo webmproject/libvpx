@@ -780,7 +780,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
     else
       recon_file = fopen(filename, "ab");
 
-    if (fwrite(lst_yv12->buffer_alloc, lst_yv12->frame_size, 1, recon_file));
+    (void)fwrite(lst_yv12->buffer_alloc, lst_yv12->frame_size, 1, recon_file);
     fclose(recon_file);
   }
 
