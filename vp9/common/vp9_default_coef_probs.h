@@ -12,10 +12,7 @@
 /*Generated file, included by vp9_entropy.c*/
 
 
-static const vp9_prob default_coef_probs [BLOCK_TYPES]
-                                         [COEF_BANDS]
-                                         [PREV_COEF_CONTEXTS]
-                                         [ENTROPY_NODES] = {
+static const vp9_coeff_probs default_coef_probs_4x4[BLOCK_TYPES_4X4] = {
   {
     /* Block Type ( 0 ) */
     {
@@ -254,10 +251,7 @@ static const vp9_prob default_coef_probs [BLOCK_TYPES]
   }
 };
 
-static const vp9_prob default_hybrid_coef_probs [BLOCK_TYPES]
-                                                [COEF_BANDS]
-                                                [PREV_COEF_CONTEXTS]
-                                                [ENTROPY_NODES] = {
+static const vp9_coeff_probs default_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4] = {
   {
     /* Block Type ( 0 ) */
     {
@@ -496,11 +490,7 @@ static const vp9_prob default_hybrid_coef_probs [BLOCK_TYPES]
   }
 };
 
-static const vp9_prob
-default_coef_probs_8x8[BLOCK_TYPES_8X8]
-[COEF_BANDS]
-[PREV_COEF_CONTEXTS]
-[ENTROPY_NODES] = {
+static const vp9_coeff_probs default_coef_probs_8x8[BLOCK_TYPES_8X8] = {
   {
     /* block Type 0 */
     {
@@ -729,11 +719,7 @@ default_coef_probs_8x8[BLOCK_TYPES_8X8]
   }
 };
 
-static const vp9_prob
-default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
-                             [COEF_BANDS]
-                             [PREV_COEF_CONTEXTS]
-                             [ENTROPY_NODES] = {
+static const vp9_coeff_probs default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8] = {
   {
     /* block Type 0 */
     {
@@ -962,11 +948,7 @@ default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
   }
 };
 
-static const vp9_prob
-  default_coef_probs_16x16[BLOCK_TYPES_16X16]
-                          [COEF_BANDS]
-                          [PREV_COEF_CONTEXTS]
-                          [ENTROPY_NODES] = {
+static const vp9_coeff_probs default_coef_probs_16x16[BLOCK_TYPES_16X16] = {
   { /* block Type 0 */
     { /* Coeff Band 0 */
       { 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
@@ -1169,11 +1151,8 @@ static const vp9_prob
   }
 };
 
-static const vp9_prob
-  default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
-                                 [COEF_BANDS]
-                                 [PREV_COEF_CONTEXTS]
-                                 [ENTROPY_NODES] = {
+static const vp9_coeff_probs
+    default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16] = {
   { /* block Type 0 */
     { /* Coeff Band 0 */
       { 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},

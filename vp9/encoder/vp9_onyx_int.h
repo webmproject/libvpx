@@ -94,24 +94,14 @@ typedef struct {
   // 0 = BPRED, ZERO_MV, MV, SPLIT
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
-  vp9_prob coef_probs[BLOCK_TYPES]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  vp9_prob hybrid_coef_probs[BLOCK_TYPES]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-
-  vp9_prob coef_probs_8x8[BLOCK_TYPES_8X8]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  vp9_prob hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-
-  vp9_prob coef_probs_16x16[BLOCK_TYPES_16X16]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  vp9_prob hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-
+  vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs hybrid_coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs hybrid_coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_probs hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
-  vp9_prob coef_probs_32x32[BLOCK_TYPES_32X32]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+  vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES_32X32];
 #endif
 
 #if CONFIG_SUPERBLOCKS
@@ -598,31 +588,31 @@ typedef struct VP9_COMP {
 
   nmv_context_counts NMVcount;
 
-  unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-  unsigned int hybrid_coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_hybrid_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_hybrid_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+  vp9_coeff_count coef_counts_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs frame_coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_stats frame_branch_ct_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_count hybrid_coef_counts_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs frame_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_stats frame_hybrid_branch_ct_4x4[BLOCK_TYPES_4X4];
 
-  unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-  unsigned int hybrid_coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_hybrid_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_hybrid_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+  vp9_coeff_count coef_counts_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs frame_coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_stats frame_branch_ct_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_count hybrid_coef_counts_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs frame_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_stats frame_hybrid_branch_ct_8x8[BLOCK_TYPES_8X8];
 
-  unsigned int coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_branch_ct_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-  unsigned int hybrid_coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_hybrid_branch_ct_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+  vp9_coeff_count coef_counts_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_probs frame_coef_probs_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_stats frame_branch_ct_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_count hybrid_coef_counts_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_probs frame_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_stats frame_hybrid_branch_ct_16x16[BLOCK_TYPES_16X16];
 
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
-  unsigned int coef_counts_32x32 [BLOCK_TYPES_32X32] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_coef_probs_32x32 [BLOCK_TYPES_32X32] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_branch_ct_32x32 [BLOCK_TYPES_32X32] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  vp9_coeff_count coef_counts_32x32[BLOCK_TYPES_32X32];
+  vp9_coeff_probs frame_coef_probs_32x32[BLOCK_TYPES_32X32];
+  vp9_coeff_stats frame_branch_ct_32x32[BLOCK_TYPES_32X32];
 #endif
 
   int gfu_boost;

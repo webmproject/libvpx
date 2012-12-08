@@ -239,10 +239,9 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 };
 #endif
 
-static void fill_token_costs(
-  unsigned int (*c)[COEF_BANDS][PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS],
-  const vp9_prob(*p)[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES],
-  int block_type_counts) {
+static void fill_token_costs(vp9_coeff_count *c,
+                             vp9_coeff_probs *p,
+                             int block_type_counts) {
   int i, j, k;
 
   for (i = 0; i < block_type_counts; i++)
@@ -370,41 +369,24 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
     }
   }
 
-  fill_token_costs(
-    cpi->mb.token_costs[TX_4X4],
-    (const vp9_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs,
-    BLOCK_TYPES);
-  fill_token_costs(
-    cpi->mb.hybrid_token_costs[TX_4X4],
-    (const vp9_prob( *)[8][PREV_COEF_CONTEXTS][11])
-    cpi->common.fc.hybrid_coef_probs,
-    BLOCK_TYPES);
+  fill_token_costs(cpi->mb.token_costs[TX_4X4],
+                   cpi->common.fc.coef_probs_4x4, BLOCK_TYPES_4X4);
+  fill_token_costs(cpi->mb.hybrid_token_costs[TX_4X4],
+                   cpi->common.fc.hybrid_coef_probs_4x4, BLOCK_TYPES_4X4);
 
-  fill_token_costs(
-    cpi->mb.token_costs[TX_8X8],
-    (const vp9_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_8x8,
-    BLOCK_TYPES_8X8);
-  fill_token_costs(
-    cpi->mb.hybrid_token_costs[TX_8X8],
-    (const vp9_prob( *)[8][PREV_COEF_CONTEXTS][11])
-    cpi->common.fc.hybrid_coef_probs_8x8,
-    BLOCK_TYPES_8X8);
+  fill_token_costs(cpi->mb.token_costs[TX_8X8],
+                   cpi->common.fc.coef_probs_8x8, BLOCK_TYPES_8X8);
+  fill_token_costs(cpi->mb.hybrid_token_costs[TX_8X8],
+                   cpi->common.fc.hybrid_coef_probs_8x8, BLOCK_TYPES_8X8);
 
-  fill_token_costs(
-    cpi->mb.token_costs[TX_16X16],
-    (const vp9_prob(*)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_16x16,
-    BLOCK_TYPES_16X16);
-  fill_token_costs(
-    cpi->mb.hybrid_token_costs[TX_16X16],
-    (const vp9_prob(*)[8][PREV_COEF_CONTEXTS][11])
-    cpi->common.fc.hybrid_coef_probs_16x16,
-    BLOCK_TYPES_16X16);
+  fill_token_costs(cpi->mb.token_costs[TX_16X16],
+                   cpi->common.fc.coef_probs_16x16, BLOCK_TYPES_16X16);
+  fill_token_costs(cpi->mb.hybrid_token_costs[TX_16X16],
+                   cpi->common.fc.hybrid_coef_probs_16x16, BLOCK_TYPES_16X16);
 
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
-  fill_token_costs(
-    cpi->mb.token_costs[TX_32X32],
-    (const vp9_prob(*)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_32x32,
-    BLOCK_TYPES_32X32);
+  fill_token_costs(cpi->mb.token_costs[TX_32X32],
+                   cpi->common.fc.coef_probs_32x32, BLOCK_TYPES_32X32);
 #endif
 
   /*rough estimate for costing*/

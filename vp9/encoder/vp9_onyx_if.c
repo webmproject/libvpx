@@ -2223,11 +2223,11 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
       fprintf(fmode, "[VP9_KF_BINTRAMODES][VP9_KF_BINTRAMODES]"
                      "[VP9_KF_BINTRAMODES] =\n{\n");
 
-      for (i = 0; i < VP8_KF_BINTRAMODES; i++) {
+      for (i = 0; i < VP9_KF_BINTRAMODES; i++) {
 
         fprintf(fmode, "    { // Above Mode :  %d\n", i);
 
-        for (j = 0; j < VP8_KF_BINTRAMODES; j++) {
+        for (j = 0; j < VP9_KF_BINTRAMODES; j++) {
 
           fprintf(fmode, "        {");
 
@@ -3691,10 +3691,12 @@ static void encode_frame_to_data_rate
 #endif
 
   update_reference_frames(cm);
-  vp9_copy(cpi->common.fc.coef_counts, cpi->coef_counts);
-  vp9_copy(cpi->common.fc.hybrid_coef_counts, cpi->hybrid_coef_counts);
+  vp9_copy(cpi->common.fc.coef_counts_4x4, cpi->coef_counts_4x4);
+  vp9_copy(cpi->common.fc.hybrid_coef_counts_4x4,
+           cpi->hybrid_coef_counts_4x4);
   vp9_copy(cpi->common.fc.coef_counts_8x8, cpi->coef_counts_8x8);
-  vp9_copy(cpi->common.fc.hybrid_coef_counts_8x8, cpi->hybrid_coef_counts_8x8);
+  vp9_copy(cpi->common.fc.hybrid_coef_counts_8x8,
+           cpi->hybrid_coef_counts_8x8);
   vp9_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
   vp9_copy(cpi->common.fc.hybrid_coef_counts_16x16,
            cpi->hybrid_coef_counts_16x16);

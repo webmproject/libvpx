@@ -29,6 +29,9 @@ typedef struct {
   unsigned char   skip_eob_node;
 } TOKENEXTRA;
 
+typedef INT64 vp9_coeff_accum[COEF_BANDS][PREV_COEF_CONTEXTS]
+                             [MAX_ENTROPY_TOKENS];
+
 extern int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block);
 extern int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd);
 extern int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block);
@@ -62,12 +65,14 @@ extern void vp9_fix_contexts_sb(MACROBLOCKD *xd);
 void init_context_counters();
 void print_context_counters();
 
-extern INT64 context_counters[BLOCK_TYPES][COEF_BANDS]
-                             [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
-extern INT64 context_counters_8x8[BLOCK_TYPES_8X8][COEF_BANDS]
-                                 [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
-extern INT64 context_counters_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
-                                   [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
+extern vp9_coeff_accum context_counters_4x4[BLOCK_TYPES_4X4];
+extern vp9_coeff_accum context_counters_8x8[BLOCK_TYPES_8X8];
+extern vp9_coeff_accum context_counters_16x16[BLOCK_TYPES_16X16];
+extern vp9_coeff_accum context_counters_32x32[BLOCK_TYPES_32X32];
+
+extern vp9_coeff_accum hybrid_context_counters_4x4[BLOCK_TYPES_4X4];
+extern vp9_coeff_accum hybrid_context_counters_8x8[BLOCK_TYPES_8X8];
+extern vp9_coeff_accum hybrid_context_counters_16x16[BLOCK_TYPES_16X16];
 #endif
 
 extern const int *vp9_dct_value_cost_ptr;

@@ -46,7 +46,7 @@ typedef struct {
 
   INT16 *qcoeff_start_ptr;
 
-  vp9_prob const *coef_probs[BLOCK_TYPES];
+  vp9_prob const *coef_probs_4x4[BLOCK_TYPES_4X4];
   vp9_prob const *coef_probs_8x8[BLOCK_TYPES_8X8];
   vp9_prob const *coef_probs_16X16[BLOCK_TYPES_16X16];
 

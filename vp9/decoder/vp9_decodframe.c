@@ -1231,14 +1231,13 @@ static void init_frame(VP9D_COMP *pbi) {
 
 }
 
-static void read_coef_probs_common(
-    BOOL_DECODER* const bc,
-    vp9_prob coef_probs[BLOCK_TYPES][COEF_BANDS]
-                       [PREV_COEF_CONTEXTS][ENTROPY_NODES]) {
+static void read_coef_probs_common(BOOL_DECODER* const bc,
+                                   vp9_coeff_probs *coef_probs,
+                                   int block_types) {
   int i, j, k, l;
 
   if (vp9_read_bit(bc)) {
-    for (i = 0; i < BLOCK_TYPES; i++) {
+    for (i = 0; i < block_types; i++) {
       for (j = !i; j < COEF_BANDS; j++) {
         /* NB: This j loop starts from 1 on block type i == 0 */
         for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
@@ -1261,20 +1260,21 @@ static void read_coef_probs_common(
 static void read_coef_probs(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
   VP9_COMMON *const pc = &pbi->common;
 
-  read_coef_probs_common(bc, pc->fc.coef_probs);
-  read_coef_probs_common(bc, pc->fc.hybrid_coef_probs);
+  read_coef_probs_common(bc, pc->fc.coef_probs_4x4, BLOCK_TYPES_4X4);
+  read_coef_probs_common(bc, pc->fc.hybrid_coef_probs_4x4, BLOCK_TYPES_4X4);
 
   if (pbi->common.txfm_mode != ONLY_4X4) {
-    read_coef_probs_common(bc, pc->fc.coef_probs_8x8);
-    read_coef_probs_common(bc, pc->fc.hybrid_coef_probs_8x8);
+    read_coef_probs_common(bc, pc->fc.coef_probs_8x8, BLOCK_TYPES_8X8);
+    read_coef_probs_common(bc, pc->fc.hybrid_coef_probs_8x8, BLOCK_TYPES_8X8);
   }
   if (pbi->common.txfm_mode > ALLOW_8X8) {
-    read_coef_probs_common(bc, pc->fc.coef_probs_16x16);
-    read_coef_probs_common(bc, pc->fc.hybrid_coef_probs_16x16);
+    read_coef_probs_common(bc, pc->fc.coef_probs_16x16, BLOCK_TYPES_16X16);
+    read_coef_probs_common(bc, pc->fc.hybrid_coef_probs_16x16,
+                           BLOCK_TYPES_16X16);
   }
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
   if (pbi->common.txfm_mode > ALLOW_16X16) {
-    read_coef_probs_common(bc, pc->fc.coef_probs_32x32);
+    read_coef_probs_common(bc, pc->fc.coef_probs_32x32, BLOCK_TYPES_32X32);
   }
 #endif
 }
@@ -1619,10 +1619,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     fclose(z);
   }
 
-  vp9_copy(pbi->common.fc.pre_coef_probs,
-           pbi->common.fc.coef_probs);
-  vp9_copy(pbi->common.fc.pre_hybrid_coef_probs,
-           pbi->common.fc.hybrid_coef_probs);
+  vp9_copy(pbi->common.fc.pre_coef_probs_4x4,
+           pbi->common.fc.coef_probs_4x4);
+  vp9_copy(pbi->common.fc.pre_hybrid_coef_probs_4x4,
+           pbi->common.fc.hybrid_coef_probs_4x4);
   vp9_copy(pbi->common.fc.pre_coef_probs_8x8,
            pbi->common.fc.coef_probs_8x8);
   vp9_copy(pbi->common.fc.pre_hybrid_coef_probs_8x8,
@@ -1648,8 +1648,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   pbi->common.fc.pre_interintra_prob = pbi->common.fc.interintra_prob;
 #endif
   pbi->common.fc.pre_nmvc = pbi->common.fc.nmvc;
-  vp9_zero(pbi->common.fc.coef_counts);
-  vp9_zero(pbi->common.fc.hybrid_coef_counts);
+  vp9_zero(pbi->common.fc.coef_counts_4x4);
+  vp9_zero(pbi->common.fc.hybrid_coef_counts_4x4);
   vp9_zero(pbi->common.fc.coef_counts_8x8);
   vp9_zero(pbi->common.fc.hybrid_coef_counts_8x8);
   vp9_zero(pbi->common.fc.coef_counts_16x16);

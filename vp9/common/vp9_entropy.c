@@ -307,10 +307,10 @@ vp9_extra_bit_struct vp9_extra_bits[12] = {
 #include "vp9/common/vp9_default_coef_probs.h"
 
 void vp9_default_coef_probs(VP9_COMMON *pc) {
-  vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
-             sizeof(pc->fc.coef_probs));
-  vpx_memcpy(pc->fc.hybrid_coef_probs, default_hybrid_coef_probs,
-             sizeof(pc->fc.hybrid_coef_probs));
+  vpx_memcpy(pc->fc.coef_probs_4x4, default_coef_probs_4x4,
+             sizeof(pc->fc.coef_probs_4x4));
+  vpx_memcpy(pc->fc.hybrid_coef_probs_4x4, default_hybrid_coef_probs_4x4,
+             sizeof(pc->fc.hybrid_coef_probs_4x4));
 
   vpx_memcpy(pc->fc.coef_probs_8x8, default_coef_probs_8x8,
              sizeof(pc->fc.coef_probs_8x8));
@@ -343,13 +343,42 @@ void vp9_coef_tree_initialize() {
 #define COEF_COUNT_SAT_AFTER_KEY 24
 #define COEF_MAX_UPDATE_FACTOR_AFTER_KEY 128
 
-void vp9_adapt_coef_probs(VP9_COMMON *cm) {
+static void update_coef_probs(vp9_coeff_probs *dst_coef_probs,
+                              vp9_coeff_probs *pre_coef_probs,
+                              int block_types, vp9_coeff_count *coef_counts,
+                              int count_sat, int update_factor) {
   int t, i, j, k, count;
   unsigned int branch_ct[ENTROPY_NODES][2];
   vp9_prob coef_probs[ENTROPY_NODES];
-  int update_factor; /* denominator 256 */
   int factor;
+
+  for (i = 0; i < block_types; ++i)
+    for (j = 0; j < COEF_BANDS; ++j)
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+          continue;
+        vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
+                                         vp9_coef_encodings, vp9_coef_tree,
+                                         coef_probs, branch_ct,
+                                         coef_counts[i][j][k], 256, 1);
+        for (t = 0; t < ENTROPY_NODES; ++t) {
+          int prob;
+          count = branch_ct[t][0] + branch_ct[t][1];
+          count = count > count_sat ? count_sat : count;
+          factor = (update_factor * count / count_sat);
+          prob = ((int)pre_coef_probs[i][j][k][t] * (256 - factor) +
+                  (int)coef_probs[t] * factor + 128) >> 8;
+          dst_coef_probs[i][j][k][t] = clip_prob(prob);
+        }
+      }
+}
+
+void vp9_adapt_coef_probs(VP9_COMMON *cm) {
+#ifdef COEF_COUNT_TESTING
+  int t, i, j, k;
+#endif
   int count_sat;
+  int update_factor; /* denominator 256 */
 
   // printf("Frame type: %d\n", cm->frame_type);
   if (cm->frame_type == KEY_FRAME) {
@@ -422,159 +451,30 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
   }
 #endif
 
-  for (i = 0; i < BLOCK_TYPES; ++i)
-    for (j = 0; j < COEF_BANDS; ++j)
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-          continue;
-        vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
-          coef_probs, branch_ct, cm->fc.coef_counts [i][j][k],
-          256, 1);
-        for (t = 0; t < ENTROPY_NODES; ++t) {
-          int prob;
-          count = branch_ct[t][0] + branch_ct[t][1];
-          count = count > count_sat ? count_sat : count;
-          factor = (update_factor * count / count_sat);
-          prob = ((int)cm->fc.pre_coef_probs[i][j][k][t] * (256 - factor) +
-                  (int)coef_probs[t] * factor + 128) >> 8;
-          if (prob <= 0) cm->fc.coef_probs[i][j][k][t] = 1;
-          else if (prob > 255) cm->fc.coef_probs[i][j][k][t] = 255;
-          else cm->fc.coef_probs[i][j][k][t] = prob;
-        }
-      }
-
-  for (i = 0; i < BLOCK_TYPES; ++i)
-    for (j = 0; j < COEF_BANDS; ++j)
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-          continue;
-        vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
-          coef_probs, branch_ct, cm->fc.hybrid_coef_counts [i][j][k],
-          256, 1);
-        for (t = 0; t < ENTROPY_NODES; ++t) {
-          int prob;
-          count = branch_ct[t][0] + branch_ct[t][1];
-          count = count > count_sat ? count_sat : count;
-          factor = (update_factor * count / count_sat);
-          prob = ((int)cm->fc.pre_hybrid_coef_probs[i][j][k][t] * (256 - factor) +
-                  (int)coef_probs[t] * factor + 128) >> 8;
-          if (prob <= 0) cm->fc.hybrid_coef_probs[i][j][k][t] = 1;
-          else if (prob > 255) cm->fc.hybrid_coef_probs[i][j][k][t] = 255;
-          else cm->fc.hybrid_coef_probs[i][j][k][t] = prob;
-        }
-      }
-
-  for (i = 0; i < BLOCK_TYPES_8X8; ++i)
-    for (j = 0; j < COEF_BANDS; ++j)
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-          continue;
-        vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
-          coef_probs, branch_ct, cm->fc.coef_counts_8x8 [i][j][k],
-          256, 1);
-        for (t = 0; t < ENTROPY_NODES; ++t) {
-          int prob;
-          count = branch_ct[t][0] + branch_ct[t][1];
-          count = count > count_sat ? count_sat : count;
-          factor = (update_factor * count / count_sat);
-          prob = ((int)cm->fc.pre_coef_probs_8x8[i][j][k][t] * (256 - factor) +
-                  (int)coef_probs[t] * factor + 128) >> 8;
-          if (prob <= 0) cm->fc.coef_probs_8x8[i][j][k][t] = 1;
-          else if (prob > 255) cm->fc.coef_probs_8x8[i][j][k][t] = 255;
-          else cm->fc.coef_probs_8x8[i][j][k][t] = prob;
-        }
-      }
-
-  for (i = 0; i < BLOCK_TYPES_8X8; ++i)
-    for (j = 0; j < COEF_BANDS; ++j)
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-          continue;
-        vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
-          coef_probs, branch_ct, cm->fc.hybrid_coef_counts_8x8 [i][j][k],
-          256, 1);
-        for (t = 0; t < ENTROPY_NODES; ++t) {
-          int prob;
-          count = branch_ct[t][0] + branch_ct[t][1];
-          count = count > count_sat ? count_sat : count;
-          factor = (update_factor * count / count_sat);
-          prob = ((int)cm->fc.pre_hybrid_coef_probs_8x8[i][j][k][t] *
-                  (256 - factor) +
-                  (int)coef_probs[t] * factor + 128) >> 8;
-          if (prob <= 0) cm->fc.hybrid_coef_probs_8x8[i][j][k][t] = 1;
-          else if (prob > 255) cm->fc.hybrid_coef_probs_8x8[i][j][k][t] = 255;
-          else cm->fc.hybrid_coef_probs_8x8[i][j][k][t] = prob;
-        }
-      }
-
-  for (i = 0; i < BLOCK_TYPES_16X16; ++i)
-    for (j = 0; j < COEF_BANDS; ++j)
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-          continue;
-        vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
-          coef_probs, branch_ct, cm->fc.coef_counts_16x16[i][j][k], 256, 1);
-        for (t = 0; t < ENTROPY_NODES; ++t) {
-          int prob;
-          count = branch_ct[t][0] + branch_ct[t][1];
-          count = count > count_sat ? count_sat : count;
-          factor = (update_factor * count / count_sat);
-          prob = ((int)cm->fc.pre_coef_probs_16x16[i][j][k][t] *
-                  (256 - factor) +
-                  (int)coef_probs[t] * factor + 128) >> 8;
-          if (prob <= 0) cm->fc.coef_probs_16x16[i][j][k][t] = 1;
-          else if (prob > 255) cm->fc.coef_probs_16x16[i][j][k][t] = 255;
-          else cm->fc.coef_probs_16x16[i][j][k][t] = prob;
-        }
-      }
-
-  for (i = 0; i < BLOCK_TYPES_16X16; ++i)
-    for (j = 0; j < COEF_BANDS; ++j)
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-          continue;
-        vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
-          coef_probs, branch_ct, cm->fc.hybrid_coef_counts_16x16[i][j][k], 256, 1);
-        for (t = 0; t < ENTROPY_NODES; ++t) {
-          int prob;
-          count = branch_ct[t][0] + branch_ct[t][1];
-          count = count > count_sat ? count_sat : count;
-          factor = (update_factor * count / count_sat);
-          prob = ((int)cm->fc.pre_hybrid_coef_probs_16x16[i][j][k][t] * (256 - factor) +
-                  (int)coef_probs[t] * factor + 128) >> 8;
-          if (prob <= 0) cm->fc.hybrid_coef_probs_16x16[i][j][k][t] = 1;
-          else if (prob > 255) cm->fc.hybrid_coef_probs_16x16[i][j][k][t] = 255;
-          else cm->fc.hybrid_coef_probs_16x16[i][j][k][t] = prob;
-        }
-      }
-
+  update_coef_probs(cm->fc.coef_probs_4x4, cm->fc.pre_coef_probs_4x4,
+                    BLOCK_TYPES_4X4, cm->fc.coef_counts_4x4,
+                    count_sat, update_factor);
+  update_coef_probs(cm->fc.hybrid_coef_probs_4x4,
+                    cm->fc.pre_hybrid_coef_probs_4x4,
+                    BLOCK_TYPES_4X4, cm->fc.hybrid_coef_counts_4x4,
+                    count_sat, update_factor);
+  update_coef_probs(cm->fc.coef_probs_8x8, cm->fc.pre_coef_probs_8x8,
+                    BLOCK_TYPES_8X8, cm->fc.coef_counts_8x8,
+                    count_sat, update_factor);
+  update_coef_probs(cm->fc.hybrid_coef_probs_8x8,
+                    cm->fc.pre_hybrid_coef_probs_8x8,
+                    BLOCK_TYPES_8X8, cm->fc.hybrid_coef_counts_8x8,
+                    count_sat, update_factor);
+  update_coef_probs(cm->fc.coef_probs_16x16, cm->fc.pre_coef_probs_16x16,
+                    BLOCK_TYPES_16X16, cm->fc.coef_counts_16x16,
+                    count_sat, update_factor);
+  update_coef_probs(cm->fc.hybrid_coef_probs_16x16,
+                    cm->fc.pre_hybrid_coef_probs_16x16,
+                    BLOCK_TYPES_16X16, cm->fc.hybrid_coef_counts_16x16,
+                    count_sat, update_factor);
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
-  for (i = 0; i < BLOCK_TYPES_32X32; ++i)
-    for (j = 0; j < COEF_BANDS; ++j)
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-          continue;
-        vp9_tree_probs_from_distribution(
-          MAX_ENTROPY_TOKENS, vp9_coef_encodings, vp9_coef_tree,
-          coef_probs, branch_ct, cm->fc.coef_counts_32x32[i][j][k], 256, 1);
-        for (t = 0; t < ENTROPY_NODES; ++t) {
-          int prob;
-          count = branch_ct[t][0] + branch_ct[t][1];
-          count = count > count_sat ? count_sat : count;
-          factor = (update_factor * count / count_sat);
-          prob = ((int)cm->fc.pre_coef_probs_32x32[i][j][k][t] *
-                  (256 - factor) +
-                  (int)coef_probs[t] * factor + 128) >> 8;
-          if (prob <= 0) cm->fc.coef_probs_32x32[i][j][k][t] = 1;
-          else if (prob > 255) cm->fc.coef_probs_32x32[i][j][k][t] = 255;
-          else cm->fc.coef_probs_32x32[i][j][k][t] = prob;
-        }
-      }
+  update_coef_probs(cm->fc.coef_probs_32x32, cm->fc.pre_coef_probs_32x32,
+                    BLOCK_TYPES_32X32, cm->fc.coef_counts_32x32,
+                    count_sat, update_factor);
 #endif
 }

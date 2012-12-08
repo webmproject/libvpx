@@ -18,6 +18,7 @@
 #ifdef ENTROPY_STATS
 extern void init_mv_ref_counts();
 extern void accum_mv_refs(MB_PREDICTION_MODE, const int near_mv_ref_cts[4]);
+void print_mode_context(void);
 #endif
 
 

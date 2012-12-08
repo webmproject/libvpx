@@ -60,7 +60,7 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 /* Coefficients are predicted via a 3-dimensional probability table. */
 
 /* Outside dimension.  0 = Y no DC, 1 = Y2, 2 = UV, 3 = Y with DC */
-#define BLOCK_TYPES 4
+#define BLOCK_TYPES_4X4 4
 
 #define BLOCK_TYPES_8X8 4
 
@@ -99,6 +99,13 @@ extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_32x32[1024]);
 
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
 #define PREV_COEF_CONTEXTS       4
+
+typedef unsigned int vp9_coeff_count[COEF_BANDS][PREV_COEF_CONTEXTS]
+                                    [MAX_ENTROPY_TOKENS];
+typedef unsigned int vp9_coeff_stats[COEF_BANDS][PREV_COEF_CONTEXTS]
+                                    [ENTROPY_NODES][2];
+typedef vp9_prob vp9_coeff_probs[COEF_BANDS][PREV_COEF_CONTEXTS]
+                                [ENTROPY_NODES];
 
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
 #define MODULUS_PARAM               13  /* Modulus parameter */
