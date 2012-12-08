@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//8O0\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-08T00:26:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///cg\u003d",
+      "revId": "242cac0355fa724f68fc5003a494bfbe4cca418b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///cQ\u003d",
         "filename": "vp9/decoder/detokenize.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//8Ow\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-08T00:26:33Z",
+      "side": 1,
+      "message": "Right, but that would be longer, right? I prefer the loopcounter to only initialize variables directly related to the loop itself, eobtotal is used outside the loop (in the return statement).",
+      "parentUuid": "AAAARn///cQ\u003d",
+      "revId": "242cac0355fa724f68fc5003a494bfbe4cca418b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn///cI\u003d",
         "filename": "vp9/decoder/detokenize.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2012-12-04T06:21:51Z",
       "side": 1,
       "message": "avoid calling a function during return. Prefer:\n\neobtotal +\u003d decode_mb_tokens_4x4_uv(dx, xd, bc, seg_eob);\n\nreturn eobtotal;",
+      "revId": "242cac0355fa724f68fc5003a494bfbe4cca418b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//8Os\u003d",
+        "filename": "vp9/decoder/detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-08T00:26:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///cI\u003d",
       "revId": "242cac0355fa724f68fc5003a494bfbe4cca418b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
