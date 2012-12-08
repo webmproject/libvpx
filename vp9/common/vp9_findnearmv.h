@@ -150,7 +150,8 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
     if (cur_mb->mbmi.mode < I8X8_PRED) {
       return pred_mode_conv(cur_mb->mbmi.mode);
     } else if (cur_mb->mbmi.mode == I8X8_PRED) {
-      return pred_mode_conv((cur_mb->bmi + 3 + b)->as_mode.first);
+      return pred_mode_conv(
+          (MB_PREDICTION_MODE)(cur_mb->bmi + 3 + b)->as_mode.first);
     } else if (cur_mb->mbmi.mode == B_PRED) {
       return ((cur_mb->bmi + 3 + b)->as_mode.first);
     } else {
@@ -169,7 +170,8 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
     if (cur_mb->mbmi.mode < I8X8_PRED) {
       return pred_mode_conv(cur_mb->mbmi.mode);
     } else if (cur_mb->mbmi.mode == I8X8_PRED) {
-      return pred_mode_conv((cur_mb->bmi + 12 + b)->as_mode.first);
+      return pred_mode_conv(
+          (MB_PREDICTION_MODE)(cur_mb->bmi + 12 + b)->as_mode.first);
     } else if (cur_mb->mbmi.mode == B_PRED) {
       return ((cur_mb->bmi + 12 + b)->as_mode.first);
     } else {
