@@ -52,6 +52,24 @@
       "revId": "202db0f88ebaf6e469c5045a5b0df704a72066cb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//8QA\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 968,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-08T00:07:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn///Ms\u003d",
+      "revId": "202db0f88ebaf6e469c5045a5b0df704a72066cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
