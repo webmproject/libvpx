@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARn//8Ho\u003d",
+        "filename": "vp9/common/vp9_blockd.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-08T01:54:43Z",
+      "side": 1,
+      "message": "This needs another copy at the bottom under #if CONFIG_TX32X32",
+      "revId": "5d50749277b5b91403f56572a01c3471a2e175aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//8Hk\u003d",
+        "filename": "vp9/common/vp9_blockd.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-08T01:54:43Z",
+      "side": 1,
+      "message": "Same.",
+      "revId": "5d50749277b5b91403f56572a01c3471a2e175aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
