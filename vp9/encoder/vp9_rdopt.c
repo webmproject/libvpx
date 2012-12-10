@@ -3256,11 +3256,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   mv_pred(cpi, x, y_buffer[frame_type], yv12->y_stride,
           frame_type, block_size);
 
-#if CONFIG_NEW_MVREF
-  // TODO(paulwilkins): Final choice of which of the best 4 candidates from
-  // above gives lowest error score when used in isolation. This stage encoder
-  // and sets the reference MV
-#endif
 }
 
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -3300,8 +3295,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     case NEWMV:
       ref_mv[0] = mbmi->ref_mvs[refs[0]][0];
       ref_mv[1] = mbmi->ref_mvs[refs[1]][0];
-      // ref_mv[0] = mbmi->ref_mvs[refs[0]][x->mv_best_ref_index[refs[0]]];
-      // ref_mv[1] = mbmi->ref_mvs[refs[1]][x->mv_best_ref_index[refs[1]]];
+
       if (is_comp_pred) {
         if (frame_mv[NEWMV][refs[0]].as_int == INVALID_MV ||
             frame_mv[NEWMV][refs[1]].as_int == INVALID_MV)
@@ -3328,8 +3322,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         vp9_clamp_mv_min_max(x, &ref_mv[0]);
 
+        // mvp_full.as_int = ref_mv[0].as_int;
         mvp_full.as_int =
-          mbmi->ref_mvs[refs[0]][x->mv_best_ref_index[refs[0]]].as_int;
+         mbmi->ref_mvs[refs[0]][x->mv_best_ref_index[refs[0]]].as_int;
+
         mvp_full.as_mv.col >>= 3;
         mvp_full.as_mv.row >>= 3;
         if (mvp_full.as_int != mvp_full.as_int) {

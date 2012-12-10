@@ -591,11 +591,6 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
     }
 #endif
 
-#if CONFIG_NEW_MVREF
-  // Temp defaults probabilities for ecnoding the MV ref id signal
-  vpx_memset(xd->mb_mv_ref_id_probs, 192, sizeof(xd->mb_mv_ref_id_probs));
-#endif
-
     read_nmvprobs(bc, nmvc, xd->allow_high_precision_mv);
   }
 }
@@ -936,7 +931,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
       // Encode the index of the choice.
       best_index =
-        vp9_read_mv_ref_id(bc, xd->mb_mv_ref_id_probs[ref_frame]);
+        vp9_read_mv_ref_id(bc, xd->mb_mv_ref_probs[ref_frame]);
 
       best_mv.as_int = mbmi->ref_mvs[ref_frame][best_index].as_int;
 
@@ -945,7 +940,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
         // Encode the index of the choice.
         best_index =
-          vp9_read_mv_ref_id(bc, xd->mb_mv_ref_id_probs[ref_frame]);
+          vp9_read_mv_ref_id(bc, xd->mb_mv_ref_probs[ref_frame]);
         best_mv_second.as_int = mbmi->ref_mvs[ref_frame][best_index].as_int;
       }
     }

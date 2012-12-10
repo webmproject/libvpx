@@ -362,7 +362,7 @@ typedef struct macroblockd {
   vp9_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
 
 #if CONFIG_NEW_MVREF
-  vp9_prob mb_mv_ref_id_probs[MAX_REF_FRAMES][3];
+  vp9_prob mb_mv_ref_probs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES-1];
 #endif
 
   // Segment features

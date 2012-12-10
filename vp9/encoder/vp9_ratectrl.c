@@ -277,6 +277,16 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
 
   vp9_update_mode_info_border(cm, cm->mip);
   vp9_update_mode_info_in_image(cm, cm->mi);
+
+#if CONFIG_NEW_MVREF
+  if (1) {
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+
+    // Defaults probabilities for encoding the MV ref id signal
+    vpx_memset(xd->mb_mv_ref_probs, VP9_DEFAULT_MV_REF_PROB,
+               sizeof(xd->mb_mv_ref_probs));
+  }
+#endif
 }
 
 void vp9_setup_inter_frame(VP9_COMP *cpi) {

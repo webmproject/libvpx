@@ -1608,6 +1608,33 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     }
   }
 
+#if CONFIG_NEW_MVREF
+  // If Key frame reset mv ref id probabilities to defaults
+  if (pc->frame_type == KEY_FRAME) {
+    // Defaults probabilities for encoding the MV ref id signal
+    vpx_memset(xd->mb_mv_ref_probs, VP9_DEFAULT_MV_REF_PROB,
+               sizeof(xd->mb_mv_ref_probs));
+  } else {
+    // Read any mv_ref index probability updates
+    int i, j;
+
+    for (i = 0; i < MAX_REF_FRAMES; ++i) {
+      // Skip the dummy entry for intra ref frame.
+      if (i == INTRA_FRAME) {
+        continue;
+      }
+
+      // Read any updates to probabilities
+      for (j = 0; j < MAX_MV_REF_CANDIDATES - 1; ++j) {
+        if (vp9_read(&header_bc, VP9_MVREF_UPDATE_PROB)) {
+          xd->mb_mv_ref_probs[i][j] =
+            (vp9_prob)vp9_read_literal(&header_bc, 8);
+        }
+      }
+    }
+  }
+#endif
+
   if (0) {
     FILE *z = fopen("decodestats.stt", "a");
     fprintf(z, "%6d F:%d,G:%d,A:%d,L:%d,Q:%d\n",

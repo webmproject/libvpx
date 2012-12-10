@@ -2992,11 +2992,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Set default state for segment based loop filter update flags
   xd->mode_ref_lf_delta_update = 0;
 
-#if CONFIG_NEW_MVREF
-  // Temp defaults probabilities for ecnoding the MV ref id signal
-  vpx_memset(xd->mb_mv_ref_id_probs, 192,
-             sizeof(xd->mb_mv_ref_id_probs));
-#endif
 
   // Set various flags etc to special state if it is a key frame
   if (cm->frame_type == KEY_FRAME) {
@@ -3788,19 +3783,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Update the skip mb flag probabilities based on the distribution seen
   // in this frame.
   update_base_skip_probs(cpi);
-
-#if 0 //CONFIG_NEW_MVREF && CONFIG_INTERNAL_STATS
-  {
-    FILE *f = fopen("mv_ref_dist.stt", "a");
-    unsigned int i;
-    for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
-      fprintf(f, "%10d", cpi->best_ref_index_counts[0][i]);
-    }
-    fprintf(f, "\n" );
-
-    fclose(f);
-  }
-#endif
 
 #if 0// 1 && CONFIG_INTERNAL_STATS
   {
