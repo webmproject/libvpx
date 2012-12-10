@@ -298,6 +298,7 @@ CONFIG_LIST="
     ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
+    external_build
     extra_warnings
     werror
     install_docs
@@ -497,7 +498,7 @@ process_detect() {
             fi
         fi
     fi
-    if [ -z "$CC" ]; then
+    if [ -z "$CC" ] || enabled external_build; then
         echo "Bypassing toolchain for environment detection."
         enable external_build
         check_header() {
@@ -506,6 +507,7 @@ process_detect() {
             shift
             var=`echo $header | sed 's/[^A-Za-z0-9_]/_/g'`
             disable $var
+            # Headers common to all environments
             case $header in
                 stdio.h)
                     true;
@@ -517,6 +519,25 @@ process_detect() {
                     done
                     ${result:-true}
             esac && enable $var
+
+            # Specialize windows and POSIX environments.
+            case $toolchain in
+                *-win*-*)
+                    case $header-$toolchain in
+                        stdint*-gcc) true;;
+                        *) false;;
+                    esac && enable $var
+                    ;;
+                *)
+                    case $header in
+                        stdint.h) true;;
+                        pthread.h) true;;
+                        sys/mman.h) true;;
+                        unistd.h) true;;
+                        *) false;;
+                    esac && enable $var
+            esac
+            enabled $var
         }
         check_ld() {
             true
@@ -530,6 +551,7 @@ EOF
     check_header stdint.h
     check_header pthread.h
     check_header sys/mman.h
+    check_header unistd.h # for sysconf(3) and friends.
 
     check_header vpx/vpx_integer.h -I${source_path} && enable vpx_ports
 }

@@ -277,6 +277,7 @@ clean_temp_files() {
 # Toolchain Check Functions
 #
 check_cmd() {
+    enabled external_build && return
     log "$@"
     "$@" >>${logfile} 2>&1
 }
@@ -1174,9 +1175,6 @@ EOF
             fi
         ;;
     esac
-
-    # for sysconf(3) and friends.
-    check_header unistd.h
 
     # glibc needs these
     if enabled linux; then
