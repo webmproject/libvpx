@@ -360,15 +360,13 @@ static void update_coef_probs(vp9_coeff_probs *dst_coef_probs,
         vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
                                          vp9_coef_encodings, vp9_coef_tree,
                                          coef_probs, branch_ct,
-                                         coef_counts[i][j][k], 256, 1);
+                                         coef_counts[i][j][k]);
         for (t = 0; t < ENTROPY_NODES; ++t) {
-          int prob;
           count = branch_ct[t][0] + branch_ct[t][1];
           count = count > count_sat ? count_sat : count;
           factor = (update_factor * count / count_sat);
-          prob = ((int)pre_coef_probs[i][j][k][t] * (256 - factor) +
-                  (int)coef_probs[t] * factor + 128) >> 8;
-          dst_coef_probs[i][j][k][t] = clip_prob(prob);
+          dst_coef_probs[i][j][k][t] = weighted_prob(pre_coef_probs[i][j][k][t],
+                                                     coef_probs[t], factor);
         }
       }
 }

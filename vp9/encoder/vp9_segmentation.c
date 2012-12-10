@@ -107,31 +107,15 @@ static void calc_segtree_probs(MACROBLOCKD *xd,
                                int *segcounts,
                                vp9_prob *segment_tree_probs) {
   int count1, count2;
-  int tot_count;
-  int i;
-
-  // Blank the strtucture to start with
-  vpx_memset(segment_tree_probs, 0,
-             MB_FEATURE_TREE_PROBS * sizeof(*segment_tree_probs));
 
   // Total count for all segments
   count1 = segcounts[0] + segcounts[1];
   count2 = segcounts[2] + segcounts[3];
-  tot_count = count1 + count2;
 
   // Work out probabilities of each segment
-  if (tot_count)
-    segment_tree_probs[0] = (count1 * 255) / tot_count;
-  if (count1 > 0)
-    segment_tree_probs[1] = (segcounts[0] * 255) / count1;
-  if (count2 > 0)
-    segment_tree_probs[2] = (segcounts[2] * 255) / count2;
-
-  // Clamp probabilities to minimum allowed value
-  for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
-    if (segment_tree_probs[i] == 0)
-      segment_tree_probs[i] = 1;
-  }
+  segment_tree_probs[0] = get_binary_prob(count1, count2);
+  segment_tree_probs[1] = get_prob(segcounts[0], count1);
+  segment_tree_probs[2] = get_prob(segcounts[2], count2);
 }
 
 // Based on set of segment counts and probabilities calculate a cost estimate
@@ -165,7 +149,6 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   int i;
-  int tot_count;
   int no_pred_cost;
   int t_pred_cost = INT_MAX;
   int pred_context;
@@ -297,20 +280,8 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
     // Add in the cost of the signalling for each prediction context
     for (i = 0; i < PREDICTION_PROBS; i++) {
-      tot_count = temporal_predictor_count[i][0] +
-                  temporal_predictor_count[i][1];
-
-      // Work out the context probabilities for the segment
-      // prediction flag
-      if (tot_count) {
-        t_nopred_prob[i] = (temporal_predictor_count[i][0] * 255) /
-                           tot_count;
-
-        // Clamp to minimum allowed value
-        if (t_nopred_prob[i] < 1)
-          t_nopred_prob[i] = 1;
-      } else
-        t_nopred_prob[i] = 1;
+      t_nopred_prob[i] = get_binary_prob(temporal_predictor_count[i][0],
+                                         temporal_predictor_count[i][1]);
 
       // Add in the predictor signaling cost
       t_pred_cost += (temporal_predictor_count[i][0] *

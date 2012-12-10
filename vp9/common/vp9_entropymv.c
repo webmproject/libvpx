@@ -213,16 +213,12 @@ void vp9_increment_nmv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
 
 static void adapt_prob(vp9_prob *dest, vp9_prob prep, vp9_prob newp,
                        unsigned int ct[2]) {
-  int factor;
-  int prob;
   int count = ct[0] + ct[1];
+
   if (count) {
     count = count > MV_COUNT_SAT ? MV_COUNT_SAT : count;
-    factor = (MV_MAX_UPDATE_FACTOR * count / MV_COUNT_SAT);
-    prob = ((int)prep * (256 - factor) + (int)(newp) * factor + 128) >> 8;
-    prob += !prob;
-    prob = (prob > 255 ? 255 : prob);
-    *dest = prob;
+    *dest = weighted_prob(prep, newp,
+                          MV_MAX_UPDATE_FACTOR * count / MV_COUNT_SAT);
   }
 }
 
@@ -251,11 +247,10 @@ void vp9_counts_to_nmv_context(
                                    vp9_mv_joint_tree,
                                    prob->joints,
                                    branch_ct_joint,
-                                   NMVcount->joints,
-                                   256, 1);
+                                   NMVcount->joints);
   for (i = 0; i < 2; ++i) {
-    prob->comps[i].sign =
-        vp9_bin_prob_from_distribution(NMVcount->comps[i].sign);
+    prob->comps[i].sign = get_binary_prob(NMVcount->comps[i].sign[0],
+                                          NMVcount->comps[i].sign[1]);
     branch_ct_sign[i][0] = NMVcount->comps[i].sign[0];
     branch_ct_sign[i][1] = NMVcount->comps[i].sign[1];
     vp9_tree_probs_from_distribution(MV_CLASSES,
@@ -263,18 +258,16 @@ void vp9_counts_to_nmv_context(
                                      vp9_mv_class_tree,
                                      prob->comps[i].classes,
                                      branch_ct_classes[i],
-                                     NMVcount->comps[i].classes,
-                                     256, 1);
+                                     NMVcount->comps[i].classes);
     vp9_tree_probs_from_distribution(CLASS0_SIZE,
                                      vp9_mv_class0_encodings,
                                      vp9_mv_class0_tree,
                                      prob->comps[i].class0,
                                      branch_ct_class0[i],
-                                     NMVcount->comps[i].class0,
-                                     256, 1);
+                                     NMVcount->comps[i].class0);
     for (j = 0; j < MV_OFFSET_BITS; ++j) {
-      prob->comps[i].bits[j] = vp9_bin_prob_from_distribution(
-          NMVcount->comps[i].bits[j]);
+      prob->comps[i].bits[j] = get_binary_prob(NMVcount->comps[i].bits[j][0],
+                                               NMVcount->comps[i].bits[j][1]);
       branch_ct_bits[i][j][0] = NMVcount->comps[i].bits[j][0];
       branch_ct_bits[i][j][1] = NMVcount->comps[i].bits[j][1];
     }
@@ -286,26 +279,25 @@ void vp9_counts_to_nmv_context(
                                        vp9_mv_fp_tree,
                                        prob->comps[i].class0_fp[k],
                                        branch_ct_class0_fp[i][k],
-                                       NMVcount->comps[i].class0_fp[k],
-                                       256, 1);
+                                       NMVcount->comps[i].class0_fp[k]);
     }
     vp9_tree_probs_from_distribution(4,
                                      vp9_mv_fp_encodings,
                                      vp9_mv_fp_tree,
                                      prob->comps[i].fp,
                                      branch_ct_fp[i],
-                                     NMVcount->comps[i].fp,
-                                     256, 1);
+                                     NMVcount->comps[i].fp);
   }
   if (usehp) {
     for (i = 0; i < 2; ++i) {
-      prob->comps[i].class0_hp = vp9_bin_prob_from_distribution(
-          NMVcount->comps[i].class0_hp);
+      prob->comps[i].class0_hp =
+          get_binary_prob(NMVcount->comps[i].class0_hp[0],
+                          NMVcount->comps[i].class0_hp[1]);
       branch_ct_class0_hp[i][0] = NMVcount->comps[i].class0_hp[0];
       branch_ct_class0_hp[i][1] = NMVcount->comps[i].class0_hp[1];
 
-      prob->comps[i].hp =
-          vp9_bin_prob_from_distribution(NMVcount->comps[i].hp);
+      prob->comps[i].hp = get_binary_prob(NMVcount->comps[i].hp[0],
+                                          NMVcount->comps[i].hp[1]);
       branch_ct_hp[i][0] = NMVcount->comps[i].hp[0];
       branch_ct_hp[i][1] = NMVcount->comps[i].hp[1];
     }

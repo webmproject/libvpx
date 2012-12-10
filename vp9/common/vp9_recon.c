@@ -24,15 +24,7 @@ void vp9_recon_b_c
 
   for (r = 0; r < 4; r++) {
     for (c = 0; c < 4; c++) {
-      int a = diff_ptr[c] + pred_ptr[c];
-
-      if (a < 0)
-        a = 0;
-
-      if (a > 255)
-        a = 255;
-
-      dst_ptr[c] = (unsigned char) a;
+      dst_ptr[c] = clip_pixel(diff_ptr[c] + pred_ptr[c]);
     }
 
     dst_ptr += stride;
@@ -52,15 +44,7 @@ void vp9_recon_uv_b_c
 
   for (r = 0; r < 4; r++) {
     for (c = 0; c < 4; c++) {
-      int a = diff_ptr[c] + pred_ptr[c];
-
-      if (a < 0)
-        a = 0;
-
-      if (a > 255)
-        a = 255;
-
-      dst_ptr[c] = (unsigned char) a;
+      dst_ptr[c] = clip_pixel(diff_ptr[c] + pred_ptr[c]);
     }
 
     dst_ptr += stride;
@@ -79,15 +63,7 @@ void vp9_recon4b_c
 
   for (r = 0; r < 4; r++) {
     for (c = 0; c < 16; c++) {
-      int a = diff_ptr[c] + pred_ptr[c];
-
-      if (a < 0)
-        a = 0;
-
-      if (a > 255)
-        a = 255;
-
-      dst_ptr[c] = (unsigned char) a;
+      dst_ptr[c] = clip_pixel(diff_ptr[c] + pred_ptr[c]);
     }
 
     dst_ptr += stride;
@@ -107,15 +83,7 @@ void vp9_recon2b_c
 
   for (r = 0; r < 4; r++) {
     for (c = 0; c < 8; c++) {
-      int a = diff_ptr[c] + pred_ptr[c];
-
-      if (a < 0)
-        a = 0;
-
-      if (a > 255)
-        a = 255;
-
-      dst_ptr[c] = (unsigned char) a;
+      dst_ptr[c] = clip_pixel(diff_ptr[c] + pred_ptr[c]);
     }
 
     dst_ptr += stride;
@@ -133,12 +101,7 @@ void vp9_recon_mby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
 
   for (y = 0; y < 16; y++) {
     for (x = 0; x < 16; x++) {
-      int a = dst[x] + diff[x];
-      if (a < 0)
-        a = 0;
-      else if (a > 255)
-        a = 255;
-      dst[x] = a;
+      dst[x] = clip_pixel(dst[x] + diff[x]);
     }
     dst += stride;
     diff += 16;
@@ -156,12 +119,7 @@ void vp9_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
 
     for (y = 0; y < 8; y++) {
       for (x = 0; x < 8; x++) {
-        int a = dst[x] + diff[x];
-        if (a < 0)
-          a = 0;
-        else if (a > 255)
-          a = 255;
-        dst[x] = a;
+        dst[x] = clip_pixel(dst[x] + diff[x]);
       }
       dst += stride;
       diff += 8;
@@ -176,12 +134,7 @@ void vp9_recon_sby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
 
   for (y = 0; y < 32; y++) {
     for (x = 0; x < 32; x++) {
-      int a = dst[x] + diff[x];
-      if (a < 0)
-        a = 0;
-      else if (a > 255)
-        a = 255;
-      dst[x] = a;
+      dst[x] = clip_pixel(dst[x] + diff[x]);
     }
     dst += stride;
     diff += 32;
@@ -195,18 +148,8 @@ void vp9_recon_sbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
 
   for (y = 0; y < 16; y++) {
     for (x = 0; x < 16; x++) {
-      int u = udst[x] + udiff[x];
-      int v = vdst[x] + vdiff[x];
-      if (u < 0)
-        u = 0;
-      else if (u > 255)
-        u = 255;
-      if (v < 0)
-        v = 0;
-      else if (v > 255)
-        v = 255;
-      udst[x] = u;
-      vdst[x] = v;
+      udst[x] = clip_pixel(udst[x] + udiff[x]);
+      vdst[x] = clip_pixel(vdst[x] + vdiff[x]);
     }
     udst += stride;
     vdst += stride;

@@ -216,7 +216,7 @@ static void set_mvcost(MACROBLOCK *mb) {
 static void init_base_skip_probs(void) {
   int i;
   double q;
-  int skip_prob, t;
+  int t;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
     q = vp9_convert_qindex_to_q(i);
@@ -225,26 +225,9 @@ static void init_base_skip_probs(void) {
     // Based on crude best fit of old table.
     t = (int)(564.25 * pow(2.71828, (-0.012 * q)));
 
-    skip_prob = t;
-    if (skip_prob < 1)
-      skip_prob = 1;
-    else if (skip_prob > 255)
-      skip_prob = 255;
-    base_skip_false_prob[i][1] = skip_prob;
-
-    skip_prob = t * 3 / 4;
-    if (skip_prob < 1)
-      skip_prob = 1;
-    else if (skip_prob > 255)
-      skip_prob = 255;
-    base_skip_false_prob[i][2] = skip_prob;
-
-    skip_prob = t * 5 / 4;
-    if (skip_prob < 1)
-      skip_prob = 1;
-    else if (skip_prob > 255)
-      skip_prob = 255;
-    base_skip_false_prob[i][0] = skip_prob;
+    base_skip_false_prob[i][1] = clip_prob(t);
+    base_skip_false_prob[i][2] = clip_prob(t * 3 / 4);
+    base_skip_false_prob[i][0] = clip_prob(t * 5 / 4);
   }
 }
 
@@ -2875,23 +2858,11 @@ void select_pred_filter_mode(VP9_COMP *cpi) {
 
 void update_pred_filt_prob(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
-  int prob_pred_filter_off;
 
   // Based on the selection in the previous frame determine what mode
   // to use for the current frame and work out the signaling probability
-  if (cpi->pred_filter_on_count + cpi->pred_filter_off_count) {
-    prob_pred_filter_off = cpi->pred_filter_off_count * 256 /
-                           (cpi->pred_filter_on_count + cpi->pred_filter_off_count);
-
-    if (prob_pred_filter_off < 1)
-      prob_pred_filter_off = 1;
-
-    if (prob_pred_filter_off > 255)
-      prob_pred_filter_off = 255;
-
-    cm->prob_pred_filter_off = prob_pred_filter_off;
-  } else
-    cm->prob_pred_filter_off = 128;
+  cm->prob_pred_filter_off = get_binary_prob(cpi->pred_filter_off_count,
+                                             cpi->pred_filter_on_count);
   /*
       {
         FILE *fp = fopen("filt_use.txt", "a");

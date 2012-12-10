@@ -100,9 +100,7 @@ void vp9_tree_probs_from_distribution(
   vp9_tree tree,
   vp9_prob probs          [ /* n-1 */ ],
   unsigned int branch_ct       [ /* n-1 */ ] [2],
-  const unsigned int num_events[ /* n */ ],
-  unsigned int Pfac,
-  int rd
+  const unsigned int num_events[ /* n */ ]
 ) {
   const int tree_len = n - 1;
   int t = 0;
@@ -110,29 +108,6 @@ void vp9_tree_probs_from_distribution(
   branch_counts(n, tok, tree, branch_ct, num_events);
 
   do {
-    const unsigned int *const c = branch_ct[t];
-    const unsigned int tot = c[0] + c[1];
-
-#if CONFIG_DEBUG
-    assert(tot < (1 << 24));        /* no overflow below */
-#endif
-
-    if (tot) {
-      const unsigned int p = ((c[0] * Pfac) + (rd ? tot >> 1 : 0)) / tot;
-      probs[t] = p < 256 ? (p ? p : 1) : 255; /* agree w/old version for now */
-    } else
-      probs[t] = vp9_prob_half;
+    probs[t] = get_binary_prob(branch_ct[t][0], branch_ct[t][1]);
   } while (++t < tree_len);
-}
-
-vp9_prob vp9_bin_prob_from_distribution(const unsigned int counts[2]) {
-  int tot_count = counts[0] + counts[1];
-  vp9_prob prob;
-  if (tot_count) {
-    prob = (counts[0] * 255 + (tot_count >> 1)) / tot_count;
-    prob += !prob;
-  } else {
-    prob = 128;
-  }
-  return prob;
 }

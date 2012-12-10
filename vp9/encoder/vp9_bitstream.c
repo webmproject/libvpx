@@ -30,6 +30,7 @@
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_mvref_common.h"
+#include "vp9/common/vp9_treecoder.h"
 
 #if defined(SECTIONBITS_OUTPUT)
 unsigned __int64 Sectionbits[500];
@@ -110,11 +111,8 @@ static void update_mode(
   unsigned int new_b = 0, old_b = 0;
   int i = 0;
 
-  vp9_tree_probs_from_distribution(
-    n--, tok, tree,
-    Pnew, bct, num_events,
-    256, 1
-  );
+  vp9_tree_probs_from_distribution(n--, tok, tree,
+                                   Pnew, bct, num_events);
 
   do {
     new_b += cost_branch(bct[i], Pnew[i]);
@@ -155,18 +153,6 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
   }
 }
 
-static int get_prob(int num, int den) {
-  int p;
-  if (den <= 0)
-    return 128;
-  p = (num * 255 + (den >> 1)) / den;
-  return clip_prob(p);
-}
-
-static int get_binary_prob(int n0, int n1) {
-  return get_prob(n0, n0 + n1);
-}
-
 void vp9_update_skip_probs(VP9_COMP *cpi) {
   VP9_COMMON *const pc = &cpi->common;
   int k;
@@ -187,7 +173,7 @@ static void update_switchable_interp_probs(VP9_COMP *cpi,
         VP9_SWITCHABLE_FILTERS,
         vp9_switchable_interp_encodings, vp9_switchable_interp_tree,
         pc->fc.switchable_interp_prob[j], branch_ct,
-        cpi->switchable_interp_count[j], 256, 1);
+        cpi->switchable_interp_count[j]);
     for (i = 0; i < VP9_SWITCHABLE_FILTERS - 1; ++i) {
       if (pc->fc.switchable_interp_prob[j][i] < 1)
         pc->fc.switchable_interp_prob[j][i] = 1;
@@ -257,13 +243,11 @@ static void update_mode_probs(VP9_COMMON *cm,
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
     for (j = 0; j < 4; j++) {
-      int new_prob, count, old_cost, new_cost;
+      int new_prob, old_cost, new_cost;
 
       // Work out cost of coding branches with the old and optimal probability
       old_cost = cost_branch256(mv_ref_ct[i][j], mode_context[i][j]);
-      count = mv_ref_ct[i][j][0] + mv_ref_ct[i][j][1];
-      new_prob = count > 0 ? (255 * mv_ref_ct[i][j][0]) / count : 128;
-      new_prob = (new_prob > 0) ? new_prob : 1;
+      new_prob = get_binary_prob(mv_ref_ct[i][j][0], mv_ref_ct[i][j][1]);
       new_cost = cost_branch256(mv_ref_ct[i][j], new_prob);
 
       // If cost saving is >= 14 bits then update the mode probability.
@@ -1404,7 +1388,7 @@ static void build_tree_distribution(vp9_coeff_probs *coef_probs,
                                          vp9_coef_encodings, vp9_coef_tree,
                                          coef_probs[i][j][k],
                                          coef_branch_ct[i][j][k],
-                                         coef_counts[i][j][k], 256, 1);
+                                         coef_counts[i][j][k]);
 #ifdef ENTROPY_STATS
         if (!cpi->dummy_packing)
           for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
