@@ -1124,9 +1124,9 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var)
     projected_size_based_on_q = (int)(((.5 + rate_correction_factor * vp8_bits_per_mb[cpi->common.frame_type][Q]) * cpi->common.MBs) / (1 << BPER_MB_NORMBITS));
 
     /* Make some allowance for cpi->zbin_over_quant */
-    if (cpi->zbin_over_quant > 0)
+    if (cpi->mb.zbin_over_quant > 0)
     {
-        int Z = cpi->zbin_over_quant;
+        int Z = cpi->mb.zbin_over_quant;
         double Factor = 0.99;
         double factor_adjustment = 0.01 / 256.0;
 
@@ -1203,7 +1203,7 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
     int Q = cpi->active_worst_quality;
 
     /* Reset Zbin OQ value */
-    cpi->zbin_over_quant = 0;
+    cpi->mb.zbin_over_quant = 0;
 
     if (cpi->oxcf.fixed_q >= 0)
     {
@@ -1318,12 +1318,12 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
              * normal maximum by expanding the zero bin and hence
              * decreasing the number of low magnitude non zero coefficients.
              */
-            while (cpi->zbin_over_quant < zbin_oqmax)
+            while (cpi->mb.zbin_over_quant < zbin_oqmax)
             {
-                cpi->zbin_over_quant ++;
+                cpi->mb.zbin_over_quant ++;
 
-                if (cpi->zbin_over_quant > zbin_oqmax)
-                    cpi->zbin_over_quant = zbin_oqmax;
+                if (cpi->mb.zbin_over_quant > zbin_oqmax)
+                    cpi->mb.zbin_over_quant = zbin_oqmax;
 
                 /* Adjust bits_per_mb_at_this_q estimate */
                 bits_per_mb_at_this_q = (int)(Factor * bits_per_mb_at_this_q);

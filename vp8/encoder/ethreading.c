@@ -423,6 +423,8 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         vpx_memcpy(z->rd_threshes, x->rd_threshes, sizeof(x->rd_threshes));
         vpx_memcpy(z->rd_thresh_mult, x->rd_thresh_mult,
                    sizeof(x->rd_thresh_mult));
+
+        z->zbin_over_quant = x->zbin_over_quant;
     }
 }
 

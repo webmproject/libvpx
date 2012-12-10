@@ -238,7 +238,7 @@ static void save_layer_context(VP8_COMP *cpi)
     lc->rate_correction_factor           = cpi->rate_correction_factor;
     lc->key_frame_rate_correction_factor = cpi->key_frame_rate_correction_factor;
     lc->gf_rate_correction_factor        = cpi->gf_rate_correction_factor;
-    lc->zbin_over_quant                  = cpi->zbin_over_quant;
+    lc->zbin_over_quant                  = cpi->mb.zbin_over_quant;
     lc->inter_frame_target               = cpi->inter_frame_target;
     lc->total_byte_count                 = cpi->total_byte_count;
     lc->filter_level                     = cpi->common.filter_level;
@@ -276,7 +276,7 @@ static void restore_layer_context(VP8_COMP *cpi, const int layer)
     cpi->rate_correction_factor           = lc->rate_correction_factor;
     cpi->key_frame_rate_correction_factor = lc->key_frame_rate_correction_factor;
     cpi->gf_rate_correction_factor        = lc->gf_rate_correction_factor;
-    cpi->zbin_over_quant                  = lc->zbin_over_quant;
+    cpi->mb.zbin_over_quant                  = lc->zbin_over_quant;
     cpi->inter_frame_target               = lc->inter_frame_target;
     cpi->total_byte_count                 = lc->total_byte_count;
     cpi->common.filter_level              = lc->filter_level;
@@ -3308,7 +3308,7 @@ static void encode_frame_to_data_rate
     cm->copy_buffer_to_arf = 0;
 
     /* Clear zbin over-quant value and mode boost values. */
-    cpi->zbin_over_quant = 0;
+    cpi->mb.zbin_over_quant = 0;
     cpi->zbin_mode_boost = 0;
 
     /* Enable or disable mode based tweaking of the zbin
@@ -4076,8 +4076,9 @@ static void encode_frame_to_data_rate
                 q_low = (Q < q_high) ? (Q + 1) : q_high;
 
                 /* If we are using over quant do the same for zbin_oq_low */
-                if (cpi->zbin_over_quant > 0)
-                    zbin_oq_low = (cpi->zbin_over_quant < zbin_oq_high) ? (cpi->zbin_over_quant + 1) : zbin_oq_high;
+                if (cpi->mb.zbin_over_quant > 0)
+                    zbin_oq_low = (cpi->mb.zbin_over_quant < zbin_oq_high) ?
+                        (cpi->mb.zbin_over_quant + 1) : zbin_oq_high;
 
                 if (undershoot_seen)
                 {
@@ -4093,11 +4094,13 @@ static void encode_frame_to_data_rate
                      * is max)
                      */
                     if (Q < MAXQ)
-                        cpi->zbin_over_quant = 0;
+                        cpi->mb.zbin_over_quant = 0;
                     else
                     {
-                        zbin_oq_low = (cpi->zbin_over_quant < zbin_oq_high) ? (cpi->zbin_over_quant + 1) : zbin_oq_high;
-                        cpi->zbin_over_quant = (zbin_oq_high + zbin_oq_low) / 2;
+                        zbin_oq_low = (cpi->mb.zbin_over_quant < zbin_oq_high) ?
+                            (cpi->mb.zbin_over_quant + 1) : zbin_oq_high;
+                        cpi->mb.zbin_over_quant =
+                            (zbin_oq_high + zbin_oq_low) / 2;
                     }
                 }
                 else
@@ -4110,7 +4113,9 @@ static void encode_frame_to_data_rate
 
                     Q = vp8_regulate_q(cpi, cpi->this_frame_target);
 
-                    while (((Q < q_low) || (cpi->zbin_over_quant < zbin_oq_low)) && (Retries < 10))
+                    while (((Q < q_low) ||
+                        (cpi->mb.zbin_over_quant < zbin_oq_low)) &&
+                        (Retries < 10))
                     {
                         vp8_update_rate_correction_factors(cpi, 0);
                         Q = vp8_regulate_q(cpi, cpi->this_frame_target);
@@ -4123,12 +4128,13 @@ static void encode_frame_to_data_rate
             /* Frame is too small */
             else
             {
-                if (cpi->zbin_over_quant == 0)
+                if (cpi->mb.zbin_over_quant == 0)
                     /* Lower q_high if not using over quant */
                     q_high = (Q > q_low) ? (Q - 1) : q_low;
                 else
                     /* else lower zbin_oq_high */
-                    zbin_oq_high = (cpi->zbin_over_quant > zbin_oq_low) ? (cpi->zbin_over_quant - 1) : zbin_oq_low;
+                    zbin_oq_high = (cpi->mb.zbin_over_quant > zbin_oq_low) ?
+                        (cpi->mb.zbin_over_quant - 1) : zbin_oq_low;
 
                 if (overshoot_seen)
                 {
@@ -4144,9 +4150,10 @@ static void encode_frame_to_data_rate
                      * is max)
                      */
                     if (Q < MAXQ)
-                        cpi->zbin_over_quant = 0;
+                        cpi->mb.zbin_over_quant = 0;
                     else
-                        cpi->zbin_over_quant = (zbin_oq_high + zbin_oq_low) / 2;
+                        cpi->mb.zbin_over_quant =
+                            (zbin_oq_high + zbin_oq_low) / 2;
                 }
                 else
                 {
@@ -4169,7 +4176,9 @@ static void encode_frame_to_data_rate
                         q_low = Q;
                     }
 
-                    while (((Q > q_high) || (cpi->zbin_over_quant > zbin_oq_high)) && (Retries < 10))
+                    while (((Q > q_high) ||
+                        (cpi->mb.zbin_over_quant > zbin_oq_high)) &&
+                        (Retries < 10))
                     {
                         vp8_update_rate_correction_factors(cpi, 0);
                         Q = vp8_regulate_q(cpi, cpi->this_frame_target);
@@ -4187,7 +4196,9 @@ static void encode_frame_to_data_rate
                 Q = q_low;
 
             /* Clamp cpi->zbin_over_quant */
-            cpi->zbin_over_quant = (cpi->zbin_over_quant < zbin_oq_low) ? zbin_oq_low : (cpi->zbin_over_quant > zbin_oq_high) ? zbin_oq_high : cpi->zbin_over_quant;
+            cpi->mb.zbin_over_quant = (cpi->mb.zbin_over_quant < zbin_oq_low) ?
+                zbin_oq_low : (cpi->mb.zbin_over_quant > zbin_oq_high) ?
+                    zbin_oq_high : cpi->mb.zbin_over_quant;
 
             Loop = Q != last_q;
         }

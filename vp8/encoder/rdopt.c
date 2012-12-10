@@ -238,15 +238,15 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue)
     cpi->RDMULT = (int)(rdconst * (capped_q * capped_q));
 
     /* Extend rate multiplier along side quantizer zbin increases */
-    if (cpi->zbin_over_quant  > 0)
+    if (cpi->mb.zbin_over_quant  > 0)
     {
         double oq_factor;
         double modq;
 
         /* Experimental code using the same basic equation as used for Q above
-         * The units of cpi->zbin_over_quant are 1/128 of Q bin size
+         * The units of cpi->mb.zbin_over_quant are 1/128 of Q bin size
          */
-        oq_factor = 1.0 + ((double)0.0015625 * cpi->zbin_over_quant);
+        oq_factor = 1.0 + ((double)0.0015625 * cpi->mb.zbin_over_quant);
         modq = (int)((double)capped_q * oq_factor);
         cpi->RDMULT = (int)(rdconst * (modq * modq));
     }
