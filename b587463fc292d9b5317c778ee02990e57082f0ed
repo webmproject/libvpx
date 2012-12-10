@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7w8\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "This structure holds the node probabilities for coding the tree.\n\nThere are MAX_MV_REF_CANDIDATES possible reference values and hence MAX_MV_REF_CANDIDATES-1 probability nodes in the tree.",
+      "parentUuid": "AAAARn//7x8\u003d",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//7yY\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-12-10T16:16:17Z",
       "side": 1,
       "message": "typo: encoding",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7wk\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1573,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn//7yY\u003d",
       "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7wo\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1574,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn//7yU\u003d",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//7yQ\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2012-12-10T16:16:17Z",
       "side": 1,
       "message": "don\u0027t skip a line",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7ws\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1575,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "Done though I think the space improves readability",
+      "parentUuid": "AAAARn//7yQ\u003d",
       "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7wY\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1576,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn//7yM\u003d",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//7yI\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2012-12-10T16:16:17Z",
       "side": 1,
       "message": "252 -\u003e #define",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7wU\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1588,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn//7yI\u003d",
       "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7v8\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "For consistency with elsewhere done",
+      "parentUuid": "AAAARn//7x4\u003d",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//7yE\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2012-12-10T16:16:17Z",
       "side": 1,
       "message": "upper bound is MAX_MV_REF_CANDIDATES-1\n\n(or it\u0027ll crash at 315)",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7vo\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "No. There are MAX_MV_REF_CANDIDATES possible values for the reference id and hence MAX_MV_REF_CANDIDATES entries in the count array. These are then translated to create (MAX_MV_REF_CANDIDATES - 1) probability nodes in the coding tree below, hence the use of the new loop variable node to distinguish.",
+      "parentUuid": "AAAARn//7yE\u003d",
       "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -166,6 +310,24 @@
       "writtenOn": "2012-12-10T16:16:17Z",
       "side": 1,
       "message": "prefer: new_cost + (14 \u003c\u003c 8) \u003c\u003d old_cost\n\n14 \u003c\u003c 8 should be a #define, too",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7vs\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn//7yA\u003d",
       "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +385,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7vk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn//7xo\u003d",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//7xk\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 2
@@ -234,6 +414,24 @@
       "writtenOn": "2012-12-10T16:16:17Z",
       "side": 1,
       "message": "just remove the \"if (1)\"",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7vg\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "This is temporary till we decide whether to merge this experiment because if I remove the if (1) then web Jenkins style guide complains about hanging {} placement !!. Alternative is to have a separate #if CONFIG at the top.",
+      "parentUuid": "AAAARn//7xk\u003d",
       "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +455,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7vc\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn//7xg\u003d",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//7xY\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -268,6 +484,24 @@
       "writtenOn": "2012-12-10T16:16:17Z",
       "side": 1,
       "message": "just remove the commented line",
+      "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7vQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3105,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-10T17:00:30Z",
+      "side": 1,
+      "message": "Place-holder for experiment.",
+      "parentUuid": "AAAARn//7xY\u003d",
       "revId": "b587463fc292d9b5317c778ee02990e57082f0ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
