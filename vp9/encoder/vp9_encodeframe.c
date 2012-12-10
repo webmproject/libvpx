@@ -581,6 +581,7 @@ static void update_state(VP9_COMP *cpi, MACROBLOCK *x,
         ++cpi->interintra_count[0];
       }
     }
+#endif
     if (cpi->common.mcomp_filter_type == SWITCHABLE &&
         mbmi->mode >= NEARESTMV &&
         mbmi->mode <= SPLITMV) {
@@ -588,7 +589,6 @@ static void update_state(VP9_COMP *cpi, MACROBLOCK *x,
           [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
           [vp9_switchable_interp_map[mbmi->interp_filter]];
     }
-#endif
 
     cpi->prediction_error += ctx->distortion;
     cpi->intra_error += ctx->intra_error;
