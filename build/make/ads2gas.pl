@@ -149,7 +149,7 @@ while (<STDIN>)
     s/^([a-zA-Z_0-9\$]+)/$1:/ if !/EQU/;
 
     # ALIGN directive
-    s/ALIGN/.balign/g;
+    s/\bALIGN\b/.balign/g;
 
     # ARM code
     s/\sARM/.arm/g;
