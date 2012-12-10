@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARn//7ek\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-10T21:12:01Z",
+      "side": 1,
+      "message": "ah, i see. I missed the difference between mb_mv_ref_count[] and mb_mv_ref_probs[].",
+      "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7e4\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-10T21:12:01Z",
+      "side": 1,
+      "message": "the idea is to avoid subtracting in cost computation, should it ever be an unsigned. So:\n\nif (new_cost + VP9_MV_REF_UPDATE_COST \u003c\u003d old_cost) {\n  ...\n}",
+      "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7eo\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-10T21:12:01Z",
+      "side": 1,
+      "message": "should probably be moved to 315...",
+      "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7eg\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2163,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-10T21:12:01Z",
+      "side": 1,
+      "message": "avoid double ()\u0027s",
+      "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7eQ\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 803,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-10T21:12:01Z",
+      "side": 1,
+      "message": "i think the name is quite too close to \"mb_mv_ref_probs[][]\" ...",
+      "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
