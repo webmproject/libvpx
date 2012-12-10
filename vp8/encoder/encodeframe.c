@@ -1229,7 +1229,7 @@ int vp8cx_encode_inter_macroblock
 
     if (cpi->sf.RD)
     {
-        int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
+        int zbin_mode_boost_enabled = x->zbin_mode_boost_enabled;
 
         /* Are we using the fast quantizer for the mode selection? */
         if(cpi->sf.use_fastquant_for_pick)
@@ -1239,7 +1239,7 @@ int vp8cx_encode_inter_macroblock
 
             /* the fast quantizer does not use zbin_extra, so
              * do not recalculate */
-            cpi->zbin_mode_boost_enabled = 0;
+            x->zbin_mode_boost_enabled = 0;
         }
         vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
                                &distortion, &intra_error);
@@ -1252,7 +1252,7 @@ int vp8cx_encode_inter_macroblock
         }
 
         /* restore cpi->zbin_mode_boost_enabled */
-        cpi->zbin_mode_boost_enabled = zbin_mode_boost_enabled;
+        x->zbin_mode_boost_enabled = zbin_mode_boost_enabled;
 
     }
     else
@@ -1298,22 +1298,22 @@ int vp8cx_encode_inter_macroblock
         /* Experimental code. Special case for gf and arf zeromv modes.
          * Increase zbin size to supress noise
          */
-        cpi->zbin_mode_boost = 0;
-        if (cpi->zbin_mode_boost_enabled)
+        x->zbin_mode_boost = 0;
+        if (x->zbin_mode_boost_enabled)
         {
             if ( xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME )
             {
                 if (xd->mode_info_context->mbmi.mode == ZEROMV)
                 {
                     if (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME)
-                        cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
+                        x->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
                     else
-                        cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
+                        x->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
                 }
                 else if (xd->mode_info_context->mbmi.mode == SPLITMV)
-                    cpi->zbin_mode_boost = 0;
+                    x->zbin_mode_boost = 0;
                 else
-                    cpi->zbin_mode_boost = MV_ZBIN_BOOST;
+                    x->zbin_mode_boost = MV_ZBIN_BOOST;
             }
         }
 

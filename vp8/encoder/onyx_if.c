@@ -3309,18 +3309,18 @@ static void encode_frame_to_data_rate
 
     /* Clear zbin over-quant value and mode boost values. */
     cpi->mb.zbin_over_quant = 0;
-    cpi->zbin_mode_boost = 0;
+    cpi->mb.zbin_mode_boost = 0;
 
     /* Enable or disable mode based tweaking of the zbin
      * For 2 Pass Only used where GF/ARF prediction quality
      * is above a threshold
      */
-    cpi->zbin_mode_boost_enabled = 1;
+    cpi->mb.zbin_mode_boost_enabled = 1;
     if (cpi->pass == 2)
     {
         if ( cpi->gfu_boost <= 400 )
         {
-            cpi->zbin_mode_boost_enabled = 0;
+            cpi->mb.zbin_mode_boost_enabled = 0;
         }
     }
 

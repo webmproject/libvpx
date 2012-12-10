@@ -412,10 +412,6 @@ typedef struct VP8_COMP
     int ni_frames;
     int avg_frame_qindex;
 
-    int zbin_mode_boost;
-    int zbin_mode_boost_enabled;
-    int last_zbin_mode_boost;
-
     int64_t total_byte_count;
 
     int buffered_mode;
