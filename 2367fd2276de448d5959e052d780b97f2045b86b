@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//8No\u003d",
+        "filename": "vp9/common/common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//uys\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//uyo\u003d",
         "filename": "vp9/common/common.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-20T16:06:43Z",
       "side": 1,
       "message": "return (val \u003e 255) ? 255u : (val \u003c 0) ? 0u : val;",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//8Ng\u003d",
+        "filename": "vp9/common/common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//uyo\u003d",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//8IM\u003d",
+        "filename": "vp9/common/entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//uyk\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//uyg\u003d",
         "filename": "vp9/common/entropymode.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2012-11-20T16:06:43Z",
       "side": 1,
       "message": "ditto. calc_prob()\n\n(and below)",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//8GM\u003d",
+        "filename": "vp9/common/entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Done, and additionally split all this repetitive code out in its own function.",
+      "parentUuid": "AAAAQ3//uyg\u003d",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//8GI\u003d",
+        "filename": "vp9/common/entropymv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//uyY\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//uxs\u003d",
         "filename": "vp9/common/filter.c",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2012-11-20T16:06:43Z",
       "side": 1,
       "message": "const uint8_t* src_ptr",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7tw\u003d",
+        "filename": "vp9/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "I agree that all unsigned chars should be moved to uint8_t. I\u0027m not going to add any new ones (i.e. don\u0027t make it worse), but will hold off changing any existing ones to prevent this patch from growing into an unreviewable monster.",
+      "parentUuid": "AAAAQ3//uxs\u003d",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7pQ\u003d",
+        "filename": "vp9/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//uyA\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//uyI\u003d",
         "filename": "vp9/common/filter.c",
         "patchSetId": 1
@@ -149,6 +275,24 @@
       "writtenOn": "2012-11-20T16:06:43Z",
       "side": 1,
       "message": "note that the shit by VP9_FILTER_SHIFT could be blended in the function itself:\n\nreturn (val \u003e (255 \u003c\u003c VP9_FILTER_SHIFT)) ? 255 : (val \u003c 0) ? 0u : (val \u003e\u003e VP9_FILTER_SHIFT);\n\n\nto save few shifts sometimes.\n\nAlso, why clip since output is \u0027int\u0027 ? Can the clipping be delayed to a later stage?",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7ts\u003d",
+        "filename": "vp9/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Fixed prototype of clip_pixel(). As for the shift, isn\u0027t that something the compiler would do automatically (I\u0027m pretty sure it is)?",
+      "parentUuid": "AAAAQ3//uyI\u003d",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -172,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7to\u003d",
+        "filename": "vp9/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "See above.",
+      "parentUuid": "AAAAQ3//uxw\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//uxo\u003d",
         "filename": "vp9/common/idctllm.c",
         "patchSetId": 1
@@ -183,6 +345,24 @@
       "writtenOn": "2012-11-20T16:06:43Z",
       "side": 1,
       "message": "const uint8_t* pred_ptr",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7tQ\u003d",
+        "filename": "vp9/common/idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "See comment in vp9_filter.c",
+      "parentUuid": "AAAAQ3//uxo\u003d",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -206,6 +386,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7tM\u003d",
+        "filename": "vp9/common/idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "So, yes, will do, but later, to prevent this patch from growing into a monster.",
+      "parentUuid": "AAAAQ3//uxk\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//uxg\u003d",
         "filename": "vp9/common/recon.c",
         "patchSetId": 1
@@ -217,6 +415,24 @@
       "writtenOn": "2012-11-20T16:06:43Z",
       "side": 1,
       "message": "const uint8_t* pred_ptr etc...",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7qo\u003d",
+        "filename": "vp9/common/recon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "See earlier comment - will do, but later.",
+      "parentUuid": "AAAAQ3//uxg\u003d",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -268,6 +484,24 @@
       "writtenOn": "2012-11-20T16:06:43Z",
       "side": 1,
       "message": "pred_filter[] only has positive values, and is normalized to 4 bits (filt_shift). So, no need to clip the sum.",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7o0\u003d",
+        "filename": "vp9/common/reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "OK, removed.",
+      "parentUuid": "AAAAQ3//uxU\u003d",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -345,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7oc\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//uy0\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//uyw\u003d",
         "filename": "vp9/common/reconintra.c",
         "patchSetId": 1
@@ -356,6 +608,24 @@
       "writtenOn": "2012-11-20T16:06:43Z",
       "side": 1,
       "message": "extra space after \u0027[\u0027 and before \u0027c\u0027",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7oY\u003d",
+        "filename": "vp9/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//uyw\u003d",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -379,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "AAAARn//7oI\u003d",
+        "filename": "vp9/common/reconintra4x4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAQ3//uxI\u003d",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAQ3//uxE\u003d",
         "filename": "vp9/common/treecoder.h",
         "patchSetId": 1
@@ -390,6 +678,24 @@
       "writtenOn": "2012-11-20T16:06:43Z",
       "side": 1,
       "message": "do you really need to clip, in practice? Won\u0027t num be always less or equal to den?",
+      "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//7lo\u003d",
+        "filename": "vp9/common/treecoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-10T19:47:01Z",
+      "side": 1,
+      "message": "You need it for the lower end, since prob\u003d[1,255] but p can be zero.\n\nFor the upper end, it depends on how we implement it. Right now, I agree we don\u0027t need it, but a lot of code uses 256 instead of 255 as multiplier, and (I\u0027ll test) if that gives better probability estimations, then we\u0027ll use that, and we\u0027ll need an upper bound clip also.",
+      "parentUuid": "AAAAQ3//uxE\u003d",
       "revId": "2367fd2276de448d5959e052d780b97f2045b86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
