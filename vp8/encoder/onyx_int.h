@@ -488,7 +488,6 @@ typedef struct VP8_COMP
     int ref_frame_flags;
 
     SPEED_FEATURES sf;
-    int error_bins[1024];
 
     /* Count ZEROMV on all reference frames. */
     int zeromv_count;

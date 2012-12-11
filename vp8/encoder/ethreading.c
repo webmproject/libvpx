@@ -427,6 +427,8 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         z->zbin_over_quant = x->zbin_over_quant;
         z->zbin_mode_boost_enabled = x->zbin_mode_boost_enabled;
         z->zbin_mode_boost = x->zbin_mode_boost;
+
+        vpx_memset(z->error_bins, 0, sizeof(z->error_bins));
     }
 }
 

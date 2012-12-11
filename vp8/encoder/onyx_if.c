@@ -837,7 +837,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
             for (i = 0; i < min; i++)
             {
-                sum += cpi->error_bins[i];
+                sum += cpi->mb.error_bins[i];
             }
 
             total_skip = sum;
@@ -846,7 +846,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             /* i starts from 2 to make sure thresh started from 2048 */
             for (; i < 1024; i++)
             {
-                sum += cpi->error_bins[i];
+                sum += cpi->mb.error_bins[i];
 
                 if (10 * sum >= (unsigned int)(cpi->Speed - 6)*(total_mbs - total_skip))
                     break;
@@ -901,7 +901,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         if (Speed >= 15)
             sf->half_pixel_search = 0;
 
-        vpx_memset(cpi->error_bins, 0, sizeof(cpi->error_bins));
+        vpx_memset(cpi->mb.error_bins, 0, sizeof(cpi->mb.error_bins));
 
     }; /* switch */
 
@@ -1998,7 +1998,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->refining_search_sad = vp8_refining_search_sad;
 
     /* make sure frame 1 is okay */
-    cpi->error_bins[0] = cpi->common.MBs;
+    cpi->mb.error_bins[0] = cpi->common.MBs;
 
     /* vp8cx_init_quantizer() is first called here. Add check in
      * vp8cx_frame_init_quantizer() so that vp8cx_init_quantizer is only

@@ -1160,7 +1160,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             this_rdbin = 1023;
         }
 
-        cpi->error_bins[this_rdbin] ++;
+        x->error_bins[this_rdbin] ++;
     }
 
 #if CONFIG_TEMPORAL_DENOISING

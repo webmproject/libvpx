@@ -19,6 +19,7 @@
 #include "vpx_ports/mem.h"
 
 #define MAX_MODES 20
+#define MAX_ERROR_BINS 1024
 
 /* motion search site */
 typedef struct
@@ -148,6 +149,7 @@ typedef struct macroblock
 
     int last_zbin_over_quant;
     int zbin_over_quant;
+    int error_bins[MAX_ERROR_BINS];
 
     void (*short_fdct4x4)(short *input, short *output, int pitch);
     void (*short_fdct8x4)(short *input, short *output, int pitch);
