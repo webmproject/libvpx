@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARn//7Q8\u003d",
+        "filename": "build/make/ads2gas.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-11T00:00:28Z",
+      "side": 1,
+      "message": "\\bALIGN\\b",
+      "revId": "4274d96dd488da7008f98d51bfa7b00a0bd829ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
