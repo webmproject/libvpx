@@ -895,7 +895,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
                 for(c_idx = 0; c_idx < MAX_REF_FRAMES; c_idx++)
                     cpi->mb.count_mb_ref_frame_usage[c_idx] +=
-                        x->count_mb_ref_frame_usage[c_idx];
+                        cpi->mb_row_ei[i].mb.count_mb_ref_frame_usage[c_idx];
 
                 /* add up counts for each thread */
                 sum_coef_counts(x, &cpi->mb_row_ei[i].mb);
