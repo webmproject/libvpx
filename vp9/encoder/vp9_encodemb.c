@@ -727,14 +727,21 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x) {
   tl = (ENTROPY_CONTEXT *)&t_left;
   type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
   for (b = 0; b < 16; b += 4) {
-    optimize_b(x, b, type,
-               ta + vp9_block2above_8x8[b], tl + vp9_block2left_8x8[b],
-               TX_8X8);
-    ta[vp9_block2above_8x8[b] + 1] = ta[vp9_block2above_8x8[b]];
-    tl[vp9_block2left_8x8[b] + 1]  = tl[vp9_block2left_8x8[b]];
+    ENTROPY_CONTEXT *const a = ta + vp9_block2above_8x8[b];
+    ENTROPY_CONTEXT *const l = tl + vp9_block2left_8x8[b];
+#if CONFIG_CNVCONTEXT
+    ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
+    ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
+#else
+    ENTROPY_CONTEXT above_ec = a[0];
+    ENTROPY_CONTEXT left_ec = l[0];
+#endif
+    optimize_b(x, b, type, &above_ec, &left_ec, TX_8X8);
+    a[1] = a[0] = above_ec;
+    l[1] = l[0] = left_ec;
   }
 
-  // 8x8 always have 2nd roder haar block
+  // 8x8 always have 2nd order block
   if (has_2nd_order) {
     check_reset_8x8_2nd_coeffs(&x->e_mbd,
                                ta + vp9_block2above_8x8[24],
@@ -744,25 +751,23 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x) {
 
 void vp9_optimize_mbuv_8x8(MACROBLOCK *x) {
   int b;
-  ENTROPY_CONTEXT_PLANES t_above, t_left;
-  ENTROPY_CONTEXT *ta;
-  ENTROPY_CONTEXT *tl;
+  ENTROPY_CONTEXT *const ta = (ENTROPY_CONTEXT *)x->e_mbd.above_context;
+  ENTROPY_CONTEXT *const tl = (ENTROPY_CONTEXT *)x->e_mbd.left_context;
 
-  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
+  if (!ta || !tl)
     return;
 
-  vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
-
-  ta = (ENTROPY_CONTEXT *)&t_above;
-  tl = (ENTROPY_CONTEXT *)&t_left;
-
   for (b = 16; b < 24; b += 4) {
-    optimize_b(x, b, PLANE_TYPE_UV,
-               ta + vp9_block2above_8x8[b], tl + vp9_block2left_8x8[b],
-               TX_8X8);
-    ta[vp9_block2above_8x8[b] + 1] = ta[vp9_block2above_8x8[b]];
-    tl[vp9_block2left_8x8[b] + 1]  = tl[vp9_block2left_8x8[b]];
+    ENTROPY_CONTEXT *const a = ta + vp9_block2above_8x8[b];
+    ENTROPY_CONTEXT *const l = tl + vp9_block2left_8x8[b];
+#if CONFIG_CNVCONTEXT
+    ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
+    ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
+#else
+    ENTROPY_CONTEXT above_ec = a[0];
+    ENTROPY_CONTEXT left_ec = l[0];
+#endif
+    optimize_b(x, b, PLANE_TYPE_UV, &above_ec, &left_ec, TX_8X8);
   }
 }
 
@@ -772,18 +777,21 @@ static void optimize_mb_8x8(MACROBLOCK *x) {
 }
 
 void vp9_optimize_mby_16x16(MACROBLOCK *x) {
-  ENTROPY_CONTEXT_PLANES t_above, t_left;
-  ENTROPY_CONTEXT *ta, *tl;
+  ENTROPY_CONTEXT_PLANES *const t_above = x->e_mbd.above_context;
+  ENTROPY_CONTEXT_PLANES *const t_left = x->e_mbd.left_context;
+  ENTROPY_CONTEXT ta, tl;
 
-  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
+  if (!t_above || !t_left)
     return;
 
-  vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
-
-  ta = (ENTROPY_CONTEXT *)&t_above;
-  tl = (ENTROPY_CONTEXT *)&t_left;
-  optimize_b(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, TX_16X16);
+#if CONFIG_CNVCONTEXT
+  ta = (t_above->y1[0] + t_above->y1[1] + t_above->y1[2] + t_above->y1[3]) != 0;
+  tl = (t_left->y1[0] + t_left->y1[1] + t_left->y1[2] + t_left->y1[3]) != 0;
+#else
+  ta = t_above->y1[0];
+  tl = t_left->y1[0];
+#endif
+  optimize_b(x, 0, PLANE_TYPE_Y_WITH_DC, &ta, &tl, TX_16X16);
 }
 
 static void optimize_mb_16x16(MACROBLOCK *x) {

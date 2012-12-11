@@ -129,4 +129,10 @@ void vp9_coef_tree_initialize(void);
 
 void vp9_adapt_coef_probs(struct VP9Common *);
 
+static void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
+  /* Clear entropy contexts */
+    vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+}
+
 #endif

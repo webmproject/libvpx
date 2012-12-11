@@ -14,6 +14,7 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_reconintra4x4.h"
 #include "vp9/common/vp9_reconinter.h"
+#include "vp9/common/vp9_entropy.h"
 #include "vp9/decoder/vp9_decodframe.h"
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/common/vp9_invtrans.h"
@@ -443,12 +444,12 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
         vp9_dequant_idct_add(b->qcoeff, b->dequant, b->predictor,
                              *(b->base_dst) + b->dst, 16, b->dst_stride);
       }
-      xd->above_context->y2 = 1;
-      xd->left_context->y2 = 1;
     }
     if (!xd->mode_info_context->mbmi.mb_skip_coeff) {
       vp9_decode_mb_tokens_4x4_uv(pbi, xd, bc);
     }
+    xd->above_context->y2 = 0;
+    xd->left_context->y2 = 0;
     vp9_build_intra_predictors_mbuv(xd);
     pbi->idct_add_uv_block(xd->qcoeff + 16 * 16,
                            xd->block[16].dequant,
