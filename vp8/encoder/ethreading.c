@@ -425,6 +425,8 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
                    sizeof(x->rd_thresh_mult));
 
         z->zbin_over_quant = x->zbin_over_quant;
+        z->zbin_mode_boost_enabled = x->zbin_mode_boost_enabled;
+        z->zbin_mode_boost = x->zbin_mode_boost;
     }
 }
 
