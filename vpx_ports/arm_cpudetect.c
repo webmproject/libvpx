@@ -125,11 +125,7 @@ int arm_cpu_caps(void)
 }
 
 #elif defined(__ANDROID__) /* end _MSC_VER */
-#if defined(CHROMIUM_BUILD)
-#include <machine/cpu-features.h>
-#else
 #include <cpu-features.h>
-#endif
 
 int arm_cpu_caps(void)
 {
