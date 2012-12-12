@@ -309,24 +309,24 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
 
   vp9_tree_probs_from_distribution(VP9_YMODES, vp9_ymode_encodings,
                                    vp9_ymode_tree, x->fc.ymode_prob,
-                                   bct, y_mode_cts, 256, 1);
+                                   bct, y_mode_cts);
 #if CONFIG_SUPERBLOCKS
   vp9_tree_probs_from_distribution(VP9_I32X32_MODES, vp9_sb_ymode_encodings,
                                    vp9_sb_ymode_tree, x->fc.sb_ymode_prob,
-                                   bct, y_mode_cts, 256, 1);
+                                   bct, y_mode_cts);
 #endif
   {
     int i;
     for (i = 0; i < 8; i++) {
       vp9_tree_probs_from_distribution(VP9_YMODES, vp9_kf_ymode_encodings,
                                        vp9_kf_ymode_tree, x->kf_ymode_prob[i],
-                                       bct, kf_y_mode_cts[i], 256, 1);
+                                       bct, kf_y_mode_cts[i]);
 #if CONFIG_SUPERBLOCKS
       vp9_tree_probs_from_distribution(VP9_I32X32_MODES,
                                        vp9_sb_kf_ymode_encodings,
                                        vp9_sb_kf_ymode_tree,
                                        x->sb_kf_ymode_prob[i], bct,
-                                       kf_y_mode_cts[i], 256, 1);
+                                       kf_y_mode_cts[i]);
 #endif
     }
   }
@@ -335,16 +335,16 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
     for (i = 0; i < VP9_YMODES; i++) {
       vp9_tree_probs_from_distribution(VP9_UV_MODES, vp9_uv_mode_encodings,
                                        vp9_uv_mode_tree, x->kf_uv_mode_prob[i],
-                                       bct, kf_uv_mode_cts[i], 256, 1);
+                                       bct, kf_uv_mode_cts[i]);
       vp9_tree_probs_from_distribution(VP9_UV_MODES, vp9_uv_mode_encodings,
                                        vp9_uv_mode_tree, x->fc.uv_mode_prob[i],
-                                       bct, uv_mode_cts[i], 256, 1);
+                                       bct, uv_mode_cts[i]);
     }
   }
 
   vp9_tree_probs_from_distribution(VP9_I8X8_MODES, vp9_i8x8_mode_encodings,
                                    vp9_i8x8_mode_tree, x->fc.i8x8_mode_prob,
-                                   bct, i8x8_mode_cts, 256, 1);
+                                   bct, i8x8_mode_cts);
 
   vpx_memcpy(x->fc.sub_mv_ref_prob, vp9_sub_mv_ref_prob2,
              sizeof(vp9_sub_mv_ref_prob2));
@@ -362,7 +362,7 @@ static void intra_bmode_probs_from_distribution(
   unsigned int branch_ct[VP9_NKF_BINTRAMODES - 1][2],
   const unsigned int events[VP9_NKF_BINTRAMODES]) {
   vp9_tree_probs_from_distribution(VP9_NKF_BINTRAMODES, vp9_bmode_encodings,
-    vp9_bmode_tree, p, branch_ct, events, 256, 1);
+                                   vp9_bmode_tree, p, branch_ct, events);
 }
 
 void vp9_default_bmode_probs(vp9_prob p[VP9_NKF_BINTRAMODES - 1]) {
@@ -375,7 +375,7 @@ static void intra_kf_bmode_probs_from_distribution(
   unsigned int branch_ct[VP9_KF_BINTRAMODES - 1][2],
   const unsigned int events[VP9_KF_BINTRAMODES]) {
   vp9_tree_probs_from_distribution(VP9_KF_BINTRAMODES, vp9_kf_bmode_encodings,
-    vp9_kf_bmode_tree, p, branch_ct, events, 256, 1);
+                                   vp9_kf_bmode_tree, p, branch_ct, events);
 }
 
 void vp9_kf_default_bmode_probs(vp9_prob p[VP9_KF_BINTRAMODES]
@@ -495,17 +495,14 @@ void vp9_update_mode_context(VP9_COMMON *pc) {
 
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     for (i = 0; i < 4; i++) {
-      int this_prob;
-      int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1];
-      int factor;
-      {
-        this_prob = count > 0 ? 256 * mv_ref_ct[j][i][0] / count : 128;
-        count = count > MVREF_COUNT_SAT ? MVREF_COUNT_SAT : count;
-        factor = (MVREF_MAX_UPDATE_FACTOR * count / MVREF_COUNT_SAT);
-        this_prob = (pc->fc.vp9_mode_contexts[j][i] * (256 - factor) +
-                     this_prob * factor + 128) >> 8;
-        mode_context[j][i] = clip_prob(this_prob);
-      }
+      int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1], factor;
+
+      count = count > MVREF_COUNT_SAT ? MVREF_COUNT_SAT : count;
+      factor = (MVREF_MAX_UPDATE_FACTOR * count / MVREF_COUNT_SAT);
+      mode_context[j][i] = weighted_prob(pc->fc.vp9_mode_contexts[j][i],
+                                         get_binary_prob(mv_ref_ct[j][i][0],
+                                                         mv_ref_ct[j][i][1]),
+                                         factor);
     }
   }
 }
@@ -531,25 +528,33 @@ void print_mode_contexts(VP9_COMMON *pc) {
 }
 #endif
 
-// #define MODE_COUNT_TESTING
 #define MODE_COUNT_SAT 20
 #define MODE_MAX_UPDATE_FACTOR 144
+static void update_mode_probs(int n_modes, struct vp9_token_struct *encoding,
+                              const vp9_tree_index *tree, unsigned int *cnt,
+                              vp9_prob *pre_probs, vp9_prob *dst_probs) {
+#define MAX_PROBS 32
+  vp9_prob probs[MAX_PROBS];
+  unsigned int branch_ct[MAX_PROBS][2];
+  int t, count, factor;
+
+  assert(n_modes - 1 < MAX_PROBS);
+  vp9_tree_probs_from_distribution(n_modes, encoding, tree, probs,
+                                   branch_ct, cnt);
+  for (t = 0; t < n_modes - 1; ++t) {
+    count = branch_ct[t][0] + branch_ct[t][1];
+    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+    dst_probs[t] = weighted_prob(pre_probs[t], probs[t], factor);
+  }
+}
+
+// #define MODE_COUNT_TESTING
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
-  int i, t, count, factor;
-  unsigned int branch_ct[32][2];
-  vp9_prob ymode_probs[VP9_YMODES - 1];
-#if CONFIG_SUPERBLOCKS
-  vp9_prob sb_ymode_probs[VP9_I32X32_MODES - 1];
-#endif
-  vp9_prob uvmode_probs[VP9_UV_MODES - 1];
-  vp9_prob bmode_probs[VP9_NKF_BINTRAMODES - 1];
-  vp9_prob i8x8_mode_probs[VP9_I8X8_MODES - 1];
-  vp9_prob sub_mv_ref_probs[VP9_SUBMVREFS - 1];
-  vp9_prob mbsplit_probs[VP9_NUMMBSPLITS - 1];
-#if CONFIG_COMP_INTERINTRA_PRED
-  vp9_prob interintra_prob;
-#endif
+  int i;
 #ifdef MODE_COUNT_TESTING
+  int t;
+
   printf("static const unsigned int\nymode_counts"
          "[VP9_YMODES] = {\n");
   for (t = 0; t < VP9_YMODES; ++t) printf("%d, ", cm->fc.ymode_counts[t]);
@@ -590,116 +595,45 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   printf("};\n");
 #endif
 #endif
-  vp9_tree_probs_from_distribution(
-    VP9_YMODES, vp9_ymode_encodings, vp9_ymode_tree,
-    ymode_probs, branch_ct, cm->fc.ymode_counts,
-    256, 1);
-  for (t = 0; t < VP9_YMODES - 1; ++t) {
-    int prob;
-    count = branch_ct[t][0] + branch_ct[t][1];
-    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    prob = ((int)cm->fc.pre_ymode_prob[t] * (256 - factor) +
-            (int)ymode_probs[t] * factor + 128) >> 8;
-    cm->fc.ymode_prob[t] = clip_prob(prob);
-  }
+
+  update_mode_probs(VP9_YMODES, vp9_ymode_encodings, vp9_ymode_tree,
+                    cm->fc.ymode_counts, cm->fc.pre_ymode_prob,
+                    cm->fc.ymode_prob);
 #if CONFIG_SUPERBLOCKS
-  vp9_tree_probs_from_distribution(VP9_I32X32_MODES,
-                                   vp9_sb_ymode_encodings, vp9_sb_ymode_tree,
-                                   sb_ymode_probs, branch_ct,
-                                   cm->fc.sb_ymode_counts,
-                                   256, 1);
-  for (t = 0; t < VP9_I32X32_MODES - 1; ++t) {
-    int prob;
-    count = branch_ct[t][0] + branch_ct[t][1];
-    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    prob = ((int)cm->fc.pre_sb_ymode_prob[t] * (256 - factor) +
-            (int)sb_ymode_probs[t] * factor + 128) >> 8;
-    cm->fc.sb_ymode_prob[t] = clip_prob(prob);
-  }
+  update_mode_probs(VP9_I32X32_MODES, vp9_sb_ymode_encodings, vp9_sb_ymode_tree,
+                    cm->fc.sb_ymode_counts, cm->fc.pre_sb_ymode_prob,
+                    cm->fc.sb_ymode_prob);
 #endif
   for (i = 0; i < VP9_YMODES; ++i) {
-    vp9_tree_probs_from_distribution(VP9_UV_MODES, vp9_uv_mode_encodings,
-                                     vp9_uv_mode_tree, uvmode_probs, branch_ct,
-                                     cm->fc.uv_mode_counts[i], 256, 1);
-    for (t = 0; t < VP9_UV_MODES - 1; ++t) {
-      int prob;
-      count = branch_ct[t][0] + branch_ct[t][1];
-      count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-      factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-      prob = ((int)cm->fc.pre_uv_mode_prob[i][t] * (256 - factor) +
-              (int)uvmode_probs[t] * factor + 128) >> 8;
-      cm->fc.uv_mode_prob[i][t] = clip_prob(prob);
-    }
+    update_mode_probs(VP9_UV_MODES, vp9_uv_mode_encodings, vp9_uv_mode_tree,
+                      cm->fc.uv_mode_counts[i], cm->fc.pre_uv_mode_prob[i],
+                      cm->fc.uv_mode_prob[i]);
   }
-  vp9_tree_probs_from_distribution(VP9_NKF_BINTRAMODES, vp9_bmode_encodings,
-                                   vp9_bmode_tree, bmode_probs, branch_ct,
-                                   cm->fc.bmode_counts, 256, 1);
-  for (t = 0; t < VP9_NKF_BINTRAMODES - 1; ++t) {
-    int prob;
-    count = branch_ct[t][0] + branch_ct[t][1];
-    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    prob = ((int)cm->fc.pre_bmode_prob[t] * (256 - factor) +
-            (int)bmode_probs[t] * factor + 128) >> 8;
-    cm->fc.bmode_prob[t] = clip_prob(prob);
-  }
-  vp9_tree_probs_from_distribution(VP9_I8X8_MODES, vp9_i8x8_mode_encodings,
-                                   vp9_i8x8_mode_tree, i8x8_mode_probs,
-                                   branch_ct, cm->fc.i8x8_mode_counts, 256, 1);
-  for (t = 0; t < VP9_I8X8_MODES - 1; ++t) {
-    int prob;
-    count = branch_ct[t][0] + branch_ct[t][1];
-    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    prob = ((int)cm->fc.pre_i8x8_mode_prob[t] * (256 - factor) +
-            (int)i8x8_mode_probs[t] * factor + 128) >> 8;
-    cm->fc.i8x8_mode_prob[t] = clip_prob(prob);
-  }
+  update_mode_probs(VP9_NKF_BINTRAMODES, vp9_bmode_encodings, vp9_bmode_tree,
+                    cm->fc.bmode_counts, cm->fc.pre_bmode_prob,
+                    cm->fc.bmode_prob);
+  update_mode_probs(VP9_I8X8_MODES, vp9_i8x8_mode_encodings,
+                    vp9_i8x8_mode_tree, cm->fc.i8x8_mode_counts,
+                    cm->fc.pre_i8x8_mode_prob, cm->fc.i8x8_mode_prob);
   for (i = 0; i < SUBMVREF_COUNT; ++i) {
-    vp9_tree_probs_from_distribution(VP9_SUBMVREFS,
-                                     vp9_sub_mv_ref_encoding_array,
-                                     vp9_sub_mv_ref_tree, sub_mv_ref_probs,
-                                     branch_ct, cm->fc.sub_mv_ref_counts[i],
-                                     256, 1);
-    for (t = 0; t < VP9_SUBMVREFS - 1; ++t) {
-      int prob;
-      count = branch_ct[t][0] + branch_ct[t][1];
-      count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-      factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-      prob = ((int)cm->fc.pre_sub_mv_ref_prob[i][t] * (256 - factor) +
-              (int)sub_mv_ref_probs[t] * factor + 128) >> 8;
-      cm->fc.sub_mv_ref_prob[i][t] = clip_prob(prob);
-    }
+    update_mode_probs(VP9_SUBMVREFS, vp9_sub_mv_ref_encoding_array,
+                      vp9_sub_mv_ref_tree, cm->fc.sub_mv_ref_counts[i],
+                      cm->fc.pre_sub_mv_ref_prob[i], cm->fc.sub_mv_ref_prob[i]);
   }
-  vp9_tree_probs_from_distribution(VP9_NUMMBSPLITS, vp9_mbsplit_encodings,
-                                   vp9_mbsplit_tree, mbsplit_probs, branch_ct,
-                                   cm->fc.mbsplit_counts, 256, 1);
-  for (t = 0; t < VP9_NUMMBSPLITS - 1; ++t) {
-    int prob;
-    count = branch_ct[t][0] + branch_ct[t][1];
-    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    prob = ((int)cm->fc.pre_mbsplit_prob[t] * (256 - factor) +
-            (int)mbsplit_probs[t] * factor + 128) >> 8;
-    cm->fc.mbsplit_prob[t] = clip_prob(prob);
-  }
+  update_mode_probs(VP9_NUMMBSPLITS, vp9_mbsplit_encodings, vp9_mbsplit_tree,
+                    cm->fc.mbsplit_counts, cm->fc.pre_mbsplit_prob,
+                    cm->fc.mbsplit_prob);
 #if CONFIG_COMP_INTERINTRA_PRED
   if (cm->use_interintra) {
-    int prob;
-    interintra_prob = vp9_bin_prob_from_distribution(cm->fc.interintra_counts);
+    int factor, interintra_prob, count;
+
+    interintra_prob = get_binary_prob(cm->fc.interintra_counts[0],
+                                      cm->fc.interintra_counts[1]);
     count = cm->fc.interintra_counts[0] + cm->fc.interintra_counts[1];
     count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
     factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    prob = ((int)cm->fc.pre_interintra_prob * (256 - factor) +
-            (int)interintra_prob * factor + 128) >> 8;
-    if (prob <= 0)
-      cm->fc.interintra_prob = 1;
-    else if (prob > 255)
-      cm->fc.interintra_prob = 255;
-    else
-      cm->fc.interintra_prob = prob;
+    cm->fc.interintra_prob = weighted_prob(cm->fc.pre_interintra_prob,
+                                           interintra_prob, factor);
   }
 #endif
 }

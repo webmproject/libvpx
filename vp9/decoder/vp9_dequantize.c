@@ -13,6 +13,7 @@
 #include "vp9/decoder/vp9_dequantize.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
+#include "vp9/common/vp9_common.h"
 
 static void add_residual(const int16_t *diff, const uint8_t *pred, int pitch,
                          uint8_t *dest, int stride, int width, int height) {
@@ -20,14 +21,7 @@ static void add_residual(const int16_t *diff, const uint8_t *pred, int pitch,
 
   for (r = 0; r < height; r++) {
     for (c = 0; c < width; c++) {
-      int a = diff[c] + pred[c];
-
-      if (a < 0)
-        a = 0;
-      else if (a > 255)
-        a = 255;
-
-      dest[c] = (uint8_t) a;
+      dest[c] = clip_pixel(diff[c] + pred[c]);
     }
 
     dest += stride;
@@ -43,14 +37,7 @@ static void add_constant_residual(const int16_t diff, const uint8_t *pred,
 
   for (r = 0; r < height; r++) {
     for (c = 0; c < width; c++) {
-      int a = diff + pred[c];
-
-      if (a < 0)
-        a = 0;
-      else if (a > 255)
-        a = 255;
-
-      dest[c] = (uint8_t) a;
+      dest[c] = clip_pixel(diff + pred[c]);
     }
 
     dest += stride;

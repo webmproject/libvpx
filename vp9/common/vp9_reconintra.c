@@ -124,18 +124,20 @@ static void d45_predictor(uint8_t *ypred_ptr, int y_stride, int n,
     }
   }
   for (c = 0; c <= r; ++c) {
-    int yabove_ext = yabove_row[r]; // 2*yabove_row[r] - yabove_row[r-1];
-    int yleft_ext = yleft_col[r]; // 2*yleft_col[r] - yleft_col[r-1];
-    yabove_ext = (yabove_ext > 255 ? 255 : (yabove_ext < 0 ? 0 : yabove_ext));
-    yleft_ext = (yleft_ext > 255 ? 255 : (yleft_ext < 0 ? 0 : yleft_ext));
+    int yabove_ext = yabove_row[r];  // clip_pixel(2 * yabove_row[r] -
+                                     //            yabove_row[r - 1]);
+    int yleft_ext = yleft_col[r];  // clip_pixel(2 * yleft_col[r] -
+                                   //            yleft_col[r-1]);
     ypred_ptr[(r - c) * y_stride + c] =
       (yabove_ext * (c + 1) +
        yleft_ext * (r - c + 1) + r / 2 + 1) / (r + 2);
   }
   for (r = 1; r < n; ++r) {
-    for (c = n - r; c < n; ++c)
-      ypred_ptr[r * y_stride + c] = (ypred_ptr[(r - 1) * y_stride + c] +
-                                     ypred_ptr[r * y_stride + c - 1] + 1) >> 1;
+    for (c = n - r; c < n; ++c) {
+      const int yabove_ext = ypred_ptr[(r - 1) * y_stride + c];
+      const int yleft_ext = ypred_ptr[r * y_stride + c - 1];
+      ypred_ptr[r * y_stride + c] = (yabove_ext + yleft_ext + 1) >> 1;
+    }
   }
 }
 
@@ -321,15 +323,7 @@ void vp9_build_intra_predictors_internal(unsigned char *src, int src_stride,
     case TM_PRED: {
       for (r = 0; r < bsize; r++) {
         for (c = 0; c < bsize; c++) {
-          int pred =  yleft_col[r] + yabove_row[ c] - ytop_left;
-
-          if (pred < 0)
-            pred = 0;
-
-          if (pred > 255)
-            pred = 255;
-
-          ypred_ptr[c] = pred;
+          ypred_ptr[c] = clip_pixel(yleft_col[r] + yabove_row[c] - ytop_left);
         }
 
         ypred_ptr += y_stride;

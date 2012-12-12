@@ -13,6 +13,7 @@
 #include "vp9/common/vp9_filter.h"
 #include "vpx_ports/mem.h"
 #include "vp9_rtcd.h"
+#include "vp9/common/vp9_common.h"
 
 DECLARE_ALIGNED(16, const short, vp9_bilinear_filters[SUBPEL_SHIFTS][2]) = {
   { 128,   0 },
@@ -148,11 +149,11 @@ static void filter_block2d_first_pass_6(unsigned char *src_ptr,
                                         unsigned int output_width,
                                         const short *vp9_filter) {
   unsigned int i, j;
-  int  Temp;
+  int temp;
 
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
-      Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp9_filter[0]) +
+      temp = ((int)src_ptr[-2 * (int)pixel_step] * vp9_filter[0]) +
              ((int)src_ptr[-1 * (int)pixel_step] * vp9_filter[1]) +
              ((int)src_ptr[0]                    * vp9_filter[2]) +
              ((int)src_ptr[pixel_step]           * vp9_filter[3]) +
@@ -161,14 +162,7 @@ static void filter_block2d_first_pass_6(unsigned char *src_ptr,
              (VP9_FILTER_WEIGHT >> 1);      /* Rounding */
 
       /* Normalize back to 0-255 */
-      Temp = Temp >> VP9_FILTER_SHIFT;
-
-      if (Temp < 0)
-        Temp = 0;
-      else if (Temp > 255)
-        Temp = 255;
-
-      output_ptr[j] = Temp;
+      output_ptr[j] = clip_pixel(temp >> VP9_FILTER_SHIFT);
       src_ptr++;
     }
 
@@ -187,12 +181,12 @@ static void filter_block2d_second_pass_6(int *src_ptr,
                                          unsigned int output_width,
                                          const short *vp9_filter) {
   unsigned int i, j;
-  int  Temp;
+  int temp;
 
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
       /* Apply filter */
-      Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp9_filter[0]) +
+      temp = ((int)src_ptr[-2 * (int)pixel_step] * vp9_filter[0]) +
              ((int)src_ptr[-1 * (int)pixel_step] * vp9_filter[1]) +
              ((int)src_ptr[0]                    * vp9_filter[2]) +
              ((int)src_ptr[pixel_step]           * vp9_filter[3]) +
@@ -201,14 +195,7 @@ static void filter_block2d_second_pass_6(int *src_ptr,
              (VP9_FILTER_WEIGHT >> 1);   /* Rounding */
 
       /* Normalize back to 0-255 */
-      Temp = Temp >> VP9_FILTER_SHIFT;
-
-      if (Temp < 0)
-        Temp = 0;
-      else if (Temp > 255)
-        Temp = 255;
-
-      output_ptr[j] = (unsigned char)Temp;
+      output_ptr[j] = clip_pixel(temp >> VP9_FILTER_SHIFT);
       src_ptr++;
     }
 
@@ -235,12 +222,12 @@ static void filter_block2d_second_pass_avg_6(int *src_ptr,
                                              unsigned int output_width,
                                              const short *vp9_filter) {
   unsigned int i, j;
-  int  Temp;
+  int temp;
 
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
       /* Apply filter */
-      Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp9_filter[0]) +
+      temp = ((int)src_ptr[-2 * (int)pixel_step] * vp9_filter[0]) +
              ((int)src_ptr[-1 * (int)pixel_step] * vp9_filter[1]) +
              ((int)src_ptr[0]                    * vp9_filter[2]) +
              ((int)src_ptr[pixel_step]           * vp9_filter[3]) +
@@ -249,14 +236,8 @@ static void filter_block2d_second_pass_avg_6(int *src_ptr,
              (VP9_FILTER_WEIGHT >> 1);   /* Rounding */
 
       /* Normalize back to 0-255 */
-      Temp = Temp >> VP9_FILTER_SHIFT;
-
-      if (Temp < 0)
-        Temp = 0;
-      else if (Temp > 255)
-        Temp = 255;
-
-      output_ptr[j] = (unsigned char)((output_ptr[j] + Temp + 1) >> 1);
+      output_ptr[j] = (clip_pixel(temp >> VP9_FILTER_SHIFT) +
+                       output_ptr[j] + 1) >> 1;
       src_ptr++;
     }
 
@@ -539,14 +520,8 @@ static void filter_block2d_8_c(const unsigned char *src_ptr,
                    (VP9_FILTER_WEIGHT >> 1); // Rounding
 
         // Normalize back to 0-255...
-        temp >>= VP9_FILTER_SHIFT;
-        if (temp < 0) {
-          temp = 0;
-        } else if (temp > 255) {
-          temp = 255;
-        }
+        *output_ptr = clip_pixel(temp >> VP9_FILTER_SHIFT);
         src_ptr++;
-        *output_ptr = temp;
         output_ptr += intermediate_height;
       }
       src_ptr += src_next_row_stride;
@@ -573,15 +548,8 @@ static void filter_block2d_8_c(const unsigned char *src_ptr,
                    (VP9_FILTER_WEIGHT >> 1); // Rounding
 
         // Normalize back to 0-255...
-        temp >>= VP9_FILTER_SHIFT;
-        if (temp < 0) {
-          temp = 0;
-        } else if (temp > 255) {
-          temp = 255;
-        }
-
+        *dst_ptr++ = clip_pixel(temp >> VP9_FILTER_SHIFT);
         src_ptr += intermediate_height;
-        *dst_ptr++ = (unsigned char)temp;
       }
       src_ptr += intermediate_next_stride;
       dst_ptr += dst_next_row_stride;
@@ -940,15 +908,15 @@ static void filter_block2d_bil_second_pass(unsigned short *src_ptr,
                                            unsigned int    width,
                                            const short    *vp9_filter) {
   unsigned int  i, j;
-  int  Temp;
+  int temp;
 
   for (i = 0; i < height; i++) {
     for (j = 0; j < width; j++) {
       /* Apply filter */
-      Temp = ((int)src_ptr[0]     * vp9_filter[0]) +
+      temp = ((int)src_ptr[0]     * vp9_filter[0]) +
              ((int)src_ptr[width] * vp9_filter[1]) +
              (VP9_FILTER_WEIGHT / 2);
-      dst_ptr[j] = (unsigned int)(Temp >> VP9_FILTER_SHIFT);
+      dst_ptr[j] = (unsigned int)(temp >> VP9_FILTER_SHIFT);
       src_ptr++;
     }
 
@@ -973,15 +941,15 @@ static void filter_block2d_bil_second_pass_avg(unsigned short *src_ptr,
                                                unsigned int    width,
                                                const short    *vp9_filter) {
   unsigned int  i, j;
-  int  Temp;
+  int temp;
 
   for (i = 0; i < height; i++) {
     for (j = 0; j < width; j++) {
       /* Apply filter */
-      Temp = ((int)src_ptr[0]     * vp9_filter[0]) +
-             ((int)src_ptr[width] * vp9_filter[1]) +
-             (VP9_FILTER_WEIGHT / 2);
-      dst_ptr[j] = (unsigned int)(((Temp >> VP9_FILTER_SHIFT) + dst_ptr[j] + 1) >> 1);
+      temp = (((int)src_ptr[0]     * vp9_filter[0]) +
+              ((int)src_ptr[width] * vp9_filter[1]) +
+              (VP9_FILTER_WEIGHT / 2)) >> VP9_FILTER_SHIFT;
+      dst_ptr[j] = (unsigned int)((temp + dst_ptr[j] + 1) >> 1);
       src_ptr++;
     }
 

@@ -613,8 +613,7 @@ static void print_probs(FILE *f, vp9_coeff_accum *context_counters,
           coef_counts[t] = context_counters[type][band][pt][t];
         vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
                                          vp9_coef_encodings, vp9_coef_tree,
-                                         coef_probs, branch_ct, coef_counts,
-                                         256, 1);
+                                         coef_probs, branch_ct, coef_counts);
         fprintf(f, "%s\n      {", Comma(pt));
 
         t = 0;

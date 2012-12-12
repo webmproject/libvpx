@@ -11,6 +11,7 @@
 
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_treecoder.h"
 
 // TBD prediction functions for various bitstream signals
 
@@ -383,26 +384,13 @@ void vp9_calc_ref_probs(int *count, vp9_prob *probs) {
   int tot_count;
 
   tot_count = count[0] + count[1] + count[2] + count[3];
-  if (tot_count) {
-    probs[0] = (vp9_prob)((count[0] * 255 + (tot_count >> 1)) / tot_count);
-    probs[0] += !probs[0];
-  } else
-    probs[0] = 128;
+  probs[0] = get_prob(count[0], tot_count);
 
   tot_count -= count[0];
-  if (tot_count) {
-    probs[1] = (vp9_prob)((count[1] * 255 + (tot_count >> 1)) / tot_count);
-    probs[1] += !probs[1];
-  } else
-    probs[1] = 128;
+  probs[1] = get_prob(count[1], tot_count);
 
   tot_count -= count[1];
-  if (tot_count) {
-    probs[2] = (vp9_prob)((count[2] * 255 + (tot_count >> 1)) / tot_count);
-    probs[2] += !probs[2];
-  } else
-    probs[2] = 128;
-
+  probs[2] = get_prob(count[2], tot_count);
 }
 
 // Computes a set of modified conditional probabilities for the reference frame

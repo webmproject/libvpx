@@ -332,8 +332,8 @@ void filter_mb(unsigned char *src, int src_stride,
                unsigned char *dst, int dst_stride,
                int width, int height) {
   int i, j, k;
-  unsigned int Temp[32 * 32];
-  unsigned int  *pTmp = Temp;
+  unsigned int temp[32 * 32];
+  unsigned int  *pTmp = temp;
   unsigned char *pSrc = src - (1 + src_stride) * (PRED_FILT_LEN / 2);
 
   // Horizontal
@@ -350,7 +350,7 @@ void filter_mb(unsigned char *src, int src_stride,
   }
 
   // Vertical
-  pTmp = Temp;
+  pTmp = temp;
   for (i = 0; i < width; i++) {
     unsigned char *pDst = dst + i;
     for (j = 0; j < height; j++) {
@@ -358,8 +358,8 @@ void filter_mb(unsigned char *src, int src_stride,
       for (k = 0; k < PRED_FILT_LEN; k++)
         sum += pTmp[(j + k) * width] * pred_filter[k];
       // Round
-      sum = (sum + ((1 << (filt_shift << 1)) >> 1)) >> (filt_shift << 1);
-      pDst[j * dst_stride] = (sum < 0 ? 0 : sum > 255 ? 255 : sum);
+      pDst[j * dst_stride] = (sum + ((1 << (filt_shift << 1)) >> 1)) >>
+                             (filt_shift << 1);
     }
     ++pTmp;
   }
