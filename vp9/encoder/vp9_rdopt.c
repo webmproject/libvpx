@@ -1120,7 +1120,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
 
   // inverse transform
   if (best_tx_type != DCT_DCT)
-    vp9_ihtllm(best_dqcoeff, b->diff, 32, best_tx_type, 4);
+    vp9_ihtllm(best_dqcoeff, b->diff, 32, best_tx_type, 4, b->eob);
   else
     xd->inv_xform4x4_x8(best_dqcoeff, b->diff, 32);
 

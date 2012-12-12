@@ -361,7 +361,7 @@ specialize vp9_short_idct16x16
 prototype void vp9_short_idct10_16x16 "short *input, short *output, int pitch"
 specialize vp9_short_idct10_16x16
 
-prototype void vp9_ihtllm "const short *input, short *output, int pitch, int tx_type, int tx_dim"
+prototype void vp9_ihtllm "const short *input, short *output, int pitch, int tx_type, int tx_dim, short eobs"
 specialize vp9_ihtllm
 
 #

@@ -404,8 +404,9 @@ void vp9_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
 #define HORIZONTAL_SHIFT 17  // 15
 #define HORIZONTAL_ROUNDING ((1 << (HORIZONTAL_SHIFT - 1)) - 1)
 void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
-                      TX_TYPE tx_type, int tx_dim) {
+                      TX_TYPE tx_type, int tx_dim, uint16_t eobs) {
   int i, j, k;
+  int nz_dim;
   int16_t imbuf[256];
 
   const int16_t *ip = input;
@@ -444,12 +445,25 @@ void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
       break;
   }
 
+  nz_dim = tx_dim;
+  if(tx_dim > 4) {
+    if(eobs < 36) {
+      vpx_memset(im, 0, 512);
+      nz_dim = 8;
+      if(eobs < 3) {
+        nz_dim = 2;
+      } else if(eobs < 10) {
+        nz_dim = 4;
+      }
+    }
+  }
+
   /* vertical transformation */
   for (j = 0; j < tx_dim; j++) {
-    for (i = 0; i < tx_dim; i++) {
+    for (i = 0; i < nz_dim; i++) {
       int temp = 0;
 
-      for (k = 0; k < tx_dim; k++) {
+      for (k = 0; k < nz_dim; k++) {
         temp += ptv[k] * ip[(k * tx_dim)];
       }
 
@@ -470,7 +484,7 @@ void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
     for (i = 0; i < tx_dim; i++) {
       int temp = 0;
 
-      for (k = 0; k < tx_dim; k++) {
+      for (k = 0; k < nz_dim; k++) {
         temp += im[k] * pthc[k];
       }
 

@@ -58,16 +58,17 @@ typedef void(*vp9_dequant_idct_add_uv_block_fn_t)(short *q, const short *dq,
 
 void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, const short *dq,
                                     unsigned char *pred, unsigned char *dest,
-                                    int pitch, int stride);
+                                    int pitch, int stride, uint16_t eobs);
 
 void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input,
                                    const short *dq, unsigned char *pred,
-                                   unsigned char *dest, int pitch, int stride);
+                                   unsigned char *dest, int pitch, int stride,
+                                   uint16_t eobs);
 
 void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, short *input,
                                      const short *dq, unsigned char *pred,
                                      unsigned char *dest,
-                                     int pitch, int stride);
+                                     int pitch, int stride, uint16_t eobs);
 
 #if CONFIG_SUPERBLOCKS
 void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(short *q, const short *dq,
