@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARn//6bU\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "tabs",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6as\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2150,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "Suggestions:\n\n* avoid multi-statement lines.\n* prefer indexing over *var++.\n* use local variable when possible.\n\nProposal:\n\nfor (i \u003d 0; i \u003c length \u003e\u003e 1; ++i) {\n  x[2 * i] \u003d (lowpass[i] + 1) \u003e\u003e 1;\n  x[2 * i + 1] \u003d highpass[i] + ((lowpass[i] + lowpass[i+1] + 2) \u003e\u003e 2);\n}",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6ak\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2175,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "one statement per line",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6aw\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2209,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "tabs",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6ao\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2229,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "these are the only difference with synthesis_26_row().\n\n-\u003e factorize and use flag?",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6a8\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2246,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "not sure the th[] / tw[] arrays are needed",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6bA\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2263,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "sizeof(*buffer)",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6a4\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2268,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "use {}\u0027s",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6a0\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2270,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "line break is strange",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6bE\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2298,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "was this code automatically generated? FFTW?",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6bM\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2515,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "the layout of buffer2[] / input[] / pitch / short_pitch is very hard to follow, all the more that they are a lot memcpy() around...\n\nA global comment about what is happening would be helpful.",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6bQ\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2531,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "sizeof(*buffer2).\n\ntabs",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//6bI\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2536,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-12T09:46:17Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "f3a1f1eef879549a398ec329c0b7860f7fbdc3ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
