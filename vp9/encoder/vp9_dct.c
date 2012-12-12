@@ -902,23 +902,24 @@ void vp9_short_walsh8x4_x8_c(short *input, short *output, int pitch) {
 
 #define TEST_INT_16x16_DCT 1
 #if !TEST_INT_16x16_DCT
-static const double C1 = 0.995184726672197;
-static const double C2 = 0.98078528040323;
-static const double C3 = 0.956940335732209;
-static const double C4 = 0.923879532511287;
-static const double C5 = 0.881921264348355;
-static const double C6 = 0.831469612302545;
-static const double C7 = 0.773010453362737;
-static const double C8 = 0.707106781186548;
-static const double C9 = 0.634393284163646;
-static const double C10 = 0.555570233019602;
-static const double C11 = 0.471396736825998;
-static const double C12 = 0.38268343236509;
-static const double C13 = 0.290284677254462;
-static const double C14 = 0.195090322016128;
-static const double C15 = 0.098017140329561;
 
 static void dct16x16_1d(double input[16], double output[16]) {
+  static const double C1 = 0.995184726672197;
+  static const double C2 = 0.98078528040323;
+  static const double C3 = 0.956940335732209;
+  static const double C4 = 0.923879532511287;
+  static const double C5 = 0.881921264348355;
+  static const double C6 = 0.831469612302545;
+  static const double C7 = 0.773010453362737;
+  static const double C8 = 0.707106781186548;
+  static const double C9 = 0.634393284163646;
+  static const double C10 = 0.555570233019602;
+  static const double C11 = 0.471396736825998;
+  static const double C12 = 0.38268343236509;
+  static const double C13 = 0.290284677254462;
+  static const double C14 = 0.195090322016128;
+  static const double C15 = 0.098017140329561;
+
   vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
     double step[16];
@@ -1686,15 +1687,18 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
 
 #else  // CONFIG_DWT32X32HYBRID
 
-#define MAX_BLOCK_LENGTH   64
-#define ENH_PRECISION_BITS 1
-#define ENH_PRECISION_RND ((1 << ENH_PRECISION_BITS) / 2)
+#define DWT_MAX_LENGTH   64
+#define DWT_TYPE         26    // 26/53/97
+#define DWT_PRECISION_BITS 2
+#define DWT_PRECISION_RND ((1 << DWT_PRECISION_BITS) / 2)
+
+#if DWT_TYPE == 53
 
 // Note: block length must be even for this implementation
 static void analysis_53_row(int length, short *x,
                             short *lowpass, short *highpass) {
   int n;
-  short r, * a, * b;
+  short r, *a, *b;
 
   n = length >> 1;
   b = highpass;
@@ -1720,7 +1724,7 @@ static void analysis_53_row(int length, short *x,
 static void analysis_53_col(int length, short *x,
                             short *lowpass, short *highpass) {
   int n;
-  short r, * a, * b;
+  short r, *a, *b;
 
   n = length >> 1;
   b = highpass;
@@ -1743,15 +1747,13 @@ static void analysis_53_col(int length, short *x,
   }
 }
 
-// NOTE: Using a 5/3 integer wavelet for now. Explore using a wavelet
-// with a better response later
-static void dyadic_analyze(int levels, int width, int height,
-                           short *x, int pitch_x, short *c, int pitch_c) {
+static void dyadic_analyze_53(int levels, int width, int height,
+                              short *x, int pitch_x, short *c, int pitch_c) {
   int lv, i, j, nh, nw, hh = height, hw = width;
-  short buffer[2 * MAX_BLOCK_LENGTH];
+  short buffer[2 * DWT_MAX_LENGTH];
   for (i = 0; i < height; i++) {
     for (j = 0; j < width; j++) {
-      c[i * pitch_c + j] = x[i * pitch_x + j] << ENH_PRECISION_BITS;
+      c[i * pitch_c + j] = x[i * pitch_x + j] << DWT_PRECISION_BITS;
     }
   }
   for (lv = 0; lv < levels; lv++) {
@@ -1774,17 +1776,398 @@ static void dyadic_analyze(int levels, int width, int height,
   }
 }
 
+#elif DWT_TYPE == 26
+
+static void analysis_26_row(int length, short *x,
+                            short *lowpass, short *highpass) {
+  int i, n;
+  short r, s, *a, *b;
+  a = lowpass;
+  b = highpass;
+  for (i = length >> 1; i; i--) {
+    r = *x++;
+    s = *x++;
+    *a++ = r + s;
+    *b++ = r - s;
+  }
+  n = length >> 1;
+  if (n >= 4) {
+    a = lowpass;
+    b = highpass;
+    r = *lowpass;
+    while (--n) {
+      *b++ -= (r - a[1] + 4) >> 3;
+      r = *a++;
+    }
+    *b -= (r - *a + 4) >> 3;
+  }
+}
+
+static void analysis_26_col(int length, short *x,
+                            short *lowpass, short *highpass) {
+  int i, n;
+  short r, s, *a, *b;
+  a = lowpass;
+  b = highpass;
+  for (i = length >> 1; i; i--) {
+    r = *x++;
+    s = *x++;
+    *a++ = (r + s + 1) >> 1;
+    *b++ = (r - s + 1) >> 1;
+  }
+  n = length >> 1;
+  if (n >= 4) {
+    a = lowpass;
+    b = highpass;
+    r = *lowpass;
+    while (--n) {
+      *b++ -= (r - a[1] + 4) >> 3;
+      r = *a++;
+    }
+    *b -= (r - *a + 4) >> 3;
+  }
+}
+
+static void dyadic_analyze_26(int levels, int width, int height,
+                              short *x, int pitch_x, short *c, int pitch_c) {
+  int lv, i, j, nh, nw, hh = height, hw = width;
+  short buffer[2 * DWT_MAX_LENGTH];
+  for (i = 0; i < height; i++) {
+    for (j = 0; j < width; j++) {
+      c[i * pitch_c + j] = x[i * pitch_x + j] << DWT_PRECISION_BITS;
+    }
+  }
+  for (lv = 0; lv < levels; lv++) {
+    nh = hh;
+    hh = (hh + 1) >> 1;
+    nw = hw;
+    hw = (hw + 1) >> 1;
+    if ((nh < 2) || (nw < 2)) return;
+    for (i = 0; i < nh; i++) {
+      memcpy(buffer, &c[i * pitch_c], nw * sizeof(short));
+      analysis_26_row(nw, buffer, &c[i * pitch_c], &c[i * pitch_c] + hw);
+    }
+    for (j = 0; j < nw; j++) {
+      for (i = 0; i < nh; i++)
+        buffer[i + nh] = c[i * pitch_c + j];
+      analysis_26_col(nh, buffer + nh, buffer, buffer + hh);
+      for (i = 0; i < nh; i++)
+        c[i * pitch_c + j] = buffer[i];
+    }
+  }
+}
+
+#elif DWT_TYPE == 97
+
+static void analysis_97(int length, double *x,
+                        double *lowpass, double *highpass) {
+  static const double a_predict1 = -1.586134342;
+  static const double a_update1 = -0.05298011854;
+  static const double a_predict2 = 0.8829110762;
+  static const double a_update2 = 0.4435068522;
+  static const double s_low = 1.149604398;
+  static const double s_high = 1/1.149604398;
+  int i;
+  double y[DWT_MAX_LENGTH];
+  // Predict 1
+  for (i = 1; i < length - 2; i += 2) {
+    x[i] += a_predict1 * (x[i - 1] + x[i + 1]);
+  }
+  x[length - 1] += 2 * a_predict1 * x[length - 2];
+  // Update 1
+  for (i = 2; i < length; i += 2) {
+    x[i] += a_update1 * (x[i - 1] + x[i + 1]);
+  }
+  x[0] += 2 * a_update1 * x[1];
+  // Predict 2
+  for (i = 1; i < length - 2; i += 2) {
+    x[i] += a_predict2 * (x[i - 1] + x[i + 1]);
+  }
+  x[length - 1] += 2 * a_predict2 * x[length - 2];
+  // Update 2
+  for (i = 2; i < length; i += 2) {
+    x[i] += a_update2 * (x[i - 1] + x[i + 1]);
+  }
+  x[0] += 2 * a_update2 * x[1];
+  memcpy(y, x, sizeof(*y) * length);
+  // Scale and pack
+  for (i = 0; i < length / 2; i++) {
+    lowpass[i] = y[2 * i] * s_low;
+    highpass[i] = y[2 * i + 1] * s_high;
+  }
+}
+
+static void dyadic_analyze_97(int levels, int width, int height,
+                             short *x, int pitch_x, short *c, int pitch_c) {
+  int lv, i, j, nh, nw, hh = height, hw = width;
+  double buffer[2 * DWT_MAX_LENGTH];
+  double y[DWT_MAX_LENGTH * DWT_MAX_LENGTH];
+  for (i = 0; i < height; i++) {
+    for (j = 0; j < width; j++) {
+      y[i * DWT_MAX_LENGTH + j] = x[i * pitch_x + j] << DWT_PRECISION_BITS;
+    }
+  }
+  for (lv = 0; lv < levels; lv++) {
+    nh = hh;
+    hh = (hh + 1) >> 1;
+    nw = hw;
+    hw = (hw + 1) >> 1;
+    if ((nh < 2) || (nw < 2)) return;
+    for (i = 0; i < nh; i++) {
+      memcpy(buffer, &y[i * DWT_MAX_LENGTH], nw * sizeof(*buffer));
+      analysis_97(nw, buffer, &y[i * DWT_MAX_LENGTH],
+                  &y[i * DWT_MAX_LENGTH] + hw);
+    }
+    for (j = 0; j < nw; j++) {
+      for (i = 0; i < nh; i++)
+        buffer[i + nh] = y[i * DWT_MAX_LENGTH + j];
+      analysis_97(nh, buffer + nh, buffer, buffer + hh);
+      for (i = 0; i < nh; i++)
+        c[i * pitch_c + j] = round(buffer[i]);
+    }
+  }
+}
+
+#endif  // DWT_TYPE
+
+// TODO(debargha): Implement the scaling differently so as not to have to
+// use the floating point dct
+static void dct16x16_1d_f(double input[16], double output[16]) {
+  static const double C1 = 0.995184726672197;
+  static const double C2 = 0.98078528040323;
+  static const double C3 = 0.956940335732209;
+  static const double C4 = 0.923879532511287;
+  static const double C5 = 0.881921264348355;
+  static const double C6 = 0.831469612302545;
+  static const double C7 = 0.773010453362737;
+  static const double C8 = 0.707106781186548;
+  static const double C9 = 0.634393284163646;
+  static const double C10 = 0.555570233019602;
+  static const double C11 = 0.471396736825998;
+  static const double C12 = 0.38268343236509;
+  static const double C13 = 0.290284677254462;
+  static const double C14 = 0.195090322016128;
+  static const double C15 = 0.098017140329561;
+
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+  {
+    double step[16];
+    double intermediate[16];
+    double temp1, temp2;
+
+    // step 1
+    step[ 0] = input[0] + input[15];
+    step[ 1] = input[1] + input[14];
+    step[ 2] = input[2] + input[13];
+    step[ 3] = input[3] + input[12];
+    step[ 4] = input[4] + input[11];
+    step[ 5] = input[5] + input[10];
+    step[ 6] = input[6] + input[ 9];
+    step[ 7] = input[7] + input[ 8];
+    step[ 8] = input[7] - input[ 8];
+    step[ 9] = input[6] - input[ 9];
+    step[10] = input[5] - input[10];
+    step[11] = input[4] - input[11];
+    step[12] = input[3] - input[12];
+    step[13] = input[2] - input[13];
+    step[14] = input[1] - input[14];
+    step[15] = input[0] - input[15];
+
+    // step 2
+    output[0] = step[0] + step[7];
+    output[1] = step[1] + step[6];
+    output[2] = step[2] + step[5];
+    output[3] = step[3] + step[4];
+    output[4] = step[3] - step[4];
+    output[5] = step[2] - step[5];
+    output[6] = step[1] - step[6];
+    output[7] = step[0] - step[7];
+
+    temp1 = step[ 8]*C7;
+    temp2 = step[15]*C9;
+    output[ 8] = temp1 + temp2;
+
+    temp1 = step[ 9]*C11;
+    temp2 = step[14]*C5;
+    output[ 9] = temp1 - temp2;
+
+    temp1 = step[10]*C3;
+    temp2 = step[13]*C13;
+    output[10] = temp1 + temp2;
+
+    temp1 = step[11]*C15;
+    temp2 = step[12]*C1;
+    output[11] = temp1 - temp2;
+
+    temp1 = step[11]*C1;
+    temp2 = step[12]*C15;
+    output[12] = temp2 + temp1;
+
+    temp1 = step[10]*C13;
+    temp2 = step[13]*C3;
+    output[13] = temp2 - temp1;
+
+    temp1 = step[ 9]*C5;
+    temp2 = step[14]*C11;
+    output[14] = temp2 + temp1;
+
+    temp1 = step[ 8]*C9;
+    temp2 = step[15]*C7;
+    output[15] = temp2 - temp1;
+
+    // step 3
+    step[ 0] = output[0] + output[3];
+    step[ 1] = output[1] + output[2];
+    step[ 2] = output[1] - output[2];
+    step[ 3] = output[0] - output[3];
+
+    temp1 = output[4]*C14;
+    temp2 = output[7]*C2;
+    step[ 4] = temp1 + temp2;
+
+    temp1 = output[5]*C10;
+    temp2 = output[6]*C6;
+    step[ 5] = temp1 + temp2;
+
+    temp1 = output[5]*C6;
+    temp2 = output[6]*C10;
+    step[ 6] = temp2 - temp1;
+
+    temp1 = output[4]*C2;
+    temp2 = output[7]*C14;
+    step[ 7] = temp2 - temp1;
+
+    step[ 8] = output[ 8] + output[11];
+    step[ 9] = output[ 9] + output[10];
+    step[10] = output[ 9] - output[10];
+    step[11] = output[ 8] - output[11];
+
+    step[12] = output[12] + output[15];
+    step[13] = output[13] + output[14];
+    step[14] = output[13] - output[14];
+    step[15] = output[12] - output[15];
+
+    // step 4
+    output[ 0] = (step[ 0] + step[ 1]);
+    output[ 8] = (step[ 0] - step[ 1]);
+
+    temp1 = step[2]*C12;
+    temp2 = step[3]*C4;
+    temp1 = temp1 + temp2;
+    output[ 4] = 2*(temp1*C8);
+
+    temp1 = step[2]*C4;
+    temp2 = step[3]*C12;
+    temp1 = temp2 - temp1;
+    output[12] = 2*(temp1*C8);
+
+    output[ 2] = 2*((step[4] + step[ 5])*C8);
+    output[14] = 2*((step[7] - step[ 6])*C8);
+
+    temp1 = step[4] - step[5];
+    temp2 = step[6] + step[7];
+    output[ 6] = (temp1 + temp2);
+    output[10] = (temp1 - temp2);
+
+    intermediate[8] = step[8] + step[14];
+    intermediate[9] = step[9] + step[15];
+
+    temp1 = intermediate[8]*C12;
+    temp2 = intermediate[9]*C4;
+    temp1 = temp1 - temp2;
+    output[3] = 2*(temp1*C8);
+
+    temp1 = intermediate[8]*C4;
+    temp2 = intermediate[9]*C12;
+    temp1 = temp2 + temp1;
+    output[13] = 2*(temp1*C8);
+
+    output[ 9] = 2*((step[10] + step[11])*C8);
+
+    intermediate[11] = step[10] - step[11];
+    intermediate[12] = step[12] + step[13];
+    intermediate[13] = step[12] - step[13];
+    intermediate[14] = step[ 8] - step[14];
+    intermediate[15] = step[ 9] - step[15];
+
+    output[15] = (intermediate[11] + intermediate[12]);
+    output[ 1] = -(intermediate[11] - intermediate[12]);
+
+    output[ 7] = 2*(intermediate[13]*C8);
+
+    temp1 = intermediate[14]*C12;
+    temp2 = intermediate[15]*C4;
+    temp1 = temp1 - temp2;
+    output[11] = -2*(temp1*C8);
+
+    temp1 = intermediate[14]*C4;
+    temp2 = intermediate[15]*C12;
+    temp1 = temp2 + temp1;
+    output[ 5] = 2*(temp1*C8);
+  }
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+}
+
+void vp9_short_fdct16x16_c_f(short *input, short *out, int pitch) {
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+  {
+    int shortpitch = pitch >> 1;
+    int i, j;
+    double output[256];
+    // First transform columns
+    for (i = 0; i < 16; i++) {
+        double temp_in[16], temp_out[16];
+        for (j = 0; j < 16; j++)
+            temp_in[j] = input[j*shortpitch + i];
+        dct16x16_1d_f(temp_in, temp_out);
+        for (j = 0; j < 16; j++)
+            output[j*16 + i] = temp_out[j];
+    }
+    // Then transform rows
+    for (i = 0; i < 16; ++i) {
+        double temp_in[16], temp_out[16];
+        for (j = 0; j < 16; ++j)
+            temp_in[j] = output[j + i*16];
+        dct16x16_1d_f(temp_in, temp_out);
+        for (j = 0; j < 16; ++j)
+            output[j + i*16] = temp_out[j];
+    }
+    // Scale by some magic number
+    for (i = 0; i < 256; i++)
+        out[i] = (short)round(output[i] / (4 << DWT_PRECISION_BITS));
+  }
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+}
+
 void vp9_short_fdct32x32_c(short *input, short *out, int pitch) {
   // assume out is a 32x32 buffer
   short buffer[16 * 16];
   int i;
   const int short_pitch = pitch >> 1;
-  dyadic_analyze(1, 32, 32, input, short_pitch, out, 32);
+#if DWT_TYPE == 26
+  dyadic_analyze_26(1, 32, 32, input, short_pitch, out, 32);
+#elif DWT_TYPE == 97
+  dyadic_analyze_97(1, 32, 32, input, short_pitch, out, 32);
+#elif DWT_TYPE == 53
+  dyadic_analyze_53(1, 32, 32, input, short_pitch, out, 32);
+#endif
   // TODO(debargha): Implement more efficiently by adding output pitch
   // argument to the dct16x16 function
-  vp9_short_fdct16x16_c(out, buffer, 64);
+  vp9_short_fdct16x16_c_f(out, buffer, 64);
   for (i = 0; i < 16; ++i)
     vpx_memcpy(out + i * 32, buffer + i * 16, sizeof(short) * 16);
+
+  vp9_short_fdct16x16_c_f(out + 16, buffer, 64);
+  for (i = 0; i < 16; ++i)
+    vpx_memcpy(out + i * 32 + 16, buffer + i * 16, sizeof(short) * 16);
+
+  vp9_short_fdct16x16_c_f(out + 32 * 16, buffer, 64);
+  for (i = 0; i < 16; ++i)
+    vpx_memcpy(out + i * 32 + 32 * 16, buffer + i * 16, sizeof(short) * 16);
+
+  vp9_short_fdct16x16_c_f(out + 33 * 16, buffer, 64);
+  for (i = 0; i < 16; ++i)
+    vpx_memcpy(out + i * 32 + 33 * 16, buffer + i * 16, sizeof(short) * 16);
 }
 #endif  // CONFIG_DWT32X32HYBRID
 #endif  // CONFIG_TX32X32
