@@ -865,8 +865,8 @@ static void idctcol(int *blk) {
         (x4 = blk[8 * 1]) | (x5 = blk[8 * 7]) | (x6 = blk[8 * 5]) |
         (x7 = blk[8 * 3]))) {
     blk[8 * 0] = blk[8 * 1] = blk[8 * 2] = blk[8 * 3]
-                                           = blk[8 * 4] = blk[8 * 5] = blk[8 * 6]
-                                                                       = blk[8 * 7] = ((blk[8 * 0] + 32) >> 6);
+        = blk[8 * 4] = blk[8 * 5] = blk[8 * 6]
+        = blk[8 * 7] = ((blk[8 * 0] + 32) >> 6);
     return;
   }
 
@@ -1104,24 +1104,24 @@ void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
 
 #define TEST_INT_16x16_IDCT 1
 #if !TEST_INT_16x16_IDCT
-static const double C1 = 0.995184726672197;
-static const double C2 = 0.98078528040323;
-static const double C3 = 0.956940335732209;
-static const double C4 = 0.923879532511287;
-static const double C5 = 0.881921264348355;
-static const double C6 = 0.831469612302545;
-static const double C7 = 0.773010453362737;
-static const double C8 = 0.707106781186548;
-static const double C9 = 0.634393284163646;
-static const double C10 = 0.555570233019602;
-static const double C11 = 0.471396736825998;
-static const double C12 = 0.38268343236509;
-static const double C13 = 0.290284677254462;
-static const double C14 = 0.195090322016128;
-static const double C15 = 0.098017140329561;
-
 
 static void butterfly_16x16_idct_1d(double input[16], double output[16]) {
+
+  static const double C1 = 0.995184726672197;
+  static const double C2 = 0.98078528040323;
+  static const double C3 = 0.956940335732209;
+  static const double C4 = 0.923879532511287;
+  static const double C5 = 0.881921264348355;
+  static const double C6 = 0.831469612302545;
+  static const double C7 = 0.773010453362737;
+  static const double C8 = 0.707106781186548;
+  static const double C9 = 0.634393284163646;
+  static const double C10 = 0.555570233019602;
+  static const double C11 = 0.471396736825998;
+  static const double C12 = 0.38268343236509;
+  static const double C13 = 0.290284677254462;
+  static const double C14 = 0.195090322016128;
+  static const double C15 = 0.098017140329561;
 
   vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
@@ -1366,6 +1366,12 @@ void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
 }
 
 #else
+
+#define INITIAL_SHIFT 2
+#define INITIAL_ROUNDING (1 << (INITIAL_SHIFT - 1))
+#define RIGHT_SHIFT 14
+#define RIGHT_ROUNDING (1 << (RIGHT_SHIFT - 1))
+
 static const int16_t C1 = 16305;
 static const int16_t C2 = 16069;
 static const int16_t C3 = 15679;
@@ -1382,212 +1388,207 @@ static const int16_t C13 = 4756;
 static const int16_t C14 = 3196;
 static const int16_t C15 = 1606;
 
-#define INITIAL_SHIFT 2
-#define INITIAL_ROUNDING (1 << (INITIAL_SHIFT - 1))
-#define RIGHT_SHIFT 14
-#define RIGHT_ROUNDING (1 << (RIGHT_SHIFT - 1))
-
 static void butterfly_16x16_idct_1d(int16_t input[16], int16_t output[16],
                                     int last_shift_bits) {
-    int16_t step[16];
-    int intermediate[16];
-    int temp1, temp2;
+  int16_t step[16];
+  int intermediate[16];
+  int temp1, temp2;
 
-    int step1_shift = RIGHT_SHIFT + INITIAL_SHIFT;
-    int step1_rounding = 1 << (step1_shift - 1);
-    int last_rounding = 0;
+  int step1_shift = RIGHT_SHIFT + INITIAL_SHIFT;
+  int step1_rounding = 1 << (step1_shift - 1);
+  int last_rounding = 0;
 
-    if (last_shift_bits > 0)
-      last_rounding = 1 << (last_shift_bits - 1);
+  if (last_shift_bits > 0)
+    last_rounding = 1 << (last_shift_bits - 1);
 
-    // step 1 and 2
-    step[ 0] = (input[0] + input[8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[ 1] = (input[0] - input[8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+  // step 1 and 2
+  step[ 0] = (input[0] + input[8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+  step[ 1] = (input[0] - input[8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
 
-    temp1 = input[4] * C12;
-    temp2 = input[12] * C4;
-    temp1 = (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp1  *= C8;
-    step[ 2] = (2 * (temp1) + step1_rounding) >> step1_shift;
+  temp1 = input[4] * C12;
+  temp2 = input[12] * C4;
+  temp1 = (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1  *= C8;
+  step[ 2] = (2 * (temp1) + step1_rounding) >> step1_shift;
 
-    temp1 = input[4] * C4;
-    temp2 = input[12] * C12;
-    temp1 = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp1 *= C8;
-    step[ 3] = (2 * (temp1) + step1_rounding) >> step1_shift;
+  temp1 = input[4] * C4;
+  temp2 = input[12] * C12;
+  temp1 = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 *= C8;
+  step[ 3] = (2 * (temp1) + step1_rounding) >> step1_shift;
 
-    temp1 = input[2] * C8;
-    temp1 = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp2 = input[6] + input[10];
-    step[ 4] = (temp1 + temp2 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[ 5] = (temp1 - temp2 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+  temp1 = input[2] * C8;
+  temp1 = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp2 = input[6] + input[10];
+  step[ 4] = (temp1 + temp2 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+  step[ 5] = (temp1 - temp2 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
 
-    temp1 = input[14] * C8;
-    temp1 = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp2 = input[6] - input[10];
-    step[ 6] = (temp2 - temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[ 7] = (temp2 + temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+  temp1 = input[14] * C8;
+  temp1 = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp2 = input[6] - input[10];
+  step[ 6] = (temp2 - temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+  step[ 7] = (temp2 + temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
 
-    // for odd input
-    temp1 = input[3] * C12;
-    temp2 = input[13] * C4;
-    temp1 = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp1 *= C8;
-    intermediate[ 8] = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  // for odd input
+  temp1 = input[3] * C12;
+  temp2 = input[13] * C4;
+  temp1 = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 *= C8;
+  intermediate[ 8] = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = input[3] * C4;
-    temp2 = input[13] * C12;
-    temp2 = (temp2 - temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp2 *= C8;
-    intermediate[ 9] = (2 * (temp2) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = input[3] * C4;
+  temp2 = input[13] * C12;
+  temp2 = (temp2 - temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp2 *= C8;
+  intermediate[ 9] = (2 * (temp2) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    intermediate[10] = (2 * (input[9] * C8) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    intermediate[11] = input[15] - input[1];
-    intermediate[12] = input[15] + input[1];
-    intermediate[13] = (2 * (input[7] * C8) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  intermediate[10] = (2 * (input[9] * C8) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  intermediate[11] = input[15] - input[1];
+  intermediate[12] = input[15] + input[1];
+  intermediate[13] = (2 * (input[7] * C8) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = input[11] * C12;
-    temp2 = input[5] * C4;
-    temp2 = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp2 *= C8;
-    intermediate[14] = (2 * (temp2) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = input[11] * C12;
+  temp2 = input[5] * C4;
+  temp2 = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp2 *= C8;
+  intermediate[14] = (2 * (temp2) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = input[11] * C4;
-    temp2 = input[5] * C12;
-    temp1 = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp1 *= C8;
-    intermediate[15] = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = input[11] * C4;
+  temp2 = input[5] * C12;
+  temp1 = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 *= C8;
+  intermediate[15] = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    step[ 8] = (intermediate[ 8] + intermediate[14] + INITIAL_ROUNDING)
-        >> INITIAL_SHIFT;
-    step[ 9] = (intermediate[ 9] + intermediate[15] + INITIAL_ROUNDING)
-        >> INITIAL_SHIFT;
-    step[10] = (intermediate[10] + intermediate[11] + INITIAL_ROUNDING)
-        >> INITIAL_SHIFT;
-    step[11] = (intermediate[10] - intermediate[11] + INITIAL_ROUNDING)
-        >> INITIAL_SHIFT;
-    step[12] = (intermediate[12] + intermediate[13] + INITIAL_ROUNDING)
-        >> INITIAL_SHIFT;
-    step[13] = (intermediate[12] - intermediate[13] + INITIAL_ROUNDING)
-        >> INITIAL_SHIFT;
-    step[14] = (intermediate[ 8] - intermediate[14] + INITIAL_ROUNDING)
-        >> INITIAL_SHIFT;
-    step[15] = (intermediate[ 9] - intermediate[15] + INITIAL_ROUNDING)
-        >> INITIAL_SHIFT;
+  step[ 8] = (intermediate[ 8] + intermediate[14] + INITIAL_ROUNDING)
+      >> INITIAL_SHIFT;
+  step[ 9] = (intermediate[ 9] + intermediate[15] + INITIAL_ROUNDING)
+      >> INITIAL_SHIFT;
+  step[10] = (intermediate[10] + intermediate[11] + INITIAL_ROUNDING)
+      >> INITIAL_SHIFT;
+  step[11] = (intermediate[10] - intermediate[11] + INITIAL_ROUNDING)
+      >> INITIAL_SHIFT;
+  step[12] = (intermediate[12] + intermediate[13] + INITIAL_ROUNDING)
+      >> INITIAL_SHIFT;
+  step[13] = (intermediate[12] - intermediate[13] + INITIAL_ROUNDING)
+      >> INITIAL_SHIFT;
+  step[14] = (intermediate[ 8] - intermediate[14] + INITIAL_ROUNDING)
+      >> INITIAL_SHIFT;
+  step[15] = (intermediate[ 9] - intermediate[15] + INITIAL_ROUNDING)
+      >> INITIAL_SHIFT;
 
-    // step 3
-    output[0] = step[ 0] + step[ 3];
-    output[1] = step[ 1] + step[ 2];
-    output[2] = step[ 1] - step[ 2];
-    output[3] = step[ 0] - step[ 3];
+  // step 3
+  output[0] = step[ 0] + step[ 3];
+  output[1] = step[ 1] + step[ 2];
+  output[2] = step[ 1] - step[ 2];
+  output[3] = step[ 0] - step[ 3];
 
-    temp1 = step[ 4] * C14;
-    temp2 = step[ 7] * C2;
-    output[4] =  (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = step[ 4] * C14;
+  temp2 = step[ 7] * C2;
+  output[4] =  (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = step[ 4] * C2;
-    temp2 = step[ 7] * C14;
-    output[7] =  (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = step[ 4] * C2;
+  temp2 = step[ 7] * C14;
+  output[7] =  (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = step[ 5] * C10;
-    temp2 = step[ 6] * C6;
-    output[5] =  (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = step[ 5] * C10;
+  temp2 = step[ 6] * C6;
+  output[5] =  (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = step[ 5] * C6;
-    temp2 = step[ 6] * C10;
-    output[6] =  (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = step[ 5] * C6;
+  temp2 = step[ 6] * C10;
+  output[6] =  (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    output[8] = step[ 8] + step[11];
-    output[9] = step[ 9] + step[10];
-    output[10] = step[ 9] - step[10];
-    output[11] = step[ 8] - step[11];
-    output[12] = step[12] + step[15];
-    output[13] = step[13] + step[14];
-    output[14] = step[13] - step[14];
-    output[15] = step[12] - step[15];
+  output[8] = step[ 8] + step[11];
+  output[9] = step[ 9] + step[10];
+  output[10] = step[ 9] - step[10];
+  output[11] = step[ 8] - step[11];
+  output[12] = step[12] + step[15];
+  output[13] = step[13] + step[14];
+  output[14] = step[13] - step[14];
+  output[15] = step[12] - step[15];
 
-    // output 4
-    step[ 0] = output[0] + output[7];
-    step[ 1] = output[1] + output[6];
-    step[ 2] = output[2] + output[5];
-    step[ 3] = output[3] + output[4];
-    step[ 4] = output[3] - output[4];
-    step[ 5] = output[2] - output[5];
-    step[ 6] = output[1] - output[6];
-    step[ 7] = output[0] - output[7];
+  // output 4
+  step[ 0] = output[0] + output[7];
+  step[ 1] = output[1] + output[6];
+  step[ 2] = output[2] + output[5];
+  step[ 3] = output[3] + output[4];
+  step[ 4] = output[3] - output[4];
+  step[ 5] = output[2] - output[5];
+  step[ 6] = output[1] - output[6];
+  step[ 7] = output[0] - output[7];
 
-    temp1 = output[8] * C7;
-    temp2 = output[15] * C9;
-    step[ 8] = (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = output[8] * C7;
+  temp2 = output[15] * C9;
+  step[ 8] = (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = output[9] * C11;
-    temp2 = output[14] * C5;
-    step[ 9] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = output[9] * C11;
+  temp2 = output[14] * C5;
+  step[ 9] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = output[10] * C3;
-    temp2 = output[13] * C13;
-    step[10] = (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = output[10] * C3;
+  temp2 = output[13] * C13;
+  step[10] = (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = output[11] * C15;
-    temp2 = output[12] * C1;
-    step[11] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = output[11] * C15;
+  temp2 = output[12] * C1;
+  step[11] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = output[11] * C1;
-    temp2 = output[12] * C15;
-    step[12] = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = output[11] * C1;
+  temp2 = output[12] * C15;
+  step[12] = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = output[10] * C13;
-    temp2 = output[13] * C3;
-    step[13] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = output[10] * C13;
+  temp2 = output[13] * C3;
+  step[13] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = output[9] * C5;
-    temp2 = output[14] * C11;
-    step[14] = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = output[9] * C5;
+  temp2 = output[14] * C11;
+  step[14] = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    temp1 = output[8] * C9;
-    temp2 = output[15] * C7;
-    step[15] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = output[8] * C9;
+  temp2 = output[15] * C7;
+  step[15] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
 
-    // step 5
-    output[0] = (step[0] + step[15] + last_rounding) >> last_shift_bits;
-    output[1] = (step[1] + step[14] + last_rounding) >> last_shift_bits;
-    output[2] = (step[2] + step[13] + last_rounding) >> last_shift_bits;
-    output[3] = (step[3] + step[12] + last_rounding) >> last_shift_bits;
-    output[4] = (step[4] + step[11] + last_rounding) >> last_shift_bits;
-    output[5] = (step[5] + step[10] + last_rounding) >> last_shift_bits;
-    output[6] = (step[6] + step[ 9] + last_rounding) >> last_shift_bits;
-    output[7] = (step[7] + step[ 8] + last_rounding) >> last_shift_bits;
+  // step 5
+  output[0] = (step[0] + step[15] + last_rounding) >> last_shift_bits;
+  output[1] = (step[1] + step[14] + last_rounding) >> last_shift_bits;
+  output[2] = (step[2] + step[13] + last_rounding) >> last_shift_bits;
+  output[3] = (step[3] + step[12] + last_rounding) >> last_shift_bits;
+  output[4] = (step[4] + step[11] + last_rounding) >> last_shift_bits;
+  output[5] = (step[5] + step[10] + last_rounding) >> last_shift_bits;
+  output[6] = (step[6] + step[ 9] + last_rounding) >> last_shift_bits;
+  output[7] = (step[7] + step[ 8] + last_rounding) >> last_shift_bits;
 
-    output[15] = (step[0] - step[15] + last_rounding) >> last_shift_bits;
-    output[14] = (step[1] - step[14] + last_rounding) >> last_shift_bits;
-    output[13] = (step[2] - step[13] + last_rounding) >> last_shift_bits;
-    output[12] = (step[3] - step[12] + last_rounding) >> last_shift_bits;
-    output[11] = (step[4] - step[11] + last_rounding) >> last_shift_bits;
-    output[10] = (step[5] - step[10] + last_rounding) >> last_shift_bits;
-    output[9] = (step[6] - step[ 9] + last_rounding) >> last_shift_bits;
-    output[8] = (step[7] - step[ 8] + last_rounding) >> last_shift_bits;
+  output[15] = (step[0] - step[15] + last_rounding) >> last_shift_bits;
+  output[14] = (step[1] - step[14] + last_rounding) >> last_shift_bits;
+  output[13] = (step[2] - step[13] + last_rounding) >> last_shift_bits;
+  output[12] = (step[3] - step[12] + last_rounding) >> last_shift_bits;
+  output[11] = (step[4] - step[11] + last_rounding) >> last_shift_bits;
+  output[10] = (step[5] - step[10] + last_rounding) >> last_shift_bits;
+  output[9] = (step[6] - step[ 9] + last_rounding) >> last_shift_bits;
+  output[8] = (step[7] - step[ 8] + last_rounding) >> last_shift_bits;
 }
 
 void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
-    int16_t out[16 * 16];
-    int16_t *outptr = &out[0];
-    const int short_pitch = pitch >> 1;
-    int i, j;
-    int16_t temp_in[16], temp_out[16];
+  int16_t out[16 * 16];
+  int16_t *outptr = &out[0];
+  const int short_pitch = pitch >> 1;
+  int i, j;
+  int16_t temp_in[16], temp_out[16];
 
-    // First transform rows
-    for (i = 0; i < 16; ++i) {
-      butterfly_16x16_idct_1d(input, outptr, 0);
-      input += short_pitch;
-      outptr += 16;
-    }
+  // First transform rows
+  for (i = 0; i < 16; ++i) {
+    butterfly_16x16_idct_1d(input, outptr, 0);
+    input += short_pitch;
+    outptr += 16;
+  }
 
-    // Then transform columns
-    for (i = 0; i < 16; ++i) {
-      for (j = 0; j < 16; ++j)
-        temp_in[j] = out[j * 16 + i];
-      butterfly_16x16_idct_1d(temp_in, temp_out, 3);
-      for (j = 0; j < 16; ++j)
+  // Then transform columns
+  for (i = 0; i < 16; ++i) {
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = out[j * 16 + i];
+    butterfly_16x16_idct_1d(temp_in, temp_out, 3);
+    for (j = 0; j < 16; ++j)
         output[j * 16 + i] = temp_out[j];
     }
 }
@@ -2097,16 +2098,20 @@ void vp9_short_idct32x32_c(short *input, short *output, int pitch) {
   }
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
+
 #else  // CONFIG_DWT32X32HYBRID
 
-#define MAX_BLOCK_LENGTH   64
-#define ENH_PRECISION_BITS 1
-#define ENH_PRECISION_RND ((1 << ENH_PRECISION_BITS) / 2)
+#define DWT_MAX_LENGTH   32
+#define DWT_TYPE         26    // 26/53/97
+#define DWT_PRECISION_BITS 2
+#define DWT_PRECISION_RND ((1 << DWT_PRECISION_BITS) / 2)
+
+#if DWT_TYPE == 53
 
 // Note: block length must be even for this implementation
 static void synthesis_53_row(int length, short *lowpass, short *highpass,
                              short *x) {
-  short r, * a, * b;
+  short r, *a, *b;
   int n;
 
   n = length >> 1;
@@ -2125,13 +2130,13 @@ static void synthesis_53_row(int length, short *lowpass, short *highpass,
     *x++ = ((r = *a++) + 1) >> 1;
     *x++ = *b++ + ((r + (*a) + 2) >> 2);
   }
-  *x++ = ((r = *a) + 1)>>1;
-  *x++ = *b + ((r+1)>>1);
+  *x++ = ((r = *a) + 1) >> 1;
+  *x++ = *b + ((r + 1) >> 1);
 }
 
 static void synthesis_53_col(int length, short *lowpass, short *highpass,
                              short *x) {
-  short r, * a, * b;
+  short r, *a, *b;
   int n;
 
   n = length >> 1;
@@ -2147,19 +2152,18 @@ static void synthesis_53_col(int length, short *lowpass, short *highpass,
   b = highpass;
   a = lowpass;
   while (--n) {
-    *x++ = r = *a++;
+    r = *a++;
+    *x++ = r;
     *x++ = ((*b++) << 1) + ((r + (*a) + 1) >> 1);
   }
-  *x++ = r = *a;
-  *x++ = ((*b) << 1) + r;
+  *x++ = *a;
+  *x++ = ((*b) << 1) + *a;
 }
 
-// NOTE: Using a 5/3 integer wavelet for now. Explore using a wavelet
-// with a better response later
-void dyadic_synthesize(int levels, int width, int height, short *c, int pitch_c,
-                       short *x, int pitch_x) {
+void dyadic_synthesize_53(int levels, int width, int height, short *c,
+                          int pitch_c, short *x, int pitch_x) {
   int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
-  short buffer[2 * MAX_BLOCK_LENGTH];
+  short buffer[2 * DWT_MAX_LENGTH];
 
   th[0] = hh;
   tw[0] = hw;
@@ -2181,35 +2185,466 @@ void dyadic_synthesize(int levels, int width, int height, short *c, int pitch_c,
         c[i * pitch_c + j] = buffer[i + nh];
     }
     for (i = 0; i < nh; i++) {
-      memcpy(buffer, &c[i * pitch_c], nw * sizeof(short));
+      memcpy(buffer, &c[i * pitch_c], nw * sizeof(*buffer));
       synthesis_53_row(nw, buffer, buffer + hw, &c[i * pitch_c]);
+    }
+  }
+  for (i = 0; i < height; i++) {
+    for (j = 0; j < width; j++) {
+      x[i * pitch_x + j] = c[i * pitch_c + j] >= 0 ?
+          ((c[i * pitch_c + j] + DWT_PRECISION_RND) >> DWT_PRECISION_BITS) :
+          -((-c[i * pitch_c + j] + DWT_PRECISION_RND) >> DWT_PRECISION_BITS);
+    }
+  }
+}
+
+#elif DWT_TYPE == 26
+
+// Note: block length must be even for this implementation
+static void synthesis_26_row(int length, short *lowpass, short *highpass,
+                             short *x) {
+  short r, s, *a, *b;
+  int i, n = length >> 1;
+
+  if (n >= 4) {
+    a = lowpass;
+    b = highpass;
+    r = *lowpass;
+    while (--n) {
+      *b++ += (r - a[1] + 4) >> 3;
+      r = *a++;
+    }
+    *b += (r - *a + 4) >> 3;
+  }
+  a = lowpass;
+  b = highpass;
+  for (i = length >> 1; i; i--) {
+    s = *b++;
+    r = *a++;
+    *x++ = (r + s + 1) >> 1;
+    *x++ = (r - s + 1) >> 1;
+  }
+}
+
+static void synthesis_26_col(int length, short *lowpass, short *highpass,
+                             short *x) {
+  short r, s, *a, *b;
+  int i, n = length >> 1;
+
+  if (n >= 4) {
+    a = lowpass;
+    b = highpass;
+    r = *lowpass;
+    while (--n) {
+      *b++ += (r - a[1] + 4) >> 3;
+      r = *a++;
+    }
+    *b += (r - *a + 4) >> 3;
+  }
+  a = lowpass;
+  b = highpass;
+  for (i = length >> 1; i; i--) {
+    s = *b++;
+    r = *a++;
+    *x++ = r + s;
+    *x++ = r - s;
+  }
+}
+
+void dyadic_synthesize_26(int levels, int width, int height, short *c,
+                          int pitch_c, short *x, int pitch_x) {
+  int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
+  short buffer[2 * DWT_MAX_LENGTH];
+
+  th[0] = hh;
+  tw[0] = hw;
+  for (i = 1; i <= levels; i++) {
+    th[i] = (th[i - 1] + 1) >> 1;
+    tw[i] = (tw[i - 1] + 1) >> 1;
+  }
+  for (lv = levels - 1; lv >= 0; lv--) {
+    nh = th[lv];
+    nw = tw[lv];
+    hh = th[lv + 1];
+    hw = tw[lv + 1];
+    if ((nh < 2) || (nw < 2)) continue;
+    for (j = 0; j < nw; j++) {
+      for (i = 0; i < nh; i++)
+        buffer[i] = c[i * pitch_c + j];
+      synthesis_26_col(nh, buffer, buffer + hh, buffer + nh);
+      for (i = 0; i < nh; i++)
+        c[i * pitch_c + j] = buffer[i + nh];
+    }
+    for (i = 0; i < nh; i++) {
+      memcpy(buffer, &c[i * pitch_c], nw * sizeof(*buffer));
+      synthesis_26_row(nw, buffer, buffer + hw, &c[i * pitch_c]);
+    }
+  }
+  for (i = 0; i < height; i++) {
+    for (j = 0; j < width; j++) {
+      x[i * pitch_x + j] = c[i * pitch_c + j] >= 0 ?
+          ((c[i * pitch_c + j] + DWT_PRECISION_RND) >> DWT_PRECISION_BITS) :
+          -((-c[i * pitch_c + j] + DWT_PRECISION_RND) >> DWT_PRECISION_BITS);
+    }
+  }
+}
+
+#elif DWT_TYPE == 97
+
+static void synthesis_97(int length, double *lowpass, double *highpass,
+                         double *x) {
+  static const double a_predict1 = -1.586134342;
+  static const double a_update1 = -0.05298011854;
+  static const double a_predict2 = 0.8829110762;
+  static const double a_update2 = 0.4435068522;
+  static const double s_low = 1.149604398;
+  static const double s_high = 1/1.149604398;
+  static const double inv_s_low = 1 / s_low;
+  static const double inv_s_high = 1 / s_high;
+  int i;
+  double y[DWT_MAX_LENGTH];
+  // Undo pack and scale
+  for (i = 0; i < length / 2; i++) {
+    y[i * 2] = lowpass[i] * inv_s_low;
+    y[i * 2 + 1] = highpass[i] * inv_s_high;
+  }
+  memcpy(x, y, sizeof(*y) * length);
+  // Undo update 2
+  for (i = 2; i < length; i += 2) {
+    x[i] -= a_update2 * (x[i-1] + x[i+1]);
+  }
+  x[0] -= 2 * a_update2 * x[1];
+  // Undo predict 2
+  for (i = 1; i < length - 2; i += 2) {
+    x[i] -= a_predict2 * (x[i - 1] + x[i + 1]);
+  }
+  x[length - 1] -= 2 * a_predict2 * x[length - 2];
+  // Undo update 1
+  for (i = 2; i < length; i += 2) {
+    x[i] -= a_update1 * (x[i - 1] + x[i + 1]);
+  }
+  x[0] -= 2 * a_update1 * x[1];
+  // Undo predict 1
+  for (i = 1; i < length - 2; i += 2) {
+    x[i] -= a_predict1 * (x[i - 1] + x[i + 1]);
+  }
+  x[length - 1] -= 2 * a_predict1 * x[length - 2];
+}
+
+void dyadic_synthesize_97(int levels, int width, int height, short *c,
+                          int pitch_c, short *x, int pitch_x) {
+  int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
+  double buffer[2 * DWT_MAX_LENGTH];
+  double y[DWT_MAX_LENGTH * DWT_MAX_LENGTH];
+
+  th[0] = hh;
+  tw[0] = hw;
+  for (i = 1; i <= levels; i++) {
+    th[i] = (th[i - 1] + 1) >> 1;
+    tw[i] = (tw[i - 1] + 1) >> 1;
+  }
+  for (lv = levels - 1; lv >= 0; lv--) {
+    nh = th[lv];
+    nw = tw[lv];
+    hh = th[lv + 1];
+    hw = tw[lv + 1];
+    if ((nh < 2) || (nw < 2)) continue;
+    for (j = 0; j < nw; j++) {
+      for (i = 0; i < nh; i++)
+        buffer[i] = c[i * pitch_c + j];
+      synthesis_97(nh, buffer, buffer + hh, buffer + nh);
+      for (i = 0; i < nh; i++)
+        y[i * DWT_MAX_LENGTH + j] = buffer[i + nh];
+    }
+    for (i = 0; i < nh; i++) {
+      memcpy(buffer, &y[i * DWT_MAX_LENGTH], nw * sizeof(*buffer));
+      synthesis_97(nw, buffer, buffer + hw, &y[i * DWT_MAX_LENGTH]);
     }
   }
   for (i = 0; i < height; i++)
     for (j = 0; j < width; j++)
-      x[i * pitch_x + j] = (c[i * pitch_c + j] + ENH_PRECISION_RND) >>
-      ENH_PRECISION_BITS;
+      x[i * pitch_x + j] = round(y[i * DWT_MAX_LENGTH + j] /
+                                 (1 << DWT_PRECISION_BITS));
+}
+
+#endif  // DWT_TYPE
+
+// TODO(debargha): Implement scaling differently so as not to have to use the
+// floating point 16x16 dct
+static void butterfly_16x16_idct_1d_f(double input[16], double output[16]) {
+  static const double C1 = 0.995184726672197;
+  static const double C2 = 0.98078528040323;
+  static const double C3 = 0.956940335732209;
+  static const double C4 = 0.923879532511287;
+  static const double C5 = 0.881921264348355;
+  static const double C6 = 0.831469612302545;
+  static const double C7 = 0.773010453362737;
+  static const double C8 = 0.707106781186548;
+  static const double C9 = 0.634393284163646;
+  static const double C10 = 0.555570233019602;
+  static const double C11 = 0.471396736825998;
+  static const double C12 = 0.38268343236509;
+  static const double C13 = 0.290284677254462;
+  static const double C14 = 0.195090322016128;
+  static const double C15 = 0.098017140329561;
+
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+  {
+    double step[16];
+    double intermediate[16];
+    double temp1, temp2;
+
+
+    // step 1 and 2
+    step[ 0] = input[0] + input[8];
+    step[ 1] = input[0] - input[8];
+
+    temp1 = input[4]*C12;
+    temp2 = input[12]*C4;
+
+    temp1 -= temp2;
+    temp1 *= C8;
+
+    step[ 2] = 2*(temp1);
+
+    temp1 = input[4]*C4;
+    temp2 = input[12]*C12;
+    temp1 += temp2;
+    temp1 = (temp1);
+    temp1 *= C8;
+    step[ 3] = 2*(temp1);
+
+    temp1 = input[2]*C8;
+    temp1 = 2*(temp1);
+    temp2 = input[6] + input[10];
+
+    step[ 4] = temp1 + temp2;
+    step[ 5] = temp1 - temp2;
+
+    temp1 = input[14]*C8;
+    temp1 = 2*(temp1);
+    temp2 = input[6] - input[10];
+
+    step[ 6] = temp2 - temp1;
+    step[ 7] = temp2 + temp1;
+
+    // for odd input
+    temp1 = input[3]*C12;
+    temp2 = input[13]*C4;
+    temp1 += temp2;
+    temp1 = (temp1);
+    temp1 *= C8;
+    intermediate[ 8] = 2*(temp1);
+
+    temp1 = input[3]*C4;
+    temp2 = input[13]*C12;
+    temp2 -= temp1;
+    temp2 = (temp2);
+    temp2 *= C8;
+    intermediate[ 9] = 2*(temp2);
+
+    intermediate[10] = 2*(input[9]*C8);
+    intermediate[11] = input[15] - input[1];
+    intermediate[12] = input[15] + input[1];
+    intermediate[13] = 2*((input[7]*C8));
+
+    temp1 = input[11]*C12;
+    temp2 = input[5]*C4;
+    temp2 -= temp1;
+    temp2 = (temp2);
+    temp2 *= C8;
+    intermediate[14] = 2*(temp2);
+
+    temp1 = input[11]*C4;
+    temp2 = input[5]*C12;
+    temp1 += temp2;
+    temp1 = (temp1);
+    temp1 *= C8;
+    intermediate[15] = 2*(temp1);
+
+    step[ 8] = intermediate[ 8] + intermediate[14];
+    step[ 9] = intermediate[ 9] + intermediate[15];
+    step[10] = intermediate[10] + intermediate[11];
+    step[11] = intermediate[10] - intermediate[11];
+    step[12] = intermediate[12] + intermediate[13];
+    step[13] = intermediate[12] - intermediate[13];
+    step[14] = intermediate[ 8] - intermediate[14];
+    step[15] = intermediate[ 9] - intermediate[15];
+
+    // step 3
+    output[0] = step[ 0] + step[ 3];
+    output[1] = step[ 1] + step[ 2];
+    output[2] = step[ 1] - step[ 2];
+    output[3] = step[ 0] - step[ 3];
+
+    temp1 = step[ 4]*C14;
+    temp2 = step[ 7]*C2;
+    temp1 -= temp2;
+    output[4] =  (temp1);
+
+    temp1 = step[ 4]*C2;
+    temp2 = step[ 7]*C14;
+    temp1 += temp2;
+    output[7] =  (temp1);
+
+    temp1 = step[ 5]*C10;
+    temp2 = step[ 6]*C6;
+    temp1 -= temp2;
+    output[5] =  (temp1);
+
+    temp1 = step[ 5]*C6;
+    temp2 = step[ 6]*C10;
+    temp1 += temp2;
+    output[6] =  (temp1);
+
+    output[8] = step[ 8] + step[11];
+    output[9] = step[ 9] + step[10];
+    output[10] = step[ 9] - step[10];
+    output[11] = step[ 8] - step[11];
+    output[12] = step[12] + step[15];
+    output[13] = step[13] + step[14];
+    output[14] = step[13] - step[14];
+    output[15] = step[12] - step[15];
+
+    // output 4
+    step[ 0] = output[0] + output[7];
+    step[ 1] = output[1] + output[6];
+    step[ 2] = output[2] + output[5];
+    step[ 3] = output[3] + output[4];
+    step[ 4] = output[3] - output[4];
+    step[ 5] = output[2] - output[5];
+    step[ 6] = output[1] - output[6];
+    step[ 7] = output[0] - output[7];
+
+    temp1 = output[8]*C7;
+    temp2 = output[15]*C9;
+    temp1 -= temp2;
+    step[ 8] = (temp1);
+
+    temp1 = output[9]*C11;
+    temp2 = output[14]*C5;
+    temp1 += temp2;
+    step[ 9] = (temp1);
+
+    temp1 = output[10]*C3;
+    temp2 = output[13]*C13;
+    temp1 -= temp2;
+    step[10] = (temp1);
+
+    temp1 = output[11]*C15;
+    temp2 = output[12]*C1;
+    temp1 += temp2;
+    step[11] = (temp1);
+
+    temp1 = output[11]*C1;
+    temp2 = output[12]*C15;
+    temp2 -= temp1;
+    step[12] = (temp2);
+
+    temp1 = output[10]*C13;
+    temp2 = output[13]*C3;
+    temp1 += temp2;
+    step[13] = (temp1);
+
+    temp1 = output[9]*C5;
+    temp2 = output[14]*C11;
+    temp2 -= temp1;
+    step[14] = (temp2);
+
+    temp1 = output[8]*C9;
+    temp2 = output[15]*C7;
+    temp1 += temp2;
+    step[15] = (temp1);
+
+    // step 5
+    output[0] = (step[0] + step[15]);
+    output[1] = (step[1] + step[14]);
+    output[2] = (step[2] + step[13]);
+    output[3] = (step[3] + step[12]);
+    output[4] = (step[4] + step[11]);
+    output[5] = (step[5] + step[10]);
+    output[6] = (step[6] + step[ 9]);
+    output[7] = (step[7] + step[ 8]);
+
+    output[15] = (step[0] - step[15]);
+    output[14] = (step[1] - step[14]);
+    output[13] = (step[2] - step[13]);
+    output[12] = (step[3] - step[12]);
+    output[11] = (step[4] - step[11]);
+    output[10] = (step[5] - step[10]);
+    output[9] = (step[6] - step[ 9]);
+    output[8] = (step[7] - step[ 8]);
+  }
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+}
+
+void vp9_short_idct16x16_c_f(short *input, short *output, int pitch) {
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+  {
+    double out[16*16], out2[16*16];
+    const int short_pitch = pitch >> 1;
+    int i, j;
+      // First transform rows
+    for (i = 0; i < 16; ++i) {
+      double temp_in[16], temp_out[16];
+      for (j = 0; j < 16; ++j)
+        temp_in[j] = input[j + i*short_pitch];
+      butterfly_16x16_idct_1d_f(temp_in, temp_out);
+      for (j = 0; j < 16; ++j)
+        out[j + i*16] = temp_out[j];
+    }
+    // Then transform columns
+    for (i = 0; i < 16; ++i) {
+      double temp_in[16], temp_out[16];
+      for (j = 0; j < 16; ++j)
+        temp_in[j] = out[j*16 + i];
+      butterfly_16x16_idct_1d_f(temp_in, temp_out);
+      for (j = 0; j < 16; ++j)
+        out2[j*16 + i] = temp_out[j];
+    }
+    for (i = 0; i < 16*16; ++i)
+      output[i] = round(out2[i] / (64 >> DWT_PRECISION_BITS));
+  }
+  vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
 void vp9_short_idct32x32_c(short *input, short *output, int pitch) {
   // assume out is a 32x32 buffer
+  // Temporary buffer to hold a 16x16 block for 16x16 inverse dct
   short buffer[16 * 16];
+  // Temporary buffer to hold a 32x32 block for inverse 32x32 dwt
   short buffer2[32 * 32];
+  // Note: pitch is in bytes, short_pitch is in short units
   const int short_pitch = pitch >> 1;
   int i;
+
   // TODO(debargha): Implement more efficiently by adding output pitch
   // argument to the idct16x16 function
-  vp9_short_idct16x16_c(input, buffer, pitch);
+  vp9_short_idct16x16_c_f(input, buffer, pitch);
   for (i = 0; i < 16; ++i) {
-    vpx_memcpy(buffer2 + i * 32, buffer + i * 16, sizeof(short) * 16);
-    vpx_memcpy(buffer2 + i * 32 + 16, input + i * short_pitch + 16,
-               sizeof(short) * 16);
+    vpx_memcpy(buffer2 + i * 32, buffer + i * 16, sizeof(*buffer2) * 16);
   }
-  for (; i < 32; ++i) {
-    vpx_memcpy(buffer2 + i * 32, input + i * short_pitch,
-               sizeof(short) * 32);
+  vp9_short_idct16x16_c_f(input + 16, buffer, pitch);
+  for (i = 0; i < 16; ++i) {
+    vpx_memcpy(buffer2 + i * 32 + 16, buffer + i * 16, sizeof(*buffer2) * 16);
   }
-  dyadic_synthesize(1, 32, 32, buffer2, 32, output, 32);
+  vp9_short_idct16x16_c_f(input + 16 * short_pitch, buffer, pitch);
+  for (i = 0; i < 16; ++i) {
+    vpx_memcpy(buffer2 + i * 32 + 16 * 32, buffer + i * 16,
+               sizeof(*buffer2) * 16);
+  }
+  vp9_short_idct16x16_c_f(input + 16 * short_pitch + 16, buffer, pitch);
+  for (i = 0; i < 16; ++i) {
+    vpx_memcpy(buffer2 + i * 32 + 16 * 33, buffer + i * 16,
+               sizeof(*buffer2) * 16);
+  }
+#if DWT_TYPE == 26
+  dyadic_synthesize_26(1, 32, 32, buffer2, 32, output, 32);
+#elif DWT_TYPE == 97
+  dyadic_synthesize_97(1, 32, 32, buffer2, 32, output, 32);
+#elif DWT_TYPE == 53
+  dyadic_synthesize_53(1, 32, 32, buffer2, 32, output, 32);
+#endif
 }
 #endif  // CONFIG_DWT32X32HYBRID
 #endif  // CONFIG_TX32X32
