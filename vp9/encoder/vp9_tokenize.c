@@ -563,7 +563,7 @@ static void print_counter(FILE *f, vp9_coeff_accum *context_counters,
 
   fprintf(f, "static const vp9_coeff_count %s = {\n", header);
 
-# define Comma( X) (X? ",":"")
+#define Comma(X) (X ? "," : "")
   type = 0;
   do {
     fprintf(f, "%s\n  { /* block Type %d */", Comma(type), type);
@@ -576,7 +576,7 @@ static void print_counter(FILE *f, vp9_coeff_accum *context_counters,
 
         t = 0;
         do {
-          const INT64 x = context_counters [type] [band] [pt] [t];
+          const INT64 x = context_counters[type][band][pt][t];
           const int y = (int) x;
 
           assert(x == (INT64) y);  /* no overflow handling yet */
@@ -595,17 +595,20 @@ static void print_probs(FILE *f, vp9_coeff_accum *context_counters,
                         int block_types, const char *header) {
   int type, band, pt, t;
 
-  fprintf(f, "static const vp9_coeff_probs %s = {\n", header);
+  fprintf(f, "static const vp9_coeff_probs %s = {", header);
 
   type = 0;
+#define Newline(x, spaces) (x ? " " : "\n" spaces)
   do {
-    fprintf(f, "%s\n  { /* block Type %d */", Comma(type), type);
+    fprintf(f, "%s%s{ /* block Type %d */",
+            Comma(type), Newline(type, "  "), type);
     band = 0;
     do {
-      fprintf(f, "%s\n    { /* Coeff Band %d */", Comma(band), band);
+      fprintf(f, "%s%s{ /* Coeff Band %d */",
+              Comma(band), Newline(band, "    "), band);
       pt = 0;
       do {
-        unsigned int branch_ct [ENTROPY_NODES] [2];
+        unsigned int branch_ct[ENTROPY_NODES][2];
         unsigned int coef_counts[MAX_ENTROPY_TOKENS];
         vp9_prob coef_probs[ENTROPY_NODES];
 
@@ -618,10 +621,10 @@ static void print_probs(FILE *f, vp9_coeff_accum *context_counters,
 
         t = 0;
         do {
-          fprintf(f, "%s %d", Comma(t), coef_probs[t]);
+          fprintf(f, "%s %3d", Comma(t), coef_probs[t]);
         } while (++t < ENTROPY_NODES);
 
-        fprintf(f, "}");
+        fprintf(f, " }");
       } while (++pt < PREV_COEF_CONTEXTS);
       fprintf(f, "\n    }");
     } while (++band < COEF_BANDS);
@@ -656,20 +659,20 @@ void print_context_counters() {
 
   /* print coefficient probabilities */
   print_probs(f, context_counters_4x4, BLOCK_TYPES_4X4,
-              "vp9_default_coef_probs_4x4[BLOCK_TYPES_4X4]");
+              "default_coef_probs_4x4[BLOCK_TYPES_4X4]");
   print_probs(f, hybrid_context_counters_4x4, BLOCK_TYPES_4X4,
-              "vp9_default_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4]");
+              "default_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4]");
   print_probs(f, context_counters_8x8, BLOCK_TYPES_8X8,
-              "vp9_default_coef_probs_8x8[BLOCK_TYPES_8X8]");
+              "default_coef_probs_8x8[BLOCK_TYPES_8X8]");
   print_probs(f, hybrid_context_counters_8x8, BLOCK_TYPES_8X8,
-              "vp9_default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]");
+              "default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]");
   print_probs(f, context_counters_16x16, BLOCK_TYPES_16X16,
-              "vp9_default_coef_probs_16x16[BLOCK_TYPES_16X16]");
+              "default_coef_probs_16x16[BLOCK_TYPES_16X16]");
   print_probs(f, hybrid_context_counters_16x16, BLOCK_TYPES_16X16,
-              "vp9_default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]");
+              "default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]");
 #if CONFIG_TX32X32
   print_probs(f, context_counters_32x32, BLOCK_TYPES_32X32,
-              "vp9_default_coef_probs_32x32[BLOCK_TYPES_32X32]");
+              "default_coef_probs_32x32[BLOCK_TYPES_32X32]");
 #endif
 
   fclose(f);
