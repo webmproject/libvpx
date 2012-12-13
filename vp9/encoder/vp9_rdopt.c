@@ -1762,8 +1762,8 @@ static int rd_cost_sbuv_16x16(MACROBLOCK *x) {
 
   for (b = 16; b < 24; b += 4)
     cost += cost_coeffs(x, xd->block + b, PLANE_TYPE_UV,
-                        ta + vp9_block2above_8x8[b],
-                        tl + vp9_block2left_8x8[b], TX_16X16);
+                        ta + vp9_block2above[TX_8X8][b],
+                        tl + vp9_block2left[TX_8X8][b], TX_16X16);
 
   return cost;
 }

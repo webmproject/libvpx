@@ -370,17 +370,16 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
   if (!dry_run)
     cpi->skip_false_count[mb_skip_context] += skip_inc;
 
-  tokenize_b(cpi, xd, xd->block, t, PLANE_TYPE_Y_WITH_DC,
-             A[0], L[0], TX_32X32, dry_run);
+  tokenize_b(cpi, xd, 0, t, PLANE_TYPE_Y_WITH_DC,
+             TX_32X32, dry_run);
   A[0][1] = A[0][2] = A[0][3] = A[0][0];
   L[0][1] = L[0][2] = L[0][3] = L[0][0];
 
   for (b = 16; b < 24; b += 4) {
-    tokenize_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
-               A[0] + vp9_block2above_8x8[b], L[0] + vp9_block2left_8x8[b],
+    tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
                TX_16X16, dry_run);
-    A[0][vp9_block2above_8x8[b] + 1] = A[0][vp9_block2above_8x8[b]];
-    L[0][vp9_block2left_8x8[b] + 1]  = L[0][vp9_block2left_8x8[b]];
+    A[0][vp9_block2above[TX_16X16][b] + 1] = A[0][vp9_block2above[TX_16X16][b]];
+    L[0][vp9_block2left[TX_16X16][b] + 1]  = L[0][vp9_block2left[TX_16X16][b]];
   }
   vpx_memset(&A[0][8], 0, sizeof(A[0][8]));
   vpx_memset(&L[0][8], 0, sizeof(L[0][8]));
@@ -908,16 +907,13 @@ static void stuff_sb_32x32(VP9_COMP *cpi, MACROBLOCKD *xd,
                             (ENTROPY_CONTEXT *) (xd->left_context + 1), };
   int b;
 
-  stuff_b(cpi, xd, xd->block, t, PLANE_TYPE_Y_WITH_DC,
-          A[0], L[0], TX_32X32, dry_run);
+  stuff_b(cpi, xd, 0, t, PLANE_TYPE_Y_WITH_DC, TX_32X32, dry_run);
   A[0][1] = A[0][2] = A[0][3] = A[0][0];
   L[0][1] = L[0][2] = L[0][3] = L[0][0];
   for (b = 16; b < 24; b += 4) {
-    stuff_b(cpi, xd, xd->block + b, t, PLANE_TYPE_UV,
-            A[0] + vp9_block2above_8x8[b],
-            L[0] + vp9_block2above_8x8[b], TX_16X16, dry_run);
-    A[0][vp9_block2above_8x8[b] + 1] = A[0][vp9_block2above_8x8[b]];
-    L[0][vp9_block2left_8x8[b] + 1]  = L[0][vp9_block2left_8x8[b]];
+    stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_16X16, dry_run);
+    A[0][vp9_block2above[TX_16X16][b] + 1] = A[0][vp9_block2above[TX_16X16][b]];
+    L[0][vp9_block2left[TX_16X16][b] + 1]  = L[0][vp9_block2left[TX_16X16][b]];
   }
   vpx_memset(&A[0][8], 0, sizeof(A[0][8]));
   vpx_memset(&L[0][8], 0, sizeof(L[0][8]));

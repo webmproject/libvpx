@@ -270,8 +270,8 @@ int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
   // 16x16 chroma blocks
   seg_eob = get_eob(xd, segment_id, 256);
   for (i = 16; i < 24; i += 4) {
-    ENTROPY_CONTEXT* const a = A + vp9_block2above_8x8[i];
-    ENTROPY_CONTEXT* const l = L + vp9_block2left_8x8[i];
+    ENTROPY_CONTEXT* const a = A + vp9_block2above[TX_16X16][i];
+    ENTROPY_CONTEXT* const l = L + vp9_block2left[TX_16X16][i];
 
     eobs[i] = c = decode_coefs(pbi, xd, bc, a, l, PLANE_TYPE_UV,
                                DCT_DCT, seg_eob,
