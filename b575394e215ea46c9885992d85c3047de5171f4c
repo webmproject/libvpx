@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAASH///+M\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-12-13T16:58:12Z",
+      "side": 1,
+      "message": "Yes.  Will fix.",
+      "parentUuid": "AAAARn//53Y\u003d",
+      "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//53g\u003d",
         "filename": "vp9/common/vp9_idctllm.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2012-12-13T06:19:31Z",
       "side": 1,
       "message": "space after \"if\"\u0027s.",
+      "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAASH///+I\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-12-13T16:58:12Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "AAAARn//53g\u003d",
       "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAASH///+A\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-12-13T16:58:12Z",
+      "side": 1,
+      "message": "I was thinking a branch would be eliminated if I didnt do the else.  Will check to see what the compiler does.\nPossibly we can do a masked eob LUT here... am waiting until the bitstream finalizes before tuning this function further.",
+      "parentUuid": "AAAARn//53c\u003d",
+      "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//53I\u003d",
         "filename": "vp9/decoder/vp9_dequantize.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2012-12-13T06:19:31Z",
       "side": 1,
       "message": "is this \"if (eobs \u003e 0)\" needed? \u0027eobs\u0027 can\u0027t be negative.",
+      "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAASH///+U\u003d",
+        "filename": "vp9/decoder/vp9_dequantize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-12-13T16:58:12Z",
+      "side": 1,
+      "message": "Not really.  Correct.  I left this in as a reminder that we can reduce overhead by having various eob cases for this function.  I will remove.",
+      "parentUuid": "AAAARn//53I\u003d",
       "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
