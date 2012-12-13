@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAARn//53Y\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-13T06:19:31Z",
+      "side": 1,
+      "message": "can just be a \u0027int\u0027 instead of \u0027uint16_t\u0027",
+      "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//53g\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-13T06:19:31Z",
+      "side": 1,
+      "message": "space after \"if\"\u0027s.",
+      "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//53c\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-13T06:19:31Z",
+      "side": 1,
+      "message": "could be an \"else { nz_dim \u003d 8; }\" at line 457.\n\nOr, simply replace the whole with:\n\nnz_dim \u003d (eobs \u003c 3) ? 2 : (eobs \u003c 10) ? 4 : 8;",
+      "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//53I\u003d",
+        "filename": "vp9/decoder/vp9_dequantize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-13T06:19:31Z",
+      "side": 1,
+      "message": "is this \"if (eobs \u003e 0)\" needed? \u0027eobs\u0027 can\u0027t be negative.",
+      "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAARn//53E\u003d",
+        "filename": "vp9/decoder/vp9_dequantize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-13T06:19:31Z",
+      "side": 1,
+      "message": "ditto.\n\n(between, this function seems factorizable with the 8x8 case. It\u0027s very similar, in any case).",
+      "revId": "b575394e215ea46c9885992d85c3047de5171f4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
