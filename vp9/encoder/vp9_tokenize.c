@@ -173,8 +173,10 @@ static void tokenize_b(VP9_COMP *cpi,
       break;
     case TX_16X16:
 #if CONFIG_CNVCONTEXT
-      a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
-      l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
+      if (type != PLANE_TYPE_UV) {
+        a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
+        l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
+      }
 #endif
       seg_eob = 256;
       bands = vp9_coef_bands_16x16;
@@ -246,8 +248,15 @@ static void tokenize_b(VP9_COMP *cpi,
     a[1] = a_ec;
     l[1] = l_ec;
   } else if (tx_size == TX_16X16) {
-    a[1] = a[2] = a[3] = a_ec;
-    l[1] = l[2] = l[3] = l_ec;
+    if (type != PLANE_TYPE_UV) {
+      a[1] = a[2] = a[3] = a_ec;
+      l[1] = l[2] = l[3] = l_ec;
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+    } else {
+      a[1] = a_ec;
+      l[1] = l_ec;
+#endif
+    }
   }
 }
 
@@ -378,8 +387,6 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
   for (b = 16; b < 24; b += 4) {
     tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
                TX_16X16, dry_run);
-    A[0][vp9_block2above[TX_16X16][b] + 1] = A[0][vp9_block2above[TX_16X16][b]];
-    L[0][vp9_block2left[TX_16X16][b] + 1]  = L[0][vp9_block2left[TX_16X16][b]];
   }
   vpx_memset(&A[0][8], 0, sizeof(A[0][8]));
   vpx_memset(&L[0][8], 0, sizeof(L[0][8]));
@@ -749,8 +756,10 @@ static __inline void stuff_b(VP9_COMP *cpi,
       break;
     case TX_16X16:
 #if CONFIG_CNVCONTEXT
-      a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
-      l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
+      if (type != PLANE_TYPE_UV) {
+        a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
+        l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
+      }
 #endif
       bands = vp9_coef_bands_16x16;
       if (tx_type != DCT_DCT) {
@@ -783,8 +792,15 @@ static __inline void stuff_b(VP9_COMP *cpi,
     a[1] = 0;
     l[1] = 0;
   } else if (tx_size == TX_16X16) {
-    a[1] = a[2] = a[3] = 0;
-    l[1] = l[2] = l[3] = 0;
+    if (type != PLANE_TYPE_UV) {
+      a[1] = a[2] = a[3] = 0;
+      l[1] = l[2] = l[3] = 0;
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+    } else {
+      a[1] = 0;
+      l[1] = 0;
+#endif
+    }
   }
 
   if (!dry_run) {
@@ -931,23 +947,6 @@ void vp9_stuff_sb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
   }
 }
 #endif
-
-void vp9_fix_contexts(MACROBLOCKD *xd) {
-  /* Clear entropy contexts for blocks */
-  if ((xd->mode_info_context->mbmi.mode != B_PRED
-       && xd->mode_info_context->mbmi.mode != I8X8_PRED
-       && xd->mode_info_context->mbmi.mode != SPLITMV)
-      || xd->mode_info_context->mbmi.txfm_size == TX_16X16
-      ) {
-    vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-  } else {
-    vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
-    vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
-    xd->above_context->y2 = 1;
-    xd->left_context->y2 = 1;
-  }
-}
 
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
 void vp9_fix_contexts_sb(MACROBLOCKD *xd) {
