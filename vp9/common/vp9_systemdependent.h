@@ -10,12 +10,26 @@
 #ifndef VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
 #define VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
 
+#ifdef _MSC_VER
+#include <math.h>
+#endif
+
 #include "vpx_ports/config.h"
 #if ARCH_X86 || ARCH_X86_64
 void vpx_reset_mmx_state(void);
 #define vp9_clear_system_state() vpx_reset_mmx_state()
 #else
 #define vp9_clear_system_state()
+#endif
+
+#ifdef _MSC_VER
+// round is not defined in MSVC
+static int round(double x) {
+  if (x < 0)
+    return (int)ceil(x - 0.5);
+  else
+    return (int)floor(x + 0.5);
+}
 #endif
 
 struct VP9Common;
