@@ -604,6 +604,10 @@ process_toolchain() {
         *-android-*)
             # GTestLog must be modified to use Android logging utilities.
         ;;
+        *-darwin-*)
+            # iOS/ARM builds do not work with gtest. This does not match
+            # x86 targets.
+        ;;
         *)
             check_cxx "$@" <<EOF && soft_enable unit_tests
 int z;
