@@ -97,8 +97,10 @@ typedef unsigned char   BOOLEAN;
 
 #ifdef _MSC_VER
 typedef __int64 INT64;
+#if _MSC_VER < 1600
 #ifndef INT64_MAX
 #define INT64_MAX LLONG_MAX
+#endif
 #endif
 #else
 
