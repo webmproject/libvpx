@@ -16,6 +16,24 @@
       "revId": "598976b5aa9a5be9c4ec07705bd24323cdb047e6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAASH///Uk\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-12-14T16:41:29Z",
+      "side": 1,
+      "message": "There are 2n+1 pixel values: n on the left, n on the top and 1 for the topleft corner. All of these pixels are filtered including the corner one. x[n] (y[n]) is the unfiltered (filtered) version of the topleft. After filtering and creating the y[n], I put the pixels back in the right places. Note the above[-1] \u003d y[n] line - which restores the topleft.",
+      "parentUuid": "AAAASH///W8\u003d",
+      "revId": "598976b5aa9a5be9c4ec07705bd24323cdb047e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
