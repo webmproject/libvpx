@@ -40,7 +40,7 @@
 
 #define COEFCOUNT_TESTING
 
-// #define DEC_DEBUG
+//#define DEC_DEBUG
 #ifdef DEC_DEBUG
 int dec_debug = 0;
 #endif
@@ -1311,7 +1311,10 @@ static void init_frame(VP9D_COMP *pbi) {
   MACROBLOCKD *const xd  = &pbi->mb;
 
   if (pc->frame_type == KEY_FRAME) {
-    /* Various keyframe initializations */
+
+    if (pc->last_frame_seg_map)
+      vpx_memset(pc->last_frame_seg_map, 0, (pc->mb_rows * pc->mb_cols));
+
     vp9_init_mv_probs(pc);
 
     vp9_init_mbmode_probs(pc);
@@ -1353,6 +1356,7 @@ static void init_frame(VP9D_COMP *pbi) {
 
     vp9_update_mode_info_border(pc, pc->mip);
     vp9_update_mode_info_in_image(pc, pc->mi);
+
 
   } else {
 
@@ -1600,6 +1604,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     pc->ref_pred_probs[0] = 120;
     pc->ref_pred_probs[1] = 80;
     pc->ref_pred_probs[2] = 40;
+
   } else {
     for (i = 0; i < PREDICTION_PROBS; i++) {
       if (vp9_read_bit(&header_bc))

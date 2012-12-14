@@ -255,6 +255,9 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
   vp9_init_mbmode_probs(& cpi->common);
   vp9_default_bmode_probs(cm->fc.bmode_prob);
 
+  if(cm->last_frame_seg_map)
+    vpx_memset(cm->last_frame_seg_map, 0, (cm->mb_rows * cm->mb_cols));
+
   vp9_init_mv_probs(& cpi->common);
 
   // cpi->common.filter_level = 0;      // Reset every key frame.
