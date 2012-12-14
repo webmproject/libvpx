@@ -1312,7 +1312,6 @@ static int64_t rd_pick_intra16x16mby_mode(VP9_COMP *cpi,
 
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
-
       if (this_rd < best_rd) {
         mode_selected = mode;
         txfm_size = mbmi->txfm_size;
@@ -1546,6 +1545,7 @@ static int64_t rd_pick_intra8x8mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
     mic->bmi[ib].as_mode.second = best_second_mode;
 #endif
   }
+
   *Rate = cost;
   *rate_y = tot_rate_y;
   *Distortion = distortion;
@@ -3385,6 +3385,9 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int ref_costs[MAX_REF_FRAMES];
   int_mv seg_mvs[NB_PARTITIONINGS][16 /* n_blocks */][MAX_REF_FRAMES - 1];
 
+  int intra_cost_penalty = 20 * vp9_dc_quant(cpi->common.base_qindex,
+                                             cpi->common.y1dc_delta_q);
+
   vpx_memset(mode8x8, 0, sizeof(mode8x8));
   vpx_memset(&frame_mv, 0, sizeof(frame_mv));
   vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
@@ -3580,16 +3583,17 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (!mbmi->ref_frame) {
       switch (this_mode) {
         default:
-        case DC_PRED:
         case V_PRED:
         case H_PRED:
-        case TM_PRED:
         case D45_PRED:
         case D135_PRED:
         case D117_PRED:
         case D153_PRED:
         case D27_PRED:
         case D63_PRED:
+          rate2 += intra_cost_penalty;
+        case DC_PRED:
+        case TM_PRED:
           mbmi->ref_frame = INTRA_FRAME;
           // FIXME compound intra prediction
           vp9_build_intra_predictors_mby(&x->e_mbd);
@@ -3623,6 +3627,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
                                              0);
           rate2 += rate;
+          rate2 += intra_cost_penalty;
           distortion2 += distortion;
 
           if (tmp_rd < best_yrd) {
@@ -3715,6 +3720,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           }
 
           rate2 += rate;
+          rate2 += intra_cost_penalty;
           distortion2 += distortion;
 
           /* TODO: uv rate maybe over-estimated here since there is UV intra
