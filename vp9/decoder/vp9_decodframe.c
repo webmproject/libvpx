@@ -38,7 +38,7 @@
 
 #define COEFCOUNT_TESTING
 
-// #define DEC_DEBUG
+//#define DEC_DEBUG
 #ifdef DEC_DEBUG
 int dec_debug = 0;
 #endif
@@ -978,8 +978,8 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
       }
 #endif
 #ifdef DEC_DEBUG
-      dec_debug = (pbi->common.current_video_frame == 46 &&
-                   mb_row == 5 && mb_col == 2);
+      dec_debug = (pbi->common.current_video_frame == 1 &&
+                   mb_row == 2 && mb_col == 8);
       if (dec_debug)
 #if CONFIG_SUPERBLOCKS
         printf("Enter Debug %d %d sb %d\n", mb_row, mb_col,
@@ -1139,7 +1139,10 @@ static void init_frame(VP9D_COMP *pbi) {
   MACROBLOCKD *const xd  = &pbi->mb;
 
   if (pc->frame_type == KEY_FRAME) {
-    /* Various keyframe initializations */
+
+    if (pc->last_frame_seg_map)
+      vpx_memset(pc->last_frame_seg_map, 0, (pc->mb_rows * pc->mb_cols));
+
     vp9_init_mv_probs(pc);
 
     vp9_init_mbmode_probs(pc);
@@ -1181,6 +1184,7 @@ static void init_frame(VP9D_COMP *pbi) {
 
     vp9_update_mode_info_border(pc, pc->mip);
     vp9_update_mode_info_in_image(pc, pc->mi);
+
 
   } else {
 
@@ -1423,6 +1427,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     pc->ref_pred_probs[0] = 120;
     pc->ref_pred_probs[1] = 80;
     pc->ref_pred_probs[2] = 40;
+
   } else {
     for (i = 0; i < PREDICTION_PROBS; i++) {
       if (vp9_read_bit(&header_bc))
