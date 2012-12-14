@@ -118,7 +118,7 @@ unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 extern unsigned __int64 Sectionbits[500];
 #endif
 #ifdef MODE_STATS
-extern INT64 Sectionbits[500];
+extern int64_t Sectionbits[500];
 extern unsigned int y_modes[VP9_YMODES];
 extern unsigned int i8x8_modes[VP9_I8X8_MODES];
 extern unsigned int uv_modes[VP9_UV_MODES];
@@ -2698,10 +2698,10 @@ static double compute_edge_pixel_proportion(YV12_BUFFER_CONFIG *frame) {
 
 // Function to test for conditions that indicate we should loop
 // back and recode a frame.
-static BOOL recode_loop_test(VP9_COMP *cpi,
-                             int high_limit, int low_limit,
-                             int q, int maxq, int minq) {
-  BOOL    force_recode = FALSE;
+static int recode_loop_test(VP9_COMP *cpi,
+                            int high_limit, int low_limit,
+                            int q, int maxq, int minq) {
+  int force_recode = FALSE;
   VP9_COMMON *cm = &cpi->common;
 
   // Is frame recode allowed at all
@@ -2941,7 +2941,7 @@ static void encode_frame_to_data_rate
   int mcomp_filters = sizeof(mcomp_filters_to_search) /
       sizeof(*mcomp_filters_to_search);
   int mcomp_filter_index = 0;
-  INT64 mcomp_filter_cost[4];
+  int64_t mcomp_filter_cost[4];
 
   // Clear down mmx registers to allow floating point in what follows
   vp9_clear_system_state();
@@ -3526,9 +3526,9 @@ static void encode_frame_to_data_rate
 
     if (Loop == FALSE && cm->frame_type != KEY_FRAME && sf->search_best_filter) {
       if (mcomp_filter_index < mcomp_filters) {
-        INT64 err = vp9_calc_ss_err(cpi->Source,
+        int64_t err = vp9_calc_ss_err(cpi->Source,
                                     &cm->yv12_fb[cm->new_fb_idx]);
-        INT64 rate = cpi->projected_frame_size << 8;
+        int64_t rate = cpi->projected_frame_size << 8;
         mcomp_filter_cost[mcomp_filter_index] =
           (RDCOST(cpi->RDMULT, cpi->RDDIV, rate, err));
         mcomp_filter_index++;
@@ -3538,7 +3538,7 @@ static void encode_frame_to_data_rate
           Loop = TRUE;
         } else {
           int f;
-          INT64 best_cost = mcomp_filter_cost[0];
+          int64_t best_cost = mcomp_filter_cost[0];
           int mcomp_best_filter = mcomp_filters_to_search[0];
           for (f = 1; f < mcomp_filters; f++) {
             if (mcomp_filter_cost[f] < best_cost) {

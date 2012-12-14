@@ -838,13 +838,13 @@ void vp9_eighttap_predict_avg16x16_sharp_c(unsigned char  *src_ptr,
  *
  *  ROUTINE       : filter_block2d_bil_first_pass
  *
- *  INPUTS        : UINT8  *src_ptr    : Pointer to source block.
- *                  UINT32  src_stride : Stride of source block.
- *                  UINT32  height     : Block height.
- *                  UINT32  width      : Block width.
- *                  INT32  *vp9_filter : Array of 2 bi-linear filter taps.
+ *  INPUTS        : uint8_t  *src_ptr    : Pointer to source block.
+ *                  uint32_t  src_stride : Stride of source block.
+ *                  uint32_t  height     : Block height.
+ *                  uint32_t  width      : Block width.
+ *                  int32_t  *vp9_filter : Array of 2 bi-linear filter taps.
  *
- *  OUTPUTS       : INT32  *dst_ptr    : Pointer to filtered block.
+ *  OUTPUTS       : int32_t  *dst_ptr    : Pointer to filtered block.
  *
  *  RETURNS       : void
  *
@@ -852,7 +852,7 @@ void vp9_eighttap_predict_avg16x16_sharp_c(unsigned char  *src_ptr,
  *                  in the horizontal direction to produce the filtered output
  *                  block. Used to implement first-pass of 2-D separable filter.
  *
- *  SPECIAL NOTES : Produces INT32 output to retain precision for next pass.
+ *  SPECIAL NOTES : Produces int32_t output to retain precision for next pass.
  *                  Two filter taps should sum to VP9_FILTER_WEIGHT.
  *
  ****************************************************************************/
@@ -883,13 +883,13 @@ static void filter_block2d_bil_first_pass(unsigned char  *src_ptr,
  *
  *  ROUTINE       : filter_block2d_bil_second_pass
  *
- *  INPUTS        : INT32  *src_ptr    : Pointer to source block.
- *                  UINT32  dst_pitch  : Destination block pitch.
- *                  UINT32  height     : Block height.
- *                  UINT32  width      : Block width.
- *                  INT32  *vp9_filter : Array of 2 bi-linear filter taps.
+ *  INPUTS        : int32_t  *src_ptr    : Pointer to source block.
+ *                  uint32_t  dst_pitch  : Destination block pitch.
+ *                  uint32_t  height     : Block height.
+ *                  uint32_t  width      : Block width.
+ *                  int32_t  *vp9_filter : Array of 2 bi-linear filter taps.
  *
- *  OUTPUTS       : UINT16 *dst_ptr    : Pointer to filtered block.
+ *  OUTPUTS       : uint16_t *dst_ptr    : Pointer to filtered block.
  *
  *  RETURNS       : void
  *
@@ -962,15 +962,15 @@ static void filter_block2d_bil_second_pass_avg(unsigned short *src_ptr,
  *
  *  ROUTINE       : filter_block2d_bil
  *
- *  INPUTS        : UINT8  *src_ptr          : Pointer to source block.
- *                  UINT32  src_pitch        : Stride of source block.
- *                  UINT32  dst_pitch        : Stride of destination block.
- *                  INT32  *HFilter          : Array of 2 horizontal filter taps.
- *                  INT32  *VFilter          : Array of 2 vertical filter taps.
- *                  INT32  Width             : Block width
- *                  INT32  Height            : Block height
+ *  INPUTS        : uint8_t  *src_ptr          : Pointer to source block.
+ *                  uint32_t  src_pitch        : Stride of source block.
+ *                  uint32_t  dst_pitch        : Stride of destination block.
+ *                  int32_t  *HFilter          : Array of 2 horizontal filter taps.
+ *                  int32_t  *VFilter          : Array of 2 vertical filter taps.
+ *                  int32_t  Width             : Block width
+ *                  int32_t  Height            : Block height
  *
- *  OUTPUTS       : UINT16 *dst_ptr       : Pointer to filtered block.
+ *  OUTPUTS       : uint16_t *dst_ptr       : Pointer to filtered block.
  *
  *  RETURNS       : void
  *

@@ -582,10 +582,10 @@ static void print_counter(FILE *f, vp9_coeff_accum *context_counters,
 
         t = 0;
         do {
-          const INT64 x = context_counters[type][band][pt][t];
+          const int64_t x = context_counters[type][band][pt][t];
           const int y = (int) x;
 
-          assert(x == (INT64) y);  /* no overflow handling yet */
+          assert(x == (int64_t) y);  /* no overflow handling yet */
           fprintf(f, "%s %d", Comma(t), y);
         } while (++t < MAX_ENTROPY_TOKENS);
         fprintf(f, "}");

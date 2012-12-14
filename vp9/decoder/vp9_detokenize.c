@@ -9,7 +9,6 @@
  */
 
 
-#include "vp9/common/vp9_type_aliases.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
@@ -91,7 +90,7 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
 
 #define WRITE_COEF_CONTINUE(val, token)                       \
   {                                                           \
-    qcoeff_ptr[scan[c]] = (INT16) get_signed(br, val);        \
+    qcoeff_ptr[scan[c]] = (int16_t) get_signed(br, val);        \
     INCREMENT_COUNT(token);                                   \
     c++;                                                      \
     continue;                                                 \
@@ -100,7 +99,7 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
 #define ADJUST_COEF(prob, bits_count)  \
   do {                                 \
     if (vp9_read(br, prob))            \
-      val += (UINT16)(1 << bits_count);\
+      val += (uint16_t)(1 << bits_count);\
   } while (0);
 
 static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
@@ -108,7 +107,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
                         ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                         PLANE_TYPE type,
                         TX_TYPE tx_type,
-                        int seg_eob, INT16 *qcoeff_ptr,
+                        int seg_eob, int16_t *qcoeff_ptr,
                         const int *const scan, TX_SIZE txfm_size,
                         const int *coef_bands) {
   FRAME_CONTEXT *const fc = &dx->common.fc;

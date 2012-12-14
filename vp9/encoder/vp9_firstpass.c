@@ -1232,7 +1232,7 @@ static int detect_transition_to_still(
   int still_interval,
   double loop_decay_rate,
   double last_decay_rate) {
-  BOOL trans_to_still = FALSE;
+  int trans_to_still = FALSE;
 
   // Break clause to detect very still sections after motion
   // For example a static image after a fade or other transition
@@ -1270,10 +1270,10 @@ static int detect_transition_to_still(
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
 // reflect this
-static BOOL detect_flash(VP9_COMP *cpi, int offset) {
+static int detect_flash(VP9_COMP *cpi, int offset) {
   FIRSTPASS_STATS next_frame;
 
-  BOOL flash_detected = FALSE;
+  int flash_detected = FALSE;
 
   // Read the frame data.
   // The return is FALSE (no flash detected) if not a valid frame
@@ -1385,7 +1385,7 @@ static int calc_arf_boost(
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   int arf_boost;
-  BOOL flash_detected = FALSE;
+  int flash_detected = FALSE;
 
   // Search forward from the proposed arf/next gf position
   for (i = 0; i < f_frames; i++) {
@@ -1542,7 +1542,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   int f_boost = 0;
   int b_boost = 0;
-  BOOL flash_detected;
+  int flash_detected;
 
   cpi->twopass.gf_group_bits = 0;
 
@@ -2101,8 +2101,11 @@ void vp9_second_pass(VP9_COMP *cpi) {
 }
 
 
-static BOOL test_candidate_kf(VP9_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRSTPASS_STATS *this_frame, FIRSTPASS_STATS *next_frame) {
-  BOOL is_viable_kf = FALSE;
+static int test_candidate_kf(VP9_COMP *cpi,
+                             FIRSTPASS_STATS *last_frame,
+                             FIRSTPASS_STATS *this_frame,
+                             FIRSTPASS_STATS *next_frame) {
+  int is_viable_kf = FALSE;
 
   // Does the frame satisfy the primary criteria of a key frame
   //      If so, then examine how well it predicts subsequent frames
