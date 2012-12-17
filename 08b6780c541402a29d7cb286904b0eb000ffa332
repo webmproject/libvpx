@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAATH///5g\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-17T11:18:51Z",
+      "side": 1,
+      "message": "Makes sense. Done",
+      "parentUuid": "AAAARn//7e4\u003d",
+      "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//7eo\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 4
@@ -47,6 +65,24 @@
       "writtenOn": "2012-12-10T21:12:01Z",
       "side": 1,
       "message": "should probably be moved to 315...",
+      "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATH///5c\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-17T11:18:51Z",
+      "side": 1,
+      "message": "Agreed... this keeps update closer to useage. Done",
+      "parentUuid": "AAAARn//7eo\u003d",
       "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAATH///5Y\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2163,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-17T11:18:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAARn//7eg\u003d",
+      "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAARn//7eQ\u003d",
         "filename": "vp9/encoder/vp9_onyx_int.h",
         "patchSetId": 4
@@ -81,6 +135,24 @@
       "writtenOn": "2012-12-10T21:12:01Z",
       "side": 1,
       "message": "i think the name is quite too close to \"mb_mv_ref_probs[][]\" ...",
+      "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATH///5U\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 803,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-12-17T11:18:51Z",
+      "side": 1,
+      "message": "This was intended to be the case as though one is a common structure used in encode and decode the count structure here is the encode side structure ultimately used to calculate and update mb_mv_ref_probs[][]...hence \"mb_mv_ref\"_probs and \"mb_mv_ref\"_count[][].",
+      "parentUuid": "AAAARn//7eQ\u003d",
       "revId": "08b6780c541402a29d7cb286904b0eb000ffa332",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
