@@ -45,7 +45,7 @@ static void setup_macroblock(MACROBLOCKD *xd, BLOCKSET bs) {
   int block;
 
   unsigned char **y, **u, **v;
-  unsigned char **y2, **u2, **v2;
+  unsigned char **y2 = NULL, **u2 = NULL, **v2 = NULL;
   BLOCKD *blockd = xd->block;
   int stride;
 
