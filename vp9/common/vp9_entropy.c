@@ -24,8 +24,6 @@
 typedef const uchar cuchar;
 typedef const uint cuint;
 
-typedef vp9_prob Prob;
-
 #include "vp9/common/vp9_coefupdateprobs.h"
 
 const int vp9_i8x8_block[4] = {0, 2, 8, 10};
@@ -490,12 +488,12 @@ struct vp9_token_struct vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 /* Trees for extra bits.  Probabilities are constant and
    do not depend on previously encoded bits */
 
-static const Prob Pcat1[] = { 159};
-static const Prob Pcat2[] = { 165, 145};
-static const Prob Pcat3[] = { 173, 148, 140};
-static const Prob Pcat4[] = { 176, 155, 140, 135};
-static const Prob Pcat5[] = { 180, 157, 141, 134, 130};
-static const Prob Pcat6[] = {
+static const vp9_prob Pcat1[] = { 159};
+static const vp9_prob Pcat2[] = { 165, 145};
+static const vp9_prob Pcat3[] = { 173, 148, 140};
+static const vp9_prob Pcat4[] = { 176, 155, 140, 135};
+static const vp9_prob Pcat5[] = { 180, 157, 141, 134, 130};
+static const vp9_prob Pcat6[] = {
   254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129
 };
 
