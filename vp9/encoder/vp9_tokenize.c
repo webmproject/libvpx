@@ -134,15 +134,15 @@ static void tokenize_b(VP9_COMP *cpi,
     default:
     case TX_4X4:
       seg_eob = 16;
-      bands = vp9_coef_bands;
-      scan = vp9_default_zig_zag1d;
+      bands = vp9_coef_bands_4x4;
+      scan = vp9_default_zig_zag1d_4x4;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_4x4;
         probs = cpi->common.fc.hybrid_coef_probs_4x4;
         if (tx_type == ADST_DCT) {
-          scan = vp9_row_scan;
+          scan = vp9_row_scan_4x4;
         } else if (tx_type == DCT_ADST) {
-          scan = vp9_col_scan;
+          scan = vp9_col_scan_4x4;
         }
       } else {
         counts = cpi->coef_counts_4x4;
@@ -152,8 +152,8 @@ static void tokenize_b(VP9_COMP *cpi,
     case TX_8X8:
       if (type == PLANE_TYPE_Y2) {
         seg_eob = 4;
-        bands = vp9_coef_bands;
-        scan = vp9_default_zig_zag1d;
+        bands = vp9_coef_bands_4x4;
+        scan = vp9_default_zig_zag1d_4x4;
       } else {
 #if CONFIG_CNVCONTEXT
         a_ec = (a[0] + a[1]) != 0;
@@ -729,7 +729,7 @@ static __inline void stuff_b(VP9_COMP *cpi,
   switch (tx_size) {
     default:
     case TX_4X4:
-      bands = vp9_coef_bands;
+      bands = vp9_coef_bands_4x4;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_4x4;
         probs = cpi->common.fc.hybrid_coef_probs_4x4;

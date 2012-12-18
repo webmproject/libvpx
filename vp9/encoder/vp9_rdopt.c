@@ -526,15 +526,15 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
   assert(eob <= 4);
 
   for (; c < eob; c++) {
-    int v = qcoeff_ptr[vp9_default_zig_zag1d[c]];
+    int v = qcoeff_ptr[vp9_default_zig_zag1d_4x4[c]];
     int t = vp9_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs[TX_8X8][type][vp9_coef_bands[c]][pt][t];
+    cost += mb->token_costs[TX_8X8][type][vp9_coef_bands_4x4[c]][pt][t];
     cost += vp9_dct_value_cost_ptr[v];
     pt = vp9_prev_token_class[t];
   }
 
   if (c < 4)
-    cost += mb->token_costs[TX_8X8][type][vp9_coef_bands[c]]
+    cost += mb->token_costs[TX_8X8][type][vp9_coef_bands_4x4[c]]
             [pt] [DCT_EOB_TOKEN];
   // is eob first coefficient;
   pt = (c > !type);
@@ -555,8 +555,8 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
   MB_MODE_INFO *mbmi = &mb->e_mbd.mode_info_context->mbmi;
   TX_TYPE tx_type = DCT_DCT;
   int segment_id = mbmi->segment_id;
-  scan = vp9_default_zig_zag1d;
-  band = vp9_coef_bands;
+  scan = vp9_default_zig_zag1d_4x4;
+  band = vp9_coef_bands_4x4;
   default_eob = 16;
 
   switch (tx_size) {
@@ -566,15 +566,15 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
         if (tx_type != DCT_DCT) {
           switch (tx_type) {
             case ADST_DCT:
-              scan = vp9_row_scan;
+              scan = vp9_row_scan_4x4;
               break;
 
             case DCT_ADST:
-              scan = vp9_col_scan;
+              scan = vp9_col_scan_4x4;
               break;
 
             default:
-              scan = vp9_default_zig_zag1d;
+              scan = vp9_default_zig_zag1d_4x4;
               break;
           }
         }

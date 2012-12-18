@@ -368,7 +368,8 @@ static int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
     eobs[24] = c = decode_coefs(pbi, xd, bc, a, l, PLANE_TYPE_Y2,
                                 DCT_DCT, get_eob(xd, segment_id, 4),
                                 xd->block[24].qcoeff,
-                                vp9_default_zig_zag1d, TX_8X8, vp9_coef_bands);
+                                vp9_default_zig_zag1d_4x4, TX_8X8,
+                                vp9_coef_bands_4x4);
     eobtotal += c - 4;
     type = PLANE_TYPE_Y_NO_DC;
   } else {
@@ -412,7 +413,8 @@ static int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
 
       eobs[i] = c = decode_coefs(pbi, xd, bc, a, l, PLANE_TYPE_UV,
                                  DCT_DCT, seg_eob, xd->block[i].qcoeff,
-                                 vp9_default_zig_zag1d, TX_4X4, vp9_coef_bands);
+                                 vp9_default_zig_zag1d_4x4, TX_4X4,
+                                 vp9_coef_bands_4x4);
       eobtotal += c;
     }
   } else {
@@ -453,7 +455,7 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
   int c;
 
   c = decode_coefs(dx, xd, bc, a, l, type, tx_type, seg_eob,
-                   xd->block[i].qcoeff, scan, TX_4X4, vp9_coef_bands);
+                   xd->block[i].qcoeff, scan, TX_4X4, vp9_coef_bands_4x4);
   eobs[i] = c;
 
   return c;
@@ -468,13 +470,13 @@ static int decode_coefs_4x4_y(VP9D_COMP *dx, MACROBLOCKD *xd,
 
   switch (tx_type) {
     case ADST_DCT:
-      scan = vp9_row_scan;
+      scan = vp9_row_scan_4x4;
       break;
     case DCT_ADST:
-      scan = vp9_col_scan;
+      scan = vp9_col_scan_4x4;
       break;
     default:
-      scan = vp9_default_zig_zag1d;
+      scan = vp9_default_zig_zag1d_4x4;
       break;
   }
 
@@ -499,7 +501,7 @@ static int decode_mb_tokens_4x4_uv(VP9D_COMP* const dx,
   // chroma blocks
   for (i = 16; i < 24; i++) {
     eobtotal += decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_UV, i, seg_eob,
-                                 DCT_DCT, vp9_default_zig_zag1d);
+                                 DCT_DCT, vp9_default_zig_zag1d_4x4);
   }
 
   return eobtotal;
@@ -526,7 +528,7 @@ static int vp9_decode_mb_tokens_4x4(VP9D_COMP* const dx,
   // 2nd order DC block
   if (has_2nd_order) {
     eobtotal += decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_Y2, 24, seg_eob,
-                                 DCT_DCT, vp9_default_zig_zag1d) - 16;
+                                 DCT_DCT, vp9_default_zig_zag1d_4x4) - 16;
     type = PLANE_TYPE_Y_NO_DC;
   } else {
     xd->above_context->y2 = 0;

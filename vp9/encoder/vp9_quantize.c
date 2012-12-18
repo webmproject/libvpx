@@ -40,15 +40,15 @@ void vp9_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d, TX_TYPE tx_type) {
 
   switch (tx_type) {
     case ADST_DCT :
-      pt_scan = vp9_row_scan;
+      pt_scan = vp9_row_scan_4x4;
       break;
 
     case DCT_ADST :
-      pt_scan = vp9_col_scan;
+      pt_scan = vp9_col_scan_4x4;
       break;
 
     default :
-      pt_scan = vp9_default_zig_zag1d;
+      pt_scan = vp9_default_zig_zag1d_4x4;
       break;
   }
 
@@ -106,7 +106,7 @@ void vp9_regular_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
   eob = -1;
 
   for (i = 0; i < b->eob_max_offset; i++) {
-    rc   = vp9_default_zig_zag1d[i];
+    rc   = vp9_default_zig_zag1d_4x4[i];
     z    = coeff_ptr[rc];
 
     zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
@@ -192,7 +192,7 @@ void vp9_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d) {
   eob = -1;
 
   for (i = 0; i < b->eob_max_offset_8x8; i++) {
-    rc   = vp9_default_zig_zag1d[i];
+    rc   = vp9_default_zig_zag1d_4x4[i];
     z    = coeff_ptr[rc];
 
     zbin_boost_ptr = &b->zrun_zbin_boost[zbin_zrun_index];
@@ -606,7 +606,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
 
     // all the 4x4 ac values =;
     for (i = 1; i < 16; i++) {
-      int rc = vp9_default_zig_zag1d[i];
+      int rc = vp9_default_zig_zag1d_4x4[i];
 
       quant_val = vp9_ac_yquant(Q);
       invert_quant(cpi->Y1quant[Q] + rc,
