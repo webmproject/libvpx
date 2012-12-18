@@ -489,9 +489,6 @@ static const unsigned int filter_size_to_wh[][2] = {
   {16,16},
 };
 
-static const unsigned int filter_max_height = 16;
-static const unsigned int filter_max_width = 16;
-
 static void filter_block2d_8_c(const unsigned char *src_ptr,
                                const unsigned int   src_stride,
                                const short *HFilter,
@@ -509,14 +506,15 @@ static void filter_block2d_8_c(const unsigned char *src_ptr,
   const int kInterp_Extend = 4;
   const unsigned int intermediate_height =
     (kInterp_Extend - 1) +     output_height + kInterp_Extend;
-  const unsigned int max_intermediate_height =
-    (kInterp_Extend - 1) + filter_max_height + kInterp_Extend;
-#ifdef _MSC_VER
-  // MSVC does not support C99 style declaration
+
+  /* Size of intermediate_buffer is max_intermediate_height * filter_max_width,
+   * where max_intermediate_height = (kInterp_Extend - 1) + filter_max_height
+   *                                 + kInterp_Extend
+   *                               = 3 + 16 + 4
+   *                               = 23
+   * and filter_max_width = 16
+   */
   unsigned char intermediate_buffer[23 * 16];
-#else
-  unsigned char intermediate_buffer[max_intermediate_height * filter_max_width];
-#endif
   const int intermediate_next_stride = 1 - intermediate_height * output_width;
 
   // Horizontal pass (src -> transposed intermediate).
