@@ -130,6 +130,14 @@ static void tokenize_b(VP9_COMP *cpi,
       vp9_block2left[tx_size][ib];
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
 
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+  ENTROPY_CONTEXT *const a1 = (ENTROPY_CONTEXT *)(&xd->above_context[1]) +
+      vp9_block2above[tx_size][ib];
+  ENTROPY_CONTEXT *const l1 = (ENTROPY_CONTEXT *)(&xd->left_context[1]) +
+      vp9_block2left[tx_size][ib];
+#endif
+
+
   switch (tx_size) {
     default:
     case TX_4X4:
@@ -176,6 +184,11 @@ static void tokenize_b(VP9_COMP *cpi,
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+      } else {
+        a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
+        l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
+#endif
       }
 #endif
       seg_eob = 256;
@@ -197,6 +210,14 @@ static void tokenize_b(VP9_COMP *cpi,
       break;
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
     case TX_32X32:
+#if CONFIG_CNVCONTEXT
+      a_ec = a[0] + a[1] + a[2] + a[3] +
+             a1[0] + a1[1] + a1[2] + a1[3];
+      l_ec = l[0] + l[1] + l[2] + l[3] +
+             l1[0] + l1[1] + l1[2] + l1[3];
+      a_ec = a_ec != 0;
+      l_ec = l_ec != 0;
+#endif
       seg_eob = 1024;
       bands = vp9_coef_bands_32x32;
       scan = vp9_default_zig_zag1d_32x32;
@@ -253,10 +274,17 @@ static void tokenize_b(VP9_COMP *cpi,
       l[1] = l[2] = l[3] = l_ec;
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
     } else {
-      a[1] = a_ec;
-      l[1] = l_ec;
+      a1[0] = a1[1] = a[1] = a_ec;
+      l1[0] = l1[1] = l[1] = l_ec;
 #endif
     }
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  } else if (tx_size == TX_32X32) {
+    a[1] = a[2] = a[3] = a_ec;
+    l[1] = l[2] = l[3] = l_ec;
+    a1[0] = a1[1] = a1[2] = a1[3] = a_ec;
+    l1[0] = l1[1] = l1[2] = l1[3] = l_ec;
+#endif
   }
 }
 
@@ -381,18 +409,12 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
 
   tokenize_b(cpi, xd, 0, t, PLANE_TYPE_Y_WITH_DC,
              TX_32X32, dry_run);
-  A[0][1] = A[0][2] = A[0][3] = A[0][0];
-  L[0][1] = L[0][2] = L[0][3] = L[0][0];
 
   for (b = 16; b < 24; b += 4) {
     tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
                TX_16X16, dry_run);
   }
-  vpx_memset(&A[0][8], 0, sizeof(A[0][8]));
-  vpx_memset(&L[0][8], 0, sizeof(L[0][8]));
-  vpx_memcpy(A[1], A[0], sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memcpy(L[1], L[0], sizeof(ENTROPY_CONTEXT_PLANES));
-
+  A[0][8] = L[0][8] = A[1][8] = L[1][8] = 0;
   if (dry_run)
     *t = t_backup;
 }
@@ -425,6 +447,7 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
 
   switch (tx_size) {
     case TX_16X16:
+
       xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_16x16(xd);
       break;
     case TX_8X8:
@@ -498,7 +521,6 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
   if (dry_run)
     *t = t_backup;
 }
-
 
 #ifdef ENTROPY_STATS
 void init_context_counters(void) {
@@ -719,12 +741,17 @@ static __inline void stuff_b(VP9_COMP *cpi,
   TOKENEXTRA *t = *tp;
   const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
                           get_tx_type(xd, b) : DCT_DCT;
-
   ENTROPY_CONTEXT *const a = (ENTROPY_CONTEXT *)xd->above_context +
       vp9_block2above[tx_size][ib];
   ENTROPY_CONTEXT *const l = (ENTROPY_CONTEXT *)xd->left_context +
       vp9_block2left[tx_size][ib];
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+  ENTROPY_CONTEXT *const a1 = (ENTROPY_CONTEXT *)(&xd->above_context[1]) +
+      vp9_block2above[tx_size][ib];
+  ENTROPY_CONTEXT *const l1 = (ENTROPY_CONTEXT *)(&xd->left_context[1]) +
+      vp9_block2left[tx_size][ib];
+#endif
 
   switch (tx_size) {
     default:
@@ -759,6 +786,11 @@ static __inline void stuff_b(VP9_COMP *cpi,
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
+#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+      } else {
+        a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
+        l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
+#endif
       }
 #endif
       bands = vp9_coef_bands_16x16;
@@ -772,6 +804,14 @@ static __inline void stuff_b(VP9_COMP *cpi,
       break;
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
     case TX_32X32:
+#if CONFIG_CNVCONTEXT
+      a_ec = a[0] + a[1] + a[2] + a[3] +
+             a1[0] + a1[1] + a1[2] + a1[3];
+      l_ec = l[0] + l[1] + l[2] + l[3] +
+             l1[0] + l1[1] + l1[2] + l1[3];
+      a_ec = a_ec != 0;
+      l_ec = l_ec != 0;
+#endif
       bands = vp9_coef_bands_32x32;
       counts = cpi->coef_counts_32x32;
       probs = cpi->common.fc.coef_probs_32x32;
@@ -797,10 +837,17 @@ static __inline void stuff_b(VP9_COMP *cpi,
       l[1] = l[2] = l[3] = 0;
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
     } else {
-      a[1] = 0;
-      l[1] = 0;
+      a1[0] = a1[1] = a[1] = a_ec;
+      l1[0] = l1[1] = l[1] = l_ec;
 #endif
     }
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  } else if (tx_size == TX_32X32) {
+    a[1] = a[2] = a[3] = a_ec;
+    l[1] = l[2] = l[3] = l_ec;
+    a1[0] = a1[1] = a1[2] = a1[3] = a_ec;
+    l1[0] = l1[1] = l1[2] = l1[3] = l_ec;
+#endif
   }
 
   if (!dry_run) {
@@ -917,24 +964,12 @@ void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
 static void stuff_sb_32x32(VP9_COMP *cpi, MACROBLOCKD *xd,
                                TOKENEXTRA **t, int dry_run) {
-  ENTROPY_CONTEXT *A[2] = { (ENTROPY_CONTEXT *) (xd->above_context + 0),
-                            (ENTROPY_CONTEXT *) (xd->above_context + 1), };
-  ENTROPY_CONTEXT *L[2] = { (ENTROPY_CONTEXT *) (xd->left_context + 0),
-                            (ENTROPY_CONTEXT *) (xd->left_context + 1), };
   int b;
 
   stuff_b(cpi, xd, 0, t, PLANE_TYPE_Y_WITH_DC, TX_32X32, dry_run);
-  A[0][1] = A[0][2] = A[0][3] = A[0][0];
-  L[0][1] = L[0][2] = L[0][3] = L[0][0];
   for (b = 16; b < 24; b += 4) {
     stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_16X16, dry_run);
-    A[0][vp9_block2above[TX_16X16][b] + 1] = A[0][vp9_block2above[TX_16X16][b]];
-    L[0][vp9_block2left[TX_16X16][b] + 1]  = L[0][vp9_block2left[TX_16X16][b]];
   }
-  vpx_memset(&A[0][8], 0, sizeof(A[0][8]));
-  vpx_memset(&L[0][8], 0, sizeof(L[0][8]));
-  vpx_memcpy(A[1], A[0], sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memcpy(L[1], L[0], sizeof(ENTROPY_CONTEXT_PLANES));
 }
 
 void vp9_stuff_sb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
