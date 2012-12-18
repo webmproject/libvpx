@@ -1381,7 +1381,7 @@ static int64_t rd_pick_intra16x16mby_mode(VP9_COMP *cpi,
                                           int *skippable,
                                           int64_t txfm_cache[NB_TXFM_MODES]) {
   MB_PREDICTION_MODE mode;
-  TX_SIZE txfm_size;
+  TX_SIZE UNINITIALIZED_IS_SAFE(txfm_size);
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
 #if CONFIG_COMP_INTRA_PRED
   MB_PREDICTION_MODE mode2;
