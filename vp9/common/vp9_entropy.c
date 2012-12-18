@@ -47,7 +47,7 @@ DECLARE_ALIGNED(16, const unsigned char, vp9_norm[256]) = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-DECLARE_ALIGNED(16, const int, vp9_coef_bands[16]) = {
+DECLARE_ALIGNED(16, const int, vp9_coef_bands_4x4[16]) = {
   0, 1, 2, 3, 6, 4, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7
 };
 
@@ -55,20 +55,20 @@ DECLARE_ALIGNED(16, cuchar, vp9_prev_token_class[MAX_ENTROPY_TOKENS]) = {
   0, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0
 };
 
-DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d[16]) = {
+DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_4x4[16]) = {
   0,  1,  4,  8,
   5,  2,  3,  6,
   9, 12, 13, 10,
   7, 11, 14, 15,
 };
 
-DECLARE_ALIGNED(16, const int, vp9_col_scan[16]) = {
+DECLARE_ALIGNED(16, const int, vp9_col_scan_4x4[16]) = {
   0, 4,  8, 12,
   1, 5,  9, 13,
   2, 6, 10, 14,
   3, 7, 11, 15
 };
-DECLARE_ALIGNED(16, const int, vp9_row_scan[16]) = {
+DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]) = {
   0,   1,  2,  3,
   4,   5,  6,  7,
   8,   9, 10, 11,

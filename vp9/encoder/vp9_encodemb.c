@@ -384,8 +384,8 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   switch (tx_size) {
     default:
     case TX_4X4:
-      scan = vp9_default_zig_zag1d;
-      bands = vp9_coef_bands;
+      scan = vp9_default_zig_zag1d_4x4;
+      bands = vp9_coef_bands_4x4;
       default_eob = 16;
       // TODO: this isn't called (for intra4x4 modes), but will be left in
       // since it could be used later
@@ -394,19 +394,19 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
         if (tx_type != DCT_DCT) {
           switch (tx_type) {
             case ADST_DCT:
-              scan = vp9_row_scan;
+              scan = vp9_row_scan_4x4;
               break;
 
             case DCT_ADST:
-              scan = vp9_col_scan;
+              scan = vp9_col_scan_4x4;
               break;
 
             default:
-              scan = vp9_default_zig_zag1d;
+              scan = vp9_default_zig_zag1d_4x4;
               break;
           }
         } else {
-          scan = vp9_default_zig_zag1d;
+          scan = vp9_default_zig_zag1d_4x4;
         }
       }
       break;
@@ -601,7 +601,7 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *xd,
     return;
 
   for (i = 0; i < bd->eob; i++) {
-    int coef = bd->dqcoeff[vp9_default_zig_zag1d[i]];
+    int coef = bd->dqcoeff[vp9_default_zig_zag1d_4x4[i]];
     sum += (coef >= 0) ? coef : -coef;
     if (sum >= SUM_2ND_COEFF_THRESH)
       return;
@@ -609,7 +609,7 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *xd,
 
   if (sum < SUM_2ND_COEFF_THRESH) {
     for (i = 0; i < bd->eob; i++) {
-      int rc = vp9_default_zig_zag1d[i];
+      int rc = vp9_default_zig_zag1d_4x4[i];
       bd->qcoeff[rc] = 0;
       bd->dqcoeff[rc] = 0;
     }
