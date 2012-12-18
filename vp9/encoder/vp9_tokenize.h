@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_ENCODER_VP9_TOKENIZE_H_
 #define VP9_ENCODER_VP9_TOKENIZE_H_
 
@@ -18,15 +17,15 @@
 void vp9_tokenize_initialize();
 
 typedef struct {
-  short Token;
-  short Extra;
+  int16_t Token;
+  int16_t Extra;
 } TOKENVALUE;
 
 typedef struct {
   const vp9_prob *context_tree;
-  short           Extra;
-  unsigned char   Token;
-  unsigned char   skip_eob_node;
+  int16_t         Extra;
+  uint8_t         Token;
+  uint8_t         skip_eob_node;
 } TOKENEXTRA;
 
 typedef int64_t vp9_coeff_accum[COEF_BANDS][PREV_COEF_CONTEXTS]
@@ -80,4 +79,4 @@ extern const int *vp9_dct_value_cost_ptr;
  */
 extern const TOKENVALUE *vp9_dct_value_tokens_ptr;
 
-#endif  /* tokenize_h */
+#endif  // VP9_ENCODER_VP9_TOKENIZE_H_

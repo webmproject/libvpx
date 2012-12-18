@@ -1210,4 +1210,4 @@ static const vp9_coeff_probs default_coef_probs_32x32[BLOCK_TYPES_32X32] = {
     }
   }
 };
-#endif
+#endif  // CONFIG_SUPERBLOCKS && CONFIG_TX32X32

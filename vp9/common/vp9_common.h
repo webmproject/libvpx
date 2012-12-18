@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_COMMON_H_
 #define VP9_COMMON_VP9_COMMON_H_
 
@@ -18,28 +17,30 @@
 
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
-#include "vp9/common/vp9_common_types.h"
+
+#define TRUE    1
+#define FALSE   0
 
 /* Only need this for fixed-size arrays, for structs just assign. */
 
-#define vp9_copy( Dest, Src) { \
-    assert( sizeof( Dest) == sizeof( Src)); \
-    vpx_memcpy( Dest, Src, sizeof( Src)); \
+#define vp9_copy(Dest, Src) { \
+    assert(sizeof(Dest) == sizeof(Src)); \
+    vpx_memcpy(Dest, Src, sizeof(Src)); \
   }
 
 /* Use this for variably-sized arrays. */
 
-#define vp9_copy_array( Dest, Src, N) { \
-    assert( sizeof( *Dest) == sizeof( *Src)); \
-    vpx_memcpy( Dest, Src, N * sizeof( *Src)); \
+#define vp9_copy_array(Dest, Src, N) { \
+    assert(sizeof(*Dest) == sizeof(*Src)); \
+    vpx_memcpy(Dest, Src, N * sizeof(*Src)); \
   }
 
-#define vp9_zero( Dest)  vpx_memset( &Dest, 0, sizeof( Dest));
+#define vp9_zero(Dest) vpx_memset(&Dest, 0, sizeof(Dest));
 
-#define vp9_zero_array( Dest, N)  vpx_memset( Dest, 0, N * sizeof( *Dest));
+#define vp9_zero_array(Dest, N) vpx_memset(Dest, 0, N * sizeof(*Dest));
 
 static __inline uint8_t clip_pixel(int val) {
   return (val > 255) ? 255u : (val < 0) ? 0u : val;
 }
 
-#endif  /* common_h */
+#endif  // VP9_COMMON_VP9_COMMON_H_

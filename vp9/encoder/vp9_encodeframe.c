@@ -80,7 +80,7 @@ unsigned int b_modes[B_MODE_COUNT];
  * Eventually this should be replaced by custom no-reference routines,
  *  which will be faster.
  */
-static const unsigned char VP9_VAR_OFFS[16] = {
+static const uint8_t VP9_VAR_OFFS[16] = {
   128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128
 };
 
@@ -1263,9 +1263,9 @@ void encode_sb_row(VP9_COMP *cpi,
     MODE_INFO *mic = xd->mode_info_context;
     PARTITION_INFO *pi = x->partition_info;
     signed char  *gfa = x->gf_active_ptr;
-    unsigned char *yb = x->src.y_buffer;
-    unsigned char *ub = x->src.u_buffer;
-    unsigned char *vb = x->src.v_buffer;
+    uint8_t *yb = x->src.y_buffer;
+    uint8_t *ub = x->src.u_buffer;
+    uint8_t *vb = x->src.v_buffer;
 #endif
 
 #if CONFIG_SUPERBLOCKS

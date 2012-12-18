@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_HEADER_H_
 #define VP9_COMMON_VP9_HEADER_H_
 
@@ -38,5 +37,4 @@ typedef struct {
 #define VP9_HEADER_SIZE 3
 #endif
 
-
-#endif
+#endif  // VP9_COMMON_VP9_HEADER_H_

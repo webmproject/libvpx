@@ -8,8 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-#if !defined __INC_FIRSTPASS_H
+#ifndef VP9_ENCODER_VP9_FIRSTPASS_H_
 #define VP9_ENCODER_VP9_FIRSTPASS_H_
 
 extern void vp9_init_first_pass(VP9_COMP *cpi);
@@ -20,4 +19,4 @@ extern void vp9_init_second_pass(VP9_COMP *cpi);
 extern void vp9_second_pass(VP9_COMP *cpi);
 extern void vp9_end_second_pass(VP9_COMP *cpi);
 
-#endif
+#endif  // VP9_ENCODER_VP9_FIRSTPASS_H_

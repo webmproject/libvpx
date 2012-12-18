@@ -12,7 +12,7 @@
 
 void vp9_swap_yv12_buffer(YV12_BUFFER_CONFIG *new_frame,
                           YV12_BUFFER_CONFIG *last_frame) {
-  unsigned char *temp;
+  uint8_t *temp;
 
   temp = last_frame->buffer_alloc;
   last_frame->buffer_alloc = new_frame->buffer_alloc;

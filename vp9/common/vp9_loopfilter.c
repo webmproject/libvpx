@@ -188,7 +188,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd) {
 
   int filter_level;
 
-  unsigned char *y_ptr, *u_ptr, *v_ptr;
+  uint8_t *y_ptr, *u_ptr, *v_ptr;
 
   /* Point at base of Mb MODE_INFO list */
   const MODE_INFO *mode_info_context = cm->mi;
@@ -325,7 +325,7 @@ void vp9_loop_filter_frame_yonly(VP9_COMMON *cm, MACROBLOCKD *xd,
                                  int default_filt_lvl) {
   YV12_BUFFER_CONFIG *post = cm->frame_to_show;
 
-  unsigned char *y_ptr;
+  uint8_t *y_ptr;
   int mb_row;
   int mb_col;
 
@@ -425,7 +425,7 @@ void vp9_loop_filter_partial_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    int default_filt_lvl) {
   YV12_BUFFER_CONFIG *post = cm->frame_to_show;
 
-  unsigned char *y_ptr;
+  uint8_t *y_ptr;
   int mb_row;
   int mb_col;
   int mb_cols = post->y_width  >> 4;

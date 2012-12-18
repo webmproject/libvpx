@@ -95,4 +95,4 @@ extern void vp9_mb_init_quantizer(struct VP9_COMP *cpi, MACROBLOCK *x);
 
 extern void vp9_init_quantizer(struct VP9_COMP *cpi);
 
-#endif
+#endif  // VP9_ENCODER_VP9_QUANTIZE_H_

@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_ONYXC_INT_H_
 #define VP9_COMMON_VP9_ONYXC_INT_H_
 
@@ -142,9 +141,9 @@ typedef enum {
 typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
-  DECLARE_ALIGNED(16, short, Y1dequant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, Y2dequant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, UVdequant[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, Y1dequant[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, Y2dequant[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, UVdequant[QINDEX_RANGE][16]);
 
   int Width;
   int Height;
@@ -299,4 +298,4 @@ typedef struct VP9Common {
 
 } VP9_COMMON;
 
-#endif  // __INC_ONYX_INT_H
+#endif  // VP9_COMMON_VP9_ONYXC_INT_H_

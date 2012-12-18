@@ -30,4 +30,5 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
                           int_mv *best_ref_mv, int_mv *second_best_ref_mv);
 
 void print_nmvcounts(nmv_context_counts tnmvcounts);
-#endif
+
+#endif  // VP9_ENCODER_VP9_ENCODEMV_H_

@@ -14,7 +14,7 @@
 #include "vp9/common/vp9_subpelvar.h"
 #include "vpx/vpx_integer.h"
 
-unsigned int vp9_get_mb_ss_c(const short *src_ptr) {
+unsigned int vp9_get_mb_ss_c(const int16_t *src_ptr) {
   unsigned int i, sum = 0;
 
   for (i = 0; i < 256; i++) {
@@ -24,12 +24,10 @@ unsigned int vp9_get_mb_ss_c(const short *src_ptr) {
   return sum;
 }
 
-
-
 #if CONFIG_SUPERBLOCKS
-unsigned int vp9_variance32x32_c(const unsigned char *src_ptr,
+unsigned int vp9_variance32x32_c(const uint8_t *src_ptr,
                                  int  source_stride,
-                                 const unsigned char *ref_ptr,
+                                 const uint8_t *ref_ptr,
                                  int  recon_stride,
                                  unsigned int *sse) {
   unsigned int var;
@@ -41,9 +39,9 @@ unsigned int vp9_variance32x32_c(const unsigned char *src_ptr,
 }
 #endif
 
-unsigned int vp9_variance16x16_c(const unsigned char *src_ptr,
+unsigned int vp9_variance16x16_c(const uint8_t *src_ptr,
                                  int  source_stride,
-                                 const unsigned char *ref_ptr,
+                                 const uint8_t *ref_ptr,
                                  int  recon_stride,
                                  unsigned int *sse) {
   unsigned int var;
@@ -54,9 +52,9 @@ unsigned int vp9_variance16x16_c(const unsigned char *src_ptr,
   return (var - (((unsigned int)avg * avg) >> 8));
 }
 
-unsigned int vp9_variance8x16_c(const unsigned char *src_ptr,
+unsigned int vp9_variance8x16_c(const uint8_t *src_ptr,
                                 int  source_stride,
-                                const unsigned char *ref_ptr,
+                                const uint8_t *ref_ptr,
                                 int  recon_stride,
                                 unsigned int *sse) {
   unsigned int var;
@@ -67,9 +65,9 @@ unsigned int vp9_variance8x16_c(const unsigned char *src_ptr,
   return (var - (((unsigned int)avg * avg) >> 7));
 }
 
-unsigned int vp9_variance16x8_c(const unsigned char *src_ptr,
+unsigned int vp9_variance16x8_c(const uint8_t *src_ptr,
                                 int  source_stride,
-                                const unsigned char *ref_ptr,
+                                const uint8_t *ref_ptr,
                                 int  recon_stride,
                                 unsigned int *sse) {
   unsigned int var;
@@ -81,9 +79,9 @@ unsigned int vp9_variance16x8_c(const unsigned char *src_ptr,
 }
 
 
-unsigned int vp9_variance8x8_c(const unsigned char *src_ptr,
+unsigned int vp9_variance8x8_c(const uint8_t *src_ptr,
                                int  source_stride,
-                               const unsigned char *ref_ptr,
+                               const uint8_t *ref_ptr,
                                int  recon_stride,
                                unsigned int *sse) {
   unsigned int var;
@@ -94,9 +92,9 @@ unsigned int vp9_variance8x8_c(const unsigned char *src_ptr,
   return (var - (((unsigned int)avg * avg) >> 6));
 }
 
-unsigned int vp9_variance4x4_c(const unsigned char *src_ptr,
+unsigned int vp9_variance4x4_c(const uint8_t *src_ptr,
                                int  source_stride,
-                               const unsigned char *ref_ptr,
+                               const uint8_t *ref_ptr,
                                int  recon_stride,
                                unsigned int *sse) {
   unsigned int var;
@@ -108,9 +106,9 @@ unsigned int vp9_variance4x4_c(const unsigned char *src_ptr,
 }
 
 
-unsigned int vp9_mse16x16_c(const unsigned char *src_ptr,
+unsigned int vp9_mse16x16_c(const uint8_t *src_ptr,
                             int  source_stride,
-                            const unsigned char *ref_ptr,
+                            const uint8_t *ref_ptr,
                             int  recon_stride,
                             unsigned int *sse) {
   unsigned int var;
@@ -122,16 +120,16 @@ unsigned int vp9_mse16x16_c(const unsigned char *src_ptr,
 }
 
 
-unsigned int vp9_sub_pixel_variance4x4_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance4x4_c(const uint8_t *src_ptr,
                                          int  src_pixels_per_line,
                                          int  xoffset,
                                          int  yoffset,
-                                         const unsigned char *dst_ptr,
+                                         const uint8_t *dst_ptr,
                                          int dst_pixels_per_line,
                                          unsigned int *sse) {
-  unsigned char  temp2[20 * 16];
-  const short *HFilter, *VFilter;
-  unsigned short FData3[5 * 4]; // Temp data bufffer used in filtering
+  uint8_t temp2[20 * 16];
+  const int16_t *HFilter, *VFilter;
+  uint16_t FData3[5 * 4];  // Temp data bufffer used in filtering
 
   HFilter = vp9_bilinear_filters[xoffset];
   VFilter = vp9_bilinear_filters[yoffset];
@@ -146,16 +144,16 @@ unsigned int vp9_sub_pixel_variance4x4_c(const unsigned char  *src_ptr,
 }
 
 
-unsigned int vp9_sub_pixel_variance8x8_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance8x8_c(const uint8_t *src_ptr,
                                          int  src_pixels_per_line,
                                          int  xoffset,
                                          int  yoffset,
-                                         const unsigned char *dst_ptr,
+                                         const uint8_t *dst_ptr,
                                          int dst_pixels_per_line,
                                          unsigned int *sse) {
-  unsigned short FData3[9 * 8]; // Temp data bufffer used in filtering
-  unsigned char  temp2[20 * 16];
-  const short *HFilter, *VFilter;
+  uint16_t FData3[9 * 8];  // Temp data bufffer used in filtering
+  uint8_t temp2[20 * 16];
+  const int16_t *HFilter, *VFilter;
 
   HFilter = vp9_bilinear_filters[xoffset];
   VFilter = vp9_bilinear_filters[yoffset];
@@ -166,16 +164,16 @@ unsigned int vp9_sub_pixel_variance8x8_c(const unsigned char  *src_ptr,
   return vp9_variance8x8_c(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
 }
 
-unsigned int vp9_sub_pixel_variance16x16_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance16x16_c(const uint8_t *src_ptr,
                                            int  src_pixels_per_line,
                                            int  xoffset,
                                            int  yoffset,
-                                           const unsigned char *dst_ptr,
+                                           const uint8_t *dst_ptr,
                                            int dst_pixels_per_line,
                                            unsigned int *sse) {
-  unsigned short FData3[17 * 16]; // Temp data bufffer used in filtering
-  unsigned char  temp2[20 * 16];
-  const short *HFilter, *VFilter;
+  uint16_t FData3[17 * 16];  // Temp data bufffer used in filtering
+  uint8_t temp2[20 * 16];
+  const int16_t *HFilter, *VFilter;
 
   HFilter = vp9_bilinear_filters[xoffset];
   VFilter = vp9_bilinear_filters[yoffset];
@@ -187,16 +185,16 @@ unsigned int vp9_sub_pixel_variance16x16_c(const unsigned char  *src_ptr,
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp9_sub_pixel_variance32x32_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance32x32_c(const uint8_t *src_ptr,
                                            int  src_pixels_per_line,
                                            int  xoffset,
                                            int  yoffset,
-                                           const unsigned char *dst_ptr,
+                                           const uint8_t *dst_ptr,
                                            int dst_pixels_per_line,
                                            unsigned int *sse) {
-  unsigned short FData3[33 * 32]; // Temp data bufffer used in filtering
-  unsigned char  temp2[36 * 32];
-  const short *HFilter, *VFilter;
+  uint16_t FData3[33 * 32];  // Temp data bufffer used in filtering
+  uint8_t temp2[36 * 32];
+  const int16_t *HFilter, *VFilter;
 
   HFilter = vp9_bilinear_filters[xoffset];
   VFilter = vp9_bilinear_filters[yoffset];
@@ -208,9 +206,9 @@ unsigned int vp9_sub_pixel_variance32x32_c(const unsigned char  *src_ptr,
 }
 #endif
 
-unsigned int vp9_variance_halfpixvar16x16_h_c(const unsigned char *src_ptr,
+unsigned int vp9_variance_halfpixvar16x16_h_c(const uint8_t *src_ptr,
                                               int  source_stride,
-                                              const unsigned char *ref_ptr,
+                                              const uint8_t *ref_ptr,
                                               int  recon_stride,
                                               unsigned int *sse) {
   return vp9_sub_pixel_variance16x16_c(src_ptr, source_stride, 8, 0,
@@ -218,9 +216,9 @@ unsigned int vp9_variance_halfpixvar16x16_h_c(const unsigned char *src_ptr,
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp9_variance_halfpixvar32x32_h_c(const unsigned char *src_ptr,
+unsigned int vp9_variance_halfpixvar32x32_h_c(const uint8_t *src_ptr,
                                               int  source_stride,
-                                              const unsigned char *ref_ptr,
+                                              const uint8_t *ref_ptr,
                                               int  recon_stride,
                                               unsigned int *sse) {
   return vp9_sub_pixel_variance32x32_c(src_ptr, source_stride, 8, 0,
@@ -229,9 +227,9 @@ unsigned int vp9_variance_halfpixvar32x32_h_c(const unsigned char *src_ptr,
 #endif
 
 
-unsigned int vp9_variance_halfpixvar16x16_v_c(const unsigned char *src_ptr,
+unsigned int vp9_variance_halfpixvar16x16_v_c(const uint8_t *src_ptr,
                                               int  source_stride,
-                                              const unsigned char *ref_ptr,
+                                              const uint8_t *ref_ptr,
                                               int  recon_stride,
                                               unsigned int *sse) {
   return vp9_sub_pixel_variance16x16_c(src_ptr, source_stride, 0, 8,
@@ -239,9 +237,9 @@ unsigned int vp9_variance_halfpixvar16x16_v_c(const unsigned char *src_ptr,
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp9_variance_halfpixvar32x32_v_c(const unsigned char *src_ptr,
+unsigned int vp9_variance_halfpixvar32x32_v_c(const uint8_t *src_ptr,
                                               int  source_stride,
-                                              const unsigned char *ref_ptr,
+                                              const uint8_t *ref_ptr,
                                               int  recon_stride,
                                               unsigned int *sse) {
   return vp9_sub_pixel_variance32x32_c(src_ptr, source_stride, 0, 8,
@@ -249,9 +247,9 @@ unsigned int vp9_variance_halfpixvar32x32_v_c(const unsigned char *src_ptr,
 }
 #endif
 
-unsigned int vp9_variance_halfpixvar16x16_hv_c(const unsigned char *src_ptr,
+unsigned int vp9_variance_halfpixvar16x16_hv_c(const uint8_t *src_ptr,
                                                int  source_stride,
-                                               const unsigned char *ref_ptr,
+                                               const uint8_t *ref_ptr,
                                                int  recon_stride,
                                                unsigned int *sse) {
   return vp9_sub_pixel_variance16x16_c(src_ptr, source_stride, 8, 8,
@@ -259,9 +257,9 @@ unsigned int vp9_variance_halfpixvar16x16_hv_c(const unsigned char *src_ptr,
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp9_variance_halfpixvar32x32_hv_c(const unsigned char *src_ptr,
+unsigned int vp9_variance_halfpixvar32x32_hv_c(const uint8_t *src_ptr,
                                                int  source_stride,
-                                               const unsigned char *ref_ptr,
+                                               const uint8_t *ref_ptr,
                                                int  recon_stride,
                                                unsigned int *sse) {
   return vp9_sub_pixel_variance32x32_c(src_ptr, source_stride, 8, 8,
@@ -269,11 +267,11 @@ unsigned int vp9_variance_halfpixvar32x32_hv_c(const unsigned char *src_ptr,
 }
 #endif
 
-unsigned int vp9_sub_pixel_mse16x16_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_mse16x16_c(const uint8_t *src_ptr,
                                       int  src_pixels_per_line,
                                       int  xoffset,
                                       int  yoffset,
-                                      const unsigned char *dst_ptr,
+                                      const uint8_t *dst_ptr,
                                       int dst_pixels_per_line,
                                       unsigned int *sse) {
   vp9_sub_pixel_variance16x16_c(src_ptr, src_pixels_per_line,
@@ -283,11 +281,11 @@ unsigned int vp9_sub_pixel_mse16x16_c(const unsigned char  *src_ptr,
 }
 
 #if CONFIG_SUPERBLOCKS
-unsigned int vp9_sub_pixel_mse32x32_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_mse32x32_c(const uint8_t *src_ptr,
                                       int  src_pixels_per_line,
                                       int  xoffset,
                                       int  yoffset,
-                                      const unsigned char *dst_ptr,
+                                      const uint8_t *dst_ptr,
                                       int dst_pixels_per_line,
                                       unsigned int *sse) {
   vp9_sub_pixel_variance32x32_c(src_ptr, src_pixels_per_line,
@@ -297,16 +295,16 @@ unsigned int vp9_sub_pixel_mse32x32_c(const unsigned char  *src_ptr,
 }
 #endif
 
-unsigned int vp9_sub_pixel_variance16x8_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance16x8_c(const uint8_t *src_ptr,
                                           int  src_pixels_per_line,
                                           int  xoffset,
                                           int  yoffset,
-                                          const unsigned char *dst_ptr,
+                                          const uint8_t *dst_ptr,
                                           int dst_pixels_per_line,
                                           unsigned int *sse) {
-  unsigned short FData3[16 * 9];  // Temp data bufffer used in filtering
-  unsigned char  temp2[20 * 16];
-  const short *HFilter, *VFilter;
+  uint16_t FData3[16 * 9];  // Temp data bufffer used in filtering
+  uint8_t temp2[20 * 16];
+  const int16_t *HFilter, *VFilter;
 
   HFilter = vp9_bilinear_filters[xoffset];
   VFilter = vp9_bilinear_filters[yoffset];
@@ -317,16 +315,16 @@ unsigned int vp9_sub_pixel_variance16x8_c(const unsigned char  *src_ptr,
   return vp9_variance16x8_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
-unsigned int vp9_sub_pixel_variance8x16_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance8x16_c(const uint8_t *src_ptr,
                                           int  src_pixels_per_line,
                                           int  xoffset,
                                           int  yoffset,
-                                          const unsigned char *dst_ptr,
+                                          const uint8_t *dst_ptr,
                                           int dst_pixels_per_line,
                                           unsigned int *sse) {
-  unsigned short FData3[9 * 16];  // Temp data bufffer used in filtering
-  unsigned char  temp2[20 * 16];
-  const short *HFilter, *VFilter;
+  uint16_t FData3[9 * 16];  // Temp data bufffer used in filtering
+  uint8_t temp2[20 * 16];
+  const int16_t *HFilter, *VFilter;
 
   HFilter = vp9_bilinear_filters[xoffset];
   VFilter = vp9_bilinear_filters[yoffset];

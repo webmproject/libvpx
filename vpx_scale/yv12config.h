@@ -8,13 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef YV12_CONFIG_H
 #define YV12_CONFIG_H
+
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
+
+#include "vpx/vpx_integer.h"
 
 #define VP8BORDERINPIXELS       32
 #define VP9BORDERINPIXELS       64
@@ -49,11 +50,11 @@ extern "C"
     int   uv_stride;
     /*    int   uvinternal_width; */
 
-    unsigned char *y_buffer;
-    unsigned char *u_buffer;
-    unsigned char *v_buffer;
+    uint8_t *y_buffer;
+    uint8_t *u_buffer;
+    uint8_t *v_buffer;
 
-    unsigned char *buffer_alloc;
+    uint8_t *buffer_alloc;
     int border;
     int frame_size;
     YUV_TYPE clrtype;
@@ -62,12 +63,12 @@ extern "C"
     int flags;
   } YV12_BUFFER_CONFIG;
 
-  int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height, int border);
+  int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+                                  int width, int height, int border);
   int vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf);
 
 #ifdef __cplusplus
 }
 #endif
 
-
-#endif /*YV12_CONFIG_H*/
+#endif  // YV12_CONFIG_H

@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_DECODER_VP9_ONYXD_INT_H_
 #define VP9_DECODER_VP9_ONYXD_INT_H_
+
 #include "vpx_ports/config.h"
-#include "vp9/common/vp9_onyxd.h"
+#include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_treereader.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/decoder/vp9_dequantize.h"
@@ -103,4 +103,4 @@ int vp9_decode_frame(VP9D_COMP *cpi, const unsigned char **p_data_end);
   } while(0)
 #endif
 
-#endif  // __INC_ONYXD_INT_H
+#endif  // VP9_DECODER_VP9_TREEREADER_H_

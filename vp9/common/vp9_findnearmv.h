@@ -22,7 +22,7 @@
  * score to use as ref motion vector
  */
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
-                           unsigned char *ref_y_buffer,
+                           uint8_t *ref_y_buffer,
                            int ref_y_stride,
                            int_mv *mvlist,
                            int_mv *nearest,
@@ -81,7 +81,7 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
                            vp9_prob p[VP9_MVREFS - 1],
                            const int context);
 
-extern const unsigned char vp9_mbsplit_offset[4][16];
+extern const uint8_t vp9_mbsplit_offset[4][16];
 
 static int left_block_mv(const MODE_INFO *cur_mb, int b) {
   if (!(b & 3)) {
@@ -181,4 +181,4 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
   return (cur_mb->bmi + b - 4)->as_mode.first;
 }
 
-#endif
+#endif  // VP9_COMMON_VP9_FINDNEARMV_H_

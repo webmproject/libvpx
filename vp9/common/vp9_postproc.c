@@ -132,20 +132,20 @@ const short vp9_rv[] = {
 
 /****************************************************************************
  */
-void vp9_post_proc_down_and_across_c(unsigned char *src_ptr,
-                                     unsigned char *dst_ptr,
+void vp9_post_proc_down_and_across_c(uint8_t *src_ptr,
+                                     uint8_t *dst_ptr,
                                      int src_pixels_per_line,
                                      int dst_pixels_per_line,
                                      int rows,
                                      int cols,
                                      int flimit) {
-  unsigned char *p_src, *p_dst;
+  uint8_t *p_src, *p_dst;
   int row;
   int col;
   int i;
   int v;
   int pitch = src_pixels_per_line;
-  unsigned char d[8];
+  uint8_t d[8];
   (void)dst_pixels_per_line;
 
   for (row = 0; row < rows; row++) {
@@ -215,12 +215,12 @@ static int q2mbl(int x) {
   return x * x / 3;
 }
 
-void vp9_mbpost_proc_across_ip_c(unsigned char *src, int pitch,
+void vp9_mbpost_proc_across_ip_c(uint8_t *src, int pitch,
                                  int rows, int cols, int flimit) {
   int r, c, i;
 
-  unsigned char *s = src;
-  unsigned char d[16];
+  uint8_t *s = src;
+  uint8_t d[16];
 
 
   for (r = 0; r < rows; r++) {
@@ -253,16 +253,16 @@ void vp9_mbpost_proc_across_ip_c(unsigned char *src, int pitch,
   }
 }
 
-void vp9_mbpost_proc_down_c(unsigned char *dst, int pitch,
+void vp9_mbpost_proc_down_c(uint8_t *dst, int pitch,
                             int rows, int cols, int flimit) {
   int r, c, i;
   const short *rv3 = &vp9_rv[63 & rand()];
 
   for (c = 0; c < cols; c++) {
-    unsigned char *s = &dst[c];
+    uint8_t *s = &dst[c];
     int sumsq = 0;
     int sum   = 0;
-    unsigned char d[16];
+    uint8_t d[16];
     const short *rv2 = rv3 + ((c * 17) & 127);
 
     for (i = -8; i <= 6; i++) {
@@ -439,7 +439,7 @@ static void fillrd(struct postproc_state *state, int q, int a) {
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp9_plane_add_noise_c(unsigned char *Start, char *noise,
+void vp9_plane_add_noise_c(uint8_t *Start, char *noise,
                            char blackclamp[16],
                            char whiteclamp[16],
                            char bothclamp[16],
@@ -447,7 +447,7 @@ void vp9_plane_add_noise_c(unsigned char *Start, char *noise,
   unsigned int i, j;
 
   for (i = 0; i < Height; i++) {
-    unsigned char *Pos = Start + i * Pitch;
+    uint8_t *Pos = Start + i * Pitch;
     char  *Ref = (char *)(noise + (rand() & 0xff));
 
     for (j = 0; j < Width; j++) {
@@ -466,7 +466,7 @@ void vp9_plane_add_noise_c(unsigned char *Start, char *noise,
  * edges unblended to give distinction to macro blocks in areas
  * filled with the same color block.
  */
-void vp9_blend_mb_inner_c(unsigned char *y, unsigned char *u, unsigned char *v,
+void vp9_blend_mb_inner_c(uint8_t *y, uint8_t *u, uint8_t *v,
                           int y1, int u1, int v1, int alpha, int stride) {
   int i, j;
   int y1_const = y1 * ((1 << 16) - alpha);
@@ -499,7 +499,7 @@ void vp9_blend_mb_inner_c(unsigned char *y, unsigned char *u, unsigned char *v,
 /* Blend only the edge of the macro block.  Leave center
  * unblended to allow for other visualizations to be layered.
  */
-void vp9_blend_mb_outer_c(unsigned char *y, unsigned char *u, unsigned char *v,
+void vp9_blend_mb_outer_c(uint8_t *y, uint8_t *u, uint8_t *v,
                           int y1, int u1, int v1, int alpha, int stride) {
   int i, j;
   int y1_const = y1 * ((1 << 16) - alpha);
@@ -554,7 +554,7 @@ void vp9_blend_mb_outer_c(unsigned char *y, unsigned char *u, unsigned char *v,
   }
 }
 
-void vp9_blend_b_c(unsigned char *y, unsigned char *u, unsigned char *v,
+void vp9_blend_b_c(uint8_t *y, uint8_t *u, uint8_t *v,
                    int y1, int u1, int v1, int alpha, int stride) {
   int i, j;
   int y1_const = y1 * ((1 << 16) - alpha);
@@ -688,7 +688,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
 
   if (flags & VP9D_DEBUG_TXT_MBLK_MODES) {
     int i, j;
-    unsigned char *y_ptr;
+    uint8_t *y_ptr;
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
     int mb_rows = post->y_height >> 4;
     int mb_cols = post->y_width  >> 4;
@@ -717,7 +717,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
 
   if (flags & VP9D_DEBUG_TXT_DC_DIFF) {
     int i, j;
-    unsigned char *y_ptr;
+    uint8_t *y_ptr;
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
     int mb_rows = post->y_height >> 4;
     int mb_cols = post->y_width  >> 4;
@@ -764,7 +764,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
     int width  = post->y_width;
     int height = post->y_height;
-    unsigned char *y_buffer = oci->post_proc_buffer.y_buffer;
+    uint8_t *y_buffer = oci->post_proc_buffer.y_buffer;
     int y_stride = oci->post_proc_buffer.y_stride;
     MODE_INFO *mi = oci->mi;
     int x0, y0;
@@ -906,9 +906,9 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
     int width  = post->y_width;
     int height = post->y_height;
-    unsigned char *y_ptr = oci->post_proc_buffer.y_buffer;
-    unsigned char *u_ptr = oci->post_proc_buffer.u_buffer;
-    unsigned char *v_ptr = oci->post_proc_buffer.v_buffer;
+    uint8_t *y_ptr = oci->post_proc_buffer.y_buffer;
+    uint8_t *u_ptr = oci->post_proc_buffer.u_buffer;
+    uint8_t *v_ptr = oci->post_proc_buffer.v_buffer;
     int y_stride = oci->post_proc_buffer.y_stride;
     MODE_INFO *mi = oci->mi;
 
@@ -920,7 +920,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
             ((ppflags->display_mb_modes_flag & B_PRED) ||
              ppflags->display_b_modes_flag)) {
           int by, bx;
-          unsigned char *yl, *ul, *vl;
+          uint8_t *yl, *ul, *vl;
           union b_mode_info *bmi = mi->bmi;
 
           yl = y_ptr + x;
@@ -971,9 +971,9 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
     YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
     int width  = post->y_width;
     int height = post->y_height;
-    unsigned char *y_ptr = oci->post_proc_buffer.y_buffer;
-    unsigned char *u_ptr = oci->post_proc_buffer.u_buffer;
-    unsigned char *v_ptr = oci->post_proc_buffer.v_buffer;
+    uint8_t *y_ptr = oci->post_proc_buffer.y_buffer;
+    uint8_t *u_ptr = oci->post_proc_buffer.u_buffer;
+    uint8_t *v_ptr = oci->post_proc_buffer.v_buffer;
     int y_stride = oci->post_proc_buffer.y_stride;
     MODE_INFO *mi = oci->mi;
 

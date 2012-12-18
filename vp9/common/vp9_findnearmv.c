@@ -14,7 +14,7 @@
 #include "vp9/common/vp9_subpelvar.h"
 #include <limits.h>
 
-const unsigned char vp9_mbsplit_offset[4][16] = {
+const uint8_t vp9_mbsplit_offset[4][16] = {
   { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
   { 0,  2,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
   { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
@@ -42,23 +42,23 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
 }
 
 #define SP(x) (((x) & 7) << 1)
-unsigned int vp9_sad3x16_c(const unsigned char *src_ptr,
+unsigned int vp9_sad3x16_c(const uint8_t *src_ptr,
                            int  src_stride,
-                           const unsigned char *ref_ptr,
+                           const uint8_t *ref_ptr,
                            int  ref_stride) {
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 3, 16);
 }
-unsigned int vp9_sad16x3_c(const unsigned char *src_ptr,
+unsigned int vp9_sad16x3_c(const uint8_t *src_ptr,
                            int  src_stride,
-                           const unsigned char *ref_ptr,
+                           const uint8_t *ref_ptr,
                            int  ref_stride) {
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 3);
 }
 
 #if CONFIG_SUBPELREFMV
-unsigned int vp9_variance2x16_c(const unsigned char *src_ptr,
+unsigned int vp9_variance2x16_c(const uint8_t *src_ptr,
                                 const int  source_stride,
-                                const unsigned char *ref_ptr,
+                                const uint8_t *ref_ptr,
                                 const int  recon_stride,
                                 unsigned int *sse) {
   int sum;
@@ -66,9 +66,9 @@ unsigned int vp9_variance2x16_c(const unsigned char *src_ptr,
   return (*sse - (((unsigned int)sum * sum) >> 5));
 }
 
-unsigned int vp9_variance16x2_c(const unsigned char *src_ptr,
+unsigned int vp9_variance16x2_c(const uint8_t *src_ptr,
                                 const int  source_stride,
-                                const unsigned char *ref_ptr,
+                                const uint8_t *ref_ptr,
                                 const int  recon_stride,
                                 unsigned int *sse) {
   int sum;
@@ -76,16 +76,16 @@ unsigned int vp9_variance16x2_c(const unsigned char *src_ptr,
   return (*sse - (((unsigned int)sum * sum) >> 5));
 }
 
-unsigned int vp9_sub_pixel_variance16x2_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance16x2_c(const uint8_t *src_ptr,
                                           const int  src_pixels_per_line,
                                           const int  xoffset,
                                           const int  yoffset,
-                                          const unsigned char *dst_ptr,
+                                          const uint8_t *dst_ptr,
                                           const int dst_pixels_per_line,
                                           unsigned int *sse) {
-  unsigned short FData3[16 * 3];  // Temp data buffer used in filtering
-  unsigned char  temp2[2 * 16];
-  const short *HFilter, *VFilter;
+  uint16_t FData3[16 * 3];  // Temp data buffer used in filtering
+  uint8_t temp2[2 * 16];
+  const int16_t *HFilter, *VFilter;
 
   HFilter = vp9_bilinear_filters[xoffset];
   VFilter = vp9_bilinear_filters[yoffset];
@@ -97,16 +97,16 @@ unsigned int vp9_sub_pixel_variance16x2_c(const unsigned char  *src_ptr,
   return vp9_variance16x2_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
-unsigned int vp9_sub_pixel_variance2x16_c(const unsigned char  *src_ptr,
+unsigned int vp9_sub_pixel_variance2x16_c(const uint8_t *src_ptr,
                                           const int  src_pixels_per_line,
                                           const int  xoffset,
                                           const int  yoffset,
-                                          const unsigned char *dst_ptr,
+                                          const uint8_t *dst_ptr,
                                           const int dst_pixels_per_line,
                                           unsigned int *sse) {
-  unsigned short FData3[2 * 17];  // Temp data buffer used in filtering
-  unsigned char  temp2[2 * 16];
-  const short *HFilter, *VFilter;
+  uint16_t FData3[2 * 17];  // Temp data buffer used in filtering
+  uint8_t temp2[2 * 16];
+  const int16_t *HFilter, *VFilter;
 
   HFilter = vp9_bilinear_filters[xoffset];
   VFilter = vp9_bilinear_filters[yoffset];
@@ -124,16 +124,16 @@ unsigned int vp9_sub_pixel_variance2x16_c(const unsigned char  *src_ptr,
  * score to use as ref motion vector
  */
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
-                           unsigned char *ref_y_buffer,
+                           uint8_t *ref_y_buffer,
                            int ref_y_stride,
                            int_mv *mvlist,
                            int_mv *nearest,
                            int_mv *near) {
   int i, j;
-  unsigned char *above_src;
-  unsigned char *left_src;
-  unsigned char *above_ref;
-  unsigned char *left_ref;
+  uint8_t *above_src;
+  uint8_t *left_src;
+  uint8_t *above_ref;
+  uint8_t *left_ref;
   unsigned int score;
 #if CONFIG_SUBPELREFMV
   unsigned int sse;

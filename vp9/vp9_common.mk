@@ -30,7 +30,6 @@ VP9_COMMON_SRCS-yes += common/vp9_idctllm.c
 VP9_COMMON_SRCS-yes += common/vp9_alloccommon.h
 VP9_COMMON_SRCS-yes += common/vp9_blockd.h
 VP9_COMMON_SRCS-yes += common/vp9_common.h
-VP9_COMMON_SRCS-yes += common/vp9_common_types.h
 VP9_COMMON_SRCS-yes += common/vp9_entropy.h
 VP9_COMMON_SRCS-yes += common/vp9_entropymode.h
 VP9_COMMON_SRCS-yes += common/vp9_entropymv.h

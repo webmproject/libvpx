@@ -59,5 +59,5 @@ int vp9_check_segref_inter(MACROBLOCKD *xd, int segment_id);
 
 int vp9_get_seg_tx_type(MACROBLOCKD *xd, int segment_id);
 
-#endif /* __INC_SEG_COMMON_H__ */
+#endif  // VP9_COMMON_VP9_SEG_COMMON_H_
 

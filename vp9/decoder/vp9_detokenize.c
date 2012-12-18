@@ -53,11 +53,11 @@
 #define CAT5_PROB3 157
 #define CAT5_PROB4 180
 
-static const unsigned char cat6_prob[15] = {
+static const vp9_prob cat6_prob[15] = {
   254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0
 };
 
-DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
 static int get_signed(BOOL_DECODER *br, int value_to_sign) {
   const int split = (br->range + 1) >> 1;
@@ -254,7 +254,7 @@ int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
   ENTROPY_CONTEXT* const A1 = (ENTROPY_CONTEXT *)(&xd->above_context[1]);
   ENTROPY_CONTEXT* const L1 = (ENTROPY_CONTEXT *)(&xd->left_context[1]);
-  unsigned short* const eobs = xd->eobs;
+  uint16_t *const eobs = xd->eobs;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   int c, i, eobtotal = 0, seg_eob;
 
@@ -320,7 +320,7 @@ static int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
                                       BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
-  unsigned short* const eobs = xd->eobs;
+  uint16_t *const eobs = xd->eobs;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   int c, i, eobtotal = 0, seg_eob;
   // Luma block
@@ -374,7 +374,7 @@ static int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
                                     BOOL_DECODER* const bc) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
-  unsigned short *const eobs = xd->eobs;
+  uint16_t *const eobs = xd->eobs;
   PLANE_TYPE type;
   int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
@@ -471,7 +471,7 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
   ENTROPY_CONTEXT *const a = A + vp9_block2above[TX_4X4][i];
   ENTROPY_CONTEXT *const l = L + vp9_block2left[TX_4X4][i];
-  unsigned short *const eobs = xd->eobs;
+  uint16_t *const eobs = xd->eobs;
   int c;
 
   c = decode_coefs(dx, xd, bc, a, l, type, tx_type, seg_eob,

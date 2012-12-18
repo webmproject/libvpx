@@ -17,18 +17,12 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vpx_mem/vpx_mem.h"
-
-#define uchar unsigned char     /* typedefs can clash */
-#define uint  unsigned int
-
-typedef const uchar cuchar;
-typedef const uint cuint;
-
+#include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_coefupdateprobs.h"
 
 const int vp9_i8x8_block[4] = {0, 2, 8, 10};
 
-DECLARE_ALIGNED(16, const unsigned char, vp9_norm[256]) = {
+DECLARE_ALIGNED(16, const uint8_t, vp9_norm[256]) = {
   0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -51,7 +45,7 @@ DECLARE_ALIGNED(16, const int, vp9_coef_bands_4x4[16]) = {
   0, 1, 2, 3, 6, 4, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7
 };
 
-DECLARE_ALIGNED(16, cuchar, vp9_prev_token_class[MAX_ENTROPY_TOKENS]) = {
+DECLARE_ALIGNED(16, const uint8_t, vp9_prev_token_class[MAX_ENTROPY_TOKENS]) = {
   0, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0
 };
 

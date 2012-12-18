@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VP9_COMMON_VP9_SUBPELVAR_H_
+#define VP9_COMMON_VP9_SUBPELVAR_H_
 
 #include "vp9/common/vp9_filter.h"
 
-
-
-static void variance(const unsigned char *src_ptr,
+static void variance(const uint8_t *src_ptr,
                      int  source_stride,
-                     const unsigned char *ref_ptr,
+                     const uint8_t *ref_ptr,
                      int  recon_stride,
                      int  w,
                      int  h,
@@ -67,13 +67,13 @@ static void variance(const unsigned char *src_ptr,
  *                  to the next.
  *
  ****************************************************************************/
-static void var_filter_block2d_bil_first_pass(const unsigned char *src_ptr,
-                                              unsigned short *output_ptr,
+static void var_filter_block2d_bil_first_pass(const uint8_t *src_ptr,
+                                              uint16_t *output_ptr,
                                               unsigned int src_pixels_per_line,
                                               int pixel_step,
                                               unsigned int output_height,
                                               unsigned int output_width,
-                                              const short *vp9_filter) {
+                                              const int16_t *vp9_filter) {
   unsigned int i, j;
 
   for (i = 0; i < output_height; i++) {
@@ -119,13 +119,13 @@ static void var_filter_block2d_bil_first_pass(const unsigned char *src_ptr,
  *                  to the next.
  *
  ****************************************************************************/
-static void var_filter_block2d_bil_second_pass(const unsigned short *src_ptr,
-                                               unsigned char *output_ptr,
+static void var_filter_block2d_bil_second_pass(const uint16_t *src_ptr,
+                                               uint8_t *output_ptr,
                                                unsigned int src_pixels_per_line,
                                                unsigned int pixel_step,
                                                unsigned int output_height,
                                                unsigned int output_width,
-                                               const short *vp9_filter) {
+                                               const int16_t *vp9_filter) {
   unsigned int  i, j;
   int  Temp;
 
@@ -145,3 +145,4 @@ static void var_filter_block2d_bil_second_pass(const unsigned short *src_ptr,
   }
 }
 
+#endif  // VP9_COMMON_VP9_SUBPELVAR_H_

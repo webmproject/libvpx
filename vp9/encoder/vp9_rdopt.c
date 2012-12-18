@@ -403,7 +403,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
   }
 }
 
-int vp9_block_error_c(short *coeff, short *dqcoeff, int block_size) {
+int vp9_block_error_c(int16_t *coeff, int16_t *dqcoeff, int block_size) {
   int i, error = 0;
 
   for (i = 0; i < block_size; i++) {
@@ -469,9 +469,9 @@ int vp9_mbuverror_c(MACROBLOCK *mb) {
 }
 
 int vp9_uvsse(MACROBLOCK *x) {
-  unsigned char *uptr, *vptr;
-  unsigned char *upred_ptr = (*(x->block[16].base_src) + x->block[16].src);
-  unsigned char *vpred_ptr = (*(x->block[20].base_src) + x->block[20].src);
+  uint8_t *uptr, *vptr;
+  uint8_t *upred_ptr = (*(x->block[16].base_src) + x->block[16].src);
+  uint8_t *vpred_ptr = (*(x->block[20].base_src) + x->block[20].src);
   int uv_stride = x->block[16].src_stride;
 
   unsigned int sse1 = 0;
@@ -520,7 +520,7 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
   int eob = b->eob;
   int pt;    /* surrounding block/prev coef predictor */
   int cost = 0;
-  short *qcoeff_ptr = b->qcoeff;
+  int16_t *qcoeff_ptr = b->qcoeff;
 
   VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   assert(eob <= 4);
@@ -550,7 +550,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
   int cost = 0, default_eob, seg_eob;
   int pt;                     /* surrounding block/prev coef predictor */
   int const *scan, *band;
-  short *qcoeff_ptr = b->qcoeff;
+  int16_t *qcoeff_ptr = b->qcoeff;
   MACROBLOCKD *xd = &mb->e_mbd;
   MB_MODE_INFO *mbmi = &mb->e_mbd.mode_info_context->mbmi;
   TX_TYPE tx_type = DCT_DCT;
@@ -928,7 +928,7 @@ static void macro_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                            txfm_cache, TX_16X16);
 }
 
-static void copy_predictor(unsigned char *dst, const unsigned char *predictor) {
+static void copy_predictor(uint8_t *dst, const uint8_t *predictor) {
   const unsigned int *p = (const unsigned int *)predictor;
   unsigned int *d = (unsigned int *)dst;
   d[0] = p[0];
@@ -951,7 +951,8 @@ static int rdcost_sby_32x32(MACROBLOCK *x) {
   return cost_coeffs(x, xd->block, PLANE_TYPE_Y_WITH_DC, ta, tl, TX_32X32);
 }
 
-static int vp9_sb_block_error_c(short *coeff, short *dqcoeff, int block_size) {
+static int vp9_sb_block_error_c(int16_t *coeff, int16_t *dqcoeff,
+                                int block_size) {
   int i;
   int64_t error = 0;
 
@@ -970,7 +971,7 @@ static void super_block_yrd_32x32(MACROBLOCK *x,
   MACROBLOCKD * const xd = &x->e_mbd;
   SUPERBLOCKD * const xd_sb = &xd->sb_coeff_data;
 #if DEBUG_ERROR || CONFIG_DWT32X32HYBRID
-  short out[1024];
+  int16_t out[1024];
 #endif
 
   vp9_transform_sby_32x32(x);
@@ -1079,7 +1080,7 @@ static void super_block_yrd(VP9_COMP *cpi,
 }
 #endif
 
-static void copy_predictor_8x8(unsigned char *dst, const unsigned char *predictor) {
+static void copy_predictor_8x8(uint8_t *dst, const uint8_t *predictor) {
   const unsigned int *p = (const unsigned int *)predictor;
   unsigned int *d = (unsigned int *)dst;
   d[0] = p[0];
@@ -1129,8 +1130,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
    * a temp buffer that meets the stride requirements, but we are only
    * interested in the left 4x4 block
    * */
-  DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16 * 4);
-  DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, best_predictor, 16 * 4);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, best_dqcoeff, 16);
 
 #if CONFIG_NEWBINTRAMODES
   b->bmi.as_mode.context = vp9_find_bpred_context(b);
@@ -1488,8 +1489,8 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
    * a temp buffer that meets the stride requirements, but we are only
    * interested in the left 8x8 block
    * */
-  DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16 * 8);
-  DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16 * 4);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, best_predictor, 16 * 8);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, best_dqcoeff, 16 * 4);
 
   // perform transformation of dimension 8x8
   // note the input and output index mapping
@@ -2921,7 +2922,7 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
-                    unsigned char *ref_y_buffer, int ref_y_stride,
+                    uint8_t *ref_y_buffer, int ref_y_stride,
                     int ref_frame, enum BlockSize block_size ) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
@@ -2933,8 +2934,8 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   int this_sad = INT_MAX;
 
   BLOCK *b = &x->block[0];
-  unsigned char *src_y_ptr = *(b->base_src);
-  unsigned char *ref_y_ptr;
+  uint8_t *src_y_ptr = *(b->base_src);
+  uint8_t *ref_y_ptr;
   int row_offset, col_offset;
 
   // Get the sad for each candidate reference mv
@@ -3182,9 +3183,9 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                int_mv frame_nearest_mv[MAX_REF_FRAMES],
                                int_mv frame_near_mv[MAX_REF_FRAMES],
                                int frame_mdcounts[4][4],
-                               unsigned char *y_buffer[4],
-                               unsigned char *u_buffer[4],
-                               unsigned char *v_buffer[4]) {
+                               uint8_t *y_buffer[4],
+                               uint8_t *u_buffer[4],
+                               uint8_t *v_buffer[4]) {
   YV12_BUFFER_CONFIG *yv12 = &cpi->common.yv12_fb[idx];
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
@@ -3557,7 +3558,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   int frame_mdcounts[4][4];
-  unsigned char *y_buffer[4], *u_buffer[4], *v_buffer[4];
+  uint8_t *y_buffer[4], *u_buffer[4], *v_buffer[4];
 
   unsigned int ref_costs[MAX_REF_FRAMES];
   int_mv seg_mvs[NB_PARTITIONINGS][16 /* n_blocks */][MAX_REF_FRAMES - 1];
@@ -4501,9 +4502,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int comp_pred, i;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   int frame_mdcounts[4][4];
-  unsigned char *y_buffer[4];
-  unsigned char *u_buffer[4];
-  unsigned char *v_buffer[4];
+  uint8_t *y_buffer[4];
+  uint8_t *u_buffer[4];
+  uint8_t *v_buffer[4];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
   int idx_list[4] = { 0, cpi->common.lst_fb_idx, cpi->common.gld_fb_idx,

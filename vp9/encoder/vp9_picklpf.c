@@ -21,7 +21,7 @@
 
 void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
                                    YV12_BUFFER_CONFIG *dst_ybc, int Fraction) {
-  unsigned char *src_y, *dst_y;
+  uint8_t *src_y, *dst_y;
   int yheight;
   int ystride;
   int border;
@@ -51,8 +51,8 @@ static int calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
   int i, j;
   int Total = 0;
   int srcoffset, dstoffset;
-  unsigned char *src = source->y_buffer;
-  unsigned char *dst = dest->y_buffer;
+  uint8_t *src = source->y_buffer;
+  uint8_t *dst = dest->y_buffer;
 
   int linestocopy = (source->y_height >> (Fraction + 4));
 

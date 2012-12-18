@@ -11,18 +11,14 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_blockd.h"
 
-
 #ifndef VP9_COMMON_VP9_MVREF_COMMON_H_
 #define VP9_COMMON_VP9_MVREF_COMMON_H_
 
-void vp9_find_mv_refs(
-  MACROBLOCKD *xd,
-  MODE_INFO *here,
-  MODE_INFO *lf_here,
-  MV_REFERENCE_FRAME ref_frame,
-  int_mv * mv_ref_list,
-  int *ref_sign_bias
-);
+void vp9_find_mv_refs(MACROBLOCKD *xd,
+                      MODE_INFO *here,
+                      MODE_INFO *lf_here,
+                      MV_REFERENCE_FRAME ref_frame,
+                      int_mv *mv_ref_list,
+                      int *ref_sign_bias);
 
-#endif
-
+#endif  // VP9_COMMON_VP9_MVREF_COMMON_H_

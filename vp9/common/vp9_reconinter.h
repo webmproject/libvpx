@@ -11,46 +11,47 @@
 #ifndef VP9_COMMON_VP9_RECONINTER_H_
 #define VP9_COMMON_VP9_RECONINTER_H_
 
+#include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
 extern void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
-                                                    unsigned char *dst_y,
+                                                    uint8_t *dst_y,
                                                     int dst_ystride,
                                                     int clamp_mvs);
 
 extern void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                                     unsigned char *dst_u,
-                                                     unsigned char *dst_v,
+                                                     uint8_t *dst_u,
+                                                     uint8_t *dst_v,
                                                      int dst_uvstride);
 
 extern void vp9_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
-                                                   unsigned char *dst_y,
-                                                   unsigned char *dst_u,
-                                                   unsigned char *dst_v,
+                                                   uint8_t *dst_y,
+                                                   uint8_t *dst_u,
+                                                   uint8_t *dst_v,
                                                    int dst_ystride,
                                                    int dst_uvstride);
 
 extern void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
-                                                    unsigned char *dst_y,
+                                                    uint8_t *dst_y,
                                                     int dst_ystride);
 
 extern void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                                     unsigned char *dst_u,
-                                                     unsigned char *dst_v,
+                                                     uint8_t *dst_u,
+                                                     uint8_t *dst_v,
                                                      int dst_uvstride);
 
 extern void vp9_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
-                                                   unsigned char *dst_y,
-                                                   unsigned char *dst_u,
-                                                   unsigned char *dst_v,
+                                                   uint8_t *dst_y,
+                                                   uint8_t *dst_u,
+                                                   uint8_t *dst_v,
                                                    int dst_ystride,
                                                    int dst_uvstride);
 
 #if CONFIG_SUPERBLOCKS
 extern void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
-                                               unsigned char *dst_y,
-                                               unsigned char *dst_u,
-                                               unsigned char *dst_v,
+                                               uint8_t *dst_y,
+                                               uint8_t *dst_u,
+                                               uint8_t *dst_v,
                                                int dst_ystride,
                                                int dst_uvstride);
 #endif
@@ -75,4 +76,4 @@ extern void vp9_setup_interp_filters(MACROBLOCKD *xd,
                                      INTERPOLATIONFILTERTYPE filter,
                                      VP9_COMMON *cm);
 
-#endif  // __INC_RECONINTER_H
+#endif  // VP9_COMMON_VP9_RECONINTER_H_

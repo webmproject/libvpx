@@ -14,4 +14,4 @@
 
 void vp9_init_mode_costs(VP9_COMP *x);
 
-#endif
+#endif  // VP9_ENCODER_VP9_MODECOSTS_H_

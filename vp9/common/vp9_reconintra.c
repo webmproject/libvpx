@@ -198,9 +198,9 @@ static void d153_predictor(uint8_t *ypred_ptr, int y_stride, int n,
   }
 }
 
-static void corner_predictor(unsigned char *ypred_ptr, int y_stride, int n,
-                             unsigned char *yabove_row,
-                             unsigned char *yleft_col) {
+static void corner_predictor(uint8_t *ypred_ptr, int y_stride, int n,
+                             uint8_t *yabove_row,
+                             uint8_t *yleft_col) {
   int mh, mv, maxgradh, maxgradv, x, y, nx, ny;
   int i, j;
   int top_left = yabove_row[-1];
@@ -248,14 +248,14 @@ void vp9_recon_intra_mbuv(MACROBLOCKD *xd) {
   }
 }
 
-void vp9_build_intra_predictors_internal(unsigned char *src, int src_stride,
-                                         unsigned char *ypred_ptr,
+void vp9_build_intra_predictors_internal(uint8_t *src, int src_stride,
+                                         uint8_t *ypred_ptr,
                                          int y_stride, int mode, int bsize,
                                          int up_available, int left_available) {
 
-  unsigned char *yabove_row = src - src_stride;
-  unsigned char yleft_col[32];
-  unsigned char ytop_left = yabove_row[-1];
+  uint8_t *yabove_row = src - src_stride;
+  uint8_t yleft_col[32];
+  uint8_t ytop_left = yabove_row[-1];
   int r, c, i;
 
   for (i = 0; i < bsize; i++) {
@@ -368,9 +368,9 @@ void vp9_build_intra_predictors_internal(unsigned char *src, int src_stride,
 
 #if CONFIG_COMP_INTERINTRA_PRED
 static void combine_interintra(MB_PREDICTION_MODE mode,
-                               unsigned char *interpred,
+                               uint8_t *interpred,
                                int interstride,
-                               unsigned char *intrapred,
+                               uint8_t *intrapred,
                                int intrastride,
                                int size) {
   // TODO(debargha): Explore different ways of combining predictors
@@ -607,18 +607,18 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
 }
 
 void vp9_build_interintra_16x16_predictors_mb(MACROBLOCKD *xd,
-                                              unsigned char *ypred,
-                                              unsigned char *upred,
-                                              unsigned char *vpred,
+                                              uint8_t *ypred,
+                                              uint8_t *upred,
+                                              uint8_t *vpred,
                                               int ystride, int uvstride) {
   vp9_build_interintra_16x16_predictors_mby(xd, ypred, ystride);
   vp9_build_interintra_16x16_predictors_mbuv(xd, upred, vpred, uvstride);
 }
 
 void vp9_build_interintra_16x16_predictors_mby(MACROBLOCKD *xd,
-                                               unsigned char *ypred,
+                                               uint8_t *ypred,
                                                int ystride) {
-  unsigned char intrapredictor[256];
+  uint8_t intrapredictor[256];
   vp9_build_intra_predictors_internal(
       xd->dst.y_buffer, xd->dst.y_stride,
       intrapredictor, 16,
@@ -629,11 +629,11 @@ void vp9_build_interintra_16x16_predictors_mby(MACROBLOCKD *xd,
 }
 
 void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                                unsigned char *upred,
-                                                unsigned char *vpred,
+                                                uint8_t *upred,
+                                                uint8_t *vpred,
                                                 int uvstride) {
-  unsigned char uintrapredictor[64];
-  unsigned char vintrapredictor[64];
+  uint8_t uintrapredictor[64];
+  uint8_t vintrapredictor[64];
   vp9_build_intra_predictors_internal(
       xd->dst.u_buffer, xd->dst.uv_stride,
       uintrapredictor, 8,
@@ -652,9 +652,9 @@ void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
 
 #if CONFIG_SUPERBLOCKS
 void vp9_build_interintra_32x32_predictors_sby(MACROBLOCKD *xd,
-                                               unsigned char *ypred,
+                                               uint8_t *ypred,
                                                int ystride) {
-  unsigned char intrapredictor[1024];
+  uint8_t intrapredictor[1024];
   vp9_build_intra_predictors_internal(
       xd->dst.y_buffer, xd->dst.y_stride,
       intrapredictor, 32,
@@ -665,11 +665,11 @@ void vp9_build_interintra_32x32_predictors_sby(MACROBLOCKD *xd,
 }
 
 void vp9_build_interintra_32x32_predictors_sbuv(MACROBLOCKD *xd,
-                                                unsigned char *upred,
-                                                unsigned char *vpred,
+                                                uint8_t *upred,
+                                                uint8_t *vpred,
                                                 int uvstride) {
-  unsigned char uintrapredictor[256];
-  unsigned char vintrapredictor[256];
+  uint8_t uintrapredictor[256];
+  uint8_t vintrapredictor[256];
   vp9_build_intra_predictors_internal(
       xd->dst.u_buffer, xd->dst.uv_stride,
       uintrapredictor, 16,
@@ -687,9 +687,9 @@ void vp9_build_interintra_32x32_predictors_sbuv(MACROBLOCKD *xd,
 }
 
 void vp9_build_interintra_32x32_predictors_sb(MACROBLOCKD *xd,
-                                              unsigned char *ypred,
-                                              unsigned char *upred,
-                                              unsigned char *vpred,
+                                              uint8_t *ypred,
+                                              uint8_t *upred,
+                                              uint8_t *vpred,
                                               int ystride,
                                               int uvstride) {
   vp9_build_interintra_32x32_predictors_sby(xd, ypred, ystride);
@@ -723,7 +723,7 @@ void vp9_build_intra_predictors_sby_s(MACROBLOCKD *xd) {
 
 #if CONFIG_COMP_INTRA_PRED
 void vp9_build_comp_intra_predictors_mby(MACROBLOCKD *xd) {
-  unsigned char predictor[2][256];
+  uint8_t predictor[2][256];
   int i;
 
   vp9_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
@@ -744,8 +744,8 @@ void vp9_build_comp_intra_predictors_mby(MACROBLOCKD *xd) {
 #endif
 
 void vp9_build_intra_predictors_mbuv_internal(MACROBLOCKD *xd,
-                                              unsigned char *upred_ptr,
-                                              unsigned char *vpred_ptr,
+                                              uint8_t *upred_ptr,
+                                              uint8_t *vpred_ptr,
                                               int uv_stride,
                                               int mode, int bsize) {
   vp9_build_intra_predictors_internal(xd->dst.u_buffer, xd->dst.uv_stride,
@@ -782,7 +782,7 @@ void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd) {
 
 #if CONFIG_COMP_INTRA_PRED
 void vp9_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
-  unsigned char predictor[2][2][64];
+  uint8_t predictor[2][2][64];
   int i;
 
   vp9_build_intra_predictors_mbuv_internal(
@@ -801,7 +801,7 @@ void vp9_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
 
 void vp9_intra8x8_predict(BLOCKD *xd,
                           int mode,
-                          unsigned char *predictor) {
+                          uint8_t *predictor) {
   vp9_build_intra_predictors_internal(*(xd->base_dst) + xd->dst,
                                       xd->dst_stride, predictor, 16,
                                       mode, 8, 1, 1);
@@ -810,8 +810,8 @@ void vp9_intra8x8_predict(BLOCKD *xd,
 #if CONFIG_COMP_INTRA_PRED
 void vp9_comp_intra8x8_predict(BLOCKD *xd,
                                int mode, int second_mode,
-                               unsigned char *out_predictor) {
-  unsigned char predictor[2][8 * 16];
+                               uint8_t *out_predictor) {
+  uint8_t predictor[2][8 * 16];
   int i, j;
 
   vp9_intra8x8_predict(xd, mode, predictor[0]);
@@ -827,7 +827,7 @@ void vp9_comp_intra8x8_predict(BLOCKD *xd,
 
 void vp9_intra_uv4x4_predict(BLOCKD *xd,
                              int mode,
-                             unsigned char *predictor) {
+                             uint8_t *predictor) {
   vp9_build_intra_predictors_internal(*(xd->base_dst) + xd->dst,
                                       xd->dst_stride, predictor, 8,
                                       mode, 4, 1, 1);
@@ -836,8 +836,8 @@ void vp9_intra_uv4x4_predict(BLOCKD *xd,
 #if CONFIG_COMP_INTRA_PRED
 void vp9_comp_intra_uv4x4_predict(BLOCKD *xd,
                                   int mode, int mode2,
-                                  unsigned char *out_predictor) {
-  unsigned char predictor[2][8 * 4];
+                                  uint8_t *out_predictor) {
+  uint8_t predictor[2][8 * 4];
   int i, j;
 
   vp9_intra_uv4x4_predict(xd, mode, predictor[0]);

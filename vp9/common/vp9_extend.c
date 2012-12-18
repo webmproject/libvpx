@@ -11,9 +11,9 @@
 #include "vp9/common/vp9_extend.h"
 #include "vpx_mem/vpx_mem.h"
 
-static void copy_and_extend_plane(unsigned char *s, /* source */
+static void copy_and_extend_plane(uint8_t *s,       /* source */
                                   int sp,           /* source pitch */
-                                  unsigned char *d, /* destination */
+                                  uint8_t *d,       /* destination */
                                   int dp,           /* destination pitch */
                                   int h,            /* height */
                                   int w,            /* width */
@@ -22,8 +22,8 @@ static void copy_and_extend_plane(unsigned char *s, /* source */
                                   int eb,           /* extend bottom border */
                                   int er) {         /* extend right border */
   int i;
-  unsigned char *src_ptr1, *src_ptr2;
-  unsigned char *dest_ptr1, *dest_ptr2;
+  uint8_t *src_ptr1, *src_ptr2;
+  uint8_t *dest_ptr1, *dest_ptr2;
   int linesize;
 
   /* copy the left and right most columns out */
@@ -143,8 +143,8 @@ void vp9_copy_and_extend_frame_with_rect(YV12_BUFFER_CONFIG *src,
 }
 
 /* note the extension is only for the last row, for intra prediction purpose */
-void vp9_extend_mb_row(YV12_BUFFER_CONFIG *ybf, unsigned char *YPtr,
-                       unsigned char *UPtr, unsigned char *VPtr) {
+void vp9_extend_mb_row(YV12_BUFFER_CONFIG *ybf, uint8_t *YPtr,
+                       uint8_t *UPtr, uint8_t *VPtr) {
   int i;
 
   YPtr += ybf->y_stride * 14;

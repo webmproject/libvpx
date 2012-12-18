@@ -279,19 +279,19 @@ typedef struct {
 } MODE_INFO;
 
 typedef struct blockd {
-  short *qcoeff;
-  short *dqcoeff;
-  unsigned char  *predictor;
-  short *diff;
-  short *dequant;
+  int16_t *qcoeff;
+  int16_t *dqcoeff;
+  uint8_t *predictor;
+  int16_t *diff;
+  int16_t *dequant;
 
   /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
-  unsigned char **base_pre;
-  unsigned char **base_second_pre;
+  uint8_t **base_pre;
+  uint8_t **base_second_pre;
   int pre;
   int pre_stride;
 
-  unsigned char **base_dst;
+  uint8_t **base_dst;
   int dst;
   int dst_stride;
 
@@ -303,18 +303,18 @@ typedef struct blockd {
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
 typedef struct superblockd {
   /* 32x32 Y and 16x16 U/V. No 2nd order transform yet. */
-  DECLARE_ALIGNED(16, short, diff[32*32+16*16*2]);
-  DECLARE_ALIGNED(16, short, qcoeff[32*32+16*16*2]);
-  DECLARE_ALIGNED(16, short, dqcoeff[32*32+16*16*2]);
+  DECLARE_ALIGNED(16, int16_t, diff[32*32+16*16*2]);
+  DECLARE_ALIGNED(16, int16_t, qcoeff[32*32+16*16*2]);
+  DECLARE_ALIGNED(16, int16_t, dqcoeff[32*32+16*16*2]);
 } SUPERBLOCKD;
 #endif
 
 typedef struct macroblockd {
-  DECLARE_ALIGNED(16, short, diff[400]);      /* from idct diff */
-  DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
-  DECLARE_ALIGNED(16, short, qcoeff[400]);
-  DECLARE_ALIGNED(16, short, dqcoeff[400]);
-  DECLARE_ALIGNED(16, unsigned short,  eobs[25]);
+  DECLARE_ALIGNED(16, int16_t,  diff[400]);      /* from idct diff */
+  DECLARE_ALIGNED(16, uint8_t,  predictor[384]);
+  DECLARE_ALIGNED(16, int16_t,  qcoeff[400]);
+  DECLARE_ALIGNED(16, int16_t,  dqcoeff[400]);
+  DECLARE_ALIGNED(16, uint16_t, eobs[25]);
 
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
   SUPERBLOCKD sb_coeff_data;
@@ -389,10 +389,10 @@ typedef struct macroblockd {
   unsigned int frames_till_alt_ref_frame;
 
   /* Inverse transform function pointers. */
-  void (*inv_xform4x4_1_x8)(short *input, short *output, int pitch);
-  void (*inv_xform4x4_x8)(short *input, short *output, int pitch);
-  void (*inv_walsh4x4_1)(short *in, short *out);
-  void (*inv_walsh4x4_lossless)(short *in, short *out);
+  void (*inv_xform4x4_1_x8)(int16_t *input, int16_t *output, int pitch);
+  void (*inv_xform4x4_x8)(int16_t *input, int16_t *output, int pitch);
+  void (*inv_walsh4x4_1)(int16_t *in, int16_t *out);
+  void (*inv_walsh4x4_lossless)(int16_t *in, int16_t *out);
 
 
   vp9_subpix_fn_t  subpixel_predict;
@@ -412,7 +412,7 @@ typedef struct macroblockd {
    * to keep a copy of the reference area. This buffer can be used for other
    * purpose.
    */
-  DECLARE_ALIGNED(32, unsigned char, y_buf[22 * 32]);
+  DECLARE_ALIGNED(32, uint8_t, y_buf[22 * 32]);
 #endif
 
   int mb_index;   // Index of the MB in the SB (0..3)
@@ -502,8 +502,8 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
   return tx_type;
 }
 
-extern const unsigned char vp9_block2left[TX_SIZE_MAX_SB][25];
-extern const unsigned char vp9_block2above[TX_SIZE_MAX_SB][25];
+extern const uint8_t vp9_block2left[TX_SIZE_MAX_SB][25];
+extern const uint8_t vp9_block2above[TX_SIZE_MAX_SB][25];
 
 #define USE_ADST_FOR_I16X16_8X8   0
 #define USE_ADST_FOR_I16X16_4X4   0
@@ -665,4 +665,4 @@ static void update_blockd_bmi(MACROBLOCKD *xd) {
     }
   }
 }
-#endif  /* __INC_BLOCKD_H */
+#endif  // VP9_COMMON_VP9_BLOCKD_H_

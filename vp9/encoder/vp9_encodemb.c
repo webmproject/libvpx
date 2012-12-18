@@ -21,9 +21,9 @@
 #include "vp9_rtcd.h"
 
 void vp9_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
-  unsigned char *src_ptr = (*(be->base_src) + be->src);
-  short *diff_ptr = be->src_diff;
-  unsigned char *pred_ptr = bd->predictor;
+  uint8_t *src_ptr = (*(be->base_src) + be->src);
+  int16_t *diff_ptr = be->src_diff;
+  uint8_t *pred_ptr = bd->predictor;
   int src_stride = be->src_stride;
 
   int r, c;
@@ -40,9 +40,9 @@ void vp9_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
 }
 
 void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
-  unsigned char *src_ptr = (*(be->base_src) + be->src);
-  short *diff_ptr = be->src_diff;
-  unsigned char *pred_ptr = bd->predictor;
+  uint8_t *src_ptr = (*(be->base_src) + be->src);
+  int16_t *diff_ptr = be->src_diff;
+  uint8_t *pred_ptr = bd->predictor;
   int src_stride = be->src_stride;
   int r, c;
 
@@ -56,12 +56,12 @@ void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   }
 }
 
-void vp9_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
-                           const unsigned char *vsrc, int src_stride,
-                           const unsigned char *upred,
-                           const unsigned char *vpred, int dst_stride) {
-  short *udiff = diff + 256;
-  short *vdiff = diff + 320;
+void vp9_subtract_mbuv_s_c(int16_t *diff, const uint8_t *usrc,
+                           const uint8_t *vsrc, int src_stride,
+                           const uint8_t *upred,
+                           const uint8_t *vpred, int dst_stride) {
+  int16_t *udiff = diff + 256;
+  int16_t *vdiff = diff + 320;
   int r, c;
 
   for (r = 0; r < 8; r++) {
@@ -85,16 +85,16 @@ void vp9_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
   }
 }
 
-void vp9_subtract_mbuv_c(short *diff, unsigned char *usrc,
-                         unsigned char *vsrc, unsigned char *pred, int stride) {
-  unsigned char *upred = pred + 256;
-  unsigned char *vpred = pred + 320;
+void vp9_subtract_mbuv_c(int16_t *diff, uint8_t *usrc,
+                         uint8_t *vsrc, uint8_t *pred, int stride) {
+  uint8_t *upred = pred + 256;
+  uint8_t *vpred = pred + 320;
 
   vp9_subtract_mbuv_s_c(diff, usrc, vsrc, stride, upred, vpred, 8);
 }
 
-void vp9_subtract_mby_s_c(short *diff, const unsigned char *src, int src_stride,
-                          const unsigned char *pred, int dst_stride) {
+void vp9_subtract_mby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
+                          const uint8_t *pred, int dst_stride) {
   int r, c;
 
   for (r = 0; r < 16; r++) {
@@ -109,8 +109,8 @@ void vp9_subtract_mby_s_c(short *diff, const unsigned char *src, int src_stride,
 }
 
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
-void vp9_subtract_sby_s_c(short *diff, const unsigned char *src, int src_stride,
-                          const unsigned char *pred, int dst_stride) {
+void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
+                          const uint8_t *pred, int dst_stride) {
   int r, c;
 
   for (r = 0; r < 32; r++) {
@@ -124,12 +124,12 @@ void vp9_subtract_sby_s_c(short *diff, const unsigned char *src, int src_stride,
   }
 }
 
-void vp9_subtract_sbuv_s_c(short *diff, const unsigned char *usrc,
-                           const unsigned char *vsrc, int src_stride,
-                           const unsigned char *upred,
-                           const unsigned char *vpred, int dst_stride) {
-  short *udiff = diff + 1024;
-  short *vdiff = diff + 1024 + 256;
+void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
+                           const uint8_t *vsrc, int src_stride,
+                           const uint8_t *upred,
+                           const uint8_t *vpred, int dst_stride) {
+  int16_t *udiff = diff + 1024;
+  int16_t *vdiff = diff + 1024 + 256;
   int r, c;
 
   for (r = 0; r < 16; r++) {
@@ -154,8 +154,8 @@ void vp9_subtract_sbuv_s_c(short *diff, const unsigned char *usrc,
 }
 #endif
 
-void vp9_subtract_mby_c(short *diff, unsigned char *src,
-                        unsigned char *pred, int stride) {
+void vp9_subtract_mby_c(int16_t *diff, uint8_t *src,
+                        uint8_t *pred, int stride) {
   vp9_subtract_mby_s_c(diff, src, stride, pred, 16);
 }
 
@@ -169,7 +169,7 @@ static void subtract_mb(MACROBLOCK *x) {
 }
 
 static void build_dcblock_4x4(MACROBLOCK *x) {
-  short *src_diff_ptr = &x->src_diff[384];
+  int16_t *src_diff_ptr = &x->src_diff[384];
   int i;
 
   for (i = 0; i < 16; i++) {
@@ -368,9 +368,9 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   BLOCKD *d = &mb->e_mbd.block[i];
   vp9_token_state tokens[257][2];
   unsigned best_index[257][2];
-  const short *dequant_ptr = d->dequant, *coeff_ptr = b->coeff;
-  short *qcoeff_ptr = d->qcoeff;
-  short *dqcoeff_ptr = d->dqcoeff;
+  const int16_t *dequant_ptr = d->dequant, *coeff_ptr = b->coeff;
+  int16_t *qcoeff_ptr = d->qcoeff;
+  int16_t *dqcoeff_ptr = d->dqcoeff;
   int eob = d->eob, final_eob, sz = 0;
   int i0 = (type == PLANE_TYPE_Y_NO_DC);
   int rc, x, next;

@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_ONYX_H_
 #define VP9_COMMON_VP9_ONYX_H_
 
@@ -221,4 +220,4 @@ extern "C"
 }
 #endif
 
-#endif  // __INC_ONYX_H
+#endif  // VP9_COMMON_VP9_ONYX_H_

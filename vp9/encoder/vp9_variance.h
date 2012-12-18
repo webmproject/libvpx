@@ -8,54 +8,55 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_ENCODER_VP9_VARIANCE_H_
 #define VP9_ENCODER_VP9_VARIANCE_H_
 
-typedef unsigned int(*vp9_sad_fn_t)(const unsigned char *src_ptr,
+#include "vpx/vpx_integer.h"
+
+typedef unsigned int(*vp9_sad_fn_t)(const uint8_t *src_ptr,
                                     int source_stride,
-                                    const unsigned char *ref_ptr,
+                                    const uint8_t *ref_ptr,
                                     int ref_stride,
                                     unsigned int max_sad);
 
-typedef void (*vp9_copy32xn_fn_t)(const unsigned char *src_ptr,
+typedef void (*vp9_copy32xn_fn_t)(const uint8_t *src_ptr,
                                   int source_stride,
-                                  const unsigned char *ref_ptr,
+                                  const uint8_t *ref_ptr,
                                   int ref_stride,
                                   int n);
 
-typedef void (*vp9_sad_multi_fn_t)(const unsigned char *src_ptr,
+typedef void (*vp9_sad_multi_fn_t)(const uint8_t *src_ptr,
                                    int source_stride,
-                                   const unsigned char *ref_ptr,
+                                   const uint8_t *ref_ptr,
                                    int  ref_stride,
                                    unsigned int *sad_array);
 
-typedef void (*vp9_sad_multi1_fn_t)(const unsigned char *src_ptr,
+typedef void (*vp9_sad_multi1_fn_t)(const uint8_t *src_ptr,
                                     int source_stride,
-                                    const unsigned char *ref_ptr,
+                                    const uint8_t *ref_ptr,
                                     int  ref_stride,
                                     unsigned short *sad_array);
 
-typedef void (*vp9_sad_multi_d_fn_t)(const unsigned char *src_ptr,
+typedef void (*vp9_sad_multi_d_fn_t)(const uint8_t *src_ptr,
                                      int source_stride,
-                                     const unsigned char ** ref_ptr,
+                                     const uint8_t ** ref_ptr,
                                      int  ref_stride, unsigned int *sad_array);
 
-typedef unsigned int (*vp9_variance_fn_t)(const unsigned char *src_ptr,
+typedef unsigned int (*vp9_variance_fn_t)(const uint8_t *src_ptr,
                                           int source_stride,
-                                          const unsigned char *ref_ptr,
+                                          const uint8_t *ref_ptr,
                                           int ref_stride,
                                           unsigned int *sse);
 
-typedef unsigned int (*vp9_subpixvariance_fn_t)(const unsigned char  *src_ptr,
+typedef unsigned int (*vp9_subpixvariance_fn_t)(const uint8_t *src_ptr,
                                                 int source_stride,
                                                 int xoffset,
                                                 int yoffset,
-                                                const unsigned char *ref_ptr,
+                                                const uint8_t *ref_ptr,
                                                 int Refstride,
                                                 unsigned int *sse);
 
-typedef void (*vp9_ssimpf_fn_t)(unsigned char *s, int sp, unsigned char *r,
+typedef void (*vp9_ssimpf_fn_t)(uint8_t *s, int sp, uint8_t *r,
                                 int rp, unsigned long *sum_s,
                                 unsigned long *sum_r, unsigned long *sum_sq_s,
                                 unsigned long *sum_sq_r,
@@ -63,9 +64,9 @@ typedef void (*vp9_ssimpf_fn_t)(unsigned char *s, int sp, unsigned char *r,
 
 typedef unsigned int (*vp9_getmbss_fn_t)(const short *);
 
-typedef unsigned int (*vp9_get16x16prederror_fn_t)(const unsigned char *src_ptr,
+typedef unsigned int (*vp9_get16x16prederror_fn_t)(const uint8_t *src_ptr,
                                                    int source_stride,
-                                                   const unsigned char *ref_ptr,
+                                                   const uint8_t *ref_ptr,
                                                    int  ref_stride);
 
 typedef struct variance_vtable {
@@ -81,4 +82,4 @@ typedef struct variance_vtable {
     vp9_copy32xn_fn_t       copymem;
 } vp9_variance_fn_ptr_t;
 
-#endif
+#endif  // VP9_ENCODER_VP9_VARIANCE_H_

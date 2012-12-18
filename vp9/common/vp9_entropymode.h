@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_ENTROPYMODE_H_
 #define VP9_COMMON_VP9_ENTROPYMODE_H_
 
@@ -114,4 +113,4 @@ extern struct vp9_token_struct vp9_switchable_interp_encodings
 extern const  vp9_prob vp9_switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                                  [VP9_SWITCHABLE_FILTERS - 1];
 
-#endif
+#endif  // VP9_COMMON_VP9_ENTROPYMODE_H_

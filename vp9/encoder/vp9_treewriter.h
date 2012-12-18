@@ -105,4 +105,4 @@ void vp9_cost_tokens(int *Costs, const vp9_prob *, vp9_tree);
 
 void vp9_cost_tokens_skip(int *c, const vp9_prob *p, vp9_tree t);
 
-#endif
+#endif  // VP9_ENCODER_VP9_TREEWRITER_H_

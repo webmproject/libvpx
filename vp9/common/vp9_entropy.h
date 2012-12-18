@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_ENTROPY_H_
 #define VP9_COMMON_VP9_ENTROPY_H_
 
+#include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_treecoder.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
@@ -110,7 +110,8 @@ typedef vp9_prob vp9_coeff_probs[COEF_BANDS][PREV_COEF_CONTEXTS]
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
 #define MODULUS_PARAM               13  /* Modulus parameter */
 
-extern DECLARE_ALIGNED(16, const unsigned char, vp9_prev_token_class[MAX_ENTROPY_TOKENS]);
+extern DECLARE_ALIGNED(16, const uint8_t,
+                       vp9_prev_token_class[MAX_ENTROPY_TOKENS]);
 
 struct VP9Common;
 void vp9_default_coef_probs(struct VP9Common *);
@@ -135,4 +136,4 @@ static void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
     vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
 }
 
-#endif
+#endif  // VP9_COMMON_VP9_ENTROPY_H_

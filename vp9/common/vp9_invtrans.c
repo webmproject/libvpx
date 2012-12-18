@@ -72,7 +72,7 @@ void vp9_inverse_transform_mb_4x4(MACROBLOCKD *xd) {
   vp9_inverse_transform_mbuv_4x4(xd);
 }
 
-void vp9_inverse_transform_b_8x8(short *input_dqcoeff, short *output_coeff,
+void vp9_inverse_transform_b_8x8(int16_t *input_dqcoeff, int16_t *output_coeff,
                                  int pitch) {
   vp9_short_idct8x8(input_dqcoeff, output_coeff, pitch);
 }
@@ -123,8 +123,8 @@ void vp9_inverse_transform_mb_8x8(MACROBLOCKD *xd) {
   vp9_inverse_transform_mbuv_8x8(xd);
 }
 
-void vp9_inverse_transform_b_16x16(short *input_dqcoeff,
-                                   short *output_coeff, int pitch) {
+void vp9_inverse_transform_b_16x16(int16_t *input_dqcoeff,
+                                   int16_t *output_coeff, int pitch) {
   vp9_short_idct16x16(input_dqcoeff, output_coeff, pitch);
 }
 

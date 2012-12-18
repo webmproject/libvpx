@@ -13,13 +13,10 @@
 #include "vp9_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
 
-void vp9_recon_b_c
-(
-  unsigned char *pred_ptr,
-  short *diff_ptr,
-  unsigned char *dst_ptr,
-  int stride
-) {
+void vp9_recon_b_c(uint8_t *pred_ptr,
+                   int16_t *diff_ptr,
+                   uint8_t *dst_ptr,
+                   int stride) {
   int r, c;
 
   for (r = 0; r < 4; r++) {
@@ -33,13 +30,10 @@ void vp9_recon_b_c
   }
 }
 
-void vp9_recon_uv_b_c
-(
-  unsigned char *pred_ptr,
-  short *diff_ptr,
-  unsigned char *dst_ptr,
-  int stride
-) {
+void vp9_recon_uv_b_c(uint8_t *pred_ptr,
+                      int16_t *diff_ptr,
+                      uint8_t *dst_ptr,
+                      int stride) {
   int r, c;
 
   for (r = 0; r < 4; r++) {
@@ -52,13 +46,11 @@ void vp9_recon_uv_b_c
     pred_ptr += 8;
   }
 }
-void vp9_recon4b_c
-(
-  unsigned char *pred_ptr,
-  short *diff_ptr,
-  unsigned char *dst_ptr,
-  int stride
-) {
+
+void vp9_recon4b_c(uint8_t *pred_ptr,
+                   int16_t *diff_ptr,
+                   uint8_t *dst_ptr,
+                   int stride) {
   int r, c;
 
   for (r = 0; r < 4; r++) {
@@ -72,13 +64,10 @@ void vp9_recon4b_c
   }
 }
 
-void vp9_recon2b_c
-(
-  unsigned char *pred_ptr,
-  short *diff_ptr,
-  unsigned char *dst_ptr,
-  int stride
-) {
+void vp9_recon2b_c(uint8_t *pred_ptr,
+                   int16_t *diff_ptr,
+                   uint8_t *dst_ptr,
+                   int stride) {
   int r, c;
 
   for (r = 0; r < 4; r++) {
@@ -97,7 +86,7 @@ void vp9_recon_mby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
   int x, y;
   BLOCKD *b = &xd->block[0];
   int stride = b->dst_stride;
-  short *diff = b->diff;
+  int16_t *diff = b->diff;
 
   for (y = 0; y < 16; y++) {
     for (x = 0; x < 16; x++) {
@@ -115,7 +104,7 @@ void vp9_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
   for (i = 0; i < 2; i++, dst = vdst) {
     BLOCKD *b = &xd->block[16 + 4 * i];
     int stride = b->dst_stride;
-    short *diff = b->diff;
+    int16_t *diff = b->diff;
 
     for (y = 0; y < 8; y++) {
       for (x = 0; x < 8; x++) {
@@ -130,7 +119,7 @@ void vp9_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
 #if CONFIG_TX32X32
 void vp9_recon_sby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
   int x, y, stride = xd->block[0].dst_stride;
-  short *diff = xd->sb_coeff_data.diff;
+  int16_t *diff = xd->sb_coeff_data.diff;
 
   for (y = 0; y < 32; y++) {
     for (x = 0; x < 32; x++) {
@@ -143,8 +132,8 @@ void vp9_recon_sby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
 
 void vp9_recon_sbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
   int x, y, stride = xd->block[16].dst_stride;
-  short *udiff = xd->sb_coeff_data.diff + 1024;
-  short *vdiff = xd->sb_coeff_data.diff + 1280;
+  int16_t *udiff = xd->sb_coeff_data.diff + 1024;
+  int16_t *vdiff = xd->sb_coeff_data.diff + 1280;
 
   for (y = 0; y < 16; y++) {
     for (x = 0; x < 16; x++) {

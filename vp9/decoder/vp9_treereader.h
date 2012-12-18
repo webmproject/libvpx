@@ -34,4 +34,4 @@ static int treed_read(vp9_reader *const r, /* !!! must return a 0 or 1 !!! */
   return -i;
 }
 
-#endif /* tree_reader_h */
+#endif  // VP9_DECODER_VP9_TREEREADER_H_

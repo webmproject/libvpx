@@ -835,4 +835,5 @@ extern void vp9_alloc_compressor_data(VP9_COMP *cpi);
                          "Failed to allocate "#lval);\
   } while(0)
 #endif
-#endif  // __INC_ONYX_INT_H
+
+#endif  // VP9_ENCODER_VP9_ONYX_INT_H_

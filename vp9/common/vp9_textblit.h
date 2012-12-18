@@ -16,4 +16,4 @@ extern void vp9_blit_text(const char *msg, unsigned char *address,
 extern void vp9_blit_line(int x0, int x1, int y0, int y1,
                           unsigned char *image, const int pitch);
 
-#endif  // __INC_TEXTBLIT_H
+#endif  // VP9_COMMON_VP9_TEXTBLIT_H_

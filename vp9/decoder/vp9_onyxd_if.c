@@ -13,7 +13,7 @@
 #if CONFIG_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif
-#include "vp9/common/vp9_onyxd.h"
+#include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_alloccommon.h"
@@ -37,7 +37,7 @@ static void ref_cnt_fb(int *buf, int *idx, int new_idx);
 #if WRITE_RECON_BUFFER == 1
 static void recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s) {
   FILE *yuv_file = fopen((char *)name, "ab");
-  unsigned char *src = s->y_buffer;
+  uint8_t *src = s->y_buffer;
   int h = s->y_height;
 
   do {

@@ -35,19 +35,16 @@
 #if VP9_TEMPORAL_ALT_REF
 
 
-static void temporal_filter_predictors_mb_c
-(
-  MACROBLOCKD *xd,
-  unsigned char *y_mb_ptr,
-  unsigned char *u_mb_ptr,
-  unsigned char *v_mb_ptr,
-  int stride,
-  int mv_row,
-  int mv_col,
-  unsigned char *pred
-) {
+static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
+                                            uint8_t *y_mb_ptr,
+                                            uint8_t *u_mb_ptr,
+                                            uint8_t *v_mb_ptr,
+                                            int stride,
+                                            int mv_row,
+                                            int mv_col,
+                                            uint8_t *pred) {
   int offset;
-  unsigned char *yptr, *uptr, *vptr;
+  uint8_t *yptr, *uptr, *vptr;
   int omv_row, omv_col;
 
   // Y
@@ -75,23 +72,20 @@ static void temporal_filter_predictors_mb_c
                            (omv_col & 15), (omv_row & 15), &pred[256], 8);
     xd->subpixel_predict8x8(vptr, stride,
                            (omv_col & 15), (omv_row & 15), &pred[320], 8);
-  }
-  else {
+  } else {
     vp9_copy_mem8x8(uptr, stride, &pred[256], 8);
     vp9_copy_mem8x8(vptr, stride, &pred[320], 8);
   }
 }
-void vp9_temporal_filter_apply_c
-(
-  unsigned char *frame1,
-  unsigned int stride,
-  unsigned char *frame2,
-  unsigned int block_size,
-  int strength,
-  int filter_weight,
-  unsigned int *accumulator,
-  unsigned short *count
-) {
+
+void vp9_temporal_filter_apply_c(uint8_t *frame1,
+                                 unsigned int stride,
+                                 uint8_t *frame2,
+                                 unsigned int block_size,
+                                 int strength,
+                                 int filter_weight,
+                                 unsigned int *accumulator,
+                                 uint16_t *count) {
   unsigned int i, j, k;
   int modifier;
   int byte = 0;
@@ -129,14 +123,11 @@ void vp9_temporal_filter_apply_c
 
 #if ALT_REF_MC_ENABLED
 
-static int temporal_filter_find_matching_mb_c
-(
-  VP9_COMP *cpi,
-  YV12_BUFFER_CONFIG *arf_frame,
-  YV12_BUFFER_CONFIG *frame_ptr,
-  int mb_offset,
-  int error_thresh
-) {
+static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
+                                              YV12_BUFFER_CONFIG *arf_frame,
+                                              YV12_BUFFER_CONFIG *frame_ptr,
+                                              int mb_offset,
+                                              int error_thresh) {
   MACROBLOCK *x = &cpi->mb;
   int step_param;
   int further_steps;
@@ -149,10 +140,10 @@ static int temporal_filter_find_matching_mb_c
   int_mv best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
 
   // Save input state
-  unsigned char **base_src = b->base_src;
+  uint8_t **base_src = b->base_src;
   int src = b->src;
   int src_stride = b->src_stride;
-  unsigned char **base_pre = d->base_pre;
+  uint8_t **base_pre = d->base_pre;
   int pre = d->pre;
   int pre_stride = d->pre_stride;
 
@@ -216,13 +207,10 @@ static int temporal_filter_find_matching_mb_c
 }
 #endif
 
-static void temporal_filter_iterate_c
-(
-  VP9_COMP *cpi,
-  int frame_count,
-  int alt_ref_index,
-  int strength
-) {
+static void temporal_filter_iterate_c(VP9_COMP *cpi,
+                                      int frame_count,
+                                      int alt_ref_index,
+                                      int strength) {
   int byte;
   int frame;
   int mb_col, mb_row;
@@ -232,16 +220,16 @@ static void temporal_filter_iterate_c
   int mb_y_offset = 0;
   int mb_uv_offset = 0;
   DECLARE_ALIGNED_ARRAY(16, unsigned int, accumulator, 16 * 16 + 8 * 8 + 8 * 8);
-  DECLARE_ALIGNED_ARRAY(16, unsigned short, count, 16 * 16 + 8 * 8 + 8 * 8);
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, count, 16 * 16 + 8 * 8 + 8 * 8);
   MACROBLOCKD *mbd = &cpi->mb.e_mbd;
   YV12_BUFFER_CONFIG *f = cpi->frames[alt_ref_index];
-  unsigned char *dst1, *dst2;
-  DECLARE_ALIGNED_ARRAY(16, unsigned char,  predictor, 16 * 16 + 8 * 8 + 8 * 8);
+  uint8_t *dst1, *dst2;
+  DECLARE_ALIGNED_ARRAY(16, uint8_t,  predictor, 16 * 16 + 8 * 8 + 8 * 8);
 
   // Save input state
-  unsigned char *y_buffer = mbd->pre.y_buffer;
-  unsigned char *u_buffer = mbd->pre.u_buffer;
-  unsigned char *v_buffer = mbd->pre.v_buffer;
+  uint8_t *y_buffer = mbd->pre.y_buffer;
+  uint8_t *u_buffer = mbd->pre.u_buffer;
+  uint8_t *v_buffer = mbd->pre.v_buffer;
 
   for (mb_row = 0; mb_row < mb_rows; mb_row++) {
 #if ALT_REF_MC_ENABLED
@@ -266,7 +254,7 @@ static void temporal_filter_iterate_c
       int stride;
 
       vpx_memset(accumulator, 0, 384 * sizeof(unsigned int));
-      vpx_memset(count, 0, 384 * sizeof(unsigned short));
+      vpx_memset(count, 0, 384 * sizeof(uint16_t));
 
 #if ALT_REF_MC_ENABLED
       cpi->mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
@@ -341,7 +329,7 @@ static void temporal_filter_iterate_c
           pval *= cpi->fixed_divide[count[k]];
           pval >>= 19;
 
-          dst1[byte] = (unsigned char)pval;
+          dst1[byte] = (uint8_t)pval;
 
           // move to next pixel
           byte++;
@@ -362,13 +350,13 @@ static void temporal_filter_iterate_c
           unsigned int pval = accumulator[k] + (count[k] >> 1);
           pval *= cpi->fixed_divide[count[k]];
           pval >>= 19;
-          dst1[byte] = (unsigned char)pval;
+          dst1[byte] = (uint8_t)pval;
 
           // V
           pval = accumulator[m] + (count[m] >> 1);
           pval *= cpi->fixed_divide[count[m]];
           pval >>= 19;
-          dst2[byte] = (unsigned char)pval;
+          dst2[byte] = (uint8_t)pval;
 
           // move to next pixel
           byte++;

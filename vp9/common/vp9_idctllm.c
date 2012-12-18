@@ -483,12 +483,12 @@ void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
   }
 }
 
-void vp9_short_idct4x4llm_c(short *input, short *output, int pitch) {
+void vp9_short_idct4x4llm_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
 
-  short *ip = input;
-  short *op = output;
+  int16_t *ip = input;
+  int16_t *op = output;
   int temp1, temp2;
   int shortpitch = pitch >> 1;
 
@@ -540,10 +540,10 @@ void vp9_short_idct4x4llm_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp9_short_idct4x4llm_1_c(short *input, short *output, int pitch) {
+void vp9_short_idct4x4llm_1_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1;
-  short *op = output;
+  int16_t *op = output;
   int shortpitch = pitch >> 1;
   a1 = ((input[0] + 16) >> 5);
   for (i = 0; i < 4; i++) {
@@ -555,8 +555,8 @@ void vp9_short_idct4x4llm_1_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp9_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr,
-                            unsigned char *dst_ptr, int pitch, int stride) {
+void vp9_dc_only_idct_add_c(int input_dc, uint8_t *pred_ptr,
+                            uint8_t *dst_ptr, int pitch, int stride) {
   int a1 = ((input_dc + 16) >> 5);
   int r, c;
 
@@ -570,11 +570,11 @@ void vp9_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr,
   }
 }
 
-void vp9_short_inv_walsh4x4_c(short *input, short *output) {
+void vp9_short_inv_walsh4x4_c(int16_t *input, int16_t *output) {
   int i;
   int a1, b1, c1, d1;
-  short *ip = input;
-  short *op = output;
+  int16_t *ip = input;
+  int16_t *op = output;
 
   for (i = 0; i < 4; i++) {
     a1 = ((ip[0] + ip[3]));
@@ -607,11 +607,11 @@ void vp9_short_inv_walsh4x4_c(short *input, short *output) {
   }
 }
 
-void vp9_short_inv_walsh4x4_1_c(short *in, short *out) {
+void vp9_short_inv_walsh4x4_1_c(int16_t *in, int16_t *out) {
   int i;
-  short tmp[4];
-  short *ip = in;
-  short *op = tmp;
+  int16_t tmp[4];
+  int16_t *ip = in;
+  int16_t *op = tmp;
 
   op[0] = (ip[0] + 1) >> 1;
   op[1] = op[2] = op[3] = (ip[0] >> 1);
@@ -627,11 +627,11 @@ void vp9_short_inv_walsh4x4_1_c(short *in, short *out) {
 }
 
 #if CONFIG_LOSSLESS
-void vp9_short_inv_walsh4x4_lossless_c(short *input, short *output) {
+void vp9_short_inv_walsh4x4_lossless_c(int16_t *input, int16_t *output) {
   int i;
   int a1, b1, c1, d1;
-  short *ip = input;
-  short *op = output;
+  int16_t *ip = input;
+  int16_t *op = output;
 
   for (i = 0; i < 4; i++) {
     a1 = ((ip[0] + ip[3])) >> Y2_WHT_UPSCALE_FACTOR;
@@ -667,11 +667,11 @@ void vp9_short_inv_walsh4x4_lossless_c(short *input, short *output) {
   }
 }
 
-void vp9_short_inv_walsh4x4_1_lossless_c(short *in, short *out) {
+void vp9_short_inv_walsh4x4_1_lossless_c(int16_t *in, int16_t *out) {
   int i;
-  short tmp[4];
-  short *ip = in;
-  short *op = tmp;
+  int16_t tmp[4];
+  int16_t *ip = in;
+  int16_t *op = tmp;
 
   op[0] = ((ip[0] >> Y2_WHT_UPSCALE_FACTOR) + 1) >> 1;
   op[1] = op[2] = op[3] = ((ip[0] >> Y2_WHT_UPSCALE_FACTOR) >> 1);
@@ -686,11 +686,11 @@ void vp9_short_inv_walsh4x4_1_lossless_c(short *in, short *out) {
   }
 }
 
-void vp9_short_inv_walsh4x4_x8_c(short *input, short *output, int pitch) {
+void vp9_short_inv_walsh4x4_x8_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
-  short *ip = input;
-  short *op = output;
+  int16_t *ip = input;
+  int16_t *op = output;
   int shortpitch = pitch >> 1;
 
   for (i = 0; i < 4; i++) {
@@ -727,11 +727,11 @@ void vp9_short_inv_walsh4x4_x8_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp9_short_inv_walsh4x4_1_x8_c(short *in, short *out, int pitch) {
+void vp9_short_inv_walsh4x4_1_x8_c(int16_t *in, int16_t *out, int pitch) {
   int i;
-  short tmp[4];
-  short *ip = in;
-  short *op = tmp;
+  int16_t tmp[4];
+  int16_t *ip = in;
+  int16_t *op = tmp;
   int shortpitch = pitch >> 1;
 
   op[0] = ((ip[0] >> WHT_UPSCALE_FACTOR) + 1) >> 1;
@@ -748,8 +748,8 @@ void vp9_short_inv_walsh4x4_1_x8_c(short *in, short *out, int pitch) {
   }
 }
 
-void vp9_dc_only_inv_walsh_add_c(short input_dc, unsigned char *pred_ptr,
-                                 unsigned char *dst_ptr,
+void vp9_dc_only_inv_walsh_add_c(short input_dc, uint8_t *pred_ptr,
+                                 uint8_t *dst_ptr,
                                  int pitch, int stride) {
   int r, c;
   short tmp[16];
@@ -767,13 +767,13 @@ void vp9_dc_only_inv_walsh_add_c(short input_dc, unsigned char *pred_ptr,
 #endif
 
 void vp9_dc_only_idct_add_8x8_c(short input_dc,
-                                unsigned char *pred_ptr,
-                                unsigned char *dst_ptr,
+                                uint8_t *pred_ptr,
+                                uint8_t *dst_ptr,
                                 int pitch, int stride) {
   int a1 = ((input_dc + 16) >> 5);
   int r, c, b;
-  unsigned char *orig_pred = pred_ptr;
-  unsigned char *orig_dst = dst_ptr;
+  uint8_t *orig_pred = pred_ptr;
+  uint8_t *orig_dst = dst_ptr;
   for (b = 0; b < 4; b++) {
     for (r = 0; r < 4; r++) {
       for (c = 0; c < 4; c++) {
@@ -911,7 +911,7 @@ static void idctcol(int *blk) {
 }
 
 #define TX_DIM 8
-void vp9_short_idct8x8_c(short *coefs, short *block, int pitch) {
+void vp9_short_idct8x8_c(int16_t *coefs, int16_t *block, int pitch) {
   int X[TX_DIM * TX_DIM];
   int i, j;
   int shortpitch = pitch >> 1;
@@ -1030,7 +1030,7 @@ static void idctcol10(int *blk) {
   blk[8 * 7] = (x7 - x1) >> 14;
 }
 
-void vp9_short_idct10_8x8_c(short *coefs, short *block, int pitch) {
+void vp9_short_idct10_8x8_c(int16_t *coefs, int16_t *block, int pitch) {
   int X[TX_DIM * TX_DIM];
   int i, j;
   int shortpitch = pitch >> 1;
@@ -1043,7 +1043,7 @@ void vp9_short_idct10_8x8_c(short *coefs, short *block, int pitch) {
   }
 
   /* Do first 4 row idct only since non-zero dct coefficients are all in
-   *  upper-left 4x4 area. */
+   * upper-left 4x4 area. */
   for (i = 0; i < 4; i++)
     idctrow10(X + 8 * i);
 
@@ -1057,10 +1057,10 @@ void vp9_short_idct10_8x8_c(short *coefs, short *block, int pitch) {
   }
 }
 
-void vp9_short_ihaar2x2_c(short *input, short *output, int pitch) {
+void vp9_short_ihaar2x2_c(int16_t *input, int16_t *output, int pitch) {
   int i;
-  short *ip = input; // 0,1, 4, 8
-  short *op = output;
+  int16_t *ip = input;  // 0, 1, 4, 8
+  int16_t *op = output;
   for (i = 0; i < 16; i++) {
     op[i] = 0;
   }
@@ -1074,7 +1074,7 @@ void vp9_short_ihaar2x2_c(short *input, short *output, int pitch) {
 
 #if 0
 // Keep a really bad float version as reference for now.
-void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
+void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
 
   vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
@@ -1334,7 +1334,7 @@ void reference_16x16_idct_1d(double input[16], double output[16]) {
 }
 #endif
 
-void vp9_short_idct16x16_c(short *input, short *output, int pitch) {
+void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
 
   vp9_clear_system_state(); // Make it simd safe : __asm emms;
   {
@@ -2069,7 +2069,7 @@ static void butterfly_32_idct_1d(double *input, double *output, int stride) {
   output[stride*31] = step2[ 0] - step2[(31 - 15)];
 }
 
-void vp9_short_idct32x32_c(short *input, short *output, int pitch) {
+void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
   {
     double out[32*32], out2[32*32];
@@ -2109,9 +2109,9 @@ void vp9_short_idct32x32_c(short *input, short *output, int pitch) {
 #if DWT_TYPE == 53
 
 // Note: block length must be even for this implementation
-static void synthesis_53_row(int length, short *lowpass, short *highpass,
-                             short *x) {
-  short r, *a, *b;
+static void synthesis_53_row(int length, int16_t *lowpass, int16_t *highpass,
+                             int16_t *x) {
+  int16_t r, *a, *b;
   int n;
 
   n = length >> 1;
@@ -2134,9 +2134,9 @@ static void synthesis_53_row(int length, short *lowpass, short *highpass,
   *x++ = *b + ((r + 1) >> 1);
 }
 
-static void synthesis_53_col(int length, short *lowpass, short *highpass,
-                             short *x) {
-  short r, *a, *b;
+static void synthesis_53_col(int length, int16_t *lowpass, int16_t *highpass,
+                             int16_t *x) {
+  int16_t r, *a, *b;
   int n;
 
   n = length >> 1;
@@ -2160,8 +2160,8 @@ static void synthesis_53_col(int length, short *lowpass, short *highpass,
   *x++ = ((*b) << 1) + *a;
 }
 
-void dyadic_synthesize_53(int levels, int width, int height, short *c,
-                          int pitch_c, short *x, int pitch_x) {
+void dyadic_synthesize_53(int levels, int width, int height, int16_t *c,
+                          int pitch_c, int16_t *x, int pitch_x) {
   int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
   short buffer[2 * DWT_MAX_LENGTH];
 
@@ -2201,9 +2201,9 @@ void dyadic_synthesize_53(int levels, int width, int height, short *c,
 #elif DWT_TYPE == 26
 
 // Note: block length must be even for this implementation
-static void synthesis_26_row(int length, short *lowpass, short *highpass,
-                             short *x) {
-  short r, s, *a, *b;
+static void synthesis_26_row(int length, int16_t *lowpass, int16_t *highpass,
+                             int16_t *x) {
+  int16_t r, s, *a, *b;
   int i, n = length >> 1;
 
   if (n >= 4) {
@@ -2226,9 +2226,9 @@ static void synthesis_26_row(int length, short *lowpass, short *highpass,
   }
 }
 
-static void synthesis_26_col(int length, short *lowpass, short *highpass,
-                             short *x) {
-  short r, s, *a, *b;
+static void synthesis_26_col(int length, int16_t *lowpass, int16_t *highpass,
+                             int16_t *x) {
+  int16_t r, s, *a, *b;
   int i, n = length >> 1;
 
   if (n >= 4) {
@@ -2251,10 +2251,10 @@ static void synthesis_26_col(int length, short *lowpass, short *highpass,
   }
 }
 
-void dyadic_synthesize_26(int levels, int width, int height, short *c,
-                          int pitch_c, short *x, int pitch_x) {
+void dyadic_synthesize_26(int levels, int width, int height, int16_t *c,
+                          int pitch_c, int16_t *x, int pitch_x) {
   int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
-  short buffer[2 * DWT_MAX_LENGTH];
+  int16_t buffer[2 * DWT_MAX_LENGTH];
 
   th[0] = hh;
   tw[0] = hw;
@@ -2331,8 +2331,8 @@ static void synthesis_97(int length, double *lowpass, double *highpass,
   x[length - 1] -= 2 * a_predict1 * x[length - 2];
 }
 
-void dyadic_synthesize_97(int levels, int width, int height, short *c,
-                          int pitch_c, short *x, int pitch_x) {
+void dyadic_synthesize_97(int levels, int width, int height, int16_t *c,
+                          int pitch_c, int16_t *x, int pitch_x) {
   int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
   double buffer[2 * DWT_MAX_LENGTH];
   double y[DWT_MAX_LENGTH * DWT_MAX_LENGTH];
@@ -2578,7 +2578,7 @@ static void butterfly_16x16_idct_1d_f(double input[16], double output[16]) {
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
-void vp9_short_idct16x16_c_f(short *input, short *output, int pitch) {
+void vp9_short_idct16x16_c_f(int16_t *input, int16_t *output, int pitch) {
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
   {
     double out[16*16], out2[16*16];
@@ -2608,12 +2608,12 @@ void vp9_short_idct16x16_c_f(short *input, short *output, int pitch) {
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
-void vp9_short_idct32x32_c(short *input, short *output, int pitch) {
+void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
   // assume out is a 32x32 buffer
   // Temporary buffer to hold a 16x16 block for 16x16 inverse dct
-  short buffer[16 * 16];
+  int16_t buffer[16 * 16];
   // Temporary buffer to hold a 32x32 block for inverse 32x32 dwt
-  short buffer2[32 * 32];
+  int16_t buffer2[32 * 32];
   // Note: pitch is in bytes, short_pitch is in short units
   const int short_pitch = pitch >> 1;
   int i;

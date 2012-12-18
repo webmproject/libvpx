@@ -82,17 +82,17 @@ void vp9_init_de_quantizer(VP9D_COMP *pbi) {
   VP9_COMMON *const pc = &pbi->common;
 
   for (Q = 0; Q < QINDEX_RANGE; Q++) {
-    pc->Y1dequant[Q][0] = (short)vp9_dc_quant(Q, pc->y1dc_delta_q);
-    pc->Y2dequant[Q][0] = (short)vp9_dc2quant(Q, pc->y2dc_delta_q);
-    pc->UVdequant[Q][0] = (short)vp9_dc_uv_quant(Q, pc->uvdc_delta_q);
+    pc->Y1dequant[Q][0] = (int16_t)vp9_dc_quant(Q, pc->y1dc_delta_q);
+    pc->Y2dequant[Q][0] = (int16_t)vp9_dc2quant(Q, pc->y2dc_delta_q);
+    pc->UVdequant[Q][0] = (int16_t)vp9_dc_uv_quant(Q, pc->uvdc_delta_q);
 
     /* all the ac values =; */
     for (i = 1; i < 16; i++) {
       int rc = vp9_default_zig_zag1d_4x4[i];
 
-      pc->Y1dequant[Q][rc] = (short)vp9_ac_yquant(Q);
-      pc->Y2dequant[Q][rc] = (short)vp9_ac2quant(Q, pc->y2ac_delta_q);
-      pc->UVdequant[Q][rc] = (short)vp9_ac_uv_quant(Q, pc->uvac_delta_q);
+      pc->Y1dequant[Q][rc] = (int16_t)vp9_ac_yquant(Q);
+      pc->Y2dequant[Q][rc] = (int16_t)vp9_ac2quant(Q, pc->y2ac_delta_q);
+      pc->UVdequant[Q][rc] = (int16_t)vp9_ac_uv_quant(Q, pc->uvac_delta_q);
     }
   }
 }
@@ -283,10 +283,10 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
       int idx = (ib & 0x02) ? (ib + 2) : ib;
-      short *q  = xd->block[idx].qcoeff;
-      short *dq = xd->block[0].dequant;
-      unsigned char *pre = xd->block[ib].predictor;
-      unsigned char *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
+      int16_t *q  = xd->block[idx].qcoeff;
+      int16_t *dq = xd->block[0].dequant;
+      uint8_t *pre = xd->block[ib].predictor;
+      uint8_t *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
       int stride = xd->dst.y_stride;
       BLOCKD *b = &xd->block[ib];
       if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
@@ -580,8 +580,8 @@ static void decode_8x8_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
       int idx = (ib & 0x02) ? (ib + 2) : ib;
-      short *q  = xd->block[idx].qcoeff;
-      short *dq = xd->block[0].dequant;
+      int16_t *q  = xd->block[idx].qcoeff;
+      int16_t *dq = xd->block[0].dequant;
       int stride = xd->dst.y_stride;
       BLOCKD *b = &xd->block[ib];
       tx_type = get_tx_type_8x8(xd, &xd->block[ib]);

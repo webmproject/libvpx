@@ -83,4 +83,4 @@ typedef int (*vp9_diamond_search_fn_t)(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                        int_mv *center_mv);
 
 
-#endif
+#endif  // VP9_ENCODER_VP9_MCOMP_H_

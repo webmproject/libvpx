@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_ENCODER_VP9_BLOCK_H_
 #define VP9_ENCODER_VP9_BLOCK_H_
 
@@ -26,32 +25,32 @@ typedef struct {
 
 typedef struct block {
   // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
-  short *src_diff;
-  short *coeff;
+  int16_t *src_diff;
+  int16_t *coeff;
 
   // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
-  short *quant;
-  short *quant_fast;      // fast quant deprecated for now
-  unsigned char *quant_shift;
-  short *zbin;
-  short *zbin_8x8;
-  short *zbin_16x16;
+  int16_t *quant;
+  int16_t *quant_fast;      // fast quant deprecated for now
+  uint8_t *quant_shift;
+  int16_t *zbin;
+  int16_t *zbin_8x8;
+  int16_t *zbin_16x16;
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
-  short *zbin_32x32;
+  int16_t *zbin_32x32;
 #endif
-  short *zrun_zbin_boost;
-  short *zrun_zbin_boost_8x8;
-  short *zrun_zbin_boost_16x16;
+  int16_t *zrun_zbin_boost;
+  int16_t *zrun_zbin_boost_8x8;
+  int16_t *zrun_zbin_boost_16x16;
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
-  short *zrun_zbin_boost_32x32;
+  int16_t *zrun_zbin_boost_32x32;
 #endif
-  short *round;
+  int16_t *round;
 
   // Zbin Over Quant value
   short zbin_extra;
 
-  unsigned char **base_src;
-  unsigned char **base_second_src;
+  uint8_t **base_src;
+  uint8_t **base_second_src;
   int src;
   int src_stride;
 
@@ -94,16 +93,16 @@ typedef struct {
 
 #if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
 typedef struct superblock {
-  DECLARE_ALIGNED(16, short, src_diff[32*32+16*16*2]);
-  DECLARE_ALIGNED(16, short, coeff[32*32+16*16*2]);
+  DECLARE_ALIGNED(16, int16_t, src_diff[32*32+16*16*2]);
+  DECLARE_ALIGNED(16, int16_t, coeff[32*32+16*16*2]);
 } SUPERBLOCK;
 #endif
 
 typedef struct macroblock {
-  DECLARE_ALIGNED(16, short, src_diff[400]);  // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
-  DECLARE_ALIGNED(16, short, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
+  DECLARE_ALIGNED(16, int16_t, src_diff[400]);  // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
+  DECLARE_ALIGNED(16, int16_t, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
 #if !CONFIG_SUPERBLOCKS
-  DECLARE_ALIGNED(16, unsigned char, thismb[256]);    // 16x16 Y
+  DECLARE_ALIGNED(16, uint8_t, thismb[256]);    // 16x16 Y
 
   unsigned char *thismb_ptr;
 #endif
@@ -188,19 +187,17 @@ typedef struct macroblock {
   PICK_MODE_CONTEXT sb_context[4];
 #endif
 
-  void (*vp9_short_fdct4x4)(short *input, short *output, int pitch);
-  void (*vp9_short_fdct8x4)(short *input, short *output, int pitch);
-  void (*short_walsh4x4)(short *input, short *output, int pitch);
+  void (*vp9_short_fdct4x4)(int16_t *input, int16_t *output, int pitch);
+  void (*vp9_short_fdct8x4)(int16_t *input, int16_t *output, int pitch);
+  void (*short_walsh4x4)(int16_t *input, int16_t *output, int pitch);
   void (*quantize_b_4x4)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_4x4_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
-  void (*vp9_short_fdct8x8)(short *input, short *output, int pitch);
-  void (*vp9_short_fdct16x16)(short *input, short *output, int pitch);
-  void (*short_fhaar2x2)(short *input, short *output, int pitch);
+  void (*vp9_short_fdct8x8)(int16_t *input, int16_t *output, int pitch);
+  void (*vp9_short_fdct16x16)(int16_t *input, int16_t *output, int pitch);
+  void (*short_fhaar2x2)(int16_t *input, int16_t *output, int pitch);
   void (*quantize_b_16x16)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_8x8)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_2x2)(BLOCK *b, BLOCKD *d);
-
 } MACROBLOCK;
 
-
-#endif
+#endif  // VP9_ENCODER_VP9_BLOCK_H_

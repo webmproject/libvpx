@@ -38,4 +38,4 @@ extern void vp9_init_me_luts();
 extern void vp9_set_mbmode_and_mvs(MACROBLOCK *x,
                                    MB_PREDICTION_MODE mb, int_mv *mv);
 
-#endif
+#endif  // VP9_ENCODER_VP9_RDOPT_H_

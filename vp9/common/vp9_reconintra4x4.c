@@ -15,7 +15,7 @@
 #include "vp9_rtcd.h"
 
 #if CONFIG_NEWBINTRAMODES
-static int find_grad_measure(unsigned char *x, int stride, int n, int t,
+static int find_grad_measure(uint8_t *x, int stride, int n, int t,
                              int dx, int dy) {
   int i, j;
   int count = 0, gsum = 0, gdiv;
@@ -35,8 +35,8 @@ static int find_grad_measure(unsigned char *x, int stride, int n, int t,
 }
 
 #if CONTEXT_PRED_REPLACEMENTS == 6
-B_PREDICTION_MODE vp9_find_dominant_direction(
-    unsigned char *ptr, int stride, int n) {
+B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
+                                              int stride, int n) {
   int g[8], i, imin, imax;
   g[1] = find_grad_measure(ptr, stride, n, 4,  2, 1);
   g[2] = find_grad_measure(ptr, stride, n, 4,  1, 1);
@@ -72,8 +72,8 @@ B_PREDICTION_MODE vp9_find_dominant_direction(
   }
 }
 #elif CONTEXT_PRED_REPLACEMENTS == 4
-B_PREDICTION_MODE vp9_find_dominant_direction(
-    unsigned char *ptr, int stride, int n) {
+B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
+                                              int stride, int n) {
   int g[8], i, imin, imax;
   g[1] = find_grad_measure(ptr, stride, n, 4,  2, 1);
   g[3] = find_grad_measure(ptr, stride, n, 4,  1, 2);
@@ -103,8 +103,8 @@ B_PREDICTION_MODE vp9_find_dominant_direction(
   }
 }
 #elif CONTEXT_PRED_REPLACEMENTS == 0
-B_PREDICTION_MODE vp9_find_dominant_direction(
-    unsigned char *ptr, int stride, int n) {
+B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
+                                              int stride, int n) {
   int g[8], i, imin, imax;
   g[0] = find_grad_measure(ptr, stride, n, 4,  1, 0);
   g[1] = find_grad_measure(ptr, stride, n, 4,  2, 1);
@@ -145,7 +145,7 @@ B_PREDICTION_MODE vp9_find_dominant_direction(
 #endif
 
 B_PREDICTION_MODE vp9_find_bpred_context(BLOCKD *x) {
-  unsigned char *ptr = *(x->base_dst) + x->dst;
+  uint8_t *ptr = *(x->base_dst) + x->dst;
   int stride = x->dst_stride;
   return vp9_find_dominant_direction(ptr, stride, 4);
 }
@@ -153,12 +153,12 @@ B_PREDICTION_MODE vp9_find_bpred_context(BLOCKD *x) {
 
 void vp9_intra4x4_predict(BLOCKD *x,
                           int b_mode,
-                          unsigned char *predictor) {
+                          uint8_t *predictor) {
   int i, r, c;
 
-  unsigned char *above = *(x->base_dst) + x->dst - x->dst_stride;
-  unsigned char left[4];
-  unsigned char top_left = above[-1];
+  uint8_t *above = *(x->base_dst) + x->dst - x->dst_stride;
+  uint8_t left[4];
+  uint8_t top_left = above[-1];
 
   left[0] = (*(x->base_dst))[x->dst - 1];
   left[1] = (*(x->base_dst))[x->dst - 1 + x->dst_stride];
@@ -203,8 +203,8 @@ void vp9_intra4x4_predict(BLOCKD *x,
     break;
 
     case B_VE_PRED: {
-
       unsigned int ap[4];
+
       ap[0] = above[0];
       ap[1] = above[1];
       ap[2] = above[2];
@@ -212,20 +212,17 @@ void vp9_intra4x4_predict(BLOCKD *x,
 
       for (r = 0; r < 4; r++) {
         for (c = 0; c < 4; c++) {
-
           predictor[c] = ap[c];
         }
 
         predictor += 16;
       }
-
     }
     break;
 
-
     case B_HE_PRED: {
-
       unsigned int lp[4];
+
       lp[0] = left[0];
       lp[1] = left[1];
       lp[2] = left[2];
@@ -241,7 +238,8 @@ void vp9_intra4x4_predict(BLOCKD *x,
     }
     break;
     case B_LD_PRED: {
-      unsigned char *ptr = above;
+      uint8_t *ptr = above;
+
       predictor[0 * 16 + 0] = (ptr[0] + ptr[1] * 2 + ptr[2] + 2) >> 2;
       predictor[0 * 16 + 1] =
         predictor[1 * 16 + 0] = (ptr[1] + ptr[2] * 2 + ptr[3] + 2) >> 2;
@@ -262,8 +260,7 @@ void vp9_intra4x4_predict(BLOCKD *x,
     }
     break;
     case B_RD_PRED: {
-
-      unsigned char pp[9];
+      uint8_t pp[9];
 
       pp[0] = left[3];
       pp[1] = left[2];
@@ -295,8 +292,7 @@ void vp9_intra4x4_predict(BLOCKD *x,
     }
     break;
     case B_VR_PRED: {
-
-      unsigned char pp[9];
+      uint8_t pp[9];
 
       pp[0] = left[3];
       pp[1] = left[2];
@@ -307,7 +303,6 @@ void vp9_intra4x4_predict(BLOCKD *x,
       pp[6] = above[1];
       pp[7] = above[2];
       pp[8] = above[3];
-
 
       predictor[3 * 16 + 0] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
       predictor[2 * 16 + 0] = (pp[2] + pp[3] * 2 + pp[4] + 2) >> 2;
@@ -329,8 +324,7 @@ void vp9_intra4x4_predict(BLOCKD *x,
     }
     break;
     case B_VL_PRED: {
-
-      unsigned char *pp = above;
+      uint8_t *pp = above;
 
       predictor[0 * 16 + 0] = (pp[0] + pp[1] + 1) >> 1;
       predictor[1 * 16 + 0] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
@@ -352,7 +346,8 @@ void vp9_intra4x4_predict(BLOCKD *x,
     break;
 
     case B_HD_PRED: {
-      unsigned char pp[9];
+      uint8_t pp[9];
+
       pp[0] = left[3];
       pp[1] = left[2];
       pp[2] = left[1];
@@ -385,7 +380,7 @@ void vp9_intra4x4_predict(BLOCKD *x,
 
 
     case B_HU_PRED: {
-      unsigned char *pp = left;
+      uint8_t *pp = left;
       predictor[0 * 16 + 0] = (pp[0] + pp[1] + 1) >> 1;
       predictor[0 * 16 + 1] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
       predictor[0 * 16 + 2] =
@@ -419,9 +414,9 @@ void vp9_intra4x4_predict(BLOCKD *x,
 
 #if CONFIG_COMP_INTRA_PRED
 void vp9_comp_intra4x4_predict_c(BLOCKD *x,
-                               int b_mode, int b_mode2,
-                               unsigned char *out_predictor) {
-  unsigned char predictor[2][4 * 16];
+                                 int b_mode, int b_mode2,
+                                 uint8_t *out_predictor) {
+  uint8_t predictor[2][4 * 16];
   int i, j;
 
   vp9_intra4x4_predict(x, b_mode, predictor[0]);
@@ -440,18 +435,18 @@ void vp9_comp_intra4x4_predict_c(BLOCKD *x,
  */
 void vp9_intra_prediction_down_copy(MACROBLOCKD *xd) {
   int extend_edge = (xd->mb_to_right_edge == 0 && xd->mb_index < 2);
-  unsigned char *above_right = *(xd->block[0].base_dst) + xd->block[0].dst -
+  uint8_t *above_right = *(xd->block[0].base_dst) + xd->block[0].dst -
                                xd->block[0].dst_stride + 16;
-  unsigned int *src_ptr = (unsigned int *)
+  uint32_t *src_ptr = (uint32_t *)
       (above_right - (xd->mb_index == 3 ? 16 * xd->block[0].dst_stride : 0));
 
-  unsigned int *dst_ptr0 = (unsigned int *)above_right;
-  unsigned int *dst_ptr1 =
-    (unsigned int *)(above_right + 4 * xd->block[0].dst_stride);
-  unsigned int *dst_ptr2 =
-    (unsigned int *)(above_right + 8 * xd->block[0].dst_stride);
-  unsigned int *dst_ptr3 =
-    (unsigned int *)(above_right + 12 * xd->block[0].dst_stride);
+  uint32_t *dst_ptr0 = (uint32_t *)above_right;
+  uint32_t *dst_ptr1 =
+    (uint32_t *)(above_right + 4 * xd->block[0].dst_stride);
+  uint32_t *dst_ptr2 =
+    (uint32_t *)(above_right + 8 * xd->block[0].dst_stride);
+  uint32_t *dst_ptr3 =
+    (uint32_t *)(above_right + 12 * xd->block[0].dst_stride);
 
   if (extend_edge) {
     *src_ptr = ((uint8_t *) src_ptr)[-1] * 0x01010101U;

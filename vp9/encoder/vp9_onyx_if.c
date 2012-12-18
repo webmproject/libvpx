@@ -2294,8 +2294,8 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 }
 
 
-static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
-                                 unsigned char *recon, int recon_stride,
+static uint64_t calc_plane_error(uint8_t *orig, int orig_stride,
+                                 uint8_t *recon, int recon_stride,
                                  unsigned int cols, unsigned int rows) {
   unsigned int row, col;
   uint64_t total_sse = 0;
@@ -2311,9 +2311,9 @@ static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
 
     /* Handle odd-sized width */
     if (col < cols) {
-      unsigned int   border_row, border_col;
-      unsigned char *border_orig = orig;
-      unsigned char *border_recon = recon;
+      unsigned int border_row, border_col;
+      uint8_t *border_orig = orig;
+      uint8_t *border_recon = recon;
 
       for (border_row = 0; border_row < 16; border_row++) {
         for (border_col = col; border_col < cols; border_col++) {
@@ -2472,7 +2472,7 @@ int vp9_update_entropy(VP9_PTR comp, int update) {
 
 #ifdef OUTPUT_YUV_SRC
 void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s) {
-  unsigned char *src = s->y_buffer;
+  uint8_t *src = s->y_buffer;
   int h = s->y_height;
 
   do {
@@ -2501,7 +2501,7 @@ void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s) {
 #ifdef OUTPUT_YUV_REC
 void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
   YV12_BUFFER_CONFIG *s = cm->frame_to_show;
-  unsigned char *src = s->y_buffer;
+  uint8_t *src = s->y_buffer;
   int h = cm->Height;
 
   do {
@@ -2674,9 +2674,9 @@ static double compute_edge_pixel_proportion(YV12_BUFFER_CONFIG *frame) {
   int i, j;
   int num_edge_pels = 0;
   int num_pels = (frame->y_height - 2) * (frame->y_width - 2);
-  unsigned char *prev = frame->y_buffer + 1;
-  unsigned char *curr = frame->y_buffer + 1 + frame->y_stride;
-  unsigned char *next = frame->y_buffer + 1 + 2 * frame->y_stride;
+  uint8_t *prev = frame->y_buffer + 1;
+  uint8_t *curr = frame->y_buffer + 1 + frame->y_stride;
+  uint8_t *next = frame->y_buffer + 1 + 2 * frame->y_stride;
   for (i = 1; i < frame->y_height - 1; i++) {
     for (j = 1; j < frame->y_width - 1; j++) {
       /* Sobel hor and ver gradients */
@@ -2887,13 +2887,10 @@ static void select_interintra_mode(VP9_COMP *cpi) {
 }
 #endif
 
-static void encode_frame_to_data_rate
-(
-  VP9_COMP *cpi,
-  unsigned long *size,
-  unsigned char *dest,
-  unsigned int *frame_flags
-) {
+static void encode_frame_to_data_rate(VP9_COMP *cpi,
+                                      unsigned long *size,
+                                      unsigned char *dest,
+                                      unsigned int *frame_flags) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
@@ -3189,7 +3186,7 @@ static void encode_frame_to_data_rate
 #if CONFIG_POSTPROC
 
   if (cpi->oxcf.noise_sensitivity > 0) {
-    unsigned char *src;
+    uint8_t *src;
     int l = 0;
 
     switch (cpi->oxcf.noise_sensitivity) {
@@ -4473,8 +4470,8 @@ int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
   int i, j;
   int Total = 0;
 
-  unsigned char *src = source->y_buffer;
-  unsigned char *dst = dest->y_buffer;
+  uint8_t *src = source->y_buffer;
+  uint8_t *dst = dest->y_buffer;
 
   // Loop through the Y plane raw and reconstruction data summing (square differences)
   for (i = 0; i < source->y_height; i += 16) {

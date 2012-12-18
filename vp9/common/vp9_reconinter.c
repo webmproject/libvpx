@@ -42,8 +42,7 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
     xd->subpixel_predict_avg    = vp9_eighttap_predict_avg4x4_sharp;
     xd->subpixel_predict_avg8x8 = vp9_eighttap_predict_avg8x8_sharp;
     xd->subpixel_predict_avg16x16 = vp9_eighttap_predict_avg16x16_sharp_c;
-  }
-  else {
+  } else {
     xd->subpixel_predict        = vp9_bilinear_predict4x4;
     xd->subpixel_predict8x4     = vp9_bilinear_predict8x4;
     xd->subpixel_predict8x8     = vp9_bilinear_predict8x8;
@@ -54,9 +53,9 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
   }
 }
 
-void vp9_copy_mem16x16_c(unsigned char *src,
+void vp9_copy_mem16x16_c(uint8_t *src,
                          int src_stride,
-                         unsigned char *dst,
+                         uint8_t *dst,
                          int dst_stride) {
   int r;
 
@@ -91,9 +90,9 @@ void vp9_copy_mem16x16_c(unsigned char *src,
   }
 }
 
-void vp9_avg_mem16x16_c(unsigned char *src,
+void vp9_avg_mem16x16_c(uint8_t *src,
                         int src_stride,
-                        unsigned char *dst,
+                        uint8_t *dst,
                         int dst_stride) {
   int r;
 
@@ -109,9 +108,9 @@ void vp9_avg_mem16x16_c(unsigned char *src,
   }
 }
 
-void vp9_copy_mem8x8_c(unsigned char *src,
+void vp9_copy_mem8x8_c(uint8_t *src,
                        int src_stride,
-                       unsigned char *dst,
+                       uint8_t *dst,
                        int dst_stride) {
   int r;
 
@@ -134,9 +133,9 @@ void vp9_copy_mem8x8_c(unsigned char *src,
   }
 }
 
-void vp9_avg_mem8x8_c(unsigned char *src,
+void vp9_avg_mem8x8_c(uint8_t *src,
                       int src_stride,
-                      unsigned char *dst,
+                      uint8_t *dst,
                       int dst_stride) {
   int r;
 
@@ -152,9 +151,9 @@ void vp9_avg_mem8x8_c(unsigned char *src,
   }
 }
 
-void vp9_copy_mem8x4_c(unsigned char *src,
+void vp9_copy_mem8x4_c(uint8_t *src,
                        int src_stride,
-                       unsigned char *dst,
+                       uint8_t *dst,
                        int dst_stride) {
   int r;
 
@@ -179,9 +178,9 @@ void vp9_copy_mem8x4_c(unsigned char *src,
 
 void vp9_build_inter_predictors_b(BLOCKD *d, int pitch, vp9_subpix_fn_t sppf) {
   int r;
-  unsigned char *ptr_base;
-  unsigned char *ptr;
-  unsigned char *pred_ptr = d->predictor;
+  uint8_t *ptr_base;
+  uint8_t *ptr;
+  uint8_t *pred_ptr = d->predictor;
   int_mv mv;
 
   ptr_base = *(d->base_pre);
@@ -221,9 +220,9 @@ void vp9_build_inter_predictors_b(BLOCKD *d, int pitch, vp9_subpix_fn_t sppf) {
 void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
                                       vp9_subpix_fn_t sppf) {
   int r;
-  unsigned char *ptr_base;
-  unsigned char *ptr;
-  unsigned char *pred_ptr = d->predictor;
+  uint8_t *ptr_base;
+  uint8_t *ptr;
+  uint8_t *pred_ptr = d->predictor;
   int_mv mv;
 
   ptr_base = *(d->base_second_pre);
@@ -251,9 +250,9 @@ void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
 }
 
 void vp9_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
-  unsigned char *ptr_base;
-  unsigned char *ptr;
-  unsigned char *pred_ptr = d->predictor;
+  uint8_t *ptr_base;
+  uint8_t *ptr;
+  uint8_t *pred_ptr = d->predictor;
   int_mv mv;
 
   ptr_base = *(d->base_pre);
@@ -277,9 +276,9 @@ void vp9_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
  */
 void vp9_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
                                       BLOCKD *d, int pitch) {
-  unsigned char *ptr_base;
-  unsigned char *ptr;
-  unsigned char *pred_ptr = d->predictor;
+  uint8_t *ptr_base;
+  uint8_t *ptr;
+  uint8_t *pred_ptr = d->predictor;
   int_mv mv;
 
   ptr_base = *(d->base_second_pre);
@@ -296,9 +295,9 @@ void vp9_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
 }
 
 static void build_inter_predictors2b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
-  unsigned char *ptr_base;
-  unsigned char *ptr;
-  unsigned char *pred_ptr = d->predictor;
+  uint8_t *ptr_base;
+  uint8_t *ptr;
+  uint8_t *pred_ptr = d->predictor;
   int_mv mv;
 
   ptr_base = *(d->base_pre);
@@ -328,13 +327,13 @@ static const int pred_filter[PRED_FILT_LEN] = {1, 2, 10, 2, 1};
 // Alternative filter {1, 1, 4, 1, 1}
 
 #if !USE_THRESH_FILTER
-void filter_mb(unsigned char *src, int src_stride,
-               unsigned char *dst, int dst_stride,
+void filter_mb(uint8_t *src, int src_stride,
+               uint8_t *dst, int dst_stride,
                int width, int height) {
   int i, j, k;
   unsigned int temp[32 * 32];
   unsigned int  *pTmp = temp;
-  unsigned char *pSrc = src - (1 + src_stride) * (PRED_FILT_LEN / 2);
+  uint8_t *pSrc = src - (1 + src_stride) * (PRED_FILT_LEN / 2);
 
   // Horizontal
   for (i = 0; i < height + PRED_FILT_LEN - 1; i++) {
@@ -352,7 +351,7 @@ void filter_mb(unsigned char *src, int src_stride,
   // Vertical
   pTmp = temp;
   for (i = 0; i < width; i++) {
-    unsigned char *pDst = dst + i;
+    uint8_t *pDst = dst + i;
     for (j = 0; j < height; j++) {
       int sum = 0;
       for (k = 0; k < PRED_FILT_LEN; k++)
@@ -366,15 +365,15 @@ void filter_mb(unsigned char *src, int src_stride,
 }
 #else
 // Based on vp9_post_proc_down_and_across_c (vp9_postproc.c)
-void filter_mb(unsigned char *src, int src_stride,
-               unsigned char *dst, int dst_stride,
+void filter_mb(uint8_t *src, int src_stride,
+               uint8_t *dst, int dst_stride,
                int width, int height) {
-  unsigned char *pSrc, *pDst;
+  uint8_t *pSrc, *pDst;
   int row;
   int col;
   int i;
   int v;
-  unsigned char d[8];
+  uint8_t d[8];
 
   /* TODO flimit should be linked to the quantizer value */
   int flimit = 7;
@@ -573,11 +572,11 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
 
 /*encoder only*/
 void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
-                                             unsigned char *dst_y,
+                                             uint8_t *dst_y,
                                              int dst_ystride,
                                              int clamp_mvs) {
-  unsigned char *ptr_base = xd->pre.y_buffer;
-  unsigned char *ptr;
+  uint8_t *ptr_base = xd->pre.y_buffer;
+  uint8_t *ptr;
   int pre_stride = xd->block[0].pre_stride;
   int_mv ymv;
 
@@ -593,8 +592,8 @@ void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
     if ((ymv.as_mv.row | ymv.as_mv.col) & 7) {
       // Sub-pel filter needs extended input
       int len = 15 + (VP9_INTERP_EXTEND << 1);
-      unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-      unsigned char *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
+      uint8_t Temp[32 * 32];  // Data required by sub-pel filter
+      uint8_t *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
 
       // Copy extended MB into Temp array, applying the spatial filter
       filter_mb(ptr - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
@@ -622,11 +621,11 @@ void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
 }
 
 void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                              unsigned char *dst_u,
-                                              unsigned char *dst_v,
+                                              uint8_t *dst_u,
+                                              uint8_t *dst_v,
                                               int dst_uvstride) {
   int offset;
-  unsigned char *uptr, *vptr;
+  uint8_t *uptr, *vptr;
   int pre_stride = xd->block[0].pre_stride;
   int_mv _o16x16mv;
   int_mv _16x16mv;
@@ -662,11 +661,11 @@ void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
 #if CONFIG_PRED_FILTER
   if (xd->mode_info_context->mbmi.pred_filter_enabled) {
     int i;
-    unsigned char *pSrc = uptr;
-    unsigned char *pDst = dst_u;
+    uint8_t *pSrc = uptr;
+    uint8_t *pDst = dst_u;
     int len = 7 + (VP9_INTERP_EXTEND << 1);
-    unsigned char Temp[32 * 32]; // Data required by the sub-pel filter
-    unsigned char *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
+    uint8_t Temp[32 * 32];  // Data required by the sub-pel filter
+    uint8_t *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
 
     // U & V
     for (i = 0; i < 2; i++) {
@@ -703,9 +702,9 @@ void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
 
 
 void vp9_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
-                                            unsigned char *dst_y,
-                                            unsigned char *dst_u,
-                                            unsigned char *dst_v,
+                                            uint8_t *dst_y,
+                                            uint8_t *dst_u,
+                                            uint8_t *dst_v,
                                             int dst_ystride, int dst_uvstride) {
   vp9_build_1st_inter16x16_predictors_mby(xd, dst_y, dst_ystride,
       xd->mode_info_context->mbmi.need_to_clamp_mvs);
@@ -714,9 +713,9 @@ void vp9_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
 
 #if CONFIG_SUPERBLOCKS
 void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
-                                        unsigned char *dst_y,
-                                        unsigned char *dst_u,
-                                        unsigned char *dst_v,
+                                        uint8_t *dst_y,
+                                        uint8_t *dst_u,
+                                        uint8_t *dst_v,
                                         int dst_ystride,
                                         int dst_uvstride) {
   uint8_t *y1 = x->pre.y_buffer, *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
@@ -798,15 +797,15 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
  * single reference framer.
  */
 void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
-                                             unsigned char *dst_y,
+                                             uint8_t *dst_y,
                                              int dst_ystride) {
-  unsigned char *ptr;
+  uint8_t *ptr;
 
   int_mv _16x16mv;
   int mv_row;
   int mv_col;
 
-  unsigned char *ptr_base = xd->second_pre.y_buffer;
+  uint8_t *ptr_base = xd->second_pre.y_buffer;
   int pre_stride = xd->block[0].pre_stride;
 
   _16x16mv.as_int = xd->mode_info_context->mbmi.mv[1].as_int;
@@ -824,8 +823,8 @@ void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
     if ((mv_row | mv_col) & 7) {
       // Sub-pel filter needs extended input
       int len = 15 + (VP9_INTERP_EXTEND << 1);
-      unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-      unsigned char *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
+      uint8_t Temp[32 * 32];  // Data required by sub-pel filter
+      uint8_t *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
 
       // Copy extended MB into Temp array, applying the spatial filter
       filter_mb(ptr - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
@@ -852,11 +851,11 @@ void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
 }
 
 void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                              unsigned char *dst_u,
-                                              unsigned char *dst_v,
+                                              uint8_t *dst_u,
+                                              uint8_t *dst_v,
                                               int dst_uvstride) {
   int offset;
-  unsigned char *uptr, *vptr;
+  uint8_t *uptr, *vptr;
 
   int_mv _16x16mv;
   int mv_row;
@@ -891,10 +890,10 @@ void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
   if (xd->mode_info_context->mbmi.pred_filter_enabled) {
     int i;
     int len = 7 + (VP9_INTERP_EXTEND << 1);
-    unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-    unsigned char *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
-    unsigned char *pSrc = uptr;
-    unsigned char *pDst = dst_u;
+    uint8_t Temp[32 * 32];  // Data required by sub-pel filter
+    uint8_t *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
+    uint8_t *pSrc = uptr;
+    uint8_t *pDst = dst_u;
 
     // U & V
     for (i = 0; i < 2; i++) {
@@ -930,9 +929,9 @@ void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
 }
 
 void vp9_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
-                                            unsigned char *dst_y,
-                                            unsigned char *dst_u,
-                                            unsigned char *dst_v,
+                                            uint8_t *dst_y,
+                                            uint8_t *dst_u,
+                                            uint8_t *dst_v,
                                             int dst_ystride,
                                             int dst_uvstride) {
   vp9_build_2nd_inter16x16_predictors_mby(xd, dst_y, dst_ystride);

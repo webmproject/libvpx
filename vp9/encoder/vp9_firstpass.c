@@ -295,7 +295,7 @@ static const double weight_table[256] = {
 static double simple_weight(YV12_BUFFER_CONFIG *source) {
   int i, j;
 
-  unsigned char *src = source->y_buffer;
+  uint8_t *src = source->y_buffer;
   double sum_weights = 0.0;
 
   // Loop throught the Y plane raw examining levels and creating a weight for the image
@@ -344,15 +344,15 @@ static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *r
   BLOCK *b = &x->block[0];
   BLOCKD *d = &x->e_mbd.block[0];
 
-  unsigned char *src_ptr = (*(b->base_src) + b->src);
+  uint8_t *src_ptr = (*(b->base_src) + b->src);
   int src_stride = b->src_stride;
-  unsigned char *ref_ptr;
+  uint8_t *ref_ptr;
   int ref_stride = d->pre_stride;
 
   // Set up pointers for this macro block recon buffer
   xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
 
-  ref_ptr = (unsigned char *)(*(d->base_pre) + d->pre);
+  ref_ptr = (uint8_t *)(*(d->base_pre) + d->pre);
 
   vp9_mse16x16(src_ptr, src_stride, ref_ptr, ref_stride,
                (unsigned int *)(best_motion_err));
