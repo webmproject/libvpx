@@ -268,7 +268,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
 
   // Get baseline error score
   vp9_set_alt_lf_level(cpi, filt_mid);
-  vp9_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_mid);
+  vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_mid, 1);
 
   best_err = vp9_calc_ss_err(sd, cm->frame_to_show);
   filt_best = filt_mid;
@@ -293,7 +293,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
     if ((filt_direction <= 0) && (filt_low != filt_mid)) {
       // Get Low filter error score
       vp9_set_alt_lf_level(cpi, filt_low);
-      vp9_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_low);
+      vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_low, 1);
 
       filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
@@ -313,7 +313,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
     // Now look at filt_high
     if ((filt_direction >= 0) && (filt_high != filt_mid)) {
       vp9_set_alt_lf_level(cpi, filt_high);
-      vp9_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_high);
+      vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_high, 1);
 
       filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
