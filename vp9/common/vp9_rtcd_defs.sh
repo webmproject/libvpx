@@ -40,7 +40,7 @@ fi
 # Dequant
 #
 prototype void vp9_dequantize_b "struct blockd *x"
-specialize vp9_dequantize_b mmx
+specialize vp9_dequantize_b
 
 prototype void vp9_dequantize_b_2x2 "struct blockd *x"
 specialize vp9_dequantize_b_2x2
@@ -67,13 +67,13 @@ prototype void vp9_dequant_dc_idct_add "short *input, const short *dq, unsigned 
 specialize vp9_dequant_dc_idct_add
 
 prototype void vp9_dequant_dc_idct_add_y_block "short *q, const short *dq, unsigned char *pre, unsigned char *dst, int stride, unsigned short *eobs, const short *dc"
-specialize vp9_dequant_dc_idct_add_y_block mmx
+specialize vp9_dequant_dc_idct_add_y_block
 
 prototype void vp9_dequant_idct_add_y_block "short *q, const short *dq, unsigned char *pre, unsigned char *dst, int stride, unsigned short *eobs"
-specialize vp9_dequant_idct_add_y_block mmx
+specialize vp9_dequant_idct_add_y_block
 
 prototype void vp9_dequant_idct_add_uv_block "short *q, const short *dq, unsigned char *pre, unsigned char *dstu, unsigned char *dstv, int stride, unsigned short *eobs"
-specialize vp9_dequant_idct_add_uv_block mmx
+specialize vp9_dequant_idct_add_uv_block
 
 #
 # RECON
@@ -341,10 +341,10 @@ specialize vp9_bilinear_predict_avg4x4
 # dct
 #
 prototype void vp9_short_idct4x4llm_1 "short *input, short *output, int pitch"
-specialize vp9_short_idct4x4llm_1 mmx
+specialize vp9_short_idct4x4llm_1
 
 prototype void vp9_short_idct4x4llm "short *input, short *output, int pitch"
-specialize vp9_short_idct4x4llm mmx
+specialize vp9_short_idct4x4llm
 
 prototype void vp9_short_idct8x8 "short *input, short *output, int pitch"
 specialize vp9_short_idct8x8

@@ -87,7 +87,6 @@ VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_asm_stubs.c
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_loopfilter_x86.c
 VP9_COMMON_SRCS-$(CONFIG_POSTPROC) += common/vp9_postproc.h
 VP9_COMMON_SRCS-$(CONFIG_POSTPROC) += common/vp9_postproc.c
-VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_idctllm_mmx.asm
 VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_iwalsh_mmx.asm
 VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_recon_mmx.asm
 VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_subpixel_mmx.asm
