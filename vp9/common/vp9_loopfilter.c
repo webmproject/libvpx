@@ -183,7 +183,15 @@ static int mb_lf_skip(const MB_MODE_INFO *const mbmi) {
   return mode != B_PRED && mode != I8X8_PRED && mode != SPLITMV &&
          tx_size >= TX_16X16 && skip_coef;
 }
-
+static int sb_mb_lf_skip(const MODE_INFO *const mip0,
+                         const MODE_INFO *const mip1) {
+  return mb_lf_skip(&mip0->mbmi) &&
+         mb_lf_skip(&mip1->mbmi) &&
+#if CONFIG_TX32X32
+         mip0->mbmi.txfm_size >= TX_32X32 &&
+#endif
+         mip0->mbmi.ref_frame;
+}
 void vp9_loop_filter_frame(VP9_COMMON *cm,
                            MACROBLOCKD *xd,
                            int frame_filter_level,
@@ -229,15 +237,19 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
           lfi.lim = lfi_n->lim[filter_level];
           lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
-          if (mb_col > 0 &&
-              !((mb_col & 1) && mode_info_context->mbmi.sb_type &&
-                ((skip_lf && mb_lf_skip(&mode_info_context[-1].mbmi))
-#if CONFIG_TX32X32
-                || tx_size == TX_32X32
-#endif
-                )))
-            vp9_loop_filter_mbv(y_ptr, u_ptr, v_ptr, post->y_stride,
+          if (mb_col > 0
+              && !((mb_col & 1) && mode_info_context->mbmi.sb_type &&
+                   sb_mb_lf_skip(mode_info_context - 1, mode_info_context))
+              ) {
+#if CONFIG_WIDERLPF
+            if (tx_size >= TX_16X16)
+              vp9_lpf_mbv_w(y_ptr, u_ptr, v_ptr, post->y_stride,
                                 post->uv_stride, &lfi);
+            else
+#endif
+              vp9_loop_filter_mbv(y_ptr, u_ptr, v_ptr, post->y_stride,
+                                post->uv_stride, &lfi);
+          }
           if (!skip_lf) {
             if (tx_size >= TX_8X8)
               vp9_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
@@ -248,19 +260,23 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
 
           }
           /* don't apply across umv border */
-          if (mb_row > 0 &&
-              !((mb_row & 1) && mode_info_context->mbmi.sb_type &&
-                ((skip_lf && mb_lf_skip(&mode_info_context[-mis].mbmi))
-#if CONFIG_TX32X32
-                 || tx_size == TX_32X32
-#endif
-                 )))
-            vp9_loop_filter_mbh(y_ptr, u_ptr, v_ptr, post->y_stride,
+          if (mb_row > 0
+              && !((mb_row & 1) && mode_info_context->mbmi.sb_type &&
+                   sb_mb_lf_skip(mode_info_context - mis, mode_info_context))
+              ) {
+#if CONFIG_WIDERLPF
+            if (tx_size >= TX_16X16)
+              vp9_lpf_mbh_w(y_ptr, u_ptr, v_ptr, post->y_stride,
                                 post->uv_stride, &lfi);
+            else
+#endif
+              vp9_loop_filter_mbh(y_ptr, u_ptr, v_ptr, post->y_stride,
+                                post->uv_stride, &lfi);
+          }
           if (!skip_lf) {
             if (tx_size >= TX_8X8)
               vp9_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                    post->uv_stride, &lfi);
+                                  post->uv_stride, &lfi);
             else
               vp9_loop_filter_bh(y_ptr, u_ptr, v_ptr, post->y_stride,
                                  post->uv_stride, &lfi);

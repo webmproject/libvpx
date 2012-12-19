@@ -254,6 +254,7 @@ EXPERIMENT_LIST="
     cnvcontext
     newcoefcontext
     enable_6tap
+    widerlpf
 "
 CONFIG_LIST="
     external_build
