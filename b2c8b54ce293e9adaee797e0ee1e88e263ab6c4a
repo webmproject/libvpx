@@ -1,0 +1,463 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAATn///5k\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "space after \u0027*\u0027.",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///5c\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "i wonder if that\u0027s really the proper test...",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///50\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "hard to parse. add spaces around \u0027-\u0027.",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///5o\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "space around \u0027\u0026\u0027 here too",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///5Y\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "\"ec\" is somehow cryptic as a name...",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///4U\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "uint8_t instead?",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///4Q\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "does it really need to be 16bits? If so -\u003e int16_t",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///4M\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "ditto.",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///4I\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "does it really have to be inlined? I can\u0027t think it makes a visible speed difference...",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///4E\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "\"const uint8_t* const end \u003d _buf + _sz\"?",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///38\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "\u0027dif\u0027 is quite a cryptic name",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///4A\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "why the prefixing with \"_\" on variables?",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///34\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "expression very hard to parse without deep knowledge of operator precedence rules.",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3o\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "too many statements in one line",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3k\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "space after )",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3s\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "hard to parse.",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3g\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "space after )",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3w\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "just remove",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3c\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "cast is surprising",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3Y\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "abuse ()\u0027s to enforce precedence readibility",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3U\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "this magic lacks a lot of comments.\n\n(and could be better expressed with a \"while()\" i guess)",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3M\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "const uint8_t*",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3Q\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "uint32",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3I\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "seems like magic",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3E\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "unneeded outer ()\u0027s",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///3A\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "add an assert(0)",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///28\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1761,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-19T22:50:40Z",
+      "side": 1,
+      "message": "looks like these two cases should be a vp9_bool_find_end() methods of their own in dboolhuff.h.\n\nThere\u0027s too many magic details here at this level, that pertain to the implementation side",
+      "revId": "b2c8b54ce293e9adaee797e0ee1e88e263ab6c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
