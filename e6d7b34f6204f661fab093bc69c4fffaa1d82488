@@ -16,6 +16,24 @@
       "revId": "e6d7b34f6204f661fab093bc69c4fffaa1d82488",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAATn///kw\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-12-20T04:12:31Z",
+      "side": 1,
+      "message": "Yes, there is a slight change in the logic and it was intentional. My intention is to reduce the chance of loop filtering being skipped, therefore reduce the tendency of being blocky.\n\nTests on derf and std-hd showed this change appears to be going towards the right direction, i.e quality metric numbers overall get slightly better(~0.25%), and the old deblocking filter in post-processing no longer improves the quality metrics after this change.",
+      "parentUuid": "AAAATn///pA\u003d",
+      "revId": "e6d7b34f6204f661fab093bc69c4fffaa1d82488",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
