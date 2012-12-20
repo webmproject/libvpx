@@ -1001,7 +1001,11 @@ EOF
         soft_enable sse2
         soft_enable sse3
         soft_enable ssse3
-        soft_enable sse4_1
+        if enabled gcc && ! disabled sse4_1 && ! check_cflags -msse4; then
+            RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sse4_1 "
+        else
+            soft_enable sse4_1
+        fi
 
         case  ${tgt_os} in
             win*)
