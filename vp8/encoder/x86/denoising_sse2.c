@@ -15,6 +15,7 @@
 #include "vp8_rtcd.h"
 
 #include <emmintrin.h>
+#include "vpx_ports/emmintrin_compat.h"
 
 union sum_union {
     __m128i v;
