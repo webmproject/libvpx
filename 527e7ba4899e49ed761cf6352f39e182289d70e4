@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAT3///dc\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAT3///lc\u003d",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAT3///lg\u003d",
         "filename": "vp9/decoder/vp9_dboolhuff.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAT3///dM\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "Oops, got the one you commented on last time, missed the others. Fixed.",
+      "parentUuid": "AAAAT3///lg\u003d",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAT3///ls\u003d",
         "filename": "vp9/decoder/vp9_dboolhuff.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2012-12-20T20:30:57Z",
       "side": 1,
       "message": "source \u003d\u003d NULL",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///c8\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "I\u0027d like to defer these more cosmetic changes to the existing code to a later CL to avoid polluting this one.",
+      "parentUuid": "AAAAT3///ls\u003d",
       "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -172,6 +226,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAT3///ck\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "the caller could test that the pointer returned by stop_decode() is \u003e\u003d the start of the buffer, but we don\u0027t currently track that pointer in the br struct.",
+      "parentUuid": "AAAAT3///k0\u003d",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAT3///k4\u003d",
         "filename": "vp9/decoder/vp9_dboolhuff.c",
         "patchSetId": 3
@@ -183,6 +255,24 @@
       "writtenOn": "2012-12-20T20:30:57Z",
       "side": 1,
       "message": "looks like \"(-15 + CHAR_BIT)\" could be some constant #define",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///cI\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAT3///k4\u003d",
       "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -206,6 +296,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAT3///cE\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAT3///kw\u003d",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAT3///ko\u003d",
         "filename": "vp9/decoder/vp9_dboolhuff.c",
         "patchSetId": 3
@@ -217,6 +325,24 @@
       "writtenOn": "2012-12-20T20:30:57Z",
       "side": 1,
       "message": "--br-\u003euser_buffer;",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///cA\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAT3///ko\u003d",
       "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -240,6 +366,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAT3///X8\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAT3///kA\u003d",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAT3///kY\u003d",
         "filename": "vp9/decoder/vp9_dboolhuff.h",
         "patchSetId": 3
@@ -251,6 +395,24 @@
       "writtenOn": "2012-12-20T20:30:57Z",
       "side": 1,
       "message": "how to be sure the loop will terminate??",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///Zg\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "It\u0027s required that f[] contain a value that\u0027s \u003d\u003d 1\u003c\u003cftb. In this case, v\u003d\u003dr, and since r \u003e q always, v \u003e q, and the loop will terminate.",
+      "parentUuid": "AAAAT3///kY\u003d",
       "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -274,6 +436,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAT3///Y8\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "updated the renormalization to use the same thing we use in vp8, and added some better variable names. Should read a bit better now.",
+      "parentUuid": "AAAAT3///jw\u003d",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAT3///kU\u003d",
         "filename": "vp9/decoder/vp9_dboolhuff.h",
         "patchSetId": 3
@@ -291,6 +471,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAT3///Y4\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAT3///kU\u003d",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAT3///js\u003d",
         "filename": "vp9/decoder/vp9_dboolhuff.h",
         "patchSetId": 3
@@ -302,6 +500,24 @@
       "writtenOn": "2012-12-20T20:30:57Z",
       "side": 1,
       "message": "\u0027br\u0027 should just have a \u0027had_errors\u0027 bool field instead...",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///YA\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-12-20T23:15:06Z",
+      "side": 1,
+      "message": "This isn\u0027t just about errors. It gives deterministic EOS behavior and allows the encoder to terminate the stream optimally by relying on this behavior in the decoder. That\u0027s one of the challenges when we go to add error concealment later, I don\u0027t know if you can determine whether the bitstream is truncated like you could in vp8.",
+      "parentUuid": "AAAAT3///js\u003d",
       "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
