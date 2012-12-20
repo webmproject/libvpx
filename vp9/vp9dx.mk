@@ -27,6 +27,7 @@ VP9_DX_SRCS-yes += decoder/vp9_dboolhuff.h
 VP9_DX_SRCS-yes += decoder/vp9_decodemv.h
 VP9_DX_SRCS-yes += decoder/vp9_dequantize.h
 VP9_DX_SRCS-yes += decoder/vp9_detokenize.h
+VP9_DX_SRCS-yes += decoder/vp9_onyxd.h
 VP9_DX_SRCS-yes += decoder/vp9_onyxd_int.h
 VP9_DX_SRCS-yes += decoder/vp9_treereader.h
 VP9_DX_SRCS-yes += decoder/vp9_onyxd_if.c
