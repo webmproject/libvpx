@@ -12,7 +12,7 @@
 %include "vpx_ports/x86_abi_support.asm"
 
 ;void vp9_short_inv_walsh4x4_1_mmx(short *input, short *output)
-global sym(vp9_short_inv_walsh4x4_1_mmx)
+global sym(vp9_short_inv_walsh4x4_1_mmx) PRIVATE
 sym(vp9_short_inv_walsh4x4_1_mmx):
     push        rbp
     mov         rbp, rsp
@@ -48,7 +48,7 @@ sym(vp9_short_inv_walsh4x4_1_mmx):
     ret
 
 ;void vp9_short_inv_walsh4x4_mmx(short *input, short *output)
-global sym(vp9_short_inv_walsh4x4_mmx)
+global sym(vp9_short_inv_walsh4x4_mmx) PRIVATE
 sym(vp9_short_inv_walsh4x4_mmx):
     push        rbp
     mov         rbp, rsp

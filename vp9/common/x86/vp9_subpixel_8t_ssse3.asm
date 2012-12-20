@@ -30,7 +30,7 @@
 ;    unsigned int   output_height,
 ;    short *filter
 ;)
-global sym(vp9_filter_block1d8_v8_ssse3)
+global sym(vp9_filter_block1d8_v8_ssse3) PRIVATE
 sym(vp9_filter_block1d8_v8_ssse3):
     push        rbp
     mov         rbp, rsp
@@ -148,7 +148,7 @@ sym(vp9_filter_block1d8_v8_ssse3):
 ;    unsigned int   output_height,
 ;    short *filter
 ;)
-global sym(vp9_filter_block1d16_v8_ssse3)
+global sym(vp9_filter_block1d16_v8_ssse3) PRIVATE
 sym(vp9_filter_block1d16_v8_ssse3):
     push        rbp
     mov         rbp, rsp
@@ -298,7 +298,7 @@ sym(vp9_filter_block1d16_v8_ssse3):
 ;    unsigned int    output_height,
 ;    short *filter
 ;)
-global sym(vp9_filter_block1d8_h8_ssse3)
+global sym(vp9_filter_block1d8_h8_ssse3) PRIVATE
 sym(vp9_filter_block1d8_h8_ssse3):
     push        rbp
     mov         rbp, rsp
@@ -405,7 +405,7 @@ sym(vp9_filter_block1d8_h8_ssse3):
 ;    unsigned int    output_height,
 ;    short *filter
 ;)
-global sym(vp9_filter_block1d16_h8_ssse3)
+global sym(vp9_filter_block1d16_h8_ssse3) PRIVATE
 sym(vp9_filter_block1d16_h8_ssse3):
     push        rbp
     mov         rbp, rsp

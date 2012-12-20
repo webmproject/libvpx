@@ -12,7 +12,7 @@
 %include "vpx_ports/x86_abi_support.asm"
 
 ;void vp9_short_fdct4x4_mmx(short *input, short *output, int pitch)
-global sym(vp9_short_fdct4x4_mmx)
+global sym(vp9_short_fdct4x4_mmx) PRIVATE
 sym(vp9_short_fdct4x4_mmx):
     push        rbp
     mov         rbp,        rsp

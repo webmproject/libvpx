@@ -14,7 +14,7 @@
 ;void vp9_subtract_b_sse2_impl(unsigned char *z,  int src_stride,
 ;                            short *diff, unsigned char *Predictor,
 ;                            int pitch);
-global sym(vp9_subtract_b_sse2_impl)
+global sym(vp9_subtract_b_sse2_impl) PRIVATE
 sym(vp9_subtract_b_sse2_impl):
     push        rbp
     mov         rbp, rsp
@@ -72,7 +72,7 @@ sym(vp9_subtract_b_sse2_impl):
 
 
 ;void vp9_subtract_mby_sse2(short *diff, unsigned char *src, unsigned char *pred, int stride)
-global sym(vp9_subtract_mby_sse2)
+global sym(vp9_subtract_mby_sse2) PRIVATE
 sym(vp9_subtract_mby_sse2):
     push        rbp
     mov         rbp, rsp
@@ -146,7 +146,7 @@ sym(vp9_subtract_mby_sse2):
 
 
 ;void vp9_subtract_mbuv_sse2(short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride)
-global sym(vp9_subtract_mbuv_sse2)
+global sym(vp9_subtract_mbuv_sse2) PRIVATE
 sym(vp9_subtract_mbuv_sse2):
     push        rbp
     mov         rbp, rsp
