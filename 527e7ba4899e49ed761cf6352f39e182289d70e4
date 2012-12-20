@@ -1,0 +1,310 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAT3///lc\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "uint32_t -\u003e size_t ?",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///lg\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "i still can\u0027t parse this line in less than 1min",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///ls\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "source \u003d\u003d NULL",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///lY\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "uint8_t",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///lQ\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "unsigned -\u003e uint32_t (everywhere?)",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///lM\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "prefer:\n\nif (num_values \u003c\u003d 1) return 0;\n--numvalues;",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///lI\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "const int l",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///lE\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "const int m",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///k8\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "prefer:\nfor (bit \u003d 0; lmax \u003e 0; ++bit) {\n  data |\u003d decode_bool(br, 128) \u003c\u003c bit;\n  lmax \u003e\u003e\u003d 1;\n}",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///k0\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "--br-\u003ebuf;\n\n\nbtw: how to test br-\u003ebuf is still a valid address?",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///k4\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "looks like \"(-15 + CHAR_BIT)\" could be some constant #define",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///kw\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "same as 152",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///ko\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "--br-\u003euser_buffer;",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///kA\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "insigned -\u003e uint32_t\n\n(or, just \u0027int\u0027)",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///kY\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "how to be sure the loop will terminate??",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///jw\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "\u0027s\u0027 variable shouldn\u0027t be re-used. It\u0027s strange to compare this line to line 82 (\"s \u003e\u003d 0\")",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///kU\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "uint8_t",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3///js\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-12-20T20:30:57Z",
+      "side": 1,
+      "message": "\u0027br\u0027 should just have a \u0027had_errors\u0027 bool field instead...",
+      "revId": "527e7ba4899e49ed761cf6352f39e182289d70e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
