@@ -2841,6 +2841,45 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
 }
 
+void select_interp_filter_type(VP9_COMP *cpi) {
+  int i;
+  int high_filter_index;
+  unsigned int thresh;
+  unsigned int high_count = 0;
+  unsigned int count_sum = 0;
+  unsigned int *hist = cpi->best_switchable_interp_count;
+
+  if (DEFAULT_INTERP_FILTER != SWITCHABLE) {
+    cpi->common.mcomp_filter_type = DEFAULT_INTERP_FILTER;
+    return;
+  }
+
+  // TODO(agrange): Look at using RD criteria to select the interpolation
+  // filter to use for the next frame rather than this simpler counting scheme.
+
+  // Select the interpolation filter mode for the next frame
+  // based on the selection frequency seen in the current frame.
+  for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
+    unsigned int count = hist[i];
+    count_sum += count;
+    if (count > high_count) {
+      high_count = count;
+      high_filter_index = i;
+    }
+  }
+
+  thresh = (unsigned int)(0.80 * count_sum);
+
+  if (high_count > thresh) {
+    // One filter accounts for 80+% of cases so force the next
+    // frame to use this filter exclusively using frame-level flag.
+    cpi->common.mcomp_filter_type = vp9_switchable_interp[high_filter_index];
+  } else {
+    // Use a MB-level switchable filter selection strategy.
+    cpi->common.mcomp_filter_type = SWITCHABLE;
+  }
+}
+
 #if CONFIG_PRED_FILTER
 void select_pred_filter_mode(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
@@ -3131,7 +3170,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (cpi->active_worst_quality < cpi->active_best_quality)
     cpi->active_worst_quality = cpi->active_best_quality;
 
-  // Specuial case code to try and match quality with forced key frames
+  // Special case code to try and match quality with forced key frames
   if ((cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced) {
     Q = cpi->last_boosted_qindex;
   } else {
@@ -3485,37 +3524,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (cpi->is_src_frame_alt_ref)
       Loop = FALSE;
 
-    if (cm->frame_type != KEY_FRAME &&
-        !sf->search_best_filter &&
-        cm->mcomp_filter_type == SWITCHABLE) {
-      int interp_factor = Q / 3;  /* denominator is 256 */
-      int count[VP9_SWITCHABLE_FILTERS];
-      int tot_count = 0, c = 0, thr;
-      int i, j;
-      for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
-        count[i] = 0;
-        for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j) {
-          count[i] += cpi->switchable_interp_count[j][i];
-        }
-        tot_count += count[i];
-      }
-
-      thr = ((tot_count * interp_factor + 128) >> 8);
-      for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
-        c += (count[i] >= thr);
-      }
-      if (c == 1) {
-        /* Mostly one filter is used. So set the filter at frame level */
-        for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
-          if (count[i]) {
-            cm->mcomp_filter_type = vp9_switchable_interp[i];
-            Loop = TRUE;  /* Make sure to loop since the filter changed */
-            break;
-          }
-        }
-      }
-    }
-
     if (Loop == FALSE && cm->frame_type != KEY_FRAME && sf->search_best_filter) {
       if (mcomp_filter_index < mcomp_filters) {
         int64_t err = vp9_calc_ss_err(cpi->Source,
@@ -3570,6 +3578,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
     if (Loop == TRUE) {
       loop_count++;
+
 #if CONFIG_INTERNAL_STATS
       cpi->tot_recode_hits++;
 #endif
