@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAT3//+so\u003d",
+        "filename": "CHANGELOG",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-12-21T22:19:34Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "28c602b7405ee17584e7707165959e39413987e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
