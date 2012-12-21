@@ -13,9 +13,9 @@
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_subpixel.h"
 
-extern const short vp9_six_tap_mmx[16][6 * 8];
+extern const short vp9_six_tap_mmx[8][6 * 8];
 
-extern const short vp9_bilinear_filters_8x_mmx[16][2 * 8];
+extern const short vp9_bilinear_filters_8x_mmx[8][2 * 8];
 
 extern void vp9_filter_block1d_h6_mmx(unsigned char   *src_ptr,
                                       unsigned short  *output_ptr,
