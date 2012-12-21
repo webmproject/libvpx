@@ -11,6 +11,7 @@
 #include <emmintrin.h>  // SSE2
 #include "vpx_config.h"
 #include "vp9/common/vp9_loopfilter.h"
+#include "vpx_ports/emmintrin_compat.h"
 
 prototype_loopfilter(vp9_loop_filter_vertical_edge_mmx);
 prototype_loopfilter(vp9_loop_filter_horizontal_edge_mmx);

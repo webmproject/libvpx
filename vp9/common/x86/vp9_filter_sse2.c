@@ -11,6 +11,7 @@
 #include <assert.h> // for alignment checks
 #include <emmintrin.h> // SSE2
 #include "vp9/common/vp9_filter.h"
+#include "vpx_ports/emmintrin_compat.h"
 #include "vpx_ports/mem.h" // for DECLARE_ALIGNED
 #include "vp9_rtcd.h"
 

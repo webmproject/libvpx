@@ -12,6 +12,7 @@
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/emmintrin_compat.h"
 
 #if HAVE_SSE2
 unsigned int vp9_sad16x3_sse2(
