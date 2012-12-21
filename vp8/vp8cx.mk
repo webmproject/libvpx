@@ -9,8 +9,6 @@
 ##
 
 
-include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8_common.mk
-
 VP8_CX_EXPORTS += exports_enc
 
 VP8_CX_SRCS-yes += $(VP8_COMMON_SRCS-yes)
@@ -97,6 +95,7 @@ ifeq ($(CONFIG_TEMPORAL_DENOISING),yes)
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/denoising_sse2.c
 ifeq ($(HAVE_SSE2),yes)
 vp8/encoder/x86/denoising_sse2.c.o: CFLAGS += -msse2
+vp8/encoder/x86/denoising_sse2.c.d: CFLAGS += -msse2
 endif
 endif
 
@@ -115,3 +114,6 @@ endif
 
 
 VP8_CX_SRCS-yes := $(filter-out $(VP8_CX_SRCS_REMOVE-yes),$(VP8_CX_SRCS-yes))
+
+$(eval $(call asm_offsets_template,\
+         vp8_asm_enc_offsets.asm, $(VP8_PREFIX)encoder/asm_enc_offsets.c))

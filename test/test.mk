@@ -1,6 +1,7 @@
-LIBVPX_TEST_SRCS-yes += acm_random.h
 LIBVPX_TEST_SRCS-yes += register_state_check.h
 LIBVPX_TEST_SRCS-yes += test.mk
+LIBVPX_TEST_SRCS-yes += acm_random.h
+
 LIBVPX_TEST_SRCS-yes += test_libvpx.cc
 LIBVPX_TEST_SRCS-yes += util.h
 LIBVPX_TEST_SRCS-yes += video_source.h
@@ -34,12 +35,14 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += test_vector_test.cc
 ##
 ifeq ($(CONFIG_SHARED),)
 
+## VP8
+ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
+
 # These tests require both the encoder and decoder to be built.
 ifeq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),yesyes)
-LIBVPX_TEST_SRCS-yes                   += boolcoder_test.cc
+LIBVPX_TEST_SRCS-yes                   += vp8_boolcoder_test.cc
 endif
 
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += fdct4x4_test.cc
 LIBVPX_TEST_SRCS-yes                   += idctllm_test.cc
 LIBVPX_TEST_SRCS-yes                   += intrapred_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
@@ -47,6 +50,27 @@ LIBVPX_TEST_SRCS-yes                   += sad_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += set_roi.cc
 LIBVPX_TEST_SRCS-yes                   += sixtap_predict_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += subtract_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += vp8_fdct4x4_test.cc
+
+endif # VP8
+
+## VP9
+ifneq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),)
+
+# These tests require both the encoder and decoder to be built.
+ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),yesyes)
+LIBVPX_TEST_SRCS-yes                   += vp9_boolcoder_test.cc
+
+# IDCT test currently depends on FDCT function
+LIBVPX_TEST_SRCS-yes                   += idct8x8_test.cc
+endif
+
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
+#LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
+endif # VP9
+
 
 endif
 

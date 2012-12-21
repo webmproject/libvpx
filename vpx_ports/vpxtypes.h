@@ -14,7 +14,7 @@
 
 #include "vpx_config.h"
 
-//#include <sys/types.h>
+// #include <sys/types.h>
 #ifdef _MSC_VER
 # include <basetsd.h>
 typedef SSIZE_T ssize_t;
@@ -107,25 +107,24 @@ typedef vpxu64 uint64_t;
 
 /*!\ingroup basetypes
    \brief Common return type*/
-typedef enum
-{
-    VPX_NOT_FOUND        = -404,
-    VPX_BUFFER_EMPTY     = -202,
-    VPX_BUFFER_FULL      = -201,
+typedef enum {
+  VPX_NOT_FOUND        = -404,
+  VPX_BUFFER_EMPTY     = -202,
+  VPX_BUFFER_FULL      = -201,
 
-    VPX_CONNREFUSED      = -102,
-    VPX_TIMEDOUT         = -101,
-    VPX_WOULDBLOCK       = -100,
+  VPX_CONNREFUSED      = -102,
+  VPX_TIMEDOUT         = -101,
+  VPX_WOULDBLOCK       = -100,
 
-    VPX_NET_ERROR        = -9,
-    VPX_INVALID_VERSION  = -8,
-    VPX_INPROGRESS       = -7,
-    VPX_NOT_SUPP         = -6,
-    VPX_NO_MEM           = -3,
-    VPX_INVALID_PARAMS   = -2,
-    VPX_ERROR            = -1,
-    VPX_OK               = 0,
-    VPX_DONE             = 1
+  VPX_NET_ERROR        = -9,
+  VPX_INVALID_VERSION  = -8,
+  VPX_INPROGRESS       = -7,
+  VPX_NOT_SUPP         = -6,
+  VPX_NO_MEM           = -3,
+  VPX_INVALID_PARAMS   = -2,
+  VPX_ERROR            = -1,
+  VPX_OK               = 0,
+  VPX_DONE             = 1
 } vpxsc;
 
 #if defined(WIN32) || defined(_WIN32_WCE)
@@ -135,7 +134,7 @@ typedef enum
 #elif defined(LINUX)
 # define DLLIMPORT
 /*visibility attribute support is available in 3.4 and later.
-  see: http://gcc.gnu.org/wiki/Visibility for more info*/
+  see: http:// gcc.gnu.org/wiki/Visibility for more info*/
 # if defined(__GNUC__) && ((__GNUC__<<16|(__GNUC_MINOR__&0xff)) >= (3<<16|4))
 #  define GCC_HASCLASSVISIBILITY
 # endif /*defined(__GNUC__) && __GNUC_PREREQ(3,4)*/

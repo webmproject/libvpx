@@ -13,7 +13,7 @@
 #include "vp8/common/reconinter.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 
 static const unsigned int NOISE_MOTION_THRESHOLD = 25 * 25;
 /* SSE_DIFF_THRESHOLD is selected as ~95% confidence assuming

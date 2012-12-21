@@ -14,7 +14,7 @@
 #include <limits.h>
 #include <assert.h>
 #include "vpx_config.h"
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 #include "vp8/common/pragmas.h"
 #include "tokenize.h"
 #include "treewriter.h"

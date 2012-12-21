@@ -9,8 +9,6 @@
 ##
 
 
-include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8_common.mk
-
 VP8_DX_EXPORTS += exports_dec
 
 VP8_DX_SRCS-yes += $(VP8_COMMON_SRCS-yes)
@@ -21,30 +19,6 @@ VP8_DX_SRCS_REMOVE-no  += $(VP8_COMMON_SRCS_REMOVE-no)
 VP8_DX_SRCS-yes += vp8dx.mk
 
 VP8_DX_SRCS-yes += vp8_dx_iface.c
-
-# common
-#define ARM
-#define DISABLE_THREAD
-
-#INCLUDES += algo/vpx_common/vpx_mem/include
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += decoder
-
-
-
-# decoder
-#define ARM
-#define DISABLE_THREAD
-
-#INCLUDES += algo/vpx_common/vpx_mem/include
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += decoder
 
 VP8_DX_SRCS-yes += decoder/asm_dec_offsets.c
 VP8_DX_SRCS-yes += decoder/dboolhuff.c
@@ -64,3 +38,6 @@ VP8_DX_SRCS-yes += decoder/onyxd_if.c
 VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/threading.c
 
 VP8_DX_SRCS-yes := $(filter-out $(VP8_DX_SRCS_REMOVE-yes),$(VP8_DX_SRCS-yes))
+
+$(eval $(call asm_offsets_template,\
+         vp8_asm_dec_offsets.asm, $(VP8_PREFIX)decoder/asm_dec_offsets.c))

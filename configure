@@ -34,6 +34,7 @@ Advanced options:
   ${toggle_md5}                   support for output of checksum data
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
   ${toggle_vp8}                   VP8 codec support
+  ${toggle_vp9}                   VP9 codec support
   ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
   ${toggle_mem_tracker}           track memory usage
   ${toggle_postproc}              postprocessing
@@ -176,19 +177,24 @@ enable os_support
 enable temporal_denoising
 
 [ -d ${source_path}/../include ] && enable alt_tree_layout
-for d in vp8; do
+for d in vp8 vp9; do
     [ -d ${source_path}/${d} ] && disable alt_tree_layout;
 done
 
 if ! enabled alt_tree_layout; then
 # development environment
 [ -d ${source_path}/vp8 ] && CODECS="${CODECS} vp8_encoder vp8_decoder"
+[ -d ${source_path}/vp9 ] && CODECS="${CODECS} vp9_encoder vp9_decoder"
 else
 # customer environment
 [ -f ${source_path}/../include/vpx/vp8cx.h ] && CODECS="${CODECS} vp8_encoder"
 [ -f ${source_path}/../include/vpx/vp8dx.h ] && CODECS="${CODECS} vp8_decoder"
+[ -f ${source_path}/../include/vpx/vp9cx.h ] && CODECS="${CODECS} vp9_encoder"
+[ -f ${source_path}/../include/vpx/vp9dx.h ] && CODECS="${CODECS} vp9_decoder"
 [ -f ${source_path}/../include/vpx/vp8cx.h ] || disable vp8_encoder
 [ -f ${source_path}/../include/vpx/vp8dx.h ] || disable vp8_decoder
+[ -f ${source_path}/../include/vpx/vp9cx.h ] || disable vp9_encoder
+[ -f ${source_path}/../include/vpx/vp9dx.h ] || disable vp9_decoder
 
 [ -f ${source_path}/../lib/*/*mt.lib ] && soft_enable static_msvcrt
 fi
@@ -229,6 +235,18 @@ HAVE_LIST="
     pthread_h
     sys_mman_h
     unistd_h
+"
+EXPERIMENT_LIST="
+    csm
+    comp_intra_pred
+    superblocks
+    pred_filter
+    lossless
+    subpelrefmv
+    new_mvref
+    implicit_segmentation
+    newbintramodes
+    comp_interintra_pred
 "
 CONFIG_LIST="
     external_build
@@ -276,8 +294,11 @@ CONFIG_LIST="
     unit_tests
     multi_res_encoding
     temporal_denoising
+    experimental
+    ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
+    external_build
     extra_warnings
     werror
     install_docs
@@ -322,6 +343,7 @@ CMDLINE_SELECT="
     unit_tests
     multi_res_encoding
     temporal_denoising
+    experimental
 "
 
 process_cmdline() {
@@ -329,6 +351,18 @@ process_cmdline() {
         optval="${opt#*=}"
         case "$opt" in
         --disable-codecs) for c in ${CODECS}; do disable $c; done ;;
+        --enable-?*|--disable-?*)
+        eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
+        if echo "${EXPERIMENT_LIST}" | grep "^ *$option\$" >/dev/null; then
+            if enabled experimental; then
+                $action $option
+            else
+                log_echo "Ignoring $opt -- not in experimental mode."
+            fi
+        else
+            process_common_cmdline $opt
+        fi
+        ;;
         *) process_common_cmdline "$opt"
         ;;
         esac
@@ -464,7 +498,7 @@ process_detect() {
             fi
         fi
     fi
-    if [ -z "$CC" ]; then
+    if [ -z "$CC" ] || enabled external_build; then
         echo "Bypassing toolchain for environment detection."
         enable external_build
         check_header() {
@@ -473,6 +507,7 @@ process_detect() {
             shift
             var=`echo $header | sed 's/[^A-Za-z0-9_]/_/g'`
             disable $var
+            # Headers common to all environments
             case $header in
                 stdio.h)
                     true;
@@ -484,6 +519,25 @@ process_detect() {
                     done
                     ${result:-true}
             esac && enable $var
+
+            # Specialize windows and POSIX environments.
+            case $toolchain in
+                *-win*-*)
+                    case $header-$toolchain in
+                        stdint*-gcc) true;;
+                        *) false;;
+                    esac && enable $var
+                    ;;
+                *)
+                    case $header in
+                        stdint.h) true;;
+                        pthread.h) true;;
+                        sys/mman.h) true;;
+                        unistd.h) true;;
+                        *) false;;
+                    esac && enable $var
+            esac
+            enabled $var
         }
         check_ld() {
             true
@@ -497,6 +551,7 @@ EOF
     check_header stdint.h
     check_header pthread.h
     check_header sys/mman.h
+    check_header unistd.h # for sysconf(3) and friends.
 
     check_header vpx/vpx_integer.h -I${source_path} && enable vpx_ports
 }
@@ -537,6 +592,7 @@ process_toolchain() {
         check_add_cflags -Wpointer-arith
         check_add_cflags -Wtype-limits
         check_add_cflags -Wcast-qual
+        check_add_cflags -Wvla
         check_add_cflags -Wimplicit-function-declaration
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunused-variable

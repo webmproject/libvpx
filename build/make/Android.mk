@@ -208,4 +208,3 @@ endif
 ifeq ($(CONFIG_RUNTIME_CPU_DETECT),yes)
 $(call import-module,cpufeatures)
 endif
-

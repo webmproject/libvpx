@@ -10,7 +10,7 @@
 
 
 #include "vpx_config.h"
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #elif ARCH_X86 || ARCH_X86_64

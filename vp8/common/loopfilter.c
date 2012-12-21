@@ -10,7 +10,7 @@
 
 
 #include "vpx_config.h"
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 #include "loopfilter.h"
 #include "onyxc_int.h"
 #include "vpx_mem/vpx_mem.h"

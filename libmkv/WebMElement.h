@@ -17,8 +17,8 @@ void writeSimpleBock(EbmlGlobal *ebml, unsigned char trackNumber, unsigned short
 
 // these are helper functions
 void writeHeader(EbmlGlobal *ebml);
-void writeSegmentInformation(EbmlGlobal *ebml, EbmlLoc* startInfo , unsigned long timeCodeScale, double duration);
-//this function is a helper only, it assumes a lot of defaults
+void writeSegmentInformation(EbmlGlobal *ebml, EbmlLoc *startInfo, unsigned long timeCodeScale, double duration);
+// this function is a helper only, it assumes a lot of defaults
 void writeVideoTrack(EbmlGlobal *ebml, unsigned int trackNumber, int flagLacing,
                      char *codecId, unsigned int pixelWidth, unsigned int pixelHeight,
                      double frameRate);

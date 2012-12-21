@@ -51,7 +51,7 @@ Some codecs provide fine grained controls over their built-in
 postprocessors. VP8 is one example. The following sample code toggles
 postprocessing on and off every 15 frames.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PRE_DECODE
-#if CONFIG_VP8_DECODER
+#if CONFIG_VP9_DECODER
 if(frame_cnt%30 == 1) {
     vp8_postproc_cfg_t  pp = {0, 0, 0};
 

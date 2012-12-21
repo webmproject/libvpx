@@ -45,8 +45,8 @@
 #define HMM_UNIQUE(BASE) hmm_ ## BASE
 
 /* Number of bytes in an Address Alignment Unit (AAU). */
-//fwg
-//#define HMM_ADDR_ALIGN_UNIT sizeof(int)
+// fwg
+// #define HMM_ADDR_ALIGN_UNIT sizeof(int)
 #define HMM_ADDR_ALIGN_UNIT 32
 
 /* Number of AAUs in a Block Alignment Unit (BAU). */
@@ -65,7 +65,7 @@ void hmm_dflt_abort(const char *, const char *);
 ** statement.  If you remove the definition of this macro, no self-auditing
 ** will be performed. */
 #define HMM_AUDIT_FAIL \
-    hmm_dflt_abort(__FILE__, HMM_SYM_TO_STRING(__LINE__));
+  hmm_dflt_abort(__FILE__, HMM_SYM_TO_STRING(__LINE__));
 
 #elif HMM_CNFG_NUM == 0
 
@@ -90,8 +90,8 @@ extern const char *HMM_UNIQUE(fail_file);
 extern unsigned HMM_UNIQUE(fail_line);
 
 #define HMM_AUDIT_FAIL \
-    { HMM_UNIQUE(fail_file) = __FILE__; HMM_UNIQUE(fail_line) = __LINE__; \
-        longjmp(HMM_UNIQUE(jmp_buf), 1); }
+  { HMM_UNIQUE(fail_file) = __FILE__; HMM_UNIQUE(fail_line) = __LINE__; \
+    longjmp(HMM_UNIQUE(jmp_buf), 1); }
 
 #elif HMM_CNFG_NUM == 1
 

@@ -127,6 +127,7 @@ enum ebml_type_enum {
 
 /* Track IDs */
 #define TRACK_ID_VP8            "V_VP8"
+#define TRACK_ID_VP9            "V_VP9"
 #define TRACK_ID_VORBIS         "A_VORBIS"
 
 enum vint_mask {
@@ -1668,6 +1669,9 @@ nestegg_track_codec_id(nestegg * ctx, unsigned int track)
 
   if (strcmp(codec_id, TRACK_ID_VP8) == 0)
     return NESTEGG_CODEC_VP8;
+
+  if (strcmp(codec_id, TRACK_ID_VP9) == 0)
+    return NESTEGG_CODEC_VP9;
 
   if (strcmp(codec_id, TRACK_ID_VORBIS) == 0)
     return NESTEGG_CODEC_VORBIS;

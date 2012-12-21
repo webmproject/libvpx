@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx/vp8dx.h"
 #include "vpx/internal/vpx_codec_internal.h"
@@ -194,7 +194,7 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
     vpx_codec_err_t        res = VPX_CODEC_OK;
     (void) data;
 
-    vpx_rtcd();
+    vp8_rtcd();
 
     /* This function only allocates space for the vpx_codec_alg_priv_t
      * structure. More memory may be required at the time the stream

@@ -11,7 +11,7 @@
 
 #include <limits.h>
 #include "vpx_config.h"
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "blockd.h"
 #include "reconinter.h"

@@ -17,6 +17,47 @@ else
   ASM:=.asm
 endif
 
+
+#
+# Calculate platform- and compiler-specific offsets for hand coded assembly
+#
+ifeq ($(filter icc gcc,$(TGT_CC)), $(TGT_CC))
+OFFSET_PATTERN:='^[a-zA-Z0-9_]* EQU'
+define asm_offsets_template
+$$(BUILD_PFX)$(1): $$(BUILD_PFX)$(2).S
+	@echo "    [CREATE] $$@"
+	$$(qexec)LC_ALL=C grep $$(OFFSET_PATTERN) $$< | tr -d '$$$$\#' $$(ADS2GAS) > $$@
+$$(BUILD_PFX)$(2).S: $(2)
+CLEAN-OBJS += $$(BUILD_PFX)$(1) $(2).S
+endef
+else
+  ifeq ($(filter rvct,$(TGT_CC)), $(TGT_CC))
+define asm_offsets_template
+$$(BUILD_PFX)$(1): obj_int_extract
+$$(BUILD_PFX)$(1): $$(BUILD_PFX)$(2).o
+	@echo "    [CREATE] $$@"
+	$$(qexec)./obj_int_extract rvds $$< $$(ADS2GAS) > $$@
+OBJS-yes += $$(BUILD_PFX)$(2).o
+CLEAN-OBJS += $$(BUILD_PFX)$(1)
+$$(filter %$$(ASM).o,$$(OBJS-yes)): $$(BUILD_PFX)$(1)
+endef
+endif # rvct
+endif # !gcc
+
+#
+# Rule to generate runtime cpu detection files
+#
+define rtcd_h_template
+$$(BUILD_PFX)$(1).h: $$(SRC_PATH_BARE)/$(2)
+	@echo "    [CREATE] $$@"
+	$$(qexec)$$(SRC_PATH_BARE)/build/make/rtcd.sh --arch=$$(TGT_ISA) \
+          --sym=$(1) \
+          --config=$$(target)$$(if $$(FAT_ARCHS),,-$$(TOOLCHAIN)).mk \
+          $$(RTCD_OPTIONS) $$^ > $$@
+CLEAN-OBJS += $$(BUILD_PFX)$(1).h
+RTCD += $$(BUILD_PFX)$(1).h
+endef
+
 CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
 
@@ -40,9 +81,12 @@ CODEC_SRCS-yes += $(addprefix vpx_scale/,$(call enabled,SCALE_SRCS))
 include $(SRC_PATH_BARE)/vpx_ports/vpx_ports.mk
 CODEC_SRCS-yes += $(addprefix vpx_ports/,$(call enabled,PORTS_SRCS))
 
+ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
+  VP8_PREFIX=vp8/
+  include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8_common.mk
+endif
 
 ifeq ($(CONFIG_VP8_ENCODER),yes)
-  VP8_PREFIX=vp8/
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8cx.mk
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_CX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
@@ -52,13 +96,41 @@ ifeq ($(CONFIG_VP8_ENCODER),yes)
 endif
 
 ifeq ($(CONFIG_VP8_DECODER),yes)
-  VP8_PREFIX=vp8/
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8dx.mk
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_DX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_DX_EXPORTS))
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
   CODEC_DOC_SECTIONS += vp8 vp8_decoder
+endif
+
+ifneq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),)
+  VP9_PREFIX=vp9/
+  include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9_common.mk
+endif
+
+ifeq ($(CONFIG_VP9_ENCODER),yes)
+  VP9_PREFIX=vp9/
+  include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9cx.mk
+  CODEC_SRCS-yes += $(addprefix $(VP9_PREFIX),$(call enabled,VP9_CX_SRCS))
+  CODEC_EXPORTS-yes += $(addprefix $(VP9_PREFIX),$(VP9_CX_EXPORTS))
+  CODEC_SRCS-yes += $(VP9_PREFIX)vp9cx.mk vpx/vp8.h vpx/vp8cx.h
+  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
+  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP9_PREFIX)/%
+  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
+  CODEC_DOC_SECTIONS += vp9 vp9_encoder
+endif
+
+ifeq ($(CONFIG_VP9_DECODER),yes)
+  VP9_PREFIX=vp9/
+  include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9dx.mk
+  CODEC_SRCS-yes += $(addprefix $(VP9_PREFIX),$(call enabled,VP9_DX_SRCS))
+  CODEC_EXPORTS-yes += $(addprefix $(VP9_PREFIX),$(VP9_DX_EXPORTS))
+  CODEC_SRCS-yes += $(VP9_PREFIX)vp9dx.mk vpx/vp8.h vpx/vp8dx.h
+  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
+  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP9_PREFIX)/%
+  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8dx.h
+  CODEC_DOC_SECTIONS += vp9 vp9_decoder
 endif
 
 
@@ -91,8 +163,11 @@ endif
 
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/rtcd.sh
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emmintrin_compat.h
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_once.h
 CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
 INSTALL-SRCS-no += $(BUILD_PFX)vpx_config.c
+CODEC_SRCS-$(BUILD_LIBVPX) += third_party/x86inc/x86inc.asm
 CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
@@ -116,7 +191,7 @@ INSTALL-LIBS-$(CONFIG_STATIC) += $(LIBSUBDIR)/libvpx.a
 INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(LIBSUBDIR)/libvpx_g.a
 endif
 
-CODEC_SRCS=$(filter-out %_test.cc,$(call enabled,CODEC_SRCS))
+CODEC_SRCS=$(call enabled,CODEC_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(CODEC_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 
@@ -158,8 +233,8 @@ CLEAN-OBJS += vpx.def
 vpx.vcproj: $(CODEC_SRCS) vpx.def
 	@echo "    [CREATE] $@"
 	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
-			--lib \
-			--target=$(TOOLCHAIN) \
+            $(if $(CONFIG_SHARED),--dll,--lib) \
+            --target=$(TOOLCHAIN) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
             --name=vpx \
             --proj-guid=DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74 \
@@ -171,7 +246,7 @@ vpx.vcproj: $(CODEC_SRCS) vpx.def
 PROJECTS-$(BUILD_LIBVPX) += vpx.vcproj
 
 vpx.vcproj: vpx_config.asm
-vpx.vcproj: vpx_rtcd.h
+vpx.vcproj: $(RTCD)
 
 endif
 else
@@ -180,17 +255,29 @@ OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
 LIBS-$(if $(BUILD_LIBVPX),$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
+
 BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
+
+ifeq ($(filter darwin%,$(TGT_OS)),$(TGT_OS))
+LIBVPX_SO               := libvpx.$(VERSION_MAJOR).dylib
+EXPORT_FILE             := libvpx.syms
+LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
+                             libvpx.dylib  )
+else
 LIBVPX_SO               := libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
-LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)\
-                           $(notdir $(LIBVPX_SO_SYMLINKS))
-$(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) libvpx.ver
-$(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
-$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
-$(BUILD_PFX)$(LIBVPX_SO): SO_VERSION_SCRIPT = libvpx.ver
+EXPORT_FILE             := libvpx.ver
+SYM_LINK                := libvpx.so
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
                              libvpx.so libvpx.so.$(VERSION_MAJOR) \
                              libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR))
+endif
+
+LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)\
+                           $(notdir $(LIBVPX_SO_SYMLINKS))
+$(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) $(EXPORT_FILE)
+$(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
+$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
+$(BUILD_PFX)$(LIBVPX_SO): EXPORTS_FILE = $(EXPORT_FILE)
 
 libvpx.ver: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
@@ -199,10 +286,16 @@ libvpx.ver: $(call enabled,CODEC_EXPORTS)
 	$(qexec)echo "local: *; };" >> $@
 CLEAN-OBJS += libvpx.ver
 
+libvpx.syms: $(call enabled,CODEC_EXPORTS)
+	@echo "    [CREATE] $@"
+	$(qexec)awk '{print "_"$$2}' $^ >$@
+CLEAN-OBJS += libvpx.syms
+
 define libvpx_symlink_template
 $(1): $(2)
-	@echo "    [LN]      $$@"
-	$(qexec)ln -sf $(LIBVPX_SO) $$@
+	@echo "    [LN]     $(2) $$@"
+	$(qexec)mkdir -p $$(dir $$@)
+	$(qexec)ln -sf $(2) $$@
 endef
 
 $(eval $(call libvpx_symlink_template,\
@@ -210,10 +303,12 @@ $(eval $(call libvpx_symlink_template,\
     $(BUILD_PFX)$(LIBVPX_SO)))
 $(eval $(call libvpx_symlink_template,\
     $(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)),\
-    $(DIST_DIR)/$(LIBSUBDIR)/$(LIBVPX_SO)))
+    $(LIBVPX_SO)))
 
-INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBVPX_SO_SYMLINKS)
-INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBSUBDIR)/$(LIBVPX_SO)
+
+INSTALL-LIBS-$(BUILD_LIBVPX_SO) += $(LIBVPX_SO_SYMLINKS)
+INSTALL-LIBS-$(BUILD_LIBVPX_SO) += $(LIBSUBDIR)/$(LIBVPX_SO)
+
 
 LIBS-$(BUILD_LIBVPX) += vpx.pc
 vpx.pc: config.mk libs.mk
@@ -229,7 +324,7 @@ vpx.pc: config.mk libs.mk
 	$(qexec)echo 'Version: $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)' >> $@
 	$(qexec)echo 'Requires:' >> $@
 	$(qexec)echo 'Conflicts:' >> $@
-	$(qexec)echo 'Libs: -L$${libdir} -lvpx' >> $@
+	$(qexec)echo 'Libs: -L$${libdir} -lvpx -lm' >> $@
 	$(qexec)echo 'Libs.private: -lm -lpthread' >> $@
 	$(qexec)echo 'Cflags: -I$${includedir}' >> $@
 INSTALL-LIBS-yes += $(LIBSUBDIR)/pkgconfig/vpx.pc
@@ -265,71 +360,10 @@ endif
 $(filter %.s.o,$(OBJS-yes)):     $(BUILD_PFX)vpx_config.asm
 $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 
-#
-# Calculate platform- and compiler-specific offsets for hand coded assembly
-#
-
-OFFSET_PATTERN:='^[a-zA-Z0-9_]* EQU'
-
-ifeq ($(filter icc gcc,$(TGT_CC)), $(TGT_CC))
-    $(BUILD_PFX)asm_com_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
-	@echo "    [CREATE] $@"
-	$(qexec)LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
-    $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S: $(VP8_PREFIX)common/asm_com_offsets.c
-    CLEAN-OBJS += $(BUILD_PFX)asm_com_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
-
-    $(BUILD_PFX)asm_enc_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
-	@echo "    [CREATE] $@"
-	$(qexec)LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
-    $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S: $(VP8_PREFIX)encoder/asm_enc_offsets.c
-    CLEAN-OBJS += $(BUILD_PFX)asm_enc_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
-
-    $(BUILD_PFX)asm_dec_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
-	@echo "    [CREATE] $@"
-	$(qexec)LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
-    $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S: $(VP8_PREFIX)decoder/asm_dec_offsets.c
-    CLEAN-OBJS += $(BUILD_PFX)asm_dec_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
-else
-  ifeq ($(filter rvct,$(TGT_CC)), $(TGT_CC))
-    asm_com_offsets.asm: obj_int_extract
-    asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.o
-	@echo "    [CREATE] $@"
-	$(qexec)./obj_int_extract rvds $< $(ADS2GAS) > $@
-    OBJS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.o
-    CLEAN-OBJS += asm_com_offsets.asm
-    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_com_offsets.asm
-
-    asm_enc_offsets.asm: obj_int_extract
-    asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
-	@echo "    [CREATE] $@"
-	$(qexec)./obj_int_extract rvds $< $(ADS2GAS) > $@
-    OBJS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
-    CLEAN-OBJS += asm_enc_offsets.asm
-    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
-
-    asm_dec_offsets.asm: obj_int_extract
-    asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
-	@echo "    [CREATE] $@"
-	$(qexec)./obj_int_extract rvds $< $(ADS2GAS) > $@
-    OBJS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
-    CLEAN-OBJS += asm_dec_offsets.asm
-    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_dec_offsets.asm
-  endif
-endif
 
 $(shell $(SRC_PATH_BARE)/build/make/version.sh "$(SRC_PATH_BARE)" $(BUILD_PFX)vpx_version.h)
 CLEAN-OBJS += $(BUILD_PFX)vpx_version.h
 
-#
-# Rule to generate runtime cpu detection files
-#
-$(BUILD_PFX)vpx_rtcd.h: $(SRC_PATH_BARE)/$(sort $(filter %rtcd_defs.sh,$(CODEC_SRCS)))
-	@echo "    [CREATE] $@"
-	$(qexec)$(SRC_PATH_BARE)/build/make/rtcd.sh --arch=$(TGT_ISA) \
-          --sym=vpx_rtcd \
-          --config=$(target)$(if $(FAT_ARCHS),,-$(TOOLCHAIN)).mk \
-          $(RTCD_OPTIONS) $^ > $@
-CLEAN-OBJS += $(BUILD_PFX)vpx_rtcd.h
 
 ##
 ## libvpx test directives
@@ -375,6 +409,7 @@ gtest.vcproj: $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
             --proj-guid=EC00E1EC-AF68-4D92-A255-181690D1C9B1 \
             --ver=$(CONFIG_VS_VERSION) \
             --src-path-bare="$(SRC_PATH_BARE)" \
+            -D_VARIADIC_MAX=10 \
             --out=gtest.vcproj $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" -I"$(SRC_PATH_BARE)/third_party/googletest/src"
 
@@ -386,6 +421,7 @@ test_libvpx.vcproj: $(LIBVPX_TEST_SRCS)
             --exe \
             --target=$(TOOLCHAIN) \
             --name=test_libvpx \
+            -D_VARIADIC_MAX=10 \
             --proj-guid=CD837F5F-52D8-4314-A370-895D614166A7 \
             --ver=$(CONFIG_VS_VERSION) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
@@ -450,5 +486,8 @@ libs.doxy: $(CODEC_DOC_SRCS)
 	@echo "INCLUDE_PATH += ." >> $@;
 	@echo "ENABLED_SECTIONS += $(sort $(CODEC_DOC_SECTIONS))" >> $@
 
-## Generate vpx_rtcd.h for all objects
-$(OBJS-yes:.o=.d): $(BUILD_PFX)vpx_rtcd.h
+## Generate rtcd.h for all objects
+$(OBJS-yes:.o=.d): $(RTCD)
+
+## Update the global src list
+SRCS += $(CODEC_SRCS) $(LIBVPX_TEST_SRCS) $(GTEST_SRCS)

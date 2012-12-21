@@ -10,7 +10,7 @@
 
 
 #include <stdlib.h>
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 #include "vp8/common/onyxc_int.h"
 
 #if HAVE_DSPR2

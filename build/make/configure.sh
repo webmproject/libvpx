@@ -277,6 +277,7 @@ clean_temp_files() {
 # Toolchain Check Functions
 #
 check_cmd() {
+    enabled external_build && return
     log "$@"
     "$@" >>${logfile} 2>&1
 }
@@ -435,10 +436,10 @@ RTCD_OPTIONS = ${RTCD_OPTIONS}
 EOF
 
     if enabled rvct; then cat >> $1 << EOF
-fmt_deps = sed -e 's;^__image.axf;\$(dir \$@)\$(notdir \$<).o \$@;' #hide
+fmt_deps = sed -e 's;^__image.axf;\$\${@:.d=.o} \$\$@;' #hide
 EOF
     else cat >> $1 << EOF
-fmt_deps = sed -e 's;^\([a-zA-Z0-9_]*\)\.o;\$(dir \$@)\1\$(suffix \$<).o \$@;'
+fmt_deps = sed -e 's;^\([a-zA-Z0-9_]*\)\.o;\$\${@:.d=.o} \$\$@;'
 EOF
     fi
 
@@ -1001,7 +1002,11 @@ EOF
         soft_enable sse2
         soft_enable sse3
         soft_enable ssse3
-        soft_enable sse4_1
+        if enabled gcc && ! disabled sse4_1 && ! check_cflags -msse4; then
+            RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sse4_1 "
+        else
+            soft_enable sse4_1
+        fi
 
         case  ${tgt_os} in
             win*)
@@ -1175,9 +1180,6 @@ EOF
             fi
         ;;
     esac
-
-    # for sysconf(3) and friends.
-    check_header unistd.h
 
     # glibc needs these
     if enabled linux; then

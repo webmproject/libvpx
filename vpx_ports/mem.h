@@ -31,8 +31,8 @@
  * within the array.
  */
 #define DECLARE_ALIGNED_ARRAY(a,typ,val,n)\
-typ val##_[(n)+(a)/sizeof(typ)+1];\
-typ *val = (typ*)((((intptr_t)val##_)+(a)-1)&((intptr_t)-(a)))
+  typ val##_[(n)+(a)/sizeof(typ)+1];\
+  typ *val = (typ*)((((intptr_t)val##_)+(a)-1)&((intptr_t)-(a)))
 
 
 /* Indicates that the usage of the specified variable has been audited to assure

@@ -29,26 +29,25 @@ static int entered = 0;
 
 /* Print abort message, file and line.  Terminate execution.
 */
-void hmm_dflt_abort(const char *file, const char *line)
-{
-    /* Avoid use of printf(), which is more likely to use heap. */
+void hmm_dflt_abort(const char *file, const char *line) {
+  /* Avoid use of printf(), which is more likely to use heap. */
 
-    if (entered)
+  if (entered)
 
-        /* The standard I/O functions called a heap function and caused
-        ** an indirect recursive call to this function.  So we'll have
-        ** to just exit without printing a message.  */
-        while (1);
-
-    entered = 1;
-
-    fputs("\n_abort - Heap corruption\n" "File: ", stderr);
-    fputs(file, stderr);
-    fputs("  Line: ", stderr);
-    fputs(line, stderr);
-    fputs("\n\n", stderr);
-    fputs("hmm_dflt_abort: while(1)!!!\n", stderr);
-    fflush(stderr);
-
+    /* The standard I/O functions called a heap function and caused
+    ** an indirect recursive call to this function.  So we'll have
+    ** to just exit without printing a message.  */
     while (1);
+
+  entered = 1;
+
+  fputs("\n_abort - Heap corruption\n" "File: ", stderr);
+  fputs(file, stderr);
+  fputs("  Line: ", stderr);
+  fputs(line, stderr);
+  fputs("\n\n", stderr);
+  fputs("hmm_dflt_abort: while(1)!!!\n", stderr);
+  fflush(stderr);
+
+  while (1);
 }

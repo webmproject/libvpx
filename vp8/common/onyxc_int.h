@@ -13,7 +13,7 @@
 #define __INC_VP8C_INT_H
 
 #include "vpx_config.h"
-#include "vpx_rtcd.h"
+#include "vp8_rtcd.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "loopfilter.h"
 #include "entropymv.h"

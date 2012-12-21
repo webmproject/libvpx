@@ -36,34 +36,32 @@
  *
  * The set of macros define the control functions of VP8 interface
  */
-enum vp8_com_control_id
-{
-    VP8_SET_REFERENCE           = 1,    /**< pass in an external frame into decoder to be used as reference frame */
-    VP8_COPY_REFERENCE          = 2,    /**< get a copy of reference frame from the decoder */
-    VP8_SET_POSTPROC            = 3,    /**< set the decoder's post processing settings  */
-    VP8_SET_DBG_COLOR_REF_FRAME = 4,    /**< set the reference frames to color for each macroblock */
-    VP8_SET_DBG_COLOR_MB_MODES  = 5,    /**< set which macro block modes to color */
-    VP8_SET_DBG_COLOR_B_MODES   = 6,    /**< set which blocks modes to color */
-    VP8_SET_DBG_DISPLAY_MV      = 7,    /**< set which motion vector modes to draw */
-    VP8_COMMON_CTRL_ID_MAX,
-    VP8_DECODER_CTRL_ID_START   = 256
+enum vp8_com_control_id {
+  VP8_SET_REFERENCE           = 1,    /**< pass in an external frame into decoder to be used as reference frame */
+  VP8_COPY_REFERENCE          = 2,    /**< get a copy of reference frame from the decoder */
+  VP8_SET_POSTPROC            = 3,    /**< set the decoder's post processing settings  */
+  VP8_SET_DBG_COLOR_REF_FRAME = 4,    /**< set the reference frames to color for each macroblock */
+  VP8_SET_DBG_COLOR_MB_MODES  = 5,    /**< set which macro block modes to color */
+  VP8_SET_DBG_COLOR_B_MODES   = 6,    /**< set which blocks modes to color */
+  VP8_SET_DBG_DISPLAY_MV      = 7,    /**< set which motion vector modes to draw */
+  VP8_COMMON_CTRL_ID_MAX,
+  VP8_DECODER_CTRL_ID_START   = 256
 };
 
 /*!\brief post process flags
  *
  * The set of macros define VP8 decoder post processing flags
  */
-enum vp8_postproc_level
-{
-    VP8_NOFILTERING             = 0,
-    VP8_DEBLOCK                 = 1<<0,
-    VP8_DEMACROBLOCK            = 1<<1,
-    VP8_ADDNOISE                = 1<<2,
-    VP8_DEBUG_TXT_FRAME_INFO    = 1<<3, /**< print frame information */
-    VP8_DEBUG_TXT_MBLK_MODES    = 1<<4, /**< print macro block modes over each macro block */
-    VP8_DEBUG_TXT_DC_DIFF       = 1<<5, /**< print dc diff for each macro block */
-    VP8_DEBUG_TXT_RATE_INFO     = 1<<6, /**< print video rate info (encoder only) */
-    VP8_MFQE                    = 1<<10
+enum vp8_postproc_level {
+  VP8_NOFILTERING             = 0,
+  VP8_DEBLOCK                 = 1 << 0,
+  VP8_DEMACROBLOCK            = 1 << 1,
+  VP8_ADDNOISE                = 1 << 2,
+  VP8_DEBUG_TXT_FRAME_INFO    = 1 << 3, /**< print frame information */
+  VP8_DEBUG_TXT_MBLK_MODES    = 1 << 4, /**< print macro block modes over each macro block */
+  VP8_DEBUG_TXT_DC_DIFF       = 1 << 5, /**< print dc diff for each macro block */
+  VP8_DEBUG_TXT_RATE_INFO     = 1 << 6, /**< print video rate info (encoder only) */
+  VP8_MFQE                    = 1 << 10
 };
 
 /*!\brief post process flags
@@ -73,22 +71,20 @@ enum vp8_postproc_level
  * to VP8_DEBLOCK and deblocking_level to 1.
  */
 
-typedef struct vp8_postproc_cfg
-{
-    int post_proc_flag;         /**< the types of post processing to be done, should be combination of "vp8_postproc_level" */
-    int deblocking_level;       /**< the strength of deblocking, valid range [0, 16] */
-    int noise_level;            /**< the strength of additive noise, valid range [0, 16] */
+typedef struct vp8_postproc_cfg {
+  int post_proc_flag;         /**< the types of post processing to be done, should be combination of "vp8_postproc_level" */
+  int deblocking_level;       /**< the strength of deblocking, valid range [0, 16] */
+  int noise_level;            /**< the strength of additive noise, valid range [0, 16] */
 } vp8_postproc_cfg_t;
 
 /*!\brief reference frame type
  *
  * The set of macros define the type of VP8 reference frames
  */
-typedef enum vpx_ref_frame_type
-{
-    VP8_LAST_FRAME = 1,
-    VP8_GOLD_FRAME = 2,
-    VP8_ALTR_FRAME = 4
+typedef enum vpx_ref_frame_type {
+  VP8_LAST_FRAME = 1,
+  VP8_GOLD_FRAME = 2,
+  VP8_ALTR_FRAME = 4
 } vpx_ref_frame_type_t;
 
 /*!\brief reference frame data struct
@@ -96,10 +92,9 @@ typedef enum vpx_ref_frame_type
  * define the data struct to access vp8 reference frames
  */
 
-typedef struct vpx_ref_frame
-{
-    vpx_ref_frame_type_t  frame_type;   /**< which reference frame */
-    vpx_image_t           img;          /**< reference frame data in image format */
+typedef struct vpx_ref_frame {
+  vpx_ref_frame_type_t  frame_type;   /**< which reference frame */
+  vpx_image_t           img;          /**< reference frame data in image format */
 } vpx_ref_frame_t;
 
 

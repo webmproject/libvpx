@@ -10,6 +10,7 @@
 
 
 #include "vpx_config.h"
+#include "./vpx_scale_rtcd.h"
 #include "vp8/common/onyxc_int.h"
 #include "vp8/common/blockd.h"
 #include "onyx_int.h"
