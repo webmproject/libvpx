@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAT3//+5w\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2873,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-21T16:57:34Z",
+      "side": 1,
+      "message": "same fixme here; ideally, we\u0027d keep track of two things: A) the RD of each filter alone (non-switchable), and B) the best filter along with the overhead of signaling it. Then here, given 3 filters and the selectable-between-these-three, we can (based on the RD sums for the whole frame) select which one to use, rather than do it based on counts alone.\n\nFor now, a FIXME is fine, but this should be marked clearly so we can fix it later on.",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3//+54\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2878,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-21T16:57:34Z",
+      "side": 1,
+      "message": "can we move this to vp9_encode_frame()? It makes other similar choices also, so it\u0027s nice to centralize everything in one place, easier to refactor later on.",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3//+6E\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3691,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-21T16:57:34Z",
+      "side": 1,
+      "message": "it seems like invalid_filter and mode_excluded have a lot of overlap, can they be merged?",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3//+6A\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4274,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-21T16:57:34Z",
+      "side": 1,
+      "message": "I actually kind of like this, but counting isn\u0027t the best thing. Can we somehow keep track of the _RD_ differences instead of plain counters? In that case, if a particular filter is chosen 90% of the time because it\u0027s 0.01% better, but the other 10% another filter is chosen because it\u0027s 100% better, then the other filter will still be forced.\n\nWe can (for now) add a FIXME to this effect and actually implement it later.",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3//+58\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5019,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-12-21T16:57:34Z",
+      "side": 1,
+      "message": "same fixme here.",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
