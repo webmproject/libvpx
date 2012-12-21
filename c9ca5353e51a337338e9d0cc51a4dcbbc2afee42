@@ -34,6 +34,24 @@
       "revId": "c9ca5353e51a337338e9d0cc51a4dcbbc2afee42",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAT3//+4I\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3719,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-12-21T17:19:08Z",
+      "side": 1,
+      "message": "Ah, yes, you\u0027re right. I have a later patch where I need this, but it isn\u0027t needed for the current codebase. i didn\u0027tcheck it carefully enough! I\u0027ll cancel the patch, thanks.",
+      "parentUuid": "AAAAT3//+9s\u003d",
+      "revId": "c9ca5353e51a337338e9d0cc51a4dcbbc2afee42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
