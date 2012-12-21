@@ -15,8 +15,6 @@
 
 extern const short vp9_six_tap_mmx[16][6 * 8];
 
-extern const short vp9_bilinear_filters_8x_mmx[16][2 * 8];
-
 extern void vp9_filter_block1d_h6_mmx(unsigned char   *src_ptr,
                                       unsigned short  *output_ptr,
                                       unsigned int     src_pixels_per_line,
@@ -94,8 +92,6 @@ extern void vp9_filter_block1d8_v6_only_sse2(unsigned char *src_ptr,
                                              int            dst_pitch,
                                              unsigned int   output_height,
                                              const short   *vp9_filter);
-
-extern prototype_subpixel_predict(vp9_bilinear_predict8x8_mmx);
 
 ///////////////////////////////////////////////////////////////////////////
 // the mmx function that does the bilinear filtering and var calculation //
@@ -231,26 +227,6 @@ void vp9_sixtap_predict8x4_mmx(unsigned char  *src_ptr,
                              16, 8, 4, 8, vfilter);
   vp9_filter_block1dc_v6_mmx(fdata2 + 20, dst_ptr + 4, dst_pitch,
                              16, 8, 4, 8, vfilter);
-}
-
-void vp9_bilinear_predict16x16_mmx(unsigned char  *src_ptr,
-                                   int  src_pixels_per_line,
-                                   int  xoffset,
-                                   int  yoffset,
-                                   unsigned char *dst_ptr,
-                                   int  dst_pitch) {
-  vp9_bilinear_predict8x8_mmx(src_ptr,
-                              src_pixels_per_line, xoffset, yoffset,
-                              dst_ptr, dst_pitch);
-  vp9_bilinear_predict8x8_mmx(src_ptr + 8,
-                              src_pixels_per_line, xoffset, yoffset,
-                              dst_ptr + 8, dst_pitch);
-  vp9_bilinear_predict8x8_mmx(src_ptr + 8 * src_pixels_per_line,
-                              src_pixels_per_line, xoffset, yoffset,
-                              dst_ptr + dst_pitch * 8, dst_pitch);
-  vp9_bilinear_predict8x8_mmx(src_ptr + 8 * src_pixels_per_line + 8,
-                              src_pixels_per_line, xoffset, yoffset,
-                              dst_ptr + dst_pitch * 8 + 8, dst_pitch);
 }
 #endif
 
