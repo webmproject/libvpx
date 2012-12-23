@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "vp9/common/vp9_postproc.h"
 #include "vp9/common/vp9_textblit.h"
@@ -32,7 +32,7 @@
     (0.071*(float)(t & 0xff)) + 128)
 
 /* global constants */
-#if CONFIG_POSTPROC_VISUALIZER
+#if 0 && CONFIG_POSTPROC_VISUALIZER
 static const unsigned char MB_PREDICTION_MODE_colors[MB_MODE_COUNT][3] = {
   { RGB_TO_YUV(0x98FB98) },   /* PaleGreen */
   { RGB_TO_YUV(0x00FF00) },   /* Green */
@@ -672,7 +672,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
                         oci->post_proc_buffer.y_stride);
   }
 
-#if CONFIG_POSTPROC_VISUALIZER
+#if 0 && CONFIG_POSTPROC_VISUALIZER
   if (flags & VP9D_DEBUG_TXT_FRAME_INFO) {
     char message[512];
     sprintf(message, "F%1dG%1dQ%3dF%3dP%d_s%dx%d",

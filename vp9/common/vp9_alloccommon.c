@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_onyxc_int.h"

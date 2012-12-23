@@ -13,7 +13,7 @@
 #define VP9_DECODER_VP9_DBOOLHUFF_H_
 #include <stddef.h>
 #include <limits.h>
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
 

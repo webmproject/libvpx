@@ -59,13 +59,15 @@ ifneq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),)
 # These tests require both the encoder and decoder to be built.
 ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),yesyes)
 LIBVPX_TEST_SRCS-yes                   += vp9_boolcoder_test.cc
+
+# IDCT test currently depends on FDCT function
+LIBVPX_TEST_SRCS-yes                   += idct8x8_test.cc
 endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
 #LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
-LIBVPX_TEST_SRCS-yes += idct8x8_test.cc
-LIBVPX_TEST_SRCS-yes += variance_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
 endif # VP9
 
 

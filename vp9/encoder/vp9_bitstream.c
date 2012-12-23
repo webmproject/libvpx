@@ -834,7 +834,6 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
       for (i = 0; i < 4; i++) {
         MB_MODE_INFO *mi;
         MV_REFERENCE_FRAME rf;
-        MV_REFERENCE_FRAME sec_ref_frame;
         MB_PREDICTION_MODE mode;
         int segment_id, skip_coeff;
 
@@ -854,7 +853,6 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
 
         mi = &m->mbmi;
         rf = mi->ref_frame;
-        sec_ref_frame = mi->second_ref_frame;
         mode = mi->mode;
         segment_id = mi->segment_id;
 
@@ -1101,7 +1099,7 @@ static void pack_inter_mode_mvs(VP9_COMP *const cpi, vp9_writer *const bc) {
                 if (mi->second_ref_frame > 0) {
 #if CONFIG_NEW_MVREF
                   unsigned int best_index;
-                  sec_ref_frame = mi->second_ref_frame;
+                  MV_REFERENCE_FRAME sec_ref_frame = mi->second_ref_frame;
 
                   /*
                   best_index =

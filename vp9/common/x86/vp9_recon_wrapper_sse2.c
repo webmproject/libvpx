@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_blockd.h"
 

@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_subpixel.h"
 

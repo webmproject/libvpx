@@ -12,7 +12,7 @@
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include <stdio.h>
 #include <limits.h>
 #include <math.h>

@@ -148,7 +148,6 @@ static int calculate_minq_index(double maxq,
                                 double x3, double x2, double x, double c) {
   int i;
   double minqtarget;
-  double thisq;
 
   minqtarget = ((x3 * maxq * maxq * maxq) +
                 (x2 * maxq * maxq) +
@@ -159,7 +158,6 @@ static int calculate_minq_index(double maxq,
     minqtarget = maxq;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    thisq = vp9_convert_qindex_to_q(i);
     if (minqtarget <= vp9_convert_qindex_to_q(i))
       return i;
   }
@@ -2933,8 +2931,6 @@ static void encode_frame_to_data_rate
 
   int Loop = FALSE;
   int loop_count;
-  int this_q;
-  int last_zbin_oq;
 
   int q_low;
   int q_high;
@@ -2948,8 +2944,6 @@ static void encode_frame_to_data_rate
   int overshoot_seen = FALSE;
   int undershoot_seen = FALSE;
 
-  int loop_size_estimate = 0;
-
   SPEED_FEATURES *sf = &cpi->sf;
 #if RESET_FOREACH_FILTER
   int q_low0;
@@ -2957,6 +2951,7 @@ static void encode_frame_to_data_rate
   int zbin_oq_high0;
   int zbin_oq_low0 = 0;
   int Q0;
+  int last_zbin_oq;
   int last_zbin_oq0;
   int active_best_quality0;
   int active_worst_quality0;
@@ -3176,7 +3171,9 @@ static void encode_frame_to_data_rate
     // Determine initial Q to try
     Q = vp9_regulate_q(cpi, cpi->this_frame_target);
   }
+#if RESET_FOREACH_FILTER
   last_zbin_oq = cpi->zbin_over_quant;
+#endif
 
   // Set highest allowed value for Zbin over quant
   if (cm->frame_type == KEY_FRAME)
@@ -3280,7 +3277,6 @@ static void encode_frame_to_data_rate
     vp9_clear_system_state();  // __asm emms;
 
     vp9_set_quantizer(cpi, Q);
-    this_q = Q;
 
     if (loop_count == 0) {
 
@@ -3516,7 +3512,9 @@ static void encode_frame_to_data_rate
 
       // Loop = ((Q != last_q) || (last_zbin_oq != cpi->zbin_over_quant)) ? TRUE : FALSE;
       Loop = ((Q != last_q)) ? TRUE : FALSE;
+#if RESET_FOREACH_FILTER
       last_zbin_oq = cpi->zbin_over_quant;
+#endif
     } else
       Loop = FALSE;
 
@@ -3730,9 +3728,6 @@ static void encode_frame_to_data_rate
    * needed in motion search besides loopfilter */
   cm->last_frame_type = cm->frame_type;
 
-  // Keep a copy of the size estimate used in the loop
-  loop_size_estimate = cpi->projected_frame_size;
-
   // Update rate control heuristics
   cpi->total_byte_count += (*size);
   cpi->projected_frame_size = (*size) << 3;
@@ -3846,7 +3841,7 @@ static void encode_frame_to_data_rate
               "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
               "%10.3f %8d %10d %10d %10d\n",
               cpi->common.current_video_frame, cpi->this_frame_target,
-              cpi->projected_frame_size, loop_size_estimate,
+              cpi->projected_frame_size, 0, //loop_size_estimate,
               (cpi->projected_frame_size - cpi->this_frame_target),
               (int)cpi->total_target_vs_actual,
               (cpi->oxcf.starting_buffer_level - cpi->bits_off_target),
@@ -3876,7 +3871,7 @@ static void encode_frame_to_data_rate
               "%8d %10d %10d %10d\n",
               cpi->common.current_video_frame,
               cpi->this_frame_target, cpi->projected_frame_size,
-              loop_size_estimate,
+              0, //loop_size_estimate,
               (cpi->projected_frame_size - cpi->this_frame_target),
               (int)cpi->total_target_vs_actual,
               (cpi->oxcf.starting_buffer_level - cpi->bits_off_target),

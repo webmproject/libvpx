@@ -13,7 +13,7 @@
 #define VP9_ENCODER_VP9_ONYX_INT_H_
 
 #include <stdio.h>
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vp9/common/vp9_onyx.h"
 #include "vp9/encoder/vp9_treewriter.h"
 #include "vp9/encoder/vp9_tokenize.h"

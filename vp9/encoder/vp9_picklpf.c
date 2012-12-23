@@ -24,11 +24,9 @@ void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
   unsigned char *src_y, *dst_y;
   int yheight;
   int ystride;
-  int border;
   int yoffset;
   int linestocopy;
 
-  border   = src_ybc->border;
   yheight  = src_ybc->y_height;
   ystride  = src_ybc->y_stride;
 

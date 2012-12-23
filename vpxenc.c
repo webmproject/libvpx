@@ -23,7 +23,9 @@
 #include <limits.h>
 #include <assert.h>
 #include "vpx/vpx_encoder.h"
+#if CONFIG_DECODERS
 #include "vpx/vpx_decoder.h"
+#endif
 #if USE_POSIX_MMAP
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -2174,6 +2176,7 @@ static void initialize_encoder(struct stream_state  *stream,
     ctx_exit_on_error(&stream->encoder, "Failed to control codec");
   }
 
+#if CONFIG_DECODERS
   if (global->test_decode) {
     int width, height;
 
@@ -2186,6 +2189,7 @@ static void initialize_encoder(struct stream_state  *stream,
     stream->ref_enc.frame_type = VP8_LAST_FRAME;
     stream->ref_dec.frame_type = VP8_LAST_FRAME;
   }
+#endif
 }
 
 
@@ -2278,11 +2282,13 @@ static void get_cx_data(struct stream_state  *stream,
         stream->nbytes += pkt->data.raw.sz;
 
         *got_data = 1;
+#if CONFIG_DECODERS
         if (global->test_decode) {
           vpx_codec_decode(&stream->decoder, pkt->data.frame.buf,
                            pkt->data.frame.sz, NULL, 0);
           ctx_exit_on_error(&stream->decoder, "Failed to decode frame");
         }
+#endif
         break;
       case VPX_CODEC_STATS_PKT:
         stream->frames_out++;

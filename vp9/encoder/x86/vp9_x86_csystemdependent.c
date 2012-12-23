@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vpx_ports/x86.h"
 #include "vp9/encoder/vp9_variance.h"
 #include "vp9/encoder/vp9_onyx_int.h"

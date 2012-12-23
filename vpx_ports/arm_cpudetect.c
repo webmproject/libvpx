@@ -136,7 +136,6 @@ int arm_cpu_caps(void) {
 
 #elif defined(__linux__) /* end __ANDROID__ */
 
-#elif defined(__linux__) /* end __ANDROID__ */
 #include <stdio.h>
 
 int arm_cpu_caps(void) {

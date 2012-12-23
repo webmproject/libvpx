@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include "vp9/common/vp9_sadmxn.h"
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 
 unsigned int vp9_sad32x32_c(const unsigned char *src_ptr,

@@ -10,7 +10,7 @@
 #ifndef VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
 #define VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #if ARCH_X86 || ARCH_X86_64
 void vpx_reset_mmx_state(void);
 #define vp9_clear_system_state() vpx_reset_mmx_state()

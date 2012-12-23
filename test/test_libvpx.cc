@@ -9,9 +9,10 @@
  */
 #include <string>
 #include "vpx_config.h"
-#if ARCH_X86 || ARCH_X86_64
 extern "C" {
+#if ARCH_X86 || ARCH_X86_64
 #include "vpx_ports/x86.h"
+#endif
 #if CONFIG_VP8
 extern void vp8_rtcd();
 #endif
@@ -19,7 +20,6 @@ extern void vp8_rtcd();
 extern void vp9_rtcd();
 #endif
 }
-#endif
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 static void append_gtest_filter(const char *str) {
@@ -47,11 +47,14 @@ int main(int argc, char **argv) {
     append_gtest_filter(":-SSE4_1/*");
 #endif
 
+#if !CONFIG_SHARED
+  /* Shared library builds don't support whitebox tests that exercise internal symbols. */
 #if CONFIG_VP8
   vp8_rtcd();
 #endif
 #if CONFIG_VP9
   vp9_rtcd();
+#endif
 #endif
 
   return RUN_ALL_TESTS();

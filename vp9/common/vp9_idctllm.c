@@ -24,7 +24,7 @@
  **************************************************************************/
 #include <assert.h>
 #include <math.h>
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vp9/common/vp9_systemdependent.h"
 
 #include "vp9/common/vp9_blockd.h"

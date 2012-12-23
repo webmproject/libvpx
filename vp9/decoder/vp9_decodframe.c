@@ -927,9 +927,9 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
   mb_col = 0;
 
   for (sb_col = 0; sb_col < sb_cols; sb_col++) {
+#if CONFIG_SUPERBLOCKS
     MODE_INFO *mi = xd->mode_info_context;
 
-#if CONFIG_SUPERBLOCKS
     mi->mbmi.encoded_as_sb = vp9_read(bc, pc->sb_coded);
 #endif
 
@@ -942,7 +942,9 @@ decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc, int mbrow, MACROBLOCKD *xd,
 
       xd->mb_index = i;
 
+#if CONFIG_SUPERBLOCKS
       mi = xd->mode_info_context;
+#endif
       if ((mb_row >= pc->mb_rows) || (mb_col >= pc->mb_cols)) {
         // MB lies outside frame, skip on to next
         mb_row += dy;

@@ -216,6 +216,7 @@ vp9_loop_filter_simple_bh_sse2=vp9_loop_filter_bhs_sse2
 #
 # post proc
 #
+if [ "$CONFIG_POSTPROC" = "yes" ]; then
 prototype void vp9_mbpost_proc_down "unsigned char *dst, int pitch, int rows, int cols, int flimit"
 specialize vp9_mbpost_proc_down mmx sse2
 vp9_mbpost_proc_down_sse2=vp9_mbpost_proc_down_xmm
@@ -231,6 +232,7 @@ vp9_post_proc_down_and_across_sse2=vp9_post_proc_down_and_across_xmm
 prototype void vp9_plane_add_noise "unsigned char *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch"
 specialize vp9_plane_add_noise mmx sse2
 vp9_plane_add_noise_sse2=vp9_plane_add_noise_wmt
+fi
 
 prototype void vp9_blend_mb_inner "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride"
 specialize vp9_blend_mb_inner

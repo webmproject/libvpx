@@ -1268,7 +1268,7 @@ static int64_t rd_pick_intra16x16mby_mode(VP9_COMP *cpi,
                                           int *skippable,
                                           int64_t txfm_cache[NB_TXFM_MODES]) {
   MB_PREDICTION_MODE mode;
-  TX_SIZE txfm_size;
+  TX_SIZE txfm_size = 0;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
 #if CONFIG_COMP_INTRA_PRED
   MB_PREDICTION_MODE mode2;
@@ -4189,7 +4189,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int mode16x16;
   int mode8x8[2][4];
   int dist;
-  int modeuv, modeuv8x8, uv_intra_skippable, uv_intra_skippable_8x8;
+  int modeuv, uv_intra_skippable, uv_intra_skippable_8x8;
   int y_intra16x16_skippable = 0;
   int64_t txfm_cache[NB_TXFM_MODES];
   TX_SIZE txfm_size_16x16;
@@ -4202,13 +4202,11 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->common.txfm_mode != ONLY_4X4) {
     rd_pick_intra_mbuv_mode_8x8(cpi, x, &rateuv8x8, &rateuv8x8_tokenonly,
                                 &distuv8x8, &uv_intra_skippable_8x8);
-    modeuv8x8 = mbmi->uv_mode;
   } else {
     uv_intra_skippable_8x8 = uv_intra_skippable;
     rateuv8x8 = rateuv;
     distuv8x8 = distuv;
     rateuv8x8_tokenonly = rateuv_tokenonly;
-    modeuv8x8 = modeuv;
   }
 
   // current macroblock under rate-distortion optimization test loop
