@@ -797,16 +797,34 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                        ref_frame, mbmi->ref_mvs[ref_frame],
                        cm->ref_frame_sign_bias);
 
-      vp9_find_best_ref_mvs(xd,
-                            xd->pre.y_buffer,
-                            recon_y_stride,
-                            mbmi->ref_mvs[ref_frame],
-                            &nearest, &nearby);
-
       vp9_mv_ref_probs(&pbi->common, mv_ref_p,
                        mbmi->mb_mode_context[ref_frame]);
 
-      best_mv = mbmi->ref_mvs[ref_frame][0];
+      // Is the segment level mode feature enabled for this segment
+      if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
+        mbmi->mode =
+          vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
+      } else {
+#if CONFIG_SUPERBLOCKS
+        if (mbmi->encoded_as_sb)
+          mbmi->mode = read_sb_mv_ref(bc, mv_ref_p);
+        else
+#endif
+        mbmi->mode = read_mv_ref(bc, mv_ref_p);
+
+        vp9_accum_mv_refs(&pbi->common, mbmi->mode,
+                          mbmi->mb_mode_context[ref_frame]);
+      }
+
+      if (mbmi->mode != ZEROMV) {
+        vp9_find_best_ref_mvs(xd,
+                              xd->pre.y_buffer,
+                              recon_y_stride,
+                              mbmi->ref_mvs[ref_frame],
+                              &nearest, &nearby);
+
+        best_mv.as_int = (mbmi->ref_mvs[ref_frame][0]).as_int;
+      }
 
 #ifdef DEC_DEBUG
       if (dec_debug)
@@ -816,21 +834,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
     }
 
-    // Is the segment level mode feature enabled for this segment
-    if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
-      mbmi->mode =
-        vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
-    } else {
-#if CONFIG_SUPERBLOCKS
-      if (mbmi->encoded_as_sb) {
-        mbmi->mode = read_sb_mv_ref(bc, mv_ref_p);
-      } else
-#endif
-      mbmi->mode = read_mv_ref(bc, mv_ref_p);
-
-      vp9_accum_mv_refs(&pbi->common, mbmi->mode,
-                        mbmi->mb_mode_context[ref_frame]);
-    }
 
 #if CONFIG_PRED_FILTER
     if (mbmi->mode >= NEARESTMV && mbmi->mode < SPLITMV) {
@@ -889,13 +892,15 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                          mbmi->ref_mvs[mbmi->second_ref_frame],
                          cm->ref_frame_sign_bias);
 
-        vp9_find_best_ref_mvs(xd,
-                              xd->second_pre.y_buffer,
-                              recon_y_stride,
-                              mbmi->ref_mvs[mbmi->second_ref_frame],
-                              &nearest_second,
-                              &nearby_second);
-        best_mv_second = mbmi->ref_mvs[mbmi->second_ref_frame][0];
+        if (mbmi->mode != ZEROMV) {
+          vp9_find_best_ref_mvs(xd,
+                                xd->second_pre.y_buffer,
+                                recon_y_stride,
+                                mbmi->ref_mvs[mbmi->second_ref_frame],
+                                &nearest_second,
+                                &nearby_second);
+          best_mv_second = mbmi->ref_mvs[mbmi->second_ref_frame][0];
+        }
       }
 
     } else {
