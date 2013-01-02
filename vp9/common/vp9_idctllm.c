@@ -399,10 +399,10 @@ void vp9_ihtllm_float_c(const int16_t *input, int16_t *output, int pitch,
 }
 
 /* Converted the transforms to integer form. */
-#define VERTICAL_SHIFT 14  // 16
-#define VERTICAL_ROUNDING ((1 << (VERTICAL_SHIFT - 1)) - 1)
-#define HORIZONTAL_SHIFT 17  // 15
+#define HORIZONTAL_SHIFT 14  // 16
 #define HORIZONTAL_ROUNDING ((1 << (HORIZONTAL_SHIFT - 1)) - 1)
+#define VERTICAL_SHIFT 17  // 15
+#define VERTICAL_ROUNDING ((1 << (VERTICAL_SHIFT - 1)) - 1)
 void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
                       TX_TYPE tx_type, int tx_dim) {
   int i, j, k;
@@ -444,41 +444,47 @@ void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
       break;
   }
 
-  /* vertical transformation */
+  /* 2-D inverse transform X = M1*Z*Transposed_M2 is calculated in 2 steps
+   * from right to left:
+   * 1. horizontal transform: Y= Z*Transposed_M2
+   * 2. vertical transform: X = M1*Y
+   * In SIMD, doing this way could eliminate the transpose needed if it is
+   * calculated from left to right.
+   */
+  /* Horizontal transformation */
   for (j = 0; j < tx_dim; j++) {
     for (i = 0; i < tx_dim; i++) {
       int temp = 0;
 
       for (k = 0; k < tx_dim; k++) {
-        temp += ptv[k] * ip[(k * tx_dim)];
+        temp += ip[k] * pth[k];
       }
 
-      im[i] = (int16_t)((temp + VERTICAL_ROUNDING) >> VERTICAL_SHIFT);
-      ip++;
+      /* Calculate im and store it in its transposed position. */
+      im[i] = (int16_t)((temp + HORIZONTAL_ROUNDING) >> HORIZONTAL_SHIFT);
+      ip += tx_dim;
     }
-    im += tx_dim;  // 16
-    ptv += tx_dim;
+    im += tx_dim;
+    pth += tx_dim;
     ip = input;
   }
 
-  /* horizontal transformation */
+  /* Vertical transformation */
   im = &imbuf[0];
 
-  for (j = 0; j < tx_dim; j++) {
-    const int16_t *pthc = pth;
-
-    for (i = 0; i < tx_dim; i++) {
+  for (i = 0; i < tx_dim; i++) {
+    for (j = 0; j < tx_dim; j++) {
       int temp = 0;
 
       for (k = 0; k < tx_dim; k++) {
-        temp += im[k] * pthc[k];
+        temp += ptv[k] * im[k];
       }
 
-      op[i] = (int16_t)((temp + HORIZONTAL_ROUNDING) >> HORIZONTAL_SHIFT);
-      pthc += tx_dim;
+      op[j] = (int16_t)((temp + VERTICAL_ROUNDING) >> VERTICAL_SHIFT);
+      im += tx_dim;
     }
-
-    im += tx_dim;  // 16
+    im = &imbuf[0];
+    ptv += tx_dim;
     op += shortpitch;
   }
 }
