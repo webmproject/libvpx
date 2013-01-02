@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAUn//+sA\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-01-02T15:50:45Z",
+      "side": 1,
+      "message": "would it be cleaner if the for loop starts with rf \u003d INTRA_FRAME, then the if (rf \u003d\u003d INTRA_FRAME) can be removed?",
+      "revId": "313d1100afad5544fb719897bbd24fe9fcc41d90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
