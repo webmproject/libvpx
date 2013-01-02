@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH///3k\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4955,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-02T23:39:07Z",
+      "side": 1,
+      "message": "I\u0027ve actually kept the RD threshold modification code disabled in SB (or SB64) code, because it basically uses the 16x16MB RD (which are already modified in the MB loop).\n\nLet\u0027s keep this #if 0 for now until after we have a better look at re-doing the speed-performance pieces in the RD...",
+      "revId": "4a9e7f7b7f560173cdc0918ff920c146c559a471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
