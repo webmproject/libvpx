@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAUn//+pM\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-01-02T18:44:25Z",
+      "side": 1,
+      "message": "should it be bsize \u003e\u003d 32 given now that bsize can be 64? maybe just remove the obsolete comment here.",
+      "revId": "179a2cd94123888ebb35c7bedc3f854a888de1d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAUn//+oQ\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-01-02T18:44:25Z",
+      "side": 1,
+      "message": "note that in vp9_mcomp.c:\n#define MIN(x,y) (((x)\u003c(y))?(x):(y))\nI suggest that we use a consistent #define for both usage.",
+      "revId": "179a2cd94123888ebb35c7bedc3f854a888de1d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAUn//+n8\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-01-02T18:44:25Z",
+      "side": 1,
+      "message": "the variable name \"encode_as_sb\" sounds Boolean-ish..  could it be better named to something else, e.g. \"sb_type\"?\n\nAre \"2\" and \"1\"  really \"BLOCK_64X64\" and \"BLOCK_32X32\"? are those enums clearer here?",
+      "revId": "179a2cd94123888ebb35c7bedc3f854a888de1d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAUn//+ns\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 618,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-01-02T18:44:25Z",
+      "side": 1,
+      "message": "As previously commented, we have a #define in vp9_mcomp.c, which I think is slightly safer than this.(considering when min() is used in: rv \u003d min(a, b) * 5; )",
+      "revId": "179a2cd94123888ebb35c7bedc3f854a888de1d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
