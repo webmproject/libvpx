@@ -16,6 +16,24 @@
       "revId": "313d1100afad5544fb719897bbd24fe9fcc41d90",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAUn//+q0\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-01-02T17:36:34Z",
+      "side": 1,
+      "message": "The reason I did not do this is that to do so assumes that INTRA_FRAME is 0 and that it is the only case we might want to skip. This is true at the moment but I did not want to hard wire that assumption into the code just yet.",
+      "parentUuid": "AAAAUn//+sA\u003d",
+      "revId": "313d1100afad5544fb719897bbd24fe9fcc41d90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
