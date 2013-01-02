@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAUn//+lI\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2873,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-01-02T20:43:23Z",
+      "side": 1,
+      "message": "I added a TODO. Since we have a one frame lag in selecting the mode the RD scheme isn\u0027t guaranteed to work better, although it probably will.",
+      "parentUuid": "AAAAT3//+5w\u003d",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAT3//+54\u003d",
         "filename": "vp9/encoder/vp9_onyx_if.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-12-21T16:57:34Z",
       "side": 1,
       "message": "can we move this to vp9_encode_frame()? It makes other similar choices also, so it\u0027s nice to centralize everything in one place, easier to refactor later on.",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAUn//+iM\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2878,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-01-02T20:43:23Z",
+      "side": 1,
+      "message": "I moved the call to select_interp_filter_type into vp9_encode_frame().",
+      "parentUuid": "AAAAT3//+54\u003d",
       "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAUn//+lE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3691,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-01-02T20:43:23Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAAT3//+6E\u003d",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAUX////s\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2012-12-22T11:13:35Z",
       "side": 1,
       "message": "as ronald mentioned - better to reuse mode_excluded.",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAUn//+lA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3717,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-01-02T20:43:23Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAAUX////s\u003d",
       "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAUn//+k4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4274,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-01-02T20:43:23Z",
+      "side": 1,
+      "message": "I added a TODO to remind us to relook at this.",
+      "parentUuid": "AAAAT3//+6A\u003d",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAT3//+58\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2012-12-21T16:57:34Z",
       "side": 1,
       "message": "same fixme here.",
+      "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAUn//+k0\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5019,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-01-02T20:43:23Z",
+      "side": 1,
+      "message": "I added a TODO to remind us to relook at this.",
+      "parentUuid": "AAAAT3//+58\u003d",
       "revId": "7a0301547aa8c5ccb3516717867812716ab78ce1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
