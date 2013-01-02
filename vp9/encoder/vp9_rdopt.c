@@ -1159,7 +1159,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
 #if CONFIG_COMP_INTRA_PRED
   B_PREDICTION_MODE mode2;
 #endif
-  int64_t best_rd = INT64_MAX;
+  int64_t best_rd = LLONG_MAX;
   int rate = 0;
   int distortion;
 
@@ -1362,7 +1362,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rat
   }
 
   if (total_rd >= best_rd)
-    return INT64_MAX;
+    return LLONG_MAX;
 
 #if CONFIG_COMP_INTRA_PRED
   cost += vp9_cost_bit(128, allow_comp);
@@ -1386,7 +1386,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi,
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
   int this_rate, this_rate_tokenonly;
   int this_distortion, s;
-  int64_t best_rd = INT64_MAX, this_rd;
+  int64_t best_rd = LLONG_MAX, this_rd;
 
   /* Y Search for 32x32 intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
@@ -1434,12 +1434,12 @@ static int64_t rd_pick_intra16x16mby_mode(VP9_COMP *cpi,
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   int rate, ratey;
   int distortion, skip;
-  int64_t best_rd = INT64_MAX;
+  int64_t best_rd = LLONG_MAX;
   int64_t this_rd;
 
   int i;
   for (i = 0; i < NB_TXFM_MODES; i++)
-    txfm_cache[i] = INT64_MAX;
+    txfm_cache[i] = LLONG_MAX;
 
   // Y Search for 16x16 intra prediction mode
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
@@ -1519,7 +1519,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   MB_PREDICTION_MODE mode2;
 #endif
   MACROBLOCKD *xd = &x->e_mbd;
-  int64_t best_rd = INT64_MAX;
+  int64_t best_rd = LLONG_MAX;
   int distortion = 0, rate = 0;
   BLOCK  *be = x->block + ib;
   BLOCKD *b = xd->block + ib;
@@ -1912,7 +1912,7 @@ static void rd_pick_intra_mbuv_mode(VP9_COMP *cpi,
 #endif
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
-  int64_t best_rd = INT64_MAX;
+  int64_t best_rd = LLONG_MAX;
   int UNINITIALIZED_IS_SAFE(d), UNINITIALIZED_IS_SAFE(r);
   int rate_to, UNINITIALIZED_IS_SAFE(skip);
 
@@ -1984,7 +1984,7 @@ static void rd_pick_intra_mbuv_mode_8x8(VP9_COMP *cpi,
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
-  int64_t best_rd = INT64_MAX;
+  int64_t best_rd = LLONG_MAX;
   int UNINITIALIZED_IS_SAFE(d), UNINITIALIZED_IS_SAFE(r);
   int rate_to, UNINITIALIZED_IS_SAFE(skip);
 
@@ -2099,7 +2099,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi,
                                        int *skippable) {
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
-  int64_t best_rd = INT64_MAX, this_rd;
+  int64_t best_rd = LLONG_MAX, this_rd;
   int this_rate_tokenonly, this_rate;
   int this_distortion, s;
 
@@ -2495,7 +2495,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->txfm_size = tx_size;
   for (i = 0; i < label_count && this_segment_rd < bsi->segment_rd; i++) {
     int_mv mode_mv[B_MODE_COUNT], second_mode_mv[B_MODE_COUNT];
-    int64_t best_label_rd = INT64_MAX, best_other_rd = INT64_MAX;
+    int64_t best_label_rd = LLONG_MAX, best_other_rd = LLONG_MAX;
     B_PREDICTION_MODE mode_selected = ZERO4X4;
     int bestlabelyrate = 0;
 
@@ -2833,7 +2833,7 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
 
   vpx_memset(&bsi, 0, sizeof(bsi));
   for (i = 0; i < NB_TXFM_MODES; i++)
-    txfm_cache[i] = INT64_MAX;
+    txfm_cache[i] = LLONG_MAX;
 
   bsi.segment_rd = best_rd;
   bsi.ref_mv = best_ref_mv;
@@ -3299,7 +3299,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (is_comp_pred) {
         if (frame_mv[NEWMV][refs[0]].as_int == INVALID_MV ||
             frame_mv[NEWMV][refs[1]].as_int == INVALID_MV)
-          return INT64_MAX;
+          return LLONG_MAX;
         *rate2 += vp9_mv_bit_cost(&frame_mv[NEWMV][refs[0]],
                                   &ref_mv[0],
                                   x->nmvjointcost, x->mvcost, 96,
@@ -3373,7 +3373,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // near) is 0,0 as this should then be coded using the zeromv mode.
       for (i = 0; i < num_refs; ++i)
         if (frame_mv[this_mode][refs[i]].as_int == 0)
-          return INT64_MAX;
+          return LLONG_MAX;
     case ZEROMV:
     default:
       break;
@@ -3383,7 +3383,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     // Clip "next_nearest" so that it does not extend to far out of image
     clamp_mv2(&cur_mv[i], xd);
     if (mv_check_bounds(x, &cur_mv[i]))
-      return INT64_MAX;
+      return LLONG_MAX;
     mbmi->mv[i].as_int = cur_mv[i].as_int;
   }
 
@@ -3569,20 +3569,20 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_txfm_diff[NB_TXFM_MODES];
   int64_t best_pred_diff[NB_PREDICTION_TYPES];
   int64_t best_pred_rd[NB_PREDICTION_TYPES];
-  int64_t best_rd = INT64_MAX, best_intra_rd = INT64_MAX;
+  int64_t best_rd = LLONG_MAX, best_intra_rd = LLONG_MAX;
 #if CONFIG_COMP_INTERINTRA_PRED
   int is_best_interintra = 0;
-  int64_t best_intra16_rd = INT64_MAX;
+  int64_t best_intra16_rd = LLONG_MAX;
   int best_intra16_mode = DC_PRED, best_intra16_uv_mode = DC_PRED;
 #endif
-  int64_t best_overall_rd = INT64_MAX;
+  int64_t best_overall_rd = LLONG_MAX;
   int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
   int uv_intra_skippable = 0;
   int uv_intra_rate_8x8 = 0, uv_intra_distortion_8x8 = 0, uv_intra_rate_tokenonly_8x8 = 0;
   int uv_intra_skippable_8x8 = 0;
   int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
   int distortion_uv = INT_MAX;
-  int64_t best_yrd = INT64_MAX;
+  int64_t best_yrd = LLONG_MAX;
 #if CONFIG_PRED_FILTER
   int best_filter_state = 0;
 #endif
@@ -3610,9 +3610,9 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < MAX_REF_FRAMES; i++)
     frame_mv[NEWMV][i].as_int = INVALID_MV;
   for (i = 0; i < NB_PREDICTION_TYPES; ++i)
-    best_pred_rd[i] = INT64_MAX;
+    best_pred_rd[i] = LLONG_MAX;
   for (i = 0; i < NB_TXFM_MODES; i++)
-    best_txfm_rd[i] = INT64_MAX;
+    best_txfm_rd[i] = LLONG_MAX;
 
   for (i = 0; i < NB_PARTITIONINGS; i++) {
     int j, k;
@@ -3643,7 +3643,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                        frame_mdcounts, y_buffer, u_buffer, v_buffer);
   }
 
-  *returnintra = INT64_MAX;
+  *returnintra = LLONG_MAX;
 
   x->skip = 0;
 
@@ -3673,7 +3673,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (mode_index = 0; mode_index < MAX_MODES;
        mode_index += (!switchable_filter_index)) {
-    int64_t this_rd = INT64_MAX;
+    int64_t this_rd = LLONG_MAX;
     int disable_skip = 0, skippable = 0;
     int other_cost = 0;
     int compmode_cost = 0;
@@ -3844,7 +3844,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             distortion2 += uv_intra_distortion;
             distortion_uv = uv_intra_distortion;
           } else {
-            this_rd = INT64_MAX;
+            this_rd = LLONG_MAX;
             disable_skip = 1;
           }
         }
@@ -3938,7 +3938,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             distortion2 += uv_intra_distortion;
             distortion_uv = uv_intra_distortion;
           } else {
-            this_rd = INT64_MAX;
+            this_rd = LLONG_MAX;
             disable_skip = 1;
           }
         }
@@ -3983,7 +3983,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         distortion2 += distortion_uv;
         skippable = skippable && uv_skippable;
       } else {
-        this_rd = INT64_MAX;
+        this_rd = LLONG_MAX;
         disable_skip = 1;
       }
 
@@ -4019,7 +4019,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip, recon_yoffset,
                                   mode_index, frame_mv);
-      if (this_rd == INT64_MAX)
+      if (this_rd == LLONG_MAX)
         continue;
     }
 
@@ -4215,7 +4215,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
 
       /* keep record of best txfm size */
-      if (!mode_excluded && this_rd != INT64_MAX) {
+      if (!mode_excluded && this_rd != LLONG_MAX) {
         for (i = 0; i < NB_TXFM_MODES; i++) {
           int64_t adj_rd;
           if (this_mode != B_PRED) {
@@ -4314,7 +4314,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
-    if (best_pred_rd[i] == INT64_MAX)
+    if (best_pred_rd[i] == LLONG_MAX)
       best_pred_diff[i] = INT_MIN;
     else
       best_pred_diff[i] = best_rd - best_pred_rd[i];
@@ -4322,7 +4322,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (!x->skip) {
     for (i = 0; i < NB_TXFM_MODES; i++) {
-      if (best_txfm_rd[i] == INT64_MAX)
+      if (best_txfm_rd[i] == LLONG_MAX)
         best_txfm_diff[i] = INT_MIN;
       else
         best_txfm_diff[i] = best_rd - best_txfm_rd[i];
@@ -4550,8 +4550,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int mdcounts[4];
   int near_sadidx[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
   int saddone = 0;
-  int64_t best_rd = INT64_MAX;
-  int64_t best_yrd = INT64_MAX;
+  int64_t best_rd = LLONG_MAX;
+  int64_t best_yrd = LLONG_MAX;
   int64_t best_txfm_rd[NB_TXFM_MODES];
   int64_t best_txfm_diff[NB_TXFM_MODES];
   int64_t best_pred_diff[NB_PREDICTION_TYPES];
@@ -4561,10 +4561,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int ref_costs[MAX_REF_FRAMES];
 #if CONFIG_COMP_INTERINTRA_PRED
   int is_best_interintra = 0;
-  int64_t best_intra16_rd = INT64_MAX;
+  int64_t best_intra16_rd = LLONG_MAX;
   int best_intra16_mode = DC_PRED, best_intra16_uv_mode = DC_PRED;
 #endif
-  int64_t best_overall_rd = INT64_MAX;
+  int64_t best_overall_rd = LLONG_MAX;
   int rate_uv_4x4 = 0, rate_uv_8x8 = 0, rate_uv_tokenonly_4x4 = 0,
       rate_uv_tokenonly_8x8 = 0;
   int dist_uv_4x4 = 0, dist_uv_8x8 = 0, uv_skip_4x4 = 0, uv_skip_8x8 = 0;
@@ -4582,9 +4582,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
 
   for (i = 0; i < NB_PREDICTION_TYPES; ++i)
-    best_pred_rd[i] = INT64_MAX;
+    best_pred_rd[i] = LLONG_MAX;
   for (i = 0; i < NB_TXFM_MODES; i++)
-    best_txfm_rd[i] = INT64_MAX;
+    best_txfm_rd[i] = LLONG_MAX;
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
@@ -4622,7 +4622,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   for (mode_index = 0; mode_index < MAX_MODES;
        mode_index += (!switchable_filter_index)) {
     int mode_excluded = 0;
-    int64_t this_rd = INT64_MAX;
+    int64_t this_rd = LLONG_MAX;
     int disable_skip = 0;
     int other_cost = 0;
     int compmode_cost = 0;
@@ -4784,7 +4784,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip, recon_yoffset,
                                   mode_index, frame_mv);
-      if (this_rd == INT64_MAX)
+      if (this_rd == LLONG_MAX)
         continue;
     }
 
@@ -4944,7 +4944,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     /* keep record of best txfm size */
-    if (!mode_excluded && this_rd != INT64_MAX) {
+    if (!mode_excluded && this_rd != LLONG_MAX) {
       for (i = 0; i < NB_TXFM_MODES; i++) {
         int64_t adj_rd;
         if (this_mode != B_PRED) {
@@ -5009,7 +5009,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   vpx_memcpy(mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
 
   for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
-    if (best_pred_rd[i] == INT64_MAX)
+    if (best_pred_rd[i] == LLONG_MAX)
       best_pred_diff[i] = INT_MIN;
     else
       best_pred_diff[i] = best_rd - best_pred_rd[i];
@@ -5017,7 +5017,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (!x->skip) {
     for (i = 0; i < NB_TXFM_MODES; i++) {
-      if (best_txfm_rd[i] == INT64_MAX)
+      if (best_txfm_rd[i] == LLONG_MAX)
         best_txfm_diff[i] = INT_MIN;
       else
         best_txfm_diff[i] = best_rd - best_txfm_rd[i];
