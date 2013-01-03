@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH///NI\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "please comment #else/#endif if far away from the initial #if:\n\n#else  // CONFIG_MULTISYMBOL",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///NE\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "same:\n\n#endif  // CONFIG_MULTISYMBOL",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///NA\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "comment #else far away from corresponding #if:\n\n#else  // CONFIG_MULTISYMBOL",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///Mc\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "space between /* and Figure",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///MY\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "space between /* and Flush",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///MU\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "space between /* and Perform",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///MM\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "what exactly is the bitstream writer doing allocating memory here? I\u0027m a little uncomfortable with this. Isn\u0027t the general implementation just taking a buffer pointer provided by the application and writing directly into that? Why does it need to allocate, reallocate and free buffers?\n\nIf it\u0027s a TODO item, a \"TODO(jkoleszar): something\" would be appropriate, at the very least. If it\u0027s a side-effect from wrapping the daala code, that\u0027s fine, but again, it warrants a TODO item so we can fix this later on.",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///M0\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "comment #else:\n\n#else  // CONFIG_MULTISYMBOL",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///Mg\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "comment #endif:\n\n#endif  // CONFIG_MULTISYMBOL",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///L4\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "spaces around \u003c\u003c",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///L8\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "uint16_t - and this is a little weird, so the bitstream consists of 16-bit elements, rather than this being an implementation detail?",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///Lw\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "int, likely.",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///L0\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "uint16_t",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH///Ls\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-03T22:54:14Z",
+      "side": 1,
+      "message": "realloc in a function that is called by encode_bool()? That can\u0027t possibly be right...",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
