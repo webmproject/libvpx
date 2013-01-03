@@ -518,49 +518,6 @@ int vp9_uvsse(MACROBLOCK *x) {
 #else
 #define PT pt
 #endif
-
-static int cost_coeffs_2x2(MACROBLOCK *mb,
-                           BLOCKD *b, PLANE_TYPE type,
-                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  int nodc = (type == PLANE_TYPE_Y_NO_DC);
-  int c = nodc; /* start at coef 0, unless Y with Y2 */
-  int eob = b->eob;
-  int pt;    /* surrounding block/prev coef predictor */
-  int cost = 0;
-  int16_t *qcoeff_ptr = b->qcoeff;
-#if CONFIG_NEWCOEFCONTEXT
-  const int *neighbors = vp9_default_zig_zag1d_4x4_neighbors;
-  int pn;
-#endif
-
-  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  assert(eob <= 4);
-
-#if CONFIG_NEWCOEFCONTEXT
-  pn = pt;
-#endif
-  for (; c < eob; c++) {
-    int v = qcoeff_ptr[vp9_default_zig_zag1d_4x4[c]];
-    int t = vp9_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs[TX_8X8][type][vp9_coef_bands_4x4[c]][pt][t];
-    cost += vp9_dct_value_cost_ptr[v];
-    pt = vp9_prev_token_class[t];
-#if CONFIG_NEWCOEFCONTEXT
-    if (c < 4 - 1)
-      pn = vp9_get_coef_neighbor_context(
-           qcoeff_ptr, nodc, neighbors, vp9_default_zig_zag1d_4x4[c + 1]);
-#endif
-  }
-
-  if (c < 4)
-    cost += mb->token_costs[TX_8X8][type][vp9_coef_bands_4x4[c]]
-        [PT][DCT_EOB_TOKEN];
-  // is eob first coefficient;
-  pt = (c > !type);
-  *a = *l = pt;
-  return cost;
-}
-
 static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        TX_SIZE tx_size) {
@@ -617,6 +574,11 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
           bb = xd->block + ib;
           tx_type = get_tx_type_8x8(xd, bb);
         }
+      } else if (type == PLANE_TYPE_Y2) {
+        scan = vp9_default_zig_zag1d_4x4;
+        band = vp9_coef_bands_4x4;
+        default_eob = 4;
+        tx_type = DCT_DCT;
       }
       break;
     case TX_16X16:
@@ -788,9 +750,10 @@ static int rdcost_mby_8x8(MACROBLOCK *mb, int has_2nd_order, int backup) {
                         TX_8X8);
 
   if (has_2nd_order)
-    cost += cost_coeffs_2x2(mb, xd->block + 24, PLANE_TYPE_Y2,
+    cost += cost_coeffs(mb, xd->block + 24, PLANE_TYPE_Y2,
                             ta + vp9_block2above[TX_8X8][24],
-                            tl + vp9_block2left[TX_8X8][24]);
+                            tl + vp9_block2left[TX_8X8][24],
+                            TX_8X8);
   return cost;
 }
 
