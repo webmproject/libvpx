@@ -518,88 +518,71 @@ int vp9_uvsse(MACROBLOCK *x) {
 #else
 #define PT pt
 #endif
-static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
-                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+static int cost_coeffs(MACROBLOCK *mb,
+                       BLOCKD *b, PLANE_TYPE type,
+                       ENTROPY_CONTEXT *a,
+                       ENTROPY_CONTEXT *l,
                        TX_SIZE tx_size) {
+  int pt;
   const int eob = b->eob;
-  int nodc = (type == PLANE_TYPE_Y_NO_DC);
-  int c = nodc; /* start at coef 0, unless Y with Y2 */
-  int cost = 0, default_eob, seg_eob;
-  int pt;                     /* surrounding block/prev coef predictor */
-  int const *scan, *band;
-  int16_t *qcoeff_ptr = b->qcoeff;
   MACROBLOCKD *xd = &mb->e_mbd;
-  MB_MODE_INFO *mbmi = &mb->e_mbd.mode_info_context->mbmi;
-  TX_TYPE tx_type = DCT_DCT;
-  int segment_id = mbmi->segment_id;
+#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+  const int ib = (int)(b - xd->block);
+#endif
+  int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0;
+  int cost = 0, seg_eob;
+  const int segment_id = xd->mode_info_context->mbmi.segment_id;
+  const int *scan, *band;
+  int16_t *qcoeff_ptr = b->qcoeff;
+  const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
+                          get_tx_type(xd, b) : DCT_DCT;
 #if CONFIG_NEWCOEFCONTEXT
   const int *neighbors;
   int pn;
 #endif
-  scan = vp9_default_zig_zag1d_4x4;
-  band = vp9_coef_bands_4x4;
-  default_eob = 16;
+
+  ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
 
   switch (tx_size) {
     case TX_4X4:
+      scan = vp9_default_zig_zag1d_4x4;
+      band = vp9_coef_bands_4x4;
+      seg_eob = 16;
       if (type == PLANE_TYPE_Y_WITH_DC) {
-        tx_type = get_tx_type_4x4(xd, b);
-        if (tx_type != DCT_DCT) {
-          switch (tx_type) {
-            case ADST_DCT:
-              scan = vp9_row_scan_4x4;
-              break;
-
-            case DCT_ADST:
-              scan = vp9_col_scan_4x4;
-              break;
-
-            default:
-              scan = vp9_default_zig_zag1d_4x4;
-              break;
-          }
+        if (tx_type == ADST_DCT) {
+          scan = vp9_row_scan_4x4;
+        } else if (tx_type == DCT_ADST) {
+          scan = vp9_col_scan_4x4;
         }
       }
-
       break;
     case TX_8X8:
-      scan = vp9_default_zig_zag1d_8x8;
-      band = vp9_coef_bands_8x8;
-      default_eob = 64;
-      if (type == PLANE_TYPE_Y_WITH_DC) {
-        BLOCKD *bb;
-        int ib = (int)(b - xd->block);
-        if (ib < 16) {
-          ib = (ib & 8) + ((ib & 4) >> 1);
-          bb = xd->block + ib;
-          tx_type = get_tx_type_8x8(xd, bb);
-        }
-      } else if (type == PLANE_TYPE_Y2) {
+      if (type == PLANE_TYPE_Y2) {
         scan = vp9_default_zig_zag1d_4x4;
         band = vp9_coef_bands_4x4;
-        default_eob = 4;
-        tx_type = DCT_DCT;
+        seg_eob = 4;
+      } else {
+        scan = vp9_default_zig_zag1d_8x8;
+        band = vp9_coef_bands_8x8;
+        seg_eob = 64;
       }
       break;
     case TX_16X16:
       scan = vp9_default_zig_zag1d_16x16;
       band = vp9_coef_bands_16x16;
-      default_eob = 256;
-      if (type == PLANE_TYPE_Y_WITH_DC) {
-        tx_type = get_tx_type_16x16(xd, b);
+      seg_eob = 256;
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
-      } else if (type == PLANE_TYPE_UV) {
-        int ib = (int)(b - xd->block) - 16;
-
-        qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 64 * ib;
-#endif
+      if (type == PLANE_TYPE_UV) {
+        const int uv_idx = ib - 16;
+        qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 64 * uv_idx;
       }
+#endif
       break;
 #if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
       band = vp9_coef_bands_32x32;
-      default_eob = 1024;
+      seg_eob = 1024;
       qcoeff_ptr = xd->sb_coeff_data.qcoeff;
       break;
 #endif
@@ -607,17 +590,16 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
       abort();
       break;
   }
-  if (vp9_segfeature_active(&mb->e_mbd, segment_id, SEG_LVL_EOB))
-    seg_eob = vp9_get_segdata(&mb->e_mbd, segment_id, SEG_LVL_EOB);
-  else
-    seg_eob = default_eob;
 
-  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-
+  VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
 #if CONFIG_NEWCOEFCONTEXT
   neighbors = vp9_get_coef_neighbors_handle(scan);
   pn = pt;
 #endif
+
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB))
+    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+
   if (tx_type != DCT_DCT) {
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
@@ -628,7 +610,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
 #if CONFIG_NEWCOEFCONTEXT
       if (c < seg_eob - 1 && NEWCOEFCONTEXT_BAND_COND(band[c + 1]))
         pn = vp9_get_coef_neighbor_context(
-            qcoeff_ptr, nodc, neighbors, scan[c + 1]);
+            qcoeff_ptr, (type == PLANE_TYPE_Y_NO_DC), neighbors, scan[c + 1]);
       else
         pn = pt;
 #endif
@@ -646,7 +628,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, PLANE_TYPE type,
 #if CONFIG_NEWCOEFCONTEXT
       if (c < seg_eob - 1 && NEWCOEFCONTEXT_BAND_COND(band[c + 1]))
         pn = vp9_get_coef_neighbor_context(
-            qcoeff_ptr, nodc, neighbors, scan[c + 1]);
+            qcoeff_ptr, (type == PLANE_TYPE_Y_NO_DC), neighbors, scan[c + 1]);
       else
         pn = pt;
 #endif
