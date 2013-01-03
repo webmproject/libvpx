@@ -120,9 +120,9 @@ static void tokenize_b(VP9_COMP *cpi,
   int pt; /* near block/prev token context index */
   int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0;
   const BLOCKD * const b = xd->block + ib;
-  int eob = b->eob;     /* one beyond last nonzero coeff */
+  const int eob = b->eob;     /* one beyond last nonzero coeff */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
-  const short *qcoeff_ptr = b->qcoeff;
+  int16_t *qcoeff_ptr = b->qcoeff;
   int seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int *bands, *scan;
@@ -214,7 +214,7 @@ static void tokenize_b(VP9_COMP *cpi,
       }
 #if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
       if (type == PLANE_TYPE_UV) {
-        int uv_idx = (((int) (b - xd->block)) - 16) >> 2;
+        int uv_idx = (ib - 16) >> 2;
         qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 256 * uv_idx;
       }
 #endif
