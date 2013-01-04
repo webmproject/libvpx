@@ -4577,7 +4577,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       (cpi->oxcf.arnr_max_frames == 0) &&
       (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME)) {
     mbmi->mode = ZEROMV;
-    if (cm->txfm_mode != TX_MODE_SELECT)
+    if (cm->txfm_mode <= ALLOW_8X8)
       mbmi->txfm_size = cm->txfm_mode;
     else
       mbmi->txfm_size = TX_16X16;
