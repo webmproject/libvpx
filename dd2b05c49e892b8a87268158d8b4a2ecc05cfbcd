@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//+5E\u003d",
+        "filename": "vp9/decoder/vp9_dequantize.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-01-04T17:03:10Z",
+      "side": 1,
+      "message": "We wanted the change from short/unsigned short/char/unsigned char to int16_t/uint16_t/int8_t/uint8_t, to be consistent with the style guide?",
+      "revId": "dd2b05c49e892b8a87268158d8b4a2ecc05cfbcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//+5A\u003d",
+        "filename": "vp9/decoder/vp9_dequantize.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-01-04T17:03:10Z",
+      "side": 1,
+      "message": "same here. \nIt looks like the wrong was picked in merge?",
+      "revId": "dd2b05c49e892b8a87268158d8b4a2ecc05cfbcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
