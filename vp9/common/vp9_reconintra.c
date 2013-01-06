@@ -254,7 +254,7 @@ void vp9_build_intra_predictors_internal(uint8_t *src, int src_stride,
                                          int up_available, int left_available) {
 
   uint8_t *yabove_row = src - src_stride;
-  uint8_t yleft_col[32];
+  uint8_t yleft_col[64];
   uint8_t ytop_left = yabove_row[-1];
   int r, c, i;
 
@@ -271,15 +271,19 @@ void vp9_build_intra_predictors_internal(uint8_t *src, int src_stride,
       int average = 0;
       int log2_bsize_minus_1;
 
-      assert(bsize == 4 || bsize == 8 || bsize == 16 || bsize == 32);
+      assert(bsize == 4 || bsize == 8 || bsize == 16 || bsize == 32 ||
+             bsize == 64);
       if (bsize == 4) {
         log2_bsize_minus_1 = 1;
       } else if (bsize == 8) {
         log2_bsize_minus_1 = 2;
       } else if (bsize == 16) {
         log2_bsize_minus_1 = 3;
-      } else /* bsize == 32 */ {
+      } else if (bsize == 32) {
         log2_bsize_minus_1 = 4;
+      } else {
+        assert(bsize == 64);
+        log2_bsize_minus_1 = 5;
       }
 
       if (up_available || left_available) {
@@ -517,16 +521,17 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
     71,  70,  70,  70,  69,  69,  69,  68,
     68,  68,  68,  68,  67,  67,  67,  67,
   };
-  int size_scale = (size == 32 ? 1 :
+  int size_scale = (size >= 32 ? 1 :
                     size == 16 ? 2 :
                     size == 8  ? 4 : 8);
+  int size_shift = size == 64 ? 1 : 0;
   int i, j;
   switch (mode) {
     case V_PRED:
       for (i = 0; i < size; ++i) {
         for (j = 0; j < size; ++j) {
           int k = i * interstride + j;
-          int scale = weights1d[i * size_scale];
+          int scale = weights1d[i * size_scale >> size_shift];
           interpred[k] =
               ((scale_max - scale) * interpred[k] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -539,7 +544,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
       for (i = 0; i < size; ++i) {
         for (j = 0; j < size; ++j) {
           int k = i * interstride + j;
-          int scale = weights1d[j * size_scale];
+          int scale = weights1d[j * size_scale >> size_shift];
           interpred[k] =
               ((scale_max - scale) * interpred[k] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -553,8 +558,9 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
       for (i = 0; i < size; ++i) {
         for (j = 0; j < size; ++j) {
           int k = i * interstride + j;
-          int scale = (weights2d[i * size_scale * 32 + j * size_scale] +
-                       weights1d[i * size_scale]) >> 1;
+          int scale = (weights2d[(i * size_scale * 32 +
+                                  j * size_scale) >> size_shift] +
+                       weights1d[i * size_scale >> size_shift]) >> 1;
           interpred[k] =
               ((scale_max - scale) * interpred[k] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -568,8 +574,9 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
       for (i = 0; i < size; ++i) {
         for (j = 0; j < size; ++j) {
           int k = i * interstride + j;
-          int scale = (weights2d[i * size_scale * 32 + j * size_scale] +
-                       weights1d[j * size_scale]) >> 1;
+          int scale = (weights2d[(i * size_scale * 32 +
+                                  j * size_scale) >> size_shift] +
+                       weights1d[j * size_scale >> size_shift]) >> 1;
           interpred[k] =
               ((scale_max - scale) * interpred[k] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -582,7 +589,8 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
       for (i = 0; i < size; ++i) {
         for (j = 0; j < size; ++j) {
           int k = i * interstride + j;
-          int scale = weights2d[i * size_scale * 32 + j * size_scale];
+          int scale = weights2d[(i * size_scale * 32 +
+                                 j * size_scale) >> size_shift];
           interpred[k] =
               ((scale_max - scale) * interpred[k] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -695,6 +703,47 @@ void vp9_build_interintra_32x32_predictors_sb(MACROBLOCKD *xd,
   vp9_build_interintra_32x32_predictors_sby(xd, ypred, ystride);
   vp9_build_interintra_32x32_predictors_sbuv(xd, upred, vpred, uvstride);
 }
+
+void vp9_build_interintra_64x64_predictors_sby(MACROBLOCKD *xd,
+                                               uint8_t *ypred,
+                                               int ystride) {
+  uint8_t intrapredictor[4096];
+  const int mode = xd->mode_info_context->mbmi.interintra_mode;
+  vp9_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
+                                      intrapredictor, 64, mode, 64,
+                                      xd->up_available, xd->left_available);
+  combine_interintra(xd->mode_info_context->mbmi.interintra_mode,
+                     ypred, ystride, intrapredictor, 64, 64);
+}
+
+void vp9_build_interintra_64x64_predictors_sbuv(MACROBLOCKD *xd,
+                                                uint8_t *upred,
+                                                uint8_t *vpred,
+                                                int uvstride) {
+  uint8_t uintrapredictor[1024];
+  uint8_t vintrapredictor[1024];
+  const int mode = xd->mode_info_context->mbmi.interintra_uv_mode;
+  vp9_build_intra_predictors_internal(xd->dst.u_buffer, xd->dst.uv_stride,
+                                      uintrapredictor, 32, mode, 32,
+                                      xd->up_available, xd->left_available);
+  vp9_build_intra_predictors_internal(xd->dst.v_buffer, xd->dst.uv_stride,
+                                      vintrapredictor, 32, mode, 32,
+                                      xd->up_available, xd->left_available);
+  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
+                     upred, uvstride, uintrapredictor, 32, 32);
+  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
+                     vpred, uvstride, vintrapredictor, 32, 32);
+}
+
+void vp9_build_interintra_64x64_predictors_sb(MACROBLOCKD *xd,
+                                              uint8_t *ypred,
+                                              uint8_t *upred,
+                                              uint8_t *vpred,
+                                              int ystride,
+                                              int uvstride) {
+  vp9_build_interintra_64x64_predictors_sby(xd, ypred, ystride);
+  vp9_build_interintra_64x64_predictors_sbuv(xd, upred, vpred, uvstride);
+}
 #endif
 #endif
 
@@ -717,6 +766,13 @@ void vp9_build_intra_predictors_sby_s(MACROBLOCKD *xd) {
   vp9_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
                                       xd->dst.y_buffer, xd->dst.y_stride,
                                       xd->mode_info_context->mbmi.mode, 32,
+                                      xd->up_available, xd->left_available);
+}
+
+void vp9_build_intra_predictors_sb64y_s(MACROBLOCKD *xd) {
+  vp9_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
+                                      xd->dst.y_buffer, xd->dst.y_stride,
+                                      xd->mode_info_context->mbmi.mode, 64,
                                       xd->up_available, xd->left_available);
 }
 #endif
@@ -777,6 +833,13 @@ void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd) {
                                            xd->dst.v_buffer, xd->dst.uv_stride,
                                            xd->mode_info_context->mbmi.uv_mode,
                                            16);
+}
+
+void vp9_build_intra_predictors_sb64uv_s(MACROBLOCKD *xd) {
+  vp9_build_intra_predictors_mbuv_internal(xd, xd->dst.u_buffer,
+                                           xd->dst.v_buffer, xd->dst.uv_stride,
+                                           xd->mode_info_context->mbmi.uv_mode,
+                                           32);
 }
 #endif
 

@@ -17,6 +17,7 @@
 #include <limits.h>
 #include <math.h>
 #include "vp9/common/vp9_findnearmv.h"
+#include "vp9/common/vp9_common.h"
 
 #ifdef ENTROPY_STATS
 static int mv_ref_ct [31] [4] [2];
@@ -240,9 +241,6 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
       }                                                                  \
     },                                                                   \
     v = INT_MAX;)
-
-#define MIN(x,y) (((x)<(y))?(x):(y))
-#define MAX(x,y) (((x)>(y))?(x):(y))
 
 int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                              int_mv *bestmv, int_mv *ref_mv,

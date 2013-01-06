@@ -21,6 +21,9 @@
 #define TRUE    1
 #define FALSE   0
 
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+
 /* Only need this for fixed-size arrays, for structs just assign. */
 
 #define vp9_copy(Dest, Src) { \

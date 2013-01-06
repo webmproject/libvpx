@@ -226,6 +226,16 @@ typedef enum {
   MAX_REF_FRAMES = 4
 } MV_REFERENCE_FRAME;
 
+#if CONFIG_SUPERBLOCKS
+typedef enum {
+  BLOCK_SIZE_MB16X16 = 0,
+  BLOCK_SIZE_SB32X32 = 1,
+#if CONFIG_SUPERBLOCKS64
+  BLOCK_SIZE_SB64X64 = 2,
+#endif
+} BLOCK_SIZE_TYPE;
+#endif
+
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
 #if CONFIG_COMP_INTRA_PRED
@@ -268,8 +278,8 @@ typedef struct {
 
 #if CONFIG_SUPERBLOCKS
   // FIXME need a SB array of 4 MB_MODE_INFOs that
-  // only needs one encoded_as_sb.
-  unsigned char encoded_as_sb;
+  // only needs one sb_type.
+  BLOCK_SIZE_TYPE sb_type;
 #endif
 } MB_MODE_INFO;
 
@@ -415,6 +425,7 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(32, uint8_t, y_buf[22 * 32]);
 #endif
 
+  int sb_index;
   int mb_index;   // Index of the MB in the SB (0..3)
   int q_index;
 
@@ -519,7 +530,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
     return tx_type;
 #if CONFIG_SUPERBLOCKS
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.encoded_as_sb)
+  if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
 #endif
   if (xd->mode_info_context->mbmi.mode == B_PRED &&
@@ -576,7 +587,7 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
     return tx_type;
 #if CONFIG_SUPERBLOCKS
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.encoded_as_sb)
+  if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
 #endif
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
@@ -611,7 +622,7 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
     return tx_type;
 #if CONFIG_SUPERBLOCKS
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.encoded_as_sb)
+  if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
 #endif
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&

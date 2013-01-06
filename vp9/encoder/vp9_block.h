@@ -181,10 +181,13 @@ typedef struct macroblock {
 
   // Structure to hold context for each of the 4 MBs within a SB:
   // when encoded as 4 independent MBs:
-  PICK_MODE_CONTEXT mb_context[4];
+  PICK_MODE_CONTEXT mb_context[4][4];
 #if CONFIG_SUPERBLOCKS
   // when 4 MBs share coding parameters:
-  PICK_MODE_CONTEXT sb_context[4];
+  PICK_MODE_CONTEXT sb32_context[4];
+#if CONFIG_SUPERBLOCKS64
+  PICK_MODE_CONTEXT sb64_context;
+#endif  // CONFIG_SUPERBLOCKS64
 #endif
 
   void (*vp9_short_fdct4x4)(int16_t *input, int16_t *output, int pitch);

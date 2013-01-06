@@ -141,21 +141,57 @@ static int cost_segmap(MACROBLOCKD *xd,
             segcounts[3] * vp9_cost_one(probs[2]);
 
   return cost;
+}
 
+static void count_segs(VP9_COMP *cpi,
+                       MODE_INFO *mi,
+                       int *no_pred_segcounts,
+                       int (*temporal_predictor_count)[2],
+                       int *t_unpred_seg_counts,
+                       int mb_size, int mb_row, int mb_col) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  const int segmap_index = mb_row * cm->mb_cols + mb_col;
+  const int segment_id = mi->mbmi.segment_id;
+
+  xd->mode_info_context = mi;
+  xd->mb_to_top_edge = -((mb_row * 16) << 3);
+  xd->mb_to_left_edge = -((mb_col * 16) << 3);
+  xd->mb_to_bottom_edge = ((cm->mb_rows - mb_size - mb_row) * 16) << 3;
+  xd->mb_to_right_edge  = ((cm->mb_cols - mb_size - mb_col) * 16) << 3;
+
+  // Count the number of hits on each segment with no prediction
+  no_pred_segcounts[segment_id]++;
+
+  // Temporal prediction not allowed on key frames
+  if (cm->frame_type != KEY_FRAME) {
+    // Test to see if the segment id matches the predicted value.
+    const int seg_predicted =
+        (segment_id == vp9_get_pred_mb_segid(cm, xd, segmap_index));
+
+    // Get the segment id prediction context
+    const int pred_context = vp9_get_pred_context(cm, xd, PRED_SEG_ID);
+
+    // Store the prediction status for this mb and update counts
+    // as appropriate
+    vp9_set_pred_flag(xd, PRED_SEG_ID, seg_predicted);
+    temporal_predictor_count[pred_context][seg_predicted]++;
+
+    if (!seg_predicted)
+      // Update the "unpredicted" segment count
+      t_unpred_seg_counts[segment_id]++;
+  }
 }
 
 void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
-  int i;
   int no_pred_cost;
   int t_pred_cost = INT_MAX;
-  int pred_context;
 
+  int i;
   int mb_row, mb_col;
-  int segmap_index = 0;
-  unsigned char segment_id;
 
   int temporal_predictor_count[PREDICTION_PROBS][2];
   int no_pred_segcounts[MAX_MB_SEGMENTS];
@@ -165,9 +201,8 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   vp9_prob t_pred_tree[MB_FEATURE_TREE_PROBS];
   vp9_prob t_nopred_prob[PREDICTION_PROBS];
 
-#if CONFIG_SUPERBLOCKS
   const int mis = cm->mode_info_stride;
-#endif
+  MODE_INFO *mi_ptr = cm->mi, *mi;
 
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities
@@ -183,87 +218,57 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   // First of all generate stats regarding how well the last segment map
   // predicts this one
 
-  // Initialize macroblock decoder mode info context for the first mb
-  // in the frame
-  xd->mode_info_context = cm->mi;
-
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 2) {
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col += 2) {
-      for (i = 0; i < 4; i++) {
-        static const int dx[4] = { +1, -1, +1, +1 };
-        static const int dy[4] = {  0, +1,  0, -1 };
-        int x_idx = i & 1, y_idx = i >> 1;
-
-        if (mb_col + x_idx >= cm->mb_cols ||
-            mb_row + y_idx >= cm->mb_rows) {
-          goto end;
-        }
-
-        xd->mb_to_top_edge = -((mb_row * 16) << 3);
-        xd->mb_to_left_edge = -((mb_col * 16) << 3);
-
-        segmap_index = (mb_row + y_idx) * cm->mb_cols + mb_col + x_idx;
-        segment_id = xd->mode_info_context->mbmi.segment_id;
+  for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4, mi_ptr += 4 * mis) {
+    mi = mi_ptr;
+    for (mb_col = 0; mb_col < cm->mb_cols; mb_col += 4, mi += 4) {
+#if CONFIG_SUPERBLOCKS && CONFIG_SUPERBLOCKS64
+      if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
+        count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
+                   t_unpred_seg_counts, 4, mb_row, mb_col);
+      } else
+#endif
+      {
+        for (i = 0; i < 4; i++) {
+          int x_idx = (i & 1) << 1, y_idx = i & 2;
 #if CONFIG_SUPERBLOCKS
-        if (xd->mode_info_context->mbmi.encoded_as_sb) {
-          if (mb_col + 1 < cm->mb_cols)
-            segment_id = segment_id &&
-                         xd->mode_info_context[1].mbmi.segment_id;
-          if (mb_row + 1 < cm->mb_rows) {
-            segment_id = segment_id &&
-                         xd->mode_info_context[mis].mbmi.segment_id;
-            if (mb_col + 1 < cm->mb_cols)
-              segment_id = segment_id &&
-                           xd->mode_info_context[mis + 1].mbmi.segment_id;
+          MODE_INFO *sb_mi = mi + y_idx * mis + x_idx;
+#endif
+
+          if (mb_col + x_idx >= cm->mb_cols ||
+              mb_row + y_idx >= cm->mb_rows) {
+            continue;
           }
-          xd->mb_to_bottom_edge = ((cm->mb_rows - 2 - mb_row) * 16) << 3;
-          xd->mb_to_right_edge  = ((cm->mb_cols - 2 - mb_col) * 16) << 3;
-        } else {
-#endif
-          xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
-          xd->mb_to_right_edge  = ((cm->mb_cols - 1 - mb_col) * 16) << 3;
-#if CONFIG_SUPERBLOCKS
-        }
-#endif
-
-        // Count the number of hits on each segment with no prediction
-        no_pred_segcounts[segment_id]++;
-
-        // Temporal prediction not allowed on key frames
-        if (cm->frame_type != KEY_FRAME) {
-          // Test to see if the segment id matches the predicted value.
-          int seg_predicted =
-            (segment_id == vp9_get_pred_mb_segid(cm, xd, segmap_index));
-
-          // Get the segment id prediction context
-          pred_context =
-            vp9_get_pred_context(cm, xd, PRED_SEG_ID);
-
-          // Store the prediction status for this mb and update counts
-          // as appropriate
-          vp9_set_pred_flag(xd, PRED_SEG_ID, seg_predicted);
-          temporal_predictor_count[pred_context][seg_predicted]++;
-
-          if (!seg_predicted)
-            // Update the "unpredicted" segment count
-            t_unpred_seg_counts[segment_id]++;
-        }
 
 #if CONFIG_SUPERBLOCKS
-        if (xd->mode_info_context->mbmi.encoded_as_sb) {
-          assert(!i);
-          xd->mode_info_context += 2;
-          break;
-        }
+          if (sb_mi->mbmi.sb_type) {
+            assert(sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X32);
+            count_segs(cpi, sb_mi, no_pred_segcounts, temporal_predictor_count,
+                       t_unpred_seg_counts, 2, mb_row + y_idx, mb_col + x_idx);
+          } else
 #endif
-      end:
-        xd->mode_info_context += dx[i] + dy[i] * cm->mode_info_stride;
+          {
+            int j;
+
+            for (j = 0; j < 4; j++) {
+              const int x_idx_mb = x_idx + (j & 1), y_idx_mb = y_idx + (j >> 1);
+              MODE_INFO *mb_mi = mi + x_idx_mb + y_idx_mb * mis;
+
+              if (mb_col + x_idx_mb >= cm->mb_cols ||
+                  mb_row + y_idx_mb >= cm->mb_rows) {
+                continue;
+              }
+
+#if CONFIG_SUPERBLOCKS
+              assert(mb_mi->mbmi.sb_type == BLOCK_SIZE_MB16X16);
+#endif
+              count_segs(cpi, mb_mi, no_pred_segcounts,
+                         temporal_predictor_count, t_unpred_seg_counts,
+                         1, mb_row + y_idx_mb, mb_col + x_idx_mb);
+            }
+          }
+        }
       }
     }
-
-    // this is to account for the border in mode_info_context
-    xd->mode_info_context -= mb_col;
-    xd->mode_info_context += cm->mode_info_stride * 2;
   }
 
   // Work out probability tree for coding segments without prediction

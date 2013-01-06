@@ -41,6 +41,12 @@ extern void vp9_build_interintra_32x32_predictors_sb(MACROBLOCKD *xd,
                                                      uint8_t *vpred,
                                                      int ystride,
                                                      int uvstride);
+extern void vp9_build_interintra_64x64_predictors_sb(MACROBLOCKD *xd,
+                                                     uint8_t *ypred,
+                                                     uint8_t *upred,
+                                                     uint8_t *vpred,
+                                                     int ystride,
+                                                     int uvstride);
 #endif  // CONFIG_SUPERBLOCKS
 
 #endif  // VP9_COMMON_VP9_RECONINTRA_H_

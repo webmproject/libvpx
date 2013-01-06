@@ -418,6 +418,9 @@ if [ "$CONFIG_VP9_ENCODER" = "yes" ]; then
 prototype unsigned int vp9_variance32x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance32x32
 
+prototype unsigned int vp9_variance64x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance64x64
+
 prototype unsigned int vp9_variance16x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance16x16 mmx sse2
 vp9_variance16x16_sse2=vp9_variance16x16_wmt
@@ -443,6 +446,9 @@ specialize vp9_variance4x4 mmx sse2
 vp9_variance4x4_sse2=vp9_variance4x4_wmt
 vp9_variance4x4_mmx=vp9_variance4x4_mmx
 
+prototype unsigned int vp9_sub_pixel_variance64x64 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp9_sub_pixel_variance64x64
+
 prototype unsigned int vp9_sub_pixel_variance32x32 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int Refstride, unsigned int *sse"
 specialize vp9_sub_pixel_variance32x32
 
@@ -466,6 +472,9 @@ vp9_sub_pixel_variance8x8_sse2=vp9_sub_pixel_variance8x8_wmt
 prototype unsigned int vp9_sub_pixel_variance4x4 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int Refstride, unsigned int *sse"
 specialize vp9_sub_pixel_variance4x4 sse2 mmx
 vp9_sub_pixel_variance4x4_sse2=vp9_sub_pixel_variance4x4_wmt
+
+prototype unsigned int vp9_sad64x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad"
+specialize vp9_sad64x64
 
 prototype unsigned int vp9_sad32x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad"
 specialize vp9_sad32x32
@@ -502,6 +511,15 @@ prototype unsigned int vp9_variance_halfpixvar16x16_hv "const uint8_t *src_ptr, 
 specialize vp9_variance_halfpixvar16x16_hv mmx sse2
 vp9_variance_halfpixvar16x16_hv_sse2=vp9_variance_halfpixvar16x16_hv_wmt
 
+prototype unsigned int vp9_variance_halfpixvar64x64_h "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance_halfpixvar64x64_h
+
+prototype unsigned int vp9_variance_halfpixvar64x64_v "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance_halfpixvar64x64_v
+
+prototype unsigned int vp9_variance_halfpixvar64x64_hv "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance_halfpixvar64x64_hv
+
 prototype unsigned int vp9_variance_halfpixvar32x32_h "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance_halfpixvar32x32_h
 
@@ -510,6 +528,9 @@ specialize vp9_variance_halfpixvar32x32_v
 
 prototype unsigned int vp9_variance_halfpixvar32x32_hv "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance_halfpixvar32x32_hv
+
+prototype void vp9_sad64x64x3 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad64x64x3
 
 prototype void vp9_sad32x32x3 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad32x32x3
@@ -529,6 +550,9 @@ specialize vp9_sad8x8x3 sse3
 prototype void vp9_sad4x4x3 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad4x4x3 sse3
 
+prototype void vp9_sad64x64x8 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint16_t *sad_array"
+specialize vp9_sad64x64x8
+
 prototype void vp9_sad32x32x8 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint16_t *sad_array"
 specialize vp9_sad32x32x8
 
@@ -546,6 +570,9 @@ specialize vp9_sad8x8x8 sse4
 
 prototype void vp9_sad4x4x8 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint16_t *sad_array"
 specialize vp9_sad4x4x8 sse4
+
+prototype void vp9_sad64x64x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t **ref_ptr, int  ref_stride, unsigned int *sad_array"
+specialize vp9_sad64x64x4d
 
 prototype void vp9_sad32x32x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t **ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad32x32x4d
@@ -582,6 +609,9 @@ vp9_sub_pixel_mse16x16_sse2=vp9_sub_pixel_mse16x16_wmt
 prototype unsigned int vp9_mse16x16 "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse"
 specialize vp9_mse16x16 mmx sse2
 vp9_mse16x16_sse2=vp9_mse16x16_wmt
+
+prototype unsigned int vp9_sub_pixel_mse64x64 "const uint8_t *src_ptr, int  source_stride, int  xoffset, int  yoffset, const uint8_t *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp9_sub_pixel_mse64x64
 
 prototype unsigned int vp9_sub_pixel_mse32x32 "const uint8_t *src_ptr, int  source_stride, int  xoffset, int  yoffset, const uint8_t *ref_ptr, int Refstride, unsigned int *sse"
 specialize vp9_sub_pixel_mse32x32

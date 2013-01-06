@@ -390,8 +390,15 @@ enum BlockSize {
   BLOCK_4X4 = PARTITIONING_4X4,
   BLOCK_16X16,
   BLOCK_MAX_SEGMENTS,
+#if CONFIG_SUPERBLOCKS
   BLOCK_32X32 = BLOCK_MAX_SEGMENTS,
+#if CONFIG_SUPERBLOCKS64
+  BLOCK_64X64,
+#endif  // CONFIG_SUPERBLOCKS64
   BLOCK_MAX_SB_SEGMENTS,
+#else  // CONFIG_SUPERBLOCKS
+  BLOCK_MAX_SB_SEGMENTS = BLOCK_MAX_SEGMENTS,
+#endif  // CONFIG_SUPERBLOCKS
 };
 
 typedef struct VP9_COMP {
@@ -571,7 +578,10 @@ typedef struct VP9_COMP {
   int cq_target_quality;
 
 #if CONFIG_SUPERBLOCKS
-  int sb_count;
+  int sb32_count[2];
+#if CONFIG_SUPERBLOCKS64
+  int sb64_count[2];
+#endif
   int sb_ymode_count [VP9_I32X32_MODES];
 #endif
   int ymode_count[VP9_YMODES];        /* intra MB type cts this frame */

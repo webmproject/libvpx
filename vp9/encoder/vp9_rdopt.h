@@ -22,16 +22,23 @@ extern void vp9_initialize_me_consts(VP9_COMP *cpi, int QIndex);
 extern void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                    int *r, int *d);
 
-extern void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
-                                      int *r, int *d);
+extern void vp9_rd_pick_intra_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
+                                        int *r, int *d);
+
+extern void vp9_rd_pick_intra_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
+                                        int *r, int *d);
 
 extern void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
-                                           int recon_yoffset,
-                                           int recon_uvoffset, int *r, int *d);
+                                           int ref_yoffset, int ref_uvoffset,
+                                           int *r, int *d);
 
-extern int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
-                                         int recon_yoffset, int recon_uvoffset,
-                                         int *returnrate, int *returndist);
+extern int64_t vp9_rd_pick_inter_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
+                                           int ref_yoffset, int ref_uvoffset,
+                                           int *r, int *d);
+
+extern int64_t vp9_rd_pick_inter_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
+                                           int ref_yoffset, int ref_uvoffset,
+                                           int *r, int *d);
 
 extern void vp9_init_me_luts();
 

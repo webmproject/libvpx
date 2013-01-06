@@ -434,12 +434,9 @@ void vp9_comp_intra4x4_predict_c(BLOCKD *x,
  * to the right prediction have filled in pixels to use.
  */
 void vp9_intra_prediction_down_copy(MACROBLOCKD *xd) {
-  int extend_edge = (xd->mb_to_right_edge == 0 && xd->mb_index < 2);
+  int extend_edge = xd->mb_to_right_edge == 0 && xd->mb_index < 2;
   uint8_t *above_right = *(xd->block[0].base_dst) + xd->block[0].dst -
                                xd->block[0].dst_stride + 16;
-  uint32_t *src_ptr = (uint32_t *)
-      (above_right - (xd->mb_index == 3 ? 16 * xd->block[0].dst_stride : 0));
-
   uint32_t *dst_ptr0 = (uint32_t *)above_right;
   uint32_t *dst_ptr1 =
     (uint32_t *)(above_right + 4 * xd->block[0].dst_stride);
@@ -447,6 +444,17 @@ void vp9_intra_prediction_down_copy(MACROBLOCKD *xd) {
     (uint32_t *)(above_right + 8 * xd->block[0].dst_stride);
   uint32_t *dst_ptr3 =
     (uint32_t *)(above_right + 12 * xd->block[0].dst_stride);
+
+  uint32_t *src_ptr = (uint32_t *) above_right;
+
+  if ((xd->sb_index >= 2 && xd->mb_to_right_edge == 0) ||
+      (xd->sb_index == 3 && xd->mb_index & 1))
+    src_ptr = (uint32_t *) (((uint8_t *) src_ptr) - 32 *
+                                                    xd->block[0].dst_stride);
+  if (xd->mb_index == 3 ||
+      (xd->mb_to_right_edge == 0 && xd->mb_index == 2))
+    src_ptr = (uint32_t *) (((uint8_t *) src_ptr) - 16 *
+                                                    xd->block[0].dst_stride);
 
   if (extend_edge) {
     *src_ptr = ((uint8_t *) src_ptr)[-1] * 0x01010101U;

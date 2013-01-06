@@ -556,43 +556,19 @@ static void print_seg_map(VP9_COMP *cpi) {
 }
 
 static void update_reference_segmentation_map(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-  int row, col, sb_rows = (cm->mb_rows + 1) >> 1, sb_cols = (cm->mb_cols + 1) >> 1;
-  MODE_INFO *mi = cm->mi;
-  uint8_t *segmap = cpi->segmentation_map;
-  uint8_t *segcache = cm->last_frame_seg_map;
+  VP9_COMMON *const cm = &cpi->common;
+  int row, col;
+  MODE_INFO *mi, *mi_ptr = cm->mi;
+  uint8_t *cache_ptr = cm->last_frame_seg_map, *cache;
 
-  for (row = 0; row < sb_rows; row++) {
-    for (col = 0; col < sb_cols; col++) {
-      MODE_INFO *miptr = mi + col * 2;
-      uint8_t *cache = segcache + col * 2;
-#if CONFIG_SUPERBLOCKS
-      if (miptr->mbmi.encoded_as_sb) {
-        cache[0] = miptr->mbmi.segment_id;
-        if (!(cm->mb_cols & 1) || col < sb_cols - 1)
-          cache[1] = miptr->mbmi.segment_id;
-        if (!(cm->mb_rows & 1) || row < sb_rows - 1) {
-          cache[cm->mb_cols] = miptr->mbmi.segment_id;
-          if (!(cm->mb_cols & 1) || col < sb_cols - 1)
-            cache[cm->mb_cols + 1] = miptr->mbmi.segment_id;
-        }
-      } else
-#endif
-      {
-        cache[0] = miptr[0].mbmi.segment_id;
-        if (!(cm->mb_cols & 1) || col < sb_cols - 1)
-          cache[1] = miptr[1].mbmi.segment_id;
-        if (!(cm->mb_rows & 1) || row < sb_rows - 1) {
-          cache[cm->mb_cols] = miptr[cm->mode_info_stride].mbmi.segment_id;
-          if (!(cm->mb_cols & 1) || col < sb_cols - 1)
-            cache[1] = miptr[1].mbmi.segment_id;
-          cache[cm->mb_cols + 1] = miptr[cm->mode_info_stride + 1].mbmi.segment_id;
-        }
-      }
+  for (row = 0; row < cm->mb_rows; row++) {
+    mi = mi_ptr;
+    cache = cache_ptr;
+    for (col = 0; col < cm->mb_cols; col++, mi++, cache++) {
+      cache[0] = mi->mbmi.segment_id;
     }
-    segmap += 2 * cm->mb_cols;
-    segcache += 2 * cm->mb_cols;
-    mi += 2 * cm->mode_info_stride;
+    mi_ptr += cm->mode_info_stride;
+    cache_ptr += cm->mb_cols;
   }
 }
 
@@ -1788,7 +1764,10 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cm->prob_gf_coded                 = 128;
   cm->prob_intra_coded              = 63;
 #if CONFIG_SUPERBLOCKS
-  cm->sb_coded                      = 200;
+  cm->sb32_coded                    = 200;
+#if CONFIG_SUPERBLOCKS64
+  cm->sb64_coded                    = 200;
+#endif
 #endif
   for (i = 0; i < COMP_PRED_CONTEXTS; i++)
     cm->prob_comppred[i]         = 128;
@@ -1994,6 +1973,13 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
       vp9_variance_halfpixvar32x32_h, vp9_variance_halfpixvar32x32_v,
       vp9_variance_halfpixvar32x32_hv, vp9_sad32x32x3, vp9_sad32x32x8,
       vp9_sad32x32x4d)
+
+#if CONFIG_SUPERBLOCKS64
+  BFP(BLOCK_64X64, vp9_sad64x64, vp9_variance64x64, vp9_sub_pixel_variance64x64,
+      vp9_variance_halfpixvar64x64_h, vp9_variance_halfpixvar64x64_v,
+      vp9_variance_halfpixvar64x64_hv, vp9_sad64x64x3, vp9_sad64x64x8,
+      vp9_sad64x64x4d)
+#endif
 #endif
 
   BFP(BLOCK_16X16, vp9_sad16x16, vp9_variance16x16, vp9_sub_pixel_variance16x16,

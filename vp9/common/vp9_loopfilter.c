@@ -228,7 +228,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd) {
 
           if (mb_col > 0
 #if CONFIG_SUPERBLOCKS
-              && !((mb_col & 1) && mode_info_context->mbmi.encoded_as_sb &&
+              && !((mb_col & 1) && mode_info_context->mbmi.sb_type &&
                    ((mode_info_context[0].mbmi.mb_skip_coeff &&
                      mode_info_context[-1].mbmi.mb_skip_coeff)
 #if CONFIG_TX32X32
@@ -253,7 +253,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd) {
           /* don't apply across umv border */
           if (mb_row > 0
 #if CONFIG_SUPERBLOCKS
-              && !((mb_row & 1) && mode_info_context->mbmi.encoded_as_sb &&
+              && !((mb_row & 1) && mode_info_context->mbmi.sb_type &&
                    ((mode_info_context[0].mbmi.mb_skip_coeff &&
                      mode_info_context[-mis].mbmi.mb_skip_coeff)
 #if CONFIG_TX32X32
@@ -277,7 +277,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd) {
           // FIXME: Not 8x8 aware
           if (mb_col > 0
 #if CONFIG_SUPERBLOCKS
-              && !((mb_col & 1) && mode_info_context->mbmi.encoded_as_sb &&
+              && !((mb_col & 1) && mode_info_context->mbmi.sb_type &&
                    mode_info_context[0].mbmi.mb_skip_coeff &&
                    mode_info_context[-1].mbmi.mb_skip_coeff)
 #endif
@@ -292,7 +292,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd) {
           /* don't apply across umv border */
           if (mb_row > 0
 #if CONFIG_SUPERBLOCKS
-              && !((mb_row & 1) && mode_info_context->mbmi.encoded_as_sb &&
+              && !((mb_row & 1) && mode_info_context->mbmi.sb_type &&
                    mode_info_context[0].mbmi.mb_skip_coeff &&
                    mode_info_context[-cm->mode_info_stride].mbmi.mb_skip_coeff)
 #endif

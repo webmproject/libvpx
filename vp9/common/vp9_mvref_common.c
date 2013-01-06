@@ -237,7 +237,7 @@ void vp9_find_mv_refs(
   vpx_memset(candidate_scores, 0, sizeof(candidate_scores));
 
 #if CONFIG_SUPERBLOCKS
-  if (mbmi->encoded_as_sb) {
+  if (mbmi->sb_type) {
     mv_ref_search = sb_mv_ref_search;
     ref_distance_weight = sb_ref_distance_weight;
   } else {

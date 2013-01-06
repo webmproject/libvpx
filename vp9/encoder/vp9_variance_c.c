@@ -25,6 +25,19 @@ unsigned int vp9_get_mb_ss_c(const int16_t *src_ptr) {
 }
 
 #if CONFIG_SUPERBLOCKS
+unsigned int vp9_variance64x64_c(const uint8_t *src_ptr,
+                                 int  source_stride,
+                                 const uint8_t *ref_ptr,
+                                 int  recon_stride,
+                                 unsigned int *sse) {
+  unsigned int var;
+  int avg;
+
+  variance(src_ptr, source_stride, ref_ptr, recon_stride, 64, 64, &var, &avg);
+  *sse = var;
+  return (var - (((int64_t)avg * avg) >> 12));
+}
+
 unsigned int vp9_variance32x32_c(const uint8_t *src_ptr,
                                  int  source_stride,
                                  const uint8_t *ref_ptr,
@@ -185,6 +198,27 @@ unsigned int vp9_sub_pixel_variance16x16_c(const uint8_t *src_ptr,
 }
 
 #if CONFIG_SUPERBLOCKS
+unsigned int vp9_sub_pixel_variance64x64_c(const uint8_t *src_ptr,
+                                           int  src_pixels_per_line,
+                                           int  xoffset,
+                                           int  yoffset,
+                                           const uint8_t *dst_ptr,
+                                           int dst_pixels_per_line,
+                                           unsigned int *sse) {
+  uint16_t FData3[65 * 64];  // Temp data bufffer used in filtering
+  uint8_t temp2[68 * 64];
+  const int16_t *HFilter, *VFilter;
+
+  HFilter = vp9_bilinear_filters[xoffset];
+  VFilter = vp9_bilinear_filters[yoffset];
+
+  var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line,
+                                    1, 65, 64, HFilter);
+  var_filter_block2d_bil_second_pass(FData3, temp2, 64, 64, 64, 64, VFilter);
+
+  return vp9_variance64x64_c(temp2, 64, dst_ptr, dst_pixels_per_line, sse);
+}
+
 unsigned int vp9_sub_pixel_variance32x32_c(const uint8_t *src_ptr,
                                            int  src_pixels_per_line,
                                            int  xoffset,
@@ -224,6 +258,15 @@ unsigned int vp9_variance_halfpixvar32x32_h_c(const uint8_t *src_ptr,
   return vp9_sub_pixel_variance32x32_c(src_ptr, source_stride, 8, 0,
                                        ref_ptr, recon_stride, sse);
 }
+
+unsigned int vp9_variance_halfpixvar64x64_h_c(const uint8_t *src_ptr,
+                                              int  source_stride,
+                                              const uint8_t *ref_ptr,
+                                              int  recon_stride,
+                                              unsigned int *sse) {
+  return vp9_sub_pixel_variance64x64_c(src_ptr, source_stride, 8, 0,
+                                       ref_ptr, recon_stride, sse);
+}
 #endif
 
 
@@ -245,6 +288,15 @@ unsigned int vp9_variance_halfpixvar32x32_v_c(const uint8_t *src_ptr,
   return vp9_sub_pixel_variance32x32_c(src_ptr, source_stride, 0, 8,
                                        ref_ptr, recon_stride, sse);
 }
+
+unsigned int vp9_variance_halfpixvar64x64_v_c(const uint8_t *src_ptr,
+                                              int  source_stride,
+                                              const uint8_t *ref_ptr,
+                                              int  recon_stride,
+                                              unsigned int *sse) {
+  return vp9_sub_pixel_variance64x64_c(src_ptr, source_stride, 0, 8,
+                                       ref_ptr, recon_stride, sse);
+}
 #endif
 
 unsigned int vp9_variance_halfpixvar16x16_hv_c(const uint8_t *src_ptr,
@@ -263,6 +315,15 @@ unsigned int vp9_variance_halfpixvar32x32_hv_c(const uint8_t *src_ptr,
                                                int  recon_stride,
                                                unsigned int *sse) {
   return vp9_sub_pixel_variance32x32_c(src_ptr, source_stride, 8, 8,
+                                       ref_ptr, recon_stride, sse);
+}
+
+unsigned int vp9_variance_halfpixvar64x64_hv_c(const uint8_t *src_ptr,
+                                               int  source_stride,
+                                               const uint8_t *ref_ptr,
+                                               int  recon_stride,
+                                               unsigned int *sse) {
+  return vp9_sub_pixel_variance64x64_c(src_ptr, source_stride, 8, 8,
                                        ref_ptr, recon_stride, sse);
 }
 #endif
@@ -289,6 +350,19 @@ unsigned int vp9_sub_pixel_mse32x32_c(const uint8_t *src_ptr,
                                       int dst_pixels_per_line,
                                       unsigned int *sse) {
   vp9_sub_pixel_variance32x32_c(src_ptr, src_pixels_per_line,
+                                xoffset, yoffset, dst_ptr,
+                                dst_pixels_per_line, sse);
+  return *sse;
+}
+
+unsigned int vp9_sub_pixel_mse64x64_c(const uint8_t *src_ptr,
+                                      int  src_pixels_per_line,
+                                      int  xoffset,
+                                      int  yoffset,
+                                      const uint8_t *dst_ptr,
+                                      int dst_pixels_per_line,
+                                      unsigned int *sse) {
+  vp9_sub_pixel_variance64x64_c(src_ptr, src_pixels_per_line,
                                 xoffset, yoffset, dst_ptr,
                                 dst_pixels_per_line, sse);
   return *sse;

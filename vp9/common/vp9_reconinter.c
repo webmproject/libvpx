@@ -780,6 +780,70 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
   }
 #endif
 }
+
+void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
+                                        uint8_t *dst_y,
+                                        uint8_t *dst_u,
+                                        uint8_t *dst_v,
+                                        int dst_ystride,
+                                        int dst_uvstride) {
+  uint8_t *y1 = x->pre.y_buffer, *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
+  uint8_t *y2 = x->second_pre.y_buffer, *u2 = x->second_pre.u_buffer,
+          *v2 = x->second_pre.v_buffer;
+  int edge[4], n;
+
+  edge[0] = x->mb_to_top_edge;
+  edge[1] = x->mb_to_bottom_edge;
+  edge[2] = x->mb_to_left_edge;
+  edge[3] = x->mb_to_right_edge;
+
+  for (n = 0; n < 4; n++) {
+    const int x_idx = n & 1, y_idx = n >> 1;
+
+    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 32) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 32) << 3);
+    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 32) << 3);
+    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 32) << 3);
+
+    x->pre.y_buffer = y1 + y_idx * 32 * x->pre.y_stride  + x_idx * 32;
+    x->pre.u_buffer = u1 + y_idx * 16 * x->pre.uv_stride + x_idx * 16;
+    x->pre.v_buffer = v1 + y_idx * 16 * x->pre.uv_stride + x_idx * 16;
+
+    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+      x->second_pre.y_buffer = y2 + y_idx * 32 * x->pre.y_stride  + x_idx * 32;
+      x->second_pre.u_buffer = u2 + y_idx * 16 * x->pre.uv_stride + x_idx * 16;
+      x->second_pre.v_buffer = v2 + y_idx * 16 * x->pre.uv_stride + x_idx * 16;
+    }
+
+    vp9_build_inter32x32_predictors_sb(x,
+        dst_y + y_idx * 32 * dst_ystride  + x_idx * 32,
+        dst_u + y_idx * 16 * dst_uvstride + x_idx * 16,
+        dst_v + y_idx * 16 * dst_uvstride + x_idx * 16,
+        dst_ystride, dst_uvstride);
+  }
+
+  x->mb_to_top_edge    = edge[0];
+  x->mb_to_bottom_edge = edge[1];
+  x->mb_to_left_edge   = edge[2];
+  x->mb_to_right_edge  = edge[3];
+
+  x->pre.y_buffer = y1;
+  x->pre.u_buffer = u1;
+  x->pre.v_buffer = v1;
+
+  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+    x->second_pre.y_buffer = y2;
+    x->second_pre.u_buffer = u2;
+    x->second_pre.v_buffer = v2;
+  }
+
+#if CONFIG_COMP_INTERINTRA_PRED
+  if (x->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+    vp9_build_interintra_64x64_predictors_sb(x, dst_y, dst_u, dst_v,
+                                             dst_ystride, dst_uvstride);
+  }
+#endif
+}
 #endif
 
 /*
