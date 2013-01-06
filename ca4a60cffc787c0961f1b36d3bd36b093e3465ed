@@ -121,6 +121,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//+WA\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1001607
+      },
+      "writtenOn": "2013-01-06T01:49:41Z",
+      "side": 1,
+      "message": "The Daala API has the encoder own the memory (to avoid forcing the application to impose an arbitrary upper bound on the packet size). It re-uses the same encoder object for multiple frames, so the allocations trigger a few times at the start of encoding, and then generally never again.\n\nIt also needs to allocate a \"precarry\" buffer which is twice the size of the output buffer in order to delay carry propagation until the very end.\n\nThe current vp9_start_encode() API doesn\u0027t even pass down the application buffer size (see the TODO in vp8e_encode), so mrc doesn\u0027t know how big to make the precarry buffer (which necessitates the reallocs here). It could, however, store the output of carry propagation directly into br-\u003eout instead of allocating a temporary buffer out, copying that into br-\u003eout, and then immediately freeing it.",
+      "parentUuid": "AAAAVH///MM\u003d",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH///M0\u003d",
         "filename": "vp9/encoder/vp9_boolhuff.c",
         "patchSetId": 4
@@ -183,6 +201,24 @@
       "writtenOn": "2013-01-03T22:54:14Z",
       "side": 1,
       "message": "uint16_t - and this is a little weird, so the bitstream consists of 16-bit elements, rather than this being an implementation detail?",
+      "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//+V8\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1001607
+      },
+      "writtenOn": "2013-01-06T01:49:41Z",
+      "side": 1,
+      "message": "No, this is part of the carry propagation optimization. It just needs a type that is at least 9 bits to store each pre-carry byte along with its carry flag. See the \"Perform carry propagation\" loop int mrc_enc_done().",
+      "parentUuid": "AAAAVH///L8\u003d",
       "revId": "ca4a60cffc787c0961f1b36d3bd36b093e3465ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
