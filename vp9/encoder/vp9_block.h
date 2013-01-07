@@ -76,6 +76,7 @@ typedef struct {
 typedef struct {
   MODE_INFO mic;
   PARTITION_INFO partition_info;
+  int skip;
   int_mv best_ref_mv;
   int_mv second_best_ref_mv;
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
