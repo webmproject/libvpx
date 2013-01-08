@@ -711,7 +711,6 @@ void vp9_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
   vp9_build_1st_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
 }
 
-#if CONFIG_SUPERBLOCKS
 void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
                                         uint8_t *dst_y,
                                         uint8_t *dst_u,
@@ -781,6 +780,7 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
 #endif
 }
 
+#if CONFIG_SUPERBLOCKS64
 void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
                                         uint8_t *dst_y,
                                         uint8_t *dst_u,
@@ -844,7 +844,7 @@ void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
   }
 #endif
 }
-#endif
+#endif  // CONFIG_SUPERBLOCKS64
 
 /*
  * The following functions should be called after an initial

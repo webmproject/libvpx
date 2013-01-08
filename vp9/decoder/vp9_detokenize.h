@@ -23,7 +23,7 @@ int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
 int vp9_decode_mb_tokens(VP9D_COMP* const, MACROBLOCKD* const,
                          BOOL_DECODER* const);
 
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
 int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
                          MACROBLOCKD* const xd,
                          BOOL_DECODER* const bc);

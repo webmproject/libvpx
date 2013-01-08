@@ -272,13 +272,11 @@ const vp9_tree_index vp9_mv_ref_tree[8] = {
   -NEWMV, -SPLITMV
 };
 
-#if CONFIG_SUPERBLOCKS
 const vp9_tree_index vp9_sb_mv_ref_tree[6] = {
   -ZEROMV, 2,
   -NEARESTMV, 4,
   -NEARMV, -NEWMV
 };
-#endif
 
 const vp9_tree_index vp9_sub_mv_ref_tree[6] = {
   -LEFT4X4, 2,
@@ -289,19 +287,15 @@ const vp9_tree_index vp9_sub_mv_ref_tree[6] = {
 struct vp9_token_struct vp9_bmode_encodings[VP9_NKF_BINTRAMODES];
 struct vp9_token_struct vp9_kf_bmode_encodings[VP9_KF_BINTRAMODES];
 struct vp9_token_struct vp9_ymode_encodings[VP9_YMODES];
-#if CONFIG_SUPERBLOCKS
 struct vp9_token_struct vp9_sb_ymode_encodings[VP9_I32X32_MODES];
 struct vp9_token_struct vp9_sb_kf_ymode_encodings[VP9_I32X32_MODES];
-#endif
 struct vp9_token_struct vp9_kf_ymode_encodings[VP9_YMODES];
 struct vp9_token_struct vp9_uv_mode_encodings[VP9_UV_MODES];
 struct vp9_token_struct vp9_i8x8_mode_encodings[VP9_I8X8_MODES];
 struct vp9_token_struct vp9_mbsplit_encodings[VP9_NUMMBSPLITS];
 
 struct vp9_token_struct vp9_mv_ref_encoding_array[VP9_MVREFS];
-#if CONFIG_SUPERBLOCKS
 struct vp9_token_struct vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
-#endif
 struct vp9_token_struct vp9_sub_mv_ref_encoding_array[VP9_SUBMVREFS];
 
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
@@ -310,24 +304,20 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
   vp9_tree_probs_from_distribution(VP9_YMODES, vp9_ymode_encodings,
                                    vp9_ymode_tree, x->fc.ymode_prob,
                                    bct, y_mode_cts);
-#if CONFIG_SUPERBLOCKS
   vp9_tree_probs_from_distribution(VP9_I32X32_MODES, vp9_sb_ymode_encodings,
                                    vp9_sb_ymode_tree, x->fc.sb_ymode_prob,
                                    bct, y_mode_cts);
-#endif
   {
     int i;
     for (i = 0; i < 8; i++) {
       vp9_tree_probs_from_distribution(VP9_YMODES, vp9_kf_ymode_encodings,
                                        vp9_kf_ymode_tree, x->kf_ymode_prob[i],
                                        bct, kf_y_mode_cts[i]);
-#if CONFIG_SUPERBLOCKS
       vp9_tree_probs_from_distribution(VP9_I32X32_MODES,
                                        vp9_sb_kf_ymode_encodings,
                                        vp9_sb_kf_ymode_tree,
                                        x->sb_kf_ymode_prob[i], bct,
                                        kf_y_mode_cts[i]);
-#endif
     }
   }
   {
@@ -426,10 +416,8 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_bmode_encodings,   vp9_bmode_tree);
   vp9_tokens_from_tree(vp9_ymode_encodings,   vp9_ymode_tree);
   vp9_tokens_from_tree(vp9_kf_ymode_encodings, vp9_kf_ymode_tree);
-#if CONFIG_SUPERBLOCKS
   vp9_tokens_from_tree(vp9_sb_ymode_encodings, vp9_sb_ymode_tree);
   vp9_tokens_from_tree(vp9_sb_kf_ymode_encodings, vp9_sb_kf_ymode_tree);
-#endif
   vp9_tokens_from_tree(vp9_uv_mode_encodings,  vp9_uv_mode_tree);
   vp9_tokens_from_tree(vp9_i8x8_mode_encodings,  vp9_i8x8_mode_tree);
   vp9_tokens_from_tree(vp9_mbsplit_encodings, vp9_mbsplit_tree);
@@ -438,10 +426,8 @@ void vp9_entropy_mode_init() {
 
   vp9_tokens_from_tree_offset(vp9_mv_ref_encoding_array,
                               vp9_mv_ref_tree, NEARESTMV);
-#if CONFIG_SUPERBLOCKS
   vp9_tokens_from_tree_offset(vp9_sb_mv_ref_encoding_array,
                               vp9_sb_mv_ref_tree, NEARESTMV);
-#endif
   vp9_tokens_from_tree_offset(vp9_sub_mv_ref_encoding_array,
                               vp9_sub_mv_ref_tree, LEFT4X4);
 }
@@ -599,11 +585,9 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   update_mode_probs(VP9_YMODES, vp9_ymode_encodings, vp9_ymode_tree,
                     cm->fc.ymode_counts, cm->fc.pre_ymode_prob,
                     cm->fc.ymode_prob);
-#if CONFIG_SUPERBLOCKS
   update_mode_probs(VP9_I32X32_MODES, vp9_sb_ymode_encodings, vp9_sb_ymode_tree,
                     cm->fc.sb_ymode_counts, cm->fc.pre_sb_ymode_prob,
                     cm->fc.sb_ymode_prob);
-#endif
   for (i = 0; i < VP9_YMODES; ++i) {
     update_mode_probs(VP9_UV_MODES, vp9_uv_mode_encodings, vp9_uv_mode_tree,
                       cm->fc.uv_mode_counts[i], cm->fc.pre_uv_mode_prob[i],

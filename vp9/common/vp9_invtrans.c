@@ -146,7 +146,7 @@ void vp9_inverse_transform_mb_16x16(MACROBLOCKD *xd) {
   vp9_inverse_transform_mbuv_8x8(xd);
 }
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
 void vp9_inverse_transform_sby_32x32(SUPERBLOCKD *xd_sb) {
   vp9_short_idct32x32(xd_sb->dqcoeff, xd_sb->diff, 64);
 }

@@ -267,31 +267,9 @@ int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int offset;
   int usehp = xd->allow_high_precision_mv;
 
-#if !CONFIG_SUPERBLOCKS && (ARCH_X86 || ARCH_X86_64)
-  uint8_t *y0 = *(d->base_pre) + d->pre +
-                (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
-  uint8_t *y;
-  int buf_r1, buf_r2, buf_c1, buf_c2;
-
-  // Clamping to avoid out-of-range data access
-  buf_r1 = ((bestmv->as_mv.row - VP9_INTERP_EXTEND) < x->mv_row_min) ?
-      (bestmv->as_mv.row - x->mv_row_min) : VP9_INTERP_EXTEND - 1;
-  buf_r2 = ((bestmv->as_mv.row + VP9_INTERP_EXTEND) > x->mv_row_max) ?
-      (x->mv_row_max - bestmv->as_mv.row) : VP9_INTERP_EXTEND - 1;
-  buf_c1 = ((bestmv->as_mv.col - VP9_INTERP_EXTEND) < x->mv_col_min) ?
-      (bestmv->as_mv.col - x->mv_col_min) : VP9_INTERP_EXTEND - 1;
-  buf_c2 = ((bestmv->as_mv.col + VP9_INTERP_EXTEND) > x->mv_col_max) ?
-      (x->mv_col_max - bestmv->as_mv.col) : VP9_INTERP_EXTEND - 1;
-  y_stride = 32;
-
-  /* Copy to intermediate buffer before searching. */
-  vfp->copymem(y0 - buf_c1 - d->pre_stride * buf_r1, d->pre_stride, xd->y_buf, y_stride, 16 + buf_r1 + buf_r2);
-  y = xd->y_buf + y_stride * buf_r1 + buf_c1;
-#else
   uint8_t *y = *(d->base_pre) + d->pre +
                (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
   y_stride = d->pre_stride;
-#endif
 
   rr = ref_mv->as_mv.row;
   rc = ref_mv->as_mv.col;
@@ -463,20 +441,9 @@ int vp9_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   MACROBLOCKD *xd = &x->e_mbd;
   int usehp = xd->allow_high_precision_mv;
 
-#if !CONFIG_SUPERBLOCKS && (ARCH_X86 || ARCH_X86_64)
-  uint8_t *y0 = *(d->base_pre) + d->pre +
-                (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
-  uint8_t *y;
-
-  y_stride = 32;
-  /* Copy 18 rows x 32 cols area to intermediate buffer before searching. */
-  vfp->copymem(y0 - 1 - d->pre_stride, d->pre_stride, xd->y_buf, y_stride, 18);
-  y = xd->y_buf + y_stride + 1;
-#else
   uint8_t *y = *(d->base_pre) + d->pre +
                (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
   y_stride = d->pre_stride;
-#endif
 
   // central mv
   bestmv->as_mv.row <<= 3;
@@ -943,20 +910,9 @@ int vp9_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int y_stride;
   MACROBLOCKD *xd = &x->e_mbd;
 
-#if !CONFIG_SUPERBLOCKS && (ARCH_X86 || ARCH_X86_64)
-  uint8_t *y0 = *(d->base_pre) + d->pre +
-      (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
-  uint8_t *y;
-
-  y_stride = 32;
-  /* Copy 18 rows x 32 cols area to intermediate buffer before searching. */
-  vfp->copymem(y0 - 1 - d->pre_stride, d->pre_stride, xd->y_buf, y_stride, 18);
-  y = xd->y_buf + y_stride + 1;
-#else
   uint8_t *y = *(d->base_pre) + d->pre +
       (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
   y_stride = d->pre_stride;
-#endif
 
   // central mv
   bestmv->as_mv.row <<= 3;

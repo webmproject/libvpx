@@ -70,7 +70,6 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
                                      unsigned char *dest,
                                      int pitch, int stride, uint16_t eobs);
 
-#if CONFIG_SUPERBLOCKS
 void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
                                                    unsigned char *dst,
                                                    int stride,
@@ -98,6 +97,5 @@ void vp9_dequant_idct_add_uv_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
                                                  int stride,
                                                  uint16_t *eobs,
                                                  MACROBLOCKD *xd);
-#endif
 
 #endif

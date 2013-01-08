@@ -81,7 +81,6 @@ void vp9_recon2b_c(uint8_t *pred_ptr,
   }
 }
 
-#if CONFIG_SUPERBLOCKS
 void vp9_recon_mby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
   int x, y;
   BLOCKD *b = &xd->block[0];
@@ -146,8 +145,7 @@ void vp9_recon_sbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
     vdiff += 16;
   }
 }
-#endif
-#endif
+#endif  // CONFIG_TX32X32
 
 void vp9_recon_mby_c(MACROBLOCKD *xd) {
   int i;

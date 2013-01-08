@@ -46,7 +46,7 @@ void vp9_transform_mb_16x16(MACROBLOCK *mb);
 void vp9_transform_mby_16x16(MACROBLOCK *x);
 void vp9_optimize_mby_16x16(MACROBLOCK *x);
 
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
 void vp9_transform_sby_32x32(MACROBLOCK *x);
 void vp9_transform_sbuv_16x16(MACROBLOCK *x);
 #endif
@@ -55,7 +55,6 @@ void vp9_fidct_mb(MACROBLOCK *x);
 
 void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
 
-#if CONFIG_SUPERBLOCKS
 void vp9_subtract_mbuv_s_c(int16_t *diff, const uint8_t *usrc,
                            const uint8_t *vsrc, int src_stride,
                            const uint8_t *upred,
@@ -71,6 +70,5 @@ void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
                            const uint8_t *upred,
                            const uint8_t *vpred, int dst_stride);
 #endif  // CONFIG_TX32X32
-#endif  // CONFIG_SUPERBLOCKS
 
 #endif  // VP9_ENCODER_VP9_ENCODEMB_H_
