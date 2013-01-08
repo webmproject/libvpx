@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//9Ng\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 908,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-08T19:11:44Z",
+      "side": 1,
+      "message": "document #else:\n\n#else  // CONFIG_MULTIPLE_ADAPTS",
+      "revId": "9ad936c769bd3da2373441d0e9fbfcac4854705a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//9Nc\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-08T19:11:44Z",
+      "side": 1,
+      "message": "#else  // CONFIG_MULTIPLE_ADAPTS",
+      "revId": "9ad936c769bd3da2373441d0e9fbfcac4854705a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//9NY\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-08T19:11:44Z",
+      "side": 1,
+      "message": "#else  // CONFIG_MULTIPLE_ADAPTS",
+      "revId": "9ad936c769bd3da2373441d0e9fbfcac4854705a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//9NU\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-08T19:11:44Z",
+      "side": 1,
+      "message": "#else  // CONFIG_MULTIPLE_ADAPTS",
+      "revId": "9ad936c769bd3da2373441d0e9fbfcac4854705a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//9NA\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1296,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-08T19:11:44Z",
+      "side": 1,
+      "message": "#else  // CONFIG_MULTIPLE_ADAPTS",
+      "revId": "9ad936c769bd3da2373441d0e9fbfcac4854705a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
