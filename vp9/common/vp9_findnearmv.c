@@ -185,33 +185,33 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
     offset = ref_y_stride * row_offset + col_offset;
     score = 0;
     if (xd->up_available) {
-      vp9_sub_pixel_variance16x2_c(above_ref + offset, ref_y_stride,
-                                   SP(this_mv.as_mv.col),
-                                   SP(this_mv.as_mv.row),
-                                   above_src, xd->dst.y_stride, &sse);
+      vp9_sub_pixel_variance16x2(above_ref + offset, ref_y_stride,
+                                 SP(this_mv.as_mv.col),
+                                 SP(this_mv.as_mv.row),
+                                 above_src, xd->dst.y_stride, &sse);
       score += sse;
 #if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
-        vp9_sub_pixel_variance16x2_c(above_ref + offset + 16,
-                                     ref_y_stride,
-                                     SP(this_mv.as_mv.col),
-                                     SP(this_mv.as_mv.row),
-                                     above_src + 16, xd->dst.y_stride, &sse);
+        vp9_sub_pixel_variance16x2(above_ref + offset + 16,
+                                   ref_y_stride,
+                                   SP(this_mv.as_mv.col),
+                                   SP(this_mv.as_mv.row),
+                                   above_src + 16, xd->dst.y_stride, &sse);
         score += sse;
       }
 #if CONFIG_SUPERBLOCKS64
       if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB64X64) {
-        vp9_sub_pixel_variance16x2_c(above_ref + offset + 32,
-                                     ref_y_stride,
-                                     SP(this_mv.as_mv.col),
-                                     SP(this_mv.as_mv.row),
-                                     above_src + 32, xd->dst.y_stride, &sse);
+        vp9_sub_pixel_variance16x2(above_ref + offset + 32,
+                                   ref_y_stride,
+                                   SP(this_mv.as_mv.col),
+                                   SP(this_mv.as_mv.row),
+                                   above_src + 32, xd->dst.y_stride, &sse);
         score += sse;
-        vp9_sub_pixel_variance16x2_c(above_ref + offset + 48,
-                                     ref_y_stride,
-                                     SP(this_mv.as_mv.col),
-                                     SP(this_mv.as_mv.row),
-                                     above_src + 48, xd->dst.y_stride, &sse);
+        vp9_sub_pixel_variance16x2(above_ref + offset + 48,
+                                   ref_y_stride,
+                                   SP(this_mv.as_mv.col),
+                                   SP(this_mv.as_mv.row),
+                                   above_src + 48, xd->dst.y_stride, &sse);
         score += sse;
       }
 #endif
