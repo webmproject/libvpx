@@ -80,15 +80,14 @@ void vp9_loop_filter_frame_init(struct VP9Common *cm,
                                 struct macroblockd *mbd,
                                 int default_filt_lvl);
 
-void vp9_loop_filter_frame(struct VP9Common *cm, struct macroblockd *mbd);
+void vp9_loop_filter_frame(struct VP9Common *cm,
+                           struct macroblockd *mbd,
+                           int filter_level,
+                           int y_only);
 
 void vp9_loop_filter_partial_frame(struct VP9Common *cm,
                                    struct macroblockd *mbd,
                                    int default_filt_lvl);
-
-void vp9_loop_filter_frame_yonly(struct VP9Common *cm,
-                                 struct macroblockd *mbd,
-                                 int default_filt_lvl);
 
 void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
                                       int sharpness_lvl);
