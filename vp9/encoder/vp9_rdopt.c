@@ -70,97 +70,6 @@ static const int auto_speed_thresh[17] = {
   105
 };
 
-#if CONFIG_PRED_FILTER
-const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
-  {ZEROMV,    LAST_FRAME,   NONE,  0},
-  {ZEROMV,    LAST_FRAME,   NONE,  1},
-  {DC_PRED,   INTRA_FRAME,  NONE,  0},
-
-  {NEARESTMV, LAST_FRAME,   NONE,  0},
-  {NEARESTMV, LAST_FRAME,   NONE,  1},
-  {NEARMV,    LAST_FRAME,   NONE,  0},
-  {NEARMV,    LAST_FRAME,   NONE,  1},
-
-  {ZEROMV,    GOLDEN_FRAME, NONE,  0},
-  {ZEROMV,    GOLDEN_FRAME, NONE,  1},
-  {NEARESTMV, GOLDEN_FRAME, NONE,  0},
-  {NEARESTMV, GOLDEN_FRAME, NONE,  1},
-
-  {ZEROMV,    ALTREF_FRAME, NONE,  0},
-  {ZEROMV,    ALTREF_FRAME, NONE,  1},
-  {NEARESTMV, ALTREF_FRAME, NONE,  0},
-  {NEARESTMV, ALTREF_FRAME, NONE,  1},
-
-  {NEARMV,    GOLDEN_FRAME, NONE,  0},
-  {NEARMV,    GOLDEN_FRAME, NONE,  1},
-  {NEARMV,    ALTREF_FRAME, NONE,  0},
-  {NEARMV,    ALTREF_FRAME, NONE,  1},
-
-  {V_PRED,    INTRA_FRAME,  NONE,  0},
-  {H_PRED,    INTRA_FRAME,  NONE,  0},
-  {D45_PRED,  INTRA_FRAME,  NONE,  0},
-  {D135_PRED, INTRA_FRAME,  NONE,  0},
-  {D117_PRED, INTRA_FRAME,  NONE,  0},
-  {D153_PRED, INTRA_FRAME,  NONE,  0},
-  {D27_PRED,  INTRA_FRAME,  NONE,  0},
-  {D63_PRED,  INTRA_FRAME,  NONE,  0},
-
-  {TM_PRED,   INTRA_FRAME,  NONE,  0},
-
-  {NEWMV,     LAST_FRAME,   NONE,  0},
-  {NEWMV,     LAST_FRAME,   NONE,  1},
-  {NEWMV,     GOLDEN_FRAME, NONE,  0},
-  {NEWMV,     GOLDEN_FRAME, NONE,  1},
-  {NEWMV,     ALTREF_FRAME, NONE,  0},
-  {NEWMV,     ALTREF_FRAME, NONE,  1},
-
-  {SPLITMV,   LAST_FRAME,   NONE,  0},
-  {SPLITMV,   GOLDEN_FRAME, NONE,  0},
-  {SPLITMV,   ALTREF_FRAME, NONE,  0},
-
-  {B_PRED,    INTRA_FRAME,  NONE,  0},
-  {I8X8_PRED, INTRA_FRAME,  NONE,  0},
-
-  /* compound prediction modes */
-  {ZEROMV,    LAST_FRAME,   GOLDEN_FRAME, 0},
-  {NEARESTMV, LAST_FRAME,   GOLDEN_FRAME, 0},
-  {NEARMV,    LAST_FRAME,   GOLDEN_FRAME, 0},
-
-  {ZEROMV,    ALTREF_FRAME, LAST_FRAME,   0},
-  {NEARESTMV, ALTREF_FRAME, LAST_FRAME,   0},
-  {NEARMV,    ALTREF_FRAME, LAST_FRAME,   0},
-
-  {ZEROMV,    GOLDEN_FRAME, ALTREF_FRAME, 0},
-  {NEARESTMV, GOLDEN_FRAME, ALTREF_FRAME, 0},
-  {NEARMV,    GOLDEN_FRAME, ALTREF_FRAME, 0},
-
-  {NEWMV,     LAST_FRAME,   GOLDEN_FRAME, 0},
-  {NEWMV,     ALTREF_FRAME, LAST_FRAME,   0},
-  {NEWMV,     GOLDEN_FRAME, ALTREF_FRAME, 0},
-
-  {SPLITMV,   LAST_FRAME,   GOLDEN_FRAME, 0},
-  {SPLITMV,   ALTREF_FRAME, LAST_FRAME,   0},
-  {SPLITMV,   GOLDEN_FRAME, ALTREF_FRAME, 0},
-
-#if CONFIG_COMP_INTERINTRA_PRED
-  /* compound inter-intra prediction */
-  {ZEROMV,    LAST_FRAME,   INTRA_FRAME, 0},
-  {NEARESTMV, LAST_FRAME,   INTRA_FRAME, 0},
-  {NEARMV,    LAST_FRAME,   INTRA_FRAME, 0},
-  {NEWMV,     LAST_FRAME,   INTRA_FRAME, 0},
-
-  {ZEROMV,    GOLDEN_FRAME,   INTRA_FRAME, 0},
-  {NEARESTMV, GOLDEN_FRAME,   INTRA_FRAME, 0},
-  {NEARMV,    GOLDEN_FRAME,   INTRA_FRAME, 0},
-  {NEWMV,     GOLDEN_FRAME,   INTRA_FRAME, 0},
-
-  {ZEROMV,    ALTREF_FRAME,   INTRA_FRAME, 0},
-  {NEARESTMV, ALTREF_FRAME,   INTRA_FRAME, 0},
-  {NEARMV,    ALTREF_FRAME,   INTRA_FRAME, 0},
-  {NEWMV,     ALTREF_FRAME,   INTRA_FRAME, 0},
-#endif
-};
-#else
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {ZEROMV,    LAST_FRAME,   NONE},
   {DC_PRED,   INTRA_FRAME,  NONE},
@@ -238,7 +147,6 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEWMV,     ALTREF_FRAME,   INTRA_FRAME},
 #endif
 };
-#endif
 
 static void fill_token_costs(vp9_coeff_count *c,
                              vp9_coeff_probs *p,
@@ -2508,9 +2416,9 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
       BLOCK *be = &x->block[i];
       int thisdistortion;
 
-      vp9_build_inter_predictors_b(bd, 16, xd->subpixel_predict);
+      vp9_build_inter_predictors_b(bd, 16, xd->subpixel_predict4x4);
       if (xd->mode_info_context->mbmi.second_ref_frame > 0)
-        vp9_build_2nd_inter_predictors_b(bd, 16, xd->subpixel_predict_avg);
+        vp9_build_2nd_inter_predictors_b(bd, 16, xd->subpixel_predict_avg4x4);
       vp9_subtract_b(be, bd, 16);
       x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
       x->quantize_b_4x4(be, bd);
@@ -3611,12 +3519,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->mv[i].as_int = cur_mv[i].as_int;
   }
 
-#if CONFIG_PRED_FILTER
-  // Filtered prediction:
-  mbmi->pred_filter_enabled = vp9_mode_order[mode_index].pred_filter_flag;
-  *rate2 += vp9_cost_bit(cpi->common.prob_pred_filter_off,
-                         mbmi->pred_filter_enabled);
-#endif
   if (cpi->common.mcomp_filter_type == SWITCHABLE) {
     const int c = vp9_get_pred_context(cm, xd, PRED_SWITCHABLE_INTERP);
     const int m = vp9_switchable_interp_map[mbmi->interp_filter];
@@ -3854,9 +3756,6 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
   int distortion_uv = INT_MAX;
   int64_t best_yrd = LLONG_MAX;
-#if CONFIG_PRED_FILTER
-  int best_filter_state = 0;
-#endif
   int switchable_filter_index = 0;
 
   MB_PREDICTION_MODE uv_intra_mode;
@@ -3969,9 +3868,6 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->uv_mode = DC_PRED;
     mbmi->ref_frame = vp9_mode_order[mode_index].ref_frame;
     mbmi->second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
-#if CONFIG_PRED_FILTER
-    mbmi->pred_filter_enabled = 0;
-#endif
 
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
@@ -4396,21 +4292,11 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       best_overall_rd = this_rd;
       best_filter = mbmi->interp_filter;
       best_mode = this_mode;
-#if CONFIG_PRED_FILTER
-      best_filter_state = mbmi->pred_filter_enabled;
-#endif
 #if CONFIG_COMP_INTERINTRA_PRED
       is_best_interintra = (mbmi->second_ref_frame == INTRA_FRAME);
 #endif
     }
 
-#if CONFIG_PRED_FILTER
-    // Ignore modes where the prediction filter state doesn't
-    // match the state signaled at the frame level
-    if ((cm->pred_filter_mode == 2) ||
-        (cm->pred_filter_mode ==
-         mbmi->pred_filter_enabled)) {
-#endif
     // Did this mode help.. i.e. is it the new best mode
     if (this_rd < best_rd || x->skip) {
       if (!mode_excluded) {
@@ -4519,21 +4405,11 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (x->skip && !mode_excluded)
       break;
     }
-#if CONFIG_PRED_FILTER
-    }
-#endif
 
   assert((cm->mcomp_filter_type == SWITCHABLE) ||
          (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
          (best_mbmode.mode <= B_PRED));
 
-#if CONFIG_PRED_FILTER
-  // Update counts for prediction filter usage
-  if (best_filter_state != 0)
-    ++cpi->pred_filter_on_count;
-  else
-    ++cpi->pred_filter_off_count;
-#endif
 #if CONFIG_COMP_INTERINTRA_PRED
   ++cpi->interintra_select_count[is_best_interintra];
 #endif

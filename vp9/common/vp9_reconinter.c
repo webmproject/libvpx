@@ -18,39 +18,53 @@
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,
                               VP9_COMMON *cm) {
+#if CONFIG_ENABLE_6TAP
   if (mcomp_filter_type == SIXTAP) {
-    xd->subpixel_predict        = vp9_sixtap_predict;
+    xd->subpixel_predict4x4     = vp9_sixtap_predict4x4;
     xd->subpixel_predict8x4     = vp9_sixtap_predict8x4;
     xd->subpixel_predict8x8     = vp9_sixtap_predict8x8;
     xd->subpixel_predict16x16   = vp9_sixtap_predict16x16;
-    xd->subpixel_predict_avg    = vp9_sixtap_predict_avg;
+    xd->subpixel_predict_avg4x4 = vp9_sixtap_predict_avg4x4;
     xd->subpixel_predict_avg8x8 = vp9_sixtap_predict_avg8x8;
     xd->subpixel_predict_avg16x16 = vp9_sixtap_predict_avg16x16;
-  } else if (mcomp_filter_type == EIGHTTAP || mcomp_filter_type == SWITCHABLE) {
-    xd->subpixel_predict        = vp9_eighttap_predict;
+  } else {
+#endif
+  if (mcomp_filter_type == EIGHTTAP || mcomp_filter_type == SWITCHABLE) {
+    xd->subpixel_predict4x4     = vp9_eighttap_predict4x4;
     xd->subpixel_predict8x4     = vp9_eighttap_predict8x4;
     xd->subpixel_predict8x8     = vp9_eighttap_predict8x8;
     xd->subpixel_predict16x16   = vp9_eighttap_predict16x16;
-    xd->subpixel_predict_avg    = vp9_eighttap_predict_avg4x4;
+    xd->subpixel_predict_avg4x4 = vp9_eighttap_predict_avg4x4;
     xd->subpixel_predict_avg8x8 = vp9_eighttap_predict_avg8x8;
     xd->subpixel_predict_avg16x16 = vp9_eighttap_predict_avg16x16;
+  } else if (mcomp_filter_type == EIGHTTAP_SMOOTH) {
+    xd->subpixel_predict4x4     = vp9_eighttap_predict4x4_smooth;
+    xd->subpixel_predict8x4     = vp9_eighttap_predict8x4_smooth;
+    xd->subpixel_predict8x8     = vp9_eighttap_predict8x8_smooth;
+    xd->subpixel_predict16x16   = vp9_eighttap_predict16x16_smooth;
+    xd->subpixel_predict_avg4x4 = vp9_eighttap_predict_avg4x4_smooth;
+    xd->subpixel_predict_avg8x8 = vp9_eighttap_predict_avg8x8_smooth;
+    xd->subpixel_predict_avg16x16 = vp9_eighttap_predict_avg16x16_smooth;
   } else if (mcomp_filter_type == EIGHTTAP_SHARP) {
-    xd->subpixel_predict        = vp9_eighttap_predict_sharp;
+    xd->subpixel_predict4x4     = vp9_eighttap_predict4x4_sharp;
     xd->subpixel_predict8x4     = vp9_eighttap_predict8x4_sharp;
     xd->subpixel_predict8x8     = vp9_eighttap_predict8x8_sharp;
     xd->subpixel_predict16x16   = vp9_eighttap_predict16x16_sharp;
-    xd->subpixel_predict_avg    = vp9_eighttap_predict_avg4x4_sharp;
+    xd->subpixel_predict_avg4x4 = vp9_eighttap_predict_avg4x4_sharp;
     xd->subpixel_predict_avg8x8 = vp9_eighttap_predict_avg8x8_sharp;
     xd->subpixel_predict_avg16x16 = vp9_eighttap_predict_avg16x16_sharp_c;
   } else {
-    xd->subpixel_predict        = vp9_bilinear_predict4x4;
+    xd->subpixel_predict4x4     = vp9_bilinear_predict4x4;
     xd->subpixel_predict8x4     = vp9_bilinear_predict8x4;
     xd->subpixel_predict8x8     = vp9_bilinear_predict8x8;
     xd->subpixel_predict16x16   = vp9_bilinear_predict16x16;
-    xd->subpixel_predict_avg    = vp9_bilinear_predict_avg4x4;
+    xd->subpixel_predict_avg4x4 = vp9_bilinear_predict_avg4x4;
     xd->subpixel_predict_avg8x8 = vp9_bilinear_predict_avg8x8;
     xd->subpixel_predict_avg16x16 = vp9_bilinear_predict_avg16x16;
   }
+#if CONFIG_ENABLE_6TAP
+  }
+#endif
 }
 
 void vp9_copy_mem16x16_c(uint8_t *src,
@@ -313,132 +327,6 @@ static void build_inter_predictors2b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
   }
 }
 
-
-/*encoder only*/
-#if CONFIG_PRED_FILTER
-
-// Select the thresholded or non-thresholded filter
-#define USE_THRESH_FILTER 0
-
-#define PRED_FILT_LEN 5
-
-static const int filt_shift = 4;
-static const int pred_filter[PRED_FILT_LEN] = {1, 2, 10, 2, 1};
-// Alternative filter {1, 1, 4, 1, 1}
-
-#if !USE_THRESH_FILTER
-void filter_mb(uint8_t *src, int src_stride,
-               uint8_t *dst, int dst_stride,
-               int width, int height) {
-  int i, j, k;
-  unsigned int temp[32 * 32];
-  unsigned int  *pTmp = temp;
-  uint8_t *pSrc = src - (1 + src_stride) * (PRED_FILT_LEN / 2);
-
-  // Horizontal
-  for (i = 0; i < height + PRED_FILT_LEN - 1; i++) {
-    for (j = 0; j < width; j++) {
-      int sum = 0;
-      for (k = 0; k < PRED_FILT_LEN; k++)
-        sum += pSrc[j + k] * pred_filter[k];
-      pTmp[j] = sum;
-    }
-
-    pSrc += src_stride;
-    pTmp += width;
-  }
-
-  // Vertical
-  pTmp = temp;
-  for (i = 0; i < width; i++) {
-    uint8_t *pDst = dst + i;
-    for (j = 0; j < height; j++) {
-      int sum = 0;
-      for (k = 0; k < PRED_FILT_LEN; k++)
-        sum += pTmp[(j + k) * width] * pred_filter[k];
-      // Round
-      pDst[j * dst_stride] = (sum + ((1 << (filt_shift << 1)) >> 1)) >>
-                             (filt_shift << 1);
-    }
-    ++pTmp;
-  }
-}
-#else
-// Based on vp9_post_proc_down_and_across_c (vp9_postproc.c)
-void filter_mb(uint8_t *src, int src_stride,
-               uint8_t *dst, int dst_stride,
-               int width, int height) {
-  uint8_t *pSrc, *pDst;
-  int row;
-  int col;
-  int i;
-  int v;
-  uint8_t d[8];
-
-  /* TODO flimit should be linked to the quantizer value */
-  int flimit = 7;
-
-  for (row = 0; row < height; row++) {
-    /* post_proc_down for one row */
-    pSrc = src;
-    pDst = dst;
-
-    for (col = 0; col < width; col++) {
-      int kernel = (1 << (filt_shift - 1));
-      int v = pSrc[col];
-
-      for (i = -2; i <= 2; i++) {
-        if (abs(v - pSrc[col + i * src_stride]) > flimit)
-          goto down_skip_convolve;
-
-        kernel += pred_filter[2 + i] * pSrc[col + i * src_stride];
-      }
-
-      v = (kernel >> filt_shift);
-    down_skip_convolve:
-      pDst[col] = v;
-    }
-
-    /* now post_proc_across */
-    pSrc = dst;
-    pDst = dst;
-
-    for (i = 0; i < 8; i++)
-      d[i] = pSrc[i];
-
-    for (col = 0; col < width; col++) {
-      int kernel = (1 << (filt_shift - 1));
-      v = pSrc[col];
-
-      d[col & 7] = v;
-
-      for (i = -2; i <= 2; i++) {
-        if (abs(v - pSrc[col + i]) > flimit)
-          goto across_skip_convolve;
-
-        kernel += pred_filter[2 + i] * pSrc[col + i];
-      }
-
-      d[col & 7] = (kernel >> filt_shift);
-    across_skip_convolve:
-
-      if (col >= 2)
-        pDst[col - 2] = d[(col - 2) & 7];
-    }
-
-    /* handle the last two pixels */
-    pDst[col - 2] = d[(col - 2) & 7];
-    pDst[col - 1] = d[(col - 1) & 7];
-
-    /* next row */
-    src += src_stride;
-    dst += dst_stride;
-  }
-}
-#endif  // !USE_THRESH_FILTER
-
-#endif  // CONFIG_PRED_FILTER
-
 /*encoder only*/
 void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd) {
   int i, j;
@@ -523,13 +411,13 @@ void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd) {
     if (d0->bmi.as_mv.first.as_int == d1->bmi.as_mv.first.as_int)
       build_inter_predictors2b(xd, d0, 8);
     else {
-      vp9_build_inter_predictors_b(d0, 8, xd->subpixel_predict);
-      vp9_build_inter_predictors_b(d1, 8, xd->subpixel_predict);
+      vp9_build_inter_predictors_b(d0, 8, xd->subpixel_predict4x4);
+      vp9_build_inter_predictors_b(d1, 8, xd->subpixel_predict4x4);
     }
 
     if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-      vp9_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg);
-      vp9_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg);
+      vp9_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg4x4);
+      vp9_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg4x4);
     }
   }
 }
@@ -587,29 +475,6 @@ void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
 
   ptr = ptr_base + (ymv.as_mv.row >> 3) * pre_stride + (ymv.as_mv.col >> 3);
 
-#if CONFIG_PRED_FILTER
-  if (xd->mode_info_context->mbmi.pred_filter_enabled) {
-    if ((ymv.as_mv.row | ymv.as_mv.col) & 7) {
-      // Sub-pel filter needs extended input
-      int len = 15 + (VP9_INTERP_EXTEND << 1);
-      uint8_t Temp[32 * 32];  // Data required by sub-pel filter
-      uint8_t *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
-
-      // Copy extended MB into Temp array, applying the spatial filter
-      filter_mb(ptr - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
-                Temp, len, len, len);
-
-      // Sub-pel interpolation
-      xd->subpixel_predict16x16(pTemp, len,
-                                (ymv.as_mv.col & 7) << 1,
-                                (ymv.as_mv.row & 7) << 1,
-                                dst_y, dst_ystride);
-    } else {
-      // Apply spatial filter to create the prediction directly
-      filter_mb(ptr, pre_stride, dst_y, dst_ystride, 16, 16);
-    }
-  } else
-#endif
     if ((ymv.as_mv.row | ymv.as_mv.col) & 7) {
       xd->subpixel_predict16x16(ptr, pre_stride,
                                 (ymv.as_mv.col & 7) << 1,
@@ -658,37 +523,6 @@ void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
   uptr = xd->pre.u_buffer + offset;
   vptr = xd->pre.v_buffer + offset;
 
-#if CONFIG_PRED_FILTER
-  if (xd->mode_info_context->mbmi.pred_filter_enabled) {
-    int i;
-    uint8_t *pSrc = uptr;
-    uint8_t *pDst = dst_u;
-    int len = 7 + (VP9_INTERP_EXTEND << 1);
-    uint8_t Temp[32 * 32];  // Data required by the sub-pel filter
-    uint8_t *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
-
-    // U & V
-    for (i = 0; i < 2; i++) {
-      if (_o16x16mv.as_int & 0x000f000f) {
-        // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
-                  Temp, len, len, len);
-
-        // Sub-pel filter
-        xd->subpixel_predict8x8(pTemp, len,
-                                _o16x16mv.as_mv.col & 15,
-                                _o16x16mv.as_mv.row & 15,
-                                pDst, dst_uvstride);
-      } else {
-        filter_mb(pSrc, pre_stride, pDst, dst_uvstride, 8, 8);
-      }
-
-      // V
-      pSrc = vptr;
-      pDst = dst_v;
-    }
-  } else
-#endif
     if (_o16x16mv.as_int & 0x000f000f) {
       xd->subpixel_predict8x8(uptr, pre_stride, _o16x16mv.as_mv.col & 15,
                               _o16x16mv.as_mv.row & 15, dst_u, dst_uvstride);
@@ -849,9 +683,9 @@ void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
 /*
  * The following functions should be called after an initial
  * call to vp9_build_1st_inter16x16_predictors_mb() or _mby()/_mbuv().
- * It will run a second sixtap filter on a (different) ref
+ * It will run a second filter on a (different) ref
  * frame and average the result with the output of the
- * first sixtap filter. The second reference frame is stored
+ * first filter. The second reference frame is stored
  * in x->second_pre (the reference frame index is in
  * x->mode_info_context->mbmi.second_ref_frame). The second
  * motion vector is x->mode_info_context->mbmi.second_mv.
@@ -882,35 +716,11 @@ void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
 
   ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
 
-#if CONFIG_PRED_FILTER
-  if (xd->mode_info_context->mbmi.pred_filter_enabled) {
-    if ((mv_row | mv_col) & 7) {
-      // Sub-pel filter needs extended input
-      int len = 15 + (VP9_INTERP_EXTEND << 1);
-      uint8_t Temp[32 * 32];  // Data required by sub-pel filter
-      uint8_t *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
-
-      // Copy extended MB into Temp array, applying the spatial filter
-      filter_mb(ptr - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
-                Temp, len, len, len);
-
-      // Sub-pel filter
-      xd->subpixel_predict_avg16x16(pTemp, len, (mv_col & 7) << 1,
-                                    (mv_row & 7) << 1, dst_y, dst_ystride);
-    } else {
-      // TODO Needs to AVERAGE with the dst_y
-      // For now, do not apply the prediction filter in these cases!
-      vp9_avg_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
-    }
-  } else
-#endif  // CONFIG_PRED_FILTER
-  {
-    if ((mv_row | mv_col) & 7) {
-      xd->subpixel_predict_avg16x16(ptr, pre_stride, (mv_col & 7) << 1,
-                                    (mv_row & 7) << 1, dst_y, dst_ystride);
-    } else {
-      vp9_avg_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
-    }
+  if ((mv_row | mv_col) & 7) {
+    xd->subpixel_predict_avg16x16(ptr, pre_stride, (mv_col & 7) << 1,
+                                  (mv_row & 7) << 1, dst_y, dst_ystride);
+  } else {
+    vp9_avg_mem16x16(ptr, pre_stride, dst_y, dst_ystride);
   }
 }
 
@@ -950,37 +760,6 @@ void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
   uptr = xd->second_pre.u_buffer + offset;
   vptr = xd->second_pre.v_buffer + offset;
 
-#if CONFIG_PRED_FILTER
-  if (xd->mode_info_context->mbmi.pred_filter_enabled) {
-    int i;
-    int len = 7 + (VP9_INTERP_EXTEND << 1);
-    uint8_t Temp[32 * 32];  // Data required by sub-pel filter
-    uint8_t *pTemp = Temp + (VP9_INTERP_EXTEND - 1) * (len + 1);
-    uint8_t *pSrc = uptr;
-    uint8_t *pDst = dst_u;
-
-    // U & V
-    for (i = 0; i < 2; i++) {
-      if ((omv_row | omv_col) & 15) {
-        // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (VP9_INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
-                  Temp, len, len, len);
-
-        // Sub-pel filter
-        xd->subpixel_predict_avg8x8(pTemp, len, omv_col & 15,
-                                    omv_row & 15, pDst, dst_uvstride);
-      } else {
-        // TODO Needs to AVERAGE with the dst_[u|v]
-        // For now, do not apply the prediction filter here!
-        vp9_avg_mem8x8(pSrc, pre_stride, pDst, dst_uvstride);
-      }
-
-      // V
-      pSrc = vptr;
-      pDst = dst_v;
-    }
-  } else
-#endif  // CONFIG_PRED_FILTER
     if ((omv_row | omv_col) & 15) {
       xd->subpixel_predict_avg8x8(uptr, pre_stride, omv_col & 15,
                                   omv_row & 15, dst_u, dst_uvstride);
@@ -1058,13 +837,13 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
       if (d0->bmi.as_mv.first.as_int == d1->bmi.as_mv.first.as_int)
         build_inter_predictors2b(xd, d0, 16);
       else {
-        vp9_build_inter_predictors_b(d0, 16, xd->subpixel_predict);
-        vp9_build_inter_predictors_b(d1, 16, xd->subpixel_predict);
+        vp9_build_inter_predictors_b(d0, 16, xd->subpixel_predict4x4);
+        vp9_build_inter_predictors_b(d1, 16, xd->subpixel_predict4x4);
       }
 
       if (mbmi->second_ref_frame > 0) {
-        vp9_build_2nd_inter_predictors_b(d0, 16, xd->subpixel_predict_avg);
-        vp9_build_2nd_inter_predictors_b(d1, 16, xd->subpixel_predict_avg);
+        vp9_build_2nd_inter_predictors_b(d0, 16, xd->subpixel_predict_avg4x4);
+        vp9_build_2nd_inter_predictors_b(d1, 16, xd->subpixel_predict_avg4x4);
       }
     }
   }
@@ -1076,13 +855,13 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
     if (d0->bmi.as_mv.first.as_int == d1->bmi.as_mv.first.as_int)
       build_inter_predictors2b(xd, d0, 8);
     else {
-      vp9_build_inter_predictors_b(d0, 8, xd->subpixel_predict);
-      vp9_build_inter_predictors_b(d1, 8, xd->subpixel_predict);
+      vp9_build_inter_predictors_b(d0, 8, xd->subpixel_predict4x4);
+      vp9_build_inter_predictors_b(d1, 8, xd->subpixel_predict4x4);
     }
 
     if (mbmi->second_ref_frame > 0) {
-      vp9_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg);
-      vp9_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg);
+      vp9_build_2nd_inter_predictors_b(d0, 8, xd->subpixel_predict_avg4x4);
+      vp9_build_2nd_inter_predictors_b(d1, 8, xd->subpixel_predict_avg4x4);
     }
   }
 }

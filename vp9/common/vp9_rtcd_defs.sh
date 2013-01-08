@@ -310,8 +310,8 @@ specialize vp9_eighttap_predict_avg4x4
 prototype void vp9_eighttap_predict8x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
 specialize vp9_eighttap_predict8x4
 
-prototype void vp9_eighttap_predict "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict
+prototype void vp9_eighttap_predict4x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict4x4
 
 prototype void vp9_eighttap_predict16x16_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
 specialize vp9_eighttap_predict16x16_sharp
@@ -331,8 +331,29 @@ specialize vp9_eighttap_predict_avg4x4_sharp
 prototype void vp9_eighttap_predict8x4_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
 specialize vp9_eighttap_predict8x4_sharp
 
-prototype void vp9_eighttap_predict_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_sharp
+prototype void vp9_eighttap_predict4x4_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict4x4_sharp
+
+prototype void vp9_eighttap_predict16x16_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict16x16_smooth
+
+prototype void vp9_eighttap_predict8x8_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict8x8_smooth
+
+prototype void vp9_eighttap_predict_avg16x16_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_avg16x16_smooth
+
+prototype void vp9_eighttap_predict_avg8x8_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_avg8x8_smooth
+
+prototype void vp9_eighttap_predict_avg4x4_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict_avg4x4_smooth
+
+prototype void vp9_eighttap_predict8x4_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict8x4_smooth
+
+prototype void vp9_eighttap_predict4x4_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_eighttap_predict4x4_smooth
 
 prototype void vp9_sixtap_predict16x16 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
 specialize vp9_sixtap_predict16x16
@@ -349,11 +370,11 @@ specialize vp9_sixtap_predict_avg8x8
 prototype void vp9_sixtap_predict8x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
 specialize vp9_sixtap_predict8x4
 
-prototype void vp9_sixtap_predict "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_sixtap_predict
+prototype void vp9_sixtap_predict4x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_sixtap_predict4x4
 
-prototype void vp9_sixtap_predict_avg "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_sixtap_predict_avg
+prototype void vp9_sixtap_predict_avg4x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
+specialize vp9_sixtap_predict_avg4x4
 
 prototype void vp9_bilinear_predict16x16 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
 specialize vp9_bilinear_predict16x16 sse2

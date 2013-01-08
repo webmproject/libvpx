@@ -25,5 +25,6 @@ extern const int16_t vp9_bilinear_filters[SUBPEL_SHIFTS][2];
 extern const int16_t vp9_sub_pel_filters_6[SUBPEL_SHIFTS][6];
 extern const int16_t vp9_sub_pel_filters_8[SUBPEL_SHIFTS][8];
 extern const int16_t vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][8];
+extern const int16_t vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS][8];
 
 #endif  // VP9_COMMON_VP9_FILTER_H_

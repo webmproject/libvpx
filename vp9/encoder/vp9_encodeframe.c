@@ -1300,16 +1300,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   cpi->skip_true_count[0] = cpi->skip_true_count[1] = cpi->skip_true_count[2] = 0;
   cpi->skip_false_count[0] = cpi->skip_false_count[1] = cpi->skip_false_count[2] = 0;
 
-#if CONFIG_PRED_FILTER
-  if (cm->current_video_frame == 0) {
-    // Initially assume that we'll signal the prediction filter
-    // state at the frame level and that it is off.
-    cpi->common.pred_filter_mode = 0;
-    cpi->common.prob_pred_filter_off = 128;
-  }
-  cpi->pred_filter_on_count = 0;
-  cpi->pred_filter_off_count = 0;
-#endif
   vp9_zero(cpi->switchable_interp_count);
   vp9_zero(cpi->best_switchable_interp_count);
 

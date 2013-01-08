@@ -253,6 +253,7 @@ EXPERIMENT_LIST="
     dwtdcthybrid
     cnvcontext
     newcoefcontext
+    enable_6tap
 "
 CONFIG_LIST="
     external_build

@@ -889,11 +889,6 @@ void vp9_encode_inter16x16y(MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
 
-#if CONFIG_PRED_FILTER
-  // Disable the prediction filter for firstpass
-  xd->mode_info_context->mbmi.pred_filter_enabled = 0;
-#endif
-
   vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
 
   vp9_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);

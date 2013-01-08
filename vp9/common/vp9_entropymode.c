@@ -388,9 +388,15 @@ const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
   -1, -2
 };
 struct vp9_token_struct vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
+#if CONFIG_ENABLE_6TAP
 const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
-  EIGHTTAP, SIXTAP, EIGHTTAP_SHARP};
-const int vp9_switchable_interp_map[SWITCHABLE+1] = {1, -1, 0, 2, -1};
+  SIXTAP, EIGHTTAP, EIGHTTAP_SHARP};
+const int vp9_switchable_interp_map[SWITCHABLE+1] = {0, -1, 1, 2, -1, -1};
+#else
+const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
+  EIGHTTAP, EIGHTTAP_SMOOTH, EIGHTTAP_SHARP};
+const int vp9_switchable_interp_map[SWITCHABLE+1] = {1, 0, 2, -1, -1};
+#endif
 const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
                                           [VP9_SWITCHABLE_FILTERS-1] = {
   {248, 192}, { 32, 248}, { 32,  32}, {192, 160}
@@ -408,7 +414,11 @@ const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
 };
 const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
   EIGHTTAP, EIGHTTAP_SHARP};
-const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, -1, 0, 1, -1}; //8, 8s
+#if CONFIG_ENABLE_6TAP
+const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, -1, 0, 1, -1, -1};
+#else
+const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, 0, 1, -1, -1};
+#endif
 #endif
 
 void vp9_entropy_mode_init() {

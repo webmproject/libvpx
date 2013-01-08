@@ -71,11 +71,6 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
         & distortion, &sse);
   }
 
-#if CONFIG_PRED_FILTER
-  // Disable the prediction filter
-  xd->mode_info_context->mbmi.pred_filter_enabled = 0;
-#endif
-
   vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
   vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
   best_err = vp9_sad16x16(xd->dst.y_buffer, xd->dst.y_stride,

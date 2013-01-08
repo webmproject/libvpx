@@ -550,12 +550,6 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
     if (!cm->kf_ymode_probs_update)
       cm->kf_ymode_probs_index = vp9_read_literal(bc, 3);
   } else {
-#if CONFIG_PRED_FILTER
-    cm->pred_filter_mode = (vp9_prob)vp9_read_literal(bc, 2);
-
-    if (cm->pred_filter_mode == 2)
-      cm->prob_pred_filter_off = (vp9_prob)vp9_read_literal(bc, 8);
-#endif
     if (cm->mcomp_filter_type == SWITCHABLE)
       read_switchable_interp_probs(pbi, bc);
 #if CONFIG_COMP_INTERINTRA_PRED
@@ -825,17 +819,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
     }
 
-
-#if CONFIG_PRED_FILTER
-    if (mbmi->mode >= NEARESTMV && mbmi->mode < SPLITMV) {
-      // Is the prediction filter enabled
-      if (cm->pred_filter_mode == 2)
-        mbmi->pred_filter_enabled =
-          vp9_read(bc, cm->prob_pred_filter_off);
-      else
-        mbmi->pred_filter_enabled = cm->pred_filter_mode;
-    }
-#endif
     if (mbmi->mode >= NEARESTMV && mbmi->mode <= SPLITMV)
     {
       if (cm->mcomp_filter_type == SWITCHABLE) {

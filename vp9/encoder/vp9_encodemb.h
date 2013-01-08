@@ -18,9 +18,6 @@ typedef struct {
   MB_PREDICTION_MODE mode;
   MV_REFERENCE_FRAME ref_frame;
   MV_REFERENCE_FRAME second_ref_frame;
-#if CONFIG_PRED_FILTER
-  int pred_filter_flag;
-#endif
 } MODE_DEFINITION;
 
 

@@ -76,10 +76,13 @@ typedef enum {
 
 typedef enum
 {
-  SIXTAP   = 0,
-  BILINEAR = 1,
-  EIGHTTAP = 2,
-  EIGHTTAP_SHARP = 3,
+#if CONFIG_ENABLE_6TAP
+  SIXTAP,
+#endif
+  EIGHTTAP_SMOOTH,
+  EIGHTTAP,
+  EIGHTTAP_SHARP,
+  BILINEAR,
   SWITCHABLE  /* should be the last one */
 } INTERPOLATIONFILTERTYPE;
 
@@ -268,10 +271,6 @@ typedef struct {
   // a valid predictor
   unsigned char mb_in_image;
 
-#if CONFIG_PRED_FILTER
-  // Flag to turn prediction signal filter on(1)/off(0 ) at the MB level
-  unsigned int pred_filter_enabled;
-#endif
   INTERPOLATIONFILTERTYPE interp_filter;
 
   BLOCK_SIZE_TYPE sb_type;
@@ -399,11 +398,11 @@ typedef struct macroblockd {
   void (*inv_walsh4x4_lossless)(int16_t *in, int16_t *out);
 
 
-  vp9_subpix_fn_t  subpixel_predict;
+  vp9_subpix_fn_t  subpixel_predict4x4;
   vp9_subpix_fn_t  subpixel_predict8x4;
   vp9_subpix_fn_t  subpixel_predict8x8;
   vp9_subpix_fn_t  subpixel_predict16x16;
-  vp9_subpix_fn_t  subpixel_predict_avg;
+  vp9_subpix_fn_t  subpixel_predict_avg4x4;
   vp9_subpix_fn_t  subpixel_predict_avg8x4;
   vp9_subpix_fn_t  subpixel_predict_avg8x8;
   vp9_subpix_fn_t  subpixel_predict_avg16x16;

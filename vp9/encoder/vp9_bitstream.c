@@ -831,17 +831,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
     }
 
-#if CONFIG_PRED_FILTER
-    // Is the prediction filter enabled
-    if (mode >= NEARESTMV && mode < SPLITMV) {
-      if (cpi->common.pred_filter_mode == 2)
-        vp9_write(bc, mi->pred_filter_enabled,
-                  pc->prob_pred_filter_off);
-      else
-        assert(mi->pred_filter_enabled ==
-               cpi->common.pred_filter_mode);
-    }
-#endif
     if (mode >= NEARESTMV && mode <= SPLITMV) {
       if (cpi->common.mcomp_filter_type == SWITCHABLE) {
         write_token(bc, vp9_switchable_interp_tree,
@@ -2023,15 +2012,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     active_section = 1;
 #endif
 
-#if CONFIG_PRED_FILTER
-    // Write the prediction filter mode used for this frame
-    vp9_write_literal(&header_bc, pc->pred_filter_mode, 2);
-
-    // Write prediction filter on/off probability if signaling at MB level
-    if (pc->pred_filter_mode == 2)
-      vp9_write_literal(&header_bc, pc->prob_pred_filter_off, 8);
-
-#endif
     if (pc->mcomp_filter_type == SWITCHABLE)
       update_switchable_interp_probs(cpi, &header_bc);
 
