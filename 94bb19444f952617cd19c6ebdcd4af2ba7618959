@@ -16,6 +16,24 @@
       "revId": "94bb19444f952617cd19c6ebdcd4af2ba7618959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//9Og\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1080,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T18:48:30Z",
+      "side": 0,
+      "message": "For some reason your reply didn\u0027t show up in gerrit.\n\nAlthough win64 and x64 are considered equal by yasm, we use x64 in many places throughout the code. You\u0027re welcome to clean up all the places and test them but as it stands this will break win64 builds.",
+      "parentUuid": "AAAAVH//9WM\u003d",
+      "revId": "94bb19444f952617cd19c6ebdcd4af2ba7618959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
