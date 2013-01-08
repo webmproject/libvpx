@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//88Y\u003d",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 1,
+      "message": "I\u0027m not sure I understand the intention here. Why would you build this target? You have x86-win32 and x86_64-win64. What is this for?",
+      "revId": "14a10b3a348e11fd6125653ce2168f140ddb0564",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//88A\u003d",
+        "filename": "third_party/libyuv/include/libyuv/basic_types.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 1,
+      "message": "Please don\u0027t change anything under third_party. If we need something, patches go upstream and we pull after. This change is cosmetic so it can just be left out.",
+      "revId": "14a10b3a348e11fd6125653ce2168f140ddb0564",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//878\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 1,
+      "message": "Fix",
+      "revId": "14a10b3a348e11fd6125653ce2168f140ddb0564",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//87g\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 1,
+      "message": "Trim. Search the file for \u0027\u003d\u003d\u003d\u003d\u0027",
+      "revId": "14a10b3a348e11fd6125653ce2168f140ddb0564",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//87Y\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 1,
+      "message": "Some places you change x64 to x86_64. This one is wrong.",
+      "revId": "14a10b3a348e11fd6125653ce2168f140ddb0564",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//87M\u003d",
+        "filename": "vpx_ports/emms.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 1,
+      "message": "No",
+      "revId": "14a10b3a348e11fd6125653ce2168f140ddb0564",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//87E\u003d",
+        "filename": "vpx_ports/emms.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 1,
+      "message": "No",
+      "revId": "14a10b3a348e11fd6125653ce2168f140ddb0564",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//87A\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 1,
+      "message": "No",
+      "revId": "14a10b3a348e11fd6125653ce2168f140ddb0564",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

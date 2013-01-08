@@ -34,6 +34,40 @@
       "revId": "94bb19444f952617cd19c6ebdcd4af2ba7618959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//88s\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1081,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 0,
+      "message": "-g cv8 adds debug information for \"CodeView 8.0 (VS2005)\" according the yasm site. I assume that doesn\u0027t cause any issues with later versions?",
+      "revId": "94bb19444f952617cd19c6ebdcd4af2ba7618959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//87o\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-08T22:51:15Z",
+      "side": 0,
+      "message": "I don\u0027t think this would be accepted upstream. Update \"Local Modifications\" in README.webm",
+      "revId": "94bb19444f952617cd19c6ebdcd4af2ba7618959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
