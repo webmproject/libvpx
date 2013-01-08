@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//9N8\u003d",
+        "filename": "vp9/common/vp9_findnearmv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-08T18:58:08Z",
+      "side": 1,
+      "message": "please reindent",
+      "revId": "206a6f1f45143154f344114c2974e18c6921a060",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//9N4\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_variance_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-08T18:58:08Z",
+      "side": 1,
+      "message": "please indent those like regular functions:\n\nvoid function(arg1, arg2, arg3,\n              arg4, arg5, arg6);",
+      "revId": "206a6f1f45143154f344114c2974e18c6921a060",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
