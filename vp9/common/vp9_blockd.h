@@ -14,7 +14,7 @@
 
 void vpx_log(const char *format, ...);
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_treecoder.h"

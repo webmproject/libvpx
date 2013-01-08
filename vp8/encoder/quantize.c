@@ -587,20 +587,20 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
 
 #define ZBIN_EXTRA_Y \
     (( cpi->common.Y1dequant[QIndex][1] *  \
-    ( cpi->zbin_over_quant +  \
-      cpi->zbin_mode_boost +  \
+    ( x->zbin_over_quant +  \
+      x->zbin_mode_boost +  \
       x->act_zbin_adj ) ) >> 7)
 
 #define ZBIN_EXTRA_UV \
     (( cpi->common.UVdequant[QIndex][1] *  \
-    ( cpi->zbin_over_quant +  \
-      cpi->zbin_mode_boost +  \
+    ( x->zbin_over_quant +  \
+      x->zbin_mode_boost +  \
       x->act_zbin_adj ) ) >> 7)
 
 #define ZBIN_EXTRA_Y2 \
     (( cpi->common.Y2dequant[QIndex][1] *  \
-    ( (cpi->zbin_over_quant / 2) +  \
-       cpi->zbin_mode_boost +  \
+    ( (x->zbin_over_quant / 2) +  \
+       x->zbin_mode_boost +  \
        x->act_zbin_adj ) ) >> 7)
 
 void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip)
@@ -702,15 +702,15 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip)
         /* save this macroblock QIndex for vp8_update_zbin_extra() */
         x->q_index = QIndex;
 
-        cpi->last_zbin_over_quant = cpi->zbin_over_quant;
-        cpi->last_zbin_mode_boost = cpi->zbin_mode_boost;
+        x->last_zbin_over_quant = x->zbin_over_quant;
+        x->last_zbin_mode_boost = x->zbin_mode_boost;
         x->last_act_zbin_adj = x->act_zbin_adj;
 
 
 
     }
-    else if(cpi->last_zbin_over_quant != cpi->zbin_over_quant
-            || cpi->last_zbin_mode_boost != cpi->zbin_mode_boost
+    else if(x->last_zbin_over_quant != x->zbin_over_quant
+            || x->last_zbin_mode_boost != x->zbin_mode_boost
             || x->last_act_zbin_adj != x->act_zbin_adj)
     {
         /* Y */
@@ -729,8 +729,8 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip)
         zbin_extra = ZBIN_EXTRA_Y2;
         x->block[24].zbin_extra = (short)zbin_extra;
 
-        cpi->last_zbin_over_quant = cpi->zbin_over_quant;
-        cpi->last_zbin_mode_boost = cpi->zbin_mode_boost;
+        x->last_zbin_over_quant = x->zbin_over_quant;
+        x->last_zbin_mode_boost = x->zbin_mode_boost;
         x->last_act_zbin_adj = x->act_zbin_adj;
     }
 }
@@ -764,7 +764,7 @@ void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x)
 void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
 {
     /* Clear Zbin mode boost for default case */
-    cpi->zbin_mode_boost = 0;
+    cpi->mb.zbin_mode_boost = 0;
 
     /* MB level quantizer setup */
     vp8cx_mb_init_quantizer(cpi, &cpi->mb, 0);

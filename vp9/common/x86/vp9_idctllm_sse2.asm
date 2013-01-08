@@ -21,7 +21,7 @@
 ;   int blk_stride      - 5
 ; )
 
-global sym(vp9_idct_dequant_0_2x_sse2)
+global sym(vp9_idct_dequant_0_2x_sse2) PRIVATE
 sym(vp9_idct_dequant_0_2x_sse2):
     push        rbp
     mov         rbp, rsp
@@ -97,7 +97,7 @@ sym(vp9_idct_dequant_0_2x_sse2):
     pop         rbp
     ret
 
-global sym(vp9_idct_dequant_full_2x_sse2)
+global sym(vp9_idct_dequant_full_2x_sse2) PRIVATE
 sym(vp9_idct_dequant_full_2x_sse2):
     push        rbp
     mov         rbp, rsp
@@ -362,7 +362,7 @@ sym(vp9_idct_dequant_full_2x_sse2):
 ;   int dst_stride      - 4
 ;   short *dc           - 5
 ; )
-global sym(vp9_idct_dequant_dc_0_2x_sse2)
+global sym(vp9_idct_dequant_dc_0_2x_sse2) PRIVATE
 sym(vp9_idct_dequant_dc_0_2x_sse2):
     push        rbp
     mov         rbp, rsp
@@ -438,7 +438,7 @@ sym(vp9_idct_dequant_dc_0_2x_sse2):
     pop         rbp
     ret
 
-global sym(vp9_idct_dequant_dc_full_2x_sse2)
+global sym(vp9_idct_dequant_dc_full_2x_sse2) PRIVATE
 sym(vp9_idct_dequant_dc_full_2x_sse2):
     push        rbp
     mov         rbp, rsp

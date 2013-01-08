@@ -27,7 +27,7 @@
 # Android.mk file in the libvpx directory:
 # LOCAL_PATH := $(call my-dir)
 # include $(CLEAR_VARS)
-# include libvpx/build/make/Android.mk
+# include jni/libvpx/build/make/Android.mk
 #
 # There are currently two TARGET_ARCH_ABI targets for ARM.
 # armeabi and armeabi-v7a.  armeabi-v7a is selected by creating an

@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
@@ -2123,8 +2123,6 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-  unsigned char *segment_id = &mbmi->segment_id;
-  int seg_ref_active;
   unsigned char ref_pred_flag;
 
 #if CONFIG_SUPERBLOCKS
@@ -2169,8 +2167,6 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     }
 
     vp9_update_zbin_extra(cpi, x);
-
-    seg_ref_active = vp9_segfeature_active(xd, *segment_id, SEG_LVL_REF_FRAME);
 
     // SET VARIOUS PREDICTION FLAGS
 

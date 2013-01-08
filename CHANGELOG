@@ -1,3 +1,32 @@
+2012-12-21 v1.2.0
+  This release acts as a checkpoint for a large amount of internal refactoring
+  and testing. It also contains a number of small bugfixes, so all users are
+  encouraged to upgrade.
+
+  - Upgrading:
+    This release is ABI and API compatible with Duclair (v1.0.0). Users
+    of older releases should refer to the Upgrading notes in this
+    document for that release.
+
+  - Enhancements:
+      VP8 optimizations for MIPS dspr2
+      vpxenc: add -quiet option
+
+  - Speed:
+      Encoder and decoder speed is consistent with the Eider release.
+
+  - Quality:
+      In general, quality is consistent with the Eider release.
+
+      Minor tweaks to ARNR filtering
+      Minor improvements to real time encoding with multiple temporal layers
+
+  - Bug Fixes:
+      Fixes multithreaded encoder race condition in loopfilter
+      Fixes multi-resolution threaded encoding
+      Fix potential encoder dead-lock after picture resize
+
+
 2012-05-09 v1.1.0 "Eider"
   This introduces a number of enhancements, mostly focused on real-time
   encoding. In addition, it fixes a decoder bug (first introduced in

@@ -352,6 +352,7 @@ sym(vp8_filter_block1d4_h6_ssse3):
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret

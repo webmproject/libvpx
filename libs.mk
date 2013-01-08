@@ -61,14 +61,25 @@ endef
 CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
 
+# If this is a universal (fat) binary, then all the subarchitectures have
+# already been built and our job is to stitch them together. The
+# BUILD_LIBVPX variable indicates whether we should be building
+# (compiling, linking) the library. The LIPO_LIBVPX variable indicates
+# that we're stitching.
+$(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
+
 include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
 CODEC_SRCS-yes += $(addprefix vpx/,$(call enabled,API_SRCS))
+CODEC_DOC_SRCS += $(addprefix vpx/,$(call enabled,API_DOC_SRCS))
 
 include $(SRC_PATH_BARE)/vpx_mem/vpx_mem.mk
 CODEC_SRCS-yes += $(addprefix vpx_mem/,$(call enabled,MEM_SRCS))
 
 include $(SRC_PATH_BARE)/vpx_scale/vpx_scale.mk
 CODEC_SRCS-yes += $(addprefix vpx_scale/,$(call enabled,SCALE_SRCS))
+
+include $(SRC_PATH_BARE)/vpx_ports/vpx_ports.mk
+CODEC_SRCS-yes += $(addprefix vpx_ports/,$(call enabled,PORTS_SRCS))
 
 ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
   VP8_PREFIX=vp8/
@@ -79,11 +90,8 @@ ifeq ($(CONFIG_VP8_ENCODER),yes)
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8cx.mk
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_CX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
-  CODEC_SRCS-yes += $(VP8_PREFIX)vp8cx.mk vpx/vp8.h vpx/vp8cx.h
-  CODEC_SRCS-$(ARCH_ARM) += $(VP8_PREFIX)vp8cx_arm.mk
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
-  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
   CODEC_DOC_SECTIONS += vp8 vp8_encoder
 endif
 
@@ -91,10 +99,8 @@ ifeq ($(CONFIG_VP8_DECODER),yes)
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8dx.mk
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_DX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_DX_EXPORTS))
-  CODEC_SRCS-yes += $(VP8_PREFIX)vp8dx.mk vpx/vp8.h vpx/vp8dx.h
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
-  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8dx.h
   CODEC_DOC_SECTIONS += vp8 vp8_decoder
 endif
 
@@ -155,30 +161,13 @@ INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/%  $(p)/Release/%)
 INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/%  $(p)/Debug/%)
 endif
 
-# If this is a universal (fat) binary, then all the subarchitectures have
-# already been built and our job is to stitch them together. The
-# BUILD_LIBVPX variable indicates whether we should be building
-# (compiling, linking) the library. The LIPO_LIBVPX variable indicates
-# that we're stitching.
-$(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
-
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/rtcd.sh
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx/vpx_integer.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/asm_offsets.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_timer.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/mem.h
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emmintrin_compat.h
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_once.h
 CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
 INSTALL-SRCS-no += $(BUILD_PFX)vpx_config.c
-ifeq ($(ARCH_X86)$(ARCH_X86_64),yes)
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emms.asm
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_abi_support.asm
 CODEC_SRCS-$(BUILD_LIBVPX) += third_party/x86inc/x86inc.asm
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_cpuid.c
-endif
-CODEC_SRCS-$(ARCH_ARM) += vpx_ports/arm_cpudetect.c
-CODEC_SRCS-$(ARCH_ARM) += vpx_ports/arm.h
 CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
@@ -202,8 +191,7 @@ INSTALL-LIBS-$(CONFIG_STATIC) += $(LIBSUBDIR)/libvpx.a
 INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(LIBSUBDIR)/libvpx_g.a
 endif
 
-CODEC_SRCS=$(filter-out %_offsets.c,\
-           $(filter-out %_test.cc,$(call enabled,CODEC_SRCS)))
+CODEC_SRCS=$(call enabled,CODEC_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(CODEC_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 
@@ -306,6 +294,7 @@ CLEAN-OBJS += libvpx.syms
 define libvpx_symlink_template
 $(1): $(2)
 	@echo "    [LN]     $(2) $$@"
+	$(qexec)mkdir -p $$(dir $$@)
 	$(qexec)ln -sf $(2) $$@
 endef
 
@@ -314,7 +303,7 @@ $(eval $(call libvpx_symlink_template,\
     $(BUILD_PFX)$(LIBVPX_SO)))
 $(eval $(call libvpx_symlink_template,\
     $(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)),\
-    $(DIST_DIR)/$(LIBSUBDIR)/$(LIBVPX_SO)))
+    $(LIBVPX_SO)))
 
 
 INSTALL-LIBS-$(BUILD_LIBVPX_SO) += $(LIBVPX_SO_SYMLINKS)
@@ -375,10 +364,6 @@ $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 $(shell $(SRC_PATH_BARE)/build/make/version.sh "$(SRC_PATH_BARE)" $(BUILD_PFX)vpx_version.h)
 CLEAN-OBJS += $(BUILD_PFX)vpx_version.h
 
-CODEC_DOC_SRCS += vpx/vpx_codec.h \
-                  vpx/vpx_decoder.h \
-                  vpx/vpx_encoder.h \
-                  vpx/vpx_image.h
 
 ##
 ## libvpx test directives

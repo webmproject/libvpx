@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vpx_ports/x86.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 

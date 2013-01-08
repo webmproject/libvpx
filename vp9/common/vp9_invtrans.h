@@ -11,7 +11,7 @@
 #ifndef VP9_COMMON_VP9_INVTRANS_H_
 #define VP9_COMMON_VP9_INVTRANS_H_
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_blockd.h"
 

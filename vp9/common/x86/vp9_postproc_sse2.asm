@@ -21,7 +21,7 @@
 ;    int cols,
 ;    int flimit
 ;)
-global sym(vp9_post_proc_down_and_across_xmm)
+global sym(vp9_post_proc_down_and_across_xmm) PRIVATE
 sym(vp9_post_proc_down_and_across_xmm):
     push        rbp
     mov         rbp, rsp
@@ -251,7 +251,7 @@ sym(vp9_post_proc_down_and_across_xmm):
 ;void vp9_mbpost_proc_down_xmm(unsigned char *dst,
 ;                            int pitch, int rows, int cols,int flimit)
 extern sym(vp9_rv)
-global sym(vp9_mbpost_proc_down_xmm)
+global sym(vp9_mbpost_proc_down_xmm) PRIVATE
 sym(vp9_mbpost_proc_down_xmm):
     push        rbp
     mov         rbp, rsp
@@ -451,7 +451,7 @@ sym(vp9_mbpost_proc_down_xmm):
 
 ;void vp9_mbpost_proc_across_ip_xmm(unsigned char *src,
 ;                                int pitch, int rows, int cols,int flimit)
-global sym(vp9_mbpost_proc_across_ip_xmm)
+global sym(vp9_mbpost_proc_across_ip_xmm) PRIVATE
 sym(vp9_mbpost_proc_across_ip_xmm):
     push        rbp
     mov         rbp, rsp
@@ -630,7 +630,7 @@ sym(vp9_mbpost_proc_across_ip_xmm):
 ;                            unsigned char bothclamp[16],
 ;                            unsigned int Width, unsigned int Height, int Pitch)
 extern sym(rand)
-global sym(vp9_plane_add_noise_wmt)
+global sym(vp9_plane_add_noise_wmt) PRIVATE
 sym(vp9_plane_add_noise_wmt):
     push        rbp
     mov         rbp, rsp

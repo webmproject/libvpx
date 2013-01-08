@@ -11,6 +11,21 @@
 
 API_EXPORTS += exports
 
+API_SRCS-$(CONFIG_VP8_ENCODER) += vp8.h
+API_SRCS-$(CONFIG_VP8_ENCODER) += vp8cx.h
+API_DOC_SRCS-$(CONFIG_VP8_ENCODER) += vp8.h
+API_DOC_SRCS-$(CONFIG_VP8_ENCODER) += vp8cx.h
+
+API_SRCS-$(CONFIG_VP8_DECODER) += vp8.h
+API_SRCS-$(CONFIG_VP8_DECODER) += vp8dx.h
+API_DOC_SRCS-$(CONFIG_VP8_DECODER) += vp8.h
+API_DOC_SRCS-$(CONFIG_VP8_DECODER) += vp8dx.h
+
+API_DOC_SRCS-yes += vpx_codec.h
+API_DOC_SRCS-yes += vpx_decoder.h
+API_DOC_SRCS-yes += vpx_encoder.h
+API_DOC_SRCS-yes += vpx_image.h
+
 API_SRCS-yes                += src/vpx_decoder.c
 API_SRCS-yes                += vpx_decoder.h
 API_SRCS-yes                += src/vpx_encoder.c
@@ -23,3 +38,4 @@ API_SRCS-yes                += vpx_codec.mk
 API_SRCS-yes                += vpx_codec_impl_bottom.h
 API_SRCS-yes                += vpx_codec_impl_top.h
 API_SRCS-yes                += vpx_image.h
+API_SRCS-$(BUILD_LIBVPX)    += vpx_integer.h

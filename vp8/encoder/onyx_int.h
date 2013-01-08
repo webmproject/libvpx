@@ -43,7 +43,7 @@
 #define AF_THRESH   25
 #define AF_THRESH2  100
 #define ARF_DECAY_THRESH 12
-#define MAX_MODES 20
+
 
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
@@ -349,13 +349,9 @@ typedef struct VP8_COMP
     int ambient_err;
 
     unsigned int mode_check_freq[MAX_MODES];
-    unsigned int mode_test_hit_counts[MAX_MODES];
     unsigned int mode_chosen_counts[MAX_MODES];
-    unsigned int mbs_tested_so_far;
 
-    int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
-    int rd_threshes[MAX_MODES];
 
     int RDMULT;
     int RDDIV ;
@@ -363,9 +359,7 @@ typedef struct VP8_COMP
     CODING_CONTEXT coding_context;
 
     /* Rate targetting variables */
-    int64_t prediction_error;
     int64_t last_prediction_error;
-    int64_t intra_error;
     int64_t last_intra_error;
 
     int this_frame_target;
@@ -418,12 +412,6 @@ typedef struct VP8_COMP
     int ni_frames;
     int avg_frame_qindex;
 
-    int zbin_over_quant;
-    int zbin_mode_boost;
-    int zbin_mode_boost_enabled;
-    int last_zbin_over_quant;
-    int last_zbin_mode_boost;
-
     int64_t total_byte_count;
 
     int buffered_mode;
@@ -452,13 +440,6 @@ typedef struct VP8_COMP
     int drop_frames_allowed; /* Are we permitted to drop frames? */
     int drop_frame;          /* Drop this frame? */
 
-    int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
-    int uv_mode_count[VP8_UV_MODES];     /* intra MB type cts this frame */
-
-    unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
-
-    unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     char update_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 
@@ -486,7 +467,6 @@ typedef struct VP8_COMP
     int Speed;
     int compressor_speed;
 
-    int interquantizer;
     int auto_gold;
     int auto_adjust_gold_quantizer;
     int auto_worst_q;
@@ -502,25 +482,16 @@ typedef struct VP8_COMP
     int last_skip_probs_q[3];
     int recent_ref_frame_usage[MAX_REF_FRAMES];
 
-    int count_mb_ref_frame_usage[MAX_REF_FRAMES];
     int this_frame_percent_intra;
     int last_frame_percent_intra;
 
     int ref_frame_flags;
 
     SPEED_FEATURES sf;
-    int error_bins[1024];
 
-    /* Data used for real time conferencing mode to help determine if it
-     * would be good to update the gf
-     */
-    int inter_zz_count;
     /* Count ZEROMV on all reference frames. */
     int zeromv_count;
     int lf_zeromv_pct;
-    int gf_bad_count;
-    int gf_update_recommended;
-    int skip_true_count;
 
     unsigned char *segmentation_map;
     signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
@@ -659,7 +630,6 @@ typedef struct VP8_COMP
     /* Per MB activity measurement */
     unsigned int activity_avg;
     unsigned int * mb_activity_map;
-    int * mb_norm_activity_map;
 
     /* Record of which MBs still refer to last golden frame either
      * directly or through 0,0
@@ -723,13 +693,10 @@ typedef struct VP8_COMP
     } rd_costs;
 } VP8_COMP;
 
-void control_data_rate(VP8_COMP *cpi);
+void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
+                        unsigned char *dest_end, unsigned long *size);
 
-void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char *dest_end, unsigned long *size);
-
-int rd_cost_intra_mb(MACROBLOCKD *x);
-
-void vp8_tokenize_mb(VP8_COMP *, MACROBLOCKD *, TOKENEXTRA **);
+void vp8_tokenize_mb(VP8_COMP *, MACROBLOCK *, TOKENEXTRA **);
 
 void vp8_set_speed_features(VP8_COMP *cpi);
 

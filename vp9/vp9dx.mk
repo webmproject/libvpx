@@ -21,6 +21,7 @@ VP9_DX_SRCS-yes += decoder/vp9_asm_dec_offsets.c
 VP9_DX_SRCS-yes += decoder/vp9_dboolhuff.c
 VP9_DX_SRCS-yes += decoder/vp9_decodemv.c
 VP9_DX_SRCS-yes += decoder/vp9_decodframe.c
+VP9_DX_SRCS-yes += decoder/vp9_decodframe.h
 VP9_DX_SRCS-yes += decoder/vp9_dequantize.c
 VP9_DX_SRCS-yes += decoder/vp9_detokenize.c
 VP9_DX_SRCS-yes += decoder/vp9_dboolhuff.h
@@ -35,9 +36,6 @@ VP9_DX_SRCS-yes += decoder/vp9_idct_blk.c
 
 VP9_DX_SRCS-yes := $(filter-out $(VP9_DX_SRCS_REMOVE-yes),$(VP9_DX_SRCS-yes))
 
-VP9_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/vp9_x86_dsystemdependent.c
-VP9_DX_SRCS-$(HAVE_MMX) += decoder/x86/vp9_dequantize_mmx.asm
-VP9_DX_SRCS-$(HAVE_MMX) += decoder/x86/vp9_idct_blk_mmx.c
 VP9_DX_SRCS-$(HAVE_SSE2) += decoder/x86/vp9_idct_blk_sse2.c
 
 $(eval $(call asm_offsets_template,\

@@ -11,7 +11,7 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 ;void vp9_recon2b_sse2(unsigned char *s, short *q, unsigned char *d, int stride)
-global sym(vp9_recon2b_sse2)
+global sym(vp9_recon2b_sse2) PRIVATE
 sym(vp9_recon2b_sse2):
     push        rbp
     mov         rbp, rsp
@@ -62,7 +62,7 @@ sym(vp9_recon2b_sse2):
 
 
 ;void vp9_recon4b_sse2(unsigned char *s, short *q, unsigned char *d, int stride)
-global sym(vp9_recon4b_sse2)
+global sym(vp9_recon4b_sse2) PRIVATE
 sym(vp9_recon4b_sse2):
     push        rbp
     mov         rbp, rsp
@@ -132,7 +132,7 @@ sym(vp9_recon4b_sse2):
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    )
-global sym(vp9_copy_mem16x16_sse2)
+global sym(vp9_copy_mem16x16_sse2) PRIVATE
 sym(vp9_copy_mem16x16_sse2):
     push        rbp
     mov         rbp, rsp
@@ -237,7 +237,7 @@ sym(vp9_copy_mem16x16_sse2):
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp9_intra_pred_uv_dc_mmx2)
+global sym(vp9_intra_pred_uv_dc_mmx2) PRIVATE
 sym(vp9_intra_pred_uv_dc_mmx2):
     push        rbp
     mov         rbp, rsp
@@ -310,7 +310,7 @@ sym(vp9_intra_pred_uv_dc_mmx2):
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp9_intra_pred_uv_dctop_mmx2)
+global sym(vp9_intra_pred_uv_dctop_mmx2) PRIVATE
 sym(vp9_intra_pred_uv_dctop_mmx2):
     push        rbp
     mov         rbp, rsp
@@ -363,7 +363,7 @@ sym(vp9_intra_pred_uv_dctop_mmx2):
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp9_intra_pred_uv_dcleft_mmx2)
+global sym(vp9_intra_pred_uv_dcleft_mmx2) PRIVATE
 sym(vp9_intra_pred_uv_dcleft_mmx2):
     push        rbp
     mov         rbp, rsp
@@ -428,7 +428,7 @@ sym(vp9_intra_pred_uv_dcleft_mmx2):
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp9_intra_pred_uv_dc128_mmx)
+global sym(vp9_intra_pred_uv_dc128_mmx) PRIVATE
 sym(vp9_intra_pred_uv_dc128_mmx):
     push        rbp
     mov         rbp, rsp
@@ -465,7 +465,7 @@ sym(vp9_intra_pred_uv_dc128_mmx):
 ;    int src_stride,
 ;    )
 %macro vp9_intra_pred_uv_tm 1
-global sym(vp9_intra_pred_uv_tm_%1)
+global sym(vp9_intra_pred_uv_tm_%1) PRIVATE
 sym(vp9_intra_pred_uv_tm_%1):
     push        rbp
     mov         rbp, rsp
@@ -545,7 +545,7 @@ vp9_intra_pred_uv_tm ssse3
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp9_intra_pred_uv_ve_mmx)
+global sym(vp9_intra_pred_uv_ve_mmx) PRIVATE
 sym(vp9_intra_pred_uv_ve_mmx):
     push        rbp
     mov         rbp, rsp
@@ -585,7 +585,7 @@ sym(vp9_intra_pred_uv_ve_mmx):
 ;    int src_stride,
 ;    )
 %macro vp9_intra_pred_uv_ho 1
-global sym(vp9_intra_pred_uv_ho_%1)
+global sym(vp9_intra_pred_uv_ho_%1) PRIVATE
 sym(vp9_intra_pred_uv_ho_%1):
     push        rbp
     mov         rbp, rsp

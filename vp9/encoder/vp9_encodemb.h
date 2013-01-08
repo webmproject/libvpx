@@ -11,7 +11,7 @@
 #ifndef VP9_ENCODER_VP9_ENCODEMB_H_
 #define VP9_ENCODER_VP9_ENCODEMB_H_
 
-#include "vpx_ports/config.h"
+#include "./vpx_config.h"
 #include "vp9/encoder/vp9_block.h"
 
 typedef struct {

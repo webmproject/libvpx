@@ -41,9 +41,10 @@
 #define RMAX       128.0
 #define GF_RMAX    96.0
 #define ERR_DIVISOR   150.0
+#define MIN_DECAY_FACTOR 0.1
 
-#define KF_MB_INTRA_MIN 300
-#define GF_MB_INTRA_MIN 200
+#define KF_MB_INTRA_MIN 150
+#define GF_MB_INTRA_MIN 100
 
 #define DOUBLE_DIVIDE_CHECK(X) ((X)<0?(X)-.000001:(X)+.000001)
 
@@ -800,6 +801,7 @@ static double bitcost(double prob) {
 
 static long long estimate_modemvcost(VP9_COMP *cpi,
                                      FIRSTPASS_STATS *fpstats) {
+#if 0
   int mv_cost;
   int mode_cost;
 
@@ -828,6 +830,7 @@ static long long estimate_modemvcost(VP9_COMP *cpi,
 
   // return mv_cost + mode_cost;
   // TODO PGW Fix overhead costs for extended Q range
+#endif
   return 0;
 }
 
@@ -1405,10 +1408,9 @@ static int calc_arf_boost(
     // Cumulative effect of prediction quality decay
     if (!flash_detected) {
       decay_accumulator =
-        decay_accumulator *
-        get_prediction_decay_rate(cpi, &this_frame);
-      decay_accumulator =
-        decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
+        decay_accumulator * get_prediction_decay_rate(cpi, &this_frame);
+      decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
+                          ? MIN_DECAY_FACTOR : decay_accumulator;
     }
 
     boost_score += (decay_accumulator *
@@ -1443,10 +1445,9 @@ static int calc_arf_boost(
     // Cumulative effect of prediction quality decay
     if (!flash_detected) {
       decay_accumulator =
-        decay_accumulator *
-        get_prediction_decay_rate(cpi, &this_frame);
-      decay_accumulator =
-        decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
+        decay_accumulator * get_prediction_decay_rate(cpi, &this_frame);
+      decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
+                          ? MIN_DECAY_FACTOR : decay_accumulator;
     }
 
     boost_score += (decay_accumulator *
@@ -1632,7 +1633,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         ((mv_ratio_accumulator > 100.0) ||
          (abs_mv_in_out_accumulator > 3.0) ||
          (mv_in_out_accumulator < -2.0) ||
-         ((boost_score - old_boost_score) < 12.5))
+         ((boost_score - old_boost_score) < IIFACTOR))
       )) {
       boost_score = old_boost_score;
       break;
@@ -1952,11 +1953,8 @@ void vp9_second_pass(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS this_frame_copy;
 
-  double this_frame_error;
   double this_frame_intra_error;
   double this_frame_coded_error;
-
-  FIRSTPASS_STATS *start_pos;
 
   int overhead_bits;
 
@@ -1971,11 +1969,8 @@ void vp9_second_pass(VP9_COMP *cpi) {
   if (EOF == input_stats(cpi, &this_frame))
     return;
 
-  this_frame_error = this_frame.ssim_weighted_pred_err;
   this_frame_intra_error = this_frame.intra_error;
   this_frame_coded_error = this_frame.coded_error;
-
-  start_pos = cpi->twopass.stats_in;
 
   // keyframe and section processing !
   if (cpi->twopass.frames_to_key == 0) {
@@ -2396,7 +2391,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if (!detect_flash(cpi, 0)) {
       loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
       decay_accumulator = decay_accumulator * loop_decay_rate;
-      decay_accumulator = decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
+      decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
+                            ? MIN_DECAY_FACTOR : decay_accumulator;
     }
 
     boost_score += (decay_accumulator * r);
@@ -2436,14 +2432,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int allocation_chunks;
     int alt_kf_bits;
 
-    if (kf_boost < 300) {
-      kf_boost += (cpi->twopass.frames_to_key * 3);
-      if (kf_boost > 300)
-        kf_boost = 300;
-    }
+    if (kf_boost < (cpi->twopass.frames_to_key * 5))
+      kf_boost = (cpi->twopass.frames_to_key * 5);
 
-    if (kf_boost < 250)                                                      // Min KF boost
-      kf_boost = 250;
+    if (kf_boost < 300) // Min KF boost
+      kf_boost = 300;
 
     // Make a note of baseline boost and the zero motion
     // accumulator value for use elsewhere.

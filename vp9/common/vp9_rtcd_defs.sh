@@ -42,7 +42,7 @@ fi
 # Dequant
 #
 prototype void vp9_dequantize_b "struct blockd *x"
-specialize vp9_dequantize_b mmx
+specialize vp9_dequantize_b
 
 prototype void vp9_dequantize_b_2x2 "struct blockd *x"
 specialize vp9_dequantize_b_2x2
@@ -69,13 +69,13 @@ prototype void vp9_dequant_dc_idct_add "int16_t *input, const int16_t *dq, uint8
 specialize vp9_dequant_dc_idct_add
 
 prototype void vp9_dequant_dc_idct_add_y_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs, const int16_t *dcs"
-specialize vp9_dequant_dc_idct_add_y_block mmx
+specialize vp9_dequant_dc_idct_add_y_block
 
 prototype void vp9_dequant_idct_add_y_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs"
-specialize vp9_dequant_idct_add_y_block mmx
+specialize vp9_dequant_idct_add_y_block
 
 prototype void vp9_dequant_idct_add_uv_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dstu, uint8_t *dstv, int stride, uint16_t *eobs"
-specialize vp9_dequant_idct_add_uv_block mmx
+specialize vp9_dequant_idct_add_uv_block
 
 #
 # RECON
@@ -218,6 +218,7 @@ vp9_loop_filter_simple_bh_sse2=vp9_loop_filter_bhs_sse2
 #
 # post proc
 #
+if [ "$CONFIG_POSTPROC" = "yes" ]; then
 prototype void vp9_mbpost_proc_down "uint8_t *dst, int pitch, int rows, int cols, int flimit"
 specialize vp9_mbpost_proc_down mmx sse2
 vp9_mbpost_proc_down_sse2=vp9_mbpost_proc_down_xmm
@@ -233,6 +234,7 @@ vp9_post_proc_down_and_across_sse2=vp9_post_proc_down_and_across_xmm
 prototype void vp9_plane_add_noise "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch"
 specialize vp9_plane_add_noise mmx sse2
 vp9_plane_add_noise_sse2=vp9_plane_add_noise_wmt
+fi
 
 prototype void vp9_blend_mb_inner "uint8_t *y, uint8_t *u, uint8_t *v, int y1, int u1, int v1, int alpha, int stride"
 specialize vp9_blend_mb_inner
@@ -343,10 +345,10 @@ specialize vp9_bilinear_predict_avg4x4
 # dct
 #
 prototype void vp9_short_idct4x4llm_1 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct4x4llm_1 mmx
+specialize vp9_short_idct4x4llm_1
 
 prototype void vp9_short_idct4x4llm "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct4x4llm mmx
+specialize vp9_short_idct4x4llm
 
 prototype void vp9_short_idct8x8 "int16_t *input, int16_t *output, int pitch"
 specialize vp9_short_idct8x8
@@ -366,7 +368,7 @@ specialize vp9_short_idct10_16x16
 prototype void vp9_short_idct32x32 "int16_t *input, int16_t *output, int pitch"
 specialize vp9_short_idct32x32
 
-prototype void vp9_ihtllm "const int16_t *input, int16_t *output, int pitch, int tx_type, int tx_dim"
+prototype void vp9_ihtllm "const int16_t *input, int16_t *output, int pitch, int tx_type, int tx_dim, int16_t eobs"
 specialize vp9_ihtllm
 
 #

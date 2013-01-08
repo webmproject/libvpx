@@ -5,7 +5,9 @@ SCALE_SRCS-yes += generic/vpx_scale.c
 SCALE_SRCS-yes += generic/yv12config.c
 SCALE_SRCS-yes += generic/yv12extend.c
 SCALE_SRCS-$(CONFIG_SPATIAL_RESAMPLING) += generic/gen_scalers.c
+SCALE_SRCS-yes += vpx_scale_asm_offsets.c
 SCALE_SRCS-yes += vpx_scale_rtcd.c
+SCALE_SRCS-yes += vpx_scale_rtcd.sh
 
 #neon
 SCALE_SRCS-$(HAVE_NEON)  += arm/neon/vp8_vpxyv12_copyframe_func_neon$(ASM)

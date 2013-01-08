@@ -39,7 +39,7 @@ static void setup_macroblock(MACROBLOCKD *xd, BLOCKSET bs) {
   int block;
 
   uint8_t **y, **u, **v;
-  uint8_t **y2, **u2, **v2;
+  uint8_t **y2 = NULL, **u2 = NULL, **v2 = NULL;
   BLOCKD *blockd = xd->block;
   int stride;
 

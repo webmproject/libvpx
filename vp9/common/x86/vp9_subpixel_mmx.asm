@@ -27,7 +27,7 @@
 ;    unsigned int    output_width,
 ;    short           * vp9_filter
 ;)
-global sym(vp9_filter_block1d_h6_mmx)
+global sym(vp9_filter_block1d_h6_mmx) PRIVATE
 sym(vp9_filter_block1d_h6_mmx):
     push        rbp
     mov         rbp, rsp
@@ -124,7 +124,7 @@ sym(vp9_filter_block1d_h6_mmx):
 ;   unsigned int output_width,
 ;   short * vp9_filter
 ;)
-global sym(vp9_filter_block1dc_v6_mmx)
+global sym(vp9_filter_block1dc_v6_mmx) PRIVATE
 sym(vp9_filter_block1dc_v6_mmx):
     push        rbp
     mov         rbp, rsp

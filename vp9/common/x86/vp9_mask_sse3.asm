@@ -25,7 +25,7 @@
 ;    int yt,
 ;    int ut,
 ;    int vt)
-global sym(vp8_makemask_sse3)
+global sym(vp8_makemask_sse3) PRIVATE
 sym(vp8_makemask_sse3):
     push        rbp
     mov         rbp, rsp
@@ -181,7 +181,7 @@ NextPairOfRows:
 ;void int vp8_growmaskmb_sse3(
 ;    unsigned char *om,
 ;    unsigned char *nm,
-global sym(vp8_growmaskmb_sse3)
+global sym(vp8_growmaskmb_sse3) PRIVATE
 sym(vp8_growmaskmb_sse3):
     push        rbp
     mov         rbp, rsp
@@ -234,7 +234,7 @@ sym(vp8_growmaskmb_sse3):
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned char *mask)
-global sym(vp8_sad16x16_masked_wmt)
+global sym(vp8_sad16x16_masked_wmt) PRIVATE
 sym(vp8_sad16x16_masked_wmt):
     push        rbp
     mov         rbp, rsp
@@ -288,7 +288,7 @@ NextSadRow:
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned char *mask)
-global sym(vp8_sad16x16_unmasked_wmt)
+global sym(vp8_sad16x16_unmasked_wmt) PRIVATE
 sym(vp8_sad16x16_unmasked_wmt):
     push        rbp
     mov         rbp, rsp
@@ -343,7 +343,7 @@ next_vp8_sad16x16_unmasked_wmt:
 ;    unsigned char *dst_ptr,
 ;    int  dst_stride,
 ;    unsigned char *mask)
-global sym(vp8_masked_predictor_wmt)
+global sym(vp8_masked_predictor_wmt) PRIVATE
 sym(vp8_masked_predictor_wmt):
     push        rbp
     mov         rbp, rsp
@@ -395,7 +395,7 @@ next_vp8_masked_predictor_wmt:
 ;    unsigned char *dst_ptr,
 ;    int  dst_stride,
 ;    unsigned char *mask)
-global sym(vp8_masked_predictor_uv_wmt)
+global sym(vp8_masked_predictor_uv_wmt) PRIVATE
 sym(vp8_masked_predictor_uv_wmt):
     push        rbp
     mov         rbp, rsp
@@ -444,7 +444,7 @@ next_vp8_masked_predictor_uv_wmt:
 ;unsigned int vp8_uv_from_y_mask(
 ;    unsigned char *ymask,
 ;    unsigned char *uvmask)
-global sym(vp8_uv_from_y_mask)
+global sym(vp8_uv_from_y_mask) PRIVATE
 sym(vp8_uv_from_y_mask):
     push        rbp
     mov         rbp, rsp

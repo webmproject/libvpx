@@ -61,7 +61,7 @@
 %endmacro
 
 ;void vp9_short_fdct4x4_sse2(short *input, short *output, int pitch)
-global sym(vp9_short_fdct4x4_sse2)
+global sym(vp9_short_fdct4x4_sse2) PRIVATE
 sym(vp9_short_fdct4x4_sse2):
 
     STACK_FRAME_CREATE
@@ -166,7 +166,7 @@ sym(vp9_short_fdct4x4_sse2):
     STACK_FRAME_DESTROY
 
 ;void vp9_short_fdct8x4_sse2(short *input, short *output, int pitch)
-global sym(vp9_short_fdct8x4_sse2)
+global sym(vp9_short_fdct8x4_sse2) PRIVATE
 sym(vp9_short_fdct8x4_sse2):
 
     STACK_FRAME_CREATE

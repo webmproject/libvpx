@@ -7,6 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 extern "C" {
 #include "vpx_config.h"
@@ -74,8 +75,8 @@ TEST_P(Vp8PostProcessingFilterTest, FilterOutputCheck) {
   // Initialize pixels in the output to 99.
   (void)vpx_memset(dst_image, 99, output_size);
 
-  GetParam()(src_image_ptr, dst_image_ptr, input_stride,
-             output_stride, block_width, flimits, 16);
+  REGISTER_STATE_CHECK(GetParam()(src_image_ptr, dst_image_ptr, input_stride,
+                                  output_stride, block_width, flimits, 16));
 
   static const uint8_t expected_data[block_height] = {
     4, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4

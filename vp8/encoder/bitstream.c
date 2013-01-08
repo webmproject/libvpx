@@ -118,7 +118,7 @@ static void update_mbintra_mode_probs(VP8_COMP *cpi)
 
         update_mode(
             w, VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
-            Pnew, x->fc.ymode_prob, bct, (unsigned int *)cpi->ymode_count
+            Pnew, x->fc.ymode_prob, bct, (unsigned int *)cpi->mb.ymode_count
         );
     }
     {
@@ -127,7 +127,7 @@ static void update_mbintra_mode_probs(VP8_COMP *cpi)
 
         update_mode(
             w, VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
-            Pnew, x->fc.uv_mode_prob, bct, (unsigned int *)cpi->uv_mode_count
+            Pnew, x->fc.uv_mode_prob, bct, (unsigned int *)cpi->mb.uv_mode_count
         );
     }
 }
@@ -493,7 +493,7 @@ static void write_mb_features(vp8_writer *w, const MB_MODE_INFO *mi, const MACRO
 }
 void vp8_convert_rfct_to_prob(VP8_COMP *const cpi)
 {
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
+    const int *const rfct = cpi->mb.count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
@@ -539,7 +539,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     {
         int total_mbs = pc->mb_rows * pc->mb_cols;
 
-        prob_skip_false = (total_mbs - cpi->skip_true_count ) * 256 / total_mbs;
+        prob_skip_false = (total_mbs - cpi->mb.skip_true_count ) * 256 / total_mbs;
 
         if (prob_skip_false <= 1)
             prob_skip_false = 1;
@@ -730,7 +730,7 @@ static void write_kfmodes(VP8_COMP *cpi)
     {
         int total_mbs = c->mb_rows * c->mb_cols;
 
-        prob_skip_false = (total_mbs - cpi->skip_true_count ) * 256 / total_mbs;
+        prob_skip_false = (total_mbs - cpi->mb.skip_true_count ) * 256 / total_mbs;
 
         if (prob_skip_false <= 1)
             prob_skip_false = 1;
@@ -851,6 +851,7 @@ static int prob_update_savings(const unsigned int *ct,
 
 static int independent_coef_context_savings(VP8_COMP *cpi)
 {
+    MACROBLOCK *const x = & cpi->mb;
     int savings = 0;
     int i = 0;
     do
@@ -867,7 +868,7 @@ static int independent_coef_context_savings(VP8_COMP *cpi)
              */
 
             probs = (const unsigned int (*)[MAX_ENTROPY_TOKENS])
-                                                    cpi->coef_counts[i][j];
+                x->coef_counts[i][j];
 
             /* Reset to default probabilities at key frames */
             if (cpi->common.frame_type == KEY_FRAME)
@@ -926,6 +927,7 @@ static int independent_coef_context_savings(VP8_COMP *cpi)
 
 static int default_coef_context_savings(VP8_COMP *cpi)
 {
+    MACROBLOCK *const x = & cpi->mb;
     int savings = 0;
     int i = 0;
     do
@@ -945,7 +947,7 @@ static int default_coef_context_savings(VP8_COMP *cpi)
                     MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                     cpi->frame_coef_probs [i][j][k],
                     cpi->frame_branch_ct [i][j][k],
-                    cpi->coef_counts [i][j][k],
+                    x->coef_counts [i][j][k],
                     256, 1
                 );
 
@@ -994,7 +996,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 {
     int savings = 0;
 
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
+    const int *const rfct = cpi->mb.count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
     int new_intra, new_last, new_garf, oldtotal, newtotal;

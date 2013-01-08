@@ -130,7 +130,6 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
                                               int error_thresh) {
   MACROBLOCK *x = &cpi->mb;
   int step_param;
-  int further_steps;
   int sadpb = x->sadperbit16;
   int bestsme = INT_MAX;
 
@@ -164,11 +163,8 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   if (cpi->Speed < 8) {
     step_param = cpi->sf.first_step +
                  ((cpi->Speed > 5) ? 1 : 0);
-    further_steps =
-      (cpi->sf.max_step_search_steps - 1) - step_param;
   } else {
     step_param = cpi->sf.first_step + 2;
-    further_steps = 0;
   }
 
   /*cpi->sf.search_method == HEX*/

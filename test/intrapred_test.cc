@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include "test/acm_random.h"
+#include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 extern "C" {
 #include "vpx_config.h"
@@ -246,8 +247,10 @@ class IntraPredYTest : public ::testing::TestWithParam<intra_pred_y_fn_t>,
 
   virtual void Predict(MB_PREDICTION_MODE mode) {
     mb_.mode_info_context->mbmi.mode = mode;
-    pred_fn_(&mb_, data_ptr_[0] - kStride, data_ptr_[0] - 1, kStride,
-             data_ptr_[0], kStride);
+    REGISTER_STATE_CHECK(pred_fn_(&mb_,
+                                  data_ptr_[0] - kStride,
+                                  data_ptr_[0] - 1, kStride,
+                                  data_ptr_[0], kStride));
   }
 
   intra_pred_y_fn_t pred_fn_;
