@@ -1534,7 +1534,7 @@ void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
 #endif
 
 #if CONFIG_TX32X32
-#if !CONFIG_DWT32X32HYBRID
+#if !CONFIG_DWTDCTHYBRID
 #define DownshiftMultiplyBy2(x) x * 2
 #define DownshiftMultiply(x) x
 static void idct16(double *input, double *output, int stride) {
@@ -1879,7 +1879,7 @@ void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
-#else  // CONFIG_DWT32X32HYBRID
+#else  // CONFIG_DWTDCTHYBRID
 
 #define DWT_MAX_LENGTH   32
 #define DWT_TYPE         26    // 26/53/97
@@ -1940,8 +1940,8 @@ static void synthesis_53_col(int length, int16_t *lowpass, int16_t *highpass,
   *x++ = ((*b) << 1) + *a;
 }
 
-void dyadic_synthesize_53(int levels, int width, int height, int16_t *c,
-                          int pitch_c, int16_t *x, int pitch_x) {
+static void dyadic_synthesize_53(int levels, int width, int height, int16_t *c,
+                                 int pitch_c, int16_t *x, int pitch_x) {
   int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
   short buffer[2 * DWT_MAX_LENGTH];
 
@@ -2031,8 +2031,8 @@ static void synthesis_26_col(int length, int16_t *lowpass, int16_t *highpass,
   }
 }
 
-void dyadic_synthesize_26(int levels, int width, int height, int16_t *c,
-                          int pitch_c, int16_t *x, int pitch_x) {
+static void dyadic_synthesize_26(int levels, int width, int height, int16_t *c,
+                                 int pitch_c, int16_t *x, int pitch_x) {
   int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
   int16_t buffer[2 * DWT_MAX_LENGTH];
 
@@ -2111,8 +2111,8 @@ static void synthesis_97(int length, double *lowpass, double *highpass,
   x[length - 1] -= 2 * a_predict1 * x[length - 2];
 }
 
-void dyadic_synthesize_97(int levels, int width, int height, int16_t *c,
-                          int pitch_c, int16_t *x, int pitch_x) {
+static void dyadic_synthesize_97(int levels, int width, int height, int16_t *c,
+                                 int pitch_c, int16_t *x, int pitch_x) {
   int th[16], tw[16], lv, i, j, nh, nw, hh = height, hw = width;
   double buffer[2 * DWT_MAX_LENGTH];
   double y[DWT_MAX_LENGTH * DWT_MAX_LENGTH];
@@ -2358,7 +2358,8 @@ static void butterfly_16x16_idct_1d_f(double input[16], double output[16]) {
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
-void vp9_short_idct16x16_c_f(int16_t *input, int16_t *output, int pitch) {
+static void vp9_short_idct16x16_c_f(int16_t *input, int16_t *output, int pitch,
+                                    int scale) {
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
   {
     double out[16*16], out2[16*16];
@@ -2383,13 +2384,13 @@ void vp9_short_idct16x16_c_f(int16_t *input, int16_t *output, int pitch) {
         out2[j*16 + i] = temp_out[j];
     }
     for (i = 0; i < 16*16; ++i)
-      output[i] = round(out2[i] / (64 >> DWT_PRECISION_BITS));
+      output[i] = round(out2[i] / (128 >> scale));
   }
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
 void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
-  // assume out is a 32x32 buffer
+  // assume output is a 32x32 buffer
   // Temporary buffer to hold a 16x16 block for 16x16 inverse dct
   int16_t buffer[16 * 16];
   // Temporary buffer to hold a 32x32 block for inverse 32x32 dwt
@@ -2400,20 +2401,24 @@ void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
 
   // TODO(debargha): Implement more efficiently by adding output pitch
   // argument to the idct16x16 function
-  vp9_short_idct16x16_c_f(input, buffer, pitch);
+  vp9_short_idct16x16_c_f(input, buffer, pitch,
+                          1 + DWT_PRECISION_BITS);
   for (i = 0; i < 16; ++i) {
     vpx_memcpy(buffer2 + i * 32, buffer + i * 16, sizeof(*buffer2) * 16);
   }
-  vp9_short_idct16x16_c_f(input + 16, buffer, pitch);
+  vp9_short_idct16x16_c_f(input + 16, buffer, pitch,
+                          1 + DWT_PRECISION_BITS);
   for (i = 0; i < 16; ++i) {
     vpx_memcpy(buffer2 + i * 32 + 16, buffer + i * 16, sizeof(*buffer2) * 16);
   }
-  vp9_short_idct16x16_c_f(input + 16 * short_pitch, buffer, pitch);
+  vp9_short_idct16x16_c_f(input + 16 * short_pitch, buffer, pitch,
+                          1 + DWT_PRECISION_BITS);
   for (i = 0; i < 16; ++i) {
     vpx_memcpy(buffer2 + i * 32 + 16 * 32, buffer + i * 16,
                sizeof(*buffer2) * 16);
   }
-  vp9_short_idct16x16_c_f(input + 16 * short_pitch + 16, buffer, pitch);
+  vp9_short_idct16x16_c_f(input + 16 * short_pitch + 16, buffer, pitch,
+                          1 + DWT_PRECISION_BITS);
   for (i = 0; i < 16; ++i) {
     vpx_memcpy(buffer2 + i * 32 + 16 * 33, buffer + i * 16,
                sizeof(*buffer2) * 16);
@@ -2426,5 +2431,78 @@ void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
   dyadic_synthesize_53(1, 32, 32, buffer2, 32, output, 32);
 #endif
 }
-#endif  // CONFIG_DWT32X32HYBRID
+
+void vp9_short_idct64x64_c(int16_t *input, int16_t *output, int pitch) {
+  // assume output is a 64x64 buffer
+  // Temporary buffer to hold a 16x16 block for 16x16 inverse dct
+  int16_t buffer[16 * 16];
+  // Temporary buffer to hold a 32x32 block for inverse 32x32 dwt
+  int16_t buffer2[64 * 64];
+  // Note: pitch is in bytes, short_pitch is in short units
+  const int short_pitch = pitch >> 1;
+  int i, j;
+
+  // TODO(debargha): Implement more efficiently by adding output pitch
+  // argument to the idct16x16 function
+  vp9_short_idct16x16_c_f(input, buffer, pitch,
+                          2 + DWT_PRECISION_BITS);
+  for (i = 0; i < 16; ++i) {
+    vpx_memcpy(buffer2 + i * 64, buffer + i * 16, sizeof(*buffer2) * 16);
+  }
+  vp9_short_idct16x16_c_f(input + 16, buffer, pitch,
+                          2 + DWT_PRECISION_BITS);
+  for (i = 0; i < 16; ++i) {
+    vpx_memcpy(buffer2 + i * 64 + 16, buffer + i * 16, sizeof(*buffer2) * 16);
+  }
+  vp9_short_idct16x16_c_f(input + 16 * short_pitch, buffer, pitch,
+                          2 + DWT_PRECISION_BITS);
+  for (i = 0; i < 16; ++i) {
+    vpx_memcpy(buffer2 + i * 64 + 16 * 64, buffer + i * 16,
+               sizeof(*buffer2) * 16);
+  }
+  vp9_short_idct16x16_c_f(input + 16 * short_pitch + 16, buffer, pitch,
+                          2 + DWT_PRECISION_BITS);
+  for (i = 0; i < 16; ++i) {
+    vpx_memcpy(buffer2 + i * 64 + 16 * 65, buffer + i * 16,
+               sizeof(*buffer2) * 16);
+  }
+
+  // Copying and scaling highest bands into buffer2
+#if DWT_PRECISION_BITS < 1
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j) {
+      buffer2[i * 64 + 32 + j] =
+          input[i * short_pitch + 32 + j] >> (1 - DWT_PRECISION_BITS);
+    }
+  }
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 64; ++j) {
+      buffer2[i * 64 + j] =
+          input[(i + 32) * short_pitch + j] >> (1 - DWT_PRECISION_BITS);
+    }
+  }
+#else
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j) {
+      buffer2[i * 64 + 32 + j] =
+          input[i * short_pitch + 32 + j] << (DWT_PRECISION_BITS - 1);
+    }
+  }
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 64; ++j) {
+      buffer2[i * 64 + j] =
+          input[(i + 32) * short_pitch + j] << (DWT_PRECISION_BITS - 1);
+    }
+  }
+#endif
+
+#if DWT_TYPE == 26
+  dyadic_synthesize_26(2, 64, 64, buffer2, 64, output, 64);
+#elif DWT_TYPE == 97
+  dyadic_synthesize_97(2, 64, 64, buffer2, 64, output, 64);
+#elif DWT_TYPE == 53
+  dyadic_synthesize_53(2, 64, 64, buffer2, 64, output, 64);
+#endif
+}
+#endif  // CONFIG_DWTDCTHYBRID
 #endif  // CONFIG_TX32X32

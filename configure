@@ -249,7 +249,8 @@ EXPERIMENT_LIST="
     newbintramodes
     comp_interintra_pred
     tx32x32
-    dwt32x32hybrid
+    tx64x64
+    dwtdcthybrid
     cnvcontext
     newcoefcontext
 "

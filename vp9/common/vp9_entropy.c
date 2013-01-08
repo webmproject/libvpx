@@ -143,7 +143,7 @@ DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]) = {
 };
 
 #if CONFIG_TX32X32
-#if CONFIG_DWT32X32HYBRID
+#if CONFIG_DWTDCTHYBRID
 DECLARE_ALIGNED(16, const int, vp9_coef_bands_32x32[1024]) = {
   0, 1, 2, 3, 5, 4, 4, 5, 5, 3, 6, 3, 5, 4, 6,
   6, 6, 6,
@@ -458,7 +458,7 @@ DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]) = {
   951,  920,  889,  858,  827,  796,  765,  734,  703,  735,  766,  797,  828,  859,  890,  921,  952,  983, 1014, 1015,  984,  953,  922,  891,  860,  829,  798,  767,  799,  830,  861,  892,
   923,  954,  985, 1016, 1017,  986,  955,  924,  893,  862,  831,  863,  894,  925,  956,  987, 1018, 1019,  988,  957,  926,  895,  927,  958,  989, 1020, 1021,  990,  959,  991, 1022, 1023,
 };
-#endif  // CONFIG_DWT32X32HYBRID
+#endif  // CONFIG_DWTDCTHYBRID
 #endif
 
 /* Array indices are identical to previously-existing CONTEXT_NODE indices */
