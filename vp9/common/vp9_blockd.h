@@ -122,7 +122,7 @@ typedef enum {
   TX_8X8 = 1,                      // 8x8 dct transform
   TX_16X16 = 2,                    // 16x16 dct transform
   TX_SIZE_MAX_MB = 3,              // Number of different transforms available
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   TX_32X32 = TX_SIZE_MAX_MB,       // 32x32 dct transform
   TX_SIZE_MAX_SB,                  // Number of transforms available to SBs
 #else
@@ -226,7 +226,6 @@ typedef enum {
   MAX_REF_FRAMES = 4
 } MV_REFERENCE_FRAME;
 
-#if CONFIG_SUPERBLOCKS
 typedef enum {
   BLOCK_SIZE_MB16X16 = 0,
   BLOCK_SIZE_SB32X32 = 1,
@@ -234,7 +233,6 @@ typedef enum {
   BLOCK_SIZE_SB64X64 = 2,
 #endif
 } BLOCK_SIZE_TYPE;
-#endif
 
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
@@ -274,13 +272,9 @@ typedef struct {
   // Flag to turn prediction signal filter on(1)/off(0 ) at the MB level
   unsigned int pred_filter_enabled;
 #endif
-    INTERPOLATIONFILTERTYPE interp_filter;
+  INTERPOLATIONFILTERTYPE interp_filter;
 
-#if CONFIG_SUPERBLOCKS
-  // FIXME need a SB array of 4 MB_MODE_INFOs that
-  // only needs one sb_type.
   BLOCK_SIZE_TYPE sb_type;
-#endif
 } MB_MODE_INFO;
 
 typedef struct {
@@ -310,7 +304,7 @@ typedef struct blockd {
   union b_mode_info bmi;
 } BLOCKD;
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
 typedef struct superblockd {
   /* 32x32 Y and 16x16 U/V. No 2nd order transform yet. */
   DECLARE_ALIGNED(16, int16_t, diff[32*32+16*16*2]);
@@ -326,7 +320,7 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[400]);
   DECLARE_ALIGNED(16, uint16_t, eobs[25]);
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   SUPERBLOCKD sb_coeff_data;
 #endif
 
@@ -416,14 +410,6 @@ typedef struct macroblockd {
   int allow_high_precision_mv;
 
   int corrupted;
-
-#if !CONFIG_SUPERBLOCKS && (ARCH_X86 || ARCH_X86_64)
-  /* This is an intermediate buffer currently used in sub-pixel motion search
-   * to keep a copy of the reference area. This buffer can be used for other
-   * purpose.
-   */
-  DECLARE_ALIGNED(32, uint8_t, y_buf[22 * 32]);
-#endif
 
   int sb_index;
   int mb_index;   // Index of the MB in the SB (0..3)
@@ -528,11 +514,9 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
   int ib = (int)(b - xd->block);
   if (ib >= 16)
     return tx_type;
-#if CONFIG_SUPERBLOCKS
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
   if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
-#endif
   if (xd->mode_info_context->mbmi.mode == B_PRED &&
       xd->q_index < ACTIVE_HT) {
     tx_type = txfm_map(
@@ -585,11 +569,9 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
   int ib = (int)(b - xd->block);
   if (ib >= 16)
     return tx_type;
-#if CONFIG_SUPERBLOCKS
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
   if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
-#endif
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
       xd->q_index < ACTIVE_HT8) {
     // TODO(rbultje): MB_PREDICTION_MODE / B_PREDICTION_MODE should be merged
@@ -620,11 +602,9 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
   int ib = (int)(b - xd->block);
   if (ib >= 16)
     return tx_type;
-#if CONFIG_SUPERBLOCKS
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
   if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
-#endif
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
       xd->q_index < ACTIVE_HT16) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));

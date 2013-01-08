@@ -221,7 +221,7 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4, mi_ptr += 4 * mis) {
     mi = mi_ptr;
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col += 4, mi += 4) {
-#if CONFIG_SUPERBLOCKS && CONFIG_SUPERBLOCKS64
+#if CONFIG_SUPERBLOCKS64
       if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
         count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
                    t_unpred_seg_counts, 4, mb_row, mb_col);
@@ -230,23 +230,18 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
       {
         for (i = 0; i < 4; i++) {
           int x_idx = (i & 1) << 1, y_idx = i & 2;
-#if CONFIG_SUPERBLOCKS
           MODE_INFO *sb_mi = mi + y_idx * mis + x_idx;
-#endif
 
           if (mb_col + x_idx >= cm->mb_cols ||
               mb_row + y_idx >= cm->mb_rows) {
             continue;
           }
 
-#if CONFIG_SUPERBLOCKS
           if (sb_mi->mbmi.sb_type) {
             assert(sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X32);
             count_segs(cpi, sb_mi, no_pred_segcounts, temporal_predictor_count,
                        t_unpred_seg_counts, 2, mb_row + y_idx, mb_col + x_idx);
-          } else
-#endif
-          {
+          } else {
             int j;
 
             for (j = 0; j < 4; j++) {
@@ -258,9 +253,7 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
                 continue;
               }
 
-#if CONFIG_SUPERBLOCKS
               assert(mb_mi->mbmi.sb_type == BLOCK_SIZE_MB16X16);
-#endif
               count_segs(cpi, mb_mi, no_pred_segcounts,
                          temporal_predictor_count, t_unpred_seg_counts,
                          1, mb_row + y_idx_mb, mb_col + x_idx_mb);

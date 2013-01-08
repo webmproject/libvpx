@@ -17,14 +17,12 @@ static int mb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
 };
 static int mb_ref_distance_weight[MVREF_NEIGHBOURS] =
   { 3, 3, 2, 1, 1, 1, 1, 1 };
-#if CONFIG_SUPERBLOCKS
 static int sb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
     {0, -1}, {-1, 0}, {1, -1}, {-1, 1},
     {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}
 };
 static int sb_ref_distance_weight[MVREF_NEIGHBOURS] =
   { 3, 3, 2, 2, 2, 1, 1, 1 };
-#endif
 
 // clamp_mv
 #define MV_BORDER (16 << 3) // Allow 16 pels in 1/8th pel units
@@ -236,7 +234,6 @@ void vp9_find_mv_refs(
   vpx_memset(candidate_mvs, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
   vpx_memset(candidate_scores, 0, sizeof(candidate_scores));
 
-#if CONFIG_SUPERBLOCKS
   if (mbmi->sb_type) {
     mv_ref_search = sb_mv_ref_search;
     ref_distance_weight = sb_ref_distance_weight;
@@ -244,10 +241,6 @@ void vp9_find_mv_refs(
     mv_ref_search = mb_mv_ref_search;
     ref_distance_weight = mb_ref_distance_weight;
   }
-#else
-  mv_ref_search = mb_mv_ref_search;
-  ref_distance_weight = mb_ref_distance_weight;
-#endif
 
   // We first scan for candidate vectors that match the current reference frame
   // Look at nearest neigbours

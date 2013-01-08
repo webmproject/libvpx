@@ -66,7 +66,7 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 
 #define BLOCK_TYPES_16X16 4
 
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
 #define BLOCK_TYPES_32X32 4
 #endif
 
@@ -77,7 +77,7 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_4x4[16]);
 extern DECLARE_ALIGNED(64, const int, vp9_coef_bands_8x8[64]);
 extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_16x16[256]);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
 extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_32x32[1024]);
 #endif
 
@@ -122,7 +122,7 @@ extern DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]);
 
 extern DECLARE_ALIGNED(64, const int, vp9_default_zig_zag1d_8x8[64]);
 extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]);
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
 extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]);
 #endif
 
@@ -154,7 +154,7 @@ extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_8x8_neighbors[
                        64 * MAX_NEIGHBORS]);
 extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_16x16_neighbors[
                        256 * MAX_NEIGHBORS]);
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
 extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_32x32_neighbors[
                        1024 * MAX_NEIGHBORS]);
 #endif

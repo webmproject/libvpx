@@ -1761,11 +1761,9 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cm->prob_last_coded               = 128;
   cm->prob_gf_coded                 = 128;
   cm->prob_intra_coded              = 63;
-#if CONFIG_SUPERBLOCKS
   cm->sb32_coded                    = 200;
 #if CONFIG_SUPERBLOCKS64
   cm->sb64_coded                    = 200;
-#endif
 #endif
   for (i = 0; i < COMP_PRED_CONTEXTS; i++)
     cm->prob_comppred[i]         = 128;
@@ -1966,7 +1964,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
     cpi->fn_ptr[BT].sdx4df         = SDX4DF;
 
 
-#if CONFIG_SUPERBLOCKS
   BFP(BLOCK_32X32, vp9_sad32x32, vp9_variance32x32, vp9_sub_pixel_variance32x32,
       vp9_variance_halfpixvar32x32_h, vp9_variance_halfpixvar32x32_v,
       vp9_variance_halfpixvar32x32_hv, vp9_sad32x32x3, vp9_sad32x32x8,
@@ -1977,7 +1974,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
       vp9_variance_halfpixvar64x64_h, vp9_variance_halfpixvar64x64_v,
       vp9_variance_halfpixvar64x64_hv, vp9_sad64x64x3, vp9_sad64x64x8,
       vp9_sad64x64x4d)
-#endif
 #endif
 
   BFP(BLOCK_16X16, vp9_sad16x16, vp9_variance16x16, vp9_sub_pixel_variance16x16,
@@ -3655,14 +3651,12 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
   vp9_copy(cpi->common.fc.hybrid_coef_counts_16x16,
            cpi->hybrid_coef_counts_16x16);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   vp9_copy(cpi->common.fc.coef_counts_32x32, cpi->coef_counts_32x32);
 #endif
   vp9_adapt_coef_probs(&cpi->common);
   if (cpi->common.frame_type != KEY_FRAME) {
-#if CONFIG_SUPERBLOCKS
     vp9_copy(cpi->common.fc.sb_ymode_counts, cpi->sb_ymode_count);
-#endif
     vp9_copy(cpi->common.fc.ymode_counts, cpi->ymode_count);
     vp9_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
     vp9_copy(cpi->common.fc.bmode_counts, cpi->bmode_count);

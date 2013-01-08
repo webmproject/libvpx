@@ -223,14 +223,11 @@ unsigned char vp9_get_pred_flag(const MACROBLOCKD *const xd,
 void vp9_set_pred_flag(MACROBLOCKD *const xd,
                        PRED_ID pred_id,
                        unsigned char pred_flag) {
-#if CONFIG_SUPERBLOCKS
   const int mis = xd->mode_info_stride;
-#endif
 
   switch (pred_id) {
     case PRED_SEG_ID:
       xd->mode_info_context->mbmi.seg_id_predicted = pred_flag;
-#if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.sb_type) {
 #define sub(a, b) (b) < 0 ? (a) + (b) : (a)
         const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
@@ -245,12 +242,10 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
           }
         }
       }
-#endif
       break;
 
     case PRED_REF:
       xd->mode_info_context->mbmi.ref_predicted = pred_flag;
-#if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.sb_type) {
         const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
         const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
@@ -263,12 +258,10 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
           }
         }
       }
-#endif
       break;
 
     case PRED_MBSKIP:
       xd->mode_info_context->mbmi.mb_skip_coeff = pred_flag;
-#if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.sb_type) {
         const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
         const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
@@ -281,7 +274,6 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
           }
         }
       }
-#endif
       break;
 
     default:
@@ -299,11 +291,8 @@ unsigned char vp9_get_pred_mb_segid(const VP9_COMMON *const cm,
                                     const MACROBLOCKD *const xd, int MbIndex) {
   // Currently the prediction for the macroblock segment ID is
   // the value stored for this macroblock in the previous frame.
-#if CONFIG_SUPERBLOCKS
   if (!xd->mode_info_context->mbmi.sb_type) {
-#endif
     return cm->last_frame_seg_map[MbIndex];
-#if CONFIG_SUPERBLOCKS
   } else {
     const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
     const int mb_col = MbIndex % cm->mb_cols;
@@ -321,7 +310,6 @@ unsigned char vp9_get_pred_mb_segid(const VP9_COMMON *const cm,
 
     return seg_id;
   }
-#endif
 }
 
 MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,

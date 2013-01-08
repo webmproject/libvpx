@@ -44,9 +44,7 @@ void vp9_initialize_common(void);
 typedef struct frame_contexts {
   vp9_prob bmode_prob[VP9_NKF_BINTRAMODES - 1];
   vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
-#if CONFIG_SUPERBLOCKS
   vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
-#endif
   vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
   vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
@@ -57,7 +55,7 @@ typedef struct frame_contexts {
   vp9_coeff_probs hybrid_coef_probs_8x8[BLOCK_TYPES_8X8];
   vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES_16X16];
   vp9_coeff_probs hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES_32X32];
 #endif
 
@@ -65,18 +63,14 @@ typedef struct frame_contexts {
   nmv_context pre_nmvc;
   vp9_prob pre_bmode_prob[VP9_NKF_BINTRAMODES - 1];
   vp9_prob pre_ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
-#if CONFIG_SUPERBLOCKS
   vp9_prob pre_sb_ymode_prob[VP9_I32X32_MODES - 1];
-#endif
   vp9_prob pre_uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
   vp9_prob pre_i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob pre_sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob pre_mbsplit_prob[VP9_NUMMBSPLITS - 1];
   unsigned int bmode_counts[VP9_NKF_BINTRAMODES];
   unsigned int ymode_counts[VP9_YMODES];   /* interframe intra mode probs */
-#if CONFIG_SUPERBLOCKS
   unsigned int sb_ymode_counts[VP9_I32X32_MODES];
-#endif
   unsigned int uv_mode_counts[VP9_YMODES][VP9_UV_MODES];
   unsigned int i8x8_mode_counts[VP9_I8X8_MODES];   /* interframe intra probs */
   unsigned int sub_mv_ref_counts[SUBMVREF_COUNT][VP9_SUBMVREFS];
@@ -88,7 +82,7 @@ typedef struct frame_contexts {
   vp9_coeff_probs pre_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8];
   vp9_coeff_probs pre_coef_probs_16x16[BLOCK_TYPES_16X16];
   vp9_coeff_probs pre_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   vp9_coeff_probs pre_coef_probs_32x32[BLOCK_TYPES_32X32];
 #endif
 
@@ -98,7 +92,7 @@ typedef struct frame_contexts {
   vp9_coeff_count hybrid_coef_counts_8x8[BLOCK_TYPES_8X8];
   vp9_coeff_count coef_counts_16x16[BLOCK_TYPES_16X16];
   vp9_coeff_count hybrid_coef_counts_16x16[BLOCK_TYPES_16X16];
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   vp9_coeff_count coef_counts_32x32[BLOCK_TYPES_32X32];
 #endif
 
@@ -131,11 +125,11 @@ typedef enum {
   ONLY_4X4            = 0,
   ALLOW_8X8           = 1,
   ALLOW_16X16         = 2,
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   ALLOW_32X32         = 3,
 #endif
-  TX_MODE_SELECT      = 3 + (CONFIG_TX32X32 && CONFIG_SUPERBLOCKS),
-  NB_TXFM_MODES       = 4 + (CONFIG_TX32X32 && CONFIG_SUPERBLOCKS),
+  TX_MODE_SELECT      = 3 + CONFIG_TX32X32,
+  NB_TXFM_MODES       = 4 + CONFIG_TX32X32,
 } TXFM_MODE;
 
 typedef struct VP9Common {
@@ -237,9 +231,7 @@ typedef struct VP9Common {
                         [VP9_KF_BINTRAMODES]
                         [VP9_KF_BINTRAMODES - 1];
   vp9_prob kf_ymode_prob[8][VP9_YMODES - 1]; /* keyframe "" */
-#if CONFIG_SUPERBLOCKS
   vp9_prob sb_kf_ymode_prob[8][VP9_I32X32_MODES - 1];
-#endif
   int kf_ymode_probs_index;
   int kf_ymode_probs_update;
   vp9_prob kf_uv_mode_prob[VP9_YMODES] [VP9_UV_MODES - 1];
@@ -247,12 +239,10 @@ typedef struct VP9Common {
   vp9_prob prob_intra_coded;
   vp9_prob prob_last_coded;
   vp9_prob prob_gf_coded;
-#if CONFIG_SUPERBLOCKS
   vp9_prob sb32_coded;
 #if CONFIG_SUPERBLOCKS64
   vp9_prob sb64_coded;
 #endif  // CONFIG_SUPERBLOCKS64
-#endif
 
   // Context probabilities when using predictive coding of segment id
   vp9_prob segment_pred_probs[PREDICTION_PROBS];

@@ -51,7 +51,6 @@ static int read_ymode(vp9_reader *bc, const vp9_prob *p) {
   return treed_read(bc, vp9_ymode_tree, p);
 }
 
-#if CONFIG_SUPERBLOCKS
 static int read_sb_ymode(vp9_reader *bc, const vp9_prob *p) {
   return treed_read(bc, vp9_sb_ymode_tree, p);
 }
@@ -59,7 +58,6 @@ static int read_sb_ymode(vp9_reader *bc, const vp9_prob *p) {
 static int read_kf_sb_ymode(vp9_reader *bc, const vp9_prob *p) {
   return treed_read(bc, vp9_uv_mode_tree, p);
 }
-#endif
 
 static int read_kf_mb_ymode(vp9_reader *bc, const vp9_prob *p) {
   return treed_read(bc, vp9_kf_ymode_tree, p);
@@ -122,7 +120,6 @@ static void kfread_modes(VP9D_COMP *pbi,
   m->mbmi.segment_id = 0;
   if (pbi->mb.update_mb_segmentation_map) {
     read_mb_segid(bc, &m->mbmi, &pbi->mb);
-#if CONFIG_SUPERBLOCKS
     if (m->mbmi.sb_type) {
       const int nmbs = 1 << m->mbmi.sb_type;
       const int ymbs = MIN(cm->mb_rows - mb_row, nmbs);
@@ -135,9 +132,7 @@ static void kfread_modes(VP9D_COMP *pbi,
               m->mbmi.segment_id;
         }
       }
-    } else
-#endif
-    {
+    } else {
       cm->last_frame_seg_map[map_index] = m->mbmi.segment_id;
     }
   }
@@ -161,14 +156,13 @@ static void kfread_modes(VP9D_COMP *pbi,
       m->mbmi.mb_skip_coeff = 0;
   }
 
-#if CONFIG_SUPERBLOCKS
   if (m->mbmi.sb_type) {
     y_mode = (MB_PREDICTION_MODE) read_kf_sb_ymode(bc,
       pbi->common.sb_kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
-  } else
-#endif
-  y_mode = (MB_PREDICTION_MODE) read_kf_mb_ymode(bc,
-    pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
+  } else {
+    y_mode = (MB_PREDICTION_MODE) read_kf_mb_ymode(bc,
+      pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
+  }
 #if CONFIG_COMP_INTRA_PRED
   m->mbmi.second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
 #endif
@@ -228,12 +222,12 @@ static void kfread_modes(VP9D_COMP *pbi,
     m->mbmi.txfm_size = vp9_read(bc, cm->prob_tx[0]);
     if (m->mbmi.txfm_size != TX_4X4 && m->mbmi.mode != I8X8_PRED) {
       m->mbmi.txfm_size += vp9_read(bc, cm->prob_tx[1]);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
       if (m->mbmi.txfm_size != TX_8X8 && m->mbmi.sb_type)
         m->mbmi.txfm_size += vp9_read(bc, cm->prob_tx[2]);
 #endif
     }
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   } else if (cm->txfm_mode >= ALLOW_32X32 && m->mbmi.sb_type) {
     m->mbmi.txfm_size = TX_32X32;
 #endif
@@ -504,11 +498,9 @@ static MV_REFERENCE_FRAME read_ref_frame(VP9D_COMP *pbi,
   return (MV_REFERENCE_FRAME)ref_frame;
 }
 
-#if CONFIG_SUPERBLOCKS
 static MB_PREDICTION_MODE read_sb_mv_ref(vp9_reader *bc, const vp9_prob *p) {
   return (MB_PREDICTION_MODE) treed_read(bc, vp9_sb_mv_ref_tree, p);
 }
-#endif
 
 static MB_PREDICTION_MODE read_mv_ref(vp9_reader *bc, const vp9_prob *p) {
   return (MB_PREDICTION_MODE) treed_read(bc, vp9_mv_ref_tree, p);
@@ -598,7 +590,6 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
       } while (++i < VP9_YMODES - 1);
     }
 
-#if CONFIG_SUPERBLOCKS
     if (vp9_read_bit(bc)) {
       int i = 0;
 
@@ -606,7 +597,6 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
         cm->fc.sb_ymode_prob[i] = (vp9_prob) vp9_read_literal(bc, 8);
       } while (++i < VP9_I32X32_MODES - 1);
     }
-#endif
 
     read_nmvprobs(bc, nmvc, xd->allow_high_precision_mv);
   }
@@ -654,7 +644,6 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
       else {
         read_mb_segid(bc, mbmi, xd);
       }
-#if CONFIG_SUPERBLOCKS
       if (mbmi->sb_type) {
         const int nmbs = 1 << mbmi->sb_type;
         const int ymbs = MIN(cm->mb_rows - mb_row, nmbs);
@@ -667,13 +656,10 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
                 mbmi->segment_id;
           }
         }
-      } else
-#endif
-      {
+      } else {
         cm->last_frame_seg_map[index] = mbmi->segment_id;
       }
     } else {
-#if CONFIG_SUPERBLOCKS
       if (mbmi->sb_type) {
         const int nmbs = 1 << mbmi->sb_type;
         const int ymbs = MIN(cm->mb_rows - mb_row, nmbs);
@@ -689,9 +675,7 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
           }
         }
         mbmi->segment_id = segment_id;
-      } else
-#endif
-      {
+      } else {
         mbmi->segment_id = cm->last_frame_seg_map[index];
       }
     }
@@ -716,11 +700,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   int mb_to_right_edge;
   int mb_to_top_edge;
   int mb_to_bottom_edge;
-#if CONFIG_SUPERBLOCKS
   const int mb_size = 1 << mi->mbmi.sb_type;
-#else
-  const int mb_size = 1;
-#endif
 
   mb_to_top_edge = xd->mb_to_top_edge;
   mb_to_bottom_edge = xd->mb_to_bottom_edge;
@@ -818,12 +798,10 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         mbmi->mode =
           vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
       } else {
-#if CONFIG_SUPERBLOCKS
         if (mbmi->sb_type)
           mbmi->mode = read_sb_mv_ref(bc, mv_ref_p);
         else
-#endif
-        mbmi->mode = read_mv_ref(bc, mv_ref_p);
+          mbmi->mode = read_mv_ref(bc, mv_ref_p);
 
         vp9_accum_mv_refs(&pbi->common, mbmi->mode,
                           mbmi->mb_mode_context[ref_frame]);
@@ -1172,12 +1150,10 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
       mbmi->mode = (MB_PREDICTION_MODE)
                    vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
-#if CONFIG_SUPERBLOCKS
     } else if (mbmi->sb_type) {
       mbmi->mode = (MB_PREDICTION_MODE)
                    read_sb_ymode(bc, pbi->common.fc.sb_ymode_prob);
       pbi->common.fc.sb_ymode_counts[mbmi->mode]++;
-#endif
     } else {
       mbmi->mode = (MB_PREDICTION_MODE)
                    read_ymode(bc, pbi->common.fc.ymode_prob);
@@ -1249,12 +1225,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     if (mbmi->txfm_size != TX_4X4 && mbmi->mode != I8X8_PRED &&
         mbmi->mode != SPLITMV) {
       mbmi->txfm_size += vp9_read(bc, cm->prob_tx[1]);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
       if (mbmi->sb_type && mbmi->txfm_size != TX_8X8)
         mbmi->txfm_size += vp9_read(bc, cm->prob_tx[2]);
 #endif
     }
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   } else if (mbmi->sb_type && cm->txfm_mode >= ALLOW_32X32) {
     mbmi->txfm_size = TX_32X32;
 #endif

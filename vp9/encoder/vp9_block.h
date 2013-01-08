@@ -35,13 +35,13 @@ typedef struct block {
   int16_t *zbin;
   int16_t *zbin_8x8;
   int16_t *zbin_16x16;
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   int16_t *zbin_32x32;
 #endif
   int16_t *zrun_zbin_boost;
   int16_t *zrun_zbin_boost_8x8;
   int16_t *zrun_zbin_boost_16x16;
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   int16_t *zrun_zbin_boost_32x32;
 #endif
   int16_t *round;
@@ -57,7 +57,7 @@ typedef struct block {
   int eob_max_offset;
   int eob_max_offset_8x8;
   int eob_max_offset_16x16;
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   int eob_max_offset_32x32;
 #endif
 } BLOCK;
@@ -92,7 +92,7 @@ typedef struct {
   int64_t txfm_rd_diff[NB_TXFM_MODES];
 } PICK_MODE_CONTEXT;
 
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
 typedef struct superblock {
   DECLARE_ALIGNED(16, int16_t, src_diff[32*32+16*16*2]);
   DECLARE_ALIGNED(16, int16_t, coeff[32*32+16*16*2]);
@@ -102,16 +102,11 @@ typedef struct superblock {
 typedef struct macroblock {
   DECLARE_ALIGNED(16, int16_t, src_diff[400]);  // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
   DECLARE_ALIGNED(16, int16_t, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
-#if !CONFIG_SUPERBLOCKS
-  DECLARE_ALIGNED(16, uint8_t, thismb[256]);    // 16x16 Y
-
-  unsigned char *thismb_ptr;
-#endif
   // 16 Y blocks, 4 U blocks, 4 V blocks,
   // 1 DC 2nd order block each with 16 entries
   BLOCK block[25];
 
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
   SUPERBLOCK sb_coeff_data;
 #endif
 
@@ -183,13 +178,11 @@ typedef struct macroblock {
   // Structure to hold context for each of the 4 MBs within a SB:
   // when encoded as 4 independent MBs:
   PICK_MODE_CONTEXT mb_context[4][4];
-#if CONFIG_SUPERBLOCKS
   // when 4 MBs share coding parameters:
   PICK_MODE_CONTEXT sb32_context[4];
 #if CONFIG_SUPERBLOCKS64
   PICK_MODE_CONTEXT sb64_context;
 #endif  // CONFIG_SUPERBLOCKS64
-#endif
 
   void (*vp9_short_fdct4x4)(int16_t *input, int16_t *output, int pitch);
   void (*vp9_short_fdct8x4)(int16_t *input, int16_t *output, int pitch);

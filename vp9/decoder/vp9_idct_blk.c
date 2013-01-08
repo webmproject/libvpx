@@ -39,7 +39,6 @@ void vp9_dequant_dc_idct_add_y_block_c(int16_t *q, const int16_t *dq,
   }
 }
 
-#if CONFIG_SUPERBLOCKS
 void vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(int16_t *q,
                                                    const int16_t *dq,
                                                    uint8_t *dst,
@@ -64,7 +63,6 @@ void vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(int16_t *q,
     dst += 4 * stride - 16;
   }
 }
-#endif
 
 void vp9_dequant_idct_add_y_block_c(int16_t *q, const int16_t *dq,
                                     uint8_t *pre,
@@ -134,7 +132,6 @@ void vp9_dequant_idct_add_uv_block_c(int16_t *q, const int16_t *dq,
   }
 }
 
-#if CONFIG_SUPERBLOCKS
 void vp9_dequant_idct_add_uv_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
                                                  uint8_t *dstu,
                                                  uint8_t *dstv,
@@ -175,7 +172,6 @@ void vp9_dequant_idct_add_uv_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
     dstv += 4 * stride - 8;
   }
 }
-#endif
 
 void vp9_dequant_dc_idct_add_y_block_8x8_c(int16_t *q, const int16_t *dq,
                                            uint8_t *pre,
@@ -200,7 +196,6 @@ void vp9_dequant_dc_idct_add_y_block_8x8_c(int16_t *q, const int16_t *dq,
                                 xd->eobs[12]);
 }
 
-#if CONFIG_SUPERBLOCKS
 void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(int16_t *q,
                                                    const int16_t *dq,
                                                    uint8_t *dst,
@@ -225,7 +220,6 @@ void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(int16_t *q,
                                 dst + 8 * stride + 8, stride, stride, 1,
                                 xd->eobs[12]);
 }
-#endif
 
 void vp9_dequant_idct_add_y_block_8x8_c(int16_t *q, const int16_t *dq,
                                         uint8_t *pre,
@@ -259,7 +253,6 @@ void vp9_dequant_idct_add_uv_block_8x8_c(int16_t *q, const int16_t *dq,
   vp9_dequant_idct_add_8x8_c(q, dq, pre, dstv, 8, stride, 0, xd->eobs[20]);
 }
 
-#if CONFIG_SUPERBLOCKS
 void vp9_dequant_idct_add_uv_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
                                                  uint8_t *dstu,
                                                  uint8_t *dstv,
@@ -273,7 +266,6 @@ void vp9_dequant_idct_add_uv_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
   vp9_dequant_idct_add_8x8_c(q, dq, dstv, dstv, stride, stride, 0,
                              xd->eobs[20]);
 }
-#endif
 
 #if CONFIG_LOSSLESS
 void vp9_dequant_dc_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,

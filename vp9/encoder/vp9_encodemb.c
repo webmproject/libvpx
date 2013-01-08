@@ -108,7 +108,7 @@ void vp9_subtract_mby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
   }
 }
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
 void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
                           const uint8_t *pred, int dst_stride) {
   int r, c;
@@ -311,7 +311,7 @@ void vp9_transform_mb_16x16(MACROBLOCK *x) {
   vp9_transform_mbuv_8x8(x);
 }
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
 void vp9_transform_sby_32x32(MACROBLOCK *x) {
   SUPERBLOCK * const x_sb = &x->sb_coeff_data;
   vp9_short_fdct32x32(x_sb->src_diff, x_sb->coeff, 64);

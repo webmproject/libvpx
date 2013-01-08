@@ -190,7 +190,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                                  SP(this_mv.as_mv.row),
                                  above_src, xd->dst.y_stride, &sse);
       score += sse;
-#if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
         vp9_sub_pixel_variance16x2(above_ref + offset + 16,
                                    ref_y_stride,
@@ -215,7 +214,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
         score += sse;
       }
 #endif
-#endif
     }
     if (xd->left_available) {
       vp9_sub_pixel_variance2x16_c(left_ref + offset, ref_y_stride,
@@ -223,7 +221,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                                    SP(this_mv.as_mv.row),
                                    left_src, xd->dst.y_stride, &sse);
       score += sse;
-#if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
         vp9_sub_pixel_variance2x16_c(left_ref + offset + ref_y_stride * 16,
                                      ref_y_stride,
@@ -251,7 +248,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
         score += sse;
       }
 #endif
-#endif
     }
 #else
     row_offset = (this_mv.as_mv.row > 0) ?
@@ -263,7 +259,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
     if (xd->up_available) {
       score += vp9_sad16x3(above_src, xd->dst.y_stride,
                            above_ref + offset, ref_y_stride);
-#if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
         score += vp9_sad16x3(above_src + 16, xd->dst.y_stride,
                              above_ref + offset + 16, ref_y_stride);
@@ -276,12 +271,10 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                              above_ref + offset + 48, ref_y_stride);
       }
 #endif
-#endif
     }
     if (xd->left_available) {
       score += vp9_sad3x16(left_src, xd->dst.y_stride,
                            left_ref + offset, ref_y_stride);
-#if CONFIG_SUPERBLOCKS
       if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
         score += vp9_sad3x16(left_src + xd->dst.y_stride * 16,
                              xd->dst.y_stride,
@@ -299,7 +292,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                              left_ref + offset + ref_y_stride * 48,
                              ref_y_stride);
       }
-#endif
 #endif
     }
 #endif

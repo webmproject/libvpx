@@ -141,7 +141,7 @@ static void tokenize_b(VP9_COMP *cpi,
       vp9_block2left[tx_size][ib];
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
 
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
   ENTROPY_CONTEXT *const a1 = (ENTROPY_CONTEXT *)(&xd->above_context[1]) +
       vp9_block2above[tx_size][ib];
   ENTROPY_CONTEXT *const l1 = (ENTROPY_CONTEXT *)(&xd->left_context[1]) +
@@ -195,7 +195,7 @@ static void tokenize_b(VP9_COMP *cpi,
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
       } else {
         a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
@@ -212,14 +212,14 @@ static void tokenize_b(VP9_COMP *cpi,
         counts = cpi->coef_counts_16x16;
         probs = cpi->common.fc.coef_probs_16x16;
       }
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
       if (type == PLANE_TYPE_UV) {
         int uv_idx = (ib - 16) >> 2;
         qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 256 * uv_idx;
       }
 #endif
       break;
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
     case TX_32X32:
 #if CONFIG_CNVCONTEXT
       a_ec = a[0] + a[1] + a[2] + a[3] +
@@ -294,13 +294,13 @@ static void tokenize_b(VP9_COMP *cpi,
     if (type != PLANE_TYPE_UV) {
       a[1] = a[2] = a[3] = a_ec;
       l[1] = l[2] = l[3] = l_ec;
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
     } else {
       a1[0] = a1[1] = a[1] = a_ec;
       l1[0] = l1[1] = l[1] = l_ec;
 #endif
     }
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   } else if (tx_size == TX_32X32) {
     a[1] = a[2] = a[3] = a_ec;
     l[1] = l[2] = l[3] = l_ec;
@@ -378,7 +378,7 @@ static int mb_is_skippable_16x16(MACROBLOCKD *xd) {
   return (vp9_mby_is_skippable_16x16(xd) & vp9_mbuv_is_skippable_8x8(xd));
 }
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
 int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd) {
   int skip = 1;
   skip &= !xd->block[0].eob;
@@ -768,7 +768,7 @@ static __inline void stuff_b(VP9_COMP *cpi,
   ENTROPY_CONTEXT *const l = (ENTROPY_CONTEXT *)xd->left_context +
       vp9_block2left[tx_size][ib];
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
   ENTROPY_CONTEXT *const a1 = (ENTROPY_CONTEXT *)(&xd->above_context[1]) +
       vp9_block2above[tx_size][ib];
   ENTROPY_CONTEXT *const l1 = (ENTROPY_CONTEXT *)(&xd->left_context[1]) +
@@ -808,7 +808,7 @@ static __inline void stuff_b(VP9_COMP *cpi,
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
-#if CONFIG_SUPERBLOCKS && CONFIG_TX32X32
+#if CONFIG_TX32X32
       } else {
         a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
@@ -824,7 +824,7 @@ static __inline void stuff_b(VP9_COMP *cpi,
         probs = cpi->common.fc.coef_probs_16x16;
       }
       break;
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
     case TX_32X32:
 #if CONFIG_CNVCONTEXT
       a_ec = a[0] + a[1] + a[2] + a[3] +
@@ -857,13 +857,13 @@ static __inline void stuff_b(VP9_COMP *cpi,
     if (type != PLANE_TYPE_UV) {
       a[1] = a[2] = a[3] = 0;
       l[1] = l[2] = l[3] = 0;
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
     } else {
       a1[0] = a1[1] = a[1] = a_ec;
       l1[0] = l1[1] = l[1] = l_ec;
 #endif
     }
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   } else if (tx_size == TX_32X32) {
     a[1] = a[2] = a[3] = a_ec;
     l[1] = l[2] = l[3] = l_ec;
@@ -983,7 +983,7 @@ void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
   }
 }
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
 static void stuff_sb_32x32(VP9_COMP *cpi, MACROBLOCKD *xd,
                                TOKENEXTRA **t, int dry_run) {
   int b;
@@ -1005,7 +1005,7 @@ void vp9_stuff_sb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
 }
 #endif
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
 void vp9_fix_contexts_sb(MACROBLOCKD *xd) {
   vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
   vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);

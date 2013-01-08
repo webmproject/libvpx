@@ -146,11 +146,9 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
       bc, VP9_YMODES, vp9_ymode_encodings, vp9_ymode_tree,
       Pnew, cm->fc.ymode_prob, bct, (unsigned int *)cpi->ymode_count
     );
-#if CONFIG_SUPERBLOCKS
     update_mode(bc, VP9_I32X32_MODES, vp9_sb_ymode_encodings,
                 vp9_sb_ymode_tree, Pnew, cm->fc.sb_ymode_prob, bct,
                 (unsigned int *)cpi->sb_ymode_count);
-#endif
   }
 }
 
@@ -318,7 +316,6 @@ static void kfwrite_ymode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_kf_ymode_tree, p, vp9_kf_ymode_encodings + m);
 }
 
-#if CONFIG_SUPERBLOCKS
 static void write_sb_ymode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_sb_ymode_tree, p, vp9_sb_ymode_encodings + m);
 }
@@ -326,7 +323,6 @@ static void write_sb_ymode(vp9_writer *bc, int m, const vp9_prob *p) {
 static void sb_kfwrite_ymode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_uv_mode_tree, p, vp9_sb_kf_ymode_encodings + m);
 }
-#endif
 
 static void write_i8x8_mode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_i8x8_mode_tree, p, vp9_i8x8_mode_encodings + m);
@@ -492,7 +488,6 @@ static void write_mv_ref
               vp9_mv_ref_encoding_array - NEARESTMV + m);
 }
 
-#if CONFIG_SUPERBLOCKS
 static void write_sb_mv_ref(vp9_writer *bc, MB_PREDICTION_MODE m,
                             const vp9_prob *p) {
 #if CONFIG_DEBUG
@@ -501,7 +496,6 @@ static void write_sb_mv_ref(vp9_writer *bc, MB_PREDICTION_MODE m,
   write_token(bc, vp9_sb_mv_ref_tree, p,
               vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
 }
-#endif
 
 static void write_sub_mv_ref
 (
@@ -703,11 +697,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   const MV_REFERENCE_FRAME rf = mi->ref_frame;
   const MB_PREDICTION_MODE mode = mi->mode;
   const int segment_id = mi->segment_id;
-#if CONFIG_SUPERBLOCKS
   const int mb_size = 1 << mi->sb_type;
-#else
-  const int mb_size = 1;
-#endif
   int skip_coeff;
 
   int mb_row = pc->mb_rows - mb_rows_left;
@@ -781,11 +771,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #endif
 
     if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
-#if CONFIG_SUPERBLOCKS
       if (m->mbmi.sb_type)
         write_sb_ymode(bc, mode, pc->fc.sb_ymode_prob);
       else
-#endif
         write_ymode(bc, mode, pc->fc.ymode_prob);
     }
     if (mode == B_PRED) {
@@ -835,12 +823,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
     // Is the segment coding of mode enabled
     if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
-#if CONFIG_SUPERBLOCKS
       if (mi->sb_type) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
-      } else
-#endif
-      {
+      } else {
         write_mv_ref(bc, mode, mv_ref_p);
       }
       vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
@@ -998,7 +983,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
     if (sz != TX_4X4 && mode != I8X8_PRED && mode != SPLITMV) {
       vp9_write(bc, sz != TX_8X8, pc->prob_tx[1]);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
       if (mi->sb_type && sz != TX_8X8)
         vp9_write(bc, sz != TX_16X16, pc->prob_tx[2]);
 #endif
@@ -1027,11 +1012,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
              vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) {
     skip_coeff = 1;
   } else {
-#if CONFIG_SUPERBLOCKS
     const int nmbs = 1 << m->mbmi.sb_type;
-#else
-    const int nmbs = 1;
-#endif
     const int xmbs = MIN(nmbs, mb_cols_left);
     const int ymbs = MIN(nmbs, mb_rows_left);
     int x, y;
@@ -1047,13 +1028,10 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
               vp9_get_pred_prob(c, xd, PRED_MBSKIP));
   }
 
-#if CONFIG_SUPERBLOCKS
   if (m->mbmi.sb_type) {
     sb_kfwrite_ymode(bc, ym,
                      c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
-  } else
-#endif
-  {
+  } else {
     kfwrite_ymode(bc, ym,
                   c->kf_ymode_prob[c->kf_ymode_probs_index]);
   }
@@ -1111,7 +1089,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
     if (sz != TX_4X4 && ym <= TM_PRED) {
       vp9_write(bc, sz != TX_8X8, c->prob_tx[1]);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
       if (m->mbmi.sb_type && sz != TX_8X8)
         vp9_write(bc, sz != TX_16X16, c->prob_tx[2]);
 #endif
@@ -1155,7 +1133,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc) {
   for (mb_row = 0; mb_row < c->mb_rows; mb_row += 4, m_ptr += 4 * mis) {
     m = m_ptr;
     for (mb_col = 0; mb_col < c->mb_cols; mb_col += 4, m += 4) {
-#if CONFIG_SUPERBLOCKS && CONFIG_SUPERBLOCKS64
+#if CONFIG_SUPERBLOCKS64
       vp9_write(bc, m->mbmi.sb_type == BLOCK_SIZE_SB64X64, c->sb64_coded);
       if (m->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
         write_modes_b(cpi, m, bc, &tok, tok_end, mb_row, mb_col);
@@ -1166,23 +1144,18 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc) {
 
         for (j = 0; j < 4; j++) {
           const int x_idx_sb = (j & 1) << 1, y_idx_sb = j & 2;
-#if CONFIG_SUPERBLOCKS
           MODE_INFO *sb_m = m + y_idx_sb * mis + x_idx_sb;
-#endif
 
           if (mb_col + x_idx_sb >= c->mb_cols ||
               mb_row + y_idx_sb >= c->mb_rows)
             continue;
 
-#if CONFIG_SUPERBLOCKS
           vp9_write(bc, sb_m->mbmi.sb_type, c->sb32_coded);
           if (sb_m->mbmi.sb_type) {
             assert(sb_m->mbmi.sb_type == BLOCK_SIZE_SB32X32);
             write_modes_b(cpi, sb_m, bc, &tok, tok_end,
                           mb_row + y_idx_sb, mb_col + x_idx_sb);
-          } else
-#endif
-          {
+          } else {
             // Process the 4 MBs in the order:
             // top-left, top-right, bottom-left, bottom-right
             for (i = 0; i < 4; i++) {
@@ -1195,9 +1168,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc) {
                 continue;
               }
 
-#if CONFIG_SUPERBLOCKS
               assert(mb_m->mbmi.sb_type == BLOCK_SIZE_MB16X16);
-#endif
               write_modes_b(cpi, mb_m, bc, &tok, tok_end,
                             mb_row + y_idx, mb_col + x_idx);
             }
@@ -1305,7 +1276,7 @@ static void build_coeff_contexts(VP9_COMP *cpi) {
                           cpi, hybrid_context_counters_16x16,
 #endif
                           cpi->frame_hybrid_branch_ct_16x16, BLOCK_TYPES_16X16);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   build_tree_distribution(cpi->frame_coef_probs_32x32,
                           cpi->coef_counts_32x32,
 #ifdef ENTROPY_STATS
@@ -1489,7 +1460,7 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
                              BLOCK_TYPES_16X16);
   }
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   if (cpi->common.txfm_mode > ALLOW_16X16) {
     update_coef_probs_common(bc,
 #ifdef ENTROPY_STATS
@@ -1535,13 +1506,11 @@ static void decide_kf_ymode_entropy(VP9_COMP *cpi) {
     for (j = 0; j < VP9_YMODES; j++) {
       cost += mode_cost[j] * cpi->ymode_count[j];
     }
-#if CONFIG_SUPERBLOCKS
     vp9_cost_tokens(mode_cost, cpi->common.sb_kf_ymode_prob[i],
                     vp9_sb_ymode_tree);
     for (j = 0; j < VP9_I32X32_MODES; j++) {
       cost += mode_cost[j] * cpi->sb_ymode_count[j];
     }
-#endif
     if (cost < bestcost) {
       bestindex = i;
       bestcost = cost;
@@ -1731,14 +1700,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     }
   }
 
-#if CONFIG_SUPERBLOCKS
 #if CONFIG_SUPERBLOCKS64
   pc->sb64_coded = get_binary_prob(cpi->sb64_count[0], cpi->sb64_count[1]);
   vp9_write_literal(&header_bc, pc->sb64_coded, 8);
 #endif
   pc->sb32_coded = get_binary_prob(cpi->sb32_count[0], cpi->sb32_count[1]);
   vp9_write_literal(&header_bc, pc->sb32_coded, 8);
-#endif
 
   {
     if (pc->txfm_mode == TX_MODE_SELECT) {
@@ -1748,7 +1715,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
                                 cpi->txfm_count_32x32p[TX_4X4] +
                                 cpi->txfm_count_32x32p[TX_8X8] +
                                 cpi->txfm_count_32x32p[TX_16X16] +
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
                                 cpi->txfm_count_32x32p[TX_32X32] +
 #endif
                                 cpi->txfm_count_16x16p[TX_4X4] +
@@ -1760,12 +1727,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
                                 cpi->txfm_count_16x16p[TX_8X8],
                                 cpi->txfm_count_32x32p[TX_8X8] +
                                 cpi->txfm_count_32x32p[TX_16X16] +
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
                                 cpi->txfm_count_32x32p[TX_32X32] +
 #endif
                                 cpi->txfm_count_16x16p[TX_8X8] +
                                 cpi->txfm_count_16x16p[TX_16X16]);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
       pc->prob_tx[2] = get_prob(cpi->txfm_count_32x32p[TX_16X16],
                                 cpi->txfm_count_32x32p[TX_16X16] +
                                 cpi->txfm_count_32x32p[TX_32X32]);
@@ -1773,12 +1740,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     } else {
       pc->prob_tx[0] = 128;
       pc->prob_tx[1] = 128;
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
       pc->prob_tx[2] = 128;
 #endif
     }
     vp9_write_literal(&header_bc, pc->txfm_mode <= 3 ? pc->txfm_mode : 3, 2);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
     if (pc->txfm_mode > ALLOW_16X16) {
       vp9_write_bit(&header_bc, pc->txfm_mode == TX_MODE_SELECT);
     }
@@ -1786,7 +1753,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     if (pc->txfm_mode == TX_MODE_SELECT) {
       vp9_write_literal(&header_bc, pc->prob_tx[0], 8);
       vp9_write_literal(&header_bc, pc->prob_tx[1], 8);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
       vp9_write_literal(&header_bc, pc->prob_tx[2], 8);
 #endif
     }
@@ -2009,13 +1976,11 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
            cpi->common.fc.coef_probs_16x16);
   vp9_copy(cpi->common.fc.pre_hybrid_coef_probs_16x16,
            cpi->common.fc.hybrid_coef_probs_16x16);
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
+#if CONFIG_TX32X32
   vp9_copy(cpi->common.fc.pre_coef_probs_32x32,
            cpi->common.fc.coef_probs_32x32);
 #endif
-#if CONFIG_SUPERBLOCKS
   vp9_copy(cpi->common.fc.pre_sb_ymode_prob, cpi->common.fc.sb_ymode_prob);
-#endif
   vp9_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
   vp9_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
   vp9_copy(cpi->common.fc.pre_bmode_prob, cpi->common.fc.bmode_prob);

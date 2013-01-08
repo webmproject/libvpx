@@ -348,10 +348,10 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
   }
 }
 
-#if CONFIG_TX32X32 && CONFIG_SUPERBLOCKS
-void vp9_dequant_idct_add_32x32(int16_t *input, const int16_t *dq,
-                                uint8_t *pred, uint8_t *dest, int pitch,
-                                int stride, int eob) {
+#if CONFIG_TX32X32
+void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
+                                  uint8_t *pred, uint8_t *dest, int pitch,
+                                  int stride, int eob) {
   int16_t output[1024];
   int i;
 
