@@ -1686,11 +1686,6 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
 
 #else  // CONFIG_DWTDCTHYBRID
 
-#define DWT_MAX_LENGTH   64
-#define DWT_TYPE         26    // 26/53/97
-#define DWT_PRECISION_BITS 2
-#define DWT_PRECISION_RND ((1 << DWT_PRECISION_BITS) / 2)
-
 #if DWT_TYPE == 53
 
 // Note: block length must be even for this implementation
@@ -2139,10 +2134,97 @@ static void vp9_short_fdct16x16_c_f(short *input, short *out, int pitch,
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
+void vp9_short_fdct8x8_c_f(short *block, short *coefs, int pitch, int scale) {
+  int j1, i, j, k;
+  static int count = 0;
+  short x[8 * 8];
+  float b[8];
+  float b1[8];
+  float d[8][8];
+  float f0 = (float) .7071068;
+  float f1 = (float) .4903926;
+  float f2 = (float) .4619398;
+  float f3 = (float) .4157348;
+  float f4 = (float) .3535534;
+  float f5 = (float) .2777851;
+  float f6 = (float) .1913417;
+  float f7 = (float) .0975452;
+  pitch = pitch / 2;
+  for (i = 0, k = 0; i < 8; i++, k += pitch) {
+    for (j = 0; j < 8; j++) {
+      b[j] = (float)(block[k + j] << (3 - scale));
+    }
+    /* Horizontal transform */
+    for (j = 0; j < 4; j++) {
+      j1 = 7 - j;
+      b1[j] = b[j] + b[j1];
+      b1[j1] = b[j] - b[j1];
+    }
+    b[0] = b1[0] + b1[3];
+    b[1] = b1[1] + b1[2];
+    b[2] = b1[1] - b1[2];
+    b[3] = b1[0] - b1[3];
+    b[4] = b1[4];
+    b[5] = (b1[6] - b1[5]) * f0;
+    b[6] = (b1[6] + b1[5]) * f0;
+    b[7] = b1[7];
+    d[i][0] = (b[0] + b[1]) * f4;
+    d[i][4] = (b[0] - b[1]) * f4;
+    d[i][2] = b[2] * f6 + b[3] * f2;
+    d[i][6] = b[3] * f6 - b[2] * f2;
+    b1[4] = b[4] + b[5];
+    b1[7] = b[7] + b[6];
+    b1[5] = b[4] - b[5];
+    b1[6] = b[7] - b[6];
+    d[i][1] = b1[4] * f7 + b1[7] * f1;
+    d[i][5] = b1[5] * f3 + b1[6] * f5;
+    d[i][7] = b1[7] * f7 - b1[4] * f1;
+    d[i][3] = b1[6] * f3 - b1[5] * f5;
+  }
+  /* Vertical transform */
+  for (i = 0; i < 8; i++) {
+    for (j = 0; j < 4; j++) {
+      j1 = 7 - j;
+      b1[j] = d[j][i] + d[j1][i];
+      b1[j1] = d[j][i] - d[j1][i];
+    }
+    b[0] = b1[0] + b1[3];
+    b[1] = b1[1] + b1[2];
+    b[2] = b1[1] - b1[2];
+    b[3] = b1[0] - b1[3];
+    b[4] = b1[4];
+    b[5] = (b1[6] - b1[5]) * f0;
+    b[6] = (b1[6] + b1[5]) * f0;
+    b[7] = b1[7];
+    d[0][i] = (b[0] + b[1]) * f4;
+    d[4][i] = (b[0] - b[1]) * f4;
+    d[2][i] = b[2] * f6 + b[3] * f2;
+    d[6][i] = b[3] * f6 - b[2] * f2;
+    b1[4] = b[4] + b[5];
+    b1[7] = b[7] + b[6];
+    b1[5] = b[4] - b[5];
+    b1[6] = b[7] - b[6];
+    d[1][i] = b1[4] * f7 + b1[7] * f1;
+    d[5][i] = b1[5] * f3 + b1[6] * f5;
+    d[7][i] = b1[7] * f7 - b1[4] * f1;
+    d[3][i] = b1[6] * f3 - b1[5] * f5;
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 0; j < 8; j++) {
+      *(coefs + j + i * 8) = (short) floor(d[i][j] + 0.5);
+    }
+  }
+  return;
+}
+
+#define divide_bits(d, n) ((n) < 0 ? (d) << (n) : (d) >> (n))
+
+#if DWTDCT_TYPE == DWTDCT16X16_LEAN
+
 void vp9_short_fdct32x32_c(short *input, short *out, int pitch) {
   // assume out is a 32x32 buffer
   short buffer[16 * 16];
-  int i;
+  int i, j;
   const int short_pitch = pitch >> 1;
 #if DWT_TYPE == 26
   dyadic_analyze_26(1, 32, 32, input, short_pitch, out, 32);
@@ -2156,7 +2238,37 @@ void vp9_short_fdct32x32_c(short *input, short *out, int pitch) {
   vp9_short_fdct16x16_c_f(out, buffer, 64, 1 + DWT_PRECISION_BITS);
   for (i = 0; i < 16; ++i)
     vpx_memcpy(out + i * 32, buffer + i * 16, sizeof(short) * 16);
+  for (i = 0; i < 16; ++i) {
+    for (j = 16; j < 32; ++j) {
+      out[i * 32 + j] = divide_bits(out[i * 32 + j], DWT_PRECISION_BITS - 2);
+    }
+  }
+  for (i = 16; i < 32; ++i) {
+    for (j = 0; j < 32; ++j) {
+      out[i * 32 + j] = divide_bits(out[i * 32 + j], DWT_PRECISION_BITS - 2);
+    }
+  }
+}
 
+#elif DWTDCT_TYPE == DWTDCT16X16
+
+void vp9_short_fdct32x32_c(short *input, short *out, int pitch) {
+  // assume out is a 32x32 buffer
+  short buffer[16 * 16];
+  int i, j;
+  const int short_pitch = pitch >> 1;
+#if DWT_TYPE == 26
+  dyadic_analyze_26(1, 32, 32, input, short_pitch, out, 32);
+#elif DWT_TYPE == 97
+  dyadic_analyze_97(1, 32, 32, input, short_pitch, out, 32);
+#elif DWT_TYPE == 53
+  dyadic_analyze_53(1, 32, 32, input, short_pitch, out, 32);
+#endif
+  // TODO(debargha): Implement more efficiently by adding output pitch
+  // argument to the dct16x16 function
+  vp9_short_fdct16x16_c_f(out, buffer, 64, 1 + DWT_PRECISION_BITS);
+  for (i = 0; i < 16; ++i)
+    vpx_memcpy(out + i * 32, buffer + i * 16, sizeof(short) * 16);
   vp9_short_fdct16x16_c_f(out + 16, buffer, 64, 1 + DWT_PRECISION_BITS);
   for (i = 0; i < 16; ++i)
     vpx_memcpy(out + i * 32 + 16, buffer + i * 16, sizeof(short) * 16);
@@ -2169,6 +2281,52 @@ void vp9_short_fdct32x32_c(short *input, short *out, int pitch) {
   for (i = 0; i < 16; ++i)
     vpx_memcpy(out + i * 32 + 33 * 16, buffer + i * 16, sizeof(short) * 16);
 }
+
+#elif DWTDCT_TYPE == DWTDCT8X8
+
+void vp9_short_fdct32x32_c(short *input, short *out, int pitch) {
+  // assume out is a 32x32 buffer
+  short buffer[8 * 8];
+  int i, j;
+  const int short_pitch = pitch >> 1;
+#if DWT_TYPE == 26
+  dyadic_analyze_26(2, 32, 32, input, short_pitch, out, 32);
+#elif DWT_TYPE == 97
+  dyadic_analyze_97(2, 32, 32, input, short_pitch, out, 32);
+#elif DWT_TYPE == 53
+  dyadic_analyze_53(2, 32, 32, input, short_pitch, out, 32);
+#endif
+  // TODO(debargha): Implement more efficiently by adding output pitch
+  // argument to the dct16x16 function
+  vp9_short_fdct8x8_c_f(out, buffer, 64, 1 + DWT_PRECISION_BITS);
+  for (i = 0; i < 8; ++i)
+    vpx_memcpy(out + i * 32, buffer + i * 8, sizeof(short) * 8);
+
+  vp9_short_fdct8x8_c_f(out + 8, buffer, 64, 1 + DWT_PRECISION_BITS);
+  for (i = 0; i < 8; ++i)
+    vpx_memcpy(out + i * 32 + 8, buffer + i * 8, sizeof(short) * 8);
+
+  vp9_short_fdct8x8_c_f(out + 32 * 8, buffer, 64, 1 + DWT_PRECISION_BITS);
+  for (i = 0; i < 8; ++i)
+    vpx_memcpy(out + i * 32 + 32 * 8, buffer + i * 8, sizeof(short) * 8);
+
+  vp9_short_fdct8x8_c_f(out + 33 * 8, buffer, 64, 1 + DWT_PRECISION_BITS);
+  for (i = 0; i < 8; ++i)
+    vpx_memcpy(out + i * 32 + 33 * 8, buffer + i * 8, sizeof(short) * 8);
+
+  for (i = 0; i < 16; ++i) {
+    for (j = 16; j < 32; ++j) {
+      out[i * 32 + j] = divide_bits(out[i * 32 + j], DWT_PRECISION_BITS - 2);
+    }
+  }
+  for (i = 16; i < 32; ++i) {
+    for (j = 0; j < 32; ++j) {
+      out[i * 32 + j] = divide_bits(out[i * 32 + j], DWT_PRECISION_BITS - 2);
+    }
+  }
+}
+
+#endif
 
 #if CONFIG_TX64X64
 void vp9_short_fdct64x64_c(short *input, short *out, int pitch) {
@@ -2189,6 +2347,18 @@ void vp9_short_fdct64x64_c(short *input, short *out, int pitch) {
   for (i = 0; i < 16; ++i)
     vpx_memcpy(out + i * 64, buffer + i * 16, sizeof(short) * 16);
 
+#if DWTDCT_TYPE == DWTDCT16X16_LEAN
+  for (i = 0; i < 16; ++i) {
+    for (j = 16; j < 48; ++j) {
+      out[i * 64 + j] = divide_bits(out[i * 64 + j], DWT_PRECISION_BITS - 1);
+    }
+  }
+  for (i = 16; i < 64; ++i) {
+    for (j = 0; j < 64; ++j) {
+      out[i * 64 + j] = divide_bits(out[i * 64 + j], DWT_PRECISION_BITS - 1);
+    }
+  }
+#elif DWTDCT_TYPE == DWTDCT16X16
   vp9_short_fdct16x16_c_f(out + 16, buffer, 128, 2 + DWT_PRECISION_BITS);
   for (i = 0; i < 16; ++i)
     vpx_memcpy(out + i * 64 + 16, buffer + i * 16, sizeof(short) * 16);
@@ -2204,29 +2374,17 @@ void vp9_short_fdct64x64_c(short *input, short *out, int pitch) {
   // There is no dct used on the highest bands for now.
   // Need to scale these coeffs by a factor of 2/2^DWT_PRECISION_BITS
   // TODO(debargha): experiment with turning these coeffs to 0
-#if DWT_PRECISION_BITS < 1
   for (i = 0; i < 32; ++i) {
-    for (j = 0; j < 32; ++j) {
-      out[i * 64 + 32 + j] <<= (1 - DWT_PRECISION_BITS);
+    for (j = 32; j < 64; ++j) {
+      out[i * 64 + j] = divide_bits(out[i * 64 + j], DWT_PRECISION_BITS - 1);
     }
   }
-  for (i = 0; i < 32; ++i) {
+  for (i = 32; i < 64; ++i) {
     for (j = 0; j < 64; ++j) {
-      out[i * 64 + j] <<= (1 - DWT_PRECISION_BITS);
+      out[i * 64 + j] = divide_bits(out[i * 64 + j], DWT_PRECISION_BITS - 1);
     }
   }
-#else
-  for (i = 0; i < 32; ++i) {
-    for (j = 0; j < 32; ++j) {
-      out[i * 64 + 32 + j] >>= (DWT_PRECISION_BITS - 1);
-    }
-  }
-  for (i = 0; i < 32; ++i) {
-    for (j = 0; j < 64; ++j) {
-      out[i * 64 + j] >>= (DWT_PRECISION_BITS - 1);
-    }
-  }
-#endif
+#endif  // DWTDCT_TYPE
 }
 #endif  // CONFIG_TX64X64
 #endif  // CONFIG_DWTDCTHYBRID
