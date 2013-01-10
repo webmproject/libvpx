@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//7vI\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 715,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-10T16:10:09Z",
+      "side": 1,
+      "message": "I believe I implemented inter-intra 64 support in the combine() function. Admittedly, it\u0027s not the most elegant (it basically reuses 2x2 coefficients from the 32x32 table for each of the 64x64 pixels), but it does work, and I\u0027ve been able to get encoder/decoder matches with solid improvements, so I think it works?",
+      "parentUuid": "AAAAVH//7yM\u003d",
+      "revId": "6884a83f06dd6c19ffc16758ecf1a5b0f70ec1a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//7yI\u003d",
         "filename": "vp9/common/vp9_reconintra.c",
         "patchSetId": 1
