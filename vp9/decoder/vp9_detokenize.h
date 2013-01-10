@@ -23,11 +23,9 @@ int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
 int vp9_decode_mb_tokens(VP9D_COMP* const, MACROBLOCKD* const,
                          BOOL_DECODER* const);
 
-#if CONFIG_TX32X32
 int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
                          MACROBLOCKD* const xd,
                          BOOL_DECODER* const bc);
-#endif
 
 int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx, MACROBLOCKD* const xd,
                                 BOOL_DECODER* const bc);

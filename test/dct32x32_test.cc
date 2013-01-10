@@ -36,7 +36,7 @@ static int round(double x) {
 }
 #endif
 
-#if !CONFIG_DWT32X32HYBRID
+#if !CONFIG_DWTDCTHYBRID
 static const double kPi = 3.141592653589793238462643383279502884;
 static void reference2_32x32_idct_2d(double *input, double *output) {
   double x;
@@ -127,9 +127,9 @@ TEST(VP9Idct32x32Test, AccuracyCheck) {
     }
   }
 }
-#else  // CONFIG_DWT32X32HYBRID
+#else  // CONFIG_DWTDCTHYBRID
   // TODO(rbultje/debargha): add DWT-specific tests
-#endif  // CONFIG_DWT32X32HYBRID
+#endif  // CONFIG_DWTDCTHYBRID
 TEST(VP9Fdct32x32Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   unsigned int max_error = 0;

@@ -142,7 +142,6 @@ DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]) = {
   237, 252, 253, 238, 223, 239, 254, 255,
 };
 
-#if CONFIG_TX32X32
 #if CONFIG_DWTDCTHYBRID
 DECLARE_ALIGNED(16, const int, vp9_coef_bands_32x32[1024]) = {
   0, 1, 2, 3, 5, 4, 4, 5, 5, 3, 6, 3, 5, 4, 6,
@@ -352,7 +351,7 @@ DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]) = {
   975,  991,  510, 1006, 1022,  511, 1007, 1023,
 };
 
-#else
+#else  // CONFIG_DWTDCTHYBRID
 
 DECLARE_ALIGNED(16, const int, vp9_coef_bands_32x32[1024]) = {
   0, 1, 2, 3, 5, 4, 4, 5, 5, 3, 6, 3, 5, 4, 6, 6,
@@ -459,7 +458,6 @@ DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]) = {
   923,  954,  985, 1016, 1017,  986,  955,  924,  893,  862,  831,  863,  894,  925,  956,  987, 1018, 1019,  988,  957,  926,  895,  927,  958,  989, 1020, 1021,  990,  959,  991, 1022, 1023,
 };
 #endif  // CONFIG_DWTDCTHYBRID
-#endif
 
 /* Array indices are identical to previously-existing CONTEXT_NODE indices */
 
@@ -547,10 +545,8 @@ DECLARE_ALIGNED(16, int,
                 vp9_default_zig_zag1d_8x8_neighbors[64 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int,
                 vp9_default_zig_zag1d_16x16_neighbors[256 * MAX_NEIGHBORS]);
-#if CONFIG_TX32X32
 DECLARE_ALIGNED(16, int,
                 vp9_default_zig_zag1d_32x32_neighbors[1024 * MAX_NEIGHBORS]);
-#endif
 
 static int find_in_scan(const int *scan, int l, int m) {
   int i, l2 = l * l;
@@ -628,10 +624,8 @@ void vp9_init_neighbors() {
                       vp9_default_zig_zag1d_8x8_neighbors);
   init_scan_neighbors(vp9_default_zig_zag1d_16x16, 16,
                       vp9_default_zig_zag1d_16x16_neighbors);
-#if CONFIG_TX32X32
   init_scan_neighbors(vp9_default_zig_zag1d_32x32, 32,
                       vp9_default_zig_zag1d_32x32_neighbors);
-#endif
 }
 
 const int *vp9_get_coef_neighbors_handle(const int *scan) {
@@ -645,10 +639,8 @@ const int *vp9_get_coef_neighbors_handle(const int *scan) {
     return vp9_default_zig_zag1d_8x8_neighbors;
   } else if (scan == vp9_default_zig_zag1d_16x16) {
     return vp9_default_zig_zag1d_16x16_neighbors;
-#if CONFIG_TX32X32
   } else if (scan == vp9_default_zig_zag1d_32x32) {
     return vp9_default_zig_zag1d_32x32_neighbors;
-#endif
   }
   return vp9_default_zig_zag1d_4x4_neighbors;
 }
@@ -693,10 +685,8 @@ void vp9_default_coef_probs(VP9_COMMON *pc) {
   vpx_memcpy(pc->fc.hybrid_coef_probs_16x16,
              default_hybrid_coef_probs_16x16,
              sizeof(pc->fc.hybrid_coef_probs_16x16));
-#if CONFIG_TX32X32
   vpx_memcpy(pc->fc.coef_probs_32x32, default_coef_probs_32x32,
              sizeof(pc->fc.coef_probs_32x32));
-#endif
 }
 
 void vp9_coef_tree_initialize() {
@@ -840,9 +830,7 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
                     cm->fc.pre_hybrid_coef_probs_16x16,
                     BLOCK_TYPES_16X16, cm->fc.hybrid_coef_counts_16x16,
                     count_sat, update_factor);
-#if CONFIG_TX32X32
   update_coef_probs(cm->fc.coef_probs_32x32, cm->fc.pre_coef_probs_32x32,
                     BLOCK_TYPES_32X32, cm->fc.coef_counts_32x32,
                     count_sat, update_factor);
-#endif
 }

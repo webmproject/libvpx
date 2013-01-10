@@ -461,11 +461,9 @@ static void update_state(VP9_COMP *cpi,
       }
     }
   }
-#if CONFIG_TX32X32
   if (block_size == 16) {
     ctx->txfm_rd_diff[ALLOW_32X32] = ctx->txfm_rd_diff[ALLOW_16X16];
   }
-#endif
 
   if (mb_mode == B_PRED) {
     for (i = 0; i < 16; i++) {
@@ -1299,9 +1297,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cpi->hybrid_coef_counts_8x8);
   vp9_zero(cpi->coef_counts_16x16);
   vp9_zero(cpi->hybrid_coef_counts_16x16);
-#if CONFIG_TX32X32
   vp9_zero(cpi->coef_counts_32x32);
-#endif
 #if CONFIG_NEW_MVREF
   vp9_zero(cpi->mb_mv_ref_count);
 #endif
@@ -1570,11 +1566,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
      * keyframe's probabilities as an estimate of what the current keyframe's
      * coefficient cost distributions may look like. */
     if (frame_type == 0) {
-#if CONFIG_TX32X32
       txfm_type = ALLOW_32X32;
-#else
-      txfm_type = ALLOW_16X16;
-#endif
     } else
 #if 0
     /* FIXME (rbultje)
@@ -1605,15 +1597,9 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     } else
       txfm_type = ALLOW_8X8;
 #else
-#if CONFIG_TX32X32
     txfm_type = cpi->rd_tx_select_threshes[frame_type][ALLOW_32X32] >=
-                 cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
-    ALLOW_32X32 : TX_MODE_SELECT;
-#else
-    txfm_type = cpi->rd_tx_select_threshes[frame_type][ALLOW_16X16] >=
-    cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
-    ALLOW_16X16 : TX_MODE_SELECT;
-#endif
+                  cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
+                    ALLOW_32X32 : TX_MODE_SELECT;
 #endif
     cpi->common.txfm_mode = txfm_type;
     if (txfm_type != TX_MODE_SELECT) {
@@ -1665,11 +1651,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       const int count8x8_8x8p = cpi->txfm_count_8x8p[TX_8X8];
       const int count16x16_16x16p = cpi->txfm_count_16x16p[TX_16X16];
       const int count16x16_lp = cpi->txfm_count_32x32p[TX_16X16];
-#if CONFIG_TX32X32
       const int count32x32 = cpi->txfm_count_32x32p[TX_32X32];
-#else
-      const int count32x32 = 0;
-#endif
 
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
           count32x32 == 0) {
@@ -1679,15 +1661,11 @@ void vp9_encode_frame(VP9_COMP *cpi) {
                  count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0) {
         cpi->common.txfm_mode = ONLY_4X4;
         reset_skip_txfm_size(cpi, TX_4X4);
-#if CONFIG_TX32X32
       } else if (count8x8_lp == 0 && count16x16_lp == 0 && count4x4 == 0) {
         cpi->common.txfm_mode = ALLOW_32X32;
-#endif
       } else if (count32x32 == 0 && count8x8_lp == 0 && count4x4 == 0) {
         cpi->common.txfm_mode = ALLOW_16X16;
-#if CONFIG_TX32X32
         reset_skip_txfm_size(cpi, TX_16X16);
-#endif
       }
     }
 
@@ -1913,7 +1891,6 @@ static void update_sb64_skip_coeff_state(VP9_COMP *cpi,
                                          int skip[16], int output_enabled) {
   MACROBLOCK *const x = &cpi->mb;
 
-#if CONFIG_TX32X32
   if (x->e_mbd.mode_info_context->mbmi.txfm_size == TX_32X32) {
     TOKENEXTRA tokens[4][1024+512];
     int n_tokens[4], n;
@@ -1961,9 +1938,7 @@ static void update_sb64_skip_coeff_state(VP9_COMP *cpi,
         (*tp) += n_tokens[n];
       }
     }
-  } else
-#endif  // CONFIG_TX32X32
-  {
+  } else {
     TOKENEXTRA tokens[16][16 * 25];
     int n_tokens[16], n;
 
@@ -2388,7 +2363,6 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
                                        xd->dst.y_stride, xd->dst.uv_stride);
   }
 
-#if CONFIG_TX32X32
   if (xd->mode_info_context->mbmi.txfm_size == TX_32X32) {
     if (!x->skip) {
       vp9_subtract_sby_s_c(x->sb_coeff_data.src_diff, src, src_y_stride,
@@ -2435,9 +2409,7 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
         mi[mis + 1].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
     }
     skip[0] = skip[2] = skip[1] = skip[3] = mi->mbmi.mb_skip_coeff;
-  } else
-#endif
-  {
+  } else {
     for (n = 0; n < 4; n++) {
       int x_idx = n & 1, y_idx = n >> 1;
 
@@ -2502,11 +2474,7 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
       cpi->txfm_count_32x32p[mi->mbmi.txfm_size]++;
     } else {
       TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ?
-#if CONFIG_TX32X32
                       TX_32X32 :
-#else
-                      TX_16X16 :
-#endif
                       cm->txfm_mode;
       mi->mbmi.txfm_size = sz;
       if (mb_col < cm->mb_cols - 1)
@@ -2634,7 +2602,6 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
                                        xd->dst.y_stride, xd->dst.uv_stride);
   }
 
-#if CONFIG_TX32X32
   if (xd->mode_info_context->mbmi.txfm_size == TX_32X32) {
     int n;
 
@@ -2705,9 +2672,7 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
       }
       skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff;
     }
-  } else
-#endif
-  {
+  } else {
     for (n = 0; n < 16; n++) {
       const int x_idx = n & 3, y_idx = n >> 2;
 
@@ -2766,15 +2731,9 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
   if (output_enabled) {
     if (cm->txfm_mode == TX_MODE_SELECT &&
         !((cm->mb_no_coeff_skip &&
-           (
-#if CONFIG_TX32X32
-            (mi->mbmi.txfm_size == TX_32X32 &&
+           ((mi->mbmi.txfm_size == TX_32X32 &&
              skip[0] && skip[1] && skip[2] && skip[3]) ||
-#endif  // CONFIG_TX32X32
-            (
-#if CONFIG_TX32X32
-             mi->mbmi.txfm_size != TX_32X32 &&
-#endif  // CONFIG_TX32X32
+            (mi->mbmi.txfm_size != TX_32X32 &&
              skip[0] && skip[1] && skip[2] && skip[3] &&
              skip[4] && skip[5] && skip[6] && skip[7] &&
              skip[8] && skip[9] && skip[10] && skip[11] &&
@@ -2785,11 +2744,7 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
     } else {
       int x, y;
       TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ?
-#if CONFIG_TX32X32
                     TX_32X32 :
-#else
-                    TX_16X16 :
-#endif
                     cm->txfm_mode;
       for (y = 0; y < 4; y++) {
         for (x = 0; x < 4; x++) {

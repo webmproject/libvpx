@@ -92,9 +92,7 @@ typedef struct {
   vp9_coeff_probs hybrid_coef_probs_8x8[BLOCK_TYPES_8X8];
   vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES_16X16];
   vp9_coeff_probs hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
-#if CONFIG_TX32X32
   vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES_32X32];
-#endif
 
   vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
   vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
@@ -331,14 +329,12 @@ typedef struct VP9_COMP {
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2_16x16[QINDEX_RANGE][256]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv_16x16[QINDEX_RANGE][256]);
 
-#if CONFIG_TX32X32
   DECLARE_ALIGNED(16, short, Y1zbin_32x32[QINDEX_RANGE][1024]);
   DECLARE_ALIGNED(16, short, Y2zbin_32x32[QINDEX_RANGE][1024]);
   DECLARE_ALIGNED(16, short, UVzbin_32x32[QINDEX_RANGE][1024]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1_32x32[QINDEX_RANGE][1024]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2_32x32[QINDEX_RANGE][1024]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv_32x32[QINDEX_RANGE][1024]);
-#endif
 
   MACROBLOCK mb;
   VP9_COMMON common;
@@ -509,11 +505,9 @@ typedef struct VP9_COMP {
   vp9_coeff_probs frame_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
   vp9_coeff_stats frame_hybrid_branch_ct_16x16[BLOCK_TYPES_16X16];
 
-#if CONFIG_TX32X32
   vp9_coeff_count coef_counts_32x32[BLOCK_TYPES_32X32];
   vp9_coeff_probs frame_coef_probs_32x32[BLOCK_TYPES_32X32];
   vp9_coeff_stats frame_branch_ct_32x32[BLOCK_TYPES_32X32];
-#endif
 
   int gfu_boost;
   int last_boost;

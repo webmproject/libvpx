@@ -379,7 +379,6 @@ void vp9_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
            &d->eob, vp9_default_zig_zag1d_16x16, 1);
 }
 
-#if CONFIG_TX32X32
 void vp9_quantize_sby_32x32(MACROBLOCK *x) {
   x->e_mbd.block[0].eob = 0;
   quantize(x->block[0].zrun_zbin_boost_32x32,
@@ -413,7 +412,6 @@ void vp9_quantize_sbuv_16x16(MACROBLOCK *x) {
              &x->e_mbd.block[i].eob,
              vp9_default_zig_zag1d_16x16, 1);
 }
-#endif
 
 /* quantize_b_pair function pointer in MACROBLOCK structure is set to one of
  * these two C functions if corresponding optimized routine is not available.
@@ -472,7 +470,6 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48,
   };
-#if CONFIG_TX32X32
   static const int zbin_boost_32x32[1024] = {
     0,  0,  0,  8,  8,  8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28,
     30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 48, 48, 48, 48, 48, 48,
@@ -539,7 +536,6 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48,
   };
-#endif
   int qrounding_factor = 48;
 
 
@@ -569,11 +565,9 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       ((quant_val * zbin_boost_8x8[0]) + 64) >> 7;
     cpi->zrun_zbin_boost_y1_16x16[Q][0] =
       ((quant_val * zbin_boost_16x16[0]) + 64) >> 7;
-#if CONFIG_TX32X32
     cpi->Y1zbin_32x32[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
     cpi->zrun_zbin_boost_y1_32x32[Q][0] =
      ((quant_val * zbin_boost_32x32[0]) + 64) >> 7;
-#endif
 
 
     quant_val = vp9_dc2quant(Q, cpi->common.y2dc_delta_q);
@@ -677,7 +671,6 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       cpi->zrun_zbin_boost_uv_16x16[Q][i] =
         ((quant_val * zbin_boost_16x16[i]) + 64) >> 7;
     }
-#if CONFIG_TX32X32
     // 32x32 structures. Same comment above applies.
     for (i = 1; i < 1024; i++) {
       int rc = vp9_default_zig_zag1d_32x32[i];
@@ -687,7 +680,6 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       cpi->zrun_zbin_boost_y1_32x32[Q][i] =
         ((quant_val * zbin_boost_32x32[i]) + 64) >> 7;
     }
-#endif
   }
 }
 
@@ -727,17 +719,13 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
     x->block[i].zbin = cpi->Y1zbin[QIndex];
     x->block[i].zbin_8x8 = cpi->Y1zbin_8x8[QIndex];
     x->block[i].zbin_16x16 = cpi->Y1zbin_16x16[QIndex];
-#if CONFIG_TX32X32
     x->block[i].zbin_32x32 = cpi->Y1zbin_32x32[QIndex];
-#endif
     x->block[i].round = cpi->Y1round[QIndex];
     x->e_mbd.block[i].dequant = cpi->common.Y1dequant[QIndex];
     x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[QIndex];
     x->block[i].zrun_zbin_boost_8x8 = cpi->zrun_zbin_boost_y1_8x8[QIndex];
     x->block[i].zrun_zbin_boost_16x16 = cpi->zrun_zbin_boost_y1_16x16[QIndex];
-#if CONFIG_TX32X32
     x->block[i].zrun_zbin_boost_32x32 = cpi->zrun_zbin_boost_y1_32x32[QIndex];
-#endif
     x->block[i].zbin_extra = (int16_t)zbin_extra;
 
     // Segment max eob offset feature.
@@ -748,17 +736,13 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
         vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
       x->block[i].eob_max_offset_16x16 =
         vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-#if CONFIG_TX32X32
       x->block[i].eob_max_offset_32x32 =
       vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-#endif
     } else {
       x->block[i].eob_max_offset = 16;
       x->block[i].eob_max_offset_8x8 = 64;
       x->block[i].eob_max_offset_16x16 = 256;
-#if CONFIG_TX32X32
       x->block[i].eob_max_offset_32x32 = 1024;
-#endif
     }
   }
 

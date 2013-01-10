@@ -1332,9 +1332,7 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *out, int pitch) {
 #undef ROUNDING
 #endif
 
-#if CONFIG_TX32X32 || CONFIG_TX64X64
 #if !CONFIG_DWTDCTHYBRID
-#if CONFIG_TX32X32
 static void dct32_1d(double *input, double *output, int stride) {
   static const double C1 = 0.998795456205;  // cos(pi * 1 / 64)
   static const double C2 = 0.995184726672;  // cos(pi * 2 / 64)
@@ -1685,7 +1683,6 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
 
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
-#endif  // CONFIG_TX32X32
 
 #else  // CONFIG_DWTDCTHYBRID
 
@@ -2142,7 +2139,6 @@ static void vp9_short_fdct16x16_c_f(short *input, short *out, int pitch,
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
-#if CONFIG_TX32X32
 void vp9_short_fdct32x32_c(short *input, short *out, int pitch) {
   // assume out is a 32x32 buffer
   short buffer[16 * 16];
@@ -2173,7 +2169,6 @@ void vp9_short_fdct32x32_c(short *input, short *out, int pitch) {
   for (i = 0; i < 16; ++i)
     vpx_memcpy(out + i * 32 + 33 * 16, buffer + i * 16, sizeof(short) * 16);
 }
-#endif  // CONFIG_TX32X32
 
 #if CONFIG_TX64X64
 void vp9_short_fdct64x64_c(short *input, short *out, int pitch) {
@@ -2235,4 +2230,3 @@ void vp9_short_fdct64x64_c(short *input, short *out, int pitch) {
 }
 #endif  // CONFIG_TX64X64
 #endif  // CONFIG_DWTDCTHYBRID
-#endif  // CONFIG_TX32X32 || CONFIG_TX64X64

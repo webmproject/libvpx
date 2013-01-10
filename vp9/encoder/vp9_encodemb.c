@@ -108,7 +108,6 @@ void vp9_subtract_mby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
   }
 }
 
-#if CONFIG_TX32X32
 void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
                           const uint8_t *pred, int dst_stride) {
   int r, c;
@@ -152,7 +151,6 @@ void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
     vsrc  += src_stride;
   }
 }
-#endif
 
 void vp9_subtract_mby_c(int16_t *diff, uint8_t *src,
                         uint8_t *pred, int stride) {
@@ -311,7 +309,6 @@ void vp9_transform_mb_16x16(MACROBLOCK *x) {
   vp9_transform_mbuv_8x8(x);
 }
 
-#if CONFIG_TX32X32
 void vp9_transform_sby_32x32(MACROBLOCK *x) {
   SUPERBLOCK * const x_sb = &x->sb_coeff_data;
   vp9_short_fdct32x32(x_sb->src_diff, x_sb->coeff, 64);
@@ -325,7 +322,6 @@ void vp9_transform_sbuv_16x16(MACROBLOCK *x) {
   x->vp9_short_fdct16x16(x_sb->src_diff + 1280,
                          x_sb->coeff + 1280, 32);
 }
-#endif
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 #define RDTRUNC_8x8(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )

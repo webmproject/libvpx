@@ -348,7 +348,6 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
   }
 }
 
-#if CONFIG_TX32X32
 void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
                                   uint8_t *pred, uint8_t *dest, int pitch,
                                   int stride, int eob) {
@@ -373,4 +372,3 @@ void vp9_dequant_idct_add_uv_block_16x16_c(int16_t *q, const int16_t *dq,
   vp9_dequant_idct_add_16x16_c(q + 256, dq,
                                dstv, dstv, stride, stride, eobs[4]);
 }
-#endif

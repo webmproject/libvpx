@@ -31,9 +31,7 @@ vp9_coeff_accum context_counters_8x8[BLOCK_TYPES_8X8];
 vp9_coeff_accum hybrid_context_counters_8x8[BLOCK_TYPES_8X8];
 vp9_coeff_accum context_counters_16x16[BLOCK_TYPES_16X16];
 vp9_coeff_accum hybrid_context_counters_16x16[BLOCK_TYPES_16X16];
-#if CONFIG_TX32X32
 vp9_coeff_accum context_counters_32x32[BLOCK_TYPES_32X32];
-#endif
 
 extern vp9_coeff_stats tree_update_hist_4x4[BLOCK_TYPES_4X4];
 extern vp9_coeff_stats hybrid_tree_update_hist_4x4[BLOCK_TYPES_4X4];
@@ -41,9 +39,7 @@ extern vp9_coeff_stats tree_update_hist_8x8[BLOCK_TYPES_8X8];
 extern vp9_coeff_stats hybrid_tree_update_hist_8x8[BLOCK_TYPES_8X8];
 extern vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES_16X16];
 extern vp9_coeff_stats hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16];
-#if CONFIG_TX32X32
 extern vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES_32X32];
-#endif
 #endif  /* ENTROPY_STATS */
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
@@ -141,12 +137,10 @@ static void tokenize_b(VP9_COMP *cpi,
       vp9_block2left[tx_size][ib];
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
 
-#if CONFIG_TX32X32
   ENTROPY_CONTEXT *const a1 = (ENTROPY_CONTEXT *)(&xd->above_context[1]) +
       vp9_block2above[tx_size][ib];
   ENTROPY_CONTEXT *const l1 = (ENTROPY_CONTEXT *)(&xd->left_context[1]) +
       vp9_block2left[tx_size][ib];
-#endif
 
 
   switch (tx_size) {
@@ -195,11 +189,9 @@ static void tokenize_b(VP9_COMP *cpi,
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
-#if CONFIG_TX32X32
       } else {
         a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
-#endif
       }
 #endif
       seg_eob = 256;
@@ -212,14 +204,11 @@ static void tokenize_b(VP9_COMP *cpi,
         counts = cpi->coef_counts_16x16;
         probs = cpi->common.fc.coef_probs_16x16;
       }
-#if CONFIG_TX32X32
       if (type == PLANE_TYPE_UV) {
         int uv_idx = (ib - 16) >> 2;
         qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 256 * uv_idx;
       }
-#endif
       break;
-#if CONFIG_TX32X32
     case TX_32X32:
 #if CONFIG_CNVCONTEXT
       a_ec = a[0] + a[1] + a[2] + a[3] +
@@ -236,7 +225,6 @@ static void tokenize_b(VP9_COMP *cpi,
       probs = cpi->common.fc.coef_probs_32x32;
       qcoeff_ptr = xd->sb_coeff_data.qcoeff;
       break;
-#endif
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
@@ -294,19 +282,15 @@ static void tokenize_b(VP9_COMP *cpi,
     if (type != PLANE_TYPE_UV) {
       a[1] = a[2] = a[3] = a_ec;
       l[1] = l[2] = l[3] = l_ec;
-#if CONFIG_TX32X32
     } else {
       a1[0] = a1[1] = a[1] = a_ec;
       l1[0] = l1[1] = l[1] = l_ec;
-#endif
     }
-#if CONFIG_TX32X32
   } else if (tx_size == TX_32X32) {
     a[1] = a[2] = a[3] = a_ec;
     l[1] = l[2] = l[3] = l_ec;
     a1[0] = a1[1] = a1[2] = a1[3] = a_ec;
     l1[0] = l1[1] = l1[2] = l1[3] = l_ec;
-#endif
   }
 }
 
@@ -378,7 +362,6 @@ static int mb_is_skippable_16x16(MACROBLOCKD *xd) {
   return (vp9_mby_is_skippable_16x16(xd) & vp9_mbuv_is_skippable_8x8(xd));
 }
 
-#if CONFIG_TX32X32
 int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd) {
   int skip = 1;
   skip &= !xd->block[0].eob;
@@ -440,7 +423,6 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
   if (dry_run)
     *t = t_backup;
 }
-#endif
 
 void vp9_tokenize_mb(VP9_COMP *cpi,
                      MACROBLOCKD *xd,
@@ -557,9 +539,7 @@ void init_context_counters(void) {
     vpx_memset(context_counters_16x16, 0, sizeof(context_counters_16x16));
     vpx_memset(hybrid_context_counters_16x16, 0,
                sizeof(hybrid_context_counters_16x16));
-#if CONFIG_TX32X32
     vpx_memset(context_counters_32x32, 0, sizeof(context_counters_32x32));
-#endif
   } else {
     fread(context_counters_4x4, sizeof(context_counters_4x4), 1, f);
     fread(hybrid_context_counters_4x4,
@@ -570,9 +550,7 @@ void init_context_counters(void) {
     fread(context_counters_16x16, sizeof(context_counters_16x16), 1, f);
     fread(hybrid_context_counters_16x16,
           sizeof(hybrid_context_counters_16x16), 1, f);
-#if CONFIG_TX32X32
     fread(context_counters_32x32, sizeof(context_counters_32x32), 1, f);
-#endif
     fclose(f);
   }
 
@@ -587,9 +565,7 @@ void init_context_counters(void) {
     vpx_memset(tree_update_hist_16x16, 0, sizeof(tree_update_hist_16x16));
     vpx_memset(hybrid_tree_update_hist_16x16, 0,
                sizeof(hybrid_tree_update_hist_16x16));
-#if CONFIG_TX32X32
     vpx_memset(tree_update_hist_32x32, 0, sizeof(tree_update_hist_32x32));
-#endif
   } else {
     fread(tree_update_hist_4x4, sizeof(tree_update_hist_4x4), 1, f);
     fread(hybrid_tree_update_hist_4x4,
@@ -600,9 +576,7 @@ void init_context_counters(void) {
     fread(tree_update_hist_16x16, sizeof(tree_update_hist_16x16), 1, f);
     fread(hybrid_tree_update_hist_16x16,
           sizeof(hybrid_tree_update_hist_16x16), 1, f);
-#if CONFIG_TX32X32
     fread(tree_update_hist_32x32, sizeof(tree_update_hist_32x32), 1, f);
-#endif
     fclose(f);
   }
 }
@@ -702,10 +676,8 @@ void print_context_counters() {
                 "vp9_default_coef_counts_16x16[BLOCK_TYPES_16X16]");
   print_counter(f, hybrid_context_counters_16x16, BLOCK_TYPES_16X16,
                 "vp9_default_hybrid_coef_counts_16x16[BLOCK_TYPES_16X16]");
-#if CONFIG_TX32X32
   print_counter(f, context_counters_32x32, BLOCK_TYPES_32X32,
                 "vp9_default_coef_counts_32x32[BLOCK_TYPES_32X32]");
-#endif
 
   /* print coefficient probabilities */
   print_probs(f, context_counters_4x4, BLOCK_TYPES_4X4,
@@ -720,10 +692,8 @@ void print_context_counters() {
               "default_coef_probs_16x16[BLOCK_TYPES_16X16]");
   print_probs(f, hybrid_context_counters_16x16, BLOCK_TYPES_16X16,
               "default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]");
-#if CONFIG_TX32X32
   print_probs(f, context_counters_32x32, BLOCK_TYPES_32X32,
               "default_coef_probs_32x32[BLOCK_TYPES_32X32]");
-#endif
 
   fclose(f);
 
@@ -737,9 +707,7 @@ void print_context_counters() {
   fwrite(context_counters_16x16, sizeof(context_counters_16x16), 1, f);
   fwrite(hybrid_context_counters_16x16,
          sizeof(hybrid_context_counters_16x16), 1, f);
-#if CONFIG_TX32X32
   fwrite(context_counters_32x32, sizeof(context_counters_32x32), 1, f);
-#endif
   fclose(f);
 }
 #endif
@@ -768,12 +736,10 @@ static __inline void stuff_b(VP9_COMP *cpi,
   ENTROPY_CONTEXT *const l = (ENTROPY_CONTEXT *)xd->left_context +
       vp9_block2left[tx_size][ib];
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
-#if CONFIG_TX32X32
   ENTROPY_CONTEXT *const a1 = (ENTROPY_CONTEXT *)(&xd->above_context[1]) +
       vp9_block2above[tx_size][ib];
   ENTROPY_CONTEXT *const l1 = (ENTROPY_CONTEXT *)(&xd->left_context[1]) +
       vp9_block2left[tx_size][ib];
-#endif
 
   switch (tx_size) {
     default:
@@ -808,11 +774,9 @@ static __inline void stuff_b(VP9_COMP *cpi,
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
-#if CONFIG_TX32X32
       } else {
         a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
-#endif
       }
 #endif
       bands = vp9_coef_bands_16x16;
@@ -824,7 +788,6 @@ static __inline void stuff_b(VP9_COMP *cpi,
         probs = cpi->common.fc.coef_probs_16x16;
       }
       break;
-#if CONFIG_TX32X32
     case TX_32X32:
 #if CONFIG_CNVCONTEXT
       a_ec = a[0] + a[1] + a[2] + a[3] +
@@ -838,7 +801,6 @@ static __inline void stuff_b(VP9_COMP *cpi,
       counts = cpi->coef_counts_32x32;
       probs = cpi->common.fc.coef_probs_32x32;
       break;
-#endif
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
@@ -857,19 +819,15 @@ static __inline void stuff_b(VP9_COMP *cpi,
     if (type != PLANE_TYPE_UV) {
       a[1] = a[2] = a[3] = 0;
       l[1] = l[2] = l[3] = 0;
-#if CONFIG_TX32X32
     } else {
       a1[0] = a1[1] = a[1] = a_ec;
       l1[0] = l1[1] = l[1] = l_ec;
-#endif
     }
-#if CONFIG_TX32X32
   } else if (tx_size == TX_32X32) {
     a[1] = a[2] = a[3] = a_ec;
     l[1] = l[2] = l[3] = l_ec;
     a1[0] = a1[1] = a1[2] = a1[3] = a_ec;
     l1[0] = l1[1] = l1[2] = l1[3] = l_ec;
-#endif
   }
 
   if (!dry_run) {
@@ -983,7 +941,6 @@ void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
   }
 }
 
-#if CONFIG_TX32X32
 static void stuff_sb_32x32(VP9_COMP *cpi, MACROBLOCKD *xd,
                                TOKENEXTRA **t, int dry_run) {
   int b;
@@ -1003,11 +960,8 @@ void vp9_stuff_sb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
     *t = t_backup;
   }
 }
-#endif
 
-#if CONFIG_TX32X32
 void vp9_fix_contexts_sb(MACROBLOCKD *xd) {
   vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
   vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
 }
-#endif

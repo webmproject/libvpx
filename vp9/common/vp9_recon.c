@@ -115,7 +115,6 @@ void vp9_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
   }
 }
 
-#if CONFIG_TX32X32
 void vp9_recon_sby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
   int x, y, stride = xd->block[0].dst_stride;
   int16_t *diff = xd->sb_coeff_data.diff;
@@ -145,7 +144,6 @@ void vp9_recon_sbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
     vdiff += 16;
   }
 }
-#endif  // CONFIG_TX32X32
 
 void vp9_recon_mby_c(MACROBLOCKD *xd) {
   int i;

@@ -972,10 +972,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
     if (sz != TX_4X4 && mode != I8X8_PRED && mode != SPLITMV) {
       vp9_write(bc, sz != TX_8X8, pc->prob_tx[1]);
-#if CONFIG_TX32X32
       if (mi->sb_type && sz != TX_8X8)
         vp9_write(bc, sz != TX_16X16, pc->prob_tx[2]);
-#endif
     }
   }
 }
@@ -1078,10 +1076,8 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
     if (sz != TX_4X4 && ym <= TM_PRED) {
       vp9_write(bc, sz != TX_8X8, c->prob_tx[1]);
-#if CONFIG_TX32X32
       if (m->mbmi.sb_type && sz != TX_8X8)
         vp9_write(bc, sz != TX_16X16, c->prob_tx[2]);
-#endif
     }
   }
 }
@@ -1262,14 +1258,12 @@ static void build_coeff_contexts(VP9_COMP *cpi) {
                           cpi, hybrid_context_counters_16x16,
 #endif
                           cpi->frame_hybrid_branch_ct_16x16, BLOCK_TYPES_16X16);
-#if CONFIG_TX32X32
   build_tree_distribution(cpi->frame_coef_probs_32x32,
                           cpi->coef_counts_32x32,
 #ifdef ENTROPY_STATS
                           cpi, context_counters_32x32,
 #endif
                           cpi->frame_branch_ct_32x32, BLOCK_TYPES_32X32);
-#endif
 }
 
 static void update_coef_probs_common(vp9_writer* const bc,
@@ -1446,7 +1440,6 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
                              BLOCK_TYPES_16X16);
   }
 
-#if CONFIG_TX32X32
   if (cpi->common.txfm_mode > ALLOW_16X16) {
     update_coef_probs_common(bc,
 #ifdef ENTROPY_STATS
@@ -1458,7 +1451,6 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
                              cpi->frame_branch_ct_32x32,
                              BLOCK_TYPES_32X32);
   }
-#endif
 }
 
 #ifdef PACKET_TESTING
@@ -1699,9 +1691,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
                                 cpi->txfm_count_32x32p[TX_4X4] +
                                 cpi->txfm_count_32x32p[TX_8X8] +
                                 cpi->txfm_count_32x32p[TX_16X16] +
-#if CONFIG_TX32X32
                                 cpi->txfm_count_32x32p[TX_32X32] +
-#endif
                                 cpi->txfm_count_16x16p[TX_4X4] +
                                 cpi->txfm_count_16x16p[TX_8X8] +
                                 cpi->txfm_count_16x16p[TX_16X16] +
@@ -1711,35 +1701,25 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
                                 cpi->txfm_count_16x16p[TX_8X8],
                                 cpi->txfm_count_32x32p[TX_8X8] +
                                 cpi->txfm_count_32x32p[TX_16X16] +
-#if CONFIG_TX32X32
                                 cpi->txfm_count_32x32p[TX_32X32] +
-#endif
                                 cpi->txfm_count_16x16p[TX_8X8] +
                                 cpi->txfm_count_16x16p[TX_16X16]);
-#if CONFIG_TX32X32
       pc->prob_tx[2] = get_prob(cpi->txfm_count_32x32p[TX_16X16],
                                 cpi->txfm_count_32x32p[TX_16X16] +
                                 cpi->txfm_count_32x32p[TX_32X32]);
-#endif
     } else {
       pc->prob_tx[0] = 128;
       pc->prob_tx[1] = 128;
-#if CONFIG_TX32X32
       pc->prob_tx[2] = 128;
-#endif
     }
     vp9_write_literal(&header_bc, pc->txfm_mode <= 3 ? pc->txfm_mode : 3, 2);
-#if CONFIG_TX32X32
     if (pc->txfm_mode > ALLOW_16X16) {
       vp9_write_bit(&header_bc, pc->txfm_mode == TX_MODE_SELECT);
     }
-#endif
     if (pc->txfm_mode == TX_MODE_SELECT) {
       vp9_write_literal(&header_bc, pc->prob_tx[0], 8);
       vp9_write_literal(&header_bc, pc->prob_tx[1], 8);
-#if CONFIG_TX32X32
       vp9_write_literal(&header_bc, pc->prob_tx[2], 8);
-#endif
     }
   }
 
@@ -1960,10 +1940,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
            cpi->common.fc.coef_probs_16x16);
   vp9_copy(cpi->common.fc.pre_hybrid_coef_probs_16x16,
            cpi->common.fc.hybrid_coef_probs_16x16);
-#if CONFIG_TX32X32
   vp9_copy(cpi->common.fc.pre_coef_probs_32x32,
            cpi->common.fc.coef_probs_32x32);
-#endif
   vp9_copy(cpi->common.fc.pre_sb_ymode_prob, cpi->common.fc.sb_ymode_prob);
   vp9_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
   vp9_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
@@ -2125,10 +2103,8 @@ void print_tree_update_probs() {
   print_tree_update_for_type(f, hybrid_tree_update_hist_16x16,
                              BLOCK_TYPES_16X16,
                              "vp9_coef_update_probs_16x16[BLOCK_TYPES_16X16]");
-#if CONFIG_TX32X32
   print_tree_update_for_type(f, tree_update_hist_32x32, BLOCK_TYPES_32X32,
                              "vp9_coef_update_probs_32x32[BLOCK_TYPES_32X32]");
-#endif
 
   fclose(f);
   f = fopen("treeupdate.bin", "wb");

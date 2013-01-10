@@ -747,7 +747,6 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
   }
 
   /* dequantization and idct */
-#if CONFIG_TX32X32
   if (xd->mode_info_context->mbmi.txfm_size == TX_32X32) {
     for (n = 0; n < 4; n++) {
       const int x_idx = n & 1, y_idx = n >> 1;
@@ -787,7 +786,6 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
       }
     }
   } else {
-#endif
     for (n = 0; n < 16; n++) {
       int x_idx = n & 3, y_idx = n >> 2;
 
@@ -816,9 +814,7 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
         decode_4x4_sb(pbi, xd, bc, n, 3, 2);
       }
     }
-#if CONFIG_TX32X32
   }
-#endif
 
   xd->above_context = pc->above_context + mb_col;
   xd->left_context = pc->left_context;
@@ -873,7 +869,6 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
   }
 
   /* dequantization and idct */
-#if CONFIG_TX32X32
   if (xd->mode_info_context->mbmi.txfm_size == TX_32X32) {
     eobtotal = vp9_decode_sb_tokens(pbi, xd, bc);
     if (eobtotal == 0) {  // skip loopfilter
@@ -895,9 +890,7 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                             xd->dst.u_buffer, xd->dst.v_buffer,
                                             xd->dst.uv_stride, xd->eobs + 16);
     }
-  } else
-#endif
-  {
+  } else {
     for (n = 0; n < 4; n++) {
       int x_idx = n & 1, y_idx = n >> 1;
 
@@ -1396,11 +1389,9 @@ static void read_coef_probs(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
     read_coef_probs_common(bc, pc->fc.hybrid_coef_probs_16x16,
                            BLOCK_TYPES_16X16);
   }
-#if CONFIG_TX32X32
   if (pbi->common.txfm_mode > ALLOW_16X16) {
     read_coef_probs_common(bc, pc->fc.coef_probs_32x32, BLOCK_TYPES_32X32);
   }
-#endif
 }
 
 int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
@@ -1590,16 +1581,12 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   /* Read the loop filter level and type */
   pc->txfm_mode = vp9_read_literal(&header_bc, 2);
-#if CONFIG_TX32X32
   if (pc->txfm_mode == 3)
     pc->txfm_mode += vp9_read_bit(&header_bc);
-#endif
   if (pc->txfm_mode == TX_MODE_SELECT) {
     pc->prob_tx[0] = vp9_read_literal(&header_bc, 8);
     pc->prob_tx[1] = vp9_read_literal(&header_bc, 8);
-#if CONFIG_TX32X32
     pc->prob_tx[2] = vp9_read_literal(&header_bc, 8);
-#endif
   }
 
   pc->filter_type = (LOOPFILTERTYPE) vp9_read_bit(&header_bc);
@@ -1782,10 +1769,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
            pbi->common.fc.coef_probs_16x16);
   vp9_copy(pbi->common.fc.pre_hybrid_coef_probs_16x16,
            pbi->common.fc.hybrid_coef_probs_16x16);
-#if CONFIG_TX32X32
   vp9_copy(pbi->common.fc.pre_coef_probs_32x32,
            pbi->common.fc.coef_probs_32x32);
-#endif
   vp9_copy(pbi->common.fc.pre_ymode_prob, pbi->common.fc.ymode_prob);
   vp9_copy(pbi->common.fc.pre_sb_ymode_prob, pbi->common.fc.sb_ymode_prob);
   vp9_copy(pbi->common.fc.pre_uv_mode_prob, pbi->common.fc.uv_mode_prob);
@@ -1803,9 +1788,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   vp9_zero(pbi->common.fc.hybrid_coef_counts_8x8);
   vp9_zero(pbi->common.fc.coef_counts_16x16);
   vp9_zero(pbi->common.fc.hybrid_coef_counts_16x16);
-#if CONFIG_TX32X32
   vp9_zero(pbi->common.fc.coef_counts_32x32);
-#endif
   vp9_zero(pbi->common.fc.ymode_counts);
   vp9_zero(pbi->common.fc.sb_ymode_counts);
   vp9_zero(pbi->common.fc.uv_mode_counts);

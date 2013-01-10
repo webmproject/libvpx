@@ -35,15 +35,11 @@ typedef struct block {
   int16_t *zbin;
   int16_t *zbin_8x8;
   int16_t *zbin_16x16;
-#if CONFIG_TX32X32
   int16_t *zbin_32x32;
-#endif
   int16_t *zrun_zbin_boost;
   int16_t *zrun_zbin_boost_8x8;
   int16_t *zrun_zbin_boost_16x16;
-#if CONFIG_TX32X32
   int16_t *zrun_zbin_boost_32x32;
-#endif
   int16_t *round;
 
   // Zbin Over Quant value
@@ -57,9 +53,7 @@ typedef struct block {
   int eob_max_offset;
   int eob_max_offset_8x8;
   int eob_max_offset_16x16;
-#if CONFIG_TX32X32
   int eob_max_offset_32x32;
-#endif
 } BLOCK;
 
 typedef struct {
@@ -92,12 +86,10 @@ typedef struct {
   int64_t txfm_rd_diff[NB_TXFM_MODES];
 } PICK_MODE_CONTEXT;
 
-#if CONFIG_TX32X32
 typedef struct superblock {
   DECLARE_ALIGNED(16, int16_t, src_diff[32*32+16*16*2]);
   DECLARE_ALIGNED(16, int16_t, coeff[32*32+16*16*2]);
 } SUPERBLOCK;
-#endif
 
 typedef struct macroblock {
   DECLARE_ALIGNED(16, int16_t, src_diff[400]);  // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
@@ -106,9 +98,7 @@ typedef struct macroblock {
   // 1 DC 2nd order block each with 16 entries
   BLOCK block[25];
 
-#if CONFIG_TX32X32
   SUPERBLOCK sb_coeff_data;
-#endif
 
   YV12_BUFFER_CONFIG src;
 

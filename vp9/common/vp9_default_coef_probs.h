@@ -1038,7 +1038,6 @@ static const vp9_coeff_probs default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16] 
     }
   }
 };
-#if CONFIG_TX32X32
 static const vp9_coeff_probs default_coef_probs_32x32[BLOCK_TYPES_32X32] = {
   { /* block Type 0 */
     { /* Coeff Band 0 */
@@ -1210,4 +1209,3 @@ static const vp9_coeff_probs default_coef_probs_32x32[BLOCK_TYPES_32X32] = {
     }
   }
 };
-#endif  // CONFIG_TX32X32

@@ -77,15 +77,11 @@ specialize vp9_dequant_idct_add_y_block
 prototype void vp9_dequant_idct_add_uv_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dstu, uint8_t *dstv, int stride, uint16_t *eobs"
 specialize vp9_dequant_idct_add_uv_block
 
-if [ "$CONFIG_TX32X32" = "yes" ]; then
-
 prototype void vp9_dequant_idct_add_32x32 "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int pitch, int stride, int eob"
 specialize vp9_dequant_idct_add_32x32
 
 prototype void vp9_dequant_idct_add_uv_block_16x16 "int16_t *q, const int16_t *dq, uint8_t *dstu, uint8_t *dstv, int stride, uint16_t *eobs"
 specialize vp9_dequant_idct_add_uv_block_16x16
-
-fi
 
 #
 # RECON
@@ -135,15 +131,11 @@ specialize vp9_recon_mby_s
 prototype void vp9_recon_mbuv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst"
 specialize void vp9_recon_mbuv_s
 
-if [ "$CONFIG_TX32X32" = "yes" ]; then
-
 prototype void vp9_recon_sby_s "struct macroblockd *x, uint8_t *dst"
 specialize vp9_recon_sby_s
 
 prototype void vp9_recon_sbuv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst"
 specialize void vp9_recon_sbuv_s
-
-fi
 
 prototype void vp9_build_intra_predictors_mby_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_mby_s

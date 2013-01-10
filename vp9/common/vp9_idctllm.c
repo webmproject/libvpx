@@ -1533,7 +1533,6 @@ void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
 #undef RIGHT_ROUNDING
 #endif
 
-#if CONFIG_TX32X32
 #if !CONFIG_DWTDCTHYBRID
 #define DownshiftMultiplyBy2(x) x * 2
 #define DownshiftMultiply(x) x
@@ -2505,4 +2504,3 @@ void vp9_short_idct64x64_c(int16_t *input, int16_t *output, int pitch) {
 #endif
 }
 #endif  // CONFIG_DWTDCTHYBRID
-#endif  // CONFIG_TX32X32

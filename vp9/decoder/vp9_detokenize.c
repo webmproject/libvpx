@@ -144,12 +144,10 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
         coef_counts = fc->hybrid_coef_counts_16x16;
       }
       break;
-#if CONFIG_TX32X32
     case TX_32X32:
       coef_probs = fc->coef_probs_32x32;
       coef_counts = fc->coef_counts_32x32;
       break;
-#endif
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
@@ -249,7 +247,6 @@ static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
   return eob;
 }
 
-#if CONFIG_TX32X32
 int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
                          MACROBLOCKD* const xd,
                          BOOL_DECODER* const bc) {
@@ -316,7 +313,6 @@ int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
   A[8] = L[8] = A1[8] = L1[8] = 0;
   return eobtotal;
 }
-#endif
 
 static int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
                                       MACROBLOCKD* const xd,

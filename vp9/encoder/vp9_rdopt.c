@@ -293,10 +293,8 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
   fill_token_costs(cpi->mb.hybrid_token_costs[TX_16X16],
                    cpi->common.fc.hybrid_coef_probs_16x16, BLOCK_TYPES_16X16);
 
-#if CONFIG_TX32X32
   fill_token_costs(cpi->mb.token_costs[TX_32X32],
                    cpi->common.fc.coef_probs_32x32, BLOCK_TYPES_32X32);
-#endif
 
   /*rough estimate for costing*/
   cpi->common.kf_ymode_probs_index = cpi->common.base_qindex >> 4;
@@ -435,9 +433,7 @@ static int cost_coeffs(MACROBLOCK *mb,
   int pt;
   const int eob = b->eob;
   MACROBLOCKD *xd = &mb->e_mbd;
-#if CONFIG_TX32X32
   const int ib = (int)(b - xd->block);
-#endif
   int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0;
   int cost = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
@@ -480,21 +476,17 @@ static int cost_coeffs(MACROBLOCK *mb,
       scan = vp9_default_zig_zag1d_16x16;
       band = vp9_coef_bands_16x16;
       seg_eob = 256;
-#if CONFIG_TX32X32
       if (type == PLANE_TYPE_UV) {
         const int uv_idx = ib - 16;
         qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 64 * uv_idx;
       }
-#endif
       break;
-#if CONFIG_TX32X32
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
       band = vp9_coef_bands_32x32;
       seg_eob = 1024;
       qcoeff_ptr = xd->sb_coeff_data.qcoeff;
       break;
-#endif
     default:
       abort();
       break;
@@ -761,21 +753,17 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-#if CONFIG_TX32X32
   if (max_txfm_size == TX_32X32 &&
       (cm->txfm_mode == ALLOW_32X32 ||
        (cm->txfm_mode == TX_MODE_SELECT &&
         rd[TX_32X32][1] < rd[TX_16X16][1] && rd[TX_32X32][1] < rd[TX_8X8][1] &&
         rd[TX_32X32][1] < rd[TX_4X4][1]))) {
     mbmi->txfm_size = TX_32X32;
-  } else
-#endif
-  if ( cm->txfm_mode == ALLOW_16X16 ||
-#if CONFIG_TX32X32
-      (max_txfm_size == TX_16X16 && cm->txfm_mode == ALLOW_32X32) ||
-#endif
-      (cm->txfm_mode == TX_MODE_SELECT &&
-       rd[TX_16X16][1] < rd[TX_8X8][1] && rd[TX_16X16][1] < rd[TX_4X4][1])) {
+  } else if ( cm->txfm_mode == ALLOW_16X16 ||
+             (max_txfm_size == TX_16X16 && cm->txfm_mode == ALLOW_32X32) ||
+             (cm->txfm_mode == TX_MODE_SELECT &&
+              rd[TX_16X16][1] < rd[TX_8X8][1] &&
+              rd[TX_16X16][1] < rd[TX_4X4][1])) {
     mbmi->txfm_size = TX_16X16;
   } else if (cm->txfm_mode == ALLOW_8X8 ||
            (cm->txfm_mode == TX_MODE_SELECT && rd[TX_8X8][1] < rd[TX_4X4][1])) {
@@ -792,15 +780,12 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   txfm_cache[ONLY_4X4] = rd[TX_4X4][0];
   txfm_cache[ALLOW_8X8] = rd[TX_8X8][0];
   txfm_cache[ALLOW_16X16] = rd[TX_16X16][0];
-#if CONFIG_TX32X32
   txfm_cache[ALLOW_32X32] = rd[max_txfm_size][0];
   if (max_txfm_size == TX_32X32 &&
       rd[TX_32X32][1] < rd[TX_16X16][1] && rd[TX_32X32][1] < rd[TX_8X8][1] &&
       rd[TX_32X32][1] < rd[TX_4X4][1])
     txfm_cache[TX_MODE_SELECT] = rd[TX_32X32][1];
-  else
-#endif
-  if (rd[TX_16X16][1] < rd[TX_8X8][1] && rd[TX_16X16][1] < rd[TX_4X4][1])
+  else if (rd[TX_16X16][1] < rd[TX_8X8][1] && rd[TX_16X16][1] < rd[TX_4X4][1])
     txfm_cache[TX_MODE_SELECT] = rd[TX_16X16][1];
   else
     txfm_cache[TX_MODE_SELECT] = rd[TX_4X4][1] < rd[TX_8X8][1] ?
@@ -833,7 +818,6 @@ static void copy_predictor(uint8_t *dst, const uint8_t *predictor) {
   d[12] = p[12];
 }
 
-#if CONFIG_TX32X32
 static int rdcost_sby_32x32(MACROBLOCK *x, int backup) {
   MACROBLOCKD * const xd = &x->e_mbd;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
@@ -895,7 +879,6 @@ static void super_block_yrd_32x32(MACROBLOCK *x,
   *rate       = rdcost_sby_32x32(x, backup);
   *skippable  = vp9_sby_is_skippable_32x32(&x->e_mbd);
 }
-#endif
 
 static void super_block_yrd(VP9_COMP *cpi,
                             MACROBLOCK *x, int *rate, int *distortion,
@@ -918,11 +901,9 @@ static void super_block_yrd(VP9_COMP *cpi,
     s[n] = 1;
   }
 
-#if CONFIG_TX32X32
   vp9_subtract_sby_s_c(x->sb_coeff_data.src_diff, src, src_y_stride,
                        dst, dst_y_stride);
   super_block_yrd_32x32(x, &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32], 1);
-#endif
 
 #if DEBUG_ERROR
   int err[3] = { 0, 0, 0 };
@@ -1003,7 +984,6 @@ static void super_block_64_yrd(VP9_COMP *cpi,
     s[n] = 1;
   }
 
-#if CONFIG_TX32X32
   for (n = 0; n < 4; n++) {
     int x_idx = n & 1, y_idx = n >> 1;
     int r_tmp, d_tmp, s_tmp;
@@ -1020,7 +1000,6 @@ static void super_block_64_yrd(VP9_COMP *cpi,
     d[TX_32X32] += d_tmp;
     s[TX_32X32] = s[TX_32X32] && s_tmp;
   }
-#endif
 
 #if DEBUG_ERROR
   int err[3] = { 0, 0, 0 };
@@ -1784,7 +1763,6 @@ static int64_t rd_inter16x16_uv_8x8(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
 
-#if CONFIG_TX32X32
 static int rd_cost_sbuv_16x16(MACROBLOCK *x, int backup) {
   int b;
   int cost = 0;
@@ -1824,7 +1802,6 @@ static void rd_inter32x32_uv_16x16(MACROBLOCK *x, int *rate,
                                    xd->sb_coeff_data.dqcoeff + 1024, 512) >> 2;
   *skip       = vp9_sbuv_is_skippable_16x16(xd);
 }
-#endif
 
 static int64_t rd_inter32x32_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                                 int *distortion, int fullpixel, int *skip) {
@@ -1834,15 +1811,12 @@ static int64_t rd_inter32x32_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   const uint8_t *vsrc = x->src.v_buffer, *vdst = xd->dst.v_buffer;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
 
-#if CONFIG_TX32X32
   if (mbmi->txfm_size == TX_32X32) {
     vp9_subtract_sbuv_s_c(x->sb_coeff_data.src_diff,
                           usrc, vsrc, src_uv_stride,
                           udst, vdst, dst_uv_stride);
     rd_inter32x32_uv_16x16(x, rate, distortion, skip, 1);
-  } else
-#endif
-  {
+  } else {
     int n, r = 0, d = 0;
     int skippable = 1;
     ENTROPY_CONTEXT_PLANES t_above[2], t_left[2];
@@ -2040,15 +2014,12 @@ static void super_block_uvrd(MACROBLOCK *x,
   const uint8_t *vsrc = x->src.v_buffer, *vdst = xd->dst.v_buffer;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
 
-#if CONFIG_TX32X32
   if (mbmi->txfm_size == TX_32X32) {
     vp9_subtract_sbuv_s_c(x->sb_coeff_data.src_diff,
                           usrc, vsrc, src_uv_stride,
                           udst, vdst, dst_uv_stride);
     rd_inter32x32_uv_16x16(x, rate, distortion, skippable, 1);
-  } else
-#endif
-  {
+  } else {
     int d = 0, r = 0, n, s = 1;
     ENTROPY_CONTEXT_PLANES t_above[2], t_left[2];
     ENTROPY_CONTEXT_PLANES *ta_orig = xd->above_context;
@@ -2113,7 +2084,6 @@ static void super_block_64_uvrd(MACROBLOCK *x,
   memcpy(t_above, xd->above_context, sizeof(t_above));
   memcpy(t_left,  xd->left_context,  sizeof(t_left));
 
-#if CONFIG_TX32X32
   if (mbmi->txfm_size == TX_32X32) {
     int n;
 
@@ -2136,9 +2106,7 @@ static void super_block_64_uvrd(MACROBLOCK *x,
       d += d_tmp;
       s = s && s_tmp;
     }
-  } else
-#endif
-  {
+  } else {
     for (n = 0; n < 16; n++) {
       int x_idx = n & 3, y_idx = n >> 2;
 
@@ -4749,11 +4717,9 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int dist_uv_4x4 = 0, dist_uv_8x8 = 0, uv_skip_4x4 = 0, uv_skip_8x8 = 0;
   MB_PREDICTION_MODE mode_uv_4x4 = NEARESTMV, mode_uv_8x8 = NEARESTMV;
   int switchable_filter_index = 0;
-#if CONFIG_TX32X32
   int rate_uv_16x16 = 0, rate_uv_tokenonly_16x16 = 0;
   int dist_uv_16x16 = 0, uv_skip_16x16 = 0;
   MB_PREDICTION_MODE mode_uv_16x16 = NEARESTMV;
-#endif
 
   x->skip = 0;
   xd->mode_info_context->mbmi.segment_id = segment_id;
@@ -4790,7 +4756,6 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                 &dist_uv_8x8, &uv_skip_8x8);
       mode_uv_8x8 = mbmi->uv_mode;
     }
-#if CONFIG_TX32X32
     if (cm->txfm_mode >= ALLOW_32X32) {
       mbmi->txfm_size = TX_32X32;
       rd_pick_intra_sb64uv_mode(cpi, x, &rate_uv_16x16,
@@ -4798,7 +4763,6 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                 &dist_uv_16x16, &uv_skip_16x16);
       mode_uv_16x16 = mbmi->uv_mode;
     }
-#endif  // CONFIG_TX32X32
   } else {
     assert(block_size == BLOCK_32X32);
     mbmi->mode = DC_PRED;
@@ -4814,14 +4778,12 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                               &dist_uv_8x8, &uv_skip_8x8);
       mode_uv_8x8 = mbmi->uv_mode;
     }
-#if CONFIG_TX32X32
     if (cm->txfm_mode >= ALLOW_32X32) {
       mbmi->txfm_size = TX_32X32;
       rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_16x16, &rate_uv_tokenonly_16x16,
                               &dist_uv_16x16, &uv_skip_16x16);
       mode_uv_16x16 = mbmi->uv_mode;
     }
-#endif  // CONFIG_TX32X32
   }
 
   for (mode_index = 0; mode_index < MAX_MODES;
@@ -4965,13 +4927,11 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         distortion_uv = dist_uv_4x4;
         skippable = skippable && uv_skip_4x4;
         mbmi->uv_mode = mode_uv_4x4;
-#if CONFIG_TX32X32
       } else if (mbmi->txfm_size == TX_32X32) {
         rate_uv = rate_uv_16x16;
         distortion_uv = dist_uv_16x16;
         skippable = skippable && uv_skip_16x16;
         mbmi->uv_mode = mode_uv_16x16;
-#endif  // CONFIG_TX32X32
       } else {
         rate_uv = rate_uv_8x8;
         distortion_uv = dist_uv_8x8;

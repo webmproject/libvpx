@@ -78,10 +78,8 @@ void vp9_quantize_mb_16x16(MACROBLOCK *x);
 extern prototype_quantize_block(vp9_quantize_quantb_16x16);
 extern prototype_quantize_mb(vp9_quantize_mby_16x16);
 
-#if CONFIG_TX32X32
 void vp9_quantize_sby_32x32(MACROBLOCK *x);
 void vp9_quantize_sbuv_16x16(MACROBLOCK *x);
-#endif
 
 struct VP9_COMP;
 

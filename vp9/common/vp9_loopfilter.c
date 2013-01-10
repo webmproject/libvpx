@@ -187,9 +187,7 @@ static int sb_mb_lf_skip(const MODE_INFO *const mip0,
                          const MODE_INFO *const mip1) {
   return mb_lf_skip(&mip0->mbmi) &&
          mb_lf_skip(&mip1->mbmi) &&
-#if CONFIG_TX32X32
          mip0->mbmi.txfm_size >= TX_32X32 &&
-#endif
          mip0->mbmi.ref_frame;
 }
 void vp9_loop_filter_frame(VP9_COMMON *cm,
