@@ -54,14 +54,12 @@ extern void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
                                                int dst_ystride,
                                                int dst_uvstride);
 
-#if CONFIG_SUPERBLOCKS64
 extern void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
                                                uint8_t *dst_y,
                                                uint8_t *dst_u,
                                                uint8_t *dst_v,
                                                int dst_ystride,
                                                int dst_uvstride);
-#endif  // CONFIG_SUPERBLOCKS64
 
 extern void vp9_build_inter_predictors_mb(MACROBLOCKD *xd);
 

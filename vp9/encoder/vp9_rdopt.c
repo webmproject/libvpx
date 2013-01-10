@@ -982,7 +982,6 @@ static void super_block_yrd(VP9_COMP *cpi,
   xd->left_context = orig_left;
 }
 
-#if CONFIG_SUPERBLOCKS64
 static void super_block_64_yrd(VP9_COMP *cpi,
                                MACROBLOCK *x, int *rate, int *distortion,
                                int *skip,
@@ -1080,7 +1079,6 @@ static void super_block_64_yrd(VP9_COMP *cpi,
   xd->above_context = orig_above;
   xd->left_context = orig_left;
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 static void copy_predictor_8x8(uint8_t *dst, const uint8_t *predictor) {
   const unsigned int *p = (const unsigned int *)predictor;
@@ -1374,7 +1372,6 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi,
   return best_rd;
 }
 
-#if CONFIG_SUPERBLOCKS64
 static int64_t rd_pick_intra_sb64y_mode(VP9_COMP *cpi,
                                         MACROBLOCK *x,
                                         int *rate,
@@ -1414,7 +1411,6 @@ static int64_t rd_pick_intra_sb64y_mode(VP9_COMP *cpi,
 
   return best_rd;
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 static int64_t rd_pick_intra16x16mby_mode(VP9_COMP *cpi,
                                           MACROBLOCK *x,
@@ -1893,7 +1889,6 @@ static int64_t rd_inter32x32_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
 
-#if CONFIG_SUPERBLOCKS64
 static void super_block_64_uvrd(MACROBLOCK *x, int *rate,
                                 int *distortion, int *skip);
 static int64_t rd_inter64x64_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
@@ -1901,7 +1896,6 @@ static int64_t rd_inter64x64_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   super_block_64_uvrd(x, rate, distortion, skip);
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 static int64_t rd_inter4x4_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                               int *distortion, int *skip, int fullpixel) {
@@ -2102,7 +2096,6 @@ static void super_block_uvrd(MACROBLOCK *x,
   }
 }
 
-#if CONFIG_SUPERBLOCKS64
 static void super_block_64_uvrd(MACROBLOCK *x,
                                 int *rate,
                                 int *distortion,
@@ -2184,7 +2177,6 @@ static void super_block_64_uvrd(MACROBLOCK *x,
   xd->left_context = tl_orig;
   xd->above_context = ta_orig;
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi,
                                        MACROBLOCK *x,
@@ -2223,7 +2215,6 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi,
   return best_rd;
 }
 
-#if CONFIG_SUPERBLOCKS64
 static int64_t rd_pick_intra_sb64uv_mode(VP9_COMP *cpi,
                                          MACROBLOCK *x,
                                          int *rate,
@@ -2260,7 +2251,6 @@ static int64_t rd_pick_intra_sb64uv_mode(VP9_COMP *cpi,
 
   return best_rd;
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 int vp9_cost_mv_ref(VP9_COMP *cpi,
                     MB_PREDICTION_MODE m,
@@ -3548,7 +3538,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 #endif
 
-#if CONFIG_SUPERBLOCKS64
   if (block_size == BLOCK_64X64) {
     vp9_build_inter64x64_predictors_sb(xd,
                                        xd->dst.y_buffer,
@@ -3556,9 +3545,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        xd->dst.v_buffer,
                                        xd->dst.y_stride,
                                        xd->dst.uv_stride);
-  } else
-#endif  // CONFIG_SUPERBLOCKS64
-  if (block_size == BLOCK_32X32) {
+  } else if (block_size == BLOCK_32X32) {
     vp9_build_inter32x32_predictors_sb(xd,
                                        xd->dst.y_buffer,
                                        xd->dst.u_buffer,
@@ -3587,13 +3574,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (threshold < x->encode_breakout)
       threshold = x->encode_breakout;
 
-#if CONFIG_SUPERBLOCKS64
     if (block_size == BLOCK_64X64) {
       var = vp9_variance64x64(*(b->base_src), b->src_stride,
                               xd->dst.y_buffer, xd->dst.y_stride, &sse);
-    } else
-#endif  // CONFIG_SUPERBLOCKS64
-    if (block_size == BLOCK_32X32) {
+    } else if (block_size == BLOCK_32X32) {
       var = vp9_variance32x32(*(b->base_src), b->src_stride,
                               xd->dst.y_buffer, xd->dst.y_stride, &sse);
     } else {
@@ -3611,7 +3595,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // Check u and v to make sure skip is ok
         int sse2;
 
-#if CONFIG_SUPERBLOCKS64
         if (block_size == BLOCK_64X64) {
           unsigned int sse2u, sse2v;
           var = vp9_variance32x32(x->src.u_buffer, x->src.uv_stride,
@@ -3619,9 +3602,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           var = vp9_variance32x32(x->src.v_buffer, x->src.uv_stride,
                                   xd->dst.v_buffer, xd->dst.uv_stride, &sse2v);
           sse2 = sse2u + sse2v;
-        } else
-#endif  // CONFIG_SUPERBLOCKS64
-        if (block_size == BLOCK_32X32) {
+        } else if (block_size == BLOCK_32X32) {
           unsigned int sse2u, sse2v;
           var = vp9_variance16x16(x->src.u_buffer, x->src.uv_stride,
                                   xd->dst.u_buffer, xd->dst.uv_stride, &sse2u);
@@ -3661,7 +3642,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (!x->skip) {
-#if CONFIG_SUPERBLOCKS64
     if (block_size == BLOCK_64X64) {
       int skippable_y, skippable_uv;
 
@@ -3677,9 +3657,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *rate2 += *rate_uv;
       *distortion += *distortion_uv;
       *skippable = skippable_y && skippable_uv;
-    } else
-#endif  // CONFIG_SUPERBLOCKS64
-    if (block_size == BLOCK_32X32) {
+    } else if (block_size == BLOCK_32X32) {
       int skippable_y, skippable_uv;
 
       // Y cost and distortion
@@ -4540,7 +4518,6 @@ void vp9_rd_pick_intra_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-#if CONFIG_SUPERBLOCKS64
 void vp9_rd_pick_intra_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *returnrate,
                                  int *returndist) {
@@ -4569,7 +4546,6 @@ void vp9_rd_pick_intra_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
     *returndist = dist_y + (dist_uv >> 2);
   }
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             int *returnrate, int *returndist) {
@@ -4800,7 +4776,6 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
 
-#if CONFIG_SUPERBLOCKS64
   if (block_size == BLOCK_64X64) {
     mbmi->mode = DC_PRED;
     if (cm->txfm_mode == ONLY_4X4 || cm->txfm_mode == TX_MODE_SELECT) {
@@ -4824,9 +4799,7 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       mode_uv_16x16 = mbmi->uv_mode;
     }
 #endif  // CONFIG_TX32X32
-  } else
-#endif  // CONFIG_SUPERBLOCKS64
-  {
+  } else {
     assert(block_size == BLOCK_32X32);
     mbmi->mode = DC_PRED;
     if (cm->txfm_mode == ONLY_4X4 || cm->txfm_mode == TX_MODE_SELECT) {
@@ -4977,14 +4950,11 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (ref_frame == INTRA_FRAME) {
-#if CONFIG_SUPERBLOCKS64
       if (block_size == BLOCK_64X64) {
         vp9_build_intra_predictors_sb64y_s(xd);
         super_block_64_yrd(cpi, x, &rate_y, &distortion_y,
                            &skippable, txfm_cache);
-      } else
-#endif  // CONFIG_SUPERBLOCKS64
-      {
+      } else {
         assert(block_size == BLOCK_32X32);
         vp9_build_intra_predictors_sby_s(xd);
         super_block_yrd(cpi, x, &rate_y, &distortion_y,
@@ -5296,13 +5266,9 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
  end:
   {
-#if CONFIG_SUPERBLOCKS64
     PICK_MODE_CONTEXT *p = (block_size == BLOCK_32X32) ?
                             &x->sb32_context[xd->sb_index] :
                             &x->sb64_context;
-#else
-    PICK_MODE_CONTEXT *p = &x->sb32_context[xd->sb_index];
-#endif
     store_coding_context(x, p, best_mode_index, NULL,
                          &mbmi->ref_mvs[mbmi->ref_frame][0],
                          &mbmi->ref_mvs[mbmi->second_ref_frame < 0 ? 0 :
@@ -5321,7 +5287,6 @@ int64_t vp9_rd_pick_inter_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
                                    returnrate, returndistortion, BLOCK_32X32);
 }
 
-#if CONFIG_SUPERBLOCKS64
 int64_t vp9_rd_pick_inter_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
                                     int recon_yoffset, int recon_uvoffset,
                                     int *returnrate,
@@ -5329,7 +5294,6 @@ int64_t vp9_rd_pick_inter_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
   return vp9_rd_pick_inter_mode_sb(cpi, x, recon_yoffset, recon_uvoffset,
                                    returnrate, returndistortion, BLOCK_64X64);
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
                                     int recon_yoffset,

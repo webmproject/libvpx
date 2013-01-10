@@ -24,7 +24,6 @@ unsigned int vp9_get_mb_ss_c(const int16_t *src_ptr) {
   return sum;
 }
 
-#if CONFIG_SUPERBLOCKS64
 unsigned int vp9_variance64x64_c(const uint8_t *src_ptr,
                                  int  source_stride,
                                  const uint8_t *ref_ptr,
@@ -37,7 +36,6 @@ unsigned int vp9_variance64x64_c(const uint8_t *src_ptr,
   *sse = var;
   return (var - (((int64_t)avg * avg) >> 12));
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 unsigned int vp9_variance32x32_c(const uint8_t *src_ptr,
                                  int  source_stride,
@@ -197,7 +195,6 @@ unsigned int vp9_sub_pixel_variance16x16_c(const uint8_t *src_ptr,
   return vp9_variance16x16_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
-#if CONFIG_SUPERBLOCKS64
 unsigned int vp9_sub_pixel_variance64x64_c(const uint8_t *src_ptr,
                                            int  src_pixels_per_line,
                                            int  xoffset,
@@ -218,7 +215,6 @@ unsigned int vp9_sub_pixel_variance64x64_c(const uint8_t *src_ptr,
 
   return vp9_variance64x64_c(temp2, 64, dst_ptr, dst_pixels_per_line, sse);
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 unsigned int vp9_sub_pixel_variance32x32_c(const uint8_t *src_ptr,
                                            int  src_pixels_per_line,
@@ -258,7 +254,6 @@ unsigned int vp9_variance_halfpixvar32x32_h_c(const uint8_t *src_ptr,
                                        ref_ptr, recon_stride, sse);
 }
 
-#if CONFIG_SUPERBLOCKS64
 unsigned int vp9_variance_halfpixvar64x64_h_c(const uint8_t *src_ptr,
                                               int  source_stride,
                                               const uint8_t *ref_ptr,
@@ -267,8 +262,6 @@ unsigned int vp9_variance_halfpixvar64x64_h_c(const uint8_t *src_ptr,
   return vp9_sub_pixel_variance64x64_c(src_ptr, source_stride, 8, 0,
                                        ref_ptr, recon_stride, sse);
 }
-#endif  // CONFIG_SUPERBLOCKS64
-
 
 unsigned int vp9_variance_halfpixvar16x16_v_c(const uint8_t *src_ptr,
                                               int  source_stride,
@@ -288,7 +281,6 @@ unsigned int vp9_variance_halfpixvar32x32_v_c(const uint8_t *src_ptr,
                                        ref_ptr, recon_stride, sse);
 }
 
-#if CONFIG_SUPERBLOCKS64
 unsigned int vp9_variance_halfpixvar64x64_v_c(const uint8_t *src_ptr,
                                               int  source_stride,
                                               const uint8_t *ref_ptr,
@@ -297,8 +289,6 @@ unsigned int vp9_variance_halfpixvar64x64_v_c(const uint8_t *src_ptr,
   return vp9_sub_pixel_variance64x64_c(src_ptr, source_stride, 0, 8,
                                        ref_ptr, recon_stride, sse);
 }
-#endif  // #if CONFIG_SUPERBLOCKS64
-
 
 unsigned int vp9_variance_halfpixvar16x16_hv_c(const uint8_t *src_ptr,
                                                int  source_stride,
@@ -318,7 +308,6 @@ unsigned int vp9_variance_halfpixvar32x32_hv_c(const uint8_t *src_ptr,
                                        ref_ptr, recon_stride, sse);
 }
 
-#if CONFIG_SUPERBLOCKS64
 unsigned int vp9_variance_halfpixvar64x64_hv_c(const uint8_t *src_ptr,
                                                int  source_stride,
                                                const uint8_t *ref_ptr,
@@ -327,7 +316,6 @@ unsigned int vp9_variance_halfpixvar64x64_hv_c(const uint8_t *src_ptr,
   return vp9_sub_pixel_variance64x64_c(src_ptr, source_stride, 8, 8,
                                        ref_ptr, recon_stride, sse);
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 unsigned int vp9_sub_pixel_mse16x16_c(const uint8_t *src_ptr,
                                       int  src_pixels_per_line,
@@ -355,7 +343,6 @@ unsigned int vp9_sub_pixel_mse32x32_c(const uint8_t *src_ptr,
   return *sse;
 }
 
-#if CONFIG_SUPERBLOCKS64
 unsigned int vp9_sub_pixel_mse64x64_c(const uint8_t *src_ptr,
                                       int  src_pixels_per_line,
                                       int  xoffset,
@@ -368,7 +355,6 @@ unsigned int vp9_sub_pixel_mse64x64_c(const uint8_t *src_ptr,
                                 dst_pixels_per_line, sse);
   return *sse;
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 unsigned int vp9_sub_pixel_variance16x8_c(const uint8_t *src_ptr,
                                           int  src_pixels_per_line,

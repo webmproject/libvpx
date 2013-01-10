@@ -240,9 +240,7 @@ typedef struct VP9Common {
   vp9_prob prob_last_coded;
   vp9_prob prob_gf_coded;
   vp9_prob sb32_coded;
-#if CONFIG_SUPERBLOCKS64
   vp9_prob sb64_coded;
-#endif  // CONFIG_SUPERBLOCKS64
 
   // Context probabilities when using predictive coding of segment id
   vp9_prob segment_pred_probs[PREDICTION_PROBS];
