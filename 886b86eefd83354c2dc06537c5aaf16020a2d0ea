@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//788\u003d",
+        "filename": "build/make/gen_msvs_proj.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-01-10T02:31:47Z",
+      "side": 1,
+      "message": "this is wrong. it\u0027s a visual studio platform, so with this change you\u0027ll see:\n\n\"\"\"\nThe project consists entirely of configurations that require support for platforms which are not installed on this machine. The project cannot be loaded.\n\"\"\"",
+      "revId": "886b86eefd83354c2dc06537c5aaf16020a2d0ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//77c\u003d",
+        "filename": "build/make/gen_msvs_proj.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-01-10T02:31:47Z",
+      "side": 1,
+      "message": "since x64 is necessary above, this PlatformName macro will resolve to x64 and the build will break due to the %ifidn renames",
+      "revId": "886b86eefd83354c2dc06537c5aaf16020a2d0ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//78k\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-01-10T02:31:47Z",
+      "side": 1,
+      "message": "this shouldn\u0027t be changed",
+      "revId": "886b86eefd83354c2dc06537c5aaf16020a2d0ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//78o\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-01-10T02:31:47Z",
+      "side": 1,
+      "message": "seems there\u0027s a missing elif here as line 49.",
+      "revId": "886b86eefd83354c2dc06537c5aaf16020a2d0ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
