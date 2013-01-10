@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//720\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 645,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-10T04:28:15Z",
+      "side": 1,
+      "message": "I thought *w64-mingw32* better fit the \"tgt_os\" category but I really don\u0027t have a strong preference",
+      "revId": "64347a10a2a34d53800ca9cb1bb65a88e3f8d759",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
