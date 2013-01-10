@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//7yM\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 715,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-10T08:45:48Z",
+      "side": 1,
+      "message": "combine_interintra is currently incompatible with 64 blocksize. So please add a line to combine_interintra to return if size is 64, and add a TODO(debargha) to fix it. I will get to it later.",
+      "revId": "6884a83f06dd6c19ffc16758ecf1a5b0f70ec1a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//7yI\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 734,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-10T08:45:48Z",
+      "side": 1,
+      "message": "ditto.",
+      "revId": "6884a83f06dd6c19ffc16758ecf1a5b0f70ec1a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
