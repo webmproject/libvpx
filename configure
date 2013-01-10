@@ -252,6 +252,7 @@ EXPERIMENT_LIST="
     newcoefcontext
     enable_6tap
     widerlpf
+    abovesprefmv
 "
 CONFIG_LIST="
     external_build
