@@ -1122,13 +1122,10 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc) {
   for (mb_row = 0; mb_row < c->mb_rows; mb_row += 4, m_ptr += 4 * mis) {
     m = m_ptr;
     for (mb_col = 0; mb_col < c->mb_cols; mb_col += 4, m += 4) {
-#if CONFIG_SUPERBLOCKS64
       vp9_write(bc, m->mbmi.sb_type == BLOCK_SIZE_SB64X64, c->sb64_coded);
       if (m->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
         write_modes_b(cpi, m, bc, &tok, tok_end, mb_row, mb_col);
-      } else
-#endif
-      {
+      } else {
         int j;
 
         for (j = 0; j < 4; j++) {
@@ -1689,10 +1686,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     }
   }
 
-#if CONFIG_SUPERBLOCKS64
   pc->sb64_coded = get_binary_prob(cpi->sb64_count[0], cpi->sb64_count[1]);
   vp9_write_literal(&header_bc, pc->sb64_coded, 8);
-#endif
   pc->sb32_coded = get_binary_prob(cpi->sb32_count[0], cpi->sb32_count[1]);
   vp9_write_literal(&header_bc, pc->sb32_coded, 8);
 

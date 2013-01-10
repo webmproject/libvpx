@@ -172,13 +172,10 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
  */
 static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd) {
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-#if CONFIG_SUPERBLOCKS64
     if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
       vp9_build_intra_predictors_sb64uv_s(xd);
       vp9_build_intra_predictors_sb64y_s(xd);
-    } else
-#endif  // CONFIG_SUPERBLOCKS64
-    if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
+    } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
       vp9_build_intra_predictors_sbuv_s(xd);
       vp9_build_intra_predictors_sby_s(xd);
     } else {
@@ -186,7 +183,6 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd) {
       vp9_build_intra_predictors_mby_s(xd);
     }
   } else {
-#if CONFIG_SUPERBLOCKS64
     if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
       vp9_build_inter64x64_predictors_sb(xd,
                                          xd->dst.y_buffer,
@@ -194,9 +190,7 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd) {
                                          xd->dst.v_buffer,
                                          xd->dst.y_stride,
                                          xd->dst.uv_stride);
-    } else
-#endif  // CONFIG_SUPERBLOCKS64
-    if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
+    } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
       vp9_build_inter32x32_predictors_sb(xd,
                                          xd->dst.y_buffer,
                                          xd->dst.u_buffer,
@@ -701,7 +695,6 @@ static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
       xd->dst.uv_stride, xd->eobs + 16, xd);
 };
 
-#if CONFIG_SUPERBLOCKS64
 static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                 int mb_row, unsigned int mb_col,
                                 BOOL_DECODER* const bc) {
@@ -831,7 +824,6 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
   xd->left_context = pc->left_context;
   xd->mode_info_context = orig_mi;
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                 int mb_row, unsigned int mb_col,
@@ -1184,16 +1176,13 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
   vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
 
   for (mb_col = 0; mb_col < pc->mb_cols; mb_col += 4) {
-#if CONFIG_SUPERBLOCKS64
     if (vp9_read(bc, pc->sb64_coded)) {
       set_offsets(pbi, 64, mb_row, mb_col);
       vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, bc);
       set_refs(pbi, 64, mb_row, mb_col);
       decode_superblock64(pbi, xd, mb_row, mb_col, bc);
       xd->corrupted |= bool_error(bc);
-    } else
-#endif  // CONFIG_SUPERBLOCKS64
-    {
+    } else {
       int j;
 
       for (j = 0; j < 4; j++) {
@@ -1596,9 +1585,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     }
   }
 
-#if CONFIG_SUPERBLOCKS64
   pc->sb64_coded = vp9_read_literal(&header_bc, 8);
-#endif
   pc->sb32_coded = vp9_read_literal(&header_bc, 8);
 
   /* Read the loop filter level and type */

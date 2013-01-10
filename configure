@@ -239,8 +239,6 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     csm
     comp_intra_pred
-    superblocks
-    superblocks64
     pred_filter
     lossless
     subpelrefmv

@@ -614,7 +614,6 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
 #endif
 }
 
-#if CONFIG_SUPERBLOCKS64
 void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
                                         uint8_t *dst_y,
                                         uint8_t *dst_u,
@@ -678,7 +677,6 @@ void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
   }
 #endif
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 /*
  * The following functions should be called after an initial

@@ -180,9 +180,7 @@ typedef struct macroblock {
   PICK_MODE_CONTEXT mb_context[4][4];
   // when 4 MBs share coding parameters:
   PICK_MODE_CONTEXT sb32_context[4];
-#if CONFIG_SUPERBLOCKS64
   PICK_MODE_CONTEXT sb64_context;
-#endif  // CONFIG_SUPERBLOCKS64
 
   void (*vp9_short_fdct4x4)(int16_t *input, int16_t *output, int pitch);
   void (*vp9_short_fdct8x4)(int16_t *input, int16_t *output, int pitch);

@@ -888,7 +888,6 @@ static void pick_sb_modes(VP9_COMP *cpi,
   }
 }
 
-#if CONFIG_SUPERBLOCKS64
 static void pick_sb64_modes(VP9_COMP *cpi,
                             int mb_row,
                             int mb_col,
@@ -924,7 +923,6 @@ static void pick_sb64_modes(VP9_COMP *cpi,
                                 totaldist);
   }
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 static void update_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
@@ -1054,7 +1052,6 @@ static void encode_sb(VP9_COMP *cpi,
 #endif
 }
 
-#if CONFIG_SUPERBLOCKS64
 static void encode_sb64(VP9_COMP *cpi,
                         int mb_row,
                         int mb_col,
@@ -1094,7 +1091,6 @@ static void encode_sb64(VP9_COMP *cpi,
     }
   }
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 static void encode_sb_row(VP9_COMP *cpi,
                           int mb_row,
@@ -1114,14 +1110,12 @@ static void encode_sb_row(VP9_COMP *cpi,
     int i;
     int sb32_rate = 0, sb32_dist = 0;
     int is_sb[4];
-#if CONFIG_SUPERBLOCKS64
     int sb64_rate = INT_MAX, sb64_dist;
     ENTROPY_CONTEXT_PLANES l[4], a[4];
     TOKENEXTRA *tp_orig = *tp;
 
     memcpy(&a, cm->above_context + mb_col, sizeof(a));
     memcpy(&l, cm->left_context, sizeof(l));
-#endif  // CONFIG_SUPERBLOCKS64
     for (i = 0; i < 4; i++) {
       const int x_idx = (i & 1) << 1, y_idx = i & 2;
       int mb_rate = 0, mb_dist = 0;
@@ -1163,11 +1157,9 @@ static void encode_sb_row(VP9_COMP *cpi,
       // pixels of the lower level; also, inverting SB/MB order (big->small
       // instead of small->big) means we can use as threshold for small, which
       // may enable breakouts if RD is not good enough (i.e. faster)
-      encode_sb(cpi, mb_row + y_idx, mb_col + x_idx,
-                !CONFIG_SUPERBLOCKS64, tp, is_sb[i]);
+      encode_sb(cpi, mb_row + y_idx, mb_col + x_idx, 0, tp, is_sb[i]);
     }
 
-#if CONFIG_SUPERBLOCKS64
     memcpy(cm->above_context + mb_col, &a, sizeof(a));
     memcpy(cm->left_context, &l, sizeof(l));
     sb32_rate += vp9_cost_bit(cm->sb64_coded, 0);
@@ -1184,17 +1176,13 @@ static void encode_sb_row(VP9_COMP *cpi,
             RDCOST(x->rdmult, x->rddiv, sb32_rate, sb32_dist)) {
       is_sb[0] = 2;
       *totalrate += sb64_rate;
-    } else
-#endif
-    {
+    } else {
       *totalrate += sb32_rate;
     }
 
-#if CONFIG_SUPERBLOCKS64
     assert(tp_orig == *tp);
     encode_sb64(cpi, mb_row, mb_col, tp, is_sb);
     assert(tp_orig < *tp);
-#endif  // CONFIG_SUPERBLOCKS64
   }
 }
 
@@ -1244,9 +1232,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->common.fc.mv_ref_ct)
   vp9_zero(cpi->sb_ymode_count)
   vp9_zero(cpi->sb32_count);
-#if CONFIG_SUPERBLOCKS64
   vp9_zero(cpi->sb64_count);
-#endif  // CONFIG_SUPERBLOCKS64
 #if CONFIG_COMP_INTERINTRA_PRED
   vp9_zero(cpi->interintra_count);
   vp9_zero(cpi->interintra_select_count);
@@ -1458,7 +1444,6 @@ static void reset_skip_txfm_size_sb32(VP9_COMP *cpi, MODE_INFO *mi,
   }
 }
 
-#if CONFIG_SUPERBLOCKS64
 static void reset_skip_txfm_size_sb64(VP9_COMP *cpi, MODE_INFO *mi,
                                       int mis, TX_SIZE txfm_max,
                                       int mb_rows_left, int mb_cols_left) {
@@ -1479,7 +1464,6 @@ static void reset_skip_txfm_size_sb64(VP9_COMP *cpi, MODE_INFO *mi,
     set_txfm_flag(mi, mis, ymbs, xmbs, txfm_max);
   }
 }
-#endif
 
 static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
   VP9_COMMON *const cm = &cpi->common;
@@ -1490,13 +1474,10 @@ static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4, mi_ptr += 4 * mis) {
     mi = mi_ptr;
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col += 4, mi += 4) {
-#if CONFIG_SUPERBLOCKS64
       if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
         reset_skip_txfm_size_sb64(cpi, mi, mis, txfm_max,
                                   cm->mb_rows - mb_row, cm->mb_cols - mb_col);
-      } else
-#endif  // CONFIG_SUPERBLOCKS64
-      {
+      } else {
         int i;
 
         for (i = 0; i < 4; i++) {
@@ -1924,7 +1905,6 @@ static void update_sb_skip_coeff_state(VP9_COMP *cpi,
   }
 }
 
-#if CONFIG_SUPERBLOCKS64
 static void update_sb64_skip_coeff_state(VP9_COMP *cpi,
                                          ENTROPY_CONTEXT_PLANES ta[16],
                                          ENTROPY_CONTEXT_PLANES tl[16],
@@ -2038,7 +2018,6 @@ static void update_sb64_skip_coeff_state(VP9_COMP *cpi,
     }
   }
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
                               int recon_yoffset, int recon_uvoffset,
@@ -2541,7 +2520,6 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
   }
 }
 
-#if CONFIG_SUPERBLOCKS64
 static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
                                 int recon_yoffset, int recon_uvoffset,
                                 int output_enabled, int mb_row, int mb_col) {
@@ -2823,4 +2801,3 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
     }
   }
 }
-#endif  // CONFIG_SUPERBLOCKS64

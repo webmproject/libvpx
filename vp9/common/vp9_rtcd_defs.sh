@@ -172,15 +172,11 @@ specialize vp9_build_intra_predictors_mbuv_s;
 prototype void vp9_build_comp_intra_predictors_mbuv "struct macroblockd *x"
 specialize vp9_build_comp_intra_predictors_mbuv;
 
-if [ "$CONFIG_SUPERBLOCKS64" = "yes" ]; then
-
 prototype void vp9_build_intra_predictors_sb64y_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_sb64y_s;
 
 prototype void vp9_build_intra_predictors_sb64uv_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_sb64uv_s;
-
-fi
 
 prototype void vp9_intra4x4_predict "struct blockd *x, int b_mode, uint8_t *predictor"
 specialize vp9_intra4x4_predict;

@@ -232,9 +232,7 @@ typedef enum {
 typedef enum {
   BLOCK_SIZE_MB16X16 = 0,
   BLOCK_SIZE_SB32X32 = 1,
-#if CONFIG_SUPERBLOCKS64
   BLOCK_SIZE_SB64X64 = 2,
-#endif
 } BLOCK_SIZE_TYPE;
 
 typedef struct {

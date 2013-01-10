@@ -292,9 +292,7 @@ enum BlockSize {
   BLOCK_16X16,
   BLOCK_MAX_SEGMENTS,
   BLOCK_32X32 = BLOCK_MAX_SEGMENTS,
-#if CONFIG_SUPERBLOCKS64
   BLOCK_64X64,
-#endif  // CONFIG_SUPERBLOCKS64
   BLOCK_MAX_SB_SEGMENTS,
 };
 
@@ -475,9 +473,7 @@ typedef struct VP9_COMP {
   int cq_target_quality;
 
   int sb32_count[2];
-#if CONFIG_SUPERBLOCKS64
   int sb64_count[2];
-#endif
   int sb_ymode_count [VP9_I32X32_MODES];
   int ymode_count[VP9_YMODES];        /* intra MB type cts this frame */
   int bmode_count[VP9_NKF_BINTRAMODES];

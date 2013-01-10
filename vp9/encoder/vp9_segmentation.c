@@ -221,13 +221,10 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4, mi_ptr += 4 * mis) {
     mi = mi_ptr;
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col += 4, mi += 4) {
-#if CONFIG_SUPERBLOCKS64
       if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
         count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
                    t_unpred_seg_counts, 4, mb_row, mb_col);
-      } else
-#endif
-      {
+      } else {
         for (i = 0; i < 4; i++) {
           int x_idx = (i & 1) << 1, y_idx = i & 2;
           MODE_INFO *sb_mi = mi + y_idx * mis + x_idx;

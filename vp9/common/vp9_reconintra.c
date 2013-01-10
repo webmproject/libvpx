@@ -703,7 +703,6 @@ void vp9_build_interintra_32x32_predictors_sb(MACROBLOCKD *xd,
   vp9_build_interintra_32x32_predictors_sbuv(xd, upred, vpred, uvstride);
 }
 
-#if CONFIG_SUPERBLOCKS64
 void vp9_build_interintra_64x64_predictors_sby(MACROBLOCKD *xd,
                                                uint8_t *ypred,
                                                int ystride) {
@@ -744,7 +743,6 @@ void vp9_build_interintra_64x64_predictors_sb(MACROBLOCKD *xd,
   vp9_build_interintra_64x64_predictors_sby(xd, ypred, ystride);
   vp9_build_interintra_64x64_predictors_sbuv(xd, upred, vpred, uvstride);
 }
-#endif  // CONFIG_SUPERBLOCKS64
 #endif  // CONFIG_COMP_INTERINTRA_PRED
 
 void vp9_build_intra_predictors_mby(MACROBLOCKD *xd) {
@@ -768,14 +766,12 @@ void vp9_build_intra_predictors_sby_s(MACROBLOCKD *xd) {
                                       xd->up_available, xd->left_available);
 }
 
-#if CONFIG_SUPERBLOCKS64
 void vp9_build_intra_predictors_sb64y_s(MACROBLOCKD *xd) {
   vp9_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
                                       xd->dst.y_buffer, xd->dst.y_stride,
                                       xd->mode_info_context->mbmi.mode, 64,
                                       xd->up_available, xd->left_available);
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 #if CONFIG_COMP_INTRA_PRED
 void vp9_build_comp_intra_predictors_mby(MACROBLOCKD *xd) {
@@ -834,14 +830,12 @@ void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd) {
                                            16);
 }
 
-#if CONFIG_SUPERBLOCKS64
 void vp9_build_intra_predictors_sb64uv_s(MACROBLOCKD *xd) {
   vp9_build_intra_predictors_mbuv_internal(xd, xd->dst.u_buffer,
                                            xd->dst.v_buffer, xd->dst.uv_stride,
                                            xd->mode_info_context->mbmi.uv_mode,
                                            32);
 }
-#endif  // CONFIG_SUPERBLOCKS64
 
 #if CONFIG_COMP_INTRA_PRED
 void vp9_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {

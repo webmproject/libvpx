@@ -1618,9 +1618,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cm->prob_gf_coded                 = 128;
   cm->prob_intra_coded              = 63;
   cm->sb32_coded                    = 200;
-#if CONFIG_SUPERBLOCKS64
   cm->sb64_coded                    = 200;
-#endif
   for (i = 0; i < COMP_PRED_CONTEXTS; i++)
     cm->prob_comppred[i]         = 128;
   for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
@@ -1825,12 +1823,10 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
       vp9_variance_halfpixvar32x32_hv, vp9_sad32x32x3, vp9_sad32x32x8,
       vp9_sad32x32x4d)
 
-#if CONFIG_SUPERBLOCKS64
   BFP(BLOCK_64X64, vp9_sad64x64, vp9_variance64x64, vp9_sub_pixel_variance64x64,
       vp9_variance_halfpixvar64x64_h, vp9_variance_halfpixvar64x64_v,
       vp9_variance_halfpixvar64x64_hv, vp9_sad64x64x3, vp9_sad64x64x8,
       vp9_sad64x64x4d)
-#endif
 
   BFP(BLOCK_16X16, vp9_sad16x16, vp9_variance16x16, vp9_sub_pixel_variance16x16,
        vp9_variance_halfpixvar16x16_h, vp9_variance_halfpixvar16x16_v,
