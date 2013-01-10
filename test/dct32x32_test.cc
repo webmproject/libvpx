@@ -180,7 +180,7 @@ TEST(VP9Fdct32x32Test, CoeffSizeCheck) {
       for (int j = 0; j < 1024; ++j)
         input_extreme_block[j] = 255;
 
-    const int pitch = 32;
+    const int pitch = 64;
     vp9_short_fdct32x32_c(input_block, output_block, pitch);
     vp9_short_fdct32x32_c(input_extreme_block, output_extreme_block, pitch);
 
