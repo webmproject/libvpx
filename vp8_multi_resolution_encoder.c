@@ -216,7 +216,7 @@ int main(int argc, char **argv)
      * If target bitrate for highest-resolution level is set to 0,
      * (i.e. target_bitrate[0]=0), we skip encoding at that level.
      */
-    unsigned int         target_bitrate[NUM_ENCODERS]={1400, 500, 100};
+    unsigned int         target_bitrate[NUM_ENCODERS]={1000, 500, 100};
     /* Enter the frame rate of the input video */
     int                  framerate = 30;
     /* Set down-sampling factor for each resolution level.
@@ -351,26 +351,25 @@ int main(int argc, char **argv)
         if(vpx_codec_control(&codec[i], VP8E_SET_CPUUSED, speed))
             die_codec(&codec[i], "Failed to set cpu_used");
     }
-    /* Set static thresh for highest-resolution encoder. Set it to 1000 for
-     * better performance. */
+
+    /* Set static threshold. */
+    for ( i=0; i<NUM_ENCODERS; i++)
     {
-        unsigned int static_thresh = 1000;
-        if(vpx_codec_control(&codec[0], VP8E_SET_STATIC_THRESHOLD, static_thresh))
-            die_codec(&codec[0], "Failed to set static threshold");
-    }
-    /* Set static thresh = 0 for other encoders for better quality */
-    for ( i=1; i<NUM_ENCODERS; i++)
-    {
-        unsigned int static_thresh = 0;
+        unsigned int static_thresh = 1;
         if(vpx_codec_control(&codec[i], VP8E_SET_STATIC_THRESHOLD, static_thresh))
             die_codec(&codec[i], "Failed to set static threshold");
     }
+
     /* Set NOISE_SENSITIVITY to do TEMPORAL_DENOISING */
-    for ( i=0; i< NUM_ENCODERS; i++)
+    /* Enable denoising for the highest-resolution encoder. */
+    if(vpx_codec_control(&codec[0], VP8E_SET_NOISE_SENSITIVITY, 1))
+        die_codec(&codec[0], "Failed to set noise_sensitivity");
+    for ( i=1; i< NUM_ENCODERS; i++)
     {
         if(vpx_codec_control(&codec[i], VP8E_SET_NOISE_SENSITIVITY, 0))
             die_codec(&codec[i], "Failed to set noise_sensitivity");
     }
+
 
     frame_avail = 1;
     got_data = 0;
