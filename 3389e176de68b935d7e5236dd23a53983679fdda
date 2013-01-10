@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//7aM\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-10T22:18:25Z",
+      "side": 1,
+      "message": "Are these 2 conditions (ref_frame and mv being equal) ever not true? This is only called if we\u0027re superblocks, in which case the MIs are copies of each other.",
+      "revId": "3389e176de68b935d7e5236dd23a53983679fdda",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
