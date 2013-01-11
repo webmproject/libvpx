@@ -675,7 +675,7 @@ void vp9_mb_lpf_vertical_edge_w
   } while (++i < count * 8);
 }
 
-void vp9_lpf_mbv_w(unsigned char *y_ptr, unsigned char *u_ptr,
+void vp9_lpf_mbv_w_c(unsigned char *y_ptr, unsigned char *u_ptr,
                    unsigned char *v_ptr, int y_stride, int uv_stride,
                    struct loop_filter_info *lfi) {
   vp9_mb_lpf_vertical_edge_w(y_ptr, y_stride,
@@ -689,7 +689,7 @@ void vp9_lpf_mbv_w(unsigned char *y_ptr, unsigned char *u_ptr,
     vp9_mb_lpf_vertical_edge_w(v_ptr, uv_stride,
                                       lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 }
-void vp9_lpf_mbh_w(unsigned char *y_ptr, unsigned char *u_ptr,
+void vp9_lpf_mbh_w_c(unsigned char *y_ptr, unsigned char *u_ptr,
                            unsigned char *v_ptr, int y_stride, int uv_stride,
                            struct loop_filter_info *lfi) {
   vp9_mb_lpf_horizontal_edge_w(y_ptr, y_stride,

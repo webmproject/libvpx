@@ -233,6 +233,11 @@ vp9_loop_filter_simple_bh_c=vp9_loop_filter_bhs_c
 vp9_loop_filter_simple_bh_mmx=vp9_loop_filter_bhs_mmx
 vp9_loop_filter_simple_bh_sse2=vp9_loop_filter_bhs_sse2
 
+prototype void vp9_lpf_mbh_w "unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr, int y_stride, int uv_stride, struct loop_filter_info *lfi"
+specialize vp9_lpf_mbh_w
+
+prototype void vp9_lpf_mbv_w "unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr, int y_stride, int uv_stride, struct loop_filter_info *lfi"
+specialize vp9_lpf_mbv_w
 #
 # post proc
 #
