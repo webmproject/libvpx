@@ -682,11 +682,11 @@ void vp9_lpf_mbv_w_c(unsigned char *y_ptr, unsigned char *u_ptr,
                                     lfi->mblim, lfi->lim, lfi->hev_thr, 2);
 
   if (u_ptr)
-    vp9_mb_lpf_vertical_edge_w(u_ptr, uv_stride,
+    vp9_mbloop_filter_vertical_edge_c(u_ptr, uv_stride,
                                       lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 
   if (v_ptr)
-    vp9_mb_lpf_vertical_edge_w(v_ptr, uv_stride,
+    vp9_mbloop_filter_vertical_edge_c(v_ptr, uv_stride,
                                       lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 }
 void vp9_lpf_mbh_w_c(unsigned char *y_ptr, unsigned char *u_ptr,
@@ -696,11 +696,11 @@ void vp9_lpf_mbh_w_c(unsigned char *y_ptr, unsigned char *u_ptr,
                                       lfi->mblim, lfi->lim, lfi->hev_thr, 2);
 
   if (u_ptr)
-    vp9_mb_lpf_horizontal_edge_w(u_ptr, uv_stride,
+    vp9_mbloop_filter_horizontal_edge_c(u_ptr, uv_stride,
                                         lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 
   if (v_ptr)
-    vp9_mb_lpf_horizontal_edge_w(v_ptr, uv_stride,
+    vp9_mbloop_filter_horizontal_edge_c(v_ptr, uv_stride,
                                         lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 }
 

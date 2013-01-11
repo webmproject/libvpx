@@ -176,19 +176,31 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
   }
 }
 
+// Determine if we should skip inner-MB loop filtering within a MB
+// The current condition is that the loop filtering is skipped only
+// the MB uses a prediction size of 16x16 and either 16x16 transform
+// is used or there is no residue at all.
 static int mb_lf_skip(const MB_MODE_INFO *const mbmi) {
   const MB_PREDICTION_MODE mode = mbmi->mode;
   const int skip_coef = mbmi->mb_skip_coeff;
   const int tx_size = mbmi->txfm_size;
   return mode != B_PRED && mode != I8X8_PRED && mode != SPLITMV &&
-         tx_size >= TX_16X16 && skip_coef;
+         (tx_size >= TX_16X16 || skip_coef);
 }
+
+// Determine if we should skip MB loop filtering on a MB edge within
+// a superblock, the current condition is that MB loop filtering is
+// skipped only when both MBs do not use inner MB loop filtering, and
+// same motion vector with same reference frame
 static int sb_mb_lf_skip(const MODE_INFO *const mip0,
                          const MODE_INFO *const mip1) {
-  return mb_lf_skip(&mip0->mbmi) &&
-         mb_lf_skip(&mip1->mbmi) &&
-         mip0->mbmi.txfm_size >= TX_32X32 &&
-         mip0->mbmi.ref_frame;
+  const MB_MODE_INFO *mbmi0 = &mip0->mbmi;
+  const MB_MODE_INFO *mbmi1 = &mip0->mbmi;
+  return mb_lf_skip(mbmi0) && mb_lf_skip(mbmi1) &&
+         (mbmi0->ref_frame == mbmi1->ref_frame) &&
+         (mbmi0->mv[mbmi0->ref_frame].as_int ==
+          mbmi1->mv[mbmi1->ref_frame].as_int) &&
+         mbmi0->ref_frame != INTRA_FRAME;
 }
 void vp9_loop_filter_frame(VP9_COMMON *cm,
                            MACROBLOCKD *xd,
@@ -235,9 +247,10 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
           lfi.lim = lfi_n->lim[filter_level];
           lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
-          if (mb_col > 0
-              && !((mb_col & 1) && mode_info_context->mbmi.sb_type &&
-                   sb_mb_lf_skip(mode_info_context - 1, mode_info_context))
+          if (mb_col > 0 &&
+              !((mb_col & 1) && mode_info_context->mbmi.sb_type &&
+                (sb_mb_lf_skip(mode_info_context - 1, mode_info_context) ||
+                 tx_size >= TX_32X32))
               ) {
 #if CONFIG_WIDERLPF
             if (tx_size >= TX_16X16)
@@ -258,9 +271,10 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
 
           }
           /* don't apply across umv border */
-          if (mb_row > 0
-              && !((mb_row & 1) && mode_info_context->mbmi.sb_type &&
-                   sb_mb_lf_skip(mode_info_context - mis, mode_info_context))
+          if (mb_row > 0 &&
+              !((mb_row & 1) && mode_info_context->mbmi.sb_type &&
+                (sb_mb_lf_skip(mode_info_context - mis, mode_info_context) ||
+                tx_size >= TX_32X32))
               ) {
 #if CONFIG_WIDERLPF
             if (tx_size >= TX_16X16)
