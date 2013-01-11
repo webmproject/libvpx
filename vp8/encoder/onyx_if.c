@@ -3466,7 +3466,7 @@ static void encode_frame_to_data_rate
         /* Note that we should not throw out a key frame (especially when
          * spatial resampling is enabled).
          */
-        if ((cm->frame_type == KEY_FRAME))
+        if (cm->frame_type == KEY_FRAME)
         {
             cpi->decimation_count = cpi->decimation_factor;
         }
