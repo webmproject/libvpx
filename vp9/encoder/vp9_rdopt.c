@@ -1362,7 +1362,7 @@ static int64_t rd_pick_intra_sb64y_mode(VP9_COMP *cpi,
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
   int this_rate, this_rate_tokenonly;
   int this_distortion, s;
-  int64_t best_rd = INT64_MAX, this_rd;
+  int64_t best_rd = LLONG_MAX, this_rd;
 
   /* Y Search for 32x32 intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
@@ -2191,7 +2191,7 @@ static int64_t rd_pick_intra_sb64uv_mode(VP9_COMP *cpi,
                                          int *skippable) {
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
-  int64_t best_rd = INT64_MAX, this_rd;
+  int64_t best_rd = LLONG_MAX, this_rd;
   int this_rate_tokenonly, this_rate;
   int this_distortion, s;
 
