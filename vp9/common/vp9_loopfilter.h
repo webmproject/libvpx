@@ -92,10 +92,15 @@ void vp9_loop_filter_partial_frame(struct VP9Common *cm,
 void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
                                       int sharpness_lvl);
 
-extern void vp9_lpf_mbv_w(unsigned char *y_ptr, unsigned char *u_ptr,
-                          unsigned char *v_ptr, int y_stride, int uv_stride,
-                          struct loop_filter_info *lfi);
-extern void vp9_lpf_mbh_w(unsigned char *y_ptr, unsigned char *u_ptr,
-                           unsigned char *v_ptr, int y_stride, int uv_stride,
-                           struct loop_filter_info *lfi);
+void vp9_mb_lpf_horizontal_edge_w(unsigned char *s, int p,
+                                  const unsigned char *blimit,
+                                  const unsigned char *limit,
+                                  const unsigned char *thresh,
+                                  int count);
+
+void vp9_mb_lpf_vertical_edge_w(unsigned char *s, int p,
+                                const unsigned char *blimit,
+                                const unsigned char *limit,
+                                const unsigned char *thresh,
+                                int count);
 #endif  // VP9_COMMON_VP9_LOOPFILTER_H_

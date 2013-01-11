@@ -596,7 +596,7 @@ static __inline void wide_mbfilter(int8_t mask, uint8_t hev,
   }
 }
 
-static void vp9_mb_lpf_horizontal_edge_w
+void vp9_mb_lpf_horizontal_edge_w
 (
   unsigned char *s,
   int p,
