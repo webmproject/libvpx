@@ -623,6 +623,11 @@ void vp9_loop_filter_bh8x8_sse2(unsigned char *y_ptr, unsigned char *u_ptr,
                              struct loop_filter_info *lfi) {
   vp9_mbloop_filter_horizontal_edge_sse2(
     y_ptr + 8 * y_stride, y_stride, lfi->blim, lfi->lim, lfi->hev_thr);
+
+  if (u_ptr)
+    vp9_loop_filter_horizontal_edge_uv_sse2(u_ptr + 4 * uv_stride, uv_stride,
+                                            lfi->blim, lfi->lim, lfi->hev_thr,
+                                            v_ptr + 4 * uv_stride);
 }
 
 /* Vertical MB Filtering */
@@ -657,6 +662,11 @@ void vp9_loop_filter_bv8x8_sse2(unsigned char *y_ptr, unsigned char *u_ptr,
                              struct loop_filter_info *lfi) {
   vp9_mbloop_filter_vertical_edge_sse2(
     y_ptr + 8, y_stride, lfi->blim, lfi->lim, lfi->hev_thr);
+
+  if (u_ptr)
+    vp9_loop_filter_vertical_edge_uv_sse2(u_ptr + 4, uv_stride,
+                                          lfi->blim, lfi->lim, lfi->hev_thr,
+                                          v_ptr + 4);
 }
 
 /* Horizontal B Filtering */

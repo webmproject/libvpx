@@ -439,6 +439,14 @@ void vp9_loop_filter_bh8x8_c(uint8_t *y_ptr, uint8_t *u_ptr,
                              struct loop_filter_info *lfi) {
   vp9_mbloop_filter_horizontal_edge_c(
     y_ptr + 8 * y_stride, y_stride, lfi->blim, lfi->lim, lfi->hev_thr, 2);
+
+  if (u_ptr)
+    vp9_loop_filter_horizontal_edge_c(u_ptr + 4 * uv_stride, uv_stride,
+                                      lfi->blim, lfi->lim, lfi->hev_thr, 1);
+
+  if (v_ptr)
+    vp9_loop_filter_horizontal_edge_c(v_ptr + 4 * uv_stride, uv_stride,
+                                      lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
 void vp9_loop_filter_bhs_c(uint8_t *y_ptr, int y_stride,
@@ -456,6 +464,14 @@ void vp9_loop_filter_bv8x8_c(uint8_t *y_ptr, uint8_t *u_ptr,
                              struct loop_filter_info *lfi) {
   vp9_mbloop_filter_vertical_edge_c(
     y_ptr + 8, y_stride, lfi->blim, lfi->lim, lfi->hev_thr, 2);
+
+  if (u_ptr)
+    vp9_loop_filter_vertical_edge_c(u_ptr + 4, uv_stride,
+                                    lfi->blim, lfi->lim, lfi->hev_thr, 1);
+
+  if (v_ptr)
+    vp9_loop_filter_vertical_edge_c(v_ptr + 4, uv_stride,
+                                    lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
 void vp9_loop_filter_bvs_c(uint8_t *y_ptr, int y_stride,
