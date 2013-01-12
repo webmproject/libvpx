@@ -3732,11 +3732,22 @@ static void encode_frame_to_data_rate
 
     /* Setup background Q adjustment for error resilient mode.
      * For multi-layer encodes only enable this for the base layer.
-     */
+     * Reduce loop filter to reduce "dot" artifacts that can occur for repeated
+     * loop filtering on ZEROMV_LASTREF blocks.
+     * For now reducing it to -32, only for resolutions above CIF and
+     * #temporal_layers < 3 (artifact is hard to see at low spatial resolution
+     * and/or high #temporal layers).
+    */
     if (cpi->cyclic_refresh_mode_enabled)
     {
+      int delta_loop_filter = 0;
+      if (cm->Width > 352 && cm->Height > 288 &&
+          cpi->oxcf.number_of_layers < 3)
+      {
+        delta_loop_filter = -32;
+      }
       if (cpi->current_layer==0)
-        cyclic_background_refresh(cpi, Q, 0);
+        cyclic_background_refresh(cpi, Q, delta_loop_filter);
       else
         disable_segmentation(cpi);
     }
