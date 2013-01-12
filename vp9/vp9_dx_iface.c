@@ -573,7 +573,8 @@ static vpx_codec_err_t vp9_set_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp9_set_reference_dec(ctx->pbi, frame->frame_type, &sd);
+    return vp9_set_reference_dec(ctx->pbi,
+                                 (VP9_REFFRAME)frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 
@@ -591,7 +592,8 @@ static vpx_codec_err_t vp9_get_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp9_get_reference_dec(ctx->pbi, frame->frame_type, &sd);
+    return vp9_get_reference_dec(ctx->pbi,
+                                 (VP9_REFFRAME)frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 
