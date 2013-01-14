@@ -97,11 +97,7 @@ void vp9_kf_default_bmode_probs(vp9_prob dest[VP9_KF_BINTRAMODES]
 
 void vp9_adapt_mode_probs(struct VP9Common *);
 
-#if CONFIG_PRED_FILTER
 #define VP9_SWITCHABLE_FILTERS 3 /* number of switchable filters */
-#else
-#define VP9_SWITCHABLE_FILTERS 2 /* number of switchable filters */
-#endif
 
 extern const  INTERPOLATIONFILTERTYPE vp9_switchable_interp
                   [VP9_SWITCHABLE_FILTERS];
