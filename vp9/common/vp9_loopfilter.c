@@ -232,11 +232,11 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
   /* vp9_filter each macro block */
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
-      const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
+      const MB_PREDICTION_MODE mode = mode_info_context->mbmi.mode;
+      const int mode_index = lfi_n->mode_lf_lut[mode];
       const int seg = mode_info_context->mbmi.segment_id;
       const int ref_frame = mode_info_context->mbmi.ref_frame;
       const int filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
-
       if (filter_level) {
         const int skip_lf = mb_lf_skip(&mode_info_context->mbmi);
         const int tx_size = mode_info_context->mbmi.txfm_size;
@@ -255,19 +255,24 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
 #if CONFIG_WIDERLPF
             if (tx_size >= TX_16X16)
               vp9_lpf_mbv_w(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                post->uv_stride, &lfi);
+                            post->uv_stride, &lfi);
             else
 #endif
               vp9_loop_filter_mbv(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                post->uv_stride, &lfi);
+                                  post->uv_stride, &lfi);
           }
           if (!skip_lf) {
-            if (tx_size >= TX_8X8)
-              vp9_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                    post->uv_stride, &lfi);
-            else
+            if (tx_size >= TX_8X8) {
+              if (tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV))
+                vp9_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
+                                      post->uv_stride, &lfi);
+              else
+                vp9_loop_filter_bv8x8(y_ptr, NULL, NULL, post->y_stride,
+                                      post->uv_stride, &lfi);
+            } else {
               vp9_loop_filter_bv(y_ptr, u_ptr, v_ptr, post->y_stride,
                                  post->uv_stride, &lfi);
+            }
 
           }
           /* don't apply across umv border */
@@ -279,19 +284,24 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
 #if CONFIG_WIDERLPF
             if (tx_size >= TX_16X16)
               vp9_lpf_mbh_w(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                post->uv_stride, &lfi);
+                            post->uv_stride, &lfi);
             else
 #endif
               vp9_loop_filter_mbh(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                post->uv_stride, &lfi);
+                                  post->uv_stride, &lfi);
           }
           if (!skip_lf) {
-            if (tx_size >= TX_8X8)
-              vp9_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                  post->uv_stride, &lfi);
-            else
+            if (tx_size >= TX_8X8) {
+              if (tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV))
+                vp9_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
+                                      post->uv_stride, &lfi);
+              else
+                vp9_loop_filter_bh8x8(y_ptr, NULL, NULL, post->y_stride,
+                                      post->uv_stride, &lfi);
+            } else {
               vp9_loop_filter_bh(y_ptr, u_ptr, v_ptr, post->y_stride,
                                  post->uv_stride, &lfi);
+            }
           }
         } else {
           // FIXME: Not 8x8 aware
