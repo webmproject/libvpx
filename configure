@@ -240,7 +240,6 @@ EXPERIMENT_LIST="
     csm
     comp_intra_pred
     lossless
-    subpelrefmv
     new_mvref
     implicit_segmentation
     newbintramodes

@@ -278,10 +278,8 @@ specialize vp9_sad16x3 sse2
 prototype unsigned int vp9_sad3x16 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int ref_stride"
 specialize vp9_sad3x16 sse2
 
-if [ "$CONFIG_SUBPELREFMV" = "yes" ]; then
 prototype unsigned int vp9_sub_pixel_variance16x2 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int Refstride, unsigned int *sse"
 specialize vp9_sub_pixel_variance16x2 sse2
-fi
 
 #
 # Sub Pixel Filters

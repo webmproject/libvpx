@@ -96,9 +96,7 @@ VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_recon_wrapper_sse2.c
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_subpixel_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_loopfilter_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_iwalsh_sse2.asm
-ifeq ($(CONFIG_SUBPELREFMV),yes)
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_subpixel_variance_sse2.c
-endif
 VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_subpixel_8t_ssse3.asm
 VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_subpixel_ssse3.asm
 ifeq ($(CONFIG_POSTPROC),yes)

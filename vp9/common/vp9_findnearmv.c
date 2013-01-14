@@ -55,7 +55,7 @@ unsigned int vp9_sad16x3_c(const uint8_t *src_ptr,
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 3);
 }
 
-#if CONFIG_SUBPELREFMV
+
 unsigned int vp9_variance2x16_c(const uint8_t *src_ptr,
                                 const int  source_stride,
                                 const uint8_t *ref_ptr,
@@ -117,7 +117,6 @@ unsigned int vp9_sub_pixel_variance2x16_c(const uint8_t *src_ptr,
 
   return vp9_variance2x16_c(temp2, 2, dst_ptr, dst_pixels_per_line, sse);
 }
-#endif
 
 /* check a list of motion vectors by sad score using a number rows of pixels
  * above and a number cols of pixels in the left to select the one with best
@@ -137,9 +136,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   uint8_t *left_ref;
 #endif
   unsigned int score;
-#if CONFIG_SUBPELREFMV
   unsigned int sse;
-#endif
   unsigned int ref_scores[MAX_MV_REF_CANDIDATES] = {0};
   int_mv sorted_mvs[MAX_MV_REF_CANDIDATES];
   int zero_seen = FALSE;
@@ -148,7 +145,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   nearest->as_int = near->as_int = 0;
   vpx_memset(sorted_mvs, 0, sizeof(sorted_mvs));
 
-#if CONFIG_SUBPELREFMV
   above_src = xd->dst.y_buffer - xd->dst.y_stride * 2;
   above_ref = ref_y_buffer - ref_y_stride * 2;
 #if CONFIG_ABOVESPREFMV
@@ -157,17 +153,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
 #else
   left_src  = xd->dst.y_buffer - 2;
   left_ref  = ref_y_buffer - 2;
-#endif
-#else
-  above_src = xd->dst.y_buffer - xd->dst.y_stride * 3;
-  above_ref = ref_y_buffer - ref_y_stride * 3;
-#if CONFIG_ABOVESPREFMV
-  above_src -= 4;
-  above_ref -= 4;
-#else
-  left_src  = xd->dst.y_buffer - 3;
-  left_ref  = ref_y_buffer - 3;
-#endif
 #endif
 
   // Limit search to the predicted best few candidates
@@ -199,7 +184,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
              xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 #endif
 
-#if CONFIG_SUBPELREFMV
     row_offset = this_mv.as_mv.row >> 3;
     col_offset = this_mv.as_mv.col >> 3;
     offset = ref_y_stride * row_offset + col_offset;
@@ -266,50 +250,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
         score += sse;
       }
     }
-#endif
-#else
-    row_offset = (this_mv.as_mv.row > 0) ?
-      ((this_mv.as_mv.row + 3) >> 3):((this_mv.as_mv.row + 4) >> 3);
-    col_offset = (this_mv.as_mv.col > 0) ?
-      ((this_mv.as_mv.col + 3) >> 3):((this_mv.as_mv.col + 4) >> 3);
-    offset = ref_y_stride * row_offset + col_offset;
-    score = 0;
-    if (xd->up_available) {
-      score += vp9_sad16x3(above_src, xd->dst.y_stride,
-                           above_ref + offset, ref_y_stride);
-      if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
-        score += vp9_sad16x3(above_src + 16, xd->dst.y_stride,
-                             above_ref + offset + 16, ref_y_stride);
-      }
-      if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB64X64) {
-        score += vp9_sad16x3(above_src + 32, xd->dst.y_stride,
-                             above_ref + offset + 32, ref_y_stride);
-        score += vp9_sad16x3(above_src + 48, xd->dst.y_stride,
-                             above_ref + offset + 48, ref_y_stride);
-      }
-    }
-#if !CONFIG_ABOVESPREFMV
-    if (xd->left_available) {
-      score += vp9_sad3x16(left_src, xd->dst.y_stride,
-                           left_ref + offset, ref_y_stride);
-      if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
-        score += vp9_sad3x16(left_src + xd->dst.y_stride * 16,
-                             xd->dst.y_stride,
-                             left_ref + offset + ref_y_stride * 16,
-                             ref_y_stride);
-      }
-      if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB64X64) {
-        score += vp9_sad3x16(left_src + xd->dst.y_stride * 32,
-                             xd->dst.y_stride,
-                             left_ref + offset + ref_y_stride * 32,
-                             ref_y_stride);
-        score += vp9_sad3x16(left_src + xd->dst.y_stride * 48,
-                             xd->dst.y_stride,
-                             left_ref + offset + ref_y_stride * 48,
-                             ref_y_stride);
-      }
-    }
-#endif
 #endif
     // Add the entry to our list and then resort the list on score.
     ref_scores[i] = score;
