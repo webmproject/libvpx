@@ -1290,8 +1290,6 @@ static void init_frame(VP9D_COMP *pbi) {
     /* All buffers are implicitly updated on key frames. */
     pc->refresh_golden_frame = 1;
     pc->refresh_alt_ref_frame = 1;
-    pc->copy_buffer_to_gf = 0;
-    pc->copy_buffer_to_arf = 0;
 
     /* Note that Golden and Altref modes cannot be used on a key frame so
      * ref_frame_sign_bias[] is undefined and meaningless
@@ -1655,17 +1653,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     } else {
       vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
     }
-
-    /* Buffer to buffer copy flags. */
-    pc->copy_buffer_to_gf = 0;
-
-    if (!pc->refresh_golden_frame)
-      pc->copy_buffer_to_gf = vp9_read_literal(&header_bc, 2);
-
-    pc->copy_buffer_to_arf = 0;
-
-    if (!pc->refresh_alt_ref_frame)
-      pc->copy_buffer_to_arf = vp9_read_literal(&header_bc, 2);
 
     pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp9_read_bit(&header_bc);
     pc->ref_frame_sign_bias[ALTREF_FRAME] = vp9_read_bit(&header_bc);

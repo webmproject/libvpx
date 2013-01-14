@@ -1776,19 +1776,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     vp9_write_bit(&header_bc, pc->refresh_golden_frame);
     vp9_write_bit(&header_bc, pc->refresh_alt_ref_frame);
 
-    // For inter frames the current default behavior is that when
-    // cm->refresh_golden_frame is set we copy the old GF over to
-    // the ARF buffer. This is purely an encoder decision at present.
-    if (pc->refresh_golden_frame)
-      pc->copy_buffer_to_arf  = 2;
-
-    // If not being updated from current frame should either GF or ARF be updated from another buffer
-    if (!pc->refresh_golden_frame)
-      vp9_write_literal(&header_bc, pc->copy_buffer_to_gf, 2);
-
-    if (!pc->refresh_alt_ref_frame)
-      vp9_write_literal(&header_bc, pc->copy_buffer_to_arf, 2);
-
     // Indicate reference frame sign bias for Golden and ARF frames (always 0 for last frame buffer)
     vp9_write_bit(&header_bc, pc->ref_frame_sign_bias[GOLDEN_FRAME]);
     vp9_write_bit(&header_bc, pc->ref_frame_sign_bias[ALTREF_FRAME]);

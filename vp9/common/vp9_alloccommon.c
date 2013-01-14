@@ -204,9 +204,6 @@ void vp9_create_common(VP9_COMMON *oci) {
   /* Initialise reference frame sign bias structure to defaults */
   vpx_memset(oci->ref_frame_sign_bias, 0, sizeof(oci->ref_frame_sign_bias));
 
-  /* Default disable buffer to buffer copying */
-  oci->copy_buffer_to_gf = 0;
-  oci->copy_buffer_to_arf = 0;
   oci->kf_ymode_probs_update = 0;
 }
 

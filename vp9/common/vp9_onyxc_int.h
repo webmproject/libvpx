@@ -206,9 +206,6 @@ typedef struct VP9Common {
   int refresh_golden_frame;     /* Two state 0 = NO, 1 = YES */
   int refresh_alt_ref_frame;     /* Two state 0 = NO, 1 = YES */
 
-  int copy_buffer_to_gf;         /* 0 none, 1 Last to GF, 2 ARF to GF */
-  int copy_buffer_to_arf;        /* 0 none, 1 Last to ARF, 2 GF to ARF */
-
   int refresh_entropy_probs;    /* Two state 0 = NO, 1 = YES */
 
   int ref_frame_sign_bias[MAX_REF_FRAMES];    /* Two state 0, 1 */
