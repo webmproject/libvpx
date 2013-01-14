@@ -3765,8 +3765,6 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   *returnintra = LLONG_MAX;
 
-  x->skip = 0;
-
   mbmi->ref_frame = INTRA_FRAME;
 
   /* Initialize zbin mode boost for uv costing */
@@ -3808,6 +3806,8 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     distortion2 = 0;
     rate_y = 0;
     rate_uv = 0;
+
+    x->skip = 0;
 
     this_mode = vp9_mode_order[mode_index].mode;
     mbmi->mode = this_mode;
