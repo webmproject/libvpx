@@ -131,9 +131,11 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            int_mv *near) {
   int i, j;
   uint8_t *above_src;
-  uint8_t *left_src;
   uint8_t *above_ref;
+#if !CONFIG_ABOVESPREFMV
+  uint8_t *left_src;
   uint8_t *left_ref;
+#endif
   unsigned int score;
 #if CONFIG_SUBPELREFMV
   unsigned int sse;
@@ -148,14 +150,24 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
 
 #if CONFIG_SUBPELREFMV
   above_src = xd->dst.y_buffer - xd->dst.y_stride * 2;
-  left_src  = xd->dst.y_buffer - 2;
   above_ref = ref_y_buffer - ref_y_stride * 2;
+#if CONFIG_ABOVESPREFMV
+  above_src -= 4;
+  above_ref -= 4;
+#else
+  left_src  = xd->dst.y_buffer - 2;
   left_ref  = ref_y_buffer - 2;
+#endif
 #else
   above_src = xd->dst.y_buffer - xd->dst.y_stride * 3;
-  left_src  = xd->dst.y_buffer - 3;
   above_ref = ref_y_buffer - ref_y_stride * 3;
+#if CONFIG_ABOVESPREFMV
+  above_src -= 4;
+  above_ref -= 4;
+#else
+  left_src  = xd->dst.y_buffer - 3;
   left_ref  = ref_y_buffer - 3;
+#endif
 #endif
 
   // Limit search to the predicted best few candidates
@@ -173,11 +185,19 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
 
     zero_seen = zero_seen || !this_mv.as_int;
 
+#if !CONFIG_ABOVESPREFMV
     clamp_mv(&this_mv,
              xd->mb_to_left_edge - LEFT_TOP_MARGIN + 24,
              xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
              xd->mb_to_top_edge - LEFT_TOP_MARGIN + 24,
              xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
+#else
+    clamp_mv(&this_mv,
+             xd->mb_to_left_edge - LEFT_TOP_MARGIN + 32,
+             xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
+             xd->mb_to_top_edge - LEFT_TOP_MARGIN + 24,
+             xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
+#endif
 
 #if CONFIG_SUBPELREFMV
     row_offset = this_mv.as_mv.row >> 3;
@@ -213,6 +233,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
         score += sse;
       }
     }
+#if !CONFIG_ABOVESPREFMV
     if (xd->left_available) {
       vp9_sub_pixel_variance2x16_c(left_ref + offset, ref_y_stride,
                                    SP(this_mv.as_mv.col),
@@ -245,6 +266,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
         score += sse;
       }
     }
+#endif
 #else
     row_offset = (this_mv.as_mv.row > 0) ?
       ((this_mv.as_mv.row + 3) >> 3):((this_mv.as_mv.row + 4) >> 3);
@@ -266,6 +288,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                              above_ref + offset + 48, ref_y_stride);
       }
     }
+#if !CONFIG_ABOVESPREFMV
     if (xd->left_available) {
       score += vp9_sad3x16(left_src, xd->dst.y_stride,
                            left_ref + offset, ref_y_stride);
@@ -286,6 +309,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                              ref_y_stride);
       }
     }
+#endif
 #endif
     // Add the entry to our list and then resort the list on score.
     ref_scores[i] = score;
