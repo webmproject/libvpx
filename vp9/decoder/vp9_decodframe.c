@@ -418,9 +418,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
     assert(get_2nd_order_usage(xd) == 0);
     for (i = 0; i < 16; i++) {
       int b_mode;
-#if CONFIG_COMP_INTRA_PRED
-      int b_mode2;
-#endif
       BLOCKD *b = &xd->block[i];
       b_mode = xd->mode_info_context->bmi[i].as_mode.first;
 #if CONFIG_NEWBINTRAMODES
@@ -429,17 +426,8 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
 #endif
       if (!xd->mode_info_context->mbmi.mb_skip_coeff)
         eobtotal += vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_Y_WITH_DC, i);
-#if CONFIG_COMP_INTRA_PRED
-      b_mode2 = xd->mode_info_context->bmi[i].as_mode.second;
 
-      if (b_mode2 == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
-#endif
-        vp9_intra4x4_predict(b, b_mode, b->predictor);
-#if CONFIG_COMP_INTRA_PRED
-      } else {
-        vp9_comp_intra4x4_predict(b, b_mode, b_mode2, b->predictor);
-      }
-#endif
+      vp9_intra4x4_predict(b, b_mode, b->predictor);
       tx_type = get_tx_type_4x4(xd, b);
       if (tx_type != DCT_DCT) {
         vp9_ht_dequant_idct_add_c(tx_type, b->qcoeff,

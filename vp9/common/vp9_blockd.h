@@ -215,9 +215,6 @@ union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
     TX_TYPE           tx_type;
-#if CONFIG_COMP_INTRA_PRED
-    B_PREDICTION_MODE second;
-#endif
 #if CONFIG_NEWBINTRAMODES
     B_PREDICTION_MODE context;
 #endif
@@ -245,9 +242,6 @@ typedef enum {
 
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
-#if CONFIG_COMP_INTRA_PRED
-  MB_PREDICTION_MODE second_mode, second_uv_mode;
-#endif
 #if CONFIG_COMP_INTERINTRA_PRED
   MB_PREDICTION_MODE interintra_mode, interintra_uv_mode;
 #endif

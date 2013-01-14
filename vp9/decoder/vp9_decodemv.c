@@ -163,17 +163,11 @@ static void kfread_modes(VP9D_COMP *pbi,
     y_mode = (MB_PREDICTION_MODE) read_kf_mb_ymode(bc,
       pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
   }
-#if CONFIG_COMP_INTRA_PRED
-  m->mbmi.second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
 
   m->mbmi.ref_frame = INTRA_FRAME;
 
   if ((m->mbmi.mode = y_mode) == B_PRED) {
     int i = 0;
-#if CONFIG_COMP_INTRA_PRED
-    int use_comp_pred = vp9_read(bc, DEFAULT_COMP_INTRA_PROB);
-#endif
     do {
       const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
       const B_PREDICTION_MODE L = left_block_mode(m, i);
@@ -181,15 +175,6 @@ static void kfread_modes(VP9D_COMP *pbi,
       m->bmi[i].as_mode.first =
         (B_PREDICTION_MODE) read_kf_bmode(
           bc, pbi->common.kf_bmode_prob [A] [L]);
-#if CONFIG_COMP_INTRA_PRED
-      if (use_comp_pred) {
-        m->bmi[i].as_mode.second =
-          (B_PREDICTION_MODE) read_kf_bmode(
-            bc, pbi->common.kf_bmode_prob [A] [L]);
-      } else {
-        m->bmi[i].as_mode.second = (B_PREDICTION_MODE)(B_DC_PRED - 1);
-      }
-#endif
     } while (++i < 16);
   }
   if ((m->mbmi.mode = y_mode) == I8X8_PRED) {
@@ -202,19 +187,10 @@ static void kfread_modes(VP9D_COMP *pbi,
       m->bmi[ib + 1].as_mode.first = mode8x8;
       m->bmi[ib + 4].as_mode.first = mode8x8;
       m->bmi[ib + 5].as_mode.first = mode8x8;
-#if CONFIG_COMP_INTRA_PRED
-      m->bmi[ib + 0].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-      m->bmi[ib + 1].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-      m->bmi[ib + 4].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-      m->bmi[ib + 5].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
     }
   } else
     m->mbmi.uv_mode = (MB_PREDICTION_MODE)read_uv_mode(bc,
                                                        pbi->common.kf_uv_mode_prob[m->mbmi.mode]);
-#if CONFIG_COMP_INTRA_PRED
-  m->mbmi.second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
 
   if (cm->txfm_mode == TX_MODE_SELECT && m->mbmi.mb_skip_coeff == 0 &&
       m->mbmi.mode <= I8X8_PRED) {
@@ -1138,16 +1114,10 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                    read_ymode(bc, pbi->common.fc.ymode_prob);
       pbi->common.fc.ymode_counts[mbmi->mode]++;
     }
-#if CONFIG_COMP_INTRA_PRED
-    mbmi->second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
 
     // If MB mode is BPRED read the block modes
     if (mbmi->mode == B_PRED) {
       int j = 0;
-#if CONFIG_COMP_INTRA_PRED
-      int use_comp_pred = vp9_read(bc, DEFAULT_COMP_INTRA_PROB);
-#endif
       do {
         int m;
         m = mi->bmi[j].as_mode.first = (B_PREDICTION_MODE)
@@ -1156,13 +1126,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
 #endif
         pbi->common.fc.bmode_counts[m]++;
-#if CONFIG_COMP_INTRA_PRED
-        if (use_comp_pred) {
-          mi->bmi[j].as_mode.second = (B_PREDICTION_MODE)read_bmode(bc, pbi->common.fc.bmode_prob);
-        } else {
-          mi->bmi[j].as_mode.second = (B_PREDICTION_MODE)(B_DC_PRED - 1);
-        }
-#endif
       } while (++j < 16);
     }
 
@@ -1177,22 +1140,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         mi->bmi[ib + 4].as_mode.first = mode8x8;
         mi->bmi[ib + 5].as_mode.first = mode8x8;
         pbi->common.fc.i8x8_mode_counts[mode8x8]++;
-#if CONFIG_COMP_INTRA_PRED
-        mi->bmi[ib + 0].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-        mi->bmi[ib + 1].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-        mi->bmi[ib + 4].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-        mi->bmi[ib + 5].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
       }
     } else {
       mbmi->uv_mode = (MB_PREDICTION_MODE)read_uv_mode(
         bc, pbi->common.fc.uv_mode_prob[mbmi->mode]);
       pbi->common.fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
     }
-
-#if CONFIG_COMP_INTRA_PRED
-    mbmi->second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
   }
 
   if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&

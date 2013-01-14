@@ -149,9 +149,6 @@ specialize vp9_build_intra_predictors_sbuv_s;
 prototype void vp9_build_intra_predictors_mby "struct macroblockd *x"
 specialize vp9_build_intra_predictors_mby;
 
-prototype void vp9_build_comp_intra_predictors_mby "struct macroblockd *x"
-specialize vp9_build_comp_intra_predictors_mby;
-
 prototype void vp9_build_intra_predictors_mby_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_mby_s;
 
@@ -160,9 +157,6 @@ specialize vp9_build_intra_predictors_mbuv;
 
 prototype void vp9_build_intra_predictors_mbuv_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_mbuv_s;
-
-prototype void vp9_build_comp_intra_predictors_mbuv "struct macroblockd *x"
-specialize vp9_build_comp_intra_predictors_mbuv;
 
 prototype void vp9_build_intra_predictors_sb64y_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_sb64y_s;
@@ -173,20 +167,11 @@ specialize vp9_build_intra_predictors_sb64uv_s;
 prototype void vp9_intra4x4_predict "struct blockd *x, int b_mode, uint8_t *predictor"
 specialize vp9_intra4x4_predict;
 
-prototype void vp9_comp_intra4x4_predict "struct blockd *x, int b_mode, int second_mode, uint8_t *predictor"
-specialize vp9_comp_intra4x4_predict;
-
 prototype void vp9_intra8x8_predict "struct blockd *x, int b_mode, uint8_t *predictor"
 specialize vp9_intra8x8_predict;
 
-prototype void vp9_comp_intra8x8_predict "struct blockd *x, int b_mode, int second_mode, uint8_t *predictor"
-specialize vp9_comp_intra8x8_predict;
-
 prototype void vp9_intra_uv4x4_predict "struct blockd *x, int b_mode, uint8_t *predictor"
 specialize vp9_intra_uv4x4_predict;
-
-prototype void vp9_comp_intra_uv4x4_predict "struct blockd *x, int b_mode, int second_mode, uint8_t *predictor"
-specialize vp9_comp_intra_uv4x4_predict;
 
 #
 # Loopfilter

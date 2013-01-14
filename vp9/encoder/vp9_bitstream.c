@@ -778,23 +778,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     }
     if (mode == B_PRED) {
       int j = 0;
-#if CONFIG_COMP_INTRA_PRED
-      int uses_second =
-      m->bmi[0].as_mode.second !=
-      (B_PREDICTION_MODE)(B_DC_PRED - 1);
-      vp9_write(bc, uses_second, DEFAULT_COMP_INTRA_PROB);
-#endif
       do {
-#if CONFIG_COMP_INTRA_PRED
-        B_PREDICTION_MODE mode2 = m->bmi[j].as_mode.second;
-#endif
         write_bmode(bc, m->bmi[j].as_mode.first,
                     pc->fc.bmode_prob);
-#if CONFIG_COMP_INTRA_PRED
-        if (uses_second) {
-          write_bmode(bc, mode2, pc->fc.bmode_prob);
-        }
-#endif
       } while (++j < 16);
     }
     if (mode == I8X8_PRED) {
@@ -1025,30 +1011,16 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
 
   if (ym == B_PRED) {
     int i = 0;
-#if CONFIG_COMP_INTRA_PRED
-    int uses_second =
-      m->bmi[0].as_mode.second !=
-      (B_PREDICTION_MODE)(B_DC_PRED - 1);
-    vp9_write(bc, uses_second, DEFAULT_COMP_INTRA_PROB);
-#endif
     do {
       const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
       const B_PREDICTION_MODE L = left_block_mode(m, i);
       const int bm = m->bmi[i].as_mode.first;
-#if CONFIG_COMP_INTRA_PRED
-      const int bm2 = m->bmi[i].as_mode.second;
-#endif
 
 #ifdef ENTROPY_STATS
       ++intra_mode_stats [A] [L] [bm];
 #endif
 
       write_kf_bmode(bc, bm, c->kf_bmode_prob[A][L]);
-#if CONFIG_COMP_INTRA_PRED
-      if (uses_second) {
-        write_kf_bmode(bc, bm2, c->kf_bmode_prob[A][L]);
-      }
-#endif
     } while (++i < 16);
   }
   if (ym == I8X8_PRED) {

@@ -238,7 +238,6 @@ HAVE_LIST="
 "
 EXPERIMENT_LIST="
     csm
-    comp_intra_pred
     lossless
     new_mvref
     implicit_segmentation

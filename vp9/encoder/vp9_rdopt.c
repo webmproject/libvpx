@@ -1082,20 +1082,12 @@ static void copy_predictor_8x8(uint8_t *dst, const uint8_t *predictor) {
 
 static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
                                      BLOCKD *b, B_PREDICTION_MODE *best_mode,
-#if CONFIG_COMP_INTRA_PRED
-                                     B_PREDICTION_MODE *best_second_mode,
-                                     int allow_comp,
-#endif
                                      int *bmode_costs,
                                      ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                                      int *bestrate, int *bestratey,
                                      int *bestdistortion) {
   B_PREDICTION_MODE mode;
   MACROBLOCKD *xd = &x->e_mbd;
-
-#if CONFIG_COMP_INTRA_PRED
-  B_PREDICTION_MODE mode2;
-#endif
   int64_t best_rd = LLONG_MAX;
   int rate = 0;
   int distortion;
@@ -1116,100 +1108,63 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
   b->bmi.as_mode.context = vp9_find_bpred_context(b);
 #endif
   for (mode = B_DC_PRED; mode < LEFT4X4; mode++) {
-#if CONFIG_COMP_INTRA_PRED
-    for (mode2 = (allow_comp ? 0 : (B_DC_PRED - 1));
-                   mode2 != (allow_comp ? (mode + 1) : 0); mode2++) {
-#endif
-      int64_t this_rd;
-      int ratey;
+    int64_t this_rd;
+    int ratey;
 
 #if CONFIG_NEWBINTRAMODES
-      if (xd->frame_type == KEY_FRAME) {
-        if (mode == B_CONTEXT_PRED) continue;
-#if CONFIG_COMP_INTRA_PRED
-        if (mode2 == B_CONTEXT_PRED) continue;
-#endif
-      } else {
-        if (mode >= B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS &&
-            mode < B_CONTEXT_PRED)
-          continue;
-#if CONFIG_COMP_INTRA_PRED
-        if (mode2 >= B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS &&
-            mode2 < B_CONTEXT_PRED)
-          continue;
-#endif
-      }
-#endif
-
-      b->bmi.as_mode.first = mode;
-#if CONFIG_NEWBINTRAMODES
-      rate = bmode_costs[
-          mode == B_CONTEXT_PRED ? mode - CONTEXT_PRED_REPLACEMENTS : mode];
-#else
-      rate = bmode_costs[mode];
-#endif
-
-#if CONFIG_COMP_INTRA_PRED
-      if (mode2 == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
-#endif
-        vp9_intra4x4_predict(b, mode, b->predictor);
-#if CONFIG_COMP_INTRA_PRED
-      } else {
-        vp9_comp_intra4x4_predict(b, mode, mode2, b->predictor);
-#if CONFIG_NEWBINTRAMODES
-        rate += bmode_costs[
-            mode2 == B_CONTEXT_PRED ?
-            mode2 - CONTEXT_PRED_REPLACEMENTS : mode2];
-#else
-        rate += bmode_costs[mode2];
-#endif
-      }
-#endif
-      vp9_subtract_b(be, b, 16);
-
-      b->bmi.as_mode.first = mode;
-      tx_type = get_tx_type_4x4(xd, b);
-      if (tx_type != DCT_DCT) {
-        vp9_fht(be->src_diff, 32, be->coeff, tx_type, 4);
-        vp9_ht_quantize_b_4x4(be, b, tx_type);
-      } else {
-        x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
-        x->quantize_b_4x4(be, b);
-      }
-
-      tempa = ta;
-      templ = tl;
-
-      ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ, TX_4X4);
-      rate += ratey;
-      distortion = vp9_block_error(be->coeff, b->dqcoeff, 16) >> 2;
-
-      this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
-
-      if (this_rd < best_rd) {
-        *bestrate = rate;
-        *bestratey = ratey;
-        *bestdistortion = distortion;
-        best_rd = this_rd;
-        *best_mode = mode;
-        best_tx_type = tx_type;
-
-#if CONFIG_COMP_INTRA_PRED
-        *best_second_mode = mode2;
-#endif
-        *a = tempa;
-        *l = templ;
-        copy_predictor(best_predictor, b->predictor);
-        vpx_memcpy(best_dqcoeff, b->dqcoeff, 32);
-      }
-#if CONFIG_COMP_INTRA_PRED
+    if (xd->frame_type == KEY_FRAME) {
+      if (mode == B_CONTEXT_PRED) continue;
+    } else {
+      if (mode >= B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS &&
+          mode < B_CONTEXT_PRED)
+        continue;
     }
 #endif
+
+    b->bmi.as_mode.first = mode;
+#if CONFIG_NEWBINTRAMODES
+    rate = bmode_costs[
+        mode == B_CONTEXT_PRED ? mode - CONTEXT_PRED_REPLACEMENTS : mode];
+#else
+    rate = bmode_costs[mode];
+#endif
+
+    vp9_intra4x4_predict(b, mode, b->predictor);
+    vp9_subtract_b(be, b, 16);
+
+    b->bmi.as_mode.first = mode;
+    tx_type = get_tx_type_4x4(xd, b);
+    if (tx_type != DCT_DCT) {
+      vp9_fht(be->src_diff, 32, be->coeff, tx_type, 4);
+      vp9_ht_quantize_b_4x4(be, b, tx_type);
+    } else {
+      x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
+      x->quantize_b_4x4(be, b);
+    }
+
+    tempa = ta;
+    templ = tl;
+
+    ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ, TX_4X4);
+    rate += ratey;
+    distortion = vp9_block_error(be->coeff, b->dqcoeff, 16) >> 2;
+
+    this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+
+    if (this_rd < best_rd) {
+      *bestrate = rate;
+      *bestratey = ratey;
+      *bestdistortion = distortion;
+      best_rd = this_rd;
+      *best_mode = mode;
+      best_tx_type = tx_type;
+      *a = tempa;
+      *l = templ;
+      copy_predictor(best_predictor, b->predictor);
+      vpx_memcpy(best_dqcoeff, b->dqcoeff, 32);
+    }
   }
   b->bmi.as_mode.first = (B_PREDICTION_MODE)(*best_mode);
-#if CONFIG_COMP_INTRA_PRED
-  b->bmi.as_mode.second = (B_PREDICTION_MODE)(*best_second_mode);
-#endif
 
   // inverse transform
   if (best_tx_type != DCT_DCT)
@@ -1222,12 +1177,10 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
   return best_rd;
 }
 
-static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rate,
-                                     int *rate_y, int *Distortion, int64_t best_rd,
-#if CONFIG_COMP_INTRA_PRED
-                                     int allow_comp,
-#endif
-                                     int update_contexts) {
+static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
+                                         int *Rate, int *rate_y,
+                                         int *Distortion, int64_t best_rd,
+                                         int update_contexts) {
   int i;
   MACROBLOCKD *const xd = &mb->e_mbd;
   int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
@@ -1258,9 +1211,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rat
     MODE_INFO *const mic = xd->mode_info_context;
     const int mis = xd->mode_info_stride;
     B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
-#if CONFIG_COMP_INTRA_PRED
-    B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_second_mode);
-#endif
     int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry), UNINITIALIZED_IS_SAFE(d);
 
     if (xd->frame_type == KEY_FRAME) {
@@ -1275,9 +1225,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rat
 
     total_rd += rd_pick_intra4x4block(
                   cpi, mb, mb->block + i, xd->block + i, &best_mode,
-#if CONFIG_COMP_INTRA_PRED
-                  & best_second_mode, allow_comp,
-#endif
                   bmode_costs, ta + vp9_block2above[TX_4X4][i],
                   tl + vp9_block2left[TX_4X4][i], &r, &ry, &d);
 
@@ -1286,9 +1233,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rat
     tot_rate_y += ry;
 
     mic->bmi[i].as_mode.first = best_mode;
-#if CONFIG_COMP_INTRA_PRED
-    mic->bmi[i].as_mode.second = best_second_mode;
-#endif
 
 #if 0  // CONFIG_NEWBINTRAMODES
     printf("%d %d\n", mic->bmi[i].as_mode.first, mic->bmi[i].as_mode.context);
@@ -1301,9 +1245,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb, int *Rat
   if (total_rd >= best_rd)
     return LLONG_MAX;
 
-#if CONFIG_COMP_INTRA_PRED
-  cost += vp9_cost_bit(128, allow_comp);
-#endif
   *Rate = cost;
   *rate_y = tot_rate_y;
   *Distortion = distortion;
@@ -1401,10 +1342,6 @@ static int64_t rd_pick_intra16x16mby_mode(VP9_COMP *cpi,
   MB_PREDICTION_MODE mode;
   TX_SIZE txfm_size = 0;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
-#if CONFIG_COMP_INTRA_PRED
-  MB_PREDICTION_MODE mode2;
-  MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode2_selected);
-#endif
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   int rate, ratey;
@@ -1422,76 +1359,49 @@ static int64_t rd_pick_intra16x16mby_mode(VP9_COMP *cpi,
 
     mbmi->mode = mode;
 
-#if CONFIG_COMP_INTRA_PRED
-    for (mode2 = DC_PRED - 1; mode2 != TM_PRED + 1; mode2++) {
-      mbmi->second_mode = mode2;
-      if (mode2 == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
-#endif
-        vp9_build_intra_predictors_mby(xd);
-#if CONFIG_COMP_INTRA_PRED
-      } else {
-        continue; // i.e. disable for now
-        vp9_build_comp_intra_predictors_mby(xd);
-      }
-#endif
+    vp9_build_intra_predictors_mby(xd);
 
-      macro_block_yrd(cpi, x, &ratey, &distortion, &skip, local_txfm_cache);
+    macro_block_yrd(cpi, x, &ratey, &distortion, &skip, local_txfm_cache);
 
-      // FIXME add compoundmode cost
-      // FIXME add rate for mode2
-      rate = ratey + x->mbmode_cost[xd->frame_type][mbmi->mode];
+    // FIXME add compoundmode cost
+    // FIXME add rate for mode2
+    rate = ratey + x->mbmode_cost[xd->frame_type][mbmi->mode];
 
-      this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+    this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
-      if (this_rd < best_rd) {
-        mode_selected = mode;
-        txfm_size = mbmi->txfm_size;
-#if CONFIG_COMP_INTRA_PRED
-        mode2_selected = mode2;
-#endif
-        best_rd = this_rd;
-        *Rate = rate;
-        *rate_y = ratey;
-        *Distortion = distortion;
-        *skippable = skip;
-      }
-
-      for (i = 0; i < NB_TXFM_MODES; i++) {
-        int64_t adj_rd = this_rd + local_txfm_cache[i] -
-                          local_txfm_cache[cpi->common.txfm_mode];
-        if (adj_rd < txfm_cache[i]) {
-          txfm_cache[i] = adj_rd;
-        }
-      }
-
-#if CONFIG_COMP_INTRA_PRED
+    if (this_rd < best_rd) {
+      mode_selected = mode;
+      txfm_size = mbmi->txfm_size;
+      best_rd = this_rd;
+      *Rate = rate;
+      *rate_y = ratey;
+      *Distortion = distortion;
+      *skippable = skip;
     }
-#endif
+
+    for (i = 0; i < NB_TXFM_MODES; i++) {
+      int64_t adj_rd = this_rd + local_txfm_cache[i] -
+                        local_txfm_cache[cpi->common.txfm_mode];
+      if (adj_rd < txfm_cache[i]) {
+        txfm_cache[i] = adj_rd;
+      }
+    }
   }
 
   mbmi->txfm_size = txfm_size;
   mbmi->mode = mode_selected;
 
-#if CONFIG_COMP_INTRA_PRED
-  mbmi->second_mode = mode2_selected;
-#endif
   return best_rd;
 }
 
 
 static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                      B_PREDICTION_MODE *best_mode,
-#if CONFIG_COMP_INTRA_PRED
-                                     B_PREDICTION_MODE *best_second_mode,
-#endif
                                      int *mode_costs,
                                      ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                                      int *bestrate, int *bestratey,
                                      int *bestdistortion) {
   MB_PREDICTION_MODE mode;
-#if CONFIG_COMP_INTRA_PRED
-  MB_PREDICTION_MODE mode2;
-#endif
   MACROBLOCKD *xd = &x->e_mbd;
   int64_t best_rd = LLONG_MAX;
   int distortion = 0, rate = 0;
@@ -1513,107 +1423,86 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   int idx = (ib & 0x02) ? (ib + 2) : ib;
 
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
-#if CONFIG_COMP_INTRA_PRED
-    for (mode2 = DC_PRED - 1; mode2 != TM_PRED + 1; mode2++) {
-#endif
-      int64_t this_rd;
-      int rate_t = 0;
+    int64_t this_rd;
+    int rate_t = 0;
 
-      // FIXME rate for compound mode and second intrapred mode
-      rate = mode_costs[mode];
-      b->bmi.as_mode.first = mode;
+    // FIXME rate for compound mode and second intrapred mode
+    rate = mode_costs[mode];
+    b->bmi.as_mode.first = mode;
 
-#if CONFIG_COMP_INTRA_PRED
-      if (mode2 == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
-#endif
-        vp9_intra8x8_predict(b, mode, b->predictor);
-#if CONFIG_COMP_INTRA_PRED
-      } else {
-        continue; // i.e. disable for now
-        vp9_comp_intra8x8_predict(b, mode, mode2, b->predictor);
-      }
-#endif
+    vp9_intra8x8_predict(b, mode, b->predictor);
 
-      vp9_subtract_4b_c(be, b, 16);
+    vp9_subtract_4b_c(be, b, 16);
 
-      assert(get_2nd_order_usage(xd) == 0);
-      if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
-        TX_TYPE tx_type = get_tx_type_8x8(xd, b);
-        if (tx_type != DCT_DCT)
-          vp9_fht(be->src_diff, 32, (x->block + idx)->coeff, tx_type, 8);
-        else
-          x->vp9_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
-        x->quantize_b_8x8(x->block + idx, xd->block + idx);
+    assert(get_2nd_order_usage(xd) == 0);
+    if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
+      TX_TYPE tx_type = get_tx_type_8x8(xd, b);
+      if (tx_type != DCT_DCT)
+        vp9_fht(be->src_diff, 32, (x->block + idx)->coeff, tx_type, 8);
+      else
+        x->vp9_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+      x->quantize_b_8x8(x->block + idx, xd->block + idx);
 
-        // compute quantization mse of 8x8 block
-        distortion = vp9_block_error_c((x->block + idx)->coeff,
-                                       (xd->block + idx)->dqcoeff, 64);
-        ta0 = a[vp9_block2above[TX_8X8][idx]];
-        tl0 = l[vp9_block2left[TX_8X8][idx]];
+      // compute quantization mse of 8x8 block
+      distortion = vp9_block_error_c((x->block + idx)->coeff,
+                                     (xd->block + idx)->dqcoeff, 64);
+      ta0 = a[vp9_block2above[TX_8X8][idx]];
+      tl0 = l[vp9_block2left[TX_8X8][idx]];
 
-        rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
-                             &ta0, &tl0, TX_8X8);
+      rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
+                           &ta0, &tl0, TX_8X8);
 
-        rate += rate_t;
-        ta1 = ta0;
-        tl1 = tl0;
-      } else {
-        static const int iblock[4] = {0, 1, 4, 5};
-        TX_TYPE tx_type;
-        int i;
-        ta0 = a[vp9_block2above[TX_4X4][ib]];
-        ta1 = a[vp9_block2above[TX_4X4][ib + 1]];
-        tl0 = l[vp9_block2left[TX_4X4][ib]];
-        tl1 = l[vp9_block2left[TX_4X4][ib + 4]];
-        distortion = 0;
-        rate_t = 0;
-        for (i = 0; i < 4; ++i) {
-          b = &xd->block[ib + iblock[i]];
-          be = &x->block[ib + iblock[i]];
-          tx_type = get_tx_type_4x4(xd, b);
-          if (tx_type != DCT_DCT) {
-            vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
-            vp9_ht_quantize_b_4x4(be, b, tx_type);
-          } else {
-            x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
-            x->quantize_b_4x4(be, b);
-          }
-          distortion += vp9_block_error_c(be->coeff, b->dqcoeff, 16);
-          rate_t += cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC,
-                                // i&1 ? &ta1 : &ta0, i&2 ? &tl1 : &tl0,
-                                &ta0, &tl0,
-                                TX_4X4);
+      rate += rate_t;
+      ta1 = ta0;
+      tl1 = tl0;
+    } else {
+      static const int iblock[4] = {0, 1, 4, 5};
+      TX_TYPE tx_type;
+      int i;
+      ta0 = a[vp9_block2above[TX_4X4][ib]];
+      ta1 = a[vp9_block2above[TX_4X4][ib + 1]];
+      tl0 = l[vp9_block2left[TX_4X4][ib]];
+      tl1 = l[vp9_block2left[TX_4X4][ib + 4]];
+      distortion = 0;
+      rate_t = 0;
+      for (i = 0; i < 4; ++i) {
+        b = &xd->block[ib + iblock[i]];
+        be = &x->block[ib + iblock[i]];
+        tx_type = get_tx_type_4x4(xd, b);
+        if (tx_type != DCT_DCT) {
+          vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
+          vp9_ht_quantize_b_4x4(be, b, tx_type);
+        } else {
+          x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
+          x->quantize_b_4x4(be, b);
         }
-        rate += rate_t;
+        distortion += vp9_block_error_c(be->coeff, b->dqcoeff, 16);
+        rate_t += cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC,
+                              // i&1 ? &ta1 : &ta0, i&2 ? &tl1 : &tl0,
+                              &ta0, &tl0,
+                              TX_4X4);
       }
+      rate += rate_t;
+    }
 
-      distortion >>= 2;
-      this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
-      if (this_rd < best_rd) {
-        *bestrate = rate;
-        *bestratey = rate_t;
-        *bestdistortion = distortion;
-        besta0 = ta0;
-        besta1 = ta1;
-        bestl0 = tl0;
-        bestl1 = tl1;
-        best_rd = this_rd;
-        *best_mode = mode;
-#if CONFIG_COMP_INTRA_PRED
-        *best_second_mode = mode2;
-#endif
-        copy_predictor_8x8(best_predictor, b->predictor);
-        vpx_memcpy(best_dqcoeff, b->dqcoeff, 64);
-        vpx_memcpy(best_dqcoeff + 32, b->dqcoeff + 64, 64);
-#if CONFIG_COMP_INTRA_PRED
-      }
-#endif
+    distortion >>= 2;
+    this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+    if (this_rd < best_rd) {
+      *bestrate = rate;
+      *bestratey = rate_t;
+      *bestdistortion = distortion;
+      besta0 = ta0;
+      besta1 = ta1;
+      bestl0 = tl0;
+      bestl1 = tl1;
+      best_rd = this_rd;
+      *best_mode = mode;
+      copy_predictor_8x8(best_predictor, b->predictor);
+      vpx_memcpy(best_dqcoeff, b->dqcoeff, 64);
+      vpx_memcpy(best_dqcoeff + 32, b->dqcoeff + 64, 64);
     }
   }
   b->bmi.as_mode.first = (*best_mode);
-#if CONFIG_COMP_INTRA_PRED
-  b->bmi.as_mode.second = (*best_second_mode);
-#endif
   vp9_encode_intra8x8(x, ib);
 
   if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
@@ -1656,25 +1545,16 @@ static int64_t rd_pick_intra8x8mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   for (i = 0; i < 4; i++) {
     MODE_INFO *const mic = xd->mode_info_context;
     B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
-#if CONFIG_COMP_INTRA_PRED
-    B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_second_mode);
-#endif
     int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry), UNINITIALIZED_IS_SAFE(d);
 
     ib = vp9_i8x8_block[i];
     total_rd += rd_pick_intra8x8block(
                   cpi, mb, ib, &best_mode,
-#if CONFIG_COMP_INTRA_PRED
-                  & best_second_mode,
-#endif
                   i8x8mode_costs, ta, tl, &r, &ry, &d);
     cost += r;
     distortion += d;
     tot_rate_y += ry;
     mic->bmi[ib].as_mode.first = best_mode;
-#if CONFIG_COMP_INTRA_PRED
-    mic->bmi[ib].as_mode.second = best_second_mode;
-#endif
   }
 
   *Rate = cost;
@@ -1887,10 +1767,6 @@ static void rd_pick_intra_mbuv_mode(VP9_COMP *cpi,
                                     int *skippable) {
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
-#if CONFIG_COMP_INTRA_PRED
-  MB_PREDICTION_MODE mode2;
-  MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode2_selected);
-#endif
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   int64_t best_rd = LLONG_MAX;
@@ -1898,50 +1774,33 @@ static void rd_pick_intra_mbuv_mode(VP9_COMP *cpi,
   int rate_to, UNINITIALIZED_IS_SAFE(skip);
 
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
-#if CONFIG_COMP_INTRA_PRED
-    for (mode2 = DC_PRED - 1; mode2 != TM_PRED + 1; mode2++) {
-#endif
-      int rate;
-      int distortion;
-      int64_t this_rd;
+    int rate;
+    int distortion;
+    int64_t this_rd;
 
-      mbmi->uv_mode = mode;
-#if CONFIG_COMP_INTRA_PRED
-      mbmi->second_uv_mode = mode2;
-      if (mode2 == (MB_PREDICTION_MODE)(DC_PRED - 1)) {
-#endif
-        vp9_build_intra_predictors_mbuv(&x->e_mbd);
-#if CONFIG_COMP_INTRA_PRED
-      } else {
-        continue;
-        vp9_build_comp_intra_predictors_mbuv(&x->e_mbd);
-      }
-#endif
+    mbmi->uv_mode = mode;
+    vp9_build_intra_predictors_mbuv(&x->e_mbd);
 
-      vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
-                        x->e_mbd.predictor, x->src.uv_stride);
-      vp9_transform_mbuv_4x4(x);
-      vp9_quantize_mbuv_4x4(x);
+    vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
+                      x->e_mbd.predictor, x->src.uv_stride);
+    vp9_transform_mbuv_4x4(x);
+    vp9_quantize_mbuv_4x4(x);
 
-      rate_to = rd_cost_mbuv_4x4(x, 1);
-      rate = rate_to
-             + x->intra_uv_mode_cost[x->e_mbd.frame_type][mbmi->uv_mode];
+    rate_to = rd_cost_mbuv_4x4(x, 1);
+    rate = rate_to
+           + x->intra_uv_mode_cost[x->e_mbd.frame_type][mbmi->uv_mode];
 
-      distortion = vp9_mbuverror(x) / 4;
+    distortion = vp9_mbuverror(x) / 4;
 
-      this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+    this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
-      if (this_rd < best_rd) {
-        skip = vp9_mbuv_is_skippable_4x4(xd);
-        best_rd = this_rd;
-        d = distortion;
-        r = rate;
-        *rate_tokenonly = rate_to;
-        mode_selected = mode;
-#if CONFIG_COMP_INTRA_PRED
-        mode2_selected = mode2;
-      }
-#endif
+    if (this_rd < best_rd) {
+      skip = vp9_mbuv_is_skippable_4x4(xd);
+      best_rd = this_rd;
+      d = distortion;
+      r = rate;
+      *rate_tokenonly = rate_to;
+      mode_selected = mode;
     }
   }
 
@@ -1950,9 +1809,6 @@ static void rd_pick_intra_mbuv_mode(VP9_COMP *cpi,
   *skippable = skip;
 
   mbmi->uv_mode = mode_selected;
-#if CONFIG_COMP_INTRA_PRED
-  mbmi->second_uv_mode = mode2_selected;
-#endif
 }
 
 static void rd_pick_intra_mbuv_mode_8x8(VP9_COMP *cpi,
@@ -3100,24 +2956,17 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   x->mv_best_ref_index[ref_frame] = best_index;
 }
 
-static void set_i8x8_block_modes(MACROBLOCK *x, int modes[2][4]) {
+static void set_i8x8_block_modes(MACROBLOCK *x, int modes[4]) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
   for (i = 0; i < 4; i++) {
     int ib = vp9_i8x8_block[i];
-    xd->mode_info_context->bmi[ib + 0].as_mode.first = modes[0][i];
-    xd->mode_info_context->bmi[ib + 1].as_mode.first = modes[0][i];
-    xd->mode_info_context->bmi[ib + 4].as_mode.first = modes[0][i];
-    xd->mode_info_context->bmi[ib + 5].as_mode.first = modes[0][i];
-#if CONFIG_COMP_INTRA_PRED
-    xd->mode_info_context->bmi[ib + 0].as_mode.second = modes[1][i];
-    xd->mode_info_context->bmi[ib + 1].as_mode.second = modes[1][i];
-    xd->mode_info_context->bmi[ib + 4].as_mode.second = modes[1][i];
-    xd->mode_info_context->bmi[ib + 5].as_mode.second = modes[1][i];
-#endif
-    // printf("%d,%d,%d,%d %d,%d,%d,%d\n",
-    //       modes[0][0], modes[0][1], modes[0][2], modes[0][3],
-    //       modes[1][0], modes[1][1], modes[1][2], modes[1][3]);
+    xd->mode_info_context->bmi[ib + 0].as_mode.first = modes[i];
+    xd->mode_info_context->bmi[ib + 1].as_mode.first = modes[i];
+    xd->mode_info_context->bmi[ib + 4].as_mode.first = modes[i];
+    xd->mode_info_context->bmi[ib + 5].as_mode.first = modes[i];
+    // printf("%d,%d,%d,%d\n",
+    //       modes[0], modes[1], modes[2], modes[3]);
   }
 
   for (i = 0; i < 16; i++) {
@@ -3676,7 +3525,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   MB_PREDICTION_MODE best_mode = DC_PRED;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
   int i, best_mode_index = 0;
-  int mode8x8[2][4];
+  int mode8x8[4];
   unsigned char segment_id = mbmi->segment_id;
 
   int mode_index;
@@ -3834,10 +3683,6 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     // current coding mode under rate-distortion optimization test loop
-#if CONFIG_COMP_INTRA_PRED
-    mbmi->second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-    mbmi->second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
 #if CONFIG_COMP_INTERINTRA_PRED
     mbmi->interintra_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
     mbmi->interintra_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
@@ -3952,10 +3797,8 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           // Note the rate value returned here includes the cost of coding
           // the BPRED mode : x->mbmode_cost[xd->frame_type][BPRED];
           mbmi->txfm_size = TX_4X4;
-          tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion, best_yrd,
-#if CONFIG_COMP_INTRA_PRED
-                                             0,
-#endif
+          tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y,
+                                             &distortion, best_yrd,
                                              cpi->update_context);
           rate2 += rate;
           rate2 += intra_cost_penalty;
@@ -3981,16 +3824,10 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           mbmi->txfm_size = TX_4X4;
           tmp_rd_4x4 = rd_pick_intra8x8mby_modes(cpi, x, &r4x4, &tok4x4,
                                                  &d4x4, best_yrd);
-          mode8x8[0][0] = xd->mode_info_context->bmi[0].as_mode.first;
-          mode8x8[0][1] = xd->mode_info_context->bmi[2].as_mode.first;
-          mode8x8[0][2] = xd->mode_info_context->bmi[8].as_mode.first;
-          mode8x8[0][3] = xd->mode_info_context->bmi[10].as_mode.first;
-#if CONFIG_COMP_INTRA_PRED
-          mode8x8[1][0] = xd->mode_info_context->bmi[0].as_mode.second;
-          mode8x8[1][1] = xd->mode_info_context->bmi[2].as_mode.second;
-          mode8x8[1][2] = xd->mode_info_context->bmi[8].as_mode.second;
-          mode8x8[1][3] = xd->mode_info_context->bmi[10].as_mode.second;
-#endif
+          mode8x8[0] = xd->mode_info_context->bmi[0].as_mode.first;
+          mode8x8[1] = xd->mode_info_context->bmi[2].as_mode.first;
+          mode8x8[2] = xd->mode_info_context->bmi[8].as_mode.first;
+          mode8x8[3] = xd->mode_info_context->bmi[10].as_mode.first;
           mbmi->txfm_size = TX_8X8;
           tmp_rd_8x8 = rd_pick_intra8x8mby_modes(cpi, x, &r8x8, &tok8x8,
                                                  &d8x8, best_yrd);
@@ -4014,16 +3851,10 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
               mbmi->txfm_size = TX_8X8;
               tmp_rd = tmp_rd_8x8s;
 
-              mode8x8[0][0] = xd->mode_info_context->bmi[0].as_mode.first;
-              mode8x8[0][1] = xd->mode_info_context->bmi[2].as_mode.first;
-              mode8x8[0][2] = xd->mode_info_context->bmi[8].as_mode.first;
-              mode8x8[0][3] = xd->mode_info_context->bmi[10].as_mode.first;
-#if CONFIG_COMP_INTRA_PRED
-              mode8x8[1][0] = xd->mode_info_context->bmi[0].as_mode.second;
-              mode8x8[1][1] = xd->mode_info_context->bmi[2].as_mode.second;
-              mode8x8[1][2] = xd->mode_info_context->bmi[8].as_mode.second;
-              mode8x8[1][3] = xd->mode_info_context->bmi[10].as_mode.second;
-#endif
+              mode8x8[0] = xd->mode_info_context->bmi[0].as_mode.first;
+              mode8x8[1] = xd->mode_info_context->bmi[2].as_mode.first;
+              mode8x8[2] = xd->mode_info_context->bmi[8].as_mode.first;
+              mode8x8[3] = xd->mode_info_context->bmi[10].as_mode.first;
             }
           } else if (cm->txfm_mode == ONLY_4X4) {
             rate = r4x4;
@@ -4038,16 +3869,10 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             mbmi->txfm_size = TX_8X8;
             tmp_rd = tmp_rd_8x8;
 
-            mode8x8[0][0] = xd->mode_info_context->bmi[0].as_mode.first;
-            mode8x8[0][1] = xd->mode_info_context->bmi[2].as_mode.first;
-            mode8x8[0][2] = xd->mode_info_context->bmi[8].as_mode.first;
-            mode8x8[0][3] = xd->mode_info_context->bmi[10].as_mode.first;
-#if CONFIG_COMP_INTRA_PRED
-            mode8x8[1][0] = xd->mode_info_context->bmi[0].as_mode.second;
-            mode8x8[1][1] = xd->mode_info_context->bmi[2].as_mode.second;
-            mode8x8[1][2] = xd->mode_info_context->bmi[8].as_mode.second;
-            mode8x8[1][3] = xd->mode_info_context->bmi[10].as_mode.second;
-#endif
+            mode8x8[0] = xd->mode_info_context->bmi[0].as_mode.first;
+            mode8x8[1] = xd->mode_info_context->bmi[2].as_mode.first;
+            mode8x8[2] = xd->mode_info_context->bmi[8].as_mode.first;
+            mode8x8[3] = xd->mode_info_context->bmi[10].as_mode.first;
           }
 
           rate2 += rate;
@@ -4519,10 +4344,6 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   int64_t error4x4, error16x16;
-#if CONFIG_COMP_INTRA_PRED
-  int64_t error4x4d;
-  int rate4x4d, dist4x4d;
-#endif
   int rate4x4, rate16x16 = 0, rateuv, rateuv8x8;
   int dist4x4 = 0, dist16x16 = 0, distuv = 0, distuv8x8 = 0;
   int rate;
@@ -4533,7 +4354,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int rate8x8_tokenonly=0;
   int rate8x8, dist8x8;
   int mode16x16;
-  int mode8x8[2][4];
+  int mode8x8[4];
   int dist;
   int modeuv, uv_intra_skippable, uv_intra_skippable_8x8;
   int y_intra16x16_skippable = 0;
@@ -4566,30 +4387,15 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->txfm_size = (cm->txfm_mode == ONLY_4X4) ? TX_4X4 : TX_8X8;
   error8x8 = rd_pick_intra8x8mby_modes(cpi, x, &rate8x8, &rate8x8_tokenonly,
                                        &dist8x8, error16x16);
-  mode8x8[0][0]= xd->mode_info_context->bmi[0].as_mode.first;
-  mode8x8[0][1]= xd->mode_info_context->bmi[2].as_mode.first;
-  mode8x8[0][2]= xd->mode_info_context->bmi[8].as_mode.first;
-  mode8x8[0][3]= xd->mode_info_context->bmi[10].as_mode.first;
-#if CONFIG_COMP_INTRA_PRED
-  mode8x8[1][0] = xd->mode_info_context->bmi[0].as_mode.second;
-  mode8x8[1][1] = xd->mode_info_context->bmi[2].as_mode.second;
-  mode8x8[1][2] = xd->mode_info_context->bmi[8].as_mode.second;
-  mode8x8[1][3] = xd->mode_info_context->bmi[10].as_mode.second;
-#endif
+  mode8x8[0]= xd->mode_info_context->bmi[0].as_mode.first;
+  mode8x8[1]= xd->mode_info_context->bmi[2].as_mode.first;
+  mode8x8[2]= xd->mode_info_context->bmi[8].as_mode.first;
+  mode8x8[3]= xd->mode_info_context->bmi[10].as_mode.first;
 
   error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
                                        &rate4x4, &rate4x4_tokenonly,
                                        &dist4x4, error16x16,
-#if CONFIG_COMP_INTRA_PRED
-                                       0,
-#endif
                                        cpi->update_context);
-#if CONFIG_COMP_INTRA_PRED
-  error4x4d = rd_pick_intra4x4mby_modes(cpi, x,
-                                        &rate4x4d, &rate4x4_tokenonly,
-                                        &dist4x4d, error16x16, 1,
-                                        cpi->update_context);
-#endif
 
   mbmi->mb_skip_coeff = 0;
   if (cpi->common.mb_no_coeff_skip &&
@@ -4606,17 +4412,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
            sizeof(x->mb_context[xd->sb_index][xd->mb_index].txfm_rd_diff));
   } else if (error8x8 > error16x16) {
     if (error4x4 < error16x16) {
-      rate = rateuv;
-#if CONFIG_COMP_INTRA_PRED
-      rate += (error4x4d < error4x4) ? rate4x4d : rate4x4;
-      if (error4x4d >= error4x4) // FIXME save original modes etc.
-        error4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4,
-                                             &rate4x4_tokenonly,
-                                             &dist4x4, error16x16, 0,
-                                             cpi->update_context);
-#else
-      rate += rate4x4;
-#endif
+      rate = rateuv + rate4x4;
       mbmi->mode = B_PRED;
       mbmi->txfm_size = TX_4X4;
       dist = dist4x4 + (distuv >> 2);
@@ -4636,17 +4432,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
       rate += vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
   } else {
     if (error4x4 < error8x8) {
-      rate = rateuv;
-#if CONFIG_COMP_INTRA_PRED
-      rate += (error4x4d < error4x4) ? rate4x4d : rate4x4;
-      if (error4x4d >= error4x4) // FIXME save original modes etc.
-        error4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4,
-                                             &rate4x4_tokenonly,
-                                             &dist4x4, error16x16, 0,
-                                             cpi->update_context);
-#else
-      rate += rate4x4;
-#endif
+      rate = rateuv + rate4x4;
       mbmi->mode = B_PRED;
       mbmi->txfm_size = TX_4X4;
       dist = dist4x4 + (distuv >> 2);
@@ -4817,10 +4603,6 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     comp_pred = mbmi->second_ref_frame > INTRA_FRAME;
     mbmi->mode = this_mode;
     mbmi->uv_mode = DC_PRED;
-#if CONFIG_COMP_INTRA_PRED
-    mbmi->second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-    mbmi->second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
 #if CONFIG_COMP_INTERINTRA_PRED
     mbmi->interintra_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
     mbmi->interintra_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);

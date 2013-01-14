@@ -773,28 +773,6 @@ void vp9_build_intra_predictors_sb64y_s(MACROBLOCKD *xd) {
                                       xd->up_available, xd->left_available);
 }
 
-#if CONFIG_COMP_INTRA_PRED
-void vp9_build_comp_intra_predictors_mby(MACROBLOCKD *xd) {
-  uint8_t predictor[2][256];
-  int i;
-
-  vp9_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
-                                      predictor[0], 16,
-                                      xd->mode_info_context->mbmi.mode,
-                                      16, xd->up_available,
-                                      xd->left_available);
-  vp9_build_intra_predictors_internal(xd->dst.y_buffer, xd->dst.y_stride,
-                                      predictor[1], 16,
-                                      xd->mode_info_context->mbmi.second_mode,
-                                      16, xd->up_available,
-                                      xd->left_available);
-
-  for (i = 0; i < 256; i++) {
-    xd->predictor[i] = (predictor[0][i] + predictor[1][i] + 1) >> 1;
-  }
-}
-#endif
-
 void vp9_build_intra_predictors_mbuv_internal(MACROBLOCKD *xd,
                                               uint8_t *upred_ptr,
                                               uint8_t *vpred_ptr,
@@ -837,25 +815,6 @@ void vp9_build_intra_predictors_sb64uv_s(MACROBLOCKD *xd) {
                                            32);
 }
 
-#if CONFIG_COMP_INTRA_PRED
-void vp9_build_comp_intra_predictors_mbuv(MACROBLOCKD *xd) {
-  uint8_t predictor[2][2][64];
-  int i;
-
-  vp9_build_intra_predictors_mbuv_internal(
-      xd, predictor[0][0], predictor[1][0], 8,
-      xd->mode_info_context->mbmi.uv_mode, 8);
-  vp9_build_intra_predictors_mbuv_internal(
-      xd, predictor[0][1], predictor[1][1], 8,
-      xd->mode_info_context->mbmi.second_uv_mode, 8);
-  for (i = 0; i < 64; i++) {
-    xd->predictor[256 + i] = (predictor[0][0][i] + predictor[0][1][i] + 1) >> 1;
-    xd->predictor[256 + 64 + i] = (predictor[1][0][i] +
-                                   predictor[1][1][i] + 1) >> 1;
-  }
-}
-#endif
-
 void vp9_intra8x8_predict(BLOCKD *xd,
                           int mode,
                           uint8_t *predictor) {
@@ -864,24 +823,6 @@ void vp9_intra8x8_predict(BLOCKD *xd,
                                       mode, 8, 1, 1);
 }
 
-#if CONFIG_COMP_INTRA_PRED
-void vp9_comp_intra8x8_predict(BLOCKD *xd,
-                               int mode, int second_mode,
-                               uint8_t *out_predictor) {
-  uint8_t predictor[2][8 * 16];
-  int i, j;
-
-  vp9_intra8x8_predict(xd, mode, predictor[0]);
-  vp9_intra8x8_predict(xd, second_mode, predictor[1]);
-
-  for (i = 0; i < 8 * 16; i += 16) {
-    for (j = i; j < i + 8; j++) {
-      out_predictor[j] = (predictor[0][j] + predictor[1][j] + 1) >> 1;
-    }
-  }
-}
-#endif
-
 void vp9_intra_uv4x4_predict(BLOCKD *xd,
                              int mode,
                              uint8_t *predictor) {
@@ -889,24 +830,6 @@ void vp9_intra_uv4x4_predict(BLOCKD *xd,
                                       xd->dst_stride, predictor, 8,
                                       mode, 4, 1, 1);
 }
-
-#if CONFIG_COMP_INTRA_PRED
-void vp9_comp_intra_uv4x4_predict(BLOCKD *xd,
-                                  int mode, int mode2,
-                                  uint8_t *out_predictor) {
-  uint8_t predictor[2][8 * 4];
-  int i, j;
-
-  vp9_intra_uv4x4_predict(xd, mode, predictor[0]);
-  vp9_intra_uv4x4_predict(xd, mode2, predictor[1]);
-
-  for (i = 0; i < 4 * 8; i += 8) {
-    for (j = i; j < i + 4; j++) {
-      out_predictor[j] = (predictor[0][j] + predictor[1][j] + 1) >> 1;
-    }
-  }
-}
-#endif
 
 /* TODO: try different ways of use Y-UV mode correlation
    Current code assumes that a uv 4x4 block use same mode
