@@ -794,7 +794,7 @@ static double bitcost(double prob) {
   return -(log(prob) / log(2.0));
 }
 
-static long long estimate_modemvcost(VP9_COMP *cpi,
+static int64_t estimate_modemvcost(VP9_COMP *cpi,
                                      FIRSTPASS_STATS *fpstats) {
 #if 0
   int mv_cost;

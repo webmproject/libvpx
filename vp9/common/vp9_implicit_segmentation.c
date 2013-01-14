@@ -33,8 +33,8 @@ typedef struct {
   int min_y;
   int max_x;
   int max_y;
-  long long sum_x;
-  long long sum_y;
+  int64_t sum_x;
+  int64_t sum_y;
   int pixels;
   int seg_value;
   int label;

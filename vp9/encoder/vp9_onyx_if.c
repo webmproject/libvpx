@@ -1727,10 +1727,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
 #endif
 
-#ifndef LLONG_MAX
-#define LLONG_MAX  9223372036854775807LL
-#endif
-  cpi->first_time_stamp_ever = LLONG_MAX;
+  cpi->first_time_stamp_ever = INT64_MAX;
 
   cpi->frames_till_gf_update_due      = 0;
   cpi->key_frame_count              = 1;
