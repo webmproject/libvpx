@@ -2136,8 +2136,6 @@ static void vp9_short_fdct16x16_c_f(short *input, short *out, int pitch,
 
 void vp9_short_fdct8x8_c_f(short *block, short *coefs, int pitch, int scale) {
   int j1, i, j, k;
-  static int count = 0;
-  short x[8 * 8];
   float b[8];
   float b1[8];
   float d[8][8];
