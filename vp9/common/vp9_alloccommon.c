@@ -80,7 +80,6 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
 
   for (i = 0; i < NUM_YV12_BUFFERS; i++) {
     oci->fb_idx_ref_cnt[i] = 0;
-    oci->yv12_fb[i].flags = 0;
     if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i], width, height,
                                     VP9BORDERINPIXELS) < 0) {
       vp9_de_alloc_frame_buffers(oci);

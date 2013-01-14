@@ -30,9 +30,6 @@
 #include "vp9/decoder/vp9_detokenize.h"
 #include "./vpx_scale_rtcd.h"
 
-static int get_free_fb(VP9_COMMON *cm);
-static void ref_cnt_fb(int *buf, int *idx, int new_idx);
-
 #define WRITE_RECON_BUFFER 0
 #if WRITE_RECON_BUFFER == 1
 static void recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s) {
@@ -233,26 +230,6 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
   return pbi->common.error.error_code;
 }
 
-
-static int get_free_fb(VP9_COMMON *cm) {
-  int i;
-  for (i = 0; i < NUM_YV12_BUFFERS; i++)
-    if (cm->fb_idx_ref_cnt[i] == 0)
-      break;
-
-  assert(i < NUM_YV12_BUFFERS);
-  cm->fb_idx_ref_cnt[i] = 1;
-  return i;
-}
-
-static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
-  if (buf[*idx] > 0)
-    buf[*idx]--;
-
-  *idx = new_idx;
-
-  buf[new_idx]++;
-}
 
 /* If any buffer copy / swapping is signalled it should be done here. */
 static int swap_frame_buffers(VP9_COMMON *cm) {

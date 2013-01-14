@@ -271,4 +271,24 @@ typedef struct VP9Common {
 
 } VP9_COMMON;
 
+static int get_free_fb(VP9_COMMON *cm) {
+  int i;
+  for (i = 0; i < NUM_YV12_BUFFERS; i++)
+    if (cm->fb_idx_ref_cnt[i] == 0)
+      break;
+
+  assert(i < NUM_YV12_BUFFERS);
+  cm->fb_idx_ref_cnt[i] = 1;
+  return i;
+}
+
+static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
+  if (buf[*idx] > 0)
+    buf[*idx]--;
+
+  *idx = new_idx;
+
+  buf[new_idx]++;
+}
+
 #endif  // VP9_COMMON_VP9_ONYXC_INT_H_

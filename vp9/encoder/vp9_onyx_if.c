@@ -2564,36 +2564,24 @@ static int recode_loop_test(VP9_COMP *cpi,
 }
 
 static void update_reference_frames(VP9_COMMON *cm) {
-  YV12_BUFFER_CONFIG *yv12_fb = cm->yv12_fb;
-
   // At this point the new frame has been encoded.
   // If any buffer copy / swapping is signaled it should be done here.
 
   if (cm->frame_type == KEY_FRAME) {
-    yv12_fb[cm->new_fb_idx].flags |= VP9_GOLD_FLAG | VP9_ALT_FLAG;
-
-    yv12_fb[cm->gld_fb_idx].flags &= ~VP9_GOLD_FLAG;
-    yv12_fb[cm->alt_fb_idx].flags &= ~VP9_ALT_FLAG;
-
-    cm->alt_fb_idx = cm->gld_fb_idx = cm->new_fb_idx;
+    ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->gld_fb_idx, cm->new_fb_idx);
+    ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->alt_fb_idx, cm->new_fb_idx);
   } else { /* For non key frames */
     if (cm->refresh_alt_ref_frame) {
-      cm->yv12_fb[cm->new_fb_idx].flags |= VP9_ALT_FLAG;
-      cm->yv12_fb[cm->alt_fb_idx].flags &= ~VP9_ALT_FLAG;
-      cm->alt_fb_idx = cm->new_fb_idx;
+      ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->alt_fb_idx, cm->new_fb_idx);
     }
 
     if (cm->refresh_golden_frame) {
-      cm->yv12_fb[cm->new_fb_idx].flags |= VP9_GOLD_FLAG;
-      cm->yv12_fb[cm->gld_fb_idx].flags &= ~VP9_GOLD_FLAG;
-      cm->gld_fb_idx = cm->new_fb_idx;
+      ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->gld_fb_idx, cm->new_fb_idx);
     }
   }
 
   if (cm->refresh_last_frame) {
-    cm->yv12_fb[cm->new_fb_idx].flags |= VP9_LAST_FLAG;
-    cm->yv12_fb[cm->lst_fb_idx].flags &= ~VP9_LAST_FLAG;
-    cm->lst_fb_idx = cm->new_fb_idx;
+    ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->lst_fb_idx, cm->new_fb_idx);
   }
 }
 
@@ -3914,18 +3902,13 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   }
 
 #endif
-  /* find a free buffer for the new frame */
-  {
-    int i = 0;
-    for (; i < NUM_YV12_BUFFERS; i++) {
-      if (!cm->yv12_fb[i].flags) {
-        cm->new_fb_idx = i;
-        break;
-      }
-    }
 
-    assert(i < NUM_YV12_BUFFERS);
-  }
+  /* find a free buffer for the new frame, releasing the reference previously
+   * held.
+   */
+  cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+  cm->new_fb_idx = get_free_fb(cm);
+
   if (cpi->pass == 1) {
     Pass1Encode(cpi, size, dest, frame_flags);
   } else if (cpi->pass == 2) {
