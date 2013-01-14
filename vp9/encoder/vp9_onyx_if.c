@@ -49,11 +49,7 @@ extern void print_tree_update_probs();
 
 static void set_default_lf_deltas(VP9_COMP *cpi);
 
-#if CONFIG_PRED_FILTER
 #define DEFAULT_INTERP_FILTER SWITCHABLE
-#else
-#define DEFAULT_INTERP_FILTER EIGHTTAP
-#endif
 
 #define SEARCH_BEST_FILTER 0            /* to search exhaustively for
                                            best filter */

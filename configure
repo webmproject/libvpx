@@ -239,7 +239,6 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     csm
     comp_intra_pred
-    pred_filter
     lossless
     subpelrefmv
     new_mvref
