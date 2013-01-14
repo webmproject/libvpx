@@ -481,7 +481,6 @@ void vp9_loop_filter_bvs_c(uint8_t *y_ptr, int y_stride,
   vp9_loop_filter_simple_vertical_edge_c(y_ptr + 12, y_stride, blimit);
 }
 
-#if CONFIG_WIDERLPF
 static __inline void wide_mbfilter(int8_t mask, uint8_t hev,
                                    uint8_t flat, uint8_t flat2,
                                    uint8_t *op7, uint8_t *op6, uint8_t *op5,
@@ -720,4 +719,3 @@ void vp9_lpf_mbh_w_c(unsigned char *y_ptr, unsigned char *u_ptr,
                                         lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 }
 
-#endif

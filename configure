@@ -250,7 +250,6 @@ EXPERIMENT_LIST="
     cnvcontext
     newcoefcontext
     enable_6tap
-    widerlpf
     abovesprefmv
 "
 CONFIG_LIST="
