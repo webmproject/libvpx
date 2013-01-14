@@ -2266,7 +2266,6 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
   uint8_t *vdst = xd->dst.v_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
-  int seg_ref_active;
   unsigned char ref_pred_flag;
   int n;
   TOKENEXTRA *tp[4];
@@ -2308,10 +2307,7 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
 
     vp9_update_zbin_extra(cpi, x);
 
-    seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
-
     // SET VARIOUS PREDICTION FLAGS
-
     // Did the chosen reference frame match its predicted value.
     ref_pred_flag = ((xd->mode_info_context->mbmi.ref_frame ==
                       vp9_get_pred_ref(cm, xd)));
@@ -2502,7 +2498,6 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
   uint8_t *vdst = xd->dst.v_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
-  int seg_ref_active;
   unsigned char ref_pred_flag;
   int n;
   TOKENEXTRA *tp[16];
@@ -2544,10 +2539,6 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
     }
 
     vp9_update_zbin_extra(cpi, x);
-
-    seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
-
-    // SET VARIOUS PREDICTION FLAGS
 
     // Did the chosen reference frame match its predicted value.
     ref_pred_flag = ((xd->mode_info_context->mbmi.ref_frame ==

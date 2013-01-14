@@ -4464,14 +4464,13 @@ void vp9_rd_pick_intra_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   int rate_y, rate_uv;
   int rate_y_tokenonly, rate_uv_tokenonly;
-  int error_y, error_uv;
   int dist_y, dist_uv;
   int y_skip, uv_skip;
   int64_t txfm_cache[NB_TXFM_MODES];
 
-  error_y = rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
+  rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
                                    &dist_y, &y_skip, txfm_cache);
-  error_uv = rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
+  rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
                                      &dist_uv, &uv_skip);
 
   if (cpi->common.mb_no_coeff_skip && y_skip && uv_skip) {
@@ -4493,14 +4492,13 @@ void vp9_rd_pick_intra_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   int rate_y, rate_uv;
   int rate_y_tokenonly, rate_uv_tokenonly;
-  int error_y, error_uv;
   int dist_y, dist_uv;
   int y_skip, uv_skip;
   int64_t txfm_cache[NB_TXFM_MODES];
 
-  error_y = rd_pick_intra_sb64y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
+  rd_pick_intra_sb64y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
                                      &dist_y, &y_skip, txfm_cache);
-  error_uv = rd_pick_intra_sb64uv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
+  rd_pick_intra_sb64uv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
                                        &dist_uv, &uv_skip);
 
   if (cpi->common.mb_no_coeff_skip && y_skip && uv_skip) {
@@ -4602,6 +4600,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
     rate = rateuv8x8 + rate16x16 - rateuv8x8_tokenonly - rate16x16_tokenonly +
            vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 1);
     dist = dist16x16 + (distuv8x8 >> 2);
+
     mbmi->txfm_size = txfm_size_16x16;
     memset(x->mb_context[xd->sb_index][xd->mb_index].txfm_rd_diff, 0,
            sizeof(x->mb_context[xd->sb_index][xd->mb_index].txfm_rd_diff));
@@ -4697,7 +4696,6 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int near_sadidx[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
   int saddone = 0;
   int64_t best_rd = LLONG_MAX;
-  int64_t best_yrd = LLONG_MAX;
   int64_t best_txfm_rd[NB_TXFM_MODES];
   int64_t best_txfm_diff[NB_TXFM_MODES];
   int64_t best_pred_diff[NB_PREDICTION_TYPES];
@@ -5071,11 +5069,6 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         }
 
         other_cost += ref_costs[xd->mode_info_context->mbmi.ref_frame];
-
-        /* Calculate the final y RD estimate for this mode */
-        best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2 - rate_uv - other_cost),
-                          (distortion2 - distortion_uv));
-
         *returnrate = rate2;
         *returndistortion = distortion2;
         best_rd = this_rd;
