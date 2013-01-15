@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//480\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1267,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-15T17:18:00Z",
+      "side": 1,
+      "message": "treat error_resilient_mode as a boolean, rather than comparing \u003d\u003d1. it will likely expand to be a bitfield as we add levels of error reslience, and you probably want to do this in all cases. Even if not, let the next feature decide if you only want to do it in mode 1 or not.",
+      "revId": "bcfd288cb84818d5ea05daa5508c1bf37093dfae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//48w\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1488,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-15T17:18:00Z",
+      "side": 1,
+      "message": "why 2 bits? Only one mode is defined on the decoder as far as I can tell.",
+      "revId": "bcfd288cb84818d5ea05daa5508c1bf37093dfae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//48s\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1842,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-15T17:18:00Z",
+      "side": 1,
+      "message": "!error_resilient_mode",
+      "revId": "bcfd288cb84818d5ea05daa5508c1bf37093dfae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//48o\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1845,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-15T17:18:00Z",
+      "side": 1,
+      "message": "!error_resilient_mode",
+      "revId": "bcfd288cb84818d5ea05daa5508c1bf37093dfae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//48k\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1543,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-15T17:18:00Z",
+      "side": 1,
+      "message": "why 2 bits? VP8 has 2 modes, but the decoder doesn\u0027t know about them.",
+      "revId": "bcfd288cb84818d5ea05daa5508c1bf37093dfae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//48g\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3459,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-15T17:18:00Z",
+      "side": 1,
+      "message": "treat as boolean, here and elsewhere this file",
+      "revId": "bcfd288cb84818d5ea05daa5508c1bf37093dfae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
