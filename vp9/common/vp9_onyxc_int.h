@@ -37,7 +37,8 @@ void vp9_initialize_common(void);
 
 #define QINDEX_RANGE (MAXQ + 1)
 
-#define NUM_YV12_BUFFERS 4
+#define NUM_REF_FRAMES 3
+#define NUM_YV12_BUFFERS (NUM_REF_FRAMES + 1)
 
 #define COMP_PRED_CONTEXTS   2
 
@@ -142,8 +143,9 @@ typedef struct VP9Common {
   YV12_BUFFER_CONFIG *frame_to_show;
 
   YV12_BUFFER_CONFIG yv12_fb[NUM_YV12_BUFFERS];
-  int fb_idx_ref_cnt[NUM_YV12_BUFFERS];
-  int new_fb_idx, lst_fb_idx, gld_fb_idx, alt_fb_idx;
+  int fb_idx_ref_cnt[NUM_YV12_BUFFERS]; /* reference counts */
+  int active_ref_idx[3]; /* each frame can reference 3 buffers */
+  int new_fb_idx;
 
   YV12_BUFFER_CONFIG post_proc_buffer;
   YV12_BUFFER_CONFIG temp_scale_frame;
@@ -201,10 +203,6 @@ typedef struct VP9Common {
   int filter_level;
   int last_sharpness_level;
   int sharpness_level;
-
-  int refresh_last_frame;       /* Two state 0 = NO, 1 = YES */
-  int refresh_golden_frame;     /* Two state 0 = NO, 1 = YES */
-  int refresh_alt_ref_frame;     /* Two state 0 = NO, 1 = YES */
 
   int refresh_entropy_probs;    /* Two state 0 = NO, 1 = YES */
 

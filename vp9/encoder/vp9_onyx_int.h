@@ -357,7 +357,12 @@ typedef struct VP9_COMP {
   int alt_is_last;  // Alt reference frame same as last ( short circuit altref search)
   int gold_is_alt;  // don't do both alt and gold search ( just do gold).
 
-  // int refresh_alt_ref_frame;
+  int lst_fb_idx;
+  int gld_fb_idx;
+  int alt_fb_idx;
+  int refresh_last_frame;
+  int refresh_golden_frame;
+  int refresh_alt_ref_frame;
   YV12_BUFFER_CONFIG last_frame_uf;
 
   TOKENEXTRA *tok;

@@ -88,9 +88,8 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   }
 
   oci->new_fb_idx = 0;
-  oci->lst_fb_idx = 1;
-  oci->gld_fb_idx = 2;
-  oci->alt_fb_idx = 3;
+  for (i = 0; i < 3; i++)
+    oci->active_ref_idx[i] = i + 1;
 
   oci->fb_idx_ref_cnt[0] = 1;
   oci->fb_idx_ref_cnt[1] = 1;

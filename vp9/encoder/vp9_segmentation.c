@@ -21,7 +21,7 @@ void vp9_update_gf_useage_maps(VP9_COMP *cpi, VP9_COMMON *cm, MACROBLOCK *x) {
 
   x->gf_active_ptr = (signed char *)cpi->gf_active_flags;
 
-  if ((cm->frame_type == KEY_FRAME) || (cm->refresh_golden_frame)) {
+  if ((cm->frame_type == KEY_FRAME) || (cpi->refresh_golden_frame)) {
     // Reset Gf useage monitors
     vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;

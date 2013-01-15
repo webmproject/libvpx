@@ -3592,22 +3592,22 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
-    setup_buffer_inter(cpi, x, cpi->common.lst_fb_idx, LAST_FRAME,
-                       BLOCK_16X16, recon_yoffset, recon_uvoffset,
+    setup_buffer_inter(cpi, x, cpi->common.active_ref_idx[cpi->lst_fb_idx],
+                       LAST_FRAME, BLOCK_16X16, recon_yoffset, recon_uvoffset,
                        frame_mv[NEARESTMV], frame_mv[NEARMV],
                        frame_mdcounts, y_buffer, u_buffer, v_buffer);
   }
 
   if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
-    setup_buffer_inter(cpi, x, cpi->common.gld_fb_idx, GOLDEN_FRAME,
-                       BLOCK_16X16, recon_yoffset, recon_uvoffset,
+    setup_buffer_inter(cpi, x, cpi->common.active_ref_idx[cpi->gld_fb_idx],
+                       GOLDEN_FRAME, BLOCK_16X16, recon_yoffset, recon_uvoffset,
                        frame_mv[NEARESTMV], frame_mv[NEARMV],
                        frame_mdcounts, y_buffer, u_buffer, v_buffer);
   }
 
   if (cpi->ref_frame_flags & VP9_ALT_FLAG) {
-    setup_buffer_inter(cpi, x, cpi->common.alt_fb_idx, ALTREF_FRAME,
-                       BLOCK_16X16, recon_yoffset, recon_uvoffset,
+    setup_buffer_inter(cpi, x, cpi->common.active_ref_idx[cpi->alt_fb_idx],
+                       ALTREF_FRAME, BLOCK_16X16, recon_yoffset, recon_uvoffset,
                        frame_mv[NEARESTMV], frame_mv[NEARMV],
                        frame_mdcounts, y_buffer, u_buffer, v_buffer);
   }
@@ -4476,8 +4476,10 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *v_buffer[4];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
-  int idx_list[4] = { 0, cpi->common.lst_fb_idx, cpi->common.gld_fb_idx,
-                      cpi->common.alt_fb_idx };
+  int idx_list[4] = {0,
+                     cpi->common.active_ref_idx[cpi->lst_fb_idx],
+                     cpi->common.active_ref_idx[cpi->gld_fb_idx],
+                     cpi->common.active_ref_idx[cpi->alt_fb_idx]};
   int mdcounts[4];
   int near_sadidx[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
   int saddone = 0;

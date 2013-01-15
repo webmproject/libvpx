@@ -1091,12 +1091,7 @@ static void set_refs(VP9D_COMP *pbi, int block_size,
     int ref_fb_idx, ref_yoffset, ref_uvoffset, ref_y_stride, ref_uv_stride;
 
     /* Select the appropriate reference frame for this MB */
-    if (mbmi->ref_frame == LAST_FRAME)
-      ref_fb_idx = cm->lst_fb_idx;
-    else if (mbmi->ref_frame == GOLDEN_FRAME)
-      ref_fb_idx = cm->gld_fb_idx;
-    else
-      ref_fb_idx = cm->alt_fb_idx;
+    ref_fb_idx = cm->active_ref_idx[mbmi->ref_frame - 1];
 
     ref_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
     ref_yoffset = mb_row * 16 * ref_y_stride + 16 * mb_col;
@@ -1113,12 +1108,7 @@ static void set_refs(VP9D_COMP *pbi, int block_size,
       int second_ref_fb_idx;
 
       /* Select the appropriate reference frame for this MB */
-      if (mbmi->second_ref_frame == LAST_FRAME)
-        second_ref_fb_idx = cm->lst_fb_idx;
-      else if (mbmi->second_ref_frame == GOLDEN_FRAME)
-        second_ref_fb_idx = cm->gld_fb_idx;
-      else
-        second_ref_fb_idx = cm->alt_fb_idx;
+      second_ref_fb_idx = cm->active_ref_idx[mbmi->second_ref_frame - 1];
 
       xd->second_pre.y_buffer =
           cm->yv12_fb[second_ref_fb_idx].y_buffer + ref_yoffset;
@@ -1288,8 +1278,7 @@ static void init_frame(VP9D_COMP *pbi) {
     vpx_memset(xd->mode_lf_deltas, 0, sizeof(xd->mode_lf_deltas));
 
     /* All buffers are implicitly updated on key frames. */
-    pc->refresh_golden_frame = 1;
-    pc->refresh_alt_ref_frame = 1;
+    pbi->refresh_frame_flags = (1 << NUM_REF_FRAMES) - 1;
 
     /* Note that Golden and Altref modes cannot be used on a key frame so
      * ref_frame_sign_bias[] is undefined and meaningless
@@ -1645,10 +1634,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
    */
   if (pc->frame_type != KEY_FRAME) {
     /* Should the GF or ARF be updated from the current frame */
-    pc->refresh_golden_frame = vp9_read_bit(&header_bc);
-    pc->refresh_alt_ref_frame = vp9_read_bit(&header_bc);
+    pbi->refresh_frame_flags = vp9_read_literal(&header_bc, NUM_REF_FRAMES);
 
-    if (pc->refresh_alt_ref_frame) {
+    /* TODO(jkoleszar): What's the right thing to do here with more refs? */
+    if (pbi->refresh_frame_flags & 0x4) {
       vpx_memcpy(&pc->fc, &pc->lfc_a, sizeof(pc->fc));
     } else {
       vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
@@ -1676,9 +1665,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   if (pc->refresh_entropy_probs == 0) {
     vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
   }
-
-  pc->refresh_last_frame = (pc->frame_type == KEY_FRAME)
-                           || vp9_read_bit(&header_bc);
 
   // Read inter mode probability context updates
   if (pc->frame_type != KEY_FRAME) {
@@ -1722,12 +1708,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   if (0) {
     FILE *z = fopen("decodestats.stt", "a");
-    fprintf(z, "%6d F:%d,G:%d,A:%d,L:%d,Q:%d\n",
+    fprintf(z, "%6d F:%d,R:%d,Q:%d\n",
             pc->current_video_frame,
             pc->frame_type,
-            pc->refresh_golden_frame,
-            pc->refresh_alt_ref_frame,
-            pc->refresh_last_frame,
+            pbi->refresh_frame_flags,
             pc->base_qindex);
     fclose(z);
   }
@@ -1779,8 +1763,11 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   read_coef_probs(pbi, &header_bc);
 
-  vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
-  vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
+  /* Initialize xd pointers. Any reference should do for xd->pre, so use 0. */
+  vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->active_ref_idx[0]],
+             sizeof(YV12_BUFFER_CONFIG));
+  vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx],
+             sizeof(YV12_BUFFER_CONFIG));
 
   // Create the segmentation map structure and set to 0
   if (!pc->last_frame_seg_map)
@@ -1832,13 +1819,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     vp9_update_mode_context(&pbi->common);
   }
 
-  /* If this was a kf or Gf note the Q used */
-  if ((pc->frame_type == KEY_FRAME) ||
-      pc->refresh_golden_frame || pc->refresh_alt_ref_frame) {
-    pc->last_kf_gf_q = pc->base_qindex;
-  }
   if (pc->refresh_entropy_probs) {
-    if (pc->refresh_alt_ref_frame)
+    /* TODO(jkoleszar): What's the right thing to do here with more refs? */
+    if (pbi->refresh_frame_flags & 0x4)
       vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
     else
       vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));

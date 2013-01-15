@@ -165,12 +165,17 @@ vpx_codec_err_t vp9_get_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
   VP9_COMMON *cm = &pbi->common;
   int ref_fb_idx;
 
+  /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
+   * encoder is using the frame buffers for. This is just a stub to keep the
+   * vpxenc --test-decode functionality working, and will be replaced in a
+   * later commit that adds VP9-specific controls for this functionality.
+   */
   if (ref_frame_flag == VP9_LAST_FLAG)
-    ref_fb_idx = cm->lst_fb_idx;
+    ref_fb_idx = pbi->common.active_ref_idx[0];
   else if (ref_frame_flag == VP9_GOLD_FLAG)
-    ref_fb_idx = cm->gld_fb_idx;
+    ref_fb_idx = pbi->common.active_ref_idx[1];
   else if (ref_frame_flag == VP9_ALT_FLAG)
-    ref_fb_idx = cm->alt_fb_idx;
+    ref_fb_idx = pbi->common.active_ref_idx[2];
   else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
@@ -197,12 +202,17 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
   int *ref_fb_ptr = NULL;
   int free_fb;
 
+  /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
+   * encoder is using the frame buffers for. This is just a stub to keep the
+   * vpxenc --test-decode functionality working, and will be replaced in a
+   * later commit that adds VP9-specific controls for this functionality.
+   */
   if (ref_frame_flag == VP9_LAST_FLAG)
-    ref_fb_ptr = &cm->lst_fb_idx;
+    ref_fb_ptr = &pbi->common.active_ref_idx[0];
   else if (ref_frame_flag == VP9_GOLD_FLAG)
-    ref_fb_ptr = &cm->gld_fb_idx;
+    ref_fb_ptr = &pbi->common.active_ref_idx[1];
   else if (ref_frame_flag == VP9_ALT_FLAG)
-    ref_fb_ptr = &cm->alt_fb_idx;
+    ref_fb_ptr = &pbi->common.active_ref_idx[2];
   else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
@@ -231,29 +241,21 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
 }
 
 
-/* If any buffer copy / swapping is signalled it should be done here. */
-static int swap_frame_buffers(VP9_COMMON *cm) {
-  int err = 0;
+/* If any buffer updating is signalled it should be done here. */
+static void swap_frame_buffers(VP9D_COMP *pbi) {
+  int ref_index = 0, mask;
 
-  /* The alternate reference frame or golden frame can be updated
-   * using the new frame.
-   */
-  if (cm->refresh_golden_frame)
-    ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->gld_fb_idx, cm->new_fb_idx);
+  for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
+    if (mask & 1) {
+      ref_cnt_fb(pbi->common.fb_idx_ref_cnt,
+                 &pbi->common.active_ref_idx[ref_index],
+                 pbi->common.new_fb_idx);
+    }
+    ++ref_index;
+  }
 
-  if (cm->refresh_alt_ref_frame)
-    ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->alt_fb_idx, cm->new_fb_idx);
-
-  if (cm->refresh_last_frame) {
-    ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->lst_fb_idx, cm->new_fb_idx);
-
-    cm->frame_to_show = &cm->yv12_fb[cm->lst_fb_idx];
-  } else
-    cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
-
-  cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
-
-  return err;
+  pbi->common.frame_to_show = &pbi->common.yv12_fb[pbi->common.new_fb_idx];
+  pbi->common.fb_idx_ref_cnt[pbi->common.new_fb_idx]--;
 }
 
 int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
@@ -281,8 +283,12 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
      * We do not know if the missing frame(s) was supposed to update
      * any of the reference buffers, but we act conservative and
      * mark only the last buffer as corrupted.
+     *
+     * TODO(jkoleszar): Error concealment is undefined and non-normative
+     * at this point, but if it becomes so, [0] may not always be the correct
+     * thing to do here.
      */
-    cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+    cm->yv12_fb[cm->active_ref_idx[0]].corrupted = 1;
   }
 
   cm->new_fb_idx = get_free_fb(cm);
@@ -293,8 +299,12 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
     /* We do not know if the missing frame(s) was supposed to update
      * any of the reference buffers, but we act conservative and
      * mark only the last buffer as corrupted.
+     *
+     * TODO(jkoleszar): Error concealment is undefined and non-normative
+     * at this point, but if it becomes so, [0] may not always be the correct
+     * thing to do here.
      */
-    cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+    cm->yv12_fb[cm->active_ref_idx[0]].corrupted = 1;
 
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
@@ -314,11 +324,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
   }
 
   {
-    if (swap_frame_buffers(cm)) {
-      pbi->common.error.error_code = VPX_CODEC_ERROR;
-      pbi->common.error.setjmp = 0;
-      return -1;
-    }
+    swap_frame_buffers(pbi);
 
 #if WRITE_RECON_BUFFER == 2
     if (cm->show_frame)

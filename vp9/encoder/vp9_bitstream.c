@@ -1773,8 +1773,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   // When there is a key frame all reference buffers are updated using the new key frame
   if (pc->frame_type != KEY_FRAME) {
     // Should the GF or ARF be updated using the transmitted frame or buffer
-    vp9_write_bit(&header_bc, pc->refresh_golden_frame);
-    vp9_write_bit(&header_bc, pc->refresh_alt_ref_frame);
+    vp9_write_bit(&header_bc, cpi->refresh_alt_ref_frame);
+    vp9_write_bit(&header_bc, cpi->refresh_golden_frame);
+    vp9_write_bit(&header_bc, cpi->refresh_last_frame);
 
     // Indicate reference frame sign bias for Golden and ARF frames (always 0 for last frame buffer)
     vp9_write_bit(&header_bc, pc->ref_frame_sign_bias[GOLDEN_FRAME]);
@@ -1819,9 +1820,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   }
 
   vp9_write_bit(&header_bc, pc->refresh_entropy_probs);
-
-  if (pc->frame_type != KEY_FRAME)
-    vp9_write_bit(&header_bc, pc->refresh_last_frame);
 
 #ifdef ENTROPY_STATS
   if (pc->frame_type == INTER_FRAME)
