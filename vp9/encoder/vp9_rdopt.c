@@ -4287,10 +4287,10 @@ void vp9_rd_pick_intra_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *returndist) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
-  int rate_y, rate_uv;
-  int rate_y_tokenonly, rate_uv_tokenonly;
-  int dist_y, dist_uv;
-  int y_skip, uv_skip;
+  int rate_y = 0, rate_uv;
+  int rate_y_tokenonly = 0, rate_uv_tokenonly;
+  int dist_y = 0, dist_uv;
+  int y_skip = 0, uv_skip;
   int64_t txfm_cache[NB_TXFM_MODES];
 
   rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
@@ -4315,10 +4315,10 @@ void vp9_rd_pick_intra_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *returndist) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
-  int rate_y, rate_uv;
-  int rate_y_tokenonly, rate_uv_tokenonly;
-  int dist_y, dist_uv;
-  int y_skip, uv_skip;
+  int rate_y = 0, rate_uv;
+  int rate_y_tokenonly = 0, rate_uv_tokenonly;
+  int dist_y = 0, dist_uv;
+  int y_skip = 0, uv_skip;
   int64_t txfm_cache[NB_TXFM_MODES];
 
   rd_pick_intra_sb64y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
