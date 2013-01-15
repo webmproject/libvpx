@@ -241,6 +241,8 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
 
 void vp9_setup_key_frame(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
+  int i;
+
   // Setup for Key frame:
   vp9_default_coef_probs(& cpi->common);
   vp9_kf_default_bmode_probs(cpi->common.kf_bmode_prob);
@@ -262,8 +264,10 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
   cpi->refresh_alt_ref_frame = TRUE;
 
   vp9_init_mode_contexts(&cpi->common);
-  vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
-  vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
+
+  for (i = 0; i < NUM_FRAME_CONTEXTS; i++)
+    vpx_memcpy(&cpi->common.frame_contexts[i], &cpi->common.fc,
+               sizeof(cpi->common.fc));
 
   vpx_memset(cm->prev_mip, 0,
     (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
@@ -285,15 +289,15 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
 }
 
 void vp9_setup_inter_frame(VP9_COMP *cpi) {
-  if (cpi->refresh_alt_ref_frame) {
-    vpx_memcpy(&cpi->common.fc,
-               &cpi->common.lfc_a,
-               sizeof(cpi->common.fc));
-  } else {
-    vpx_memcpy(&cpi->common.fc,
-               &cpi->common.lfc,
-               sizeof(cpi->common.fc));
-  }
+  /* Choose which entropy context to use. Currently there are only two
+   * contexts used, one for normal frames and one for alt ref frames.
+   */
+  cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
+
+  assert(cpi->common.frame_context_idx < NUM_FRAME_CONTEXTS);
+  vpx_memcpy(&cpi->common.fc,
+             &cpi->common.frame_contexts[cpi->common.frame_context_idx],
+             sizeof(cpi->common.fc));
 }
 
 

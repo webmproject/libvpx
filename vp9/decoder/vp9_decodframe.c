@@ -1255,6 +1255,7 @@ static void init_frame(VP9D_COMP *pbi) {
   MACROBLOCKD *const xd  = &pbi->mb;
 
   if (pc->frame_type == KEY_FRAME) {
+    int i;
 
     if (pc->last_frame_seg_map)
       vpx_memset(pc->last_frame_seg_map, 0, (pc->mb_rows * pc->mb_cols));
@@ -1287,8 +1288,9 @@ static void init_frame(VP9D_COMP *pbi) {
     pc->ref_frame_sign_bias[ALTREF_FRAME] = 0;
 
     vp9_init_mode_contexts(&pbi->common);
-    vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
-    vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
+
+    for (i = 0; i < NUM_FRAME_CONTEXTS; i++)
+      vpx_memcpy(&pc->frame_contexts[i], &pc->fc, sizeof(pc->fc));
 
     vpx_memset(pc->prev_mip, 0,
                (pc->mb_cols + 1) * (pc->mb_rows + 1)* sizeof(MODE_INFO));
@@ -1636,13 +1638,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     /* Should the GF or ARF be updated from the current frame */
     pbi->refresh_frame_flags = vp9_read_literal(&header_bc, NUM_REF_FRAMES);
 
-    /* TODO(jkoleszar): What's the right thing to do here with more refs? */
-    if (pbi->refresh_frame_flags & 0x4) {
-      vpx_memcpy(&pc->fc, &pc->lfc_a, sizeof(pc->fc));
-    } else {
-      vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
-    }
-
     pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp9_read_bit(&header_bc);
     pc->ref_frame_sign_bias[ALTREF_FRAME] = vp9_read_bit(&header_bc);
 
@@ -1662,9 +1657,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   }
 
   pc->refresh_entropy_probs = vp9_read_bit(&header_bc);
-  if (pc->refresh_entropy_probs == 0) {
-    vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
-  }
+  pc->frame_context_idx = vp9_read_literal(&header_bc, NUM_FRAME_CONTEXTS_LG2);
+  vpx_memcpy(&pc->fc, &pc->frame_contexts[pc->frame_context_idx],
+             sizeof(pc->fc));
 
   // Read inter mode probability context updates
   if (pc->frame_type != KEY_FRAME) {
@@ -1820,11 +1815,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   }
 
   if (pc->refresh_entropy_probs) {
-    /* TODO(jkoleszar): What's the right thing to do here with more refs? */
-    if (pbi->refresh_frame_flags & 0x4)
-      vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
-    else
-      vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
+    vpx_memcpy(&pc->frame_contexts[pc->frame_context_idx], &pc->fc,
+               sizeof(pc->fc));
   }
 
 #ifdef PACKET_TESTING

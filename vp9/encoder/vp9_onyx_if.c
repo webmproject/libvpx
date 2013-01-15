@@ -3939,10 +3939,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   }
 
   if (cm->refresh_entropy_probs) {
-    if (cpi->refresh_alt_ref_frame)
-      vpx_memcpy(&cm->lfc_a, &cm->fc, sizeof(cm->fc));
-    else
-      vpx_memcpy(&cm->lfc, &cm->fc, sizeof(cm->fc));
+    vpx_memcpy(&cm->frame_contexts[cm->frame_context_idx], &cm->fc,
+               sizeof(cm->fc));
   }
 
   // if its a dropped frame honor the requests on subsequent frames

@@ -40,6 +40,9 @@ void vp9_initialize_common(void);
 #define NUM_REF_FRAMES 3
 #define NUM_YV12_BUFFERS (NUM_REF_FRAMES + 1)
 
+#define NUM_FRAME_CONTEXTS_LG2 2
+#define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LG2)
+
 #define COMP_PRED_CONTEXTS   2
 
 typedef struct frame_contexts {
@@ -245,9 +248,9 @@ typedef struct VP9Common {
 
   vp9_prob mbskip_pred_probs[MBSKIP_CONTEXTS];
 
-  FRAME_CONTEXT lfc_a; /* last alt ref entropy */
-  FRAME_CONTEXT lfc; /* last frame entropy */
   FRAME_CONTEXT fc;  /* this frame entropy */
+  FRAME_CONTEXT frame_contexts[NUM_FRAME_CONTEXTS];
+  unsigned int  frame_context_idx; /* Context to use/update */
 
   unsigned int current_video_frame;
   int near_boffset[3];
