@@ -32,7 +32,6 @@
 #include "vp9/decoder/vp9_dboolhuff.h"
 
 #include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_entropy.h"
 #include "vp9_rtcd.h"
 
 #include <assert.h>
@@ -1255,54 +1254,14 @@ static void init_frame(VP9D_COMP *pbi) {
   MACROBLOCKD *const xd  = &pbi->mb;
 
   if (pc->frame_type == KEY_FRAME) {
-    int i;
-
-    if (pc->last_frame_seg_map)
-      vpx_memset(pc->last_frame_seg_map, 0, (pc->mb_rows * pc->mb_cols));
-
-    vp9_init_mv_probs(pc);
-
-    vp9_init_mbmode_probs(pc);
-    vp9_default_bmode_probs(pc->fc.bmode_prob);
-
-    vp9_default_coef_probs(pc);
-    vp9_kf_default_bmode_probs(pc->kf_bmode_prob);
-
-    // Reset the segment feature data to the default stats:
-    // Features disabled, 0, with delta coding (Default state).
-    vp9_clearall_segfeatures(xd);
-
-    xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
-
-    /* reset the mode ref deltasa for loop filter */
-    vpx_memset(xd->ref_lf_deltas, 0, sizeof(xd->ref_lf_deltas));
-    vpx_memset(xd->mode_lf_deltas, 0, sizeof(xd->mode_lf_deltas));
-
+    vp9_setup_past_independence(pc, xd);
     /* All buffers are implicitly updated on key frames. */
     pbi->refresh_frame_flags = (1 << NUM_REF_FRAMES) - 1;
+  } else if (pc->error_resilient_mode) {
+    vp9_setup_past_independence(pc, xd);
+  }
 
-    /* Note that Golden and Altref modes cannot be used on a key frame so
-     * ref_frame_sign_bias[] is undefined and meaningless
-     */
-    pc->ref_frame_sign_bias[GOLDEN_FRAME] = 0;
-    pc->ref_frame_sign_bias[ALTREF_FRAME] = 0;
-
-    vp9_init_mode_contexts(&pbi->common);
-
-    for (i = 0; i < NUM_FRAME_CONTEXTS; i++)
-      vpx_memcpy(&pc->frame_contexts[i], &pc->fc, sizeof(pc->fc));
-
-    vpx_memset(pc->prev_mip, 0,
-               (pc->mb_cols + 1) * (pc->mb_rows + 1)* sizeof(MODE_INFO));
-    vpx_memset(pc->mip, 0,
-               (pc->mb_cols + 1) * (pc->mb_rows + 1)* sizeof(MODE_INFO));
-
-    vp9_update_mode_info_border(pc, pc->mip);
-    vp9_update_mode_info_in_image(pc, pc->mi);
-
-
-  } else {
-
+  if (pc->frame_type != KEY_FRAME) {
     if (!pc->use_bilinear_mc_filter)
       pc->mcomp_filter_type = EIGHTTAP;
     else
@@ -1322,7 +1281,6 @@ static void init_frame(VP9D_COMP *pbi) {
   xd->fullpixel_mask = 0xffffffff;
   if (pc->full_pixel)
     xd->fullpixel_mask = 0xfffffff8;
-
 }
 
 static void read_coef_probs_common(BOOL_DECODER* const bc,
@@ -1383,6 +1341,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   int i, j;
   int corrupt_tokens = 0;
 
+  // printf("Decoding frame %d\n", pc->current_video_frame);
   /* start with no corruption of current frame */
   xd->corrupted = 0;
   pc->yv12_fb[pc->new_fb_idx].corrupted = 0;
@@ -1452,9 +1411,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
       }
     }
   }
-#ifdef DEC_DEBUG
-  printf("Decode frame %d\n", pc->current_video_frame);
-#endif
 
   if ((!pbi->decoded_key_frame && pc->frame_type != KEY_FRAME) ||
       pc->Width == 0 || pc->Height == 0) {
@@ -1472,6 +1428,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     pc->clamp_type  = (CLAMP_TYPE)vp9_read_bit(&header_bc);
   }
 
+  pc->error_resilient_mode = vp9_read_bit(&header_bc);
   /* Is segmentation enabled */
   xd->segmentation_enabled = (unsigned char)vp9_read_bit(&header_bc);
 
@@ -1687,11 +1644,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
 #if CONFIG_NEW_MVREF
   // If Key frame reset mv ref id probabilities to defaults
-  if (pc->frame_type == KEY_FRAME) {
-    // Defaults probabilities for encoding the MV ref id signal
-    vpx_memset(xd->mb_mv_ref_probs, VP9_DEFAULT_MV_REF_PROB,
-               sizeof(xd->mb_mv_ref_probs));
-  } else {
+  if (pc->frame_type != KEY_FRAME) {
     // Read any mv_ref index probability updates
     int i, j;
 
@@ -1818,11 +1771,14 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
                          "A stream must start with a complete key frame");
   }
 
-  vp9_adapt_coef_probs(pc);
+  if (!pc->error_resilient_mode)
+    vp9_adapt_coef_probs(pc);
   if (pc->frame_type != KEY_FRAME) {
-    vp9_adapt_mode_probs(pc);
-    vp9_adapt_nmv_probs(pc, xd->allow_high_precision_mv);
-    vp9_update_mode_context(&pbi->common);
+    if (!pc->error_resilient_mode) {
+      vp9_adapt_mode_probs(pc);
+      vp9_adapt_nmv_probs(pc, xd->allow_high_precision_mv);
+      vp9_adapt_mode_context(&pbi->common);
+    }
   }
 
   if (pc->refresh_entropy_probs) {
@@ -1839,7 +1795,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     fclose(f);
   }
 #endif
-  // printf("Frame %d Done\n", frame_count++);
 
   /* Find the end of the coded buffer */
   while (residual_bc.count > CHAR_BIT

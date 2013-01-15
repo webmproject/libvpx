@@ -431,7 +431,7 @@ static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
                                   long                   deadline) {
   const uint8_t *data_start = data;
   const uint8_t *data_end = data + data_sz;
-  vpx_codec_err_t res;
+  vpx_codec_err_t res = 0;
 
   do {
     res = decode_one(ctx, &data_start, data_sz, user_priv, deadline);

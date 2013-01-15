@@ -109,6 +109,9 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
   loop_filter_info_n *lfi = &cm->lf_info;
 
   /* update limits if sharpness has changed */
+  // printf("vp9_loop_filter_frame_init %d\n", default_filt_lvl);
+  // printf("sharpness level: %d [%d]\n",
+  //        cm->sharpness_level, cm->last_sharpness_level);
   if (cm->last_sharpness_level != cm->sharpness_level) {
     vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
     cm->last_sharpness_level = cm->sharpness_level;
@@ -202,6 +205,7 @@ static int sb_mb_lf_skip(const MODE_INFO *const mip0,
           mbmi1->mv[mbmi1->ref_frame].as_int) &&
          mbmi0->ref_frame != INTRA_FRAME;
 }
+
 void vp9_loop_filter_frame(VP9_COMMON *cm,
                            MACROBLOCKD *xd,
                            int frame_filter_level,
@@ -271,7 +275,6 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
               vp9_loop_filter_bv(y_ptr, u_ptr, v_ptr, post->y_stride,
                                  post->uv_stride, &lfi);
             }
-
           }
           /* don't apply across umv border */
           if (mb_row > 0 &&

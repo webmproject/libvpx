@@ -9,6 +9,8 @@
  */
 #ifndef TEST_ENCODE_TEST_DRIVER_H_
 #define TEST_ENCODE_TEST_DRIVER_H_
+
+#include "./vpx_config.h"
 #include <string>
 #include <vector>
 #include "third_party/googletest/src/include/gtest/gtest.h"
@@ -162,7 +164,7 @@ class EncoderTest {
   // Map the TestMode enum to the deadline_ and passes_ variables.
   void SetMode(TestMode mode);
 
-  // Main loop.
+  // Main loop
   virtual void RunLoop(VideoSource *video);
 
   // Hook to be called at the beginning of a pass.
@@ -185,6 +187,13 @@ class EncoderTest {
   virtual bool Continue() const { return !abort_; }
 
   const CodecFactory   *codec_;
+  // Hook to determine whether to decode frame after encoding
+  virtual bool DoDecode() const { return 1; }
+
+  // Hook to handle encode/decode mismatch
+  virtual void MismatchHook(const vpx_image_t *img1,
+                            const vpx_image_t *img2);
+
   bool                 abort_;
   vpx_codec_enc_cfg_t  cfg_;
   unsigned int         passes_;

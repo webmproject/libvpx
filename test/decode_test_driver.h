@@ -81,7 +81,7 @@ class Decoder {
 // Common test functionality for all Decoder tests.
 class DecoderTest {
  public:
-  // Main loop.
+  // Main decoding loop
   virtual void RunLoop(CompressedVideoSource *video);
 
   // Hook to be called on every decompressed frame.

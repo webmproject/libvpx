@@ -159,6 +159,12 @@ extern "C"
 
     int encode_breakout;  // early breakout encode threshold : for video conf recommend 800
 
+    /* Bitfield defining the error resiliency features to enable.
+     * Can provide decodable frames after losses in previous
+     * frames and decodable partitions after losses in the same frame.
+     */
+    unsigned int error_resilient_mode;
+
     int arnr_max_frames;
     int arnr_strength;
     int arnr_type;

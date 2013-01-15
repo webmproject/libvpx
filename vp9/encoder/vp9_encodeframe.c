@@ -646,6 +646,10 @@ static void set_offsets(VP9_COMP *cpi,
   const int idx_map = mb_row * cm->mb_cols + mb_col;
   const int idx_str = xd->mode_info_stride * mb_row + mb_col;
 
+#ifdef ENC_DEBUG
+  enc_debug = (cpi->common.current_video_frame == 2 &&
+               mb_row == 4 && mb_col == 5);
+#endif
   // entropy context structures
   xd->above_context = cm->above_context + mb_col;
   xd->left_context  = cm->left_context + (mb_row & 3);
@@ -2007,8 +2011,8 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
   assert(!xd->mode_info_context->mbmi.sb_type);
 
 #ifdef ENC_DEBUG
-  enc_debug = (cpi->common.current_video_frame == 46 &&
-               mb_row == 5 && mb_col == 2);
+  enc_debug = (cpi->common.current_video_frame == 2 &&
+               mb_row == 5 && mb_col == 18);
   if (enc_debug)
     printf("Encode MB %d %d output %d\n", mb_row, mb_col, output_enabled);
 #endif
@@ -2150,7 +2154,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
   }
 
   if (!x->skip) {
-#ifdef ENC_DEBUG
+#if 0  // def ENC_DEBUG
     if (enc_debug) {
       int i, j;
       printf("\n");

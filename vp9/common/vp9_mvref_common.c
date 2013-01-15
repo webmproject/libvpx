@@ -259,12 +259,14 @@ void vp9_find_mv_refs(
       split_count += (candidate_mi->mbmi.mode == SPLITMV);
     }
   }
-  // Look in the last frame
-  candidate_mi = lf_here;
-  if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv)) {
-    clamp_mv(xd, &c_refmv);
-    addmv_and_shuffle(candidate_mvs, candidate_scores,
-                      &index, c_refmv, 18);
+  // Look in the last frame if it exists
+  if (lf_here) {
+    candidate_mi = lf_here;
+    if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv)) {
+      clamp_mv(xd, &c_refmv);
+      addmv_and_shuffle(candidate_mvs, candidate_scores,
+                        &index, c_refmv, 18);
+    }
   }
   // More distant neigbours
   for (i = 2; (i < MVREF_NEIGHBOURS) &&
@@ -316,8 +318,8 @@ void vp9_find_mv_refs(
       }
     }
   }
-  // Look at the last frame
-  if (index < (MAX_MV_REF_CANDIDATES - 1)) {
+  // Look at the last frame if it exists
+  if (index < (MAX_MV_REF_CANDIDATES - 1) && lf_here) {
     candidate_mi = lf_here;
     get_non_matching_candidates(candidate_mi, ref_frame,
                                 &c_ref_frame, &c_refmv,
@@ -366,7 +368,7 @@ void vp9_find_mv_refs(
 
   // 0,0 is always a valid reference.
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
-    if (candidate_mvs[i].as_int == 0)
+     if (candidate_mvs[i].as_int == 0)
       break;
   }
   if (i == MAX_MV_REF_CANDIDATES) {

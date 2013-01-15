@@ -146,6 +146,7 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
 
   return 0;
 }
+
 void vp9_setup_version(VP9_COMMON *cm) {
   if (cm->version & 0x4) {
     if (!CONFIG_EXPERIMENTAL)

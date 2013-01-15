@@ -293,7 +293,10 @@ static void read_nmv_fp(vp9_reader *r, MV *mv, const MV *ref,
     mv->col = read_nmv_component_fp(r, mv->col, ref->col, &mvctx->comps[1],
                                     usehp);
   }
-  //printf("  %d: %d %d ref: %d %d\n", usehp, mv->row, mv-> col, ref->row, ref->col);
+  /*
+  printf("MV: %d %d REF: %d %d\n", mv->row + ref->row, mv->col + ref->col,
+	 ref->row, ref->col);
+	 */
 }
 
 static void update_nmv(vp9_reader *bc, vp9_prob *const p,
@@ -716,6 +719,11 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   else
     mbmi->ref_frame = read_ref_frame(pbi, bc, mbmi->segment_id);
 
+  /*
+  if (pbi->common.current_video_frame == 1)
+    printf("ref frame: %d [%d %d]\n", mbmi->ref_frame, mb_row, mb_col);
+    */
+
   // If reference frame is an Inter frame
   if (mbmi->ref_frame) {
     int_mv nearest, nearby, best_mv;
@@ -747,12 +755,25 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         printf("%d %d\n", xd->mode_info_context->mbmi.mv[0].as_mv.row,
                xd->mode_info_context->mbmi.mv[0].as_mv.col);
 #endif
-      vp9_find_mv_refs(xd, mi, prev_mi,
+      // if (cm->current_video_frame == 1 && mb_row == 4 && mb_col == 5)
+      //  printf("Dello\n");
+      vp9_find_mv_refs(xd, mi, cm->error_resilient_mode ? 0 : prev_mi,
                        ref_frame, mbmi->ref_mvs[ref_frame],
                        cm->ref_frame_sign_bias);
 
       vp9_mv_ref_probs(&pbi->common, mv_ref_p,
                        mbmi->mb_mode_context[ref_frame]);
+      /*
+      if (pbi->common.current_video_frame == 1) {
+	int k = mbmi->mb_mode_context[ref_frame];
+	printf("vp9_mode_contexts: [%d %d %d %d] %d %d %d %d\n",
+	       mb_row, mb_col, ref_frame, k,
+	       cm->fc.vp9_mode_contexts[k][0],
+	       cm->fc.vp9_mode_contexts[k][1],
+	       cm->fc.vp9_mode_contexts[k][2],
+	       cm->fc.vp9_mode_contexts[k][3]);
+      }
+      */
 
       // Is the segment level mode feature enabled for this segment
       if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
@@ -770,7 +791,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
       if (mbmi->mode != ZEROMV) {
         vp9_find_best_ref_mvs(xd,
-                              xd->pre.y_buffer,
+                              pbi->common.error_resilient_mode ?
+                              0 : xd->pre.y_buffer,
                               recon_y_stride,
                               mbmi->ref_mvs[ref_frame],
                               &nearest, &nearby);
@@ -822,14 +844,15 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         xd->second_pre.v_buffer =
           cm->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
 
-        vp9_find_mv_refs(xd, mi, prev_mi,
+        vp9_find_mv_refs(xd, mi, cm->error_resilient_mode ? 0 : prev_mi,
                          mbmi->second_ref_frame,
                          mbmi->ref_mvs[mbmi->second_ref_frame],
                          cm->ref_frame_sign_bias);
 
         if (mbmi->mode != ZEROMV) {
           vp9_find_best_ref_mvs(xd,
-                                xd->second_pre.y_buffer,
+                                pbi->common.error_resilient_mode ?
+                                0 : xd->second_pre.y_buffer,
                                 recon_y_stride,
                                 mbmi->ref_mvs[mbmi->second_ref_frame],
                                 &nearest_second,
@@ -1136,6 +1159,10 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       pbi->common.fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
     }
   }
+  /*
+  if (pbi->common.current_video_frame == 1)
+    printf("mode: %d skip: %d\n", mbmi->mode, mbmi->mb_skip_coeff);
+    */
 
   if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= I8X8_PRED) ||
@@ -1177,6 +1204,7 @@ void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, BOOL_DECODER* const bc) {
 
   mb_mode_mv_init(pbi, bc);
 }
+
 void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
                            MACROBLOCKD* const xd,
                            int mb_row,

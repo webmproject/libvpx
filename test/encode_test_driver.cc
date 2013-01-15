@@ -7,6 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+
 #include "vpx_config.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
@@ -129,6 +130,11 @@ static bool compare_img(const vpx_image_t *img1,
   return match;
 }
 
+void EncoderTest::MismatchHook(const vpx_image_t *img1,
+                               const vpx_image_t *img2) {
+  ASSERT_TRUE(0) << "Encode/Decode mismatch found";
+}
+
 void EncoderTest::RunLoop(VideoSource *video) {
   vpx_codec_dec_cfg_t dec_cfg = {0};
 
@@ -149,7 +155,6 @@ void EncoderTest::RunLoop(VideoSource *video) {
                                                    &stats_);
     ASSERT_TRUE(encoder != NULL);
     Decoder* const decoder = codec_->CreateDecoder(dec_cfg, 0);
-    bool has_cxdata = false;
     bool again;
     for (again = true, video->Begin(); again; video->Next()) {
       again = video->img() != NULL;
@@ -160,15 +165,18 @@ void EncoderTest::RunLoop(VideoSource *video) {
 
       CxDataIterator iter = encoder->GetCxData();
 
+      bool has_cxdata = false;
+      bool has_dxdata = false;
       while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
         again = true;
-
         switch (pkt->kind) {
           case VPX_CODEC_CX_FRAME_PKT:
             has_cxdata = true;
-            if (decoder)
+            if (decoder && DoDecode()) {
               decoder->DecodeFrame((const uint8_t*)pkt->data.frame.buf,
                                    pkt->data.frame.sz);
+              has_dxdata = true;
+            }
             ASSERT_GE(pkt->data.frame.pts, last_pts_);
             last_pts_ = pkt->data.frame.pts;
             FramePktHook(pkt);
@@ -183,16 +191,17 @@ void EncoderTest::RunLoop(VideoSource *video) {
         }
       }
 
-      if (decoder && has_cxdata) {
+      if (has_dxdata && has_cxdata) {
         const vpx_image_t *img_enc = encoder->GetPreviewFrame();
         DxDataIterator dec_iter = decoder->GetDxData();
         const vpx_image_t *img_dec = dec_iter.Next();
-        if(img_enc && img_dec) {
+        if (img_enc && img_dec) {
           const bool res = compare_img(img_enc, img_dec);
-          ASSERT_TRUE(res)<< "Encoder/Decoder mismatch found.";
+          if (!res) {  // Mismatch
+            MismatchHook(img_enc, img_dec);
+          }
         }
       }
-
       if (!Continue())
         break;
     }
@@ -207,4 +216,5 @@ void EncoderTest::RunLoop(VideoSource *video) {
       break;
   }
 }
+
 }  // namespace libvpx_test

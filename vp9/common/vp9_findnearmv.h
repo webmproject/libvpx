@@ -28,7 +28,8 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            int_mv *nearest,
                            int_mv *near);
 
-static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, const int *ref_frame_sign_bias) {
+static void mv_bias(int refmb_ref_frame_sign_bias, int refframe,
+                    int_mv *mvp, const int *ref_frame_sign_bias) {
   MV xmv;
   xmv = mvp->as_mv;
 

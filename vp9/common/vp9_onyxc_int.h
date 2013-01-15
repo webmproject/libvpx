@@ -276,6 +276,7 @@ typedef struct VP9Common {
   int use_interintra;
 #endif
 
+  int error_resilient_mode;
 } VP9_COMMON;
 
 static int get_free_fb(VP9_COMMON *cm) {

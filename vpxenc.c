@@ -1449,14 +1449,16 @@ static void show_rate_histogram(struct rate_hist          *hist,
 #define mmin(a, b)  ((a) < (b) ? (a) : (b))
 static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                           int yloc[2], int uloc[2], int vloc[2]) {
+  static const int bsize = 64;
+  static const int bsize2 = bsize >> 1;
   int match = 1;
   int i, j;
   yloc[0] = yloc[1] = -1;
-  for (i = 0, match = 1; match && i < img1->d_h; i+=32) {
-    for (j = 0; match && j < img1->d_w; j+=32) {
+  for (i = 0, match = 1; match && i < img1->d_h; i += bsize) {
+    for (j = 0; match && j < img1->d_w; j += bsize) {
       int k, l;
-      int si = mmin(i + 32, img1->d_h) - i;
-      int sj = mmin(j + 32, img1->d_w) - j;
+      int si = mmin(i + bsize, img1->d_h) - i;
+      int sj = mmin(j + bsize, img1->d_w) - j;
       for (k = 0; match && k < si; k++)
         for (l = 0; match && l < sj; l++) {
           if (*(img1->planes[VPX_PLANE_Y] +
@@ -1472,11 +1474,11 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
     }
   }
   uloc[0] = uloc[1] = -1;
-  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i+=16) {
-    for (j = 0; j < match && (img1->d_w + 1) / 2; j+=16) {
+  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i += bsize2) {
+    for (j = 0; j < match && (img1->d_w + 1) / 2; j += bsize2) {
       int k, l;
-      int si = mmin(i + 16, (img1->d_h + 1) / 2) - i;
-      int sj = mmin(j + 16, (img1->d_w + 1) / 2) - j;
+      int si = mmin(i + bsize2, (img1->d_h + 1) / 2) - i;
+      int sj = mmin(j + bsize2, (img1->d_w + 1) / 2) - j;
       for (k = 0; match && k < si; k++)
         for (l = 0; match && l < sj; l++) {
           if (*(img1->planes[VPX_PLANE_U] +
@@ -1492,11 +1494,11 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
     }
   }
   vloc[0] = vloc[1] = -1;
-  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i+=16) {
-    for (j = 0; j < match && (img1->d_w + 1) / 2; j+=16) {
+  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i += bsize2) {
+    for (j = 0; j < match && (img1->d_w + 1) / 2; j += bsize2) {
       int k, l;
-      int si = mmin(i + 16, (img1->d_h + 1) / 2) - i;
-      int sj = mmin(j + 16, (img1->d_w + 1) / 2) - j;
+      int si = mmin(i + bsize2, (img1->d_h + 1) / 2) - i;
+      int sj = mmin(j + bsize2, (img1->d_w + 1) / 2) - j;
       for (k = 0; match && k < si; k++)
         for (l = 0; match && l < sj; l++) {
           if (*(img1->planes[VPX_PLANE_V] +

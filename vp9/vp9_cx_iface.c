@@ -313,33 +313,35 @@ static vpx_codec_err_t set_vp8e_config(VP9_CONFIG *oxcf,
   oxcf->lossless = vp8_cfg.lossless;
 #endif
 
+  oxcf->error_resilient_mode = cfg.g_error_resilient;
   /*
-      printf("Current VP8 Settings: \n");
-      printf("target_bandwidth: %d\n", oxcf->target_bandwidth);
-      printf("noise_sensitivity: %d\n", oxcf->noise_sensitivity);
-      printf("Sharpness: %d\n",    oxcf->Sharpness);
-      printf("cpu_used: %d\n",  oxcf->cpu_used);
-      printf("Mode: %d\n",     oxcf->Mode);
-      printf("delete_first_pass_file: %d\n",  oxcf->delete_first_pass_file);
-      printf("auto_key: %d\n",  oxcf->auto_key);
-      printf("key_freq: %d\n", oxcf->key_freq);
-      printf("end_usage: %d\n", oxcf->end_usage);
-      printf("under_shoot_pct: %d\n", oxcf->under_shoot_pct);
-      printf("over_shoot_pct: %d\n", oxcf->over_shoot_pct);
-      printf("starting_buffer_level: %d\n", oxcf->starting_buffer_level);
-      printf("optimal_buffer_level: %d\n",  oxcf->optimal_buffer_level);
-      printf("maximum_buffer_size: %d\n", oxcf->maximum_buffer_size);
-      printf("fixed_q: %d\n",  oxcf->fixed_q);
-      printf("worst_allowed_q: %d\n", oxcf->worst_allowed_q);
-      printf("best_allowed_q: %d\n", oxcf->best_allowed_q);
-      printf("two_pass_vbrbias: %d\n",  oxcf->two_pass_vbrbias);
-      printf("two_pass_vbrmin_section: %d\n", oxcf->two_pass_vbrmin_section);
-      printf("two_pass_vbrmax_section: %d\n", oxcf->two_pass_vbrmax_section);
-      printf("allow_lag: %d\n", oxcf->allow_lag);
-      printf("lag_in_frames: %d\n", oxcf->lag_in_frames);
-      printf("play_alternate: %d\n", oxcf->play_alternate);
-      printf("Version: %d\n", oxcf->Version);
-      printf("encode_breakout: %d\n", oxcf->encode_breakout);
+  printf("Current VP9 Settings: \n");
+  printf("target_bandwidth: %d\n", oxcf->target_bandwidth);
+  printf("noise_sensitivity: %d\n", oxcf->noise_sensitivity);
+  printf("Sharpness: %d\n",    oxcf->Sharpness);
+  printf("cpu_used: %d\n",  oxcf->cpu_used);
+  printf("Mode: %d\n",     oxcf->Mode);
+  // printf("delete_first_pass_file: %d\n",  oxcf->delete_first_pass_file);
+  printf("auto_key: %d\n",  oxcf->auto_key);
+  printf("key_freq: %d\n", oxcf->key_freq);
+  printf("end_usage: %d\n", oxcf->end_usage);
+  printf("under_shoot_pct: %d\n", oxcf->under_shoot_pct);
+  printf("over_shoot_pct: %d\n", oxcf->over_shoot_pct);
+  printf("starting_buffer_level: %d\n", oxcf->starting_buffer_level);
+  printf("optimal_buffer_level: %d\n",  oxcf->optimal_buffer_level);
+  printf("maximum_buffer_size: %d\n", oxcf->maximum_buffer_size);
+  printf("fixed_q: %d\n",  oxcf->fixed_q);
+  printf("worst_allowed_q: %d\n", oxcf->worst_allowed_q);
+  printf("best_allowed_q: %d\n", oxcf->best_allowed_q);
+  printf("two_pass_vbrbias: %d\n",  oxcf->two_pass_vbrbias);
+  printf("two_pass_vbrmin_section: %d\n", oxcf->two_pass_vbrmin_section);
+  printf("two_pass_vbrmax_section: %d\n", oxcf->two_pass_vbrmax_section);
+  printf("allow_lag: %d\n", oxcf->allow_lag);
+  printf("lag_in_frames: %d\n", oxcf->lag_in_frames);
+  printf("play_alternate: %d\n", oxcf->play_alternate);
+  printf("Version: %d\n", oxcf->Version);
+  printf("encode_breakout: %d\n", oxcf->encode_breakout);
+  printf("error resilient: %d\n", oxcf->error_resilient_mode);
   */
   return VPX_CODEC_OK;
 }

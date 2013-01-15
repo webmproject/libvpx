@@ -11,8 +11,9 @@
 
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_modecont.h"
+#include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_alloccommon.h"
 #include "vpx_mem/vpx_mem.h"
-
 
 static const unsigned int kf_y_mode_cts[8][VP9_YMODES] = {
   /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 BPRED */
@@ -344,6 +345,9 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
 #if CONFIG_COMP_INTERINTRA_PRED
   x->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
 #endif
+  x->ref_pred_probs[0] = 120;
+  x->ref_pred_probs[1] = 80;
+  x->ref_pred_probs[2] = 40;
 }
 
 
@@ -480,7 +484,7 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 
 #define MVREF_COUNT_SAT 20
 #define MVREF_MAX_UPDATE_FACTOR 128
-void vp9_update_mode_context(VP9_COMMON *pc) {
+void vp9_adapt_mode_context(VP9_COMMON *pc) {
   int i, j;
   unsigned int (*mv_ref_ct)[4][2];
   int (*mode_context)[4];
@@ -630,4 +634,66 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                                            interintra_prob, factor);
   }
 #endif
+}
+
+static void set_default_lf_deltas(MACROBLOCKD *xd) {
+  xd->mode_ref_lf_delta_enabled = 1;
+  xd->mode_ref_lf_delta_update = 1;
+
+  xd->ref_lf_deltas[INTRA_FRAME] = 2;
+  xd->ref_lf_deltas[LAST_FRAME] = 0;
+  xd->ref_lf_deltas[GOLDEN_FRAME] = -2;
+  xd->ref_lf_deltas[ALTREF_FRAME] = -2;
+
+  xd->mode_lf_deltas[0] = 4;               // BPRED
+  xd->mode_lf_deltas[1] = -2;              // Zero
+  xd->mode_lf_deltas[2] = 2;               // New mv
+  xd->mode_lf_deltas[3] = 4;               // Split mv
+}
+
+void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
+  // Reset the segment feature data to the default stats:
+  // Features disabled, 0, with delta coding (Default state).
+  int i;
+  vp9_clearall_segfeatures(xd);
+  xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
+  if (cm->last_frame_seg_map)
+    vpx_memset(cm->last_frame_seg_map, 0, (cm->mb_rows * cm->mb_cols));
+
+  /* reset the mode ref deltas for loop filter */
+  vpx_memset(xd->last_ref_lf_deltas, 0, sizeof(xd->last_ref_lf_deltas));
+  vpx_memset(xd->last_mode_lf_deltas, 0, sizeof(xd->last_mode_lf_deltas));
+  set_default_lf_deltas(xd);
+
+  vp9_default_coef_probs(cm);
+  vp9_init_mbmode_probs(cm);
+  vp9_default_bmode_probs(cm->fc.bmode_prob);
+  vp9_kf_default_bmode_probs(cm->kf_bmode_prob);
+  vp9_init_mv_probs(cm);
+  // To force update of the sharpness
+  cm->last_sharpness_level = -1;
+
+  vp9_init_mode_contexts(cm);
+
+  for (i = 0; i < NUM_FRAME_CONTEXTS; i++) {
+    vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
+  }
+
+  vpx_memset(cm->prev_mip, 0,
+             (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+  vpx_memset(cm->mip, 0,
+             (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+
+  vp9_update_mode_info_border(cm, cm->mip);
+  vp9_update_mode_info_in_image(cm, cm->mi);
+
+#if CONFIG_NEW_MVREF
+  // Defaults probabilities for encoding the MV ref id signal
+  vpx_memset(xd->mb_mv_ref_probs, VP9_DEFAULT_MV_REF_PROB,
+             sizeof(xd->mb_mv_ref_probs));
+#endif
+  cm->ref_frame_sign_bias[GOLDEN_FRAME] = 0;
+  cm->ref_frame_sign_bias[ALTREF_FRAME] = 0;
+
+  cm->frame_context_idx = 0;
 }

@@ -3177,18 +3177,20 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Gets an initial list of candidate vectors from neighbours and orders them
   vp9_find_mv_refs(xd, xd->mode_info_context,
-                   xd->prev_mode_info_context,
+                   cpi->common.error_resilient_mode ?
+                   0 : xd->prev_mode_info_context,
                    frame_type,
                    mbmi->ref_mvs[frame_type],
                    cpi->common.ref_frame_sign_bias);
 
   // Candidate refinement carried out at encoder and decoder
-  vp9_find_best_ref_mvs(xd, y_buffer[frame_type],
+  vp9_find_best_ref_mvs(xd,
+                        cpi->common.error_resilient_mode ?
+                        0 : y_buffer[frame_type],
                         yv12->y_stride,
                         mbmi->ref_mvs[frame_type],
                         &frame_nearest_mv[frame_type],
                         &frame_near_mv[frame_type]);
-
 
   // Further refinement that is encode side only to test the top few candidates
   // in full and choose the best as the centre point for subsequent searches.

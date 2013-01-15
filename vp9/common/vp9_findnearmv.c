@@ -141,130 +141,136 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   int_mv sorted_mvs[MAX_MV_REF_CANDIDATES];
   int zero_seen = FALSE;
 
-  // Default all to 0,0 if nothing else available
-  nearest->as_int = near->as_int = 0;
-  vpx_memset(sorted_mvs, 0, sizeof(sorted_mvs));
+  if (ref_y_buffer) {
 
-  above_src = xd->dst.y_buffer - xd->dst.y_stride * 2;
-  above_ref = ref_y_buffer - ref_y_stride * 2;
+    // Default all to 0,0 if nothing else available
+    nearest->as_int = near->as_int = 0;
+    vpx_memset(sorted_mvs, 0, sizeof(sorted_mvs));
+
+    above_src = xd->dst.y_buffer - xd->dst.y_stride * 2;
+    above_ref = ref_y_buffer - ref_y_stride * 2;
 #if CONFIG_ABOVESPREFMV
-  above_src -= 4;
-  above_ref -= 4;
+    above_src -= 4;
+    above_ref -= 4;
 #else
-  left_src  = xd->dst.y_buffer - 2;
-  left_ref  = ref_y_buffer - 2;
+    left_src  = xd->dst.y_buffer - 2;
+    left_ref  = ref_y_buffer - 2;
 #endif
 
-  // Limit search to the predicted best few candidates
-  for(i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
-    int_mv this_mv;
-    int offset = 0;
-    int row_offset, col_offset;
+    // Limit search to the predicted best few candidates
+    for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
+      int_mv this_mv;
+      int offset = 0;
+      int row_offset, col_offset;
 
-    this_mv.as_int = mvlist[i].as_int;
+      this_mv.as_int = mvlist[i].as_int;
 
-    // If we see a 0,0 vector for a second time we have reached the end of
-    // the list of valid candidate vectors.
-    if (!this_mv.as_int && zero_seen)
-      break;
-
-    zero_seen = zero_seen || !this_mv.as_int;
-
-#if !CONFIG_ABOVESPREFMV
-    clamp_mv(&this_mv,
-             xd->mb_to_left_edge - LEFT_TOP_MARGIN + 24,
-             xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
-             xd->mb_to_top_edge - LEFT_TOP_MARGIN + 24,
-             xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
-#else
-    clamp_mv(&this_mv,
-             xd->mb_to_left_edge - LEFT_TOP_MARGIN + 32,
-             xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
-             xd->mb_to_top_edge - LEFT_TOP_MARGIN + 24,
-             xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
-#endif
-
-    row_offset = this_mv.as_mv.row >> 3;
-    col_offset = this_mv.as_mv.col >> 3;
-    offset = ref_y_stride * row_offset + col_offset;
-    score = 0;
-    if (xd->up_available) {
-      vp9_sub_pixel_variance16x2(above_ref + offset, ref_y_stride,
-                                 SP(this_mv.as_mv.col),
-                                 SP(this_mv.as_mv.row),
-                                 above_src, xd->dst.y_stride, &sse);
-      score += sse;
-      if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
-        vp9_sub_pixel_variance16x2(above_ref + offset + 16,
-                                   ref_y_stride,
-                                   SP(this_mv.as_mv.col),
-                                   SP(this_mv.as_mv.row),
-                                   above_src + 16, xd->dst.y_stride, &sse);
-        score += sse;
-      }
-      if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB64X64) {
-        vp9_sub_pixel_variance16x2(above_ref + offset + 32,
-                                   ref_y_stride,
-                                   SP(this_mv.as_mv.col),
-                                   SP(this_mv.as_mv.row),
-                                   above_src + 32, xd->dst.y_stride, &sse);
-        score += sse;
-        vp9_sub_pixel_variance16x2(above_ref + offset + 48,
-                                   ref_y_stride,
-                                   SP(this_mv.as_mv.col),
-                                   SP(this_mv.as_mv.row),
-                                   above_src + 48, xd->dst.y_stride, &sse);
-        score += sse;
-      }
-    }
-#if !CONFIG_ABOVESPREFMV
-    if (xd->left_available) {
-      vp9_sub_pixel_variance2x16_c(left_ref + offset, ref_y_stride,
-                                   SP(this_mv.as_mv.col),
-                                   SP(this_mv.as_mv.row),
-                                   left_src, xd->dst.y_stride, &sse);
-      score += sse;
-      if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
-        vp9_sub_pixel_variance2x16_c(left_ref + offset + ref_y_stride * 16,
-                                     ref_y_stride,
-                                     SP(this_mv.as_mv.col),
-                                     SP(this_mv.as_mv.row),
-                                     left_src + xd->dst.y_stride * 16,
-                                     xd->dst.y_stride, &sse);
-        score += sse;
-      }
-      if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB64X64) {
-        vp9_sub_pixel_variance2x16_c(left_ref + offset + ref_y_stride * 32,
-                                     ref_y_stride,
-                                     SP(this_mv.as_mv.col),
-                                     SP(this_mv.as_mv.row),
-                                     left_src + xd->dst.y_stride * 32,
-                                     xd->dst.y_stride, &sse);
-        score += sse;
-        vp9_sub_pixel_variance2x16_c(left_ref + offset + ref_y_stride * 48,
-                                     ref_y_stride,
-                                     SP(this_mv.as_mv.col),
-                                     SP(this_mv.as_mv.row),
-                                     left_src + xd->dst.y_stride * 48,
-                                     xd->dst.y_stride, &sse);
-        score += sse;
-      }
-    }
-#endif
-    // Add the entry to our list and then resort the list on score.
-    ref_scores[i] = score;
-    sorted_mvs[i].as_int = this_mv.as_int;
-    j = i;
-    while (j > 0) {
-      if (ref_scores[j] < ref_scores[j-1]) {
-        ref_scores[j] = ref_scores[j-1];
-        sorted_mvs[j].as_int = sorted_mvs[j-1].as_int;
-        ref_scores[j-1] = score;
-        sorted_mvs[j-1].as_int = this_mv.as_int;
-        j--;
-      } else
+      // If we see a 0,0 vector for a second time we have reached the end of
+      // the list of valid candidate vectors.
+      if (!this_mv.as_int && zero_seen)
         break;
+
+      zero_seen = zero_seen || !this_mv.as_int;
+
+#if !CONFIG_ABOVESPREFMV
+      clamp_mv(&this_mv,
+               xd->mb_to_left_edge - LEFT_TOP_MARGIN + 24,
+               xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
+               xd->mb_to_top_edge - LEFT_TOP_MARGIN + 24,
+               xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
+#else
+      clamp_mv(&this_mv,
+               xd->mb_to_left_edge - LEFT_TOP_MARGIN + 32,
+               xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
+               xd->mb_to_top_edge - LEFT_TOP_MARGIN + 24,
+               xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
+#endif
+
+      row_offset = this_mv.as_mv.row >> 3;
+      col_offset = this_mv.as_mv.col >> 3;
+      offset = ref_y_stride * row_offset + col_offset;
+      score = 0;
+      if (xd->up_available) {
+        vp9_sub_pixel_variance16x2(above_ref + offset, ref_y_stride,
+                                   SP(this_mv.as_mv.col),
+                                   SP(this_mv.as_mv.row),
+                                   above_src, xd->dst.y_stride, &sse);
+        score += sse;
+        if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
+          vp9_sub_pixel_variance16x2(above_ref + offset + 16,
+                                     ref_y_stride,
+                                     SP(this_mv.as_mv.col),
+                                     SP(this_mv.as_mv.row),
+                                     above_src + 16, xd->dst.y_stride, &sse);
+          score += sse;
+        }
+        if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB64X64) {
+          vp9_sub_pixel_variance16x2(above_ref + offset + 32,
+                                     ref_y_stride,
+                                     SP(this_mv.as_mv.col),
+                                     SP(this_mv.as_mv.row),
+                                     above_src + 32, xd->dst.y_stride, &sse);
+          score += sse;
+          vp9_sub_pixel_variance16x2(above_ref + offset + 48,
+                                     ref_y_stride,
+                                     SP(this_mv.as_mv.col),
+                                     SP(this_mv.as_mv.row),
+                                     above_src + 48, xd->dst.y_stride, &sse);
+          score += sse;
+        }
+      }
+#if !CONFIG_ABOVESPREFMV
+      if (xd->left_available) {
+        vp9_sub_pixel_variance2x16_c(left_ref + offset, ref_y_stride,
+                                     SP(this_mv.as_mv.col),
+                                     SP(this_mv.as_mv.row),
+                                     left_src, xd->dst.y_stride, &sse);
+        score += sse;
+        if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
+          vp9_sub_pixel_variance2x16_c(left_ref + offset + ref_y_stride * 16,
+                                       ref_y_stride,
+                                       SP(this_mv.as_mv.col),
+                                       SP(this_mv.as_mv.row),
+                                       left_src + xd->dst.y_stride * 16,
+                                       xd->dst.y_stride, &sse);
+          score += sse;
+        }
+        if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB64X64) {
+          vp9_sub_pixel_variance2x16_c(left_ref + offset + ref_y_stride * 32,
+                                     ref_y_stride,
+                                       SP(this_mv.as_mv.col),
+                                       SP(this_mv.as_mv.row),
+                                       left_src + xd->dst.y_stride * 32,
+                                       xd->dst.y_stride, &sse);
+          score += sse;
+          vp9_sub_pixel_variance2x16_c(left_ref + offset + ref_y_stride * 48,
+                                       ref_y_stride,
+                                       SP(this_mv.as_mv.col),
+                                       SP(this_mv.as_mv.row),
+                                       left_src + xd->dst.y_stride * 48,
+                                       xd->dst.y_stride, &sse);
+          score += sse;
+        }
+      }
+#endif
+      // Add the entry to our list and then resort the list on score.
+      ref_scores[i] = score;
+      sorted_mvs[i].as_int = this_mv.as_int;
+      j = i;
+      while (j > 0) {
+        if (ref_scores[j] < ref_scores[j-1]) {
+          ref_scores[j] = ref_scores[j-1];
+          sorted_mvs[j].as_int = sorted_mvs[j-1].as_int;
+          ref_scores[j-1] = score;
+          sorted_mvs[j-1].as_int = this_mv.as_int;
+          j--;
+        } else {
+          break;
+        }
+      }
     }
+  } else {
+    vpx_memcpy(sorted_mvs, mvlist, sizeof(sorted_mvs));
   }
 
   // Make sure all the candidates are properly clamped etc
