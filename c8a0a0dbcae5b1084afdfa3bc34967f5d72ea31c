@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//4rM\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-01-15T21:58:29Z",
+      "side": 1,
+      "message": "Call to vp9_setup_key_frame(cpi)\n\nThis wont work as it will cause various things to be reset that we definitely do not want reset on inter frames even if error_resilient mode is on.\n\nFor example it will force an update of GF and ALT_REF.\n\nWe need to look carefully at what is the minimum set of things that need to be reset.",
+      "revId": "c8a0a0dbcae5b1084afdfa3bc34967f5d72ea31c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
