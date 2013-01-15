@@ -239,15 +239,17 @@ HAVE_LIST="
 "
 EXPERIMENT_LIST="
     csm
-    comp_intra_pred
-    superblocks
-    pred_filter
     lossless
-    subpelrefmv
     new_mvref
     implicit_segmentation
     newbintramodes
     comp_interintra_pred
+    tx64x64
+    dwtdcthybrid
+    cnvcontext
+    newcoefcontext
+    enable_6tap
+    abovesprefmv
 "
 CONFIG_LIST="
     external_build

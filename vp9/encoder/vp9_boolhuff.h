@@ -109,4 +109,4 @@ static void encode_bool(BOOL_CODER *br, int bit, int probability) {
   br->range = range;
 }
 
-#endif
+#endif  // VP9_ENCODER_VP9_BOOLHUFF_H_

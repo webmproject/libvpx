@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_ENTROPYMODE_H_
 #define VP9_COMMON_VP9_ENTROPYMODE_H_
 
@@ -17,9 +16,6 @@
 
 #define SUBMVREF_COUNT 5
 #define VP9_NUMMBSPLITS 4
-#if CONFIG_COMP_INTRA_PRED
-#define DEFAULT_COMP_INTRA_PROB  32
-#endif
 
 #if CONFIG_COMP_INTERINTRA_PRED
 #define VP9_DEF_INTERINTRA_PROB 248
@@ -98,7 +94,7 @@ void vp9_kf_default_bmode_probs(vp9_prob dest[VP9_KF_BINTRAMODES]
 
 void vp9_adapt_mode_probs(struct VP9Common *);
 
-#define VP9_SWITCHABLE_FILTERS 2 /* number of switchable filters */
+#define VP9_SWITCHABLE_FILTERS 3 /* number of switchable filters */
 
 extern const  INTERPOLATIONFILTERTYPE vp9_switchable_interp
                   [VP9_SWITCHABLE_FILTERS];
@@ -114,4 +110,4 @@ extern struct vp9_token_struct vp9_switchable_interp_encodings
 extern const  vp9_prob vp9_switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                                  [VP9_SWITCHABLE_FILTERS - 1];
 
-#endif
+#endif  // VP9_COMMON_VP9_ENTROPYMODE_H_

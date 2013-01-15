@@ -13,6 +13,7 @@
 
 #include "vpx_config.h"
 #include "vpx_scale/yv12config.h"
+#include "vpx/vpx_integer.h"
 
 #define BLOCK_HEIGHT_WIDTH 4
 #define VP9_FILTER_WEIGHT 128
@@ -20,9 +21,10 @@
 
 #define SUBPEL_SHIFTS 16
 
-extern const short vp9_bilinear_filters[SUBPEL_SHIFTS][2];
-extern const short vp9_sub_pel_filters_6[SUBPEL_SHIFTS][6];
-extern const short vp9_sub_pel_filters_8[SUBPEL_SHIFTS][8];
-extern const short vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][8];
+extern const int16_t vp9_bilinear_filters[SUBPEL_SHIFTS][2];
+extern const int16_t vp9_sub_pel_filters_6[SUBPEL_SHIFTS][6];
+extern const int16_t vp9_sub_pel_filters_8[SUBPEL_SHIFTS][8];
+extern const int16_t vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][8];
+extern const int16_t vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS][8];
 
-#endif // FILTER_H
+#endif  // VP9_COMMON_VP9_FILTER_H_

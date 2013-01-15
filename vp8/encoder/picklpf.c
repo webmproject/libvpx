@@ -14,7 +14,7 @@
 #include "onyx_int.h"
 #include "quantize.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp8/common/alloccommon.h"
 #include "vp8/common/loopfilter.h"
 #if ARCH_ARM

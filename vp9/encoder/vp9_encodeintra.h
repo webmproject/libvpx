@@ -22,4 +22,4 @@ void vp9_encode_intra8x8mby(MACROBLOCK *x);
 void vp9_encode_intra8x8mbuv(MACROBLOCK *x);
 void vp9_encode_intra8x8(MACROBLOCK *x, int ib);
 
-#endif  // __ENCODEINTRA_H_
+#endif  // VP9_ENCODER_VP9_ENCODEINTRA_H_

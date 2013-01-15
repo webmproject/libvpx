@@ -16,4 +16,4 @@
 void vp9_swap_yv12_buffer(YV12_BUFFER_CONFIG *new_frame,
                           YV12_BUFFER_CONFIG *last_frame);
 
-#endif  // __SWAPYV12_BUFFER_H
+#endif  // VP9_COMMON_VP9_SWAPYV12BUFFER_H_

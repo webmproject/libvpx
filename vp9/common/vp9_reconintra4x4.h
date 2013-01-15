@@ -14,4 +14,4 @@
 
 extern void vp9_intra_prediction_down_copy(MACROBLOCKD *xd);
 
-#endif
+#endif  // VP9_COMMON_VP9_RECONINTRA4X4_H_

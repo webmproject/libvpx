@@ -8,14 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_SUBPIXEL_H_
 #define VP9_COMMON_VP9_SUBPIXEL_H_
 
 #define prototype_subpixel_predict(sym) \
-  void sym(unsigned char *src, int src_pitch, int xofst, int yofst, \
-           unsigned char *dst, int dst_pitch)
+  void sym(uint8_t *src, int src_pitch, int xofst, int yofst, \
+           uint8_t *dst, int dst_pitch)
 
 typedef prototype_subpixel_predict((*vp9_subpix_fn_t));
 
-#endif
+#endif  // VP9_COMMON_VP9_SUBPIXEL_H_

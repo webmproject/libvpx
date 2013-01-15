@@ -15,7 +15,7 @@
 #include "vpx/vp8dx.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
-#include "common/vp9_onyxd.h"
+#include "decoder/vp9_onyxd.h"
 #include "decoder/vp9_onyxd_int.h"
 
 #define VP8_CAP_POSTPROC (CONFIG_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
@@ -573,7 +573,8 @@ static vpx_codec_err_t vp9_set_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp9_set_reference_dec(ctx->pbi, frame->frame_type, &sd);
+    return vp9_set_reference_dec(ctx->pbi,
+                                 (VP9_REFFRAME)frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 
@@ -591,7 +592,8 @@ static vpx_codec_err_t vp9_get_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp9_get_reference_dec(ctx->pbi, frame->frame_type, &sd);
+    return vp9_get_reference_dec(ctx->pbi,
+                                 (VP9_REFFRAME)frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 

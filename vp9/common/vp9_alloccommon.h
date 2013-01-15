@@ -23,4 +23,4 @@ void vp9_setup_version(VP9_COMMON *oci);
 void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi_base);
 void vp9_update_mode_info_in_image(VP9_COMMON *cpi, MODE_INFO *mi);
 
-#endif
+#endif  // VP9_COMMON_VP9_ALLOCCOMMON_H_

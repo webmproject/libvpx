@@ -8,9 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_PPFLAGS_H_
 #define VP9_COMMON_VP9_PPFLAGS_H_
+
 enum {
   VP9D_NOFILTERING            = 0,
   VP9D_DEBLOCK                = 1 << 0,
@@ -35,4 +35,4 @@ typedef struct {
   int display_mv_flag;
 } vp9_ppflags_t;
 
-#endif
+#endif  // VP9_COMMON_VP9_PPFLAGS_H_

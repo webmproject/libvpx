@@ -14,4 +14,4 @@
 
 extern double vp9_mse2psnr(double Samples, double Peak, double Mse);
 
-#endif
+#endif  // VP9_ENCODER_VP9_PSNR_H_

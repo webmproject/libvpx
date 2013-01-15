@@ -18,4 +18,4 @@ extern void vp9_build_block_offsets(struct macroblock *x);
 
 extern void vp9_setup_block_ptrs(struct macroblock *x);
 
-#endif  // __INC_ENCODEFRAME_H
+#endif  // VP9_ENCODER_VP9_ENCODEFRAME_H_

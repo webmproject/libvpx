@@ -8,17 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_ONYXD_H_
 #define VP9_COMMON_VP9_ONYXD_H_
 
-
 /* Create/destroy static data structures. */
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-#include "vp9/common/vp9_type_aliases.h"
 #include "vpx_scale/yv12config.h"
 #include "vp9/common/vp9_ppflags.h"
 #include "vpx_ports/mem.h"
@@ -65,4 +61,4 @@ extern "C"
 }
 #endif
 
-#endif  // __INC_ONYXD_H
+#endif  // VP9_COMMON_VP9_ONYXD_H_

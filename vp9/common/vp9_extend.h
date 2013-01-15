@@ -12,9 +12,10 @@
 #define VP9_COMMON_VP9_EXTEND_H_
 
 #include "vpx_scale/yv12config.h"
+#include "vpx/vpx_integer.h"
 
-void vp9_extend_mb_row(YV12_BUFFER_CONFIG *ybf, unsigned char *YPtr,
-                       unsigned char *UPtr, unsigned char *VPtr);
+void vp9_extend_mb_row(YV12_BUFFER_CONFIG *ybf, uint8_t *YPtr,
+                       uint8_t *UPtr, uint8_t *VPtr);
 
 void vp9_copy_and_extend_frame(YV12_BUFFER_CONFIG *src,
                                YV12_BUFFER_CONFIG *dst);
@@ -24,4 +25,4 @@ void vp9_copy_and_extend_frame_with_rect(YV12_BUFFER_CONFIG *src,
                                          int srcy, int srcx,
                                          int srch, int srcw);
 
-#endif  // __INC_EXTEND_H
+#endif  // VP9_COMMON_VP9_EXTEND_H_

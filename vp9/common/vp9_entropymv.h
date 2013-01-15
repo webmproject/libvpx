@@ -25,6 +25,13 @@ void vp9_adapt_nmv_probs(struct VP9Common *cm, int usehp);
 int vp9_use_nmv_hp(const MV *ref);
 
 #define VP9_NMV_UPDATE_PROB  255
+
+#if CONFIG_NEW_MVREF
+#define VP9_MVREF_UPDATE_PROB 252
+#define VP9_DEFAULT_MV_REF_PROB 192
+#define VP9_MV_REF_UPDATE_COST (14 << 8)
+#endif
+
 //#define MV_GROUP_UPDATE
 
 #define LOW_PRECISION_MV_UPDATE  /* Use 7 bit forward update */
@@ -126,4 +133,5 @@ void vp9_counts_to_nmv_context(
     unsigned int (*branch_ct_class0_hp)[2],
     unsigned int (*branch_ct_hp)[2]);
 void vp9_counts_process(nmv_context_counts *NMVcount, int usehp);
-#endif
+
+#endif  // VP9_COMMON_VP9_ENTROPYMV_H_

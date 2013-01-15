@@ -9,11 +9,9 @@
 ##
 
 VP9_COMMON_SRCS-yes += vp9_common.mk
-VP9_COMMON_SRCS-yes += common/vp9_type_aliases.h
 VP9_COMMON_SRCS-yes += common/vp9_pragmas.h
 VP9_COMMON_SRCS-yes += common/vp9_ppflags.h
 VP9_COMMON_SRCS-yes += common/vp9_onyx.h
-VP9_COMMON_SRCS-yes += common/vp9_onyxd.h
 VP9_COMMON_SRCS-yes += common/vp9_alloccommon.c
 VP9_COMMON_SRCS-yes += common/vp9_asm_com_offsets.c
 VP9_COMMON_SRCS-yes += common/vp9_blockd.c
@@ -32,7 +30,6 @@ VP9_COMMON_SRCS-yes += common/vp9_idctllm.c
 VP9_COMMON_SRCS-yes += common/vp9_alloccommon.h
 VP9_COMMON_SRCS-yes += common/vp9_blockd.h
 VP9_COMMON_SRCS-yes += common/vp9_common.h
-VP9_COMMON_SRCS-yes += common/vp9_common_types.h
 VP9_COMMON_SRCS-yes += common/vp9_entropy.h
 VP9_COMMON_SRCS-yes += common/vp9_entropymode.h
 VP9_COMMON_SRCS-yes += common/vp9_entropymv.h
@@ -94,11 +91,13 @@ VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_recon_mmx.asm
 VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_subpixel_mmx.asm
 VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_loopfilter_mmx.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idctllm_sse2.asm
+VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_iwalsh_sse2.asm
+VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_loopfilter_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_recon_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_recon_wrapper_sse2.c
+VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_subpel_variance_impl_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_subpixel_sse2.asm
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_loopfilter_sse2.asm
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_iwalsh_sse2.asm
+VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_subpixel_variance_sse2.c
 VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_subpixel_8t_ssse3.asm
 VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_subpixel_ssse3.asm
 ifeq ($(CONFIG_POSTPROC),yes)

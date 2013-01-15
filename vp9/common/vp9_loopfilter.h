@@ -49,26 +49,26 @@ struct loop_filter_info {
 };
 
 #define prototype_loopfilter(sym) \
-  void sym(unsigned char *src, int pitch, const unsigned char *blimit,\
+  void sym(uint8_t *src, int pitch, const unsigned char *blimit, \
            const unsigned char *limit, const unsigned char *thresh, int count)
 
 #define prototype_loopfilter_block(sym) \
-  void sym(unsigned char *y, unsigned char *u, unsigned char *v, \
+  void sym(uint8_t *y, uint8_t *u, uint8_t *v, \
            int ystride, int uv_stride, struct loop_filter_info *lfi)
 
 #define prototype_simple_loopfilter(sym) \
-  void sym(unsigned char *y, int ystride, const unsigned char *blimit)
+  void sym(uint8_t *y, int ystride, const unsigned char *blimit)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/vp9_loopfilter_x86.h"
 #endif
 
-typedef void loop_filter_uvfunction(unsigned char *u,   /* source pointer */
+typedef void loop_filter_uvfunction(uint8_t *u,   /* source pointer */
                                     int p,              /* pitch */
                                     const unsigned char *blimit,
                                     const unsigned char *limit,
                                     const unsigned char *thresh,
-                                    unsigned char *v);
+                                    uint8_t *v);
 
 /* assorted loopfilter functions which get used elsewhere */
 struct VP9Common;
@@ -80,17 +80,27 @@ void vp9_loop_filter_frame_init(struct VP9Common *cm,
                                 struct macroblockd *mbd,
                                 int default_filt_lvl);
 
-void vp9_loop_filter_frame(struct VP9Common *cm, struct macroblockd *mbd);
+void vp9_loop_filter_frame(struct VP9Common *cm,
+                           struct macroblockd *mbd,
+                           int filter_level,
+                           int y_only);
 
 void vp9_loop_filter_partial_frame(struct VP9Common *cm,
                                    struct macroblockd *mbd,
                                    int default_filt_lvl);
 
-void vp9_loop_filter_frame_yonly(struct VP9Common *cm,
-                                 struct macroblockd *mbd,
-                                 int default_filt_lvl);
-
 void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
                                       int sharpness_lvl);
 
-#endif  // loopfilter_h
+void vp9_mb_lpf_horizontal_edge_w(unsigned char *s, int p,
+                                  const unsigned char *blimit,
+                                  const unsigned char *limit,
+                                  const unsigned char *thresh,
+                                  int count);
+
+void vp9_mb_lpf_vertical_edge_w(unsigned char *s, int p,
+                                const unsigned char *blimit,
+                                const unsigned char *limit,
+                                const unsigned char *thresh,
+                                int count);
+#endif  // VP9_COMMON_VP9_LOOPFILTER_H_

@@ -8,9 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_DECODER_VP9_DBOOLHUFF_H_
 #define VP9_DECODER_VP9_DBOOLHUFF_H_
+
 #include <stddef.h>
 #include <limits.h>
 #include "./vpx_config.h"
@@ -33,7 +33,7 @@ typedef struct {
   unsigned int         range;
 } BOOL_DECODER;
 
-DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
 int vp9_start_decode(BOOL_DECODER *br,
                      const unsigned char *source,
@@ -152,4 +152,4 @@ static int bool_error(BOOL_DECODER *br) {
 
 extern int vp9_decode_unsigned_max(BOOL_DECODER *br, int max);
 
-#endif
+#endif  // VP9_DECODER_VP9_DBOOLHUFF_H_

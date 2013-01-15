@@ -139,9 +139,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->vp9_mode_contexts, cm->fc.vp9_mode_contexts);
 
   vp9_copy(cc->ymode_prob, cm->fc.ymode_prob);
-#if CONFIG_SUPERBLOCKS
   vp9_copy(cc->sb_ymode_prob, cm->fc.sb_ymode_prob);
-#endif
   vp9_copy(cc->bmode_prob, cm->fc.bmode_prob);
   vp9_copy(cc->uv_mode_prob, cm->fc.uv_mode_prob);
   vp9_copy(cc->i8x8_mode_prob, cm->fc.i8x8_mode_prob);
@@ -169,12 +167,13 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->last_ref_lf_deltas, xd->last_ref_lf_deltas);
   vp9_copy(cc->last_mode_lf_deltas, xd->last_mode_lf_deltas);
 
-  vp9_copy(cc->coef_probs, cm->fc.coef_probs);
-  vp9_copy(cc->hybrid_coef_probs, cm->fc.hybrid_coef_probs);
+  vp9_copy(cc->coef_probs_4x4, cm->fc.coef_probs_4x4);
+  vp9_copy(cc->hybrid_coef_probs_4x4, cm->fc.hybrid_coef_probs_4x4);
   vp9_copy(cc->coef_probs_8x8, cm->fc.coef_probs_8x8);
   vp9_copy(cc->hybrid_coef_probs_8x8, cm->fc.hybrid_coef_probs_8x8);
   vp9_copy(cc->coef_probs_16x16, cm->fc.coef_probs_16x16);
   vp9_copy(cc->hybrid_coef_probs_16x16, cm->fc.hybrid_coef_probs_16x16);
+  vp9_copy(cc->coef_probs_32x32, cm->fc.coef_probs_32x32);
   vp9_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
 #if CONFIG_COMP_INTERINTRA_PRED
   cc->interintra_prob = cm->fc.interintra_prob;
@@ -197,9 +196,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.vp9_mode_contexts, cc->vp9_mode_contexts);
 
   vp9_copy(cm->fc.ymode_prob, cc->ymode_prob);
-#if CONFIG_SUPERBLOCKS
   vp9_copy(cm->fc.sb_ymode_prob, cc->sb_ymode_prob);
-#endif
   vp9_copy(cm->fc.bmode_prob, cc->bmode_prob);
   vp9_copy(cm->fc.i8x8_mode_prob, cc->i8x8_mode_prob);
   vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
@@ -228,12 +225,13 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(xd->last_ref_lf_deltas, cc->last_ref_lf_deltas);
   vp9_copy(xd->last_mode_lf_deltas, cc->last_mode_lf_deltas);
 
-  vp9_copy(cm->fc.coef_probs, cc->coef_probs);
-  vp9_copy(cm->fc.hybrid_coef_probs, cc->hybrid_coef_probs);
+  vp9_copy(cm->fc.coef_probs_4x4, cc->coef_probs_4x4);
+  vp9_copy(cm->fc.hybrid_coef_probs_4x4, cc->hybrid_coef_probs_4x4);
   vp9_copy(cm->fc.coef_probs_8x8, cc->coef_probs_8x8);
   vp9_copy(cm->fc.hybrid_coef_probs_8x8, cc->hybrid_coef_probs_8x8);
   vp9_copy(cm->fc.coef_probs_16x16, cc->coef_probs_16x16);
   vp9_copy(cm->fc.hybrid_coef_probs_16x16, cc->hybrid_coef_probs_16x16);
+  vp9_copy(cm->fc.coef_probs_32x32, cc->coef_probs_32x32);
   vp9_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
 #if CONFIG_COMP_INTERINTRA_PRED
   cm->fc.interintra_prob = cc->interintra_prob;
@@ -274,6 +272,16 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
 
   vp9_update_mode_info_border(cm, cm->mip);
   vp9_update_mode_info_in_image(cm, cm->mi);
+
+#if CONFIG_NEW_MVREF
+  if (1) {
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+
+    // Defaults probabilities for encoding the MV ref id signal
+    vpx_memset(xd->mb_mv_ref_probs, VP9_DEFAULT_MV_REF_PROB,
+               sizeof(xd->mb_mv_ref_probs));
+  }
+#endif
 }
 
 void vp9_setup_inter_frame(VP9_COMP *cpi) {

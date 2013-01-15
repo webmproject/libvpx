@@ -16,17 +16,13 @@ typedef enum {
   DEST = 1
 } BLOCKSET;
 
-static void setup_block
-(
-  BLOCKD *b,
-  int mv_stride,
-  unsigned char **base,
-  unsigned char **base2,
-  int Stride,
-  int offset,
-  BLOCKSET bs
-) {
-
+static void setup_block(BLOCKD *b,
+                        int mv_stride,
+                        uint8_t **base,
+                        uint8_t **base2,
+                        int Stride,
+                        int offset,
+                        BLOCKSET bs) {
   if (bs == DEST) {
     b->dst_stride = Stride;
     b->dst = offset;
@@ -37,15 +33,13 @@ static void setup_block
     b->base_pre = base;
     b->base_second_pre = base2;
   }
-
 }
-
 
 static void setup_macroblock(MACROBLOCKD *xd, BLOCKSET bs) {
   int block;
 
-  unsigned char **y, **u, **v;
-  unsigned char **y2 = NULL, **u2 = NULL, **v2 = NULL;
+  uint8_t **y, **u, **v;
+  uint8_t **y2 = NULL, **u2 = NULL, **v2 = NULL;
   BLOCKD *blockd = xd->block;
   int stride;
 
@@ -117,7 +111,6 @@ void vp9_setup_block_dptrs(MACROBLOCKD *xd) {
 }
 
 void vp9_build_block_doffsets(MACROBLOCKD *xd) {
-
   /* handle the destination pitch features */
   setup_macroblock(xd, DEST);
   setup_macroblock(xd, PRED);

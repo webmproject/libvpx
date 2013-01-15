@@ -38,4 +38,5 @@ void vp9_deblock(YV12_BUFFER_CONFIG         *source,
                  int                         q,
                  int                         low_var_thresh,
                  int                         flag);
-#endif
+
+#endif  // VP9_COMMON_VP9_POSTPROC_H_

@@ -43,4 +43,4 @@ extern void vp9_set_segment_data(VP9_PTR ptr, signed char *feature_data,
 
 extern void vp9_choose_segmap_coding_method(VP9_COMP *cpi);
 
-#endif /* __INC_SEGMENTATION_H__ */
+#endif  // VP9_ENCODER_VP9_SEGMENTATION_H_

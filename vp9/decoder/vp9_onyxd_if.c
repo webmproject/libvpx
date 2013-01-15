@@ -13,7 +13,7 @@
 #if CONFIG_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif
-#include "vp9/common/vp9_onyxd.h"
+#include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_alloccommon.h"
@@ -23,7 +23,7 @@
 #include <assert.h>
 
 #include "vp9/common/vp9_quant_common.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vp9/decoder/vp9_decodframe.h"
@@ -37,7 +37,7 @@ static void ref_cnt_fb(int *buf, int *idx, int new_idx);
 #if WRITE_RECON_BUFFER == 1
 static void recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s) {
   FILE *yuv_file = fopen((char *)name, "ab");
-  unsigned char *src = s->y_buffer;
+  uint8_t *src = s->y_buffer;
   int h = s->y_height;
 
   do {
@@ -382,7 +382,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 
     if (cm->filter_level) {
       /* Apply the loop filter if appropriate. */
-      vp9_loop_filter_frame(cm, &pbi->mb);
+      vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0);
     }
     vp8_yv12_extend_frame_borders(cm->frame_to_show);
   }

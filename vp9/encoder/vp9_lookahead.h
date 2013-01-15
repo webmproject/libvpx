@@ -7,8 +7,10 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+
 #ifndef VP9_ENCODER_VP9_LOOKAHEAD_H_
 #define VP9_ENCODER_VP9_LOOKAHEAD_H_
+
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 
@@ -101,5 +103,4 @@ vp9_lookahead_peek(struct lookahead_ctx *ctx,
 unsigned int
 vp9_lookahead_depth(struct lookahead_ctx *ctx);
 
-
-#endif
+#endif  // VP9_ENCODER_VP9_LOOKAHEAD_H_

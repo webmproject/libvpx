@@ -21,7 +21,7 @@
 #include "vp8/common/alloccommon.h"
 #include "vp8/common/entropymode.h"
 #include "vp8/common/quant_common.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp8/common/setupintrarecon.h"
 
 #include "decodemv.h"

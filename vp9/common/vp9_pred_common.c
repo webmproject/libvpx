@@ -9,8 +9,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_treecoder.h"
 
 // TBD prediction functions for various bitstream signals
 
@@ -221,54 +223,57 @@ unsigned char vp9_get_pred_flag(const MACROBLOCKD *const xd,
 void vp9_set_pred_flag(MACROBLOCKD *const xd,
                        PRED_ID pred_id,
                        unsigned char pred_flag) {
-#if CONFIG_SUPERBLOCKS
   const int mis = xd->mode_info_stride;
-#endif
 
   switch (pred_id) {
     case PRED_SEG_ID:
       xd->mode_info_context->mbmi.seg_id_predicted = pred_flag;
-#if CONFIG_SUPERBLOCKS
-      if (xd->mode_info_context->mbmi.encoded_as_sb) {
-        if (xd->mb_to_right_edge >= 0)
-          xd->mode_info_context[1].mbmi.seg_id_predicted = pred_flag;
-        if (xd->mb_to_bottom_edge >= 0) {
-          xd->mode_info_context[mis].mbmi.seg_id_predicted = pred_flag;
-          if (xd->mb_to_right_edge >= 0)
-            xd->mode_info_context[mis + 1].mbmi.seg_id_predicted = pred_flag;
+      if (xd->mode_info_context->mbmi.sb_type) {
+#define sub(a, b) (b) < 0 ? (a) + (b) : (a)
+        const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
+        const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
+        const int y_mbs = sub(n_mbs, xd->mb_to_bottom_edge >> 7);
+        int x, y;
+
+        for (y = 0; y < y_mbs; y++) {
+          for (x = !y; x < x_mbs; x++) {
+            xd->mode_info_context[y * mis + x].mbmi.seg_id_predicted =
+                pred_flag;
+          }
         }
       }
-#endif
       break;
 
     case PRED_REF:
       xd->mode_info_context->mbmi.ref_predicted = pred_flag;
-#if CONFIG_SUPERBLOCKS
-      if (xd->mode_info_context->mbmi.encoded_as_sb) {
-        if (xd->mb_to_right_edge >= 0)
-          xd->mode_info_context[1].mbmi.ref_predicted = pred_flag;
-        if (xd->mb_to_bottom_edge >= 0) {
-          xd->mode_info_context[mis].mbmi.ref_predicted = pred_flag;
-          if (xd->mb_to_right_edge >= 0)
-            xd->mode_info_context[mis + 1].mbmi.ref_predicted = pred_flag;
+      if (xd->mode_info_context->mbmi.sb_type) {
+        const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
+        const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
+        const int y_mbs = sub(n_mbs, xd->mb_to_bottom_edge >> 7);
+        int x, y;
+
+        for (y = 0; y < y_mbs; y++) {
+          for (x = !y; x < x_mbs; x++) {
+            xd->mode_info_context[y * mis + x].mbmi.ref_predicted = pred_flag;
+          }
         }
       }
-#endif
       break;
 
     case PRED_MBSKIP:
       xd->mode_info_context->mbmi.mb_skip_coeff = pred_flag;
-#if CONFIG_SUPERBLOCKS
-      if (xd->mode_info_context->mbmi.encoded_as_sb) {
-        if (xd->mb_to_right_edge >= 0)
-          xd->mode_info_context[1].mbmi.mb_skip_coeff = pred_flag;
-        if (xd->mb_to_bottom_edge >= 0) {
-          xd->mode_info_context[mis].mbmi.mb_skip_coeff = pred_flag;
-          if (xd->mb_to_right_edge >= 0)
-            xd->mode_info_context[mis + 1].mbmi.mb_skip_coeff = pred_flag;
+      if (xd->mode_info_context->mbmi.sb_type) {
+        const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
+        const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
+        const int y_mbs = sub(n_mbs, xd->mb_to_bottom_edge >> 7);
+        int x, y;
+
+        for (y = 0; y < y_mbs; y++) {
+          for (x = !y; x < x_mbs; x++) {
+            xd->mode_info_context[y * mis + x].mbmi.mb_skip_coeff = pred_flag;
+          }
         }
       }
-#endif
       break;
 
     default:
@@ -286,25 +291,25 @@ unsigned char vp9_get_pred_mb_segid(const VP9_COMMON *const cm,
                                     const MACROBLOCKD *const xd, int MbIndex) {
   // Currently the prediction for the macroblock segment ID is
   // the value stored for this macroblock in the previous frame.
-#if CONFIG_SUPERBLOCKS
-  if (!xd->mode_info_context->mbmi.encoded_as_sb) {
-#endif
+  if (!xd->mode_info_context->mbmi.sb_type) {
     return cm->last_frame_seg_map[MbIndex];
-#if CONFIG_SUPERBLOCKS
   } else {
-    int seg_id = cm->last_frame_seg_map[MbIndex];
-    int mb_col = MbIndex % cm->mb_cols;
-    int mb_row = MbIndex / cm->mb_cols;
-    if (mb_col + 1 < cm->mb_cols)
-      seg_id = seg_id && cm->last_frame_seg_map[MbIndex + 1];
-    if (mb_row + 1 < cm->mb_rows) {
-      seg_id = seg_id && cm->last_frame_seg_map[MbIndex + cm->mb_cols];
-      if (mb_col + 1 < cm->mb_cols)
-        seg_id = seg_id && cm->last_frame_seg_map[MbIndex + cm->mb_cols + 1];
+    const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
+    const int mb_col = MbIndex % cm->mb_cols;
+    const int mb_row = MbIndex / cm->mb_cols;
+    const int x_mbs = MIN(n_mbs, cm->mb_cols - mb_col);
+    const int y_mbs = MIN(n_mbs, cm->mb_rows - mb_row);
+    int x, y;
+    unsigned seg_id = -1;
+
+    for (y = mb_row; y < mb_row + y_mbs; y++) {
+      for (x = mb_col; x < mb_col + x_mbs; x++) {
+        seg_id = MIN(seg_id, cm->last_frame_seg_map[cm->mb_cols * y + x]);
+      }
     }
+
     return seg_id;
   }
-#endif
 }
 
 MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
@@ -383,26 +388,13 @@ void vp9_calc_ref_probs(int *count, vp9_prob *probs) {
   int tot_count;
 
   tot_count = count[0] + count[1] + count[2] + count[3];
-  if (tot_count) {
-    probs[0] = (vp9_prob)((count[0] * 255 + (tot_count >> 1)) / tot_count);
-    probs[0] += !probs[0];
-  } else
-    probs[0] = 128;
+  probs[0] = get_prob(count[0], tot_count);
 
   tot_count -= count[0];
-  if (tot_count) {
-    probs[1] = (vp9_prob)((count[1] * 255 + (tot_count >> 1)) / tot_count);
-    probs[1] += !probs[1];
-  } else
-    probs[1] = 128;
+  probs[1] = get_prob(count[1], tot_count);
 
   tot_count -= count[1];
-  if (tot_count) {
-    probs[2] = (vp9_prob)((count[2] * 255 + (tot_count >> 1)) / tot_count);
-    probs[2] += !probs[2];
-  } else
-    probs[2] = 128;
-
+  probs[2] = get_prob(count[2], tot_count);
 }
 
 // Computes a set of modified conditional probabilities for the reference frame

@@ -18,7 +18,7 @@
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_psnr.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_extend.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/common/vp9_quant_common.h"
@@ -49,7 +49,8 @@ extern void print_tree_update_probs();
 
 static void set_default_lf_deltas(VP9_COMP *cpi);
 
-#define DEFAULT_INTERP_FILTER EIGHTTAP  /* SWITCHABLE for better performance */
+#define DEFAULT_INTERP_FILTER SWITCHABLE
+
 #define SEARCH_BEST_FILTER 0            /* to search exhaustively for
                                            best filter */
 #define RESET_FOREACH_FILTER 0          /* whether to reset the encoder state
@@ -118,7 +119,7 @@ unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 extern unsigned __int64 Sectionbits[500];
 #endif
 #ifdef MODE_STATS
-extern INT64 Sectionbits[500];
+extern int64_t Sectionbits[500];
 extern unsigned int y_modes[VP9_YMODES];
 extern unsigned int i8x8_modes[VP9_I8X8_MODES];
 extern unsigned int uv_modes[VP9_UV_MODES];
@@ -214,7 +215,7 @@ static void set_mvcost(MACROBLOCK *mb) {
 static void init_base_skip_probs(void) {
   int i;
   double q;
-  int skip_prob, t;
+  int t;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
     q = vp9_convert_qindex_to_q(i);
@@ -223,26 +224,9 @@ static void init_base_skip_probs(void) {
     // Based on crude best fit of old table.
     t = (int)(564.25 * pow(2.71828, (-0.012 * q)));
 
-    skip_prob = t;
-    if (skip_prob < 1)
-      skip_prob = 1;
-    else if (skip_prob > 255)
-      skip_prob = 255;
-    base_skip_false_prob[i][1] = skip_prob;
-
-    skip_prob = t * 3 / 4;
-    if (skip_prob < 1)
-      skip_prob = 1;
-    else if (skip_prob > 255)
-      skip_prob = 255;
-    base_skip_false_prob[i][2] = skip_prob;
-
-    skip_prob = t * 5 / 4;
-    if (skip_prob < 1)
-      skip_prob = 1;
-    else if (skip_prob > 255)
-      skip_prob = 255;
-    base_skip_false_prob[i][0] = skip_prob;
+    base_skip_false_prob[i][1] = clip_prob(t);
+    base_skip_false_prob[i][2] = clip_prob(t * 3 / 4);
+    base_skip_false_prob[i][0] = clip_prob(t * 5 / 4);
   }
 }
 
@@ -571,43 +555,19 @@ static void print_seg_map(VP9_COMP *cpi) {
 }
 
 static void update_reference_segmentation_map(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-  int row, col, sb_rows = (cm->mb_rows + 1) >> 1, sb_cols = (cm->mb_cols + 1) >> 1;
-  MODE_INFO *mi = cm->mi;
-  uint8_t *segmap = cpi->segmentation_map;
-  uint8_t *segcache = cm->last_frame_seg_map;
+  VP9_COMMON *const cm = &cpi->common;
+  int row, col;
+  MODE_INFO *mi, *mi_ptr = cm->mi;
+  uint8_t *cache_ptr = cm->last_frame_seg_map, *cache;
 
-  for (row = 0; row < sb_rows; row++) {
-    for (col = 0; col < sb_cols; col++) {
-      MODE_INFO *miptr = mi + col * 2;
-      uint8_t *cache = segcache + col * 2;
-#if CONFIG_SUPERBLOCKS
-      if (miptr->mbmi.encoded_as_sb) {
-        cache[0] = miptr->mbmi.segment_id;
-        if (!(cm->mb_cols & 1) || col < sb_cols - 1)
-          cache[1] = miptr->mbmi.segment_id;
-        if (!(cm->mb_rows & 1) || row < sb_rows - 1) {
-          cache[cm->mb_cols] = miptr->mbmi.segment_id;
-          if (!(cm->mb_cols & 1) || col < sb_cols - 1)
-            cache[cm->mb_cols + 1] = miptr->mbmi.segment_id;
-        }
-      } else
-#endif
-      {
-        cache[0] = miptr[0].mbmi.segment_id;
-        if (!(cm->mb_cols & 1) || col < sb_cols - 1)
-          cache[1] = miptr[1].mbmi.segment_id;
-        if (!(cm->mb_rows & 1) || row < sb_rows - 1) {
-          cache[cm->mb_cols] = miptr[cm->mode_info_stride].mbmi.segment_id;
-          if (!(cm->mb_cols & 1) || col < sb_cols - 1)
-            cache[1] = miptr[1].mbmi.segment_id;
-          cache[cm->mb_cols + 1] = miptr[cm->mode_info_stride + 1].mbmi.segment_id;
-        }
-      }
+  for (row = 0; row < cm->mb_rows; row++) {
+    mi = mi_ptr;
+    cache = cache_ptr;
+    for (col = 0; col < cm->mb_cols; col++, mi++, cache++) {
+      cache[0] = mi->mbmi.segment_id;
     }
-    segmap += 2 * cm->mb_cols;
-    segcache += 2 * cm->mb_cols;
-    mi += 2 * cm->mode_info_stride;
+    mi_ptr += cm->mode_info_stride;
+    cache_ptr += cm->mb_cols;
   }
 }
 
@@ -666,7 +626,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   sf->first_step = 0;
   sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
-  sf->improved_mv_pred = 1;
 
   // default thresholds to 0
   for (i = 0; i < MAX_MODES; i++)
@@ -674,47 +633,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   switch (Mode) {
     case 0: // best quality mode
-#if CONFIG_PRED_FILTER
-      sf->thresh_mult[THR_ZEROMV        ] = 0;
-      sf->thresh_mult[THR_ZEROMV_FILT   ] = 0;
-      sf->thresh_mult[THR_ZEROG         ] = 0;
-      sf->thresh_mult[THR_ZEROG_FILT    ] = 0;
-      sf->thresh_mult[THR_ZEROA         ] = 0;
-      sf->thresh_mult[THR_ZEROA_FILT    ] = 0;
-      sf->thresh_mult[THR_NEARESTMV     ] = 0;
-      sf->thresh_mult[THR_NEARESTMV_FILT] = 0;
-      sf->thresh_mult[THR_NEARESTG      ] = 0;
-      sf->thresh_mult[THR_NEARESTG_FILT ] = 0;
-      sf->thresh_mult[THR_NEARESTA      ] = 0;
-      sf->thresh_mult[THR_NEARESTA_FILT ] = 0;
-      sf->thresh_mult[THR_NEARMV        ] = 0;
-      sf->thresh_mult[THR_NEARMV_FILT   ] = 0;
-      sf->thresh_mult[THR_NEARG         ] = 0;
-      sf->thresh_mult[THR_NEARG_FILT    ] = 0;
-      sf->thresh_mult[THR_NEARA         ] = 0;
-      sf->thresh_mult[THR_NEARA_FILT    ] = 0;
-
-      sf->thresh_mult[THR_DC       ] = 0;
-
-      sf->thresh_mult[THR_V_PRED   ] = 1000;
-      sf->thresh_mult[THR_H_PRED   ] = 1000;
-      sf->thresh_mult[THR_D45_PRED ] = 1000;
-      sf->thresh_mult[THR_D135_PRED] = 1000;
-      sf->thresh_mult[THR_D117_PRED] = 1000;
-      sf->thresh_mult[THR_D153_PRED] = 1000;
-      sf->thresh_mult[THR_D27_PRED ] = 1000;
-      sf->thresh_mult[THR_D63_PRED ] = 1000;
-      sf->thresh_mult[THR_B_PRED   ] = 2000;
-      sf->thresh_mult[THR_I8X8_PRED] = 2000;
-      sf->thresh_mult[THR_TM       ] = 1000;
-
-      sf->thresh_mult[THR_NEWMV    ] = 1000;
-      sf->thresh_mult[THR_NEWG     ] = 1000;
-      sf->thresh_mult[THR_NEWA     ] = 1000;
-      sf->thresh_mult[THR_NEWMV_FILT    ] = 1000;
-      sf->thresh_mult[THR_NEWG_FILT     ] = 1000;
-      sf->thresh_mult[THR_NEWA_FILT     ] = 1000;
-#else
       sf->thresh_mult[THR_ZEROMV   ] = 0;
       sf->thresh_mult[THR_ZEROG    ] = 0;
       sf->thresh_mult[THR_ZEROA    ] = 0;
@@ -742,7 +660,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       sf->thresh_mult[THR_NEWMV    ] = 1000;
       sf->thresh_mult[THR_NEWG     ] = 1000;
       sf->thresh_mult[THR_NEWA     ] = 1000;
-#endif
+
       sf->thresh_mult[THR_SPLITMV  ] = 2500;
       sf->thresh_mult[THR_SPLITG   ] = 5000;
       sf->thresh_mult[THR_SPLITA   ] = 5000;
@@ -785,66 +703,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       sf->search_best_filter = SEARCH_BEST_FILTER;
       break;
     case 1:
-#if CONFIG_PRED_FILTER
-      sf->thresh_mult[THR_NEARESTMV] = 0;
-      sf->thresh_mult[THR_NEARESTMV_FILT] = 0;
-      sf->thresh_mult[THR_ZEROMV   ] = 0;
-      sf->thresh_mult[THR_ZEROMV_FILT   ] = 0;
-      sf->thresh_mult[THR_DC       ] = 0;
-      sf->thresh_mult[THR_NEARMV   ] = 0;
-      sf->thresh_mult[THR_NEARMV_FILT   ] = 0;
-      sf->thresh_mult[THR_V_PRED   ] = 1000;
-      sf->thresh_mult[THR_H_PRED   ] = 1000;
-      sf->thresh_mult[THR_D45_PRED ] = 1000;
-      sf->thresh_mult[THR_D135_PRED] = 1000;
-      sf->thresh_mult[THR_D117_PRED] = 1000;
-      sf->thresh_mult[THR_D153_PRED] = 1000;
-      sf->thresh_mult[THR_D27_PRED ] = 1000;
-      sf->thresh_mult[THR_D63_PRED ] = 1000;
-      sf->thresh_mult[THR_B_PRED   ] = 2500;
-      sf->thresh_mult[THR_I8X8_PRED] = 2500;
-      sf->thresh_mult[THR_TM       ] = 1000;
-
-      sf->thresh_mult[THR_NEARESTG ] = 1000;
-      sf->thresh_mult[THR_NEARESTG_FILT ] = 1000;
-      sf->thresh_mult[THR_NEARESTA ] = 1000;
-      sf->thresh_mult[THR_NEARESTA_FILT ] = 1000;
-
-      sf->thresh_mult[THR_ZEROG    ] = 1000;
-      sf->thresh_mult[THR_ZEROA    ] = 1000;
-      sf->thresh_mult[THR_NEARG    ] = 1000;
-      sf->thresh_mult[THR_NEARA    ] = 1000;
-      sf->thresh_mult[THR_ZEROG_FILT    ] = 1000;
-      sf->thresh_mult[THR_ZEROA_FILT    ] = 1000;
-      sf->thresh_mult[THR_NEARG_FILT    ] = 1000;
-      sf->thresh_mult[THR_NEARA_FILT    ] = 1000;
-
-      sf->thresh_mult[THR_ZEROMV   ] = 0;
-      sf->thresh_mult[THR_ZEROG    ] = 0;
-      sf->thresh_mult[THR_ZEROA    ] = 0;
-      sf->thresh_mult[THR_NEARESTMV] = 0;
-      sf->thresh_mult[THR_NEARESTG ] = 0;
-      sf->thresh_mult[THR_NEARESTA ] = 0;
-      sf->thresh_mult[THR_NEARMV   ] = 0;
-      sf->thresh_mult[THR_NEARG    ] = 0;
-      sf->thresh_mult[THR_NEARA    ] = 0;
-      sf->thresh_mult[THR_ZEROMV_FILT   ] = 0;
-      sf->thresh_mult[THR_ZEROG_FILT    ] = 0;
-      sf->thresh_mult[THR_ZEROA_FILT    ] = 0;
-      sf->thresh_mult[THR_NEARESTMV_FILT] = 0;
-      sf->thresh_mult[THR_NEARESTG_FILT ] = 0;
-      sf->thresh_mult[THR_NEARESTA_FILT ] = 0;
-      sf->thresh_mult[THR_NEARMV_FILT   ] = 0;
-      sf->thresh_mult[THR_NEARG_FILT    ] = 0;
-      sf->thresh_mult[THR_NEARA_FILT    ] = 0;
-
-      sf->thresh_mult[THR_NEWMV    ] = 1000;
-      sf->thresh_mult[THR_NEWG     ] = 1000;
-      sf->thresh_mult[THR_NEWA     ] = 1000;
-      sf->thresh_mult[THR_NEWMV_FILT    ] = 1000;
-      sf->thresh_mult[THR_NEWG_FILT     ] = 1000;
-      sf->thresh_mult[THR_NEWA_FILT     ] = 1000;
-#else
       sf->thresh_mult[THR_NEARESTMV] = 0;
       sf->thresh_mult[THR_ZEROMV   ] = 0;
       sf->thresh_mult[THR_DC       ] = 0;
@@ -882,7 +740,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       sf->thresh_mult[THR_NEWMV    ] = 1000;
       sf->thresh_mult[THR_NEWG     ] = 1000;
       sf->thresh_mult[THR_NEWA     ] = 1000;
-#endif
+
       sf->thresh_mult[THR_SPLITMV  ] = 1700;
       sf->thresh_mult[THR_SPLITG   ] = 4500;
       sf->thresh_mult[THR_SPLITA   ] = 4500;
@@ -958,9 +816,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
           sf->thresh_mult[THR_NEWMV    ] = 2000;
-#if CONFIG_PRED_FILTER
-          sf->thresh_mult[THR_NEWMV_FILT    ] = 2000;
-#endif
           sf->thresh_mult[THR_SPLITMV  ] = 10000;
           sf->thresh_mult[THR_COMP_SPLITLG  ] = 20000;
         }
@@ -970,12 +825,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
           sf->thresh_mult[THR_ZEROG    ] = 1500;
           sf->thresh_mult[THR_NEARG    ] = 1500;
           sf->thresh_mult[THR_NEWG     ] = 2000;
-#if CONFIG_PRED_FILTER
-          sf->thresh_mult[THR_NEARESTG_FILT ] = 1500;
-          sf->thresh_mult[THR_ZEROG_FILT    ] = 1500;
-          sf->thresh_mult[THR_NEARG_FILT    ] = 1500;
-          sf->thresh_mult[THR_NEWG_FILT     ] = 2000;
-#endif
           sf->thresh_mult[THR_SPLITG   ] = 20000;
           sf->thresh_mult[THR_COMP_SPLITGA  ] = 20000;
         }
@@ -985,12 +834,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
           sf->thresh_mult[THR_ZEROA    ] = 1500;
           sf->thresh_mult[THR_NEARA    ] = 1500;
           sf->thresh_mult[THR_NEWA     ] = 2000;
-#if CONFIG_PRED_FILTER
-          sf->thresh_mult[THR_NEARESTA_FILT ] = 1500;
-          sf->thresh_mult[THR_ZEROA_FILT    ] = 1500;
-          sf->thresh_mult[THR_NEARA_FILT    ] = 1500;
-          sf->thresh_mult[THR_NEWA_FILT     ] = 2000;
-#endif
           sf->thresh_mult[THR_SPLITA   ] = 20000;
           sf->thresh_mult[THR_COMP_SPLITLA  ] = 10000;
         }
@@ -1047,9 +890,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
           sf->thresh_mult[THR_NEWMV    ] = 2000;
-#if CONFIG_PRED_FILTER
-          sf->thresh_mult[THR_NEWMV_FILT    ] = 2000;
-#endif
           sf->thresh_mult[THR_SPLITMV  ] = 25000;
           sf->thresh_mult[THR_COMP_SPLITLG  ] = 50000;
         }
@@ -1059,12 +899,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
           sf->thresh_mult[THR_ZEROG    ] = 2000;
           sf->thresh_mult[THR_NEARG    ] = 2000;
           sf->thresh_mult[THR_NEWG     ] = 2500;
-#if CONFIG_PRED_FILTER
-          sf->thresh_mult[THR_NEARESTG_FILT ] = 2000;
-          sf->thresh_mult[THR_ZEROG_FILT    ] = 2000;
-          sf->thresh_mult[THR_NEARG_FILT    ] = 2000;
-          sf->thresh_mult[THR_NEWG_FILT     ] = 2500;
-#endif
           sf->thresh_mult[THR_SPLITG   ] = 50000;
           sf->thresh_mult[THR_COMP_SPLITGA  ] = 50000;
         }
@@ -1074,12 +908,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
           sf->thresh_mult[THR_ZEROA    ] = 2000;
           sf->thresh_mult[THR_NEARA    ] = 2000;
           sf->thresh_mult[THR_NEWA     ] = 2500;
-#if CONFIG_PRED_FILTER
-          sf->thresh_mult[THR_NEARESTA_FILT ] = 2000;
-          sf->thresh_mult[THR_ZEROA_FILT    ] = 2000;
-          sf->thresh_mult[THR_NEARA_FILT    ] = 2000;
-          sf->thresh_mult[THR_NEWA_FILT     ] = 2500;
-#endif
           sf->thresh_mult[THR_SPLITA   ] = 50000;
           sf->thresh_mult[THR_COMP_SPLITLA  ] = 25000;
         }
@@ -1130,12 +958,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     sf->thresh_mult[THR_NEARESTMV] = INT_MAX;
     sf->thresh_mult[THR_ZEROMV   ] = INT_MAX;
     sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
-#if CONFIG_PRED_FILTER
-    sf->thresh_mult[THR_NEWMV_FILT    ] = INT_MAX;
-    sf->thresh_mult[THR_NEARESTMV_FILT] = INT_MAX;
-    sf->thresh_mult[THR_ZEROMV_FILT   ] = INT_MAX;
-    sf->thresh_mult[THR_NEARMV_FILT   ] = INT_MAX;
-#endif
     sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
   }
 
@@ -1144,12 +966,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
     sf->thresh_mult[THR_NEARG    ] = INT_MAX;
     sf->thresh_mult[THR_NEWG     ] = INT_MAX;
-#if CONFIG_PRED_FILTER
-    sf->thresh_mult[THR_NEARESTG_FILT ] = INT_MAX;
-    sf->thresh_mult[THR_ZEROG_FILT    ] = INT_MAX;
-    sf->thresh_mult[THR_NEARG_FILT    ] = INT_MAX;
-    sf->thresh_mult[THR_NEWG_FILT     ] = INT_MAX;
-#endif
 #if CONFIG_COMP_INTERINTRA_PRED
     sf->thresh_mult[THR_COMP_INTERINTRA_ZEROG   ] = INT_MAX;
     sf->thresh_mult[THR_COMP_INTERINTRA_NEARESTG] = INT_MAX;
@@ -1164,12 +980,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
     sf->thresh_mult[THR_NEARA    ] = INT_MAX;
     sf->thresh_mult[THR_NEWA     ] = INT_MAX;
-#if CONFIG_PRED_FILTER
-    sf->thresh_mult[THR_NEARESTA_FILT ] = INT_MAX;
-    sf->thresh_mult[THR_ZEROA_FILT    ] = INT_MAX;
-    sf->thresh_mult[THR_NEARA_FILT    ] = INT_MAX;
-    sf->thresh_mult[THR_NEWA_FILT     ] = INT_MAX;
-#endif
 #if CONFIG_COMP_INTERINTRA_PRED
     sf->thresh_mult[THR_COMP_INTERINTRA_ZEROA   ] = INT_MAX;
     sf->thresh_mult[THR_COMP_INTERINTRA_NEARESTA] = INT_MAX;
@@ -1803,12 +1613,11 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cm->prob_last_coded               = 128;
   cm->prob_gf_coded                 = 128;
   cm->prob_intra_coded              = 63;
-#if CONFIG_SUPERBLOCKS
-  cm->sb_coded                      = 200;
-#endif
+  cm->sb32_coded                    = 200;
+  cm->sb64_coded                    = 200;
   for (i = 0; i < COMP_PRED_CONTEXTS; i++)
     cm->prob_comppred[i]         = 128;
-  for (i = 0; i < TX_SIZE_MAX - 1; i++)
+  for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
     cm->prob_tx[i]               = 128;
 
   // Prime the recent reference frame useage counters.
@@ -1918,10 +1727,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
 #endif
 
-#ifndef LLONG_MAX
-#define LLONG_MAX  9223372036854775807LL
-#endif
-  cpi->first_time_stamp_ever = LLONG_MAX;
+  cpi->first_time_stamp_ever = INT64_MAX;
 
   cpi->frames_till_gf_update_due      = 0;
   cpi->key_frame_count              = 1;
@@ -2005,12 +1811,15 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
     cpi->fn_ptr[BT].sdx4df         = SDX4DF;
 
 
-#if CONFIG_SUPERBLOCKS
   BFP(BLOCK_32X32, vp9_sad32x32, vp9_variance32x32, vp9_sub_pixel_variance32x32,
       vp9_variance_halfpixvar32x32_h, vp9_variance_halfpixvar32x32_v,
       vp9_variance_halfpixvar32x32_hv, vp9_sad32x32x3, vp9_sad32x32x8,
       vp9_sad32x32x4d)
-#endif
+
+  BFP(BLOCK_64X64, vp9_sad64x64, vp9_variance64x64, vp9_sub_pixel_variance64x64,
+      vp9_variance_halfpixvar64x64_h, vp9_variance_halfpixvar64x64_v,
+      vp9_variance_halfpixvar64x64_hv, vp9_sad64x64x3, vp9_sad64x64x8,
+      vp9_sad64x64x4d)
 
   BFP(BLOCK_16X16, vp9_sad16x16, vp9_variance16x16, vp9_sub_pixel_variance16x16,
        vp9_variance_halfpixvar16x16_h, vp9_variance_halfpixvar16x16_v,
@@ -2221,11 +2030,11 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
       fprintf(fmode, "[VP9_KF_BINTRAMODES][VP9_KF_BINTRAMODES]"
                      "[VP9_KF_BINTRAMODES] =\n{\n");
 
-      for (i = 0; i < VP8_KF_BINTRAMODES; i++) {
+      for (i = 0; i < VP9_KF_BINTRAMODES; i++) {
 
         fprintf(fmode, "    { // Above Mode :  %d\n", i);
 
-        for (j = 0; j < VP8_KF_BINTRAMODES; j++) {
+        for (j = 0; j < VP9_KF_BINTRAMODES; j++) {
 
           fprintf(fmode, "        {");
 
@@ -2310,8 +2119,8 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 }
 
 
-static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
-                                 unsigned char *recon, int recon_stride,
+static uint64_t calc_plane_error(uint8_t *orig, int orig_stride,
+                                 uint8_t *recon, int recon_stride,
                                  unsigned int cols, unsigned int rows) {
   unsigned int row, col;
   uint64_t total_sse = 0;
@@ -2327,9 +2136,9 @@ static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
 
     /* Handle odd-sized width */
     if (col < cols) {
-      unsigned int   border_row, border_col;
-      unsigned char *border_orig = orig;
-      unsigned char *border_recon = recon;
+      unsigned int border_row, border_col;
+      uint8_t *border_orig = orig;
+      uint8_t *border_recon = recon;
 
       for (border_row = 0; border_row < 16; border_row++) {
         for (border_col = col; border_col < cols; border_col++) {
@@ -2488,7 +2297,7 @@ int vp9_update_entropy(VP9_PTR comp, int update) {
 
 #ifdef OUTPUT_YUV_SRC
 void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s) {
-  unsigned char *src = s->y_buffer;
+  uint8_t *src = s->y_buffer;
   int h = s->y_height;
 
   do {
@@ -2517,7 +2326,7 @@ void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s) {
 #ifdef OUTPUT_YUV_REC
 void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
   YV12_BUFFER_CONFIG *s = cm->frame_to_show;
-  unsigned char *src = s->y_buffer;
+  uint8_t *src = s->y_buffer;
   int h = cm->Height;
 
   do {
@@ -2690,9 +2499,9 @@ static double compute_edge_pixel_proportion(YV12_BUFFER_CONFIG *frame) {
   int i, j;
   int num_edge_pels = 0;
   int num_pels = (frame->y_height - 2) * (frame->y_width - 2);
-  unsigned char *prev = frame->y_buffer + 1;
-  unsigned char *curr = frame->y_buffer + 1 + frame->y_stride;
-  unsigned char *next = frame->y_buffer + 1 + 2 * frame->y_stride;
+  uint8_t *prev = frame->y_buffer + 1;
+  uint8_t *curr = frame->y_buffer + 1 + frame->y_stride;
+  uint8_t *next = frame->y_buffer + 1 + 2 * frame->y_stride;
   for (i = 1; i < frame->y_height - 1; i++) {
     for (j = 1; j < frame->y_width - 1; j++) {
       /* Sobel hor and ver gradients */
@@ -2714,10 +2523,10 @@ static double compute_edge_pixel_proportion(YV12_BUFFER_CONFIG *frame) {
 
 // Function to test for conditions that indicate we should loop
 // back and recode a frame.
-static BOOL recode_loop_test(VP9_COMP *cpi,
-                             int high_limit, int low_limit,
-                             int q, int maxq, int minq) {
-  BOOL    force_recode = FALSE;
+static int recode_loop_test(VP9_COMP *cpi,
+                            int high_limit, int low_limit,
+                            int q, int maxq, int minq) {
+  int force_recode = FALSE;
   VP9_COMMON *cm = &cpi->common;
 
   // Is frame recode allowed at all
@@ -2850,57 +2659,52 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
   if (cm->filter_level > 0) {
     vp9_set_alt_lf_level(cpi, cm->filter_level);
-    vp9_loop_filter_frame(cm, &cpi->mb.e_mbd);
+    vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level, 0);
   }
 
   vp8_yv12_extend_frame_borders(cm->frame_to_show);
 
 }
 
-#if CONFIG_PRED_FILTER
-void select_pred_filter_mode(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
+void select_interp_filter_type(VP9_COMP *cpi) {
+  int i;
+  int high_filter_index = 0;
+  unsigned int thresh;
+  unsigned int high_count = 0;
+  unsigned int count_sum = 0;
+  unsigned int *hist = cpi->best_switchable_interp_count;
 
-  int prob_pred_filter_off = cm->prob_pred_filter_off;
+  if (DEFAULT_INTERP_FILTER != SWITCHABLE) {
+    cpi->common.mcomp_filter_type = DEFAULT_INTERP_FILTER;
+    return;
+  }
 
-  // Force filter on/off if probability is extreme
-  if (prob_pred_filter_off >= 255 * 0.95)
-    cm->pred_filter_mode = 0;   // Off at the frame level
-  else if (prob_pred_filter_off <= 255 * 0.05)
-    cm->pred_filter_mode = 1;   // On at the frame level
-  else
-    cm->pred_filter_mode = 2;   // Selectable at the MB level
+  // TODO(agrange): Look at using RD criteria to select the interpolation
+  // filter to use for the next frame rather than this simpler counting scheme.
+
+  // Select the interpolation filter mode for the next frame
+  // based on the selection frequency seen in the current frame.
+  for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
+    unsigned int count = hist[i];
+    count_sum += count;
+    if (count > high_count) {
+      high_count = count;
+      high_filter_index = i;
+    }
+  }
+
+  thresh = (unsigned int)(0.80 * count_sum);
+
+  if (high_count > thresh) {
+    // One filter accounts for 80+% of cases so force the next
+    // frame to use this filter exclusively using frame-level flag.
+    cpi->common.mcomp_filter_type = vp9_switchable_interp[high_filter_index];
+  } else {
+    // Use a MB-level switchable filter selection strategy.
+    cpi->common.mcomp_filter_type = SWITCHABLE;
+  }
 }
 
-void update_pred_filt_prob(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-  int prob_pred_filter_off;
-
-  // Based on the selection in the previous frame determine what mode
-  // to use for the current frame and work out the signaling probability
-  if (cpi->pred_filter_on_count + cpi->pred_filter_off_count) {
-    prob_pred_filter_off = cpi->pred_filter_off_count * 256 /
-                           (cpi->pred_filter_on_count + cpi->pred_filter_off_count);
-
-    if (prob_pred_filter_off < 1)
-      prob_pred_filter_off = 1;
-
-    if (prob_pred_filter_off > 255)
-      prob_pred_filter_off = 255;
-
-    cm->prob_pred_filter_off = prob_pred_filter_off;
-  } else
-    cm->prob_pred_filter_off = 128;
-  /*
-      {
-        FILE *fp = fopen("filt_use.txt", "a");
-        fprintf (fp, "%d %d prob=%d\n", cpi->pred_filter_off_count,
-                 cpi->pred_filter_on_count, cm->prob_pred_filter_off);
-        fclose(fp);
-      }
-  */
-}
-#endif
 #if CONFIG_COMP_INTERINTRA_PRED
 static void select_interintra_mode(VP9_COMP *cpi) {
   static const double threshold = 0.01;
@@ -2915,13 +2719,10 @@ static void select_interintra_mode(VP9_COMP *cpi) {
 }
 #endif
 
-static void encode_frame_to_data_rate
-(
-  VP9_COMP *cpi,
-  unsigned long *size,
-  unsigned char *dest,
-  unsigned int *frame_flags
-) {
+static void encode_frame_to_data_rate(VP9_COMP *cpi,
+                                      unsigned long *size,
+                                      unsigned char *dest,
+                                      unsigned int *frame_flags) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
@@ -2961,12 +2762,16 @@ static void encode_frame_to_data_rate
 
   /* list of filters to search over */
   int mcomp_filters_to_search[] = {
-    EIGHTTAP, EIGHTTAP_SHARP, SIXTAP, SWITCHABLE
+#if CONFIG_ENABLE_6TAP
+      EIGHTTAP, EIGHTTAP_SHARP, SIXTAP, SWITCHABLE
+#else
+      EIGHTTAP, EIGHTTAP_SHARP, EIGHTTAP_SMOOTH, SWITCHABLE
+#endif
   };
   int mcomp_filters = sizeof(mcomp_filters_to_search) /
       sizeof(*mcomp_filters_to_search);
   int mcomp_filter_index = 0;
-  INT64 mcomp_filter_cost[4];
+  int64_t mcomp_filter_cost[4];
 
   // Clear down mmx registers to allow floating point in what follows
   vp9_clear_system_state();
@@ -3020,11 +2825,6 @@ static void encode_frame_to_data_rate
   // Set default state for segment based loop filter update flags
   xd->mode_ref_lf_delta_update = 0;
 
-#if CONFIG_NEW_MVREF
-  // Temp defaults probabilities for ecnoding the MV ref id signal
-  vpx_memset(xd->mb_mv_ref_id_probs, 192,
-             sizeof(xd->mb_mv_ref_id_probs));
-#endif
 
   // Set various flags etc to special state if it is a key frame
   if (cm->frame_type == KEY_FRAME) {
@@ -3164,7 +2964,7 @@ static void encode_frame_to_data_rate
   if (cpi->active_worst_quality < cpi->active_best_quality)
     cpi->active_worst_quality = cpi->active_best_quality;
 
-  // Specuial case code to try and match quality with forced key frames
+  // Special case code to try and match quality with forced key frames
   if ((cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced) {
     Q = cpi->last_boosted_qindex;
   } else {
@@ -3216,7 +3016,7 @@ static void encode_frame_to_data_rate
 #if CONFIG_POSTPROC
 
   if (cpi->oxcf.noise_sensitivity > 0) {
-    unsigned char *src;
+    uint8_t *src;
     int l = 0;
 
     switch (cpi->oxcf.noise_sensitivity) {
@@ -3339,13 +3139,6 @@ static void encode_frame_to_data_rate
     update_base_skip_probs(cpi);
 
     vp9_clear_system_state();  // __asm emms;
-
-#if CONFIG_PRED_FILTER
-    // Update prediction filter on/off probability based on
-    // selection made for the current frame
-    if (cm->frame_type != KEY_FRAME)
-      update_pred_filt_prob(cpi);
-#endif
 
     // Dummy pack of the bitstream using up to date stats to get an
     // accurate estimate of output frame size to determine if we need
@@ -3521,42 +3314,11 @@ static void encode_frame_to_data_rate
     if (cpi->is_src_frame_alt_ref)
       Loop = FALSE;
 
-    if (cm->frame_type != KEY_FRAME &&
-        !sf->search_best_filter &&
-        cm->mcomp_filter_type == SWITCHABLE) {
-      int interp_factor = Q / 3;  /* denominator is 256 */
-      int count[VP9_SWITCHABLE_FILTERS];
-      int tot_count = 0, c = 0, thr;
-      int i, j;
-      for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
-        count[i] = 0;
-        for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j) {
-          count[i] += cpi->switchable_interp_count[j][i];
-        }
-        tot_count += count[i];
-      }
-
-      thr = ((tot_count * interp_factor + 128) >> 8);
-      for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
-        c += (count[i] >= thr);
-      }
-      if (c == 1) {
-        /* Mostly one filter is used. So set the filter at frame level */
-        for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
-          if (count[i]) {
-            cm->mcomp_filter_type = vp9_switchable_interp[i];
-            Loop = TRUE;  /* Make sure to loop since the filter changed */
-            break;
-          }
-        }
-      }
-    }
-
     if (Loop == FALSE && cm->frame_type != KEY_FRAME && sf->search_best_filter) {
       if (mcomp_filter_index < mcomp_filters) {
-        INT64 err = vp9_calc_ss_err(cpi->Source,
+        int64_t err = vp9_calc_ss_err(cpi->Source,
                                     &cm->yv12_fb[cm->new_fb_idx]);
-        INT64 rate = cpi->projected_frame_size << 8;
+        int64_t rate = cpi->projected_frame_size << 8;
         mcomp_filter_cost[mcomp_filter_index] =
           (RDCOST(cpi->RDMULT, cpi->RDDIV, rate, err));
         mcomp_filter_index++;
@@ -3566,7 +3328,7 @@ static void encode_frame_to_data_rate
           Loop = TRUE;
         } else {
           int f;
-          INT64 best_cost = mcomp_filter_cost[0];
+          int64_t best_cost = mcomp_filter_cost[0];
           int mcomp_best_filter = mcomp_filters_to_search[0];
           for (f = 1; f < mcomp_filters; f++) {
             if (mcomp_filter_cost[f] < best_cost) {
@@ -3606,6 +3368,7 @@ static void encode_frame_to_data_rate
 
     if (Loop == TRUE) {
       loop_count++;
+
 #if CONFIG_INTERNAL_STATS
       cpi->tot_recode_hits++;
 #endif
@@ -3681,26 +3444,20 @@ static void encode_frame_to_data_rate
     update_reference_segmentation_map(cpi);
   }
 
-#if CONFIG_PRED_FILTER
-  // Select the prediction filtering mode to use for the
-  // next frame based on the current frame selections
-  if (cm->frame_type != KEY_FRAME)
-    select_pred_filter_mode(cpi);
-#endif
-
   update_reference_frames(cm);
-  vp9_copy(cpi->common.fc.coef_counts, cpi->coef_counts);
-  vp9_copy(cpi->common.fc.hybrid_coef_counts, cpi->hybrid_coef_counts);
+  vp9_copy(cpi->common.fc.coef_counts_4x4, cpi->coef_counts_4x4);
+  vp9_copy(cpi->common.fc.hybrid_coef_counts_4x4,
+           cpi->hybrid_coef_counts_4x4);
   vp9_copy(cpi->common.fc.coef_counts_8x8, cpi->coef_counts_8x8);
-  vp9_copy(cpi->common.fc.hybrid_coef_counts_8x8, cpi->hybrid_coef_counts_8x8);
+  vp9_copy(cpi->common.fc.hybrid_coef_counts_8x8,
+           cpi->hybrid_coef_counts_8x8);
   vp9_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
   vp9_copy(cpi->common.fc.hybrid_coef_counts_16x16,
            cpi->hybrid_coef_counts_16x16);
+  vp9_copy(cpi->common.fc.coef_counts_32x32, cpi->coef_counts_32x32);
   vp9_adapt_coef_probs(&cpi->common);
   if (cpi->common.frame_type != KEY_FRAME) {
-#if CONFIG_SUPERBLOCKS
     vp9_copy(cpi->common.fc.sb_ymode_counts, cpi->sb_ymode_count);
-#endif
     vp9_copy(cpi->common.fc.ymode_counts, cpi->ymode_count);
     vp9_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
     vp9_copy(cpi->common.fc.bmode_counts, cpi->bmode_count);
@@ -3811,19 +3568,6 @@ static void encode_frame_to_data_rate
   // Update the skip mb flag probabilities based on the distribution seen
   // in this frame.
   update_base_skip_probs(cpi);
-
-#if 0 //CONFIG_NEW_MVREF && CONFIG_INTERNAL_STATS
-  {
-    FILE *f = fopen("mv_ref_dist.stt", "a");
-    unsigned int i;
-    for (i = 0; i < MAX_MV_REFS; ++i) {
-      fprintf(f, "%10d", cpi->best_ref_index_counts[0][i]);
-    }
-    fprintf(f, "\n" );
-
-    fclose(f);
-  }
-#endif
 
 #if 0// 1 && CONFIG_INTERNAL_STATS
   {
@@ -4493,8 +4237,8 @@ int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
   int i, j;
   int Total = 0;
 
-  unsigned char *src = source->y_buffer;
-  unsigned char *dst = dest->y_buffer;
+  uint8_t *src = source->y_buffer;
+  uint8_t *dst = dest->y_buffer;
 
   // Loop through the Y plane raw and reconstruction data summing (square differences)
   for (i = 0; i < source->y_height; i += 16) {

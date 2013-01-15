@@ -8,11 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_DECODER_VP9_ONYXD_INT_H_
 #define VP9_DECODER_VP9_ONYXD_INT_H_
 #include "./vpx_config.h"
-#include "vp9/common/vp9_onyxd.h"
+#include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_treereader.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/decoder/vp9_dequantize.h"
@@ -35,22 +34,22 @@ typedef struct {
 typedef struct {
   int const *scan;
   int const *scan_8x8;
-  UINT8 const *ptr_block2leftabove;
+  uint8_t const *ptr_block2leftabove;
   vp9_tree_index const *vp9_coef_tree_ptr;
   unsigned char *norm_ptr;
-  UINT8 *ptr_coef_bands_x;
-  UINT8 *ptr_coef_bands_x_8x8;
+  uint8_t *ptr_coef_bands_x;
+  uint8_t *ptr_coef_bands_x_8x8;
 
   ENTROPY_CONTEXT_PLANES *A;
   ENTROPY_CONTEXT_PLANES *L;
 
-  INT16 *qcoeff_start_ptr;
+  int16_t *qcoeff_start_ptr;
 
-  vp9_prob const *coef_probs[BLOCK_TYPES];
+  vp9_prob const *coef_probs_4x4[BLOCK_TYPES_4X4];
   vp9_prob const *coef_probs_8x8[BLOCK_TYPES_8X8];
   vp9_prob const *coef_probs_16X16[BLOCK_TYPES_16X16];
 
-  UINT8 eob[25];
+  uint8_t eob[25];
 
 } DETOK;
 
@@ -103,4 +102,4 @@ int vp9_decode_frame(VP9D_COMP *cpi, const unsigned char **p_data_end);
   } while(0)
 #endif
 
-#endif  // __INC_ONYXD_INT_H
+#endif  // VP9_DECODER_VP9_TREEREADER_H_

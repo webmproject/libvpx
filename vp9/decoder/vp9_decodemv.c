@@ -14,7 +14,7 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/common/vp9_findnearmv.h"
-
+#include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_entropy.h"
@@ -51,7 +51,6 @@ static int read_ymode(vp9_reader *bc, const vp9_prob *p) {
   return treed_read(bc, vp9_ymode_tree, p);
 }
 
-#if CONFIG_SUPERBLOCKS
 static int read_sb_ymode(vp9_reader *bc, const vp9_prob *p) {
   return treed_read(bc, vp9_sb_ymode_tree, p);
 }
@@ -59,7 +58,6 @@ static int read_sb_ymode(vp9_reader *bc, const vp9_prob *p) {
 static int read_kf_sb_ymode(vp9_reader *bc, const vp9_prob *p) {
   return treed_read(bc, vp9_uv_mode_tree, p);
 }
-#endif
 
 static int read_kf_mb_ymode(vp9_reader *bc, const vp9_prob *p) {
   return treed_read(bc, vp9_kf_ymode_tree, p);
@@ -122,7 +120,21 @@ static void kfread_modes(VP9D_COMP *pbi,
   m->mbmi.segment_id = 0;
   if (pbi->mb.update_mb_segmentation_map) {
     read_mb_segid(bc, &m->mbmi, &pbi->mb);
-    pbi->common.last_frame_seg_map[map_index] = m->mbmi.segment_id;
+    if (m->mbmi.sb_type) {
+      const int nmbs = 1 << m->mbmi.sb_type;
+      const int ymbs = MIN(cm->mb_rows - mb_row, nmbs);
+      const int xmbs = MIN(cm->mb_cols - mb_col, nmbs);
+      int x, y;
+
+      for (y = 0; y < ymbs; y++) {
+        for (x = 0; x < xmbs; x++) {
+          cm->last_frame_seg_map[map_index + x + y * cm->mb_cols] =
+              m->mbmi.segment_id;
+        }
+      }
+    } else {
+      cm->last_frame_seg_map[map_index] = m->mbmi.segment_id;
+    }
   }
 
   m->mbmi.mb_skip_coeff = 0;
@@ -144,25 +156,18 @@ static void kfread_modes(VP9D_COMP *pbi,
       m->mbmi.mb_skip_coeff = 0;
   }
 
-#if CONFIG_SUPERBLOCKS
-  if (m->mbmi.encoded_as_sb) {
+  if (m->mbmi.sb_type) {
     y_mode = (MB_PREDICTION_MODE) read_kf_sb_ymode(bc,
       pbi->common.sb_kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
-  } else
-#endif
-  y_mode = (MB_PREDICTION_MODE) read_kf_mb_ymode(bc,
-    pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
-#if CONFIG_COMP_INTRA_PRED
-  m->mbmi.second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
+  } else {
+    y_mode = (MB_PREDICTION_MODE) read_kf_mb_ymode(bc,
+      pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
+  }
 
   m->mbmi.ref_frame = INTRA_FRAME;
 
   if ((m->mbmi.mode = y_mode) == B_PRED) {
     int i = 0;
-#if CONFIG_COMP_INTRA_PRED
-    int use_comp_pred = vp9_read(bc, DEFAULT_COMP_INTRA_PROB);
-#endif
     do {
       const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
       const B_PREDICTION_MODE L = left_block_mode(m, i);
@@ -170,15 +175,6 @@ static void kfread_modes(VP9D_COMP *pbi,
       m->bmi[i].as_mode.first =
         (B_PREDICTION_MODE) read_kf_bmode(
           bc, pbi->common.kf_bmode_prob [A] [L]);
-#if CONFIG_COMP_INTRA_PRED
-      if (use_comp_pred) {
-        m->bmi[i].as_mode.second =
-          (B_PREDICTION_MODE) read_kf_bmode(
-            bc, pbi->common.kf_bmode_prob [A] [L]);
-      } else {
-        m->bmi[i].as_mode.second = (B_PREDICTION_MODE)(B_DC_PRED - 1);
-      }
-#endif
     } while (++i < 16);
   }
   if ((m->mbmi.mode = y_mode) == I8X8_PRED) {
@@ -191,26 +187,22 @@ static void kfread_modes(VP9D_COMP *pbi,
       m->bmi[ib + 1].as_mode.first = mode8x8;
       m->bmi[ib + 4].as_mode.first = mode8x8;
       m->bmi[ib + 5].as_mode.first = mode8x8;
-#if CONFIG_COMP_INTRA_PRED
-      m->bmi[ib + 0].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-      m->bmi[ib + 1].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-      m->bmi[ib + 4].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-      m->bmi[ib + 5].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
     }
   } else
     m->mbmi.uv_mode = (MB_PREDICTION_MODE)read_uv_mode(bc,
                                                        pbi->common.kf_uv_mode_prob[m->mbmi.mode]);
-#if CONFIG_COMP_INTRA_PRED
-  m->mbmi.second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
 
   if (cm->txfm_mode == TX_MODE_SELECT && m->mbmi.mb_skip_coeff == 0 &&
       m->mbmi.mode <= I8X8_PRED) {
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     m->mbmi.txfm_size = vp9_read(bc, cm->prob_tx[0]);
-    if (m->mbmi.txfm_size != TX_4X4 && m->mbmi.mode != I8X8_PRED)
+    if (m->mbmi.txfm_size != TX_4X4 && m->mbmi.mode != I8X8_PRED) {
       m->mbmi.txfm_size += vp9_read(bc, cm->prob_tx[1]);
+      if (m->mbmi.txfm_size != TX_8X8 && m->mbmi.sb_type)
+        m->mbmi.txfm_size += vp9_read(bc, cm->prob_tx[2]);
+    }
+  } else if (cm->txfm_mode >= ALLOW_32X32 && m->mbmi.sb_type) {
+    m->mbmi.txfm_size = TX_32X32;
   } else if (cm->txfm_mode >= ALLOW_16X16 && m->mbmi.mode <= TM_PRED) {
     m->mbmi.txfm_size = TX_16X16;
   } else if (cm->txfm_mode >= ALLOW_8X8 && m->mbmi.mode != B_PRED) {
@@ -478,11 +470,9 @@ static MV_REFERENCE_FRAME read_ref_frame(VP9D_COMP *pbi,
   return (MV_REFERENCE_FRAME)ref_frame;
 }
 
-#if CONFIG_SUPERBLOCKS
 static MB_PREDICTION_MODE read_sb_mv_ref(vp9_reader *bc, const vp9_prob *p) {
   return (MB_PREDICTION_MODE) treed_read(bc, vp9_sb_mv_ref_tree, p);
 }
-#endif
 
 static MB_PREDICTION_MODE read_mv_ref(vp9_reader *bc, const vp9_prob *p) {
   return (MB_PREDICTION_MODE) treed_read(bc, vp9_mv_ref_tree, p);
@@ -532,12 +522,6 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
     if (!cm->kf_ymode_probs_update)
       cm->kf_ymode_probs_index = vp9_read_literal(bc, 3);
   } else {
-#if CONFIG_PRED_FILTER
-    cm->pred_filter_mode = (vp9_prob)vp9_read_literal(bc, 2);
-
-    if (cm->pred_filter_mode == 2)
-      cm->prob_pred_filter_off = (vp9_prob)vp9_read_literal(bc, 8);
-#endif
     if (cm->mcomp_filter_type == SWITCHABLE)
       read_switchable_interp_probs(pbi, bc);
 #if CONFIG_COMP_INTERINTRA_PRED
@@ -572,7 +556,6 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
       } while (++i < VP9_YMODES - 1);
     }
 
-#if CONFIG_SUPERBLOCKS
     if (vp9_read_bit(bc)) {
       int i = 0;
 
@@ -580,12 +563,6 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
         cm->fc.sb_ymode_prob[i] = (vp9_prob) vp9_read_literal(bc, 8);
       } while (++i < VP9_I32X32_MODES - 1);
     }
-#endif
-
-#if CONFIG_NEW_MVREF
-  // Temp defaults probabilities for ecnoding the MV ref id signal
-  vpx_memset(xd->mb_mv_ref_id_probs, 192, sizeof(xd->mb_mv_ref_id_probs));
-#endif
 
     read_nmvprobs(bc, nmvc, xd->allow_high_precision_mv);
   }
@@ -633,38 +610,38 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
       else {
         read_mb_segid(bc, mbmi, xd);
       }
-#if CONFIG_SUPERBLOCKS
-      if (mbmi->encoded_as_sb) {
-        cm->last_frame_seg_map[index] = mbmi->segment_id;
-        if (mb_col + 1 < cm->mb_cols)
-          cm->last_frame_seg_map[index + 1] = mbmi->segment_id;
-        if (mb_row + 1 < cm->mb_rows) {
-          cm->last_frame_seg_map[index + cm->mb_cols] = mbmi->segment_id;
-          if (mb_col + 1 < cm->mb_cols)
-            cm->last_frame_seg_map[index + cm->mb_cols + 1] = mbmi->segment_id;
+      if (mbmi->sb_type) {
+        const int nmbs = 1 << mbmi->sb_type;
+        const int ymbs = MIN(cm->mb_rows - mb_row, nmbs);
+        const int xmbs = MIN(cm->mb_cols - mb_col, nmbs);
+        int x, y;
+
+        for (y = 0; y < ymbs; y++) {
+          for (x = 0; x < xmbs; x++) {
+            cm->last_frame_seg_map[index + x + y * cm->mb_cols] =
+                mbmi->segment_id;
+          }
         }
-      } else
-#endif
-      {
+      } else {
         cm->last_frame_seg_map[index] = mbmi->segment_id;
       }
     } else {
-#if CONFIG_SUPERBLOCKS
-      if (mbmi->encoded_as_sb) {
-        mbmi->segment_id = cm->last_frame_seg_map[index];
-        if (mb_col < cm->mb_cols - 1)
-          mbmi->segment_id = mbmi->segment_id &&
-                             cm->last_frame_seg_map[index + 1];
-        if (mb_row < cm->mb_rows - 1) {
-          mbmi->segment_id = mbmi->segment_id &&
-                             cm->last_frame_seg_map[index + cm->mb_cols];
-          if (mb_col < cm->mb_cols - 1)
-            mbmi->segment_id = mbmi->segment_id &&
-                               cm->last_frame_seg_map[index + cm->mb_cols + 1];
+      if (mbmi->sb_type) {
+        const int nmbs = 1 << mbmi->sb_type;
+        const int ymbs = MIN(cm->mb_rows - mb_row, nmbs);
+        const int xmbs = MIN(cm->mb_cols - mb_col, nmbs);
+        unsigned segment_id = -1;
+        int x, y;
+
+        for (y = 0; y < ymbs; y++) {
+          for (x = 0; x < xmbs; x++) {
+            segment_id = MIN(segment_id,
+                             cm->last_frame_seg_map[index + x +
+                                                    y * cm->mb_cols]);
+          }
         }
-      } else
-#endif
-      {
+        mbmi->segment_id = segment_id;
+      } else {
         mbmi->segment_id = cm->last_frame_seg_map[index];
       }
     }
@@ -689,6 +666,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   int mb_to_right_edge;
   int mb_to_top_edge;
   int mb_to_bottom_edge;
+  const int mb_size = 1 << mi->mbmi.sb_type;
 
   mb_to_top_edge = xd->mb_to_top_edge;
   mb_to_bottom_edge = xd->mb_to_bottom_edge;
@@ -703,18 +681,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   xd->mb_to_left_edge =
     mb_to_left_edge = -((mb_col * 16) << 3);
   mb_to_left_edge -= LEFT_TOP_MARGIN;
-
-#if CONFIG_SUPERBLOCKS
-  if (mi->mbmi.encoded_as_sb) {
-    xd->mb_to_right_edge =
-      mb_to_right_edge = ((pbi->common.mb_cols - 2 - mb_col) * 16) << 3;
-  } else {
-#endif
-    xd->mb_to_right_edge =
-      mb_to_right_edge = ((pbi->common.mb_cols - 1 - mb_col) * 16) << 3;
-#if CONFIG_SUPERBLOCKS
-  }
-#endif
+  xd->mb_to_right_edge =
+      mb_to_right_edge = ((pbi->common.mb_cols - mb_size - mb_col) * 16) << 3;
   mb_to_right_edge += RIGHT_BOTTOM_MARGIN;
 
   // Make sure the MACROBLOCKD mode info pointer is pointed at the
@@ -756,10 +724,10 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
     int recon_y_stride, recon_yoffset;
     int recon_uv_stride, recon_uvoffset;
+    MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
 
     {
       int ref_fb_idx;
-      MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
 
       /* Select the appropriate reference frame for this MB */
       if (ref_frame == LAST_FRAME)
@@ -788,14 +756,33 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                        ref_frame, mbmi->ref_mvs[ref_frame],
                        cm->ref_frame_sign_bias);
 
-      vp9_find_best_ref_mvs(xd,
-                            xd->pre.y_buffer,
-                            recon_y_stride,
-                            mbmi->ref_mvs[ref_frame],
-                            &best_mv, &nearest, &nearby);
-
       vp9_mv_ref_probs(&pbi->common, mv_ref_p,
                        mbmi->mb_mode_context[ref_frame]);
+
+      // Is the segment level mode feature enabled for this segment
+      if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
+        mbmi->mode =
+          vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
+      } else {
+        if (mbmi->sb_type)
+          mbmi->mode = read_sb_mv_ref(bc, mv_ref_p);
+        else
+          mbmi->mode = read_mv_ref(bc, mv_ref_p);
+
+        vp9_accum_mv_refs(&pbi->common, mbmi->mode,
+                          mbmi->mb_mode_context[ref_frame]);
+      }
+
+      if (mbmi->mode != ZEROMV) {
+        vp9_find_best_ref_mvs(xd,
+                              xd->pre.y_buffer,
+                              recon_y_stride,
+                              mbmi->ref_mvs[ref_frame],
+                              &nearest, &nearby);
+
+        best_mv.as_int = (mbmi->ref_mvs[ref_frame][0]).as_int;
+      }
+
 #ifdef DEC_DEBUG
       if (dec_debug)
         printf("[D %d %d] %d %d %d %d\n", ref_frame,
@@ -804,32 +791,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
     }
 
-    // Is the segment level mode feature enabled for this segment
-    if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
-      mbmi->mode =
-        vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
-    } else {
-#if CONFIG_SUPERBLOCKS
-      if (mbmi->encoded_as_sb) {
-        mbmi->mode = read_sb_mv_ref(bc, mv_ref_p);
-      } else
-#endif
-      mbmi->mode = read_mv_ref(bc, mv_ref_p);
-
-      vp9_accum_mv_refs(&pbi->common, mbmi->mode,
-                        mbmi->mb_mode_context[mbmi->ref_frame]);
-    }
-
-#if CONFIG_PRED_FILTER
-    if (mbmi->mode >= NEARESTMV && mbmi->mode < SPLITMV) {
-      // Is the prediction filter enabled
-      if (cm->pred_filter_mode == 2)
-        mbmi->pred_filter_enabled =
-          vp9_read(bc, cm->prob_pred_filter_off);
-      else
-        mbmi->pred_filter_enabled = cm->pred_filter_mode;
-    }
-#endif
     if (mbmi->mode >= NEARESTMV && mbmi->mode <= SPLITMV)
     {
       if (cm->mcomp_filter_type == SWITCHABLE) {
@@ -877,13 +838,15 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                          mbmi->ref_mvs[mbmi->second_ref_frame],
                          cm->ref_frame_sign_bias);
 
-        vp9_find_best_ref_mvs(xd,
-                              xd->second_pre.y_buffer,
-                              recon_y_stride,
-                              mbmi->ref_mvs[mbmi->second_ref_frame],
-                              &best_mv_second,
-                              &nearest_second,
-                              &nearby_second);
+        if (mbmi->mode != ZEROMV) {
+          vp9_find_best_ref_mvs(xd,
+                                xd->second_pre.y_buffer,
+                                recon_y_stride,
+                                mbmi->ref_mvs[mbmi->second_ref_frame],
+                                &nearest_second,
+                                &nearby_second);
+          best_mv_second = mbmi->ref_mvs[mbmi->second_ref_frame][0];
+        }
       }
 
     } else {
@@ -915,6 +878,29 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       }
 #endif
     }
+
+#if CONFIG_NEW_MVREF
+    // if ((mbmi->mode == NEWMV) || (mbmi->mode == SPLITMV))
+    if (mbmi->mode == NEWMV) {
+      int best_index;
+      MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
+
+      // Encode the index of the choice.
+      best_index =
+        vp9_read_mv_ref_id(bc, xd->mb_mv_ref_probs[ref_frame]);
+
+      best_mv.as_int = mbmi->ref_mvs[ref_frame][best_index].as_int;
+
+      if (mbmi->second_ref_frame > 0) {
+        ref_frame = mbmi->second_ref_frame;
+
+        // Encode the index of the choice.
+        best_index =
+          vp9_read_mv_ref_id(bc, xd->mb_mv_ref_probs[ref_frame]);
+        best_mv_second.as_int = mbmi->ref_mvs[ref_frame][best_index].as_int;
+      }
+    }
+#endif
 
     mbmi->uv_mode = DC_PRED;
     switch (mbmi->mode) {
@@ -1072,19 +1058,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
       case NEWMV:
 
-#if CONFIG_NEW_MVREF
-        {
-          int best_index;
-          MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
-
-          // Encode the index of the choice.
-          best_index =
-            vp9_read_mv_ref_id(bc, xd->mb_mv_ref_id_probs[ref_frame]);
-
-          best_mv.as_int = mbmi->ref_mvs[ref_frame][best_index].as_int;
-        }
-#endif
-
         read_nmv(bc, &mv->as_mv, &best_mv.as_mv, nmvc);
         read_nmv_fp(bc, &mv->as_mv, &best_mv.as_mv, nmvc,
                     xd->allow_high_precision_mv);
@@ -1106,18 +1079,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                   mb_to_bottom_edge);
 
         if (mbmi->second_ref_frame > 0) {
-#if CONFIG_NEW_MVREF
-        {
-          int best_index;
-          MV_REFERENCE_FRAME ref_frame = mbmi->second_ref_frame;
-
-          // Encode the index of the choice.
-          best_index =
-            vp9_read_mv_ref_id(bc, xd->mb_mv_ref_id_probs[ref_frame]);
-          best_mv_second.as_int = mbmi->ref_mvs[ref_frame][best_index].as_int;
-        }
-#endif
-
           read_nmv(bc, &mbmi->mv[1].as_mv, &best_mv_second.as_mv, nmvc);
           read_nmv_fp(bc, &mbmi->mv[1].as_mv, &best_mv_second.as_mv, nmvc,
                       xd->allow_high_precision_mv);
@@ -1144,27 +1105,19 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE)) {
       mbmi->mode = (MB_PREDICTION_MODE)
                    vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_MODE);
-#if CONFIG_SUPERBLOCKS
-    } else if (mbmi->encoded_as_sb) {
+    } else if (mbmi->sb_type) {
       mbmi->mode = (MB_PREDICTION_MODE)
                    read_sb_ymode(bc, pbi->common.fc.sb_ymode_prob);
       pbi->common.fc.sb_ymode_counts[mbmi->mode]++;
-#endif
     } else {
       mbmi->mode = (MB_PREDICTION_MODE)
                    read_ymode(bc, pbi->common.fc.ymode_prob);
       pbi->common.fc.ymode_counts[mbmi->mode]++;
     }
-#if CONFIG_COMP_INTRA_PRED
-    mbmi->second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
 
     // If MB mode is BPRED read the block modes
     if (mbmi->mode == B_PRED) {
       int j = 0;
-#if CONFIG_COMP_INTRA_PRED
-      int use_comp_pred = vp9_read(bc, DEFAULT_COMP_INTRA_PROB);
-#endif
       do {
         int m;
         m = mi->bmi[j].as_mode.first = (B_PREDICTION_MODE)
@@ -1173,13 +1126,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
 #endif
         pbi->common.fc.bmode_counts[m]++;
-#if CONFIG_COMP_INTRA_PRED
-        if (use_comp_pred) {
-          mi->bmi[j].as_mode.second = (B_PREDICTION_MODE)read_bmode(bc, pbi->common.fc.bmode_prob);
-        } else {
-          mi->bmi[j].as_mode.second = (B_PREDICTION_MODE)(B_DC_PRED - 1);
-        }
-#endif
       } while (++j < 16);
     }
 
@@ -1194,22 +1140,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         mi->bmi[ib + 4].as_mode.first = mode8x8;
         mi->bmi[ib + 5].as_mode.first = mode8x8;
         pbi->common.fc.i8x8_mode_counts[mode8x8]++;
-#if CONFIG_COMP_INTRA_PRED
-        mi->bmi[ib + 0].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-        mi->bmi[ib + 1].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-        mi->bmi[ib + 4].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-        mi->bmi[ib + 5].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
       }
     } else {
       mbmi->uv_mode = (MB_PREDICTION_MODE)read_uv_mode(
         bc, pbi->common.fc.uv_mode_prob[mbmi->mode]);
       pbi->common.fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
     }
-
-#if CONFIG_COMP_INTRA_PRED
-    mbmi->second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
-#endif
   }
 
   if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
@@ -1219,8 +1155,13 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     mbmi->txfm_size = vp9_read(bc, cm->prob_tx[0]);
     if (mbmi->txfm_size != TX_4X4 && mbmi->mode != I8X8_PRED &&
-        mbmi->mode != SPLITMV)
+        mbmi->mode != SPLITMV) {
       mbmi->txfm_size += vp9_read(bc, cm->prob_tx[1]);
+      if (mbmi->sb_type && mbmi->txfm_size != TX_8X8)
+        mbmi->txfm_size += vp9_read(bc, cm->prob_tx[2]);
+    }
+  } else if (mbmi->sb_type && cm->txfm_mode >= ALLOW_32X32) {
+    mbmi->txfm_size = TX_32X32;
   } else if (cm->txfm_mode >= ALLOW_16X16 &&
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= TM_PRED) ||
        (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {

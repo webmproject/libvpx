@@ -16,4 +16,4 @@ struct VP9Decompressor;
 
 extern void vp9_init_de_quantizer(struct VP9Decompressor *pbi);
 
-#endif  // __INC_DECODFRAME_H
+#endif  // VP9_DECODER_VP9_DECODFRAME_H_

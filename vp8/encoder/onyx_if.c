@@ -20,7 +20,7 @@
 #include "mcomp.h"
 #include "firstpass.h"
 #include "psnr.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp8/common/extend.h"
 #include "ratectrl.h"
 #include "vp8/common/quant_common.h"
@@ -2588,7 +2588,7 @@ static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         Scale2Ratio(cm->horiz_scale, &hr, &hs);
         Scale2Ratio(cm->vert_scale, &vr, &vs);
 
-        vp8_scale_frame(sd, &cpi->scaled_source, cm->temp_scale_frame.y_buffer,
+        vpx_scale_frame(sd, &cpi->scaled_source, cm->temp_scale_frame.y_buffer,
                         tmp_height, hs, hr, vs, vr, 0);
 
         vp8_yv12_extend_frame_borders(&cpi->scaled_source);
@@ -3466,7 +3466,7 @@ static void encode_frame_to_data_rate
         /* Note that we should not throw out a key frame (especially when
          * spatial resampling is enabled).
          */
-        if ((cm->frame_type == KEY_FRAME))
+        if (cm->frame_type == KEY_FRAME)
         {
             cpi->decimation_count = cpi->decimation_factor;
         }

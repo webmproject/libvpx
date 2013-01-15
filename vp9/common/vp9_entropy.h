@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_ENTROPY_H_
 #define VP9_COMMON_VP9_ENTROPY_H_
 
+#include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_treecoder.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
@@ -55,24 +55,27 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 #define PROB_UPDATE_BASELINE_COST   7
 
 #define MAX_PROB                255
-#define DCT_MAX_VALUE           8192
+#define DCT_MAX_VALUE           16384
 
 /* Coefficients are predicted via a 3-dimensional probability table. */
 
 /* Outside dimension.  0 = Y no DC, 1 = Y2, 2 = UV, 3 = Y with DC */
-#define BLOCK_TYPES 4
+#define BLOCK_TYPES_4X4 4
 
 #define BLOCK_TYPES_8X8 4
 
 #define BLOCK_TYPES_16X16 4
 
+#define BLOCK_TYPES_32X32 4
+
 /* Middle dimension is a coarsening of the coefficient's
    position within the 4x4 DCT. */
 
 #define COEF_BANDS 8
-extern DECLARE_ALIGNED(16, const int, vp9_coef_bands[16]);
+extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_4x4[16]);
 extern DECLARE_ALIGNED(64, const int, vp9_coef_bands_8x8[64]);
 extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_16x16[256]);
+extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_32x32[1024]);
 
 /* Inside dimension is 3-valued measure of nearby complexity, that is,
    the extent to which nearby coefficients are nonzero.  For the first
@@ -91,24 +94,61 @@ extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_16x16[256]);
    distinct bands). */
 
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
-#define PREV_COEF_CONTEXTS       4
+#define PREV_COEF_CONTEXTS          4
+
+typedef unsigned int vp9_coeff_count[COEF_BANDS][PREV_COEF_CONTEXTS]
+                                    [MAX_ENTROPY_TOKENS];
+typedef unsigned int vp9_coeff_stats[COEF_BANDS][PREV_COEF_CONTEXTS]
+                                    [ENTROPY_NODES][2];
+typedef vp9_prob vp9_coeff_probs[COEF_BANDS][PREV_COEF_CONTEXTS]
+                                [ENTROPY_NODES];
 
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
 #define MODULUS_PARAM               13  /* Modulus parameter */
 
-extern DECLARE_ALIGNED(16, const unsigned char, vp9_prev_token_class[MAX_ENTROPY_TOKENS]);
+extern DECLARE_ALIGNED(16, const uint8_t,
+                       vp9_prev_token_class[MAX_ENTROPY_TOKENS]);
 
 struct VP9Common;
 void vp9_default_coef_probs(struct VP9Common *);
-extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d[16]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_4x4[16]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_col_scan[16]);
-extern DECLARE_ALIGNED(16, const int, vp9_row_scan[16]);
+extern DECLARE_ALIGNED(16, const int, vp9_col_scan_4x4[16]);
+extern DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]);
 
 extern DECLARE_ALIGNED(64, const int, vp9_default_zig_zag1d_8x8[64]);
-void vp9_coef_tree_initialize(void);
-
 extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]);
+
+void vp9_coef_tree_initialize(void);
 void vp9_adapt_coef_probs(struct VP9Common *);
 
-#endif
+static void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
+  /* Clear entropy contexts */
+  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+}
+
+#if CONFIG_NEWCOEFCONTEXT
+
+#define MAX_NEIGHBORS 5
+#define NEWCOEFCONTEXT_BAND_COND(b)   ((b) >= 1)
+void vp9_init_neighbors(void);
+
+const int *vp9_get_coef_neighbors_handle(const int *scan);
+int vp9_get_coef_neighbor_context(const short int *qcoeff_ptr, int nodc,
+                                  const int *neigbor_handle, int rc);
+extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_4x4_neighbors[
+                       16 * MAX_NEIGHBORS]);
+extern DECLARE_ALIGNED(16, int, vp9_row_scan_4x4_neighbors[
+                       16 * MAX_NEIGHBORS]);
+extern DECLARE_ALIGNED(16, int, vp9_col_scan_4x4_neighbors[
+                       16 * MAX_NEIGHBORS]);
+extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_8x8_neighbors[
+                       64 * MAX_NEIGHBORS]);
+extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_16x16_neighbors[
+                       256 * MAX_NEIGHBORS]);
+extern DECLARE_ALIGNED(16, int, vp9_default_zig_zag1d_32x32_neighbors[
+                       1024 * MAX_NEIGHBORS]);
+#endif  // CONFIG_NEWCOEFCONTEXT
+#endif  // VP9_COMMON_VP9_ENTROPY_H_

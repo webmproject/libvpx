@@ -21,7 +21,7 @@
 #include "vp8/common/systemdependent.h"
 #include "mcomp.h"
 #include "firstpass.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "encodemb.h"
 #include "vp8/common/extend.h"
 #include "vpx_mem/vpx_mem.h"

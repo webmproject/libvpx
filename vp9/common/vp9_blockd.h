@@ -45,6 +45,19 @@ void vpx_log(const char *format, ...);
 #define SEGMENT_DELTADATA   0
 #define SEGMENT_ABSDATA     1
 #define MAX_MV_REFS 9
+#define MAX_MV_REF_CANDIDATES 4
+
+#if CONFIG_DWTDCTHYBRID
+#define DWT_MAX_LENGTH     64
+#define DWT_TYPE           26    // 26/53/97
+#define DWT_PRECISION_BITS 2
+#define DWT_PRECISION_RND  ((1 << DWT_PRECISION_BITS) / 2)
+
+#define DWTDCT16X16        0
+#define DWTDCT16X16_LEAN   1
+#define DWTDCT8X8          2
+#define DWTDCT_TYPE        DWTDCT16X16_LEAN
+#endif
 
 typedef struct {
   int r, c;
@@ -65,11 +78,6 @@ typedef struct {
   ENTROPY_CONTEXT y2;
 } ENTROPY_CONTEXT_PLANES;
 
-extern const unsigned char vp9_block2left[25];
-extern const unsigned char vp9_block2above[25];
-extern const unsigned char vp9_block2left_8x8[25];
-extern const unsigned char vp9_block2above_8x8[25];
-
 #define VP9_COMBINEENTROPYCONTEXTS( Dest, A, B) \
   Dest = ((A)!=0) + ((B)!=0);
 
@@ -80,10 +88,13 @@ typedef enum {
 
 typedef enum
 {
-  SIXTAP   = 0,
-  BILINEAR = 1,
-  EIGHTTAP = 2,
-  EIGHTTAP_SHARP = 3,
+#if CONFIG_ENABLE_6TAP
+  SIXTAP,
+#endif
+  EIGHTTAP_SMOOTH,
+  EIGHTTAP,
+  EIGHTTAP_SHARP,
+  BILINEAR,
   SWITCHABLE  /* should be the last one */
 } INTERPOLATIONFILTERTYPE;
 
@@ -101,13 +112,11 @@ typedef enum
   TM_PRED,            /* Truemotion prediction */
   I8X8_PRED,          /* 8x8 based prediction, each 8x8 has its own prediction mode */
   B_PRED,             /* block based prediction, each block has its own prediction mode */
-
   NEARESTMV,
   NEARMV,
   ZEROMV,
   NEWMV,
   SPLITMV,
-
   MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 
@@ -120,15 +129,16 @@ typedef enum {
   SEG_LVL_EOB = 4,                 // EOB end stop marker.
   SEG_LVL_TRANSFORM = 5,           // Block transform size.
   SEG_LVL_MAX = 6                  // Number of MB level features supported
-
 } SEG_LVL_FEATURES;
 
 // Segment level features.
 typedef enum {
-  TX_4X4,                      // 4x4 dct transform
-  TX_8X8,                      // 8x8 dct transform
-  TX_16X16,                    // 16x16 dct transform
-  TX_SIZE_MAX                  // Number of different transforms available
+  TX_4X4 = 0,                      // 4x4 dct transform
+  TX_8X8 = 1,                      // 8x8 dct transform
+  TX_16X16 = 2,                    // 16x16 dct transform
+  TX_SIZE_MAX_MB = 3,              // Number of different transforms available
+  TX_32X32 = TX_SIZE_MAX_MB,       // 32x32 dct transform
+  TX_SIZE_MAX_SB,                  // Number of transforms available to SBs
 } TX_SIZE;
 
 typedef enum {
@@ -205,9 +215,6 @@ union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
     TX_TYPE           tx_type;
-#if CONFIG_COMP_INTRA_PRED
-    B_PREDICTION_MODE second;
-#endif
 #if CONFIG_NEWBINTRAMODES
     B_PREDICTION_MODE context;
 #endif
@@ -227,18 +234,21 @@ typedef enum {
   MAX_REF_FRAMES = 4
 } MV_REFERENCE_FRAME;
 
+typedef enum {
+  BLOCK_SIZE_MB16X16 = 0,
+  BLOCK_SIZE_SB32X32 = 1,
+  BLOCK_SIZE_SB64X64 = 2,
+} BLOCK_SIZE_TYPE;
+
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
-#if CONFIG_COMP_INTRA_PRED
-  MB_PREDICTION_MODE second_mode, second_uv_mode;
-#endif
 #if CONFIG_COMP_INTERINTRA_PRED
   MB_PREDICTION_MODE interintra_mode, interintra_uv_mode;
 #endif
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   TX_SIZE txfm_size;
   int_mv mv[2]; // for each reference frame used
-  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REFS];
+  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int_mv best_mv, best_second_mv;
 #if CONFIG_NEW_MVREF
   int best_index, best_second_index;
@@ -261,17 +271,9 @@ typedef struct {
   // a valid predictor
   unsigned char mb_in_image;
 
-#if CONFIG_PRED_FILTER
-  // Flag to turn prediction signal filter on(1)/off(0 ) at the MB level
-  unsigned int pred_filter_enabled;
-#endif
-    INTERPOLATIONFILTERTYPE interp_filter;
+  INTERPOLATIONFILTERTYPE interp_filter;
 
-#if CONFIG_SUPERBLOCKS
-  // FIXME need a SB array of 4 MB_MODE_INFOs that
-  // only needs one encoded_as_sb.
-  unsigned char encoded_as_sb;
-#endif
+  BLOCK_SIZE_TYPE sb_type;
 } MB_MODE_INFO;
 
 typedef struct {
@@ -280,19 +282,19 @@ typedef struct {
 } MODE_INFO;
 
 typedef struct blockd {
-  short *qcoeff;
-  short *dqcoeff;
-  unsigned char  *predictor;
-  short *diff;
-  short *dequant;
+  int16_t *qcoeff;
+  int16_t *dqcoeff;
+  uint8_t *predictor;
+  int16_t *diff;
+  int16_t *dequant;
 
   /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
-  unsigned char **base_pre;
-  unsigned char **base_second_pre;
+  uint8_t **base_pre;
+  uint8_t **base_second_pre;
   int pre;
   int pre_stride;
 
-  unsigned char **base_dst;
+  uint8_t **base_dst;
   int dst;
   int dst_stride;
 
@@ -301,12 +303,21 @@ typedef struct blockd {
   union b_mode_info bmi;
 } BLOCKD;
 
+typedef struct superblockd {
+  /* 32x32 Y and 16x16 U/V. No 2nd order transform yet. */
+  DECLARE_ALIGNED(16, int16_t, diff[32*32+16*16*2]);
+  DECLARE_ALIGNED(16, int16_t, qcoeff[32*32+16*16*2]);
+  DECLARE_ALIGNED(16, int16_t, dqcoeff[32*32+16*16*2]);
+} SUPERBLOCKD;
+
 typedef struct macroblockd {
-  DECLARE_ALIGNED(16, short, diff[400]);      /* from idct diff */
-  DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
-  DECLARE_ALIGNED(16, short, qcoeff[400]);
-  DECLARE_ALIGNED(16, short, dqcoeff[400]);
-  DECLARE_ALIGNED(16, unsigned short,  eobs[25]);
+  DECLARE_ALIGNED(16, int16_t,  diff[400]);      /* from idct diff */
+  DECLARE_ALIGNED(16, uint8_t,  predictor[384]);
+  DECLARE_ALIGNED(16, int16_t,  qcoeff[400]);
+  DECLARE_ALIGNED(16, int16_t,  dqcoeff[400]);
+  DECLARE_ALIGNED(16, uint16_t, eobs[25]);
+
+  SUPERBLOCKD sb_coeff_data;
 
   /* 16 Y blocks, 4 U, 4 V, 1 DC 2nd order block, each with 16 entries. */
   BLOCKD block[25];
@@ -350,7 +361,7 @@ typedef struct macroblockd {
   vp9_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
 
 #if CONFIG_NEW_MVREF
-  vp9_prob mb_mv_ref_id_probs[MAX_REF_FRAMES][3];
+  vp9_prob mb_mv_ref_probs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES-1];
 #endif
 
   // Segment features
@@ -377,17 +388,17 @@ typedef struct macroblockd {
   unsigned int frames_till_alt_ref_frame;
 
   /* Inverse transform function pointers. */
-  void (*inv_xform4x4_1_x8)(short *input, short *output, int pitch);
-  void (*inv_xform4x4_x8)(short *input, short *output, int pitch);
-  void (*inv_walsh4x4_1)(short *in, short *out);
-  void (*inv_walsh4x4_lossless)(short *in, short *out);
+  void (*inv_xform4x4_1_x8)(int16_t *input, int16_t *output, int pitch);
+  void (*inv_xform4x4_x8)(int16_t *input, int16_t *output, int pitch);
+  void (*inv_walsh4x4_1)(int16_t *in, int16_t *out);
+  void (*inv_walsh4x4_lossless)(int16_t *in, int16_t *out);
 
 
-  vp9_subpix_fn_t  subpixel_predict;
+  vp9_subpix_fn_t  subpixel_predict4x4;
   vp9_subpix_fn_t  subpixel_predict8x4;
   vp9_subpix_fn_t  subpixel_predict8x8;
   vp9_subpix_fn_t  subpixel_predict16x16;
-  vp9_subpix_fn_t  subpixel_predict_avg;
+  vp9_subpix_fn_t  subpixel_predict_avg4x4;
   vp9_subpix_fn_t  subpixel_predict_avg8x4;
   vp9_subpix_fn_t  subpixel_predict_avg8x8;
   vp9_subpix_fn_t  subpixel_predict_avg16x16;
@@ -395,14 +406,7 @@ typedef struct macroblockd {
 
   int corrupted;
 
-#if !CONFIG_SUPERBLOCKS && (ARCH_X86 || ARCH_X86_64)
-  /* This is an intermediate buffer currently used in sub-pixel motion search
-   * to keep a copy of the reference area. This buffer can be used for other
-   * purpose.
-   */
-  DECLARE_ALIGNED(32, unsigned char, y_buf[22 * 32]);
-#endif
-
+  int sb_index;
   int mb_index;   // Index of the MB in the SB (0..3)
   int q_index;
 
@@ -490,6 +494,9 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
   return tx_type;
 }
 
+extern const uint8_t vp9_block2left[TX_SIZE_MAX_SB][25];
+extern const uint8_t vp9_block2above[TX_SIZE_MAX_SB][25];
+
 #define USE_ADST_FOR_I16X16_8X8   0
 #define USE_ADST_FOR_I16X16_4X4   0
 #define USE_ADST_FOR_I8X8_4X4     1
@@ -502,11 +509,9 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
   int ib = (int)(b - xd->block);
   if (ib >= 16)
     return tx_type;
-#if CONFIG_SUPERBLOCKS
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.encoded_as_sb)
+  if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
-#endif
   if (xd->mode_info_context->mbmi.mode == B_PRED &&
       xd->q_index < ACTIVE_HT) {
     tx_type = txfm_map(
@@ -559,11 +564,9 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
   int ib = (int)(b - xd->block);
   if (ib >= 16)
     return tx_type;
-#if CONFIG_SUPERBLOCKS
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.encoded_as_sb)
+  if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
-#endif
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
       xd->q_index < ACTIVE_HT8) {
     // TODO(rbultje): MB_PREDICTION_MODE / B_PREDICTION_MODE should be merged
@@ -594,11 +597,9 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
   int ib = (int)(b - xd->block);
   if (ib >= 16)
     return tx_type;
-#if CONFIG_SUPERBLOCKS
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.encoded_as_sb)
+  if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
-#endif
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
       xd->q_index < ACTIVE_HT16) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
@@ -650,4 +651,4 @@ static void update_blockd_bmi(MACROBLOCKD *xd) {
     }
   }
 }
-#endif  /* __INC_BLOCKD_H */
+#endif  // VP9_COMMON_VP9_BLOCKD_H_

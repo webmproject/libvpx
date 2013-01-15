@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_MV_H_
 #define VP9_COMMON_VP9_MV_H_
+
 #include "vpx/vpx_integer.h"
 
 typedef struct {
-  short row;
-  short col;
+  int16_t row;
+  int16_t col;
 } MV;
 
 typedef union int_mv {
@@ -23,4 +23,4 @@ typedef union int_mv {
   MV as_mv;
 } int_mv; /* facilitates faster equality tests and copies */
 
-#endif
+#endif  // VP9_COMMON_VP9_MV_H_

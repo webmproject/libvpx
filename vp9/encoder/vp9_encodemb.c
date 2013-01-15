@@ -21,9 +21,9 @@
 #include "vp9_rtcd.h"
 
 void vp9_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
-  unsigned char *src_ptr = (*(be->base_src) + be->src);
-  short *diff_ptr = be->src_diff;
-  unsigned char *pred_ptr = bd->predictor;
+  uint8_t *src_ptr = (*(be->base_src) + be->src);
+  int16_t *diff_ptr = be->src_diff;
+  uint8_t *pred_ptr = bd->predictor;
   int src_stride = be->src_stride;
 
   int r, c;
@@ -40,9 +40,9 @@ void vp9_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
 }
 
 void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
-  unsigned char *src_ptr = (*(be->base_src) + be->src);
-  short *diff_ptr = be->src_diff;
-  unsigned char *pred_ptr = bd->predictor;
+  uint8_t *src_ptr = (*(be->base_src) + be->src);
+  int16_t *diff_ptr = be->src_diff;
+  uint8_t *pred_ptr = bd->predictor;
   int src_stride = be->src_stride;
   int r, c;
 
@@ -56,12 +56,12 @@ void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   }
 }
 
-void vp9_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
-                           const unsigned char *vsrc, int src_stride,
-                           const unsigned char *upred,
-                           const unsigned char *vpred, int dst_stride) {
-  short *udiff = diff + 256;
-  short *vdiff = diff + 320;
+void vp9_subtract_mbuv_s_c(int16_t *diff, const uint8_t *usrc,
+                           const uint8_t *vsrc, int src_stride,
+                           const uint8_t *upred,
+                           const uint8_t *vpred, int dst_stride) {
+  int16_t *udiff = diff + 256;
+  int16_t *vdiff = diff + 320;
   int r, c;
 
   for (r = 0; r < 8; r++) {
@@ -85,16 +85,16 @@ void vp9_subtract_mbuv_s_c(short *diff, const unsigned char *usrc,
   }
 }
 
-void vp9_subtract_mbuv_c(short *diff, unsigned char *usrc,
-                         unsigned char *vsrc, unsigned char *pred, int stride) {
-  unsigned char *upred = pred + 256;
-  unsigned char *vpred = pred + 320;
+void vp9_subtract_mbuv_c(int16_t *diff, uint8_t *usrc,
+                         uint8_t *vsrc, uint8_t *pred, int stride) {
+  uint8_t *upred = pred + 256;
+  uint8_t *vpred = pred + 320;
 
   vp9_subtract_mbuv_s_c(diff, usrc, vsrc, stride, upred, vpred, 8);
 }
 
-void vp9_subtract_mby_s_c(short *diff, const unsigned char *src, int src_stride,
-                          const unsigned char *pred, int dst_stride) {
+void vp9_subtract_mby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
+                          const uint8_t *pred, int dst_stride) {
   int r, c;
 
   for (r = 0; r < 16; r++) {
@@ -108,8 +108,52 @@ void vp9_subtract_mby_s_c(short *diff, const unsigned char *src, int src_stride,
   }
 }
 
-void vp9_subtract_mby_c(short *diff, unsigned char *src,
-                        unsigned char *pred, int stride) {
+void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
+                          const uint8_t *pred, int dst_stride) {
+  int r, c;
+
+  for (r = 0; r < 32; r++) {
+    for (c = 0; c < 32; c++) {
+      diff[c] = src[c] - pred[c];
+    }
+
+    diff += 32;
+    pred += dst_stride;
+    src  += src_stride;
+  }
+}
+
+void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
+                           const uint8_t *vsrc, int src_stride,
+                           const uint8_t *upred,
+                           const uint8_t *vpred, int dst_stride) {
+  int16_t *udiff = diff + 1024;
+  int16_t *vdiff = diff + 1024 + 256;
+  int r, c;
+
+  for (r = 0; r < 16; r++) {
+    for (c = 0; c < 16; c++) {
+      udiff[c] = usrc[c] - upred[c];
+    }
+
+    udiff += 16;
+    upred += dst_stride;
+    usrc  += src_stride;
+  }
+
+  for (r = 0; r < 16; r++) {
+    for (c = 0; c < 16; c++) {
+      vdiff[c] = vsrc[c] - vpred[c];
+    }
+
+    vdiff += 16;
+    vpred += dst_stride;
+    vsrc  += src_stride;
+  }
+}
+
+void vp9_subtract_mby_c(int16_t *diff, uint8_t *src,
+                        uint8_t *pred, int stride) {
   vp9_subtract_mby_s_c(diff, src, stride, pred, 16);
 }
 
@@ -123,7 +167,7 @@ static void subtract_mb(MACROBLOCK *x) {
 }
 
 static void build_dcblock_4x4(MACROBLOCK *x) {
-  short *src_diff_ptr = &x->src_diff[384];
+  int16_t *src_diff_ptr = &x->src_diff[384];
   int i;
 
   for (i = 0; i < 16; i++) {
@@ -265,6 +309,20 @@ void vp9_transform_mb_16x16(MACROBLOCK *x) {
   vp9_transform_mbuv_8x8(x);
 }
 
+void vp9_transform_sby_32x32(MACROBLOCK *x) {
+  SUPERBLOCK * const x_sb = &x->sb_coeff_data;
+  vp9_short_fdct32x32(x_sb->src_diff, x_sb->coeff, 64);
+}
+
+void vp9_transform_sbuv_16x16(MACROBLOCK *x) {
+  SUPERBLOCK * const x_sb = &x->sb_coeff_data;
+  vp9_clear_system_state();
+  x->vp9_short_fdct16x16(x_sb->src_diff + 1024,
+                         x_sb->coeff + 1024, 32);
+  x->vp9_short_fdct16x16(x_sb->src_diff + 1280,
+                         x_sb->coeff + 1280, 32);
+}
+
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 #define RDTRUNC_8x8(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 typedef struct vp9_token_state vp9_token_state;
@@ -302,41 +360,31 @@ static const int plane_rd_mult[4] = {
 static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        int tx_size) {
-  BLOCK *b;
-  BLOCKD *d;
-  vp9_token_state tokens[65][2];
-  uint64_t best_mask[2];
-  const short *dequant_ptr;
-  const short *coeff_ptr;
-  short *qcoeff_ptr;
-  short *dqcoeff_ptr;
-  int eob;
-  int i0;
-  int rc;
-  int x;
-  int sz = 0;
-  int next;
-  int rdmult;
-  int rddiv;
-  int final_eob;
-  int64_t rd_cost0, rd_cost1;
-  int rate0, rate1;
-  int error0, error1;
-  int t0, t1;
-  int best;
-  int band;
-  int pt;
+  BLOCK *b = &mb->block[i];
+  BLOCKD *d = &mb->e_mbd.block[i];
+  vp9_token_state tokens[257][2];
+  unsigned best_index[257][2];
+  const int16_t *dequant_ptr = d->dequant, *coeff_ptr = b->coeff;
+  int16_t *qcoeff_ptr = d->qcoeff;
+  int16_t *dqcoeff_ptr = d->dqcoeff;
+  int eob = d->eob, final_eob, sz = 0;
+  int i0 = (type == PLANE_TYPE_Y_NO_DC);
+  int rc, x, next;
+  int64_t rdmult, rddiv, rd_cost0, rd_cost1;
+  int rate0, rate1, error0, error1, t0, t1;
+  int best, band, pt;
   int err_mult = plane_rd_mult[type];
   int default_eob;
   int const *scan, *bands;
+#if CONFIG_NEWCOEFCONTEXT
+  const int *neighbors;
+#endif
 
-  b = &mb->block[i];
-  d = &mb->e_mbd.block[i];
   switch (tx_size) {
     default:
     case TX_4X4:
-      scan = vp9_default_zig_zag1d;
-      bands = vp9_coef_bands;
+      scan = vp9_default_zig_zag1d_4x4;
+      bands = vp9_coef_bands_4x4;
       default_eob = 16;
       // TODO: this isn't called (for intra4x4 modes), but will be left in
       // since it could be used later
@@ -345,19 +393,19 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
         if (tx_type != DCT_DCT) {
           switch (tx_type) {
             case ADST_DCT:
-              scan = vp9_row_scan;
+              scan = vp9_row_scan_4x4;
               break;
 
             case DCT_ADST:
-              scan = vp9_col_scan;
+              scan = vp9_col_scan_4x4;
               break;
 
             default:
-              scan = vp9_default_zig_zag1d;
+              scan = vp9_default_zig_zag1d_4x4;
               break;
           }
         } else {
-          scan = vp9_default_zig_zag1d;
+          scan = vp9_default_zig_zag1d_4x4;
         }
       }
       break;
@@ -366,21 +414,22 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       bands = vp9_coef_bands_8x8;
       default_eob = 64;
       break;
+    case TX_16X16:
+      scan = vp9_default_zig_zag1d_16x16;
+      bands = vp9_coef_bands_16x16;
+      default_eob = 256;
+      break;
   }
-
-  dequant_ptr = d->dequant;
-  coeff_ptr = b->coeff;
-  qcoeff_ptr = d->qcoeff;
-  dqcoeff_ptr = d->dqcoeff;
-  i0 = (type == PLANE_TYPE_Y_NO_DC);
-  eob = d->eob;
+#if CONFIG_NEWCOEFCONTEXT
+  neighbors = vp9_get_coef_neighbors_handle(scan);
+#endif
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   rdmult = mb->rdmult * err_mult;
   if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     rdmult = (rdmult * 9) >> 4;
   rddiv = mb->rddiv;
-  best_mask[0] = best_mask[1] = 0;
+  memset(best_index, 0, sizeof(best_index));
   /* Initialize the sentinel node of the trellis. */
   tokens[eob][0].rate = 0;
   tokens[eob][0].error = 0;
@@ -390,9 +439,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   *(tokens[eob] + 1) = *(tokens[eob] + 0);
   next = eob;
   for (i = eob; i-- > i0;) {
-    int base_bits;
-    int d2;
-    int dx;
+    int base_bits, d2, dx;
 
     rc = scan[i];
     x = qcoeff_ptr[rc];
@@ -409,6 +456,11 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       if (next < default_eob) {
         band = bands[i + 1];
         pt = vp9_prev_token_class[t0];
+#if CONFIG_NEWCOEFCONTEXT
+        if (NEWCOEFCONTEXT_BAND_COND(band))
+          pt = vp9_get_coef_neighbor_context(
+              qcoeff_ptr, i0, neighbors, scan[i + 1]);
+#endif
         rate0 +=
           mb->token_costs[tx_size][type][band][pt][tokens[next][0].token];
         rate1 +=
@@ -425,7 +477,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       tokens[i][0].next = next;
       tokens[i][0].token = t0;
       tokens[i][0].qc = x;
-      best_mask[0] |= best << i;
+      best_index[i][0] = best;
       /* Evaluate the second possibility for this state. */
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
@@ -456,12 +508,34 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       if (next < default_eob) {
         band = bands[i + 1];
         if (t0 != DCT_EOB_TOKEN) {
+#if CONFIG_NEWCOEFCONTEXT
+          int tmp = qcoeff_ptr[scan[i]];
+          qcoeff_ptr[scan[i]] = x;
+          if (NEWCOEFCONTEXT_BAND_COND(band))
+            pt = vp9_get_coef_neighbor_context(
+                qcoeff_ptr, i0, neighbors, scan[i + 1]);
+          else
+            pt = vp9_prev_token_class[t0];
+          qcoeff_ptr[scan[i]] = tmp;
+#else
           pt = vp9_prev_token_class[t0];
+#endif
           rate0 += mb->token_costs[tx_size][type][band][pt][
               tokens[next][0].token];
         }
         if (t1 != DCT_EOB_TOKEN) {
+#if CONFIG_NEWCOEFCONTEXT
+          int tmp = qcoeff_ptr[scan[i]];
+          qcoeff_ptr[scan[i]] = x;
+          if (NEWCOEFCONTEXT_BAND_COND(band))
+            pt = vp9_get_coef_neighbor_context(
+                qcoeff_ptr, i0, neighbors, scan[i + 1]);
+          else
+            pt = vp9_prev_token_class[t1];
+          qcoeff_ptr[scan[i]] = tmp;
+#else
           pt = vp9_prev_token_class[t1];
+#endif
           rate1 += mb->token_costs[tx_size][type][band][pt][
               tokens[next][1].token];
         }
@@ -481,7 +555,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       tokens[i][1].next = next;
       tokens[i][1].token = best ? t1 : t0;
       tokens[i][1].qc = x;
-      best_mask[1] |= best << i;
+      best_index[i][1] = best;
       /* Finally, make this the new head of the trellis. */
       next = i;
     }
@@ -528,7 +602,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
     dqcoeff_ptr[rc] = (x * dequant_ptr[rc != 0]);
 
     next = tokens[i][best].next;
-    best = (best_mask[best] >> i) & 1;
+    best = best_index[i][best];
   }
   final_eob++;
 
@@ -556,7 +630,7 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *xd,
     return;
 
   for (i = 0; i < bd->eob; i++) {
-    int coef = bd->dqcoeff[vp9_default_zig_zag1d[i]];
+    int coef = bd->dqcoeff[vp9_default_zig_zag1d_4x4[i]];
     sum += (coef >= 0) ? coef : -coef;
     if (sum >= SUM_2ND_COEFF_THRESH)
       return;
@@ -564,7 +638,7 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *xd,
 
   if (sum < SUM_2ND_COEFF_THRESH) {
     for (i = 0; i < bd->eob; i++) {
-      int rc = vp9_default_zig_zag1d[i];
+      int rc = vp9_default_zig_zag1d_4x4[i];
       bd->qcoeff[rc] = 0;
       bd->dqcoeff[rc] = 0;
     }
@@ -626,15 +700,18 @@ void vp9_optimize_mby_4x4(MACROBLOCK *x) {
 
   for (b = 0; b < 16; b++) {
     optimize_b(x, b, type,
-               ta + vp9_block2above[b], tl + vp9_block2left[b], TX_4X4);
+               ta + vp9_block2above[TX_4X4][b],
+               tl + vp9_block2left[TX_4X4][b], TX_4X4);
   }
 
   if (has_2nd_order) {
     b = 24;
     optimize_b(x, b, PLANE_TYPE_Y2,
-               ta + vp9_block2above[b], tl + vp9_block2left[b], TX_4X4);
+               ta + vp9_block2above[TX_4X4][b],
+               tl + vp9_block2left[TX_4X4][b], TX_4X4);
     check_reset_2nd_coeffs(&x->e_mbd,
-                           ta + vp9_block2above[b], tl + vp9_block2left[b]);
+                           ta + vp9_block2above[TX_4X4][b],
+                           tl + vp9_block2left[TX_4X4][b]);
   }
 }
 
@@ -655,7 +732,8 @@ void vp9_optimize_mbuv_4x4(MACROBLOCK *x) {
 
   for (b = 16; b < 24; b++) {
     optimize_b(x, b, PLANE_TYPE_UV,
-               ta + vp9_block2above[b], tl + vp9_block2left[b], TX_4X4);
+               ta + vp9_block2above[TX_4X4][b],
+               tl + vp9_block2left[TX_4X4][b], TX_4X4);
   }
 }
 
@@ -682,42 +760,47 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x) {
   tl = (ENTROPY_CONTEXT *)&t_left;
   type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
   for (b = 0; b < 16; b += 4) {
-    optimize_b(x, b, type,
-               ta + vp9_block2above_8x8[b], tl + vp9_block2left_8x8[b],
-               TX_8X8);
-    ta[vp9_block2above_8x8[b] + 1] = ta[vp9_block2above_8x8[b]];
-    tl[vp9_block2left_8x8[b] + 1]  = tl[vp9_block2left_8x8[b]];
+    ENTROPY_CONTEXT *const a = ta + vp9_block2above[TX_8X8][b];
+    ENTROPY_CONTEXT *const l = tl + vp9_block2left[TX_8X8][b];
+#if CONFIG_CNVCONTEXT
+    ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
+    ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
+#else
+    ENTROPY_CONTEXT above_ec = a[0];
+    ENTROPY_CONTEXT left_ec = l[0];
+#endif
+    optimize_b(x, b, type, &above_ec, &left_ec, TX_8X8);
+    a[1] = a[0] = above_ec;
+    l[1] = l[0] = left_ec;
   }
 
-  // 8x8 always have 2nd roder haar block
+  // 8x8 always have 2nd order block
   if (has_2nd_order) {
     check_reset_8x8_2nd_coeffs(&x->e_mbd,
-                               ta + vp9_block2above_8x8[24],
-                               tl + vp9_block2left_8x8[24]);
+                               ta + vp9_block2above[TX_8X8][24],
+                               tl + vp9_block2left[TX_8X8][24]);
   }
 }
 
 void vp9_optimize_mbuv_8x8(MACROBLOCK *x) {
   int b;
-  ENTROPY_CONTEXT_PLANES t_above, t_left;
-  ENTROPY_CONTEXT *ta;
-  ENTROPY_CONTEXT *tl;
+  ENTROPY_CONTEXT *const ta = (ENTROPY_CONTEXT *)x->e_mbd.above_context;
+  ENTROPY_CONTEXT *const tl = (ENTROPY_CONTEXT *)x->e_mbd.left_context;
 
-  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
+  if (!ta || !tl)
     return;
 
-  vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
-
-  ta = (ENTROPY_CONTEXT *)&t_above;
-  tl = (ENTROPY_CONTEXT *)&t_left;
-
   for (b = 16; b < 24; b += 4) {
-    optimize_b(x, b, PLANE_TYPE_UV,
-               ta + vp9_block2above_8x8[b], tl + vp9_block2left_8x8[b],
-               TX_8X8);
-    ta[vp9_block2above_8x8[b] + 1] = ta[vp9_block2above_8x8[b]];
-    tl[vp9_block2left_8x8[b] + 1]  = tl[vp9_block2left_8x8[b]];
+    ENTROPY_CONTEXT *const a = ta + vp9_block2above[TX_8X8][b];
+    ENTROPY_CONTEXT *const l = tl + vp9_block2left[TX_8X8][b];
+#if CONFIG_CNVCONTEXT
+    ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
+    ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
+#else
+    ENTROPY_CONTEXT above_ec = a[0];
+    ENTROPY_CONTEXT left_ec = l[0];
+#endif
+    optimize_b(x, b, PLANE_TYPE_UV, &above_ec, &left_ec, TX_8X8);
   }
 }
 
@@ -726,192 +809,22 @@ static void optimize_mb_8x8(MACROBLOCK *x) {
   vp9_optimize_mbuv_8x8(x);
 }
 
-static void optimize_b_16x16(MACROBLOCK *mb, int i, PLANE_TYPE type,
-                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  BLOCK *b = &mb->block[i];
-  BLOCKD *d = &mb->e_mbd.block[i];
-  vp9_token_state tokens[257][2];
-  unsigned best_index[257][2];
-  const short *dequant_ptr = d->dequant, *coeff_ptr = b->coeff;
-  short *qcoeff_ptr = qcoeff_ptr = d->qcoeff;
-  short *dqcoeff_ptr = dqcoeff_ptr = d->dqcoeff;
-  int eob = d->eob, final_eob, sz = 0;
-  int rc, x, next;
-  int64_t rdmult, rddiv, rd_cost0, rd_cost1;
-  int rate0, rate1, error0, error1, t0, t1;
-  int best, band, pt;
-  int err_mult = plane_rd_mult[type];
-
-  /* Now set up a Viterbi trellis to evaluate alternative roundings. */
-  rdmult = mb->rdmult * err_mult;
-  if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
-      rdmult = (rdmult * 9)>>4;
-  rddiv = mb->rddiv;
-  memset(best_index, 0, sizeof(best_index));
-  /* Initialize the sentinel node of the trellis. */
-  tokens[eob][0].rate = 0;
-  tokens[eob][0].error = 0;
-  tokens[eob][0].next = 256;
-  tokens[eob][0].token = DCT_EOB_TOKEN;
-  tokens[eob][0].qc = 0;
-  *(tokens[eob] + 1) = *(tokens[eob] + 0);
-  next = eob;
-  for (i = eob; i-- > 0;) {
-    int base_bits, d2, dx;
-
-    rc = vp9_default_zig_zag1d_16x16[i];
-    x = qcoeff_ptr[rc];
-    /* Only add a trellis state for non-zero coefficients. */
-    if (x) {
-      int shortcut = 0;
-      error0 = tokens[next][0].error;
-      error1 = tokens[next][1].error;
-      /* Evaluate the first possibility for this state. */
-      rate0 = tokens[next][0].rate;
-      rate1 = tokens[next][1].rate;
-      t0 = (vp9_dct_value_tokens_ptr + x)->Token;
-      /* Consider both possible successor states. */
-      if (next < 256) {
-        band = vp9_coef_bands_16x16[i + 1];
-        pt = vp9_prev_token_class[t0];
-        rate0 += mb->token_costs[TX_16X16][type][band][pt][tokens[next][0].token];
-        rate1 += mb->token_costs[TX_16X16][type][band][pt][tokens[next][1].token];
-      }
-      UPDATE_RD_COST();
-      /* And pick the best. */
-      best = rd_cost1 < rd_cost0;
-      base_bits = *(vp9_dct_value_cost_ptr + x);
-      dx = dqcoeff_ptr[rc] - coeff_ptr[rc];
-      d2 = dx*dx;
-      tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
-      tokens[i][0].error = d2 + (best ? error1 : error0);
-      tokens[i][0].next = next;
-      tokens[i][0].token = t0;
-      tokens[i][0].qc = x;
-      best_index[i][0] = best;
-      /* Evaluate the second possibility for this state. */
-      rate0 = tokens[next][0].rate;
-      rate1 = tokens[next][1].rate;
-
-      if((abs(x)*dequant_ptr[rc!=0]>abs(coeff_ptr[rc])) &&
-         (abs(x)*dequant_ptr[rc!=0]<abs(coeff_ptr[rc])+dequant_ptr[rc!=0]))
-        shortcut = 1;
-      else
-        shortcut = 0;
-
-      if (shortcut) {
-        sz = -(x < 0);
-        x -= 2*sz + 1;
-      }
-
-      /* Consider both possible successor states. */
-      if (!x) {
-        /* If we reduced this coefficient to zero, check to see if
-         *  we need to move the EOB back here.
-         */
-        t0 = tokens[next][0].token == DCT_EOB_TOKEN ?
-             DCT_EOB_TOKEN : ZERO_TOKEN;
-        t1 = tokens[next][1].token == DCT_EOB_TOKEN ?
-             DCT_EOB_TOKEN : ZERO_TOKEN;
-      }
-      else
-        t0=t1 = (vp9_dct_value_tokens_ptr + x)->Token;
-      if (next < 256) {
-        band = vp9_coef_bands_16x16[i + 1];
-        if (t0 != DCT_EOB_TOKEN) {
-            pt = vp9_prev_token_class[t0];
-            rate0 += mb->token_costs[TX_16X16][type][band][pt]
-                [tokens[next][0].token];
-        }
-        if (t1!=DCT_EOB_TOKEN) {
-            pt = vp9_prev_token_class[t1];
-            rate1 += mb->token_costs[TX_16X16][type][band][pt]
-                [tokens[next][1].token];
-        }
-      }
-      UPDATE_RD_COST();
-      /* And pick the best. */
-      best = rd_cost1 < rd_cost0;
-      base_bits = *(vp9_dct_value_cost_ptr + x);
-
-      if(shortcut) {
-        dx -= (dequant_ptr[rc!=0] + sz) ^ sz;
-        d2 = dx*dx;
-      }
-      tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
-      tokens[i][1].error = d2 + (best ? error1 : error0);
-      tokens[i][1].next = next;
-      tokens[i][1].token = best ? t1 : t0;
-      tokens[i][1].qc = x;
-      best_index[i][1] = best;
-      /* Finally, make this the new head of the trellis. */
-      next = i;
-    }
-    /* There's no choice to make for a zero coefficient, so we don't
-     *  add a new trellis node, but we do need to update the costs.
-     */
-    else {
-      band = vp9_coef_bands_16x16[i + 1];
-      t0 = tokens[next][0].token;
-      t1 = tokens[next][1].token;
-      /* Update the cost of each path if we're past the EOB token. */
-      if (t0 != DCT_EOB_TOKEN) {
-        tokens[next][0].rate += mb->token_costs[TX_16X16][type][band][0][t0];
-        tokens[next][0].token = ZERO_TOKEN;
-      }
-      if (t1 != DCT_EOB_TOKEN) {
-        tokens[next][1].rate += mb->token_costs[TX_16X16][type][band][0][t1];
-        tokens[next][1].token = ZERO_TOKEN;
-      }
-      /* Don't update next, because we didn't add a new node. */
-    }
-  }
-
-  /* Now pick the best path through the whole trellis. */
-  band = vp9_coef_bands_16x16[i + 1];
-  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  rate0 = tokens[next][0].rate;
-  rate1 = tokens[next][1].rate;
-  error0 = tokens[next][0].error;
-  error1 = tokens[next][1].error;
-  t0 = tokens[next][0].token;
-  t1 = tokens[next][1].token;
-  rate0 += mb->token_costs[TX_16X16][type][band][pt][t0];
-  rate1 += mb->token_costs[TX_16X16][type][band][pt][t1];
-  UPDATE_RD_COST();
-  best = rd_cost1 < rd_cost0;
-  final_eob = -1;
-
-  for (i = next; i < eob; i = next) {
-    x = tokens[i][best].qc;
-    if (x)
-      final_eob = i;
-    rc = vp9_default_zig_zag1d_16x16[i];
-    qcoeff_ptr[rc] = x;
-    dqcoeff_ptr[rc] = (x * dequant_ptr[rc!=0]);
-
-    next = tokens[i][best].next;
-    best = best_index[i][best];
-  }
-  final_eob++;
-
-  d->eob = final_eob;
-  *a = *l = (d->eob > !type);
-}
-
 void vp9_optimize_mby_16x16(MACROBLOCK *x) {
-  ENTROPY_CONTEXT_PLANES t_above, t_left;
-  ENTROPY_CONTEXT *ta, *tl;
+  ENTROPY_CONTEXT_PLANES *const t_above = x->e_mbd.above_context;
+  ENTROPY_CONTEXT_PLANES *const t_left = x->e_mbd.left_context;
+  ENTROPY_CONTEXT ta, tl;
 
-  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
+  if (!t_above || !t_left)
     return;
 
-  vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
-
-  ta = (ENTROPY_CONTEXT *)&t_above;
-  tl = (ENTROPY_CONTEXT *)&t_left;
-  optimize_b_16x16(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl);
+#if CONFIG_CNVCONTEXT
+  ta = (t_above->y1[0] + t_above->y1[1] + t_above->y1[2] + t_above->y1[3]) != 0;
+  tl = (t_left->y1[0] + t_left->y1[1] + t_left->y1[2] + t_left->y1[3]) != 0;
+#else
+  ta = t_above->y1[0];
+  tl = t_left->y1[0];
+#endif
+  optimize_b(x, 0, PLANE_TYPE_Y_WITH_DC, &ta, &tl, TX_16X16);
 }
 
 static void optimize_mb_16x16(MACROBLOCK *x) {
@@ -971,11 +884,6 @@ void vp9_encode_inter16x16(MACROBLOCK *x) {
 void vp9_encode_inter16x16y(MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
-
-#if CONFIG_PRED_FILTER
-  // Disable the prediction filter for firstpass
-  xd->mode_info_context->mbmi.pred_filter_enabled = 0;
-#endif
 
   vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
 

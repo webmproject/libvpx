@@ -17,7 +17,7 @@
 #include "vp9/common/vp9_setupintrarecon.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_firstpass.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/common/vp9_extend.h"
@@ -296,7 +296,7 @@ static const double weight_table[256] = {
 static double simple_weight(YV12_BUFFER_CONFIG *source) {
   int i, j;
 
-  unsigned char *src = source->y_buffer;
+  uint8_t *src = source->y_buffer;
   double sum_weights = 0.0;
 
   // Loop throught the Y plane raw examining levels and creating a weight for the image
@@ -345,15 +345,15 @@ static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *r
   BLOCK *b = &x->block[0];
   BLOCKD *d = &x->e_mbd.block[0];
 
-  unsigned char *src_ptr = (*(b->base_src) + b->src);
+  uint8_t *src_ptr = (*(b->base_src) + b->src);
   int src_stride = b->src_stride;
-  unsigned char *ref_ptr;
+  uint8_t *ref_ptr;
   int ref_stride = d->pre_stride;
 
   // Set up pointers for this macro block recon buffer
   xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
 
-  ref_ptr = (unsigned char *)(*(d->base_pre) + d->pre);
+  ref_ptr = (uint8_t *)(*(d->base_pre) + d->pre);
 
   vp9_mse16x16(src_ptr, src_stride, ref_ptr, ref_stride,
                (unsigned int *)(best_motion_err));
@@ -515,11 +515,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
       xd->dst.u_buffer = new_yv12->u_buffer + recon_uvoffset;
       xd->dst.v_buffer = new_yv12->v_buffer + recon_uvoffset;
       xd->left_available = (mb_col != 0);
-
-#if !CONFIG_SUPERBLOCKS
-      // Copy current mb to a buffer
-      vp9_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
-#endif
 
       // do intra 16x16 prediction
       this_error = vp9_encode_intra(cpi, x, use_dc_pred);
@@ -799,7 +794,7 @@ static double bitcost(double prob) {
   return -(log(prob) / log(2.0));
 }
 
-static long long estimate_modemvcost(VP9_COMP *cpi,
+static int64_t estimate_modemvcost(VP9_COMP *cpi,
                                      FIRSTPASS_STATS *fpstats) {
 #if 0
   int mv_cost;
@@ -1235,7 +1230,7 @@ static int detect_transition_to_still(
   int still_interval,
   double loop_decay_rate,
   double last_decay_rate) {
-  BOOL trans_to_still = FALSE;
+  int trans_to_still = FALSE;
 
   // Break clause to detect very still sections after motion
   // For example a static image after a fade or other transition
@@ -1273,10 +1268,10 @@ static int detect_transition_to_still(
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
 // reflect this
-static BOOL detect_flash(VP9_COMP *cpi, int offset) {
+static int detect_flash(VP9_COMP *cpi, int offset) {
   FIRSTPASS_STATS next_frame;
 
-  BOOL flash_detected = FALSE;
+  int flash_detected = FALSE;
 
   // Read the frame data.
   // The return is FALSE (no flash detected) if not a valid frame
@@ -1388,7 +1383,7 @@ static int calc_arf_boost(
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   int arf_boost;
-  BOOL flash_detected = FALSE;
+  int flash_detected = FALSE;
 
   // Search forward from the proposed arf/next gf position
   for (i = 0; i < f_frames; i++) {
@@ -1543,7 +1538,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   int f_boost = 0;
   int b_boost = 0;
-  BOOL flash_detected;
+  int flash_detected;
 
   cpi->twopass.gf_group_bits = 0;
 
@@ -2096,8 +2091,11 @@ void vp9_second_pass(VP9_COMP *cpi) {
 }
 
 
-static BOOL test_candidate_kf(VP9_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRSTPASS_STATS *this_frame, FIRSTPASS_STATS *next_frame) {
-  BOOL is_viable_kf = FALSE;
+static int test_candidate_kf(VP9_COMP *cpi,
+                             FIRSTPASS_STATS *last_frame,
+                             FIRSTPASS_STATS *this_frame,
+                             FIRSTPASS_STATS *next_frame) {
+  int is_viable_kf = FALSE;
 
   // Does the frame satisfy the primary criteria of a key frame
   //      If so, then examine how well it predicts subsequent frames

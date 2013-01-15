@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VP9_COMMON_VP9_SUBPELVAR_H_
+#define VP9_COMMON_VP9_SUBPELVAR_H_
 
 #include "vp9/common/vp9_filter.h"
 
-
-
-static void variance(const unsigned char *src_ptr,
+static void variance(const uint8_t *src_ptr,
                      int  source_stride,
-                     const unsigned char *ref_ptr,
+                     const uint8_t *ref_ptr,
                      int  recon_stride,
                      int  w,
                      int  h,
@@ -43,14 +43,14 @@ static void variance(const unsigned char *src_ptr,
  *
  *  ROUTINE       : filter_block2d_bil_first_pass
  *
- *  INPUTS        : UINT8  *src_ptr          : Pointer to source block.
- *                  UINT32 src_pixels_per_line : Stride of input block.
- *                  UINT32 pixel_step        : Offset between filter input samples (see notes).
- *                  UINT32 output_height     : Input block height.
- *                  UINT32 output_width      : Input block width.
- *                  INT32  *vp9_filter          : Array of 2 bi-linear filter taps.
+ *  INPUTS        : uint8_t  *src_ptr          : Pointer to source block.
+ *                  uint32_t src_pixels_per_line : Stride of input block.
+ *                  uint32_t pixel_step        : Offset between filter input samples (see notes).
+ *                  uint32_t output_height     : Input block height.
+ *                  uint32_t output_width      : Input block width.
+ *                  int32_t  *vp9_filter          : Array of 2 bi-linear filter taps.
  *
- *  OUTPUTS       : INT32 *output_ptr        : Pointer to filtered block.
+ *  OUTPUTS       : int32_t *output_ptr        : Pointer to filtered block.
  *
  *  RETURNS       : void
  *
@@ -59,7 +59,7 @@ static void variance(const unsigned char *src_ptr,
  *                  filtered output block. Used to implement first-pass
  *                  of 2-D separable filter.
  *
- *  SPECIAL NOTES : Produces INT32 output to retain precision for next pass.
+ *  SPECIAL NOTES : Produces int32_t output to retain precision for next pass.
  *                  Two filter taps should sum to VP9_FILTER_WEIGHT.
  *                  pixel_step defines whether the filter is applied
  *                  horizontally (pixel_step=1) or vertically (pixel_step=stride).
@@ -67,13 +67,13 @@ static void variance(const unsigned char *src_ptr,
  *                  to the next.
  *
  ****************************************************************************/
-static void var_filter_block2d_bil_first_pass(const unsigned char *src_ptr,
-                                              unsigned short *output_ptr,
+static void var_filter_block2d_bil_first_pass(const uint8_t *src_ptr,
+                                              uint16_t *output_ptr,
                                               unsigned int src_pixels_per_line,
                                               int pixel_step,
                                               unsigned int output_height,
                                               unsigned int output_width,
-                                              const short *vp9_filter) {
+                                              const int16_t *vp9_filter) {
   unsigned int i, j;
 
   for (i = 0; i < output_height; i++) {
@@ -95,14 +95,14 @@ static void var_filter_block2d_bil_first_pass(const unsigned char *src_ptr,
  *
  *  ROUTINE       : filter_block2d_bil_second_pass
  *
- *  INPUTS        : INT32  *src_ptr          : Pointer to source block.
- *                  UINT32 src_pixels_per_line : Stride of input block.
- *                  UINT32 pixel_step        : Offset between filter input samples (see notes).
- *                  UINT32 output_height     : Input block height.
- *                  UINT32 output_width      : Input block width.
- *                  INT32  *vp9_filter          : Array of 2 bi-linear filter taps.
+ *  INPUTS        : int32_t  *src_ptr          : Pointer to source block.
+ *                  uint32_t src_pixels_per_line : Stride of input block.
+ *                  uint32_t pixel_step        : Offset between filter input samples (see notes).
+ *                  uint32_t output_height     : Input block height.
+ *                  uint32_t output_width      : Input block width.
+ *                  int32_t  *vp9_filter          : Array of 2 bi-linear filter taps.
  *
- *  OUTPUTS       : UINT16 *output_ptr       : Pointer to filtered block.
+ *  OUTPUTS       : uint16_t *output_ptr       : Pointer to filtered block.
  *
  *  RETURNS       : void
  *
@@ -119,13 +119,13 @@ static void var_filter_block2d_bil_first_pass(const unsigned char *src_ptr,
  *                  to the next.
  *
  ****************************************************************************/
-static void var_filter_block2d_bil_second_pass(const unsigned short *src_ptr,
-                                               unsigned char *output_ptr,
+static void var_filter_block2d_bil_second_pass(const uint16_t *src_ptr,
+                                               uint8_t *output_ptr,
                                                unsigned int src_pixels_per_line,
                                                unsigned int pixel_step,
                                                unsigned int output_height,
                                                unsigned int output_width,
-                                               const short *vp9_filter) {
+                                               const int16_t *vp9_filter) {
   unsigned int  i, j;
   int  Temp;
 
@@ -145,3 +145,4 @@ static void var_filter_block2d_bil_second_pass(const unsigned short *src_ptr,
   }
 }
 
+#endif  // VP9_COMMON_VP9_SUBPELVAR_H_

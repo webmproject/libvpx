@@ -41,19 +41,11 @@
 #define AF_THRESH2  100
 #define ARF_DECAY_THRESH 12
 
-#if CONFIG_PRED_FILTER
-#if CONFIG_COMP_INTERINTRA_PRED
-#define MAX_MODES 66
-#else
-#define MAX_MODES 54
-#endif
-#else  // CONFIG_PRED_FILTER
 #if CONFIG_COMP_INTERINTRA_PRED
 #define MAX_MODES 54
 #else
 #define MAX_MODES 42
 #endif
-#endif  // CONFIG_PRED_FILTER
 
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
@@ -94,24 +86,15 @@ typedef struct {
   // 0 = BPRED, ZERO_MV, MV, SPLIT
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
-  vp9_prob coef_probs[BLOCK_TYPES]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  vp9_prob hybrid_coef_probs[BLOCK_TYPES]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+  vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs hybrid_coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs hybrid_coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_probs hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES_32X32];
 
-  vp9_prob coef_probs_8x8[BLOCK_TYPES_8X8]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  vp9_prob hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-
-  vp9_prob coef_probs_16x16[BLOCK_TYPES_16X16]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  vp9_prob hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]
-      [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-
-#if CONFIG_SUPERBLOCKS
   vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
-#endif
   vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
   vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
   vp9_prob bmode_prob[VP9_NKF_BINTRAMODES - 1];
@@ -180,94 +163,6 @@ typedef struct {
   MBGRAPH_MB_STATS *mb_stats;
 } MBGRAPH_FRAME_STATS;
 
-#if CONFIG_PRED_FILTER
-typedef enum {
-  THR_ZEROMV,
-  THR_ZEROMV_FILT,
-  THR_DC,
-
-  THR_NEARESTMV,
-  THR_NEARESTMV_FILT,
-  THR_NEARMV,
-  THR_NEARMV_FILT,
-
-  THR_ZEROG,
-  THR_ZEROG_FILT,
-  THR_NEARESTG,
-  THR_NEARESTG_FILT,
-
-  THR_ZEROA,
-  THR_ZEROA_FILT,
-  THR_NEARESTA,
-  THR_NEARESTA_FILT,
-
-  THR_NEARG,
-  THR_NEARG_FILT,
-  THR_NEARA,
-  THR_NEARA_FILT,
-
-  THR_V_PRED,
-  THR_H_PRED,
-  THR_D45_PRED,
-  THR_D135_PRED,
-  THR_D117_PRED,
-  THR_D153_PRED,
-  THR_D27_PRED,
-  THR_D63_PRED,
-  THR_TM,
-
-  THR_NEWMV,
-  THR_NEWMV_FILT,
-  THR_NEWG,
-  THR_NEWG_FILT,
-  THR_NEWA,
-  THR_NEWA_FILT,
-
-  THR_SPLITMV,
-  THR_SPLITG,
-  THR_SPLITA,
-
-  THR_B_PRED,
-  THR_I8X8_PRED,
-
-  THR_COMP_ZEROLG,
-  THR_COMP_NEARESTLG,
-  THR_COMP_NEARLG,
-
-  THR_COMP_ZEROLA,
-  THR_COMP_NEARESTLA,
-  THR_COMP_NEARLA,
-
-  THR_COMP_ZEROGA,
-  THR_COMP_NEARESTGA,
-  THR_COMP_NEARGA,
-
-  THR_COMP_NEWLG,
-  THR_COMP_NEWLA,
-  THR_COMP_NEWGA,
-
-  THR_COMP_SPLITLG,
-  THR_COMP_SPLITLA,
-  THR_COMP_SPLITGA,
-#if CONFIG_COMP_INTERINTRA_PRED
-  THR_COMP_INTERINTRA_ZEROL,
-  THR_COMP_INTERINTRA_NEARESTL,
-  THR_COMP_INTERINTRA_NEARL,
-  THR_COMP_INTERINTRA_NEWL,
-
-  THR_COMP_INTERINTRA_ZEROG,
-  THR_COMP_INTERINTRA_NEARESTG,
-  THR_COMP_INTERINTRA_NEARG,
-  THR_COMP_INTERINTRA_NEWG,
-
-  THR_COMP_INTERINTRA_ZEROA,
-  THR_COMP_INTERINTRA_NEARESTA,
-  THR_COMP_INTERINTRA_NEARA,
-  THR_COMP_INTERINTRA_NEWA,
-#endif
-}
-THR_MODES;
-#else
 typedef enum {
   THR_ZEROMV,
   THR_DC,
@@ -342,7 +237,6 @@ typedef enum {
 #endif
 }
 THR_MODES;
-#endif
 
 typedef enum {
   DIAMOND = 0,
@@ -364,7 +258,6 @@ typedef struct {
   int first_step;
   int optimize_coefficients;
   int no_skip_block4x4_search;
-  int improved_mv_pred;
   int search_best_filter;
 
 } SPEED_FEATURES;
@@ -397,6 +290,7 @@ enum BlockSize {
   BLOCK_16X16,
   BLOCK_MAX_SEGMENTS,
   BLOCK_32X32 = BLOCK_MAX_SEGMENTS,
+  BLOCK_64X64,
   BLOCK_MAX_SB_SEGMENTS,
 };
 
@@ -434,6 +328,13 @@ typedef struct VP9_COMP {
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1_16x16[QINDEX_RANGE][256]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2_16x16[QINDEX_RANGE][256]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv_16x16[QINDEX_RANGE][256]);
+
+  DECLARE_ALIGNED(16, short, Y1zbin_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, Y2zbin_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, UVzbin_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2_32x32[QINDEX_RANGE][1024]);
+  DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv_32x32[QINDEX_RANGE][1024]);
 
   MACROBLOCK mb;
   VP9_COMMON common;
@@ -483,8 +384,9 @@ typedef struct VP9_COMP {
   int comp_pred_count[COMP_PRED_CONTEXTS];
   int single_pred_count[COMP_PRED_CONTEXTS];
   // FIXME contextualize
-  int txfm_count[TX_SIZE_MAX];
-  int txfm_count_8x8p[TX_SIZE_MAX - 1];
+  int txfm_count_32x32p[TX_SIZE_MAX_SB];
+  int txfm_count_16x16p[TX_SIZE_MAX_MB];
+  int txfm_count_8x8p[TX_SIZE_MAX_MB - 1];
   int64_t rd_tx_select_diff[NB_TXFM_MODES];
   int rd_tx_select_threshes[4][NB_TXFM_MODES];
 
@@ -566,10 +468,9 @@ typedef struct VP9_COMP {
 
   int cq_target_quality;
 
-#if CONFIG_SUPERBLOCKS
-  int sb_count;
+  int sb32_count[2];
+  int sb64_count[2];
   int sb_ymode_count [VP9_I32X32_MODES];
-#endif
   int ymode_count[VP9_YMODES];        /* intra MB type cts this frame */
   int bmode_count[VP9_NKF_BINTRAMODES];
   int i8x8_mode_count[VP9_I8X8_MODES];
@@ -583,26 +484,30 @@ typedef struct VP9_COMP {
 
   nmv_context_counts NMVcount;
 
-  unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-  unsigned int hybrid_coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_hybrid_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_hybrid_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+  vp9_coeff_count coef_counts_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs frame_coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_stats frame_branch_ct_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_count hybrid_coef_counts_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs frame_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_stats frame_hybrid_branch_ct_4x4[BLOCK_TYPES_4X4];
 
-  unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-  unsigned int hybrid_coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_hybrid_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_hybrid_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+  vp9_coeff_count coef_counts_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs frame_coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_stats frame_branch_ct_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_count hybrid_coef_counts_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs frame_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_stats frame_hybrid_branch_ct_8x8[BLOCK_TYPES_8X8];
 
-  unsigned int coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_branch_ct_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-  unsigned int hybrid_coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-  vp9_prob frame_hybrid_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  unsigned int frame_hybrid_branch_ct_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+  vp9_coeff_count coef_counts_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_probs frame_coef_probs_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_stats frame_branch_ct_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_count hybrid_coef_counts_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_probs frame_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_stats frame_hybrid_branch_ct_16x16[BLOCK_TYPES_16X16];
+
+  vp9_coeff_count coef_counts_32x32[BLOCK_TYPES_32X32];
+  vp9_coeff_probs frame_coef_probs_32x32[BLOCK_TYPES_32X32];
+  vp9_coeff_stats frame_branch_ct_32x32[BLOCK_TYPES_32X32];
 
   int gfu_boost;
   int last_boost;
@@ -783,14 +688,12 @@ typedef struct VP9_COMP {
 
   int dummy_packing;    /* flag to indicate if packing is dummy */
 
-#if CONFIG_PRED_FILTER
-  int pred_filter_on_count;
-  int pred_filter_off_count;
-#endif
   unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
                                       [VP9_SWITCHABLE_FILTERS];
+  unsigned int best_switchable_interp_count[VP9_SWITCHABLE_FILTERS];
+
 #if CONFIG_NEW_MVREF
-  unsigned int best_ref_index_counts[MAX_REF_FRAMES][MAX_MV_REFS];
+  unsigned int mb_mv_ref_count[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
 #endif
 
 } VP9_COMP;
@@ -825,4 +728,5 @@ extern void vp9_alloc_compressor_data(VP9_COMP *cpi);
                          "Failed to allocate "#lval);\
   } while(0)
 #endif
-#endif  // __INC_ONYX_INT_H
+
+#endif  // VP9_ENCODER_VP9_ONYX_INT_H_

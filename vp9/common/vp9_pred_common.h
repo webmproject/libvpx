@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9/common/vp9_type_aliases.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_blockd.h"
 
@@ -53,4 +52,4 @@ extern MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
                                        const MACROBLOCKD *const xd);
 extern void vp9_compute_mod_refprobs(VP9_COMMON *const cm);
 
-#endif /* __INC_PRED_COMMON_H__ */
+#endif  // VP9_COMMON_VP9_PRED_COMMON_H_

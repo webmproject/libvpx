@@ -14,14 +14,14 @@
 #include "vp9/encoder/vp9_picklpf.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "./vpx_scale_rtcd.h"
 
 void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
                                    YV12_BUFFER_CONFIG *dst_ybc, int Fraction) {
-  unsigned char *src_y, *dst_y;
+  uint8_t *src_y, *dst_y;
   int yheight;
   int ystride;
   int yoffset;
@@ -49,8 +49,8 @@ static int calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
   int i, j;
   int Total = 0;
   int srcoffset, dstoffset;
-  unsigned char *src = source->y_buffer;
-  unsigned char *dst = dest->y_buffer;
+  uint8_t *src = source->y_buffer;
+  uint8_t *dst = dest->y_buffer;
 
   int linestocopy = (source->y_height >> (Fraction + 4));
 
@@ -266,7 +266,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
 
   // Get baseline error score
   vp9_set_alt_lf_level(cpi, filt_mid);
-  vp9_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_mid);
+  vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_mid, 1);
 
   best_err = vp9_calc_ss_err(sd, cm->frame_to_show);
   filt_best = filt_mid;
@@ -291,7 +291,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
     if ((filt_direction <= 0) && (filt_low != filt_mid)) {
       // Get Low filter error score
       vp9_set_alt_lf_level(cpi, filt_low);
-      vp9_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_low);
+      vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_low, 1);
 
       filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
@@ -311,7 +311,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
     // Now look at filt_high
     if ((filt_direction >= 0) && (filt_high != filt_mid)) {
       vp9_set_alt_lf_level(cpi, filt_high);
-      vp9_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_high);
+      vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_high, 1);
 
       filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 

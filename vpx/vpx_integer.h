@@ -27,6 +27,7 @@ typedef unsigned int   uint32_t;
 #if (defined(_MSC_VER) && (_MSC_VER < 1600))
 typedef signed __int64   int64_t;
 typedef unsigned __int64 uint64_t;
+#define INT64_MAX _I64_MAX
 #endif
 
 #ifndef _UINTPTR_T_DEFINED

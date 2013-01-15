@@ -11,16 +11,17 @@
 #include <stdlib.h>
 #include "vpx_ports/mem.h"
 #include "./vp9_rtcd.h"
-unsigned int vp9_satd16x16_c(const unsigned char *src_ptr,
+
+unsigned int vp9_satd16x16_c(const uint8_t *src_ptr,
                              int  src_stride,
-                             const unsigned char *ref_ptr,
+                             const uint8_t *ref_ptr,
                              int  ref_stride,
                              unsigned int *psatd) {
   int r, c, i;
   unsigned int satd = 0;
-  DECLARE_ALIGNED(16, short, diff_in[256]);
-  DECLARE_ALIGNED(16, short, diff_out[16]);
-  short *in;
+  DECLARE_ALIGNED(16, int16_t, diff_in[256]);
+  DECLARE_ALIGNED(16, int16_t, diff_out[16]);
+  int16_t *in;
 
   for (r = 0; r < 16; r++) {
     for (c = 0; c < 16; c++) {
