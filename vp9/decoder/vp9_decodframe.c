@@ -1634,9 +1634,20 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
    * For all non key frames the GF and ARF refresh flags and sign bias
    * flags must be set explicitly.
    */
-  if (pc->frame_type != KEY_FRAME) {
+  if (pc->frame_type == KEY_FRAME) {
+    pc->active_ref_idx[0] = pc->new_fb_idx;
+    pc->active_ref_idx[1] = pc->new_fb_idx;
+    pc->active_ref_idx[2] = pc->new_fb_idx;
+  } else {
     /* Should the GF or ARF be updated from the current frame */
     pbi->refresh_frame_flags = vp9_read_literal(&header_bc, NUM_REF_FRAMES);
+
+    /* Select active reference frames */
+    for (i = 0; i < 3; i++) {
+      int ref_frame_num = vp9_read_literal(&header_bc, NUM_REF_FRAMES_LG2);
+
+      pc->active_ref_idx[i] = pc->ref_frame_map[ref_frame_num];
+    }
 
     pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp9_read_bit(&header_bc);
     pc->ref_frame_sign_bias[ALTREF_FRAME] = vp9_read_bit(&header_bc);

@@ -38,6 +38,7 @@ void vp9_initialize_common(void);
 #define QINDEX_RANGE (MAXQ + 1)
 
 #define NUM_REF_FRAMES 3
+#define NUM_REF_FRAMES_LG2 2
 #define NUM_YV12_BUFFERS (NUM_REF_FRAMES + 1)
 
 #define NUM_FRAME_CONTEXTS_LG2 2
@@ -147,6 +148,11 @@ typedef struct VP9Common {
 
   YV12_BUFFER_CONFIG yv12_fb[NUM_YV12_BUFFERS];
   int fb_idx_ref_cnt[NUM_YV12_BUFFERS]; /* reference counts */
+  int ref_frame_map[NUM_REF_FRAMES]; /* maps fb_idx to reference slot */
+
+  /* TODO(jkoleszar): could expand active_ref_idx to 4, with 0 as intra, and
+   * roll new_fb_idx into it.
+   */
   int active_ref_idx[3]; /* each frame can reference 3 buffers */
   int new_fb_idx;
 

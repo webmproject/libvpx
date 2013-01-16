@@ -2573,13 +2573,30 @@ static void update_reference_frames(VP9_COMP * const cpi) {
 
   // At this point the new frame has been encoded.
   // If any buffer copy / swapping is signaled it should be done here.
-
   if (cm->frame_type == KEY_FRAME) {
     ref_cnt_fb(cm->fb_idx_ref_cnt,
                &cm->active_ref_idx[cpi->gld_fb_idx], cm->new_fb_idx);
     ref_cnt_fb(cm->fb_idx_ref_cnt,
                &cm->active_ref_idx[cpi->alt_fb_idx], cm->new_fb_idx);
-  } else { /* For non key frames */
+  } else if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
+    /* Preserve the previously existing golden frame and update the frame in
+     * the alt ref slot instead. This is highly specific to the current use of
+     * alt-ref as a forward reference, and this needs to be generalized as
+     * other uses are implemented (like RTC/temporal scaling)
+     *
+     * The update to the buffer in the alt ref slot was signalled in
+     * vp9_pack_bitstream(), now swap the buffer pointers so that it's treated
+     * as the golden frame next time.
+     */
+    int tmp;
+
+    ref_cnt_fb(cm->fb_idx_ref_cnt,
+               &cm->active_ref_idx[cpi->alt_fb_idx], cm->new_fb_idx);
+
+    tmp = cpi->alt_fb_idx;
+    cpi->alt_fb_idx = cpi->gld_fb_idx;
+    cpi->gld_fb_idx = tmp;
+  } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       ref_cnt_fb(cm->fb_idx_ref_cnt,
                  &cm->active_ref_idx[cpi->alt_fb_idx], cm->new_fb_idx);

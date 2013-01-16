@@ -171,11 +171,7 @@ vpx_codec_err_t vp9_get_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
    * later commit that adds VP9-specific controls for this functionality.
    */
   if (ref_frame_flag == VP9_LAST_FLAG)
-    ref_fb_idx = pbi->common.active_ref_idx[0];
-  else if (ref_frame_flag == VP9_GOLD_FLAG)
-    ref_fb_idx = pbi->common.active_ref_idx[1];
-  else if (ref_frame_flag == VP9_ALT_FLAG)
-    ref_fb_idx = pbi->common.active_ref_idx[2];
+    ref_fb_idx = pbi->common.new_fb_idx;
   else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
@@ -248,7 +244,7 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
   for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
     if (mask & 1) {
       ref_cnt_fb(pbi->common.fb_idx_ref_cnt,
-                 &pbi->common.active_ref_idx[ref_index],
+                 &pbi->common.ref_frame_map[ref_index],
                  pbi->common.new_fb_idx);
     }
     ++ref_index;
@@ -256,6 +252,10 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
 
   pbi->common.frame_to_show = &pbi->common.yv12_fb[pbi->common.new_fb_idx];
   pbi->common.fb_idx_ref_cnt[pbi->common.new_fb_idx]--;
+
+  /* Invalidate these references until the next frame starts. */
+  for (ref_index = 0; ref_index < 3; ref_index++)
+    pbi->common.active_ref_idx[ref_index] = INT_MAX;
 }
 
 int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
