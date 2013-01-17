@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//3ak\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T02:06:55Z",
+      "side": 1,
+      "message": "This should be done more generically with a hook rather than adding error_frame to the run loop.",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3d0\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T02:06:55Z",
+      "side": 1,
+      "message": "testing for CONFIG_DECODERS is probably preferable to CONFIG_VP8_DECODER || CONFIG_VP9_DECODER",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3do\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T02:06:55Z",
+      "side": 1,
+      "message": "the encoder to be used needs to be selectable on a per-test basis at runtime.",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3dY\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T02:06:55Z",
+      "side": 1,
+      "message": "this change is too test specific. It\u0027d be better to implement it with a hook. Consider a test that wants to drop multiple frames at different places, rather than just 1, for example, or maybe wants to manipulate the data before it\u0027s decoded.",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3aA\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T02:06:55Z",
+      "side": 1,
+      "message": "This test is a good start, but doesn\u0027t verify that we\u0027ve gotten rid of all the dependencies. I think what you\u0027d want to check (in addition to this test) is that if you drop a droppable frame, all later frames decode exactly as they do if that frame is not dropped. ie, take a checksum of the frames without dropping, then decode with drops and verify that they\u0027re still exactly the same.\n\nTesting that the PSNR doesn\u0027t get hurt by more than x% is good too, to see that just enabling the mode doesn\u0027t hurt quality too badly even when there are no drops.\n\nAlso, this should be in its own TEST_P.",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3Z0\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T02:06:55Z",
+      "side": 1,
+      "message": "use CONFIG_ENCODERS and CONFIG_DECODERS rather than duplicating these lines between vp8 and vp9.",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3Zw\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T02:06:55Z",
+      "side": 1,
+      "message": "CONFIG_ENCODERS",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
