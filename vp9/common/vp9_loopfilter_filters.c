@@ -143,11 +143,11 @@ void vp9_loop_filter_vertical_edge_c(uint8_t *s,
     s += p;
   } while (++i < count * 8);
 }
-static __inline signed char flatmask(uint8_t thresh,
-                                     uint8_t p4, uint8_t p3, uint8_t p2,
-                                     uint8_t p1, uint8_t p0,
-                                     uint8_t q0, uint8_t q1, uint8_t q2,
-                                     uint8_t q3, uint8_t q4) {
+static __inline signed char flatmask4(uint8_t thresh,
+                                      uint8_t p3, uint8_t p2,
+                                      uint8_t p1, uint8_t p0,
+                                      uint8_t q0, uint8_t q1,
+                                      uint8_t q2, uint8_t q3) {
   int8_t flat = 0;
   flat |= (abs(p1 - p0) > thresh) * -1;
   flat |= (abs(q1 - q0) > thresh) * -1;
@@ -155,26 +155,34 @@ static __inline signed char flatmask(uint8_t thresh,
   flat |= (abs(q0 - q2) > thresh) * -1;
   flat |= (abs(p3 - p0) > thresh) * -1;
   flat |= (abs(q3 - q0) > thresh) * -1;
-  flat |= (abs(p4 - p0) > thresh) * -1;
-  flat |= (abs(q4 - q0) > thresh) * -1;
   flat = ~flat;
   return flat;
 }
+static __inline signed char flatmask5(uint8_t thresh,
+                                      uint8_t p4, uint8_t p3, uint8_t p2,
+                                      uint8_t p1, uint8_t p0,
+                                      uint8_t q0, uint8_t q1, uint8_t q2,
+                                      uint8_t q3, uint8_t q4) {
+  int8_t flat = 0;
+  flat |= (abs(p4 - p0) > thresh) * -1;
+  flat |= (abs(q4 - q0) > thresh) * -1;
+  flat = ~flat;
+  return flat & flatmask4(thresh, p3, p2, p1, p0, q0, q1, q2, q3);
+}
+
 
 static __inline void mbfilter(int8_t mask, uint8_t hev, uint8_t flat,
-                              uint8_t *op4, uint8_t *op3, uint8_t *op2,
+                              uint8_t *op3, uint8_t *op2,
                               uint8_t *op1, uint8_t *op0,
-                              uint8_t *oq0, uint8_t *oq1, uint8_t *oq2,
-                              uint8_t *oq3, uint8_t *oq4) {
+                              uint8_t *oq0, uint8_t *oq1,
+                              uint8_t *oq2, uint8_t *oq3) {
   /* use a 7 tap filter [1, 1, 1, 2, 1, 1, 1] for flat line */
   if (flat && mask) {
     uint8_t p0, q0;
     uint8_t p1, q1;
     uint8_t p2, q2;
     uint8_t p3, q3;
-    uint8_t p4, q4;
 
-    p4 = *op4;
     p3 = *op3;
     p2 = *op2;
     p1 = *op1;
@@ -183,14 +191,13 @@ static __inline void mbfilter(int8_t mask, uint8_t hev, uint8_t flat,
     q1 = *oq1;
     q2 = *oq2;
     q3 = *oq3;
-    q4 = *oq4;
 
-    *op2 = (p4 + p4 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
-    *op1 = (p4 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
+    *op2 = (p3 + p3 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
+    *op1 = (p3 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
     *op0 = (p3 + p2 + p1 + p0 + p0 + q0 + q1 + q2 + 4) >> 3;
     *oq0 = (p2 + p1 + p0 + q0 + q0 + q1 + q2 + q3 + 4) >> 3;
-    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q4 + 4) >> 3;
-    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q4 + q4 + 4) >> 3;
+    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q3 + 4) >> 3;
+    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q3 + q3 + 4) >> 3;
   } else {
     int8_t ps0, qs0;
     int8_t ps1, qs1;
@@ -254,12 +261,11 @@ void vp9_mbloop_filter_horizontal_edge_c(uint8_t *s,
 
     hev = hevmask(thresh[0], s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
 
-    flat = flatmask(1,
-                    s[-5 * p], s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
-                    s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p], s[ 4 * p]);
+    flat = flatmask4(1, s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
+                        s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
     mbfilter(mask, hev, flat,
-             s - 5 * p, s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
-             s,       s + 1 * p, s + 2 * p, s + 3 * p, s + 4 * p);
+             s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
+             s,         s + 1 * p, s + 2 * p, s + 3 * p);
 
     ++s;
   } while (++i < count * 8);
@@ -283,12 +289,12 @@ void vp9_mbloop_filter_vertical_edge_c(uint8_t *s,
                        s[0], s[1], s[2], s[3]);
 
     hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
-    flat = flatmask(1,
-                    s[-5], s[-4], s[-3], s[-2], s[-1],
-                    s[ 0], s[ 1], s[ 2], s[ 3], s[ 4]);
+    flat = flatmask4(1,
+                    s[-4], s[-3], s[-2], s[-1],
+                    s[ 0], s[ 1], s[ 2], s[ 3]);
     mbfilter(mask, hev, flat,
-             s - 5, s - 4, s - 3, s - 2, s - 1,
-             s,     s + 1, s + 2, s + 3, s + 4);
+             s - 4, s - 3, s - 2, s - 1,
+             s,     s + 1, s + 2, s + 3);
     s += p;
   } while (++i < count * 8);
 
@@ -550,9 +556,7 @@ static __inline void wide_mbfilter(int8_t mask, uint8_t hev,
     unsigned char p1, q1;
     unsigned char p2, q2;
     unsigned char p3, q3;
-    unsigned char p4, q4;
 
-    p4 = *op4;
     p3 = *op3;
     p2 = *op2;
     p1 = *op1;
@@ -561,14 +565,13 @@ static __inline void wide_mbfilter(int8_t mask, uint8_t hev,
     q1 = *oq1;
     q2 = *oq2;
     q3 = *oq3;
-    q4 = *oq4;
 
-    *op2 = (p4 + p4 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
-    *op1 = (p4 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
+    *op2 = (p3 + p3 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
+    *op1 = (p3 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
     *op0 = (p3 + p2 + p1 + p0 + p0 + q0 + q1 + q2 + 4) >> 3;
     *oq0 = (p2 + p1 + p0 + q0 + q0 + q1 + q2 + q3 + 4) >> 3;
-    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q4 + 4) >> 3;
-    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q4 + q4 + 4) >> 3;
+    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q3 + 4) >> 3;
+    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q3 + q3 + 4) >> 3;
   } else {
     signed char ps0, qs0;
     signed char ps1, qs1;
@@ -636,19 +639,19 @@ void vp9_mb_lpf_horizontal_edge_w
 
     hev = hevmask(thresh[0], s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
 
-    flat = flatmask(1,
-                    s[-5 * p], s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
-                    s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p], s[ 4 * p]);
+    flat = flatmask4(1,
+                     s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
+                     s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
 
-    flat2 = flatmask(1,
-                    s[-8 * p], s[-7 * p], s[-6 * p], s[-5 * p], s[-1 * p],
-                    s[ 0 * p], s[ 4 * p], s[ 5 * p], s[ 6 * p], s[ 7 * p]);
+    flat2 = flatmask5(1,
+                      s[-8 * p], s[-7 * p], s[-6 * p], s[-5 * p], s[-1 * p],
+                      s[ 0 * p], s[ 4 * p], s[ 5 * p], s[ 6 * p], s[ 7 * p]);
 
     wide_mbfilter(mask, hev, flat, flat2,
-             s - 8 * p, s - 7 * p, s - 6 * p, s - 5 * p,
-             s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
-             s,         s + 1 * p, s + 2 * p, s + 3 * p,
-             s + 4 * p, s + 5 * p, s + 6 * p, s + 7 * p);
+                  s - 8 * p, s - 7 * p, s - 6 * p, s - 5 * p,
+                  s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
+                  s,         s + 1 * p, s + 2 * p, s + 3 * p,
+                  s + 4 * p, s + 5 * p, s + 6 * p, s + 7 * p);
 
     ++s;
   } while (++i < count * 8);
@@ -674,18 +677,18 @@ void vp9_mb_lpf_vertical_edge_w
                        s[0], s[1], s[2], s[3]);
 
     hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
-    flat = flatmask(1,
-                    s[-5], s[-4], s[-3], s[-2], s[-1],
-                    s[ 0], s[ 1], s[ 2], s[ 3], s[ 4]);
-    flat2 = flatmask(1,
-                    s[-8], s[-7], s[-6], s[-5], s[-1],
-                    s[ 0], s[ 4], s[ 5], s[ 6], s[ 7]);
+    flat = flatmask4(1,
+                     s[-4], s[-3], s[-2], s[-1],
+                     s[ 0], s[ 1], s[ 2], s[ 3]);
+    flat2 = flatmask5(1,
+                     s[-8], s[-7], s[-6], s[-5], s[-1],
+                     s[ 0], s[ 4], s[ 5], s[ 6], s[ 7]);
 
     wide_mbfilter(mask, hev, flat, flat2,
-             s - 8, s - 7, s - 6, s - 5,
-             s - 4, s - 3, s - 2, s - 1,
-             s,     s + 1, s + 2, s + 3,
-             s + 4, s + 5, s + 6, s + 7);
+                  s - 8, s - 7, s - 6, s - 5,
+                  s - 4, s - 3, s - 2, s - 1,
+                  s,     s + 1, s + 2, s + 3,
+                  s + 4, s + 5, s + 6, s + 7);
     s += p;
   } while (++i < count * 8);
 }
