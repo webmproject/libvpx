@@ -118,6 +118,74 @@
       "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3FE\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 645,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-01-17T18:15:51Z",
+      "side": 1,
+      "message": "We need to think carefully what to do about segmentation.\nIn the simplest case we only allow non temporal update of the segmentation map and clear down the map every frame. In this case I thing the segmentation_map structure needs to be cleared down here as well as last_frame_seg_map.\n\nThere are several steps we could do to improve upon this by for example allowing the base map to be updated on key frames only. These frames are guaranteed and will be resent if lost. We could then allow update from this fixed base but would have to discard the updates and reset to the kf values at the end of each non key frame. A further refinement would be to allow explicit override of the normal error_ resilient rules such that updates can be made on other frames (such as base layer frames) provided the application guarantees delivery of these frames.\n\nFor now I think start with the requirement that the map is reset on every frame and does not persist and if we have time we can refine this to allow more efficient support for specific use cases.",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3KE\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 682,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-01-17T18:15:51Z",
+      "side": 1,
+      "message": "There is overlap / conflict here with Johns buffer changes that will need to be resolved when the two changes are merged.",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3EQ\u003d",
+        "filename": "vp9/common/vp9_findnearmv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-01-17T18:15:51Z",
+      "side": 1,
+      "message": "I think we will need to turn off the sort of motion vectors in error resilient mode. If it is on and we have lost a frame then the reconstructed buffers in the decoder may not match the encoder. This search may then yield different reference motion vectors. This in turn impacts the choice of mode entropy contexts in vp9_mvref_common.c",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3EY\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-01-17T18:15:51Z",
+      "side": 1,
+      "message": "We may need to force default contexts here or disable Yaowu\u0027s reference motion vector sort (see comments in the vp9_findnearmv.c)",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
