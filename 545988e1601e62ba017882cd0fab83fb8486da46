@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//3yA\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T00:00:13Z",
+      "side": 1,
+      "message": "no, 0 is not intra here. These are just numbered buffers, the counts are associated with the corresponding buffer in yv12_fb. The semantic meaning of what\u0027s in each buffer is provided by the other pointers (new_fb_idx, etc)",
+      "parentUuid": "AAAAVH//38Y\u003d",
+      "revId": "545988e1601e62ba017882cd0fab83fb8486da46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//37M\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 5
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//3xc\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2575,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T00:00:13Z",
+      "side": 1,
+      "message": "I think I hit this one in a later commit.",
+      "parentUuid": "AAAAVH//36o\u003d",
+      "revId": "545988e1601e62ba017882cd0fab83fb8486da46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//344\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 5
@@ -64,6 +100,24 @@
       "writtenOn": "2013-01-16T20:32:22Z",
       "side": 1,
       "message": "NUM_YV12_BUFFERS ?",
+      "revId": "545988e1601e62ba017882cd0fab83fb8486da46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//3wg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4474,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-17T00:00:13Z",
+      "side": 1,
+      "message": "no, 4\u0027s right here. Later, when NUM_YV12_BUFFERS \u003e 4, there are still only the 3 refs plus intra available to choose from here.",
+      "parentUuid": "AAAAVH//344\u003d",
       "revId": "545988e1601e62ba017882cd0fab83fb8486da46",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
