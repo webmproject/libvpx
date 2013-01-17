@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//23E\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-17T21:20:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//3ak\u003d",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//3d0\u003d",
         "filename": "test/encode_test_driver.cc",
         "patchSetId": 4
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//23A\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-17T21:20:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//3dY\u003d",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//3aA\u003d",
         "filename": "test/error_resilience_test.cc",
         "patchSetId": 4
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//22o\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-17T21:20:50Z",
+      "side": 1,
+      "message": "Currently the test tests psnr drop only as a start. However the checksum will not work because the reconstruction will not be exact.",
+      "parentUuid": "AAAAVH//3aA\u003d",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//3Z0\u003d",
         "filename": "test/test.mk",
         "patchSetId": 4
@@ -98,6 +152,24 @@
       "writtenOn": "2013-01-17T02:06:55Z",
       "side": 1,
       "message": "use CONFIG_ENCODERS and CONFIG_DECODERS rather than duplicating these lines between vp8 and vp9.",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//21c\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-17T21:20:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//3Z0\u003d",
       "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +210,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//2xw\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 645,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-17T21:20:50Z",
+      "side": 1,
+      "message": "Doesn\u0027t vp9_clearall_segfeatures(xd) clear everything needed?\nOr did I miss something?",
+      "parentUuid": "AAAAVH//3FE\u003d",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//3KE\u003d",
         "filename": "vp9/common/vp9_entropymode.c",
         "patchSetId": 4
@@ -155,6 +245,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//2v8\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 682,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-17T21:20:50Z",
+      "side": 1,
+      "message": "will work with john to rebase correctly after his patch is submitted.",
+      "parentUuid": "AAAAVH//3KE\u003d",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//3EQ\u003d",
         "filename": "vp9/common/vp9_findnearmv.c",
         "patchSetId": 4
@@ -166,6 +274,24 @@
       "writtenOn": "2013-01-17T18:15:51Z",
       "side": 1,
       "message": "I think we will need to turn off the sort of motion vectors in error resilient mode. If it is on and we have lost a frame then the reconstructed buffers in the decoder may not match the encoder. This search may then yield different reference motion vectors. This in turn impacts the choice of mode entropy contexts in vp9_mvref_common.c",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//2vU\u003d",
+        "filename": "vp9/common/vp9_findnearmv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-17T21:20:50Z",
+      "side": 1,
+      "message": "Currently I am just ignoring the last frame\u0027s mv while making the initial list. So as I understand, if both encoder/decoder ignores the last frame\u0027s mv, the sorted versions should also be consistent. no?",
+      "parentUuid": "AAAAVH//3EQ\u003d",
       "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
