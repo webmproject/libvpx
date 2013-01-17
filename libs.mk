@@ -167,7 +167,9 @@ CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emmintrin_compat.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_once.h
 CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
 INSTALL-SRCS-no += $(BUILD_PFX)vpx_config.c
+ifeq ($(ARCH_X86)$(ARCH_X86_64),yes)
 CODEC_SRCS-$(BUILD_LIBVPX) += third_party/x86inc/x86inc.asm
+endif
 CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
