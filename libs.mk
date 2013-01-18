@@ -17,7 +17,6 @@ else
   ASM:=.asm
 endif
 
-
 #
 # Calculate platform- and compiler-specific offsets for hand coded assembly
 #
@@ -327,7 +326,11 @@ vpx.pc: config.mk libs.mk
 	$(qexec)echo 'Requires:' >> $@
 	$(qexec)echo 'Conflicts:' >> $@
 	$(qexec)echo 'Libs: -L$${libdir} -lvpx -lm' >> $@
+ifeq ($(HAVE_PTHREAD_H),yes)
 	$(qexec)echo 'Libs.private: -lm -lpthread' >> $@
+else
+	$(qexec)echo 'Libs.private: -lm' >> $@
+endif
 	$(qexec)echo 'Cflags: -I$${includedir}' >> $@
 INSTALL-LIBS-yes += $(LIBSUBDIR)/pkgconfig/vpx.pc
 INSTALL_MAPS += $(LIBSUBDIR)/pkgconfig/%.pc %.pc

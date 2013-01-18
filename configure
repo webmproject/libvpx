@@ -655,7 +655,7 @@ process_toolchain() {
         enabled postproc || die "postproc_visualizer requires postproc to be enabled"
     fi
 
-    # Enable unit tests if we have a working C++ compiler
+    # Enable unit tests by default if we have a working C++ compiler.
     case "$toolchain" in
         *-vs*)
             soft_enable unit_tests
@@ -668,7 +668,7 @@ process_toolchain() {
             # x86 targets.
         ;;
         *)
-            check_cxx "$@" <<EOF && soft_enable unit_tests
+            enabled pthread_h && check_cxx "$@" <<EOF && soft_enable unit_tests
 int z;
 EOF
         ;;
