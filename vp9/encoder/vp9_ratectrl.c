@@ -286,6 +286,13 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
                sizeof(xd->mb_mv_ref_probs));
   }
 #endif
+
+  /* Choose which entropy context to use. When using a forward reference
+   * frame, it immediately follows the keyframe, and thus benefits from
+   * using the same entropy context established by the keyframe. Otherwise,
+   * use the default context 0.
+   */
+  cm->frame_context_idx = cpi->oxcf.play_alternate;
 }
 
 void vp9_setup_inter_frame(VP9_COMP *cpi) {
