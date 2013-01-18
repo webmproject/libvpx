@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//2Uc\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-18T04:53:28Z",
+      "side": 1,
+      "message": "Can you reword this commit message so the fix is described in the subject line of the commit? Mentioning issue 517 in the body is good too, but the git log --oneline output would be more useful with a better subject.",
+      "revId": "06382e33371c666c564e8fec1448a1a4595f8631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
