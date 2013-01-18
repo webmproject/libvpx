@@ -8,20 +8,22 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
+#include "test/util.h"
 #include "test/video_source.h"
 
 namespace {
 
 class ConfigTest : public ::libvpx_test::EncoderTest,
-    public ::testing::TestWithParam<enum libvpx_test::TestMode> {
- public:
-  ConfigTest() : frame_count_in_(0), frame_count_out_(0), frame_count_max_(0) {}
-
+    public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
+  ConfigTest() : EncoderTest(GET_PARAM(0)),
+                 frame_count_in_(0), frame_count_out_(0), frame_count_max_(0) {}
+
   virtual void SetUp() {
     InitializeConfig();
-    SetMode(GetParam());
+    SetMode(GET_PARAM(1));
   }
 
   virtual void BeginPassHook(unsigned int /*pass*/) {
@@ -57,5 +59,5 @@ TEST_P(ConfigTest, LagIsDisabled) {
   EXPECT_EQ(frame_count_in_, frame_count_out_);
 }
 
-INSTANTIATE_TEST_CASE_P(OnePassModes, ConfigTest, ONE_PASS_TEST_MODES);
+VP8_INSTANTIATE_TEST_CASE(ConfigTest, ONE_PASS_TEST_MODES);
 }  // namespace

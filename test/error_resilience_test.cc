@@ -8,19 +8,19 @@
   be found in the AUTHORS file in the root of the source tree.
 */
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
+#include "test/util.h"
 
 namespace {
 
-class ErrorResilienceTest : public libvpx_test::EncoderTest,
-    public ::testing::TestWithParam<int> {
+class ErrorResilienceTest : public ::libvpx_test::EncoderTest,
+    public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
-  ErrorResilienceTest() {
-    psnr_ = 0.0;
-    nframes_ = 0;
-    encoding_mode_ = static_cast<libvpx_test::TestMode>(GetParam());
-  }
+  ErrorResilienceTest() : EncoderTest(GET_PARAM(0)), psnr_(0.0), nframes_(0),
+      encoding_mode_(GET_PARAM(1)) {}
+
   virtual ~ErrorResilienceTest() {}
 
   virtual void SetUp() {
@@ -85,6 +85,5 @@ TEST_P(ErrorResilienceTest, OnVersusOff) {
   }
 }
 
-INSTANTIATE_TEST_CASE_P(OnOffTest, ErrorResilienceTest,
-                        ONE_PASS_TEST_MODES);
+VP8_INSTANTIATE_TEST_CASE(ErrorResilienceTest, ONE_PASS_TEST_MODES);
 }  // namespace

@@ -9,9 +9,11 @@
  */
 #include <climits>
 #include <vector>
+#include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/video_source.h"
-#include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/util.h"
 
 namespace {
 
@@ -49,8 +51,10 @@ class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
 };
 
 class ResizeTest : public ::libvpx_test::EncoderTest,
-  public ::testing::TestWithParam<enum libvpx_test::TestMode> {
+  public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
+  ResizeTest() : EncoderTest(GET_PARAM(0)) {}
+
   struct FrameInfo {
     FrameInfo(vpx_codec_pts_t _pts, unsigned int _w, unsigned int _h)
         : pts(_pts), w(_w), h(_h) {}
@@ -62,7 +66,7 @@ class ResizeTest : public ::libvpx_test::EncoderTest,
 
   virtual void SetUp() {
     InitializeConfig();
-    SetMode(GetParam());
+    SetMode(GET_PARAM(1));
   }
 
   virtual bool Continue() const {
@@ -100,5 +104,5 @@ TEST_P(ResizeTest, TestExternalResizeWorks) {
   }
 }
 
-INSTANTIATE_TEST_CASE_P(OnePass, ResizeTest, ONE_PASS_TEST_MODES);
+VP8_INSTANTIATE_TEST_CASE(ResizeTest, ONE_PASS_TEST_MODES);
 }  // namespace

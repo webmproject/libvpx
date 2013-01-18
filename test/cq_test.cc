@@ -9,8 +9,12 @@
  */
 #include <cmath>
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
+#include "test/util.h"
+
+namespace {
 
 // CQ level range: [kCQLevelMin, kCQLevelMax).
 const int kCQLevelMin = 4;
@@ -18,12 +22,13 @@ const int kCQLevelMax = 63;
 const int kCQLevelStep = 8;
 const int kCQTargetBitrate = 2000;
 
-namespace {
-
-class CQTest : public libvpx_test::EncoderTest,
-    public ::testing::TestWithParam<int> {
+class CQTest : public ::libvpx_test::EncoderTest,
+    public ::libvpx_test::CodecTestWithParam<int> {
  protected:
-  CQTest() : cq_level_(GetParam()) { init_flags_ = VPX_CODEC_USE_PSNR; }
+  CQTest() : EncoderTest(GET_PARAM(0)), cq_level_(GET_PARAM(1)) {
+    init_flags_ = VPX_CODEC_USE_PSNR;
+  }
+
   virtual ~CQTest() {}
 
   virtual void SetUp() {
@@ -100,7 +105,7 @@ TEST_P(CQTest, LinearPSNRIsHigherForCQLevel) {
   EXPECT_GE(cq_psnr_lin, vbr_psnr_lin);
 }
 
-INSTANTIATE_TEST_CASE_P(CQLevelRange, CQTest,
-                        ::testing::Range(kCQLevelMin, kCQLevelMax,
-                                         kCQLevelStep));
+VP8_INSTANTIATE_TEST_CASE(CQTest,
+                          ::testing::Range(kCQLevelMin, kCQLevelMax,
+                                           kCQLevelStep));
 }  // namespace

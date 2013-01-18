@@ -12,8 +12,10 @@
 #include <cstdlib>
 #include <string>
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
 #include "test/ivf_video_source.h"
+#include "test/util.h"
 extern "C" {
 #include "./md5_utils.h"
 #include "vpx_mem/vpx_mem.h"
@@ -59,10 +61,10 @@ const char *kTestVectors[] = {
   "vp80-05-sharpness-1440.ivf", "vp80-05-sharpness-1443.ivf"
 };
 
-class TestVectorTest : public libvpx_test::DecoderTest,
-    public ::testing::TestWithParam<const char*> {
+class TestVectorTest : public ::libvpx_test::DecoderTest,
+    public ::libvpx_test::CodecTestWithParam<const char*> {
  protected:
-  TestVectorTest() : md5_file_(NULL) {}
+  TestVectorTest() : DecoderTest(GET_PARAM(0)), md5_file_(NULL) {}
 
   virtual ~TestVectorTest() {
     if (md5_file_)
@@ -124,7 +126,7 @@ class TestVectorTest : public libvpx_test::DecoderTest,
 // checksums match the correct md5 data, then the test is passed. Otherwise,
 // the test failed.
 TEST_P(TestVectorTest, MD5Match) {
-  const std::string filename = GetParam();
+  const std::string filename = GET_PARAM(1);
   // Open compressed video file.
   libvpx_test::IVFVideoSource video(filename);
 
@@ -138,7 +140,7 @@ TEST_P(TestVectorTest, MD5Match) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-INSTANTIATE_TEST_CASE_P(TestVectorSequence, TestVectorTest,
-                        ::testing::ValuesIn(kTestVectors));
+VP8_INSTANTIATE_TEST_CASE(TestVectorTest,
+                          ::testing::ValuesIn(kTestVectors));
 
 }  // namespace
