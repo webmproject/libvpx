@@ -141,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//2Z4\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-18T01:49:17Z",
+      "side": 1,
+      "message": "I don\u0027t mean dropping arbitrary P-frames, I mean allowing the encoder to generate a frame that no later frame should depend on, and dropping that. Exact reconstruction is required in that case. This is used in temporal layers, for example.",
+      "parentUuid": "AAAAVH//22o\u003d",
+      "revId": "6b09f84677640f5deb2ab4969e79a7c7f2798ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//3Z0\u003d",
         "filename": "test/test.mk",
         "patchSetId": 4
