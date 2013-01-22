@@ -37,7 +37,12 @@ void vp9_initialize_common(void);
 
 #define QINDEX_RANGE (MAXQ + 1)
 
-#define NUM_YV12_BUFFERS 4
+#define NUM_REF_FRAMES 3
+#define NUM_REF_FRAMES_LG2 2
+#define NUM_YV12_BUFFERS (NUM_REF_FRAMES + 1)
+
+#define NUM_FRAME_CONTEXTS_LG2 2
+#define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LG2)
 
 #define COMP_PRED_CONTEXTS   2
 
@@ -142,8 +147,14 @@ typedef struct VP9Common {
   YV12_BUFFER_CONFIG *frame_to_show;
 
   YV12_BUFFER_CONFIG yv12_fb[NUM_YV12_BUFFERS];
-  int fb_idx_ref_cnt[NUM_YV12_BUFFERS];
-  int new_fb_idx, lst_fb_idx, gld_fb_idx, alt_fb_idx;
+  int fb_idx_ref_cnt[NUM_YV12_BUFFERS]; /* reference counts */
+  int ref_frame_map[NUM_REF_FRAMES]; /* maps fb_idx to reference slot */
+
+  /* TODO(jkoleszar): could expand active_ref_idx to 4, with 0 as intra, and
+   * roll new_fb_idx into it.
+   */
+  int active_ref_idx[3]; /* each frame can reference 3 buffers */
+  int new_fb_idx;
 
   YV12_BUFFER_CONFIG post_proc_buffer;
   YV12_BUFFER_CONFIG temp_scale_frame;
@@ -202,13 +213,6 @@ typedef struct VP9Common {
   int last_sharpness_level;
   int sharpness_level;
 
-  int refresh_last_frame;       /* Two state 0 = NO, 1 = YES */
-  int refresh_golden_frame;     /* Two state 0 = NO, 1 = YES */
-  int refresh_alt_ref_frame;     /* Two state 0 = NO, 1 = YES */
-
-  int copy_buffer_to_gf;         /* 0 none, 1 Last to GF, 2 ARF to GF */
-  int copy_buffer_to_arf;        /* 0 none, 1 Last to ARF, 2 GF to ARF */
-
   int refresh_entropy_probs;    /* Two state 0 = NO, 1 = YES */
 
   int ref_frame_sign_bias[MAX_REF_FRAMES];    /* Two state 0, 1 */
@@ -250,9 +254,9 @@ typedef struct VP9Common {
 
   vp9_prob mbskip_pred_probs[MBSKIP_CONTEXTS];
 
-  FRAME_CONTEXT lfc_a; /* last alt ref entropy */
-  FRAME_CONTEXT lfc; /* last frame entropy */
   FRAME_CONTEXT fc;  /* this frame entropy */
+  FRAME_CONTEXT frame_contexts[NUM_FRAME_CONTEXTS];
+  unsigned int  frame_context_idx; /* Context to use/update */
 
   unsigned int current_video_frame;
   int near_boffset[3];
@@ -273,5 +277,25 @@ typedef struct VP9Common {
 #endif
 
 } VP9_COMMON;
+
+static int get_free_fb(VP9_COMMON *cm) {
+  int i;
+  for (i = 0; i < NUM_YV12_BUFFERS; i++)
+    if (cm->fb_idx_ref_cnt[i] == 0)
+      break;
+
+  assert(i < NUM_YV12_BUFFERS);
+  cm->fb_idx_ref_cnt[i] = 1;
+  return i;
+}
+
+static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
+  if (buf[*idx] > 0)
+    buf[*idx]--;
+
+  *idx = new_idx;
+
+  buf[new_idx]++;
+}
 
 #endif  // VP9_COMMON_VP9_ONYXC_INT_H_

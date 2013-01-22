@@ -640,7 +640,7 @@ static void set_offsets(VP9_COMP *cpi,
   const int src_uv_stride = x->src.uv_stride;
   const int src_yoffset = 16 * mb_row * src_y_stride + 16 * mb_col;
   const int src_uvoffset = 8 * mb_row * src_uv_stride + 8 * mb_col;
-  const int ref_fb_idx = cm->lst_fb_idx;
+  const int ref_fb_idx = cm->active_ref_idx[cpi->lst_fb_idx];
   const int ref_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
   const int ref_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
   const int idx_map = mb_row * cm->mb_cols + mb_col;
@@ -1205,7 +1205,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   // Copy data over into macro block data structures.
   x->src = *cpi->Source;
-  xd->pre = cm->yv12_fb[cm->lst_fb_idx];
+  xd->pre = cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]];
   xd->dst = cm->yv12_fb[cm->new_fb_idx];
 
   // set up frame for intra coded blocks
@@ -1526,9 +1526,9 @@ void vp9_encode_frame(VP9_COMP *cpi) {
      */
     if (cpi->common.frame_type == KEY_FRAME)
       frame_type = 0;
-    else if (cpi->is_src_frame_alt_ref && cpi->common.refresh_golden_frame)
+    else if (cpi->is_src_frame_alt_ref && cpi->refresh_golden_frame)
       frame_type = 3;
-    else if (cpi->common.refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
+    else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)
       frame_type = 1;
     else
       frame_type = 2;
@@ -2086,11 +2086,11 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     assert(cm->frame_type != KEY_FRAME);
 
     if (mbmi->ref_frame == LAST_FRAME)
-      ref_fb_idx = cpi->common.lst_fb_idx;
+      ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
     else if (mbmi->ref_frame == GOLDEN_FRAME)
-      ref_fb_idx = cpi->common.gld_fb_idx;
+      ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
     else
-      ref_fb_idx = cpi->common.alt_fb_idx;
+      ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
     xd->pre.y_buffer = cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
     xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
@@ -2100,11 +2100,11 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
       int second_ref_fb_idx;
 
       if (mbmi->second_ref_frame == LAST_FRAME)
-        second_ref_fb_idx = cpi->common.lst_fb_idx;
+        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
       else if (mbmi->second_ref_frame == GOLDEN_FRAME)
-        second_ref_fb_idx = cpi->common.gld_fb_idx;
+        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
       else
-        second_ref_fb_idx = cpi->common.alt_fb_idx;
+        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
       xd->second_pre.y_buffer = cpi->common.yv12_fb[second_ref_fb_idx].y_buffer +
                                 recon_yoffset;
@@ -2326,11 +2326,11 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
     assert(cm->frame_type != KEY_FRAME);
 
     if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
-      ref_fb_idx = cpi->common.lst_fb_idx;
+      ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
     else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-      ref_fb_idx = cpi->common.gld_fb_idx;
+      ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
     else
-      ref_fb_idx = cpi->common.alt_fb_idx;
+      ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
     xd->pre.y_buffer = cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
     xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
@@ -2340,11 +2340,11 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
       int second_ref_fb_idx;
 
       if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
-        second_ref_fb_idx = cpi->common.lst_fb_idx;
+        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
       else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
-        second_ref_fb_idx = cpi->common.gld_fb_idx;
+        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
       else
-        second_ref_fb_idx = cpi->common.alt_fb_idx;
+        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
       xd->second_pre.y_buffer = cpi->common.yv12_fb[second_ref_fb_idx].y_buffer +
                                     recon_yoffset;
@@ -2557,11 +2557,11 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
     assert(cm->frame_type != KEY_FRAME);
 
     if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
-      ref_fb_idx = cpi->common.lst_fb_idx;
+      ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
     else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-      ref_fb_idx = cpi->common.gld_fb_idx;
+      ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
     else
-      ref_fb_idx = cpi->common.alt_fb_idx;
+      ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
     xd->pre.y_buffer =
         cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
@@ -2574,11 +2574,11 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
       int second_ref_fb_idx;
 
       if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
-        second_ref_fb_idx = cpi->common.lst_fb_idx;
+        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
       else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
-        second_ref_fb_idx = cpi->common.gld_fb_idx;
+        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
       else
-        second_ref_fb_idx = cpi->common.alt_fb_idx;
+        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
       xd->second_pre.y_buffer =
           cpi->common.yv12_fb[second_ref_fb_idx].y_buffer + recon_yoffset;

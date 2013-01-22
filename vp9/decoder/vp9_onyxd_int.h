@@ -76,6 +76,7 @@ typedef struct VP9Decompressor {
   vp9_dequant_idct_add_y_block_fn_t    idct_add_y_block;
   vp9_dequant_idct_add_uv_block_fn_t   idct_add_uv_block;
 
+  int refresh_frame_flags;
   vp9_prob prob_skip_false;
 
   int decoded_key_frame;

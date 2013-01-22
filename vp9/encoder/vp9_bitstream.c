@@ -1772,22 +1772,30 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
   // When there is a key frame all reference buffers are updated using the new key frame
   if (pc->frame_type != KEY_FRAME) {
+    int refresh_mask;
+
     // Should the GF or ARF be updated using the transmitted frame or buffer
-    vp9_write_bit(&header_bc, pc->refresh_golden_frame);
-    vp9_write_bit(&header_bc, pc->refresh_alt_ref_frame);
-
-    // For inter frames the current default behavior is that when
-    // cm->refresh_golden_frame is set we copy the old GF over to
-    // the ARF buffer. This is purely an encoder decision at present.
-    if (pc->refresh_golden_frame)
-      pc->copy_buffer_to_arf  = 2;
-
-    // If not being updated from current frame should either GF or ARF be updated from another buffer
-    if (!pc->refresh_golden_frame)
-      vp9_write_literal(&header_bc, pc->copy_buffer_to_gf, 2);
-
-    if (!pc->refresh_alt_ref_frame)
-      vp9_write_literal(&header_bc, pc->copy_buffer_to_arf, 2);
+    if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
+      /* Preserve the previously existing golden frame and update the frame in
+       * the alt ref slot instead. This is highly specific to the use of
+       * alt-ref as a forward reference, and this needs to be generalized as
+       * other uses are implemented (like RTC/temporal scaling)
+       *
+       * gld_fb_idx and alt_fb_idx need to be swapped for future frames, but
+       * that happens in vp9_onyx_if.c:update_reference_frames() so that it can
+       * be done outside of the recode loop.
+       */
+      refresh_mask = (cpi->refresh_last_frame << cpi->lst_fb_idx) |
+                     (cpi->refresh_golden_frame << cpi->alt_fb_idx);
+    } else {
+      refresh_mask = (cpi->refresh_last_frame << cpi->lst_fb_idx) |
+                     (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
+                     (cpi->refresh_alt_ref_frame << cpi->alt_fb_idx);
+    }
+    vp9_write_literal(&header_bc, refresh_mask, NUM_REF_FRAMES);
+    vp9_write_literal(&header_bc, cpi->lst_fb_idx, NUM_REF_FRAMES_LG2);
+    vp9_write_literal(&header_bc, cpi->gld_fb_idx, NUM_REF_FRAMES_LG2);
+    vp9_write_literal(&header_bc, cpi->alt_fb_idx, NUM_REF_FRAMES_LG2);
 
     // Indicate reference frame sign bias for Golden and ARF frames (always 0 for last frame buffer)
     vp9_write_bit(&header_bc, pc->ref_frame_sign_bias[GOLDEN_FRAME]);
@@ -1832,9 +1840,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   }
 
   vp9_write_bit(&header_bc, pc->refresh_entropy_probs);
-
-  if (pc->frame_type != KEY_FRAME)
-    vp9_write_bit(&header_bc, pc->refresh_last_frame);
+  vp9_write_literal(&header_bc, pc->frame_context_idx,
+                    NUM_FRAME_CONTEXTS_LG2);
 
 #ifdef ENTROPY_STATS
   if (pc->frame_type == INTER_FRAME)

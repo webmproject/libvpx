@@ -80,7 +80,6 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
 
   for (i = 0; i < NUM_YV12_BUFFERS; i++) {
     oci->fb_idx_ref_cnt[i] = 0;
-    oci->yv12_fb[i].flags = 0;
     if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i], width, height,
                                     VP9BORDERINPIXELS) < 0) {
       vp9_de_alloc_frame_buffers(oci);
@@ -88,15 +87,16 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
     }
   }
 
-  oci->new_fb_idx = 0;
-  oci->lst_fb_idx = 1;
-  oci->gld_fb_idx = 2;
-  oci->alt_fb_idx = 3;
+  oci->new_fb_idx = NUM_YV12_BUFFERS - 1;
+  oci->fb_idx_ref_cnt[oci->new_fb_idx] = 1;
 
-  oci->fb_idx_ref_cnt[0] = 1;
-  oci->fb_idx_ref_cnt[1] = 1;
-  oci->fb_idx_ref_cnt[2] = 1;
-  oci->fb_idx_ref_cnt[3] = 1;
+  for (i = 0; i < 3; i++)
+    oci->active_ref_idx[i] = i;
+
+  for (i = 0; i < NUM_REF_FRAMES; i++) {
+    oci->ref_frame_map[i] = i;
+    oci->fb_idx_ref_cnt[i] = 1;
+  }
 
   if (vp8_yv12_alloc_frame_buffer(&oci->temp_scale_frame, width, 16,
                                   VP9BORDERINPIXELS) < 0) {
@@ -204,9 +204,6 @@ void vp9_create_common(VP9_COMMON *oci) {
   /* Initialise reference frame sign bias structure to defaults */
   vpx_memset(oci->ref_frame_sign_bias, 0, sizeof(oci->ref_frame_sign_bias));
 
-  /* Default disable buffer to buffer copying */
-  oci->copy_buffer_to_gf = 0;
-  oci->copy_buffer_to_arf = 0;
   oci->kf_ymode_probs_update = 0;
 }
 

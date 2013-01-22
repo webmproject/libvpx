@@ -241,6 +241,8 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
 
 void vp9_setup_key_frame(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
+  int i;
+
   // Setup for Key frame:
   vp9_default_coef_probs(& cpi->common);
   vp9_kf_default_bmode_probs(cpi->common.kf_bmode_prob);
@@ -258,12 +260,14 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
   // interval before next GF
   cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
 
-  cpi->common.refresh_golden_frame = TRUE;
-  cpi->common.refresh_alt_ref_frame = TRUE;
+  cpi->refresh_golden_frame = TRUE;
+  cpi->refresh_alt_ref_frame = TRUE;
 
   vp9_init_mode_contexts(&cpi->common);
-  vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
-  vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
+
+  for (i = 0; i < NUM_FRAME_CONTEXTS; i++)
+    vpx_memcpy(&cpi->common.frame_contexts[i], &cpi->common.fc,
+               sizeof(cpi->common.fc));
 
   vpx_memset(cm->prev_mip, 0,
     (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
@@ -282,18 +286,25 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
                sizeof(xd->mb_mv_ref_probs));
   }
 #endif
+
+  /* Choose which entropy context to use. When using a forward reference
+   * frame, it immediately follows the keyframe, and thus benefits from
+   * using the same entropy context established by the keyframe. Otherwise,
+   * use the default context 0.
+   */
+  cm->frame_context_idx = cpi->oxcf.play_alternate;
 }
 
 void vp9_setup_inter_frame(VP9_COMP *cpi) {
-  if (cpi->common.refresh_alt_ref_frame) {
-    vpx_memcpy(&cpi->common.fc,
-               &cpi->common.lfc_a,
-               sizeof(cpi->common.fc));
-  } else {
-    vpx_memcpy(&cpi->common.fc,
-               &cpi->common.lfc,
-               sizeof(cpi->common.fc));
-  }
+  /* Choose which entropy context to use. Currently there are only two
+   * contexts used, one for normal frames and one for alt ref frames.
+   */
+  cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
+
+  assert(cpi->common.frame_context_idx < NUM_FRAME_CONTEXTS);
+  vpx_memcpy(&cpi->common.fc,
+             &cpi->common.frame_contexts[cpi->common.frame_context_idx],
+             sizeof(cpi->common.fc));
 }
 
 
@@ -358,7 +369,7 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
 
 
   // Special alt reference frame case
-  if (cpi->common.refresh_alt_ref_frame) {
+  if (cpi->refresh_alt_ref_frame) {
     // Per frame bit target for the alt ref frame
     cpi->per_frame_bandwidth = cpi->twopass.gf_bits;
     cpi->this_frame_target = cpi->per_frame_bandwidth;
@@ -377,7 +388,7 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
   if (cpi->this_frame_target < min_frame_target)
     cpi->this_frame_target = min_frame_target;
 
-  if (!cpi->common.refresh_alt_ref_frame)
+  if (!cpi->refresh_alt_ref_frame)
     // Note the baseline target data rate for this inter frame.
     cpi->inter_frame_target = cpi->this_frame_target;
 
@@ -386,7 +397,7 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
     // int Boost = 0;
     int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
 
-    cpi->common.refresh_golden_frame = TRUE;
+    cpi->refresh_golden_frame = TRUE;
 
     calc_gf_params(cpi);
 
@@ -431,7 +442,7 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   if (cpi->common.frame_type == KEY_FRAME) {
     rate_correction_factor = cpi->key_frame_rate_correction_factor;
   } else {
-    if (cpi->common.refresh_alt_ref_frame || cpi->common.refresh_golden_frame)
+    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
       rate_correction_factor = cpi->gf_rate_correction_factor;
     else
       rate_correction_factor = cpi->rate_correction_factor;
@@ -505,7 +516,7 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   if (cpi->common.frame_type == KEY_FRAME)
     cpi->key_frame_rate_correction_factor = rate_correction_factor;
   else {
-    if (cpi->common.refresh_alt_ref_frame || cpi->common.refresh_golden_frame)
+    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
       cpi->gf_rate_correction_factor = rate_correction_factor;
     else
       cpi->rate_correction_factor = rate_correction_factor;
@@ -529,7 +540,7 @@ int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
   if (cpi->common.frame_type == KEY_FRAME)
     correction_factor = cpi->key_frame_rate_correction_factor;
   else {
-    if (cpi->common.refresh_alt_ref_frame || cpi->common.refresh_golden_frame)
+    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
       correction_factor = cpi->gf_rate_correction_factor;
     else
       correction_factor = cpi->rate_correction_factor;
@@ -570,7 +581,8 @@ int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
 
     if (cpi->common.frame_type == KEY_FRAME)
       zbin_oqmax = 0; // ZBIN_OQ_MAX/16
-    else if (cpi->common.refresh_alt_ref_frame || (cpi->common.refresh_golden_frame && !cpi->source_alt_ref_active))
+    else if (cpi->refresh_alt_ref_frame
+             || (cpi->refresh_golden_frame && !cpi->source_alt_ref_active))
       zbin_oqmax = 16;
     else
       zbin_oqmax = ZBIN_OQ_MAX;
@@ -671,7 +683,7 @@ void vp9_compute_frame_size_bounds(VP9_COMP *cpi, int *frame_under_shoot_limit,
       *frame_over_shoot_limit  = cpi->this_frame_target * 9 / 8;
       *frame_under_shoot_limit = cpi->this_frame_target * 7 / 8;
     } else {
-      if (cpi->common.refresh_alt_ref_frame || cpi->common.refresh_golden_frame) {
+      if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) {
         *frame_over_shoot_limit  = cpi->this_frame_target * 9 / 8;
         *frame_under_shoot_limit = cpi->this_frame_target * 7 / 8;
       } else {
