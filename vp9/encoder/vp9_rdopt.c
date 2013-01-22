@@ -847,7 +847,7 @@ static int vp9_sb_block_error_c(int16_t *coeff, int16_t *dqcoeff,
     error += this_diff * this_diff;
   }
 
-  return error > INT_MAX ? INT_MAX : error;
+  return error > INT_MAX ? INT_MAX : (int)error;
 }
 
 #define DEBUG_ERROR 0
@@ -3123,9 +3123,9 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   ctx->best_ref_mv.as_int = ref_mv->as_int;
   ctx->second_best_ref_mv.as_int = second_ref_mv->as_int;
 
-  ctx->single_pred_diff = comp_pred_diff[SINGLE_PREDICTION_ONLY];
-  ctx->comp_pred_diff   = comp_pred_diff[COMP_PREDICTION_ONLY];
-  ctx->hybrid_pred_diff = comp_pred_diff[HYBRID_PREDICTION];
+  ctx->single_pred_diff = (int)comp_pred_diff[SINGLE_PREDICTION_ONLY];
+  ctx->comp_pred_diff   = (int)comp_pred_diff[COMP_PREDICTION_ONLY];
+  ctx->hybrid_pred_diff = (int)comp_pred_diff[HYBRID_PREDICTION];
 
   memcpy(ctx->txfm_rd_diff, txfm_size_diff, sizeof(ctx->txfm_rd_diff));
 }
