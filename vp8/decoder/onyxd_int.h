@@ -33,6 +33,14 @@ typedef struct
     MACROBLOCKD  mbd;
 } MB_ROW_DEC;
 
+typedef struct
+{
+    int enabled;
+    unsigned int count;
+    const unsigned char *ptrs[MAX_PARTITIONS];
+    unsigned int sizes[MAX_PARTITIONS];
+} FRAGMENT_DATA;
+
 typedef struct VP8D_COMP
 {
     DECLARE_ALIGNED(16, MACROBLOCKD, mb);
