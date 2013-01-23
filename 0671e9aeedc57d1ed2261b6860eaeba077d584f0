@@ -247,6 +247,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//zyw\u003d",
+        "filename": "test/cq_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T22:13:52Z",
+      "side": 1,
+      "message": "put these inside namespace",
+      "revId": "0671e9aeedc57d1ed2261b6860eaeba077d584f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//0Bo\u003d",
         "filename": "test/decode_test_driver.cc",
         "patchSetId": 9
@@ -387,6 +404,57 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//z2Q\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T22:13:52Z",
+      "side": 1,
+      "message": "this should be moved inside the for loop before the while",
+      "revId": "0671e9aeedc57d1ed2261b6860eaeba077d584f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//z14\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T22:13:52Z",
+      "side": 1,
+      "message": "create another bool has_dxdata \u003d false; here for consistency\n\nso:\nbool has_cxdata \u003d false;\nbool has_dxdata \u003d false;",
+      "revId": "0671e9aeedc57d1ed2261b6860eaeba077d584f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//z1Q\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T22:13:52Z",
+      "side": 1,
+      "message": "if (decoder) {\n  decoder-\u003eDecodeFrame()...\n  has_dxdata \u003d true;\n}",
+      "revId": "0671e9aeedc57d1ed2261b6860eaeba077d584f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//0BM\u003d",
         "filename": "test/encode_test_driver.cc",
         "patchSetId": 9
@@ -416,6 +484,23 @@
       "side": 1,
       "message": "ok (later)",
       "parentUuid": "AAAAVH//0BM\u003d",
+      "revId": "0671e9aeedc57d1ed2261b6860eaeba077d584f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//z1A\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T22:13:52Z",
+      "side": 1,
+      "message": "if (has_dxdata \u0026\u0026 has_cxdata)",
       "revId": "0671e9aeedc57d1ed2261b6860eaeba077d584f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
