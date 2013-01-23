@@ -7,17 +7,23 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
-#include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/util.h"
+
 namespace {
 
 class DatarateTest : public ::libvpx_test::EncoderTest,
-    public ::testing::TestWithParam<enum libvpx_test::TestMode> {
+    public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+ public:
+  DatarateTest() : EncoderTest(GET_PARAM(0)) {}
+
  protected:
   virtual void SetUp() {
     InitializeConfig();
-    SetMode(GetParam());
+    SetMode(GET_PARAM(1));
     ResetModel();
   }
 
@@ -174,5 +180,6 @@ TEST_P(DatarateTest, ChangingDropFrameThresh) {
   }
 }
 
-INSTANTIATE_TEST_CASE_P(AllModes, DatarateTest, ALL_TEST_MODES);
+VP8_INSTANTIATE_TEST_CASE(DatarateTest, ALL_TEST_MODES);
+
 }  // namespace

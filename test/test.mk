@@ -1,7 +1,7 @@
 LIBVPX_TEST_SRCS-yes += register_state_check.h
 LIBVPX_TEST_SRCS-yes += test.mk
 LIBVPX_TEST_SRCS-yes += acm_random.h
-
+LIBVPX_TEST_SRCS-yes += codec_factory.h
 LIBVPX_TEST_SRCS-yes += test_libvpx.cc
 LIBVPX_TEST_SRCS-yes += util.h
 LIBVPX_TEST_SRCS-yes += video_source.h
@@ -15,17 +15,17 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += altref_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += config_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += cq_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += datarate_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += encode_test_driver.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += encode_test_driver.h
+LIBVPX_TEST_SRCS-yes                   += encode_test_driver.cc
+LIBVPX_TEST_SRCS-yes                   += encode_test_driver.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += error_resilience_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += i420_video_source.h
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += i420_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += keyframe_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += resize_test.cc
 
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += ../md5_utils.h ../md5_utils.c
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += decode_test_driver.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += decode_test_driver.h
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += ivf_video_source.h
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../md5_utils.h ../md5_utils.c
+LIBVPX_TEST_SRCS-yes                   += decode_test_driver.cc
+LIBVPX_TEST_SRCS-yes                   += decode_test_driver.h
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ivf_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += test_vector_test.cc
 ##
 ## WHITE BOX TESTS

@@ -14,10 +14,10 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vpx_config.h"
 #include "vpx/vpx_decoder.h"
-#include "vpx/vp8dx.h"
 
 namespace libvpx_test {
 
+class CodecFactory;
 class CompressedVideoSource;
 
 // Provides an object to handle decoding output
@@ -46,7 +46,7 @@ class Decoder {
     memset(&decoder_, 0, sizeof(decoder_));
   }
 
-  ~Decoder() {
+  virtual ~Decoder() {
     vpx_codec_destroy(&decoder_);
   }
 
@@ -66,7 +66,9 @@ class Decoder {
   }
 
  protected:
-  const char *DecodeError() {
+  virtual const vpx_codec_iface_t* CodecInterface() const = 0;
+
+  const char* DecodeError() {
     const char *detail = vpx_codec_error_detail(&decoder_);
     return detail ? detail : vpx_codec_error(&decoder_);
   }
@@ -87,9 +89,11 @@ class DecoderTest {
                                      const unsigned int frame_number) {}
 
  protected:
-  DecoderTest() {}
+  explicit DecoderTest(const CodecFactory *codec) : codec_(codec) {}
 
   virtual ~DecoderTest() {}
+
+  const CodecFactory *codec_;
 };
 
 }  // namespace libvpx_test
