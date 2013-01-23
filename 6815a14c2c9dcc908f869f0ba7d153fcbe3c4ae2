@@ -37,6 +37,42 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//0RE\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//0Ts\u003d",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0RI\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//0YI\u003d",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//0YQ\u003d",
         "filename": "test/error_resilience_test.cc",
         "patchSetId": 9
@@ -54,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//0Q8\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//0YQ\u003d",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//0XI\u003d",
         "filename": "test/error_resilience_test.cc",
         "patchSetId": 9
@@ -65,6 +119,24 @@
       "writtenOn": "2013-01-23T16:52:53Z",
       "side": 1,
       "message": "still would like to see a checksum based check as described previously.",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0Qw\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "This is a nice test to have, but it may require some changes in the encoder and the api to ensure that we can encode a frame in a way that no subsequent frame depends on it. I would like to take this up in a separate patch.",
+      "parentUuid": "AAAAVH//0XI\u003d",
       "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -106,6 +178,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//0QU\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1261,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "I agree that multiple levels of resilience may be useful for sure. For this patch, let\u0027s focus on on/off functionality.",
+      "parentUuid": "AAAAVH//0Sg\u003d",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//0Xc\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 9
@@ -117,6 +207,24 @@
       "writtenOn": "2013-01-23T16:52:53Z",
       "side": 1,
       "message": "remove",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0QM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 512,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//0Xc\u003d",
       "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -140,6 +248,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//0QE\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//0XY\u003d",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//0XU\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 9
@@ -151,6 +277,24 @@
       "writtenOn": "2013-01-23T16:52:53Z",
       "side": 1,
       "message": "remove",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0QA\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 810,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//0XU\u003d",
       "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -174,6 +318,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//0P8\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 960,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//0XQ\u003d",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//0XM\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 9
@@ -185,6 +347,24 @@
       "writtenOn": "2013-01-23T16:52:53Z",
       "side": 1,
       "message": "remove",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0P0\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1141,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-01-23T18:13:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//0XM\u003d",
       "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
