@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//0YI\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-23T16:52:53Z",
+      "side": 1,
+      "message": "ComputePSNR. Also, can you put this in util.h, so other tests can use it?",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0YQ\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-23T16:52:53Z",
+      "side": 1,
+      "message": "Suggest naming this DropFramesWithoutRecovery",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0XI\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-23T16:52:53Z",
+      "side": 1,
+      "message": "still would like to see a checksum based check as described previously.",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0Xk\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1261,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-23T16:52:53Z",
+      "side": 1,
+      "message": "I think the strategy VP8 uses where you can choose on a per-frame basis whether to persist the updates is more flexible than forcing a reset to the baseline on every frame. An application should be able to choose what level of resiliency it requires. An additional bit that means \"do all the keyframe stuff except keep the reference frames\" could be useful, but we shouldn\u0027t require that it be set for this use case. It could be useful in a recovery scenario. Imagine an RTC app that sets up a segmentation map with additional resiliency, and then wants to send droppable frames using that map, you probably don\u0027t want to do a segmentation reset in that case. In general, we should try to keep as much of the ER implementation on the encoder as possible.",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0Xc\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 512,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-23T16:52:53Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0XY\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-23T16:52:53Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0XU\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 810,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-23T16:52:53Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0XQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 960,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-23T16:52:53Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//0XM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1141,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-23T16:52:53Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "6815a14c2c9dcc908f869f0ba7d153fcbe3c4ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
