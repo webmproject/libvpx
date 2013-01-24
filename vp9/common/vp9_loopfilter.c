@@ -257,19 +257,19 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
                  tx_size >= TX_32X32))
               ) {
             if (tx_size >= TX_16X16)
-              vp9_lpf_mbv_w_c(y_ptr, u_ptr, v_ptr, post->y_stride,
+              vp9_lpf_mbv_w(y_ptr, u_ptr, v_ptr, post->y_stride,
                             post->uv_stride, &lfi);
             else
-              vp9_loop_filter_mbv_c(y_ptr, u_ptr, v_ptr, post->y_stride,
+              vp9_loop_filter_mbv(y_ptr, u_ptr, v_ptr, post->y_stride,
                                   post->uv_stride, &lfi);
           }
           if (!skip_lf) {
             if (tx_size >= TX_8X8) {
               if (tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV))
-                vp9_loop_filter_bv8x8_c(y_ptr, u_ptr, v_ptr, post->y_stride,
+                vp9_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
                                       post->uv_stride, &lfi);
               else
-                vp9_loop_filter_bv8x8_c(y_ptr, NULL, NULL, post->y_stride,
+                vp9_loop_filter_bv8x8(y_ptr, NULL, NULL, post->y_stride,
                                       post->uv_stride, &lfi);
             } else {
               vp9_loop_filter_bv(y_ptr, u_ptr, v_ptr, post->y_stride,
@@ -283,19 +283,19 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
                 tx_size >= TX_32X32))
               ) {
             if (tx_size >= TX_16X16)
-              vp9_lpf_mbh_w_c(y_ptr, u_ptr, v_ptr, post->y_stride,
+              vp9_lpf_mbh_w(y_ptr, u_ptr, v_ptr, post->y_stride,
                             post->uv_stride, &lfi);
             else
-              vp9_loop_filter_mbh_c(y_ptr, u_ptr, v_ptr, post->y_stride,
+              vp9_loop_filter_mbh(y_ptr, u_ptr, v_ptr, post->y_stride,
                                   post->uv_stride, &lfi);
           }
           if (!skip_lf) {
             if (tx_size >= TX_8X8) {
               if (tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV))
-                vp9_loop_filter_bh8x8_c(y_ptr, u_ptr, v_ptr, post->y_stride,
+                vp9_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
                                       post->uv_stride, &lfi);
               else
-                vp9_loop_filter_bh8x8_c(y_ptr, NULL, NULL, post->y_stride,
+                vp9_loop_filter_bh8x8(y_ptr, NULL, NULL, post->y_stride,
                                       post->uv_stride, &lfi);
             } else {
               vp9_loop_filter_bh(y_ptr, u_ptr, v_ptr, post->y_stride,
