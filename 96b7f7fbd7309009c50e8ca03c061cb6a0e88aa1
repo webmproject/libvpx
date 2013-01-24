@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//zKk\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1453,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-24T16:23:33Z",
+      "side": 1,
+      "message": "static is unimportant here. const is generally a good idea. You could make both of these const unsigned int, and bsize2 \u003d 32. No strong objection though.",
+      "revId": "96b7f7fbd7309009c50e8ca03c061cb6a0e88aa1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
