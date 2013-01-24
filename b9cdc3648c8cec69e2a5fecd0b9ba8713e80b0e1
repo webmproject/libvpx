@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//yrA\u003d",
+        "filename": "vp9/decoder/vp9_dequantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-24T22:51:50Z",
+      "side": 1,
+      "message": "if (dest \u003d\u003d pred) skip this step also\n\nI think that really happens yes.",
+      "revId": "b9cdc3648c8cec69e2a5fecd0b9ba8713e80b0e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
