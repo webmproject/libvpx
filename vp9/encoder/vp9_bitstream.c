@@ -1833,7 +1833,11 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 #endif
   }
 
-  vp9_write_bit(&header_bc, pc->refresh_entropy_probs);
+  if (!pc->error_resilient_mode) {
+    vp9_write_bit(&header_bc, pc->refresh_entropy_probs);
+    vp9_write_bit(&header_bc, pc->frame_parallel_decoding_mode);
+  }
+
   vp9_write_literal(&header_bc, pc->frame_context_idx,
                     NUM_FRAME_CONTEXTS_LG2);
 
@@ -2023,9 +2027,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
      * final packing pass */
     // if (!cpi->dummy_packing) vp9_zero(cpi->NMVcount);
     write_modes(cpi, &residual_bc);
-
-    if (!cpi->common.error_resilient_mode)
-      vp9_adapt_mode_context(&cpi->common);
   }
 
   vp9_stop_encode(&residual_bc);

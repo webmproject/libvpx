@@ -2824,6 +2824,12 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
 
     cm->error_resilient_mode = (cpi->oxcf.error_resilient_mode != 0);
+    cm->frame_parallel_decoding_mode =
+      (cpi->oxcf.frame_parallel_decoding_mode != 0);
+    if (cm->error_resilient_mode) {
+      cm->frame_parallel_decoding_mode = 1;
+      cm->refresh_entropy_probs = 0;
+    }
   }
 
   // Test code for new segment features
@@ -3449,7 +3455,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_copy(cpi->common.fc.hybrid_coef_counts_16x16,
            cpi->hybrid_coef_counts_16x16);
   vp9_copy(cpi->common.fc.coef_counts_32x32, cpi->coef_counts_32x32);
-  if (!cpi->common.error_resilient_mode)
+  if (!cpi->common.error_resilient_mode &&
+      !cpi->common.frame_parallel_decoding_mode)
     vp9_adapt_coef_probs(&cpi->common);
   if (cpi->common.frame_type != KEY_FRAME) {
     vp9_copy(cpi->common.fc.sb_ymode_counts, cpi->sb_ymode_count);
@@ -3462,12 +3469,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #if CONFIG_COMP_INTERINTRA_PRED
     vp9_copy(cpi->common.fc.interintra_counts, cpi->interintra_count);
 #endif
-    if (!cpi->common.error_resilient_mode)
-      vp9_adapt_mode_probs(&cpi->common);
-
     cpi->common.fc.NMVcount = cpi->NMVcount;
-    if (!cpi->common.error_resilient_mode)
+    if (!cpi->common.error_resilient_mode &&
+        !cpi->common.frame_parallel_decoding_mode) {
+      vp9_adapt_mode_probs(&cpi->common);
+      vp9_adapt_mode_context(&cpi->common);
       vp9_adapt_nmv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
+    }
   }
 #if CONFIG_COMP_INTERINTRA_PRED
   if (cm->frame_type != KEY_FRAME)

@@ -314,6 +314,7 @@ static vpx_codec_err_t set_vp8e_config(VP9_CONFIG *oxcf,
 #endif
 
   oxcf->error_resilient_mode = cfg.g_error_resilient;
+  oxcf->frame_parallel_decoding_mode = cfg.g_frame_parallel_decoding;
   /*
   printf("Current VP9 Settings: \n");
   printf("target_bandwidth: %d\n", oxcf->target_bandwidth);
@@ -342,6 +343,8 @@ static vpx_codec_err_t set_vp8e_config(VP9_CONFIG *oxcf,
   printf("Version: %d\n", oxcf->Version);
   printf("encode_breakout: %d\n", oxcf->encode_breakout);
   printf("error resilient: %d\n", oxcf->error_resilient_mode);
+  printf("frame parallel detokenization: %d\n",
+         oxcf->frame_parallel_decoding_mode);
   */
   return VPX_CODEC_OK;
 }
@@ -1034,6 +1037,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] = {
       {1, 30},            /* g_timebase */
 
       0,                  /* g_error_resilient */
+      0,                  /* g_frame_parallel_decoding */
 
       VPX_RC_ONE_PASS,    /* g_pass */
 

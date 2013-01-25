@@ -791,7 +791,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
       if (mbmi->mode != ZEROMV) {
         vp9_find_best_ref_mvs(xd,
-                              pbi->common.error_resilient_mode ?
+                              pbi->common.error_resilient_mode ||
+                              pbi->common.frame_parallel_decoding_mode ?
                               0 : xd->pre.y_buffer,
                               recon_y_stride,
                               mbmi->ref_mvs[ref_frame],
@@ -851,7 +852,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
         if (mbmi->mode != ZEROMV) {
           vp9_find_best_ref_mvs(xd,
-                                pbi->common.error_resilient_mode ?
+                                pbi->common.error_resilient_mode ||
+                                pbi->common.frame_parallel_decoding_mode ?
                                 0 : xd->second_pre.y_buffer,
                                 recon_y_stride,
                                 mbmi->ref_mvs[mbmi->second_ref_frame],

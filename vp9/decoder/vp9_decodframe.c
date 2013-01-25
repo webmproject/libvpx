@@ -1624,7 +1624,13 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }
 
-  pc->refresh_entropy_probs = vp9_read_bit(&header_bc);
+  if (!pc->error_resilient_mode) {
+    pc->refresh_entropy_probs = vp9_read_bit(&header_bc);
+    pc->frame_parallel_decoding_mode = vp9_read_bit(&header_bc);
+  } else {
+    pc->refresh_entropy_probs = 0;
+    pc->frame_parallel_decoding_mode = 1;
+  }
   pc->frame_context_idx = vp9_read_literal(&header_bc, NUM_FRAME_CONTEXTS_LG2);
   vpx_memcpy(&pc->fc, &pc->frame_contexts[pc->frame_context_idx],
              sizeof(pc->fc));
@@ -1771,10 +1777,12 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
                          "A stream must start with a complete key frame");
   }
 
-  if (!pc->error_resilient_mode)
+  if (!pc->error_resilient_mode &&
+      !pc->frame_parallel_decoding_mode)
     vp9_adapt_coef_probs(pc);
   if (pc->frame_type != KEY_FRAME) {
-    if (!pc->error_resilient_mode) {
+    if (!pc->error_resilient_mode &&
+        !pc->frame_parallel_decoding_mode) {
       vp9_adapt_mode_probs(pc);
       vp9_adapt_nmv_probs(pc, xd->allow_high_precision_mv);
       vp9_adapt_mode_context(&pbi->common);
