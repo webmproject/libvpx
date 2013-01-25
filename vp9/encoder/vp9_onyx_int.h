@@ -688,9 +688,6 @@ typedef struct VP9_COMP {
 
   int droppable;
 
-  // TODO Do we still need this??
-  int update_context;
-
   int dummy_packing;    /* flag to indicate if packing is dummy */
 
   unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
