@@ -92,9 +92,6 @@ struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 
     pbi->decoded_key_frame = 0;
 
-    pbi->input_fragments = oxcf->input_fragments;
-    pbi->num_fragments = 0;
-
     /* Independent partitions is activated when a frame updates the
      * token probability table to have equal probabilities over the
      * PREV_COEF context.
@@ -282,60 +279,13 @@ static int swap_frame_buffers (VP8_COMMON *cm)
     return err;
 }
 
-int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
-                                  const uint8_t *source,
-                                  int64_t time_stamp)
+int check_fragments_for_errors(VP8D_COMP *pbi)
 {
-#if HAVE_NEON
-    int64_t dx_store_reg[8];
-#endif
-    VP8_COMMON *cm = &pbi->common;
-    int retcode = -1;
-
-    pbi->common.error.error_code = VPX_CODEC_OK;
-
-    if (pbi->num_fragments == 0)
-    {
-        /* New frame, reset fragment pointers and sizes */
-        vpx_memset((void*)pbi->fragments, 0, sizeof(pbi->fragments));
-        vpx_memset(pbi->fragment_sizes, 0, sizeof(pbi->fragment_sizes));
-    }
-    if (pbi->input_fragments && !(source == NULL && size == 0))
-    {
-        /* Store a pointer to this fragment and return. We haven't
-         * received the complete frame yet, so we will wait with decoding.
-         */
-        assert(pbi->num_fragments < MAX_PARTITIONS);
-        pbi->fragments[pbi->num_fragments] = source;
-        pbi->fragment_sizes[pbi->num_fragments] = size;
-        pbi->num_fragments++;
-        if (pbi->num_fragments > (1 << EIGHT_PARTITION) + 1)
-        {
-            pbi->common.error.error_code = VPX_CODEC_UNSUP_BITSTREAM;
-            pbi->common.error.setjmp = 0;
-            pbi->num_fragments = 0;
-            return -1;
-        }
-        return 0;
-    }
-
-    if (!pbi->input_fragments)
-    {
-        pbi->fragments[0] = source;
-        pbi->fragment_sizes[0] = size;
-        pbi->num_fragments = 1;
-    }
-    assert(pbi->common.multi_token_partition <= EIGHT_PARTITION);
-    if (pbi->num_fragments == 0)
-    {
-        pbi->num_fragments = 1;
-        pbi->fragments[0] = NULL;
-        pbi->fragment_sizes[0] = 0;
-    }
-
     if (!pbi->ec_active &&
         pbi->num_fragments <= 1 && pbi->fragment_sizes[0] == 0)
     {
+        VP8_COMMON *cm = &pbi->common;
+
         /* If error concealment is disabled we won't signal missing frames
          * to the decoder.
          */
@@ -361,11 +311,28 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
         /* Signal that we have no frame to show. */
         cm->show_frame = 0;
 
-        pbi->num_fragments = 0;
-
         /* Nothing more to do. */
         return 0;
     }
+
+    return 1;
+}
+ 
+int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
+                                  const uint8_t *source,
+                                  int64_t time_stamp)
+{
+#if HAVE_NEON
+    int64_t dx_store_reg[8];
+#endif
+    VP8_COMMON *cm = &pbi->common;
+    int retcode = -1;
+
+    pbi->common.error.error_code = VPX_CODEC_OK;
+
+    retcode = check_fragments_for_errors(pbi);
+    if(retcode <= 0)
+        return retcode;
 
 #if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -458,7 +425,6 @@ decode_exit:
 #endif
 
     pbi->common.error.setjmp = 0;
-    pbi->num_fragments = 0;
     return retcode;
 }
 int vp8dx_get_raw_frame(VP8D_COMP *pbi, YV12_BUFFER_CONFIG *sd, int64_t *time_stamp, int64_t *time_end_stamp, vp8_ppflags_t *flags)

@@ -34,7 +34,6 @@ extern "C"
         int     postprocess;
         int     max_threads;
         int     error_concealment;
-        int     input_fragments;
     } VP8D_CONFIG;
 
     typedef enum
