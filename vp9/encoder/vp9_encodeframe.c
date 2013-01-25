@@ -785,8 +785,6 @@ static void pick_mb_modes(VP9_COMP *cpi,
     mbmi = &xd->mode_info_context->mbmi;
     mbmi->sb_type = BLOCK_SIZE_MB16X16;
 
-    cpi->update_context = 0;    // TODO Do we need this now??
-
     vp9_intra_prediction_down_copy(xd);
 
     // Find best coding mode & reconstruct the MB so it is available
@@ -869,7 +867,6 @@ static void pick_sb_modes(VP9_COMP *cpi,
   xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB32X32;
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     vp9_activity_masking(cpi, x);
-  cpi->update_context = 0;    // TODO Do we need this now??
 
   /* Find best coding mode & reconstruct the MB so it is available
    * as a predictor for MBs that follow in the SB */
@@ -905,7 +902,6 @@ static void pick_sb64_modes(VP9_COMP *cpi,
   xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB64X64;
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     vp9_activity_masking(cpi, x);
-  cpi->update_context = 0;    // TODO(rbultje) Do we need this now??
 
   /* Find best coding mode & reconstruct the MB so it is available
    * as a predictor for MBs that follow in the SB */

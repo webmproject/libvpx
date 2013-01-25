@@ -1179,8 +1179,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
 
 static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
                                          int *Rate, int *rate_y,
-                                         int *Distortion, int64_t best_rd,
-                                         int update_contexts) {
+                                         int *Distortion, int64_t best_rd) {
   int i;
   MACROBLOCKD *const xd = &mb->e_mbd;
   int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
@@ -1191,18 +1190,13 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   ENTROPY_CONTEXT *ta, *tl;
   int *bmode_costs;
 
-  if (update_contexts) {
-    ta = (ENTROPY_CONTEXT *)xd->above_context;
-    tl = (ENTROPY_CONTEXT *)xd->left_context;
-  } else {
-    vpx_memcpy(&t_above, xd->above_context,
-               sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memcpy(&t_left, xd->left_context,
-               sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memcpy(&t_above, xd->above_context,
+             sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memcpy(&t_left, xd->left_context,
+             sizeof(ENTROPY_CONTEXT_PLANES));
 
-    ta = (ENTROPY_CONTEXT *)&t_above;
-    tl = (ENTROPY_CONTEXT *)&t_left;
-  }
+  ta = (ENTROPY_CONTEXT *)&t_above;
+  tl = (ENTROPY_CONTEXT *)&t_left;
 
   xd->mode_info_context->mbmi.mode = B_PRED;
   bmode_costs = mb->inter_bmode_costs;
@@ -3800,8 +3794,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           // the BPRED mode : x->mbmode_cost[xd->frame_type][BPRED];
           mbmi->txfm_size = TX_4X4;
           tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y,
-                                             &distortion, best_yrd,
-                                             cpi->update_context);
+                                             &distortion, best_yrd);
           rate2 += rate;
           rate2 += intra_cost_penalty;
           distortion2 += distortion;
@@ -4396,8 +4389,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
                                        &rate4x4, &rate4x4_tokenonly,
-                                       &dist4x4, error16x16,
-                                       cpi->update_context);
+                                       &dist4x4, error16x16);
 
   mbmi->mb_skip_coeff = 0;
   if (cpi->common.mb_no_coeff_skip &&
