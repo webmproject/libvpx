@@ -182,8 +182,7 @@ TEST_P(ErrorResilienceTest, OnVersusOff) {
 TEST_P(ErrorResilienceTest, DropFramesWithoutRecovery) {
   const vpx_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
-  cfg_.rc_target_bitrate = 2000;
-  cfg_.g_lag_in_frames = 5;
+  cfg_.rc_target_bitrate = 500;
 
   init_flags_ = VPX_CODEC_USE_PSNR;
 
