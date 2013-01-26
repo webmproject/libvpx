@@ -386,7 +386,13 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
 
     vp8_clear_system_state();
 
-#if CONFIG_ERROR_CONCEALMENT
+    if (cm->show_frame)
+    {
+        cm->current_video_frame++;
+        cm->show_frame_mi = cm->mi;
+    }
+
+    #if CONFIG_ERROR_CONCEALMENT
     /* swap the mode infos to storage for future error concealment */
     if (pbi->ec_enabled && pbi->common.prev_mi)
     {
@@ -407,9 +413,6 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
         }
     }
 #endif
-
-    if (cm->show_frame)
-        cm->current_video_frame++;
 
     pbi->ready_for_new_data = 0;
     pbi->last_time_stamp = time_stamp;
