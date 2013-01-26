@@ -1011,11 +1011,6 @@ EOF
         soft_enable sse2
         soft_enable sse3
         soft_enable ssse3
-        if enabled gcc && ! disabled sse4_1 && ! check_cflags -msse4; then
-            RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sse4_1 "
-        else
-            soft_enable sse4_1
-        fi
 
         case  ${tgt_os} in
             win*)
@@ -1057,7 +1052,7 @@ EOF
                 add_ldflags -m${bits}
                 link_with_cc=gcc
                 tune_cflags="-march="
-            setup_gnu_toolchain
+                setup_gnu_toolchain
                 #for 32 bit x86 builds, -O3 did not turn on this flag
                 enabled optimizations && check_add_cflags -fomit-frame-pointer
             ;;
@@ -1068,6 +1063,14 @@ EOF
                 AS=msvs
             ;;
         esac
+
+        # We can't use 'check_cflags' until the compiler is configured and CC is
+        # populated.
+        if enabled gcc && ! disabled sse4_1 && ! check_cflags -msse4.1; then
+            RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sse4_1 "
+        else
+            soft_enable sse4_1
+        fi
 
         case "${AS}" in
             auto|"")
