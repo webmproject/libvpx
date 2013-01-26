@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//xXI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1014,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-01-26T00:48:12Z",
+      "side": 0,
+      "message": "This was frustrating because I couldn\u0027t override with --enable-sse4 (probably still can\u0027t, but at least the compiler check works now)",
+      "revId": "e48776f29bbc991b1842c80baf8f3b3d5e24eceb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
