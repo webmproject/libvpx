@@ -315,27 +315,6 @@ typedef struct VP9_COMP {
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2[QINDEX_RANGE][16]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv[QINDEX_RANGE][16]);
 
-  DECLARE_ALIGNED(64, short, Y1zbin_8x8[QINDEX_RANGE][64]);
-  DECLARE_ALIGNED(64, short, Y2zbin_8x8[QINDEX_RANGE][64]);
-  DECLARE_ALIGNED(64, short, UVzbin_8x8[QINDEX_RANGE][64]);
-  DECLARE_ALIGNED(64, short, zrun_zbin_boost_y1_8x8[QINDEX_RANGE][64]);
-  DECLARE_ALIGNED(64, short, zrun_zbin_boost_y2_8x8[QINDEX_RANGE][64]);
-  DECLARE_ALIGNED(64, short, zrun_zbin_boost_uv_8x8[QINDEX_RANGE][64]);
-
-  DECLARE_ALIGNED(16, short, Y1zbin_16x16[QINDEX_RANGE][256]);
-  DECLARE_ALIGNED(16, short, Y2zbin_16x16[QINDEX_RANGE][256]);
-  DECLARE_ALIGNED(16, short, UVzbin_16x16[QINDEX_RANGE][256]);
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1_16x16[QINDEX_RANGE][256]);
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2_16x16[QINDEX_RANGE][256]);
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv_16x16[QINDEX_RANGE][256]);
-
-  DECLARE_ALIGNED(16, short, Y1zbin_32x32[QINDEX_RANGE][1024]);
-  DECLARE_ALIGNED(16, short, Y2zbin_32x32[QINDEX_RANGE][1024]);
-  DECLARE_ALIGNED(16, short, UVzbin_32x32[QINDEX_RANGE][1024]);
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1_32x32[QINDEX_RANGE][1024]);
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2_32x32[QINDEX_RANGE][1024]);
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv_32x32[QINDEX_RANGE][1024]);
-
   MACROBLOCK mb;
   VP9_COMMON common;
   VP9_CONFIG oxcf;
