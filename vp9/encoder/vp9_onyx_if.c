@@ -446,7 +446,7 @@ static void init_seg_features(VP9_COMP *cpi) {
   else if (xd->segmentation_enabled) {
     // First normal frame in a valid gf or alt ref group
     if (cpi->common.frames_since_golden == 0) {
-      // Set up segment features for normal frames in an af group
+      // Set up segment features for normal frames in an arf group
       if (cpi->source_alt_ref_active) {
         xd->update_mb_segmentation_map = 0;
         xd->update_mb_segmentation_data = 1;
@@ -463,16 +463,9 @@ static void init_seg_features(VP9_COMP *cpi) {
 
         // Segment coding disabled for compred testing
         if (high_q || (cpi->static_mb_pct == 100)) {
-          // set_segref(xd, 1, LAST_FRAME);
           vp9_set_segref(xd, 1, ALTREF_FRAME);
           vp9_enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
-
-          vp9_set_segdata(xd, 1, SEG_LVL_MODE, ZEROMV);
-          vp9_enable_segfeature(xd, 1, SEG_LVL_MODE);
-
-          // EOB segment coding not fixed for 8x8 yet
-          vp9_set_segdata(xd, 1, SEG_LVL_EOB, 0);
-          vp9_enable_segfeature(xd, 1, SEG_LVL_EOB);
+          vp9_enable_segfeature(xd, 1, SEG_LVL_SKIP);
         }
       }
       // Disable segmentation and clear down features if alt ref
@@ -491,29 +484,23 @@ static void init_seg_features(VP9_COMP *cpi) {
     }
 
     // Special case where we are coding over the top of a previous
-    // alt ref frame
+    // alt ref frame.
     // Segment coding disabled for compred testing
     else if (cpi->is_src_frame_alt_ref) {
-      // Enable mode and ref frame features for segment 0 as well
+      // Enable ref frame features for segment 0 as well
       vp9_enable_segfeature(xd, 0, SEG_LVL_REF_FRAME);
-      vp9_enable_segfeature(xd, 0, SEG_LVL_MODE);
       vp9_enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
-      vp9_enable_segfeature(xd, 1, SEG_LVL_MODE);
 
-      // All mbs should use ALTREF_FRAME, ZEROMV exclusively
+      // All mbs should use ALTREF_FRAME
       vp9_clear_segref(xd, 0);
       vp9_set_segref(xd, 0, ALTREF_FRAME);
       vp9_clear_segref(xd, 1);
       vp9_set_segref(xd, 1, ALTREF_FRAME);
-      vp9_set_segdata(xd, 0, SEG_LVL_MODE, ZEROMV);
-      vp9_set_segdata(xd, 1, SEG_LVL_MODE, ZEROMV);
 
-      // Skip all MBs if high Q
+      // Skip all MBs if high Q (0,0 mv and skip coeffs)
       if (high_q) {
-        vp9_enable_segfeature(xd, 0, SEG_LVL_EOB);
-        vp9_set_segdata(xd, 0, SEG_LVL_EOB, 0);
-        vp9_enable_segfeature(xd, 1, SEG_LVL_EOB);
-        vp9_set_segdata(xd, 1, SEG_LVL_EOB, 0);
+          vp9_enable_segfeature(xd, 0, SEG_LVL_SKIP);
+          vp9_enable_segfeature(xd, 1, SEG_LVL_SKIP);
       }
       // Enable data udpate
       xd->update_mb_segmentation_data = 1;

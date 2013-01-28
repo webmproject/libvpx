@@ -233,8 +233,8 @@ static void tokenize_b(VP9_COMP *cpi,
   pn = pt;
 #endif
 
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB))
-    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
+    seg_eob = 0;
 
   do {
     const int band = bands[c];
@@ -390,8 +390,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
                             (ENTROPY_CONTEXT *) (xd->left_context + 1), };
   const int mb_skip_context = vp9_get_pred_context(cm, xd, PRED_MBSKIP);
   const int segment_id = mbmi->segment_id;
-  const int skip_inc =  !vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
-                        (vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) != 0);
+  const int skip_inc = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
   int b;
 
   mbmi->mb_skip_coeff = sb_is_skippable_32x32(xd);
@@ -441,8 +440,7 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
   int skip_inc;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
-  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
-      (vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) != 0)) {
+  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     skip_inc = 1;
   } else
     skip_inc = 0;

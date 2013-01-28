@@ -556,16 +556,12 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
     x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[QIndex];
     x->block[i].zbin_extra = (int16_t)zbin_extra;
 
-    // Segment max eob offset feature.
-    if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
-      x->block[i].eob_max_offset =
-        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-      x->block[i].eob_max_offset_8x8 =
-        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-      x->block[i].eob_max_offset_16x16 =
-        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-      x->block[i].eob_max_offset_32x32 =
-      vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+    // Segment skip feature.
+    if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
+      x->block[i].eob_max_offset = 0;
+      x->block[i].eob_max_offset_8x8 = 0;
+      x->block[i].eob_max_offset_16x16 = 0;
+      x->block[i].eob_max_offset_32x32 = 0;
     } else {
       x->block[i].eob_max_offset = 16;
       x->block[i].eob_max_offset_8x8 = 64;
@@ -590,14 +586,11 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
 
     x->block[i].zbin_extra = (int16_t)zbin_extra;
 
-    // Segment max eob offset feature.
-    if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
-      x->block[i].eob_max_offset =
-        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-      x->block[i].eob_max_offset_8x8 =
-        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-      x->block[i].eob_max_offset_16x16 =
-      vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+    // Segment skip feature.
+    if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
+      x->block[i].eob_max_offset = 0;
+      x->block[i].eob_max_offset_8x8 = 0;
+      x->block[i].eob_max_offset_16x16 = 0;
     } else {
       x->block[i].eob_max_offset = 16;
       x->block[i].eob_max_offset_8x8 = 64;
@@ -620,12 +613,10 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   x->block[24].zbin_extra = (int16_t)zbin_extra;
 
   // TBD perhaps not use for Y2
-  // Segment max eob offset feature.
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
-    x->block[24].eob_max_offset =
-      vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
-    x->block[24].eob_max_offset_8x8 =
-      vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+  // Segment skip feature.
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
+    x->block[24].eob_max_offset = 0;
+    x->block[24].eob_max_offset_8x8 = 0;
   } else {
     x->block[24].eob_max_offset = 16;
     x->block[24].eob_max_offset_8x8 = 4;
