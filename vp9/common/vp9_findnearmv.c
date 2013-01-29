@@ -57,9 +57,9 @@ unsigned int vp9_sad16x3_c(const uint8_t *src_ptr,
 
 
 unsigned int vp9_variance2x16_c(const uint8_t *src_ptr,
-                                const int  source_stride,
+                                int  source_stride,
                                 const uint8_t *ref_ptr,
-                                const int  recon_stride,
+                                int  recon_stride,
                                 unsigned int *sse) {
   int sum;
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 2, 16, sse, &sum);
@@ -67,9 +67,9 @@ unsigned int vp9_variance2x16_c(const uint8_t *src_ptr,
 }
 
 unsigned int vp9_variance16x2_c(const uint8_t *src_ptr,
-                                const int  source_stride,
+                                int  source_stride,
                                 const uint8_t *ref_ptr,
-                                const int  recon_stride,
+                                int  recon_stride,
                                 unsigned int *sse) {
   int sum;
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 2, sse, &sum);
@@ -77,11 +77,11 @@ unsigned int vp9_variance16x2_c(const uint8_t *src_ptr,
 }
 
 unsigned int vp9_sub_pixel_variance16x2_c(const uint8_t *src_ptr,
-                                          const int  src_pixels_per_line,
-                                          const int  xoffset,
-                                          const int  yoffset,
+                                          int  src_pixels_per_line,
+                                          int  xoffset,
+                                          int  yoffset,
                                           const uint8_t *dst_ptr,
-                                          const int dst_pixels_per_line,
+                                          int dst_pixels_per_line,
                                           unsigned int *sse) {
   uint16_t FData3[16 * 3];  // Temp data buffer used in filtering
   uint8_t temp2[2 * 16];
@@ -98,11 +98,11 @@ unsigned int vp9_sub_pixel_variance16x2_c(const uint8_t *src_ptr,
 }
 
 unsigned int vp9_sub_pixel_variance2x16_c(const uint8_t *src_ptr,
-                                          const int  src_pixels_per_line,
-                                          const int  xoffset,
-                                          const int  yoffset,
+                                          int  src_pixels_per_line,
+                                          int  xoffset,
+                                          int  yoffset,
                                           const uint8_t *dst_ptr,
-                                          const int dst_pixels_per_line,
+                                          int dst_pixels_per_line,
                                           unsigned int *sse) {
   uint16_t FData3[2 * 17];  // Temp data buffer used in filtering
   uint8_t temp2[2 * 16];
