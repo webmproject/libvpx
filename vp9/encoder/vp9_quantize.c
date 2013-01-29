@@ -57,27 +57,29 @@ void vp9_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d, TX_TYPE tx_type) {
 
   eob = -1;
 
-  for (i = 0; i < b->eob_max_offset; i++) {
-    rc   = pt_scan[i];
-    z    = coeff_ptr[rc];
+  if (!b->skip_block) {
+    for (i = 0; i < 16; i++) {
+      rc   = pt_scan[i];
+      z    = coeff_ptr[rc];
 
-    zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
-    zbin_boost_ptr ++;
+      zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
+      zbin_boost_ptr++;
 
-    sz = (z >> 31);                                 // sign of z
-    x  = (z ^ sz) - sz;                             // x = abs(z)
+      sz = (z >> 31);                                 // sign of z
+      x  = (z ^ sz) - sz;                             // x = abs(z)
 
-    if (x >= zbin) {
-      x += round_ptr[rc];
-      y  = (((x * quant_ptr[rc]) >> 16) + x)
-           >> quant_shift_ptr[rc];                // quantize (x)
-      x  = (y ^ sz) - sz;                         // get the sign back
-      qcoeff_ptr[rc]  = x;                        // write to destination
-      dqcoeff_ptr[rc] = x * dequant_ptr[rc];      // dequantized value
+      if (x >= zbin) {
+        x += round_ptr[rc];
+        y  = (((x * quant_ptr[rc]) >> 16) + x)
+             >> quant_shift_ptr[rc];                // quantize (x)
+        x  = (y ^ sz) - sz;                         // get the sign back
+        qcoeff_ptr[rc]  = x;                        // write to destination
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc];      // dequantized value
 
-      if (y) {
-        eob = i;                                // last nonzero coeffs
-        zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
+        if (y) {
+          eob = i;                                // last nonzero coeffs
+          zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
+        }
       }
     }
   }
@@ -105,28 +107,30 @@ void vp9_regular_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
 
   eob = -1;
 
-  for (i = 0; i < b->eob_max_offset; i++) {
-    rc   = vp9_default_zig_zag1d_4x4[i];
-    z    = coeff_ptr[rc];
+  if (!b->skip_block) {
+    for (i = 0; i < 16; i++) {
+      rc   = vp9_default_zig_zag1d_4x4[i];
+      z    = coeff_ptr[rc];
 
-    zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
-    zbin_boost_ptr ++;
+      zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
+      zbin_boost_ptr++;
 
-    sz = (z >> 31);                                 // sign of z
-    x  = (z ^ sz) - sz;                             // x = abs(z)
+      sz = (z >> 31);                                 // sign of z
+      x  = (z ^ sz) - sz;                             // x = abs(z)
 
-    if (x >= zbin) {
-      x += round_ptr[rc];
+      if (x >= zbin) {
+        x += round_ptr[rc];
 
-      y  = (((x * quant_ptr[rc]) >> 16) + x)
-           >> quant_shift_ptr[rc];                // quantize (x)
-      x  = (y ^ sz) - sz;                         // get the sign back
-      qcoeff_ptr[rc]  = x;                        // write to destination
-      dqcoeff_ptr[rc] = x * dequant_ptr[rc];      // dequantized value
+        y  = (((x * quant_ptr[rc]) >> 16) + x)
+             >> quant_shift_ptr[rc];                // quantize (x)
+        x  = (y ^ sz) - sz;                         // get the sign back
+        qcoeff_ptr[rc]  = x;                        // write to destination
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc];      // dequantized value
 
-      if (y) {
-        eob = i;                                // last nonzero coeffs
-        zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
+        if (y) {
+          eob = i;                                // last nonzero coeffs
+          zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
+        }
       }
     }
   }
@@ -185,34 +189,37 @@ void vp9_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d) {
   int16_t *dqcoeff_ptr = d->dqcoeff;
   int16_t *dequant_ptr = d->dequant;
   int zbin_oq_value    = b->zbin_extra;
+
   // double q2nd = 4;
   vpx_memset(qcoeff_ptr, 0, 32);
   vpx_memset(dqcoeff_ptr, 0, 32);
 
   eob = -1;
 
-  for (i = 0; i < b->eob_max_offset_8x8; i++) {
-    rc   = vp9_default_zig_zag1d_4x4[i];
-    z    = coeff_ptr[rc];
+  if (!b->skip_block) {
+    for (i = 0; i < 4; i++) {
+      rc   = vp9_default_zig_zag1d_4x4[i];
+      z    = coeff_ptr[rc];
 
-    zbin_boost_ptr = &b->zrun_zbin_boost[zbin_zrun_index];
-    zbin_zrun_index += 4;
-    zbin = (zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value);
+      zbin_boost_ptr = &b->zrun_zbin_boost[zbin_zrun_index];
+      zbin_zrun_index += 4;
+      zbin = (zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value);
 
-    sz = (z >> 31);                               // sign of z
-    x  = (z ^ sz) - sz;                           // x = abs(z)
+      sz = (z >> 31);                               // sign of z
+      x  = (z ^ sz) - sz;                           // x = abs(z)
 
-    if (x >= zbin) {
-      x += (round_ptr[rc]);
-      y  = ((int)((int)(x * quant_ptr[rc]) >> 16) + x)
-           >> quant_shift_ptr[rc];                // quantize (x)
-      x  = (y ^ sz) - sz;                         // get the sign back
-      qcoeff_ptr[rc]  = x;                        // write to destination
-      dqcoeff_ptr[rc] = x * dequant_ptr[rc];      // dequantized value
+      if (x >= zbin) {
+        x += (round_ptr[rc]);
+        y  = ((int)((int)(x * quant_ptr[rc]) >> 16) + x)
+             >> quant_shift_ptr[rc];                // quantize (x)
+        x  = (y ^ sz) - sz;                         // get the sign back
+        qcoeff_ptr[rc]  = x;                        // write to destination
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc];      // dequantized value
 
-      if (y) {
-        eob = i;                                  // last nonzero coeffs
-        zbin_zrun_index = 0;
+        if (y) {
+          eob = i;                                  // last nonzero coeffs
+          zbin_zrun_index = 0;
+        }
       }
     }
   }
@@ -241,30 +248,31 @@ void vp9_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d) {
 
   eob = -1;
 
-  for (i = 0; i < b->eob_max_offset_8x8; i++) {
-    rc   = vp9_default_zig_zag1d_8x8[i];
-    z    = coeff_ptr[rc];
-    zbin = (zbin_ptr[rc != 0] + zbin_boost_ptr[zero_run] + zbin_oq_value);
-    zero_run += (zero_run < 15);
+  if (!b->skip_block) {
+    for (i = 0; i < 64; i++) {
+      rc   = vp9_default_zig_zag1d_8x8[i];
+      z    = coeff_ptr[rc];
+      zbin = (zbin_ptr[rc != 0] + zbin_boost_ptr[zero_run] + zbin_oq_value);
+      zero_run += (zero_run < 15);
 
-    sz = (z >> 31);                               // sign of z
-    x  = (z ^ sz) - sz;                           // x = abs(z)
+      sz = (z >> 31);                                // sign of z
+      x  = (z ^ sz) - sz;                            // x = abs(z)
 
-    if (x >= zbin) {
-      x += (round_ptr[rc != 0]);
-      y  = ((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x))
-           >> quant_shift_ptr[rc != 0];           // quantize (x)
-      x  = (y ^ sz) - sz;                         // get the sign back
-      qcoeff_ptr[rc]  = x;                        // write to destination
-      dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0]; // dequantized value
+      if (x >= zbin) {
+        x += (round_ptr[rc != 0]);
+        y  = ((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x))
+             >> quant_shift_ptr[rc != 0];            // quantize (x)
+        x  = (y ^ sz) - sz;                          // get the sign back
+        qcoeff_ptr[rc]  = x;                         // write to destination
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0];  // dequantized value
 
-      if (y) {
-        eob = i;                                  // last nonzero coeffs
-        zero_run = 0;
+        if (y) {
+          eob = i;                                   // last nonzero coeffs
+          zero_run = 0;
+        }
       }
     }
   }
-
   d->eob = eob + 1;
 }
 
@@ -324,7 +332,7 @@ void vp9_quantize_mb_16x16(MACROBLOCK *x) {
 }
 
 static void quantize(int16_t *zbin_boost_orig_ptr,
-                     int16_t *coeff_ptr, int n_coeffs, int max_coeffs,
+                     int16_t *coeff_ptr, int n_coeffs, int skip_block,
                      int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr,
                      uint8_t *quant_shift_ptr,
                      int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
@@ -340,27 +348,30 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
   vpx_memset(dqcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
 
   eob = -1;
-  for (i = 0; i < max_coeffs; i++) {
-    rc   = scan[i];
-    z    = coeff_ptr[rc] * mul;
 
-    zbin = (zbin_ptr[rc != 0] + zbin_boost_ptr[zero_run] + zbin_oq_value);
-    zero_run += (zero_run < 15);
+  if (!skip_block) {
+    for (i = 0; i < n_coeffs; i++) {
+      rc   = scan[i];
+      z    = coeff_ptr[rc] * mul;
 
-    sz = (z >> 31);                               // sign of z
-    x  = (z ^ sz) - sz;                           // x = abs(z)
+      zbin = (zbin_ptr[rc != 0] + zbin_boost_ptr[zero_run] + zbin_oq_value);
+      zero_run += (zero_run < 15);
 
-    if (x >= zbin) {
-      x += (round_ptr[rc!=0]);
-      y  = ((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x))
-          >> quant_shift_ptr[rc!=0];              // quantize (x)
-      x  = (y ^ sz) - sz;                         // get the sign back
-      qcoeff_ptr[rc]  = x;                        // write to destination
-      dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0] / mul;  // dequantized value
+      sz = (z >> 31);                               // sign of z
+      x  = (z ^ sz) - sz;                           // x = abs(z)
 
-      if (y) {
-        eob = i;                                  // last nonzero coeffs
-        zero_run = 0;
+      if (x >= zbin) {
+        x += (round_ptr[rc != 0]);
+        y  = ((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x))
+            >> quant_shift_ptr[rc != 0];            // quantize (x)
+        x  = (y ^ sz) - sz;                         // get the sign back
+        qcoeff_ptr[rc]  = x;                        // write to destination
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0] / mul;  // dequantized value
+
+        if (y) {
+          eob = i;                                  // last nonzero coeffs
+          zero_run = 0;
+        }
       }
     }
   }
@@ -371,7 +382,7 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
 void vp9_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
   quantize(b->zrun_zbin_boost,
            b->coeff,
-           256, b->eob_max_offset_16x16,
+           256, b->skip_block,
            b->zbin, b->round, b->quant, b->quant_shift,
            d->qcoeff,
            d->dqcoeff,
@@ -381,36 +392,41 @@ void vp9_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
 }
 
 void vp9_quantize_sby_32x32(MACROBLOCK *x) {
-  x->e_mbd.block[0].eob = 0;
-  quantize(x->block[0].zrun_zbin_boost,
+  MACROBLOCKD *xd = &x->e_mbd;
+  BLOCK *b = &x->block[0];
+  BLOCKD *d = &xd->block[0];
+
+  d->eob = 0;
+  quantize(b->zrun_zbin_boost,
            x->sb_coeff_data.coeff,
-           1024, x->block[0].eob_max_offset_32x32,
-           x->block[0].zbin,
-           x->block[0].round, x->block[0].quant, x->block[0].quant_shift,
-           x->e_mbd.sb_coeff_data.qcoeff,
-           x->e_mbd.sb_coeff_data.dqcoeff,
-           x->e_mbd.block[0].dequant,
-           x->block[0].zbin_extra,
-           &x->e_mbd.block[0].eob,
+           1024, b->skip_block,
+           b->zbin,
+           b->round, b->quant, b->quant_shift,
+           xd->sb_coeff_data.qcoeff,
+           xd->sb_coeff_data.dqcoeff,
+           d->dequant,
+           b->zbin_extra,
+           &d->eob,
            vp9_default_zig_zag1d_32x32, 2);
 }
 
 void vp9_quantize_sbuv_16x16(MACROBLOCK *x) {
   int i;
+  MACROBLOCKD *xd = &x->e_mbd;
 
-  x->e_mbd.block[16].eob = 0;
-  x->e_mbd.block[20].eob = 0;
+  xd->block[16].eob = 0;
+  xd->block[20].eob = 0;
   for (i = 16; i < 24; i += 4)
     quantize(x->block[i].zrun_zbin_boost,
              x->sb_coeff_data.coeff + 1024 + (i - 16) * 64,
-             256, x->block[i].eob_max_offset_16x16,
+             256, x->block[i].skip_block,
              x->block[i].zbin,
              x->block[i].round, x->block[0].quant, x->block[i].quant_shift,
-             x->e_mbd.sb_coeff_data.qcoeff + 1024 + (i - 16) * 64,
-             x->e_mbd.sb_coeff_data.dqcoeff + 1024 + (i - 16) * 64,
-             x->e_mbd.block[i].dequant,
+             xd->sb_coeff_data.qcoeff + 1024 + (i - 16) * 64,
+             xd->sb_coeff_data.dqcoeff + 1024 + (i - 16) * 64,
+             xd->block[i].dequant,
              x->block[i].zbin_extra,
-             &x->e_mbd.block[i].eob,
+             &xd->block[i].eob,
              vp9_default_zig_zag1d_16x16, 1);
 }
 
@@ -557,17 +573,8 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
     x->block[i].zbin_extra = (int16_t)zbin_extra;
 
     // Segment skip feature.
-    if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-      x->block[i].eob_max_offset = 0;
-      x->block[i].eob_max_offset_8x8 = 0;
-      x->block[i].eob_max_offset_16x16 = 0;
-      x->block[i].eob_max_offset_32x32 = 0;
-    } else {
-      x->block[i].eob_max_offset = 16;
-      x->block[i].eob_max_offset_8x8 = 64;
-      x->block[i].eob_max_offset_16x16 = 256;
-      x->block[i].eob_max_offset_32x32 = 1024;
-    }
+    x->block[i].skip_block =
+      vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
   }
 
   // UV
@@ -583,19 +590,11 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
     x->block[i].round = cpi->UVround[QIndex];
     x->e_mbd.block[i].dequant = cpi->common.UVdequant[QIndex];
     x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[QIndex];
-
     x->block[i].zbin_extra = (int16_t)zbin_extra;
 
     // Segment skip feature.
-    if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-      x->block[i].eob_max_offset = 0;
-      x->block[i].eob_max_offset_8x8 = 0;
-      x->block[i].eob_max_offset_16x16 = 0;
-    } else {
-      x->block[i].eob_max_offset = 16;
-      x->block[i].eob_max_offset_8x8 = 64;
-      x->block[i].eob_max_offset_16x16 = 256;
-    }
+    x->block[i].skip_block =
+      vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
   }
 
   // Y2
@@ -614,13 +613,8 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
 
   // TBD perhaps not use for Y2
   // Segment skip feature.
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-    x->block[24].eob_max_offset = 0;
-    x->block[24].eob_max_offset_8x8 = 0;
-  } else {
-    x->block[24].eob_max_offset = 16;
-    x->block[24].eob_max_offset_8x8 = 4;
-  }
+  x->block[24].skip_block =
+    vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
 
   /* save this macroblock QIndex for vp9_update_zbin_extra() */
   x->e_mbd.q_index = QIndex;
