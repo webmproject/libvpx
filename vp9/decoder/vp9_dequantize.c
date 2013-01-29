@@ -354,13 +354,15 @@ void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
   int16_t output[1024];
   int i;
 
-  input[0]= input[0] * dq[0] / 2;
-  for (i = 1; i < 1024; i++)
-    input[i] = input[i] * dq[1] / 2;
-  vp9_short_idct32x32_c(input, output, 64);
-  vpx_memset(input, 0, 2048);
+  if (eob) {
+    input[0]= input[0] * dq[0] / 2;
+    for (i = 1; i < 1024; i++)
+      input[i] = input[i] * dq[1] / 2;
+    vp9_short_idct32x32_c(input, output, 64);
+    vpx_memset(input, 0, 2048);
 
-  add_residual(output, pred, pitch, dest, stride, 32, 32);
+    add_residual(output, pred, pitch, dest, stride, 32, 32);
+  }
 }
 
 void vp9_dequant_idct_add_uv_block_16x16_c(int16_t *q, const int16_t *dq,
