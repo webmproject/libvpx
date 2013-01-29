@@ -16,9 +16,9 @@ void vpx_log(const char *format, ...);
 
 #include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
+#include "vp9/common/vp9_convolve.h"
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_treecoder.h"
-#include "vp9/common/vp9_subpixel.h"
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_common.h"
 
@@ -393,15 +393,8 @@ typedef struct macroblockd {
   void (*inv_walsh4x4_1)(int16_t *in, int16_t *out);
   void (*inv_walsh4x4_lossless)(int16_t *in, int16_t *out);
 
+  struct subpix_fn_table  subpix;
 
-  vp9_subpix_fn_t  subpixel_predict4x4;
-  vp9_subpix_fn_t  subpixel_predict8x4;
-  vp9_subpix_fn_t  subpixel_predict8x8;
-  vp9_subpix_fn_t  subpixel_predict16x16;
-  vp9_subpix_fn_t  subpixel_predict_avg4x4;
-  vp9_subpix_fn_t  subpixel_predict_avg8x4;
-  vp9_subpix_fn_t  subpixel_predict_avg8x8;
-  vp9_subpix_fn_t  subpixel_predict_avg16x16;
   int allow_high_precision_mv;
 
   int corrupted;

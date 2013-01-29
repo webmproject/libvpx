@@ -23,21 +23,6 @@ EOF
 }
 forward_decls vp9_common_forward_decls
 
-prototype void vp9_filter_block2d_4x4_8 "const uint8_t *src_ptr, const unsigned int src_stride, const int16_t *HFilter_aligned16, const int16_t *VFilter_aligned16, uint8_t *dst_ptr, unsigned int dst_stride"
-prototype void vp9_filter_block2d_8x4_8 "const uint8_t *src_ptr, const unsigned int src_stride, const int16_t *HFilter_aligned16, const int16_t *VFilter_aligned16, uint8_t *dst_ptr, unsigned int dst_stride"
-prototype void vp9_filter_block2d_8x8_8 "const uint8_t *src_ptr, const unsigned int src_stride, const int16_t *HFilter_aligned16, const int16_t *VFilter_aligned16, uint8_t *dst_ptr, unsigned int dst_stride"
-prototype void vp9_filter_block2d_16x16_8 "const uint8_t *src_ptr, const unsigned int src_stride, const int16_t *HFilter_aligned16, const int16_t *VFilter_aligned16, uint8_t *dst_ptr, unsigned int dst_stride"
-
-# At the very least, MSVC 2008 has compiler bug exhibited by this code; code
-# compiles warning free but a dissassembly of generated code show bugs. To be
-# on the safe side, only enabled when compiled with 'gcc'.
-if [ "$CONFIG_GCC" = "yes" ]; then
-    specialize vp9_filter_block2d_4x4_8 sse4_1 sse2
-fi
-    specialize vp9_filter_block2d_8x4_8 ssse3 #sse4_1 sse2
-    specialize vp9_filter_block2d_8x8_8 ssse3 #sse4_1 sse2
-    specialize vp9_filter_block2d_16x16_8 ssse3 #sse4_1 sse2
-
 #
 # Dequant
 #
@@ -86,26 +71,16 @@ specialize vp9_dequant_idct_add_uv_block_16x16
 #
 # RECON
 #
-prototype void vp9_copy_mem16x16 "uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
+prototype void vp9_copy_mem16x16 "const uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
 specialize vp9_copy_mem16x16 mmx sse2 dspr2
 vp9_copy_mem16x16_dspr2=vp9_copy_mem16x16_dspr2
 
-prototype void vp9_copy_mem8x8 "uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
+prototype void vp9_copy_mem8x8 "const uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
 specialize vp9_copy_mem8x8 mmx dspr2
 vp9_copy_mem8x8_dspr2=vp9_copy_mem8x8_dspr2
 
-prototype void vp9_copy_mem8x4 "uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
+prototype void vp9_copy_mem8x4 "const uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
 specialize vp9_copy_mem8x4 mmx
-
-prototype void vp9_avg_mem16x16 "uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
-specialize vp9_avg_mem16x16
-
-prototype void vp9_avg_mem8x8 "uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
-specialize vp9_avg_mem8x8
-
-prototype void vp9_copy_mem8x4 "uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
-specialize vp9_copy_mem8x4 mmx dspr2
-vp9_copy_mem8x4_dspr2=vp9_copy_mem8x4_dspr2
 
 prototype void vp9_recon_b "uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr, int stride"
 specialize vp9_recon_b
@@ -286,111 +261,6 @@ specialize vp9_convolve8_avg_horiz
 
 prototype void vp9_convolve8_avg_vert "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8_avg_vert
-
-prototype void vp9_eighttap_predict16x16 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict16x16
-
-prototype void vp9_eighttap_predict8x8 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict8x8
-
-prototype void vp9_eighttap_predict_avg16x16 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_avg16x16
-
-prototype void vp9_eighttap_predict_avg8x8 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_avg8x8
-
-prototype void vp9_eighttap_predict_avg4x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_avg4x4
-
-prototype void vp9_eighttap_predict8x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict8x4
-
-prototype void vp9_eighttap_predict4x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict4x4
-
-prototype void vp9_eighttap_predict16x16_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict16x16_sharp
-
-prototype void vp9_eighttap_predict8x8_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict8x8_sharp
-
-prototype void vp9_eighttap_predict_avg16x16_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_avg16x16_sharp
-
-prototype void vp9_eighttap_predict_avg8x8_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_avg8x8_sharp
-
-prototype void vp9_eighttap_predict_avg4x4_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_avg4x4_sharp
-
-prototype void vp9_eighttap_predict8x4_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict8x4_sharp
-
-prototype void vp9_eighttap_predict4x4_sharp "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict4x4_sharp
-
-prototype void vp9_eighttap_predict16x16_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict16x16_smooth
-
-prototype void vp9_eighttap_predict8x8_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict8x8_smooth
-
-prototype void vp9_eighttap_predict_avg16x16_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_avg16x16_smooth
-
-prototype void vp9_eighttap_predict_avg8x8_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_avg8x8_smooth
-
-prototype void vp9_eighttap_predict_avg4x4_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict_avg4x4_smooth
-
-prototype void vp9_eighttap_predict8x4_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict8x4_smooth
-
-prototype void vp9_eighttap_predict4x4_smooth "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_eighttap_predict4x4_smooth
-
-prototype void vp9_sixtap_predict16x16 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_sixtap_predict16x16
-
-prototype void vp9_sixtap_predict8x8 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_sixtap_predict8x8
-
-prototype void vp9_sixtap_predict_avg16x16 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_sixtap_predict_avg16x16
-
-prototype void vp9_sixtap_predict_avg8x8 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_sixtap_predict_avg8x8
-
-prototype void vp9_sixtap_predict8x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_sixtap_predict8x4
-
-prototype void vp9_sixtap_predict4x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_sixtap_predict4x4
-
-prototype void vp9_sixtap_predict_avg4x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_sixtap_predict_avg4x4
-
-prototype void vp9_bilinear_predict16x16 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_bilinear_predict16x16 sse2
-
-prototype void vp9_bilinear_predict8x8 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_bilinear_predict8x8 sse2
-
-prototype void vp9_bilinear_predict_avg16x16 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_bilinear_predict_avg16x16
-
-prototype void vp9_bilinear_predict_avg8x8 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_bilinear_predict_avg8x8
-
-prototype void vp9_bilinear_predict8x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_bilinear_predict8x4
-
-prototype void vp9_bilinear_predict4x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_bilinear_predict4x4
-
-prototype void vp9_bilinear_predict_avg4x4 "uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, uint8_t *dst_ptr, int  dst_pitch"
-specialize vp9_bilinear_predict_avg4x4
 
 #
 # dct

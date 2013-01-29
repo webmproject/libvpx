@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9/common/vp9_subpixel.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "recon.h"
 #include "vp9/common/vp9_onyxc_int.h"
