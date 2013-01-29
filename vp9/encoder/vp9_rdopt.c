@@ -498,8 +498,8 @@ static int cost_coeffs(MACROBLOCK *mb,
   pn = pt;
 #endif
 
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB))
-    seg_eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
+    seg_eob = 0;
 
   if (tx_type != DCT_DCT) {
     for (; c < eob; c++) {
@@ -2076,12 +2076,8 @@ int vp9_cost_mv_ref(VP9_COMP *cpi,
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
-  // If the mode coding is done entirely at the segment level
-  // we should not account for it at the per mb level in rd code.
-  // Note that if the segment level coding is expanded from single mode
-  // to multiple mode masks as per reference frame coding we will need
-  // to do something different here.
-  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
+  // Dont account for mode here if segment skip is enabled.
+  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     VP9_COMMON *pc = &cpi->common;
 
     vp9_prob p [VP9_MVREFS - 1];
@@ -3689,18 +3685,16 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME) &&
         !vp9_check_segref(xd, segment_id, mbmi->ref_frame)) {
       continue;
-    // If the segment mode feature is enabled....
+    // If the segment skip feature is enabled....
     // then do nothing if the current mode is not allowed..
-    } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE) &&
-               (this_mode !=
-                vp9_get_segdata(xd, segment_id, SEG_LVL_MODE))) {
+    } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP) &&
+               (this_mode != ZEROMV)) {
       continue;
-    // Disable this drop out case if either the mode or ref frame
-    // segment level feature is enabled for this segment. This is to
+    // Disable this drop out case if  the ref frame segment
+    // level feature is enabled for this segment. This is to
     // prevent the possibility that the we end up unable to pick any mode.
-    } else if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME) &&
-               !vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
-      // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
+    } else if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME)) {
+      // Only consider ZEROMV/ALTREF_FRAME for alt ref frame overlay,
       // unless ARNR filtering is enabled in which case we want
       // an unfiltered alternative
       if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
@@ -3990,10 +3984,8 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (cpi->common.mb_no_coeff_skip) {
         int mb_skip_allowed;
 
-        // Is Mb level skip allowed for this mb.
-        mb_skip_allowed =
-          !vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
-          vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+        // Is Mb level skip allowed (i.e. not coded at segment level).
+        mb_skip_allowed = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
 
         if (skippable) {
           mbmi->mb_skip_coeff = 1;
@@ -4199,12 +4191,11 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         cpi->rd_thresh_mult[best_mode_index];
   }
 
-  // This code force Altref,0,0 and skip for the frame that overlays a
+  // This code forces Altref,0,0 and skip for the frame that overlays a
   // an alrtef unless Altref is filtered. However, this is unsafe if
-  // segment level coding of ref frame or mode is enabled for this
+  // segment level coding of ref frame is enabled for this
   // segment.
   if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME) &&
-      !vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE) &&
       cpi->is_src_frame_alt_ref &&
       (cpi->oxcf.arnr_max_frames == 0) &&
       (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME)) {
@@ -4667,16 +4658,15 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME) &&
         !vp9_check_segref(xd, segment_id, ref_frame)) {
       continue;
-    // If the segment mode feature is enabled....
+    // If the segment skip feature is enabled....
     // then do nothing if the current mode is not allowed..
-    } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE) &&
-               (this_mode != vp9_get_segdata(xd, segment_id, SEG_LVL_MODE))) {
+    } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP) &&
+               (this_mode != ZEROMV)) {
       continue;
-    // Disable this drop out case if either the mode or ref frame
+    // Disable this drop out case if the ref frame
     // segment level feature is enabled for this segment. This is to
     // prevent the possibility that we end up unable to pick any mode.
-    } else if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME) &&
-               !vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
+    } else if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME)) {
       // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
       // unless ARNR filtering is enabled in which case we want
       // an unfiltered alternative
@@ -4765,10 +4755,8 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (cpi->common.mb_no_coeff_skip) {
         int mb_skip_allowed;
 
-        // Is Mb level skip allowed for this mb.
-        mb_skip_allowed =
-          !vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
-          vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+        // Is Mb level skip allowed (i.e. not coded at segment level).
+        mb_skip_allowed = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
 
         if (skippable) {
           // Back out the coefficient coding costs
@@ -4952,10 +4940,8 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   // This code forces Altref,0,0 and skip for the frame that overlays a
   // an alrtef unless Altref is filtered. However, this is unsafe if
-  // segment level coding of ref frame or mode is enabled for this
-  // segment.
+  // segment level coding of ref frame is enabled for this segment.
   if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME) &&
-      !vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE) &&
       cpi->is_src_frame_alt_ref &&
       (cpi->oxcf.arnr_max_frames == 0) &&
       (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME)) {

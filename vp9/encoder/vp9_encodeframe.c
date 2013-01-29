@@ -488,8 +488,7 @@ static void update_state(VP9_COMP *cpi,
 
   {
     int segment_id = mbmi->segment_id;
-    if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
-        vp9_get_segdata(xd, segment_id, SEG_LVL_EOB)) {
+    if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
       for (i = 0; i < NB_TXFM_MODES; i++) {
         cpi->rd_tx_select_diff[i] += ctx->txfm_rd_diff[i];
       }
@@ -1388,8 +1387,7 @@ static void reset_skip_txfm_size_mb(VP9_COMP *cpi,
     const int segment_id = mbmi->segment_id;
 
     xd->mode_info_context = mi;
-    assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-            vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
+    assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) ||
            (cm->mb_no_coeff_skip && mbmi->mb_skip_coeff));
     mbmi->txfm_size = txfm_max;
   }
@@ -1433,8 +1431,7 @@ static void reset_skip_txfm_size_sb32(VP9_COMP *cpi, MODE_INFO *mi,
     const int xmbs = MIN(2, mb_cols_left);
 
     xd->mode_info_context = mi;
-    assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-            vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
+    assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) ||
            (cm->mb_no_coeff_skip && get_skip_flag(mi, mis, ymbs, xmbs)));
     set_txfm_flag(mi, mis, ymbs, xmbs, txfm_max);
   }
@@ -1454,8 +1451,7 @@ static void reset_skip_txfm_size_sb64(VP9_COMP *cpi, MODE_INFO *mi,
     const int xmbs = MIN(4, mb_cols_left);
 
     xd->mode_info_context = mi;
-    assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-            vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) ||
+    assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) ||
            (cm->mb_no_coeff_skip && get_skip_flag(mi, mis, ymbs, xmbs)));
     set_txfm_flag(mi, mis, ymbs, xmbs, txfm_max);
   }
@@ -2227,8 +2223,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     int segment_id = mbmi->segment_id;
     if (cpi->common.txfm_mode == TX_MODE_SELECT &&
         !((cpi->common.mb_no_coeff_skip && mbmi->mb_skip_coeff) ||
-          (vp9_segfeature_active(&x->e_mbd, segment_id, SEG_LVL_EOB) &&
-           vp9_get_segdata(&x->e_mbd, segment_id, SEG_LVL_EOB) == 0))) {
+          (vp9_segfeature_active(&x->e_mbd, segment_id, SEG_LVL_SKIP)))) {
       assert(mbmi->txfm_size <= TX_16X16);
       if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED &&
           mbmi->mode != SPLITMV) {
@@ -2465,8 +2460,7 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
   if (output_enabled) {
     if (cm->txfm_mode == TX_MODE_SELECT &&
         !((cm->mb_no_coeff_skip && skip[0] && skip[1] && skip[2] && skip[3]) ||
-          (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-           vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+          (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
       cpi->txfm_count_32x32p[mi->mbmi.txfm_size]++;
     } else {
       TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ?
@@ -2729,8 +2723,7 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
              skip[4] && skip[5] && skip[6] && skip[7] &&
              skip[8] && skip[9] && skip[10] && skip[11] &&
              skip[12] && skip[13] && skip[14] && skip[15]))) ||
-          (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-           vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+          (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
       cpi->txfm_count_32x32p[mi->mbmi.txfm_size]++;
     } else {
       int x, y;

@@ -12,9 +12,9 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_seg_common.h"
 
-static const int segfeaturedata_signed[SEG_LVL_MAX] = { 1, 1, 0, 0, 0, 0 };
+static const int segfeaturedata_signed[SEG_LVL_MAX] = { 1, 1, 0, 0, 0 };
 static const int seg_feature_data_max[SEG_LVL_MAX] =
-                 { MAXQ, 63, 0xf, MB_MODE_COUNT - 1, 255, TX_SIZE_MAX_SB - 1};
+                 { MAXQ, 63, 0xf, 0xf, TX_SIZE_MAX_SB - 1};
 
 // These functions provide access to new segment level features.
 // Eventually these function may be "optimized out" but for the moment,

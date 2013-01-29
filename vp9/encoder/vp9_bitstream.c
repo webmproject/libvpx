@@ -729,8 +729,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
   if (!pc->mb_no_coeff_skip) {
     skip_coeff = 0;
-  } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-             vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) {
+  } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     skip_coeff = 1;
   } else {
     const int nmbs = mb_size;
@@ -750,24 +749,18 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   }
 
   // Encode the reference frame.
-  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)
-      || vp9_get_segdata(xd, segment_id, SEG_LVL_MODE) >= NEARESTMV) {
-    encode_ref_frame(bc, pc, xd, segment_id, rf);
-  } else {
-    assert(rf == INTRA_FRAME);
-  }
+  encode_ref_frame(bc, pc, xd, segment_id, rf);
 
   if (rf == INTRA_FRAME) {
 #ifdef ENTROPY_STATS
     active_section = 6;
 #endif
 
-    if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
-      if (m->mbmi.sb_type)
-        write_sb_ymode(bc, mode, pc->fc.sb_ymode_prob);
-      else
-        write_ymode(bc, mode, pc->fc.ymode_prob);
-    }
+    if (m->mbmi.sb_type)
+      write_sb_ymode(bc, mode, pc->fc.sb_ymode_prob);
+    else
+      write_ymode(bc, mode, pc->fc.ymode_prob);
+
     if (mode == B_PRED) {
       int j = 0;
       do {
@@ -798,8 +791,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     active_section = 3;
 #endif
 
-    // Is the segment coding of mode enabled
-    if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_MODE)) {
+    // Is segment skip is not enabled code the mode.
+    if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
       if (mi->sb_type) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
       } else {
@@ -942,8 +935,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
                                mi->partitioning == PARTITIONING_4X4))) &&
       pc->txfm_mode == TX_MODE_SELECT &&
       !((pc->mb_no_coeff_skip && skip_coeff) ||
-        (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-         vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+        (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
     TX_SIZE sz = mi->txfm_size;
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
@@ -972,8 +964,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
 
   if (!c->mb_no_coeff_skip) {
     skip_coeff = 0;
-  } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-             vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0) {
+  } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     skip_coeff = 1;
   } else {
     const int nmbs = 1 << m->mbmi.sb_type;
@@ -1032,8 +1023,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
 
   if (ym <= I8X8_PRED && c->txfm_mode == TX_MODE_SELECT &&
       !((c->mb_no_coeff_skip && skip_coeff) ||
-        (vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB) &&
-         vp9_get_segdata(xd, segment_id, SEG_LVL_EOB) == 0))) {
+        (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
     TX_SIZE sz = m->mbmi.txfm_size;
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);

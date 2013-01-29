@@ -239,11 +239,13 @@ SKIP_START:
 }
 
 static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
-  int active = vp9_segfeature_active(xd, segment_id, SEG_LVL_EOB);
-  int eob = vp9_get_segdata(xd, segment_id, SEG_LVL_EOB);
+  int eob;
 
-  if (!active || eob > eob_max)
+  if (vp9_get_segdata(xd, segment_id, SEG_LVL_SKIP)) {
+    eob = 0;
+  } else {
     eob = eob_max;
+  }
   return eob;
 }
 
