@@ -222,7 +222,6 @@ obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
     -I"$(SRC_PATH_BARE)" \
 
 PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.vcproj
-PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.bat
 
 vpx.def: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
