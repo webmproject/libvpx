@@ -1,0 +1,310 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//vjw\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "A[x_idx]",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vjs\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "L[y_idx]",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vjo\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "(a[0]+a[1]+a[2]+a[3]) !\u003d 0",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vjc\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "(l[0]+l[1]+l[2]+l[3]) !\u003d 0",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vjQ\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "\u0026xd-\u003esb_coeff_data.qcoeff[64*n], since n is a multiple of 4.",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vjI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2415,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "No need to do 4x subtract_mby_s, just call subtract_sby_s once.",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vjA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2422,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "same here, don\u0027t do 4x recon_mby_s, just once recon_sby_s should be ok.",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vi0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2429,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "just use tokenize_sb32() and extend it to support 16x16 also.",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vi4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2442,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "let\u0027s not add manual stuffing functions, just vp9_stuff_sb32() can be extended to support both TX32X32 as well as TX_16X16.",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vis\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "unused?",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vik\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 900,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "unused?",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//viY\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "unused",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vic\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "merge with tokenize_sb",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//viU\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "A[x_idx]",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//viQ\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "L[y_idx]",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//viM\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "A[x_idx]",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//viI\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "L[y_idx]",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//viA\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1069,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-29T23:17:17Z",
+      "side": 1,
+      "message": "merge with stuff_sb",
+      "revId": "357ff1ec8b15a830ace35daa57f75dfd84b9e23b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
