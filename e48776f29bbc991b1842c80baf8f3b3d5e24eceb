@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//wFU\u003d",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-01-29T17:21:59Z",
+      "side": 0,
+      "message": "OK, I\u0027ll let you and Scott talk it out.",
+      "parentUuid": "AAAAVH//wG4\u003d",
+      "revId": "e48776f29bbc991b1842c80baf8f3b3d5e24eceb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//wG0\u003d",
         "filename": "vp9/common/vp9_findnearmv.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-01-29T16:40:58Z",
       "side": 0,
       "message": "what was the warning here? These should be harmless, unless it\u0027s just a mismatched prototype. I\u0027m ok with removing them if that\u0027s the case, I don\u0027t think const should be part of the API here  so better not to add them to the rtcd prototypes.",
+      "revId": "e48776f29bbc991b1842c80baf8f3b3d5e24eceb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//wFY\u003d",
+        "filename": "vp9/common/vp9_findnearmv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-01-29T17:21:59Z",
+      "side": 0,
+      "message": "Right mismatched prototype. Actually it was on vp9_sub_pixel_variance16x2_c but there is no reason to have const on a built in type. I have already changed this before, so I was just changing the rest in the file.",
+      "parentUuid": "AAAAVH//wG0\u003d",
       "revId": "e48776f29bbc991b1842c80baf8f3b3d5e24eceb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
