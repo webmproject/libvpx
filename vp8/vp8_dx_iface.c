@@ -598,13 +598,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
         }
 
         /* update the pbi fragment data */
-        ctx->pbi->num_fragments = ctx->fragments.count;
-        ctx->pbi->input_fragments = ctx->fragments.enabled;
-        vpx_memcpy(ctx->pbi->fragments, ctx->fragments.ptrs,
-                   sizeof(ctx->fragments.ptrs));
-        vpx_memcpy(ctx->pbi->fragment_sizes, ctx->fragments.sizes,
-                   sizeof(ctx->fragments.sizes));
-
+        ctx->pbi->fragments = ctx->fragments;
 
         ctx->user_priv = user_priv;
         if (vp8dx_receive_compressed_data(ctx->pbi, data_sz, data, deadline))

@@ -282,7 +282,7 @@ static int swap_frame_buffers (VP8_COMMON *cm)
 int check_fragments_for_errors(VP8D_COMP *pbi)
 {
     if (!pbi->ec_active &&
-        pbi->num_fragments <= 1 && pbi->fragment_sizes[0] == 0)
+        pbi->fragments.count <= 1 && pbi->fragments.sizes[0] == 0)
     {
         VP8_COMMON *cm = &pbi->common;
 
