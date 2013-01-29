@@ -50,10 +50,7 @@ typedef struct block {
   int src;
   int src_stride;
 
-  int eob_max_offset;
-  int eob_max_offset_8x8;
-  int eob_max_offset_16x16;
-  int eob_max_offset_32x32;
+  int skip_block;
 } BLOCK;
 
 typedef struct {
