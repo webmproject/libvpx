@@ -32,29 +32,32 @@
 
 #define WRITE_RECON_BUFFER 0
 #if WRITE_RECON_BUFFER == 1
-static void recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s) {
+static void recon_write_yuv_frame(const char *name,
+                                  const YV12_BUFFER_CONFIG *s,
+                                  int w, int _h) {
   FILE *yuv_file = fopen((char *)name, "ab");
-  uint8_t *src = s->y_buffer;
-  int h = s->y_height;
+  const uint8_t *src = s->y_buffer;
+  int h = _h;
 
   do {
-    fwrite(src, s->y_width, 1,  yuv_file);
+    fwrite(src, w, 1,  yuv_file);
     src += s->y_stride;
   } while (--h);
 
   src = s->u_buffer;
-  h = s->uv_height;
+  h = (_h + 1) >> 1;
+  w = (w + 1) >> 1;
 
   do {
-    fwrite(src, s->uv_width, 1,  yuv_file);
+    fwrite(src, w, 1,  yuv_file);
     src += s->uv_stride;
   } while (--h);
 
   src = s->v_buffer;
-  h = s->uv_height;
+  h = (_h + 1) >> 1;
 
   do {
-    fwrite(src, s->uv_width, 1, yuv_file);
+    fwrite(src, w, 1, yuv_file);
     src += s->uv_stride;
   } while (--h);
 
@@ -344,7 +347,8 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 
 #if WRITE_RECON_BUFFER == 1
   if (cm->show_frame)
-    recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
+    recon_write_yuv_frame("recon.yuv", cm->frame_to_show,
+                          cm->Width, cm->Height);
 #endif
 
   vp9_clear_system_state();
