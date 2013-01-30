@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//vDg\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2013-01-30T13:34:49Z",
+      "side": 1,
+      "message": "Is the \"\u0026\u0026 xd-\u003esb_index !\u003d 3\" correct condition? I think above right is available at sb_index\u003d\u003d3 for MBs at index 0 and 2.",
+      "revId": "5220ad3d37f4a174489e8b18f117b87dcd5404ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
