@@ -393,6 +393,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
      70,  70,  69,  69,  69,  69,  68,  68,
      68,  68,  68,  67,  67,  67,  67,  67,
   };
+
   int size_scale = (size >= 64 ? 1:
                     size == 32 ? 2 :
                     size == 16 ? 4 :
@@ -469,8 +470,21 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
       break;
 
     case D45_PRED:
-    case DC_PRED:
+      for (i = 0; i < size; ++i) {
+        for (j = 0; j < size; ++j) {
+          int k = i * interstride + j;
+          int scale = (weights1d[i * size_scale] +
+                       weights1d[j * size_scale]) >> 1;
+          interpred[k] =
+              ((scale_max - scale) * interpred[k] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+              >> scale_bits;
+        }
+      }
+      break;
+
     case TM_PRED:
+    case DC_PRED:
     default:
       // simple average
       for (i = 0; i < size; ++i) {
