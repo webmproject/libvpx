@@ -3177,7 +3177,8 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Candidate refinement carried out at encoder and decoder
   vp9_find_best_ref_mvs(xd,
-                        cpi->common.error_resilient_mode ?
+                        cpi->common.error_resilient_mode ||
+                        cpi->common.frame_parallel_decoding_mode ?
                         0 : y_buffer[frame_type],
                         yv12->y_stride,
                         mbmi->ref_mvs[frame_type],

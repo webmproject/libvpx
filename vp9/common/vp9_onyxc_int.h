@@ -277,6 +277,7 @@ typedef struct VP9Common {
 #endif
 
   int error_resilient_mode;
+  int frame_parallel_decoding_mode;
 } VP9_COMMON;
 
 static int get_free_fb(VP9_COMMON *cm) {

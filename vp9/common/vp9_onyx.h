@@ -165,6 +165,12 @@ extern "C"
      */
     unsigned int error_resilient_mode;
 
+    /* Bitfield defining the parallel decoding mode where the
+     * decoding in successive frames may be conducted in parallel
+     * just by decoding the frame headers.
+     */
+    unsigned int frame_parallel_decoding_mode;
+
     int arnr_max_frames;
     int arnr_strength;
     int arnr_type;

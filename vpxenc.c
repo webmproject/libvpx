@@ -993,12 +993,20 @@ static const arg_def_t timebase         = ARG_DEF(NULL, "timebase", 1,
                                                   "Output timestamp precision (fractional seconds)");
 static const arg_def_t error_resilient  = ARG_DEF(NULL, "error-resilient", 1,
                                                   "Enable error resiliency features");
+#if CONFIG_VP9_ENCODER
+static const arg_def_t frame_parallel_decoding  = ARG_DEF(
+    NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
+#endif
 static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
                                                   "Max number of frames to lag");
 
 static const arg_def_t *global_args[] = {
   &use_yv12, &use_i420, &usage, &threads, &profile,
-  &width, &height, &stereo_mode, &timebase, &framerate, &error_resilient,
+  &width, &height, &stereo_mode, &timebase, &framerate,
+  &error_resilient,
+#if CONFIG_VP9_ENCODER
+  &frame_parallel_decoding,
+#endif
   &lag_in_frames, NULL
 };
 
@@ -1882,6 +1890,10 @@ static int parse_stream_params(struct global_config *global,
       validate_positive_rational(arg.name, &config->cfg.g_timebase);
     } else if (arg_match(&arg, &error_resilient, argi))
       config->cfg.g_error_resilient = arg_parse_uint(&arg);
+#if CONFIG_VP9_ENCODER
+    else if (arg_match(&arg, &frame_parallel_decoding, argi))
+      config->cfg.g_frame_parallel_decoding = arg_parse_uint(&arg);
+#endif
     else if (arg_match(&arg, &lag_in_frames, argi))
       config->cfg.g_lag_in_frames = arg_parse_uint(&arg);
     else if (arg_match(&arg, &dropframe_thresh, argi))
@@ -2062,6 +2074,9 @@ static void show_stream_config(struct stream_state  *stream,
   SHOW(g_timebase.num);
   SHOW(g_timebase.den);
   SHOW(g_error_resilient);
+#if CONFIG_VP9_ENCODER
+  SHOW(g_frame_parallel_decoding);
+#endif
   SHOW(g_pass);
   SHOW(g_lag_in_frames);
   SHOW(rc_dropframe_thresh);
