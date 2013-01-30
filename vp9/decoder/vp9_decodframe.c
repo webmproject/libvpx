@@ -1458,6 +1458,22 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
           pc->segment_pred_probs[i] = 255;
         }
       }
+
+      if (pc->temporal_update) {
+        int count[4];
+        const vp9_prob *p = xd->mb_segment_tree_probs;
+        vp9_prob *p_mod = xd->mb_segment_mispred_tree_probs;
+
+        count[0] =        p[0]  *        p[1];
+        count[1] =        p[0]  * (256 - p[1]);
+        count[2] = (256 - p[0]) *        p[2];
+        count[3] = (256 - p[0]) * (256 - p[2]);
+
+        p_mod[0] = get_binary_prob(count[1], count[2] + count[3]);
+        p_mod[1] = get_binary_prob(count[0], count[2] + count[3]);
+        p_mod[2] = get_binary_prob(count[0] + count[1], count[3]);
+        p_mod[3] = get_binary_prob(count[0] + count[1], count[2]);
+      }
     }
     // Is the segment data being updated
     xd->update_mb_segmentation_data = (unsigned char)vp9_read_bit(&header_bc);

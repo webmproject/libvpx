@@ -143,11 +143,74 @@ static int cost_segmap(MACROBLOCKD *xd,
   return cost;
 }
 
+// Based on set of segment counts calculate a probability tree
+static void calc_segtree_probs_pred(MACROBLOCKD *xd,
+                                    int (*segcounts)[MAX_MB_SEGMENTS],
+                                    vp9_prob *segment_tree_probs,
+                                    vp9_prob *mod_probs) {
+  int count[4];
+
+  assert(!segcounts[0][0] && !segcounts[1][1] &&
+         !segcounts[2][2] && !segcounts[3][3]);
+
+  // Total count for all segments
+  count[0] = segcounts[3][0] + segcounts[1][0] + segcounts[2][0];
+  count[1] = segcounts[2][1] + segcounts[0][1] + segcounts[3][1];
+  count[2] = segcounts[0][2] + segcounts[3][2] + segcounts[1][2];
+  count[3] = segcounts[1][3] + segcounts[2][3] + segcounts[0][3];
+
+  // Work out probabilities of each segment
+  segment_tree_probs[0] = get_binary_prob(count[0] + count[1],
+                                          count[2] + count[3]);
+  segment_tree_probs[1] = get_binary_prob(count[0], count[1]);
+  segment_tree_probs[2] = get_binary_prob(count[2], count[3]);
+
+  // now work out modified counts that the decoder would have
+  count[0] =        segment_tree_probs[0]  *        segment_tree_probs[1];
+  count[1] =        segment_tree_probs[0]  * (256 - segment_tree_probs[1]);
+  count[2] = (256 - segment_tree_probs[0]) *        segment_tree_probs[2];
+  count[3] = (256 - segment_tree_probs[0]) * (256 - segment_tree_probs[2]);
+
+  // Work out modified probabilties depending on what segment was predicted
+  mod_probs[0] = get_binary_prob(count[1], count[2] + count[3]);
+  mod_probs[1] = get_binary_prob(count[0], count[2] + count[3]);
+  mod_probs[2] = get_binary_prob(count[0] + count[1], count[3]);
+  mod_probs[3] = get_binary_prob(count[0] + count[1], count[2]);
+}
+
+// Based on set of segment counts and probabilities calculate a cost estimate
+static int cost_segmap_pred(MACROBLOCKD *xd,
+                            int (*segcounts)[MAX_MB_SEGMENTS],
+                            vp9_prob *probs, vp9_prob *mod_probs) {
+  int pred_seg, cost = 0;
+
+  for (pred_seg = 0; pred_seg < MAX_MB_SEGMENTS; pred_seg++) {
+    int count1, count2;
+
+    // Cost the top node of the tree
+    count1 = segcounts[pred_seg][0] + segcounts[pred_seg][1];
+    count2 = segcounts[pred_seg][2] + segcounts[pred_seg][3];
+    cost += count1 * vp9_cost_zero(mod_probs[pred_seg]) +
+            count2 * vp9_cost_one(mod_probs[pred_seg]);
+
+    // Now add the cost of each individual segment branch
+    if (pred_seg >= 2 && count1) {
+      cost += segcounts[pred_seg][0] * vp9_cost_zero(probs[1]) +
+              segcounts[pred_seg][1] * vp9_cost_one(probs[1]);
+    } else if (pred_seg < 2 && count2 > 0) {
+      cost += segcounts[pred_seg][2] * vp9_cost_zero(probs[2]) +
+              segcounts[pred_seg][3] * vp9_cost_one(probs[2]);
+    }
+  }
+
+  return cost;
+}
+
 static void count_segs(VP9_COMP *cpi,
                        MODE_INFO *mi,
                        int *no_pred_segcounts,
                        int (*temporal_predictor_count)[2],
-                       int *t_unpred_seg_counts,
+                       int (*t_unpred_seg_counts)[MAX_MB_SEGMENTS],
                        int mb_size, int mb_row, int mb_col) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
@@ -166,8 +229,8 @@ static void count_segs(VP9_COMP *cpi,
   // Temporal prediction not allowed on key frames
   if (cm->frame_type != KEY_FRAME) {
     // Test to see if the segment id matches the predicted value.
-    const int seg_predicted =
-        (segment_id == vp9_get_pred_mb_segid(cm, xd, segmap_index));
+    const int pred_seg_id = vp9_get_pred_mb_segid(cm, xd, segmap_index);
+    const int seg_predicted = (segment_id == pred_seg_id);
 
     // Get the segment id prediction context
     const int pred_context = vp9_get_pred_context(cm, xd, PRED_SEG_ID);
@@ -179,7 +242,7 @@ static void count_segs(VP9_COMP *cpi,
 
     if (!seg_predicted)
       // Update the "unpredicted" segment count
-      t_unpred_seg_counts[segment_id]++;
+      t_unpred_seg_counts[pred_seg_id][segment_id]++;
   }
 }
 
@@ -195,10 +258,11 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   int temporal_predictor_count[PREDICTION_PROBS][2];
   int no_pred_segcounts[MAX_MB_SEGMENTS];
-  int t_unpred_seg_counts[MAX_MB_SEGMENTS];
+  int t_unpred_seg_counts[MAX_MB_SEGMENTS][MAX_MB_SEGMENTS];
 
   vp9_prob no_pred_tree[MB_FEATURE_TREE_PROBS];
   vp9_prob t_pred_tree[MB_FEATURE_TREE_PROBS];
+  vp9_prob t_pred_tree_mod[MAX_MB_SEGMENTS];
   vp9_prob t_nopred_prob[PREDICTION_PROBS];
 
   const int mis = cm->mode_info_stride;
@@ -270,8 +334,10 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   if (cm->frame_type != KEY_FRAME) {
     // Work out probability tree for coding those segments not
     // predicted using the temporal method and the cost.
-    calc_segtree_probs(xd, t_unpred_seg_counts, t_pred_tree);
-    t_pred_cost = cost_segmap(xd, t_unpred_seg_counts, t_pred_tree);
+    calc_segtree_probs_pred(xd, t_unpred_seg_counts, t_pred_tree,
+                            t_pred_tree_mod);
+    t_pred_cost = cost_segmap_pred(xd, t_unpred_seg_counts, t_pred_tree,
+                                   t_pred_tree_mod);
 
     // Add in the cost of the signalling for each prediction context
     for (i = 0; i < PREDICTION_PROBS; i++) {
@@ -291,6 +357,8 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
     cm->temporal_update = 1;
     vpx_memcpy(xd->mb_segment_tree_probs,
                t_pred_tree, sizeof(t_pred_tree));
+    vpx_memcpy(xd->mb_segment_mispred_tree_probs,
+               t_pred_tree_mod, sizeof(t_pred_tree_mod));
     vpx_memcpy(&cm->segment_pred_probs,
                t_nopred_prob, sizeof(t_nopred_prob));
   } else {
