@@ -4955,7 +4955,7 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
     mbmi->partitioning = 0;
     mbmi->txfm_size = cm->txfm_mode == TX_MODE_SELECT ?
-                      TX_16X16 : cm->txfm_mode;
+                      TX_32X32 : cm->txfm_mode;
 
     vpx_memset(best_txfm_diff, 0, sizeof(best_txfm_diff));
     vpx_memset(best_pred_diff, 0, sizeof(best_pred_diff));
