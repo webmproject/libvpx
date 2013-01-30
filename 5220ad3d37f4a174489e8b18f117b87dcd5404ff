@@ -16,6 +16,24 @@
       "revId": "5220ad3d37f4a174489e8b18f117b87dcd5404ff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//vCE\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-30T16:18:22Z",
+      "side": 1,
+      "message": "Yes, you are correct. In my tests, I found a few very significant degradations in quality with the actual tiling disabled (i.e. --tile-columns\u003d0), and that\u0027s likely related to what you just pointed out here. I\u0027ll fix this (i.e. change it so it matches the old behaviour) in my next iteration of this patch.",
+      "parentUuid": "AAAAVH//vDg\u003d",
+      "revId": "5220ad3d37f4a174489e8b18f117b87dcd5404ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
