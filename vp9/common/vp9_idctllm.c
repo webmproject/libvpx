@@ -1534,350 +1534,437 @@ void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
 #endif
 
 #if !CONFIG_DWTDCTHYBRID
-#define DownshiftMultiplyBy2(x) x * 2
-#define DownshiftMultiply(x) x
+#define DCT_CONST_BITS 14
+#define DCT_CONST_ROUNDING  (1 << (DCT_CONST_BITS - 1))
+// Constants are 16384 * cos(kPi/64) where k = 1 to 31.
+// Note: sin(kPi/64) = cos((32-k)Pi/64)
+static const int cospi_1_64  = 16364;
+static const int cospi_2_64  = 16305;
+static const int cospi_3_64  = 16207;
+static const int cospi_4_64  = 16069;
+static const int cospi_5_64  = 15893;
+static const int cospi_6_64  = 15679;
+static const int cospi_7_64  = 15426;
+static const int cospi_8_64  = 15137;
+static const int cospi_9_64  = 14811;
+static const int cospi_10_64 = 14449;
+static const int cospi_11_64 = 14053;
+static const int cospi_12_64 = 13623;
+static const int cospi_13_64 = 13160;
+static const int cospi_14_64 = 12665;
+static const int cospi_15_64 = 12140;
+static const int cospi_16_64 = 11585;
+static const int cospi_17_64 = 11003;
+static const int cospi_18_64 = 10394;
+static const int cospi_19_64 = 9760;
+static const int cospi_20_64 = 9102;
+static const int cospi_21_64 = 8423;
+static const int cospi_22_64 = 7723;
+static const int cospi_23_64 = 7005;
+static const int cospi_24_64 = 6270;
+static const int cospi_25_64 = 5520;
+static const int cospi_26_64 = 4756;
+static const int cospi_27_64 = 3981;
+static const int cospi_28_64 = 3196;
+static const int cospi_29_64 = 2404;
+static const int cospi_30_64 = 1606;
+static const int cospi_31_64 = 804;
 
-static void idct16(double *input, double *output, int stride) {
-  static const double C1 = 0.995184726672197;
-  static const double C2 = 0.98078528040323;
-  static const double C3 = 0.956940335732209;
-  static const double C4 = 0.923879532511287;
-  static const double C5 = 0.881921264348355;
-  static const double C6 = 0.831469612302545;
-  static const double C7 = 0.773010453362737;
-  static const double C8 = 0.707106781186548;
-  static const double C9 = 0.634393284163646;
-  static const double C10 = 0.555570233019602;
-  static const double C11 = 0.471396736825998;
-  static const double C12 = 0.38268343236509;
-  static const double C13 = 0.290284677254462;
-  static const double C14 = 0.195090322016128;
-  static const double C15 = 0.098017140329561;
-
-  double step[16];
-  double intermediate[16];
-  double temp1, temp2;
-
-  // step 1 and 2
-  step[ 0] = input[stride*0] + input[stride*8];
-  step[ 1] = input[stride*0] - input[stride*8];
-
-  temp1 = input[stride*4]*C12;
-  temp2 = input[stride*12]*C4;
-
-  temp1 -= temp2;
-  temp1 = DownshiftMultiply(temp1);
-  temp1 *= C8;
-
-  step[ 2] = DownshiftMultiplyBy2(temp1);
-
-  temp1 = input[stride*4]*C4;
-  temp2 = input[stride*12]*C12;
-  temp1 += temp2;
-  temp1 = DownshiftMultiply(temp1);
-  temp1 *= C8;
-  step[ 3] = DownshiftMultiplyBy2(temp1);
-
-  temp1 = input[stride*2]*C8;
-  temp1 = DownshiftMultiplyBy2(temp1);
-  temp2 = input[stride*6] + input[stride*10];
-
-  step[ 4] = temp1 + temp2;
-  step[ 5] = temp1 - temp2;
-
-  temp1 = input[stride*14]*C8;
-  temp1 = DownshiftMultiplyBy2(temp1);
-  temp2 = input[stride*6] - input[stride*10];
-
-  step[ 6] = temp2 - temp1;
-  step[ 7] = temp2 + temp1;
-
-  // for odd input
-  temp1 = input[stride*3]*C12;
-  temp2 = input[stride*13]*C4;
-  temp1 += temp2;
-  temp1 = DownshiftMultiply(temp1);
-  temp1 *= C8;
-  intermediate[ 8] = DownshiftMultiplyBy2(temp1);
-
-  temp1 = input[stride*3]*C4;
-  temp2 = input[stride*13]*C12;
-  temp2 -= temp1;
-  temp2 = DownshiftMultiply(temp2);
-  temp2 *= C8;
-  intermediate[ 9] = DownshiftMultiplyBy2(temp2);
-
-  intermediate[10] = DownshiftMultiplyBy2(input[stride*9]*C8);
-  intermediate[11] = input[stride*15] - input[stride*1];
-  intermediate[12] = input[stride*15] + input[stride*1];
-  intermediate[13] = DownshiftMultiplyBy2((input[stride*7]*C8));
-
-  temp1 = input[stride*11]*C12;
-  temp2 = input[stride*5]*C4;
-  temp2 -= temp1;
-  temp2 = DownshiftMultiply(temp2);
-  temp2 *= C8;
-  intermediate[14] = DownshiftMultiplyBy2(temp2);
-
-  temp1 = input[stride*11]*C4;
-  temp2 = input[stride*5]*C12;
-  temp1 += temp2;
-  temp1 = DownshiftMultiply(temp1);
-  temp1 *= C8;
-  intermediate[15] = DownshiftMultiplyBy2(temp1);
-
-  step[ 8] = intermediate[ 8] + intermediate[14];
-  step[ 9] = intermediate[ 9] + intermediate[15];
-  step[10] = intermediate[10] + intermediate[11];
-  step[11] = intermediate[10] - intermediate[11];
-  step[12] = intermediate[12] + intermediate[13];
-  step[13] = intermediate[12] - intermediate[13];
-  step[14] = intermediate[ 8] - intermediate[14];
-  step[15] = intermediate[ 9] - intermediate[15];
-
-  // step 3
-  output[stride*0] = step[ 0] + step[ 3];
-  output[stride*1] = step[ 1] + step[ 2];
-  output[stride*2] = step[ 1] - step[ 2];
-  output[stride*3] = step[ 0] - step[ 3];
-
-  temp1 = step[ 4]*C14;
-  temp2 = step[ 7]*C2;
-  temp1 -= temp2;
-  output[stride*4] =  DownshiftMultiply(temp1);
-
-  temp1 = step[ 4]*C2;
-  temp2 = step[ 7]*C14;
-  temp1 += temp2;
-  output[stride*7] =  DownshiftMultiply(temp1);
-
-  temp1 = step[ 5]*C10;
-  temp2 = step[ 6]*C6;
-  temp1 -= temp2;
-  output[stride*5] =  DownshiftMultiply(temp1);
-
-  temp1 = step[ 5]*C6;
-  temp2 = step[ 6]*C10;
-  temp1 += temp2;
-  output[stride*6] =  DownshiftMultiply(temp1);
-
-  output[stride*8] = step[ 8] + step[11];
-  output[stride*9] = step[ 9] + step[10];
-  output[stride*10] = step[ 9] - step[10];
-  output[stride*11] = step[ 8] - step[11];
-  output[stride*12] = step[12] + step[15];
-  output[stride*13] = step[13] + step[14];
-  output[stride*14] = step[13] - step[14];
-  output[stride*15] = step[12] - step[15];
-
-  // output 4
-  step[ 0] = output[stride*0] + output[stride*7];
-  step[ 1] = output[stride*1] + output[stride*6];
-  step[ 2] = output[stride*2] + output[stride*5];
-  step[ 3] = output[stride*3] + output[stride*4];
-  step[ 4] = output[stride*3] - output[stride*4];
-  step[ 5] = output[stride*2] - output[stride*5];
-  step[ 6] = output[stride*1] - output[stride*6];
-  step[ 7] = output[stride*0] - output[stride*7];
-
-  temp1 = output[stride*8]*C7;
-  temp2 = output[stride*15]*C9;
-  temp1 -= temp2;
-  step[ 8] = DownshiftMultiply(temp1);
-
-  temp1 = output[stride*9]*C11;
-  temp2 = output[stride*14]*C5;
-  temp1 += temp2;
-  step[ 9] = DownshiftMultiply(temp1);
-
-  temp1 = output[stride*10]*C3;
-  temp2 = output[stride*13]*C13;
-  temp1 -= temp2;
-  step[10] = DownshiftMultiply(temp1);
-
-  temp1 = output[stride*11]*C15;
-  temp2 = output[stride*12]*C1;
-  temp1 += temp2;
-  step[11] = DownshiftMultiply(temp1);
-
-  temp1 = output[stride*11]*C1;
-  temp2 = output[stride*12]*C15;
-  temp2 -= temp1;
-  step[12] = DownshiftMultiply(temp2);
-
-  temp1 = output[stride*10]*C13;
-  temp2 = output[stride*13]*C3;
-  temp1 += temp2;
-  step[13] = DownshiftMultiply(temp1);
-
-  temp1 = output[stride*9]*C5;
-  temp2 = output[stride*14]*C11;
-  temp2 -= temp1;
-  step[14] = DownshiftMultiply(temp2);
-
-  temp1 = output[stride*8]*C9;
-  temp2 = output[stride*15]*C7;
-  temp1 += temp2;
-  step[15] = DownshiftMultiply(temp1);
-
-  // step 5
-  output[stride*0] = step[0] + step[15];
-  output[stride*1] = step[1] + step[14];
-  output[stride*2] = step[2] + step[13];
-  output[stride*3] = step[3] + step[12];
-  output[stride*4] = step[4] + step[11];
-  output[stride*5] = step[5] + step[10];
-  output[stride*6] = step[6] + step[ 9];
-  output[stride*7] = step[7] + step[ 8];
-
-  output[stride*15] = step[0] - step[15];
-  output[stride*14] = step[1] - step[14];
-  output[stride*13] = step[2] - step[13];
-  output[stride*12] = step[3] - step[12];
-  output[stride*11] = step[4] - step[11];
-  output[stride*10] = step[5] - step[10];
-  output[stride*9] = step[6] - step[ 9];
-  output[stride*8] = step[7] - step[ 8];
+static int16_t dct_const_round_shift(int input) {
+  int rv = (input + DCT_CONST_ROUNDING) >> DCT_CONST_BITS;
+  assert((rv <= INT16_MAX) && (rv >= INT16_MIN));
+  return (int16_t)rv;
 }
 
-static void butterfly_32_idct_1d(double *input, double *output, int stride) {
-  static const double C1 = 0.998795456205;  // cos(pi * 1 / 64)
-  static const double C3 = 0.989176509965;  // cos(pi * 3 / 64)
-  static const double C5 = 0.970031253195;  // cos(pi * 5 / 64)
-  static const double C7 = 0.941544065183;  // cos(pi * 7 / 64)
-  static const double C9 = 0.903989293123;  // cos(pi * 9 / 64)
-  static const double C11 = 0.857728610000;  // cos(pi * 11 / 64)
-  static const double C13 = 0.803207531481;  // cos(pi * 13 / 64)
-  static const double C15 = 0.740951125355;  // cos(pi * 15 / 64)
-  static const double C16 = 0.707106781187;  // cos(pi * 16 / 64)
-  static const double C17 = 0.671558954847;  // cos(pi * 17 / 64)
-  static const double C19 = 0.595699304492;  // cos(pi * 19 / 64)
-  static const double C21 = 0.514102744193;  // cos(pi * 21 / 64)
-  static const double C23 = 0.427555093430;  // cos(pi * 23 / 64)
-  static const double C25 = 0.336889853392;  // cos(pi * 25 / 64)
-  static const double C27 = 0.242980179903;  // cos(pi * 27 / 64)
-  static const double C29 = 0.146730474455;  // cos(pi * 29 / 64)
-  static const double C31 = 0.049067674327;  // cos(pi * 31 / 64)
+void idct32_1d(int16_t *input, int16_t *output) {
+  int16_t step1[32], step2[32];
+  int temp1, temp2;
 
-  double step1[32];
-  double step2[32];
+  // stage 1
+  step1[0] = input[0];
+  step1[1] = input[16];
+  step1[2] = input[8];
+  step1[3] = input[24];
+  step1[4] = input[4];
+  step1[5] = input[20];
+  step1[6] = input[12];
+  step1[7] = input[28];
+  step1[8] = input[2];
+  step1[9] = input[18];
+  step1[10] = input[10];
+  step1[11] = input[26];
+  step1[12] = input[6];
+  step1[13] = input[22];
+  step1[14] = input[14];
+  step1[15] = input[30];
 
-  step1[ 0] = input[stride*0];
-  step1[ 1] = input[stride*2];
-  step1[ 2] = input[stride*4];
-  step1[ 3] = input[stride*6];
-  step1[ 4] = input[stride*8];
-  step1[ 5] = input[stride*10];
-  step1[ 6] = input[stride*12];
-  step1[ 7] = input[stride*14];
-  step1[ 8] = input[stride*16];
-  step1[ 9] = input[stride*18];
-  step1[10] = input[stride*20];
-  step1[11] = input[stride*22];
-  step1[12] = input[stride*24];
-  step1[13] = input[stride*26];
-  step1[14] = input[stride*28];
-  step1[15] = input[stride*30];
+  temp1 = input[1] * cospi_31_64 - input[31] * cospi_1_64;
+  temp2 = input[1] * cospi_1_64 + input[31] * cospi_31_64;
+  step1[16] = dct_const_round_shift(temp1);
+  step1[31] = dct_const_round_shift(temp2);
 
-  step1[16] = DownshiftMultiplyBy2(input[stride*1]*C16);
-  step1[17] = (input[stride*3] + input[stride*1]);
-  step1[18] = (input[stride*5] + input[stride*3]);
-  step1[19] = (input[stride*7] + input[stride*5]);
-  step1[20] = (input[stride*9] + input[stride*7]);
-  step1[21] = (input[stride*11] + input[stride*9]);
-  step1[22] = (input[stride*13] + input[stride*11]);
-  step1[23] = (input[stride*15] + input[stride*13]);
-  step1[24] = (input[stride*17] + input[stride*15]);
-  step1[25] = (input[stride*19] + input[stride*17]);
-  step1[26] = (input[stride*21] + input[stride*19]);
-  step1[27] = (input[stride*23] + input[stride*21]);
-  step1[28] = (input[stride*25] + input[stride*23]);
-  step1[29] = (input[stride*27] + input[stride*25]);
-  step1[30] = (input[stride*29] + input[stride*27]);
-  step1[31] = (input[stride*31] + input[stride*29]);
+  temp1 = input[17] * cospi_15_64 - input[15] * cospi_17_64;
+  temp2 = input[17] * cospi_17_64 + input[15] * cospi_15_64;
+  step1[17] = dct_const_round_shift(temp1);
+  step1[30] = dct_const_round_shift(temp2);
 
-  idct16(step1, step2, 1);
-  idct16(step1 + 16, step2 + 16, 1);
+  temp1 = input[9] * cospi_23_64 - input[23] * cospi_9_64;
+  temp2 = input[9] * cospi_9_64 + input[23] * cospi_23_64;
+  step1[18] = dct_const_round_shift(temp1);
+  step1[29] = dct_const_round_shift(temp2);
 
-  step2[16] = DownshiftMultiply(step2[16] / (2*C1));
-  step2[17] = DownshiftMultiply(step2[17] / (2*C3));
-  step2[18] = DownshiftMultiply(step2[18] / (2*C5));
-  step2[19] = DownshiftMultiply(step2[19] / (2*C7));
-  step2[20] = DownshiftMultiply(step2[20] / (2*C9));
-  step2[21] = DownshiftMultiply(step2[21] / (2*C11));
-  step2[22] = DownshiftMultiply(step2[22] / (2*C13));
-  step2[23] = DownshiftMultiply(step2[23] / (2*C15));
-  step2[24] = DownshiftMultiply(step2[24] / (2*C17));
-  step2[25] = DownshiftMultiply(step2[25] / (2*C19));
-  step2[26] = DownshiftMultiply(step2[26] / (2*C21));
-  step2[27] = DownshiftMultiply(step2[27] / (2*C23));
-  step2[28] = DownshiftMultiply(step2[28] / (2*C25));
-  step2[29] = DownshiftMultiply(step2[29] / (2*C27));
-  step2[30] = DownshiftMultiply(step2[30] / (2*C29));
-  step2[31] = DownshiftMultiply(step2[31] / (2*C31));
+  temp1 = input[25] * cospi_7_64 - input[7] * cospi_25_64;
+  temp2 = input[25] * cospi_25_64 + input[7] * cospi_7_64;
+  step1[19] = dct_const_round_shift(temp1);
+  step1[28] = dct_const_round_shift(temp2);
 
-  output[stride* 0] = step2[ 0] + step2[16];
-  output[stride* 1] = step2[ 1] + step2[17];
-  output[stride* 2] = step2[ 2] + step2[18];
-  output[stride* 3] = step2[ 3] + step2[19];
-  output[stride* 4] = step2[ 4] + step2[20];
-  output[stride* 5] = step2[ 5] + step2[21];
-  output[stride* 6] = step2[ 6] + step2[22];
-  output[stride* 7] = step2[ 7] + step2[23];
-  output[stride* 8] = step2[ 8] + step2[24];
-  output[stride* 9] = step2[ 9] + step2[25];
-  output[stride*10] = step2[10] + step2[26];
-  output[stride*11] = step2[11] + step2[27];
-  output[stride*12] = step2[12] + step2[28];
-  output[stride*13] = step2[13] + step2[29];
-  output[stride*14] = step2[14] + step2[30];
-  output[stride*15] = step2[15] + step2[31];
-  output[stride*16] = step2[15] - step2[(31 - 0)];
-  output[stride*17] = step2[14] - step2[(31 - 1)];
-  output[stride*18] = step2[13] - step2[(31 - 2)];
-  output[stride*19] = step2[12] - step2[(31 - 3)];
-  output[stride*20] = step2[11] - step2[(31 - 4)];
-  output[stride*21] = step2[10] - step2[(31 - 5)];
-  output[stride*22] = step2[ 9] - step2[(31 - 6)];
-  output[stride*23] = step2[ 8] - step2[(31 - 7)];
-  output[stride*24] = step2[ 7] - step2[(31 - 8)];
-  output[stride*25] = step2[ 6] - step2[(31 - 9)];
-  output[stride*26] = step2[ 5] - step2[(31 - 10)];
-  output[stride*27] = step2[ 4] - step2[(31 - 11)];
-  output[stride*28] = step2[ 3] - step2[(31 - 12)];
-  output[stride*29] = step2[ 2] - step2[(31 - 13)];
-  output[stride*30] = step2[ 1] - step2[(31 - 14)];
-  output[stride*31] = step2[ 0] - step2[(31 - 15)];
+  temp1 = input[5] * cospi_27_64 - input[27] * cospi_5_64;
+  temp2 = input[5] * cospi_5_64 + input[27] * cospi_27_64;
+  step1[20] = dct_const_round_shift(temp1);
+  step1[27] = dct_const_round_shift(temp2);
+
+  temp1 = input[21] * cospi_11_64 - input[11] * cospi_21_64;
+  temp2 = input[21] * cospi_21_64 + input[11] * cospi_11_64;
+  step1[21] = dct_const_round_shift(temp1);
+  step1[26] = dct_const_round_shift(temp2);
+
+  temp1 = input[13] * cospi_19_64 - input[19] * cospi_13_64;
+  temp2 = input[13] * cospi_13_64 + input[19] * cospi_19_64;
+  step1[22] = dct_const_round_shift(temp1);
+  step1[25] = dct_const_round_shift(temp2);
+
+  temp1 = input[29] * cospi_3_64 - input[3] * cospi_29_64;
+  temp2 = input[29] * cospi_29_64 + input[3] * cospi_3_64;
+  step1[23] = dct_const_round_shift(temp1);
+  step1[24] = dct_const_round_shift(temp2);
+
+  // stage 2
+  step2[0] = step1[0];
+  step2[1] = step1[1];
+  step2[2] = step1[2];
+  step2[3] = step1[3];
+  step2[4] = step1[4];
+  step2[5] = step1[5];
+  step2[6] = step1[6];
+  step2[7] = step1[7];
+
+  temp1 = step1[8] * cospi_30_64 - step1[15] * cospi_2_64;
+  temp2 = step1[8] * cospi_2_64 + step1[15] * cospi_30_64;
+  step2[8] = dct_const_round_shift(temp1);
+  step2[15] = dct_const_round_shift(temp2);
+
+  temp1 = step1[9] * cospi_14_64 - step1[14] * cospi_18_64;
+  temp2 = step1[9] * cospi_18_64 + step1[14] * cospi_14_64;
+  step2[9] = dct_const_round_shift(temp1);
+  step2[14] = dct_const_round_shift(temp2);
+
+  temp1 = step1[10] * cospi_22_64 - step1[13] * cospi_10_64;
+  temp2 = step1[10] * cospi_10_64 + step1[13] * cospi_22_64;
+  step2[10] = dct_const_round_shift(temp1);
+  step2[13] = dct_const_round_shift(temp2);
+
+  temp1 = step1[11] * cospi_6_64 - step1[12] * cospi_26_64;
+  temp2 = step1[11] * cospi_26_64 + step1[12] * cospi_6_64;
+  step2[11] = dct_const_round_shift(temp1);
+  step2[12] = dct_const_round_shift(temp2);
+
+  step2[16] = step1[16] + step1[17];
+  step2[17] = step1[16] - step1[17];
+  step2[18] = -step1[18] + step1[19];
+  step2[19] = step1[18] + step1[19];
+  step2[20] = step1[20] + step1[21];
+  step2[21] = step1[20] - step1[21];
+  step2[22] = -step1[22] + step1[23];
+  step2[23] = step1[22] + step1[23];
+  step2[24] = step1[24] + step1[25];
+  step2[25] = step1[24] - step1[25];
+  step2[26] = -step1[26] + step1[27];
+  step2[27] = step1[26] + step1[27];
+  step2[28] = step1[28] + step1[29];
+  step2[29] = step1[28] - step1[29];
+  step2[30] = -step1[30] + step1[31];
+  step2[31] = step1[30] + step1[31];
+
+  // stage 3
+  step1[0] = step2[0];
+  step1[1] = step2[1];
+  step1[2] = step2[2];
+  step1[3] = step2[3];
+
+  temp1 = step2[4] * cospi_28_64 - step2[7] * cospi_4_64;
+  temp2 = step2[4] * cospi_4_64 + step2[7] * cospi_28_64;
+  step1[4] = dct_const_round_shift(temp1);
+  step1[7] = dct_const_round_shift(temp2);
+  temp1 = step2[5] * cospi_12_64 - step2[6] * cospi_20_64;
+  temp2 = step2[5] * cospi_20_64 + step2[6] * cospi_12_64;
+  step1[5] = dct_const_round_shift(temp1);
+  step1[6] = dct_const_round_shift(temp2);
+
+  step1[8] = step2[8] + step2[9];
+  step1[9] = step2[8] - step2[9];
+  step1[10] = -step2[10] + step2[11];
+  step1[11] = step2[10] + step2[11];
+  step1[12] = step2[12] + step2[13];
+  step1[13] = step2[12] - step2[13];
+  step1[14] = -step2[14] + step2[15];
+  step1[15] = step2[14] + step2[15];
+
+  step1[16] = step2[16];
+  step1[31] = step2[31];
+  temp1 = -step2[17] * cospi_4_64 + step2[30] * cospi_28_64;
+  temp2 = step2[17] * cospi_28_64 + step2[30] * cospi_4_64;
+  step1[17] = dct_const_round_shift(temp1);
+  step1[30] = dct_const_round_shift(temp2);
+  temp1 = -step2[18] * cospi_28_64 - step2[29] * cospi_4_64;
+  temp2 = -step2[18] * cospi_4_64 + step2[29] * cospi_28_64;
+  step1[18] = dct_const_round_shift(temp1);
+  step1[29] = dct_const_round_shift(temp2);
+  step1[19] = step2[19];
+  step1[20] = step2[20];
+  temp1 = -step2[21] * cospi_20_64 + step2[26] * cospi_12_64;
+  temp2 = step2[21] * cospi_12_64 + step2[26] * cospi_20_64;
+  step1[21] = dct_const_round_shift(temp1);
+  step1[26] = dct_const_round_shift(temp2);
+  temp1 = -step2[22] * cospi_12_64 - step2[25] * cospi_20_64;
+  temp2 = -step2[22] * cospi_20_64 + step2[25] * cospi_12_64;
+  step1[22] = dct_const_round_shift(temp1);
+  step1[25] = dct_const_round_shift(temp2);
+  step1[23] = step2[23];
+  step1[24] = step2[24];
+  step1[27] = step2[27];
+  step1[28] = step2[28];
+
+  // stage 4
+  temp1 = (step1[0] + step1[1]) * cospi_16_64;
+  temp2 = (step1[0] - step1[1]) * cospi_16_64;
+  step2[0] = dct_const_round_shift(temp1);
+  step2[1] = dct_const_round_shift(temp2);
+  temp1 = step1[2] * cospi_24_64 - step1[3] * cospi_8_64;
+  temp2 = step1[2] * cospi_8_64 + step1[3] * cospi_24_64;
+  step2[2] = dct_const_round_shift(temp1);
+  step2[3] = dct_const_round_shift(temp2);
+  step2[4] = step1[4] + step1[5];
+  step2[5] = step1[4] - step1[5];
+  step2[6] = -step1[6] + step1[7];
+  step2[7] = step1[6] + step1[7];
+
+  step2[8] = step1[8];
+  step2[15] = step1[15];
+  temp1 = -step1[9] * cospi_8_64 + step1[14] * cospi_24_64;
+  temp2 = step1[9] * cospi_24_64 + step1[14] * cospi_8_64;
+  step2[9] = dct_const_round_shift(temp1);
+  step2[14] = dct_const_round_shift(temp2);
+  temp1 = -step1[10] * cospi_24_64 - step1[13] * cospi_8_64;
+  temp2 = -step1[10] * cospi_8_64 + step1[13] * cospi_24_64;
+  step2[10] = dct_const_round_shift(temp1);
+  step2[13] = dct_const_round_shift(temp2);
+  step2[11] = step1[11];
+  step2[12] = step1[12];
+
+  step2[16] = step1[16] + step1[19];
+  step2[17] = step1[17] + step1[18];
+  step2[18] = step1[17] - step1[18];
+  step2[19] = step1[16] - step1[19];
+  step2[20] = -step1[20] + step1[23];
+  step2[21] = -step1[21] + step1[22];
+  step2[22] = step1[21] + step1[22];
+  step2[23] = step1[20] + step1[23];
+
+  step2[24] = step1[24] + step1[27];
+  step2[25] = step1[25] + step1[26];
+  step2[26] = step1[25] - step1[26];
+  step2[27] = step1[24] - step1[27];
+  step2[28] = -step1[28] + step1[31];
+  step2[29] = -step1[29] + step1[30];
+  step2[30] = step1[29] + step1[30];
+  step2[31] = step1[28] + step1[31];
+
+  // stage 5
+  step1[0] = step2[0] + step2[3];
+  step1[1] = step2[1] + step2[2];
+  step1[2] = step2[1] - step2[2];
+  step1[3] = step2[0] - step2[3];
+  step1[4] = step2[4];
+  temp1 = (step2[6] - step2[5]) * cospi_16_64;
+  temp2 = (step2[5] + step2[6]) * cospi_16_64;
+  step1[5] = dct_const_round_shift(temp1);
+  step1[6] = dct_const_round_shift(temp2);
+  step1[7] = step2[7];
+
+  step1[8] = step2[8] + step2[11];
+  step1[9] = step2[9] + step2[10];
+  step1[10] = step2[9] - step2[10];
+  step1[11] = step2[8] - step2[11];
+  step1[12] = -step2[12] + step2[15];
+  step1[13] = -step2[13] + step2[14];
+  step1[14] = step2[13] + step2[14];
+  step1[15] = step2[12] + step2[15];
+
+  step1[16] = step2[16];
+  step1[17] = step2[17];
+  temp1 = -step2[18] * cospi_8_64 + step2[29] * cospi_24_64;
+  temp2 = step2[18] * cospi_24_64 + step2[29] * cospi_8_64;
+  step1[18] = dct_const_round_shift(temp1);
+  step1[29] = dct_const_round_shift(temp2);
+  temp1 = -step2[19] * cospi_8_64 + step2[28] * cospi_24_64;
+  temp2 = step2[19] * cospi_24_64 + step2[28] * cospi_8_64;
+  step1[19] = dct_const_round_shift(temp1);
+  step1[28] = dct_const_round_shift(temp2);
+  temp1 = -step2[20] * cospi_24_64 - step2[27] * cospi_8_64;
+  temp2 = -step2[20] * cospi_8_64 + step2[27] * cospi_24_64;
+  step1[20] = dct_const_round_shift(temp1);
+  step1[27] = dct_const_round_shift(temp2);
+  temp1 = -step2[21] * cospi_24_64 - step2[26] * cospi_8_64;
+  temp2 = -step2[21] * cospi_8_64 + step2[26] * cospi_24_64;
+  step1[21] = dct_const_round_shift(temp1);
+  step1[26] = dct_const_round_shift(temp2);
+  step1[22] = step2[22];
+  step1[23] = step2[23];
+  step1[24] = step2[24];
+  step1[25] = step2[25];
+  step1[30] = step2[30];
+  step1[31] = step2[31];
+
+  // stage 6
+  step2[0] = step1[0] + step1[7];
+  step2[1] = step1[1] + step1[6];
+  step2[2] = step1[2] + step1[5];
+  step2[3] = step1[3] + step1[4];
+  step2[4] = step1[3] - step1[4];
+  step2[5] = step1[2] - step1[5];
+  step2[6] = step1[1] - step1[6];
+  step2[7] = step1[0] - step1[7];
+  step2[8] = step1[8];
+  step2[9] = step1[9];
+  temp1 = (-step1[10] + step1[13]) * cospi_16_64;
+  temp2 = (step1[10] + step1[13]) * cospi_16_64;
+  step2[10] = dct_const_round_shift(temp1);
+  step2[13] = dct_const_round_shift(temp2);
+  temp1 = (-step1[11] + step1[12]) * cospi_16_64;
+  temp2 = (step1[11] + step1[12]) * cospi_16_64;
+  step2[11] = dct_const_round_shift(temp1);
+  step2[12] = dct_const_round_shift(temp2);
+  step2[14] = step1[14];
+  step2[15] = step1[15];
+
+  step2[16] = step1[16] + step1[23];
+  step2[17] = step1[17] + step1[22];
+  step2[18] = step1[18] + step1[21];
+  step2[19] = step1[19] + step1[20];
+  step2[20] = step1[19] - step1[20];
+  step2[21] = step1[18] - step1[21];
+  step2[22] = step1[17] - step1[22];
+  step2[23] = step1[16] - step1[23];
+
+  step2[24] = -step1[24] + step1[31];
+  step2[25] = -step1[25] + step1[30];
+  step2[26] = -step1[26] + step1[29];
+  step2[27] = -step1[27] + step1[28];
+  step2[28] = step1[27] + step1[28];
+  step2[29] = step1[26] + step1[29];
+  step2[30] = step1[25] + step1[30];
+  step2[31] = step1[24] + step1[31];
+
+  // stage 7
+  step1[0] = step2[0] + step2[15];
+  step1[1] = step2[1] + step2[14];
+  step1[2] = step2[2] + step2[13];
+  step1[3] = step2[3] + step2[12];
+  step1[4] = step2[4] + step2[11];
+  step1[5] = step2[5] + step2[10];
+  step1[6] = step2[6] + step2[9];
+  step1[7] = step2[7] + step2[8];
+  step1[8] = step2[7] - step2[8];
+  step1[9] = step2[6] - step2[9];
+  step1[10] = step2[5] - step2[10];
+  step1[11] = step2[4] - step2[11];
+  step1[12] = step2[3] - step2[12];
+  step1[13] = step2[2] - step2[13];
+  step1[14] = step2[1] - step2[14];
+  step1[15] = step2[0] - step2[15];
+
+  step1[16] = step2[16];
+  step1[17] = step2[17];
+  step1[18] = step2[18];
+  step1[19] = step2[19];
+  temp1 = (-step2[20] + step2[27]) * cospi_16_64;
+  temp2 = (step2[20] + step2[27]) * cospi_16_64;
+  step1[20] = dct_const_round_shift(temp1);
+  step1[27] = dct_const_round_shift(temp2);
+  temp1 = (-step2[21] + step2[26]) * cospi_16_64;
+  temp2 = (step2[21] + step2[26]) * cospi_16_64;
+  step1[21] = dct_const_round_shift(temp1);
+  step1[26] = dct_const_round_shift(temp2);
+  temp1 = (-step2[22] + step2[25]) * cospi_16_64;
+  temp2 = (step2[22] + step2[25]) * cospi_16_64;
+  step1[22] = dct_const_round_shift(temp1);
+  step1[25] = dct_const_round_shift(temp2);
+  temp1 = (-step2[23] + step2[24]) * cospi_16_64;
+  temp2 = (step2[23] + step2[24]) * cospi_16_64;
+  step1[23] = dct_const_round_shift(temp1);
+  step1[24] = dct_const_round_shift(temp2);
+  step1[28] = step2[28];
+  step1[29] = step2[29];
+  step1[30] = step2[30];
+  step1[31] = step2[31];
+
+  // final stage
+  output[0] = step1[0] + step1[31];
+  output[1] = step1[1] + step1[30];
+  output[2] = step1[2] + step1[29];
+  output[3] = step1[3] + step1[28];
+  output[4] = step1[4] + step1[27];
+  output[5] = step1[5] + step1[26];
+  output[6] = step1[6] + step1[25];
+  output[7] = step1[7] + step1[24];
+  output[8] = step1[8] + step1[23];
+  output[9] = step1[9] + step1[22];
+  output[10] = step1[10] + step1[21];
+  output[11] = step1[11] + step1[20];
+  output[12] = step1[12] + step1[19];
+  output[13] = step1[13] + step1[18];
+  output[14] = step1[14] + step1[17];
+  output[15] = step1[15] + step1[16];
+  output[16] = step1[15] - step1[16];
+  output[17] = step1[14] - step1[17];
+  output[18] = step1[13] - step1[18];
+  output[19] = step1[12] - step1[19];
+  output[20] = step1[11] - step1[20];
+  output[21] = step1[10] - step1[21];
+  output[22] = step1[9] - step1[22];
+  output[23] = step1[8] - step1[23];
+  output[24] = step1[7] - step1[24];
+  output[25] = step1[6] - step1[25];
+  output[26] = step1[5] - step1[26];
+  output[27] = step1[4] - step1[27];
+  output[28] = step1[3] - step1[28];
+  output[29] = step1[2] - step1[29];
+  output[30] = step1[1] - step1[30];
+  output[31] = step1[0] - step1[31];
 }
+
 
 void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
-  vp9_clear_system_state();  // Make it simd safe : __asm emms;
-  {
-    double out[32*32], out2[32*32];
-    const int short_pitch = pitch >> 1;
-    int i, j;
-    // First transform rows
-    for (i = 0; i < 32; ++i) {
-      double temp_in[32], temp_out[32];
-      for (j = 0; j < 32; ++j)
-        temp_in[j] = input[j + i*short_pitch];
-      butterfly_32_idct_1d(temp_in, temp_out, 1);
-      for (j = 0; j < 32; ++j)
-        out[j + i*32] = temp_out[j];
-    }
-    // Then transform columns
-    for (i = 0; i < 32; ++i) {
-      double temp_in[32], temp_out[32];
-      for (j = 0; j < 32; ++j)
-        temp_in[j] = out[j*32 + i];
-      butterfly_32_idct_1d(temp_in, temp_out, 1);
-      for (j = 0; j < 32; ++j)
-        out2[j*32 + i] = temp_out[j];
-    }
-    for (i = 0; i < 32*32; ++i)
-      output[i] = round(out2[i]/128);
+  int16_t out[32 * 32];
+  int16_t *outptr = &out[0];
+  const int short_pitch = pitch >> 1;
+  int i, j;
+  int16_t temp_in[32], temp_out[32];
+
+  // First transform rows
+  for (i = 0; i < 32; ++i) {
+    idct32_1d(input, outptr);
+    input += short_pitch;
+    outptr += 32;
   }
-  vp9_clear_system_state();  // Make it simd safe : __asm emms;
+  // Then transform columns
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = out[j * 32 + i];
+    idct32_1d(temp_in, temp_out);
+    for (j = 0; j < 32; ++j)
+      output[j * 32 + i] = (temp_out[j] + 32) >> 6;
+  }
 }
 
 #else  // !CONFIG_DWTDCTHYBRID
