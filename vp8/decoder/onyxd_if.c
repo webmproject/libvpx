@@ -42,7 +42,16 @@ extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
 static int get_free_fb (VP8_COMMON *cm);
 static void ref_cnt_fb (int *buf, int *idx, int new_idx);
 
-struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
+static void remove_decompressor(VP8D_COMP *pbi)
+{
+#if CONFIG_ERROR_CONCEALMENT
+    vp8_de_alloc_overlap_lists(pbi);
+#endif
+    vp8_remove_common(&pbi->common);
+    vpx_free(pbi);
+}
+
+static struct VP8D_COMP * create_decompressor(VP8D_CONFIG *oxcf)
 {
     VP8D_COMP *pbi = vpx_memalign(32, sizeof(VP8D_COMP));
 
@@ -54,7 +63,7 @@ struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     if (setjmp(pbi->common.error.jmp))
     {
         pbi->common.error.setjmp = 0;
-        vp8dx_remove_decompressor(pbi);
+        remove_decompressor(pbi);
         return 0;
     }
 
@@ -64,11 +73,6 @@ struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 
     pbi->common.current_video_frame = 0;
     pbi->ready_for_new_data = 1;
-
-#if CONFIG_MULTITHREAD
-    pbi->max_threads = oxcf->max_threads;
-    vp8_decoder_create_threads(pbi);
-#endif
 
     /* vp8cx_init_de_quantizer() is first called here. Add check in frame_init_dequantizer() to avoid
      *  unnecessary calling of vp8cx_init_de_quantizer() for every frame.
@@ -102,25 +106,6 @@ struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 
     return pbi;
 }
-
-
-void vp8dx_remove_decompressor(VP8D_COMP *pbi)
-{
-    if (!pbi)
-        return;
-
-#if CONFIG_MULTITHREAD
-    if (pbi->b_multithreaded_rd)
-        vp8mt_de_alloc_temp_buffers(pbi, pbi->common.mb_rows);
-    vp8_decoder_remove_threads(pbi);
-#endif
-#if CONFIG_ERROR_CONCEALMENT
-    vp8_de_alloc_overlap_lists(pbi);
-#endif
-    vp8_remove_common(&pbi->common);
-    vpx_free(pbi);
-}
-
 
 vpx_codec_err_t vp8dx_get_reference(VP8D_COMP *pbi, enum vpx_ref_frame_type ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
@@ -489,4 +474,55 @@ int vp8dx_references_buffer( VP8_COMMON *oci, int ref_frame )
     }
     return 0;
 
+}
+
+int vp8_create_decoder_instances(struct frame_buffers *fb, VP8D_CONFIG *oxcf)
+{
+    if(!fb->use_frame_threads)
+    {
+        /* decoder instance for single thread mode */
+        fb->pbi[0] = create_decompressor(oxcf);
+        if(!fb->pbi[0])
+            return VPX_CODEC_ERROR;
+
+#if CONFIG_MULTITHREAD
+        /* enable row-based threading only when use_frame_threads
+         * is disabled */
+        fb->pbi[0]->max_threads = oxcf->max_threads;
+        vp8_decoder_create_threads(fb->pbi[0]);
+#endif
+    }
+    else
+    {
+        /* TODO : create frame threads and decoder instances for each
+         * thread here */
+    }
+
+    return VPX_CODEC_OK;
+}
+
+int vp8_remove_decoder_instances(struct frame_buffers *fb)
+{
+    if(!fb->use_frame_threads)
+    {
+        VP8D_COMP *pbi = fb->pbi[0];
+
+        if (!pbi)
+            return VPX_CODEC_ERROR;
+#if CONFIG_MULTITHREAD
+        if (pbi->b_multithreaded_rd)
+            vp8mt_de_alloc_temp_buffers(pbi, pbi->common.mb_rows);
+        vp8_decoder_remove_threads(pbi);
+#endif
+
+        /* decoder instance for single thread mode */
+        remove_decompressor(pbi);
+    }
+    else
+    {
+        /* TODO : remove frame threads and decoder instances for each
+         * thread here */
+    }
+
+    return VPX_CODEC_OK;
 }

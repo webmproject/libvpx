@@ -33,6 +33,7 @@ typedef struct
     MACROBLOCKD  mbd;
 } MB_ROW_DEC;
 
+
 typedef struct
 {
     int enabled;
@@ -40,6 +41,22 @@ typedef struct
     const unsigned char *ptrs[MAX_PARTITIONS];
     unsigned int sizes[MAX_PARTITIONS];
 } FRAGMENT_DATA;
+
+#define MAX_FB_MT_DEC 32
+
+struct frame_buffers
+{
+    /*
+     * this struct will be populated with frame buffer management
+     * info in future commits. */
+
+    /* enable/disable frame-based threading */
+    int     use_frame_threads;
+
+    /* decoder instances */
+    struct VP8D_COMP *pbi[MAX_FB_MT_DEC];
+
+};
 
 typedef struct VP8D_COMP
 {
@@ -107,6 +124,9 @@ typedef struct VP8D_COMP
 } VP8D_COMP;
 
 int vp8_decode_frame(VP8D_COMP *cpi);
+
+int vp8_create_decoder_instances(struct frame_buffers *fb, VP8D_CONFIG *oxcf);
+int vp8_remove_decoder_instances(struct frame_buffers *fb);
 
 #if CONFIG_DEBUG
 #define CHECK_MEM_ERROR(lval,expr) do {\
