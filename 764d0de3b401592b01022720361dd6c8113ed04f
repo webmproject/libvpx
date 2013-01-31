@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//tp4\u003d",
+        "filename": "test/md5_helper.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-31T23:05:39Z",
+      "side": 1,
+      "message": "make a temp copy of md5_, then call final on the temp copy. That way you can call Add again after Get. Not always useful, but at least you could create the same md5 with another program. Finalizing adds a certain amount of padding into the checksum, so Add-Final-Add-Final is different than Add-Add-Final.",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//tps\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-31T23:05:39Z",
+      "side": 1,
+      "message": "this is kinda awkward. it\u0027d be better to return a const reference to storage held inside the md5 object (probably as a std::string, to appease the c++ folks)",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//toA\u003d",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-31T23:05:39Z",
+      "side": 1,
+      "message": "codec_-\u003eCreateDecoder(...)",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//tog\u003d",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-31T23:05:39Z",
+      "side": 1,
+      "message": "this should be a parameter. put libvpx_test::TestMode in with int in CodecTestWithParam\u003c\u003e above, and testing::Values(libvpx_test::kTwoPassGood) in the \tVP9_INSTANTIATE_TEST_CASE. The macro will give you the cartesian product of the two lists.",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
