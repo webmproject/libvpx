@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//tzk\u003d",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-31T20:15:57Z",
+      "side": 1,
+      "message": "can all this MD5 stuff be factored into a separate class, so it can be easily reused in multiple tests? It distracts from the core of your test here, and there are and will be more tests that use MD5s.",
+      "revId": "e1d15a12a81d2002b6551f6856f89c66969e81d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
