@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//tlM\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-31T23:50:18Z",
+      "side": 1,
+      "message": "That\u0027s fine, as long as the storage is inside the md5_res object I personally don\u0027t care.. I just think that this code reads better than the current approach:\n\n  const char* actual_md5 \u003d md5_res.Get();",
+      "parentUuid": "AAAAVH//tmM\u003d",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//toA\u003d",
         "filename": "test/tile_independence_test.cc",
         "patchSetId": 15
@@ -136,6 +154,24 @@
       "side": 1,
       "message": "error: macro \"VP9_INSTANTIATE_TEST_CASE\" passed 3 arguments, but takes just 2\n\nI get that error if I add another parameter?",
       "parentUuid": "AAAAVH//tog\u003d",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//tlI\u003d",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-01-31T23:50:18Z",
+      "side": 1,
+      "message": "maybe need to make params __VA_ARGS__ in the macro then. This is the first CodecTestWithParam to take multiple parameters, so you\u0027re breaking new ground.",
+      "parentUuid": "AAAAVH//tls\u003d",
       "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
