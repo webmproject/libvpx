@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//t7s\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1574,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-01-31T17:53:05Z",
+      "side": 1,
+      "message": "done.",
+      "parentUuid": "AAAAVH//uDM\u003d",
+      "revId": "2908efcdd57e1f4491f76dcfae85bf04f6c3ca75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//uDI\u003d",
         "filename": "vp9/common/vp9_idctllm.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2013-01-31T13:48:10Z",
       "side": 1,
       "message": "note: the rounding with DCT_CONST_ROUNDING probably unneeded until stage 5. You could just descale by 13 instead, and leave the final rounding for later.",
+      "revId": "2908efcdd57e1f4491f76dcfae85bf04f6c3ca75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//t7w\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1637,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-01-31T17:53:05Z",
+      "side": 1,
+      "message": "Good point! \nThe rounding operations can certainly be optimized. We had always tried to reduce the rounding operations in inverse transforms for faster decoders and compensate any loss of accuracy in the forward transforms. So I will optimize fwd/inv transform rounding operations jointly in later commits.",
+      "parentUuid": "AAAAVH//uDI\u003d",
       "revId": "2908efcdd57e1f4491f76dcfae85bf04f6c3ca75",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
