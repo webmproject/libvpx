@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//uE0\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2076,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-01-31T12:11:53Z",
+      "side": 1,
+      "message": "In VP8 we ran into problems on some larger image sizes because of a limit on partition size of 24 bits. I suggest we make it 32 bits which should be enough.",
+      "revId": "26d36c2d6ba29e9772cde8da39a39c7cd9ba4bee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
