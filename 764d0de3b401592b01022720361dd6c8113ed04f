@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//tmk\u003d",
+        "filename": "test/md5_helper.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-31T23:43:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//tp4\u003d",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//tps\u003d",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 15
@@ -30,6 +48,24 @@
       "writtenOn": "2013-01-31T23:05:39Z",
       "side": 1,
       "message": "this is kinda awkward. it\u0027d be better to return a const reference to storage held inside the md5 object (probably as a std::string, to appease the c++ folks)",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//tmM\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-31T23:43:12Z",
+      "side": 1,
+      "message": "So I\u0027ve done it as char[33] for now since that\u0027s what we\u0027re using before this patch also... If you insist, I will change it to std::String. Trying to be lazy. :-).",
+      "parentUuid": "AAAAVH//tps\u003d",
       "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//tl4\u003d",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-31T23:43:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//toA\u003d",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//tog\u003d",
         "filename": "test/tile_independence_test.cc",
         "patchSetId": 15
@@ -64,6 +118,24 @@
       "writtenOn": "2013-01-31T23:05:39Z",
       "side": 1,
       "message": "this should be a parameter. put libvpx_test::TestMode in with int in CodecTestWithParam\u003c\u003e above, and testing::Values(libvpx_test::kTwoPassGood) in the \tVP9_INSTANTIATE_TEST_CASE. The macro will give you the cartesian product of the two lists.",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//tls\u003d",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-01-31T23:43:12Z",
+      "side": 1,
+      "message": "error: macro \"VP9_INSTANTIATE_TEST_CASE\" passed 3 arguments, but takes just 2\n\nI get that error if I add another parameter?",
+      "parentUuid": "AAAAVH//tog\u003d",
       "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
