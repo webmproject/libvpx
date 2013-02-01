@@ -61,6 +61,8 @@
     %define mangle(x) x
 %elifidn __OUTPUT_FORMAT__,x64
     %define mangle(x) x
+%elifidn __OUTPUT_FORMAT__,win64
+    %define mangle(x) x
 %else
     %define mangle(x) _ %+ x
 %endif
