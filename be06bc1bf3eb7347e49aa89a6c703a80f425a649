@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//tV4\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-02-01T06:36:13Z",
+      "side": 1,
+      "message": "static const int taps_v[10] \u003d { ... }",
+      "revId": "be06bc1bf3eb7347e49aa89a6c703a80f425a649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//tV0\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-02-01T06:36:13Z",
+      "side": 1,
+      "message": "const int c1 \u003d ...\nconst int c2 \u003d ...\nconst int c3 \u003d ...",
+      "revId": "be06bc1bf3eb7347e49aa89a6c703a80f425a649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
