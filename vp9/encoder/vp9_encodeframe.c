@@ -21,7 +21,6 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/common/vp9_setupintrarecon.h"
-#include "vp9/common/vp9_reconintra4x4.h"
 #include "vp9/encoder/vp9_encodeintra.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_invtrans.h"
@@ -689,8 +688,9 @@ static void set_offsets(VP9_COMP *cpi,
   xd->mb_to_right_edge  = ((cm->mb_cols - block_size - mb_col) * 16) << 3;
 
   // Are edges available for intra prediction?
-  xd->up_available   = (mb_row != 0);
-  xd->left_available = (mb_col != 0);
+  xd->up_available    = (mb_row != 0);
+  xd->left_available  = (mb_col > cm->cur_tile_mb_col_start);
+  xd->right_available = (mb_col + block_size < cm->cur_tile_mb_col_end);
 
   /* Reference buffer offsets */
   *ref_yoffset  = (mb_row * ref_y_stride * 16) + (mb_col * 16);
@@ -730,9 +730,11 @@ static void set_offsets(VP9_COMP *cpi,
       const int x = mb_col & ~3;
       const int p16 = ((mb_row & 1) << 1) +  (mb_col & 1);
       const int p32 = ((mb_row & 2) << 2) + ((mb_col & 2) << 1);
+      const int tile_progress = cm->cur_tile_mb_col_start * cm->mb_rows;
+      const int mb_cols = cm->cur_tile_mb_col_end - cm->cur_tile_mb_col_start;
 
       cpi->seg0_progress =
-          ((y * cm->mb_cols + x * 4 + p32 + p16) << 16) / cm->MBs;
+          ((y * mb_cols + x * 4 + p32 + p16 + tile_progress) << 16) / cm->MBs;
     }
   } else {
     mbmi->segment_id = 0;
@@ -783,8 +785,6 @@ static void pick_mb_modes(VP9_COMP *cpi,
 
     mbmi = &xd->mode_info_context->mbmi;
     mbmi->sb_type = BLOCK_SIZE_MB16X16;
-
-    vp9_intra_prediction_down_copy(xd);
 
     // Find best coding mode & reconstruct the MB so it is available
     // as a predictor for MBs that follow in the SB
@@ -1022,8 +1022,6 @@ static void encode_sb(VP9_COMP *cpi,
       if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
         vp9_activity_masking(cpi, x);
 
-      vp9_intra_prediction_down_copy(xd);
-
       encode_macroblock(cpi, tp, recon_yoffset, recon_uvoffset,
                         output_enabled, mb_row + y_idx, mb_col + x_idx);
       if (output_enabled)
@@ -1097,13 +1095,13 @@ static void encode_sb_row(VP9_COMP *cpi,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int mb_col;
-  int mb_cols = cm->mb_cols;
 
   // Initialize the left context for the new SB row
   vpx_memset(cm->left_context, 0, sizeof(cm->left_context));
 
   // Code each SB in the row
-  for (mb_col = 0; mb_col < mb_cols; mb_col += 4) {
+  for (mb_col = cm->cur_tile_mb_col_start;
+       mb_col < cm->cur_tile_mb_col_end; mb_col += 4) {
     int i;
     int sb32_rate = 0, sb32_dist = 0;
     int is_sb[4];
@@ -1127,7 +1125,7 @@ static void encode_sb_row(VP9_COMP *cpi,
                     tp, &mb_rate, &mb_dist);
       mb_rate += vp9_cost_bit(cm->sb32_coded, 0);
 
-      if (!(((    mb_cols & 1) && mb_col + x_idx ==     mb_cols - 1) ||
+      if (!(((cm->mb_cols & 1) && mb_col + x_idx == cm->mb_cols - 1) ||
             ((cm->mb_rows & 1) && mb_row + y_idx == cm->mb_rows - 1))) {
         /* Pick a mode assuming that it applies to all 4 of the MBs in the SB */
         pick_sb_modes(cpi, mb_row + y_idx, mb_col + x_idx,
@@ -1161,7 +1159,7 @@ static void encode_sb_row(VP9_COMP *cpi,
     memcpy(cm->left_context, &l, sizeof(l));
     sb32_rate += vp9_cost_bit(cm->sb64_coded, 0);
 
-    if (!(((    mb_cols & 3) && mb_col + 3 >=     mb_cols) ||
+    if (!(((cm->mb_cols & 3) && mb_col + 3 >= cm->mb_cols) ||
           ((cm->mb_rows & 3) && mb_row + 3 >= cm->mb_rows))) {
       pick_sb64_modes(cpi, mb_row, mb_col, tp, &sb64_rate, &sb64_dist);
       sb64_rate += vp9_cost_bit(cm->sb64_coded, 1);
@@ -1329,9 +1327,24 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     vpx_usec_timer_start(&emr_timer);
 
     {
-      // For each row of SBs in the frame
-      for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4) {
-        encode_sb_row(cpi, mb_row, &tp, &totalrate);
+      // Take tiles into account and give start/end MB
+      int tile, mb_start = 0;
+
+      for (tile = 0; tile < cm->tile_columns; tile++) {
+        // calculate end of tile column
+        const int sb_cols = (cm->mb_cols + 3) >> 2;
+        const int sb_end = (sb_cols * (tile + 1)) >> cpi->oxcf.tile_columns;
+        const int mb_end = ((sb_end << 2) > cm->mb_cols) ?
+                            cm->mb_cols : (sb_end << 2);
+
+        // For each row of SBs in the frame
+        cm->cur_tile_idx = tile;
+        cm->cur_tile_mb_col_start = mb_start;
+        cm->cur_tile_mb_col_end = mb_end;
+        for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4) {
+          encode_sb_row(cpi, mb_row, &tp, &totalrate);
+        }
+        mb_start = mb_end;
       }
 
       cpi->tok_count = (unsigned int)(tp - cpi->tok);

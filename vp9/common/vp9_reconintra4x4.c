@@ -151,19 +151,99 @@ B_PREDICTION_MODE vp9_find_bpred_context(BLOCKD *x) {
 }
 #endif
 
-void vp9_intra4x4_predict(BLOCKD *x,
+void vp9_intra4x4_predict(MACROBLOCKD *xd,
+                          BLOCKD *x,
                           int b_mode,
                           uint8_t *predictor) {
   int i, r, c;
+  const int block_idx = x - xd->block;
+  const int have_top = (block_idx >> 2) || xd->up_available;
+  const int have_left = (block_idx & 3)  || xd->left_available;
+  const int have_right = (block_idx & 3) != 3 || xd->right_available;
+  uint8_t left[4], above[8], top_left;
+  /*
+   * 127 127 127 .. 127 127 127 127 127 127
+   * 129  A   B  ..  Y   Z
+   * 129  C   D  ..  W   X
+   * 129  E   F  ..  U   V
+   * 129  G   H  ..  S   T   T   T   T   T
+   *  ..
+   */
 
-  uint8_t *above = *(x->base_dst) + x->dst - x->dst_stride;
-  uint8_t left[4];
-  uint8_t top_left = above[-1];
+  if (have_left) {
+    uint8_t *left_ptr = *(x->base_dst) + x->dst - 1;
+    const int stride = x->dst_stride;
 
-  left[0] = (*(x->base_dst))[x->dst - 1];
-  left[1] = (*(x->base_dst))[x->dst - 1 + x->dst_stride];
-  left[2] = (*(x->base_dst))[x->dst - 1 + 2 * x->dst_stride];
-  left[3] = (*(x->base_dst))[x->dst - 1 + 3 * x->dst_stride];
+    left[0] = left_ptr[0 * stride];
+    left[1] = left_ptr[1 * stride];
+    left[2] = left_ptr[2 * stride];
+    left[3] = left_ptr[3 * stride];
+  } else {
+    left[0] = left[1] = left[2] = left[3] = 129;
+  }
+
+  if (have_top) {
+    uint8_t *above_ptr = *(x->base_dst) + x->dst - x->dst_stride;
+
+    if (have_left) {
+      top_left = above_ptr[-1];
+    } else {
+      top_left = 127;
+    }
+
+    above[0] = above_ptr[0];
+    above[1] = above_ptr[1];
+    above[2] = above_ptr[2];
+    above[3] = above_ptr[3];
+    if (((block_idx & 3) != 3) ||
+        (have_right && block_idx == 3 &&
+         ((xd->mb_index != 3 && xd->sb_index != 3) ||
+          ((xd->mb_index & 1) == 0 && xd->sb_index == 3)))) {
+      above[4] = above_ptr[4];
+      above[5] = above_ptr[5];
+      above[6] = above_ptr[6];
+      above[7] = above_ptr[7];
+    } else if (have_right) {
+      uint8_t *above_right = above_ptr + 4;
+
+      if (xd->sb_index == 3 && (xd->mb_index & 1))
+        above_right -= 32 * x->dst_stride;
+      if (xd->mb_index == 3)
+        above_right -= 16 * x->dst_stride;
+      above_right -= (block_idx & ~3) * x->dst_stride;
+
+      /* use a more distant above-right (from closest available top-right
+       * corner), but with a "localized DC" (similar'ish to TM-pred):
+       *
+       *  A   B   C   D   E   F   G   H
+       *  I   J   K   L
+       *  M   N   O   P
+       *  Q   R   S   T
+       *  U   V   W   X   x1  x2  x3  x4
+       *
+       * Where:
+       * x1 = clip_pixel(E + X - D)
+       * x2 = clip_pixel(F + X - D)
+       * x3 = clip_pixel(G + X - D)
+       * x4 = clip_pixel(H + X - D)
+       *
+       * This is applied anytime when we use a "distant" above-right edge
+       * that is not immediately top-right to the block that we're going
+       * to do intra prediction for.
+       */
+      above[4] = clip_pixel(above_right[0] + above_ptr[3] - above_right[-1]);
+      above[5] = clip_pixel(above_right[1] + above_ptr[3] - above_right[-1]);
+      above[6] = clip_pixel(above_right[2] + above_ptr[3] - above_right[-1]);
+      above[7] = clip_pixel(above_right[3] + above_ptr[3] - above_right[-1]);
+    } else {
+      // extend edge
+      above[4] = above[5] = above[6] = above[7] = above[3];
+    }
+  } else {
+    above[0] = above[1] = above[2] = above[3] = 127;
+    above[4] = above[5] = above[6] = above[7] = 127;
+    top_left = 127;
+  }
 
 #if CONFIG_NEWBINTRAMODES
   if (b_mode == B_CONTEXT_PRED)
@@ -410,40 +490,4 @@ void vp9_intra4x4_predict(BLOCKD *x,
     */
 #endif
   }
-}
-
-/* copy 4 bytes from the above right down so that the 4x4 prediction modes using pixels above and
- * to the right prediction have filled in pixels to use.
- */
-void vp9_intra_prediction_down_copy(MACROBLOCKD *xd) {
-  int extend_edge = xd->mb_to_right_edge == 0 && xd->mb_index < 2;
-  uint8_t *above_right = *(xd->block[0].base_dst) + xd->block[0].dst -
-                               xd->block[0].dst_stride + 16;
-  uint32_t *dst_ptr0 = (uint32_t *)above_right;
-  uint32_t *dst_ptr1 =
-    (uint32_t *)(above_right + 4 * xd->block[0].dst_stride);
-  uint32_t *dst_ptr2 =
-    (uint32_t *)(above_right + 8 * xd->block[0].dst_stride);
-  uint32_t *dst_ptr3 =
-    (uint32_t *)(above_right + 12 * xd->block[0].dst_stride);
-
-  uint32_t *src_ptr = (uint32_t *) above_right;
-
-  if ((xd->sb_index >= 2 && xd->mb_to_right_edge == 0) ||
-      (xd->sb_index == 3 && xd->mb_index & 1))
-    src_ptr = (uint32_t *) (((uint8_t *) src_ptr) - 32 *
-                                                    xd->block[0].dst_stride);
-  if (xd->mb_index == 3 ||
-      (xd->mb_to_right_edge == 0 && xd->mb_index == 2))
-    src_ptr = (uint32_t *) (((uint8_t *) src_ptr) - 16 *
-                                                    xd->block[0].dst_stride);
-
-  if (extend_edge) {
-    *src_ptr = ((uint8_t *) src_ptr)[-1] * 0x01010101U;
-  }
-
-  *dst_ptr0 = *src_ptr;
-  *dst_ptr1 = *src_ptr;
-  *dst_ptr2 = *src_ptr;
-  *dst_ptr3 = *src_ptr;
 }

@@ -921,7 +921,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #else
           while (j != L[++k]);
 #endif
-          leftmv.as_int = left_block_mv(m, k);
+          leftmv.as_int = left_block_mv(xd, m, k);
           abovemv.as_int = above_block_mv(m, k, mis);
           mv_contz = vp9_mv_cont(&leftmv, &abovemv);
 
@@ -1017,7 +1017,8 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     int i = 0;
     do {
       const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
-      const B_PREDICTION_MODE L = left_block_mode(m, i);
+      const B_PREDICTION_MODE L = (xd->left_available || (i & 3)) ?
+                                  left_block_mode(m, i) : B_DC_PRED;
       const int bm = m->bmi[i].as_mode.first;
 
 #ifdef ENTROPY_STATS
@@ -1064,6 +1065,10 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   xd->mode_info_context = m;
+  xd->left_available = mb_col > c->cur_tile_mb_col_start;
+  xd->right_available =
+      (mb_col + (1 << m->mbmi.sb_type)) < c->cur_tile_mb_col_end;
+  xd->up_available = mb_row > 0;
   if (c->frame_type == KEY_FRAME) {
     write_mb_modes_kf(cpi, m, bc,
                       c->mb_rows - mb_row, c->mb_cols - mb_col);
@@ -1082,20 +1087,21 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   pack_mb_tokens(bc, tok, tok_end);
 }
 
-static void write_modes(VP9_COMP *cpi, vp9_writer* const bc) {
+static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
+                        TOKENEXTRA **tok) {
   VP9_COMMON *const c = &cpi->common;
   const int mis = c->mode_info_stride;
-  MODE_INFO *m, *m_ptr = c->mi;
+  MODE_INFO *m, *m_ptr = c->mi + c->cur_tile_mb_col_start;
   int i, mb_row, mb_col;
-  TOKENEXTRA *tok = cpi->tok;
-  TOKENEXTRA *tok_end = tok + cpi->tok_count;
+  TOKENEXTRA *tok_end = *tok + cpi->tok_count;
 
   for (mb_row = 0; mb_row < c->mb_rows; mb_row += 4, m_ptr += 4 * mis) {
     m = m_ptr;
-    for (mb_col = 0; mb_col < c->mb_cols; mb_col += 4, m += 4) {
+    for (mb_col = c->cur_tile_mb_col_start;
+         mb_col < c->cur_tile_mb_col_end; mb_col += 4, m += 4) {
       vp9_write(bc, m->mbmi.sb_type == BLOCK_SIZE_SB64X64, c->sb64_coded);
       if (m->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
-        write_modes_b(cpi, m, bc, &tok, tok_end, mb_row, mb_col);
+        write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
       } else {
         int j;
 
@@ -1110,7 +1116,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc) {
           vp9_write(bc, sb_m->mbmi.sb_type, c->sb32_coded);
           if (sb_m->mbmi.sb_type) {
             assert(sb_m->mbmi.sb_type == BLOCK_SIZE_SB32X32);
-            write_modes_b(cpi, sb_m, bc, &tok, tok_end,
+            write_modes_b(cpi, sb_m, bc, tok, tok_end,
                           mb_row + y_idx_sb, mb_col + x_idx_sb);
           } else {
             // Process the 4 MBs in the order:
@@ -1126,7 +1132,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc) {
               }
 
               assert(mb_m->mbmi.sb_type == BLOCK_SIZE_MB16X16);
-              write_modes_b(cpi, mb_m, bc, &tok, tok_end,
+              write_modes_b(cpi, mb_m, bc, tok, tok_end,
                             mb_row + y_idx, mb_col + x_idx);
             }
           }
@@ -2012,6 +2018,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     vp9_write_nmv_probs(cpi, xd->allow_high_precision_mv, &header_bc);
   }
 
+  /* tiling */
+  vp9_write(&header_bc, pc->tile_columns > 1, 128);
+  if (pc->tile_columns > 1) {
+    vp9_write(&header_bc, pc->tile_columns > 2, 128);
+  }
+
   vp9_stop_encode(&header_bc);
 
   oh.first_partition_length_in_bytes = header_bc.pos;
@@ -2029,21 +2041,57 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   }
 
   *size = VP9_HEADER_SIZE + extra_bytes_packed + header_bc.pos;
-  vp9_start_encode(&residual_bc, cx_data + header_bc.pos);
 
   if (pc->frame_type == KEY_FRAME) {
     decide_kf_ymode_entropy(cpi);
-    write_modes(cpi, &residual_bc);
   } else {
     /* This is not required if the counts in cpi are consistent with the
      * final packing pass */
     // if (!cpi->dummy_packing) vp9_zero(cpi->NMVcount);
-    write_modes(cpi, &residual_bc);
   }
 
-  vp9_stop_encode(&residual_bc);
+  {
+    int mb_start = 0, tile;
+    int total_size = 0;
+    unsigned char *data_ptr = cx_data + header_bc.pos;
+    TOKENEXTRA *tok = cpi->tok;
 
-  *size += residual_bc.pos;
+    for (tile = 0; tile < pc->tile_columns; tile++) {
+      // calculate end of tile column
+      const int sb_cols = (pc->mb_cols + 3) >> 2;
+      const int sb_end = (sb_cols * (tile + 1)) >> cpi->oxcf.tile_columns;
+      const int mb_end = ((sb_end << 2) > pc->mb_cols) ?
+                          pc->mb_cols : (sb_end << 2);
+
+      pc->cur_tile_idx = tile;
+      pc->cur_tile_mb_col_start = mb_start;
+      pc->cur_tile_mb_col_end = mb_end;
+
+      if (tile < pc->tile_columns - 1)
+        vp9_start_encode(&residual_bc, data_ptr + total_size + 4);
+      else
+        vp9_start_encode(&residual_bc, data_ptr + total_size);
+      write_modes(cpi, &residual_bc, &tok);
+      vp9_stop_encode(&residual_bc);
+      if (tile < pc->tile_columns - 1) {
+        /* size of this tile */
+        data_ptr[total_size + 0] = residual_bc.pos;
+        data_ptr[total_size + 1] = residual_bc.pos >> 8;
+        data_ptr[total_size + 2] = residual_bc.pos >> 16;
+        data_ptr[total_size + 3] = residual_bc.pos >> 24;
+        total_size += 4;
+      }
+
+      mb_start = mb_end;
+      total_size += residual_bc.pos;
+    }
+
+    *size += total_size;
+  }
+
+  if (pc->frame_type != KEY_FRAME && !cpi->common.error_resilient_mode) {
+    vp9_adapt_mode_context(&cpi->common);
+  }
 }
 
 #ifdef ENTROPY_STATS

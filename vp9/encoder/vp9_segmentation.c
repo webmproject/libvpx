@@ -254,7 +254,7 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   int t_pred_cost = INT_MAX;
 
   int i;
-  int mb_row, mb_col;
+  int tile, mb_row, mb_col, mb_start = 0;
 
   int temporal_predictor_count[PREDICTION_PROBS][2];
   int no_pred_segcounts[MAX_MB_SEGMENTS];
@@ -266,7 +266,7 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   vp9_prob t_nopred_prob[PREDICTION_PROBS];
 
   const int mis = cm->mode_info_stride;
-  MODE_INFO *mi_ptr = cm->mi, *mi;
+  MODE_INFO *mi_ptr, *mi;
 
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities
@@ -282,9 +282,21 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   // First of all generate stats regarding how well the last segment map
   // predicts this one
 
+  for (tile = 0; tile < cm->tile_columns; tile++) {
+    // calculate end of tile column
+    const int sb_cols = (cm->mb_cols + 3) >> 2;
+    const int sb_end = (sb_cols * (tile + 1)) >> cpi->oxcf.tile_columns;
+    const int mb_end = ((sb_end << 2) > cm->mb_cols) ?
+                        cm->mb_cols : (sb_end << 2);
+
+    cm->cur_tile_idx = tile;
+    cm->cur_tile_mb_col_start = mb_start;
+    cm->cur_tile_mb_col_end = mb_end;
+
+    mi_ptr = cm->mi + mb_start;
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4, mi_ptr += 4 * mis) {
     mi = mi_ptr;
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col += 4, mi += 4) {
+    for (mb_col = mb_start; mb_col < mb_end; mb_col += 4, mi += 4) {
       if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
         count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
                    t_unpred_seg_counts, 4, mb_row, mb_col);
@@ -323,6 +335,9 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
         }
       }
     }
+  }
+
+    mb_start = mb_end;
   }
 
   // Work out probability tree for coding segments without prediction

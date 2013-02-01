@@ -13,7 +13,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_header.h"
 #include "vp9/common/vp9_reconintra.h"
-#include "vp9/common/vp9_reconintra4x4.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/decoder/vp9_decodframe.h"
@@ -294,7 +293,7 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
       BLOCKD *b = &xd->block[ib];
       if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
         int i8x8mode = b->bmi.as_mode.first;
-        vp9_intra8x8_predict(b, i8x8mode, b->predictor);
+        vp9_intra8x8_predict(xd, b, i8x8mode, b->predictor);
       }
       tx_type = get_tx_type_8x8(xd, &xd->block[ib]);
       if (tx_type != DCT_DCT) {
@@ -344,11 +343,11 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
       BLOCKD *b = &xd->block[ib];
       int i8x8mode = b->bmi.as_mode.first;
       b = &xd->block[16 + i];
-      vp9_intra_uv4x4_predict(&xd->block[16 + i], i8x8mode, b->predictor);
+      vp9_intra_uv4x4_predict(xd, &xd->block[16 + i], i8x8mode, b->predictor);
       pbi->idct_add(b->qcoeff, b->dequant, b->predictor,
                     *(b->base_dst) + b->dst, 8, b->dst_stride);
       b = &xd->block[20 + i];
-      vp9_intra_uv4x4_predict(&xd->block[20 + i], i8x8mode, b->predictor);
+      vp9_intra_uv4x4_predict(xd, &xd->block[20 + i], i8x8mode, b->predictor);
       pbi->idct_add(b->qcoeff, b->dequant, b->predictor,
                     *(b->base_dst) + b->dst, 8, b->dst_stride);
     }
@@ -390,7 +389,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       BLOCKD *b;
       b = &xd->block[ib];
       i8x8mode = b->bmi.as_mode.first;
-      vp9_intra8x8_predict(b, i8x8mode, b->predictor);
+      vp9_intra8x8_predict(xd, b, i8x8mode, b->predictor);
       for (j = 0; j < 4; j++) {
         b = &xd->block[ib + iblock[j]];
         tx_type = get_tx_type_4x4(xd, b);
@@ -405,11 +404,11 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
         }
       }
       b = &xd->block[16 + i];
-      vp9_intra_uv4x4_predict(b, i8x8mode, b->predictor);
+      vp9_intra_uv4x4_predict(xd, b, i8x8mode, b->predictor);
       pbi->idct_add(b->qcoeff, b->dequant, b->predictor,
                     *(b->base_dst) + b->dst, 8, b->dst_stride);
       b = &xd->block[20 + i];
-      vp9_intra_uv4x4_predict(b, i8x8mode, b->predictor);
+      vp9_intra_uv4x4_predict(xd, b, i8x8mode, b->predictor);
       pbi->idct_add(b->qcoeff, b->dequant, b->predictor,
                     *(b->base_dst) + b->dst, 8, b->dst_stride);
     }
@@ -426,7 +425,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       if (!xd->mode_info_context->mbmi.mb_skip_coeff)
         eobtotal += vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_Y_WITH_DC, i);
 
-      vp9_intra4x4_predict(b, b_mode, b->predictor);
+      vp9_intra4x4_predict(xd, b, b_mode, b->predictor);
       tx_type = get_tx_type_4x4(xd, b);
       if (tx_type != DCT_DCT) {
         vp9_ht_dequant_idct_add_c(tx_type, b->qcoeff,
@@ -1071,8 +1070,9 @@ static void set_offsets(VP9D_COMP *pbi, int block_size,
   xd->mb_to_bottom_edge = ((cm->mb_rows - block_size - mb_row) * 16) << 3;
   xd->mb_to_right_edge = ((cm->mb_cols - block_size - mb_col) * 16) << 3;
 
-  xd->up_available = (mb_row != 0);
-  xd->left_available = (mb_col != 0);
+  xd->up_available    = (mb_row != 0);
+  xd->left_available  = (mb_col > cm->cur_tile_mb_col_start);
+  xd->right_available = (mb_col + block_size < cm->cur_tile_mb_col_end);
 
   xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
   xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
@@ -1145,7 +1145,8 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
   // For a SB there are 2 left contexts, each pertaining to a MB row within
   vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
 
-  for (mb_col = 0; mb_col < pc->mb_cols; mb_col += 4) {
+  for (mb_col = pc->cur_tile_mb_col_start;
+       mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
     if (vp9_read(bc, pc->sb64_coded)) {
       set_offsets(pbi, 64, mb_row, mb_col);
       vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, bc);
@@ -1193,8 +1194,7 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
             vp9_decode_mb_mode_mv(pbi, xd, mb_row + y_idx, mb_col + x_idx, bc);
             update_blockd_bmi(xd);
             set_refs(pbi, 16, mb_row + y_idx, mb_col + x_idx);
-            vp9_intra_prediction_down_copy(xd);
-            decode_macroblock(pbi, xd, mb_row, mb_col, bc);
+            decode_macroblock(pbi, xd, mb_row + y_idx, mb_col + x_idx, bc);
 
             /* check if the boolean decoder has suffered an error */
             xd->corrupted |= bool_error(bc);
@@ -1579,9 +1579,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   // Dummy read for now
   vp9_read_literal(&header_bc, 2);
 
-  setup_token_decoder(pbi, data + first_partition_length_in_bytes,
-                      &residual_bc);
-
   /* Read the default quantizers. */
   {
     int Q, q_update;
@@ -1770,11 +1767,83 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   vp9_decode_mode_mvs_init(pbi, &header_bc);
 
-  vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
+  /* tile info */
+  {
+    int log2_tile_cols;
+    const unsigned char *data_ptr = data + first_partition_length_in_bytes;
+    int tile, mb_start, mb_end;
 
-  /* Decode a row of superblocks */
-  for (mb_row = 0; mb_row < pc->mb_rows; mb_row += 4) {
-    decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
+    log2_tile_cols = vp9_read_bit(&header_bc);
+    if (log2_tile_cols) {
+      log2_tile_cols += vp9_read_bit(&header_bc);
+    }
+    pc->tile_columns = 1 << log2_tile_cols;
+
+    vpx_memset(pc->above_context, 0,
+               sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
+
+    if (pbi->oxcf.inv_tile_order) {
+      const unsigned char *data_ptr2[4];
+      BOOL_DECODER UNINITIALIZED_IS_SAFE(bc_bak);
+
+      data_ptr2[0] = data_ptr;
+      for (tile = 1; tile < pc->tile_columns; tile++) {
+        int size = data_ptr2[tile - 1][0] + (data_ptr2[tile - 1][1] << 8) +
+                (data_ptr2[tile - 1][2] << 16) + (data_ptr2[tile - 1][3] << 24);
+        data_ptr2[tile - 1] += 4;
+        data_ptr2[tile] = data_ptr2[tile - 1] + size;
+      }
+      for (mb_end = pc->mb_cols, tile = pc->tile_columns - 1;
+           tile >= 0; tile--) {
+        // calculate end of tile column
+        const int sb_cols = (pc->mb_cols + 3) >> 2;
+        const int sb_start = (sb_cols * tile) >> log2_tile_cols;
+        mb_start = ((sb_start << 2) > pc->mb_cols) ?
+                    pc->mb_cols : (sb_start << 2);
+
+        pc->cur_tile_idx = tile;
+        pc->cur_tile_mb_col_start = mb_start;
+        pc->cur_tile_mb_col_end   = mb_end;
+
+        setup_token_decoder(pbi, data_ptr2[tile], &residual_bc);
+
+        /* Decode a row of superblocks */
+        for (mb_row = 0; mb_row < pc->mb_rows; mb_row += 4) {
+          decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
+        }
+        mb_end = mb_start;
+        if (tile == pc->tile_columns - 1)
+          bc_bak = residual_bc;
+      }
+      residual_bc = bc_bak;
+    } else {
+      for (mb_start = 0, tile = 0; tile < pc->tile_columns; tile++) {
+        // calculate end of tile column
+        const int sb_cols = (pc->mb_cols + 3) >> 2;
+        const int sb_end = (sb_cols * (tile + 1)) >> log2_tile_cols;
+        mb_end = ((sb_end << 2) > pc->mb_cols) ? pc->mb_cols : (sb_end << 2);
+
+        pc->cur_tile_idx = tile;
+        pc->cur_tile_mb_col_start = mb_start;
+        pc->cur_tile_mb_col_end   = mb_end;
+
+        if (tile < pc->tile_columns - 1)
+          setup_token_decoder(pbi, data_ptr + 4, &residual_bc);
+        else
+          setup_token_decoder(pbi, data_ptr, &residual_bc);
+
+        /* Decode a row of superblocks */
+        for (mb_row = 0; mb_row < pc->mb_rows; mb_row += 4) {
+          decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
+        }
+        mb_start = mb_end;
+        if (tile < pc->tile_columns - 1) {
+          int size = data_ptr[0] + (data_ptr[1] << 8) + (data_ptr[2] << 16) +
+                    (data_ptr[3] << 24);
+          data_ptr += 4 + size;
+        }
+      }
+    }
   }
   corrupt_tokens |= xd->corrupted;
 

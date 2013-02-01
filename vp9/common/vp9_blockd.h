@@ -336,6 +336,7 @@ typedef struct macroblockd {
 
   int up_available;
   int left_available;
+  int right_available;
 
   /* Y,U,V,Y2 */
   ENTROPY_CONTEXT_PLANES *above_context;

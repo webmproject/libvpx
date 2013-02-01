@@ -12,7 +12,6 @@
 #include "vp9_rtcd.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/common/vp9_reconintra.h"
-#include "vp9/common/vp9_reconintra4x4.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/common/vp9_invtrans.h"
 #include "vp9/encoder/vp9_encodeintra.h"
@@ -50,7 +49,7 @@ void vp9_encode_intra4x4block(MACROBLOCK *x, int ib) {
   b->bmi.as_mode.context = vp9_find_bpred_context(b);
 #endif
 
-  vp9_intra4x4_predict(b, b->bmi.as_mode.first, b->predictor);
+  vp9_intra4x4_predict(&x->e_mbd, b, b->bmi.as_mode.first, b->predictor);
   vp9_subtract_b(be, b, 16);
 
   tx_type = get_tx_type_4x4(&x->e_mbd, b);
@@ -141,7 +140,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
   int i;
   TX_TYPE tx_type;
 
-  vp9_intra8x8_predict(b, b->bmi.as_mode.first, b->predictor);
+  vp9_intra8x8_predict(xd, b, b->bmi.as_mode.first, b->predictor);
   // generate residual blocks
   vp9_subtract_4b_c(be, b, 16);
 
@@ -199,7 +198,7 @@ static void encode_intra_uv4x4(MACROBLOCK *x, int ib,
   BLOCKD *b = &x->e_mbd.block[ib];
   BLOCK *be = &x->block[ib];
 
-  vp9_intra_uv4x4_predict(b, mode, b->predictor);
+  vp9_intra_uv4x4_predict(&x->e_mbd, b, mode, b->predictor);
 
   vp9_subtract_b(be, b, 8);
 

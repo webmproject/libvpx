@@ -187,7 +187,8 @@ enum vp8e_enc_control_id {
 
 
   /* TODO(jkoleszar): Move to vp9cx.h */
-  VP9E_SET_LOSSLESS
+  VP9E_SET_LOSSLESS,
+  VP9E_SET_TILE_COLUMNS
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -255,6 +256,19 @@ typedef enum {
 } vp8e_token_partitions;
 
 
+/*!\brief VP8 tile column mode
+ *
+ * This defines VP9 tiling mode for compressed data, i.e., the number of
+ * sub-streams in the bitstream. Used for parallelized encoding/decoding.
+ *
+ */
+
+typedef enum {
+  VP8_ONE_TILE_COLUMN   = 0,
+  VP8_TWO_TILE_COLUMNS  = 1,
+  VP8_FOUR_TILE_COLUMNS = 2
+} vp8e_tile_column_mode;
+
 /*!\brief VP8 model tuning parameters
  *
  * Changes the encoder to tune for certain types of input material.
@@ -297,6 +311,8 @@ VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_STRENGTH,     unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_TYPE,     unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_TUNING,             int) /* vp8e_tuning */
 VPX_CTRL_USE_TYPE(VP8E_SET_CQ_LEVEL,      unsigned int)
+
+VPX_CTRL_USE_TYPE(VP9E_SET_TILE_COLUMNS,  int)
 
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)

@@ -46,7 +46,6 @@ VP9_COMMON_SRCS-yes += common/vp9_pred_common.c
 VP9_COMMON_SRCS-yes += common/vp9_quant_common.h
 VP9_COMMON_SRCS-yes += common/vp9_reconinter.h
 VP9_COMMON_SRCS-yes += common/vp9_reconintra.h
-VP9_COMMON_SRCS-yes += common/vp9_reconintra4x4.h
 VP9_COMMON_SRCS-yes += common/vp9_rtcd.c
 VP9_COMMON_SRCS-yes += common/vp9_rtcd_defs.sh
 VP9_COMMON_SRCS-yes += common/vp9_sadmxn.h

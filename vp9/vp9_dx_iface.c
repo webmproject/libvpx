@@ -362,6 +362,7 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
       oxcf.Version = 9;
       oxcf.postprocess = 0;
       oxcf.max_threads = ctx->cfg.threads;
+      oxcf.inv_tile_order = ctx->cfg.inv_tile_order;
       optr = vp9_create_decompressor(&oxcf);
 
       /* If postprocessing was enabled by the application and a

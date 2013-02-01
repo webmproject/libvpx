@@ -127,6 +127,7 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   vp9_initialize_dec();
 
   vp9_create_common(&pbi->common);
+  pbi->oxcf = *oxcf;
 
   pbi->common.current_video_frame = 0;
   pbi->ready_for_new_data = 1;
@@ -291,7 +292,8 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
      * at this point, but if it becomes so, [0] may not always be the correct
      * thing to do here.
      */
-    cm->yv12_fb[cm->active_ref_idx[0]].corrupted = 1;
+    if (cm->active_ref_idx[0] != INT_MAX)
+      cm->yv12_fb[cm->active_ref_idx[0]].corrupted = 1;
   }
 
   cm->new_fb_idx = get_free_fb(cm);
@@ -307,7 +309,8 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
      * at this point, but if it becomes so, [0] may not always be the correct
      * thing to do here.
      */
-    cm->yv12_fb[cm->active_ref_idx[0]].corrupted = 1;
+    if (cm->active_ref_idx[0] != INT_MAX)
+      cm->yv12_fb[cm->active_ref_idx[0]].corrupted = 1;
 
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;

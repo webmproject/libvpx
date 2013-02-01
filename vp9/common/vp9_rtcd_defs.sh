@@ -164,13 +164,13 @@ specialize vp9_build_intra_predictors_sb64y_s;
 prototype void vp9_build_intra_predictors_sb64uv_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_sb64uv_s;
 
-prototype void vp9_intra4x4_predict "struct blockd *x, int b_mode, uint8_t *predictor"
+prototype void vp9_intra4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor"
 specialize vp9_intra4x4_predict;
 
-prototype void vp9_intra8x8_predict "struct blockd *x, int b_mode, uint8_t *predictor"
+prototype void vp9_intra8x8_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor"
 specialize vp9_intra8x8_predict;
 
-prototype void vp9_intra_uv4x4_predict "struct blockd *x, int b_mode, uint8_t *predictor"
+prototype void vp9_intra_uv4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor"
 specialize vp9_intra_uv4x4_predict;
 
 #

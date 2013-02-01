@@ -84,8 +84,12 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
 
 extern const uint8_t vp9_mbsplit_offset[4][16];
 
-static int left_block_mv(const MODE_INFO *cur_mb, int b) {
+static int left_block_mv(const MACROBLOCKD *xd,
+                         const MODE_INFO *cur_mb, int b) {
   if (!(b & 3)) {
+    if (!xd->left_available)
+      return 0;
+
     /* On L edge, get from MB to left of us */
     --cur_mb;
 
@@ -97,8 +101,12 @@ static int left_block_mv(const MODE_INFO *cur_mb, int b) {
   return (cur_mb->bmi + b - 1)->as_mv.first.as_int;
 }
 
-static int left_block_second_mv(const MODE_INFO *cur_mb, int b) {
+static int left_block_second_mv(const MACROBLOCKD *xd,
+                                const MODE_INFO *cur_mb, int b) {
   if (!(b & 3)) {
+    if (!xd->left_available)
+      return 0;
+
     /* On L edge, get from MB to left of us */
     --cur_mb;
 

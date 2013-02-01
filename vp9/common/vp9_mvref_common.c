@@ -243,6 +243,7 @@ static void add_candidate_mv(
 // list of candidate reference vectors.
 //
 void vp9_find_mv_refs(
+  VP9_COMMON *cm,
   MACROBLOCKD *xd,
   MODE_INFO *here,
   MODE_INFO *lf_here,
@@ -265,6 +266,7 @@ void vp9_find_mv_refs(
   int (*mv_ref_search)[2];
   int *ref_distance_weight;
   int zero_seen = FALSE;
+  const int mb_col = (-xd->mb_to_left_edge) >> 7;
 
   // Blank the reference vector lists and other local structures.
   vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
@@ -282,7 +284,10 @@ void vp9_find_mv_refs(
   // We first scan for candidate vectors that match the current reference frame
   // Look at nearest neigbours
   for (i = 0; i < 2; ++i) {
-    if (((mv_ref_search[i][0] << 7) >= xd->mb_to_left_edge) &&
+    const int mb_search_col = mb_col + mv_ref_search[i][0];
+
+    if ((mb_search_col >= cm->cur_tile_mb_col_start) &&
+        (mb_search_col < cm->cur_tile_mb_col_end) &&
         ((mv_ref_search[i][1] << 7) >= xd->mb_to_top_edge)) {
 
       candidate_mi = here + mv_ref_search[i][0] +
@@ -306,7 +311,10 @@ void vp9_find_mv_refs(
   // More distant neigbours
   for (i = 2; (i < MVREF_NEIGHBOURS) &&
               (refmv_count < (MAX_MV_REF_CANDIDATES - 1)); ++i) {
-    if (((mv_ref_search[i][0] << 7) >= xd->mb_to_left_edge) &&
+    const int mb_search_col = mb_col + mv_ref_search[i][0];
+
+    if ((mb_search_col >= cm->cur_tile_mb_col_start) &&
+        (mb_search_col < cm->cur_tile_mb_col_end) &&
         ((mv_ref_search[i][1] << 7) >= xd->mb_to_top_edge)) {
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
@@ -324,7 +332,10 @@ void vp9_find_mv_refs(
   // Look first at spatial neighbours
   if (refmv_count < (MAX_MV_REF_CANDIDATES - 1)) {
     for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
-      if (((mv_ref_search[i][0] << 7) >= xd->mb_to_left_edge) &&
+      const int mb_search_col = mb_col + mv_ref_search[i][0];
+
+      if ((mb_search_col >= cm->cur_tile_mb_col_start) &&
+          (mb_search_col < cm->cur_tile_mb_col_end) &&
           ((mv_ref_search[i][1] << 7) >= xd->mb_to_top_edge)) {
 
         candidate_mi = here + mv_ref_search[i][0] +

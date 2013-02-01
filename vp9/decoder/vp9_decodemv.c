@@ -138,6 +138,7 @@ static void kfread_modes(VP9D_COMP *pbi,
                          int mb_col,
                          BOOL_DECODER* const bc) {
   VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd  = &pbi->mb;
   const int mis = pbi->common.mode_info_stride;
   int map_index = mb_row * pbi->common.mb_cols + mb_col;
   MB_PREDICTION_MODE y_mode;
@@ -193,7 +194,8 @@ static void kfread_modes(VP9D_COMP *pbi,
     int i = 0;
     do {
       const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
-      const B_PREDICTION_MODE L = left_block_mode(m, i);
+      const B_PREDICTION_MODE L = (xd->left_available || (i & 3)) ?
+                                  left_block_mode(m, i) : B_DC_PRED;
 
       m->bmi[i].as_mode.first =
         (B_PREDICTION_MODE) read_kf_bmode(
@@ -772,7 +774,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
       // if (cm->current_video_frame == 1 && mb_row == 4 && mb_col == 5)
       //  printf("Dello\n");
-      vp9_find_mv_refs(xd, mi, cm->error_resilient_mode ? 0 : prev_mi,
+      vp9_find_mv_refs(cm, xd, mi, cm->error_resilient_mode ? 0 : prev_mi,
                        ref_frame, mbmi->ref_mvs[ref_frame],
                        cm->ref_frame_sign_bias);
 
@@ -859,7 +861,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         xd->second_pre.v_buffer =
           cm->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
 
-        vp9_find_mv_refs(xd, mi, cm->error_resilient_mode ? 0 : prev_mi,
+        vp9_find_mv_refs(cm, xd, mi, cm->error_resilient_mode ? 0 : prev_mi,
                          mbmi->second_ref_frame,
                          mbmi->ref_mvs[mbmi->second_ref_frame],
                          cm->ref_frame_sign_bias);
@@ -949,12 +951,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
           k = vp9_mbsplit_offset[s][j];
 
-          leftmv.as_int = left_block_mv(mi, k);
+          leftmv.as_int = left_block_mv(xd, mi, k);
           abovemv.as_int = above_block_mv(mi, k, mis);
           second_leftmv.as_int = 0;
           second_abovemv.as_int = 0;
           if (mbmi->second_ref_frame > 0) {
-            second_leftmv.as_int = left_block_second_mv(mi, k);
+            second_leftmv.as_int = left_block_second_mv(xd, mi, k);
             second_abovemv.as_int = above_block_second_mv(mi, k, mis);
           }
           mv_contz = vp9_mv_cont(&leftmv, &abovemv);

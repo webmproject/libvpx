@@ -29,14 +29,16 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
   // The prediction flags in these dummy entries are initialised to 0.
   switch (pred_id) {
     case PRED_SEG_ID:
-      pred_context = (m - 1)->mbmi.seg_id_predicted +
-                     (m - cm->mode_info_stride)->mbmi.seg_id_predicted;
+      pred_context = (m - cm->mode_info_stride)->mbmi.seg_id_predicted;
+      if (xd->left_available)
+        pred_context += (m - 1)->mbmi.seg_id_predicted;
       break;
 
 
     case PRED_REF:
-      pred_context = (m - 1)->mbmi.ref_predicted +
-                     (m - cm->mode_info_stride)->mbmi.ref_predicted;
+      pred_context = (m - cm->mode_info_stride)->mbmi.ref_predicted;
+      if (xd->left_available)
+        pred_context += (m - 1)->mbmi.ref_predicted;
       break;
 
     case PRED_COMP:
@@ -61,13 +63,14 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
       break;
 
     case PRED_MBSKIP:
-      pred_context = (m - 1)->mbmi.mb_skip_coeff +
-                     (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
+      pred_context = (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
+      if (xd->left_available)
+        pred_context += (m - 1)->mbmi.mb_skip_coeff;
       break;
 
     case PRED_SWITCHABLE_INTERP:
       {
-        int left_in_image = (m - 1)->mbmi.mb_in_image;
+        int left_in_image = xd->left_available && (m - 1)->mbmi.mb_in_image;
         int above_in_image = (m - cm->mode_info_stride)->mbmi.mb_in_image;
         int left_mode = (m - 1)->mbmi.mode;
         int above_mode = (m - cm->mode_info_stride)->mbmi.mode;
@@ -355,9 +358,10 @@ MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
   above_left = (m - 1 - cm->mode_info_stride)->mbmi.ref_frame;
 
   // Are neighbours in image
-  left_in_image = (m - 1)->mbmi.mb_in_image;
+  left_in_image = (m - 1)->mbmi.mb_in_image && xd->left_available;
   above_in_image = (m - cm->mode_info_stride)->mbmi.mb_in_image;
-  above_left_in_image = (m - 1 - cm->mode_info_stride)->mbmi.mb_in_image;
+  above_left_in_image = (m - 1 - cm->mode_info_stride)->mbmi.mb_in_image &&
+                        xd->left_available;
 
   // Adjust scores for candidate reference frames based on neigbours
   if (frame_allowed[left] && left_in_image) {

@@ -27,6 +27,7 @@ extern "C" {
     int     Version;
     int     postprocess;
     int     max_threads;
+    int     inv_tile_order;
     int     input_partition;
   } VP9D_CONFIG;
   typedef enum {

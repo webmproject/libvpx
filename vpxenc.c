@@ -1081,7 +1081,9 @@ static const arg_def_t static_thresh = ARG_DEF(NULL, "static-thresh", 1,
 static const arg_def_t cpu_used = ARG_DEF(NULL, "cpu-used", 1,
                                           "CPU Used (-16..16)");
 static const arg_def_t token_parts = ARG_DEF(NULL, "token-parts", 1,
-                                             "Number of token partitions to use, log2");
+                                     "Number of token partitions to use, log2");
+static const arg_def_t tile_cols = ARG_DEF(NULL, "tile-columns", 1,
+                                         "Number of tile columns to use, log2");
 static const arg_def_t auto_altref = ARG_DEF(NULL, "auto-alt-ref", 1,
                                              "Enable automatic alt reference frames");
 static const arg_def_t arnr_maxframes = ARG_DEF(NULL, "arnr-maxframes", 1,
@@ -1125,7 +1127,7 @@ static const int vp8_arg_ctrl_map[] = {
 #if CONFIG_VP9_ENCODER
 static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
-  &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
+  &tile_cols, &arnr_maxframes, &arnr_strength, &arnr_type,
   &tune_ssim, &cq_level, &max_intra_rate_pct,
 #if CONFIG_LOSSLESS
   &lossless,
@@ -1135,7 +1137,7 @@ static const arg_def_t *vp9_args[] = {
 static const int vp9_arg_ctrl_map[] = {
   VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
   VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
-  VP8E_SET_TOKEN_PARTITIONS,
+  VP9E_SET_TILE_COLUMNS,
   VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
 #if CONFIG_LOSSLESS
