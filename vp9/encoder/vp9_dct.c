@@ -1288,7 +1288,7 @@ static void dct16x16_1d(int16_t input[16], int16_t output[16],
 
     output[15] = (intermediate[11] + intermediate[12] + output_rounding)
         >> output_shift;
-    output[ 1] = -(intermediate[11] - intermediate[12] + output_rounding)
+    output[ 1] = (intermediate[12] - intermediate[11] + output_rounding)
         >> output_shift;
 
     output[ 7] = (2 * (intermediate[13] * C8) + final_rounding) >> final_shift;
