@@ -33,6 +33,50 @@ static const int cospi8sqrt2minus1 = 20091;
 static const int sinpi8sqrt2      = 35468;
 static const int rounding = 0;
 
+// Constants and Macros used by 16 and 32 point idct functions
+#define DCT_CONST_BITS 14
+#define DCT_CONST_ROUNDING  (1 << (DCT_CONST_BITS - 1))
+// Constants are 16384 * cos(kPi/64) where k = 1 to 31.
+// Note: sin(kPi/64) = cos((32-k)Pi/64)
+static const int cospi_1_64  = 16364;
+static const int cospi_2_64  = 16305;
+static const int cospi_3_64  = 16207;
+static const int cospi_4_64  = 16069;
+static const int cospi_5_64  = 15893;
+static const int cospi_6_64  = 15679;
+static const int cospi_7_64  = 15426;
+static const int cospi_8_64  = 15137;
+static const int cospi_9_64  = 14811;
+static const int cospi_10_64 = 14449;
+static const int cospi_11_64 = 14053;
+static const int cospi_12_64 = 13623;
+static const int cospi_13_64 = 13160;
+static const int cospi_14_64 = 12665;
+static const int cospi_15_64 = 12140;
+static const int cospi_16_64 = 11585;
+static const int cospi_17_64 = 11003;
+static const int cospi_18_64 = 10394;
+static const int cospi_19_64 = 9760;
+static const int cospi_20_64 = 9102;
+static const int cospi_21_64 = 8423;
+static const int cospi_22_64 = 7723;
+static const int cospi_23_64 = 7005;
+static const int cospi_24_64 = 6270;
+static const int cospi_25_64 = 5520;
+static const int cospi_26_64 = 4756;
+static const int cospi_27_64 = 3981;
+static const int cospi_28_64 = 3196;
+static const int cospi_29_64 = 2404;
+static const int cospi_30_64 = 1606;
+static const int cospi_31_64 = 804;
+
+static int16_t dct_const_round_shift(int input) {
+  int rv = (input + DCT_CONST_ROUNDING) >> DCT_CONST_BITS;
+  assert((rv <= INT16_MAX) && (rv >= INT16_MIN));
+  return (int16_t)rv;
+}
+
+
 static const int16_t idct_i4[16] = {
   8192,  10703,  8192,   4433,
   8192,   4433, -8192, -10703,
@@ -1147,206 +1191,168 @@ void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
 
 #else
 
-#define INITIAL_SHIFT 2
-#define INITIAL_ROUNDING (1 << (INITIAL_SHIFT - 1))
-#define RIGHT_SHIFT 14
-#define RIGHT_ROUNDING (1 << (RIGHT_SHIFT - 1))
-
-static const int16_t C1 = 16305;
-static const int16_t C2 = 16069;
-static const int16_t C3 = 15679;
-static const int16_t C4 = 15137;
-static const int16_t C5 = 14449;
-static const int16_t C6 = 13623;
-static const int16_t C7 = 12665;
-static const int16_t C8 = 11585;
-static const int16_t C9 = 10394;
-static const int16_t C10 = 9102;
-static const int16_t C11 = 7723;
-static const int16_t C12 = 6270;
-static const int16_t C13 = 4756;
-static const int16_t C14 = 3196;
-static const int16_t C15 = 1606;
-
-static void butterfly_16x16_idct_1d(int16_t input[16], int16_t output[16],
-                                    int last_shift_bits) {
-  int16_t step[16];
-  int intermediate[16];
+void idct16_1d(int16_t *input, int16_t *output) {
+  int16_t step1[16], step2[16];
   int temp1, temp2;
 
-  int step1_shift = RIGHT_SHIFT + INITIAL_SHIFT;
-  int step1_rounding = 1 << (step1_shift - 1);
-  int last_rounding = 0;
+  // stage 1
+  step1[0] = input[0/2];
+  step1[1] = input[16/2];
+  step1[2] = input[8/2];
+  step1[3] = input[24/2];
+  step1[4] = input[4/2];
+  step1[5] = input[20/2];
+  step1[6] = input[12/2];
+  step1[7] = input[28/2];
+  step1[8] = input[2/2];
+  step1[9] = input[18/2];
+  step1[10] = input[10/2];
+  step1[11] = input[26/2];
+  step1[12] = input[6/2];
+  step1[13] = input[22/2];
+  step1[14] = input[14/2];
+  step1[15] = input[30/2];
 
-  if (last_shift_bits > 0)
-    last_rounding = 1 << (last_shift_bits - 1);
+  // stage 2
+  step2[0] = step1[0];
+  step2[1] = step1[1];
+  step2[2] = step1[2];
+  step2[3] = step1[3];
+  step2[4] = step1[4];
+  step2[5] = step1[5];
+  step2[6] = step1[6];
+  step2[7] = step1[7];
 
-  // step 1 and 2
-  step[ 0] = (input[0] + input[8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-  step[ 1] = (input[0] - input[8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+  temp1 = step1[8] * cospi_30_64 - step1[15] * cospi_2_64;
+  temp2 = step1[8] * cospi_2_64 + step1[15] * cospi_30_64;
+  step2[8] = dct_const_round_shift(temp1);
+  step2[15] = dct_const_round_shift(temp2);
 
-  temp1 = input[4] * C12;
-  temp2 = input[12] * C4;
-  temp1 = (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-  temp1  *= C8;
-  step[ 2] = (2 * (temp1) + step1_rounding) >> step1_shift;
+  temp1 = step1[9] * cospi_14_64 - step1[14] * cospi_18_64;
+  temp2 = step1[9] * cospi_18_64 + step1[14] * cospi_14_64;
+  step2[9] = dct_const_round_shift(temp1);
+  step2[14] = dct_const_round_shift(temp2);
 
-  temp1 = input[4] * C4;
-  temp2 = input[12] * C12;
-  temp1 = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-  temp1 *= C8;
-  step[ 3] = (2 * (temp1) + step1_rounding) >> step1_shift;
+  temp1 = step1[10] * cospi_22_64 - step1[13] * cospi_10_64;
+  temp2 = step1[10] * cospi_10_64 + step1[13] * cospi_22_64;
+  step2[10] = dct_const_round_shift(temp1);
+  step2[13] = dct_const_round_shift(temp2);
 
-  temp1 = input[2] * C8;
-  temp1 = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-  temp2 = input[6] + input[10];
-  step[ 4] = (temp1 + temp2 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-  step[ 5] = (temp1 - temp2 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+  temp1 = step1[11] * cospi_6_64 - step1[12] * cospi_26_64;
+  temp2 = step1[11] * cospi_26_64 + step1[12] * cospi_6_64;
+  step2[11] = dct_const_round_shift(temp1);
+  step2[12] = dct_const_round_shift(temp2);
 
-  temp1 = input[14] * C8;
-  temp1 = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-  temp2 = input[6] - input[10];
-  step[ 6] = (temp2 - temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-  step[ 7] = (temp2 + temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
+  // stage 3
+  step1[0] = step2[0];
+  step1[1] = step2[1];
+  step1[2] = step2[2];
+  step1[3] = step2[3];
 
-  // for odd input
-  temp1 = input[3] * C12;
-  temp2 = input[13] * C4;
-  temp1 = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-  temp1 *= C8;
-  intermediate[ 8] = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = step2[4] * cospi_28_64 - step2[7] * cospi_4_64;
+  temp2 = step2[4] * cospi_4_64 + step2[7] * cospi_28_64;
+  step1[4] = dct_const_round_shift(temp1);
+  step1[7] = dct_const_round_shift(temp2);
+  temp1 = step2[5] * cospi_12_64 - step2[6] * cospi_20_64;
+  temp2 = step2[5] * cospi_20_64 + step2[6] * cospi_12_64;
+  step1[5] = dct_const_round_shift(temp1);
+  step1[6] = dct_const_round_shift(temp2);
 
-  temp1 = input[3] * C4;
-  temp2 = input[13] * C12;
-  temp2 = (temp2 - temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-  temp2 *= C8;
-  intermediate[ 9] = (2 * (temp2) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  step1[8] = step2[8] + step2[9];
+  step1[9] = step2[8] - step2[9];
+  step1[10] = -step2[10] + step2[11];
+  step1[11] = step2[10] + step2[11];
+  step1[12] = step2[12] + step2[13];
+  step1[13] = step2[12] - step2[13];
+  step1[14] = -step2[14] + step2[15];
+  step1[15] = step2[14] + step2[15];
 
-  intermediate[10] = (2 * (input[9] * C8) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-  intermediate[11] = input[15] - input[1];
-  intermediate[12] = input[15] + input[1];
-  intermediate[13] = (2 * (input[7] * C8) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  temp1 = (step1[0] + step1[1]) * cospi_16_64;
+  temp2 = (step1[0] - step1[1]) * cospi_16_64;
+  step2[0] = dct_const_round_shift(temp1);
+  step2[1] = dct_const_round_shift(temp2);
+  temp1 = step1[2] * cospi_24_64 - step1[3] * cospi_8_64;
+  temp2 = step1[2] * cospi_8_64 + step1[3] * cospi_24_64;
+  step2[2] = dct_const_round_shift(temp1);
+  step2[3] = dct_const_round_shift(temp2);
+  step2[4] = step1[4] + step1[5];
+  step2[5] = step1[4] - step1[5];
+  step2[6] = -step1[6] + step1[7];
+  step2[7] = step1[6] + step1[7];
 
-  temp1 = input[11] * C12;
-  temp2 = input[5] * C4;
-  temp2 = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-  temp2 *= C8;
-  intermediate[14] = (2 * (temp2) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  step2[8] = step1[8];
+  step2[15] = step1[15];
+  temp1 = -step1[9] * cospi_8_64 + step1[14] * cospi_24_64;
+  temp2 = step1[9] * cospi_24_64 + step1[14] * cospi_8_64;
+  step2[9] = dct_const_round_shift(temp1);
+  step2[14] = dct_const_round_shift(temp2);
+  temp1 = -step1[10] * cospi_24_64 - step1[13] * cospi_8_64;
+  temp2 = -step1[10] * cospi_8_64 + step1[13] * cospi_24_64;
+  step2[10] = dct_const_round_shift(temp1);
+  step2[13] = dct_const_round_shift(temp2);
+  step2[11] = step1[11];
+  step2[12] = step1[12];
 
-  temp1 = input[11] * C4;
-  temp2 = input[5] * C12;
-  temp1 = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-  temp1 *= C8;
-  intermediate[15] = (2 * (temp1) +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
+  // stage 5
+  step1[0] = step2[0] + step2[3];
+  step1[1] = step2[1] + step2[2];
+  step1[2] = step2[1] - step2[2];
+  step1[3] = step2[0] - step2[3];
+  step1[4] = step2[4];
+  temp1 = (step2[6] - step2[5]) * cospi_16_64;
+  temp2 = (step2[5] + step2[6]) * cospi_16_64;
+  step1[5] = dct_const_round_shift(temp1);
+  step1[6] = dct_const_round_shift(temp2);
+  step1[7] = step2[7];
 
-  step[ 8] = (intermediate[ 8] + intermediate[14] + INITIAL_ROUNDING)
-      >> INITIAL_SHIFT;
-  step[ 9] = (intermediate[ 9] + intermediate[15] + INITIAL_ROUNDING)
-      >> INITIAL_SHIFT;
-  step[10] = (intermediate[10] + intermediate[11] + INITIAL_ROUNDING)
-      >> INITIAL_SHIFT;
-  step[11] = (intermediate[10] - intermediate[11] + INITIAL_ROUNDING)
-      >> INITIAL_SHIFT;
-  step[12] = (intermediate[12] + intermediate[13] + INITIAL_ROUNDING)
-      >> INITIAL_SHIFT;
-  step[13] = (intermediate[12] - intermediate[13] + INITIAL_ROUNDING)
-      >> INITIAL_SHIFT;
-  step[14] = (intermediate[ 8] - intermediate[14] + INITIAL_ROUNDING)
-      >> INITIAL_SHIFT;
-  step[15] = (intermediate[ 9] - intermediate[15] + INITIAL_ROUNDING)
-      >> INITIAL_SHIFT;
+  step1[8] = step2[8] + step2[11];
+  step1[9] = step2[9] + step2[10];
+  step1[10] = step2[9] - step2[10];
+  step1[11] = step2[8] - step2[11];
+  step1[12] = -step2[12] + step2[15];
+  step1[13] = -step2[13] + step2[14];
+  step1[14] = step2[13] + step2[14];
+  step1[15] = step2[12] + step2[15];
 
-  // step 3
-  output[0] = step[ 0] + step[ 3];
-  output[1] = step[ 1] + step[ 2];
-  output[2] = step[ 1] - step[ 2];
-  output[3] = step[ 0] - step[ 3];
+  // stage 6
+  step2[0] = step1[0] + step1[7];
+  step2[1] = step1[1] + step1[6];
+  step2[2] = step1[2] + step1[5];
+  step2[3] = step1[3] + step1[4];
+  step2[4] = step1[3] - step1[4];
+  step2[5] = step1[2] - step1[5];
+  step2[6] = step1[1] - step1[6];
+  step2[7] = step1[0] - step1[7];
+  step2[8] = step1[8];
+  step2[9] = step1[9];
+  temp1 = (-step1[10] + step1[13]) * cospi_16_64;
+  temp2 = (step1[10] + step1[13]) * cospi_16_64;
+  step2[10] = dct_const_round_shift(temp1);
+  step2[13] = dct_const_round_shift(temp2);
+  temp1 = (-step1[11] + step1[12]) * cospi_16_64;
+  temp2 = (step1[11] + step1[12]) * cospi_16_64;
+  step2[11] = dct_const_round_shift(temp1);
+  step2[12] = dct_const_round_shift(temp2);
+  step2[14] = step1[14];
+  step2[15] = step1[15];
 
-  temp1 = step[ 4] * C14;
-  temp2 = step[ 7] * C2;
-  output[4] =  (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = step[ 4] * C2;
-  temp2 = step[ 7] * C14;
-  output[7] =  (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = step[ 5] * C10;
-  temp2 = step[ 6] * C6;
-  output[5] =  (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = step[ 5] * C6;
-  temp2 = step[ 6] * C10;
-  output[6] =  (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  output[8] = step[ 8] + step[11];
-  output[9] = step[ 9] + step[10];
-  output[10] = step[ 9] - step[10];
-  output[11] = step[ 8] - step[11];
-  output[12] = step[12] + step[15];
-  output[13] = step[13] + step[14];
-  output[14] = step[13] - step[14];
-  output[15] = step[12] - step[15];
-
-  // output 4
-  step[ 0] = output[0] + output[7];
-  step[ 1] = output[1] + output[6];
-  step[ 2] = output[2] + output[5];
-  step[ 3] = output[3] + output[4];
-  step[ 4] = output[3] - output[4];
-  step[ 5] = output[2] - output[5];
-  step[ 6] = output[1] - output[6];
-  step[ 7] = output[0] - output[7];
-
-  temp1 = output[8] * C7;
-  temp2 = output[15] * C9;
-  step[ 8] = (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = output[9] * C11;
-  temp2 = output[14] * C5;
-  step[ 9] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = output[10] * C3;
-  temp2 = output[13] * C13;
-  step[10] = (temp1 - temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = output[11] * C15;
-  temp2 = output[12] * C1;
-  step[11] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = output[11] * C1;
-  temp2 = output[12] * C15;
-  step[12] = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = output[10] * C13;
-  temp2 = output[13] * C3;
-  step[13] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = output[9] * C5;
-  temp2 = output[14] * C11;
-  step[14] = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  temp1 = output[8] * C9;
-  temp2 = output[15] * C7;
-  step[15] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-  // step 5
-  output[0] = (step[0] + step[15] + last_rounding) >> last_shift_bits;
-  output[1] = (step[1] + step[14] + last_rounding) >> last_shift_bits;
-  output[2] = (step[2] + step[13] + last_rounding) >> last_shift_bits;
-  output[3] = (step[3] + step[12] + last_rounding) >> last_shift_bits;
-  output[4] = (step[4] + step[11] + last_rounding) >> last_shift_bits;
-  output[5] = (step[5] + step[10] + last_rounding) >> last_shift_bits;
-  output[6] = (step[6] + step[ 9] + last_rounding) >> last_shift_bits;
-  output[7] = (step[7] + step[ 8] + last_rounding) >> last_shift_bits;
-
-  output[15] = (step[0] - step[15] + last_rounding) >> last_shift_bits;
-  output[14] = (step[1] - step[14] + last_rounding) >> last_shift_bits;
-  output[13] = (step[2] - step[13] + last_rounding) >> last_shift_bits;
-  output[12] = (step[3] - step[12] + last_rounding) >> last_shift_bits;
-  output[11] = (step[4] - step[11] + last_rounding) >> last_shift_bits;
-  output[10] = (step[5] - step[10] + last_rounding) >> last_shift_bits;
-  output[9] = (step[6] - step[ 9] + last_rounding) >> last_shift_bits;
-  output[8] = (step[7] - step[ 8] + last_rounding) >> last_shift_bits;
+  // stage 7
+  output[0] = step2[0] + step2[15];
+  output[1] = step2[1] + step2[14];
+  output[2] = step2[2] + step2[13];
+  output[3] = step2[3] + step2[12];
+  output[4] = step2[4] + step2[11];
+  output[5] = step2[5] + step2[10];
+  output[6] = step2[6] + step2[9];
+  output[7] = step2[7] + step2[8];
+  output[8] = step2[7] - step2[8];
+  output[9] = step2[6] - step2[9];
+  output[10] = step2[5] - step2[10];
+  output[11] = step2[4] - step2[11];
+  output[12] = step2[3] - step2[12];
+  output[13] = step2[2] - step2[13];
+  output[14] = step2[1] - step2[14];
+  output[15] = step2[0] - step2[15];
 }
 
 void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
@@ -1358,7 +1364,7 @@ void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
 
   // First transform rows
   for (i = 0; i < 16; ++i) {
-    butterfly_16x16_idct_1d(input, outptr, 0);
+    idct16_1d(input, outptr);
     input += short_pitch;
     outptr += 16;
   }
@@ -1367,138 +1373,10 @@ void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
   for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j)
       temp_in[j] = out[j * 16 + i];
-    butterfly_16x16_idct_1d(temp_in, temp_out, 3);
+    idct16_1d(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
-        output[j * 16 + i] = temp_out[j];
+        output[j * 16 + i] = (temp_out[j] + 32) >> 6;
     }
-}
-
-/* The following function is called when we know the maximum number of non-zero
- * dct coefficients is less or equal 10.
- */
-static void butterfly_16x16_idct10_1d(int16_t input[16], int16_t output[16],
-                                      int last_shift_bits) {
-    int16_t step[16] = {0};
-    int intermediate[16] = {0};
-    int temp1, temp2;
-    int last_rounding = 0;
-
-    if (last_shift_bits > 0)
-      last_rounding = 1 << (last_shift_bits - 1);
-
-    // step 1 and 2
-    step[ 0] = (input[0] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[ 1] = (input[0] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-
-    temp1 = (2 * (input[2] * C8) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    step[ 4] = (temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[ 5] = (temp1 + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-
-    // for odd input
-    temp1 = (input[3] * C12 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp1 *= C8;
-    intermediate[ 8] = (2 * (temp1) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = (-input[3] * C4 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-    temp1 *= C8;
-    intermediate[ 9] = (2 * (temp1) + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    step[ 8] = (intermediate[ 8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[ 9] = (intermediate[ 9] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[10] = (-input[1] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[11] = (input[1] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[12] = (input[1] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[13] = (input[1] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[14] = (intermediate[ 8] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-    step[15] = (intermediate[ 9] + INITIAL_ROUNDING) >> INITIAL_SHIFT;
-
-    // step 3
-    output[0] = step[ 0];
-    output[1] = step[ 1];
-    output[2] = step[ 1];
-    output[3] = step[ 0];
-
-    temp1 = step[ 4] * C14;
-    output[4] =  (temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = step[ 4] * C2;
-    output[7] =  (temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = step[ 5] * C10;
-    output[5] =  (temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = step[ 5] * C6;
-    output[6] =  (temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    output[8] = step[ 8] + step[11];
-    output[9] = step[ 9] + step[10];
-    output[10] = step[ 9] - step[10];
-    output[11] = step[ 8] - step[11];
-    output[12] = step[12] + step[15];
-    output[13] = step[13] + step[14];
-    output[14] = step[13] - step[14];
-    output[15] = step[12] - step[15];
-
-    // output 4
-    step[ 0] = output[0] + output[7];
-    step[ 1] = output[1] + output[6];
-    step[ 2] = output[2] + output[5];
-    step[ 3] = output[3] + output[4];
-    step[ 4] = output[3] - output[4];
-    step[ 5] = output[2] - output[5];
-    step[ 6] = output[1] - output[6];
-    step[ 7] = output[0] - output[7];
-
-    temp1 = output[8] * C7;
-    temp2 = output[15] * C9;
-    step[ 8] = (temp1 - temp2 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = output[9] * C11;
-    temp2 = output[14] * C5;
-    step[ 9] = (temp1 + temp2 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = output[10] * C3;
-    temp2 = output[13] * C13;
-    step[10] = (temp1 - temp2 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = output[11] * C15;
-    temp2 = output[12] * C1;
-    step[11] = (temp1 + temp2 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = output[11] * C1;
-    temp2 = output[12] * C15;
-    step[12] = (temp2 - temp1 + RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = output[10] * C13;
-    temp2 = output[13] * C3;
-    step[13] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = output[9] * C5;
-    temp2 = output[14] * C11;
-    step[14] = (temp2 - temp1 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    temp1 = output[8] * C9;
-    temp2 = output[15] * C7;
-    step[15] = (temp1 + temp2 +   RIGHT_ROUNDING) >> RIGHT_SHIFT;
-
-    // step 5
-    output[0] = (step[0] + step[15] + last_rounding) >> last_shift_bits;
-    output[1] = (step[1] + step[14] + last_rounding) >> last_shift_bits;
-    output[2] = (step[2] + step[13] + last_rounding) >> last_shift_bits;
-    output[3] = (step[3] + step[12] + last_rounding) >> last_shift_bits;
-    output[4] = (step[4] + step[11] + last_rounding) >> last_shift_bits;
-    output[5] = (step[5] + step[10] + last_rounding) >> last_shift_bits;
-    output[6] = (step[6] + step[ 9] + last_rounding) >> last_shift_bits;
-    output[7] = (step[7] + step[ 8] + last_rounding) >> last_shift_bits;
-
-    output[15] = (step[0] - step[15] + last_rounding) >> last_shift_bits;
-    output[14] = (step[1] - step[14] + last_rounding) >> last_shift_bits;
-    output[13] = (step[2] - step[13] + last_rounding) >> last_shift_bits;
-    output[12] = (step[3] - step[12] + last_rounding) >> last_shift_bits;
-    output[11] = (step[4] - step[11] + last_rounding) >> last_shift_bits;
-    output[10] = (step[5] - step[10] + last_rounding) >> last_shift_bits;
-    output[9] = (step[6] - step[ 9] + last_rounding) >> last_shift_bits;
-    output[8] = (step[7] - step[ 8] + last_rounding) >> last_shift_bits;
 }
 
 void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
@@ -1513,7 +1391,7 @@ void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
      */
     vpx_memset(out, 0, sizeof(out));
     for (i = 0; i < 4; ++i) {
-      butterfly_16x16_idct10_1d(input, outptr, 0);
+      idct16_1d(input, outptr);
       input += short_pitch;
       outptr += 16;
     }
@@ -1522,60 +1400,25 @@ void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
     for (i = 0; i < 16; ++i) {
       for (j = 0; j < 16; ++j)
         temp_in[j] = out[j*16 + i];
-      butterfly_16x16_idct10_1d(temp_in, temp_out, 3);
+      idct16_1d(temp_in, temp_out);
       for (j = 0; j < 16; ++j)
-        output[j*16 + i] = temp_out[j];
+        output[j*16 + i] = (temp_out[j] + 32) >> 6;
     }
 }
-#undef INITIAL_SHIFT
-#undef INITIAL_ROUNDING
-#undef RIGHT_SHIFT
-#undef RIGHT_ROUNDING
+
+
+void vp9_short_idct1_16x16_c(int16_t *input, int16_t *output) {
+  int tmp;
+  int16_t out;
+  tmp = input[0] * cospi_16_64;
+  out = dct_const_round_shift(tmp);
+  tmp = out * cospi_16_64;
+  out = dct_const_round_shift(tmp);
+  *output = (out + 32) >> 6;
+}
 #endif
 
 #if !CONFIG_DWTDCTHYBRID
-#define DCT_CONST_BITS 14
-#define DCT_CONST_ROUNDING  (1 << (DCT_CONST_BITS - 1))
-// Constants are 16384 * cos(kPi/64) where k = 1 to 31.
-// Note: sin(kPi/64) = cos((32-k)Pi/64)
-static const int cospi_1_64  = 16364;
-static const int cospi_2_64  = 16305;
-static const int cospi_3_64  = 16207;
-static const int cospi_4_64  = 16069;
-static const int cospi_5_64  = 15893;
-static const int cospi_6_64  = 15679;
-static const int cospi_7_64  = 15426;
-static const int cospi_8_64  = 15137;
-static const int cospi_9_64  = 14811;
-static const int cospi_10_64 = 14449;
-static const int cospi_11_64 = 14053;
-static const int cospi_12_64 = 13623;
-static const int cospi_13_64 = 13160;
-static const int cospi_14_64 = 12665;
-static const int cospi_15_64 = 12140;
-static const int cospi_16_64 = 11585;
-static const int cospi_17_64 = 11003;
-static const int cospi_18_64 = 10394;
-static const int cospi_19_64 = 9760;
-static const int cospi_20_64 = 9102;
-static const int cospi_21_64 = 8423;
-static const int cospi_22_64 = 7723;
-static const int cospi_23_64 = 7005;
-static const int cospi_24_64 = 6270;
-static const int cospi_25_64 = 5520;
-static const int cospi_26_64 = 4756;
-static const int cospi_27_64 = 3981;
-static const int cospi_28_64 = 3196;
-static const int cospi_29_64 = 2404;
-static const int cospi_30_64 = 1606;
-static const int cospi_31_64 = 804;
-
-static int16_t dct_const_round_shift(int input) {
-  int rv = (input + DCT_CONST_ROUNDING) >> DCT_CONST_BITS;
-  assert((rv <= INT16_MAX) && (rv >= INT16_MIN));
-  return (int16_t)rv;
-}
-
 void idct32_1d(int16_t *input, int16_t *output) {
   int16_t step1[32], step2[32];
   int temp1, temp2;
