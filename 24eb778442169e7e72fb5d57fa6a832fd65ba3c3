@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//ti0\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-02-01T00:19:34Z",
+      "side": 1,
+      "message": "I don\u0027t think so because is defined in x86_abi_support.asm which is not included in this file.",
+      "parentUuid": "AAAAVH//tlk\u003d",
+      "revId": "24eb778442169e7e72fb5d57fa6a832fd65ba3c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//tlY\u003d",
         "filename": "vpx_ports/x86_abi_support.asm",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-01-31T23:49:43Z",
       "side": 1,
       "message": "%elif LIBVPX_YASM_WIN64?\n http://www.tortall.net/projects/yasm/manual/html/nasm-macro-conditional.html",
+      "revId": "24eb778442169e7e72fb5d57fa6a832fd65ba3c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//tjE\u003d",
+        "filename": "vpx_ports/x86_abi_support.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-02-01T00:19:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//tlY\u003d",
       "revId": "24eb778442169e7e72fb5d57fa6a832fd65ba3c3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
