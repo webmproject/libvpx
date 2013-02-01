@@ -212,14 +212,11 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
     vp9_copy_mem8x8(pred, pitch, dest, stride);
   } else if (eob == 1) {
     /* DC only DCT coefficient. */
+    int16_t in = input[0];
     int16_t out;
-
     /* Note: the idct1 will need to be modified accordingly whenever
      * vp9_short_idct8x8_c() is modified. */
-    out = (input[0] + 1 + (input[0] < 0)) >> 2;
-    out = out << 3;
-    out = (out + 32) >> 7;
-
+    vp9_short_idct1_8x8_c(&in, &out);
     input[0] = 0;
 
     add_constant_residual(out, pred, pitch, dest, stride, 8, 8);

@@ -590,273 +590,129 @@ void vp9_dc_only_inv_walsh_add_c(short input_dc, uint8_t *pred_ptr,
 }
 #endif
 
-#define W1 2841                 /* 2048*sqrt(2)*cos(1*pi/16) */
-#define W2 2676                 /* 2048*sqrt(2)*cos(2*pi/16) */
-#define W3 2408                 /* 2048*sqrt(2)*cos(3*pi/16) */
-#define W5 1609                 /* 2048*sqrt(2)*cos(5*pi/16) */
-#define W6 1108                 /* 2048*sqrt(2)*cos(6*pi/16) */
-#define W7 565                  /* 2048*sqrt(2)*cos(7*pi/16) */
+void idct4_1d(int16_t *input, int16_t *output) {
+  int16_t step[4];
+  int temp1, temp2;
+  // stage 1
+  temp1 = (input[0] + input[2]) * cospi_16_64;
+  temp2 = (input[0] - input[2]) * cospi_16_64;
+  step[0] = dct_const_round_shift(temp1);
+  step[1] = dct_const_round_shift(temp2);
+  temp1 = input[1] * cospi_24_64 - input[3] * cospi_8_64;
+  temp2 = input[1] * cospi_8_64 + input[3] * cospi_24_64;
+  step[2] = dct_const_round_shift(temp1);
+  step[3] = dct_const_round_shift(temp2);
 
-/* row (horizontal) IDCT
- *
- * 7                       pi         1 dst[k] = sum c[l] * src[l] * cos( -- *
- * ( k + - ) * l ) l=0                      8          2
- *
- * where: c[0]    = 128 c[1..7] = 128*sqrt(2) */
-
-static void idctrow(int *blk) {
-  int x0, x1, x2, x3, x4, x5, x6, x7, x8;
-  /* shortcut */
-  if (!((x1 = blk[4] << 11) | (x2 = blk[6]) | (x3 = blk[2]) |
-        (x4 = blk[1]) | (x5 = blk[7]) | (x6 = blk[5]) | (x7 = blk[3]))) {
-    blk[0] = blk[1] = blk[2] = blk[3] = blk[4]
-                                        = blk[5] = blk[6] = blk[7] = blk[0] << 3;
-    return;
-  }
-
-  x0 = (blk[0] << 11) + 128;    /* for proper rounding in the fourth stage */
-  /* first stage */
-  x8 = W7 * (x4 + x5);
-  x4 = x8 + (W1 - W7) * x4;
-  x5 = x8 - (W1 + W7) * x5;
-  x8 = W3 * (x6 + x7);
-  x6 = x8 - (W3 - W5) * x6;
-  x7 = x8 - (W3 + W5) * x7;
-
-  /* second stage */
-  x8 = x0 + x1;
-  x0 -= x1;
-  x1 = W6 * (x3 + x2);
-  x2 = x1 - (W2 + W6) * x2;
-  x3 = x1 + (W2 - W6) * x3;
-  x1 = x4 + x6;
-  x4 -= x6;
-  x6 = x5 + x7;
-  x5 -= x7;
-
-  /* third stage */
-  x7 = x8 + x3;
-  x8 -= x3;
-  x3 = x0 + x2;
-  x0 -= x2;
-  x2 = (181 * (x4 + x5) + 128) >> 8;
-  x4 = (181 * (x4 - x5) + 128) >> 8;
-
-  /* fourth stage */
-  blk[0] = (x7 + x1) >> 8;
-  blk[1] = (x3 + x2) >> 8;
-  blk[2] = (x0 + x4) >> 8;
-  blk[3] = (x8 + x6) >> 8;
-  blk[4] = (x8 - x6) >> 8;
-  blk[5] = (x0 - x4) >> 8;
-  blk[6] = (x3 - x2) >> 8;
-  blk[7] = (x7 - x1) >> 8;
+  // stage 2
+  output[0] = step[0] + step[3];
+  output[1] = step[1] + step[2];
+  output[2] = step[1] - step[2];
+  output[3] = step[0] - step[3];
 }
 
-/* column (vertical) IDCT
- *
- * 7                         pi         1 dst[8*k] = sum c[l] * src[8*l] *
- * cos( -- * ( k + - ) * l ) l=0                        8          2
- *
- * where: c[0]    = 1/1024 c[1..7] = (1/1024)*sqrt(2) */
-static void idctcol(int *blk) {
-  int x0, x1, x2, x3, x4, x5, x6, x7, x8;
+void idct8_1d(int16_t *input, int16_t *output) {
+  int16_t step1[8], step2[8];
+  int temp1, temp2;
+  // stage 1
+  step1[0] = input[0];
+  step1[2] = input[4];
+  step1[1] = input[2];
+  step1[3] = input[6];
+  temp1 = input[1] * cospi_28_64 - input[7] * cospi_4_64;
+  temp2 = input[1] * cospi_4_64 + input[7] * cospi_28_64;
+  step1[4] = dct_const_round_shift(temp1);
+  step1[7] = dct_const_round_shift(temp2);
+  temp1 = input[5] * cospi_12_64 - input[3] * cospi_20_64;
+  temp2 = input[5] * cospi_20_64 + input[3] * cospi_12_64;
+  step1[5] = dct_const_round_shift(temp1);
+  step1[6] = dct_const_round_shift(temp2);
 
-  /* shortcut */
-  if (!((x1 = (blk[8 * 4] << 8)) | (x2 = blk[8 * 6]) | (x3 = blk[8 * 2]) |
-        (x4 = blk[8 * 1]) | (x5 = blk[8 * 7]) | (x6 = blk[8 * 5]) |
-        (x7 = blk[8 * 3]))) {
-    blk[8 * 0] = blk[8 * 1] = blk[8 * 2] = blk[8 * 3]
-        = blk[8 * 4] = blk[8 * 5] = blk[8 * 6]
-        = blk[8 * 7] = ((blk[8 * 0] + 32) >> 6);
-    return;
-  }
+  // stage 2 & stage 3 - even half
+  idct4_1d(step1, step1);
 
-  x0 = (blk[8 * 0] << 8) + 16384;
+  // stage 2 - odd half
+  step2[4] = step1[4] + step1[5];
+  step2[5] = step1[4] - step1[5];
+  step2[6] = -step1[6] + step1[7];
+  step2[7] = step1[6] + step1[7];
 
-  /* first stage */
-  x8 = W7 * (x4 + x5) + 4;
-  x4 = (x8 + (W1 - W7) * x4) >> 3;
-  x5 = (x8 - (W1 + W7) * x5) >> 3;
-  x8 = W3 * (x6 + x7) + 4;
-  x6 = (x8 - (W3 - W5) * x6) >> 3;
-  x7 = (x8 - (W3 + W5) * x7) >> 3;
+  // stage 3 -odd half
+  step1[4] = step2[4];
+  temp1 = (step2[6] - step2[5]) * cospi_16_64;
+  temp2 = (step2[5] + step2[6]) * cospi_16_64;
+  step1[5] = dct_const_round_shift(temp1);
+  step1[6] = dct_const_round_shift(temp2);
+  step1[7] = step2[7];
 
-  /* second stage */
-  x8 = x0 + x1;
-  x0 -= x1;
-  x1 = W6 * (x3 + x2) + 4;
-  x2 = (x1 - (W2 + W6) * x2) >> 3;
-  x3 = (x1 + (W2 - W6) * x3) >> 3;
-  x1 = x4 + x6;
-  x4 -= x6;
-  x6 = x5 + x7;
-  x5 -= x7;
-
-  /* third stage */
-  x7 = x8 + x3;
-  x8 -= x3;
-  x3 = x0 + x2;
-  x0 -= x2;
-  x2 = (181 * (x4 + x5) + 128) >> 8;
-  x4 = (181 * (x4 - x5) + 128) >> 8;
-
-  /* fourth stage */
-  blk[8 * 0] = (x7 + x1) >> 14;
-  blk[8 * 1] = (x3 + x2) >> 14;
-  blk[8 * 2] = (x0 + x4) >> 14;
-  blk[8 * 3] = (x8 + x6) >> 14;
-  blk[8 * 4] = (x8 - x6) >> 14;
-  blk[8 * 5] = (x0 - x4) >> 14;
-  blk[8 * 6] = (x3 - x2) >> 14;
-  blk[8 * 7] = (x7 - x1) >> 14;
+  // stage 4
+  output[0] = step1[0] + step1[7];
+  output[1] = step1[1] + step1[6];
+  output[2] = step1[2] + step1[5];
+  output[3] = step1[3] + step1[4];
+  output[4] = step1[3] - step1[4];
+  output[5] = step1[2] - step1[5];
+  output[6] = step1[1] - step1[6];
+  output[7] = step1[0] - step1[7];
 }
 
-#define TX_DIM 8
-void vp9_short_idct8x8_c(int16_t *coefs, int16_t *block, int pitch) {
-  int X[TX_DIM * TX_DIM];
+void vp9_short_idct8x8_c(int16_t *input, int16_t *output, int pitch) {
+  int16_t out[8 * 8];
+  int16_t *outptr = &out[0];
+  const int short_pitch = pitch >> 1;
   int i, j;
-  int shortpitch = pitch >> 1;
+  int16_t temp_in[8], temp_out[8];
 
-  for (i = 0; i < TX_DIM; i++) {
-    for (j = 0; j < TX_DIM; j++) {
-      X[i * TX_DIM + j] = (int)(coefs[i * TX_DIM + j] + 1
-                                + (coefs[i * TX_DIM + j] < 0)) >> 2;
+  // First transform rows
+  for (i = 0; i < 8; ++i) {
+    idct8_1d(input, outptr);
+    input += 8;
+    outptr += 8;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j * 8 + i];
+    idct8_1d(temp_in, temp_out);
+    for (j = 0; j < 8; ++j)
+        output[j * short_pitch + i] = (temp_out[j] + 16) >> 5;
     }
-  }
-  for (i = 0; i < 8; i++)
-    idctrow(X + 8 * i);
-
-  for (i = 0; i < 8; i++)
-    idctcol(X + i);
-
-  for (i = 0; i < TX_DIM; i++) {
-    for (j = 0; j < TX_DIM; j++) {
-      block[i * shortpitch + j]  = X[i * TX_DIM + j] >> 1;
-    }
-  }
 }
 
-/* Row IDCT when only first 4 coefficients are non-zero. */
-static void idctrow10(int *blk) {
-  int x0, x1, x2, x3, x4, x5, x6, x7, x8;
-
-  /* shortcut */
-  if (!((x1 = blk[4] << 11) | (x2 = blk[6]) | (x3 = blk[2]) |
-        (x4 = blk[1]) | (x5 = blk[7]) | (x6 = blk[5]) | (x7 = blk[3]))) {
-    blk[0] = blk[1] = blk[2] = blk[3] = blk[4]
-           = blk[5] = blk[6] = blk[7] = blk[0] << 3;
-    return;
-  }
-
-  x0 = (blk[0] << 11) + 128;    /* for proper rounding in the fourth stage */
-  /* first stage */
-  x5 = W7 * x4;
-  x4 = W1 * x4;
-  x6 = W3 * x7;
-  x7 = -W5 * x7;
-
-  /* second stage */
-  x2 = W6 * x3;
-  x3 = W2 * x3;
-  x1 = x4 + x6;
-  x4 -= x6;
-  x6 = x5 + x7;
-  x5 -= x7;
-
-  /* third stage */
-  x7 = x0 + x3;
-  x8 = x0 - x3;
-  x3 = x0 + x2;
-  x0 -= x2;
-  x2 = (181 * (x4 + x5) + 128) >> 8;
-  x4 = (181 * (x4 - x5) + 128) >> 8;
-
-  /* fourth stage */
-  blk[0] = (x7 + x1) >> 8;
-  blk[1] = (x3 + x2) >> 8;
-  blk[2] = (x0 + x4) >> 8;
-  blk[3] = (x8 + x6) >> 8;
-  blk[4] = (x8 - x6) >> 8;
-  blk[5] = (x0 - x4) >> 8;
-  blk[6] = (x3 - x2) >> 8;
-  blk[7] = (x7 - x1) >> 8;
-}
-
-/* Column (vertical) IDCT when only first 4 coefficients are non-zero. */
-static void idctcol10(int *blk) {
-  int x0, x1, x2, x3, x4, x5, x6, x7, x8;
-
-  /* shortcut */
-  if (!((x1 = (blk[8 * 4] << 8)) | (x2 = blk[8 * 6]) | (x3 = blk[8 * 2]) |
-        (x4 = blk[8 * 1]) | (x5 = blk[8 * 7]) | (x6 = blk[8 * 5]) |
-        (x7 = blk[8 * 3]))) {
-    blk[8 * 0] = blk[8 * 1] = blk[8 * 2] = blk[8 * 3]
-        = blk[8 * 4] = blk[8 * 5] = blk[8 * 6]
-        = blk[8 * 7] = ((blk[8 * 0] + 32) >> 6);
-    return;
-  }
-
-  x0 = (blk[8 * 0] << 8) + 16384;
-
-  /* first stage */
-  x5 = (W7 * x4 + 4) >> 3;
-  x4 = (W1 * x4 + 4) >> 3;
-  x6 = (W3 * x7 + 4) >> 3;
-  x7 = (-W5 * x7 + 4) >> 3;
-
-  /* second stage */
-  x2 = (W6 * x3 + 4) >> 3;
-  x3 = (W2 * x3 + 4) >> 3;
-  x1 = x4 + x6;
-  x4 -= x6;
-  x6 = x5 + x7;
-  x5 -= x7;
-
-  /* third stage */
-  x7 = x0 + x3;
-  x8 = x0 - x3;
-  x3 = x0 + x2;
-  x0 -= x2;
-  x2 = (181 * (x4 + x5) + 128) >> 8;
-  x4 = (181 * (x4 - x5) + 128) >> 8;
-
-  /* fourth stage */
-  blk[8 * 0] = (x7 + x1) >> 14;
-  blk[8 * 1] = (x3 + x2) >> 14;
-  blk[8 * 2] = (x0 + x4) >> 14;
-  blk[8 * 3] = (x8 + x6) >> 14;
-  blk[8 * 4] = (x8 - x6) >> 14;
-  blk[8 * 5] = (x0 - x4) >> 14;
-  blk[8 * 6] = (x3 - x2) >> 14;
-  blk[8 * 7] = (x7 - x1) >> 14;
-}
-
-void vp9_short_idct10_8x8_c(int16_t *coefs, int16_t *block, int pitch) {
-  int X[TX_DIM * TX_DIM];
+void vp9_short_idct10_8x8_c(int16_t *input, int16_t *output, int pitch) {
+  int16_t out[8 * 8];
+  int16_t *outptr = &out[0];
+  const int short_pitch = pitch >> 1;
   int i, j;
-  int shortpitch = pitch >> 1;
+  int16_t temp_in[8], temp_out[8];
 
-  for (i = 0; i < TX_DIM; i++) {
-    for (j = 0; j < TX_DIM; j++) {
-      X[i * TX_DIM + j] = (int)(coefs[i * TX_DIM + j] + 1
-                                + (coefs[i * TX_DIM + j] < 0)) >> 2;
-    }
+  vpx_memset(out, 0, sizeof(out));
+  // First transform rows
+  // only first 4 row has non-zero coefs
+  for (i = 0; i < 4; ++i) {
+    idct8_1d(input, outptr);
+    input += 8;
+    outptr += 8;
   }
 
-  /* Do first 4 row idct only since non-zero dct coefficients are all in
-   * upper-left 4x4 area. */
-  for (i = 0; i < 4; i++)
-    idctrow10(X + 8 * i);
-
-  for (i = 0; i < 8; i++)
-    idctcol10(X + i);
-
-  for (i = 0; i < TX_DIM; i++) {
-    for (j = 0; j < TX_DIM; j++) {
-      block[i * shortpitch + j]  = X[i * TX_DIM + j] >> 1;
+  // Then transform columns
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j * 8 + i];
+    idct8_1d(temp_in, temp_out);
+    for (j = 0; j < 8; ++j)
+        output[j * short_pitch + i] = (temp_out[j] + 16) >> 5;
     }
-  }
+}
+
+void vp9_short_idct1_8x8_c(int16_t *input, int16_t *output) {
+  int tmp;
+  int16_t out;
+  tmp = input[0] * cospi_16_64;
+  out = dct_const_round_shift(tmp);
+  tmp = out * cospi_16_64;
+  out = dct_const_round_shift(tmp);
+  *output = (out + 16) >> 5;
 }
 
 void vp9_short_ihaar2x2_c(int16_t *input, int16_t *output, int pitch) {
@@ -2293,7 +2149,7 @@ static void vp9_short_idct16x16_c_f(int16_t *input, int16_t *output, int pitch,
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
 
-static void idct8_1d(double *x) {
+static void idct8_1d_f(double *x) {
   int i, j;
   double t[8];
   static const double idctmat[64] = {
@@ -2338,11 +2194,11 @@ static void vp9_short_idct8x8_c_f(int16_t *coefs, int16_t *block, int pitch,
       }
     }
     for (i = 0; i < 8; i++)
-      idct8_1d(X + 8 * i);
+      idct8_1d_f(X + 8 * i);
     for (i = 0; i < 8; i++) {
       for (j = 0; j < 8; ++j)
         Y[j] = X[i + 8 * j];
-      idct8_1d(Y);
+      idct8_1d_f(Y);
       for (j = 0; j < 8; ++j)
         X[i + 8 * j] = Y[j];
     }

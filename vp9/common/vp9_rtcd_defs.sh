@@ -389,6 +389,9 @@ specialize vp9_short_idct8x8
 prototype void vp9_short_idct10_8x8 "int16_t *input, int16_t *output, int pitch"
 specialize vp9_short_idct10_8x8
 
+prototype void vp9_short_idct1_8x8 "int16_t *input, int16_t *output"
+specialize vp9_short_idct1_8x8
+
 prototype void vp9_short_ihaar2x2 "int16_t *input, int16_t *output, int pitch"
 specialize vp9_short_ihaar2x2
 
