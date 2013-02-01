@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//tSQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 2070,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-01T15:00:12Z",
+      "side": 1,
+      "message": "can you add the tile index in the first 2 bits of the residual_bc? if the tiles can be decoded/encoded in any order, then they should be able to be packed in any order (for instance, the order that the threads finish in). This also could help for RTC to deal with out of order delivery better.",
+      "revId": "3392d94d2c62b6a509ff2359945ce427baed2b79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
