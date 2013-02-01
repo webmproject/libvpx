@@ -175,6 +175,24 @@
       "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//tiY\u003d",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-01T00:20:32Z",
+      "side": 1,
+      "message": "Hm, that caused even more scary compiler troubles. Seriously, there\u0027s no reason this test _requires_ 2-pass, I can simply remove this line and it still works as-is and then I can keep it as a 1-argument test using whatever is the default testmode. Is that OK with you?",
+      "parentUuid": "AAAAVH//tlI\u003d",
+      "revId": "764d0de3b401592b01022720361dd6c8113ed04f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
