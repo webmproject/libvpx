@@ -590,28 +590,6 @@ void vp9_dc_only_inv_walsh_add_c(short input_dc, uint8_t *pred_ptr,
 }
 #endif
 
-void vp9_dc_only_idct_add_8x8_c(short input_dc,
-                                uint8_t *pred_ptr,
-                                uint8_t *dst_ptr,
-                                int pitch, int stride) {
-  int a1 = ((input_dc + 16) >> 5);
-  int r, c, b;
-  uint8_t *orig_pred = pred_ptr;
-  uint8_t *orig_dst = dst_ptr;
-  for (b = 0; b < 4; b++) {
-    for (r = 0; r < 4; r++) {
-      for (c = 0; c < 4; c++) {
-        dst_ptr[c] = clip_pixel(a1 + pred_ptr[c]);
-      }
-
-      dst_ptr += stride;
-      pred_ptr += pitch;
-    }
-    dst_ptr = orig_dst + (b + 1) % 2 * 4 + (b + 1) / 2 * 4 * stride;
-    pred_ptr = orig_pred + (b + 1) % 2 * 4 + (b + 1) / 2 * 4 * pitch;
-  }
-}
-
 #define W1 2841                 /* 2048*sqrt(2)*cos(1*pi/16) */
 #define W2 2676                 /* 2048*sqrt(2)*cos(2*pi/16) */
 #define W3 2408                 /* 2048*sqrt(2)*cos(3*pi/16) */
