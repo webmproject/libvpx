@@ -114,7 +114,12 @@
 %endif
 
 ; Always use long nops (reduces 0x90 spam in disassembly on x86_32)
+%ifndef __NASM_VER__
 CPU amdnop
+%else
+%use smartalign
+ALIGNMODE k7
+%endif
 
 ; Macros to eliminate most code duplication between x86_32 and x86_64:
 ; Currently this works only for leaf functions which load all their arguments
