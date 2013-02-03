@@ -10,7 +10,7 @@
 
 #include "vpx_config.h"
 
-#if defined(_WIN32) || !CONFIG_OS_SUPPORT
+#if defined(_WIN32) || defined(__OS2__) || !CONFIG_OS_SUPPORT
 #define USE_POSIX_MMAP 0
 #else
 #define USE_POSIX_MMAP 1
