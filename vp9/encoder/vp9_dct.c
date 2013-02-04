@@ -725,47 +725,94 @@ void vp9_fht_int_c(const int16_t *input, int pitch, int16_t *output,
     op += tx_dim;
   }
 }
+// Constants and Macros used by all idct functions
+// TODO(Yaowu): move these to a header file as they shared by DCTs and iDCTs
+#define DCT_CONST_BITS 14
+#define DCT_CONST_ROUNDING  (1 << (DCT_CONST_BITS - 1))
+// Constants are 16384 * cos(kPi/64) where k = 1 to 31.
+// Note: sin(kPi/64) = cos((32-k)Pi/64)
+static const int cospi_1_64  = 16364;
+static const int cospi_2_64  = 16305;
+static const int cospi_3_64  = 16207;
+static const int cospi_4_64  = 16069;
+static const int cospi_5_64  = 15893;
+static const int cospi_6_64  = 15679;
+static const int cospi_7_64  = 15426;
+static const int cospi_8_64  = 15137;
+static const int cospi_9_64  = 14811;
+static const int cospi_10_64 = 14449;
+static const int cospi_11_64 = 14053;
+static const int cospi_12_64 = 13623;
+static const int cospi_13_64 = 13160;
+static const int cospi_14_64 = 12665;
+static const int cospi_15_64 = 12140;
+static const int cospi_16_64 = 11585;
+static const int cospi_17_64 = 11003;
+static const int cospi_18_64 = 10394;
+static const int cospi_19_64 = 9760;
+static const int cospi_20_64 = 9102;
+static const int cospi_21_64 = 8423;
+static const int cospi_22_64 = 7723;
+static const int cospi_23_64 = 7005;
+static const int cospi_24_64 = 6270;
+static const int cospi_25_64 = 5520;
+static const int cospi_26_64 = 4756;
+static const int cospi_27_64 = 3981;
+static const int cospi_28_64 = 3196;
+static const int cospi_29_64 = 2404;
+static const int cospi_30_64 = 1606;
+static const int cospi_31_64 = 804;
+
+static inline int dct_const_round_shift(int input) {
+  int rv = (input + DCT_CONST_ROUNDING) >> DCT_CONST_BITS;
+  assert((rv <= INT16_MAX) && (rv >= INT16_MIN));
+  return rv;
+}
+
+static void fdct4_1d(int16_t *input, int16_t *output) {
+  int16_t step[4];
+  int temp1, temp2;
+
+  step[0] = input[0] + input[3];
+  step[1] = input[1] + input[2];
+  step[2] = input[1] - input[2];
+  step[3] = input[0] - input[3];
+
+  temp1 = (step[0] + step[1]) * cospi_16_64;
+  temp2 = (step[0] - step[1]) * cospi_16_64;
+  output[0] = dct_const_round_shift(temp1);
+  output[2] = dct_const_round_shift(temp2);
+  temp1 = step[2] * cospi_24_64 + step[3] * cospi_8_64;
+  temp2 = -step[2] * cospi_8_64 + step[3] * cospi_24_64;
+  output[1] = dct_const_round_shift(temp1);
+  output[3] = dct_const_round_shift(temp2);
+}
 
 void vp9_short_fdct4x4_c(short *input, short *output, int pitch) {
-  int i;
-  int a1, b1, c1, d1;
-  short *ip = input;
-  short *op = output;
-
-  for (i = 0; i < 4; i++) {
-    a1 = ((ip[0] + ip[3]) << 5);
-    b1 = ((ip[1] + ip[2]) << 5);
-    c1 = ((ip[1] - ip[2]) << 5);
-    d1 = ((ip[0] - ip[3]) << 5);
-
-    op[0] = a1 + b1;
-    op[2] = a1 - b1;
-
-    op[1] = (c1 * 2217 + d1 * 5352 +  14500) >> 12;
-    op[3] = (d1 * 2217 - c1 * 5352 +   7500) >> 12;
-
-    ip += pitch / 2;
-    op += 4;
-
+  int16_t out[4 * 4];
+  int16_t *outptr = &out[0];
+  const int short_pitch = pitch >> 1;
+  int i, j;
+  int16_t temp_in[4], temp_out[4];
+  // First transform cols
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j)
+      temp_in[j] = input[j * short_pitch + i] << 4;
+    if (i == 0 && temp_in[0])
+      temp_in[0] += 1;
+    fdct4_1d(temp_in, temp_out);
+    for (j = 0; j < 4; ++j)
+      outptr[j * 4 + i] = temp_out[j];
   }
-  ip = output;
-  op = output;
-  for (i = 0; i < 4; i++) {
-    a1 = ip[0] + ip[12];
-    b1 = ip[4] + ip[8];
-    c1 = ip[4] - ip[8];
-    d1 = ip[0] - ip[12];
-
-    op[0]  = (a1 + b1 + 7) >> 4;
-    op[8]  = (a1 - b1 + 7) >> 4;
-
-    op[4]  = ((c1 * 2217 + d1 * 5352 +  12000) >> 16) + (d1 != 0);
-    op[12] = (d1 * 2217 - c1 * 5352 +  51000) >> 16;
-
-    ip++;
-    op++;
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j)
+      temp_in[j] = out[j + i * 4];
+    fdct4_1d(temp_in, temp_out);
+    for (j = 0; j < 4; ++j)
+        output[j + i * 4] = (temp_out[j] + 1) >> 2;
   }
 }
+
 
 void vp9_short_fdct8x4_c(short *input, short *output, int pitch)
 {
