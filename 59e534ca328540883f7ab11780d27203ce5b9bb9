@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//sP8\u003d",
+        "filename": "vp8/encoder/x86/quantize_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-02-04T22:20:20Z",
+      "side": 1,
+      "message": "apple compiler complains on 0bN notation. Need to switch to 0xN",
+      "revId": "59e534ca328540883f7ab11780d27203ce5b9bb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
