@@ -16,6 +16,24 @@
       "revId": "5a3795887e14b4f7be395d8c8018a6313863014e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//sb8\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-04T19:14:58Z",
+      "side": 1,
+      "message": "It\u0027s actually a no-op for that case, because then left and top-left are the same, so a + l - l \u003d\u003d a. But you\u0027re right, I should remove it for clarity purposes (condition should actually be (((block_idx \u0026 3) !\u003d 3) || (block_idx \u003d\u003d 3 \u0026\u0026 (mb_index !\u003d 3 \u0026\u0026 sb_index !\u003d 3) || ((mb_index \u0026 1) \u003d\u003d 0 \u0026\u0026 sb_index \u003d\u003d 3))), will do in next iteration.",
+      "parentUuid": "AAAAVH//ssw\u003d",
+      "revId": "5a3795887e14b4f7be395d8c8018a6313863014e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
