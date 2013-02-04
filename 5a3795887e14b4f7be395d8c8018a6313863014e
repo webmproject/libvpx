@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//ssw\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2013-02-04T09:13:52Z",
+      "side": 1,
+      "message": "How about ((block_idx \u003d\u003d 3) \u0026\u0026 (mb_index !\u003d 3)) ?\n\nI think that in this case we have immediate above-right available and thus it is not necessary to use distant above-right \"filtering\".",
+      "revId": "5a3795887e14b4f7be395d8c8018a6313863014e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
