@@ -261,6 +261,7 @@ typedef struct {
   int search_best_filter;
   int splitmode_breakout;
   int mb16_breakout;
+  int static_segmentation;
 } SPEED_FEATURES;
 
 typedef struct {
