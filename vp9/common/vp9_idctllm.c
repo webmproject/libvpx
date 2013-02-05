@@ -120,6 +120,42 @@ static const int16_t idct_i16[256] = {
    4096, -3675,  3218, -2731,  2217, -1682,  1130,  -568
 };
 
+#if CONFIG_INTHT
+static const int16_t iadst_i16[256] = {
+   284,   850,  1407,  1951,  2476,  2977,  3450,  3889,
+  4291,  4652,  4967,  5235,  5453,  5618,  5729,  5784,
+   850,  2476,  3889,  4967,  5618,  5784,  5453,  4652,
+  3450,  1951,   284, -1407, -2977, -4291, -5235, -5729,
+  1407,  3889,  5453,  5729,  4652,  2476,  -284, -2977,
+ -4967, -5784, -5235, -3450,  -850,  1951,  4291,  5618,
+  1951,  4967,  5729,  3889,   284, -3450, -5618, -5235,
+ -2476,  1407,  4652,  5784,  4291,   850, -2977, -5453,
+  2476,  5618,  4652,   284, -4291, -5729, -2977,  1951,
+  5453,  4967,   850, -3889, -5784, -3450,  1407,  5235,
+  2977,  5784,  2476, -3450, -5729, -1951,  3889,  5618,
+  1407, -4291, -5453,  -850,  4652,  5235,   284, -4967,
+  3450,  5453,  -284, -5618, -2977,  3889,  5235,  -850,
+ -5729, -2476,  4291,  4967, -1407, -5784, -1951,  4652,
+  3889,  4652, -2977, -5235,  1951,  5618,  -850, -5784,
+  -284,  5729,  1407, -5453, -2476,  4967,  3450, -4291,
+  4291,  3450, -4967, -2476,  5453,  1407, -5729,  -284,
+  5784,  -850, -5618,  1951,  5235, -2977, -4652,  3889,
+  4652,  1951, -5784,  1407,  4967, -4291, -2476,  5729,
+  -850, -5235,  3889,  2977, -5618,   284,  5453, -3450,
+  4967,   284, -5235,  4652,   850, -5453,  4291,  1407,
+ -5618,  3889,  1951, -5729,  3450,  2476, -5784,  2977,
+  5235, -1407, -3450,  5784, -3889,  -850,  4967, -5453,
+  1951,  2977, -5729,  4291,   284, -4652,  5618, -2476,
+  5453, -2977,  -850,  4291, -5784,  4652, -1407, -2476,
+  5235, -5618,  3450,   284, -3889,  5729, -4967,  1951,
+  5618, -4291,  1951,   850, -3450,  5235, -5784,  4967,
+ -2977,   284,  2476, -4652,  5729, -5453,  3889, -1407,
+  5729, -5235,  4291, -2977,  1407,   284, -1951,  3450,
+ -4652,  5453, -5784,  5618, -4967,  3889, -2476,   850,
+  5784, -5729,  5618, -5453,  5235, -4967,  4652, -4291,
+  3889, -3450,  2977, -2476,  1951, -1407,   850,  -284
+};
+#else
 static const int16_t iadst_i16[256] = {
     542,  1607,  2614,  3526,  4311,  4940,  5390,  5646,
    5698,  5543,  5189,  4646,  3936,  3084,  2120,  1080,
@@ -154,7 +190,7 @@ static const int16_t iadst_i16[256] = {
    5698, -5646,  5543, -5390,  5189, -4940,  4646, -4311,
    3936, -3526,  3084, -2614,  2120, -1607,  1080,  -542
 };
-
+#endif
 
 /* Converted the transforms to integer form. */
 #define HORIZONTAL_SHIFT 14  // 16
@@ -656,6 +692,138 @@ void vp9_short_idct8x8_c(int16_t *input, int16_t *output, int pitch) {
         output[j * short_pitch + i] = (temp_out[j] + 16) >> 5;
     }
 }
+
+#if CONFIG_INTHT
+static void iadst8_1d(int16_t *input, int16_t *output) {
+  int x0, x1, x2, x3, x4, x5, x6, x7;
+  int s0, s1, s2, s3, s4, s5, s6, s7;
+
+  x0 = input[7];
+  x1 = input[0];
+  x2 = input[5];
+  x3 = input[2];
+  x4 = input[3];
+  x5 = input[4];
+  x6 = input[1];
+  x7 = input[6];
+
+  if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
+    output[0] = output[1] = output[2] = output[3] = output[4]
+                    = output[5] = output[6] = output[7] = 0;
+    return;
+  }
+
+  // stage 1
+  s0 = cospi_2_64  * x0 + cospi_30_64 * x1;
+  s1 = cospi_30_64 * x0 - cospi_2_64  * x1;
+  s2 = cospi_10_64 * x2 + cospi_22_64 * x3;
+  s3 = cospi_22_64 * x2 - cospi_10_64 * x3;
+  s4 = cospi_18_64 * x4 + cospi_14_64 * x5;
+  s5 = cospi_14_64 * x4 - cospi_18_64 * x5;
+  s6 = cospi_26_64 * x6 + cospi_6_64  * x7;
+  s7 = cospi_6_64  * x6 - cospi_26_64 * x7;
+
+  x0 = dct_const_round_shift(s0 + s4);
+  x1 = dct_const_round_shift(s1 + s5);
+  x2 = dct_const_round_shift(s2 + s6);
+  x3 = dct_const_round_shift(s3 + s7);
+  x4 = dct_const_round_shift(s0 - s4);
+  x5 = dct_const_round_shift(s1 - s5);
+  x6 = dct_const_round_shift(s2 - s6);
+  x7 = dct_const_round_shift(s3 - s7);
+
+  // stage 2
+  s0 = x0;
+  s1 = x1;
+  s2 = x2;
+  s3 = x3;
+  s4 = cospi_8_64  * x4 + cospi_24_64 * x5;
+  s5 = cospi_24_64 * x4 - cospi_8_64  * x5;
+  s6 = - cospi_24_64 * x6 + cospi_8_64  * x7;
+  s7 =   cospi_8_64  * x6 + cospi_24_64 * x7;
+
+  x0 = s0 + s2;
+  x1 = s1 + s3;
+  x2 = s0 - s2;
+  x3 = s1 - s3;
+  x4 = dct_const_round_shift(s4 + s6);
+  x5 = dct_const_round_shift(s5 + s7);
+  x6 = dct_const_round_shift(s4 - s6);
+  x7 = dct_const_round_shift(s5 - s7);
+
+  // stage 3
+  s2 = cospi_16_64 * (x2 + x3);
+  s3 = cospi_16_64 * (x2 - x3);
+  s6 = cospi_16_64 * (x6 + x7);
+  s7 = cospi_16_64 * (x6 - x7);
+
+  x2 = dct_const_round_shift(s2);
+  x3 = dct_const_round_shift(s3);
+  x6 = dct_const_round_shift(s6);
+  x7 = dct_const_round_shift(s7);
+
+  output[0] =   x0;
+  output[1] = - x4;
+  output[2] =   x6;
+  output[3] = - x2;
+  output[4] =   x3;
+  output[5] = - x7;
+  output[6] =   x5;
+  output[7] = - x1;
+
+  return;
+}
+
+void vp9_short_iht8x8_c(int16_t *input, int16_t *output,
+                        TX_TYPE tx_type, int pitch) {
+  int16_t out[8 * 8];
+  int16_t *outptr = &out[0];
+  const int short_pitch = pitch >> 1;
+  int i, j;
+  int16_t temp_in[8], temp_out[8];
+
+  void (*invr)(int16_t*, int16_t*);
+  void (*invc)(int16_t*, int16_t*);
+
+  switch (tx_type) {
+    case ADST_ADST:
+      invc = &iadst8_1d;
+      invr = &iadst8_1d;
+      break;
+    case ADST_DCT:
+      invc = &iadst8_1d;
+      invr = &idct8_1d;
+      break;
+    case DCT_ADST:
+      invc = &idct8_1d;
+      invr = &iadst8_1d;
+      break;
+    case DCT_DCT:
+      invc = &idct8_1d;
+      invr = &idct8_1d;
+      break;
+    default:
+      assert(0);
+  }
+
+  // inverse transform row vectors
+  for (i = 0; i < 8; ++i) {
+    invr(input, outptr);
+    input += 8;
+    outptr += 8;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j * 8 + i];
+    invc(temp_in, temp_out);
+    for (j = 0; j < 8; ++j)
+      output[j * short_pitch + i] = (temp_out[j] + 16) >> 5;
+  }
+}
+#endif
+
 
 void vp9_short_idct10_8x8_c(int16_t *input, int16_t *output, int pitch) {
   int16_t out[8 * 8];

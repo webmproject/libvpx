@@ -413,9 +413,9 @@ typedef struct macroblockd {
 
 } MACROBLOCKD;
 
-#define ACTIVE_HT 110                // quantization stepsize threshold
+#define ACTIVE_HT   110                // quantization stepsize threshold
 
-#define ACTIVE_HT8 300
+#define ACTIVE_HT8  300
 
 #define ACTIVE_HT16 300
 

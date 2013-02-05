@@ -152,8 +152,14 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
       vp9_fht(be->src_diff, 32, (x->block + idx)->coeff,
                 tx_type, 8);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
+
+#if CONFIG_INTHT
+      vp9_short_iht8x8(xd->block[idx].dqcoeff, xd->block[ib].diff,
+                            tx_type, 32);
+#else
       vp9_ihtllm(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
                    tx_type, 8, xd->block[idx].eob);
+#endif
     } else {
       x->vp9_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);

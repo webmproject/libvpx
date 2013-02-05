@@ -91,8 +91,13 @@ void vp9_inverse_transform_mby_8x8(MACROBLOCKD *xd) {
   for (i = 0; i < 9; i += 8) {
     TX_TYPE tx_type = get_tx_type_8x8(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
+#if CONFIG_INTHT
+      vp9_short_iht8x8(xd->block[i].dqcoeff, xd->block[i].diff,
+                           tx_type, 32);
+#else
       vp9_ihtllm(xd->block[i].dqcoeff, xd->block[i].diff, 32, tx_type, 8,
                  xd->block[i].eob);
+#endif
     } else {
       vp9_inverse_transform_b_8x8(&blockd[i].dqcoeff[0],
                                   &blockd[i].diff[0], 32);
@@ -101,8 +106,13 @@ void vp9_inverse_transform_mby_8x8(MACROBLOCKD *xd) {
   for (i = 2; i < 11; i += 8) {
     TX_TYPE tx_type = get_tx_type_8x8(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
+#if CONFIG_INTHT
+      vp9_short_iht8x8(xd->block[i + 2].dqcoeff, xd->block[i].diff,
+                           tx_type, 32);
+#else
       vp9_ihtllm(xd->block[i + 2].dqcoeff, xd->block[i].diff, 32, tx_type, 8,
                  xd->block[i + 2].eob);
+#endif
     } else {
       vp9_inverse_transform_b_8x8(&blockd[i + 2].dqcoeff[0],
                                   &blockd[i].diff[0], 32);

@@ -249,6 +249,7 @@ EXPERIMENT_LIST="
     newcoefcontext
     enable_6tap
     abovesprefmv
+    intht
 "
 CONFIG_LIST="
     external_build

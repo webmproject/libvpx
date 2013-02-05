@@ -92,8 +92,11 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
       input[i] = dq[1] * input[i];
     }
 
+#if CONFIG_INTHT
+    vp9_short_iht8x8(input, output, tx_type, 16);
+#else
     vp9_ihtllm(input, output, 16, tx_type, 8, eobs);
-
+#endif
     vpx_memset(input, 0, 128);
 
     add_residual(diff_ptr, pred, pitch, dest, stride, 8, 8);
