@@ -259,7 +259,8 @@ typedef struct {
   int optimize_coefficients;
   int no_skip_block4x4_search;
   int search_best_filter;
-
+  int splitmode_breakout;
+  int mb16_breakout;
 } SPEED_FEATURES;
 
 typedef struct {

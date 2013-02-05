@@ -741,17 +741,18 @@ static void set_offsets(VP9_COMP *cpi,
   }
 }
 
-static void pick_mb_modes(VP9_COMP *cpi,
-                          int mb_row,
-                          int mb_col,
-                          TOKENEXTRA **tp,
-                          int *totalrate,
-                          int *totaldist) {
+static int pick_mb_modes(VP9_COMP *cpi,
+                         int mb_row,
+                         int mb_col,
+                         TOKENEXTRA **tp,
+                         int *totalrate,
+                         int *totaldist) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int i;
   int recon_yoffset, recon_uvoffset;
+  int splitmodes_used = 0;
   ENTROPY_CONTEXT_PLANES left_context[2];
   ENTROPY_CONTEXT_PLANES above_context[2];
   ENTROPY_CONTEXT_PLANES *initial_above_context_ptr = cm->above_context
@@ -818,6 +819,8 @@ static void pick_mb_modes(VP9_COMP *cpi,
       *totalrate += r;
       *totaldist += d;
 
+      splitmodes_used += (mbmi->mode == SPLITMV);
+
       // Dummy encode, do not do the tokenization
       encode_macroblock(cpi, tp, recon_yoffset, recon_uvoffset, 0,
                         mb_row + y_idx, mb_col + x_idx);
@@ -849,6 +852,8 @@ static void pick_mb_modes(VP9_COMP *cpi,
   vpx_memcpy(initial_above_context_ptr,
              above_context,
              sizeof(above_context));
+
+  return splitmodes_used;
 }
 
 static void pick_sb_modes(VP9_COMP *cpi,
@@ -1106,6 +1111,7 @@ static void encode_sb_row(VP9_COMP *cpi,
     int sb32_rate = 0, sb32_dist = 0;
     int is_sb[4];
     int sb64_rate = INT_MAX, sb64_dist;
+    int sb64_skip = 0;
     ENTROPY_CONTEXT_PLANES l[4], a[4];
     TOKENEXTRA *tp_orig = *tp;
 
@@ -1115,18 +1121,27 @@ static void encode_sb_row(VP9_COMP *cpi,
       const int x_idx = (i & 1) << 1, y_idx = i & 2;
       int mb_rate = 0, mb_dist = 0;
       int sb_rate = INT_MAX, sb_dist;
+      int splitmodes_used = 0;
+      int sb32_skip = 0;
 
       if (mb_row + y_idx >= cm->mb_rows || mb_col + x_idx >= cm->mb_cols)
         continue;
 
       xd->sb_index = i;
 
-      pick_mb_modes(cpi, mb_row + y_idx, mb_col + x_idx,
-                    tp, &mb_rate, &mb_dist);
+      splitmodes_used = pick_mb_modes(cpi, mb_row + y_idx, mb_col + x_idx,
+                                      tp, &mb_rate, &mb_dist);
+
       mb_rate += vp9_cost_bit(cm->sb32_coded, 0);
 
-      if (!(((cm->mb_cols & 1) && mb_col + x_idx == cm->mb_cols - 1) ||
-            ((cm->mb_rows & 1) && mb_row + y_idx == cm->mb_rows - 1))) {
+      if (cpi->sf.splitmode_breakout) {
+        sb32_skip = splitmodes_used;
+        sb64_skip += splitmodes_used;
+      }
+
+      if ( !sb32_skip &&
+           !(((cm->mb_cols & 1) && mb_col + x_idx == cm->mb_cols - 1) ||
+             ((cm->mb_rows & 1) && mb_row + y_idx == cm->mb_rows - 1))) {
         /* Pick a mode assuming that it applies to all 4 of the MBs in the SB */
         pick_sb_modes(cpi, mb_row + y_idx, mb_col + x_idx,
                       tp, &sb_rate, &sb_dist);
@@ -1144,6 +1159,11 @@ static void encode_sb_row(VP9_COMP *cpi,
         is_sb[i] = 0;
         sb32_rate += mb_rate;
         sb32_dist += mb_dist;
+
+        // If we used 16x16 instead of 32x32 then skip 64x64 (if enabled).
+        if (cpi->sf.mb16_breakout) {
+          ++sb64_skip;
+        }
       }
 
       /* Encode SB using best computed mode(s) */
@@ -1159,7 +1179,8 @@ static void encode_sb_row(VP9_COMP *cpi,
     memcpy(cm->left_context, &l, sizeof(l));
     sb32_rate += vp9_cost_bit(cm->sb64_coded, 0);
 
-    if (!(((cm->mb_cols & 3) && mb_col + 3 >= cm->mb_cols) ||
+    if (!sb64_skip &&
+        !(((cm->mb_cols & 3) && mb_col + 3 >= cm->mb_cols) ||
           ((cm->mb_rows & 3) && mb_row + 3 >= cm->mb_rows))) {
       pick_sb64_modes(cpi, mb_row, mb_col, tp, &sb64_rate, &sb64_dist);
       sb64_rate += vp9_cost_bit(cm->sb64_coded, 1);
