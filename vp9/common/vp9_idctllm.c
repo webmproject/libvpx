@@ -1644,6 +1644,16 @@ void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
   }
 }
 
+void vp9_short_idct1_32x32_c(int16_t *input, int16_t *output) {
+  int tmp;
+  int16_t out;
+  tmp = input[0] * cospi_16_64;
+  out = dct_const_round_shift(tmp);
+  tmp = out * cospi_16_64;
+  out = dct_const_round_shift(tmp);
+  *output = (out + 32) >> 6;
+}
+
 #else  // !CONFIG_DWTDCTHYBRID
 
 #if DWT_TYPE == 53
