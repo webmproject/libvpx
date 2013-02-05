@@ -279,21 +279,16 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
     clamp_mv2(&sorted_mvs[i], xd);
   }
 
-  // Provided that there are non zero vectors available there will not
-  // be more than one 0,0 entry in the sorted list.
-  // The best ref mv is always set to the first entry (which gave the best
-  // results. The nearest is set to the first non zero vector if available and
-  // near to the second non zero vector if available.
-  // We do not use 0,0 as a nearest or near as 0,0 has its own mode.
-  if ( sorted_mvs[0].as_int ) {
-    nearest->as_int = sorted_mvs[0].as_int;
-    if ( sorted_mvs[1].as_int )
-      near->as_int = sorted_mvs[1].as_int;
-    else
-      near->as_int = sorted_mvs[2].as_int;
+  // Nearest may be a 0,0 or non zero vector and now matches the chosen
+  // "best reference". This has advantages when it is used as part of a
+  // compound predictor as it means a non zero vector can be paired using
+  // this mode with a 0 vector. The Near vector is still forced to be a
+  // non zero candidate if one is avaialble.
+  nearest->as_int = sorted_mvs[0].as_int;
+  if ( sorted_mvs[1].as_int ) {
+    near->as_int = sorted_mvs[1].as_int;
   } else {
-      nearest->as_int = sorted_mvs[1].as_int;
-      near->as_int = sorted_mvs[2].as_int;
+    near->as_int = sorted_mvs[2].as_int;
   }
 
   // Copy back the re-ordered mv list

@@ -3301,13 +3301,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                   96, xd->allow_high_precision_mv);
       }
       break;
-    case NEARESTMV:
     case NEARMV:
-      // Do not bother proceeding if the vector (from newmv, nearest or
-      // near) is 0,0 as this should then be coded using the zeromv mode.
-      for (i = 0; i < num_refs; ++i)
-        if (frame_mv[this_mode][refs[i]].as_int == 0)
-          return INT64_MAX;
+    case NEARESTMV:
     case ZEROMV:
     default:
       break;
