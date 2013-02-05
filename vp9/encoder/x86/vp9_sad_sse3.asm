@@ -258,49 +258,49 @@
         mov             %5,         [%1+REG_SZ_BYTES*3]
 %endmacro
 
-%macro PROCESS_16X2X4 8
-%if %1==0
-        movdqa          xmm0,       XMMWORD PTR [%2]
-        lddqu           xmm4,       XMMWORD PTR [%3]
-        lddqu           xmm5,       XMMWORD PTR [%4]
-        lddqu           xmm6,       XMMWORD PTR [%5]
-        lddqu           xmm7,       XMMWORD PTR [%6]
+%macro PROCESS_16X2X4 8-9 0
+%if %1==0 || %1==3
+        movdqa          xmm0,       XMMWORD PTR [%2+%9]
+        lddqu           xmm4,       XMMWORD PTR [%3+%9]
+        lddqu           xmm5,       XMMWORD PTR [%4+%9]
+        lddqu           xmm6,       XMMWORD PTR [%5+%9]
+        lddqu           xmm7,       XMMWORD PTR [%6+%9]
 
         psadbw          xmm4,       xmm0
         psadbw          xmm5,       xmm0
         psadbw          xmm6,       xmm0
         psadbw          xmm7,       xmm0
 %else
-        movdqa          xmm0,       XMMWORD PTR [%2]
-        lddqu           xmm1,       XMMWORD PTR [%3]
-        lddqu           xmm2,       XMMWORD PTR [%4]
-        lddqu           xmm3,       XMMWORD PTR [%5]
+        movdqa          xmm0,       XMMWORD PTR [%2+%9]
+        lddqu           xmm1,       XMMWORD PTR [%3+%9]
+        lddqu           xmm2,       XMMWORD PTR [%4+%9]
+        lddqu           xmm3,       XMMWORD PTR [%5+%9]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
         psadbw          xmm3,       xmm0
 
-        paddw           xmm4,       xmm1
-        lddqu           xmm1,       XMMWORD PTR [%6]
-        paddw           xmm5,       xmm2
-        paddw           xmm6,       xmm3
+        paddd           xmm4,       xmm1
+        lddqu           xmm1,       XMMWORD PTR [%6+%9]
+        paddd           xmm5,       xmm2
+        paddd           xmm6,       xmm3
 
         psadbw          xmm1,       xmm0
-        paddw           xmm7,       xmm1
+        paddd           xmm7,       xmm1
 %endif
-        movdqa          xmm0,       XMMWORD PTR [%2+%7]
-        lddqu           xmm1,       XMMWORD PTR [%3+%8]
-        lddqu           xmm2,       XMMWORD PTR [%4+%8]
-        lddqu           xmm3,       XMMWORD PTR [%5+%8]
+        movdqa          xmm0,       XMMWORD PTR [%2+%7+%9]
+        lddqu           xmm1,       XMMWORD PTR [%3+%8+%9]
+        lddqu           xmm2,       XMMWORD PTR [%4+%8+%9]
+        lddqu           xmm3,       XMMWORD PTR [%5+%8+%9]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
         psadbw          xmm3,       xmm0
 
-        paddw           xmm4,       xmm1
-        lddqu           xmm1,       XMMWORD PTR [%6+%8]
-        paddw           xmm5,       xmm2
-        paddw           xmm6,       xmm3
+        paddd           xmm4,       xmm1
+        lddqu           xmm1,       XMMWORD PTR [%6+%8+%9]
+        paddd           xmm5,       xmm2
+        paddd           xmm6,       xmm3
 
 %if %1==0 || %1==1
         lea             %2,         [%2+%7*2]
@@ -312,7 +312,7 @@
         lea             %6,         [%6+%8*2]
 %endif
         psadbw          xmm1,       xmm0
-        paddw           xmm7,       xmm1
+        paddd           xmm7,       xmm1
 
 %endmacro
 
@@ -697,6 +697,109 @@ sym(vp9_copy32xn_sse3):
 .copy_is_done:
     STACK_FRAME_DESTROY_X3
 
+;void vp9_sad64x64x4d_sse3(
+;    unsigned char *src_ptr,
+;    int  src_stride,
+;    unsigned char *ref_ptr_base,
+;    int  ref_stride,
+;    int  *results)
+global sym(vp9_sad64x64x4d_sse3) PRIVATE
+sym(vp9_sad64x64x4d_sse3):
+
+    STACK_FRAME_CREATE_X4
+
+%macro PROCESS_64X8X4 2-3+
+        PROCESS_16X2X4 %1, %3
+        PROCESS_16X2X4  2, %3, 16
+        PROCESS_16X2X4  2, %3, 32
+        PROCESS_16X2X4  1, %3, 48
+        PROCESS_16X2X4  2, %3
+        PROCESS_16X2X4  2, %3, 16
+        PROCESS_16X2X4  2, %3, 32
+        PROCESS_16X2X4  1, %3, 48
+        PROCESS_16X2X4  2, %3
+        PROCESS_16X2X4  2, %3, 16
+        PROCESS_16X2X4  2, %3, 32
+        PROCESS_16X2X4  1, %3, 48
+        PROCESS_16X2X4  2, %3
+        PROCESS_16X2X4  2, %3, 16
+        PROCESS_16X2X4  2, %3, 32
+        PROCESS_16X2X4 %2, %3, 48
+%endmacro
+
+        PROCESS_64X8X4 3, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_64X8X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_64X8X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_64X8X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_64X8X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_64X8X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_64X8X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_64X8X4 2, 2, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+
+%macro STORE_4D_RESULTS 0
+%if ABI_IS_32BIT
+        pop             rbp
+%endif
+        mov             rcx,        result_ptr
+
+        movq            xmm0,       xmm4
+        psrldq          xmm4,       8
+
+        paddd           xmm0,       xmm4
+        movd            [rcx],      xmm0
+;-
+        movq            xmm0,       xmm5
+        psrldq          xmm5,       8
+
+        paddd           xmm0,       xmm5
+        movd            [rcx+4],    xmm0
+;-
+        movq            xmm0,       xmm6
+        psrldq          xmm6,       8
+
+        paddd           xmm0,       xmm6
+        movd            [rcx+8],    xmm0
+;-
+        movq            xmm0,       xmm7
+        psrldq          xmm7,       8
+
+        paddd           xmm0,       xmm7
+        movd            [rcx+12],   xmm0
+%endmacro
+
+        STORE_4D_RESULTS
+    STACK_FRAME_DESTROY_X4
+
+;void vp9_sad32x32x4d_sse3(
+;    unsigned char *src_ptr,
+;    int  src_stride,
+;    unsigned char *ref_ptr_base,
+;    int  ref_stride,
+;    int  *results)
+global sym(vp9_sad32x32x4d_sse3) PRIVATE
+sym(vp9_sad32x32x4d_sse3):
+
+    STACK_FRAME_CREATE_X4
+
+%macro PROCESS_32X4X4 2-3+
+        PROCESS_16X2X4 %1, %3
+        PROCESS_16X2X4  1, %3, 16
+        PROCESS_16X2X4  2, %3
+        PROCESS_16X2X4 %2, %3, 16
+%endmacro
+
+        PROCESS_32X4X4 3, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_32X4X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_32X4X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_32X4X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_32X4X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_32X4X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_32X4X4 2, 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        PROCESS_32X4X4 2, 2, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+
+        STORE_4D_RESULTS
+    STACK_FRAME_DESTROY_X4
+
 ;void vp9_sad16x16x4d_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
@@ -717,35 +820,7 @@ sym(vp9_sad16x16x4d_sse3):
         PROCESS_16X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
         PROCESS_16X2X4 2, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
 
-%if ABI_IS_32BIT
-        pop             rbp
-%endif
-        mov             rcx,        result_ptr
-
-        movq            xmm0,       xmm4
-        psrldq          xmm4,       8
-
-        paddw           xmm0,       xmm4
-        movd            [rcx],      xmm0
-;-
-        movq            xmm0,       xmm5
-        psrldq          xmm5,       8
-
-        paddw           xmm0,       xmm5
-        movd            [rcx+4],    xmm0
-;-
-        movq            xmm0,       xmm6
-        psrldq          xmm6,       8
-
-        paddw           xmm0,       xmm6
-        movd            [rcx+8],    xmm0
-;-
-        movq            xmm0,       xmm7
-        psrldq          xmm7,       8
-
-        paddw           xmm0,       xmm7
-        movd            [rcx+12],   xmm0
-
+        STORE_4D_RESULTS
     STACK_FRAME_DESTROY_X4
 
 ;void vp9_sad16x8x4d_sse3(
