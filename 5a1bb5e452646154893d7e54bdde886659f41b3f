@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//r9Y\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-05T01:12:14Z",
+      "side": 1,
+      "message": "__inline?",
+      "revId": "5a1bb5e452646154893d7e54bdde886659f41b3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//r9U\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-05T01:12:14Z",
+      "side": 1,
+      "message": "so, the compiler may actually introduce an and instruction here to make the wrap explicit, which isn\u0027t actually what you want. I think removing the cast and just keeping the assert (and change the return type to int) should be OK here. It will still do what it should, and I think it\u0027ll be faster?",
+      "revId": "5a1bb5e452646154893d7e54bdde886659f41b3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//r9M\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 765,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-05T01:12:14Z",
+      "side": 1,
+      "message": "__inline",
+      "revId": "5a1bb5e452646154893d7e54bdde886659f41b3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//r9Q\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-05T01:12:14Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "5a1bb5e452646154893d7e54bdde886659f41b3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
