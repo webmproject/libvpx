@@ -221,8 +221,8 @@ static void update_refpred_stats(VP9_COMP *cpi) {
 //
 // The branch counts table is re-populated during the actual pack stage and in
 // the decoder to facilitate backwards update of the context.
-static void update_mode_probs(VP9_COMMON *cm,
-                              int mode_context[INTER_MODE_CONTEXTS][4]) {
+static void update_inter_mode_probs(VP9_COMMON *cm,
+                                    int mode_context[INTER_MODE_CONTEXTS][4]) {
   int i, j;
   unsigned int (*mv_ref_ct)[4][2];
 
@@ -813,7 +813,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     active_section = 3;
 #endif
 
-    // Is segment skip is not enabled code the mode.
+    // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
       if (mi->sb_type) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
@@ -1871,7 +1871,13 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   if (pc->frame_type != KEY_FRAME) {
     int i, j;
     int new_context[INTER_MODE_CONTEXTS][4];
-    update_mode_probs(pc, new_context);
+    if (!cpi->dummy_packing) {
+      update_inter_mode_probs(pc, new_context);
+    } else {
+      // In dummy pack assume context unchanged.
+      vpx_memcpy(new_context, pc->fc.vp9_mode_contexts,
+                 sizeof(pc->fc.vp9_mode_contexts));
+    }
 
     for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
       for (j = 0; j < 4; j++) {

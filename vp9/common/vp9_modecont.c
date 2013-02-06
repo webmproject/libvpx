@@ -12,7 +12,7 @@
 #include "vp9/common/vp9_entropy.h"
 
 const int vp9_default_mode_contexts[INTER_MODE_CONTEXTS][4] = {
-  {223,     1,     1,    237},  // 0,0 best: Only candidate
+  {1,       223,   1,    237},  // 0,0 best: Only candidate
   {87,      166,   26,   219},  // 0,0 best: non zero candidates
   {89,      67,    18,   125},  // 0,0 best: non zero candidates, split
   {16,      141,   69,   226},  // strong nz candidate(s), no split
