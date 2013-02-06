@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//qFQ\u003d",
+        "filename": "vp9/encoder/vp9_treewriter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-06T22:17:42Z",
+      "side": 1,
+      "message": "This is weird, with a forceinline function calling a function that\u0027s not forceinline. Either they both should be forceinline or the leaf function should be. cost_token below, too.\n\nDo we really need two levels for inline? It\u0027s not clear what the criteria for using INLINE is.. I don\u0027t want to go decorating every single static function. Can we get away with just one, forceinline, and let the compiler decide on the others? ie INLINE is basically implied by static, and if profiling shows the compiler making the wrong decision later, we can make things FORCEINLINE as needed.",
+      "revId": "089026d6efde43e23db51e8be4529d7bc4771b9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
