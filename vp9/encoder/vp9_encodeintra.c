@@ -168,6 +168,12 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
         vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
         vp9_ht_quantize_b_4x4(be, b, tx_type);
         vp9_ihtllm(b->dqcoeff, b->diff, 32, tx_type, 4, b->eob);
+      } else if (!(i & 1) && get_tx_type_4x4(xd, b + 1) == DCT_DCT) {
+        x->vp9_short_fdct8x4(be->src_diff, be->coeff, 32);
+        x->quantize_b_4x4_pair(be, be + 1, b, b + 1);
+        vp9_inverse_transform_b_4x4(xd, ib + iblock[i], 32);
+        vp9_inverse_transform_b_4x4(xd, ib + iblock[i] + 1, 32);
+        i++;
       } else {
         x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
         x->quantize_b_4x4(be, b);

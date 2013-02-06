@@ -187,6 +187,10 @@ void vp9_transform_mby_4x4(MACROBLOCK *x) {
     if (tx_type != DCT_DCT) {
       assert(has_2nd_order == 0);
       vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 4);
+    } else if (!(i & 1) && get_tx_type_4x4(xd, &xd->block[i + 1]) == DCT_DCT) {
+      x->vp9_short_fdct8x4(&x->block[i].src_diff[0],
+                           &x->block[i].coeff[0], 32);
+      i++;
     } else {
       x->vp9_short_fdct4x4(&x->block[i].src_diff[0],
                            &x->block[i].coeff[0], 32);

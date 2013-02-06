@@ -1459,21 +1459,33 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       distortion = 0;
       rate_t = 0;
       for (i = 0; i < 4; ++i) {
+        int do_two = 0;
         b = &xd->block[ib + iblock[i]];
         be = &x->block[ib + iblock[i]];
         tx_type = get_tx_type_4x4(xd, b);
         if (tx_type != DCT_DCT) {
           vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
           vp9_ht_quantize_b_4x4(be, b, tx_type);
+        } else if (!(i & 1) && get_tx_type_4x4(xd, b + 1) == DCT_DCT) {
+          x->vp9_short_fdct8x4(be->src_diff, be->coeff, 32);
+          x->quantize_b_4x4_pair(be, be + 1, b, b + 1);
+          do_two = 1;
         } else {
           x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
           x->quantize_b_4x4(be, b);
         }
-        distortion += vp9_block_error_c(be->coeff, b->dqcoeff, 16);
+        distortion += vp9_block_error_c(be->coeff, b->dqcoeff, 16 << do_two);
         rate_t += cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC,
                               // i&1 ? &ta1 : &ta0, i&2 ? &tl1 : &tl0,
                               &ta0, &tl0,
                               TX_4X4);
+        if (do_two) {
+          rate_t += cost_coeffs(x, b + 1, PLANE_TYPE_Y_WITH_DC,
+                                // i&1 ? &ta1 : &ta0, i&2 ? &tl1 : &tl0,
+                                &ta0, &tl0,
+                                TX_4X4);
+          i++;
+        }
       }
       b = &xd->block[ib];
       be = &x->block[ib];
