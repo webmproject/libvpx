@@ -3265,9 +3265,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         mvp_full.as_mv.col >>= 3;
         mvp_full.as_mv.row >>= 3;
-        if (mvp_full.as_int != mvp_full.as_int) {
-          mvp_full.as_int = mvp_full.as_int;
-        }
 
         // adjust search range according to sr from mv prediction
         step_param = MAX(step_param, sr);
