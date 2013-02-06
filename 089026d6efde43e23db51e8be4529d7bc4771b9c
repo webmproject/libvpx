@@ -16,6 +16,24 @@
       "revId": "089026d6efde43e23db51e8be4529d7bc4771b9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//qEM\u003d",
+        "filename": "vp9/encoder/vp9_treewriter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-06T22:21:29Z",
+      "side": 1,
+      "message": "In this particular case, I actually agree, it\u0027s a little weird. In general, the idea (I think) is to optimize for different things; sometimes, a smaller binary is more critical than the last few cycles. Sometimes, the cycles count more (e.g. -Os vs -O3). FORCEINLINE vs INLINE allows us to distinguish between these.\n\nIf you prefer \"just\" FORCEINLINE, I can just use that (i.e. #define INLINE __attribute__((always_inline)) if available, else #define INLINE inline, except on MSVC where it\u0027d be __forceinline, and then get rid of FORCEINLINE). I don\u0027t mind so much either way.\n\n(Will fix style nits in next iteration.)",
+      "parentUuid": "AAAAVH//qFQ\u003d",
+      "revId": "089026d6efde43e23db51e8be4529d7bc4771b9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
