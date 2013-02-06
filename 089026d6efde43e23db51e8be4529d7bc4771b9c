@@ -34,6 +34,24 @@
       "revId": "089026d6efde43e23db51e8be4529d7bc4771b9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//qDc\u003d",
+        "filename": "vp9/encoder/vp9_treewriter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-06T22:28:52Z",
+      "side": 1,
+      "message": "Yeah, do it that way. Until there\u0027s clear semantics defined for when we\u0027d use each one, and profiling to support its use, I don\u0027t see the need for the weaker form. GCC at least mostly ignores the weaker form anyway (and can ignore the stronger form too, in some cases)",
+      "parentUuid": "AAAAVH//qEM\u003d",
+      "revId": "089026d6efde43e23db51e8be4529d7bc4771b9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
