@@ -294,48 +294,50 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
     cm->cur_tile_mb_col_end = mb_end;
 
     mi_ptr = cm->mi + mb_start;
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4, mi_ptr += 4 * mis) {
-    mi = mi_ptr;
-    for (mb_col = mb_start; mb_col < mb_end; mb_col += 4, mi += 4) {
-      if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
-        count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
-                   t_unpred_seg_counts, 4, mb_row, mb_col);
-      } else {
-        for (i = 0; i < 4; i++) {
-          int x_idx = (i & 1) << 1, y_idx = i & 2;
-          MODE_INFO *sb_mi = mi + y_idx * mis + x_idx;
+    for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4, mi_ptr += 4 * mis) {
+      mi = mi_ptr;
+      for (mb_col = mb_start; mb_col < mb_end; mb_col += 4, mi += 4) {
+        if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
+          count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
+                     t_unpred_seg_counts, 4, mb_row, mb_col);
+        } else {
+          for (i = 0; i < 4; i++) {
+            int x_idx = (i & 1) << 1, y_idx = i & 2;
+            MODE_INFO *sb_mi = mi + y_idx * mis + x_idx;
 
-          if (mb_col + x_idx >= cm->mb_cols ||
-              mb_row + y_idx >= cm->mb_rows) {
-            continue;
-          }
+            if (mb_col + x_idx >= cm->mb_cols ||
+                mb_row + y_idx >= cm->mb_rows) {
+              continue;
+            }
 
-          if (sb_mi->mbmi.sb_type) {
-            assert(sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X32);
-            count_segs(cpi, sb_mi, no_pred_segcounts, temporal_predictor_count,
-                       t_unpred_seg_counts, 2, mb_row + y_idx, mb_col + x_idx);
-          } else {
-            int j;
+            if (sb_mi->mbmi.sb_type) {
+              assert(sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X32);
+              count_segs(cpi, sb_mi, no_pred_segcounts,
+                         temporal_predictor_count, t_unpred_seg_counts, 2,
+                         mb_row + y_idx, mb_col + x_idx);
+            } else {
+              int j;
 
-            for (j = 0; j < 4; j++) {
-              const int x_idx_mb = x_idx + (j & 1), y_idx_mb = y_idx + (j >> 1);
-              MODE_INFO *mb_mi = mi + x_idx_mb + y_idx_mb * mis;
+              for (j = 0; j < 4; j++) {
+                const int x_idx_mb = x_idx + (j & 1);
+                const int y_idx_mb = y_idx + (j >> 1);
+                MODE_INFO *mb_mi = mi + x_idx_mb + y_idx_mb * mis;
 
-              if (mb_col + x_idx_mb >= cm->mb_cols ||
-                  mb_row + y_idx_mb >= cm->mb_rows) {
-                continue;
+                if (mb_col + x_idx_mb >= cm->mb_cols ||
+                    mb_row + y_idx_mb >= cm->mb_rows) {
+                  continue;
+                }
+
+                assert(mb_mi->mbmi.sb_type == BLOCK_SIZE_MB16X16);
+                count_segs(cpi, mb_mi, no_pred_segcounts,
+                           temporal_predictor_count, t_unpred_seg_counts,
+                           1, mb_row + y_idx_mb, mb_col + x_idx_mb);
               }
-
-              assert(mb_mi->mbmi.sb_type == BLOCK_SIZE_MB16X16);
-              count_segs(cpi, mb_mi, no_pred_segcounts,
-                         temporal_predictor_count, t_unpred_seg_counts,
-                         1, mb_row + y_idx_mb, mb_col + x_idx_mb);
             }
           }
         }
       }
     }
-  }
 
     mb_start = mb_end;
   }
