@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include <assert.h>
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_picklpf.h"
@@ -27,6 +27,7 @@ void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
   int yoffset;
   int linestocopy;
 
+  assert(src_ybc->y_stride == dst_ybc->y_stride);
   yheight  = src_ybc->y_height;
   ystride  = src_ybc->y_stride;
 

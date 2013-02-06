@@ -677,6 +677,8 @@ typedef struct VP9_COMP {
   unsigned int mb_mv_ref_count[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
 #endif
 
+  int initial_width;
+  int initial_height;
 } VP9_COMP;
 
 void vp9_encode_frame(VP9_COMP *cpi);

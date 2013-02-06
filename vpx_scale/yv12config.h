@@ -55,6 +55,7 @@ extern "C" {
     uint8_t *v_buffer;
 
     uint8_t *buffer_alloc;
+    int buffer_alloc_sz;
     int border;
     int frame_size;
     YUV_TYPE clrtype;
@@ -65,6 +66,8 @@ extern "C" {
 
   int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                                   int width, int height, int border);
+  int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+                                    int width, int height, int border);
   int vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf);
 
 #ifdef __cplusplus
