@@ -495,7 +495,7 @@ static const int cospi_29_64 = 2404;
 static const int cospi_30_64 = 1606;
 static const int cospi_31_64 = 804;
 
-static inline int dct_const_round_shift(int input) {
+static INLINE int dct_const_round_shift(int input) {
   int rv = (input + DCT_CONST_ROUNDING) >> DCT_CONST_BITS;
   assert((rv <= INT16_MAX) && (rv >= INT16_MIN));
   return rv;

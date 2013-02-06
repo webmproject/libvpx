@@ -871,8 +871,8 @@ void vp9_mbloop_filter_horizontal_edge_uv_sse2(unsigned char *u,
                    _mm_loadl_epi64((__m128i *)(src + 120)));
 }
 
-static __inline void transpose8x16(unsigned char *in0, unsigned char *in1,
-                                   int in_p, unsigned char *out, int out_p) {
+static INLINE void transpose8x16(unsigned char *in0, unsigned char *in1,
+                                 int in_p, unsigned char *out, int out_p) {
   __m128i x0, x1, x2, x3, x4, x5, x6, x7;
   __m128i x8, x9, x10, x11, x12, x13, x14, x15;
 
@@ -937,9 +937,9 @@ static __inline void transpose8x16(unsigned char *in0, unsigned char *in1,
   _mm_storeu_si128((__m128i *)(out + 7 * out_p), _mm_unpackhi_epi64(x7, x15));
 }
 
-static __inline void transpose(unsigned char *src[], int in_p,
-                               unsigned char *dst[], int out_p,
-                               int num_8x8_to_transpose) {
+static INLINE void transpose(unsigned char *src[], int in_p,
+                             unsigned char *dst[], int out_p,
+                             int num_8x8_to_transpose) {
   int idx8x8 = 0;
   __m128i x0, x1, x2, x3, x4, x5, x6, x7;
   do {

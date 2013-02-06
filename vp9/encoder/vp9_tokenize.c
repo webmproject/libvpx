@@ -714,13 +714,13 @@ void vp9_tokenize_initialize() {
   fill_value_tokens();
 }
 
-static __inline void stuff_b(VP9_COMP *cpi,
-                             MACROBLOCKD *xd,
-                             const int ib,
-                             TOKENEXTRA **tp,
-                             PLANE_TYPE type,
-                             TX_SIZE tx_size,
-                             int dry_run) {
+static INLINE void stuff_b(VP9_COMP *cpi,
+                           MACROBLOCKD *xd,
+                           const int ib,
+                           TOKENEXTRA **tp,
+                           PLANE_TYPE type,
+                           TX_SIZE tx_size,
+                           int dry_run) {
   const BLOCKD * const b = xd->block + ib;
   const int *bands;
   vp9_coeff_count *counts;

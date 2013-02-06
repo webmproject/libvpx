@@ -13,7 +13,7 @@
 #include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
-static __inline int8_t signed_char_clamp(int t) {
+static INLINE int8_t signed_char_clamp(int t) {
   t = (t < -128 ? -128 : t);
   t = (t > 127 ? 127 : t);
   return (int8_t) t;
@@ -21,11 +21,11 @@ static __inline int8_t signed_char_clamp(int t) {
 
 
 /* should we apply any filter at all ( 11111111 yes, 00000000 no) */
-static __inline int8_t filter_mask(uint8_t limit, uint8_t blimit,
-                                   uint8_t p3, uint8_t p2,
-                                   uint8_t p1, uint8_t p0,
-                                   uint8_t q0, uint8_t q1,
-                                   uint8_t q2, uint8_t q3) {
+static INLINE int8_t filter_mask(uint8_t limit, uint8_t blimit,
+                                 uint8_t p3, uint8_t p2,
+                                 uint8_t p1, uint8_t p0,
+                                 uint8_t q0, uint8_t q1,
+                                 uint8_t q2, uint8_t q3) {
   int8_t mask = 0;
   mask |= (abs(p3 - p2) > limit) * -1;
   mask |= (abs(p2 - p1) > limit) * -1;
@@ -39,16 +39,16 @@ static __inline int8_t filter_mask(uint8_t limit, uint8_t blimit,
 }
 
 /* is there high variance internal edge ( 11111111 yes, 00000000 no) */
-static __inline int8_t hevmask(uint8_t thresh, uint8_t p1, uint8_t p0,
-                               uint8_t q0, uint8_t q1) {
+static INLINE int8_t hevmask(uint8_t thresh, uint8_t p1, uint8_t p0,
+                             uint8_t q0, uint8_t q1) {
   int8_t hev = 0;
   hev  |= (abs(p1 - p0) > thresh) * -1;
   hev  |= (abs(q1 - q0) > thresh) * -1;
   return hev;
 }
 
-static __inline void filter(int8_t mask, uint8_t hev, uint8_t *op1,
-                            uint8_t *op0, uint8_t *oq0, uint8_t *oq1) {
+static INLINE void filter(int8_t mask, uint8_t hev, uint8_t *op1,
+                          uint8_t *op0, uint8_t *oq0, uint8_t *oq1) {
   int8_t ps0, qs0;
   int8_t ps1, qs1;
   int8_t filter, Filter1, Filter2;
@@ -143,11 +143,11 @@ void vp9_loop_filter_vertical_edge_c(uint8_t *s,
     s += p;
   } while (++i < count * 8);
 }
-static __inline signed char flatmask4(uint8_t thresh,
-                                      uint8_t p3, uint8_t p2,
-                                      uint8_t p1, uint8_t p0,
-                                      uint8_t q0, uint8_t q1,
-                                      uint8_t q2, uint8_t q3) {
+static INLINE signed char flatmask4(uint8_t thresh,
+                                    uint8_t p3, uint8_t p2,
+                                    uint8_t p1, uint8_t p0,
+                                    uint8_t q0, uint8_t q1,
+                                    uint8_t q2, uint8_t q3) {
   int8_t flat = 0;
   flat |= (abs(p1 - p0) > thresh) * -1;
   flat |= (abs(q1 - q0) > thresh) * -1;
@@ -158,11 +158,11 @@ static __inline signed char flatmask4(uint8_t thresh,
   flat = ~flat;
   return flat;
 }
-static __inline signed char flatmask5(uint8_t thresh,
-                                      uint8_t p4, uint8_t p3, uint8_t p2,
-                                      uint8_t p1, uint8_t p0,
-                                      uint8_t q0, uint8_t q1, uint8_t q2,
-                                      uint8_t q3, uint8_t q4) {
+static INLINE signed char flatmask5(uint8_t thresh,
+                                    uint8_t p4, uint8_t p3, uint8_t p2,
+                                    uint8_t p1, uint8_t p0,
+                                    uint8_t q0, uint8_t q1, uint8_t q2,
+                                    uint8_t q3, uint8_t q4) {
   int8_t flat = 0;
   flat |= (abs(p4 - p0) > thresh) * -1;
   flat |= (abs(q4 - q0) > thresh) * -1;
@@ -171,11 +171,11 @@ static __inline signed char flatmask5(uint8_t thresh,
 }
 
 
-static __inline void mbfilter(int8_t mask, uint8_t hev, uint8_t flat,
-                              uint8_t *op3, uint8_t *op2,
-                              uint8_t *op1, uint8_t *op0,
-                              uint8_t *oq0, uint8_t *oq1,
-                              uint8_t *oq2, uint8_t *oq3) {
+static INLINE void mbfilter(int8_t mask, uint8_t hev, uint8_t flat,
+                            uint8_t *op3, uint8_t *op2,
+                            uint8_t *op1, uint8_t *op0,
+                            uint8_t *oq0, uint8_t *oq1,
+                            uint8_t *oq2, uint8_t *oq3) {
   /* use a 7 tap filter [1, 1, 1, 2, 1, 1, 1] for flat line */
   if (flat && mask) {
     uint8_t p0, q0;
@@ -301,9 +301,9 @@ void vp9_mbloop_filter_vertical_edge_c(uint8_t *s,
 }
 
 /* should we apply any filter at all ( 11111111 yes, 00000000 no) */
-static __inline int8_t simple_filter_mask(uint8_t blimit,
-                                          uint8_t p1, uint8_t p0,
-                                          uint8_t q0, uint8_t q1) {
+static INLINE int8_t simple_filter_mask(uint8_t blimit,
+                                        uint8_t p1, uint8_t p0,
+                                        uint8_t q0, uint8_t q1) {
   /* Why does this cause problems for win32?
    * error C2143: syntax error : missing ';' before 'type'
    *  (void) limit;
@@ -312,9 +312,9 @@ static __inline int8_t simple_filter_mask(uint8_t blimit,
   return mask;
 }
 
-static __inline void simple_filter(int8_t mask,
-                                   uint8_t *op1, uint8_t *op0,
-                                   uint8_t *oq0, uint8_t *oq1) {
+static INLINE void simple_filter(int8_t mask,
+                                 uint8_t *op1, uint8_t *op0,
+                                 uint8_t *oq0, uint8_t *oq1) {
   int8_t filter, Filter1, Filter2;
   int8_t p1 = (int8_t) *op1 ^ 0x80;
   int8_t p0 = (int8_t) *op0 ^ 0x80;
@@ -487,14 +487,14 @@ void vp9_loop_filter_bvs_c(uint8_t *y_ptr, int y_stride,
   vp9_loop_filter_simple_vertical_edge_c(y_ptr + 12, y_stride, blimit);
 }
 
-static __inline void wide_mbfilter(int8_t mask, uint8_t hev,
-                                   uint8_t flat, uint8_t flat2,
-                                   uint8_t *op7, uint8_t *op6, uint8_t *op5,
-                                   uint8_t *op4, uint8_t *op3, uint8_t *op2,
-                                   uint8_t *op1, uint8_t *op0, uint8_t *oq0,
-                                   uint8_t *oq1, uint8_t *oq2, uint8_t *oq3,
-                                   uint8_t *oq4, uint8_t *oq5, uint8_t *oq6,
-                                   uint8_t *oq7) {
+static INLINE void wide_mbfilter(int8_t mask, uint8_t hev,
+                                 uint8_t flat, uint8_t flat2,
+                                 uint8_t *op7, uint8_t *op6, uint8_t *op5,
+                                 uint8_t *op4, uint8_t *op3, uint8_t *op2,
+                                 uint8_t *op1, uint8_t *op0, uint8_t *oq0,
+                                 uint8_t *oq1, uint8_t *oq2, uint8_t *oq3,
+                                 uint8_t *oq4, uint8_t *oq5, uint8_t *oq6,
+                                 uint8_t *oq7) {
   /* use a 15 tap filter [1,1,1,1,1,1,1,2,1,1,1,1,1,1,1] for flat line */
   if (flat2 && flat && mask) {
     uint8_t p0, q0;

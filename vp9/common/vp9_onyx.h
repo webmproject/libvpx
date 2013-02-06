@@ -16,6 +16,7 @@ extern "C"
 {
 #endif
 
+#include "./vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vp8cx.h"
 #include "vpx_scale/yv12config.h"
@@ -62,7 +63,7 @@ extern "C"
 
 
 #include <assert.h>
-  static __inline void Scale2Ratio(int mode, int *hr, int *hs) {
+  static INLINE void Scale2Ratio(int mode, int *hr, int *hs) {
     switch (mode) {
       case    NORMAL:
         *hr = 1;

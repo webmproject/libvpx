@@ -42,7 +42,7 @@
 
 #define vp9_zero_array(Dest, N) vpx_memset(Dest, 0, N * sizeof(*Dest));
 
-static __inline uint8_t clip_pixel(int val) {
+static INLINE uint8_t clip_pixel(int val) {
   return (val > 255) ? 255u : (val < 0) ? 0u : val;
 }
 

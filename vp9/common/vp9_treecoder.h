@@ -11,6 +11,7 @@
 #ifndef VP9_COMMON_VP9_TREECODER_H_
 #define VP9_COMMON_VP9_TREECODER_H_
 
+#include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 
 typedef uint8_t vp9_prob;
@@ -53,20 +54,20 @@ void vp9_tree_probs_from_distribution(int n,  /* n = size of alphabet */
                                       unsigned int branch_ct[ /* n - 1 */ ][2],
                                       const unsigned int num_events[ /* n */ ]);
 
-static __inline vp9_prob clip_prob(int p) {
+static INLINE vp9_prob clip_prob(int p) {
   return (p > 255) ? 255u : (p < 1) ? 1u : p;
 }
 
-static __inline vp9_prob get_prob(int num, int den) {
+static INLINE vp9_prob get_prob(int num, int den) {
   return (den == 0) ? 128u : clip_prob((num * 256 + (den >> 1)) / den);
 }
 
-static __inline vp9_prob get_binary_prob(int n0, int n1) {
+static INLINE vp9_prob get_binary_prob(int n0, int n1) {
   return get_prob(n0, n0 + n1);
 }
 
 /* this function assumes prob1 and prob2 are already within [1,255] range */
-static __inline vp9_prob weighted_prob(int prob1, int prob2, int factor) {
+static INLINE vp9_prob weighted_prob(int prob1, int prob2, int factor) {
   return (prob1 * (256 - factor) + prob2 * factor + 128) >> 8;
 }
 

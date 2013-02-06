@@ -2368,8 +2368,7 @@ typedef struct {
 
 } BEST_SEG_INFO;
 
-static __inline
-int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
+static INLINE int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
   int r = 0;
   r |= (mv->as_mv.row >> 3) < x->mv_row_min;
   r |= (mv->as_mv.row >> 3) > x->mv_row_max;
@@ -2744,7 +2743,7 @@ static void rd_check_segment(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-static __inline void cal_step_param(int sr, int *sp) {
+static INLINE void cal_step_param(int sr, int *sp) {
   int step = 0;
 
   if (sr > MAX_FIRST_STEP) sr = MAX_FIRST_STEP;
@@ -3011,7 +3010,8 @@ static void estimate_curframe_refprobs(VP9_COMP *cpi, vp9_prob mod_refprobs[3], 
   }
 }
 
-static __inline unsigned weighted_cost(vp9_prob *tab0, vp9_prob *tab1, int idx, int val, int weight) {
+static INLINE unsigned weighted_cost(vp9_prob *tab0, vp9_prob *tab1,
+                                     int idx, int val, int weight) {
   unsigned cost0 = tab0[idx] ? vp9_cost_bit(tab0[idx], val) : 0;
   unsigned cost1 = tab1[idx] ? vp9_cost_bit(tab1[idx], val) : 0;
   // weight is 16-bit fixed point, so this basically calculates:

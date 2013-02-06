@@ -460,6 +460,7 @@ write_common_target_config_h() {
 #ifndef VPX_CONFIG_H
 #define VPX_CONFIG_H
 #define RESTRICT    ${RESTRICT}
+#define INLINE      ${INLINE}
 EOF
     print_config_h ARCH   "${TMP_H}" ${ARCH_LIST}
     print_config_h HAVE   "${TMP_H}" ${HAVE_LIST}
@@ -1159,6 +1160,14 @@ EOF
 EOF
     [ -f "${TMP_O}" ] && od -A n -t x1 "${TMP_O}" | tr -d '\n' |
         grep '4f *32 *42 *45' >/dev/null 2>&1 && enable big_endian
+
+    # Try to find which inline keywords are supported
+    check_cc <<EOF && INLINE="inline"
+    static inline function() {}
+EOF
+    check_cc <<EOF && INLINE="__attribute__((always_inline))"
+    static __attribute__((always_inline)) function() {}
+EOF
 
     # Almost every platform uses pthreads.
     if enabled multithread; then
