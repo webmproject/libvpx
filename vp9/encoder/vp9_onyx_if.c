@@ -4205,15 +4205,16 @@ int vp9_set_internal_size(VP9_PTR comp,
   VP9_COMP *cpi = (VP9_COMP *) comp;
 
   if (horiz_mode <= ONETWO)
-    cpi->common.horiz_scale = horiz_mode;
+    cpi->horiz_scale = horiz_mode;
   else
     return -1;
 
   if (vert_mode <= ONETWO)
-    cpi->common.vert_scale  = vert_mode;
+    cpi->vert_scale = vert_mode;
   else
     return -1;
 
+  vp9_change_config(comp, &cpi->oxcf);
   return 0;
 }
 

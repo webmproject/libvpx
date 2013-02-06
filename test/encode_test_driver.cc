@@ -201,6 +201,8 @@ void EncoderTest::RunLoop(VideoSource *video) {
             MismatchHook(img_enc, img_dec);
           }
         }
+        if (img_dec)
+          DecompressedFrameHook(*img_dec, video->pts());
       }
       if (!Continue())
         break;
