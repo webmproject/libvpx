@@ -1367,9 +1367,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     vp9_setup_version(pc);
 
     if (pc->frame_type == KEY_FRAME) {
-      const int Width = pc->Width;
-      const int Height = pc->Height;
-
       /* vet via sync code */
       /* When error concealment is enabled we should only check the sync
        * code if we have enough bits available
@@ -1379,18 +1376,23 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
           vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
                              "Invalid frame sync code");
       }
+      data += 3;
+    }
+    {
+      const int Width = pc->Width;
+      const int Height = pc->Height;
 
       /* If error concealment is enabled we should only parse the new size
        * if we have enough data. Otherwise we will end up with the wrong
        * size.
        */
-      if (data + 6 < data_end) {
-        pc->Width = (data[3] | (data[4] << 8)) & 0x3fff;
-        pc->horiz_scale = data[4] >> 6;
-        pc->Height = (data[5] | (data[6] << 8)) & 0x3fff;
-        pc->vert_scale = data[6] >> 6;
+      if (data + 4 < data_end) {
+        pc->Width = (data[0] | (data[1] << 8)) & 0x3fff;
+        pc->horiz_scale = data[1] >> 6;
+        pc->Height = (data[2] | (data[3] << 8)) & 0x3fff;
+        pc->vert_scale = data[3] >> 6;
       }
-      data += 7;
+      data += 4;
 
       if (Width != pc->Width  ||  Height != pc->Height) {
         if (pc->Width <= 0) {
@@ -1423,10 +1425,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
                        (unsigned int)first_partition_length_in_bytes))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
-  if (pc->frame_type == KEY_FRAME) {
-    pc->clr_type    = (YUV_TYPE)vp9_read_bit(&header_bc);
-    pc->clamp_type  = (CLAMP_TYPE)vp9_read_bit(&header_bc);
-  }
+  pc->clr_type    = (YUV_TYPE)vp9_read_bit(&header_bc);
+  pc->clamp_type  = (CLAMP_TYPE)vp9_read_bit(&header_bc);
 
   pc->error_resilient_mode = vp9_read_bit(&header_bc);
   /* Is segmentation enabled */

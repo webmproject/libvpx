@@ -3995,6 +3995,23 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                                 cm->mb_cols * 16, cm->mb_rows * 16,
                                 VP9BORDERINPIXELS);
 
+  /* Disable any references that have different size */
+  if ((cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].y_width !=
+       cm->yv12_fb[cm->new_fb_idx].y_width) ||
+      (cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].y_height !=
+       cm->yv12_fb[cm->new_fb_idx].y_height))
+    cpi->ref_frame_flags &= ~VP9_LAST_FLAG;
+  if ((cm->yv12_fb[cm->active_ref_idx[cpi->gld_fb_idx]].y_width !=
+       cm->yv12_fb[cm->new_fb_idx].y_width) ||
+      (cm->yv12_fb[cm->active_ref_idx[cpi->gld_fb_idx]].y_height !=
+       cm->yv12_fb[cm->new_fb_idx].y_height))
+    cpi->ref_frame_flags &= ~VP9_GOLD_FLAG;
+  if ((cm->yv12_fb[cm->active_ref_idx[cpi->alt_fb_idx]].y_width !=
+       cm->yv12_fb[cm->new_fb_idx].y_width) ||
+      (cm->yv12_fb[cm->active_ref_idx[cpi->alt_fb_idx]].y_height !=
+       cm->yv12_fb[cm->new_fb_idx].y_height))
+    cpi->ref_frame_flags &= ~VP9_ALT_FLAG;
+
   vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);
   if (cpi->pass == 1) {
     Pass1Encode(cpi, size, dest, frame_flags);

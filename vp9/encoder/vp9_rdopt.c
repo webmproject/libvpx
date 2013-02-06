@@ -3510,6 +3510,8 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                int recon_yoffset, int recon_uvoffset,
                                int *returnrate, int *returndistortion,
                                int64_t *returnintra) {
+  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
+                                    VP9_ALT_FLAG };
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   union b_mode_info best_bmodes[16];
@@ -3676,6 +3678,16 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     // Test best rd so far against threshold for trying this mode.
     if (best_rd <= cpi->rd_threshes[mode_index])
       continue;
+
+    // Ensure that the references used by this mode are available.
+    if (mbmi->ref_frame &&
+        !(cpi->ref_frame_flags & flag_list[mbmi->ref_frame]))
+      continue;
+
+    if (mbmi->second_ref_frame > 0 &&
+        !(cpi->ref_frame_flags & flag_list[mbmi->second_ref_frame]))
+      continue;
+
 
     // current coding mode under rate-distortion optimization test loop
 #if CONFIG_COMP_INTERINTRA_PRED
