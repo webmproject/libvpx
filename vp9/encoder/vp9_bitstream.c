@@ -2088,10 +2088,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
     *size += total_size;
   }
-
-  if (pc->frame_type != KEY_FRAME && !cpi->common.error_resilient_mode) {
-    vp9_adapt_mode_context(&cpi->common);
-  }
 }
 
 #ifdef ENTROPY_STATS
