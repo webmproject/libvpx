@@ -23,6 +23,7 @@
 #include "vp9/common/vp9_extend.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/common/vp9_quant_common.h"
+#include "vp9/common/vp9_tile_common.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
@@ -949,7 +950,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
-
   vpx_free(cpi->tok);
 
   {
@@ -1107,6 +1107,17 @@ rescale(int val, int num, int denom) {
   return (int)(llval * llnum / llden);
 }
 
+static void set_tile_limits(VP9_COMMON *cm) {
+  int min_log2_tiles, max_log2_tiles;
+
+  vp9_get_tile_n_bits(cm, &min_log2_tiles, &max_log2_tiles);
+  max_log2_tiles += min_log2_tiles;
+  if (cm->log2_tile_columns < min_log2_tiles)
+    cm->log2_tile_columns = min_log2_tiles;
+  else if (cm->log2_tile_columns > max_log2_tiles)
+    cm->log2_tile_columns = max_log2_tiles;
+  cm->tile_columns = 1 << cm->log2_tile_columns;
+}
 
 static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   VP9_COMP *cpi = (VP9_COMP *)(ptr);
@@ -1145,7 +1156,8 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->gld_fb_idx = 1;
   cpi->alt_fb_idx = 2;
 
-  cm->tile_columns = 1 << cpi->oxcf.tile_columns;
+  cm->log2_tile_columns = cpi->oxcf.tile_columns;
+  set_tile_limits(cm);
 
 #if VP9_TEMPORAL_ALT_REF
   {
@@ -1372,7 +1384,8 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->last_frame_distortion = 0;
 #endif
 
-  cm->tile_columns = 1 << cpi->oxcf.tile_columns;
+  cm->log2_tile_columns = cpi->oxcf.tile_columns;
+  set_tile_limits(cm);
 }
 
 #define M_LOG2_E 0.693147180559945309417

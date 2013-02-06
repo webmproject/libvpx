@@ -256,19 +256,6 @@ typedef enum {
 } vp8e_token_partitions;
 
 
-/*!\brief VP8 tile column mode
- *
- * This defines VP9 tiling mode for compressed data, i.e., the number of
- * sub-streams in the bitstream. Used for parallelized encoding/decoding.
- *
- */
-
-typedef enum {
-  VP8_ONE_TILE_COLUMN   = 0,
-  VP8_TWO_TILE_COLUMNS  = 1,
-  VP8_FOUR_TILE_COLUMNS = 2
-} vp8e_tile_column_mode;
-
 /*!\brief VP8 model tuning parameters
  *
  * Changes the encoder to tune for certain types of input material.

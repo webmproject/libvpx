@@ -54,7 +54,7 @@ static const struct extraconfig_map extracfg_map[] = {
       0,                          /* noise_sensitivity */
       0,                          /* Sharpness */
       0,                          /* static_thresh */
-      VP8_ONE_TILE_COLUMN,        /* tile_columns */
+      0,                          /* tile_columns */
       0,                          /* arnr_max_frames */
       3,                          /* arnr_strength */
       3,                          /* arnr_type*/
@@ -171,8 +171,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
   RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
 
-  RANGE_CHECK(vp8_cfg, tile_columns,
-              VP8_ONE_TILE_COLUMN, VP8_FOUR_TILE_COLUMNS);
+  RANGE_CHECK(vp8_cfg, tile_columns, 0, 6);
   RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
   RANGE_CHECK(vp8_cfg, arnr_max_frames, 0, 15);
   RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);

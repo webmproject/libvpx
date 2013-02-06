@@ -279,7 +279,7 @@ typedef struct VP9Common {
   int error_resilient_mode;
   int frame_parallel_decoding_mode;
 
-  int tile_columns;
+  int tile_columns, log2_tile_columns;
   int cur_tile_mb_col_start, cur_tile_mb_col_end, cur_tile_idx;
 } VP9_COMMON;
 

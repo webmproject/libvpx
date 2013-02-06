@@ -14,6 +14,7 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_findnearmv.h"
+#include "vp9/common/vp9_tile_common.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include <assert.h>
@@ -2026,9 +2027,19 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   }
 
   /* tiling */
-  vp9_write(&header_bc, pc->tile_columns > 1, 128);
-  if (pc->tile_columns > 1) {
-    vp9_write(&header_bc, pc->tile_columns > 2, 128);
+  {
+    int min_log2_tiles, delta_log2_tiles, n_tile_bits, n;
+
+    vp9_get_tile_n_bits(pc, &min_log2_tiles, &delta_log2_tiles);
+    n_tile_bits = pc->log2_tile_columns - min_log2_tiles;
+    for (n = 0; n < delta_log2_tiles; n++) {
+      if (n_tile_bits--) {
+        vp9_write_bit(&header_bc, 1);
+      } else {
+        vp9_write_bit(&header_bc, 0);
+        break;
+      }
+    }
   }
 
   vp9_stop_encode(&header_bc);
@@ -2058,21 +2069,14 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   }
 
   {
-    int mb_start = 0, tile;
-    int total_size = 0;
+    int tile, total_size = 0;
     unsigned char *data_ptr = cx_data + header_bc.pos;
     TOKENEXTRA *tok = cpi->tok;
 
     for (tile = 0; tile < pc->tile_columns; tile++) {
-      // calculate end of tile column
-      const int sb_cols = (pc->mb_cols + 3) >> 2;
-      const int sb_end = (sb_cols * (tile + 1)) >> cpi->oxcf.tile_columns;
-      const int mb_end = ((sb_end << 2) > pc->mb_cols) ?
-                          pc->mb_cols : (sb_end << 2);
-
       pc->cur_tile_idx = tile;
-      pc->cur_tile_mb_col_start = mb_start;
-      pc->cur_tile_mb_col_end = mb_end;
+      vp9_get_tile_offsets(pc, &pc->cur_tile_mb_col_start,
+                           &pc->cur_tile_mb_col_end);
 
       if (tile < pc->tile_columns - 1)
         vp9_start_encode(&residual_bc, data_ptr + total_size + 4);
@@ -2089,7 +2093,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
         total_size += 4;
       }
 
-      mb_start = mb_end;
       total_size += residual_bc.pos;
     }
 

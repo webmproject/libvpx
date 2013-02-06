@@ -31,6 +31,7 @@
 #include "vp9/decoder/vp9_dboolhuff.h"
 
 #include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_tile_common.h"
 #include "vp9_rtcd.h"
 
 #include <assert.h>
@@ -1769,15 +1770,18 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   /* tile info */
   {
-    int log2_tile_cols;
     const unsigned char *data_ptr = data + first_partition_length_in_bytes;
-    int tile, mb_start, mb_end;
+    int tile, delta_log2_tiles;
 
-    log2_tile_cols = vp9_read_bit(&header_bc);
-    if (log2_tile_cols) {
-      log2_tile_cols += vp9_read_bit(&header_bc);
+    vp9_get_tile_n_bits(pc, &pc->log2_tile_columns, &delta_log2_tiles);
+    while (delta_log2_tiles--) {
+      if (vp9_read_bit(&header_bc)) {
+        pc->log2_tile_columns++;
+      } else {
+        break;
+      }
     }
-    pc->tile_columns = 1 << log2_tile_cols;
+    pc->tile_columns = 1 << pc->log2_tile_columns;
 
     vpx_memset(pc->above_context, 0,
                sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
@@ -1793,39 +1797,25 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
         data_ptr2[tile - 1] += 4;
         data_ptr2[tile] = data_ptr2[tile - 1] + size;
       }
-      for (mb_end = pc->mb_cols, tile = pc->tile_columns - 1;
-           tile >= 0; tile--) {
-        // calculate end of tile column
-        const int sb_cols = (pc->mb_cols + 3) >> 2;
-        const int sb_start = (sb_cols * tile) >> log2_tile_cols;
-        mb_start = ((sb_start << 2) > pc->mb_cols) ?
-                    pc->mb_cols : (sb_start << 2);
-
+      for (tile = pc->tile_columns - 1; tile >= 0; tile--) {
         pc->cur_tile_idx = tile;
-        pc->cur_tile_mb_col_start = mb_start;
-        pc->cur_tile_mb_col_end   = mb_end;
-
+        vp9_get_tile_offsets(pc, &pc->cur_tile_mb_col_start,
+                             &pc->cur_tile_mb_col_end);
         setup_token_decoder(pbi, data_ptr2[tile], &residual_bc);
 
         /* Decode a row of superblocks */
         for (mb_row = 0; mb_row < pc->mb_rows; mb_row += 4) {
           decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
         }
-        mb_end = mb_start;
         if (tile == pc->tile_columns - 1)
           bc_bak = residual_bc;
       }
       residual_bc = bc_bak;
     } else {
-      for (mb_start = 0, tile = 0; tile < pc->tile_columns; tile++) {
-        // calculate end of tile column
-        const int sb_cols = (pc->mb_cols + 3) >> 2;
-        const int sb_end = (sb_cols * (tile + 1)) >> log2_tile_cols;
-        mb_end = ((sb_end << 2) > pc->mb_cols) ? pc->mb_cols : (sb_end << 2);
-
+      for (tile = 0; tile < pc->tile_columns; tile++) {
         pc->cur_tile_idx = tile;
-        pc->cur_tile_mb_col_start = mb_start;
-        pc->cur_tile_mb_col_end   = mb_end;
+        vp9_get_tile_offsets(pc, &pc->cur_tile_mb_col_start,
+                             &pc->cur_tile_mb_col_end);
 
         if (tile < pc->tile_columns - 1)
           setup_token_decoder(pbi, data_ptr + 4, &residual_bc);
@@ -1836,7 +1826,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
         for (mb_row = 0; mb_row < pc->mb_rows; mb_row += 4) {
           decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
         }
-        mb_start = mb_end;
         if (tile < pc->tile_columns - 1) {
           int size = data_ptr[0] + (data_ptr[1] << 8) + (data_ptr[2] << 16) +
                     (data_ptr[3] << 24);

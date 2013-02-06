@@ -29,8 +29,8 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
       md5_fw_order_(), md5_inv_order_() {
     init_flags_ = VPX_CODEC_USE_PSNR;
     vpx_codec_dec_cfg_t cfg;
-    cfg.w = 352;
-    cfg.h = 288;
+    cfg.w = 704;
+    cfg.h = 144;
     cfg.threads = 1;
     cfg.inv_tile_order = 0;
     fw_dec_ = codec_->CreateDecoder(cfg, 0);
@@ -83,7 +83,7 @@ TEST_P(TileIndependenceTest, MD5Match) {
   cfg_.g_lag_in_frames = 25;
   cfg_.rc_end_usage = VPX_VBR;
 
-  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 144,
                                      timebase.den, timebase.num, 0, 30);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
@@ -97,7 +97,6 @@ TEST_P(TileIndependenceTest, MD5Match) {
 }
 
 VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest,
-                          ::testing::Values(VP8_TWO_TILE_COLUMNS,
-                                            VP8_FOUR_TILE_COLUMNS));
+                          ::testing::Range(0, 2, 1));
 
 }  // namespace

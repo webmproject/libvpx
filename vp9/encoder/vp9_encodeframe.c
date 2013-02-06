@@ -28,6 +28,7 @@
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_tile_common.h"
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9_rtcd.h"
 #include <stdio.h>
@@ -1312,23 +1313,16 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
     {
       // Take tiles into account and give start/end MB
-      int tile, mb_start = 0;
+      int tile;
 
       for (tile = 0; tile < cm->tile_columns; tile++) {
-        // calculate end of tile column
-        const int sb_cols = (cm->mb_cols + 3) >> 2;
-        const int sb_end = (sb_cols * (tile + 1)) >> cpi->oxcf.tile_columns;
-        const int mb_end = ((sb_end << 2) > cm->mb_cols) ?
-                            cm->mb_cols : (sb_end << 2);
-
         // For each row of SBs in the frame
         cm->cur_tile_idx = tile;
-        cm->cur_tile_mb_col_start = mb_start;
-        cm->cur_tile_mb_col_end = mb_end;
+        vp9_get_tile_offsets(cm, &cm->cur_tile_mb_col_start,
+                             &cm->cur_tile_mb_col_end);
         for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4) {
           encode_sb_row(cpi, mb_row, &tp, &totalrate);
         }
-        mb_start = mb_end;
       }
 
       cpi->tok_count = (unsigned int)(tp - cpi->tok);
