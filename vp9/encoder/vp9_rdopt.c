@@ -424,11 +424,11 @@ int vp9_uvsse(MACROBLOCK *x) {
 #else
 #define PT pt
 #endif
-static int cost_coeffs(MACROBLOCK *mb,
-                       BLOCKD *b, PLANE_TYPE type,
-                       ENTROPY_CONTEXT *a,
-                       ENTROPY_CONTEXT *l,
-                       TX_SIZE tx_size) {
+static INLINE int cost_coeffs(MACROBLOCK *mb,
+                              BLOCKD *b, PLANE_TYPE type,
+                              ENTROPY_CONTEXT *a,
+                              ENTROPY_CONTEXT *l,
+                              TX_SIZE tx_size) {
   int pt;
   const int eob = b->eob;
   MACROBLOCKD *xd = &mb->e_mbd;
@@ -440,6 +440,9 @@ static int cost_coeffs(MACROBLOCK *mb,
   int16_t *qcoeff_ptr = b->qcoeff;
   const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
                           get_tx_type(xd, b) : DCT_DCT;
+  unsigned int (*token_costs)[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
+      (tx_type == DCT_DCT) ? mb->token_costs[tx_size][type] :
+                             mb->hybrid_token_costs[tx_size][type];
 #if CONFIG_NEWCOEFCONTEXT
   const int *neighbors;
   int pn;
@@ -504,7 +507,7 @@ static int cost_coeffs(MACROBLOCK *mb,
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
-      cost += mb->hybrid_token_costs[tx_size][type][band[c]][PT][t];
+      cost += token_costs[band[c]][PT][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_prev_token_class[t];
 #if CONFIG_NEWCOEFCONTEXT
@@ -522,7 +525,7 @@ static int cost_coeffs(MACROBLOCK *mb,
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
-      cost += mb->token_costs[tx_size][type][band[c]][pt][t];
+      cost += token_costs[band[c]][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_prev_token_class[t];
 #if CONFIG_NEWCOEFCONTEXT
