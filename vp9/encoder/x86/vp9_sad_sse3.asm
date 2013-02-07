@@ -582,60 +582,6 @@ sym(vp9_sad4x4x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;unsigned int vp9_sad16x16_sse3(
-;    unsigned char *src_ptr,
-;    int  src_stride,
-;    unsigned char *ref_ptr,
-;    int  ref_stride,
-;    int  max_err)
-;%define lddqu movdqu
-global sym(vp9_sad16x16_sse3) PRIVATE
-sym(vp9_sad16x16_sse3):
-
-    STACK_FRAME_CREATE_X3
-
-        mov             end_ptr,    4
-        pxor            xmm7,        xmm7
-
-.vp9_sad16x16_sse3_loop:
-        movdqa          xmm0,       XMMWORD PTR [src_ptr]
-        movdqu          xmm1,       XMMWORD PTR [ref_ptr]
-        movdqa          xmm2,       XMMWORD PTR [src_ptr+src_stride]
-        movdqu          xmm3,       XMMWORD PTR [ref_ptr+ref_stride]
-
-        lea             src_ptr,    [src_ptr+src_stride*2]
-        lea             ref_ptr,    [ref_ptr+ref_stride*2]
-
-        movdqa          xmm4,       XMMWORD PTR [src_ptr]
-        movdqu          xmm5,       XMMWORD PTR [ref_ptr]
-        movdqa          xmm6,       XMMWORD PTR [src_ptr+src_stride]
-
-        psadbw          xmm0,       xmm1
-
-        movdqu          xmm1,       XMMWORD PTR [ref_ptr+ref_stride]
-
-        psadbw          xmm2,       xmm3
-        psadbw          xmm4,       xmm5
-        psadbw          xmm6,       xmm1
-
-        lea             src_ptr,    [src_ptr+src_stride*2]
-        lea             ref_ptr,    [ref_ptr+ref_stride*2]
-
-        paddw           xmm7,        xmm0
-        paddw           xmm7,        xmm2
-        paddw           xmm7,        xmm4
-        paddw           xmm7,        xmm6
-
-        sub             end_ptr,     1
-        jne             .vp9_sad16x16_sse3_loop
-
-        movq            xmm0,       xmm7
-        psrldq          xmm7,       8
-        paddw           xmm0,       xmm7
-        movq            rax,        xmm0
-
-    STACK_FRAME_DESTROY_X3
-
 ;void vp9_copy32xn_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
