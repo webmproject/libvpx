@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//pSs\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-02-07T18:35:07Z",
+      "side": 1,
+      "message": "these \u0027-\u0027 could be integrated higher.\n\nFor instance, instead of using -x2 here, you could have\nline 755 replaced by:\n\ns2 \u003d (-cospi_16_64) * (x2 + x3);\n\nthe main difference would be at line 760, because\n-round(x) is not equal to round(-x).\n\nBut i\u0027d say that in this case, round(-x) might be more precise than -round(x).\n\nAnd same for x4/x7/x1 etc...\nSomething to keep an eye on, since this code will be the spec.",
+      "revId": "d15e1da4940f813311035c3ed101a9c69f15b527",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//pSo\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-02-07T18:35:07Z",
+      "side": 1,
+      "message": "eventually, this \u003e\u003e5 should be integrated in the various invc functions directly, to potentially provide more precise rounding.",
+      "revId": "d15e1da4940f813311035c3ed101a9c69f15b527",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
