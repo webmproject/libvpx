@@ -323,9 +323,7 @@ typedef struct macroblockd {
   int fullpixel_mask;
 
   YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
-  struct {
-    uint8_t *y_buffer, *u_buffer, *v_buffer;
-  } second_pre;
+  YV12_BUFFER_CONFIG second_pre;
   YV12_BUFFER_CONFIG dst;
 
   MODE_INFO *prev_mode_info_context;
