@@ -280,7 +280,9 @@ typedef struct VP9Common {
   int frame_parallel_decoding_mode;
 
   int tile_columns, log2_tile_columns;
-  int cur_tile_mb_col_start, cur_tile_mb_col_end, cur_tile_idx;
+  int cur_tile_mb_col_start, cur_tile_mb_col_end, cur_tile_col_idx;
+  int tile_rows, log2_tile_rows;
+  int cur_tile_mb_row_start, cur_tile_mb_row_end, cur_tile_row_idx;
 } VP9_COMMON;
 
 static int get_free_fb(VP9_COMMON *cm) {

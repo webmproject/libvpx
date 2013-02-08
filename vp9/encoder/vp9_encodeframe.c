@@ -1231,8 +1231,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
-
-  TOKENEXTRA *tp = cpi->tok;
   int totalrate;
 
   // printf("encode_frame_internal frame %d (%d)\n",
@@ -1313,19 +1311,19 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
     {
       // Take tiles into account and give start/end MB
-      int tile;
+      int tile_col;
+      TOKENEXTRA *tp = cpi->tok;
 
-      for (tile = 0; tile < cm->tile_columns; tile++) {
+      for (tile_col = 0; tile_col < cm->tile_columns; tile_col++) {
+        TOKENEXTRA *tp_old = tp;
+
         // For each row of SBs in the frame
-        cm->cur_tile_idx = tile;
-        vp9_get_tile_offsets(cm, &cm->cur_tile_mb_col_start,
-                             &cm->cur_tile_mb_col_end);
+        vp9_get_tile_col_offsets(cm, tile_col);
         for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4) {
           encode_sb_row(cpi, mb_row, &tp, &totalrate);
         }
+        cpi->tok_count[tile_col] = (unsigned int)(tp - tp_old);
       }
-
-      cpi->tok_count = (unsigned int)(tp - cpi->tok);
     }
 
     vpx_usec_timer_mark(&emr_timer);

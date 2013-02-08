@@ -188,7 +188,8 @@ enum vp8e_enc_control_id {
 
   /* TODO(jkoleszar): Move to vp9cx.h */
   VP9E_SET_LOSSLESS,
-  VP9E_SET_TILE_COLUMNS
+  VP9E_SET_TILE_COLUMNS,
+  VP9E_SET_TILE_ROWS,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -300,6 +301,7 @@ VPX_CTRL_USE_TYPE(VP8E_SET_TUNING,             int) /* vp8e_tuning */
 VPX_CTRL_USE_TYPE(VP8E_SET_CQ_LEVEL,      unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_TILE_COLUMNS,  int)
+VPX_CTRL_USE_TYPE(VP9E_SET_TILE_ROWS,  int)
 
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)

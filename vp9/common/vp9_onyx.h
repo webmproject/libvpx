@@ -177,6 +177,7 @@ extern "C"
     int arnr_type;
 
     int tile_columns;
+    int tile_rows;
 
     struct vpx_fixed_buf         two_pass_stats_in;
     struct vpx_codec_pkt_list  *output_pkt_list;

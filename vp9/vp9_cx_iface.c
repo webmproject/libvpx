@@ -27,6 +27,7 @@ struct vp8_extracfg {
   unsigned int                Sharpness;
   unsigned int                static_thresh;
   unsigned int                tile_columns;
+  unsigned int                tile_rows;
   unsigned int                arnr_max_frames;    /* alt_ref Noise Reduction Max Frame Count */
   unsigned int                arnr_strength;    /* alt_ref Noise Reduction Strength */
   unsigned int                arnr_type;        /* alt_ref filter type */
@@ -55,6 +56,7 @@ static const struct extraconfig_map extracfg_map[] = {
       0,                          /* Sharpness */
       0,                          /* static_thresh */
       0,                          /* tile_columns */
+      0,                          /* tile_rows */
       0,                          /* arnr_max_frames */
       3,                          /* arnr_strength */
       3,                          /* arnr_type*/
@@ -172,6 +174,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
   RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
 
   RANGE_CHECK(vp8_cfg, tile_columns, 0, 6);
+  RANGE_CHECK(vp8_cfg, tile_rows, 0, 2);
   RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
   RANGE_CHECK(vp8_cfg, arnr_max_frames, 0, 15);
   RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
@@ -309,6 +312,7 @@ static vpx_codec_err_t set_vp8e_config(VP9_CONFIG *oxcf,
   oxcf->tuning = vp8_cfg.tuning;
 
   oxcf->tile_columns = vp8_cfg.tile_columns;
+  oxcf->tile_rows = vp8_cfg.tile_rows;
 
 #if CONFIG_LOSSLESS
   oxcf->lossless = vp8_cfg.lossless;
@@ -416,6 +420,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
       MAP(VP8E_SET_SHARPNESS,             xcfg.Sharpness);
       MAP(VP8E_SET_STATIC_THRESHOLD,      xcfg.static_thresh);
       MAP(VP9E_SET_TILE_COLUMNS,          xcfg.tile_columns);
+      MAP(VP9E_SET_TILE_ROWS,             xcfg.tile_rows);
 
       MAP(VP8E_SET_ARNR_MAXFRAMES,        xcfg.arnr_max_frames);
       MAP(VP8E_SET_ARNR_STRENGTH,        xcfg.arnr_strength);
@@ -1006,6 +1011,7 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] = {
   {VP8E_SET_SHARPNESS,                set_param},
   {VP8E_SET_STATIC_THRESHOLD,         set_param},
   {VP9E_SET_TILE_COLUMNS,             set_param},
+  {VP9E_SET_TILE_ROWS,                set_param},
   {VP8E_GET_LAST_QUANTIZER,           get_param},
   {VP8E_GET_LAST_QUANTIZER_64,        get_param},
   {VP8E_SET_ARNR_MAXFRAMES,           set_param},

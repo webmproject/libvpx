@@ -1105,8 +1105,12 @@ rescale(int val, int num, int denom) {
   return (int)(llval * llnum / llden);
 }
 
-static void set_tile_limits(VP9_COMMON *cm) {
+static void set_tile_limits(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
   int min_log2_tiles, max_log2_tiles;
+
+  cm->log2_tile_columns = cpi->oxcf.tile_columns;
+  cm->log2_tile_rows = cpi->oxcf.tile_rows;
 
   vp9_get_tile_n_bits(cm, &min_log2_tiles, &max_log2_tiles);
   max_log2_tiles += min_log2_tiles;
@@ -1115,6 +1119,7 @@ static void set_tile_limits(VP9_COMMON *cm) {
   else if (cm->log2_tile_columns > max_log2_tiles)
     cm->log2_tile_columns = max_log2_tiles;
   cm->tile_columns = 1 << cm->log2_tile_columns;
+  cm->tile_rows = 1 << cm->log2_tile_rows;
 }
 
 static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
@@ -1154,8 +1159,7 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->gld_fb_idx = 1;
   cpi->alt_fb_idx = 2;
 
-  cm->log2_tile_columns = cpi->oxcf.tile_columns;
-  set_tile_limits(cm);
+  set_tile_limits(cpi);
 
 #if VP9_TEMPORAL_ALT_REF
   {
@@ -1382,8 +1386,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->last_frame_distortion = 0;
 #endif
 
-  cm->log2_tile_columns = cpi->oxcf.tile_columns;
-  set_tile_limits(cm);
+  set_tile_limits(cpi);
 }
 
 #define M_LOG2_E 0.693147180559945309417

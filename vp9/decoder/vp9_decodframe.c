@@ -1770,7 +1770,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   /* tile info */
   {
     const unsigned char *data_ptr = data + first_partition_length_in_bytes;
-    int tile, delta_log2_tiles;
+    int tile_row, tile_col, delta_log2_tiles;
 
     vp9_get_tile_n_bits(pc, &pc->log2_tile_columns, &delta_log2_tiles);
     while (delta_log2_tiles--) {
@@ -1780,55 +1780,80 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
         break;
       }
     }
+    pc->log2_tile_rows = vp9_read_bit(&header_bc);
+    if (pc->log2_tile_rows)
+      pc->log2_tile_rows += vp9_read_bit(&header_bc);
     pc->tile_columns = 1 << pc->log2_tile_columns;
+    pc->tile_rows    = 1 << pc->log2_tile_rows;
 
     vpx_memset(pc->above_context, 0,
                sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 
     if (pbi->oxcf.inv_tile_order) {
-      const unsigned char *data_ptr2[4];
+      const int n_cols = pc->tile_columns;
+      const unsigned char *data_ptr2[4][1 << 6];
       BOOL_DECODER UNINITIALIZED_IS_SAFE(bc_bak);
 
-      data_ptr2[0] = data_ptr;
-      for (tile = 1; tile < pc->tile_columns; tile++) {
-        int size = data_ptr2[tile - 1][0] + (data_ptr2[tile - 1][1] << 8) +
-                (data_ptr2[tile - 1][2] << 16) + (data_ptr2[tile - 1][3] << 24);
-        data_ptr2[tile - 1] += 4;
-        data_ptr2[tile] = data_ptr2[tile - 1] + size;
-      }
-      for (tile = pc->tile_columns - 1; tile >= 0; tile--) {
-        pc->cur_tile_idx = tile;
-        vp9_get_tile_offsets(pc, &pc->cur_tile_mb_col_start,
-                             &pc->cur_tile_mb_col_end);
-        setup_token_decoder(pbi, data_ptr2[tile], &residual_bc);
-
-        /* Decode a row of superblocks */
-        for (mb_row = 0; mb_row < pc->mb_rows; mb_row += 4) {
-          decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
+      // pre-initialize the offsets, we're going to read in inverse order
+      data_ptr2[0][0] = data_ptr;
+      for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+        if (tile_row) {
+          int size = data_ptr2[tile_row - 1][n_cols - 1][0] +
+                    (data_ptr2[tile_row - 1][n_cols - 1][1] << 8) +
+                    (data_ptr2[tile_row - 1][n_cols - 1][2] << 16) +
+                    (data_ptr2[tile_row - 1][n_cols - 1][3] << 24);
+          data_ptr2[tile_row - 1][n_cols - 1] += 4;
+          data_ptr2[tile_row][0] = data_ptr2[tile_row - 1][n_cols - 1] + size;
         }
-        if (tile == pc->tile_columns - 1)
-          bc_bak = residual_bc;
+
+        for (tile_col = 1; tile_col < n_cols; tile_col++) {
+          int size = data_ptr2[tile_row][tile_col - 1][0] +
+                    (data_ptr2[tile_row][tile_col - 1][1] << 8) +
+                    (data_ptr2[tile_row][tile_col - 1][2] << 16) +
+                    (data_ptr2[tile_row][tile_col - 1][3] << 24);
+          data_ptr2[tile_row][tile_col - 1] += 4;
+          data_ptr2[tile_row][tile_col] =
+              data_ptr2[tile_row][tile_col - 1] + size;
+        }
+      }
+
+      for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+        vp9_get_tile_row_offsets(pc, tile_row);
+        for (tile_col = n_cols - 1; tile_col >= 0; tile_col--) {
+          vp9_get_tile_col_offsets(pc, tile_col);
+          setup_token_decoder(pbi, data_ptr2[tile_row][tile_col], &residual_bc);
+
+          /* Decode a row of superblocks */
+          for (mb_row = pc->cur_tile_mb_row_start;
+               mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
+            decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
+          }
+          if (tile_row == pc->tile_rows - 1 && tile_col == n_cols - 1)
+            bc_bak = residual_bc;
+        }
       }
       residual_bc = bc_bak;
     } else {
-      for (tile = 0; tile < pc->tile_columns; tile++) {
-        pc->cur_tile_idx = tile;
-        vp9_get_tile_offsets(pc, &pc->cur_tile_mb_col_start,
-                             &pc->cur_tile_mb_col_end);
+      for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+        vp9_get_tile_row_offsets(pc, tile_row);
+        for (tile_col = 0; tile_col < pc->tile_columns; tile_col++) {
+          vp9_get_tile_col_offsets(pc, tile_col);
 
-        if (tile < pc->tile_columns - 1)
-          setup_token_decoder(pbi, data_ptr + 4, &residual_bc);
-        else
-          setup_token_decoder(pbi, data_ptr, &residual_bc);
+          if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1)
+            setup_token_decoder(pbi, data_ptr + 4, &residual_bc);
+          else
+            setup_token_decoder(pbi, data_ptr, &residual_bc);
 
-        /* Decode a row of superblocks */
-        for (mb_row = 0; mb_row < pc->mb_rows; mb_row += 4) {
-          decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
-        }
-        if (tile < pc->tile_columns - 1) {
-          int size = data_ptr[0] + (data_ptr[1] << 8) + (data_ptr[2] << 16) +
-                    (data_ptr[3] << 24);
-          data_ptr += 4 + size;
+          /* Decode a row of superblocks */
+          for (mb_row = pc->cur_tile_mb_row_start;
+               mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
+            decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
+          }
+          if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1) {
+            int size = data_ptr[0] + (data_ptr[1] << 8) + (data_ptr[2] << 16) +
+                      (data_ptr[3] << 24);
+            data_ptr += 4 + size;
+          }
         }
       }
     }

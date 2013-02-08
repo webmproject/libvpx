@@ -347,7 +347,7 @@ typedef struct VP9_COMP {
   YV12_BUFFER_CONFIG last_frame_uf;
 
   TOKENEXTRA *tok;
-  unsigned int tok_count;
+  unsigned int tok_count[1 << 6];
 
 
   unsigned int frames_since_key;
