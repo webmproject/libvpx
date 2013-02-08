@@ -12,6 +12,7 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
+#include "test/i420_video_source.h"
 #include "test/video_source.h"
 #include "test/util.h"
 
@@ -73,15 +74,9 @@ class ResizeTest : public ::libvpx_test::EncoderTest,
     return !HasFatalFailure() && !abort_;
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
-    if (pkt->data.frame.flags & VPX_FRAME_IS_KEY) {
-      const unsigned char *buf =
-          reinterpret_cast<const unsigned char *>(pkt->data.frame.buf);
-      const unsigned int w = (buf[6] | (buf[7] << 8)) & 0x3fff;
-      const unsigned int h = (buf[8] | (buf[9] << 8)) & 0x3fff;
-
-      frame_info_list_.push_back(FrameInfo(pkt->data.frame.pts, w, h));
-    }
+  virtual void DecompressedFrameHook(const vpx_image_t &img,
+                                     vpx_codec_pts_t pts) {
+    frame_info_list_.push_back(FrameInfo(pts, img.d_w, img.d_h));
   }
 
   std::vector< FrameInfo > frame_info_list_;
@@ -104,5 +99,38 @@ TEST_P(ResizeTest, TestExternalResizeWorks) {
   }
 }
 
+class ResizeInternalTest : public ResizeTest {
+ protected:
+  ResizeInternalTest() : ResizeTest() {}
+
+  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
+                                  libvpx_test::Encoder *encoder) {
+    if (video->frame() == 3) {
+      struct vpx_scaling_mode mode = {VP8E_FOURFIVE, VP8E_THREEFIVE};
+      encoder->Control(VP8E_SET_SCALEMODE, &mode);
+    }
+  }
+};
+
+TEST_P(ResizeInternalTest, TestInternalResizeWorks) {
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 5);
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+
+  for (std::vector<FrameInfo>::iterator info = frame_info_list_.begin();
+       info != frame_info_list_.end(); ++info) {
+    const vpx_codec_pts_t pts = info->pts;
+    if (pts >= 3) {
+      ASSERT_EQ(282U, info->w) << "Frame " << pts << " had unexpected width";
+      ASSERT_EQ(173U, info->h) << "Frame " << pts << " had unexpected height";
+    } else {
+      EXPECT_EQ(352U, info->w) << "Frame " << pts << " had unexpected width";
+      EXPECT_EQ(288U, info->h) << "Frame " << pts << " had unexpected height";
+    }
+  }
+}
+
 VP8_INSTANTIATE_TEST_CASE(ResizeTest, ONE_PASS_TEST_MODES);
+VP9_INSTANTIATE_TEST_CASE(ResizeInternalTest,
+                          ::testing::Values(::libvpx_test::kOnePassBest));
 }  // namespace

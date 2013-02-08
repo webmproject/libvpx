@@ -1005,6 +1005,38 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 }
 
 
+static void update_frame_size(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+
+  /* our internal buffers are always multiples of 16 */
+  int width = (cm->Width + 15) & ~15;
+  int height = (cm->Height + 15) & ~15;
+
+  cm->mb_rows = height >> 4;
+  cm->mb_cols = width >> 4;
+  cm->MBs = cm->mb_rows * cm->mb_cols;
+  cm->mode_info_stride = cm->mb_cols + 1;
+  memset(cm->mip, 0,
+        (cm->mb_cols + 1) * (cm->mb_rows + 1) * sizeof(MODE_INFO));
+  vp9_update_mode_info_border(cm, cm->mip);
+
+  cm->mi = cm->mip + cm->mode_info_stride + 1;
+  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
+  vp9_update_mode_info_in_image(cm, cm->mi);
+
+  /* Update size of buffers local to this frame */
+  if (vp8_yv12_realloc_frame_buffer(&cpi->last_frame_uf,
+                                    width, height, VP9BORDERINPIXELS))
+    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                       "Failed to reallocate last frame buffer");
+
+  if (vp8_yv12_realloc_frame_buffer(&cpi->scaled_source,
+                                    width, height, VP9BORDERINPIXELS))
+    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                       "Failed to reallocate scaled source buffer");
+}
+
+
 // TODO perhaps change number of steps expose to outside world when setting
 // max and min limits. Also this will likely want refining for the extended Q
 // range.
@@ -1302,14 +1334,18 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
     cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
   }
 
-  if (((cm->Width + 15) & 0xfffffff0) !=
-      cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].y_width ||
-      ((cm->Height + 15) & 0xfffffff0) !=
-      cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].y_height ||
-      cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].y_width == 0) {
+  // Increasing the size of the frame beyond the first seen frame, or some
+  // otherwise signalled maximum size, is not supported.
+  // TODO(jkoleszar): exit gracefully.
+  if (!cpi->initial_width) {
     alloc_raw_frame_buffers(cpi);
     vp9_alloc_compressor_data(cpi);
+    cpi->initial_width = cm->Width;
+    cpi->initial_height = cm->Height;
   }
+  assert(cm->Width <= cpi->initial_width);
+  assert(cm->Height <= cpi->initial_height);
+  update_frame_size(cpi);
 
   if (cpi->oxcf.fixed_q >= 0) {
     cpi->last_q[0] = cpi->oxcf.fixed_q;
@@ -3776,6 +3812,28 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
   cm->new_fb_idx = get_free_fb(cm);
 
+  /* Reset the frame pointers to the current frame size */
+  vp8_yv12_realloc_frame_buffer(&cm->yv12_fb[cm->new_fb_idx],
+                                cm->mb_cols * 16, cm->mb_rows * 16,
+                                VP9BORDERINPIXELS);
+
+  /* Disable any references that have different size */
+  if ((cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].y_width !=
+       cm->yv12_fb[cm->new_fb_idx].y_width) ||
+      (cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].y_height !=
+       cm->yv12_fb[cm->new_fb_idx].y_height))
+    cpi->ref_frame_flags &= ~VP9_LAST_FLAG;
+  if ((cm->yv12_fb[cm->active_ref_idx[cpi->gld_fb_idx]].y_width !=
+       cm->yv12_fb[cm->new_fb_idx].y_width) ||
+      (cm->yv12_fb[cm->active_ref_idx[cpi->gld_fb_idx]].y_height !=
+       cm->yv12_fb[cm->new_fb_idx].y_height))
+    cpi->ref_frame_flags &= ~VP9_GOLD_FLAG;
+  if ((cm->yv12_fb[cm->active_ref_idx[cpi->alt_fb_idx]].y_width !=
+       cm->yv12_fb[cm->new_fb_idx].y_width) ||
+      (cm->yv12_fb[cm->active_ref_idx[cpi->alt_fb_idx]].y_height !=
+       cm->yv12_fb[cm->new_fb_idx].y_height))
+    cpi->ref_frame_flags &= ~VP9_ALT_FLAG;
+
   vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);
   if (cpi->pass == 1) {
     Pass1Encode(cpi, size, dest, frame_flags);
@@ -4027,15 +4085,16 @@ int vp9_set_internal_size(VP9_PTR comp,
   VP9_COMP *cpi = (VP9_COMP *) comp;
 
   if (horiz_mode <= ONETWO)
-    cpi->common.horiz_scale = horiz_mode;
+    cpi->horiz_scale = horiz_mode;
   else
     return -1;
 
   if (vert_mode <= ONETWO)
-    cpi->common.vert_scale  = vert_mode;
+    cpi->vert_scale = vert_mode;
   else
     return -1;
 
+  vp9_change_config(comp, &cpi->oxcf);
   return 0;
 }
 

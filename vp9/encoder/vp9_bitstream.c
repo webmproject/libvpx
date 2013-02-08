@@ -1532,33 +1532,34 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
    * and color type.
    */
   if (oh.type == KEY_FRAME) {
-    int v;
-
     // Start / synch code
     cx_data[0] = 0x9D;
     cx_data[1] = 0x01;
     cx_data[2] = 0x2a;
+    extra_bytes_packed = 3;
+    cx_data += extra_bytes_packed;
+  }
+  {
+    int v;
 
+    /* TODO(jkoleszar): support arbitrary resolutions */
     v = (pc->horiz_scale << 14) | pc->Width;
-    cx_data[3] = v;
-    cx_data[4] = v >> 8;
+    cx_data[0] = v;
+    cx_data[1] = v >> 8;
 
     v = (pc->vert_scale << 14) | pc->Height;
-    cx_data[5] = v;
-    cx_data[6] = v >> 8;
+    cx_data[2] = v;
+    cx_data[3] = v >> 8;
 
-    extra_bytes_packed = 7;
-    cx_data += extra_bytes_packed;
-
-    vp9_start_encode(&header_bc, cx_data);
-
-    // signal clr type
-    vp9_write_bit(&header_bc, pc->clr_type);
-    vp9_write_bit(&header_bc, pc->clamp_type);
-
-  } else {
-    vp9_start_encode(&header_bc, cx_data);
+    extra_bytes_packed += 4;
+    cx_data += 4;
   }
+
+  vp9_start_encode(&header_bc, cx_data);
+
+  // TODO(jkoleszar): remove these two unused bits?
+  vp9_write_bit(&header_bc, pc->clr_type);
+  vp9_write_bit(&header_bc, pc->clamp_type);
 
   // error resilient mode
   vp9_write_bit(&header_bc, pc->error_resilient_mode);

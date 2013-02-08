@@ -80,7 +80,6 @@ struct vpx_codec_alg_priv {
   unsigned char          *pending_cx_data;
   unsigned int            pending_cx_data_sz;
   vpx_image_t             preview_img;
-  unsigned int            next_frame_flag;
   vp8_postproc_cfg_t      preview_ppcfg;
   vpx_codec_pkt_list_decl(64) pkt_list;              // changed to accomendate the maximum number of lagged frames allowed
   unsigned int                fixed_kf_cntr;
@@ -678,14 +677,11 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     if (img != NULL) {
       res = image2yuvconfig(img, &sd);
 
-      if (vp9_receive_raw_frame(ctx->cpi, ctx->next_frame_flag | lib_flags,
+      if (vp9_receive_raw_frame(ctx->cpi, lib_flags,
                                 &sd, dst_time_stamp, dst_end_time_stamp)) {
         VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
         res = update_error_state(ctx, &cpi->common.error);
       }
-
-      /* reset for next frame */
-      ctx->next_frame_flag = 0;
     }
 
     cx_data = ctx->cx_data;
@@ -987,8 +983,6 @@ static vpx_codec_err_t vp8e_set_scalemode(vpx_codec_alg_priv_t *ctx,
                                 scalemode.v_scaling_mode);
 
     if (!res) {
-      /*force next frame a key frame to effect scaling mode */
-      ctx->next_frame_flag |= FRAMEFLAGS_KEY;
       return VPX_CODEC_OK;
     } else
       return VPX_CODEC_INVALID_PARAM;

@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include <assert.h>
 #include "vpx_scale/yv12config.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/vpx_scale.h"
@@ -215,6 +215,9 @@ vp8_yv12_copy_frame_c(YV12_BUFFER_CONFIG *src_ybc,
                       YV12_BUFFER_CONFIG *dst_ybc) {
   int row;
   unsigned char *source, *dest;
+
+  assert(src_ybc->y_width == dst_ybc->y_width);
+  assert(src_ybc->y_height == dst_ybc->y_height);
 
   source = src_ybc->y_buffer;
   dest = dst_ybc->y_buffer;
