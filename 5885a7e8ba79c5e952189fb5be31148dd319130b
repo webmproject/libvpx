@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//osg\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4213,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-02-08T09:54:08Z",
+      "side": 1,
+      "message": "I assume you are still expecting to use the copy in -\u003ecommon later as the decoder will need to know / store the scaling mode. ?",
+      "revId": "5885a7e8ba79c5e952189fb5be31148dd319130b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
