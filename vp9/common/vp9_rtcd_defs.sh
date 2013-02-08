@@ -245,13 +245,13 @@ specialize vp9_sub_pixel_variance16x2 sse2
 # Sub Pixel Filters
 #
 prototype void vp9_convolve8 "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve8
+specialize vp9_convolve8 ssse3
 
 prototype void vp9_convolve8_horiz "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve8_horiz
+specialize vp9_convolve8_horiz ssse3
 
 prototype void vp9_convolve8_vert "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve8_vert
+specialize vp9_convolve8_vert ssse3
 
 prototype void vp9_convolve8_avg "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8_avg

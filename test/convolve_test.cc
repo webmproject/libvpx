@@ -12,6 +12,7 @@
 extern "C" {
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
+#include "vpx_mem/vpx_mem.h"
 }
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/acm_random.h"
@@ -166,7 +167,25 @@ static void filter_average_block2d_8_c(const uint8_t *src_ptr,
 }
 
 class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
+ public:
+  static void SetUpTestCase() {
+    // Force input_ to be unaligned, output to be 16 byte aligned.
+    input_ = reinterpret_cast<uint8_t*>(
+        vpx_memalign(kDataAlignment, kOuterBlockSize * kOuterBlockSize + 1))
+        + 1;
+    output_ = reinterpret_cast<uint8_t*>(
+        vpx_memalign(kDataAlignment, kOuterBlockSize * kOuterBlockSize));
+  }
+
+  static void TearDownTestCase() {
+    vpx_free(input_ - 1);
+    input_ = NULL;
+    vpx_free(output_);
+    output_ = NULL;
+  }
+
   protected:
+    static const int kDataAlignment = 16;
     static const int kOuterBlockSize = 32;
     static const int kInputStride = kOuterBlockSize;
     static const int kOutputStride = kOuterBlockSize;
@@ -174,7 +193,10 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
 
     int Width() const { return GET_PARAM(0); }
     int Height() const { return GET_PARAM(1); }
-    int BorderLeft() const { return (kOuterBlockSize - Width()) / 2; }
+    int BorderLeft() const {
+      const int center = (kOuterBlockSize - Width()) / 2;
+      return (center + (kDataAlignment - 1)) & ~(kDataAlignment - 1);
+    }
     int BorderTop() const { return (kOuterBlockSize - Height()) / 2; }
 
     bool IsIndexInBorder(int i) {
@@ -216,9 +238,11 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
     }
 
     const ConvolveFunctions* UUT_;
-    uint8_t input_[kOuterBlockSize * kOuterBlockSize];
-    uint8_t output_[kOuterBlockSize * kOuterBlockSize];
+    static uint8_t* input_;
+    static uint8_t* output_;
 };
+uint8_t* ConvolveTest::input_ = NULL;
+uint8_t* ConvolveTest::output_ = NULL;
 
 TEST_P(ConvolveTest, GuardBlocks) {
   CheckGuardBlocks();
@@ -488,3 +512,16 @@ INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
     make_tuple(8, 8, &convolve8_c),
     make_tuple(16, 16, &convolve8_c)));
 }
+
+#if HAVE_SSSE3
+const ConvolveFunctions convolve8_ssse3(
+    vp9_convolve8_horiz_ssse3, vp9_convolve8_avg_horiz_c,
+    vp9_convolve8_vert_ssse3, vp9_convolve8_avg_vert_c,
+    vp9_convolve8_ssse3, vp9_convolve8_avg_c);
+
+INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
+    make_tuple(4, 4, &convolve8_ssse3),
+    make_tuple(8, 4, &convolve8_ssse3),
+    make_tuple(8, 8, &convolve8_ssse3),
+    make_tuple(16, 16, &convolve8_ssse3)));
+#endif
