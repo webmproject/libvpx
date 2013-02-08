@@ -16,6 +16,24 @@
       "revId": "5885a7e8ba79c5e952189fb5be31148dd319130b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//orc\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4213,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-08T14:57:34Z",
+      "side": 1,
+      "message": "I can\u0027t recall the exact reason for having both of these in vp8, but I expect that I\u0027ll be removing both of them in favor of an explicit display width/height, and sort out whether there are really two copies required then. This was just the minimum I needed to do to get the old scaling to trigger. The decoder actually ignores these completely right now (other than parsing them from the bitstream)",
+      "parentUuid": "AAAAVH//osg\u003d",
+      "revId": "5885a7e8ba79c5e952189fb5be31148dd319130b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
