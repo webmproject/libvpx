@@ -11,6 +11,7 @@
 
 #include "vpx_config.h"
 #include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_reconinter.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/encoder/vp9_quantize.h"
@@ -3775,6 +3776,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
   cm->new_fb_idx = get_free_fb(cm);
 
+  vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);
   if (cpi->pass == 1) {
     Pass1Encode(cpi, size, dest, frame_flags);
   } else if (cpi->pass == 2) {

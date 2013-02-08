@@ -14,6 +14,8 @@
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+struct subpix_fn_table;
+
 extern void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                                     uint8_t *dst_y,
                                                     int dst_ystride,
@@ -64,10 +66,10 @@ extern void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
 extern void vp9_build_inter_predictors_mb(MACROBLOCKD *xd);
 
 extern void vp9_build_inter_predictors_b(BLOCKD *d, int pitch,
-                                         vp9_subpix_fn_t sppf);
+                                         struct subpix_fn_table *sppf);
 
 extern void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
-                                             vp9_subpix_fn_t sppf);
+                                             struct subpix_fn_table *sppf);
 
 extern void vp9_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d,
                                          int pitch);

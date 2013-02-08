@@ -50,12 +50,11 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   // Y
   yptr = y_mb_ptr + (mv_row >> 3) * stride + (mv_col >> 3);
 
-  if ((mv_row | mv_col) & 7) {
-    xd->subpixel_predict16x16(yptr, stride,
-                             (mv_col & 7) << 1, (mv_row & 7) << 1, &pred[0], 16);
-  } else {
-    vp9_copy_mem16x16(yptr, stride, &pred[0], 16);
-  }
+  xd->subpix.predict[!!(mv_col & 7)][!!(mv_row & 7)][0](
+      yptr, stride, &pred[0], 16,
+      xd->subpix.filter_x[(mv_col & 7) << 1], xd->subpix.x_step_q4,
+      xd->subpix.filter_y[(mv_row & 7) << 1], xd->subpix.y_step_q4,
+      16, 16);
 
   // U & V
   omv_row = mv_row;
@@ -67,15 +66,17 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   uptr = u_mb_ptr + offset;
   vptr = v_mb_ptr + offset;
 
-  if ((omv_row | omv_col) & 15) {
-    xd->subpixel_predict8x8(uptr, stride,
-                           (omv_col & 15), (omv_row & 15), &pred[256], 8);
-    xd->subpixel_predict8x8(vptr, stride,
-                           (omv_col & 15), (omv_row & 15), &pred[320], 8);
-  } else {
-    vp9_copy_mem8x8(uptr, stride, &pred[256], 8);
-    vp9_copy_mem8x8(vptr, stride, &pred[320], 8);
-  }
+  xd->subpix.predict[!!(omv_col & 15)][!!(omv_row & 15)][0](
+      uptr, stride, &pred[256], 8,
+      xd->subpix.filter_x[(omv_col & 15)], xd->subpix.x_step_q4,
+      xd->subpix.filter_y[(omv_row & 15)], xd->subpix.y_step_q4,
+      8, 8);
+
+  xd->subpix.predict[!!(omv_col & 15)][!!(omv_row & 15)][0](
+      vptr, stride, &pred[320], 8,
+      xd->subpix.filter_x[(omv_col & 15)], xd->subpix.x_step_q4,
+      xd->subpix.filter_y[(omv_row & 15)], xd->subpix.y_step_q4,
+      8, 8);
 }
 
 void vp9_temporal_filter_apply_c(uint8_t *frame1,

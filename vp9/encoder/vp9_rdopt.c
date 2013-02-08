@@ -2237,9 +2237,9 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
       BLOCK *be = &x->block[i];
       int thisdistortion;
 
-      vp9_build_inter_predictors_b(bd, 16, xd->subpixel_predict4x4);
+      vp9_build_inter_predictors_b(bd, 16, &xd->subpix);
       if (xd->mode_info_context->mbmi.second_ref_frame > 0)
-        vp9_build_2nd_inter_predictors_b(bd, 16, xd->subpixel_predict_avg4x4);
+        vp9_build_2nd_inter_predictors_b(bd, 16, &xd->subpix);
       vp9_subtract_b(be, bd, 16);
       x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
       x->quantize_b_4x4(be, bd);
