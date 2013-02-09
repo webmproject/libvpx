@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//oJg\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-02-09T09:09:47Z",
+      "side": 1,
+      "message": "not sure why you need to repeat the value (110) in the comment",
+      "revId": "9f6eb96ce2d78f3218d64666530f4dd0577a0899",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//oJY\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-02-09T09:09:47Z",
+      "side": 1,
+      "message": "these \u0027-\u0027 for s4 and s6 could go at line 678 (\"x1 \u003d s1 - s4 - s6\") instead.",
+      "revId": "9f6eb96ce2d78f3218d64666530f4dd0577a0899",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//oJU\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 687,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-02-09T09:09:47Z",
+      "side": 1,
+      "message": "you should add a note that this transform add 5 bits of final precision, but requires 19bits of dynamic range headroom for the intermediate calculation.\nIt all fits in 32bits but that\u0027s close!\n\nAlso: did you verify that the output after 2 pass fits into 16bit output?\n\nI see: 8b input + 19 - 14 \u003d 13bit output after first pass (invr).\nThen, 2nd pass (invc): 13bit + 19 - 14 \u003d 18bit, which doesn\u0027t fit in int16_t output.",
+      "revId": "9f6eb96ce2d78f3218d64666530f4dd0577a0899",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//oJc\u003d",
+        "filename": "vp9/common/vp9_idctllm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 692,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-02-09T09:09:47Z",
+      "side": 1,
+      "message": "not needed",
+      "revId": "9f6eb96ce2d78f3218d64666530f4dd0577a0899",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//oJQ\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-02-09T09:09:47Z",
+      "side": 1,
+      "message": "note: \u0027tx_type\u0027 and \u0027pitch\u0027 arguments are in reverse order compared to the twin vp9_ihtllm() function below. This can be misleading. Doesn\u0027t hurt to put them swap them, for coherency.",
+      "revId": "9f6eb96ce2d78f3218d64666530f4dd0577a0899",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
