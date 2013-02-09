@@ -65,6 +65,20 @@ void vp9_filter_block1d8_h8_ssse3(const unsigned char *src_ptr,
                                    unsigned int output_height,
                                    const short *filter);
 
+void vp9_filter_block1d4_v8_ssse3(const unsigned char *src_ptr,
+                                   const unsigned int src_pitch,
+                                   unsigned char *output_ptr,
+                                   unsigned int out_pitch,
+                                   unsigned int output_height,
+                                   const short *filter);
+
+void vp9_filter_block1d4_h8_ssse3(const unsigned char *src_ptr,
+                                   const unsigned int src_pitch,
+                                   unsigned char *output_ptr,
+                                   unsigned int out_pitch,
+                                   unsigned int output_height,
+                                   const short *filter);
+
 void vp9_convolve8_horiz_ssse3(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
                                const int16_t *filter_x, int x_step_q4,
@@ -86,6 +100,14 @@ void vp9_convolve8_horiz_ssse3(const uint8_t *src, int src_stride,
       src += 8;
       dst += 8;
       w -= 8;
+    }
+    while (w >= 4) {
+      vp9_filter_block1d4_h8_ssse3(src, src_stride,
+                                   dst, dst_stride,
+                                   h, filter_x);
+      src += 4;
+      dst += 4;
+      w -= 4;
     }
   }
   if (w) {
@@ -116,6 +138,14 @@ void vp9_convolve8_vert_ssse3(const uint8_t *src, int src_stride,
       src += 8;
       dst += 8;
       w -= 8;
+    }
+    while (w >= 4) {
+      vp9_filter_block1d4_v8_ssse3(src - src_stride * 3, src_stride,
+                                   dst, dst_stride,
+                                   h, filter_y);
+      src += 4;
+      dst += 4;
+      w -= 4;
     }
   }
   if (w) {
@@ -152,6 +182,15 @@ void vp9_convolve8_ssse3(const uint8_t *src, int src_stride,
                                    fdata2, 16,
                                    h + 7, filter_x);
       vp9_filter_block1d8_v8_ssse3(fdata2, 16,
+                                   dst, dst_stride,
+                                   h, filter_y);
+      return;
+    }
+    if (w == 4) {
+      vp9_filter_block1d4_h8_ssse3(src - 3 * src_stride, src_stride,
+                                   fdata2, 16,
+                                   h + 7, filter_x);
+      vp9_filter_block1d4_v8_ssse3(fdata2, 16,
                                    dst, dst_stride,
                                    h, filter_y);
       return;
