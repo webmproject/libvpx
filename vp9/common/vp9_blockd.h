@@ -218,10 +218,7 @@ union b_mode_info {
     B_PREDICTION_MODE context;
 #endif
   } as_mode;
-  struct {
-    int_mv first;
-    int_mv second;
-  } as_mv;
+  int_mv as_mv[2];  // first, second inter predictor motion vectors
 };
 
 typedef enum {

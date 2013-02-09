@@ -1041,9 +1041,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             fill_offset = &mbsplit_fill_offset[s][(unsigned char)j * mbsplit_fill_count[s]];
 
             do {
-              mi->bmi[ *fill_offset].as_mv.first.as_int = blockmv.as_int;
+              mi->bmi[ *fill_offset].as_mv[0].as_int = blockmv.as_int;
               if (mbmi->second_ref_frame > 0)
-                mi->bmi[ *fill_offset].as_mv.second.as_int = secondmv.as_int;
+                mi->bmi[ *fill_offset].as_mv[1].as_int = secondmv.as_int;
               fill_offset++;
             } while (--fill_count);
           }
@@ -1051,8 +1051,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         } while (++j < num_p);
       }
 
-      mv->as_int = mi->bmi[15].as_mv.first.as_int;
-      mbmi->mv[1].as_int = mi->bmi[15].as_mv.second.as_int;
+      mv->as_int = mi->bmi[15].as_mv[0].as_int;
+      mbmi->mv[1].as_int = mi->bmi[15].as_mv[1].as_int;
 
       break;  /* done with SPLITMV */
 
