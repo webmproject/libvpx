@@ -792,7 +792,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       }
       */
 
-      // Is the segment level skip mode enabled
+      // If the segment level skip mode enabled
       if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
         mbmi->mode = ZEROMV;
       } else {
