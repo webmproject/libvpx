@@ -51,8 +51,13 @@ void vp9_inverse_transform_mby_4x4(MACROBLOCKD *xd) {
   for (i = 0; i < 16; i++) {
     TX_TYPE tx_type = get_tx_type_4x4(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
+#if CONFIG_INTHT4X4
+      vp9_short_iht4x4(xd->block[i].dqcoeff, xd->block[i].diff,
+                       32, tx_type);
+#else
       vp9_ihtllm(xd->block[i].dqcoeff, xd->block[i].diff, 32,
                    tx_type, 4, xd->block[i].eob);
+#endif
     } else {
       vp9_inverse_transform_b_4x4(xd, i, 32);
     }
@@ -93,7 +98,7 @@ void vp9_inverse_transform_mby_8x8(MACROBLOCKD *xd) {
     if (tx_type != DCT_DCT) {
 #if CONFIG_INTHT
       vp9_short_iht8x8(xd->block[i].dqcoeff, xd->block[i].diff,
-                           tx_type, 32);
+                           32, tx_type);
 #else
       vp9_ihtllm(xd->block[i].dqcoeff, xd->block[i].diff, 32, tx_type, 8,
                  xd->block[i].eob);
@@ -108,7 +113,7 @@ void vp9_inverse_transform_mby_8x8(MACROBLOCKD *xd) {
     if (tx_type != DCT_DCT) {
 #if CONFIG_INTHT
       vp9_short_iht8x8(xd->block[i + 2].dqcoeff, xd->block[i].diff,
-                           tx_type, 32);
+                           32, tx_type);
 #else
       vp9_ihtllm(xd->block[i + 2].dqcoeff, xd->block[i].diff, 32, tx_type, 8,
                  xd->block[i + 2].eob);
