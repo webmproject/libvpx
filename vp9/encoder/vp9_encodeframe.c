@@ -47,15 +47,12 @@ int enc_debug = 0;
 extern void select_interp_filter_type(VP9_COMP *cpi);
 
 static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
-                              int recon_yoffset, int recon_uvoffset,
                               int output_enabled, int mb_row, int mb_col);
 
 static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
-                                int recon_yoffset, int recon_uvoffset,
                                 int output_enabled, int mb_row, int mb_col);
 
 static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
-                                int recon_yoffset, int recon_uvoffset,
                                 int output_enabled, int mb_row, int mb_col);
 
 static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
@@ -623,24 +620,12 @@ static unsigned find_seg_id(uint8_t *buf, int block_size,
 }
 
 static void set_offsets(VP9_COMP *cpi,
-                        int mb_row, int mb_col, int block_size,
-                        int *ref_yoffset, int *ref_uvoffset) {
+                        int mb_row, int mb_col, int block_size) {
   MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi;
   const int dst_fb_idx = cm->new_fb_idx;
-  const int recon_y_stride = cm->yv12_fb[dst_fb_idx].y_stride;
-  const int recon_uv_stride = cm->yv12_fb[dst_fb_idx].uv_stride;
-  const int recon_yoffset = 16 * mb_row * recon_y_stride + 16 * mb_col;
-  const int recon_uvoffset = 8 * mb_row * recon_uv_stride + 8 * mb_col;
-  const int src_y_stride = x->src.y_stride;
-  const int src_uv_stride = x->src.uv_stride;
-  const int src_yoffset = 16 * mb_row * src_y_stride + 16 * mb_col;
-  const int src_uvoffset = 8 * mb_row * src_uv_stride + 8 * mb_col;
-  const int ref_fb_idx = cm->active_ref_idx[cpi->lst_fb_idx];
-  const int ref_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
-  const int ref_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
   const int idx_map = mb_row * cm->mb_cols + mb_col;
   const int idx_str = xd->mode_info_stride * mb_row + mb_col;
 
@@ -666,9 +651,9 @@ static void set_offsets(VP9_COMP *cpi,
   xd->prev_mode_info_context = cm->prev_mi + idx_str;
 
   // Set up destination pointers
-  xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
-  xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
-  xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
+  setup_pred_block(&xd->dst,
+                   &cm->yv12_fb[dst_fb_idx],
+                   mb_row, mb_col);
 
   /* Set up limit values for MV components to prevent them from
    * extending beyond the UMV borders assuming 16x16 block size */
@@ -692,14 +677,8 @@ static void set_offsets(VP9_COMP *cpi,
   xd->left_available  = (mb_col > cm->cur_tile_mb_col_start);
   xd->right_available = (mb_col + block_size < cm->cur_tile_mb_col_end);
 
-  /* Reference buffer offsets */
-  *ref_yoffset  = (mb_row * ref_y_stride * 16) + (mb_col * 16);
-  *ref_uvoffset = (mb_row * ref_uv_stride * 8) + (mb_col *  8);
-
   /* set up source buffers */
-  x->src.y_buffer = cpi->Source->y_buffer + src_yoffset;
-  x->src.u_buffer = cpi->Source->u_buffer + src_uvoffset;
-  x->src.v_buffer = cpi->Source->v_buffer + src_uvoffset;
+  setup_pred_block(&x->src, cpi->Source, mb_row, mb_col);
 
   /* R/D setup */
   x->rddiv = cpi->RDDIV;
@@ -742,8 +721,8 @@ static void set_offsets(VP9_COMP *cpi,
 }
 
 static int pick_mb_modes(VP9_COMP *cpi,
-                         int mb_row,
-                         int mb_col,
+                         int mb_row0,
+                         int mb_col0,
                          TOKENEXTRA **tp,
                          int *totalrate,
                          int *totaldist) {
@@ -751,16 +730,15 @@ static int pick_mb_modes(VP9_COMP *cpi,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int i;
-  int recon_yoffset, recon_uvoffset;
   int splitmodes_used = 0;
   ENTROPY_CONTEXT_PLANES left_context[2];
   ENTROPY_CONTEXT_PLANES above_context[2];
   ENTROPY_CONTEXT_PLANES *initial_above_context_ptr = cm->above_context
-                                                      + mb_col;
+                                                      + mb_col0;
 
   /* Function should not modify L & A contexts; save and restore on exit */
   vpx_memcpy(left_context,
-             cm->left_context + (mb_row & 2),
+             cm->left_context + (mb_row0 & 2),
              sizeof(left_context));
   vpx_memcpy(above_context,
              initial_above_context_ptr,
@@ -769,17 +747,18 @@ static int pick_mb_modes(VP9_COMP *cpi,
   /* Encode MBs in raster order within the SB */
   for (i = 0; i < 4; i++) {
     const int x_idx = i & 1, y_idx = i >> 1;
+    const int mb_row = mb_row0 + y_idx;
+    const int mb_col = mb_col0 + x_idx;
     MB_MODE_INFO *mbmi;
 
-    if ((mb_row + y_idx >= cm->mb_rows) || (mb_col + x_idx >= cm->mb_cols)) {
+    if ((mb_row >= cm->mb_rows) || (mb_col >= cm->mb_cols)) {
       // MB lies outside frame, move on
       continue;
     }
 
     // Index of the MB in the SB 0..3
     xd->mb_index = i;
-    set_offsets(cpi, mb_row + y_idx, mb_col + x_idx, 16,
-                &recon_yoffset, &recon_uvoffset);
+    set_offsets(cpi, mb_row, mb_col, 16);
 
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
       vp9_activity_masking(cpi, x);
@@ -800,8 +779,8 @@ static int pick_mb_modes(VP9_COMP *cpi,
       *totaldist += d;
 
       // Dummy encode, do not do the tokenization
-      encode_macroblock(cpi, tp, recon_yoffset, recon_uvoffset, 0,
-                        mb_row + y_idx, mb_col + x_idx);
+      encode_macroblock(cpi, tp, 0, mb_row, mb_col);
+
       // Note the encoder may have changed the segment_id
 
       // Save the coding context
@@ -814,16 +793,14 @@ static int pick_mb_modes(VP9_COMP *cpi,
       if (enc_debug)
         printf("inter pick_mb_modes %d %d\n", mb_row, mb_col);
 #endif
-      vp9_pick_mode_inter_macroblock(cpi, x, recon_yoffset,
-                                     recon_uvoffset, &r, &d);
+      vp9_pick_mode_inter_macroblock(cpi, x, mb_row, mb_col, &r, &d);
       *totalrate += r;
       *totaldist += d;
 
       splitmodes_used += (mbmi->mode == SPLITMV);
 
       // Dummy encode, do not do the tokenization
-      encode_macroblock(cpi, tp, recon_yoffset, recon_uvoffset, 0,
-                        mb_row + y_idx, mb_col + x_idx);
+      encode_macroblock(cpi, tp, 0, mb_row, mb_col);
 
       seg_id = mbmi->segment_id;
       if (cpi->mb.e_mbd.segmentation_enabled && seg_id == 0) {
@@ -846,7 +823,7 @@ static int pick_mb_modes(VP9_COMP *cpi,
   }
 
   /* Restore L & A coding context to those in place on entry */
-  vpx_memcpy(cm->left_context + (mb_row & 2),
+  vpx_memcpy(cm->left_context + (mb_row0 & 2),
              left_context,
              sizeof(left_context));
   vpx_memcpy(initial_above_context_ptr,
@@ -865,9 +842,8 @@ static void pick_sb_modes(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  int recon_yoffset, recon_uvoffset;
 
-  set_offsets(cpi, mb_row, mb_col, 32, &recon_yoffset, &recon_uvoffset);
+  set_offsets(cpi, mb_row, mb_col, 32);
   xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB32X32;
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     vp9_activity_masking(cpi, x);
@@ -883,11 +859,7 @@ static void pick_sb_modes(VP9_COMP *cpi,
     vpx_memcpy(&x->sb32_context[xd->sb_index].mic, xd->mode_info_context,
                sizeof(MODE_INFO));
   } else {
-    vp9_rd_pick_inter_mode_sb32(cpi, x,
-                                recon_yoffset,
-                                recon_uvoffset,
-                                totalrate,
-                                totaldist);
+    vp9_rd_pick_inter_mode_sb32(cpi, x, mb_row, mb_col, totalrate, totaldist);
   }
 }
 
@@ -900,9 +872,8 @@ static void pick_sb64_modes(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  int recon_yoffset, recon_uvoffset;
 
-  set_offsets(cpi, mb_row, mb_col, 64, &recon_yoffset, &recon_uvoffset);
+  set_offsets(cpi, mb_row, mb_col, 64);
   xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB64X64;
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     vp9_activity_masking(cpi, x);
@@ -918,11 +889,7 @@ static void pick_sb64_modes(VP9_COMP *cpi,
     vpx_memcpy(&x->sb64_context.mic, xd->mode_info_context,
                sizeof(MODE_INFO));
   } else {
-    vp9_rd_pick_inter_mode_sb64(cpi, x,
-                                recon_yoffset,
-                                recon_uvoffset,
-                                totalrate,
-                                totaldist);
+    vp9_rd_pick_inter_mode_sb64(cpi, x, mb_row, mb_col, totalrate, totaldist);
   }
 }
 
@@ -990,14 +957,13 @@ static void encode_sb(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  int recon_yoffset, recon_uvoffset;
 
   cpi->sb32_count[is_sb]++;
   if (is_sb) {
-    set_offsets(cpi, mb_row, mb_col, 32, &recon_yoffset, &recon_uvoffset);
+    set_offsets(cpi, mb_row, mb_col, 32);
     update_state(cpi, &x->sb32_context[xd->sb_index], 32, output_enabled);
 
-    encode_superblock32(cpi, tp, recon_yoffset, recon_uvoffset,
+    encode_superblock32(cpi, tp,
                         output_enabled, mb_row, mb_col);
     if (output_enabled)
       update_stats(cpi);
@@ -1019,15 +985,14 @@ static void encode_sb(VP9_COMP *cpi,
         continue;
       }
 
-      set_offsets(cpi, mb_row + y_idx, mb_col + x_idx, 16,
-                  &recon_yoffset, &recon_uvoffset);
+      set_offsets(cpi, mb_row + y_idx, mb_col + x_idx, 16);
       xd->mb_index = i;
       update_state(cpi, &x->mb_context[xd->sb_index][i], 16, output_enabled);
 
       if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
         vp9_activity_masking(cpi, x);
 
-      encode_macroblock(cpi, tp, recon_yoffset, recon_uvoffset,
+      encode_macroblock(cpi, tp,
                         output_enabled, mb_row + y_idx, mb_col + x_idx);
       if (output_enabled)
         update_stats(cpi);
@@ -1062,11 +1027,9 @@ static void encode_sb64(VP9_COMP *cpi,
 
   cpi->sb64_count[is_sb[0] == 2]++;
   if (is_sb[0] == 2) {
-    int recon_yoffset, recon_uvoffset;
-
-    set_offsets(cpi, mb_row, mb_col, 64, &recon_yoffset, &recon_uvoffset);
+    set_offsets(cpi, mb_row, mb_col, 64);
     update_state(cpi, &x->sb64_context, 64, 1);
-    encode_superblock64(cpi, tp, recon_yoffset, recon_uvoffset,
+    encode_superblock64(cpi, tp,
                         1, mb_row, mb_col);
     update_stats(cpi);
 
@@ -2025,7 +1988,6 @@ static void update_sb64_skip_coeff_state(VP9_COMP *cpi,
 }
 
 static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
-                              int recon_yoffset, int recon_uvoffset,
                               int output_enabled,
                               int mb_row, int mb_col) {
   VP9_COMMON *const cm = &cpi->common;
@@ -2122,9 +2084,9 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     else
       ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
-    xd->pre.y_buffer = cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
-    xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
-    xd->pre.v_buffer = cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
+    setup_pred_block(&xd->pre,
+                     &cpi->common.yv12_fb[ref_fb_idx],
+                     mb_row, mb_col);
 
     if (mbmi->second_ref_frame > 0) {
       int second_ref_fb_idx;
@@ -2136,12 +2098,9 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
       else
         second_ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
-      xd->second_pre.y_buffer = cpi->common.yv12_fb[second_ref_fb_idx].y_buffer +
-                                recon_yoffset;
-      xd->second_pre.u_buffer = cpi->common.yv12_fb[second_ref_fb_idx].u_buffer +
-                                recon_uvoffset;
-      xd->second_pre.v_buffer = cpi->common.yv12_fb[second_ref_fb_idx].v_buffer +
-                                recon_uvoffset;
+      setup_pred_block(&xd->second_pre,
+                       &cpi->common.yv12_fb[second_ref_fb_idx],
+                       mb_row, mb_col);
     }
 
     if (!x->skip) {
@@ -2282,7 +2241,6 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
 }
 
 static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
-                                int recon_yoffset, int recon_uvoffset,
                                 int output_enabled, int mb_row, int mb_col) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
@@ -2361,9 +2319,9 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
     else
       ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
-    xd->pre.y_buffer = cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
-    xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
-    xd->pre.v_buffer = cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
+    setup_pred_block(&xd->pre,
+                     &cpi->common.yv12_fb[ref_fb_idx],
+                     mb_row, mb_col);
 
     if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
       int second_ref_fb_idx;
@@ -2375,12 +2333,9 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
       else
         second_ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
-      xd->second_pre.y_buffer = cpi->common.yv12_fb[second_ref_fb_idx].y_buffer +
-                                    recon_yoffset;
-      xd->second_pre.u_buffer = cpi->common.yv12_fb[second_ref_fb_idx].u_buffer +
-                                    recon_uvoffset;
-      xd->second_pre.v_buffer = cpi->common.yv12_fb[second_ref_fb_idx].v_buffer +
-                                    recon_uvoffset;
+      setup_pred_block(&xd->second_pre,
+                       &cpi->common.yv12_fb[second_ref_fb_idx],
+                       mb_row, mb_col);
     }
 
     vp9_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
@@ -2513,7 +2468,6 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
 }
 
 static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
-                                int recon_yoffset, int recon_uvoffset,
                                 int output_enabled, int mb_row, int mb_col) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
@@ -2591,12 +2545,9 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
     else
       ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
-    xd->pre.y_buffer =
-        cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
-    xd->pre.u_buffer =
-        cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
-    xd->pre.v_buffer =
-        cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
+    setup_pred_block(&xd->pre,
+                     &cpi->common.yv12_fb[ref_fb_idx],
+                     mb_row, mb_col);
 
     if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
       int second_ref_fb_idx;
@@ -2608,12 +2559,9 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
       else
         second_ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
 
-      xd->second_pre.y_buffer =
-          cpi->common.yv12_fb[second_ref_fb_idx].y_buffer + recon_yoffset;
-      xd->second_pre.u_buffer =
-          cpi->common.yv12_fb[second_ref_fb_idx].u_buffer + recon_uvoffset;
-      xd->second_pre.v_buffer =
-          cpi->common.yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
+      setup_pred_block(&xd->second_pre,
+                       &cpi->common.yv12_fb[second_ref_fb_idx],
+                       mb_row, mb_col);
     }
 
     vp9_build_inter64x64_predictors_sb(xd, xd->dst.y_buffer,
