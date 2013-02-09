@@ -72,7 +72,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   }
 
   vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
-  vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
+  vp9_build_inter16x16_predictors_mby(xd, xd->predictor, 16);
   best_err = vp9_sad16x16(xd->dst.y_buffer, xd->dst.y_stride,
                           xd->predictor, 16, INT_MAX);
 
@@ -291,6 +291,9 @@ static void update_mbgraph_frame_stats
   int mb_y_offset = 0, arf_y_offset = 0, gld_y_offset = 0;
   int_mv arf_top_mv, gld_top_mv;
   MODE_INFO mi_local;
+
+  // Make sure the mi context starts in a consistent state.
+  memset(&mi_local, 0, sizeof(mi_local));
 
   // Set up limit values for motion vectors to prevent them extending outside the UMV borders
   arf_top_mv.as_int = 0;

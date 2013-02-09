@@ -146,109 +146,118 @@ void vp9_copy_mem8x4_c(const uint8_t *src,
   }
 }
 
-void vp9_build_inter_predictors_b(BLOCKD *d, int pitch,
-                                  struct subpix_fn_table *subpix) {
-  uint8_t *ptr_base;
-  uint8_t *ptr;
-  uint8_t *pred_ptr = d->predictor;
-  int_mv mv;
+static int32_t scale_motion_vector_component(int mv,
+                                             int num,
+                                             int den,
+                                             int offset_q4) {
+  // returns the scaled and offset value of the mv component.
+  // input and output mv have the same units -- this would work with either q3
+  // or q4 motion vectors. Offset is given as a q4 fractional number.
+  const int32_t mv_q4 = mv * 16;
 
-  ptr_base = *(d->base_pre);
-  mv.as_int = d->bmi.as_mv[0].as_int;
-  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
-        (mv.as_mv.col >> 3);
+  /* TODO(jkoleszar): make fixed point, or as a second multiply? */
+  return (mv_q4 * num / den + offset_q4 + 8) >> 4;
+}
 
-  subpix->predict[!!(mv.as_mv.col & 7)][!!(mv.as_mv.row & 7)][0](
-      ptr, d->pre_stride, pred_ptr, pitch,
+static int_mv32 scale_motion_vector(const int_mv *src_mv,
+                                    const struct scale_factors *scale) {
+  // returns mv * scale + offset
+  int_mv32 result;
+
+  result.as_mv.row = scale_motion_vector_component(src_mv->as_mv.row,
+                                                   scale->y_num, scale->y_den,
+                                                   scale->y_offset_q4);
+  result.as_mv.col = scale_motion_vector_component(src_mv->as_mv.col,
+                                                   scale->x_num, scale->x_den,
+                                                   scale->x_offset_q4);
+  return result;
+}
+
+void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
+                               uint8_t *dst, int dst_stride,
+                               const int_mv *mv_q3,
+                               const struct scale_factors *scale,
+                               int w, int h, int do_avg,
+                               const struct subpix_fn_table *subpix) {
+  int_mv32 mv;
+
+  mv = scale_motion_vector(mv_q3, scale);
+  src = src + (mv.as_mv.row >> 3) * src_stride + (mv.as_mv.col >> 3);
+  subpix->predict[!!(mv.as_mv.col & 7)][!!(mv.as_mv.row & 7)][do_avg](
+      src, src_stride, dst, dst_stride,
       subpix->filter_x[(mv.as_mv.col & 7) << 1], subpix->x_step_q4,
       subpix->filter_y[(mv.as_mv.row & 7) << 1], subpix->y_step_q4,
-      4, 4);
+      w, h);
 }
 
-/*
- * Similar to vp9_build_inter_predictors_b(), but instead of storing the
- * results in d->predictor, we average the contents of d->predictor (which
- * come from an earlier call to vp9_build_inter_predictors_b()) with the
- * predictor of the second reference frame / motion vector.
+/* Like vp9_build_inter_predictor, but takes the full-pel part of the
+ * mv separately, and the fractional part as a q4.
  */
-void vp9_build_2nd_inter_predictors_b(BLOCKD *d, int pitch,
-                                      struct subpix_fn_table *subpix) {
-  uint8_t *ptr_base;
-  uint8_t *ptr;
-  uint8_t *pred_ptr = d->predictor;
-  int_mv mv;
+void vp9_build_inter_predictor_q4(const uint8_t *src, int src_stride,
+                                  uint8_t *dst, int dst_stride,
+                                  const int_mv *fullpel_mv_q3,
+                                  const int_mv *frac_mv_q4,
+                                  const struct scale_factors *scale,
+                                  int w, int h, int do_avg,
+                                  const struct subpix_fn_table *subpix) {
+  const int mv_row_q4 = ((fullpel_mv_q3->as_mv.row >> 3) << 4)
+                        + (frac_mv_q4->as_mv.row & 0xf);
+  const int mv_col_q4 = ((fullpel_mv_q3->as_mv.col >> 3) << 4)
+                        + (frac_mv_q4->as_mv.col & 0xf);
+  const int scaled_mv_row_q4 =
+      scale_motion_vector_component(mv_row_q4, scale->y_num, scale->y_den,
+                                    scale->y_offset_q4);
+  const int scaled_mv_col_q4 =
+      scale_motion_vector_component(mv_col_q4, scale->x_num, scale->x_den,
+                                    scale->x_offset_q4);
+  const int subpel_x = scaled_mv_col_q4 & 15;
+  const int subpel_y = scaled_mv_row_q4 & 15;
 
-  ptr_base = *(d->base_second_pre);
-  mv.as_int = d->bmi.as_mv[1].as_int;
-  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
-        (mv.as_mv.col >> 3);
-
-  subpix->predict[!!(mv.as_mv.col & 7)][!!(mv.as_mv.row & 7)][1](
-      ptr, d->pre_stride, pred_ptr, pitch,
-      subpix->filter_x[(mv.as_mv.col & 7) << 1], subpix->x_step_q4,
-      subpix->filter_y[(mv.as_mv.row & 7) << 1], subpix->y_step_q4,
-      4, 4);
+  src = src + (scaled_mv_row_q4 >> 4) * src_stride + (scaled_mv_col_q4 >> 4);
+  subpix->predict[!!subpel_x][!!subpel_y][do_avg](
+      src, src_stride, dst, dst_stride,
+      subpix->filter_x[subpel_x], subpix->x_step_q4,
+      subpix->filter_y[subpel_y], subpix->y_step_q4,
+      w, h);
 }
 
-void vp9_build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
-  uint8_t *ptr_base;
-  uint8_t *ptr;
-  uint8_t *pred_ptr = d->predictor;
-  int_mv mv;
+static void build_2x1_inter_predictor(const BLOCKD *d0, const BLOCKD *d1,
+                                      const struct scale_factors *scale,
+                                      int block_size, int stride, int which_mv,
+                                      const struct subpix_fn_table *subpix) {
+  assert(d1->predictor - d0->predictor == block_size);
+  assert(d1->pre == d0->pre + block_size);
 
-  ptr_base = *(d->base_pre);
-  mv.as_int = d->bmi.as_mv[0].as_int;
-  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
-        (mv.as_mv.col >> 3);
+  if (d0->bmi.as_mv[which_mv].as_int == d1->bmi.as_mv[which_mv].as_int) {
+    uint8_t **base_pre = which_mv ? d0->base_second_pre : d0->base_pre;
 
-  xd->subpix.predict[!!(mv.as_mv.col & 7)][!!(mv.as_mv.row & 7)][0](
-      ptr, d->pre_stride, pred_ptr, pitch,
-      xd->subpix.filter_x[(mv.as_mv.col & 7) << 1], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[(mv.as_mv.row & 7) << 1], xd->subpix.y_step_q4,
-      8, 8);
-}
+    vp9_build_inter_predictor(*base_pre + d0->pre,
+                              d0->pre_stride,
+                              d0->predictor, stride,
+                              &d0->bmi.as_mv[which_mv],
+                              &scale[which_mv],
+                              2 * block_size, block_size, which_mv,
+                              subpix);
 
-/*
- * Similar to build_inter_predictors_4b(), but instead of storing the
- * results in d->predictor, we average the contents of d->predictor (which
- * come from an earlier call to build_inter_predictors_4b()) with the
- * predictor of the second reference frame / motion vector.
- */
-void vp9_build_2nd_inter_predictors4b(MACROBLOCKD *xd,
-                                      BLOCKD *d, int pitch) {
-  uint8_t *ptr_base;
-  uint8_t *ptr;
-  uint8_t *pred_ptr = d->predictor;
-  int_mv mv;
+  } else {
+    uint8_t **base_pre0 = which_mv ? d0->base_second_pre : d0->base_pre;
+    uint8_t **base_pre1 = which_mv ? d1->base_second_pre : d1->base_pre;
 
-  ptr_base = *(d->base_second_pre);
-  mv.as_int = d->bmi.as_mv[1].as_int;
-  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
-        (mv.as_mv.col >> 3);
-
-  xd->subpix.predict[!!(mv.as_mv.col & 7)][!!(mv.as_mv.row & 7)][1](
-      ptr, d->pre_stride, pred_ptr, pitch,
-      xd->subpix.filter_x[(mv.as_mv.col & 7) << 1], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[(mv.as_mv.row & 7) << 1], xd->subpix.y_step_q4,
-      8, 8);
-}
-
-static void build_inter_predictors2b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
-  uint8_t *ptr_base;
-  uint8_t *ptr;
-  uint8_t *pred_ptr = d->predictor;
-  int_mv mv;
-
-  ptr_base = *(d->base_pre);
-  mv.as_int = d->bmi.as_mv[0].as_int;
-  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
-        (mv.as_mv.col >> 3);
-
-  xd->subpix.predict[!!(mv.as_mv.col & 7)][!!(mv.as_mv.row & 7)][0](
-      ptr, d->pre_stride, pred_ptr, pitch,
-      xd->subpix.filter_x[(mv.as_mv.col & 7) << 1], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[(mv.as_mv.row & 7) << 1], xd->subpix.y_step_q4,
-      8, 4);
+    vp9_build_inter_predictor(*base_pre0 + d0->pre,
+                              d0->pre_stride,
+                              d0->predictor, stride,
+                              &d0->bmi.as_mv[which_mv],
+                              &scale[which_mv],
+                              block_size, block_size, which_mv,
+                              subpix);
+    vp9_build_inter_predictor(*base_pre1 + d1->pre,
+                              d1->pre_stride,
+                              d1->predictor, stride,
+                              &d1->bmi.as_mv[which_mv],
+                              &scale[which_mv],
+                              block_size, block_size, which_mv,
+                              subpix);
+  }
 }
 
 /*encoder only*/
@@ -329,19 +338,14 @@ void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd) {
   }
 
   for (i = 16; i < 24; i += 2) {
+    const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
+    int which_mv;
     BLOCKD *d0 = &blockd[i];
     BLOCKD *d1 = &blockd[i + 1];
 
-    if (d0->bmi.as_mv[0].as_int == d1->bmi.as_mv[0].as_int)
-      build_inter_predictors2b(xd, d0, 8);
-    else {
-      vp9_build_inter_predictors_b(d0, 8, &xd->subpix);
-      vp9_build_inter_predictors_b(d1, 8, &xd->subpix);
-    }
-
-    if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-      vp9_build_2nd_inter_predictors_b(d0, 8, &xd->subpix);
-      vp9_build_2nd_inter_predictors_b(d1, 8, &xd->subpix);
+    for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+      build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
+                                &xd->subpix);
     }
   }
 }
@@ -383,91 +387,87 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
 }
 
 /*encoder only*/
-void vp9_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
-                                             uint8_t *dst_y,
-                                             int dst_ystride,
-                                             int clamp_mvs) {
-  uint8_t *ptr_base = xd->pre.y_buffer;
-  uint8_t *ptr;
-  int pre_stride = xd->block[0].pre_stride;
-  int_mv ymv;
+void vp9_build_inter16x16_predictors_mby(MACROBLOCKD *xd,
+                                         uint8_t *dst_y,
+                                         int dst_ystride) {
+  const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
+  int which_mv;
 
-  ymv.as_int = xd->mode_info_context->mbmi.mv[0].as_int;
+  for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+    const int clamp_mvs =
+        which_mv ? xd->mode_info_context->mbmi.need_to_clamp_secondmv
+                 : xd->mode_info_context->mbmi.need_to_clamp_mvs;
+    uint8_t *base_pre;
+    int_mv ymv;
 
-  if (clamp_mvs)
-    clamp_mv_to_umv_border(&ymv.as_mv, xd);
+    ymv.as_int = xd->mode_info_context->mbmi.mv[which_mv].as_int;
+    base_pre = which_mv ? xd->second_pre.y_buffer
+                        : xd->pre.y_buffer;
+    if (clamp_mvs)
+      clamp_mv_to_umv_border(&ymv.as_mv, xd);
 
-  ptr = ptr_base + (ymv.as_mv.row >> 3) * pre_stride + (ymv.as_mv.col >> 3);
-
-  xd->subpix.predict[!!(ymv.as_mv.col & 7)][!!(ymv.as_mv.row & 7)][0](
-      ptr, pre_stride, dst_y, dst_ystride,
-      xd->subpix.filter_x[(ymv.as_mv.col & 7) << 1], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[(ymv.as_mv.row & 7) << 1], xd->subpix.y_step_q4,
-      16, 16);
+    vp9_build_inter_predictor(base_pre, xd->block[0].pre_stride,
+                              dst_y, dst_ystride,
+                              &ymv, &xd->scale_factor[which_mv],
+                              16, 16, which_mv, &xd->subpix);
+  }
 }
 
-void vp9_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                              uint8_t *dst_u,
-                                              uint8_t *dst_v,
-                                              int dst_uvstride) {
-  int offset;
-  uint8_t *uptr, *vptr;
-  int pre_stride = xd->block[0].pre_stride;
-  int_mv _o16x16mv;
-  int_mv _16x16mv;
+void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
+                                          uint8_t *dst_u,
+                                          uint8_t *dst_v,
+                                          int dst_uvstride) {
+  const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
+  int which_mv;
 
-  _16x16mv.as_int = xd->mode_info_context->mbmi.mv[0].as_int;
+  for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+    const int clamp_mvs =
+        which_mv ? xd->mode_info_context->mbmi.need_to_clamp_secondmv
+                 : xd->mode_info_context->mbmi.need_to_clamp_mvs;
+    uint8_t *uptr, *vptr;
+    int pre_stride = xd->block[0].pre_stride;
+    int_mv _o16x16mv;
+    int_mv _16x16mv;
 
-  if (xd->mode_info_context->mbmi.need_to_clamp_mvs)
-    clamp_mv_to_umv_border(&_16x16mv.as_mv, xd);
+    _16x16mv.as_int = xd->mode_info_context->mbmi.mv[which_mv].as_int;
 
-  _o16x16mv = _16x16mv;
-  /* calc uv motion vectors */
-  if (_16x16mv.as_mv.row < 0)
-    _16x16mv.as_mv.row -= 1;
-  else
-    _16x16mv.as_mv.row += 1;
+    if (clamp_mvs)
+      clamp_mv_to_umv_border(&_16x16mv.as_mv, xd);
 
-  if (_16x16mv.as_mv.col < 0)
-    _16x16mv.as_mv.col -= 1;
-  else
-    _16x16mv.as_mv.col += 1;
+    _o16x16mv = _16x16mv;
+    /* calc uv motion vectors */
+    if (_16x16mv.as_mv.row < 0)
+      _16x16mv.as_mv.row -= 1;
+    else
+      _16x16mv.as_mv.row += 1;
 
-  _16x16mv.as_mv.row /= 2;
-  _16x16mv.as_mv.col /= 2;
+    if (_16x16mv.as_mv.col < 0)
+      _16x16mv.as_mv.col -= 1;
+    else
+      _16x16mv.as_mv.col += 1;
 
-  _16x16mv.as_mv.row &= xd->fullpixel_mask;
-  _16x16mv.as_mv.col &= xd->fullpixel_mask;
+    _16x16mv.as_mv.row /= 2;
+    _16x16mv.as_mv.col /= 2;
 
-  pre_stride >>= 1;
-  offset = (_16x16mv.as_mv.row >> 3) * pre_stride + (_16x16mv.as_mv.col >> 3);
-  uptr = xd->pre.u_buffer + offset;
-  vptr = xd->pre.v_buffer + offset;
+    _16x16mv.as_mv.row &= xd->fullpixel_mask;
+    _16x16mv.as_mv.col &= xd->fullpixel_mask;
 
-  xd->subpix.predict[!!(_o16x16mv.as_mv.col & 15)]
-                    [!!(_o16x16mv.as_mv.row & 15)][0](
-      uptr, pre_stride, dst_u, dst_uvstride,
-      xd->subpix.filter_x[_o16x16mv.as_mv.col & 15], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[_o16x16mv.as_mv.row & 15], xd->subpix.y_step_q4,
-      8, 8);
+    pre_stride >>= 1;
+    uptr = (which_mv ? xd->second_pre.u_buffer : xd->pre.u_buffer);
+    vptr = (which_mv ? xd->second_pre.v_buffer : xd->pre.v_buffer);
 
-  xd->subpix.predict[!!(_o16x16mv.as_mv.col & 15)]
-                    [!!(_o16x16mv.as_mv.row & 15)][0](
-      vptr, pre_stride, dst_v, dst_uvstride,
-      xd->subpix.filter_x[_o16x16mv.as_mv.col & 15], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[_o16x16mv.as_mv.row & 15], xd->subpix.y_step_q4,
-      8, 8);
-}
+    vp9_build_inter_predictor_q4(uptr, pre_stride,
+                                 dst_u, dst_uvstride,
+                                 &_16x16mv, &_o16x16mv,
+                                 &xd->scale_factor_uv[which_mv],
+                                 8, 8, which_mv, &xd->subpix);
 
-
-void vp9_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
-                                            uint8_t *dst_y,
-                                            uint8_t *dst_u,
-                                            uint8_t *dst_v,
-                                            int dst_ystride, int dst_uvstride) {
-  vp9_build_1st_inter16x16_predictors_mby(xd, dst_y, dst_ystride,
-      xd->mode_info_context->mbmi.need_to_clamp_mvs);
-  vp9_build_1st_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
+    vp9_build_inter_predictor_q4(vptr, pre_stride,
+                                 dst_v, dst_uvstride,
+                                 &_16x16mv, &_o16x16mv,
+                                 &xd->scale_factor_uv[which_mv],
+                                 8, 8, which_mv, &xd->subpix);
+  }
 }
 
 void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
@@ -498,22 +498,17 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
     x->pre.u_buffer = u1 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
     x->pre.v_buffer = v1 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
 
-    vp9_build_1st_inter16x16_predictors_mb(x,
-      dst_y + y_idx * 16 * dst_ystride  + x_idx * 16,
-      dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
-      dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
-      dst_ystride, dst_uvstride);
     if (x->mode_info_context->mbmi.second_ref_frame > 0) {
       x->second_pre.y_buffer = y2 + y_idx * 16 * x->pre.y_stride  + x_idx * 16;
       x->second_pre.u_buffer = u2 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
       x->second_pre.v_buffer = v2 + y_idx *  8 * x->pre.uv_stride + x_idx *  8;
+    }
 
-      vp9_build_2nd_inter16x16_predictors_mb(x,
+    vp9_build_inter16x16_predictors_mb(x,
         dst_y + y_idx * 16 * dst_ystride  + x_idx * 16,
         dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
         dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
         dst_ystride, dst_uvstride);
-    }
   }
 
   x->mb_to_top_edge    = edge[0];
@@ -603,143 +598,53 @@ void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
 #endif
 }
 
-/*
- * The following functions should be called after an initial
- * call to vp9_build_1st_inter16x16_predictors_mb() or _mby()/_mbuv().
- * It will run a second filter on a (different) ref
- * frame and average the result with the output of the
- * first filter. The second reference frame is stored
- * in x->second_pre (the reference frame index is in
- * x->mode_info_context->mbmi.second_ref_frame). The second
- * motion vector is x->mode_info_context->mbmi.second_mv.
- *
- * This allows blending prediction from two reference frames
- * which sometimes leads to better prediction than from a
- * single reference framer.
- */
-void vp9_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *xd,
-                                             uint8_t *dst_y,
-                                             int dst_ystride) {
-  uint8_t *ptr;
-
-  int_mv _16x16mv;
-  int mv_row;
-  int mv_col;
-
-  uint8_t *ptr_base = xd->second_pre.y_buffer;
-  int pre_stride = xd->block[0].pre_stride;
-
-  _16x16mv.as_int = xd->mode_info_context->mbmi.mv[1].as_int;
-
-  if (xd->mode_info_context->mbmi.need_to_clamp_secondmv)
-    clamp_mv_to_umv_border(&_16x16mv.as_mv, xd);
-
-  mv_row = _16x16mv.as_mv.row;
-  mv_col = _16x16mv.as_mv.col;
-
-  ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
-
-  xd->subpix.predict[!!(mv_col & 7)][!!(mv_row & 7)][1](
-      ptr, pre_stride, dst_y, dst_ystride,
-      xd->subpix.filter_x[(mv_col & 7) << 1], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[(mv_row & 7) << 1], xd->subpix.y_step_q4,
-      16, 16);
-}
-
-void vp9_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                              uint8_t *dst_u,
-                                              uint8_t *dst_v,
-                                              int dst_uvstride) {
-  int offset;
-  uint8_t *uptr, *vptr;
-
-  int_mv _16x16mv;
-  int mv_row;
-  int mv_col;
-  int omv_row, omv_col;
-
-  int pre_stride = xd->block[0].pre_stride;
-
-  _16x16mv.as_int = xd->mode_info_context->mbmi.mv[1].as_int;
-
-  if (xd->mode_info_context->mbmi.need_to_clamp_secondmv)
-    clamp_mv_to_umv_border(&_16x16mv.as_mv, xd);
-
-  mv_row = _16x16mv.as_mv.row;
-  mv_col = _16x16mv.as_mv.col;
-
-  /* calc uv motion vectors */
-  omv_row = mv_row;
-  omv_col = mv_col;
-  mv_row = (mv_row + (mv_row > 0)) >> 1;
-  mv_col = (mv_col + (mv_col > 0)) >> 1;
-
-  mv_row &= xd->fullpixel_mask;
-  mv_col &= xd->fullpixel_mask;
-
-  pre_stride >>= 1;
-  offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
-  uptr = xd->second_pre.u_buffer + offset;
-  vptr = xd->second_pre.v_buffer + offset;
-
-  xd->subpix.predict[!!(omv_col & 15)][!!(omv_row & 15)][1](
-      uptr, pre_stride, dst_u, dst_uvstride,
-      xd->subpix.filter_x[omv_col & 15], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[omv_row & 15], xd->subpix.y_step_q4,
-      8, 8);
-
-  xd->subpix.predict[!!(omv_col & 15)][!!(omv_row & 15)][1](
-      vptr, pre_stride, dst_v, dst_uvstride,
-      xd->subpix.filter_x[omv_col & 15], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[omv_row & 15], xd->subpix.y_step_q4,
-      8, 8);
-}
-
-void vp9_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *xd,
-                                            uint8_t *dst_y,
-                                            uint8_t *dst_u,
-                                            uint8_t *dst_v,
-                                            int dst_ystride,
-                                            int dst_uvstride) {
-  vp9_build_2nd_inter16x16_predictors_mby(xd, dst_y, dst_ystride);
-  vp9_build_2nd_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
-}
-
 static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
   int i;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
   BLOCKD *blockd = xd->block;
+  int which_mv = 0;
+  const int use_second_ref = mbmi->second_ref_frame > 0;
 
   if (xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4) {
-    blockd[ 0].bmi = xd->mode_info_context->bmi[ 0];
-    blockd[ 2].bmi = xd->mode_info_context->bmi[ 2];
-    blockd[ 8].bmi = xd->mode_info_context->bmi[ 8];
-    blockd[10].bmi = xd->mode_info_context->bmi[10];
+    for (i = 0; i < 16; i += 8) {
+      BLOCKD *d0 = &blockd[i];
+      BLOCKD *d1 = &blockd[i + 2];
 
-    if (mbmi->need_to_clamp_mvs) {
-      clamp_mv_to_umv_border(&blockd[ 0].bmi.as_mv[0].as_mv, xd);
-      clamp_mv_to_umv_border(&blockd[ 2].bmi.as_mv[0].as_mv, xd);
-      clamp_mv_to_umv_border(&blockd[ 8].bmi.as_mv[0].as_mv, xd);
-      clamp_mv_to_umv_border(&blockd[10].bmi.as_mv[0].as_mv, xd);
-      if (mbmi->second_ref_frame > 0) {
-        clamp_mv_to_umv_border(&blockd[ 0].bmi.as_mv[1].as_mv, xd);
-        clamp_mv_to_umv_border(&blockd[ 2].bmi.as_mv[1].as_mv, xd);
-        clamp_mv_to_umv_border(&blockd[ 8].bmi.as_mv[1].as_mv, xd);
-        clamp_mv_to_umv_border(&blockd[10].bmi.as_mv[1].as_mv, xd);
+      blockd[i + 0].bmi = xd->mode_info_context->bmi[i + 0];
+      blockd[i + 2].bmi = xd->mode_info_context->bmi[i + 2];
+
+      for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+        if (mbmi->need_to_clamp_mvs) {
+          clamp_mv_to_umv_border(&blockd[i + 0].bmi.as_mv[which_mv].as_mv, xd);
+          clamp_mv_to_umv_border(&blockd[i + 2].bmi.as_mv[which_mv].as_mv, xd);
+        }
+
+        /* TODO(jkoleszar): Enabling this for EIGHTTAP_SMOOTH changes the
+         * result slightly, for reasons that are not immediately obvious to me.
+         * It probably makes sense to enable this for all filter types to be
+         * consistent with the way we do 8x4 below. Leaving disabled for now.
+         */
+        if (mbmi->interp_filter != EIGHTTAP_SMOOTH) {
+          build_2x1_inter_predictor(d0, d1, xd->scale_factor, 8, 16,
+                                    which_mv, &xd->subpix);
+        } else {
+          uint8_t **base_pre0 = which_mv ? d0->base_second_pre : d0->base_pre;
+          uint8_t **base_pre1 = which_mv ? d1->base_second_pre : d1->base_pre;
+
+          vp9_build_inter_predictor(*base_pre0 + d0->pre,
+                                    d0->pre_stride,
+                                    d0->predictor, 16,
+                                    &d0->bmi.as_mv[which_mv],
+                                    &xd->scale_factor[which_mv],
+                                    8, 8, which_mv, &xd->subpix);
+          vp9_build_inter_predictor(*base_pre1 + d1->pre,
+                                    d1->pre_stride,
+                                    d1->predictor, 16,
+                                    &d1->bmi.as_mv[which_mv],
+                                    &xd->scale_factor[which_mv],
+                                    8, 8, which_mv, &xd->subpix);
+        }
       }
-    }
-
-
-    vp9_build_inter_predictors4b(xd, &blockd[ 0], 16);
-    vp9_build_inter_predictors4b(xd, &blockd[ 2], 16);
-    vp9_build_inter_predictors4b(xd, &blockd[ 8], 16);
-    vp9_build_inter_predictors4b(xd, &blockd[10], 16);
-
-    if (mbmi->second_ref_frame > 0) {
-      vp9_build_2nd_inter_predictors4b(xd, &blockd[ 0], 16);
-      vp9_build_2nd_inter_predictors4b(xd, &blockd[ 2], 16);
-      vp9_build_2nd_inter_predictors4b(xd, &blockd[ 8], 16);
-      vp9_build_2nd_inter_predictors4b(xd, &blockd[10], 16);
     }
   } else {
     for (i = 0; i < 16; i += 2) {
@@ -749,25 +654,9 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
       blockd[i + 0].bmi = xd->mode_info_context->bmi[i + 0];
       blockd[i + 1].bmi = xd->mode_info_context->bmi[i + 1];
 
-      if (mbmi->need_to_clamp_mvs) {
-        clamp_mv_to_umv_border(&blockd[i + 0].bmi.as_mv[0].as_mv, xd);
-        clamp_mv_to_umv_border(&blockd[i + 1].bmi.as_mv[0].as_mv, xd);
-        if (mbmi->second_ref_frame > 0) {
-          clamp_mv_to_umv_border(&blockd[i + 0].bmi.as_mv[1].as_mv, xd);
-          clamp_mv_to_umv_border(&blockd[i + 1].bmi.as_mv[1].as_mv, xd);
-        }
-      }
-
-      if (d0->bmi.as_mv[0].as_int == d1->bmi.as_mv[0].as_int)
-        build_inter_predictors2b(xd, d0, 16);
-      else {
-        vp9_build_inter_predictors_b(d0, 16, &xd->subpix);
-        vp9_build_inter_predictors_b(d1, 16, &xd->subpix);
-      }
-
-      if (mbmi->second_ref_frame > 0) {
-        vp9_build_2nd_inter_predictors_b(d0, 16, &xd->subpix);
-        vp9_build_2nd_inter_predictors_b(d1, 16, &xd->subpix);
+      for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+        build_2x1_inter_predictor(d0, d1, xd->scale_factor, 4, 16,
+                                  which_mv, &xd->subpix);
       }
     }
   }
@@ -776,16 +665,9 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd) {
     BLOCKD *d0 = &blockd[i];
     BLOCKD *d1 = &blockd[i + 1];
 
-    if (d0->bmi.as_mv[0].as_int == d1->bmi.as_mv[0].as_int)
-      build_inter_predictors2b(xd, d0, 8);
-    else {
-      vp9_build_inter_predictors_b(d0, 8, &xd->subpix);
-      vp9_build_inter_predictors_b(d1, 8, &xd->subpix);
-    }
-
-    if (mbmi->second_ref_frame > 0) {
-      vp9_build_2nd_inter_predictors_b(d0, 8, &xd->subpix);
-      vp9_build_2nd_inter_predictors_b(d1, 8, &xd->subpix);
+    for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+      build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8,
+                                which_mv, &xd->subpix);
     }
   }
 }
@@ -882,22 +764,25 @@ void build_4x4uvmvs(MACROBLOCKD *xd) {
   }
 }
 
+void vp9_build_inter16x16_predictors_mb(MACROBLOCKD *xd,
+                                        uint8_t *dst_y,
+                                        uint8_t *dst_u,
+                                        uint8_t *dst_v,
+                                        int dst_ystride,
+                                        int dst_uvstride) {
+  vp9_build_inter16x16_predictors_mby(xd, dst_y, dst_ystride);
+  vp9_build_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
+}
+
+
 void vp9_build_inter_predictors_mb(MACROBLOCKD *xd) {
   if (xd->mode_info_context->mbmi.mode != SPLITMV) {
-    vp9_build_1st_inter16x16_predictors_mb(xd, xd->predictor,
-                                           &xd->predictor[256],
-                                           &xd->predictor[320], 16, 8);
+    vp9_build_inter16x16_predictors_mb(xd, xd->predictor,
+                                       &xd->predictor[256],
+                                       &xd->predictor[320], 16, 8);
 
-    if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-      /* 256 = offset of U plane in Y+U+V buffer;
-       * 320 = offset of V plane in Y+U+V buffer.
-       * (256=16x16, 320=16x16+8x8). */
-      vp9_build_2nd_inter16x16_predictors_mb(xd, xd->predictor,
-                                             &xd->predictor[256],
-                                             &xd->predictor[320], 16, 8);
-    }
 #if CONFIG_COMP_INTERINTRA_PRED
-    else if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+    if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
       vp9_build_interintra_16x16_predictors_mb(xd, xd->predictor,
                                                &xd->predictor[256],
                                                &xd->predictor[320], 16, 8);

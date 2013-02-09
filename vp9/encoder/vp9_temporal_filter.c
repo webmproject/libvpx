@@ -12,6 +12,7 @@
 #include <limits.h>
 
 #include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_reconinter.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/encoder/vp9_quantize.h"
@@ -42,40 +43,35 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             int mv_row,
                                             int mv_col,
                                             uint8_t *pred) {
-  int offset;
-  uint8_t *yptr, *uptr, *vptr;
-  int omv_row, omv_col;
+  const int which_mv = 0;
+  int_mv subpel_mv;
+  int_mv fullpel_mv;
 
-  // Y
-  yptr = y_mb_ptr + (mv_row >> 3) * stride + (mv_col >> 3);
+  subpel_mv.as_mv.row = mv_row;
+  subpel_mv.as_mv.col = mv_col;
+  // TODO(jkoleszar): Make this rounding consistent with the rest of the code
+  fullpel_mv.as_mv.row = (mv_row >> 1) & ~7;
+  fullpel_mv.as_mv.col = (mv_col >> 1) & ~7;
 
-  xd->subpix.predict[!!(mv_col & 7)][!!(mv_row & 7)][0](
-      yptr, stride, &pred[0], 16,
-      xd->subpix.filter_x[(mv_col & 7) << 1], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[(mv_row & 7) << 1], xd->subpix.y_step_q4,
-      16, 16);
+  vp9_build_inter_predictor(y_mb_ptr, stride,
+                            &pred[0], 16,
+                            &subpel_mv,
+                            &xd->scale_factor[which_mv],
+                            16, 16, which_mv, &xd->subpix);
 
-  // U & V
-  omv_row = mv_row;
-  omv_col = mv_col;
-  mv_row >>= 1;
-  mv_col >>= 1;
   stride = (stride + 1) >> 1;
-  offset = (mv_row >> 3) * stride + (mv_col >> 3);
-  uptr = u_mb_ptr + offset;
-  vptr = v_mb_ptr + offset;
 
-  xd->subpix.predict[!!(omv_col & 15)][!!(omv_row & 15)][0](
-      uptr, stride, &pred[256], 8,
-      xd->subpix.filter_x[(omv_col & 15)], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[(omv_row & 15)], xd->subpix.y_step_q4,
-      8, 8);
+  vp9_build_inter_predictor_q4(u_mb_ptr, stride,
+                               &pred[256], 8,
+                               &fullpel_mv, &subpel_mv,
+                               &xd->scale_factor_uv[which_mv],
+                               8, 8, which_mv, &xd->subpix);
 
-  xd->subpix.predict[!!(omv_col & 15)][!!(omv_row & 15)][0](
-      vptr, stride, &pred[320], 8,
-      xd->subpix.filter_x[(omv_col & 15)], xd->subpix.x_step_q4,
-      xd->subpix.filter_y[(omv_row & 15)], xd->subpix.y_step_q4,
-      8, 8);
+  vp9_build_inter_predictor_q4(v_mb_ptr, stride,
+                               &pred[320], 8,
+                               &fullpel_mv, &subpel_mv,
+                               &xd->scale_factor_uv[which_mv],
+                               8, 8, which_mv, &xd->subpix);
 }
 
 void vp9_temporal_filter_apply_c(uint8_t *frame1,

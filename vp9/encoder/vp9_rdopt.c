@@ -2115,9 +2115,22 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
       BLOCK *be = &x->block[i];
       int thisdistortion;
 
-      vp9_build_inter_predictors_b(bd, 16, &xd->subpix);
-      if (xd->mode_info_context->mbmi.second_ref_frame > 0)
-        vp9_build_2nd_inter_predictors_b(bd, 16, &xd->subpix);
+      vp9_build_inter_predictor(*(bd->base_pre) + bd->pre,
+                                bd->pre_stride,
+                                bd->predictor, 16,
+                                &bd->bmi.as_mv[0],
+                                &xd->scale_factor[0],
+                                4, 4, 0 /* no avg */, &xd->subpix);
+
+      if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
+        vp9_build_inter_predictor(*(bd->base_second_pre) + bd->pre,
+                                  bd->pre_stride,
+                                  bd->predictor, 16,
+                                  &bd->bmi.as_mv[1],
+                                  &xd->scale_factor[1],
+                                  4, 4, 1 /* avg */, &xd->subpix);
+      }
+
       vp9_subtract_b(be, bd, 16);
       x->fwd_txm4x4(be->src_diff, be->coeff, 32);
       x->quantize_b_4x4(be, bd);
@@ -2159,14 +2172,25 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
     int ib = vp9_i8x8_block[i];
 
     if (labels[ib] == which_label) {
+      const int use_second_ref =
+          xd->mode_info_context->mbmi.second_ref_frame > 0;
+      int which_mv;
       int idx = (ib & 8) + ((ib & 2) << 1);
       BLOCKD *bd = &xd->block[ib], *bd2 = &xd->block[idx];
       BLOCK *be = &x->block[ib], *be2 = &x->block[idx];
       int thisdistortion;
 
-      vp9_build_inter_predictors4b(xd, bd, 16);
-      if (xd->mode_info_context->mbmi.second_ref_frame > 0)
-        vp9_build_2nd_inter_predictors4b(xd, bd, 16);
+      for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+        uint8_t **base_pre = which_mv ? bd->base_second_pre : bd->base_pre;
+
+        vp9_build_inter_predictor(*base_pre + bd->pre,
+                                  bd->pre_stride,
+                                  bd->predictor, 16,
+                                  &bd->bmi.as_mv[which_mv],
+                                  &xd->scale_factor[which_mv],
+                                  8, 8, which_mv, &xd->subpix);
+      }
+
       vp9_subtract_4b_c(be, bd, 16);
 
       if (xd->mode_info_context->mbmi.txfm_size == TX_4X4) {
@@ -3482,19 +3506,19 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         unsigned int sse, var;
         int tmp_rate_y, tmp_rate_u, tmp_rate_v;
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
-        vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
-        if (is_comp_pred)
-          vp9_build_2nd_inter16x16_predictors_mby(xd, xd->predictor, 16);
+        // TODO(jkoleszar): these 2 y/uv should be replaced with one call to
+        // vp9_build_interintra_16x16_predictors_mb().
+        vp9_build_inter16x16_predictors_mby(xd, xd->predictor, 16);
+
 #if CONFIG_COMP_INTERINTRA_PRED
         if (is_comp_interintra_pred) {
           vp9_build_interintra_16x16_predictors_mby(xd, xd->predictor, 16);
         }
 #endif
-        vp9_build_1st_inter16x16_predictors_mbuv(xd, xd->predictor + 256,
-                                                 xd->predictor + 320, 8);
-        if (is_comp_pred)
-          vp9_build_2nd_inter16x16_predictors_mbuv(xd, xd->predictor + 256,
-                                                   xd->predictor + 320, 8);
+
+        vp9_build_inter16x16_predictors_mbuv(xd, xd->predictor + 256,
+                                             xd->predictor + 320, 8);
+
 #if CONFIG_COMP_INTERINTRA_PRED
         if (is_comp_interintra_pred) {
           vp9_build_interintra_16x16_predictors_mbuv(xd, xd->predictor + 256,
@@ -3598,19 +3622,16 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                          xd->dst.y_stride,
                                          xd->dst.uv_stride);
     } else {
-      vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
-      if (is_comp_pred)
-        vp9_build_2nd_inter16x16_predictors_mby(xd, xd->predictor, 16);
+      // TODO(jkoleszar): These y/uv fns can be replaced with their mb
+      // equivalent
+      vp9_build_inter16x16_predictors_mby(xd, xd->predictor, 16);
 #if CONFIG_COMP_INTERINTRA_PRED
       if (is_comp_interintra_pred) {
         vp9_build_interintra_16x16_predictors_mby(xd, xd->predictor, 16);
       }
 #endif
-      vp9_build_1st_inter16x16_predictors_mbuv(xd, &xd->predictor[256],
-                                               &xd->predictor[320], 8);
-      if (is_comp_pred)
-        vp9_build_2nd_inter16x16_predictors_mbuv(xd, &xd->predictor[256],
-                                                 &xd->predictor[320], 8);
+      vp9_build_inter16x16_predictors_mbuv(xd, &xd->predictor[256],
+                                           &xd->predictor[320], 8);
 #if CONFIG_COMP_INTERINTRA_PRED
       if (is_comp_interintra_pred) {
         vp9_build_interintra_16x16_predictors_mbuv(xd, &xd->predictor[256],

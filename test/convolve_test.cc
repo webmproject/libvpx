@@ -506,10 +506,12 @@ INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
     make_tuple(4, 4, &convolve8_2d_only_c),
     make_tuple(8, 4, &convolve8_2d_only_c),
     make_tuple(8, 8, &convolve8_2d_only_c),
+    make_tuple(16, 8, &convolve8_2d_only_c),
     make_tuple(16, 16, &convolve8_2d_only_c),
     make_tuple(4, 4, &convolve8_c),
     make_tuple(8, 4, &convolve8_c),
     make_tuple(8, 8, &convolve8_c),
+    make_tuple(16, 8, &convolve8_c),
     make_tuple(16, 16, &convolve8_c)));
 }
 
@@ -523,5 +525,6 @@ INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
     make_tuple(4, 4, &convolve8_ssse3),
     make_tuple(8, 4, &convolve8_ssse3),
     make_tuple(8, 8, &convolve8_ssse3),
+    make_tuple(16, 8, &convolve8_ssse3),
     make_tuple(16, 16, &convolve8_ssse3)));
 #endif
