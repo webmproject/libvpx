@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//oI4\u003d",
+        "filename": "vp9/common/vp9_tile_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-09T15:26:54Z",
+      "side": 1,
+      "message": "have you given any thought to whether the number of tiles must be a power of 2? It seems like if this were a little more flexible, you could more closely align the tile width to a SB boundary, and that would help quality. For example, 1920 could be packed into 3 or 5 tiles, but if you pack it into 4, then you lose the 64x64 mode on 1/8 sbs. This will come up with other resolutions too with spatial scalability, 3/2 and 5/4 are useful scaling factors.",
+      "revId": "f9eb2d949d63549819beabe731e9efe1acc39726",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
