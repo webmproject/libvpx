@@ -7,12 +7,15 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "vp9/common/vp9_convolve.h"
+
 #include <assert.h>
 
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_common.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/mem.h"
 
 #define VP9_FILTER_WEIGHT 128
 #define VP9_FILTER_SHIFT  7
@@ -293,9 +296,21 @@ void vp9_convolve8_avg_c(const uint8_t *src, int src_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
-  convolve_avg_c(src, src_stride, dst, dst_stride,
-                 filter_x, x_step_q4, filter_y, y_step_q4,
-                 w, h, 8);
+  /* Fixed size intermediate buffer places limits on parameters. */
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp, 16 * 16);
+  assert(w <= 16);
+  assert(h <= 16);
+
+  vp9_convolve8(src, src_stride,
+                temp, 16,
+                filter_x, x_step_q4,
+                filter_y, y_step_q4,
+                w, h);
+  vp9_convolve_avg(temp, 16,
+                   dst, dst_stride,
+                   NULL, 0, /* These unused parameter should be removed! */
+                   NULL, 0, /* These unused parameter should be removed! */
+                   w, h);
 }
 
 void vp9_convolve_copy(const uint8_t *src, int src_stride,
