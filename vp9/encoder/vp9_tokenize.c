@@ -109,6 +109,7 @@ static void tokenize_b(VP9_COMP *cpi,
                        int dry_run) {
   int pt; /* near block/prev token context index */
   int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0;
+  int recent_energy = 0;
   const BLOCKD * const b = xd->block + ib;
   const int eob = b->eob;     /* one beyond last nonzero coeff */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
@@ -245,7 +246,8 @@ static void tokenize_b(VP9_COMP *cpi,
     if (!dry_run) {
       ++counts[type][band][pt][token];
     }
-    pt = vp9_prev_token_class[token];
+
+    pt = vp9_get_coef_context(&recent_energy, token);
     ++t;
   } while (c < eob && ++c < seg_eob);
 

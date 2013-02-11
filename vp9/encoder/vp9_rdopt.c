@@ -490,23 +490,25 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
     seg_eob = 0;
 
   if (tx_type != DCT_DCT) {
+    int recent_energy = 0;
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
       cost += token_costs[band[c]][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
-      pt = vp9_prev_token_class[t];
+      pt = vp9_get_coef_context(&recent_energy, t);
     }
     if (c < seg_eob)
       cost += mb->hybrid_token_costs[tx_size][type][band[c]]
           [pt][DCT_EOB_TOKEN];
   } else {
+    int recent_energy = 0;
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
       cost += token_costs[band[c]][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
-      pt = vp9_prev_token_class[t];
+      pt = vp9_get_coef_context(&recent_energy, t);
     }
     if (c < seg_eob)
       cost += mb->token_costs[tx_size][type][band[c]]
@@ -670,7 +672,8 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   // TODO(jingning) is it possible to quickly determine whether to force
   //                trailing coefficients to be zero, instead of running trellis
   //                optimization in the rate-distortion optimization loop?
-  if (mb->optimize && mb->e_mbd.mode_info_context->mbmi.mode < I8X8_PRED)
+  if (mb->optimize &&
+      xd->mode_info_context->mbmi.mode < I8X8_PRED)
     vp9_optimize_mby_16x16(mb);
 
   d = vp9_mbblock_error(mb, 0);

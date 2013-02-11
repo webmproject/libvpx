@@ -106,9 +106,6 @@ typedef vp9_prob vp9_coeff_probs[COEF_BANDS][PREV_COEF_CONTEXTS]
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
 #define MODULUS_PARAM               13  /* Modulus parameter */
 
-extern DECLARE_ALIGNED(16, const uint8_t,
-                       vp9_prev_token_class[MAX_ENTROPY_TOKENS]);
-
 struct VP9Common;
 void vp9_default_coef_probs(struct VP9Common *);
 extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_4x4[16]);
@@ -129,4 +126,5 @@ static void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
   vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
 }
 
+extern int vp9_get_coef_context(int * recent_energy, int token);
 #endif  // VP9_COMMON_VP9_ENTROPY_H_

@@ -318,6 +318,29 @@ vp9_extra_bit_struct vp9_extra_bits[12] = {
 
 #include "vp9/common/vp9_default_coef_probs.h"
 
+// This function updates and then returns n AC coefficient context
+// This is currently a placeholder function to allow experimentation
+// using various context models based on the energy earlier tokens
+// within the current block.
+//
+// For now it just returns the previously used context.
+int vp9_get_coef_context(int * recent_energy, int token) {
+  // int token_energy;
+  // int av_energy;
+
+  // Placeholder code for experiments with token energy
+  // as a coefficient context.
+  /*token_energy = ((token != DCT_EOB_TOKEN) ? token : 0);
+  if (token_energy) {
+    av_energy = (token_energy + *recent_energy + 1) >> 1;
+  } else {
+    av_energy = 0;
+  }
+  *recent_energy = token_energy;*/
+
+  return vp9_prev_token_class[token];
+};
+
 void vp9_default_coef_probs(VP9_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs_4x4, default_coef_probs_4x4,
              sizeof(pc->fc.coef_probs_4x4));
