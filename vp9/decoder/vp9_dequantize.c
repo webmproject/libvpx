@@ -357,21 +357,17 @@ void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
 
   if (eob) {
     input[0] = input[0] * dq[0] / 2;
-#if !CONFIG_DWTDCTHYBRID
     if (eob == 1) {
       vp9_short_idct1_32x32_c(input, output);
       add_constant_residual(output[0], pred, pitch, dest, stride, 32, 32);
       input[0] = 0;
     } else {
-#endif
       for (i = 1; i < 1024; i++)
         input[i] = input[i] * dq[1] / 2;
       vp9_short_idct32x32_c(input, output, 64);
       vpx_memset(input, 0, 2048);
       add_residual(output, pred, pitch, dest, stride, 32, 32);
-#if !CONFIG_DWTDCTHYBRID
     }
-#endif
   }
 }
 

@@ -244,7 +244,6 @@ EXPERIMENT_LIST="
     newbintramodes
     comp_interintra_pred
     tx64x64
-    dwtdcthybrid
     cnvcontext
     newcoefcontext
     enable_6tap

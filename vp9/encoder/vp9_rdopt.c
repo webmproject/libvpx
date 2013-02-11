@@ -859,21 +859,18 @@ static void super_block_yrd_32x32(MACROBLOCK *x,
   SUPERBLOCK  * const x_sb = &x->sb_coeff_data;
   MACROBLOCKD * const xd = &x->e_mbd;
   SUPERBLOCKD * const xd_sb = &xd->sb_coeff_data;
-#if DEBUG_ERROR || CONFIG_DWTDCTHYBRID
+#if DEBUG_ERROR
   int16_t out[1024];
 #endif
 
   vp9_transform_sby_32x32(x);
   vp9_quantize_sby_32x32(x);
-#if DEBUG_ERROR || CONFIG_DWTDCTHYBRID
+#if DEBUG_ERROR
   vp9_short_idct32x32(xd_sb->dqcoeff, out, 64);
 #endif
 
-#if !CONFIG_DWTDCTHYBRID
   *distortion = vp9_sb_block_error_c(x_sb->coeff, xd_sb->dqcoeff, 1024);
-#else
-  *distortion = vp9_block_error_c(x_sb->src_diff, out, 1024) << 4;
-#endif
+
 #if DEBUG_ERROR
   printf("IDCT/FDCT error 32x32: %d (d: %d)\n",
          vp9_block_error_c(x_sb->src_diff, out, 1024), *distortion);
