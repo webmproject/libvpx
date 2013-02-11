@@ -1543,8 +1543,10 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
     /* transform size (4x4, 8x8, 16x16 or select-per-mb) selection */
 #if CONFIG_LOSSLESS
+    cpi->mb.e_mbd.lossless = 0;
     if (cpi->oxcf.lossless) {
       txfm_type = ONLY_4X4;
+      cpi->mb.e_mbd.lossless = 1;
     } else
 #endif
     /* FIXME (rbultje)

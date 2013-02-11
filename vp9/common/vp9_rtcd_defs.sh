@@ -324,10 +324,15 @@ specialize vp9_dc_only_idct_add
 
 if [ "$CONFIG_LOSSLESS" = "yes" ]; then
 prototype void vp9_short_inv_walsh4x4_1_x8 "int16_t *input, int16_t *output, int pitch"
+specialize vp9_short_inv_walsh4x4_1_x8
 prototype void vp9_short_inv_walsh4x4_x8 "int16_t *input, int16_t *output, int pitch"
+specialize vp9_short_inv_walsh4x4_x8
 prototype void vp9_dc_only_inv_walsh_add "int input_dc, uint8_t *pred_ptr, uint8_t *dst_ptr, int pitch, int stride"
+specialize vp9_dc_only_inv_walsh_add
 prototype void vp9_short_inv_walsh4x4_1_lossless "int16_t *in, int16_t *out"
+specialize vp9_short_inv_walsh4x4_1_lossless
 prototype void vp9_short_inv_walsh4x4_lossless "int16_t *in, int16_t *out"
+specialize vp9_short_inv_walsh4x4_lossless
 fi
 
 prototype unsigned int vp9_sad32x3 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int ref_stride, int max_sad"

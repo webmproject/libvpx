@@ -42,20 +42,6 @@ extern void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *
                                                      uint16_t *eobs);
 #endif
 
-typedef void (*vp9_dequant_idct_add_fn_t)(int16_t *input, const int16_t *dq,
-    unsigned char *pred, unsigned char *output, int pitch, int stride);
-typedef void(*vp9_dequant_dc_idct_add_fn_t)(int16_t *input, const int16_t *dq,
-    unsigned char *pred, unsigned char *output, int pitch, int stride, int dc);
-
-typedef void(*vp9_dequant_dc_idct_add_y_block_fn_t)(int16_t *q, const int16_t *dq,
-    unsigned char *pre, unsigned char *dst, int stride, uint16_t *eobs,
-    const int16_t *dc);
-typedef void(*vp9_dequant_idct_add_y_block_fn_t)(int16_t *q, const int16_t *dq,
-    unsigned char *pre, unsigned char *dst, int stride, uint16_t *eobs);
-typedef void(*vp9_dequant_idct_add_uv_block_fn_t)(int16_t *q, const int16_t *dq,
-    unsigned char *pre, unsigned char *dst_u, unsigned char *dst_v, int stride,
-    uint16_t *eobs);
-
 void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input, const int16_t *dq,
                                     unsigned char *pred, unsigned char *dest,
                                     int pitch, int stride, uint16_t eobs);
