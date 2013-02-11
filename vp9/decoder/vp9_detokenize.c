@@ -63,24 +63,11 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
   return decode_bool(br, 128) ? -value_to_sign : value_to_sign;
 }
 
-#if CONFIG_NEWCOEFCONTEXT
-#define PT pn
-#define INCREMENT_COUNT(token)                       \
-  do {                                               \
-    coef_counts[type][coef_bands[c]][pn][token]++;   \
-    pn = pt = vp9_prev_token_class[token];           \
-    if (c < seg_eob - 1 && NEWCOEFCONTEXT_BAND_COND(coef_bands[c + 1]))  \
-      pn = vp9_get_coef_neighbor_context(            \
-          qcoeff_ptr, nodc, neighbors, scan[c + 1]); \
-  } while (0)
-#else
-#define PT pt
 #define INCREMENT_COUNT(token)               \
   do {                                       \
     coef_counts[type][coef_bands[c]][pt][token]++; \
     pt = vp9_prev_token_class[token];              \
   } while (0)
-#endif  /* CONFIG_NEWCOEFCONTEXT */
 
 #define WRITE_COEF_CONTINUE(val, token)                       \
   {                                                           \
@@ -108,10 +95,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   const int lidx = vp9_block2left[txfm_size][block_idx];
   ENTROPY_CONTEXT above_ec = A0[aidx] != 0, left_ec = L0[lidx] != 0;
   FRAME_CONTEXT *const fc = &dx->common.fc;
-#if CONFIG_NEWCOEFCONTEXT
-  const int *neighbors;
-  int pn;
-#endif
   int nodc = (type == PLANE_TYPE_Y_NO_DC);
   int pt, c = nodc;
   vp9_coeff_probs *coef_probs;
@@ -192,15 +175,11 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, above_ec, left_ec);
-#if CONFIG_NEWCOEFCONTEXT
-  pn = pt;
-  neighbors = vp9_get_coef_neighbors_handle(scan);
-#endif
   while (1) {
     int val;
     const uint8_t *cat6 = cat6_prob;
     if (c >= seg_eob) break;
-    prob = coef_probs[type][coef_bands[c]][PT];
+    prob = coef_probs[type][coef_bands[c]][pt];
     if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
       break;
 SKIP_START:
@@ -208,7 +187,7 @@ SKIP_START:
     if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
-      prob = coef_probs[type][coef_bands[c]][PT];
+      prob = coef_probs[type][coef_bands[c]][pt];
       goto SKIP_START;
     }
     // ONE_CONTEXT_NODE_0_
@@ -272,7 +251,7 @@ SKIP_START:
   }
 
   if (c < seg_eob)
-    coef_counts[type][coef_bands[c]][PT][DCT_EOB_TOKEN]++;
+    coef_counts[type][coef_bands[c]][pt][DCT_EOB_TOKEN]++;
 
   A0[aidx] = L0[lidx] = (c > !type);
   if (txfm_size >= TX_8X8 && type != PLANE_TYPE_Y2) {

@@ -100,12 +100,6 @@ static void fill_value_tokens() {
   vp9_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
-#if CONFIG_NEWCOEFCONTEXT
-#define PT pn
-#else
-#define PT pt
-#endif
-
 static void tokenize_b(VP9_COMP *cpi,
                        MACROBLOCKD *xd,
                        const int ib,
@@ -126,10 +120,6 @@ static void tokenize_b(VP9_COMP *cpi,
   vp9_coeff_probs *probs;
   const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
                           get_tx_type(xd, b) : DCT_DCT;
-#if CONFIG_NEWCOEFCONTEXT
-  const int *neighbors;
-  int pn;
-#endif
 
   ENTROPY_CONTEXT *const a = (ENTROPY_CONTEXT *)xd->above_context +
       vp9_block2above[tx_size][ib];
@@ -228,10 +218,6 @@ static void tokenize_b(VP9_COMP *cpi,
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
-#if CONFIG_NEWCOEFCONTEXT
-  neighbors = vp9_get_coef_neighbors_handle(scan);
-  pn = pt;
-#endif
 
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
     seg_eob = 0;
@@ -252,21 +238,14 @@ static void tokenize_b(VP9_COMP *cpi,
     }
 
     t->Token = token;
-    t->context_tree = probs[type][band][PT];
+    t->context_tree = probs[type][band][pt];
     t->skip_eob_node = (pt == 0) && ((band > 0 && type != PLANE_TYPE_Y_NO_DC) ||
                                      (band > 1 && type == PLANE_TYPE_Y_NO_DC));
     assert(vp9_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
     if (!dry_run) {
-      ++counts[type][band][PT][token];
+      ++counts[type][band][pt][token];
     }
     pt = vp9_prev_token_class[token];
-#if CONFIG_NEWCOEFCONTEXT
-    if (c < seg_eob - 1 && NEWCOEFCONTEXT_BAND_COND(bands[c + 1]))
-      pn = vp9_get_coef_neighbor_context(
-          qcoeff_ptr, (type == PLANE_TYPE_Y_NO_DC), neighbors, scan[c + 1]);
-    else
-      pn = pt;
-#endif
     ++t;
   } while (c < eob && ++c < seg_eob);
 

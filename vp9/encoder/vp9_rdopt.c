@@ -419,11 +419,6 @@ int vp9_uvsse(MACROBLOCK *x) {
 
 }
 
-#if CONFIG_NEWCOEFCONTEXT
-#define PT pn
-#else
-#define PT pt
-#endif
 static INLINE int cost_coeffs(MACROBLOCK *mb,
                               BLOCKD *b, PLANE_TYPE type,
                               ENTROPY_CONTEXT *a,
@@ -443,11 +438,6 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   unsigned int (*token_costs)[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
       (tx_type == DCT_DCT) ? mb->token_costs[tx_size][type] :
                              mb->hybrid_token_costs[tx_size][type];
-#if CONFIG_NEWCOEFCONTEXT
-  const int *neighbors;
-  int pn;
-#endif
-
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
 
   switch (tx_size) {
@@ -495,10 +485,6 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
-#if CONFIG_NEWCOEFCONTEXT
-  neighbors = vp9_get_coef_neighbors_handle(scan);
-  pn = pt;
-#endif
 
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
     seg_eob = 0;
@@ -507,20 +493,13 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
-      cost += token_costs[band[c]][PT][t];
+      cost += token_costs[band[c]][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_prev_token_class[t];
-#if CONFIG_NEWCOEFCONTEXT
-      if (c < seg_eob - 1 && NEWCOEFCONTEXT_BAND_COND(band[c + 1]))
-        pn = vp9_get_coef_neighbor_context(
-            qcoeff_ptr, (type == PLANE_TYPE_Y_NO_DC), neighbors, scan[c + 1]);
-      else
-        pn = pt;
-#endif
     }
     if (c < seg_eob)
       cost += mb->hybrid_token_costs[tx_size][type][band[c]]
-          [PT][DCT_EOB_TOKEN];
+          [pt][DCT_EOB_TOKEN];
   } else {
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
@@ -528,17 +507,10 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       cost += token_costs[band[c]][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_prev_token_class[t];
-#if CONFIG_NEWCOEFCONTEXT
-      if (c < seg_eob - 1 && NEWCOEFCONTEXT_BAND_COND(band[c + 1]))
-        pn = vp9_get_coef_neighbor_context(
-            qcoeff_ptr, (type == PLANE_TYPE_Y_NO_DC), neighbors, scan[c + 1]);
-      else
-        pn = pt;
-#endif
     }
     if (c < seg_eob)
       cost += mb->token_costs[tx_size][type][band[c]]
-          [PT][DCT_EOB_TOKEN];
+          [pt][DCT_EOB_TOKEN];
   }
 
   // is eob first coefficient;
