@@ -50,6 +50,14 @@ static const int cospi_29_64 = 2404;
 static const int cospi_30_64 = 1606;
 static const int cospi_31_64 = 804;
 
+#if CONFIG_INTHT4X4
+//  16384 * sqrt(2) * sin(kPi/9) * 2 / 3
+static const int sinpi_1_9 = 5283;
+static const int sinpi_2_9 = 9929;
+static const int sinpi_3_9 = 13377;
+static const int sinpi_4_9 = 15212;
+#endif
+
 static INLINE int dct_const_round_shift(int input) {
   int rv = (input + DCT_CONST_ROUNDING) >> DCT_CONST_BITS;
   assert((rv <= INT16_MAX) && (rv >= INT16_MIN));

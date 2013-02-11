@@ -494,7 +494,6 @@ void vp9_dc_only_inv_walsh_add_c(short input_dc, uint8_t *pred_ptr,
 }
 #endif
 
-
 void idct4_1d(int16_t *input, int16_t *output) {
   int16_t step[4];
   int temp1, temp2;
@@ -651,6 +650,100 @@ void vp9_short_idct8x8_c(int16_t *input, int16_t *output, int pitch) {
     }
 }
 
+#if CONFIG_INTHT4X4
+static void iadst4_1d(int16_t *input, int16_t *output) {
+  int x0, x1, x2, x3;
+  int s0, s1, s2, s3, s4, s5, s6, s7;
+
+  x0 = input[0];
+  x1 = input[1];
+  x2 = input[2];
+  x3 = input[3];
+
+  if (!(x0 | x1 | x2 | x3)) {
+    output[0] = output[1] = output[2] = output[3] = 0;
+    return;
+  }
+
+  s0 = sinpi_1_9 * x0;
+  s1 = sinpi_2_9 * x0;
+  s2 = sinpi_3_9 * x1;
+  s3 = sinpi_4_9 * x2;
+  s4 = sinpi_1_9 * x2;
+  s5 = sinpi_2_9 * x3;
+  s6 = sinpi_4_9 * x3;
+  s7 = x0 - x2 + x3;
+
+  x0 = s0 + s3 + s5;
+  x1 = s1 - s4 - s6;
+  x2 = sinpi_3_9 * s7;
+  x3 = s2;
+
+  s0 = x0 + x3;
+  s1 = x1 + x3;
+  s2 = x2;
+  s3 = x0 + x1 - x3;
+
+  // 1-D transform scaling factor is sqrt(2).
+  // The overall dynamic range is 14b (input) + 14b (multiplication scaling)
+  // + 1b (addition) = 29b.
+  // Hence the output bit depth is 15b.
+  output[0] = dct_const_round_shift(s0);
+  output[1] = dct_const_round_shift(s1);
+  output[2] = dct_const_round_shift(s2);
+  output[3] = dct_const_round_shift(s3);
+}
+
+void vp9_short_iht4x4_c(int16_t *input, int16_t *output,
+                        int pitch, TX_TYPE tx_type) {
+  int16_t out[16];
+  int16_t *outptr = &out[0];
+  const int short_pitch = pitch >> 1;
+  int i, j;
+  int16_t temp_in[4], temp_out[4];
+
+  void (*invr)(int16_t*, int16_t*);
+  void (*invc)(int16_t*, int16_t*);
+
+  switch (tx_type) {
+    case ADST_ADST:
+      invc = &iadst4_1d;
+      invr = &iadst4_1d;
+      break;
+    case ADST_DCT:
+      invc = &iadst4_1d;
+      invr = &idct4_1d;
+      break;
+    case DCT_ADST:
+      invc = &idct4_1d;
+      invr = &iadst4_1d;
+      break;
+    case DCT_DCT:
+      invc = &idct4_1d;
+      invr = &idct4_1d;
+      break;
+    default:
+      assert(0);
+  }
+
+  // inverse transform row vectors
+  for (i = 0; i < 4; ++i) {
+    invr(input, outptr);
+    input  += 4;
+    outptr += 4;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j)
+      temp_in[j] = out[j * 4 + i];
+    invc(temp_in, temp_out);
+    for (j = 0; j < 4; ++j)
+      output[j * short_pitch + i] = (temp_out[j] + 8) >> 4;
+  }
+}
+#endif
+
 #if CONFIG_INTHT
 static void iadst8_1d(int16_t *input, int16_t *output) {
   int x0, x1, x2, x3, x4, x5, x6, x7;
@@ -733,7 +826,7 @@ static void iadst8_1d(int16_t *input, int16_t *output) {
 }
 
 void vp9_short_iht8x8_c(int16_t *input, int16_t *output,
-                        TX_TYPE tx_type, int pitch) {
+                        int pitch, TX_TYPE tx_type) {
   int16_t out[8 * 8];
   int16_t *outptr = &out[0];
   const int short_pitch = pitch >> 1;

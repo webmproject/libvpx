@@ -69,7 +69,11 @@ void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
     input[i] = dq[i] * input[i];
   }
 
+#if CONFIG_INTHT4X4
+  vp9_short_iht4x4(input, output, 8, tx_type);
+#else
   vp9_ihtllm(input, output, 4 << 1, tx_type, 4, eobs);
+#endif
 
   vpx_memset(input, 0, 32);
 
@@ -93,7 +97,7 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
     }
 
 #if CONFIG_INTHT
-    vp9_short_iht8x8(input, output, tx_type, 16);
+    vp9_short_iht8x8(input, output, 16, tx_type);
 #else
     vp9_ihtllm(input, output, 16, tx_type, 8, eobs);
 #endif
