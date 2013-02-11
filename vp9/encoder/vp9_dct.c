@@ -1396,6 +1396,11 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *out, int pitch) {
 #endif
 
 #if !CONFIG_DWTDCTHYBRID
+
+#define TEST_INT_32x32_DCT 1
+
+#if !TEST_INT_32x32_DCT
+
 static void dct32_1d(double *input, double *output, int stride) {
   static const double C1 = 0.998795456205;  // cos(pi * 1 / 64)
   static const double C2 = 0.995184726672;  // cos(pi * 2 / 64)
@@ -1746,6 +1751,389 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
 
   vp9_clear_system_state();  // Make it simd safe : __asm emms;
 }
+
+#else
+
+#define RIGHT_SHIFT 13
+#define ROUNDING (1 << (RIGHT_SHIFT - 1))
+
+static void dct32_1d(int *input, int *output, int last_shift_bits) {
+  static const int16_t C1 = 8182;    // 2^13
+  static const int16_t C2 = 8153;
+  static const int16_t C3 = 8103;
+  static const int16_t C4 = 8035;
+  static const int16_t C5 = 7946;
+  static const int16_t C6 = 7839;
+  static const int16_t C7 = 7713;
+  static const int16_t C8 = 7568;
+  static const int16_t C9 = 7405;
+  static const int16_t C10 = 7225;
+  static const int16_t C11 = 7027;
+  static const int16_t C12 = 6811;
+  static const int16_t C13 = 6580;
+  static const int16_t C14 = 6333;
+  static const int16_t C15 = 6070;
+  static const int16_t C16 = 5793;
+  static const int16_t C17 = 5501;
+  static const int16_t C18 = 5197;
+  static const int16_t C19 = 4880;
+  static const int16_t C20 = 4551;
+  static const int16_t C21 = 4212;
+  static const int16_t C22 = 3862;
+  static const int16_t C23 = 3503;
+  static const int16_t C24 = 3135;
+  static const int16_t C25 = 2760;
+  static const int16_t C26 = 2378;
+  static const int16_t C27 = 1990;
+  static const int16_t C28 = 1598;
+  static const int16_t C29 = 1202;
+  static const int16_t C30 = 803;
+  static const int16_t C31 = 402;
+
+  int step[32];
+
+  int last_rounding = 0;
+  int final_shift = RIGHT_SHIFT;
+  int final_rounding = 0;
+
+  if (last_shift_bits > 0)
+    last_rounding = 1 << (last_shift_bits - 1);
+
+  final_shift += last_shift_bits;
+  if (final_shift > 0)
+    final_rounding = 1 << (final_shift - 1);
+
+  // Stage 1
+  step[0] = input[0] + input[(32 - 1)];
+  step[1] = input[1] + input[(32 - 2)];
+  step[2] = input[2] + input[(32 - 3)];
+  step[3] = input[3] + input[(32 - 4)];
+  step[4] = input[4] + input[(32 - 5)];
+  step[5] = input[5] + input[(32 - 6)];
+  step[6] = input[6] + input[(32 - 7)];
+  step[7] = input[7] + input[(32 - 8)];
+  step[8] = input[8] + input[(32 - 9)];
+  step[9] = input[9] + input[(32 - 10)];
+  step[10] = input[10] + input[(32 - 11)];
+  step[11] = input[11] + input[(32 - 12)];
+  step[12] = input[12] + input[(32 - 13)];
+  step[13] = input[13] + input[(32 - 14)];
+  step[14] = input[14] + input[(32 - 15)];
+  step[15] = input[15] + input[(32 - 16)];
+  step[16] = -input[16] + input[(32 - 17)];
+  step[17] = -input[17] + input[(32 - 18)];
+  step[18] = -input[18] + input[(32 - 19)];
+  step[19] = -input[19] + input[(32 - 20)];
+  step[20] = -input[20] + input[(32 - 21)];
+  step[21] = -input[21] + input[(32 - 22)];
+  step[22] = -input[22] + input[(32 - 23)];
+  step[23] = -input[23] + input[(32 - 24)];
+  step[24] = -input[24] + input[(32 - 25)];
+  step[25] = -input[25] + input[(32 - 26)];
+  step[26] = -input[26] + input[(32 - 27)];
+  step[27] = -input[27] + input[(32 - 28)];
+  step[28] = -input[28] + input[(32 - 29)];
+  step[29] = -input[29] + input[(32 - 30)];
+  step[30] = -input[30] + input[(32 - 31)];
+  step[31] = -input[31] + input[(32 - 32)];
+
+  // Stage 2
+  output[0] = step[0] + step[16 - 1];
+  output[1] = step[1] + step[16 - 2];
+  output[2] = step[2] + step[16 - 3];
+  output[3] = step[3] + step[16 - 4];
+  output[4] = step[4] + step[16 - 5];
+  output[5] = step[5] + step[16 - 6];
+  output[6] = step[6] + step[16 - 7];
+  output[7] = step[7] + step[16 - 8];
+  output[8] = -step[8] + step[16 - 9];
+  output[9] = -step[9] + step[16 - 10];
+  output[10] = -step[10] + step[16 - 11];
+  output[11] = -step[11] + step[16 - 12];
+  output[12] = -step[12] + step[16 - 13];
+  output[13] = -step[13] + step[16 - 14];
+  output[14] = -step[14] + step[16 - 15];
+  output[15] = -step[15] + step[16 - 16];
+
+  output[16] = step[16];
+  output[17] = step[17];
+  output[18] = step[18];
+  output[19] = step[19];
+
+  output[20] = ((-step[20] + step[27]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  output[21] = ((-step[21] + step[26]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  output[22] = ((-step[22] + step[25]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  output[23] = ((-step[23] + step[24]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+
+  output[24] = ((step[24] + step[23]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  output[25] = ((step[25] + step[22]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  output[26] = ((step[26] + step[21]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  output[27] = ((step[27] + step[20]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+
+  output[28] = step[28];
+  output[29] = step[29];
+  output[30] = step[30];
+  output[31] = step[31];
+
+  // Stage 3
+  step[0] = output[0] + output[(8 - 1)];
+  step[1] = output[1] + output[(8 - 2)];
+  step[2] = output[2] + output[(8 - 3)];
+  step[3] = output[3] + output[(8 - 4)];
+  step[4] = -output[4] + output[(8 - 5)];
+  step[5] = -output[5] + output[(8 - 6)];
+  step[6] = -output[6] + output[(8 - 7)];
+  step[7] = -output[7] + output[(8 - 8)];
+  step[8] = output[8];
+  step[9] = output[9];
+  step[10] = ((-output[10] + output[13]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  step[11] = ((-output[11] + output[12]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  step[12] = ((output[12] + output[11]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  step[13] = ((output[13] + output[10]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  step[14] = output[14];
+  step[15] = output[15];
+
+  step[16] = output[16] + output[23];
+  step[17] = output[17] + output[22];
+  step[18] = output[18] + output[21];
+  step[19] = output[19] + output[20];
+  step[20] = -output[20] + output[19];
+  step[21] = -output[21] + output[18];
+  step[22] = -output[22] + output[17];
+  step[23] = -output[23] + output[16];
+  step[24] = -output[24] + output[31];
+  step[25] = -output[25] + output[30];
+  step[26] = -output[26] + output[29];
+  step[27] = -output[27] + output[28];
+  step[28] = output[28] + output[27];
+  step[29] = output[29] + output[26];
+  step[30] = output[30] + output[25];
+  step[31] = output[31] + output[24];
+
+  // Stage 4
+  output[0] = step[0] + step[3];
+  output[1] = step[1] + step[2];
+  output[2] = -step[2] + step[1];
+  output[3] = -step[3] + step[0];
+  output[4] = step[4];
+  output[5] = ((-step[5] + step[6]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  output[6] = ((step[6] + step[5]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  output[7] = step[7];
+  output[8] = step[8] + step[11];
+  output[9] = step[9] + step[10];
+  output[10] = -step[10] + step[9];
+  output[11] = -step[11] + step[8];
+  output[12] = -step[12] + step[15];
+  output[13] = -step[13] + step[14];
+  output[14] = step[14] + step[13];
+  output[15] = step[15] + step[12];
+
+  output[16] = step[16];
+  output[17] = step[17];
+  output[18] = (step[18] * -C8 + step[29] * C24 + ROUNDING) >> RIGHT_SHIFT;
+  output[19] = (step[19] * -C8 + step[28] * C24 + ROUNDING) >> RIGHT_SHIFT;
+  output[20] = (step[20] * -C24 + step[27] * -C8 + ROUNDING) >> RIGHT_SHIFT;
+  output[21] = (step[21] * -C24 + step[26] * -C8 + ROUNDING) >> RIGHT_SHIFT;
+  output[22] = step[22];
+  output[23] = step[23];
+  output[24] = step[24];
+  output[25] = step[25];
+  output[26] = (step[26] * C24 + step[21] * -C8 + ROUNDING) >> RIGHT_SHIFT;
+  output[27] = (step[27] * C24 + step[20] * -C8 + ROUNDING) >> RIGHT_SHIFT;
+  output[28] = (step[28] * C8 + step[19] * C24 + ROUNDING) >> RIGHT_SHIFT;
+  output[29] = (step[29] * C8 + step[18] * C24 + ROUNDING) >> RIGHT_SHIFT;
+  output[30] = step[30];
+  output[31] = step[31];
+
+  // Stage 5
+  step[0] = ((output[0] + output[1]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  step[1] = ((-output[1] + output[0]) * C16 + ROUNDING) >> RIGHT_SHIFT;
+  step[2] = (output[2] * C24 + output[3] * C8 + ROUNDING) >> RIGHT_SHIFT;
+  step[3] = (output[3] * C24 - output[2] * C8 + ROUNDING) >> RIGHT_SHIFT;
+  step[4] = output[4] + output[5];
+  step[5] = -output[5] + output[4];
+  step[6] = -output[6] + output[7];
+  step[7] = output[7] + output[6];
+  step[8] = output[8];
+  step[9] = (output[9] * -C8 + output[14] * C24 + ROUNDING) >> RIGHT_SHIFT;
+  step[10] = (output[10] * -C24 + output[13] * -C8 + ROUNDING) >> RIGHT_SHIFT;
+  step[11] = output[11];
+  step[12] = output[12];
+  step[13] = (output[13] * C24 + output[10] * -C8 + ROUNDING) >> RIGHT_SHIFT;
+  step[14] = (output[14] * C8 + output[9] * C24 + ROUNDING) >> RIGHT_SHIFT;
+  step[15] = output[15];
+
+  step[16] = output[16] + output[19];
+  step[17] = output[17] + output[18];
+  step[18] = -output[18] + output[17];
+  step[19] = -output[19] + output[16];
+  step[20] = -output[20] + output[23];
+  step[21] = -output[21] + output[22];
+  step[22] = output[22] + output[21];
+  step[23] = output[23] + output[20];
+  step[24] = output[24] + output[27];
+  step[25] = output[25] + output[26];
+  step[26] = -output[26] + output[25];
+  step[27] = -output[27] + output[24];
+  step[28] = -output[28] + output[31];
+  step[29] = -output[29] + output[30];
+  step[30] = output[30] + output[29];
+  step[31] = output[31] + output[28];
+
+  // Stage 6
+  output[0] = step[0];
+  output[1] = step[1];
+  output[2] = step[2];
+  output[3] = step[3];
+  output[4] = (step[4] * C28 + step[7] * C4 + ROUNDING) >> RIGHT_SHIFT;
+  output[5] = (step[5] * C12 + step[6] * C20 + ROUNDING) >> RIGHT_SHIFT;
+  output[6] = (step[6] * C12 + step[5] * -C20 + ROUNDING) >> RIGHT_SHIFT;
+  output[7] = (step[7] * C28 + step[4] * -C4 + ROUNDING) >> RIGHT_SHIFT;
+  output[8] = step[8] + step[9];
+  output[9] = -step[9] + step[8];
+  output[10] = -step[10] + step[11];
+  output[11] = step[11] + step[10];
+  output[12] = step[12] + step[13];
+  output[13] = -step[13] + step[12];
+  output[14] = -step[14] + step[15];
+  output[15] = step[15] + step[14];
+
+  output[16] = step[16];
+  output[17] = (step[17] * -C4 + step[30] * C28 + ROUNDING) >> RIGHT_SHIFT;
+  output[18] = (step[18] * -C28 + step[29] * -C4 + ROUNDING) >> RIGHT_SHIFT;
+  output[19] = step[19];
+  output[20] = step[20];
+  output[21] = (step[21] * -C20 + step[26] * C12 + ROUNDING) >> RIGHT_SHIFT;
+  output[22] = (step[22] * -C12 + step[25] * -C20 + ROUNDING) >> RIGHT_SHIFT;
+  output[23] = step[23];
+  output[24] = step[24];
+  output[25] = (step[25] * C12 + step[22] * -C20 + ROUNDING) >> RIGHT_SHIFT;
+  output[26] = (step[26] * C20 + step[21] * C12 + ROUNDING) >> RIGHT_SHIFT;
+  output[27] = step[27];
+  output[28] = step[28];
+  output[29] = (step[29] * C28 + step[18] * -C4 + ROUNDING) >> RIGHT_SHIFT;
+  output[30] = (step[30] * C4 + step[17] * C28 + ROUNDING) >> RIGHT_SHIFT;
+  output[31] = step[31];
+
+  // Stage 7
+  step[0] = output[0];
+  step[1] = output[1];
+  step[2] = output[2];
+  step[3] = output[3];
+  step[4] = output[4];
+  step[5] = output[5];
+  step[6] = output[6];
+  step[7] = output[7];
+  step[8] = (output[8] * C30 + output[15] * C2 + ROUNDING) >> RIGHT_SHIFT;
+  step[9] = (output[9] * C14 + output[14] * C18 + ROUNDING) >> RIGHT_SHIFT;
+  step[10] = (output[10] * C22 + output[13] * C10 + ROUNDING) >> RIGHT_SHIFT;
+  step[11] = (output[11] * C6 + output[12] * C26 + ROUNDING) >> RIGHT_SHIFT;
+  step[12] = (output[12] * C6 + output[11] * -C26 + ROUNDING) >> RIGHT_SHIFT;
+  step[13] = (output[13] * C22 + output[10] * -C10 + ROUNDING) >> RIGHT_SHIFT;
+  step[14] = (output[14] * C14 + output[9] * -C18 + ROUNDING) >> RIGHT_SHIFT;
+  step[15] = (output[15] * C30 + output[8] * -C2 + ROUNDING) >> RIGHT_SHIFT;
+
+  step[16] = output[16] + output[17];
+  step[17] = -output[17] + output[16];
+  step[18] = -output[18] + output[19];
+  step[19] = output[19] + output[18];
+  step[20] = output[20] + output[21];
+  step[21] = -output[21] + output[20];
+  step[22] = -output[22] + output[23];
+  step[23] = output[23] + output[22];
+  step[24] = output[24] + output[25];
+  step[25] = -output[25] + output[24];
+  step[26] = -output[26] + output[27];
+  step[27] = output[27] + output[26];
+  step[28] = output[28] + output[29];
+  step[29] = -output[29] + output[28];
+  step[30] = -output[30] + output[31];
+  step[31] = output[31] + output[30];
+
+  // Final stage --- outputs indices are bit-reversed.
+  output[0] = (step[0] + last_rounding) >> last_shift_bits;
+  output[16] = (step[1] + last_rounding) >> last_shift_bits;
+  output[8] = (step[2] + last_rounding) >> last_shift_bits;
+  output[24] = (step[3] + last_rounding) >> last_shift_bits;
+  output[4] = (step[4] + last_rounding) >> last_shift_bits;
+  output[20] = (step[5] + last_rounding) >> last_shift_bits;
+  output[12] = (step[6] + last_rounding) >> last_shift_bits;
+  output[28] = (step[7] + last_rounding) >> last_shift_bits;
+  output[2] = (step[8] + last_rounding) >> last_shift_bits;
+  output[18] = (step[9] + last_rounding) >> last_shift_bits;
+  output[10] = (step[10] + last_rounding) >> last_shift_bits;
+  output[26] = (step[11] + last_rounding) >> last_shift_bits;
+  output[6] = (step[12] + last_rounding) >> last_shift_bits;
+  output[22] = (step[13] + last_rounding) >> last_shift_bits;
+  output[14] = (step[14] + last_rounding) >> last_shift_bits;
+  output[30] = (step[15] + last_rounding) >> last_shift_bits;
+
+  output[1] = (step[16] * C31 + step[31] * C1 + final_rounding) >> final_shift;
+  output[17] = (step[17] * C15 + step[30] * C17 + final_rounding)
+      >> final_shift;
+  output[9] = (step[18] * C23 + step[29] * C9 + final_rounding) >> final_shift;
+  output[25] = (step[19] * C7 + step[28] * C25 + final_rounding) >> final_shift;
+  output[5] = (step[20] * C27 + step[27] * C5 + final_rounding) >> final_shift;
+  output[21] = (step[21] * C11 + step[26] * C21 + final_rounding)
+      >> final_shift;
+  output[13] = (step[22] * C19 + step[25] * C13 + final_rounding)
+      >> final_shift;
+  output[29] = (step[23] * C3 + step[24] * C29 + final_rounding) >> final_shift;
+  output[3] = (step[24] * C3 + step[23] * -C29 + final_rounding) >> final_shift;
+  output[19] = (step[25] * C19 + step[22] * -C13 + final_rounding)
+      >> final_shift;
+  output[11] = (step[26] * C11 + step[21] * -C21 + final_rounding)
+      >> final_shift;
+  output[27] = (step[27] * C27 + step[20] * -C5 + final_rounding)
+      >> final_shift;
+  output[7] = (step[28] * C7 + step[19] * -C25 + final_rounding) >> final_shift;
+  output[23] = (step[29] * C23 + step[18] * -C9 + final_rounding)
+      >> final_shift;
+  output[15] = (step[30] * C15 + step[17] * -C17 + final_rounding)
+      >> final_shift;
+  output[31] = (step[31] * C31 + step[16] * -C1 + final_rounding)
+      >> final_shift;
+
+  // Clamp to fit 16-bit.
+  if (last_shift_bits > 0) {
+    int i;
+
+    for (i = 0; i < 32; i++)
+      if (output[i] < -32768)
+        output[i] = -32768;
+      else if (output[i] > 32767)
+        output[i] = 32767;
+  }
+}
+#undef RIGHT_SHIFT
+#undef ROUNDING
+
+void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
+  int shortpitch = pitch >> 1;
+  int i, j;
+  int output[1024];
+  // First transform columns
+  for (i = 0; i < 32; i++) {
+    int temp_in[32], temp_out[32];
+    for (j = 0; j < 32; j++)
+      temp_in[j] = input[j * shortpitch + i];
+    dct32_1d(temp_in, temp_out, 0);
+    for (j = 0; j < 32; j++)
+      output[j * 32 + i] = temp_out[j];
+  }
+
+  // Then transform rows
+  for (i = 0; i < 32; ++i) {
+    int temp_in[32], temp_out[32];
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = output[j + i * 32];
+    dct32_1d(temp_in, temp_out, 2);
+    for (j = 0; j < 32; ++j)
+      out[j + i * 32] = temp_out[j];
+  }
+}
+
+#endif
 
 #else  // CONFIG_DWTDCTHYBRID
 
