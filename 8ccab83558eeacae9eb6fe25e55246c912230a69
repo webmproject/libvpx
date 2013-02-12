@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//nMA\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-12T18:49:11Z",
+      "side": 1,
+      "message": "no it doesn\u0027t. remove this comment.",
+      "revId": "8ccab83558eeacae9eb6fe25e55246c912230a69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//nL8\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-12T18:49:11Z",
+      "side": 1,
+      "message": "this needs to go through the scaling path too.",
+      "revId": "8ccab83558eeacae9eb6fe25e55246c912230a69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//nL0\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-12T18:49:11Z",
+      "side": 1,
+      "message": "this needs to go through the scaling path",
+      "revId": "8ccab83558eeacae9eb6fe25e55246c912230a69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
