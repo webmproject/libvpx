@@ -30,6 +30,124 @@
 ;    unsigned int   output_height,
 ;    short *filter
 ;)
+global sym(vp9_filter_block1d4_v8_ssse3) PRIVATE
+sym(vp9_filter_block1d4_v8_ssse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM 7
+    push        rsi
+    push        rdi
+    push        rbx
+    ; end prolog
+
+    ALIGN_STACK 16, rax
+    sub         rsp, 16*5
+    %define k0k1 [rsp + 16*0]
+    %define k2k3 [rsp + 16*1]
+    %define k4k5 [rsp + 16*2]
+    %define k6k7 [rsp + 16*3]
+    %define krd [rsp + 16*4]
+
+    mov         rdx, arg(5)                 ;filter ptr
+    mov         rsi, arg(0)                 ;src_ptr
+    mov         rdi, arg(2)                 ;output_ptr
+    mov         rcx, 0x0400040
+
+    movdqa      xmm4, [rdx]                 ;load filters
+    movd        xmm5, rcx
+    packsswb    xmm4, xmm4
+    pshuflw     xmm0, xmm4, 0b              ;k0_k1
+    pshuflw     xmm1, xmm4, 01010101b       ;k2_k3
+    pshuflw     xmm2, xmm4, 10101010b       ;k4_k5
+    pshuflw     xmm3, xmm4, 11111111b       ;k6_k7
+
+    punpcklqdq  xmm0, xmm0
+    punpcklqdq  xmm1, xmm1
+    punpcklqdq  xmm2, xmm2
+    punpcklqdq  xmm3, xmm3
+
+    movdqa      k0k1, xmm0
+    movdqa      k2k3, xmm1
+    pshufd      xmm5, xmm5, 0
+    movdqa      k4k5, xmm2
+    movdqa      k6k7, xmm3
+    movdqa      krd, xmm5
+
+    movsxd      rdx, DWORD PTR arg(1)       ;pixels_per_line
+
+%if ABI_IS_32BIT=0
+    movsxd      r8, DWORD PTR arg(3)        ;out_pitch
+%endif
+    mov         rax, rsi
+    movsxd      rcx, DWORD PTR arg(4)       ;output_height
+    add         rax, rdx
+
+    lea         rbx, [rdx + rdx*4]
+    add         rbx, rdx                    ;pitch * 6
+
+.vp9_filter_block1d4_v8_ssse3_loop:
+    movd        xmm0, [rsi]                 ;A
+    movd        xmm1, [rsi + rdx]           ;B
+    movd        xmm2, [rsi + rdx * 2]       ;C
+    movd        xmm3, [rax + rdx * 2]       ;D
+    movd        xmm4, [rsi + rdx * 4]       ;E
+    movd        xmm5, [rax + rdx * 4]       ;F
+
+    punpcklbw   xmm0, xmm1                  ;A B
+    punpcklbw   xmm2, xmm3                  ;C D
+    punpcklbw   xmm4, xmm5                  ;E F
+
+    movd        xmm6, [rsi + rbx]           ;G
+    movd        xmm7, [rax + rbx]           ;H
+
+    pmaddubsw   xmm0, k0k1
+    pmaddubsw   xmm2, k2k3
+    punpcklbw   xmm6, xmm7                  ;G H
+    pmaddubsw   xmm4, k4k5
+    pmaddubsw   xmm6, k6k7
+
+    paddsw      xmm0, xmm2
+    paddsw      xmm0, krd
+    paddsw      xmm4, xmm6
+    paddsw      xmm0, xmm4
+
+    psraw       xmm0, 7
+    packuswb    xmm0, xmm0
+
+    add         rsi,  rdx
+    add         rax,  rdx
+
+    movd        [rdi], xmm0
+
+%if ABI_IS_32BIT
+    add         rdi, DWORD PTR arg(3)       ;out_pitch
+%else
+    add         rdi, r8
+%endif
+    dec         rcx
+    jnz         .vp9_filter_block1d4_v8_ssse3_loop
+
+    add rsp, 16*5
+    pop rsp
+    pop rbx
+    ; begin epilog
+    pop rdi
+    pop rsi
+    RESTORE_XMM
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
+;void vp9_filter_block1d8_v8_ssse3
+;(
+;    unsigned char *src_ptr,
+;    unsigned int   src_pitch,
+;    unsigned char *output_ptr,
+;    unsigned int   out_pitch,
+;    unsigned int   output_height,
+;    short *filter
+;)
 global sym(vp9_filter_block1d8_v8_ssse3) PRIVATE
 sym(vp9_filter_block1d8_v8_ssse3):
     push        rbp
@@ -289,6 +407,110 @@ sym(vp9_filter_block1d16_v8_ssse3):
     pop         rbp
     ret
 
+;void vp9_filter_block1d4_h8_ssse3
+;(
+;    unsigned char  *src_ptr,
+;    unsigned int    src_pixels_per_line,
+;    unsigned char  *output_ptr,
+;    unsigned int    output_pitch,
+;    unsigned int    output_height,
+;    short *filter
+;)
+global sym(vp9_filter_block1d4_h8_ssse3) PRIVATE
+sym(vp9_filter_block1d4_h8_ssse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM 7
+    GET_GOT     rbx
+    push        rsi
+    push        rdi
+    ; end prolog
+
+    ALIGN_STACK 16, rax
+    sub         rsp, 16*5
+    %define k0k1 [rsp + 16*0]
+    %define k2k3 [rsp + 16*1]
+    %define k4k5 [rsp + 16*2]
+    %define k6k7 [rsp + 16*3]
+    %define krd [rsp + 16*4]
+
+    mov         rdx, arg(5)                 ;filter ptr
+    mov         rsi, arg(0)                 ;src_ptr
+    mov         rdi, arg(2)                 ;output_ptr
+    mov         rcx, 0x0400040
+
+    movdqa      xmm4, [rdx]                 ;load filters
+    movd        xmm5, rcx
+    packsswb    xmm4, xmm4
+    pshuflw     xmm0, xmm4, 0b              ;k0_k1
+    pshuflw     xmm1, xmm4, 01010101b       ;k2_k3
+    pshuflw     xmm2, xmm4, 10101010b       ;k4_k5
+    pshuflw     xmm3, xmm4, 11111111b       ;k6_k7
+
+    punpcklqdq  xmm0, xmm0
+    punpcklqdq  xmm1, xmm1
+    punpcklqdq  xmm2, xmm2
+    punpcklqdq  xmm3, xmm3
+
+    movdqa      k0k1, xmm0
+    movdqa      k2k3, xmm1
+    pshufd      xmm5, xmm5, 0
+    movdqa      k4k5, xmm2
+    movdqa      k6k7, xmm3
+    movdqa      krd, xmm5
+
+    movsxd      rax, dword ptr arg(1)       ;src_pixels_per_line
+    movsxd      rdx, dword ptr arg(3)       ;output_pitch
+    movsxd      rcx, dword ptr arg(4)       ;output_height
+
+.filter_block1d4_h8_rowloop_ssse3:
+    movq        xmm0,   [rsi - 3]    ; -3 -2 -1  0  1  2  3  4
+
+    movq        xmm3,   [rsi + 5]    ; 5  6  7  8  9 10 11 12
+    punpcklqdq  xmm0,   xmm3
+
+    movdqa      xmm1,   xmm0
+    pshufb      xmm0,   [GLOBAL(shuf_t0t1)]
+    pmaddubsw   xmm0,   k0k1
+
+    movdqa      xmm2,   xmm1
+    pshufb      xmm1,   [GLOBAL(shuf_t2t3)]
+    pmaddubsw   xmm1,   k2k3
+
+    movdqa      xmm4,   xmm2
+    pshufb      xmm2,   [GLOBAL(shuf_t4t5)]
+    pmaddubsw   xmm2,   k4k5
+
+    pshufb      xmm4,   [GLOBAL(shuf_t6t7)]
+    pmaddubsw   xmm4,   k6k7
+
+    paddsw      xmm0,   xmm1
+    paddsw      xmm0,   xmm4
+    paddsw      xmm0,   xmm2
+    paddsw      xmm0,   krd
+    psraw       xmm0,   7
+    packuswb    xmm0,   xmm0
+
+    lea         rsi,    [rsi + rax]
+    movd        [rdi],  xmm0
+
+    lea         rdi,    [rdi + rdx]
+    dec         rcx
+    jnz         .filter_block1d4_h8_rowloop_ssse3
+
+    add rsp, 16*5
+    pop rsp
+
+    ; begin epilog
+    pop rdi
+    pop rsi
+    RESTORE_GOT
+    RESTORE_XMM
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
 ;void vp9_filter_block1d8_h8_ssse3
 ;(
 ;    unsigned char  *src_ptr,
@@ -340,7 +562,7 @@ sym(vp9_filter_block1d8_h8_ssse3):
     pshufd      xmm5, xmm5, 0
     movdqa      k4k5, xmm2
     movdqa      k6k7, xmm3
-;    movdqa      krd, xmm5
+    movdqa      krd, xmm5
 
     movsxd      rax, dword ptr arg(1)       ;src_pixels_per_line
     movsxd      rdx, dword ptr arg(3)       ;output_pitch
@@ -349,10 +571,7 @@ sym(vp9_filter_block1d8_h8_ssse3):
 .filter_block1d8_h8_rowloop_ssse3:
     movq        xmm0,   [rsi - 3]    ; -3 -2 -1  0  1  2  3  4
 
-;    movq        xmm3,   [rsi + 4]    ; 4  5  6  7  8  9 10 11
     movq        xmm3,   [rsi + 5]    ; 5  6  7  8  9 10 11 12
-;note: if we create a k0_k7 filter, we can save a pshufb
-;    punpcklbw   xmm0,   xmm3         ; -3 4 -2 5 -1 6 0 7 1 8 2 9 3 10 4 11
     punpcklqdq  xmm0,   xmm3
 
     movdqa      xmm1,   xmm0
@@ -371,9 +590,9 @@ sym(vp9_filter_block1d8_h8_ssse3):
     pmaddubsw   xmm4,   k6k7
 
     paddsw      xmm0,   xmm1
-    paddsw      xmm0,   xmm2
-    paddsw      xmm0,   xmm5
     paddsw      xmm0,   xmm4
+    paddsw      xmm0,   xmm2
+    paddsw      xmm0,   krd
     psraw       xmm0,   7
     packuswb    xmm0,   xmm0
 
@@ -456,10 +675,7 @@ sym(vp9_filter_block1d16_h8_ssse3):
 .filter_block1d16_h8_rowloop_ssse3:
     movq        xmm0,   [rsi - 3]    ; -3 -2 -1  0  1  2  3  4
 
-;    movq        xmm3,   [rsi + 4]    ; 4  5  6  7  8  9 10 11
     movq        xmm3,   [rsi + 5]    ; 5  6  7  8  9 10 11 12
-;note: if we create a k0_k7 filter, we can save a pshufb
-;    punpcklbw   xmm0,   xmm3         ; -3 4 -2 5 -1 6 0 7 1 8 2 9 3 10 4 11
     punpcklqdq  xmm0,   xmm3
 
     movdqa      xmm1,   xmm0
@@ -486,10 +702,7 @@ sym(vp9_filter_block1d16_h8_ssse3):
 
 
     movq        xmm3,   [rsi +  5]
-;    movq        xmm7,   [rsi + 12]
     movq        xmm7,   [rsi + 13]
-;note: same as above
-;    punpcklbw   xmm3,   xmm7
     punpcklqdq  xmm3,   xmm7
 
     movdqa      xmm1,   xmm3
@@ -508,9 +721,9 @@ sym(vp9_filter_block1d16_h8_ssse3):
     pmaddubsw   xmm4,   k6k7
 
     paddsw      xmm3,   xmm1
+    paddsw      xmm3,   xmm4
     paddsw      xmm3,   xmm2
     paddsw      xmm3,   krd
-    paddsw      xmm3,   xmm4
     psraw       xmm3,   7
     packuswb    xmm3,   xmm3
     punpcklqdq  xmm0,   xmm3
