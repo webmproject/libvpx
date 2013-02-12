@@ -323,6 +323,8 @@ static const int16_t adst_i16[256] = {
 };
 #endif
 
+#define NEW_FDCT8x8 1
+#if !NEW_FDCT8x8
 static const int xC1S7 = 16069;
 static const int xC2S6 = 15137;
 static const int xC3S5 = 13623;
@@ -560,6 +562,7 @@ void vp9_short_fdct8x8_c(short *InputData, short *OutputData, int pitch) {
     op++;
   }
 }
+#endif
 
 void vp9_short_fhaar2x2_c(short *input, short *output, int pitch) {
   /* [1 1; 1 -1] orthogonal transform */
@@ -835,6 +838,79 @@ void vp9_short_fdct8x4_c(short *input, short *output, int pitch)
     vp9_short_fdct4x4_c(input,   output,    pitch);
     vp9_short_fdct4x4_c(input + 4, output + 16, pitch);
 }
+
+#if NEW_FDCT8x8
+static void fdct8_1d(int16_t *input, int16_t *output) {
+  int16_t step[8];
+  int temp1, temp2;
+
+  // stage 1
+  step[0] = input[0] + input[7];
+  step[1] = input[1] + input[6];
+  step[2] = input[2] + input[5];
+  step[3] = input[3] + input[4];
+  step[4] = input[3] - input[4];
+  step[5] = input[2] - input[5];
+  step[6] = input[1] - input[6];
+  step[7] = input[0] - input[7];
+
+  fdct4_1d(step, step);
+
+  // Stage 2
+  output[4] = step[4];
+  temp1 = (-step[5] + step[6]) * cospi_16_64;
+  temp2 = (step[6] + step[5]) * cospi_16_64;
+  output[5] = dct_const_round_shift(temp1);
+  output[6] = dct_const_round_shift(temp2);
+  output[7] = step[7];
+
+  // Stage 3
+  step[4] = output[4] + output[5];
+  step[5] = -output[5] + output[4];
+  step[6] = -output[6] + output[7];
+  step[7] = output[7] + output[6];
+
+  // Stage 4
+  output[0] = step[0];
+  output[4] = step[2];
+  output[2] = step[1];
+  output[6] = step[3];
+
+  temp1 = step[4] * cospi_28_64 + step[7] * cospi_4_64;
+  temp2 = step[5] * cospi_12_64 + step[6] * cospi_20_64;
+  output[1] = dct_const_round_shift(temp1);
+  output[5] = dct_const_round_shift(temp2);
+  temp1 = step[6] * cospi_12_64 + step[5] * -cospi_20_64;
+  temp2 = step[7] * cospi_28_64 + step[4] * -cospi_4_64;
+  output[3] = dct_const_round_shift(temp1);
+  output[7] = dct_const_round_shift(temp2);
+}
+
+void vp9_short_fdct8x8_c(int16_t *input, int16_t *output, int pitch) {
+  int shortpitch = pitch >> 1;
+  int i, j;
+  int16_t out[64];
+  int16_t temp_in[8], temp_out[8];
+
+  // First transform columns
+  for (i = 0; i < 8; i++) {
+    for (j = 0; j < 8; j++)
+      temp_in[j] = input[j * shortpitch + i] << 2;
+    fdct8_1d(temp_in, temp_out);
+    for (j = 0; j < 8; j++)
+      out[j * 8 + i] = temp_out[j];
+  }
+
+  // Then transform rows
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j + i * 8];
+    fdct8_1d(temp_in, temp_out);
+    for (j = 0; j < 8; ++j)
+      output[j + i * 8] = temp_out[j] >> 1;
+  }
+}
+#endif
 
 void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
   int i;
