@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//nEo\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3247,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-12T20:18:28Z",
+      "side": 1,
+      "message": "DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_Xbuf, N * N);",
+      "revId": "2bf89934f1b0b49e6abbe26f112051302f0d611b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//nEk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3376,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-12T20:18:28Z",
+      "side": 1,
+      "message": "//TODO(someone): change this so if we\u0027re not in switchable mode, we do direct rendering of the appropriate filter directly into the target buffer. Also, if switchable, the first run could be done in the target buffer directly to prevent the memcpy that always happens for the first filter in that case.",
+      "revId": "2bf89934f1b0b49e6abbe26f112051302f0d611b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
