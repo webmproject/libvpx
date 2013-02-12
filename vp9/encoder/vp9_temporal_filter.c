@@ -171,7 +171,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   /*cpi->sf.search_method == HEX*/
   // TODO Check that the 16x16 vf & sdf are selected here
   // Ignore mv costing by sending NULL pointer instead of cost arrays
-  bestsme = vp9_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv.first,
+  bestsme = vp9_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv[0],
                            step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
                            NULL, NULL, NULL, NULL,
                            &best_ref_mv1);
@@ -183,7 +183,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
     int distortion;
     unsigned int sse;
     // Ignore mv costing by sending NULL pointer instead of cost array
-    bestsme = cpi->find_fractional_mv_step(x, b, d, &d->bmi.as_mv.first,
+    bestsme = cpi->find_fractional_mv_step(x, b, d, &d->bmi.as_mv[0],
                                            &best_ref_mv1,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],
@@ -263,8 +263,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
         if (cpi->frames[frame] == NULL)
           continue;
 
-        mbd->block[0].bmi.as_mv.first.as_mv.row = 0;
-        mbd->block[0].bmi.as_mv.first.as_mv.col = 0;
+        mbd->block[0].bmi.as_mv[0].as_mv.row = 0;
+        mbd->block[0].bmi.as_mv[0].as_mv.col = 0;
 
         if (frame == alt_ref_index) {
           filter_weight = 2;
@@ -297,8 +297,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
            cpi->frames[frame]->u_buffer + mb_uv_offset,
            cpi->frames[frame]->v_buffer + mb_uv_offset,
            cpi->frames[frame]->y_stride,
-           mbd->block[0].bmi.as_mv.first.as_mv.row,
-           mbd->block[0].bmi.as_mv.first.as_mv.col,
+           mbd->block[0].bmi.as_mv[0].as_mv.row,
+           mbd->block[0].bmi.as_mv[0].as_mv.col,
            predictor);
 
           // Apply the filter (YUV)

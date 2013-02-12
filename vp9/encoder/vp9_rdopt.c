@@ -2166,17 +2166,17 @@ static int labels2mode(
           }
           break;
         case LEFT4X4:
-          this_mv->as_int = col ? d[-1].bmi.as_mv.first.as_int :
+          this_mv->as_int = col ? d[-1].bmi.as_mv[0].as_int :
                                   left_block_mv(xd, mic, i);
           if (mbmi->second_ref_frame > 0)
-            this_second_mv->as_int = col ? d[-1].bmi.as_mv.second.as_int :
+            this_second_mv->as_int = col ? d[-1].bmi.as_mv[1].as_int :
                                            left_block_second_mv(xd, mic, i);
           break;
         case ABOVE4X4:
-          this_mv->as_int = row ? d[-4].bmi.as_mv.first.as_int :
+          this_mv->as_int = row ? d[-4].bmi.as_mv[0].as_int :
                                   above_block_mv(mic, i, mis);
           if (mbmi->second_ref_frame > 0)
-            this_second_mv->as_int = row ? d[-4].bmi.as_mv.second.as_int :
+            this_second_mv->as_int = row ? d[-4].bmi.as_mv[1].as_int :
                                            above_block_second_mv(mic, i, mis);
           break;
         case ZERO4X4:
@@ -2192,10 +2192,10 @@ static int labels2mode(
         int_mv left_mv, left_second_mv;
 
         left_second_mv.as_int = 0;
-        left_mv.as_int = col ? d[-1].bmi.as_mv.first.as_int :
+        left_mv.as_int = col ? d[-1].bmi.as_mv[0].as_int :
                          left_block_mv(xd, mic, i);
         if (mbmi->second_ref_frame > 0)
-          left_second_mv.as_int = col ? d[-1].bmi.as_mv.second.as_int :
+          left_second_mv.as_int = col ? d[-1].bmi.as_mv[1].as_int :
                                   left_block_second_mv(xd, mic, i);
 
         if (left_mv.as_int == this_mv->as_int &&
@@ -2212,9 +2212,9 @@ static int labels2mode(
 #endif
     }
 
-    d->bmi.as_mv.first.as_int = this_mv->as_int;
+    d->bmi.as_mv[0].as_int = this_mv->as_int;
     if (mbmi->second_ref_frame > 0)
-      d->bmi.as_mv.second.as_int = this_second_mv->as_int;
+      d->bmi.as_mv[1].as_int = this_second_mv->as_int;
 
     x->partition_info->bmi[i].mode = m;
     x->partition_info->bmi[i].mv.as_int = this_mv->as_int;
@@ -2500,9 +2500,9 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
           // use previous block's result as next block's MV predictor.
           if (segmentation == PARTITIONING_4X4 && i > 0) {
-            bsi->mvp.as_int = x->e_mbd.block[i - 1].bmi.as_mv.first.as_int;
+            bsi->mvp.as_int = x->e_mbd.block[i - 1].bmi.as_mv[0].as_int;
             if (i == 4 || i == 8 || i == 12)
-              bsi->mvp.as_int = x->e_mbd.block[i - 4].bmi.as_mv.first.as_int;
+              bsi->mvp.as_int = x->e_mbd.block[i - 4].bmi.as_mv[0].as_int;
             step_param = 2;
           }
         }
@@ -2541,11 +2541,11 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
             if (thissme < bestsme) {
               bestsme = thissme;
-              mode_mv[NEW4X4].as_int = e->bmi.as_mv.first.as_int;
+              mode_mv[NEW4X4].as_int = e->bmi.as_mv[0].as_int;
             } else {
               /* The full search result is actually worse so re-instate the
                * previous best vector */
-              e->bmi.as_mv.first.as_int = mode_mv[NEW4X4].as_int;
+              e->bmi.as_mv[0].as_int = mode_mv[NEW4X4].as_int;
             }
           }
         }
@@ -2885,9 +2885,9 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < 16; i++) {
     BLOCKD *bd = &x->e_mbd.block[i];
 
-    bd->bmi.as_mv.first.as_int = bsi.mvs[i].as_int;
+    bd->bmi.as_mv[0].as_int = bsi.mvs[i].as_int;
     if (mbmi->second_ref_frame > 0)
-      bd->bmi.as_mv.second.as_int = bsi.second_mvs[i].as_int;
+      bd->bmi.as_mv[1].as_int = bsi.second_mvs[i].as_int;
     bd->eob = bsi.eobs[i];
   }
 
@@ -3307,8 +3307,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        x->nmvjointcost, x->mvcost,
                                        &dis, &sse);
         }
-        d->bmi.as_mv.first.as_int = tmp_mv.as_int;
-        frame_mv[NEWMV][refs[0]].as_int = d->bmi.as_mv.first.as_int;
+        d->bmi.as_mv[0].as_int = tmp_mv.as_int;
+        frame_mv[NEWMV][refs[0]].as_int = d->bmi.as_mv[0].as_int;
 
         // Add the new motion vector cost to our rolling cost variable
         *rate2 += vp9_mv_bit_cost(&tmp_mv, &ref_mv[0],
@@ -4251,10 +4251,12 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (best_mbmode.mode == SPLITMV) {
     for (i = 0; i < 16; i++)
-      xd->mode_info_context->bmi[i].as_mv.first.as_int = best_bmodes[i].as_mv.first.as_int;
+      xd->mode_info_context->bmi[i].as_mv[0].as_int =
+          best_bmodes[i].as_mv[0].as_int;
     if (mbmi->second_ref_frame > 0)
       for (i = 0; i < 16; i++)
-        xd->mode_info_context->bmi[i].as_mv.second.as_int = best_bmodes[i].as_mv.second.as_int;
+        xd->mode_info_context->bmi[i].as_mv[1].as_int =
+            best_bmodes[i].as_mv[1].as_int;
 
     vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
