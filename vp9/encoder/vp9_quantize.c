@@ -228,43 +228,70 @@ void vp9_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d) {
 }
 
 void vp9_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d) {
-  int i, rc, eob;
-  int zbin;
-  int x, y, z, sz;
-  int zero_run = 0;
-  int16_t *zbin_boost_ptr = b->zrun_zbin_boost;
-  int16_t *coeff_ptr  = b->coeff;
-  int16_t *zbin_ptr   = b->zbin;
-  int16_t *round_ptr  = b->round;
-  int16_t *quant_ptr  = b->quant;
-  uint8_t *quant_shift_ptr = b->quant_shift;
-  int16_t *qcoeff_ptr = d->qcoeff;
-  int16_t *dqcoeff_ptr = d->dqcoeff;
-  int16_t *dequant_ptr = d->dequant;
-  int zbin_oq_value = b->zbin_extra;
-
-  vpx_memset(qcoeff_ptr, 0, 64 * sizeof(int16_t));
-  vpx_memset(dqcoeff_ptr, 0, 64 * sizeof(int16_t));
-
-  eob = -1;
-
   if (!b->skip_block) {
-    for (i = 0; i < 64; i++) {
+    int i, rc, eob;
+    int zbin;
+    int x, y, z, sz;
+    int zero_run;
+    int16_t *zbin_boost_ptr = b->zrun_zbin_boost;
+    int16_t *coeff_ptr  = b->coeff;
+    int16_t *zbin_ptr   = b->zbin;
+    int16_t *round_ptr  = b->round;
+    int16_t *quant_ptr  = b->quant;
+    uint8_t *quant_shift_ptr = b->quant_shift;
+    int16_t *qcoeff_ptr = d->qcoeff;
+    int16_t *dqcoeff_ptr = d->dqcoeff;
+    int16_t *dequant_ptr = d->dequant;
+    int zbin_oq_value = b->zbin_extra;
+
+    vpx_memset(qcoeff_ptr, 0, 64 * sizeof(int16_t));
+    vpx_memset(dqcoeff_ptr, 0, 64 * sizeof(int16_t));
+
+    eob = -1;
+
+    // Special case for DC as it is the one triggering access in various
+    // tables: {zbin, quant, quant_shift, dequant}_ptr[rc != 0]
+    {
+      z    = coeff_ptr[0];
+      zbin = (zbin_ptr[0] + zbin_boost_ptr[0] + zbin_oq_value);
+      zero_run = 1;
+
+      sz = (z >> 31);                                // sign of z
+      x  = (z ^ sz) - sz;                            // x = abs(z)
+
+      if (x >= zbin) {
+        x += (round_ptr[0]);
+        y  = ((int)(((int)(x * quant_ptr[0]) >> 16) + x))
+             >> quant_shift_ptr[0];                  // quantize (x)
+        x  = (y ^ sz) - sz;                          // get the sign back
+        qcoeff_ptr[0]  = x;                          // write to destination
+        dqcoeff_ptr[0] = x * dequant_ptr[0];         // dequantized value
+
+        if (y) {
+          eob = 0;                                   // last nonzero coeffs
+          zero_run = 0;
+        }
+      }
+    }
+    for (i = 1; i < 64; i++) {
       rc   = vp9_default_zig_zag1d_8x8[i];
       z    = coeff_ptr[rc];
-      zbin = (zbin_ptr[rc != 0] + zbin_boost_ptr[zero_run] + zbin_oq_value);
-      zero_run += (zero_run < 15);
+      zbin = (zbin_ptr[1] + zbin_boost_ptr[zero_run] + zbin_oq_value);
+      // The original code was incrementing zero_run while keeping it at
+      // maximum 15 by adding "(zero_run < 15)". The same is achieved by
+      // removing the opposite of the sign mask of "(zero_run - 15)".
+      zero_run -= (zero_run - 15) >> 31;
 
       sz = (z >> 31);                                // sign of z
       x  = (z ^ sz) - sz;                            // x = abs(z)
 
       if (x >= zbin) {
         x += (round_ptr[rc != 0]);
-        y  = ((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x))
-             >> quant_shift_ptr[rc != 0];            // quantize (x)
+        y  = ((int)(((int)(x * quant_ptr[1]) >> 16) + x))
+             >> quant_shift_ptr[1];                  // quantize (x)
         x  = (y ^ sz) - sz;                          // get the sign back
         qcoeff_ptr[rc]  = x;                         // write to destination
-        dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0];  // dequantized value
+        dqcoeff_ptr[rc] = x * dequant_ptr[1];        // dequantized value
 
         if (y) {
           eob = i;                                   // last nonzero coeffs
@@ -272,8 +299,10 @@ void vp9_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d) {
         }
       }
     }
+    d->eob = eob + 1;
+  } else {
+    d->eob = 0;
   }
-  d->eob = eob + 1;
 }
 
 void vp9_quantize_mby_8x8(MACROBLOCK *x) {
