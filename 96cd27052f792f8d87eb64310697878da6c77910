@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//n3Q\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-12T19:36:34Z",
+      "side": 1,
+      "message": "I did not put it as the last since it interferes with the other experiment - NEWBINTRAMODES.\nBut it will be removed, and then it will be easier to add new modes at the end.",
+      "parentUuid": "AAAAVH//qVk\u003d",
+      "revId": "96cd27052f792f8d87eb64310697878da6c77910",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//qUs\u003d",
         "filename": "vp9/common/vp9_reconintra4x4.c",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2013-02-06T19:25:13Z",
       "side": 1,
       "message": "you should remove the commented old values. They\u0027re misleading.",
+      "revId": "96cd27052f792f8d87eb64310697878da6c77910",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//n3c\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-12T19:36:34Z",
+      "side": 1,
+      "message": "Reverting to the original values.",
+      "parentUuid": "AAAAVH//qUs\u003d",
       "revId": "96cd27052f792f8d87eb64310697878da6c77910",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//n3k\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-12T19:36:34Z",
+      "side": 1,
+      "message": "Actually I decided to remove the normalization since it may not be needed. I will let Yue decide on this.",
+      "parentUuid": "AAAAVH//qUc\u003d",
+      "revId": "96cd27052f792f8d87eb64310697878da6c77910",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//qUU\u003d",
         "filename": "vp9/common/vp9_reconintra4x4.c",
         "patchSetId": 10
@@ -64,6 +118,24 @@
       "writtenOn": "2013-02-06T19:25:13Z",
       "side": 1,
       "message": "const double c3 \u003d 1. - c1 - c2;",
+      "revId": "96cd27052f792f8d87eb64310697878da6c77910",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//n3g\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-12T19:36:34Z",
+      "side": 1,
+      "message": "ditto.",
+      "parentUuid": "AAAAVH//qUU\u003d",
       "revId": "96cd27052f792f8d87eb64310697878da6c77910",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
