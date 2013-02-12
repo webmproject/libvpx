@@ -188,11 +188,11 @@ void vp9_transform_mby_4x4(MACROBLOCK *x) {
       assert(has_2nd_order == 0);
       vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 4);
     } else if (!(i & 1) && get_tx_type_4x4(xd, &xd->block[i + 1]) == DCT_DCT) {
-      x->vp9_short_fdct8x4(&x->block[i].src_diff[0],
+      x->fwd_txm8x4(&x->block[i].src_diff[0],
                            &x->block[i].coeff[0], 32);
       i++;
     } else {
-      x->vp9_short_fdct4x4(&x->block[i].src_diff[0],
+      x->fwd_txm4x4(&x->block[i].src_diff[0],
                            &x->block[i].coeff[0], 32);
     }
   }
@@ -202,7 +202,7 @@ void vp9_transform_mby_4x4(MACROBLOCK *x) {
     build_dcblock_4x4(x);
 
     // do 2nd order transform on the dc block
-    x->short_walsh4x4(&x->block[24].src_diff[0],
+    x->fwd_2ndtxm4x4(&x->block[24].src_diff[0],
                       &x->block[24].coeff[0], 8);
   } else {
     vpx_memset(x->block[24].coeff, 0, 16 * sizeof(x->block[24].coeff[0]));
@@ -213,7 +213,7 @@ void vp9_transform_mbuv_4x4(MACROBLOCK *x) {
   int i;
 
   for (i = 16; i < 24; i += 2) {
-    x->vp9_short_fdct8x4(&x->block[i].src_diff[0],
+    x->fwd_txm8x4(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 16);
   }
 }
@@ -253,7 +253,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
       assert(has_2nd_order == 0);
       vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 8);
     } else {
-      x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
+      x->fwd_txm8x8(&x->block[i].src_diff[0],
                            &x->block[i].coeff[0], 32);
     }
   }
@@ -264,7 +264,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
       assert(has_2nd_order == 0);
       vp9_fht_c(b->src_diff, 32, (b + 2)->coeff, tx_type, 8);
     } else {
-      x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
+      x->fwd_txm8x8(&x->block[i].src_diff[0],
                            &x->block[i + 2].coeff[0], 32);
     }
   }
@@ -274,7 +274,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
     build_dcblock_8x8(x);
 
     // do 2nd order transform on the dc block
-    x->short_fhaar2x2(&x->block[24].src_diff[0],
+    x->fwd_2ndtxm2x2(&x->block[24].src_diff[0],
                       &x->block[24].coeff[0], 8);
   } else {
     vpx_memset(x->block[24].coeff, 0, 16 * sizeof(x->block[24].coeff[0]));
@@ -285,7 +285,7 @@ void vp9_transform_mbuv_8x8(MACROBLOCK *x) {
   int i;
 
   for (i = 16; i < 24; i += 4) {
-    x->vp9_short_fdct8x8(&x->block[i].src_diff[0],
+    x->fwd_txm8x8(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 16);
   }
 }
@@ -303,7 +303,7 @@ void vp9_transform_mby_16x16(MACROBLOCK *x) {
   if (tx_type != DCT_DCT) {
     vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 16);
   } else {
-    x->vp9_short_fdct16x16(&x->block[0].src_diff[0],
+    x->fwd_txm16x16(&x->block[0].src_diff[0],
                            &x->block[0].coeff[0], 32);
   }
 }
@@ -321,9 +321,9 @@ void vp9_transform_sby_32x32(MACROBLOCK *x) {
 void vp9_transform_sbuv_16x16(MACROBLOCK *x) {
   SUPERBLOCK * const x_sb = &x->sb_coeff_data;
   vp9_clear_system_state();
-  x->vp9_short_fdct16x16(x_sb->src_diff + 1024,
+  x->fwd_txm16x16(x_sb->src_diff + 1024,
                          x_sb->coeff + 1024, 32);
-  x->vp9_short_fdct16x16(x_sb->src_diff + 1280,
+  x->fwd_txm16x16(x_sb->src_diff + 1280,
                          x_sb->coeff + 1280, 32);
 }
 

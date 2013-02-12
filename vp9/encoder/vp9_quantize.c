@@ -460,18 +460,14 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
   static const int zbin_boost[16] = { 0,  0,  0,  8,  8,  8, 10, 12,
                                      14, 16, 20, 24, 28, 32, 36, 40 };
 
-
-  int qrounding_factor = 48;
-
   for (Q = 0; Q < QINDEX_RANGE; Q++) {
     int qzbin_factor = (vp9_dc_quant(Q, 0) < 148) ? 84 : 80;
 
+    int qrounding_factor = 48;
 #if CONFIG_LOSSLESS
-    if (cpi->oxcf.lossless) {
-      if (Q == 0) {
-        qzbin_factor = 64;
-        qrounding_factor = 64;
-      }
+    if (cpi->oxcf.lossless && Q == 0) {
+      qzbin_factor = 64;
+      qrounding_factor = 64;
     }
 #endif
 

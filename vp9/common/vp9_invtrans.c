@@ -32,9 +32,9 @@ static void recon_dcblock_8x8(MACROBLOCKD *xd) {
 void vp9_inverse_transform_b_4x4(MACROBLOCKD *xd, int block, int pitch) {
   BLOCKD *b = &xd->block[block];
   if (b->eob <= 1)
-    xd->inv_xform4x4_1_x8(b->dqcoeff, b->diff, pitch);
+    xd->inv_txm4x4_1(b->dqcoeff, b->diff, pitch);
   else
-    xd->inv_xform4x4_x8(b->dqcoeff, b->diff, pitch);
+    xd->inv_txm4x4(b->dqcoeff, b->diff, pitch);
 }
 
 void vp9_inverse_transform_mby_4x4(MACROBLOCKD *xd) {
@@ -44,7 +44,7 @@ void vp9_inverse_transform_mby_4x4(MACROBLOCKD *xd) {
 
   if (has_2nd_order) {
     /* do 2nd order transform on the dc block */
-    xd->inv_walsh4x4_lossless(blockd[24].dqcoeff, blockd[24].diff);
+    xd->inv_2ndtxm4x4(blockd[24].dqcoeff, blockd[24].diff);
     recon_dcblock(xd);
   }
 
