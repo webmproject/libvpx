@@ -104,6 +104,8 @@ extern const  INTERPOLATIONFILTERTYPE vp9_switchable_interp
 
 extern const  int vp9_switchable_interp_map[SWITCHABLE + 1];
 
+extern const  int vp9_is_interpolating_filter[SWITCHABLE + 1];
+
 extern const  vp9_tree_index vp9_switchable_interp_tree
                   [2 * (VP9_SWITCHABLE_FILTERS - 1)];
 

@@ -423,6 +423,14 @@ const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, -1, 0, 1, -1, -1};
 #else
 const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, 0, 1, -1, -1};
 #endif
+#endif  // VP9_SWITCHABLE_FILTERS
+
+// Indicates if the filter is interpolating or non-interpolating
+// Note currently only the EIGHTTAP_SMOOTH is non-interpolating
+#if CONFIG_ENABLE_6TAP
+const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {1, 0, 1, 1, 1, -1};
+#else
+const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {0, 1, 1, 1, -1};
 #endif
 
 void vp9_entropy_mode_init() {
