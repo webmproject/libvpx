@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//mVg\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-13T17:08:03Z",
+      "side": 1,
+      "message": "do you need to clear pbi-\u003emb.lossless here?",
+      "revId": "7b02061a3a45eaf9c211aa81dbc0115b8c3eaac0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//mVc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1545,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-13T17:08:03Z",
+      "side": 1,
+      "message": "here too (or maybe you fix that in the other patch), I believe you need to clear cpi-\u003emb.e_mbd.lossless if not lossless.",
+      "revId": "7b02061a3a45eaf9c211aa81dbc0115b8c3eaac0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
