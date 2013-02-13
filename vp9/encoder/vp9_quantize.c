@@ -228,6 +228,12 @@ void vp9_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d) {
 }
 
 void vp9_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d) {
+  int16_t *qcoeff_ptr = d->qcoeff;
+  int16_t *dqcoeff_ptr = d->dqcoeff;
+
+  vpx_memset(qcoeff_ptr, 0, 64 * sizeof(int16_t));
+  vpx_memset(dqcoeff_ptr, 0, 64 * sizeof(int16_t));
+
   if (!b->skip_block) {
     int i, rc, eob;
     int zbin;
@@ -239,13 +245,8 @@ void vp9_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d) {
     int16_t *round_ptr  = b->round;
     int16_t *quant_ptr  = b->quant;
     uint8_t *quant_shift_ptr = b->quant_shift;
-    int16_t *qcoeff_ptr = d->qcoeff;
-    int16_t *dqcoeff_ptr = d->dqcoeff;
     int16_t *dequant_ptr = d->dequant;
     int zbin_oq_value = b->zbin_extra;
-
-    vpx_memset(qcoeff_ptr, 0, 64 * sizeof(int16_t));
-    vpx_memset(dqcoeff_ptr, 0, 64 * sizeof(int16_t));
 
     eob = -1;
 
