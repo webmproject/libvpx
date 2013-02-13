@@ -476,12 +476,13 @@ void vp9_short_inv_walsh4x4_1_x8_c(int16_t *in, int16_t *out, int pitch) {
   }
 }
 
-void vp9_dc_only_inv_walsh_add_c(short input_dc, uint8_t *pred_ptr,
+void vp9_dc_only_inv_walsh_add_c(int input_dc, uint8_t *pred_ptr,
                                  uint8_t *dst_ptr,
                                  int pitch, int stride) {
   int r, c;
-  short tmp[16];
-  vp9_short_inv_walsh4x4_1_x8_c(&input_dc, tmp, 4 << 1);
+  int16_t dc = input_dc;
+  int16_t tmp[16];
+  vp9_short_inv_walsh4x4_1_x8_c(&dc, tmp, 4 << 1);
 
   for (r = 0; r < 4; r++) {
     for (c = 0; c < 4; c++) {

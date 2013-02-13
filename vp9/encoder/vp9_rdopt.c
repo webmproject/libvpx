@@ -1137,7 +1137,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
       vp9_fht(be->src_diff, 32, be->coeff, tx_type, 4);
       vp9_ht_quantize_b_4x4(be, b, tx_type);
     } else {
-      x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
+      x->fwd_txm4x4(be->src_diff, be->coeff, 32);
       x->quantize_b_4x4(be, b);
     }
 
@@ -1173,7 +1173,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
     vp9_ihtllm(best_dqcoeff, b->diff, 32, best_tx_type, 4, b->eob);
 #endif
   else
-    xd->inv_xform4x4_x8(best_dqcoeff, b->diff, 32);
+    xd->inv_txm4x4(best_dqcoeff, b->diff, 32);
 
   vp9_recon_b(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 
@@ -1437,7 +1437,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       if (tx_type != DCT_DCT)
         vp9_fht(be->src_diff, 32, (x->block + idx)->coeff, tx_type, 8);
       else
-        x->vp9_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+        x->fwd_txm8x8(be->src_diff, (x->block + idx)->coeff, 32);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
 
       // compute quantization mse of 8x8 block
@@ -1471,11 +1471,11 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
           vp9_ht_quantize_b_4x4(be, b, tx_type);
         } else if (!(i & 1) && get_tx_type_4x4(xd, b + 1) == DCT_DCT) {
-          x->vp9_short_fdct8x4(be->src_diff, be->coeff, 32);
+          x->fwd_txm8x4(be->src_diff, be->coeff, 32);
           x->quantize_b_4x4_pair(be, be + 1, b, b + 1);
           do_two = 1;
         } else {
-          x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
+          x->fwd_txm4x4(be->src_diff, be->coeff, 32);
           x->quantize_b_4x4(be, b);
         }
         distortion += vp9_block_error_c(be->coeff, b->dqcoeff, 16 << do_two);
@@ -2245,7 +2245,7 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
       if (xd->mode_info_context->mbmi.second_ref_frame > 0)
         vp9_build_2nd_inter_predictors_b(bd, 16, &xd->subpix);
       vp9_subtract_b(be, bd, 16);
-      x->vp9_short_fdct4x4(be->src_diff, be->coeff, 32);
+      x->fwd_txm4x4(be->src_diff, be->coeff, 32);
       x->quantize_b_4x4(be, bd);
       thisdistortion = vp9_block_error(be->coeff, bd->dqcoeff, 16);
       *distortion += thisdistortion;
@@ -2297,7 +2297,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
 
       if (xd->mode_info_context->mbmi.txfm_size == TX_4X4) {
         if (otherrd) {
-          x->vp9_short_fdct8x8(be->src_diff, be2->coeff, 32);
+          x->fwd_txm8x8(be->src_diff, be2->coeff, 32);
           x->quantize_b_8x8(be2, bd2);
           thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
           otherdist += thisdistortion;
@@ -2309,7 +2309,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
         for (j = 0; j < 4; j += 2) {
           bd = &xd->block[ib + iblock[j]];
           be = &x->block[ib + iblock[j]];
-          x->vp9_short_fdct8x4(be->src_diff, be->coeff, 32);
+          x->fwd_txm8x4(be->src_diff, be->coeff, 32);
           x->quantize_b_4x4_pair(be, be + 1, bd, bd + 1);
           thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
           *distortion += thisdistortion;
@@ -2327,7 +2327,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
           for (j = 0; j < 4; j += 2) {
             BLOCKD *bd = &xd->block[ib + iblock[j]];
             BLOCK *be = &x->block[ib + iblock[j]];
-            x->vp9_short_fdct8x4(be->src_diff, be->coeff, 32);
+            x->fwd_txm8x4(be->src_diff, be->coeff, 32);
             x->quantize_b_4x4_pair(be, be + 1, bd, bd + 1);
             thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
             otherdist += thisdistortion;
@@ -2341,7 +2341,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
                            TX_4X4);
           }
         }
-        x->vp9_short_fdct8x8(be->src_diff, be2->coeff, 32);
+        x->fwd_txm8x8(be->src_diff, be2->coeff, 32);
         x->quantize_b_8x8(be2, bd2);
         thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
         *distortion += thisdistortion;

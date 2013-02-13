@@ -375,22 +375,22 @@ typedef struct macroblockd {
   int lossless;
 #endif
   /* Inverse transform function pointers. */
-  void (*inv_xform4x4_1_x8)(int16_t *input, int16_t *output, int pitch);
-  void (*inv_xform4x4_x8)(int16_t *input, int16_t *output, int pitch);
-  void (*inv_walsh4x4_1)(int16_t *in, int16_t *out);
-  void (*inv_walsh4x4_lossless)(int16_t *in, int16_t *out);
-  void (*idct_add)(int16_t *input, const int16_t *dq,
+  void (*inv_txm4x4_1)(int16_t *input, int16_t *output, int pitch);
+  void (*inv_txm4x4)(int16_t *input, int16_t *output, int pitch);
+  void (*inv_2ndtxm4x4_1)(int16_t *in, int16_t *out);
+  void (*inv_2ndtxm4x4)(int16_t *in, int16_t *out);
+  void (*itxm_add)(int16_t *input, const int16_t *dq,
     uint8_t *pred, uint8_t *output, int pitch, int stride);
-  void (*dc_idct_add)(int16_t *input, const int16_t *dq,
+  void (*dc_itxm_add)(int16_t *input, const int16_t *dq,
     uint8_t *pred, uint8_t *output, int pitch, int stride, int dc);
-  void (*dc_only_idct_add)(int input_dc, uint8_t *pred_ptr,
+  void (*dc_only_itxm_add)(int input_dc, uint8_t *pred_ptr,
     uint8_t *dst_ptr, int pitch, int stride);
-  void (*dc_idct_add_y_block)(int16_t *q, const int16_t *dq,
+  void (*dc_itxm_add_y_block)(int16_t *q, const int16_t *dq,
     uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs,
     const int16_t *dc);
-  void (*idct_add_y_block)(int16_t *q, const int16_t *dq,
+  void (*itxm_add_y_block)(int16_t *q, const int16_t *dq,
     uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs);
-  void (*idct_add_uv_block)(int16_t *q, const int16_t *dq,
+  void (*itxm_add_uv_block)(int16_t *q, const int16_t *dq,
     uint8_t *pre, uint8_t *dst_u, uint8_t *dst_v, int stride,
     uint16_t *eobs);
 
@@ -505,7 +505,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
     return tx_type;
 #if CONFIG_LOSSLESS
   if (xd->lossless)
-    return tx_type;
+    return DCT_DCT;
 #endif
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
   if (xd->mode_info_context->mbmi.sb_type)

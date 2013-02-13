@@ -124,43 +124,30 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
     xd->block[i].dequant = pc->Y1dequant[QIndex];
   }
 
+  xd->inv_txm4x4_1        = vp9_short_idct4x4llm_1;
+  xd->inv_txm4x4          = vp9_short_idct4x4llm;
+  xd->inv_2ndtxm4x4_1     = vp9_short_inv_walsh4x4_1;
+  xd->inv_2ndtxm4x4       = vp9_short_inv_walsh4x4;
+  xd->itxm_add            = vp9_dequant_idct_add;
+  xd->dc_only_itxm_add    = vp9_dc_only_idct_add_c;
+  xd->dc_itxm_add         = vp9_dequant_dc_idct_add;
+  xd->dc_itxm_add_y_block = vp9_dequant_dc_idct_add_y_block;
+  xd->itxm_add_y_block    = vp9_dequant_idct_add_y_block;
+  xd->itxm_add_uv_block   = vp9_dequant_idct_add_uv_block;
 #if CONFIG_LOSSLESS
-  pbi->mb.lossless = 0;
-  if (!QIndex) {
-    pbi->mb.inv_xform4x4_1_x8     = vp9_short_inv_walsh4x4_1_x8;
-    pbi->mb.inv_xform4x4_x8       = vp9_short_inv_walsh4x4_x8;
-    pbi->mb.inv_walsh4x4_1        = vp9_short_inv_walsh4x4_1_lossless;
-    pbi->mb.inv_walsh4x4_lossless = vp9_short_inv_walsh4x4_lossless;
-    pbi->mb.idct_add            = vp9_dequant_idct_add_lossless_c;
-    pbi->mb.dc_only_idct_add    = vp9_dc_only_inv_walsh_add_c;
-    pbi->mb.dc_idct_add         = vp9_dequant_dc_idct_add_lossless_c;
-    pbi->mb.dc_idct_add_y_block = vp9_dequant_dc_idct_add_y_block_lossless_c;
-    pbi->mb.idct_add_y_block    = vp9_dequant_idct_add_y_block_lossless_c;
-    pbi->mb.idct_add_uv_block   = vp9_dequant_idct_add_uv_block_lossless_c;
-    pbi->mb.lossless = 1;
-  } else {
-    pbi->mb.inv_xform4x4_1_x8     = vp9_short_idct4x4llm_1;
-    pbi->mb.inv_xform4x4_x8       = vp9_short_idct4x4llm;
-    pbi->mb.inv_walsh4x4_1        = vp9_short_inv_walsh4x4_1;
-    pbi->mb.inv_walsh4x4_lossless = vp9_short_inv_walsh4x4;
-    pbi->mb.idct_add            = vp9_dequant_idct_add;
-    pbi->mb.dc_only_idct_add    = vp9_dc_only_idct_add_c;
-    pbi->mb.dc_idct_add         = vp9_dequant_dc_idct_add;
-    pbi->mb.dc_idct_add_y_block = vp9_dequant_dc_idct_add_y_block;
-    pbi->mb.idct_add_y_block    = vp9_dequant_idct_add_y_block;
-    pbi->mb.idct_add_uv_block   = vp9_dequant_idct_add_uv_block;
+  if (xd->lossless) {
+    assert(QIndex == 0);
+    xd->inv_txm4x4_1        = vp9_short_inv_walsh4x4_1_x8;
+    xd->inv_txm4x4          = vp9_short_inv_walsh4x4_x8;
+    xd->inv_2ndtxm4x4_1     = vp9_short_inv_walsh4x4_1_lossless;
+    xd->inv_2ndtxm4x4       = vp9_short_inv_walsh4x4_lossless;
+    xd->itxm_add            = vp9_dequant_idct_add_lossless_c;
+    xd->dc_only_itxm_add    = vp9_dc_only_inv_walsh_add_c;
+    xd->dc_itxm_add         = vp9_dequant_dc_idct_add_lossless_c;
+    xd->dc_itxm_add_y_block = vp9_dequant_dc_idct_add_y_block_lossless_c;
+    xd->itxm_add_y_block    = vp9_dequant_idct_add_y_block_lossless_c;
+    xd->itxm_add_uv_block   = vp9_dequant_idct_add_uv_block_lossless_c;
   }
-#else
-  pbi->mb.inv_xform4x4_1_x8     = vp9_short_idct4x4llm_1;
-  pbi->mb.inv_xform4x4_x8       = vp9_short_idct4x4llm;
-  pbi->mb.inv_walsh4x4_1        = vp9_short_inv_walsh4x4_1;
-  pbi->mb.inv_walsh4x4_lossless = vp9_short_inv_walsh4x4;
-  pbi->mb.idct_add            = vp9_dequant_idct_add;
-  pbi->mb.dc_only_idct_add    = vp9_dc_only_idct_add_c;
-  pbi->mb.dc_idct_add         = vp9_dequant_dc_idct_add;
-  pbi->mb.dc_idct_add_y_block = vp9_dequant_dc_idct_add_y_block;
-  pbi->mb.idct_add_y_block    = vp9_dequant_idct_add_y_block;
-  pbi->mb.idct_add_uv_block   = vp9_dequant_idct_add_uv_block;
 #endif
 
   for (i = 16; i < 24; i++) {
@@ -350,15 +337,15 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
       int i8x8mode = b->bmi.as_mode.first;
       b = &xd->block[16 + i];
       vp9_intra_uv4x4_predict(xd, &xd->block[16 + i], i8x8mode, b->predictor);
-      xd->idct_add(b->qcoeff, b->dequant, b->predictor,
+      xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
                     *(b->base_dst) + b->dst, 8, b->dst_stride);
       b = &xd->block[20 + i];
       vp9_intra_uv4x4_predict(xd, &xd->block[20 + i], i8x8mode, b->predictor);
-      xd->idct_add(b->qcoeff, b->dequant, b->predictor,
+      xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
                     *(b->base_dst) + b->dst, 8, b->dst_stride);
     }
   } else if (xd->mode_info_context->mbmi.mode == SPLITMV) {
-    xd->idct_add_uv_block(xd->qcoeff + 16 * 16, xd->block[16].dequant,
+    xd->itxm_add_uv_block(xd->qcoeff + 16 * 16, xd->block[16].dequant,
          xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
          xd->dst.uv_stride, xd->eobs + 16);
   } else {
@@ -405,17 +392,17 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                     *(b->base_dst) + b->dst, 16,
                                     b->dst_stride, b->eob);
         } else {
-          xd->idct_add(b->qcoeff, b->dequant, b->predictor,
+          xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
                         *(b->base_dst) + b->dst, 16, b->dst_stride);
         }
       }
       b = &xd->block[16 + i];
       vp9_intra_uv4x4_predict(xd, b, i8x8mode, b->predictor);
-      xd->idct_add(b->qcoeff, b->dequant, b->predictor,
+      xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
                     *(b->base_dst) + b->dst, 8, b->dst_stride);
       b = &xd->block[20 + i];
       vp9_intra_uv4x4_predict(xd, b, i8x8mode, b->predictor);
-      xd->idct_add(b->qcoeff, b->dequant, b->predictor,
+      xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
                     *(b->base_dst) + b->dst, 8, b->dst_stride);
     }
   } else if (mode == B_PRED) {
@@ -439,7 +426,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                   *(b->base_dst) + b->dst, 16, b->dst_stride,
                                   b->eob);
       } else {
-        xd->idct_add(b->qcoeff, b->dequant, b->predictor,
+        xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
                       *(b->base_dst) + b->dst, 16, b->dst_stride);
       }
     }
@@ -449,7 +436,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
     xd->above_context->y2 = 0;
     xd->left_context->y2 = 0;
     vp9_build_intra_predictors_mbuv(xd);
-    xd->idct_add_uv_block(xd->qcoeff + 16 * 16,
+    xd->itxm_add_uv_block(xd->qcoeff + 16 * 16,
                            xd->block[16].dequant,
                            xd->predictor + 16 * 16,
                            xd->dst.u_buffer,
@@ -458,13 +445,13 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                            xd->eobs + 16);
   } else if (mode == SPLITMV) {
     assert(get_2nd_order_usage(xd) == 0);
-    xd->idct_add_y_block(xd->qcoeff,
+    xd->itxm_add_y_block(xd->qcoeff,
                           xd->block[0].dequant,
                           xd->predictor,
                           xd->dst.y_buffer,
                           xd->dst.y_stride,
                           xd->eobs);
-    xd->idct_add_uv_block(xd->qcoeff + 16 * 16,
+    xd->itxm_add_uv_block(xd->qcoeff + 16 * 16,
                            xd->block[16].dequant,
                            xd->predictor + 16 * 16,
                            xd->dst.u_buffer,
@@ -501,7 +488,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                     *(b->base_dst) + b->dst, 16,
                                     b->dst_stride, b->eob);
         } else {
-          xd->idct_add(b->qcoeff, b->dequant, b->predictor,
+          xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
                         *(b->base_dst) + b->dst, 16, b->dst_stride);
         }
       }
@@ -510,7 +497,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       assert(get_2nd_order_usage(xd) == 1);
       vp9_dequantize_b(b);
       if (xd->eobs[24] > 1) {
-        xd->inv_walsh4x4_lossless(&b->dqcoeff[0], b->diff);
+        xd->inv_2ndtxm4x4(&b->dqcoeff[0], b->diff);
         ((int *)b->qcoeff)[0] = 0;
         ((int *)b->qcoeff)[1] = 0;
         ((int *)b->qcoeff)[2] = 0;
@@ -520,11 +507,11 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
         ((int *)b->qcoeff)[6] = 0;
         ((int *)b->qcoeff)[7] = 0;
       } else {
-        xd->inv_walsh4x4_1(&b->dqcoeff[0], b->diff);
+        xd->inv_2ndtxm4x4_1(&b->dqcoeff[0], b->diff);
         ((int *)b->qcoeff)[0] = 0;
       }
       vp9_dequantize_b(b);
-      xd->dc_idct_add_y_block(xd->qcoeff,
+      xd->dc_itxm_add_y_block(xd->qcoeff,
                                xd->block[0].dequant,
                                xd->predictor,
                                xd->dst.y_buffer,
@@ -532,7 +519,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                xd->eobs,
                                xd->block[24].diff);
     }
-    xd->idct_add_uv_block(xd->qcoeff + 16 * 16,
+    xd->itxm_add_uv_block(xd->qcoeff + 16 * 16,
                            xd->block[16].dequant,
                            xd->predictor + 16 * 16,
                            xd->dst.u_buffer,
@@ -650,7 +637,7 @@ static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
             + x_idx * 16 + (i & 3) * 4,
             xd->dst.y_stride, xd->dst.y_stride, b->eob);
       } else {
-        xd->idct_add(
+        xd->itxm_add(
             b->qcoeff, b->dequant,
             xd->dst.y_buffer + (y_idx * 16 + (i / 4) * 4) * xd->dst.y_stride
             + x_idx * 16 + (i & 3) * 4,
@@ -662,7 +649,7 @@ static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
   } else {
     vp9_dequantize_b(b);
     if (xd->eobs[24] > 1) {
-      xd->inv_walsh4x4_lossless(&b->dqcoeff[0], b->diff);
+      xd->inv_2ndtxm4x4(&b->dqcoeff[0], b->diff);
       ((int *)b->qcoeff)[0] = 0;
       ((int *)b->qcoeff)[1] = 0;
       ((int *)b->qcoeff)[2] = 0;
@@ -672,7 +659,7 @@ static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
       ((int *)b->qcoeff)[6] = 0;
       ((int *)b->qcoeff)[7] = 0;
     } else {
-      xd->inv_walsh4x4_1(&b->dqcoeff[0], b->diff);
+      xd->inv_2ndtxm4x4_1(&b->dqcoeff[0], b->diff);
       ((int *)b->qcoeff)[0] = 0;
     }
     vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(
@@ -1534,17 +1521,24 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   pc->sb64_coded = vp9_read_literal(&header_bc, 8);
   pc->sb32_coded = vp9_read_literal(&header_bc, 8);
-
-  /* Read the loop filter level and type */
-  pc->txfm_mode = vp9_read_literal(&header_bc, 2);
-  if (pc->txfm_mode == 3)
-    pc->txfm_mode += vp9_read_bit(&header_bc);
-  if (pc->txfm_mode == TX_MODE_SELECT) {
-    pc->prob_tx[0] = vp9_read_literal(&header_bc, 8);
-    pc->prob_tx[1] = vp9_read_literal(&header_bc, 8);
-    pc->prob_tx[2] = vp9_read_literal(&header_bc, 8);
+#if CONFIG_LOSSLESS
+  xd->lossless = vp9_read_bit(&header_bc);
+  if (xd->lossless) {
+    pc->txfm_mode = ONLY_4X4;
   }
-
+  else
+#endif
+  {
+    /* Read the loop filter level and type */
+    pc->txfm_mode = vp9_read_literal(&header_bc, 2);
+    if (pc->txfm_mode == 3)
+      pc->txfm_mode += vp9_read_bit(&header_bc);
+    if (pc->txfm_mode == TX_MODE_SELECT) {
+      pc->prob_tx[0] = vp9_read_literal(&header_bc, 8);
+      pc->prob_tx[1] = vp9_read_literal(&header_bc, 8);
+      pc->prob_tx[2] = vp9_read_literal(&header_bc, 8);
+    }
+  }
   pc->filter_type = (LOOPFILTERTYPE) vp9_read_bit(&header_bc);
   pc->filter_level = vp9_read_literal(&header_bc, 6);
   pc->sharpness_level = vp9_read_literal(&header_bc, 3);

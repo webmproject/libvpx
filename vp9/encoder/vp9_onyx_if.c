@@ -753,10 +753,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->quarter_pixel_search = 1;
   sf->half_pixel_search = 1;
   sf->iterative_sub_pixel = 1;
-#if CONFIG_LOSSLESS
-  sf->optimize_coefficients = 0;
-#else
   sf->optimize_coefficients = 1;
+#if CONFIG_LOSSLESS
+  if (cpi->oxcf.lossless)
+    sf->optimize_coefficients = 0;
 #endif
   sf->no_skip_block4x4_search = 1;
   sf->first_step = 0;
@@ -841,20 +841,18 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     }
   }
 
-  cpi->mb.vp9_short_fdct16x16 = vp9_short_fdct16x16;
-  cpi->mb.vp9_short_fdct8x8 = vp9_short_fdct8x8;
-  cpi->mb.vp9_short_fdct8x4 = vp9_short_fdct8x4;
-  cpi->mb.vp9_short_fdct4x4 = vp9_short_fdct4x4;
-  cpi->mb.short_walsh4x4 = vp9_short_walsh4x4;
-  cpi->mb.short_fhaar2x2 = vp9_short_fhaar2x2;
+  cpi->mb.fwd_txm16x16  = vp9_short_fdct16x16;
+  cpi->mb.fwd_txm8x8    = vp9_short_fdct8x8;
+  cpi->mb.fwd_txm8x4    = vp9_short_fdct8x4;
+  cpi->mb.fwd_txm4x4    = vp9_short_fdct4x4;
+  cpi->mb.fwd_2ndtxm4x4 = vp9_short_walsh4x4;
+  cpi->mb.fwd_2ndtxm2x2 = vp9_short_fhaar2x2;
 
 #if CONFIG_LOSSLESS
   if (cpi->oxcf.lossless) {
-    cpi->mb.vp9_short_fdct8x4 = vp9_short_walsh8x4_x8;
-    cpi->mb.vp9_short_fdct4x4 = vp9_short_walsh4x4_x8;
-    cpi->mb.short_walsh4x4 = vp9_short_walsh4x4;
-    cpi->mb.short_fhaar2x2 = vp9_short_fhaar2x2;
-    cpi->mb.short_walsh4x4 = vp9_short_walsh4x4_lossless;
+    cpi->mb.fwd_txm8x4    = vp9_short_walsh8x4_x8;
+    cpi->mb.fwd_txm4x4    = vp9_short_walsh4x4_x8;
+    cpi->mb.fwd_2ndtxm4x4 = vp9_short_walsh4x4_lossless;
   }
 #endif
 
@@ -1218,18 +1216,18 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->oxcf.best_allowed_q = q_trans[oxcf->best_allowed_q];
   cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
 
-  cpi->mb.e_mbd.inv_xform4x4_1_x8     = vp9_short_idct4x4llm_1;
-  cpi->mb.e_mbd.inv_xform4x4_x8       = vp9_short_idct4x4llm;
-  cpi->mb.e_mbd.inv_walsh4x4_1        = vp9_short_inv_walsh4x4_1;
-  cpi->mb.e_mbd.inv_walsh4x4_lossless = vp9_short_inv_walsh4x4;
+  cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_idct4x4llm_1;
+  cpi->mb.e_mbd.inv_txm4x4      = vp9_short_idct4x4llm;
+  cpi->mb.e_mbd.inv_2ndtxm4x4_1 = vp9_short_inv_walsh4x4_1;
+  cpi->mb.e_mbd.inv_2ndtxm4x4   = vp9_short_inv_walsh4x4;
 
 #if CONFIG_LOSSLESS
   cpi->oxcf.lossless = oxcf->lossless;
   if (cpi->oxcf.lossless) {
-    cpi->mb.e_mbd.inv_xform4x4_1_x8     = vp9_short_inv_walsh4x4_1_x8;
-    cpi->mb.e_mbd.inv_xform4x4_x8       = vp9_short_inv_walsh4x4_x8;
-    cpi->mb.e_mbd.inv_walsh4x4_1        = vp9_short_inv_walsh4x4_1_lossless;
-    cpi->mb.e_mbd.inv_walsh4x4_lossless = vp9_short_inv_walsh4x4_lossless;
+    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_inv_walsh4x4_1_x8;
+    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_inv_walsh4x4_x8;
+    cpi->mb.e_mbd.inv_2ndtxm4x4_1 = vp9_short_inv_walsh4x4_1_lossless;
+    cpi->mb.e_mbd.inv_2ndtxm4x4   = vp9_short_inv_walsh4x4_lossless;
   }
 #endif
 
@@ -2632,10 +2630,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // For 2 Pass Only used where GF/ARF prediction quality
   // is above a threshold
   cpi->zbin_mode_boost = 0;
-#if CONFIG_LOSSLESS
-  cpi->zbin_mode_boost_enabled = FALSE;
-#else
   cpi->zbin_mode_boost_enabled = TRUE;
+#if CONFIG_LOSSLESS
+  if (cpi->oxcf.lossless)
+    cpi->zbin_mode_boost_enabled = FALSE;
 #endif
   if (cpi->gfu_boost <= 400) {
     cpi->zbin_mode_boost_enabled = FALSE;

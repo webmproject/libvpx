@@ -169,14 +169,14 @@ typedef struct macroblock {
   PICK_MODE_CONTEXT sb32_context[4];
   PICK_MODE_CONTEXT sb64_context;
 
-  void (*vp9_short_fdct4x4)(int16_t *input, int16_t *output, int pitch);
-  void (*vp9_short_fdct8x4)(int16_t *input, int16_t *output, int pitch);
-  void (*short_walsh4x4)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_txm4x4)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_txm8x4)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_2ndtxm4x4)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_txm8x8)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_txm16x16)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_2ndtxm2x2)(int16_t *input, int16_t *output, int pitch);
   void (*quantize_b_4x4)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_4x4_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
-  void (*vp9_short_fdct8x8)(int16_t *input, int16_t *output, int pitch);
-  void (*vp9_short_fdct16x16)(int16_t *input, int16_t *output, int pitch);
-  void (*short_fhaar2x2)(int16_t *input, int16_t *output, int pitch);
   void (*quantize_b_16x16)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_8x8)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_2x2)(BLOCK *b, BLOCKD *d);

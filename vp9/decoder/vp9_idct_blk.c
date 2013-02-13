@@ -51,9 +51,9 @@ void vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(int16_t *q,
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) {
       if (*eobs++ > 1)
-        xd->dc_idct_add(q, dq, dst, dst, stride, stride, dc[0]);
+        xd->dc_itxm_add(q, dq, dst, dst, stride, stride, dc[0]);
       else
-        xd->dc_only_idct_add(dc[0], dst, dst, stride, stride);
+        xd->dc_only_itxm_add(dc[0], dst, dst, stride, stride);
 
       q   += 16;
       dst += 4;
@@ -143,9 +143,9 @@ void vp9_dequant_idct_add_uv_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
   for (i = 0; i < 2; i++) {
     for (j = 0; j < 2; j++) {
       if (*eobs++ > 1) {
-        xd->idct_add(q, dq, dstu, dstu, stride, stride);
+        xd->itxm_add(q, dq, dstu, dstu, stride, stride);
       } else {
-        xd->dc_only_idct_add(q[0]*dq[0], dstu, dstu, stride, stride);
+        xd->dc_only_itxm_add(q[0]*dq[0], dstu, dstu, stride, stride);
         ((int *)q)[0] = 0;
       }
 
@@ -159,9 +159,9 @@ void vp9_dequant_idct_add_uv_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
   for (i = 0; i < 2; i++) {
     for (j = 0; j < 2; j++) {
       if (*eobs++ > 1) {
-        xd->idct_add(q, dq, dstv, dstv, stride, stride);
+        xd->itxm_add(q, dq, dstv, dstv, stride, stride);
       } else {
-        xd->dc_only_idct_add(q[0]*dq[0], dstv, dstv, stride, stride);
+        xd->dc_only_itxm_add(q[0]*dq[0], dstv, dstv, stride, stride);
         ((int *)q)[0] = 0;
       }
 
