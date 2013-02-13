@@ -219,8 +219,4 @@ void vp9_initialize_common() {
   vp9_entropy_mode_init();
 
   vp9_entropy_mv_init();
-
-#if CONFIG_NEWCOEFCONTEXT
-  vp9_init_neighbors();
-#endif
 }

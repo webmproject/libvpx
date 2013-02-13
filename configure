@@ -245,7 +245,6 @@ EXPERIMENT_LIST="
     comp_interintra_pred
     tx64x64
     cnvcontext
-    newcoefcontext
     enable_6tap
     abovesprefmv
     intht

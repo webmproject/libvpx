@@ -380,9 +380,6 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   int err_mult = plane_rd_mult[type];
   int default_eob;
   int const *scan, *bands;
-#if CONFIG_NEWCOEFCONTEXT
-  const int *neighbors;
-#endif
 
   switch (tx_size) {
     default:
@@ -424,9 +421,6 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       default_eob = 256;
       break;
   }
-#if CONFIG_NEWCOEFCONTEXT
-  neighbors = vp9_get_coef_neighbors_handle(scan);
-#endif
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   rdmult = mb->rdmult * err_mult;
@@ -460,11 +454,6 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       if (next < default_eob) {
         band = bands[i + 1];
         pt = vp9_prev_token_class[t0];
-#if CONFIG_NEWCOEFCONTEXT
-        if (NEWCOEFCONTEXT_BAND_COND(band))
-          pt = vp9_get_coef_neighbor_context(
-              qcoeff_ptr, i0, neighbors, scan[i + 1]);
-#endif
         rate0 +=
           mb->token_costs[tx_size][type][band][pt][tokens[next][0].token];
         rate1 +=
@@ -512,34 +501,12 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       if (next < default_eob) {
         band = bands[i + 1];
         if (t0 != DCT_EOB_TOKEN) {
-#if CONFIG_NEWCOEFCONTEXT
-          int tmp = qcoeff_ptr[scan[i]];
-          qcoeff_ptr[scan[i]] = x;
-          if (NEWCOEFCONTEXT_BAND_COND(band))
-            pt = vp9_get_coef_neighbor_context(
-                qcoeff_ptr, i0, neighbors, scan[i + 1]);
-          else
-            pt = vp9_prev_token_class[t0];
-          qcoeff_ptr[scan[i]] = tmp;
-#else
           pt = vp9_prev_token_class[t0];
-#endif
           rate0 += mb->token_costs[tx_size][type][band][pt][
               tokens[next][0].token];
         }
         if (t1 != DCT_EOB_TOKEN) {
-#if CONFIG_NEWCOEFCONTEXT
-          int tmp = qcoeff_ptr[scan[i]];
-          qcoeff_ptr[scan[i]] = x;
-          if (NEWCOEFCONTEXT_BAND_COND(band))
-            pt = vp9_get_coef_neighbor_context(
-                qcoeff_ptr, i0, neighbors, scan[i + 1]);
-          else
-            pt = vp9_prev_token_class[t1];
-          qcoeff_ptr[scan[i]] = tmp;
-#else
           pt = vp9_prev_token_class[t1];
-#endif
           rate1 += mb->token_costs[tx_size][type][band][pt][
               tokens[next][1].token];
         }
