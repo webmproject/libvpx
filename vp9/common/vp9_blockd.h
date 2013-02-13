@@ -618,6 +618,9 @@ static TX_TYPE get_tx_type(const MACROBLOCKD *xd, const BLOCKD *b) {
 }
 
 static int get_2nd_order_usage(const MACROBLOCKD *xd) {
+#if 1
+  return 0;
+#else
   int has_2nd_order = (xd->mode_info_context->mbmi.mode != SPLITMV &&
                        xd->mode_info_context->mbmi.mode != I8X8_PRED &&
                        xd->mode_info_context->mbmi.mode != B_PRED &&
@@ -625,6 +628,7 @@ static int get_2nd_order_usage(const MACROBLOCKD *xd) {
   if (has_2nd_order)
     has_2nd_order = (get_tx_type(xd, xd->block) == DCT_DCT);
   return has_2nd_order;
+#endif
 }
 
 extern void vp9_build_block_doffsets(MACROBLOCKD *xd);

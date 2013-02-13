@@ -64,6 +64,31 @@ void vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(int16_t *q,
   }
 }
 
+void vp9_dequant_idct_add_y_block_4x4_inplace_c(int16_t *q,
+                                                const int16_t *dq,
+                                                uint8_t *dst,
+                                                int stride,
+                                                uint16_t *eobs,
+                                                MACROBLOCKD *xd) {
+  int i, j;
+
+  for (i = 0; i < 4; i++) {
+    for (j = 0; j < 4; j++) {
+      if (*eobs++ > 1) {
+        vp9_dequant_idct_add_c(q, dq, dst, dst, stride, stride);
+      } else {
+        vp9_dc_only_idct_add_c(q[0]*dq[0], dst, dst, stride, stride);
+        ((int *)q)[0] = 0;
+      }
+
+      q   += 16;
+      dst += 4;
+    }
+
+    dst += 4 * stride - 16;
+  }
+}
+
 void vp9_dequant_idct_add_y_block_c(int16_t *q, const int16_t *dq,
                                     uint8_t *pre,
                                     uint8_t *dst,
@@ -219,6 +244,26 @@ void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(int16_t *q,
   vp9_dequant_idct_add_8x8_c(&q[192], dq, dst + 8 * stride + 8,
                                 dst + 8 * stride + 8, stride, stride, 1,
                                 xd->eobs[12]);
+}
+
+void vp9_dequant_idct_add_y_block_8x8_inplace_c(int16_t *q,
+                                                const int16_t *dq,
+                                                uint8_t *dst,
+                                                int stride,
+                                                uint16_t *eobs,
+                                                MACROBLOCKD *xd) {
+  vp9_dequant_idct_add_8x8_c(q, dq, dst, dst, stride, stride, 0, xd->eobs[0]);
+
+  vp9_dequant_idct_add_8x8_c(&q[64], dq, dst + 8,
+                             dst + 8, stride, stride, 0, xd->eobs[4]);
+
+  vp9_dequant_idct_add_8x8_c(&q[128], dq, dst + 8 * stride,
+                             dst + 8 * stride, stride, stride, 0,
+                             xd->eobs[8]);
+
+  vp9_dequant_idct_add_8x8_c(&q[192], dq, dst + 8 * stride + 8,
+                             dst + 8 * stride + 8, stride, stride, 0,
+                             xd->eobs[12]);
 }
 
 void vp9_dequant_idct_add_y_block_8x8_c(int16_t *q, const int16_t *dq,

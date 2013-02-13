@@ -77,12 +77,24 @@ void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(int16_t *q, const int16_t *dq
                                                    const int16_t *dc,
                                                    MACROBLOCKD *xd);
 
+void vp9_dequant_idct_add_y_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
+                                                unsigned char *dst,
+                                                int stride,
+                                                uint16_t *eobs,
+                                                MACROBLOCKD *xd);
+
 void vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
                                                    unsigned char *dst,
                                                    int stride,
                                                    uint16_t *eobs,
                                                    const int16_t *dc,
                                                    MACROBLOCKD *xd);
+
+void vp9_dequant_idct_add_y_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
+                                                unsigned char *dst,
+                                                int stride,
+                                                uint16_t *eobs,
+                                                MACROBLOCKD *xd);
 
 void vp9_dequant_idct_add_uv_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
                                                  unsigned char *dstu,

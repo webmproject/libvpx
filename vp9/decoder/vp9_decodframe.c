@@ -304,7 +304,8 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                    0, xd->eobs[idx]);
       }
     }
-  } else if (xd->mode_info_context->mbmi.mode == SPLITMV) {
+  } else if (xd->mode_info_context->mbmi.mode == SPLITMV ||
+             get_2nd_order_usage(xd) == 0) {
     assert(get_2nd_order_usage(xd) == 0);
     vp9_dequant_idct_add_y_block_8x8(xd->qcoeff,
                                      xd->block[0].dequant,
@@ -450,7 +451,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                            xd->dst.v_buffer,
                            xd->dst.uv_stride,
                            xd->eobs + 16);
-  } else if (mode == SPLITMV) {
+  } else if (mode == SPLITMV || get_2nd_order_usage(xd) == 0) {
     assert(get_2nd_order_usage(xd) == 0);
     pbi->idct_add_y_block(xd->qcoeff,
                           xd->block[0].dequant,
@@ -595,13 +596,8 @@ static void decode_8x8_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
             + x_idx * 16 + (i & 1) * 8,
             stride, stride, 0, b->eob);
       }
-      vp9_dequant_idct_add_uv_block_8x8_inplace_c(
-          xd->qcoeff + 16 * 16, xd->block[16].dequant,
-          xd->dst.u_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
-          xd->dst.v_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
-          xd->dst.uv_stride, xd->eobs + 16, xd);
     }
-  } else {
+  } else if (get_2nd_order_usage(xd) == 1) {
     vp9_dequantize_b_2x2(b);
     vp9_short_ihaar2x2(&b->dqcoeff[0], b->diff, 8);
     ((int *)b->qcoeff)[0] = 0;  // 2nd order block are set to 0 after idct
@@ -616,12 +612,17 @@ static void decode_8x8_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
         xd->qcoeff, xd->block[0].dequant,
         xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
         xd->dst.y_stride, xd->eobs, xd->block[24].diff, xd);
-    vp9_dequant_idct_add_uv_block_8x8_inplace_c(
-        xd->qcoeff + 16 * 16, xd->block[16].dequant,
-        xd->dst.u_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
-        xd->dst.v_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
-        xd->dst.uv_stride, xd->eobs + 16, xd);
+  } else {
+    vp9_dequant_idct_add_y_block_8x8_inplace_c(
+        xd->qcoeff, xd->block[0].dequant,
+        xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+        xd->dst.y_stride, xd->eobs, xd);
   }
+  vp9_dequant_idct_add_uv_block_8x8_inplace_c(
+      xd->qcoeff + 16 * 16, xd->block[16].dequant,
+      xd->dst.u_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
+      xd->dst.v_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
+      xd->dst.uv_stride, xd->eobs + 16, xd);
 };
 
 static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
@@ -653,7 +654,7 @@ static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
             xd->dst.y_stride, xd->dst.y_stride);
       }
     }
-  } else {
+  } else if (get_2nd_order_usage(xd) == 1) {
     vp9_dequantize_b(b);
     if (xd->eobs[24] > 1) {
       vp9_short_inv_walsh4x4(&b->dqcoeff[0], b->diff);
@@ -673,6 +674,11 @@ static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
         xd->qcoeff, xd->block[0].dequant,
         xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
         xd->dst.y_stride, xd->eobs, xd->block[24].diff, xd);
+  } else {
+    vp9_dequant_idct_add_y_block_4x4_inplace_c(
+        xd->qcoeff, xd->block[0].dequant,
+        xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+        xd->dst.y_stride, xd->eobs, xd);
   }
   vp9_dequant_idct_add_uv_block_4x4_inplace_c(
       xd->qcoeff + 16 * 16, xd->block[16].dequant,
