@@ -698,7 +698,7 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
   // TODO(jingning) is it possible to quickly determine whether to force
   //                trailing coefficients to be zero, instead of running trellis
   //                optimization in the rate-distortion optimization loop?
-  if (mb->e_mbd.mode_info_context->mbmi.mode < I8X8_PRED)
+  if (mb->optimize && mb->e_mbd.mode_info_context->mbmi.mode < I8X8_PRED)
     vp9_optimize_mby_16x16(mb);
 
   d = vp9_mbblock_error(mb, 0);
