@@ -301,6 +301,7 @@ struct detect_buffer {
 struct input_state {
   char                 *fn;
   FILE                 *file;
+  off_t                 length;
   y4m_input             y4m;
   struct detect_buffer  detect;
   enum video_file_type  file_type;
@@ -1742,6 +1743,14 @@ void open_input_file(struct input_state *input) {
   if (!input->file)
     fatal("Failed to open input file");
 
+  if (!fseeko(input->file, 0, SEEK_END)) {
+    /* Input file is seekable. Figure out how long it is, so we can get
+     * progress info.
+     */
+    input->length = ftello(input->file);
+    rewind(input->file);
+  }
+
   /* For RAW input sources, these bytes will applied on the first frame
    *  in read_frame().
    */
@@ -2265,9 +2274,6 @@ static void get_cx_data(struct stream_state  *stream,
         if (!(pkt->data.frame.flags & VPX_FRAME_IS_FRAGMENT)) {
           stream->frames_out++;
         }
-        if (!global->quiet)
-          fprintf(stderr, " %6luF",
-                  (unsigned long)pkt->data.frame.sz);
 
         update_rate_histogram(&stream->rate_hist, cfg, pkt);
         if (stream->config.write_webm) {
@@ -2311,9 +2317,6 @@ static void get_cx_data(struct stream_state  *stream,
         break;
       case VPX_CODEC_STATS_PKT:
         stream->frames_out++;
-        if (!global->quiet)
-          fprintf(stderr, " %6luS",
-                  (unsigned long)pkt->data.twopass_stats.sz);
         stats_write(&stream->stats,
                     pkt->data.twopass_stats.buf,
                     pkt->data.twopass_stats.sz);
@@ -2327,8 +2330,6 @@ static void get_cx_data(struct stream_state  *stream,
           stream->psnr_sse_total += pkt->data.psnr.sse[0];
           stream->psnr_samples_total += pkt->data.psnr.samples[0];
           for (i = 0; i < 4; i++) {
-            if (!global->quiet)
-              fprintf(stderr, "%.3f ", pkt->data.psnr.psnr[i]);
             stream->psnr_totals[i] += pkt->data.psnr.psnr[i];
           }
           stream->psnr_count++;
@@ -2361,7 +2362,7 @@ static void show_psnr(struct stream_state  *stream) {
 }
 
 
-float usec_to_fps(uint64_t usec, unsigned int frames) {
+static float usec_to_fps(uint64_t usec, unsigned int frames) {
   return (float)(usec > 0 ? frames * 1000000.0 / (float)usec : 0);
 }
 
@@ -2383,6 +2384,24 @@ static void test_decode(struct stream_state  *stream) {
          stream->index, stream->frames_out,
          y[0], y[1], u[0], u[1], v[0], v[1]);
     stream->mismatch_seen = stream->frames_out;
+  }
+}
+
+
+static void print_time(const char *label, int64_t etl) {
+  int hours, mins, secs;
+
+  if (etl >= 0) {
+    hours = etl / 3600;
+    etl -= hours * 3600;
+    mins = etl / 60;
+    etl -= mins * 60;
+    secs = etl;
+
+    fprintf(stderr, "[%3s %2d:%02d:%02d] ",
+            label, hours, mins, secs);
+  } else {
+    fprintf(stderr, "[%3s  unknown] ", label);
   }
 }
 
@@ -2443,6 +2462,9 @@ int main(int argc, const char **argv_) {
 
   for (pass = global.pass ? global.pass - 1 : 0; pass < global.passes; pass++) {
     int frames_in = 0;
+    int64_t estimated_time_left = -1;
+    int64_t average_rate = -1;
+    off_t lagged_count = 0;
 
     open_input_file(&input);
 
@@ -2518,18 +2540,23 @@ int main(int argc, const char **argv_) {
           frames_in++;
 
         if (!global.quiet) {
+          float fps = usec_to_fps(cx_time, frames_in);
+          fprintf(stderr, "\rPass %d/%d ", pass + 1, global.passes);
+
           if (stream_cnt == 1)
             fprintf(stderr,
-                    "\rPass %d/%d frame %4d/%-4d %7"PRId64"B \033[K",
-                    pass + 1, global.passes, frames_in,
-                    streams->frames_out, (int64_t)streams->nbytes);
+                    "frame %4d/%-4d %7"PRId64"B ",
+                    frames_in, streams->frames_out, (int64_t)streams->nbytes);
           else
-            fprintf(stderr,
-                    "\rPass %d/%d frame %4d %7lu %s (%.2f fps)\033[K",
-                    pass + 1, global.passes, frames_in,
-                    cx_time > 9999999 ? cx_time / 1000 : cx_time,
-                    cx_time > 9999999 ? "ms" : "us",
-                    usec_to_fps(cx_time, frames_in));
+            fprintf(stderr, "frame %4d ", frames_in);
+
+          fprintf(stderr, "%7lu %s %.2f %s ",
+                  cx_time > 9999999 ? cx_time / 1000 : cx_time,
+                  cx_time > 9999999 ? "ms" : "us",
+                  fps >= 1.0 ? fps : 1000.0 / fps,
+                  fps >= 1.0 ? "fps" : "ms/f");
+          print_time("ETA", estimated_time_left);
+          fprintf(stderr, "\033[K");
         }
 
       } else
@@ -2547,6 +2574,32 @@ int main(int argc, const char **argv_) {
 
         got_data = 0;
         FOREACH_STREAM(get_cx_data(stream, &global, &got_data));
+
+        if (!got_data && input.length && !streams->frames_out) {
+          lagged_count = global.limit ? frames_in : ftello(input.file);
+        } else if (got_data && input.length) {
+          int64_t remaining;
+          int64_t rate;
+
+          if (global.limit) {
+            int frame_in_lagged = (frames_in - lagged_count) * 1000;
+
+            rate = cx_time ? frame_in_lagged * (int64_t)1000000 / cx_time : 0;
+            remaining = 1000 * (global.limit - frames_in + lagged_count);
+          } else {
+            off_t input_pos = ftello(input.file);
+            off_t input_pos_lagged = input_pos - lagged_count;
+            int64_t limit = input.length;
+
+            rate = cx_time ? input_pos_lagged * (int64_t)1000000 / cx_time : 0;
+            remaining = limit - input_pos + lagged_count;
+          }
+
+          average_rate = (average_rate <= 0)
+              ? rate
+              : (average_rate * 7 + rate) / 8;
+          estimated_time_left = average_rate ? remaining / average_rate : -1;
+        }
 
         if (got_data && global.test_decode)
           FOREACH_STREAM(test_decode(stream));
