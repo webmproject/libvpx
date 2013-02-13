@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//mlw\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-13T01:10:23Z",
+      "side": 1,
+      "message": "so (for historical purposes), I don\u0027t actually understand why this works, but why don\u0027t we need to set qcoeff_ptr and dqcoeff_ptr to zero if skip_block is set? Paul, is there some check in the IDCT to skip reconstruction if skip_block is set? Christian tested and the output doesn\u0027t change if we put random data in qcoeff_ptr/dqcoeff_ptr, but I don\u0027t see any condition around the call to idct() in encodeframe.c like if (!b-\u003eskip_block), so I\u0027m not sure why that works...",
+      "revId": "0e4397f0cd8b8d6dc106a80d9e01b4ba63486b2b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
