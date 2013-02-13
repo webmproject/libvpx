@@ -1673,8 +1673,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   pc->sb32_coded = get_binary_prob(cpi->sb32_count[0], cpi->sb32_count[1]);
   vp9_write_literal(&header_bc, pc->sb32_coded, 8);
 #if CONFIG_LOSSLESS
-  vp9_write_bit(&header_bc, cpi->oxcf.lossless);
-  if (cpi->oxcf.lossless) {
+  vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
+  if (cpi->mb.e_mbd.lossless) {
     pc->txfm_mode = ONLY_4X4;
   }
   else

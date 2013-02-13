@@ -411,15 +411,11 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
 
   for (Q = 0; Q < QINDEX_RANGE; Q++) {
     int qzbin_factor = (vp9_dc_quant(Q, 0) < 148) ? 84 : 80;
-
     int qrounding_factor = 48;
-#if CONFIG_LOSSLESS
-    if (cpi->oxcf.lossless && Q == 0) {
+    if (Q == 0) {
       qzbin_factor = 64;
       qrounding_factor = 64;
     }
-#endif
-
     // dc values
     quant_val = vp9_dc_quant(Q, cpi->common.y1dc_delta_q);
     invert_quant(cpi->Y1quant[Q] + 0,

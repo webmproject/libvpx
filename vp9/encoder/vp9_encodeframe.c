@@ -30,7 +30,7 @@
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_tile_common.h"
 #include "vp9/encoder/vp9_tokenize.h"
-#include "vp9_rtcd.h"
+#include "./vp9_rtcd.h"
 #include <stdio.h>
 #include <math.h>
 #include <limits.h>
@@ -1225,6 +1225,25 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   if (cm->full_pixel)
     xd->fullpixel_mask = 0xfffffff8;
 }
+#if CONFIG_LOSSLESS
+static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
+  if (lossless) {
+    cpi->mb.fwd_txm8x4            = vp9_short_walsh8x4_x8;
+    cpi->mb.fwd_txm4x4            = vp9_short_walsh4x4_x8;
+    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_inv_walsh4x4_1_x8;
+    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_inv_walsh4x4_x8;
+    cpi->mb.optimize              = 0;
+    cpi->common.filter_level      = 0;
+    cpi->zbin_mode_boost_enabled  = FALSE;
+    cpi->common.txfm_mode         = ONLY_4X4;
+  } else {
+    cpi->mb.fwd_txm8x4            = vp9_short_fdct8x4;
+    cpi->mb.fwd_txm4x4            = vp9_short_fdct4x4;
+    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_idct4x4llm_1;
+    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_idct4x4llm;
+  }
+}
+#endif
 
 static void encode_frame_internal(VP9_COMP *cpi) {
   int mb_row;
@@ -1282,6 +1301,14 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cpi->mb_mv_ref_count);
 #endif
 
+#if CONFIG_LOSSLESS
+  // force lossless mode when Q0 is selected
+  cpi->mb.e_mbd.lossless = (cm->base_qindex == 0 &&
+                            cm->y1dc_delta_q == 0 &&
+                            cm->uvdc_delta_q == 0 &&
+                            cm->uvac_delta_q == 0);
+  switch_lossless_mode(cpi, cpi->mb.e_mbd.lossless);
+#endif
   vp9_frame_init_quantizer(cpi);
 
   vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);

@@ -847,7 +847,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   cpi->mb.fwd_txm4x4    = vp9_short_fdct4x4;
 
 #if CONFIG_LOSSLESS
-  if (cpi->oxcf.lossless) {
+  if (cpi->oxcf.lossless || cpi->mb.e_mbd.lossless) {
     cpi->mb.fwd_txm8x4    = vp9_short_walsh8x4_x8;
     cpi->mb.fwd_txm4x4    = vp9_short_walsh4x4_x8;
   }
@@ -2469,7 +2469,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
     cm->filter_level = 0;
   }
 #if CONFIG_LOSSLESS
-  else if (cpi->oxcf.lossless) {
+  else if (cpi->mb.e_mbd.lossless) {
     cm->filter_level = 0;
   }
 #endif
