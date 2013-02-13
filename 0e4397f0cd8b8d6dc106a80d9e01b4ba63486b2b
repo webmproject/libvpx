@@ -16,6 +16,24 @@
       "revId": "0e4397f0cd8b8d6dc106a80d9e01b4ba63486b2b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//mRM\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-02-13T18:25:14Z",
+      "side": 1,
+      "message": "I don\u0027t know from memory so would have to track it through. If skip is set then in theory we should not need to even do the idct etc. If we are it is a bit of a waste. I think it falls through if the eob is set to 0 and we end up calling the stuff functions. Worth checking though.",
+      "parentUuid": "AAAAVH//mlw\u003d",
+      "revId": "0e4397f0cd8b8d6dc106a80d9e01b4ba63486b2b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
