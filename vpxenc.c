@@ -2297,6 +2297,8 @@ static void get_cx_data(struct stream_state  *stream,
         if (!(pkt->data.frame.flags & VPX_FRAME_IS_FRAGMENT)) {
           stream->frames_out++;
         }
+        if (!global->quiet)
+          fprintf(stderr, " %6luF", (unsigned long)pkt->data.frame.sz);
 
         update_rate_histogram(&stream->rate_hist, cfg, pkt);
         if (stream->config.write_webm) {
@@ -2359,6 +2361,8 @@ static void get_cx_data(struct stream_state  *stream,
           stream->psnr_sse_total += pkt->data.psnr.sse[0];
           stream->psnr_samples_total += pkt->data.psnr.samples[0];
           for (i = 0; i < 4; i++) {
+            if (!global->quiet)
+              fprintf(stderr, "%.3f ", pkt->data.psnr.psnr[i]);
             stream->psnr_totals[i] += pkt->data.psnr.psnr[i];
           }
           stream->psnr_count++;
