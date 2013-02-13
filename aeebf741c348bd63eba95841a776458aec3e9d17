@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//mVQ\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-13T17:11:50Z",
+      "side": 1,
+      "message": "well, code-wise this is smaller, but now you\u0027re re-initializing qrounding_factor for each Q in [0, QINDEX_RANGE], so shouldn\u0027t that go back out of the loop?",
+      "revId": "aeebf741c348bd63eba95841a776458aec3e9d17",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
