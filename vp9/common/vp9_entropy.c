@@ -244,13 +244,6 @@ int vp9_get_coef_context(int * recent_energy, int token) {
   return vp9_prev_token_class[token];
 };
 
-int vp9_get_coef_band(int coef_index) {
-  if (coef_index < 32)
-    return vp9_coef_bands[coef_index];
-  else
-    return 7;
-}
-
 void vp9_default_coef_probs(VP9_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs_4x4, default_coef_probs_4x4,
              sizeof(pc->fc.coef_probs_4x4));

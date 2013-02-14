@@ -219,7 +219,7 @@ static void tokenize_b(VP9_COMP *cpi,
     seg_eob = 0;
 
   do {
-    const int band = vp9_get_coef_band(c);
+    const int band = get_coef_band(c);
     int token;
 
     if (c < eob) {
@@ -774,7 +774,7 @@ static INLINE void stuff_b(VP9_COMP *cpi,
 
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
 
-  band = vp9_get_coef_band((type == PLANE_TYPE_Y_NO_DC) ? 1 : 0);
+  band = get_coef_band((type == PLANE_TYPE_Y_NO_DC) ? 1 : 0);
   t->Token = DCT_EOB_TOKEN;
   t->context_tree = probs[type][band][pt];
   t->skip_eob_node = 0;

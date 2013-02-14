@@ -65,7 +65,7 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
 
 #define INCREMENT_COUNT(token)               \
   do {                                       \
-    coef_counts[type][vp9_get_coef_band(c)][pt][token]++;     \
+    coef_counts[type][get_coef_band(c)][pt][token]++;     \
     pt = vp9_get_coef_context(&recent_energy, token);         \
   } while (0)
 
@@ -179,7 +179,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     int val;
     const uint8_t *cat6 = cat6_prob;
     if (c >= seg_eob) break;
-    prob = coef_probs[type][vp9_get_coef_band(c)][pt];
+    prob = coef_probs[type][get_coef_band(c)][pt];
     if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
       break;
 SKIP_START:
@@ -187,7 +187,7 @@ SKIP_START:
     if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
-      prob = coef_probs[type][vp9_get_coef_band(c)][pt];
+      prob = coef_probs[type][get_coef_band(c)][pt];
       goto SKIP_START;
     }
     // ONE_CONTEXT_NODE_0_
@@ -251,7 +251,7 @@ SKIP_START:
   }
 
   if (c < seg_eob)
-    coef_counts[type][vp9_get_coef_band(c)][pt][DCT_EOB_TOKEN]++;
+    coef_counts[type][get_coef_band(c)][pt][DCT_EOB_TOKEN]++;
 
   A0[aidx] = L0[lidx] = (c > !type);
   if (txfm_size >= TX_8X8 && type != PLANE_TYPE_Y2) {
