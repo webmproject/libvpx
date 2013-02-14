@@ -1250,6 +1250,9 @@ void vp9_short_fdct16x16_c(short *input, short *out, int pitch) {
 }
 
 #else
+
+#define NEW_FDCT16 1
+#if !NEW_FDCT16
 static const int16_t C1 = 16305;
 static const int16_t C2 = 16069;
 static const int16_t C3 = 15679;
@@ -1469,6 +1472,137 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *out, int pitch) {
 }
 #undef RIGHT_SHIFT
 #undef ROUNDING
+
+#else
+// Rewrote to use same algorithm as others.
+static void fdct16_1d(int16_t input[16], int16_t output[16]) {
+  int16_t step[16];
+  int temp1, temp2;
+
+  // step 1
+  step[ 0] = input[0] + input[15];
+  step[ 1] = input[1] + input[14];
+  step[ 2] = input[2] + input[13];
+  step[ 3] = input[3] + input[12];
+  step[ 4] = input[4] + input[11];
+  step[ 5] = input[5] + input[10];
+  step[ 6] = input[6] + input[ 9];
+  step[ 7] = input[7] + input[ 8];
+  step[ 8] = input[7] - input[ 8];
+  step[ 9] = input[6] - input[ 9];
+  step[10] = input[5] - input[10];
+  step[11] = input[4] - input[11];
+  step[12] = input[3] - input[12];
+  step[13] = input[2] - input[13];
+  step[14] = input[1] - input[14];
+  step[15] = input[0] - input[15];
+
+  fdct8_1d(step, step);
+
+  // step 2
+  output[8] = step[8];
+  output[9] = step[9];
+  temp1 = (-step[10] + step[13]) * cospi_16_64;
+  temp2 = (-step[11] + step[12]) * cospi_16_64;
+  output[10] = dct_const_round_shift(temp1);
+  output[11] = dct_const_round_shift(temp2);
+  temp1 = (step[11] + step[12]) * cospi_16_64;
+  temp2 = (step[10] + step[13]) * cospi_16_64;
+  output[12] = dct_const_round_shift(temp1);
+  output[13] = dct_const_round_shift(temp2);
+  output[14] = step[14];
+  output[15] = step[15];
+
+  // step 3
+  step[ 8] = output[8] + output[11];
+  step[ 9] = output[9] + output[10];
+  step[ 10] = output[9] - output[10];
+  step[ 11] = output[8] - output[11];
+  step[ 12] = -output[12] + output[15];
+  step[ 13] = -output[13] + output[14];
+  step[ 14] = output[13] + output[14];
+  step[ 15] = output[12] + output[15];
+
+  // step 4
+  output[8] = step[8];
+  temp1 = -step[9] * cospi_8_64 + step[14] * cospi_24_64;
+  temp2 = -step[10] * cospi_24_64 - step[13] * cospi_8_64;
+  output[9] = dct_const_round_shift(temp1);
+  output[10] = dct_const_round_shift(temp2);
+  output[11] = step[11];
+  output[12] = step[12];
+  temp1 = -step[10] * cospi_8_64 + step[13] * cospi_24_64;
+  temp2 = step[9] * cospi_24_64 + step[14] * cospi_8_64;
+  output[13] = dct_const_round_shift(temp1);
+  output[14] = dct_const_round_shift(temp2);
+  output[15] = step[15];
+
+  // step 5
+  step[8] = output[8] + output[9];
+  step[9] = output[8] - output[9];
+  step[10] = -output[10] + output[11];
+  step[11] = output[10] + output[11];
+  step[12] = output[12] + output[13];
+  step[13] = output[12] - output[13];
+  step[14] = -output[14] + output[15];
+  step[15] = output[14] + output[15];
+
+  // step 6
+  output[0] = step[0];
+  output[8] = step[4];
+  output[4] = step[2];
+  output[12] = step[6];
+  output[2] = step[1];
+  output[10] = step[5];
+  output[6] = step[3];
+  output[14] = step[7];
+
+  temp1 = step[8] * cospi_30_64 + step[15] * cospi_2_64;
+  temp2 = step[9] * cospi_14_64 + step[14] * cospi_18_64;
+  output[1] = dct_const_round_shift(temp1);
+  output[9] = dct_const_round_shift(temp2);
+
+  temp1 = step[10] * cospi_22_64 + step[13] * cospi_10_64;
+  temp2 = step[11] * cospi_6_64 + step[12] * cospi_26_64;
+  output[5] = dct_const_round_shift(temp1);
+  output[13] = dct_const_round_shift(temp2);
+
+  temp1 = -step[11] * cospi_26_64 + step[12] * cospi_6_64;
+  temp2 = -step[10] * cospi_10_64 + step[13] * cospi_22_64;
+  output[3] = dct_const_round_shift(temp1);
+  output[11] = dct_const_round_shift(temp2);
+
+  temp1 = -step[9] * cospi_18_64 + step[14] * cospi_14_64;
+  temp2 = -step[8] * cospi_2_64 + step[15] * cospi_30_64;
+  output[7] = dct_const_round_shift(temp1);
+  output[15] = dct_const_round_shift(temp2);
+}
+
+void vp9_short_fdct16x16_c(int16_t *input, int16_t *out, int pitch) {
+  int shortpitch = pitch >> 1;
+  int i, j;
+  int16_t output[256];
+  int16_t temp_in[16], temp_out[16];
+
+  // First transform columns
+  for (i = 0; i < 16; i++) {
+    for (j = 0; j < 16; j++)
+      temp_in[j] = input[j * shortpitch + i];
+    fdct16_1d(temp_in, temp_out);
+    for (j = 0; j < 16; j++)
+      output[j * 16 + i] = temp_out[j];
+  }
+
+  // Then transform rows
+  for (i = 0; i < 16; ++i) {
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = output[j + i * 16];
+    fdct16_1d(temp_in, temp_out);
+    for (j = 0; j < 16; ++j)
+      out[j + i * 16] = temp_out[j];
+  }
+}
+#endif
 #endif
 
 #define TEST_INT_32x32_DCT 1
