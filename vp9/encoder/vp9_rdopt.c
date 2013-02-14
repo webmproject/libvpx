@@ -431,7 +431,7 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0;
   int cost = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int *scan, *band;
+  const int *scan;
   int16_t *qcoeff_ptr = b->qcoeff;
   const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
                           get_tx_type(xd, b) : DCT_DCT;
@@ -443,7 +443,6 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   switch (tx_size) {
     case TX_4X4:
       scan = vp9_default_zig_zag1d_4x4;
-      band = vp9_coef_bands_4x4;
       seg_eob = 16;
       if (type == PLANE_TYPE_Y_WITH_DC) {
         if (tx_type == ADST_DCT) {
@@ -456,17 +455,14 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
     case TX_8X8:
       if (type == PLANE_TYPE_Y2) {
         scan = vp9_default_zig_zag1d_4x4;
-        band = vp9_coef_bands_4x4;
         seg_eob = 4;
       } else {
         scan = vp9_default_zig_zag1d_8x8;
-        band = vp9_coef_bands_8x8;
         seg_eob = 64;
       }
       break;
     case TX_16X16:
       scan = vp9_default_zig_zag1d_16x16;
-      band = vp9_coef_bands_16x16;
       seg_eob = 256;
       if (type == PLANE_TYPE_UV) {
         const int uv_idx = ib - 16;
@@ -475,7 +471,6 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       break;
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
-      band = vp9_coef_bands_32x32;
       seg_eob = 1024;
       qcoeff_ptr = xd->sb_coeff_data.qcoeff;
       break;
@@ -494,24 +489,24 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
-      cost += token_costs[band[c]][pt][t];
+      cost += token_costs[vp9_get_coef_band(c)][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_get_coef_context(&recent_energy, t);
     }
     if (c < seg_eob)
-      cost += mb->hybrid_token_costs[tx_size][type][band[c]]
+      cost += mb->hybrid_token_costs[tx_size][type][vp9_get_coef_band(c)]
           [pt][DCT_EOB_TOKEN];
   } else {
     int recent_energy = 0;
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
-      cost += token_costs[band[c]][pt][t];
+      cost += token_costs[vp9_get_coef_band(c)][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_get_coef_context(&recent_energy, t);
     }
     if (c < seg_eob)
-      cost += mb->token_costs[tx_size][type][band[c]]
+      cost += mb->token_costs[tx_size][type][vp9_get_coef_band(c)]
           [pt][DCT_EOB_TOKEN];
   }
 

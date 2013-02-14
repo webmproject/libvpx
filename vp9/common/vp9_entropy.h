@@ -72,10 +72,6 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
    position within the 4x4 DCT. */
 
 #define COEF_BANDS 8
-extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_4x4[16]);
-extern DECLARE_ALIGNED(64, const int, vp9_coef_bands_8x8[64]);
-extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_16x16[256]);
-extern DECLARE_ALIGNED(16, const int, vp9_coef_bands_32x32[1024]);
 
 /* Inside dimension is 3-valued measure of nearby complexity, that is,
    the extent to which nearby coefficients are nonzero.  For the first
@@ -127,4 +123,5 @@ static void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
 }
 
 extern int vp9_get_coef_context(int * recent_energy, int token);
+extern int vp9_get_coef_band(int coef_index);
 #endif  // VP9_COMMON_VP9_ENTROPY_H_

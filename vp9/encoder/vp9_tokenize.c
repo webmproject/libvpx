@@ -116,7 +116,7 @@ static void tokenize_b(VP9_COMP *cpi,
   int16_t *qcoeff_ptr = b->qcoeff;
   int seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int *bands, *scan;
+  const int *scan;
   vp9_coeff_count *counts;
   vp9_coeff_probs *probs;
   const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
@@ -138,7 +138,6 @@ static void tokenize_b(VP9_COMP *cpi,
     default:
     case TX_4X4:
       seg_eob = 16;
-      bands = vp9_coef_bands_4x4;
       scan = vp9_default_zig_zag1d_4x4;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_4x4;
@@ -156,7 +155,6 @@ static void tokenize_b(VP9_COMP *cpi,
     case TX_8X8:
       if (type == PLANE_TYPE_Y2) {
         seg_eob = 4;
-        bands = vp9_coef_bands_4x4;
         scan = vp9_default_zig_zag1d_4x4;
       } else {
 #if CONFIG_CNVCONTEXT
@@ -164,7 +162,6 @@ static void tokenize_b(VP9_COMP *cpi,
         l_ec = (l[0] + l[1]) != 0;
 #endif
         seg_eob = 64;
-        bands = vp9_coef_bands_8x8;
         scan = vp9_default_zig_zag1d_8x8;
       }
       if (tx_type != DCT_DCT) {
@@ -186,7 +183,6 @@ static void tokenize_b(VP9_COMP *cpi,
       }
 #endif
       seg_eob = 256;
-      bands = vp9_coef_bands_16x16;
       scan = vp9_default_zig_zag1d_16x16;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_16x16;
@@ -210,7 +206,6 @@ static void tokenize_b(VP9_COMP *cpi,
       l_ec = l_ec != 0;
 #endif
       seg_eob = 1024;
-      bands = vp9_coef_bands_32x32;
       scan = vp9_default_zig_zag1d_32x32;
       counts = cpi->coef_counts_32x32;
       probs = cpi->common.fc.coef_probs_32x32;
@@ -224,7 +219,7 @@ static void tokenize_b(VP9_COMP *cpi,
     seg_eob = 0;
 
   do {
-    const int band = bands[c];
+    const int band = vp9_get_coef_band(c);
     int token;
 
     if (c < eob) {
@@ -703,7 +698,6 @@ static INLINE void stuff_b(VP9_COMP *cpi,
                            TX_SIZE tx_size,
                            int dry_run) {
   const BLOCKD * const b = xd->block + ib;
-  const int *bands;
   vp9_coeff_count *counts;
   vp9_coeff_probs *probs;
   int pt, band;
@@ -723,7 +717,6 @@ static INLINE void stuff_b(VP9_COMP *cpi,
   switch (tx_size) {
     default:
     case TX_4X4:
-      bands = vp9_coef_bands_4x4;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_4x4;
         probs = cpi->common.fc.hybrid_coef_probs_4x4;
@@ -739,7 +732,6 @@ static INLINE void stuff_b(VP9_COMP *cpi,
         l_ec = (l[0] + l[1]) != 0;
       }
 #endif
-      bands = vp9_coef_bands_8x8;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_8x8;
         probs = cpi->common.fc.hybrid_coef_probs_8x8;
@@ -758,7 +750,6 @@ static INLINE void stuff_b(VP9_COMP *cpi,
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
       }
 #endif
-      bands = vp9_coef_bands_16x16;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_16x16;
         probs = cpi->common.fc.hybrid_coef_probs_16x16;
@@ -776,7 +767,6 @@ static INLINE void stuff_b(VP9_COMP *cpi,
       a_ec = a_ec != 0;
       l_ec = l_ec != 0;
 #endif
-      bands = vp9_coef_bands_32x32;
       counts = cpi->coef_counts_32x32;
       probs = cpi->common.fc.coef_probs_32x32;
       break;
@@ -784,7 +774,7 @@ static INLINE void stuff_b(VP9_COMP *cpi,
 
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
 
-  band = bands[(type == PLANE_TYPE_Y_NO_DC) ? 1 : 0];
+  band = vp9_get_coef_band((type == PLANE_TYPE_Y_NO_DC) ? 1 : 0);
   t->Token = DCT_EOB_TOKEN;
   t->context_tree = probs[type][band][pt];
   t->skip_eob_node = 0;
