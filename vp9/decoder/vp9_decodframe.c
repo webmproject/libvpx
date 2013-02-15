@@ -1484,10 +1484,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     q_update = 0;
     /* AC 1st order Q = default */
     pc->y1dc_delta_q = get_delta_q(&header_bc, pc->y1dc_delta_q, &q_update);
-    pc->y2dc_delta_q_unused = get_delta_q(&header_bc, pc->y2dc_delta_q_unused,
-                                          &q_update);
-    pc->y2ac_delta_q_unused = get_delta_q(&header_bc, pc->y2ac_delta_q_unused,
-                                          &q_update);
     pc->uvdc_delta_q = get_delta_q(&header_bc, pc->uvdc_delta_q, &q_update);
     pc->uvac_delta_q = get_delta_q(&header_bc, pc->uvac_delta_q, &q_update);
 

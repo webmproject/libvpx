@@ -183,8 +183,6 @@ typedef struct VP9Common {
   int last_kf_gf_q;  /* Q used on the last GF or KF */
 
   int y1dc_delta_q;
-  int y2dc_delta_q_unused;
-  int y2ac_delta_q_unused;
   int uvdc_delta_q;
   int uvac_delta_q;
 

@@ -571,10 +571,8 @@ void vp9_set_quantizer(struct VP9_COMP *cpi, int Q) {
   // if any of the delta_q values are changing update flag will
   // have to be set.
   cm->y1dc_delta_q = 0;
-  cm->y2ac_delta_q_unused = 0;
   cm->uvdc_delta_q = 0;
   cm->uvac_delta_q = 0;
-  cm->y2dc_delta_q_unused = 0;
 
   // quantizer has to be reinitialized if any delta_q changes.
   // As there are not any here for now this is inactive code.
