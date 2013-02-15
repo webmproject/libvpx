@@ -122,6 +122,12 @@ static void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
   vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
 }
 
+extern const int vp9_coef_bands[32];
+static int get_coef_band(int coef_index) {
+  if (coef_index < 32)
+    return vp9_coef_bands[coef_index];
+  else
+    return 7;
+}
 extern int vp9_get_coef_context(int * recent_energy, int token);
-extern int vp9_get_coef_band(int coef_index);
 #endif  // VP9_COMMON_VP9_ENTROPY_H_
