@@ -4306,6 +4306,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mode8x8[2]= xd->mode_info_context->bmi[8].as_mode.first;
   mode8x8[3]= xd->mode_info_context->bmi[10].as_mode.first;
 
+  mbmi->txfm_size = TX_4X4;
   error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
                                        &rate4x4, &rate4x4_tokenonly,
                                        &dist4x4, error16x16);
