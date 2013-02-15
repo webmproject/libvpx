@@ -810,7 +810,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     vp9_mv_ref_probs(&cpi->common, mv_ref_p, mi->mb_mode_context[rf]);
 
 #ifdef ENTROPY_STATS
-    accum_mv_refs(mode, ct);
     active_section = 3;
 #endif
 

@@ -19,11 +19,6 @@
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_common.h"
 
-#ifdef ENTROPY_STATS
-static int mv_ref_ct [31] [4] [2];
-static int mv_mode_cts [4] [2];
-#endif
-
 void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
   int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL +
       ((ref_mv->as_mv.col & 7) ? 1 : 0);
@@ -2103,21 +2098,22 @@ int vp9_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
 
 #ifdef ENTROPY_STATS
-void print_mode_context(void) {
+void print_mode_context(VP9_COMMON *pc) {
   FILE *f = fopen("vp9_modecont.c", "a");
   int i, j;
 
   fprintf(f, "#include \"vp9_entropy.h\"\n");
-  fprintf(f, "const int vp9_mode_contexts[6][4] =");
+  fprintf(f, "const int vp9_mode_contexts[INTER_MODE_CONTEXTS][4] =");
   fprintf(f, "{\n");
-  for (j = 0; j < 6; j++) {
+  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     fprintf(f, "  {/* %d */ ", j);
     fprintf(f, "    ");
     for (i = 0; i < 4; i++) {
       int this_prob;
 
       // context probs
-      this_prob = get_binary_prob(mv_ref_ct[j][i][0], mv_ref_ct[j][i][1]);
+      this_prob = get_binary_prob(pc->fc.mv_ref_ct[j][i][0],
+                                  pc->fc.mv_ref_ct[j][i][1]);
 
       fprintf(f, "%5d, ", this_prob);
     }
@@ -2126,46 +2122,6 @@ void print_mode_context(void) {
 
   fprintf(f, "};\n");
   fclose(f);
-}
-
-/* MV ref count ENTROPY_STATS stats code */
-void init_mv_ref_counts() {
-  vpx_memset(mv_ref_ct, 0, sizeof(mv_ref_ct));
-  vpx_memset(mv_mode_cts, 0, sizeof(mv_mode_cts));
-}
-
-void accum_mv_refs(MB_PREDICTION_MODE m, const int ct[4]) {
-  if (m == ZEROMV) {
-    ++mv_ref_ct [ct[0]] [0] [0];
-    ++mv_mode_cts[0][0];
-  } else {
-    ++mv_ref_ct [ct[0]] [0] [1];
-    ++mv_mode_cts[0][1];
-
-    if (m == NEARESTMV) {
-      ++mv_ref_ct [ct[1]] [1] [0];
-      ++mv_mode_cts[1][0];
-    } else {
-      ++mv_ref_ct [ct[1]] [1] [1];
-      ++mv_mode_cts[1][1];
-
-      if (m == NEARMV) {
-        ++mv_ref_ct [ct[2]] [2] [0];
-        ++mv_mode_cts[2][0];
-      } else {
-        ++mv_ref_ct [ct[2]] [2] [1];
-        ++mv_mode_cts[2][1];
-
-        if (m == NEWMV) {
-          ++mv_ref_ct [ct[3]] [3] [0];
-          ++mv_mode_cts[3][0];
-        } else {
-          ++mv_ref_ct [ct[3]] [3] [1];
-          ++mv_mode_cts[3][1];
-        }
-      }
-    }
-  }
 }
 
 #endif/* END MV ref count ENTROPY_STATS stats code */

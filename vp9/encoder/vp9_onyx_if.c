@@ -1648,10 +1648,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
     cpi->rd_thresh_mult[i] = 128;
   }
 
-#ifdef ENTROPY_STATS
-  init_mv_ref_counts();
-#endif
-
 #define BFP(BT, SDF, VF, SVF, SVFHH, SVFHV, SVFHHV, SDX3F, SDX8F, SDX4DF) \
     cpi->fn_ptr[BT].sdf            = SDF; \
     cpi->fn_ptr[BT].vf             = VF; \
@@ -1738,7 +1734,7 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
     if (cpi->pass != 1) {
       print_context_counters();
       print_tree_update_probs();
-      print_mode_context();
+      print_mode_context(&cpi->common);
     }
 #endif
 #ifdef NMV_STATS

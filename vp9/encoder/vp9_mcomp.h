@@ -16,9 +16,7 @@
 #include "vp9/encoder/vp9_variance.h"
 
 #ifdef ENTROPY_STATS
-extern void init_mv_ref_counts();
-extern void accum_mv_refs(MB_PREDICTION_MODE, const int near_mv_ref_cts[4]);
-void print_mode_context(void);
+void print_mode_context(VP9_COMMON *pc);
 #endif
 
 
