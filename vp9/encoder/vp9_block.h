@@ -89,11 +89,10 @@ typedef struct superblock {
 } SUPERBLOCK;
 
 typedef struct macroblock {
-  DECLARE_ALIGNED(16, int16_t, src_diff[400]);  // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
-  DECLARE_ALIGNED(16, int16_t, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
+  DECLARE_ALIGNED(16, int16_t, src_diff[384]);  // 16x16 Y 8x8 U 8x8 V
+  DECLARE_ALIGNED(16, int16_t, coeff[384]);     // 16x16 Y 8x8 U 8x8 V
   // 16 Y blocks, 4 U blocks, 4 V blocks,
-  // 1 DC 2nd order block each with 16 entries
-  BLOCK block[25];
+  BLOCK block[24];
 
   SUPERBLOCK sb_coeff_data;
 
@@ -171,15 +170,12 @@ typedef struct macroblock {
 
   void (*fwd_txm4x4)(int16_t *input, int16_t *output, int pitch);
   void (*fwd_txm8x4)(int16_t *input, int16_t *output, int pitch);
-  void (*fwd_2ndtxm4x4)(int16_t *input, int16_t *output, int pitch);
   void (*fwd_txm8x8)(int16_t *input, int16_t *output, int pitch);
   void (*fwd_txm16x16)(int16_t *input, int16_t *output, int pitch);
-  void (*fwd_2ndtxm2x2)(int16_t *input, int16_t *output, int pitch);
   void (*quantize_b_4x4)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_4x4_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
   void (*quantize_b_16x16)(BLOCK *b, BLOCKD *d);
   void (*quantize_b_8x8)(BLOCK *b, BLOCKD *d);
-  void (*quantize_b_2x2)(BLOCK *b, BLOCKD *d);
 } MACROBLOCK;
 
 #endif  // VP9_ENCODER_VP9_BLOCK_H_

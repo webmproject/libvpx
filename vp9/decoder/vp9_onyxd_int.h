@@ -49,7 +49,7 @@ typedef struct {
   vp9_prob const *coef_probs_8x8[BLOCK_TYPES_8X8];
   vp9_prob const *coef_probs_16X16[BLOCK_TYPES_16X16];
 
-  uint8_t eob[25];
+  uint8_t eob[24];
 
 } DETOK;
 

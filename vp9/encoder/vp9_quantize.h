@@ -50,11 +50,6 @@ extern prototype_quantize_block(vp9_quantize_quantb_8x8);
 #endif
 extern prototype_quantize_block(vp9_quantize_quantb_16x16);
 
-#ifndef vp9_quantize_quantb_2x2
-#define vp9_quantize_quantb_2x2 vp9_regular_quantize_b_2x2
-#endif
-extern prototype_quantize_block(vp9_quantize_quantb_2x2);
-
 #ifndef vp9_quantize_mb_4x4
 #define vp9_quantize_mb_4x4 vp9_quantize_mb_4x4_c
 #endif

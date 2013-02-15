@@ -102,9 +102,7 @@ void vp9_setup_block_dptrs(MACROBLOCKD *xd) {
     }
   }
 
-  blockd[24].diff = &xd->diff[384];
-
-  for (r = 0; r < 25; r++) {
+  for (r = 0; r < 24; r++) {
     blockd[r].qcoeff  = xd->qcoeff  + r * 16;
     blockd[r].dqcoeff = xd->dqcoeff + r * 16;
   }

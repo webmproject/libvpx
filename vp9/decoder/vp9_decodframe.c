@@ -83,7 +83,6 @@ void vp9_init_de_quantizer(VP9D_COMP *pbi) {
 
   for (Q = 0; Q < QINDEX_RANGE; Q++) {
     pc->Y1dequant[Q][0] = (int16_t)vp9_dc_quant(Q, pc->y1dc_delta_q);
-    pc->Y2dequant[Q][0] = (int16_t)vp9_dc2quant(Q, pc->y2dc_delta_q);
     pc->UVdequant[Q][0] = (int16_t)vp9_dc_uv_quant(Q, pc->uvdc_delta_q);
 
     /* all the ac values =; */
@@ -91,7 +90,6 @@ void vp9_init_de_quantizer(VP9D_COMP *pbi) {
       int rc = vp9_default_zig_zag1d_4x4[i];
 
       pc->Y1dequant[Q][rc] = (int16_t)vp9_ac_yquant(Q);
-      pc->Y2dequant[Q][rc] = (int16_t)vp9_ac2quant(Q, pc->y2ac_delta_q);
       pc->UVdequant[Q][rc] = (int16_t)vp9_ac_uv_quant(Q, pc->uvac_delta_q);
     }
   }
@@ -126,12 +124,8 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
 
   xd->inv_txm4x4_1        = vp9_short_idct4x4llm_1;
   xd->inv_txm4x4          = vp9_short_idct4x4llm;
-  xd->inv_2ndtxm4x4_1     = vp9_short_inv_walsh4x4_1;
-  xd->inv_2ndtxm4x4       = vp9_short_inv_walsh4x4;
   xd->itxm_add            = vp9_dequant_idct_add;
   xd->dc_only_itxm_add    = vp9_dc_only_idct_add_c;
-  xd->dc_itxm_add         = vp9_dequant_dc_idct_add;
-  xd->dc_itxm_add_y_block = vp9_dequant_dc_idct_add_y_block;
   xd->itxm_add_y_block    = vp9_dequant_idct_add_y_block;
   xd->itxm_add_uv_block   = vp9_dequant_idct_add_uv_block;
 #if CONFIG_LOSSLESS
@@ -139,12 +133,8 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
     assert(QIndex == 0);
     xd->inv_txm4x4_1        = vp9_short_inv_walsh4x4_1_x8;
     xd->inv_txm4x4          = vp9_short_inv_walsh4x4_x8;
-    xd->inv_2ndtxm4x4_1     = vp9_short_inv_walsh4x4_1_lossless;
-    xd->inv_2ndtxm4x4       = vp9_short_inv_walsh4x4_lossless;
     xd->itxm_add            = vp9_dequant_idct_add_lossless_c;
     xd->dc_only_itxm_add    = vp9_dc_only_inv_walsh_add_c;
-    xd->dc_itxm_add         = vp9_dequant_dc_idct_add_lossless_c;
-    xd->dc_itxm_add_y_block = vp9_dequant_dc_idct_add_y_block_lossless_c;
     xd->itxm_add_y_block    = vp9_dequant_idct_add_y_block_lossless_c;
     xd->itxm_add_uv_block   = vp9_dequant_idct_add_uv_block_lossless_c;
   }
@@ -153,9 +143,6 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
   for (i = 16; i < 24; i++) {
     xd->block[i].dequant = pc->UVdequant[QIndex];
   }
-
-  xd->block[24].dequant = pc->Y2dequant[QIndex];
-
 }
 
 /* skip_recon_mb() is Modified: Instead of writing the result to predictor buffer and then copying it
@@ -222,7 +209,6 @@ static void decode_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc) {
   BLOCKD *bd = &xd->block[0];
   TX_TYPE tx_type = get_tx_type_16x16(xd, bd);
-  assert(get_2nd_order_usage(xd) == 0);
 #ifdef DEC_DEBUG
   if (dec_debug) {
     int i;
@@ -274,7 +260,6 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
 #endif
   if (tx_type != DCT_DCT || xd->mode_info_context->mbmi.mode == I8X8_PRED) {
     int i;
-    assert(get_2nd_order_usage(xd) == 0);
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
       int idx = (ib & 0x02) ? (ib + 2) : ib;
@@ -294,39 +279,16 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                       xd->eobs[idx]);
       } else {
         vp9_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride,
-                                   0, xd->eobs[idx]);
+                                   xd->eobs[idx]);
       }
     }
-  } else if (xd->mode_info_context->mbmi.mode == SPLITMV ||
-             get_2nd_order_usage(xd) == 0) {
-    assert(get_2nd_order_usage(xd) == 0);
+  } else {
     vp9_dequant_idct_add_y_block_8x8(xd->qcoeff,
                                      xd->block[0].dequant,
                                      xd->predictor,
                                      xd->dst.y_buffer,
                                      xd->dst.y_stride,
                                      xd->eobs, xd);
-  } else {
-    BLOCKD *b = &xd->block[24];
-    assert(get_2nd_order_usage(xd) == 1);
-    vp9_dequantize_b_2x2(b);
-    vp9_short_ihaar2x2(&b->dqcoeff[0], b->diff, 8);
-    ((int *)b->qcoeff)[0] = 0;  // 2nd order block are set to 0 after idct
-    ((int *)b->qcoeff)[1] = 0;
-    ((int *)b->qcoeff)[2] = 0;
-    ((int *)b->qcoeff)[3] = 0;
-    ((int *)b->qcoeff)[4] = 0;
-    ((int *)b->qcoeff)[5] = 0;
-    ((int *)b->qcoeff)[6] = 0;
-    ((int *)b->qcoeff)[7] = 0;
-    vp9_dequant_dc_idct_add_y_block_8x8(xd->qcoeff,
-                                        xd->block[0].dequant,
-                                        xd->predictor,
-                                        xd->dst.y_buffer,
-                                        xd->dst.y_stride,
-                                        xd->eobs,
-                                        xd->block[24].diff,
-                                        xd);
   }
 
   // Now do UV
@@ -374,7 +336,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
   int i, eobtotal = 0;
   MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
   if (mode == I8X8_PRED) {
-    assert(get_2nd_order_usage(xd) == 0);
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
       const int iblock[4] = {0, 1, 4, 5};
@@ -407,7 +368,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                     *(b->base_dst) + b->dst, 8, b->dst_stride);
     }
   } else if (mode == B_PRED) {
-    assert(get_2nd_order_usage(xd) == 0);
     for (i = 0; i < 16; i++) {
       int b_mode;
       BLOCKD *b = &xd->block[i];
@@ -434,8 +394,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
     if (!xd->mode_info_context->mbmi.mb_skip_coeff) {
       vp9_decode_mb_tokens_4x4_uv(pbi, xd, bc);
     }
-    xd->above_context->y2 = 0;
-    xd->left_context->y2 = 0;
     vp9_build_intra_predictors_mbuv(xd);
     xd->itxm_add_uv_block(xd->qcoeff + 16 * 16,
                            xd->block[16].dequant,
@@ -444,8 +402,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                            xd->dst.v_buffer,
                            xd->dst.uv_stride,
                            xd->eobs + 16);
-  } else if (mode == SPLITMV || get_2nd_order_usage(xd) == 0) {
-    assert(get_2nd_order_usage(xd) == 0);
+  } else if (mode == SPLITMV || get_tx_type_4x4(xd, &xd->block[0]) == DCT_DCT) {
     xd->itxm_add_y_block(xd->qcoeff,
                           xd->block[0].dequant,
                           xd->predictor,
@@ -477,48 +434,18 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       }
     }
 #endif
-    tx_type = get_tx_type_4x4(xd, &xd->block[0]);
-    if (tx_type != DCT_DCT) {
-      assert(get_2nd_order_usage(xd) == 0);
-      for (i = 0; i < 16; i++) {
-        BLOCKD *b = &xd->block[i];
-        tx_type = get_tx_type_4x4(xd, b);
-        if (tx_type != DCT_DCT) {
-          vp9_ht_dequant_idct_add_c(tx_type, b->qcoeff,
-                                    b->dequant, b->predictor,
-                                    *(b->base_dst) + b->dst, 16,
-                                    b->dst_stride, b->eob);
-        } else {
-          xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
-                        *(b->base_dst) + b->dst, 16, b->dst_stride);
-        }
-      }
-    } else {
-      BLOCKD *b = &xd->block[24];
-      assert(get_2nd_order_usage(xd) == 1);
-      vp9_dequantize_b(b);
-      if (xd->eobs[24] > 1) {
-        xd->inv_2ndtxm4x4(&b->dqcoeff[0], b->diff);
-        ((int *)b->qcoeff)[0] = 0;
-        ((int *)b->qcoeff)[1] = 0;
-        ((int *)b->qcoeff)[2] = 0;
-        ((int *)b->qcoeff)[3] = 0;
-        ((int *)b->qcoeff)[4] = 0;
-        ((int *)b->qcoeff)[5] = 0;
-        ((int *)b->qcoeff)[6] = 0;
-        ((int *)b->qcoeff)[7] = 0;
+    for (i = 0; i < 16; i++) {
+      BLOCKD *b = &xd->block[i];
+      tx_type = get_tx_type_4x4(xd, b);
+      if (tx_type != DCT_DCT) {
+        vp9_ht_dequant_idct_add_c(tx_type, b->qcoeff,
+                                  b->dequant, b->predictor,
+                                  *(b->base_dst) + b->dst, 16,
+                                  b->dst_stride, b->eob);
       } else {
-        xd->inv_2ndtxm4x4_1(&b->dqcoeff[0], b->diff);
-        ((int *)b->qcoeff)[0] = 0;
+        xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
+                      *(b->base_dst) + b->dst, 16, b->dst_stride);
       }
-      vp9_dequantize_b(b);
-      xd->dc_itxm_add_y_block(xd->qcoeff,
-                               xd->block[0].dequant,
-                               xd->predictor,
-                               xd->dst.y_buffer,
-                               xd->dst.y_stride,
-                               xd->eobs,
-                               xd->block[24].diff);
     }
     xd->itxm_add_uv_block(xd->qcoeff + 16 * 16,
                            xd->block[16].dequant,
@@ -560,7 +487,6 @@ static void decode_8x8_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
                           BOOL_DECODER* const bc, int n,
                           int maska, int shiftb) {
   int x_idx = n & maska, y_idx = n >> shiftb;
-  BLOCKD *b = &xd->block[24];
   TX_TYPE tx_type = get_tx_type_8x8(xd, &xd->block[0]);
   if (tx_type != DCT_DCT) {
     int i;
@@ -587,24 +513,9 @@ static void decode_8x8_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
             + x_idx * 16 + (i & 1) * 8,
             xd->dst.y_buffer + (y_idx * 16 + (i / 2) * 8) * xd->dst.y_stride
             + x_idx * 16 + (i & 1) * 8,
-            stride, stride, 0, b->eob);
+            stride, stride, b->eob);
       }
     }
-  } else if (get_2nd_order_usage(xd) == 1) {
-    vp9_dequantize_b_2x2(b);
-    vp9_short_ihaar2x2(&b->dqcoeff[0], b->diff, 8);
-    ((int *)b->qcoeff)[0] = 0;  // 2nd order block are set to 0 after idct
-    ((int *)b->qcoeff)[1] = 0;
-    ((int *)b->qcoeff)[2] = 0;
-    ((int *)b->qcoeff)[3] = 0;
-    ((int *)b->qcoeff)[4] = 0;
-    ((int *)b->qcoeff)[5] = 0;
-    ((int *)b->qcoeff)[6] = 0;
-    ((int *)b->qcoeff)[7] = 0;
-    vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(
-        xd->qcoeff, xd->block[0].dequant,
-        xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-        xd->dst.y_stride, xd->eobs, xd->block[24].diff, xd);
   } else {
     vp9_dequant_idct_add_y_block_8x8_inplace_c(
         xd->qcoeff, xd->block[0].dequant,
@@ -622,7 +533,6 @@ static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
                           BOOL_DECODER* const bc, int n,
                           int maska, int shiftb) {
   int x_idx = n & maska, y_idx = n >> shiftb;
-  BLOCKD *b = &xd->block[24];
   TX_TYPE tx_type = get_tx_type_4x4(xd, &xd->block[0]);
   if (tx_type != DCT_DCT) {
     int i;
@@ -647,26 +557,6 @@ static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
             xd->dst.y_stride, xd->dst.y_stride);
       }
     }
-  } else if (get_2nd_order_usage(xd) == 1) {
-    vp9_dequantize_b(b);
-    if (xd->eobs[24] > 1) {
-      xd->inv_2ndtxm4x4(&b->dqcoeff[0], b->diff);
-      ((int *)b->qcoeff)[0] = 0;
-      ((int *)b->qcoeff)[1] = 0;
-      ((int *)b->qcoeff)[2] = 0;
-      ((int *)b->qcoeff)[3] = 0;
-      ((int *)b->qcoeff)[4] = 0;
-      ((int *)b->qcoeff)[5] = 0;
-      ((int *)b->qcoeff)[6] = 0;
-      ((int *)b->qcoeff)[7] = 0;
-    } else {
-      xd->inv_2ndtxm4x4_1(&b->dqcoeff[0], b->diff);
-      ((int *)b->qcoeff)[0] = 0;
-    }
-    vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(
-        xd->qcoeff, xd->block[0].dequant,
-        xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-        xd->dst.y_stride, xd->eobs, xd->block[24].diff, xd);
   } else {
     vp9_dequant_idct_add_y_block_4x4_inplace_c(
         xd->qcoeff, xd->block[0].dequant,
@@ -780,7 +670,7 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
       xd->above_context = pc->above_context + mb_col + x_idx;
       xd->left_context = pc->left_context + y_idx;
       xd->mode_info_context = orig_mi + x_idx + y_idx * mis;
-      for (i = 0; i < 25; i++) {
+      for (i = 0; i < 24; i++) {
         xd->block[i].eob = 0;
         xd->eobs[i] = 0;
       }
@@ -885,7 +775,7 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
       xd->above_context = pc->above_context + mb_col + x_idx;
       xd->left_context = pc->left_context + y_idx + (mb_row & 2);
       xd->mode_info_context = orig_mi + x_idx + y_idx * mis;
-      for (i = 0; i < 25; i++) {
+      for (i = 0; i < 24; i++) {
         xd->block[i].eob = 0;
         xd->eobs[i] = 0;
       }
@@ -931,7 +821,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
     vp9_reset_mb_tokens_context(xd);
   } else if (!bool_error(bc)) {
-    for (i = 0; i < 25; i++) {
+    for (i = 0; i < 24; i++) {
       xd->block[i].eob = 0;
       xd->eobs[i] = 0;
     }
@@ -1594,8 +1484,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     q_update = 0;
     /* AC 1st order Q = default */
     pc->y1dc_delta_q = get_delta_q(&header_bc, pc->y1dc_delta_q, &q_update);
-    pc->y2dc_delta_q = get_delta_q(&header_bc, pc->y2dc_delta_q, &q_update);
-    pc->y2ac_delta_q = get_delta_q(&header_bc, pc->y2ac_delta_q, &q_update);
+    pc->y2dc_delta_q_unused = get_delta_q(&header_bc, pc->y2dc_delta_q_unused,
+                                          &q_update);
+    pc->y2ac_delta_q_unused = get_delta_q(&header_bc, pc->y2ac_delta_q_unused,
+                                          &q_update);
     pc->uvdc_delta_q = get_delta_q(&header_bc, pc->uvdc_delta_q, &q_update);
     pc->uvac_delta_q = get_delta_q(&header_bc, pc->uvac_delta_q, &q_update);
 

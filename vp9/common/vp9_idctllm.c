@@ -298,122 +298,7 @@ void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
   }
 }
 
-void vp9_short_inv_walsh4x4_c(int16_t *input, int16_t *output) {
-  int i;
-  int a1, b1, c1, d1;
-  int16_t *ip = input;
-  int16_t *op = output;
-
-  for (i = 0; i < 4; i++) {
-    a1 = ((ip[0] + ip[3]));
-    b1 = ((ip[1] + ip[2]));
-    c1 = ((ip[1] - ip[2]));
-    d1 = ((ip[0] - ip[3]));
-
-    op[0] = (a1 + b1 + 1) >> 1;
-    op[1] = (c1 + d1) >> 1;
-    op[2] = (a1 - b1) >> 1;
-    op[3] = (d1 - c1) >> 1;
-
-    ip += 4;
-    op += 4;
-  }
-
-  ip = output;
-  op = output;
-  for (i = 0; i < 4; i++) {
-    a1 = ip[0] + ip[12];
-    b1 = ip[4] + ip[8];
-    c1 = ip[4] - ip[8];
-    d1 = ip[0] - ip[12];
-    op[0] = (a1 + b1 + 1) >> 1;
-    op[4] = (c1 + d1) >> 1;
-    op[8] = (a1 - b1) >> 1;
-    op[12] = (d1 - c1) >> 1;
-    ip++;
-    op++;
-  }
-}
-
-void vp9_short_inv_walsh4x4_1_c(int16_t *in, int16_t *out) {
-  int i;
-  int16_t tmp[4];
-  int16_t *ip = in;
-  int16_t *op = tmp;
-
-  op[0] = (ip[0] + 1) >> 1;
-  op[1] = op[2] = op[3] = (ip[0] >> 1);
-
-  ip = tmp;
-  op = out;
-  for (i = 0; i < 4; i++) {
-    op[0] = (ip[0] + 1) >> 1;
-    op[4] = op[8] = op[12] = (ip[0] >> 1);
-    ip++;
-    op++;
-  }
-}
-
 #if CONFIG_LOSSLESS
-void vp9_short_inv_walsh4x4_lossless_c(int16_t *input, int16_t *output) {
-  int i;
-  int a1, b1, c1, d1;
-  int16_t *ip = input;
-  int16_t *op = output;
-
-  for (i = 0; i < 4; i++) {
-    a1 = ((ip[0] + ip[3])) >> Y2_WHT_UPSCALE_FACTOR;
-    b1 = ((ip[1] + ip[2])) >> Y2_WHT_UPSCALE_FACTOR;
-    c1 = ((ip[1] - ip[2])) >> Y2_WHT_UPSCALE_FACTOR;
-    d1 = ((ip[0] - ip[3])) >> Y2_WHT_UPSCALE_FACTOR;
-
-    op[0] = (a1 + b1 + 1) >> 1;
-    op[1] = (c1 + d1) >> 1;
-    op[2] = (a1 - b1) >> 1;
-    op[3] = (d1 - c1) >> 1;
-
-    ip += 4;
-    op += 4;
-  }
-
-  ip = output;
-  op = output;
-  for (i = 0; i < 4; i++) {
-    a1 = ip[0] + ip[12];
-    b1 = ip[4] + ip[8];
-    c1 = ip[4] - ip[8];
-    d1 = ip[0] - ip[12];
-
-
-    op[0] = ((a1 + b1 + 1) >> 1) << Y2_WHT_UPSCALE_FACTOR;
-    op[4] = ((c1 + d1) >> 1) << Y2_WHT_UPSCALE_FACTOR;
-    op[8] = ((a1 - b1) >> 1) << Y2_WHT_UPSCALE_FACTOR;
-    op[12] = ((d1 - c1) >> 1) << Y2_WHT_UPSCALE_FACTOR;
-
-    ip++;
-    op++;
-  }
-}
-
-void vp9_short_inv_walsh4x4_1_lossless_c(int16_t *in, int16_t *out) {
-  int i;
-  int16_t tmp[4];
-  int16_t *ip = in;
-  int16_t *op = tmp;
-
-  op[0] = ((ip[0] >> Y2_WHT_UPSCALE_FACTOR) + 1) >> 1;
-  op[1] = op[2] = op[3] = ((ip[0] >> Y2_WHT_UPSCALE_FACTOR) >> 1);
-
-  ip = tmp;
-  op = out;
-  for (i = 0; i < 4; i++) {
-    op[0] = ((ip[0] + 1) >> 1) << Y2_WHT_UPSCALE_FACTOR;
-    op[4] = op[8] = op[12] = ((ip[0] >> 1)) << Y2_WHT_UPSCALE_FACTOR;
-    ip++;
-    op++;
-  }
-}
-
 void vp9_short_inv_walsh4x4_x8_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
@@ -911,20 +796,6 @@ void vp9_short_idct1_8x8_c(int16_t *input, int16_t *output) {
   tmp = out * cospi_16_64;
   out = dct_const_round_shift(tmp);
   *output = (out + 16) >> 5;
-}
-
-void vp9_short_ihaar2x2_c(int16_t *input, int16_t *output, int pitch) {
-  int i;
-  int16_t *ip = input;  // 0, 1, 4, 8
-  int16_t *op = output;
-  for (i = 0; i < 16; i++) {
-    op[i] = 0;
-  }
-
-  op[0] = (ip[0] + ip[1] + ip[4] + ip[8] + 1) >> 1;
-  op[1] = (ip[0] - ip[1] + ip[4] - ip[8]) >> 1;
-  op[4] = (ip[0] + ip[1] - ip[4] - ip[8]) >> 1;
-  op[8] = (ip[0] - ip[1] - ip[4] + ip[8]) >> 1;
 }
 
 void idct16_1d(int16_t *input, int16_t *output) {

@@ -31,9 +31,9 @@ typedef struct {
 typedef int64_t vp9_coeff_accum[COEF_BANDS][PREV_COEF_CONTEXTS]
                                [MAX_ENTROPY_TOKENS];
 
-extern int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd, int has_y2_block);
+extern int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd);
 extern int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd);
-extern int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd, int has_y2_block);
+extern int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd);
 extern int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd);
 extern int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd);
 extern int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd);

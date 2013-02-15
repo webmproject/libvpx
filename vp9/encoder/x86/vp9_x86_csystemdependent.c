@@ -23,11 +23,11 @@ void vp9_short_fdct8x4_mmx(short *input, short *output, int pitch) {
   vp9_short_fdct4x4_mmx(input + 4, output + 16, pitch);
 }
 
-int vp9_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
-int vp9_mbblock_error_mmx(MACROBLOCK *mb, int dc) {
+int vp9_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr);
+int vp9_mbblock_error_mmx(MACROBLOCK *mb) {
   short *coeff_ptr =  mb->block[0].coeff;
   short *dcoef_ptr =  mb->e_mbd.block[0].dqcoeff;
-  return vp9_mbblock_error_mmx_impl(coeff_ptr, dcoef_ptr, dc);
+  return vp9_mbblock_error_mmx_impl(coeff_ptr, dcoef_ptr);
 }
 
 int vp9_mbuverror_mmx_impl(short *s_ptr, short *d_ptr);
@@ -51,11 +51,11 @@ void vp9_subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch) {
 #endif
 
 #if HAVE_SSE2
-int vp9_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
-int vp9_mbblock_error_xmm(MACROBLOCK *mb, int dc) {
+int vp9_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr);
+int vp9_mbblock_error_xmm(MACROBLOCK *mb) {
   short *coeff_ptr =  mb->block[0].coeff;
   short *dcoef_ptr =  mb->e_mbd.block[0].dqcoeff;
-  return vp9_mbblock_error_xmm_impl(coeff_ptr, dcoef_ptr, dc);
+  return vp9_mbblock_error_xmm_impl(coeff_ptr, dcoef_ptr);
 }
 
 int vp9_mbuverror_xmm_impl(short *s_ptr, short *d_ptr);

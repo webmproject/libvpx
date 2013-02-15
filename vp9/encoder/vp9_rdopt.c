@@ -320,26 +320,7 @@ int vp9_block_error_c(int16_t *coeff, int16_t *dqcoeff, int block_size) {
   return error;
 }
 
-int vp9_mbblock_error_8x8_c(MACROBLOCK *mb, int dc) {
-  BLOCK  *be;
-  BLOCKD *bd;
-  int i, j;
-  int berror, error = 0;
-
-  for (i = 0; i < 16; i+=4) {
-    be = &mb->block[i];
-    bd = &mb->e_mbd.block[i];
-    berror = 0;
-    for (j = dc; j < 64; j++) {
-      int this_diff = be->coeff[j] - bd->dqcoeff[j];
-      berror += this_diff * this_diff;
-    }
-    error += berror;
-  }
-  return error;
-}
-
-int vp9_mbblock_error_c(MACROBLOCK *mb, int dc) {
+int vp9_mbblock_error_c(MACROBLOCK *mb) {
   BLOCK  *be;
   BLOCKD *bd;
   int i, j;
@@ -349,7 +330,7 @@ int vp9_mbblock_error_c(MACROBLOCK *mb, int dc) {
     be = &mb->block[i];
     bd = &mb->e_mbd.block[i];
     berror = 0;
-    for (j = dc; j < 16; j++) {
+    for (j = 0; j < 16; j++) {
       int this_diff = be->coeff[j] - bd->dqcoeff[j];
       berror += this_diff * this_diff;
     }
@@ -428,7 +409,7 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   const int eob = b->eob;
   MACROBLOCKD *xd = &mb->e_mbd;
   const int ib = (int)(b - xd->block);
-  int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0;
+  int c = 0;
   int cost = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int *scan;
@@ -453,13 +434,8 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       }
       break;
     case TX_8X8:
-      if (type == PLANE_TYPE_Y2) {
-        scan = vp9_default_zig_zag1d_4x4;
-        seg_eob = 4;
-      } else {
-        scan = vp9_default_zig_zag1d_8x8;
-        seg_eob = 64;
-      }
+      scan = vp9_default_zig_zag1d_8x8;
+      seg_eob = 64;
       break;
     case TX_16X16:
       scan = vp9_default_zig_zag1d_16x16;
@@ -511,12 +487,12 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   }
 
   // is eob first coefficient;
-  pt = (c > !type);
+  pt = (c > 0);
   *a = *l = pt;
   return cost;
 }
 
-static int rdcost_mby_4x4(MACROBLOCK *mb, int has_2nd_order, int backup) {
+static int rdcost_mby_4x4(MACROBLOCK *mb, int backup) {
   int cost = 0;
   int b;
   MACROBLOCKD *xd = &mb->e_mbd;
@@ -536,17 +512,9 @@ static int rdcost_mby_4x4(MACROBLOCK *mb, int has_2nd_order, int backup) {
   }
 
   for (b = 0; b < 16; b++)
-    cost += cost_coeffs(mb, xd->block + b,
-                        (has_2nd_order ?
-                         PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC),
+    cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_Y_WITH_DC,
                         ta + vp9_block2above[TX_4X4][b],
                         tl + vp9_block2left[TX_4X4][b],
-                        TX_4X4);
-
-  if (has_2nd_order)
-    cost += cost_coeffs(mb, xd->block + 24, PLANE_TYPE_Y2,
-                        ta + vp9_block2above[TX_4X4][24],
-                        tl + vp9_block2left[TX_4X4][24],
                         TX_4X4);
 
   return cost;
@@ -557,26 +525,17 @@ static void macro_block_yrd_4x4(MACROBLOCK *mb,
                                 int *Distortion,
                                 int *skippable, int backup) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  BLOCK   *const mb_y2 = mb->block + 24;
-  BLOCKD *const x_y2  = xd->block + 24;
-  int d, has_2nd_order;
 
   xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-  has_2nd_order = get_2nd_order_usage(xd);
-  // Fdct and building the 2nd order block
   vp9_transform_mby_4x4(mb);
   vp9_quantize_mby_4x4(mb);
-  d = vp9_mbblock_error(mb, has_2nd_order);
-  if (has_2nd_order)
-    d += vp9_block_error(mb_y2->coeff, x_y2->dqcoeff, 16);
 
-  *Distortion = (d >> 2);
-  // rate
-  *Rate = rdcost_mby_4x4(mb, has_2nd_order, backup);
-  *skippable = vp9_mby_is_skippable_4x4(&mb->e_mbd, has_2nd_order);
+  *Distortion = vp9_mbblock_error(mb) >> 2;
+  *Rate = rdcost_mby_4x4(mb, backup);
+  *skippable = vp9_mby_is_skippable_4x4(xd);
 }
 
-static int rdcost_mby_8x8(MACROBLOCK *mb, int has_2nd_order, int backup) {
+static int rdcost_mby_8x8(MACROBLOCK *mb, int backup) {
   int cost = 0;
   int b;
   MACROBLOCKD *xd = &mb->e_mbd;
@@ -596,18 +555,11 @@ static int rdcost_mby_8x8(MACROBLOCK *mb, int has_2nd_order, int backup) {
   }
 
   for (b = 0; b < 16; b += 4)
-    cost += cost_coeffs(mb, xd->block + b,
-                        (has_2nd_order ?
-                         PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC),
+    cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_Y_WITH_DC,
                         ta + vp9_block2above[TX_8X8][b],
                         tl + vp9_block2left[TX_8X8][b],
                         TX_8X8);
 
-  if (has_2nd_order)
-    cost += cost_coeffs(mb, xd->block + 24, PLANE_TYPE_Y2,
-                            ta + vp9_block2above[TX_8X8][24],
-                            tl + vp9_block2left[TX_8X8][24],
-                            TX_8X8);
   return cost;
 }
 
@@ -616,23 +568,14 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
                                 int *Distortion,
                                 int *skippable, int backup) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  BLOCK   *const mb_y2 = mb->block + 24;
-  BLOCKD *const x_y2  = xd->block + 24;
-  int d, has_2nd_order;
 
   xd->mode_info_context->mbmi.txfm_size = TX_8X8;
-
   vp9_transform_mby_8x8(mb);
   vp9_quantize_mby_8x8(mb);
-  has_2nd_order = get_2nd_order_usage(xd);
-  d = vp9_mbblock_error_8x8_c(mb, has_2nd_order);
-  if (has_2nd_order)
-    d += vp9_block_error(mb_y2->coeff, x_y2->dqcoeff, 16);
 
-  *Distortion = (d >> 2);
-  // rate
-  *Rate = rdcost_mby_8x8(mb, has_2nd_order, backup);
-  *skippable = vp9_mby_is_skippable_8x8(&mb->e_mbd, has_2nd_order);
+  *Distortion = vp9_mbblock_error(mb) >> 2;
+  *Rate = rdcost_mby_8x8(mb, backup);
+  *skippable = vp9_mby_is_skippable_8x8(xd);
 }
 
 static int rdcost_mby_16x16(MACROBLOCK *mb, int backup) {
@@ -658,7 +601,6 @@ static int rdcost_mby_16x16(MACROBLOCK *mb, int backup) {
 
 static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
                                   int *skippable, int backup) {
-  int d;
   MACROBLOCKD *xd = &mb->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_16X16;
@@ -671,12 +613,9 @@ static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
       xd->mode_info_context->mbmi.mode < I8X8_PRED)
     vp9_optimize_mby_16x16(mb);
 
-  d = vp9_mbblock_error(mb, 0);
-
-  *Distortion = (d >> 2);
-  // rate
+  *Distortion = vp9_mbblock_error(mb) >> 2;
   *Rate = rdcost_mby_16x16(mb, backup);
-  *skippable = vp9_mby_is_skippable_16x16(&mb->e_mbd);
+  *skippable = vp9_mby_is_skippable_16x16(xd);
 }
 
 static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
@@ -1401,7 +1340,6 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
     vp9_subtract_4b_c(be, b, 16);
 
-    assert(get_2nd_order_usage(xd) == 0);
     if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
       TX_TYPE tx_type = get_tx_type_8x8(xd, b);
       if (tx_type != DCT_DCT)
@@ -2862,8 +2800,8 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   *returndistortion = bsi.d;
   *returnyrate = bsi.segment_yrate;
   *skippable = bsi.txfm_size == TX_4X4 ?
-                    vp9_mby_is_skippable_4x4(&x->e_mbd, 0) :
-                    vp9_mby_is_skippable_8x8(&x->e_mbd, 0);
+                    vp9_mby_is_skippable_4x4(&x->e_mbd) :
+                    vp9_mby_is_skippable_8x8(&x->e_mbd);
 
   /* save partitions */
   mbmi->txfm_size = bsi.txfm_size;
@@ -3376,7 +3314,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if ((int)sse < threshold) {
-      unsigned int q2dc = xd->block[24].dequant[0];
+      unsigned int q2dc = xd->block[0].dequant[0];
       /* If there is no codeable 2nd order dc
        or a very small uniform pixel change change */
       if ((sse - var < q2dc * q2dc >> 4) ||

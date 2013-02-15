@@ -185,20 +185,9 @@ void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
 }
 #endif
 
-void vp9_dequantize_b_2x2_c(BLOCKD *d) {
-  int i;
-  int16_t *DQ  = d->dqcoeff;
-  const int16_t *Q   = d->qcoeff;
-  const int16_t *DQC = d->dequant;
-
-  for (i = 0; i < 16; i++) {
-    DQ[i] = (int16_t)((Q[i] * DQC[i]));
-  }
-}
-
 void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
                                 uint8_t *pred, uint8_t *dest, int pitch,
-                                int stride, int dc, int eob) {
+                                int stride, int eob) {
   int16_t output[64];
   int16_t *diff_ptr = output;
   int i;
@@ -206,8 +195,7 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
   /* If dc is 1, then input[0] is the reconstructed value, do not need
    * dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
    */
-  if (!dc)
-    input[0] *= dq[0];
+  input[0] *= dq[0];
 
   /* The calculation can be simplified if there are not many non-zero dct
    * coefficients. Use eobs to decide what to do.

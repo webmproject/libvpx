@@ -166,26 +166,14 @@ static void subtract_mb(MACROBLOCK *x) {
                     x->e_mbd.predictor, x->src.uv_stride);
 }
 
-static void build_dcblock_4x4(MACROBLOCK *x) {
-  int16_t *src_diff_ptr = &x->src_diff[384];
-  int i;
-
-  for (i = 0; i < 16; i++) {
-    src_diff_ptr[i] = x->coeff[i * 16];
-    x->coeff[i * 16] = 0;
-  }
-}
-
 void vp9_transform_mby_4x4(MACROBLOCK *x) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
-  int has_2nd_order = get_2nd_order_usage(xd);
 
   for (i = 0; i < 16; i++) {
     BLOCK *b = &x->block[i];
     TX_TYPE tx_type = get_tx_type_4x4(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
-      assert(has_2nd_order == 0);
       vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 4);
     } else if (!(i & 1) && get_tx_type_4x4(xd, &xd->block[i + 1]) == DCT_DCT) {
       x->fwd_txm8x4(&x->block[i].src_diff[0],
@@ -195,17 +183,6 @@ void vp9_transform_mby_4x4(MACROBLOCK *x) {
       x->fwd_txm4x4(&x->block[i].src_diff[0],
                            &x->block[i].coeff[0], 32);
     }
-  }
-
-  if (has_2nd_order) {
-    // build dc block from 16 y dc values
-    build_dcblock_4x4(x);
-
-    // do 2nd order transform on the dc block
-    x->fwd_2ndtxm4x4(&x->block[24].src_diff[0],
-                      &x->block[24].coeff[0], 8);
-  } else {
-    vpx_memset(x->block[24].coeff, 0, 16 * sizeof(x->block[24].coeff[0]));
   }
 }
 
@@ -223,34 +200,15 @@ static void transform_mb_4x4(MACROBLOCK *x) {
   vp9_transform_mbuv_4x4(x);
 }
 
-static void build_dcblock_8x8(MACROBLOCK *x) {
-  int16_t *src_diff_ptr = x->block[24].src_diff;
-  int i;
-
-  for (i = 0; i < 16; i++) {
-    src_diff_ptr[i] = 0;
-  }
-  src_diff_ptr[0] = x->coeff[0 * 16];
-  src_diff_ptr[1] = x->coeff[4 * 16];
-  src_diff_ptr[4] = x->coeff[8 * 16];
-  src_diff_ptr[8] = x->coeff[12 * 16];
-  x->coeff[0 * 16] = 0;
-  x->coeff[4 * 16] = 0;
-  x->coeff[8 * 16] = 0;
-  x->coeff[12 * 16] = 0;
-}
-
 void vp9_transform_mby_8x8(MACROBLOCK *x) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
   TX_TYPE tx_type;
-  int has_2nd_order = get_2nd_order_usage(xd);
 
   for (i = 0; i < 9; i += 8) {
     BLOCK *b = &x->block[i];
     tx_type = get_tx_type_8x8(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
-      assert(has_2nd_order == 0);
       vp9_fht_c(b->src_diff, 32, b->coeff, tx_type, 8);
     } else {
       x->fwd_txm8x8(&x->block[i].src_diff[0],
@@ -261,23 +219,11 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
     BLOCK *b = &x->block[i];
     tx_type = get_tx_type_8x8(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
-      assert(has_2nd_order == 0);
       vp9_fht_c(b->src_diff, 32, (b + 2)->coeff, tx_type, 8);
     } else {
       x->fwd_txm8x8(&x->block[i].src_diff[0],
                            &x->block[i + 2].coeff[0], 32);
     }
-  }
-
-  if (has_2nd_order) {
-    // build dc block from 2x2 y dc values
-    build_dcblock_8x8(x);
-
-    // do 2nd order transform on the dc block
-    x->fwd_2ndtxm2x2(&x->block[24].src_diff[0],
-                      &x->block[24].coeff[0], 8);
-  } else {
-    vpx_memset(x->block[24].coeff, 0, 16 * sizeof(x->block[24].coeff[0]));
   }
 }
 
@@ -379,7 +325,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   int16_t *qcoeff_ptr = d->qcoeff;
   int16_t *dqcoeff_ptr = d->dqcoeff;
   int eob = d->eob, final_eob, sz = 0;
-  int i0 = (type == PLANE_TYPE_Y_NO_DC);
+  const int i0 = 0;
   int rc, x, next;
   int64_t rdmult, rddiv, rd_cost0, rd_cost1;
   int rate0, rate1, error0, error1, t0, t1;
@@ -582,80 +528,11 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   final_eob++;
 
   d->eob = final_eob;
-  *a = *l = (d->eob > !type);
-}
-
-/**************************************************************************
-our inverse hadamard transform effectively is weighted sum of all 16 inputs
-with weight either 1 or -1. It has a last stage scaling of (sum+1)>>2. And
-dc only idct is (dc+16)>>5. So if all the sums are between -65 and 63 the
-output after inverse wht and idct will be all zero. A sum of absolute value
-smaller than 65 guarantees all 16 different (+1/-1) weighted sums in wht
-fall between -65 and +65.
-**************************************************************************/
-#define SUM_2ND_COEFF_THRESH 65
-
-static void check_reset_2nd_coeffs(MACROBLOCKD *xd,
-                                   ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  int sum = 0;
-  int i;
-  BLOCKD *bd = &xd->block[24];
-  if (bd->dequant[0] >= SUM_2ND_COEFF_THRESH
-      && bd->dequant[1] >= SUM_2ND_COEFF_THRESH)
-    return;
-
-  for (i = 0; i < bd->eob; i++) {
-    int coef = bd->dqcoeff[vp9_default_zig_zag1d_4x4[i]];
-    sum += (coef >= 0) ? coef : -coef;
-    if (sum >= SUM_2ND_COEFF_THRESH)
-      return;
-  }
-
-  if (sum < SUM_2ND_COEFF_THRESH) {
-    for (i = 0; i < bd->eob; i++) {
-      int rc = vp9_default_zig_zag1d_4x4[i];
-      bd->qcoeff[rc] = 0;
-      bd->dqcoeff[rc] = 0;
-    }
-    bd->eob = 0;
-    *a = *l = (bd->eob != 0);
-  }
-}
-
-#define SUM_2ND_COEFF_THRESH_8X8 32
-static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *xd,
-                                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  int sum = 0;
-  BLOCKD *bd = &xd->block[24];
-  int coef;
-
-  coef = bd->dqcoeff[0];
-  sum += (coef >= 0) ? coef : -coef;
-  coef = bd->dqcoeff[1];
-  sum += (coef >= 0) ? coef : -coef;
-  coef = bd->dqcoeff[4];
-  sum += (coef >= 0) ? coef : -coef;
-  coef = bd->dqcoeff[8];
-  sum += (coef >= 0) ? coef : -coef;
-
-  if (sum < SUM_2ND_COEFF_THRESH_8X8) {
-    bd->qcoeff[0] = 0;
-    bd->dqcoeff[0] = 0;
-    bd->qcoeff[1] = 0;
-    bd->dqcoeff[1] = 0;
-    bd->qcoeff[4] = 0;
-    bd->dqcoeff[4] = 0;
-    bd->qcoeff[8] = 0;
-    bd->dqcoeff[8] = 0;
-    bd->eob = 0;
-    *a = *l = (bd->eob != 0);
-  }
+  *a = *l = (d->eob > 0);
 }
 
 void vp9_optimize_mby_4x4(MACROBLOCK *x) {
   int b;
-  PLANE_TYPE type;
-  int has_2nd_order;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
@@ -669,24 +546,10 @@ void vp9_optimize_mby_4x4(MACROBLOCK *x) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  has_2nd_order = get_2nd_order_usage(&x->e_mbd);
-
-  type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
-
   for (b = 0; b < 16; b++) {
-    optimize_b(x, b, type,
+    optimize_b(x, b, PLANE_TYPE_Y_WITH_DC,
                ta + vp9_block2above[TX_4X4][b],
                tl + vp9_block2left[TX_4X4][b], TX_4X4);
-  }
-
-  if (has_2nd_order) {
-    b = 24;
-    optimize_b(x, b, PLANE_TYPE_Y2,
-               ta + vp9_block2above[TX_4X4][b],
-               tl + vp9_block2left[TX_4X4][b], TX_4X4);
-    check_reset_2nd_coeffs(&x->e_mbd,
-                           ta + vp9_block2above[TX_4X4][b],
-                           tl + vp9_block2left[TX_4X4][b]);
   }
 }
 
@@ -719,11 +582,9 @@ static void optimize_mb_4x4(MACROBLOCK *x) {
 
 void vp9_optimize_mby_8x8(MACROBLOCK *x) {
   int b;
-  PLANE_TYPE type;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
-  int has_2nd_order = get_2nd_order_usage(&x->e_mbd);
 
   if (!x->e_mbd.above_context || !x->e_mbd.left_context)
     return;
@@ -733,7 +594,6 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x) {
 
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
-  type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
   for (b = 0; b < 16; b += 4) {
     ENTROPY_CONTEXT *const a = ta + vp9_block2above[TX_8X8][b];
     ENTROPY_CONTEXT *const l = tl + vp9_block2left[TX_8X8][b];
@@ -744,16 +604,9 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x) {
     ENTROPY_CONTEXT above_ec = a[0];
     ENTROPY_CONTEXT left_ec = l[0];
 #endif
-    optimize_b(x, b, type, &above_ec, &left_ec, TX_8X8);
+    optimize_b(x, b, PLANE_TYPE_Y_WITH_DC, &above_ec, &left_ec, TX_8X8);
     a[1] = a[0] = above_ec;
     l[1] = l[0] = left_ec;
-  }
-
-  // 8x8 always have 2nd order block
-  if (has_2nd_order) {
-    check_reset_8x8_2nd_coeffs(&x->e_mbd,
-                               ta + vp9_block2above[TX_8X8][24],
-                               tl + vp9_block2left[TX_8X8][24]);
   }
 }
 

@@ -1688,10 +1688,7 @@ void vp9_setup_block_ptrs(MACROBLOCK *x) {
     }
   }
 
-  x->block[24].src_diff = x->src_diff + 384;
-
-
-  for (i = 0; i < 25; i++) {
+  for (i = 0; i < 24; i++) {
     x->block[i].coeff = x->coeff + i * 16;
   }
 }

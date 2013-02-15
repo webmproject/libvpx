@@ -108,7 +108,7 @@ static void tokenize_b(VP9_COMP *cpi,
                        TX_SIZE tx_size,
                        int dry_run) {
   int pt; /* near block/prev token context index */
-  int c = (type == PLANE_TYPE_Y_NO_DC) ? 1 : 0;
+  int c = 0;
   int recent_energy = 0;
   const BLOCKD * const b = xd->block + ib;
   const int eob = b->eob;     /* one beyond last nonzero coeff */
@@ -153,17 +153,12 @@ static void tokenize_b(VP9_COMP *cpi,
       }
       break;
     case TX_8X8:
-      if (type == PLANE_TYPE_Y2) {
-        seg_eob = 4;
-        scan = vp9_default_zig_zag1d_4x4;
-      } else {
 #if CONFIG_CNVCONTEXT
-        a_ec = (a[0] + a[1]) != 0;
-        l_ec = (l[0] + l[1]) != 0;
+      a_ec = (a[0] + a[1]) != 0;
+      l_ec = (l[0] + l[1]) != 0;
 #endif
-        seg_eob = 64;
-        scan = vp9_default_zig_zag1d_8x8;
-      }
+      seg_eob = 64;
+      scan = vp9_default_zig_zag1d_8x8;
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_8x8;
         probs = cpi->common.fc.hybrid_coef_probs_8x8;
@@ -235,8 +230,7 @@ static void tokenize_b(VP9_COMP *cpi,
 
     t->Token = token;
     t->context_tree = probs[type][band][pt];
-    t->skip_eob_node = (pt == 0) && ((band > 0 && type != PLANE_TYPE_Y_NO_DC) ||
-                                     (band > 1 && type == PLANE_TYPE_Y_NO_DC));
+    t->skip_eob_node = (pt == 0) && (band > 0);
     assert(vp9_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
     if (!dry_run) {
       ++counts[type][band][pt][token];
@@ -247,11 +241,11 @@ static void tokenize_b(VP9_COMP *cpi,
   } while (c < eob && ++c < seg_eob);
 
   *tp = t;
-  a_ec = l_ec = (c > !type); /* 0 <-> all coeff data is zero */
+  a_ec = l_ec = (c > 0); /* 0 <-> all coeff data is zero */
   a[0] = a_ec;
   l[0] = l_ec;
 
-  if (tx_size == TX_8X8 && type != PLANE_TYPE_Y2) {
+  if (tx_size == TX_8X8) {
     a[1] = a_ec;
     l[1] = l_ec;
   } else if (tx_size == TX_16X16) {
@@ -270,18 +264,13 @@ static void tokenize_b(VP9_COMP *cpi,
   }
 }
 
-int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd, int has_2nd_order) {
+int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd) {
   int skip = 1;
   int i = 0;
 
-  if (has_2nd_order) {
-    for (i = 0; i < 16; i++)
-      skip &= (xd->block[i].eob < 2);
-    skip &= (!xd->block[24].eob);
-  } else {
-    for (i = 0; i < 16; i++)
-      skip &= (!xd->block[i].eob);
-  }
+  for (i = 0; i < 16; i++)
+    skip &= (!xd->block[i].eob);
+
   return skip;
 }
 
@@ -294,23 +283,18 @@ int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd) {
   return skip;
 }
 
-static int mb_is_skippable_4x4(MACROBLOCKD *xd, int has_2nd_order) {
-  return (vp9_mby_is_skippable_4x4(xd, has_2nd_order) &
+static int mb_is_skippable_4x4(MACROBLOCKD *xd) {
+  return (vp9_mby_is_skippable_4x4(xd) &
           vp9_mbuv_is_skippable_4x4(xd));
 }
 
-int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd, int has_2nd_order) {
+int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd) {
   int skip = 1;
   int i = 0;
 
-  if (has_2nd_order) {
-    for (i = 0; i < 16; i += 4)
-      skip &= (xd->block[i].eob < 2);
-    skip &= (!xd->block[24].eob);
-  } else {
-    for (i = 0; i < 16; i += 4)
-      skip &= (!xd->block[i].eob);
-  }
+  for (i = 0; i < 16; i += 4)
+    skip &= (!xd->block[i].eob);
+
   return skip;
 }
 
@@ -318,13 +302,13 @@ int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd) {
   return (!xd->block[16].eob) & (!xd->block[20].eob);
 }
 
-static int mb_is_skippable_8x8(MACROBLOCKD *xd, int has_2nd_order) {
-  return (vp9_mby_is_skippable_8x8(xd, has_2nd_order) &
+static int mb_is_skippable_8x8(MACROBLOCKD *xd) {
+  return (vp9_mby_is_skippable_8x8(xd) &
           vp9_mbuv_is_skippable_8x8(xd));
 }
 
-static int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd, int has_2nd_order) {
-  return (vp9_mby_is_skippable_8x8(xd, has_2nd_order) &
+static int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd) {
+  return (vp9_mby_is_skippable_8x8(xd) &
           vp9_mbuv_is_skippable_4x4(xd));
 }
 
@@ -360,10 +344,6 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
   VP9_COMMON * const cm = &cpi->common;
   MB_MODE_INFO * const mbmi = &xd->mode_info_context->mbmi;
   TOKENEXTRA *t_backup = *t;
-  ENTROPY_CONTEXT *A[2] = { (ENTROPY_CONTEXT *) (xd->above_context + 0),
-                            (ENTROPY_CONTEXT *) (xd->above_context + 1), };
-  ENTROPY_CONTEXT *L[2] = { (ENTROPY_CONTEXT *) (xd->left_context + 0),
-                            (ENTROPY_CONTEXT *) (xd->left_context + 1), };
   const int mb_skip_context = vp9_get_pred_context(cm, xd, PRED_MBSKIP);
   const int segment_id = mbmi->segment_id;
   const int skip_inc = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
@@ -394,7 +374,6 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
     tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
                TX_16X16, dry_run);
   }
-  A[0][8] = L[0][8] = A[1][8] = L[1][8] = 0;
   if (dry_run)
     *t = t_backup;
 }
@@ -403,8 +382,6 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
                      MACROBLOCKD *xd,
                      TOKENEXTRA **t,
                      int dry_run) {
-  PLANE_TYPE plane_type;
-  int has_2nd_order;
   int b;
   int tx_size = xd->mode_info_context->mbmi.txfm_size;
   int mb_skip_context = vp9_get_pred_context(&cpi->common, xd, PRED_MBSKIP);
@@ -421,8 +398,6 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
   } else
     skip_inc = 0;
 
-  has_2nd_order = get_2nd_order_usage(xd);
-
   switch (tx_size) {
     case TX_16X16:
 
@@ -432,15 +407,15 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
       if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
           xd->mode_info_context->mbmi.mode == SPLITMV)
         xd->mode_info_context->mbmi.mb_skip_coeff =
-            mb_is_skippable_8x8_4x4uv(xd, 0);
+            mb_is_skippable_8x8_4x4uv(xd);
       else
         xd->mode_info_context->mbmi.mb_skip_coeff =
-            mb_is_skippable_8x8(xd, has_2nd_order);
+            mb_is_skippable_8x8(xd);
       break;
 
     default:
       xd->mode_info_context->mbmi.mb_skip_coeff =
-          mb_is_skippable_4x4(xd, has_2nd_order);
+          mb_is_skippable_4x4(xd);
       break;
   }
 
@@ -461,15 +436,6 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
   if (!dry_run)
     cpi->skip_false_count[mb_skip_context] += skip_inc;
 
-  if (has_2nd_order) {
-    tokenize_b(cpi, xd, 24, t, PLANE_TYPE_Y2, tx_size, dry_run);
-    plane_type = PLANE_TYPE_Y_NO_DC;
-  } else {
-    xd->above_context->y2 = 0;
-    xd->left_context->y2 = 0;
-    plane_type = PLANE_TYPE_Y_WITH_DC;
-  }
-
   if (tx_size == TX_16X16) {
     tokenize_b(cpi, xd, 0, t, PLANE_TYPE_Y_WITH_DC, TX_16X16, dry_run);
     for (b = 16; b < 24; b += 4) {
@@ -477,7 +443,7 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
     }
   } else if (tx_size == TX_8X8) {
     for (b = 0; b < 16; b += 4) {
-      tokenize_b(cpi, xd, b, t, plane_type, TX_8X8, dry_run);
+      tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_8X8, dry_run);
     }
     if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
         xd->mode_info_context->mbmi.mode == SPLITMV) {
@@ -490,11 +456,10 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
       }
     }
   } else {
-    for (b = 0; b < 24; b++) {
-      if (b >= 16)
-        plane_type = PLANE_TYPE_UV;
-      tokenize_b(cpi, xd, b, t, plane_type, TX_4X4, dry_run);
-    }
+    for (b = 0; b < 16; b++)
+      tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_4X4, dry_run);
+    for (b = 16; b < 24; b++)
+      tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_4X4, dry_run);
   }
   if (dry_run)
     *t = t_backup;
@@ -727,10 +692,8 @@ static INLINE void stuff_b(VP9_COMP *cpi,
       break;
     case TX_8X8:
 #if CONFIG_CNVCONTEXT
-      if (type != PLANE_TYPE_Y2) {
-        a_ec = (a[0] + a[1]) != 0;
-        l_ec = (l[0] + l[1]) != 0;
-      }
+      a_ec = (a[0] + a[1]) != 0;
+      l_ec = (l[0] + l[1]) != 0;
 #endif
       if (tx_type != DCT_DCT) {
         counts = cpi->hybrid_coef_counts_8x8;
@@ -774,14 +737,14 @@ static INLINE void stuff_b(VP9_COMP *cpi,
 
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
 
-  band = get_coef_band((type == PLANE_TYPE_Y_NO_DC) ? 1 : 0);
+  band = get_coef_band(0);
   t->Token = DCT_EOB_TOKEN;
   t->context_tree = probs[type][band][pt];
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
   *a = *l = 0;
-  if (tx_size == TX_8X8 && type != PLANE_TYPE_Y2) {
+  if (tx_size == TX_8X8) {
     a[1] = 0;
     l[1] = 0;
   } else if (tx_size == TX_16X16) {
@@ -806,26 +769,12 @@ static INLINE void stuff_b(VP9_COMP *cpi,
 
 static void stuff_mb_8x8(VP9_COMP *cpi, MACROBLOCKD *xd,
                          TOKENEXTRA **t, int dry_run) {
-  PLANE_TYPE plane_type;
   int b;
-  int has_2nd_order = get_2nd_order_usage(xd);
 
-  if (has_2nd_order) {
-    stuff_b(cpi, xd, 24, t, PLANE_TYPE_Y2, TX_8X8, dry_run);
-    plane_type = PLANE_TYPE_Y_NO_DC;
-  } else {
-#if CONFIG_CNVCONTEXT
-    xd->above_context->y2 = 0;
-    xd->left_context->y2 = 0;
-#endif
-    plane_type = PLANE_TYPE_Y_WITH_DC;
-  }
-
-  for (b = 0; b < 24; b += 4) {
-    if (b >= 16)
-      plane_type = PLANE_TYPE_UV;
-    stuff_b(cpi, xd, b, t, plane_type, TX_8X8, dry_run);
-  }
+  for (b = 0; b < 16; b += 4)
+    stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_8X8, dry_run);
+  for (b = 16; b < 24; b += 4)
+    stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_8X8, dry_run);
 }
 
 static void stuff_mb_16x16(VP9_COMP *cpi, MACROBLOCKD *xd,
@@ -836,56 +785,26 @@ static void stuff_mb_16x16(VP9_COMP *cpi, MACROBLOCKD *xd,
   for (b = 16; b < 24; b += 4) {
     stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_8X8, dry_run);
   }
-#if CONFIG_CNVCONTEXT
-  xd->above_context->y2 = 0;
-  xd->left_context->y2 = 0;
-#endif
 }
 
 static void stuff_mb_4x4(VP9_COMP *cpi, MACROBLOCKD *xd,
                          TOKENEXTRA **t, int dry_run) {
   int b;
-  PLANE_TYPE plane_type;
-  int has_2nd_order = get_2nd_order_usage(xd);
 
-  if (has_2nd_order) {
-    stuff_b(cpi, xd, 24, t, PLANE_TYPE_Y2, TX_4X4, dry_run);
-    plane_type = PLANE_TYPE_Y_NO_DC;
-  } else {
-    xd->above_context->y2 = 0;
-    xd->left_context->y2 = 0;
-    plane_type = PLANE_TYPE_Y_WITH_DC;
-  }
-
-  for (b = 0; b < 24; b++) {
-    if (b >= 16)
-      plane_type = PLANE_TYPE_UV;
-    stuff_b(cpi, xd, b, t, plane_type, TX_4X4, dry_run);
-  }
+  for (b = 0; b < 16; b++)
+    stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_4X4, dry_run);
+  for (b = 16; b < 24; b++)
+    stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_4X4, dry_run);
 }
 
 static void stuff_mb_8x8_4x4uv(VP9_COMP *cpi, MACROBLOCKD *xd,
                                TOKENEXTRA **t, int dry_run) {
-  PLANE_TYPE plane_type;
   int b;
 
-  int has_2nd_order = get_2nd_order_usage(xd);
-  if (has_2nd_order) {
-    stuff_b(cpi, xd, 24, t, PLANE_TYPE_Y2, TX_8X8, dry_run);
-    plane_type = PLANE_TYPE_Y_NO_DC;
-  } else {
-    xd->above_context->y2 = 0;
-    xd->left_context->y2 = 0;
-    plane_type = PLANE_TYPE_Y_WITH_DC;
-  }
-
-  for (b = 0; b < 16; b += 4) {
-    stuff_b(cpi, xd, b, t, plane_type, TX_8X8, dry_run);
-  }
-
-  for (b = 16; b < 24; b++) {
+  for (b = 0; b < 16; b += 4)
+    stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_8X8, dry_run);
+  for (b = 16; b < 24; b++)
     stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_4X4, dry_run);
-  }
 }
 
 void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {

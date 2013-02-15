@@ -29,12 +29,6 @@ forward_decls vp9_common_forward_decls
 prototype void vp9_dequantize_b "struct blockd *x"
 specialize vp9_dequantize_b
 
-prototype void vp9_dequantize_b_2x2 "struct blockd *x"
-specialize vp9_dequantize_b_2x2
-
-prototype void vp9_dequant_dc_idct_add_y_block_8x8 "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs, const int16_t *dc, struct macroblockd *xd"
-specialize vp9_dequant_dc_idct_add_y_block_8x8
-
 prototype void vp9_dequant_idct_add_y_block_8x8 "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs, struct macroblockd *xd"
 specialize vp9_dequant_idct_add_y_block_8x8
 
@@ -44,17 +38,11 @@ specialize vp9_dequant_idct_add_uv_block_8x8
 prototype void vp9_dequant_idct_add_16x16 "int16_t *input, const int16_t *dq, uint8_t *pred, uint8_t *dest, int pitch, int stride, int eob"
 specialize vp9_dequant_idct_add_16x16
 
-prototype void vp9_dequant_idct_add_8x8 "int16_t *input, const int16_t *dq, uint8_t *pred, uint8_t *dest, int pitch, int stride, int dc, int eob"
+prototype void vp9_dequant_idct_add_8x8 "int16_t *input, const int16_t *dq, uint8_t *pred, uint8_t *dest, int pitch, int stride, int eob"
 specialize vp9_dequant_idct_add_8x8
 
 prototype void vp9_dequant_idct_add "int16_t *input, const int16_t *dq, uint8_t *pred, uint8_t *dest, int pitch, int stride"
 specialize vp9_dequant_idct_add
-
-prototype void vp9_dequant_dc_idct_add "int16_t *input, const int16_t *dq, uint8_t *pred, uint8_t *dest, int pitch, int stride, int dc"
-specialize vp9_dequant_dc_idct_add
-
-prototype void vp9_dequant_dc_idct_add_y_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs, const int16_t *dcs"
-specialize vp9_dequant_dc_idct_add_y_block
 
 prototype void vp9_dequant_idct_add_y_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs"
 specialize vp9_dequant_idct_add_y_block
@@ -280,9 +268,6 @@ specialize vp9_short_idct10_8x8
 prototype void vp9_short_idct1_8x8 "int16_t *input, int16_t *output"
 specialize vp9_short_idct1_8x8
 
-prototype void vp9_short_ihaar2x2 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_ihaar2x2
-
 prototype void vp9_short_idct16x16 "int16_t *input, int16_t *output, int pitch"
 specialize vp9_short_idct16x16
 
@@ -312,15 +297,6 @@ specialize vp9_short_iht4x4
 prototype void vp9_ihtllm "const int16_t *input, int16_t *output, int pitch, int tx_type, int tx_dim, int16_t eobs"
 specialize vp9_ihtllm
 
-#
-# 2nd order
-#
-prototype void vp9_short_inv_walsh4x4_1 "int16_t *in, int16_t *out"
-specialize vp9_short_inv_walsh4x4_1
-
-prototype void vp9_short_inv_walsh4x4 "int16_t *in, int16_t *out"
-specialize vp9_short_inv_walsh4x4_
-
 
 # dct and add
 
@@ -334,10 +310,6 @@ prototype void vp9_short_inv_walsh4x4_x8 "int16_t *input, int16_t *output, int p
 specialize vp9_short_inv_walsh4x4_x8
 prototype void vp9_dc_only_inv_walsh_add "int input_dc, uint8_t *pred_ptr, uint8_t *dst_ptr, int pitch, int stride"
 specialize vp9_dc_only_inv_walsh_add
-prototype void vp9_short_inv_walsh4x4_1_lossless "int16_t *in, int16_t *out"
-specialize vp9_short_inv_walsh4x4_1_lossless
-prototype void vp9_short_inv_walsh4x4_lossless "int16_t *in, int16_t *out"
-specialize vp9_short_inv_walsh4x4_lossless
 fi
 
 prototype unsigned int vp9_sad32x3 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int ref_stride, int max_sad"
@@ -552,7 +524,7 @@ specialize vp9_sub_pixel_mse32x32
 prototype unsigned int vp9_get_mb_ss "const int16_t *"
 specialize vp9_get_mb_ss mmx sse2
 # ENCODEMB INVOKE
-prototype int vp9_mbblock_error "struct macroblock *mb, int dc"
+prototype int vp9_mbblock_error "struct macroblock *mb"
 specialize vp9_mbblock_error mmx sse2
 vp9_mbblock_error_sse2=vp9_mbblock_error_xmm
 
@@ -596,26 +568,17 @@ specialize vp9_fht
 prototype void vp9_short_fdct8x8 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_fdct8x8
 
-prototype void vp9_short_fhaar2x2 "int16_t *InputData, int16_t *OutputData, int pitch"
-specialize vp9_short_fhaar2x2
-
 prototype void vp9_short_fdct4x4 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_fdct4x4
 
 prototype void vp9_short_fdct8x4 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_fdct8x4
 
-prototype void vp9_short_walsh4x4 "int16_t *InputData, int16_t *OutputData, int pitch"
-specialize vp9_short_walsh4x4
-
 prototype void vp9_short_fdct32x32 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_fdct32x32
 
 prototype void vp9_short_fdct16x16 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_fdct16x16
-
-prototype void vp9_short_walsh4x4_lossless "int16_t *InputData, int16_t *OutputData, int pitch"
-specialize vp9_short_walsh4x4_lossless
 
 prototype void vp9_short_walsh4x4_x8 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_walsh4x4_x8

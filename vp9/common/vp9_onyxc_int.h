@@ -133,7 +133,6 @@ typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
   DECLARE_ALIGNED(16, int16_t, Y1dequant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, int16_t, Y2dequant[QINDEX_RANGE][16]);
   DECLARE_ALIGNED(16, int16_t, UVdequant[QINDEX_RANGE][16]);
 
   int Width;
@@ -184,8 +183,8 @@ typedef struct VP9Common {
   int last_kf_gf_q;  /* Q used on the last GF or KF */
 
   int y1dc_delta_q;
-  int y2dc_delta_q;
-  int y2ac_delta_q;
+  int y2dc_delta_q_unused;
+  int y2ac_delta_q_unused;
   int uvdc_delta_q;
   int uvac_delta_q;
 
@@ -217,7 +216,7 @@ typedef struct VP9Common {
 
   int ref_frame_sign_bias[MAX_REF_FRAMES];    /* Two state 0, 1 */
 
-  /* Y,U,V,Y2 */
+  /* Y,U,V */
   ENTROPY_CONTEXT_PLANES *above_context;   /* row of context for each plane */
   ENTROPY_CONTEXT_PLANES left_context[4];  /* (up to) 4 contexts "" */
 

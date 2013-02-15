@@ -1786,8 +1786,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
   // Transmit Dc, Second order and Uv quantizer delta information
   put_delta_q(&header_bc, pc->y1dc_delta_q);
-  put_delta_q(&header_bc, pc->y2dc_delta_q);
-  put_delta_q(&header_bc, pc->y2ac_delta_q);
+  put_delta_q(&header_bc, pc->y2dc_delta_q_unused);
+  put_delta_q(&header_bc, pc->y2ac_delta_q_unused);
   put_delta_q(&header_bc, pc->uvdc_delta_q);
   put_delta_q(&header_bc, pc->uvac_delta_q);
 

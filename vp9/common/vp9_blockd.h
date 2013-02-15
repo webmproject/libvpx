@@ -52,8 +52,8 @@ typedef struct {
 } POS;
 
 typedef enum PlaneType {
-  PLANE_TYPE_Y_NO_DC = 0,
-  PLANE_TYPE_Y2,
+  PLANE_TYPE_Y_NO_DC_UNUSED = 0,
+  PLANE_TYPE_Y2_UNUSED,
   PLANE_TYPE_UV,
   PLANE_TYPE_Y_WITH_DC,
 } PLANE_TYPE;
@@ -63,7 +63,6 @@ typedef struct {
   ENTROPY_CONTEXT y1[4];
   ENTROPY_CONTEXT u[2];
   ENTROPY_CONTEXT v[2];
-  ENTROPY_CONTEXT y2;
 } ENTROPY_CONTEXT_PLANES;
 
 #define VP9_COMBINEENTROPYCONTEXTS( Dest, A, B) \
@@ -144,7 +143,6 @@ typedef enum {
 
 #if CONFIG_LOSSLESS
 #define WHT_UPSCALE_FACTOR 3
-#define Y2_WHT_UPSCALE_FACTOR 2
 #endif
 
 typedef enum {
@@ -288,23 +286,23 @@ typedef struct blockd {
 } BLOCKD;
 
 typedef struct superblockd {
-  /* 32x32 Y and 16x16 U/V. No 2nd order transform yet. */
+  /* 32x32 Y and 16x16 U/V */
   DECLARE_ALIGNED(16, int16_t, diff[32*32+16*16*2]);
   DECLARE_ALIGNED(16, int16_t, qcoeff[32*32+16*16*2]);
   DECLARE_ALIGNED(16, int16_t, dqcoeff[32*32+16*16*2]);
 } SUPERBLOCKD;
 
 typedef struct macroblockd {
-  DECLARE_ALIGNED(16, int16_t,  diff[400]);      /* from idct diff */
+  DECLARE_ALIGNED(16, int16_t,  diff[384]);      /* from idct diff */
   DECLARE_ALIGNED(16, uint8_t,  predictor[384]);
-  DECLARE_ALIGNED(16, int16_t,  qcoeff[400]);
-  DECLARE_ALIGNED(16, int16_t,  dqcoeff[400]);
-  DECLARE_ALIGNED(16, uint16_t, eobs[25]);
+  DECLARE_ALIGNED(16, int16_t,  qcoeff[384]);
+  DECLARE_ALIGNED(16, int16_t,  dqcoeff[384]);
+  DECLARE_ALIGNED(16, uint16_t, eobs[24]);
 
   SUPERBLOCKD sb_coeff_data;
 
-  /* 16 Y blocks, 4 U, 4 V, 1 DC 2nd order block, each with 16 entries. */
-  BLOCKD block[25];
+  /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
+  BLOCKD block[24];
   int fullpixel_mask;
 
   YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
@@ -321,7 +319,7 @@ typedef struct macroblockd {
   int left_available;
   int right_available;
 
-  /* Y,U,V,Y2 */
+  /* Y,U,V */
   ENTROPY_CONTEXT_PLANES *above_context;
   ENTROPY_CONTEXT_PLANES *left_context;
 
@@ -377,17 +375,10 @@ typedef struct macroblockd {
   /* Inverse transform function pointers. */
   void (*inv_txm4x4_1)(int16_t *input, int16_t *output, int pitch);
   void (*inv_txm4x4)(int16_t *input, int16_t *output, int pitch);
-  void (*inv_2ndtxm4x4_1)(int16_t *in, int16_t *out);
-  void (*inv_2ndtxm4x4)(int16_t *in, int16_t *out);
   void (*itxm_add)(int16_t *input, const int16_t *dq,
     uint8_t *pred, uint8_t *output, int pitch, int stride);
-  void (*dc_itxm_add)(int16_t *input, const int16_t *dq,
-    uint8_t *pred, uint8_t *output, int pitch, int stride, int dc);
   void (*dc_only_itxm_add)(int input_dc, uint8_t *pred_ptr,
     uint8_t *dst_ptr, int pitch, int stride);
-  void (*dc_itxm_add_y_block)(int16_t *q, const int16_t *dq,
-    uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs,
-    const int16_t *dc);
   void (*itxm_add_y_block)(int16_t *q, const int16_t *dq,
     uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs);
   void (*itxm_add_uv_block)(int16_t *q, const int16_t *dq,
@@ -488,8 +479,8 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
   return tx_type;
 }
 
-extern const uint8_t vp9_block2left[TX_SIZE_MAX_SB][25];
-extern const uint8_t vp9_block2above[TX_SIZE_MAX_SB][25];
+extern const uint8_t vp9_block2left[TX_SIZE_MAX_SB][24];
+extern const uint8_t vp9_block2above[TX_SIZE_MAX_SB][24];
 
 #define USE_ADST_FOR_I16X16_8X8   0
 #define USE_ADST_FOR_I16X16_4X4   0
@@ -621,20 +612,6 @@ static TX_TYPE get_tx_type(const MACROBLOCKD *xd, const BLOCKD *b) {
     tx_type = get_tx_type_4x4(xd, b);
   }
   return tx_type;
-}
-
-static int get_2nd_order_usage(const MACROBLOCKD *xd) {
-#if 1
-  return 0;
-#else
-  int has_2nd_order = (xd->mode_info_context->mbmi.mode != SPLITMV &&
-                       xd->mode_info_context->mbmi.mode != I8X8_PRED &&
-                       xd->mode_info_context->mbmi.mode != B_PRED &&
-                       xd->mode_info_context->mbmi.txfm_size != TX_16X16);
-  if (has_2nd_order)
-    has_2nd_order = (get_tx_type(xd, xd->block) == DCT_DCT);
-  return has_2nd_order;
-#endif
 }
 
 extern void vp9_build_block_doffsets(MACROBLOCKD *xd);
