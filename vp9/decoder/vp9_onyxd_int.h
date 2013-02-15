@@ -18,41 +18,6 @@
 
 // #define DEC_DEBUG
 
-typedef struct {
-  int ithread;
-  void *ptr1;
-  void *ptr2;
-} DECODETHREAD_DATA;
-
-typedef struct {
-  MACROBLOCKD  mbd;
-  int mb_row;
-  int current_mb_col;
-  short *coef_ptr;
-} MB_ROW_DEC;
-
-typedef struct {
-  int const *scan;
-  int const *scan_8x8;
-  uint8_t const *ptr_block2leftabove;
-  vp9_tree_index const *vp9_coef_tree_ptr;
-  unsigned char *norm_ptr;
-  uint8_t *ptr_coef_bands_x;
-  uint8_t *ptr_coef_bands_x_8x8;
-
-  ENTROPY_CONTEXT_PLANES *A;
-  ENTROPY_CONTEXT_PLANES *L;
-
-  int16_t *qcoeff_start_ptr;
-
-  vp9_prob const *coef_probs_4x4[BLOCK_TYPES_4X4];
-  vp9_prob const *coef_probs_8x8[BLOCK_TYPES_8X8];
-  vp9_prob const *coef_probs_16X16[BLOCK_TYPES_16X16];
-
-  uint8_t eob[24];
-
-} DETOK;
-
 typedef struct VP9Decompressor {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
@@ -67,8 +32,6 @@ typedef struct VP9Decompressor {
   vp9_reader *mbc;
   int64_t last_time_stamp;
   int   ready_for_new_data;
-
-  DETOK detoken;
 
   int refresh_frame_flags;
   vp9_prob prob_skip_false;
