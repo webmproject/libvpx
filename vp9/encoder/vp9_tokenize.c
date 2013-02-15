@@ -26,19 +26,19 @@
 
 #ifdef ENTROPY_STATS
 vp9_coeff_accum context_counters_4x4[BLOCK_TYPES_4X4];
-vp9_coeff_accum hybrid_context_counters_4x4[BLOCK_TYPES_4X4];
+vp9_coeff_accum hybrid_context_counters_4x4[BLOCK_TYPES_4X4_HYBRID];
 vp9_coeff_accum context_counters_8x8[BLOCK_TYPES_8X8];
-vp9_coeff_accum hybrid_context_counters_8x8[BLOCK_TYPES_8X8];
+vp9_coeff_accum hybrid_context_counters_8x8[BLOCK_TYPES_8X8_HYBRID];
 vp9_coeff_accum context_counters_16x16[BLOCK_TYPES_16X16];
-vp9_coeff_accum hybrid_context_counters_16x16[BLOCK_TYPES_16X16];
+vp9_coeff_accum hybrid_context_counters_16x16[BLOCK_TYPES_16X16_HYBRID];
 vp9_coeff_accum context_counters_32x32[BLOCK_TYPES_32X32];
 
 extern vp9_coeff_stats tree_update_hist_4x4[BLOCK_TYPES_4X4];
-extern vp9_coeff_stats hybrid_tree_update_hist_4x4[BLOCK_TYPES_4X4];
+extern vp9_coeff_stats hybrid_tree_update_hist_4x4[BLOCK_TYPES_4X4_HYBRID];
 extern vp9_coeff_stats tree_update_hist_8x8[BLOCK_TYPES_8X8];
-extern vp9_coeff_stats hybrid_tree_update_hist_8x8[BLOCK_TYPES_8X8];
+extern vp9_coeff_stats hybrid_tree_update_hist_8x8[BLOCK_TYPES_8X8_HYBRID];
 extern vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES_16X16];
-extern vp9_coeff_stats hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16];
+extern vp9_coeff_stats hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16_HYBRID];
 extern vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES_32X32];
 #endif  /* ENTROPY_STATS */
 
@@ -605,32 +605,33 @@ void print_context_counters() {
   /* print counts */
   print_counter(f, context_counters_4x4, BLOCK_TYPES_4X4,
                 "vp9_default_coef_counts_4x4[BLOCK_TYPES_4X4]");
-  print_counter(f, hybrid_context_counters_4x4, BLOCK_TYPES_4X4,
-                "vp9_default_hybrid_coef_counts_4x4[BLOCK_TYPES_4X4]");
+  print_counter(f, hybrid_context_counters_4x4, BLOCK_TYPES_4X4_HYBRID,
+                "vp9_default_hybrid_coef_counts_4x4[BLOCK_TYPES_4X4_HYBRID]");
   print_counter(f, context_counters_8x8, BLOCK_TYPES_8X8,
                 "vp9_default_coef_counts_8x8[BLOCK_TYPES_8X8]");
-  print_counter(f, hybrid_context_counters_8x8, BLOCK_TYPES_8X8,
-                "vp9_default_hybrid_coef_counts_8x8[BLOCK_TYPES_8X8]");
+  print_counter(f, hybrid_context_counters_8x8, BLOCK_TYPES_8X8_HYBRID,
+                "vp9_default_hybrid_coef_counts_8x8[BLOCK_TYPES_8X8_HYBRID]");
   print_counter(f, context_counters_16x16, BLOCK_TYPES_16X16,
                 "vp9_default_coef_counts_16x16[BLOCK_TYPES_16X16]");
-  print_counter(f, hybrid_context_counters_16x16, BLOCK_TYPES_16X16,
-                "vp9_default_hybrid_coef_counts_16x16[BLOCK_TYPES_16X16]");
+  print_counter(f, hybrid_context_counters_16x16, BLOCK_TYPES_16X16_HYBRID,
+                "vp9_default_hybrid_coef_counts_16x16"
+                    "[BLOCK_TYPES_16X16_HYBRID]");
   print_counter(f, context_counters_32x32, BLOCK_TYPES_32X32,
                 "vp9_default_coef_counts_32x32[BLOCK_TYPES_32X32]");
 
   /* print coefficient probabilities */
   print_probs(f, context_counters_4x4, BLOCK_TYPES_4X4,
               "default_coef_probs_4x4[BLOCK_TYPES_4X4]");
-  print_probs(f, hybrid_context_counters_4x4, BLOCK_TYPES_4X4,
-              "default_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4]");
+  print_probs(f, hybrid_context_counters_4x4, BLOCK_TYPES_4X4_HYBRID,
+              "default_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4_HYBRID]");
   print_probs(f, context_counters_8x8, BLOCK_TYPES_8X8,
               "default_coef_probs_8x8[BLOCK_TYPES_8X8]");
-  print_probs(f, hybrid_context_counters_8x8, BLOCK_TYPES_8X8,
-              "default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8]");
+  print_probs(f, hybrid_context_counters_8x8, BLOCK_TYPES_8X8_HYBRID,
+              "default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8_HYBRID]");
   print_probs(f, context_counters_16x16, BLOCK_TYPES_16X16,
               "default_coef_probs_16x16[BLOCK_TYPES_16X16]");
-  print_probs(f, hybrid_context_counters_16x16, BLOCK_TYPES_16X16,
-              "default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16]");
+  print_probs(f, hybrid_context_counters_16x16, BLOCK_TYPES_16X16_HYBRID,
+              "default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16_HYBRID]");
   print_probs(f, context_counters_32x32, BLOCK_TYPES_32X32,
               "default_coef_probs_32x32[BLOCK_TYPES_32X32]");
 

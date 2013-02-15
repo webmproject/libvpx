@@ -59,14 +59,17 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 
 /* Coefficients are predicted via a 3-dimensional probability table. */
 
-/* Outside dimension.  0 = Y no DC, 1 = Y2, 2 = UV, 3 = Y with DC */
-#define BLOCK_TYPES_4X4 4
+/* Outside dimension.  0 = Y with DC, 1 = UV */
+#define BLOCK_TYPES_4X4 2
+#define BLOCK_TYPES_4X4_HYBRID 1
 
-#define BLOCK_TYPES_8X8 4
+#define BLOCK_TYPES_8X8 2
+#define BLOCK_TYPES_8X8_HYBRID 1
 
-#define BLOCK_TYPES_16X16 4
+#define BLOCK_TYPES_16X16 2
+#define BLOCK_TYPES_16X16_HYBRID 1
 
-#define BLOCK_TYPES_32X32 4
+#define BLOCK_TYPES_32X32 1
 
 /* Middle dimension is a coarsening of the coefficient's
    position within the 4x4 DCT. */

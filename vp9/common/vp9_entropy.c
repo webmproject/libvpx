@@ -1,4 +1,4 @@
-/*
+/*
  *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
@@ -290,7 +290,7 @@ static void update_coef_probs(vp9_coeff_probs *dst_coef_probs,
   for (i = 0; i < block_types; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+        if (k >= 3 && j == 0)
           continue;
         vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
                                          vp9_coef_encodings, vp9_coef_tree,
@@ -389,21 +389,21 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
                     count_sat, update_factor);
   update_coef_probs(cm->fc.hybrid_coef_probs_4x4,
                     cm->fc.pre_hybrid_coef_probs_4x4,
-                    BLOCK_TYPES_4X4, cm->fc.hybrid_coef_counts_4x4,
+                    BLOCK_TYPES_4X4_HYBRID, cm->fc.hybrid_coef_counts_4x4,
                     count_sat, update_factor);
   update_coef_probs(cm->fc.coef_probs_8x8, cm->fc.pre_coef_probs_8x8,
                     BLOCK_TYPES_8X8, cm->fc.coef_counts_8x8,
                     count_sat, update_factor);
   update_coef_probs(cm->fc.hybrid_coef_probs_8x8,
                     cm->fc.pre_hybrid_coef_probs_8x8,
-                    BLOCK_TYPES_8X8, cm->fc.hybrid_coef_counts_8x8,
+                    BLOCK_TYPES_8X8_HYBRID, cm->fc.hybrid_coef_counts_8x8,
                     count_sat, update_factor);
   update_coef_probs(cm->fc.coef_probs_16x16, cm->fc.pre_coef_probs_16x16,
                     BLOCK_TYPES_16X16, cm->fc.coef_counts_16x16,
                     count_sat, update_factor);
   update_coef_probs(cm->fc.hybrid_coef_probs_16x16,
                     cm->fc.pre_hybrid_coef_probs_16x16,
-                    BLOCK_TYPES_16X16, cm->fc.hybrid_coef_counts_16x16,
+                    BLOCK_TYPES_16X16_HYBRID, cm->fc.hybrid_coef_counts_16x16,
                     count_sat, update_factor);
   update_coef_probs(cm->fc.coef_probs_32x32, cm->fc.pre_coef_probs_32x32,
                     BLOCK_TYPES_32X32, cm->fc.coef_counts_32x32,
