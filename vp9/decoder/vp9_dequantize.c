@@ -267,7 +267,11 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
       input[i] = input[i] * dq[1];
 
     // inverse hybrid transform
+#if CONFIG_INTHT16X16
+    vp9_short_iht16x16(input, output, 32, tx_type);
+#else
     vp9_ihtllm(input, output, 32, tx_type, 16, eobs);
+#endif
 
     // the idct halves ( >> 1) the pitch
     // vp9_short_idct16x16_c(input, output, 32);

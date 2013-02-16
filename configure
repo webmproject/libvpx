@@ -249,6 +249,7 @@ EXPERIMENT_LIST="
     abovesprefmv
     intht
     intht4x4
+    intht16x16
 "
 CONFIG_LIST="
     external_build

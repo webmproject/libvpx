@@ -116,7 +116,11 @@ void vp9_inverse_transform_mby_16x16(MACROBLOCKD *xd) {
   BLOCKD *bd = &xd->block[0];
   TX_TYPE tx_type = get_tx_type_16x16(xd, bd);
   if (tx_type != DCT_DCT) {
+#if CONFIG_INTHT16X16
+    vp9_short_iht16x16(bd->dqcoeff, bd->diff, 32, tx_type);
+#else
     vp9_ihtllm(bd->dqcoeff, bd->diff, 32, tx_type, 16, bd->eob);
+#endif
   } else {
     vp9_inverse_transform_b_16x16(&xd->block[0].dqcoeff[0],
                                   &xd->block[0].diff[0], 32);
