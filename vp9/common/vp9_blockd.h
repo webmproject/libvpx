@@ -52,10 +52,8 @@ typedef struct {
 } POS;
 
 typedef enum PlaneType {
-  PLANE_TYPE_Y_NO_DC_UNUSED = 0,
-  PLANE_TYPE_Y2_UNUSED,
-  PLANE_TYPE_UV,
   PLANE_TYPE_Y_WITH_DC,
+  PLANE_TYPE_UV,
 } PLANE_TYPE;
 
 typedef char ENTROPY_CONTEXT;

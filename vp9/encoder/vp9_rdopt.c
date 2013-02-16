@@ -155,7 +155,7 @@ static void fill_token_costs(vp9_coeff_count *c,
   for (i = 0; i < block_type_counts; i++)
     for (j = 0; j < COEF_BANDS; j++)
       for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-        if (k == 0 && ((j > 0 && i > 0) || (j > 1 && i == 0)))
+        if (k == 0 && j > 0)
           vp9_cost_tokens_skip((int *)(c[i][j][k]),
                                p[i][j][k],
                                vp9_coef_tree);
@@ -280,17 +280,20 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
   fill_token_costs(cpi->mb.token_costs[TX_4X4],
                    cpi->common.fc.coef_probs_4x4, BLOCK_TYPES_4X4);
   fill_token_costs(cpi->mb.hybrid_token_costs[TX_4X4],
-                   cpi->common.fc.hybrid_coef_probs_4x4, BLOCK_TYPES_4X4);
+                   cpi->common.fc.hybrid_coef_probs_4x4,
+                   BLOCK_TYPES_4X4_HYBRID);
 
   fill_token_costs(cpi->mb.token_costs[TX_8X8],
                    cpi->common.fc.coef_probs_8x8, BLOCK_TYPES_8X8);
   fill_token_costs(cpi->mb.hybrid_token_costs[TX_8X8],
-                   cpi->common.fc.hybrid_coef_probs_8x8, BLOCK_TYPES_8X8);
+                   cpi->common.fc.hybrid_coef_probs_8x8,
+                   BLOCK_TYPES_8X8_HYBRID);
 
   fill_token_costs(cpi->mb.token_costs[TX_16X16],
                    cpi->common.fc.coef_probs_16x16, BLOCK_TYPES_16X16);
   fill_token_costs(cpi->mb.hybrid_token_costs[TX_16X16],
-                   cpi->common.fc.hybrid_coef_probs_16x16, BLOCK_TYPES_16X16);
+                   cpi->common.fc.hybrid_coef_probs_16x16,
+                   BLOCK_TYPES_16X16_HYBRID);
 
   fill_token_costs(cpi->mb.token_costs[TX_32X32],
                    cpi->common.fc.coef_probs_32x32, BLOCK_TYPES_32X32);

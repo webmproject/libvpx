@@ -288,13 +288,10 @@ struct vp9_token_state {
 // TODO: experiments to find optimal multiple numbers
 #define Y1_RD_MULT 4
 #define UV_RD_MULT 2
-#define Y2_RD_MULT 4
 
 static const int plane_rd_mult[4] = {
   Y1_RD_MULT,
-  Y2_RD_MULT,
   UV_RD_MULT,
-  Y1_RD_MULT
 };
 
 #define UPDATE_RD_COST()\

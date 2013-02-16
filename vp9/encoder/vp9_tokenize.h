@@ -61,9 +61,9 @@ extern vp9_coeff_accum context_counters_8x8[BLOCK_TYPES_8X8];
 extern vp9_coeff_accum context_counters_16x16[BLOCK_TYPES_16X16];
 extern vp9_coeff_accum context_counters_32x32[BLOCK_TYPES_32X32];
 
-extern vp9_coeff_accum hybrid_context_counters_4x4[BLOCK_TYPES_4X4];
-extern vp9_coeff_accum hybrid_context_counters_8x8[BLOCK_TYPES_8X8];
-extern vp9_coeff_accum hybrid_context_counters_16x16[BLOCK_TYPES_16X16];
+extern vp9_coeff_accum hybrid_context_counters_4x4[BLOCK_TYPES_4X4_HYBRID];
+extern vp9_coeff_accum hybrid_context_counters_8x8[BLOCK_TYPES_8X8_HYBRID];
+extern vp9_coeff_accum hybrid_context_counters_16x16[BLOCK_TYPES_16X16_HYBRID];
 #endif
 
 extern const int *vp9_dct_value_cost_ptr;

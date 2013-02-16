@@ -55,11 +55,11 @@ typedef struct frame_contexts {
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob mbsplit_prob[VP9_NUMMBSPLITS - 1];
   vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES_4X4];
-  vp9_coeff_probs hybrid_coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs hybrid_coef_probs_4x4[BLOCK_TYPES_4X4_HYBRID];
   vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES_8X8];
-  vp9_coeff_probs hybrid_coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs hybrid_coef_probs_8x8[BLOCK_TYPES_8X8_HYBRID];
   vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES_16X16];
-  vp9_coeff_probs hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_probs hybrid_coef_probs_16x16[BLOCK_TYPES_16X16_HYBRID];
   vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES_32X32];
 
   nmv_context nmvc;
@@ -80,19 +80,19 @@ typedef struct frame_contexts {
   unsigned int mbsplit_counts[VP9_NUMMBSPLITS];
 
   vp9_coeff_probs pre_coef_probs_4x4[BLOCK_TYPES_4X4];
-  vp9_coeff_probs pre_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_probs pre_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4_HYBRID];
   vp9_coeff_probs pre_coef_probs_8x8[BLOCK_TYPES_8X8];
-  vp9_coeff_probs pre_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_probs pre_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8_HYBRID];
   vp9_coeff_probs pre_coef_probs_16x16[BLOCK_TYPES_16X16];
-  vp9_coeff_probs pre_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_probs pre_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16_HYBRID];
   vp9_coeff_probs pre_coef_probs_32x32[BLOCK_TYPES_32X32];
 
   vp9_coeff_count coef_counts_4x4[BLOCK_TYPES_4X4];
-  vp9_coeff_count hybrid_coef_counts_4x4[BLOCK_TYPES_4X4];
+  vp9_coeff_count hybrid_coef_counts_4x4[BLOCK_TYPES_4X4_HYBRID];
   vp9_coeff_count coef_counts_8x8[BLOCK_TYPES_8X8];
-  vp9_coeff_count hybrid_coef_counts_8x8[BLOCK_TYPES_8X8];
+  vp9_coeff_count hybrid_coef_counts_8x8[BLOCK_TYPES_8X8_HYBRID];
   vp9_coeff_count coef_counts_16x16[BLOCK_TYPES_16X16];
-  vp9_coeff_count hybrid_coef_counts_16x16[BLOCK_TYPES_16X16];
+  vp9_coeff_count hybrid_coef_counts_16x16[BLOCK_TYPES_16X16_HYBRID];
   vp9_coeff_count coef_counts_32x32[BLOCK_TYPES_32X32];
 
   nmv_context_counts NMVcount;
