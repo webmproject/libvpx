@@ -139,10 +139,8 @@ void warn(const char *fmt, ...) {
 }
 
 
-static void ctx_exit_on_error(vpx_codec_ctx_t *ctx, const char *s, ...) {
-  va_list ap;
-
-  va_start(ap, s);
+static void warn_or_exit_on_errorv(vpx_codec_ctx_t *ctx, int fatal,
+                                   const char *s, va_list ap) {
   if (ctx->err) {
     const char *detail = vpx_codec_error_detail(ctx);
 
@@ -152,8 +150,26 @@ static void ctx_exit_on_error(vpx_codec_ctx_t *ctx, const char *s, ...) {
     if (detail)
       fprintf(stderr, "    %s\n", detail);
 
-    exit(EXIT_FAILURE);
+    if (fatal)
+      exit(EXIT_FAILURE);
   }
+}
+
+static void ctx_exit_on_error(vpx_codec_ctx_t *ctx, const char *s, ...) {
+  va_list ap;
+
+  va_start(ap, s);
+  warn_or_exit_on_errorv(ctx, 1, s, ap);
+  va_end(ap);
+}
+
+static void warn_or_exit_on_error(vpx_codec_ctx_t *ctx, int fatal,
+                                  const char *s, ...) {
+  va_list ap;
+
+  va_start(ap, s);
+  warn_or_exit_on_errorv(ctx, fatal, s, ap);
+  va_end(ap);
 }
 
 /* This structure is used to abstract the different ways of handling
@@ -950,8 +966,20 @@ static const arg_def_t verbosearg       = ARG_DEF("v", "verbose", 0,
                                                   "Show encoder parameters");
 static const arg_def_t psnrarg          = ARG_DEF(NULL, "psnr", 0,
                                                   "Show PSNR in status line");
-static const arg_def_t recontest        = ARG_DEF(NULL, "test-decode", 0,
-                                                  "Test encode/decode mismatch");
+enum TestDecodeFatality {
+  TEST_DECODE_OFF,
+  TEST_DECODE_FATAL,
+  TEST_DECODE_WARN,
+};
+static const struct arg_enum_list test_decode_enum[] = {
+  {"off",   TEST_DECODE_OFF},
+  {"fatal", TEST_DECODE_FATAL},
+  {"warn",  TEST_DECODE_WARN},
+  {NULL, 0}
+};
+static const arg_def_t recontest = ARG_DEF_ENUM(NULL, "test-decode", 1,
+                                                "Test encode/decode mismatch",
+                                                test_decode_enum);
 static const arg_def_t framerate        = ARG_DEF(NULL, "fps", 1,
                                                   "Stream frame rate (rate/scale)");
 static const arg_def_t use_ivf          = ARG_DEF(NULL, "ivf", 0,
@@ -1566,7 +1594,7 @@ struct global_config {
   int                       limit;
   int                       skip_frames;
   int                       show_psnr;
-  int                       test_decode;
+  enum TestDecodeFatality   test_decode;
   int                       have_framerate;
   struct vpx_rational       framerate;
   int                       out_part;
@@ -1691,7 +1719,7 @@ static void parse_global_config(struct global_config *global, char **argv) {
     else if (arg_match(&arg, &psnrarg, argi))
       global->show_psnr = 1;
     else if (arg_match(&arg, &recontest, argi))
-      global->test_decode = 1;
+      global->test_decode = arg_parse_enum_or_int(&arg);
     else if (arg_match(&arg, &framerate, argi)) {
       global->framerate = arg_parse_rational(&arg);
       validate_positive_rational(arg.name, &global->framerate);
@@ -2186,7 +2214,7 @@ static void initialize_encoder(struct stream_state  *stream,
   }
 
 #if CONFIG_DECODERS
-  if (global->test_decode) {
+  if (global->test_decode != TEST_DECODE_OFF) {
     int width, height;
 
     vpx_codec_dec_init(&stream->decoder, global->codec->dx_iface(), NULL, 0);
@@ -2289,10 +2317,16 @@ static void get_cx_data(struct stream_state  *stream,
 
         *got_data = 1;
 #if CONFIG_DECODERS
-        if (global->test_decode) {
+        if (global->test_decode != TEST_DECODE_OFF && !stream->mismatch_seen) {
           vpx_codec_decode(&stream->decoder, pkt->data.frame.buf,
                            pkt->data.frame.sz, NULL, 0);
-          ctx_exit_on_error(&stream->decoder, "Failed to decode frame");
+          if (stream->decoder.err) {
+            warn_or_exit_on_error(&stream->decoder,
+                                  global->test_decode == TEST_DECODE_FATAL,
+                                  "Failed to decode frame %d in stream %d",
+                                  stream->frames_out + 1, stream->index);
+            stream->mismatch_seen = stream->frames_out + 1;
+          }
         }
 #endif
         break;
@@ -2348,22 +2382,25 @@ static float usec_to_fps(uint64_t usec, unsigned int frames) {
 }
 
 
-static void test_decode(struct stream_state  *stream) {
+static void test_decode(struct stream_state  *stream,
+                        enum TestDecodeFatality fatal) {
+  if (stream->mismatch_seen)
+    return;
+
   vpx_codec_control(&stream->encoder, VP8_COPY_REFERENCE, &stream->ref_enc);
   ctx_exit_on_error(&stream->encoder, "Failed to get encoder reference frame");
   vpx_codec_control(&stream->decoder, VP8_COPY_REFERENCE, &stream->ref_dec);
   ctx_exit_on_error(&stream->decoder, "Failed to get decoder reference frame");
 
-  if (!stream->mismatch_seen
-      && !compare_img(&stream->ref_enc.img, &stream->ref_dec.img)) {
-    /* TODO(jkoleszar): make fatal. */
+  if (!compare_img(&stream->ref_enc.img, &stream->ref_dec.img)) {
     int y[2], u[2], v[2];
     find_mismatch(&stream->ref_enc.img, &stream->ref_dec.img,
                   y, u, v);
-    warn("Stream %d: Encode/decode mismatch on frame %d"
-         " at Y[%d, %d], U[%d, %d], V[%d, %d]",
-         stream->index, stream->frames_out,
-         y[0], y[1], u[0], u[1], v[0], v[1]);
+    warn_or_exit_on_error(&stream->decoder, fatal == TEST_DECODE_FATAL,
+                          "Stream %d: Encode/decode mismatch on frame %d"
+                          " at Y[%d, %d], U[%d, %d], V[%d, %d]",
+                          stream->index, stream->frames_out,
+                          y[0], y[1], u[0], u[1], v[0], v[1]);
     stream->mismatch_seen = stream->frames_out;
   }
 }
@@ -2397,6 +2434,7 @@ int main(int argc, const char **argv_) {
   char                   **argv, **argi;
   unsigned long            cx_time = 0;
   int                      stream_cnt = 0;
+  int                      res = 0;
 
   exec_name = argv_[0];
 
@@ -2583,8 +2621,8 @@ int main(int argc, const char **argv_) {
           estimated_time_left = average_rate ? remaining / average_rate : -1;
         }
 
-        if (got_data && global.test_decode)
-          FOREACH_STREAM(test_decode(stream));
+        if (got_data && global.test_decode != TEST_DECODE_OFF)
+          FOREACH_STREAM(test_decode(stream, global.test_decode));
       }
 
       fflush(stdout);
@@ -2614,7 +2652,7 @@ int main(int argc, const char **argv_) {
 
     FOREACH_STREAM(vpx_codec_destroy(&stream->encoder));
 
-    if (global.test_decode) {
+    if (global.test_decode != TEST_DECODE_OFF) {
       FOREACH_STREAM(vpx_codec_destroy(&stream->decoder));
       FOREACH_STREAM(vpx_img_free(&stream->ref_enc.img));
       FOREACH_STREAM(vpx_img_free(&stream->ref_dec.img));
@@ -2622,6 +2660,9 @@ int main(int argc, const char **argv_) {
 
     close_input_file(&input);
 
+    if (global.test_decode == TEST_DECODE_FATAL) {
+      FOREACH_STREAM(res |= stream->mismatch_seen);
+    }
     FOREACH_STREAM(close_output_file(stream, global.codec->fourcc));
 
     FOREACH_STREAM(stats_close(&stream->stats, global.passes - 1));
@@ -2659,5 +2700,5 @@ int main(int argc, const char **argv_) {
   vpx_img_free(&raw);
   free(argv);
   free(streams);
-  return EXIT_SUCCESS;
+  return res ? EXIT_FAILURE : EXIT_SUCCESS;
 }
