@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//i0Q\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 952,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-19T18:42:56Z",
+      "side": 1,
+      "message": "use an ARG_DEF_ENUM here. Suggest ordering \"none\", \"fatal\", \"warn\", so that --test-decode\u003d1 will be fatal, consistent with all the other errors we trap.",
+      "revId": "0a45afc0a8f96951843682a726e45f45456091b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//i0M\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1707,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-19T18:42:56Z",
+      "side": 1,
+      "message": "arg_parse_enum_or_int",
+      "revId": "0a45afc0a8f96951843682a726e45f45456091b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//izY\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2313,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-19T18:42:56Z",
+      "side": 1,
+      "message": "Avoid duplicating the strings in this if(fatal) exit else warn construct, here and below. Suggest making a warn_or_exit_on_error that takes an is_fatal parameter.",
+      "revId": "0a45afc0a8f96951843682a726e45f45456091b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//iyM\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2573,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-19T18:42:56Z",
+      "side": 1,
+      "message": "pass the enum in here directly, rather than -1. The callee can figure out what to do with it.",
+      "revId": "0a45afc0a8f96951843682a726e45f45456091b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//iyA\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2613,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-19T18:42:56Z",
+      "side": 1,
+      "message": "need something like FOREACH_STREAM(mismatch_seen |\u003d stream-\u003emismatch_seen) here.",
+      "revId": "0a45afc0a8f96951843682a726e45f45456091b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//ix4\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2648,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-19T18:42:56Z",
+      "side": 1,
+      "message": "mismatch_seen ? EXIT_FAILURE : EXIT_SUCCESS",
+      "revId": "0a45afc0a8f96951843682a726e45f45456091b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
