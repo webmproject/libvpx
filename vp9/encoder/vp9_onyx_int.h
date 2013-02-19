@@ -85,12 +85,9 @@ typedef struct {
   // 0 = BPRED, ZERO_MV, MV, SPLIT
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
-  vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES_4X4];
-  vp9_coeff_probs hybrid_coef_probs_4x4[BLOCK_TYPES_4X4_HYBRID];
-  vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES_8X8];
-  vp9_coeff_probs hybrid_coef_probs_8x8[BLOCK_TYPES_8X8_HYBRID];
-  vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES_16X16];
-  vp9_coeff_probs hybrid_coef_probs_16x16[BLOCK_TYPES_16X16_HYBRID];
+  vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES];
+  vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES];
+  vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES_32X32];
 
   vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
@@ -462,26 +459,17 @@ typedef struct VP9_COMP {
 
   nmv_context_counts NMVcount;
 
-  vp9_coeff_count coef_counts_4x4[BLOCK_TYPES_4X4];
-  vp9_coeff_probs frame_coef_probs_4x4[BLOCK_TYPES_4X4];
-  vp9_coeff_stats frame_branch_ct_4x4[BLOCK_TYPES_4X4];
-  vp9_coeff_count hybrid_coef_counts_4x4[BLOCK_TYPES_4X4_HYBRID];
-  vp9_coeff_probs frame_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4_HYBRID];
-  vp9_coeff_stats frame_hybrid_branch_ct_4x4[BLOCK_TYPES_4X4_HYBRID];
+  vp9_coeff_count coef_counts_4x4[BLOCK_TYPES];
+  vp9_coeff_probs frame_coef_probs_4x4[BLOCK_TYPES];
+  vp9_coeff_stats frame_branch_ct_4x4[BLOCK_TYPES];
 
-  vp9_coeff_count coef_counts_8x8[BLOCK_TYPES_8X8];
-  vp9_coeff_probs frame_coef_probs_8x8[BLOCK_TYPES_8X8];
-  vp9_coeff_stats frame_branch_ct_8x8[BLOCK_TYPES_8X8];
-  vp9_coeff_count hybrid_coef_counts_8x8[BLOCK_TYPES_8X8_HYBRID];
-  vp9_coeff_probs frame_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8_HYBRID];
-  vp9_coeff_stats frame_hybrid_branch_ct_8x8[BLOCK_TYPES_8X8_HYBRID];
+  vp9_coeff_count coef_counts_8x8[BLOCK_TYPES];
+  vp9_coeff_probs frame_coef_probs_8x8[BLOCK_TYPES];
+  vp9_coeff_stats frame_branch_ct_8x8[BLOCK_TYPES];
 
-  vp9_coeff_count coef_counts_16x16[BLOCK_TYPES_16X16];
-  vp9_coeff_probs frame_coef_probs_16x16[BLOCK_TYPES_16X16];
-  vp9_coeff_stats frame_branch_ct_16x16[BLOCK_TYPES_16X16];
-  vp9_coeff_count hybrid_coef_counts_16x16[BLOCK_TYPES_16X16_HYBRID];
-  vp9_coeff_probs frame_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16_HYBRID];
-  vp9_coeff_stats frame_hybrid_branch_ct_16x16[BLOCK_TYPES_16X16_HYBRID];
+  vp9_coeff_count coef_counts_16x16[BLOCK_TYPES];
+  vp9_coeff_probs frame_coef_probs_16x16[BLOCK_TYPES];
+  vp9_coeff_stats frame_branch_ct_16x16[BLOCK_TYPES];
 
   vp9_coeff_count coef_counts_32x32[BLOCK_TYPES_32X32];
   vp9_coeff_probs frame_coef_probs_32x32[BLOCK_TYPES_32X32];

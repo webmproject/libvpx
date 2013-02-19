@@ -65,7 +65,7 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
 
 #define INCREMENT_COUNT(token)               \
   do {                                       \
-    coef_counts[type][get_coef_band(txfm_size, c)][pt][token]++;     \
+    coef_counts[type][ref][get_coef_band(txfm_size, c)][pt][token]++;     \
     pt = vp9_get_coef_context(&recent_energy, token);         \
   } while (0)
 
@@ -99,39 +99,25 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   vp9_coeff_probs *coef_probs;
   vp9_prob *prob;
   vp9_coeff_count *coef_counts;
+  const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
 
   switch (txfm_size) {
     default:
     case TX_4X4:
-      if (tx_type == DCT_DCT) {
-        coef_probs  = fc->coef_probs_4x4;
-        coef_counts = fc->coef_counts_4x4;
-      } else {
-        coef_probs  = fc->hybrid_coef_probs_4x4;
-        coef_counts = fc->hybrid_coef_counts_4x4;
-      }
+      coef_probs  = fc->coef_probs_4x4;
+      coef_counts = fc->coef_counts_4x4;
       break;
     case TX_8X8:
-      if (tx_type == DCT_DCT) {
-        coef_probs  = fc->coef_probs_8x8;
-        coef_counts = fc->coef_counts_8x8;
-      } else {
-        coef_probs  = fc->hybrid_coef_probs_8x8;
-        coef_counts = fc->hybrid_coef_counts_8x8;
-      }
+      coef_probs  = fc->coef_probs_8x8;
+      coef_counts = fc->coef_counts_8x8;
 #if CONFIG_CNVCONTEXT
       above_ec = (A0[aidx] + A0[aidx + 1]) != 0;
       left_ec  = (L0[lidx] + L0[lidx + 1]) != 0;
 #endif
       break;
     case TX_16X16:
-      if (tx_type == DCT_DCT) {
-        coef_probs  = fc->coef_probs_16x16;
-        coef_counts = fc->coef_counts_16x16;
-      } else {
-        coef_probs  = fc->hybrid_coef_probs_16x16;
-        coef_counts = fc->hybrid_coef_counts_16x16;
-      }
+      coef_probs  = fc->coef_probs_16x16;
+      coef_counts = fc->coef_counts_16x16;
 #if CONFIG_CNVCONTEXT
       if (type == PLANE_TYPE_UV) {
         ENTROPY_CONTEXT *A1 = (ENTROPY_CONTEXT *) (xd->above_context + 1);
@@ -176,7 +162,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     int val;
     const uint8_t *cat6 = cat6_prob;
     if (c >= seg_eob) break;
-    prob = coef_probs[type][get_coef_band(txfm_size, c)][pt];
+    prob = coef_probs[type][ref][get_coef_band(txfm_size, c)][pt];
     if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
       break;
 SKIP_START:
@@ -184,7 +170,7 @@ SKIP_START:
     if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
-      prob = coef_probs[type][get_coef_band(txfm_size, c)][pt];
+      prob = coef_probs[type][ref][get_coef_band(txfm_size, c)][pt];
       goto SKIP_START;
     }
     // ONE_CONTEXT_NODE_0_
@@ -248,7 +234,7 @@ SKIP_START:
   }
 
   if (c < seg_eob)
-    coef_counts[type][get_coef_band(txfm_size, c)][pt][DCT_EOB_TOKEN]++;
+    coef_counts[type][ref][get_coef_band(txfm_size, c)][pt][DCT_EOB_TOKEN]++;
 
   A0[aidx] = L0[lidx] = (c > 0);
   if (txfm_size >= TX_8X8) {

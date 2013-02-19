@@ -150,20 +150,21 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 static void fill_token_costs(vp9_coeff_count *c,
                              vp9_coeff_probs *p,
                              int block_type_counts) {
-  int i, j, k;
+  int i, j, k, l;
 
   for (i = 0; i < block_type_counts; i++)
-    for (j = 0; j < COEF_BANDS; j++)
-      for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-        if (k == 0 && j > 0)
-          vp9_cost_tokens_skip((int *)(c[i][j][k]),
-                               p[i][j][k],
-                               vp9_coef_tree);
-        else
-          vp9_cost_tokens((int *)(c[i][j][k]),
-                          p[i][j][k],
-                          vp9_coef_tree);
-      }
+    for (j = 0; j < REF_TYPES; j++)
+      for (k = 0; k < COEF_BANDS; k++)
+        for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
+          if (l == 0 && k > 0)
+            vp9_cost_tokens_skip((int *)(c[i][j][k][l]),
+                                 p[i][j][k][l],
+                                 vp9_coef_tree);
+          else
+            vp9_cost_tokens((int *)(c[i][j][k][l]),
+                            p[i][j][k][l],
+                            vp9_coef_tree);
+        }
 }
 
 
@@ -268,23 +269,11 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
   }
 
   fill_token_costs(cpi->mb.token_costs[TX_4X4],
-                   cpi->common.fc.coef_probs_4x4, BLOCK_TYPES_4X4);
-  fill_token_costs(cpi->mb.hybrid_token_costs[TX_4X4],
-                   cpi->common.fc.hybrid_coef_probs_4x4,
-                   BLOCK_TYPES_4X4_HYBRID);
-
+                   cpi->common.fc.coef_probs_4x4, BLOCK_TYPES);
   fill_token_costs(cpi->mb.token_costs[TX_8X8],
-                   cpi->common.fc.coef_probs_8x8, BLOCK_TYPES_8X8);
-  fill_token_costs(cpi->mb.hybrid_token_costs[TX_8X8],
-                   cpi->common.fc.hybrid_coef_probs_8x8,
-                   BLOCK_TYPES_8X8_HYBRID);
-
+                   cpi->common.fc.coef_probs_8x8, BLOCK_TYPES);
   fill_token_costs(cpi->mb.token_costs[TX_16X16],
-                   cpi->common.fc.coef_probs_16x16, BLOCK_TYPES_16X16);
-  fill_token_costs(cpi->mb.hybrid_token_costs[TX_16X16],
-                   cpi->common.fc.hybrid_coef_probs_16x16,
-                   BLOCK_TYPES_16X16_HYBRID);
-
+                   cpi->common.fc.coef_probs_16x16, BLOCK_TYPES);
   fill_token_costs(cpi->mb.token_costs[TX_32X32],
                    cpi->common.fc.coef_probs_32x32, BLOCK_TYPES_32X32);
 
@@ -407,11 +396,11 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int *scan;
   int16_t *qcoeff_ptr = b->qcoeff;
+  const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
   const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
                           get_tx_type(xd, b) : DCT_DCT;
   unsigned int (*token_costs)[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
-      (tx_type == DCT_DCT) ? mb->token_costs[tx_size][type] :
-                             mb->hybrid_token_costs[tx_size][type];
+      mb->token_costs[tx_size][type][ref];
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
 
   switch (tx_size) {
@@ -453,7 +442,7 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
     seg_eob = 0;
 
-  if (tx_type != DCT_DCT) {
+  {
     int recent_energy = 0;
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
@@ -463,19 +452,7 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       pt = vp9_get_coef_context(&recent_energy, t);
     }
     if (c < seg_eob)
-      cost += mb->hybrid_token_costs[tx_size][type][get_coef_band(tx_size, c)]
-          [pt][DCT_EOB_TOKEN];
-  } else {
-    int recent_energy = 0;
-    for (; c < eob; c++) {
-      int v = qcoeff_ptr[scan[c]];
-      int t = vp9_dct_value_tokens_ptr[v].Token;
-      cost += token_costs[get_coef_band(tx_size, c)][pt][t];
-      cost += vp9_dct_value_cost_ptr[v];
-      pt = vp9_get_coef_context(&recent_energy, t);
-    }
-    if (c < seg_eob)
-      cost += mb->token_costs[tx_size][type][get_coef_band(tx_size, c)]
+      cost += mb->token_costs[tx_size][type][ref][get_coef_band(tx_size, c)]
           [pt][DCT_EOB_TOKEN];
   }
 

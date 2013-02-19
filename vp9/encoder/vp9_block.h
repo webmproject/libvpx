@@ -156,8 +156,7 @@ typedef struct macroblock {
 
   unsigned char *active_ptr;
 
-  vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES_4X4];
-  vp9_coeff_count hybrid_token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES_4X4_HYBRID];
+  vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES];
 
   int optimize;
 

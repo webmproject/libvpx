@@ -3233,14 +3233,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   update_reference_frames(cpi);
   vp9_copy(cpi->common.fc.coef_counts_4x4, cpi->coef_counts_4x4);
-  vp9_copy(cpi->common.fc.hybrid_coef_counts_4x4,
-           cpi->hybrid_coef_counts_4x4);
   vp9_copy(cpi->common.fc.coef_counts_8x8, cpi->coef_counts_8x8);
-  vp9_copy(cpi->common.fc.hybrid_coef_counts_8x8,
-           cpi->hybrid_coef_counts_8x8);
   vp9_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
-  vp9_copy(cpi->common.fc.hybrid_coef_counts_16x16,
-           cpi->hybrid_coef_counts_16x16);
   vp9_copy(cpi->common.fc.coef_counts_32x32, cpi->coef_counts_32x32);
   if (!cpi->common.error_resilient_mode &&
       !cpi->common.frame_parallel_decoding_mode)

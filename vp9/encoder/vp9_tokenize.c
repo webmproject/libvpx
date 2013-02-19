@@ -25,20 +25,14 @@
    compressions, then generating vp9_context.c = initial stats. */
 
 #ifdef ENTROPY_STATS
-vp9_coeff_accum context_counters_4x4[BLOCK_TYPES_4X4];
-vp9_coeff_accum hybrid_context_counters_4x4[BLOCK_TYPES_4X4_HYBRID];
-vp9_coeff_accum context_counters_8x8[BLOCK_TYPES_8X8];
-vp9_coeff_accum hybrid_context_counters_8x8[BLOCK_TYPES_8X8_HYBRID];
-vp9_coeff_accum context_counters_16x16[BLOCK_TYPES_16X16];
-vp9_coeff_accum hybrid_context_counters_16x16[BLOCK_TYPES_16X16_HYBRID];
+vp9_coeff_accum context_counters_4x4[BLOCK_TYPES];
+vp9_coeff_accum context_counters_8x8[BLOCK_TYPES];
+vp9_coeff_accum context_counters_16x16[BLOCK_TYPES];
 vp9_coeff_accum context_counters_32x32[BLOCK_TYPES_32X32];
 
-extern vp9_coeff_stats tree_update_hist_4x4[BLOCK_TYPES_4X4];
-extern vp9_coeff_stats hybrid_tree_update_hist_4x4[BLOCK_TYPES_4X4_HYBRID];
-extern vp9_coeff_stats tree_update_hist_8x8[BLOCK_TYPES_8X8];
-extern vp9_coeff_stats hybrid_tree_update_hist_8x8[BLOCK_TYPES_8X8_HYBRID];
-extern vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES_16X16];
-extern vp9_coeff_stats hybrid_tree_update_hist_16x16[BLOCK_TYPES_16X16_HYBRID];
+extern vp9_coeff_stats tree_update_hist_4x4[BLOCK_TYPES];
+extern vp9_coeff_stats tree_update_hist_8x8[BLOCK_TYPES];
+extern vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES];
 extern vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES_32X32];
 #endif  /* ENTROPY_STATS */
 
@@ -121,6 +115,7 @@ static void tokenize_b(VP9_COMP *cpi,
   vp9_coeff_probs *probs;
   const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
                           get_tx_type(xd, b) : DCT_DCT;
+  const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
 
   ENTROPY_CONTEXT *const a = (ENTROPY_CONTEXT *)xd->above_context +
       vp9_block2above[tx_size][ib];
@@ -140,17 +135,14 @@ static void tokenize_b(VP9_COMP *cpi,
       seg_eob = 16;
       scan = vp9_default_zig_zag1d_4x4;
       if (tx_type != DCT_DCT) {
-        counts = cpi->hybrid_coef_counts_4x4;
-        probs = cpi->common.fc.hybrid_coef_probs_4x4;
         if (tx_type == ADST_DCT) {
           scan = vp9_row_scan_4x4;
         } else if (tx_type == DCT_ADST) {
           scan = vp9_col_scan_4x4;
         }
-      } else {
-        counts = cpi->coef_counts_4x4;
-        probs = cpi->common.fc.coef_probs_4x4;
       }
+      counts = cpi->coef_counts_4x4;
+      probs = cpi->common.fc.coef_probs_4x4;
       break;
     case TX_8X8:
 #if CONFIG_CNVCONTEXT
@@ -159,13 +151,8 @@ static void tokenize_b(VP9_COMP *cpi,
 #endif
       seg_eob = 64;
       scan = vp9_default_zig_zag1d_8x8;
-      if (tx_type != DCT_DCT) {
-        counts = cpi->hybrid_coef_counts_8x8;
-        probs = cpi->common.fc.hybrid_coef_probs_8x8;
-      } else {
-        counts = cpi->coef_counts_8x8;
-        probs = cpi->common.fc.coef_probs_8x8;
-      }
+      counts = cpi->coef_counts_8x8;
+      probs = cpi->common.fc.coef_probs_8x8;
       break;
     case TX_16X16:
 #if CONFIG_CNVCONTEXT
@@ -179,13 +166,8 @@ static void tokenize_b(VP9_COMP *cpi,
 #endif
       seg_eob = 256;
       scan = vp9_default_zig_zag1d_16x16;
-      if (tx_type != DCT_DCT) {
-        counts = cpi->hybrid_coef_counts_16x16;
-        probs = cpi->common.fc.hybrid_coef_probs_16x16;
-      } else {
-        counts = cpi->coef_counts_16x16;
-        probs = cpi->common.fc.coef_probs_16x16;
-      }
+      counts = cpi->coef_counts_16x16;
+      probs = cpi->common.fc.coef_probs_16x16;
       if (type == PLANE_TYPE_UV) {
         int uv_idx = (ib - 16) >> 2;
         qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 256 * uv_idx;
@@ -229,11 +211,11 @@ static void tokenize_b(VP9_COMP *cpi,
     }
 
     t->Token = token;
-    t->context_tree = probs[type][band][pt];
+    t->context_tree = probs[type][ref][band][pt];
     t->skip_eob_node = (pt == 0) && (band > 0);
     assert(vp9_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
     if (!dry_run) {
-      ++counts[type][band][pt][token];
+      ++counts[type][ref][band][pt][token];
     }
 
     pt = vp9_get_coef_context(&recent_energy, token);
@@ -470,25 +452,13 @@ void init_context_counters(void) {
   FILE *f = fopen("context.bin", "rb");
   if (!f) {
     vpx_memset(context_counters_4x4, 0, sizeof(context_counters_4x4));
-    vpx_memset(hybrid_context_counters_4x4, 0,
-               sizeof(hybrid_context_counters_4x4));
     vpx_memset(context_counters_8x8, 0, sizeof(context_counters_8x8));
-    vpx_memset(hybrid_context_counters_8x8, 0,
-               sizeof(hybrid_context_counters_8x8));
     vpx_memset(context_counters_16x16, 0, sizeof(context_counters_16x16));
-    vpx_memset(hybrid_context_counters_16x16, 0,
-               sizeof(hybrid_context_counters_16x16));
     vpx_memset(context_counters_32x32, 0, sizeof(context_counters_32x32));
   } else {
     fread(context_counters_4x4, sizeof(context_counters_4x4), 1, f);
-    fread(hybrid_context_counters_4x4,
-          sizeof(hybrid_context_counters_4x4), 1, f);
     fread(context_counters_8x8, sizeof(context_counters_8x8), 1, f);
-    fread(hybrid_context_counters_8x8,
-          sizeof(hybrid_context_counters_8x8), 1, f);
     fread(context_counters_16x16, sizeof(context_counters_16x16), 1, f);
-    fread(hybrid_context_counters_16x16,
-          sizeof(hybrid_context_counters_16x16), 1, f);
     fread(context_counters_32x32, sizeof(context_counters_32x32), 1, f);
     fclose(f);
   }
@@ -496,25 +466,13 @@ void init_context_counters(void) {
   f = fopen("treeupdate.bin", "rb");
   if (!f) {
     vpx_memset(tree_update_hist_4x4, 0, sizeof(tree_update_hist_4x4));
-    vpx_memset(hybrid_tree_update_hist_4x4, 0,
-               sizeof(hybrid_tree_update_hist_4x4));
     vpx_memset(tree_update_hist_8x8, 0, sizeof(tree_update_hist_8x8));
-    vpx_memset(hybrid_tree_update_hist_8x8, 0,
-               sizeof(hybrid_tree_update_hist_8x8));
     vpx_memset(tree_update_hist_16x16, 0, sizeof(tree_update_hist_16x16));
-    vpx_memset(hybrid_tree_update_hist_16x16, 0,
-               sizeof(hybrid_tree_update_hist_16x16));
     vpx_memset(tree_update_hist_32x32, 0, sizeof(tree_update_hist_32x32));
   } else {
     fread(tree_update_hist_4x4, sizeof(tree_update_hist_4x4), 1, f);
-    fread(hybrid_tree_update_hist_4x4,
-          sizeof(hybrid_tree_update_hist_4x4), 1, f);
     fread(tree_update_hist_8x8, sizeof(tree_update_hist_8x8), 1, f);
-    fread(hybrid_tree_update_hist_8x8,
-          sizeof(hybrid_tree_update_hist_8x8), 1, f);
     fread(tree_update_hist_16x16, sizeof(tree_update_hist_16x16), 1, f);
-    fread(hybrid_tree_update_hist_16x16,
-          sizeof(hybrid_tree_update_hist_16x16), 1, f);
     fread(tree_update_hist_32x32, sizeof(tree_update_hist_32x32), 1, f);
     fclose(f);
   }
@@ -522,33 +480,38 @@ void init_context_counters(void) {
 
 static void print_counter(FILE *f, vp9_coeff_accum *context_counters,
                           int block_types, const char *header) {
-  int type, band, pt, t;
+  int type, ref, band, pt, t;
 
   fprintf(f, "static const vp9_coeff_count %s = {\n", header);
 
 #define Comma(X) (X ? "," : "")
   type = 0;
   do {
+    ref = 0;
     fprintf(f, "%s\n  { /* block Type %d */", Comma(type), type);
-    band = 0;
     do {
-      fprintf(f, "%s\n    { /* Coeff Band %d */", Comma(band), band);
-      pt = 0;
+      fprintf(f, "%s\n    { /* %s */", Comma(type), ref ? "Inter" : "Intra");
+      band = 0;
       do {
-        fprintf(f, "%s\n      {", Comma(pt));
-
-        t = 0;
+        fprintf(f, "%s\n      { /* Coeff Band %d */", Comma(band), band);
+        pt = 0;
         do {
-          const int64_t x = context_counters[type][band][pt][t];
-          const int y = (int) x;
+          fprintf(f, "%s\n        {", Comma(pt));
 
-          assert(x == (int64_t) y);  /* no overflow handling yet */
-          fprintf(f, "%s %d", Comma(t), y);
-        } while (++t < MAX_ENTROPY_TOKENS);
-        fprintf(f, "}");
-      } while (++pt < PREV_COEF_CONTEXTS);
+          t = 0;
+          do {
+            const int64_t x = context_counters[type][ref][band][pt][t];
+            const int y = (int) x;
+
+            assert(x == (int64_t) y);  /* no overflow handling yet */
+            fprintf(f, "%s %d", Comma(t), y);
+          } while (++t < MAX_ENTROPY_TOKENS);
+          fprintf(f, "}");
+        } while (++pt < PREV_COEF_CONTEXTS);
+        fprintf(f, "\n      }");
+      } while (++band < COEF_BANDS);
       fprintf(f, "\n    }");
-    } while (++band < COEF_BANDS);
+    } while (++ref < REF_TYPES);
     fprintf(f, "\n  }");
   } while (++type < block_types);
   fprintf(f, "\n};\n");
@@ -556,7 +519,7 @@ static void print_counter(FILE *f, vp9_coeff_accum *context_counters,
 
 static void print_probs(FILE *f, vp9_coeff_accum *context_counters,
                         int block_types, const char *header) {
-  int type, band, pt, t;
+  int type, ref, band, pt, t;
 
   fprintf(f, "static const vp9_coeff_probs %s = {", header);
 
@@ -565,32 +528,38 @@ static void print_probs(FILE *f, vp9_coeff_accum *context_counters,
   do {
     fprintf(f, "%s%s{ /* block Type %d */",
             Comma(type), Newline(type, "  "), type);
-    band = 0;
+    ref = 0;
     do {
-      fprintf(f, "%s%s{ /* Coeff Band %d */",
-              Comma(band), Newline(band, "    "), band);
-      pt = 0;
+      fprintf(f, "%s%s{ /* %s */",
+              Comma(band), Newline(band, "    "), ref ? "Inter" : "Intra");
+      band = 0;
       do {
-        unsigned int branch_ct[ENTROPY_NODES][2];
-        unsigned int coef_counts[MAX_ENTROPY_TOKENS];
-        vp9_prob coef_probs[ENTROPY_NODES];
-
-        for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
-          coef_counts[t] = context_counters[type][band][pt][t];
-        vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
-                                         vp9_coef_encodings, vp9_coef_tree,
-                                         coef_probs, branch_ct, coef_counts);
-        fprintf(f, "%s\n      {", Comma(pt));
-
-        t = 0;
+        fprintf(f, "%s%s{ /* Coeff Band %d */",
+                Comma(band), Newline(band, "      "), band);
+        pt = 0;
         do {
-          fprintf(f, "%s %3d", Comma(t), coef_probs[t]);
-        } while (++t < ENTROPY_NODES);
+          unsigned int branch_ct[ENTROPY_NODES][2];
+          unsigned int coef_counts[MAX_ENTROPY_TOKENS];
+          vp9_prob coef_probs[ENTROPY_NODES];
 
-        fprintf(f, " }");
-      } while (++pt < PREV_COEF_CONTEXTS);
+          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+            coef_counts[t] = context_counters[type][ref][band][pt][t];
+          vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
+                                           vp9_coef_encodings, vp9_coef_tree,
+                                           coef_probs, branch_ct, coef_counts);
+          fprintf(f, "%s\n      {", Comma(pt));
+
+          t = 0;
+          do {
+            fprintf(f, "%s %3d", Comma(t), coef_probs[t]);
+          } while (++t < ENTROPY_NODES);
+
+          fprintf(f, " }");
+        } while (++pt < PREV_COEF_CONTEXTS);
+        fprintf(f, "\n      }");
+      } while (++band < COEF_BANDS);
       fprintf(f, "\n    }");
-    } while (++band < COEF_BANDS);
+    } while (++ref < REF_TYPES);
     fprintf(f, "\n  }");
   } while (++type < block_types);
   fprintf(f, "\n};\n");
@@ -603,35 +572,22 @@ void print_context_counters() {
   fprintf(f, "\n/* *** GENERATED FILE: DO NOT EDIT *** */\n\n");
 
   /* print counts */
-  print_counter(f, context_counters_4x4, BLOCK_TYPES_4X4,
+  print_counter(f, context_counters_4x4, BLOCK_TYPES,
                 "vp9_default_coef_counts_4x4[BLOCK_TYPES_4X4]");
-  print_counter(f, hybrid_context_counters_4x4, BLOCK_TYPES_4X4_HYBRID,
-                "vp9_default_hybrid_coef_counts_4x4[BLOCK_TYPES_4X4_HYBRID]");
-  print_counter(f, context_counters_8x8, BLOCK_TYPES_8X8,
+  print_counter(f, context_counters_8x8, BLOCK_TYPES,
                 "vp9_default_coef_counts_8x8[BLOCK_TYPES_8X8]");
-  print_counter(f, hybrid_context_counters_8x8, BLOCK_TYPES_8X8_HYBRID,
-                "vp9_default_hybrid_coef_counts_8x8[BLOCK_TYPES_8X8_HYBRID]");
-  print_counter(f, context_counters_16x16, BLOCK_TYPES_16X16,
+  print_counter(f, context_counters_16x16, BLOCK_TYPES,
                 "vp9_default_coef_counts_16x16[BLOCK_TYPES_16X16]");
-  print_counter(f, hybrid_context_counters_16x16, BLOCK_TYPES_16X16_HYBRID,
-                "vp9_default_hybrid_coef_counts_16x16"
-                    "[BLOCK_TYPES_16X16_HYBRID]");
   print_counter(f, context_counters_32x32, BLOCK_TYPES_32X32,
                 "vp9_default_coef_counts_32x32[BLOCK_TYPES_32X32]");
 
   /* print coefficient probabilities */
-  print_probs(f, context_counters_4x4, BLOCK_TYPES_4X4,
+  print_probs(f, context_counters_4x4, BLOCK_TYPES,
               "default_coef_probs_4x4[BLOCK_TYPES_4X4]");
-  print_probs(f, hybrid_context_counters_4x4, BLOCK_TYPES_4X4_HYBRID,
-              "default_hybrid_coef_probs_4x4[BLOCK_TYPES_4X4_HYBRID]");
-  print_probs(f, context_counters_8x8, BLOCK_TYPES_8X8,
+  print_probs(f, context_counters_8x8, BLOCK_TYPES,
               "default_coef_probs_8x8[BLOCK_TYPES_8X8]");
-  print_probs(f, hybrid_context_counters_8x8, BLOCK_TYPES_8X8_HYBRID,
-              "default_hybrid_coef_probs_8x8[BLOCK_TYPES_8X8_HYBRID]");
-  print_probs(f, context_counters_16x16, BLOCK_TYPES_16X16,
+  print_probs(f, context_counters_16x16, BLOCK_TYPES,
               "default_coef_probs_16x16[BLOCK_TYPES_16X16]");
-  print_probs(f, hybrid_context_counters_16x16, BLOCK_TYPES_16X16_HYBRID,
-              "default_hybrid_coef_probs_16x16[BLOCK_TYPES_16X16_HYBRID]");
   print_probs(f, context_counters_32x32, BLOCK_TYPES_32X32,
               "default_coef_probs_32x32[BLOCK_TYPES_32X32]");
 
@@ -639,14 +595,8 @@ void print_context_counters() {
 
   f = fopen("context.bin", "wb");
   fwrite(context_counters_4x4, sizeof(context_counters_4x4), 1, f);
-  fwrite(hybrid_context_counters_4x4,
-         sizeof(hybrid_context_counters_4x4), 1, f);
   fwrite(context_counters_8x8, sizeof(context_counters_8x8), 1, f);
-  fwrite(hybrid_context_counters_8x8,
-         sizeof(hybrid_context_counters_8x8), 1, f);
   fwrite(context_counters_16x16, sizeof(context_counters_16x16), 1, f);
-  fwrite(hybrid_context_counters_16x16,
-         sizeof(hybrid_context_counters_16x16), 1, f);
   fwrite(context_counters_32x32, sizeof(context_counters_32x32), 1, f);
   fclose(f);
 }
@@ -663,13 +613,11 @@ static INLINE void stuff_b(VP9_COMP *cpi,
                            PLANE_TYPE type,
                            TX_SIZE tx_size,
                            int dry_run) {
-  const BLOCKD * const b = xd->block + ib;
   vp9_coeff_count *counts;
   vp9_coeff_probs *probs;
   int pt, band;
   TOKENEXTRA *t = *tp;
-  const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-                          get_tx_type(xd, b) : DCT_DCT;
+  const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
   ENTROPY_CONTEXT *const a = (ENTROPY_CONTEXT *)xd->above_context +
       vp9_block2above[tx_size][ib];
   ENTROPY_CONTEXT *const l = (ENTROPY_CONTEXT *)xd->left_context +
@@ -683,26 +631,16 @@ static INLINE void stuff_b(VP9_COMP *cpi,
   switch (tx_size) {
     default:
     case TX_4X4:
-      if (tx_type != DCT_DCT) {
-        counts = cpi->hybrid_coef_counts_4x4;
-        probs = cpi->common.fc.hybrid_coef_probs_4x4;
-      } else {
-        counts = cpi->coef_counts_4x4;
-        probs = cpi->common.fc.coef_probs_4x4;
-      }
+      counts = cpi->coef_counts_4x4;
+      probs = cpi->common.fc.coef_probs_4x4;
       break;
     case TX_8X8:
 #if CONFIG_CNVCONTEXT
       a_ec = (a[0] + a[1]) != 0;
       l_ec = (l[0] + l[1]) != 0;
 #endif
-      if (tx_type != DCT_DCT) {
-        counts = cpi->hybrid_coef_counts_8x8;
-        probs = cpi->common.fc.hybrid_coef_probs_8x8;
-      } else {
-        counts = cpi->coef_counts_8x8;
-        probs = cpi->common.fc.coef_probs_8x8;
-      }
+      counts = cpi->coef_counts_8x8;
+      probs = cpi->common.fc.coef_probs_8x8;
       break;
     case TX_16X16:
 #if CONFIG_CNVCONTEXT
@@ -714,13 +652,8 @@ static INLINE void stuff_b(VP9_COMP *cpi,
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
       }
 #endif
-      if (tx_type != DCT_DCT) {
-        counts = cpi->hybrid_coef_counts_16x16;
-        probs = cpi->common.fc.hybrid_coef_probs_16x16;
-      } else {
-        counts = cpi->coef_counts_16x16;
-        probs = cpi->common.fc.coef_probs_16x16;
-      }
+      counts = cpi->coef_counts_16x16;
+      probs = cpi->common.fc.coef_probs_16x16;
       break;
     case TX_32X32:
 #if CONFIG_CNVCONTEXT
@@ -740,7 +673,7 @@ static INLINE void stuff_b(VP9_COMP *cpi,
 
   band = get_coef_band(tx_size, 0);
   t->Token = DCT_EOB_TOKEN;
-  t->context_tree = probs[type][band][pt];
+  t->context_tree = probs[type][ref][band][pt];
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
@@ -764,7 +697,7 @@ static INLINE void stuff_b(VP9_COMP *cpi,
   }
 
   if (!dry_run) {
-    ++counts[type][band][pt][DCT_EOB_TOKEN];
+    ++counts[type][ref][band][pt][DCT_EOB_TOKEN];
   }
 }
 

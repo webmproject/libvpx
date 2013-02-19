@@ -255,19 +255,10 @@ int vp9_get_coef_context(int * recent_energy, int token) {
 void vp9_default_coef_probs(VP9_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs_4x4, default_coef_probs_4x4,
              sizeof(pc->fc.coef_probs_4x4));
-  vpx_memcpy(pc->fc.hybrid_coef_probs_4x4, default_hybrid_coef_probs_4x4,
-             sizeof(pc->fc.hybrid_coef_probs_4x4));
-
   vpx_memcpy(pc->fc.coef_probs_8x8, default_coef_probs_8x8,
              sizeof(pc->fc.coef_probs_8x8));
-  vpx_memcpy(pc->fc.hybrid_coef_probs_8x8, default_hybrid_coef_probs_8x8,
-             sizeof(pc->fc.hybrid_coef_probs_8x8));
-
   vpx_memcpy(pc->fc.coef_probs_16x16, default_coef_probs_16x16,
              sizeof(pc->fc.coef_probs_16x16));
-  vpx_memcpy(pc->fc.hybrid_coef_probs_16x16,
-             default_hybrid_coef_probs_16x16,
-             sizeof(pc->fc.hybrid_coef_probs_16x16));
   vpx_memcpy(pc->fc.coef_probs_32x32, default_coef_probs_32x32,
              sizeof(pc->fc.coef_probs_32x32));
 }
@@ -290,28 +281,30 @@ static void update_coef_probs(vp9_coeff_probs *dst_coef_probs,
                               vp9_coeff_probs *pre_coef_probs,
                               int block_types, vp9_coeff_count *coef_counts,
                               int count_sat, int update_factor) {
-  int t, i, j, k, count;
+  int t, i, j, k, l, count;
   unsigned int branch_ct[ENTROPY_NODES][2];
   vp9_prob coef_probs[ENTROPY_NODES];
   int factor;
 
   for (i = 0; i < block_types; ++i)
-    for (j = 0; j < COEF_BANDS; ++j)
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-        if (k >= 3 && j == 0)
-          continue;
-        vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
-                                         vp9_coef_encodings, vp9_coef_tree,
-                                         coef_probs, branch_ct,
-                                         coef_counts[i][j][k]);
-        for (t = 0; t < ENTROPY_NODES; ++t) {
-          count = branch_ct[t][0] + branch_ct[t][1];
-          count = count > count_sat ? count_sat : count;
-          factor = (update_factor * count / count_sat);
-          dst_coef_probs[i][j][k][t] = weighted_prob(pre_coef_probs[i][j][k][t],
-                                                     coef_probs[t], factor);
+    for (j = 0; j < REF_TYPES; ++j)
+      for (k = 0; k < COEF_BANDS; ++k)
+        for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
+          if (l >= 3 && k == 0)
+            continue;
+          vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
+                                           vp9_coef_encodings, vp9_coef_tree,
+                                           coef_probs, branch_ct,
+                                           coef_counts[i][j][k][l]);
+          for (t = 0; t < ENTROPY_NODES; ++t) {
+            count = branch_ct[t][0] + branch_ct[t][1];
+            count = count > count_sat ? count_sat : count;
+            factor = (update_factor * count / count_sat);
+            dst_coef_probs[i][j][k][l][t] =
+                weighted_prob(pre_coef_probs[i][j][k][l][t],
+                              coef_probs[t], factor);
+          }
         }
-      }
 }
 
 void vp9_adapt_coef_probs(VP9_COMMON *cm) {
@@ -333,85 +326,14 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
     count_sat = COEF_COUNT_SAT;
   }
 
-#ifdef COEF_COUNT_TESTING
-  {
-    printf("static const unsigned int\ncoef_counts"
-           "[BLOCK_TYPES] [COEF_BANDS]"
-           "[PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {\n");
-    for (i = 0; i < BLOCK_TYPES; ++i) {
-      printf("  {\n");
-      for (j = 0; j < COEF_BANDS; ++j) {
-        printf("    {\n");
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-          printf("      {");
-          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
-            printf("%d, ", cm->fc.coef_counts[i][j][k][t]);
-          printf("},\n");
-        }
-        printf("    },\n");
-      }
-      printf("  },\n");
-    }
-    printf("};\n");
-    printf("static const unsigned int\ncoef_counts_8x8"
-           "[BLOCK_TYPES_8X8] [COEF_BANDS]"
-           "[PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {\n");
-    for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
-      printf("  {\n");
-      for (j = 0; j < COEF_BANDS; ++j) {
-        printf("    {\n");
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-          printf("      {");
-          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
-            printf("%d, ", cm->fc.coef_counts_8x8[i][j][k][t]);
-          printf("},\n");
-        }
-        printf("    },\n");
-      }
-      printf("  },\n");
-    }
-    printf("};\n");
-    printf("static const unsigned int\nhybrid_coef_counts"
-           "[BLOCK_TYPES] [COEF_BANDS]"
-           "[PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {\n");
-    for (i = 0; i < BLOCK_TYPES; ++i) {
-      printf("  {\n");
-      for (j = 0; j < COEF_BANDS; ++j) {
-        printf("    {\n");
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-          printf("      {");
-          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
-            printf("%d, ", cm->fc.hybrid_coef_counts[i][j][k][t]);
-          printf("},\n");
-        }
-        printf("    },\n");
-      }
-      printf("  },\n");
-    }
-    printf("};\n");
-  }
-#endif
-
   update_coef_probs(cm->fc.coef_probs_4x4, cm->fc.pre_coef_probs_4x4,
-                    BLOCK_TYPES_4X4, cm->fc.coef_counts_4x4,
-                    count_sat, update_factor);
-  update_coef_probs(cm->fc.hybrid_coef_probs_4x4,
-                    cm->fc.pre_hybrid_coef_probs_4x4,
-                    BLOCK_TYPES_4X4_HYBRID, cm->fc.hybrid_coef_counts_4x4,
+                    BLOCK_TYPES, cm->fc.coef_counts_4x4,
                     count_sat, update_factor);
   update_coef_probs(cm->fc.coef_probs_8x8, cm->fc.pre_coef_probs_8x8,
-                    BLOCK_TYPES_8X8, cm->fc.coef_counts_8x8,
-                    count_sat, update_factor);
-  update_coef_probs(cm->fc.hybrid_coef_probs_8x8,
-                    cm->fc.pre_hybrid_coef_probs_8x8,
-                    BLOCK_TYPES_8X8_HYBRID, cm->fc.hybrid_coef_counts_8x8,
+                    BLOCK_TYPES, cm->fc.coef_counts_8x8,
                     count_sat, update_factor);
   update_coef_probs(cm->fc.coef_probs_16x16, cm->fc.pre_coef_probs_16x16,
-                    BLOCK_TYPES_16X16, cm->fc.coef_counts_16x16,
-                    count_sat, update_factor);
-  update_coef_probs(cm->fc.hybrid_coef_probs_16x16,
-                    cm->fc.pre_hybrid_coef_probs_16x16,
-                    BLOCK_TYPES_16X16_HYBRID, cm->fc.hybrid_coef_counts_16x16,
+                    BLOCK_TYPES, cm->fc.coef_counts_16x16,
                     count_sat, update_factor);
   update_coef_probs(cm->fc.coef_probs_32x32, cm->fc.pre_coef_probs_32x32,
                     BLOCK_TYPES_32X32, cm->fc.coef_counts_32x32,

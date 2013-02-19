@@ -143,6 +143,8 @@ static void kfread_modes(VP9D_COMP *pbi,
   int map_index = mb_row * pbi->common.mb_cols + mb_col;
   MB_PREDICTION_MODE y_mode;
 
+  m->mbmi.ref_frame = INTRA_FRAME;
+
   // Read the Macroblock segmentation map if it is being updated explicitly
   // this frame (reset to 0 by default).
   m->mbmi.segment_id = 0;

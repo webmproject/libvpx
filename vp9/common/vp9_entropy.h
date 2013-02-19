@@ -60,16 +60,9 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 /* Coefficients are predicted via a 3-dimensional probability table. */
 
 /* Outside dimension.  0 = Y with DC, 1 = UV */
-#define BLOCK_TYPES_4X4 2
-#define BLOCK_TYPES_4X4_HYBRID 1
-
-#define BLOCK_TYPES_8X8 2
-#define BLOCK_TYPES_8X8_HYBRID 1
-
-#define BLOCK_TYPES_16X16 2
-#define BLOCK_TYPES_16X16_HYBRID 1
-
+#define BLOCK_TYPES 2
 #define BLOCK_TYPES_32X32 1
+#define REF_TYPES 2  // intra=0, inter=1
 
 /* Middle dimension reflects the coefficient position within the transform. */
 #define COEF_BANDS 6
@@ -93,11 +86,11 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
 #define PREV_COEF_CONTEXTS          6
 
-typedef unsigned int vp9_coeff_count[COEF_BANDS][PREV_COEF_CONTEXTS]
+typedef unsigned int vp9_coeff_count[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                     [MAX_ENTROPY_TOKENS];
-typedef unsigned int vp9_coeff_stats[COEF_BANDS][PREV_COEF_CONTEXTS]
+typedef unsigned int vp9_coeff_stats[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                     [ENTROPY_NODES][2];
-typedef vp9_prob vp9_coeff_probs[COEF_BANDS][PREV_COEF_CONTEXTS]
+typedef vp9_prob vp9_coeff_probs[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                 [ENTROPY_NODES];
 
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
