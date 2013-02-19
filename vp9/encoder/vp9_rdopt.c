@@ -2656,7 +2656,8 @@ static void rd_check_segment(VP9_COMP *cpi, MACROBLOCK *x,
         txfm_cache[ONLY_4X4] = base_rd;
       }
       if (base_rd + diff < txfm_cache[1]) {
-        txfm_cache[ALLOW_8X8] = txfm_cache[ALLOW_16X16] = base_rd + diff;
+        txfm_cache[ALLOW_8X8] = txfm_cache[ALLOW_16X16] =
+            txfm_cache[ALLOW_32X32] = base_rd + diff;
       }
       if (diff < 0) {
         base_rd += diff + RDCOST(x->rdmult, x->rddiv, cost8x8, 0);
@@ -4182,7 +4183,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (!x->skip) {
     for (i = 0; i < NB_TXFM_MODES; i++) {
       if (best_txfm_rd[i] == INT64_MAX)
-        best_txfm_diff[i] = INT_MIN;
+        best_txfm_diff[i] = 0;
       else
         best_txfm_diff[i] = best_rd - best_txfm_rd[i];
     }
@@ -4208,9 +4209,10 @@ void vp9_rd_pick_intra_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
   int rate_y_tokenonly = 0, rate_uv_tokenonly;
   int dist_y = 0, dist_uv;
   int y_skip = 0, uv_skip;
-  int64_t txfm_cache[NB_TXFM_MODES];
+  int64_t txfm_cache[NB_TXFM_MODES], err;
+  int i;
 
-  rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
+  err = rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
                                    &dist_y, &y_skip, txfm_cache);
   rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
                                      &dist_uv, &uv_skip);
@@ -4219,11 +4221,16 @@ void vp9_rd_pick_intra_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
                   vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 1);
     *returndist = dist_y + (dist_uv >> 2);
+    memset(x->sb32_context[xd->sb_index].txfm_rd_diff, 0,
+           sizeof(x->sb32_context[xd->sb_index].txfm_rd_diff));
   } else {
     *returnrate = rate_y + rate_uv;
     if (cpi->common.mb_no_coeff_skip)
       *returnrate += vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
     *returndist = dist_y + (dist_uv >> 2);
+    for (i = 0; i < NB_TXFM_MODES; i++) {
+      x->sb32_context[xd->sb_index].txfm_rd_diff[i] = err - txfm_cache[i];
+    }
   }
 }
 
@@ -4236,9 +4243,10 @@ void vp9_rd_pick_intra_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
   int rate_y_tokenonly = 0, rate_uv_tokenonly;
   int dist_y = 0, dist_uv;
   int y_skip = 0, uv_skip;
-  int64_t txfm_cache[NB_TXFM_MODES];
+  int64_t txfm_cache[NB_TXFM_MODES], err;
+  int i;
 
-  rd_pick_intra_sb64y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
+  err = rd_pick_intra_sb64y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
                                      &dist_y, &y_skip, txfm_cache);
   rd_pick_intra_sb64uv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
                                        &dist_uv, &uv_skip);
@@ -4247,11 +4255,16 @@ void vp9_rd_pick_intra_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
     vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 1);
     *returndist = dist_y + (dist_uv >> 2);
+    memset(x->sb64_context.txfm_rd_diff, 0,
+           sizeof(x->sb64_context.txfm_rd_diff));
   } else {
     *returnrate = rate_y + rate_uv;
     if (cm->mb_no_coeff_skip)
       *returnrate += vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
     *returndist = dist_y + (dist_uv >> 2);
+    for (i = 0; i < NB_TXFM_MODES; i++) {
+      x->sb64_context.txfm_rd_diff[i] = err - txfm_cache[i];
+    }
   }
 }
 
@@ -4899,7 +4912,7 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (!x->skip) {
     for (i = 0; i < NB_TXFM_MODES; i++) {
       if (best_txfm_rd[i] == INT64_MAX)
-        best_txfm_diff[i] = INT_MIN;
+        best_txfm_diff[i] = 0;
       else
         best_txfm_diff[i] = best_rd - best_txfm_rd[i];
     }
