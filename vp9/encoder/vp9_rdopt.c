@@ -2655,7 +2655,7 @@ static void rd_check_segment(VP9_COMP *cpi, MACROBLOCK *x,
       if (base_rd < txfm_cache[ONLY_4X4]) {
         txfm_cache[ONLY_4X4] = base_rd;
       }
-      if (base_rd + diff < txfm_cache[1]) {
+      if (base_rd + diff < txfm_cache[ALLOW_8X8]) {
         txfm_cache[ALLOW_8X8] = txfm_cache[ALLOW_16X16] =
             txfm_cache[ALLOW_32X32] = base_rd + diff;
       }
@@ -4213,9 +4213,9 @@ void vp9_rd_pick_intra_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
   int i;
 
   err = rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
-                                   &dist_y, &y_skip, txfm_cache);
+                               &dist_y, &y_skip, txfm_cache);
   rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
-                                     &dist_uv, &uv_skip);
+                          &dist_uv, &uv_skip);
 
   if (cpi->common.mb_no_coeff_skip && y_skip && uv_skip) {
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
@@ -4247,9 +4247,9 @@ void vp9_rd_pick_intra_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
   int i;
 
   err = rd_pick_intra_sb64y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
-                                     &dist_y, &y_skip, txfm_cache);
+                                 &dist_y, &y_skip, txfm_cache);
   rd_pick_intra_sb64uv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
-                                       &dist_uv, &uv_skip);
+                            &dist_uv, &uv_skip);
 
   if (cpi->common.mb_no_coeff_skip && y_skip && uv_skip) {
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
