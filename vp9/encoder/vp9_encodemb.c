@@ -415,7 +415,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
       t0 = (vp9_dct_value_tokens_ptr + x)->Token;
       /* Consider both possible successor states. */
       if (next < default_eob) {
-        band = get_coef_band(i + 1);
+        band = get_coef_band(tx_size, i + 1);
         pt = trellis_get_coeff_context(t0);
         rate0 +=
           mb->token_costs[tx_size][type][band][pt][tokens[next][0].token];
@@ -462,7 +462,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
         t0 = t1 = (vp9_dct_value_tokens_ptr + x)->Token;
       }
       if (next < default_eob) {
-        band = get_coef_band(i + 1);
+        band = get_coef_band(tx_size, i + 1);
         if (t0 != DCT_EOB_TOKEN) {
           pt = trellis_get_coeff_context(t0);
           rate0 += mb->token_costs[tx_size][type][band][pt][
@@ -497,7 +497,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
      *  add a new trellis node, but we do need to update the costs.
      */
     else {
-      band = get_coef_band(i + 1);
+      band = get_coef_band(tx_size, i + 1);
       t0 = tokens[next][0].token;
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
@@ -514,7 +514,7 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   }
 
   /* Now pick the best path through the whole trellis. */
-  band = get_coef_band(i + 1);
+  band = get_coef_band(tx_size, i + 1);
   VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   rate0 = tokens[next][0].rate;
   rate1 = tokens[next][1].rate;

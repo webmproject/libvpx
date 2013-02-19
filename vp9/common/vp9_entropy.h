@@ -71,18 +71,16 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 
 #define BLOCK_TYPES_32X32 1
 
-/* Middle dimension is a coarsening of the coefficient's
-   position within the 4x4 DCT. */
+/* Middle dimension reflects the coefficient position within the transform. */
+#define COEF_BANDS 6
 
-#define COEF_BANDS 8
-
-/* Inside dimension is 3-valued measure of nearby complexity, that is,
-   the extent to which nearby coefficients are nonzero.  For the first
-   coefficient (DC, unless block type is 0), we look at the (already encoded)
-   blocks above and to the left of the current block.  The context index is
-   then the number (0,1,or 2) of these blocks having nonzero coefficients.
-   After decoding a coefficient, the measure is roughly the size of the
-   most recently decoded coefficient (0 for 0, 1 for 1, 2 for >1).
+/* Inside dimension is measure of nearby complexity, that reflects the energy
+   of nearby coefficients are nonzero.  For the first coefficient (DC, unless
+   block type is 0), we look at the (already encoded) blocks above and to the
+   left of the current block.  The context index is then the number (0,1,or 2)
+   of these blocks having nonzero coefficients.
+   After decoding a coefficient, the measure is determined by the size of the
+   most recently decoded coefficient.
    Note that the intuitive meaning of this measure changes as coefficients
    are decoded, e.g., prior to the first token, a zero means that my neighbors
    are empty while, after the first token, because of the use of end-of-block,
@@ -93,7 +91,7 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
    distinct bands). */
 
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
-#define PREV_COEF_CONTEXTS          4
+#define PREV_COEF_CONTEXTS          6
 
 typedef unsigned int vp9_coeff_count[COEF_BANDS][PREV_COEF_CONTEXTS]
                                     [MAX_ENTROPY_TOKENS];
@@ -126,11 +124,18 @@ static void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
 }
 
 extern const int vp9_coef_bands[32];
-static int get_coef_band(int coef_index) {
-  if (coef_index < 32)
-    return vp9_coef_bands[coef_index];
-  else
-    return 7;
+extern const int vp9_coef_bands4x4[16];
+
+static int get_coef_band(TX_SIZE tx_size, int coef_index) {
+  if (tx_size == TX_4X4) {
+    return vp9_coef_bands4x4[coef_index];
+  } else {
+    if (coef_index < 32)
+      return vp9_coef_bands[coef_index];
+    else
+      return 5;
+  }
 }
 extern int vp9_get_coef_context(int * recent_energy, int token);
+
 #endif  // VP9_COMMON_VP9_ENTROPY_H_

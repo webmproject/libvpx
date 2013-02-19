@@ -458,24 +458,24 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
-      cost += token_costs[get_coef_band(c)][pt][t];
+      cost += token_costs[get_coef_band(tx_size, c)][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_get_coef_context(&recent_energy, t);
     }
     if (c < seg_eob)
-      cost += mb->hybrid_token_costs[tx_size][type][get_coef_band(c)]
+      cost += mb->hybrid_token_costs[tx_size][type][get_coef_band(tx_size, c)]
           [pt][DCT_EOB_TOKEN];
   } else {
     int recent_energy = 0;
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].Token;
-      cost += token_costs[get_coef_band(c)][pt][t];
+      cost += token_costs[get_coef_band(tx_size, c)][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
       pt = vp9_get_coef_context(&recent_energy, t);
     }
     if (c < seg_eob)
-      cost += mb->token_costs[tx_size][type][get_coef_band(c)]
+      cost += mb->token_costs[tx_size][type][get_coef_band(tx_size, c)]
           [pt][DCT_EOB_TOKEN];
   }
 
