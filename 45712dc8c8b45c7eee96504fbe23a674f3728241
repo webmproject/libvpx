@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//i10\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1191,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-19T18:02:48Z",
+      "side": 0,
+      "message": "is there a reason you removed this? The first coefficient can still just have [0,2] as values for pt, right? So [3-5] are never used.",
+      "revId": "45712dc8c8b45c7eee96504fbe23a674f3728241",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
