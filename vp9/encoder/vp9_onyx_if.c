@@ -947,7 +947,7 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->tok);
 
   {
-    unsigned int tokens = cm->mb_rows * cm->mb_cols * 24 * 16;
+    unsigned int tokens = cm->mb_rows * cm->mb_cols * (24 * 16 + 1);
 
     CHECK_MEM_ERROR(cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
