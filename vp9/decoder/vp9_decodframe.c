@@ -1767,6 +1767,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   }
   corrupt_tokens |= xd->corrupted;
 
+  // keep track of the last coded dimensions
+  pc->last_width = pc->Width;
+  pc->last_height = pc->Height;
+
   /* Collect information about decoder corruption. */
   /* 1. Check first boolean decoder for errors. */
   pc->yv12_fb[pc->new_fb_idx].corrupted = bool_error(&header_bc);

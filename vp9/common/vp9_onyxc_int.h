@@ -39,7 +39,11 @@ void vp9_initialize_common(void);
 
 #define NUM_REF_FRAMES 3
 #define NUM_REF_FRAMES_LG2 2
-#define NUM_YV12_BUFFERS (NUM_REF_FRAMES + 1)
+
+// 1 scratch frame for the new frame, 3 for scaled references on the encoder
+// TODO(jkoleszar): These 3 extra references could probably come from the
+// normal reference pool.
+#define NUM_YV12_BUFFERS (NUM_REF_FRAMES + 4)
 
 #define NUM_FRAME_CONTEXTS_LG2 2
 #define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LG2)
@@ -128,6 +132,8 @@ typedef struct VP9Common {
 
   int Width;
   int Height;
+  int last_width;
+  int last_height;
   int horiz_scale;
   int vert_scale;
 
