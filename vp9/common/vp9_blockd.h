@@ -51,7 +51,7 @@ typedef struct {
   int r, c;
 } POS;
 
-typedef enum PlaneType {
+typedef enum {
   PLANE_TYPE_Y_WITH_DC,
   PLANE_TYPE_UV,
 } PLANE_TYPE;
@@ -63,7 +63,7 @@ typedef struct {
   ENTROPY_CONTEXT v[2];
 } ENTROPY_CONTEXT_PLANES;
 
-#define VP9_COMBINEENTROPYCONTEXTS( Dest, A, B) \
+#define VP9_COMBINEENTROPYCONTEXTS(Dest, A, B) \
   Dest = ((A)!=0) + ((B)!=0);
 
 typedef enum {
@@ -606,8 +606,8 @@ static TX_TYPE get_tx_type(const MACROBLOCKD *xd, const BLOCKD *b) {
   return tx_type;
 }
 
-extern void vp9_build_block_doffsets(MACROBLOCKD *xd);
-extern void vp9_setup_block_dptrs(MACROBLOCKD *xd);
+void vp9_build_block_doffsets(MACROBLOCKD *xd);
+void vp9_setup_block_dptrs(MACROBLOCKD *xd);
 
 static void update_blockd_bmi(MACROBLOCKD *xd) {
   int i;

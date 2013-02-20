@@ -15,31 +15,31 @@
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_blockd.h"
 
-extern void vp9_inverse_transform_b_4x4(MACROBLOCKD *xd, int block, int pitch);
+void vp9_inverse_transform_b_4x4(MACROBLOCKD *xd, int block, int pitch);
 
-extern void vp9_inverse_transform_mb_4x4(MACROBLOCKD *xd);
+void vp9_inverse_transform_mb_4x4(MACROBLOCKD *xd);
 
-extern void vp9_inverse_transform_mby_4x4(MACROBLOCKD *xd);
+void vp9_inverse_transform_mby_4x4(MACROBLOCKD *xd);
 
-extern void vp9_inverse_transform_mbuv_4x4(MACROBLOCKD *xd);
+void vp9_inverse_transform_mbuv_4x4(MACROBLOCKD *xd);
 
-extern void vp9_inverse_transform_b_8x8(int16_t *input_dqcoeff,
+void vp9_inverse_transform_b_8x8(int16_t *input_dqcoeff,
                                         int16_t *output_coeff, int pitch);
 
-extern void vp9_inverse_transform_mb_8x8(MACROBLOCKD *xd);
+void vp9_inverse_transform_mb_8x8(MACROBLOCKD *xd);
 
-extern void vp9_inverse_transform_mby_8x8(MACROBLOCKD *xd);
+void vp9_inverse_transform_mby_8x8(MACROBLOCKD *xd);
 
-extern void vp9_inverse_transform_mbuv_8x8(MACROBLOCKD *xd);
+void vp9_inverse_transform_mbuv_8x8(MACROBLOCKD *xd);
 
-extern void vp9_inverse_transform_b_16x16(int16_t *input_dqcoeff,
+void vp9_inverse_transform_b_16x16(int16_t *input_dqcoeff,
                                           int16_t *output_coeff, int pitch);
 
-extern void vp9_inverse_transform_mb_16x16(MACROBLOCKD *xd);
+void vp9_inverse_transform_mb_16x16(MACROBLOCKD *xd);
 
-extern void vp9_inverse_transform_mby_16x16(MACROBLOCKD *xd);
+void vp9_inverse_transform_mby_16x16(MACROBLOCKD *xd);
 
-extern void vp9_inverse_transform_sby_32x32(SUPERBLOCKD *xd_sb);
-extern void vp9_inverse_transform_sbuv_16x16(SUPERBLOCKD *xd_sb);
+void vp9_inverse_transform_sby_32x32(SUPERBLOCKD *xd_sb);
+void vp9_inverse_transform_sbuv_16x16(SUPERBLOCKD *xd_sb);
 
 #endif  // VP9_COMMON_VP9_INVTRANS_H_
