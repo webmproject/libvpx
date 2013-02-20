@@ -128,6 +128,7 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
       break;
 #endif
   }
+  assert(((intptr_t)xd->subpix.filter_x & 0xff) == 0);
 }
 
 void vp9_copy_mem16x16_c(const uint8_t *src,
