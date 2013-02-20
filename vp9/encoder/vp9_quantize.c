@@ -40,6 +40,9 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   int zbin_oq_value        = b->zbin_extra;
 
   int const *pt_scan ;
+#if CONFIG_CODE_NONZEROCOUNT
+  int nzc = 0;
+#endif
 
   switch (tx_type) {
     case ADST_DCT:
@@ -81,6 +84,9 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
 
         if (y) {
           eob = i;                                // last nonzero coeffs
+#if CONFIG_CODE_NONZEROCOUNT
+          ++nzc;                                  // number of nonzero coeffs
+#endif
           zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
         }
       }
@@ -88,6 +94,9 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   }
 
   xd->eobs[b_idx] = eob + 1;
+#if CONFIG_CODE_NONZEROCOUNT
+  xd->nzcs[b_idx] = nzc;
+#endif
 }
 
 void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
@@ -107,6 +116,9 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
   int16_t *dqcoeff_ptr     = d->dqcoeff;
   int16_t *dequant_ptr     = d->dequant;
   int zbin_oq_value        = b->zbin_extra;
+#if CONFIG_CODE_NONZEROCOUNT
+  int nzc = 0;
+#endif
 
   vpx_memset(qcoeff_ptr, 0, 32);
   vpx_memset(dqcoeff_ptr, 0, 32);
@@ -135,6 +147,9 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
 
         if (y) {
           eob = i;                                // last nonzero coeffs
+#if CONFIG_CODE_NONZEROCOUNT
+          ++nzc;                                  // number of nonzero coeffs
+#endif
           zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
         }
       }
@@ -142,6 +157,9 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
   }
 
   xd->eobs[b_idx] = eob + 1;
+#if CONFIG_CODE_NONZEROCOUNT
+  xd->nzcs[b_idx] = nzc;
+#endif
 }
 
 void vp9_quantize_mby_4x4_c(MACROBLOCK *x) {
@@ -192,6 +210,9 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx) {
     uint8_t *quant_shift_ptr = b->quant_shift;
     int16_t *dequant_ptr = d->dequant;
     int zbin_oq_value = b->zbin_extra;
+#if CONFIG_CODE_NONZEROCOUNT
+    int nzc = 0;
+#endif
 
     eob = -1;
 
@@ -215,6 +236,9 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx) {
 
         if (y) {
           eob = 0;                                   // last nonzero coeffs
+#if CONFIG_CODE_NONZEROCOUNT
+          ++nzc;                                  // number of nonzero coeffs
+#endif
           zero_run = 0;
         }
       }
@@ -241,19 +265,33 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx) {
 
         if (y) {
           eob = i;                                   // last nonzero coeffs
+#if CONFIG_CODE_NONZEROCOUNT
+          ++nzc;                                     // number of nonzero coeffs
+#endif
           zero_run = 0;
         }
       }
     }
     xd->eobs[b_idx] = eob + 1;
+#if CONFIG_CODE_NONZEROCOUNT
+    xd->nzcs[b_idx] = nzc;
+#endif
   } else {
     xd->eobs[b_idx] = 0;
+#if CONFIG_CODE_NONZEROCOUNT
+    xd->nzcs[b_idx] = 0;
+#endif
   }
 }
 
 void vp9_quantize_mby_8x8(MACROBLOCK *x) {
   int i;
 
+#if CONFIG_CODE_NONZEROCOUNT
+  for (i = 0; i < 16; i ++) {
+    x->e_mbd.nzcs[i] = 0;
+  }
+#endif
   for (i = 0; i < 16; i += 4) {
     x->quantize_b_8x8(x, i);
   }
@@ -262,6 +300,11 @@ void vp9_quantize_mby_8x8(MACROBLOCK *x) {
 void vp9_quantize_mbuv_8x8(MACROBLOCK *x) {
   int i;
 
+#if CONFIG_CODE_NONZEROCOUNT
+  for (i = 16; i < 24; i ++) {
+    x->e_mbd.nzcs[i] = 0;
+  }
+#endif
   for (i = 16; i < 24; i += 4)
     x->quantize_b_8x8(x, i);
 }
@@ -272,6 +315,12 @@ void vp9_quantize_mb_8x8(MACROBLOCK *x) {
 }
 
 void vp9_quantize_mby_16x16(MACROBLOCK *x) {
+#if CONFIG_CODE_NONZEROCOUNT
+  int i;
+  for (i = 0; i < 16; i++) {
+    x->e_mbd.nzcs[i] = 0;
+  }
+#endif
   x->quantize_b_16x16(x, 0);
 }
 
@@ -286,12 +335,19 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
                      uint8_t *quant_shift_ptr,
                      int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
                      int16_t *dequant_ptr, int zbin_oq_value,
-                     uint16_t *eob_ptr, const int *scan, int mul) {
+                     uint16_t *eob_ptr,
+#if CONFIG_CODE_NONZEROCOUNT
+                     uint16_t *nzc_ptr,
+#endif
+                     const int *scan, int mul) {
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
   int zero_run = 0;
   int16_t *zbin_boost_ptr = zbin_boost_orig_ptr;
+#if CONFIG_CODE_NONZEROCOUNT
+  int nzc = 0;
+#endif
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
   vpx_memset(dqcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
@@ -320,12 +376,18 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
         if (y) {
           eob = i;                                  // last nonzero coeffs
           zero_run = 0;
+#if CONFIG_CODE_NONZEROCOUNT
+          ++nzc;                                    // number of nonzero coeffs
+#endif
         }
       }
     }
   }
 
   *eob_ptr = eob + 1;
+#if CONFIG_CODE_NONZEROCOUNT
+  *nzc_ptr = nzc;
+#endif
 }
 
 void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx) {
@@ -340,7 +402,11 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx) {
            d->dqcoeff,
            d->dequant,
            b->zbin_extra,
-           &xd->eobs[b_idx], vp9_default_zig_zag1d_16x16, 1);
+           &xd->eobs[b_idx],
+#if CONFIG_CODE_NONZEROCOUNT
+           &xd->nzcs[b_idx],
+#endif
+           vp9_default_zig_zag1d_16x16, 1);
 }
 
 void vp9_quantize_sby_32x32(MACROBLOCK *x) {
@@ -358,6 +424,9 @@ void vp9_quantize_sby_32x32(MACROBLOCK *x) {
            d->dequant,
            b->zbin_extra,
            &xd->eobs[0],
+#if CONFIG_CODE_NONZEROCOUNT
+           &xd->nzcs[0],
+#endif
            vp9_default_zig_zag1d_32x32, 2);
 }
 
@@ -378,6 +447,9 @@ void vp9_quantize_sby_16x16(MACROBLOCK *x) {
              d->dequant,
              b->zbin_extra,
              &xd->eobs[n * 16],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[n * 16],
+#endif
              vp9_default_zig_zag1d_16x16, 1);
 }
 
@@ -398,6 +470,9 @@ void vp9_quantize_sby_8x8(MACROBLOCK *x) {
              d->dequant,
              b->zbin_extra,
              &xd->eobs[n * 4],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[n * 4],
+#endif
              vp9_default_zig_zag1d_8x8, 1);
 }
 
@@ -418,6 +493,9 @@ void vp9_quantize_sby_4x4(MACROBLOCK *x) {
              d->dequant,
              b->zbin_extra,
              &xd->eobs[n],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[n],
+#endif
              vp9_default_zig_zag1d_4x4, 1);
 }
 
@@ -437,6 +515,9 @@ void vp9_quantize_sbuv_16x16(MACROBLOCK *x) {
              xd->block[cidx].dequant,
              x->block[cidx].zbin_extra,
              &xd->eobs[i],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[i],
+#endif
              vp9_default_zig_zag1d_16x16, 1);
   }
 }
@@ -457,6 +538,9 @@ void vp9_quantize_sbuv_8x8(MACROBLOCK *x) {
              xd->block[cidx].dequant,
              x->block[cidx].zbin_extra,
              &xd->eobs[i],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[i],
+#endif
              vp9_default_zig_zag1d_8x8, 1);
   }
 }
@@ -477,6 +561,9 @@ void vp9_quantize_sbuv_4x4(MACROBLOCK *x) {
              xd->block[cidx].dequant,
              x->block[cidx].zbin_extra,
              &xd->eobs[i],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[i],
+#endif
              vp9_default_zig_zag1d_4x4, 1);
   }
 }
@@ -498,6 +585,9 @@ void vp9_quantize_sb64y_32x32(MACROBLOCK *x) {
              d->dequant,
              b->zbin_extra,
              &xd->eobs[n * 64],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[n * 64],
+#endif
              vp9_default_zig_zag1d_32x32, 2);
 }
 
@@ -518,6 +608,9 @@ void vp9_quantize_sb64y_16x16(MACROBLOCK *x) {
              d->dequant,
              b->zbin_extra,
              &xd->eobs[n * 16],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[n * 16],
+#endif
              vp9_default_zig_zag1d_16x16, 1);
 }
 
@@ -538,6 +631,9 @@ void vp9_quantize_sb64y_8x8(MACROBLOCK *x) {
              d->dequant,
              b->zbin_extra,
              &xd->eobs[n * 4],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[n * 4],
+#endif
              vp9_default_zig_zag1d_8x8, 1);
 }
 
@@ -558,6 +654,9 @@ void vp9_quantize_sb64y_4x4(MACROBLOCK *x) {
              d->dequant,
              b->zbin_extra,
              &xd->eobs[n],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[n],
+#endif
              vp9_default_zig_zag1d_4x4, 1);
 }
 
@@ -577,6 +676,9 @@ void vp9_quantize_sb64uv_32x32(MACROBLOCK *x) {
              xd->block[cidx].dequant,
              x->block[cidx].zbin_extra,
              &xd->eobs[i],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[i],
+#endif
              vp9_default_zig_zag1d_32x32, 2);
   }
 }
@@ -597,6 +699,9 @@ void vp9_quantize_sb64uv_16x16(MACROBLOCK *x) {
              xd->block[cidx].dequant,
              x->block[cidx].zbin_extra,
              &xd->eobs[i],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[i],
+#endif
              vp9_default_zig_zag1d_16x16, 1);
   }
 }
@@ -617,6 +722,9 @@ void vp9_quantize_sb64uv_8x8(MACROBLOCK *x) {
              xd->block[cidx].dequant,
              x->block[cidx].zbin_extra,
              &xd->eobs[i],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[i],
+#endif
              vp9_default_zig_zag1d_8x8, 1);
   }
 }
@@ -637,6 +745,9 @@ void vp9_quantize_sb64uv_4x4(MACROBLOCK *x) {
              xd->block[cidx].dequant,
              x->block[cidx].zbin_extra,
              &xd->eobs[i],
+#if CONFIG_CODE_NONZEROCOUNT
+             &xd->nzcs[i],
+#endif
              vp9_default_zig_zag1d_4x4, 1);
   }
 }

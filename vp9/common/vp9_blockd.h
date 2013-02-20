@@ -250,6 +250,9 @@ typedef struct {
   INTERPOLATIONFILTERTYPE interp_filter;
 
   BLOCK_SIZE_TYPE sb_type;
+#if CONFIG_CODE_NONZEROCOUNT
+  uint16_t nzcs[256+64*2];
+#endif
 } MB_MODE_INFO;
 
 typedef struct {
@@ -295,6 +298,9 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(16, int16_t,  qcoeff[64*64+32*32*2]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[64*64+32*32*2]);
   DECLARE_ALIGNED(16, uint16_t, eobs[256+64*2]);
+#if CONFIG_CODE_NONZEROCOUNT
+  DECLARE_ALIGNED(16, uint16_t, nzcs[256+64*2]);
+#endif
 
   /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
   BLOCKD block[24];
@@ -592,4 +598,25 @@ static void update_blockd_bmi(MACROBLOCKD *xd) {
   }
 }
 
+static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
+  TX_SIZE tx_size_uv;
+  if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
+    tx_size_uv = xd->mode_info_context->mbmi.txfm_size;
+  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
+    if (xd->mode_info_context->mbmi.txfm_size == TX_32X32)
+      tx_size_uv = TX_16X16;
+    else
+      tx_size_uv = xd->mode_info_context->mbmi.txfm_size;
+  } else {
+    if (xd->mode_info_context->mbmi.txfm_size == TX_16X16)
+      tx_size_uv = TX_8X8;
+    else if (xd->mode_info_context->mbmi.txfm_size == TX_8X8 &&
+             (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
+              xd->mode_info_context->mbmi.mode == SPLITMV))
+      tx_size_uv = TX_4X4;
+    else
+      tx_size_uv = xd->mode_info_context->mbmi.txfm_size;
+  }
+  return tx_size_uv;
+}
 #endif  // VP9_COMMON_VP9_BLOCKD_H_

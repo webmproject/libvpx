@@ -1697,6 +1697,12 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->common.error.setjmp = 0;
 
   vp9_zero(cpi->y_uv_mode_count)
+#if CONFIG_CODE_NONZEROCOUNT
+  vp9_zero(cm->fc.nzc_counts_4x4);
+  vp9_zero(cm->fc.nzc_counts_8x8);
+  vp9_zero(cm->fc.nzc_counts_16x16);
+  vp9_zero(cm->fc.nzc_counts_32x32);
+#endif
 
   return (VP9_PTR) cpi;
 }
@@ -3340,8 +3346,12 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
   vp9_copy(cpi->common.fc.coef_counts_32x32, cpi->coef_counts_32x32);
   if (!cpi->common.error_resilient_mode &&
-      !cpi->common.frame_parallel_decoding_mode)
+      !cpi->common.frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(&cpi->common);
+#if CONFIG_CODE_NONZEROCOUNT
+    vp9_adapt_nzc_probs(&cpi->common);
+#endif
+  }
   if (cpi->common.frame_type != KEY_FRAME) {
     vp9_copy(cpi->common.fc.sb_ymode_counts, cpi->sb_ymode_count);
     vp9_copy(cpi->common.fc.ymode_counts, cpi->ymode_count);

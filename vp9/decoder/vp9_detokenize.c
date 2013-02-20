@@ -69,13 +69,24 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
     pt = vp9_get_coef_context(&recent_energy, token);         \
   } while (0)
 
+#if CONFIG_CODE_NONZEROCOUNT
 #define WRITE_COEF_CONTINUE(val, token)                       \
   {                                                           \
-    qcoeff_ptr[scan[c]] = (int16_t) get_signed(br, val);        \
+    qcoeff_ptr[scan[c]] = (int16_t) get_signed(br, val);      \
+    INCREMENT_COUNT(token);                                   \
+    c++;                                                      \
+    nzc++;                                           \
+    continue;                                                 \
+  }
+#else
+#define WRITE_COEF_CONTINUE(val, token)                       \
+  {                                                           \
+    qcoeff_ptr[scan[c]] = (int16_t) get_signed(br, val);      \
     INCREMENT_COUNT(token);                                   \
     c++;                                                      \
     continue;                                                 \
   }
+#endif  // CONFIG_CODE_NONZEROCOUNT
 
 #define ADJUST_COEF(prob, bits_count)  \
   do {                                 \
@@ -99,6 +110,10 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   vp9_prob *prob;
   vp9_coeff_count *coef_counts;
   const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
+#if CONFIG_CODE_NONZEROCOUNT
+  uint16_t nzc = 0;
+  uint16_t nzc_expected = xd->mode_info_context->mbmi.nzcs[block_idx];
+#endif
 
   if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
     aidx = vp9_block2above_sb64[txfm_size][block_idx];
@@ -170,12 +185,24 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
 
     if (c >= seg_eob)
       break;
+#if CONFIG_CODE_NONZEROCOUNT
+    if (nzc == nzc_expected)
+      break;
+#endif
     prob = coef_probs[type][ref][get_coef_band(txfm_size, c)][pt];
+#if CONFIG_CODE_NONZEROCOUNT == 0
     if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
       break;
+#endif
 SKIP_START:
     if (c >= seg_eob)
       break;
+#if CONFIG_CODE_NONZEROCOUNT
+    if (nzc == nzc_expected)
+      break;
+    // decode zero node only if there are zeros left
+    if (seg_eob - nzc_expected - c + nzc > 0)
+#endif
     if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
@@ -242,8 +269,10 @@ SKIP_START:
     WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY6);
   }
 
+#if CONFIG_CODE_NONZEROCOUNT == 0
   if (c < seg_eob)
     coef_counts[type][ref][get_coef_band(txfm_size, c)][pt][DCT_EOB_TOKEN]++;
+#endif
 
   A0[aidx] = L0[lidx] = c > 0;
   if (txfm_size >= TX_8X8) {
@@ -272,7 +301,6 @@ SKIP_START:
       }
     }
   }
-
   return c;
 }
 

@@ -112,6 +112,16 @@ typedef struct {
   int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
   int vp9_mode_contexts[INTER_MODE_CONTEXTS][4];
 
+#if CONFIG_CODE_NONZEROCOUNT
+  vp9_prob nzc_probs_4x4
+           [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC4X4_NODES];
+  vp9_prob nzc_probs_8x8
+           [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC8X8_NODES];
+  vp9_prob nzc_probs_16x16
+           [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC16X16_NODES];
+  vp9_prob nzc_probs_32x32
+           [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC32X32_NODES];
+#endif
 } CODING_CONTEXT;
 
 typedef struct {
@@ -480,6 +490,25 @@ typedef struct VP9_COMP {
   vp9_coeff_count coef_counts_32x32[BLOCK_TYPES];
   vp9_coeff_probs frame_coef_probs_32x32[BLOCK_TYPES];
   vp9_coeff_stats frame_branch_ct_32x32[BLOCK_TYPES];
+
+#if CONFIG_CODE_NONZEROCOUNT
+  vp9_prob frame_nzc_probs_4x4
+      [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC4X4_NODES];
+  unsigned int frame_nzc_branch_ct_4x4
+      [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC4X4_NODES][2];
+  vp9_prob frame_nzc_probs_8x8
+      [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC8X8_NODES];
+  unsigned int frame_nzc_branch_ct_8x8
+      [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC8X8_NODES][2];
+  vp9_prob frame_nzc_probs_16x16
+      [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC16X16_NODES];
+  unsigned int frame_nzc_branch_ct_16x16
+      [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC16X16_NODES][2];
+  vp9_prob frame_nzc_probs_32x32
+      [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC32X32_NODES];
+  unsigned int frame_nzc_branch_ct_32x32
+      [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC32X32_NODES][2];
+#endif
 
   int gfu_boost;
   int last_boost;

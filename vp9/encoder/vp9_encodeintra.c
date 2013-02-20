@@ -25,7 +25,7 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
     mbmi->uv_mode = DC_PRED;
     mbmi->ref_frame = INTRA_FRAME;
 
-    vp9_encode_intra16x16mby(x);
+    vp9_encode_intra16x16mby(&cpi->common, x);
   } else {
     int i;
 
@@ -72,7 +72,7 @@ void vp9_encode_intra4x4mby(MACROBLOCK *mb) {
     vp9_encode_intra4x4block(mb, i);
 }
 
-void vp9_encode_intra16x16mby(MACROBLOCK *x) {
+void vp9_encode_intra16x16mby(VP9_COMMON *const cm, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
@@ -86,21 +86,21 @@ void vp9_encode_intra16x16mby(MACROBLOCK *x) {
       vp9_transform_mby_16x16(x);
       vp9_quantize_mby_16x16(x);
       if (x->optimize)
-        vp9_optimize_mby_16x16(x);
+        vp9_optimize_mby_16x16(cm, x);
       vp9_inverse_transform_mby_16x16(xd);
       break;
     case TX_8X8:
       vp9_transform_mby_8x8(x);
       vp9_quantize_mby_8x8(x);
       if (x->optimize)
-        vp9_optimize_mby_8x8(x);
+        vp9_optimize_mby_8x8(cm, x);
       vp9_inverse_transform_mby_8x8(xd);
       break;
     default:
       vp9_transform_mby_4x4(x);
       vp9_quantize_mby_4x4(x);
       if (x->optimize)
-        vp9_optimize_mby_4x4(x);
+        vp9_optimize_mby_4x4(cm, x);
       vp9_inverse_transform_mby_4x4(xd);
       break;
   }
@@ -108,7 +108,7 @@ void vp9_encode_intra16x16mby(MACROBLOCK *x) {
   vp9_recon_mby(xd);
 }
 
-void vp9_encode_intra16x16mbuv(MACROBLOCK *x) {
+void vp9_encode_intra16x16mbuv(VP9_COMMON *const cm, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
@@ -122,14 +122,14 @@ void vp9_encode_intra16x16mbuv(MACROBLOCK *x) {
       vp9_transform_mbuv_4x4(x);
       vp9_quantize_mbuv_4x4(x);
       if (x->optimize)
-        vp9_optimize_mbuv_4x4(x);
+        vp9_optimize_mbuv_4x4(cm, x);
       vp9_inverse_transform_mbuv_4x4(xd);
       break;
     default:  // 16x16 or 8x8
       vp9_transform_mbuv_8x8(x);
       vp9_quantize_mbuv_8x8(x);
       if (x->optimize)
-        vp9_optimize_mbuv_8x8(x);
+        vp9_optimize_mbuv_8x8(cm, x);
       vp9_inverse_transform_mbuv_8x8(xd);
       break;
     }

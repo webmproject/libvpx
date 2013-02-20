@@ -39,7 +39,7 @@
 
 #define COEFCOUNT_TESTING
 
-//#define DEC_DEBUG
+// #define DEC_DEBUG
 #ifdef DEC_DEBUG
 int dec_debug = 0;
 #endif
@@ -246,7 +246,7 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
     int i;
     printf("\n");
     printf("qcoeff 8x8\n");
-    for (i = 0; i < 400; i++) {
+    for (i = 0; i < 384; i++) {
       printf("%3d ", xd->qcoeff[i]);
       if (i % 16 == 15) printf("\n");
     }
@@ -862,14 +862,9 @@ static void set_offsets(VP9D_COMP *pbi, int block_size,
    * values that are in 1/8th pel units
    */
   block_size >>= 4;  // in mb units
-  xd->mb_to_top_edge = -((mb_row * 16)) << 3;
-  xd->mb_to_left_edge = -((mb_col * 16) << 3);
-  xd->mb_to_bottom_edge = ((cm->mb_rows - block_size - mb_row) * 16) << 3;
-  xd->mb_to_right_edge = ((cm->mb_cols - block_size - mb_col) * 16) << 3;
 
-  xd->up_available    = (mb_row != 0);
-  xd->left_available  = (mb_col > cm->cur_tile_mb_col_start);
-  xd->right_available = (mb_col + block_size < cm->cur_tile_mb_col_end);
+  set_mb_row(cm, xd, mb_row, block_size);
+  set_mb_col(cm, xd, mb_col, block_size);
 
   xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
   xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
@@ -910,20 +905,6 @@ static void set_refs(VP9D_COMP *pbi, int block_size,
       xd->corrupted |= cm->yv12_fb[second_ref_fb_idx].corrupted;
     }
   }
-
-  if (mbmi->sb_type) {
-    const int n_mbs = 1 << mbmi->sb_type;
-    const int y_mbs = MIN(n_mbs, cm->mb_rows - mb_row);
-    const int x_mbs = MIN(n_mbs, cm->mb_cols - mb_col);
-    const int mis = cm->mode_info_stride;
-    int x, y;
-
-    for (y = 0; y < y_mbs; y++) {
-      for (x = !y; x < x_mbs; x++) {
-        mi[y * mis + x] = *mi;
-      }
-    }
-  }
 }
 
 /* Decode a row of Superblocks (2x2 region of MBs) */
@@ -938,6 +919,11 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
   for (mb_col = pc->cur_tile_mb_col_start;
        mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
     if (vp9_read(bc, pc->sb64_coded)) {
+#ifdef DEC_DEBUG
+      dec_debug = (pc->current_video_frame == 1 && mb_row == 0 && mb_col == 0);
+      if (dec_debug)
+        printf("Debug\n");
+#endif
       set_offsets(pbi, 64, mb_row, mb_col);
       vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, bc);
       set_refs(pbi, 64, mb_row, mb_col);
@@ -958,6 +944,10 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
         xd->sb_index = j;
 
         if (vp9_read(bc, pc->sb32_coded)) {
+#ifdef DEC_DEBUG
+          dec_debug = (pc->current_video_frame == 1 &&
+                       mb_row + y_idx_sb == 0 && mb_col + x_idx_sb == 0);
+#endif
           set_offsets(pbi, 32, mb_row + y_idx_sb, mb_col + x_idx_sb);
           vp9_decode_mb_mode_mv(pbi,
                                 xd, mb_row + y_idx_sb, mb_col + x_idx_sb, bc);
@@ -978,11 +968,14 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
               // MB lies outside frame, skip on to next
               continue;
             }
+#ifdef DEC_DEBUG
+            dec_debug = (pc->current_video_frame == 1 &&
+                         mb_row + y_idx == 0 && mb_col + x_idx == 0);
+#endif
 
             set_offsets(pbi, 16, mb_row + y_idx, mb_col + x_idx);
             xd->mb_index = i;
             vp9_decode_mb_mode_mv(pbi, xd, mb_row + y_idx, mb_col + x_idx, bc);
-            update_blockd_bmi(xd);
             set_refs(pbi, 16, mb_row + y_idx, mb_col + x_idx);
             decode_macroblock(pbi, xd, mb_row + y_idx, mb_col + x_idx, bc);
 
@@ -1073,6 +1066,63 @@ static void init_frame(VP9D_COMP *pbi) {
     xd->fullpixel_mask = 0xfffffff8;
 }
 
+#if CONFIG_CODE_NONZEROCOUNT
+static void read_nzc_probs_common(VP9_COMMON *cm,
+                                  BOOL_DECODER* const bc,
+                                  int block_size) {
+  int c, r, b, t;
+  int tokens, nodes;
+  vp9_prob *nzc_probs;
+  vp9_prob upd;
+
+  if (!vp9_read_bit(bc)) return;
+
+  if (block_size == 32) {
+    tokens = NZC32X32_TOKENS;
+    nzc_probs = cm->fc.nzc_probs_32x32[0][0][0];
+    upd = NZC_UPDATE_PROB_32X32;
+  } else if (block_size == 16) {
+    tokens = NZC16X16_TOKENS;
+    nzc_probs = cm->fc.nzc_probs_16x16[0][0][0];
+    upd = NZC_UPDATE_PROB_16X16;
+  } else if (block_size == 8) {
+    tokens = NZC8X8_TOKENS;
+    nzc_probs = cm->fc.nzc_probs_8x8[0][0][0];
+    upd = NZC_UPDATE_PROB_8X8;
+  } else {
+    tokens = NZC4X4_TOKENS;
+    nzc_probs = cm->fc.nzc_probs_4x4[0][0][0];
+    upd = NZC_UPDATE_PROB_4X4;
+  }
+  nodes = tokens - 1;
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    for (r = 0; r < REF_TYPES; ++r) {
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        int offset = c * REF_TYPES * BLOCK_TYPES + r * BLOCK_TYPES + b;
+        int offset_nodes = offset * nodes;
+        for (t = 0; t < nodes; ++t) {
+          vp9_prob *p = &nzc_probs[offset_nodes + t];
+          if (vp9_read(bc, upd)) {
+            *p = read_prob_diff_update(bc, *p);
+          }
+        }
+      }
+    }
+  }
+}
+
+static void read_nzc_probs(VP9_COMMON *cm,
+                           BOOL_DECODER* const bc) {
+  read_nzc_probs_common(cm, bc, 4);
+  if (cm->txfm_mode != ONLY_4X4)
+    read_nzc_probs_common(cm, bc, 8);
+  if (cm->txfm_mode > ALLOW_8X8)
+    read_nzc_probs_common(cm, bc, 16);
+  if (cm->txfm_mode > ALLOW_16X16)
+    read_nzc_probs_common(cm, bc, 32);
+}
+#endif  // CONFIG_CODE_NONZEROCOUNT
+
 static void read_coef_probs_common(BOOL_DECODER* const bc,
                                    vp9_coeff_probs *coef_probs,
                                    int block_types) {
@@ -1085,7 +1135,7 @@ static void read_coef_probs_common(BOOL_DECODER* const bc,
           for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
             if (l >= 3 && k == 0)
               continue;
-            for (m = 0; m < ENTROPY_NODES; m++) {
+            for (m = CONFIG_CODE_NONZEROCOUNT; m < ENTROPY_NODES; m++) {
               vp9_prob *const p = coef_probs[i][j][k][l] + m;
 
               if (vp9_read(bc, COEF_UPDATE_PROB)) {
@@ -1539,6 +1589,17 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   pbi->common.fc.pre_interintra_prob = pbi->common.fc.interintra_prob;
 #endif
   pbi->common.fc.pre_nmvc = pbi->common.fc.nmvc;
+#if CONFIG_CODE_NONZEROCOUNT
+  vp9_copy(pbi->common.fc.pre_nzc_probs_4x4,
+           pbi->common.fc.nzc_probs_4x4);
+  vp9_copy(pbi->common.fc.pre_nzc_probs_8x8,
+           pbi->common.fc.nzc_probs_8x8);
+  vp9_copy(pbi->common.fc.pre_nzc_probs_16x16,
+           pbi->common.fc.nzc_probs_16x16);
+  vp9_copy(pbi->common.fc.pre_nzc_probs_32x32,
+           pbi->common.fc.nzc_probs_32x32);
+#endif
+
   vp9_zero(pbi->common.fc.coef_counts_4x4);
   vp9_zero(pbi->common.fc.coef_counts_8x8);
   vp9_zero(pbi->common.fc.coef_counts_16x16);
@@ -1555,8 +1616,17 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 #if CONFIG_COMP_INTERINTRA_PRED
   vp9_zero(pbi->common.fc.interintra_counts);
 #endif
+#if CONFIG_CODE_NONZEROCOUNT
+  vp9_zero(pbi->common.fc.nzc_counts_4x4);
+  vp9_zero(pbi->common.fc.nzc_counts_8x8);
+  vp9_zero(pbi->common.fc.nzc_counts_16x16);
+  vp9_zero(pbi->common.fc.nzc_counts_32x32);
+#endif
 
   read_coef_probs(pbi, &header_bc);
+#if CONFIG_CODE_NONZEROCOUNT
+  read_nzc_probs(&pbi->common, &header_bc);
+#endif
 
   /* Initialize xd pointers. Any reference should do for xd->pre, so use 0. */
   vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->active_ref_idx[0]],
@@ -1700,8 +1770,12 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   }
 
   if (!pc->error_resilient_mode &&
-      !pc->frame_parallel_decoding_mode)
+      !pc->frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(pc);
+#if CONFIG_CODE_NONZEROCOUNT
+    vp9_adapt_nzc_probs(pc);
+#endif
+  }
   if (pc->frame_type != KEY_FRAME) {
     if (!pc->error_resilient_mode &&
         !pc->frame_parallel_decoding_mode) {

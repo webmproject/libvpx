@@ -185,6 +185,12 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
 #if CONFIG_COMP_INTERINTRA_PRED
   cc->interintra_prob = cm->fc.interintra_prob;
 #endif
+#if CONFIG_CODE_NONZEROCOUNT
+  vp9_copy(cc->nzc_probs_4x4, cm->fc.nzc_probs_4x4);
+  vp9_copy(cc->nzc_probs_8x8, cm->fc.nzc_probs_8x8);
+  vp9_copy(cc->nzc_probs_16x16, cm->fc.nzc_probs_16x16);
+  vp9_copy(cc->nzc_probs_32x32, cm->fc.nzc_probs_32x32);
+#endif
 }
 
 void vp9_restore_coding_context(VP9_COMP *cpi) {
@@ -239,6 +245,12 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
 #if CONFIG_COMP_INTERINTRA_PRED
   cm->fc.interintra_prob = cc->interintra_prob;
+#endif
+#if CONFIG_CODE_NONZEROCOUNT
+  vp9_copy(cm->fc.nzc_probs_4x4, cc->nzc_probs_4x4);
+  vp9_copy(cm->fc.nzc_probs_8x8, cc->nzc_probs_8x8);
+  vp9_copy(cm->fc.nzc_probs_16x16, cc->nzc_probs_16x16);
+  vp9_copy(cm->fc.nzc_probs_32x32, cc->nzc_probs_32x32);
 #endif
 }
 

@@ -491,7 +491,8 @@ static int trellis_get_coeff_context(int token) {
   return vp9_get_coef_context(&recent_energy, token);
 }
 
-static void optimize_b(MACROBLOCK *mb, int ib, PLANE_TYPE type,
+static void optimize_b(VP9_COMMON *const cm,
+                       MACROBLOCK *mb, int ib, PLANE_TYPE type,
                        const int16_t *dequant_ptr,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        int tx_size) {
@@ -512,26 +513,73 @@ static void optimize_b(MACROBLOCK *mb, int ib, PLANE_TYPE type,
   int default_eob;
   int const *scan;
   const int mul = 1 + (tx_size == TX_32X32);
+  TX_TYPE tx_type;
+#if CONFIG_CODE_NONZEROCOUNT
+  // TODO(debargha): the dynamic programming approach used in this function
+  // is not compatible with the true rate cost when nzcs are used. Note
+  // the total rate is the sum of the nzc rate and the indicvidual token
+  // rates. The latter part can be optimized in this function, but because
+  // the nzc rate is a function of all the other tokens without a Markov
+  // relationship this rate cannot be considered correctly.
+  // The current implementation uses a suboptimal approach to account for
+  // the nzc rates somewhat, but in reality the optimization approach needs
+  // to change substantially.
+  uint16_t nzc = xd->nzcs[ib];
+  uint16_t nzc0, nzc1;
+  uint16_t final_nzc = 0, final_nzc_exp;
+  int nzc_context = vp9_get_nzc_context(cm, xd, ib);
+  unsigned int *nzc_cost;
+  nzc0 = nzc1 = nzc;
+#endif
 
   switch (tx_size) {
     default:
     case TX_4X4:
       default_eob = 16;
-      // FIXME(rbultje): although optimize_b currently isn't called for
-      // intra4x4, this should be changed to be adst-compatible
-      scan = vp9_default_zig_zag1d_4x4;
+#if CONFIG_CODE_NONZEROCOUNT
+      nzc_cost = mb->nzc_costs_4x4[nzc_context][ref][type];
+#endif
+      // NOTE: this isn't called (for intra4x4 modes), but will be left in
+      // since it could be used later
+      tx_type = get_tx_type_4x4(&mb->e_mbd, &xd->block[ib]);
+      if (tx_type != DCT_DCT) {
+        switch (tx_type) {
+          case ADST_DCT:
+            scan = vp9_row_scan_4x4;
+            break;
+
+          case DCT_ADST:
+            scan = vp9_col_scan_4x4;
+            break;
+
+          default:
+            scan = vp9_default_zig_zag1d_4x4;
+            break;
+        }
+      } else {
+        scan = vp9_default_zig_zag1d_4x4;
+      }
       break;
     case TX_8X8:
       scan = vp9_default_zig_zag1d_8x8;
       default_eob = 64;
+#if CONFIG_CODE_NONZEROCOUNT
+      nzc_cost = mb->nzc_costs_8x8[nzc_context][ref][type];
+#endif
       break;
     case TX_16X16:
       scan = vp9_default_zig_zag1d_16x16;
       default_eob = 256;
+#if CONFIG_CODE_NONZEROCOUNT
+      nzc_cost = mb->nzc_costs_16x16[nzc_context][ref][type];
+#endif
       break;
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
       default_eob = 1024;
+#if CONFIG_CODE_NONZEROCOUNT
+      nzc_cost = mb->nzc_costs_32x32[nzc_context][ref][type];
+#endif
       break;
   }
 
@@ -542,7 +590,11 @@ static void optimize_b(MACROBLOCK *mb, int ib, PLANE_TYPE type,
   rddiv = mb->rddiv;
   memset(best_index, 0, sizeof(best_index));
   /* Initialize the sentinel node of the trellis. */
+#if CONFIG_CODE_NONZEROCOUNT
+  tokens[eob][0].rate = nzc_cost[nzc];
+#else
   tokens[eob][0].rate = 0;
+#endif
   tokens[eob][0].error = 0;
   tokens[eob][0].next = default_eob;
   tokens[eob][0].token = DCT_EOB_TOKEN;
@@ -551,6 +603,9 @@ static void optimize_b(MACROBLOCK *mb, int ib, PLANE_TYPE type,
   next = eob;
   for (i = eob; i-- > i0;) {
     int base_bits, d2, dx;
+#if CONFIG_CODE_NONZEROCOUNT
+    int new_nzc0, new_nzc1;
+#endif
 
     rc = scan[i];
     x = qcoeff_ptr[rc];
@@ -584,6 +639,10 @@ static void optimize_b(MACROBLOCK *mb, int ib, PLANE_TYPE type,
       tokens[i][0].token = t0;
       tokens[i][0].qc = x;
       best_index[i][0] = best;
+#if CONFIG_CODE_NONZEROCOUNT
+      new_nzc0 = (best ? nzc1 : nzc0);
+#endif
+
       /* Evaluate the second possibility for this state. */
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
@@ -609,6 +668,12 @@ static void optimize_b(MACROBLOCK *mb, int ib, PLANE_TYPE type,
              DCT_EOB_TOKEN : ZERO_TOKEN;
         t1 = tokens[next][1].token == DCT_EOB_TOKEN ?
              DCT_EOB_TOKEN : ZERO_TOKEN;
+#if CONFIG_CODE_NONZEROCOUNT
+        // Account for rate drop because of the nzc change.
+        // TODO(debargha): Find a better solution
+        rate0 -= nzc_cost[nzc0] - nzc_cost[nzc0 - 1];
+        rate1 -= nzc_cost[nzc1] - nzc_cost[nzc1 - 1];
+#endif
       } else {
         t0 = t1 = (vp9_dct_value_tokens_ptr + x)->Token;
       }
@@ -641,6 +706,11 @@ static void optimize_b(MACROBLOCK *mb, int ib, PLANE_TYPE type,
       tokens[i][1].token = best ? t1 : t0;
       tokens[i][1].qc = x;
       best_index[i][1] = best;
+#if CONFIG_CODE_NONZEROCOUNT
+      new_nzc1 = (best ? nzc1 : nzc0) - (!x);
+      nzc0 = new_nzc0;
+      nzc1 = new_nzc1;
+#endif
       /* Finally, make this the new head of the trellis. */
       next = i;
     }
@@ -679,11 +749,18 @@ static void optimize_b(MACROBLOCK *mb, int ib, PLANE_TYPE type,
   rate1 += mb->token_costs[tx_size][type][ref][band][pt][t1];
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
+#if CONFIG_CODE_NONZEROCOUNT
+  final_nzc_exp = (best ? nzc1 : nzc0);
+#endif
   final_eob = i0 - 1;
   for (i = next; i < eob; i = next) {
     x = tokens[i][best].qc;
-    if (x)
+    if (x) {
       final_eob = i;
+#if CONFIG_CODE_NONZEROCOUNT
+      ++final_nzc;
+#endif
+    }
     rc = scan[i];
     qcoeff_ptr[rc] = x;
     dqcoeff_ptr[rc] = (x * dequant_ptr[rc != 0]) / mul;
@@ -695,9 +772,13 @@ static void optimize_b(MACROBLOCK *mb, int ib, PLANE_TYPE type,
 
   xd->eobs[ib] = final_eob;
   *a = *l = (final_eob > 0);
+#if CONFIG_CODE_NONZEROCOUNT
+  assert(final_nzc == final_nzc_exp);
+  xd->nzcs[ib] = final_nzc;
+#endif
 }
 
-void vp9_optimize_mby_4x4(MACROBLOCK *x) {
+void vp9_optimize_mby_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
   int b;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -713,13 +794,13 @@ void vp9_optimize_mby_4x4(MACROBLOCK *x) {
   tl = (ENTROPY_CONTEXT *)&t_left;
 
   for (b = 0; b < 16; b++) {
-    optimize_b(x, b, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[b].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[b].dequant,
                ta + vp9_block2above[TX_4X4][b],
                tl + vp9_block2left[TX_4X4][b], TX_4X4);
   }
 }
 
-void vp9_optimize_mbuv_4x4(MACROBLOCK *x) {
+void vp9_optimize_mbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
   int b;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -735,18 +816,18 @@ void vp9_optimize_mbuv_4x4(MACROBLOCK *x) {
   tl = (ENTROPY_CONTEXT *)&t_left;
 
   for (b = 16; b < 24; b++) {
-    optimize_b(x, b, PLANE_TYPE_UV, x->e_mbd.block[b].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[b].dequant,
                ta + vp9_block2above[TX_4X4][b],
                tl + vp9_block2left[TX_4X4][b], TX_4X4);
   }
 }
 
-static void optimize_mb_4x4(MACROBLOCK *x) {
-  vp9_optimize_mby_4x4(x);
-  vp9_optimize_mbuv_4x4(x);
+static void optimize_mb_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
+  vp9_optimize_mby_4x4(cm, x);
+  vp9_optimize_mbuv_4x4(cm, x);
 }
 
-void vp9_optimize_mby_8x8(MACROBLOCK *x) {
+void vp9_optimize_mby_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
   int b;
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
@@ -765,14 +846,14 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x) {
     ENTROPY_CONTEXT *const l = tl + vp9_block2left[TX_8X8][b];
     ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
     ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
-    optimize_b(x, b, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[b].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[b].dequant,
                &above_ec, &left_ec, TX_8X8);
     a[1] = a[0] = above_ec;
     l[1] = l[0] = left_ec;
   }
 }
 
-void vp9_optimize_mbuv_8x8(MACROBLOCK *x) {
+void vp9_optimize_mbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
   int b;
   ENTROPY_CONTEXT *const ta = (ENTROPY_CONTEXT *)x->e_mbd.above_context;
   ENTROPY_CONTEXT *const tl = (ENTROPY_CONTEXT *)x->e_mbd.left_context;
@@ -785,17 +866,17 @@ void vp9_optimize_mbuv_8x8(MACROBLOCK *x) {
     ENTROPY_CONTEXT *const l = tl + vp9_block2left[TX_8X8][b];
     ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
     ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
-    optimize_b(x, b, PLANE_TYPE_UV, x->e_mbd.block[b].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[b].dequant,
                &above_ec, &left_ec, TX_8X8);
   }
 }
 
-static void optimize_mb_8x8(MACROBLOCK *x) {
-  vp9_optimize_mby_8x8(x);
-  vp9_optimize_mbuv_8x8(x);
+static void optimize_mb_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
+  vp9_optimize_mby_8x8(cm, x);
+  vp9_optimize_mbuv_8x8(cm, x);
 }
 
-void vp9_optimize_mby_16x16(MACROBLOCK *x) {
+void vp9_optimize_mby_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES *const t_above = x->e_mbd.above_context;
   ENTROPY_CONTEXT_PLANES *const t_left = x->e_mbd.left_context;
   ENTROPY_CONTEXT ta, tl;
@@ -805,16 +886,16 @@ void vp9_optimize_mby_16x16(MACROBLOCK *x) {
 
   ta = (t_above->y1[0] + t_above->y1[1] + t_above->y1[2] + t_above->y1[3]) != 0;
   tl = (t_left->y1[0] + t_left->y1[1] + t_left->y1[2] + t_left->y1[3]) != 0;
-  optimize_b(x, 0, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+  optimize_b(cm, x, 0, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
              &ta, &tl, TX_16X16);
 }
 
-static void optimize_mb_16x16(MACROBLOCK *x) {
-  vp9_optimize_mby_16x16(x);
-  vp9_optimize_mbuv_8x8(x);
+static void optimize_mb_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
+  vp9_optimize_mby_16x16(cm, x);
+  vp9_optimize_mbuv_8x8(cm, x);
 }
 
-void vp9_optimize_sby_32x32(MACROBLOCK *x) {
+void vp9_optimize_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT *a = (ENTROPY_CONTEXT *) x->e_mbd.above_context;
   ENTROPY_CONTEXT *a1 = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + 1);
   ENTROPY_CONTEXT *l = (ENTROPY_CONTEXT *) x->e_mbd.left_context;
@@ -823,11 +904,11 @@ void vp9_optimize_sby_32x32(MACROBLOCK *x) {
 
   ta = (a[0] + a[1] + a[2] + a[3] + a1[0] + a1[1] + a1[2] + a1[3]) != 0;
   tl = (l[0] + l[1] + l[2] + l[3] + l1[0] + l1[1] + l1[2] + l1[3]) != 0;
-  optimize_b(x, 0, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+  optimize_b(cm, x, 0, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
              &ta, &tl, TX_32X32);
 }
 
-void vp9_optimize_sby_16x16(MACROBLOCK *x) {
+void vp9_optimize_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT *a = (ENTROPY_CONTEXT *) x->e_mbd.above_context;
   ENTROPY_CONTEXT *a1 = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + 1);
   ENTROPY_CONTEXT *l = (ENTROPY_CONTEXT *) x->e_mbd.left_context;
@@ -842,12 +923,12 @@ void vp9_optimize_sby_16x16(MACROBLOCK *x) {
   for (n = 0; n < 4; n++) {
     const int x_idx = n & 1, y_idx = n >> 1;
 
-    optimize_b(x, n * 16, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n * 16, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
                ta + x_idx, tl + y_idx, TX_16X16);
   }
 }
 
-void vp9_optimize_sby_8x8(MACROBLOCK *x) {
+void vp9_optimize_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT *a = (ENTROPY_CONTEXT *) x->e_mbd.above_context;
   ENTROPY_CONTEXT *a1 = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + 1);
   ENTROPY_CONTEXT *l = (ENTROPY_CONTEXT *) x->e_mbd.left_context;
@@ -866,12 +947,12 @@ void vp9_optimize_sby_8x8(MACROBLOCK *x) {
   for (n = 0; n < 16; n++) {
     const int x_idx = n & 3, y_idx = n >> 2;
 
-    optimize_b(x, n * 4, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n * 4, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
                ta + x_idx, tl + y_idx, TX_8X8);
   }
 }
 
-void vp9_optimize_sby_4x4(MACROBLOCK *x) {
+void vp9_optimize_sby_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT ta[8], tl[8];
   int n;
 
@@ -882,12 +963,12 @@ void vp9_optimize_sby_4x4(MACROBLOCK *x) {
   for (n = 0; n < 64; n++) {
     const int x_idx = n & 7, y_idx = n >> 3;
 
-    optimize_b(x, n, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
                ta + x_idx, tl + y_idx, TX_4X4);
   }
 }
 
-void vp9_optimize_sbuv_16x16(MACROBLOCK *x) {
+void vp9_optimize_sbuv_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT *ta = (ENTROPY_CONTEXT *) x->e_mbd.above_context;
   ENTROPY_CONTEXT *tl = (ENTROPY_CONTEXT *) x->e_mbd.left_context;
   ENTROPY_CONTEXT *a, *l, *a1, *l1, above_ec, left_ec;
@@ -901,12 +982,12 @@ void vp9_optimize_sbuv_16x16(MACROBLOCK *x) {
     l1 = l + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
     above_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
     left_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
-    optimize_b(x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
                &above_ec, &left_ec, TX_16X16);
   }
 }
 
-void vp9_optimize_sbuv_8x8(MACROBLOCK *x) {
+void vp9_optimize_sbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES t_above[2], t_left[2];
   ENTROPY_CONTEXT *ta = (ENTROPY_CONTEXT *) t_above;
   ENTROPY_CONTEXT *tl = (ENTROPY_CONTEXT *) t_left;
@@ -921,14 +1002,14 @@ void vp9_optimize_sbuv_8x8(MACROBLOCK *x) {
     l = tl + vp9_block2left_sb[TX_8X8][b];
     above_ec = (a[0] + a[1]) != 0;
     left_ec = (l[0] + l[1]) != 0;
-    optimize_b(x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
                &above_ec, &left_ec, TX_8X8);
     a[0] = a[1] = above_ec;
     l[0] = l[1] = left_ec;
   }
 }
 
-void vp9_optimize_sbuv_4x4(MACROBLOCK *x) {
+void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES t_above[2], t_left[2];
   ENTROPY_CONTEXT *ta = (ENTROPY_CONTEXT *) t_above;
   ENTROPY_CONTEXT *tl = (ENTROPY_CONTEXT *) t_left;
@@ -941,12 +1022,12 @@ void vp9_optimize_sbuv_4x4(MACROBLOCK *x) {
     const int cidx = b >= 80 ? 20 : 16;
     a = ta + vp9_block2above_sb[TX_4X4][b];
     l = tl + vp9_block2left_sb[TX_4X4][b];
-    optimize_b(x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
                a, l, TX_4X4);
   }
 }
 
-void vp9_optimize_sb64y_32x32(MACROBLOCK *x) {
+void vp9_optimize_sb64y_32x32(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT *a = (ENTROPY_CONTEXT *) x->e_mbd.above_context;
   ENTROPY_CONTEXT *a1 = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + 1);
   ENTROPY_CONTEXT *a2 = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + 2);
@@ -965,12 +1046,12 @@ void vp9_optimize_sb64y_32x32(MACROBLOCK *x) {
   for (n = 0; n < 4; n++) {
     const int x_idx = n & 1, y_idx = n >> 1;
 
-    optimize_b(x, n * 64, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n * 64, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
                ta + x_idx, tl + y_idx, TX_32X32);
   }
 }
 
-void vp9_optimize_sb64y_16x16(MACROBLOCK *x) {
+void vp9_optimize_sb64y_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT *a = (ENTROPY_CONTEXT *) x->e_mbd.above_context;
   ENTROPY_CONTEXT *a1 = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + 1);
   ENTROPY_CONTEXT *a2 = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + 2);
@@ -993,12 +1074,12 @@ void vp9_optimize_sb64y_16x16(MACROBLOCK *x) {
   for (n = 0; n < 16; n++) {
     const int x_idx = n & 3, y_idx = n >> 2;
 
-    optimize_b(x, n * 16, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n * 16, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
                ta + x_idx, tl + y_idx, TX_16X16);
   }
 }
 
-void vp9_optimize_sb64y_8x8(MACROBLOCK *x) {
+void vp9_optimize_sb64y_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT *a = (ENTROPY_CONTEXT *) x->e_mbd.above_context;
   ENTROPY_CONTEXT *a1 = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + 1);
   ENTROPY_CONTEXT *a2 = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + 2);
@@ -1029,12 +1110,12 @@ void vp9_optimize_sb64y_8x8(MACROBLOCK *x) {
   for (n = 0; n < 64; n++) {
     const int x_idx = n & 7, y_idx = n >> 3;
 
-    optimize_b(x, n * 4, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n * 4, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
                ta + x_idx, tl + y_idx, TX_8X8);
   }
 }
 
-void vp9_optimize_sb64y_4x4(MACROBLOCK *x) {
+void vp9_optimize_sb64y_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT ta[16], tl[16];
   int n;
 
@@ -1049,12 +1130,12 @@ void vp9_optimize_sb64y_4x4(MACROBLOCK *x) {
   for (n = 0; n < 256; n++) {
     const int x_idx = n & 15, y_idx = n >> 4;
 
-    optimize_b(x, n, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
                ta + x_idx, tl + y_idx, TX_4X4);
   }
 }
 
-void vp9_optimize_sb64uv_32x32(MACROBLOCK *x) {
+void vp9_optimize_sb64uv_32x32(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT *ta = (ENTROPY_CONTEXT *) x->e_mbd.above_context;
   ENTROPY_CONTEXT *tl = (ENTROPY_CONTEXT *) x->e_mbd.left_context;
   ENTROPY_CONTEXT *a, *l, *a1, *l1, *a2, *l2, *a3, *l3, a_ec, l_ec;
@@ -1072,12 +1153,12 @@ void vp9_optimize_sb64uv_32x32(MACROBLOCK *x) {
     l3 = l + 3 * sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
     a_ec = (a[0] + a[1] + a1[0] + a1[1] + a2[0] + a2[1] + a3[0] + a3[1]) != 0;
     l_ec = (l[0] + l[1] + l1[0] + l1[1] + l2[0] + l2[1] + l3[0] + l3[1]) != 0;
-    optimize_b(x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
                &a_ec, &l_ec, TX_32X32);
   }
 }
 
-void vp9_optimize_sb64uv_16x16(MACROBLOCK *x) {
+void vp9_optimize_sb64uv_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES t_above[4], t_left[4];
   ENTROPY_CONTEXT *ta = (ENTROPY_CONTEXT *) t_above;
   ENTROPY_CONTEXT *tl = (ENTROPY_CONTEXT *) t_left;
@@ -1094,14 +1175,14 @@ void vp9_optimize_sb64uv_16x16(MACROBLOCK *x) {
     l1 = l + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
     above_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
     left_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
-    optimize_b(x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
                &above_ec, &left_ec, TX_16X16);
     a[0] = a[1] = a1[0] = a1[1] = above_ec;
     l[0] = l[1] = l1[0] = l1[1] = left_ec;
   }
 }
 
-void vp9_optimize_sb64uv_8x8(MACROBLOCK *x) {
+void vp9_optimize_sb64uv_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES t_above[4], t_left[4];
   ENTROPY_CONTEXT *ta = (ENTROPY_CONTEXT *) t_above;
   ENTROPY_CONTEXT *tl = (ENTROPY_CONTEXT *) t_left;
@@ -1116,14 +1197,14 @@ void vp9_optimize_sb64uv_8x8(MACROBLOCK *x) {
     l = tl + vp9_block2left_sb64[TX_8X8][b];
     above_ec = (a[0] + a[1]) != 0;
     left_ec = (l[0] + l[1]) != 0;
-    optimize_b(x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
                &above_ec, &left_ec, TX_8X8);
     a[0] = a[1] = above_ec;
     l[0] = l[1] = left_ec;
   }
 }
 
-void vp9_optimize_sb64uv_4x4(MACROBLOCK *x) {
+void vp9_optimize_sb64uv_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
   ENTROPY_CONTEXT_PLANES t_above[4], t_left[4];
   ENTROPY_CONTEXT *ta = (ENTROPY_CONTEXT *) t_above;
   ENTROPY_CONTEXT *tl = (ENTROPY_CONTEXT *) t_left;
@@ -1136,12 +1217,12 @@ void vp9_optimize_sb64uv_4x4(MACROBLOCK *x) {
     const int cidx = b >= 320 ? 20 : 16;
     a = ta + vp9_block2above_sb64[TX_4X4][b];
     l = tl + vp9_block2left_sb64[TX_4X4][b];
-    optimize_b(x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
                a, l, TX_4X4);
   }
 }
 
-void vp9_fidct_mb(MACROBLOCK *x) {
+void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x) {
   MACROBLOCKD *const xd = &x->e_mbd;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
@@ -1149,7 +1230,7 @@ void vp9_fidct_mb(MACROBLOCK *x) {
     vp9_transform_mb_16x16(x);
     vp9_quantize_mb_16x16(x);
     if (x->optimize)
-      optimize_mb_16x16(x);
+      optimize_mb_16x16(cm, x);
     vp9_inverse_transform_mb_16x16(xd);
   } else if (tx_size == TX_8X8) {
     if (xd->mode_info_context->mbmi.mode == SPLITMV) {
@@ -1159,8 +1240,8 @@ void vp9_fidct_mb(MACROBLOCK *x) {
       vp9_quantize_mby_8x8(x);
       vp9_quantize_mbuv_4x4(x);
       if (x->optimize) {
-        vp9_optimize_mby_8x8(x);
-        vp9_optimize_mbuv_4x4(x);
+        vp9_optimize_mby_8x8(cm, x);
+        vp9_optimize_mbuv_4x4(cm, x);
       }
       vp9_inverse_transform_mby_8x8(xd);
       vp9_inverse_transform_mbuv_4x4(xd);
@@ -1168,24 +1249,25 @@ void vp9_fidct_mb(MACROBLOCK *x) {
       vp9_transform_mb_8x8(x);
       vp9_quantize_mb_8x8(x);
       if (x->optimize)
-        optimize_mb_8x8(x);
+        optimize_mb_8x8(cm, x);
       vp9_inverse_transform_mb_8x8(xd);
     }
   } else {
     transform_mb_4x4(x);
     vp9_quantize_mb_4x4(x);
     if (x->optimize)
-      optimize_mb_4x4(x);
+      optimize_mb_4x4(cm, x);
     vp9_inverse_transform_mb_4x4(xd);
   }
 }
 
-void vp9_encode_inter16x16(MACROBLOCK *x, int mb_row, int mb_col) {
+void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
+                           int mb_row, int mb_col) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
   vp9_build_inter_predictors_mb(xd, mb_row, mb_col);
   subtract_mb(x);
-  vp9_fidct_mb(x);
+  vp9_fidct_mb(cm, x);
   vp9_recon_mb(xd);
 }
 

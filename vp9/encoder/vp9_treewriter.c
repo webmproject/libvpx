@@ -35,5 +35,6 @@ void vp9_cost_tokens(int *c, const vp9_prob *p, vp9_tree t) {
 }
 
 void vp9_cost_tokens_skip(int *c, const vp9_prob *p, vp9_tree t) {
+  c[0] = 0;
   cost(c, t, p, 2, 0);
 }

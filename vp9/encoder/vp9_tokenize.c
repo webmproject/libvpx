@@ -119,6 +119,11 @@ static void tokenize_b(VP9_COMP *cpi,
                           get_tx_type(xd, &xd->block[ib]) : DCT_DCT;
   const int ref = mbmi->ref_frame != INTRA_FRAME;
   ENTROPY_CONTEXT *a, *l, *a1, *l1, *a2, *l2, *a3, *l3, a_ec, l_ec;
+#if CONFIG_CODE_NONZEROCOUNT
+  int zerosleft, nzc = 0;
+  if (eob == 0)
+    assert(xd->nzcs[ib] == 0);
+#endif
 
   if (sb_type == BLOCK_SIZE_SB64X64) {
     a = (ENTROPY_CONTEXT *)xd->above_context +
@@ -207,29 +212,47 @@ static void tokenize_b(VP9_COMP *cpi,
   do {
     const int band = get_coef_band(tx_size, c);
     int token;
-
+    int v = 0;
+#if CONFIG_CODE_NONZEROCOUNT
+    zerosleft = seg_eob - xd->nzcs[ib] - c + nzc;
+#endif
     if (c < eob) {
       const int rc = scan[c];
-      const int v = qcoeff_ptr[rc];
+      v = qcoeff_ptr[rc];
       assert(-DCT_MAX_VALUE <= v  &&  v < DCT_MAX_VALUE);
 
       t->Extra = vp9_dct_value_tokens_ptr[v].Extra;
       token    = vp9_dct_value_tokens_ptr[v].Token;
     } else {
+#if CONFIG_CODE_NONZEROCOUNT
+      break;
+#else
       token = DCT_EOB_TOKEN;
+#endif
     }
 
     t->Token = token;
     t->context_tree = probs[type][ref][band][pt];
+#if CONFIG_CODE_NONZEROCOUNT
+    // Skip zero node if there are no zeros left
+    t->skip_eob_node = 1 + (zerosleft == 0);
+#else
     t->skip_eob_node = (pt == 0) && (band > 0);
+#endif
     assert(vp9_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
     if (!dry_run) {
       ++counts[type][ref][band][pt][token];
     }
+#if CONFIG_CODE_NONZEROCOUNT
+    nzc += (v != 0);
+#endif
 
     pt = vp9_get_coef_context(&recent_energy, token);
     ++t;
   } while (c < eob && ++c < seg_eob);
+#if CONFIG_CODE_NONZEROCOUNT
+  assert(nzc == xd->nzcs[ib]);
+#endif
 
   *tp = t;
   a_ec = l_ec = (c > 0); /* 0 <-> all coeff data is zero */
@@ -903,13 +926,15 @@ static void stuff_b(VP9_COMP *cpi,
                     PLANE_TYPE type,
                     TX_SIZE tx_size,
                     int dry_run) {
+  MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  const BLOCK_SIZE_TYPE sb_type = mbmi->sb_type;
+#if CONFIG_CODE_NONZEROCOUNT == 0
   vp9_coeff_count *counts;
   vp9_coeff_probs *probs;
   int pt, band;
   TOKENEXTRA *t = *tp;
-  MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   const int ref = mbmi->ref_frame != INTRA_FRAME;
-  const BLOCK_SIZE_TYPE sb_type = mbmi->sb_type;
+#endif
   ENTROPY_CONTEXT *a, *l, *a1, *l1, *a2, *l2, *a3, *l3, a_ec, l_ec;
 
   if (sb_type == BLOCK_SIZE_SB32X32) {
@@ -939,14 +964,18 @@ static void stuff_b(VP9_COMP *cpi,
     case TX_4X4:
       a_ec = a[0];
       l_ec = l[0];
+#if CONFIG_CODE_NONZEROCOUNT == 0
       counts = cpi->coef_counts_4x4;
       probs = cpi->common.fc.coef_probs_4x4;
+#endif
       break;
     case TX_8X8:
       a_ec = (a[0] + a[1]) != 0;
       l_ec = (l[0] + l[1]) != 0;
+#if CONFIG_CODE_NONZEROCOUNT == 0
       counts = cpi->coef_counts_8x8;
       probs = cpi->common.fc.coef_probs_8x8;
+#endif
       break;
     case TX_16X16:
       if (type != PLANE_TYPE_UV) {
@@ -956,8 +985,10 @@ static void stuff_b(VP9_COMP *cpi,
         a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
       }
+#if CONFIG_CODE_NONZEROCOUNT == 0
       counts = cpi->coef_counts_16x16;
       probs = cpi->common.fc.coef_probs_16x16;
+#endif
       break;
     case TX_32X32:
       if (type != PLANE_TYPE_UV) {
@@ -971,19 +1002,25 @@ static void stuff_b(VP9_COMP *cpi,
         l_ec = (l[0] + l[1] + l1[0] + l1[1] +
                 l2[0] + l2[1] + l3[0] + l3[1]) != 0;
       }
+#if CONFIG_CODE_NONZEROCOUNT == 0
       counts = cpi->coef_counts_32x32;
       probs = cpi->common.fc.coef_probs_32x32;
+#endif
       break;
   }
 
+#if CONFIG_CODE_NONZEROCOUNT == 0
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
-
   band = get_coef_band(tx_size, 0);
   t->Token = DCT_EOB_TOKEN;
   t->context_tree = probs[type][ref][band][pt];
   t->skip_eob_node = 0;
   ++t;
   *tp = t;
+  if (!dry_run) {
+    ++counts[type][ref][band][pt][DCT_EOB_TOKEN];
+  }
+#endif
   *a = *l = 0;
   if (tx_size == TX_8X8) {
     a[1] = 0;
@@ -1008,10 +1045,6 @@ static void stuff_b(VP9_COMP *cpi,
       a2[0] = a2[1] = a3[0] = a3[1] = a_ec;
       l2[0] = l2[1] = l3[0] = l3[1] = l_ec;
     }
-  }
-
-  if (!dry_run) {
-    ++counts[type][ref][band][pt][DCT_EOB_TOKEN];
   }
 }
 

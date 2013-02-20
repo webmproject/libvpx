@@ -58,10 +58,21 @@ typedef struct frame_contexts {
   vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob mbsplit_prob[VP9_NUMMBSPLITS - 1];
+
   vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES];
+#if CONFIG_CODE_NONZEROCOUNT
+  vp9_prob nzc_probs_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                        [NZC4X4_NODES];
+  vp9_prob nzc_probs_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                        [NZC8X8_NODES];
+  vp9_prob nzc_probs_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                          [NZC16X16_NODES];
+  vp9_prob nzc_probs_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                          [NZC32X32_NODES];
+#endif
 
   nmv_context nmvc;
   nmv_context pre_nmvc;
@@ -84,11 +95,31 @@ typedef struct frame_contexts {
   vp9_coeff_probs pre_coef_probs_8x8[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_16x16[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_32x32[BLOCK_TYPES];
+#if CONFIG_CODE_NONZEROCOUNT
+  vp9_prob pre_nzc_probs_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                            [NZC4X4_NODES];
+  vp9_prob pre_nzc_probs_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                            [NZC8X8_NODES];
+  vp9_prob pre_nzc_probs_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                              [NZC16X16_NODES];
+  vp9_prob pre_nzc_probs_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                              [NZC32X32_NODES];
+#endif
 
   vp9_coeff_count coef_counts_4x4[BLOCK_TYPES];
   vp9_coeff_count coef_counts_8x8[BLOCK_TYPES];
   vp9_coeff_count coef_counts_16x16[BLOCK_TYPES];
   vp9_coeff_count coef_counts_32x32[BLOCK_TYPES];
+#if CONFIG_CODE_NONZEROCOUNT
+  unsigned int nzc_counts_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                             [NZC4X4_TOKENS];
+  unsigned int nzc_counts_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                             [NZC8X8_TOKENS];
+  unsigned int nzc_counts_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                               [NZC16X16_TOKENS];
+  unsigned int nzc_counts_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                               [NZC32X32_TOKENS];
+#endif
 
   nmv_context_counts NMVcount;
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
@@ -300,4 +331,31 @@ static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
   buf[new_idx]++;
 }
 
+// TODO(debargha): merge the two functions
+static void set_mb_row(VP9_COMMON *cm, MACROBLOCKD *xd,
+                       int mb_row, int block_size) {
+  xd->mb_to_top_edge    = -((mb_row * 16) << 3);
+  xd->mb_to_bottom_edge = ((cm->mb_rows - block_size - mb_row) * 16) << 3;
+
+  // Are edges available for intra prediction?
+  xd->up_available    = (mb_row != 0);
+}
+
+static void set_mb_col(VP9_COMMON *cm, MACROBLOCKD *xd,
+                       int mb_col, int block_size) {
+  xd->mb_to_left_edge   = -((mb_col * 16) << 3);
+  xd->mb_to_right_edge  = ((cm->mb_cols - block_size - mb_col) * 16) << 3;
+
+  // Are edges available for intra prediction?
+  xd->left_available  = (mb_col > cm->cur_tile_mb_col_start);
+  xd->right_available = (mb_col + block_size < cm->cur_tile_mb_col_end);
+}
+
+static int get_mb_row(const MACROBLOCKD *xd) {
+  return ((-xd->mb_to_top_edge) >> 7);
+}
+
+static int get_mb_col(const MACROBLOCKD *xd) {
+  return ((-xd->mb_to_left_edge) >> 7);
+}
 #endif  // VP9_COMMON_VP9_ONYXC_INT_H_
