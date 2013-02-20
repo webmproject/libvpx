@@ -25,9 +25,9 @@ void vp9_dequant_idct_add_y_block_4x4_inplace_c(int16_t *q,
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) {
       if (*eobs++ > 1) {
-        vp9_dequant_idct_add_c(q, dq, dst, dst, stride, stride);
+        xd->itxm_add(q, dq, dst, dst, stride, stride);
       } else {
-        vp9_dc_only_idct_add_c(q[0]*dq[0], dst, dst, stride, stride);
+        xd->dc_only_itxm_add(q[0]*dq[0], dst, dst, stride, stride);
         ((int *)q)[0] = 0;
       }
 
