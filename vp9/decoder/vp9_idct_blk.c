@@ -10,9 +10,7 @@
 
 #include "vp9_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
-#if CONFIG_LOSSLESS
 #include "vp9/decoder/vp9_dequantize.h"
-#endif
 
 void vp9_dequant_idct_add_y_block_4x4_inplace_c(int16_t *q,
                                                 const int16_t *dq,
@@ -214,7 +212,7 @@ void vp9_dequant_idct_add_uv_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
                              xd->eobs[20]);
 }
 
-#if CONFIG_LOSSLESS
+
 void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
                                              uint8_t *pre,
                                              uint8_t *dst,
@@ -284,5 +282,4 @@ void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *dq,
     dstv += 4 * stride - 8;
   }
 }
-#endif
 

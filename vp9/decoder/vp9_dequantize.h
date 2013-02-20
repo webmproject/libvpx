@@ -13,7 +13,7 @@
 #define VP9_DECODER_VP9_DEQUANTIZE_H_
 #include "vp9/common/vp9_blockd.h"
 
-#if CONFIG_LOSSLESS
+
 extern void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
                                             unsigned char *pred,
                                             unsigned char *output,
@@ -40,7 +40,6 @@ extern void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *
                                                      unsigned char *dst_v,
                                                      int stride,
                                                      uint16_t *eobs);
-#endif
 
 void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input, const int16_t *dq,
                                     unsigned char *pred, unsigned char *dest,

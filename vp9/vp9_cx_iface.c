@@ -35,9 +35,7 @@ struct vp8_extracfg {
   vp8e_tuning                 tuning;
   unsigned int                cq_level;         /* constrained quality level */
   unsigned int                rc_max_intra_bitrate_pct;
-#if CONFIG_LOSSLESS
   unsigned int                lossless;
-#endif
 };
 
 struct extraconfig_map {
@@ -64,9 +62,7 @@ static const struct extraconfig_map extracfg_map[] = {
       0,                          /* tuning*/
       10,                         /* cq_level */
       0,                          /* rc_max_intra_bitrate_pct */
-#if CONFIG_LOSSLESS
       0,                          /* lossless */
-#endif
     }
   }
 };
@@ -138,13 +134,11 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
   RANGE_CHECK_HI(cfg, rc_max_quantizer,   63);
   RANGE_CHECK_HI(cfg, rc_min_quantizer,   cfg->rc_max_quantizer);
-#if CONFIG_LOSSLESS
   RANGE_CHECK_BOOL(vp8_cfg, lossless);
   if (vp8_cfg->lossless) {
     RANGE_CHECK_HI(cfg, rc_max_quantizer, 0);
     RANGE_CHECK_HI(cfg, rc_min_quantizer, 0);
   }
-#endif
 
   RANGE_CHECK_HI(cfg, g_threads,          64);
   RANGE_CHECK_HI(cfg, g_lag_in_frames,    MAX_LAG_BUFFERS);
@@ -314,9 +308,7 @@ static vpx_codec_err_t set_vp8e_config(VP9_CONFIG *oxcf,
   oxcf->tile_columns = vp8_cfg.tile_columns;
   oxcf->tile_rows = vp8_cfg.tile_rows;
 
-#if CONFIG_LOSSLESS
   oxcf->lossless = vp8_cfg.lossless;
-#endif
 
   oxcf->error_resilient_mode = cfg.g_error_resilient;
   oxcf->frame_parallel_decoding_mode = cfg.g_frame_parallel_decoding;
@@ -428,9 +420,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
       MAP(VP8E_SET_TUNING,                xcfg.tuning);
       MAP(VP8E_SET_CQ_LEVEL,              xcfg.cq_level);
       MAP(VP8E_SET_MAX_INTRA_BITRATE_PCT, xcfg.rc_max_intra_bitrate_pct);
-#if CONFIG_LOSSLESS
       MAP(VP9E_SET_LOSSLESS,              xcfg.lossless);
-#endif
   }
 
   res = validate_config(ctx, &ctx->cfg, &xcfg);
@@ -1020,9 +1010,7 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] = {
   {VP8E_SET_TUNING,                   set_param},
   {VP8E_SET_CQ_LEVEL,                 set_param},
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    set_param},
-#if CONFIG_LOSSLESS
   {VP9E_SET_LOSSLESS,                 set_param},
-#endif
   { -1, NULL},
 };
 

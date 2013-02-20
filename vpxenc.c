@@ -1106,9 +1106,7 @@ static const arg_def_t cq_level = ARG_DEF(NULL, "cq-level", 1,
                                           "Constrained Quality Level");
 static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
                                                     "Max I-frame bitrate (pct)");
-#if CONFIG_LOSSLESS
 static const arg_def_t lossless = ARG_DEF(NULL, "lossless", 1, "Lossless mode");
-#endif
 
 #if CONFIG_VP8_ENCODER
 static const arg_def_t *vp8_args[] = {
@@ -1131,10 +1129,7 @@ static const int vp8_arg_ctrl_map[] = {
 static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
-  &tune_ssim, &cq_level, &max_intra_rate_pct,
-#if CONFIG_LOSSLESS
-  &lossless,
-#endif
+  &tune_ssim, &cq_level, &max_intra_rate_pct, &lossless,
   NULL
 };
 static const int vp9_arg_ctrl_map[] = {
@@ -1143,9 +1138,7 @@ static const int vp9_arg_ctrl_map[] = {
   VP9E_SET_TILE_COLUMNS, VP9E_SET_TILE_ROWS,
   VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
-#if CONFIG_LOSSLESS
   VP9E_SET_LOSSLESS,
-#endif
   0
 };
 #endif

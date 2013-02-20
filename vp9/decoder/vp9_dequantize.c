@@ -145,7 +145,6 @@ void vp9_dequant_dc_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
   add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
 
-#if CONFIG_LOSSLESS
 void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
                                      uint8_t *pred, uint8_t *dest,
                                      int pitch, int stride) {
@@ -183,7 +182,6 @@ void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
 
   add_residual(diff_ptr, pred, pitch, dest, stride, 4, 4);
 }
-#endif
 
 void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
                                 uint8_t *pred, uint8_t *dest, int pitch,

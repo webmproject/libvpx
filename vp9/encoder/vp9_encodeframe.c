@@ -1225,7 +1225,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   if (cm->full_pixel)
     xd->fullpixel_mask = 0xfffffff8;
 }
-#if CONFIG_LOSSLESS
+
 static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
   if (lossless) {
     cpi->mb.fwd_txm8x4            = vp9_short_walsh8x4_x8;
@@ -1243,7 +1243,7 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
     cpi->mb.e_mbd.inv_txm4x4      = vp9_short_idct4x4llm;
   }
 }
-#endif
+
 
 static void encode_frame_internal(VP9_COMP *cpi) {
   int mb_row;
@@ -1301,14 +1301,14 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cpi->mb_mv_ref_count);
 #endif
 
-#if CONFIG_LOSSLESS
+
   // force lossless mode when Q0 is selected
   cpi->mb.e_mbd.lossless = (cm->base_qindex == 0 &&
                             cm->y1dc_delta_q == 0 &&
                             cm->uvdc_delta_q == 0 &&
                             cm->uvac_delta_q == 0);
   switch_lossless_mode(cpi, cpi->mb.e_mbd.lossless);
-#endif
+
   vp9_frame_init_quantizer(cpi);
 
   vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
@@ -1561,13 +1561,12 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       pred_type = HYBRID_PREDICTION;
 
     /* transform size (4x4, 8x8, 16x16 or select-per-mb) selection */
-#if CONFIG_LOSSLESS
+
     cpi->mb.e_mbd.lossless = 0;
     if (cpi->oxcf.lossless) {
       txfm_type = ONLY_4X4;
       cpi->mb.e_mbd.lossless = 1;
     } else
-#endif
     /* FIXME (rbultje)
      * this is a hack (no really), basically to work around the complete
      * nonsense coefficient cost prediction for keyframes. The probabilities

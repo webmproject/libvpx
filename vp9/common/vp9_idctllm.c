@@ -298,7 +298,6 @@ void vp9_ihtllm_c(const int16_t *input, int16_t *output, int pitch,
   }
 }
 
-#if CONFIG_LOSSLESS
 void vp9_short_inv_walsh4x4_x8_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
@@ -378,7 +377,6 @@ void vp9_dc_only_inv_walsh_add_c(int input_dc, uint8_t *pred_ptr,
     pred_ptr += pitch;
   }
 }
-#endif
 
 void idct4_1d(int16_t *input, int16_t *output) {
   int16_t step[4];
