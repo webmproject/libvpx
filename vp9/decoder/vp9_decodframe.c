@@ -128,7 +128,6 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
   xd->dc_only_itxm_add    = vp9_dc_only_idct_add_c;
   xd->itxm_add_y_block    = vp9_dequant_idct_add_y_block;
   xd->itxm_add_uv_block   = vp9_dequant_idct_add_uv_block;
-#if CONFIG_LOSSLESS
   if (xd->lossless) {
     assert(QIndex == 0);
     xd->inv_txm4x4_1        = vp9_short_inv_walsh4x4_1_x8;
@@ -138,7 +137,6 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
     xd->itxm_add_y_block    = vp9_dequant_idct_add_y_block_lossless_c;
     xd->itxm_add_uv_block   = vp9_dequant_idct_add_uv_block_lossless_c;
   }
-#endif
 
   for (i = 16; i < 24; i++) {
     xd->block[i].dequant = pc->UVdequant[QIndex];
@@ -1418,14 +1416,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   pc->sb64_coded = vp9_read_literal(&header_bc, 8);
   pc->sb32_coded = vp9_read_literal(&header_bc, 8);
-#if CONFIG_LOSSLESS
   xd->lossless = vp9_read_bit(&header_bc);
   if (xd->lossless) {
     pc->txfm_mode = ONLY_4X4;
-  }
-  else
-#endif
-  {
+  } else {
     /* Read the loop filter level and type */
     pc->txfm_mode = vp9_read_literal(&header_bc, 2);
     if (pc->txfm_mode == 3)

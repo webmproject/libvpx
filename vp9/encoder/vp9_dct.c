@@ -896,7 +896,6 @@ void vp9_short_fdct8x8_c(int16_t *input, int16_t *output, int pitch) {
 }
 #endif
 
-#if CONFIG_LOSSLESS
 void vp9_short_walsh4x4_x8_c(short *input, short *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
@@ -941,7 +940,6 @@ void vp9_short_walsh8x4_x8_c(short *input, short *output, int pitch) {
   vp9_short_walsh4x4_x8_c(input,   output,    pitch);
   vp9_short_walsh4x4_x8_c(input + 4, output + 16, pitch);
 }
-#endif
 
 #define TEST_INT_16x16_DCT 1
 #if !TEST_INT_16x16_DCT

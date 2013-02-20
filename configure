@@ -238,7 +238,6 @@ HAVE_LIST="
 "
 EXPERIMENT_LIST="
     csm
-    lossless
     new_mvref
     implicit_segmentation
     newbintramodes
