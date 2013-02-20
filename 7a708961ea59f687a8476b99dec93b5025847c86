@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//hXM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 3137,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-20T23:56:28Z",
+      "side": 1,
+      "message": "exp, sqrt, log in rd code seems like a bad idea. Can we approximate this in lookup tables or something similar?",
+      "revId": "7a708961ea59f687a8476b99dec93b5025847c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//hXQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 3147,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-20T23:56:28Z",
+      "side": 1,
+      "message": "this may mix float and mmx code - should probably call emms.",
+      "revId": "7a708961ea59f687a8476b99dec93b5025847c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
