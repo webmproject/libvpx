@@ -293,7 +293,6 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(16, uint8_t,  predictor[384]);
   DECLARE_ALIGNED(16, int16_t,  qcoeff[384]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[384]);
-  DECLARE_ALIGNED(16, uint16_t, eobs[24]);
 
   SUPERBLOCKD sb_coeff_data;
 
@@ -374,10 +373,10 @@ typedef struct macroblockd {
   void (*dc_only_itxm_add)(int input_dc, uint8_t *pred_ptr,
     uint8_t *dst_ptr, int pitch, int stride);
   void (*itxm_add_y_block)(int16_t *q, const int16_t *dq,
-    uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs);
+    uint8_t *pre, uint8_t *dst, int stride, struct macroblockd *xd);
   void (*itxm_add_uv_block)(int16_t *q, const int16_t *dq,
     uint8_t *pre, uint8_t *dst_u, uint8_t *dst_v, int stride,
-    uint16_t *eobs);
+    struct macroblockd *xd);
 
   struct subpix_fn_table  subpix;
 

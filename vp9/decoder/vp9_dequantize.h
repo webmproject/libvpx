@@ -27,72 +27,65 @@ extern void vp9_dequant_dc_idct_add_y_block_lossless_c(int16_t *q,
                                                        unsigned char *pre,
                                                        unsigned char *dst,
                                                        int stride,
-                                                       uint16_t *eobs,
                                                        const int16_t *dc);
 extern void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
                                                     unsigned char *pre,
                                                     unsigned char *dst,
                                                     int stride,
-                                                    uint16_t *eobs);
+                                                    struct macroblockd *xd);
 extern void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *dq,
                                                      unsigned char *pre,
                                                      unsigned char *dst_u,
                                                      unsigned char *dst_v,
                                                      int stride,
-                                                     uint16_t *eobs);
+                                                     struct macroblockd *xd);
 
 void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input, const int16_t *dq,
                                     unsigned char *pred, unsigned char *dest,
-                                    int pitch, int stride, uint16_t eobs);
+                                    int pitch, int stride, int eob);
 
 void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
                                    const int16_t *dq, unsigned char *pred,
                                    unsigned char *dest, int pitch, int stride,
-                                   uint16_t eobs);
+                                   int eob);
 
 void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
                                      const int16_t *dq, unsigned char *pred,
                                      unsigned char *dest,
-                                     int pitch, int stride, uint16_t eobs);
+                                     int pitch, int stride, int eob);
 
 void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
                                                    unsigned char *dst,
                                                    int stride,
-                                                   uint16_t *eobs,
                                                    const int16_t *dc,
                                                    MACROBLOCKD *xd);
 
 void vp9_dequant_idct_add_y_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
                                                 unsigned char *dst,
                                                 int stride,
-                                                uint16_t *eobs,
                                                 MACROBLOCKD *xd);
 
 void vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
                                                    unsigned char *dst,
                                                    int stride,
-                                                   uint16_t *eobs,
                                                    const int16_t *dc,
                                                    MACROBLOCKD *xd);
 
 void vp9_dequant_idct_add_y_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
                                                 unsigned char *dst,
                                                 int stride,
-                                                uint16_t *eobs,
                                                 MACROBLOCKD *xd);
 
 void vp9_dequant_idct_add_uv_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
                                                  unsigned char *dstu,
                                                  unsigned char *dstv,
                                                  int stride,
-                                                 uint16_t *eobs,
                                                  MACROBLOCKD *xd);
 
 void vp9_dequant_idct_add_uv_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
                                                  unsigned char *dstu,
                                                  unsigned char *dstv,
                                                  int stride,
-                                                 uint16_t *eobs,
                                                  MACROBLOCKD *xd);
 
 #endif
