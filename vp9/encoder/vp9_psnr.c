@@ -11,17 +11,16 @@
 
 #include "vpx_scale/yv12config.h"
 #include "math.h"
-#include "vp9/common/vp9_systemdependent.h" /* for vp9_clear_system_state() */
 
 #define MAX_PSNR 100
 
-double vp9_mse2psnr(double Samples, double Peak, double Mse) {
+double vp9_mse2psnr(double samples, double peak, double mse) {
   double psnr;
 
-  if ((double)Mse > 0.0)
-    psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
+  if (mse > 0.0)
+    psnr = 10.0 * log10(peak * peak * samples / mse);
   else
-    psnr = MAX_PSNR;      // Limit to prevent / 0
+    psnr = MAX_PSNR;  // Limit to prevent / 0
 
   if (psnr > MAX_PSNR)
     psnr = MAX_PSNR;
