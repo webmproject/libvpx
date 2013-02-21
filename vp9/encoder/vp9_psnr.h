@@ -12,6 +12,6 @@
 #ifndef VP9_ENCODER_VP9_PSNR_H_
 #define VP9_ENCODER_VP9_PSNR_H_
 
-extern double vp9_mse2psnr(double Samples, double Peak, double Mse);
+double vp9_mse2psnr(double samples, double peak, double mse);
 
 #endif  // VP9_ENCODER_VP9_PSNR_H_

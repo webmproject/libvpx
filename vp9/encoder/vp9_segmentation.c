@@ -9,7 +9,7 @@
  */
 
 
-#include "limits.h"
+#include <limits.h>
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/common/vp9_pred_common.h"
