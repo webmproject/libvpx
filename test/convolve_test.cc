@@ -309,6 +309,8 @@ const int16_t (*kTestFilterList[])[8] = {
   vp9_sub_pel_filters_8lp
 };
 
+const int16_t kInvalidFilter[8] = { 0 };
+
 TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
   uint8_t* const in = input();
   uint8_t* const out = output();
@@ -336,12 +338,12 @@ TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
         else if (filter_y)
           REGISTER_STATE_CHECK(
               UUT_->v8_(in, kInputStride, out, kOutputStride,
-                        filters[filter_x], 16, filters[filter_y], 16,
+                        kInvalidFilter, 16, filters[filter_y], 16,
                         Width(), Height()));
         else
           REGISTER_STATE_CHECK(
               UUT_->h8_(in, kInputStride, out, kOutputStride,
-                        filters[filter_x], 16, filters[filter_y], 16,
+                        filters[filter_x], 16, kInvalidFilter, 16,
                         Width(), Height()));
 
         CheckGuardBlocks();
@@ -479,22 +481,12 @@ TEST_P(ConvolveTest, ChangeFilterWorks) {
 
 using std::tr1::make_tuple;
 
-const ConvolveFunctions convolve8_2d_only_c(
-    vp9_convolve8_c, vp9_convolve8_avg_c,
-    vp9_convolve8_c, vp9_convolve8_avg_c,
-    vp9_convolve8_c, vp9_convolve8_avg_c);
-
 const ConvolveFunctions convolve8_c(
     vp9_convolve8_horiz_c, vp9_convolve8_avg_horiz_c,
     vp9_convolve8_vert_c, vp9_convolve8_avg_vert_c,
     vp9_convolve8_c, vp9_convolve8_avg_c);
 
 INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
-    make_tuple(4, 4, &convolve8_2d_only_c),
-    make_tuple(8, 4, &convolve8_2d_only_c),
-    make_tuple(8, 8, &convolve8_2d_only_c),
-    make_tuple(16, 8, &convolve8_2d_only_c),
-    make_tuple(16, 16, &convolve8_2d_only_c),
     make_tuple(4, 4, &convolve8_c),
     make_tuple(8, 4, &convolve8_c),
     make_tuple(8, 8, &convolve8_c),
