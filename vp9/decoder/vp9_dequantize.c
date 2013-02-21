@@ -60,7 +60,7 @@ void vp9_dequantize_b_c(BLOCKD *d) {
 void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
                                const int16_t *dq,
                                uint8_t *pred, uint8_t *dest,
-                               int pitch, int stride, uint16_t eobs) {
+                               int pitch, int stride, int eob) {
   int16_t output[16];
   int16_t *diff_ptr = output;
   int i;
@@ -72,7 +72,7 @@ void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
 #if CONFIG_INTHT4X4
   vp9_short_iht4x4(input, output, 8, tx_type);
 #else
-  vp9_ihtllm(input, output, 4 << 1, tx_type, 4, eobs);
+  vp9_ihtllm(input, output, 4 << 1, tx_type, 4, eob);
 #endif
 
   vpx_memset(input, 0, 32);
@@ -83,14 +83,14 @@ void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
 void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
                                    const int16_t *dq,
                                    uint8_t *pred, uint8_t *dest,
-                                   int pitch, int stride, uint16_t eobs) {
+                                   int pitch, int stride, int eob) {
   int16_t output[64];
   int16_t *diff_ptr = output;
   int i;
-  if (eobs == 0) {
+  if (eob == 0) {
     /* All 0 DCT coefficient */
     vp9_copy_mem8x8(pred, pitch, dest, stride);
-  } else if (eobs > 0) {
+  } else if (eob > 0) {
     input[0] = dq[0] * input[0];
     for (i = 1; i < 64; i++) {
       input[i] = dq[1] * input[i];
@@ -99,7 +99,7 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
 #if CONFIG_INTHT
     vp9_short_iht8x8(input, output, 16, tx_type);
 #else
-    vp9_ihtllm(input, output, 16, tx_type, 8, eobs);
+    vp9_ihtllm(input, output, 16, tx_type, 8, eob);
 #endif
     vpx_memset(input, 0, 128);
 
@@ -250,14 +250,14 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
 void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
                                      const int16_t *dq, uint8_t *pred,
                                      uint8_t *dest, int pitch, int stride,
-                                     uint16_t eobs) {
+                                     int eob) {
   int16_t output[256];
   int16_t *diff_ptr = output;
   int i;
-  if (eobs == 0) {
+  if (eob == 0) {
     /* All 0 DCT coefficient */
     vp9_copy_mem16x16(pred, pitch, dest, stride);
-  } else if (eobs > 0) {
+  } else if (eob > 0) {
     input[0]= input[0] * dq[0];
 
     // recover quantizer for 4 4x4 blocks
@@ -268,7 +268,7 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
 #if CONFIG_INTHT16X16
     vp9_short_iht16x16(input, output, 32, tx_type);
 #else
-    vp9_ihtllm(input, output, 32, tx_type, 16, eobs);
+    vp9_ihtllm(input, output, 32, tx_type, 16, eob);
 #endif
 
     // the idct halves ( >> 1) the pitch
@@ -365,8 +365,9 @@ void vp9_dequant_idct_add_uv_block_16x16_c(int16_t *q, const int16_t *dq,
                                            uint8_t *dstu,
                                            uint8_t *dstv,
                                            int stride,
-                                           uint16_t *eobs) {
-  vp9_dequant_idct_add_16x16_c(q, dq, dstu, dstu, stride, stride, eobs[0]);
-  vp9_dequant_idct_add_16x16_c(q + 256, dq,
-                               dstv, dstv, stride, stride, eobs[4]);
+                                           MACROBLOCKD *xd) {
+  vp9_dequant_idct_add_16x16_c(q, dq, dstu, dstu, stride, stride,
+                               xd->block[16].eob);
+  vp9_dequant_idct_add_16x16_c(q + 256, dq, dstv, dstv, stride, stride,
+                               xd->block[20].eob);
 }

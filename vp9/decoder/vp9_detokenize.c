@@ -295,25 +295,24 @@ static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
 int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
                          MACROBLOCKD* const xd,
                          BOOL_DECODER* const bc) {
-  uint16_t *const eobs = xd->eobs;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   int c, i, eobtotal = 0, seg_eob;
 
   // Luma block
-  eobs[0] = c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
-                             DCT_DCT, get_eob(xd, segment_id, 1024),
-                             xd->sb_coeff_data.qcoeff,
-                             vp9_default_zig_zag1d_32x32,
-                             TX_32X32);
+  c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
+                   DCT_DCT, get_eob(xd, segment_id, 1024),
+                   xd->sb_coeff_data.qcoeff,
+                   vp9_default_zig_zag1d_32x32, TX_32X32);
+  xd->block[0].eob = c;
   eobtotal += c;
 
   // 16x16 chroma blocks
   seg_eob = get_eob(xd, segment_id, 256);
   for (i = 16; i < 24; i += 4) {
-    eobs[i] = c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV, DCT_DCT, seg_eob,
-                               xd->sb_coeff_data.qcoeff + 1024 + (i - 16) * 64,
-                               vp9_default_zig_zag1d_16x16,
-                               TX_16X16);
+    c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV, DCT_DCT, seg_eob,
+                     xd->sb_coeff_data.qcoeff + 1024 + (i - 16) * 64,
+                     vp9_default_zig_zag1d_16x16, TX_16X16);
+    xd->block[i].eob = c;
     eobtotal += c;
   }
 
@@ -323,25 +322,24 @@ int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
 static int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
                                       MACROBLOCKD* const xd,
                                       BOOL_DECODER* const bc) {
-  uint16_t *const eobs = xd->eobs;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   int c, i, eobtotal = 0, seg_eob;
 
   // Luma block
-  eobs[0] = c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
-                             get_tx_type(xd, &xd->block[0]),
-                             get_eob(xd, segment_id, 256),
-                             xd->qcoeff, vp9_default_zig_zag1d_16x16,
-                             TX_16X16);
+  c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
+                   get_tx_type(xd, &xd->block[0]),
+                   get_eob(xd, segment_id, 256),
+                   xd->qcoeff, vp9_default_zig_zag1d_16x16, TX_16X16);
+  xd->block[0].eob = c;
   eobtotal += c;
 
   // 8x8 chroma blocks
   seg_eob = get_eob(xd, segment_id, 64);
   for (i = 16; i < 24; i += 4) {
-    eobs[i] = c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV,
-                               DCT_DCT, seg_eob, xd->block[i].qcoeff,
-                               vp9_default_zig_zag1d_8x8,
-                               TX_8X8);
+    c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV,
+                     DCT_DCT, seg_eob, xd->block[i].qcoeff,
+                     vp9_default_zig_zag1d_8x8, TX_8X8);
+    xd->block[i].eob = c;
     eobtotal += c;
   }
   return eobtotal;
@@ -350,17 +348,17 @@ static int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
 static int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
                                     MACROBLOCKD* const xd,
                                     BOOL_DECODER* const bc) {
-  uint16_t *const eobs = xd->eobs;
   int c, i, eobtotal = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
 
   // luma blocks
   seg_eob = get_eob(xd, segment_id, 64);
   for (i = 0; i < 16; i += 4) {
-    eobs[i] = c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_Y_WITH_DC,
-                               get_tx_type(xd, xd->block + i),
-                               seg_eob, xd->block[i].qcoeff,
-                               vp9_default_zig_zag1d_8x8, TX_8X8);
+    c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_Y_WITH_DC,
+                     get_tx_type(xd, xd->block + i),
+                     seg_eob, xd->block[i].qcoeff,
+                     vp9_default_zig_zag1d_8x8, TX_8X8);
+    xd->block[i].eob = c;
     eobtotal += c;
   }
 
@@ -370,16 +368,18 @@ static int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
     // use 4x4 transform for U, V components in I8X8/splitmv prediction mode
     seg_eob = get_eob(xd, segment_id, 16);
     for (i = 16; i < 24; i++) {
-      eobs[i] = c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV,
-                                 DCT_DCT, seg_eob, xd->block[i].qcoeff,
-                                 vp9_default_zig_zag1d_4x4, TX_4X4);
+      c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV,
+                       DCT_DCT, seg_eob, xd->block[i].qcoeff,
+                       vp9_default_zig_zag1d_4x4, TX_4X4);
+      xd->block[i].eob = c;
       eobtotal += c;
     }
   } else {
     for (i = 16; i < 24; i += 4) {
-      eobs[i] = c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV,
-                                 DCT_DCT, seg_eob, xd->block[i].qcoeff,
-                                 vp9_default_zig_zag1d_8x8, TX_8X8);
+      c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV,
+                       DCT_DCT, seg_eob, xd->block[i].qcoeff,
+                       vp9_default_zig_zag1d_8x8, TX_8X8);
+      xd->block[i].eob = c;
       eobtotal += c;
     }
   }
@@ -391,12 +391,11 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
                             BOOL_DECODER* const bc,
                             PLANE_TYPE type, int i, int seg_eob,
                             TX_TYPE tx_type, const int *scan) {
-  uint16_t *const eobs = xd->eobs;
   int c;
 
   c = decode_coefs(dx, xd, bc, i, type, tx_type, seg_eob,
                    xd->block[i].qcoeff, scan, TX_4X4);
-  eobs[i] = c;
+  xd->block[i].eob = c;
 
   return c;
 }
