@@ -16,6 +16,24 @@
       "revId": "9cda91ffa0d18058fbb8859117a4c6e8bc6185e1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//gcw\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-21T20:28:04Z",
+      "side": 1,
+      "message": "The original code had that issue also, I wasn\u0027t sure if that was for a reason or not so left it as-is. Anyway, changed in new patch.",
+      "parentUuid": "AAAAVH//gdU\u003d",
+      "revId": "9cda91ffa0d18058fbb8859117a4c6e8bc6185e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
