@@ -2562,8 +2562,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   int q_low;
   int q_high;
-  int zbin_oq_high;
-  int zbin_oq_low = 0;
 
   int top_index;
   int bottom_index;
@@ -2576,11 +2574,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #if RESET_FOREACH_FILTER
   int q_low0;
   int q_high0;
-  int zbin_oq_high0;
-  int zbin_oq_low0 = 0;
   int Q0;
-  int last_zbin_oq;
-  int last_zbin_oq0;
   int active_best_quality0;
   int active_worst_quality0;
   double rate_correction_factor0;
@@ -2614,7 +2608,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 
   // Clear zbin over-quant value and mode boost values.
-  cpi->zbin_over_quant = 0;
   cpi->zbin_mode_boost = 0;
 
   // Enable or disable mode based tweaking of the zbin
@@ -2804,18 +2797,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     // Determine initial Q to try
     Q = vp9_regulate_q(cpi, cpi->this_frame_target);
   }
-#if RESET_FOREACH_FILTER
-  last_zbin_oq = cpi->zbin_over_quant;
-#endif
-
-  // Set highest allowed value for Zbin over quant
-  if (cm->frame_type == KEY_FRAME)
-    zbin_oq_high = 0; // ZBIN_OQ_MAX/16
-  else if (cpi->refresh_alt_ref_frame
-           || (cpi->refresh_golden_frame && !cpi->source_alt_ref_active))
-    zbin_oq_high = 16;
-  else
-    zbin_oq_high = ZBIN_OQ_MAX;
 
   vp9_compute_frame_size_bounds(cpi, &frame_under_shoot_limit,
                                 &frame_over_shoot_limit);
@@ -2898,9 +2879,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     q_low0 = q_low;
     q_high0 = q_high;
     Q0 = Q;
-    zbin_oq_low0 = zbin_oq_low;
-    zbin_oq_high0 = zbin_oq_high;
-    last_zbin_oq0 = last_zbin_oq;
     rate_correction_factor0 = cpi->rate_correction_factor;
     gf_rate_correction_factor0 = cpi->gf_rate_correction_factor;
     active_best_quality0 = cpi->active_best_quality;
@@ -3059,23 +3037,12 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       if (cpi->projected_frame_size > cpi->this_frame_target) {
         q_low = (Q < q_high) ? (Q + 1) : q_high; // Raise Qlow as to at least the current value
 
-        if (cpi->zbin_over_quant > 0)            // If we are using over quant do the same for zbin_oq_low
-          zbin_oq_low = (cpi->zbin_over_quant < zbin_oq_high) ? (cpi->zbin_over_quant + 1) : zbin_oq_high;
-
         if (undershoot_seen || (loop_count > 1)) {
           // Update rate_correction_factor unless cpi->active_worst_quality has changed.
           if (!active_worst_qchanged)
             vp9_update_rate_correction_factors(cpi, 1);
 
           Q = (q_high + q_low + 1) / 2;
-
-          // Adjust cpi->zbin_over_quant (only allowed when Q is max)
-          if (Q < MAXQ)
-            cpi->zbin_over_quant = 0;
-          else {
-            zbin_oq_low = (cpi->zbin_over_quant < zbin_oq_high) ? (cpi->zbin_over_quant + 1) : zbin_oq_high;
-            cpi->zbin_over_quant = (zbin_oq_high + zbin_oq_low) / 2;
-          }
         } else {
           // Update rate_correction_factor unless cpi->active_worst_quality has changed.
           if (!active_worst_qchanged)
@@ -3083,7 +3050,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
           Q = vp9_regulate_q(cpi, cpi->this_frame_target);
 
-          while (((Q < q_low) || (cpi->zbin_over_quant < zbin_oq_low)) && (Retries < 10)) {
+          while ((Q < q_low) && (Retries < 10)) {
             vp9_update_rate_correction_factors(cpi, 0);
             Q = vp9_regulate_q(cpi, cpi->this_frame_target);
             Retries++;
@@ -3094,10 +3061,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       }
       // Frame is too small
       else {
-        if (cpi->zbin_over_quant == 0)
-          q_high = (Q > q_low) ? (Q - 1) : q_low; // Lower q_high if not using over quant
-        else                                    // else lower zbin_oq_high
-          zbin_oq_high = (cpi->zbin_over_quant > zbin_oq_low) ? (cpi->zbin_over_quant - 1) : zbin_oq_low;
+        q_high = (Q > q_low) ? (Q - 1) : q_low;
 
         if (overshoot_seen || (loop_count > 1)) {
           // Update rate_correction_factor unless cpi->active_worst_quality has changed.
@@ -3105,12 +3069,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
             vp9_update_rate_correction_factors(cpi, 1);
 
           Q = (q_high + q_low) / 2;
-
-          // Adjust cpi->zbin_over_quant (only allowed when Q is max)
-          if (Q < MAXQ)
-            cpi->zbin_over_quant = 0;
-          else
-            cpi->zbin_over_quant = (zbin_oq_high + zbin_oq_low) / 2;
         } else {
           // Update rate_correction_factor unless cpi->active_worst_quality has changed.
           if (!active_worst_qchanged)
@@ -3127,7 +3085,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
             q_low = Q;
           }
 
-          while (((Q > q_high) || (cpi->zbin_over_quant > zbin_oq_high)) && (Retries < 10)) {
+          while ((Q > q_high) && (Retries < 10)) {
             vp9_update_rate_correction_factors(cpi, 0);
             Q = vp9_regulate_q(cpi, cpi->this_frame_target);
             Retries++;
@@ -3143,16 +3101,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       else if (Q < q_low)
         Q = q_low;
 
-      // Clamp cpi->zbin_over_quant
-      cpi->zbin_over_quant = (cpi->zbin_over_quant < zbin_oq_low) ?
-          zbin_oq_low : (cpi->zbin_over_quant > zbin_oq_high) ?
-          zbin_oq_high : cpi->zbin_over_quant;
-
-      // Loop = ((Q != last_q) || (last_zbin_oq != cpi->zbin_over_quant)) ? TRUE : FALSE;
       Loop = ((Q != last_q)) ? TRUE : FALSE;
-#if RESET_FOREACH_FILTER
-      last_zbin_oq = cpi->zbin_over_quant;
-#endif
     } else
       Loop = FALSE;
 
@@ -3196,12 +3145,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         if (Loop == TRUE) {
           overshoot_seen = FALSE;
           undershoot_seen = FALSE;
-          zbin_oq_low = zbin_oq_low0;
-          zbin_oq_high = zbin_oq_high0;
           q_low = q_low0;
           q_high = q_high0;
           Q = Q0;
-          cpi->zbin_over_quant = last_zbin_oq = last_zbin_oq0;
           cpi->rate_correction_factor = rate_correction_factor0;
           cpi->gf_rate_correction_factor = gf_rate_correction_factor0;
           cpi->active_best_quality = active_best_quality0;
@@ -3450,8 +3396,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
               cpi->avg_q,
               vp9_convert_qindex_to_q(cpi->ni_av_qi),
               vp9_convert_qindex_to_q(cpi->cq_target_quality),
-              cpi->zbin_over_quant,
-              // cpi->avg_frame_qindex, cpi->zbin_over_quant,
               cpi->refresh_golden_frame, cpi->refresh_alt_ref_frame,
               cm->frame_type, cpi->gfu_boost,
               cpi->twopass.est_max_qcorrection_factor,
@@ -3464,7 +3408,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     else
       fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d"
               "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
-              "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
+              "%5d %5d %8d %8.2f %10d %10.3f"
               "%8d %10d %10d %10d\n",
               cpi->common.current_video_frame,
               cpi->this_frame_target, cpi->projected_frame_size,
@@ -3480,8 +3424,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
               cpi->avg_q,
               vp9_convert_qindex_to_q(cpi->ni_av_qi),
               vp9_convert_qindex_to_q(cpi->cq_target_quality),
-              cpi->zbin_over_quant,
-              // cpi->avg_frame_qindex, cpi->zbin_over_quant,
               cpi->refresh_golden_frame, cpi->refresh_alt_ref_frame,
               cm->frame_type, cpi->gfu_boost,
               cpi->twopass.est_max_qcorrection_factor,
