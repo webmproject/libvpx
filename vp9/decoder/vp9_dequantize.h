@@ -11,34 +11,39 @@
 
 #ifndef VP9_DECODER_VP9_DEQUANTIZE_H_
 #define VP9_DECODER_VP9_DEQUANTIZE_H_
+
 #include "vp9/common/vp9_blockd.h"
 
 
-extern void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
-                                            unsigned char *pred,
-                                            unsigned char *output,
-                                            int pitch, int stride);
-extern void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
-                                               unsigned char *pred,
-                                               unsigned char *output,
-                                               int pitch, int stride, int dc);
-extern void vp9_dequant_dc_idct_add_y_block_lossless_c(int16_t *q,
-                                                       const int16_t *dq,
-                                                       unsigned char *pre,
-                                                       unsigned char *dst,
-                                                       int stride,
-                                                       const int16_t *dc);
-extern void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
-                                                    unsigned char *pre,
-                                                    unsigned char *dst,
-                                                    int stride,
-                                                    struct macroblockd *xd);
-extern void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *dq,
-                                                     unsigned char *pre,
-                                                     unsigned char *dst_u,
-                                                     unsigned char *dst_v,
-                                                     int stride,
-                                                     struct macroblockd *xd);
+void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
+                                     unsigned char *pred,
+                                     unsigned char *output,
+                                     int pitch, int stride);
+
+void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
+                                        unsigned char *pred,
+                                        unsigned char *output,
+                                        int pitch, int stride, int dc);
+
+void vp9_dequant_dc_idct_add_y_block_lossless_c(int16_t *q,
+                                                const int16_t *dq,
+                                                unsigned char *pre,
+                                                unsigned char *dst,
+                                                int stride,
+                                                const int16_t *dc);
+
+void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
+                                             unsigned char *pre,
+                                             unsigned char *dst,
+                                             int stride,
+                                             struct macroblockd *xd);
+
+void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *dq,
+                                              unsigned char *pre,
+                                              unsigned char *dst_u,
+                                              unsigned char *dst_v,
+                                              int stride,
+                                              struct macroblockd *xd);
 
 void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input, const int16_t *dq,
                                     unsigned char *pred, unsigned char *dest,
@@ -88,4 +93,4 @@ void vp9_dequant_idct_add_uv_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
                                                  int stride,
                                                  MACROBLOCKD *xd);
 
-#endif
+#endif  // VP9_DECODER_VP9_DEQUANTIZE_H_

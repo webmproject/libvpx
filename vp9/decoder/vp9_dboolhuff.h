@@ -19,11 +19,11 @@
 
 typedef size_t VP9_BD_VALUE;
 
-# define VP9_BD_VALUE_SIZE ((int)sizeof(VP9_BD_VALUE)*CHAR_BIT)
+#define VP9_BD_VALUE_SIZE ((int)sizeof(VP9_BD_VALUE)*CHAR_BIT)
 /*This is meant to be a large, positive constant that can still be efficiently
    loaded as an immediate (on platforms like ARM, for example).
   Even relatively modest values like 100 would work fine.*/
-# define VP9_LOTS_OF_BITS (0x40000000)
+#define VP9_LOTS_OF_BITS (0x40000000)
 
 typedef struct {
   const unsigned char *user_buffer_end;
@@ -150,6 +150,6 @@ static int bool_error(BOOL_DECODER *br) {
   return 0;
 }
 
-extern int vp9_decode_unsigned_max(BOOL_DECODER *br, int max);
+int vp9_decode_unsigned_max(BOOL_DECODER *br, int max);
 
 #endif  // VP9_DECODER_VP9_DBOOLHUFF_H_

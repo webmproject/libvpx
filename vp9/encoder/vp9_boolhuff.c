@@ -40,7 +40,6 @@ const unsigned int vp9_prob_cost[256] = {
 };
 
 void vp9_start_encode(BOOL_CODER *br, unsigned char *source) {
-
   br->lowvalue = 0;
   br->range    = 255;
   br->value    = 0;

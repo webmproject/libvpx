@@ -17,10 +17,10 @@ int vp9_start_decode(BOOL_DECODER *br,
                      const unsigned char *source,
                      unsigned int source_sz) {
   br->user_buffer_end = source + source_sz;
-  br->user_buffer     = source;
-  br->value    = 0;
-  br->count    = -8;
-  br->range    = 255;
+  br->user_buffer = source;
+  br->value = 0;
+  br->count = -8;
+  br->range = 255;
 
   if (source_sz && !source)
     return 1;
@@ -33,16 +33,27 @@ int vp9_start_decode(BOOL_DECODER *br,
 
 
 void vp9_bool_decoder_fill(BOOL_DECODER *br) {
-  const unsigned char *bufptr;
-  const unsigned char *bufend;
-  VP9_BD_VALUE         value;
-  int                  count;
-  bufend = br->user_buffer_end;
-  bufptr = br->user_buffer;
-  value = br->value;
-  count = br->count;
+  const unsigned char *bufptr = br->user_buffer;
+  const unsigned char *bufend = br->user_buffer_end;
+  VP9_BD_VALUE value = br->value;
+  int count = br->count;
+  int shift = VP9_BD_VALUE_SIZE - 8 - (count + 8);
+  int loop_end = 0;
+  int bits_left = (int)((bufend - bufptr)*CHAR_BIT);
+  int x = shift + CHAR_BIT - bits_left;
 
-  VP9DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
+  if (x >= 0) {
+    count += VP9_LOTS_OF_BITS;
+    loop_end = x;
+  }
+
+  if (x < 0 || bits_left) {
+    while (shift >= loop_end) {
+      count += CHAR_BIT;
+      value |= (VP9_BD_VALUE)*bufptr++ << shift;
+      shift -= CHAR_BIT;
+    }
+  }
 
   br->user_buffer = bufptr;
   br->value = value;
