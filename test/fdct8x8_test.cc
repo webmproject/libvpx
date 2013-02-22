@@ -141,7 +141,7 @@ TEST(VP9Fdct8x8Test, ExtremalCheck) {
 
     // Initialize a test block with input range {-255, 255}.
     for (int j = 0; j < 64; ++j)
-      test_input_block[j] = rnd.Rand8() % 2 ? 255 : -255;
+      test_input_block[j] = rnd.Rand8() % 2 ? 255 : -256;
 
     const int pitch = 16;
     vp9_short_fdct8x8_c(test_input_block, test_temp_block, pitch);
