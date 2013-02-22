@@ -410,23 +410,6 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
             vp9_bits_per_mb(cpi->common.frame_type, Q)) *
            cpi->common.MBs) / (1 << BPER_MB_NORMBITS));
 
-  // Make some allowance for cpi->zbin_over_quant
-  if (cpi->zbin_over_quant > 0) {
-    int Z = cpi->zbin_over_quant;
-    double Factor = 0.99;
-    double factor_adjustment = 0.01 / 256.0; // (double)ZBIN_OQ_MAX;
-
-    while (Z > 0) {
-      Z--;
-      projected_size_based_on_q =
-        (int)(Factor * projected_size_based_on_q);
-      Factor += factor_adjustment;
-
-      if (Factor  >= 0.999)
-        Factor = 0.999;
-    }
-  }
-
   // Work out a size correction factor.
   // if ( cpi->this_frame_target > 0 )
   //  correction_factor = (100 * cpi->projected_frame_size) / cpi->this_frame_target;
@@ -488,9 +471,6 @@ int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
   int bits_per_mb_at_this_q;
   double correction_factor;
 
-  // Reset Zbin OQ value
-  cpi->zbin_over_quant = 0;
-
   // Select the appropriate correction factor based upon type of frame.
   if (cpi->common.frame_type == KEY_FRAME)
     correction_factor = cpi->key_frame_rate_correction_factor;
@@ -524,46 +504,6 @@ int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
     } else
       last_error = bits_per_mb_at_this_q - target_bits_per_mb;
   } while (++i <= cpi->active_worst_quality);
-
-
-  // If we are at MAXQ then enable Q over-run which seeks to claw back additional bits through things like
-  // the RD multiplier and zero bin size.
-  if (Q >= MAXQ) {
-    int zbin_oqmax;
-
-    double Factor = 0.99;
-    double factor_adjustment = 0.01 / 256.0; // (double)ZBIN_OQ_MAX;
-
-    if (cpi->common.frame_type == KEY_FRAME)
-      zbin_oqmax = 0; // ZBIN_OQ_MAX/16
-    else if (cpi->refresh_alt_ref_frame
-             || (cpi->refresh_golden_frame && !cpi->source_alt_ref_active))
-      zbin_oqmax = 16;
-    else
-      zbin_oqmax = ZBIN_OQ_MAX;
-
-    // Each incrment in the zbin is assumed to have a fixed effect on bitrate. This is not of course true.
-    // The effect will be highly clip dependent and may well have sudden steps.
-    // The idea here is to acheive higher effective quantizers than the normal maximum by expanding the zero
-    // bin and hence decreasing the number of low magnitude non zero coefficients.
-    while (cpi->zbin_over_quant < zbin_oqmax) {
-      cpi->zbin_over_quant++;
-
-      if (cpi->zbin_over_quant > zbin_oqmax)
-        cpi->zbin_over_quant = zbin_oqmax;
-
-      // Adjust bits_per_mb_at_this_q estimate
-      bits_per_mb_at_this_q = (int)(Factor * bits_per_mb_at_this_q);
-      Factor += factor_adjustment;
-
-      if (Factor  >= 0.999)
-        Factor = 0.999;
-
-      if (bits_per_mb_at_this_q <= target_bits_per_mb)    // Break out if we get down to the target rate
-        break;
-    }
-
-  }
 
   return Q;
 }

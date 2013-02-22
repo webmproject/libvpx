@@ -484,8 +484,7 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
 
   // Y
   zbin_extra = (cpi->common.Y1dequant[QIndex][1] *
-                (cpi->zbin_over_quant +
-                 cpi->zbin_mode_boost +
+                (cpi->zbin_mode_boost +
                  x->act_zbin_adj)) >> 7;
 
   for (i = 0; i < 16; i++) {
@@ -504,8 +503,7 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
 
   // UV
   zbin_extra = (cpi->common.UVdequant[QIndex][1] *
-                (cpi->zbin_over_quant +
-                 cpi->zbin_mode_boost +
+                (cpi->zbin_mode_boost +
                  x->act_zbin_adj)) >> 7;
 
   for (i = 16; i < 24; i++) {
@@ -533,8 +531,7 @@ void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x) {
 
   // Y
   zbin_extra = (cpi->common.Y1dequant[QIndex][1] *
-                (cpi->zbin_over_quant +
-                 cpi->zbin_mode_boost +
+                (cpi->zbin_mode_boost +
                  x->act_zbin_adj)) >> 7;
   for (i = 0; i < 16; i++) {
     x->block[i].zbin_extra = (int16_t)zbin_extra;
@@ -542,8 +539,7 @@ void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x) {
 
   // UV
   zbin_extra = (cpi->common.UVdequant[QIndex][1] *
-                (cpi->zbin_over_quant +
-                 cpi->zbin_mode_boost +
+                (cpi->zbin_mode_boost +
                  x->act_zbin_adj)) >> 7;
 
   for (i = 16; i < 24; i++) {

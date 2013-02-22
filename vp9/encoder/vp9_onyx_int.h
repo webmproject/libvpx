@@ -53,7 +53,6 @@
 #define GF_ZEROMV_ZBIN_BOOST 12
 #define LF_ZEROMV_ZBIN_BOOST 6
 #define MV_ZBIN_BOOST        4
-#define ZBIN_OQ_MAX 192
 
 #define VP9_TEMPORAL_ALT_REF 1
 
@@ -421,7 +420,6 @@ typedef struct VP9_COMP {
   double tot_q;
   double avg_q;
 
-  int zbin_over_quant;
   int zbin_mode_boost;
   int zbin_mode_boost_enabled;
 

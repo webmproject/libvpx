@@ -217,16 +217,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
 
   cpi->RDMULT = compute_rd_mult(QIndex);
 
-  // Extend rate multiplier along side quantizer zbin increases
-  if (cpi->zbin_over_quant  > 0) {
-    double oq_factor;
-
-    // Experimental code using the same basic equation as used for Q above
-    // The units of cpi->zbin_over_quant are 1/128 of Q bin size
-    oq_factor = 1.0 + ((double)0.0015625 * cpi->zbin_over_quant);
-    cpi->RDMULT = (int)((double)cpi->RDMULT * oq_factor * oq_factor);
-  }
-
   if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     if (cpi->twopass.next_iiratio > 31)
       cpi->RDMULT += (cpi->RDMULT * rd_iifactor[31]) >> 4;
