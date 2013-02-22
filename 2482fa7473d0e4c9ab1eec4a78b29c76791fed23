@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//gAs\u003d",
+        "filename": "vp9/decoder/vp9_dboolhuff.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-22T05:15:54Z",
+      "side": 1,
+      "message": "unnecessary parens, though it may be better to rewrite with the decrement after the return.. this is unnecessarily clever.",
+      "revId": "2482fa7473d0e4c9ab1eec4a78b29c76791fed23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//gAk\u003d",
+        "filename": "vp9/decoder/vp9_dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-22T05:15:54Z",
+      "side": 1,
+      "message": "unnecessary cast",
+      "revId": "2482fa7473d0e4c9ab1eec4a78b29c76791fed23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//gA0\u003d",
+        "filename": "vp9/encoder/vp9_treewriter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-22T05:15:54Z",
+      "side": 1,
+      "message": "spaces around *. Optionally, could write this as\n\n  return cost_branch256(ct, p) \u003e\u003e 8;\n\nto make it clear that the calculation is the same. your call.",
+      "revId": "2482fa7473d0e4c9ab1eec4a78b29c76791fed23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//gAw\u003d",
+        "filename": "vp9/encoder/vp9_treewriter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-22T05:15:54Z",
+      "side": 1,
+      "message": "spaces around *",
+      "revId": "2482fa7473d0e4c9ab1eec4a78b29c76791fed23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
