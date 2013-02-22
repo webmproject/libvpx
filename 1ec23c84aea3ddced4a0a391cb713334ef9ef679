@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//f1I\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-22T16:26:15Z",
+      "side": 1,
+      "message": "it\u0027d be helpful to have some detail here.",
+      "revId": "1ec23c84aea3ddced4a0a391cb713334ef9ef679",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
