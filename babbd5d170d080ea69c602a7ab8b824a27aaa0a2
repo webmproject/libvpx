@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//fyc\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2300,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-02-22T17:11:54Z",
+      "side": 1,
+      "message": "just temporarily brought this back, so that we can observe bit-rate and psnr per frame for debug purpose. maybe we could remove these two places later?",
+      "parentUuid": "AAAAVH//gBU\u003d",
+      "revId": "babbd5d170d080ea69c602a7ab8b824a27aaa0a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//gBQ\u003d",
         "filename": "vpxenc.c",
         "patchSetId": 2
