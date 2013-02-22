@@ -25,7 +25,7 @@ using libvpx_test::ACMRandom;
 
 namespace {
 
-TEST(Vp9FdctTest, SignBiasCheck) {
+TEST(Vp9Fdct4x4Test, SignBiasCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int16_t test_input_block[16];
   int16_t test_output_block[16];
@@ -88,7 +88,7 @@ TEST(Vp9FdctTest, SignBiasCheck) {
   }
 };
 
-TEST(Vp9FdctTest, RoundTripErrorCheck) {
+TEST(Vp9Fdct4x4Test, RoundTripErrorCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int max_error = 0;
   double total_error = 0;
