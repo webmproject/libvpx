@@ -587,7 +587,7 @@ typedef struct VP8_COMP
         /* Error score of frames still to be coded in kf group */
         int64_t kf_group_error_left;
         /* Projected Bits available for a group including 1 GF or ARF */
-        int gf_group_bits;
+        int64_t gf_group_bits;
         /* Bits for the golden frame or ARF */
         int gf_bits;
         int alt_extra_bits;

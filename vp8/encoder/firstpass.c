@@ -2131,8 +2131,10 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     /* Clip cpi->twopass.gf_group_bits based on user supplied data rate
      * variability limit (cpi->oxcf.two_pass_vbrmax_section)
      */
-    if (cpi->twopass.gf_group_bits > max_bits * cpi->baseline_gf_interval)
-        cpi->twopass.gf_group_bits = max_bits * cpi->baseline_gf_interval;
+    if (cpi->twopass.gf_group_bits >
+        (int64_t)max_bits * cpi->baseline_gf_interval)
+        cpi->twopass.gf_group_bits =
+            (int64_t)max_bits * cpi->baseline_gf_interval;
 
     /* Reset the file position */
     reset_fpf_position(cpi, start_pos);
