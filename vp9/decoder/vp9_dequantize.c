@@ -45,14 +45,13 @@ static void add_constant_residual(const int16_t diff, const uint8_t *pred,
 }
 
 void vp9_dequantize_b_c(BLOCKD *d) {
-
   int i;
-  int16_t *DQ  = d->dqcoeff;
-  const int16_t *Q   = d->qcoeff;
-  const int16_t *DQC = d->dequant;
+  int16_t *dq = d->dqcoeff;
+  const int16_t *q = d->qcoeff;
+  const int16_t *dqc = d->dequant;
 
   for (i = 0; i < 16; i++) {
-    DQ[i] = Q[i] * DQC[i];
+    dq[i] = q[i] * dqc[i];
   }
 }
 
@@ -91,9 +90,9 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
     /* All 0 DCT coefficient */
     vp9_copy_mem8x8(pred, pitch, dest, stride);
   } else if (eob > 0) {
-    input[0] = dq[0] * input[0];
+    input[0] *= dq[0];
     for (i = 1; i < 64; i++) {
-      input[i] = dq[1] * input[i];
+      input[i] *= dq[1];
     }
 
 #if CONFIG_INTHT
@@ -114,7 +113,7 @@ void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
   int i;
 
   for (i = 0; i < 16; i++) {
-    input[i] = dq[i] * input[i];
+    input[i] *= dq[i];
   }
 
   /* the idct halves ( >> 1) the pitch */
@@ -126,15 +125,15 @@ void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
 }
 
 void vp9_dequant_dc_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
-                               uint8_t *dest, int pitch, int stride, int Dc) {
+                               uint8_t *dest, int pitch, int stride, int dc) {
   int i;
   int16_t output[16];
   int16_t *diff_ptr = output;
 
-  input[0] = (int16_t)Dc;
+  input[0] = dc;
 
   for (i = 1; i < 16; i++) {
-    input[i] = dq[i] * input[i];
+    input[i] *= dq[i];
   }
 
   /* the idct halves ( >> 1) the pitch */
@@ -153,7 +152,7 @@ void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
   int i;
 
   for (i = 0; i < 16; i++) {
-    input[i] = dq[i] * input[i];
+    input[i] *= dq[i];
   }
 
   vp9_short_inv_walsh4x4_x8_c(input, output, 4 << 1);
@@ -174,7 +173,7 @@ void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
   input[0] = (int16_t)dc;
 
   for (i = 1; i < 16; i++) {
-    input[i] = dq[i] * input[i];
+    input[i] *= dq[i];
   }
 
   vp9_short_inv_walsh4x4_x8_c(input, output, 4 << 1);
@@ -235,7 +234,7 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
   } else {
     // recover quantizer for 4 4x4 blocks
     for (i = 1; i < 64; i++) {
-      input[i] = input[i] * dq[1];
+      input[i] *= dq[1];
     }
     // the idct halves ( >> 1) the pitch
     vp9_short_idct8x8_c(input, output, 16);
@@ -258,11 +257,11 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
     /* All 0 DCT coefficient */
     vp9_copy_mem16x16(pred, pitch, dest, stride);
   } else if (eob > 0) {
-    input[0]= input[0] * dq[0];
+    input[0] *= dq[0];
 
     // recover quantizer for 4 4x4 blocks
     for (i = 1; i < 256; i++)
-      input[i] = input[i] * dq[1];
+      input[i] *= dq[1];
 
     // inverse hybrid transform
 #if CONFIG_INTHT16X16
@@ -324,11 +323,11 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
 
     add_residual(diff_ptr, pred, pitch, dest, stride, 16, 16);
   } else {
-    input[0]= input[0] * dq[0];
+    input[0] *= dq[0];
 
     // recover quantizer for 4 4x4 blocks
     for (i = 1; i < 256; i++)
-      input[i] = input[i] * dq[1];
+      input[i] *= dq[1];
 
     // the idct halves ( >> 1) the pitch
     vp9_short_idct16x16_c(input, output, 32);

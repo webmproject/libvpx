@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <math.h>
+#include <limits.h>
 
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/encoder/vp9_onyx_int.h"
@@ -25,9 +27,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_swapyv12buffer.h"
 #include "vpx_ports/vpx_timer.h"
-
-#include <math.h>
-#include <limits.h>
 
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
 #define ALT_REF_SUBPEL_ENABLED 1 // dis/enable subpel in MC AltRef filtering
@@ -376,11 +375,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   mbd->pre.v_buffer = v_buffer;
 }
 
-void vp9_temporal_filter_prepare
-(
-  VP9_COMP *cpi,
-  int distance
-) {
+void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   int frame = 0;
 
   int num_frames_backward = 0;

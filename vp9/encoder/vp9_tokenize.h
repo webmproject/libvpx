@@ -31,27 +31,28 @@ typedef struct {
 typedef int64_t vp9_coeff_accum[COEF_BANDS][PREV_COEF_CONTEXTS]
                                [MAX_ENTROPY_TOKENS];
 
-extern int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd);
-extern int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd);
-extern int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd);
-extern int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd);
-extern int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd);
-extern int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd);
-extern int vp9_sbuv_is_skippable_16x16(MACROBLOCKD *xd);
+int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd);
+int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd);
+int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd);
+int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd);
+int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd);
+int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd);
+int vp9_sbuv_is_skippable_16x16(MACROBLOCKD *xd);
 
 struct VP9_COMP;
 
-extern void vp9_tokenize_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                            TOKENEXTRA **t, int dry_run);
-extern void vp9_tokenize_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                            TOKENEXTRA **t, int dry_run);
+void vp9_tokenize_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
+                     TOKENEXTRA **t, int dry_run);
+void vp9_tokenize_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
+                     TOKENEXTRA **t, int dry_run);
 
-extern void vp9_stuff_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                         TOKENEXTRA **t, int dry_run);
-extern void vp9_stuff_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                         TOKENEXTRA **t, int dry_run);
+void vp9_stuff_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
+                  TOKENEXTRA **t, int dry_run);
+void vp9_stuff_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
+                  TOKENEXTRA **t, int dry_run);
 
-extern void vp9_fix_contexts_sb(MACROBLOCKD *xd);
+void vp9_fix_contexts_sb(MACROBLOCKD *xd);
+
 #ifdef ENTROPY_STATS
 void init_context_counters();
 void print_context_counters();

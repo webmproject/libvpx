@@ -16,11 +16,11 @@
 #define MIN_TILE_WIDTH 256
 #define MAX_TILE_WIDTH 4096
 
-extern void vp9_get_tile_col_offsets(VP9_COMMON *cm, int tile_col_idx);
+void vp9_get_tile_col_offsets(VP9_COMMON *cm, int tile_col_idx);
 
-extern void vp9_get_tile_row_offsets(VP9_COMMON *cm, int tile_row_idx);
+void vp9_get_tile_row_offsets(VP9_COMMON *cm, int tile_row_idx);
 
-extern void vp9_get_tile_n_bits(VP9_COMMON *cm, int *min_log2_n_tiles,
-                                int *delta_log2_n_tiles);
+void vp9_get_tile_n_bits(VP9_COMMON *cm, int *min_log2_n_tiles,
+                         int *delta_log2_n_tiles);
 
 #endif  // VP9_COMMON_VP9_TILE_COMMON_H_

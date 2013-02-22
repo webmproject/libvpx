@@ -530,8 +530,8 @@ void vp9_short_idct8x8_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 8 + i];
     idct8_1d(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-        output[j * short_pitch + i] = (temp_out[j] + 16) >> 5;
-    }
+      output[j * short_pitch + i] = (temp_out[j] + 16) >> 5;
+  }
 }
 
 #if CONFIG_INTHT4X4
@@ -782,18 +782,14 @@ void vp9_short_idct10_8x8_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 8 + i];
     idct8_1d(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-        output[j * short_pitch + i] = (temp_out[j] + 16) >> 5;
-    }
+      output[j * short_pitch + i] = (temp_out[j] + 16) >> 5;
+  }
 }
 
 void vp9_short_idct1_8x8_c(int16_t *input, int16_t *output) {
-  int tmp;
-  int16_t out;
-  tmp = input[0] * cospi_16_64;
-  out = dct_const_round_shift(tmp);
-  tmp = out * cospi_16_64;
-  out = dct_const_round_shift(tmp);
-  *output = (out + 16) >> 5;
+  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
+  out = dct_const_round_shift(out * cospi_16_64);
+  output[0] = (out + 16) >> 5;
 }
 
 void idct16_1d(int16_t *input, int16_t *output) {
@@ -980,8 +976,8 @@ void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 16 + i];
     idct16_1d(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
-        output[j * 16 + i] = (temp_out[j] + 32) >> 6;
-    }
+      output[j * 16 + i] = (temp_out[j] + 32) >> 6;
+  }
 }
 
 #if CONFIG_INTHT16X16
@@ -1638,11 +1634,7 @@ void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
 }
 
 void vp9_short_idct1_32x32_c(int16_t *input, int16_t *output) {
-  int tmp;
-  int16_t out;
-  tmp = input[0] * cospi_16_64;
-  out = dct_const_round_shift(tmp);
-  tmp = out * cospi_16_64;
-  out = dct_const_round_shift(tmp);
-  *output = (out + 32) >> 6;
+  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
+  out = dct_const_round_shift(out * cospi_16_64);
+  output[0] = (out + 32) >> 6;
 }

@@ -14,8 +14,8 @@
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
+#include <math.h>
 
-#include "math.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_modecont.h"
 #include "vp9/common/vp9_common.h"
@@ -27,8 +27,8 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_seg_common.h"
 
-#define MIN_BPB_FACTOR          0.005
-#define MAX_BPB_FACTOR          50
+#define MIN_BPB_FACTOR 0.005
+#define MAX_BPB_FACTOR 50
 
 #ifdef MODE_STATS
 extern unsigned int y_modes[VP9_YMODES];
