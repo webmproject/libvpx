@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//fz0\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-22T16:57:36Z",
+      "side": 1,
+      "message": "I wonder if it\u0027d be better to use a straight vector instead of doing a tree for these. Something like:\n\n  max \u003d decode_bool(prob[0]);\n  if(max) \n    for (i \u003d 1; i \u003c K; i++) {\n      if (!decode_bool(prob[i])\n        break;\n      max \u003c\u003c\u003d 1;\n    }\n\nSeems like it should follow the same distribution of what you have here, and be marginally faster.",
+      "revId": "e508ac7ed8c45bcfdc7c1bbee956ec410e745f6f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
