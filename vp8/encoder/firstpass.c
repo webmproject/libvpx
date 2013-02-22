@@ -858,7 +858,9 @@ skip_motion_search:
      */
     if ((cm->current_video_frame > 0) &&
         (cpi->twopass.this_frame_stats.pcnt_inter > 0.20) &&
-        ((cpi->twopass.this_frame_stats.intra_error / cpi->twopass.this_frame_stats.coded_error) > 2.0))
+        ((cpi->twopass.this_frame_stats.intra_error /
+          DOUBLE_DIVIDE_CHECK(cpi->twopass.this_frame_stats.coded_error)) >
+         2.0))
     {
         vp8_yv12_copy_frame(lst_yv12, gld_yv12);
     }
