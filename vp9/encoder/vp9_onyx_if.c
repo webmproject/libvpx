@@ -833,7 +833,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   }
 
   {
-    int y_stride = cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].y_stride;
+    int y_stride = cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]].y_stride;
 
     if (cpi->sf.search_method == NSTEP) {
       vp9_init3smotion_compensation(&cpi->mb, y_stride);
@@ -1754,7 +1754,7 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 #endif
       if (cpi->b_calculate_psnr) {
         YV12_BUFFER_CONFIG *lst_yv12 =
-            &cpi->common.yv12_fb[cpi->common.active_ref_idx[cpi->lst_fb_idx]];
+            &cpi->common.yv12_fb[cpi->common.ref_frame_map[cpi->lst_fb_idx]];
         double samples = 3.0 / 2 * cpi->count * lst_yv12->y_width * lst_yv12->y_height;
         double total_psnr = vp9_mse2psnr(samples, 255.0, cpi->total_sq_error);
         double total_psnr2 = vp9_mse2psnr(samples, 255.0, cpi->total_sq_error2);
@@ -2099,11 +2099,11 @@ int vp9_get_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
   int ref_fb_idx;
 
   if (ref_frame_flag == VP9_LAST_FLAG)
-    ref_fb_idx = cm->active_ref_idx[cpi->lst_fb_idx];
+    ref_fb_idx = cm->ref_frame_map[cpi->lst_fb_idx];
   else if (ref_frame_flag == VP9_GOLD_FLAG)
-    ref_fb_idx = cm->active_ref_idx[cpi->gld_fb_idx];
+    ref_fb_idx = cm->ref_frame_map[cpi->gld_fb_idx];
   else if (ref_frame_flag == VP9_ALT_FLAG)
-    ref_fb_idx = cm->active_ref_idx[cpi->alt_fb_idx];
+    ref_fb_idx = cm->ref_frame_map[cpi->alt_fb_idx];
   else
     return -1;
 
@@ -2120,11 +2120,11 @@ int vp9_set_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
   int ref_fb_idx;
 
   if (ref_frame_flag == VP9_LAST_FLAG)
-    ref_fb_idx = cm->active_ref_idx[cpi->lst_fb_idx];
+    ref_fb_idx = cm->ref_frame_map[cpi->lst_fb_idx];
   else if (ref_frame_flag == VP9_GOLD_FLAG)
-    ref_fb_idx = cm->active_ref_idx[cpi->gld_fb_idx];
+    ref_fb_idx = cm->ref_frame_map[cpi->gld_fb_idx];
   else if (ref_frame_flag == VP9_ALT_FLAG)
-    ref_fb_idx = cm->active_ref_idx[cpi->alt_fb_idx];
+    ref_fb_idx = cm->ref_frame_map[cpi->alt_fb_idx];
   else
     return -1;
 
@@ -2480,9 +2480,9 @@ static void update_reference_frames(VP9_COMP * const cpi) {
   // If any buffer copy / swapping is signaled it should be done here.
   if (cm->frame_type == KEY_FRAME) {
     ref_cnt_fb(cm->fb_idx_ref_cnt,
-               &cm->active_ref_idx[cpi->gld_fb_idx], cm->new_fb_idx);
+               &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
     ref_cnt_fb(cm->fb_idx_ref_cnt,
-               &cm->active_ref_idx[cpi->alt_fb_idx], cm->new_fb_idx);
+               &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
   } else if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
     /* Preserve the previously existing golden frame and update the frame in
      * the alt ref slot instead. This is highly specific to the current use of
@@ -2496,7 +2496,7 @@ static void update_reference_frames(VP9_COMP * const cpi) {
     int tmp;
 
     ref_cnt_fb(cm->fb_idx_ref_cnt,
-               &cm->active_ref_idx[cpi->alt_fb_idx], cm->new_fb_idx);
+               &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
 
     tmp = cpi->alt_fb_idx;
     cpi->alt_fb_idx = cpi->gld_fb_idx;
@@ -2504,18 +2504,18 @@ static void update_reference_frames(VP9_COMP * const cpi) {
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       ref_cnt_fb(cm->fb_idx_ref_cnt,
-                 &cm->active_ref_idx[cpi->alt_fb_idx], cm->new_fb_idx);
+                 &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
     }
 
     if (cpi->refresh_golden_frame) {
       ref_cnt_fb(cm->fb_idx_ref_cnt,
-                 &cm->active_ref_idx[cpi->gld_fb_idx], cm->new_fb_idx);
+                 &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
     }
   }
 
   if (cpi->refresh_last_frame) {
     ref_cnt_fb(cm->fb_idx_ref_cnt,
-               &cm->active_ref_idx[cpi->lst_fb_idx], cm->new_fb_idx);
+               &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
   }
 }
 
@@ -2604,7 +2604,7 @@ static void scale_references(VP9_COMP *cpi) {
   int i;
 
   for (i = 0; i < 3; i++) {
-    YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[cm->active_ref_idx[i]];
+    YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[cm->ref_frame_map[i]];
 
     if (ref->y_width != cm->Width || ref->y_height != cm->Height) {
       int new_fb = get_free_fb(cm);
@@ -2616,8 +2616,8 @@ static void scale_references(VP9_COMP *cpi) {
       scale_and_extend_frame(ref, &cm->yv12_fb[new_fb]);
       cpi->scaled_ref_idx[i] = new_fb;
     } else {
-      cpi->scaled_ref_idx[i] = cm->active_ref_idx[i];
-      cm->fb_idx_ref_cnt[cm->active_ref_idx[i]]++;
+      cpi->scaled_ref_idx[i] = cm->ref_frame_map[i];
+      cm->fb_idx_ref_cnt[cm->ref_frame_map[i]]++;
     }
   }
 }
@@ -3644,8 +3644,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     FILE *recon_file;
     sprintf(filename, "enc%04d.yuv", (int) cm->current_video_frame);
     recon_file = fopen(filename, "wb");
-    fwrite(cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].buffer_alloc,
-           cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]].frame_size,
+    fwrite(cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]].buffer_alloc,
+           cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]].frame_size,
            1, recon_file);
     fclose(recon_file);
   }
@@ -3866,6 +3866,11 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
    */
   cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
   cm->new_fb_idx = get_free_fb(cm);
+
+  /* Get the mapping of L/G/A to the reference buffer pool */
+  cm->active_ref_idx[0] = cm->ref_frame_map[cpi->lst_fb_idx];
+  cm->active_ref_idx[1] = cm->ref_frame_map[cpi->gld_fb_idx];
+  cm->active_ref_idx[2] = cm->ref_frame_map[cpi->alt_fb_idx];
 
   /* Reset the frame pointers to the current frame size */
   vp8_yv12_realloc_frame_buffer(&cm->yv12_fb[cm->new_fb_idx],
