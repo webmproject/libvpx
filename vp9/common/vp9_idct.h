@@ -16,8 +16,8 @@
 // Constants and Macros used by all idct/dct functions
 #define DCT_CONST_BITS 14
 #define DCT_CONST_ROUNDING  (1 << (DCT_CONST_BITS - 1))
-// Constants are 16384 * cos(kPi/64) where k = 1 to 31.
-// Note: sin(kPi/64) = cos((32-k)Pi/64)
+// Constants are round(16384 * cos(k*Pi/64)) where k = 1 to 31.
+// Note: sin(k*Pi/64) = cos((32-k)*Pi/64)
 static const int cospi_1_64  = 16364;
 static const int cospi_2_64  = 16305;
 static const int cospi_3_64  = 16207;

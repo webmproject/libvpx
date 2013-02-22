@@ -11,9 +11,9 @@
 #ifndef VP9_COMMON_VP9_TEXTBLIT_H_
 #define VP9_COMMON_VP9_TEXTBLIT_H_
 
-extern void vp9_blit_text(const char *msg, unsigned char *address,
-                          const int pitch);
-extern void vp9_blit_line(int x0, int x1, int y0, int y1,
-                          unsigned char *image, const int pitch);
+void vp9_blit_text(const char *msg, unsigned char *address, int pitch);
+
+void vp9_blit_line(int x0, int x1, int y0, int y1, unsigned char *image,
+                   int pitch);
 
 #endif  // VP9_COMMON_VP9_TEXTBLIT_H_
