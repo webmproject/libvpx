@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//gBU\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2300,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-22T16:16:18Z",
+      "side": 1,
+      "message": "unrelated. probably a merge conflict?",
+      "revId": "babbd5d170d080ea69c602a7ab8b824a27aaa0a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//gBQ\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2364,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-22T16:16:18Z",
+      "side": 1,
+      "message": "here too.",
+      "revId": "babbd5d170d080ea69c602a7ab8b824a27aaa0a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
