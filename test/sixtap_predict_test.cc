@@ -61,9 +61,9 @@ class SixtapPredictTest : public PARAMS(int, int, sixtap_predict_fn_t) {
     width_ = GET_PARAM(0);
     height_ = GET_PARAM(1);
     sixtap_predict_ = GET_PARAM(2);
-    memset(src_, 0, sizeof(src_));
-    memset(dst_, 0, sizeof(dst_));
-    memset(dst_c_, 0, sizeof(dst_c_));
+    memset(src_, 0, kSrcSize);
+    memset(dst_, 0, kDstSize);
+    memset(dst_c_, 0, kDstSize);
   }
 
   int width_;
