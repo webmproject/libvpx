@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//e4s\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "This commit does remove them from that table (which now (later) needs to be renamed)",
+      "parentUuid": "AAAAVH//e6Y\u003d",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//e6U\u003d",
         "filename": "vp9/common/vp9_convolve.c",
         "patchSetId": 2
@@ -30,6 +48,41 @@
       "writtenOn": "2013-02-23T17:24:18Z",
       "side": 1,
       "message": "Why 39?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e4o\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "the largest value of intermediate_height, for y_step_q4 \u003d\u003d 32 and h \u003d\u003d 16. Will add a comment.",
+      "parentUuid": "AAAAVH//e6U\u003d",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e4k\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "This is broken for upscaling. Needs a floor of h.",
       "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//e4Y\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "I think there are cases where we\u0027d want to smooth in only one direction, and in that mode, not filtering at 0,0 is consistent. It may be useful to have a mode where you smooth in both directions unconditionally, but I think it\u0027d be best implemented as a separate filter mode, EIGHTTAP_SMOOTH_2D or something.",
+      "parentUuid": "AAAAVH//e6s\u003d",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//e6k\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 2
@@ -64,6 +135,24 @@
       "writtenOn": "2013-02-23T17:24:18Z",
       "side": 1,
       "message": "No divisions in code that is part of the spec, and can\u0027t this just call scale_motion_vector_component_q4 internally?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e4Q\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "as mentioned before, this division will go away eventually. Will make this call the _q4 version.",
+      "parentUuid": "AAAAVH//e6k\u003d",
       "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//e4M\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "The offset to use changes from block to block, and is more accurately calculated from the actual mb index rather than a fixed offset from the base of the SB/MB.",
+      "parentUuid": "AAAAVH//e6c\u003d",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//e6Q\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 2
@@ -98,6 +205,24 @@
       "writtenOn": "2013-02-23T17:24:18Z",
       "side": 1,
       "message": "doesn\u0027t this crash? I mean, if prev_mi is 2x2 MBs and mi is 4x4 MBs, what happens when we reference the bottomright one? Shouldn\u0027t prev_mi be NULL after a scaling event?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e4I\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1338,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "prev_mi isn\u0027t referenced if the previous frame was a different resolution. In this commit, because it\u0027s only used for ZEROMV, and in later commits, because it\u0027s explicitly disabled.",
+      "parentUuid": "AAAAVH//e6Q\u003d",
       "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//e4E\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1433,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "beyond the initial frame size, in this implementation. You can go down, then back up. Could make the max frame size allowed a separate parameter in the future if you want to avoid doing malloc more than once. This restriction isn\u0027t intended to be normative wrt the spec. I\u0027ll need to resolve this as part of writing a test app for spatial layers.",
+      "parentUuid": "AAAAVH//e6M\u003d",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//e6I\u003d",
         "filename": "vp9/encoder/vp9_onyx_if.c",
         "patchSetId": 2
@@ -138,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//e38\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2181,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "I can revert this, this was a problem related to odd-sized images.",
+      "parentUuid": "AAAAVH//e6I\u003d",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//e6E\u003d",
         "filename": "vp9/encoder/vp9_onyx_if.c",
         "patchSetId": 2
@@ -149,6 +310,24 @@
       "writtenOn": "2013-02-23T17:24:18Z",
       "side": 1,
       "message": "When is this required?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e34\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2668,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:07:26Z",
+      "side": 1,
+      "message": "if (cm-\u003eWidth !\u003d cpi-\u003eun_scaled_source-\u003ey_width ||\n      cm-\u003eHeight !\u003d cpi-\u003eun_scaled_source-\u003ey_height)\n\nif the height of the frame to produce isn\u0027t the same size as the frame that was passed in from the application.",
+      "parentUuid": "AAAAVH//e6E\u003d",
       "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
