@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//e54\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2628,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T18:49:44Z",
+      "side": 1,
+      "message": "Does this make the actual scaling filter part of the bitstream spec, or is this just used as a source for the motion search in the encoder-only (I think this is the case, just want to make sure)? In the first case, we should review this scaling filter itself also.",
+      "revId": "6ccdca0217321cc7f137471d11fccede8a4335ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e58\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3319,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T18:49:44Z",
+      "side": 1,
+      "message": "This probably needs a comment. What does this do? Does this do the motion search in a scale frame?\n\nSo what is the purpose here? It seems to me if you\u0027re going to scale the frame anyway, why not just do all operations on the scaled ref frame, and then not needing all these complicated scaling filter operations?\n\nAlso, the commit log says that the subpixel stepping is disabled for scaled filtering - if the ref is pre-scaled, why is that the case?",
+      "revId": "6ccdca0217321cc7f137471d11fccede8a4335ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
