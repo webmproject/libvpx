@@ -246,9 +246,6 @@ EXPERIMENT_LIST="
     cnvcontext
     enable_6tap
     abovesprefmv
-    intht
-    intht4x4
-    intht16x16
 "
 CONFIG_LIST="
     external_build

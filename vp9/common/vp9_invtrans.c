@@ -25,13 +25,8 @@ void vp9_inverse_transform_mby_4x4(MACROBLOCKD *xd) {
   for (i = 0; i < 16; i++) {
     TX_TYPE tx_type = get_tx_type_4x4(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
-#if CONFIG_INTHT4X4
       vp9_short_iht4x4(xd->block[i].dqcoeff, xd->block[i].diff,
                        32, tx_type);
-#else
-      vp9_ihtllm(xd->block[i].dqcoeff, xd->block[i].diff, 32,
-                   tx_type, 4, xd->block[i].eob);
-#endif
     } else {
       vp9_inverse_transform_b_4x4(xd, i, 32);
     }
@@ -63,13 +58,8 @@ void vp9_inverse_transform_mby_8x8(MACROBLOCKD *xd) {
   for (i = 0; i < 9; i += 8) {
     TX_TYPE tx_type = get_tx_type_8x8(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
-#if CONFIG_INTHT
       vp9_short_iht8x8(xd->block[i].dqcoeff, xd->block[i].diff,
                            32, tx_type);
-#else
-      vp9_ihtllm(xd->block[i].dqcoeff, xd->block[i].diff, 32, tx_type, 8,
-                 xd->block[i].eob);
-#endif
     } else {
       vp9_inverse_transform_b_8x8(&blockd[i].dqcoeff[0],
                                   &blockd[i].diff[0], 32);
@@ -78,13 +68,8 @@ void vp9_inverse_transform_mby_8x8(MACROBLOCKD *xd) {
   for (i = 2; i < 11; i += 8) {
     TX_TYPE tx_type = get_tx_type_8x8(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
-#if CONFIG_INTHT
       vp9_short_iht8x8(xd->block[i + 2].dqcoeff, xd->block[i].diff,
                            32, tx_type);
-#else
-      vp9_ihtllm(xd->block[i + 2].dqcoeff, xd->block[i].diff, 32, tx_type, 8,
-                 xd->block[i + 2].eob);
-#endif
     } else {
       vp9_inverse_transform_b_8x8(&blockd[i + 2].dqcoeff[0],
                                   &blockd[i].diff[0], 32);
@@ -116,11 +101,7 @@ void vp9_inverse_transform_mby_16x16(MACROBLOCKD *xd) {
   BLOCKD *bd = &xd->block[0];
   TX_TYPE tx_type = get_tx_type_16x16(xd, bd);
   if (tx_type != DCT_DCT) {
-#if CONFIG_INTHT16X16
     vp9_short_iht16x16(bd->dqcoeff, bd->diff, 32, tx_type);
-#else
-    vp9_ihtllm(bd->dqcoeff, bd->diff, 32, tx_type, 16, bd->eob);
-#endif
   } else {
     vp9_inverse_transform_b_16x16(&xd->block[0].dqcoeff[0],
                                   &xd->block[0].diff[0], 32);

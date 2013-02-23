@@ -54,17 +54,9 @@ void vp9_encode_intra4x4block(MACROBLOCK *x, int ib) {
 
   tx_type = get_tx_type_4x4(&x->e_mbd, b);
   if (tx_type != DCT_DCT) {
-#if CONFIG_INTHT4X4
     vp9_short_fht4x4(be->src_diff, be->coeff, 32, tx_type);
-#else
-    vp9_fht(be->src_diff, 32, be->coeff, tx_type, 4);
-#endif
     vp9_ht_quantize_b_4x4(be, b, tx_type);
-#if CONFIG_INTHT4X4
     vp9_short_iht4x4(b->dqcoeff, b->diff, 32, tx_type);
-#else
-    vp9_ihtllm(b->dqcoeff, b->diff, 32, tx_type, 4, b->eob);
-#endif
   } else {
     x->fwd_txm4x4(be->src_diff, be->coeff, 32);
     x->quantize_b_4x4(be, b) ;
@@ -157,21 +149,10 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
 
     tx_type = get_tx_type_8x8(xd, &xd->block[ib]);
     if (tx_type != DCT_DCT) {
-#if CONFIG_INTHT
       vp9_short_fht8x8(be->src_diff, (x->block + idx)->coeff, 32, tx_type);
-#else
-      vp9_fht(be->src_diff, 32, (x->block + idx)->coeff,
-                tx_type, 8);
-#endif
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
-
-#if CONFIG_INTHT
       vp9_short_iht8x8(xd->block[idx].dqcoeff, xd->block[ib].diff,
                             32, tx_type);
-#else
-      vp9_ihtllm(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
-                   tx_type, 8, xd->block[idx].eob);
-#endif
     } else {
       x->fwd_txm8x8(be->src_diff, (x->block + idx)->coeff, 32);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
@@ -183,17 +164,9 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
       be = &x->block[ib + iblock[i]];
       tx_type = get_tx_type_4x4(xd, b);
       if (tx_type != DCT_DCT) {
-#if CONFIG_INTHT4X4
         vp9_short_fht4x4(be->src_diff, be->coeff, 32, tx_type);
-#else
-        vp9_fht_c(be->src_diff, 32, be->coeff, tx_type, 4);
-#endif
         vp9_ht_quantize_b_4x4(be, b, tx_type);
-#if CONFIG_INTHT4X4
         vp9_short_iht4x4(b->dqcoeff, b->diff, 32, tx_type);
-#else
-        vp9_ihtllm(b->dqcoeff, b->diff, 32, tx_type, 4, b->eob);
-#endif
       } else if (!(i & 1) && get_tx_type_4x4(xd, b + 1) == DCT_DCT) {
         x->fwd_txm8x4(be->src_diff, be->coeff, 32);
         x->quantize_b_4x4_pair(be, be + 1, b, b + 1);
