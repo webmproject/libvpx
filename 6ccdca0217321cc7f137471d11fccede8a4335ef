@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//e30\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2628,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:09:11Z",
+      "side": 1,
+      "message": "This usage is non-normative, though using a filter that the decoder has access to minimizes the residual. You could plug any scaler in here, or the application could do it, without affecting the basic functionality.",
+      "parentUuid": "AAAAVH//e54\u003d",
+      "revId": "6ccdca0217321cc7f137471d11fccede8a4335ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//e58\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-02-23T18:49:44Z",
       "side": 1,
       "message": "This probably needs a comment. What does this do? Does this do the motion search in a scale frame?\n\nSo what is the purpose here? It seems to me if you\u0027re going to scale the frame anyway, why not just do all operations on the scaled ref frame, and then not needing all these complicated scaling filter operations?\n\nAlso, the commit log says that the subpixel stepping is disabled for scaled filtering - if the ref is pre-scaled, why is that the case?",
+      "revId": "6ccdca0217321cc7f137471d11fccede8a4335ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e3w\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3319,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T23:09:11Z",
+      "side": 1,
+      "message": "I can put a comment in. Yes, this is effectively swapping out the frame for a scaled version of it in order to do motion search with the existing code. See an earlier commit for the reasoning behind scaling on-demand.\n\nThe commit message refers to disabling the use of the scaled reference frame when doing vp9_find_best_ref_mvs() and vp9_find_mv_refs(), since there aren\u0027t scaling versions of the 16x2/2x16 subpixel variance functions at this point.",
+      "parentUuid": "AAAAVH//e58\u003d",
       "revId": "6ccdca0217321cc7f137471d11fccede8a4335ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
