@@ -14,14 +14,14 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/common/vp9_common.h"
+
 static void add_residual(const int16_t *diff, const uint8_t *pred, int pitch,
                          uint8_t *dest, int stride, int width, int height) {
   int r, c;
 
   for (r = 0; r < height; r++) {
-    for (c = 0; c < width; c++) {
+    for (c = 0; c < width; c++)
       dest[c] = clip_pixel(diff[c] + pred[c]);
-    }
 
     dest += stride;
     diff += width;
@@ -35,9 +35,8 @@ static void add_constant_residual(const int16_t diff, const uint8_t *pred,
   int r, c;
 
   for (r = 0; r < height; r++) {
-    for (c = 0; c < width; c++) {
+    for (c = 0; c < width; c++)
       dest[c] = clip_pixel(diff + pred[c]);
-    }
 
     dest += stride;
     pred += pitch;
@@ -50,9 +49,8 @@ void vp9_dequantize_b_c(BLOCKD *d) {
   const int16_t *q = d->qcoeff;
   const int16_t *dqc = d->dequant;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; i++)
     dq[i] = q[i] * dqc[i];
-  }
 }
 
 
@@ -64,9 +62,8 @@ void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
   int16_t *diff_ptr = output;
   int i;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; i++)
     input[i] = dq[i] * input[i];
-  }
 
   vp9_short_iht4x4(input, output, 8, tx_type);
   vpx_memset(input, 0, 32);
@@ -86,9 +83,8 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
     vp9_copy_mem8x8(pred, pitch, dest, stride);
   } else if (eob > 0) {
     input[0] *= dq[0];
-    for (i = 1; i < 64; i++) {
+    for (i = 1; i < 64; i++)
       input[i] *= dq[1];
-    }
 
     vp9_short_iht8x8(input, output, 16, tx_type);
     vpx_memset(input, 0, 128);
@@ -103,9 +99,8 @@ void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
   int16_t *diff_ptr = output;
   int i;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; i++)
     input[i] *= dq[i];
-  }
 
   /* the idct halves ( >> 1) the pitch */
   vp9_short_idct4x4llm_c(input, output, 4 << 1);
@@ -123,9 +118,8 @@ void vp9_dequant_dc_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
 
   input[0] = dc;
 
-  for (i = 1; i < 16; i++) {
+  for (i = 1; i < 16; i++)
     input[i] *= dq[i];
-  }
 
   /* the idct halves ( >> 1) the pitch */
   vp9_short_idct4x4llm_c(input, output, 4 << 1);
@@ -142,9 +136,8 @@ void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
   int16_t *diff_ptr = output;
   int i;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; i++)
     input[i] *= dq[i];
-  }
 
   vp9_short_inv_walsh4x4_x8_c(input, output, 4 << 1);
 
@@ -161,11 +154,10 @@ void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
   int16_t output[16];
   int16_t *diff_ptr = output;
 
-  input[0] = (int16_t)dc;
+  input[0] = dc;
 
-  for (i = 1; i < 16; i++) {
+  for (i = 1; i < 16; i++)
     input[i] *= dq[i];
-  }
 
   vp9_short_inv_walsh4x4_x8_c(input, output, 4 << 1);
   vpx_memset(input, 0, 32);
@@ -224,9 +216,9 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
     add_residual(diff_ptr, pred, pitch, dest, stride, 8, 8);
   } else {
     // recover quantizer for 4 4x4 blocks
-    for (i = 1; i < 64; i++) {
+    for (i = 1; i < 64; i++)
       input[i] *= dq[1];
-    }
+
     // the idct halves ( >> 1) the pitch
     vp9_short_idct8x8_c(input, output, 16);
 
