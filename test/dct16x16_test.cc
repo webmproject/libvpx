@@ -289,7 +289,7 @@ TEST(VP9Idct16x16Test, AccuracyCheck) {
     }
   }
 }
-#if 0
+#if 1
 // we need enable fdct test once we re-do the 16 point fdct.
 TEST(VP9Fdct16x16Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
