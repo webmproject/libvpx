@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//e5M\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T22:56:17Z",
+      "side": 1,
+      "message": "right, my question was as to the method I want to use to replace the division, which is going to depend on whether I ever need the reciprocal of this ratio. It won\u0027t stay as a division forever.",
+      "parentUuid": "AAAAVH//e60\u003d",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//e64\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-02-23T17:07:08Z",
       "side": 1,
       "message": "so this assumes that the sinc-curve for the scaled case (particularly, its wavelength/period) is actually identical as it is for the unscaled case. For upscaling, that may be the case, but for downscaling, I don\u0027t think that\u0027s necessarily true. How do we handle that?\n\nAlso, as I\u0027ve said before, this switching of filter on a per-pixel basis will incur significant overhead in the scaling SIMD code. Do we have any evidence that this is faster/simpler/better/... than simply pre-scaling the whole reference?",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e48\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T22:56:17Z",
+      "side": 1,
+      "message": "The math works out as long as you\u0027re not downscaling by more than 2:1, so larger ratios are simply unsupported.\n\nMy approach lets you combine the subpixel part with the scaling,  so that it only takes as long as the scaling alone would. The time to scale up on the integer pixel locations, then filter again to get the subpixel location, is more than the time it takes to just adjust the origin of the scale to scale on the subpixel position. Even if it takes 2X the time to scale, then it\u0027s still better to scale+subpel in 2X than scale,subpel in 3X. Initial tests put the real number at more like 1.15X. Also, it means that you easily only do the scaling for only the MBs that need it, rather than scaling the whole frame just to use it on only a (perhaps small) subset of MBs. MBs that don\u0027t get scaled still get the subpel treatment in only 1X.",
+      "parentUuid": "AAAAVH//e64\u003d",
       "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//e40\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T22:56:17Z",
+      "side": 1,
+      "message": "I can remove the _scaled from the name, it doesn\u0027t add anything other than helping me namespace it as separate during development. They can both do scaling, but the caller shouldn\u0027t have to think about it.\n\nThe usage in rdopt maps most directly to build_inter4x4_predictors_mb, and the one in temporal_filter to this function, and there\u0027s not really any good reason they couldn\u0027t or shouldn\u0027t call functions in this file. I can make that change, up to you if you want it in this patch or a later commit.",
+      "parentUuid": "AAAAVH//e7M\u003d",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//e7E\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//e4w\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T22:56:17Z",
+      "side": 1,
+      "message": "Agreed. Will look at it some more as part of the later commit that changes it to use the 2x1 mode.",
+      "parentUuid": "AAAAVH//e7E\u003d",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//e7I\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 2
@@ -81,6 +153,24 @@
       "writtenOn": "2013-02-23T17:07:08Z",
       "side": 1,
       "message": "see earlier comment, this seems inconsistent - the 32x32/64z64 call interintra inside the build_inter, but the 16x16 does not.",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e5Q\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-23T22:56:17Z",
+      "side": 1,
+      "message": "This is consistent with the existing code, and is likely just an artifact of how the larger blocks grew as wrappers around the 16x16 code. Seems like a reasonable refactoring, but I think it might change the output, so it probably belongs in a different patch.",
+      "parentUuid": "AAAAVH//e7I\u003d",
       "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
