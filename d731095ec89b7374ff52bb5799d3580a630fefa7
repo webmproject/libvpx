@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//e6Y\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:24:18Z",
+      "side": 1,
+      "message": "If you add these here, you should likely remove them from the subpix_fn_table?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e6U\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:24:18Z",
+      "side": 1,
+      "message": "Why 39?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e6s\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:24:18Z",
+      "side": 1,
+      "message": "We shouldn\u0027t do what _currently_ gives best quality, but what is expected to give best quality once all pieces are in-place. Since the motion search uses a bilinear filter for the subpixel position, we will automatically not choose fullpel positions in the RD loop of smoothing is desired, thus this will never trigger intentionally.\n\nFrom a bitstream point of view, we should (imo) always do the smoothing in both directions regardless of fullpel or subpel in whatever dimension. This may slightly hurt quality, but once we fix the RD loop, it will give gains (or it will not be chosen).",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e6k\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:24:18Z",
+      "side": 1,
+      "message": "No divisions in code that is part of the spec, and can\u0027t this just call scale_motion_vector_component_q4 internally?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e6c\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:24:18Z",
+      "side": 1,
+      "message": "So you\u0027re now moving setting the offsets (scaled or not) into this function instead of in the caller - what is the reason for that? This seems like a massive code change that I\u0027m not really sure does anything else other than, well, change a whole lot of code.\n\n(Both encodeframe and decodframe have a set_offset() function already where this could easily be integrated into.)",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e6Q\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1338,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:24:18Z",
+      "side": 1,
+      "message": "doesn\u0027t this crash? I mean, if prev_mi is 2x2 MBs and mi is 4x4 MBs, what happens when we reference the bottomright one? Shouldn\u0027t prev_mi be NULL after a scaling event?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e6M\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1433,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:24:18Z",
+      "side": 1,
+      "message": "So this seems to disallow upscaling?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e6I\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2181,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:24:18Z",
+      "side": 1,
+      "message": "This isn\u0027t right, and will cause mismatches between rec.yuv and recon.yuv if width%16!\u003d0 or height%16!\u003d0.",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e6E\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2668,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:24:18Z",
+      "side": 1,
+      "message": "When is this required?",
+      "revId": "d731095ec89b7374ff52bb5799d3580a630fefa7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
