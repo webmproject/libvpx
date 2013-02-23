@@ -196,8 +196,9 @@ filter() {
 # Helper functions for generating the arch specific RTCD files
 #
 common_top() {
-  outfile_basename=$(basename ${symbol:-rtcd.h})
-  include_guard=$(echo $outfile_basename | tr '[a-z]' '[A-Z]' | tr -c '[A-Z]' _)
+  outfile_basename=$(basename ${symbol:-rtcd})
+  include_guard=$(echo $outfile_basename | tr '[a-z]' '[A-Z]' | \
+    tr -c '[A-Z0-9]' _)H_
   cat <<EOF
 #ifndef ${include_guard}
 #define ${include_guard}
