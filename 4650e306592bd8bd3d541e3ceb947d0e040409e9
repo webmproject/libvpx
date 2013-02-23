@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//e60\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:07:08Z",
+      "side": 1,
+      "message": "Right, we shouldn\u0027t do divisions in code that is part of the spec.",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e64\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:07:08Z",
+      "side": 1,
+      "message": "so this assumes that the sinc-curve for the scaled case (particularly, its wavelength/period) is actually identical as it is for the unscaled case. For upscaling, that may be the case, but for downscaling, I don\u0027t think that\u0027s necessarily true. How do we handle that?\n\nAlso, as I\u0027ve said before, this switching of filter on a per-pixel basis will incur significant overhead in the scaling SIMD code. Do we have any evidence that this is faster/simpler/better/... than simply pre-scaling the whole reference?",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e7M\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:07:08Z",
+      "side": 1,
+      "message": "It is completely unclear to me how the subpixel interpolation functions, build_scaled_inter and build_inter relate to each other. From the function names, it seems that one does scaling and one does not, however clearly they do both scale, since build_inter calls build_scaled_inter.\n\nI can see one is called from rdopt and one from encodeframe, so it seems one does more than the other (but that\u0027s the same for multiple iterations on the same MB/SB, so we can extract that out of the loop), is that setup-code the only difference? Should/can we merge the two to make this somewhat simpler to understand?",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e7E\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:07:08Z",
+      "side": 1,
+      "message": "this seems buggy - do we at least know if the output before or after is the correct one? One example of a reason could be that for the 2x1 (before or after - could be either), we don\u0027t set the max. value of the motion vector correctly, which means we emulate the edge or clip the motion vector at a position where that is not correct (this would be a bitstream bug) - so we should really know what\u0027s going on here.",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e7I\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:07:08Z",
+      "side": 1,
+      "message": "see earlier comment, this seems inconsistent - the 32x32/64z64 call interintra inside the build_inter, but the 16x16 does not.",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//e7Q\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2122,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-23T17:07:08Z",
+      "side": 1,
+      "message": "build_inter32x32 and build_inter64x64 call the interintra function internally - why doesn\u0027t build_inter16x16?",
+      "revId": "4650e306592bd8bd3d541e3ceb947d0e040409e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
