@@ -206,16 +206,25 @@ static void convolve_c(const uint8_t *src, int src_stride,
                        const int16_t *filter_x, int x_step_q4,
                        const int16_t *filter_y, int y_step_q4,
                        int w, int h, int taps) {
-  /* Fixed size intermediate buffer places limits on parameters. */
-  uint8_t temp[16 * 23];
+  /* Fixed size intermediate buffer places limits on parameters.
+   * Maximum intermediate_height is 39, for y_step_q4 == 32,
+   * h == 16, taps == 8.
+   */
+  uint8_t temp[16 * 39];
+  int intermediate_height = ((h * y_step_q4) >> 4) + taps - 1;
+
   assert(w <= 16);
   assert(h <= 16);
   assert(taps <= 8);
+  assert(y_step_q4 <= 32);
+
+  if (intermediate_height < h)
+    intermediate_height = h;
 
   convolve_horiz_c(src - src_stride * (taps / 2 - 1), src_stride,
                    temp, 16,
                    filter_x, x_step_q4, filter_y, y_step_q4,
-                   w, h + taps - 1, taps);
+                   w, intermediate_height, taps);
   convolve_vert_c(temp + 16 * (taps / 2 - 1), 16, dst, dst_stride,
                   filter_x, x_step_q4, filter_y, y_step_q4,
                   w, h, taps);
@@ -226,16 +235,25 @@ static void convolve_avg_c(const uint8_t *src, int src_stride,
                            const int16_t *filter_x, int x_step_q4,
                            const int16_t *filter_y, int y_step_q4,
                            int w, int h, int taps) {
-  /* Fixed size intermediate buffer places limits on parameters. */
-  uint8_t temp[16 * 23];
+  /* Fixed size intermediate buffer places limits on parameters.
+   * Maximum intermediate_height is 39, for y_step_q4 == 32,
+   * h == 16, taps == 8.
+   */
+  uint8_t temp[16 * 39];
+  int intermediate_height = ((h * y_step_q4) >> 4) + taps - 1;
+
   assert(w <= 16);
   assert(h <= 16);
   assert(taps <= 8);
+  assert(y_step_q4 <= 32);
+
+  if (intermediate_height < h)
+    intermediate_height = h;
 
   convolve_horiz_c(src - src_stride * (taps / 2 - 1), src_stride,
                    temp, 16,
                    filter_x, x_step_q4, filter_y, y_step_q4,
-                   w, h + taps - 1, taps);
+                   w, intermediate_height, taps);
   convolve_avg_vert_c(temp + 16 * (taps / 2 - 1), 16, dst, dst_stride,
                       filter_x, x_step_q4, filter_y, y_step_q4,
                       w, h, taps);

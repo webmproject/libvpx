@@ -613,7 +613,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           this_error = motion_error;
           vp9_set_mbmode_and_mvs(x, NEWMV, &mv);
           xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-          vp9_encode_inter16x16y(x);
+          vp9_encode_inter16x16y(x, mb_row, mb_col);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);
           sum_mvc += mv.as_mv.col;

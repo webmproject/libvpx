@@ -33,11 +33,8 @@ void vp9_convolve_avg(const uint8_t *src, int src_stride,
                       int w, int h);
 
 struct subpix_fn_table {
-  convolve_fn_t predict[2][2][2];  // horiz, vert, avg
   const int16_t (*filter_x)[8];
   const int16_t (*filter_y)[8];
-  int x_step_q4;
-  int y_step_q4;
 };
 
 #endif  // VP9_COMMON_CONVOLVE_H_

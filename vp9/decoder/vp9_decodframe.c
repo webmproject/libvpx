@@ -147,7 +147,8 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
 /* skip_recon_mb() is Modified: Instead of writing the result to predictor buffer and then copying it
  *  to dst buffer, we can write the result directly to dst buffer. This eliminates unnecessary copy.
  */
-static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd) {
+static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
+                          int mb_row, int mb_col) {
   BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
 
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
@@ -168,21 +169,24 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd) {
                                          xd->dst.u_buffer,
                                          xd->dst.v_buffer,
                                          xd->dst.y_stride,
-                                         xd->dst.uv_stride);
+                                         xd->dst.uv_stride,
+                                         mb_row, mb_col);
     } else if (sb_type == BLOCK_SIZE_SB32X32) {
       vp9_build_inter32x32_predictors_sb(xd,
                                          xd->dst.y_buffer,
                                          xd->dst.u_buffer,
                                          xd->dst.v_buffer,
                                          xd->dst.y_stride,
-                                         xd->dst.uv_stride);
+                                         xd->dst.uv_stride,
+                                         mb_row, mb_col);
     } else {
       vp9_build_inter16x16_predictors_mb(xd,
                                          xd->dst.y_buffer,
                                          xd->dst.u_buffer,
                                          xd->dst.v_buffer,
                                          xd->dst.y_stride,
-                                         xd->dst.uv_stride);
+                                         xd->dst.uv_stride,
+                                         mb_row, mb_col);
 #if CONFIG_COMP_INTERINTRA_PRED
       if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
         vp9_build_interintra_16x16_predictors_mb(xd,
@@ -599,7 +603,7 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
     /* Special case:  Force the loopfilter to skip when eobtotal and
      * mb_skip_coeff are zero.
      */
-    skip_recon_mb(pbi, xd);
+    skip_recon_mb(pbi, xd, mb_row, mb_col);
     return;
   }
 
@@ -610,7 +614,8 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
   } else {
     vp9_build_inter64x64_predictors_sb(xd, xd->dst.y_buffer,
                                        xd->dst.u_buffer, xd->dst.v_buffer,
-                                       xd->dst.y_stride, xd->dst.uv_stride);
+                                       xd->dst.y_stride, xd->dst.uv_stride,
+                                       mb_row, mb_col);
   }
 
   /* dequantization and idct */
@@ -720,7 +725,7 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
     /* Special case:  Force the loopfilter to skip when eobtotal and
      * mb_skip_coeff are zero.
      */
-    skip_recon_mb(pbi, xd);
+    skip_recon_mb(pbi, xd, mb_row, mb_col);
     return;
   }
 
@@ -731,7 +736,8 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
   } else {
     vp9_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
                                        xd->dst.u_buffer, xd->dst.v_buffer,
-                                       xd->dst.y_stride, xd->dst.uv_stride);
+                                       xd->dst.y_stride, xd->dst.uv_stride,
+                                       mb_row, mb_col);
   }
 
   /* dequantization and idct */
@@ -832,7 +838,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
     /* Special case:  Force the loopfilter to skip when eobtotal and
        mb_skip_coeff are zero. */
     xd->mode_info_context->mbmi.mb_skip_coeff = 1;
-    skip_recon_mb(pbi, xd);
+    skip_recon_mb(pbi, xd, mb_row, mb_col);
     return;
   }
 #ifdef DEC_DEBUG
@@ -859,7 +865,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
            xd->mode_info_context->mbmi.mode, tx_size,
            xd->mode_info_context->mbmi.interp_filter);
 #endif
-    vp9_build_inter_predictors_mb(xd);
+    vp9_build_inter_predictors_mb(xd, mb_row, mb_col);
   }
 
   if (tx_size == TX_16X16) {
@@ -966,18 +972,14 @@ static void set_refs(VP9D_COMP *pbi, int block_size,
   MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   if (mbmi->ref_frame > INTRA_FRAME) {
-    int ref_fb_idx, ref_yoffset, ref_uvoffset, ref_y_stride, ref_uv_stride;
+    int ref_fb_idx;
 
     /* Select the appropriate reference frame for this MB */
     ref_fb_idx = cm->active_ref_idx[mbmi->ref_frame - 1];
-
-    ref_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
-    ref_yoffset = mb_row * 16 * ref_y_stride + 16 * mb_col;
-    xd->pre.y_buffer = cm->yv12_fb[ref_fb_idx].y_buffer + ref_yoffset;
-    ref_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
-    ref_uvoffset = mb_row * 8 * ref_uv_stride + 8 * mb_col;
-    xd->pre.u_buffer = cm->yv12_fb[ref_fb_idx].u_buffer + ref_uvoffset;
-    xd->pre.v_buffer = cm->yv12_fb[ref_fb_idx].v_buffer + ref_uvoffset;
+    xd->scale_factor[0] = cm->active_ref_scale[mbmi->ref_frame - 1];
+    xd->scale_factor_uv[0] = cm->active_ref_scale[mbmi->ref_frame - 1];
+    setup_pred_block(&xd->pre, &cm->yv12_fb[ref_fb_idx], mb_row, mb_col,
+                     &xd->scale_factor[0], &xd->scale_factor_uv[0]);
 
     /* propagate errors from reference frames */
     xd->corrupted |= cm->yv12_fb[ref_fb_idx].corrupted;
@@ -988,12 +990,9 @@ static void set_refs(VP9D_COMP *pbi, int block_size,
       /* Select the appropriate reference frame for this MB */
       second_ref_fb_idx = cm->active_ref_idx[mbmi->second_ref_frame - 1];
 
-      xd->second_pre.y_buffer =
-          cm->yv12_fb[second_ref_fb_idx].y_buffer + ref_yoffset;
-      xd->second_pre.u_buffer =
-          cm->yv12_fb[second_ref_fb_idx].u_buffer + ref_uvoffset;
-      xd->second_pre.v_buffer =
-          cm->yv12_fb[second_ref_fb_idx].v_buffer + ref_uvoffset;
+      setup_pred_block(&xd->second_pre, &cm->yv12_fb[second_ref_fb_idx],
+                       mb_row, mb_col,
+                       &xd->scale_factor[1], &xd->scale_factor_uv[1]);
 
       /* propagate errors from reference frames */
       xd->corrupted |= cm->yv12_fb[second_ref_fb_idx].corrupted;
@@ -1204,6 +1203,26 @@ static void read_coef_probs(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
   }
 }
 
+static void update_frame_size(VP9D_COMP *pbi) {
+  VP9_COMMON *cm = &pbi->common;
+
+  /* our internal buffers are always multiples of 16 */
+  int width = (cm->Width + 15) & ~15;
+  int height = (cm->Height + 15) & ~15;
+
+  cm->mb_rows = height >> 4;
+  cm->mb_cols = width >> 4;
+  cm->MBs = cm->mb_rows * cm->mb_cols;
+  cm->mode_info_stride = cm->mb_cols + 1;
+  memset(cm->mip, 0,
+        (cm->mb_cols + 1) * (cm->mb_rows + 1) * sizeof(MODE_INFO));
+  vp9_update_mode_info_border(cm, cm->mip);
+
+  cm->mi = cm->mip + cm->mode_info_stride + 1;
+  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
+  vp9_update_mode_info_in_image(cm, cm->mi);
+}
+
 int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   BOOL_DECODER header_bc, residual_bc;
   VP9_COMMON *const pc = &pbi->common;
@@ -1281,9 +1300,25 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
                              "Invalid frame height");
         }
 
-        if (vp9_alloc_frame_buffers(pc, pc->Width, pc->Height))
-          vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
-                             "Failed to allocate frame buffers");
+        if (!pbi->initial_width || !pbi->initial_height) {
+          if (vp9_alloc_frame_buffers(pc, pc->Width, pc->Height))
+            vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
+                               "Failed to allocate frame buffers");
+          pbi->initial_width = pc->Width;
+          pbi->initial_height = pc->Height;
+        }
+
+        if (pc->Width > pbi->initial_width) {
+          vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                             "Frame width too large");
+        }
+
+        if (pc->Height > pbi->initial_height) {
+          vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                             "Frame height too large");
+        }
+
+        update_frame_size(pbi);
       }
     }
   }
@@ -1294,6 +1329,11 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   }
 
   init_frame(pbi);
+
+  /* Reset the frame pointers to the current frame size */
+  vp8_yv12_realloc_frame_buffer(&pc->yv12_fb[pc->new_fb_idx],
+                                pc->mb_cols * 16, pc->mb_rows * 16,
+                                VP9BORDERINPIXELS);
 
   if (vp9_start_decode(&header_bc, data,
                        (unsigned int)first_partition_length_in_bytes))

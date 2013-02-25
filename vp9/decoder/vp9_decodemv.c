@@ -12,6 +12,7 @@
 #include "vp9/decoder/vp9_treereader.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropymode.h"
+#include "vp9/common/vp9_reconinter.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_common.h"
@@ -749,21 +750,25 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     int_mv nearest_second, nearby_second, best_mv_second;
     vp9_prob mv_ref_p [VP9_MVREFS - 1];
 
-    int recon_y_stride, recon_yoffset;
-    int recon_uv_stride, recon_uvoffset;
     MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
 
     {
       int ref_fb_idx;
+      int recon_y_stride, recon_yoffset;
+      int recon_uv_stride, recon_uvoffset;
 
       /* Select the appropriate reference frame for this MB */
       ref_fb_idx = cm->active_ref_idx[ref_frame - 1];
 
-      recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride  ;
+      recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
       recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
 
-      recon_yoffset = (mb_row * recon_y_stride * 16) + (mb_col * 16);
-      recon_uvoffset = (mb_row * recon_uv_stride * 8) + (mb_col * 8);
+      recon_yoffset = scaled_buffer_offset(mb_col * 16, mb_row * 16,
+                                           recon_y_stride,
+                                           &xd->scale_factor[0]);
+      recon_uvoffset = scaled_buffer_offset(mb_col * 8, mb_row * 8,
+                                            recon_uv_stride,
+                                            &xd->scale_factor_uv[0]);
 
       xd->pre.y_buffer = cm->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
       xd->pre.u_buffer = cm->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
@@ -853,9 +858,21 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         mbmi->second_ref_frame = 1;
       if (mbmi->second_ref_frame > 0) {
         int second_ref_fb_idx;
+        int recon_y_stride, recon_yoffset;
+        int recon_uv_stride, recon_uvoffset;
+
         /* Select the appropriate reference frame for this MB */
         second_ref_fb_idx = cm->active_ref_idx[mbmi->second_ref_frame - 1];
 
+        recon_y_stride = cm->yv12_fb[second_ref_fb_idx].y_stride;
+        recon_uv_stride = cm->yv12_fb[second_ref_fb_idx].uv_stride;
+
+        recon_yoffset = scaled_buffer_offset(mb_col * 16, mb_row * 16,
+                                             recon_y_stride,
+                                             &xd->scale_factor[1]);
+        recon_uvoffset = scaled_buffer_offset(mb_col * 8, mb_row * 8,
+                                             recon_uv_stride,
+                                             &xd->scale_factor_uv[1]);
         xd->second_pre.y_buffer =
           cm->yv12_fb[second_ref_fb_idx].y_buffer + recon_yoffset;
         xd->second_pre.u_buffer =
@@ -1089,7 +1106,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         break;
 
       case NEWMV:
-
         read_nmv(bc, &mv->as_mv, &best_mv.as_mv, nmvc);
         read_nmv_fp(bc, &mv->as_mv, &best_mv.as_mv, nmvc,
                     xd->allow_high_precision_mv);
@@ -1230,8 +1246,12 @@ void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
   MODE_INFO *mi = xd->mode_info_context;
   MODE_INFO *prev_mi = xd->prev_mode_info_context;
 
-  if (pbi->common.frame_type == KEY_FRAME)
+  if (pbi->common.frame_type == KEY_FRAME) {
     kfread_modes(pbi, mi, mb_row, mb_col, bc);
-  else
+  } else {
     read_mb_modes_mv(pbi, mi, &mi->mbmi, prev_mi, mb_row, mb_col, bc);
+    set_scale_factors(xd,
+                      mi->mbmi.ref_frame - 1, mi->mbmi.second_ref_frame - 1,
+                      pbi->common.active_ref_scale);
+  }
 }

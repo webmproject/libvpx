@@ -292,9 +292,12 @@ struct scale_factors {
   int x_num;
   int x_den;
   int x_offset_q4;
+  int x_step_q4;
   int y_num;
   int y_den;
   int y_offset_q4;
+  int y_step_q4;
+  convolve_fn_t predict[2][2][2];  // horiz, vert, avg
 };
 
 typedef struct macroblockd {

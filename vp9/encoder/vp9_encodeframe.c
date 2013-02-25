@@ -654,7 +654,7 @@ static void set_offsets(VP9_COMP *cpi,
   // Set up destination pointers
   setup_pred_block(&xd->dst,
                    &cm->yv12_fb[dst_fb_idx],
-                   mb_row, mb_col);
+                   mb_row, mb_col, NULL, NULL);
 
   /* Set up limit values for MV components to prevent them from
    * extending beyond the UMV borders assuming 16x16 block size */
@@ -679,7 +679,7 @@ static void set_offsets(VP9_COMP *cpi,
   xd->right_available = (mb_col + block_size < cm->cur_tile_mb_col_end);
 
   /* set up source buffers */
-  setup_pred_block(&x->src, cpi->Source, mb_row, mb_col);
+  setup_pred_block(&x->src, cpi->Source, mb_row, mb_col, NULL, NULL);
 
   /* R/D setup */
   x->rddiv = cpi->RDDIV;
@@ -1271,9 +1271,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 #endif
 
   totalrate = 0;
-
-  // Functions setup for all frame types so we can use MC in AltRef
-  vp9_setup_interp_filters(xd, cm->mcomp_filter_type, cm);
 
   // Reset frame count of inter 0,0 motion vector usage.
   cpi->inter_zz_count = 0;
@@ -2100,7 +2097,8 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
     setup_pred_block(&xd->pre,
                      &cpi->common.yv12_fb[ref_fb_idx],
-                     mb_row, mb_col);
+                     mb_row, mb_col,
+                     &xd->scale_factor[0], &xd->scale_factor_uv[0]);
 
     if (mbmi->second_ref_frame > 0) {
       int second_ref_fb_idx;
@@ -2114,11 +2112,12 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
       setup_pred_block(&xd->second_pre,
                        &cpi->common.yv12_fb[second_ref_fb_idx],
-                       mb_row, mb_col);
+                       mb_row, mb_col,
+                       &xd->scale_factor[1], &xd->scale_factor_uv[1]);
     }
 
     if (!x->skip) {
-      vp9_encode_inter16x16(x);
+      vp9_encode_inter16x16(x, mb_row, mb_col);
 
       // Clear mb_skip_coeff if mb_no_coeff_skip is not set
       if (!cpi->common.mb_no_coeff_skip)
@@ -2130,7 +2129,8 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
                                          xd->dst.u_buffer,
                                          xd->dst.v_buffer,
                                          xd->dst.y_stride,
-                                         xd->dst.uv_stride);
+                                         xd->dst.uv_stride,
+                                         mb_row, mb_col);
 #if CONFIG_COMP_INTERINTRA_PRED
       if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
         vp9_build_interintra_16x16_predictors_mb(xd,
@@ -2327,7 +2327,8 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
 
     setup_pred_block(&xd->pre,
                      &cpi->common.yv12_fb[ref_fb_idx],
-                     mb_row, mb_col);
+                     mb_row, mb_col,
+                     &xd->scale_factor[0], &xd->scale_factor_uv[0]);
 
     if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
       int second_ref_fb_idx;
@@ -2341,12 +2342,14 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
 
       setup_pred_block(&xd->second_pre,
                        &cpi->common.yv12_fb[second_ref_fb_idx],
-                       mb_row, mb_col);
+                       mb_row, mb_col,
+                       &xd->scale_factor[1], &xd->scale_factor_uv[1]);
     }
 
     vp9_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
                                        xd->dst.u_buffer, xd->dst.v_buffer,
-                                       xd->dst.y_stride, xd->dst.uv_stride);
+                                       xd->dst.y_stride, xd->dst.uv_stride,
+                                       mb_row, mb_col);
   }
 
   if (xd->mode_info_context->mbmi.txfm_size == TX_32X32) {
@@ -2553,7 +2556,8 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
 
     setup_pred_block(&xd->pre,
                      &cpi->common.yv12_fb[ref_fb_idx],
-                     mb_row, mb_col);
+                     mb_row, mb_col,
+                     &xd->scale_factor[0], &xd->scale_factor_uv[0]);
 
     if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
       int second_ref_fb_idx;
@@ -2567,12 +2571,14 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
 
       setup_pred_block(&xd->second_pre,
                        &cpi->common.yv12_fb[second_ref_fb_idx],
-                       mb_row, mb_col);
+                       mb_row, mb_col,
+                       &xd->scale_factor[1], &xd->scale_factor_uv[1]);
     }
 
     vp9_build_inter64x64_predictors_sb(xd, xd->dst.y_buffer,
                                        xd->dst.u_buffer, xd->dst.v_buffer,
-                                       xd->dst.y_stride, xd->dst.uv_stride);
+                                       xd->dst.y_stride, xd->dst.uv_stride,
+                                       mb_row, mb_col);
   }
 
   if (xd->mode_info_context->mbmi.txfm_size == TX_32X32) {

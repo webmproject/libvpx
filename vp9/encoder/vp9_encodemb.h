@@ -23,14 +23,14 @@ typedef struct {
 
 #include "vp9/encoder/vp9_onyx_int.h"
 struct VP9_ENCODER_RTCD;
-void vp9_encode_inter16x16(MACROBLOCK *x);
+void vp9_encode_inter16x16(MACROBLOCK *x, int mb_row, int mb_col);
 
 void vp9_transform_mbuv_4x4(MACROBLOCK *x);
 void vp9_transform_mby_4x4(MACROBLOCK *x);
 
 void vp9_optimize_mby_4x4(MACROBLOCK *x);
 void vp9_optimize_mbuv_4x4(MACROBLOCK *x);
-void vp9_encode_inter16x16y(MACROBLOCK *x);
+void vp9_encode_inter16x16y(MACROBLOCK *x, int mb_row, int mb_col);
 
 void vp9_transform_mb_8x8(MACROBLOCK *mb);
 void vp9_transform_mby_8x8(MACROBLOCK *x);

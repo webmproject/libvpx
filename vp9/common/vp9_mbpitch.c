@@ -71,17 +71,6 @@ static void setup_macroblock(MACROBLOCKD *xd, BLOCKSET bs) {
     setup_block(&blockd[block + 4], stride, v, v2, stride,
       ((block - 16) >> 1) * 4 * stride + (block & 1) * 4, bs);
   }
-
-  // TODO(jkoleszar): this will move once we're actually scaling.
-  xd->scale_factor[0].x_num = 1;
-  xd->scale_factor[0].x_den = 1;
-  xd->scale_factor[0].y_num = 1;
-  xd->scale_factor[0].y_den = 1;
-  xd->scale_factor[0].x_offset_q4 = 0;
-  xd->scale_factor[0].y_offset_q4 = 0;
-  xd->scale_factor[1]= xd->scale_factor[0];
-  xd->scale_factor_uv[0] = xd->scale_factor[0];
-  xd->scale_factor_uv[1] = xd->scale_factor[1];
 }
 
 void vp9_setup_block_dptrs(MACROBLOCKD *xd) {

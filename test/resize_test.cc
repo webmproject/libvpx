@@ -114,7 +114,8 @@ class ResizeInternalTest : public ResizeTest {
 
 TEST_P(ResizeInternalTest, TestInternalResizeWorks) {
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 5);
+                                       30, 1, 0, 6);
+  cfg_.rc_target_bitrate = 5000;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   for (std::vector<FrameInfo>::iterator info = frame_info_list_.begin();

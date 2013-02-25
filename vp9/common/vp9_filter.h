@@ -21,11 +21,11 @@
 
 #define SUBPEL_SHIFTS 16
 
-extern const int16_t vp9_bilinear_filters[SUBPEL_SHIFTS][8];
-extern const int16_t vp9_sub_pel_filters_6[SUBPEL_SHIFTS][8];
-extern const int16_t vp9_sub_pel_filters_8[SUBPEL_SHIFTS][8];
-extern const int16_t vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][8];
-extern const int16_t vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS][8];
+extern const int16_t vp9_bilinear_filters[SUBPEL_SHIFTS*2][8];
+extern const int16_t vp9_sub_pel_filters_6[SUBPEL_SHIFTS*2][8];
+extern const int16_t vp9_sub_pel_filters_8[SUBPEL_SHIFTS*2][8];
+extern const int16_t vp9_sub_pel_filters_8s[SUBPEL_SHIFTS*2][8];
+extern const int16_t vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS*2][8];
 
 // The VP9_BILINEAR_FILTERS_2TAP macro returns a pointer to the bilinear
 // filter kernel as a 2 tap filter.
