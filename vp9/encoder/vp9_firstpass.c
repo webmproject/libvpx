@@ -844,16 +844,13 @@ static double calc_correction_factor(double err_per_mb,
   power_term = (vp9_convert_qindex_to_q(Q) * 0.01) + pt_low;
   power_term = (power_term > pt_high) ? pt_high : power_term;
 
-  // Adjustments to error term
-  // TBD
-
   // Calculate correction factor
   correction_factor = pow(error_term, power_term);
 
   // Clip range
   correction_factor =
     (correction_factor < 0.05)
-    ? 0.05 : (correction_factor > 2.0) ? 2.0 : correction_factor;
+    ? 0.05 : (correction_factor > 5.0) ? 5.0 : correction_factor;
 
   return correction_factor;
 }
@@ -887,8 +884,7 @@ static void adjust_maxq_qrange(VP9_COMP *cpi) {
 
 static int estimate_max_q(VP9_COMP *cpi,
                           FIRSTPASS_STATS *fpstats,
-                          int section_target_bandwitdh,
-                          int overhead_bits) {
+                          int section_target_bandwitdh) {
   int Q;
   int num_mbs = cpi->common.MBs;
   int target_norm_bits_per_mb;
@@ -899,7 +895,6 @@ static int estimate_max_q(VP9_COMP *cpi,
   double err_per_mb = section_err / num_mbs;
   double err_correction_factor;
   double speed_correction = 1.0;
-  double overhead_bits_per_mb;
 
   if (section_target_bandwitdh <= 0)
     return cpi->twopass.maxq_max_limit;          // Highest value allowed
@@ -951,13 +946,6 @@ static int estimate_max_q(VP9_COMP *cpi,
       speed_correction = 1.25;
   }
 
-  // Estimate of overhead bits per mb
-  // Correction to overhead bits for min allowed Q.
-  // PGW TODO.. This code is broken for the extended Q range
-  //            for now overhead set to 0.
-  overhead_bits_per_mb = overhead_bits / num_mbs;
-  overhead_bits_per_mb *= pow(0.98, (double)cpi->twopass.maxq_min_limit);
-
   // Try and pick a max Q that will be high enough to encode the
   // content at the given rate.
   for (Q = cpi->twopass.maxq_min_limit; Q < cpi->twopass.maxq_max_limit; Q++) {
@@ -968,23 +956,9 @@ static int estimate_max_q(VP9_COMP *cpi,
       sr_correction * speed_correction *
       cpi->twopass.est_max_qcorrection_factor;
 
-    if (err_correction_factor < 0.05)
-      err_correction_factor = 0.05;
-    else if (err_correction_factor > 5.0)
-      err_correction_factor = 5.0;
 
     bits_per_mb_at_this_q =
-      vp9_bits_per_mb(INTER_FRAME, Q) + (int)overhead_bits_per_mb;
-
-    bits_per_mb_at_this_q = (int)(.5 + err_correction_factor *
-                                  (double)bits_per_mb_at_this_q);
-
-    // Mode and motion overhead
-    // As Q rises in real encode loop rd code will force overhead down
-    // We make a crude adjustment for this here as *.98 per Q step.
-    // PGW TODO.. This code is broken for the extended Q range
-    //            for now overhead set to 0.
-    // overhead_bits_per_mb = (int)((double)overhead_bits_per_mb * 0.98);
+      vp9_bits_per_mb(INTER_FRAME, Q, err_correction_factor);
 
     if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
       break;
@@ -1002,7 +976,7 @@ static int estimate_max_q(VP9_COMP *cpi,
   // PGW TODO.. This code is broken for the extended Q range
   if ((cpi->ni_frames >
        ((int)cpi->twopass.total_stats->count >> 8)) &&
-      (cpi->ni_frames > 150)) {
+      (cpi->ni_frames > 25)) {
     adjust_maxq_qrange(cpi);
   }
 
@@ -1013,8 +987,7 @@ static int estimate_max_q(VP9_COMP *cpi,
 // complexity and data rate.
 static int estimate_cq(VP9_COMP *cpi,
                        FIRSTPASS_STATS *fpstats,
-                       int section_target_bandwitdh,
-                       int overhead_bits) {
+                       int section_target_bandwitdh) {
   int Q;
   int num_mbs = cpi->common.MBs;
   int target_norm_bits_per_mb;
@@ -1027,15 +1000,11 @@ static int estimate_cq(VP9_COMP *cpi,
   double speed_correction = 1.0;
   double clip_iiratio;
   double clip_iifactor;
-  double overhead_bits_per_mb;
-
 
   target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20))
                             ? (512 * section_target_bandwitdh) / num_mbs
                             : 512 * (section_target_bandwitdh / num_mbs);
 
-  // Estimate of overhead bits per mb
-  overhead_bits_per_mb = overhead_bits / num_mbs;
 
   // Corrections for higher compression speed settings
   // (reduced compression expected)
@@ -1074,23 +1043,8 @@ static int estimate_cq(VP9_COMP *cpi,
       calc_correction_factor(err_per_mb, 100.0, 0.4, 0.90, Q) *
       sr_correction * speed_correction * clip_iifactor;
 
-    if (err_correction_factor < 0.05)
-      err_correction_factor = 0.05;
-    else if (err_correction_factor > 5.0)
-      err_correction_factor = 5.0;
-
     bits_per_mb_at_this_q =
-      vp9_bits_per_mb(INTER_FRAME, Q) + (int)overhead_bits_per_mb;
-
-    bits_per_mb_at_this_q = (int)(.5 + err_correction_factor *
-                                  (double)bits_per_mb_at_this_q);
-
-    // Mode and motion overhead
-    // As Q rises in real encode loop rd code will force overhead down
-    // We make a crude adjustment for this here as *.98 per Q step.
-    // PGW TODO.. This code is broken for the extended Q range
-    //            for now overhead set to 0.
-    overhead_bits_per_mb = (int)((double)overhead_bits_per_mb * 0.98);
+      vp9_bits_per_mb(INTER_FRAME, Q, err_correction_factor);
 
     if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
       break;
@@ -1953,8 +1907,6 @@ void vp9_second_pass(VP9_COMP *cpi) {
   double this_frame_intra_error;
   double this_frame_coded_error;
 
-  int overhead_bits;
-
   if (!cpi->twopass.stats_in) {
     return;
   }
@@ -2018,11 +1970,6 @@ void vp9_second_pass(VP9_COMP *cpi) {
   if (cpi->target_bandwidth < 0)
     cpi->target_bandwidth = 0;
 
-
-  // Account for mv, mode and other overheads.
-  overhead_bits = (int)estimate_modemvcost(
-                        cpi, cpi->twopass.total_left_stats);
-
   // Special case code for first frame.
   if (cpi->common.current_video_frame == 0) {
     cpi->twopass.est_max_qcorrection_factor = 1.0;
@@ -2034,8 +1981,7 @@ void vp9_second_pass(VP9_COMP *cpi) {
       est_cq =
         estimate_cq(cpi,
                     cpi->twopass.total_left_stats,
-                    (int)(cpi->twopass.bits_left / frames_left),
-                    overhead_bits);
+                    (int)(cpi->twopass.bits_left / frames_left));
 
       cpi->cq_target_quality = cpi->oxcf.cq_level;
       if (est_cq > cpi->cq_target_quality)
@@ -2049,21 +1995,23 @@ void vp9_second_pass(VP9_COMP *cpi) {
     tmp_q = estimate_max_q(
               cpi,
               cpi->twopass.total_left_stats,
-              (int)(cpi->twopass.bits_left / frames_left),
-              overhead_bits);
+              (int)(cpi->twopass.bits_left / frames_left));
 
     cpi->active_worst_quality         = tmp_q;
     cpi->ni_av_qi                     = tmp_q;
     cpi->avg_q                        = vp9_convert_qindex_to_q(tmp_q);
 
+#ifndef ONE_SHOT_Q_ESTIMATE
     // Limit the maxq value returned subsequently.
     // This increases the risk of overspend or underspend if the initial
     // estimate for the clip is bad, but helps prevent excessive
     // variation in Q, especially near the end of a clip
     // where for example a small overspend may cause Q to crash
     adjust_maxq_qrange(cpi);
+#endif
   }
 
+#ifndef ONE_SHOT_Q_ESTIMATE
   // The last few frames of a clip almost always have to few or too many
   // bits and for the sake of over exact rate control we dont want to make
   // radical adjustments to the allowed quantizer range just to use up a
@@ -2078,20 +2026,19 @@ void vp9_second_pass(VP9_COMP *cpi) {
     tmp_q = estimate_max_q(
               cpi,
               cpi->twopass.total_left_stats,
-              (int)(cpi->twopass.bits_left / frames_left),
-              overhead_bits);
+              (int)(cpi->twopass.bits_left / frames_left));
 
     // Make a damped adjustment to active max Q
     cpi->active_worst_quality =
       adjust_active_maxq(cpi->active_worst_quality, tmp_q);
   }
+#endif
 
   cpi->twopass.frames_to_key--;
 
   // Update the total stats remaining sturcture
   subtract_stats(cpi->twopass.total_left_stats, &this_frame);
 }
-
 
 static int test_candidate_kf(VP9_COMP *cpi,
                              FIRSTPASS_STATS *last_frame,

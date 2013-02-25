@@ -3321,11 +3321,19 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size)
     cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
 
-  // Rolling monitors of whether we are over or underspending used to help regulate min and Max Q in two pass.
-  cpi->rolling_target_bits = ((cpi->rolling_target_bits * 3) + cpi->this_frame_target + 2) / 4;
-  cpi->rolling_actual_bits = ((cpi->rolling_actual_bits * 3) + cpi->projected_frame_size + 2) / 4;
-  cpi->long_rolling_target_bits = ((cpi->long_rolling_target_bits * 31) + cpi->this_frame_target + 16) / 32;
-  cpi->long_rolling_actual_bits = ((cpi->long_rolling_actual_bits * 31) + cpi->projected_frame_size + 16) / 32;
+  // Rolling monitors of whether we are over or underspending used to help
+  // regulate min and Max Q in two pass.
+  if (cm->frame_type != KEY_FRAME) {
+    cpi->rolling_target_bits =
+      ((cpi->rolling_target_bits * 3) + cpi->this_frame_target + 2) / 4;
+    cpi->rolling_actual_bits =
+      ((cpi->rolling_actual_bits * 3) + cpi->projected_frame_size + 2) / 4;
+    cpi->long_rolling_target_bits =
+      ((cpi->long_rolling_target_bits * 31) + cpi->this_frame_target + 16) / 32;
+    cpi->long_rolling_actual_bits =
+      ((cpi->long_rolling_actual_bits * 31) +
+       cpi->projected_frame_size + 16) / 32;
+  }
 
   // Actual bits spent
   cpi->total_actual_bits    += cpi->projected_frame_size;
@@ -3551,7 +3559,12 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
     vp9_second_pass(cpi);
 
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
+
+#ifdef DISABLE_RC_LONG_TERM_MEM
+  cpi->twopass.bits_left -=  cpi->this_frame_target;
+#else
   cpi->twopass.bits_left -= 8 * *size;
+#endif
 
   if (!cpi->refresh_alt_ref_frame) {
     double lower_bounds_min_rate = FRAME_OVERHEAD_BITS * cpi->oxcf.frame_rate;

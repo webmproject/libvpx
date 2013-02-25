@@ -114,13 +114,19 @@ static int kfboost_qadjust(int qindex) {
   return retval;
 }
 
-int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex) {
-  if (frame_type == KEY_FRAME)
-    return (int)(4500000 / vp9_convert_qindex_to_q(qindex));
-  else
-    return (int)(2850000 / vp9_convert_qindex_to_q(qindex));
-}
+int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
+                    double correction_factor) {
+  int enumerator;
+  double q = vp9_convert_qindex_to_q(qindex);
 
+  if (frame_type == KEY_FRAME) {
+    enumerator = 4500000;
+  } else {
+    enumerator = 2850000;
+  }
+
+  return (int)(0.5 + (enumerator * correction_factor / q));
+}
 
 void vp9_save_coding_context(VP9_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
@@ -259,7 +265,7 @@ void vp9_setup_inter_frame(VP9_COMP *cpi) {
 
 static int estimate_bits_at_q(int frame_kind, int Q, int MBs,
                               double correction_factor) {
-  int Bpm = (int)(.5 + correction_factor * vp9_bits_per_mb(frame_kind, Q));
+  int Bpm = (int)(vp9_bits_per_mb(frame_kind, Q, correction_factor));
 
   /* Attempt to retain reasonable accuracy without overflow. The cutoff is
    * chosen such that the maximum product of Bpm and MBs fits 31 bits. The
@@ -397,12 +403,12 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
       rate_correction_factor = cpi->rate_correction_factor;
   }
 
-  // Work out how big we would have expected the frame to be at this Q given the current correction factor.
+  // Work out how big we would have expected the frame to be at this Q given
+  // the current correction factor.
   // Stay in double to avoid int overflow when values are large
   projected_size_based_on_q =
-    (int)(((.5 + rate_correction_factor *
-            vp9_bits_per_mb(cpi->common.frame_type, Q)) *
-           cpi->common.MBs) / (1 << BPER_MB_NORMBITS));
+    estimate_bits_at_q(cpi->common.frame_type, Q,
+                       cpi->common.MBs, rate_correction_factor);
 
   // Work out a size correction factor.
   // if ( cpi->this_frame_target > 0 )
@@ -485,8 +491,7 @@ int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
 
   do {
     bits_per_mb_at_this_q =
-      (int)(.5 + correction_factor *
-            vp9_bits_per_mb(cpi->common.frame_type, i));
+      (int)(vp9_bits_per_mb(cpi->common.frame_type, i, correction_factor));
 
     if (bits_per_mb_at_this_q <= target_bits_per_mb) {
       if ((target_bits_per_mb - bits_per_mb_at_this_q) <= last_error)
