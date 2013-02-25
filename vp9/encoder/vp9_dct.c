@@ -728,10 +728,10 @@ void vp9_short_fht16x16_c(int16_t *input, int16_t *output,
   // column transform
   for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j)
-      temp_in[j] = input[j * short_pitch + i];
+      temp_in[j] = input[j * short_pitch + i] << 2;
     fwdc(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
-      outptr[j * 16 + i] = temp_out[j];
+      outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
   }
 
   // row transform
