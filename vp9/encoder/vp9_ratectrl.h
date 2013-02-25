@@ -32,7 +32,8 @@ int vp9_pick_frame_size(VP9_COMP *cpi);
 
 double vp9_convert_qindex_to_q(int qindex);
 int vp9_gfboost_qadjust(int qindex);
-int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex);
+extern int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
+                           double correction_factor);
 void vp9_setup_inter_frame(VP9_COMP *cpi);
 
 #endif  // VP9_ENCODER_VP9_RATECTRL_H_

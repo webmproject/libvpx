@@ -29,6 +29,10 @@
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/encoder/vp9_lookahead.h"
 
+// Experimental rate control switches
+// #define ONE_SHOT_Q_ESTIMATE 1
+// #define DISABLE_RC_LONG_TERM_MEM 1
+
 // #define SPEEDSTATS 1
 #define MIN_GF_INTERVAL             4
 #define DEFAULT_GF_INTERVAL         7
