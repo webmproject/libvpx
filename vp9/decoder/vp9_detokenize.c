@@ -161,12 +161,15 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   while (1) {
     int val;
     const uint8_t *cat6 = cat6_prob;
-    if (c >= seg_eob) break;
+
+    if (c >= seg_eob)
+      break;
     prob = coef_probs[type][ref][get_coef_band(txfm_size, c)][pt];
     if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
       break;
 SKIP_START:
-    if (c >= seg_eob) break;
+    if (c >= seg_eob)
+      break;
     if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
@@ -236,7 +239,7 @@ SKIP_START:
   if (c < seg_eob)
     coef_counts[type][ref][get_coef_band(txfm_size, c)][pt][DCT_EOB_TOKEN]++;
 
-  A0[aidx] = L0[lidx] = (c > 0);
+  A0[aidx] = L0[lidx] = c > 0;
   if (txfm_size >= TX_8X8) {
     A0[aidx + 1] = L0[lidx + 1] = A0[aidx];
     if (txfm_size >= TX_16X16) {
@@ -268,27 +271,20 @@ SKIP_START:
 }
 
 static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
-  int eob;
-
-  if (vp9_get_segdata(xd, segment_id, SEG_LVL_SKIP)) {
-    eob = 0;
-  } else {
-    eob = eob_max;
-  }
-  return eob;
+  return vp9_get_segdata(xd, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
 
 int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
                          MACROBLOCKD* const xd,
                          BOOL_DECODER* const bc) {
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  int c, i, eobtotal = 0, seg_eob;
+  int i, eobtotal = 0, seg_eob;
 
   // Luma block
-  c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
-                   DCT_DCT, get_eob(xd, segment_id, 1024),
-                   xd->sb_coeff_data.qcoeff,
-                   vp9_default_zig_zag1d_32x32, TX_32X32);
+  int c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
+                       DCT_DCT, get_eob(xd, segment_id, 1024),
+                       xd->sb_coeff_data.qcoeff,
+                       vp9_default_zig_zag1d_32x32, TX_32X32);
   xd->block[0].eob = c;
   eobtotal += c;
 
@@ -309,13 +305,13 @@ static int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
                                       MACROBLOCKD* const xd,
                                       BOOL_DECODER* const bc) {
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  int c, i, eobtotal = 0, seg_eob;
+  int i, eobtotal = 0, seg_eob;
 
   // Luma block
-  c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
-                   get_tx_type(xd, &xd->block[0]),
-                   get_eob(xd, segment_id, 256),
-                   xd->qcoeff, vp9_default_zig_zag1d_16x16, TX_16X16);
+  int c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
+                       get_tx_type(xd, &xd->block[0]),
+                       get_eob(xd, segment_id, 256),
+                       xd->qcoeff, vp9_default_zig_zag1d_16x16, TX_16X16);
   xd->block[0].eob = c;
   eobtotal += c;
 
@@ -377,12 +373,9 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
                             BOOL_DECODER* const bc,
                             PLANE_TYPE type, int i, int seg_eob,
                             TX_TYPE tx_type, const int *scan) {
-  int c;
-
-  c = decode_coefs(dx, xd, bc, i, type, tx_type, seg_eob,
-                   xd->block[i].qcoeff, scan, TX_4X4);
+  int c = decode_coefs(dx, xd, bc, i, type, tx_type, seg_eob,
+                       xd->block[i].qcoeff, scan, TX_4X4);
   xd->block[i].eob = c;
-
   return c;
 }
 
@@ -464,16 +457,13 @@ int vp9_decode_mb_tokens(VP9D_COMP* const dx,
                          MACROBLOCKD* const xd,
                          BOOL_DECODER* const bc) {
   const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
-  int eobtotal;
-
-  if (tx_size == TX_16X16) {
-    eobtotal = vp9_decode_mb_tokens_16x16(dx, xd, bc);
-  } else if (tx_size == TX_8X8) {
-    eobtotal = vp9_decode_mb_tokens_8x8(dx, xd, bc);
-  } else {
-    assert(tx_size == TX_4X4);
-    eobtotal = vp9_decode_mb_tokens_4x4(dx, xd, bc);
+  switch (tx_size) {
+    case TX_16X16:
+      return vp9_decode_mb_tokens_16x16(dx, xd, bc);
+    case TX_8X8:
+      return vp9_decode_mb_tokens_8x8(dx, xd, bc);
+    default:
+      assert(tx_size == TX_4X4);
+      return vp9_decode_mb_tokens_4x4(dx, xd, bc);
   }
-
-  return eobtotal;
 }

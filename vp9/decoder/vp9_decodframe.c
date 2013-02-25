@@ -78,68 +78,69 @@ static vp9_prob read_prob_diff_update(vp9_reader *const bc, int oldp) {
 
 void vp9_init_de_quantizer(VP9D_COMP *pbi) {
   int i;
-  int Q;
+  int q;
   VP9_COMMON *const pc = &pbi->common;
 
-  for (Q = 0; Q < QINDEX_RANGE; Q++) {
-    pc->Y1dequant[Q][0] = (int16_t)vp9_dc_quant(Q, pc->y1dc_delta_q);
-    pc->UVdequant[Q][0] = (int16_t)vp9_dc_uv_quant(Q, pc->uvdc_delta_q);
+  for (q = 0; q < QINDEX_RANGE; q++) {
+    pc->Y1dequant[q][0] = (int16_t)vp9_dc_quant(q, pc->y1dc_delta_q);
+    pc->UVdequant[q][0] = (int16_t)vp9_dc_uv_quant(q, pc->uvdc_delta_q);
 
     /* all the ac values =; */
     for (i = 1; i < 16; i++) {
       int rc = vp9_default_zig_zag1d_4x4[i];
 
-      pc->Y1dequant[Q][rc] = (int16_t)vp9_ac_yquant(Q);
-      pc->UVdequant[Q][rc] = (int16_t)vp9_ac_uv_quant(Q, pc->uvac_delta_q);
+      pc->Y1dequant[q][rc] = (int16_t)vp9_ac_yquant(q);
+      pc->UVdequant[q][rc] = (int16_t)vp9_ac_uv_quant(q, pc->uvac_delta_q);
     }
   }
 }
 
 static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
   int i;
-  int QIndex;
+  int qindex;
   VP9_COMMON *const pc = &pbi->common;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
   // Set the Q baseline allowing for any segment level adjustment
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
-    /* Abs Value */
     if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
-      QIndex = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
-
-    /* Delta Value */
+      /* Abs Value */
+      qindex = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
     else {
-      QIndex = pc->base_qindex +
+      /* Delta Value */
+      qindex = pc->base_qindex +
                vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
-      QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    /* Clamp to valid range */
+      /* Clamp to valid range */
+      qindex = (qindex >= 0) ? ((qindex <= MAXQ) ? qindex : MAXQ) : 0;
     }
   } else
-    QIndex = pc->base_qindex;
-  xd->q_index = QIndex;
+    qindex = pc->base_qindex;
+
+  xd->q_index = qindex;
 
   /* Set up the block level dequant pointers */
   for (i = 0; i < 16; i++) {
-    xd->block[i].dequant = pc->Y1dequant[QIndex];
+    xd->block[i].dequant = pc->Y1dequant[qindex];
   }
 
-  xd->inv_txm4x4_1        = vp9_short_idct4x4llm_1;
-  xd->inv_txm4x4          = vp9_short_idct4x4llm;
-  xd->itxm_add            = vp9_dequant_idct_add;
-  xd->dc_only_itxm_add    = vp9_dc_only_idct_add_c;
-  xd->itxm_add_y_block    = vp9_dequant_idct_add_y_block;
-  xd->itxm_add_uv_block   = vp9_dequant_idct_add_uv_block;
+  xd->inv_txm4x4_1      = vp9_short_idct4x4llm_1;
+  xd->inv_txm4x4        = vp9_short_idct4x4llm;
+  xd->itxm_add          = vp9_dequant_idct_add;
+  xd->dc_only_itxm_add  = vp9_dc_only_idct_add_c;
+  xd->itxm_add_y_block  = vp9_dequant_idct_add_y_block;
+  xd->itxm_add_uv_block = vp9_dequant_idct_add_uv_block;
   if (xd->lossless) {
-    assert(QIndex == 0);
-    xd->inv_txm4x4_1        = vp9_short_inv_walsh4x4_1_x8;
-    xd->inv_txm4x4          = vp9_short_inv_walsh4x4_x8;
-    xd->itxm_add            = vp9_dequant_idct_add_lossless_c;
-    xd->dc_only_itxm_add    = vp9_dc_only_inv_walsh_add_c;
-    xd->itxm_add_y_block    = vp9_dequant_idct_add_y_block_lossless_c;
-    xd->itxm_add_uv_block   = vp9_dequant_idct_add_uv_block_lossless_c;
+    assert(qindex == 0);
+    xd->inv_txm4x4_1      = vp9_short_inv_walsh4x4_1_x8;
+    xd->inv_txm4x4        = vp9_short_inv_walsh4x4_x8;
+    xd->itxm_add          = vp9_dequant_idct_add_lossless_c;
+    xd->dc_only_itxm_add  = vp9_dc_only_inv_walsh_add_c;
+    xd->itxm_add_y_block  = vp9_dequant_idct_add_y_block_lossless_c;
+    xd->itxm_add_uv_block = vp9_dequant_idct_add_uv_block_lossless_c;
   }
 
   for (i = 16; i < 24; i++) {
-    xd->block[i].dequant = pc->UVdequant[QIndex];
+    xd->block[i].dequant = pc->UVdequant[qindex];
   }
 }
 
@@ -147,11 +148,13 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
  *  to dst buffer, we can write the result directly to dst buffer. This eliminates unnecessary copy.
  */
 static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd) {
+  BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-    if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
+    if (sb_type == BLOCK_SIZE_SB64X64) {
       vp9_build_intra_predictors_sb64uv_s(xd);
       vp9_build_intra_predictors_sb64y_s(xd);
-    } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
+    } else if (sb_type == BLOCK_SIZE_SB32X32) {
       vp9_build_intra_predictors_sbuv_s(xd);
       vp9_build_intra_predictors_sby_s(xd);
     } else {
@@ -159,14 +162,14 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd) {
       vp9_build_intra_predictors_mby_s(xd);
     }
   } else {
-    if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
+    if (sb_type == BLOCK_SIZE_SB64X64) {
       vp9_build_inter64x64_predictors_sb(xd,
                                          xd->dst.y_buffer,
                                          xd->dst.u_buffer,
                                          xd->dst.v_buffer,
                                          xd->dst.y_stride,
                                          xd->dst.uv_stride);
-    } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
+    } else if (sb_type == BLOCK_SIZE_SB32X32) {
       vp9_build_inter32x32_predictors_sb(xd,
                                          xd->dst.y_buffer,
                                          xd->dst.u_buffer,
@@ -830,12 +833,13 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
     vp9_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter,
                              &pbi->common);
 
-  if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV
-      && mode != I8X8_PRED
-      && !bool_error(bc)) {
+  if (eobtotal == 0 &&
+      mode != B_PRED &&
+      mode != SPLITMV &&
+      mode != I8X8_PRED &&
+      !bool_error(bc)) {
     /* Special case:  Force the loopfilter to skip when eobtotal and
-     * mb_skip_coeff are zero.
-     * */
+       mb_skip_coeff are zero. */
     xd->mode_info_context->mbmi.mb_skip_coeff = 1;
     skip_recon_mb(pbi, xd);
     return;
@@ -1098,7 +1102,7 @@ static unsigned int read_partition_size(const unsigned char *cx_size) {
 static int read_is_valid(const unsigned char *start,
                          size_t               len,
                          const unsigned char *end) {
-  return (start + len > start && start + len <= end);
+  return start + len > start && start + len <= end;
 }
 
 
@@ -1227,8 +1231,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   pc->yv12_fb[pc->new_fb_idx].corrupted = 0;
 
   if (data_end - data < 3) {
-    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Truncated packet");
+    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
   } else {
     pc->last_frame_type = pc->frame_type;
     pc->frame_type = (FRAME_TYPE)(data[0] & 1);
@@ -1259,8 +1262,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
       data += 3;
     }
     {
-      const int Width = pc->Width;
-      const int Height = pc->Height;
+      const int width = pc->Width;
+      const int height = pc->Height;
 
       /* If error concealment is enabled we should only parse the new size
        * if we have enough data. Otherwise we will end up with the wrong
@@ -1274,15 +1277,15 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
       }
       data += 4;
 
-      if (Width != pc->Width  ||  Height != pc->Height) {
+      if (width != pc->Width || height != pc->Height) {
         if (pc->Width <= 0) {
-          pc->Width = Width;
+          pc->Width = width;
           vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                              "Invalid frame width");
         }
 
         if (pc->Height <= 0) {
-          pc->Height = Height;
+          pc->Height = height;
           vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                              "Invalid frame height");
         }
@@ -1464,11 +1467,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   /* Read the default quantizers. */
   {
-    int Q, q_update;
+    int q_update = 0;
+    pc->base_qindex = vp9_read_literal(&header_bc, QINDEX_BITS);
 
-    Q = vp9_read_literal(&header_bc, QINDEX_BITS);
-    pc->base_qindex = Q;
-    q_update = 0;
     /* AC 1st order Q = default */
     pc->y1dc_delta_q = get_delta_q(&header_bc, pc->y1dc_delta_q, &q_update);
     pc->uvdc_delta_q = get_delta_q(&header_bc, pc->uvdc_delta_q, &q_update);
@@ -1670,18 +1671,18 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
       data_ptr2[0][0] = data_ptr;
       for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
         if (tile_row) {
-          int size = data_ptr2[tile_row - 1][n_cols - 1][0] +
-                    (data_ptr2[tile_row - 1][n_cols - 1][1] << 8) +
-                    (data_ptr2[tile_row - 1][n_cols - 1][2] << 16) +
+          int size = data_ptr2[tile_row - 1][n_cols - 1][0] |
+                    (data_ptr2[tile_row - 1][n_cols - 1][1] << 8) |
+                    (data_ptr2[tile_row - 1][n_cols - 1][2] << 16) |
                     (data_ptr2[tile_row - 1][n_cols - 1][3] << 24);
           data_ptr2[tile_row - 1][n_cols - 1] += 4;
           data_ptr2[tile_row][0] = data_ptr2[tile_row - 1][n_cols - 1] + size;
         }
 
         for (tile_col = 1; tile_col < n_cols; tile_col++) {
-          int size = data_ptr2[tile_row][tile_col - 1][0] +
-                    (data_ptr2[tile_row][tile_col - 1][1] << 8) +
-                    (data_ptr2[tile_row][tile_col - 1][2] << 16) +
+          int size = data_ptr2[tile_row][tile_col - 1][0] |
+                    (data_ptr2[tile_row][tile_col - 1][1] << 8) |
+                    (data_ptr2[tile_row][tile_col - 1][2] << 16) |
                     (data_ptr2[tile_row][tile_col - 1][3] << 24);
           data_ptr2[tile_row][tile_col - 1] += 4;
           data_ptr2[tile_row][tile_col] =
@@ -1721,8 +1722,11 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
                mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
             decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
           }
+
           if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1) {
-            int size = data_ptr[0] + (data_ptr[1] << 8) + (data_ptr[2] << 16) +
+            int size = data_ptr[0] |
+                      (data_ptr[1] << 8) |
+                      (data_ptr[2] << 16) |
                       (data_ptr[3] << 24);
             data_ptr += 4 + size;
           }
