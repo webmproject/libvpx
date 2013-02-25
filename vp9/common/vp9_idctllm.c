@@ -38,12 +38,18 @@ static INLINE int16_t round_power_of_two(int16_t value, int n) {
   return (value + (1 << (n - 1))) >> n;
 }*/
 
+typedef void (*transform_1d)(int16_t*, int16_t*);
+
+typedef struct {
+  transform_1d cols, rows;  // vertical and horizontal
+} transform_2d;
+
 void vp9_short_inv_walsh4x4_x8_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
   int16_t *ip = input;
   int16_t *op = output;
-  int shortpitch = pitch >> 1;
+  const int half_pitch = pitch >> 1;
 
   for (i = 0; i < 4; i++) {
     a1 = (ip[0] + ip[3]) >> WHT_UPSCALE_FACTOR;
@@ -57,22 +63,22 @@ void vp9_short_inv_walsh4x4_x8_c(int16_t *input, int16_t *output, int pitch) {
     op[3] = (d1 - c1) >> 1;
 
     ip += 4;
-    op += shortpitch;
+    op += half_pitch;
   }
 
   ip = output;
   op = output;
   for (i = 0; i < 4; i++) {
-    a1 = ip[shortpitch * 0] + ip[shortpitch * 3];
-    b1 = ip[shortpitch * 1] + ip[shortpitch * 2];
-    c1 = ip[shortpitch * 1] - ip[shortpitch * 2];
-    d1 = ip[shortpitch * 0] - ip[shortpitch * 3];
+    a1 = ip[half_pitch * 0] + ip[half_pitch * 3];
+    b1 = ip[half_pitch * 1] + ip[half_pitch * 2];
+    c1 = ip[half_pitch * 1] - ip[half_pitch * 2];
+    d1 = ip[half_pitch * 0] - ip[half_pitch * 3];
 
 
-    op[shortpitch * 0] = (a1 + b1 + 1) >> 1;
-    op[shortpitch * 1] = (c1 + d1) >> 1;
-    op[shortpitch * 2] = (a1 - b1) >> 1;
-    op[shortpitch * 3] = (d1 - c1) >> 1;
+    op[half_pitch * 0] = (a1 + b1 + 1) >> 1;
+    op[half_pitch * 1] = (c1 + d1) >> 1;
+    op[half_pitch * 2] = (a1 - b1) >> 1;
+    op[half_pitch * 3] = (d1 - c1) >> 1;
 
     ip++;
     op++;
@@ -84,17 +90,16 @@ void vp9_short_inv_walsh4x4_1_x8_c(int16_t *in, int16_t *out, int pitch) {
   int16_t tmp[4];
   int16_t *ip = in;
   int16_t *op = tmp;
-  int shortpitch = pitch >> 1;
+  const int half_pitch = pitch >> 1;
 
   op[0] = ((ip[0] >> WHT_UPSCALE_FACTOR) + 1) >> 1;
   op[1] = op[2] = op[3] = (ip[0] >> WHT_UPSCALE_FACTOR) >> 1;
 
-
   ip = tmp;
   op = out;
   for (i = 0; i < 4; i++) {
-    op[shortpitch * 0] = (ip[0] + 1) >> 1;
-    op[shortpitch * 1] = op[shortpitch * 2] = op[shortpitch * 3] = ip[0] >> 1;
+    op[half_pitch * 0] = (ip[0] + 1) >> 1;
+    op[half_pitch * 1] = op[half_pitch * 2] = op[half_pitch * 3] = ip[0] >> 1;
     ip++;
     op++;
   }
@@ -105,7 +110,7 @@ void vp9_dc_only_inv_walsh_add_c(int input_dc, uint8_t *pred_ptr,
                                  int pitch, int stride) {
   int r, c;
   int16_t dc = input_dc;
-  int16_t tmp[16];
+  int16_t tmp[4 * 4];
   vp9_short_inv_walsh4x4_1_x8_c(&dc, tmp, 4 << 1);
 
   for (r = 0; r < 4; r++) {
@@ -139,11 +144,12 @@ void idct4_1d(int16_t *input, int16_t *output) {
 
 void vp9_short_idct4x4llm_c(int16_t *input, int16_t *output, int pitch) {
   int16_t out[4 * 4];
-  int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
+  int16_t *outptr = out;
+  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[4], temp_out[4];
-  // First transform rows
+
+  // Rows
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
       temp_in[j] = input[j];
@@ -151,13 +157,14 @@ void vp9_short_idct4x4llm_c(int16_t *input, int16_t *output, int pitch) {
     input += 4;
     outptr += 4;
   }
-  // Then transform columns
+
+  // Columns
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
       temp_in[j] = out[j * 4 + i];
     idct4_1d(temp_in, temp_out);
     for (j = 0; j < 4; ++j)
-      output[j * short_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 4);
+      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 4);
   }
 }
 
@@ -165,14 +172,14 @@ void vp9_short_idct4x4llm_1_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1;
   int16_t *op = output;
-  int shortpitch = pitch >> 1;
+  const int half_pitch = pitch >> 1;
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
   out = dct_const_round_shift(out * cospi_16_64);
   a1 = ROUND_POWER_OF_TWO(out, 4);
 
   for (i = 0; i < 4; i++) {
     op[0] = op[1] = op[2] = op[3] = a1;
-    op += shortpitch;
+    op += half_pitch;
   }
 }
 
@@ -240,36 +247,35 @@ void idct8_1d(int16_t *input, int16_t *output) {
 
 void vp9_short_idct8x8_c(int16_t *input, int16_t *output, int pitch) {
   int16_t out[8 * 8];
-  int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
+  int16_t *outptr = out;
+  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[8], temp_out[8];
 
-  // First transform rows
+  // Rows
   for (i = 0; i < 8; ++i) {
     idct8_1d(input, outptr);
     input += 8;
     outptr += 8;
   }
 
-  // Then transform columns
+  // Columns
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j)
       temp_in[j] = out[j * 8 + i];
     idct8_1d(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-      output[j * short_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
+      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
   }
 }
 
 static void iadst4_1d(int16_t *input, int16_t *output) {
-  int x0, x1, x2, x3;
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
-  x0 = input[0];
-  x1 = input[1];
-  x2 = input[2];
-  x3 = input[3];
+  int x0 = input[0];
+  int x1 = input[1];
+  int x2 = input[2];
+  int x3 = input[3];
 
   if (!(x0 | x1 | x2 | x3)) {
     output[0] = output[1] = output[2] = output[3] = 0;
@@ -305,41 +311,25 @@ static void iadst4_1d(int16_t *input, int16_t *output) {
   output[3] = dct_const_round_shift(s3);
 }
 
+static const transform_2d IHT_4[] = {
+  { idct4_1d,  idct4_1d  },  // DCT_DCT  = 0
+  { iadst4_1d, idct4_1d  },  // ADST_DCT = 1
+  { idct4_1d,  iadst4_1d },  // DCT_ADST = 2
+  { iadst4_1d, iadst4_1d }   // ADST_ADST = 3
+};
+
 void vp9_short_iht4x4_c(int16_t *input, int16_t *output,
                         int pitch, TX_TYPE tx_type) {
-  int16_t out[16];
-  int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
+  int16_t out[4 * 4];
+  int16_t *outptr = out;
+  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[4], temp_out[4];
-
-  void (*invr)(int16_t*, int16_t*);
-  void (*invc)(int16_t*, int16_t*);
-
-  switch (tx_type) {
-    case ADST_ADST:
-      invc = &iadst4_1d;
-      invr = &iadst4_1d;
-      break;
-    case ADST_DCT:
-      invc = &iadst4_1d;
-      invr = &idct4_1d;
-      break;
-    case DCT_ADST:
-      invc = &idct4_1d;
-      invr = &iadst4_1d;
-      break;
-    case DCT_DCT:
-      invc = &idct4_1d;
-      invr = &idct4_1d;
-      break;
-    default:
-      assert(0);
-  }
+  const transform_2d ht = IHT_4[tx_type];
 
   // inverse transform row vectors
   for (i = 0; i < 4; ++i) {
-    invr(input, outptr);
+    ht.rows(input, outptr);
     input  += 4;
     outptr += 4;
   }
@@ -348,24 +338,23 @@ void vp9_short_iht4x4_c(int16_t *input, int16_t *output,
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
       temp_in[j] = out[j * 4 + i];
-    invc(temp_in, temp_out);
+    ht.cols(temp_in, temp_out);
     for (j = 0; j < 4; ++j)
-      output[j * short_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 4);
+      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 4);
   }
 }
 
 static void iadst8_1d(int16_t *input, int16_t *output) {
-  int x0, x1, x2, x3, x4, x5, x6, x7;
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
-  x0 = input[7];
-  x1 = input[0];
-  x2 = input[5];
-  x3 = input[2];
-  x4 = input[3];
-  x5 = input[4];
-  x6 = input[1];
-  x7 = input[6];
+  int x0 = input[7];
+  int x1 = input[0];
+  int x2 = input[5];
+  int x3 = input[2];
+  int x4 = input[3];
+  int x5 = input[4];
+  int x6 = input[1];
+  int x7 = input[6];
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
     output[0] = output[1] = output[2] = output[3] = output[4]
@@ -397,10 +386,10 @@ static void iadst8_1d(int16_t *input, int16_t *output) {
   s1 = x1;
   s2 = x2;
   s3 = x3;
-  s4 = cospi_8_64  * x4 + cospi_24_64 * x5;
-  s5 = cospi_24_64 * x4 - cospi_8_64  * x5;
-  s6 = - cospi_24_64 * x6 + cospi_8_64  * x7;
-  s7 =   cospi_8_64  * x6 + cospi_24_64 * x7;
+  s4 =  cospi_8_64  * x4 + cospi_24_64 * x5;
+  s5 =  cospi_24_64 * x4 - cospi_8_64  * x5;
+  s6 = -cospi_24_64 * x6 + cospi_8_64  * x7;
+  s7 =  cospi_8_64  * x6 + cospi_24_64 * x7;
 
   x0 = s0 + s2;
   x1 = s1 + s3;
@@ -422,53 +411,35 @@ static void iadst8_1d(int16_t *input, int16_t *output) {
   x6 = dct_const_round_shift(s6);
   x7 = dct_const_round_shift(s7);
 
-  output[0] =   x0;
-  output[1] = - x4;
-  output[2] =   x6;
-  output[3] = - x2;
-  output[4] =   x3;
-  output[5] = - x7;
-  output[6] =   x5;
-  output[7] = - x1;
-
-  return;
+  output[0] =  x0;
+  output[1] = -x4;
+  output[2] =  x6;
+  output[3] = -x2;
+  output[4] =  x3;
+  output[5] = -x7;
+  output[6] =  x5;
+  output[7] = -x1;
 }
+
+static const transform_2d IHT_8[] = {
+  { idct8_1d,  idct8_1d  },  // DCT_DCT  = 0
+  { iadst8_1d, idct8_1d  },  // ADST_DCT = 1
+  { idct8_1d,  iadst8_1d },  // DCT_ADST = 2
+  { iadst8_1d, iadst8_1d }   // ADST_ADST = 3
+};
 
 void vp9_short_iht8x8_c(int16_t *input, int16_t *output,
                         int pitch, TX_TYPE tx_type) {
   int16_t out[8 * 8];
-  int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
+  int16_t *outptr = out;
+  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[8], temp_out[8];
-
-  void (*invr)(int16_t*, int16_t*);
-  void (*invc)(int16_t*, int16_t*);
-
-  switch (tx_type) {
-    case ADST_ADST:
-      invc = &iadst8_1d;
-      invr = &iadst8_1d;
-      break;
-    case ADST_DCT:
-      invc = &iadst8_1d;
-      invr = &idct8_1d;
-      break;
-    case DCT_ADST:
-      invc = &idct8_1d;
-      invr = &iadst8_1d;
-      break;
-    case DCT_DCT:
-      invc = &idct8_1d;
-      invr = &idct8_1d;
-      break;
-    default:
-      assert(0);
-  }
+  const transform_2d ht = IHT_8[tx_type];
 
   // inverse transform row vectors
   for (i = 0; i < 8; ++i) {
-    invr(input, outptr);
+    ht.rows(input, outptr);
     input += 8;
     outptr += 8;
   }
@@ -477,16 +448,16 @@ void vp9_short_iht8x8_c(int16_t *input, int16_t *output,
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j)
       temp_in[j] = out[j * 8 + i];
-    invc(temp_in, temp_out);
+    ht.cols(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-      output[j * short_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
+      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
   }
 }
 
 void vp9_short_idct10_8x8_c(int16_t *input, int16_t *output, int pitch) {
   int16_t out[8 * 8];
-  int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
+  int16_t *outptr = out;
+  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[8], temp_out[8];
 
@@ -505,7 +476,7 @@ void vp9_short_idct10_8x8_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 8 + i];
     idct8_1d(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-      output[j * short_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
+      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
   }
 }
 
@@ -681,15 +652,15 @@ void idct16_1d(int16_t *input, int16_t *output) {
 
 void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
   int16_t out[16 * 16];
-  int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
+  int16_t *outptr = out;
+  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[16], temp_out[16];
 
   // First transform rows
   for (i = 0; i < 16; ++i) {
     idct16_1d(input, outptr);
-    input += short_pitch;
+    input += half_pitch;
     outptr += 16;
   }
 
@@ -704,25 +675,24 @@ void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
 }
 
 void iadst16_1d(int16_t *input, int16_t *output) {
-  int x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15;
   int s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15;
 
-  x0 = input[15];
-  x1 = input[0];
-  x2 = input[13];
-  x3 = input[2];
-  x4 = input[11];
-  x5 = input[4];
-  x6 = input[9];
-  x7 = input[6];
-  x8 = input[7];
-  x9 = input[8];
-  x10 = input[5];
-  x11 = input[10];
-  x12 = input[3];
-  x13 = input[12];
-  x14 = input[1];
-  x15 = input[14];
+  int x0 = input[15];
+  int x1 = input[0];
+  int x2 = input[13];
+  int x3 = input[2];
+  int x4 = input[11];
+  int x5 = input[4];
+  int x6 = input[9];
+  int x7 = input[6];
+  int x8 = input[7];
+  int x9 = input[8];
+  int x10 = input[5];
+  int x11 = input[10];
+  int x12 = input[3];
+  int x13 = input[12];
+  int x14 = input[1];
+  int x15 = input[14];
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8
            | x9 | x10 | x11 | x12 | x13 | x14 | x15)) {
@@ -857,68 +827,52 @@ void iadst16_1d(int16_t *input, int16_t *output) {
   x14 = dct_const_round_shift(s14);
   x15 = dct_const_round_shift(s15);
 
-  output[0] = x0;
-  output[1] = - x8;
-  output[2] = x12;
-  output[3] = - x4;
-  output[4] = x6;
-  output[5] = x14;
-  output[6] = x10;
-  output[7] = x2;
-  output[8] = x3;
+  output[0] =  x0;
+  output[1] = -x8;
+  output[2] =  x12;
+  output[3] = -x4;
+  output[4] =  x6;
+  output[5] =  x14;
+  output[6] =  x10;
+  output[7] =  x2;
+  output[8] =  x3;
   output[9] =  x11;
-  output[10] = x15;
-  output[11] = x7;
-  output[12] = x5;
-  output[13] = - x13;
-  output[14] = x9;
-  output[15] = - x1;
+  output[10] =  x15;
+  output[11] =  x7;
+  output[12] =  x5;
+  output[13] = -x13;
+  output[14] =  x9;
+  output[15] = -x1;
 }
 
+static const transform_2d IHT_16[] = {
+  { idct16_1d,  idct16_1d  },  // DCT_DCT  = 0
+  { iadst16_1d, idct16_1d  },  // ADST_DCT = 1
+  { idct16_1d,  iadst16_1d },  // DCT_ADST = 2
+  { iadst16_1d, iadst16_1d }   // ADST_ADST = 3
+};
+
 void vp9_short_iht16x16_c(int16_t *input, int16_t *output,
-                        int pitch, TX_TYPE tx_type) {
+                          int pitch, TX_TYPE tx_type) {
   int16_t out[16 * 16];
-  int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
+  int16_t *outptr = out;
+  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[16], temp_out[16];
+  const transform_2d ht = IHT_16[tx_type];
 
-  void (*invr)(int16_t*, int16_t*);
-  void (*invc)(int16_t*, int16_t*);
-
-  switch (tx_type) {
-    case ADST_ADST:
-      invc = &iadst16_1d;
-      invr = &iadst16_1d;
-      break;
-    case ADST_DCT:
-      invc = &iadst16_1d;
-      invr = &idct16_1d;
-      break;
-    case DCT_ADST:
-      invc = &idct16_1d;
-      invr = &iadst16_1d;
-      break;
-    case DCT_DCT:
-      invc = &idct16_1d;
-      invr = &idct16_1d;
-      break;
-    default:
-      assert(0);
-  }
-
-  // inverse transform row vectors
+  // Rows
   for (i = 0; i < 16; ++i) {
-    invr(input, outptr);
-    input += short_pitch;
+    ht.rows(input, outptr);
+    input += half_pitch;
     outptr += 16;
   }
 
-  // inverse transform column vectors
+  // Columns
   for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j)
       temp_in[j] = out[j * 16 + i];
-    invc(temp_in, temp_out);
+    ht.cols(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
       output[j * 16 + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
   }
@@ -926,8 +880,8 @@ void vp9_short_iht16x16_c(int16_t *input, int16_t *output,
 
 void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
     int16_t out[16 * 16];
-    int16_t *outptr = &out[0];
-    const int short_pitch = pitch >> 1;
+    int16_t *outptr = out;
+    const int half_pitch = pitch >> 1;
     int i, j;
     int16_t temp_in[16], temp_out[16];
 
@@ -937,7 +891,7 @@ void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
     vpx_memset(out, 0, sizeof(out));
     for (i = 0; i < 4; ++i) {
       idct16_1d(input, outptr);
-      input += short_pitch;
+      input += half_pitch;
       outptr += 16;
     }
 
@@ -1327,18 +1281,19 @@ void idct32_1d(int16_t *input, int16_t *output) {
 
 void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
   int16_t out[32 * 32];
-  int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
+  int16_t *outptr = out;
+  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[32], temp_out[32];
 
-  // First transform rows
+  // Rows
   for (i = 0; i < 32; ++i) {
     idct32_1d(input, outptr);
-    input += short_pitch;
+    input += half_pitch;
     outptr += 32;
   }
-  // Then transform columns
+
+  // Columns
   for (i = 0; i < 32; ++i) {
     for (j = 0; j < 32; ++j)
       temp_in[j] = out[j * 32 + i];
