@@ -288,6 +288,15 @@ typedef struct superblockd {
   DECLARE_ALIGNED(16, int16_t, dqcoeff[32*32+16*16*2]);
 } SUPERBLOCKD;
 
+struct scale_factors {
+  int x_num;
+  int x_den;
+  int x_offset_q4;
+  int y_num;
+  int y_den;
+  int y_offset_q4;
+};
+
 typedef struct macroblockd {
   DECLARE_ALIGNED(16, int16_t,  diff[384]);      /* from idct diff */
   DECLARE_ALIGNED(16, uint8_t,  predictor[384]);
@@ -303,6 +312,8 @@ typedef struct macroblockd {
   YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
   YV12_BUFFER_CONFIG second_pre;
   YV12_BUFFER_CONFIG dst;
+  struct scale_factors scale_factor[2];
+  struct scale_factors scale_factor_uv[2];
 
   MODE_INFO *prev_mode_info_context;
   MODE_INFO *mode_info_context;

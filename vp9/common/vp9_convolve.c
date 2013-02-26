@@ -318,25 +318,17 @@ void vp9_convolve_copy(const uint8_t *src, int src_stride,
                        const int16_t *filter_x, int filter_x_stride,
                        const int16_t *filter_y, int filter_y_stride,
                        int w, int h) {
-  if (h == 16) {
+  if (w == 16 && h == 16) {
     vp9_copy_mem16x16(src, src_stride, dst, dst_stride);
-  } else if (h == 8) {
+  } else if (w == 8 && h == 8) {
     vp9_copy_mem8x8(src, src_stride, dst, dst_stride);
-  } else if (w == 8) {
+  } else if (w == 8 && h == 4) {
     vp9_copy_mem8x4(src, src_stride, dst, dst_stride);
   } else {
-    // 4x4
     int r;
 
-    for (r = 0; r < 4; ++r) {
-#if !(CONFIG_FAST_UNALIGNED)
-      dst[0]  = src[0];
-      dst[1]  = src[1];
-      dst[2]  = src[2];
-      dst[3]  = src[3];
-#else
-      *(uint32_t *)dst = *(const uint32_t *)src;
-#endif
+    for (r = h; r > 0; --r) {
+      memcpy(dst, src, w);
       src += src_stride;
       dst += dst_stride;
     }

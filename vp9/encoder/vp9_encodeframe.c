@@ -2125,22 +2125,14 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
         mbmi->mb_skip_coeff = 0;
 
     } else {
-      vp9_build_1st_inter16x16_predictors_mb(xd,
-                                             xd->dst.y_buffer,
-                                             xd->dst.u_buffer,
-                                             xd->dst.v_buffer,
-                                             xd->dst.y_stride,
-                                             xd->dst.uv_stride);
-      if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-        vp9_build_2nd_inter16x16_predictors_mb(xd,
-                                               xd->dst.y_buffer,
-                                               xd->dst.u_buffer,
-                                               xd->dst.v_buffer,
-                                               xd->dst.y_stride,
-                                               xd->dst.uv_stride);
-      }
+      vp9_build_inter16x16_predictors_mb(xd,
+                                         xd->dst.y_buffer,
+                                         xd->dst.u_buffer,
+                                         xd->dst.v_buffer,
+                                         xd->dst.y_stride,
+                                         xd->dst.uv_stride);
 #if CONFIG_COMP_INTERINTRA_PRED
-      else if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+      if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
         vp9_build_interintra_16x16_predictors_mb(xd,
                                                  xd->dst.y_buffer,
                                                  xd->dst.u_buffer,
