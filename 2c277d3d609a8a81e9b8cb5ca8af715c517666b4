@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//dg4\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-02-26T03:57:59Z",
+      "side": 1,
+      "message": "Would non-recursive implementation be easier to follow and less complex?",
+      "revId": "2c277d3d609a8a81e9b8cb5ca8af715c517666b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//dgM\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-02-26T03:57:59Z",
+      "side": 1,
+      "message": "what is the offset_q4? does it need to be scaled?\nAlso (x+8)\u003e\u003e4 is not symmetric for positive and negative numbers.",
+      "revId": "2c277d3d609a8a81e9b8cb5ca8af715c517666b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
