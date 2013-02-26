@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//dPE\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-26T16:45:34Z",
+      "side": 1,
+      "message": "This was a mental exercise as much as anything. You take the fun out of everything :)\n\nThe idea here was to use our existing implementations wherever possible, for example to turn a 16x8 copy request into 2 calls to the 8x8 function, and do it in a generic way so that if I needed to handle 32 or 64, it would turn into multiple calls to the 16, etc. I always intended it remove it in favor of code that looked exactly like the code this replaces (an if-tree based on block size) but wanted to find out what all the block sizes were first. I\u0027ll just do it now and make the fallthrough case an arbitrary memcpy loop rather than the 4x4 code that\u0027s there now.",
+      "parentUuid": "AAAAVH//dQ4\u003d",
+      "revId": "2c277d3d609a8a81e9b8cb5ca8af715c517666b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//dg4\u003d",
         "filename": "vp9/common/vp9_convolve.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//dPA\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-26T16:45:34Z",
+      "side": 1,
+      "message": "I actually tried it iteratively first, and realized that all the temp variables I was saving looked exactly like saving the variables of the stack during a function call, so it ended up this way.",
+      "parentUuid": "AAAAVH//dg4\u003d",
+      "revId": "2c277d3d609a8a81e9b8cb5ca8af715c517666b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//dgM\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2013-02-26T03:57:59Z",
       "side": 1,
       "message": "what is the offset_q4? does it need to be scaled?\nAlso (x+8)\u003e\u003e4 is not symmetric for positive and negative numbers.",
+      "revId": "2c277d3d609a8a81e9b8cb5ca8af715c517666b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//dRU\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-26T16:45:34Z",
+      "side": 1,
+      "message": "offset_q4 is the fractional pel location of the origin of the current block when projected onto the reference frame. For example, say the mv is 0,0 and we\u0027re at pixel 16 in the current frame and we\u0027re doing a 11:9 downscale. What we want is to interpolate the pixel at 176/9 (19.55). When using a q4, this is then 312/16, or 19 8/16. offset_q4 is the 8/16.\n\nYou\u0027re right that I got the calculation wrong in this commit. The next one, the ZEROMV one, makes this mv_q4 \u003d mv_q3 \u003c\u003c 1, return mv_q4 * num / den + offset_q4.",
+      "parentUuid": "AAAAVH//dgM\u003d",
       "revId": "2c277d3d609a8a81e9b8cb5ca8af715c517666b4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
