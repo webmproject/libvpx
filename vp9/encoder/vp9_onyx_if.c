@@ -3373,7 +3373,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (cpi->twopass.total_left_stats->coded_error != 0.0)
       fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d"
               "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
-              "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
+              "%6d %5d %5d %5d %8.2f %10d %10.3f"
               "%10.3f %8d %10d %10d %10d\n",
               cpi->common.current_video_frame, cpi->this_frame_target,
               cpi->projected_frame_size, 0, //loop_size_estimate,
@@ -3400,7 +3400,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     else
       fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d"
               "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
-              "%5d %5d %8d %8.2f %10d %10.3f"
+              "%5d %5d %8d %8d %8.2f %10d %10.3f"
               "%8d %10d %10d %10d\n",
               cpi->common.current_video_frame,
               cpi->this_frame_target, cpi->projected_frame_size,
