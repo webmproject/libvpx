@@ -174,7 +174,7 @@ void vp9_transform_mby_4x4(MACROBLOCK *x) {
     BLOCK *b = &x->block[i];
     TX_TYPE tx_type = get_tx_type_4x4(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
-      vp9_short_fht4x4(b->src_diff, b->coeff, 32, tx_type);
+      vp9_short_fht4x4(b->src_diff, b->coeff, 16, tx_type);
     } else if (!(i & 1) && get_tx_type_4x4(xd, &xd->block[i + 1]) == DCT_DCT) {
       x->fwd_txm8x4(&x->block[i].src_diff[0],
                            &x->block[i].coeff[0], 32);
@@ -209,7 +209,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
     BLOCK *b = &x->block[i];
     tx_type = get_tx_type_8x8(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
-      vp9_short_fht8x8(b->src_diff, b->coeff, 32, tx_type);
+      vp9_short_fht8x8(b->src_diff, b->coeff, 16, tx_type);
     } else {
       x->fwd_txm8x8(&x->block[i].src_diff[0],
                            &x->block[i].coeff[0], 32);
@@ -219,7 +219,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
     BLOCK *b = &x->block[i];
     tx_type = get_tx_type_8x8(xd, &xd->block[i]);
     if (tx_type != DCT_DCT) {
-      vp9_short_fht8x8(b->src_diff, (b + 2)->coeff, 32, tx_type);
+      vp9_short_fht8x8(b->src_diff, (b + 2)->coeff, 16, tx_type);
     } else {
       x->fwd_txm8x8(&x->block[i].src_diff[0],
                            &x->block[i + 2].coeff[0], 32);
@@ -247,7 +247,7 @@ void vp9_transform_mby_16x16(MACROBLOCK *x) {
   TX_TYPE tx_type = get_tx_type_16x16(xd, &xd->block[0]);
   vp9_clear_system_state();
   if (tx_type != DCT_DCT) {
-    vp9_short_fht16x16(b->src_diff, b->coeff, 32, tx_type);
+    vp9_short_fht16x16(b->src_diff, b->coeff, 16, tx_type);
   } else {
     x->fwd_txm16x16(&x->block[0].src_diff[0],
                            &x->block[0].coeff[0], 32);
