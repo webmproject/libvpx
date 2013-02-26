@@ -105,7 +105,6 @@ void vp9_short_fht4x4_c(int16_t *input, int16_t *output,
                         int pitch, TX_TYPE tx_type) {
   int16_t out[4 * 4];
   int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[4], temp_out[4];
 
@@ -137,7 +136,7 @@ void vp9_short_fht4x4_c(int16_t *input, int16_t *output,
   // column transform
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
-      temp_in[j] = input[j * short_pitch + i] << 4;
+      temp_in[j] = input[j * pitch + i] << 4;
     if (i == 0 && temp_in[0])
       temp_in[0] += 1;
     fwdc(temp_in, temp_out);
@@ -308,7 +307,6 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
                         int pitch, TX_TYPE tx_type) {
   int16_t out[64];
   int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[8], temp_out[8];
 
@@ -339,7 +337,7 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
   // column transform
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j)
-      temp_in[j] = input[j * short_pitch + i] << 2;
+      temp_in[j] = input[j * pitch + i] << 2;
     fwdc(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
       outptr[j * 8 + i] = temp_out[j];
@@ -697,7 +695,6 @@ void vp9_short_fht16x16_c(int16_t *input, int16_t *output,
                           int pitch, TX_TYPE tx_type) {
   int16_t out[256];
   int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[16], temp_out[16];
 
@@ -728,7 +725,7 @@ void vp9_short_fht16x16_c(int16_t *input, int16_t *output,
   // column transform
   for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j)
-      temp_in[j] = input[j * short_pitch + i] << 2;
+      temp_in[j] = input[j * pitch + i] << 2;
     fwdc(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
       outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
