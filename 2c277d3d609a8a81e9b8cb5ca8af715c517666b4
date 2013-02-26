@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAVH//dQ4\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-02-26T15:03:38Z",
+      "side": 1,
+      "message": "Does this do something different than?   \n\nwhile(h\u003e0) {\n  memcpy(dst,src,w0);\n  dst +\u003d dst_stride;\n  src +\u003d src_stride;\n  h--;\n}\n\nor something like that ?   \n\nI don\u0027t get why we need this code to be so long and complicated?",
+      "revId": "2c277d3d609a8a81e9b8cb5ca8af715c517666b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//dg4\u003d",
         "filename": "vp9/common/vp9_convolve.c",
         "patchSetId": 3
