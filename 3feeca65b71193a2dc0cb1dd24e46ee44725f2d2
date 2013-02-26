@@ -16,6 +16,24 @@
       "revId": "3feeca65b71193a2dc0cb1dd24e46ee44725f2d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//dD0\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-26T18:41:59Z",
+      "side": 1,
+      "message": "All modern compilers will do this transformation automatically as part of strength reduction / peephole optimization.",
+      "parentUuid": "AAAAVH//dTA\u003d",
+      "revId": "3feeca65b71193a2dc0cb1dd24e46ee44725f2d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
