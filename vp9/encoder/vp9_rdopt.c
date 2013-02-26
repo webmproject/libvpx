@@ -402,12 +402,10 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   unsigned int (*token_costs)[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
       mb->token_costs[tx_size][type][ref];
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
-#if CONFIG_CNVCONTEXT
   ENTROPY_CONTEXT *const a1 = a +
       sizeof(ENTROPY_CONTEXT_PLANES)/sizeof(ENTROPY_CONTEXT);
   ENTROPY_CONTEXT *const l1 = l +
       sizeof(ENTROPY_CONTEXT_PLANES)/sizeof(ENTROPY_CONTEXT);
-#endif
 
   switch (tx_size) {
     case TX_4X4:
@@ -422,10 +420,8 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       }
       break;
     case TX_8X8:
-#if CONFIG_CNVCONTEXT
       a_ec = (a[0] + a[1]) != 0;
       l_ec = (l[0] + l[1]) != 0;
-#endif
       scan = vp9_default_zig_zag1d_8x8;
       seg_eob = 64;
       break;
@@ -435,25 +431,21 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       if (type == PLANE_TYPE_UV) {
         const int uv_idx = ib - 16;
         qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 64 * uv_idx;
-#if CONFIG_CNVCONTEXT
         a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
       } else {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
-#endif
       }
       break;
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
       seg_eob = 1024;
       qcoeff_ptr = xd->sb_coeff_data.qcoeff;
-#if CONFIG_CNVCONTEXT
       a_ec = (a[0] + a[1] + a[2] + a[3] +
               a1[0] + a1[1] + a1[2] + a1[3]) != 0;
       l_ec = (l[0] + l[1] + l[2] + l[3] +
               l1[0] + l1[1] + l1[2] + l1[3]) != 0;
-#endif
       break;
     default:
       abort();
@@ -482,7 +474,6 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   // is eob first coefficient;
   pt = (c > 0);
   *a = *l = pt;
-#if CONFIG_CNVCONTEXT
   if (tx_size >= TX_8X8) {
     a[1] = l[1] = pt;
     if (tx_size >= TX_16X16) {
@@ -497,7 +488,6 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       }
     }
   }
-#endif
   return cost;
 }
 
