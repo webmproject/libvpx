@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//dTI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3234,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-02-26T12:35:53Z",
+      "side": 1,
+      "message": "Am I correct in thinking that the x_den and y_den are always the current frame / compression width and height and the _num are the height and width of the reference buffer?",
+      "revId": "38a30d5e549194b68a8ca9053a607d1594dd47e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
