@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//dkM\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-26T03:33:30Z",
+      "side": 0,
+      "message": "please don\u0027t remove newlines between variable declarations and code blocks, these are intentional.",
+      "revId": "9770d564f4984e6a0d3cfdfb7e5b8bc83f52dccf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
