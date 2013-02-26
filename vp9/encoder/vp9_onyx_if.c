@@ -2751,7 +2751,15 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         cpi->active_best_quality * 15 / 16;
     }
   } else {
+#ifdef ONE_SHOT_Q_ESTIMATE
+#ifdef STRICT_ONE_SHOT_Q
+    cpi->active_best_quality = Q;
+#else
     cpi->active_best_quality = inter_minq[Q];
+#endif
+#else
+    cpi->active_best_quality = inter_minq[Q];
+#endif
 
     // For the constant/constrained quality mode we dont want
     // q to fall below the cq level.

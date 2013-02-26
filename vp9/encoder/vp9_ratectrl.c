@@ -120,10 +120,13 @@ int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
   double q = vp9_convert_qindex_to_q(qindex);
 
   if (frame_type == KEY_FRAME) {
-    enumerator = 4500000;
+    enumerator = 4000000;
   } else {
-    enumerator = 2850000;
+    enumerator = 2500000;
   }
+
+  // Q based adjustment to baseline enumberator
+  enumerator += (int)(enumerator * q) >> 12;
 
   return (int)(0.5 + (enumerator * correction_factor / q));
 }
