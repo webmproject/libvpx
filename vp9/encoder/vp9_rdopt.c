@@ -402,6 +402,12 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   unsigned int (*token_costs)[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
       mb->token_costs[tx_size][type][ref];
   ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
+#if CONFIG_CNVCONTEXT
+  ENTROPY_CONTEXT *const a1 = a +
+      sizeof(ENTROPY_CONTEXT_PLANES)/sizeof(ENTROPY_CONTEXT);
+  ENTROPY_CONTEXT *const l1 = l +
+      sizeof(ENTROPY_CONTEXT_PLANES)/sizeof(ENTROPY_CONTEXT);
+#endif
 
   switch (tx_size) {
     case TX_4X4:
@@ -416,6 +422,10 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       }
       break;
     case TX_8X8:
+#if CONFIG_CNVCONTEXT
+      a_ec = (a[0] + a[1]) != 0;
+      l_ec = (l[0] + l[1]) != 0;
+#endif
       scan = vp9_default_zig_zag1d_8x8;
       seg_eob = 64;
       break;
@@ -425,12 +435,27 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       if (type == PLANE_TYPE_UV) {
         const int uv_idx = ib - 16;
         qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 64 * uv_idx;
+#if CONFIG_CNVCONTEXT
+        a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
+        l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
+      } else {
+        a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
+        l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
+#endif
       }
       break;
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
       seg_eob = 1024;
       qcoeff_ptr = xd->sb_coeff_data.qcoeff;
+#if CONFIG_CNVCONTEXT
+      a_ec = a[0] + a[1] + a[2] + a[3] +
+      a1[0] + a1[1] + a1[2] + a1[3];
+      l_ec = l[0] + l[1] + l[2] + l[3] +
+      l1[0] + l1[1] + l1[2] + l1[3];
+      a_ec = a_ec != 0;
+      l_ec = l_ec != 0;
+#endif
       break;
     default:
       abort();
@@ -459,6 +484,22 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   // is eob first coefficient;
   pt = (c > 0);
   *a = *l = pt;
+#if CONFIG_CNVCONTEXT
+  if (tx_size >= TX_8X8) {
+    a[1] = l[1] = pt;
+    if (tx_size >= TX_16X16) {
+      if (type == PLANE_TYPE_UV) {
+        a1[0] = a1[1] = l1[0] = l1[1] = pt;
+      } else {
+        a[2] = a[3] = l[2] = l[3] = pt;
+        if (tx_size >= TX_32X32) {
+          a1[0] = a1[1] = a1[2] = a1[3] = pt;
+          l1[0] = l1[1] = l1[2] = l1[3] = pt;
+        }
+      }
+    }
+  }
+#endif
   return cost;
 }
 
@@ -701,15 +742,15 @@ static void copy_predictor(uint8_t *dst, const uint8_t *predictor) {
 
 static int rdcost_sby_32x32(MACROBLOCK *x, int backup) {
   MACROBLOCKD * const xd = &x->e_mbd;
-  ENTROPY_CONTEXT_PLANES t_above, t_left;
+  ENTROPY_CONTEXT_PLANES t_above[2], t_left[2];
   ENTROPY_CONTEXT *ta, *tl;
 
   if (backup) {
     ta = (ENTROPY_CONTEXT *) &t_above,
     tl = (ENTROPY_CONTEXT *) &t_left;
 
-    vpx_memcpy(&t_above, xd->above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memcpy(&t_left,  xd->left_context,  sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_above, xd->above_context, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
+    vpx_memcpy(&t_left,  xd->left_context,  sizeof(ENTROPY_CONTEXT_PLANES) * 2);
   } else {
     ta = (ENTROPY_CONTEXT *) xd->above_context;
     tl = (ENTROPY_CONTEXT *) xd->left_context;
@@ -1287,8 +1328,9 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   int distortion = 0, rate = 0;
   BLOCK  *be = x->block + ib;
   BLOCKD *b = xd->block + ib;
-  ENTROPY_CONTEXT ta0, ta1, besta0 = 0, besta1 = 0;
-  ENTROPY_CONTEXT tl0, tl1, bestl0 = 0, bestl1 = 0;
+  ENTROPY_CONTEXT_PLANES ta, tl;
+  ENTROPY_CONTEXT *ta0, *ta1, besta0 = 0, besta1 = 0;
+  ENTROPY_CONTEXT *tl0, *tl1, bestl0 = 0, bestl1 = 0;
 
   /*
    * The predictor buffer is a 2d buffer with a stride of 16.  Create
@@ -1329,23 +1371,29 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       // compute quantization mse of 8x8 block
       distortion = vp9_block_error_c((x->block + idx)->coeff,
                                      (xd->block + idx)->dqcoeff, 64);
-      ta0 = a[vp9_block2above[TX_8X8][idx]];
-      tl0 = l[vp9_block2left[TX_8X8][idx]];
+
+      vpx_memcpy(&ta, a, sizeof(ENTROPY_CONTEXT_PLANES));
+      vpx_memcpy(&tl, l, sizeof(ENTROPY_CONTEXT_PLANES));
+
+      ta0 = ((ENTROPY_CONTEXT*)&ta) + vp9_block2above[TX_8X8][idx];
+      tl0 = ((ENTROPY_CONTEXT*)&tl) + vp9_block2left[TX_8X8][idx];
+      ta1 = ta0 + 1;
+      tl1 = tl0 + 1;
 
       rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
-                           &ta0, &tl0, TX_8X8);
+                           ta0, tl0, TX_8X8);
 
       rate += rate_t;
-      ta1 = ta0;
-      tl1 = tl0;
     } else {
       static const int iblock[4] = {0, 1, 4, 5};
       TX_TYPE tx_type;
       int i;
-      ta0 = a[vp9_block2above[TX_4X4][ib]];
-      ta1 = a[vp9_block2above[TX_4X4][ib + 1]];
-      tl0 = l[vp9_block2left[TX_4X4][ib]];
-      tl1 = l[vp9_block2left[TX_4X4][ib + 4]];
+      vpx_memcpy(&ta, a, sizeof(ENTROPY_CONTEXT_PLANES));
+      vpx_memcpy(&tl, l, sizeof(ENTROPY_CONTEXT_PLANES));
+      ta0 = ((ENTROPY_CONTEXT*)&ta) + vp9_block2above[TX_4X4][ib];
+      tl0 = ((ENTROPY_CONTEXT*)&tl) + vp9_block2left[TX_4X4][ib];
+      ta1 = ta0 + 1;
+      tl1 = tl0 + 1;
       distortion = 0;
       rate_t = 0;
       for (i = 0; i < 4; ++i) {
@@ -1370,15 +1418,13 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         }
         distortion += vp9_block_error_c(be->coeff, b->dqcoeff, 16 << do_two);
         rate_t += cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC,
-                              // i&1 ? &ta1 : &ta0, i&2 ? &tl1 : &tl0,
-                              &ta0, &tl0,
+                              i&1 ? ta1 : ta0, i&2 ? tl1 : tl0,
                               TX_4X4);
         if (do_two) {
-          rate_t += cost_coeffs(x, b + 1, PLANE_TYPE_Y_WITH_DC,
-                                // i&1 ? &ta1 : &ta0, i&2 ? &tl1 : &tl0,
-                                &ta0, &tl0,
-                                TX_4X4);
           i++;
+          rate_t += cost_coeffs(x, b + 1, PLANE_TYPE_Y_WITH_DC,
+                                i&1 ? ta1 : ta0, i&2 ? tl1 : tl0,
+                                TX_4X4);
         }
       }
       b = &xd->block[ib];
@@ -1392,10 +1438,10 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       *bestrate = rate;
       *bestratey = rate_t;
       *bestdistortion = distortion;
-      besta0 = ta0;
-      besta1 = ta1;
-      bestl0 = tl0;
-      bestl1 = tl1;
+      besta0 = *ta0;
+      besta1 = *ta1;
+      bestl0 = *tl0;
+      bestl1 = *tl1;
       best_rd = this_rd;
       *best_mode = mode;
       copy_predictor_8x8(best_predictor, b->predictor);
@@ -1548,12 +1594,12 @@ static int rd_cost_sbuv_16x16(MACROBLOCK *x, int backup) {
   int b;
   int cost = 0;
   MACROBLOCKD *const xd = &x->e_mbd;
-  ENTROPY_CONTEXT_PLANES t_above, t_left;
+  ENTROPY_CONTEXT_PLANES t_above[2], t_left[2];
   ENTROPY_CONTEXT *ta, *tl;
 
   if (backup) {
-    vpx_memcpy(&t_above, xd->above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memcpy(&t_left, xd->left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_above, xd->above_context, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
+    vpx_memcpy(&t_left, xd->left_context, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
 
     ta = (ENTROPY_CONTEXT *) &t_above;
     tl = (ENTROPY_CONTEXT *) &t_left;
