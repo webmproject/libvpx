@@ -12,6 +12,7 @@
 extern "C" {
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
+#include "vp9/common/vp9_filter.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 }
@@ -300,62 +301,60 @@ TEST_P(ConvolveTest, Copy2D) {
           << "(" << x << "," << y << ")";
 }
 
+const int16_t (*kTestFilterList[])[8] = {
+  vp9_bilinear_filters,
+  vp9_sub_pel_filters_6,
+  vp9_sub_pel_filters_8,
+  vp9_sub_pel_filters_8s,
+  vp9_sub_pel_filters_8lp
+};
+
+const int16_t kInvalidFilter[8] = { 0 };
+
 TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
   uint8_t* const in = input();
   uint8_t* const out = output();
   uint8_t ref[kOutputStride * kMaxDimension];
 
-  const int16_t filters[][8] = {
-    { 0,   0,   0, 128,   0,   0,   0,  0},
-    { 0,   1,  -5, 126,   8,  -3,   1,  0},
-    { -1,   3, -10, 122,  18,  -6,   2,  0},
-    { -1,   4, -13, 118,  27,  -9,   3, -1},
-    { -1,   4, -16, 112,  37, -11,   4, -1},
-    { -1,   5, -18, 105,  48, -14,   4, -1},
-    { -1,   5, -19,  97,  58, -16,   5, -1},
-    { -1,   6, -19,  88,  68, -18,   5, -1},
-    { -1,   6, -19,  78,  78, -19,   6, -1},
-    { -1,   5, -18,  68,  88, -19,   6, -1},
-    { -1,   5, -16,  58,  97, -19,   5, -1},
-    { -1,   4, -14,  48, 105, -18,   5, -1},
-    { -1,   4, -11,  37, 112, -16,   4, -1},
-    { -1,   3,  -9,  27, 118, -13,   4, -1},
-    { 0,   2,  -6,  18, 122, -10,   3, -1},
-    { 0,   1,  -3,   8, 126,  -5,   1,  0}
-  };
+  const int kNumFilterBanks = sizeof(kTestFilterList) /
+      sizeof(kTestFilterList[0]);
 
-  const int kNumFilters = sizeof(filters) / sizeof(filters[0]);
+  for (int filter_bank = 0; filter_bank < kNumFilterBanks; ++filter_bank) {
+    const int16_t (*filters)[8] = kTestFilterList[filter_bank];
+    const int kNumFilters = 16;
 
-  for (int filter_x = 0; filter_x < kNumFilters; ++filter_x) {
-    for (int filter_y = 0; filter_y < kNumFilters; ++filter_y) {
-      filter_block2d_8_c(in, kInputStride,
-                         filters[filter_x], filters[filter_y],
-                         ref, kOutputStride,
-                         Width(), Height());
+    for (int filter_x = 0; filter_x < kNumFilters; ++filter_x) {
+      for (int filter_y = 0; filter_y < kNumFilters; ++filter_y) {
+        filter_block2d_8_c(in, kInputStride,
+                           filters[filter_x], filters[filter_y],
+                           ref, kOutputStride,
+                           Width(), Height());
 
-      if (filter_x && filter_y)
-        REGISTER_STATE_CHECK(
-            UUT_->hv8_(in, kInputStride, out, kOutputStride,
-                       filters[filter_x], 16, filters[filter_y], 16,
-                       Width(), Height()));
-      else if (filter_y)
-        REGISTER_STATE_CHECK(
-            UUT_->v8_(in, kInputStride, out, kOutputStride,
-                      filters[filter_x], 16, filters[filter_y], 16,
-                      Width(), Height()));
-      else
-        REGISTER_STATE_CHECK(
-            UUT_->h8_(in, kInputStride, out, kOutputStride,
-                      filters[filter_x], 16, filters[filter_y], 16,
-                      Width(), Height()));
+        if (filters == vp9_sub_pel_filters_8lp || (filter_x && filter_y))
+          REGISTER_STATE_CHECK(
+              UUT_->hv8_(in, kInputStride, out, kOutputStride,
+                         filters[filter_x], 16, filters[filter_y], 16,
+                         Width(), Height()));
+        else if (filter_y)
+          REGISTER_STATE_CHECK(
+              UUT_->v8_(in, kInputStride, out, kOutputStride,
+                        kInvalidFilter, 16, filters[filter_y], 16,
+                        Width(), Height()));
+        else
+          REGISTER_STATE_CHECK(
+              UUT_->h8_(in, kInputStride, out, kOutputStride,
+                        filters[filter_x], 16, kInvalidFilter, 16,
+                        Width(), Height()));
 
-      CheckGuardBlocks();
+        CheckGuardBlocks();
 
-      for (int y = 0; y < Height(); ++y)
-        for (int x = 0; x < Width(); ++x)
-          ASSERT_EQ(ref[y * kOutputStride + x], out[y * kOutputStride + x])
-              << "mismatch at (" << x << "," << y << "), "
-              << "filters (" << filter_x << "," << filter_y << ")";
+        for (int y = 0; y < Height(); ++y)
+          for (int x = 0; x < Width(); ++x)
+            ASSERT_EQ(ref[y * kOutputStride + x], out[y * kOutputStride + x])
+                << "mismatch at (" << x << "," << y << "), "
+                << "filters (" << filter_bank << ","
+                << filter_x << "," << filter_y << ")";
+      }
     }
   }
 }
@@ -376,57 +375,45 @@ TEST_P(ConvolveTest, MatchesReferenceAveragingSubpixelFilter) {
     }
   }
 
-  const int16_t filters[][8] = {
-    { 0,   0,   0, 128,   0,   0,   0,  0},
-    { 0,   1,  -5, 126,   8,  -3,   1,  0},
-    { -1,   3, -10, 122,  18,  -6,   2,  0},
-    { -1,   4, -13, 118,  27,  -9,   3, -1},
-    { -1,   4, -16, 112,  37, -11,   4, -1},
-    { -1,   5, -18, 105,  48, -14,   4, -1},
-    { -1,   5, -19,  97,  58, -16,   5, -1},
-    { -1,   6, -19,  88,  68, -18,   5, -1},
-    { -1,   6, -19,  78,  78, -19,   6, -1},
-    { -1,   5, -18,  68,  88, -19,   6, -1},
-    { -1,   5, -16,  58,  97, -19,   5, -1},
-    { -1,   4, -14,  48, 105, -18,   5, -1},
-    { -1,   4, -11,  37, 112, -16,   4, -1},
-    { -1,   3,  -9,  27, 118, -13,   4, -1},
-    { 0,   2,  -6,  18, 122, -10,   3, -1},
-    { 0,   1,  -3,   8, 126,  -5,   1,  0}
-  };
+  const int kNumFilterBanks = sizeof(kTestFilterList) /
+      sizeof(kTestFilterList[0]);
 
-  const int kNumFilters = sizeof(filters) / sizeof(filters[0]);
+  for (int filter_bank = 0; filter_bank < kNumFilterBanks; ++filter_bank) {
+    const int16_t (*filters)[8] = kTestFilterList[filter_bank];
+    const int kNumFilters = 16;
 
-  for (int filter_x = 0; filter_x < kNumFilters; ++filter_x) {
-    for (int filter_y = 0; filter_y < kNumFilters; ++filter_y) {
-      filter_average_block2d_8_c(in, kInputStride,
-                                 filters[filter_x], filters[filter_y],
-                                 ref, kOutputStride,
-                                 Width(), Height());
+    for (int filter_x = 0; filter_x < kNumFilters; ++filter_x) {
+      for (int filter_y = 0; filter_y < kNumFilters; ++filter_y) {
+        filter_average_block2d_8_c(in, kInputStride,
+                                   filters[filter_x], filters[filter_y],
+                                   ref, kOutputStride,
+                                   Width(), Height());
 
-      if (filter_x && filter_y)
-        REGISTER_STATE_CHECK(
-            UUT_->hv8_avg_(in, kInputStride, out, kOutputStride,
-                           filters[filter_x], 16, filters[filter_y], 16,
-                           Width(), Height()));
-      else if (filter_y)
-        REGISTER_STATE_CHECK(
-            UUT_->v8_avg_(in, kInputStride, out, kOutputStride,
-                          filters[filter_x], 16, filters[filter_y], 16,
-                          Width(), Height()));
-      else
-        REGISTER_STATE_CHECK(
-            UUT_->h8_avg_(in, kInputStride, out, kOutputStride,
-                          filters[filter_x], 16, filters[filter_y], 16,
-                          Width(), Height()));
+        if (filters == vp9_sub_pel_filters_8lp || (filter_x && filter_y))
+          REGISTER_STATE_CHECK(
+              UUT_->hv8_avg_(in, kInputStride, out, kOutputStride,
+                             filters[filter_x], 16, filters[filter_y], 16,
+                             Width(), Height()));
+        else if (filter_y)
+          REGISTER_STATE_CHECK(
+              UUT_->v8_avg_(in, kInputStride, out, kOutputStride,
+                            filters[filter_x], 16, filters[filter_y], 16,
+                            Width(), Height()));
+        else
+          REGISTER_STATE_CHECK(
+              UUT_->h8_avg_(in, kInputStride, out, kOutputStride,
+                            filters[filter_x], 16, filters[filter_y], 16,
+                            Width(), Height()));
 
-      CheckGuardBlocks();
+        CheckGuardBlocks();
 
-      for (int y = 0; y < Height(); ++y)
-        for (int x = 0; x < Width(); ++x)
-          ASSERT_EQ(ref[y * kOutputStride + x], out[y * kOutputStride + x])
-              << "mismatch at (" << x << "," << y << "), "
-              << "filters (" << filter_x << "," << filter_y << ")";
+        for (int y = 0; y < Height(); ++y)
+          for (int x = 0; x < Width(); ++x)
+            ASSERT_EQ(ref[y * kOutputStride + x], out[y * kOutputStride + x])
+                << "mismatch at (" << x << "," << y << "), "
+                << "filters (" << filter_bank << ","
+                << filter_x << "," << filter_y << ")";
+      }
     }
   }
 }
@@ -494,22 +481,12 @@ TEST_P(ConvolveTest, ChangeFilterWorks) {
 
 using std::tr1::make_tuple;
 
-const ConvolveFunctions convolve8_2d_only_c(
-    vp9_convolve8_c, vp9_convolve8_avg_c,
-    vp9_convolve8_c, vp9_convolve8_avg_c,
-    vp9_convolve8_c, vp9_convolve8_avg_c);
-
 const ConvolveFunctions convolve8_c(
     vp9_convolve8_horiz_c, vp9_convolve8_avg_horiz_c,
     vp9_convolve8_vert_c, vp9_convolve8_avg_vert_c,
     vp9_convolve8_c, vp9_convolve8_avg_c);
 
 INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
-    make_tuple(4, 4, &convolve8_2d_only_c),
-    make_tuple(8, 4, &convolve8_2d_only_c),
-    make_tuple(8, 8, &convolve8_2d_only_c),
-    make_tuple(16, 8, &convolve8_2d_only_c),
-    make_tuple(16, 16, &convolve8_2d_only_c),
     make_tuple(4, 4, &convolve8_c),
     make_tuple(8, 4, &convolve8_c),
     make_tuple(8, 8, &convolve8_c),
