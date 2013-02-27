@@ -597,13 +597,8 @@ void vp9_optimize_mby_8x8(MACROBLOCK *x) {
   for (b = 0; b < 16; b += 4) {
     ENTROPY_CONTEXT *const a = ta + vp9_block2above[TX_8X8][b];
     ENTROPY_CONTEXT *const l = tl + vp9_block2left[TX_8X8][b];
-#if CONFIG_CNVCONTEXT
     ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
     ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
-#else
-    ENTROPY_CONTEXT above_ec = a[0];
-    ENTROPY_CONTEXT left_ec = l[0];
-#endif
     optimize_b(x, b, PLANE_TYPE_Y_WITH_DC, &above_ec, &left_ec, TX_8X8);
     a[1] = a[0] = above_ec;
     l[1] = l[0] = left_ec;
@@ -621,13 +616,8 @@ void vp9_optimize_mbuv_8x8(MACROBLOCK *x) {
   for (b = 16; b < 24; b += 4) {
     ENTROPY_CONTEXT *const a = ta + vp9_block2above[TX_8X8][b];
     ENTROPY_CONTEXT *const l = tl + vp9_block2left[TX_8X8][b];
-#if CONFIG_CNVCONTEXT
     ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
     ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
-#else
-    ENTROPY_CONTEXT above_ec = a[0];
-    ENTROPY_CONTEXT left_ec = l[0];
-#endif
     optimize_b(x, b, PLANE_TYPE_UV, &above_ec, &left_ec, TX_8X8);
   }
 }
@@ -645,13 +635,8 @@ void vp9_optimize_mby_16x16(MACROBLOCK *x) {
   if (!t_above || !t_left)
     return;
 
-#if CONFIG_CNVCONTEXT
   ta = (t_above->y1[0] + t_above->y1[1] + t_above->y1[2] + t_above->y1[3]) != 0;
   tl = (t_left->y1[0] + t_left->y1[1] + t_left->y1[2] + t_left->y1[3]) != 0;
-#else
-  ta = t_above->y1[0];
-  tl = t_left->y1[0];
-#endif
   optimize_b(x, 0, PLANE_TYPE_Y_WITH_DC, &ta, &tl, TX_16X16);
 }
 

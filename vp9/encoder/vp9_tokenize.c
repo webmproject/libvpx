@@ -145,17 +145,14 @@ static void tokenize_b(VP9_COMP *cpi,
       probs = cpi->common.fc.coef_probs_4x4;
       break;
     case TX_8X8:
-#if CONFIG_CNVCONTEXT
       a_ec = (a[0] + a[1]) != 0;
       l_ec = (l[0] + l[1]) != 0;
-#endif
       seg_eob = 64;
       scan = vp9_default_zig_zag1d_8x8;
       counts = cpi->coef_counts_8x8;
       probs = cpi->common.fc.coef_probs_8x8;
       break;
     case TX_16X16:
-#if CONFIG_CNVCONTEXT
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
@@ -163,7 +160,6 @@ static void tokenize_b(VP9_COMP *cpi,
         a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
       }
-#endif
       seg_eob = 256;
       scan = vp9_default_zig_zag1d_16x16;
       counts = cpi->coef_counts_16x16;
@@ -174,14 +170,12 @@ static void tokenize_b(VP9_COMP *cpi,
       }
       break;
     case TX_32X32:
-#if CONFIG_CNVCONTEXT
       a_ec = a[0] + a[1] + a[2] + a[3] +
              a1[0] + a1[1] + a1[2] + a1[3];
       l_ec = l[0] + l[1] + l[2] + l[3] +
              l1[0] + l1[1] + l1[2] + l1[3];
       a_ec = a_ec != 0;
       l_ec = l_ec != 0;
-#endif
       seg_eob = 1024;
       scan = vp9_default_zig_zag1d_32x32;
       counts = cpi->coef_counts_32x32;
@@ -635,15 +629,12 @@ static INLINE void stuff_b(VP9_COMP *cpi,
       probs = cpi->common.fc.coef_probs_4x4;
       break;
     case TX_8X8:
-#if CONFIG_CNVCONTEXT
       a_ec = (a[0] + a[1]) != 0;
       l_ec = (l[0] + l[1]) != 0;
-#endif
       counts = cpi->coef_counts_8x8;
       probs = cpi->common.fc.coef_probs_8x8;
       break;
     case TX_16X16:
-#if CONFIG_CNVCONTEXT
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
@@ -651,19 +642,16 @@ static INLINE void stuff_b(VP9_COMP *cpi,
         a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
       }
-#endif
       counts = cpi->coef_counts_16x16;
       probs = cpi->common.fc.coef_probs_16x16;
       break;
     case TX_32X32:
-#if CONFIG_CNVCONTEXT
       a_ec = a[0] + a[1] + a[2] + a[3] +
              a1[0] + a1[1] + a1[2] + a1[3];
       l_ec = l[0] + l[1] + l[2] + l[3] +
              l1[0] + l1[1] + l1[2] + l1[3];
       a_ec = a_ec != 0;
       l_ec = l_ec != 0;
-#endif
       counts = cpi->coef_counts_32x32;
       probs = cpi->common.fc.coef_probs_32x32;
       break;

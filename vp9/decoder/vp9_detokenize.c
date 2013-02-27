@@ -110,15 +110,12 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     case TX_8X8:
       coef_probs  = fc->coef_probs_8x8;
       coef_counts = fc->coef_counts_8x8;
-#if CONFIG_CNVCONTEXT
       above_ec = (A0[aidx] + A0[aidx + 1]) != 0;
       left_ec  = (L0[lidx] + L0[lidx + 1]) != 0;
-#endif
       break;
     case TX_16X16:
       coef_probs  = fc->coef_probs_16x16;
       coef_counts = fc->coef_counts_16x16;
-#if CONFIG_CNVCONTEXT
       if (type == PLANE_TYPE_UV) {
         ENTROPY_CONTEXT *A1 = (ENTROPY_CONTEXT *) (xd->above_context + 1);
         ENTROPY_CONTEXT *L1 = (ENTROPY_CONTEXT *) (xd->left_context + 1);
@@ -128,12 +125,10 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
         above_ec = (A0[aidx] + A0[aidx + 1] + A0[aidx + 2] + A0[aidx + 3]) != 0;
         left_ec  = (L0[lidx] + L0[lidx + 1] + L0[lidx + 2] + L0[lidx + 3]) != 0;
       }
-#endif
       break;
     case TX_32X32:
       coef_probs = fc->coef_probs_32x32;
       coef_counts = fc->coef_counts_32x32;
-#if CONFIG_CNVCONTEXT
       if (type == PLANE_TYPE_UV) {
         ENTROPY_CONTEXT *A1 = (ENTROPY_CONTEXT *) (xd->above_context + 1);
         ENTROPY_CONTEXT *L1 = (ENTROPY_CONTEXT *) (xd->left_context + 1);
@@ -153,7 +148,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
         left_ec  = (L0[lidx] + L0[lidx + 1] + L0[lidx + 2] + L0[lidx + 3] +
                     L1[lidx] + L1[lidx + 1] + L1[lidx + 2] + L1[lidx + 3]) != 0;
       }
-#endif
       break;
   }
 

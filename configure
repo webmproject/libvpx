@@ -242,8 +242,6 @@ EXPERIMENT_LIST="
     implicit_segmentation
     newbintramodes
     comp_interintra_pred
-    tx64x64
-    cnvcontext
     enable_6tap
     abovesprefmv
 "
