@@ -21,7 +21,10 @@
 extern int enc_debug;
 #endif
 
-void vp9_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d, TX_TYPE tx_type) {
+void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
+  MACROBLOCKD *const xd = &mb->e_mbd;
+  BLOCK *const b = &mb->block[b_idx];
+  BLOCKD *const d = &xd->block[b_idx];
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
@@ -84,10 +87,13 @@ void vp9_ht_quantize_b_4x4(BLOCK *b, BLOCKD *d, TX_TYPE tx_type) {
     }
   }
 
-  d->eob = eob + 1;
+  xd->eobs[b_idx] = eob + 1;
 }
 
-void vp9_regular_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
+void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
+  MACROBLOCKD *const xd = &mb->e_mbd;
+  BLOCK *const b = &mb->block[b_idx];
+  BLOCKD *const d = &xd->block[b_idx];
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
@@ -135,7 +141,7 @@ void vp9_regular_quantize_b_4x4(BLOCK *b, BLOCKD *d) {
     }
   }
 
-  d->eob = eob + 1;
+  xd->eobs[b_idx] = eob + 1;
 }
 
 void vp9_quantize_mby_4x4_c(MACROBLOCK *x) {
@@ -144,9 +150,9 @@ void vp9_quantize_mby_4x4_c(MACROBLOCK *x) {
   for (i = 0; i < 16; i++) {
     TX_TYPE tx_type = get_tx_type_4x4(&x->e_mbd, &x->e_mbd.block[i]);
     if (tx_type != DCT_DCT) {
-      vp9_ht_quantize_b_4x4(&x->block[i], &x->e_mbd.block[i], tx_type);
+      vp9_ht_quantize_b_4x4(x, i, tx_type);
     } else {
-      x->quantize_b_4x4(&x->block[i], &x->e_mbd.block[i]);
+      x->quantize_b_4x4(x, i);
     }
   }
 }
@@ -155,7 +161,7 @@ void vp9_quantize_mbuv_4x4_c(MACROBLOCK *x) {
   int i;
 
   for (i = 16; i < 24; i++)
-    x->quantize_b_4x4(&x->block[i], &x->e_mbd.block[i]);
+    x->quantize_b_4x4(x, i);
 }
 
 void vp9_quantize_mb_4x4_c(MACROBLOCK *x) {
@@ -163,7 +169,10 @@ void vp9_quantize_mb_4x4_c(MACROBLOCK *x) {
   vp9_quantize_mbuv_4x4_c(x);
 }
 
-void vp9_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d) {
+void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx) {
+  MACROBLOCKD *const xd = &mb->e_mbd;
+  BLOCK *const b = &mb->block[b_idx];
+  BLOCKD *const d = &xd->block[b_idx];
   int16_t *qcoeff_ptr = d->qcoeff;
   int16_t *dqcoeff_ptr = d->dqcoeff;
 
@@ -236,30 +245,25 @@ void vp9_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d) {
         }
       }
     }
-    d->eob = eob + 1;
+    xd->eobs[b_idx] = eob + 1;
   } else {
-    d->eob = 0;
+    xd->eobs[b_idx] = 0;
   }
 }
 
 void vp9_quantize_mby_8x8(MACROBLOCK *x) {
   int i;
 
-  for (i = 0; i < 16; i ++) {
-    x->e_mbd.block[i].eob = 0;
-  }
   for (i = 0; i < 16; i += 4) {
-    x->quantize_b_8x8(&x->block[i], &x->e_mbd.block[i]);
+    x->quantize_b_8x8(x, i);
   }
 }
 
 void vp9_quantize_mbuv_8x8(MACROBLOCK *x) {
   int i;
 
-  for (i = 16; i < 24; i ++)
-    x->e_mbd.block[i].eob = 0;
   for (i = 16; i < 24; i += 4)
-    x->quantize_b_8x8(&x->block[i], &x->e_mbd.block[i]);
+    x->quantize_b_8x8(x, i);
 }
 
 void vp9_quantize_mb_8x8(MACROBLOCK *x) {
@@ -268,11 +272,7 @@ void vp9_quantize_mb_8x8(MACROBLOCK *x) {
 }
 
 void vp9_quantize_mby_16x16(MACROBLOCK *x) {
-  int i;
-
-  for (i = 0; i < 16; i++)
-    x->e_mbd.block[i].eob = 0;
-  x->quantize_b_16x16(&x->block[0], &x->e_mbd.block[0]);
+  x->quantize_b_16x16(x, 0);
 }
 
 void vp9_quantize_mb_16x16(MACROBLOCK *x) {
@@ -286,7 +286,7 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
                      uint8_t *quant_shift_ptr,
                      int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
                      int16_t *dequant_ptr, int zbin_oq_value,
-                     int *eob_ptr, const int *scan, int mul) {
+                     uint16_t *eob_ptr, const int *scan, int mul) {
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
@@ -328,7 +328,10 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
   *eob_ptr = eob + 1;
 }
 
-void vp9_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
+void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx) {
+  MACROBLOCKD *const xd = &mb->e_mbd;
+  BLOCK *const b = &mb->block[b_idx];
+  BLOCKD *const d = &xd->block[b_idx];
   quantize(b->zrun_zbin_boost,
            b->coeff,
            256, b->skip_block,
@@ -337,7 +340,7 @@ void vp9_regular_quantize_b_16x16(BLOCK *b, BLOCKD *d) {
            d->dqcoeff,
            d->dequant,
            b->zbin_extra,
-           &d->eob, vp9_default_zig_zag1d_16x16, 1);
+           &xd->eobs[b_idx], vp9_default_zig_zag1d_16x16, 1);
 }
 
 void vp9_quantize_sby_32x32(MACROBLOCK *x) {
@@ -345,7 +348,6 @@ void vp9_quantize_sby_32x32(MACROBLOCK *x) {
   BLOCK *b = &x->block[0];
   BLOCKD *d = &xd->block[0];
 
-  d->eob = 0;
   quantize(b->zrun_zbin_boost,
            x->sb_coeff_data.coeff,
            1024, b->skip_block,
@@ -355,7 +357,7 @@ void vp9_quantize_sby_32x32(MACROBLOCK *x) {
            xd->sb_coeff_data.dqcoeff,
            d->dequant,
            b->zbin_extra,
-           &d->eob,
+           &xd->eobs[0],
            vp9_default_zig_zag1d_32x32, 2);
 }
 
@@ -363,8 +365,6 @@ void vp9_quantize_sbuv_16x16(MACROBLOCK *x) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
 
-  xd->block[16].eob = 0;
-  xd->block[20].eob = 0;
   for (i = 16; i < 24; i += 4)
     quantize(x->block[i].zrun_zbin_boost,
              x->sb_coeff_data.coeff + 1024 + (i - 16) * 64,
@@ -375,7 +375,7 @@ void vp9_quantize_sbuv_16x16(MACROBLOCK *x) {
              xd->sb_coeff_data.dqcoeff + 1024 + (i - 16) * 64,
              xd->block[i].dequant,
              x->block[i].zbin_extra,
-             &xd->block[i].eob,
+             &xd->eobs[i],
              vp9_default_zig_zag1d_16x16, 1);
 }
 
@@ -383,10 +383,9 @@ void vp9_quantize_sbuv_16x16(MACROBLOCK *x) {
  * these two C functions if corresponding optimized routine is not available.
  * NEON optimized version implements currently the fast quantization for pair
  * of blocks. */
-void vp9_regular_quantize_b_4x4_pair(BLOCK *b1, BLOCK *b2,
-                                     BLOCKD *d1, BLOCKD *d2) {
-  vp9_regular_quantize_b_4x4(b1, d1);
-  vp9_regular_quantize_b_4x4(b2, d2);
+void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *x, int b_idx1, int b_idx2) {
+  vp9_regular_quantize_b_4x4(x, b_idx1);
+  vp9_regular_quantize_b_4x4(x, b_idx2);
 }
 
 static void invert_quant(int16_t *quant,

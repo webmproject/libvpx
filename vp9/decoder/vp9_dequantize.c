@@ -345,7 +345,7 @@ void vp9_dequant_idct_add_uv_block_16x16_c(int16_t *q, const int16_t *dq,
                                            int stride,
                                            MACROBLOCKD *xd) {
   vp9_dequant_idct_add_16x16_c(q, dq, dstu, dstu, stride, stride,
-                               xd->block[16].eob);
+                               xd->eobs[16]);
   vp9_dequant_idct_add_16x16_c(q + 256, dq, dstv, dstv, stride, stride,
-                               xd->block[20].eob);
+                               xd->eobs[20]);
 }

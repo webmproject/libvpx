@@ -13,7 +13,7 @@
 
 void vp9_inverse_transform_b_4x4(MACROBLOCKD *xd, int block, int pitch) {
   BLOCKD *b = &xd->block[block];
-  if (b->eob <= 1)
+  if (xd->eobs[block] <= 1)
     xd->inv_txm4x4_1(b->dqcoeff, b->diff, pitch);
   else
     xd->inv_txm4x4(b->dqcoeff, b->diff, pitch);

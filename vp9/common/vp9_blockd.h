@@ -276,8 +276,6 @@ typedef struct blockd {
   int dst;
   int dst_stride;
 
-  int eob;
-
   union b_mode_info bmi;
 } BLOCKD;
 
@@ -305,6 +303,7 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(16, uint8_t,  predictor[384]);
   DECLARE_ALIGNED(16, int16_t,  qcoeff[384]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[384]);
+  DECLARE_ALIGNED(16, uint16_t, eobs[24]);
 
   SUPERBLOCKD sb_coeff_data;
 

@@ -379,7 +379,6 @@ int vp9_uvsse(MACROBLOCK *x) {
     sse2 += sse1;
   }
   return sse2;
-
 }
 
 static INLINE int cost_coeffs(MACROBLOCK *mb,
@@ -388,9 +387,9 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
                               ENTROPY_CONTEXT *l,
                               TX_SIZE tx_size) {
   int pt;
-  const int eob = b->eob;
-  MACROBLOCKD *xd = &mb->e_mbd;
+  MACROBLOCKD *const xd = &mb->e_mbd;
   const int ib = (int)(b - xd->block);
+  const int eob = xd->eobs[ib];
   int c = 0;
   int cost = 0, seg_eob;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
@@ -1043,10 +1042,10 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
     tx_type = get_tx_type_4x4(xd, b);
     if (tx_type != DCT_DCT) {
       vp9_short_fht4x4(be->src_diff, be->coeff, 16, tx_type);
-      vp9_ht_quantize_b_4x4(be, b, tx_type);
+      vp9_ht_quantize_b_4x4(x, be - x->block, tx_type);
     } else {
       x->fwd_txm4x4(be->src_diff, be->coeff, 32);
-      x->quantize_b_4x4(be, b);
+      x->quantize_b_4x4(x, be - x->block);
     }
 
     tempa = ta;
@@ -1342,7 +1341,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         vp9_short_fht8x8(be->src_diff, (x->block + idx)->coeff, 16, tx_type);
       else
         x->fwd_txm8x8(be->src_diff, (x->block + idx)->coeff, 32);
-      x->quantize_b_8x8(x->block + idx, xd->block + idx);
+      x->quantize_b_8x8(x, idx);
 
       // compute quantization mse of 8x8 block
       distortion = vp9_block_error_c((x->block + idx)->coeff,
@@ -1379,14 +1378,14 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         tx_type = get_tx_type_4x4(xd, b);
         if (tx_type != DCT_DCT) {
           vp9_short_fht4x4(be->src_diff, be->coeff, 16, tx_type);
-          vp9_ht_quantize_b_4x4(be, b, tx_type);
+          vp9_ht_quantize_b_4x4(x, ib + iblock[i], tx_type);
         } else if (!(i & 1) && get_tx_type_4x4(xd, b + 1) == DCT_DCT) {
           x->fwd_txm8x4(be->src_diff, be->coeff, 32);
-          x->quantize_b_4x4_pair(be, be + 1, b, b + 1);
+          x->quantize_b_4x4_pair(x, ib + iblock[i], ib + iblock[i] + 1);
           do_two = 1;
         } else {
           x->fwd_txm4x4(be->src_diff, be->coeff, 32);
-          x->quantize_b_4x4(be, b);
+          x->quantize_b_4x4(x, ib + iblock[i]);
         }
         distortion += vp9_block_error_c(be->coeff, b->dqcoeff, 16 << do_two);
         rate_t += cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC,
@@ -2168,7 +2167,7 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
 
       vp9_subtract_b(be, bd, 16);
       x->fwd_txm4x4(be->src_diff, be->coeff, 32);
-      x->quantize_b_4x4(be, bd);
+      x->quantize_b_4x4(x, i);
       thisdistortion = vp9_block_error(be->coeff, bd->dqcoeff, 16);
       *distortion += thisdistortion;
       *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
@@ -2231,7 +2230,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
       if (xd->mode_info_context->mbmi.txfm_size == TX_4X4) {
         if (otherrd) {
           x->fwd_txm8x8(be->src_diff, be2->coeff, 32);
-          x->quantize_b_8x8(be2, bd2);
+          x->quantize_b_8x8(x, idx);
           thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
           otherdist += thisdistortion;
           othercost += cost_coeffs(x, bd2, PLANE_TYPE_Y_WITH_DC,
@@ -2243,7 +2242,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
           bd = &xd->block[ib + iblock[j]];
           be = &x->block[ib + iblock[j]];
           x->fwd_txm8x4(be->src_diff, be->coeff, 32);
-          x->quantize_b_4x4_pair(be, be + 1, bd, bd + 1);
+          x->quantize_b_4x4_pair(x, ib + iblock[j], ib + iblock[j] + 1);
           thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
           *distortion += thisdistortion;
           *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
@@ -2261,7 +2260,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
             BLOCKD *bd = &xd->block[ib + iblock[j]];
             BLOCK *be = &x->block[ib + iblock[j]];
             x->fwd_txm8x4(be->src_diff, be->coeff, 32);
-            x->quantize_b_4x4_pair(be, be + 1, bd, bd + 1);
+            x->quantize_b_4x4_pair(x, ib + iblock[j], ib + iblock[j]);
             thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
             otherdist += thisdistortion;
             othercost += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
@@ -2275,7 +2274,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
           }
         }
         x->fwd_txm8x8(be->src_diff, be2->coeff, 32);
-        x->quantize_b_8x8(be2, bd2);
+        x->quantize_b_8x8(x, idx);
         thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
         *distortion += thisdistortion;
         *labelyrate += cost_coeffs(x, bd2, PLANE_TYPE_Y_WITH_DC,
@@ -2538,13 +2537,13 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         if (x->e_mbd.mode_info_context->mbmi.txfm_size == TX_4X4) {
           for (j = 0; j < 16; j++)
             if (labels[j] == i)
-              best_eobs[j] = x->e_mbd.block[j].eob;
+              best_eobs[j] = x->e_mbd.eobs[j];
         } else {
           for (j = 0; j < 4; j++) {
             int ib = vp9_i8x8_block[j], idx = j * 4;
 
             if (labels[ib] == i)
-              best_eobs[idx] = x->e_mbd.block[idx].eob;
+              best_eobs[idx] = x->e_mbd.eobs[idx];
           }
         }
         if (other_rd < best_other_rd)
@@ -2819,7 +2818,7 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
     bd->bmi.as_mv[0].as_int = bsi.mvs[i].as_int;
     if (mbmi->second_ref_frame > 0)
       bd->bmi.as_mv[1].as_int = bsi.second_mvs[i].as_int;
-    bd->eob = bsi.eobs[i];
+    x->e_mbd.eobs[i] = bsi.eobs[i];
   }
 
   *returntotrate = bsi.r;

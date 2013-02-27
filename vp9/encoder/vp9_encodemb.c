@@ -315,14 +315,15 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        int tx_size) {
   const int ref = mb->e_mbd.mode_info_context->mbmi.ref_frame != INTRA_FRAME;
+  MACROBLOCKD *const xd = &mb->e_mbd;
   BLOCK *b = &mb->block[i];
-  BLOCKD *d = &mb->e_mbd.block[i];
+  BLOCKD *d = &xd->block[i];
   vp9_token_state tokens[257][2];
   unsigned best_index[257][2];
   const int16_t *dequant_ptr = d->dequant, *coeff_ptr = b->coeff;
   int16_t *qcoeff_ptr = d->qcoeff;
   int16_t *dqcoeff_ptr = d->dqcoeff;
-  int eob = d->eob, final_eob, sz = 0;
+  int eob = xd->eobs[i], final_eob, sz = 0;
   const int i0 = 0;
   int rc, x, next;
   int64_t rdmult, rddiv, rd_cost0, rd_cost1;
@@ -527,8 +528,8 @@ static void optimize_b(MACROBLOCK *mb, int i, PLANE_TYPE type,
   }
   final_eob++;
 
-  d->eob = final_eob;
-  *a = *l = (d->eob > 0);
+  xd->eobs[d - xd->block] = final_eob;
+  *a = *l = (final_eob > 0);
 }
 
 void vp9_optimize_mby_4x4(MACROBLOCK *x) {
