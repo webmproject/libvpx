@@ -110,6 +110,12 @@ VP9_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/vp9_quantize_mmx.asm
 VP9_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/vp9_encodeopt.asm
 VP9_CX_SRCS-$(ARCH_X86_64) += encoder/x86/vp9_ssim_opt.asm
 
+VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_dct_sse2.c
+ifeq ($(HAVE_SSE2),yes)
+vp9/encoder/x86/vp9_dct_sse2.c.d: CFLAGS += -msse2
+vp9/encoder/x86/vp9_dct_sse2.c.o: CFLAGS += -msse2
+endif
+
 
 VP9_CX_SRCS-yes := $(filter-out $(VP9_CX_SRCS_REMOVE-yes),$(VP9_CX_SRCS-yes))
 
