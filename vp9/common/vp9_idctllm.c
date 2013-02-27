@@ -31,13 +31,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-#define ROUND_POWER_OF_TWO(value, n) (((value) + (1 << ((n) - 1))) >> (n))
-
-/* If we don't want to use ROUND_POWER_OF_TWO macro
-static INLINE int16_t round_power_of_two(int16_t value, int n) {
-  return (value + (1 << (n - 1))) >> n;
-}*/
-
 typedef void (*transform_1d)(int16_t*, int16_t*);
 
 typedef struct {
