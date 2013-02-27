@@ -3112,7 +3112,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                YV12_BUFFER_CONFIG yv12_mb[4],
                                struct scale_factors scale[MAX_REF_FRAMES]) {
   VP9_COMMON *cm = &cpi->common;
-  YV12_BUFFER_CONFIG *yv12 = &cm->yv12_fb[cpi->common.active_ref_idx[idx]];
+  YV12_BUFFER_CONFIG *yv12 = &cm->yv12_fb[cpi->common.ref_frame_map[idx]];
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   int use_prev_in_find_mv_refs, use_prev_in_find_best_ref;
@@ -4084,7 +4084,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         fb = cpi->alt_fb_idx;
       }
 
-      if (cpi->scaled_ref_idx[fb] != cm->active_ref_idx[fb])
+      if (cpi->scaled_ref_idx[fb] != cm->ref_frame_map[fb])
         scaled_ref_frame = &cm->yv12_fb[cpi->scaled_ref_idx[fb]];
     }
 
@@ -5177,7 +5177,7 @@ static int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         fb = cpi->alt_fb_idx;
       }
 
-      if (cpi->scaled_ref_idx[fb] != cm->active_ref_idx[fb])
+      if (cpi->scaled_ref_idx[fb] != cm->ref_frame_map[fb])
         scaled_ref_frame = &cm->yv12_fb[cpi->scaled_ref_idx[fb]];
 
 #if CONFIG_COMP_INTERINTRA_PRED

@@ -1187,7 +1187,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   // Copy data over into macro block data structures.
   x->src = *cpi->Source;
-  xd->pre = cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]];
+  xd->pre = cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]];
   xd->dst = cm->yv12_fb[cm->new_fb_idx];
 
   // set up frame for intra coded blocks
@@ -2089,11 +2089,11 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     assert(cm->frame_type != KEY_FRAME);
 
     if (mbmi->ref_frame == LAST_FRAME)
-      ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
+      ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
     else if (mbmi->ref_frame == GOLDEN_FRAME)
-      ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
+      ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
     else
-      ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
+      ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
 
     setup_pred_block(&xd->pre,
                      &cpi->common.yv12_fb[ref_fb_idx],
@@ -2104,11 +2104,11 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
       int second_ref_fb_idx;
 
       if (mbmi->second_ref_frame == LAST_FRAME)
-        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
+        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
       else if (mbmi->second_ref_frame == GOLDEN_FRAME)
-        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
+        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
       else
-        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
+        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
 
       setup_pred_block(&xd->second_pre,
                        &cpi->common.yv12_fb[second_ref_fb_idx],
@@ -2319,11 +2319,11 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
     assert(cm->frame_type != KEY_FRAME);
 
     if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
-      ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
+      ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
     else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-      ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
+      ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
     else
-      ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
+      ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
 
     setup_pred_block(&xd->pre,
                      &cpi->common.yv12_fb[ref_fb_idx],
@@ -2334,11 +2334,11 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
       int second_ref_fb_idx;
 
       if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
-        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
+        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
       else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
-        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
+        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
       else
-        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
+        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
 
       setup_pred_block(&xd->second_pre,
                        &cpi->common.yv12_fb[second_ref_fb_idx],
@@ -2548,11 +2548,11 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
     assert(cm->frame_type != KEY_FRAME);
 
     if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
-      ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
+      ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
     else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-      ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
+      ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
     else
-      ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
+      ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
 
     setup_pred_block(&xd->pre,
                      &cpi->common.yv12_fb[ref_fb_idx],
@@ -2563,11 +2563,11 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
       int second_ref_fb_idx;
 
       if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
-        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->lst_fb_idx];
+        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
       else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
-        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->gld_fb_idx];
+        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
       else
-        second_ref_fb_idx = cpi->common.active_ref_idx[cpi->alt_fb_idx];
+        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
 
       setup_pred_block(&xd->second_pre,
                        &cpi->common.yv12_fb[second_ref_fb_idx],

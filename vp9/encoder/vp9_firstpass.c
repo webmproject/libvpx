@@ -436,10 +436,10 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   int recon_yoffset, recon_uvoffset;
   YV12_BUFFER_CONFIG *lst_yv12 =
-      &cm->yv12_fb[cm->active_ref_idx[cpi->lst_fb_idx]];
+      &cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]];
   YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
   YV12_BUFFER_CONFIG *gld_yv12 =
-      &cm->yv12_fb[cm->active_ref_idx[cpi->gld_fb_idx]];
+      &cm->yv12_fb[cm->ref_frame_map[cpi->gld_fb_idx]];
   int recon_y_stride = lst_yv12->y_stride;
   int recon_uv_stride = lst_yv12->uv_stride;
   int64_t intra_error = 0;
