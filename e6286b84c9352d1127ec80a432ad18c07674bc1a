@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//bcw\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "let\u0027s get rid of this one, duplicate entries may make coding easier in one particular spot, but they do cause sort of a bookkeeping nightmare in the long run. Just nzc in MB_MODE_INFO should be enough.",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//bcs\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "Same.",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//bcg\u003d",
+        "filename": "vp9/common/vp9_default_coef_probs.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "shouldn\u0027t those be probabilities instead of counts? (I guess we can do that later, but let\u0027s mark this as a todo).",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//bcQ\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "so these are indexed as \"token - 3\"? How about we just pad it with leading zeroes so we can index it as token? Less chance of causing obvious bugs.",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//bbQ\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "so, you\u0027re actually losing a lot of precision here, which may be bad esp. at high quantizers. Do you think it makes sense to return 32x32-scale nzcs in these functions instead? We can do that later (mark as fixme).",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//bbM\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "these adds should probably be in semi-log scale, otherwise high nzcs have a bigger weight than smaller nzcs (e.g. compare adding nzc\u003d1000 + nzc\u003d1, the result is nzc\u003d500, which is still approximately the same token, whereas you realistically expect it to be in the token halfway the two (i.e. around 50 or 100).\n\ncan mark as fixme for now while we work out the experiment.",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//bbE\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "how come we don\u0027t need counts for bw adaptivity?",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//bZg\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1362,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "this might cause some issues, because isn\u0027t the non-first mi copied over by the first after decode_modes_mv ends?\n\nsee decodframe.c line 1032:\n        mi[y * mis + x] \u003d *mi;\n\n(later note, maybe you\u0027ve moved that into this file, then it\u0027s ok, so maybe ignore this.)",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//bZU\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2007,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "can this bookkeeping go away? If we just have a single array of nzc in MB_MODE_INFO, hopefully we don\u0027t need this.",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//bZM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3796,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-02-27T20:21:11Z",
+      "side": 1,
+      "message": "unrelated?",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
