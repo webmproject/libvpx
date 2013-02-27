@@ -4123,19 +4123,18 @@ int vp9_set_internal_size(VP9_PTR comp,
   VP9_COMP *cpi = (VP9_COMP *) comp;
   VP9_COMMON *cm = &cpi->common;
 
-  if (horiz_mode <= ONETWO)
-    cm->horiz_scale = horiz_mode;
-  else
+  if (horiz_mode > ONETWO)
     return -1;
 
-  if (vert_mode <= ONETWO)
-    cm->vert_scale = vert_mode;
-  else
+  if (vert_mode > ONETWO)
     return -1;
 
-  if (cm->horiz_scale != NORMAL || cm->vert_scale != NORMAL) {
+  if (cm->horiz_scale != horiz_mode || cm->vert_scale != vert_mode) {
     int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
     int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
+
+    cm->horiz_scale = horiz_mode;
+    cm->vert_scale = vert_mode;
 
     Scale2Ratio(cm->horiz_scale, &hr, &hs);
     Scale2Ratio(cm->vert_scale, &vr, &vs);
