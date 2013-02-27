@@ -31,12 +31,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-typedef void (*transform_1d)(int16_t*, int16_t*);
-
-typedef struct {
-  transform_1d cols, rows;  // vertical and horizontal
-} transform_2d;
-
 void vp9_short_inv_walsh4x4_x8_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
