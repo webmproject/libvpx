@@ -449,12 +449,10 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       seg_eob = 1024;
       qcoeff_ptr = xd->sb_coeff_data.qcoeff;
 #if CONFIG_CNVCONTEXT
-      a_ec = a[0] + a[1] + a[2] + a[3] +
-      a1[0] + a1[1] + a1[2] + a1[3];
-      l_ec = l[0] + l[1] + l[2] + l[3] +
-      l1[0] + l1[1] + l1[2] + l1[3];
-      a_ec = a_ec != 0;
-      l_ec = l_ec != 0;
+      a_ec = (a[0] + a[1] + a[2] + a[3] +
+              a1[0] + a1[1] + a1[2] + a1[3]) != 0;
+      l_ec = (l[0] + l[1] + l[2] + l[3] +
+              l1[0] + l1[1] + l1[2] + l1[3]) != 0;
 #endif
       break;
     default:
