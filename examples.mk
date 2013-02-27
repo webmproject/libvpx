@@ -31,6 +31,7 @@ vpxdec.SRCS                 += nestegg/halloc/src/hlist.h
 vpxdec.SRCS                 += nestegg/halloc/src/macros.h
 vpxdec.SRCS                 += nestegg/include/nestegg/nestegg.h
 vpxdec.SRCS                 += nestegg/src/nestegg.c
+vpxdec.SRCS                 += $(LIBYUV_SRCS)
 vpxdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
 vpxdec.DESCRIPTION           = Full featured decoder
 UTILS-$(CONFIG_ENCODERS)    += vpxenc.c

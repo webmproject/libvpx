@@ -30,6 +30,7 @@
 #endif
 #include "tools_common.h"
 #include "nestegg/include/nestegg/nestegg.h"
+#include "third_party/libyuv/include/libyuv/scale.h"
 
 #if CONFIG_OS_SUPPORT
 #if defined(_MSC_VER)
@@ -93,6 +94,8 @@ static const arg_def_t verbosearg = ARG_DEF("v", "verbose", 0,
                                             "Show version string");
 static const arg_def_t error_concealment = ARG_DEF(NULL, "error-concealment", 0,
                                                    "Enable decoder error-concealment");
+static const arg_def_t scalearg = ARG_DEF("S", "scale", 0,
+                                            "Scale output frames uniformly");
 
 
 #if CONFIG_MD5
@@ -102,7 +105,7 @@ static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
 static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
   &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
-  &threadsarg, &verbosearg,
+  &threadsarg, &verbosearg, &scalearg,
 #if CONFIG_MD5
   &md5arg,
 #endif
@@ -708,6 +711,9 @@ int main(int argc, const char **argv_) {
   struct input_ctx        input = {0};
   int                     frames_corrupted = 0;
   int                     dec_flags = 0;
+  int                     do_scale;
+  int                     stream_w = 0, stream_h = 0;
+  vpx_image_t             *scaled_img = NULL;
 
   /* Parse command line */
   exec_name = argv_[0];
@@ -757,6 +763,8 @@ int main(int argc, const char **argv_) {
       cfg.threads = arg_parse_uint(&arg);
     else if (arg_match(&arg, &verbosearg, argi))
       quiet = 0;
+    else if (arg_match(&arg, &scalearg, argi))
+      do_scale = 1;
 
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
@@ -1015,6 +1023,30 @@ int main(int argc, const char **argv_) {
       show_progress(frame_in, frame_out, dx_time);
 
     if (!noblit) {
+      if (do_scale) {
+        if (frame_out == 1) {
+          stream_w = img->d_w;
+          stream_h = img->d_h;
+          scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,
+                                     stream_w, stream_h, 16);
+        }
+        if (img && (img->d_w != stream_w || img->d_h != stream_h)) {
+          I420Scale(img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y],
+                    img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U],
+                    img->planes[VPX_PLANE_V], img->stride[VPX_PLANE_V],
+                    img->d_w, img->d_h,
+                    scaled_img->planes[VPX_PLANE_Y],
+                    scaled_img->stride[VPX_PLANE_Y],
+                    scaled_img->planes[VPX_PLANE_U],
+                    scaled_img->stride[VPX_PLANE_U],
+                    scaled_img->planes[VPX_PLANE_V],
+                    scaled_img->stride[VPX_PLANE_V],
+                    stream_w, stream_h,
+                    kFilterBox);
+          img = scaled_img;
+        }
+      }
+
       if (img) {
         unsigned int y;
         char out_fn[PATH_MAX];
