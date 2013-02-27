@@ -19,12 +19,6 @@ typedef unsigned int(*vp9_sad_fn_t)(const uint8_t *src_ptr,
                                     int ref_stride,
                                     unsigned int max_sad);
 
-typedef void (*vp9_copy32xn_fn_t)(const uint8_t *src_ptr,
-                                  int source_stride,
-                                  const uint8_t *ref_ptr,
-                                  int ref_stride,
-                                  int n);
-
 typedef void (*vp9_sad_multi_fn_t)(const uint8_t *src_ptr,
                                    int source_stride,
                                    const uint8_t *ref_ptr,
@@ -79,7 +73,6 @@ typedef struct variance_vtable {
     vp9_sad_multi_fn_t      sdx3f;
     vp9_sad_multi1_fn_t     sdx8f;
     vp9_sad_multi_d_fn_t    sdx4df;
-    vp9_copy32xn_fn_t       copymem;
 } vp9_variance_fn_ptr_t;
 
 #endif  // VP9_ENCODER_VP9_VARIANCE_H_

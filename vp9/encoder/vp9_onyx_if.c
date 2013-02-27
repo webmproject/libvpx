@@ -1683,14 +1683,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   BFP(BLOCK_4X4, vp9_sad4x4, vp9_variance4x4, vp9_sub_pixel_variance4x4,
       NULL, NULL, NULL, vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
-#if ARCH_X86 || ARCH_X86_64
-  cpi->fn_ptr[BLOCK_16X16].copymem  = vp9_copy32xn;
-  cpi->fn_ptr[BLOCK_16X8].copymem   = vp9_copy32xn;
-  cpi->fn_ptr[BLOCK_8X16].copymem   = vp9_copy32xn;
-  cpi->fn_ptr[BLOCK_8X8].copymem    = vp9_copy32xn;
-  cpi->fn_ptr[BLOCK_4X4].copymem    = vp9_copy32xn;
-#endif
-
   cpi->full_search_sad = vp9_full_search_sad;
   cpi->diamond_search_sad = vp9_diamond_search_sad;
   cpi->refining_search_sad = vp9_refining_search_sad;
