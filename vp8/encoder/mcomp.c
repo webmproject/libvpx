@@ -235,13 +235,12 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     MACROBLOCKD *xd = &x->e_mbd;
     unsigned char *y0 = base_pre + d->offset + (bestmv->as_mv.row) * pre_stride + bestmv->as_mv.col;
     unsigned char *y;
-    int buf_r1, buf_r2, buf_c1, buf_c2;
+    int buf_r1, buf_r2, buf_c1;
 
     /* Clamping to avoid out-of-range data access */
     buf_r1 = ((bestmv->as_mv.row - 3) < x->mv_row_min)?(bestmv->as_mv.row - x->mv_row_min):3;
     buf_r2 = ((bestmv->as_mv.row + 3) > x->mv_row_max)?(x->mv_row_max - bestmv->as_mv.row):3;
     buf_c1 = ((bestmv->as_mv.col - 3) < x->mv_col_min)?(bestmv->as_mv.col - x->mv_col_min):3;
-    buf_c2 = ((bestmv->as_mv.col + 3) > x->mv_col_max)?(x->mv_col_max - bestmv->as_mv.col):3;
     y_stride = 32;
 
     /* Copy to intermediate buffer before searching. */
