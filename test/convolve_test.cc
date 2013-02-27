@@ -13,6 +13,7 @@ extern "C" {
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/mem.h"
 }
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/acm_random.h"
@@ -430,60 +431,61 @@ TEST_P(ConvolveTest, MatchesReferenceAveragingSubpixelFilter) {
   }
 }
 
+DECLARE_ALIGNED(256, const int16_t, kChangeFilters[16][8]) = {
+    { 0,   0,   0,   0,   0,   0,   0, 128},
+    { 0,   0,   0,   0,   0,   0, 128},
+    { 0,   0,   0,   0,   0, 128},
+    { 0,   0,   0,   0, 128},
+    { 0,   0,   0, 128},
+    { 0,   0, 128},
+    { 0, 128},
+    { 128},
+    { 0,   0,   0,   0,   0,   0,   0, 128},
+    { 0,   0,   0,   0,   0,   0, 128},
+    { 0,   0,   0,   0,   0, 128},
+    { 0,   0,   0,   0, 128},
+    { 0,   0,   0, 128},
+    { 0,   0, 128},
+    { 0, 128},
+    { 128}
+};
+
 TEST_P(ConvolveTest, ChangeFilterWorks) {
   uint8_t* const in = input();
   uint8_t* const out = output();
 
-  const int16_t filters[][8] = {
-    { 0,   0,   0,   0,   0,   0,   0, 128},
-    { 0,   0,   0,   0,   0,   0, 128},
-    { 0,   0,   0,   0,   0, 128},
-    { 0,   0,   0,   0, 128},
-    { 0,   0,   0, 128},
-    { 0,   0, 128},
-    { 0, 128},
-    { 128},
-    { 0,   0,   0,   0,   0,   0,   0, 128},
-    { 0,   0,   0,   0,   0,   0, 128},
-    { 0,   0,   0,   0,   0, 128},
-    { 0,   0,   0,   0, 128},
-    { 0,   0,   0, 128},
-    { 0,   0, 128},
-    { 0, 128},
-    { 128},
-    { 0,   0,   0,   0,   0,   0,   0, 128},
-    { 0,   0,   0,   0,   0,   0, 128},
-    { 0,   0,   0,   0,   0, 128},
-    { 0,   0,   0,   0, 128},
-    { 0,   0,   0, 128},
-    { 0,   0, 128},
-    { 0, 128},
-    { 128},
-  };
-
   REGISTER_STATE_CHECK(UUT_->h8_(in, kInputStride, out, kOutputStride,
-                                 filters[0], 17, filters[4], 16,
+                                 kChangeFilters[8], 17, kChangeFilters[4], 16,
                                  Width(), Height()));
 
-  for (int x = 0; x < (Width() > 4 ? 8 : 4); ++x) {
-    ASSERT_EQ(in[4], out[x]) << "x == " << x;
+  for (int x = 0; x < Width(); ++x) {
+    if (x < 8)
+      ASSERT_EQ(in[4], out[x]) << "x == " << x;
+    else
+      ASSERT_EQ(in[12], out[x]) << "x == " << x;
   }
 
   REGISTER_STATE_CHECK(UUT_->v8_(in, kInputStride, out, kOutputStride,
-                                 filters[4], 16, filters[0], 17,
+                                 kChangeFilters[4], 16, kChangeFilters[8], 17,
                                  Width(), Height()));
 
-  for (int y = 0; y < (Height() > 4 ? 8 : 4); ++y) {
-    ASSERT_EQ(in[4 * kInputStride], out[y * kOutputStride]) << "y == " << y;
+  for (int y = 0; y < Height(); ++y) {
+    if (y < 8)
+      ASSERT_EQ(in[4 * kInputStride], out[y * kOutputStride]) << "y == " << y;
+    else
+      ASSERT_EQ(in[12 * kInputStride], out[y * kOutputStride]) << "y == " << y;
   }
 
   REGISTER_STATE_CHECK(UUT_->hv8_(in, kInputStride, out, kOutputStride,
-                                  filters[0], 17, filters[0], 17,
+                                  kChangeFilters[8], 17, kChangeFilters[8], 17,
                                   Width(), Height()));
 
-  for (int y = 0; y < (Height() > 4 ? 8 : 4); ++y) {
-    for (int x = 0; x < (Width() > 4 ? 8 : 4); ++x) {
-      ASSERT_EQ(in[4 * kInputStride + 4], out[y * kOutputStride + x])
+  for (int y = 0; y < Height(); ++y) {
+    for (int x = 0; x < Width(); ++x) {
+      const int ref_x = x < 8 ? 4 : 12;
+      const int ref_y = y < 8 ? 4 : 12;
+
+      ASSERT_EQ(in[ref_y * kInputStride + ref_x], out[y * kOutputStride + x])
           << "x == " << x << ", y == " << y;
     }
   }
