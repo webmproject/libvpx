@@ -105,7 +105,7 @@ static void tokenize_b(VP9_COMP *cpi,
   int c = 0;
   int recent_energy = 0;
   const BLOCKD * const b = xd->block + ib;
-  const int eob = b->eob;     /* one beyond last nonzero coeff */
+  const int eob = xd->eobs[ib];     /* one beyond last nonzero coeff */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   int16_t *qcoeff_ptr = b->qcoeff;
   int seg_eob;
@@ -245,7 +245,7 @@ int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd) {
   int i = 0;
 
   for (i = 0; i < 16; i++)
-    skip &= (!xd->block[i].eob);
+    skip &= (!xd->eobs[i]);
 
   return skip;
 }
@@ -255,7 +255,7 @@ int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd) {
   int i;
 
   for (i = 16; i < 24; i++)
-    skip &= (!xd->block[i].eob);
+    skip &= (!xd->eobs[i]);
   return skip;
 }
 
@@ -269,13 +269,13 @@ int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd) {
   int i = 0;
 
   for (i = 0; i < 16; i += 4)
-    skip &= (!xd->block[i].eob);
+    skip &= (!xd->eobs[i]);
 
   return skip;
 }
 
 int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd) {
-  return (!xd->block[16].eob) & (!xd->block[20].eob);
+  return (!xd->eobs[16]) & (!xd->eobs[20]);
 }
 
 static int mb_is_skippable_8x8(MACROBLOCKD *xd) {
@@ -290,7 +290,7 @@ static int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd) {
 
 int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd) {
   int skip = 1;
-  skip &= !xd->block[0].eob;
+  skip &= !xd->eobs[0];
   return skip;
 }
 
@@ -300,12 +300,12 @@ static int mb_is_skippable_16x16(MACROBLOCKD *xd) {
 
 int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd) {
   int skip = 1;
-  skip &= !xd->block[0].eob;
+  skip &= !xd->eobs[0];
   return skip;
 }
 
 int vp9_sbuv_is_skippable_16x16(MACROBLOCKD *xd) {
-  return (!xd->block[16].eob) & (!xd->block[20].eob);
+  return (!xd->eobs[16]) & (!xd->eobs[20]);
 }
 
 static int sb_is_skippable_32x32(MACROBLOCKD *xd) {

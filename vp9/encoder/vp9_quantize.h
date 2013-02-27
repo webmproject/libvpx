@@ -14,10 +14,10 @@
 #include "vp9/encoder/vp9_block.h"
 
 #define prototype_quantize_block(sym) \
-  void (sym)(BLOCK *b,BLOCKD *d)
+  void (sym)(MACROBLOCK *mb, int b_idx)
 
 #define prototype_quantize_block_pair(sym) \
-  void (sym)(BLOCK *b1, BLOCK *b2, BLOCKD *d1, BLOCKD *d2)
+  void (sym)(MACROBLOCK *mb, int b_idx1, int b_idx2)
 
 #define prototype_quantize_mb(sym) \
   void (sym)(MACROBLOCK *x)
@@ -27,7 +27,7 @@
 #endif
 
 #define prototype_quantize_block_type(sym) \
-  void (sym)(BLOCK *b, BLOCKD *d, TX_TYPE type)
+  void (sym)(MACROBLOCK *mb, int b_ix, TX_TYPE type)
 extern prototype_quantize_block_type(vp9_ht_quantize_b_4x4);
 
 #ifndef vp9_quantize_quantb_4x4
