@@ -332,6 +332,7 @@ typedef struct VP9_COMP {
   int alt_is_last;  // Alt reference frame same as last ( short circuit altref search)
   int gold_is_alt;  // don't do both alt and gold search ( just do gold).
 
+  int scaled_ref_idx[3];
   int lst_fb_idx;
   int gld_fb_idx;
   int alt_fb_idx;

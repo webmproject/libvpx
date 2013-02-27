@@ -698,6 +698,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   int mb_to_top_edge;
   int mb_to_bottom_edge;
   const int mb_size = 1 << mi->mbmi.sb_type;
+  const int use_prev_in_find_mv_refs = cm->Width == cm->last_width &&
+                                       cm->Height == cm->last_height &&
+                                       !cm->error_resilient_mode;
 
   mb_to_top_edge = xd->mb_to_top_edge;
   mb_to_bottom_edge = xd->mb_to_bottom_edge;
@@ -751,28 +754,21 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     vp9_prob mv_ref_p [VP9_MVREFS - 1];
 
     MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
+    xd->scale_factor[0] = cm->active_ref_scale[mbmi->ref_frame - 1];
 
     {
       int ref_fb_idx;
-      int recon_y_stride, recon_yoffset;
-      int recon_uv_stride, recon_uvoffset;
+      const int use_prev_in_find_best_ref =
+          xd->scale_factor[0].x_num == xd->scale_factor[0].x_den &&
+          xd->scale_factor[0].y_num == xd->scale_factor[0].y_den &&
+          !cm->error_resilient_mode &&
+          !cm->frame_parallel_decoding_mode;
 
       /* Select the appropriate reference frame for this MB */
       ref_fb_idx = cm->active_ref_idx[ref_frame - 1];
 
-      recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
-      recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
-
-      recon_yoffset = scaled_buffer_offset(mb_col * 16, mb_row * 16,
-                                           recon_y_stride,
-                                           &xd->scale_factor[0]);
-      recon_uvoffset = scaled_buffer_offset(mb_col * 8, mb_row * 8,
-                                            recon_uv_stride,
-                                            &xd->scale_factor_uv[0]);
-
-      xd->pre.y_buffer = cm->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
-      xd->pre.u_buffer = cm->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
-      xd->pre.v_buffer = cm->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
+      setup_pred_block(&xd->pre, &cm->yv12_fb[ref_fb_idx],
+          mb_row, mb_col, &xd->scale_factor[0], &xd->scale_factor_uv[0]);
 
 #ifdef DEC_DEBUG
       if (dec_debug)
@@ -781,7 +777,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
       // if (cm->current_video_frame == 1 && mb_row == 4 && mb_col == 5)
       //  printf("Dello\n");
-      vp9_find_mv_refs(cm, xd, mi, cm->error_resilient_mode ? 0 : prev_mi,
+      vp9_find_mv_refs(cm, xd, mi, use_prev_in_find_mv_refs ? prev_mi : NULL,
                        ref_frame, mbmi->ref_mvs[ref_frame],
                        cm->ref_frame_sign_bias);
 
@@ -814,10 +810,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
       if (mbmi->mode != ZEROMV) {
         vp9_find_best_ref_mvs(xd,
-                              pbi->common.error_resilient_mode ||
-                              pbi->common.frame_parallel_decoding_mode ?
-                              0 : xd->pre.y_buffer,
-                              recon_y_stride,
+                              use_prev_in_find_best_ref ?
+                                  xd->pre.y_buffer : NULL,
+                              xd->pre.y_stride,
                               mbmi->ref_mvs[ref_frame],
                               &nearest, &nearby);
 
@@ -858,39 +853,31 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         mbmi->second_ref_frame = 1;
       if (mbmi->second_ref_frame > 0) {
         int second_ref_fb_idx;
-        int recon_y_stride, recon_yoffset;
-        int recon_uv_stride, recon_uvoffset;
+        int use_prev_in_find_best_ref;
+
+        xd->scale_factor[1] = cm->active_ref_scale[mbmi->second_ref_frame - 1];
+        use_prev_in_find_best_ref =
+            xd->scale_factor[1].x_num == xd->scale_factor[1].x_den &&
+            xd->scale_factor[1].y_num == xd->scale_factor[1].y_den &&
+            !cm->error_resilient_mode &&
+            !cm->frame_parallel_decoding_mode;
 
         /* Select the appropriate reference frame for this MB */
         second_ref_fb_idx = cm->active_ref_idx[mbmi->second_ref_frame - 1];
 
-        recon_y_stride = cm->yv12_fb[second_ref_fb_idx].y_stride;
-        recon_uv_stride = cm->yv12_fb[second_ref_fb_idx].uv_stride;
+        setup_pred_block(&xd->second_pre, &cm->yv12_fb[second_ref_fb_idx],
+            mb_row, mb_col, &xd->scale_factor[1], &xd->scale_factor_uv[1]);
 
-        recon_yoffset = scaled_buffer_offset(mb_col * 16, mb_row * 16,
-                                             recon_y_stride,
-                                             &xd->scale_factor[1]);
-        recon_uvoffset = scaled_buffer_offset(mb_col * 8, mb_row * 8,
-                                             recon_uv_stride,
-                                             &xd->scale_factor_uv[1]);
-        xd->second_pre.y_buffer =
-          cm->yv12_fb[second_ref_fb_idx].y_buffer + recon_yoffset;
-        xd->second_pre.u_buffer =
-          cm->yv12_fb[second_ref_fb_idx].u_buffer + recon_uvoffset;
-        xd->second_pre.v_buffer =
-          cm->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
-
-        vp9_find_mv_refs(cm, xd, mi, cm->error_resilient_mode ? 0 : prev_mi,
+        vp9_find_mv_refs(cm, xd, mi, use_prev_in_find_mv_refs ? prev_mi : NULL,
                          mbmi->second_ref_frame,
                          mbmi->ref_mvs[mbmi->second_ref_frame],
                          cm->ref_frame_sign_bias);
 
         if (mbmi->mode != ZEROMV) {
           vp9_find_best_ref_mvs(xd,
-                                pbi->common.error_resilient_mode ||
-                                pbi->common.frame_parallel_decoding_mode ?
-                                0 : xd->second_pre.y_buffer,
-                                recon_y_stride,
+                                use_prev_in_find_best_ref ?
+                                    xd->second_pre.y_buffer : NULL,
+                                xd->second_pre.y_stride,
                                 mbmi->ref_mvs[mbmi->second_ref_frame],
                                 &nearest_second,
                                 &nearby_second);

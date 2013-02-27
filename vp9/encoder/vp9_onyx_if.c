@@ -2599,6 +2599,38 @@ static void select_interintra_mode(VP9_COMP *cpi) {
 }
 #endif
 
+static void scale_references(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+  int i;
+
+  for (i = 0; i < 3; i++) {
+    YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[cm->active_ref_idx[i]];
+
+    if (ref->y_width != cm->Width || ref->y_height != cm->Height) {
+      int new_fb = get_free_fb(cm);
+
+      vp8_yv12_realloc_frame_buffer(&cm->yv12_fb[new_fb],
+                                    cm->mb_cols * 16,
+                                    cm->mb_rows * 16,
+                                    VP9BORDERINPIXELS);
+      scale_and_extend_frame(ref, &cm->yv12_fb[new_fb]);
+      cpi->scaled_ref_idx[i] = new_fb;
+    } else {
+      cpi->scaled_ref_idx[i] = cm->active_ref_idx[i];
+      cm->fb_idx_ref_cnt[cm->active_ref_idx[i]]++;
+    }
+  }
+}
+
+static void release_scaled_references(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+  int i;
+
+  for (i = 0; i < 3; i++) {
+    cm->fb_idx_ref_cnt[cpi->scaled_ref_idx[i]]--;
+  }
+}
+
 static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       unsigned long *size,
                                       unsigned char *dest,
@@ -2655,6 +2687,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   } else {
     cpi->Source = cpi->un_scaled_source;
   }
+
+  scale_references(cpi);
 
   // Clear down mmx registers to allow floating point in what follows
   vp9_clear_system_state();
@@ -3304,6 +3338,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     update_reference_segmentation_map(cpi);
   }
 
+  release_scaled_references(cpi);
   update_reference_frames(cpi);
   vp9_copy(cpi->common.fc.coef_counts_4x4, cpi->coef_counts_4x4);
   vp9_copy(cpi->common.fc.coef_counts_8x8, cpi->coef_counts_8x8);
@@ -3589,6 +3624,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   xd->update_mb_segmentation_data = 0;
   xd->mode_ref_lf_delta_update = 0;
 
+  // keep track of the last coded dimensions
+  cm->last_width = cm->Width;
+  cm->last_height = cm->Height;
 
   // Dont increment frame counters if this was an altref buffer update not a real frame
   if (cm->show_frame) {
@@ -4083,18 +4121,32 @@ int vp9_set_active_map(VP9_PTR comp, unsigned char *map,
 int vp9_set_internal_size(VP9_PTR comp,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
   VP9_COMP *cpi = (VP9_COMP *) comp;
+  VP9_COMMON *cm = &cpi->common;
 
   if (horiz_mode <= ONETWO)
-    cpi->horiz_scale = horiz_mode;
+    cm->horiz_scale = horiz_mode;
   else
     return -1;
 
   if (vert_mode <= ONETWO)
-    cpi->vert_scale = vert_mode;
+    cm->vert_scale = vert_mode;
   else
     return -1;
 
-  vp9_change_config(comp, &cpi->oxcf);
+  if (cm->horiz_scale != NORMAL || cm->vert_scale != NORMAL) {
+    int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
+    int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
+
+    Scale2Ratio(cm->horiz_scale, &hr, &hs);
+    Scale2Ratio(cm->vert_scale, &vr, &vs);
+
+    // always go to the next whole number
+    cm->Width = (hs - 1 + cpi->oxcf.Width * hr) / hs;
+    cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
+  }
+  assert(cm->Width <= cpi->initial_width);
+  assert(cm->Height <= cpi->initial_height);
+  update_frame_size(cpi);
   return 0;
 }
 
