@@ -26,9 +26,6 @@ forward_decls vp9_common_forward_decls
 #
 # Dequant
 #
-prototype void vp9_dequantize_b "struct blockd *x"
-specialize vp9_dequantize_b
-
 prototype void vp9_dequant_idct_add_y_block_8x8 "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, struct macroblockd *xd"
 specialize vp9_dequant_idct_add_y_block_8x8
 
