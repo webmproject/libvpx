@@ -1782,7 +1782,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int col_min = ref_col - distance;
   int col_max = ref_col + distance;
 
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, sad_array8, 8);
+  DECLARE_ALIGNED_ARRAY(16, uint32_t, sad_array8, 8);
   unsigned int sad_array[3];
   int_mv fcenter_mv;
 

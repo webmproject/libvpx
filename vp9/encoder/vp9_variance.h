@@ -29,7 +29,7 @@ typedef void (*vp9_sad_multi1_fn_t)(const uint8_t *src_ptr,
                                     int source_stride,
                                     const uint8_t *ref_ptr,
                                     int  ref_stride,
-                                    unsigned short *sad_array);
+                                    unsigned int *sad_array);
 
 typedef void (*vp9_sad_multi_d_fn_t)(const uint8_t *src_ptr,
                                      int source_stride,

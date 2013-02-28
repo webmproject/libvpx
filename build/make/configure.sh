@@ -997,17 +997,6 @@ process_common_toolchain() {
 #error "not x32"
 #endif
 EOF
-        soft_enable runtime_cpu_detect
-        soft_enable mmx
-        soft_enable sse
-        soft_enable sse2
-        soft_enable sse3
-        soft_enable ssse3
-        if enabled gcc && ! disabled sse4_1 && ! check_cflags -msse4; then
-            RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sse4_1 "
-        else
-            soft_enable sse4_1
-        fi
 
         case  ${tgt_os} in
             win*)
@@ -1060,6 +1049,18 @@ EOF
                 AS=msvs
             ;;
         esac
+
+        soft_enable runtime_cpu_detect
+        soft_enable mmx
+        soft_enable sse
+        soft_enable sse2
+        soft_enable sse3
+        soft_enable ssse3
+        if enabled gcc && ! disabled sse4_1 && ! check_cflags -msse4; then
+            RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sse4_1 "
+        else
+            soft_enable sse4_1
+        fi
 
         case "${AS}" in
             auto|"")
