@@ -16,6 +16,24 @@
       "revId": "e508ac7ed8c45bcfdc7c1bbee956ec410e745f6f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//aAw\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:42:23Z",
+      "side": 1,
+      "message": "The advantage of a tree is that we can use utility functions like vp9_tree_probs_from_distribution() etc. more easily. Later we can specialize to a specific kind of tree (like the one you suggest) for speed reasons.",
+      "parentUuid": "AAAAVH//fz0\u003d",
+      "revId": "e508ac7ed8c45bcfdc7c1bbee956ec410e745f6f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
