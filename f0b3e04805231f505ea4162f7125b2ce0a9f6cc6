@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//aTg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-28T20:41:25Z",
+      "side": 1,
+      "message": "needs to be static, or have a vp9_ prefix if used elsewhere.",
+      "revId": "f0b3e04805231f505ea4162f7125b2ce0a9f6cc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//aTM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1419,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-28T20:41:25Z",
+      "side": 1,
+      "message": "I\u0027m mildly against doing this for nested loops, but ok.",
+      "revId": "f0b3e04805231f505ea4162f7125b2ce0a9f6cc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//aS4\u003d",
+        "filename": "vp9/encoder/vp9_encodeintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-02-28T20:41:25Z",
+      "side": 1,
+      "message": "this is sorta bogus for a 2 case switch, but ok for consistency with vp9_encode_intra16x16mby I guess. The whole thing is probably begging for a function pointer table indexed by tx_size.",
+      "revId": "f0b3e04805231f505ea4162f7125b2ce0a9f6cc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
