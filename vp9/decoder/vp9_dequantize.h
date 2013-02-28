@@ -18,7 +18,7 @@
 void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
                                      unsigned char *pred,
                                      unsigned char *output,
-                                     int pitch, int stride);
+                                     int pitch, int stride, int eob);
 
 void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
                                         unsigned char *pred,

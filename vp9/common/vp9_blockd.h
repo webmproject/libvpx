@@ -380,9 +380,7 @@ typedef struct macroblockd {
   void (*inv_txm4x4_1)(int16_t *input, int16_t *output, int pitch);
   void (*inv_txm4x4)(int16_t *input, int16_t *output, int pitch);
   void (*itxm_add)(int16_t *input, const int16_t *dq,
-    uint8_t *pred, uint8_t *output, int pitch, int stride);
-  void (*dc_only_itxm_add)(int input_dc, uint8_t *pred_ptr,
-    uint8_t *dst_ptr, int pitch, int stride);
+    uint8_t *pred, uint8_t *output, int pitch, int stride, int eob);
   void (*itxm_add_y_block)(int16_t *q, const int16_t *dq,
     uint8_t *pre, uint8_t *dst, int stride, struct macroblockd *xd);
   void (*itxm_add_uv_block)(int16_t *q, const int16_t *dq,
