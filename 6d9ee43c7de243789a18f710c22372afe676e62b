@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//afA\u003d",
+        "filename": "vp8/encoder/x86/quantize_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-02-28T17:44:58Z",
+      "side": 1,
+      "message": "qcoef_ptr is set to zero at the beginning of the function.  You do not have to update qcoef_ptr[rc] unless y[rc] is non zero.",
+      "revId": "6d9ee43c7de243789a18f710c22372afe676e62b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
