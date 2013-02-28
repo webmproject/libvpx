@@ -3,6 +3,8 @@
 *.d
 *.o
 *~
+/*.ivf
+/*.ivf.md5
 /*-*.mk
 /*.asm
 /*.doxy
