@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//aWc\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:39:40Z",
+      "side": 1,
+      "message": "Actually it is better to have this since I can generate these usually during quantization.",
+      "parentUuid": "AAAAVH//bcw\u003d",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//bcs\u003d",
         "filename": "vp9/common/vp9_blockd.h",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2013-02-27T20:21:11Z",
       "side": 1,
       "message": "Same.",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//aWY\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:39:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//bcs\u003d",
       "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//aWU\u003d",
+        "filename": "vp9/common/vp9_default_coef_probs.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:39:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//bcg\u003d",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//bcQ\u003d",
         "filename": "vp9/common/vp9_entropy.c",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2013-02-27T20:21:11Z",
       "side": 1,
       "message": "so these are indexed as \"token - 3\"? How about we just pad it with leading zeroes so we can index it as token? Less chance of causing obvious bugs.",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//aWQ\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:39:40Z",
+      "side": 1,
+      "message": "Let\u0027s put this as an optimization for later.",
+      "parentUuid": "AAAAVH//bcQ\u003d",
       "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//aUo\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:39:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVH//bbQ\u003d",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//bbM\u003d",
         "filename": "vp9/common/vp9_entropy.c",
         "patchSetId": 7
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//aUg\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:39:40Z",
+      "side": 1,
+      "message": "Yes - good idea. noting as todo.",
+      "parentUuid": "AAAAVH//bbM\u003d",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//bbE\u003d",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 7
@@ -115,6 +223,24 @@
       "writtenOn": "2013-02-27T20:21:11Z",
       "side": 1,
       "message": "how come we don\u0027t need counts for bw adaptivity?",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//aUM\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:39:40Z",
+      "side": 1,
+      "message": "I am using counts in common frame_context for both forward and backward adaptation.\n\nThere is a lot of redundant arrays in cpi that is not exactly required for various other symbols. For nzcs I am doing it the right way by re-using the same count array for forward and backward adaptation. Later I will clean up the others to use the same approach.",
+      "parentUuid": "AAAAVH//bbE\u003d",
       "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVH//aBg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2007,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:39:40Z",
+      "side": 1,
+      "message": "Actually most of this code is a test to make sure that the counts as obtained from the quantizer is right. The only thing needed is the assignment. But I will keep the verification code in for sometime.",
+      "parentUuid": "AAAAVH//bZU\u003d",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVH//bZM\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 7
@@ -166,6 +310,24 @@
       "writtenOn": "2013-02-27T20:21:11Z",
       "side": 1,
       "message": "unrelated?",
+      "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVH//aBc\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3796,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-02-28T22:39:40Z",
+      "side": 1,
+      "message": "yes - to silence some compiler warnings.",
+      "parentUuid": "AAAAVH//bZM\u003d",
       "revId": "e6286b84c9352d1127ec80a432ad18c07674bc1a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
