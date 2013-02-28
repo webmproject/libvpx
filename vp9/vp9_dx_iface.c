@@ -229,8 +229,8 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
       if (c[0] != 0x9d || c[1] != 0x01 || c[2] != 0x2a)
         res = VPX_CODEC_UNSUP_BITSTREAM;
 
-      si->w = (c[3] | (c[4] << 8)) & 0x3fff;
-      si->h = (c[5] | (c[6] << 8)) & 0x3fff;
+      si->w = (c[3] | (c[4] << 8));
+      si->h = (c[5] | (c[6] << 8));
 
       /*printf("w=%d, h=%d\n", si->w, si->h);*/
       if (!(si->h | si->w))

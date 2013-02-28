@@ -94,7 +94,7 @@ extern "C"
     int Width;              // width of data passed to the compressor
     int Height;             // height of data passed to the compressor
     double frame_rate;       // set to passed in framerate
-    int target_bandwidth;    // bandwidth to be used in kilobits per second
+    int64_t target_bandwidth;    // bandwidth to be used in kilobits per second
 
     int noise_sensitivity;   // parameter used for applying pre processing blur: recommendation 0
     int Sharpness;          // parameter used for sharpening output: recommendation 0:
@@ -135,9 +135,9 @@ extern "C"
     int over_shoot_pct;
 
     // buffering parameters
-    int starting_buffer_level;  // in seconds
-    int optimal_buffer_level;
-    int maximum_buffer_size;
+    int64_t starting_buffer_level;  // in seconds
+    int64_t optimal_buffer_level;
+    int64_t maximum_buffer_size;
 
     // controlling quality
     int fixed_q;

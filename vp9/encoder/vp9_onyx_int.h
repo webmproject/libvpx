@@ -485,7 +485,7 @@ typedef struct VP9_COMP {
   int kf_boost;
   int kf_zeromotion_pct;
 
-  int target_bandwidth;
+  int64_t target_bandwidth;
   struct vpx_codec_pkt_list  *output_pkt_list;
 
 #if 0

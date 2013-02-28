@@ -1267,13 +1267,14 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
        * if we have enough data. Otherwise we will end up with the wrong
        * size.
        */
-      if (data + 4 < data_end) {
-        pc->Width = (data[0] | (data[1] << 8)) & 0x3fff;
-        pc->horiz_scale = data[1] >> 6;
-        pc->Height = (data[2] | (data[3] << 8)) & 0x3fff;
-        pc->vert_scale = data[3] >> 6;
+      if (data + 5 < data_end) {
+        pc->Width  = (data[0] | (data[1] << 8));
+        pc->Height = (data[2] | (data[3] << 8));
+
+        pc->horiz_scale = data[4] >> 4;
+        pc->vert_scale  = data[4] & 0x0F;
       }
-      data += 4;
+      data += 5;
 
       if (width != pc->Width || height != pc->Height) {
         if (pc->Width <= 0) {

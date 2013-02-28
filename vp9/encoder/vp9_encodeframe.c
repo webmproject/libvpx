@@ -1247,8 +1247,8 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &x->e_mbd;
   int totalrate;
 
-  // printf("encode_frame_internal frame %d (%d)\n",
-  //        cpi->common.current_video_frame, cpi->common.show_frame);
+//   fprintf(stderr, "encode_frame_internal frame %d (%d)\n",
+//          cpi->common.current_video_frame, cpi->common.show_frame);
 
   // Compute a modified set of reference frame probabilities to use when
   // prediction fails. These are based on the current general estimates for
@@ -1329,12 +1329,11 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       // Take tiles into account and give start/end MB
       int tile_col;
       TOKENEXTRA *tp = cpi->tok;
-
       for (tile_col = 0; tile_col < cm->tile_columns; tile_col++) {
         TOKENEXTRA *tp_old = tp;
-
         // For each row of SBs in the frame
         vp9_get_tile_col_offsets(cm, tile_col);
+
         for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 4) {
           encode_sb_row(cpi, mb_row, &tp, &totalrate);
         }

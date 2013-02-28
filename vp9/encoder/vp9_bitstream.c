@@ -1500,17 +1500,20 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   {
     int v;
 
-    /* TODO(jkoleszar): support arbitrary resolutions */
-    v = (pc->horiz_scale << 14) | pc->Width;
+    // support arbitrary resolutions
+    v = pc->Width;
     cx_data[0] = v;
     cx_data[1] = v >> 8;
 
-    v = (pc->vert_scale << 14) | pc->Height;
+    v = pc->Height;
     cx_data[2] = v;
     cx_data[3] = v >> 8;
 
-    extra_bytes_packed += 4;
-    cx_data += 4;
+    // use a separate byte to store the scale factors, each ranging 0-15
+    cx_data[4] = (pc->horiz_scale << 4) | (pc->vert_scale);
+
+    extra_bytes_packed += 5;
+    cx_data += 5;
   }
 
   vp9_start_encode(&header_bc, cx_data);
