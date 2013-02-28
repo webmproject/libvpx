@@ -11,7 +11,10 @@
 #ifndef VP9_COMMON_VP9_IDCT_H_
 #define VP9_COMMON_VP9_IDCT_H_
 
+#include <assert.h>
+
 #include "./vpx_config.h"
+#include "vpx/vpx_integer.h"
 
 #define ROUND_POWER_OF_TWO(value, n) (((value) + (1 << ((n) - 1))) >> (n))
 

@@ -146,73 +146,126 @@ void vp9_short_fdct8x4_c(int16_t *input, int16_t *output, int pitch) {
 }
 
 static void fdct8_1d(int16_t *input, int16_t *output) {
-  int16_t step[8];
-  int temp1, temp2;
+  /*canbe16*/ int s0, s1, s2, s3, s4, s5, s6, s7;
+  /*needs32*/ int t0, t1, t2, t3;
+  /*canbe16*/ int x0, x1, x2, x3;
 
   // stage 1
-  step[0] = input[0] + input[7];
-  step[1] = input[1] + input[6];
-  step[2] = input[2] + input[5];
-  step[3] = input[3] + input[4];
-  step[4] = input[3] - input[4];
-  step[5] = input[2] - input[5];
-  step[6] = input[1] - input[6];
-  step[7] = input[0] - input[7];
+  s0 = input[0] + input[7];
+  s1 = input[1] + input[6];
+  s2 = input[2] + input[5];
+  s3 = input[3] + input[4];
+  s4 = input[3] - input[4];
+  s5 = input[2] - input[5];
+  s6 = input[1] - input[6];
+  s7 = input[0] - input[7];
 
-  fdct4_1d(step, step);
+  // fdct4_1d(step, step);
+  x0 = s0 + s3;
+  x1 = s1 + s2;
+  x2 = s1 - s2;
+  x3 = s0 - s3;
+  t0 = (x0 + x1) * cospi_16_64;
+  t1 = (x0 - x1) * cospi_16_64;
+  t2 =  x2 * cospi_24_64 + x3 *  cospi_8_64;
+  t3 = -x2 * cospi_8_64  + x3 * cospi_24_64;
+  output[0] = dct_const_round_shift(t0);
+  output[2] = dct_const_round_shift(t2);
+  output[4] = dct_const_round_shift(t1);
+  output[6] = dct_const_round_shift(t3);
 
   // Stage 2
-  output[4] = step[4];
-  temp1 = (-step[5] + step[6]) * cospi_16_64;
-  temp2 = (step[6] + step[5]) * cospi_16_64;
-  output[5] = dct_const_round_shift(temp1);
-  output[6] = dct_const_round_shift(temp2);
-  output[7] = step[7];
+  t0 = (s6 - s5) * cospi_16_64;
+  t1 = (s6 + s5) * cospi_16_64;
+  t2 = dct_const_round_shift(t0);
+  t3 = dct_const_round_shift(t1);
 
   // Stage 3
-  step[4] = output[4] + output[5];
-  step[5] = -output[5] + output[4];
-  step[6] = -output[6] + output[7];
-  step[7] = output[7] + output[6];
+  x0 = s4 + t2;
+  x1 = s4 - t2;
+  x2 = s7 - t3;
+  x3 = s7 + t3;
 
   // Stage 4
-  output[0] = step[0];
-  output[4] = step[2];
-  output[2] = step[1];
-  output[6] = step[3];
-
-  temp1 = step[4] * cospi_28_64 + step[7] * cospi_4_64;
-  temp2 = step[5] * cospi_12_64 + step[6] * cospi_20_64;
-  output[1] = dct_const_round_shift(temp1);
-  output[5] = dct_const_round_shift(temp2);
-  temp1 = step[6] * cospi_12_64 + step[5] * -cospi_20_64;
-  temp2 = step[7] * cospi_28_64 + step[4] * -cospi_4_64;
-  output[3] = dct_const_round_shift(temp1);
-  output[7] = dct_const_round_shift(temp2);
+  t0 = x0 * cospi_28_64 + x3 *   cospi_4_64;
+  t1 = x1 * cospi_12_64 + x2 *  cospi_20_64;
+  t2 = x2 * cospi_12_64 + x1 * -cospi_20_64;
+  t3 = x3 * cospi_28_64 + x0 *  -cospi_4_64;
+  output[1] = dct_const_round_shift(t0);
+  output[3] = dct_const_round_shift(t2);
+  output[5] = dct_const_round_shift(t1);
+  output[7] = dct_const_round_shift(t3);
 }
 
-void vp9_short_fdct8x8_c(int16_t *input, int16_t *output, int pitch) {
-  int shortpitch = pitch >> 1;
+void vp9_short_fdct8x8_c(int16_t *input, int16_t *final_output, int pitch) {
+  const int stride = pitch >> 1;
   int i, j;
-  int16_t out[64];
-  int16_t temp_in[8], temp_out[8];
+  int16_t intermediate[64];
 
-  // Columns
-  for (i = 0; i < 8; i++) {
-    for (j = 0; j < 8; j++)
-      temp_in[j] = input[j * shortpitch + i] << 2;
-    fdct8_1d(temp_in, temp_out);
-    for (j = 0; j < 8; j++)
-      out[j * 8 + i] = temp_out[j];
+  // Transform columns
+  {
+    int16_t *output = intermediate;
+    /*canbe16*/ int s0, s1, s2, s3, s4, s5, s6, s7;
+    /*needs32*/ int t0, t1, t2, t3;
+    /*canbe16*/ int x0, x1, x2, x3;
+
+    int i;
+    for (i = 0; i < 8; i++) {
+      // stage 1
+      s0 = (input[0 * stride] + input[7 * stride]) << 2;
+      s1 = (input[1 * stride] + input[6 * stride]) << 2;
+      s2 = (input[2 * stride] + input[5 * stride]) << 2;
+      s3 = (input[3 * stride] + input[4 * stride]) << 2;
+      s4 = (input[3 * stride] - input[4 * stride]) << 2;
+      s5 = (input[2 * stride] - input[5 * stride]) << 2;
+      s6 = (input[1 * stride] - input[6 * stride]) << 2;
+      s7 = (input[0 * stride] - input[7 * stride]) << 2;
+
+      // fdct4_1d(step, step);
+      x0 = s0 + s3;
+      x1 = s1 + s2;
+      x2 = s1 - s2;
+      x3 = s0 - s3;
+      t0 = (x0 + x1) * cospi_16_64;
+      t1 = (x0 - x1) * cospi_16_64;
+      t2 =  x2 * cospi_24_64 + x3 *  cospi_8_64;
+      t3 = -x2 * cospi_8_64  + x3 * cospi_24_64;
+      output[0 * 8] = dct_const_round_shift(t0);
+      output[2 * 8] = dct_const_round_shift(t2);
+      output[4 * 8] = dct_const_round_shift(t1);
+      output[6 * 8] = dct_const_round_shift(t3);
+
+      // Stage 2
+      t0 = (s6 - s5) * cospi_16_64;
+      t1 = (s6 + s5) * cospi_16_64;
+      t2 = dct_const_round_shift(t0);
+      t3 = dct_const_round_shift(t1);
+
+      // Stage 3
+      x0 = s4 + t2;
+      x1 = s4 - t2;
+      x2 = s7 - t3;
+      x3 = s7 + t3;
+
+      // Stage 4
+      t0 = x0 * cospi_28_64 + x3 *   cospi_4_64;
+      t1 = x1 * cospi_12_64 + x2 *  cospi_20_64;
+      t2 = x2 * cospi_12_64 + x1 * -cospi_20_64;
+      t3 = x3 * cospi_28_64 + x0 *  -cospi_4_64;
+      output[1 * 8] = dct_const_round_shift(t0);
+      output[3 * 8] = dct_const_round_shift(t2);
+      output[5 * 8] = dct_const_round_shift(t1);
+      output[7 * 8] = dct_const_round_shift(t3);
+      input++;
+      output++;
+    }
   }
 
   // Rows
   for (i = 0; i < 8; ++i) {
+    fdct8_1d(&intermediate[i * 8], &final_output[i * 8]);
     for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j + i * 8];
-    fdct8_1d(temp_in, temp_out);
-    for (j = 0; j < 8; ++j)
-      output[j + i * 8] = temp_out[j] / 2;
+      final_output[j + i * 8] /= 2;
   }
 }
 
