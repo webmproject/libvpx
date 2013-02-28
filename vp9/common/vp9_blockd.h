@@ -71,8 +71,7 @@ typedef enum {
   INTER_FRAME = 1
 } FRAME_TYPE;
 
-typedef enum
-{
+typedef enum {
 #if CONFIG_ENABLE_6TAP
   SIXTAP,
 #endif
@@ -83,8 +82,7 @@ typedef enum
   SWITCHABLE  /* should be the last one */
 } INTERPOLATIONFILTERTYPE;
 
-typedef enum
-{
+typedef enum {
   DC_PRED,            /* average of above and left pixels */
   V_PRED,             /* vertical prediction */
   H_PRED,             /* horizontal prediction */
@@ -411,66 +409,38 @@ typedef struct macroblockd {
 
 // convert MB_PREDICTION_MODE to B_PREDICTION_MODE
 static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
-  B_PREDICTION_MODE b_mode;
   switch (mode) {
-    case DC_PRED:
-      b_mode = B_DC_PRED;
-      break;
-    case V_PRED:
-      b_mode = B_VE_PRED;
-      break;
-    case H_PRED:
-      b_mode = B_HE_PRED;
-      break;
-    case TM_PRED:
-      b_mode = B_TM_PRED;
-      break;
-    case D45_PRED:
-      b_mode = B_LD_PRED;
-      break;
-    case D135_PRED:
-      b_mode = B_RD_PRED;
-      break;
-    case D117_PRED:
-      b_mode = B_VR_PRED;
-      break;
-    case D153_PRED:
-      b_mode = B_HD_PRED;
-      break;
-    case D27_PRED:
-      b_mode = B_HU_PRED;
-      break;
-    case D63_PRED:
-      b_mode = B_VL_PRED;
-      break;
-    default :
-      // for debug purpose, to be removed after full testing
-      assert(0);
-      break;
+    case DC_PRED: return B_DC_PRED;
+    case V_PRED: return B_VE_PRED;
+    case H_PRED: return B_HE_PRED;
+    case TM_PRED: return B_TM_PRED;
+    case D45_PRED: return B_LD_PRED;
+    case D135_PRED: return B_RD_PRED;
+    case D117_PRED: return B_VR_PRED;
+    case D153_PRED: return B_HD_PRED;
+    case D27_PRED: return B_HU_PRED;
+    case D63_PRED: return B_VL_PRED;
+    default:
+       assert(0);
+       return B_MODE_COUNT;  // Dummy value
   }
-  return b_mode;
 }
 
 // transform mapping
 static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
-  // map transform type
-  TX_TYPE tx_type;
   switch (bmode) {
     case B_TM_PRED :
     case B_RD_PRED :
-      tx_type = ADST_ADST;
-      break;
+      return ADST_ADST;
 
     case B_VE_PRED :
     case B_VR_PRED :
-      tx_type = ADST_DCT;
-      break;
+      return ADST_DCT;
 
     case B_HE_PRED :
     case B_HD_PRED :
     case B_HU_PRED :
-      tx_type = DCT_ADST;
-      break;
+      return DCT_ADST;
 
 #if CONFIG_NEWBINTRAMODES
     case B_CONTEXT_PRED:
@@ -478,11 +448,9 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
       break;
 #endif
 
-    default :
-      tx_type = DCT_DCT;
-      break;
+    default:
+      return DCT_DCT;
   }
-  return tx_type;
 }
 
 extern const uint8_t vp9_block2left[TX_SIZE_MAX_SB][24];
@@ -622,16 +590,13 @@ void vp9_build_block_doffsets(MACROBLOCKD *xd);
 void vp9_setup_block_dptrs(MACROBLOCKD *xd);
 
 static void update_blockd_bmi(MACROBLOCKD *xd) {
-  int i;
-  int is_4x4;
-  is_4x4 = (xd->mode_info_context->mbmi.mode == SPLITMV) ||
-           (xd->mode_info_context->mbmi.mode == I8X8_PRED) ||
-           (xd->mode_info_context->mbmi.mode == B_PRED);
+  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
 
-  if (is_4x4) {
-    for (i = 0; i < 16; i++) {
+  if (mode == SPLITMV || mode == I8X8_PRED || mode == B_PRED) {
+    int i;
+    for (i = 0; i < 16; i++)
       xd->block[i].bmi = xd->mode_info_context->bmi[i];
-    }
   }
 }
+
 #endif  // VP9_COMMON_VP9_BLOCKD_H_

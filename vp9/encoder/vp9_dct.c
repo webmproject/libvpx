@@ -36,13 +36,14 @@ static void fdct4_1d(int16_t *input, int16_t *output) {
   output[3] = dct_const_round_shift(temp2);
 }
 
-void vp9_short_fdct4x4_c(short *input, short *output, int pitch) {
+void vp9_short_fdct4x4_c(int16_t *input, int16_t *output, int pitch) {
   int16_t out[4 * 4];
   int16_t *outptr = &out[0];
   const int short_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[4], temp_out[4];
-  // First transform cols
+
+  // Columns
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
       temp_in[j] = input[j * short_pitch + i] << 4;
@@ -52,6 +53,8 @@ void vp9_short_fdct4x4_c(short *input, short *output, int pitch) {
     for (j = 0; j < 4; ++j)
       outptr[j * 4 + i] = temp_out[j];
   }
+
+  // Rows
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
       temp_in[j] = out[j + i * 4];
@@ -101,62 +104,44 @@ static void fadst4_1d(int16_t *input, int16_t *output) {
   output[3] = dct_const_round_shift(s3);
 }
 
+static const transform_2d FHT_4[] = {
+  { fdct4_1d,  fdct4_1d  },  // DCT_DCT  = 0
+  { fadst4_1d, fdct4_1d  },  // ADST_DCT = 1
+  { fdct4_1d,  fadst4_1d },  // DCT_ADST = 2
+  { fadst4_1d, fadst4_1d }   // ADST_ADST = 3
+};
+
 void vp9_short_fht4x4_c(int16_t *input, int16_t *output,
                         int pitch, TX_TYPE tx_type) {
   int16_t out[4 * 4];
   int16_t *outptr = &out[0];
   int i, j;
   int16_t temp_in[4], temp_out[4];
+  const transform_2d ht = FHT_4[tx_type];
 
-  void (*fwdr)(int16_t*, int16_t*);
-  void (*fwdc)(int16_t*, int16_t*);
-
-  switch (tx_type) {
-    case ADST_ADST:
-      fwdc = &fadst4_1d;
-      fwdr = &fadst4_1d;
-      break;
-    case ADST_DCT:
-      fwdc = &fadst4_1d;
-      fwdr = &fdct4_1d;
-      break;
-    case DCT_ADST:
-      fwdc = &fdct4_1d;
-      fwdr = &fadst4_1d;
-      break;
-    case DCT_DCT:
-      fwdc = &fdct4_1d;
-      fwdr = &fdct4_1d;
-      break;
-    default:
-      assert(0);
-  }
-
-
-  // column transform
+  // Columns
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
       temp_in[j] = input[j * pitch + i] << 4;
     if (i == 0 && temp_in[0])
       temp_in[0] += 1;
-    fwdc(temp_in, temp_out);
+    ht.cols(temp_in, temp_out);
     for (j = 0; j < 4; ++j)
       outptr[j * 4 + i] = temp_out[j];
   }
 
-  // row transform
+  // Rows
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
       temp_in[j] = out[j + i * 4];
-    fwdr(temp_in, temp_out);
+    ht.rows(temp_in, temp_out);
     for (j = 0; j < 4; ++j)
       output[j + i * 4] = (temp_out[j] + 1) >> 2;
   }
 }
 
-void vp9_short_fdct8x4_c(short *input, short *output, int pitch)
-{
-    vp9_short_fdct4x4_c(input,   output,    pitch);
+void vp9_short_fdct8x4_c(int16_t *input, int16_t *output, int pitch) {
+    vp9_short_fdct4x4_c(input, output, pitch);
     vp9_short_fdct4x4_c(input + 4, output + 16, pitch);
 }
 
@@ -212,7 +197,7 @@ void vp9_short_fdct8x8_c(int16_t *input, int16_t *output, int pitch) {
   int16_t out[64];
   int16_t temp_in[8], temp_out[8];
 
-  // First transform columns
+  // Columns
   for (i = 0; i < 8; i++) {
     for (j = 0; j < 8; j++)
       temp_in[j] = input[j * shortpitch + i] << 2;
@@ -221,7 +206,7 @@ void vp9_short_fdct8x8_c(int16_t *input, int16_t *output, int pitch) {
       out[j * 8 + i] = temp_out[j];
   }
 
-  // Then transform rows
+  // Rows
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j)
       temp_in[j] = out[j + i * 8];
@@ -232,17 +217,16 @@ void vp9_short_fdct8x8_c(int16_t *input, int16_t *output, int pitch) {
 }
 
 static void fadst8_1d(int16_t *input, int16_t *output) {
-  int x0, x1, x2, x3, x4, x5, x6, x7;
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
-  x0 = input[7];
-  x1 = input[0];
-  x2 = input[5];
-  x3 = input[2];
-  x4 = input[3];
-  x5 = input[4];
-  x6 = input[1];
-  x7 = input[6];
+  int x0 = input[7];
+  int x1 = input[0];
+  int x2 = input[5];
+  int x3 = input[2];
+  int x4 = input[3];
+  int x5 = input[4];
+  int x6 = input[1];
+  int x7 = input[6];
 
   // stage 1
   s0 = cospi_2_64  * x0 + cospi_30_64 * x1;
@@ -303,51 +287,35 @@ static void fadst8_1d(int16_t *input, int16_t *output) {
   output[7] = - x1;
 }
 
+static const transform_2d FHT_8[] = {
+  { fdct8_1d,  fdct8_1d  },  // DCT_DCT  = 0
+  { fadst8_1d, fdct8_1d  },  // ADST_DCT = 1
+  { fdct8_1d,  fadst8_1d },  // DCT_ADST = 2
+  { fadst8_1d, fadst8_1d }   // ADST_ADST = 3
+};
+
 void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
                         int pitch, TX_TYPE tx_type) {
   int16_t out[64];
   int16_t *outptr = &out[0];
   int i, j;
   int16_t temp_in[8], temp_out[8];
+  const transform_2d ht = FHT_8[tx_type];
 
-  void (*fwdr)(int16_t*, int16_t*);
-  void (*fwdc)(int16_t*, int16_t*);
-
-  switch (tx_type) {
-    case ADST_ADST:
-      fwdc = &fadst8_1d;
-      fwdr = &fadst8_1d;
-      break;
-    case ADST_DCT:
-      fwdc = &fadst8_1d;
-      fwdr = &fdct8_1d;
-      break;
-    case DCT_ADST:
-      fwdc = &fdct8_1d;
-      fwdr = &fadst8_1d;
-      break;
-    case DCT_DCT:
-      fwdc = &fdct8_1d;
-      fwdr = &fdct8_1d;
-      break;
-    default:
-      assert(0);
-  }
-
-  // column transform
+  // Columns
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j)
       temp_in[j] = input[j * pitch + i] << 2;
-    fwdc(temp_in, temp_out);
+    ht.cols(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
       outptr[j * 8 + i] = temp_out[j];
   }
 
-  // row transform
+  // Rows
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j)
       temp_in[j] = out[j + i * 8];
-    fwdr(temp_in, temp_out);
+    ht.rows(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
       output[j + i * 8] = temp_out[j] >> 1;
   }
@@ -529,25 +497,24 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *out, int pitch) {
 }
 
 void fadst16_1d(int16_t *input, int16_t *output) {
-  int x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15;
   int s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15;
 
-  x0 = input[15];
-  x1 = input[0];
-  x2 = input[13];
-  x3 = input[2];
-  x4 = input[11];
-  x5 = input[4];
-  x6 = input[9];
-  x7 = input[6];
-  x8 = input[7];
-  x9 = input[8];
-  x10 = input[5];
-  x11 = input[10];
-  x12 = input[3];
-  x13 = input[12];
-  x14 = input[1];
-  x15 = input[14];
+  int x0 = input[15];
+  int x1 = input[0];
+  int x2 = input[13];
+  int x3 = input[2];
+  int x4 = input[11];
+  int x5 = input[4];
+  int x6 = input[9];
+  int x7 = input[6];
+  int x8 = input[7];
+  int x9 = input[8];
+  int x10 = input[5];
+  int x11 = input[10];
+  int x12 = input[3];
+  int x13 = input[12];
+  int x14 = input[1];
+  int x15 = input[14];
 
   // stage 1
   s0 = x0 * cospi_1_64  + x1 * cospi_31_64;
@@ -691,51 +658,35 @@ void fadst16_1d(int16_t *input, int16_t *output) {
   output[15] = - x1;
 }
 
+static const transform_2d FHT_16[] = {
+  { fdct16_1d,  fdct16_1d  },  // DCT_DCT  = 0
+  { fadst16_1d, fdct16_1d  },  // ADST_DCT = 1
+  { fdct16_1d,  fadst16_1d },  // DCT_ADST = 2
+  { fadst16_1d, fadst16_1d }   // ADST_ADST = 3
+};
+
 void vp9_short_fht16x16_c(int16_t *input, int16_t *output,
                           int pitch, TX_TYPE tx_type) {
   int16_t out[256];
   int16_t *outptr = &out[0];
   int i, j;
   int16_t temp_in[16], temp_out[16];
+  const transform_2d ht = FHT_16[tx_type];
 
-  void (*fwdr)(int16_t*, int16_t*);
-  void (*fwdc)(int16_t*, int16_t*);
-
-  switch (tx_type) {
-    case ADST_ADST:
-      fwdc = &fadst16_1d;
-      fwdr = &fadst16_1d;
-      break;
-    case ADST_DCT:
-      fwdc = &fadst16_1d;
-      fwdr = &fdct16_1d;
-      break;
-    case DCT_ADST:
-      fwdc = &fdct16_1d;
-      fwdr = &fadst16_1d;
-      break;
-    case DCT_DCT:
-      fwdc = &fdct16_1d;
-      fwdr = &fdct16_1d;
-      break;
-    default:
-      assert(0);
-  }
-
-  // column transform
+  // Columns
   for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j)
       temp_in[j] = input[j * pitch + i] << 2;
-    fwdc(temp_in, temp_out);
+    ht.cols(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
       outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
   }
 
-  // row transform
+  // Rows
   for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j)
       temp_in[j] = out[j + i * 16];
-    fwdr(temp_in, temp_out);
+    ht.rows(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
       output[j + i * 16] = temp_out[j];
   }
@@ -1030,8 +981,9 @@ static void dct32_1d(int *input, int *output) {
 void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
   int shortpitch = pitch >> 1;
   int i, j;
-  int output[1024];
-  // First transform columns
+  int output[32 * 32];
+
+  // Columns
   for (i = 0; i < 32; i++) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; j++)
@@ -1041,7 +993,7 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
       output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
   }
 
-  // Then transform rows
+  // Rows
   for (i = 0; i < 32; ++i) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)

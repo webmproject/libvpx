@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_IDCT_H
-#define VP9_COMMON_VP9_IDCT_H
+#ifndef VP9_COMMON_VP9_IDCT_H_
+#define VP9_COMMON_VP9_IDCT_H_
 
 #include "./vpx_config.h"
 
@@ -75,4 +75,17 @@ static INLINE int dct_32_round(int input) {
   return rv;
 }
 
-#endif
+typedef void (*transform_1d)(int16_t*, int16_t*);
+
+typedef struct {
+  transform_1d cols, rows;  // vertical and horizontal
+} transform_2d;
+
+#define ROUND_POWER_OF_TWO(value, n) (((value) + (1 << ((n) - 1))) >> (n))
+
+/* If we don't want to use ROUND_POWER_OF_TWO macro
+static INLINE int16_t round_power_of_two(int16_t value, int n) {
+  return (value + (1 << (n - 1))) >> n;
+}*/
+
+#endif  // VP9_COMMON_VP9_IDCT_H_
