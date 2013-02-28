@@ -17,8 +17,6 @@
 #include "vp9/encoder/vp9_encodeintra.h"
 
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
-  int i;
-  int intra_pred_var = 0;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   (void) cpi;
 
@@ -29,15 +27,15 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
 
     vp9_encode_intra16x16mby(x);
   } else {
+    int i;
+
     for (i = 0; i < 16; i++) {
       x->e_mbd.block[i].bmi.as_mode.first = B_DC_PRED;
       vp9_encode_intra4x4block(x, i);
     }
   }
 
-  intra_pred_var = vp9_get_mb_ss(x->src_diff);
-
-  return intra_pred_var;
+  return vp9_get_mb_ss(x->src_diff);
 }
 
 void vp9_encode_intra4x4block(MACROBLOCK *x, int ib) {
@@ -71,7 +69,6 @@ void vp9_encode_intra4x4mby(MACROBLOCK *mb) {
 
   for (i = 0; i < 16; i++)
     vp9_encode_intra4x4block(mb, i);
-  return;
 }
 
 void vp9_encode_intra16x16mby(MACROBLOCK *x) {
@@ -83,24 +80,28 @@ void vp9_encode_intra16x16mby(MACROBLOCK *x) {
 
   vp9_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
 
-  if (tx_size == TX_16X16) {
-    vp9_transform_mby_16x16(x);
-    vp9_quantize_mby_16x16(x);
-    if (x->optimize)
-      vp9_optimize_mby_16x16(x);
-    vp9_inverse_transform_mby_16x16(xd);
-  } else if (tx_size == TX_8X8) {
-    vp9_transform_mby_8x8(x);
-    vp9_quantize_mby_8x8(x);
-    if (x->optimize)
-      vp9_optimize_mby_8x8(x);
-    vp9_inverse_transform_mby_8x8(xd);
-  } else {
-    vp9_transform_mby_4x4(x);
-    vp9_quantize_mby_4x4(x);
-    if (x->optimize)
-      vp9_optimize_mby_4x4(x);
-    vp9_inverse_transform_mby_4x4(xd);
+  switch (tx_size) {
+    case TX_16X16:
+      vp9_transform_mby_16x16(x);
+      vp9_quantize_mby_16x16(x);
+      if (x->optimize)
+        vp9_optimize_mby_16x16(x);
+      vp9_inverse_transform_mby_16x16(xd);
+      break;
+    case TX_8X8:
+      vp9_transform_mby_8x8(x);
+      vp9_quantize_mby_8x8(x);
+      if (x->optimize)
+        vp9_optimize_mby_8x8(x);
+      vp9_inverse_transform_mby_8x8(xd);
+      break;
+    default:
+      vp9_transform_mby_4x4(x);
+      vp9_quantize_mby_4x4(x);
+      if (x->optimize)
+        vp9_optimize_mby_4x4(x);
+      vp9_inverse_transform_mby_4x4(xd);
+      break;
   }
 
   vp9_recon_mby(xd);
@@ -115,19 +116,22 @@ void vp9_encode_intra16x16mbuv(MACROBLOCK *x) {
   vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                     xd->predictor, x->src.uv_stride);
 
-  if (tx_size == TX_4X4) {
-    vp9_transform_mbuv_4x4(x);
-    vp9_quantize_mbuv_4x4(x);
-    if (x->optimize)
-      vp9_optimize_mbuv_4x4(x);
-    vp9_inverse_transform_mbuv_4x4(xd);
-  } else /* 16x16 or 8x8 */ {
-    vp9_transform_mbuv_8x8(x);
-    vp9_quantize_mbuv_8x8(x);
-    if (x->optimize)
-      vp9_optimize_mbuv_8x8(x);
-    vp9_inverse_transform_mbuv_8x8(xd);
-  }
+  switch (tx_size) {
+    case TX_4X4:
+      vp9_transform_mbuv_4x4(x);
+      vp9_quantize_mbuv_4x4(x);
+      if (x->optimize)
+        vp9_optimize_mbuv_4x4(x);
+      vp9_inverse_transform_mbuv_4x4(xd);
+      break;
+    default:  // 16x16 or 8x8
+      vp9_transform_mbuv_8x8(x);
+      vp9_quantize_mbuv_8x8(x);
+      if (x->optimize)
+        vp9_optimize_mbuv_8x8(x);
+      vp9_inverse_transform_mbuv_8x8(xd);
+      break;
+    }
 
   vp9_recon_intra_mbuv(xd);
 }
@@ -190,16 +194,13 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
 }
 
 void vp9_encode_intra8x8mby(MACROBLOCK *x) {
-  int i, ib;
+  int i;
 
-  for (i = 0; i < 4; i++) {
-    ib = vp9_i8x8_block[i];
-    vp9_encode_intra8x8(x, ib);
-  }
+  for (i = 0; i < 4; i++)
+    vp9_encode_intra8x8(x, vp9_i8x8_block[i]);
 }
 
-static void encode_intra_uv4x4(MACROBLOCK *x, int ib,
-                               int mode) {
+static void encode_intra_uv4x4(MACROBLOCK *x, int ib, int mode) {
   BLOCKD *b = &x->e_mbd.block[ib];
   BLOCK *be = &x->block[ib];
 
@@ -216,17 +217,13 @@ static void encode_intra_uv4x4(MACROBLOCK *x, int ib,
 }
 
 void vp9_encode_intra8x8mbuv(MACROBLOCK *x) {
-  int i, ib, mode;
-  BLOCKD *b;
+  int i;
 
   for (i = 0; i < 4; i++) {
-    ib = vp9_i8x8_block[i];
-    b = &x->e_mbd.block[ib];
-    mode = b->bmi.as_mode.first;
+    BLOCKD *b = &x->e_mbd.block[vp9_i8x8_block[i]];
+    int mode = b->bmi.as_mode.first;
 
-    /*u */
-    encode_intra_uv4x4(x, i + 16, mode);
-    /*v */
-    encode_intra_uv4x4(x, i + 20, mode);
+    encode_intra_uv4x4(x, i + 16, mode);  // u
+    encode_intra_uv4x4(x, i + 20, mode);  // v
   }
 }

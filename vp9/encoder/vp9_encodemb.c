@@ -29,9 +29,8 @@ void vp9_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   int r, c;
 
   for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++) {
+    for (c = 0; c < 4; c++)
       diff_ptr[c] = src_ptr[c] - pred_ptr[c];
-    }
 
     diff_ptr += pitch;
     pred_ptr += pitch;
@@ -47,9 +46,9 @@ void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   int r, c;
 
   for (r = 0; r < 8; r++) {
-    for (c = 0; c < 8; c++) {
+    for (c = 0; c < 8; c++)
       diff_ptr[c] = src_ptr[c] - pred_ptr[c];
-    }
+
     diff_ptr += pitch;
     pred_ptr += pitch;
     src_ptr  += src_stride;
@@ -65,9 +64,8 @@ void vp9_subtract_mbuv_s_c(int16_t *diff, const uint8_t *usrc,
   int r, c;
 
   for (r = 0; r < 8; r++) {
-    for (c = 0; c < 8; c++) {
+    for (c = 0; c < 8; c++)
       udiff[c] = usrc[c] - upred[c];
-    }
 
     udiff += 8;
     upred += dst_stride;
@@ -98,9 +96,8 @@ void vp9_subtract_mby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
   int r, c;
 
   for (r = 0; r < 16; r++) {
-    for (c = 0; c < 16; c++) {
+    for (c = 0; c < 16; c++)
       diff[c] = src[c] - pred[c];
-    }
 
     diff += 16;
     pred += dst_stride;
@@ -113,9 +110,8 @@ void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
   int r, c;
 
   for (r = 0; r < 32; r++) {
-    for (c = 0; c < 32; c++) {
+    for (c = 0; c < 32; c++)
       diff[c] = src[c] - pred[c];
-    }
 
     diff += 32;
     pred += dst_stride;
@@ -132,9 +128,8 @@ void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
   int r, c;
 
   for (r = 0; r < 16; r++) {
-    for (c = 0; c < 16; c++) {
+    for (c = 0; c < 16; c++)
       udiff[c] = usrc[c] - upred[c];
-    }
 
     udiff += 16;
     upred += dst_stride;
@@ -142,9 +137,8 @@ void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
   }
 
   for (r = 0; r < 16; r++) {
-    for (c = 0; c < 16; c++) {
+    for (c = 0; c < 16; c++)
       vdiff[c] = vsrc[c] - vpred[c];
-    }
 
     vdiff += 16;
     vpred += dst_stride;
@@ -176,12 +170,10 @@ void vp9_transform_mby_4x4(MACROBLOCK *x) {
     if (tx_type != DCT_DCT) {
       vp9_short_fht4x4(b->src_diff, b->coeff, 16, tx_type);
     } else if (!(i & 1) && get_tx_type_4x4(xd, &xd->block[i + 1]) == DCT_DCT) {
-      x->fwd_txm8x4(&x->block[i].src_diff[0],
-                           &x->block[i].coeff[0], 32);
+      x->fwd_txm8x4(x->block[i].src_diff, x->block[i].coeff, 32);
       i++;
     } else {
-      x->fwd_txm4x4(&x->block[i].src_diff[0],
-                           &x->block[i].coeff[0], 32);
+      x->fwd_txm4x4(x->block[i].src_diff, x->block[i].coeff, 32);
     }
   }
 }
@@ -189,10 +181,8 @@ void vp9_transform_mby_4x4(MACROBLOCK *x) {
 void vp9_transform_mbuv_4x4(MACROBLOCK *x) {
   int i;
 
-  for (i = 16; i < 24; i += 2) {
-    x->fwd_txm8x4(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 16);
-  }
+  for (i = 16; i < 24; i += 2)
+    x->fwd_txm8x4(x->block[i].src_diff, x->block[i].coeff, 16);
 }
 
 static void transform_mb_4x4(MACROBLOCK *x) {
@@ -211,8 +201,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
     if (tx_type != DCT_DCT) {
       vp9_short_fht8x8(b->src_diff, b->coeff, 16, tx_type);
     } else {
-      x->fwd_txm8x8(&x->block[i].src_diff[0],
-                           &x->block[i].coeff[0], 32);
+      x->fwd_txm8x8(x->block[i].src_diff, x->block[i].coeff, 32);
     }
   }
   for (i = 2; i < 11; i += 8) {
@@ -221,8 +210,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
     if (tx_type != DCT_DCT) {
       vp9_short_fht8x8(b->src_diff, (b + 2)->coeff, 16, tx_type);
     } else {
-      x->fwd_txm8x8(&x->block[i].src_diff[0],
-                           &x->block[i + 2].coeff[0], 32);
+      x->fwd_txm8x8(x->block[i].src_diff, x->block[i + 2].coeff, 32);
     }
   }
 }
@@ -230,10 +218,8 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
 void vp9_transform_mbuv_8x8(MACROBLOCK *x) {
   int i;
 
-  for (i = 16; i < 24; i += 4) {
-    x->fwd_txm8x8(&x->block[i].src_diff[0],
-                         &x->block[i].coeff[0], 16);
-  }
+  for (i = 16; i < 24; i += 4)
+    x->fwd_txm8x8(x->block[i].src_diff, x->block[i].coeff, 16);
 }
 
 void vp9_transform_mb_8x8(MACROBLOCK *x) {
@@ -249,8 +235,7 @@ void vp9_transform_mby_16x16(MACROBLOCK *x) {
   if (tx_type != DCT_DCT) {
     vp9_short_fht16x16(b->src_diff, b->coeff, 16, tx_type);
   } else {
-    x->fwd_txm16x16(&x->block[0].src_diff[0],
-                           &x->block[0].coeff[0], 32);
+    x->fwd_txm16x16(x->block[0].src_diff, x->block[0].coeff, 32);
   }
 }
 
@@ -267,10 +252,8 @@ void vp9_transform_sby_32x32(MACROBLOCK *x) {
 void vp9_transform_sbuv_16x16(MACROBLOCK *x) {
   SUPERBLOCK * const x_sb = &x->sb_coeff_data;
   vp9_clear_system_state();
-  x->fwd_txm16x16(x_sb->src_diff + 1024,
-                         x_sb->coeff + 1024, 32);
-  x->fwd_txm16x16(x_sb->src_diff + 1280,
-                         x_sb->coeff + 1280, 32);
+  x->fwd_txm16x16(x_sb->src_diff + 1024, x_sb->coeff + 1024, 32);
+  x->fwd_txm16x16(x_sb->src_diff + 1280, x_sb->coeff + 1280, 32);
 }
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )

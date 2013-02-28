@@ -45,7 +45,7 @@
 int enc_debug = 0;
 #endif
 
-extern void select_interp_filter_type(VP9_COMP *cpi);
+void vp9_select_interp_filter_type(VP9_COMP *cpi);
 
 static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
                               int output_enabled, int mb_row, int mb_col);
@@ -100,7 +100,7 @@ static unsigned int tt_activity_measure(VP9_COMP *cpi, MACROBLOCK *x) {
    */
   act = vp9_variance16x16(x->src.y_buffer, x->src.y_stride, VP9_VAR_OFFS, 0,
                           &sse);
-  act = act << 4;
+  act <<= 4;
 
   /* If the region is flat, lower the activity some more. */
   if (act < 8 << 12)
@@ -882,13 +882,10 @@ static void pick_sb64_modes(VP9_COMP *cpi,
   /* Find best coding mode & reconstruct the MB so it is available
    * as a predictor for MBs that follow in the SB */
   if (cm->frame_type == KEY_FRAME) {
-    vp9_rd_pick_intra_mode_sb64(cpi, x,
-                                totalrate,
-                                totaldist);
+    vp9_rd_pick_intra_mode_sb64(cpi, x, totalrate, totaldist);
 
     /* Save the coding context */
-    vpx_memcpy(&x->sb64_context.mic, xd->mode_info_context,
-               sizeof(MODE_INFO));
+    vpx_memcpy(&x->sb64_context.mic, xd->mode_info_context, sizeof(MODE_INFO));
   } else {
     vp9_rd_pick_inter_mode_sb64(cpi, x, mb_row, mb_col, totalrate, totaldist);
   }
@@ -1221,9 +1218,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vpx_memset(cm->above_context, 0,
              sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
 
-  xd->fullpixel_mask = 0xffffffff;
-  if (cm->full_pixel)
-    xd->fullpixel_mask = 0xfffffff8;
+  xd->fullpixel_mask = cm->full_pixel ? 0xfffffff8 : 0xffffffff;
 }
 
 static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
@@ -1421,9 +1416,8 @@ static void set_txfm_flag(MODE_INFO *mi, int mis, int ymbs, int xmbs,
   int x, y;
 
   for (y = 0; y < ymbs; y++) {
-    for (x = 0; x < xmbs; x++) {
+    for (x = 0; x < xmbs; x++)
       mi[y * mis + x].mbmi.txfm_size = txfm_size;
-    }
   }
 }
 
@@ -1678,7 +1672,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
     // Update interpolation filter strategy for next frame.
     if ((cpi->common.frame_type != KEY_FRAME) && (cpi->sf.search_best_filter))
-      select_interp_filter_type(cpi);
+      vp9_select_interp_filter_type(cpi);
   } else {
     encode_frame_internal(cpi);
   }
@@ -1690,27 +1684,23 @@ void vp9_setup_block_ptrs(MACROBLOCK *x) {
   int i;
 
   for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++) {
+    for (c = 0; c < 4; c++)
       x->block[r * 4 + c].src_diff = x->src_diff + r * 4 * 16 + c * 4;
-    }
   }
 
   for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++) {
+    for (c = 0; c < 2; c++)
       x->block[16 + r * 2 + c].src_diff = x->src_diff + 256 + r * 4 * 8 + c * 4;
-    }
   }
 
 
   for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++) {
+    for (c = 0; c < 2; c++)
       x->block[20 + r * 2 + c].src_diff = x->src_diff + 320 + r * 4 * 8 + c * 4;
-    }
   }
 
-  for (i = 0; i < 24; i++) {
+  for (i = 0; i < 24; i++)
     x->block[i].coeff = x->coeff + i * 16;
-  }
 }
 
 void vp9_build_block_offsets(MACROBLOCK *x) {

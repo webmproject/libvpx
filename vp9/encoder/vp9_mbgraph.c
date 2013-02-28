@@ -29,7 +29,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   BLOCKD *d = &xd->block[0];
   vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
   unsigned int best_err;
-  int step_param;
+
 
   int tmp_col_min = x->mv_col_min;
   int tmp_col_max = x->mv_col_max;
@@ -38,11 +38,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   int_mv ref_full;
 
   // Further step/diamond searches as necessary
-  if (cpi->Speed < 8) {
-    step_param = cpi->sf.first_step + ((cpi->Speed > 5) ? 1 : 0);
-  } else {
-    step_param = cpi->sf.first_step + 2;
-  }
+  int step_param = cpi->sf.first_step +
+      (cpi->Speed < 8 ? (cpi->Speed > 5 ? 1 : 0) : 2);
 
   vp9_clamp_mv_min_max(x, ref_mv);
 
@@ -438,10 +435,7 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
   vpx_free(arf_not_zz);
 }
 
-void vp9_update_mbgraph_stats
-(
-  VP9_COMP *cpi
-) {
+void vp9_update_mbgraph_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int i, n_frames = vp9_lookahead_depth(cpi->lookahead);
   YV12_BUFFER_CONFIG *golden_ref =
