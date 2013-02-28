@@ -1695,8 +1695,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   if ((cpi->twopass.kf_group_bits > 0) &&
       (cpi->twopass.kf_group_error_left > 0)) {
     cpi->twopass.gf_group_bits =
-      (int)((double)cpi->twopass.kf_group_bits *
-            (gf_group_err / cpi->twopass.kf_group_error_left));
+      (int64_t)(cpi->twopass.kf_group_bits *
+                (gf_group_err / cpi->twopass.kf_group_error_left));
   } else
     cpi->twopass.gf_group_bits = 0;
 

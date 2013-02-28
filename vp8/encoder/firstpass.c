@@ -2118,17 +2118,17 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         (cpi->twopass.kf_group_error_left > 0))
     {
         cpi->twopass.gf_group_bits =
-            (int)((double)cpi->twopass.kf_group_bits *
-                  (gf_group_err / (double)cpi->twopass.kf_group_error_left));
+            (int64_t)(cpi->twopass.kf_group_bits *
+                      (gf_group_err / cpi->twopass.kf_group_error_left));
     }
     else
         cpi->twopass.gf_group_bits = 0;
 
-    cpi->twopass.gf_group_bits = (int)(
+    cpi->twopass.gf_group_bits =
         (cpi->twopass.gf_group_bits < 0)
             ? 0
             : (cpi->twopass.gf_group_bits > cpi->twopass.kf_group_bits)
-                ? cpi->twopass.kf_group_bits : cpi->twopass.gf_group_bits);
+                ? cpi->twopass.kf_group_bits : cpi->twopass.gf_group_bits;
 
     /* Clip cpi->twopass.gf_group_bits based on user supplied data rate
      * variability limit (cpi->oxcf.two_pass_vbrmax_section)
@@ -2450,7 +2450,7 @@ void vp8_second_pass(VP8_COMP *cpi)
          */
         if (cpi->oxcf.error_resilient_mode)
         {
-            cpi->twopass.gf_group_bits = (int)cpi->twopass.kf_group_bits;
+            cpi->twopass.gf_group_bits = cpi->twopass.kf_group_bits;
             cpi->twopass.gf_group_error_left =
                                   (int)cpi->twopass.kf_group_error_left;
             cpi->baseline_gf_interval = cpi->twopass.frames_to_key;
