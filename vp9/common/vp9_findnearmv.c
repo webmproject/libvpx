@@ -190,7 +190,11 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
       col_offset = this_mv.as_mv.col >> 3;
       offset = ref_y_stride * row_offset + col_offset;
       score = 0;
+#if !CONFIG_ABOVESPREFMV
       if (xd->up_available) {
+#else
+      if (xd->up_available && xd->left_available) {
+#endif
         vp9_sub_pixel_variance16x2(above_ref + offset, ref_y_stride,
                                    SP(this_mv.as_mv.col),
                                    SP(this_mv.as_mv.row),
