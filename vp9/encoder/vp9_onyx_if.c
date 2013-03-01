@@ -2538,7 +2538,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
 }
 
-void select_interp_filter_type(VP9_COMP *cpi) {
+void vp9_select_interp_filter_type(VP9_COMP *cpi) {
   int i;
   int high_filter_index = 0;
   unsigned int thresh;
