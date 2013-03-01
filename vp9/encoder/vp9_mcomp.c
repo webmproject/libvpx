@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <stdio.h>
+#include <limits.h>
+#include <math.h>
 
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vpx_mem/vpx_mem.h"
 #include "./vpx_config.h"
-#include <stdio.h>
-#include <limits.h>
-#include <math.h>
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_common.h"
 
@@ -39,21 +39,20 @@ void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
 }
 
 int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
-                    int Weight, int ishp) {
+                    int weight, int ishp) {
   MV v;
-  v.row = (mv->as_mv.row - ref->as_mv.row);
-  v.col = (mv->as_mv.col - ref->as_mv.col);
+  v.row = mv->as_mv.row - ref->as_mv.row;
+  v.col = mv->as_mv.col - ref->as_mv.col;
   return ((mvjcost[vp9_get_mv_joint(v)] +
-           mvcost[0][v.row] + mvcost[1][v.col]) *
-          Weight) >> 7;
+           mvcost[0][v.row] + mvcost[1][v.col]) * weight) >> 7;
 }
 
 static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
                        int error_per_bit, int ishp) {
   if (mvcost) {
     MV v;
-    v.row = (mv->as_mv.row - ref->as_mv.row);
-    v.col = (mv->as_mv.col - ref->as_mv.col);
+    v.row = mv->as_mv.row - ref->as_mv.row;
+    v.col = mv->as_mv.col - ref->as_mv.col;
     return ((mvjcost[vp9_get_mv_joint(v)] +
              mvcost[0][v.row] + mvcost[1][v.col]) *
             error_per_bit + 128) >> 8;
@@ -63,11 +62,10 @@ static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
 
 static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvjsadcost,
                           int *mvsadcost[2], int error_per_bit) {
-
   if (mvsadcost) {
     MV v;
-    v.row = (mv->as_mv.row - ref->as_mv.row);
-    v.col = (mv->as_mv.col - ref->as_mv.col);
+    v.row = mv->as_mv.row - ref->as_mv.row;
+    v.col = mv->as_mv.col - ref->as_mv.col;
     return ((mvjsadcost[vp9_get_mv_joint(v)] +
              mvsadcost[0][v.row] + mvsadcost[1][v.col]) *
             error_per_bit + 128) >> 8;
@@ -76,45 +74,39 @@ static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvjsadcost,
 }
 
 void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride) {
-  int Len;
+  int len;
   int search_site_count = 0;
 
-
   // Generate offsets for 4 search sites per step.
-  Len = MAX_FIRST_STEP;
   x->ss[search_site_count].mv.col = 0;
   x->ss[search_site_count].mv.row = 0;
   x->ss[search_site_count].offset = 0;
   search_site_count++;
 
-  while (Len > 0) {
+  for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
+    // Compute offsets for search sites.
+    x->ss[search_site_count].mv.col = 0;
+    x->ss[search_site_count].mv.row = -len;
+    x->ss[search_site_count].offset = -len * stride;
+    search_site_count++;
 
     // Compute offsets for search sites.
     x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = -Len;
-    x->ss[search_site_count].offset = -Len * stride;
+    x->ss[search_site_count].mv.row = len;
+    x->ss[search_site_count].offset = len * stride;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = Len;
-    x->ss[search_site_count].offset = Len * stride;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -Len;
+    x->ss[search_site_count].mv.col = -len;
     x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = -Len;
+    x->ss[search_site_count].offset = -len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = Len;
+    x->ss[search_site_count].mv.col = len;
     x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = Len;
+    x->ss[search_site_count].offset = len;
     search_site_count++;
-
-    // Contract.
-    Len /= 2;
   }
 
   x->ss_count = search_site_count;
@@ -122,68 +114,63 @@ void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride) {
 }
 
 void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
-  int Len;
+  int len;
   int search_site_count = 0;
 
   // Generate offsets for 8 search sites per step.
-  Len = MAX_FIRST_STEP;
   x->ss[search_site_count].mv.col = 0;
   x->ss[search_site_count].mv.row = 0;
   x->ss[search_site_count].offset = 0;
   search_site_count++;
 
-  while (Len > 0) {
+  for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
+    // Compute offsets for search sites.
+    x->ss[search_site_count].mv.col = 0;
+    x->ss[search_site_count].mv.row = -len;
+    x->ss[search_site_count].offset = -len * stride;
+    search_site_count++;
 
     // Compute offsets for search sites.
     x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = -Len;
-    x->ss[search_site_count].offset = -Len * stride;
+    x->ss[search_site_count].mv.row = len;
+    x->ss[search_site_count].offset = len * stride;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = Len;
-    x->ss[search_site_count].offset = Len * stride;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -Len;
+    x->ss[search_site_count].mv.col = -len;
     x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = -Len;
+    x->ss[search_site_count].offset = -len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = Len;
+    x->ss[search_site_count].mv.col = len;
     x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = Len;
+    x->ss[search_site_count].offset = len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -Len;
-    x->ss[search_site_count].mv.row = -Len;
-    x->ss[search_site_count].offset = -Len * stride - Len;
+    x->ss[search_site_count].mv.col = -len;
+    x->ss[search_site_count].mv.row = -len;
+    x->ss[search_site_count].offset = -len * stride - len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = Len;
-    x->ss[search_site_count].mv.row = -Len;
-    x->ss[search_site_count].offset = -Len * stride + Len;
+    x->ss[search_site_count].mv.col = len;
+    x->ss[search_site_count].mv.row = -len;
+    x->ss[search_site_count].offset = -len * stride + len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -Len;
-    x->ss[search_site_count].mv.row = Len;
-    x->ss[search_site_count].offset = Len * stride - Len;
+    x->ss[search_site_count].mv.col = -len;
+    x->ss[search_site_count].mv.row = len;
+    x->ss[search_site_count].offset = len * stride - len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = Len;
-    x->ss[search_site_count].mv.row = Len;
-    x->ss[search_site_count].offset = Len * stride + Len;
+    x->ss[search_site_count].mv.col = len;
+    x->ss[search_site_count].mv.row = len;
+    x->ss[search_site_count].offset = len * stride + len;
     search_site_count++;
-
-    // Contract.
-    Len /= 2;
   }
 
   x->ss_count = search_site_count;
@@ -2018,12 +2005,10 @@ int vp9_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
   for (i = 0; i < search_range; i++) {
     int best_site = -1;
-    int all_in = 1;
-
-    all_in &= ((ref_mv->as_mv.row - 1) > x->mv_row_min);
-    all_in &= ((ref_mv->as_mv.row + 1) < x->mv_row_max);
-    all_in &= ((ref_mv->as_mv.col - 1) > x->mv_col_min);
-    all_in &= ((ref_mv->as_mv.col + 1) < x->mv_col_max);
+    int all_in = ((ref_mv->as_mv.row - 1) > x->mv_row_min) &
+                 ((ref_mv->as_mv.row + 1) < x->mv_row_max) &
+                 ((ref_mv->as_mv.col - 1) > x->mv_col_min) &
+                 ((ref_mv->as_mv.col + 1) < x->mv_col_max);
 
     if (all_in) {
       unsigned int sad_array[4];
