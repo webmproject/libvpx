@@ -16,6 +16,24 @@
       "revId": "82791f76212b3f904dff729ee80821739efbc0d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///+I\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1074,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-03-01T14:51:28Z",
+      "side": 1,
+      "message": "You are correct, this is a bit too hackish.. hope that the fixed initialization feels better.",
+      "parentUuid": "AAAAVH//ZvI\u003d",
+      "revId": "82791f76212b3f904dff729ee80821739efbc0d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
