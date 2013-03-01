@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVH//ZvI\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1074,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-03-01T00:40:17Z",
+      "side": 1,
+      "message": "There is a discontinuity in this calculation:\noutput_frame_rate\u003d49 \u003d\u003d\u003e max_gf_interval\u003d26,\noutput_frame_rate\u003d50 \u003d\u003d\u003e max_gf_interval\u003d14\nShould we at least ensure the calculation produces monotonic output?",
+      "revId": "82791f76212b3f904dff729ee80821739efbc0d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
