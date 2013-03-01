@@ -281,6 +281,9 @@ specialize vp9_short_idct32x32
 prototype void vp9_short_idct1_32x32 "int16_t *input, int16_t *output"
 specialize vp9_short_idct1_32x32
 
+prototype void vp9_short_idct10_32x32 "int16_t *input, int16_t *output, int pitch"
+specialize vp9_short_idct10_32x32
+
 prototype void vp9_short_iht8x8 "int16_t *input, int16_t *output, int pitch, int tx_type"
 specialize vp9_short_iht8x8
 

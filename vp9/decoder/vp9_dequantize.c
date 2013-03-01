@@ -314,14 +314,34 @@ void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
   if (eob) {
     input[0] = input[0] * dq[0] / 2;
     if (eob == 1) {
-      vp9_short_idct1_32x32_c(input, output);
+      vp9_short_idct1_32x32(input, output);
       add_constant_residual(output[0], pred, pitch, dest, stride, 32, 32);
       input[0] = 0;
+    } else if (eob <= 10) {
+      input[1] = input[1] * dq[1] / 2;
+      input[2] = input[2] * dq[1] / 2;
+      input[3] = input[3] * dq[1] / 2;
+      input[32] = input[32] * dq[1] / 2;
+      input[33] = input[33] * dq[1] / 2;
+      input[34] = input[34] * dq[1] / 2;
+      input[64] = input[64] * dq[1] / 2;
+      input[65] = input[65] * dq[1] / 2;
+      input[96] = input[96] * dq[1] / 2;
+
+      // the idct halves ( >> 1) the pitch
+      vp9_short_idct10_32x32(input, output, 64);
+
+      input[0] = input[1] = input[2] = input[3] = 0;
+      input[32] = input[33] = input[34] = 0;
+      input[64] = input[65] = 0;
+      input[96] = 0;
+
+      add_residual(output, pred, pitch, dest, stride, 32, 32);
     } else {
       int i;
       for (i = 1; i < 1024; i++)
         input[i] = input[i] * dq[1] / 2;
-      vp9_short_idct32x32_c(input, output, 64);
+      vp9_short_idct32x32(input, output, 64);
       vpx_memset(input, 0, 2048);
       add_residual(output, pred, pitch, dest, stride, 32, 32);
     }
