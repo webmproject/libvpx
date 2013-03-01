@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVX///ls\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-03-01T20:41:25Z",
+      "side": 1,
+      "message": "ASSERT_TRUE or preferably an ASSERT_GE/LE pair",
+      "revId": "e0957d0cd51cc2be658ece1b8b6de1da24d5efad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
