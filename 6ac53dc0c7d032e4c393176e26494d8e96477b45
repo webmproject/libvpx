@@ -1,0 +1,378 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVX///YI\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "so, the row check here is inconsistent with other checks in the codec; that is, for all other contextual elements (e.g. the skip flag, segment id, etc), context elements should not cross column boundaries, but it\u0027s fine for them to cross row boundaries. It\u0027s inconsistent to do differently for nzcs.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///YA\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "if the m was tx32x32 and in this tile, and mb_row/col was odd, then the topright m of that sb must be in this tile also (otherwise you\u0027d have a 32x32 tx crossing a sb boundary), so this mb_in_cur_tile check isn\u0027t necessary.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///Xs\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "see above",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///XA\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 550,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "so this is (in number of non-zero coefficients in a 32x32 tx block) 512-1024: 2, 64-511: 1, 0-63: 0? Maybe add that as a comment. Also, in 4x4 language: 0: 0, 1-7: 1, 8-15: 2.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///W0\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "are set_mb_row and set_mb_col ever not used together? If not, maybe merge them.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///Ws\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1578,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "remove debug printf?",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///WU\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "remove commented out code here",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///WQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1005,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "remove commented out code here",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///WM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1078,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "why are the counts commented out? I suppose they\u0027re done inline with the tokenization itself now? In that case, let\u0027s remove the counting here.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///WI\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1420,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "remove commented out code",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///WE\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2416,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "remove commented out code?",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///V8\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2429,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "cosmetic stray change.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///V4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "indentation is off here.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///V0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 964,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "cosmetic stray change (this one will make dimitry unhappy).",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///Vo\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1347,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "so - why do we need to do the tile row thing here? The part where we _don\u0027t_ do it is by design; that is, tile rows are not independent.\n\nI don\u0027t mind putting this loop here, it doesn\u0027t really hurt or help in any way, but it allows for dangerous things like doing tile row context boundary checks, which are not done by design. I can explain this further outside this review, but if the only point of adding this loop is to be able to do tile row boundary checks, then I suggest we remove it.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///Vk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1367,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "indentation is off.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///VM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2198,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "This is redundant (I think), tokenize_mb already sets this. Plus, you set it again in line 2347.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///VQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2248,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "redundant, already set in line 2347.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///VI\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "int.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///VE\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "int",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///VA\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "int",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX///U8\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-01T23:35:22Z",
+      "side": 1,
+      "message": "int",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
