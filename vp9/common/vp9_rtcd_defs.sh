@@ -470,25 +470,25 @@ specialize vp9_sad8x8x8 sse4
 prototype void vp9_sad4x4x8 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array"
 specialize vp9_sad4x4x8 sse4
 
-prototype void vp9_sad64x64x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t **ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad64x64x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad64x64x4d sse2
 
-prototype void vp9_sad32x32x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t **ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad32x32x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad32x32x4d sse2
 
-prototype void vp9_sad16x16x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t **ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad16x16x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad16x16x4d sse2
 
-prototype void vp9_sad16x8x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t **ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad16x8x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad16x8x4d sse2
 
-prototype void vp9_sad8x16x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t **ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad8x16x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad8x16x4d sse2
 
-prototype void vp9_sad8x8x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t **ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad8x8x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad8x8x4d sse2
 
-prototype void vp9_sad4x4x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t **ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp9_sad4x4x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad4x4x4d sse
 prototype unsigned int vp9_sub_pixel_mse16x16 "const uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, const uint8_t *dst_ptr, int dst_pixels_per_line, unsigned int *sse"
 specialize vp9_sub_pixel_mse16x16 sse2 mmx
