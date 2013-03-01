@@ -565,7 +565,7 @@ static void decode_4x4_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
 };
 
 static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
-                                int mb_row, unsigned int mb_col,
+                                int mb_row, int mb_col,
                                 BOOL_DECODER* const bc) {
   int n, eobtotal;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
@@ -688,7 +688,7 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
 }
 
 static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
-                                int mb_row, unsigned int mb_col,
+                                int mb_row, int mb_col,
                                 BOOL_DECODER* const bc) {
   int n, eobtotal;
   TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;

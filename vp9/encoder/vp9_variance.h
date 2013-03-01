@@ -63,7 +63,7 @@ typedef unsigned int (*vp9_get16x16prederror_fn_t)(const uint8_t *src_ptr,
                                                    const uint8_t *ref_ptr,
                                                    int  ref_stride);
 
-typedef struct variance_vtable {
+typedef struct vp9_variance_vtable {
     vp9_sad_fn_t            sdf;
     vp9_variance_fn_t       vf;
     vp9_subpixvariance_fn_t svf;

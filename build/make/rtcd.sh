@@ -59,13 +59,13 @@ for f in $defs_file; do [ -f "$f" ] || usage; done
 # Routines for the RTCD DSL to call
 #
 prototype() {
-  local rtyp
+  rtyp=""
   case "$1" in
     unsigned) rtyp="$1 "; shift;;
   esac
   rtyp="${rtyp}$1"
-  local fn="$2"
-  local args="$3"
+  fn="$2"
+  args="$3"
 
   eval "${2}_rtyp='$rtyp'"
   eval "${2}_args='$3'"
@@ -74,7 +74,7 @@ prototype() {
 }
 
 specialize() {
-  local fn="$1"
+  fn="$1"
   shift
   for opt in "$@"; do
     eval "${fn}_${opt}=${fn}_${opt}"
@@ -84,13 +84,13 @@ specialize() {
 require() {
   for fn in $ALL_FUNCS; do
     for opt in "$@"; do
-      local ofn=$(eval "echo \$${fn}_${opt}")
+      ofn=$(eval "echo \$${fn}_${opt}")
       [ -z "$ofn" ] && continue
 
       # if we already have a default, then we can disable it, as we know
       # we can do better.
-      local best=$(eval "echo \$${fn}_default")
-      local best_ofn=$(eval "echo \$${best}")
+      best=$(eval "echo \$${fn}_default")
+      best_ofn=$(eval "echo \$${best}")
       [ -n "$best" ] && [ "$best_ofn" != "$ofn" ] && eval "${best}_link=false"
       eval "${fn}_default=${fn}_${opt}"
       eval "${fn}_${opt}_link=true"
@@ -121,15 +121,15 @@ process_forward_decls() {
 determine_indirection() {
   [ "$CONFIG_RUNTIME_CPU_DETECT" = "yes" ] || require $ALL_ARCHS
   for fn in $ALL_FUNCS; do
-    local n=""
-    local rtyp="$(eval "echo \$${fn}_rtyp")"
-    local args="$(eval "echo \"\$${fn}_args\"")"
-    local dfn="$(eval "echo \$${fn}_default")"
+    n=""
+    rtyp="$(eval "echo \$${fn}_rtyp")"
+    args="$(eval "echo \"\$${fn}_args\"")"
+    dfn="$(eval "echo \$${fn}_default")"
     dfn=$(eval "echo \$${dfn}")
     for opt in "$@"; do
-      local ofn=$(eval "echo \$${fn}_${opt}")
+      ofn=$(eval "echo \$${fn}_${opt}")
       [ -z "$ofn" ] && continue
-      local link=$(eval "echo \$${fn}_${opt}_link")
+      link=$(eval "echo \$${fn}_${opt}_link")
       [ "$link" = "false" ] && continue
       n="${n}x"
     done
@@ -143,12 +143,12 @@ determine_indirection() {
 
 declare_function_pointers() {
   for fn in $ALL_FUNCS; do
-    local rtyp="$(eval "echo \$${fn}_rtyp")"
-    local args="$(eval "echo \"\$${fn}_args\"")"
-    local dfn="$(eval "echo \$${fn}_default")"
+    rtyp="$(eval "echo \$${fn}_rtyp")"
+    args="$(eval "echo \"\$${fn}_args\"")"
+    dfn="$(eval "echo \$${fn}_default")"
     dfn=$(eval "echo \$${dfn}")
     for opt in "$@"; do
-      local ofn=$(eval "echo \$${fn}_${opt}")
+      ofn=$(eval "echo \$${fn}_${opt}")
       [ -z "$ofn" ] && continue
       echo "$rtyp ${ofn}($args);"
     done
@@ -163,20 +163,20 @@ declare_function_pointers() {
 
 set_function_pointers() {
   for fn in $ALL_FUNCS; do
-    local n=""
-    local rtyp="$(eval "echo \$${fn}_rtyp")"
-    local args="$(eval "echo \"\$${fn}_args\"")"
-    local dfn="$(eval "echo \$${fn}_default")"
+    n=""
+    rtyp="$(eval "echo \$${fn}_rtyp")"
+    args="$(eval "echo \"\$${fn}_args\"")"
+    dfn="$(eval "echo \$${fn}_default")"
     dfn=$(eval "echo \$${dfn}")
     if $(eval "echo \$${fn}_indirect"); then
       echo "    $fn = $dfn;"
       for opt in "$@"; do
-        local ofn=$(eval "echo \$${fn}_${opt}")
+        ofn=$(eval "echo \$${fn}_${opt}")
         [ -z "$ofn" ] && continue
         [ "$ofn" = "$dfn" ] && continue;
-        local link=$(eval "echo \$${fn}_${opt}_link")
+        link=$(eval "echo \$${fn}_${opt}_link")
         [ "$link" = "false" ] && continue
-        local cond="$(eval "echo \$have_${opt}")"
+        cond="$(eval "echo \$have_${opt}")"
         echo "    if (${cond}) $fn = $ofn;"
       done
     fi
@@ -185,7 +185,7 @@ set_function_pointers() {
 }
 
 filter() {
-  local filtered
+  filtered=""
   for opt in "$@"; do
     [ -z $(eval "echo \$disable_${opt}") ] && filtered="$filtered $opt"
   done
@@ -196,8 +196,9 @@ filter() {
 # Helper functions for generating the arch specific RTCD files
 #
 common_top() {
-  local outfile_basename=$(basename ${symbol:-rtcd.h})
-  local include_guard=$(echo $outfile_basename | tr '[a-z]' '[A-Z]' | tr -c '[A-Z]' _)
+  outfile_basename=$(basename ${symbol:-rtcd})
+  include_guard=$(echo $outfile_basename | tr '[a-z]' '[A-Z]' | \
+    tr -c '[A-Z0-9]' _)H_
   cat <<EOF
 #ifndef ${include_guard}
 #define ${include_guard}
@@ -227,7 +228,7 @@ x86() {
 
   # Assign the helper variable for each enabled extension
   for opt in $ALL_ARCHS; do
-    local uc=$(echo $opt | tr '[a-z]' '[A-Z]')
+    uc=$(echo $opt | tr '[a-z]' '[A-Z]')
     eval "have_${opt}=\"flags & HAS_${uc}\""
   done
 
@@ -254,7 +255,7 @@ arm() {
 
   # Assign the helper variable for each enabled extension
   for opt in $ALL_ARCHS; do
-    local uc=$(echo $opt | tr '[a-z]' '[A-Z]')
+    uc=$(echo $opt | tr '[a-z]' '[A-Z]')
     eval "have_${opt}=\"flags & HAS_${uc}\""
   done
 

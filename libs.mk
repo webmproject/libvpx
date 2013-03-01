@@ -17,7 +17,6 @@ else
   ASM:=.asm
 endif
 
-
 #
 # Calculate platform- and compiler-specific offsets for hand coded assembly
 #
@@ -167,7 +166,9 @@ CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emmintrin_compat.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_once.h
 CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
 INSTALL-SRCS-no += $(BUILD_PFX)vpx_config.c
+ifeq ($(ARCH_X86)$(ARCH_X86_64),yes)
 CODEC_SRCS-$(BUILD_LIBVPX) += third_party/x86inc/x86inc.asm
+endif
 CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
@@ -221,7 +222,6 @@ obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
     -I"$(SRC_PATH_BARE)" \
 
 PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.vcproj
-PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.bat
 
 vpx.def: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
@@ -325,7 +325,11 @@ vpx.pc: config.mk libs.mk
 	$(qexec)echo 'Requires:' >> $@
 	$(qexec)echo 'Conflicts:' >> $@
 	$(qexec)echo 'Libs: -L$${libdir} -lvpx -lm' >> $@
+ifeq ($(HAVE_PTHREAD_H),yes)
 	$(qexec)echo 'Libs.private: -lm -lpthread' >> $@
+else
+	$(qexec)echo 'Libs.private: -lm' >> $@
+endif
 	$(qexec)echo 'Cflags: -I$${includedir}' >> $@
 INSTALL-LIBS-yes += $(LIBSUBDIR)/pkgconfig/vpx.pc
 INSTALL_MAPS += $(LIBSUBDIR)/pkgconfig/%.pc %.pc
@@ -373,7 +377,7 @@ LIBVPX_TEST_DATA_PATH ?= .
 
 include $(SRC_PATH_BARE)/test/test.mk
 LIBVPX_TEST_SRCS=$(addprefix test/,$(call enabled,LIBVPX_TEST_SRCS))
-LIBVPX_TEST_BINS=./test_libvpx
+LIBVPX_TEST_BINS=./test_libvpx$(EXE_SFX)
 LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
                      $(call enabled,LIBVPX_TEST_DATA))
 libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)

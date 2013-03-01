@@ -106,6 +106,7 @@ all_platforms="${all_platforms} ppc64-darwin8-gcc"
 all_platforms="${all_platforms} ppc64-darwin9-gcc"
 all_platforms="${all_platforms} ppc64-linux-gcc"
 all_platforms="${all_platforms} sparc-solaris-gcc"
+all_platforms="${all_platforms} x86-android-gcc"
 all_platforms="${all_platforms} x86-darwin8-gcc"
 all_platforms="${all_platforms} x86-darwin8-icc"
 all_platforms="${all_platforms} x86-darwin9-gcc"
@@ -650,7 +651,7 @@ process_toolchain() {
         enabled postproc || die "postproc_visualizer requires postproc to be enabled"
     fi
 
-    # Enable unit tests if we have a working C++ compiler
+    # Enable unit tests by default if we have a working C++ compiler.
     case "$toolchain" in
         *-vs*)
             soft_enable unit_tests
@@ -663,7 +664,7 @@ process_toolchain() {
             # x86 targets.
         ;;
         *)
-            check_cxx "$@" <<EOF && soft_enable unit_tests
+            enabled pthread_h && check_cxx "$@" <<EOF && soft_enable unit_tests
 int z;
 EOF
         ;;

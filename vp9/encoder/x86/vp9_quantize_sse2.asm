@@ -27,7 +27,7 @@ sym(vp9_regular_quantize_b_sse2):
     push        rdi
     push        rsi
 %else
-  %ifidn __OUTPUT_FORMAT__,x64
+  %if LIBVPX_YASM_WIN64
     push        rdi
     push        rsi
   %endif
@@ -46,7 +46,7 @@ sym(vp9_regular_quantize_b_sse2):
     mov         rdi, arg(0)                 ; BLOCK *b
     mov         rsi, arg(1)                 ; BLOCKD *d
 %else
-  %ifidn __OUTPUT_FORMAT__,x64
+  %if LIBVPX_YASM_WIN64
     mov         rdi, rcx                    ; BLOCK *b
     mov         rsi, rdx                    ; BLOCKD *d
   %else
@@ -223,7 +223,7 @@ ZIGZAG_LOOP 15
     pop         rsi
     pop         rdi
 %else
-  %ifidn __OUTPUT_FORMAT__,x64
+  %if LIBVPX_YASM_WIN64
     pop         rsi
     pop         rdi
   %endif
@@ -247,7 +247,7 @@ sym(vp9_fast_quantize_b_sse2):
     push        rdi
     push        rsi
 %else
-  %ifidn __OUTPUT_FORMAT__,x64
+  %if LIBVPX_YASM_WIN64
     push        rdi
     push        rsi
   %else
@@ -261,7 +261,7 @@ sym(vp9_fast_quantize_b_sse2):
     mov         rdi, arg(0)                 ; BLOCK *b
     mov         rsi, arg(1)                 ; BLOCKD *d
 %else
-  %ifidn __OUTPUT_FORMAT__,x64
+  %if LIBVPX_YASM_WIN64
     mov         rdi, rcx                    ; BLOCK *b
     mov         rsi, rdx                    ; BLOCKD *d
   %else
@@ -361,7 +361,7 @@ sym(vp9_fast_quantize_b_sse2):
     pop         rsi
     pop         rdi
 %else
-  %ifidn __OUTPUT_FORMAT__,x64
+  %if LIBVPX_YASM_WIN64
     pop         rsi
     pop         rdi
   %endif
