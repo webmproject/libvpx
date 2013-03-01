@@ -140,6 +140,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
 
   stats_.Reset();
 
+  ASSERT_TRUE(passes_ == 1 || passes_ == 2);
   for (unsigned int pass = 0; pass < passes_; pass++) {
     last_pts_ = 0;
 

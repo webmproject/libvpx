@@ -45,6 +45,7 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
 
   virtual void SetUp() {
     InitializeConfig();
+    SetMode(libvpx_test::kTwoPassGood);
   }
 
   virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
