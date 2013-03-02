@@ -127,7 +127,8 @@ typedef struct VP8Common
     MODE_INFO *prev_mip; /* MODE_INFO array 'mip' from last decoded frame */
     MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
 #endif
-
+    MODE_INFO *show_frame_mi;  /* MODE_INFO for the last decoded frame
+                                  to show */
     LOOPFILTERTYPE filter_type;
 
     loop_filter_info_n lf_info;

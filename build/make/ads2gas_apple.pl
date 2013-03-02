@@ -10,12 +10,12 @@
 ##
 
 
-# ads2gas.pl
+# ads2gas_apple.pl
 # Author: Eric Fung (efung (at) acm.org)
 #
 # Convert ARM Developer Suite 1.0.1 syntax assembly source to GNU as format
 #
-# Usage: cat inputfile | perl ads2gas.pl > outputfile
+# Usage: cat inputfile | perl ads2gas_apple.pl > outputfile
 #
 print "@ This file was created from a .asm file\n";
 print "@  using the ads2gas_apple.pl script.\n\n";

@@ -74,7 +74,7 @@ HOSTCC?=gcc
 TGT_ISA:=$(word 1, $(subst -, ,$(TOOLCHAIN)))
 TGT_OS:=$(word 2, $(subst -, ,$(TOOLCHAIN)))
 TGT_CC:=$(word 3, $(subst -, ,$(TOOLCHAIN)))
-quiet:=$(if $(verbose),,yes)
+quiet:=$(if $(or $(verbose), $(V)),, yes)
 qexec=$(if $(quiet),@)
 
 # Cancel built-in implicit rules
@@ -380,6 +380,7 @@ ifneq ($(call enabled,DIST-SRCS),)
     # Include obj_int_extract if we use offsets from asm_*_offsets
     DIST-SRCS-$(ARCH_ARM)$(ARCH_X86)$(ARCH_X86_64)    += build/make/obj_int_extract.c
     DIST-SRCS-$(ARCH_ARM)    += build/make/ads2gas.pl
+    DIST-SRCS-$(ARCH_ARM)    += build/make/ads2gas_apple.pl
     DIST-SRCS-yes            += $(target:-$(TOOLCHAIN)=).mk
 endif
 INSTALL-SRCS := $(call cond_enabled,CONFIG_INSTALL_SRCS,INSTALL-SRCS)

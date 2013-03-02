@@ -1360,10 +1360,10 @@ static int estimate_keyframe_frequency(VP8_COMP *cpi)
          * whichever is smaller.
          */
         int key_freq = cpi->oxcf.key_freq>0 ? cpi->oxcf.key_freq : 1;
-        av_key_frame_frequency = (int)cpi->output_frame_rate * 2;
+        av_key_frame_frequency = 1 + (int)cpi->output_frame_rate * 2;
 
         if (cpi->oxcf.auto_key && av_key_frame_frequency > key_freq)
-            av_key_frame_frequency = cpi->oxcf.key_freq;
+            av_key_frame_frequency = key_freq;
 
         cpi->prior_key_frame_distance[KEY_FRAME_CONTEXT - 1]
             = av_key_frame_frequency;
@@ -1393,6 +1393,10 @@ static int estimate_keyframe_frequency(VP8_COMP *cpi)
         av_key_frame_frequency  /= total_weight;
 
     }
+    // TODO (marpan): Given the checks above, |av_key_frame_frequency|
+    // should always be above 0. But for now we keep the sanity check in.
+    if (av_key_frame_frequency == 0)
+        av_key_frame_frequency = 1;
     return av_key_frame_frequency;
 }
 
