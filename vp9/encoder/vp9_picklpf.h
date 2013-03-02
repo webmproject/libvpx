@@ -15,12 +15,12 @@
 struct yv12_buffer_config;
 struct VP9_COMP;
 
-extern void vp9_pick_filter_level_fast(struct yv12_buffer_config *sd,
-                                       struct VP9_COMP *cpi);
+void vp9_pick_filter_level_fast(struct yv12_buffer_config *sd,
+                                struct VP9_COMP *cpi);
 
-extern void vp9_set_alt_lf_level(struct VP9_COMP *cpi, int filt_val);
+void vp9_set_alt_lf_level(struct VP9_COMP *cpi, int filt_val);
 
-extern void vp9_pick_filter_level(struct yv12_buffer_config *sd,
-                                  struct VP9_COMP *cpi);
+void vp9_pick_filter_level(struct yv12_buffer_config *sd,
+                           struct VP9_COMP *cpi);
 
 #endif  // VP9_ENCODER_VP9_PICKLPF_H_
