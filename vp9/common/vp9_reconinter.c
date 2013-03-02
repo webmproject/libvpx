@@ -20,14 +20,14 @@
 void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
                                        YV12_BUFFER_CONFIG *other,
                                        int this_w, int this_h) {
-  int other_w, other_h;
+  int other_h = other->y_height;
+  int other_w = other->y_width;
 
-  other_h = other->y_height;
-  other_w = other->y_width;
   scale->x_num = other_w;
   scale->x_den = this_w;
   scale->x_offset_q4 = 0;  // calculated per-mb
   scale->x_step_q4 = 16 * other_w / this_w;
+
   scale->y_num = other_h;
   scale->y_den = this_h;
   scale->y_offset_q4 = 0;  // calculated per-mb
@@ -271,10 +271,8 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                const struct scale_factors *scale,
                                int w, int h, int do_avg,
                                const struct subpix_fn_table *subpix) {
-  int_mv32 mv;
-
-  mv = scale_motion_vector_q3_to_q4(mv_q3, scale);
-  src = src + (mv.as_mv.row >> 4) * src_stride + (mv.as_mv.col >> 4);
+  int_mv32 mv = scale_motion_vector_q3_to_q4(mv_q3, scale);
+  src += (mv.as_mv.row >> 4) * src_stride + (mv.as_mv.col >> 4);
 
   scale->predict[!!(mv.as_mv.col & 15)][!!(mv.as_mv.row & 15)][do_avg](
       src, src_stride, dst, dst_stride,
@@ -306,7 +304,7 @@ void vp9_build_inter_predictor_q4(const uint8_t *src, int src_stride,
   const int subpel_x = scaled_mv_col_q4 & 15;
   const int subpel_y = scaled_mv_row_q4 & 15;
 
-  src = src + (scaled_mv_row_q4 >> 4) * src_stride + (scaled_mv_col_q4 >> 4);
+  src += (scaled_mv_row_q4 >> 4) * src_stride + (scaled_mv_col_q4 >> 4);
   scale->predict[!!subpel_x][!!subpel_y][do_avg](
       src, src_stride, dst, dst_stride,
       subpix->filter_x[subpel_x], scale->x_step_q4,
@@ -500,18 +498,15 @@ void vp9_build_inter16x16_predictors_mby(MACROBLOCKD *xd,
   int which_mv;
 
   for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-    const int clamp_mvs =
-        which_mv ? xd->mode_info_context->mbmi.need_to_clamp_secondmv
-                 : xd->mode_info_context->mbmi.need_to_clamp_mvs;
-    uint8_t *base_pre;
-    int_mv ymv;
-    int pre_stride;
+    const int clamp_mvs = which_mv ?
+         xd->mode_info_context->mbmi.need_to_clamp_secondmv :
+         xd->mode_info_context->mbmi.need_to_clamp_mvs;
 
+    uint8_t *base_pre = which_mv ? xd->second_pre.y_buffer : xd->pre.y_buffer;
+    int pre_stride = which_mv ? xd->second_pre.y_stride : xd->pre.y_stride;
+    int_mv ymv;
     ymv.as_int = xd->mode_info_context->mbmi.mv[which_mv].as_int;
-    base_pre = which_mv ? xd->second_pre.y_buffer
-                        : xd->pre.y_buffer;
-    pre_stride = which_mv ? xd->second_pre.y_stride
-                          : xd->pre.y_stride;
+
     if (clamp_mvs)
       clamp_mv_to_umv_border(&ymv.as_mv, xd);
 
@@ -811,93 +806,61 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
   }
 }
 
-static
-void build_4x4uvmvs(MACROBLOCKD *xd) {
+static int mv_pred_row(MACROBLOCKD *mb, int off, int idx) {
+  int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.row +
+             mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.row +
+             mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.row +
+             mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.row;
+  return (temp < 0 ? temp - 4 : temp + 4) / 8;
+}
+
+static int mv_pred_col(MACROBLOCKD *mb, int off, int idx) {
+  int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.col +
+             mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.col +
+             mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.col +
+             mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.col;
+  return (temp < 0 ? temp - 4 : temp + 4) / 8;
+}
+
+static void build_4x4uvmvs(MACROBLOCKD *xd) {
   int i, j;
   BLOCKD *blockd = xd->block;
+  const int mask = xd->fullpixel_mask;
 
   for (i = 0; i < 2; i++) {
     for (j = 0; j < 2; j++) {
-      int yoffset = i * 8 + j * 2;
-      int uoffset = 16 + i * 2 + j;
-      int voffset = 20 + i * 2 + j;
+      const int yoffset = i * 8 + j * 2;
+      const int uoffset = 16 + i * 2 + j;
+      const int voffset = 20 + i * 2 + j;
 
-      int temp;
-
-      temp = xd->mode_info_context->bmi[yoffset + 0].as_mv[0].as_mv.row
-             + xd->mode_info_context->bmi[yoffset + 1].as_mv[0].as_mv.row
-             + xd->mode_info_context->bmi[yoffset + 4].as_mv[0].as_mv.row
-             + xd->mode_info_context->bmi[yoffset + 5].as_mv[0].as_mv.row;
-
-      if (temp < 0) temp -= 4;
-      else temp += 4;
-
-      blockd[uoffset].bmi.as_mv[0].as_mv.row = (temp / 8) &
-                                                  xd->fullpixel_mask;
-
-      temp = xd->mode_info_context->bmi[yoffset + 0].as_mv[0].as_mv.col
-             + xd->mode_info_context->bmi[yoffset + 1].as_mv[0].as_mv.col
-             + xd->mode_info_context->bmi[yoffset + 4].as_mv[0].as_mv.col
-             + xd->mode_info_context->bmi[yoffset + 5].as_mv[0].as_mv.col;
-
-      if (temp < 0) temp -= 4;
-      else temp += 4;
-
-      blockd[uoffset].bmi.as_mv[0].as_mv.col = (temp / 8) &
-        xd->fullpixel_mask;
+      MV *u = &blockd[uoffset].bmi.as_mv[0].as_mv;
+      MV *v = &blockd[voffset].bmi.as_mv[0].as_mv;
+      u->row = mv_pred_row(xd, yoffset, 0) & mask;
+      u->col = mv_pred_col(xd, yoffset, 0) & mask;
 
       // if (x->mode_info_context->mbmi.need_to_clamp_mvs)
-      clamp_uvmv_to_umv_border(&blockd[uoffset].bmi.as_mv[0].as_mv, xd);
+      clamp_uvmv_to_umv_border(u, xd);
 
       // if (x->mode_info_context->mbmi.need_to_clamp_mvs)
-      clamp_uvmv_to_umv_border(&blockd[uoffset].bmi.as_mv[0].as_mv, xd);
+      clamp_uvmv_to_umv_border(u, xd);
 
-      blockd[voffset].bmi.as_mv[0].as_mv.row =
-        blockd[uoffset].bmi.as_mv[0].as_mv.row;
-      blockd[voffset].bmi.as_mv[0].as_mv.col =
-        blockd[uoffset].bmi.as_mv[0].as_mv.col;
+      v->row = u->row;
+      v->col = u->col;
 
       if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-        temp = xd->mode_info_context->bmi[yoffset + 0].as_mv[1].as_mv.row
-               + xd->mode_info_context->bmi[yoffset + 1].as_mv[1].as_mv.row
-               + xd->mode_info_context->bmi[yoffset + 4].as_mv[1].as_mv.row
-               + xd->mode_info_context->bmi[yoffset + 5].as_mv[1].as_mv.row;
-
-        if (temp < 0) {
-          temp -= 4;
-        } else {
-          temp += 4;
-        }
-
-       blockd[uoffset].bmi.as_mv[1].as_mv.row = (temp / 8) &
-                                                    xd->fullpixel_mask;
-
-        temp = xd->mode_info_context->bmi[yoffset + 0].as_mv[1].as_mv.col
-               + xd->mode_info_context->bmi[yoffset + 1].as_mv[1].as_mv.col
-               + xd->mode_info_context->bmi[yoffset + 4].as_mv[1].as_mv.col
-               + xd->mode_info_context->bmi[yoffset + 5].as_mv[1].as_mv.col;
-
-        if (temp < 0) {
-          temp -= 4;
-        } else {
-          temp += 4;
-        }
-
-        blockd[uoffset].bmi.as_mv[1].as_mv.col = (temp / 8) &
-                                                        xd->fullpixel_mask;
+        u = &blockd[uoffset].bmi.as_mv[1].as_mv;
+        v = &blockd[voffset].bmi.as_mv[1].as_mv;
+        u->row = mv_pred_row(xd, yoffset, 1) & mask;
+        u->col = mv_pred_col(xd, yoffset, 1) & mask;
 
         // if (mbmi->need_to_clamp_mvs)
-        clamp_uvmv_to_umv_border(
-          &blockd[uoffset].bmi.as_mv[1].as_mv, xd);
+        clamp_uvmv_to_umv_border(u, xd);
 
         // if (mbmi->need_to_clamp_mvs)
-        clamp_uvmv_to_umv_border(
-          &blockd[uoffset].bmi.as_mv[1].as_mv, xd);
+        clamp_uvmv_to_umv_border(u, xd);
 
-        blockd[voffset].bmi.as_mv[1].as_mv.row =
-          blockd[uoffset].bmi.as_mv[1].as_mv.row;
-        blockd[voffset].bmi.as_mv[1].as_mv.col =
-          blockd[uoffset].bmi.as_mv[1].as_mv.col;
+        v->row = u->row;
+        v->col = u->col;
       }
     }
   }
