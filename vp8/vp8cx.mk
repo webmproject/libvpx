@@ -24,7 +24,6 @@ VP8_CX_SRCS-yes += vp8cx.mk
 
 VP8_CX_SRCS-yes += vp8_cx_iface.c
 
-VP8_CX_SRCS-yes += encoder/asm_enc_offsets.c
 VP8_CX_SRCS-yes += encoder/defaultcoefcounts.h
 VP8_CX_SRCS-yes += encoder/bitstream.c
 VP8_CX_SRCS-yes += encoder/boolhuff.c
@@ -78,6 +77,7 @@ VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.c
 VP8_CX_SRCS-$(CONFIG_MULTI_RES_ENCODING) += encoder/mr_dissim.c
 VP8_CX_SRCS-$(CONFIG_MULTI_RES_ENCODING) += encoder/mr_dissim.h
+VP8_CX_SRCS-yes += encoder/vp8_asm_enc_offsets.c
 
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
@@ -121,4 +121,4 @@ endif
 VP8_CX_SRCS-yes := $(filter-out $(VP8_CX_SRCS_REMOVE-yes),$(VP8_CX_SRCS-yes))
 
 $(eval $(call asm_offsets_template,\
-         vp8_asm_enc_offsets.asm, $(VP8_PREFIX)encoder/asm_enc_offsets.c))
+         vp8_asm_enc_offsets.asm, $(VP8_PREFIX)encoder/vp8_asm_enc_offsets.c))

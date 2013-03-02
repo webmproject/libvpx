@@ -144,7 +144,7 @@ int parse_macho(uint8_t *base_buf, size_t sz) {
           /* Location of string is cacluated each time from the
            * start of the string buffer.  On darwin the symbols
            * are prefixed by "_", so we bump the pointer by 1.
-           * The target value is defined as an int in asm_*_offsets.c,
+           * The target value is defined as an int in *_asm_*_offsets.c,
            * which is 4 bytes on all targets we currently use.
            */
           if (bits == 32) {
@@ -446,7 +446,7 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode) {
             if (strcmp(section_name, ".bss")) {
               if (sizeof(val) != sym.st_size) {
                 /* The target value is declared as an int in
-                 * asm_*_offsets.c, which is 4 bytes on all
+                 * *_asm_*_offsets.c, which is 4 bytes on all
                  * targets we currently use. Complain loudly if
                  * this is not true.
                  */
@@ -528,7 +528,7 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode) {
             if ((strcmp(section_name, ".bss"))) {
               if (sizeof(val) != sym.st_size) {
                 /* The target value is declared as an int in
-                 * asm_*_offsets.c, which is 4 bytes on all
+                 * *_asm_*_offsets.c, which is 4 bytes on all
                  * targets we currently use. Complain loudly if
                  * this is not true.
                  */
