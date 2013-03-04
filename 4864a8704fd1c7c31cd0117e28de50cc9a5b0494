@@ -33,6 +33,24 @@
       "revId": "4864a8704fd1c7c31cd0117e28de50cc9a5b0494",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//99E\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2445,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-04T22:24:08Z",
+      "side": 1,
+      "message": "Well, if I fix this in warn_or_exit_on_errorv(), it exits directly because that\u0027s called unconditionally from all kinds of paths (through error()) because they assume it\u0027s only doing anything if ctx-\u003eerr is set. So I\u0027m trying to stay within that basic assumption.",
+      "parentUuid": "AAAAVX//99s\u003d",
+      "revId": "4864a8704fd1c7c31cd0117e28de50cc9a5b0494",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
