@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAVX//+y4\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-04T01:45:02Z",
+      "side": 1,
+      "message": "I\u0027m a little confused -- this commit message says support for 16k (14 bit) but implements 64k (16 bit). Maybe this should say 64k? Probably better to stay away from saying \"16 bit\" as it could be confused with bit-depth per pixel.",
+      "revId": "85412421a11b9e48f00464ef0c23f65517c7ca52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX//+8I\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 3
@@ -13,6 +30,24 @@
       "writtenOn": "2013-03-02T18:31:14Z",
       "side": 1,
       "message": "if you do this, we need to remove horiz/vert_scale. Right now, the upper 2 bits are both scale and size, which doesn\u0027t make sense.",
+      "revId": "85412421a11b9e48f00464ef0c23f65517c7ca52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+yw\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1272,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-04T01:45:02Z",
+      "side": 1,
+      "message": "yes, move the scale bits into their own byte for now, and make sure the resize unit test still works. I\u0027ll have a patch shortly that removes them in favor of more explicit coded and display resolution parameters.",
+      "parentUuid": "AAAAVX//+8I\u003d",
       "revId": "85412421a11b9e48f00464ef0c23f65517c7ca52",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -47,6 +82,23 @@
       "writtenOn": "2013-03-02T18:31:14Z",
       "side": 1,
       "message": "no new line necessary.",
+      "revId": "85412421a11b9e48f00464ef0c23f65517c7ca52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+ys\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1096,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-04T01:45:02Z",
+      "side": 1,
+      "message": "this cast is unnecessary.",
       "revId": "85412421a11b9e48f00464ef0c23f65517c7ca52",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
