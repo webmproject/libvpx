@@ -277,13 +277,6 @@ typedef struct blockd {
   union b_mode_info bmi;
 } BLOCKD;
 
-typedef struct superblockd {
-  /* 32x32 Y and 16x16 U/V */
-  DECLARE_ALIGNED(16, int16_t, diff[32*32+16*16*2]);
-  DECLARE_ALIGNED(16, int16_t, qcoeff[32*32+16*16*2]);
-  DECLARE_ALIGNED(16, int16_t, dqcoeff[32*32+16*16*2]);
-} SUPERBLOCKD;
-
 struct scale_factors {
   int x_num;
   int x_den;
@@ -297,13 +290,11 @@ struct scale_factors {
 };
 
 typedef struct macroblockd {
-  DECLARE_ALIGNED(16, int16_t,  diff[384]);      /* from idct diff */
-  DECLARE_ALIGNED(16, uint8_t,  predictor[384]);
-  DECLARE_ALIGNED(16, int16_t,  qcoeff[384]);
-  DECLARE_ALIGNED(16, int16_t,  dqcoeff[384]);
-  DECLARE_ALIGNED(16, uint16_t, eobs[24]);
-
-  SUPERBLOCKD sb_coeff_data;
+  DECLARE_ALIGNED(16, int16_t,  diff[64*64+32*32*2]);      /* from idct diff */
+  DECLARE_ALIGNED(16, uint8_t,  predictor[384]);  // unused for superblocks
+  DECLARE_ALIGNED(16, int16_t,  qcoeff[64*64+32*32*2]);
+  DECLARE_ALIGNED(16, int16_t,  dqcoeff[64*64+32*32*2]);
+  DECLARE_ALIGNED(16, uint16_t, eobs[256+64*2]);
 
   /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
   BLOCKD block[24];
@@ -451,8 +442,12 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
   }
 }
 
-extern const uint8_t vp9_block2left[TX_SIZE_MAX_SB][24];
-extern const uint8_t vp9_block2above[TX_SIZE_MAX_SB][24];
+extern const uint8_t vp9_block2left[TX_SIZE_MAX_MB][24];
+extern const uint8_t vp9_block2above[TX_SIZE_MAX_MB][24];
+extern const uint8_t vp9_block2left_sb[TX_SIZE_MAX_SB][96];
+extern const uint8_t vp9_block2above_sb[TX_SIZE_MAX_SB][96];
+extern const uint8_t vp9_block2left_sb64[TX_SIZE_MAX_SB][384];
+extern const uint8_t vp9_block2above_sb64[TX_SIZE_MAX_SB][384];
 
 #define USE_ADST_FOR_I16X16_8X8   0
 #define USE_ADST_FOR_I16X16_4X4   0

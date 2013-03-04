@@ -645,7 +645,7 @@ void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
   // First transform rows
   for (i = 0; i < 16; ++i) {
     idct16_1d(input, outptr);
-    input += half_pitch;
+    input += 16;
     outptr += 16;
   }
 
@@ -655,7 +655,7 @@ void vp9_short_idct16x16_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 16 + i];
     idct16_1d(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
-      output[j * 16 + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
   }
 }
 
@@ -838,7 +838,7 @@ static const transform_2d IHT_16[] = {
 };
 
 void vp9_short_iht16x16_c(int16_t *input, int16_t *output,
-                          int input_pitch, TX_TYPE tx_type) {
+                          int pitch, TX_TYPE tx_type) {
   int i, j;
   int16_t out[16 * 16];
   int16_t *outptr = out;
@@ -848,7 +848,7 @@ void vp9_short_iht16x16_c(int16_t *input, int16_t *output,
   // Rows
   for (i = 0; i < 16; ++i) {
     ht.rows(input, outptr);
-    input += input_pitch;
+    input += 16;
     outptr += 16;
   }
 
@@ -858,7 +858,7 @@ void vp9_short_iht16x16_c(int16_t *input, int16_t *output,
       temp_in[j] = out[j * 16 + i];
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
-      output[j * 16 + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+      output[j * pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
   }
 }
 
@@ -875,7 +875,7 @@ void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
     vpx_memset(out, 0, sizeof(out));
     for (i = 0; i < 4; ++i) {
       idct16_1d(input, outptr);
-      input += half_pitch;
+      input += 16;
       outptr += 16;
     }
 
@@ -885,7 +885,7 @@ void vp9_short_idct10_16x16_c(int16_t *input, int16_t *output, int pitch) {
         temp_in[j] = out[j*16 + i];
       idct16_1d(temp_in, temp_out);
       for (j = 0; j < 16; ++j)
-        output[j*16 + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+        output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
     }
 }
 
@@ -1273,7 +1273,7 @@ void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
   // Rows
   for (i = 0; i < 32; ++i) {
     idct32_1d(input, outptr);
-    input += half_pitch;
+    input += 32;
     outptr += 32;
   }
 
@@ -1283,7 +1283,7 @@ void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 32 + i];
     idct32_1d(temp_in, temp_out);
     for (j = 0; j < 32; ++j)
-      output[j * 32 + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
   }
 }
 
@@ -1306,7 +1306,7 @@ void vp9_short_idct10_32x32_c(int16_t *input, int16_t *output, int pitch) {
   vpx_memset(out, 0, sizeof(out));
   for (i = 0; i < 4; ++i) {
     idct32_1d(input, outptr);
-    input += half_pitch;
+    input += 32;
     outptr += 32;
   }
 
@@ -1316,6 +1316,6 @@ void vp9_short_idct10_32x32_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 32 + i];
     idct32_1d(temp_in, temp_out);
     for (j = 0; j < 32; ++j)
-      output[j * 32 + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
   }
 }

@@ -1820,63 +1820,6 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x) {
 #endif
 }
 
-static void update_sb_skip_coeff_state(VP9_COMP *cpi,
-                                       ENTROPY_CONTEXT_PLANES ta[4],
-                                       ENTROPY_CONTEXT_PLANES tl[4],
-                                       TOKENEXTRA *t[4],
-                                       TOKENEXTRA **tp,
-                                       int skip[4], int output_enabled) {
-  MACROBLOCK *const x = &cpi->mb;
-  TOKENEXTRA tokens[4][16 * 25];
-  int n_tokens[4], n;
-
-  // if there were no skips, we don't need to do anything
-  if (!skip[0] && !skip[1] && !skip[2] && !skip[3])
-    return;
-
-  // if we don't do coeff skipping for this frame, we don't
-  // need to do anything here
-  if (!cpi->common.mb_no_coeff_skip)
-    return;
-
-  // if all 4 MBs skipped coeff coding, nothing to be done
-  if (skip[0] && skip[1] && skip[2] && skip[3])
-    return;
-
-  // so the situation now is that we want to skip coeffs
-  // for some MBs, but not all, and we didn't code EOB
-  // coefficients for them. However, the skip flag for this
-  // SB will be 0 overall, so we need to insert EOBs in the
-  // middle of the token tree. Do so here.
-  n_tokens[0] = t[1] - t[0];
-  n_tokens[1] = t[2] - t[1];
-  n_tokens[2] = t[3] - t[2];
-  n_tokens[3] = *tp  - t[3];
-  if (n_tokens[0])
-    memcpy(tokens[0], t[0], n_tokens[0] * sizeof(*t[0]));
-  if (n_tokens[1])
-    memcpy(tokens[1], t[1], n_tokens[1] * sizeof(*t[0]));
-  if (n_tokens[2])
-    memcpy(tokens[2], t[2], n_tokens[2] * sizeof(*t[0]));
-  if (n_tokens[3])
-    memcpy(tokens[3], t[3], n_tokens[3] * sizeof(*t[0]));
-
-  // reset pointer, stuff EOBs where necessary
-  *tp = t[0];
-  for (n = 0; n < 4; n++) {
-    if (skip[n]) {
-      x->e_mbd.above_context = &ta[n];
-      x->e_mbd.left_context  = &tl[n];
-      vp9_stuff_mb(cpi, &x->e_mbd, tp, !output_enabled);
-    } else {
-      if (n_tokens[n]) {
-        memcpy(*tp, tokens[n], sizeof(*t[0]) * n_tokens[n]);
-      }
-      (*tp) += n_tokens[n];
-    }
-  }
-}
-
 static void update_sb64_skip_coeff_state(VP9_COMP *cpi,
                                          ENTROPY_CONTEXT_PLANES ta[16],
                                          ENTROPY_CONTEXT_PLANES tl[16],
@@ -1994,7 +1937,9 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
+  MODE_INFO *mi = xd->mode_info_context;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const int mis = cm->mode_info_stride;
   unsigned char ref_pred_flag;
 
   assert(!xd->mode_info_context->mbmi.sb_type);
@@ -2190,12 +2135,11 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     vp9_tokenize_mb(cpi, xd, t, !output_enabled);
 
   } else {
-    int mb_skip_context =
-      cpi->common.mb_no_coeff_skip ?
-      (x->e_mbd.mode_info_context - 1)->mbmi.mb_skip_coeff +
-      (x->e_mbd.mode_info_context - cpi->common.mode_info_stride)->mbmi.mb_skip_coeff :
-      0;
-    if (cpi->common.mb_no_coeff_skip) {
+    // FIXME(rbultje): not tile-aware (mi - 1)
+    int mb_skip_context = cpi->common.mb_no_coeff_skip ?
+      (mi - 1)->mbmi.mb_skip_coeff + (mi - mis)->mbmi.mb_skip_coeff : 0;
+
+    if (cm->mb_no_coeff_skip) {
       mbmi->mb_skip_coeff = 1;
       if (output_enabled)
         cpi->skip_true_count[mb_skip_context]++;
@@ -2250,12 +2194,8 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
   unsigned char ref_pred_flag;
-  int n;
-  TOKENEXTRA *tp[4];
-  int skip[4];
   MODE_INFO *mi = x->e_mbd.mode_info_context;
   unsigned int segment_id = mi->mbmi.segment_id;
-  ENTROPY_CONTEXT_PLANES ta[4], tl[4];
   const int mis = cm->mode_info_stride;
 
   if (cm->frame_type == KEY_FRAME) {
@@ -2342,118 +2282,101 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
                                        mb_row, mb_col);
   }
 
-  if (xd->mode_info_context->mbmi.txfm_size == TX_32X32) {
-    if (!x->skip) {
-      vp9_subtract_sby_s_c(x->sb_coeff_data.src_diff, src, src_y_stride,
-                           dst, dst_y_stride);
-      vp9_subtract_sbuv_s_c(x->sb_coeff_data.src_diff,
-                            usrc, vsrc, src_uv_stride,
-                            udst, vdst, dst_uv_stride);
-      vp9_transform_sby_32x32(x);
-      vp9_transform_sbuv_16x16(x);
-      vp9_quantize_sby_32x32(x);
-      vp9_quantize_sbuv_16x16(x);
-      // TODO(rbultje): trellis optimize
-      vp9_inverse_transform_sbuv_16x16(&x->e_mbd.sb_coeff_data);
-      vp9_inverse_transform_sby_32x32(&x->e_mbd.sb_coeff_data);
-      vp9_recon_sby_s_c(&x->e_mbd, dst);
-      vp9_recon_sbuv_s_c(&x->e_mbd, udst, vdst);
-
-      vp9_tokenize_sb(cpi, &x->e_mbd, t, !output_enabled);
-    } else {
-      int mb_skip_context =
-          cpi->common.mb_no_coeff_skip ?
-          (mi - 1)->mbmi.mb_skip_coeff +
-          (mi - mis)->mbmi.mb_skip_coeff :
-          0;
-      mi->mbmi.mb_skip_coeff = 1;
-      if (cm->mb_no_coeff_skip) {
-        if (output_enabled)
-          cpi->skip_true_count[mb_skip_context]++;
-        vp9_fix_contexts_sb(xd);
-      } else {
-        vp9_stuff_sb(cpi, xd, t, !output_enabled);
-        if (output_enabled)
-          cpi->skip_false_count[mb_skip_context]++;
-      }
-    }
-
-    // copy skip flag on all mb_mode_info contexts in this SB
-    // if this was a skip at this txfm size
-    if (mb_col < cm->mb_cols - 1)
-      mi[1].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
-    if (mb_row < cm->mb_rows - 1) {
-      mi[mis].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
-      if (mb_col < cm->mb_cols - 1)
-        mi[mis + 1].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
-    }
-    skip[0] = skip[2] = skip[1] = skip[3] = mi->mbmi.mb_skip_coeff;
-  } else {
-    for (n = 0; n < 4; n++) {
-      int x_idx = n & 1, y_idx = n >> 1;
-
-      xd->left_context = cm->left_context + y_idx + (mb_row & 2);
-      xd->above_context = cm->above_context + mb_col + x_idx;
-      memcpy(&ta[n], xd->above_context, sizeof(ta[n]));
-      memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
-      tp[n] = *t;
-      xd->mode_info_context = mi + x_idx + y_idx * mis;
-
-      if (!x->skip) {
-        vp9_subtract_mby_s_c(x->src_diff,
-                             src + x_idx * 16 + y_idx * 16 * src_y_stride,
-                             src_y_stride,
-                             dst + x_idx * 16 + y_idx * 16 * dst_y_stride,
-                             dst_y_stride);
-        vp9_subtract_mbuv_s_c(x->src_diff,
-                              usrc + x_idx * 8 + y_idx * 8 * src_uv_stride,
-                              vsrc + x_idx * 8 + y_idx * 8 * src_uv_stride,
-                              src_uv_stride,
-                              udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
-                              vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
-                              dst_uv_stride);
-        vp9_fidct_mb(x);
-        vp9_recon_mby_s_c(&x->e_mbd,
-                          dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
-        vp9_recon_mbuv_s_c(&x->e_mbd,
-                           udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
-                           vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride);
-
-        vp9_tokenize_mb(cpi, &x->e_mbd, t, !output_enabled);
-        skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff;
-      } else {
-        int mb_skip_context = cpi->common.mb_no_coeff_skip ?
-            (x->e_mbd.mode_info_context - 1)->mbmi.mb_skip_coeff +
-            (x->e_mbd.mode_info_context - mis)->mbmi.mb_skip_coeff :
-            0;
-        xd->mode_info_context->mbmi.mb_skip_coeff = skip[n] = 1;
-        if (cpi->common.mb_no_coeff_skip) {
-          // TODO(rbultje) this should be done per-sb instead of per-mb?
-          if (output_enabled)
-            cpi->skip_true_count[mb_skip_context]++;
-          vp9_reset_mb_tokens_context(xd);
-        } else {
-          vp9_stuff_mb(cpi, xd, t, !output_enabled);
-          // TODO(rbultje) this should be done per-sb instead of per-mb?
-          if (output_enabled)
-            cpi->skip_false_count[mb_skip_context]++;
+  if (!x->skip) {
+    vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride,
+                         dst, dst_y_stride);
+    vp9_subtract_sbuv_s_c(x->src_diff,
+                          usrc, vsrc, src_uv_stride,
+                          udst, vdst, dst_uv_stride);
+    switch (mi->mbmi.txfm_size) {
+      case TX_32X32:
+        vp9_transform_sby_32x32(x);
+        vp9_transform_sbuv_16x16(x);
+        vp9_quantize_sby_32x32(x);
+        vp9_quantize_sbuv_16x16(x);
+        if (x->optimize) {
+          vp9_optimize_sby_32x32(x);
+          vp9_optimize_sbuv_16x16(x);
         }
-      }
+        vp9_inverse_transform_sby_32x32(xd);
+        vp9_inverse_transform_sbuv_16x16(xd);
+        break;
+      case TX_16X16:
+        vp9_transform_sby_16x16(x);
+        vp9_transform_sbuv_16x16(x);
+        vp9_quantize_sby_16x16(x);
+        vp9_quantize_sbuv_16x16(x);
+        if (x->optimize) {
+          vp9_optimize_sby_16x16(x);
+          vp9_optimize_sbuv_16x16(x);
+        }
+        vp9_inverse_transform_sby_16x16(xd);
+        vp9_inverse_transform_sbuv_16x16(xd);
+        break;
+      case TX_8X8:
+        vp9_transform_sby_8x8(x);
+        vp9_transform_sbuv_8x8(x);
+        vp9_quantize_sby_8x8(x);
+        vp9_quantize_sbuv_8x8(x);
+        if (x->optimize) {
+          vp9_optimize_sby_8x8(x);
+          vp9_optimize_sbuv_8x8(x);
+        }
+        vp9_inverse_transform_sby_8x8(xd);
+        vp9_inverse_transform_sbuv_8x8(xd);
+        break;
+      case TX_4X4:
+        vp9_transform_sby_4x4(x);
+        vp9_transform_sbuv_4x4(x);
+        vp9_quantize_sby_4x4(x);
+        vp9_quantize_sbuv_4x4(x);
+        if (x->optimize) {
+          vp9_optimize_sby_4x4(x);
+          vp9_optimize_sbuv_4x4(x);
+        }
+        vp9_inverse_transform_sby_4x4(xd);
+        vp9_inverse_transform_sbuv_4x4(xd);
+        break;
+      default: assert(0);
     }
+    vp9_recon_sby_s_c(xd, dst);
+    vp9_recon_sbuv_s_c(xd, udst, vdst);
 
-    xd->mode_info_context = mi;
-    update_sb_skip_coeff_state(cpi, ta, tl, tp, t, skip, output_enabled);
+    vp9_tokenize_sb(cpi, xd, t, !output_enabled);
+  } else {
+    // FIXME(rbultje): not tile-aware (mi - 1)
+    int mb_skip_context = cm->mb_no_coeff_skip ?
+          (mi - 1)->mbmi.mb_skip_coeff + (mi - mis)->mbmi.mb_skip_coeff : 0;
+
+    mi->mbmi.mb_skip_coeff = 1;
+    if (cm->mb_no_coeff_skip) {
+      if (output_enabled)
+        cpi->skip_true_count[mb_skip_context]++;
+      vp9_reset_sb_tokens_context(xd);
+    } else {
+      vp9_stuff_sb(cpi, xd, t, !output_enabled);
+      if (output_enabled)
+        cpi->skip_false_count[mb_skip_context]++;
+    }
+  }
+
+  // copy skip flag on all mb_mode_info contexts in this SB
+  // if this was a skip at this txfm size
+  if (mb_col < cm->mb_cols - 1)
+    mi[1].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
+  if (mb_row < cm->mb_rows - 1) {
+    mi[mis].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
+    if (mb_col < cm->mb_cols - 1)
+      mi[mis + 1].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
   }
 
   if (output_enabled) {
     if (cm->txfm_mode == TX_MODE_SELECT &&
-        !((cm->mb_no_coeff_skip && skip[0] && skip[1] && skip[2] && skip[3]) ||
+        !((cm->mb_no_coeff_skip && mi->mbmi.mb_skip_coeff) ||
           (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
       cpi->txfm_count_32x32p[mi->mbmi.txfm_size]++;
     } else {
-      TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ?
-                      TX_32X32 :
-                      cm->txfm_mode;
+      TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ? TX_32X32 : cm->txfm_mode;
       mi->mbmi.txfm_size = sz;
       if (mb_col < cm->mb_cols - 1)
         mi[1].mbmi.txfm_size = sz;
@@ -2481,11 +2404,8 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
   unsigned char ref_pred_flag;
   int n;
-  TOKENEXTRA *tp[16];
-  int skip[16];
   MODE_INFO *mi = x->e_mbd.mode_info_context;
   unsigned int segment_id = mi->mbmi.segment_id;
-  ENTROPY_CONTEXT_PLANES ta[16], tl[16];
   const int mis = cm->mode_info_stride;
 
   if (cm->frame_type == KEY_FRAME) {
@@ -2571,149 +2491,99 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
                                        mb_row, mb_col);
   }
 
-  if (xd->mode_info_context->mbmi.txfm_size == TX_32X32) {
-    int n;
+  if (!x->skip) {
+    vp9_subtract_sb64y_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride);
+    vp9_subtract_sb64uv_s_c(x->src_diff, usrc, vsrc, src_uv_stride,
+                            udst, vdst, dst_uv_stride);
 
-    for (n = 0; n < 4; n++) {
-      int x_idx = n & 1, y_idx = n >> 1;
-
-      xd->mode_info_context = mi + x_idx * 2 + mis * y_idx * 2;
-      xd->left_context = cm->left_context + (y_idx << 1);
-      xd->above_context = cm->above_context + mb_col + (x_idx << 1);
-      memcpy(&ta[n * 2], xd->above_context, sizeof(*ta) * 2);
-      memcpy(&tl[n * 2], xd->left_context, sizeof(*tl) * 2);
-      tp[n] = *t;
-      xd->mode_info_context = mi + x_idx * 2 + y_idx * mis * 2;
-      if (!x->skip) {
-        vp9_subtract_sby_s_c(x->sb_coeff_data.src_diff,
-                             src + x_idx * 32 + y_idx * 32 * src_y_stride,
-                             src_y_stride,
-                             dst + x_idx * 32 + y_idx * 32 * dst_y_stride,
-                             dst_y_stride);
-        vp9_subtract_sbuv_s_c(x->sb_coeff_data.src_diff,
-                              usrc + x_idx * 16 + y_idx * 16 * src_uv_stride,
-                              vsrc + x_idx * 16 + y_idx * 16 * src_uv_stride,
-                              src_uv_stride,
-                              udst + x_idx * 16 + y_idx * 16 * dst_uv_stride,
-                              vdst + x_idx * 16 + y_idx * 16 * dst_uv_stride,
-                              dst_uv_stride);
-        vp9_transform_sby_32x32(x);
-        vp9_transform_sbuv_16x16(x);
-        vp9_quantize_sby_32x32(x);
-        vp9_quantize_sbuv_16x16(x);
-        // TODO(rbultje): trellis optimize
-        vp9_inverse_transform_sbuv_16x16(&x->e_mbd.sb_coeff_data);
-        vp9_inverse_transform_sby_32x32(&x->e_mbd.sb_coeff_data);
-        vp9_recon_sby_s_c(&x->e_mbd,
-                          dst + 32 * x_idx + 32 * y_idx * dst_y_stride);
-        vp9_recon_sbuv_s_c(&x->e_mbd,
-                           udst + x_idx * 16 + y_idx * 16 * dst_uv_stride,
-                           vdst + x_idx * 16 + y_idx * 16 * dst_uv_stride);
-
-        vp9_tokenize_sb(cpi, &x->e_mbd, t, !output_enabled);
-      } else {
-        int mb_skip_context = cpi->common.mb_no_coeff_skip ?
-                              (mi - 1)->mbmi.mb_skip_coeff +
-                                  (mi - mis)->mbmi.mb_skip_coeff : 0;
-        xd->mode_info_context->mbmi.mb_skip_coeff = 1;
-        if (cm->mb_no_coeff_skip) {
-          if (output_enabled)
-            cpi->skip_true_count[mb_skip_context]++;
-          vp9_fix_contexts_sb(xd);
-        } else {
-          vp9_stuff_sb(cpi, xd, t, !output_enabled);
-          if (output_enabled)
-            cpi->skip_false_count[mb_skip_context]++;
+    switch (xd->mode_info_context->mbmi.txfm_size) {
+      case TX_32X32:
+        vp9_transform_sb64y_32x32(x);
+        vp9_transform_sb64uv_32x32(x);
+        vp9_quantize_sb64y_32x32(x);
+        vp9_quantize_sb64uv_32x32(x);
+        if (x->optimize) {
+          vp9_optimize_sb64y_32x32(x);
+          vp9_optimize_sb64uv_32x32(x);
         }
-      }
-
-      // copy skip flag on all mb_mode_info contexts in this SB
-      // if this was a skip at this txfm size
-      if (mb_col + x_idx * 2 < cm->mb_cols - 1)
-        mi[mis * y_idx * 2 + x_idx * 2 + 1].mbmi.mb_skip_coeff =
-            mi[mis * y_idx * 2 + x_idx * 2].mbmi.mb_skip_coeff;
-      if (mb_row + y_idx * 2 < cm->mb_rows - 1) {
-        mi[mis * y_idx * 2 + x_idx * 2 + mis].mbmi.mb_skip_coeff =
-            mi[mis * y_idx * 2 + x_idx * 2].mbmi.mb_skip_coeff;
-        if (mb_col + x_idx * 2 < cm->mb_cols - 1)
-          mi[mis * y_idx * 2 + x_idx * 2 + mis + 1].mbmi.mb_skip_coeff =
-              mi[mis * y_idx * 2 + x_idx * 2].mbmi.mb_skip_coeff;
-      }
-      skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff;
+        vp9_inverse_transform_sb64y_32x32(xd);
+        vp9_inverse_transform_sb64uv_32x32(xd);
+        break;
+      case TX_16X16:
+        vp9_transform_sb64y_16x16(x);
+        vp9_transform_sb64uv_16x16(x);
+        vp9_quantize_sb64y_16x16(x);
+        vp9_quantize_sb64uv_16x16(x);
+        if (x->optimize) {
+          vp9_optimize_sb64y_16x16(x);
+          vp9_optimize_sb64uv_16x16(x);
+        }
+        vp9_inverse_transform_sb64y_16x16(xd);
+        vp9_inverse_transform_sb64uv_16x16(xd);
+        break;
+      case TX_8X8:
+        vp9_transform_sb64y_8x8(x);
+        vp9_transform_sb64uv_8x8(x);
+        vp9_quantize_sb64y_8x8(x);
+        vp9_quantize_sb64uv_8x8(x);
+        if (x->optimize) {
+          vp9_optimize_sb64y_8x8(x);
+          vp9_optimize_sb64uv_8x8(x);
+        }
+        vp9_inverse_transform_sb64y_8x8(xd);
+        vp9_inverse_transform_sb64uv_8x8(xd);
+        break;
+      case TX_4X4:
+        vp9_transform_sb64y_4x4(x);
+        vp9_transform_sb64uv_4x4(x);
+        vp9_quantize_sb64y_4x4(x);
+        vp9_quantize_sb64uv_4x4(x);
+        if (x->optimize) {
+          vp9_optimize_sb64y_4x4(x);
+          vp9_optimize_sb64uv_4x4(x);
+        }
+        vp9_inverse_transform_sb64y_4x4(xd);
+        vp9_inverse_transform_sb64uv_4x4(xd);
+        break;
+      default: assert(0);
     }
+    vp9_recon_sb64y_s_c(xd, dst);
+    vp9_recon_sb64uv_s_c(&x->e_mbd, udst, vdst);
+
+    vp9_tokenize_sb64(cpi, &x->e_mbd, t, !output_enabled);
   } else {
-    for (n = 0; n < 16; n++) {
-      const int x_idx = n & 3, y_idx = n >> 2;
+    // FIXME(rbultje): not tile-aware (mi - 1)
+    int mb_skip_context = cpi->common.mb_no_coeff_skip ?
+        (mi - 1)->mbmi.mb_skip_coeff + (mi - mis)->mbmi.mb_skip_coeff : 0;
 
-      xd->left_context = cm->left_context + y_idx;
-      xd->above_context = cm->above_context + mb_col + x_idx;
-      memcpy(&ta[n], xd->above_context, sizeof(ta[n]));
-      memcpy(&tl[n], xd->left_context, sizeof(tl[n]));
-      tp[n] = *t;
-      xd->mode_info_context = mi + x_idx + y_idx * mis;
-
-      if (!x->skip) {
-        vp9_subtract_mby_s_c(x->src_diff,
-                             src + x_idx * 16 + y_idx * 16 * src_y_stride,
-                             src_y_stride,
-                             dst + x_idx * 16 + y_idx * 16 * dst_y_stride,
-                             dst_y_stride);
-        vp9_subtract_mbuv_s_c(x->src_diff,
-                              usrc + x_idx * 8 + y_idx * 8 * src_uv_stride,
-                              vsrc + x_idx * 8 + y_idx * 8 * src_uv_stride,
-                              src_uv_stride,
-                              udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
-                              vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
-                              dst_uv_stride);
-        vp9_fidct_mb(x);
-        vp9_recon_mby_s_c(&x->e_mbd,
-                          dst + x_idx * 16 + y_idx * 16 * dst_y_stride);
-        vp9_recon_mbuv_s_c(&x->e_mbd,
-                           udst + x_idx * 8 + y_idx * 8 * dst_uv_stride,
-                           vdst + x_idx * 8 + y_idx * 8 * dst_uv_stride);
-
-        vp9_tokenize_mb(cpi, &x->e_mbd, t, !output_enabled);
-        skip[n] = xd->mode_info_context->mbmi.mb_skip_coeff;
-      } else {
-        int mb_skip_context = cpi->common.mb_no_coeff_skip ?
-          (x->e_mbd.mode_info_context - 1)->mbmi.mb_skip_coeff +
-          (x->e_mbd.mode_info_context - mis)->mbmi.mb_skip_coeff : 0;
-        xd->mode_info_context->mbmi.mb_skip_coeff = skip[n] = 1;
-        if (cpi->common.mb_no_coeff_skip) {
-          // TODO(rbultje) this should be done per-sb instead of per-mb?
-          if (output_enabled)
-            cpi->skip_true_count[mb_skip_context]++;
-          vp9_reset_mb_tokens_context(xd);
-        } else {
-          vp9_stuff_mb(cpi, xd, t, !output_enabled);
-          // TODO(rbultje) this should be done per-sb instead of per-mb?
-          if (output_enabled)
-            cpi->skip_false_count[mb_skip_context]++;
-        }
-      }
+    xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+    if (cm->mb_no_coeff_skip) {
+      if (output_enabled)
+        cpi->skip_true_count[mb_skip_context]++;
+      vp9_reset_sb64_tokens_context(xd);
+    } else {
+      vp9_stuff_sb64(cpi, xd, t, !output_enabled);
+      if (output_enabled)
+        cpi->skip_false_count[mb_skip_context]++;
     }
   }
 
-  xd->mode_info_context = mi;
-  update_sb64_skip_coeff_state(cpi, ta, tl, tp, t, skip, output_enabled);
+  // copy skip flag on all mb_mode_info contexts in this SB
+  // if this was a skip at this txfm size
+  for (n = 1; n < 16; n++) {
+    const int x_idx = n & 3, y_idx = n >> 2;
+    if (mb_col + x_idx < cm->mb_cols && mb_row + y_idx < cm->mb_rows)
+      mi[x_idx + y_idx * mis].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
+  }
 
   if (output_enabled) {
     if (cm->txfm_mode == TX_MODE_SELECT &&
-        !((cm->mb_no_coeff_skip &&
-           ((mi->mbmi.txfm_size == TX_32X32 &&
-             skip[0] && skip[1] && skip[2] && skip[3]) ||
-            (mi->mbmi.txfm_size != TX_32X32 &&
-             skip[0] && skip[1] && skip[2] && skip[3] &&
-             skip[4] && skip[5] && skip[6] && skip[7] &&
-             skip[8] && skip[9] && skip[10] && skip[11] &&
-             skip[12] && skip[13] && skip[14] && skip[15]))) ||
+        !((cm->mb_no_coeff_skip && mi->mbmi.mb_skip_coeff) ||
           (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
       cpi->txfm_count_32x32p[mi->mbmi.txfm_size]++;
     } else {
       int x, y;
-      TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ?
-                    TX_32X32 :
-                    cm->txfm_mode;
+      TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ? TX_32X32 : cm->txfm_mode;
       for (y = 0; y < 4; y++) {
         for (x = 0; x < 4; x++) {
           if (mb_col + x < cm->mb_cols && mb_row + y < cm->mb_rows) {

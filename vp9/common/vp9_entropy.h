@@ -61,7 +61,6 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 
 /* Outside dimension.  0 = Y with DC, 1 = UV */
 #define BLOCK_TYPES 2
-#define BLOCK_TYPES_32X32 1
 #define REF_TYPES 2  // intra=0, inter=1
 
 /* Middle dimension reflects the coefficient position within the transform. */
@@ -110,10 +109,22 @@ extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]);
 void vp9_coef_tree_initialize(void);
 void vp9_adapt_coef_probs(struct VP9Common *);
 
-static void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
+static INLINE void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
   /* Clear entropy contexts */
   vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
   vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+}
+
+static INLINE void vp9_reset_sb_tokens_context(MACROBLOCKD* const xd) {
+  /* Clear entropy contexts */
+  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
+  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
+}
+
+static INLINE void vp9_reset_sb64_tokens_context(MACROBLOCKD* const xd) {
+  /* Clear entropy contexts */
+  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 4);
+  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 4);
 }
 
 extern const int vp9_coef_bands[32];

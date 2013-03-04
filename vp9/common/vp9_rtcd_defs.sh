@@ -97,6 +97,12 @@ specialize vp9_recon_sby_s
 prototype void vp9_recon_sbuv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst"
 specialize void vp9_recon_sbuv_s
 
+prototype void vp9_recon_sb64y_s "struct macroblockd *x, uint8_t *dst"
+specialize vp9_recon_sb64y_s
+
+prototype void vp9_recon_sb64uv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst"
+specialize void vp9_recon_sb64uv_s
+
 prototype void vp9_build_intra_predictors_mby_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_mby_s
 

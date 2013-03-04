@@ -83,19 +83,12 @@ typedef struct {
   int64_t txfm_rd_diff[NB_TXFM_MODES];
 } PICK_MODE_CONTEXT;
 
-typedef struct superblock {
-  DECLARE_ALIGNED(16, int16_t, src_diff[32*32+16*16*2]);
-  DECLARE_ALIGNED(16, int16_t, coeff[32*32+16*16*2]);
-} SUPERBLOCK;
-
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
-  DECLARE_ALIGNED(16, int16_t, src_diff[384]);  // 16x16 Y 8x8 U 8x8 V
-  DECLARE_ALIGNED(16, int16_t, coeff[384]);     // 16x16 Y 8x8 U 8x8 V
+  DECLARE_ALIGNED(16, int16_t, src_diff[64*64+32*32*2]);
+  DECLARE_ALIGNED(16, int16_t, coeff[64*64+32*32*2]);
   // 16 Y blocks, 4 U blocks, 4 V blocks,
   BLOCK block[24];
-
-  SUPERBLOCK sb_coeff_data;
 
   YV12_BUFFER_CONFIG src;
 
