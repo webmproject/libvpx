@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVX//+9s\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///YI\u003d",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX///YA\u003d",
         "filename": "vp9/common/vp9_entropy.c",
         "patchSetId": 14
@@ -30,6 +48,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "if the m was tx32x32 and in this tile, and mb_row/col was odd, then the topright m of that sb must be in this tile also (otherwise you\u0027d have a 32x32 tx crossing a sb boundary), so this mb_in_cur_tile check isn\u0027t necessary.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+9o\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///YA\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVX//+9k\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///Xs\u003d",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX///XA\u003d",
         "filename": "vp9/common/vp9_entropy.c",
         "patchSetId": 14
@@ -64,6 +118,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "so this is (in number of non-zero coefficients in a 32x32 tx block) 512-1024: 2, 64-511: 1, 0-63: 0? Maybe add that as a comment. Also, in 4x4 language: 0: 0, 1-7: 1, 8-15: 2.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+j4\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 550,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///XA\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVX//+gs\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Adding a todo.",
+      "parentUuid": "AAAAVX///W0\u003d",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX///Ws\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 14
@@ -98,6 +188,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "remove debug printf?",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+go\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1578,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///Ws\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVX//+gg\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///WU\u003d",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX///WQ\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 14
@@ -132,6 +258,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "remove commented out code here",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+gc\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1005,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///WQ\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVX//+gY\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1078,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "The counts obtained during search are already consistent with the real counts written in the bitstream. Hence the count update is unnecessary. I left the code in, in case there are reasons why the search counts are different. In that case, we also need to reset the counts to zero before the final pack bitstream.",
+      "parentUuid": "AAAAVX///WM\u003d",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX///WI\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 14
@@ -166,6 +328,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "remove commented out code",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+gU\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1420,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///WI\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVX//+gM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2416,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Adding a note here.",
+      "parentUuid": "AAAAVX///WE\u003d",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX///V8\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 14
@@ -200,6 +398,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "cosmetic stray change.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+gI\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2429,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///V8\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVX//+gE\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///V4\u003d",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX///V0\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 14
@@ -234,6 +468,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "cosmetic stray change (this one will make dimitry unhappy).",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+f0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 964,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///V0\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVX//+fs\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1347,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Better to keep the loop here for consistency with pack bitstream.",
+      "parentUuid": "AAAAVX///Vo\u003d",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX///Vk\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 14
@@ -268,6 +538,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "indentation is off.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+fU\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1367,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX///Vk\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAVX//+fQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2198,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "Done.\nYes - this was a debugging artifact.",
+      "parentUuid": "AAAAVX///VM\u003d",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAVX///VQ\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 14
@@ -302,6 +608,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "redundant, already set in line 2347.",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+fA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2248,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "the code was already there.",
+      "parentUuid": "AAAAVX///VQ\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -336,6 +660,24 @@
       "writtenOn": "2013-03-01T23:35:22Z",
       "side": 1,
       "message": "int",
+      "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+e4\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-04T17:04:03Z",
+      "side": 1,
+      "message": "why?",
+      "parentUuid": "AAAAVX///VE\u003d",
       "revId": "6ac53dc0c7d032e4c393176e26494d8e96477b45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
