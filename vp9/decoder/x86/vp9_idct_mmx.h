@@ -16,9 +16,6 @@ void vp9_dequant_dc_idct_add_mmx(short *input, const short *dq,
                                  unsigned char *pred, unsigned char *dest,
                                  int pitch, int stride, int Dc);
 
-void vp9_dc_only_idct_add_mmx(short input_dc, const unsigned char *pred_ptr,
-                              unsigned char *dst_ptr, int pitch, int stride);
-
 void vp9_dequant_idct_add_mmx(short *input, const short *dq, unsigned char *pred,
                               unsigned char *dest, int pitch, int stride);
 
