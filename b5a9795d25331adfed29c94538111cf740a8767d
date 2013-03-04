@@ -16,6 +16,24 @@
       "revId": "b5a9795d25331adfed29c94538111cf740a8767d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+Go\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-04T20:45:34Z",
+      "side": 1,
+      "message": "No, they are different. E.g. for temp \u003d\u003d -4 the original one evaluates to -1 but yours to 0.",
+      "parentUuid": "AAAAVX//+JI\u003d",
+      "revId": "b5a9795d25331adfed29c94538111cf740a8767d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
