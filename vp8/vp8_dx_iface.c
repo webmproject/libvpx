@@ -211,21 +211,19 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
         mmap.flags = vp8_mem_req_segs[0].flags;
 
         res = vp8_mmap_alloc(&mmap);
+        if (res != VPX_CODEC_OK) return res;
 
-        if (!res)
-        {
-            vp8_init_ctx(ctx, &mmap);
+        vp8_init_ctx(ctx, &mmap);
 
-            /* initialize number of fragments to zero */
-            ctx->priv->alg_priv->fragments.count = 0;
-            /* is input fragments enabled? */
-            ctx->priv->alg_priv->fragments.enabled =
-                    (ctx->priv->alg_priv->base.init_flags &
-                        VPX_CODEC_USE_INPUT_FRAGMENTS);
+        /* initialize number of fragments to zero */
+        ctx->priv->alg_priv->fragments.count = 0;
+        /* is input fragments enabled? */
+        ctx->priv->alg_priv->fragments.enabled =
+                (ctx->priv->alg_priv->base.init_flags &
+                    VPX_CODEC_USE_INPUT_FRAGMENTS);
 
-            ctx->priv->alg_priv->defer_alloc = 1;
-            /*post processing level initialized to do nothing */
-        }
+        ctx->priv->alg_priv->defer_alloc = 1;
+        /*post processing level initialized to do nothing */
     }
 
     ctx->priv->alg_priv->yv12_frame_buffers.use_frame_threads =
