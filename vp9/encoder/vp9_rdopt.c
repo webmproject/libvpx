@@ -193,19 +193,17 @@ void vp9_init_me_luts() {
 }
 
 static int compute_rd_mult(int qindex) {
-  int q;
-
-  q = vp9_dc_quant(qindex, 0);
+  int q = vp9_dc_quant(qindex, 0);
   return (11 * q * q) >> 6;
 }
 
-void vp9_initialize_me_consts(VP9_COMP *cpi, int QIndex) {
-  cpi->mb.sadperbit16 =  sad_per_bit16lut[QIndex];
-  cpi->mb.sadperbit4  =  sad_per_bit4lut[QIndex];
+void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
+  cpi->mb.sadperbit16 = sad_per_bit16lut[qindex];
+  cpi->mb.sadperbit4 = sad_per_bit4lut[qindex];
 }
 
 
-void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
+void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   int q, i;
 
   vp9_clear_system_state();  // __asm emms;
@@ -214,16 +212,16 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
   // for key frames, golden frames and arf frames.
   // if (cpi->common.refresh_golden_frame ||
   //     cpi->common.refresh_alt_ref_frame)
-  QIndex = (QIndex < 0) ? 0 : ((QIndex > MAXQ) ? MAXQ : QIndex);
+  qindex = (qindex < 0) ? 0 : ((qindex > MAXQ) ? MAXQ : qindex);
 
-  cpi->RDMULT = compute_rd_mult(QIndex);
+  cpi->RDMULT = compute_rd_mult(qindex);
 
   if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     if (cpi->twopass.next_iiratio > 31)
       cpi->RDMULT += (cpi->RDMULT * rd_iifactor[31]) >> 4;
     else
       cpi->RDMULT +=
-        (cpi->RDMULT * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
+          (cpi->RDMULT * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
   }
 
   if (cpi->RDMULT < 7)
@@ -234,8 +232,8 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int QIndex) {
 
   vp9_set_speed_features(cpi);
 
-  q = (int)pow(vp9_dc_quant(QIndex, 0) >> 2, 1.25);
-  q = q << 2;
+  q = (int)pow(vp9_dc_quant(qindex, 0) >> 2, 1.25);
+  q <<= 2;
   cpi->RDMULT = cpi->RDMULT << 4;
 
   if (q < 8)
