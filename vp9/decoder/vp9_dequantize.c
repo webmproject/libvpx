@@ -90,7 +90,7 @@ void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
       input[i] *= dq[i];
 
     // the idct halves ( >> 1) the pitch
-    vp9_short_idct4x4llm_c(input, output, 4 << 1);
+    vp9_short_idct4x4llm(input, output, 4 << 1);
 
     vpx_memset(input, 0, 32);
 
@@ -112,7 +112,7 @@ void vp9_dequant_dc_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
     input[i] *= dq[i];
 
   // the idct halves ( >> 1) the pitch
-  vp9_short_idct4x4llm_c(input, output, 4 << 1);
+  vp9_short_idct4x4llm(input, output, 4 << 1);
   vpx_memset(input, 0, 32);
   add_residual(output, pred, pitch, dest, stride, 4, 4);
 }
