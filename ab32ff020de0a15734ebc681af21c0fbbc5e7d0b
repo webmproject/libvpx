@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVX//+gk\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-04T18:57:10Z",
+      "side": 1,
+      "message": "it\u0027s a little interesting to me that this change doesn\u0027t apply to the convolve_avg_c function too -- is this filtered intra stuff for intra-only, or is is used for the inter-intra compound mode too?",
+      "revId": "ab32ff020de0a15734ebc681af21c0fbbc5e7d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+fk\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-04T18:57:10Z",
+      "side": 1,
+      "message": "don\u0027t call the _c directly, call vp9_convolve8() to let RTCD dispatch it correctly.",
+      "revId": "ab32ff020de0a15734ebc681af21c0fbbc5e7d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//+fM\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1230,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-04T18:57:10Z",
+      "side": 1,
+      "message": "static",
+      "revId": "ab32ff020de0a15734ebc681af21c0fbbc5e7d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
