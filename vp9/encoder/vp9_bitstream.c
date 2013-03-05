@@ -45,7 +45,7 @@ int intra_mode_stats[VP9_KF_BINTRAMODES]
 vp9_coeff_stats tree_update_hist_4x4[BLOCK_TYPES];
 vp9_coeff_stats tree_update_hist_8x8[BLOCK_TYPES];
 vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES];
-vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES_32X32];
+vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES];
 
 extern unsigned int active_section;
 #endif
@@ -1229,7 +1229,7 @@ static void build_coeff_contexts(VP9_COMP *cpi) {
 #ifdef ENTROPY_STATS
                           cpi, context_counters_32x32,
 #endif
-                          cpi->frame_branch_ct_32x32, BLOCK_TYPES_32X32);
+                          cpi->frame_branch_ct_32x32, BLOCK_TYPES);
 }
 
 static void update_coef_probs_common(vp9_writer* const bc,
@@ -1388,7 +1388,7 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
                              cpi->frame_coef_probs_32x32,
                              cpi->common.fc.coef_probs_32x32,
                              cpi->frame_branch_ct_32x32,
-                             BLOCK_TYPES_32X32);
+                             BLOCK_TYPES);
   }
 }
 
@@ -2106,13 +2106,13 @@ void print_tree_update_probs() {
   fprintf(f, "\n/* Update probabilities for token entropy tree. */\n\n");
 
   print_tree_update_for_type(f, tree_update_hist_4x4, BLOCK_TYPES,
-                             "vp9_coef_update_probs_4x4[BLOCK_TYPES_4X4]");
+                             "vp9_coef_update_probs_4x4[BLOCK_TYPES]");
   print_tree_update_for_type(f, tree_update_hist_8x8, BLOCK_TYPES,
-                             "vp9_coef_update_probs_8x8[BLOCK_TYPES_8X8]");
+                             "vp9_coef_update_probs_8x8[BLOCK_TYPES]");
   print_tree_update_for_type(f, tree_update_hist_16x16, BLOCK_TYPES,
-                             "vp9_coef_update_probs_16x16[BLOCK_TYPES_16X16]");
-  print_tree_update_for_type(f, tree_update_hist_32x32, BLOCK_TYPES_32X32,
-                             "vp9_coef_update_probs_32x32[BLOCK_TYPES_32X32]");
+                             "vp9_coef_update_probs_16x16[BLOCK_TYPES]");
+  print_tree_update_for_type(f, tree_update_hist_32x32, BLOCK_TYPES,
+                             "vp9_coef_update_probs_32x32[BLOCK_TYPES]");
 
   fclose(f);
   f = fopen("treeupdate.bin", "wb");

@@ -336,6 +336,6 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
                     BLOCK_TYPES, cm->fc.coef_counts_16x16,
                     count_sat, update_factor);
   update_coef_probs(cm->fc.coef_probs_32x32, cm->fc.pre_coef_probs_32x32,
-                    BLOCK_TYPES_32X32, cm->fc.coef_counts_32x32,
+                    BLOCK_TYPES, cm->fc.coef_counts_32x32,
                     count_sat, update_factor);
 }

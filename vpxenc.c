@@ -2442,6 +2442,7 @@ static void test_decode(struct stream_state  *stream,
     int y[2], u[2], v[2];
     find_mismatch(&stream->ref_enc.img, &stream->ref_dec.img,
                   y, u, v);
+    stream->decoder.err = 1;
     warn_or_exit_on_error(&stream->decoder, fatal == TEST_DECODE_FATAL,
                           "Stream %d: Encode/decode mismatch on frame %d"
                           " at Y[%d, %d], U[%d, %d], V[%d, %d]",

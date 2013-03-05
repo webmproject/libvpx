@@ -273,7 +273,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   fill_token_costs(cpi->mb.token_costs[TX_16X16],
                    cpi->common.fc.coef_probs_16x16, BLOCK_TYPES);
   fill_token_costs(cpi->mb.token_costs[TX_32X32],
-                   cpi->common.fc.coef_probs_32x32, BLOCK_TYPES_32X32);
+                   cpi->common.fc.coef_probs_32x32, BLOCK_TYPES);
 
   /*rough estimate for costing*/
   cpi->common.kf_ymode_probs_index = cpi->common.base_qindex >> 4;
@@ -380,25 +380,27 @@ int vp9_uvsse(MACROBLOCK *x) {
 }
 
 static INLINE int cost_coeffs(MACROBLOCK *mb,
-                              BLOCKD *b, PLANE_TYPE type,
+                              int ib, PLANE_TYPE type,
                               ENTROPY_CONTEXT *a,
                               ENTROPY_CONTEXT *l,
                               TX_SIZE tx_size) {
-  int pt;
   MACROBLOCKD *const xd = &mb->e_mbd;
-  const int ib = (int)(b - xd->block);
+  MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  const BLOCK_SIZE_TYPE sb_type = mbmi->sb_type;
+  int pt;
   const int eob = xd->eobs[ib];
   int c = 0;
   int cost = 0, seg_eob;
-  const int segment_id = xd->mode_info_context->mbmi.segment_id;
+  const int segment_id = mbmi->segment_id;
   const int *scan;
-  int16_t *qcoeff_ptr = b->qcoeff;
-  const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
-  const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-                          get_tx_type(xd, b) : DCT_DCT;
+  const int16_t *qcoeff_ptr = xd->qcoeff + ib * 16;
+  const int ref = mbmi->ref_frame != INTRA_FRAME;
+  const TX_TYPE tx_type = (sb_type == BLOCK_SIZE_MB16X16 &&
+                           type == PLANE_TYPE_Y_WITH_DC) ?
+                          get_tx_type(xd, &xd->block[ib]) : DCT_DCT;
   unsigned int (*token_costs)[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
       mb->token_costs[tx_size][type][ref];
-  ENTROPY_CONTEXT a_ec = *a, l_ec = *l;
+  ENTROPY_CONTEXT a_ec, l_ec;
   ENTROPY_CONTEXT *const a1 = a +
       sizeof(ENTROPY_CONTEXT_PLANES)/sizeof(ENTROPY_CONTEXT);
   ENTROPY_CONTEXT *const l1 = l +
@@ -406,6 +408,8 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
 
   switch (tx_size) {
     case TX_4X4:
+      a_ec = *a;
+      l_ec = *l;
       scan = vp9_default_zig_zag1d_4x4;
       seg_eob = 16;
       if (type == PLANE_TYPE_Y_WITH_DC) {
@@ -426,8 +430,6 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
       scan = vp9_default_zig_zag1d_16x16;
       seg_eob = 256;
       if (type == PLANE_TYPE_UV) {
-        const int uv_idx = ib - 16;
-        qcoeff_ptr = xd->sb_coeff_data.qcoeff + 1024 + 64 * uv_idx;
         a_ec = (a[0] + a[1] + a1[0] + a1[1]) != 0;
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
       } else {
@@ -438,11 +440,22 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
       seg_eob = 1024;
-      qcoeff_ptr = xd->sb_coeff_data.qcoeff;
-      a_ec = (a[0] + a[1] + a[2] + a[3] +
-              a1[0] + a1[1] + a1[2] + a1[3]) != 0;
-      l_ec = (l[0] + l[1] + l[2] + l[3] +
-              l1[0] + l1[1] + l1[2] + l1[3]) != 0;
+      if (type == PLANE_TYPE_UV) {
+        ENTROPY_CONTEXT *a2, *a3, *l2, *l3;
+        a2 = a1 + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+        a3 = a2 + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+        l2 = l1 + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+        l3 = l2 + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+        a_ec = (a[0] + a[1] + a1[0] + a1[1] +
+                a2[0] + a2[1] + a3[0] + a3[1]) != 0;
+        l_ec = (l[0] + l[1] + l1[0] + l1[1] +
+                l2[0] + l2[1] + l3[0] + l3[1]) != 0;
+      } else {
+        a_ec = (a[0] + a[1] + a[2] + a[3] +
+                a1[0] + a1[1] + a1[2] + a1[3]) != 0;
+        l_ec = (l[0] + l[1] + l[2] + l[3] +
+                l1[0] + l1[1] + l1[2] + l1[3]) != 0;
+      }
       break;
     default:
       abort();
@@ -508,7 +521,7 @@ static int rdcost_mby_4x4(MACROBLOCK *mb, int backup) {
   }
 
   for (b = 0; b < 16; b++)
-    cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_Y_WITH_DC,
+    cost += cost_coeffs(mb, b, PLANE_TYPE_Y_WITH_DC,
                         ta + vp9_block2above[TX_4X4][b],
                         tl + vp9_block2left[TX_4X4][b],
                         TX_4X4);
@@ -551,7 +564,7 @@ static int rdcost_mby_8x8(MACROBLOCK *mb, int backup) {
   }
 
   for (b = 0; b < 16; b += 4)
-    cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_Y_WITH_DC,
+    cost += cost_coeffs(mb, b, PLANE_TYPE_Y_WITH_DC,
                         ta + vp9_block2above[TX_8X8][b],
                         tl + vp9_block2left[TX_8X8][b],
                         TX_8X8);
@@ -591,7 +604,7 @@ static int rdcost_mby_16x16(MACROBLOCK *mb, int backup) {
     tl = (ENTROPY_CONTEXT *)xd->left_context;
   }
 
-  cost = cost_coeffs(mb, xd->block, PLANE_TYPE_Y_WITH_DC, ta, tl, TX_16X16);
+  cost = cost_coeffs(mb, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, TX_16X16);
   return cost;
 }
 
@@ -741,7 +754,7 @@ static int rdcost_sby_32x32(MACROBLOCK *x, int backup) {
     tl = (ENTROPY_CONTEXT *) xd->left_context;
   }
 
-  return cost_coeffs(x, xd->block, PLANE_TYPE_Y_WITH_DC, ta, tl, TX_32X32);
+  return cost_coeffs(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, TX_32X32);
 }
 
 static int vp9_sb_block_error_c(int16_t *coeff, int16_t *dqcoeff,
@@ -761,9 +774,7 @@ static int vp9_sb_block_error_c(int16_t *coeff, int16_t *dqcoeff,
 static void super_block_yrd_32x32(MACROBLOCK *x,
                                   int *rate, int *distortion, int *skippable,
                                   int backup) {
-  SUPERBLOCK  * const x_sb = &x->sb_coeff_data;
-  MACROBLOCKD * const xd = &x->e_mbd;
-  SUPERBLOCKD * const xd_sb = &xd->sb_coeff_data;
+  MACROBLOCKD *const xd = &x->e_mbd;
 #if DEBUG_ERROR
   int16_t out[1024];
 #endif
@@ -771,17 +782,17 @@ static void super_block_yrd_32x32(MACROBLOCK *x,
   vp9_transform_sby_32x32(x);
   vp9_quantize_sby_32x32(x);
 #if DEBUG_ERROR
-  vp9_short_idct32x32(xd_sb->dqcoeff, out, 64);
+  vp9_short_idct32x32(xd->dqcoeff, out, 64);
 #endif
 
-  *distortion = vp9_sb_block_error_c(x_sb->coeff, xd_sb->dqcoeff, 1024);
+  *distortion = vp9_sb_block_error_c(x->coeff, xd->dqcoeff, 1024);
 
 #if DEBUG_ERROR
   printf("IDCT/FDCT error 32x32: %d (d: %d)\n",
-         vp9_block_error_c(x_sb->src_diff, out, 1024), *distortion);
+         vp9_block_error_c(x->src_diff, out, 1024), *distortion);
 #endif
   *rate       = rdcost_sby_32x32(x, backup);
-  *skippable  = vp9_sby_is_skippable_32x32(&x->e_mbd);
+  *skippable  = vp9_sby_is_skippable_32x32(xd);
 }
 
 static void super_block_yrd(VP9_COMP *cpi,
@@ -805,7 +816,7 @@ static void super_block_yrd(VP9_COMP *cpi,
     s[n] = 1;
   }
 
-  vp9_subtract_sby_s_c(x->sb_coeff_data.src_diff, src, src_y_stride,
+  vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride,
                        dst, dst_y_stride);
   super_block_yrd_32x32(x, &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32], 1);
 
@@ -894,7 +905,7 @@ static void super_block_64_yrd(VP9_COMP *cpi,
 
     xd->above_context = &t_above[TX_32X32][x_idx << 1];
     xd->left_context = &t_left[TX_32X32][y_idx << 1];
-    vp9_subtract_sby_s_c(x->sb_coeff_data.src_diff,
+    vp9_subtract_sby_s_c(x->src_diff,
                          src + 32 * x_idx + 32 * y_idx * src_y_stride,
                          src_y_stride,
                          dst + 32 * x_idx + 32 * y_idx * dst_y_stride,
@@ -1049,7 +1060,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
     tempa = ta;
     templ = tl;
 
-    ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ, TX_4X4);
+    ratey = cost_coeffs(x, b - xd->block,
+                        PLANE_TYPE_Y_WITH_DC, &tempa, &templ, TX_4X4);
     rate += ratey;
     distortion = vp9_block_error(be->coeff, b->dqcoeff, 16) >> 2;
 
@@ -1353,7 +1365,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       ta1 = ta0 + 1;
       tl1 = tl0 + 1;
 
-      rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
+      rate_t = cost_coeffs(x, idx, PLANE_TYPE_Y_WITH_DC,
                            ta0, tl0, TX_8X8);
 
       rate += rate_t;
@@ -1386,12 +1398,12 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           x->quantize_b_4x4(x, ib + iblock[i]);
         }
         distortion += vp9_block_error_c(be->coeff, b->dqcoeff, 16 << do_two);
-        rate_t += cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC,
+        rate_t += cost_coeffs(x, ib + iblock[i], PLANE_TYPE_Y_WITH_DC,
                               i&1 ? ta1 : ta0, i&2 ? tl1 : tl0,
                               TX_4X4);
         if (do_two) {
           i++;
-          rate_t += cost_coeffs(x, b + 1, PLANE_TYPE_Y_WITH_DC,
+          rate_t += cost_coeffs(x, ib + iblock[i], PLANE_TYPE_Y_WITH_DC,
                                 i&1 ? ta1 : ta0, i&2 ? tl1 : tl0,
                                 TX_4X4);
         }
@@ -1498,7 +1510,7 @@ static int rd_cost_mbuv_4x4(MACROBLOCK *mb, int backup) {
   }
 
   for (b = 16; b < 24; b++)
-    cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_UV,
+    cost += cost_coeffs(mb, b, PLANE_TYPE_UV,
                         ta + vp9_block2above[TX_4X4][b],
                         tl + vp9_block2left[TX_4X4][b],
                         TX_4X4);
@@ -1539,7 +1551,7 @@ static int rd_cost_mbuv_8x8(MACROBLOCK *mb, int backup) {
   }
 
   for (b = 16; b < 24; b += 4)
-    cost += cost_coeffs(mb, xd->block + b, PLANE_TYPE_UV,
+    cost += cost_coeffs(mb, b, PLANE_TYPE_UV,
                         ta + vp9_block2above[TX_8X8][b],
                         tl + vp9_block2left[TX_8X8][b], TX_8X8);
 
@@ -1578,7 +1590,7 @@ static int rd_cost_sbuv_16x16(MACROBLOCK *x, int backup) {
   }
 
   for (b = 16; b < 24; b += 4)
-    cost += cost_coeffs(x, xd->block + b, PLANE_TYPE_UV,
+    cost += cost_coeffs(x, b * 4, PLANE_TYPE_UV,
                         ta + vp9_block2above[TX_8X8][b],
                         tl + vp9_block2left[TX_8X8][b], TX_16X16);
 
@@ -1594,8 +1606,8 @@ static void rd_inter32x32_uv_16x16(MACROBLOCK *x, int *rate,
   vp9_quantize_sbuv_16x16(x);
 
   *rate       = rd_cost_sbuv_16x16(x, backup);
-  *distortion = vp9_block_error_c(x->sb_coeff_data.coeff + 1024,
-                                   xd->sb_coeff_data.dqcoeff + 1024, 512) >> 2;
+  *distortion = vp9_block_error_c(x->coeff + 1024,
+                                  xd->dqcoeff + 1024, 512) >> 2;
   *skip       = vp9_sbuv_is_skippable_16x16(xd);
 }
 
@@ -1607,8 +1619,8 @@ static int64_t rd_inter32x32_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   const uint8_t *vsrc = x->src.v_buffer, *vdst = xd->dst.v_buffer;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
 
-  if (mbmi->txfm_size == TX_32X32) {
-    vp9_subtract_sbuv_s_c(x->sb_coeff_data.src_diff,
+  if (mbmi->txfm_size >= TX_16X16) {
+    vp9_subtract_sbuv_s_c(x->src_diff,
                           usrc, vsrc, src_uv_stride,
                           udst, vdst, dst_uv_stride);
     rd_inter32x32_uv_16x16(x, rate, distortion, skip, 1);
@@ -1787,8 +1799,8 @@ static void super_block_uvrd(MACROBLOCK *x,
   const uint8_t *vsrc = x->src.v_buffer, *vdst = xd->dst.v_buffer;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
 
-  if (mbmi->txfm_size == TX_32X32) {
-    vp9_subtract_sbuv_s_c(x->sb_coeff_data.src_diff,
+  if (mbmi->txfm_size >= TX_16X16) {
+    vp9_subtract_sbuv_s_c(x->src_diff,
                           usrc, vsrc, src_uv_stride,
                           udst, vdst, dst_uv_stride);
     rd_inter32x32_uv_16x16(x, rate, distortion, skippable, 1);
@@ -1840,6 +1852,46 @@ static void super_block_uvrd(MACROBLOCK *x,
   }
 }
 
+static int rd_cost_sb64uv_32x32(MACROBLOCK *x, int backup) {
+  int b;
+  int cost = 0;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  ENTROPY_CONTEXT_PLANES t_above[4], t_left[4];
+  ENTROPY_CONTEXT *ta, *tl;
+
+  if (backup) {
+    vpx_memcpy(&t_above, xd->above_context, sizeof(ENTROPY_CONTEXT_PLANES) * 4);
+    vpx_memcpy(&t_left, xd->left_context, sizeof(ENTROPY_CONTEXT_PLANES) * 4);
+
+    ta = (ENTROPY_CONTEXT *) &t_above;
+    tl = (ENTROPY_CONTEXT *) &t_left;
+  } else {
+    ta = (ENTROPY_CONTEXT *)xd->above_context;
+    tl = (ENTROPY_CONTEXT *)xd->left_context;
+  }
+
+  for (b = 16; b < 24; b += 4)
+    cost += cost_coeffs(x, b * 16, PLANE_TYPE_UV,
+                        ta + vp9_block2above[TX_8X8][b],
+                        tl + vp9_block2left[TX_8X8][b], TX_32X32);
+
+  return cost;
+}
+
+static void rd_inter64x64_uv_32x32(MACROBLOCK *x, int *rate,
+                                   int *distortion, int *skip,
+                                   int backup) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+
+  vp9_transform_sb64uv_32x32(x);
+  vp9_quantize_sb64uv_32x32(x);
+
+  *rate       = rd_cost_sb64uv_32x32(x, backup);
+  *distortion = vp9_block_error_c(x->coeff + 4096,
+                                  xd->dqcoeff + 4096, 2048);
+  *skip       = vp9_sb64uv_is_skippable_32x32(xd);
+}
+
 static void super_block_64_uvrd(MACROBLOCK *x,
                                 int *rate,
                                 int *distortion,
@@ -1854,10 +1906,15 @@ static void super_block_64_uvrd(MACROBLOCK *x,
   ENTROPY_CONTEXT_PLANES *tl_orig = xd->left_context;
   int d = 0, r = 0, n, s = 1;
 
+  // FIXME not needed if tx=32x32
   memcpy(t_above, xd->above_context, sizeof(t_above));
   memcpy(t_left,  xd->left_context,  sizeof(t_left));
 
   if (mbmi->txfm_size == TX_32X32) {
+    vp9_subtract_sb64uv_s_c(x->src_diff, usrc, vsrc, src_uv_stride,
+                            udst, vdst, dst_uv_stride);
+    rd_inter64x64_uv_32x32(x, &r, &d, &s, 1);
+  } else if (mbmi->txfm_size == TX_16X16) {
     int n;
 
     *rate = 0;
@@ -1865,7 +1922,7 @@ static void super_block_64_uvrd(MACROBLOCK *x,
       int x_idx = n & 1, y_idx = n >> 1;
       int r_tmp, d_tmp, s_tmp;
 
-      vp9_subtract_sbuv_s_c(x->sb_coeff_data.src_diff,
+      vp9_subtract_sbuv_s_c(x->src_diff,
                             usrc + x_idx * 16 + y_idx * 16 * src_uv_stride,
                             vsrc + x_idx * 16 + y_idx * 16 * src_uv_stride,
                             src_uv_stride,
@@ -2168,7 +2225,7 @@ static int64_t encode_inter_mb_segment(MACROBLOCK *x,
       x->quantize_b_4x4(x, i);
       thisdistortion = vp9_block_error(be->coeff, bd->dqcoeff, 16);
       *distortion += thisdistortion;
-      *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
+      *labelyrate += cost_coeffs(x, i, PLANE_TYPE_Y_WITH_DC,
                                  ta + vp9_block2above[TX_4X4][i],
                                  tl + vp9_block2left[TX_4X4][i], TX_4X4);
     }
@@ -2231,10 +2288,10 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
           x->quantize_b_8x8(x, idx);
           thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
           otherdist += thisdistortion;
-          othercost += cost_coeffs(x, bd2, PLANE_TYPE_Y_WITH_DC,
-                                     tacp + vp9_block2above[TX_8X8][idx],
-                                     tlcp + vp9_block2left[TX_8X8][idx],
-                                     TX_8X8);
+          othercost += cost_coeffs(x, idx, PLANE_TYPE_Y_WITH_DC,
+                                   tacp + vp9_block2above[TX_8X8][idx],
+                                   tlcp + vp9_block2left[TX_8X8][idx],
+                                   TX_8X8);
         }
         for (j = 0; j < 4; j += 2) {
           bd = &xd->block[ib + iblock[j]];
@@ -2243,11 +2300,12 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
           x->quantize_b_4x4_pair(x, ib + iblock[j], ib + iblock[j] + 1);
           thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
           *distortion += thisdistortion;
-          *labelyrate += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
+          *labelyrate += cost_coeffs(x, ib + iblock[j], PLANE_TYPE_Y_WITH_DC,
                            ta + vp9_block2above[TX_4X4][ib + iblock[j]],
                            tl + vp9_block2left[TX_4X4][ib + iblock[j]],
                            TX_4X4);
-          *labelyrate += cost_coeffs(x, bd + 1, PLANE_TYPE_Y_WITH_DC,
+          *labelyrate += cost_coeffs(x, ib + iblock[j] + 1,
+                           PLANE_TYPE_Y_WITH_DC,
                            ta + vp9_block2above[TX_4X4][ib + iblock[j] + 1],
                            tl + vp9_block2left[TX_4X4][ib + iblock[j]],
                            TX_4X4);
@@ -2261,11 +2319,12 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
             x->quantize_b_4x4_pair(x, ib + iblock[j], ib + iblock[j]);
             thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
             otherdist += thisdistortion;
-            othercost += cost_coeffs(x, bd, PLANE_TYPE_Y_WITH_DC,
+            othercost += cost_coeffs(x, ib + iblock[j], PLANE_TYPE_Y_WITH_DC,
                            tacp + vp9_block2above[TX_4X4][ib + iblock[j]],
                            tlcp + vp9_block2left[TX_4X4][ib + iblock[j]],
                            TX_4X4);
-            othercost += cost_coeffs(x, bd + 1, PLANE_TYPE_Y_WITH_DC,
+            othercost += cost_coeffs(x, ib + iblock[j] + 1,
+                           PLANE_TYPE_Y_WITH_DC,
                            tacp + vp9_block2above[TX_4X4][ib + iblock[j] + 1],
                            tlcp + vp9_block2left[TX_4X4][ib + iblock[j]],
                            TX_4X4);
@@ -2275,7 +2334,7 @@ static int64_t encode_inter_mb_segment_8x8(MACROBLOCK *x,
         x->quantize_b_8x8(x, idx);
         thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
         *distortion += thisdistortion;
-        *labelyrate += cost_coeffs(x, bd2, PLANE_TYPE_Y_WITH_DC,
+        *labelyrate += cost_coeffs(x, idx, PLANE_TYPE_Y_WITH_DC,
                                    ta + vp9_block2above[TX_8X8][idx],
                                    tl + vp9_block2left[TX_8X8][idx], TX_8X8);
       }
