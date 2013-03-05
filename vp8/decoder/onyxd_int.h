@@ -9,8 +9,9 @@
  */
 
 
-#ifndef __INC_VP8D_INT_H
-#define __INC_VP8D_INT_H
+#ifndef ONYXD_INT_H_
+#define ONYXD_INT_H_
+
 #include "vpx_config.h"
 #include "vp8/common/onyxd.h"
 #include "treereader.h"
@@ -145,4 +146,4 @@ int vp8_remove_decoder_instances(struct frame_buffers *fb);
     } while(0)
 #endif
 
-#endif
+#endif  // ONYXD_INT_H_
