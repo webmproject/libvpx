@@ -4009,7 +4009,7 @@ int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
                               vp9_ppflags_t *flags) {
   VP9_COMP *cpi = (VP9_COMP *) comp;
 
-  if (cpi->refresh_alt_ref_frame)
+  if (!cpi->common.show_frame)
     return -1;
   else {
     int ret;

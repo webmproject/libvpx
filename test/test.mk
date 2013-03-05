@@ -68,6 +68,7 @@ LIBVPX_TEST_SRCS-yes                   += vp9_boolcoder_test.cc
 
 # IDCT test currently depends on FDCT function
 LIBVPX_TEST_SRCS-yes                   += idct8x8_test.cc
+LIBVPX_TEST_SRCS-yes                   += superframe_test.cc
 LIBVPX_TEST_SRCS-yes                   += tile_independence_test.cc
 endif
 

@@ -203,6 +203,12 @@ class EncoderTest {
   virtual void DecompressedFrameHook(const vpx_image_t& img,
                                      vpx_codec_pts_t pts) {}
 
+  // Hook that can modify the encoder's output data
+  virtual const vpx_codec_cx_pkt_t * MutateEncoderOutputHook(
+      const vpx_codec_cx_pkt_t *pkt) {
+    return pkt;
+  }
+
   bool                 abort_;
   vpx_codec_enc_cfg_t  cfg_;
   unsigned int         passes_;

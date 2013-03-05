@@ -169,6 +169,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
       bool has_cxdata = false;
       bool has_dxdata = false;
       while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
+        pkt = MutateEncoderOutputHook(pkt);
         again = true;
         switch (pkt->kind) {
           case VPX_CODEC_CX_FRAME_PKT:
