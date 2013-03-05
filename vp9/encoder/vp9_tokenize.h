@@ -37,8 +37,20 @@ int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd);
 int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd);
 int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd);
 int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd);
+int vp9_sby_is_skippable_16x16(MACROBLOCKD *xd);
+int vp9_sby_is_skippable_8x8(MACROBLOCKD *xd);
+int vp9_sby_is_skippable_4x4(MACROBLOCKD *xd);
 int vp9_sbuv_is_skippable_16x16(MACROBLOCKD *xd);
+int vp9_sbuv_is_skippable_8x8(MACROBLOCKD *xd);
+int vp9_sbuv_is_skippable_4x4(MACROBLOCKD *xd);
+int vp9_sb64y_is_skippable_32x32(MACROBLOCKD *xd);
+int vp9_sb64y_is_skippable_16x16(MACROBLOCKD *xd);
+int vp9_sb64y_is_skippable_8x8(MACROBLOCKD *xd);
+int vp9_sb64y_is_skippable_4x4(MACROBLOCKD *xd);
 int vp9_sb64uv_is_skippable_32x32(MACROBLOCKD *xd);
+int vp9_sb64uv_is_skippable_16x16(MACROBLOCKD *xd);
+int vp9_sb64uv_is_skippable_8x8(MACROBLOCKD *xd);
+int vp9_sb64uv_is_skippable_4x4(MACROBLOCKD *xd);
 
 struct VP9_COMP;
 

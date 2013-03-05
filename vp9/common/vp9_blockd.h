@@ -460,20 +460,20 @@ extern const uint8_t vp9_block2above_sb64[TX_SIZE_MAX_SB][384];
 #define USE_ADST_FOR_I8X8_4X4     1
 #define USE_ADST_PERIPHERY_ONLY   1
 
-static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
+static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   // TODO(debargha): explore different patterns for ADST usage when blocksize
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
-  int ib = (int)(b - xd->block);
+  // TODO(rbultje, debargha): Explore ADST usage for superblocks
+  if (xd->mode_info_context->mbmi.sb_type)
+    return tx_type;
   if (ib >= 16)
     return tx_type;
   if (xd->lossless)
     return DCT_DCT;
-  // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.sb_type)
-    return tx_type;
   if (xd->mode_info_context->mbmi.mode == B_PRED &&
       xd->q_index < ACTIVE_HT) {
+    const BLOCKD *b = &xd->block[ib];
     tx_type = txfm_map(
 #if CONFIG_NEWBINTRAMODES
         b->bmi.as_mode.first == B_CONTEXT_PRED ? b->bmi.as_mode.context :
@@ -481,6 +481,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
         b->bmi.as_mode.first);
   } else if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
              xd->q_index < ACTIVE_HT) {
+    const BLOCKD *b = &xd->block[ib];
 #if USE_ADST_FOR_I8X8_4X4
 #if USE_ADST_PERIPHERY_ONLY
     // Use ADST for periphery blocks only
@@ -517,18 +518,18 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
   return tx_type;
 }
 
-static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
+static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
   // TODO(debargha): explore different patterns for ADST usage when blocksize
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
-  int ib = (int)(b - xd->block);
-  if (ib >= 16)
-    return tx_type;
   // TODO(rbultje, debargha): Explore ADST usage for superblocks
   if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
+  if (ib >= 16)
+    return tx_type;
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
       xd->q_index < ACTIVE_HT8) {
+    const BLOCKD *b = &xd->block[ib];
     // TODO(rbultje): MB_PREDICTION_MODE / B_PREDICTION_MODE should be merged
     // or the relationship otherwise modified to address this type conversion.
     tx_type = txfm_map(pred_mode_conv(
@@ -552,35 +553,13 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
   return tx_type;
 }
 
-static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
+static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type = DCT_DCT;
-  int ib = (int)(b - xd->block);
   if (ib >= 16)
-    return tx_type;
-  // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.sb_type)
     return tx_type;
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
       xd->q_index < ACTIVE_HT16) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
-  }
-  return tx_type;
-}
-
-static TX_TYPE get_tx_type(const MACROBLOCKD *xd, const BLOCKD *b) {
-  TX_TYPE tx_type = DCT_DCT;
-  int ib = (int)(b - xd->block);
-  if (ib >= 16)
-    return tx_type;
-  if (xd->mode_info_context->mbmi.txfm_size == TX_16X16) {
-    tx_type = get_tx_type_16x16(xd, b);
-  }
-  if (xd->mode_info_context->mbmi.txfm_size  == TX_8X8) {
-    ib = (ib & 8) + ((ib & 4) >> 1);
-    tx_type = get_tx_type_8x8(xd, &xd->block[ib]);
-  }
-  if (xd->mode_info_context->mbmi.txfm_size  == TX_4X4) {
-    tx_type = get_tx_type_4x4(xd, b);
   }
   return tx_type;
 }

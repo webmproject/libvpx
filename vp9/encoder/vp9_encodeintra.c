@@ -50,7 +50,7 @@ void vp9_encode_intra4x4block(MACROBLOCK *x, int ib) {
   vp9_intra4x4_predict(&x->e_mbd, b, b->bmi.as_mode.first, b->predictor);
   vp9_subtract_b(be, b, 16);
 
-  tx_type = get_tx_type_4x4(&x->e_mbd, b);
+  tx_type = get_tx_type_4x4(&x->e_mbd, ib);
   if (tx_type != DCT_DCT) {
     vp9_short_fht4x4(be->src_diff, be->coeff, 16, tx_type);
     vp9_ht_quantize_b_4x4(x, ib, tx_type);
@@ -152,7 +152,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
   if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
     int idx = (ib & 0x02) ? (ib + 2) : ib;
 
-    tx_type = get_tx_type_8x8(xd, &xd->block[ib]);
+    tx_type = get_tx_type_8x8(xd, ib);
     if (tx_type != DCT_DCT) {
       vp9_short_fht8x8(be->src_diff, (x->block + idx)->coeff, 16, tx_type);
       x->quantize_b_8x8(x, idx);
@@ -167,12 +167,13 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
     for (i = 0; i < 4; i++) {
       b = &xd->block[ib + iblock[i]];
       be = &x->block[ib + iblock[i]];
-      tx_type = get_tx_type_4x4(xd, b);
+      tx_type = get_tx_type_4x4(xd, ib + iblock[i]);
       if (tx_type != DCT_DCT) {
         vp9_short_fht4x4(be->src_diff, be->coeff, 16, tx_type);
         vp9_ht_quantize_b_4x4(x, ib + iblock[i], tx_type);
         vp9_short_iht4x4(b->dqcoeff, b->diff, 16, tx_type);
-      } else if (!(i & 1) && get_tx_type_4x4(xd, b + 1) == DCT_DCT) {
+      } else if (!(i & 1) &&
+                 get_tx_type_4x4(xd, ib + iblock[i] + 1) == DCT_DCT) {
         x->fwd_txm8x4(be->src_diff, be->coeff, 32);
         x->quantize_b_4x4_pair(x, ib + iblock[i], ib + iblock[i] + 1);
         vp9_inverse_transform_b_4x4(xd, xd->eobs[ib + iblock[i]],

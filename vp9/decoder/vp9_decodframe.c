@@ -201,8 +201,7 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
 
 static void decode_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc) {
-  BLOCKD *bd = &xd->block[0];
-  TX_TYPE tx_type = get_tx_type_16x16(xd, bd);
+  TX_TYPE tx_type = get_tx_type_16x16(xd, 0);
 #ifdef DEC_DEBUG
   if (dec_debug) {
     int i;
@@ -240,7 +239,7 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
                        BOOL_DECODER* const bc) {
   // First do Y
   // if the first one is DCT_DCT assume all the rest are as well
-  TX_TYPE tx_type = get_tx_type_8x8(xd, &xd->block[0]);
+  TX_TYPE tx_type = get_tx_type_8x8(xd, 0);
 #ifdef DEC_DEBUG
   if (dec_debug) {
     int i;
@@ -267,7 +266,7 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
         int i8x8mode = b->bmi.as_mode.first;
         vp9_intra8x8_predict(xd, b, i8x8mode, b->predictor);
       }
-      tx_type = get_tx_type_8x8(xd, &xd->block[ib]);
+      tx_type = get_tx_type_8x8(xd, ib);
       if (tx_type != DCT_DCT) {
         vp9_ht_dequant_idct_add_8x8_c(tx_type, q, dq, pre, dst, 16, stride,
                                       xd->eobs[idx]);
@@ -341,7 +340,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       vp9_intra8x8_predict(xd, b, i8x8mode, b->predictor);
       for (j = 0; j < 4; j++) {
         b = &xd->block[ib + iblock[j]];
-        tx_type = get_tx_type_4x4(xd, b);
+        tx_type = get_tx_type_4x4(xd, ib + iblock[j]);
         if (tx_type != DCT_DCT) {
           vp9_ht_dequant_idct_add_c(tx_type, b->qcoeff,
                                     b->dequant, b->predictor,
@@ -375,7 +374,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
         eobtotal += vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_Y_WITH_DC, i);
 
       vp9_intra4x4_predict(xd, b, b_mode, b->predictor);
-      tx_type = get_tx_type_4x4(xd, b);
+      tx_type = get_tx_type_4x4(xd, i);
       if (tx_type != DCT_DCT) {
         vp9_ht_dequant_idct_add_c(tx_type, b->qcoeff,
                                   b->dequant, b->predictor,
@@ -397,7 +396,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                            xd->dst.v_buffer,
                            xd->dst.uv_stride,
                            xd);
-  } else if (mode == SPLITMV || get_tx_type_4x4(xd, &xd->block[0]) == DCT_DCT) {
+  } else if (mode == SPLITMV || get_tx_type_4x4(xd, 0) == DCT_DCT) {
     xd->itxm_add_y_block(xd->qcoeff,
                           xd->block[0].dequant,
                           xd->predictor,
@@ -431,7 +430,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
 #endif
     for (i = 0; i < 16; i++) {
       BLOCKD *b = &xd->block[i];
-      tx_type = get_tx_type_4x4(xd, b);
+      tx_type = get_tx_type_4x4(xd, i);
       if (tx_type != DCT_DCT) {
         vp9_ht_dequant_idct_add_c(tx_type, b->qcoeff,
                                   b->dequant, b->predictor,
@@ -517,13 +516,24 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
             xd->block[20].dequant, xd->dst.v_buffer, xd->dst.v_buffer,
             xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[320]);
         break;
-      case TX_16X16:  // FIXME(rbultje): adst
+      case TX_16X16:
         for (n = 0; n < 16; n++) {
           const int x_idx = n & 3, y_idx = n >> 2;
-          vp9_dequant_idct_add_16x16(xd->qcoeff + n * 256, xd->block[0].dequant,
-              xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-              xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-              xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
+          const TX_TYPE tx_type = get_tx_type_16x16(xd,
+                                                    (y_idx * 16 + x_idx) * 4);
+          if (tx_type == DCT_DCT) {
+            vp9_dequant_idct_add_16x16(xd->qcoeff + n * 256,
+                xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
+          } else {
+            vp9_ht_dequant_idct_add_16x16_c(tx_type, xd->qcoeff + n * 256,
+                xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
+          }
         }
         for (n = 0; n < 4; n++) {
           const int x_idx = n & 1, y_idx = n >> 1;
@@ -539,13 +549,23 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[320 + n * 16]);
         }
         break;
-      case TX_8X8:  // FIXME(rbultje): adst
+      case TX_8X8:
         for (n = 0; n < 64; n++) {
           const int x_idx = n & 7, y_idx = n >> 3;
-          vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64, xd->block[0].dequant,
-              xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
-              xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
-              xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
+          const TX_TYPE tx_type = get_tx_type_8x8(xd, (y_idx * 16 + x_idx) * 2);
+          if (tx_type == DCT_DCT) {
+            vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64,
+                xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
+          } else {
+            vp9_ht_dequant_idct_add_8x8_c(tx_type, xd->qcoeff + n * 64,
+                xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
+          }
         }
         for (n = 0; n < 16; n++) {
           const int x_idx = n & 3, y_idx = n >> 2;
@@ -561,13 +581,22 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[320 + n * 4]);
         }
         break;
-      case TX_4X4:  // FIXME(rbultje): adst
+      case TX_4X4:
         for (n = 0; n < 256; n++) {
           const int x_idx = n & 15, y_idx = n >> 4;
-          xd->itxm_add(xd->qcoeff + n * 16, xd->block[0].dequant,
-              xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
-              xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
-              xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
+          const TX_TYPE tx_type = get_tx_type_4x4(xd, y_idx * 16 + x_idx);
+          if (tx_type == DCT_DCT) {
+            xd->itxm_add(xd->qcoeff + n * 16, xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
+          } else {
+            vp9_ht_dequant_idct_add_c(tx_type, xd->qcoeff + n * 16,
+                xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
+          }
         }
         for (n = 0; n < 64; n++) {
           const int x_idx = n & 7, y_idx = n >> 3;
@@ -649,14 +678,24 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                               xd->dst.v_buffer,
                                               xd->dst.uv_stride, xd);
         break;
-      case TX_16X16:  // FIXME(rbultje): adst
+      case TX_16X16:
         for (n = 0; n < 4; n++) {
           const int x_idx = n & 1, y_idx = n >> 1;
-          vp9_dequant_idct_add_16x16(
-              xd->qcoeff + n * 256, xd->block[0].dequant,
-              xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-              xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-              xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
+          const TX_TYPE tx_type = get_tx_type_16x16(xd,
+                                                    (y_idx * 8 + x_idx) * 4);
+          if (tx_type == DCT_DCT) {
+            vp9_dequant_idct_add_16x16(
+                xd->qcoeff + n * 256, xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
+          } else {
+            vp9_ht_dequant_idct_add_16x16_c(tx_type, xd->qcoeff + n * 256,
+                xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
+          }
         }
         vp9_dequant_idct_add_uv_block_16x16_c(xd->qcoeff + 1024,
                                               xd->block[16].dequant,
@@ -664,13 +703,23 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                               xd->dst.v_buffer,
                                               xd->dst.uv_stride, xd);
         break;
-      case TX_8X8:  // FIXME(rbultje): adst
+      case TX_8X8:
         for (n = 0; n < 16; n++) {
           const int x_idx = n & 3, y_idx = n >> 2;
-          vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64, xd->block[0].dequant,
-              xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
-              xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
-              xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
+          const TX_TYPE tx_type = get_tx_type_8x8(xd, (y_idx * 8 + x_idx) * 2);
+          if (tx_type == DCT_DCT) {
+            vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64,
+                xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
+          } else {
+            vp9_ht_dequant_idct_add_8x8_c(tx_type, xd->qcoeff + n * 64,
+                xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
+          }
         }
         for (n = 0; n < 4; n++) {
           const int x_idx = n & 1, y_idx = n >> 1;
@@ -686,13 +735,22 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[80 + n * 4]);
         }
         break;
-      case TX_4X4:  // FIXME(rbultje): adst
+      case TX_4X4:
         for (n = 0; n < 64; n++) {
           const int x_idx = n & 7, y_idx = n >> 3;
-          xd->itxm_add(xd->qcoeff + n * 16, xd->block[0].dequant,
-              xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
-              xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
-              xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
+          const TX_TYPE tx_type = get_tx_type_4x4(xd, y_idx * 8 + x_idx);
+          if (tx_type == DCT_DCT) {
+            xd->itxm_add(xd->qcoeff + n * 16, xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
+          } else {
+            vp9_ht_dequant_idct_add_c(tx_type, xd->qcoeff + n * 16,
+                xd->block[0].dequant,
+                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
+          }
         }
         for (n = 0; n < 16; n++) {
           const int x_idx = n & 3, y_idx = n >> 2;

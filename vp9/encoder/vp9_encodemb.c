@@ -210,10 +210,10 @@ void vp9_transform_mby_4x4(MACROBLOCK *x) {
 
   for (i = 0; i < 16; i++) {
     BLOCK *b = &x->block[i];
-    TX_TYPE tx_type = get_tx_type_4x4(xd, &xd->block[i]);
+    TX_TYPE tx_type = get_tx_type_4x4(xd, i);
     if (tx_type != DCT_DCT) {
       vp9_short_fht4x4(b->src_diff, b->coeff, 16, tx_type);
-    } else if (!(i & 1) && get_tx_type_4x4(xd, &xd->block[i + 1]) == DCT_DCT) {
+    } else if (!(i & 1) && get_tx_type_4x4(xd, i + 1) == DCT_DCT) {
       x->fwd_txm8x4(x->block[i].src_diff, x->block[i].coeff, 32);
       i++;
     } else {
@@ -241,7 +241,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
 
   for (i = 0; i < 9; i += 8) {
     BLOCK *b = &x->block[i];
-    tx_type = get_tx_type_8x8(xd, &xd->block[i]);
+    tx_type = get_tx_type_8x8(xd, i);
     if (tx_type != DCT_DCT) {
       vp9_short_fht8x8(b->src_diff, b->coeff, 16, tx_type);
     } else {
@@ -250,7 +250,7 @@ void vp9_transform_mby_8x8(MACROBLOCK *x) {
   }
   for (i = 2; i < 11; i += 8) {
     BLOCK *b = &x->block[i];
-    tx_type = get_tx_type_8x8(xd, &xd->block[i]);
+    tx_type = get_tx_type_8x8(xd, i);
     if (tx_type != DCT_DCT) {
       vp9_short_fht8x8(b->src_diff, (b + 2)->coeff, 16, tx_type);
     } else {
@@ -274,7 +274,7 @@ void vp9_transform_mb_8x8(MACROBLOCK *x) {
 void vp9_transform_mby_16x16(MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK *b = &x->block[0];
-  TX_TYPE tx_type = get_tx_type_16x16(xd, &xd->block[0]);
+  TX_TYPE tx_type = get_tx_type_16x16(xd, 0);
   vp9_clear_system_state();
   if (tx_type != DCT_DCT) {
     vp9_short_fht16x16(b->src_diff, b->coeff, 16, tx_type);
@@ -293,35 +293,56 @@ void vp9_transform_sby_32x32(MACROBLOCK *x) {
 }
 
 void vp9_transform_sby_16x16(MACROBLOCK *x) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   int n;
 
   for (n = 0; n < 4; n++) {
     const int x_idx = n & 1, y_idx = n >> 1;
+    const TX_TYPE tx_type = get_tx_type_16x16(xd, (y_idx * 8 + x_idx) * 4);
 
-    x->fwd_txm16x16(x->src_diff + y_idx * 32 * 16 + x_idx * 16,
-                    x->coeff + n * 256, 64);
+    if (tx_type != DCT_DCT) {
+      vp9_short_fht16x16(x->src_diff + y_idx * 32 * 16 + x_idx * 16,
+                         x->coeff + n * 256, 32, tx_type);
+    } else {
+      x->fwd_txm16x16(x->src_diff + y_idx * 32 * 16 + x_idx * 16,
+                      x->coeff + n * 256, 64);
+    }
   }
 }
 
 void vp9_transform_sby_8x8(MACROBLOCK *x) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   int n;
 
   for (n = 0; n < 16; n++) {
     const int x_idx = n & 3, y_idx = n >> 2;
+    const TX_TYPE tx_type = get_tx_type_8x8(xd, (y_idx * 8 + x_idx) * 2);
 
-    x->fwd_txm8x8(x->src_diff + y_idx * 32 * 8 + x_idx * 8,
-                  x->coeff + n * 64, 64);
+    if (tx_type != DCT_DCT) {
+      vp9_short_fht8x8(x->src_diff + y_idx * 32 * 8 + x_idx * 8,
+                       x->coeff + n * 64, 32, tx_type);
+    } else {
+      x->fwd_txm8x8(x->src_diff + y_idx * 32 * 8 + x_idx * 8,
+                    x->coeff + n * 64, 64);
+    }
   }
 }
 
 void vp9_transform_sby_4x4(MACROBLOCK *x) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   int n;
 
   for (n = 0; n < 64; n++) {
     const int x_idx = n & 7, y_idx = n >> 3;
+    const TX_TYPE tx_type = get_tx_type_4x4(xd, y_idx * 8 + x_idx);
 
-    x->fwd_txm4x4(x->src_diff + y_idx * 32 * 4 + x_idx * 4,
-                  x->coeff + n * 16, 64);
+    if (tx_type != DCT_DCT) {
+      vp9_short_fht4x4(x->src_diff + y_idx * 32 * 4 + x_idx * 4,
+                       x->coeff + n * 16, 32, tx_type);
+    } else {
+      x->fwd_txm4x4(x->src_diff + y_idx * 32 * 4 + x_idx * 4,
+                    x->coeff + n * 16, 64);
+    }
   }
 }
 
@@ -371,35 +392,56 @@ void vp9_transform_sb64y_32x32(MACROBLOCK *x) {
 }
 
 void vp9_transform_sb64y_16x16(MACROBLOCK *x) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   int n;
 
   for (n = 0; n < 16; n++) {
     const int x_idx = n & 3, y_idx = n >> 2;
+    const TX_TYPE tx_type = get_tx_type_16x16(xd, (y_idx * 16 + x_idx) * 4);
 
-    x->fwd_txm16x16(x->src_diff + y_idx * 64 * 16 + x_idx * 16,
-                    x->coeff + n * 256, 128);
+    if (tx_type != DCT_DCT) {
+      vp9_short_fht16x16(x->src_diff + y_idx * 64 * 16 + x_idx * 16,
+                         x->coeff + n * 256, 64, tx_type);
+    } else {
+      x->fwd_txm16x16(x->src_diff + y_idx * 64 * 16 + x_idx * 16,
+                      x->coeff + n * 256, 128);
+    }
   }
 }
 
 void vp9_transform_sb64y_8x8(MACROBLOCK *x) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   int n;
 
   for (n = 0; n < 64; n++) {
     const int x_idx = n & 7, y_idx = n >> 3;
+    const TX_TYPE tx_type = get_tx_type_8x8(xd, (y_idx * 16 + x_idx) * 2);
 
-    x->fwd_txm8x8(x->src_diff + y_idx * 64 * 8 + x_idx * 8,
-                  x->coeff + n * 64, 128);
+    if (tx_type != DCT_DCT) {
+      vp9_short_fht8x8(x->src_diff + y_idx * 64 * 8 + x_idx * 8,
+                         x->coeff + n * 64, 64, tx_type);
+    } else {
+      x->fwd_txm8x8(x->src_diff + y_idx * 64 * 8 + x_idx * 8,
+                    x->coeff + n * 64, 128);
+    }
   }
 }
 
 void vp9_transform_sb64y_4x4(MACROBLOCK *x) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   int n;
 
   for (n = 0; n < 256; n++) {
     const int x_idx = n & 15, y_idx = n >> 4;
+    const TX_TYPE tx_type = get_tx_type_4x4(xd, y_idx * 16 + x_idx);
 
-    x->fwd_txm4x4(x->src_diff + y_idx * 64 * 4 + x_idx * 4,
-                  x->coeff + n * 16, 128);
+    if (tx_type != DCT_DCT) {
+      vp9_short_fht8x8(x->src_diff + y_idx * 64 * 4 + x_idx * 4,
+                       x->coeff + n * 16, 64, tx_type);
+    } else {
+      x->fwd_txm4x4(x->src_diff + y_idx * 64 * 4 + x_idx * 4,
+                    x->coeff + n * 16, 128);
+    }
   }
 }
 
@@ -513,7 +555,6 @@ static void optimize_b(VP9_COMMON *const cm,
   int default_eob;
   int const *scan;
   const int mul = 1 + (tx_size == TX_32X32);
-  TX_TYPE tx_type;
 #if CONFIG_CODE_NONZEROCOUNT
   // TODO(debargha): the dynamic programming approach used in this function
   // is not compatible with the true rate cost when nzcs are used. Note
@@ -534,32 +575,21 @@ static void optimize_b(VP9_COMMON *const cm,
 
   switch (tx_size) {
     default:
-    case TX_4X4:
+    case TX_4X4: {
+      const TX_TYPE tx_type = get_tx_type_4x4(xd, ib);
       default_eob = 16;
 #if CONFIG_CODE_NONZEROCOUNT
       nzc_cost = mb->nzc_costs_4x4[nzc_context][ref][type];
 #endif
-      // NOTE: this isn't called (for intra4x4 modes), but will be left in
-      // since it could be used later
-      tx_type = get_tx_type_4x4(&mb->e_mbd, &xd->block[ib]);
-      if (tx_type != DCT_DCT) {
-        switch (tx_type) {
-          case ADST_DCT:
-            scan = vp9_row_scan_4x4;
-            break;
-
-          case DCT_ADST:
-            scan = vp9_col_scan_4x4;
-            break;
-
-          default:
-            scan = vp9_default_zig_zag1d_4x4;
-            break;
-        }
+      if (tx_type == DCT_ADST) {
+        scan = vp9_col_scan_4x4;
+      } else if (tx_type == ADST_DCT) {
+        scan = vp9_row_scan_4x4;
       } else {
         scan = vp9_default_zig_zag1d_4x4;
       }
       break;
+    }
     case TX_8X8:
       scan = vp9_default_zig_zag1d_8x8;
       default_eob = 64;

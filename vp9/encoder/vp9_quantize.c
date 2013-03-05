@@ -21,38 +21,46 @@
 extern int enc_debug;
 #endif
 
+static INLINE int plane_idx(MACROBLOCKD *xd, int b_idx) {
+  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+  if (b_idx < (16 << (sb_type * 2)))
+    return 0;  // Y
+  else if (b_idx < (20 << (sb_type * 2)))
+    return 16;  // U
+  assert(b_idx < (24 << (sb_type * 2)));
+  return 20;  // V
+}
+
 void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  BLOCK *const b = &mb->block[b_idx];
-  BLOCKD *const d = &xd->block[b_idx];
+  BLOCK *const b = &mb->block[0];
+  BLOCKD *const d = &xd->block[0];
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
+  int16_t *coeff_ptr       = mb->coeff + b_idx * 16;
+  int16_t *qcoeff_ptr      = xd->qcoeff + b_idx * 16;
+  int16_t *dqcoeff_ptr     = xd->dqcoeff + b_idx * 16;
   int16_t *zbin_boost_ptr  = b->zrun_zbin_boost;
-  int16_t *coeff_ptr       = b->coeff;
   int16_t *zbin_ptr        = b->zbin;
   int16_t *round_ptr       = b->round;
   int16_t *quant_ptr       = b->quant;
   uint8_t *quant_shift_ptr = b->quant_shift;
-  int16_t *qcoeff_ptr      = d->qcoeff;
-  int16_t *dqcoeff_ptr     = d->dqcoeff;
   int16_t *dequant_ptr     = d->dequant;
   int zbin_oq_value        = b->zbin_extra;
-
-  int const *pt_scan ;
+  const int *pt_scan;
 #if CONFIG_CODE_NONZEROCOUNT
   int nzc = 0;
 #endif
 
+  assert(plane_idx(xd, b_idx) == 0);
   switch (tx_type) {
     case ADST_DCT:
       pt_scan = vp9_row_scan_4x4;
       break;
-
     case DCT_ADST:
       pt_scan = vp9_col_scan_4x4;
       break;
-
     default:
       pt_scan = vp9_default_zig_zag1d_4x4;
       break;
@@ -101,19 +109,20 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
 
 void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  BLOCK *const b = &mb->block[b_idx];
-  BLOCKD *const d = &xd->block[b_idx];
+  const int c_idx = plane_idx(xd, b_idx);
+  BLOCK *const b = &mb->block[c_idx];
+  BLOCKD *const d = &xd->block[c_idx];
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
+  int16_t *coeff_ptr       = mb->coeff + b_idx * 16;
+  int16_t *qcoeff_ptr      = xd->qcoeff + b_idx * 16;
+  int16_t *dqcoeff_ptr     = xd->dqcoeff + b_idx * 16;
   int16_t *zbin_boost_ptr  = b->zrun_zbin_boost;
-  int16_t *coeff_ptr       = b->coeff;
   int16_t *zbin_ptr        = b->zbin;
   int16_t *round_ptr       = b->round;
   int16_t *quant_ptr       = b->quant;
   uint8_t *quant_shift_ptr = b->quant_shift;
-  int16_t *qcoeff_ptr      = d->qcoeff;
-  int16_t *dqcoeff_ptr     = d->dqcoeff;
   int16_t *dequant_ptr     = d->dequant;
   int zbin_oq_value        = b->zbin_extra;
 #if CONFIG_CODE_NONZEROCOUNT
@@ -162,11 +171,11 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
 #endif
 }
 
-void vp9_quantize_mby_4x4_c(MACROBLOCK *x) {
+void vp9_quantize_mby_4x4(MACROBLOCK *x) {
   int i;
 
   for (i = 0; i < 16; i++) {
-    TX_TYPE tx_type = get_tx_type_4x4(&x->e_mbd, &x->e_mbd.block[i]);
+    TX_TYPE tx_type = get_tx_type_4x4(&x->e_mbd, i);
     if (tx_type != DCT_DCT) {
       vp9_ht_quantize_b_4x4(x, i, tx_type);
     } else {
@@ -175,24 +184,25 @@ void vp9_quantize_mby_4x4_c(MACROBLOCK *x) {
   }
 }
 
-void vp9_quantize_mbuv_4x4_c(MACROBLOCK *x) {
+void vp9_quantize_mbuv_4x4(MACROBLOCK *x) {
   int i;
 
   for (i = 16; i < 24; i++)
     x->quantize_b_4x4(x, i);
 }
 
-void vp9_quantize_mb_4x4_c(MACROBLOCK *x) {
-  vp9_quantize_mby_4x4_c(x);
-  vp9_quantize_mbuv_4x4_c(x);
+void vp9_quantize_mb_4x4(MACROBLOCK *x) {
+  vp9_quantize_mby_4x4(x);
+  vp9_quantize_mbuv_4x4(x);
 }
 
 void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  BLOCK *const b = &mb->block[b_idx];
-  BLOCKD *const d = &xd->block[b_idx];
-  int16_t *qcoeff_ptr = d->qcoeff;
-  int16_t *dqcoeff_ptr = d->dqcoeff;
+  int16_t *qcoeff_ptr = xd->qcoeff + 16 * b_idx;
+  int16_t *dqcoeff_ptr = xd->dqcoeff + 16 * b_idx;
+  const int c_idx = plane_idx(xd, b_idx);
+  BLOCK *const b = &mb->block[c_idx];
+  BLOCKD *const d = &xd->block[c_idx];
 
   vpx_memset(qcoeff_ptr, 0, 64 * sizeof(int16_t));
   vpx_memset(dqcoeff_ptr, 0, 64 * sizeof(int16_t));
@@ -203,7 +213,7 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx) {
     int x, y, z, sz;
     int zero_run;
     int16_t *zbin_boost_ptr = b->zrun_zbin_boost;
-    int16_t *coeff_ptr  = b->coeff;
+    int16_t *coeff_ptr  = mb->coeff + 16 * b_idx;
     int16_t *zbin_ptr   = b->zbin;
     int16_t *round_ptr  = b->round;
     int16_t *quant_ptr  = b->quant;
@@ -392,14 +402,16 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
 
 void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  BLOCK *const b = &mb->block[b_idx];
-  BLOCKD *const d = &xd->block[b_idx];
+  const int c_idx = plane_idx(xd, b_idx);
+  BLOCK *const b = &mb->block[c_idx];
+  BLOCKD *const d = &xd->block[c_idx];
+
   quantize(b->zrun_zbin_boost,
-           b->coeff,
+           mb->coeff + 16 * b_idx,
            256, b->skip_block,
            b->zbin, b->round, b->quant, b->quant_shift,
-           d->qcoeff,
-           d->dqcoeff,
+           xd->qcoeff + 16 * b_idx,
+           xd->dqcoeff + 16 * b_idx,
            d->dequant,
            b->zbin_extra,
            &xd->eobs[b_idx],
@@ -409,347 +421,138 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx) {
            vp9_default_zig_zag1d_16x16, 1);
 }
 
-void vp9_quantize_sby_32x32(MACROBLOCK *x) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *const b = &x->block[0];
-  BLOCKD *const d = &xd->block[0];
+void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx) {
+  MACROBLOCKD *const xd = &mb->e_mbd;
+  const int c_idx = plane_idx(xd, b_idx);
+  BLOCK *const b = &mb->block[c_idx];
+  BLOCKD *const d = &xd->block[c_idx];
 
   quantize(b->zrun_zbin_boost,
-           x->coeff,
+           mb->coeff + b_idx * 16,
            1024, b->skip_block,
            b->zbin,
            b->round, b->quant, b->quant_shift,
-           xd->qcoeff,
-           xd->dqcoeff,
+           xd->qcoeff + b_idx * 16,
+           xd->dqcoeff + b_idx * 16,
            d->dequant,
            b->zbin_extra,
-           &xd->eobs[0],
+           &xd->eobs[b_idx],
 #if CONFIG_CODE_NONZEROCOUNT
-           &xd->nzcs[0],
+           &xd->nzcs[b_idx],
 #endif
            vp9_default_zig_zag1d_32x32, 2);
 }
 
+void vp9_quantize_sby_32x32(MACROBLOCK *x) {
+  vp9_regular_quantize_b_32x32(x, 0);
+}
+
 void vp9_quantize_sby_16x16(MACROBLOCK *x) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *const b = &x->block[0];
-  BLOCKD *const d = &xd->block[0];
   int n;
 
   for (n = 0; n < 4; n++)
-    quantize(b->zrun_zbin_boost,
-             x->coeff + n * 256,
-             256, b->skip_block,
-             b->zbin,
-             b->round, b->quant, b->quant_shift,
-             xd->qcoeff + n * 256,
-             xd->dqcoeff + n * 256,
-             d->dequant,
-             b->zbin_extra,
-             &xd->eobs[n * 16],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[n * 16],
-#endif
-             vp9_default_zig_zag1d_16x16, 1);
+    x->quantize_b_16x16(x, n * 16);
 }
 
 void vp9_quantize_sby_8x8(MACROBLOCK *x) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *const b = &x->block[0];
-  BLOCKD *const d = &xd->block[0];
   int n;
 
   for (n = 0; n < 16; n++)
-    quantize(b->zrun_zbin_boost,
-             x->coeff + n * 64,
-             64, b->skip_block,
-             b->zbin,
-             b->round, b->quant, b->quant_shift,
-             xd->qcoeff + n * 64,
-             xd->dqcoeff + n * 64,
-             d->dequant,
-             b->zbin_extra,
-             &xd->eobs[n * 4],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[n * 4],
-#endif
-             vp9_default_zig_zag1d_8x8, 1);
+    x->quantize_b_8x8(x, n * 4);
 }
 
 void vp9_quantize_sby_4x4(MACROBLOCK *x) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *const b = &x->block[0];
-  BLOCKD *const d = &xd->block[0];
   int n;
 
-  for (n = 0; n < 64; n++)
-    quantize(b->zrun_zbin_boost,
-             x->coeff + n * 16,
-             16, b->skip_block,
-             b->zbin,
-             b->round, b->quant, b->quant_shift,
-             xd->qcoeff + n * 16,
-             xd->dqcoeff + n * 16,
-             d->dequant,
-             b->zbin_extra,
-             &xd->eobs[n],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[n],
-#endif
-             vp9_default_zig_zag1d_4x4, 1);
+  for (n = 0; n < 64; n++) {
+    const TX_TYPE tx_type = get_tx_type_4x4(xd, n);
+    if (tx_type != DCT_DCT) {
+      vp9_ht_quantize_b_4x4(x, n, tx_type);
+    } else {
+      x->quantize_b_4x4(x, n);
+    }
+  }
 }
 
 void vp9_quantize_sbuv_16x16(MACROBLOCK *x) {
-  int i;
-  MACROBLOCKD *const xd = &x->e_mbd;
-
-  for (i = 64; i < 96; i += 16) {
-    int cidx = i < 80 ? 16 : 20;
-    quantize(x->block[cidx].zrun_zbin_boost,
-             x->coeff + i * 16,
-             256, x->block[cidx].skip_block,
-             x->block[cidx].zbin, x->block[cidx].round,
-             x->block[cidx].quant, x->block[cidx].quant_shift,
-             xd->qcoeff + i * 16,
-             xd->dqcoeff + i * 16,
-             xd->block[cidx].dequant,
-             x->block[cidx].zbin_extra,
-             &xd->eobs[i],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[i],
-#endif
-             vp9_default_zig_zag1d_16x16, 1);
-  }
+  x->quantize_b_16x16(x, 64);
+  x->quantize_b_16x16(x, 80);
 }
 
 void vp9_quantize_sbuv_8x8(MACROBLOCK *x) {
   int i;
-  MACROBLOCKD *const xd = &x->e_mbd;
 
-  for (i = 64; i < 96; i += 4) {
-    int cidx = i < 80 ? 16 : 20;
-    quantize(x->block[cidx].zrun_zbin_boost,
-             x->coeff + i * 16,
-             64, x->block[cidx].skip_block,
-             x->block[cidx].zbin, x->block[cidx].round,
-             x->block[cidx].quant, x->block[cidx].quant_shift,
-             xd->qcoeff + i * 16,
-             xd->dqcoeff + i * 16,
-             xd->block[cidx].dequant,
-             x->block[cidx].zbin_extra,
-             &xd->eobs[i],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[i],
-#endif
-             vp9_default_zig_zag1d_8x8, 1);
-  }
+  for (i = 64; i < 96; i += 4)
+    x->quantize_b_8x8(x, i);
 }
 
 void vp9_quantize_sbuv_4x4(MACROBLOCK *x) {
   int i;
-  MACROBLOCKD *const xd = &x->e_mbd;
 
-  for (i = 64; i < 96; i++) {
-    int cidx = i < 80 ? 16 : 20;
-    quantize(x->block[cidx].zrun_zbin_boost,
-             x->coeff + i * 16,
-             16, x->block[cidx].skip_block,
-             x->block[cidx].zbin, x->block[cidx].round,
-             x->block[cidx].quant, x->block[cidx].quant_shift,
-             xd->qcoeff + i * 16,
-             xd->dqcoeff + i * 16,
-             xd->block[cidx].dequant,
-             x->block[cidx].zbin_extra,
-             &xd->eobs[i],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[i],
-#endif
-             vp9_default_zig_zag1d_4x4, 1);
-  }
+  for (i = 64; i < 96; i++)
+    x->quantize_b_4x4(x, i);
 }
 
 void vp9_quantize_sb64y_32x32(MACROBLOCK *x) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *const b = &x->block[0];
-  BLOCKD *const d = &xd->block[0];
   int n;
 
   for (n = 0; n < 4; n++)
-    quantize(b->zrun_zbin_boost,
-             x->coeff + n * 1024,
-             1024, b->skip_block,
-             b->zbin,
-             b->round, b->quant, b->quant_shift,
-             xd->qcoeff + n * 1024,
-             xd->dqcoeff + n * 1024,
-             d->dequant,
-             b->zbin_extra,
-             &xd->eobs[n * 64],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[n * 64],
-#endif
-             vp9_default_zig_zag1d_32x32, 2);
+    vp9_regular_quantize_b_32x32(x, n * 64);
 }
 
 void vp9_quantize_sb64y_16x16(MACROBLOCK *x) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *const b = &x->block[0];
-  BLOCKD *const d = &xd->block[0];
   int n;
 
   for (n = 0; n < 16; n++)
-    quantize(b->zrun_zbin_boost,
-             x->coeff + n * 256,
-             256, b->skip_block,
-             b->zbin,
-             b->round, b->quant, b->quant_shift,
-             xd->qcoeff + n * 256,
-             xd->dqcoeff + n * 256,
-             d->dequant,
-             b->zbin_extra,
-             &xd->eobs[n * 16],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[n * 16],
-#endif
-             vp9_default_zig_zag1d_16x16, 1);
+    x->quantize_b_16x16(x, n * 16);
 }
 
 void vp9_quantize_sb64y_8x8(MACROBLOCK *x) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *const b = &x->block[0];
-  BLOCKD *const d = &xd->block[0];
   int n;
 
   for (n = 0; n < 64; n++)
-    quantize(b->zrun_zbin_boost,
-             x->coeff + n * 64,
-             64, b->skip_block,
-             b->zbin,
-             b->round, b->quant, b->quant_shift,
-             xd->qcoeff + n * 64,
-             xd->dqcoeff + n * 64,
-             d->dequant,
-             b->zbin_extra,
-             &xd->eobs[n * 4],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[n * 4],
-#endif
-             vp9_default_zig_zag1d_8x8, 1);
+    x->quantize_b_8x8(x, n * 4);
 }
 
 void vp9_quantize_sb64y_4x4(MACROBLOCK *x) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *const b = &x->block[0];
-  BLOCKD *const d = &xd->block[0];
   int n;
 
-  for (n = 0; n < 256; n++)
-    quantize(b->zrun_zbin_boost,
-             x->coeff + n * 16,
-             16, b->skip_block,
-             b->zbin,
-             b->round, b->quant, b->quant_shift,
-             xd->qcoeff + n * 16,
-             xd->dqcoeff + n * 16,
-             d->dequant,
-             b->zbin_extra,
-             &xd->eobs[n],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[n],
-#endif
-             vp9_default_zig_zag1d_4x4, 1);
+  for (n = 0; n < 256; n++) {
+    const TX_TYPE tx_type = get_tx_type_4x4(xd, n);
+    if (tx_type != DCT_DCT) {
+      vp9_ht_quantize_b_4x4(x, n, tx_type);
+    } else {
+      x->quantize_b_4x4(x, n);
+    }
+  }
 }
 
 void vp9_quantize_sb64uv_32x32(MACROBLOCK *x) {
-  int i;
-  MACROBLOCKD *const xd = &x->e_mbd;
-
-  for (i = 256; i < 384; i += 64) {
-    int cidx = i < 320 ? 16 : 20;
-    quantize(x->block[cidx].zrun_zbin_boost,
-             x->coeff + i * 16,
-             1024, x->block[cidx].skip_block,
-             x->block[cidx].zbin, x->block[cidx].round,
-             x->block[cidx].quant, x->block[cidx].quant_shift,
-             xd->qcoeff + i * 16,
-             xd->dqcoeff + i * 16,
-             xd->block[cidx].dequant,
-             x->block[cidx].zbin_extra,
-             &xd->eobs[i],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[i],
-#endif
-             vp9_default_zig_zag1d_32x32, 2);
-  }
+  vp9_regular_quantize_b_32x32(x, 256);
+  vp9_regular_quantize_b_32x32(x, 320);
 }
 
 void vp9_quantize_sb64uv_16x16(MACROBLOCK *x) {
   int i;
-  MACROBLOCKD *const xd = &x->e_mbd;
 
-  for (i = 256; i < 384; i += 16) {
-    int cidx = i < 320 ? 16 : 20;
-    quantize(x->block[cidx].zrun_zbin_boost,
-             x->coeff + i * 16,
-             256, x->block[cidx].skip_block,
-             x->block[cidx].zbin, x->block[cidx].round,
-             x->block[cidx].quant, x->block[cidx].quant_shift,
-             xd->qcoeff + i * 16,
-             xd->dqcoeff + i * 16,
-             xd->block[cidx].dequant,
-             x->block[cidx].zbin_extra,
-             &xd->eobs[i],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[i],
-#endif
-             vp9_default_zig_zag1d_16x16, 1);
-  }
+  for (i = 256; i < 384; i += 16)
+    x->quantize_b_16x16(x, i);
 }
 
 void vp9_quantize_sb64uv_8x8(MACROBLOCK *x) {
   int i;
-  MACROBLOCKD *const xd = &x->e_mbd;
 
-  for (i = 256; i < 384; i += 4) {
-    int cidx = i < 320 ? 16 : 20;
-    quantize(x->block[cidx].zrun_zbin_boost,
-             x->coeff + i * 16,
-             64, x->block[cidx].skip_block,
-             x->block[cidx].zbin, x->block[cidx].round,
-             x->block[cidx].quant, x->block[cidx].quant_shift,
-             xd->qcoeff + i * 16,
-             xd->dqcoeff + i * 16,
-             xd->block[cidx].dequant,
-             x->block[cidx].zbin_extra,
-             &xd->eobs[i],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[i],
-#endif
-             vp9_default_zig_zag1d_8x8, 1);
-  }
+  for (i = 256; i < 384; i += 4)
+    x->quantize_b_8x8(x, i);
 }
 
 void vp9_quantize_sb64uv_4x4(MACROBLOCK *x) {
   int i;
-  MACROBLOCKD *const xd = &x->e_mbd;
 
-  for (i = 256; i < 384; i++) {
-    int cidx = i < 320 ? 16 : 20;
-    quantize(x->block[cidx].zrun_zbin_boost,
-             x->coeff + i * 16,
-             16, x->block[cidx].skip_block,
-             x->block[cidx].zbin, x->block[cidx].round,
-             x->block[cidx].quant, x->block[cidx].quant_shift,
-             xd->qcoeff + i * 16,
-             xd->dqcoeff + i * 16,
-             xd->block[cidx].dequant,
-             x->block[cidx].zbin_extra,
-             &xd->eobs[i],
-#if CONFIG_CODE_NONZEROCOUNT
-             &xd->nzcs[i],
-#endif
-             vp9_default_zig_zag1d_4x4, 1);
-  }
+  for (i = 256; i < 384; i++)
+    x->quantize_b_4x4(x, i);
 }
 
 /* quantize_b_pair function pointer in MACROBLOCK structure is set to one of
