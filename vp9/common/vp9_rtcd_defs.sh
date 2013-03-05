@@ -133,6 +133,20 @@ specialize vp9_intra8x8_predict;
 prototype void vp9_intra_uv4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor"
 specialize vp9_intra_uv4x4_predict;
 
+if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
+prototype void vp9_add_residual_4x4 "const int16_t *diff, const uint8_t *pred, int pitch, uint8_t *dest, int stride"
+specialize vp9_add_residual_4x4 sse2
+
+prototype void vp9_add_residual_8x8 "const int16_t *diff, const uint8_t *pred, int pitch, uint8_t *dest, int stride"
+specialize vp9_add_residual_8x8 sse2
+
+prototype void vp9_add_residual_16x16 "const int16_t *diff, const uint8_t *pred, int pitch, uint8_t *dest, int stride"
+specialize vp9_add_residual_16x16 sse2
+
+prototype void vp9_add_residual_32x32 "const int16_t *diff, const uint8_t *pred, int pitch, uint8_t *dest, int stride"
+specialize vp9_add_residual_32x32 sse2
+fi
+
 #
 # Loopfilter
 #

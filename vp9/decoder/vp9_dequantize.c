@@ -15,6 +15,7 @@
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/common/vp9_common.h"
 
+
 static void add_residual(const int16_t *diff, const uint8_t *pred, int pitch,
                          uint8_t *dest, int stride, int width, int height) {
   int r, c;
@@ -27,6 +28,26 @@ static void add_residual(const int16_t *diff, const uint8_t *pred, int pitch,
     diff += width;
     pred += pitch;
   }
+}
+
+void vp9_add_residual_4x4_c(const int16_t *diff, const uint8_t *pred, int pitch,
+                         uint8_t *dest, int stride) {
+  add_residual(diff, pred, pitch, dest, stride, 4, 4);
+}
+
+void vp9_add_residual_8x8_c(const int16_t *diff, const uint8_t *pred, int pitch,
+                         uint8_t *dest, int stride) {
+  add_residual(diff, pred, pitch, dest, stride, 8, 8);
+}
+
+void vp9_add_residual_16x16_c(const int16_t *diff, const uint8_t *pred,
+                              int pitch, uint8_t *dest, int stride) {
+  add_residual(diff, pred, pitch, dest, stride, 16, 16);
+}
+
+void vp9_add_residual_32x32_c(const int16_t *diff, const uint8_t *pred,
+                              int pitch, uint8_t *dest, int stride) {
+  add_residual(diff, pred, pitch, dest, stride, 32, 32);
 }
 
 static void add_constant_residual(const int16_t diff, const uint8_t *pred,
@@ -55,7 +76,7 @@ void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
 
   vp9_short_iht4x4(input, output, 4, tx_type);
   vpx_memset(input, 0, 32);
-  add_residual(output, pred, pitch, dest, stride, 4, 4);
+  vp9_add_residual_4x4(output, pred, pitch, dest, stride);
 }
 
 void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
@@ -76,7 +97,7 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
 
     vp9_short_iht8x8(input, output, 8, tx_type);
     vpx_memset(input, 0, 128);
-    add_residual(output, pred, pitch, dest, stride, 8, 8);
+    vp9_add_residual_8x8(output, pred, pitch, dest, stride);
   }
 }
 
@@ -94,7 +115,7 @@ void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
 
     vpx_memset(input, 0, 32);
 
-    add_residual(output, pred, pitch, dest, stride, 4, 4);
+    vp9_add_residual_4x4(output, pred, pitch, dest, stride);
   } else {
     vp9_dc_only_idct_add(input[0]*dq[0], pred, dest, pitch, stride);
     ((int *)input)[0] = 0;
@@ -114,7 +135,7 @@ void vp9_dequant_dc_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
   // the idct halves ( >> 1) the pitch
   vp9_short_idct4x4llm(input, output, 4 << 1);
   vpx_memset(input, 0, 32);
-  add_residual(output, pred, pitch, dest, stride, 4, 4);
+  vp9_add_residual_4x4(output, pred, pitch, dest, stride);
 }
 
 void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
@@ -131,7 +152,7 @@ void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
 
     vpx_memset(input, 0, 32);
 
-    add_residual(output, pred, pitch, dest, stride, 4, 4);
+    vp9_add_residual_4x4(output, pred, pitch, dest, stride);
   } else {
     vp9_dc_only_inv_walsh_add(input[0]*dq[0], pred, dest, pitch, stride);
     ((int *)input)[0] = 0;
@@ -152,7 +173,7 @@ void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
 
   vp9_short_inv_walsh4x4_x8_c(input, output, 4 << 1);
   vpx_memset(input, 0, 32);
-  add_residual(output, pred, pitch, dest, stride, 4, 4);
+  vp9_add_residual_4x4(output, pred, pitch, dest, stride);
 }
 
 void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
@@ -201,7 +222,7 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
     input[16] = input[17] = 0;
     input[24] = 0;
 
-    add_residual(output, pred, pitch, dest, stride, 8, 8);
+    vp9_add_residual_8x8(output, pred, pitch, dest, stride);
   } else {
     int i;
 
@@ -212,7 +233,7 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
     // the idct halves ( >> 1) the pitch
     vp9_short_idct8x8_c(input, output, 8 << 1);
     vpx_memset(input, 0, 128);
-    add_residual(output, pred, pitch, dest, stride, 8, 8);
+    vp9_add_residual_8x8(output, pred, pitch, dest, stride);
   }
 }
 
@@ -242,7 +263,7 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
 
     vpx_memset(input, 0, 512);
 
-    add_residual(output, pred, pitch, dest, stride, 16, 16);
+    vp9_add_residual_16x16(output, pred, pitch, dest, stride);
   }
 }
 
@@ -287,7 +308,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
     input[32] = input[33] = 0;
     input[48] = 0;
 
-    add_residual(output, pred, pitch, dest, stride, 16, 16);
+    vp9_add_residual_16x16(output, pred, pitch, dest, stride);
   } else {
     int i;
 
@@ -302,7 +323,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
 
     vpx_memset(input, 0, 512);
 
-    add_residual(output, pred, pitch, dest, stride, 16, 16);
+    vp9_add_residual_16x16(output, pred, pitch, dest, stride);
   }
 }
 
@@ -336,14 +357,14 @@ void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
       input[64] = input[65] = 0;
       input[96] = 0;
 
-      add_residual(output, pred, pitch, dest, stride, 32, 32);
+      vp9_add_residual_32x32(output, pred, pitch, dest, stride);
     } else {
       int i;
       for (i = 1; i < 1024; i++)
         input[i] = input[i] * dq[1] / 2;
       vp9_short_idct32x32(input, output, 64);
       vpx_memset(input, 0, 2048);
-      add_residual(output, pred, pitch, dest, stride, 32, 32);
+      vp9_add_residual_32x32(output, pred, pitch, dest, stride);
     }
   }
 }
