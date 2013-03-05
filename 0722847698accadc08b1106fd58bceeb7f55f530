@@ -16,6 +16,24 @@
       "revId": "0722847698accadc08b1106fd58bceeb7f55f530",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//8vw\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 983,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-03-05T22:09:54Z",
+      "side": 1,
+      "message": "probably nothing, I can add a MAX too, though I think only prob_gf_coded is subtracted from\nonyx_if.c:2818 and thereabouts. onyx_if.c:update_rd_ref_frame_probs() from my first message",
+      "parentUuid": "AAAAVX//8w8\u003d",
+      "revId": "0722847698accadc08b1106fd58bceeb7f55f530",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
