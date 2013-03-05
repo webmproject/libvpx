@@ -13,7 +13,6 @@
 #define VP9_DECODER_VP9_TREEREADER_H_
 
 #include "vp9/common/vp9_treecoder.h"
-
 #include "vp9/decoder/vp9_dboolhuff.h"
 
 typedef BOOL_DECODER vp9_reader;

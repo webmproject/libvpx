@@ -9,6 +9,7 @@
  */
 
 #include <stdio.h>
+
 #include "vp9/common/vp9_blockd.h"
 
 void vp9_print_modes_and_motion_vectors(MODE_INFO *mi, int rows, int cols,
@@ -18,8 +19,7 @@ void vp9_print_modes_and_motion_vectors(MODE_INFO *mi, int rows, int cols,
   int mb_index = 0;
   FILE *mvs = fopen("mvs.stt", "a");
 
-  /* print out the macroblock Y modes */
-  mb_index = 0;
+  // Print out the macroblock Y modes
   fprintf(mvs, "Mb Modes for Frame %d\n", frame);
 
   for (mb_row = 0; mb_row < rows; mb_row++) {

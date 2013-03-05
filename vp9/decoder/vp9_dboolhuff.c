@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-#include "vp9/decoder/vp9_dboolhuff.h"
 #include "vpx_ports/mem.h"
 #include "vpx_mem/vpx_mem.h"
+
+#include "vp9/decoder/vp9_dboolhuff.h"
 
 int vp9_start_decode(BOOL_DECODER *br,
                      const unsigned char *source,

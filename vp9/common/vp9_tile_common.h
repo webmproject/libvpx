@@ -13,9 +13,6 @@
 
 #include "vp9/common/vp9_onyxc_int.h"
 
-#define MIN_TILE_WIDTH 256
-#define MAX_TILE_WIDTH 4096
-
 void vp9_get_tile_col_offsets(VP9_COMMON *cm, int tile_col_idx);
 
 void vp9_get_tile_row_offsets(VP9_COMMON *cm, int tile_row_idx);

@@ -11,25 +11,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-extern unsigned int vp9_sad16x16_sse3(
+
+unsigned int vp9_sad16x16_sse3(
   unsigned char *src_ptr,
   int  src_stride,
   unsigned char *ref_ptr,
   int  ref_stride,
   int  max_err);
 
-extern void vp9_sad16x16x3_sse3(
-  unsigned char *src_ptr,
-  int  src_stride,
-  unsigned char *ref_ptr,
-  int  ref_stride,
-  int  *results);
-
-extern int vp8_growmaskmb_sse3(
+int vp8_growmaskmb_sse3(
   unsigned char *om,
   unsigned char *nm);
 
-extern void vp8_makemask_sse3(
+void vp8_makemask_sse3(
   unsigned char *y,
   unsigned char *u,
   unsigned char *v,
@@ -238,6 +232,7 @@ void grow_ymask(unsigned char *ym) {
   for (i = 0; i < 256; i++)
     ym[i] = nym[i];
 }
+
 void make_mb_mask(unsigned char *y, unsigned char *u, unsigned char *v,
                   unsigned char *ym, unsigned char *uvm,
                   int yp, int uvp,
@@ -283,6 +278,7 @@ int compare_masks(unsigned char *sym, unsigned char *ym) {
 
   return sad;
 }
+
 int unmasked_sad(unsigned char *src, int p, unsigned char *dst, int dp,
                  unsigned char *ym) {
   int i, j;
@@ -294,6 +290,7 @@ int unmasked_sad(unsigned char *src, int p, unsigned char *dst, int dp,
 
   return sad;
 }
+
 int masked_motion_search(unsigned char *y, unsigned char *u, unsigned char *v,
                          int yp, int uvp,
                          unsigned char *dy, unsigned char *du, unsigned char *dv,
@@ -802,5 +799,5 @@ int mainz(int argc, char *argv[]) {
   }
   fclose(f);
   fclose(g);
-  return;
+  return 0;
 }
