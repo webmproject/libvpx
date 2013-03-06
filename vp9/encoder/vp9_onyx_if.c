@@ -1075,12 +1075,12 @@ void vp9_new_frame_rate(VP9_COMP *cpi, double framerate) {
     cpi->min_frame_bandwidth = FRAME_OVERHEAD_BITS;
 
   // Set Maximum gf/arf interval
-  cpi->max_gf_interval = 15;
+  cpi->max_gf_interval = 16;
 
   // Extended interval for genuinely static scenes
   cpi->twopass.static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
 
-  // Special conditions when altr ref frame enabled in lagged compress mode
+  // Special conditions when alt ref frame enabled in lagged compress mode
   if (cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames) {
     if (cpi->max_gf_interval > cpi->oxcf.lag_in_frames - 1)
       cpi->max_gf_interval = cpi->oxcf.lag_in_frames - 1;

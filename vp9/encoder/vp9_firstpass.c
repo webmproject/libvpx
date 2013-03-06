@@ -1509,6 +1509,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int f_boost = 0;
   int b_boost = 0;
   int flash_detected;
+  int active_max_gf_interval;
 
   cpi->twopass.gf_group_bits = 0;
 
@@ -1535,6 +1536,18 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // should contain and what level of boost is appropriate for the GF
   // or ARF that will be coded with the group
   i = 0;
+
+  // Work out a maximum interval for the GF.
+  // If the image appears completely static we can extend beyond this.
+  // The value chosen depends on the active Q range. At low Q we have
+  // bits to spare and are better with a smaller interval and smaller boost.
+  // At high Q when there are few bits to spare we are better with a longer
+  // interval to spread the cost of the GF.
+  active_max_gf_interval =
+    12 + ((int)vp9_convert_qindex_to_q(cpi->active_worst_quality) >> 5);
+
+  if (active_max_gf_interval > cpi->max_gf_interval)
+    active_max_gf_interval = cpi->max_gf_interval;
 
   while (((i < cpi->twopass.static_scene_max_gf_interval) ||
           ((cpi->twopass.frames_to_key - i) < MIN_GF_INTERVAL)) &&
@@ -1587,7 +1600,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Break out conditions.
     if (
       // Break at cpi->max_gf_interval unless almost totally static
-      (i >= cpi->max_gf_interval && (zero_motion_accumulator < 0.995)) ||
+      (i >= active_max_gf_interval && (zero_motion_accumulator < 0.995)) ||
       (
         // Dont break out with a very short interval
         (i > MIN_GF_INTERVAL) &&
@@ -1914,7 +1927,8 @@ static int adjust_active_maxq(int old_maxqi, int new_maxqi) {
 
 void vp9_second_pass(VP9_COMP *cpi) {
   int tmp_q;
-  int frames_left = (int)(cpi->twopass.total_stats->count - cpi->common.current_video_frame);
+  int frames_left = (int)(cpi->twopass.total_stats->count -
+                          cpi->common.current_video_frame);
 
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS this_frame_copy;
@@ -1927,63 +1941,6 @@ void vp9_second_pass(VP9_COMP *cpi) {
   }
 
   vp9_clear_system_state();
-
-  vpx_memset(&this_frame, 0, sizeof(FIRSTPASS_STATS));
-
-  if (EOF == input_stats(cpi, &this_frame))
-    return;
-
-  this_frame_intra_error = this_frame.intra_error;
-  this_frame_coded_error = this_frame.coded_error;
-
-  // keyframe and section processing !
-  if (cpi->twopass.frames_to_key == 0) {
-    // Define next KF group and assign bits to it
-    vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
-    find_next_key_frame(cpi, &this_frame_copy);
-  }
-
-  // Is this a GF / ARF (Note that a KF is always also a GF)
-  if (cpi->frames_till_gf_update_due == 0) {
-    // Define next gf group and assign bits to it
-    vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
-    define_gf_group(cpi, &this_frame_copy);
-
-    // If we are going to code an altref frame at the end of the group and the current frame is not a key frame....
-    // If the previous group used an arf this frame has already benefited from that arf boost and it should not be given extra bits
-    // If the previous group was NOT coded using arf we may want to apply some boost to this GF as well
-    if (cpi->source_alt_ref_pending && (cpi->common.frame_type != KEY_FRAME)) {
-      // Assign a standard frames worth of bits from those allocated to the GF group
-      int bak = cpi->per_frame_bandwidth;
-      vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
-      assign_std_frame_bits(cpi, &this_frame_copy);
-      cpi->per_frame_bandwidth = bak;
-    }
-  }
-
-  // Otherwise this is an ordinary frame
-  else {
-    // Assign bits from those allocated to the GF group
-    vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
-    assign_std_frame_bits(cpi, &this_frame_copy);
-  }
-
-  // Keep a globally available copy of this and the next frame's iiratio.
-  cpi->twopass.this_iiratio = (int)(this_frame_intra_error /
-                              DOUBLE_DIVIDE_CHECK(this_frame_coded_error));
-  {
-    FIRSTPASS_STATS next_frame;
-    if (lookup_next_frame_stats(cpi, &next_frame) != EOF) {
-      cpi->twopass.next_iiratio = (int)(next_frame.intra_error /
-                                  DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
-    }
-  }
-
-  // Set nominal per second bandwidth for this frame
-  cpi->target_bandwidth = (int)(cpi->per_frame_bandwidth
-                                * cpi->output_frame_rate);
-  if (cpi->target_bandwidth < 0)
-    cpi->target_bandwidth = 0;
 
   // Special case code for first frame.
   if (cpi->common.current_video_frame == 0) {
@@ -2048,6 +2005,64 @@ void vp9_second_pass(VP9_COMP *cpi) {
       adjust_active_maxq(cpi->active_worst_quality, tmp_q);
   }
 #endif
+
+  vpx_memset(&this_frame, 0, sizeof(FIRSTPASS_STATS));
+  if (EOF == input_stats(cpi, &this_frame))
+    return;
+
+  this_frame_intra_error = this_frame.intra_error;
+  this_frame_coded_error = this_frame.coded_error;
+
+  // keyframe and section processing !
+  if (cpi->twopass.frames_to_key == 0) {
+    // Define next KF group and assign bits to it
+    vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+    find_next_key_frame(cpi, &this_frame_copy);
+  }
+
+  // Is this a GF / ARF (Note that a KF is always also a GF)
+  if (cpi->frames_till_gf_update_due == 0) {
+    // Define next gf group and assign bits to it
+    vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+    define_gf_group(cpi, &this_frame_copy);
+
+    // If we are going to code an altref frame at the end of the group
+    // and the current frame is not a key frame....
+    // If the previous group used an arf this frame has already benefited
+    // from that arf boost and it should not be given extra bits
+    // If the previous group was NOT coded using arf we may want to apply
+    // some boost to this GF as well
+    if (cpi->source_alt_ref_pending && (cpi->common.frame_type != KEY_FRAME)) {
+      // Assign a standard frames worth of bits from those allocated
+      // to the GF group
+      int bak = cpi->per_frame_bandwidth;
+      vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+      assign_std_frame_bits(cpi, &this_frame_copy);
+      cpi->per_frame_bandwidth = bak;
+    }
+  } else {
+    // Otherwise this is an ordinary frame
+    // Assign bits from those allocated to the GF group
+    vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+    assign_std_frame_bits(cpi, &this_frame_copy);
+  }
+
+  // Keep a globally available copy of this and the next frame's iiratio.
+  cpi->twopass.this_iiratio = (int)(this_frame_intra_error /
+                              DOUBLE_DIVIDE_CHECK(this_frame_coded_error));
+  {
+    FIRSTPASS_STATS next_frame;
+    if (lookup_next_frame_stats(cpi, &next_frame) != EOF) {
+      cpi->twopass.next_iiratio = (int)(next_frame.intra_error /
+                                  DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
+    }
+  }
+
+  // Set nominal per second bandwidth for this frame
+  cpi->target_bandwidth = (int)(cpi->per_frame_bandwidth
+                                * cpi->output_frame_rate);
+  if (cpi->target_bandwidth < 0)
+    cpi->target_bandwidth = 0;
 
   cpi->twopass.frames_to_key--;
 
