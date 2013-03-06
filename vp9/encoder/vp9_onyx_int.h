@@ -31,6 +31,7 @@
 
 // Experimental rate control switches
 // #define ONE_SHOT_Q_ESTIMATE 1
+// #define STRICT_ONE_SHOT_Q 1
 // #define DISABLE_RC_LONG_TERM_MEM 1
 
 // #define SPEEDSTATS 1
