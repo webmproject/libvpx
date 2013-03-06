@@ -16,6 +16,24 @@
       "revId": "48d9b4af0c27fbccc268320792a86fdae7a46cf7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//8aQ\u003d",
+        "filename": "vp9/decoder/x86/vp9_dequantize_x86.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-03-06T00:28:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAVX//8gU\u003d",
+      "revId": "48d9b4af0c27fbccc268320792a86fdae7a46cf7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
