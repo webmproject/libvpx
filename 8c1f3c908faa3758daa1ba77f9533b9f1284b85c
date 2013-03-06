@@ -16,6 +16,24 @@
       "revId": "8c1f3c908faa3758daa1ba77f9533b9f1284b85c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//7e4\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-06T22:45:06Z",
+      "side": 1,
+      "message": "I suppose you mean \"if (!(ib \u003c 4 || (ib \u0026 3) \u003d\u003d 0)) tx_type \u003d DCT_DCT\" (i.e. use whatever dct/adst combination the topleft transform-block uses for edge transform blocks, and DCT_DCT for all inner transform blocks)? Yes, I\u0027ll test various combinations.",
+      "parentUuid": "AAAAVX//7gY\u003d",
+      "revId": "8c1f3c908faa3758daa1ba77f9533b9f1284b85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
