@@ -19,12 +19,17 @@
 void print_mode_context(VP9_COMMON *pc);
 #endif
 
-
-#define MAX_MVSEARCH_STEPS 8                                    // The maximum number of steps in a step search given the largest allowed initial step
-#define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS)) - 1)      // Max full pel mv specified in 1 pel units
-#define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))            // Maximum size of the first step in full pel units
+// The maximum number of steps in a step search given the largest
+// allowed initial step
+#define MAX_MVSEARCH_STEPS 10
+// Max full pel mv specified in 1 pel units
+#define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS)) - 1)
+// Maximum size of the first step in full pel units
+#define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))
 
 void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv);
+int vp9_init_search_range(int width, int height);
+
 int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvjcost,
                            int *mvcost[2], int weight, int ishp);
 void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride);

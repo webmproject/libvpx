@@ -3505,6 +3505,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         vp9_clamp_mv_min_max(x, &ref_mv[0]);
 
+        sr = vp9_init_search_range(cpi->common.Width, cpi->common.Height);
+
         // mvp_full.as_int = ref_mv[0].as_int;
         mvp_full.as_int =
          mbmi->ref_mvs[refs[0]][x->mv_best_ref_index[refs[0]]].as_int;

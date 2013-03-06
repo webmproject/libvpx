@@ -1241,8 +1241,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &x->e_mbd;
   int totalrate;
 
-//   fprintf(stderr, "encode_frame_internal frame %d (%d)\n",
-//          cpi->common.current_video_frame, cpi->common.show_frame);
+//   fprintf(stderr, "encode_frame_internal frame %d (%d) type %d\n",
+//            cpi->common.current_video_frame, cpi->common.show_frame,
+//            cm->frame_type);
 
   // Compute a modified set of reference frame probabilities to use when
   // prediction fails. These are based on the current general estimates for

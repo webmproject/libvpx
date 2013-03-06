@@ -42,7 +42,9 @@ const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
   -MV_CLASS_2, -MV_CLASS_3,
   10, 12,
   -MV_CLASS_4, -MV_CLASS_5,
+  14, 16,
   -MV_CLASS_6, -MV_CLASS_7,
+  -MV_CLASS_8, -MV_CLASS_9,
 };
 struct vp9_token_struct vp9_mv_class_encodings[MV_CLASSES];
 
@@ -63,9 +65,9 @@ const nmv_context vp9_default_nmv_context = {
   {
     { /* vert component */
       128,                                             /* sign */
-      {224, 144, 192, 168, 192, 176, 192},             /* class */
+      {224, 144, 192, 168, 192, 176, 192, 198, 198},   /* class */
       {216},                                           /* class0 */
-      {136, 140, 148, 160, 176, 192, 224},             /* bits */
+      {136, 140, 148, 160, 176, 192, 224, 234, 234},   /* bits */
       {{128, 128, 64}, {96, 112, 64}},                 /* class0_fp */
       {64, 96, 64},                                    /* fp */
       160,                                             /* class0_hp bit */
@@ -73,9 +75,9 @@ const nmv_context vp9_default_nmv_context = {
     },
     { /* hor component */
       128,                                             /* sign */
-      {216, 128, 176, 160, 176, 176, 192},             /* class */
+      {216, 128, 176, 160, 176, 176, 192, 198, 198},   /* class */
       {208},                                           /* class0 */
-      {136, 140, 148, 160, 176, 192, 224},             /* bits */
+      {136, 140, 148, 160, 176, 192, 224, 234, 234},   /* bits */
       {{128, 128, 64}, {96, 112, 64}},                 /* class0_fp */
       {64, 96, 64},                                    /* fp */
       160,                                             /* class0_hp bit */
@@ -103,6 +105,8 @@ MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset) {
   else if (z < CLASS0_SIZE * 256)  c = MV_CLASS_5;
   else if (z < CLASS0_SIZE * 512)  c = MV_CLASS_6;
   else if (z < CLASS0_SIZE * 1024) c = MV_CLASS_7;
+  else if (z < CLASS0_SIZE * 2048) c = MV_CLASS_8;
+  else if (z < CLASS0_SIZE * 4096) c = MV_CLASS_9;
   else assert(0);
   if (offset)
     *offset = z - mv_class_base(c);

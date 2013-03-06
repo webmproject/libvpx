@@ -420,7 +420,7 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
       cpi->static_mb_pct = (ncnt[1] * 100) / cm->MBs;
 
     // This error case should not be reachable as this function should
-    // never be called with the common data structure unititialized.
+    // never be called with the common data structure uninitialized.
     else
       cpi->static_mb_pct = 0;
 

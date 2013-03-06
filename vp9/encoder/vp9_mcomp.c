@@ -21,9 +21,9 @@
 
 void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
   int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL +
-      ((ref_mv->as_mv.col & 7) ? 1 : 0);
+                                 ((ref_mv->as_mv.col & 7) ? 1 : 0);
   int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL +
-      ((ref_mv->as_mv.row & 7) ? 1 : 0);
+                                 ((ref_mv->as_mv.row & 7) ? 1 : 0);
   int col_max = (ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
   int row_max = (ref_mv->as_mv.row >> 3) + MAX_FULL_PEL_VAL;
 
@@ -36,6 +36,19 @@ void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
     x->mv_row_min = row_min;
   if (x->mv_row_max > row_max)
     x->mv_row_max = row_max;
+}
+
+int vp9_init_search_range(int width, int height) {
+  int sr = 0;
+  int frm = MIN(width, height);
+
+  while ((frm << sr) < MAX_FULL_PEL_VAL)
+    sr++;
+
+  if (sr)
+    sr--;
+
+  return sr;
 }
 
 int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],

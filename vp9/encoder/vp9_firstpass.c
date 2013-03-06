@@ -378,6 +378,19 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
   int new_mv_mode_penalty = 256;
 
+  int sr = 0;
+  int quart_frm = MIN(cpi->common.Width, cpi->common.Height);
+
+  // refine the motion search range accroding to the frame dimension
+  // for first pass test
+  while ((quart_frm << sr) < MAX_FULL_PEL_VAL)
+    sr++;
+  if (sr)
+    sr--;
+
+  step_param    += sr;
+  further_steps -= sr;
+
   // override the default variance function to use MSE
   v_fn_ptr.vf = vp9_mse16x16;
 
