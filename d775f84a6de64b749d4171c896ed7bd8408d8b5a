@@ -16,6 +16,24 @@
       "revId": "d775f84a6de64b749d4171c896ed7bd8408d8b5a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAVX//7/s\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-03-06T11:57:54Z",
+      "side": 1,
+      "message": "Yes. Though in other patches I will make further changes here.",
+      "parentUuid": "AAAAVX//9O4\u003d",
+      "revId": "d775f84a6de64b749d4171c896ed7bd8408d8b5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
