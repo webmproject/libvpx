@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAVX//7gY\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-06T22:26:34Z",
+      "side": 1,
+      "message": "I think this logic can be simplified for what was intended.\n\nif (inner \u003d\u003d 1) {\n  if (tx_type \u003d\u003d ADST_ADST) tx_type \u003d ADST_DCT;\n  else if (tx_type \u003d\u003d DCT_ADST) tx_type \u003d DCT_DCT;\n} else if (inner \u003d\u003d 4) {\n  if (tx_type \u003d\u003d ADST_ADST) tx_type \u003d DCT_ADST;\n  else if (tx_type \u003d\u003d ADST_DCT) tx_type \u003d DCT_DCT;\n} else if (inner \u003d\u003d 5) {\n  tx_type \u003d DCT_DCT;\n}\n\nAlso am curious how the performance changes if we simply used:\n\nif (ib \u003c 4 || (ib \u0026 3) \u003d\u003d 0) tx_type \u003d DCT_DCT;",
+      "revId": "8c1f3c908faa3758daa1ba77f9533b9f1284b85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
