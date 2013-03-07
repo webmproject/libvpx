@@ -9,6 +9,9 @@
  */
 
 
+#include <stdio.h>
+#include <assert.h>
+
 #include "vp9/common/vp9_onyxc_int.h"
 #if CONFIG_POSTPROC
 #include "vp9/common/vp9_postproc.h"
@@ -19,8 +22,6 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_swapyv12buffer.h"
-#include <stdio.h>
-#include <assert.h>
 
 #include "vp9/common/vp9_quant_common.h"
 #include "vpx_scale/vpx_scale.h"
@@ -99,7 +100,7 @@ void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
 }
 #endif
 
-void vp9_initialize_dec(void) {
+void vp9_initialize_dec() {
   static int init_done = 0;
 
   if (!init_done) {

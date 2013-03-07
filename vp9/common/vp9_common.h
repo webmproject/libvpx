@@ -11,10 +11,11 @@
 #ifndef VP9_COMMON_VP9_COMMON_H_
 #define VP9_COMMON_VP9_COMMON_H_
 
-#include <assert.h>
-#include "vpx_config.h"
 /* Interface header for common constant data structures and lookup tables */
 
+#include <assert.h>
+
+#include "./vpx_config.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
 

@@ -11,23 +11,27 @@
 #include "vp9/common/vp9_mvref_common.h"
 
 #define MVREF_NEIGHBOURS 8
+
 static int mb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
     {0, -1}, {-1, 0}, {-1, -1}, {0, -2},
     {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}
 };
+
 static int mb_ref_distance_weight[MVREF_NEIGHBOURS] =
   { 3, 3, 2, 1, 1, 1, 1, 1 };
+
 static int sb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
     {0, -1}, {-1, 0}, {1, -1}, {-1, 1},
     {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}
 };
+
 static int sb_ref_distance_weight[MVREF_NEIGHBOURS] =
   { 3, 3, 2, 2, 2, 1, 1, 1 };
 
 // clamp_mv_ref
 #define MV_BORDER (16 << 3) // Allow 16 pels in 1/8th pel units
-static void clamp_mv_ref(const MACROBLOCKD *xd, int_mv *mv) {
 
+static void clamp_mv_ref(const MACROBLOCKD *xd, int_mv *mv) {
   if (mv->as_mv.col < (xd->mb_to_left_edge - MV_BORDER))
     mv->as_mv.col = xd->mb_to_left_edge - MV_BORDER;
   else if (mv->as_mv.col > xd->mb_to_right_edge + MV_BORDER)
@@ -41,11 +45,9 @@ static void clamp_mv_ref(const MACROBLOCKD *xd, int_mv *mv) {
 
 // Gets a candidate refenence motion vector from the given mode info
 // structure if one exists that matches the given reference frame.
-static int get_matching_candidate(
-  const MODE_INFO *candidate_mi,
+static int get_matching_candidate(const MODE_INFO *candidate_mi,
   MV_REFERENCE_FRAME ref_frame,
-  int_mv *c_mv
-) {
+  int_mv *c_mv) {
   int ret_val = TRUE;
 
   if (ref_frame == candidate_mi->mbmi.ref_frame) {

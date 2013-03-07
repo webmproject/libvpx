@@ -20,15 +20,15 @@ static void setup_block(BLOCKD *b,
                         int mv_stride,
                         uint8_t **base,
                         uint8_t **base2,
-                        int Stride,
+                        int stride,
                         int offset,
                         BLOCKSET bs) {
   if (bs == DEST) {
-    b->dst_stride = Stride;
+    b->dst_stride = stride;
     b->dst = offset;
     b->base_dst = base;
   } else {
-    b->pre_stride = Stride;
+    b->pre_stride = stride;
     b->pre = offset;
     b->base_pre = base;
     b->base_second_pre = base2;

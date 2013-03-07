@@ -10,6 +10,11 @@
 
 #include "vp9/common/vp9_tile_common.h"
 
+#define MIN_TILE_WIDTH 256
+#define MAX_TILE_WIDTH 4096
+#define MIN_TILE_WIDTH_SBS (MIN_TILE_WIDTH >> 6)
+#define MAX_TILE_WIDTH_SBS (MAX_TILE_WIDTH >> 6)
+
 static void vp9_get_tile_offsets(VP9_COMMON *cm, int *min_tile_off,
                                  int *max_tile_off, int tile_idx,
                                  int log2_n_tiles, int n_mbs) {
@@ -35,8 +40,6 @@ void vp9_get_tile_row_offsets(VP9_COMMON *cm, int tile_row_idx) {
                        cm->log2_tile_rows, cm->mb_rows);
 }
 
-#define MIN_TILE_WIDTH_SBS (MIN_TILE_WIDTH >> 6)
-#define MAX_TILE_WIDTH_SBS (MAX_TILE_WIDTH >> 6)
 
 void vp9_get_tile_n_bits(VP9_COMMON *cm, int *min_log2_n_tiles_ptr,
                          int *delta_log2_n_tiles) {

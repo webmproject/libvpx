@@ -9,10 +9,11 @@
  */
 
 
+#include <limits.h>
+
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_sadmxn.h"
 #include "vp9/common/vp9_subpelvar.h"
-#include <limits.h>
 
 const uint8_t vp9_mbsplit_offset[4][16] = {
   { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
@@ -32,8 +33,7 @@ static void lower_mv_precision(int_mv *mv, int usehp)
 }
 
 vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
-                           vp9_prob p[4], const int context
-                          ) {
+                           vp9_prob p[4], const int context) {
   p[0] = pc->fc.vp9_mode_contexts[context][0];
   p[1] = pc->fc.vp9_mode_contexts[context][1];
   p[2] = pc->fc.vp9_mode_contexts[context][2];

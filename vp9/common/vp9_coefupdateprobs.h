@@ -9,7 +9,7 @@
  */
 
 #ifndef VP9_COMMON_VP9_COEFUPDATEPROBS_H_
-#define VP9_COMMON_VP9_COEFUPDATEPROBS_H__
+#define VP9_COMMON_VP9_COEFUPDATEPROBS_H_
 
 /* Update probabilities for the nodes in the token entropy tree.
    Generated file included by vp9_entropy.c */
