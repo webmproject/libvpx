@@ -68,7 +68,7 @@ static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
     v.col = mv->as_mv.col - ref->as_mv.col;
     return ((mvjcost[vp9_get_mv_joint(v)] +
              mvcost[0][v.row] + mvcost[1][v.col]) *
-            error_per_bit + 128) >> 8;
+            error_per_bit + 4096) >> 13;
   }
   return 0;
 }
@@ -205,7 +205,8 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
     (mvcost ?                                           \
      ((mvjcost[((r) != rr) * 2 + ((c) != rc)] +         \
        mvcost[0][((r) - rr)] + mvcost[1][((c) - rc)]) * \
-      error_per_bit + 128) >> 8 : 0)
+      error_per_bit + 4096) >> 13 : 0)
+
 
 #define SP(x) (((x) & 7) << 1)  // convert motion vector component to offset
                                 // for svf calc
