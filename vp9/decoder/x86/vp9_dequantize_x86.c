@@ -67,14 +67,14 @@ void vp9_add_residual_8x8_sse2(const int16_t *diff, const uint8_t *pred,
   const __m128i zero = _mm_setzero_si128();
 
   // Diff data
-  const __m128i d0 = _mm_loadu_si128((const __m128i *)(diff + 0 * width));
-  const __m128i d1 = _mm_loadu_si128((const __m128i *)(diff + 1 * width));
-  const __m128i d2 = _mm_loadu_si128((const __m128i *)(diff + 2 * width));
-  const __m128i d3 = _mm_loadu_si128((const __m128i *)(diff + 3 * width));
-  const __m128i d4 = _mm_loadu_si128((const __m128i *)(diff + 4 * width));
-  const __m128i d5 = _mm_loadu_si128((const __m128i *)(diff + 5 * width));
-  const __m128i d6 = _mm_loadu_si128((const __m128i *)(diff + 6 * width));
-  const __m128i d7 = _mm_loadu_si128((const __m128i *)(diff + 7 * width));
+  const __m128i d0 = _mm_load_si128((const __m128i *)(diff + 0 * width));
+  const __m128i d1 = _mm_load_si128((const __m128i *)(diff + 1 * width));
+  const __m128i d2 = _mm_load_si128((const __m128i *)(diff + 2 * width));
+  const __m128i d3 = _mm_load_si128((const __m128i *)(diff + 3 * width));
+  const __m128i d4 = _mm_load_si128((const __m128i *)(diff + 4 * width));
+  const __m128i d5 = _mm_load_si128((const __m128i *)(diff + 5 * width));
+  const __m128i d6 = _mm_load_si128((const __m128i *)(diff + 6 * width));
+  const __m128i d7 = _mm_load_si128((const __m128i *)(diff + 7 * width));
 
   // Prediction data.
   __m128i p0 = _mm_loadl_epi64((const __m128i *)(pred + 0 * pitch));
@@ -137,14 +137,14 @@ void vp9_add_residual_16x16_sse2(const int16_t *diff, const uint8_t *pred,
   __m128i p0, p1, p2, p3, p4, p5, p6, p7;
 
   do {
-    d0 = _mm_loadu_si128((const __m128i *)(diff + 0 * width));
-    d1 = _mm_loadu_si128((const __m128i *)(diff + 0 * width + 8));
-    d2 = _mm_loadu_si128((const __m128i *)(diff + 1 * width));
-    d3 = _mm_loadu_si128((const __m128i *)(diff + 1 * width + 8));
-    d4 = _mm_loadu_si128((const __m128i *)(diff + 2 * width));
-    d5 = _mm_loadu_si128((const __m128i *)(diff + 2 * width + 8));
-    d6 = _mm_loadu_si128((const __m128i *)(diff + 3 * width));
-    d7 = _mm_loadu_si128((const __m128i *)(diff + 3 * width + 8));
+    d0 = _mm_load_si128((const __m128i *)(diff + 0 * width));
+    d1 = _mm_load_si128((const __m128i *)(diff + 0 * width + 8));
+    d2 = _mm_load_si128((const __m128i *)(diff + 1 * width));
+    d3 = _mm_load_si128((const __m128i *)(diff + 1 * width + 8));
+    d4 = _mm_load_si128((const __m128i *)(diff + 2 * width));
+    d5 = _mm_load_si128((const __m128i *)(diff + 2 * width + 8));
+    d6 = _mm_load_si128((const __m128i *)(diff + 3 * width));
+    d7 = _mm_load_si128((const __m128i *)(diff + 3 * width + 8));
 
     // Prediction data.
     p1 = _mm_load_si128((const __m128i *)(pred + 0 * pitch));
@@ -197,14 +197,14 @@ void vp9_add_residual_32x32_sse2(const int16_t *diff, const uint8_t *pred,
   __m128i p0, p1, p2, p3, p4, p5, p6, p7;
 
   do {
-    d0 = _mm_loadu_si128((const __m128i *)(diff + 0 * width));
-    d1 = _mm_loadu_si128((const __m128i *)(diff + 0 * width + 8));
-    d2 = _mm_loadu_si128((const __m128i *)(diff + 0 * width + 16));
-    d3 = _mm_loadu_si128((const __m128i *)(diff + 0 * width + 24));
-    d4 = _mm_loadu_si128((const __m128i *)(diff + 1 * width));
-    d5 = _mm_loadu_si128((const __m128i *)(diff + 1 * width + 8));
-    d6 = _mm_loadu_si128((const __m128i *)(diff + 1 * width + 16));
-    d7 = _mm_loadu_si128((const __m128i *)(diff + 1 * width + 24));
+    d0 = _mm_load_si128((const __m128i *)(diff + 0 * width));
+    d1 = _mm_load_si128((const __m128i *)(diff + 0 * width + 8));
+    d2 = _mm_load_si128((const __m128i *)(diff + 0 * width + 16));
+    d3 = _mm_load_si128((const __m128i *)(diff + 0 * width + 24));
+    d4 = _mm_load_si128((const __m128i *)(diff + 1 * width));
+    d5 = _mm_load_si128((const __m128i *)(diff + 1 * width + 8));
+    d6 = _mm_load_si128((const __m128i *)(diff + 1 * width + 16));
+    d7 = _mm_load_si128((const __m128i *)(diff + 1 * width + 24));
 
     // Prediction data.
     p1 = _mm_load_si128((const __m128i *)(pred + 0 * pitch));

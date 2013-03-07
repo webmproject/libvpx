@@ -69,7 +69,7 @@ void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
                                uint8_t *pred, uint8_t *dest,
                                int pitch, int stride, int eob) {
   int i;
-  int16_t output[16];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
 
   for (i = 0; i < 16; i++)
     input[i] *= dq[i];
@@ -83,7 +83,7 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
                                    const int16_t *dq,
                                    uint8_t *pred, uint8_t *dest,
                                    int pitch, int stride, int eob) {
-  int16_t output[64];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 64);
 
   if (eob == 0) {
     // All 0 DCT coefficients
@@ -104,7 +104,7 @@ void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
 void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
                             uint8_t *dest, int pitch, int stride, int eob) {
   int i;
-  int16_t output[16];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
 
   if (eob > 1) {
     for (i = 0; i < 16; i++)
@@ -125,7 +125,7 @@ void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
 void vp9_dequant_dc_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
                                uint8_t *dest, int pitch, int stride, int dc) {
   int i;
-  int16_t output[16];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
 
   input[0] = dc;
 
@@ -142,7 +142,7 @@ void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
                                      uint8_t *pred, uint8_t *dest,
                                      int pitch, int stride, int eob) {
   int i;
-  int16_t output[16];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
 
   if (eob > 1) {
     for (i = 0; i < 16; i++)
@@ -164,7 +164,7 @@ void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
                                         uint8_t *dest,
                                         int pitch, int stride, int dc) {
   int i;
-  int16_t output[16];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
 
   input[0] = dc;
 
@@ -179,8 +179,7 @@ void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
 void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
                                 uint8_t *pred, uint8_t *dest, int pitch,
                                 int stride, int eob) {
-  int16_t output[64];
-
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 64);
 
   // If dc is 1, then input[0] is the reconstructed value, do not need
   // dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
@@ -241,7 +240,7 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
                                      const int16_t *dq, uint8_t *pred,
                                      uint8_t *dest, int pitch, int stride,
                                      int eob) {
-  int16_t output[256];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 256);
 
   if (eob == 0) {
     // All 0 DCT coefficients
@@ -270,7 +269,7 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
 void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
                                   uint8_t *pred, uint8_t *dest, int pitch,
                                   int stride, int eob) {
-  int16_t output[256];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 256);
 
   /* The calculation can be simplified if there are not many non-zero dct
    * coefficients. Use eobs to separate different cases. */
@@ -330,7 +329,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
 void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
                                   uint8_t *pred, uint8_t *dest, int pitch,
                                   int stride, int eob) {
-  int16_t output[1024];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 1024);
 
   if (eob) {
     input[0] = input[0] * dq[0] / 2;
