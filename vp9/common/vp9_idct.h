@@ -15,17 +15,12 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
-
-#define ROUND_POWER_OF_TWO(value, n) (((value) + (1 << ((n) - 1))) >> (n))
-
-/* If we don't want to use ROUND_POWER_OF_TWO macro
-static INLINE int16_t round_power_of_two(int16_t value, int n) {
-  return (value + (1 << (n - 1))) >> n;
-}*/
+#include "vp9/common/vp9_common.h"
 
 // Constants and Macros used by all idct/dct functions
 #define DCT_CONST_BITS 14
 #define DCT_CONST_ROUNDING  (1 << (DCT_CONST_BITS - 1))
+
 // Constants are round(16384 * cos(k*Pi/64)) where k = 1 to 31.
 // Note: sin(k*Pi/64) = cos((32-k)*Pi/64)
 static const int cospi_1_64  = 16364;
@@ -67,13 +62,13 @@ static const int sinpi_3_9 = 13377;
 static const int sinpi_4_9 = 15212;
 
 static INLINE int dct_const_round_shift(int input) {
-  int rv = (input + DCT_CONST_ROUNDING) >> DCT_CONST_BITS;
+  int rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
   assert(INT16_MIN <= rv && rv <= INT16_MAX);
   return rv;
 }
 
 static INLINE int dct_32_round(int input) {
-  int rv = (input + DCT_CONST_ROUNDING) >> DCT_CONST_BITS;
+  int rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
   assert(-131072 <= rv && rv <= 131071);
   return rv;
 }

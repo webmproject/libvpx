@@ -25,23 +25,27 @@
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
-/* Only need this for fixed-size arrays, for structs just assign. */
+#define ROUND_POWER_OF_TWO(value, n) (((value) + (1 << ((n) - 1))) >> (n))
 
-#define vp9_copy(Dest, Src) { \
-    assert(sizeof(Dest) == sizeof(Src)); \
-    vpx_memcpy(Dest, Src, sizeof(Src)); \
+/* If we don't want to use ROUND_POWER_OF_TWO macro
+static INLINE int16_t round_power_of_two(int16_t value, int n) {
+  return (value + (1 << (n - 1))) >> n;
+}*/
+
+// Only need this for fixed-size arrays, for structs just assign.
+#define vp9_copy(dest, src) {            \
+    assert(sizeof(dest) == sizeof(src)); \
+    vpx_memcpy(dest, src, sizeof(src));  \
   }
 
-/* Use this for variably-sized arrays. */
-
-#define vp9_copy_array(Dest, Src, N) { \
-    assert(sizeof(*Dest) == sizeof(*Src)); \
-    vpx_memcpy(Dest, Src, N * sizeof(*Src)); \
+// Use this for variably-sized arrays.
+#define vp9_copy_array(dest, src, n) {       \
+    assert(sizeof(*dest) == sizeof(*src));   \
+    vpx_memcpy(dest, src, n * sizeof(*src)); \
   }
 
-#define vp9_zero(Dest) vpx_memset(&Dest, 0, sizeof(Dest));
-
-#define vp9_zero_array(Dest, N) vpx_memset(Dest, 0, N * sizeof(*Dest));
+#define vp9_zero(dest) vpx_memset(&dest, 0, sizeof(dest));
+#define vp9_zero_array(dest, n) vpx_memset(dest, 0, n * sizeof(*dest));
 
 static INLINE uint8_t clip_pixel(int val) {
   return (val > 255) ? 255u : (val < 0) ? 0u : val;

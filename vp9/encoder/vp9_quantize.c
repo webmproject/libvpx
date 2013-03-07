@@ -761,8 +761,7 @@ void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *x, int b_idx1, int b_idx2) {
   vp9_regular_quantize_b_4x4(x, b_idx2);
 }
 
-static void invert_quant(int16_t *quant,
-                         uint8_t *shift, int d) {
+static void invert_quant(int16_t *quant, uint8_t *shift, int d) {
   unsigned t;
   int l;
   t = d;
@@ -776,56 +775,52 @@ static void invert_quant(int16_t *quant,
 void vp9_init_quantizer(VP9_COMP *cpi) {
   int i;
   int quant_val;
-  int Q;
+  int q;
 
   static const int zbin_boost[16] = { 0,  0,  0,  8,  8,  8, 10, 12,
                                      14, 16, 20, 24, 28, 32, 36, 40 };
 
-  for (Q = 0; Q < QINDEX_RANGE; Q++) {
-    int qzbin_factor = (vp9_dc_quant(Q, 0) < 148) ? 84 : 80;
+  for (q = 0; q < QINDEX_RANGE; q++) {
+    int qzbin_factor = (vp9_dc_quant(q, 0) < 148) ? 84 : 80;
     int qrounding_factor = 48;
-    if (Q == 0) {
+    if (q == 0) {
       qzbin_factor = 64;
       qrounding_factor = 64;
     }
     // dc values
-    quant_val = vp9_dc_quant(Q, cpi->common.y1dc_delta_q);
-    invert_quant(cpi->Y1quant[Q] + 0,
-                 cpi->Y1quant_shift[Q] + 0, quant_val);
-    cpi->Y1zbin[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
-    cpi->Y1round[Q][0] = (qrounding_factor * quant_val) >> 7;
-    cpi->common.Y1dequant[Q][0] = quant_val;
-    cpi->zrun_zbin_boost_y1[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+    quant_val = vp9_dc_quant(q, cpi->common.y1dc_delta_q);
+    invert_quant(cpi->Y1quant[q] + 0, cpi->Y1quant_shift[q] + 0, quant_val);
+    cpi->Y1zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
+    cpi->Y1round[q][0] = (qrounding_factor * quant_val) >> 7;
+    cpi->common.Y1dequant[q][0] = quant_val;
+    cpi->zrun_zbin_boost_y1[q][0] = (quant_val * zbin_boost[0]) >> 7;
 
-    quant_val = vp9_dc_uv_quant(Q, cpi->common.uvdc_delta_q);
-    invert_quant(cpi->UVquant[Q] + 0,
-                 cpi->UVquant_shift[Q] + 0, quant_val);
-    cpi->UVzbin[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
-    cpi->UVround[Q][0] = (qrounding_factor * quant_val) >> 7;
-    cpi->common.UVdequant[Q][0] = quant_val;
-    cpi->zrun_zbin_boost_uv[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+    quant_val = vp9_dc_uv_quant(q, cpi->common.uvdc_delta_q);
+    invert_quant(cpi->UVquant[q] + 0, cpi->UVquant_shift[q] + 0, quant_val);
+    cpi->UVzbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
+    cpi->UVround[q][0] = (qrounding_factor * quant_val) >> 7;
+    cpi->common.UVdequant[q][0] = quant_val;
+    cpi->zrun_zbin_boost_uv[q][0] = (quant_val * zbin_boost[0]) >> 7;
 
     // all the 4x4 ac values =;
     for (i = 1; i < 16; i++) {
       int rc = vp9_default_zig_zag1d_4x4[i];
 
-      quant_val = vp9_ac_yquant(Q);
-      invert_quant(cpi->Y1quant[Q] + rc,
-                   cpi->Y1quant_shift[Q] + rc, quant_val);
-      cpi->Y1zbin[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
-      cpi->Y1round[Q][rc] = (qrounding_factor * quant_val) >> 7;
-      cpi->common.Y1dequant[Q][rc] = quant_val;
-      cpi->zrun_zbin_boost_y1[Q][i] =
-        ((quant_val * zbin_boost[i]) + 64) >> 7;
+      quant_val = vp9_ac_yquant(q);
+      invert_quant(cpi->Y1quant[q] + rc, cpi->Y1quant_shift[q] + rc, quant_val);
+      cpi->Y1zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
+      cpi->Y1round[q][rc] = (qrounding_factor * quant_val) >> 7;
+      cpi->common.Y1dequant[q][rc] = quant_val;
+      cpi->zrun_zbin_boost_y1[q][i] =
+          ROUND_POWER_OF_TWO(quant_val * zbin_boost[i], 7);
 
-      quant_val = vp9_ac_uv_quant(Q, cpi->common.uvac_delta_q);
-      invert_quant(cpi->UVquant[Q] + rc,
-                   cpi->UVquant_shift[Q] + rc, quant_val);
-      cpi->UVzbin[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
-      cpi->UVround[Q][rc] = (qrounding_factor * quant_val) >> 7;
-      cpi->common.UVdequant[Q][rc] = quant_val;
-      cpi->zrun_zbin_boost_uv[Q][i] =
-        ((quant_val * zbin_boost[i]) + 64) >> 7;
+      quant_val = vp9_ac_uv_quant(q, cpi->common.uvac_delta_q);
+      invert_quant(cpi->UVquant[q] + rc, cpi->UVquant_shift[q] + rc, quant_val);
+      cpi->UVzbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
+      cpi->UVround[q][rc] = (qrounding_factor * quant_val) >> 7;
+      cpi->common.UVdequant[q][rc] = quant_val;
+      cpi->zrun_zbin_boost_uv[q][i] =
+          ROUND_POWER_OF_TWO(quant_val * zbin_boost[i], 7);
     }
   }
 }
