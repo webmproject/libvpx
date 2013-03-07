@@ -34,6 +34,24 @@
       "revId": "3162371544da4bfd956951ca43422d3d8c2ca195",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH///yQ\u003d",
+        "filename": "vp9/decoder/x86/vp9_dequantize_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-07T18:03:48Z",
+      "side": 1,
+      "message": "Can\u0027t say that I checked all the calling paths, but here\u0027s an example. vp9_dequant_idct_add_8x8_c() calls vp9_add_residual_8x8(output, ...), ie \u0027diff\u0027 is the \u0027output\u0027 array allocated on the stack in vp9_dequant_idct_add_c(). If you make that array aligned (in the caller, idct_add) then you can use aligned loads in the callee (add_residual)",
+      "parentUuid": "AAAAWH///y8\u003d",
+      "revId": "3162371544da4bfd956951ca43422d3d8c2ca195",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
