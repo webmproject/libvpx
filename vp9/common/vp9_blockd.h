@@ -455,19 +455,23 @@ extern const uint8_t vp9_block2above_sb[TX_SIZE_MAX_SB][96];
 extern const uint8_t vp9_block2left_sb64[TX_SIZE_MAX_SB][384];
 extern const uint8_t vp9_block2above_sb64[TX_SIZE_MAX_SB][384];
 
-#define USE_ADST_FOR_I16X16_8X8   0
-#define USE_ADST_FOR_I16X16_4X4   0
+#define USE_ADST_FOR_I16X16_8X8   1
+#define USE_ADST_FOR_I16X16_4X4   1
 #define USE_ADST_FOR_I8X8_4X4     1
 #define USE_ADST_PERIPHERY_ONLY   1
+#define USE_ADST_FOR_SB           1
+#define USE_ADST_FOR_REMOTE_EDGE  0
 
 static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   // TODO(debargha): explore different patterns for ADST usage when blocksize
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
-  // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.sb_type)
+  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+#if !USE_ADST_FOR_SB
+  if (sb_type)
     return tx_type;
-  if (ib >= 16)
+#endif
+  if (ib >= (16 << (2 * sb_type)))  // no chroma adst
     return tx_type;
   if (xd->lossless)
     return DCT_DCT;
@@ -482,16 +486,31 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   } else if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
              xd->q_index < ACTIVE_HT) {
     const BLOCKD *b = &xd->block[ib];
+    const int ic = (ib & 10);
 #if USE_ADST_FOR_I8X8_4X4
 #if USE_ADST_PERIPHERY_ONLY
     // Use ADST for periphery blocks only
-    int ic = (ib & 10);
+    const int inner = ib & 5;
     b += ic - ib;
-    tx_type = (ic != 10) ?
-         txfm_map(pred_mode_conv((MB_PREDICTION_MODE)b->bmi.as_mode.first)) :
-         DCT_DCT;
+    tx_type = txfm_map(pred_mode_conv(
+        (MB_PREDICTION_MODE)b->bmi.as_mode.first));
+#if USE_ADST_FOR_REMOTE_EDGE
+    if (inner == 5)
+      tx_type = DCT_DCT;
+#else
+    if (inner == 1) {
+      if (tx_type == ADST_ADST) tx_type = ADST_DCT;
+      else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
+    } else if (inner == 4) {
+      if (tx_type == ADST_ADST) tx_type = DCT_ADST;
+      else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
+    } else if (inner == 5) {
+      tx_type = DCT_DCT;
+    }
+#endif
 #else
     // Use ADST
+    b += ic - ib;
     tx_type = txfm_map(pred_mode_conv(
         (MB_PREDICTION_MODE)b->bmi.as_mode.first));
 #endif
@@ -503,9 +522,22 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
              xd->q_index < ACTIVE_HT) {
 #if USE_ADST_FOR_I16X16_4X4
 #if USE_ADST_PERIPHERY_ONLY
-    // Use ADST for periphery blocks only
-    tx_type = (ib < 4 || ((ib & 3) == 0)) ?
-        txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode)) : DCT_DCT;
+    const int hmax = 4 << sb_type;
+    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+#if USE_ADST_FOR_REMOTE_EDGE
+    if ((ib & (hmax - 1)) != 0 && ib >= hmax)
+      tx_type = DCT_DCT;
+#else
+    if (ib >= 1 && ib < hmax) {
+      if (tx_type == ADST_ADST) tx_type = ADST_DCT;
+      else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
+    } else if (ib >= 1 && (ib & (hmax - 1)) == 0) {
+      if (tx_type == ADST_ADST) tx_type = DCT_ADST;
+      else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
+    } else if (ib != 0) {
+      tx_type = DCT_DCT;
+    }
+#endif
 #else
     // Use ADST
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
@@ -522,10 +554,12 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
   // TODO(debargha): explore different patterns for ADST usage when blocksize
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
-  // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.sb_type)
+  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+#if !USE_ADST_FOR_SB
+  if (sb_type)
     return tx_type;
-  if (ib >= 16)
+#endif
+  if (ib >= (16 << (2 * sb_type)))  // no chroma adst
     return tx_type;
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
       xd->q_index < ACTIVE_HT8) {
@@ -536,11 +570,24 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
            (MB_PREDICTION_MODE)b->bmi.as_mode.first));
   } else if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
              xd->q_index < ACTIVE_HT8) {
-#if USE_ADST_FOR_I8X8_4X4
+#if USE_ADST_FOR_I16X16_8X8
 #if USE_ADST_PERIPHERY_ONLY
-    // Use ADST for periphery blocks only
-    tx_type = (ib != 10) ?
-        txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode)) : DCT_DCT;
+    const int hmax = 4 << sb_type;
+    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+#if USE_ADST_FOR_REMOTE_EDGE
+    if ((ib & (hmax - 1)) != 0 && ib >= hmax)
+      tx_type = DCT_DCT;
+#else
+    if (ib >= 1 && ib < hmax) {
+      if (tx_type == ADST_ADST) tx_type = ADST_DCT;
+      else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
+    } else if (ib >= 1 && (ib & (hmax - 1)) == 0) {
+      if (tx_type == ADST_ADST) tx_type = DCT_ADST;
+      else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
+    } else if (ib != 0) {
+      tx_type = DCT_DCT;
+    }
+#endif
 #else
     // Use ADST
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
@@ -555,11 +602,35 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
 
 static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type = DCT_DCT;
-  if (ib >= 16)
+  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+#if !USE_ADST_FOR_SB
+  if (sb_type)
+    return tx_type;
+#endif
+  if (ib >= (16 << (2 * sb_type)))
     return tx_type;
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
       xd->q_index < ACTIVE_HT16) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+#if USE_ADST_PERIPHERY_ONLY
+    if (sb_type) {
+      const int hmax = 4 << sb_type;
+#if USE_ADST_FOR_REMOTE_EDGE
+      if ((ib & (hmax - 1)) != 0 && ib >= hmax)
+        tx_type = DCT_DCT;
+#else
+      if (ib >= 1 && ib < hmax) {
+        if (tx_type == ADST_ADST) tx_type = ADST_DCT;
+        else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
+      } else if (ib >= 1 && (ib & (hmax - 1)) == 0) {
+        if (tx_type == ADST_ADST) tx_type = DCT_ADST;
+        else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
+      } else if (ib != 0) {
+        tx_type = DCT_DCT;
+      }
+#endif
+    }
+#endif
   }
   return tx_type;
 }
