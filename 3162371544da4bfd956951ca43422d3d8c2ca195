@@ -16,6 +16,24 @@
       "revId": "3162371544da4bfd956951ca43422d3d8c2ca195",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH///y8\u003d",
+        "filename": "vp9/decoder/x86/vp9_dequantize_x86.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-03-07T17:59:07Z",
+      "side": 1,
+      "message": "Not sure I understand it. Diff pointer is passed in from caller function. I would have to preload the data to an aligned buffer if we want to make it aligned. Right?",
+      "parentUuid": "AAAAWH///zk\u003d",
+      "revId": "3162371544da4bfd956951ca43422d3d8c2ca195",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
