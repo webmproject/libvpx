@@ -10,7 +10,6 @@
 
 #include <assert.h>
 #include <emmintrin.h>  // SSE2
-#include <mmintrin.h>   // SSE
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_common.h"
@@ -68,14 +67,14 @@ void vp9_add_residual_8x8_sse2(const int16_t *diff, const uint8_t *pred,
   const __m128i zero = _mm_setzero_si128();
 
   // Diff data
-  const __m128i d0 = _mm_load_si128((const __m128i *)(diff + 0 * width));
-  const __m128i d1 = _mm_load_si128((const __m128i *)(diff + 1 * width));
-  const __m128i d2 = _mm_load_si128((const __m128i *)(diff + 2 * width));
-  const __m128i d3 = _mm_load_si128((const __m128i *)(diff + 3 * width));
-  const __m128i d4 = _mm_load_si128((const __m128i *)(diff + 4 * width));
-  const __m128i d5 = _mm_load_si128((const __m128i *)(diff + 5 * width));
-  const __m128i d6 = _mm_load_si128((const __m128i *)(diff + 6 * width));
-  const __m128i d7 = _mm_load_si128((const __m128i *)(diff + 7 * width));
+  const __m128i d0 = _mm_loadu_si128((const __m128i *)(diff + 0 * width));
+  const __m128i d1 = _mm_loadu_si128((const __m128i *)(diff + 1 * width));
+  const __m128i d2 = _mm_loadu_si128((const __m128i *)(diff + 2 * width));
+  const __m128i d3 = _mm_loadu_si128((const __m128i *)(diff + 3 * width));
+  const __m128i d4 = _mm_loadu_si128((const __m128i *)(diff + 4 * width));
+  const __m128i d5 = _mm_loadu_si128((const __m128i *)(diff + 5 * width));
+  const __m128i d6 = _mm_loadu_si128((const __m128i *)(diff + 6 * width));
+  const __m128i d7 = _mm_loadu_si128((const __m128i *)(diff + 7 * width));
 
   // Prediction data.
   __m128i p0 = _mm_loadl_epi64((const __m128i *)(pred + 0 * pitch));
@@ -110,18 +109,21 @@ void vp9_add_residual_8x8_sse2(const int16_t *diff, const uint8_t *pred,
   p4 = _mm_packus_epi16(p4, p5);
   p6 = _mm_packus_epi16(p6, p7);
 
-  // SSE
-  _mm_storel_pi((__m64 *)(dest + 0 * stride), (__m128)p0);
-  _mm_storeh_pi((__m64 *)(dest + 1 * stride), (__m128)p0);
+  _mm_storel_epi64((__m128i *)(dest + 0 * stride), p0);
+  p0 = _mm_srli_si128(p0, 8);
+  _mm_storel_epi64((__m128i *)(dest + 1 * stride), p0);
 
-  _mm_storel_pi((__m64 *)(dest + 2 * stride), (__m128)p2);
-  _mm_storeh_pi((__m64 *)(dest + 3 * stride), (__m128)p2);
+  _mm_storel_epi64((__m128i *)(dest + 2 * stride), p2);
+  p2 = _mm_srli_si128(p2, 8);
+  _mm_storel_epi64((__m128i *)(dest + 3 * stride), p2);
 
-  _mm_storel_pi((__m64 *)(dest + 4 * stride), (__m128)p4);
-  _mm_storeh_pi((__m64 *)(dest + 5 * stride), (__m128)p4);
+  _mm_storel_epi64((__m128i *)(dest + 4 * stride), p4);
+  p4 = _mm_srli_si128(p4, 8);
+  _mm_storel_epi64((__m128i *)(dest + 5 * stride), p4);
 
-  _mm_storel_pi((__m64 *)(dest + 6 * stride), (__m128)p6);
-  _mm_storeh_pi((__m64 *)(dest + 7 * stride), (__m128)p6);
+  _mm_storel_epi64((__m128i *)(dest + 6 * stride), p6);
+  p6 = _mm_srli_si128(p6, 8);
+  _mm_storel_epi64((__m128i *)(dest + 7 * stride), p6);
 }
 
 void vp9_add_residual_16x16_sse2(const int16_t *diff, const uint8_t *pred,
@@ -135,14 +137,14 @@ void vp9_add_residual_16x16_sse2(const int16_t *diff, const uint8_t *pred,
   __m128i p0, p1, p2, p3, p4, p5, p6, p7;
 
   do {
-    d0 = _mm_load_si128((const __m128i *)(diff + 0 * width));
-    d1 = _mm_load_si128((const __m128i *)(diff + 0 * width + 8));
-    d2 = _mm_load_si128((const __m128i *)(diff + 1 * width));
-    d3 = _mm_load_si128((const __m128i *)(diff + 1 * width + 8));
-    d4 = _mm_load_si128((const __m128i *)(diff + 2 * width));
-    d5 = _mm_load_si128((const __m128i *)(diff + 2 * width + 8));
-    d6 = _mm_load_si128((const __m128i *)(diff + 3 * width));
-    d7 = _mm_load_si128((const __m128i *)(diff + 3 * width + 8));
+    d0 = _mm_loadu_si128((const __m128i *)(diff + 0 * width));
+    d1 = _mm_loadu_si128((const __m128i *)(diff + 0 * width + 8));
+    d2 = _mm_loadu_si128((const __m128i *)(diff + 1 * width));
+    d3 = _mm_loadu_si128((const __m128i *)(diff + 1 * width + 8));
+    d4 = _mm_loadu_si128((const __m128i *)(diff + 2 * width));
+    d5 = _mm_loadu_si128((const __m128i *)(diff + 2 * width + 8));
+    d6 = _mm_loadu_si128((const __m128i *)(diff + 3 * width));
+    d7 = _mm_loadu_si128((const __m128i *)(diff + 3 * width + 8));
 
     // Prediction data.
     p1 = _mm_load_si128((const __m128i *)(pred + 0 * pitch));
@@ -195,14 +197,14 @@ void vp9_add_residual_32x32_sse2(const int16_t *diff, const uint8_t *pred,
   __m128i p0, p1, p2, p3, p4, p5, p6, p7;
 
   do {
-    d0 = _mm_load_si128((const __m128i *)(diff + 0 * width));
-    d1 = _mm_load_si128((const __m128i *)(diff + 0 * width + 8));
-    d2 = _mm_load_si128((const __m128i *)(diff + 0 * width + 16));
-    d3 = _mm_load_si128((const __m128i *)(diff + 0 * width + 24));
-    d4 = _mm_load_si128((const __m128i *)(diff + 1 * width));
-    d5 = _mm_load_si128((const __m128i *)(diff + 1 * width + 8));
-    d6 = _mm_load_si128((const __m128i *)(diff + 1 * width + 16));
-    d7 = _mm_load_si128((const __m128i *)(diff + 1 * width + 24));
+    d0 = _mm_loadu_si128((const __m128i *)(diff + 0 * width));
+    d1 = _mm_loadu_si128((const __m128i *)(diff + 0 * width + 8));
+    d2 = _mm_loadu_si128((const __m128i *)(diff + 0 * width + 16));
+    d3 = _mm_loadu_si128((const __m128i *)(diff + 0 * width + 24));
+    d4 = _mm_loadu_si128((const __m128i *)(diff + 1 * width));
+    d5 = _mm_loadu_si128((const __m128i *)(diff + 1 * width + 8));
+    d6 = _mm_loadu_si128((const __m128i *)(diff + 1 * width + 16));
+    d7 = _mm_loadu_si128((const __m128i *)(diff + 1 * width + 24));
 
     // Prediction data.
     p1 = _mm_load_si128((const __m128i *)(pred + 0 * pitch));
