@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWH///Js\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T02:03:44Z",
+      "side": 1,
+      "message": "I think the only reason for these is to pass a copy into vp9_clamp_mv_min_max(). I\u0027d rather add the w/h as parameters to that function (or whatever replaces it, per my other comment) than to make another copy here. From a quick check, I think all the callers have access to cm/cpi.",
+      "revId": "3acb6a9fa30753c4119f968bfc220531bfc74449",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH///LE\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T02:03:44Z",
+      "side": 1,
+      "message": "you want cpi-\u003ecommon.Width here, not oxcf, though it doesn\u0027t matter much in this case.",
+      "revId": "3acb6a9fa30753c4119f968bfc220531bfc74449",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH///KA\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T02:03:44Z",
+      "side": 1,
+      "message": "I\u0027m a little concerned that we\u0027re packing too much into this function -- it seems like the existing function, which clamps the search range by the maximum codable vector is still correct as is. If you want to restrict the search range by limiting the number of steps, then it seems like it\u0027d be better to pull the calculation for that out into its own function. I don\u0027t think you need to change the col_min/max in that case, but maybe there\u0027s something I\u0027m missing?",
+      "revId": "3acb6a9fa30753c4119f968bfc220531bfc74449",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
