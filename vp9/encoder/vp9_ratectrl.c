@@ -190,6 +190,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->nzc_probs_8x8, cm->fc.nzc_probs_8x8);
   vp9_copy(cc->nzc_probs_16x16, cm->fc.nzc_probs_16x16);
   vp9_copy(cc->nzc_probs_32x32, cm->fc.nzc_probs_32x32);
+  vp9_copy(cc->nzc_pcat_probs, cm->fc.nzc_pcat_probs);
 #endif
 }
 
@@ -251,6 +252,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.nzc_probs_8x8, cc->nzc_probs_8x8);
   vp9_copy(cm->fc.nzc_probs_16x16, cc->nzc_probs_16x16);
   vp9_copy(cm->fc.nzc_probs_32x32, cc->nzc_probs_32x32);
+  vp9_copy(cm->fc.nzc_pcat_probs, cc->nzc_pcat_probs);
 #endif
 }
 

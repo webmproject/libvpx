@@ -121,6 +121,8 @@ typedef struct {
            [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC16X16_NODES];
   vp9_prob nzc_probs_32x32
            [MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][NZC32X32_NODES];
+  vp9_prob nzc_pcat_probs[MAX_NZC_CONTEXTS]
+                         [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA];
 #endif
 } CODING_CONTEXT;
 

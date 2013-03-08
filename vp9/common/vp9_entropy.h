@@ -175,7 +175,13 @@ extern int vp9_get_coef_context(int * recent_energy, int token);
 /* Max number of extra bits */
 #define NZC_BITS_EXTRA          9
 
+/* Tokens without extra bits */
+#define NZC_TOKENS_NOEXTRA      (NZC32X32_TOKENS - NZC_TOKENS_EXTRA)
+
 #define MAX_NZC_CONTEXTS        3
+
+/* whether to update extra bit probabilities */
+#define NZC_PCAT_UPDATE
 
 /* nzc trees */
 extern const vp9_tree_index    vp9_nzc4x4_tree[];
@@ -193,8 +199,6 @@ extern struct vp9_token_struct  vp9_nzc32x32_encodings[NZC32X32_TOKENS];
   (x) <= 3 ? (x) : (x) <= 4 ? 3 : (x) <= 8 ? 4 : \
   (x) <= 16 ? 5 : (x) <= 32 ? 6 : (x) <= 64 ? 7 :\
   (x) <= 128 ? 8 : (x) <= 256 ? 9 : (x) <= 512 ? 10 : 11)
-#define extranzcbits(c) ((c) <= 2 ? 0 : (c) - 2)
-#define basenzcvalue(c) ((c) <= 2 ? (c) : (1 << ((c) - 2)) + 1)
 
 int vp9_get_nzc_context_y_sb64(struct VP9Common *cm, MODE_INFO *cur,
                                int mb_row, int mb_col, int block);
@@ -213,9 +217,11 @@ void vp9_update_nzc_counts(struct VP9Common *cm, MACROBLOCKD *xd,
                            int mb_row, int mb_col);
 void vp9_adapt_nzc_probs(struct VP9Common *cm);
 
-/* Extra bit probabilities - block size agnostic */
-extern const vp9_prob Pcat_nzc[MAX_NZC_CONTEXTS][NZC_TOKENS_EXTRA]
-                              [NZC_BITS_EXTRA];
+/* Extra bits array */
+extern const int vp9_extranzcbits[NZC32X32_TOKENS];
+
+/* Base nzc values */
+extern const int vp9_basenzcvalue[NZC32X32_TOKENS];
 
 #endif  // CONFIG_CODE_NONZEROCOUNT
 #endif  // VP9_COMMON_VP9_ENTROPY_H_

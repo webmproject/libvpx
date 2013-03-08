@@ -183,44 +183,43 @@ static void fill_nzc_costs(VP9_COMP *cpi, int block_size) {
   for (nzc_context = 0; nzc_context < MAX_NZC_CONTEXTS; ++nzc_context) {
     for (r = 0; r < REF_TYPES; ++r) {
       for (b = 0; b < BLOCK_TYPES; ++b) {
-        if (block_size == 4)
+        unsigned int *nzc_costs;
+        if (block_size == 4) {
           vp9_cost_tokens(cost,
                           cpi->common.fc.nzc_probs_4x4[nzc_context][r][b],
                           vp9_nzc4x4_tree);
-        else if (block_size == 8)
+          nzc_costs = cpi->mb.nzc_costs_4x4[nzc_context][r][b];
+        } else if (block_size == 8) {
           vp9_cost_tokens(cost,
                           cpi->common.fc.nzc_probs_8x8[nzc_context][r][b],
                           vp9_nzc8x8_tree);
-        else if (block_size == 16)
+          nzc_costs = cpi->mb.nzc_costs_8x8[nzc_context][r][b];
+        } else if (block_size == 16) {
           vp9_cost_tokens(cost,
                           cpi->common.fc.nzc_probs_16x16[nzc_context][r][b],
                           vp9_nzc16x16_tree);
-        else
+          nzc_costs = cpi->mb.nzc_costs_16x16[nzc_context][r][b];
+        } else {
           vp9_cost_tokens(cost,
                           cpi->common.fc.nzc_probs_32x32[nzc_context][r][b],
                           vp9_nzc32x32_tree);
+          nzc_costs = cpi->mb.nzc_costs_32x32[nzc_context][r][b];
+        }
 
         for (nzc = 0; nzc < values; ++nzc) {
           int e, c, totalcost = 0;
           c = codenzc(nzc);
           totalcost = cost[c];
-          if ((e = extranzcbits(c))) {
-            int x = nzc - basenzcvalue(c);
+          if ((e = vp9_extranzcbits[c])) {
+            int x = nzc - vp9_basenzcvalue[c];
             while (e--) {
-              if ((x >> e) & 1)
-                totalcost += vp9_cost_one(Pcat_nzc[nzc_context][c - 3][e]);
-              else
-                totalcost += vp9_cost_zero(Pcat_nzc[nzc_context][c - 3][e]);
+              totalcost += vp9_cost_bit(
+                  cpi->common.fc.nzc_pcat_probs[nzc_context]
+                                               [c - NZC_TOKENS_NOEXTRA][e],
+                  ((x >> e) & 1));
             }
           }
-          if (block_size == 4)
-            cpi->mb.nzc_costs_4x4[nzc_context][r][b][nzc] = totalcost;
-          else if (block_size == 8)
-            cpi->mb.nzc_costs_8x8[nzc_context][r][b][nzc] = totalcost;
-          else if (block_size == 16)
-            cpi->mb.nzc_costs_16x16[nzc_context][r][b][nzc] = totalcost;
-          else
-            cpi->mb.nzc_costs_32x32[nzc_context][r][b][nzc] = totalcost;
+          nzc_costs[nzc] = totalcost;
         }
       }
     }

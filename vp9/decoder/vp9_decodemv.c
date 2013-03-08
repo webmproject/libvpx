@@ -1201,11 +1201,15 @@ static uint16_t read_nzc(VP9_COMMON *const cm,
   } else {
     assert(0);
   }
-  nzc = basenzcvalue(c);
-  if ((e = extranzcbits(c))) {
+  nzc = vp9_basenzcvalue[c];
+  if ((e = vp9_extranzcbits[c])) {
     int x = 0;
-    while (e--)
-      x |= (vp9_read(bc, Pcat_nzc[nzc_context][c - 3][e]) << e);
+    while (e--) {
+      int b = vp9_read(
+          bc, cm->fc.nzc_pcat_probs[nzc_context][c - NZC_TOKENS_NOEXTRA][e]);
+      x |= (b << e);
+      cm->fc.nzc_pcat_counts[nzc_context][c - NZC_TOKENS_NOEXTRA][e][b]++;
+    }
     nzc += x;
   }
   if (tx_size == TX_32X32)

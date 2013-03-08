@@ -50,6 +50,24 @@ vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES];
 extern unsigned int active_section;
 #endif
 
+#if CONFIG_CODE_NONZEROCOUNT
+#ifdef NZC_STATS
+unsigned int nzc_stats_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                          [NZC4X4_TOKENS];
+unsigned int nzc_stats_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                          [NZC8X8_TOKENS];
+unsigned int nzc_stats_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                          [NZC16X16_TOKENS];
+unsigned int nzc_stats_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                          [NZC32X32_TOKENS];
+unsigned int nzc_pcat_stats[MAX_NZC_CONTEXTS][NZC_TOKENS_EXTRA]
+                          [NZC_BITS_EXTRA][2];
+void init_nzcstats();
+void update_nzcstats(VP9_COMMON *const cm);
+void print_nzcstats();
+#endif
+#endif
+
 #ifdef MODE_STATS
 int count_mb_seg[4] = { 0, 0, 0, 0 };
 #endif
@@ -1066,10 +1084,14 @@ static void write_nzc(VP9_COMMON *const cm,
     assert(0);
   }
 
-  if ((e = extranzcbits(c))) {
-    int x = nzc - basenzcvalue(c);
-    while (e--)
-      vp9_write(bc, (x >> e) & 1, Pcat_nzc[nzc_context][c - 3][e]);
+  if ((e = vp9_extranzcbits[c])) {
+    int x = nzc - vp9_basenzcvalue[c];
+    while (e--) {
+      int b = (x >> e) & 1;
+      vp9_write(bc, b,
+                cm->fc.nzc_pcat_probs[nzc_context][c - NZC_TOKENS_NOEXTRA][e]);
+      // cm->fc.nzc_pcat_counts[nzc_context][c - NZC_TOKENS_NOEXTRA][e][b]++;
+    }
   }
 }
 
@@ -1269,7 +1291,313 @@ static void write_nzcs_mb16(VP9_COMP *cpi,
       break;
   }
 }
+
+#ifdef NZC_STATS
+void init_nzcstats() {
+  vp9_zero(nzc_stats_4x4);
+  vp9_zero(nzc_stats_8x8);
+  vp9_zero(nzc_stats_16x16);
+  vp9_zero(nzc_stats_32x32);
+  vp9_zero(nzc_pcat_stats);
+}
+
+void update_nzcstats(VP9_COMMON *const cm) {
+  int c, r, b, t;
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    for (r = 0; r < REF_TYPES; ++r) {
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        for (t = 0; t < NZC4X4_TOKENS; ++t) {
+          nzc_stats_4x4[c][r][b][t] += cm->fc.nzc_counts_4x4[c][r][b][t];
+        }
+      }
+    }
+  }
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    for (r = 0; r < REF_TYPES; ++r) {
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        for (t = 0; t < NZC8X8_TOKENS; ++t) {
+          nzc_stats_8x8[c][r][b][t] += cm->fc.nzc_counts_8x8[c][r][b][t];
+        }
+      }
+    }
+  }
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    for (r = 0; r < REF_TYPES; ++r) {
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        for (t = 0; t < NZC16X16_TOKENS; ++t) {
+          nzc_stats_16x16[c][r][b][t] += cm->fc.nzc_counts_16x16[c][r][b][t];
+        }
+      }
+    }
+  }
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    for (r = 0; r < REF_TYPES; ++r) {
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        for (t = 0; t < NZC32X32_TOKENS; ++t) {
+          nzc_stats_32x32[c][r][b][t] += cm->fc.nzc_counts_32x32[c][r][b][t];
+        }
+      }
+    }
+  }
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    for (t = 0; t < NZC_TOKENS_EXTRA; ++t) {
+      int bits = vp9_extranzcbits[t + NZC_TOKENS_NOEXTRA];
+      for (b = 0; b < bits; ++b) {
+        nzc_pcat_stats[c][t][b][0] += cm->fc.nzc_pcat_counts[c][t][b][0];
+        nzc_pcat_stats[c][t][b][1] += cm->fc.nzc_pcat_counts[c][t][b][1];
+      }
+    }
+  }
+}
+
+void print_nzcstats() {
+  int c, r, b, t;
+  printf(
+    "static const unsigned int default_nzc_counts_4x4[MAX_NZC_CONTEXTS]\n"
+    "                                                [REF_TYPES]\n"
+    "                                                [BLOCK_TYPES]\n"
+    "                                                [NZC4X4_TOKENS] = {\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (r = 0; r < REF_TYPES; ++r) {
+      printf("    {\n");
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        printf("      {");
+        for (t = 0; t < NZC4X4_TOKENS; ++t) {
+          printf(" %-3d,", nzc_stats_4x4[c][r][b][t]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  printf(
+    "static const unsigned int default_nzc_counts_8x8[MAX_NZC_CONTEXTS]\n"
+    "                                                [REF_TYPES]\n"
+    "                                                [BLOCK_TYPES]\n"
+    "                                                [NZC8X8_TOKENS] = {\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (r = 0; r < REF_TYPES; ++r) {
+      printf("    {\n");
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        printf("      {");
+        for (t = 0; t < NZC8X8_TOKENS; ++t) {
+          printf(" %-3d,", nzc_stats_8x8[c][r][b][t]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  printf(
+    "static const unsigned int default_nzc_counts_16x16[MAX_NZC_CONTEXTS]\n"
+    "                                                  [REF_TYPES]\n"
+    "                                                  [BLOCK_TYPES]\n"
+    "                                                  [NZC16X16_TOKENS] = {"
+    "\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (r = 0; r < REF_TYPES; ++r) {
+      printf("    {\n");
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        printf("      {");
+        for (t = 0; t < NZC16X16_TOKENS; ++t) {
+          printf(" %-3d,", nzc_stats_16x16[c][r][b][t]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  printf(
+    "static const unsigned int default_nzc_counts_32x32[MAX_NZC_CONTEXTS]\n"
+    "                                                  [REF_TYPES]\n"
+    "                                                  [BLOCK_TYPES]\n"
+    "                                                  [NZC32X32_TOKENS] = {"
+    "\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (r = 0; r < REF_TYPES; ++r) {
+      printf("    {\n");
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        printf("      {");
+        for (t = 0; t < NZC32X32_TOKENS; ++t) {
+          printf(" %-3d,", nzc_stats_32x32[c][r][b][t]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  printf(
+    "static const vp9_prob default_nzc_pcat_counts[MAX_NZC_CONTEXTS]\n"
+    "                                             [NZC_TOKENS_EXTRA]\n"
+    "                                             [NZC_BITS_EXTRA] = {\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (t = 0; t < NZC_TOKENS_EXTRA; ++t) {
+      printf("    {");
+      for (b = 0; b < NZC_BITS_EXTRA; ++b) {
+        printf(" %d/%d,",
+               nzc_pcat_stats[c][t][b][0], nzc_pcat_stats[c][t][b][1]);
+      }
+      printf(" },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  printf(
+    "static const vp9_prob default_nzc_probs_4x4[MAX_NZC_CONTEXTS]\n"
+    "                                           [REF_TYPES]\n"
+    "                                           [BLOCK_TYPES]\n"
+    "                                           [NZC4X4_TOKENS] = {\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (r = 0; r < REF_TYPES; ++r) {
+      printf("    {\n");
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        vp9_prob probs[NZC4X4_NODES];
+        unsigned int branch_ct[NZC4X4_NODES][2];
+        vp9_tree_probs_from_distribution(NZC4X4_TOKENS,
+                                         vp9_nzc4x4_encodings,
+                                         vp9_nzc4x4_tree,
+                                         probs, branch_ct,
+                                         nzc_stats_4x4[c][r][b]);
+        printf("      {");
+        for (t = 0; t < NZC4X4_NODES; ++t) {
+          printf(" %-3d,", probs[t]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  printf(
+    "static const vp9_prob default_nzc_probs_8x8[MAX_NZC_CONTEXTS]\n"
+    "                                           [REF_TYPES]\n"
+    "                                           [BLOCK_TYPES]\n"
+    "                                           [NZC8X8_TOKENS] = {\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (r = 0; r < REF_TYPES; ++r) {
+      printf("    {\n");
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        vp9_prob probs[NZC8X8_NODES];
+        unsigned int branch_ct[NZC8X8_NODES][2];
+        vp9_tree_probs_from_distribution(NZC8X8_TOKENS,
+                                         vp9_nzc8x8_encodings,
+                                         vp9_nzc8x8_tree,
+                                         probs, branch_ct,
+                                         nzc_stats_8x8[c][r][b]);
+        printf("      {");
+        for (t = 0; t < NZC8X8_NODES; ++t) {
+          printf(" %-3d,", probs[t]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  printf(
+    "static const vp9_prob default_nzc_probs_16x16[MAX_NZC_CONTEXTS]\n"
+    "                                             [REF_TYPES]\n"
+    "                                             [BLOCK_TYPES]\n"
+    "                                             [NZC16X16_TOKENS] = {\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (r = 0; r < REF_TYPES; ++r) {
+      printf("    {\n");
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        vp9_prob probs[NZC16X16_NODES];
+        unsigned int branch_ct[NZC16X16_NODES][2];
+        vp9_tree_probs_from_distribution(NZC16X16_TOKENS,
+                                         vp9_nzc16x16_encodings,
+                                         vp9_nzc16x16_tree,
+                                         probs, branch_ct,
+                                         nzc_stats_16x16[c][r][b]);
+        printf("      {");
+        for (t = 0; t < NZC16X16_NODES; ++t) {
+          printf(" %-3d,", probs[t]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  printf(
+    "static const vp9_prob default_nzc_probs_32x32[MAX_NZC_CONTEXTS]\n"
+    "                                             [REF_TYPES]\n"
+    "                                             [BLOCK_TYPES]\n"
+    "                                             [NZC32X32_TOKENS] = {\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (r = 0; r < REF_TYPES; ++r) {
+      printf("    {\n");
+      for (b = 0; b < BLOCK_TYPES; ++b) {
+        vp9_prob probs[NZC32X32_NODES];
+        unsigned int branch_ct[NZC32X32_NODES][2];
+        vp9_tree_probs_from_distribution(NZC32X32_TOKENS,
+                                         vp9_nzc32x32_encodings,
+                                         vp9_nzc32x32_tree,
+                                         probs, branch_ct,
+                                         nzc_stats_32x32[c][r][b]);
+        printf("      {");
+        for (t = 0; t < NZC32X32_NODES; ++t) {
+          printf(" %-3d,", probs[t]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  printf(
+    "static const vp9_prob default_nzc_pcat_probs[MAX_NZC_CONTEXTS]\n"
+    "                                            [NZC_TOKENS_EXTRA]\n"
+    "                                            [NZC_BITS_EXTRA] = {\n");
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    printf("  {\n");
+    for (t = 0; t < NZC_TOKENS_EXTRA; ++t) {
+      printf("    {");
+      for (b = 0; b < NZC_BITS_EXTRA; ++b) {
+        vp9_prob prob = get_binary_prob(nzc_pcat_stats[c][t][b][0],
+                                        nzc_pcat_stats[c][t][b][1]);
+        printf(" %-3d,", prob);
+      }
+      printf(" },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+}
 #endif
+
+#endif  // CONFIG_CODE_NONZEROCOUNT
 
 static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
                           TOKENEXTRA **tok, TOKENEXTRA *tok_end,
@@ -1593,6 +1921,76 @@ static void update_nzc_probs_common(VP9_COMP* cpi,
   }
 }
 
+static void update_nzc_pcat_probs(VP9_COMP *cpi, vp9_writer* const bc) {
+  VP9_COMMON *cm = &cpi->common;
+  int c, t, b;
+  int update[2] = {0, 0};
+  int savings = 0;
+  vp9_prob upd = NZC_UPDATE_PROB_PCAT;
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    for (t = 0; t < NZC_TOKENS_EXTRA; ++t) {
+      int bits = vp9_extranzcbits[t + NZC_TOKENS_NOEXTRA];
+      for (b = 0; b < bits; ++b) {
+        vp9_prob newp = get_binary_prob(cm->fc.nzc_pcat_counts[c][t][b][0],
+                                        cm->fc.nzc_pcat_counts[c][t][b][1]);
+        vp9_prob oldp = cm->fc.nzc_pcat_probs[c][t][b];
+        int s, u = 0;
+#if defined(SEARCH_NEWP)
+        s = prob_diff_update_savings_search(cm->fc.nzc_pcat_counts[c][t][b],
+                                            oldp, &newp, upd);
+        if (s > 0 && newp != oldp)
+          u = 1;
+        if (u)
+          savings += s - (int)(vp9_cost_zero(upd));
+        else
+          savings -= (int)(vp9_cost_zero(upd));
+#else
+        s = prob_update_savings(cm->fc.nzc_pcat_counts[c][t][b],
+                                oldp, newp, upd);
+        if (s > 0)
+          u = 1;
+        if (u)
+          savings += s;
+#endif
+        update[u]++;
+      }
+    }
+  }
+  if (update[1] == 0 || savings < 0) {
+    vp9_write_bit(bc, 0);
+  } else {
+    vp9_write_bit(bc, 1);
+    for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+      for (t = 0; t < NZC_TOKENS_EXTRA; ++t) {
+        int bits = vp9_extranzcbits[t + NZC_TOKENS_NOEXTRA];
+        for (b = 0; b < bits; ++b) {
+          vp9_prob newp = get_binary_prob(cm->fc.nzc_pcat_counts[c][t][b][0],
+                                          cm->fc.nzc_pcat_counts[c][t][b][1]);
+          vp9_prob *oldp = &cm->fc.nzc_pcat_probs[c][t][b];
+          int s, u = 0;
+#if defined(SEARCH_NEWP)
+          s = prob_diff_update_savings_search(cm->fc.nzc_pcat_counts[c][t][b],
+                                              *oldp, &newp, upd);
+          if (s > 0 && newp != *oldp)
+            u = 1;
+#else
+          s = prob_update_savings(cm->fc.nzc_pcat_counts[c][t][b],
+                                  *oldp, newp, upd);
+          if (s > 0)
+            u = 1;
+#endif
+          vp9_write(bc, u, upd);
+          if (u) {
+            /* send/use new probability */
+            write_prob_diff_update(bc, newp, *oldp);
+            *oldp = newp;
+          }
+        }
+      }
+    }
+  }
+}
+
 static void update_nzc_probs(VP9_COMP* cpi,
                              vp9_writer* const bc) {
   update_nzc_probs_common(cpi, bc, 4);
@@ -1602,6 +2000,13 @@ static void update_nzc_probs(VP9_COMP* cpi,
     update_nzc_probs_common(cpi, bc, 16);
   if (cpi->common.txfm_mode > ALLOW_16X16)
     update_nzc_probs_common(cpi, bc, 32);
+#ifdef NZC_PCAT_UPDATE
+  update_nzc_pcat_probs(cpi, bc);
+#endif
+#ifdef NZC_STATS
+  if (!cpi->dummy_packing)
+    update_nzcstats(&cpi->common);
+#endif
 }
 #endif  // CONFIG_CODE_NONZEROCOUNT
 
@@ -2282,6 +2687,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
            cpi->common.fc.nzc_probs_16x16);
   vp9_copy(cpi->common.fc.pre_nzc_probs_32x32,
            cpi->common.fc.nzc_probs_32x32);
+  vp9_copy(cpi->common.fc.pre_nzc_pcat_probs,
+           cpi->common.fc.nzc_pcat_probs);
   // NOTE that if the counts are reset, we also need to uncomment
   // the count updates in the write_nzc function
   /*
@@ -2289,6 +2696,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   vp9_zero(cpi->common.fc.nzc_counts_8x8);
   vp9_zero(cpi->common.fc.nzc_counts_16x16);
   vp9_zero(cpi->common.fc.nzc_counts_32x32);
+  vp9_zero(cpi->common.fc.nzc_pcat_counts);
   */
 #endif
   vp9_copy(cpi->common.fc.pre_sb_ymode_prob, cpi->common.fc.sb_ymode_prob);

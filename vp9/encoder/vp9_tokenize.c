@@ -36,6 +36,21 @@ extern vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES];
 extern vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES];
 #endif  /* ENTROPY_STATS */
 
+#if CONFIG_CODE_NONZEROCOUNT
+#ifdef NZC_STATS
+unsigned int nzc_counts_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                           [NZC4X4_TOKENS];
+unsigned int nzc_counts_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                           [NZC8X8_TOKENS];
+unsigned int nzc_counts_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                             [NZC16X16_TOKENS];
+unsigned int nzc_counts_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
+                             [NZC32X32_TOKENS];
+unsigned int nzc_pcat_counts[MAX_NZC_CONTEXTS][NZC_TOKENS_EXTRA]
+                            [NZC_BITS_EXTRA][2];
+#endif
+#endif
+
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp9_dct_value_tokens_ptr;
 static int dct_value_cost[DCT_MAX_VALUE * 2];

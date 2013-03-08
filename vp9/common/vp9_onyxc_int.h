@@ -72,6 +72,8 @@ typedef struct frame_contexts {
                           [NZC16X16_NODES];
   vp9_prob nzc_probs_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
                           [NZC32X32_NODES];
+  vp9_prob nzc_pcat_probs[MAX_NZC_CONTEXTS]
+                         [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA];
 #endif
 
   nmv_context nmvc;
@@ -104,6 +106,8 @@ typedef struct frame_contexts {
                               [NZC16X16_NODES];
   vp9_prob pre_nzc_probs_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
                               [NZC32X32_NODES];
+  vp9_prob pre_nzc_pcat_probs[MAX_NZC_CONTEXTS]
+                             [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA];
 #endif
 
   vp9_coeff_count coef_counts_4x4[BLOCK_TYPES];
@@ -119,6 +123,8 @@ typedef struct frame_contexts {
                                [NZC16X16_TOKENS];
   unsigned int nzc_counts_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
                                [NZC32X32_TOKENS];
+  unsigned int nzc_pcat_counts[MAX_NZC_CONTEXTS]
+                              [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA][2];
 #endif
 
   nmv_context_counts NMVcount;

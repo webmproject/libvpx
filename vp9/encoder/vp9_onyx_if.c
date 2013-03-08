@@ -114,6 +114,13 @@ extern void init_nmvstats();
 extern void print_nmvstats();
 #endif
 
+#if CONFIG_CODE_NONZEROCOUNT
+#ifdef NZC_STATS
+extern void init_nzcstats();
+extern void print_nzcstats();
+#endif
+#endif
+
 #ifdef SPEEDSTATS
 unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
@@ -1526,6 +1533,11 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 #ifdef NMV_STATS
   init_nmvstats();
 #endif
+#if CONFIG_CODE_NONZEROCOUNT
+#ifdef NZC_STATS
+  init_nzcstats();
+#endif
+#endif
 
   /*Initialize the feed-forward activity masking.*/
   cpi->activity_avg = 90 << 12;
@@ -1702,6 +1714,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   vp9_zero(cm->fc.nzc_counts_8x8);
   vp9_zero(cm->fc.nzc_counts_16x16);
   vp9_zero(cm->fc.nzc_counts_32x32);
+  vp9_zero(cm->fc.nzc_pcat_counts);
 #endif
 
   return (VP9_PTR) cpi;
@@ -1729,6 +1742,12 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 #ifdef NMV_STATS
     if (cpi->pass != 1)
       print_nmvstats();
+#endif
+#if CONFIG_CODE_NONZEROCOUNT
+#ifdef NZC_STATS
+    if (cpi->pass != 1)
+      print_nzcstats();
+#endif
 #endif
 
 #if CONFIG_INTERNAL_STATS

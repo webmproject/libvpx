@@ -1169,6 +1169,25 @@ static void read_nzc_probs_common(VP9_COMMON *cm,
   }
 }
 
+static void read_nzc_pcat_probs(VP9_COMMON *cm, BOOL_DECODER* const bc) {
+  int c, t, b;
+  vp9_prob upd = NZC_UPDATE_PROB_PCAT;
+  if (!vp9_read_bit(bc)) {
+    return;
+  }
+  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
+    for (t = 0; t < NZC_TOKENS_EXTRA; ++t) {
+      int bits = vp9_extranzcbits[t + NZC_TOKENS_NOEXTRA];
+      for (b = 0; b < bits; ++b) {
+        vp9_prob *p = &cm->fc.nzc_pcat_probs[c][t][b];
+        if (vp9_read(bc, upd)) {
+          *p = read_prob_diff_update(bc, *p);
+        }
+      }
+    }
+  }
+}
+
 static void read_nzc_probs(VP9_COMMON *cm,
                            BOOL_DECODER* const bc) {
   read_nzc_probs_common(cm, bc, 4);
@@ -1178,6 +1197,9 @@ static void read_nzc_probs(VP9_COMMON *cm,
     read_nzc_probs_common(cm, bc, 16);
   if (cm->txfm_mode > ALLOW_16X16)
     read_nzc_probs_common(cm, bc, 32);
+#ifdef NZC_PCAT_UPDATE
+  read_nzc_pcat_probs(cm, bc);
+#endif
 }
 #endif  // CONFIG_CODE_NONZEROCOUNT
 
@@ -1656,6 +1678,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
            pbi->common.fc.nzc_probs_16x16);
   vp9_copy(pbi->common.fc.pre_nzc_probs_32x32,
            pbi->common.fc.nzc_probs_32x32);
+  vp9_copy(pbi->common.fc.pre_nzc_pcat_probs,
+           pbi->common.fc.nzc_pcat_probs);
 #endif
 
   vp9_zero(pbi->common.fc.coef_counts_4x4);
@@ -1679,6 +1703,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   vp9_zero(pbi->common.fc.nzc_counts_8x8);
   vp9_zero(pbi->common.fc.nzc_counts_16x16);
   vp9_zero(pbi->common.fc.nzc_counts_32x32);
+  vp9_zero(pbi->common.fc.nzc_pcat_counts);
 #endif
 
   read_coef_probs(pbi, &header_bc);
