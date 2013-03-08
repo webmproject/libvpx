@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWH//+VU\u003d",
+        "filename": "test/vp8_boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "I\u0027d like to see a test that actually exercises the key too.",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+Vc\u003d",
+        "filename": "vp8/decoder/dboolhuff.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "wrap long lines.",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+VY\u003d",
+        "filename": "vp8/decoder/dboolhuff.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "rather than taking offset as an int and ch directly, these should take const unsigned char*. You can calculate the offset and do the dereference inside this function rather than in the caller, otherwise it\u0027s sort of leaking the abstraction across the function boundaries.",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+VQ\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1044,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "wrap long lines. Can move these inside the following if block for scope.",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+VI\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1065,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "naming these 6,7,8,9 is a little confusing. Can we scope the other data{3,4,5} so that we can name these 3,4,5,6?",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+U4\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 997,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "make this a new function, vp8_peek_si_external, that is a wrapper that calls vp8_peek_si with the fake key.",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+U8\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "we can avoid modifying this file by not changing the prototype in vpx_codec_internal.h",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+U0\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "I think we can avoid modifying this, it\u0027s sort of a quirk of the implementation rather than being part of the external API. We should make sure the next API supports this case natively though.",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+Us\u003d",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "unneeded.",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+Uo\u003d",
+        "filename": "vpx/vp8.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-08T22:40:06Z",
+      "side": 1,
+      "message": "this should be in vp8dx.h, not this enum. it\u0027s a decoder control, not one that\u0027s common to the both the encoder and decoder.",
+      "revId": "8519610dd0a7dcbdf0699738477ce043f6b25478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
