@@ -2816,6 +2816,8 @@ static void update_rd_ref_frame_probs(VP8_COMP *cpi)
         if (cpi->common.refresh_alt_ref_frame)
         {
             cpi->prob_intra_coded += 40;
+            if (cpi->prob_intra_coded > 255)
+                cpi->prob_intra_coded = 255;
             cpi->prob_last_coded = 200;
             cpi->prob_gf_coded = 1;
         }
