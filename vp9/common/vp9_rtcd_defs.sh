@@ -151,6 +151,15 @@ specialize vp9_add_residual_16x16 sse2
 
 prototype void vp9_add_residual_32x32 "const int16_t *diff, const uint8_t *pred, int pitch, uint8_t *dest, int stride"
 specialize vp9_add_residual_32x32 sse2
+
+prototype void vp9_add_constant_residual_8x8 "const int16_t diff, const uint8_t *pred, int pitch, uint8_t *dest, int stride"
+specialize vp9_add_constant_residual_8x8 sse2
+
+prototype void vp9_add_constant_residual_16x16 "const int16_t diff, const uint8_t *pred, int pitch, uint8_t *dest, int stride"
+specialize vp9_add_constant_residual_16x16 sse2
+
+prototype void vp9_add_constant_residual_32x32 "const int16_t diff, const uint8_t *pred, int pitch, uint8_t *dest, int stride"
+specialize vp9_add_constant_residual_32x32 sse2
 fi
 
 #

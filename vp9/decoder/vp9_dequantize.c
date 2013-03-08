@@ -64,6 +64,21 @@ static void add_constant_residual(const int16_t diff, const uint8_t *pred,
   }
 }
 
+void vp9_add_constant_residual_8x8_c(const int16_t diff, const uint8_t *pred,
+                                     int pitch, uint8_t *dest, int stride) {
+  add_constant_residual(diff, pred, pitch, dest, stride, 8, 8);
+}
+
+void vp9_add_constant_residual_16x16_c(const int16_t diff, const uint8_t *pred,
+                                       int pitch, uint8_t *dest, int stride) {
+  add_constant_residual(diff, pred, pitch, dest, stride, 16, 16);
+}
+
+void vp9_add_constant_residual_32x32_c(const int16_t diff, const uint8_t *pred,
+                                       int pitch, uint8_t *dest, int stride) {
+  add_constant_residual(diff, pred, pitch, dest, stride, 32, 32);
+}
+
 void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
                                const int16_t *dq,
                                uint8_t *pred, uint8_t *dest,
@@ -202,7 +217,7 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
     vp9_short_idct1_8x8_c(&in, &out);
     input[0] = 0;
 
-    add_constant_residual(out, pred, pitch, dest, stride, 8, 8);
+    vp9_add_constant_residual_8x8(out, pred, pitch, dest, stride);
   } else if (eob <= 10) {
     input[1] *= dq[1];
     input[2] *= dq[1];
@@ -285,7 +300,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
     vp9_short_idct1_16x16_c(&in, &out);
     input[0] = 0;
 
-    add_constant_residual(out, pred, pitch, dest, stride, 16, 16);
+    vp9_add_constant_residual_16x16(out, pred, pitch, dest, stride);
   } else if (eob <= 10) {
     input[0] *= dq[0];
 
@@ -335,7 +350,7 @@ void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
     input[0] = input[0] * dq[0] / 2;
     if (eob == 1) {
       vp9_short_idct1_32x32(input, output);
-      add_constant_residual(output[0], pred, pitch, dest, stride, 32, 32);
+      vp9_add_constant_residual_32x32(output[0], pred, pitch, dest, stride);
       input[0] = 0;
     } else if (eob <= 10) {
       input[1] = input[1] * dq[1] / 2;
