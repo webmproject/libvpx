@@ -322,6 +322,9 @@ specialize vp9_short_iht4x4
 prototype void vp9_short_iht16x16 "int16_t *input, int16_t *output, int pitch, int tx_type"
 specialize vp9_short_iht16x16
 
+prototype void vp9_idct4_1d "int16_t *input, int16_t *output"
+specialize vp9_idct4_1d sse2
+
 # dct and add
 
 prototype void vp9_dc_only_idct_add "int input_dc, uint8_t *pred_ptr, uint8_t *dst_ptr, int pitch, int stride"
