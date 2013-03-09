@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWH//+Nk\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-09T00:18:49Z",
+      "side": 1,
+      "message": "do you want to put this under ENTROPY_STATS? (No string opinions, but it\u0027d be somewhat consistent with other usages of the macro).",
+      "revId": "4701f263aaf38ab3bd3cc78d22cb9192076c7b9b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+NY\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1371,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-09T00:18:49Z",
+      "side": 1,
+      "message": "I believe our coding style actually doesn\u0027t want a newline if this is not the last bracket, so you\u0027d want something like \"},%c\", r \u003d\u003d REF_TYPES - 1 ? \u0027\\n\u0027 : \u0027 \u0027 - and then also remove the leading spaces for the next opening bracket.",
+      "revId": "4701f263aaf38ab3bd3cc78d22cb9192076c7b9b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+NU\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1802,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-09T00:18:49Z",
+      "side": 1,
+      "message": "do we still need two codepaths here?",
+      "revId": "4701f263aaf38ab3bd3cc78d22cb9192076c7b9b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
