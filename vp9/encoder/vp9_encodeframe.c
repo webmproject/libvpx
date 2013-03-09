@@ -1559,30 +1559,15 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       txfm_type = ONLY_4X4;
       cpi->mb.e_mbd.lossless = 1;
     } else
-    /* FIXME (rbultje)
-     * this is a hack (no really), basically to work around the complete
-     * nonsense coefficient cost prediction for keyframes. The probabilities
-     * are reset to defaults, and thus we basically have no idea how expensive
-     * a 4x4 vs. 8x8 will really be. The result is that any estimate at which
-     * of the two is better is utterly bogus.
-     * I'd like to eventually remove this hack, but in order to do that, we
-     * need to move the frame reset code from the frame encode init to the
-     * bitstream write code, or alternatively keep a backup of the previous
-     * keyframe's probabilities as an estimate of what the current keyframe's
-     * coefficient cost distributions may look like. */
-    if (frame_type == 0) {
-      txfm_type = ALLOW_32X32;
-    } else
 #if 0
-    /* FIXME (rbultje)
-     * this code is disabled for a similar reason as the code above; the
-     * problem is that each time we "revert" to 4x4 only (or even 8x8 only),
-     * the coefficient probabilities for 16x16 (and 8x8) start lagging behind,
-     * thus leading to them lagging further behind and not being chosen for
-     * subsequent frames either. This is essentially a local minimum problem
-     * that we can probably fix by estimating real costs more closely within
-     * a frame, perhaps by re-calculating costs on-the-fly as frame encoding
-     * progresses. */
+    /* FIXME (rbultje): this code is disabled until we support cost updates
+     * while a frame is being encoded; the problem is that each time we
+     * "revert" to 4x4 only (or even 8x8 only), the coefficient probabilities
+     * for 16x16 (and 8x8) start lagging behind, thus leading to them lagging
+     * further behind and not being chosen for subsequent frames either. This
+     * is essentially a local minimum problem that we can probably fix by
+     * estimating real costs more closely within a frame, perhaps by re-
+     * calculating costs on-the-fly as frame encoding progresses. */
     if (cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] >
             cpi->rd_tx_select_threshes[frame_type][ONLY_4X4] &&
         cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] >
