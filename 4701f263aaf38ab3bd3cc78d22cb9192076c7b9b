@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWH//+Ks\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-09T00:36:48Z",
+      "side": 1,
+      "message": "Let\u0027s deal with that later. I wanted to do only the nzc for now.",
+      "parentUuid": "AAAAWH//+Nk\u003d",
+      "revId": "4701f263aaf38ab3bd3cc78d22cb9192076c7b9b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWH//+NY\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWH//+LA\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1371,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-09T00:36:48Z",
+      "side": 1,
+      "message": "I usually manually adjust to make it consistent with the style.",
+      "parentUuid": "AAAAWH//+NY\u003d",
+      "revId": "4701f263aaf38ab3bd3cc78d22cb9192076c7b9b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWH//+NU\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2013-03-09T00:18:49Z",
       "side": 1,
       "message": "do we still need two codepaths here?",
+      "revId": "4701f263aaf38ab3bd3cc78d22cb9192076c7b9b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//+Kw\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1802,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-09T00:36:48Z",
+      "side": 1,
+      "message": "This is in general true for the coef updates also. I left it there to be consistent. \nI will try the modeling hopefully in a couple of weeks. If that works, all this code will disappear as well as a lot of tables.",
+      "parentUuid": "AAAAWH//+NU\u003d",
       "revId": "4701f263aaf38ab3bd3cc78d22cb9192076c7b9b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
