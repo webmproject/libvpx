@@ -47,12 +47,11 @@ void vp9_tokens_from_tree_offset(struct vp9_token_struct *, vp9_tree,
    taken for each node on the tree; this facilitiates decisions as to
    probability updates. */
 
-void vp9_tree_probs_from_distribution(int n,  /* n = size of alphabet */
-                                      vp9_token tok[ /* n */ ],
-                                      vp9_tree tree,
+void vp9_tree_probs_from_distribution(vp9_tree tree,
                                       vp9_prob probs[ /* n - 1 */ ],
                                       unsigned int branch_ct[ /* n - 1 */ ][2],
-                                      const unsigned int num_events[ /* n */ ]);
+                                      const unsigned int num_events[ /* n */ ],
+                                      unsigned int tok0_offset);
 
 static INLINE vp9_prob clip_prob(int p) {
   return (p > 255) ? 255u : (p < 1) ? 1u : p;

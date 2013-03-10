@@ -242,29 +242,23 @@ void vp9_counts_to_nmv_context(
     unsigned int (*branch_ct_hp)[2]) {
   int i, j, k;
   vp9_counts_process(NMVcount, usehp);
-  vp9_tree_probs_from_distribution(MV_JOINTS,
-                                   vp9_mv_joint_encodings,
-                                   vp9_mv_joint_tree,
+  vp9_tree_probs_from_distribution(vp9_mv_joint_tree,
                                    prob->joints,
                                    branch_ct_joint,
-                                   NMVcount->joints);
+                                   NMVcount->joints, 0);
   for (i = 0; i < 2; ++i) {
     prob->comps[i].sign = get_binary_prob(NMVcount->comps[i].sign[0],
                                           NMVcount->comps[i].sign[1]);
     branch_ct_sign[i][0] = NMVcount->comps[i].sign[0];
     branch_ct_sign[i][1] = NMVcount->comps[i].sign[1];
-    vp9_tree_probs_from_distribution(MV_CLASSES,
-                                     vp9_mv_class_encodings,
-                                     vp9_mv_class_tree,
+    vp9_tree_probs_from_distribution(vp9_mv_class_tree,
                                      prob->comps[i].classes,
                                      branch_ct_classes[i],
-                                     NMVcount->comps[i].classes);
-    vp9_tree_probs_from_distribution(CLASS0_SIZE,
-                                     vp9_mv_class0_encodings,
-                                     vp9_mv_class0_tree,
+                                     NMVcount->comps[i].classes, 0);
+    vp9_tree_probs_from_distribution(vp9_mv_class0_tree,
                                      prob->comps[i].class0,
                                      branch_ct_class0[i],
-                                     NMVcount->comps[i].class0);
+                                     NMVcount->comps[i].class0, 0);
     for (j = 0; j < MV_OFFSET_BITS; ++j) {
       prob->comps[i].bits[j] = get_binary_prob(NMVcount->comps[i].bits[j][0],
                                                NMVcount->comps[i].bits[j][1]);
@@ -274,19 +268,15 @@ void vp9_counts_to_nmv_context(
   }
   for (i = 0; i < 2; ++i) {
     for (k = 0; k < CLASS0_SIZE; ++k) {
-      vp9_tree_probs_from_distribution(4,
-                                       vp9_mv_fp_encodings,
-                                       vp9_mv_fp_tree,
+      vp9_tree_probs_from_distribution(vp9_mv_fp_tree,
                                        prob->comps[i].class0_fp[k],
                                        branch_ct_class0_fp[i][k],
-                                       NMVcount->comps[i].class0_fp[k]);
+                                       NMVcount->comps[i].class0_fp[k], 0);
     }
-    vp9_tree_probs_from_distribution(4,
-                                     vp9_mv_fp_encodings,
-                                     vp9_mv_fp_tree,
+    vp9_tree_probs_from_distribution(vp9_mv_fp_tree,
                                      prob->comps[i].fp,
                                      branch_ct_fp[i],
-                                     NMVcount->comps[i].fp);
+                                     NMVcount->comps[i].fp, 0);
   }
   if (usehp) {
     for (i = 0; i < 2; ++i) {
