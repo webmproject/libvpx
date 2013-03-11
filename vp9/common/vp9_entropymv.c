@@ -138,6 +138,7 @@ static void increment_nmv_component(int v,
                                     int incr,
                                     int usehp) {
   int s, z, c, o, d, e, f;
+  if (!incr) return;
   assert (v != 0);            /* should not be zero */
   s = v < 0;
   mvcomp->sign[s] += incr;
