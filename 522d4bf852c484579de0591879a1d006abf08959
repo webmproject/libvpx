@@ -16,6 +16,24 @@
       "revId": "522d4bf852c484579de0591879a1d006abf08959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//8i0\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4012,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-11T23:31:48Z",
+      "side": 1,
+      "message": "yes, it\u0027s a bugfix, but was exposed by the unit test for the new index, and I lazily didn\u0027t separate it into its own patch. This path is used by the unit tests as part of the mismatch check, while vpxenc uses the vp9_get_reference_enc() path. The unit test for this patch is the first to exercise vp9 alt ref frames.",
+      "parentUuid": "AAAAWH//8kQ\u003d",
+      "revId": "522d4bf852c484579de0591879a1d006abf08959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
