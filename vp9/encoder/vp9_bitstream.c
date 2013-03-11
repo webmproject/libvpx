@@ -1790,7 +1790,6 @@ static void update_nzc_probs_common(VP9_COMP* cpi,
   int savings = 0;
   int tokens, nodes;
   const vp9_tree_index *nzc_tree;
-  const struct vp9_token_struct *nzc_encodings;
   vp9_prob *new_nzc_probs;
   vp9_prob *old_nzc_probs;
   unsigned int *nzc_counts;
@@ -1800,7 +1799,6 @@ static void update_nzc_probs_common(VP9_COMP* cpi,
   if (block_size == 32) {
     tokens = NZC32X32_TOKENS;
     nzc_tree = vp9_nzc32x32_tree;
-    nzc_encodings = vp9_nzc32x32_encodings;
     old_nzc_probs = cm->fc.nzc_probs_32x32[0][0][0];
     new_nzc_probs = cpi->frame_nzc_probs_32x32[0][0][0];
     nzc_counts = cm->fc.nzc_counts_32x32[0][0][0];
@@ -1809,7 +1807,6 @@ static void update_nzc_probs_common(VP9_COMP* cpi,
   } else if (block_size == 16) {
     tokens = NZC16X16_TOKENS;
     nzc_tree = vp9_nzc16x16_tree;
-    nzc_encodings = vp9_nzc16x16_encodings;
     old_nzc_probs = cm->fc.nzc_probs_16x16[0][0][0];
     new_nzc_probs = cpi->frame_nzc_probs_16x16[0][0][0];
     nzc_counts = cm->fc.nzc_counts_16x16[0][0][0];
@@ -1818,7 +1815,6 @@ static void update_nzc_probs_common(VP9_COMP* cpi,
   } else if (block_size == 8) {
     tokens = NZC8X8_TOKENS;
     nzc_tree = vp9_nzc8x8_tree;
-    nzc_encodings = vp9_nzc8x8_encodings;
     old_nzc_probs = cm->fc.nzc_probs_8x8[0][0][0];
     new_nzc_probs = cpi->frame_nzc_probs_8x8[0][0][0];
     nzc_counts = cm->fc.nzc_counts_8x8[0][0][0];
@@ -1826,7 +1822,6 @@ static void update_nzc_probs_common(VP9_COMP* cpi,
     upd = NZC_UPDATE_PROB_8X8;
   } else {
     nzc_tree = vp9_nzc4x4_tree;
-    nzc_encodings = vp9_nzc4x4_encodings;
     tokens = NZC4X4_TOKENS;
     old_nzc_probs = cm->fc.nzc_probs_4x4[0][0][0];
     new_nzc_probs = cpi->frame_nzc_probs_4x4[0][0][0];
@@ -1842,11 +1837,10 @@ static void update_nzc_probs_common(VP9_COMP* cpi,
         int offset = c * REF_TYPES * BLOCK_TYPES + r * BLOCK_TYPES + b;
         int offset_nodes = offset * nodes;
         int offset_tokens = offset * tokens;
-        vp9_tree_probs_from_distribution(tokens,
-                                         nzc_encodings, nzc_tree,
+        vp9_tree_probs_from_distribution(nzc_tree,
                                          new_nzc_probs + offset_nodes,
                                          nzc_branch_ct + offset_nodes,
-                                         nzc_counts + offset_tokens);
+                                         nzc_counts + offset_tokens, 0);
       }
     }
   }

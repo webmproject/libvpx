@@ -324,27 +324,27 @@ void vp9_default_coef_probs(VP9_COMMON *pc) {
       unsigned int branch_ct32x32[NZC32X32_NODES][2];
       for (i = 0; i < BLOCK_TYPES; ++i) {
         vp9_tree_probs_from_distribution(
-          NZC4X4_TOKENS, vp9_nzc4x4_encodings, vp9_nzc4x4_tree,
+          vp9_nzc4x4_tree,
           pc->fc.nzc_probs_4x4[h][g][i], branch_ct4x4,
-          default_nzc_counts_4x4[h][g][i]);
+          default_nzc_counts_4x4[h][g][i], 0);
       }
       for (i = 0; i < BLOCK_TYPES; ++i) {
         vp9_tree_probs_from_distribution(
-          NZC8X8_TOKENS, vp9_nzc8x8_encodings, vp9_nzc8x8_tree,
+          vp9_nzc8x8_tree,
           pc->fc.nzc_probs_8x8[h][g][i], branch_ct8x8,
-          default_nzc_counts_8x8[h][g][i]);
+          default_nzc_counts_8x8[h][g][i], 0);
       }
       for (i = 0; i < BLOCK_TYPES; ++i) {
         vp9_tree_probs_from_distribution(
-          NZC16X16_TOKENS, vp9_nzc16x16_encodings, vp9_nzc16x16_tree,
+          vp9_nzc16x16_tree,
           pc->fc.nzc_probs_16x16[h][g][i], branch_ct16x16,
-          default_nzc_counts_16x16[h][g][i]);
+          default_nzc_counts_16x16[h][g][i], 0);
       }
       for (i = 0; i < BLOCK_TYPES; ++i) {
         vp9_tree_probs_from_distribution(
-          NZC32X32_TOKENS, vp9_nzc32x32_encodings, vp9_nzc32x32_tree,
+          vp9_nzc32x32_tree,
           pc->fc.nzc_probs_32x32[h][g][i], branch_ct32x32,
-          default_nzc_counts_32x32[h][g][i]);
+          default_nzc_counts_32x32[h][g][i], 0);
       }
     }
   }
@@ -1545,7 +1545,6 @@ static void adapt_nzc_probs(VP9_COMMON *cm,
   vp9_prob nzc_probs[NZC32X32_NODES];
   int tokens, nodes;
   const vp9_tree_index *nzc_tree;
-  const struct vp9_token_struct *nzc_encodings;
   vp9_prob *dst_nzc_probs;
   vp9_prob *pre_nzc_probs;
   unsigned int *nzc_counts;
@@ -1553,27 +1552,23 @@ static void adapt_nzc_probs(VP9_COMMON *cm,
   if (block_size == 32) {
     tokens = NZC32X32_TOKENS;
     nzc_tree = vp9_nzc32x32_tree;
-    nzc_encodings = vp9_nzc32x32_encodings;
     dst_nzc_probs = cm->fc.nzc_probs_32x32[0][0][0];
     pre_nzc_probs = cm->fc.pre_nzc_probs_32x32[0][0][0];
     nzc_counts = cm->fc.nzc_counts_32x32[0][0][0];
   } else if (block_size == 16) {
     tokens = NZC16X16_TOKENS;
     nzc_tree = vp9_nzc16x16_tree;
-    nzc_encodings = vp9_nzc16x16_encodings;
     dst_nzc_probs = cm->fc.nzc_probs_16x16[0][0][0];
     pre_nzc_probs = cm->fc.pre_nzc_probs_16x16[0][0][0];
     nzc_counts = cm->fc.nzc_counts_16x16[0][0][0];
   } else if (block_size == 8) {
     tokens = NZC8X8_TOKENS;
     nzc_tree = vp9_nzc8x8_tree;
-    nzc_encodings = vp9_nzc8x8_encodings;
     dst_nzc_probs = cm->fc.nzc_probs_8x8[0][0][0];
     pre_nzc_probs = cm->fc.pre_nzc_probs_8x8[0][0][0];
     nzc_counts = cm->fc.nzc_counts_8x8[0][0][0];
   } else {
     nzc_tree = vp9_nzc4x4_tree;
-    nzc_encodings = vp9_nzc4x4_encodings;
     tokens = NZC4X4_TOKENS;
     dst_nzc_probs = cm->fc.nzc_probs_4x4[0][0][0];
     pre_nzc_probs = cm->fc.pre_nzc_probs_4x4[0][0][0];
@@ -1586,10 +1581,9 @@ static void adapt_nzc_probs(VP9_COMMON *cm,
         int offset = c * REF_TYPES * BLOCK_TYPES + r * BLOCK_TYPES + b;
         int offset_nodes = offset * nodes;
         int offset_tokens = offset * tokens;
-        vp9_tree_probs_from_distribution(tokens,
-                                         nzc_encodings, nzc_tree,
+        vp9_tree_probs_from_distribution(nzc_tree,
                                          nzc_probs, nzc_branch_ct,
-                                         nzc_counts + offset_tokens);
+                                         nzc_counts + offset_tokens, 0);
         for (n = 0; n < nodes; ++n) {
           count = nzc_branch_ct[n][0] + nzc_branch_ct[n][1];
           count = count > count_sat ? count_sat : count;
