@@ -31,7 +31,7 @@ extern const int vp9_i8x8_block[4];
 #define DCT_VAL_CATEGORY3       7       /* 11-18     Extra Bits 3+1 */
 #define DCT_VAL_CATEGORY4       8       /* 19-34     Extra Bits 4+1 */
 #define DCT_VAL_CATEGORY5       9       /* 35-66     Extra Bits 5+1 */
-#define DCT_VAL_CATEGORY6       10      /* 67+       Extra Bits 13+1 */
+#define DCT_VAL_CATEGORY6       10      /* 67+       Extra Bits 14+1 */
 #define DCT_EOB_TOKEN           11      /* EOB       Extra Bits 0+0 */
 #define MAX_ENTROPY_TOKENS 12
 #define ENTROPY_NODES 11
