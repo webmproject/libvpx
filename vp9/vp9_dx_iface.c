@@ -425,6 +425,39 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
   return res;
 }
 
+static void parse_superframe_index(const uint8_t *data,
+                                   size_t         data_sz,
+                                   uint32_t       sizes[8],
+                                   int           *count) {
+  uint8_t marker;
+
+  assert(data_sz);
+  marker = data[data_sz - 1];
+  *count = 0;
+
+  if ((marker & 0xf0) == 0xc0) {
+    const int frames = (marker & 0x7) + 1;
+    const int mag = ((marker >> 3) & 3) + 1;
+    const int index_sz = 2 + mag  * frames;
+
+    if (data_sz >= index_sz && data[data_sz - index_sz] == marker) {
+      // found a valid superframe index
+      int i, j;
+      const uint8_t *x = data + data_sz - index_sz + 1;
+
+      for (i = 0; i < frames; i++) {
+        int this_sz = 0;
+
+        for (j = 0; j < mag; j++)
+          this_sz |= (*x++) << (j * 8);
+        sizes[i] = this_sz;
+      }
+
+      *count = frames;
+    }
+  }
+}
+
 static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
                                   const uint8_t         *data,
                                   unsigned int           data_sz,
@@ -433,8 +466,42 @@ static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
   const uint8_t *data_start = data;
   const uint8_t *data_end = data + data_sz;
   vpx_codec_err_t res = 0;
+  uint32_t sizes[8];
+  int frames_this_pts, frame_count = 0;
+
+  parse_superframe_index(data, data_sz, sizes, &frames_this_pts);
 
   do {
+    // Skip over the superframe index, if present
+    if (data_sz && (*data_start & 0xf0) == 0xc0) {
+      const uint8_t marker = *data_start;
+      const int frames = (marker & 0x7) + 1;
+      const int mag = ((marker >> 3) & 3) + 1;
+      const int index_sz = 2 + mag  * frames;
+
+      if (data_sz >= index_sz && data_start[index_sz - 1] == marker) {
+        data_start += index_sz;
+        data_sz -= index_sz;
+        if (data_start < data_end)
+          continue;
+        else
+          break;
+      }
+    }
+
+    // Use the correct size for this frame, if an index is present.
+    if (frames_this_pts) {
+      uint32_t this_sz = sizes[frame_count];
+
+      if (data_sz < this_sz) {
+        ctx->base.err_detail = "Invalid frame size in index";
+        return VPX_CODEC_CORRUPT_FRAME;
+      }
+
+      data_sz = this_sz;
+      frame_count++;
+    }
+
     res = decode_one(ctx, &data_start, data_sz, user_priv, deadline);
     assert(data_start >= data);
     assert(data_start <= data_end);

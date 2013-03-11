@@ -77,6 +77,9 @@ struct vpx_codec_alg_priv {
   unsigned int            cx_data_sz;
   unsigned char          *pending_cx_data;
   unsigned int            pending_cx_data_sz;
+  int                     pending_frame_count;
+  uint32_t                pending_frame_sizes[8];
+  uint32_t                pending_frame_magnitude;
   vpx_image_t             preview_img;
   vp8_postproc_cfg_t      preview_ppcfg;
   vpx_codec_pkt_list_decl(64) pkt_list;              // changed to accomendate the maximum number of lagged frames allowed
@@ -579,6 +582,45 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
 }
 
 
+static void write_superframe_index(vpx_codec_alg_priv_t *ctx) {
+  uint8_t marker = 0xc0;
+  int mag, mask, index_sz;
+
+  assert(ctx->pending_frame_count);
+  assert(ctx->pending_frame_count <= 8);
+
+  /* Add the number of frames to the marker byte */
+  marker |= ctx->pending_frame_count - 1;
+
+  /* Choose the magnitude */
+  for (mag = 0, mask = 0xff; mag < 4; mag++) {
+    if (ctx->pending_frame_magnitude < mask)
+      break;
+    mask <<= 8;
+    mask |= 0xff;
+  }
+  marker |= mag << 3;
+
+  /* Write the index */
+  index_sz = 2 + (mag + 1) * ctx->pending_frame_count;
+  if (ctx->pending_cx_data_sz + index_sz < ctx->cx_data_sz) {
+    uint8_t *x = ctx->pending_cx_data + ctx->pending_cx_data_sz;
+    int i, j;
+
+    *x++ = marker;
+    for (i = 0; i < ctx->pending_frame_count; i++) {
+      int this_sz = ctx->pending_frame_sizes[i];
+
+      for (j = 0; j <= mag; j++) {
+        *x++ = this_sz & 0xff;
+        this_sz >>= 8;
+      }
+    }
+    *x++ = marker;
+    ctx->pending_cx_data_sz += index_sz;
+  }
+}
+
 static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                                    const vpx_image_t     *img,
                                    vpx_codec_pts_t        pts,
@@ -712,6 +754,8 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
           if (!ctx->pending_cx_data)
             ctx->pending_cx_data = cx_data;
           ctx->pending_cx_data_sz += size;
+          ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+          ctx->pending_frame_magnitude |= size;
           cx_data += size;
           cx_data_sz -= size;
           continue;
@@ -771,10 +815,16 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         else*/
         {
           if (ctx->pending_cx_data) {
+            ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+            ctx->pending_frame_magnitude |= size;
+            ctx->pending_cx_data_sz += size;
+            write_superframe_index(ctx);
             pkt.data.frame.buf = ctx->pending_cx_data;
-            pkt.data.frame.sz  = ctx->pending_cx_data_sz + size;
+            pkt.data.frame.sz  = ctx->pending_cx_data_sz;
             ctx->pending_cx_data = NULL;
             ctx->pending_cx_data_sz = 0;
+            ctx->pending_frame_count = 0;
+            ctx->pending_frame_magnitude = 0;
           } else {
             pkt.data.frame.buf = cx_data;
             pkt.data.frame.sz  = size;
