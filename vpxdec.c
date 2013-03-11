@@ -711,7 +711,7 @@ int main(int argc, const char **argv_) {
   struct input_ctx        input = {0};
   int                     frames_corrupted = 0;
   int                     dec_flags = 0;
-  int                     do_scale;
+  int                     do_scale = 0;
   int                     stream_w = 0, stream_h = 0;
   vpx_image_t             *scaled_img = NULL;
 
@@ -1024,7 +1024,7 @@ int main(int argc, const char **argv_) {
 
     if (!noblit) {
       if (do_scale) {
-        if (frame_out == 1) {
+        if (img && frame_out == 1) {
           stream_w = img->d_w;
           stream_h = img->d_h;
           scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,
