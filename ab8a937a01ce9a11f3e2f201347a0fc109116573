@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWH//8kI\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1064,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-11T23:25:23Z",
+      "side": 1,
+      "message": "the previous code is correct, this is protecting against wrapping around the top of the heap.",
+      "revId": "ab8a937a01ce9a11f3e2f201347a0fc109116573",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
