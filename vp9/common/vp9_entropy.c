@@ -1490,10 +1490,9 @@ static void adapt_coef_probs(vp9_coeff_probs *dst_coef_probs,
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
           if (l >= 3 && k == 0)
             continue;
-          vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
-                                           vp9_coef_encodings, vp9_coef_tree,
+          vp9_tree_probs_from_distribution(vp9_coef_tree,
                                            coef_probs, branch_ct,
-                                           coef_counts[i][j][k][l]);
+                                           coef_counts[i][j][k][l], 0);
           for (t = 0; t < ENTROPY_NODES; ++t) {
             count = branch_ct[t][0] + branch_ct[t][1];
             count = count > count_sat ? count_sat : count;

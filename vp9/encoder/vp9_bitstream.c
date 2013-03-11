@@ -128,8 +128,8 @@ static void update_mode(
   unsigned int new_b = 0, old_b = 0;
   int i = 0;
 
-  vp9_tree_probs_from_distribution(n--, tok, tree,
-                                   Pnew, bct, num_events);
+  vp9_tree_probs_from_distribution(tree, Pnew, bct, num_events, 0);
+  n--;
 
   do {
     new_b += cost_branch(bct[i], Pnew[i]);
@@ -185,10 +185,9 @@ static void update_switchable_interp_probs(VP9_COMP *cpi,
   int i, j;
   for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j) {
     vp9_tree_probs_from_distribution(
-        VP9_SWITCHABLE_FILTERS,
-        vp9_switchable_interp_encodings, vp9_switchable_interp_tree,
+        vp9_switchable_interp_tree,
         pc->fc.switchable_interp_prob[j], branch_ct,
-        cpi->switchable_interp_count[j]);
+        cpi->switchable_interp_count[j], 0);
     for (i = 0; i < VP9_SWITCHABLE_FILTERS - 1; ++i) {
       if (pc->fc.switchable_interp_prob[j][i] < 1)
         pc->fc.switchable_interp_prob[j][i] = 1;
@@ -1739,11 +1738,10 @@ static void build_tree_distribution(vp9_coeff_probs *coef_probs,
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
           if (l >= 3 && k == 0)
             continue;
-          vp9_tree_probs_from_distribution(MAX_ENTROPY_TOKENS,
-                                           vp9_coef_encodings, vp9_coef_tree,
+          vp9_tree_probs_from_distribution(vp9_coef_tree,
                                            coef_probs[i][j][k][l],
                                            coef_branch_ct[i][j][k][l],
-                                           coef_counts[i][j][k][l]);
+                                           coef_counts[i][j][k][l], 0);
 #ifdef ENTROPY_STATS
         if (!cpi->dummy_packing)
           for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)

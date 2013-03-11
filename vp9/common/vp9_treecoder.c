@@ -48,66 +48,37 @@ void vp9_tokens_from_tree_offset(struct vp9_token_struct *p, vp9_tree t,
   tree2tok(p - offset, t, 0, 0, 0);
 }
 
-static void branch_counts(
-  int n,                      /* n = size of alphabet */
-  vp9_token tok               [ /* n */ ],
-  vp9_tree tree,
-  unsigned int branch_ct       [ /* n-1 */ ] [2],
-  const unsigned int num_events[ /* n */ ]
-) {
-  const int tree_len = n - 1;
-  int t = 0;
+static unsigned int convert_distribution(unsigned int i,
+                                         vp9_tree tree,
+                                         vp9_prob probs[],
+                                         unsigned int branch_ct[][2],
+                                         const unsigned int num_events[],
+                                         unsigned int tok0_offset) {
+  unsigned int left, right;
 
-#if CONFIG_DEBUG
-  assert(tree_len);
-#endif
-
-  do {
-    branch_ct[t][0] = branch_ct[t][1] = 0;
-  } while (++t < tree_len);
-
-  t = 0;
-
-  do {
-    int L = tok[t].Len;
-    const int enc = tok[t].value;
-    const unsigned int ct = num_events[t];
-
-    vp9_tree_index i = 0;
-
-    do {
-      const int b = (enc >> --L) & 1;
-      const int j = i >> 1;
-#if CONFIG_DEBUG
-      assert(j < tree_len  &&  0 <= L);
-#endif
-
-      branch_ct [j] [b] += ct;
-      i = tree[ i + b];
-    } while (i > 0);
-
-#if CONFIG_DEBUG
-    assert(!L);
-#endif
-  } while (++t < n);
-
+  if (tree[i] <= 0) {
+    left = num_events[-tree[i] - tok0_offset];
+  } else {
+    left = convert_distribution(tree[i], tree, probs, branch_ct,
+                                num_events, tok0_offset);
+  }
+  if (tree[i + 1] <= 0) {
+    right = num_events[-tree[i + 1] - tok0_offset];
+  } else {
+    right = convert_distribution(tree[i + 1], tree, probs, branch_ct,
+                                num_events, tok0_offset);
+  }
+  probs[i>>1] = get_binary_prob(left, right);
+  branch_ct[i>>1][0] = left;
+  branch_ct[i>>1][1] = right;
+  return left + right;
 }
 
-
 void vp9_tree_probs_from_distribution(
-  int n,                      /* n = size of alphabet */
-  vp9_token tok               [ /* n */ ],
   vp9_tree tree,
   vp9_prob probs          [ /* n-1 */ ],
   unsigned int branch_ct       [ /* n-1 */ ] [2],
-  const unsigned int num_events[ /* n */ ]
-) {
-  const int tree_len = n - 1;
-  int t = 0;
-
-  branch_counts(n, tok, tree, branch_ct, num_events);
-
-  do {
-    probs[t] = get_binary_prob(branch_ct[t][0], branch_ct[t][1]);
-  } while (++t < tree_len);
+  const unsigned int num_events[ /* n */ ],
+  unsigned int tok0_offset) {
+  convert_distribution(0, tree, probs, branch_ct, num_events, tok0_offset);
 }
