@@ -739,7 +739,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   int mode = cpi->compressor_speed;
   int speed = cpi->Speed;
   int i;
-  VP9_COMMON *cm = &cpi->common;
 
   // Only modes 0 and 1 supported for now in experimental code basae
   if (mode > 1)
@@ -837,16 +836,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   if (cpi->pass == 1) {
     sf->optimize_coefficients = 0;
     sf->improved_dct = 0;
-  }
-
-  {
-    int y_stride = cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]].y_stride;
-
-    if (cpi->sf.search_method == NSTEP) {
-      vp9_init3smotion_compensation(&cpi->mb, y_stride);
-    } else if (cpi->sf.search_method == DIAMOND) {
-      vp9_init_dsmotion_compensation(&cpi->mb, y_stride);
-    }
   }
 
   cpi->mb.fwd_txm16x16  = vp9_short_fdct16x16;
@@ -1032,6 +1021,16 @@ static void update_frame_size(VP9_COMP *cpi) {
                                     width, height, VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate scaled source buffer");
+
+  {
+    int y_stride = cpi->scaled_source.y_stride;
+
+    if (cpi->sf.search_method == NSTEP) {
+      vp9_init3smotion_compensation(&cpi->mb, y_stride);
+    } else if (cpi->sf.search_method == DIAMOND) {
+      vp9_init_dsmotion_compensation(&cpi->mb, y_stride);
+    }
+  }
 }
 
 
