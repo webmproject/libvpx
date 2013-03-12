@@ -51,4 +51,8 @@ static INLINE uint8_t clip_pixel(int val) {
   return (val > 255) ? 255u : (val < 0) ? 0u : val;
 }
 
+static INLINE int clamp(int value, int low, int high) {
+  return value < low ? low : (value > high ? high : value);
+}
+
 #endif  // VP9_COMMON_VP9_COMMON_H_
