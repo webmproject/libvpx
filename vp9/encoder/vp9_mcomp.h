@@ -21,7 +21,7 @@ void print_mode_context(VP9_COMMON *pc);
 
 // The maximum number of steps in a step search given the largest
 // allowed initial step
-#define MAX_MVSEARCH_STEPS 10
+#define MAX_MVSEARCH_STEPS 11
 // Max full pel mv specified in 1 pel units
 #define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS)) - 1)
 // Maximum size of the first step in full pel units
