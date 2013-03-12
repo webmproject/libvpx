@@ -582,7 +582,7 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
 }
 
 
-static void write_superframe_index(vpx_codec_alg_priv_t *ctx) {
+static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   uint8_t marker = 0xc0;
   int mag, mask, index_sz;
 
@@ -619,6 +619,7 @@ static void write_superframe_index(vpx_codec_alg_priv_t *ctx) {
     *x++ = marker;
     ctx->pending_cx_data_sz += index_sz;
   }
+  return index_sz;
 }
 
 static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
@@ -818,7 +819,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
             ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
             ctx->pending_frame_magnitude |= size;
             ctx->pending_cx_data_sz += size;
-            write_superframe_index(ctx);
+            size += write_superframe_index(ctx);
             pkt.data.frame.buf = ctx->pending_cx_data;
             pkt.data.frame.sz  = ctx->pending_cx_data_sz;
             ctx->pending_cx_data = NULL;
