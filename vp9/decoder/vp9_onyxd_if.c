@@ -176,7 +176,7 @@ vpx_codec_err_t vp9_get_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
    * later commit that adds VP9-specific controls for this functionality.
    */
   if (ref_frame_flag == VP9_LAST_FLAG)
-    ref_fb_idx = pbi->common.new_fb_idx;
+    ref_fb_idx = pbi->common.ref_frame_map[0];
   else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
