@@ -53,6 +53,10 @@ void vp9_stop_encode(BOOL_CODER *br) {
 
   for (i = 0; i < 32; i++)
     encode_bool(br, 0, 128);
+
+  // Ensure there's no ambigous collision with any index marker bytes
+  if ((br->buffer[br->pos - 1] & 0xe0) == 0xc0)
+    br->buffer[br->pos++] = 0;
 }
 
 
