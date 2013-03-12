@@ -195,16 +195,6 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                          xd->dst.y_stride,
                                          xd->dst.uv_stride,
                                          mb_row, mb_col);
-#if CONFIG_COMP_INTERINTRA_PRED
-      if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
-        vp9_build_interintra_16x16_predictors_mb(xd,
-                                                 xd->dst.y_buffer,
-                                                 xd->dst.u_buffer,
-                                                 xd->dst.v_buffer,
-                                                 xd->dst.y_stride,
-                                                 xd->dst.uv_stride);
-      }
-#endif
     }
   }
 }
@@ -212,7 +202,7 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
 static void decode_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc) {
   TX_TYPE tx_type = get_tx_type_16x16(xd, 0);
-#ifdef DEC_DEBUG
+#if 0  // def DEC_DEBUG
   if (dec_debug) {
     int i;
     printf("\n");
@@ -250,7 +240,7 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
   // First do Y
   // if the first one is DCT_DCT assume all the rest are as well
   TX_TYPE tx_type = get_tx_type_8x8(xd, 0);
-#ifdef DEC_DEBUG
+#if 0  // def DEC_DEBUG
   if (dec_debug) {
     int i;
     printf("\n");
@@ -322,7 +312,7 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
          xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
          xd->dst.uv_stride, xd);
   }
-#ifdef DEC_DEBUG
+#if 0  // def DEC_DEBUG
   if (dec_debug) {
     int i;
     printf("\n");
@@ -340,6 +330,17 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
   TX_TYPE tx_type;
   int i, eobtotal = 0;
   MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
+#if 0  // def DEC_DEBUG
+  if (dec_debug) {
+    int i;
+    printf("\n");
+    printf("predictor\n");
+    for (i = 0; i < 384; i++) {
+      printf("%3d ", xd->predictor[i]);
+      if (i % 16 == 15) printf("\n");
+    }
+  }
+#endif
   if (mode == I8X8_PRED) {
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
@@ -420,7 +421,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                            xd->dst.uv_stride,
                            xd);
   } else {
-#ifdef DEC_DEBUG
+#if 0  // def DEC_DEBUG
     if (dec_debug) {
       int i;
       printf("\n");
@@ -834,14 +835,14 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
     skip_recon_mb(pbi, xd, mb_row, mb_col);
     return;
   }
-#ifdef DEC_DEBUG
+#if 0  // def DEC_DEBUG
   if (dec_debug)
     printf("Decoding mb:  %d %d\n", xd->mode_info_context->mbmi.mode, tx_size);
 #endif
 
   // moved to be performed before detokenization
-//  if (xd->segmentation_enabled)
-//    mb_init_dequantizer(pbi, xd);
+  //  if (xd->segmentation_enabled)
+  //    mb_init_dequantizer(pbi, xd);
 
   /* do prediction */
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
@@ -852,7 +853,7 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
       }
     }
   } else {
-#ifdef DEC_DEBUG
+#if 0  // def DEC_DEBUG
   if (dec_debug)
     printf("Decoding mb:  %d %d interp %d\n",
            xd->mode_info_context->mbmi.mode, tx_size,
@@ -871,6 +872,13 @@ static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
 #ifdef DEC_DEBUG
   if (dec_debug) {
     int i, j;
+    printf("\n");
+    printf("predictor y\n");
+    for (i = 0; i < 16; i++) {
+      for (j = 0; j < 16; j++)
+        printf("%3d ", xd->predictor[i * 16 + j]);
+      printf("\n");
+    }
     printf("\n");
     printf("final y\n");
     for (i = 0; i < 16; i++) {
@@ -994,9 +1002,10 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
        mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
     if (vp9_read(bc, pc->sb64_coded)) {
 #ifdef DEC_DEBUG
-      dec_debug = (pc->current_video_frame == 1 && mb_row == 0 && mb_col == 0);
+      dec_debug = (pc->current_video_frame == 11 && pc->show_frame &&
+                   mb_row == 8 && mb_col == 0);
       if (dec_debug)
-        printf("Debug\n");
+        printf("Debug Decode SB64\n");
 #endif
       set_offsets(pbi, 64, mb_row, mb_col);
       vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, bc);
@@ -1019,8 +1028,10 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
 
         if (vp9_read(bc, pc->sb32_coded)) {
 #ifdef DEC_DEBUG
-          dec_debug = (pc->current_video_frame == 1 &&
-                       mb_row + y_idx_sb == 0 && mb_col + x_idx_sb == 0);
+          dec_debug = (pc->current_video_frame == 11 && pc->show_frame &&
+                       mb_row + y_idx_sb == 8 && mb_col + x_idx_sb == 0);
+          if (dec_debug)
+            printf("Debug Decode SB32\n");
 #endif
           set_offsets(pbi, 32, mb_row + y_idx_sb, mb_col + x_idx_sb);
           vp9_decode_mb_mode_mv(pbi,
@@ -1043,8 +1054,10 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
               continue;
             }
 #ifdef DEC_DEBUG
-            dec_debug = (pc->current_video_frame == 1 &&
-                         mb_row + y_idx == 0 && mb_col + x_idx == 0);
+            dec_debug = (pc->current_video_frame == 11 && pc->show_frame &&
+                         mb_row + y_idx == 8 && mb_col + x_idx == 0);
+            if (dec_debug)
+              printf("Debug Decode MB\n");
 #endif
 
             set_offsets(pbi, 16, mb_row + y_idx, mb_col + x_idx);

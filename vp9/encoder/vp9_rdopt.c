@@ -2424,13 +2424,15 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
                                 &xd->scale_factor[0],
                                 4, 4, 0 /* no avg */, &xd->subpix);
 
+      // TODO(debargha): Make this work properly with the
+      // implicit-compoundinter-weight experiment when implicit
+      // weighting for splitmv modes is turned on.
       if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-        vp9_build_inter_predictor(*(bd->base_second_pre) + bd->pre,
-                                  bd->pre_stride,
-                                  bd->predictor, 16,
-                                  &bd->bmi.as_mv[1],
-                                  &xd->scale_factor[1],
-                                  4, 4, 1 /* avg */, &xd->subpix);
+        vp9_build_inter_predictor(
+            *(bd->base_second_pre) + bd->pre, bd->pre_stride, bd->predictor, 16,
+            &bd->bmi.as_mv[1], &xd->scale_factor[1], 4, 4,
+            1 << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT) /* avg */,
+            &xd->subpix);
       }
 
       vp9_subtract_b(be, bd, 16);
@@ -2486,12 +2488,14 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
       for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
         uint8_t **base_pre = which_mv ? bd->base_second_pre : bd->base_pre;
 
-        vp9_build_inter_predictor(*base_pre + bd->pre,
-                                  bd->pre_stride,
-                                  bd->predictor, 16,
-                                  &bd->bmi.as_mv[which_mv],
-                                  &xd->scale_factor[which_mv],
-                                  8, 8, which_mv, &xd->subpix);
+        // TODO(debargha): Make this work properly with the
+        // implicit-compoundinter-weight experiment when implicit
+        // weighting for splitmv modes is turned on.
+        vp9_build_inter_predictor(
+            *base_pre + bd->pre, bd->pre_stride, bd->predictor, 16,
+            &bd->bmi.as_mv[which_mv], &xd->scale_factor[which_mv], 8, 8,
+            which_mv << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+            &xd->subpix);
       }
 
       vp9_subtract_4b_c(be, bd, 16);
@@ -3866,27 +3870,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         unsigned int sse, var;
         int tmp_rate_y, tmp_rate_u, tmp_rate_v;
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
-        // TODO(jkoleszar): these 2 y/uv should be replaced with one call to
-        // vp9_build_interintra_16x16_predictors_mb().
-        vp9_build_inter16x16_predictors_mby(xd, xd->predictor, 16,
-                                            mb_row, mb_col);
-
-#if CONFIG_COMP_INTERINTRA_PRED
-        if (is_comp_interintra_pred) {
-          vp9_build_interintra_16x16_predictors_mby(xd, xd->predictor, 16);
-        }
-#endif
-
-        vp9_build_inter16x16_predictors_mbuv(xd, xd->predictor + 256,
-                                             xd->predictor + 320, 8,
-                                             mb_row, mb_col);
-
-#if CONFIG_COMP_INTERINTRA_PRED
-        if (is_comp_interintra_pred) {
-          vp9_build_interintra_16x16_predictors_mbuv(xd, xd->predictor + 256,
-                                                     xd->predictor + 320, 8);
-        }
-#endif
+        vp9_build_inter16x16_predictors_mb(xd, xd->predictor,
+                                           xd->predictor + 256,
+                                           xd->predictor + 320,
+                                           16, 8, mb_row, mb_col);
         var = vp9_variance16x16(*(b->base_src), b->src_stride,
                                 xd->predictor, 16, &sse);
         // Note our transform coeffs are 8 times an orthogonal transform.
@@ -3986,24 +3973,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                          xd->dst.uv_stride,
                                          mb_row, mb_col);
     } else {
-      // TODO(jkoleszar): These y/uv fns can be replaced with their mb
-      // equivalent
-      vp9_build_inter16x16_predictors_mby(xd, xd->predictor, 16,
-                                          mb_row, mb_col);
-#if CONFIG_COMP_INTERINTRA_PRED
-      if (is_comp_interintra_pred) {
-        vp9_build_interintra_16x16_predictors_mby(xd, xd->predictor, 16);
-      }
-#endif
-      vp9_build_inter16x16_predictors_mbuv(xd, &xd->predictor[256],
-                                           &xd->predictor[320], 8,
-                                           mb_row, mb_col);
-#if CONFIG_COMP_INTERINTRA_PRED
-      if (is_comp_interintra_pred) {
-        vp9_build_interintra_16x16_predictors_mbuv(xd, &xd->predictor[256],
-                                                   &xd->predictor[320], 8);
-      }
-#endif
+      vp9_build_inter16x16_predictors_mb(xd, xd->predictor,
+                                         xd->predictor + 256,
+                                         xd->predictor + 320,
+                                         16, 8, mb_row, mb_col);
     }
   }
 
@@ -4586,7 +4559,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         vpx_memcpy(x->partition_info, &tmp_best_partition,
                    sizeof(PARTITION_INFO));
         for (i = 0; i < 16; i++) {
-          xd->block[i].bmi = tmp_best_bmodes[i];
+          xd->block[i].bmi = xd->mode_info_context->bmi[i] = tmp_best_bmodes[i];
         }
       }
 

@@ -1488,7 +1488,7 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
   const unsigned int bsize2 = bsize >> 1;
   unsigned int match = 1;
   unsigned int i, j;
-  yloc[0] = yloc[1] = -1;
+  yloc[0] = yloc[1] = yloc[2] = yloc[3] = -1;
   for (i = 0, match = 1; match && i < img1->d_h; i += bsize) {
     for (j = 0; match && j < img1->d_w; j += bsize) {
       int k, l;
@@ -1502,13 +1502,17 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                 (i + k) * img2->stride[VPX_PLANE_Y] + j + l)) {
             yloc[0] = i + k;
             yloc[1] = j + l;
+            yloc[2] = *(img1->planes[VPX_PLANE_Y] +
+                        (i + k) * img1->stride[VPX_PLANE_Y] + j + l);
+            yloc[3] = *(img2->planes[VPX_PLANE_Y] +
+                        (i + k) * img2->stride[VPX_PLANE_Y] + j + l);
             match = 0;
             break;
           }
         }
     }
   }
-  uloc[0] = uloc[1] = -1;
+  uloc[0] = uloc[1] = uloc[2] = uloc[3] = -1;
   for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i += bsize2) {
     for (j = 0; j < match && (img1->d_w + 1) / 2; j += bsize2) {
       int k, l;
@@ -1522,13 +1526,17 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                 (i + k) * img2->stride[VPX_PLANE_U] + j + l)) {
             uloc[0] = i + k;
             uloc[1] = j + l;
+            uloc[2] = *(img1->planes[VPX_PLANE_U] +
+                        (i + k) * img1->stride[VPX_PLANE_U] + j + l);
+            uloc[3] = *(img2->planes[VPX_PLANE_U] +
+                        (i + k) * img2->stride[VPX_PLANE_V] + j + l);
             match = 0;
             break;
           }
         }
     }
   }
-  vloc[0] = vloc[1] = -1;
+  vloc[0] = vloc[1] = vloc[2] = vloc[3] = -1;
   for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i += bsize2) {
     for (j = 0; j < match && (img1->d_w + 1) / 2; j += bsize2) {
       int k, l;
@@ -1542,6 +1550,10 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                 (i + k) * img2->stride[VPX_PLANE_V] + j + l)) {
             vloc[0] = i + k;
             vloc[1] = j + l;
+            vloc[2] = *(img1->planes[VPX_PLANE_V] +
+                        (i + k) * img1->stride[VPX_PLANE_V] + j + l);
+            vloc[3] = *(img2->planes[VPX_PLANE_V] +
+                        (i + k) * img2->stride[VPX_PLANE_V] + j + l);
             match = 0;
             break;
           }
@@ -2454,14 +2466,18 @@ static void test_decode(struct stream_state  *stream,
   ctx_exit_on_error(&stream->decoder, "Failed to get decoder reference frame");
 
   if (!compare_img(&enc_img, &dec_img)) {
-    int y[2], u[2], v[2];
+    int y[4], u[4], v[4];
     find_mismatch(&enc_img, &dec_img, y, u, v);
     stream->decoder.err = 1;
     warn_or_exit_on_error(&stream->decoder, fatal == TEST_DECODE_FATAL,
-                          "Stream %d: Encode/decode mismatch on frame %d"
-                          " at Y[%d, %d], U[%d, %d], V[%d, %d]",
+                          "Stream %d: Encode/decode mismatch on frame %d at"
+                          " Y[%d, %d] {%d/%d},"
+                          " U[%d, %d] {%d/%d},"
+                          " V[%d, %d] {%d/%d}",
                           stream->index, stream->frames_out,
-                          y[0], y[1], u[0], u[1], v[0], v[1]);
+                          y[0], y[1], y[2], y[3],
+                          u[0], u[1], u[2], u[3],
+                          v[0], v[1], v[2], v[3]);
     stream->mismatch_seen = stream->frames_out;
   }
 

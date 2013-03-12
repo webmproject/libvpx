@@ -122,6 +122,78 @@ static void convolve_avg_horiz_c(const uint8_t *src, int src_stride,
   }
 }
 
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+
+static inline uint8_t combine_qtr(uint8_t a, uint8_t b) {
+  return (((a) + (b) * 3 + 2) >> 2);
+}
+
+static inline uint8_t combine_3qtr(uint8_t a, uint8_t b) {
+  return (((a) * 3 + (b) + 2) >> 2);
+}
+
+static inline uint8_t combine_1by8(uint8_t a, uint8_t b) {
+  return (((a) * 1 + (b) * 7 + 4) >> 3);
+}
+
+static inline uint8_t combine_3by8(uint8_t a, uint8_t b) {
+  return (((a) * 3 + (b) * 5 + 4) >> 3);
+}
+
+static inline uint8_t combine_5by8(uint8_t a, uint8_t b) {
+  return (((a) * 5 + (b) * 3 + 4) >> 3);
+}
+
+static inline uint8_t combine_7by8(uint8_t a, uint8_t b) {
+  return (((a) * 7 + (b) * 1 + 4) >> 3);
+}
+
+// TODO(debargha): Implment with a separate weight parameter
+static void convolve_wtd_horiz_c(const uint8_t *src, int src_stride,
+                                 uint8_t *dst, int dst_stride,
+                                 const int16_t *filter_x0, int x_step_q4,
+                                 const int16_t *filter_y, int y_step_q4,
+                                 int w, int h, int taps,
+                                 uint8_t (*combine)(uint8_t a, uint8_t b)) {
+  int x, y, k, sum;
+  const int16_t *filter_x_base = filter_x0;
+
+#if ALIGN_FILTERS_256
+  filter_x_base = (const int16_t *)(((intptr_t)filter_x0) & ~(intptr_t)0xff);
+#endif
+
+  /* Adjust base pointer address for this source line */
+  src -= taps / 2 - 1;
+
+  for (y = 0; y < h; ++y) {
+    /* Pointer to filter to use */
+    const int16_t *filter_x = filter_x0;
+
+    /* Initial phase offset */
+    int x0_q4 = (filter_x - filter_x_base) / taps;
+    int x_q4 = x0_q4;
+
+    for (x = 0; x < w; ++x) {
+      /* Per-pixel src offset */
+      int src_x = (x_q4 - x0_q4) >> 4;
+
+      for (sum = 0, k = 0; k < taps; ++k) {
+        sum += src[src_x + k] * filter_x[k];
+      }
+      sum += (VP9_FILTER_WEIGHT >> 1);
+      dst[x] = combine(dst[x], clip_pixel(sum >> VP9_FILTER_SHIFT));
+
+      /* Adjust source and filter to use for the next pixel */
+      x_q4 += x_step_q4;
+      filter_x = filter_x_base + (x_q4 & 0xf) * taps;
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+
+#endif
+
 static void convolve_vert_c(const uint8_t *src, int src_stride,
                             uint8_t *dst, int dst_stride,
                             const int16_t *filter_x, int x_step_q4,
@@ -207,6 +279,52 @@ static void convolve_avg_vert_c(const uint8_t *src, int src_stride,
   }
 }
 
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+static void convolve_wtd_vert_c(const uint8_t *src, int src_stride,
+                                uint8_t *dst, int dst_stride,
+                                const int16_t *filter_x, int x_step_q4,
+                                const int16_t *filter_y0, int y_step_q4,
+                                int w, int h, int taps,
+                                uint8_t (*combine)(uint8_t a, uint8_t b)) {
+  int x, y, k, sum;
+
+  const int16_t *filter_y_base = filter_y0;
+
+#if ALIGN_FILTERS_256
+  filter_y_base = (const int16_t *)(((intptr_t)filter_y0) & ~(intptr_t)0xff);
+#endif
+
+  /* Adjust base pointer address for this source column */
+  src -= src_stride * (taps / 2 - 1);
+  for (x = 0; x < w; ++x) {
+    /* Pointer to filter to use */
+    const int16_t *filter_y = filter_y0;
+
+    /* Initial phase offset */
+    int y0_q4 = (filter_y - filter_y_base) / taps;
+    int y_q4 = y0_q4;
+
+    for (y = 0; y < h; ++y) {
+      /* Per-pixel src offset */
+      int src_y = (y_q4 - y0_q4) >> 4;
+
+      for (sum = 0, k = 0; k < taps; ++k) {
+        sum += src[(src_y + k) * src_stride] * filter_y[k];
+      }
+      sum += (VP9_FILTER_WEIGHT >> 1);
+      dst[y * dst_stride] = combine(dst[y * dst_stride],
+                                    clip_pixel(sum >> VP9_FILTER_SHIFT));
+
+      /* Adjust source and filter to use for the next pixel */
+      y_q4 += y_step_q4;
+      filter_y = filter_y_base + (y_q4 & 0xf) * taps;
+    }
+    ++src;
+    ++dst;
+  }
+}
+#endif
+
 static void convolve_c(const uint8_t *src, int src_stride,
                        uint8_t *dst, int dst_stride,
                        const int16_t *filter_x, int x_step_q4,
@@ -285,6 +403,68 @@ void vp9_convolve8_avg_horiz_c(const uint8_t *src, int src_stride,
                        w, h, 8);
 }
 
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+void vp9_convolve8_1by8_horiz_c(const uint8_t *src, int src_stride,
+                                uint8_t *dst, int dst_stride,
+                                const int16_t *filter_x, int x_step_q4,
+                                const int16_t *filter_y, int y_step_q4,
+                                int w, int h) {
+  convolve_wtd_horiz_c(src, src_stride, dst, dst_stride,
+                       filter_x, x_step_q4, filter_y, y_step_q4,
+                       w, h, 8, combine_1by8);
+}
+
+void vp9_convolve8_qtr_horiz_c(const uint8_t *src, int src_stride,
+                               uint8_t *dst, int dst_stride,
+                               const int16_t *filter_x, int x_step_q4,
+                               const int16_t *filter_y, int y_step_q4,
+                               int w, int h) {
+  convolve_wtd_horiz_c(src, src_stride, dst, dst_stride,
+                       filter_x, x_step_q4, filter_y, y_step_q4,
+                       w, h, 8, combine_qtr);
+}
+
+void vp9_convolve8_3by8_horiz_c(const uint8_t *src, int src_stride,
+                                uint8_t *dst, int dst_stride,
+                                const int16_t *filter_x, int x_step_q4,
+                                const int16_t *filter_y, int y_step_q4,
+                                int w, int h) {
+  convolve_wtd_horiz_c(src, src_stride, dst, dst_stride,
+                       filter_x, x_step_q4, filter_y, y_step_q4,
+                       w, h, 8, combine_3by8);
+}
+
+void vp9_convolve8_5by8_horiz_c(const uint8_t *src, int src_stride,
+                                uint8_t *dst, int dst_stride,
+                                const int16_t *filter_x, int x_step_q4,
+                                const int16_t *filter_y, int y_step_q4,
+                                int w, int h) {
+  convolve_wtd_horiz_c(src, src_stride, dst, dst_stride,
+                       filter_x, x_step_q4, filter_y, y_step_q4,
+                       w, h, 8, combine_5by8);
+}
+
+void vp9_convolve8_3qtr_horiz_c(const uint8_t *src, int src_stride,
+                                uint8_t *dst, int dst_stride,
+                                const int16_t *filter_x, int x_step_q4,
+                                const int16_t *filter_y, int y_step_q4,
+                                int w, int h) {
+  convolve_wtd_horiz_c(src, src_stride, dst, dst_stride,
+                       filter_x, x_step_q4, filter_y, y_step_q4,
+                       w, h, 8, combine_3qtr);
+}
+
+void vp9_convolve8_7by8_horiz_c(const uint8_t *src, int src_stride,
+                                uint8_t *dst, int dst_stride,
+                                const int16_t *filter_x, int x_step_q4,
+                                const int16_t *filter_y, int y_step_q4,
+                                int w, int h) {
+  convolve_wtd_horiz_c(src, src_stride, dst, dst_stride,
+                       filter_x, x_step_q4, filter_y, y_step_q4,
+                       w, h, 8, combine_7by8);
+}
+#endif
+
 void vp9_convolve8_vert_c(const uint8_t *src, int src_stride,
                           uint8_t *dst, int dst_stride,
                           const int16_t *filter_x, int x_step_q4,
@@ -304,6 +484,68 @@ void vp9_convolve8_avg_vert_c(const uint8_t *src, int src_stride,
                       filter_x, x_step_q4, filter_y, y_step_q4,
                       w, h, 8);
 }
+
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+void vp9_convolve8_1by8_vert_c(const uint8_t *src, int src_stride,
+                               uint8_t *dst, int dst_stride,
+                               const int16_t *filter_x, int x_step_q4,
+                               const int16_t *filter_y, int y_step_q4,
+                               int w, int h) {
+  convolve_wtd_vert_c(src, src_stride, dst, dst_stride,
+                      filter_x, x_step_q4, filter_y, y_step_q4,
+                      w, h, 8, combine_1by8);
+}
+
+void vp9_convolve8_qtr_vert_c(const uint8_t *src, int src_stride,
+                              uint8_t *dst, int dst_stride,
+                              const int16_t *filter_x, int x_step_q4,
+                              const int16_t *filter_y, int y_step_q4,
+                              int w, int h) {
+  convolve_wtd_vert_c(src, src_stride, dst, dst_stride,
+                      filter_x, x_step_q4, filter_y, y_step_q4,
+                      w, h, 8, combine_qtr);
+}
+
+void vp9_convolve8_3by8_vert_c(const uint8_t *src, int src_stride,
+                               uint8_t *dst, int dst_stride,
+                               const int16_t *filter_x, int x_step_q4,
+                               const int16_t *filter_y, int y_step_q4,
+                               int w, int h) {
+  convolve_wtd_vert_c(src, src_stride, dst, dst_stride,
+                      filter_x, x_step_q4, filter_y, y_step_q4,
+                      w, h, 8, combine_3by8);
+}
+
+void vp9_convolve8_5by8_vert_c(const uint8_t *src, int src_stride,
+                               uint8_t *dst, int dst_stride,
+                               const int16_t *filter_x, int x_step_q4,
+                               const int16_t *filter_y, int y_step_q4,
+                               int w, int h) {
+  convolve_wtd_vert_c(src, src_stride, dst, dst_stride,
+                      filter_x, x_step_q4, filter_y, y_step_q4,
+                      w, h, 8, combine_5by8);
+}
+
+void vp9_convolve8_3qtr_vert_c(const uint8_t *src, int src_stride,
+                               uint8_t *dst, int dst_stride,
+                               const int16_t *filter_x, int x_step_q4,
+                               const int16_t *filter_y, int y_step_q4,
+                               int w, int h) {
+  convolve_wtd_vert_c(src, src_stride, dst, dst_stride,
+                      filter_x, x_step_q4, filter_y, y_step_q4,
+                      w, h, 8, combine_3qtr);
+}
+
+void vp9_convolve8_7by8_vert_c(const uint8_t *src, int src_stride,
+                               uint8_t *dst, int dst_stride,
+                               const int16_t *filter_x, int x_step_q4,
+                               const int16_t *filter_y, int y_step_q4,
+                               int w, int h) {
+  convolve_wtd_vert_c(src, src_stride, dst, dst_stride,
+                      filter_x, x_step_q4, filter_y, y_step_q4,
+                      w, h, 8, combine_7by8);
+}
+#endif
 
 void vp9_convolve8_c(const uint8_t *src, int src_stride,
                      uint8_t *dst, int dst_stride,
@@ -336,6 +578,140 @@ void vp9_convolve8_avg_c(const uint8_t *src, int src_stride,
                    NULL, 0, /* These unused parameter should be removed! */
                    w, h);
 }
+
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+void vp9_convolve8_1by8_c(const uint8_t *src, int src_stride,
+                         uint8_t *dst, int dst_stride,
+                         const int16_t *filter_x, int x_step_q4,
+                         const int16_t *filter_y, int y_step_q4,
+                         int w, int h) {
+  /* Fixed size intermediate buffer places limits on parameters. */
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp, 16 * 16);
+  assert(w <= 16);
+  assert(h <= 16);
+
+  vp9_convolve8(src, src_stride,
+                temp, 16,
+                filter_x, x_step_q4,
+                filter_y, y_step_q4,
+                w, h);
+  vp9_convolve_1by8(temp, 16,
+                    dst, dst_stride,
+                    NULL, 0, /* These unused parameter should be removed! */
+                    NULL, 0, /* These unused parameter should be removed! */
+                    w, h);
+}
+
+void vp9_convolve8_qtr_c(const uint8_t *src, int src_stride,
+                         uint8_t *dst, int dst_stride,
+                         const int16_t *filter_x, int x_step_q4,
+                         const int16_t *filter_y, int y_step_q4,
+                         int w, int h) {
+  /* Fixed size intermediate buffer places limits on parameters. */
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp, 16 * 16);
+  assert(w <= 16);
+  assert(h <= 16);
+
+  vp9_convolve8(src, src_stride,
+                temp, 16,
+                filter_x, x_step_q4,
+                filter_y, y_step_q4,
+                w, h);
+  vp9_convolve_qtr(temp, 16,
+                   dst, dst_stride,
+                   NULL, 0, /* These unused parameter should be removed! */
+                   NULL, 0, /* These unused parameter should be removed! */
+                   w, h);
+}
+
+void vp9_convolve8_3by8_c(const uint8_t *src, int src_stride,
+                         uint8_t *dst, int dst_stride,
+                         const int16_t *filter_x, int x_step_q4,
+                         const int16_t *filter_y, int y_step_q4,
+                         int w, int h) {
+  /* Fixed size intermediate buffer places limits on parameters. */
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp, 16 * 16);
+  assert(w <= 16);
+  assert(h <= 16);
+
+  vp9_convolve8(src, src_stride,
+                temp, 16,
+                filter_x, x_step_q4,
+                filter_y, y_step_q4,
+                w, h);
+  vp9_convolve_3by8(temp, 16,
+                    dst, dst_stride,
+                    NULL, 0, /* These unused parameter should be removed! */
+                    NULL, 0, /* These unused parameter should be removed! */
+                    w, h);
+}
+
+void vp9_convolve8_5by8_c(const uint8_t *src, int src_stride,
+                         uint8_t *dst, int dst_stride,
+                         const int16_t *filter_x, int x_step_q4,
+                         const int16_t *filter_y, int y_step_q4,
+                         int w, int h) {
+  /* Fixed size intermediate buffer places limits on parameters. */
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp, 16 * 16);
+  assert(w <= 16);
+  assert(h <= 16);
+
+  vp9_convolve8(src, src_stride,
+                temp, 16,
+                filter_x, x_step_q4,
+                filter_y, y_step_q4,
+                w, h);
+  vp9_convolve_5by8(temp, 16,
+                    dst, dst_stride,
+                    NULL, 0, /* These unused parameter should be removed! */
+                    NULL, 0, /* These unused parameter should be removed! */
+                    w, h);
+}
+
+void vp9_convolve8_3qtr_c(const uint8_t *src, int src_stride,
+                          uint8_t *dst, int dst_stride,
+                          const int16_t *filter_x, int x_step_q4,
+                          const int16_t *filter_y, int y_step_q4,
+                          int w, int h) {
+  /* Fixed size intermediate buffer places limits on parameters. */
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp, 16 * 16);
+  assert(w <= 16);
+  assert(h <= 16);
+
+  vp9_convolve8(src, src_stride,
+                temp, 16,
+                filter_x, x_step_q4,
+                filter_y, y_step_q4,
+                w, h);
+  vp9_convolve_3qtr(temp, 16,
+                    dst, dst_stride,
+                    NULL, 0, /* These unused parameter should be removed! */
+                    NULL, 0, /* These unused parameter should be removed! */
+                    w, h);
+}
+
+void vp9_convolve8_7by8_c(const uint8_t *src, int src_stride,
+                         uint8_t *dst, int dst_stride,
+                         const int16_t *filter_x, int x_step_q4,
+                         const int16_t *filter_y, int y_step_q4,
+                         int w, int h) {
+  /* Fixed size intermediate buffer places limits on parameters. */
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp, 16 * 16);
+  assert(w <= 16);
+  assert(h <= 16);
+
+  vp9_convolve8(src, src_stride,
+                temp, 16,
+                filter_x, x_step_q4,
+                filter_y, y_step_q4,
+                w, h);
+  vp9_convolve_7by8(temp, 16,
+                    dst, dst_stride,
+                    NULL, 0, /* These unused parameter should be removed! */
+                    NULL, 0, /* These unused parameter should be removed! */
+                    w, h);
+}
+#endif
 
 void vp9_convolve_copy(const uint8_t *src, int src_stride,
                        uint8_t *dst, int dst_stride,
@@ -374,3 +750,101 @@ void vp9_convolve_avg(const uint8_t *src, int src_stride,
     dst += dst_stride;
   }
 }
+
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+void vp9_convolve_1by8(const uint8_t *src, int src_stride,
+                       uint8_t *dst, int dst_stride,
+                       const int16_t *filter_x, int filter_x_stride,
+                       const int16_t *filter_y, int filter_y_stride,
+                       int w, int h) {
+  int x, y;
+
+  for (y = 0; y < h; ++y) {
+    for (x = 0; x < w; ++x) {
+      dst[x] = combine_1by8(dst[x], src[x]);
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+
+void vp9_convolve_qtr(const uint8_t *src, int src_stride,
+                      uint8_t *dst, int dst_stride,
+                      const int16_t *filter_x, int filter_x_stride,
+                      const int16_t *filter_y, int filter_y_stride,
+                      int w, int h) {
+  int x, y;
+
+  for (y = 0; y < h; ++y) {
+    for (x = 0; x < w; ++x) {
+      dst[x] = combine_qtr(dst[x], src[x]);
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+
+void vp9_convolve_3by8(const uint8_t *src, int src_stride,
+                       uint8_t *dst, int dst_stride,
+                       const int16_t *filter_x, int filter_x_stride,
+                       const int16_t *filter_y, int filter_y_stride,
+                       int w, int h) {
+  int x, y;
+
+  for (y = 0; y < h; ++y) {
+    for (x = 0; x < w; ++x) {
+      dst[x] = combine_3by8(dst[x], src[x]);
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+
+void vp9_convolve_5by8(const uint8_t *src, int src_stride,
+                       uint8_t *dst, int dst_stride,
+                       const int16_t *filter_x, int filter_x_stride,
+                       const int16_t *filter_y, int filter_y_stride,
+                       int w, int h) {
+  int x, y;
+
+  for (y = 0; y < h; ++y) {
+    for (x = 0; x < w; ++x) {
+      dst[x] = combine_5by8(dst[x], src[x]);
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+
+void vp9_convolve_3qtr(const uint8_t *src, int src_stride,
+                       uint8_t *dst, int dst_stride,
+                       const int16_t *filter_x, int filter_x_stride,
+                       const int16_t *filter_y, int filter_y_stride,
+                       int w, int h) {
+  int x, y;
+
+  for (y = 0; y < h; ++y) {
+    for (x = 0; x < w; ++x) {
+      dst[x] = combine_3qtr(dst[x], src[x]);
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+
+void vp9_convolve_7by8(const uint8_t *src, int src_stride,
+                       uint8_t *dst, int dst_stride,
+                       const int16_t *filter_x, int filter_x_stride,
+                       const int16_t *filter_y, int filter_y_stride,
+                       int w, int h) {
+  int x, y;
+
+  for (y = 0; y < h; ++y) {
+    for (x = 0; x < w; ++x) {
+      dst[x] = combine_7by8(dst[x], src[x]);
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+#endif

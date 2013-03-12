@@ -757,7 +757,7 @@ static int pick_mb_modes(VP9_COMP *cpi,
     // as a predictor for MBs that follow in the SB
     if (cm->frame_type == KEY_FRAME) {
       int r, d;
-#ifdef ENC_DEBUG
+#if 0  // ENC_DEBUG
       if (enc_debug)
         printf("intra pick_mb_modes %d %d\n", mb_row, mb_col);
 #endif
@@ -776,7 +776,7 @@ static int pick_mb_modes(VP9_COMP *cpi,
     } else {
       int seg_id, r, d;
 
-#ifdef ENC_DEBUG
+#if 0  // ENC_DEBUG
       if (enc_debug)
         printf("inter pick_mb_modes %d %d\n", mb_row, mb_col);
 #endif
@@ -2057,8 +2057,8 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
   assert(!xd->mode_info_context->mbmi.sb_type);
 
 #ifdef ENC_DEBUG
-  enc_debug = (cpi->common.current_video_frame == 1 &&
-               mb_row == 0 && mb_col == 0 && output_enabled);
+  enc_debug = (cpi->common.current_video_frame == 11 && cm->show_frame &&
+               mb_row == 8 && mb_col == 0 && output_enabled);
   if (enc_debug)
     printf("Encode MB %d %d output %d\n", mb_row, mb_col, output_enabled);
 #endif
@@ -2105,7 +2105,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
   }
 
   if (mbmi->ref_frame == INTRA_FRAME) {
-#ifdef ENC_DEBUG
+#if 0  // def ENC_DEBUG
     if (enc_debug) {
       printf("Mode %d skip %d tx_size %d\n", mbmi->mode, x->skip,
              mbmi->txfm_size);
@@ -2316,10 +2316,16 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
   const int mis = cm->mode_info_stride;
 
 #ifdef ENC_DEBUG
-  enc_debug = (cpi->common.current_video_frame == 1 &&
-               mb_row == 0 && mb_col == 0 && output_enabled);
-  if (enc_debug)
+  enc_debug = (cpi->common.current_video_frame == 11 && cm->show_frame &&
+               mb_row == 8 && mb_col == 0 && output_enabled);
+  if (enc_debug) {
     printf("Encode SB32 %d %d output %d\n", mb_row, mb_col, output_enabled);
+    printf("Mode %d skip %d tx_size %d ref %d ref2 %d mv %d %d interp %d\n",
+           mi->mbmi.mode, x->skip, mi->mbmi.txfm_size,
+           mi->mbmi.ref_frame, mi->mbmi.second_ref_frame,
+           mi->mbmi.mv[0].as_mv.row, mi->mbmi.mv[0].as_mv.col,
+           mi->mbmi.interp_filter);
+  }
 #endif
   if (cm->frame_type == KEY_FRAME) {
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
@@ -2537,8 +2543,8 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
   const int mis = cm->mode_info_stride;
 
 #ifdef ENC_DEBUG
-  enc_debug = (cpi->common.current_video_frame == 1 &&
-               mb_row == 0 && mb_col == 0 && output_enabled);
+  enc_debug = (cpi->common.current_video_frame == 11 && cm->show_frame &&
+               mb_row == 8 && mb_col == 0 && output_enabled);
   if (enc_debug)
     printf("Encode SB64 %d %d output %d\n", mb_row, mb_col, output_enabled);
 #endif

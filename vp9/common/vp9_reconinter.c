@@ -39,6 +39,127 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
   // applied in one direction only, and not at all for 0,0, seems to give the
   // best quality, but it may be worth trying an additional mode that does
   // do the filtering on full-pel.
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+  if (scale->x_step_q4 == 16) {
+    if (scale->y_step_q4 == 16) {
+      // No scaling in either direction.
+      scale->predict[0][0][0] = vp9_convolve_copy;
+      scale->predict[0][0][1] = vp9_convolve_1by8;
+      scale->predict[0][0][2] = vp9_convolve_qtr;
+      scale->predict[0][0][3] = vp9_convolve_3by8;
+      scale->predict[0][0][4] = vp9_convolve_avg;
+      scale->predict[0][0][5] = vp9_convolve_5by8;
+      scale->predict[0][0][6] = vp9_convolve_3qtr;
+      scale->predict[0][0][7] = vp9_convolve_7by8;
+      scale->predict[0][1][0] = vp9_convolve8_vert;
+      scale->predict[0][1][1] = vp9_convolve8_1by8_vert;
+      scale->predict[0][1][2] = vp9_convolve8_qtr_vert;
+      scale->predict[0][1][3] = vp9_convolve8_3by8_vert;
+      scale->predict[0][1][4] = vp9_convolve8_avg_vert;
+      scale->predict[0][1][5] = vp9_convolve8_5by8_vert;
+      scale->predict[0][1][6] = vp9_convolve8_3qtr_vert;
+      scale->predict[0][1][7] = vp9_convolve8_7by8_vert;
+      scale->predict[1][0][0] = vp9_convolve8_horiz;
+      scale->predict[1][0][1] = vp9_convolve8_1by8_horiz;
+      scale->predict[1][0][2] = vp9_convolve8_qtr_horiz;
+      scale->predict[1][0][3] = vp9_convolve8_3by8_horiz;
+      scale->predict[1][0][4] = vp9_convolve8_avg_horiz;
+      scale->predict[1][0][5] = vp9_convolve8_5by8_horiz;
+      scale->predict[1][0][6] = vp9_convolve8_3qtr_horiz;
+      scale->predict[1][0][7] = vp9_convolve8_7by8_horiz;
+    } else {
+      // No scaling in x direction. Must always scale in the y direction.
+      scale->predict[0][0][0] = vp9_convolve8_vert;
+      scale->predict[0][0][1] = vp9_convolve8_1by8_vert;
+      scale->predict[0][0][2] = vp9_convolve8_qtr_vert;
+      scale->predict[0][0][3] = vp9_convolve8_3by8_vert;
+      scale->predict[0][0][4] = vp9_convolve8_avg_vert;
+      scale->predict[0][0][5] = vp9_convolve8_5by8_vert;
+      scale->predict[0][0][6] = vp9_convolve8_3qtr_vert;
+      scale->predict[0][0][7] = vp9_convolve8_7by8_vert;
+      scale->predict[0][1][0] = vp9_convolve8_vert;
+      scale->predict[0][1][1] = vp9_convolve8_1by8_vert;
+      scale->predict[0][1][2] = vp9_convolve8_qtr_vert;
+      scale->predict[0][1][3] = vp9_convolve8_3by8_vert;
+      scale->predict[0][1][4] = vp9_convolve8_avg_vert;
+      scale->predict[0][1][5] = vp9_convolve8_5by8_vert;
+      scale->predict[0][1][6] = vp9_convolve8_3qtr_vert;
+      scale->predict[0][1][7] = vp9_convolve8_7by8_vert;
+      scale->predict[1][0][0] = vp9_convolve8;
+      scale->predict[1][0][1] = vp9_convolve8_1by8;
+      scale->predict[1][0][2] = vp9_convolve8_qtr;
+      scale->predict[1][0][3] = vp9_convolve8_3by8;
+      scale->predict[1][0][4] = vp9_convolve8_avg;
+      scale->predict[1][0][5] = vp9_convolve8_5by8;
+      scale->predict[1][0][6] = vp9_convolve8_3qtr;
+      scale->predict[1][0][7] = vp9_convolve8_7by8;
+    }
+  } else {
+    if (scale->y_step_q4 == 16) {
+      // No scaling in the y direction. Must always scale in the x direction.
+      scale->predict[0][0][0] = vp9_convolve8_horiz;
+      scale->predict[0][0][1] = vp9_convolve8_1by8_horiz;
+      scale->predict[0][0][2] = vp9_convolve8_qtr_horiz;
+      scale->predict[0][0][3] = vp9_convolve8_3by8_horiz;
+      scale->predict[0][0][4] = vp9_convolve8_avg_horiz;
+      scale->predict[0][0][5] = vp9_convolve8_5by8_horiz;
+      scale->predict[0][0][6] = vp9_convolve8_3qtr_horiz;
+      scale->predict[0][0][7] = vp9_convolve8_7by8_horiz;
+      scale->predict[0][1][0] = vp9_convolve8;
+      scale->predict[0][1][1] = vp9_convolve8_1by8;
+      scale->predict[0][1][2] = vp9_convolve8_qtr;
+      scale->predict[0][1][3] = vp9_convolve8_3by8;
+      scale->predict[0][1][4] = vp9_convolve8_avg;
+      scale->predict[0][1][5] = vp9_convolve8_5by8;
+      scale->predict[0][1][6] = vp9_convolve8_3qtr;
+      scale->predict[0][1][7] = vp9_convolve8_7by8;
+      scale->predict[1][0][0] = vp9_convolve8_horiz;
+      scale->predict[1][0][1] = vp9_convolve8_1by8_horiz;
+      scale->predict[1][0][2] = vp9_convolve8_qtr_horiz;
+      scale->predict[1][0][3] = vp9_convolve8_3by8_horiz;
+      scale->predict[1][0][4] = vp9_convolve8_avg_horiz;
+      scale->predict[1][0][5] = vp9_convolve8_5by8_horiz;
+      scale->predict[1][0][6] = vp9_convolve8_3qtr_horiz;
+      scale->predict[1][0][7] = vp9_convolve8_7by8_horiz;
+    } else {
+      // Must always scale in both directions.
+      scale->predict[0][0][0] = vp9_convolve8;
+      scale->predict[0][0][1] = vp9_convolve8_1by8;
+      scale->predict[0][0][2] = vp9_convolve8_qtr;
+      scale->predict[0][0][3] = vp9_convolve8_3by8;
+      scale->predict[0][0][4] = vp9_convolve8_avg;
+      scale->predict[0][0][5] = vp9_convolve8_5by8;
+      scale->predict[0][0][6] = vp9_convolve8_3qtr;
+      scale->predict[0][0][7] = vp9_convolve8_7by8;
+      scale->predict[0][1][0] = vp9_convolve8;
+      scale->predict[0][1][1] = vp9_convolve8_1by8;
+      scale->predict[0][1][2] = vp9_convolve8_qtr;
+      scale->predict[0][1][3] = vp9_convolve8_3by8;
+      scale->predict[0][1][4] = vp9_convolve8_avg;
+      scale->predict[0][1][5] = vp9_convolve8_5by8;
+      scale->predict[0][1][6] = vp9_convolve8_3qtr;
+      scale->predict[0][1][7] = vp9_convolve8_7by8;
+      scale->predict[1][0][0] = vp9_convolve8;
+      scale->predict[1][0][1] = vp9_convolve8_1by8;
+      scale->predict[1][0][2] = vp9_convolve8_qtr;
+      scale->predict[1][0][3] = vp9_convolve8_3by8;
+      scale->predict[1][0][4] = vp9_convolve8_avg;
+      scale->predict[1][0][5] = vp9_convolve8_5by8;
+      scale->predict[1][0][6] = vp9_convolve8_3qtr;
+      scale->predict[1][0][7] = vp9_convolve8_7by8;
+    }
+  }
+  // 2D subpel motion always gets filtered in both directions
+  scale->predict[1][1][0] = vp9_convolve8;
+  scale->predict[1][1][1] = vp9_convolve8_1by8;
+  scale->predict[1][1][2] = vp9_convolve8_qtr;
+  scale->predict[1][1][3] = vp9_convolve8_3by8;
+  scale->predict[1][1][4] = vp9_convolve8_avg;
+  scale->predict[1][1][5] = vp9_convolve8_5by8;
+  scale->predict[1][1][6] = vp9_convolve8_3qtr;
+  scale->predict[1][1][7] = vp9_convolve8_7by8;
+}
+#else
   if (scale->x_step_q4 == 16) {
     if (scale->y_step_q4 == 16) {
       // No scaling in either direction.
@@ -80,6 +201,7 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
   scale->predict[1][1][0] = vp9_convolve8;
   scale->predict[1][1][1] = vp9_convolve8_avg;
 }
+#endif
 
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,
@@ -269,12 +391,11 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
                                const int_mv *mv_q3,
                                const struct scale_factors *scale,
-                               int w, int h, int do_avg,
+                               int w, int h, int weight,
                                const struct subpix_fn_table *subpix) {
   int_mv32 mv = scale_motion_vector_q3_to_q4(mv_q3, scale);
   src += (mv.as_mv.row >> 4) * src_stride + (mv.as_mv.col >> 4);
-
-  scale->predict[!!(mv.as_mv.col & 15)][!!(mv.as_mv.row & 15)][do_avg](
+  scale->predict[!!(mv.as_mv.col & 15)][!!(mv.as_mv.row & 15)][weight](
       src, src_stride, dst, dst_stride,
       subpix->filter_x[mv.as_mv.col & 15], scale->x_step_q4,
       subpix->filter_y[mv.as_mv.row & 15], scale->y_step_q4,
@@ -289,7 +410,7 @@ void vp9_build_inter_predictor_q4(const uint8_t *src, int src_stride,
                                   const int_mv *fullpel_mv_q3,
                                   const int_mv *frac_mv_q4,
                                   const struct scale_factors *scale,
-                                  int w, int h, int do_avg,
+                                  int w, int h, int weight,
                                   const struct subpix_fn_table *subpix) {
   const int mv_row_q4 = ((fullpel_mv_q3->as_mv.row >> 3) << 4)
                         + (frac_mv_q4->as_mv.row & 0xf);
@@ -305,16 +426,67 @@ void vp9_build_inter_predictor_q4(const uint8_t *src, int src_stride,
   const int subpel_y = scaled_mv_row_q4 & 15;
 
   src += (scaled_mv_row_q4 >> 4) * src_stride + (scaled_mv_col_q4 >> 4);
-  scale->predict[!!subpel_x][!!subpel_y][do_avg](
+  scale->predict[!!subpel_x][!!subpel_y][weight](
       src, src_stride, dst, dst_stride,
       subpix->filter_x[subpel_x], scale->x_step_q4,
       subpix->filter_y[subpel_y], scale->y_step_q4,
       w, h);
 }
 
+static void build_2x1_inter_predictor_wh(const BLOCKD *d0, const BLOCKD *d1,
+                                         struct scale_factors *scale,
+                                         uint8_t *predictor,
+                                         int block_size, int stride,
+                                         int which_mv, int weight,
+                                         int width, int height,
+                                         const struct subpix_fn_table *subpix,
+                                         int row, int col) {
+  assert(d1->predictor - d0->predictor == block_size);
+  assert(d1->pre == d0->pre + block_size);
+
+  set_scaled_offsets(&scale[which_mv], row, col);
+
+  if (d0->bmi.as_mv[which_mv].as_int == d1->bmi.as_mv[which_mv].as_int) {
+    uint8_t **base_pre = which_mv ? d0->base_second_pre : d0->base_pre;
+
+    vp9_build_inter_predictor(*base_pre + d0->pre,
+                              d0->pre_stride,
+                              predictor, stride,
+                              &d0->bmi.as_mv[which_mv],
+                              &scale[which_mv],
+                              width, height,
+                              weight, subpix);
+
+  } else {
+    uint8_t **base_pre0 = which_mv ? d0->base_second_pre : d0->base_pre;
+    uint8_t **base_pre1 = which_mv ? d1->base_second_pre : d1->base_pre;
+
+    vp9_build_inter_predictor(*base_pre0 + d0->pre,
+                              d0->pre_stride,
+                              predictor, stride,
+                              &d0->bmi.as_mv[which_mv],
+                              &scale[which_mv],
+                              width > block_size ? block_size : width, height,
+                              weight, subpix);
+
+    if (width <= block_size) return;
+
+    set_scaled_offsets(&scale[which_mv], row, col + block_size);
+
+    vp9_build_inter_predictor(*base_pre1 + d1->pre,
+                              d1->pre_stride,
+                              predictor + block_size, stride,
+                              &d1->bmi.as_mv[which_mv],
+                              &scale[which_mv],
+                              width - block_size, height,
+                              weight, subpix);
+  }
+}
+
 static void build_2x1_inter_predictor(const BLOCKD *d0, const BLOCKD *d1,
                                       struct scale_factors *scale,
-                                      int block_size, int stride, int which_mv,
+                                      int block_size, int stride,
+                                      int which_mv, int weight,
                                       const struct subpix_fn_table *subpix,
                                       int row, int col) {
   assert(d1->predictor - d0->predictor == block_size);
@@ -330,8 +502,8 @@ static void build_2x1_inter_predictor(const BLOCKD *d0, const BLOCKD *d1,
                               d0->predictor, stride,
                               &d0->bmi.as_mv[which_mv],
                               &scale[which_mv],
-                              2 * block_size, block_size, which_mv,
-                              subpix);
+                              2 * block_size, block_size,
+                              weight, subpix);
 
   } else {
     uint8_t **base_pre0 = which_mv ? d0->base_second_pre : d0->base_pre;
@@ -342,8 +514,8 @@ static void build_2x1_inter_predictor(const BLOCKD *d0, const BLOCKD *d1,
                               d0->predictor, stride,
                               &d0->bmi.as_mv[which_mv],
                               &scale[which_mv],
-                              block_size, block_size, which_mv,
-                              subpix);
+                              block_size, block_size,
+                              weight, subpix);
 
     set_scaled_offsets(&scale[which_mv], row, col + block_size);
 
@@ -352,103 +524,8 @@ static void build_2x1_inter_predictor(const BLOCKD *d0, const BLOCKD *d1,
                               d1->predictor, stride,
                               &d1->bmi.as_mv[which_mv],
                               &scale[which_mv],
-                              block_size, block_size, which_mv,
-                              subpix);
-  }
-}
-
-/*encoder only*/
-void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
-                                        int mb_row,
-                                        int mb_col) {
-  int i, j;
-  BLOCKD *blockd = xd->block;
-
-  /* build uv mvs */
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 2; j++) {
-      int yoffset = i * 8 + j * 2;
-      int uoffset = 16 + i * 2 + j;
-      int voffset = 20 + i * 2 + j;
-      int temp;
-
-      temp = blockd[yoffset  ].bmi.as_mv[0].as_mv.row
-             + blockd[yoffset + 1].bmi.as_mv[0].as_mv.row
-             + blockd[yoffset + 4].bmi.as_mv[0].as_mv.row
-             + blockd[yoffset + 5].bmi.as_mv[0].as_mv.row;
-
-      if (temp < 0) temp -= 4;
-      else temp += 4;
-
-      xd->block[uoffset].bmi.as_mv[0].as_mv.row = (temp / 8) &
-        xd->fullpixel_mask;
-
-      temp = blockd[yoffset  ].bmi.as_mv[0].as_mv.col
-             + blockd[yoffset + 1].bmi.as_mv[0].as_mv.col
-             + blockd[yoffset + 4].bmi.as_mv[0].as_mv.col
-             + blockd[yoffset + 5].bmi.as_mv[0].as_mv.col;
-
-      if (temp < 0) temp -= 4;
-      else temp += 4;
-
-      blockd[uoffset].bmi.as_mv[0].as_mv.col = (temp / 8) &
-        xd->fullpixel_mask;
-
-      blockd[voffset].bmi.as_mv[0].as_mv.row =
-        blockd[uoffset].bmi.as_mv[0].as_mv.row;
-      blockd[voffset].bmi.as_mv[0].as_mv.col =
-        blockd[uoffset].bmi.as_mv[0].as_mv.col;
-
-      if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-        temp = blockd[yoffset  ].bmi.as_mv[1].as_mv.row
-               + blockd[yoffset + 1].bmi.as_mv[1].as_mv.row
-               + blockd[yoffset + 4].bmi.as_mv[1].as_mv.row
-               + blockd[yoffset + 5].bmi.as_mv[1].as_mv.row;
-
-        if (temp < 0) {
-          temp -= 4;
-        } else {
-          temp += 4;
-        }
-
-        blockd[uoffset].bmi.as_mv[1].as_mv.row = (temp / 8) &
-          xd->fullpixel_mask;
-
-        temp = blockd[yoffset  ].bmi.as_mv[1].as_mv.col
-               + blockd[yoffset + 1].bmi.as_mv[1].as_mv.col
-               + blockd[yoffset + 4].bmi.as_mv[1].as_mv.col
-               + blockd[yoffset + 5].bmi.as_mv[1].as_mv.col;
-
-        if (temp < 0) {
-          temp -= 4;
-        } else {
-          temp += 4;
-        }
-
-        blockd[uoffset].bmi.as_mv[1].as_mv.col = (temp / 8) &
-          xd->fullpixel_mask;
-
-        blockd[voffset].bmi.as_mv[1].as_mv.row =
-          blockd[uoffset].bmi.as_mv[1].as_mv.row;
-        blockd[voffset].bmi.as_mv[1].as_mv.col =
-          blockd[uoffset].bmi.as_mv[1].as_mv.col;
-      }
-    }
-  }
-
-  for (i = 16; i < 24; i += 2) {
-    const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
-    const int x = 4 * (i & 1);
-    const int y = ((i - 16) >> 1) * 4;
-
-    int which_mv;
-    BLOCKD *d0 = &blockd[i];
-    BLOCKD *d1 = &blockd[i + 1];
-
-    for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-      build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
-                                &xd->subpix, mb_row * 8 + y, mb_col * 8 + x);
-    }
+                              block_size, block_size,
+                              weight, subpix);
   }
 }
 
@@ -488,7 +565,358 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
             (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
 }
 
-/*encoder only*/
+#define AVERAGE_WEIGHT  (1 << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT))
+
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+
+// Whether to use implicit weighting for UV
+#define USE_IMPLICIT_WEIGHT_UV
+
+// Whether to use implicit weighting for SplitMV
+// #define USE_IMPLICIT_WEIGHT_SPLITMV
+
+// #define SEARCH_MIN3
+static int64_t get_consistency_metric(MACROBLOCKD *xd,
+                                      uint8_t *tmp_y, int tmp_ystride) {
+  int block_size = 16 <<  xd->mode_info_context->mbmi.sb_type;
+  uint8_t *rec_y = xd->dst.y_buffer;
+  int rec_ystride = xd->dst.y_stride;
+  int64_t metric = 0;
+  int i;
+  if (xd->up_available) {
+    for (i = 0; i < block_size; ++i) {
+      int diff = abs(*(rec_y - rec_ystride + i) -
+                     *(tmp_y + i));
+#ifdef SEARCH_MIN3
+      // Searches for the min abs diff among 3 pixel neighbors in the border
+      int diff1 = xd->left_available ?
+          abs(*(rec_y - rec_ystride + i - 1) - *(tmp_y + i)) : diff;
+      int diff2 = i < block_size - 1 ?
+          abs(*(rec_y - rec_ystride + i + 1) - *(tmp_y + i)) : diff;
+      diff = diff <= diff1 ? diff : diff1;
+      diff = diff <= diff2 ? diff : diff2;
+#endif
+      metric += diff;
+    }
+  }
+  if (xd->left_available) {
+    for (i = 0; i < block_size; ++i) {
+      int diff = abs(*(rec_y - 1 + i * rec_ystride) -
+                     *(tmp_y + i * tmp_ystride));
+#ifdef SEARCH_MIN3
+      // Searches for the min abs diff among 3 pixel neighbors in the border
+      int diff1 = xd->up_available ?
+          abs(*(rec_y - 1 + (i - 1) * rec_ystride) -
+                      *(tmp_y + i * tmp_ystride)) : diff;
+      int diff2 = i < block_size - 1 ?
+          abs(*(rec_y - 1 + (i + 1) * rec_ystride) -
+              *(tmp_y + i * tmp_ystride)) : diff;
+      diff = diff <= diff1 ? diff : diff1;
+      diff = diff <= diff2 ? diff : diff2;
+#endif
+      metric += diff;
+    }
+  }
+  return metric;
+}
+
+static int get_weight(MACROBLOCKD *xd, int64_t metric_1, int64_t metric_2) {
+  int weight = AVERAGE_WEIGHT;
+  if (2 * metric_1 < metric_2)
+    weight = 6;
+  else if (4 * metric_1 < 3 * metric_2)
+    weight = 5;
+  else if (2 * metric_2 < metric_1)
+    weight = 2;
+  else if (4 * metric_2 < 3 * metric_1)
+    weight = 3;
+  return weight;
+}
+
+#ifdef USE_IMPLICIT_WEIGHT_SPLITMV
+static int get_implicit_compoundinter_weight_splitmv(
+    MACROBLOCKD *xd, int mb_row, int mb_col) {
+  MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  BLOCKD *blockd = xd->block;
+  const int use_second_ref = mbmi->second_ref_frame > 0;
+  int64_t metric_2 = 0, metric_1 = 0;
+  int i, which_mv, weight;
+  uint8_t tmp_y[256];
+  const int tmp_ystride = 16;
+
+  if (!use_second_ref) return 0;
+  if (!(xd->up_available || xd->left_available))
+    return AVERAGE_WEIGHT;
+
+  assert(xd->mode_info_context->mbmi.mode == SPLITMV);
+
+  which_mv = 1;  // second predictor
+  if (xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4) {
+    for (i = 0; i < 16; i += 8) {
+      BLOCKD *d0 = &blockd[i];
+      BLOCKD *d1 = &blockd[i + 2];
+      const int y = i & 8;
+
+      blockd[i + 0].bmi = xd->mode_info_context->bmi[i + 0];
+      blockd[i + 2].bmi = xd->mode_info_context->bmi[i + 2];
+
+      if (mbmi->need_to_clamp_mvs) {
+        clamp_mv_to_umv_border(&blockd[i + 0].bmi.as_mv[which_mv].as_mv, xd);
+        clamp_mv_to_umv_border(&blockd[i + 2].bmi.as_mv[which_mv].as_mv, xd);
+      }
+      if (i == 0) {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y, 8, 16,
+                                     which_mv, 0, 16, 1,
+                                     &xd->subpix, mb_row * 16 + y, mb_col * 16);
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y, 8, 16,
+                                     which_mv, 0, 1, 8,
+                                     &xd->subpix, mb_row * 16 + y, mb_col * 16);
+      } else {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y + 8 * 16,
+                                     8, 16, which_mv, 0, 1, 8,
+                                     &xd->subpix, mb_row * 16 + y, mb_col * 16);
+      }
+    }
+  } else {
+    for (i = 0; i < 16; i += 2) {
+      BLOCKD *d0 = &blockd[i];
+      BLOCKD *d1 = &blockd[i + 1];
+      const int x = (i & 3) * 4;
+      const int y = (i >> 2) * 4;
+
+      blockd[i + 0].bmi = xd->mode_info_context->bmi[i + 0];
+      blockd[i + 1].bmi = xd->mode_info_context->bmi[i + 1];
+
+      if (i >= 4 && (i & 3) != 0) continue;
+
+      if (i == 0) {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y, 4, 16,
+                                     which_mv, 0, 8, 1, &xd->subpix,
+                                     mb_row * 16 + y, mb_col * 16 + x);
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y, 4, 16,
+                                     which_mv, 0, 1, 4, &xd->subpix,
+                                     mb_row * 16 + y, mb_col * 16 + x);
+      } else if (i < 4) {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y + x, 4, 16,
+                                     which_mv, 0, 8, 1, &xd->subpix,
+                                     mb_row * 16 + y, mb_col * 16 + x);
+      } else {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y + y * 16,
+                                     4, 16, which_mv, 0, 1, 4, &xd->subpix,
+                                     mb_row * 16 + y, mb_col * 16 + x);
+      }
+    }
+  }
+  metric_2 = get_consistency_metric(xd, tmp_y, tmp_ystride);
+
+  which_mv = 0;  // first predictor
+  if (xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4) {
+    for (i = 0; i < 16; i += 8) {
+      BLOCKD *d0 = &blockd[i];
+      BLOCKD *d1 = &blockd[i + 2];
+      const int y = i & 8;
+
+      blockd[i + 0].bmi = xd->mode_info_context->bmi[i + 0];
+      blockd[i + 2].bmi = xd->mode_info_context->bmi[i + 2];
+
+      if (mbmi->need_to_clamp_mvs) {
+        clamp_mv_to_umv_border(&blockd[i + 0].bmi.as_mv[which_mv].as_mv, xd);
+        clamp_mv_to_umv_border(&blockd[i + 2].bmi.as_mv[which_mv].as_mv, xd);
+      }
+      if (i == 0) {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y, 8, 16,
+                                     which_mv, 0, 16, 1,
+                                     &xd->subpix, mb_row * 16 + y, mb_col * 16);
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y, 8, 16,
+                                     which_mv, 0, 1, 8,
+                                     &xd->subpix, mb_row * 16 + y, mb_col * 16);
+      } else {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y + 8 * 16,
+                                     8, 16, which_mv, 0, 1, 8,
+                                     &xd->subpix, mb_row * 16 + y, mb_col * 16);
+      }
+    }
+  } else {
+    for (i = 0; i < 16; i += 2) {
+      BLOCKD *d0 = &blockd[i];
+      BLOCKD *d1 = &blockd[i + 1];
+      const int x = (i & 3) * 4;
+      const int y = (i >> 2) * 4;
+
+      blockd[i + 0].bmi = xd->mode_info_context->bmi[i + 0];
+      blockd[i + 1].bmi = xd->mode_info_context->bmi[i + 1];
+
+      if (i >= 4 && (i & 3) != 0) continue;
+
+      if (i == 0) {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y, 4, 16,
+                                     which_mv, 0, 8, 1, &xd->subpix,
+                                     mb_row * 16 + y, mb_col * 16 + x);
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y, 4, 16,
+                                     which_mv, 0, 1, 4, &xd->subpix,
+                                     mb_row * 16 + y, mb_col * 16 + x);
+      } else if (i < 4) {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y + x, 4, 16,
+                                     which_mv, 0, 8, 1, &xd->subpix,
+                                     mb_row * 16 + y, mb_col * 16 + x);
+      } else {
+        build_2x1_inter_predictor_wh(d0, d1, xd->scale_factor, tmp_y + y * 16,
+                                     4, 16, which_mv, 0, 1, 4, &xd->subpix,
+                                     mb_row * 16 + y, mb_col * 16 + x);
+      }
+    }
+  }
+  metric_1 = get_consistency_metric(xd, tmp_y, tmp_ystride);
+
+  // Choose final weight for averaging
+  weight = get_weight(xd, metric_1, metric_2);
+  return weight;
+}
+#endif
+
+static int get_implicit_compoundinter_weight(MACROBLOCKD *xd,
+                                             int mb_row,
+                                             int mb_col) {
+  const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
+  int64_t metric_2 = 0, metric_1 = 0;
+  int n, clamp_mvs, pre_stride;
+  uint8_t *base_pre;
+  int_mv ymv;
+  uint8_t tmp_y[4096];
+  const int tmp_ystride = 64;
+  int weight;
+  int edge[4];
+  int block_size = 16 <<  xd->mode_info_context->mbmi.sb_type;
+
+  if (!use_second_ref) return 0;
+  if (!(xd->up_available || xd->left_available))
+    return AVERAGE_WEIGHT;
+
+  edge[0] = xd->mb_to_top_edge;
+  edge[1] = xd->mb_to_bottom_edge;
+  edge[2] = xd->mb_to_left_edge;
+  edge[3] = xd->mb_to_right_edge;
+
+  clamp_mvs = xd->mode_info_context->mbmi.need_to_clamp_secondmv;
+  base_pre = xd->second_pre.y_buffer;
+  pre_stride = xd->second_pre.y_stride;
+  ymv.as_int = xd->mode_info_context->mbmi.mv[1].as_int;
+  // First generate the second predictor
+  for (n = 0; n < block_size; n += 16) {
+    xd->mb_to_left_edge   = edge[2] - (n << 3);
+    xd->mb_to_right_edge  = edge[3] + ((16 - n) << 3);
+    if (clamp_mvs)
+      clamp_mv_to_umv_border(&ymv.as_mv, xd);
+    set_scaled_offsets(&xd->scale_factor[1], mb_row * 16, mb_col * 16 + n);
+    // predict a single row of pixels
+    vp9_build_inter_predictor(
+        base_pre + scaled_buffer_offset(n, 0, pre_stride, &xd->scale_factor[1]),
+        pre_stride, tmp_y + n, tmp_ystride, &ymv, &xd->scale_factor[1],
+        16, 1, 0, &xd->subpix);
+  }
+  xd->mb_to_left_edge = edge[2];
+  xd->mb_to_right_edge = edge[3];
+  for (n = 0; n < block_size; n += 16) {
+    xd->mb_to_top_edge    = edge[0] - (n << 3);
+    xd->mb_to_bottom_edge = edge[1] + ((16 - n) << 3);
+    if (clamp_mvs)
+      clamp_mv_to_umv_border(&ymv.as_mv, xd);
+    set_scaled_offsets(&xd->scale_factor[1], mb_row * 16 + n, mb_col * 16);
+    // predict a single col of pixels
+    vp9_build_inter_predictor(
+        base_pre + scaled_buffer_offset(0, n, pre_stride, &xd->scale_factor[1]),
+        pre_stride, tmp_y + n * tmp_ystride, tmp_ystride, &ymv,
+        &xd->scale_factor[1], 1, 16, 0, &xd->subpix);
+  }
+  xd->mb_to_top_edge = edge[0];
+  xd->mb_to_bottom_edge = edge[1];
+  // Compute consistency metric
+  metric_2 = get_consistency_metric(xd, tmp_y, tmp_ystride);
+
+  clamp_mvs = xd->mode_info_context->mbmi.need_to_clamp_mvs;
+  base_pre = xd->pre.y_buffer;
+  pre_stride = xd->pre.y_stride;
+  ymv.as_int = xd->mode_info_context->mbmi.mv[0].as_int;
+  // Now generate the first predictor
+  for (n = 0; n < block_size; n += 16) {
+    xd->mb_to_left_edge   = edge[2] - (n << 3);
+    xd->mb_to_right_edge  = edge[3] + ((16 - n) << 3);
+    if (clamp_mvs)
+      clamp_mv_to_umv_border(&ymv.as_mv, xd);
+    set_scaled_offsets(&xd->scale_factor[0], mb_row * 16, mb_col * 16 + n);
+    // predict a single row of pixels
+    vp9_build_inter_predictor(
+        base_pre + scaled_buffer_offset(n, 0, pre_stride, &xd->scale_factor[0]),
+        pre_stride, tmp_y + n, tmp_ystride, &ymv, &xd->scale_factor[0],
+        16, 1, 0, &xd->subpix);
+  }
+  xd->mb_to_left_edge = edge[2];
+  xd->mb_to_right_edge = edge[3];
+  for (n = 0; n < block_size; n += 16) {
+    xd->mb_to_top_edge    = edge[0] - (n << 3);
+    xd->mb_to_bottom_edge = edge[1] + ((16 - n) << 3);
+    if (clamp_mvs)
+      clamp_mv_to_umv_border(&ymv.as_mv, xd);
+    set_scaled_offsets(&xd->scale_factor[0], mb_row * 16 + n, mb_col * 16);
+    // predict a single col of pixels
+    vp9_build_inter_predictor(
+        base_pre + scaled_buffer_offset(0, n, pre_stride, &xd->scale_factor[0]),
+        pre_stride, tmp_y + n * tmp_ystride, tmp_ystride, &ymv,
+        &xd->scale_factor[0], 1, 16, 0, &xd->subpix);
+  }
+  xd->mb_to_top_edge = edge[0];
+  xd->mb_to_bottom_edge = edge[1];
+  metric_1 = get_consistency_metric(xd, tmp_y, tmp_ystride);
+
+  // Choose final weight for averaging
+  weight = get_weight(xd, metric_1, metric_2);
+  return weight;
+}
+
+static void build_inter16x16_predictors_mby_w(MACROBLOCKD *xd,
+                                              uint8_t *dst_y,
+                                              int dst_ystride,
+                                              int weight,
+                                              int mb_row,
+                                              int mb_col) {
+  const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
+  int which_mv;
+
+  for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+    const int clamp_mvs = which_mv ?
+        xd->mode_info_context->mbmi.need_to_clamp_secondmv :
+         xd->mode_info_context->mbmi.need_to_clamp_mvs;
+
+    uint8_t *base_pre = which_mv ? xd->second_pre.y_buffer : xd->pre.y_buffer;
+    int pre_stride = which_mv ? xd->second_pre.y_stride : xd->pre.y_stride;
+    int_mv ymv;
+    ymv.as_int = xd->mode_info_context->mbmi.mv[which_mv].as_int;
+
+    if (clamp_mvs)
+      clamp_mv_to_umv_border(&ymv.as_mv, xd);
+
+    set_scaled_offsets(&xd->scale_factor[which_mv], mb_row * 16, mb_col * 16);
+
+    vp9_build_inter_predictor(base_pre, pre_stride,
+                              dst_y, dst_ystride,
+                              &ymv, &xd->scale_factor[which_mv],
+                              16, 16, which_mv ? weight : 0, &xd->subpix);
+  }
+}
+
+void vp9_build_inter16x16_predictors_mby(MACROBLOCKD *xd,
+                                         uint8_t *dst_y,
+                                         int dst_ystride,
+                                         int mb_row,
+                                         int mb_col) {
+  int weight = get_implicit_compoundinter_weight(xd, mb_row, mb_col);
+
+  build_inter16x16_predictors_mby_w(xd, dst_y, dst_ystride, weight,
+                                    mb_row, mb_col);
+}
+
+#else
+
 void vp9_build_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                          uint8_t *dst_y,
                                          int dst_ystride,
@@ -518,6 +946,86 @@ void vp9_build_inter16x16_predictors_mby(MACROBLOCKD *xd,
                               16, 16, which_mv, &xd->subpix);
   }
 }
+#endif
+
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+static void build_inter16x16_predictors_mbuv_w(MACROBLOCKD *xd,
+                                               uint8_t *dst_u,
+                                               uint8_t *dst_v,
+                                               int dst_uvstride,
+                                               int weight,
+                                               int mb_row,
+                                               int mb_col) {
+  const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
+  int which_mv;
+
+  for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+    const int clamp_mvs =
+        which_mv ? xd->mode_info_context->mbmi.need_to_clamp_secondmv
+                 : xd->mode_info_context->mbmi.need_to_clamp_mvs;
+    uint8_t *uptr, *vptr;
+    int pre_stride = which_mv ? xd->second_pre.uv_stride
+                              : xd->pre.uv_stride;
+    int_mv _o16x16mv;
+    int_mv _16x16mv;
+
+    _16x16mv.as_int = xd->mode_info_context->mbmi.mv[which_mv].as_int;
+
+    if (clamp_mvs)
+      clamp_mv_to_umv_border(&_16x16mv.as_mv, xd);
+
+    _o16x16mv = _16x16mv;
+    /* calc uv motion vectors */
+    if (_16x16mv.as_mv.row < 0)
+      _16x16mv.as_mv.row -= 1;
+    else
+      _16x16mv.as_mv.row += 1;
+
+    if (_16x16mv.as_mv.col < 0)
+      _16x16mv.as_mv.col -= 1;
+    else
+      _16x16mv.as_mv.col += 1;
+
+    _16x16mv.as_mv.row /= 2;
+    _16x16mv.as_mv.col /= 2;
+
+    _16x16mv.as_mv.row &= xd->fullpixel_mask;
+    _16x16mv.as_mv.col &= xd->fullpixel_mask;
+
+    uptr = (which_mv ? xd->second_pre.u_buffer : xd->pre.u_buffer);
+    vptr = (which_mv ? xd->second_pre.v_buffer : xd->pre.v_buffer);
+
+    set_scaled_offsets(&xd->scale_factor_uv[which_mv],
+                       mb_row * 16, mb_col * 16);
+
+    vp9_build_inter_predictor_q4(
+        uptr, pre_stride, dst_u, dst_uvstride, &_16x16mv, &_o16x16mv,
+        &xd->scale_factor_uv[which_mv], 8, 8,
+        which_mv ? weight : 0, &xd->subpix);
+
+    vp9_build_inter_predictor_q4(
+        vptr, pre_stride, dst_v, dst_uvstride, &_16x16mv, &_o16x16mv,
+        &xd->scale_factor_uv[which_mv], 8, 8,
+        which_mv ? weight : 0, &xd->subpix);
+  }
+}
+
+void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
+                                          uint8_t *dst_u,
+                                          uint8_t *dst_v,
+                                          int dst_uvstride,
+                                          int mb_row,
+                                          int mb_col) {
+#ifdef USE_IMPLICIT_WEIGHT_UV
+  int weight = get_implicit_compoundinter_weight(xd, mb_row, mb_col);
+#else
+  int weight = AVERAGE_WEIGHT;
+#endif
+  build_inter16x16_predictors_mbuv_w(xd, dst_u, dst_v, dst_uvstride,
+                                     weight, mb_row, mb_col);
+}
+
+#else
 
 void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
                                           uint8_t *dst_u,
@@ -567,31 +1075,28 @@ void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
     set_scaled_offsets(&xd->scale_factor_uv[which_mv],
                        mb_row * 16, mb_col * 16);
 
-    vp9_build_inter_predictor_q4(uptr, pre_stride,
-                                 dst_u, dst_uvstride,
-                                 &_16x16mv, &_o16x16mv,
-                                 &xd->scale_factor_uv[which_mv],
-                                 8, 8, which_mv, &xd->subpix);
+    vp9_build_inter_predictor_q4(
+        uptr, pre_stride, dst_u, dst_uvstride, &_16x16mv, &_o16x16mv,
+        &xd->scale_factor_uv[which_mv], 8, 8,
+        which_mv << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT), &xd->subpix);
 
-    vp9_build_inter_predictor_q4(vptr, pre_stride,
-                                 dst_v, dst_uvstride,
-                                 &_16x16mv, &_o16x16mv,
-                                 &xd->scale_factor_uv[which_mv],
-                                 8, 8, which_mv, &xd->subpix);
+    vp9_build_inter_predictor_q4(
+        vptr, pre_stride, dst_v, dst_uvstride, &_16x16mv, &_o16x16mv,
+        &xd->scale_factor_uv[which_mv], 8, 8,
+        which_mv << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT), &xd->subpix);
   }
 }
+#endif
 
-void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
-                                        uint8_t *dst_y,
-                                        uint8_t *dst_u,
-                                        uint8_t *dst_v,
-                                        int dst_ystride,
-                                        int dst_uvstride,
-                                        int mb_row,
-                                        int mb_col) {
-  uint8_t *y1 = x->pre.y_buffer, *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
-  uint8_t *y2 = x->second_pre.y_buffer, *u2 = x->second_pre.u_buffer,
-          *v2 = x->second_pre.v_buffer;
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+static void build_inter32x32_predictors_sby_w(MACROBLOCKD *x,
+                                              uint8_t *dst_y,
+                                              int dst_ystride,
+                                              int weight,
+                                              int mb_row,
+                                              int mb_col) {
+  uint8_t *y1 = x->pre.y_buffer;
+  uint8_t *y2 = x->second_pre.y_buffer;
   int edge[4], n;
 
   edge[0] = x->mb_to_top_edge;
@@ -601,7 +1106,6 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
 
   for (n = 0; n < 4; n++) {
     const int x_idx = n & 1, y_idx = n >> 1;
-    int scaled_uv_offset;
 
     x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
     x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
@@ -612,6 +1116,118 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
                                                 y_idx * 16,
                                                 x->pre.y_stride,
                                                 &x->scale_factor[0]);
+    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+      x->second_pre.y_buffer = y2 +
+          scaled_buffer_offset(x_idx * 16,
+                               y_idx * 16,
+                               x->second_pre.y_stride,
+                               &x->scale_factor[1]);
+    }
+    build_inter16x16_predictors_mby_w(x,
+        dst_y + y_idx * 16 * dst_ystride  + x_idx * 16,
+        dst_ystride, weight, mb_row + y_idx, mb_col + x_idx);
+  }
+  x->mb_to_top_edge    = edge[0];
+  x->mb_to_bottom_edge = edge[1];
+  x->mb_to_left_edge   = edge[2];
+  x->mb_to_right_edge  = edge[3];
+
+  x->pre.y_buffer = y1;
+  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+    x->second_pre.y_buffer = y2;
+  }
+}
+
+void vp9_build_inter32x32_predictors_sby(MACROBLOCKD *x,
+                                         uint8_t *dst_y,
+                                         int dst_ystride,
+                                         int mb_row,
+                                         int mb_col) {
+  int weight = get_implicit_compoundinter_weight(x, mb_row, mb_col);
+  build_inter32x32_predictors_sby_w(x, dst_y, dst_ystride, weight,
+                                    mb_row, mb_col);
+}
+
+#else
+
+// TODO(all): Can we use 32x32 specific implementations of this rather than
+// using 16x16 implementations ?
+void vp9_build_inter32x32_predictors_sby(MACROBLOCKD *x,
+                                         uint8_t *dst_y,
+                                         int dst_ystride,
+                                         int mb_row,
+                                         int mb_col) {
+  uint8_t *y1 = x->pre.y_buffer;
+  uint8_t *y2 = x->second_pre.y_buffer;
+  int edge[4], n;
+
+  edge[0] = x->mb_to_top_edge;
+  edge[1] = x->mb_to_bottom_edge;
+  edge[2] = x->mb_to_left_edge;
+  edge[3] = x->mb_to_right_edge;
+
+  for (n = 0; n < 4; n++) {
+    const int x_idx = n & 1, y_idx = n >> 1;
+
+    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
+    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 16) << 3);
+    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 16) << 3);
+
+    x->pre.y_buffer = y1 + scaled_buffer_offset(x_idx * 16,
+                                                y_idx * 16,
+                                                x->pre.y_stride,
+                                                &x->scale_factor[0]);
+    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+      x->second_pre.y_buffer = y2 +
+          scaled_buffer_offset(x_idx * 16,
+                               y_idx * 16,
+                               x->second_pre.y_stride,
+                               &x->scale_factor[1]);
+    }
+    vp9_build_inter16x16_predictors_mby(x,
+        dst_y + y_idx * 16 * dst_ystride  + x_idx * 16,
+        dst_ystride, mb_row + y_idx, mb_col + x_idx);
+  }
+  x->mb_to_top_edge    = edge[0];
+  x->mb_to_bottom_edge = edge[1];
+  x->mb_to_left_edge   = edge[2];
+  x->mb_to_right_edge  = edge[3];
+
+  x->pre.y_buffer = y1;
+  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+    x->second_pre.y_buffer = y2;
+  }
+}
+
+#endif
+
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+static void build_inter32x32_predictors_sbuv_w(MACROBLOCKD *x,
+                                               uint8_t *dst_u,
+                                               uint8_t *dst_v,
+                                               int dst_uvstride,
+                                               int weight,
+                                               int mb_row,
+                                               int mb_col) {
+  uint8_t *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
+  uint8_t *u2 = x->second_pre.u_buffer, *v2 = x->second_pre.v_buffer;
+  int edge[4], n;
+
+  edge[0] = x->mb_to_top_edge;
+  edge[1] = x->mb_to_bottom_edge;
+  edge[2] = x->mb_to_left_edge;
+  edge[3] = x->mb_to_right_edge;
+
+  for (n = 0; n < 4; n++) {
+    int scaled_uv_offset;
+    const int x_idx = n & 1, y_idx = n >> 1;
+
+    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
+    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 16) << 3);
+    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 16) << 3);
+
     scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
                                             y_idx * 8,
                                             x->pre.uv_stride,
@@ -620,11 +1236,6 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
     x->pre.v_buffer = v1 + scaled_uv_offset;
 
     if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-      x->second_pre.y_buffer = y2 +
-          scaled_buffer_offset(x_idx * 16,
-                               y_idx * 16,
-                               x->second_pre.y_stride,
-                               &x->scale_factor[1]);
       scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
                                               y_idx * 8,
                                               x->second_pre.uv_stride,
@@ -633,28 +1244,114 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
       x->second_pre.v_buffer = v2 + scaled_uv_offset;
     }
 
-    vp9_build_inter16x16_predictors_mb(x,
-        dst_y + y_idx * 16 * dst_ystride  + x_idx * 16,
+    build_inter16x16_predictors_mbuv_w(x,
         dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
         dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
-        dst_ystride, dst_uvstride, mb_row + y_idx, mb_col + x_idx);
+        dst_uvstride, weight, mb_row + y_idx, mb_col + x_idx);
   }
-
   x->mb_to_top_edge    = edge[0];
   x->mb_to_bottom_edge = edge[1];
   x->mb_to_left_edge   = edge[2];
   x->mb_to_right_edge  = edge[3];
 
-  x->pre.y_buffer = y1;
   x->pre.u_buffer = u1;
   x->pre.v_buffer = v1;
 
   if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-    x->second_pre.y_buffer = y2;
     x->second_pre.u_buffer = u2;
     x->second_pre.v_buffer = v2;
   }
+}
 
+void vp9_build_inter32x32_predictors_sbuv(MACROBLOCKD *xd,
+                                          uint8_t *dst_u,
+                                          uint8_t *dst_v,
+                                          int dst_uvstride,
+                                          int mb_row,
+                                          int mb_col) {
+#ifdef USE_IMPLICIT_WEIGHT_UV
+  int weight = get_implicit_compoundinter_weight(xd, mb_row, mb_col);
+#else
+  int weight = AVERAGE_WEIGHT;
+#endif
+  build_inter32x32_predictors_sbuv_w(xd, dst_u, dst_v, dst_uvstride,
+                                     weight, mb_row, mb_col);
+}
+
+#else
+
+void vp9_build_inter32x32_predictors_sbuv(MACROBLOCKD *x,
+                                          uint8_t *dst_u,
+                                          uint8_t *dst_v,
+                                          int dst_uvstride,
+                                          int mb_row,
+                                          int mb_col) {
+  uint8_t *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
+  uint8_t *u2 = x->second_pre.u_buffer, *v2 = x->second_pre.v_buffer;
+  int edge[4], n;
+
+  edge[0] = x->mb_to_top_edge;
+  edge[1] = x->mb_to_bottom_edge;
+  edge[2] = x->mb_to_left_edge;
+  edge[3] = x->mb_to_right_edge;
+
+  for (n = 0; n < 4; n++) {
+    int scaled_uv_offset;
+    const int x_idx = n & 1, y_idx = n >> 1;
+
+    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
+    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 16) << 3);
+    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 16) << 3);
+
+    scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
+                                            y_idx * 8,
+                                            x->pre.uv_stride,
+                                            &x->scale_factor_uv[0]);
+    x->pre.u_buffer = u1 + scaled_uv_offset;
+    x->pre.v_buffer = v1 + scaled_uv_offset;
+
+    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+      scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
+                                              y_idx * 8,
+                                              x->second_pre.uv_stride,
+                                              &x->scale_factor_uv[1]);
+      x->second_pre.u_buffer = u2 + scaled_uv_offset;
+      x->second_pre.v_buffer = v2 + scaled_uv_offset;
+    }
+
+    vp9_build_inter16x16_predictors_mbuv(x,
+        dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
+        dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
+        dst_uvstride, mb_row + y_idx, mb_col + x_idx);
+  }
+  x->mb_to_top_edge    = edge[0];
+  x->mb_to_bottom_edge = edge[1];
+  x->mb_to_left_edge   = edge[2];
+  x->mb_to_right_edge  = edge[3];
+
+  x->pre.u_buffer = u1;
+  x->pre.v_buffer = v1;
+
+  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+    x->second_pre.u_buffer = u2;
+    x->second_pre.v_buffer = v2;
+  }
+}
+#endif
+
+void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
+                                        uint8_t *dst_y,
+                                        uint8_t *dst_u,
+                                        uint8_t *dst_v,
+                                        int dst_ystride,
+                                        int dst_uvstride,
+                                        int mb_row,
+                                        int mb_col) {
+  vp9_build_inter32x32_predictors_sby(x, dst_y, dst_ystride,
+                                      mb_row, mb_col);
+  vp9_build_inter32x32_predictors_sbuv(x, dst_u, dst_v, dst_uvstride,
+                                      mb_row, mb_col);
 #if CONFIG_COMP_INTERINTRA_PRED
   if (x->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
     vp9_build_interintra_32x32_predictors_sb(
@@ -663,17 +1360,133 @@ void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
 #endif
 }
 
-void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
-                                        uint8_t *dst_y,
-                                        uint8_t *dst_u,
-                                        uint8_t *dst_v,
-                                        int dst_ystride,
-                                        int dst_uvstride,
-                                        int mb_row,
-                                        int mb_col) {
-  uint8_t *y1 = x->pre.y_buffer, *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
-  uint8_t *y2 = x->second_pre.y_buffer, *u2 = x->second_pre.u_buffer,
-          *v2 = x->second_pre.v_buffer;
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+static void build_inter64x64_predictors_sby_w(MACROBLOCKD *x,
+                                              uint8_t *dst_y,
+                                              int dst_ystride,
+                                              int weight,
+                                              int mb_row,
+                                              int mb_col) {
+  uint8_t *y1 = x->pre.y_buffer;
+  uint8_t *y2 = x->second_pre.y_buffer;
+  int edge[4], n;
+
+  edge[0] = x->mb_to_top_edge;
+  edge[1] = x->mb_to_bottom_edge;
+  edge[2] = x->mb_to_left_edge;
+  edge[3] = x->mb_to_right_edge;
+
+  for (n = 0; n < 4; n++) {
+    const int x_idx = n & 1, y_idx = n >> 1;
+
+    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 32) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 32) << 3);
+    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 32) << 3);
+    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 32) << 3);
+
+    x->pre.y_buffer = y1 + scaled_buffer_offset(x_idx * 32,
+                                                y_idx * 32,
+                                                x->pre.y_stride,
+                                                &x->scale_factor[0]);
+
+    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+      x->second_pre.y_buffer = y2 +
+          scaled_buffer_offset(x_idx * 32,
+                               y_idx * 32,
+                               x->second_pre.y_stride,
+                               &x->scale_factor[1]);
+    }
+
+    build_inter32x32_predictors_sby_w(x,
+        dst_y + y_idx * 32 * dst_ystride  + x_idx * 32,
+        dst_ystride, weight, mb_row + y_idx * 2, mb_col + x_idx * 2);
+  }
+
+  x->mb_to_top_edge    = edge[0];
+  x->mb_to_bottom_edge = edge[1];
+  x->mb_to_left_edge   = edge[2];
+  x->mb_to_right_edge  = edge[3];
+
+  x->pre.y_buffer = y1;
+
+  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+    x->second_pre.y_buffer = y2;
+  }
+}
+
+void vp9_build_inter64x64_predictors_sby(MACROBLOCKD *x,
+                                         uint8_t *dst_y,
+                                         int dst_ystride,
+                                         int mb_row,
+                                         int mb_col) {
+  int weight = get_implicit_compoundinter_weight(x, mb_row, mb_col);
+  build_inter64x64_predictors_sby_w(x, dst_y, dst_ystride, weight,
+                                    mb_row, mb_col);
+}
+
+#else
+
+void vp9_build_inter64x64_predictors_sby(MACROBLOCKD *x,
+                                         uint8_t *dst_y,
+                                         int dst_ystride,
+                                         int mb_row,
+                                         int mb_col) {
+  uint8_t *y1 = x->pre.y_buffer;
+  uint8_t *y2 = x->second_pre.y_buffer;
+  int edge[4], n;
+
+  edge[0] = x->mb_to_top_edge;
+  edge[1] = x->mb_to_bottom_edge;
+  edge[2] = x->mb_to_left_edge;
+  edge[3] = x->mb_to_right_edge;
+
+  for (n = 0; n < 4; n++) {
+    const int x_idx = n & 1, y_idx = n >> 1;
+
+    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 32) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 32) << 3);
+    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 32) << 3);
+    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 32) << 3);
+
+    x->pre.y_buffer = y1 + scaled_buffer_offset(x_idx * 32,
+                                                y_idx * 32,
+                                                x->pre.y_stride,
+                                                &x->scale_factor[0]);
+
+    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+      x->second_pre.y_buffer = y2 +
+          scaled_buffer_offset(x_idx * 32,
+                               y_idx * 32,
+                               x->second_pre.y_stride,
+                               &x->scale_factor[1]);
+    }
+
+    vp9_build_inter32x32_predictors_sby(x,
+        dst_y + y_idx * 32 * dst_ystride  + x_idx * 32,
+        dst_ystride, mb_row + y_idx * 2, mb_col + x_idx * 2);
+  }
+
+  x->mb_to_top_edge    = edge[0];
+  x->mb_to_bottom_edge = edge[1];
+  x->mb_to_left_edge   = edge[2];
+  x->mb_to_right_edge  = edge[3];
+
+  x->pre.y_buffer = y1;
+
+  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
+    x->second_pre.y_buffer = y2;
+  }
+}
+#endif
+
+void vp9_build_inter64x64_predictors_sbuv(MACROBLOCKD *x,
+                                          uint8_t *dst_u,
+                                          uint8_t *dst_v,
+                                          int dst_uvstride,
+                                          int mb_row,
+                                          int mb_col) {
+  uint8_t *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
+  uint8_t *u2 = x->second_pre.u_buffer, *v2 = x->second_pre.v_buffer;
   int edge[4], n;
 
   edge[0] = x->mb_to_top_edge;
@@ -690,10 +1503,6 @@ void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
     x->mb_to_left_edge   = edge[2] -      ((x_idx  * 32) << 3);
     x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 32) << 3);
 
-    x->pre.y_buffer = y1 + scaled_buffer_offset(x_idx * 32,
-                                                y_idx * 32,
-                                                x->pre.y_stride,
-                                                &x->scale_factor[0]);
     scaled_uv_offset = scaled_buffer_offset(x_idx * 16,
                                             y_idx * 16,
                                             x->pre.uv_stride,
@@ -702,11 +1511,6 @@ void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
     x->pre.v_buffer = v1 + scaled_uv_offset;
 
     if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-      x->second_pre.y_buffer = y2 +
-          scaled_buffer_offset(x_idx * 32,
-                               y_idx * 32,
-                               x->second_pre.y_stride,
-                               &x->scale_factor[1]);
       scaled_uv_offset = scaled_buffer_offset(x_idx * 16,
                                               y_idx * 16,
                                               x->second_pre.uv_stride,
@@ -715,11 +1519,10 @@ void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
       x->second_pre.v_buffer = v2 + scaled_uv_offset;
     }
 
-    vp9_build_inter32x32_predictors_sb(x,
-        dst_y + y_idx * 32 * dst_ystride  + x_idx * 32,
+    vp9_build_inter32x32_predictors_sbuv(x,
         dst_u + y_idx * 16 * dst_uvstride + x_idx * 16,
         dst_v + y_idx * 16 * dst_uvstride + x_idx * 16,
-        dst_ystride, dst_uvstride, mb_row + y_idx * 2, mb_col + x_idx * 2);
+        dst_uvstride, mb_row + y_idx * 2, mb_col + x_idx * 2);
   }
 
   x->mb_to_top_edge    = edge[0];
@@ -727,16 +1530,27 @@ void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
   x->mb_to_left_edge   = edge[2];
   x->mb_to_right_edge  = edge[3];
 
-  x->pre.y_buffer = y1;
   x->pre.u_buffer = u1;
   x->pre.v_buffer = v1;
 
   if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-    x->second_pre.y_buffer = y2;
     x->second_pre.u_buffer = u2;
     x->second_pre.v_buffer = v2;
   }
+}
 
+void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
+                                        uint8_t *dst_y,
+                                        uint8_t *dst_u,
+                                        uint8_t *dst_v,
+                                        int dst_ystride,
+                                        int dst_uvstride,
+                                        int mb_row,
+                                        int mb_col) {
+  vp9_build_inter64x64_predictors_sby(x, dst_y, dst_ystride,
+                                      mb_row, mb_col);
+  vp9_build_inter64x64_predictors_sbuv(x, dst_u, dst_v, dst_uvstride,
+                                       mb_row, mb_col);
 #if CONFIG_COMP_INTERINTRA_PRED
   if (x->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
     vp9_build_interintra_64x64_predictors_sb(x, dst_y, dst_u, dst_v,
@@ -752,6 +1566,11 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
   BLOCKD *blockd = xd->block;
   int which_mv = 0;
   const int use_second_ref = mbmi->second_ref_frame > 0;
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT && defined(USE_IMPLICIT_WEIGHT_SPLITMV)
+  int weight = get_implicit_compoundinter_weight_splitmv(xd, mb_row, mb_col);
+#else
+  int weight = AVERAGE_WEIGHT;
+#endif
 
   if (xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4) {
     for (i = 0; i < 16; i += 8) {
@@ -768,9 +1587,9 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
           clamp_mv_to_umv_border(&blockd[i + 2].bmi.as_mv[which_mv].as_mv, xd);
         }
 
-        build_2x1_inter_predictor(d0, d1, xd->scale_factor, 8, 16,
-                                  which_mv, &xd->subpix,
-                                  mb_row * 16 + y, mb_col * 16);
+        build_2x1_inter_predictor(d0, d1, xd->scale_factor, 8, 16, which_mv,
+                                  which_mv ? weight : 0,
+                                  &xd->subpix, mb_row * 16 + y, mb_col * 16);
       }
     }
   } else {
@@ -784,13 +1603,18 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
       blockd[i + 1].bmi = xd->mode_info_context->bmi[i + 1];
 
       for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-        build_2x1_inter_predictor(d0, d1, xd->scale_factor, 4, 16,
-                                  which_mv, &xd->subpix,
+        build_2x1_inter_predictor(d0, d1, xd->scale_factor, 4, 16, which_mv,
+                                  which_mv ? weight : 0,
+                                  &xd->subpix,
                                   mb_row * 16 + y, mb_col * 16 + x);
       }
     }
   }
-
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+#if !defined(USE_IMPLICIT_WEIGHT_UV)
+  weight = AVERAGE_WEIGHT;
+#endif
+#endif
   for (i = 16; i < 24; i += 2) {
     BLOCKD *d0 = &blockd[i];
     BLOCKD *d1 = &blockd[i + 1];
@@ -798,8 +1622,8 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
     const int y = ((i - 16) >> 1) * 4;
 
     for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-      build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8,
-                                which_mv, &xd->subpix,
+      build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
+                                which_mv ? weight : 0, &xd->subpix,
                                 mb_row * 8 + y, mb_col * 8 + x);
     }
   }
@@ -876,8 +1700,13 @@ void vp9_build_inter16x16_predictors_mb(MACROBLOCKD *xd,
   vp9_build_inter16x16_predictors_mby(xd, dst_y, dst_ystride, mb_row, mb_col);
   vp9_build_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride,
                                        mb_row, mb_col);
+#if CONFIG_COMP_INTERINTRA_PRED
+  if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+    vp9_build_interintra_16x16_predictors_mb(xd, dst_y, dst_u, dst_v,
+                                             dst_ystride, dst_uvstride);
+  }
+#endif
 }
-
 
 void vp9_build_inter_predictors_mb(MACROBLOCKD *xd,
                                    int mb_row,
@@ -888,15 +1717,116 @@ void vp9_build_inter_predictors_mb(MACROBLOCKD *xd,
                                        &xd->predictor[320], 16, 8,
                                        mb_row, mb_col);
 
-#if CONFIG_COMP_INTERINTRA_PRED
-    if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
-      vp9_build_interintra_16x16_predictors_mb(xd, xd->predictor,
-                                               &xd->predictor[256],
-                                               &xd->predictor[320], 16, 8);
-    }
-#endif
   } else {
     build_4x4uvmvs(xd);
     build_inter4x4_predictors_mb(xd, mb_row, mb_col);
+  }
+}
+
+/*encoder only*/
+void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
+                                        int mb_row,
+                                        int mb_col) {
+  int i, j;
+  int weight;
+  BLOCKD *blockd = xd->block;
+
+  /* build uv mvs */
+  for (i = 0; i < 2; i++) {
+    for (j = 0; j < 2; j++) {
+      int yoffset = i * 8 + j * 2;
+      int uoffset = 16 + i * 2 + j;
+      int voffset = 20 + i * 2 + j;
+      int temp;
+
+      temp = blockd[yoffset  ].bmi.as_mv[0].as_mv.row
+             + blockd[yoffset + 1].bmi.as_mv[0].as_mv.row
+             + blockd[yoffset + 4].bmi.as_mv[0].as_mv.row
+             + blockd[yoffset + 5].bmi.as_mv[0].as_mv.row;
+
+      if (temp < 0)
+        temp -= 4;
+      else
+        temp += 4;
+
+      xd->block[uoffset].bmi.as_mv[0].as_mv.row = (temp / 8) &
+        xd->fullpixel_mask;
+
+      temp = blockd[yoffset  ].bmi.as_mv[0].as_mv.col
+             + blockd[yoffset + 1].bmi.as_mv[0].as_mv.col
+             + blockd[yoffset + 4].bmi.as_mv[0].as_mv.col
+             + blockd[yoffset + 5].bmi.as_mv[0].as_mv.col;
+
+      if (temp < 0)
+        temp -= 4;
+      else
+        temp += 4;
+
+      blockd[uoffset].bmi.as_mv[0].as_mv.col = (temp / 8) &
+        xd->fullpixel_mask;
+
+      blockd[voffset].bmi.as_mv[0].as_mv.row =
+        blockd[uoffset].bmi.as_mv[0].as_mv.row;
+      blockd[voffset].bmi.as_mv[0].as_mv.col =
+        blockd[uoffset].bmi.as_mv[0].as_mv.col;
+
+      if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
+        temp = blockd[yoffset  ].bmi.as_mv[1].as_mv.row
+               + blockd[yoffset + 1].bmi.as_mv[1].as_mv.row
+               + blockd[yoffset + 4].bmi.as_mv[1].as_mv.row
+               + blockd[yoffset + 5].bmi.as_mv[1].as_mv.row;
+
+        if (temp < 0) {
+          temp -= 4;
+        } else {
+          temp += 4;
+        }
+
+        blockd[uoffset].bmi.as_mv[1].as_mv.row = (temp / 8) &
+          xd->fullpixel_mask;
+
+        temp = blockd[yoffset  ].bmi.as_mv[1].as_mv.col
+               + blockd[yoffset + 1].bmi.as_mv[1].as_mv.col
+               + blockd[yoffset + 4].bmi.as_mv[1].as_mv.col
+               + blockd[yoffset + 5].bmi.as_mv[1].as_mv.col;
+
+        if (temp < 0) {
+          temp -= 4;
+        } else {
+          temp += 4;
+        }
+
+        blockd[uoffset].bmi.as_mv[1].as_mv.col = (temp / 8) &
+          xd->fullpixel_mask;
+
+        blockd[voffset].bmi.as_mv[1].as_mv.row =
+          blockd[uoffset].bmi.as_mv[1].as_mv.row;
+        blockd[voffset].bmi.as_mv[1].as_mv.col =
+          blockd[uoffset].bmi.as_mv[1].as_mv.col;
+      }
+    }
+  }
+
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT && \
+  defined(USE_IMPLICIT_WEIGHT_SPLITMV) && \
+  defined(USE_IMPLICIT_WEIGHT_UV)
+  weight = get_implicit_compoundinter_weight_splitmv(xd, mb_row, mb_col);
+#else
+  weight = AVERAGE_WEIGHT;
+#endif
+  for (i = 16; i < 24; i += 2) {
+    const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
+    const int x = 4 * (i & 1);
+    const int y = ((i - 16) >> 1) * 4;
+
+    int which_mv;
+    BLOCKD *d0 = &blockd[i];
+    BLOCKD *d1 = &blockd[i + 1];
+
+    for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
+      build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
+                                which_mv ? weight : 0,
+                                &xd->subpix, mb_row * 8 + y, mb_col * 8 + x);
+    }
   }
 }

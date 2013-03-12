@@ -288,7 +288,11 @@ struct scale_factors {
   int y_den;
   int y_offset_q4;
   int y_step_q4;
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+  convolve_fn_t predict[2][2][8];  // horiz, vert, weight (0 - 7)
+#else
   convolve_fn_t predict[2][2][2];  // horiz, vert, avg
+#endif
 };
 
 typedef struct macroblockd {

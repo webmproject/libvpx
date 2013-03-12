@@ -815,7 +815,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         second_ref_fb_idx = cm->active_ref_idx[mbmi->second_ref_frame - 1];
 
         setup_pred_block(&xd->second_pre, &cm->yv12_fb[second_ref_fb_idx],
-            mb_row, mb_col, &xd->scale_factor[1], &xd->scale_factor_uv[1]);
+             mb_row, mb_col, &xd->scale_factor[1], &xd->scale_factor_uv[1]);
 
         vp9_find_mv_refs(cm, xd, mi, use_prev_in_find_mv_refs ? prev_mi : NULL,
                          mbmi->second_ref_frame,
