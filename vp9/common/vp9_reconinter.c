@@ -533,8 +533,8 @@ void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
         which_mv ? xd->mode_info_context->mbmi.need_to_clamp_secondmv
                  : xd->mode_info_context->mbmi.need_to_clamp_mvs;
     uint8_t *uptr, *vptr;
-    int pre_stride = which_mv ? xd->second_pre.y_stride
-                              : xd->pre.y_stride;
+    int pre_stride = which_mv ? xd->second_pre.uv_stride
+                              : xd->pre.uv_stride;
     int_mv _o16x16mv;
     int_mv _16x16mv;
 
@@ -561,7 +561,6 @@ void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
     _16x16mv.as_mv.row &= xd->fullpixel_mask;
     _16x16mv.as_mv.col &= xd->fullpixel_mask;
 
-    pre_stride >>= 1;
     uptr = (which_mv ? xd->second_pre.u_buffer : xd->pre.u_buffer);
     vptr = (which_mv ? xd->second_pre.v_buffer : xd->pre.v_buffer);
 
