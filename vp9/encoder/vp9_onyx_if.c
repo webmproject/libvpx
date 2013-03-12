@@ -3491,7 +3491,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // in this frame.
   update_base_skip_probs(cpi);
 
-#if 0// 1 && CONFIG_INTERNAL_STATS
+#if 0  // 1 && CONFIG_INTERNAL_STATS
   {
     FILE *f = fopen("tmp.stt", "a");
     int recon_err;
@@ -3504,13 +3504,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (cpi->twopass.total_left_stats->coded_error != 0.0)
       fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d"
               "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
-              "%6d %5d %5d %5d %8.2f %10d %10.3f"
+              "%6d %6d %5d %5d %5d %8.2f %10d %10.3f"
               "%10.3f %8d %10d %10d %10d\n",
               cpi->common.current_video_frame, cpi->this_frame_target,
               cpi->projected_frame_size, 0, //loop_size_estimate,
               (cpi->projected_frame_size - cpi->this_frame_target),
               (int)cpi->total_target_vs_actual,
-              (cpi->oxcf.starting_buffer_level - cpi->bits_off_target),
+              (int)(cpi->oxcf.starting_buffer_level - cpi->bits_off_target),
               (int)cpi->total_actual_bits,
               vp9_convert_qindex_to_q(cm->base_qindex),
               (double)vp9_dc_quant(cm->base_qindex, 0) / 4.0,
@@ -3519,6 +3519,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
               cpi->avg_q,
               vp9_convert_qindex_to_q(cpi->ni_av_qi),
               vp9_convert_qindex_to_q(cpi->cq_target_quality),
+              cpi->refresh_last_frame,
               cpi->refresh_golden_frame, cpi->refresh_alt_ref_frame,
               cm->frame_type, cpi->gfu_boost,
               cpi->twopass.est_max_qcorrection_factor,
@@ -3531,14 +3532,14 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     else
       fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d"
               "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
-              "%5d %5d %8d %8d %8.2f %10d %10.3f"
+              "%5d %5d %5d %8d %8d %8.2f %10d %10.3f"
               "%8d %10d %10d %10d\n",
               cpi->common.current_video_frame,
               cpi->this_frame_target, cpi->projected_frame_size,
               0, //loop_size_estimate,
               (cpi->projected_frame_size - cpi->this_frame_target),
               (int)cpi->total_target_vs_actual,
-              (cpi->oxcf.starting_buffer_level - cpi->bits_off_target),
+              (int)(cpi->oxcf.starting_buffer_level - cpi->bits_off_target),
               (int)cpi->total_actual_bits,
               vp9_convert_qindex_to_q(cm->base_qindex),
               (double)vp9_dc_quant(cm->base_qindex, 0) / 4.0,
@@ -3547,6 +3548,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
               cpi->avg_q,
               vp9_convert_qindex_to_q(cpi->ni_av_qi),
               vp9_convert_qindex_to_q(cpi->cq_target_quality),
+              cpi->refresh_last_frame,
               cpi->refresh_golden_frame, cpi->refresh_alt_ref_frame,
               cm->frame_type, cpi->gfu_boost,
               cpi->twopass.est_max_qcorrection_factor,
@@ -3790,8 +3792,10 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
       cpi->is_src_frame_alt_ref = cpi->alt_ref_source
                                   && (cpi->source == cpi->alt_ref_source);
 
-      if (cpi->is_src_frame_alt_ref)
+      if (cpi->is_src_frame_alt_ref) {
+        cpi->refresh_last_frame = 0;
         cpi->alt_ref_source = NULL;
+      }
     }
   }
 
@@ -3914,8 +3918,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                sizeof(cm->fc));
   }
 
-  // if its a dropped frame honor the requests on subsequent frames
   if (*size > 0) {
+    // if its a dropped frame honor the requests on subsequent frames
     cpi->droppable = !frame_is_reference(cpi);
 
     // return to normal state
