@@ -126,7 +126,7 @@ void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
       input[i] *= dq[i];
 
     // the idct halves ( >> 1) the pitch
-    vp9_short_idct4x4llm(input, output, 4 << 1);
+    vp9_short_idct4x4(input, output, 4 << 1);
 
     vpx_memset(input, 0, 32);
 
@@ -148,7 +148,7 @@ void vp9_dequant_dc_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
     input[i] *= dq[i];
 
   // the idct halves ( >> 1) the pitch
-  vp9_short_idct4x4llm(input, output, 4 << 1);
+  vp9_short_idct4x4(input, output, 4 << 1);
   vpx_memset(input, 0, 32);
   vp9_add_residual_4x4(output, pred, pitch, dest, stride);
 }
@@ -163,7 +163,7 @@ void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
     for (i = 0; i < 16; i++)
       input[i] *= dq[i];
 
-    vp9_short_inv_walsh4x4_x8_c(input, output, 4 << 1);
+    vp9_short_iwalsh4x4_c(input, output, 4 << 1);
 
     vpx_memset(input, 0, 32);
 
@@ -186,7 +186,7 @@ void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
   for (i = 1; i < 16; i++)
     input[i] *= dq[i];
 
-  vp9_short_inv_walsh4x4_x8_c(input, output, 4 << 1);
+  vp9_short_iwalsh4x4_c(input, output, 4 << 1);
   vpx_memset(input, 0, 32);
   vp9_add_residual_4x4(output, pred, pitch, dest, stride);
 }

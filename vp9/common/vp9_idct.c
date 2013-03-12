@@ -8,20 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-/****************************************************************************
- * Notes:
- *
- * This implementation makes use of 16 bit fixed point verio of two multiply
- * constants:
- *         1.   sqrt(2) * cos (pi/8)
- *         2.   sqrt(2) * sin (pi/8)
- * Becuase the first constant is bigger than 1, to maintain the same 16 bit
- * fixed point precision as the second one, we use a trick of
- *         x * a = x + x*(a-1)
- * so
- *         x * sqrt(2) * cos (pi/8) = x + x * (sqrt(2) *cos(pi/8)-1).
- **************************************************************************/
 #include <assert.h>
 #include <math.h>
 
@@ -32,7 +18,7 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-void vp9_short_inv_walsh4x4_x8_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_iwalsh4x4_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
   int16_t *ip = input;
@@ -73,7 +59,7 @@ void vp9_short_inv_walsh4x4_x8_c(int16_t *input, int16_t *output, int pitch) {
   }
 }
 
-void vp9_short_inv_walsh4x4_1_x8_c(int16_t *in, int16_t *out, int pitch) {
+void vp9_short_iwalsh4x4_1_c(int16_t *in, int16_t *out, int pitch) {
   int i;
   int16_t tmp[4];
   int16_t *ip = in;
@@ -99,7 +85,7 @@ void vp9_dc_only_inv_walsh_add_c(int input_dc, uint8_t *pred_ptr,
   int r, c;
   int16_t dc = input_dc;
   int16_t tmp[4 * 4];
-  vp9_short_inv_walsh4x4_1_x8_c(&dc, tmp, 4 << 1);
+  vp9_short_iwalsh4x4_1_c(&dc, tmp, 4 << 1);
 
   for (r = 0; r < 4; r++) {
     for (c = 0; c < 4; c++)
@@ -130,7 +116,7 @@ void vp9_idct4_1d_c(int16_t *input, int16_t *output) {
   output[3] = step[0] - step[3];
 }
 
-void vp9_short_idct4x4llm_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_idct4x4_c(int16_t *input, int16_t *output, int pitch) {
   int16_t out[4 * 4];
   int16_t *outptr = out;
   const int half_pitch = pitch >> 1;
@@ -156,7 +142,7 @@ void vp9_short_idct4x4llm_c(int16_t *input, int16_t *output, int pitch) {
   }
 }
 
-void vp9_short_idct4x4llm_1_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_idct4x4_1_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1;
   int16_t *op = output;

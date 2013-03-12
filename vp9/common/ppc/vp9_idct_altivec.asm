@@ -9,7 +9,7 @@
 ;
 
 
-    .globl short_idct4x4llm_ppc
+    .globl short_idct4x4_ppc
 
 .macro load_c V, LABEL, OFF, R0, R1
     lis     \R0, \LABEL@ha
@@ -21,7 +21,7 @@
 ;# r4 short *output
 ;# r5 int pitch
     .align 2
-short_idct4x4llm_ppc:
+short_idct4x4_ppc:
     mfspr   r11, 256            ;# get old VRSAVE
     oris    r12, r11, 0xfff8
     mtspr   256, r12            ;# set VRSAVE

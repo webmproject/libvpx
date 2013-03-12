@@ -74,7 +74,7 @@ void vp9_dc_only_idct_add_sse2(int input_dc, uint8_t *pred_ptr,
   *(int *)dst_ptr = _mm_cvtsi128_si32(p1);
 }
 
-void vp9_short_idct4x4llm_sse2(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_idct4x4_sse2(int16_t *input, int16_t *output, int pitch) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i eight = _mm_set1_epi16(8);
   const __m128i cst = _mm_setr_epi16((int16_t)cospi_16_64, (int16_t)cospi_16_64,

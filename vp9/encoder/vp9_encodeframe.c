@@ -1217,10 +1217,10 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
 static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
   if (lossless) {
-    cpi->mb.fwd_txm8x4            = vp9_short_walsh8x4_x8;
-    cpi->mb.fwd_txm4x4            = vp9_short_walsh4x4_x8;
-    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_inv_walsh4x4_1_x8;
-    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_inv_walsh4x4_x8;
+    cpi->mb.fwd_txm8x4            = vp9_short_walsh8x4;
+    cpi->mb.fwd_txm4x4            = vp9_short_walsh4x4;
+    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_iwalsh4x4_1;
+    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_iwalsh4x4;
     cpi->mb.optimize              = 0;
     cpi->common.filter_level      = 0;
     cpi->zbin_mode_boost_enabled  = FALSE;
@@ -1228,8 +1228,8 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
   } else {
     cpi->mb.fwd_txm8x4            = vp9_short_fdct8x4;
     cpi->mb.fwd_txm4x4            = vp9_short_fdct4x4;
-    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_idct4x4llm_1;
-    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_idct4x4llm;
+    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_idct4x4_1;
+    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_idct4x4;
   }
 }
 

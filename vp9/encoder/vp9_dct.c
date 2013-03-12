@@ -374,7 +374,7 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
   }
 }
 
-void vp9_short_walsh4x4_x8_c(short *input, short *output, int pitch) {
+void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
   short *ip = input;
@@ -414,9 +414,9 @@ void vp9_short_walsh4x4_x8_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp9_short_walsh8x4_x8_c(short *input, short *output, int pitch) {
-  vp9_short_walsh4x4_x8_c(input,   output,    pitch);
-  vp9_short_walsh4x4_x8_c(input + 4, output + 16, pitch);
+void vp9_short_walsh8x4_c(short *input, short *output, int pitch) {
+  vp9_short_walsh4x4_c(input,   output,    pitch);
+  vp9_short_walsh4x4_c(input + 4, output + 16, pitch);
 }
 
 

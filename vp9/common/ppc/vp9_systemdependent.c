@@ -63,7 +63,7 @@ void recon_b_ppc(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_pt
 void recon2b_ppc(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
 void recon4b_ppc(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
 
-extern void short_idct4x4llm_ppc(short *input, short *output, int pitch);
+extern void short_idct4x4_ppc(short *input, short *output, int pitch);
 
 // Generic C
 extern subpixel_predict_function vp9_sixtap_predict_c;
@@ -83,8 +83,8 @@ void vp9_recon_b_c(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_
 void vp9_recon2b_c(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
 void vp9_recon4b_c(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
 
-extern void vp9_short_idct4x4llm_1_c(short *input, short *output, int pitch);
-extern void vp9_short_idct4x4llm_c(short *input, short *output, int pitch);
+extern void vp9_short_idct4x4_1_c(short *input, short *output, int pitch);
+extern void vp9_short_idct4x4_c(short *input, short *output, int pitch);
 extern void vp8_dc_only_idct_c(short input_dc, short *output, int pitch);
 
 // PPC
@@ -139,8 +139,8 @@ void vp9_machine_specific_config(void) {
   vp9_sixtap_predict8x4                = sixtap_predict8x4_ppc;
   vp9_sixtap_predict                   = sixtap_predict_ppc;
 
-  vp8_short_idct4x4_1                  = vp9_short_idct4x4llm_1_c;
-  vp8_short_idct4x4                    = short_idct4x4llm_ppc;
+  vp8_short_idct4x4_1                  = vp9_short_idct4x4_1_c;
+  vp8_short_idct4x4                    = short_idct4x4_ppc;
   vp8_dc_only_idct                      = vp8_dc_only_idct_c;
 
   vp8_lf_mbvfull                       = loop_filter_mbv_ppc;
