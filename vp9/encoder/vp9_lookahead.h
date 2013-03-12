@@ -28,17 +28,13 @@ struct lookahead_ctx;
  *
  * The lookahead stage is a queue of frame buffers on which some analysis
  * may be done when buffers are enqueued.
- *
- *
  */
 struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
                                          unsigned int height,
-                                         unsigned int depth
-                                        );
+                                         unsigned int depth);
 
 
 /**\brief Destroys the lookahead stage
- *
  */
 void vp9_lookahead_destroy(struct lookahead_ctx *ctx);
 
@@ -58,13 +54,9 @@ void vp9_lookahead_destroy(struct lookahead_ctx *ctx);
  * \param[in] flags       Flags set on this frame
  * \param[in] active_map  Map that specifies which macroblock is active
  */
-int
-vp9_lookahead_push(struct lookahead_ctx *ctx,
-                   YV12_BUFFER_CONFIG   *src,
-                   int64_t               ts_start,
-                   int64_t               ts_end,
-                   unsigned int          flags,
-                   unsigned char        *active_map);
+int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
+                       int64_t ts_start, int64_t ts_end, unsigned int flags,
+                       unsigned char *active_map);
 
 
 /**\brief Get the next source buffer to encode
@@ -76,11 +68,9 @@ vp9_lookahead_push(struct lookahead_ctx *ctx,
  *
  * \retval NULL, if drain set and queue is empty
  * \retval NULL, if drain not set and queue not of the configured depth
- *
  */
-struct lookahead_entry *
-vp9_lookahead_pop(struct lookahead_ctx *ctx,
-                  int                   drain);
+struct lookahead_entry *vp9_lookahead_pop(struct lookahead_ctx *ctx,
+                                          int drain);
 
 
 /**\brief Get a future source buffer to encode
@@ -89,18 +79,15 @@ vp9_lookahead_pop(struct lookahead_ctx *ctx,
  * \param[in] index     Index of the frame to be returned, 0 == next frame
  *
  * \retval NULL, if no buffer exists at the specified index
- *
  */
-struct lookahead_entry *
-vp9_lookahead_peek(struct lookahead_ctx *ctx,
-                   int                   index);
+struct lookahead_entry *vp9_lookahead_peek(struct lookahead_ctx *ctx,
+                                           int index);
 
 
 /**\brief Get the number of frames currently in the lookahead queue
  *
  * \param[in] ctx       Pointer to the lookahead context
  */
-unsigned int
-vp9_lookahead_depth(struct lookahead_ctx *ctx);
+unsigned int vp9_lookahead_depth(struct lookahead_ctx *ctx);
 
 #endif  // VP9_ENCODER_VP9_LOOKAHEAD_H_

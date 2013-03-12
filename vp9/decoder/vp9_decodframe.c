@@ -95,50 +95,46 @@ void vp9_init_de_quantizer(VP9D_COMP *pbi) {
   }
 }
 
-static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *xd) {
-  int i;
-  int qindex;
-  VP9_COMMON *const pc = &pbi->common;
-  int segment_id = xd->mode_info_context->mbmi.segment_id;
-
+static int get_qindex(MACROBLOCKD *mb, int segment_id, int base_qindex) {
   // Set the Q baseline allowing for any segment level adjustment
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
-    if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
-      /* Abs Value */
-      qindex = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
-    else {
-      /* Delta Value */
-      qindex = pc->base_qindex +
-               vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
-      /* Clamp to valid range */
-      qindex = (qindex >= 0) ? ((qindex <= MAXQ) ? qindex : MAXQ) : 0;
-    }
-  } else
-    qindex = pc->base_qindex;
-
-  xd->q_index = qindex;
-
-  /* Set up the block level dequant pointers */
-  for (i = 0; i < 16; i++) {
-    xd->block[i].dequant = pc->Y1dequant[qindex];
+  if (vp9_segfeature_active(mb, segment_id, SEG_LVL_ALT_Q)) {
+    if (mb->mb_segment_abs_delta == SEGMENT_ABSDATA)
+      return vp9_get_segdata(mb, segment_id, SEG_LVL_ALT_Q);  // Abs Value
+    else
+      return clamp(base_qindex + vp9_get_segdata(mb, segment_id, SEG_LVL_ALT_Q),
+                   0, MAXQ);  // Delta Value
+  } else {
+    return base_qindex;
   }
+}
 
-  xd->inv_txm4x4_1      = vp9_short_idct4x4llm_1;
-  xd->inv_txm4x4        = vp9_short_idct4x4llm;
-  xd->itxm_add          = vp9_dequant_idct_add;
-  xd->itxm_add_y_block  = vp9_dequant_idct_add_y_block;
-  xd->itxm_add_uv_block = vp9_dequant_idct_add_uv_block;
-  if (xd->lossless) {
+static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *mb) {
+  int i;
+
+  VP9_COMMON *const pc = &pbi->common;
+  int segment_id = mb->mode_info_context->mbmi.segment_id;
+  int qindex = get_qindex(mb, segment_id, pc->base_qindex);
+  mb->q_index = qindex;
+
+  for (i = 0; i < 16; i++)
+    mb->block[i].dequant = pc->Y1dequant[qindex];
+
+  for (i = 16; i < 24; i++)
+    mb->block[i].dequant = pc->UVdequant[qindex];
+
+  if (mb->lossless) {
     assert(qindex == 0);
-    xd->inv_txm4x4_1      = vp9_short_inv_walsh4x4_1_x8;
-    xd->inv_txm4x4        = vp9_short_inv_walsh4x4_x8;
-    xd->itxm_add          = vp9_dequant_idct_add_lossless_c;
-    xd->itxm_add_y_block  = vp9_dequant_idct_add_y_block_lossless_c;
-    xd->itxm_add_uv_block = vp9_dequant_idct_add_uv_block_lossless_c;
-  }
-
-  for (i = 16; i < 24; i++) {
-    xd->block[i].dequant = pc->UVdequant[qindex];
+    mb->inv_txm4x4_1      = vp9_short_inv_walsh4x4_1_x8;
+    mb->inv_txm4x4        = vp9_short_inv_walsh4x4_x8;
+    mb->itxm_add          = vp9_dequant_idct_add_lossless_c;
+    mb->itxm_add_y_block  = vp9_dequant_idct_add_y_block_lossless_c;
+    mb->itxm_add_uv_block = vp9_dequant_idct_add_uv_block_lossless_c;
+  } else {
+    mb->inv_txm4x4_1      = vp9_short_idct4x4llm_1;
+    mb->inv_txm4x4        = vp9_short_idct4x4llm;
+    mb->itxm_add          = vp9_dequant_idct_add;
+    mb->itxm_add_y_block  = vp9_dequant_idct_add_y_block;
+    mb->itxm_add_uv_block = vp9_dequant_idct_add_uv_block;
   }
 }
 
@@ -333,10 +329,8 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       int ib = vp9_i8x8_block[i];
       const int iblock[4] = {0, 1, 4, 5};
       int j;
-      int i8x8mode;
-      BLOCKD *b;
-      b = &xd->block[ib];
-      i8x8mode = b->bmi.as_mode.first;
+      BLOCKD *b = &xd->block[ib];
+      int i8x8mode = b->bmi.as_mode.first;
       vp9_intra8x8_predict(xd, b, i8x8mode, b->predictor);
       for (j = 0; j < 4; j++) {
         b = &xd->block[ib + iblock[j]];
@@ -363,9 +357,8 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
     }
   } else if (mode == B_PRED) {
     for (i = 0; i < 16; i++) {
-      int b_mode;
       BLOCKD *b = &xd->block[i];
-      b_mode = xd->mode_info_context->bmi[i].as_mode.first;
+      int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
 #if CONFIG_NEWBINTRAMODES
       xd->mode_info_context->bmi[i].as_mode.context = b->bmi.as_mode.context =
           vp9_find_bpred_context(b);
@@ -503,10 +496,11 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
       case TX_32X32:
         for (n = 0; n < 4; n++) {
           const int x_idx = n & 1, y_idx = n >> 1;
+          const int y_offset = x_idx * 32 + y_idx * xd->dst.y_stride * 32;
           vp9_dequant_idct_add_32x32(xd->qcoeff + n * 1024,
               xd->block[0].dequant,
-              xd->dst.y_buffer + x_idx * 32 + y_idx * xd->dst.y_stride * 32,
-              xd->dst.y_buffer + x_idx * 32 + y_idx * xd->dst.y_stride * 32,
+              xd->dst.y_buffer + y_offset,
+              xd->dst.y_buffer + y_offset,
               xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 64]);
         }
         vp9_dequant_idct_add_32x32(xd->qcoeff + 4096,
@@ -519,96 +513,103 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
       case TX_16X16:
         for (n = 0; n < 16; n++) {
           const int x_idx = n & 3, y_idx = n >> 2;
+          const int y_offset = y_idx * 16 * xd->dst.y_stride + x_idx * 16;
           const TX_TYPE tx_type = get_tx_type_16x16(xd,
                                                     (y_idx * 16 + x_idx) * 4);
+
           if (tx_type == DCT_DCT) {
             vp9_dequant_idct_add_16x16(xd->qcoeff + n * 256,
                 xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
           } else {
             vp9_ht_dequant_idct_add_16x16_c(tx_type, xd->qcoeff + n * 256,
                 xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
           }
         }
         for (n = 0; n < 4; n++) {
           const int x_idx = n & 1, y_idx = n >> 1;
+          const int uv_offset = y_idx * 16 * xd->dst.uv_stride + x_idx * 16;
           vp9_dequant_idct_add_16x16(xd->qcoeff + 4096 + n * 256,
               xd->block[16].dequant,
-              xd->dst.u_buffer + y_idx * 16 * xd->dst.uv_stride + x_idx * 16,
-              xd->dst.u_buffer + y_idx * 16 * xd->dst.uv_stride + x_idx * 16,
+              xd->dst.u_buffer + uv_offset,
+              xd->dst.u_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[256 + n * 16]);
           vp9_dequant_idct_add_16x16(xd->qcoeff + 4096 + 1024 + n * 256,
               xd->block[20].dequant,
-              xd->dst.v_buffer + y_idx * 16 * xd->dst.uv_stride + x_idx * 16,
-              xd->dst.v_buffer + y_idx * 16 * xd->dst.uv_stride + x_idx * 16,
+              xd->dst.v_buffer + uv_offset,
+              xd->dst.v_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[320 + n * 16]);
         }
         break;
       case TX_8X8:
         for (n = 0; n < 64; n++) {
           const int x_idx = n & 7, y_idx = n >> 3;
+          const int y_offset = y_idx * 8 * xd->dst.y_stride + x_idx * 8;
           const TX_TYPE tx_type = get_tx_type_8x8(xd, (y_idx * 16 + x_idx) * 2);
           if (tx_type == DCT_DCT) {
             vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64,
                 xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
-                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
           } else {
             vp9_ht_dequant_idct_add_8x8_c(tx_type, xd->qcoeff + n * 64,
                 xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
-                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
           }
         }
         for (n = 0; n < 16; n++) {
           const int x_idx = n & 3, y_idx = n >> 2;
+          const int uv_offset = y_idx * 8 * xd->dst.uv_stride + x_idx * 8;
           vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64 + 4096,
               xd->block[16].dequant,
-              xd->dst.u_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
-              xd->dst.u_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
+              xd->dst.u_buffer + uv_offset,
+              xd->dst.u_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[256 + n * 4]);
           vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64 + 4096 + 1024,
               xd->block[20].dequant,
-              xd->dst.v_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
-              xd->dst.v_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
+              xd->dst.v_buffer + uv_offset,
+              xd->dst.v_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[320 + n * 4]);
         }
         break;
       case TX_4X4:
         for (n = 0; n < 256; n++) {
           const int x_idx = n & 15, y_idx = n >> 4;
+          const int y_offset = y_idx * 4 * xd->dst.y_stride + x_idx * 4;
           const TX_TYPE tx_type = get_tx_type_4x4(xd, y_idx * 16 + x_idx);
           if (tx_type == DCT_DCT) {
             xd->itxm_add(xd->qcoeff + n * 16, xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
-                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
           } else {
             vp9_ht_dequant_idct_add_c(tx_type, xd->qcoeff + n * 16,
                 xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
-                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
           }
         }
         for (n = 0; n < 64; n++) {
           const int x_idx = n & 7, y_idx = n >> 3;
+          const int uv_offset = y_idx * 4 * xd->dst.uv_stride + x_idx * 4;
           xd->itxm_add(xd->qcoeff + 4096 + n * 16,
               xd->block[16].dequant,
-              xd->dst.u_buffer + y_idx * 4 * xd->dst.uv_stride + x_idx * 4,
-              xd->dst.u_buffer + y_idx * 4 * xd->dst.uv_stride + x_idx * 4,
+              xd->dst.u_buffer + uv_offset,
+              xd->dst.u_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[256 + n]);
           xd->itxm_add(xd->qcoeff + 4096 + 1024 + n * 16,
               xd->block[20].dequant,
-              xd->dst.v_buffer + y_idx * 4 * xd->dst.uv_stride + x_idx * 4,
-              xd->dst.v_buffer + y_idx * 4 * xd->dst.uv_stride + x_idx * 4,
+              xd->dst.v_buffer + uv_offset,
+              xd->dst.v_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[320 + n]);
         }
         break;
@@ -681,19 +682,20 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
       case TX_16X16:
         for (n = 0; n < 4; n++) {
           const int x_idx = n & 1, y_idx = n >> 1;
+          const int y_offset = y_idx * 16 * xd->dst.y_stride + x_idx * 16;
           const TX_TYPE tx_type = get_tx_type_16x16(xd,
                                                     (y_idx * 8 + x_idx) * 4);
           if (tx_type == DCT_DCT) {
             vp9_dequant_idct_add_16x16(
                 xd->qcoeff + n * 256, xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
           } else {
             vp9_ht_dequant_idct_add_16x16_c(tx_type, xd->qcoeff + n * 256,
                 xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
-                xd->dst.y_buffer + y_idx * 16 * xd->dst.y_stride + x_idx * 16,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 16]);
           }
         }
@@ -706,63 +708,69 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
       case TX_8X8:
         for (n = 0; n < 16; n++) {
           const int x_idx = n & 3, y_idx = n >> 2;
+          const int y_offset = y_idx * 8 * xd->dst.y_stride + x_idx * 8;
           const TX_TYPE tx_type = get_tx_type_8x8(xd, (y_idx * 8 + x_idx) * 2);
           if (tx_type == DCT_DCT) {
             vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64,
                 xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
-                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
           } else {
             vp9_ht_dequant_idct_add_8x8_c(tx_type, xd->qcoeff + n * 64,
                 xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
-                xd->dst.y_buffer + y_idx * 8 * xd->dst.y_stride + x_idx * 8,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n * 4]);
           }
         }
         for (n = 0; n < 4; n++) {
           const int x_idx = n & 1, y_idx = n >> 1;
+          const int uv_offset = y_idx * 8 * xd->dst.uv_stride + x_idx * 8;
           vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64 + 1024,
               xd->block[16].dequant,
-              xd->dst.u_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
-              xd->dst.u_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
+              xd->dst.u_buffer + uv_offset,
+              xd->dst.u_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[64 + n * 4]);
           vp9_dequant_idct_add_8x8_c(xd->qcoeff + n * 64 + 1280,
               xd->block[20].dequant,
-              xd->dst.v_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
-              xd->dst.v_buffer + y_idx * 8 * xd->dst.uv_stride + x_idx * 8,
+              xd->dst.v_buffer + uv_offset,
+              xd->dst.v_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[80 + n * 4]);
         }
         break;
       case TX_4X4:
         for (n = 0; n < 64; n++) {
           const int x_idx = n & 7, y_idx = n >> 3;
+          const int y_offset = y_idx * 4 * xd->dst.y_stride + x_idx * 4;
+
           const TX_TYPE tx_type = get_tx_type_4x4(xd, y_idx * 8 + x_idx);
           if (tx_type == DCT_DCT) {
             xd->itxm_add(xd->qcoeff + n * 16, xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
-                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
           } else {
             vp9_ht_dequant_idct_add_c(tx_type, xd->qcoeff + n * 16,
                 xd->block[0].dequant,
-                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
-                xd->dst.y_buffer + y_idx * 4 * xd->dst.y_stride + x_idx * 4,
+                xd->dst.y_buffer + y_offset,
+                xd->dst.y_buffer + y_offset,
                 xd->dst.y_stride, xd->dst.y_stride, xd->eobs[n]);
           }
         }
+
         for (n = 0; n < 16; n++) {
           const int x_idx = n & 3, y_idx = n >> 2;
+          const int uv_offset = y_idx * 4 * xd->dst.uv_stride + x_idx * 4;
           xd->itxm_add(xd->qcoeff + 1024 + n * 16,
               xd->block[16].dequant,
-              xd->dst.u_buffer + y_idx * 4 * xd->dst.uv_stride + x_idx * 4,
-              xd->dst.u_buffer + y_idx * 4 * xd->dst.uv_stride + x_idx * 4,
+              xd->dst.u_buffer + uv_offset,
+              xd->dst.u_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[64 + n]);
           xd->itxm_add(xd->qcoeff + 1280 + n * 16,
               xd->block[20].dequant,
-              xd->dst.v_buffer + y_idx * 4 * xd->dst.uv_stride + x_idx * 4,
-              xd->dst.v_buffer + y_idx * 4 * xd->dst.uv_stride + x_idx * 4,
+              xd->dst.v_buffer + uv_offset,
+              xd->dst.v_buffer + uv_offset,
               xd->dst.uv_stride, xd->dst.uv_stride, xd->eobs[80 + n]);
         }
         break;
@@ -1047,13 +1055,10 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
 }
 
 static unsigned int read_partition_size(const unsigned char *cx_size) {
-  const unsigned int size =
-    cx_size[0] + (cx_size[1] << 8) + (cx_size[2] << 16);
-  return size;
+  return cx_size[0] + (cx_size[1] << 8) + (cx_size[2] << 16);
 }
 
-static int read_is_valid(const unsigned char *start,
-                         size_t               len,
+static int read_is_valid(const unsigned char *start, size_t len,
                          const unsigned char *end) {
   return start + len > start && start + len <= end;
 }
@@ -1062,22 +1067,15 @@ static int read_is_valid(const unsigned char *start,
 static void setup_token_decoder(VP9D_COMP *pbi,
                                 const unsigned char *cx_data,
                                 BOOL_DECODER* const bool_decoder) {
-  VP9_COMMON          *pc = &pbi->common;
+  VP9_COMMON *pc = &pbi->common;
   const unsigned char *user_data_end = pbi->Source + pbi->source_sz;
-  const unsigned char *partition;
+  const unsigned char *partition = cx_data;
+  ptrdiff_t bytes_left = user_data_end - partition;
+  ptrdiff_t partition_size = bytes_left;
 
-  ptrdiff_t            partition_size;
-  ptrdiff_t            bytes_left;
-
-  // Set up pointers to token partition
-  partition = cx_data;
-  bytes_left = user_data_end - partition;
-  partition_size = bytes_left;
-
-  /* Validate the calculated partition length. If the buffer
-   * described by the partition can't be fully read, then restrict
-   * it to the portion that can be (for EC mode) or throw an error.
-   */
+  // Validate the calculated partition length. If the buffer
+  // described by the partition can't be fully read, then restrict
+  // it to the portion that can be (for EC mode) or throw an error.
   if (!read_is_valid(partition, partition_size, user_data_end)) {
     vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt partition "
@@ -1096,19 +1094,16 @@ static void init_frame(VP9D_COMP *pbi) {
 
   if (pc->frame_type == KEY_FRAME) {
     vp9_setup_past_independence(pc, xd);
-    /* All buffers are implicitly updated on key frames. */
+    // All buffers are implicitly updated on key frames.
     pbi->refresh_frame_flags = (1 << NUM_REF_FRAMES) - 1;
   } else if (pc->error_resilient_mode) {
     vp9_setup_past_independence(pc, xd);
   }
 
   if (pc->frame_type != KEY_FRAME) {
-    if (!pc->use_bilinear_mc_filter)
-      pc->mcomp_filter_type = EIGHTTAP;
-    else
-      pc->mcomp_filter_type = BILINEAR;
+    pc->mcomp_filter_type = pc->use_bilinear_mc_filter ? BILINEAR : EIGHTTAP;
 
-    /* To enable choice of different interpolation filters */
+    // To enable choice of different interpolation filters
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }
 
@@ -1117,11 +1112,9 @@ static void init_frame(VP9D_COMP *pbi) {
   xd->frame_type = pc->frame_type;
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_stride = pc->mode_info_stride;
-  xd->corrupted = 0; /* init without corruption */
+  xd->corrupted = 0;
 
-  xd->fullpixel_mask = 0xffffffff;
-  if (pc->full_pixel)
-    xd->fullpixel_mask = 0xfffffff8;
+  xd->fullpixel_mask = pc->full_pixel ? 0xfffffff8 : 0xffffffff;
 }
 
 #if CONFIG_CODE_NONZEROCOUNT
@@ -1234,15 +1227,14 @@ static void read_coef_probs(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
 
   read_coef_probs_common(bc, pc->fc.coef_probs_4x4, BLOCK_TYPES);
 
-  if (pbi->common.txfm_mode != ONLY_4X4) {
+  if (pbi->common.txfm_mode != ONLY_4X4)
     read_coef_probs_common(bc, pc->fc.coef_probs_8x8, BLOCK_TYPES);
-  }
-  if (pbi->common.txfm_mode > ALLOW_8X8) {
+
+  if (pbi->common.txfm_mode > ALLOW_8X8)
     read_coef_probs_common(bc, pc->fc.coef_probs_16x16, BLOCK_TYPES);
-  }
-  if (pbi->common.txfm_mode > ALLOW_16X16) {
+
+  if (pbi->common.txfm_mode > ALLOW_16X16)
     read_coef_probs_common(bc, pc->fc.coef_probs_32x32, BLOCK_TYPES);
-  }
 }
 
 static void update_frame_size(VP9D_COMP *pbi) {
