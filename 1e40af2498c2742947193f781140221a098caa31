@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWH//8Yg\u003d",
+        "filename": "vp8/decoder/dboolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-03-12T01:06:20Z",
+      "side": 1,
+      "message": "so if CONFIG_DECRYPT is enabled, is the library still usable for unencrypted content? instead of the fake key maybe it would be better to test the validity of the context\u0027s decrypt buffer.",
+      "revId": "1e40af2498c2742947193f781140221a098caa31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWH//8ZI\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-03-12T01:06:20Z",
+      "side": 1,
+      "message": "some reference of what this expects as input would be good.",
+      "revId": "1e40af2498c2742947193f781140221a098caa31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
