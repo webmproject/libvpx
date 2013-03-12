@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWH//73k\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 564,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-03-12T16:19:04Z",
+      "side": 1,
+      "message": "do we still need divide by 2 if pre_stride is now uv_stride?",
+      "revId": "577424e26a4564af28d7eaf5362a2950031b8c9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
