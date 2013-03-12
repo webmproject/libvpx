@@ -246,6 +246,7 @@ EXPERIMENT_LIST="
     enable_6tap
     abovesprefmv
     code_nonzerocount
+    useselectrefmv
 "
 CONFIG_LIST="
     external_build

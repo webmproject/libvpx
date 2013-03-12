@@ -118,10 +118,12 @@ unsigned int vp9_sub_pixel_variance2x16_c(const uint8_t *src_ptr,
   return vp9_variance2x16_c(temp2, 2, dst_ptr, dst_pixels_per_line, sse);
 }
 
+#if CONFIG_USESELECTREFMV
 /* check a list of motion vectors by sad score using a number rows of pixels
  * above and a number cols of pixels in the left to select the one with best
  * score to use as ref motion vector
  */
+
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            uint8_t *ref_y_buffer,
                            int ref_y_stride,
@@ -298,3 +300,20 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   // Copy back the re-ordered mv list
   vpx_memcpy(mvlist, sorted_mvs, sizeof(sorted_mvs));
 }
+#else
+void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
+                           uint8_t *ref_y_buffer,
+                           int ref_y_stride,
+                           int_mv *mvlist,
+                           int_mv *nearest,
+                           int_mv *near) {
+  int i;
+  // Make sure all the candidates are properly clamped etc
+  for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
+    lower_mv_precision(&mvlist[i], xd->allow_high_precision_mv);
+    clamp_mv2(&mvlist[i], xd);
+  }
+  *nearest = mvlist[0];
+  *near = mvlist[1];
+}
+#endif
