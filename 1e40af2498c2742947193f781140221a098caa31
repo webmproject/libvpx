@@ -124,6 +124,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX///uc\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 959,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-13T16:54:58Z",
+      "side": 1,
+      "message": "We should probably make a copy of this. What happens if the outside application changes the contents during decode? If we want to leave this as a reference, make sure to document that the application needs to keep it stable for the lifetime of the frame.",
+      "revId": "1e40af2498c2742947193f781140221a098caa31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWH//8ZI\u003d",
         "filename": "vpx/vp8dx.h",
         "patchSetId": 4
