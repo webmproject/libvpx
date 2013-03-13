@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWX///oQ\u003d",
+        "filename": "vp8/common/loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-13T17:53:21Z",
+      "side": 1,
+      "message": "it\u0027s a little strange to treat lvl_ref and lvl_mode differently here. Seems like the changes in this file could be reduced to just recalculating lvl_ref as you do, without redeclaring the variable.",
+      "revId": "76f12949071715a5f2886a70caad99647a5ff9d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
