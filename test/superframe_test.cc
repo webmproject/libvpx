@@ -54,7 +54,7 @@ class SuperframeTest : public ::libvpx_test::EncoderTest,
     const int frames = (marker & 0x7) + 1;
     const int mag = ((marker >> 3) & 3) + 1;
     const unsigned int index_sz = 2 + mag  * frames;
-    if ((marker & 0xf0) == 0xc0 &&
+    if ((marker & 0xe0) == 0xc0 &&
         pkt->data.frame.sz >= index_sz &&
         buffer[pkt->data.frame.sz - index_sz] == marker) {
       // frame is a superframe. strip off the index.

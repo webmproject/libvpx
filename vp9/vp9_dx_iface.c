@@ -435,7 +435,7 @@ static void parse_superframe_index(const uint8_t *data,
   marker = data[data_sz - 1];
   *count = 0;
 
-  if ((marker & 0xf0) == 0xc0) {
+  if ((marker & 0xe0) == 0xc0) {
     const int frames = (marker & 0x7) + 1;
     const int mag = ((marker >> 3) & 3) + 1;
     const int index_sz = 2 + mag  * frames;
@@ -473,7 +473,7 @@ static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
 
   do {
     // Skip over the superframe index, if present
-    if (data_sz && (*data_start & 0xf0) == 0xc0) {
+    if (data_sz && (*data_start & 0xe0) == 0xc0) {
       const uint8_t marker = *data_start;
       const int frames = (marker & 0x7) + 1;
       const int mag = ((marker >> 3) & 3) + 1;
