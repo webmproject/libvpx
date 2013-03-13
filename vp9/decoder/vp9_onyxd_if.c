@@ -164,8 +164,9 @@ void vp9_remove_decompressor(VP9D_PTR ptr) {
 }
 
 
-vpx_codec_err_t vp9_get_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
-                                      YV12_BUFFER_CONFIG *sd) {
+vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR ptr,
+                                       VP9_REFFRAME ref_frame_flag,
+                                       YV12_BUFFER_CONFIG *sd) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
   int ref_fb_idx;
@@ -241,6 +242,17 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
   return pbi->common.error.error_code;
 }
 
+
+int vp9_get_reference_dec(VP9D_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
+  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
+  VP9_COMMON *cm = &pbi->common;
+
+  if (index < 0 || index >= NUM_REF_FRAMES)
+    return -1;
+
+  *fb = &cm->yv12_fb[cm->ref_frame_map[index]];
+  return 0;
+}
 
 /* If any buffer updating is signalled it should be done here. */
 static void swap_frame_buffers(VP9D_COMP *pbi) {

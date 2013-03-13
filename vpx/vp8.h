@@ -44,6 +44,12 @@ enum vp8_com_control_id {
   VP8_SET_DBG_COLOR_MB_MODES  = 5,    /**< set which macro block modes to color */
   VP8_SET_DBG_COLOR_B_MODES   = 6,    /**< set which blocks modes to color */
   VP8_SET_DBG_DISPLAY_MV      = 7,    /**< set which motion vector modes to draw */
+
+  /* TODO(jkoleszar): The encoder incorrectly reuses some of these values (5+)
+   * for its control ids. These should be migrated to something like the
+   * VP8_DECODER_CTRL_ID_START range next time we're ready to break the ABI.
+   */
+  VP9_GET_REFERENCE           = 128,  /**< get a pointer to a reference frame */
   VP8_COMMON_CTRL_ID_MAX,
   VP8_DECODER_CTRL_ID_START   = 256
 };
@@ -97,6 +103,10 @@ typedef struct vpx_ref_frame {
   vpx_image_t           img;          /**< reference frame data in image format */
 } vpx_ref_frame_t;
 
+typedef struct vp9_ref_frame {
+  int idx; /**< frame index to get (input) */
+  vpx_image_t  img; /**< img structure to populate (output) */
+} vp9_ref_frame_t;
 
 /*!\brief vp8 decoder control function parameter type
  *
@@ -110,6 +120,7 @@ VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_REF_FRAME, int)
 VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_MB_MODES,  int)
 VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_B_MODES,   int)
 VPX_CTRL_USE_TYPE(VP8_SET_DBG_DISPLAY_MV,      int)
+VPX_CTRL_USE_TYPE(VP9_GET_REFERENCE,           vp9_ref_frame_t *)
 
 
 /*! @} - end defgroup vp8 */

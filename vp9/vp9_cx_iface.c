@@ -16,6 +16,7 @@
 #include "vpx/vp8cx.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/common/vp9_onyx.h"
+#include "vp9/vp9_iface_common.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -867,9 +868,9 @@ static vpx_codec_err_t vp8e_set_reference(vpx_codec_alg_priv_t *ctx,
 
 }
 
-static vpx_codec_err_t vp8e_get_reference(vpx_codec_alg_priv_t *ctx,
-                                          int ctr_id,
-                                          va_list args) {
+static vpx_codec_err_t vp8e_copy_reference(vpx_codec_alg_priv_t *ctx,
+                                           int ctr_id,
+                                           va_list args) {
 
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
@@ -878,10 +879,26 @@ static vpx_codec_err_t vp8e_get_reference(vpx_codec_alg_priv_t *ctx,
     YV12_BUFFER_CONFIG sd;
 
     image2yuvconfig(&frame->img, &sd);
-    vp9_get_reference_enc(ctx->cpi, frame->frame_type, &sd);
+    vp9_copy_reference_enc(ctx->cpi, frame->frame_type, &sd);
     return VPX_CODEC_OK;
   } else
     return VPX_CODEC_INVALID_PARAM;
+}
+
+static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx,
+                                     int ctr_id,
+                                     va_list args) {
+  vp9_ref_frame_t *data = va_arg(args, vp9_ref_frame_t *);
+
+  if (data) {
+    YV12_BUFFER_CONFIG* fb;
+
+    vp9_get_reference_enc(ctx->cpi, data->idx, &fb);
+    yuvconfig2image(&data->img, fb, NULL);
+    return VPX_CODEC_OK;
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
 }
 
 static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
@@ -1038,7 +1055,7 @@ static vpx_codec_err_t vp8e_set_scalemode(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] = {
   {VP8_SET_REFERENCE,                 vp8e_set_reference},
-  {VP8_COPY_REFERENCE,                vp8e_get_reference},
+  {VP8_COPY_REFERENCE,                vp8e_copy_reference},
   {VP8_SET_POSTPROC,                  vp8e_set_previewpp},
   {VP8E_UPD_ENTROPY,                  vp8e_update_entropy},
   {VP8E_UPD_REFERENCE,                vp8e_update_reference},
@@ -1062,6 +1079,7 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] = {
   {VP8E_SET_CQ_LEVEL,                 set_param},
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    set_param},
   {VP9E_SET_LOSSLESS,                 set_param},
+  {VP9_GET_REFERENCE,                 get_reference},
   { -1, NULL},
 };
 
