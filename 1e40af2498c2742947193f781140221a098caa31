@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAWX///vY\u003d",
+        "filename": "test/vp8_boolcoder_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-13T16:49:29Z",
+      "side": 1,
+      "message": "uint8_t key[32]",
+      "revId": "1e40af2498c2742947193f781140221a098caa31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX///vI\u003d",
+        "filename": "vp8/decoder/dboolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-13T16:49:29Z",
+      "side": 1,
+      "message": "key[32]",
+      "revId": "1e40af2498c2742947193f781140221a098caa31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWH//8Yg\u003d",
         "filename": "vp8/decoder/dboolhuff.h",
         "patchSetId": 4
@@ -67,6 +101,23 @@
       "side": 1,
       "message": "agree, will add this kind of test to the next patch set",
       "parentUuid": "AAAAWH//7tI\u003d",
+      "revId": "1e40af2498c2742947193f781140221a098caa31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX///vM\u003d",
+        "filename": "vp8/decoder/dboolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-13T16:49:29Z",
+      "side": 1,
+      "message": "key[32]",
       "revId": "1e40af2498c2742947193f781140221a098caa31",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
