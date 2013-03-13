@@ -11,6 +11,10 @@
 
 /*Generated file, included by vp9_entropy.c*/
 
+// NOTE: When the CONFIG_MODELCOEFPROB experiment is on, only the first
+// 2 or 3 from each row is actually used depending on whether
+// UNCONSTRAINDED_NODES is 2 or 3. If this experiment is merged
+// the tables below should be shortened accordingly.
 static const vp9_coeff_probs default_coef_probs_4x4[BLOCK_TYPES] = {
   { /* block Type 0 */
     { /* Intra */

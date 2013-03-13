@@ -3052,6 +3052,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
 
     // transform / motion compensation build reconstruction frame
+#if CONFIG_MODELCOEFPROB && ADJUST_KF_COEF_PROBS
+    if (cm->frame_type == KEY_FRAME)
+      vp9_adjust_default_coef_probs(cm);
+#endif
 
     vp9_encode_frame(cpi);
 
