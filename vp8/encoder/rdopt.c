@@ -884,8 +884,8 @@ static void rd_pick_intra_mbuv_mode(MACROBLOCK *x, int *rate,
 
     for (mode = DC_PRED; mode <= TM_PRED; mode++)
     {
-        int rate;
-        int distortion;
+        int this_rate;
+        int this_distortion;
         int this_rd;
 
         xd->mode_info_context->mbmi.uv_mode = mode;
@@ -907,17 +907,17 @@ static void rd_pick_intra_mbuv_mode(MACROBLOCK *x, int *rate,
         vp8_quantize_mbuv(x);
 
         rate_to = rd_cost_mbuv(x);
-        rate = rate_to + x->intra_uv_mode_cost[xd->frame_type][xd->mode_info_context->mbmi.uv_mode];
+        this_rate = rate_to + x->intra_uv_mode_cost[xd->frame_type][xd->mode_info_context->mbmi.uv_mode];
 
-        distortion = vp8_mbuverror(x) / 4;
+        this_distortion = vp8_mbuverror(x) / 4;
 
-        this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+        this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
         if (this_rd < best_rd)
         {
             best_rd = this_rd;
-            d = distortion;
-            r = rate;
+            d = this_distortion;
+            r = this_rate;
             *rate_tokenonly = rate_to;
             mode_selected = mode;
         }
@@ -1294,12 +1294,11 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
 
                 if (bestsme < INT_MAX)
                 {
-                    int distortion;
+                    int disto;
                     unsigned int sse;
                     cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
                         bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost,
-                        &distortion, &sse);
-
+                        &disto, &sse);
                 }
             } /* NEW4X4 */
 
