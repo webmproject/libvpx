@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWX//90Y\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-03-14T23:12:06Z",
+      "side": 0,
+      "message": "restore this line; this is part of the style, one blank b/w sections...",
+      "revId": "7d855a9f13c0b303ec07b2025a35925b7a84dde9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
