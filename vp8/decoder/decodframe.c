@@ -1335,11 +1335,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #if CONFIG_MULTITHREAD
     if (pbi->b_multithreaded_rd && pc->multi_token_partition != ONE_PARTITION)
     {
-        unsigned int i;
+        unsigned int thread;
         vp8mt_decode_mb_rows(pbi, xd);
         vp8_yv12_extend_frame_borders(yv12_fb_new);
-        for (i = 0; i < pbi->decoding_thread_count; ++i)
-            corrupt_tokens |= pbi->mb_row_di[i].mbd.corrupted;
+        for (thread = 0; thread < pbi->decoding_thread_count; ++thread)
+            corrupt_tokens |= pbi->mb_row_di[thread].mbd.corrupted;
     }
     else
 #endif

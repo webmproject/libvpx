@@ -343,7 +343,6 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row)
 
     for (mb_row = start_mb_row; mb_row < pc->mb_rows; mb_row += (pbi->decoding_thread_count + 1))
     {
-       int i;
        int recon_yoffset, recon_uvoffset;
        int mb_col;
        int filter_level;
