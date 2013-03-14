@@ -1115,6 +1115,9 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cm->version = oxcf->Version;
   vp9_setup_version(cm);
 
+  cm->Width = oxcf->Width;
+  cm->Height = oxcf->Height;
+
   // change includes all joint functionality
   vp9_change_config(ptr, oxcf);
 
@@ -1299,26 +1302,14 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
-  cm->Width       = cpi->oxcf.Width;
-  cm->Height      = cpi->oxcf.Height;
+  cm->display_width = cpi->oxcf.Width;
+  cm->display_height = cpi->oxcf.Height;
 
   // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
   if (cpi->oxcf.Sharpness > 7)
     cpi->oxcf.Sharpness = 7;
 
   cm->sharpness_level = cpi->oxcf.Sharpness;
-
-  if (cm->horiz_scale != NORMAL || cm->vert_scale != NORMAL) {
-    int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
-    int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
-
-    Scale2Ratio(cm->horiz_scale, &hr, &hs);
-    Scale2Ratio(cm->vert_scale, &vr, &vs);
-
-    // always go to the next whole number
-    cm->Width = (hs - 1 + cpi->oxcf.Width * hr) / hs;
-    cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
-  }
 
   // Increasing the size of the frame beyond the first seen frame, or some
   // otherwise signalled maximum size, is not supported.
@@ -4149,6 +4140,7 @@ int vp9_set_internal_size(VP9_PTR comp,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
   VP9_COMP *cpi = (VP9_COMP *) comp;
   VP9_COMMON *cm = &cpi->common;
+  int hr = 0, hs = 0, vr = 0, vs = 0;
 
   if (horiz_mode > ONETWO)
     return -1;
@@ -4156,20 +4148,13 @@ int vp9_set_internal_size(VP9_PTR comp,
   if (vert_mode > ONETWO)
     return -1;
 
-  if (cm->horiz_scale != horiz_mode || cm->vert_scale != vert_mode) {
-    int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
-    int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
+  Scale2Ratio(horiz_mode, &hr, &hs);
+  Scale2Ratio(vert_mode, &vr, &vs);
 
-    cm->horiz_scale = horiz_mode;
-    cm->vert_scale = vert_mode;
+  // always go to the next whole number
+  cm->Width = (hs - 1 + cpi->oxcf.Width * hr) / hs;
+  cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
 
-    Scale2Ratio(cm->horiz_scale, &hr, &hs);
-    Scale2Ratio(cm->vert_scale, &vr, &vs);
-
-    // always go to the next whole number
-    cm->Width = (hs - 1 + cpi->oxcf.Width * hr) / hs;
-    cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
-  }
   assert(cm->Width <= cpi->initial_width);
   assert(cm->Height <= cpi->initial_height);
   update_frame_size(cpi);
