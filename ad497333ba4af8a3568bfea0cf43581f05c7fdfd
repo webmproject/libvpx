@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//+HU\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-14T20:49:04Z",
+      "side": 1,
+      "message": "Why does this need to be split from DecodeFrame? It\u0027s a little funny as an Init function, since it doesn\u0027t re-init if you call it multiple times, and it\u0027s not clear why you\u0027d ever want to call DecodeFrameRaw without having Init\u0027d first.",
+      "revId": "ad497333ba4af8a3568bfea0cf43581f05c7fdfd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX//+Nw\u003d",
         "filename": "test/decode_test_driver.h",
         "patchSetId": 6
@@ -47,6 +64,23 @@
       "writtenOn": "2013-03-14T20:02:02Z",
       "side": 1,
       "message": "long linr",
+      "revId": "ad497333ba4af8a3568bfea0cf43581f05c7fdfd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//+IU\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-14T20:49:04Z",
+      "side": 1,
+      "message": "Control() takes data too -- just overload that function with the new type. See encode_test_driver.h for an example. I\u0027m torn as to whether this should be a const unsigned char * instead, since that matches the type exactly. You can do it as a void I guess, but it means casting in every test that wants to use it.",
       "revId": "ad497333ba4af8a3568bfea0cf43581f05c7fdfd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -166,6 +200,23 @@
       "writtenOn": "2013-03-14T20:02:02Z",
       "side": 1,
       "message": "VP8_DECRYPT_KEY_SIZE ?",
+      "revId": "ad497333ba4af8a3568bfea0cf43581f05c7fdfd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//+IE\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-14T20:49:04Z",
+      "side": 1,
+      "message": "no objection to this, but it\u0027s probably unnecessary -- alg_priv is calloc\u0027d.",
       "revId": "ad497333ba4af8a3568bfea0cf43581f05c7fdfd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
