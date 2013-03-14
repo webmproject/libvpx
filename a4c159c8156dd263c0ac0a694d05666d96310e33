@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWX//91E\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-14T23:00:01Z",
+      "side": 1,
+      "message": "I still don\u0027t understand what\u0027s going on here. Why is DecodeFrameRaw useful? Why does DecodeFrame no longer call the init code?",
+      "revId": "a4c159c8156dd263c0ac0a694d05666d96310e33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//908\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-14T23:00:01Z",
+      "side": 1,
+      "message": "suggest making this \u0027arg\u0027, for consistency with the other Control()",
+      "revId": "a4c159c8156dd263c0ac0a694d05666d96310e33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
