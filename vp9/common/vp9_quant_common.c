@@ -52,21 +52,6 @@ int vp9_dc_quant(int QIndex, int Delta) {
   return retval;
 }
 
-int vp9_dc2quant(int QIndex, int Delta) {
-  int retval;
-
-  QIndex = QIndex + Delta;
-
-  if (QIndex > MAXQ)
-    QIndex = MAXQ;
-  else if (QIndex < 0)
-    QIndex = 0;
-
-  retval = dc_qlookup[ QIndex ];
-
-  return retval;
-
-}
 int vp9_dc_uv_quant(int QIndex, int Delta) {
   int retval;
 
@@ -94,22 +79,6 @@ int vp9_ac_yquant(int QIndex) {
   return retval;
 }
 
-int vp9_ac2quant(int QIndex, int Delta) {
-  int retval;
-
-  QIndex = QIndex + Delta;
-
-  if (QIndex > MAXQ)
-    QIndex = MAXQ;
-  else if (QIndex < 0)
-    QIndex = 0;
-
-  retval = (ac_qlookup[ QIndex ] * 775) / 1000;
-  if (retval < 4)
-    retval = 4;
-
-  return retval;
-}
 int vp9_ac_uv_quant(int QIndex, int Delta) {
   int retval;
 
