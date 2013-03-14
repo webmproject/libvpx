@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//+nU\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-03-14T15:25:05Z",
+      "side": 1,
+      "message": "guess I better learn how to type ;-)",
+      "parentUuid": "AAAAWX//+y0\u003d",
+      "revId": "d7b9fdb8ec8f8b43c22b60246da622ade5c0e3a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX//+y4\u003d",
         "filename": "vp8/common/loopfilter.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-03-14T07:09:07Z",
       "side": 1,
       "message": "you missed a /* clamp */ if you were intending to move these...",
+      "revId": "d7b9fdb8ec8f8b43c22b60246da622ade5c0e3a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//+nY\u003d",
+        "filename": "vp8/common/loopfilter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-03-14T15:25:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//+y4\u003d",
       "revId": "d7b9fdb8ec8f8b43c22b60246da622ade5c0e3a2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
