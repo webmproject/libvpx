@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//+9M\u003d",
+        "filename": "vp8/decoder/dboolhuff.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-14T02:01:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWH//7UQ\u003d",
+      "revId": "1e40af2498c2742947193f781140221a098caa31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX///vM\u003d",
         "filename": "vp8/decoder/dboolhuff.h",
         "patchSetId": 4
@@ -135,6 +153,24 @@
       "writtenOn": "2013-03-13T16:54:58Z",
       "side": 1,
       "message": "We should probably make a copy of this. What happens if the outside application changes the contents during decode? If we want to leave this as a reference, make sure to document that the application needs to keep it stable for the lifetime of the frame.",
+      "revId": "1e40af2498c2742947193f781140221a098caa31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX///Ek\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 959,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-14T02:01:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX///uc\u003d",
       "revId": "1e40af2498c2742947193f781140221a098caa31",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -188,6 +224,24 @@
       "side": 1,
       "message": "I\u0027m waiting for the John\u0027s review to update the the whole patch set.",
       "parentUuid": "AAAAWH//7tE\u003d",
+      "revId": "1e40af2498c2742947193f781140221a098caa31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX///Ec\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-14T02:01:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWH//7UU\u003d",
       "revId": "1e40af2498c2742947193f781140221a098caa31",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
