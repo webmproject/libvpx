@@ -3444,9 +3444,11 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Further refinement that is encode side only to test the top few candidates
   // in full and choose the best as the centre point for subsequent searches.
-  mv_pred(cpi, x, yv12_mb[frame_type].y_buffer, yv12->y_stride,
-          frame_type, block_size);
-
+  // The current implementation doesn't support scaling.
+  if (scale[frame_type].x_num == scale[frame_type].x_den &&
+      scale[frame_type].y_num == scale[frame_type].y_den)
+    mv_pred(cpi, x, yv12_mb[frame_type].y_buffer, yv12->y_stride,
+            frame_type, block_size);
 }
 
 static void model_rd_from_var_lapndz(int var, int n, int qstep,

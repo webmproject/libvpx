@@ -20,8 +20,8 @@
 void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
                                        YV12_BUFFER_CONFIG *other,
                                        int this_w, int this_h) {
-  int other_h = other->y_height;
-  int other_w = other->y_width;
+  int other_h = other->y_crop_height;
+  int other_w = other->y_crop_width;
 
   scale->x_num = other_w;
   scale->x_den = this_w;
@@ -95,7 +95,7 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
 
     vp9_setup_scale_factors_for_frame(&cm->active_ref_scale[i],
                                       &cm->yv12_fb[cm->active_ref_idx[i]],
-                                      cm->mb_cols * 16, cm->mb_rows * 16);
+                                      cm->Width, cm->Height);
   }
 
   if (xd->mode_info_context) {
