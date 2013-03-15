@@ -21,6 +21,9 @@
 #define DCT_CONST_BITS 14
 #define DCT_CONST_ROUNDING  (1 << (DCT_CONST_BITS - 1))
 
+#define pair_set_epi16(a, b) \
+  _mm_set1_epi32(((uint16_t)(a)) + (((uint16_t)(b)) << 16))
+
 // Constants are round(16384 * cos(k*Pi/64)) where k = 1 to 31.
 // Note: sin(k*Pi/64) = cos((32-k)*Pi/64)
 static const int cospi_1_64  = 16364;

@@ -11,9 +11,6 @@
 #include <emmintrin.h>  // SSE2
 #include "vp9/common/vp9_idct.h"  // for cospi constants
 
-#define pair_set_epi16(a, b) \
-  _mm_set1_epi32(((uint16_t)(a)) + (((uint16_t)(b)) << 16))
-
 void vp9_short_fdct8x8_sse2(int16_t *input, int16_t *output, int pitch) {
   const int stride = pitch >> 1;
   int pass;
