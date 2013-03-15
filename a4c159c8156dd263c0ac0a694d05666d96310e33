@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//894\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-15T21:25:25Z",
+      "side": 1,
+      "message": "See the next patch set, init code will go to the decoder\u0027s constructor.",
+      "parentUuid": "AAAAWX//91E\u003d",
+      "revId": "a4c159c8156dd263c0ac0a694d05666d96310e33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX//908\u003d",
         "filename": "test/decode_test_driver.h",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2013-03-14T23:00:01Z",
       "side": 1,
       "message": "suggest making this \u0027arg\u0027, for consistency with the other Control()",
+      "revId": "a4c159c8156dd263c0ac0a694d05666d96310e33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//9xY\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-15T21:25:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//908\u003d",
       "revId": "a4c159c8156dd263c0ac0a694d05666d96310e33",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//9xk\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-15T21:25:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//90Q\u003d",
+      "revId": "a4c159c8156dd263c0ac0a694d05666d96310e33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX//9z8\u003d",
         "filename": "test/vp8_decrypt_test.cc",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2013-03-14T23:12:06Z",
       "side": 1,
       "message": "this can go since you moved Init() to the constructor",
+      "revId": "a4c159c8156dd263c0ac0a694d05666d96310e33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//9x4\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-15T21:25:25Z",
+      "side": 1,
+      "message": "That\u0027s IVFVideoSource object, not a Decoder instance",
+      "parentUuid": "AAAAWX//9z8\u003d",
       "revId": "a4c159c8156dd263c0ac0a694d05666d96310e33",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
