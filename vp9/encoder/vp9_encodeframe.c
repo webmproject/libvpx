@@ -1292,7 +1292,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cpi->mb_mv_ref_count);
 #endif
 
-
   // force lossless mode when Q0 is selected
   cpi->mb.e_mbd.lossless = (cm->base_qindex == 0 &&
                             cm->y1dc_delta_q == 0 &&
