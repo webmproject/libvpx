@@ -63,6 +63,12 @@ enum vp8_dec_control_id {
    */
   VP8D_GET_LAST_REF_USED,
 
+  /** decryption key to protect encoded data buffer before decoding,
+   *  pointer to 32 byte array which is copied, so the array passed
+   *  does not need to be preserved
+   */
+  VP8_SET_DECRYPT_KEY,
+
   VP8_DECODER_CTRL_ID_MAX
 };
 
@@ -78,6 +84,7 @@ enum vp8_dec_control_id {
 VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_UPDATES,   int *)
 VPX_CTRL_USE_TYPE(VP8D_GET_FRAME_CORRUPTED,    int *)
 VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_USED,      int *)
+VPX_CTRL_USE_TYPE(VP8_SET_DECRYPT_KEY,         const unsigned char *)
 
 /*! @} - end defgroup vp8_decoder */
 

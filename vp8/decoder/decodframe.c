@@ -893,7 +893,9 @@ static void setup_token_decoder(VP8D_COMP *pbi,
     {
         if (vp8dx_start_decode(bool_decoder,
                                pbi->fragments.ptrs[partition_idx],
-                               pbi->fragments.sizes[partition_idx]))
+                               pbi->fragments.sizes[partition_idx],
+                               pbi->fragments.ptrs[0],
+                               pbi->decrypt_key))
             vpx_internal_error(&pbi->common.error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate bool decoder %d",
                                partition_idx);
@@ -980,10 +982,11 @@ static void init_frame(VP8D_COMP *pbi)
 
 int vp8_decode_frame(VP8D_COMP *pbi)
 {
-    vp8_reader *const bc = & pbi->mbc[8];
-    VP8_COMMON *const pc = & pbi->common;
-    MACROBLOCKD *const xd  = & pbi->mb;
+    vp8_reader *const bc = &pbi->mbc[8];
+    VP8_COMMON *const pc = &pbi->common;
+    MACROBLOCKD *const xd  = &pbi->mb;
     const unsigned char *data = pbi->fragments.ptrs[0];
+    const unsigned char *const origin = data;
     const unsigned char *data_end =  data + pbi->fragments.sizes[0];
     ptrdiff_t first_partition_length_in_bytes;
 
@@ -1016,13 +1019,21 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
     else
     {
-        pc->frame_type = (FRAME_TYPE)(data[0] & 1);
-        pc->version = (data[0] >> 1) & 7;
-        pc->show_frame = (data[0] >> 4) & 1;
-        first_partition_length_in_bytes =
-            (data[0] | (data[1] << 8) | (data[2] << 16)) >> 5;
+        const unsigned char data0 = decrypt_byte(data + 0, origin,
+                                                 pbi->decrypt_key);
+        const unsigned char data1 = decrypt_byte(data + 1, origin,
+                                                 pbi->decrypt_key);
+        const unsigned char data2 = decrypt_byte(data + 2, origin,
+                                                 pbi->decrypt_key);
 
-        if (!pbi->ec_active && (data + first_partition_length_in_bytes > data_end
+        pc->frame_type = (FRAME_TYPE)(data0 & 1);
+        pc->version = (data0 >> 1) & 7;
+        pc->show_frame = (data0 >> 4) & 1;
+        first_partition_length_in_bytes =
+            (data0 | (data1 << 8) | (data2 << 16)) >> 5;
+
+        if (!pbi->ec_active &&
+            (data + first_partition_length_in_bytes > data_end
             || data + first_partition_length_in_bytes < data))
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated packet or corrupt partition 0 length");
@@ -1040,7 +1051,13 @@ int vp8_decode_frame(VP8D_COMP *pbi)
              */
             if (!pbi->ec_active || data + 3 < data_end)
             {
-                if (data[0] != 0x9d || data[1] != 0x01 || data[2] != 0x2a)
+                const unsigned char data0 = decrypt_byte(data + 0, origin,
+                                                         pbi->decrypt_key);
+                const unsigned char data1 = decrypt_byte(data + 1, origin,
+                                                         pbi->decrypt_key);
+                const unsigned char data2 = decrypt_byte(data + 2, origin,
+                                                         pbi->decrypt_key);
+                if (data0 != 0x9d || data1 != 0x01 || data2 != 0x2a)
                     vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
                                    "Invalid frame sync code");
             }
@@ -1051,10 +1068,19 @@ int vp8_decode_frame(VP8D_COMP *pbi)
              */
             if (!pbi->ec_active || data + 6 < data_end)
             {
-                pc->Width = (data[3] | (data[4] << 8)) & 0x3fff;
-                pc->horiz_scale = data[4] >> 6;
-                pc->Height = (data[5] | (data[6] << 8)) & 0x3fff;
-                pc->vert_scale = data[6] >> 6;
+                const unsigned char data3 = decrypt_byte(data + 3, origin,
+                                                         pbi->decrypt_key);
+                const unsigned char data4 = decrypt_byte(data + 4, origin,
+                                                         pbi->decrypt_key);
+                const unsigned char data5 = decrypt_byte(data + 5, origin,
+                                                         pbi->decrypt_key);
+                const unsigned char data6 = decrypt_byte(data + 6, origin,
+                                                         pbi->decrypt_key);
+
+                pc->Width = (data3 | (data4 << 8)) & 0x3fff;
+                pc->horiz_scale = data4 >> 6;
+                pc->Height = (data5 | (data6 << 8)) & 0x3fff;
+                pc->vert_scale = data6 >> 6;
             }
             data += 7;
 
@@ -1072,7 +1098,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     init_frame(pbi);
 
-    if (vp8dx_start_decode(bc, data, (unsigned int)(data_end - data)))
+    if (vp8dx_start_decode(bc,
+                           data,
+                           (unsigned int)(data_end - data),
+                           pbi->fragments.ptrs[0],
+                           pbi->decrypt_key))
         vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate bool decoder 0");
     if (pc->frame_type == KEY_FRAME) {
