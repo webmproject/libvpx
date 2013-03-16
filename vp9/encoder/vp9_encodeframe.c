@@ -594,9 +594,6 @@ static void update_state(VP9_COMP *cpi,
           [vp9_switchable_interp_map[mbmi->interp_filter]];
     }
 
-    cpi->prediction_error += ctx->distortion;
-    cpi->intra_error += ctx->intra_error;
-
     cpi->rd_comp_pred_diff[SINGLE_PREDICTION_ONLY] += ctx->single_pred_diff;
     cpi->rd_comp_pred_diff[COMP_PREDICTION_ONLY]   += ctx->comp_pred_diff;
     cpi->rd_comp_pred_diff[HYBRID_PREDICTION]      += ctx->hybrid_pred_diff;
@@ -1265,8 +1262,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   // Reset frame count of inter 0,0 motion vector usage.
   cpi->inter_zz_count = 0;
 
-  cpi->prediction_error = 0;
-  cpi->intra_error = 0;
   cpi->skip_true_count[0] = cpi->skip_true_count[1] = cpi->skip_true_count[2] = 0;
   cpi->skip_false_count[0] = cpi->skip_false_count[1] = cpi->skip_false_count[2] = 0;
 
