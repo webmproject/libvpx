@@ -859,6 +859,8 @@ static double calc_correction_factor(double err_per_mb,
   power_term = (power_term > pt_high) ? pt_high : power_term;
 
   // Calculate correction factor
+  if (power_term < 1.0)
+    assert(error_term >= 0.0);
   correction_factor = pow(error_term, power_term);
 
   // Clip range
@@ -920,15 +922,19 @@ static int estimate_max_q(VP9_COMP *cpi,
 
   // Look at the drop in prediction quality between the last frame
   // and the GF buffer (which contained an older frame).
-  sr_err_diff =
-    (fpstats->sr_coded_error - fpstats->coded_error) /
-    (fpstats->count * cpi->common.MBs);
-  sr_correction = (sr_err_diff / 32.0);
-  sr_correction = pow(sr_correction, 0.25);
-  if (sr_correction < 0.75)
+  if (fpstats->sr_coded_error > fpstats->coded_error) {
+    sr_err_diff =
+      (fpstats->sr_coded_error - fpstats->coded_error) /
+      (fpstats->count * cpi->common.MBs);
+    sr_correction = (sr_err_diff / 32.0);
+    sr_correction = pow(sr_correction, 0.25);
+    if (sr_correction < 0.75)
+      sr_correction = 0.75;
+    else if (sr_correction > 1.25)
+      sr_correction = 1.25;
+  } else {
     sr_correction = 0.75;
-  else if (sr_correction > 1.25)
-    sr_correction = 1.25;
+  }
 
   // Calculate a corrective factor based on a rolling ratio of bits spent
   // vs target bits
@@ -1031,15 +1037,19 @@ static int estimate_cq(VP9_COMP *cpi,
 
   // Look at the drop in prediction quality between the last frame
   // and the GF buffer (which contained an older frame).
-  sr_err_diff =
-    (fpstats->sr_coded_error - fpstats->coded_error) /
-    (fpstats->count * cpi->common.MBs);
-  sr_correction = (sr_err_diff / 32.0);
-  sr_correction = pow(sr_correction, 0.25);
-  if (sr_correction < 0.75)
+  if (fpstats->sr_coded_error > fpstats->coded_error) {
+    sr_err_diff =
+      (fpstats->sr_coded_error - fpstats->coded_error) /
+      (fpstats->count * cpi->common.MBs);
+    sr_correction = (sr_err_diff / 32.0);
+    sr_correction = pow(sr_correction, 0.25);
+    if (sr_correction < 0.75)
+      sr_correction = 0.75;
+    else if (sr_correction > 1.25)
+      sr_correction = 1.25;
+  } else {
     sr_correction = 0.75;
-  else if (sr_correction > 1.25)
-    sr_correction = 1.25;
+  }
 
   // II ratio correction factor for clip as a whole
   clip_iiratio = cpi->twopass.total_stats->intra_error /
@@ -1178,12 +1188,16 @@ static double get_prediction_decay_rate(VP9_COMP *cpi,
   mb_sr_err_diff =
     (next_frame->sr_coded_error - next_frame->coded_error) /
     (cpi->common.MBs);
-  second_ref_decay = 1.0 - (mb_sr_err_diff / 512.0);
-  second_ref_decay = pow(second_ref_decay, 0.5);
-  if (second_ref_decay < 0.85)
+  if (mb_sr_err_diff <= 512.0) {
+    second_ref_decay = 1.0 - (mb_sr_err_diff / 512.0);
+    second_ref_decay = pow(second_ref_decay, 0.5);
+    if (second_ref_decay < 0.85)
+      second_ref_decay = 0.85;
+    else if (second_ref_decay > 1.0)
+      second_ref_decay = 1.0;
+  } else {
     second_ref_decay = 0.85;
-  else if (second_ref_decay > 1.0)
-    second_ref_decay = 1.0;
+  }
 
   if (second_ref_decay < prediction_decay_rate)
     prediction_decay_rate = second_ref_decay;
