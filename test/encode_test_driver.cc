@@ -160,13 +160,16 @@ void EncoderTest::RunLoop(VideoSource *video) {
 
       while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
         again = true;
-
+#if CONFIG_VP8_DECODER
+        vpx_codec_err_t res_dec;
+#endif
         switch (pkt->kind) {
           case VPX_CODEC_CX_FRAME_PKT:
 #if CONFIG_VP8_DECODER
             has_cxdata = true;
-            decoder.DecodeFrame((const uint8_t*)pkt->data.frame.buf,
-                                pkt->data.frame.sz);
+            res_dec = decoder.DecodeFrame((const uint8_t*)pkt->data.frame.buf,
+                                          pkt->data.frame.sz);
+            ASSERT_EQ(VPX_CODEC_OK, res_dec) << decoder.DecodeError();
 #endif
             ASSERT_GE(pkt->data.frame.pts, last_pts_);
             last_pts_ = pkt->data.frame.pts;

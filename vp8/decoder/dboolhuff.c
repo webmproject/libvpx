@@ -13,13 +13,17 @@
 
 int vp8dx_start_decode(BOOL_DECODER *br,
                        const unsigned char *source,
-                       unsigned int source_sz)
+                       unsigned int source_sz,
+                       const unsigned char *origin,
+                       const unsigned char *key)
 {
     br->user_buffer_end = source+source_sz;
     br->user_buffer     = source;
     br->value    = 0;
     br->count    = -8;
     br->range    = 255;
+    br->origin = origin;
+    br->key = key;
 
     if (source_sz && !source)
         return 1;
@@ -52,7 +56,9 @@ void vp8dx_bool_decoder_fill(BOOL_DECODER *br)
         while(shift >= loop_end)
         {
             count += CHAR_BIT;
-            value |= (VP8_BD_VALUE)*bufptr++ << shift;
+            value |= ((VP8_BD_VALUE)decrypt_byte(bufptr, br->origin,
+                                                 br->key)) << shift;
+            ++bufptr;
             shift -= CHAR_BIT;
         }
     }
