@@ -361,7 +361,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
 #if CONFIG_NEWBINTRAMODES
       xd->mode_info_context->bmi[i].as_mode.context = b->bmi.as_mode.context =
-          vp9_find_bpred_context(b);
+          vp9_find_bpred_context(xd, b);
 #endif
       if (!xd->mode_info_context->mbmi.mb_skip_coeff)
         eobtotal += vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_Y_WITH_DC, i);

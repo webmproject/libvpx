@@ -15,17 +15,17 @@
 #include "vp9_rtcd.h"
 
 #if CONFIG_NEWBINTRAMODES
-static int find_grad_measure(uint8_t *x, int stride, int n, int t,
+static int find_grad_measure(uint8_t *x, int stride, int n, int tx, int ty,
                              int dx, int dy) {
   int i, j;
   int count = 0, gsum = 0, gdiv;
   /* TODO: Make this code more efficient by breaking up into two loops */
-  for (i = -t; i < n; ++i)
-    for (j = -t; j < n; ++j) {
+  for (i = -ty; i < n; ++i)
+    for (j = -tx; j < n; ++j) {
       int g;
       if (i >= 0 && j >= 0) continue;
       if (i + dy >= 0 && j + dx >= 0) continue;
-      if (i + dy < -t || i + dy >= n || j + dx < -t || j + dx >= n) continue;
+      if (i + dy < -ty || i + dy >= n || j + dx < -tx || j + dx >= n) continue;
       g = abs(x[(i + dy) * stride + j + dx] - x[i * stride + j]);
       gsum += g * g;
       count++;
@@ -36,14 +36,15 @@ static int find_grad_measure(uint8_t *x, int stride, int n, int t,
 
 #if CONTEXT_PRED_REPLACEMENTS == 6
 B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
-                                              int stride, int n) {
+                                              int stride, int n,
+                                              int tx, int ty) {
   int g[8], i, imin, imax;
-  g[1] = find_grad_measure(ptr, stride, n, 4,  2, 1);
-  g[2] = find_grad_measure(ptr, stride, n, 4,  1, 1);
-  g[3] = find_grad_measure(ptr, stride, n, 4,  1, 2);
-  g[5] = find_grad_measure(ptr, stride, n, 4, -1, 2);
-  g[6] = find_grad_measure(ptr, stride, n, 4, -1, 1);
-  g[7] = find_grad_measure(ptr, stride, n, 4, -2, 1);
+  g[1] = find_grad_measure(ptr, stride, n, tx, ty,  2, 1);
+  g[2] = find_grad_measure(ptr, stride, n, tx, ty,  1, 1);
+  g[3] = find_grad_measure(ptr, stride, n, tx, ty,  1, 2);
+  g[5] = find_grad_measure(ptr, stride, n, tx, ty, -1, 2);
+  g[6] = find_grad_measure(ptr, stride, n, tx, ty, -1, 1);
+  g[7] = find_grad_measure(ptr, stride, n, tx, ty, -2, 1);
   imin = 1;
   for (i = 2; i < 8; i += 1 + (i == 3))
     imin = (g[i] < g[imin] ? i : imin);
@@ -73,12 +74,13 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
 }
 #elif CONTEXT_PRED_REPLACEMENTS == 4
 B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
-                                              int stride, int n) {
+                                              int stride, int n,
+                                              int tx, int ty) {
   int g[8], i, imin, imax;
-  g[1] = find_grad_measure(ptr, stride, n, 4,  2, 1);
-  g[3] = find_grad_measure(ptr, stride, n, 4,  1, 2);
-  g[5] = find_grad_measure(ptr, stride, n, 4, -1, 2);
-  g[7] = find_grad_measure(ptr, stride, n, 4, -2, 1);
+  g[1] = find_grad_measure(ptr, stride, n, tx, ty,  2, 1);
+  g[3] = find_grad_measure(ptr, stride, n, tx, ty,  1, 2);
+  g[5] = find_grad_measure(ptr, stride, n, tx, ty, -1, 2);
+  g[7] = find_grad_measure(ptr, stride, n, tx, ty, -2, 1);
   imin = 1;
   for (i = 3; i < 8; i+=2)
     imin = (g[i] < g[imin] ? i : imin);
@@ -104,16 +106,17 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
 }
 #elif CONTEXT_PRED_REPLACEMENTS == 0
 B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
-                                              int stride, int n) {
+                                              int stride, int n,
+                                              int tx, int ty) {
   int g[8], i, imin, imax;
-  g[0] = find_grad_measure(ptr, stride, n, 4,  1, 0);
-  g[1] = find_grad_measure(ptr, stride, n, 4,  2, 1);
-  g[2] = find_grad_measure(ptr, stride, n, 4,  1, 1);
-  g[3] = find_grad_measure(ptr, stride, n, 4,  1, 2);
-  g[4] = find_grad_measure(ptr, stride, n, 4,  0, 1);
-  g[5] = find_grad_measure(ptr, stride, n, 4, -1, 2);
-  g[6] = find_grad_measure(ptr, stride, n, 4, -1, 1);
-  g[7] = find_grad_measure(ptr, stride, n, 4, -2, 1);
+  g[0] = find_grad_measure(ptr, stride, n, tx, ty,  1, 0);
+  g[1] = find_grad_measure(ptr, stride, n, tx, ty,  2, 1);
+  g[2] = find_grad_measure(ptr, stride, n, tx, ty,  1, 1);
+  g[3] = find_grad_measure(ptr, stride, n, tx, ty,  1, 2);
+  g[4] = find_grad_measure(ptr, stride, n, tx, ty,  0, 1);
+  g[5] = find_grad_measure(ptr, stride, n, tx, ty, -1, 2);
+  g[6] = find_grad_measure(ptr, stride, n, tx, ty, -1, 1);
+  g[7] = find_grad_measure(ptr, stride, n, tx, ty, -2, 1);
   imax = 0;
   for (i = 1; i < 8; i++)
     imax = (g[i] > g[imax] ? i : imax);
@@ -144,10 +147,17 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
 }
 #endif
 
-B_PREDICTION_MODE vp9_find_bpred_context(BLOCKD *x) {
+B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, BLOCKD *x) {
+  const int block_idx = x - xd->block;
+  const int have_top = (block_idx >> 2) || xd->up_available;
+  const int have_left = (block_idx & 3)  || xd->left_available;
   uint8_t *ptr = *(x->base_dst) + x->dst;
   int stride = x->dst_stride;
-  return vp9_find_dominant_direction(ptr, stride, 4);
+  int tx = have_left ? 4 : 0;
+  int ty = have_top ? 4 : 0;
+  if (!have_left && !have_top)
+    return B_DC_PRED;
+  return vp9_find_dominant_direction(ptr, stride, 4, tx, ty);
 }
 #endif
 

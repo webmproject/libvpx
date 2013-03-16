@@ -1168,7 +1168,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, BLOCK *be,
   DECLARE_ALIGNED_ARRAY(16, int16_t, best_dqcoeff, 16);
 
 #if CONFIG_NEWBINTRAMODES
-  b->bmi.as_mode.context = vp9_find_bpred_context(b);
+  b->bmi.as_mode.context = vp9_find_bpred_context(xd, b);
 #endif
   xd->mode_info_context->mbmi.txfm_size = TX_4X4;
   for (mode = B_DC_PRED; mode < LEFT4X4; mode++) {
@@ -1279,7 +1279,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
       bmode_costs  = mb->bmode_costs[A][L];
     }
 #if CONFIG_NEWBINTRAMODES
-    mic->bmi[i].as_mode.context = vp9_find_bpred_context(xd->block + i);
+    mic->bmi[i].as_mode.context = vp9_find_bpred_context(xd, xd->block + i);
 #endif
 
     total_rd += rd_pick_intra4x4block(
