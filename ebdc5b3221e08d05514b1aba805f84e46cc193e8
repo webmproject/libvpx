@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//8ko\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-16T01:22:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//8k8\u003d",
+      "revId": "ebdc5b3221e08d05514b1aba805f84e46cc193e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX//8lA\u003d",
         "filename": "test/vp8_decrypt_test.cc",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2013-03-16T01:16:28Z",
       "side": 1,
       "message": "not sure why you\u0027re using the calls directly here and not the Decoder wrapper class, but I guess it\u0027s ok. Use vpx_codec_control() (without the trailing underscore) in this context.",
+      "revId": "ebdc5b3221e08d05514b1aba805f84e46cc193e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//8kk\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-16T01:22:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//8lA\u003d",
       "revId": "ebdc5b3221e08d05514b1aba805f84e46cc193e8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
