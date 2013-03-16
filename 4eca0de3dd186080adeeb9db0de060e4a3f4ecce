@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//8nw\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-16T01:13:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//8w4\u003d",
+      "revId": "4eca0de3dd186080adeeb9db0de060e4a3f4ecce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX//8ws\u003d",
         "filename": "test/vp8_decrypt_test.cc",
         "patchSetId": 9
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//8lQ\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-16T01:13:09Z",
+      "side": 1,
+      "message": "Separate test has been added",
+      "parentUuid": "AAAAWX//8ws\u003d",
+      "revId": "4eca0de3dd186080adeeb9db0de060e4a3f4ecce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX//8v4\u003d",
         "filename": "vp8/decoder/dboolhuff.h",
         "patchSetId": 9
@@ -47,6 +83,24 @@
       "writtenOn": "2013-03-15T23:27:08Z",
       "side": 1,
       "message": "VP8_DECRYPT_KEY_SIZE",
+      "revId": "4eca0de3dd186080adeeb9db0de060e4a3f4ecce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//8lI\u003d",
+        "filename": "vp8/decoder/dboolhuff.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-16T01:13:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//8v4\u003d",
       "revId": "4eca0de3dd186080adeeb9db0de060e4a3f4ecce",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
