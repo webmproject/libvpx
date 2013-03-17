@@ -44,7 +44,7 @@ void vp9_encode_intra4x4block(MACROBLOCK *x, int ib) {
   TX_TYPE tx_type;
 
 #if CONFIG_NEWBINTRAMODES
-  b->bmi.as_mode.context = vp9_find_bpred_context(b);
+  b->bmi.as_mode.context = vp9_find_bpred_context(&x->e_mbd, b);
 #endif
 
   vp9_intra4x4_predict(&x->e_mbd, b, b->bmi.as_mode.first, b->predictor);
