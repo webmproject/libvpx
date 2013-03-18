@@ -381,10 +381,8 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   int frames_to_blur = 0;
   int start_frame = 0;
 
-  int strength = cpi->oxcf.arnr_strength;
-
+  int strength = cpi->active_arnr_strength;
   int blur_type = cpi->oxcf.arnr_type;
-
   int max_frames = cpi->active_arnr_frames;
 
   num_frames_backward = distance;

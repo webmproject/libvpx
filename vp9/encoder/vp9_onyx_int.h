@@ -416,6 +416,7 @@ typedef struct VP9_COMP {
   int max_gf_interval;
   int baseline_gf_interval;
   int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
+  int active_arnr_strength;         // <= cpi->oxcf.arnr_max_strength
 
   int64_t key_frame_count;
   int prior_key_frame_distance[KEY_FRAME_CONTEXT];
