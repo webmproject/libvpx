@@ -17,6 +17,7 @@
 #include "vpx_version.h"
 #include "decoder/vp9_onyxd.h"
 #include "decoder/vp9_onyxd_int.h"
+#include "vp9/vp9_iface_common.h"
 
 #define VP8_CAP_POSTPROC (CONFIG_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
 typedef vpx_codec_stream_info_t  vp8_stream_info_t;
@@ -271,36 +272,6 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
                            : NULL;
 
   return res;
-}
-
-static void yuvconfig2image(vpx_image_t               *img,
-                            const YV12_BUFFER_CONFIG  *yv12,
-                            void                      *user_priv) {
-  /** vpx_img_wrap() doesn't allow specifying independent strides for
-    * the Y, U, and V planes, nor other alignment adjustments that
-    * might be representable by a YV12_BUFFER_CONFIG, so we just
-    * initialize all the fields.*/
-  img->fmt = yv12->clrtype == REG_YUV ?
-             VPX_IMG_FMT_I420 : VPX_IMG_FMT_VPXI420;
-  img->w = yv12->y_stride;
-  img->h = (yv12->y_height + 2 * VP9BORDERINPIXELS + 15) & ~15;
-  img->d_w = yv12->y_width;
-  img->d_h = yv12->y_height;
-  img->x_chroma_shift = 1;
-  img->y_chroma_shift = 1;
-  img->planes[VPX_PLANE_Y] = yv12->y_buffer;
-  img->planes[VPX_PLANE_U] = yv12->u_buffer;
-  img->planes[VPX_PLANE_V] = yv12->v_buffer;
-  img->planes[VPX_PLANE_ALPHA] = NULL;
-  img->stride[VPX_PLANE_Y] = yv12->y_stride;
-  img->stride[VPX_PLANE_U] = yv12->uv_stride;
-  img->stride[VPX_PLANE_V] = yv12->uv_stride;
-  img->stride[VPX_PLANE_ALPHA] = yv12->y_stride;
-  img->bps = 12;
-  img->user_priv = user_priv;
-  img->img_data = yv12->buffer_alloc;
-  img->img_data_owner = 0;
-  img->self_allocd = 0;
 }
 
 static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
@@ -648,9 +619,9 @@ static vpx_codec_err_t vp9_set_reference(vpx_codec_alg_priv_t *ctx,
 
 }
 
-static vpx_codec_err_t vp9_get_reference(vpx_codec_alg_priv_t *ctx,
-                                         int ctr_id,
-                                         va_list args) {
+static vpx_codec_err_t vp9_copy_reference(vpx_codec_alg_priv_t *ctx,
+                                          int ctr_id,
+                                          va_list args) {
 
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
@@ -660,11 +631,27 @@ static vpx_codec_err_t vp9_get_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp9_get_reference_dec(ctx->pbi,
-                                 (VP9_REFFRAME)frame->frame_type, &sd);
+    return vp9_copy_reference_dec(ctx->pbi,
+                                  (VP9_REFFRAME)frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 
+}
+
+static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx,
+                                     int ctr_id,
+                                     va_list args) {
+  vp9_ref_frame_t *data = va_arg(args, vp9_ref_frame_t *);
+
+  if (data) {
+    YV12_BUFFER_CONFIG* fb;
+
+    vp9_get_reference_dec(ctx->pbi, data->idx, &fb);
+    yuvconfig2image(&data->img, fb, NULL);
+    return VPX_CODEC_OK;
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
 }
 
 static vpx_codec_err_t vp8_set_postproc(vpx_codec_alg_priv_t *ctx,
@@ -739,7 +726,7 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_ctrl_fn_map_t ctf_maps[] = {
   {VP8_SET_REFERENCE,             vp9_set_reference},
-  {VP8_COPY_REFERENCE,            vp9_get_reference},
+  {VP8_COPY_REFERENCE,            vp9_copy_reference},
   {VP8_SET_POSTPROC,              vp8_set_postproc},
   {VP8_SET_DBG_COLOR_REF_FRAME,   vp8_set_dbg_options},
   {VP8_SET_DBG_COLOR_MB_MODES,    vp8_set_dbg_options},
@@ -747,6 +734,7 @@ static vpx_codec_ctrl_fn_map_t ctf_maps[] = {
   {VP8_SET_DBG_DISPLAY_MV,        vp8_set_dbg_options},
   {VP8D_GET_LAST_REF_UPDATES,     vp8_get_last_ref_updates},
   {VP8D_GET_FRAME_CORRUPTED,      vp8_get_frame_corrupted},
+  {VP9_GET_REFERENCE,             get_reference},
   { -1, NULL},
 };
 

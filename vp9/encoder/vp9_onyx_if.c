@@ -2103,8 +2103,8 @@ int vp9_update_reference(VP9_PTR ptr, int ref_frame_flags) {
   return 0;
 }
 
-int vp9_get_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
-                          YV12_BUFFER_CONFIG *sd) {
+int vp9_copy_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
+                           YV12_BUFFER_CONFIG *sd) {
   VP9_COMP *cpi = (VP9_COMP *)(ptr);
   VP9_COMMON *cm = &cpi->common;
   int ref_fb_idx;
@@ -2120,6 +2120,17 @@ int vp9_get_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
 
   vp8_yv12_copy_frame(&cm->yv12_fb[ref_fb_idx], sd);
 
+  return 0;
+}
+
+int vp9_get_reference_enc(VP9_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
+  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+  VP9_COMMON *cm = &cpi->common;
+
+  if (index < 0 || index >= NUM_REF_FRAMES)
+    return -1;
+
+  *fb = &cm->yv12_fb[cm->ref_frame_map[index]];
   return 0;
 }
 

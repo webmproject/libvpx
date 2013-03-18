@@ -1645,8 +1645,6 @@ struct stream_state {
   stats_io_t                stats;
   struct vpx_image         *img;
   vpx_codec_ctx_t           decoder;
-  vpx_ref_frame_t           ref_enc;
-  vpx_ref_frame_t           ref_dec;
   int                       mismatch_seen;
 };
 
@@ -2235,16 +2233,7 @@ static void initialize_encoder(struct stream_state  *stream,
 
 #if CONFIG_DECODERS
   if (global->test_decode != TEST_DECODE_OFF) {
-    int width, height;
-
     vpx_codec_dec_init(&stream->decoder, global->codec->dx_iface(), NULL, 0);
-
-    width = (stream->config.cfg.g_w + 15) & ~15;
-    height = (stream->config.cfg.g_h + 15) & ~15;
-    vpx_img_alloc(&stream->ref_enc.img, VPX_IMG_FMT_I420, width, height, 1);
-    vpx_img_alloc(&stream->ref_dec.img, VPX_IMG_FMT_I420, width, height, 1);
-    stream->ref_enc.frame_type = VP8_LAST_FRAME;
-    stream->ref_dec.frame_type = VP8_LAST_FRAME;
   }
 #endif
 }
@@ -2429,19 +2418,44 @@ static float usec_to_fps(uint64_t usec, unsigned int frames) {
 
 
 static void test_decode(struct stream_state  *stream,
-                        enum TestDecodeFatality fatal) {
+                        enum TestDecodeFatality fatal,
+                        const struct codec_item *codec) {
+  vpx_image_t enc_img, dec_img;
+
   if (stream->mismatch_seen)
     return;
 
-  vpx_codec_control(&stream->encoder, VP8_COPY_REFERENCE, &stream->ref_enc);
+  /* Get the internal reference frame */
+  if (codec->fourcc == VP8_FOURCC) {
+    struct vpx_ref_frame ref_enc, ref_dec;
+    int width, height;
+
+    width = (stream->config.cfg.g_w + 15) & ~15;
+    height = (stream->config.cfg.g_h + 15) & ~15;
+    vpx_img_alloc(&ref_enc.img, VPX_IMG_FMT_I420, width, height, 1);
+    enc_img = ref_enc.img;
+    vpx_img_alloc(&ref_dec.img, VPX_IMG_FMT_I420, width, height, 1);
+    dec_img = ref_dec.img;
+
+    ref_enc.frame_type = VP8_LAST_FRAME;
+    ref_dec.frame_type = VP8_LAST_FRAME;
+    vpx_codec_control(&stream->encoder, VP8_COPY_REFERENCE, &ref_enc);
+    vpx_codec_control(&stream->decoder, VP8_COPY_REFERENCE, &ref_dec);
+  } else {
+    struct vp9_ref_frame ref;
+
+    ref.idx = 0;
+    vpx_codec_control(&stream->encoder, VP9_GET_REFERENCE, &ref);
+    enc_img = ref.img;
+    vpx_codec_control(&stream->decoder, VP9_GET_REFERENCE, &ref);
+    dec_img = ref.img;
+  }
   ctx_exit_on_error(&stream->encoder, "Failed to get encoder reference frame");
-  vpx_codec_control(&stream->decoder, VP8_COPY_REFERENCE, &stream->ref_dec);
   ctx_exit_on_error(&stream->decoder, "Failed to get decoder reference frame");
 
-  if (!compare_img(&stream->ref_enc.img, &stream->ref_dec.img)) {
+  if (!compare_img(&enc_img, &dec_img)) {
     int y[2], u[2], v[2];
-    find_mismatch(&stream->ref_enc.img, &stream->ref_dec.img,
-                  y, u, v);
+    find_mismatch(&enc_img, &dec_img, y, u, v);
     stream->decoder.err = 1;
     warn_or_exit_on_error(&stream->decoder, fatal == TEST_DECODE_FATAL,
                           "Stream %d: Encode/decode mismatch on frame %d"
@@ -2450,6 +2464,9 @@ static void test_decode(struct stream_state  *stream,
                           y[0], y[1], u[0], u[1], v[0], v[1]);
     stream->mismatch_seen = stream->frames_out;
   }
+
+  vpx_img_free(&enc_img);
+  vpx_img_free(&dec_img);
 }
 
 
@@ -2671,7 +2688,7 @@ int main(int argc, const char **argv_) {
         }
 
         if (got_data && global.test_decode != TEST_DECODE_OFF)
-          FOREACH_STREAM(test_decode(stream, global.test_decode));
+          FOREACH_STREAM(test_decode(stream, global.test_decode, global.codec));
       }
 
       fflush(stdout);
@@ -2703,8 +2720,6 @@ int main(int argc, const char **argv_) {
 
     if (global.test_decode != TEST_DECODE_OFF) {
       FOREACH_STREAM(vpx_codec_destroy(&stream->decoder));
-      FOREACH_STREAM(vpx_img_free(&stream->ref_enc.img));
-      FOREACH_STREAM(vpx_img_free(&stream->ref_dec.img));
     }
 
     close_input_file(&input);
