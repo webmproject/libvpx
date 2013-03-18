@@ -111,7 +111,7 @@ extern int skip_false_count;
 #endif
 
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
 extern int intra_mode_stats[10][10][10];
 #endif
 
@@ -1806,7 +1806,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     else
         cpi->cyclic_refresh_map = (signed char *) NULL;
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
     init_context_counters();
 #endif
 
@@ -1924,7 +1924,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
         cpi->mb.rd_thresh_mult[i] = 128;
     }
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
     init_mv_ref_counts();
 #endif
 
@@ -2061,7 +2061,7 @@ void vp8_remove_compressor(VP8_COMP **ptr)
 
 #endif
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
         print_context_counters();
         print_tree_update_probs();
         print_mode_context();
@@ -2243,7 +2243,7 @@ void vp8_remove_compressor(VP8_COMP **ptr)
         }
 #endif
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
         {
             int i, j, k;
             FILE *fmode = fopen("modecontext.c", "w");
