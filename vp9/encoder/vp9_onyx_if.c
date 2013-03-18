@@ -2722,10 +2722,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   else
     cpi->zbin_mode_boost_enabled = TRUE;
 
-  if (cpi->gfu_boost <= 400) {
-    cpi->zbin_mode_boost_enabled = FALSE;
-  }
-
   // Current default encoder behaviour for the altref sign bias
   if (cpi->source_alt_ref_active)
     cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = 1;

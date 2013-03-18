@@ -1442,11 +1442,14 @@ static int calc_arf_boost(
   return arf_boost;
 }
 
-static void configure_arnr_filter(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static void configure_arnr_filter(VP9_COMP *cpi,
+                                  FIRSTPASS_STATS *this_frame,
+                                  int group_boost) {
   int half_gf_int;
   int frames_after_arf;
   int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
   int frames_fwd = cpi->oxcf.arnr_max_frames - 1;
+  int q;
 
   // Define the arnr filter width for this group of frames:
   // We only filter frames that lie within a distance of half
@@ -1491,6 +1494,25 @@ static void configure_arnr_filter(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 
   cpi->active_arnr_frames = frames_bwd + 1 + frames_fwd;
+
+  // Adjust the strength based on active max q
+  q = ((int)vp9_convert_qindex_to_q(cpi->active_worst_quality) >> 1);
+  if (q > 8) {
+    cpi->active_arnr_strength = cpi->oxcf.arnr_strength;
+  } else {
+    cpi->active_arnr_strength = cpi->oxcf.arnr_strength - (8 - q);
+    if (cpi->active_arnr_strength < 0)
+      cpi->active_arnr_strength = 0;
+  }
+
+  // Adjust number of frames in filter and strength based on gf boost level.
+  if (cpi->active_arnr_frames > (group_boost / 150)) {
+    cpi->active_arnr_frames = (group_boost / 150);
+    cpi->active_arnr_frames += !(cpi->active_arnr_frames & 1);
+  }
+  if (cpi->active_arnr_strength > (group_boost / 300)) {
+    cpi->active_arnr_strength = (group_boost / 300);
+  }
 }
 
 // Analyse and define a gf/arf group .
@@ -1669,7 +1691,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     cpi->gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost, &b_boost);
     cpi->source_alt_ref_pending = TRUE;
 
-    configure_arnr_filter(cpi, this_frame);
+    configure_arnr_filter(cpi, this_frame, cpi->gfu_boost);
   } else {
     cpi->gfu_boost = (int)boost_score;
     cpi->source_alt_ref_pending = FALSE;

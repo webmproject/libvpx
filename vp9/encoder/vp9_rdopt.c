@@ -284,9 +284,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
           (cpi->RDMULT * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
   }
 
-  if (cpi->RDMULT < 7)
-    cpi->RDMULT = 7;
-
   cpi->mb.errorperbit = (cpi->RDMULT / 110);
   cpi->mb.errorperbit += (cpi->mb.errorperbit == 0);
 
