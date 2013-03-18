@@ -38,10 +38,12 @@ vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
 int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                                   int width, int height, int border) {
   if (ybf) {
-    int y_stride = ((width + 2 * border) + 31) & ~31;
-    int yplane_size = (height + 2 * border) * y_stride;
-    int uv_width = width >> 1;
-    int uv_height = height >> 1;
+    int aligned_width = (width + 15) & ~15;
+    int aligned_height = (height + 15) & ~15;
+    int y_stride = ((aligned_width + 2 * border) + 31) & ~31;
+    int yplane_size = (aligned_height + 2 * border) * y_stride;
+    int uv_width = aligned_width >> 1;
+    int uv_height = aligned_height >> 1;
     /** There is currently a bunch of code which assumes
       *  uv_stride == y_stride/2, so enforce this here. */
     int uv_stride = y_stride >> 1;
@@ -56,17 +58,18 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     if (!ybf->buffer_alloc || ybf->buffer_alloc_sz < frame_size)
       return -1;
 
-    /** Only support allocating buffers that have a height and width that
-      *  are multiples of 16, and a border that's a multiple of 32.
-      * The border restriction is required to get 16-byte alignment of the
-      *  start of the chroma rows without intoducing an arbitrary gap
-      *  between planes, which would break the semantics of things like
-      *  vpx_img_set_rect(). */
-    if ((width & 0xf) | (height & 0xf) | (border & 0x1f))
+    /* Only support allocating buffers that have a border that's a multiple
+     * of 32. The border restriction is required to get 16-byte alignment of
+     * the start of the chroma rows without intoducing an arbitrary gap
+     * between planes, which would break the semantics of things like
+     * vpx_img_set_rect(). */
+    if (border & 0x1f)
       return -3;
 
-    ybf->y_width  = width;
-    ybf->y_height = height;
+    ybf->y_crop_width = width;
+    ybf->y_crop_height = height;
+    ybf->y_width  = aligned_width;
+    ybf->y_height = aligned_height;
     ybf->y_stride = y_stride;
 
     ybf->uv_width = uv_width;

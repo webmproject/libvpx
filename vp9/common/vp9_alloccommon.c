@@ -67,16 +67,13 @@ void vp9_de_alloc_frame_buffers(VP9_COMMON *oci) {
 
 int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   int i;
+  int aligned_width, aligned_height;
 
   vp9_de_alloc_frame_buffers(oci);
 
   /* our internal buffers are always multiples of 16 */
-  if ((width & 0xf) != 0)
-    width += 16 - (width & 0xf);
-
-  if ((height & 0xf) != 0)
-    height += 16 - (height & 0xf);
-
+  aligned_width = (width + 15) & ~15;
+  aligned_height = (height + 15) & ~15;
 
   for (i = 0; i < NUM_YV12_BUFFERS; i++) {
     oci->fb_idx_ref_cnt[i] = 0;
@@ -110,8 +107,8 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
     return 1;
   }
 
-  oci->mb_rows = height >> 4;
-  oci->mb_cols = width >> 4;
+  oci->mb_rows = aligned_height >> 4;
+  oci->mb_cols = aligned_width >> 4;
   oci->MBs = oci->mb_rows * oci->mb_cols;
   oci->mode_info_stride = oci->mb_cols + 1;
   oci->mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));

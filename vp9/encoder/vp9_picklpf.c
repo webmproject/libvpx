@@ -247,7 +247,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   int Bias = 0;                       // Bias against raising loop filter and in favour of lowering it
 
   //  Make a copy of the unfiltered / processed recon buffer
-  vp8_yv12_copy_frame(cm->frame_to_show, &cpi->last_frame_uf);
+  vp8_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
   if (cm->frame_type == KEY_FRAME)
     cm->sharpness_level = 0;

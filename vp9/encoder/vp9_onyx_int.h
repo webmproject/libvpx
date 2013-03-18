@@ -540,8 +540,6 @@ typedef struct VP9_COMP {
   int goldfreq;
   int auto_worst_q;
   int cpu_used;
-  int horiz_scale;
-  int vert_scale;
   int pass;
 
   vp9_prob last_skip_false_probs[3][MBSKIP_CONTEXTS];

@@ -62,10 +62,6 @@ struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
   // Clamp the lookahead queue depth
   depth = clamp(depth, 1, MAX_LAG_BUFFERS);
 
-  // Align the buffer dimensions
-  width = (width + 15) &~15;
-  height = (height + 15) &~15;
-
   // Allocate the lookahead structures
   ctx = calloc(1, sizeof(*ctx));
   if (ctx) {

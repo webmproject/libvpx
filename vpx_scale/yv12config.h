@@ -42,6 +42,8 @@ extern "C" {
   typedef struct yv12_buffer_config {
     int   y_width;
     int   y_height;
+    int   y_crop_width;
+    int   y_crop_height;
     int   y_stride;
     /*    int   yinternal_width; */
 

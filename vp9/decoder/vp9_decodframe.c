@@ -1364,7 +1364,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   /* Reset the frame pointers to the current frame size */
   vp8_yv12_realloc_frame_buffer(&pc->yv12_fb[pc->new_fb_idx],
-                                pc->mb_cols * 16, pc->mb_rows * 16,
+                                pc->Width, pc->Height,
                                 VP9BORDERINPIXELS);
 
   if (vp9_start_decode(&header_bc, data,
