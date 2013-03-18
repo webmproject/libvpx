@@ -843,8 +843,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   cpi->mb.fwd_txm8x4    = vp9_short_fdct8x4;
   cpi->mb.fwd_txm4x4    = vp9_short_fdct4x4;
   if (cpi->oxcf.lossless || cpi->mb.e_mbd.lossless) {
-    cpi->mb.fwd_txm8x4    = vp9_short_walsh8x4_x8;
-    cpi->mb.fwd_txm4x4    = vp9_short_walsh4x4_x8;
+    cpi->mb.fwd_txm8x4    = vp9_short_walsh8x4;
+    cpi->mb.fwd_txm4x4    = vp9_short_walsh4x4;
   }
 
   cpi->mb.quantize_b_4x4      = vp9_regular_quantize_b_4x4;
@@ -1217,11 +1217,11 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->oxcf.lossless = oxcf->lossless;
   if (cpi->oxcf.lossless) {
-    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_inv_walsh4x4_1_x8;
-    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_inv_walsh4x4_x8;
+    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_iwalsh4x4_1;
+    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_iwalsh4x4;
   } else {
-    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_idct4x4llm_1;
-    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_idct4x4llm;
+    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_idct4x4_1;
+    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_idct4x4;
   }
 
   cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;

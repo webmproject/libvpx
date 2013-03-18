@@ -279,11 +279,11 @@ specialize vp9_convolve8_avg_vert ssse3
 #
 # dct
 #
-prototype void vp9_short_idct4x4llm_1 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct4x4llm_1
+prototype void vp9_short_idct4x4_1 "int16_t *input, int16_t *output, int pitch"
+specialize vp9_short_idct4x4_1
 
-prototype void vp9_short_idct4x4llm "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct4x4llm sse2
+prototype void vp9_short_idct4x4 "int16_t *input, int16_t *output, int pitch"
+specialize vp9_short_idct4x4 sse2
 
 prototype void vp9_short_idct8x8 "int16_t *input, int16_t *output, int pitch"
 specialize vp9_short_idct8x8
@@ -330,10 +330,10 @@ specialize vp9_idct4_1d sse2
 prototype void vp9_dc_only_idct_add "int input_dc, uint8_t *pred_ptr, uint8_t *dst_ptr, int pitch, int stride"
 specialize vp9_dc_only_idct_add sse2
 
-prototype void vp9_short_inv_walsh4x4_1_x8 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_inv_walsh4x4_1_x8
-prototype void vp9_short_inv_walsh4x4_x8 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_inv_walsh4x4_x8
+prototype void vp9_short_iwalsh4x4_1 "int16_t *input, int16_t *output, int pitch"
+specialize vp9_short_iwalsh4x4_1
+prototype void vp9_short_iwalsh4x4 "int16_t *input, int16_t *output, int pitch"
+specialize vp9_short_iwalsh4x4
 prototype void vp9_dc_only_inv_walsh_add "int input_dc, uint8_t *pred_ptr, uint8_t *dst_ptr, int pitch, int stride"
 specialize vp9_dc_only_inv_walsh_add
 
@@ -600,11 +600,11 @@ specialize vp9_short_fdct32x32
 prototype void vp9_short_fdct16x16 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_fdct16x16 sse2
 
-prototype void vp9_short_walsh4x4_x8 "int16_t *InputData, int16_t *OutputData, int pitch"
-specialize vp9_short_walsh4x4_x8
+prototype void vp9_short_walsh4x4 "int16_t *InputData, int16_t *OutputData, int pitch"
+specialize vp9_short_walsh4x4
 
-prototype void vp9_short_walsh8x4_x8 "int16_t *InputData, int16_t *OutputData, int pitch"
-specialize vp9_short_walsh8x4_x8
+prototype void vp9_short_walsh8x4 "int16_t *InputData, int16_t *OutputData, int pitch"
+specialize vp9_short_walsh8x4
 
 #
 # Motion search

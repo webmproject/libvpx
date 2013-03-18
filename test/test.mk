@@ -47,7 +47,7 @@ ifeq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),yesyes)
 LIBVPX_TEST_SRCS-yes                   += vp8_boolcoder_test.cc
 endif
 
-LIBVPX_TEST_SRCS-yes                   += idctllm_test.cc
+LIBVPX_TEST_SRCS-yes                   += idct_test.cc
 LIBVPX_TEST_SRCS-yes                   += intrapred_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += sad_test.cc
