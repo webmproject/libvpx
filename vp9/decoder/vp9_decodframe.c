@@ -1275,12 +1275,13 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   if (data_end - data < 3) {
     vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
   } else {
+    int scaling_active;
     pc->last_frame_type = pc->frame_type;
     pc->frame_type = (FRAME_TYPE)(data[0] & 1);
     pc->version = (data[0] >> 1) & 7;
     pc->show_frame = (data[0] >> 4) & 1;
-    first_partition_length_in_bytes =
-      (data[0] | (data[1] << 8) | (data[2] << 16)) >> 5;
+    scaling_active = (data[0] >> 5) & 1;
+    first_partition_length_in_bytes = data[1] | (data[2] << 8);
 
     if (!read_is_valid(data, first_partition_length_in_bytes, data_end))
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
@@ -1310,14 +1311,20 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
        * if we have enough data. Otherwise we will end up with the wrong
        * size.
        */
-      if (data + 5 < data_end) {
-        pc->Width  = read_le16(data);
-        pc->Height = read_le16(data + 2);
-
-        pc->horiz_scale = data[4] >> 4;
-        pc->vert_scale  = data[4] & 0x0F;
+      if (scaling_active && data + 4 < data_end) {
+        pc->display_width = read_le16(data + 0);
+        pc->display_height = read_le16(data + 2);
+        data += 4;
       }
-      data += 5;
+      if (data + 4 < data_end) {
+        pc->Width = read_le16(data + 0);
+        pc->Height = read_le16(data + 2);
+        data += 4;
+      }
+      if (!scaling_active) {
+        pc->display_width = pc->Width;
+        pc->display_height = pc->Height;
+      }
 
       if (width != pc->Width || height != pc->Height) {
         if (pc->Width <= 0) {

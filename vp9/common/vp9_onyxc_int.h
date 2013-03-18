@@ -169,10 +169,10 @@ typedef struct VP9Common {
 
   int Width;
   int Height;
+  int display_width;
+  int display_height;
   int last_width;
   int last_height;
-  int horiz_scale;
-  int vert_scale;
 
   YUV_TYPE clr_type;
   CLAMP_TYPE  clamp_type;

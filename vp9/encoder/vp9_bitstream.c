@@ -2270,7 +2270,18 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   {
     int v;
 
-    // support arbitrary resolutions
+    if (pc->Width != pc->display_width || pc->Height != pc->display_height) {
+      v = pc->display_width;
+      cx_data[0] = v;
+      cx_data[1] = v >> 8;
+
+      v = pc->display_height;
+      cx_data[2] = v;
+      cx_data[3] = v >> 8;
+      cx_data += 4;
+      extra_bytes_packed += 4;
+    }
+
     v = pc->Width;
     cx_data[0] = v;
     cx_data[1] = v >> 8;
@@ -2279,11 +2290,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     cx_data[2] = v;
     cx_data[3] = v >> 8;
 
-    // use a separate byte to store the scale factors, each ranging 0-15
-    cx_data[4] = (pc->horiz_scale << 4) | (pc->vert_scale);
-
-    extra_bytes_packed += 5;
-    cx_data += 5;
+    extra_bytes_packed += 4;
+    cx_data += 4;
   }
 
   vp9_start_encode(&header_bc, cx_data);
@@ -2801,11 +2809,15 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
   /* update frame tag */
   {
-    int v = (oh.first_partition_length_in_bytes << 5) |
+    int scaling = (pc->Width != pc->display_width
+                   || pc->Height != pc->display_height);
+    int v = (oh.first_partition_length_in_bytes << 8) |
+            (scaling << 5) |
             (oh.show_frame << 4) |
             (oh.version << 1) |
             oh.type;
 
+    assert(oh.first_partition_length_in_bytes <= 0xffff);
     dest[0] = v;
     dest[1] = v >> 8;
     dest[2] = v >> 16;
