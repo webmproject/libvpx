@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAWX//4Xc\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-20T22:47:43Z",
+      "side": 1,
+      "message": "I find this less readable than the previous code. It\u0027s a little better if you make the ? and : in the outer ternary leading on their lines as below, but I\u0027m not convinced it\u0027s any better than the code it replaced. \n\n    mi-\u003esegment_id \u003d vp9_read(r, prob)\n      ? 2 + (pred_seg_id \u003c 2 ? vp9_read(r, p[2]) : (pred_seg_id \u003d\u003d 2)) \n      : (pred_seg_id \u003e\u003d 2 ? vp9_read(r, p[1]) : (pred_seg_id \u003d\u003d 0));\n\nI\u0027d also probably parenthesize (2 + (pred_seg... ? ... : ...)) even though it\u0027s unnecessary. I generally try to split nested ternaries onto different lines, but I don\u0027t see any clean way to do that here, other than the original code.",
+      "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//4WY\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-20T22:47:43Z",
+      "side": 1,
+      "message": "this would be more clearly written:\n\n  const vp9_prob p \u003d mv_class \u003d\u003d MV_CLASS_0 ? mvcomp-\u003eclass0_hp : mvcomp-\u003ehp;\n  offset +\u003d vpx_read(r, p)\n\nor:\n\n  offset +\u003d vpx_read(r, mv_class \u003d\u003d MV_CLASS_0 ? mvcomp-\u003eclass0_hp : mvcomp-\u003ehp);\n\nWrap as appropriate.",
+      "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//4V0\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 892,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-20T22:47:43Z",
+      "side": 1,
+      "message": "might be clearer to put mbmi-\u003epartioning \u003d s; on a later line.",
+      "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//4Vw\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1078,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-20T22:47:43Z",
+      "side": 1,
+      "message": "might be clearer to put mi-\u003ebmi[j].as_mode.first \u003d m; on a second line.",
+      "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
