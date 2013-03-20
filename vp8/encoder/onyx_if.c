@@ -641,7 +641,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     for (i = 0; i < MAX_MODES; i ++)
     {
         cpi->mode_check_freq[i] = 0;
-        cpi->mode_chosen_counts[i] = 0;
     }
 
     cpi->mb.mbs_tested_so_far = 0;
@@ -4599,9 +4598,6 @@ static void encode_frame_to_data_rate
                         cpi->common.current_video_frame,
                         cm->frame_type, cm->refresh_golden_frame,
                         cm->refresh_alt_ref_frame);
-
-            for (i = 0; i < MAX_MODES; i++)
-                fprintf(fmodes, "%5d ", cpi->mode_chosen_counts[i]);
 
             fprintf(fmodes, "\n");
 

@@ -349,7 +349,6 @@ typedef struct VP8_COMP
     int ambient_err;
 
     unsigned int mode_check_freq[MAX_MODES];
-    unsigned int mode_chosen_counts[MAX_MODES];
 
     int rd_baseline_thresh[MAX_MODES];
 
