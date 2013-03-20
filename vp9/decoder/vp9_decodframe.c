@@ -1239,8 +1239,8 @@ static void update_frame_size(VP9D_COMP *pbi) {
   VP9_COMMON *cm = &pbi->common;
 
   /* our internal buffers are always multiples of 16 */
-  const int width = (cm->Width + 15) & ~15;
-  const int height = (cm->Height + 15) & ~15;
+  const int width = (cm->width + 15) & ~15;
+  const int height = (cm->height + 15) & ~15;
 
   cm->mb_rows = height >> 4;
   cm->mb_cols = width >> 4;
@@ -1304,8 +1304,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
       data += 3;
     }
     {
-      const int width = pc->Width;
-      const int height = pc->Height;
+      const int width = pc->width;
+      const int height = pc->height;
 
       /* If error concealment is enabled we should only parse the new size
        * if we have enough data. Otherwise we will end up with the wrong
@@ -1317,42 +1317,42 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
         data += 4;
       }
       if (data + 4 < data_end) {
-        pc->Width = read_le16(data + 0);
-        pc->Height = read_le16(data + 2);
+        pc->width = read_le16(data + 0);
+        pc->height = read_le16(data + 2);
         data += 4;
       }
       if (!scaling_active) {
-        pc->display_width = pc->Width;
-        pc->display_height = pc->Height;
+        pc->display_width = pc->width;
+        pc->display_height = pc->height;
       }
 
-      if (width != pc->Width || height != pc->Height) {
-        if (pc->Width <= 0) {
-          pc->Width = width;
+      if (width != pc->width || height != pc->height) {
+        if (pc->width <= 0) {
+          pc->width = width;
           vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                              "Invalid frame width");
         }
 
-        if (pc->Height <= 0) {
-          pc->Height = height;
+        if (pc->height <= 0) {
+          pc->height = height;
           vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                              "Invalid frame height");
         }
 
         if (!pbi->initial_width || !pbi->initial_height) {
-          if (vp9_alloc_frame_buffers(pc, pc->Width, pc->Height))
+          if (vp9_alloc_frame_buffers(pc, pc->width, pc->height))
             vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffers");
-          pbi->initial_width = pc->Width;
-          pbi->initial_height = pc->Height;
+          pbi->initial_width = pc->width;
+          pbi->initial_height = pc->height;
         }
 
-        if (pc->Width > pbi->initial_width) {
+        if (pc->width > pbi->initial_width) {
           vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                              "Frame width too large");
         }
 
-        if (pc->Height > pbi->initial_height) {
+        if (pc->height > pbi->initial_height) {
           vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                              "Frame height too large");
         }
@@ -1363,7 +1363,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   }
 
   if ((!pbi->decoded_key_frame && pc->frame_type != KEY_FRAME) ||
-      pc->Width == 0 || pc->Height == 0) {
+      pc->width == 0 || pc->height == 0) {
     return -1;
   }
 
@@ -1371,7 +1371,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   /* Reset the frame pointers to the current frame size */
   vp8_yv12_realloc_frame_buffer(&pc->yv12_fb[pc->new_fb_idx],
-                                pc->Width, pc->Height,
+                                pc->width, pc->height,
                                 VP9BORDERINPIXELS);
 
   if (vp9_start_decode(&header_bc, data,
@@ -1820,8 +1820,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   corrupt_tokens |= xd->corrupted;
 
   // keep track of the last coded dimensions
-  pc->last_width = pc->Width;
-  pc->last_height = pc->Height;
+  pc->last_width = pc->width;
+  pc->last_height = pc->height;
 
   // Collect information about decoder corruption.
   // 1. Check first boolean decoder for errors.

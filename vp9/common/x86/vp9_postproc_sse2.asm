@@ -624,11 +624,11 @@ sym(vp9_mbpost_proc_across_ip_xmm):
 %undef flimit4
 
 
-;void vp9_plane_add_noise_wmt (unsigned char *Start, unsigned char *noise,
+;void vp9_plane_add_noise_wmt (unsigned char *start, unsigned char *noise,
 ;                            unsigned char blackclamp[16],
 ;                            unsigned char whiteclamp[16],
 ;                            unsigned char bothclamp[16],
-;                            unsigned int Width, unsigned int Height, int Pitch)
+;                            unsigned int width, unsigned int height, int pitch)
 extern sym(rand)
 global sym(vp9_plane_add_noise_wmt) PRIVATE
 sym(vp9_plane_add_noise_wmt):

@@ -226,11 +226,9 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t set_vp8e_config(VP9_CONFIG *oxcf,
                                        vpx_codec_enc_cfg_t cfg,
                                        struct vp8_extracfg vp8_cfg) {
-  oxcf->Version               = cfg.g_profile;
-  oxcf->Version              |= vp8_cfg.experimental ? 0x4 : 0;
-
-  oxcf->Width                 = cfg.g_w;
-  oxcf->Height                = cfg.g_h;
+  oxcf->version = cfg.g_profile | (vp8_cfg.experimental ? 0x4 : 0);
+  oxcf->width   = cfg.g_w;
+  oxcf->height  = cfg.g_h;
   /* guess a frame rate if out of whack, use 30 */
   oxcf->frame_rate             = (double)(cfg.g_timebase.den) / (double)(cfg.g_timebase.num);
 

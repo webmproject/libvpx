@@ -90,9 +90,11 @@ extern "C"
   }
 
   typedef struct {
-    int Version;            // 4 versions of bitstream defined 0 best quality/slowest decode, 3 lowest quality/fastest decode
-    int Width;              // width of data passed to the compressor
-    int Height;             // height of data passed to the compressor
+    int version;  // 4 versions of bitstream defined:
+                  //   0 - best quality/slowest decode,
+                  //   3 - lowest quality/fastest decode
+    int width;  // width of data passed to the compressor
+    int height;  // height of data passed to the compressor
     double frame_rate;       // set to passed in framerate
     int64_t target_bandwidth;    // bandwidth to be used in kilobits per second
 

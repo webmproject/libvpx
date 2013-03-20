@@ -167,8 +167,8 @@ typedef struct VP9Common {
   DECLARE_ALIGNED(16, int16_t, Y1dequant[QINDEX_RANGE][16]);
   DECLARE_ALIGNED(16, int16_t, UVdequant[QINDEX_RANGE][16]);
 
-  int Width;
-  int Height;
+  int width;
+  int height;
   int display_width;
   int display_height;
   int last_width;

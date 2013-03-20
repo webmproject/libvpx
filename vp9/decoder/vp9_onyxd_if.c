@@ -364,7 +364,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 #if WRITE_RECON_BUFFER == 1
   if (cm->show_frame)
     recon_write_yuv_frame("recon.yuv", cm->frame_to_show,
-                          cm->Width, cm->Height);
+                          cm->width, cm->height);
 #endif
 
   vp9_clear_system_state();
@@ -415,9 +415,9 @@ int vp9_get_raw_frame(VP9D_PTR ptr, YV12_BUFFER_CONFIG *sd,
 
   if (pbi->common.frame_to_show) {
     *sd = *pbi->common.frame_to_show;
-    sd->y_width = pbi->common.Width;
-    sd->y_height = pbi->common.Height;
-    sd->uv_height = pbi->common.Height / 2;
+    sd->y_width = pbi->common.width;
+    sd->y_height = pbi->common.height;
+    sd->uv_height = pbi->common.height / 2;
     ret = 0;
   } else {
     ret = -1;

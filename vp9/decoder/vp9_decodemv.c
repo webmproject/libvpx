@@ -673,8 +673,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   int_mv *const mv = &mbmi->mv[0];
   const int mb_size = 1 << mi->mbmi.sb_type;
 
-  const int use_prev_in_find_mv_refs = cm->Width == cm->last_width &&
-                                       cm->Height == cm->last_height &&
+  const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
+                                       cm->height == cm->last_height &&
                                        !cm->error_resilient_mode;
 
   int mb_to_left_edge;

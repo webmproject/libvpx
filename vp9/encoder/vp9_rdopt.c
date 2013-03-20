@@ -3412,8 +3412,8 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                    &scale[frame_type], &scale[frame_type]);
 
   // Gets an initial list of candidate vectors from neighbours and orders them
-  use_prev_in_find_mv_refs = cm->Width == cm->last_width &&
-                             cm->Height == cm->last_height &&
+  use_prev_in_find_mv_refs = cm->width == cm->last_width &&
+                             cm->height == cm->last_height &&
                              !cpi->common.error_resilient_mode;
   vp9_find_mv_refs(&cpi->common, xd, xd->mode_info_context,
                    use_prev_in_find_mv_refs ? xd->prev_mode_info_context : NULL,
@@ -3572,7 +3572,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         vp9_clamp_mv_min_max(x, &ref_mv[0]);
 
-        sr = vp9_init_search_range(cpi->common.Width, cpi->common.Height);
+        sr = vp9_init_search_range(cpi->common.width, cpi->common.height);
 
         // mvp_full.as_int = ref_mv[0].as_int;
         mvp_full.as_int =

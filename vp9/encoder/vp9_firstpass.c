@@ -379,7 +379,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int new_mv_mode_penalty = 256;
 
   int sr = 0;
-  int quart_frm = MIN(cpi->common.Width, cpi->common.Height);
+  int quart_frm = MIN(cpi->common.width, cpi->common.height);
 
   // refine the motion search range accroding to the frame dimension
   // for first pass test

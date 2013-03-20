@@ -873,7 +873,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 }
 
 static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
-  cpi->lookahead = vp9_lookahead_init(cpi->oxcf.Width, cpi->oxcf.Height,
+  cpi->lookahead = vp9_lookahead_init(cpi->oxcf.width, cpi->oxcf.height,
                                       cpi->oxcf.lag_in_frames);
   if (!cpi->lookahead)
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
@@ -882,7 +882,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
 #if VP9_TEMPORAL_ALT_REF
 
   if (vp8_yv12_alloc_frame_buffer(&cpi->alt_ref_buffer,
-                                  cpi->oxcf.Width, cpi->oxcf.Height,
+                                  cpi->oxcf.width, cpi->oxcf.height,
                                   VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
@@ -907,7 +907,7 @@ static int alloc_partition_data(VP9_COMP *cpi) {
 void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
 
-  if (vp9_alloc_frame_buffers(cm, cm->Width, cm->Height))
+  if (vp9_alloc_frame_buffers(cm, cm->width, cm->height))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffers");
 
@@ -916,12 +916,12 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
                        "Failed to allocate partition data");
 
   if (vp8_yv12_alloc_frame_buffer(&cpi->last_frame_uf,
-                                  cm->Width, cm->Height, VP9BORDERINPIXELS))
+                                  cm->width, cm->height, VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
 
   if (vp8_yv12_alloc_frame_buffer(&cpi->scaled_source,
-                                  cm->Width, cm->Height, VP9BORDERINPIXELS))
+                                  cm->width, cm->height, VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
@@ -983,8 +983,8 @@ static void update_frame_size(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
 
   /* our internal buffers are always multiples of 16 */
-  int aligned_width = (cm->Width + 15) & ~15;
-  int aligned_height = (cm->Height + 15) & ~15;
+  int aligned_width = (cm->width + 15) & ~15;
+  int aligned_height = (cm->height + 15) & ~15;
 
   cm->mb_rows = aligned_height >> 4;
   cm->mb_cols = aligned_width >> 4;
@@ -1000,12 +1000,12 @@ static void update_frame_size(VP9_COMP *cpi) {
 
   /* Update size of buffers local to this frame */
   if (vp8_yv12_realloc_frame_buffer(&cpi->last_frame_uf,
-                                    cm->Width, cm->Height, VP9BORDERINPIXELS))
+                                    cm->width, cm->height, VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate last frame buffer");
 
   if (vp8_yv12_realloc_frame_buffer(&cpi->scaled_source,
-                                    cm->Width, cm->Height, VP9BORDERINPIXELS))
+                                    cm->width, cm->height, VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate scaled source buffer");
 
@@ -1112,11 +1112,11 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->goldfreq = 7;
 
-  cm->version = oxcf->Version;
+  cm->version = oxcf->version;
   vp9_setup_version(cm);
 
-  cm->Width = oxcf->Width;
-  cm->Height = oxcf->Height;
+  cm->width = oxcf->width;
+  cm->height = oxcf->height;
 
   // change includes all joint functionality
   vp9_change_config(ptr, oxcf);
@@ -1169,8 +1169,8 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   if (!oxcf)
     return;
 
-  if (cm->version != oxcf->Version) {
-    cm->version = oxcf->Version;
+  if (cm->version != oxcf->version) {
+    cm->version = oxcf->version;
     vp9_setup_version(cm);
   }
 
@@ -1302,8 +1302,8 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
-  cm->display_width = cpi->oxcf.Width;
-  cm->display_height = cpi->oxcf.Height;
+  cm->display_width = cpi->oxcf.width;
+  cm->display_height = cpi->oxcf.height;
 
   // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
   if (cpi->oxcf.Sharpness > 7)
@@ -1317,11 +1317,11 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   if (!cpi->initial_width) {
     alloc_raw_frame_buffers(cpi);
     vp9_alloc_compressor_data(cpi);
-    cpi->initial_width = cm->Width;
-    cpi->initial_height = cm->Height;
+    cpi->initial_width = cm->width;
+    cpi->initial_height = cm->height;
   }
-  assert(cm->Width <= cpi->initial_width);
-  assert(cm->Height <= cpi->initial_height);
+  assert(cm->width <= cpi->initial_width);
+  assert(cm->height <= cpi->initial_height);
   update_frame_size(cpi);
 
   if (cpi->oxcf.fixed_q >= 0) {
@@ -2008,8 +2008,8 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
   struct vpx_codec_cx_pkt  pkt;
   uint64_t                 sse;
   int                      i;
-  unsigned int             width = cpi->common.Width;
-  unsigned int             height = cpi->common.Height;
+  unsigned int             width = cpi->common.width;
+  unsigned int             height = cpi->common.height;
 
   pkt.kind = VPX_CODEC_PSNR_PKT;
   sse = calc_plane_error(orig->y_buffer, orig->y_stride,
@@ -2170,7 +2170,7 @@ void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s) {
 void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
   YV12_BUFFER_CONFIG *s = cm->frame_to_show;
   uint8_t *src = s->y_buffer;
-  int h = cm->Height;
+  int h = cm->height;
 
   do {
     fwrite(src, s->y_width, 1,  yuv_rec_file);
@@ -2178,7 +2178,7 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
   } while (--h);
 
   src = s->u_buffer;
-  h = (cm->Height + 1) / 2;
+  h = (cm->height + 1) / 2;
 
   do {
     fwrite(src, s->uv_width, 1,  yuv_rec_file);
@@ -2186,7 +2186,7 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
   } while (--h);
 
   src = s->v_buffer;
-  h = (cm->Height + 1) / 2;
+  h = (cm->height + 1) / 2;
 
   do {
     fwrite(src, s->uv_width, 1, yuv_rec_file);
@@ -2603,12 +2603,12 @@ static void scale_references(VP9_COMP *cpi) {
   for (i = 0; i < 3; i++) {
     YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[cm->ref_frame_map[i]];
 
-    if (ref->y_crop_width != cm->Width ||
-        ref->y_crop_height != cm->Height) {
+    if (ref->y_crop_width != cm->width ||
+        ref->y_crop_height != cm->height) {
       int new_fb = get_free_fb(cm);
 
       vp8_yv12_realloc_frame_buffer(&cm->yv12_fb[new_fb],
-                                    cm->Width, cm->Height,
+                                    cm->width, cm->height,
                                     VP9BORDERINPIXELS);
       scale_and_extend_frame(ref, &cm->yv12_fb[new_fb]);
       cpi->scaled_ref_idx[i] = new_fb;
@@ -3632,8 +3632,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   xd->mode_ref_lf_delta_update = 0;
 
   // keep track of the last coded dimensions
-  cm->last_width = cm->Width;
-  cm->last_height = cm->Height;
+  cm->last_width = cm->width;
+  cm->last_height = cm->height;
 
   // Dont increment frame counters if this was an altref buffer update not a real frame
   if (cm->show_frame) {
@@ -3883,7 +3883,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
   /* Reset the frame pointers to the current frame size */
   vp8_yv12_realloc_frame_buffer(&cm->yv12_fb[cm->new_fb_idx],
-                                cm->Width, cm->Height,
+                                cm->width, cm->height,
                                 VP9BORDERINPIXELS);
 
   vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);
@@ -4041,9 +4041,9 @@ int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
 
     if (cpi->common.frame_to_show) {
       *dest = *cpi->common.frame_to_show;
-      dest->y_width = cpi->common.Width;
-      dest->y_height = cpi->common.Height;
-      dest->uv_height = cpi->common.Height / 2;
+      dest->y_width = cpi->common.width;
+      dest->y_height = cpi->common.height;
+      dest->uv_height = cpi->common.height / 2;
       ret = 0;
     } else {
       ret = -1;
@@ -4148,11 +4148,11 @@ int vp9_set_internal_size(VP9_PTR comp,
   Scale2Ratio(vert_mode, &vr, &vs);
 
   // always go to the next whole number
-  cm->Width = (hs - 1 + cpi->oxcf.Width * hr) / hs;
-  cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
+  cm->width = (hs - 1 + cpi->oxcf.width * hr) / hs;
+  cm->height = (vs - 1 + cpi->oxcf.height * vr) / vs;
 
-  assert(cm->Width <= cpi->initial_width);
-  assert(cm->Height <= cpi->initial_height);
+  assert(cm->width <= cpi->initial_width);
+  assert(cm->height <= cpi->initial_height);
   update_frame_size(cpi);
   return 0;
 }

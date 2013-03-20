@@ -16,32 +16,28 @@ void (*vp8_short_idct4x4)(short *input, short *output, int pitch);
 void (*vp8_short_idct4x4_1)(short *input, short *output, int pitch);
 void (*vp8_dc_only_idct)(short input_dc, short *output, int pitch);
 
-extern void (*vp9_post_proc_down_and_across)(
-  unsigned char *src_ptr,
-  unsigned char *dst_ptr,
-  int src_pixels_per_line,
-  int dst_pixels_per_line,
-  int rows,
-  int cols,
-  int flimit
-);
+extern void (*vp9_post_proc_down_and_across)(unsigned char *src_ptr,
+                                             unsigned char *dst_ptr,
+                                             int src_pixels_per_line,
+                                             int dst_pixels_per_line,
+                                             int rows, int cols, int flimit);
 
-extern void (*vp9_mbpost_proc_down)(unsigned char *dst, int pitch, int rows, int cols, int flimit);
-extern void vp9_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, int flimit);
-extern void (*vp9_mbpost_proc_across_ip)(unsigned char *src, int pitch, int rows, int cols, int flimit);
-extern void vp9_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int cols, int flimit);
-
-extern void vp9_post_proc_down_and_across_c
-(
-  unsigned char *src_ptr,
-  unsigned char *dst_ptr,
-  int src_pixels_per_line,
-  int dst_pixels_per_line,
-  int rows,
-  int cols,
-  int flimit
-);
-void vp9_plane_add_noise_c(unsigned char *Start, unsigned int Width, unsigned int Height, int Pitch, int q, int a);
+extern void (*vp9_mbpost_proc_down)(unsigned char *dst, int pitch,
+                                    int rows, int cols, int flimit);
+extern void vp9_mbpost_proc_down_c(unsigned char *dst, int pitch,
+                                   int rows, int cols, int flimit);
+extern void (*vp9_mbpost_proc_across_ip)(unsigned char *src, int pitch,
+                                         int rows, int cols, int flimit);
+extern void vp9_mbpost_proc_across_ip_c(unsigned char *src, int pitch,
+                                        int rows, int cols, int flimit);
+extern void vp9_post_proc_down_and_across_c(unsigned char *src_ptr,
+                                            unsigned char *dst_ptr,
+                                            int src_pixels_per_line,
+                                            int dst_pixels_per_line,
+                                            int rows, int cols, int flimit);
+void vp9_plane_add_noise_c(unsigned char *start,
+                           unsigned int width, unsigned int height,
+                           int pitch, int q, int a);
 
 extern copy_mem_block_function *vp9_copy_mem16x16;
 extern copy_mem_block_function *vp9_copy_mem8x8;
@@ -59,9 +55,12 @@ extern subpixel_predict_function bilinear_predict16x16_ppc;
 
 extern copy_mem_block_function copy_mem16x16_ppc;
 
-void recon_b_ppc(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
-void recon2b_ppc(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
-void recon4b_ppc(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
+void recon_b_ppc(short *diff_ptr, unsigned char *pred_ptr,
+                 unsigned char *dst_ptr, int stride);
+void recon2b_ppc(short *diff_ptr, unsigned char *pred_ptr,
+                 unsigned char *dst_ptr, int stride);
+void recon4b_ppc(short *diff_ptr, unsigned char *pred_ptr,
+                 unsigned char *dst_ptr, int stride);
 
 extern void short_idct4x4_ppc(short *input, short *output, int pitch);
 
@@ -79,9 +78,12 @@ extern copy_mem_block_function vp9_copy_mem16x16_c;
 extern copy_mem_block_function vp9_copy_mem8x8_c;
 extern copy_mem_block_function vp9_copy_mem8x4_c;
 
-void vp9_recon_b_c(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
-void vp9_recon2b_c(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
-void vp9_recon4b_c(short *diff_ptr, unsigned char *pred_ptr, unsigned char *dst_ptr, int stride);
+void vp9_recon_b_c(short *diff_ptr, unsigned char *pred_ptr,
+                   unsigned char *dst_ptr, int stride);
+void vp9_recon2b_c(short *diff_ptr, unsigned char *pred_ptr,
+                   unsigned char *dst_ptr, int stride);
+void vp9_recon4b_c(short *diff_ptr, unsigned char *pred_ptr,
+                   unsigned char *dst_ptr, int stride);
 
 extern void vp9_short_idct4x4_1_c(short *input, short *output, int pitch);
 extern void vp9_short_idct4x4_c(short *input, short *output, int pitch);

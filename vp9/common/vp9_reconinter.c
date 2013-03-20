@@ -95,7 +95,7 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
 
     vp9_setup_scale_factors_for_frame(&cm->active_ref_scale[i],
                                       &cm->yv12_fb[cm->active_ref_idx[i]],
-                                      cm->Width, cm->Height);
+                                      cm->width, cm->height);
   }
 
   if (xd->mode_info_context) {

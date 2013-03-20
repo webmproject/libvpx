@@ -2270,7 +2270,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   {
     int v;
 
-    if (pc->Width != pc->display_width || pc->Height != pc->display_height) {
+    if (pc->width != pc->display_width || pc->height != pc->display_height) {
       v = pc->display_width;
       cx_data[0] = v;
       cx_data[1] = v >> 8;
@@ -2282,11 +2282,11 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       extra_bytes_packed += 4;
     }
 
-    v = pc->Width;
+    v = pc->width;
     cx_data[0] = v;
     cx_data[1] = v >> 8;
 
-    v = pc->Height;
+    v = pc->height;
     cx_data[2] = v;
     cx_data[3] = v >> 8;
 
@@ -2809,8 +2809,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
   /* update frame tag */
   {
-    int scaling = (pc->Width != pc->display_width
-                   || pc->Height != pc->display_height);
+    int scaling = (pc->width != pc->display_width ||
+                   pc->height != pc->display_height);
     int v = (oh.first_partition_length_in_bytes << 8) |
             (scaling << 5) |
             (oh.show_frame << 4) |
