@@ -356,7 +356,8 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 
     if (cm->filter_level) {
       /* Apply the loop filter if appropriate. */
-      vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0);
+      vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0,
+                            cm->dering_enabled);
     }
     vp8_yv12_extend_frame_borders(cm->frame_to_show);
   }

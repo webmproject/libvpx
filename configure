@@ -248,6 +248,7 @@ EXPERIMENT_LIST="
     code_nonzerocount
     useselectrefmv
     modelcoefprob
+    loop_dering
 "
 CONFIG_LIST="
     external_build

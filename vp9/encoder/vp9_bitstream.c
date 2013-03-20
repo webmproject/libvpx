@@ -2515,6 +2515,14 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   vp9_write_bit(&header_bc, pc->filter_type);
   vp9_write_literal(&header_bc, pc->filter_level, 6);
   vp9_write_literal(&header_bc, pc->sharpness_level, 3);
+#if CONFIG_LOOP_DERING
+  if (pc->dering_enabled) {
+    vp9_write_bit(&header_bc, 1);
+    vp9_write_literal(&header_bc, pc->dering_enabled - 1, 4);
+  } else {
+    vp9_write_bit(&header_bc, 0);
+  }
+#endif
 
   // Write out loop filter deltas applied at the MB level based on mode or ref frame (if they are enabled).
   vp9_write_bit(&header_bc, (xd->mode_ref_lf_delta_enabled) ? 1 : 0);

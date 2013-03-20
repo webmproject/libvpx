@@ -209,7 +209,8 @@ static int sb_mb_lf_skip(const MODE_INFO *const mip0,
 void vp9_loop_filter_frame(VP9_COMMON *cm,
                            MACROBLOCKD *xd,
                            int frame_filter_level,
-                           int y_only) {
+                           int y_only,
+                           int dering) {
   YV12_BUFFER_CONFIG *post = cm->frame_to_show;
   loop_filter_info_n *lfi_n = &cm->lf_info;
   struct loop_filter_info lfi;
@@ -302,6 +303,62 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
                                  post->uv_stride, &lfi);
             }
           }
+#if CONFIG_LOOP_DERING
+          if (dering) {
+            if (mb_row && mb_row < cm->mb_rows - 1 &&
+                mb_col && mb_col < cm->mb_cols - 1) {
+              vp9_post_proc_down_and_across(y_ptr, y_ptr,
+                                            post->y_stride, post->y_stride,
+                                            16, 16, dering);
+              if (!y_only) {
+                vp9_post_proc_down_and_across(u_ptr, u_ptr,
+                                              post->uv_stride, post->uv_stride,
+                                              8, 8, dering);
+                vp9_post_proc_down_and_across(v_ptr, v_ptr,
+                                              post->uv_stride, post->uv_stride,
+                                              8, 8, dering);
+              }
+            } else {
+              // Adjust the filter so that no out-of-frame data is used.
+              uint8_t *dr_y = y_ptr, *dr_u = u_ptr, *dr_v = v_ptr;
+              int w_adjust = 0;
+              int h_adjust = 0;
+
+              if (mb_col == 0) {
+                dr_y += 2;
+                dr_u += 2;
+                dr_v += 2;
+                w_adjust += 2;
+              }
+              if (mb_col == cm->mb_cols - 1)
+                w_adjust += 2;
+              if (mb_row == 0) {
+                dr_y += 2 * post->y_stride;
+                dr_u += 2 * post->uv_stride;
+                dr_v += 2 * post->uv_stride;
+                h_adjust += 2;
+              }
+              if (mb_row == cm->mb_rows - 1)
+                h_adjust += 2;
+              vp9_post_proc_down_and_across_c(dr_y, dr_y,
+                                              post->y_stride, post->y_stride,
+                                              16 - w_adjust, 16 - h_adjust,
+                                              dering);
+              if (!y_only) {
+                vp9_post_proc_down_and_across_c(dr_u, dr_u,
+                                                post->uv_stride,
+                                                post->uv_stride,
+                                                8 - w_adjust, 8 - h_adjust,
+                                                dering);
+                vp9_post_proc_down_and_across_c(dr_v, dr_v,
+                                                post->uv_stride,
+                                                post->uv_stride,
+                                                8 - w_adjust, 8 - h_adjust,
+                                                dering);
+              }
+            }
+          }
+#endif
         } else {
           // FIXME: Not 8x8 aware
           if (mb_col > 0 &&
