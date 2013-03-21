@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//3mA\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-21T20:02:49Z",
+      "side": 1,
+      "message": "I\u0027ve changed the code according to you suggestion and made special alignment for readability. I think it\u0027s still better than the previous code because there is only one occurrence of \"mi-\u003esegment_id \u003d \"",
+      "parentUuid": "AAAAWX//4Xc\u003d",
+      "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX//4WY\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-03-20T22:47:43Z",
       "side": 1,
       "message": "this would be more clearly written:\n\n  const vp9_prob p \u003d mv_class \u003d\u003d MV_CLASS_0 ? mvcomp-\u003eclass0_hp : mvcomp-\u003ehp;\n  offset +\u003d vpx_read(r, p)\n\nor:\n\n  offset +\u003d vpx_read(r, mv_class \u003d\u003d MV_CLASS_0 ? mvcomp-\u003eclass0_hp : mvcomp-\u003ehp);\n\nWrap as appropriate.",
+      "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//3ls\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-21T20:02:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//4WY\u003d",
       "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAWX//3lk\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 892,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-21T20:02:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//4V0\u003d",
+      "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAWX//4Vw\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2013-03-20T22:47:43Z",
       "side": 1,
       "message": "might be clearer to put mi-\u003ebmi[j].as_mode.first \u003d m; on a second line.",
+      "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//3lg\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1078,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-21T20:02:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAWX//4Vw\u003d",
       "revId": "508a5874611da455c6805e0a558bbdc6feb64c08",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
