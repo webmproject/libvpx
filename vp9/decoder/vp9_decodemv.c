@@ -76,12 +76,10 @@ static MB_PREDICTION_MODE read_uv_mode(vp9_reader *bc, const vp9_prob *p) {
 // This function reads the current macro block's segnent id from the bitstream
 // It should only be called if a segment map update is indicated.
 static void read_mb_segid(vp9_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *xd) {
-  /* Is segmentation enabled */
   if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
-    /* If so then read the segment id. */
-    mi->segment_id = vp9_read(r, xd->mb_segment_tree_probs[0]) ?
-        (unsigned char)(2 + vp9_read(r, xd->mb_segment_tree_probs[2])):
-        (unsigned char)(vp9_read(r, xd->mb_segment_tree_probs[1]));
+    const vp9_prob *const p = xd->mb_segment_tree_probs;
+    mi->segment_id = vp9_read(r, p[0]) ? 2 + vp9_read(r, p[2])
+                                       : vp9_read(r, p[1]);
   }
 }
 
@@ -90,21 +88,15 @@ static void read_mb_segid(vp9_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *xd) {
 static void read_mb_segid_except(VP9_COMMON *cm,
                                  vp9_reader *r, MB_MODE_INFO *mi,
                                  MACROBLOCKD *xd, int mb_row, int mb_col) {
-  int pred_seg_id = vp9_get_pred_mb_segid(cm, xd,
-                                          mb_row * cm->mb_cols + mb_col);
-  const vp9_prob *p = xd->mb_segment_tree_probs;
-  vp9_prob p1 = xd->mb_segment_mispred_tree_probs[pred_seg_id];
+  const int mb_index = mb_row * cm->mb_cols + mb_col;
+  const int pred_seg_id = vp9_get_pred_mb_segid(cm, xd, mb_index);
+  const vp9_prob *const p = xd->mb_segment_tree_probs;
+  const vp9_prob prob = xd->mb_segment_mispred_tree_probs[pred_seg_id];
 
-  /* Is segmentation enabled */
   if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
-    /* If so then read the segment id. */
-    if (vp9_read(r, p1)) {
-      mi->segment_id = 2 +
-          (pred_seg_id < 2 ? vp9_read(r, p[2]) : (pred_seg_id == 2));
-    } else {
-      mi->segment_id =
-          pred_seg_id >= 2 ? vp9_read(r, p[1]) : (pred_seg_id == 0);
-    }
+    mi->segment_id = vp9_read(r, prob)
+        ? 2 + (pred_seg_id  < 2 ? vp9_read(r, p[2]) : (pred_seg_id == 2))
+        :     (pred_seg_id >= 2 ? vp9_read(r, p[1]) : (pred_seg_id == 0));
   }
 }
 
@@ -265,8 +257,8 @@ static int read_nmv_component_fp(vp9_reader *r,
   offset += f << 1;
 
   if (usehp) {
-    offset += mv_class == MV_CLASS_0 ?
-        vp9_read(r, mvcomp->class0_hp) : vp9_read(r, mvcomp->hp);
+    const vp9_prob p = mv_class == MV_CLASS_0 ? mvcomp->class0_hp : mvcomp->hp;
+    offset += vp9_read(r, p);
   } else {
     offset += 1;  // If hp is not used, the default value of the hp bit is 1
   }
@@ -567,10 +559,10 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
                                int mb_row, int mb_col,
                                BOOL_DECODER* const bc) {
   VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd  = &pbi->mb;
+  MACROBLOCKD *const xd = &pbi->mb;
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *mbmi = &mi->mbmi;
-  int index = mb_row * pbi->common.mb_cols + mb_col;
+  int mb_index = mb_row * pbi->common.mb_cols + mb_col;
 
   if (xd->segmentation_enabled) {
     if (xd->update_mb_segmentation_map) {
@@ -589,7 +581,7 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
         // If the value is flagged as correctly predicted
         // then use the predicted value
         if (seg_pred_flag) {
-          mbmi->segment_id = vp9_get_pred_mb_segid(cm, xd, index);
+          mbmi->segment_id = vp9_get_pred_mb_segid(cm, xd, mb_index);
         } else {
           // Decode it explicitly
           read_mb_segid_except(cm, bc, mbmi, xd, mb_row, mb_col);
@@ -607,12 +599,12 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
 
         for (y = 0; y < ymbs; y++) {
           for (x = 0; x < xmbs; x++) {
-            cm->last_frame_seg_map[index + x + y * cm->mb_cols] =
+            cm->last_frame_seg_map[mb_index + x + y * cm->mb_cols] =
                 mbmi->segment_id;
           }
         }
       } else {
-        cm->last_frame_seg_map[index] = mbmi->segment_id;
+        cm->last_frame_seg_map[mb_index] = mbmi->segment_id;
       }
     } else {
       if (mbmi->sb_type) {
@@ -625,12 +617,12 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
         for (y = 0; y < ymbs; y++) {
           for (x = 0; x < xmbs; x++) {
             segment_id = MIN(segment_id,
-                cm->last_frame_seg_map[index + x + y * cm->mb_cols]);
+                cm->last_frame_seg_map[mb_index + x + y * cm->mb_cols]);
           }
         }
         mbmi->segment_id = segment_id;
       } else {
-        mbmi->segment_id = cm->last_frame_seg_map[index];
+        mbmi->segment_id = cm->last_frame_seg_map[mb_index];
       }
     }
   } else {
@@ -668,7 +660,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   VP9_COMMON *const cm = &pbi->common;
   nmv_context *const nmvc = &pbi->common.fc.nmvc;
   const int mis = pbi->common.mode_info_stride;
-  MACROBLOCKD *const xd  = &pbi->mb;
+  MACROBLOCKD *const xd = &pbi->mb;
 
   int_mv *const mv = &mbmi->mv[0];
   const int mb_size = 1 << mi->mbmi.sb_type;
@@ -677,10 +669,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                        cm->height == cm->last_height &&
                                        !cm->error_resilient_mode;
 
-  int mb_to_left_edge;
-  int mb_to_right_edge;
-  int mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
-  int mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
+  int mb_to_left_edge, mb_to_right_edge, mb_to_top_edge, mb_to_bottom_edge;
 
   mbmi->need_to_clamp_mvs = 0;
   mbmi->need_to_clamp_secondmv = 0;
@@ -697,6 +686,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   set_mb_row(cm, xd, mb_row, mb_size);
   set_mb_col(cm, xd, mb_col, mb_size);
 
+  mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
+  mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
   mb_to_left_edge = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
   mb_to_right_edge = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
 
@@ -898,13 +889,13 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mbmi->uv_mode = DC_PRED;
     switch (mbmi->mode) {
       case SPLITMV: {
-        const int s = mbmi->partitioning =
-                        treed_read(bc, vp9_mbsplit_tree, cm->fc.mbsplit_prob);
-        const int num_p = vp9_mbsplit_count [s];
+        const int s = treed_read(bc, vp9_mbsplit_tree, cm->fc.mbsplit_prob);
+        const int num_p = vp9_mbsplit_count[s];
         int j = 0;
-        cm->fc.mbsplit_counts[s]++;
 
+        cm->fc.mbsplit_counts[s]++;
         mbmi->need_to_clamp_mvs = 0;
+        mbmi->partitioning = s;
         do {  // for each subset j
           int_mv leftmv, abovemv, second_leftmv, second_abovemv;
           int_mv blockmv, secondmv;
@@ -1084,9 +1075,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     if (mbmi->mode == B_PRED) {
       int j = 0;
       do {
-        int m;
-        m = mi->bmi[j].as_mode.first = read_bmode(bc,
-                                                  pbi->common.fc.bmode_prob);
+        int m = read_bmode(bc, pbi->common.fc.bmode_prob);
+        mi->bmi[j].as_mode.first = m;
 #if CONFIG_NEWBINTRAMODES
         if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
 #endif
