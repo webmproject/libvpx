@@ -315,7 +315,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
     input[48] *= dq[1];
 
     // the idct halves ( >> 1) the pitch
-    vp9_short_idct10_16x16_c(input, output, 32);
+    vp9_short_idct10_16x16(input, output, 32);
 
     input[0] = input[1] = input[2] = input[3] = 0;
     input[16] = input[17] = input[18] = 0;

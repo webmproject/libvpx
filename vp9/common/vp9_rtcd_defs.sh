@@ -298,7 +298,7 @@ prototype void vp9_short_idct16x16 "int16_t *input, int16_t *output, int pitch"
 specialize vp9_short_idct16x16 sse2
 
 prototype void vp9_short_idct10_16x16 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct10_16x16
+specialize vp9_short_idct10_16x16 sse2
 
 prototype void vp9_short_idct1_16x16 "int16_t *input, int16_t *output"
 specialize vp9_short_idct1_16x16
