@@ -273,7 +273,7 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
     vp9_short_iht16x16(input, output, 16, tx_type);
 
     // the idct halves ( >> 1) the pitch
-    // vp9_short_idct16x16_c(input, output, 32);
+    // vp9_short_idct16x16(input, output, 32);
 
     vpx_memset(input, 0, 512);
 
@@ -296,7 +296,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
     int16_t in = input[0] * dq[0];
     int16_t out;
     /* Note: the idct1 will need to be modified accordingly whenever
-     * vp9_short_idct16x16_c() is modified. */
+     * vp9_short_idct16x16() is modified. */
     vp9_short_idct1_16x16_c(&in, &out);
     input[0] = 0;
 
@@ -333,7 +333,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
       input[i] *= dq[1];
 
     // the idct halves ( >> 1) the pitch
-    vp9_short_idct16x16_c(input, output, 16 << 1);
+    vp9_short_idct16x16(input, output, 16 << 1);
 
     vpx_memset(input, 0, 512);
 
