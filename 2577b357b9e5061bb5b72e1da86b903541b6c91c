@@ -50,6 +50,24 @@
       "revId": "2577b357b9e5061bb5b72e1da86b903541b6c91c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAWX//2eY\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-22T17:40:29Z",
+      "side": 1,
+      "message": "qcoeff is coefficients, this is tokens. I got better prediction results from combining tokens vs. coefficients (basically one is linear scale, one is logarithmic scale).",
+      "parentUuid": "AAAAWX//2iI\u003d",
+      "revId": "2577b357b9e5061bb5b72e1da86b903541b6c91c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
