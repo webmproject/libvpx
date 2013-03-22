@@ -89,8 +89,8 @@ static size_t wrap_fwrite(const void *ptr, size_t size, size_t nmemb,
 
 static const char *exec_name;
 
-#define VP8_FOURCC (0x00385056)
-#define VP9_FOURCC (0x00395056)
+#define VP8_FOURCC (0x30385056)
+#define VP9_FOURCC (0x30395056)
 static const struct codec_item {
   char const              *name;
   const vpx_codec_iface_t *(*iface)(void);
