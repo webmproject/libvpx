@@ -342,9 +342,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vp8_yv12_de_alloc_frame_buffer(&cpi->last_frame_uf);
   vp8_yv12_de_alloc_frame_buffer(&cpi->scaled_source);
-#if VP9_TEMPORAL_ALT_REF
   vp8_yv12_de_alloc_frame_buffer(&cpi->alt_ref_buffer);
-#endif
   vp9_lookahead_destroy(cpi->lookahead);
 
   vpx_free(cpi->tok);
@@ -879,15 +877,11 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate lag buffers");
 
-#if VP9_TEMPORAL_ALT_REF
-
   if (vp8_yv12_alloc_frame_buffer(&cpi->alt_ref_buffer,
                                   cpi->oxcf.width, cpi->oxcf.height,
                                   VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
-
-#endif
 }
 
 static int alloc_partition_data(VP9_COMP *cpi) {
@@ -1146,16 +1140,12 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   set_tile_limits(cpi);
 
-#if VP9_TEMPORAL_ALT_REF
   {
     int i;
-
     cpi->fixed_divide[0] = 0;
-
     for (i = 1; i < 512; i++)
       cpi->fixed_divide[i] = 0x80000 / i;
   }
-#endif
 }
 
 

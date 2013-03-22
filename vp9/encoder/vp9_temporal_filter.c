@@ -32,9 +32,6 @@
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
 #define ALT_REF_SUBPEL_ENABLED 1 // dis/enable subpel in MC AltRef filtering
 
-#if VP9_TEMPORAL_ALT_REF
-
-
 static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             uint8_t *y_mb_ptr,
                                             uint8_t *u_mb_ptr,
@@ -476,4 +473,3 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
     frames_to_blur_backward,
     strength);
 }
-#endif

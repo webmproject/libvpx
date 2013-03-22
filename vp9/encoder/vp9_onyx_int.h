@@ -42,10 +42,6 @@
 
 #define MAX_LAG_BUFFERS 25
 
-#define AF_THRESH   25
-#define AF_THRESH2  100
-#define ARF_DECAY_THRESH 12
-
 #if CONFIG_COMP_INTERINTRA_PRED
 #define MAX_MODES 54
 #else
@@ -58,8 +54,8 @@
 #define GF_ZEROMV_ZBIN_BOOST 12
 #define LF_ZEROMV_ZBIN_BOOST 6
 #define MV_ZBIN_BOOST        4
-
-#define VP9_TEMPORAL_ALT_REF 1
+#define SPLIT_MV_ZBIN_BOOST  0
+#define INTRA_ZBIN_BOOST     0
 
 typedef struct {
   nmv_context nmvc;
@@ -625,11 +621,9 @@ typedef struct VP9_COMP {
     double est_max_qcorrection_factor;
   } twopass;
 
-#if VP9_TEMPORAL_ALT_REF
   YV12_BUFFER_CONFIG alt_ref_buffer;
   YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
   int fixed_divide[512];
-#endif
 
 #if CONFIG_INTERNAL_STATS
   int    count;
