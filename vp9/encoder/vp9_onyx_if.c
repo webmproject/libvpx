@@ -2698,10 +2698,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // is above a threshold
   cpi->zbin_mode_boost = 0;
 
-  if (cpi->oxcf.lossless)
+  // if (cpi->oxcf.lossless)
     cpi->zbin_mode_boost_enabled = FALSE;
-  else
-    cpi->zbin_mode_boost_enabled = TRUE;
+  // else
+  //   cpi->zbin_mode_boost_enabled = TRUE;
 
   // Current default encoder behaviour for the altref sign bias
   if (cpi->source_alt_ref_active)

@@ -51,9 +51,9 @@
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
 
-#define GF_ZEROMV_ZBIN_BOOST 12
-#define LF_ZEROMV_ZBIN_BOOST 6
-#define MV_ZBIN_BOOST        4
+#define GF_ZEROMV_ZBIN_BOOST 0
+#define LF_ZEROMV_ZBIN_BOOST 0
+#define MV_ZBIN_BOOST        0
 #define SPLIT_MV_ZBIN_BOOST  0
 #define INTRA_ZBIN_BOOST     0
 
