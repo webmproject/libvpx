@@ -22,8 +22,8 @@ static void vp9_get_tile_offsets(VP9_COMMON *cm, int *min_tile_off,
   const int sb_off1 =  (tile_idx      * n_sbs) >> log2_n_tiles;
   const int sb_off2 = ((tile_idx + 1) * n_sbs) >> log2_n_tiles;
 
-  *min_tile_off = (sb_off1 << 2) > n_mbs ? n_mbs : (sb_off1 << 2);
-  *max_tile_off = (sb_off2 << 2) > n_mbs ? n_mbs : (sb_off2 << 2);
+  *min_tile_off = MIN(sb_off1 << 2, n_mbs);
+  *max_tile_off = MIN(sb_off2 << 2, n_mbs);
 }
 
 void vp9_get_tile_col_offsets(VP9_COMMON *cm, int tile_col_idx) {
