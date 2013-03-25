@@ -598,20 +598,40 @@ static void optimize_b(VP9_COMMON *const cm,
       }
       break;
     }
-    case TX_8X8:
-      scan = vp9_default_zig_zag1d_8x8;
+    case TX_8X8: {
+      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+      const int sz = 3 + sb_type, x = ib & ((1 << sz) - 1), y = ib - x;
+      const TX_TYPE tx_type = get_tx_type_8x8(xd, y + (x >> 1));
+      if (tx_type == DCT_ADST) {
+        scan = vp9_col_scan_8x8;
+      } else if (tx_type == ADST_DCT) {
+        scan = vp9_row_scan_8x8;
+      } else {
+        scan = vp9_default_zig_zag1d_8x8;
+      }
       default_eob = 64;
 #if CONFIG_CODE_NONZEROCOUNT
       nzc_cost = mb->nzc_costs_8x8[nzc_context][ref][type];
 #endif
       break;
-    case TX_16X16:
-      scan = vp9_default_zig_zag1d_16x16;
+    }
+    case TX_16X16: {
+      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+      const int sz = 4 + sb_type, x = ib & ((1 << sz) - 1), y = ib - x;
+      const TX_TYPE tx_type = get_tx_type_16x16(xd, y + (x >> 2));
+      if (tx_type == DCT_ADST) {
+        scan = vp9_col_scan_16x16;
+      } else if (tx_type == ADST_DCT) {
+        scan = vp9_row_scan_16x16;
+      } else {
+        scan = vp9_default_zig_zag1d_16x16;
+      }
       default_eob = 256;
 #if CONFIG_CODE_NONZEROCOUNT
       nzc_cost = mb->nzc_costs_16x16[nzc_context][ref][type];
 #endif
       break;
+    }
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
       default_eob = 1024;

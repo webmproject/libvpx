@@ -488,10 +488,20 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       }
       break;
     }
-    case TX_8X8:
+    case TX_8X8: {
+      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+      const int sz = 3 + sb_type, x = ib & ((1 << sz) - 1), y = ib - x;
+      const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
+                              get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
       a_ec = (a[0] + a[1]) != 0;
       l_ec = (l[0] + l[1]) != 0;
-      scan = vp9_default_zig_zag1d_8x8;
+      if (tx_type == ADST_DCT) {
+        scan = vp9_row_scan_8x8;
+      } else if (tx_type == DCT_ADST) {
+        scan = vp9_col_scan_8x8;
+      } else {
+        scan = vp9_default_zig_zag1d_8x8;
+      }
 #if CONFIG_CODE_NONZEROCOUNT
       nzc_cost = mb->nzc_costs_8x8[nzc_context][ref][type];
 #else
@@ -499,8 +509,19 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
 #endif
       seg_eob = 64;
       break;
-    case TX_16X16:
-      scan = vp9_default_zig_zag1d_16x16;
+    }
+    case TX_16X16: {
+      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+      const int sz = 4 + sb_type, x = ib & ((1 << sz) - 1), y = ib - x;
+      const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
+                              get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
+      if (tx_type == ADST_DCT) {
+        scan = vp9_row_scan_16x16;
+      } else if (tx_type == DCT_ADST) {
+        scan = vp9_col_scan_16x16;
+      } else {
+        scan = vp9_default_zig_zag1d_16x16;
+      }
 #if CONFIG_CODE_NONZEROCOUNT
       nzc_cost = mb->nzc_costs_16x16[nzc_context][ref][type];
 #else
@@ -515,6 +536,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
       }
       break;
+    }
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
 #if CONFIG_CODE_NONZEROCOUNT
@@ -1498,7 +1520,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         vp9_short_fht8x8(be->src_diff, (x->block + idx)->coeff, 16, tx_type);
       else
         x->fwd_txm8x8(be->src_diff, (x->block + idx)->coeff, 32);
-      x->quantize_b_8x8(x, idx);
+      x->quantize_b_8x8(x, idx, tx_type);
 
       // compute quantization mse of 8x8 block
       distortion = vp9_block_error_c((x->block + idx)->coeff,
@@ -2503,7 +2525,7 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
       if (xd->mode_info_context->mbmi.txfm_size == TX_4X4) {
         if (otherrd) {
           x->fwd_txm8x8(be->src_diff, be2->coeff, 32);
-          x->quantize_b_8x8(x, idx);
+          x->quantize_b_8x8(x, idx, DCT_DCT);
           thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
           otherdist += thisdistortion;
           xd->mode_info_context->mbmi.txfm_size = TX_8X8;
@@ -2557,7 +2579,7 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
           }
         }
         x->fwd_txm8x8(be->src_diff, be2->coeff, 32);
-        x->quantize_b_8x8(x, idx);
+        x->quantize_b_8x8(x, idx, DCT_DCT);
         thisdistortion = vp9_block_error_c(be2->coeff, bd2->dqcoeff, 64);
         *distortion += thisdistortion;
         *labelyrate += cost_coeffs(cm, x, idx, PLANE_TYPE_Y_WITH_DC,

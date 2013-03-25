@@ -29,8 +29,8 @@
 void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_ix, TX_TYPE type);
 void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx);
 void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *mb, int b_idx1, int b_idx2);
-void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx);
-void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx);
+void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type);
+void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type);
 void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx);
 
 void vp9_quantize_mb_4x4(MACROBLOCK *x);

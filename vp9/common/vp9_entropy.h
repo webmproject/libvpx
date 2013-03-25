@@ -102,7 +102,15 @@ extern DECLARE_ALIGNED(16, const int, vp9_col_scan_4x4[16]);
 extern DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]);
 
 extern DECLARE_ALIGNED(64, const int, vp9_default_zig_zag1d_8x8[64]);
+
+extern DECLARE_ALIGNED(16, const int, vp9_col_scan_8x8[64]);
+extern DECLARE_ALIGNED(16, const int, vp9_row_scan_8x8[64]);
+
 extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]);
+
+extern DECLARE_ALIGNED(16, const int, vp9_col_scan_16x16[256]);
+extern DECLARE_ALIGNED(16, const int, vp9_row_scan_16x16[256]);
+
 extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]);
 
 void vp9_coef_tree_initialize(void);

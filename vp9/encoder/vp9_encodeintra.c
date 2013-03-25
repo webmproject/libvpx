@@ -155,12 +155,12 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
     tx_type = get_tx_type_8x8(xd, ib);
     if (tx_type != DCT_DCT) {
       vp9_short_fht8x8(be->src_diff, (x->block + idx)->coeff, 16, tx_type);
-      x->quantize_b_8x8(x, idx);
+      x->quantize_b_8x8(x, idx, tx_type);
       vp9_short_iht8x8(xd->block[idx].dqcoeff, xd->block[ib].diff,
                             16, tx_type);
     } else {
       x->fwd_txm8x8(be->src_diff, (x->block + idx)->coeff, 32);
-      x->quantize_b_8x8(x, idx);
+      x->quantize_b_8x8(x, idx, DCT_DCT);
       vp9_short_idct8x8(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
     }
   } else {
