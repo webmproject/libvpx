@@ -129,7 +129,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
         lvl_seg = vp9_get_segdata(xd, seg, SEG_LVL_ALT_LF);
       } else { /* Delta Value */
         lvl_seg += vp9_get_segdata(xd, seg, SEG_LVL_ALT_LF);
-        lvl_seg = (lvl_seg > 0) ? ((lvl_seg > 63) ? 63 : lvl_seg) : 0;
+        lvl_seg = clamp(lvl_seg, 0, 63);
       }
     }
 
@@ -152,13 +152,12 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
     /* Apply delta for Intra modes */
     mode = 0; /* B_PRED */
     /* Only the split mode BPRED has a further special case */
-    lvl_mode = lvl_ref +  xd->mode_lf_deltas[mode];
-    lvl_mode = (lvl_mode > 0) ? (lvl_mode > 63 ? 63 : lvl_mode) : 0; /* clamp */
+    lvl_mode = clamp(lvl_ref +  xd->mode_lf_deltas[mode], 0, 63);
 
     lfi->lvl[seg][ref][mode] = lvl_mode;
 
     mode = 1; /* all the rest of Intra modes */
-    lvl_mode = (lvl_ref > 0) ? (lvl_ref > 63 ? 63 : lvl_ref)  : 0; /* clamp */
+    lvl_mode = clamp(lvl_ref, 0, 63);
     lfi->lvl[seg][ref][mode] = lvl_mode;
 
     /* LAST, GOLDEN, ALT */
@@ -170,9 +169,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
 
       /* Apply delta for Inter modes */
       for (mode = 1; mode < 4; mode++) {
-        lvl_mode = lvl_ref + xd->mode_lf_deltas[mode];
-        lvl_mode = (lvl_mode > 0) ? (lvl_mode > 63 ? 63 : lvl_mode) : 0; /* clamp */
-
+        lvl_mode = clamp(lvl_ref + xd->mode_lf_deltas[mode], 0, 63);
         lfi->lvl[seg][ref][mode] = lvl_mode;
       }
     }
@@ -379,16 +376,13 @@ void vp9_loop_filter_partial_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
    */
   if (alt_flt_enabled) {
     for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-      /* Abs value */
       if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA) {
+        // Abs value
         lvl_seg[i] = vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
-      }
-      /* Delta Value */
-      else {
-        lvl_seg[i] = default_filt_lvl +
-                     vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
-        lvl_seg[i] = (lvl_seg[i] > 0) ?
-                     ((lvl_seg[i] > 63) ? 63 : lvl_seg[i]) : 0;
+      } else {
+        // Delta Value
+        lvl_seg[i] = default_filt_lvl + vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
+        lvl_seg[i] = clamp(lvl_seg[i], 0, 63);
       }
     }
   }
