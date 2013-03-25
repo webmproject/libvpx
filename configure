@@ -250,6 +250,7 @@ EXPERIMENT_LIST="
     modelcoefprob
     loop_dering
     implicit_compoundinter_weight
+    scatterscan
 "
 CONFIG_LIST="
     external_build

@@ -218,6 +218,7 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
     input[0] = 0;
 
     vp9_add_constant_residual_8x8(out, pred, pitch, dest, stride);
+#if !CONFIG_SCATTERSCAN
   } else if (eob <= 10) {
     input[1] *= dq[1];
     input[2] *= dq[1];
@@ -237,6 +238,7 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
     input[24] = 0;
 
     vp9_add_residual_8x8(output, pred, pitch, dest, stride);
+#endif
   } else {
     int i;
 
@@ -301,6 +303,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
     input[0] = 0;
 
     vp9_add_constant_residual_16x16(out, pred, pitch, dest, stride);
+#if !CONFIG_SCATTERSCAN
   } else if (eob <= 10) {
     input[0] *= dq[0];
 
@@ -323,6 +326,7 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
     input[48] = 0;
 
     vp9_add_residual_16x16(output, pred, pitch, dest, stride);
+#endif
   } else {
     int i;
 
@@ -352,6 +356,7 @@ void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
       vp9_short_idct1_32x32(input, output);
       vp9_add_constant_residual_32x32(output[0], pred, pitch, dest, stride);
       input[0] = 0;
+#if !CONFIG_SCATTERSCAN
     } else if (eob <= 10) {
       input[1] = input[1] * dq[1] / 2;
       input[2] = input[2] * dq[1] / 2;
@@ -372,6 +377,7 @@ void vp9_dequant_idct_add_32x32_c(int16_t *input, const int16_t *dq,
       input[96] = 0;
 
       vp9_add_residual_32x32(output, pred, pitch, dest, stride);
+#endif
     } else {
       int i;
       for (i = 1; i < 1024; i++)
