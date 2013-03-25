@@ -1339,6 +1339,7 @@ void init_nzcstats() {
 
 void update_nzcstats(VP9_COMMON *const cm) {
   int c, r, b, t;
+
   for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
     for (r = 0; r < REF_TYPES; ++r) {
       for (b = 0; b < BLOCK_TYPES; ++b) {
@@ -1388,6 +1389,8 @@ void update_nzcstats(VP9_COMMON *const cm) {
 
 void print_nzcstats() {
   int c, r, b, t;
+  FILE *f;
+
   printf(
     "static const unsigned int default_nzc_counts_4x4[MAX_NZC_CONTEXTS]\n"
     "                                                [REF_TYPES]\n"
@@ -1508,11 +1511,9 @@ void print_nzcstats() {
       for (b = 0; b < BLOCK_TYPES; ++b) {
         vp9_prob probs[NZC4X4_NODES];
         unsigned int branch_ct[NZC4X4_NODES][2];
-        vp9_tree_probs_from_distribution(NZC4X4_TOKENS,
-                                         vp9_nzc4x4_encodings,
-                                         vp9_nzc4x4_tree,
+        vp9_tree_probs_from_distribution(vp9_nzc4x4_tree,
                                          probs, branch_ct,
-                                         nzc_stats_4x4[c][r][b]);
+                                         nzc_stats_4x4[c][r][b], 0);
         printf("      {");
         for (t = 0; t < NZC4X4_NODES; ++t) {
           printf(" %-3d,", probs[t]);
@@ -1537,11 +1538,9 @@ void print_nzcstats() {
       for (b = 0; b < BLOCK_TYPES; ++b) {
         vp9_prob probs[NZC8X8_NODES];
         unsigned int branch_ct[NZC8X8_NODES][2];
-        vp9_tree_probs_from_distribution(NZC8X8_TOKENS,
-                                         vp9_nzc8x8_encodings,
-                                         vp9_nzc8x8_tree,
+        vp9_tree_probs_from_distribution(vp9_nzc8x8_tree,
                                          probs, branch_ct,
-                                         nzc_stats_8x8[c][r][b]);
+                                         nzc_stats_8x8[c][r][b], 0);
         printf("      {");
         for (t = 0; t < NZC8X8_NODES; ++t) {
           printf(" %-3d,", probs[t]);
@@ -1566,11 +1565,9 @@ void print_nzcstats() {
       for (b = 0; b < BLOCK_TYPES; ++b) {
         vp9_prob probs[NZC16X16_NODES];
         unsigned int branch_ct[NZC16X16_NODES][2];
-        vp9_tree_probs_from_distribution(NZC16X16_TOKENS,
-                                         vp9_nzc16x16_encodings,
-                                         vp9_nzc16x16_tree,
+        vp9_tree_probs_from_distribution(vp9_nzc16x16_tree,
                                          probs, branch_ct,
-                                         nzc_stats_16x16[c][r][b]);
+                                         nzc_stats_16x16[c][r][b], 0);
         printf("      {");
         for (t = 0; t < NZC16X16_NODES; ++t) {
           printf(" %-3d,", probs[t]);
@@ -1595,11 +1592,9 @@ void print_nzcstats() {
       for (b = 0; b < BLOCK_TYPES; ++b) {
         vp9_prob probs[NZC32X32_NODES];
         unsigned int branch_ct[NZC32X32_NODES][2];
-        vp9_tree_probs_from_distribution(NZC32X32_TOKENS,
-                                         vp9_nzc32x32_encodings,
-                                         vp9_nzc32x32_tree,
+        vp9_tree_probs_from_distribution(vp9_nzc32x32_tree,
                                          probs, branch_ct,
-                                         nzc_stats_32x32[c][r][b]);
+                                         nzc_stats_32x32[c][r][b], 0);
         printf("      {");
         for (t = 0; t < NZC32X32_NODES; ++t) {
           printf(" %-3d,", probs[t]);
@@ -1630,6 +1625,14 @@ void print_nzcstats() {
     printf("  },\n");
   }
   printf("};\n");
+
+  f = fopen("nzcstats.bin", "wb");
+  fwrite(nzc_stats_4x4, sizeof(nzc_stats_4x4), 1, f);
+  fwrite(nzc_stats_8x8, sizeof(nzc_stats_8x8), 1, f);
+  fwrite(nzc_stats_16x16, sizeof(nzc_stats_16x16), 1, f);
+  fwrite(nzc_stats_32x32, sizeof(nzc_stats_32x32), 1, f);
+  fwrite(nzc_pcat_stats, sizeof(nzc_pcat_stats), 1, f);
+  fclose(f);
 }
 #endif
 
