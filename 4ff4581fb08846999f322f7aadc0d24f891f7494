@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAW3///Zs\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-25T21:53:22Z",
+      "side": 1,
+      "message": "#endif  // CONFIG_MODELCOEFPROB",
+      "revId": "4ff4581fb08846999f322f7aadc0d24f891f7494",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAW3///ZY\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1292,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-25T21:53:22Z",
+      "side": 1,
+      "message": "unrelated - or maybe related to your change in vp9_quantize.c, in which case you can just remove it instead of comment it out. Also, move the comment along with the code if you want to move it to vp9_quantize.c.",
+      "revId": "4ff4581fb08846999f322f7aadc0d24f891f7494",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
