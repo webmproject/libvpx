@@ -229,7 +229,7 @@ static void tokenize_b(VP9_COMP *cpi,
     seg_eob = 0;
 
   do {
-    const int band = get_coef_band(tx_size, c);
+    const int band = get_coef_band(scan, tx_size, c);
     int token;
     int v = 0;
 #if CONFIG_CODE_NONZEROCOUNT
