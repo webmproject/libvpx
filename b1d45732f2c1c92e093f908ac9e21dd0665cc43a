@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAW3///bo\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-25T21:48:48Z",
+      "side": 1,
+      "message": "add comment here also:\n\n// horiz, vert, comp_weight",
+      "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAW3///bA\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 659,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-25T21:48:48Z",
+      "side": 1,
+      "message": "duplicate (x2)?",
+      "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAW3///ag\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1218,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-25T21:48:48Z",
+      "side": 1,
+      "message": "so - general comment (maybe also for John) - the original intent in these \"use 16x16 in 32x32\" functions was to get SIMD for the encoder/decoder. Now that we have convolve, I feel we should remove these wrappers and just call convolve directly for the 32x32 functions?\n\nUnrelated to this patch of course... But worth doing imo. It makes the code simpler and less prone to typos in the above wrappers re: MV clipping.",
+      "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAW3///aQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2432,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-03-25T21:48:48Z",
+      "side": 1,
+      "message": "isn\u0027t the reason your splitmv gave no gains simply because you\u0027re not testing for it in the RD? Or is that code missing but you did write it in your local tries?",
+      "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
