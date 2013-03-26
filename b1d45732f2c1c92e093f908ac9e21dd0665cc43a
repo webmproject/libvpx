@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAW3//+7s\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-26T06:36:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAW3///bo\u003d",
+      "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAW3///bA\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2013-03-25T21:48:48Z",
       "side": 1,
       "message": "duplicate (x2)?",
+      "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAW3//+8w\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 659,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-26T06:36:17Z",
+      "side": 1,
+      "message": "This code was separated to experiment with different options for different block sizes. In the end I did not find any material difference. So merging now.",
+      "parentUuid": "AAAAW3///bA\u003d",
       "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAW3//+8s\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1218,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-26T06:36:17Z",
+      "side": 1,
+      "message": "There may be some limits in the SIMD implementation. So I will let this pass and add a TODO.",
+      "parentUuid": "AAAAW3///ag\u003d",
+      "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAW3///aQ\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 11
@@ -64,6 +118,24 @@
       "writtenOn": "2013-03-25T21:48:48Z",
       "side": 1,
       "message": "isn\u0027t the reason your splitmv gave no gains simply because you\u0027re not testing for it in the RD? Or is that code missing but you did write it in your local tries?",
+      "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAW3//+6c\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2432,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-03-26T06:36:17Z",
+      "side": 1,
+      "message": "That could well be. However, testing this one properly in RD is more involved and unlikely to give us major gains that we are currently looking for. Adding a TODO.",
+      "parentUuid": "AAAAW3///aQ\u003d",
       "revId": "b1d45732f2c1c92e093f908ac9e21dd0665cc43a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
