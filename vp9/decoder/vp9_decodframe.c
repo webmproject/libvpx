@@ -1218,7 +1218,7 @@ static void read_coef_probs_common(BOOL_DECODER* const bc,
               if (vp9_read(bc, vp9_coef_update_prob[m])) {
                 *p = read_prob_diff_update(bc, *p);
 #if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
-                if (m == 1)
+                if (m == UNCONSTRAINED_NODES - 1)
                   vp9_get_model_distribution(*p, coef_probs[i][j][k][l], i, j);
 #endif
               }
