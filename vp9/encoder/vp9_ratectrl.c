@@ -89,45 +89,31 @@ static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] = { 1, 2, 3,
 // tables if and when things settle down in the experimental bitstream
 double vp9_convert_qindex_to_q(int qindex) {
   // Convert the index to a real Q value (scaled down to match old Q values)
-  return (double)vp9_ac_yquant(qindex) / 4.0;
+  return vp9_ac_yquant(qindex) / 4.0;
 }
 
 int vp9_gfboost_qadjust(int qindex) {
-  int retval;
-  double q;
-
-  q = vp9_convert_qindex_to_q(qindex);
-  retval = (int)((0.00000828 * q * q * q) +
-                 (-0.0055 * q * q) +
-                 (1.32 * q) + 79.3);
-  return retval;
+  const double q = vp9_convert_qindex_to_q(qindex);
+  return (int)((0.00000828 * q * q * q) +
+               (-0.0055 * q * q) +
+               (1.32 * q) + 79.3);
 }
 
 static int kfboost_qadjust(int qindex) {
-  int retval;
-  double q;
-
-  q = vp9_convert_qindex_to_q(qindex);
-  retval = (int)((0.00000973 * q * q * q) +
-                 (-0.00613 * q * q) +
-                 (1.316 * q) + 121.2);
-  return retval;
+  const double q = vp9_convert_qindex_to_q(qindex);
+  return (int)((0.00000973 * q * q * q) +
+               (-0.00613 * q * q) +
+               (1.316 * q) + 121.2);
 }
 
 int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
                     double correction_factor) {
-  int enumerator;
-  double q = vp9_convert_qindex_to_q(qindex);
 
-  if (frame_type == KEY_FRAME) {
-    enumerator = 4000000;
-  } else {
-    enumerator = 2500000;
-  }
+  const double q = vp9_convert_qindex_to_q(qindex);
+  int enumerator = frame_type == KEY_FRAME ? 4000000 : 2500000;
 
-  // Q based adjustment to baseline enumberator
+  // q based adjustment to baseline enumberator
   enumerator += (int)(enumerator * q) >> 12;
-
   return (int)(0.5 + (enumerator * correction_factor / q));
 }
 
@@ -265,33 +251,30 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
   // interval before next GF
   cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
   /* All buffers are implicitly updated on key frames. */
-  cpi->refresh_golden_frame = TRUE;
-  cpi->refresh_alt_ref_frame = TRUE;
+  cpi->refresh_golden_frame = 1;
+  cpi->refresh_alt_ref_frame = 1;
 }
 
 void vp9_setup_inter_frame(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  if (cm->error_resilient_mode) {
+  if (cm->error_resilient_mode)
     vp9_setup_past_independence(cm, xd);
-  }
+
   assert(cm->frame_context_idx < NUM_FRAME_CONTEXTS);
   vpx_memcpy(&cm->fc, &cm->frame_contexts[cm->frame_context_idx],
              sizeof(cm->fc));
 }
 
-static int estimate_bits_at_q(int frame_kind, int Q, int MBs,
+static int estimate_bits_at_q(int frame_kind, int q, int mbs,
                               double correction_factor) {
-  int Bpm = (int)(vp9_bits_per_mb(frame_kind, Q, correction_factor));
+  const int bpm = (int)(vp9_bits_per_mb(frame_kind, q, correction_factor));
 
-  /* Attempt to retain reasonable accuracy without overflow. The cutoff is
-   * chosen such that the maximum product of Bpm and MBs fits 31 bits. The
-   * largest Bpm takes 20 bits.
-   */
-  if (MBs > (1 << 11))
-    return (Bpm >> BPER_MB_NORMBITS) * MBs;
-  else
-    return (Bpm * MBs) >> BPER_MB_NORMBITS;
+  // Attempt to retain reasonable accuracy without overflow. The cutoff is
+  // chosen such that the maximum product of Bpm and MBs fits 31 bits. The
+  // largest Bpm takes 20 bits.
+  return (mbs > (1 << 11)) ? (bpm >> BPER_MB_NORMBITS) * mbs
+                           : (bpm * mbs) >> BPER_MB_NORMBITS;
 }
 
 
@@ -314,7 +297,6 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
   }
 
   cpi->this_frame_target = target;
-
 }
 
 
@@ -330,25 +312,15 @@ static void calc_gf_params(VP9_COMP *cpi) {
 
 
 static void calc_pframe_target_size(VP9_COMP *cpi) {
-  int min_frame_target;
-
-  min_frame_target = 0;
-
-  min_frame_target = cpi->min_frame_bandwidth;
-
-  if (min_frame_target < (cpi->av_per_frame_bandwidth >> 5))
-    min_frame_target = cpi->av_per_frame_bandwidth >> 5;
-
-
-  // Special alt reference frame case
+  const int min_frame_target = MAX(cpi->min_frame_bandwidth,
+                                   cpi->av_per_frame_bandwidth >> 5);
   if (cpi->refresh_alt_ref_frame) {
+    // Special alt reference frame case
     // Per frame bit target for the alt ref frame
     cpi->per_frame_bandwidth = cpi->twopass.gf_bits;
     cpi->this_frame_target = cpi->per_frame_bandwidth;
-  }
-
-  // Normal frames (gf,and inter)
-  else {
+  } else {
+    // Normal frames (gf,and inter)
     cpi->this_frame_target = cpi->per_frame_bandwidth;
   }
 
@@ -366,10 +338,10 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
 
   // Adjust target frame size for Golden Frames:
   if (cpi->frames_till_gf_update_due == 0) {
-    // int Boost = 0;
-    int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
+    const int q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME]
+                                          : cpi->oxcf.fixed_q;
 
-    cpi->refresh_golden_frame = TRUE;
+    cpi->refresh_golden_frame = 1;
 
     calc_gf_params(cpi);
 
@@ -381,17 +353,17 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
         // The spend on the GF is defined in the two pass code
         // for two pass encodes
         cpi->this_frame_target = cpi->per_frame_bandwidth;
-      } else
+      } else {
         cpi->this_frame_target =
-          (estimate_bits_at_q(1, Q, cpi->common.MBs, 1.0)
+          (estimate_bits_at_q(1, q, cpi->common.MBs, 1.0)
            * cpi->last_boost) / 100;
+      }
 
-    }
-    // If there is an active ARF at this location use the minimum
-    // bits on this frame even if it is a contructed arf.
-    // The active maximum quantizer insures that an appropriate
-    // number of bits will be spent if needed for contstructed ARFs.
-    else {
+    } else {
+      // If there is an active ARF at this location use the minimum
+      // bits on this frame even if it is a contructed arf.
+      // The active maximum quantizer insures that an appropriate
+      // number of bits will be spent if needed for contstructed ARFs.
       cpi->this_frame_target = 0;
     }
 
@@ -401,12 +373,12 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
 
 
 void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
-  int    Q = cpi->common.base_qindex;
-  int    correction_factor = 100;
+  const int q = cpi->common.base_qindex;
+  int correction_factor = 100;
   double rate_correction_factor;
   double adjustment_limit;
 
-  int    projected_size_based_on_q = 0;
+  int projected_size_based_on_q = 0;
 
   // Clear down mmx registers to allow floating point in what follows
   vp9_clear_system_state();  // __asm emms;
@@ -423,9 +395,9 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   // Work out how big we would have expected the frame to be at this Q given
   // the current correction factor.
   // Stay in double to avoid int overflow when values are large
-  projected_size_based_on_q =
-    estimate_bits_at_q(cpi->common.frame_type, Q,
-                       cpi->common.MBs, rate_correction_factor);
+  projected_size_based_on_q = estimate_bits_at_q(cpi->common.frame_type, q,
+                                                 cpi->common.MBs,
+                                                 rate_correction_factor);
 
   // Work out a size correction factor.
   // if ( cpi->this_frame_target > 0 )
@@ -480,7 +452,7 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
 
 
 int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
-  int Q = cpi->active_worst_quality;
+  int q = cpi->active_worst_quality;
 
   int i;
   int last_error = INT_MAX;
@@ -507,21 +479,22 @@ int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
   i = cpi->active_best_quality;
 
   do {
-    bits_per_mb_at_this_q =
-      (int)(vp9_bits_per_mb(cpi->common.frame_type, i, correction_factor));
+    bits_per_mb_at_this_q = (int)vp9_bits_per_mb(cpi->common.frame_type, i,
+                                                 correction_factor);
 
     if (bits_per_mb_at_this_q <= target_bits_per_mb) {
       if ((target_bits_per_mb - bits_per_mb_at_this_q) <= last_error)
-        Q = i;
+        q = i;
       else
-        Q = i - 1;
+        q = i - 1;
 
       break;
-    } else
+    } else {
       last_error = bits_per_mb_at_this_q - target_bits_per_mb;
+    }
   } while (++i <= cpi->active_worst_quality);
 
-  return Q;
+  return q;
 }
 
 
@@ -566,7 +539,7 @@ static int estimate_keyframe_frequency(VP9_COMP *cpi) {
       total_weight += prior_key_frame_weight[i];
     }
 
-    av_key_frame_frequency  /= total_weight;
+    av_key_frame_frequency /= total_weight;
 
   }
   return av_key_frame_frequency;
