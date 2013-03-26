@@ -1265,6 +1265,143 @@ static void update_frame_size(VP9D_COMP *pbi) {
   vp9_update_mode_info_in_image(cm, cm->mi);
 }
 
+static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd,
+                               BOOL_DECODER *header_bc) {
+  int i, j;
+
+  // Is segmentation enabled
+  xd->segmentation_enabled = vp9_read_bit(header_bc);
+
+  if (xd->segmentation_enabled) {
+    // Read whether or not the segmentation map is being explicitly updated
+    // this frame.
+    xd->update_mb_segmentation_map = vp9_read_bit(header_bc);
+
+    // If so what method will be used.
+    if (xd->update_mb_segmentation_map) {
+      // Which macro block level features are enabled. Read the probs used to
+      // decode the segment id for each macro block.
+      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
+          xd->mb_segment_tree_probs[i] = vp9_read_bit(header_bc) ?
+              (vp9_prob)vp9_read_literal(header_bc, 8) : 255;
+      }
+
+      // Read the prediction probs needed to decode the segment id
+      pc->temporal_update = vp9_read_bit(header_bc);
+      for (i = 0; i < PREDICTION_PROBS; i++) {
+        if (pc->temporal_update) {
+          pc->segment_pred_probs[i] = vp9_read_bit(header_bc) ?
+              (vp9_prob)vp9_read_literal(header_bc, 8) : 255;
+        } else {
+          pc->segment_pred_probs[i] = 255;
+        }
+      }
+
+      if (pc->temporal_update) {
+        int count[4];
+        const vp9_prob *p = xd->mb_segment_tree_probs;
+        vp9_prob *p_mod = xd->mb_segment_mispred_tree_probs;
+
+        count[0] =        p[0]  *        p[1];
+        count[1] =        p[0]  * (256 - p[1]);
+        count[2] = (256 - p[0]) *        p[2];
+        count[3] = (256 - p[0]) * (256 - p[2]);
+
+        p_mod[0] = get_binary_prob(count[1], count[2] + count[3]);
+        p_mod[1] = get_binary_prob(count[0], count[2] + count[3]);
+        p_mod[2] = get_binary_prob(count[0] + count[1], count[3]);
+        p_mod[3] = get_binary_prob(count[0] + count[1], count[2]);
+      }
+    }
+    // Is the segment data being updated
+    xd->update_mb_segmentation_data = vp9_read_bit(header_bc);
+
+    if (xd->update_mb_segmentation_data) {
+      int data;
+
+      xd->mb_segment_abs_delta = vp9_read_bit(header_bc);
+
+      vp9_clearall_segfeatures(xd);
+
+      // For each segmentation...
+      for (i = 0; i < MAX_MB_SEGMENTS; i++) {
+        // For each of the segments features...
+        for (j = 0; j < SEG_LVL_MAX; j++) {
+          // Is the feature enabled
+          if (vp9_read_bit(header_bc)) {
+            // Update the feature data and mask
+            vp9_enable_segfeature(xd, i, j);
+
+            data = vp9_decode_unsigned_max(header_bc,
+                                           vp9_seg_feature_data_max(j));
+
+            // Is the segment data signed..
+            if (vp9_is_segfeature_signed(j)) {
+              if (vp9_read_bit(header_bc))
+                data = -data;
+            }
+          } else {
+            data = 0;
+          }
+
+          vp9_set_segdata(xd, i, j, data);
+        }
+      }
+    }
+  }
+}
+
+static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd,
+                             BOOL_DECODER *header_bc) {
+  int i;
+
+  pc->filter_type = (LOOPFILTERTYPE) vp9_read_bit(header_bc);
+  pc->filter_level = vp9_read_literal(header_bc, 6);
+  pc->sharpness_level = vp9_read_literal(header_bc, 3);
+
+#if CONFIG_LOOP_DERING
+  if (vp9_read_bit(header_bc))
+    pc->dering_enabled = 1 + vp9_read_literal(header_bc, 4);
+  else
+    pc->dering_enabled = 0;
+#endif
+
+  // Read in loop filter deltas applied at the MB level based on mode or ref
+  // frame.
+  xd->mode_ref_lf_delta_update = 0;
+  xd->mode_ref_lf_delta_enabled = vp9_read_bit(header_bc);
+
+  if (xd->mode_ref_lf_delta_enabled) {
+    // Do the deltas need to be updated
+    xd->mode_ref_lf_delta_update = vp9_read_bit(header_bc);
+
+    if (xd->mode_ref_lf_delta_update) {
+      // Send update
+      for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
+        if (vp9_read_bit(header_bc)) {
+          // sign = vp9_read_bit( &header_bc );
+          xd->ref_lf_deltas[i] = (signed char)vp9_read_literal(header_bc, 6);
+
+          if (vp9_read_bit(header_bc))
+            xd->ref_lf_deltas[i] = -xd->ref_lf_deltas[i];  // Apply sign
+        }
+      }
+
+      // Send update
+      for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
+        if (vp9_read_bit(header_bc)) {
+          // sign = vp9_read_bit( &header_bc );
+          xd->mode_lf_deltas[i] = (signed char)vp9_read_literal(header_bc, 6);
+
+          if (vp9_read_bit(header_bc))
+            xd->mode_lf_deltas[i] = -xd->mode_lf_deltas[i];  // Apply sign
+        }
+      }
+    }
+  }
+}
+
+
 int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   BOOL_DECODER header_bc, residual_bc;
   VP9_COMMON *const pc = &pbi->common;
@@ -1272,10 +1409,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   const uint8_t *data = (const uint8_t *)pbi->Source;
   const uint8_t *data_end = data + pbi->source_sz;
   ptrdiff_t first_partition_length_in_bytes = 0;
-
-  int mb_row;
-  int i, j;
-  int corrupt_tokens = 0;
+  int mb_row, i, corrupt_tokens = 0;
 
   // printf("Decoding frame %d\n", pc->current_video_frame);
   /* start with no corruption of current frame */
@@ -1392,87 +1526,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   pc->clamp_type  = (CLAMP_TYPE)vp9_read_bit(&header_bc);
 
   pc->error_resilient_mode = vp9_read_bit(&header_bc);
-  /* Is segmentation enabled */
-  xd->segmentation_enabled = (unsigned char)vp9_read_bit(&header_bc);
 
-  if (xd->segmentation_enabled) {
-    // Read whether or not the segmentation map is being explicitly
-    // updated this frame.
-    xd->update_mb_segmentation_map = (unsigned char)vp9_read_bit(&header_bc);
-
-    // If so what method will be used.
-    if (xd->update_mb_segmentation_map) {
-      // Which macro block level features are enabled
-
-      // Read the probs used to decode the segment id for each macro
-      // block.
-      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
-          xd->mb_segment_tree_probs[i] = vp9_read_bit(&header_bc) ?
-              (vp9_prob)vp9_read_literal(&header_bc, 8) : 255;
-      }
-
-      // Read the prediction probs needed to decode the segment id
-      pc->temporal_update = (unsigned char)vp9_read_bit(&header_bc);
-      for (i = 0; i < PREDICTION_PROBS; i++) {
-        if (pc->temporal_update) {
-          pc->segment_pred_probs[i] = vp9_read_bit(&header_bc) ?
-              (vp9_prob)vp9_read_literal(&header_bc, 8) : 255;
-        } else {
-          pc->segment_pred_probs[i] = 255;
-        }
-      }
-
-      if (pc->temporal_update) {
-        int count[4];
-        const vp9_prob *p = xd->mb_segment_tree_probs;
-        vp9_prob *p_mod = xd->mb_segment_mispred_tree_probs;
-
-        count[0] =        p[0]  *        p[1];
-        count[1] =        p[0]  * (256 - p[1]);
-        count[2] = (256 - p[0]) *        p[2];
-        count[3] = (256 - p[0]) * (256 - p[2]);
-
-        p_mod[0] = get_binary_prob(count[1], count[2] + count[3]);
-        p_mod[1] = get_binary_prob(count[0], count[2] + count[3]);
-        p_mod[2] = get_binary_prob(count[0] + count[1], count[3]);
-        p_mod[3] = get_binary_prob(count[0] + count[1], count[2]);
-      }
-    }
-    // Is the segment data being updated
-    xd->update_mb_segmentation_data = (unsigned char)vp9_read_bit(&header_bc);
-
-    if (xd->update_mb_segmentation_data) {
-      int data;
-
-      xd->mb_segment_abs_delta = (unsigned char)vp9_read_bit(&header_bc);
-
-      vp9_clearall_segfeatures(xd);
-
-      // For each segmentation...
-      for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-        // For each of the segments features...
-        for (j = 0; j < SEG_LVL_MAX; j++) {
-          // Is the feature enabled
-          if (vp9_read_bit(&header_bc)) {
-            // Update the feature data and mask
-            vp9_enable_segfeature(xd, i, j);
-
-            data = vp9_decode_unsigned_max(&header_bc,
-                                           vp9_seg_feature_data_max(j));
-
-            // Is the segment data signed..
-            if (vp9_is_segfeature_signed(j)) {
-              if (vp9_read_bit(&header_bc))
-                data = -data;
-            }
-          } else
-            data = 0;
-
-          vp9_set_segdata(xd, i, j, data);
-        }
-      }
-    }
-  }
+  setup_segmentation(pc, xd, &header_bc);
 
   // Read common prediction model status flag probability updates for the
   // reference frame
@@ -1505,48 +1560,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
       pc->prob_tx[2] = vp9_read_literal(&header_bc, 8);
     }
   }
-  pc->filter_type = (LOOPFILTERTYPE) vp9_read_bit(&header_bc);
-  pc->filter_level = vp9_read_literal(&header_bc, 6);
-  pc->sharpness_level = vp9_read_literal(&header_bc, 3);
-#if CONFIG_LOOP_DERING
-  if (vp9_read_bit(&header_bc))
-    pc->dering_enabled = 1 + vp9_read_literal(&header_bc, 4);
-  else
-    pc->dering_enabled = 0;
-#endif
 
-  /* Read in loop filter deltas applied at the MB level based on mode or ref frame. */
-  xd->mode_ref_lf_delta_update = 0;
-  xd->mode_ref_lf_delta_enabled = (unsigned char)vp9_read_bit(&header_bc);
-
-  if (xd->mode_ref_lf_delta_enabled) {
-    /* Do the deltas need to be updated */
-    xd->mode_ref_lf_delta_update = (unsigned char)vp9_read_bit(&header_bc);
-
-    if (xd->mode_ref_lf_delta_update) {
-      /* Send update */
-      for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
-        if (vp9_read_bit(&header_bc)) {
-          /*sign = vp9_read_bit( &header_bc );*/
-          xd->ref_lf_deltas[i] = (signed char)vp9_read_literal(&header_bc, 6);
-
-          if (vp9_read_bit(&header_bc))        /* Apply sign */
-            xd->ref_lf_deltas[i] = -xd->ref_lf_deltas[i];
-        }
-      }
-
-      /* Send update */
-      for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
-        if (vp9_read_bit(&header_bc)) {
-          /*sign = vp9_read_bit( &header_bc );*/
-          xd->mode_lf_deltas[i] = (signed char)vp9_read_literal(&header_bc, 6);
-
-          if (vp9_read_bit(&header_bc))        /* Apply sign */
-            xd->mode_lf_deltas[i] = -xd->mode_lf_deltas[i];
-        }
-      }
-    }
-  }
+  setup_loopfilter(pc, xd, &header_bc);
 
   // Dummy read for now
   vp9_read_literal(&header_bc, 2);
