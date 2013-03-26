@@ -66,7 +66,8 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
 #define INCREMENT_COUNT(token)               \
   do {                                       \
     coef_counts[type][ref][get_coef_band(txfm_size, c)][pt][token]++;     \
-    pt = vp9_get_coef_context(&recent_energy, token);         \
+    token_cache[c] = token; \
+    pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob); \
   } while (0)
 
 #if CONFIG_CODE_NONZEROCOUNT
@@ -103,8 +104,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   int aidx, lidx;
   ENTROPY_CONTEXT above_ec, left_ec;
   FRAME_CONTEXT *const fc = &dx->common.fc;
-  int recent_energy = 0;
-  int pt, c = 0;
+  int pt, c = 0, pad, default_eob;
   vp9_coeff_probs *coef_probs;
   vp9_prob *prob;
   vp9_coeff_count *coef_counts;
@@ -113,7 +113,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   uint16_t nzc = 0;
   uint16_t nzc_expected = xd->mode_info_context->mbmi.nzcs[block_idx];
 #endif
-  const int *scan;
+  const int *scan, *nb;
+  uint8_t token_cache[1024];
 
   if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
     aidx = vp9_block2above_sb64[txfm_size][block_idx];
@@ -145,6 +146,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       left_ec = L0[lidx] != 0;
       coef_probs  = fc->coef_probs_4x4;
       coef_counts = fc->coef_counts_4x4;
+      default_eob = 16;
       break;
     }
     case TX_8X8:
@@ -153,6 +155,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       coef_counts = fc->coef_counts_8x8;
       above_ec = (A0[aidx] + A0[aidx + 1]) != 0;
       left_ec  = (L0[lidx] + L0[lidx + 1]) != 0;
+      default_eob = 64;
       break;
     case TX_16X16:
       scan = vp9_default_zig_zag1d_16x16;
@@ -167,6 +170,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
         above_ec = (A0[aidx] + A0[aidx + 1] + A0[aidx + 2] + A0[aidx + 3]) != 0;
         left_ec  = (L0[lidx] + L0[lidx + 1] + L0[lidx + 2] + L0[lidx + 3]) != 0;
       }
+      default_eob = 256;
       break;
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
@@ -191,10 +195,13 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
         left_ec  = (L0[lidx] + L0[lidx + 1] + L0[lidx + 2] + L0[lidx + 3] +
                     L1[lidx] + L1[lidx + 1] + L1[lidx + 2] + L1[lidx + 3]) != 0;
       }
+      default_eob = 1024;
       break;
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, above_ec, left_ec);
+  nb = vp9_get_coef_neighbors_handle(scan, &pad);
+
   while (1) {
     int val;
     const uint8_t *cat6 = cat6_prob;
@@ -207,6 +214,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
 #endif
     prob = coef_probs[type][ref][get_coef_band(txfm_size, c)][pt];
 #if CONFIG_CODE_NONZEROCOUNT == 0
+    fc->eob_branch_counts[txfm_size][type][ref]
+                         [get_coef_band(txfm_size, c)][pt]++;
     if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
       break;
 #endif

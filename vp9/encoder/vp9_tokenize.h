@@ -29,7 +29,7 @@ typedef struct {
 } TOKENEXTRA;
 
 typedef int64_t vp9_coeff_accum[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
-                               [MAX_ENTROPY_TOKENS];
+                               [MAX_ENTROPY_TOKENS + 1];
 
 int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd);
 int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd);

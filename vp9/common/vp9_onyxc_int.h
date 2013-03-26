@@ -114,6 +114,9 @@ typedef struct frame_contexts {
   vp9_coeff_count coef_counts_8x8[BLOCK_TYPES];
   vp9_coeff_count coef_counts_16x16[BLOCK_TYPES];
   vp9_coeff_count coef_counts_32x32[BLOCK_TYPES];
+  unsigned int eob_branch_counts[TX_SIZE_MAX_SB][BLOCK_TYPES][REF_TYPES]
+                                [COEF_BANDS][PREV_COEF_CONTEXTS];
+
 #if CONFIG_CODE_NONZEROCOUNT
   unsigned int nzc_counts_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
                              [NZC4X4_TOKENS];

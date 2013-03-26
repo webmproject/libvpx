@@ -1886,25 +1886,25 @@ vp9_extra_bit_struct vp9_extra_bits[12] = {
 // within the current block.
 //
 // For now it just returns the previously used context.
-int vp9_get_coef_context(int * recent_energy, int token) {
-  // int token_energy;
-  // int av_energy;
-
-  /*token_energy = ((token != DCT_EOB_TOKEN) ? token : 0);
-  if (!token_energy) {
-    if (!(*recent_energy)) {
-      av_energy = 0;
-    } else {
-      av_energy = 1;
-    }
+#define MAX_NEIGHBORS 2
+int vp9_get_coef_context(const int *scan, const int *neighbors,
+                         int nb_pad, uint8_t *token_cache, int c, int l) {
+  int eob = l;
+  assert(nb_pad == MAX_NEIGHBORS);
+  if (c == eob - 1) {
+    return 0;
   } else {
-    av_energy = ((token_energy + *recent_energy + 1) >> 1) + 1;
-    if (av_energy > DCT_VAL_CATEGORY6)
-      av_energy = DCT_VAL_CATEGORY6;
+    int ctx;
+    c++;
+    assert(neighbors[MAX_NEIGHBORS * c + 0] >= 0);
+    if (neighbors[MAX_NEIGHBORS * c + 1] >= 0) {
+      ctx = (1 + token_cache[neighbors[MAX_NEIGHBORS * c + 0]] +
+             token_cache[neighbors[MAX_NEIGHBORS * c + 1]]) >> 1;
+    } else {
+      ctx = token_cache[neighbors[MAX_NEIGHBORS * c + 0]];
+    }
+    return vp9_pt_energy_class[ctx];
   }
-  *recent_energy = token_energy;*/
-
-  return vp9_pt_energy_class[token];
 };
 
 void vp9_default_coef_probs(VP9_COMMON *pc) {
@@ -2063,7 +2063,119 @@ void vp9_adjust_default_coef_probs(VP9_COMMON *cm) {
 }
 #endif
 
+// Neighborhood 5-tuples for various scans and blocksizes,
+// in {top, left, topleft, topright, bottomleft} order
+// for each position in raster scan order.
+// -1 indicates the neighbor does not exist.
+DECLARE_ALIGNED(16, int,
+                vp9_default_zig_zag1d_4x4_neighbors[16 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int,
+                vp9_col_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int,
+                vp9_row_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int,
+                vp9_default_zig_zag1d_8x8_neighbors[64 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int,
+                vp9_default_zig_zag1d_16x16_neighbors[256 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int,
+                vp9_default_zig_zag1d_32x32_neighbors[1024 * MAX_NEIGHBORS]);
+
+static int find_in_scan(const int *scan, int l, int idx) {
+  int n, l2 = l * l;
+  for (n = 0; n < l2; n++) {
+    int rc = scan[n];
+    if (rc == idx)
+      return  n;
+  }
+  assert(0);
+  return -1;
+}
+static void init_scan_neighbors(const int *scan, int l, int *neighbors,
+                                int max_neighbors) {
+  int l2 = l * l;
+  int n, i, j;
+
+  for (n = 0; n < l2; n++) {
+    int rc = scan[n];
+    assert(max_neighbors == MAX_NEIGHBORS);
+    i = rc / l;
+    j = rc % l;
+    if (i > 0 && j > 0) {
+      // col/row scan is used for adst/dct, and generally means that
+      // energy decreases to zero much faster in the dimension in
+      // which ADST is used compared to the direction in which DCT
+      // is used. Likewise, we find much higher correlation between
+      // coefficients within the direction in which DCT is used.
+      // Therefore, if we use ADST/DCT, prefer the DCT neighbor coeff
+      // as a context. If ADST or DCT is used in both directions, we
+      // use the combination of the two as a context.
+      int a = find_in_scan(scan, l, (i - 1) * l + j);
+      int b = find_in_scan(scan, l,  i      * l + j - 1);
+      if (scan == vp9_col_scan_4x4 || scan == vp9_row_scan_4x4) {
+        neighbors[max_neighbors * n + 0] = MAX(a, b);
+        neighbors[max_neighbors * n + 1] = -1;
+      } else {
+        neighbors[max_neighbors * n + 0] = a;
+        neighbors[max_neighbors * n + 1] = b;
+      }
+    } else if (i > 0) {
+      neighbors[max_neighbors * n + 0] = find_in_scan(scan, l, (i - 1) * l + j);
+      neighbors[max_neighbors * n + 1] = -1;
+    } else if (j > 0) {
+      neighbors[max_neighbors * n + 0] =
+          find_in_scan(scan, l,  i      * l + j - 1);
+      neighbors[max_neighbors * n + 1] = -1;
+    } else {
+      assert(n == 0);
+      // dc predictor doesn't use previous tokens
+      neighbors[max_neighbors * n + 0] = -1;
+    }
+    assert(neighbors[max_neighbors * n + 0] < n);
+  }
+}
+
+void vp9_init_neighbors() {
+  init_scan_neighbors(vp9_default_zig_zag1d_4x4, 4,
+                      vp9_default_zig_zag1d_4x4_neighbors, MAX_NEIGHBORS);
+  init_scan_neighbors(vp9_row_scan_4x4, 4,
+                      vp9_row_scan_4x4_neighbors, MAX_NEIGHBORS);
+  init_scan_neighbors(vp9_col_scan_4x4, 4,
+                      vp9_col_scan_4x4_neighbors, MAX_NEIGHBORS);
+  init_scan_neighbors(vp9_default_zig_zag1d_8x8, 8,
+                      vp9_default_zig_zag1d_8x8_neighbors, MAX_NEIGHBORS);
+  init_scan_neighbors(vp9_default_zig_zag1d_16x16, 16,
+                      vp9_default_zig_zag1d_16x16_neighbors, MAX_NEIGHBORS);
+  init_scan_neighbors(vp9_default_zig_zag1d_32x32, 32,
+                      vp9_default_zig_zag1d_32x32_neighbors, MAX_NEIGHBORS);
+}
+
+const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad) {
+  if (scan == vp9_default_zig_zag1d_4x4) {
+    *pad = MAX_NEIGHBORS;
+    return vp9_default_zig_zag1d_4x4_neighbors;
+  } else if (scan == vp9_row_scan_4x4) {
+    *pad = MAX_NEIGHBORS;
+    return vp9_row_scan_4x4_neighbors;
+  } else if (scan == vp9_col_scan_4x4) {
+    *pad = MAX_NEIGHBORS;
+    return vp9_col_scan_4x4_neighbors;
+  } else if (scan == vp9_default_zig_zag1d_8x8) {
+    *pad = MAX_NEIGHBORS;
+    return vp9_default_zig_zag1d_8x8_neighbors;
+  } else if (scan == vp9_default_zig_zag1d_16x16) {
+    *pad = MAX_NEIGHBORS;
+    return vp9_default_zig_zag1d_16x16_neighbors;
+  } else if (scan == vp9_default_zig_zag1d_32x32) {
+    *pad = MAX_NEIGHBORS;
+    return vp9_default_zig_zag1d_32x32_neighbors;
+  } else {
+    assert(0);
+    return NULL;
+  }
+}
+
 void vp9_coef_tree_initialize() {
+  vp9_init_neighbors();
   init_bit_trees();
   vp9_tokens_from_tree(vp9_coef_encodings, vp9_coef_tree);
 #if CONFIG_CODE_NONZEROCOUNT
@@ -3170,6 +3282,9 @@ void vp9_update_nzc_counts(VP9_COMMON *cm,
 static void adapt_coef_probs(vp9_coeff_probs *dst_coef_probs,
                              vp9_coeff_probs *pre_coef_probs,
                              int block_types, vp9_coeff_count *coef_counts,
+                             unsigned int (*eob_branch_count)[REF_TYPES]
+                                                             [COEF_BANDS]
+                                                      [PREV_COEF_CONTEXTS],
                              int count_sat, int update_factor) {
   int t, i, j, k, l, count;
   unsigned int branch_ct[ENTROPY_NODES][2];
@@ -3190,6 +3305,8 @@ static void adapt_coef_probs(vp9_coeff_probs *dst_coef_probs,
           vp9_tree_probs_from_distribution(vp9_coef_tree,
                                            coef_probs, branch_ct,
                                            coef_counts[i][j][k][l], 0);
+          branch_ct[0][1] = eob_branch_count[i][j][k][l] - branch_ct[0][0];
+          coef_probs[0] = get_binary_prob(branch_ct[0][0], branch_ct[0][1]);
           for (t = 0; t < entropy_nodes_adapt; ++t) {
             count = branch_ct[t][0] + branch_ct[t][1];
             count = count > count_sat ? count_sat : count;
@@ -3224,15 +3341,19 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
 
   adapt_coef_probs(cm->fc.coef_probs_4x4, cm->fc.pre_coef_probs_4x4,
                    BLOCK_TYPES, cm->fc.coef_counts_4x4,
+                   cm->fc.eob_branch_counts[TX_4X4],
                    count_sat, update_factor);
   adapt_coef_probs(cm->fc.coef_probs_8x8, cm->fc.pre_coef_probs_8x8,
                    BLOCK_TYPES, cm->fc.coef_counts_8x8,
+                   cm->fc.eob_branch_counts[TX_8X8],
                    count_sat, update_factor);
   adapt_coef_probs(cm->fc.coef_probs_16x16, cm->fc.pre_coef_probs_16x16,
                    BLOCK_TYPES, cm->fc.coef_counts_16x16,
+                   cm->fc.eob_branch_counts[TX_16X16],
                    count_sat, update_factor);
   adapt_coef_probs(cm->fc.coef_probs_32x32, cm->fc.pre_coef_probs_32x32,
                    BLOCK_TYPES, cm->fc.coef_counts_32x32,
+                   cm->fc.eob_branch_counts[TX_32X32],
                    count_sat, update_factor);
 }
 
