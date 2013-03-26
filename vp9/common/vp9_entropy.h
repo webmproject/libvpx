@@ -153,22 +153,18 @@ const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 #define UNCONSTRAINED_NODES         3   // Choose one of 2 or 3
 
 // whether forward updates are model-based
-#define MODEL_BASED_UPDATE          0
+#define MODEL_BASED_UPDATE          1
 // if model-based how many nodes are unconstrained
 #define UNCONSTRAINED_UPDATE_NODES  3
 // whether backward updates are model-based
 #define MODEL_BASED_ADAPT           0
 #define UNCONSTRAINED_ADAPT_NODES   3
 
-// whether to adjust the coef probs for key frames based on qindex
-#define ADJUST_KF_COEF_PROBS        0
-
 typedef vp9_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]
                                       [PREV_COEF_CONTEXTS][2];
 extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
 void vp9_get_model_distribution(vp9_prob model, vp9_prob *tree_probs,
                                 int b, int r);
-void vp9_adjust_default_coef_probs(struct VP9Common *cm);
 #endif  // CONFIG_MODELCOEFPROB
 
 #if CONFIG_CODE_NONZEROCOUNT

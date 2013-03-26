@@ -1127,7 +1127,8 @@ static void read_nzc_probs(VP9_COMMON *cm,
 }
 #endif  // CONFIG_CODE_NONZEROCOUNT
 
-static void read_coef_probs_common(BOOL_DECODER* const bc,
+static void read_coef_probs_common(VP9D_COMP *pbi,
+                                   BOOL_DECODER* const bc,
                                    vp9_coeff_probs *coef_probs,
                                    TX_SIZE tx_size) {
 #if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
@@ -1172,16 +1173,16 @@ static void read_coef_probs_common(BOOL_DECODER* const bc,
 static void read_coef_probs(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
   VP9_COMMON *const pc = &pbi->common;
 
-  read_coef_probs_common(bc, pc->fc.coef_probs_4x4, TX_4X4);
+  read_coef_probs_common(pbi, bc, pc->fc.coef_probs_4x4, TX_4X4);
 
   if (pbi->common.txfm_mode != ONLY_4X4)
-    read_coef_probs_common(bc, pc->fc.coef_probs_8x8, TX_8X8);
+    read_coef_probs_common(pbi, bc, pc->fc.coef_probs_8x8, TX_8X8);
 
   if (pbi->common.txfm_mode > ALLOW_8X8)
-    read_coef_probs_common(bc, pc->fc.coef_probs_16x16, TX_16X16);
+    read_coef_probs_common(pbi, bc, pc->fc.coef_probs_16x16, TX_16X16);
 
   if (pbi->common.txfm_mode > ALLOW_16X16)
-    read_coef_probs_common(bc, pc->fc.coef_probs_32x32, TX_32X32);
+    read_coef_probs_common(pbi, bc, pc->fc.coef_probs_32x32, TX_32X32);
 }
 
 static void update_frame_size(VP9D_COMP *pbi) {
@@ -1707,9 +1708,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
         if (vp9_read(&header_bc, 252))
           pc->fc.vp9_mode_contexts[i][j] = vp9_read_prob(&header_bc);
   }
-#if CONFIG_MODELCOEFPROB && ADJUST_KF_COEF_PROBS
-  if (pc->frame_type == KEY_FRAME)
-    vp9_adjust_default_coef_probs(pc);
+#if CONFIG_MODELCOEFPROB
+  if (pc->frame_type == KEY_FRAME) {
+    vp9_default_coef_probs(pc);
+  }
 #endif
 
 #if CONFIG_NEW_MVREF
