@@ -32,45 +32,36 @@ static int sb_ref_distance_weight[MVREF_NEIGHBOURS] =
 #define MV_BORDER (16 << 3) // Allow 16 pels in 1/8th pel units
 
 static void clamp_mv_ref(const MACROBLOCKD *xd, int_mv *mv) {
-  if (mv->as_mv.col < (xd->mb_to_left_edge - MV_BORDER))
-    mv->as_mv.col = xd->mb_to_left_edge - MV_BORDER;
-  else if (mv->as_mv.col > xd->mb_to_right_edge + MV_BORDER)
-    mv->as_mv.col = xd->mb_to_right_edge + MV_BORDER;
-
-  if (mv->as_mv.row < (xd->mb_to_top_edge - MV_BORDER))
-    mv->as_mv.row = xd->mb_to_top_edge - MV_BORDER;
-  else if (mv->as_mv.row > xd->mb_to_bottom_edge + MV_BORDER)
-    mv->as_mv.row = xd->mb_to_bottom_edge + MV_BORDER;
+  mv->as_mv.col = clamp(mv->as_mv.col, xd->mb_to_left_edge - MV_BORDER,
+                                       xd->mb_to_right_edge + MV_BORDER);
+  mv->as_mv.row = clamp(mv->as_mv.row, xd->mb_to_top_edge - MV_BORDER,
+                                       xd->mb_to_bottom_edge + MV_BORDER);
 }
 
 // Gets a candidate refenence motion vector from the given mode info
 // structure if one exists that matches the given reference frame.
 static int get_matching_candidate(const MODE_INFO *candidate_mi,
-  MV_REFERENCE_FRAME ref_frame,
-  int_mv *c_mv) {
-  int ret_val = TRUE;
-
+                                  MV_REFERENCE_FRAME ref_frame,
+                                  int_mv *c_mv) {
   if (ref_frame == candidate_mi->mbmi.ref_frame) {
     c_mv->as_int = candidate_mi->mbmi.mv[0].as_int;
   } else if (ref_frame == candidate_mi->mbmi.second_ref_frame) {
     c_mv->as_int = candidate_mi->mbmi.mv[1].as_int;
   } else {
-    ret_val = FALSE;
+    return 0;
   }
 
-  return ret_val;
+  return 1;
 }
 
 // Gets candidate refenence motion vector(s) from the given mode info
 // structure if they exists and do NOT match the given reference frame.
-static void get_non_matching_candidates(
-  const MODE_INFO *candidate_mi,
-  MV_REFERENCE_FRAME ref_frame,
-  MV_REFERENCE_FRAME *c_ref_frame,
-  int_mv *c_mv,
-  MV_REFERENCE_FRAME *c2_ref_frame,
-  int_mv *c2_mv
-) {
+static void get_non_matching_candidates(const MODE_INFO *candidate_mi,
+                                        MV_REFERENCE_FRAME ref_frame,
+                                        MV_REFERENCE_FRAME *c_ref_frame,
+                                        int_mv *c_mv,
+                                        MV_REFERENCE_FRAME *c2_ref_frame,
+                                        int_mv *c2_mv) {
 
   c_mv->as_int = 0;
   c2_mv->as_int = 0;
@@ -88,8 +79,7 @@ static void get_non_matching_candidates(
     // Second candidate
     if ((candidate_mi->mbmi.second_ref_frame > INTRA_FRAME) &&
         (candidate_mi->mbmi.second_ref_frame != ref_frame) &&
-        (candidate_mi->mbmi.mv[1].as_int !=
-         candidate_mi->mbmi.mv[0].as_int)) {
+        (candidate_mi->mbmi.mv[1].as_int != candidate_mi->mbmi.mv[0].as_int)) {
       *c2_ref_frame = candidate_mi->mbmi.second_ref_frame;
       c2_mv->as_int = candidate_mi->mbmi.mv[1].as_int;
     }
@@ -98,13 +88,9 @@ static void get_non_matching_candidates(
 
 
 // Performs mv sign inversion if indicated by the reference frame combination.
-static void scale_mv(
-  MACROBLOCKD *xd,
-  MV_REFERENCE_FRAME this_ref_frame,
-  MV_REFERENCE_FRAME candidate_ref_frame,
-  int_mv *candidate_mv,
-  int *ref_sign_bias
-) {
+static void scale_mv(MACROBLOCKD *xd, MV_REFERENCE_FRAME this_ref_frame,
+                     MV_REFERENCE_FRAME candidate_ref_frame,
+                     int_mv *candidate_mv, int *ref_sign_bias) {
   // int frame_distances[MAX_REF_FRAMES];
   // int last_distance = 1;
   // int gf_distance = xd->frames_since_golden;
@@ -211,19 +197,13 @@ static void addmv_and_shuffle(
 // Unlike the addmv_and_shuffle() this does not reorder the list
 // but assumes that candidates are added in the order most likely to
 // match distance and reference frame bias.
-static void add_candidate_mv(
-  int_mv *mv_list,
-  int *mv_scores,
-  int *candidate_count,
-  int_mv candidate_mv,
-  int weight
-) {
+static void add_candidate_mv(int_mv *mv_list,  int *mv_scores,
+                             int *candidate_count, int_mv candidate_mv,
+                             int weight) {
   int i;
-  int insert_point;
 
   // Make sure we dont insert off the end of the list
-  insert_point = (*candidate_count < (MAX_MV_REF_CANDIDATES - 1))
-                 ? *candidate_count : (MAX_MV_REF_CANDIDATES - 1);
+  const int insert_point = MIN(*candidate_count, MAX_MV_REF_CANDIDATES - 1);
 
   // Look for duplicates
   for (i = 0; i <= insert_point; ++i) {
@@ -233,8 +213,7 @@ static void add_candidate_mv(
 
   // Add the candidate. If the list is already full it is only desirable that
   // it should overwrite if it has a higher weight than the last entry.
-  if ((i >= insert_point) &&
-      (weight > mv_scores[insert_point])) {
+  if (i >= insert_point && weight > mv_scores[insert_point]) {
     mv_list[insert_point].as_int = candidate_mv.as_int;
     mv_scores[insert_point] = weight;
     *candidate_count += (*candidate_count < MAX_MV_REF_CANDIDATES);
@@ -244,16 +223,9 @@ static void add_candidate_mv(
 // This function searches the neighbourhood of a given MB/SB and populates a
 // list of candidate reference vectors.
 //
-void vp9_find_mv_refs(
-  VP9_COMMON *cm,
-  MACROBLOCKD *xd,
-  MODE_INFO *here,
-  MODE_INFO *lf_here,
-  MV_REFERENCE_FRAME ref_frame,
-  int_mv *mv_ref_list,
-  int *ref_sign_bias
-) {
-
+void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
+                      MODE_INFO *lf_here, MV_REFERENCE_FRAME ref_frame,
+                      int_mv *mv_ref_list, int *ref_sign_bias) {
   int i;
   MODE_INFO *candidate_mi;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
@@ -397,20 +369,12 @@ void vp9_find_mv_refs(
     } else {
       mbmi->mb_mode_context[ref_frame] = 2;
     }
-  // Non zero best, No Split MV cases
   } else if (split_count == 0) {
-    if (candidate_scores[0] >= 16) {
-      mbmi->mb_mode_context[ref_frame] = 3;
-    } else {
-      mbmi->mb_mode_context[ref_frame] = 4;
-    }
-  // Non zero best, some split mv
+    // Non zero best, No Split MV cases
+    mbmi->mb_mode_context[ref_frame] = candidate_scores[0] >= 16 ? 3 : 4;
   } else {
-    if (candidate_scores[0] >= 16) {
-      mbmi->mb_mode_context[ref_frame] = 5;
-    } else {
-      mbmi->mb_mode_context[ref_frame] = 6;
-    }
+    // Non zero best, some split mv
+    mbmi->mb_mode_context[ref_frame] = candidate_scores[0] >= 16 ? 5 : 6;
   }
 
   // Scan for 0,0 case and clamp non zero choices
@@ -422,9 +386,8 @@ void vp9_find_mv_refs(
     }
   }
   // 0,0 is always a valid reference. Add it if not already seen.
-  if (!zero_seen) {
+  if (!zero_seen)
     candidate_mvs[MAX_MV_REF_CANDIDATES-1].as_int = 0;
-  }
 
   // Copy over the candidate list.
   vpx_memcpy(mv_ref_list, candidate_mvs, sizeof(candidate_mvs));
