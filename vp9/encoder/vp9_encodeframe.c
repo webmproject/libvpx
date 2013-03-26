@@ -1958,9 +1958,10 @@ static void gather_nzcs_mb16(VP9_COMMON *const cm,
 
 static void gather_nzcs_sb32(VP9_COMMON *const cm,
                              MACROBLOCKD *xd) {
-  int i, j;
   MODE_INFO *m = xd->mode_info_context;
   int mis = cm->mode_info_stride;
+  int i, j;
+
   vpx_memset(m->mbmi.nzcs, 0,
              384 * sizeof(xd->mode_info_context->mbmi.nzcs[0]));
   switch (xd->mode_info_context->mbmi.txfm_size) {
@@ -2002,9 +2003,10 @@ static void gather_nzcs_sb32(VP9_COMMON *const cm,
 
 static void gather_nzcs_sb64(VP9_COMMON *const cm,
                              MACROBLOCKD *xd) {
-  int i, j;
   MODE_INFO *m = xd->mode_info_context;
   int mis = cm->mode_info_stride;
+  int i, j;
+
   vpx_memset(xd->mode_info_context->mbmi.nzcs, 0,
              384 * sizeof(xd->mode_info_context->mbmi.nzcs[0]));
   switch (xd->mode_info_context->mbmi.txfm_size) {

@@ -1157,6 +1157,7 @@ static uint16_t read_nzc(VP9_COMMON *const cm,
                          BOOL_DECODER* const bc) {
   int c, e;
   uint16_t nzc;
+  if (!get_nzc_used(tx_size)) return 0;
   if (tx_size == TX_32X32) {
     c = treed_read(bc, vp9_nzc32x32_tree,
                    cm->fc.nzc_probs_32x32[nzc_context][ref][type]);

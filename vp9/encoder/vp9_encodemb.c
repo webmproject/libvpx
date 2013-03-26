@@ -573,6 +573,7 @@ static void optimize_b(VP9_COMMON *const cm,
   // The current implementation uses a suboptimal approach to account for
   // the nzc rates somewhat, but in reality the optimization approach needs
   // to change substantially.
+  const int nzc_used = get_nzc_used(tx_size);
   uint16_t nzc = xd->nzcs[ib];
   uint16_t nzc0, nzc1;
   uint16_t final_nzc = 0, final_nzc_exp;
@@ -649,7 +650,7 @@ static void optimize_b(VP9_COMMON *const cm,
   memset(best_index, 0, sizeof(best_index));
   /* Initialize the sentinel node of the trellis. */
 #if CONFIG_CODE_NONZEROCOUNT
-  tokens[eob][0].rate = nzc_cost[nzc];
+  tokens[eob][0].rate = nzc_used ? nzc_cost[nzc] : 0;
 #else
   tokens[eob][0].rate = 0;
 #endif
@@ -734,8 +735,10 @@ static void optimize_b(VP9_COMMON *const cm,
 #if CONFIG_CODE_NONZEROCOUNT
         // Account for rate drop because of the nzc change.
         // TODO(debargha): Find a better solution
-        rate0 -= nzc_cost[nzc0] - nzc_cost[nzc0 - 1];
-        rate1 -= nzc_cost[nzc1] - nzc_cost[nzc1 - 1];
+        if (nzc_used) {
+          rate0 -= nzc_cost[nzc0] - nzc_cost[nzc0 - 1];
+          rate1 -= nzc_cost[nzc1] - nzc_cost[nzc1 - 1];
+        }
 #endif
       } else {
         t0 = t1 = (vp9_dct_value_tokens_ptr + x)->Token;

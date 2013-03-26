@@ -672,4 +672,10 @@ static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
   }
   return tx_size_uv;
 }
+
+#if CONFIG_CODE_NONZEROCOUNT
+static int get_nzc_used(TX_SIZE tx_size) {
+  return (tx_size >= TX_16X16);
+}
+#endif
 #endif  // VP9_COMMON_VP9_BLOCKD_H_
