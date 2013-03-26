@@ -247,6 +247,7 @@ EXPERIMENT_LIST="
     abovesprefmv
     code_nonzerocount
     useselectrefmv
+    modelcoefprob
 "
 CONFIG_LIST="
     external_build

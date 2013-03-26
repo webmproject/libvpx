@@ -15,7 +15,6 @@
 #include "vp9/common/vp9_treecoder.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_coefupdateprobs.h"
 
 extern const int vp9_i8x8_block[4];
 
@@ -33,8 +32,8 @@ extern const int vp9_i8x8_block[4];
 #define DCT_VAL_CATEGORY5       9       /* 35-66     Extra Bits 5+1 */
 #define DCT_VAL_CATEGORY6       10      /* 67+       Extra Bits 14+1 */
 #define DCT_EOB_TOKEN           11      /* EOB       Extra Bits 0+0 */
-#define MAX_ENTROPY_TOKENS 12
-#define ENTROPY_NODES 11
+#define MAX_ENTROPY_TOKENS      12
+#define ENTROPY_NODES           11
 #define EOSB_TOKEN              127     /* Not signalled, encoder only */
 
 #define INTER_MODE_CONTEXTS     7
@@ -142,6 +141,33 @@ static int get_coef_band(TX_SIZE tx_size, int coef_index) {
 }
 extern int vp9_get_coef_context(int * recent_energy, int token);
 
+#if CONFIG_MODELCOEFPROB
+#define COEFPROB_BITS               8
+#define COEFPROB_MODELS             (1 << COEFPROB_BITS)
+
+// 2 => EOB and Zero nodes are unconstrained, rest are modeled
+// 3 => EOB, Zero and One nodes are unconstrained, rest are modeled
+#define UNCONSTRAINED_NODES         3   // Choose one of 2 or 3
+
+// whether forward updates are model-based
+#define MODEL_BASED_UPDATE          0
+// if model-based how many nodes are unconstrained
+#define UNCONSTRAINED_UPDATE_NODES  3
+// whether backward updates are model-based
+#define MODEL_BASED_ADAPT           0
+#define UNCONSTRAINED_ADAPT_NODES   3
+
+// whether to adjust the coef probs for key frames based on qindex
+#define ADJUST_KF_COEF_PROBS        0
+
+typedef vp9_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]
+                                      [PREV_COEF_CONTEXTS][2];
+extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
+void vp9_get_model_distribution(vp9_prob model, vp9_prob *tree_probs,
+                                int b, int r);
+void vp9_adjust_default_coef_probs(struct VP9Common *cm);
+#endif  // CONFIG_MODELCOEFPROB
+
 #if CONFIG_CODE_NONZEROCOUNT
 /* Alphabet for number of non-zero symbols in block */
 #define NZC_0                   0       /* Used for all blocks */
@@ -224,4 +250,7 @@ extern const int vp9_extranzcbits[NZC32X32_TOKENS];
 extern const int vp9_basenzcvalue[NZC32X32_TOKENS];
 
 #endif  // CONFIG_CODE_NONZEROCOUNT
+
+#include "vp9/common/vp9_coefupdateprobs.h"
+
 #endif  // VP9_COMMON_VP9_ENTROPY_H_

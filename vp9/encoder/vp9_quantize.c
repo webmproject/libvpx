@@ -730,6 +730,10 @@ void vp9_set_quantizer(struct VP9_COMP *cpi, int Q) {
 
   cm->base_qindex = Q;
 
+  // Set lossless mode
+  if (cm->base_qindex <= 4)
+    cm->base_qindex = 0;
+
   // if any of the delta_q values are changing update flag will
   // have to be set.
   cm->y1dc_delta_q = 0;

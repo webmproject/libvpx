@@ -1197,6 +1197,12 @@ static void read_nzc_probs(VP9_COMMON *cm,
 static void read_coef_probs_common(BOOL_DECODER* const bc,
                                    vp9_coeff_probs *coef_probs,
                                    int block_types) {
+#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
+  const int entropy_nodes_update = UNCONSTRAINED_UPDATE_NODES;
+#else
+  const int entropy_nodes_update = ENTROPY_NODES;
+#endif
+
   int i, j, k, l, m;
 
   if (vp9_read_bit(bc)) {
@@ -1206,11 +1212,15 @@ static void read_coef_probs_common(BOOL_DECODER* const bc,
           for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
             if (l >= 3 && k == 0)
               continue;
-            for (m = CONFIG_CODE_NONZEROCOUNT; m < ENTROPY_NODES; m++) {
+            for (m = CONFIG_CODE_NONZEROCOUNT; m < entropy_nodes_update; m++) {
               vp9_prob *const p = coef_probs[i][j][k][l] + m;
 
-              if (vp9_read(bc, COEF_UPDATE_PROB)) {
+              if (vp9_read(bc, vp9_coef_update_prob[m])) {
                 *p = read_prob_diff_update(bc, *p);
+#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
+                if (m == 1)
+                  vp9_get_model_distribution(*p, coef_probs[i][j][k][l], i, j);
+#endif
               }
             }
           }
@@ -1611,6 +1621,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
       }
     }
   }
+#if CONFIG_MODELCOEFPROB && ADJUST_KF_COEF_PROBS
+  if (pc->frame_type == KEY_FRAME)
+    vp9_adjust_default_coef_probs(pc);
+#endif
 
 #if CONFIG_NEW_MVREF
   // If Key frame reset mv ref id probabilities to defaults

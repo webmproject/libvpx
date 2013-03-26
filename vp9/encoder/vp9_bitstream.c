@@ -399,6 +399,43 @@ static int prob_diff_update_savings_search(const unsigned int *ct,
   return bestsavings;
 }
 
+#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
+static int prob_diff_update_savings_search_model(const unsigned int *ct,
+                                                 const vp9_prob *oldp,
+                                                 vp9_prob *bestp,
+                                                 const vp9_prob upd,
+                                                 int b, int r) {
+  int i, old_b, new_b, update_b, savings, bestsavings, step;
+  int newp;
+  vp9_prob bestnewp, newplist[ENTROPY_NODES];
+  for (i = UNCONSTRAINED_NODES - 1, old_b = 0; i < ENTROPY_NODES; ++i)
+    old_b += cost_branch256(ct + 2 * i, oldp[i]);
+
+  bestsavings = 0;
+  bestnewp = oldp[UNCONSTRAINED_NODES - 1];
+
+  step = (*bestp > oldp[UNCONSTRAINED_NODES - 1] ? -1 : 1);
+  newp = *bestp;
+  // newp = *bestp - step * (abs(*bestp - oldp[UNCONSTRAINED_NODES - 1]) >> 1);
+  for (; newp != oldp[UNCONSTRAINED_NODES - 1]; newp += step) {
+    if (newp < 1 || newp > 255) continue;
+    newplist[UNCONSTRAINED_NODES - 1] = newp;
+    vp9_get_model_distribution(newp, newplist, b, r);
+    for (i = UNCONSTRAINED_NODES - 1, new_b = 0; i < ENTROPY_NODES; ++i)
+      new_b += cost_branch256(ct + 2 * i, newplist[i]);
+    update_b = prob_diff_update_cost(newp, oldp[UNCONSTRAINED_NODES - 1]) +
+        vp9_cost_upd256;
+    savings = old_b - new_b - update_b;
+    if (savings > bestsavings) {
+      bestsavings = savings;
+      bestnewp = newp;
+    }
+  }
+  *bestp = bestnewp;
+  return bestsavings;
+}
+#endif
+
 static void vp9_cond_prob_update(vp9_writer *bc, vp9_prob *oldp, vp9_prob upd,
                                  unsigned int *ct) {
   vp9_prob newp;
@@ -2014,6 +2051,11 @@ static void update_coef_probs_common(vp9_writer* const bc,
   int i, j, k, l, t;
   int update[2] = {0, 0};
   int savings;
+#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
+  const int entropy_nodes_update = UNCONSTRAINED_UPDATE_NODES;
+#else
+  const int entropy_nodes_update = ENTROPY_NODES;
+#endif
   // vp9_prob bestupd = find_coef_update_prob(cpi);
 
   /* dry run to see if there is any udpate at all needed */
@@ -2021,20 +2063,27 @@ static void update_coef_probs_common(vp9_writer* const bc,
   for (i = 0; i < block_types; ++i) {
     for (j = 0; j < REF_TYPES; ++j) {
       for (k = 0; k < COEF_BANDS; ++k) {
-        int prev_coef_savings[ENTROPY_NODES] = {0};
+        // int prev_coef_savings[ENTROPY_NODES] = {0};
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
-          for (t = CONFIG_CODE_NONZEROCOUNT; t < ENTROPY_NODES; ++t) {
+          for (t = CONFIG_CODE_NONZEROCOUNT; t < entropy_nodes_update; ++t) {
             vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
             const vp9_prob oldp = old_frame_coef_probs[i][j][k][l][t];
-            const vp9_prob upd = COEF_UPDATE_PROB;
-            int s = prev_coef_savings[t];
+            const vp9_prob upd = vp9_coef_update_prob[t];
+            int s;  // = prev_coef_savings[t];
             int u = 0;
 
             if (l >= 3 && k == 0)
               continue;
 #if defined(SEARCH_NEWP)
-            s = prob_diff_update_savings_search(frame_branch_ct[i][j][k][l][t],
-                                                oldp, &newp, upd);
+#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
+            if (t == UNCONSTRAINED_NODES - 1)
+              s = prob_diff_update_savings_search_model(
+                  frame_branch_ct[i][j][k][l][0],
+                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+            else
+#endif
+              s = prob_diff_update_savings_search(
+                  frame_branch_ct[i][j][k][l][t], oldp, &newp, upd);
             if (s > 0 && newp != oldp)
               u = 1;
             if (u)
@@ -2061,45 +2110,57 @@ static void update_coef_probs_common(vp9_writer* const bc,
   /* Is coef updated at all */
   if (update[1] == 0 || savings < 0) {
     vp9_write_bit(bc, 0);
-  } else {
-    vp9_write_bit(bc, 1);
-    for (i = 0; i < block_types; ++i) {
-      for (j = 0; j < REF_TYPES; ++j) {
-        for (k = 0; k < COEF_BANDS; ++k) {
-          int prev_coef_savings[ENTROPY_NODES] = {0};
-          for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
-            // calc probs and branch cts for this frame only
-            for (t = CONFIG_CODE_NONZEROCOUNT; t < ENTROPY_NODES; ++t) {
-              vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
-              vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
-              const vp9_prob upd = COEF_UPDATE_PROB;
-              int s = prev_coef_savings[t];
-              int u = 0;
-              if (l >= 3 && k == 0)
-                continue;
+    return;
+  }
+  vp9_write_bit(bc, 1);
+  for (i = 0; i < block_types; ++i) {
+    for (j = 0; j < REF_TYPES; ++j) {
+      for (k = 0; k < COEF_BANDS; ++k) {
+        // int prev_coef_savings[ENTROPY_NODES] = {0};
+        for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
+          // calc probs and branch cts for this frame only
+          for (t = CONFIG_CODE_NONZEROCOUNT; t < entropy_nodes_update; ++t) {
+            vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
+            vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
+            const vp9_prob upd = vp9_coef_update_prob[t];
+            int s;  // = prev_coef_savings[t];
+            int u = 0;
+            if (l >= 3 && k == 0)
+              continue;
 
 #if defined(SEARCH_NEWP)
+#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
+            if (t == UNCONSTRAINED_NODES - 1)
+              s = prob_diff_update_savings_search_model(
+                  frame_branch_ct[i][j][k][l][0],
+                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+            else
+#endif
               s = prob_diff_update_savings_search(
-                      frame_branch_ct[i][j][k][l][t],
-                      *oldp, &newp, upd);
-              if (s > 0 && newp != *oldp)
-                u = 1;
+                  frame_branch_ct[i][j][k][l][t],
+                  *oldp, &newp, upd);
+            if (s > 0 && newp != *oldp)
+              u = 1;
 #else
-              s = prob_update_savings(frame_branch_ct[i][j][k][l][t],
-                                      *oldp, newp, upd);
-              if (s > 0)
-                u = 1;
+            s = prob_update_savings(frame_branch_ct[i][j][k][l][t],
+                                    *oldp, newp, upd);
+            if (s > 0)
+              u = 1;
 #endif
-              vp9_write(bc, u, upd);
+            vp9_write(bc, u, upd);
 #ifdef ENTROPY_STATS
-              if (!cpi->dummy_packing)
-                ++tree_update_hist[i][j][k][l][t][u];
+            if (!cpi->dummy_packing)
+              ++tree_update_hist[i][j][k][l][t][u];
 #endif
-              if (u) {
-                /* send/use new probability */
-                write_prob_diff_update(bc, newp, *oldp);
-                *oldp = newp;
-              }
+            if (u) {
+              /* send/use new probability */
+              write_prob_diff_update(bc, newp, *oldp);
+              *oldp = newp;
+#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
+              if (t == UNCONSTRAINED_NODES - 1)
+                vp9_get_model_distribution(
+                    newp, old_frame_coef_probs[i][j][k][l], i, j);
+#endif
             }
           }
         }
