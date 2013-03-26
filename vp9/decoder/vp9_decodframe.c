@@ -1508,6 +1508,12 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   pc->filter_type = (LOOPFILTERTYPE) vp9_read_bit(&header_bc);
   pc->filter_level = vp9_read_literal(&header_bc, 6);
   pc->sharpness_level = vp9_read_literal(&header_bc, 3);
+#if CONFIG_LOOP_DERING
+  if (vp9_read_bit(&header_bc))
+    pc->dering_enabled = 1 + vp9_read_literal(&header_bc, 4);
+  else
+    pc->dering_enabled = 0;
+#endif
 
   /* Read in loop filter deltas applied at the MB level based on mode or ref frame. */
   xd->mode_ref_lf_delta_update = 0;

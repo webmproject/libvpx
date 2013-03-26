@@ -244,6 +244,7 @@ typedef struct VP9Common {
   int filter_level;
   int last_sharpness_level;
   int sharpness_level;
+  int dering_enabled;
 
   int refresh_entropy_probs;    /* Two state 0 = NO, 1 = YES */
 

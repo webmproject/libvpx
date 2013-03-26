@@ -2526,7 +2526,8 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
   if (cm->filter_level > 0) {
     vp9_set_alt_lf_level(cpi, cm->filter_level);
-    vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level, 0);
+    vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level, 0,
+                          cm->dering_enabled);
   }
 
   vp8_yv12_extend_frame_borders(cm->frame_to_show);
