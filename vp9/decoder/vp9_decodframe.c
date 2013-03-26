@@ -1291,7 +1291,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     pc->version = (data[0] >> 1) & 7;
     pc->show_frame = (data[0] >> 4) & 1;
     scaling_active = (data[0] >> 5) & 1;
-    first_partition_length_in_bytes = data[1] | (data[2] << 8);
+    first_partition_length_in_bytes = read_le16(data + 1);
 
     if (!read_is_valid(data, first_partition_length_in_bytes, data_end))
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
