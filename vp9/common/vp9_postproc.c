@@ -336,11 +336,8 @@ void vp9_deblock(YV12_BUFFER_CONFIG         *source,
                                 source->uv_height, source->uv_width, ppl);
 }
 
-void vp9_de_noise(YV12_BUFFER_CONFIG         *src,
-                  YV12_BUFFER_CONFIG         *post,
-                  int                         q,
-                  int                         low_var_thresh,
-                  int                         flag) {
+void vp9_denoise(YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *post,
+                 int q, int low_var_thresh, int flag) {
   double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
   int ppl = (int)(level + .5);
   (void) post;

@@ -88,34 +88,28 @@ static int decode_value(BOOL_DECODER *br, int bits) {
   int bit;
 
   for (bit = bits - 1; bit >= 0; bit--) {
-    z |= (decode_bool(br, 0x80) << bit);
+    z |= decode_bool(br, 0x80) << bit;
   }
 
   return z;
 }
 
 static int bool_error(BOOL_DECODER *br) {
-  /* Check if we have reached the end of the buffer.
-   *
-   * Variable 'count' stores the number of bits in the 'value' buffer, minus
-   * 8. The top byte is part of the algorithm, and the remainder is buffered
-   * to be shifted into it. So if count == 8, the top 16 bits of 'value' are
-   * occupied, 8 for the algorithm and 8 in the buffer.
-   *
-   * When reading a byte from the user's buffer, count is filled with 8 and
-   * one byte is filled into the value buffer. When we reach the end of the
-   * data, count is additionally filled with VP9_LOTS_OF_BITS. So when
-   * count == VP9_LOTS_OF_BITS - 1, the user's data has been exhausted.
-   */
-  if ((br->count > VP9_BD_VALUE_SIZE) && (br->count < VP9_LOTS_OF_BITS)) {
-    /* We have tried to decode bits after the end of
-     * stream was encountered.
-     */
-    return 1;
-  }
-
-  /* No error. */
-  return 0;
+  // Check if we have reached the end of the buffer.
+  //
+  // Variable 'count' stores the number of bits in the 'value' buffer, minus
+  // 8. The top byte is part of the algorithm, and the remainder is buffered
+  // to be shifted into it. So if count == 8, the top 16 bits of 'value' are
+  // occupied, 8 for the algorithm and 8 in the buffer.
+  //
+  // When reading a byte from the user's buffer, count is filled with 8 and
+  // one byte is filled into the value buffer. When we reach the end of the
+  // data, count is additionally filled with VP9_LOTS_OF_BITS. So when
+  // count == VP9_LOTS_OF_BITS - 1, the user's data has been exhausted.
+  //
+  // 1 if we have tried to decode bits after the end of stream was encountered.
+  // 0 No error.
+  return br->count > VP9_BD_VALUE_SIZE && br->count < VP9_LOTS_OF_BITS;
 }
 
 int vp9_decode_unsigned_max(BOOL_DECODER *br, int max);
