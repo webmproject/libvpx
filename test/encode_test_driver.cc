@@ -175,8 +175,9 @@ void EncoderTest::RunLoop(VideoSource *video) {
           case VPX_CODEC_CX_FRAME_PKT:
             has_cxdata = true;
             if (decoder && DoDecode()) {
-              decoder->DecodeFrame((const uint8_t*)pkt->data.frame.buf,
-                                   pkt->data.frame.sz);
+              vpx_codec_err_t res_dec = decoder->DecodeFrame(
+                  (const uint8_t*)pkt->data.frame.buf, pkt->data.frame.sz);
+              ASSERT_EQ(VPX_CODEC_OK, res_dec) << decoder->DecodeError();
               has_dxdata = true;
             }
             ASSERT_GE(pkt->data.frame.pts, last_pts_);

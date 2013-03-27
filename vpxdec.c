@@ -1024,7 +1024,7 @@ int main(int argc, const char **argv_) {
 
     if (!noblit) {
       if (do_scale) {
-        if (frame_out == 1) {
+        if (img && frame_out == 1) {
           stream_w = img->d_w;
           stream_h = img->d_h;
           scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,

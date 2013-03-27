@@ -42,7 +42,7 @@ class DxDataIterator {
 class Decoder {
  public:
   Decoder(vpx_codec_dec_cfg_t cfg, unsigned long deadline)
-      : cfg_(cfg), deadline_(deadline) {
+      : cfg_(cfg), deadline_(deadline), init_done_(false) {
     memset(&decoder_, 0, sizeof(decoder_));
   }
 
@@ -50,7 +50,7 @@ class Decoder {
     vpx_codec_destroy(&decoder_);
   }
 
-  void DecodeFrame(const uint8_t *cxdata, int size);
+  vpx_codec_err_t DecodeFrame(const uint8_t *cxdata, int size);
 
   DxDataIterator GetDxData() {
     return DxDataIterator(&decoder_);
@@ -61,21 +61,39 @@ class Decoder {
   }
 
   void Control(int ctrl_id, int arg) {
+    InitOnce();
     const vpx_codec_err_t res = vpx_codec_control_(&decoder_, ctrl_id, arg);
     ASSERT_EQ(VPX_CODEC_OK, res) << DecodeError();
   }
 
- protected:
-  virtual const vpx_codec_iface_t* CodecInterface() const = 0;
+  void Control(int ctrl_id, const void *arg) {
+    InitOnce();
+    const vpx_codec_err_t res = vpx_codec_control_(&decoder_, ctrl_id, arg);
+    ASSERT_EQ(VPX_CODEC_OK, res) << DecodeError();
+  }
 
   const char* DecodeError() {
     const char *detail = vpx_codec_error_detail(&decoder_);
     return detail ? detail : vpx_codec_error(&decoder_);
   }
 
+ protected:
+  virtual const vpx_codec_iface_t* CodecInterface() const = 0;
+
+  void InitOnce() {
+    if (!init_done_) {
+      const vpx_codec_err_t res = vpx_codec_dec_init(&decoder_,
+                                                     CodecInterface(),
+                                                     &cfg_, 0);
+      ASSERT_EQ(VPX_CODEC_OK, res) << DecodeError();
+      init_done_ = true;
+    }
+  }
+
   vpx_codec_ctx_t     decoder_;
   vpx_codec_dec_cfg_t cfg_;
   unsigned int        deadline_;
+  bool                init_done_;
 };
 
 // Common test functionality for all Decoder tests.

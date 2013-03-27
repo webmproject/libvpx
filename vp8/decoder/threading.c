@@ -36,7 +36,7 @@
 } while (0)
 
 
-extern void vp8_mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd);
+void vp8_mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd);
 
 static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC *mbrd, int count)
 {
