@@ -1629,26 +1629,48 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
   }
 }
 
-static int mv_pred_row(MACROBLOCKD *mb, int off, int idx) {
-  int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.row +
-             mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.row +
-             mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.row +
-             mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.row;
-  return (temp < 0 ? temp - 4 : temp + 4) / 8;
+static INLINE int round_mv_comp(int value) {
+  return (value < 0 ? value - 4 : value + 4) / 8;
 }
 
-static int mv_pred_col(MACROBLOCKD *mb, int off, int idx) {
-  int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.col +
-             mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.col +
-             mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.col +
-             mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.col;
-  return (temp < 0 ? temp - 4 : temp + 4) / 8;
+static int mi_mv_pred_row(MACROBLOCKD *mb, int off, int idx) {
+  const int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.row +
+                   mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.row +
+                   mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.row +
+                   mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.row;
+  return round_mv_comp(temp) & mb->fullpixel_mask;
 }
+
+static int mi_mv_pred_col(MACROBLOCKD *mb, int off, int idx) {
+  const int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.col +
+                   mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.col +
+                   mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.col +
+                   mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.col;
+  return round_mv_comp(temp) & mb->fullpixel_mask;
+}
+
+static int b_mv_pred_row(MACROBLOCKD *mb, int off, int idx) {
+  BLOCKD *const blockd = mb->block;
+  const int temp = blockd[off + 0].bmi.as_mv[idx].as_mv.row +
+                   blockd[off + 1].bmi.as_mv[idx].as_mv.row +
+                   blockd[off + 4].bmi.as_mv[idx].as_mv.row +
+                   blockd[off + 5].bmi.as_mv[idx].as_mv.row;
+  return round_mv_comp(temp) & mb->fullpixel_mask;
+}
+
+static int b_mv_pred_col(MACROBLOCKD *mb, int off, int idx) {
+  BLOCKD *const blockd = mb->block;
+  const int temp = blockd[off + 0].bmi.as_mv[idx].as_mv.col +
+                   blockd[off + 1].bmi.as_mv[idx].as_mv.col +
+                   blockd[off + 4].bmi.as_mv[idx].as_mv.col +
+                   blockd[off + 5].bmi.as_mv[idx].as_mv.col;
+  return round_mv_comp(temp) & mb->fullpixel_mask;
+}
+
 
 static void build_4x4uvmvs(MACROBLOCKD *xd) {
   int i, j;
   BLOCKD *blockd = xd->block;
-  const int mask = xd->fullpixel_mask;
 
   for (i = 0; i < 2; i++) {
     for (j = 0; j < 2; j++) {
@@ -1658,8 +1680,8 @@ static void build_4x4uvmvs(MACROBLOCKD *xd) {
 
       MV *u = &blockd[uoffset].bmi.as_mv[0].as_mv;
       MV *v = &blockd[voffset].bmi.as_mv[0].as_mv;
-      u->row = mv_pred_row(xd, yoffset, 0) & mask;
-      u->col = mv_pred_col(xd, yoffset, 0) & mask;
+      u->row = mi_mv_pred_row(xd, yoffset, 0);
+      u->col = mi_mv_pred_col(xd, yoffset, 0);
 
       // if (x->mode_info_context->mbmi.need_to_clamp_mvs)
       clamp_uvmv_to_umv_border(u, xd);
@@ -1673,8 +1695,8 @@ static void build_4x4uvmvs(MACROBLOCKD *xd) {
       if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
         u = &blockd[uoffset].bmi.as_mv[1].as_mv;
         v = &blockd[voffset].bmi.as_mv[1].as_mv;
-        u->row = mv_pred_row(xd, yoffset, 1) & mask;
-        u->col = mv_pred_col(xd, yoffset, 1) & mask;
+        u->row = mi_mv_pred_row(xd, yoffset, 1);
+        u->col = mi_mv_pred_col(xd, yoffset, 1);
 
         // if (mbmi->need_to_clamp_mvs)
         clamp_uvmv_to_umv_border(u, xd);
@@ -1725,84 +1747,29 @@ void vp9_build_inter_predictors_mb(MACROBLOCKD *xd,
 
 /*encoder only*/
 void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
-                                        int mb_row,
-                                        int mb_col) {
-  int i, j;
-  int weight;
-  BLOCKD *blockd = xd->block;
+                                        int mb_row, int mb_col) {
+  int i, j, weight;
+  BLOCKD *const blockd = xd->block;
 
   /* build uv mvs */
   for (i = 0; i < 2; i++) {
     for (j = 0; j < 2; j++) {
-      int yoffset = i * 8 + j * 2;
-      int uoffset = 16 + i * 2 + j;
-      int voffset = 20 + i * 2 + j;
-      int temp;
+      const int yoffset = i * 8 + j * 2;
+      const int uoffset = 16 + i * 2 + j;
+      const int voffset = 20 + i * 2 + j;
 
-      temp = blockd[yoffset  ].bmi.as_mv[0].as_mv.row
-             + blockd[yoffset + 1].bmi.as_mv[0].as_mv.row
-             + blockd[yoffset + 4].bmi.as_mv[0].as_mv.row
-             + blockd[yoffset + 5].bmi.as_mv[0].as_mv.row;
+      MV *u = &blockd[uoffset].bmi.as_mv[0].as_mv;
+      MV *v = &blockd[voffset].bmi.as_mv[0].as_mv;
 
-      if (temp < 0)
-        temp -= 4;
-      else
-        temp += 4;
-
-      xd->block[uoffset].bmi.as_mv[0].as_mv.row = (temp / 8) &
-        xd->fullpixel_mask;
-
-      temp = blockd[yoffset  ].bmi.as_mv[0].as_mv.col
-             + blockd[yoffset + 1].bmi.as_mv[0].as_mv.col
-             + blockd[yoffset + 4].bmi.as_mv[0].as_mv.col
-             + blockd[yoffset + 5].bmi.as_mv[0].as_mv.col;
-
-      if (temp < 0)
-        temp -= 4;
-      else
-        temp += 4;
-
-      blockd[uoffset].bmi.as_mv[0].as_mv.col = (temp / 8) &
-        xd->fullpixel_mask;
-
-      blockd[voffset].bmi.as_mv[0].as_mv.row =
-        blockd[uoffset].bmi.as_mv[0].as_mv.row;
-      blockd[voffset].bmi.as_mv[0].as_mv.col =
-        blockd[uoffset].bmi.as_mv[0].as_mv.col;
+      v->row = u->row = b_mv_pred_row(xd, yoffset, 0);
+      v->col = u->col = b_mv_pred_col(xd, yoffset, 0);
 
       if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-        temp = blockd[yoffset  ].bmi.as_mv[1].as_mv.row
-               + blockd[yoffset + 1].bmi.as_mv[1].as_mv.row
-               + blockd[yoffset + 4].bmi.as_mv[1].as_mv.row
-               + blockd[yoffset + 5].bmi.as_mv[1].as_mv.row;
+        u = &blockd[uoffset].bmi.as_mv[1].as_mv;
+        v = &blockd[voffset].bmi.as_mv[1].as_mv;
 
-        if (temp < 0) {
-          temp -= 4;
-        } else {
-          temp += 4;
-        }
-
-        blockd[uoffset].bmi.as_mv[1].as_mv.row = (temp / 8) &
-          xd->fullpixel_mask;
-
-        temp = blockd[yoffset  ].bmi.as_mv[1].as_mv.col
-               + blockd[yoffset + 1].bmi.as_mv[1].as_mv.col
-               + blockd[yoffset + 4].bmi.as_mv[1].as_mv.col
-               + blockd[yoffset + 5].bmi.as_mv[1].as_mv.col;
-
-        if (temp < 0) {
-          temp -= 4;
-        } else {
-          temp += 4;
-        }
-
-        blockd[uoffset].bmi.as_mv[1].as_mv.col = (temp / 8) &
-          xd->fullpixel_mask;
-
-        blockd[voffset].bmi.as_mv[1].as_mv.row =
-          blockd[uoffset].bmi.as_mv[1].as_mv.row;
-        blockd[voffset].bmi.as_mv[1].as_mv.col =
-          blockd[uoffset].bmi.as_mv[1].as_mv.col;
+        v->row = u->row = b_mv_pred_row(xd, yoffset, 1);
+        v->row = u->col = b_mv_pred_row(xd, yoffset, 1);
       }
     }
   }
