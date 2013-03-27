@@ -28,6 +28,18 @@ static int sb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
 static int sb_ref_distance_weight[MVREF_NEIGHBOURS] =
   { 3, 3, 2, 2, 2, 1, 1, 1 };
 
+
+
+static int sb64_mv_ref_search[MVREF_NEIGHBOURS][2] = {
+    {0, -1}, {-1, 0}, {1, -1}, {-1, 1},
+    {2, -1}, {-1, 2}, {3, -1}, {-1,-1}
+};
+
+static int sb64_ref_distance_weight[MVREF_NEIGHBOURS] =
+  { 1, 1, 1, 1, 1, 1, 1, 1 };
+
+
+
 // clamp_mv_ref
 #define MV_BORDER (16 << 3) // Allow 16 pels in 1/8th pel units
 
@@ -275,7 +287,10 @@ void vp9_find_mv_refs(
   vpx_memset(candidate_mvs, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
   vpx_memset(candidate_scores, 0, sizeof(candidate_scores));
 
-  if (mbmi->sb_type) {
+  if (mbmi->sb_type == BLOCK_SIZE_SB64X64) {
+    mv_ref_search = sb64_mv_ref_search;
+    ref_distance_weight = sb64_ref_distance_weight;
+  } else if (mbmi->sb_type == BLOCK_SIZE_SB32X32) {
     mv_ref_search = sb_mv_ref_search;
     ref_distance_weight = sb_ref_distance_weight;
   } else {
