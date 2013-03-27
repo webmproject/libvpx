@@ -112,12 +112,12 @@ endef
 # Use ads2gas script to convert from RVCT format to GAS format.  This passes
 #  puts the processed file under $(ASM_CNV_PATH).  Local clean rule
 #  to handle removing these
-ASM_CNV_OFFSETS_DEPEND = $(ASM_CNV_PATH)/asm_com_offsets.asm
+ASM_CNV_OFFSETS_DEPEND = $(ASM_CNV_PATH)/vp8_asm_com_offsets.asm
 ifeq ($(CONFIG_VP8_DECODER), yes)
-  ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/asm_dec_offsets.asm
+  ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/vp8_asm_dec_offsets.asm
 endif
 ifeq ($(CONFIG_VP8_ENCODER), yes)
-  ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/asm_enc_offsets.asm
+  ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/vp8_asm_enc_offsets.asm
 endif
 
 .PRECIOUS: %.asm.s
@@ -190,19 +190,19 @@ clean:
 include $(BUILD_SHARED_LIBRARY)
 
 $(eval $(call asm_offsets_template,\
-    $(ASM_CNV_PATH)/asm_com_offsets.asm, \
-    $(LIBVPX_PATH)/vp8/common/asm_com_offsets.c))
+    $(ASM_CNV_PATH)/vp8_asm_com_offsets.asm, \
+    $(LIBVPX_PATH)/vp8/common/vp8_asm_com_offsets.c))
 
 ifeq ($(CONFIG_VP8_DECODER), yes)
   $(eval $(call asm_offsets_template,\
-    $(ASM_CNV_PATH)/asm_dec_offsets.asm, \
-    $(LIBVPX_PATH)/vp8/decoder/asm_dec_offsets.c))
+    $(ASM_CNV_PATH)/vp8_asm_dec_offsets.asm, \
+    $(LIBVPX_PATH)/vp8/decoder/vp8_asm_dec_offsets.c))
 endif
 
 ifeq ($(CONFIG_VP8_ENCODER), yes)
   $(eval $(call asm_offsets_template,\
-    $(ASM_CNV_PATH)/asm_enc_offsets.asm, \
-    $(LIBVPX_PATH)/vp8/encoder/asm_enc_offsets.c))
+    $(ASM_CNV_PATH)/vp8_asm_enc_offsets.asm, \
+    $(LIBVPX_PATH)/vp8/encoder/vp8_asm_enc_offsets.c))
 endif
 
 ifeq ($(CONFIG_RUNTIME_CPU_DETECT),yes)

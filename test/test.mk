@@ -31,6 +31,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ivf_video_source.h
 
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += test_vector_test.cc
+
 ##
 ## WHITE BOX TESTS
 ##
@@ -55,6 +56,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += set_roi.cc
 LIBVPX_TEST_SRCS-yes                   += sixtap_predict_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += subtract_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += variance_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += vp8_decrypt_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += vp8_fdct4x4_test.cc
 
 endif # VP8

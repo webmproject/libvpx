@@ -89,8 +89,8 @@ static size_t wrap_fwrite(const void *ptr, size_t size, size_t nmemb,
 
 static const char *exec_name;
 
-#define VP8_FOURCC (0x00385056)
-#define VP9_FOURCC (0x00395056)
+#define VP8_FOURCC (0x30385056)
+#define VP9_FOURCC (0x30395056)
 static const struct codec_item {
   char const              *name;
   const vpx_codec_iface_t *(*iface)(void);
@@ -2560,7 +2560,7 @@ int main(int argc, const char **argv_) {
     usage_exit();
 
   for (pass = global.pass ? global.pass - 1 : 0; pass < global.passes; pass++) {
-    int frames_in = 0;
+    int frames_in = 0, seen_frames = 0;
     int64_t estimated_time_left = -1;
     int64_t average_rate = -1;
     off_t lagged_count = 0;
@@ -2640,9 +2640,11 @@ int main(int argc, const char **argv_) {
 
         if (frame_avail)
           frames_in++;
+        seen_frames = frames_in > global.skip_frames ?
+                          frames_in - global.skip_frames : 0;
 
         if (!global.quiet) {
-          float fps = usec_to_fps(cx_time, frames_in);
+          float fps = usec_to_fps(cx_time, seen_frames);
           fprintf(stderr, "\rPass %d/%d ", pass + 1, global.passes);
 
           if (stream_cnt == 1)
@@ -2678,16 +2680,17 @@ int main(int argc, const char **argv_) {
         FOREACH_STREAM(get_cx_data(stream, &global, &got_data));
 
         if (!got_data && input.length && !streams->frames_out) {
-          lagged_count = global.limit ? frames_in : ftello(input.file);
+          lagged_count = global.limit ? seen_frames : ftello(input.file);
         } else if (input.length) {
           int64_t remaining;
           int64_t rate;
 
           if (global.limit) {
-            int frame_in_lagged = (frames_in - lagged_count) * 1000;
+            int frame_in_lagged = (seen_frames - lagged_count) * 1000;
 
             rate = cx_time ? frame_in_lagged * (int64_t)1000000 / cx_time : 0;
-            remaining = 1000 * (global.limit - frames_in + lagged_count);
+            remaining = 1000 * (global.limit - global.skip_frames
+                                - seen_frames + lagged_count);
           } else {
             off_t input_pos = ftello(input.file);
             off_t input_pos_lagged = input_pos - lagged_count;
@@ -2719,14 +2722,14 @@ int main(int argc, const char **argv_) {
                        "\rPass %d/%d frame %4d/%-4d %7"PRId64"B %7lub/f %7"PRId64"b/s"
                        " %7"PRId64" %s (%.2f fps)\033[K\n", pass + 1,
                        global.passes, frames_in, stream->frames_out, (int64_t)stream->nbytes,
-                       frames_in ? (unsigned long)(stream->nbytes * 8 / frames_in) : 0,
-                       frames_in ? (int64_t)stream->nbytes * 8
+                       seen_frames ? (unsigned long)(stream->nbytes * 8 / seen_frames) : 0,
+                       seen_frames ? (int64_t)stream->nbytes * 8
                        * (int64_t)global.framerate.num / global.framerate.den
-                       / frames_in
+                       / seen_frames
                        : 0,
                        stream->cx_time > 9999999 ? stream->cx_time / 1000 : stream->cx_time,
                        stream->cx_time > 9999999 ? "ms" : "us",
-                       usec_to_fps(stream->cx_time, frames_in));
+                       usec_to_fps(stream->cx_time, seen_frames));
                     );
 
     if (global.show_psnr)

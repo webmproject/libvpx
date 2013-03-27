@@ -299,6 +299,7 @@ CONFIG_LIST="
     multi_res_encoding
     temporal_denoising
     experimental
+    decrypt
     ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
@@ -348,6 +349,7 @@ CMDLINE_SELECT="
     multi_res_encoding
     temporal_denoising
     experimental
+    decrypt
 "
 
 process_cmdline() {

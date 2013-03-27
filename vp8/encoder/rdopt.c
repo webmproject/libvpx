@@ -2512,9 +2512,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 x->rd_thresh_mult[best_mode_index];
     }
 
-    /* Note how often each mode chosen as best */
-    cpi->mode_chosen_counts[best_mode_index] ++;
-
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity)
     {
