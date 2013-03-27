@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAW3//9MY\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-03-27T19:27:24Z",
+      "side": 1,
+      "message": "avoid reusing subject lines in your commits, as it can make the log confusing (usually indicates cherry-picks or merges, rather than different commits). Could name this one \u0027extract setup_frame_size and update_frame_context\u0027",
+      "revId": "e08f5a42609d83d67c2094cbad0eafacfc2264ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
