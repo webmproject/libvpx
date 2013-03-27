@@ -1520,6 +1520,101 @@ static void update_frame_context(VP9D_COMP *pbi, vp9_reader *r) {
 #endif
 }
 
+static void decode_tiles(VP9D_COMP *pbi,
+                         const uint8_t *data, int first_partition_size,
+                         BOOL_DECODER *header_bc, BOOL_DECODER *residual_bc) {
+  VP9_COMMON *const pc = &pbi->common;
+  MACROBLOCKD *const xd  = &pbi->mb;
+
+  const uint8_t *data_ptr = data + first_partition_size;
+  int tile_row, tile_col, delta_log2_tiles;
+  int mb_row;
+
+  vp9_get_tile_n_bits(pc, &pc->log2_tile_columns, &delta_log2_tiles);
+  while (delta_log2_tiles--) {
+    if (vp9_read_bit(header_bc)) {
+      pc->log2_tile_columns++;
+    } else {
+      break;
+    }
+  }
+  pc->log2_tile_rows = vp9_read_bit(header_bc);
+  if (pc->log2_tile_rows)
+    pc->log2_tile_rows += vp9_read_bit(header_bc);
+  pc->tile_columns = 1 << pc->log2_tile_columns;
+  pc->tile_rows    = 1 << pc->log2_tile_rows;
+
+  vpx_memset(pc->above_context, 0,
+             sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
+
+  if (pbi->oxcf.inv_tile_order) {
+    const int n_cols = pc->tile_columns;
+    const uint8_t *data_ptr2[4][1 << 6];
+    BOOL_DECODER UNINITIALIZED_IS_SAFE(bc_bak);
+
+    // pre-initialize the offsets, we're going to read in inverse order
+    data_ptr2[0][0] = data_ptr;
+    for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+      if (tile_row) {
+        const int size = read_le32(data_ptr2[tile_row - 1][n_cols - 1]);
+        data_ptr2[tile_row - 1][n_cols - 1] += 4;
+        data_ptr2[tile_row][0] = data_ptr2[tile_row - 1][n_cols - 1] + size;
+      }
+
+      for (tile_col = 1; tile_col < n_cols; tile_col++) {
+        const int size = read_le32(data_ptr2[tile_row][tile_col - 1]);
+        data_ptr2[tile_row][tile_col - 1] += 4;
+        data_ptr2[tile_row][tile_col] =
+            data_ptr2[tile_row][tile_col - 1] + size;
+      }
+    }
+
+    for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+      vp9_get_tile_row_offsets(pc, tile_row);
+      for (tile_col = n_cols - 1; tile_col >= 0; tile_col--) {
+        vp9_get_tile_col_offsets(pc, tile_col);
+        setup_token_decoder(pbi, data_ptr2[tile_row][tile_col], residual_bc);
+
+        // Decode a row of superblocks
+        for (mb_row = pc->cur_tile_mb_row_start;
+             mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
+          decode_sb_row(pbi, pc, mb_row, xd, residual_bc);
+        }
+
+        if (tile_row == pc->tile_rows - 1 && tile_col == n_cols - 1)
+          bc_bak = *residual_bc;
+      }
+    }
+    *residual_bc = bc_bak;
+  } else {
+    int has_more;
+
+    for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+      vp9_get_tile_row_offsets(pc, tile_row);
+      for (tile_col = 0; tile_col < pc->tile_columns; tile_col++) {
+        vp9_get_tile_col_offsets(pc, tile_col);
+
+        has_more = tile_col < pc->tile_columns - 1 ||
+                   tile_row < pc->tile_rows - 1;
+
+        // Setup decoder
+        setup_token_decoder(pbi, data_ptr + (has_more ? 4 : 0), residual_bc);
+
+        // Decode a row of superblocks
+        for (mb_row = pc->cur_tile_mb_row_start;
+             mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
+          decode_sb_row(pbi, pc, mb_row, xd, residual_bc);
+        }
+
+        if (has_more) {
+          const int size = read_le32(data_ptr);
+          data_ptr += 4 + size;
+        }
+      }
+    }
+  }
+}
+
 int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   BOOL_DECODER header_bc, residual_bc;
   VP9_COMMON *const pc = &pbi->common;
@@ -1527,7 +1622,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   const uint8_t *data = (const uint8_t *)pbi->Source;
   const uint8_t *data_end = data + pbi->source_sz;
   ptrdiff_t first_partition_length_in_bytes = 0;
-  int mb_row, i, corrupt_tokens = 0;
+  int i, corrupt_tokens = 0;
 
   // printf("Decoding frame %d\n", pc->current_video_frame);
 
@@ -1766,91 +1861,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 
   vp9_decode_mode_mvs_init(pbi, &header_bc);
 
-  /* tile info */
-  {
-    const uint8_t *data_ptr = data + first_partition_length_in_bytes;
-    int tile_row, tile_col, delta_log2_tiles;
-
-    vp9_get_tile_n_bits(pc, &pc->log2_tile_columns, &delta_log2_tiles);
-    while (delta_log2_tiles--) {
-      if (vp9_read_bit(&header_bc)) {
-        pc->log2_tile_columns++;
-      } else {
-        break;
-      }
-    }
-    pc->log2_tile_rows = vp9_read_bit(&header_bc);
-    if (pc->log2_tile_rows)
-      pc->log2_tile_rows += vp9_read_bit(&header_bc);
-    pc->tile_columns = 1 << pc->log2_tile_columns;
-    pc->tile_rows    = 1 << pc->log2_tile_rows;
-
-    vpx_memset(pc->above_context, 0,
-               sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
-
-    if (pbi->oxcf.inv_tile_order) {
-      const int n_cols = pc->tile_columns;
-      const uint8_t *data_ptr2[4][1 << 6];
-      BOOL_DECODER UNINITIALIZED_IS_SAFE(bc_bak);
-
-      // pre-initialize the offsets, we're going to read in inverse order
-      data_ptr2[0][0] = data_ptr;
-      for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
-        if (tile_row) {
-          const int size = read_le32(data_ptr2[tile_row - 1][n_cols - 1]);
-          data_ptr2[tile_row - 1][n_cols - 1] += 4;
-          data_ptr2[tile_row][0] = data_ptr2[tile_row - 1][n_cols - 1] + size;
-        }
-
-        for (tile_col = 1; tile_col < n_cols; tile_col++) {
-          const int size = read_le32(data_ptr2[tile_row][tile_col - 1]);
-          data_ptr2[tile_row][tile_col - 1] += 4;
-          data_ptr2[tile_row][tile_col] =
-              data_ptr2[tile_row][tile_col - 1] + size;
-        }
-      }
-
-      for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
-        vp9_get_tile_row_offsets(pc, tile_row);
-        for (tile_col = n_cols - 1; tile_col >= 0; tile_col--) {
-          vp9_get_tile_col_offsets(pc, tile_col);
-          setup_token_decoder(pbi, data_ptr2[tile_row][tile_col], &residual_bc);
-
-          /* Decode a row of superblocks */
-          for (mb_row = pc->cur_tile_mb_row_start;
-               mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
-            decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
-          }
-          if (tile_row == pc->tile_rows - 1 && tile_col == n_cols - 1)
-            bc_bak = residual_bc;
-        }
-      }
-      residual_bc = bc_bak;
-    } else {
-      for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
-        vp9_get_tile_row_offsets(pc, tile_row);
-        for (tile_col = 0; tile_col < pc->tile_columns; tile_col++) {
-          vp9_get_tile_col_offsets(pc, tile_col);
-
-          if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1)
-            setup_token_decoder(pbi, data_ptr + 4, &residual_bc);
-          else
-            setup_token_decoder(pbi, data_ptr, &residual_bc);
-
-          /* Decode a row of superblocks */
-          for (mb_row = pc->cur_tile_mb_row_start;
-               mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
-            decode_sb_row(pbi, pc, mb_row, xd, &residual_bc);
-          }
-
-          if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1) {
-            int size = read_le32(data_ptr);
-            data_ptr += 4 + size;
-          }
-        }
-      }
-    }
-  }
+  decode_tiles(pbi, data, first_partition_length_in_bytes,
+               &header_bc, &residual_bc);
   corrupt_tokens |= xd->corrupted;
 
   // keep track of the last coded dimensions
@@ -1902,8 +1914,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
 #endif
 
   /* Find the end of the coded buffer */
-  while (residual_bc.count > CHAR_BIT
-         && residual_bc.count < VP9_BD_VALUE_SIZE) {
+  while (residual_bc.count > CHAR_BIT &&
+         residual_bc.count < VP9_BD_VALUE_SIZE) {
     residual_bc.count -= CHAR_BIT;
     residual_bc.user_buffer--;
   }
