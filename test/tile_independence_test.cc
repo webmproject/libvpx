@@ -32,10 +32,9 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
     cfg.w = 704;
     cfg.h = 144;
     cfg.threads = 1;
-    cfg.inv_tile_order = 0;
     fw_dec_ = codec_->CreateDecoder(cfg, 0);
-    cfg.inv_tile_order = 1;
     inv_dec_ = codec_->CreateDecoder(cfg, 0);
+    inv_dec_->Control(VP9_INVERT_TILE_DECODE_ORDER, 1);
   }
 
   virtual ~TileIndependenceTest() {

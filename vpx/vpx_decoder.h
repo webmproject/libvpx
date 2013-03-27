@@ -106,7 +106,6 @@ extern "C" {
     unsigned int threads; /**< Maximum number of threads to use, default 1 */
     unsigned int w;      /**< Width */
     unsigned int h;      /**< Height */
-    int inv_tile_order;  /**< Invert tile decoding order, default 0 */
   } vpx_codec_dec_cfg_t; /**< alias for struct vpx_codec_dec_cfg */
 
 

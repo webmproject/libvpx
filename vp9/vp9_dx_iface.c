@@ -64,6 +64,7 @@ struct vpx_codec_alg_priv {
   vpx_image_t             img;
   int                     img_setup;
   int                     img_avail;
+  int                     invert_tile_order;
 };
 
 static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si,
@@ -333,7 +334,7 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
       oxcf.Version = 9;
       oxcf.postprocess = 0;
       oxcf.max_threads = ctx->cfg.threads;
-      oxcf.inv_tile_order = ctx->cfg.inv_tile_order;
+      oxcf.inv_tile_order = ctx->invert_tile_order;
       optr = vp9_create_decompressor(&oxcf);
 
       /* If postprocessing was enabled by the application and a
@@ -726,6 +727,13 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 
 }
 
+static vpx_codec_err_t set_invert_tile_order(vpx_codec_alg_priv_t *ctx,
+                                             int ctr_id,
+                                             va_list args) {
+  ctx->invert_tile_order = va_arg(args, int);
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t ctf_maps[] = {
   {VP8_SET_REFERENCE,             vp9_set_reference},
   {VP8_COPY_REFERENCE,            vp9_copy_reference},
@@ -737,6 +745,7 @@ static vpx_codec_ctrl_fn_map_t ctf_maps[] = {
   {VP8D_GET_LAST_REF_UPDATES,     vp8_get_last_ref_updates},
   {VP8D_GET_FRAME_CORRUPTED,      vp8_get_frame_corrupted},
   {VP9_GET_REFERENCE,             get_reference},
+  {VP9_INVERT_TILE_DECODE_ORDER,  set_invert_tile_order},
   { -1, NULL},
 };
 
