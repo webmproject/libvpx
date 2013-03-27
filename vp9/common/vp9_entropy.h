@@ -139,7 +139,9 @@ static int get_coef_band(TX_SIZE tx_size, int coef_index) {
       return 5;
   }
 }
-extern int vp9_get_coef_context(int * recent_energy, int token);
+extern int vp9_get_coef_context(const int *scan, const int *neighbors,
+                                int nb_pad, uint8_t *token_cache, int c, int l);
+const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 
 #if CONFIG_MODELCOEFPROB
 #define COEFPROB_BITS               8

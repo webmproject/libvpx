@@ -109,6 +109,8 @@ static void fill_value_tokens() {
   vp9_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
+extern const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
+
 static void tokenize_b(VP9_COMP *cpi,
                        MACROBLOCKD *xd,
                        const int ib,
@@ -119,18 +121,18 @@ static void tokenize_b(VP9_COMP *cpi,
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int pt; /* near block/prev token context index */
   int c = 0;
-  int recent_energy = 0;
   const int eob = xd->eobs[ib];     /* one beyond last nonzero coeff */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   int16_t *qcoeff_ptr = xd->qcoeff + 16 * ib;
-  int seg_eob;
+  int seg_eob, default_eob, pad;
   const int segment_id = mbmi->segment_id;
   const BLOCK_SIZE_TYPE sb_type = mbmi->sb_type;
-  const int *scan;
+  const int *scan, *nb;
   vp9_coeff_count *counts;
   vp9_coeff_probs *probs;
   const int ref = mbmi->ref_frame != INTRA_FRAME;
   ENTROPY_CONTEXT *a, *l, *a1, *l1, *a2, *l2, *a3, *l3, a_ec, l_ec;
+  uint8_t token_cache[1024];
 #if CONFIG_CODE_NONZEROCOUNT
   int zerosleft, nzc = 0;
   if (eob == 0)
@@ -220,6 +222,8 @@ static void tokenize_b(VP9_COMP *cpi,
   }
 
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
+  nb = vp9_get_coef_neighbors_handle(scan, &pad);
+  default_eob = seg_eob;
 
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
     seg_eob = 0;
@@ -252,17 +256,20 @@ static void tokenize_b(VP9_COMP *cpi,
     // Skip zero node if there are no zeros left
     t->skip_eob_node = 1 + (zerosleft == 0);
 #else
-    t->skip_eob_node = (pt == 0) && (band > 0);
+    t->skip_eob_node = (c > 0) && (token_cache[c - 1] == 0);
 #endif
     assert(vp9_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
     if (!dry_run) {
       ++counts[type][ref][band][pt][token];
+      if (!t->skip_eob_node)
+        ++cpi->common.fc.eob_branch_counts[tx_size][type][ref][band][pt];
     }
 #if CONFIG_CODE_NONZEROCOUNT
     nzc += (v != 0);
 #endif
+    token_cache[c] = token;
 
-    pt = vp9_get_coef_context(&recent_energy, token);
+    pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
     ++t;
   } while (c < eob && ++c < seg_eob);
 #if CONFIG_CODE_NONZEROCOUNT
@@ -833,7 +840,7 @@ static void print_counter(FILE *f, vp9_coeff_accum *context_counters,
 
             assert(x == (int64_t) y);  /* no overflow handling yet */
             fprintf(f, "%s %d", Comma(t), y);
-          } while (++t < MAX_ENTROPY_TOKENS);
+          } while (++t < 1 + MAX_ENTROPY_TOKENS);
           fprintf(f, "}");
         } while (++pt < PREV_COEF_CONTEXTS);
         fprintf(f, "\n      }");
@@ -867,13 +874,17 @@ static void print_probs(FILE *f, vp9_coeff_accum *context_counters,
         pt = 0;
         do {
           unsigned int branch_ct[ENTROPY_NODES][2];
-          unsigned int coef_counts[MAX_ENTROPY_TOKENS];
+          unsigned int coef_counts[MAX_ENTROPY_TOKENS + 1];
           vp9_prob coef_probs[ENTROPY_NODES];
 
-          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+          if (pt >= 3 && band == 0)
+            break;
+          for (t = 0; t < MAX_ENTROPY_TOKENS + 1; ++t)
             coef_counts[t] = context_counters[type][ref][band][pt][t];
           vp9_tree_probs_from_distribution(vp9_coef_tree, coef_probs,
                                            branch_ct, coef_counts, 0);
+          branch_ct[0][1] = coef_counts[MAX_ENTROPY_TOKENS] - branch_ct[0][0];
+          coef_probs[0] = get_binary_prob(branch_ct[0][0], branch_ct[0][1]);
           fprintf(f, "%s\n      {", Comma(pt));
 
           t = 0;
@@ -1025,7 +1036,7 @@ static void stuff_b(VP9_COMP *cpi,
 
 #if CONFIG_CODE_NONZEROCOUNT == 0
   VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
-  band = get_coef_band(tx_size, 0);
+  band = 0;
   t->Token = DCT_EOB_TOKEN;
   t->context_tree = probs[type][ref][band][pt];
   t->skip_eob_node = 0;

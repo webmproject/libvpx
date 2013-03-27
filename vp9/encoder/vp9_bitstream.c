@@ -1758,6 +1758,9 @@ static void print_prob_tree(vp9_coeff_probs *coef_probs, int block_types) {
 
 static void build_tree_distribution(vp9_coeff_probs *coef_probs,
                                     vp9_coeff_count *coef_counts,
+                                    unsigned int (*eob_branch_ct)[REF_TYPES]
+                                                                 [COEF_BANDS]
+                                                          [PREV_COEF_CONTEXTS],
 #ifdef ENTROPY_STATS
                                     VP9_COMP *cpi,
                                     vp9_coeff_accum *context_counters,
@@ -1779,10 +1782,18 @@ static void build_tree_distribution(vp9_coeff_probs *coef_probs,
                                            coef_probs[i][j][k][l],
                                            coef_branch_ct[i][j][k][l],
                                            coef_counts[i][j][k][l], 0);
+          coef_branch_ct[i][j][k][l][0][1] = eob_branch_ct[i][j][k][l] -
+                                             coef_branch_ct[i][j][k][l][0][0];
+          coef_probs[i][j][k][l][0] =
+              get_binary_prob(coef_branch_ct[i][j][k][l][0][0],
+                              coef_branch_ct[i][j][k][l][0][1]);
 #ifdef ENTROPY_STATS
-        if (!cpi->dummy_packing)
-          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
-            context_counters[i][j][k][l][t] += coef_counts[i][j][k][l][t];
+          if (!cpi->dummy_packing) {
+            for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+              context_counters[i][j][k][l][t] += coef_counts[i][j][k][l][t];
+            context_counters[i][j][k][l][MAX_ENTROPY_TOKENS] +=
+                eob_branch_ct[i][j][k][l];
+          }
 #endif
         }
       }
@@ -1793,24 +1804,28 @@ static void build_tree_distribution(vp9_coeff_probs *coef_probs,
 static void build_coeff_contexts(VP9_COMP *cpi) {
   build_tree_distribution(cpi->frame_coef_probs_4x4,
                           cpi->coef_counts_4x4,
+                          cpi->common.fc.eob_branch_counts[TX_4X4],
 #ifdef ENTROPY_STATS
                           cpi, context_counters_4x4,
 #endif
                           cpi->frame_branch_ct_4x4, BLOCK_TYPES);
   build_tree_distribution(cpi->frame_coef_probs_8x8,
                           cpi->coef_counts_8x8,
+                          cpi->common.fc.eob_branch_counts[TX_8X8],
 #ifdef ENTROPY_STATS
                           cpi, context_counters_8x8,
 #endif
                           cpi->frame_branch_ct_8x8, BLOCK_TYPES);
   build_tree_distribution(cpi->frame_coef_probs_16x16,
                           cpi->coef_counts_16x16,
+                          cpi->common.fc.eob_branch_counts[TX_16X16],
 #ifdef ENTROPY_STATS
                           cpi, context_counters_16x16,
 #endif
                           cpi->frame_branch_ct_16x16, BLOCK_TYPES);
   build_tree_distribution(cpi->frame_coef_probs_32x32,
                           cpi->coef_counts_32x32,
+                          cpi->common.fc.eob_branch_counts[TX_32X32],
 #ifdef ENTROPY_STATS
                           cpi, context_counters_32x32,
 #endif

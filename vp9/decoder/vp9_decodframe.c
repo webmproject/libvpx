@@ -1729,6 +1729,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
   vp9_zero(pbi->common.fc.coef_counts_8x8);
   vp9_zero(pbi->common.fc.coef_counts_16x16);
   vp9_zero(pbi->common.fc.coef_counts_32x32);
+  vp9_zero(pbi->common.fc.eob_branch_counts);
   vp9_zero(pbi->common.fc.ymode_counts);
   vp9_zero(pbi->common.fc.sb_ymode_counts);
   vp9_zero(pbi->common.fc.uv_mode_counts);
