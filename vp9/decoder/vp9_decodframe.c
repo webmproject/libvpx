@@ -171,21 +171,9 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     }
   } else {
     if (sb_type == BLOCK_SIZE_SB64X64) {
-      vp9_build_inter64x64_predictors_sb(xd,
-                                         xd->dst.y_buffer,
-                                         xd->dst.u_buffer,
-                                         xd->dst.v_buffer,
-                                         xd->dst.y_stride,
-                                         xd->dst.uv_stride,
-                                         mb_row, mb_col);
+      vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
     } else if (sb_type == BLOCK_SIZE_SB32X32) {
-      vp9_build_inter32x32_predictors_sb(xd,
-                                         xd->dst.y_buffer,
-                                         xd->dst.u_buffer,
-                                         xd->dst.v_buffer,
-                                         xd->dst.y_stride,
-                                         xd->dst.uv_stride,
-                                         mb_row, mb_col);
+      vp9_build_inter32x32_predictors_sb(xd, mb_row, mb_col);
     } else {
       vp9_build_inter16x16_predictors_mb(xd,
                                          xd->dst.y_buffer,
@@ -492,10 +480,7 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
     vp9_build_intra_predictors_sb64y_s(xd);
     vp9_build_intra_predictors_sb64uv_s(xd);
   } else {
-    vp9_build_inter64x64_predictors_sb(xd, xd->dst.y_buffer,
-                                       xd->dst.u_buffer, xd->dst.v_buffer,
-                                       xd->dst.y_stride, xd->dst.uv_stride,
-                                       mb_row, mb_col);
+    vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
   }
 
   /* dequantization and idct */
@@ -665,10 +650,7 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
     vp9_build_intra_predictors_sby_s(xd);
     vp9_build_intra_predictors_sbuv_s(xd);
   } else {
-    vp9_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
-                                       xd->dst.u_buffer, xd->dst.v_buffer,
-                                       xd->dst.y_stride, xd->dst.uv_stride,
-                                       mb_row, mb_col);
+    vp9_build_inter32x32_predictors_sb(xd, mb_row, mb_col);
   }
 
   /* dequantization and idct */

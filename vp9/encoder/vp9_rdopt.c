@@ -3725,13 +3725,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         unsigned int sse, var;
         int tmp_rate_y, tmp_rate_u, tmp_rate_v;
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
-        vp9_build_inter64x64_predictors_sb(xd,
-                                           xd->dst.y_buffer,
-                                           xd->dst.u_buffer,
-                                           xd->dst.v_buffer,
-                                           xd->dst.y_stride,
-                                           xd->dst.uv_stride,
-                                           mb_row, mb_col);
+        vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
         var = vp9_variance64x64(*(b->base_src), b->src_stride,
                                 xd->dst.y_buffer, xd->dst.y_stride, &sse);
         // Note our transform coeffs are 8 times an orthogonal transform.
@@ -3810,13 +3804,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         unsigned int sse, var;
         int tmp_rate_y, tmp_rate_u, tmp_rate_v;
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
-        vp9_build_inter32x32_predictors_sb(xd,
-                                           xd->dst.y_buffer,
-                                           xd->dst.u_buffer,
-                                           xd->dst.v_buffer,
-                                           xd->dst.y_stride,
-                                           xd->dst.uv_stride,
-                                           mb_row, mb_col);
+        vp9_build_inter32x32_predictors_sb(xd, mb_row, mb_col);
         var = vp9_variance32x32(*(b->base_src), b->src_stride,
                                 xd->dst.y_buffer, xd->dst.y_stride, &sse);
         // Note our transform coeffs are 8 times an orthogonal transform.
@@ -3983,21 +3971,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear, 6-tap) is indicated at the frame level
     if (block_size == BLOCK_64X64) {
-      vp9_build_inter64x64_predictors_sb(xd,
-                                         xd->dst.y_buffer,
-                                         xd->dst.u_buffer,
-                                         xd->dst.v_buffer,
-                                         xd->dst.y_stride,
-                                         xd->dst.uv_stride,
-                                         mb_row, mb_col);
+      vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
     } else if (block_size == BLOCK_32X32) {
-      vp9_build_inter32x32_predictors_sb(xd,
-                                         xd->dst.y_buffer,
-                                         xd->dst.u_buffer,
-                                         xd->dst.v_buffer,
-                                         xd->dst.y_stride,
-                                         xd->dst.uv_stride,
-                                         mb_row, mb_col);
+      vp9_build_inter32x32_predictors_sb(xd, mb_row, mb_col);
     } else {
       vp9_build_inter16x16_predictors_mb(xd, xd->predictor,
                                          xd->predictor + 256,

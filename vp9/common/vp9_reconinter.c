@@ -1340,22 +1340,19 @@ void vp9_build_inter32x32_predictors_sbuv(MACROBLOCKD *x,
 }
 #endif
 
-void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
-                                        uint8_t *dst_y,
-                                        uint8_t *dst_u,
-                                        uint8_t *dst_v,
-                                        int dst_ystride,
-                                        int dst_uvstride,
-                                        int mb_row,
-                                        int mb_col) {
-  vp9_build_inter32x32_predictors_sby(x, dst_y, dst_ystride,
-                                      mb_row, mb_col);
-  vp9_build_inter32x32_predictors_sbuv(x, dst_u, dst_v, dst_uvstride,
-                                      mb_row, mb_col);
+void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *mb,
+                                        int mb_row, int mb_col) {
+  uint8_t *const y = mb->dst.y_buffer;
+  uint8_t *const u = mb->dst.u_buffer;
+  uint8_t *const v = mb->dst.v_buffer;
+  const int y_stride = mb->dst.y_stride;
+  const int uv_stride = mb->dst.uv_stride;
+
+  vp9_build_inter32x32_predictors_sby(mb, y, y_stride, mb_row, mb_col);
+  vp9_build_inter32x32_predictors_sbuv(mb, u, v, uv_stride, mb_row, mb_col);
 #if CONFIG_COMP_INTERINTRA_PRED
-  if (x->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
-    vp9_build_interintra_32x32_predictors_sb(
-        x, dst_y, dst_u, dst_v, dst_ystride, dst_uvstride);
+  if (mb->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+    vp9_build_interintra_32x32_predictors_sb(mb, y, u, v, y_stride, uv_stride);
   }
 #endif
 }
@@ -1539,22 +1536,19 @@ void vp9_build_inter64x64_predictors_sbuv(MACROBLOCKD *x,
   }
 }
 
-void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
-                                        uint8_t *dst_y,
-                                        uint8_t *dst_u,
-                                        uint8_t *dst_v,
-                                        int dst_ystride,
-                                        int dst_uvstride,
-                                        int mb_row,
-                                        int mb_col) {
-  vp9_build_inter64x64_predictors_sby(x, dst_y, dst_ystride,
-                                      mb_row, mb_col);
-  vp9_build_inter64x64_predictors_sbuv(x, dst_u, dst_v, dst_uvstride,
-                                       mb_row, mb_col);
+void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *mb,
+                                        int mb_row, int mb_col) {
+  uint8_t *const y = mb->dst.y_buffer;
+  uint8_t *const u = mb->dst.u_buffer;
+  uint8_t *const v = mb->dst.v_buffer;
+  const int y_stride = mb->dst.y_stride;
+  const int uv_stride = mb->dst.uv_stride;
+
+  vp9_build_inter64x64_predictors_sby(mb, y, y_stride, mb_row, mb_col);
+  vp9_build_inter64x64_predictors_sbuv(mb, u, v, uv_stride, mb_row, mb_col);
 #if CONFIG_COMP_INTERINTRA_PRED
-  if (x->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
-    vp9_build_interintra_64x64_predictors_sb(x, dst_y, dst_u, dst_v,
-                                             dst_ystride, dst_uvstride);
+  if (mb->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
+    vp9_build_interintra_64x64_predictors_sb(mb, y, u, v, y_stride, uv_stride);
   }
 #endif
 }

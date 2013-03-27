@@ -2408,10 +2408,7 @@ static void encode_superblock32(VP9_COMP *cpi, TOKENEXTRA **t,
                        &xd->scale_factor[1], &xd->scale_factor_uv[1]);
     }
 
-    vp9_build_inter32x32_predictors_sb(xd, xd->dst.y_buffer,
-                                       xd->dst.u_buffer, xd->dst.v_buffer,
-                                       xd->dst.y_stride, xd->dst.uv_stride,
-                                       mb_row, mb_col);
+    vp9_build_inter32x32_predictors_sb(xd, mb_row, mb_col);
   }
 
   if (!x->skip) {
@@ -2628,10 +2625,7 @@ static void encode_superblock64(VP9_COMP *cpi, TOKENEXTRA **t,
                        &xd->scale_factor[1], &xd->scale_factor_uv[1]);
     }
 
-    vp9_build_inter64x64_predictors_sb(xd, xd->dst.y_buffer,
-                                       xd->dst.u_buffer, xd->dst.v_buffer,
-                                       xd->dst.y_stride, xd->dst.uv_stride,
-                                       mb_row, mb_col);
+    vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
   }
 
   if (!x->skip) {
