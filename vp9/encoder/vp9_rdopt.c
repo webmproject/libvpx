@@ -565,12 +565,12 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       nzc += (v != 0);
 #endif
       token_cache[c] = t;
-      cost += token_costs[get_coef_band(tx_size, c)][pt][t];
+      cost += token_costs[get_coef_band(scan, tx_size, c)][pt][t];
       cost += vp9_dct_value_cost_ptr[v];
 #if !CONFIG_CODE_NONZEROCOUNT
       if (!c || token_cache[c - 1])
         cost += vp9_cost_bit(coef_probs[type][ref]
-                                       [get_coef_band(tx_size, c)]
+                                       [get_coef_band(scan, tx_size, c)]
                                        [pt][0], 1);
 #endif
       pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
@@ -579,8 +579,9 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
     cost += nzc_cost[nzc];
 #else
     if (c < seg_eob)
-      cost += mb->token_costs[tx_size][type][ref][get_coef_band(tx_size, c)]
-          [pt][DCT_EOB_TOKEN];
+      cost += mb->token_costs[tx_size][type][ref]
+                             [get_coef_band(scan, tx_size, c)]
+                             [pt][DCT_EOB_TOKEN];
 #endif
   }
 

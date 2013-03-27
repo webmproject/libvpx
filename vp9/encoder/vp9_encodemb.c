@@ -662,7 +662,7 @@ static void optimize_b(VP9_COMMON *const cm,
       t0 = (vp9_dct_value_tokens_ptr + x)->Token;
       /* Consider both possible successor states. */
       if (next < default_eob) {
-        band = get_coef_band(tx_size, i + 1);
+        band = get_coef_band(scan, tx_size, i + 1);
         pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
                                        pad, default_eob);
         rate0 +=
@@ -721,7 +721,7 @@ static void optimize_b(VP9_COMMON *const cm,
         t0 = t1 = (vp9_dct_value_tokens_ptr + x)->Token;
       }
       if (next < default_eob) {
-        band = get_coef_band(tx_size, i + 1);
+        band = get_coef_band(scan, tx_size, i + 1);
         if (t0 != DCT_EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
                                          pad, default_eob);
@@ -763,7 +763,7 @@ static void optimize_b(VP9_COMMON *const cm,
      *  add a new trellis node, but we do need to update the costs.
      */
     else {
-      band = get_coef_band(tx_size, i + 1);
+      band = get_coef_band(scan, tx_size, i + 1);
       t0 = tokens[next][0].token;
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
@@ -782,7 +782,7 @@ static void optimize_b(VP9_COMMON *const cm,
   }
 
   /* Now pick the best path through the whole trellis. */
-  band = get_coef_band(tx_size, i + 1);
+  band = get_coef_band(scan, tx_size, i + 1);
   VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   rate0 = tokens[next][0].rate;
   rate1 = tokens[next][1].rate;

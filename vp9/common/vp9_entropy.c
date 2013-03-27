@@ -42,15 +42,21 @@ DECLARE_ALIGNED(16, const uint8_t, vp9_norm[256]) = {
 };
 
 // Unified coefficient band structure used by all block sizes
-DECLARE_ALIGNED(16, const int, vp9_coef_bands[32]) = {
-  0, 1, 2, 3, 3, 3, 4, 4,
-  4, 4, 4, 4, 4, 4, 4, 5,
+DECLARE_ALIGNED(16, const int, vp9_coef_bands8x8[64]) = {
+  0, 1, 2, 3, 4, 4, 5, 5,
+  1, 2, 3, 4, 4, 5, 5, 5,
+  2, 3, 4, 4, 5, 5, 5, 5,
+  3, 4, 4, 5, 5, 5, 5, 5,
+  4, 4, 5, 5, 5, 5, 5, 5,
+  4, 5, 5, 5, 5, 5, 5, 5,
   5, 5, 5, 5, 5, 5, 5, 5,
   5, 5, 5, 5, 5, 5, 5, 5
 };
 DECLARE_ALIGNED(16, const int, vp9_coef_bands4x4[16]) = {
-  0, 1, 2, 3, 3, 3, 4, 4,
-  4, 4, 5, 5, 5, 5, 5, 5
+  0, 1, 2, 3,
+  1, 2, 3, 4,
+  2, 3, 4, 5,
+  3, 4, 5, 5
 };
 
 DECLARE_ALIGNED(16, const uint8_t, vp9_pt_energy_class[MAX_ENTROPY_TOKENS]) = {

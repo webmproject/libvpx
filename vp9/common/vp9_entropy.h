@@ -126,17 +126,20 @@ static INLINE void vp9_reset_sb64_tokens_context(MACROBLOCKD* const xd) {
   vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 4);
 }
 
-extern const int vp9_coef_bands[32];
+extern const int vp9_coef_bands8x8[64];
 extern const int vp9_coef_bands4x4[16];
 
-static int get_coef_band(TX_SIZE tx_size, int coef_index) {
+static int get_coef_band(const int *scan, TX_SIZE tx_size, int coef_index) {
   if (tx_size == TX_4X4) {
-    return vp9_coef_bands4x4[coef_index];
+    return vp9_coef_bands4x4[scan[coef_index]];
   } else {
-    if (coef_index < 32)
-      return vp9_coef_bands[coef_index];
-    else
+    const int pos = scan[coef_index];
+    const int sz = 1 << (2 + tx_size);
+    const int x = pos & (sz - 1), y = pos >> (2 + tx_size);
+    if (x >= 8 || y >= 8)
       return 5;
+    else
+      return vp9_coef_bands8x8[y * 8 + x];
   }
 }
 extern int vp9_get_coef_context(const int *scan, const int *neighbors,
