@@ -334,12 +334,6 @@ extern "C" {
      */
     vpx_codec_er_flags_t   g_error_resilient;
 
-    /*!\brief Enable frame parallel decoding mode
-     * This value should be 1 to encode in a way that enables frame parallel
-     * decoding. Otherwise make it 0.
-     */
-    unsigned int           g_frame_parallel_decoding;
-
 
     /*!\brief Multi-pass Encoding Mode
      *

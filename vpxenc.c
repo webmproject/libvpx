@@ -1023,10 +1023,6 @@ static const arg_def_t timebase         = ARG_DEF(NULL, "timebase", 1,
                                                   "Output timestamp precision (fractional seconds)");
 static const arg_def_t error_resilient  = ARG_DEF(NULL, "error-resilient", 1,
                                                   "Enable error resiliency features");
-#if CONFIG_VP9_ENCODER
-static const arg_def_t frame_parallel_decoding  = ARG_DEF(
-    NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
-#endif
 static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
                                                   "Max number of frames to lag");
 
@@ -1034,9 +1030,6 @@ static const arg_def_t *global_args[] = {
   &use_yv12, &use_i420, &usage, &threads, &profile,
   &width, &height, &stereo_mode, &timebase, &framerate,
   &error_resilient,
-#if CONFIG_VP9_ENCODER
-  &frame_parallel_decoding,
-#endif
   &lag_in_frames, NULL
 };
 
@@ -1136,6 +1129,10 @@ static const arg_def_t cq_level = ARG_DEF(NULL, "cq-level", 1,
 static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
                                                     "Max I-frame bitrate (pct)");
 static const arg_def_t lossless = ARG_DEF(NULL, "lossless", 1, "Lossless mode");
+#if CONFIG_VP9_ENCODER
+static const arg_def_t frame_parallel_decoding  = ARG_DEF(
+    NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
+#endif
 
 #if CONFIG_VP8_ENCODER
 static const arg_def_t *vp8_args[] = {
@@ -1159,6 +1156,7 @@ static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
   &tune_ssim, &cq_level, &max_intra_rate_pct, &lossless,
+  &frame_parallel_decoding,
   NULL
 };
 static const int vp9_arg_ctrl_map[] = {
@@ -1167,7 +1165,7 @@ static const int vp9_arg_ctrl_map[] = {
   VP9E_SET_TILE_COLUMNS, VP9E_SET_TILE_ROWS,
   VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
-  VP9E_SET_LOSSLESS,
+  VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING,
   0
 };
 #endif
@@ -1936,10 +1934,6 @@ static int parse_stream_params(struct global_config *global,
       validate_positive_rational(arg.name, &config->cfg.g_timebase);
     } else if (arg_match(&arg, &error_resilient, argi))
       config->cfg.g_error_resilient = arg_parse_uint(&arg);
-#if CONFIG_VP9_ENCODER
-    else if (arg_match(&arg, &frame_parallel_decoding, argi))
-      config->cfg.g_frame_parallel_decoding = arg_parse_uint(&arg);
-#endif
     else if (arg_match(&arg, &lag_in_frames, argi))
       config->cfg.g_lag_in_frames = arg_parse_uint(&arg);
     else if (arg_match(&arg, &dropframe_thresh, argi))
@@ -2124,9 +2118,6 @@ static void show_stream_config(struct stream_state  *stream,
   SHOW(g_timebase.num);
   SHOW(g_timebase.den);
   SHOW(g_error_resilient);
-#if CONFIG_VP9_ENCODER
-  SHOW(g_frame_parallel_decoding);
-#endif
   SHOW(g_pass);
   SHOW(g_lag_in_frames);
   SHOW(rc_dropframe_thresh);
