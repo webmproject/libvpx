@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAW3//9S4\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-27T18:21:36Z",
+      "side": 1,
+      "message": "Ok, I minimized the amount of differences, let\u0027s format them later.",
+      "parentUuid": "AAAAW3//9hg\u003d",
+      "revId": "b92495791b610668776d772ec25eee4a8695c136",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAW3//954\u003d",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-03-27T16:20:31Z",
       "side": 1,
       "message": "move this cast to the get_signed function (ie, fix its value_to_sign argument and return type to be int16_t)",
+      "revId": "b92495791b610668776d772ec25eee4a8695c136",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAW3//9XQ\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-27T18:21:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAW3//954\u003d",
       "revId": "b92495791b610668776d772ec25eee4a8695c136",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAW3//9XM\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-27T18:21:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAW3//9hY\u003d",
+      "revId": "b92495791b610668776d772ec25eee4a8695c136",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAW3//9hU\u003d",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2013-03-27T16:20:31Z",
       "side": 1,
       "message": "unnecessary cast",
+      "revId": "b92495791b610668776d772ec25eee4a8695c136",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAW3//9XA\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-27T18:21:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAW3//9hU\u003d",
       "revId": "b92495791b610668776d772ec25eee4a8695c136",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAW3//9UY\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-27T18:21:36Z",
+      "side": 1,
+      "message": "I combined decode_sb32 and decode_sb64 into one function decode_sb. We can\u0027t use separate function for inner loops because of \"xd-\u003eqcoeff + i * 16\" expression (it is different in other places).",
+      "parentUuid": "AAAAW3//950\u003d",
+      "revId": "b92495791b610668776d772ec25eee4a8695c136",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAW3//95w\u003d",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2013-03-27T16:20:31Z",
       "side": 1,
       "message": "what\u0027s different about this case that doesn\u0027t fit into the decode_sb32 pattern?",
+      "revId": "b92495791b610668776d772ec25eee4a8695c136",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAW3//9Ug\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-03-27T18:21:36Z",
+      "side": 1,
+      "message": "For some reason here get_eob function is called twice with different arguments for luma and chroma. It also seems strage to me.",
+      "parentUuid": "AAAAW3//95w\u003d",
       "revId": "b92495791b610668776d772ec25eee4a8695c136",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
