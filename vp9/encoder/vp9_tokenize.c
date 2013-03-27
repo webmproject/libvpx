@@ -181,15 +181,29 @@ static void tokenize_b(VP9_COMP *cpi,
       probs = cpi->common.fc.coef_probs_4x4;
       break;
     }
-    case TX_8X8:
+    case TX_8X8: {
+      const int sz = 3 + sb_type, x = ib & ((1 << sz) - 1), y = ib - x;
+      const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
+                              get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
       a_ec = (a[0] + a[1]) != 0;
       l_ec = (l[0] + l[1]) != 0;
       seg_eob = 64;
       scan = vp9_default_zig_zag1d_8x8;
+      if (tx_type != DCT_DCT) {
+        if (tx_type == ADST_DCT) {
+          scan = vp9_row_scan_8x8;
+        } else if (tx_type == DCT_ADST) {
+          scan = vp9_col_scan_8x8;
+        }
+      }
       counts = cpi->coef_counts_8x8;
       probs = cpi->common.fc.coef_probs_8x8;
       break;
-    case TX_16X16:
+    }
+    case TX_16X16: {
+      const int sz = 4 + sb_type, x = ib & ((1 << sz) - 1), y = ib - x;
+      const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
+                              get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3]) != 0;
         l_ec = (l[0] + l[1] + l[2] + l[3]) != 0;
@@ -199,9 +213,17 @@ static void tokenize_b(VP9_COMP *cpi,
       }
       seg_eob = 256;
       scan = vp9_default_zig_zag1d_16x16;
+      if (tx_type != DCT_DCT) {
+        if (tx_type == ADST_DCT) {
+          scan = vp9_row_scan_16x16;
+        } else if (tx_type == DCT_ADST) {
+          scan = vp9_col_scan_16x16;
+        }
+      }
       counts = cpi->coef_counts_16x16;
       probs = cpi->common.fc.coef_probs_16x16;
       break;
+    }
     case TX_32X32:
       if (type != PLANE_TYPE_UV) {
         a_ec = (a[0] + a[1] + a[2] + a[3] +
