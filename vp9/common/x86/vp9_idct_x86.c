@@ -298,129 +298,110 @@ void vp9_idct4_1d_sse2(int16_t *input, int16_t *output) {
     in3 = _mm_unpackhi_epi32(tr0_2, tr0_3);  /* i7 i6 */  \
   }
 
-#define IDCT8x8_1D                                             \
-  /* Stage1 */                                                 \
-  {                                                            \
-    const __m128i lo_17 = _mm_unpacklo_epi16(in1, in7);        \
-    const __m128i hi_17 = _mm_unpackhi_epi16(in1, in7);        \
-    const __m128i lo_35 = _mm_unpacklo_epi16(in3, in5);        \
-    const __m128i hi_35 = _mm_unpackhi_epi16(in3, in5);        \
-                                                               \
-    tmp0 = _mm_madd_epi16(lo_17, stg1_0);                      \
-    tmp1 = _mm_madd_epi16(hi_17, stg1_0);                      \
-    tmp2 = _mm_madd_epi16(lo_17, stg1_1);                      \
-    tmp3 = _mm_madd_epi16(hi_17, stg1_1);                      \
-    tmp4 = _mm_madd_epi16(lo_35, stg1_2);                      \
-    tmp5 = _mm_madd_epi16(hi_35, stg1_2);                      \
-    tmp6 = _mm_madd_epi16(lo_35, stg1_3);                      \
-    tmp7 = _mm_madd_epi16(hi_35, stg1_3);                      \
-                                                               \
-    tmp0 = _mm_add_epi32(tmp0, rounding);                      \
-    tmp1 = _mm_add_epi32(tmp1, rounding);                      \
-    tmp2 = _mm_add_epi32(tmp2, rounding);                      \
-    tmp3 = _mm_add_epi32(tmp3, rounding);                      \
-    tmp4 = _mm_add_epi32(tmp4, rounding);                      \
-    tmp5 = _mm_add_epi32(tmp5, rounding);                      \
-    tmp6 = _mm_add_epi32(tmp6, rounding);                      \
-    tmp7 = _mm_add_epi32(tmp7, rounding);                      \
-                                                               \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);               \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);               \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);               \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);               \
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS);               \
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS);               \
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS);               \
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS);               \
-                                                               \
-    stp1_4 = _mm_packs_epi32(tmp0, tmp1);                      \
-    stp1_7 = _mm_packs_epi32(tmp2, tmp3);                      \
-    stp1_5 = _mm_packs_epi32(tmp4, tmp5);                      \
-    stp1_6 = _mm_packs_epi32(tmp6, tmp7);                      \
-  }                                                            \
-                                                               \
-  /* Stage2 */                                                 \
-  {                                                            \
-    const __m128i lo_04 = _mm_unpacklo_epi16(in0, in4);        \
-    const __m128i hi_04 = _mm_unpackhi_epi16(in0, in4);        \
-    const __m128i lo_26 = _mm_unpacklo_epi16(in2, in6);        \
-    const __m128i hi_26 = _mm_unpackhi_epi16(in2, in6);        \
-                                                               \
-    tmp0 = _mm_madd_epi16(lo_04, stg2_0);                      \
-    tmp1 = _mm_madd_epi16(hi_04, stg2_0);                      \
-    tmp2 = _mm_madd_epi16(lo_04, stg2_1);                      \
-    tmp3 = _mm_madd_epi16(hi_04, stg2_1);                      \
-    tmp4 = _mm_madd_epi16(lo_26, stg2_2);                      \
-    tmp5 = _mm_madd_epi16(hi_26, stg2_2);                      \
-    tmp6 = _mm_madd_epi16(lo_26, stg2_3);                      \
-    tmp7 = _mm_madd_epi16(hi_26, stg2_3);                      \
-                                                               \
-    tmp0 = _mm_add_epi32(tmp0, rounding);                      \
-    tmp1 = _mm_add_epi32(tmp1, rounding);                      \
-    tmp2 = _mm_add_epi32(tmp2, rounding);                      \
-    tmp3 = _mm_add_epi32(tmp3, rounding);                      \
-    tmp4 = _mm_add_epi32(tmp4, rounding);                      \
-    tmp5 = _mm_add_epi32(tmp5, rounding);                      \
-    tmp6 = _mm_add_epi32(tmp6, rounding);                      \
-    tmp7 = _mm_add_epi32(tmp7, rounding);                      \
-                                                               \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);               \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);               \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);               \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);               \
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS);               \
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS);               \
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS);               \
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS);               \
-                                                               \
-    stp2_0 = _mm_packs_epi32(tmp0, tmp1);                      \
-    stp2_1 = _mm_packs_epi32(tmp2, tmp3);                      \
-    stp2_2 = _mm_packs_epi32(tmp4, tmp5);                      \
-    stp2_3 = _mm_packs_epi32(tmp6, tmp7);                      \
-                                                               \
-    stp2_4 = _mm_adds_epi16(stp1_4, stp1_5);                   \
-    stp2_5 = _mm_subs_epi16(stp1_4, stp1_5);                   \
-    stp2_6 = _mm_subs_epi16(stp1_7, stp1_6);                   \
-    stp2_7 = _mm_adds_epi16(stp1_7, stp1_6);                   \
-  }                                                            \
-                                                               \
-  /* Stage3 */                                                 \
-  {                                                            \
-    const __m128i lo_56 = _mm_unpacklo_epi16(stp2_6, stp2_5);  \
-    const __m128i hi_56 = _mm_unpackhi_epi16(stp2_6, stp2_5);  \
-                                                               \
-    stp1_0 = _mm_adds_epi16(stp2_0, stp2_3);                   \
-    stp1_1 = _mm_adds_epi16(stp2_1, stp2_2);                   \
-    stp1_2 = _mm_subs_epi16(stp2_1, stp2_2);                   \
-    stp1_3 = _mm_subs_epi16(stp2_0, stp2_3);                   \
-                                                               \
-    tmp0 = _mm_madd_epi16(lo_56, stg2_1);                      \
-    tmp1 = _mm_madd_epi16(hi_56, stg2_1);                      \
-    tmp2 = _mm_madd_epi16(lo_56, stg2_0);                      \
-    tmp3 = _mm_madd_epi16(hi_56, stg2_0);                      \
-                                                               \
-    tmp0 = _mm_add_epi32(tmp0, rounding);                      \
-    tmp1 = _mm_add_epi32(tmp1, rounding);                      \
-    tmp2 = _mm_add_epi32(tmp2, rounding);                      \
-    tmp3 = _mm_add_epi32(tmp3, rounding);                      \
-                                                               \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);               \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);               \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);               \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);               \
-                                                               \
-    stp1_5 = _mm_packs_epi32(tmp0, tmp1);                      \
-    stp1_6 = _mm_packs_epi32(tmp2, tmp3);                      \
-  }                                                            \
-                                                               \
-  /* Stage4  */                                                \
-  in0 = _mm_adds_epi16(stp1_0, stp2_7);                        \
-  in1 = _mm_adds_epi16(stp1_1, stp1_6);                        \
-  in2 = _mm_adds_epi16(stp1_2, stp1_5);                        \
-  in3 = _mm_adds_epi16(stp1_3, stp2_4);                        \
-  in4 = _mm_subs_epi16(stp1_3, stp2_4);                        \
-  in5 = _mm_subs_epi16(stp1_2, stp1_5);                        \
-  in6 = _mm_subs_epi16(stp1_1, stp1_6);                        \
+// Define Macro for multiplying elements by constants and adding them together.
+#define MULTIPLICATION_AND_ADD(lo_0, hi_0, lo_1, hi_1, \
+                               cst0, cst1, cst2, cst3, res0, res1, res2, res3) \
+  {   \
+      tmp0 = _mm_madd_epi16(lo_0, cst0); \
+      tmp1 = _mm_madd_epi16(hi_0, cst0); \
+      tmp2 = _mm_madd_epi16(lo_0, cst1); \
+      tmp3 = _mm_madd_epi16(hi_0, cst1); \
+      tmp4 = _mm_madd_epi16(lo_1, cst2); \
+      tmp5 = _mm_madd_epi16(hi_1, cst2); \
+      tmp6 = _mm_madd_epi16(lo_1, cst3); \
+      tmp7 = _mm_madd_epi16(hi_1, cst3); \
+      \
+      tmp0 = _mm_add_epi32(tmp0, rounding); \
+      tmp1 = _mm_add_epi32(tmp1, rounding); \
+      tmp2 = _mm_add_epi32(tmp2, rounding); \
+      tmp3 = _mm_add_epi32(tmp3, rounding); \
+      tmp4 = _mm_add_epi32(tmp4, rounding); \
+      tmp5 = _mm_add_epi32(tmp5, rounding); \
+      tmp6 = _mm_add_epi32(tmp6, rounding); \
+      tmp7 = _mm_add_epi32(tmp7, rounding); \
+      \
+      tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
+      tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
+      tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
+      tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
+      tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS); \
+      tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS); \
+      tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS); \
+      tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS); \
+      \
+      res0 = _mm_packs_epi32(tmp0, tmp1); \
+      res1 = _mm_packs_epi32(tmp2, tmp3); \
+      res2 = _mm_packs_epi32(tmp4, tmp5); \
+      res3 = _mm_packs_epi32(tmp6, tmp7); \
+  }
+
+#define IDCT8x8_1D  \
+  /* Stage1 */      \
+  { \
+    const __m128i lo_17 = _mm_unpacklo_epi16(in1, in7); \
+    const __m128i hi_17 = _mm_unpackhi_epi16(in1, in7); \
+    const __m128i lo_35 = _mm_unpacklo_epi16(in3, in5); \
+    const __m128i hi_35 = _mm_unpackhi_epi16(in3, in5); \
+    \
+    MULTIPLICATION_AND_ADD(lo_17, hi_17, lo_35, hi_35, stg1_0, \
+                          stg1_1, stg1_2, stg1_3, stp1_4,      \
+                          stp1_7, stp1_5, stp1_6)              \
+  } \
+    \
+  /* Stage2 */ \
+  { \
+    const __m128i lo_04 = _mm_unpacklo_epi16(in0, in4); \
+    const __m128i hi_04 = _mm_unpackhi_epi16(in0, in4); \
+    const __m128i lo_26 = _mm_unpacklo_epi16(in2, in6); \
+    const __m128i hi_26 = _mm_unpackhi_epi16(in2, in6); \
+    \
+    MULTIPLICATION_AND_ADD(lo_04, hi_04, lo_26, hi_26, stg2_0, \
+                           stg2_1, stg2_2, stg2_3, stp2_0,     \
+                           stp2_1, stp2_2, stp2_3)             \
+    \
+    stp2_4 = _mm_adds_epi16(stp1_4, stp1_5); \
+    stp2_5 = _mm_subs_epi16(stp1_4, stp1_5); \
+    stp2_6 = _mm_subs_epi16(stp1_7, stp1_6); \
+    stp2_7 = _mm_adds_epi16(stp1_7, stp1_6); \
+  } \
+    \
+  /* Stage3 */ \
+  { \
+    const __m128i lo_56 = _mm_unpacklo_epi16(stp2_6, stp2_5); \
+    const __m128i hi_56 = _mm_unpackhi_epi16(stp2_6, stp2_5); \
+    \
+    stp1_0 = _mm_adds_epi16(stp2_0, stp2_3); \
+    stp1_1 = _mm_adds_epi16(stp2_1, stp2_2); \
+    stp1_2 = _mm_subs_epi16(stp2_1, stp2_2); \
+    stp1_3 = _mm_subs_epi16(stp2_0, stp2_3); \
+    \
+    tmp0 = _mm_madd_epi16(lo_56, stg2_1); \
+    tmp1 = _mm_madd_epi16(hi_56, stg2_1); \
+    tmp2 = _mm_madd_epi16(lo_56, stg2_0); \
+    tmp3 = _mm_madd_epi16(hi_56, stg2_0); \
+    \
+    tmp0 = _mm_add_epi32(tmp0, rounding); \
+    tmp1 = _mm_add_epi32(tmp1, rounding); \
+    tmp2 = _mm_add_epi32(tmp2, rounding); \
+    tmp3 = _mm_add_epi32(tmp3, rounding); \
+    \
+    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
+    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
+    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
+    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
+    \
+    stp1_5 = _mm_packs_epi32(tmp0, tmp1); \
+    stp1_6 = _mm_packs_epi32(tmp2, tmp3); \
+  } \
+  \
+  /* Stage4  */ \
+  in0 = _mm_adds_epi16(stp1_0, stp2_7); \
+  in1 = _mm_adds_epi16(stp1_1, stp1_6); \
+  in2 = _mm_adds_epi16(stp1_2, stp1_5); \
+  in3 = _mm_adds_epi16(stp1_3, stp2_4); \
+  in4 = _mm_subs_epi16(stp1_3, stp2_4); \
+  in5 = _mm_subs_epi16(stp1_2, stp1_5); \
+  in6 = _mm_subs_epi16(stp1_1, stp1_6); \
   in7 = _mm_subs_epi16(stp1_0, stp2_7);
 
 void vp9_short_idct8x8_sse2(int16_t *input, int16_t *output, int pitch) {
@@ -643,9 +624,9 @@ void vp9_short_idct10_8x8_sse2(int16_t *input, int16_t *output, int pitch) {
   _mm_store_si128((__m128i *)(output + half_pitch * 7), in7);
 }
 
-#define IDCT16x16_1D                                       \
-  /* Stage2 */                                             \
-  {                                                        \
+#define IDCT16x16_1D \
+  /* Stage2 */ \
+  { \
     const __m128i lo_1_15 = _mm_unpacklo_epi16(in1, in15); \
     const __m128i hi_1_15 = _mm_unpackhi_epi16(in1, in15); \
     const __m128i lo_9_7 = _mm_unpacklo_epi16(in9, in7);   \
@@ -654,250 +635,110 @@ void vp9_short_idct10_8x8_sse2(int16_t *input, int16_t *output, int pitch) {
     const __m128i hi_5_11 = _mm_unpackhi_epi16(in5, in11); \
     const __m128i lo_13_3 = _mm_unpacklo_epi16(in13, in3); \
     const __m128i hi_13_3 = _mm_unpackhi_epi16(in13, in3); \
-                                            \
-    tmp0 = _mm_madd_epi16(lo_1_15, stg2_0); \
-    tmp1 = _mm_madd_epi16(hi_1_15, stg2_0); \
-    tmp2 = _mm_madd_epi16(lo_1_15, stg2_1); \
-    tmp3 = _mm_madd_epi16(hi_1_15, stg2_1); \
-    tmp4 = _mm_madd_epi16(lo_9_7, stg2_2);  \
-    tmp5 = _mm_madd_epi16(hi_9_7, stg2_2);  \
-    tmp6 = _mm_madd_epi16(lo_9_7, stg2_3);  \
-    tmp7 = _mm_madd_epi16(hi_9_7, stg2_3);  \
-                                          \
-    tmp0 = _mm_add_epi32(tmp0, rounding); \
-    tmp1 = _mm_add_epi32(tmp1, rounding); \
-    tmp2 = _mm_add_epi32(tmp2, rounding); \
-    tmp3 = _mm_add_epi32(tmp3, rounding); \
-    tmp4 = _mm_add_epi32(tmp4, rounding); \
-    tmp5 = _mm_add_epi32(tmp5, rounding); \
-    tmp6 = _mm_add_epi32(tmp6, rounding); \
-    tmp7 = _mm_add_epi32(tmp7, rounding); \
-                                          \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS); \
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS); \
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS); \
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS); \
-                                           \
-    stp2_8 = _mm_packs_epi32(tmp0, tmp1);  \
-    stp2_15 = _mm_packs_epi32(tmp2, tmp3); \
-    stp2_9 = _mm_packs_epi32(tmp4, tmp5);  \
-    stp2_14 = _mm_packs_epi32(tmp6, tmp7); \
-                                           \
-    tmp0 = _mm_madd_epi16(lo_5_11, stg2_4); \
-    tmp1 = _mm_madd_epi16(hi_5_11, stg2_4); \
-    tmp2 = _mm_madd_epi16(lo_5_11, stg2_5); \
-    tmp3 = _mm_madd_epi16(hi_5_11, stg2_5); \
-    tmp4 = _mm_madd_epi16(lo_13_3, stg2_6); \
-    tmp5 = _mm_madd_epi16(hi_13_3, stg2_6); \
-    tmp6 = _mm_madd_epi16(lo_13_3, stg2_7); \
-    tmp7 = _mm_madd_epi16(hi_13_3, stg2_7); \
-                                          \
-    tmp0 = _mm_add_epi32(tmp0, rounding); \
-    tmp1 = _mm_add_epi32(tmp1, rounding); \
-    tmp2 = _mm_add_epi32(tmp2, rounding); \
-    tmp3 = _mm_add_epi32(tmp3, rounding); \
-    tmp4 = _mm_add_epi32(tmp4, rounding); \
-    tmp5 = _mm_add_epi32(tmp5, rounding); \
-    tmp6 = _mm_add_epi32(tmp6, rounding); \
-    tmp7 = _mm_add_epi32(tmp7, rounding); \
-                                          \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS); \
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS); \
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS); \
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS); \
-                                           \
-    stp2_10 = _mm_packs_epi32(tmp0, tmp1); \
-    stp2_13 = _mm_packs_epi32(tmp2, tmp3); \
-    stp2_11 = _mm_packs_epi32(tmp4, tmp5); \
-    stp2_12 = _mm_packs_epi32(tmp6, tmp7); \
-  }                                        \
-                                           \
-  /* Stage3 */                             \
-  {                                        \
+    \
+    MULTIPLICATION_AND_ADD(lo_1_15, hi_1_15, lo_9_7, hi_9_7, \
+                           stg2_0, stg2_1, stg2_2, stg2_3, \
+                           stp2_8, stp2_15, stp2_9, stp2_14) \
+    \
+    MULTIPLICATION_AND_ADD(lo_5_11, hi_5_11, lo_13_3, hi_13_3, \
+                           stg2_4, stg2_5, stg2_6, stg2_7, \
+                           stp2_10, stp2_13, stp2_11, stp2_12) \
+  } \
+    \
+  /* Stage3 */ \
+  { \
     const __m128i lo_2_14 = _mm_unpacklo_epi16(in2, in14); \
     const __m128i hi_2_14 = _mm_unpackhi_epi16(in2, in14); \
     const __m128i lo_10_6 = _mm_unpacklo_epi16(in10, in6); \
     const __m128i hi_10_6 = _mm_unpackhi_epi16(in10, in6); \
-                                            \
-    tmp0 = _mm_madd_epi16(lo_2_14, stg3_0); \
-    tmp1 = _mm_madd_epi16(hi_2_14, stg3_0); \
-    tmp2 = _mm_madd_epi16(lo_2_14, stg3_1); \
-    tmp3 = _mm_madd_epi16(hi_2_14, stg3_1); \
-    tmp4 = _mm_madd_epi16(lo_10_6, stg3_2); \
-    tmp5 = _mm_madd_epi16(hi_10_6, stg3_2); \
-    tmp6 = _mm_madd_epi16(lo_10_6, stg3_3); \
-    tmp7 = _mm_madd_epi16(hi_10_6, stg3_3); \
-                                          \
-    tmp0 = _mm_add_epi32(tmp0, rounding); \
-    tmp1 = _mm_add_epi32(tmp1, rounding); \
-    tmp2 = _mm_add_epi32(tmp2, rounding); \
-    tmp3 = _mm_add_epi32(tmp3, rounding); \
-    tmp4 = _mm_add_epi32(tmp4, rounding); \
-    tmp5 = _mm_add_epi32(tmp5, rounding); \
-    tmp6 = _mm_add_epi32(tmp6, rounding); \
-    tmp7 = _mm_add_epi32(tmp7, rounding); \
-                                          \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS); \
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS); \
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS); \
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS); \
-                                          \
-    stp1_4 = _mm_packs_epi32(tmp0, tmp1); \
-    stp1_7 = _mm_packs_epi32(tmp2, tmp3); \
-    stp1_5 = _mm_packs_epi32(tmp4, tmp5); \
-    stp1_6 = _mm_packs_epi32(tmp6, tmp7); \
-                                          \
+    \
+    MULTIPLICATION_AND_ADD(lo_2_14, hi_2_14, lo_10_6, hi_10_6, \
+                           stg3_0, stg3_1, stg3_2, stg3_3, \
+                           stp1_4, stp1_7, stp1_5, stp1_6) \
+    \
     stp1_8_0 = _mm_add_epi16(stp2_8, stp2_9);  \
     stp1_9 = _mm_sub_epi16(stp2_8, stp2_9);    \
     stp1_10 = _mm_sub_epi16(stp2_11, stp2_10); \
     stp1_11 = _mm_add_epi16(stp2_11, stp2_10); \
-                                               \
+    \
     stp1_12_0 = _mm_add_epi16(stp2_12, stp2_13); \
     stp1_13 = _mm_sub_epi16(stp2_12, stp2_13); \
     stp1_14 = _mm_sub_epi16(stp2_15, stp2_14); \
     stp1_15 = _mm_add_epi16(stp2_15, stp2_14); \
-  }                                            \
-                                               \
-  /* Stage4 */                                 \
-  {                                            \
+  } \
+  \
+  /* Stage4 */ \
+  { \
     const __m128i lo_0_8 = _mm_unpacklo_epi16(in0, in8); \
     const __m128i hi_0_8 = _mm_unpackhi_epi16(in0, in8); \
     const __m128i lo_4_12 = _mm_unpacklo_epi16(in4, in12); \
     const __m128i hi_4_12 = _mm_unpackhi_epi16(in4, in12); \
-                                                           \
+    \
     const __m128i lo_9_14 = _mm_unpacklo_epi16(stp1_9, stp1_14); \
     const __m128i hi_9_14 = _mm_unpackhi_epi16(stp1_9, stp1_14); \
     const __m128i lo_10_13 = _mm_unpacklo_epi16(stp1_10, stp1_13); \
     const __m128i hi_10_13 = _mm_unpackhi_epi16(stp1_10, stp1_13); \
-                                           \
-    tmp0 = _mm_madd_epi16(lo_0_8, stg4_0); \
-    tmp1 = _mm_madd_epi16(hi_0_8, stg4_0); \
-    tmp2 = _mm_madd_epi16(lo_0_8, stg4_1); \
-    tmp3 = _mm_madd_epi16(hi_0_8, stg4_1); \
-    tmp4 = _mm_madd_epi16(lo_4_12, stg4_2); \
-    tmp5 = _mm_madd_epi16(hi_4_12, stg4_2); \
-    tmp6 = _mm_madd_epi16(lo_4_12, stg4_3); \
-    tmp7 = _mm_madd_epi16(hi_4_12, stg4_3); \
-                                          \
-    tmp0 = _mm_add_epi32(tmp0, rounding); \
-    tmp1 = _mm_add_epi32(tmp1, rounding); \
-    tmp2 = _mm_add_epi32(tmp2, rounding); \
-    tmp3 = _mm_add_epi32(tmp3, rounding); \
-    tmp4 = _mm_add_epi32(tmp4, rounding); \
-    tmp5 = _mm_add_epi32(tmp5, rounding); \
-    tmp6 = _mm_add_epi32(tmp6, rounding); \
-    tmp7 = _mm_add_epi32(tmp7, rounding); \
-                                          \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS); \
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS); \
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS); \
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS); \
-                                          \
-    stp2_0 = _mm_packs_epi32(tmp0, tmp1); \
-    stp2_1 = _mm_packs_epi32(tmp2, tmp3); \
-    stp2_2 = _mm_packs_epi32(tmp4, tmp5); \
-    stp2_3 = _mm_packs_epi32(tmp6, tmp7); \
-                                          \
+    \
+    MULTIPLICATION_AND_ADD(lo_0_8, hi_0_8, lo_4_12, hi_4_12, \
+                           stg4_0, stg4_1, stg4_2, stg4_3, \
+                           stp2_0, stp2_1, stp2_2, stp2_3) \
+    \
     stp2_4 = _mm_add_epi16(stp1_4, stp1_5); \
     stp2_5 = _mm_sub_epi16(stp1_4, stp1_5); \
     stp2_6 = _mm_sub_epi16(stp1_7, stp1_6); \
     stp2_7 = _mm_add_epi16(stp1_7, stp1_6); \
-                                            \
-    tmp0 = _mm_madd_epi16(lo_9_14, stg4_4); \
-    tmp1 = _mm_madd_epi16(hi_9_14, stg4_4); \
-    tmp2 = _mm_madd_epi16(lo_9_14, stg4_5); \
-    tmp3 = _mm_madd_epi16(hi_9_14, stg4_5); \
-    tmp4 = _mm_madd_epi16(lo_10_13, stg4_6); \
-    tmp5 = _mm_madd_epi16(hi_10_13, stg4_6); \
-    tmp6 = _mm_madd_epi16(lo_10_13, stg4_7); \
-    tmp7 = _mm_madd_epi16(hi_10_13, stg4_7); \
-                                          \
-    tmp0 = _mm_add_epi32(tmp0, rounding); \
-    tmp1 = _mm_add_epi32(tmp1, rounding); \
-    tmp2 = _mm_add_epi32(tmp2, rounding); \
-    tmp3 = _mm_add_epi32(tmp3, rounding); \
-    tmp4 = _mm_add_epi32(tmp4, rounding); \
-    tmp5 = _mm_add_epi32(tmp5, rounding); \
-    tmp6 = _mm_add_epi32(tmp6, rounding); \
-    tmp7 = _mm_add_epi32(tmp7, rounding); \
-                                          \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS); \
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS); \
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS); \
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS); \
-                                           \
-    stp2_9 = _mm_packs_epi32(tmp0, tmp1);  \
-    stp2_14 = _mm_packs_epi32(tmp2, tmp3); \
-    stp2_10 = _mm_packs_epi32(tmp4, tmp5); \
-    stp2_13 = _mm_packs_epi32(tmp6, tmp7); \
-  }                                        \
-                                           \
-  /* Stage5 */                             \
-  {                                        \
+    \
+    MULTIPLICATION_AND_ADD(lo_9_14, hi_9_14, lo_10_13, hi_10_13, \
+                           stg4_4, stg4_5, stg4_6, stg4_7, \
+                           stp2_9, stp2_14, stp2_10, stp2_13) \
+  } \
+    \
+  /* Stage5 */ \
+  { \
     const __m128i lo_6_5 = _mm_unpacklo_epi16(stp2_6, stp2_5); \
     const __m128i hi_6_5 = _mm_unpackhi_epi16(stp2_6, stp2_5); \
-                                            \
+    \
     stp1_0 = _mm_add_epi16(stp2_0, stp2_3); \
     stp1_1 = _mm_add_epi16(stp2_1, stp2_2); \
     stp1_2 = _mm_sub_epi16(stp2_1, stp2_2); \
     stp1_3 = _mm_sub_epi16(stp2_0, stp2_3); \
-                                           \
+    \
     tmp0 = _mm_madd_epi16(lo_6_5, stg4_1); \
     tmp1 = _mm_madd_epi16(hi_6_5, stg4_1); \
     tmp2 = _mm_madd_epi16(lo_6_5, stg4_0); \
     tmp3 = _mm_madd_epi16(hi_6_5, stg4_0); \
-                                          \
+    \
     tmp0 = _mm_add_epi32(tmp0, rounding); \
     tmp1 = _mm_add_epi32(tmp1, rounding); \
     tmp2 = _mm_add_epi32(tmp2, rounding); \
     tmp3 = _mm_add_epi32(tmp3, rounding); \
-                                          \
+    \
     tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
     tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
     tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
     tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
-                                          \
+    \
     stp1_5 = _mm_packs_epi32(tmp0, tmp1); \
     stp1_6 = _mm_packs_epi32(tmp2, tmp3); \
-                                          \
+    \
     stp1_8 = _mm_add_epi16(stp1_8_0, stp1_11);  \
     stp1_9 = _mm_add_epi16(stp2_9, stp2_10);    \
     stp1_10 = _mm_sub_epi16(stp2_9, stp2_10);   \
     stp1_11 = _mm_sub_epi16(stp1_8_0, stp1_11); \
-                                                 \
+    \
     stp1_12 = _mm_sub_epi16(stp1_15, stp1_12_0); \
     stp1_13 = _mm_sub_epi16(stp2_14, stp2_13);   \
     stp1_14 = _mm_add_epi16(stp2_14, stp2_13);   \
     stp1_15 = _mm_add_epi16(stp1_15, stp1_12_0); \
-  }                                              \
-                                                 \
-  /* Stage6 */                                   \
-  {                                              \
+  } \
+    \
+  /* Stage6 */ \
+  { \
     const __m128i lo_10_13 = _mm_unpacklo_epi16(stp1_10, stp1_13); \
     const __m128i hi_10_13 = _mm_unpackhi_epi16(stp1_10, stp1_13); \
     const __m128i lo_11_12 = _mm_unpacklo_epi16(stp1_11, stp1_12); \
     const __m128i hi_11_12 = _mm_unpackhi_epi16(stp1_11, stp1_12); \
-                                            \
+    \
     stp2_0 = _mm_add_epi16(stp1_0, stp2_7); \
     stp2_1 = _mm_add_epi16(stp1_1, stp1_6); \
     stp2_2 = _mm_add_epi16(stp1_2, stp1_5); \
@@ -906,38 +747,10 @@ void vp9_short_idct10_8x8_sse2(int16_t *input, int16_t *output, int pitch) {
     stp2_5 = _mm_sub_epi16(stp1_2, stp1_5); \
     stp2_6 = _mm_sub_epi16(stp1_1, stp1_6); \
     stp2_7 = _mm_sub_epi16(stp1_0, stp2_7); \
-                                             \
-    tmp0 = _mm_madd_epi16(lo_10_13, stg6_0); \
-    tmp1 = _mm_madd_epi16(hi_10_13, stg6_0); \
-    tmp2 = _mm_madd_epi16(lo_10_13, stg4_0); \
-    tmp3 = _mm_madd_epi16(hi_10_13, stg4_0); \
-    tmp4 = _mm_madd_epi16(lo_11_12, stg6_0); \
-    tmp5 = _mm_madd_epi16(hi_11_12, stg6_0); \
-    tmp6 = _mm_madd_epi16(lo_11_12, stg4_0); \
-    tmp7 = _mm_madd_epi16(hi_11_12, stg4_0); \
-                                          \
-    tmp0 = _mm_add_epi32(tmp0, rounding); \
-    tmp1 = _mm_add_epi32(tmp1, rounding); \
-    tmp2 = _mm_add_epi32(tmp2, rounding); \
-    tmp3 = _mm_add_epi32(tmp3, rounding); \
-    tmp4 = _mm_add_epi32(tmp4, rounding); \
-    tmp5 = _mm_add_epi32(tmp5, rounding); \
-    tmp6 = _mm_add_epi32(tmp6, rounding); \
-    tmp7 = _mm_add_epi32(tmp7, rounding); \
-                                                 \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS); \
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS); \
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS); \
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS); \
-                                           \
-    stp2_10 = _mm_packs_epi32(tmp0, tmp1); \
-    stp2_13 = _mm_packs_epi32(tmp2, tmp3); \
-    stp2_11 = _mm_packs_epi32(tmp4, tmp5); \
-    stp2_12 = _mm_packs_epi32(tmp6, tmp7); \
+    \
+    MULTIPLICATION_AND_ADD(lo_10_13, hi_10_13, lo_11_12, hi_11_12, \
+                           stg6_0, stg4_0, stg6_0, stg4_0, \
+                           stp2_10, stp2_13, stp2_11, stp2_12) \
   }
 
 void vp9_short_idct16x16_sse2(int16_t *input, int16_t *output, int pitch) {
@@ -1506,43 +1319,6 @@ void vp9_short_idct10_16x16_sse2(int16_t *input, int16_t *output, int pitch) {
     output += 8;
   }
 }
-
-// Define Macro for multiplying elements by constants and adding them together.
-#define MULTIPLICATION_AND_ADD(lo_0, hi_0, lo_1, hi_1, \
-                               cst0, cst1, cst2, cst3, res0, res1, res2, res3) \
-  {   \
-      tmp0 = _mm_madd_epi16(lo_0, cst0); \
-      tmp1 = _mm_madd_epi16(hi_0, cst0); \
-      tmp2 = _mm_madd_epi16(lo_0, cst1); \
-      tmp3 = _mm_madd_epi16(hi_0, cst1); \
-      tmp4 = _mm_madd_epi16(lo_1, cst2); \
-      tmp5 = _mm_madd_epi16(hi_1, cst2); \
-      tmp6 = _mm_madd_epi16(lo_1, cst3); \
-      tmp7 = _mm_madd_epi16(hi_1, cst3); \
-      \
-      tmp0 = _mm_add_epi32(tmp0, rounding); \
-      tmp1 = _mm_add_epi32(tmp1, rounding); \
-      tmp2 = _mm_add_epi32(tmp2, rounding); \
-      tmp3 = _mm_add_epi32(tmp3, rounding); \
-      tmp4 = _mm_add_epi32(tmp4, rounding); \
-      tmp5 = _mm_add_epi32(tmp5, rounding); \
-      tmp6 = _mm_add_epi32(tmp6, rounding); \
-      tmp7 = _mm_add_epi32(tmp7, rounding); \
-      \
-      tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
-      tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
-      tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
-      tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
-      tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS); \
-      tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS); \
-      tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS); \
-      tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS); \
-      \
-      res0 = _mm_packs_epi32(tmp0, tmp1); \
-      res1 = _mm_packs_epi32(tmp2, tmp3); \
-      res2 = _mm_packs_epi32(tmp4, tmp5); \
-      res3 = _mm_packs_epi32(tmp6, tmp7); \
-  }
 
 void vp9_short_idct32x32_sse2(int16_t *input, int16_t *output, int pitch) {
   const int half_pitch = pitch >> 1;
