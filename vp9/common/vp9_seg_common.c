@@ -51,7 +51,7 @@ int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id) {
 }
 
 int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id) {
-  return (segfeaturedata_signed[feature_id]);
+  return segfeaturedata_signed[feature_id];
 }
 
 void vp9_clear_segdata(MACROBLOCKD *xd,

@@ -490,7 +490,7 @@ static void read_switchable_interp_probs(VP9D_COMP* const pbi,
   int i, j;
   for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j) {
     for (i = 0; i < VP9_SWITCHABLE_FILTERS - 1; ++i) {
-      cm->fc.switchable_interp_prob[j][i] = vp9_read_literal(bc, 8);
+      cm->fc.switchable_interp_prob[j][i] = vp9_read_prob(bc);
     }
   }
   //printf("DECODER: %d %d\n", cm->fc.switchable_interp_prob[0],
@@ -511,13 +511,13 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
 #if CONFIG_COMP_INTERINTRA_PRED
     if (cm->use_interintra) {
       if (vp9_read(bc, VP9_UPD_INTERINTRA_PROB))
-        cm->fc.interintra_prob  = (vp9_prob)vp9_read_literal(bc, 8);
+        cm->fc.interintra_prob = vp9_read_prob(bc);
     }
 #endif
     // Decode the baseline probabilities for decoding reference frame
-    cm->prob_intra_coded = (vp9_prob)vp9_read_literal(bc, 8);
-    cm->prob_last_coded  = (vp9_prob)vp9_read_literal(bc, 8);
-    cm->prob_gf_coded    = (vp9_prob)vp9_read_literal(bc, 8);
+    cm->prob_intra_coded = vp9_read_prob(bc);
+    cm->prob_last_coded  = vp9_read_prob(bc);
+    cm->prob_gf_coded    = vp9_read_prob(bc);
 
     // Computes a modified set of probabilities for use when reference
     // frame prediction fails.
@@ -529,14 +529,14 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
     if (cm->comp_pred_mode == HYBRID_PREDICTION) {
       int i;
       for (i = 0; i < COMP_PRED_CONTEXTS; i++)
-        cm->prob_comppred[i] = (vp9_prob)vp9_read_literal(bc, 8);
+        cm->prob_comppred[i] = vp9_read_prob(bc);
     }
 
     if (vp9_read_bit(bc)) {
       int i = 0;
 
       do {
-        cm->fc.ymode_prob[i] = (vp9_prob) vp9_read_literal(bc, 8);
+        cm->fc.ymode_prob[i] = vp9_read_prob(bc);
       } while (++i < VP9_YMODES - 1);
     }
 
@@ -544,7 +544,7 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
       int i = 0;
 
       do {
-        cm->fc.sb_ymode_prob[i] = (vp9_prob) vp9_read_literal(bc, 8);
+        cm->fc.sb_ymode_prob[i] = vp9_read_prob(bc);
       } while (++i < VP9_I32X32_MODES - 1);
     }
 
@@ -1141,7 +1141,7 @@ void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, BOOL_DECODER* const bc) {
   if (pbi->common.mb_no_coeff_skip) {
     int k;
     for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
-      cm->mbskip_pred_probs[k] = (vp9_prob)vp9_read_literal(bc, 8);
+      cm->mbskip_pred_probs[k] = vp9_read_prob(bc);
     }
   }
 
