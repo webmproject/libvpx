@@ -198,7 +198,7 @@ static void calc_av_activity(VP9_COMP *cpi, int64_t activity_sum) {
 #define OUTPUT_NORM_ACT_STATS   0
 
 #if USE_ACT_INDEX
-// Calculate and activity index for each mb
+// Calculate an activity index for each mb
 static void calc_activity_index(VP9_COMP *cpi, MACROBLOCK *x) {
   VP9_COMMON *const cm = &cpi->common;
   int mb_row, mb_col;
@@ -267,6 +267,8 @@ static void build_activity_map(VP9_COMP *cpi) {
   int mb_row, mb_col;
   unsigned int mb_activity;
   int64_t activity_sum = 0;
+
+  x->mb_activity_ptr = cpi->mb_activity_map;
 
   // for each macroblock row in image
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
