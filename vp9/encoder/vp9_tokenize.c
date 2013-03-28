@@ -291,7 +291,7 @@ static void tokenize_b(VP9_COMP *cpi,
 #endif
     token_cache[c] = token;
 
-    pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
+    pt = vp9_get_coef_context(scan, nb, pad, token_cache, c + 1, default_eob);
     ++t;
   } while (c < eob && ++c < seg_eob);
 #if CONFIG_CODE_NONZEROCOUNT

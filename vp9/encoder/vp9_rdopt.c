@@ -595,7 +595,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
                                        [get_coef_band(scan, tx_size, c)]
                                        [pt][0], 1);
 #endif
-      pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
+      pt = vp9_get_coef_context(scan, nb, pad, token_cache, c + 1, default_eob);
     }
 #if CONFIG_CODE_NONZEROCOUNT
     cost += nzc_cost[nzc];

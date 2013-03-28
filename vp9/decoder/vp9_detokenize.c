@@ -69,7 +69,7 @@ static int get_signed(BOOL_DECODER *br, int value_to_sign) {
                [pt][token]++;     \
     token_cache[c] = token; \
     pt = vp9_get_coef_context(scan, nb, pad, token_cache,     \
-                              c, default_eob); \
+                              c + 1, default_eob); \
   } while (0)
 
 #if CONFIG_CODE_NONZEROCOUNT
