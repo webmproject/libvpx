@@ -2105,11 +2105,10 @@ int vp9_get_coef_context(const int *scan, const int *neighbors,
                          int nb_pad, uint8_t *token_cache, int c, int l) {
   int eob = l;
   assert(nb_pad == MAX_NEIGHBORS);
-  if (c == eob - 1) {
+  if (c == eob) {
     return 0;
   } else {
     int ctx;
-    c++;
     assert(neighbors[MAX_NEIGHBORS * c + 0] >= 0);
     if (neighbors[MAX_NEIGHBORS * c + 1] >= 0) {
       ctx = (1 + token_cache[neighbors[MAX_NEIGHBORS * c + 0]] +
