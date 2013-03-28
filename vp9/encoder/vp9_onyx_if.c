@@ -2735,8 +2735,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     // the maximum key frame interval. Here force the Q to a range
     // based on the ambient Q to reduce the risk of popping
     if (cpi->this_key_frame_forced) {
-      const int qindex = cpi->last_boosted_qindex;
-      const int delta_qindex = compute_qdelta(cpi, qindex, qindex * 0.75);
+      int delta_qindex;
+      int qindex = cpi->last_boosted_qindex;
+      double last_boosted_q = vp9_convert_qindex_to_q(qindex);
+
+      delta_qindex = compute_qdelta(cpi, last_boosted_q,
+                                    (last_boosted_q * 0.75));
+
 
       cpi->active_best_quality = MAX(qindex + delta_qindex, cpi->best_quality);
     }
