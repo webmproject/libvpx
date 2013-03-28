@@ -995,6 +995,54 @@ static void init_frame(VP9D_COMP *pbi) {
   xd->corrupted = 0;
 }
 
+#if CONFIG_CODE_ZEROGROUP
+static void read_zpc_probs_common(VP9_COMMON *cm,
+                                  vp9_reader* bc,
+                                  TX_SIZE tx_size) {
+  int r, b, p, n;
+  vp9_zpc_probs *zpc_probs;
+  vp9_prob upd = ZPC_UPDATE_PROB;
+  if (!get_zpc_used(tx_size)) return;
+  if (!vp9_read_bit(bc)) return;
+
+  if (tx_size == TX_32X32) {
+    zpc_probs = &cm->fc.zpc_probs_32x32;
+  } else if (tx_size == TX_16X16) {
+    zpc_probs = &cm->fc.zpc_probs_16x16;
+  } else if (tx_size == TX_8X8) {
+    zpc_probs = &cm->fc.zpc_probs_8x8;
+  } else {
+    zpc_probs = &cm->fc.zpc_probs_4x4;
+  }
+  for (r = 0; r < REF_TYPES; ++r) {
+    for (b = 0; b < ZPC_BANDS; ++b) {
+      for (p = 0; p < ZPC_PTOKS; ++p) {
+        for (n = 0; n < ZPC_NODES; ++n) {
+          vp9_prob *q = &(*zpc_probs)[r][b][p][n];
+#if USE_ZPC_EXTRA == 0
+          if (n == 1) continue;
+#endif
+          if (vp9_read(bc, upd)) {
+            *q = read_prob_diff_update(bc, *q);
+          }
+        }
+      }
+    }
+  }
+}
+
+static void read_zpc_probs(VP9_COMMON *cm,
+                           vp9_reader* bc) {
+  read_zpc_probs_common(cm, bc, TX_4X4);
+  if (cm->txfm_mode != ONLY_4X4)
+    read_zpc_probs_common(cm, bc, TX_8X8);
+  if (cm->txfm_mode > ALLOW_8X8)
+    read_zpc_probs_common(cm, bc, TX_16X16);
+  if (cm->txfm_mode > ALLOW_16X16)
+    read_zpc_probs_common(cm, bc, TX_32X32);
+}
+#endif  // CONFIG_CODE_ZEROGROUP
+
 #if CONFIG_CODE_NONZEROCOUNT
 static void read_nzc_probs_common(VP9_COMMON *cm,
                                   vp9_reader *rd,
@@ -1404,6 +1452,17 @@ static void update_frame_context(VP9D_COMP *pbi) {
   vp9_zero(fc->nzc_counts_32x32);
   vp9_zero(fc->nzc_pcat_counts);
 #endif
+#if CONFIG_CODE_ZEROGROUP
+  vp9_copy(fc->pre_zpc_probs_4x4, fc->zpc_probs_4x4);
+  vp9_copy(fc->pre_zpc_probs_8x8, fc->zpc_probs_8x8);
+  vp9_copy(fc->pre_zpc_probs_16x16, fc->zpc_probs_16x16);
+  vp9_copy(fc->pre_zpc_probs_32x32, fc->zpc_probs_32x32);
+
+  vp9_zero(fc->zpc_counts_4x4);
+  vp9_zero(fc->zpc_counts_8x8);
+  vp9_zero(fc->zpc_counts_16x16);
+  vp9_zero(fc->zpc_counts_32x32);
+#endif
 }
 
 static void decode_tiles(VP9D_COMP *pbi,
@@ -1660,6 +1719,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 #if CONFIG_CODE_NONZEROCOUNT
   read_nzc_probs(&pbi->common, &header_bc);
 #endif
+#if CONFIG_CODE_ZEROGROUP
+  read_zpc_probs(&pbi->common, &header_bc);
+#endif
 
   // Initialize xd pointers. Any reference should do for xd->pre, so use 0.
   vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->active_ref_idx[0]],
@@ -1711,6 +1773,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     vp9_adapt_coef_probs(pc);
 #if CONFIG_CODE_NONZEROCOUNT
     vp9_adapt_nzc_probs(pc);
+#endif
+#if CONFIG_CODE_ZEROGROUP
+    vp9_adapt_zpc_probs(pc);
 #endif
   }
 

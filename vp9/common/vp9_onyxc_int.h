@@ -86,6 +86,12 @@ typedef struct frame_contexts {
   vp9_prob nzc_pcat_probs[MAX_NZC_CONTEXTS]
                          [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA];
 #endif
+#if CONFIG_CODE_ZEROGROUP
+  vp9_zpc_probs zpc_probs_4x4;
+  vp9_zpc_probs zpc_probs_8x8;
+  vp9_zpc_probs zpc_probs_16x16;
+  vp9_zpc_probs zpc_probs_32x32;
+#endif
 
   nmv_context nmvc;
   nmv_context pre_nmvc;
@@ -122,6 +128,12 @@ typedef struct frame_contexts {
   vp9_prob pre_nzc_pcat_probs[MAX_NZC_CONTEXTS]
                              [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA];
 #endif
+#if CONFIG_CODE_ZEROGROUP
+  vp9_zpc_probs pre_zpc_probs_4x4;
+  vp9_zpc_probs pre_zpc_probs_8x8;
+  vp9_zpc_probs pre_zpc_probs_16x16;
+  vp9_zpc_probs pre_zpc_probs_32x32;
+#endif
 
   vp9_coeff_count coef_counts_4x4[BLOCK_TYPES];
   vp9_coeff_count coef_counts_8x8[BLOCK_TYPES];
@@ -141,6 +153,12 @@ typedef struct frame_contexts {
                                [NZC32X32_TOKENS];
   unsigned int nzc_pcat_counts[MAX_NZC_CONTEXTS]
                               [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA][2];
+#endif
+#if CONFIG_CODE_ZEROGROUP
+  vp9_zpc_count zpc_counts_4x4;
+  vp9_zpc_count zpc_counts_8x8;
+  vp9_zpc_count zpc_counts_16x16;
+  vp9_zpc_count zpc_counts_32x32;
 #endif
 
   nmv_context_counts NMVcount;
@@ -376,5 +394,9 @@ static int get_mb_row(const MACROBLOCKD *xd) {
 
 static int get_mb_col(const MACROBLOCKD *xd) {
   return ((-xd->mb_to_left_edge) >> 7);
+}
+
+static int get_token_alloc(int mb_rows, int mb_cols) {
+  return mb_rows * mb_cols * (24 * 16 + 4);
 }
 #endif  // VP9_COMMON_VP9_ONYXC_INT_H_

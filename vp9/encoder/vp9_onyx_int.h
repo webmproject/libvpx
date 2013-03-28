@@ -126,6 +126,12 @@ typedef struct {
   vp9_prob nzc_pcat_probs[MAX_NZC_CONTEXTS]
                          [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA];
 #endif
+#if CONFIG_CODE_ZEROGROUP
+  vp9_zpc_probs zpc_probs_4x4;
+  vp9_zpc_probs zpc_probs_8x8;
+  vp9_zpc_probs zpc_probs_16x16;
+  vp9_zpc_probs zpc_probs_32x32;
+#endif
 } CODING_CONTEXT;
 
 typedef struct {

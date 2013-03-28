@@ -251,6 +251,7 @@ EXPERIMENT_LIST="
     oneshotq
     sbsegment
     multiple_arf
+    code_zerogroup
 "
 CONFIG_LIST="
     external_build

@@ -67,6 +67,17 @@ void update_nzcstats(VP9_COMMON *const cm);
 void print_nzcstats();
 #endif
 #endif
+#if CONFIG_CODE_ZEROGROUP
+#ifdef ZPC_STATS
+vp9_zpc_count zpc_stats_4x4;
+vp9_zpc_count zpc_stats_8x8;
+vp9_zpc_count zpc_stats_16x16;
+vp9_zpc_count zpc_stats_32x32;
+void init_zpcstats();
+void update_zpcstats(VP9_COMMON *const cm);
+void print_zpcstats();
+#endif
+#endif
 
 #ifdef MODE_STATS
 int count_mb_seg[4] = { 0, 0, 0, 0 };
@@ -427,24 +438,42 @@ static void pack_mb_tokens(vp9_writer* const bc,
     const unsigned char *pp = p->context_tree;
     int v = a->value;
     int n = a->len;
+    int ncount = n;
 
     if (t == EOSB_TOKEN)
     {
       ++p;
       break;
     }
+    assert(pp != 0);
+#if CONFIG_CODE_ZEROGROUP
+    if (t == ZPC_ISOLATED || t == ZPC_EOORIENT) {
+      assert((p - 1)->token == ZERO_TOKEN);
+      encode_bool(bc, t == ZPC_ISOLATED, *pp);
+      ++p;
+      continue;
+    } else if (p->skip_coef_val) {
+      assert(p->skip_eob_node == 0);
+      assert(t == DCT_EOB_TOKEN || t == ZERO_TOKEN);
+      encode_bool(bc, t == ZERO_TOKEN, *pp);
+      ++p;
+      continue;
+    }
+#endif
 
     /* skip one or two nodes */
     if (p->skip_eob_node) {
       n -= p->skip_eob_node;
       i = 2 * p->skip_eob_node;
+      ncount -= p->skip_eob_node;
     }
 
     do {
       const int bb = (v >> --n) & 1;
       vp9_write(bc, bb, pp[i >> 1]);
       i = vp9_coef_tree[i + bb];
-    } while (n);
+      ncount--;
+    } while (n && ncount);
 
 
     if (b->base_val) {
@@ -1541,6 +1570,150 @@ void print_nzcstats() {
 
 #endif  // CONFIG_CODE_NONZEROCOUNT
 
+#if CONFIG_CODE_ZEROGROUP
+#ifdef ZPC_STATS
+void init_zpcstats() {
+  vp9_zero(zpc_stats_4x4);
+  vp9_zero(zpc_stats_8x8);
+  vp9_zero(zpc_stats_16x16);
+  vp9_zero(zpc_stats_32x32);
+}
+
+void update_zpcstats(VP9_COMMON *const cm) {
+  int r, b, p, n;
+  for (r = 0; r < REF_TYPES; ++r) {
+    for (b = 0; b < ZPC_BANDS; ++b) {
+      for (p = 0; p < ZPC_PTOKS; ++p) {
+        for (n = 0; n < ZPC_NODES; ++n) {
+          zpc_stats_4x4[r][b][p][n][0] += cm->fc.zpc_counts_4x4[r][b][p][n][0];
+          zpc_stats_4x4[r][b][p][n][1] += cm->fc.zpc_counts_4x4[r][b][p][n][1];
+          zpc_stats_8x8[r][b][p][n][0] += cm->fc.zpc_counts_8x8[r][b][p][n][0];
+          zpc_stats_8x8[r][b][p][n][1] += cm->fc.zpc_counts_8x8[r][b][p][n][1];
+          zpc_stats_16x16[r][b][p][n][0] +=
+              cm->fc.zpc_counts_16x16[r][b][p][n][0];
+          zpc_stats_16x16[r][b][p][n][1] +=
+              cm->fc.zpc_counts_16x16[r][b][p][n][1];
+          zpc_stats_32x32[r][b][p][n][0] +=
+              cm->fc.zpc_counts_32x32[r][b][p][n][0];
+          zpc_stats_32x32[r][b][p][n][1] +=
+              cm->fc.zpc_counts_32x32[r][b][p][n][1];
+        }
+      }
+    }
+  }
+}
+
+void print_zpcstats() {
+  int r, b, p, n;
+  FILE *f;
+
+  printf(
+      "static const unsigned int default_zpc_probs_4x4[REF_TYPES]\n"
+      "                                               [ZPC_BANDS]\n"
+      "                                               [ZPC_PTOKS]\n"
+      "                                               [ZPC_NODES] = {\n");
+  for (r = 0; r < REF_TYPES; ++r) {
+    printf("  {\n");
+    for (b = 0; b < ZPC_BANDS; ++b) {
+      printf("    {\n");
+      for (p = 0; p < ZPC_PTOKS; ++p) {
+        printf("      {");
+        for (n = 0; n < ZPC_NODES; ++n) {
+          vp9_prob prob = get_binary_prob(zpc_stats_4x4[r][b][p][n][0],
+                                          zpc_stats_4x4[r][b][p][n][1]);
+          printf(" %-3d [%d/%d],", prob, zpc_stats_4x4[r][b][p][n][0],
+                                         zpc_stats_4x4[r][b][p][n][1]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+  printf(
+    "static const unsigned int default_zpc_probs_8x8[REF_TYPES]\n"
+    "                                               [ZPC_BANDS]\n"
+    "                                               [ZPC_PTOKS]\n"
+    "                                               [ZPC_NODES] = {\n");
+  for (r = 0; r < REF_TYPES; ++r) {
+    printf("  {\n");
+    for (b = 0; b < ZPC_BANDS; ++b) {
+      printf("    {\n");
+      for (p = 0; p < ZPC_PTOKS; ++p) {
+        printf("      {");
+        for (n = 0; n < ZPC_NODES; ++n) {
+          vp9_prob prob = get_binary_prob(zpc_stats_8x8[r][b][p][n][0],
+                                          zpc_stats_8x8[r][b][p][n][1]);
+          printf(" %-3d [%d/%d],", prob, zpc_stats_8x8[r][b][p][n][0],
+                                         zpc_stats_8x8[r][b][p][n][1]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+  printf(
+    "static const unsigned int default_zpc_probs_16x16[REF_TYPES]\n"
+    "                                                 [ZPC_BANDS]\n"
+    "                                                 [ZPC_PTOKS]\n"
+    "                                                 [ZPC_NODES] = {\n");
+  for (r = 0; r < REF_TYPES; ++r) {
+    printf("  {\n");
+    for (b = 0; b < ZPC_BANDS; ++b) {
+      printf("    {\n");
+      for (p = 0; p < ZPC_PTOKS; ++p) {
+        printf("      {");
+        for (n = 0; n < ZPC_NODES; ++n) {
+          vp9_prob prob = get_binary_prob(zpc_stats_16x16[r][b][p][n][0],
+                                          zpc_stats_16x16[r][b][p][n][1]);
+          printf(" %-3d [%d/%d],", prob, zpc_stats_16x16[r][b][p][n][0],
+                                         zpc_stats_16x16[r][b][p][n][1]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+  printf(
+    "static const unsigned int default_zpc_probs_32x32[REF_TYPES]\n"
+    "                                                 [ZPC_BANDS]\n"
+    "                                                 [ZPC_PTOKS]\n"
+    "                                                 [ZPC_NODES] = {\n");
+  for (r = 0; r < REF_TYPES; ++r) {
+    printf("  {\n");
+    for (b = 0; b < ZPC_BANDS; ++b) {
+      printf("    {\n");
+      for (p = 0; p < ZPC_PTOKS; ++p) {
+        printf("      {");
+        for (n = 0; n < ZPC_NODES; ++n) {
+          vp9_prob prob = get_binary_prob(zpc_stats_32x32[r][b][p][n][0],
+                                          zpc_stats_32x32[r][b][p][n][1]);
+          printf(" %-3d [%d/%d],", prob, zpc_stats_32x32[r][b][p][n][0],
+                                         zpc_stats_32x32[r][b][p][n][1]);
+        }
+        printf(" },\n");
+      }
+      printf("    },\n");
+    }
+    printf("  },\n");
+  }
+  printf("};\n");
+
+  f = fopen("zpcstats.bin", "wb");
+  fwrite(zpc_stats_4x4, sizeof(zpc_stats_4x4), 1, f);
+  fwrite(zpc_stats_8x8, sizeof(zpc_stats_8x8), 1, f);
+  fwrite(zpc_stats_16x16, sizeof(zpc_stats_16x16), 1, f);
+  fwrite(zpc_stats_32x32, sizeof(zpc_stats_32x32), 1, f);
+  fclose(f);
+}
+#endif
+#endif  // CONFIG_CODE_ZEROGROUP
+
 static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
                           TOKENEXTRA **tok, TOKENEXTRA *tok_end,
                           int mb_row, int mb_col) {
@@ -1778,6 +1951,129 @@ static void build_coeff_contexts(VP9_COMP *cpi) {
 #endif
                           cpi->frame_branch_ct_32x32, BLOCK_TYPES);
 }
+
+#if CONFIG_CODE_ZEROGROUP
+static void update_zpc_probs_common(VP9_COMP* cpi,
+                                    vp9_writer* const bc,
+                                    TX_SIZE tx_size) {
+  int r, b, p, n;
+  VP9_COMMON *const cm = &cpi->common;
+  int update[2] = {0, 0};
+  int savings = 0;
+  vp9_zpc_probs newprobs;
+  vp9_zpc_probs *zpc_probs;
+  vp9_zpc_count *zpc_counts;
+  vp9_prob upd = ZPC_UPDATE_PROB;
+
+  if (!get_zpc_used(tx_size)) return;
+  if (tx_size == TX_32X32) {
+    zpc_probs = &cm->fc.zpc_probs_32x32;
+    zpc_counts = &cm->fc.zpc_counts_32x32;
+  } else if (tx_size == TX_16X16) {
+    zpc_probs = &cm->fc.zpc_probs_16x16;
+    zpc_counts = &cm->fc.zpc_counts_16x16;
+  } else if (tx_size == TX_8X8) {
+    zpc_probs = &cm->fc.zpc_probs_8x8;
+    zpc_counts = &cm->fc.zpc_counts_8x8;
+  } else {
+    zpc_probs = &cm->fc.zpc_probs_4x4;
+    zpc_counts = &cm->fc.zpc_counts_4x4;
+  }
+  for (r = 0; r < REF_TYPES; ++r) {
+    for (b = 0; b < ZPC_BANDS; ++b) {
+      for (p = 0; p < ZPC_PTOKS; ++p) {
+        for (n = 0; n < ZPC_NODES; ++n) {
+          newprobs[r][b][p][n] = get_binary_prob((*zpc_counts)[r][b][p][n][0],
+                                                 (*zpc_counts)[r][b][p][n][1]);
+        }
+      }
+    }
+  }
+  for (r = 0; r < REF_TYPES; ++r) {
+    for (b = 0; b < ZPC_BANDS; ++b) {
+      for (p = 0; p < ZPC_PTOKS; ++p) {
+        for (n = 0; n < ZPC_NODES; ++n) {
+          vp9_prob newp = newprobs[r][b][p][n];
+          vp9_prob oldp = (*zpc_probs)[r][b][p][n];
+          int s, u = 0;
+#if USE_ZPC_EXTRA == 0
+          if (n == 1) continue;
+#endif
+#if defined(SEARCH_NEWP)
+          s = prob_diff_update_savings_search((*zpc_counts)[r][b][p][n],
+                                              oldp, &newp, upd);
+          if (s > 0 && newp != oldp)
+            u = 1;
+          if (u)
+            savings += s - (int)(vp9_cost_zero(upd));
+          else
+            savings -= (int)(vp9_cost_zero(upd));
+#else
+          s = prob_update_savings((*zpc_counts)[r][b][p][n],
+                                  oldp, newp, upd);
+          if (s > 0)
+            u = 1;
+          if (u)
+            savings += s;
+#endif
+          update[u]++;
+        }
+      }
+    }
+  }
+  if (update[1] == 0 || savings < 0) {
+    vp9_write_bit(bc, 0);
+    return;
+  }
+  vp9_write_bit(bc, 1);
+  for (r = 0; r < REF_TYPES; ++r) {
+    for (b = 0; b < ZPC_BANDS; ++b) {
+      for (p = 0; p < ZPC_PTOKS; ++p) {
+        for (n = 0; n < ZPC_NODES; ++n) {
+          vp9_prob newp = newprobs[r][b][p][n];
+          vp9_prob *oldp = &(*zpc_probs)[r][b][p][n];
+          int s, u = 0;
+#if USE_ZPC_EXTRA == 0
+          if (n == 1) continue;
+#endif
+#if defined(SEARCH_NEWP)
+          s = prob_diff_update_savings_search((*zpc_counts)[r][b][p][n],
+                                              *oldp, &newp, upd);
+          if (s > 0 && newp != *oldp)
+            u = 1;
+#else
+          s = prob_update_savings((*zpc_counts)[r][b][p][n],
+                                  *oldp, newp, upd);
+          if (s > 0)
+            u = 1;
+#endif
+          vp9_write(bc, u, upd);
+          if (u) {
+            /* send/use new probability */
+            write_prob_diff_update(bc, newp, *oldp);
+            *oldp = newp;
+          }
+        }
+      }
+    }
+  }
+}
+
+static void update_zpc_probs(VP9_COMP* cpi,
+                             vp9_writer* const bc) {
+  update_zpc_probs_common(cpi, bc, TX_4X4);
+  if (cpi->common.txfm_mode != ONLY_4X4)
+    update_zpc_probs_common(cpi, bc, TX_8X8);
+  if (cpi->common.txfm_mode > ALLOW_8X8)
+    update_zpc_probs_common(cpi, bc, TX_16X16);
+  if (cpi->common.txfm_mode > ALLOW_16X16)
+    update_zpc_probs_common(cpi, bc, TX_32X32);
+#ifdef ZPC_STATS
+  if (!cpi->dummy_packing)
+    update_zpcstats(&cpi->common);
+#endif
+}
+#endif  // CONFIG_CODE_ZEROGROUP
 
 #if CONFIG_CODE_NONZEROCOUNT
 static void update_nzc_probs_common(VP9_COMP* cpi,
@@ -2691,6 +2987,16 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   vp9_zero(cpi->common.fc.nzc_pcat_counts);
   */
 #endif
+#if CONFIG_CODE_ZEROGROUP
+  vp9_copy(cpi->common.fc.pre_zpc_probs_4x4,
+           cpi->common.fc.zpc_probs_4x4);
+  vp9_copy(cpi->common.fc.pre_zpc_probs_8x8,
+           cpi->common.fc.zpc_probs_8x8);
+  vp9_copy(cpi->common.fc.pre_zpc_probs_16x16,
+           cpi->common.fc.zpc_probs_16x16);
+  vp9_copy(cpi->common.fc.pre_zpc_probs_32x32,
+           cpi->common.fc.zpc_probs_32x32);
+#endif
   vp9_copy(cpi->common.fc.pre_sb_ymode_prob, cpi->common.fc.sb_ymode_prob);
   vp9_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
   vp9_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
@@ -2710,6 +3016,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   update_coef_probs(cpi, &header_bc);
 #if CONFIG_CODE_NONZEROCOUNT
   update_nzc_probs(cpi, &header_bc);
+#endif
+#if CONFIG_CODE_ZEROGROUP
+  update_zpc_probs(cpi, &header_bc);
 #endif
 
 #ifdef ENTROPY_STATS

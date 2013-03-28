@@ -767,7 +767,7 @@ struct plane_block_idx {
 // TODO(jkoleszar): returning a struct so it can be used in a const context,
 // expect to refactor this further later.
 static INLINE struct plane_block_idx plane_block_idx(int y_blocks,
-                                                      int b_idx) {
+                                                     int b_idx) {
   const int v_offset = y_blocks * 5 / 4;
   struct plane_block_idx res;
 
@@ -939,6 +939,9 @@ static INLINE void foreach_predicted_block_uv(
   }
 }
 
-
-
+#if CONFIG_CODE_ZEROGROUP
+static int get_zpc_used(TX_SIZE tx_size) {
+  return (tx_size >= TX_16X16);
+}
+#endif
 #endif  // VP9_COMMON_VP9_BLOCKD_H_
