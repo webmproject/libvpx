@@ -1536,7 +1536,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double this_frame_mv_in_out = 0.0;
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
-
+  double mv_ratio_accumulator_thresh;
   int max_bits = frame_max_bits(cpi);     // Max for a single frame
 
   unsigned int allow_alt_ref =
@@ -1568,10 +1568,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   if (cpi->common.frame_type == KEY_FRAME)
     gf_group_err -= gf_first_frame_err;
 
-  // Scan forward to try and work out how many frames the next gf group
-  // should contain and what level of boost is appropriate for the GF
-  // or ARF that will be coded with the group
-  i = 0;
+  // Motion breakout threshold for loop below depends on image size.
+  mv_ratio_accumulator_thresh = (cpi->common.width + cpi->common.height) / 10.0;
 
   // Work out a maximum interval for the GF.
   // If the image appears completely static we can extend beyond this.
@@ -1585,6 +1583,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   if (active_max_gf_interval > cpi->max_gf_interval)
     active_max_gf_interval = cpi->max_gf_interval;
 
+  i = 0;
   while (((i < cpi->twopass.static_scene_max_gf_interval) ||
           ((cpi->twopass.frames_to_key - i) < MIN_GF_INTERVAL)) &&
          (i < cpi->twopass.frames_to_key)) {
@@ -1644,7 +1643,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         ((cpi->twopass.frames_to_key - i) >= MIN_GF_INTERVAL) &&
         ((boost_score > 125.0) || (next_frame.pcnt_inter < 0.75)) &&
         (!flash_detected) &&
-        ((mv_ratio_accumulator > 100.0) ||
+        ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
          (abs_mv_in_out_accumulator > 3.0) ||
          (mv_in_out_accumulator < -2.0) ||
          ((boost_score - old_boost_score) < IIFACTOR))
