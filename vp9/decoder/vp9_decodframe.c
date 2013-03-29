@@ -151,12 +151,39 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *mb) {
   }
 }
 
+#if CONFIG_CODE_NONZEROCOUNT
+static void propagate_nzcs(VP9_COMMON *cm, MACROBLOCKD *xd) {
+  MODE_INFO *m = xd->mode_info_context;
+  BLOCK_SIZE_TYPE sb_type = m->mbmi.sb_type;
+  const int mis = cm->mode_info_stride;
+  int n;
+  if (sb_type == BLOCK_SIZE_SB64X64) {
+    for (n = 0; n < 16; ++n) {
+      int i = n >> 2;
+      int j = n & 3;
+      if (i == 0 && j == 0) continue;
+      vpx_memcpy((m + j + mis * i)->mbmi.nzcs, m->mbmi.nzcs,
+                 384 * sizeof(m->mbmi.nzcs[0]));
+    }
+  } else if (sb_type == BLOCK_SIZE_SB32X32) {
+    for (n = 0; n < 4; ++n) {
+      int i = n >> 1;
+      int j = n & 1;
+      if (i == 0 && j == 0) continue;
+      vpx_memcpy((m + j + mis * i)->mbmi.nzcs, m->mbmi.nzcs,
+                 384 * sizeof(m->mbmi.nzcs[0]));
+    }
+  }
+}
+#endif
+
 /* skip_recon_mb() is Modified: Instead of writing the result to predictor buffer and then copying it
  *  to dst buffer, we can write the result directly to dst buffer. This eliminates unnecessary copy.
  */
 static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
                           int mb_row, int mb_col) {
-  BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+  MODE_INFO *m = xd->mode_info_context;
+  BLOCK_SIZE_TYPE sb_type = m->mbmi.sb_type;
 
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     if (sb_type == BLOCK_SIZE_SB64X64) {
@@ -196,6 +223,10 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                          mb_row, mb_col);
     }
   }
+#if CONFIG_CODE_NONZEROCOUNT
+  vpx_memset(m->mbmi.nzcs, 0, 384 * sizeof(m->mbmi.nzcs[0]));
+  propagate_nzcs(&pbi->common, xd);
+#endif
 }
 
 static void decode_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
@@ -468,16 +499,16 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
   MODE_INFO *mi = xd->mode_info_context;
   const int mis = pc->mode_info_stride;
 
-  assert(xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64);
+  assert(mi->mbmi.sb_type == BLOCK_SIZE_SB64X64);
 
   if (pbi->common.frame_type != KEY_FRAME)
-    vp9_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter, pc);
+    vp9_setup_interp_filters(xd, mi->mbmi.interp_filter, pc);
 
   // re-initialize macroblock dequantizer before detokenization
   if (xd->segmentation_enabled)
     mb_init_dequantizer(pbi, xd);
 
-  if (xd->mode_info_context->mbmi.mb_skip_coeff) {
+  if (mi->mbmi.mb_skip_coeff) {
     vp9_reset_sb64_tokens_context(xd);
 
     /* Special case:  Force the loopfilter to skip when eobtotal and
@@ -632,6 +663,9 @@ static void decode_superblock64(VP9D_COMP *pbi, MACROBLOCKD *xd,
       default: assert(0);
     }
   }
+#if CONFIG_CODE_NONZEROCOUNT
+  propagate_nzcs(&pbi->common, xd);
+#endif
 }
 
 static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
@@ -639,18 +673,19 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                 BOOL_DECODER* const bc) {
   int n, eobtotal;
   VP9_COMMON *const pc = &pbi->common;
+  MODE_INFO *mi = xd->mode_info_context;
   const int mis = pc->mode_info_stride;
 
-  assert(xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32);
+  assert(mi->mbmi.sb_type == BLOCK_SIZE_SB32X32);
 
   if (pbi->common.frame_type != KEY_FRAME)
-    vp9_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter, pc);
+    vp9_setup_interp_filters(xd, mi->mbmi.interp_filter, pc);
 
   // re-initialize macroblock dequantizer before detokenization
   if (xd->segmentation_enabled)
     mb_init_dequantizer(pbi, xd);
 
-  if (xd->mode_info_context->mbmi.mb_skip_coeff) {
+  if (mi->mbmi.mb_skip_coeff) {
     vp9_reset_sb_tokens_context(xd);
 
     /* Special case:  Force the loopfilter to skip when eobtotal and
@@ -661,7 +696,7 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
   }
 
   /* do prediction */
-  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
+  if (mi->mbmi.ref_frame == INTRA_FRAME) {
     vp9_build_intra_predictors_sby_s(xd);
     vp9_build_intra_predictors_sbuv_s(xd);
   } else {
@@ -674,13 +709,13 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
   /* dequantization and idct */
   eobtotal = vp9_decode_sb_tokens(pbi, xd, bc);
   if (eobtotal == 0) {  // skip loopfilter
-    xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+    mi->mbmi.mb_skip_coeff = 1;
     if (mb_col + 1 < pc->mb_cols)
-      xd->mode_info_context[1].mbmi.mb_skip_coeff = 1;
+      mi[1].mbmi.mb_skip_coeff = 1;
     if (mb_row + 1 < pc->mb_rows) {
-      xd->mode_info_context[mis].mbmi.mb_skip_coeff = 1;
+      mi[mis].mbmi.mb_skip_coeff = 1;
       if (mb_col + 1 < pc->mb_cols)
-        xd->mode_info_context[mis + 1].mbmi.mb_skip_coeff = 1;
+        mi[mis + 1].mbmi.mb_skip_coeff = 1;
     }
   } else {
     switch (xd->mode_info_context->mbmi.txfm_size) {
@@ -793,6 +828,9 @@ static void decode_superblock32(VP9D_COMP *pbi, MACROBLOCKD *xd,
       default: assert(0);
     }
   }
+#if CONFIG_CODE_NONZEROCOUNT
+  propagate_nzcs(&pbi->common, xd);
+#endif
 }
 
 static void decode_macroblock(VP9D_COMP *pbi, MACROBLOCKD *xd,
@@ -1130,23 +1168,24 @@ static void init_frame(VP9D_COMP *pbi) {
 #if CONFIG_CODE_NONZEROCOUNT
 static void read_nzc_probs_common(VP9_COMMON *cm,
                                   BOOL_DECODER* const bc,
-                                  int block_size) {
+                                  TX_SIZE tx_size) {
   int c, r, b, t;
   int tokens, nodes;
   vp9_prob *nzc_probs;
   vp9_prob upd;
 
+  if (!get_nzc_used(tx_size)) return;
   if (!vp9_read_bit(bc)) return;
 
-  if (block_size == 32) {
+  if (tx_size == TX_32X32) {
     tokens = NZC32X32_TOKENS;
     nzc_probs = cm->fc.nzc_probs_32x32[0][0][0];
     upd = NZC_UPDATE_PROB_32X32;
-  } else if (block_size == 16) {
+  } else if (tx_size == TX_16X16) {
     tokens = NZC16X16_TOKENS;
     nzc_probs = cm->fc.nzc_probs_16x16[0][0][0];
     upd = NZC_UPDATE_PROB_16X16;
-  } else if (block_size == 8) {
+  } else if (tx_size == TX_8X8) {
     tokens = NZC8X8_TOKENS;
     nzc_probs = cm->fc.nzc_probs_8x8[0][0][0];
     upd = NZC_UPDATE_PROB_8X8;
@@ -1175,6 +1214,9 @@ static void read_nzc_probs_common(VP9_COMMON *cm,
 static void read_nzc_pcat_probs(VP9_COMMON *cm, BOOL_DECODER* const bc) {
   int c, t, b;
   vp9_prob upd = NZC_UPDATE_PROB_PCAT;
+  if (!(get_nzc_used(TX_4X4) || get_nzc_used(TX_8X8) ||
+        get_nzc_used(TX_16X16) || get_nzc_used(TX_32X32)))
+    return;
   if (!vp9_read_bit(bc)) {
     return;
   }
@@ -1193,13 +1235,13 @@ static void read_nzc_pcat_probs(VP9_COMMON *cm, BOOL_DECODER* const bc) {
 
 static void read_nzc_probs(VP9_COMMON *cm,
                            BOOL_DECODER* const bc) {
-  read_nzc_probs_common(cm, bc, 4);
+  read_nzc_probs_common(cm, bc, TX_4X4);
   if (cm->txfm_mode != ONLY_4X4)
-    read_nzc_probs_common(cm, bc, 8);
+    read_nzc_probs_common(cm, bc, TX_8X8);
   if (cm->txfm_mode > ALLOW_8X8)
-    read_nzc_probs_common(cm, bc, 16);
+    read_nzc_probs_common(cm, bc, TX_16X16);
   if (cm->txfm_mode > ALLOW_16X16)
-    read_nzc_probs_common(cm, bc, 32);
+    read_nzc_probs_common(cm, bc, TX_32X32);
 #ifdef NZC_PCAT_UPDATE
   read_nzc_pcat_probs(cm, bc);
 #endif
@@ -1208,7 +1250,7 @@ static void read_nzc_probs(VP9_COMMON *cm,
 
 static void read_coef_probs_common(BOOL_DECODER* const bc,
                                    vp9_coeff_probs *coef_probs,
-                                   int block_types) {
+                                   TX_SIZE tx_size) {
 #if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
   const int entropy_nodes_update = UNCONSTRAINED_UPDATE_NODES;
 #else
@@ -1218,13 +1260,19 @@ static void read_coef_probs_common(BOOL_DECODER* const bc,
   int i, j, k, l, m;
 
   if (vp9_read_bit(bc)) {
-    for (i = 0; i < block_types; i++) {
+    for (i = 0; i < BLOCK_TYPES; i++) {
       for (j = 0; j < REF_TYPES; j++) {
         for (k = 0; k < COEF_BANDS; k++) {
           for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
+#if CONFIG_CODE_NONZEROCOUNT
+            const int mstart = get_nzc_used(tx_size);
+#else
+            const int mstart = 0;
+#endif
             if (l >= 3 && k == 0)
               continue;
-            for (m = CONFIG_CODE_NONZEROCOUNT; m < entropy_nodes_update; m++) {
+
+            for (m = mstart; m < entropy_nodes_update; m++) {
               vp9_prob *const p = coef_probs[i][j][k][l] + m;
 
               if (vp9_read(bc, vp9_coef_update_prob[m])) {
@@ -1245,16 +1293,16 @@ static void read_coef_probs_common(BOOL_DECODER* const bc,
 static void read_coef_probs(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
   VP9_COMMON *const pc = &pbi->common;
 
-  read_coef_probs_common(bc, pc->fc.coef_probs_4x4, BLOCK_TYPES);
+  read_coef_probs_common(bc, pc->fc.coef_probs_4x4, TX_4X4);
 
   if (pbi->common.txfm_mode != ONLY_4X4)
-    read_coef_probs_common(bc, pc->fc.coef_probs_8x8, BLOCK_TYPES);
+    read_coef_probs_common(bc, pc->fc.coef_probs_8x8, TX_8X8);
 
   if (pbi->common.txfm_mode > ALLOW_8X8)
-    read_coef_probs_common(bc, pc->fc.coef_probs_16x16, BLOCK_TYPES);
+    read_coef_probs_common(bc, pc->fc.coef_probs_16x16, TX_16X16);
 
   if (pbi->common.txfm_mode > ALLOW_16X16)
-    read_coef_probs_common(bc, pc->fc.coef_probs_32x32, BLOCK_TYPES);
+    read_coef_probs_common(bc, pc->fc.coef_probs_32x32, TX_32X32);
 }
 
 static void update_frame_size(VP9D_COMP *pbi) {

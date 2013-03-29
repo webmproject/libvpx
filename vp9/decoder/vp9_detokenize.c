@@ -113,8 +113,10 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   vp9_coeff_count *coef_counts;
   const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
 #if CONFIG_CODE_NONZEROCOUNT
+  const int nzc_used = get_nzc_used(txfm_size);
   uint16_t nzc = 0;
-  uint16_t nzc_expected = xd->mode_info_context->mbmi.nzcs[block_idx];
+  uint16_t nzc_expected =
+      nzc_used ? xd->mode_info_context->mbmi.nzcs[block_idx] : 0;
 #endif
   const int *scan, *nb;
   uint8_t token_cache[1024];
@@ -245,24 +247,25 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     if (c >= seg_eob)
       break;
 #if CONFIG_CODE_NONZEROCOUNT
-    if (nzc == nzc_expected)
+    if (nzc_used && nzc == nzc_expected)
       break;
 #endif
     prob = coef_probs[type][ref][get_coef_band(scan, txfm_size, c)][pt];
-#if CONFIG_CODE_NONZEROCOUNT == 0
     fc->eob_branch_counts[txfm_size][type][ref]
                          [get_coef_band(scan, txfm_size, c)][pt]++;
-    if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
-      break;
+#if CONFIG_CODE_NONZEROCOUNT
+    if (!nzc_used)
 #endif
+      if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
+        break;
 SKIP_START:
     if (c >= seg_eob)
       break;
 #if CONFIG_CODE_NONZEROCOUNT
-    if (nzc == nzc_expected)
+    if (nzc_used && nzc == nzc_expected)
       break;
     // decode zero node only if there are zeros left
-    if (seg_eob - nzc_expected - c + nzc > 0)
+    if (!nzc_used || seg_eob - nzc_expected - c + nzc > 0)
 #endif
     if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
@@ -330,10 +333,17 @@ SKIP_START:
     WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY6);
   }
 
-#if CONFIG_CODE_NONZEROCOUNT == 0
-  if (c < seg_eob)
-    coef_counts[type][ref][get_coef_band(scan, txfm_size, c)]
-               [pt][DCT_EOB_TOKEN]++;
+#if CONFIG_CODE_NONZEROCOUNT
+  if (!nzc_used)
+#endif
+    if (c < seg_eob)
+      coef_counts[type][ref][get_coef_band(scan, txfm_size, c)]
+                 [pt][DCT_EOB_TOKEN]++;
+#if CONFIG_CODE_NONZEROCOUNT
+  if (!nzc_used)
+    xd->mode_info_context->mbmi.nzcs[block_idx] = nzc;
+  else
+    assert(nzc == nzc_expected);
 #endif
 
   A0[aidx] = L0[lidx] = c > 0;

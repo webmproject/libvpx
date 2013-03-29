@@ -2646,8 +2646,8 @@ static unsigned int get_nzc_4x4_uv(VP9_COMMON *cm, MODE_INFO *m,
     if (m->mbmi.mb_skip_coeff || !mb_in_cur_tile(cm, mb_row - r, mb_col - c))
       return 0;
     else
-    return get_nzc_4x4_uv_sb32(
-        &m->mbmi, mb16_to_sb32_index(mb_row, mb_col, block));
+      return get_nzc_4x4_uv_sb32(
+          &m->mbmi, mb16_to_sb32_index(mb_row, mb_col, block));
   } else {
     return get_nzc_4x4_uv_mb16(mi, block);
   }
@@ -3291,6 +3291,7 @@ static void update_nzc(VP9_COMMON *cm,
                        int ref,
                        int type) {
   int e, c;
+  if (!get_nzc_used(tx_size)) return;
   c = codenzc(nzc);
   if (tx_size == TX_32X32)
     cm->fc.nzc_counts_32x32[nzc_context][ref][type][c]++;
@@ -3604,10 +3605,10 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
 }
 
 #if CONFIG_CODE_NONZEROCOUNT
-static void adapt_nzc_probs(VP9_COMMON *cm,
-                            int block_size,
-                            int count_sat,
-                            int update_factor) {
+static void adapt_nzc_probs_common(VP9_COMMON *cm,
+                                   TX_SIZE tx_size,
+                                   int count_sat,
+                                   int update_factor) {
   int c, r, b, n;
   int count, factor;
   unsigned int nzc_branch_ct[NZC32X32_NODES][2];
@@ -3618,19 +3619,20 @@ static void adapt_nzc_probs(VP9_COMMON *cm,
   vp9_prob *pre_nzc_probs;
   unsigned int *nzc_counts;
 
-  if (block_size == 32) {
+  if (!get_nzc_used(tx_size)) return;
+  if (tx_size == TX_32X32) {
     tokens = NZC32X32_TOKENS;
     nzc_tree = vp9_nzc32x32_tree;
     dst_nzc_probs = cm->fc.nzc_probs_32x32[0][0][0];
     pre_nzc_probs = cm->fc.pre_nzc_probs_32x32[0][0][0];
     nzc_counts = cm->fc.nzc_counts_32x32[0][0][0];
-  } else if (block_size == 16) {
+  } else if (tx_size == TX_16X16) {
     tokens = NZC16X16_TOKENS;
     nzc_tree = vp9_nzc16x16_tree;
     dst_nzc_probs = cm->fc.nzc_probs_16x16[0][0][0];
     pre_nzc_probs = cm->fc.pre_nzc_probs_16x16[0][0][0];
     nzc_counts = cm->fc.nzc_counts_16x16[0][0][0];
-  } else if (block_size == 8) {
+  } else if (tx_size == TX_8X8) {
     tokens = NZC8X8_TOKENS;
     nzc_tree = vp9_nzc8x8_tree;
     dst_nzc_probs = cm->fc.nzc_probs_8x8[0][0][0];
@@ -3667,6 +3669,9 @@ static void adapt_nzc_probs(VP9_COMMON *cm,
 static void adapt_nzc_pcat(VP9_COMMON *cm, int count_sat, int update_factor) {
   int c, t;
   int count, factor;
+  if (!(get_nzc_used(TX_4X4) || get_nzc_used(TX_8X8) ||
+        get_nzc_used(TX_16X16) || get_nzc_used(TX_32X32)))
+    return;
   for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
     for (t = 0; t < NZC_TOKENS_EXTRA; ++t) {
       int bits = vp9_extranzcbits[t + NZC_TOKENS_NOEXTRA];
@@ -3716,10 +3721,10 @@ void vp9_adapt_nzc_probs(VP9_COMMON *cm) {
     count_sat = COEF_COUNT_SAT;
   }
 
-  adapt_nzc_probs(cm, 4, count_sat, update_factor);
-  adapt_nzc_probs(cm, 8, count_sat, update_factor);
-  adapt_nzc_probs(cm, 16, count_sat, update_factor);
-  adapt_nzc_probs(cm, 32, count_sat, update_factor);
+  adapt_nzc_probs_common(cm, TX_4X4, count_sat, update_factor);
+  adapt_nzc_probs_common(cm, TX_8X8, count_sat, update_factor);
+  adapt_nzc_probs_common(cm, TX_16X16, count_sat, update_factor);
+  adapt_nzc_probs_common(cm, TX_32X32, count_sat, update_factor);
   adapt_nzc_pcat(cm, count_sat, update_factor);
 }
 #endif  // CONFIG_CODE_NONZEROCOUNT
