@@ -11,159 +11,137 @@
 #include "vp9/common/vp9_extend.h"
 #include "vpx_mem/vpx_mem.h"
 
-static void copy_and_extend_plane(uint8_t *s,       /* source */
-                                  int sp,           /* source pitch */
-                                  uint8_t *d,       /* destination */
-                                  int dp,           /* destination pitch */
-                                  int h,            /* height */
-                                  int w,            /* width */
-                                  int et,           /* extend top border */
-                                  int el,           /* extend left border */
-                                  int eb,           /* extend bottom border */
-                                  int er) {         /* extend right border */
-  int i;
-  uint8_t *src_ptr1, *src_ptr2;
-  uint8_t *dest_ptr1, *dest_ptr2;
-  int linesize;
+static void copy_and_extend_plane(const uint8_t *src, int src_pitch,
+                                  uint8_t *dst, int dst_pitch,
+                                  int w, int h,
+                                  int extend_top, int extend_left,
+                                  int extend_bottom, int extend_right) {
+  int i, linesize;
 
-  /* copy the left and right most columns out */
-  src_ptr1 = s;
-  src_ptr2 = s + w - 1;
-  dest_ptr1 = d - el;
-  dest_ptr2 = d + w;
+  // copy the left and right most columns out
+  const uint8_t *src_ptr1 = src;
+  const uint8_t *src_ptr2 = src + w - 1;
+  uint8_t *dst_ptr1 = dst - extend_left;
+  uint8_t *dst_ptr2 = dst + w;
 
   for (i = 0; i < h; i++) {
-    vpx_memset(dest_ptr1, src_ptr1[0], el);
-    vpx_memcpy(dest_ptr1 + el, src_ptr1, w);
-    vpx_memset(dest_ptr2, src_ptr2[0], er);
-    src_ptr1  += sp;
-    src_ptr2  += sp;
-    dest_ptr1 += dp;
-    dest_ptr2 += dp;
+    vpx_memset(dst_ptr1, src_ptr1[0], extend_left);
+    vpx_memcpy(dst_ptr1 + extend_left, src_ptr1, w);
+    vpx_memset(dst_ptr2, src_ptr2[0], extend_right);
+    src_ptr1 += src_pitch;
+    src_ptr2 += src_pitch;
+    dst_ptr1 += dst_pitch;
+    dst_ptr2 += dst_pitch;
   }
 
-  /* Now copy the top and bottom lines into each line of the respective
-   * borders
-   */
-  src_ptr1 = d - el;
-  src_ptr2 = d + dp * (h - 1) - el;
-  dest_ptr1 = d + dp * (-et) - el;
-  dest_ptr2 = d + dp * (h) - el;
-  linesize = el + er + w;
+  // Now copy the top and bottom lines into each line of the respective
+  // borders
+  src_ptr1 = dst - extend_left;
+  src_ptr2 = dst + dst_pitch * (h - 1) - extend_left;
+  dst_ptr1 = dst + dst_pitch * (-extend_top) - extend_left;
+  dst_ptr2 = dst + dst_pitch * (h) - extend_left;
+  linesize = extend_left + extend_right + w;
 
-  for (i = 0; i < et; i++) {
-    vpx_memcpy(dest_ptr1, src_ptr1, linesize);
-    dest_ptr1 += dp;
+  for (i = 0; i < extend_top; i++) {
+    vpx_memcpy(dst_ptr1, src_ptr1, linesize);
+    dst_ptr1 += dst_pitch;
   }
 
-  for (i = 0; i < eb; i++) {
-    vpx_memcpy(dest_ptr2, src_ptr2, linesize);
-    dest_ptr2 += dp;
+  for (i = 0; i < extend_bottom; i++) {
+    vpx_memcpy(dst_ptr2, src_ptr2, linesize);
+    dst_ptr2 += dst_pitch;
   }
 }
 
-void vp9_copy_and_extend_frame(YV12_BUFFER_CONFIG *src,
+void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                YV12_BUFFER_CONFIG *dst) {
-  int et = dst->border;
-  int el = dst->border;
-  int eb = dst->border + dst->y_height - src->y_height;
-  int er = dst->border + dst->y_width - src->y_width;
+  const int et_y = dst->border;
+  const int el_y = dst->border;
+  const int eb_y = dst->border + dst->y_height - src->y_height;
+  const int er_y = dst->border + dst->y_width - src->y_width;
+
+  const int et_uv = dst->border >> 1;
+  const int el_uv = dst->border >> 1;
+  const int eb_uv = (dst->border >> 1) + dst->uv_height - src->uv_height;
+  const int er_uv = (dst->border >> 1) + dst->uv_width - src->uv_width;
 
   copy_and_extend_plane(src->y_buffer, src->y_stride,
                         dst->y_buffer, dst->y_stride,
-                        src->y_height, src->y_width,
-                        et, el, eb, er);
-
-  et = dst->border >> 1;
-  el = dst->border >> 1;
-  eb = (dst->border >> 1) + dst->uv_height - src->uv_height;
-  er = (dst->border >> 1) + dst->uv_width - src->uv_width;
+                        src->y_width, src->y_height,
+                        et_y, el_y, eb_y, er_y);
 
   copy_and_extend_plane(src->u_buffer, src->uv_stride,
                         dst->u_buffer, dst->uv_stride,
-                        src->uv_height, src->uv_width,
-                        et, el, eb, er);
+                        src->uv_width, src->uv_height,
+                        et_uv, el_uv, eb_uv, er_uv);
 
   copy_and_extend_plane(src->v_buffer, src->uv_stride,
                         dst->v_buffer, dst->uv_stride,
-                        src->uv_height, src->uv_width,
-                        et, el, eb, er);
+                        src->uv_width, src->uv_height,
+                        et_y, el_y, eb_uv, er_uv);
 }
 
-void vp9_copy_and_extend_frame_with_rect(YV12_BUFFER_CONFIG *src,
+void vp9_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
                                          YV12_BUFFER_CONFIG *dst,
                                          int srcy, int srcx,
                                          int srch, int srcw) {
-  int et = dst->border;
-  int el = dst->border;
-  int eb = dst->border + dst->y_height - src->y_height;
-  int er = dst->border + dst->y_width - src->y_width;
-  int src_y_offset = srcy * src->y_stride + srcx;
-  int dst_y_offset = srcy * dst->y_stride + srcx;
-  int src_uv_offset = ((srcy * src->uv_stride) >> 1) + (srcx >> 1);
-  int dst_uv_offset = ((srcy * dst->uv_stride) >> 1) + (srcx >> 1);
-
   // If the side is not touching the bounder then don't extend.
-  if (srcy)
-    et = 0;
-  if (srcx)
-    el = 0;
-  if (srcy + srch != src->y_height)
-    eb = 0;
-  if (srcx + srcw != src->y_width)
-    er = 0;
+  const int et_y = srcy ? 0 : dst->border;
+  const int el_y = srcx ? 0 : dst->border;
+  const int eb_y = srcy + srch != src->y_height ? 0 :
+                      dst->border + dst->y_height - src->y_height;
+  const int er_y = srcx + srcw != src->y_width ? 0 :
+                      dst->border + dst->y_width - src->y_width;
+  const int src_y_offset = srcy * src->y_stride + srcx;
+  const int dst_y_offset = srcy * dst->y_stride + srcx;
 
-  copy_and_extend_plane(src->y_buffer + src_y_offset,
-                        src->y_stride,
-                        dst->y_buffer + dst_y_offset,
-                        dst->y_stride,
-                        srch, srcw,
-                        et, el, eb, er);
+  const int et_uv = (et_y + 1) >> 1;
+  const int el_uv = (el_y + 1) >> 1;
+  const int eb_uv = (eb_y + 1) >> 1;
+  const int er_uv = (er_y + 1) >> 1;
+  const int src_uv_offset = ((srcy * src->uv_stride) >> 1) + (srcx >> 1);
+  const int dst_uv_offset = ((srcy * dst->uv_stride) >> 1) + (srcx >> 1);
+  const int srch_uv = (srch + 1) >> 1;
+  const int srcw_uv = (srcw + 1) >> 1;
 
-  et = (et + 1) >> 1;
-  el = (el + 1) >> 1;
-  eb = (eb + 1) >> 1;
-  er = (er + 1) >> 1;
-  srch = (srch + 1) >> 1;
-  srcw = (srcw + 1) >> 1;
+  copy_and_extend_plane(src->y_buffer + src_y_offset, src->y_stride,
+                        dst->y_buffer + dst_y_offset, dst->y_stride,
+                        srcw, srch,
+                        et_y, el_y, eb_y, er_y);
 
-  copy_and_extend_plane(src->u_buffer + src_uv_offset,
-                        src->uv_stride,
-                        dst->u_buffer + dst_uv_offset,
-                        dst->uv_stride,
-                        srch, srcw,
-                        et, el, eb, er);
+  copy_and_extend_plane(src->u_buffer + src_uv_offset, src->uv_stride,
+                        dst->u_buffer + dst_uv_offset, dst->uv_stride,
+                        srcw_uv, srch_uv,
+                        et_uv, el_uv, eb_uv, er_uv);
 
-  copy_and_extend_plane(src->v_buffer + src_uv_offset,
-                        src->uv_stride,
-                        dst->v_buffer + dst_uv_offset,
-                        dst->uv_stride,
-                        srch, srcw,
-                        et, el, eb, er);
+  copy_and_extend_plane(src->v_buffer + src_uv_offset, src->uv_stride,
+                        dst->v_buffer + dst_uv_offset, dst->uv_stride,
+                        srcw_uv, srch_uv,
+                        et_uv, el_uv, eb_uv, er_uv);
 }
 
-/* note the extension is only for the last row, for intra prediction purpose */
-void vp9_extend_mb_row(YV12_BUFFER_CONFIG *ybf, uint8_t *YPtr,
-                       uint8_t *UPtr, uint8_t *VPtr) {
+// note the extension is only for the last row, for intra prediction purpose
+void vp9_extend_mb_row(YV12_BUFFER_CONFIG *buf,
+                       uint8_t *y, uint8_t *u, uint8_t *v) {
   int i;
 
-  YPtr += ybf->y_stride * 14;
-  UPtr += ybf->uv_stride * 6;
-  VPtr += ybf->uv_stride * 6;
+  y += buf->y_stride * 14;
+  u += buf->uv_stride * 6;
+  v += buf->uv_stride * 6;
 
   for (i = 0; i < 4; i++) {
-    YPtr[i] = YPtr[-1];
-    UPtr[i] = UPtr[-1];
-    VPtr[i] = VPtr[-1];
+    y[i] = y[-1];
+    u[i] = u[-1];
+    v[i] = v[-1];
   }
 
-  YPtr += ybf->y_stride;
-  UPtr += ybf->uv_stride;
-  VPtr += ybf->uv_stride;
+  y += buf->y_stride;
+  u += buf->uv_stride;
+  v += buf->uv_stride;
 
   for (i = 0; i < 4; i++) {
-    YPtr[i] = YPtr[-1];
-    UPtr[i] = UPtr[-1];
-    VPtr[i] = VPtr[-1];
+    y[i] = y[-1];
+    u[i] = u[-1];
+    v[i] = v[-1];
   }
 }

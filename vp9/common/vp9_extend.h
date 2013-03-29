@@ -14,15 +14,17 @@
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 
-void vp9_extend_mb_row(YV12_BUFFER_CONFIG *ybf, uint8_t *YPtr,
-                       uint8_t *UPtr, uint8_t *VPtr);
 
-void vp9_copy_and_extend_frame(YV12_BUFFER_CONFIG *src,
+void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                YV12_BUFFER_CONFIG *dst);
 
-void vp9_copy_and_extend_frame_with_rect(YV12_BUFFER_CONFIG *src,
+void vp9_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
                                          YV12_BUFFER_CONFIG *dst,
                                          int srcy, int srcx,
                                          int srch, int srcw);
+
+void vp9_extend_mb_row(YV12_BUFFER_CONFIG *buf,
+                       uint8_t *y, uint8_t *u, uint8_t *v);
+
 
 #endif  // VP9_COMMON_VP9_EXTEND_H_

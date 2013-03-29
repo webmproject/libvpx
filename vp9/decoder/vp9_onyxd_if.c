@@ -154,8 +154,8 @@ void vp9_remove_decompressor(VP9D_PTR ptr) {
   if (!pbi)
     return;
 
-  // Delete sementation map
-  if (pbi->common.last_frame_seg_map != 0)
+  // Delete segmentation map
+  if (pbi->common.last_frame_seg_map)
     vpx_free(pbi->common.last_frame_seg_map);
 
   vp9_remove_common(&pbi->common);
@@ -163,6 +163,10 @@ void vp9_remove_decompressor(VP9D_PTR ptr) {
   vpx_free(pbi);
 }
 
+static int equal_dimensions(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
+    return a->y_height == b->y_height && a->y_width == b->y_width &&
+           a->uv_height == b->uv_height && a->uv_width == b->uv_width;
+}
 
 vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR ptr,
                                        VP9_REFFRAME ref_frame_flag,
@@ -176,22 +180,20 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR ptr,
    * vpxenc --test-decode functionality working, and will be replaced in a
    * later commit that adds VP9-specific controls for this functionality.
    */
-  if (ref_frame_flag == VP9_LAST_FLAG)
+  if (ref_frame_flag == VP9_LAST_FLAG) {
     ref_fb_idx = pbi->common.ref_frame_map[0];
-  else {
+  } else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
     return pbi->common.error.error_code;
   }
 
-  if (cm->yv12_fb[ref_fb_idx].y_height != sd->y_height ||
-      cm->yv12_fb[ref_fb_idx].y_width != sd->y_width ||
-      cm->yv12_fb[ref_fb_idx].uv_height != sd->uv_height ||
-      cm->yv12_fb[ref_fb_idx].uv_width != sd->uv_width) {
+  if (!equal_dimensions(&cm->yv12_fb[ref_fb_idx], sd)) {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Incorrect buffer dimensions");
-  } else
+  } else {
     vp8_yv12_copy_frame(&cm->yv12_fb[ref_fb_idx], sd);
+  }
 
   return pbi->common.error.error_code;
 }
@@ -202,7 +204,6 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
   int *ref_fb_ptr = NULL;
-  int free_fb;
 
   /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
    * encoder is using the frame buffers for. This is just a stub to keep the
@@ -221,20 +222,17 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
     return pbi->common.error.error_code;
   }
 
-  if (cm->yv12_fb[*ref_fb_ptr].y_height != sd->y_height ||
-      cm->yv12_fb[*ref_fb_ptr].y_width != sd->y_width ||
-      cm->yv12_fb[*ref_fb_ptr].uv_height != sd->uv_height ||
-      cm->yv12_fb[*ref_fb_ptr].uv_width != sd->uv_width) {
+  if (!equal_dimensions(&cm->yv12_fb[*ref_fb_ptr], sd)) {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Incorrect buffer dimensions");
   } else {
-    /* Find an empty frame buffer. */
-    free_fb = get_free_fb(cm);
-    /* Decrease fb_idx_ref_cnt since it will be increased again in
-     * ref_cnt_fb() below. */
+    // Find an empty frame buffer.
+    const int free_fb = get_free_fb(cm);
+    // Decrease fb_idx_ref_cnt since it will be increased again in
+    // ref_cnt_fb() below.
     cm->fb_idx_ref_cnt[free_fb]--;
 
-    /* Manage the reference counters and copy image. */
+    // Manage the reference counters and copy image.
     ref_cnt_fb(cm->fb_idx_ref_cnt, ref_fb_ptr, free_fb);
     vp8_yv12_copy_frame(sd, &cm->yv12_fb[*ref_fb_ptr]);
   }

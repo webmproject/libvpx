@@ -156,31 +156,24 @@ static int inter_minq[QINDEX_RANGE];
 // The formulae were derived from computing a 3rd order polynomial best
 // fit to the original data (after plotting real maxq vs minq (not q index))
 static int calculate_minq_index(double maxq,
-                                double x3, double x2, double x, double c) {
+                                double x3, double x2, double x1, double c) {
   int i;
-  double minqtarget;
-
-  minqtarget = ((x3 * maxq * maxq * maxq) +
-                (x2 * maxq * maxq) +
-                (x * maxq) +
-                c);
-
-  if (minqtarget > maxq)
-    minqtarget = maxq;
+  const double minqtarget = MIN(((x3 * maxq + x2) * maxq + x1) * maxq + c,
+                                maxq);
 
   for (i = 0; i < QINDEX_RANGE; i++) {
     if (minqtarget <= vp9_convert_qindex_to_q(i))
       return i;
   }
+
   return QINDEX_RANGE - 1;
 }
 
 static void init_minq_luts(void) {
   int i;
-  double maxq;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    maxq = vp9_convert_qindex_to_q(i);
+    const double maxq = vp9_convert_qindex_to_q(i);
 
 
     kf_low_motion_minq[i] = calculate_minq_index(maxq,
@@ -216,7 +209,6 @@ static void set_mvcost(MACROBLOCK *mb) {
   if (mb->e_mbd.allow_high_precision_mv) {
     mb->mvcost = mb->nmvcost_hp;
     mb->mvsadcost = mb->nmvsadcost_hp;
-
   } else {
     mb->mvcost = mb->nmvcost;
     mb->mvsadcost = mb->nmvsadcost;
@@ -224,15 +216,13 @@ static void set_mvcost(MACROBLOCK *mb) {
 }
 static void init_base_skip_probs(void) {
   int i;
-  double q;
-  int t;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    q = vp9_convert_qindex_to_q(i);
+    const double q = vp9_convert_qindex_to_q(i);
 
     // Exponential decay caluclation of baseline skip prob with clamping
     // Based on crude best fit of old table.
-    t = (int)(564.25 * pow(2.71828, (-0.012 * q)));
+    const int t = (int)(564.25 * pow(2.71828, (-0.012 * q)));
 
     base_skip_false_prob[i][1] = clip_prob(t);
     base_skip_false_prob[i][2] = clip_prob(t * 3 / 4);
@@ -268,7 +258,6 @@ static void update_base_skip_probs(VP9_COMP *cpi) {
           cm->mbskip_pred_probs[k];
     }
   }
-
 }
 
 void vp9_initialize_enc() {
@@ -309,7 +298,6 @@ static void setup_features(VP9_COMP *cpi) {
   vpx_memset(xd->last_mode_lf_deltas, 0, sizeof(xd->mode_lf_deltas));
 
   set_default_lf_deltas(cpi);
-
 }
 
 
@@ -527,17 +515,13 @@ static void print_seg_map(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int row, col;
   int map_index = 0;
-  FILE *statsfile;
+  FILE *statsfile = fopen("segmap.stt", "a");
 
-  statsfile = fopen("segmap.stt", "a");
-
-  fprintf(statsfile, "%10d\n",
-          cm->current_video_frame);
+  fprintf(statsfile, "%10d\n", cm->current_video_frame);
 
   for (row = 0; row < cpi->common.mb_rows; row++) {
     for (col = 0; col < cpi->common.mb_cols; col++) {
-      fprintf(statsfile, "%10d",
-              cpi->segmentation_map[map_index]);
+      fprintf(statsfile, "%10d", cpi->segmentation_map[map_index]);
       map_index++;
     }
     fprintf(statsfile, "\n");
@@ -1153,10 +1137,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   VP9_COMP *cpi = (VP9_COMP *)(ptr);
   VP9_COMMON *const cm = &cpi->common;
 
-  if (!cpi)
-    return;
-
-  if (!oxcf)
+  if (!cpi || !oxcf)
     return;
 
   if (cm->version != oxcf->version) {
@@ -1197,11 +1178,11 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->oxcf.lossless = oxcf->lossless;
   if (cpi->oxcf.lossless) {
-    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_iwalsh4x4_1;
-    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_iwalsh4x4;
+    cpi->mb.e_mbd.inv_txm4x4_1 = vp9_short_iwalsh4x4_1;
+    cpi->mb.e_mbd.inv_txm4x4   = vp9_short_iwalsh4x4;
   } else {
-    cpi->mb.e_mbd.inv_txm4x4_1    = vp9_short_idct4x4_1;
-    cpi->mb.e_mbd.inv_txm4x4      = vp9_short_idct4x4;
+    cpi->mb.e_mbd.inv_txm4x4_1 = vp9_short_idct4x4_1;
+    cpi->mb.e_mbd.inv_txm4x4   = vp9_short_idct4x4;
   }
 
   cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;
@@ -1239,31 +1220,28 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   // Convert target bandwidth from Kbit/s to Bit/s
   cpi->oxcf.target_bandwidth       *= 1000;
 
-  cpi->oxcf.starting_buffer_level =
-    rescale(cpi->oxcf.starting_buffer_level,
-            cpi->oxcf.target_bandwidth, 1000);
+  cpi->oxcf.starting_buffer_level = rescale(cpi->oxcf.starting_buffer_level,
+                                            cpi->oxcf.target_bandwidth, 1000);
 
   // Set or reset optimal and maximum buffer levels.
   if (cpi->oxcf.optimal_buffer_level == 0)
     cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
   else
-    cpi->oxcf.optimal_buffer_level =
-      rescale(cpi->oxcf.optimal_buffer_level,
-              cpi->oxcf.target_bandwidth, 1000);
+    cpi->oxcf.optimal_buffer_level = rescale(cpi->oxcf.optimal_buffer_level,
+                                             cpi->oxcf.target_bandwidth, 1000);
 
   if (cpi->oxcf.maximum_buffer_size == 0)
     cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
   else
-    cpi->oxcf.maximum_buffer_size =
-      rescale(cpi->oxcf.maximum_buffer_size,
-              cpi->oxcf.target_bandwidth, 1000);
+    cpi->oxcf.maximum_buffer_size = rescale(cpi->oxcf.maximum_buffer_size,
+                                            cpi->oxcf.target_bandwidth, 1000);
 
   // Set up frame rate and related parameters rate control values.
   vp9_new_frame_rate(cpi, cpi->oxcf.frame_rate);
 
   // Set absolute upper and lower quality limits
-  cpi->worst_quality               = cpi->oxcf.worst_allowed_q;
-  cpi->best_quality                = cpi->oxcf.best_allowed_q;
+  cpi->worst_quality = cpi->oxcf.worst_allowed_q;
+  cpi->best_quality = cpi->oxcf.best_allowed_q;
 
   // active values should only be modified if out of new range
   if (cpi->active_worst_quality > cpi->oxcf.worst_allowed_q) {
@@ -1356,30 +1334,30 @@ static void cal_nmvjointsadcost(int *mvjointsadcost) {
 static void cal_nmvsadcosts(int *mvsadcost[2]) {
   int i = 1;
 
-  mvsadcost [0] [0] = 0;
-  mvsadcost [1] [0] = 0;
+  mvsadcost[0][0] = 0;
+  mvsadcost[1][0] = 0;
 
   do {
     double z = 256 * (2 * (log2f(8 * i) + .6));
-    mvsadcost [0][i] = (int) z;
-    mvsadcost [1][i] = (int) z;
-    mvsadcost [0][-i] = (int) z;
-    mvsadcost [1][-i] = (int) z;
+    mvsadcost[0][i] = (int)z;
+    mvsadcost[1][i] = (int)z;
+    mvsadcost[0][-i] = (int)z;
+    mvsadcost[1][-i] = (int)z;
   } while (++i <= MV_MAX);
 }
 
 static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
   int i = 1;
 
-  mvsadcost [0] [0] = 0;
-  mvsadcost [1] [0] = 0;
+  mvsadcost[0][0] = 0;
+  mvsadcost[1][0] = 0;
 
   do {
     double z = 256 * (2 * (log2f(8 * i) + .6));
-    mvsadcost [0][i] = (int) z;
-    mvsadcost [1][i] = (int) z;
-    mvsadcost [0][-i] = (int) z;
-    mvsadcost [1][-i] = (int) z;
+    mvsadcost[0][i] = (int)z;
+    mvsadcost[1][i] = (int)z;
+    mvsadcost[0][-i] = (int)z;
+    mvsadcost[1][-i] = (int)z;
   } while (++i <= MV_MAX);
 }
 
@@ -2920,7 +2898,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #if CONFIG_POSTPROC
 
   if (cpi->oxcf.noise_sensitivity > 0) {
-    uint8_t *src;
     int l = 0;
 
     switch (cpi->oxcf.noise_sensitivity) {
@@ -2934,7 +2911,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         l = 60;
         break;
       case 4:
-
       case 5:
         l = 100;
         break;
@@ -2943,18 +2919,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         break;
     }
 
-
-    if (cm->frame_type == KEY_FRAME) {
-      vp9_de_noise(cpi->Source, cpi->Source, l, 1,  0);
-    } else {
-      vp9_de_noise(cpi->Source, cpi->Source, l, 1,  0);
-
-      src = cpi->Source->y_buffer;
-
-      if (cpi->Source->y_stride < 0) {
-        src += cpi->Source->y_stride * (cpi->Source->y_height - 1);
-      }
-    }
+    vp9_denoise(cpi->Source, cpi->Source, l, 1, 0);
   }
 
 #endif
@@ -3189,12 +3154,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       }
 
       // Clamp Q to upper and lower limits:
-      if (Q > q_high)
-        Q = q_high;
-      else if (Q < q_low)
-        Q = q_low;
+      Q = clamp(Q, q_low, q_high);
 
-      Loop = ((Q != last_q)) ? TRUE : FALSE;
+      Loop = Q != last_q;
     } else
       Loop = FALSE;
 
@@ -4156,16 +4118,17 @@ int vp9_set_internal_size(VP9_PTR comp,
 
 int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
   int i, j;
-  int Total = 0;
+  int total = 0;
 
   uint8_t *src = source->y_buffer;
   uint8_t *dst = dest->y_buffer;
 
-  // Loop through the Y plane raw and reconstruction data summing (square differences)
+  // Loop through the Y plane raw and reconstruction data summing
+  // (square differences)
   for (i = 0; i < source->y_height; i += 16) {
     for (j = 0; j < source->y_width; j += 16) {
       unsigned int sse;
-      Total += vp9_mse16x16(src + j, source->y_stride, dst + j, dest->y_stride,
+      total += vp9_mse16x16(src + j, source->y_stride, dst + j, dest->y_stride,
                             &sse);
     }
 
@@ -4173,7 +4136,7 @@ int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
     dst += 16 * dest->y_stride;
   }
 
-  return Total;
+  return total;
 }
 
 
