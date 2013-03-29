@@ -34,8 +34,6 @@ extern const vp9_prob vp9_mbsplit_probs[VP9_NUMMBSPLITS - 1];
 
 extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
-extern const vp9_prob vp9_sub_mv_ref_prob[VP9_SUBMVREFS - 1];
-
 extern const vp9_prob vp9_sub_mv_ref_prob2[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
 
 extern const unsigned int vp9_kf_default_bmode_counts[VP9_KF_BINTRAMODES]

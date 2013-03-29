@@ -115,8 +115,6 @@ int vp9_mv_cont(const int_mv *l, const int_mv *a) {
   return SUBMVREF_NORMAL;
 }
 
-const vp9_prob vp9_sub_mv_ref_prob [VP9_SUBMVREFS - 1] = { 180, 162, 25};
-
 const vp9_prob vp9_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP9_SUBMVREFS - 1] = {
   { 147, 136, 18 },
   { 106, 145, 1  },
