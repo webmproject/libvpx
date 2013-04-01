@@ -640,6 +640,8 @@ typedef struct VP9_COMP {
   int    bytes;
   double summed_quality;
   double summed_weights;
+  double summedp_quality;
+  double summedp_weights;
   unsigned int tot_recode_hits;
 
 
