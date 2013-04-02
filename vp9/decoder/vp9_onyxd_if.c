@@ -111,7 +111,7 @@ void vp9_initialize_dec() {
 }
 
 VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
-  VP9D_COMP *pbi = vpx_memalign(32, sizeof(VP9D_COMP));
+  VP9D_COMP *const pbi = vpx_memalign(32, sizeof(VP9D_COMP));
 
   if (!pbi)
     return NULL;
@@ -121,40 +121,37 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   if (setjmp(pbi->common.error.jmp)) {
     pbi->common.error.setjmp = 0;
     vp9_remove_decompressor(pbi);
-    return 0;
+    return NULL;
   }
 
   pbi->common.error.setjmp = 1;
   vp9_initialize_dec();
 
   vp9_create_common(&pbi->common);
-  pbi->oxcf = *oxcf;
 
+  pbi->oxcf = *oxcf;
   pbi->common.current_video_frame = 0;
   pbi->ready_for_new_data = 1;
 
-  /* vp9_init_de_quantizer() is first called here. Add check in
-   * frame_init_dequantizer() to avoid unnecessary calling of
-   * vp9_init_de_quantizer() for every frame.
-   */
+  // vp9_init_de_quantizer() is first called here. Add check in
+  // frame_init_dequantizer() to avoid unnecessary calling of
+  // vp9_init_de_quantizer() for every frame.
   vp9_init_de_quantizer(pbi);
 
   vp9_loop_filter_init(&pbi->common);
 
   pbi->common.error.setjmp = 0;
-
   pbi->decoded_key_frame = 0;
 
-  return (VP9D_PTR) pbi;
+  return pbi;
 }
 
 void vp9_remove_decompressor(VP9D_PTR ptr) {
-  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
+  VP9D_COMP *const pbi = (VP9D_COMP *)ptr;
 
   if (!pbi)
     return;
 
-  // Delete segmentation map
   if (pbi->common.last_frame_seg_map)
     vpx_free(pbi->common.last_frame_seg_map);
 
@@ -273,24 +270,23 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
     pbi->common.active_ref_idx[ref_index] = INT_MAX;
 }
 
-int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
-                                const unsigned char **psource,
+int vp9_receive_compressed_data(VP9D_PTR ptr,
+                                uint64_t size, const uint8_t **psource,
                                 int64_t time_stamp) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
-  const unsigned char *source = *psource;
+  const uint8_t *source = *psource;
   int retcode = 0;
 
   /*if(pbi->ready_for_new_data == 0)
       return -1;*/
 
-  if (ptr == 0) {
+  if (ptr == 0)
     return -1;
-  }
 
   pbi->common.error.error_code = VPX_CODEC_OK;
 
-  pbi->Source = source;
+  pbi->source = source;
   pbi->source_sz = size;
 
   if (pbi->source_sz == 0) {
@@ -325,6 +321,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+
     return -1;
   }
 
