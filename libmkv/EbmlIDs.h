@@ -67,10 +67,10 @@ enum mkv {
   BlockGroup = 0xA0,
   Block = 0xA1,
 /* BlockVirtual = 0xA2, */
-/* BlockAdditions = 0x75A1, */
-/* BlockMore = 0xA6, */
-/* BlockAddID = 0xEE, */
-/* BlockAdditional = 0xA5, */
+  BlockAdditions = 0x75A1,
+  BlockMore = 0xA6,
+  BlockAddID = 0xEE,
+  BlockAdditional = 0xA5,
   BlockDuration = 0x9B,
 /* ReferencePriority = 0xFA, */
   ReferenceBlock = 0xFB,
@@ -100,7 +100,7 @@ enum mkv {
   DefaultDuration = 0x23E383,
 /* TrackTimecodeScale = 0x23314F, */
 /* TrackOffset = 0x537F, */
-/* MaxBlockAdditionID = 0x55EE, */
+  MaxBlockAdditionID = 0x55EE,
   Name = 0x536E,
   Language = 0x22B59C,
   CodecID = 0x86,
@@ -120,6 +120,7 @@ enum mkv {
   Video = 0xE0,
   FlagInterlaced = 0x9A,
   StereoMode = 0x53B8,
+  AlphaMode = 0x53C0,
   PixelWidth = 0xB0,
   PixelHeight = 0xBA,
   PixelCropBottom = 0x54AA,

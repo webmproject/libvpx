@@ -19,6 +19,13 @@ EOF
 forward_decls vp8_common_forward_decls
 
 #
+# system state
+#
+prototype void vp8_clear_system_state ""
+specialize vp8_clear_system_state mmx
+vp8_clear_system_state_mmx=vpx_reset_mmx_state
+
+#
 # Dequant
 #
 prototype void vp8_dequantize_b "struct blockd*, short *dqc"

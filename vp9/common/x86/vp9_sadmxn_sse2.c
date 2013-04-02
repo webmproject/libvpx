@@ -8,13 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <emmintrin.h>  // SSE2
-#include "./vpx_config.h"
-#include "./vp9_rtcd.h"
+#include <emmintrin.h>  /* SSE2 */
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/emmintrin_compat.h"
 
-#if HAVE_SSE2
 unsigned int vp9_sad16x3_sse2(
   const unsigned char *src_ptr,
   int  src_stride,
@@ -96,5 +93,3 @@ unsigned int vp9_sad3x16_sse2(
   sad = _mm_add_epi16(sad,  _mm_srli_si128(sad, 8));
   return _mm_cvtsi128_si32(sad);
 }
-
-#endif
