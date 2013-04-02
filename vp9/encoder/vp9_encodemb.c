@@ -549,9 +549,10 @@ static void optimize_b(VP9_COMMON *const cm,
   MACROBLOCKD *const xd = &mb->e_mbd;
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
+  const struct plane_block_idx pb_idx = plane_block_idx(xd, ib);
   const int16_t *coeff_ptr = mb->coeff + ib * 16;
-  int16_t *qcoeff_ptr = xd->qcoeff + ib * 16;
-  int16_t *dqcoeff_ptr = xd->dqcoeff + ib * 16;
+  int16_t *qcoeff_ptr;
+  int16_t *dqcoeff_ptr;
   int eob = xd->eobs[ib], final_eob, sz = 0;
   const int i0 = 0;
   int rc, x, next, i;
@@ -582,6 +583,8 @@ static void optimize_b(VP9_COMMON *const cm,
   nzc0 = nzc1 = nzc;
 #endif
 
+  dqcoeff_ptr = BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block, 16);
+  qcoeff_ptr = BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16);
   switch (tx_size) {
     default:
     case TX_4X4: {

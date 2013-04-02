@@ -16,6 +16,8 @@
 #include "vp9/common/vp9_invtrans.h"
 #include "vp9/encoder/vp9_encodeintra.h"
 
+static void encode_intra4x4block(MACROBLOCK *x, int ib);
+
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   (void) cpi;
@@ -31,17 +33,20 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
 
     for (i = 0; i < 16; i++) {
       x->e_mbd.block[i].bmi.as_mode.first = B_DC_PRED;
-      vp9_encode_intra4x4block(x, i);
+      encode_intra4x4block(x, i);
     }
   }
 
   return vp9_get_mb_ss(x->src_diff);
 }
 
-void vp9_encode_intra4x4block(MACROBLOCK *x, int ib) {
+static void encode_intra4x4block(MACROBLOCK *x, int ib) {
   BLOCKD *b = &x->e_mbd.block[ib];
   BLOCK *be = &x->block[ib];
+  MACROBLOCKD * const xd = &x->e_mbd;
   TX_TYPE tx_type;
+
+  assert(ib < 16);
 
 #if CONFIG_NEWBINTRAMODES
   b->bmi.as_mode.context = vp9_find_bpred_context(&x->e_mbd, b);
@@ -54,12 +59,14 @@ void vp9_encode_intra4x4block(MACROBLOCK *x, int ib) {
   if (tx_type != DCT_DCT) {
     vp9_short_fht4x4(be->src_diff, be->coeff, 16, tx_type);
     vp9_ht_quantize_b_4x4(x, ib, tx_type);
-    vp9_short_iht4x4(b->dqcoeff, b->diff, 16, tx_type);
+    vp9_short_iht4x4(BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
+                     b->diff, 16, tx_type);
   } else {
     x->fwd_txm4x4(be->src_diff, be->coeff, 32);
     x->quantize_b_4x4(x, ib);
     vp9_inverse_transform_b_4x4(&x->e_mbd, x->e_mbd.eobs[ib],
-                                b->dqcoeff, b->diff, 32);
+                                BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
+                                b->diff, 32);
   }
 
   vp9_recon_b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
@@ -69,7 +76,7 @@ void vp9_encode_intra4x4mby(MACROBLOCK *mb) {
   int i;
 
   for (i = 0; i < 16; i++)
-    vp9_encode_intra4x4block(mb, i);
+    encode_intra4x4block(mb, i);
 }
 
 void vp9_encode_intra16x16mby(VP9_COMMON *const cm, MACROBLOCK *x) {
@@ -151,41 +158,47 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
 
   if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
     int idx = (ib & 0x02) ? (ib + 2) : ib;
+    int16_t * const dqcoeff = BLOCK_OFFSET(xd->plane[0].dqcoeff, idx, 16);
 
+    assert(idx < 16);
     tx_type = get_tx_type_8x8(xd, ib);
     if (tx_type != DCT_DCT) {
       vp9_short_fht8x8(be->src_diff, (x->block + idx)->coeff, 16, tx_type);
       x->quantize_b_8x8(x, idx, tx_type);
-      vp9_short_iht8x8(xd->block[idx].dqcoeff, xd->block[ib].diff,
+      vp9_short_iht8x8(dqcoeff, xd->block[ib].diff,
                             16, tx_type);
     } else {
       x->fwd_txm8x8(be->src_diff, (x->block + idx)->coeff, 32);
       x->quantize_b_8x8(x, idx, DCT_DCT);
-      vp9_short_idct8x8(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
+      vp9_short_idct8x8(dqcoeff, xd->block[ib].diff, 32);
     }
   } else {
     for (i = 0; i < 4; i++) {
+      int idx = ib + iblock[i];
+      int16_t * const dqcoeff = BLOCK_OFFSET(xd->plane[0].dqcoeff, idx, 16);
+
+      assert(idx < 16);
       b = &xd->block[ib + iblock[i]];
       be = &x->block[ib + iblock[i]];
       tx_type = get_tx_type_4x4(xd, ib + iblock[i]);
       if (tx_type != DCT_DCT) {
         vp9_short_fht4x4(be->src_diff, be->coeff, 16, tx_type);
         vp9_ht_quantize_b_4x4(x, ib + iblock[i], tx_type);
-        vp9_short_iht4x4(b->dqcoeff, b->diff, 16, tx_type);
+        vp9_short_iht4x4(dqcoeff, b->diff, 16, tx_type);
       } else if (!(i & 1) &&
                  get_tx_type_4x4(xd, ib + iblock[i] + 1) == DCT_DCT) {
         x->fwd_txm8x4(be->src_diff, be->coeff, 32);
         x->quantize_b_4x4_pair(x, ib + iblock[i], ib + iblock[i] + 1);
         vp9_inverse_transform_b_4x4(xd, xd->eobs[ib + iblock[i]],
-                                    b->dqcoeff, b->diff, 32);
+                                    dqcoeff, b->diff, 32);
         vp9_inverse_transform_b_4x4(xd, xd->eobs[ib + iblock[i] + 1],
-                                    (b + 1)->dqcoeff, (b + 1)->diff, 32);
+                                    dqcoeff + 16, (b + 1)->diff, 32);
         i++;
       } else {
         x->fwd_txm4x4(be->src_diff, be->coeff, 32);
         x->quantize_b_4x4(x, ib + iblock[i]);
         vp9_inverse_transform_b_4x4(xd, xd->eobs[ib + iblock[i]],
-                                    b->dqcoeff, b->diff, 32);
+                                    dqcoeff, b->diff, 32);
       }
     }
   }
@@ -206,9 +219,12 @@ void vp9_encode_intra8x8mby(MACROBLOCK *x) {
 }
 
 static void encode_intra_uv4x4(MACROBLOCK *x, int ib, int mode) {
+  MACROBLOCKD * const xd = &x->e_mbd;
   BLOCKD *b = &x->e_mbd.block[ib];
   BLOCK *be = &x->block[ib];
+  int16_t * const dqcoeff = MB_SUBBLOCK_FIELD(xd, dqcoeff, ib);
 
+  assert(ib >= 16 && ib < 24);
   vp9_intra_uv4x4_predict(&x->e_mbd, b, mode, b->predictor);
 
   vp9_subtract_b(be, b, 8);
@@ -216,7 +232,7 @@ static void encode_intra_uv4x4(MACROBLOCK *x, int ib, int mode) {
   x->fwd_txm4x4(be->src_diff, be->coeff, 16);
   x->quantize_b_4x4(x, ib);
   vp9_inverse_transform_b_4x4(&x->e_mbd, x->e_mbd.eobs[ib],
-                              b->dqcoeff, b->diff, 16);
+                              dqcoeff, b->diff, 16);
 
   vp9_recon_uv_b_c(b->predictor, b->diff, *(b->base_dst) + b->dst,
                    b->dst_stride);

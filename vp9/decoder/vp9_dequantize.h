@@ -40,10 +40,9 @@ void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
 
 void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *dq,
                                               unsigned char *pre,
-                                              unsigned char *dst_u,
-                                              unsigned char *dst_v,
+                                              unsigned char *dst,
                                               int stride,
-                                              struct macroblockd *xd);
+                                              uint16_t *eobs);
 
 void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input, const int16_t *dq,
                                     unsigned char *pred, unsigned char *dest,

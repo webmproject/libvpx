@@ -260,8 +260,6 @@ typedef struct {
 } MODE_INFO;
 
 typedef struct blockd {
-  int16_t *qcoeff;
-  int16_t *dqcoeff;
   uint8_t *predictor;
   int16_t *diff;
   int16_t *dequant;
@@ -295,15 +293,28 @@ struct scale_factors {
 #endif
 };
 
+enum { MAX_MB_PLANE = 3 };
+
+struct mb_plane {
+  DECLARE_ALIGNED(16, int16_t,  qcoeff[64 * 64]);
+  DECLARE_ALIGNED(16, int16_t,  dqcoeff[64 * 64]);
+};
+
+#define BLOCK_OFFSET(x, i, n) ((x) + (i) * (n))
+
+#define MB_SUBBLOCK_FIELD(x, field, i) (\
+  ((i) < 16) ? BLOCK_OFFSET((x)->plane[0].field, (i), 16) : \
+  ((i) < 20) ? BLOCK_OFFSET((x)->plane[1].field, ((i) - 16), 16) : \
+  BLOCK_OFFSET((x)->plane[2].field, ((i) - 20), 16))
+
 typedef struct macroblockd {
   DECLARE_ALIGNED(16, int16_t,  diff[64*64+32*32*2]);      /* from idct diff */
   DECLARE_ALIGNED(16, uint8_t,  predictor[384]);  // unused for superblocks
-  DECLARE_ALIGNED(16, int16_t,  qcoeff[64*64+32*32*2]);
-  DECLARE_ALIGNED(16, int16_t,  dqcoeff[64*64+32*32*2]);
   DECLARE_ALIGNED(16, uint16_t, eobs[256+64*2]);
 #if CONFIG_CODE_NONZEROCOUNT
   DECLARE_ALIGNED(16, uint16_t, nzcs[256+64*2]);
 #endif
+  struct mb_plane plane[MAX_MB_PLANE];
 
   /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
   BLOCKD block[24];
@@ -384,8 +395,8 @@ typedef struct macroblockd {
   void (*itxm_add_y_block)(int16_t *q, const int16_t *dq,
     uint8_t *pre, uint8_t *dst, int stride, struct macroblockd *xd);
   void (*itxm_add_uv_block)(int16_t *q, const int16_t *dq,
-    uint8_t *pre, uint8_t *dst_u, uint8_t *dst_v, int stride,
-    struct macroblockd *xd);
+    uint8_t *pre, uint8_t *dst, int stride,
+    uint16_t *eobs);
 
   struct subpix_fn_table  subpix;
 
@@ -681,4 +692,34 @@ static int get_nzc_used(TX_SIZE tx_size) {
   return (tx_size >= TX_16X16);
 }
 #endif
+
+struct plane_block_idx {
+  int plane;
+  int block;
+};
+
+// TODO(jkoleszar): returning a struct so it can be used in a const context,
+// expect to refactor this further later.
+static INLINE struct plane_block_idx plane_block_idx(MACROBLOCKD *xd,
+                                                     int b_idx) {
+  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+  const int u_offset = 16 << (sb_type * 2);
+  const int v_offset = 20 << (sb_type * 2);
+  struct plane_block_idx res;
+
+  if (b_idx < u_offset) {
+    res.plane = 0;
+    res.block = b_idx;
+  } else if (b_idx < v_offset) {
+    res.plane = 1;
+    res.block = b_idx - u_offset;
+  } else {
+    assert(b_idx < (24 << (sb_type * 2)));
+    res.plane = 2;
+    res.block = b_idx - v_offset;
+  }
+  return res;
+}
+
+
 #endif  // VP9_COMMON_VP9_BLOCKD_H_

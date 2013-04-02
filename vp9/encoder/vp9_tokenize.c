@@ -123,7 +123,9 @@ static void tokenize_b(VP9_COMP *cpi,
   int c = 0;
   const int eob = xd->eobs[ib];     /* one beyond last nonzero coeff */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
-  int16_t *qcoeff_ptr = xd->qcoeff + 16 * ib;
+  const struct plane_block_idx pb_idx = plane_block_idx(xd, ib);
+  const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff,
+                                           pb_idx.block, 16);
   int seg_eob, default_eob, pad;
   const int segment_id = mbmi->segment_id;
   const BLOCK_SIZE_TYPE sb_type = mbmi->sb_type;
