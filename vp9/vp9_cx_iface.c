@@ -486,7 +486,10 @@ static vpx_codec_err_t vp8e_common_init(vpx_codec_ctx_t *ctx,
     priv->vp8_cfg.pkt_list = &priv->pkt_list.head;
     priv->vp8_cfg.experimental = experimental;
 
-    priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 2;
+    // TODO(agrange) Check the limits set on this buffer, or the check that is
+    // applied in vp8e_encode.
+    priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 8;
+//    priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 2;
 
     if (priv->cx_data_sz < 4096) priv->cx_data_sz = 4096;
 
@@ -754,7 +757,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_cx_pkt_t pkt;
         VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
 
-        /* Pack invisible frames with the next visisble frame */
+        /* Pack invisible frames with the next visible frame */
         if (!cpi->common.show_frame) {
           if (!ctx->pending_cx_data)
             ctx->pending_cx_data = cx_data;

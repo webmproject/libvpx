@@ -249,7 +249,7 @@ int vp9_get_reference_dec(VP9D_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
   return 0;
 }
 
-/* If any buffer updating is signalled it should be done here. */
+/* If any buffer updating is signaled it should be done here. */
 static void swap_frame_buffers(VP9D_COMP *pbi) {
   int ref_index = 0, mask;
 

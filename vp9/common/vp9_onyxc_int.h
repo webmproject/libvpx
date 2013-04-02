@@ -18,6 +18,7 @@
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
+
 #if CONFIG_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif
@@ -37,8 +38,13 @@ void vp9_initialize_common(void);
 
 #define QINDEX_RANGE (MAXQ + 1)
 
+#if CONFIG_MULTIPLE_ARF
+#define NUM_REF_FRAMES 8
+#define NUM_REF_FRAMES_LG2 3
+#else
 #define NUM_REF_FRAMES 3
 #define NUM_REF_FRAMES_LG2 2
+#endif
 
 #define ALLOWED_REFS_PER_FRAME 3
 
@@ -51,6 +57,8 @@ void vp9_initialize_common(void);
 #define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LG2)
 
 #define COMP_PRED_CONTEXTS   2
+
+#define MAX_LAG_BUFFERS 25
 
 typedef struct frame_contexts {
   vp9_prob bmode_prob[VP9_NKF_BINTRAMODES - 1];

@@ -253,6 +253,7 @@ EXPERIMENT_LIST="
     scatterscan
     oneshotq
     sbsegment
+    multiple_arf
 "
 CONFIG_LIST="
     external_build

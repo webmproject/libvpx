@@ -2617,7 +2617,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     int refresh_mask;
 
     // Should the GF or ARF be updated using the transmitted frame or buffer
-    if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
+#if CONFIG_MULTIPLE_ARF
+    if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
+        !cpi->refresh_alt_ref_frame) {
+#else
+      if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
+#endif
       /* Preserve the previously existing golden frame and update the frame in
        * the alt ref slot instead. This is highly specific to the use of
        * alt-ref as a forward reference, and this needs to be generalized as
@@ -2630,10 +2635,21 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       refresh_mask = (cpi->refresh_last_frame << cpi->lst_fb_idx) |
                      (cpi->refresh_golden_frame << cpi->alt_fb_idx);
     } else {
+      int arf_idx = cpi->alt_fb_idx;
+#if CONFIG_MULTIPLE_ARF
+      // Determine which ARF buffer to use to encode this ARF frame.
+      if (cpi->multi_arf_enabled) {
+        int sn = cpi->sequence_number;
+        arf_idx = (cpi->frame_coding_order[sn] < 0) ?
+            cpi->arf_buffer_idx[sn + 1] :
+            cpi->arf_buffer_idx[sn];
+      }
+#endif
       refresh_mask = (cpi->refresh_last_frame << cpi->lst_fb_idx) |
                      (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
-                     (cpi->refresh_alt_ref_frame << cpi->alt_fb_idx);
+                     (cpi->refresh_alt_ref_frame << arf_idx);
     }
+
     vp9_write_literal(&header_bc, refresh_mask, NUM_REF_FRAMES);
     vp9_write_literal(&header_bc, cpi->lst_fb_idx, NUM_REF_FRAMES_LG2);
     vp9_write_literal(&header_bc, cpi->gld_fb_idx, NUM_REF_FRAMES_LG2);
