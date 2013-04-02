@@ -19,8 +19,7 @@ static INLINE int8_t signed_char_clamp(int t) {
   return (int8_t) t;
 }
 
-
-/* should we apply any filter at all ( 11111111 yes, 00000000 no) */
+// should we apply any filter at all: 11111111 yes, 00000000 no
 static INLINE int8_t filter_mask(uint8_t limit, uint8_t blimit,
                                  uint8_t p3, uint8_t p2,
                                  uint8_t p1, uint8_t p0,
@@ -34,11 +33,10 @@ static INLINE int8_t filter_mask(uint8_t limit, uint8_t blimit,
   mask |= (abs(q2 - q1) > limit) * -1;
   mask |= (abs(q3 - q2) > limit) * -1;
   mask |= (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  > blimit) * -1;
-  mask = ~mask;
-  return mask;
+  return ~mask;
 }
 
-/* is there high variance internal edge ( 11111111 yes, 00000000 no) */
+// is there high variance internal edge: 11111111 yes, 00000000 no
 static INLINE int8_t hevmask(uint8_t thresh, uint8_t p1, uint8_t p0,
                              uint8_t q0, uint8_t q1) {
   int8_t hev = 0;
@@ -81,25 +79,23 @@ static INLINE void filter(int8_t mask, uint8_t hev, uint8_t *op1,
   *op1 = signed_char_clamp(ps1 + filter) ^ 0x80;
 }
 
-void vp9_loop_filter_horizontal_edge_c(uint8_t *s,
-                                       int p, /* pitch */
-                                       const unsigned char *blimit,
-                                       const unsigned char *limit,
-                                       const unsigned char *thresh,
+void vp9_loop_filter_horizontal_edge_c(uint8_t *s, int p /* pitch */,
+                                       const uint8_t *blimit,
+                                       const uint8_t *limit,
+                                       const uint8_t *thresh,
                                        int count) {
-  int hev = 0; /* high edge variance */
-  int8_t mask = 0;
   int i = 0;
 
-  /* loop filter designed to work using chars so that we can make maximum use
-   * of 8 bit simd instructions.
-   */
+  // loop filter designed to work using chars so that we can make maximum use
+  // of 8 bit simd instructions.
   do {
-    mask = filter_mask(limit[0], blimit[0],
-                       s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
-                       s[0 * p], s[1 * p], s[2 * p], s[3 * p]);
+    const int8_t mask = filter_mask(limit[0], blimit[0],
+                                    s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
+                                    s[0 * p],  s[1 * p],  s[2 * p],  s[3 * p]);
 
-    hev = hevmask(thresh[0], s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
+    // high edge variance
+    const int8_t hev = hevmask(thresh[0],
+                               s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
 
     filter(mask, hev, s - 2 * p, s - 1 * p, s, s + 1 * p);
 
@@ -107,36 +103,31 @@ void vp9_loop_filter_horizontal_edge_c(uint8_t *s,
   } while (++i < count * 8);
 }
 
-void vp9_loop_filter_vertical_edge_c(uint8_t *s,
-                                     int p,
-                                     const unsigned char *blimit,
-                                     const unsigned char *limit,
-                                     const unsigned char *thresh,
+void vp9_loop_filter_vertical_edge_c(uint8_t *s, int pitch,
+                                     const uint8_t *blimit,
+                                     const uint8_t *limit,
+                                     const uint8_t *thresh,
                                      int count) {
-  int  hev = 0; /* high edge variance */
-  int8_t mask = 0;
   int i = 0;
 
-  /* loop filter designed to work using chars so that we can make maximum use
-   * of 8 bit simd instructions.
-   */
+  // loop filter designed to work using chars so that we can make maximum use
+  // of 8 bit simd instructions.
   do {
-    mask = filter_mask(limit[0], blimit[0],
-                       s[-4], s[-3], s[-2], s[-1],
-                       s[0], s[1], s[2], s[3]);
+    const int8_t mask = filter_mask(limit[0], blimit[0],
+                                    s[-4], s[-3], s[-2], s[-1],
+                                    s[0],  s[1],  s[2],  s[3]);
 
-    hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
-
+    // high edge variance
+    const int8_t hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
     filter(mask, hev, s - 2, s - 1, s, s + 1);
-
-    s += p;
+    s += pitch;
   } while (++i < count * 8);
 }
-static INLINE signed char flatmask4(uint8_t thresh,
-                                    uint8_t p3, uint8_t p2,
-                                    uint8_t p1, uint8_t p0,
-                                    uint8_t q0, uint8_t q1,
-                                    uint8_t q2, uint8_t q3) {
+static INLINE int8_t flatmask4(uint8_t thresh,
+                               uint8_t p3, uint8_t p2,
+                               uint8_t p1, uint8_t p0,
+                               uint8_t q0, uint8_t q1,
+                               uint8_t q2, uint8_t q3) {
   int8_t flat = 0;
   flat |= (abs(p1 - p0) > thresh) * -1;
   flat |= (abs(q1 - q0) > thresh) * -1;
@@ -144,8 +135,7 @@ static INLINE signed char flatmask4(uint8_t thresh,
   flat |= (abs(q0 - q2) > thresh) * -1;
   flat |= (abs(p3 - p0) > thresh) * -1;
   flat |= (abs(q3 - q0) > thresh) * -1;
-  flat = ~flat;
-  return flat;
+  return ~flat;
 }
 static INLINE signed char flatmask5(uint8_t thresh,
                                     uint8_t p4, uint8_t p3, uint8_t p2,
@@ -213,29 +203,26 @@ static INLINE void mbfilter(int8_t mask, uint8_t hev, uint8_t flat,
   }
 }
 
-void vp9_mbloop_filter_horizontal_edge_c(uint8_t *s,
-                                         int p,
-                                         const unsigned char *blimit,
-                                         const unsigned char *limit,
-                                         const unsigned char *thresh,
+void vp9_mbloop_filter_horizontal_edge_c(uint8_t *s, int p,
+                                         const uint8_t *blimit,
+                                         const uint8_t *limit,
+                                         const uint8_t *thresh,
                                          int count) {
-  int8_t hev = 0; /* high edge variance */
-  int8_t mask = 0;
-  int8_t flat = 0;
   int i = 0;
 
-  /* loop filter designed to work using chars so that we can make maximum use
-   * of 8 bit simd instructions.
-   */
+  // loop filter designed to work using chars so that we can make maximum use
+  // of 8 bit simd instructions.
   do {
-    mask = filter_mask(limit[0], blimit[0],
-                       s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
-                       s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
+    const int8_t mask = filter_mask(limit[0], blimit[0],
+                                    s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
+                                    s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
 
-    hev = hevmask(thresh[0], s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
+    const int8_t hev = hevmask(thresh[0],
+                               s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
 
-    flat = flatmask4(1, s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
-                        s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
+    const int8_t flat = flatmask4(1,
+                                  s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
+                                  s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
     mbfilter(mask, hev, flat,
              s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
              s,         s + 1 * p, s + 2 * p, s + 3 * p);
@@ -245,35 +232,29 @@ void vp9_mbloop_filter_horizontal_edge_c(uint8_t *s,
 
 }
 
-void vp9_mbloop_filter_vertical_edge_c(uint8_t *s,
-                                       int p,
-                                       const unsigned char *blimit,
-                                       const unsigned char *limit,
-                                       const unsigned char *thresh,
+void vp9_mbloop_filter_vertical_edge_c(uint8_t *s, int pitch,
+                                       const uint8_t *blimit,
+                                       const uint8_t *limit,
+                                       const uint8_t *thresh,
                                        int count) {
-  int8_t hev = 0; /* high edge variance */
-  int8_t mask = 0;
-  int8_t flat = 0;
   int i = 0;
 
   do {
-    mask = filter_mask(limit[0], blimit[0],
-                       s[-4], s[-3], s[-2], s[-1],
-                       s[0], s[1], s[2], s[3]);
+    const int8_t mask = filter_mask(limit[0], blimit[0],
+                                    s[-4], s[-3], s[-2], s[-1],
+                                    s[0],  s[1],  s[2],  s[3]);
 
-    hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
-    flat = flatmask4(1,
-                    s[-4], s[-3], s[-2], s[-1],
-                    s[ 0], s[ 1], s[ 2], s[ 3]);
-    mbfilter(mask, hev, flat,
-             s - 4, s - 3, s - 2, s - 1,
-             s,     s + 1, s + 2, s + 3);
-    s += p;
+    const int8_t hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
+    const int8_t flat = flatmask4(1, s[-4], s[-3], s[-2], s[-1],
+                                     s[ 0], s[ 1], s[ 2], s[ 3]);
+    mbfilter(mask, hev, flat, s - 4, s - 3, s - 2, s - 1,
+                              s,     s + 1, s + 2, s + 3);
+    s += pitch;
   } while (++i < count * 8);
 
 }
 
-/* should we apply any filter at all ( 11111111 yes, 00000000 no) */
+// should we apply any filter at all: 11111111 yes, 00000000 no
 static INLINE int8_t simple_filter_mask(uint8_t blimit,
                                         uint8_t p1, uint8_t p0,
                                         uint8_t q0, uint8_t q1) {
@@ -301,31 +282,24 @@ static INLINE void simple_filter(int8_t mask,
   *op0 = signed_char_clamp(p0 + filter2) ^ 0x80;
 }
 
-void vp9_loop_filter_simple_horizontal_edge_c(uint8_t *s,
-                                              int p,
-                                              const unsigned char *blimit) {
-  int8_t mask = 0;
+void vp9_loop_filter_simple_horizontal_edge_c(uint8_t *s, int p,
+                                              const uint8_t *blimit) {
   int i = 0;
 
   do {
-    mask = simple_filter_mask(blimit[0],
-                              s[-2 * p], s[-1 * p],
-                              s[0 * p], s[1 * p]);
-    simple_filter(mask,
-                  s - 2 * p, s - 1 * p,
-                  s, s + 1 * p);
+    const int8_t mask = simple_filter_mask(blimit[0], s[-2 * p], s[-1 * p],
+                                                      s[0 * p],  s[1 * p]);
+    simple_filter(mask, s - 2 * p, s - 1 * p, s, s + 1 * p);
     ++s;
   } while (++i < 16);
 }
 
-void vp9_loop_filter_simple_vertical_edge_c(uint8_t *s,
-                                            int p,
-                                            const unsigned char *blimit) {
-  int8_t mask = 0;
+void vp9_loop_filter_simple_vertical_edge_c(uint8_t *s, int p,
+                                            const uint8_t *blimit) {
   int i = 0;
 
   do {
-    mask = simple_filter_mask(blimit[0], s[-2], s[-1], s[0], s[1]);
+    const int8_t mask = simple_filter_mask(blimit[0], s[-2], s[-1], s[0], s[1]);
     simple_filter(mask, s - 2, s - 1, s, s + 1);
     s += p;
   } while (++i < 16);
@@ -367,87 +341,82 @@ void vp9_loop_filter_bv_c(uint8_t*y_ptr, uint8_t *u_ptr,
                                     lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
-/* Horizontal MB filtering */
-void vp9_loop_filter_mbh_c(uint8_t *y_ptr, uint8_t *u_ptr,
-                           uint8_t *v_ptr, int y_stride, int uv_stride,
+// Horizontal MB filtering
+void vp9_loop_filter_mbh_c(uint8_t *y, uint8_t *u, uint8_t *v,
+                           int y_stride, int uv_stride,
                            struct loop_filter_info *lfi) {
-  vp9_mbloop_filter_horizontal_edge_c(y_ptr, y_stride,
+  vp9_mbloop_filter_horizontal_edge_c(y, y_stride,
                                       lfi->mblim, lfi->lim, lfi->hev_thr, 2);
 
-  if (u_ptr)
-    vp9_mbloop_filter_horizontal_edge_c(u_ptr, uv_stride,
+  if (u)
+    vp9_mbloop_filter_horizontal_edge_c(u, uv_stride,
                                         lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 
-  if (v_ptr)
-    vp9_mbloop_filter_horizontal_edge_c(v_ptr, uv_stride,
+  if (v)
+    vp9_mbloop_filter_horizontal_edge_c(v, uv_stride,
                                         lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 }
 
-/* Horizontal B Filtering */
-void vp9_loop_filter_bh_c(uint8_t *y_ptr, uint8_t *u_ptr,
-                          uint8_t *v_ptr, int y_stride, int uv_stride,
+// Horizontal B Filtering
+void vp9_loop_filter_bh_c(uint8_t *y, uint8_t *u, uint8_t *v,
+                          int y_stride, int uv_stride,
                           struct loop_filter_info *lfi) {
-  vp9_loop_filter_horizontal_edge_c(y_ptr + 4 * y_stride, y_stride,
+  vp9_loop_filter_horizontal_edge_c(y + 4 * y_stride, y_stride,
                                     lfi->blim, lfi->lim, lfi->hev_thr, 2);
-  vp9_loop_filter_horizontal_edge_c(y_ptr + 8 * y_stride, y_stride,
+  vp9_loop_filter_horizontal_edge_c(y + 8 * y_stride, y_stride,
                                     lfi->blim, lfi->lim, lfi->hev_thr, 2);
-  vp9_loop_filter_horizontal_edge_c(y_ptr + 12 * y_stride, y_stride,
+  vp9_loop_filter_horizontal_edge_c(y + 12 * y_stride, y_stride,
                                     lfi->blim, lfi->lim, lfi->hev_thr, 2);
 
-  if (u_ptr)
-    vp9_loop_filter_horizontal_edge_c(u_ptr + 4 * uv_stride, uv_stride,
+  if (u)
+    vp9_loop_filter_horizontal_edge_c(u + 4 * uv_stride, uv_stride,
                                       lfi->blim, lfi->lim, lfi->hev_thr, 1);
 
-  if (v_ptr)
-    vp9_loop_filter_horizontal_edge_c(v_ptr + 4 * uv_stride, uv_stride,
+  if (v)
+    vp9_loop_filter_horizontal_edge_c(v + 4 * uv_stride, uv_stride,
                                       lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
-void vp9_loop_filter_bh8x8_c(uint8_t *y_ptr, uint8_t *u_ptr,
-                             uint8_t *v_ptr, int y_stride, int uv_stride,
+void vp9_loop_filter_bh8x8_c(uint8_t *y, uint8_t *u, uint8_t *v,
+                             int y_stride, int uv_stride,
                              struct loop_filter_info *lfi) {
-  vp9_mbloop_filter_horizontal_edge_c(
-    y_ptr + 8 * y_stride, y_stride, lfi->blim, lfi->lim, lfi->hev_thr, 2);
+  vp9_mbloop_filter_horizontal_edge_c(y + 8 * y_stride, y_stride,
+                                      lfi->blim, lfi->lim, lfi->hev_thr, 2);
 
-  if (u_ptr)
-    vp9_loop_filter_horizontal_edge_c(u_ptr + 4 * uv_stride, uv_stride,
+  if (u)
+    vp9_loop_filter_horizontal_edge_c(u + 4 * uv_stride, uv_stride,
                                       lfi->blim, lfi->lim, lfi->hev_thr, 1);
 
-  if (v_ptr)
-    vp9_loop_filter_horizontal_edge_c(v_ptr + 4 * uv_stride, uv_stride,
+  if (v)
+    vp9_loop_filter_horizontal_edge_c(v + 4 * uv_stride, uv_stride,
                                       lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
-void vp9_loop_filter_bhs_c(uint8_t *y_ptr, int y_stride,
-                           const unsigned char *blimit) {
-  vp9_loop_filter_simple_horizontal_edge_c(y_ptr + 4 * y_stride,
-                                           y_stride, blimit);
-  vp9_loop_filter_simple_horizontal_edge_c(y_ptr + 8 * y_stride,
-                                           y_stride, blimit);
-  vp9_loop_filter_simple_horizontal_edge_c(y_ptr + 12 * y_stride,
-                                           y_stride, blimit);
+void vp9_loop_filter_bhs_c(uint8_t *y, int y_stride, const uint8_t *blimit) {
+  vp9_loop_filter_simple_horizontal_edge_c(y + 4 * y_stride, y_stride, blimit);
+  vp9_loop_filter_simple_horizontal_edge_c(y + 8 * y_stride, y_stride, blimit);
+  vp9_loop_filter_simple_horizontal_edge_c(y + 12 * y_stride, y_stride, blimit);
 }
 
-void vp9_loop_filter_bv8x8_c(uint8_t *y_ptr, uint8_t *u_ptr,
-                             uint8_t *v_ptr, int y_stride, int uv_stride,
+void vp9_loop_filter_bv8x8_c(uint8_t *y, uint8_t *u, uint8_t *v,
+                             int y_stride, int uv_stride,
                              struct loop_filter_info *lfi) {
-  vp9_mbloop_filter_vertical_edge_c(
-    y_ptr + 8, y_stride, lfi->blim, lfi->lim, lfi->hev_thr, 2);
+  vp9_mbloop_filter_vertical_edge_c(y + 8, y_stride,
+                                    lfi->blim, lfi->lim, lfi->hev_thr, 2);
 
-  if (u_ptr)
-    vp9_loop_filter_vertical_edge_c(u_ptr + 4, uv_stride,
+  if (u)
+    vp9_loop_filter_vertical_edge_c(u + 4, uv_stride,
                                     lfi->blim, lfi->lim, lfi->hev_thr, 1);
 
-  if (v_ptr)
-    vp9_loop_filter_vertical_edge_c(v_ptr + 4, uv_stride,
+  if (v)
+    vp9_loop_filter_vertical_edge_c(v + 4, uv_stride,
                                     lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
-void vp9_loop_filter_bvs_c(uint8_t *y_ptr, int y_stride,
-                           const unsigned char *blimit) {
-  vp9_loop_filter_simple_vertical_edge_c(y_ptr + 4, y_stride, blimit);
-  vp9_loop_filter_simple_vertical_edge_c(y_ptr + 8, y_stride, blimit);
-  vp9_loop_filter_simple_vertical_edge_c(y_ptr + 12, y_stride, blimit);
+void vp9_loop_filter_bvs_c(uint8_t *y, int y_stride, const uint8_t *blimit) {
+  vp9_loop_filter_simple_vertical_edge_c(y + 4, y_stride, blimit);
+  vp9_loop_filter_simple_vertical_edge_c(y + 8, y_stride, blimit);
+  vp9_loop_filter_simple_vertical_edge_c(y + 12, y_stride, blimit);
 }
 
 static INLINE void wide_mbfilter(int8_t mask, uint8_t hev,
@@ -551,38 +520,30 @@ static INLINE void wide_mbfilter(int8_t mask, uint8_t hev,
   }
 }
 
-void vp9_mb_lpf_horizontal_edge_w
-(
-  unsigned char *s,
-  int p,
-  const unsigned char *blimit,
-  const unsigned char *limit,
-  const unsigned char *thresh,
-  int count
-) {
-  signed char hev = 0; /* high edge variance */
-  signed char mask = 0;
-  signed char flat = 0;
-  signed char flat2 = 0;
+void vp9_mb_lpf_horizontal_edge_w(uint8_t *s, int p,
+                                 const uint8_t *blimit,
+                                 const uint8_t *limit,
+                                 const uint8_t *thresh,
+                                 int count) {
   int i = 0;
 
-  /* loop filter designed to work using chars so that we can make maximum use
-   * of 8 bit simd instructions.
-   */
+  // loop filter designed to work using chars so that we can make maximum use
+  // of 8 bit simd instructions.
   do {
-    mask = filter_mask(limit[0], blimit[0],
-                       s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
-                       s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
+    const int8_t mask = filter_mask(limit[0], blimit[0],
+                                    s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
+                                    s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
 
-    hev = hevmask(thresh[0], s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
+    const int8_t hev = hevmask(thresh[0],
+                               s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
 
-    flat = flatmask4(1,
-                     s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
-                     s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
+    const int8_t flat = flatmask4(1,
+                                  s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
+                                  s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
 
-    flat2 = flatmask5(1,
-                      s[-8 * p], s[-7 * p], s[-6 * p], s[-5 * p], s[-1 * p],
-                      s[ 0 * p], s[ 4 * p], s[ 5 * p], s[ 6 * p], s[ 7 * p]);
+    const int8_t flat2 = flatmask5(1,
+                         s[-8 * p], s[-7 * p], s[-6 * p], s[-5 * p], s[-1 * p],
+                         s[ 0 * p], s[ 4 * p], s[ 5 * p], s[ 6 * p], s[ 7 * p]);
 
     wide_mbfilter(mask, hev, flat, flat2,
                   s - 8 * p, s - 7 * p, s - 6 * p, s - 5 * p,
@@ -593,33 +554,23 @@ void vp9_mb_lpf_horizontal_edge_w
     ++s;
   } while (++i < count * 8);
 }
-void vp9_mb_lpf_vertical_edge_w
-(
-  unsigned char *s,
-  int p,
-  const unsigned char *blimit,
-  const unsigned char *limit,
-  const unsigned char *thresh,
-  int count
-) {
-  signed char hev = 0; /* high edge variance */
-  signed char mask = 0;
-  signed char flat = 0;
-  signed char flat2 = 0;
+void vp9_mb_lpf_vertical_edge_w(uint8_t *s, int p,
+                                const uint8_t *blimit,
+                                const uint8_t *limit,
+                                const uint8_t *thresh,
+                                int count) {
   int i = 0;
 
   do {
-    mask = filter_mask(limit[0], blimit[0],
-                       s[-4], s[-3], s[-2], s[-1],
-                       s[0], s[1], s[2], s[3]);
+    const int8_t mask = filter_mask(limit[0], blimit[0],
+                                    s[-4], s[-3], s[-2], s[-1],
+                                    s[0],  s[1],  s[2],  s[3]);
 
-    hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
-    flat = flatmask4(1,
-                     s[-4], s[-3], s[-2], s[-1],
-                     s[ 0], s[ 1], s[ 2], s[ 3]);
-    flat2 = flatmask5(1,
-                     s[-8], s[-7], s[-6], s[-5], s[-1],
-                     s[ 0], s[ 4], s[ 5], s[ 6], s[ 7]);
+    const int8_t hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
+    const int8_t flat = flatmask4(1, s[-4], s[-3], s[-2], s[-1],
+                                     s[ 0], s[ 1], s[ 2], s[ 3]);
+    const int8_t flat2 = flatmask5(1, s[-8], s[-7], s[-6], s[-5], s[-1],
+                                      s[ 0], s[ 4], s[ 5], s[ 6], s[ 7]);
 
     wide_mbfilter(mask, hev, flat, flat2,
                   s - 8, s - 7, s - 6, s - 5,
@@ -630,32 +581,33 @@ void vp9_mb_lpf_vertical_edge_w
   } while (++i < count * 8);
 }
 
-void vp9_lpf_mbv_w_c(unsigned char *y_ptr, unsigned char *u_ptr,
-                   unsigned char *v_ptr, int y_stride, int uv_stride,
-                   struct loop_filter_info *lfi) {
-  vp9_mb_lpf_vertical_edge_w(y_ptr, y_stride,
-                                    lfi->mblim, lfi->lim, lfi->hev_thr, 2);
+void vp9_lpf_mbv_w_c(uint8_t *y, uint8_t *u, uint8_t *v,
+                     int y_stride, int uv_stride,
+                     struct loop_filter_info *lfi) {
+  vp9_mb_lpf_vertical_edge_w(y, y_stride,
+                             lfi->mblim, lfi->lim, lfi->hev_thr, 2);
 
-  if (u_ptr)
-    vp9_mbloop_filter_vertical_edge_c(u_ptr, uv_stride,
+  if (u)
+    vp9_mbloop_filter_vertical_edge_c(u, uv_stride,
                                       lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 
-  if (v_ptr)
-    vp9_mbloop_filter_vertical_edge_c(v_ptr, uv_stride,
+  if (v)
+    vp9_mbloop_filter_vertical_edge_c(v, uv_stride,
                                       lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 }
-void vp9_lpf_mbh_w_c(unsigned char *y_ptr, unsigned char *u_ptr,
-                           unsigned char *v_ptr, int y_stride, int uv_stride,
-                           struct loop_filter_info *lfi) {
-  vp9_mb_lpf_horizontal_edge_w(y_ptr, y_stride,
-                                      lfi->mblim, lfi->lim, lfi->hev_thr, 2);
 
-  if (u_ptr)
-    vp9_mbloop_filter_horizontal_edge_c(u_ptr, uv_stride,
+void vp9_lpf_mbh_w_c(uint8_t *y, uint8_t *u, uint8_t *v,
+                     int y_stride, int uv_stride,
+                     struct loop_filter_info *lfi) {
+  vp9_mb_lpf_horizontal_edge_w(y, y_stride,
+                               lfi->mblim, lfi->lim, lfi->hev_thr, 2);
+
+  if (u)
+    vp9_mbloop_filter_horizontal_edge_c(u, uv_stride,
                                         lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 
-  if (v_ptr)
-    vp9_mbloop_filter_horizontal_edge_c(v_ptr, uv_stride,
+  if (v)
+    vp9_mbloop_filter_horizontal_edge_c(v, uv_stride,
                                         lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 }
 

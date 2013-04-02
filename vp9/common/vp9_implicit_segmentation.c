@@ -191,11 +191,12 @@ void segment_via_mode_info(VP9_COMMON *oci, int how) {
 
   // give new labels to regions
   for (i = 1; i < label; i++)
-    if (labels[i].next->count > min_mbs_in_region  &&  labels[labels[i].next->label].label == 0) {
+    if (labels[i].next->count > min_mbs_in_region &&
+        labels[labels[i].next->label].label == 0) {
       segment_info *cs = &segments[label_count];
       cs->label = label_count;
       labels[labels[i].next->label].label = label_count++;
-      labels[labels[i].next->label].seg_value  = labels[i].next->seg_value;
+      labels[labels[i].next->label].seg_value = labels[i].next->seg_value;
       cs->seg_value = labels[labels[i].next->label].seg_value;
       cs->min_x = oci->mb_cols;
       cs->min_y = oci->mb_rows;
@@ -204,24 +205,21 @@ void segment_via_mode_info(VP9_COMMON *oci, int how) {
       cs->sum_x = 0;
       cs->sum_y = 0;
       cs->pixels = 0;
-
     }
+
   lp = labeling;
 
   // this is just to gather stats...
   for (i = 0; i < oci->mb_rows; i++, lp += pitch) {
     for (j = 0; j < oci->mb_cols; j++) {
-      segment_info *cs;
-      int oldlab = labels[lp[j]].next->label;
-      int lab = labels[oldlab].label;
-      lp[j] = lab;
+      const int old_lab = labels[lp[j]].next->label;
+      const int lab = labels[old_lab].label;
+      segment_info *cs = &segments[lab];
 
-      cs = &segments[lab];
-
-      cs->min_x = (j < cs->min_x ? j : cs->min_x);
-      cs->max_x = (j > cs->max_x ? j : cs->max_x);
-      cs->min_y = (i < cs->min_y ? i : cs->min_y);
-      cs->max_y = (i > cs->max_y ? i : cs->max_y);
+      cs->min_x = MIN(cs->min_x, j);
+      cs->max_x = MAX(cs->max_x, j);
+      cs->min_y = MIN(cs->min_y, i);
+      cs->max_y = MAX(cs->max_y, i);
       cs->sum_x += j;
       cs->sum_y += i;
       cs->pixels++;
