@@ -19,17 +19,16 @@
 #include "vp9/common/vp9_systemdependent.h"
 
 
-void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi_base) {
-  int stride = cpi->mode_info_stride;
+void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi) {
+  const int stride = cpi->mode_info_stride;
   int i;
 
   // Clear down top border row
-  vpx_memset(mi_base, 0, sizeof(MODE_INFO) * cpi->mode_info_stride);
+  vpx_memset(mi, 0, sizeof(MODE_INFO) * stride);
 
   // Clear left border column
-  for (i = 1; i < cpi->mb_rows + 1; i++) {
-    vpx_memset(&mi_base[i * stride], 0, sizeof(MODE_INFO));
-  }
+  for (i = 1; i < cpi->mb_rows + 1; i++)
+    vpx_memset(&mi[i * stride], 0, sizeof(MODE_INFO));
 }
 
 void vp9_update_mode_info_in_image(VP9_COMMON *cpi, MODE_INFO *mi) {
@@ -39,14 +38,14 @@ void vp9_update_mode_info_in_image(VP9_COMMON *cpi, MODE_INFO *mi) {
   for (i = 0; i < cpi->mb_rows; i++) {
     for (j = 0; j < cpi->mb_cols; j++) {
       mi->mbmi.mb_in_image = 1;
-      mi++;   // Next element in the row
+      mi++;  // Next element in the row
     }
 
-    mi++;       // Step over border element at start of next row
+    mi++;  // Step over border element at start of next row
   }
 }
 
-void vp9_de_alloc_frame_buffers(VP9_COMMON *oci) {
+void vp9_free_frame_buffers(VP9_COMMON *oci) {
   int i;
 
   for (i = 0; i < NUM_YV12_BUFFERS; i++)
@@ -67,19 +66,18 @@ void vp9_de_alloc_frame_buffers(VP9_COMMON *oci) {
 
 int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   int i;
-  int aligned_width, aligned_height;
 
-  vp9_de_alloc_frame_buffers(oci);
+  // Our internal buffers are always multiples of 16
+  const int aligned_width = multiple16(width);
+  const int aligned_height = multiple16(height);
 
-  /* our internal buffers are always multiples of 16 */
-  aligned_width = (width + 15) & ~15;
-  aligned_height = (height + 15) & ~15;
+  vp9_free_frame_buffers(oci);
 
   for (i = 0; i < NUM_YV12_BUFFERS; i++) {
     oci->fb_idx_ref_cnt[i] = 0;
     if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i], width, height,
                                     VP9BORDERINPIXELS) < 0) {
-      vp9_de_alloc_frame_buffers(oci);
+      vp9_free_frame_buffers(oci);
       return 1;
     }
   }
@@ -97,13 +95,13 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
 
   if (vp8_yv12_alloc_frame_buffer(&oci->temp_scale_frame, width, 16,
                                   VP9BORDERINPIXELS) < 0) {
-    vp9_de_alloc_frame_buffers(oci);
+    vp9_free_frame_buffers(oci);
     return 1;
   }
 
   if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer, width, height,
                                   VP9BORDERINPIXELS) < 0) {
-    vp9_de_alloc_frame_buffers(oci);
+    vp9_free_frame_buffers(oci);
     return 1;
   }
 
@@ -114,7 +112,7 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   oci->mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
 
   if (!oci->mip) {
-    vp9_de_alloc_frame_buffers(oci);
+    vp9_free_frame_buffers(oci);
     return 1;
   }
 
@@ -125,7 +123,7 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   oci->prev_mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
 
   if (!oci->prev_mip) {
-    vp9_de_alloc_frame_buffers(oci);
+    vp9_free_frame_buffers(oci);
     return 1;
   }
 
@@ -135,7 +133,7 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
     vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * (3 + oci->mb_cols), 1);
 
   if (!oci->above_context) {
-    vp9_de_alloc_frame_buffers(oci);
+    vp9_free_frame_buffers(oci);
     return 1;
   }
 
@@ -200,20 +198,18 @@ void vp9_create_common(VP9_COMMON *oci) {
   oci->clr_type = REG_YUV;
   oci->clamp_type = RECON_CLAMP_REQUIRED;
 
-  /* Initialise reference frame sign bias structure to defaults */
+  // Initialize reference frame sign bias structure to defaults
   vpx_memset(oci->ref_frame_sign_bias, 0, sizeof(oci->ref_frame_sign_bias));
 
   oci->kf_ymode_probs_update = 0;
 }
 
 void vp9_remove_common(VP9_COMMON *oci) {
-  vp9_de_alloc_frame_buffers(oci);
+  vp9_free_frame_buffers(oci);
 }
 
 void vp9_initialize_common() {
   vp9_coef_tree_initialize();
-
   vp9_entropy_mode_init();
-
   vp9_entropy_mv_init();
 }

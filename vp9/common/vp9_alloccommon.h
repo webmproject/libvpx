@@ -14,13 +14,15 @@
 
 #include "vp9/common/vp9_onyxc_int.h"
 
+void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi);
+void vp9_update_mode_info_in_image(VP9_COMMON *cpi, MODE_INFO *mi);
+
 void vp9_create_common(VP9_COMMON *oci);
 void vp9_remove_common(VP9_COMMON *oci);
-void vp9_de_alloc_frame_buffers(VP9_COMMON *oci);
-int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height);
-void vp9_setup_version(VP9_COMMON *oci);
 
-void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi_base);
-void vp9_update_mode_info_in_image(VP9_COMMON *cpi, MODE_INFO *mi);
+int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height);
+void vp9_free_frame_buffers(VP9_COMMON *oci);
+
+void vp9_setup_version(VP9_COMMON *oci);
 
 #endif  // VP9_COMMON_VP9_ALLOCCOMMON_H_

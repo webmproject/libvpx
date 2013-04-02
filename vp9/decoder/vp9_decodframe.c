@@ -1290,9 +1290,8 @@ static void read_coef_probs(VP9D_COMP *pbi, BOOL_DECODER* const bc) {
 static void update_frame_size(VP9D_COMP *pbi) {
   VP9_COMMON *cm = &pbi->common;
 
-  /* our internal buffers are always multiples of 16 */
-  const int width = (cm->width + 15) & ~15;
-  const int height = (cm->height + 15) & ~15;
+  const int width = multiple16(cm->width);
+  const int height = multiple16(cm->height);
 
   cm->mb_rows = height >> 4;
   cm->mb_cols = width >> 4;

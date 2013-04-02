@@ -326,7 +326,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->active_map);
   cpi->active_map = 0;
 
-  vp9_de_alloc_frame_buffers(&cpi->common);
+  vp9_free_frame_buffers(&cpi->common);
 
   vp8_yv12_de_alloc_frame_buffer(&cpi->last_frame_uf);
   vp8_yv12_de_alloc_frame_buffer(&cpi->scaled_source);
@@ -960,9 +960,8 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 static void update_frame_size(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
 
-  /* our internal buffers are always multiples of 16 */
-  int aligned_width = (cm->width + 15) & ~15;
-  int aligned_height = (cm->height + 15) & ~15;
+  const int aligned_width = multiple16(cm->width);
+  const int aligned_height = multiple16(cm->height);
 
   cm->mb_rows = aligned_height >> 4;
   cm->mb_cols = aligned_width >> 4;

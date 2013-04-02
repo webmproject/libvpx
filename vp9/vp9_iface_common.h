@@ -10,17 +10,15 @@
 #ifndef VP9_VP9_IFACE_COMMON_H_
 #define VP9_VP9_IFACE_COMMON_H_
 
-static void yuvconfig2image(vpx_image_t               *img,
-                            const YV12_BUFFER_CONFIG  *yv12,
-                            void                      *user_priv) {
+static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
+                            void *user_priv) {
   /** vpx_img_wrap() doesn't allow specifying independent strides for
     * the Y, U, and V planes, nor other alignment adjustments that
     * might be representable by a YV12_BUFFER_CONFIG, so we just
     * initialize all the fields.*/
-  img->fmt = yv12->clrtype == REG_YUV ?
-             VPX_IMG_FMT_I420 : VPX_IMG_FMT_VPXI420;
+  img->fmt = yv12->clrtype == REG_YUV ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_VPXI420;
   img->w = yv12->y_stride;
-  img->h = (yv12->y_height + 2 * VP9BORDERINPIXELS + 15) & ~15;
+  img->h = multiple16(yv12->y_height + 2 * VP9BORDERINPIXELS);
   img->d_w = yv12->y_width;
   img->d_h = yv12->y_height;
   img->x_chroma_shift = 1;
@@ -40,4 +38,4 @@ static void yuvconfig2image(vpx_image_t               *img,
   img->self_allocd = 0;
 }
 
-#endif
+#endif  // VP9_VP9_IFACE_COMMON_H_

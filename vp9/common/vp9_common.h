@@ -55,4 +55,8 @@ static INLINE int clamp(int value, int low, int high) {
   return value < low ? low : (value > high ? high : value);
 }
 
+static INLINE int multiple16(int value) {
+  return (value + 15) & ~15;
+}
+
 #endif  // VP9_COMMON_VP9_COMMON_H_
