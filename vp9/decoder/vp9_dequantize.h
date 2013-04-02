@@ -59,38 +59,4 @@ void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
                                      unsigned char *dest,
                                      int pitch, int stride, int eob);
 
-void vp9_dequant_dc_idct_add_y_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
-                                                   unsigned char *dst,
-                                                   int stride,
-                                                   const int16_t *dc,
-                                                   MACROBLOCKD *xd);
-
-void vp9_dequant_idct_add_y_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
-                                                unsigned char *dst,
-                                                int stride,
-                                                MACROBLOCKD *xd);
-
-void vp9_dequant_dc_idct_add_y_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
-                                                   unsigned char *dst,
-                                                   int stride,
-                                                   const int16_t *dc,
-                                                   MACROBLOCKD *xd);
-
-void vp9_dequant_idct_add_y_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
-                                                unsigned char *dst,
-                                                int stride,
-                                                MACROBLOCKD *xd);
-
-void vp9_dequant_idct_add_uv_block_8x8_inplace_c(int16_t *q, const int16_t *dq,
-                                                 unsigned char *dstu,
-                                                 unsigned char *dstv,
-                                                 int stride,
-                                                 MACROBLOCKD *xd);
-
-void vp9_dequant_idct_add_uv_block_4x4_inplace_c(int16_t *q, const int16_t *dq,
-                                                 unsigned char *dstu,
-                                                 unsigned char *dstv,
-                                                 int stride,
-                                                 MACROBLOCKD *xd);
-
 #endif  // VP9_DECODER_VP9_DEQUANTIZE_H_
