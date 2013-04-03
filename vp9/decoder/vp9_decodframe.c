@@ -1019,7 +1019,7 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
 
   for (mb_col = pc->cur_tile_mb_col_start;
        mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
-    if (vp9_read(bc, pc->sb64_coded)) {
+    if (vp9_read(bc, pc->prob_sb64_coded)) {
 #ifdef DEC_DEBUG
       dec_debug = (pc->current_video_frame == 11 && pc->show_frame &&
                    mb_row == 8 && mb_col == 0);
@@ -1045,7 +1045,7 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
 
         xd->sb_index = j;
 
-        if (vp9_read(bc, pc->sb32_coded)) {
+        if (vp9_read(bc, pc->prob_sb32_coded)) {
 #ifdef DEC_DEBUG
           dec_debug = (pc->current_video_frame == 11 && pc->show_frame &&
                        mb_row + y_idx_sb == 8 && mb_col + x_idx_sb == 0);
@@ -1728,8 +1728,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
     }
   }
 
-  pc->sb64_coded = vp9_read_prob(&header_bc);
-  pc->sb32_coded = vp9_read_prob(&header_bc);
+  pc->prob_sb64_coded = vp9_read_prob(&header_bc);
+  pc->prob_sb32_coded = vp9_read_prob(&header_bc);
   xd->lossless = vp9_read_bit(&header_bc);
   if (xd->lossless) {
     pc->txfm_mode = ONLY_4X4;

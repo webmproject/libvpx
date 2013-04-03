@@ -1405,8 +1405,8 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cm->prob_last_coded               = 128;
   cm->prob_gf_coded                 = 128;
   cm->prob_intra_coded              = 63;
-  cm->sb32_coded                    = 200;
-  cm->sb64_coded                    = 200;
+  cm->prob_sb32_coded               = 200;
+  cm->prob_sb64_coded               = 200;
   for (i = 0; i < COMP_PRED_CONTEXTS; i++)
     cm->prob_comppred[i]         = 128;
   for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)

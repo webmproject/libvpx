@@ -1690,7 +1690,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
     m = m_ptr;
     for (mb_col = c->cur_tile_mb_col_start;
          mb_col < c->cur_tile_mb_col_end; mb_col += 4, m += 4) {
-      vp9_write(bc, m->mbmi.sb_type == BLOCK_SIZE_SB64X64, c->sb64_coded);
+      vp9_write(bc, m->mbmi.sb_type == BLOCK_SIZE_SB64X64, c->prob_sb64_coded);
       if (m->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
         write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
       } else {
@@ -1704,7 +1704,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
               mb_row + y_idx_sb >= c->mb_rows)
             continue;
 
-          vp9_write(bc, sb_m->mbmi.sb_type, c->sb32_coded);
+          vp9_write(bc, sb_m->mbmi.sb_type, c->prob_sb32_coded);
           if (sb_m->mbmi.sb_type) {
             assert(sb_m->mbmi.sb_type == BLOCK_SIZE_SB32X32);
             write_modes_b(cpi, sb_m, bc, tok, tok_end,
@@ -2494,10 +2494,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     }
   }
 
-  pc->sb64_coded = get_binary_prob(cpi->sb64_count[0], cpi->sb64_count[1]);
-  vp9_write_literal(&header_bc, pc->sb64_coded, 8);
-  pc->sb32_coded = get_binary_prob(cpi->sb32_count[0], cpi->sb32_count[1]);
-  vp9_write_literal(&header_bc, pc->sb32_coded, 8);
+  pc->prob_sb64_coded = get_binary_prob(cpi->sb64_count[0], cpi->sb64_count[1]);
+  vp9_write_literal(&header_bc, pc->prob_sb64_coded, 8);
+  pc->prob_sb32_coded = get_binary_prob(cpi->sb32_count[0], cpi->sb32_count[1]);
+  vp9_write_literal(&header_bc, pc->prob_sb32_coded, 8);
 
   vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
   if (cpi->mb.e_mbd.lossless) {
