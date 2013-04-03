@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAW3//30s\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-03T04:17:25Z",
+      "side": 1,
+      "message": "xd is the common abbreviation for MACROBLOCKD. MACROBLOCK (a different type on the encoder) is sometimes abbreviated as mb. See:\n\n  $ grep -RE \u0027MACROBLOCKD.*\u003d\u0027 vp9",
+      "revId": "47336d947342b7d02b892c5552165b8f8cc37c3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
