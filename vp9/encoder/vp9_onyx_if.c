@@ -3640,6 +3640,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   VP9_COMMON *cm = &cpi->common;
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG    *force_src_buffer = NULL;
+  int i;
 
   if (!cpi)
     return -1;
@@ -3784,7 +3785,20 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                                 cm->width, cm->height,
                                 VP9BORDERINPIXELS);
 
+  /* Calculate scaling factors for each of the 3 available references */
+  for (i = 0; i < 3; ++i) {
+    if (cm->active_ref_idx[i] >= NUM_YV12_BUFFERS) {
+      memset(&cm->active_ref_scale[i], 0, sizeof(cm->active_ref_scale[i]));
+      continue;
+    }
+
+    vp9_setup_scale_factors_for_frame(&cm->active_ref_scale[i],
+                                      &cm->yv12_fb[cm->active_ref_idx[i]],
+                                      cm->width, cm->height);
+  }
+
   vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);
+
   if (cpi->pass == 1) {
     Pass1Encode(cpi, size, dest, frame_flags);
   } else if (cpi->pass == 2) {
