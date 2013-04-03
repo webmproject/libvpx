@@ -78,7 +78,7 @@ void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   copy_and_extend_plane(src->v_buffer, src->uv_stride,
                         dst->v_buffer, dst->uv_stride,
                         src->uv_width, src->uv_height,
-                        et_y, el_y, eb_uv, er_uv);
+                        et_uv, el_uv, eb_uv, er_uv);
 }
 
 void vp9_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
