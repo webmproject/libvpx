@@ -1086,7 +1086,7 @@ static void encode_sb_row(VP9_COMP *cpi,
       splitmodes_used = pick_mb_modes(cpi, mb_row + y_idx, mb_col + x_idx,
                                       tp, &mb_rate, &mb_dist);
 
-      mb_rate += vp9_cost_bit(cm->sb32_coded, 0);
+      mb_rate += vp9_cost_bit(cm->prob_sb32_coded, 0);
 
       if (cpi->sf.splitmode_breakout) {
         sb32_skip = splitmodes_used;
@@ -1099,7 +1099,7 @@ static void encode_sb_row(VP9_COMP *cpi,
         /* Pick a mode assuming that it applies to all 4 of the MBs in the SB */
         pick_sb_modes(cpi, mb_row + y_idx, mb_col + x_idx,
                       tp, &sb_rate, &sb_dist);
-        sb_rate += vp9_cost_bit(cm->sb32_coded, 1);
+        sb_rate += vp9_cost_bit(cm->prob_sb32_coded, 1);
       }
 
       /* Decide whether to encode as a SB or 4xMBs */
@@ -1131,13 +1131,13 @@ static void encode_sb_row(VP9_COMP *cpi,
 
     memcpy(cm->above_context + mb_col, &a, sizeof(a));
     memcpy(cm->left_context, &l, sizeof(l));
-    sb32_rate += vp9_cost_bit(cm->sb64_coded, 0);
+    sb32_rate += vp9_cost_bit(cm->prob_sb64_coded, 0);
 
     if (!sb64_skip &&
         !(((cm->mb_cols & 3) && mb_col + 3 >= cm->mb_cols) ||
           ((cm->mb_rows & 3) && mb_row + 3 >= cm->mb_rows))) {
       pick_sb64_modes(cpi, mb_row, mb_col, tp, &sb64_rate, &sb64_dist);
-      sb64_rate += vp9_cost_bit(cm->sb64_coded, 1);
+      sb64_rate += vp9_cost_bit(cm->prob_sb64_coded, 1);
     }
 
     /* Decide whether to encode as a SB or 4xMBs */
