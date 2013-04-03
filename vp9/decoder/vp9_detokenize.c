@@ -531,15 +531,6 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
   return c;
 }
 
-int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
-                         BOOL_DECODER* const bc,
-                         PLANE_TYPE type, int i) {
-  const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int seg_eob = get_eob(xd, segment_id, 16);
-
-  return decode_coefs_4x4(dx, xd, bc, type, i, seg_eob);
-}
-
 static int decode_mb_tokens_4x4_uv(VP9D_COMP* const dx,
                                    MACROBLOCKD* const xd,
                                    BOOL_DECODER* const bc,

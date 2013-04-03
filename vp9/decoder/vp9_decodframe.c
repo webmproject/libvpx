@@ -346,7 +346,7 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
 static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                        BOOL_DECODER* const bc) {
   TX_TYPE tx_type;
-  int i, eobtotal = 0;
+  int i;
   MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
 #if 0  // def DEC_DEBUG
   if (dec_debug) {
@@ -398,9 +398,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       xd->mode_info_context->bmi[i].as_mode.context = b->bmi.as_mode.context =
           vp9_find_bpred_context(xd, b);
 #endif
-      if (!xd->mode_info_context->mbmi.mb_skip_coeff)
-        eobtotal += vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_Y_WITH_DC, i);
-
       vp9_intra4x4_predict(xd, b, b_mode, b->predictor);
       tx_type = get_tx_type_4x4(xd, i);
       if (tx_type != DCT_DCT) {
@@ -412,9 +409,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
         xd->itxm_add(b->qcoeff, b->dequant, b->predictor,
                       *(b->base_dst) + b->dst, 16, b->dst_stride, xd->eobs[i]);
       }
-    }
-    if (!xd->mode_info_context->mbmi.mb_skip_coeff) {
-      vp9_decode_mb_tokens_4x4_uv(pbi, xd, bc);
     }
     vp9_build_intra_predictors_mbuv(xd);
     xd->itxm_add_uv_block(xd->qcoeff + 16 * 16,
@@ -812,8 +806,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
     vp9_reset_mb_tokens_context(xd);
   } else if (!bool_error(bc)) {
-    if (mode != B_PRED)
-      eobtotal = vp9_decode_mb_tokens(pbi, xd, bc);
+    eobtotal = vp9_decode_mb_tokens(pbi, xd, bc);
   }
 
   //mode = xd->mode_info_context->mbmi.mode;
