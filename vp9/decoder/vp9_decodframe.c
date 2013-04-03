@@ -1103,13 +1103,6 @@ static void init_frame(VP9D_COMP *pbi) {
     vp9_setup_past_independence(pc, xd);
   }
 
-  if (pc->frame_type != KEY_FRAME) {
-    pc->mcomp_filter_type = pc->use_bilinear_mc_filter ? BILINEAR : EIGHTTAP;
-
-    // To enable choice of different interpolation filters
-    vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
-  }
-
   xd->mode_info_context = pc->mi;
   xd->prev_mode_info_context = pc->prev_mi;
   xd->frame_type = pc->frame_type;
@@ -1767,6 +1760,19 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 #if CONFIG_COMP_INTERINTRA_PRED
     pc->use_interintra = vp9_read_bit(&header_bc);
 #endif
+
+    /* Calculate scaling factors for each of the 3 available references */
+    for (i = 0; i < 3; ++i) {
+      if (pc->active_ref_idx[i] >= NUM_YV12_BUFFERS) {
+        memset(&pc->active_ref_scale[i], 0, sizeof(pc->active_ref_scale[i]));
+        continue;
+      }
+
+      vp9_setup_scale_factors_for_frame(&pc->active_ref_scale[i],
+                                        &pc->yv12_fb[pc->active_ref_idx[i]],
+                                        pc->width, pc->height);
+    }
+
     // To enable choice of different interploation filters
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }

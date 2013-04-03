@@ -206,20 +206,6 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,
                               VP9_COMMON *cm) {
-  int i;
-
-  /* Calculate scaling factors for each of the 3 available references */
-  for (i = 0; i < 3; ++i) {
-    if (cm->active_ref_idx[i] >= NUM_YV12_BUFFERS) {
-      memset(&cm->active_ref_scale[i], 0, sizeof(cm->active_ref_scale[i]));
-      continue;
-    }
-
-    vp9_setup_scale_factors_for_frame(&cm->active_ref_scale[i],
-                                      &cm->yv12_fb[cm->active_ref_idx[i]],
-                                      cm->width, cm->height);
-  }
-
   if (xd->mode_info_context) {
     MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
 
@@ -228,7 +214,6 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
                       mbmi->second_ref_frame - 1,
                       cm->active_ref_scale);
   }
-
 
   switch (mcomp_filter_type) {
     case EIGHTTAP:
