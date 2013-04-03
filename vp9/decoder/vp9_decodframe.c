@@ -1430,62 +1430,65 @@ static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   }
 }
 
+static const uint8_t *read_frame_size(VP9_COMMON *const pc, const uint8_t *data,
+                                      const uint8_t *data_end,
+                                      int *width, int *height) {
+  if (data + 4 < data_end) {
+    *width = read_le16(data);
+    *height = read_le16(data + 2);
+    data += 4;
+  } else {
+    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Failed to read frame size");
+  }
+  return data;
+}
+
 static const uint8_t *setup_frame_size(VP9D_COMP *pbi, int scaling_active,
                                       const uint8_t *data,
                                       const uint8_t *data_end) {
-  VP9_COMMON *const pc = &pbi->common;
-  const int width = pc->width;
-  const int height = pc->height;
-
   // If error concealment is enabled we should only parse the new size
   // if we have enough data. Otherwise we will end up with the wrong size.
-  if (scaling_active && data + 4 < data_end) {
-    pc->display_width = read_le16(data + 0);
-    pc->display_height = read_le16(data + 2);
-    data += 4;
-  }
+  VP9_COMMON *const pc = &pbi->common;
+  int display_width = pc->display_width;
+  int display_height = pc->display_height;
+  int width = pc->width;
+  int height = pc->height;
 
-  if (data + 4 < data_end) {
-    pc->width = read_le16(data + 0);
-    pc->height = read_le16(data + 2);
-    data += 4;
-  }
+  if (scaling_active)
+    data = read_frame_size(pc, data, data_end, &display_width, &display_height);
 
-  if (!scaling_active) {
-    pc->display_width = pc->width;
-    pc->display_height = pc->height;
-  }
+  data = read_frame_size(pc, data, data_end, &width, &height);
 
-  if (width != pc->width || height != pc->height) {
-    if (pc->width <= 0) {
-      pc->width = width;
+  if (pc->width != width || pc->height != height) {
+    if (width <= 0)
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                          "Invalid frame width");
-    }
 
-    if (pc->height <= 0) {
-      pc->height = height;
+    if (height <= 0)
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                          "Invalid frame height");
-    }
 
     if (!pbi->initial_width || !pbi->initial_height) {
-      if (vp9_alloc_frame_buffers(pc, pc->width, pc->height))
+      if (vp9_alloc_frame_buffers(pc, width, height))
         vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate frame buffers");
-      pbi->initial_width = pc->width;
-      pbi->initial_height = pc->height;
+        pbi->initial_width = width;
+        pbi->initial_height = height;
+    } else {
+      if (width > pbi->initial_width)
+        vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Frame width too large");
+
+      if (height > pbi->initial_height)
+        vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Frame height too large");
     }
 
-    if (pc->width > pbi->initial_width) {
-      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Frame width too large");
-    }
-
-    if (pc->height > pbi->initial_height) {
-      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Frame height too large");
-    }
+    pc->width = width;
+    pc->height = height;
+    pc->display_width = scaling_active ? display_width : width;
+    pc->display_height = scaling_active ? display_height : height;
 
     update_frame_size(pbi);
   }
