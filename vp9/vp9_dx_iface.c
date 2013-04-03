@@ -329,9 +329,9 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
 
       vp9_initialize_dec();
 
-      oxcf.Width = ctx->si.w;
-      oxcf.Height = ctx->si.h;
-      oxcf.Version = 9;
+      oxcf.width = ctx->si.w;
+      oxcf.height = ctx->si.h;
+      oxcf.version = 9;
       oxcf.postprocess = 0;
       oxcf.max_threads = ctx->cfg.threads;
       oxcf.inv_tile_order = ctx->invert_tile_order;

@@ -86,17 +86,16 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
   loop_filter_info_n *lfi = &cm->lf_info;
   int i;
 
-  /* init limits for given sharpness*/
+  // init limits for given sharpness
   vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
   cm->last_sharpness_level = cm->sharpness_level;
 
-  /* init LUT for lvl  and hev thr picking */
+  // init LUT for lvl  and hev thr picking
   lf_init_lut(lfi);
 
-  /* init hev threshold const vectors */
-  for (i = 0; i < 4; i++) {
+  // init hev threshold const vectors
+  for (i = 0; i < 4; i++)
     vpx_memset(lfi->hev_thr[i], i, SIMD_WIDTH);
-  }
 }
 
 void vp9_loop_filter_frame_init(VP9_COMMON *cm,

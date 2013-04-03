@@ -100,7 +100,7 @@ void vp9_init_de_quantizer(VP9D_COMP *pbi) {
 
     /* all the ac values =; */
     for (i = 1; i < 16; i++) {
-      int rc = vp9_default_zig_zag1d_4x4[i];
+      const int rc = vp9_default_zig_zag1d_4x4[i];
 
       pc->Y1dequant[q][rc] = (int16_t)vp9_ac_yquant(q);
       pc->UVdequant[q][rc] = (int16_t)vp9_ac_uv_quant(q, pc->uvac_delta_q);
@@ -1071,8 +1071,8 @@ static void setup_token_decoder(VP9D_COMP *pbi,
                                 const unsigned char *cx_data,
                                 BOOL_DECODER* const bool_decoder) {
   VP9_COMMON *pc = &pbi->common;
-  const unsigned char *user_data_end = pbi->Source + pbi->source_sz;
-  const unsigned char *partition = cx_data;
+  const uint8_t *user_data_end = pbi->source + pbi->source_sz;
+  const uint8_t *partition = cx_data;
   ptrdiff_t bytes_left = user_data_end - partition;
   ptrdiff_t partition_size = bytes_left;
 
@@ -1612,11 +1612,11 @@ static void decode_tiles(VP9D_COMP *pbi,
   }
 }
 
-int vp9_decode_frame(VP9D_COMP *pbi, const unsigned char **p_data_end) {
+int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   BOOL_DECODER header_bc, residual_bc;
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd  = &pbi->mb;
-  const uint8_t *data = (const uint8_t *)pbi->Source;
+  const uint8_t *data = pbi->source;
   const uint8_t *data_end = data + pbi->source_sz;
   ptrdiff_t first_partition_length_in_bytes = 0;
   int i, corrupt_tokens = 0;
