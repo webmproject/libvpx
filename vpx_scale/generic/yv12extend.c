@@ -117,8 +117,13 @@ vp8_yv12_copy_frame_c(YV12_BUFFER_CONFIG *src_ybc,
   int row;
   unsigned char *source, *dest;
 
+#if 0
+  /* These assertions are valid in the codec, but the libvpx-tester uses
+   * this code slightly differently.
+   */
   assert(src_ybc->y_width == dst_ybc->y_width);
   assert(src_ybc->y_height == dst_ybc->y_height);
+#endif
 
   source = src_ybc->y_buffer;
   dest = dst_ybc->y_buffer;
