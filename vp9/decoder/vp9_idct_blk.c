@@ -20,7 +20,8 @@ void vp9_dequant_idct_add_y_block_c(int16_t *q, const int16_t *dq,
 
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) {
-      vp9_dequant_idct_add(q, dq, pre, dst, 16, stride, xd->eobs[i * 4  + j]);
+      vp9_dequant_idct_add(q, dq, pre, dst, 16, stride,
+                           xd->plane[0].eobs[i * 4  + j]);
       q   += 16;
       pre += 4;
       dst += 4;
@@ -56,15 +57,17 @@ void vp9_dequant_idct_add_y_block_8x8_c(int16_t *q, const int16_t *dq,
   uint8_t *origdest = dst;
   uint8_t *origpred = pre;
 
-  vp9_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride, xd->eobs[0]);
+  vp9_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride,
+                             xd->plane[0].eobs[0]);
   vp9_dequant_idct_add_8x8_c(&q[64], dq, origpred + 8,
-                             origdest + 8, 16, stride, xd->eobs[4]);
+                             origdest + 8, 16, stride,
+                             xd->plane[0].eobs[4]);
   vp9_dequant_idct_add_8x8_c(&q[128], dq, origpred + 8 * 16,
                              origdest + 8 * stride, 16, stride,
-                             xd->eobs[8]);
+                             xd->plane[0].eobs[8]);
   vp9_dequant_idct_add_8x8_c(&q[192], dq, origpred + 8 * 16 + 8,
                              origdest + 8 * stride + 8, 16, stride,
-                             xd->eobs[12]);
+                             xd->plane[0].eobs[12]);
 }
 
 void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
@@ -76,7 +79,7 @@ void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) {
       vp9_dequant_idct_add_lossless_c(q, dq, pre, dst, 16, stride,
-                                      xd->eobs[i * 4 + j]);
+                                      xd->plane[0].eobs[i * 4 + j]);
       q   += 16;
       pre += 4;
       dst += 4;

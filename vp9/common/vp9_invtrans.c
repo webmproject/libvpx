@@ -29,7 +29,8 @@ void vp9_inverse_transform_mby_4x4(MACROBLOCKD *xd) {
       vp9_short_iht4x4(BLOCK_OFFSET(xd->plane[0].dqcoeff, i, 16),
                        xd->block[i].diff, 16, tx_type);
     } else {
-      vp9_inverse_transform_b_4x4(xd, xd->eobs[i],
+      vp9_inverse_transform_b_4x4(xd,
+                                  xd->plane[0].eobs[i],
                                   BLOCK_OFFSET(xd->plane[0].dqcoeff, i, 16),
                                   xd->block[i].diff, 32);
     }
@@ -40,12 +41,12 @@ void vp9_inverse_transform_mbuv_4x4(MACROBLOCKD *xd) {
   int i;
 
   for (i = 16; i < 20; i++) {
-    vp9_inverse_transform_b_4x4(xd, xd->eobs[i],
+    vp9_inverse_transform_b_4x4(xd, xd->plane[1].eobs[i - 16],
                                 BLOCK_OFFSET(xd->plane[1].dqcoeff, i - 16, 16),
                                 xd->block[i].diff, 16);
   }
   for (i = 20; i < 24; i++) {
-    vp9_inverse_transform_b_4x4(xd, xd->eobs[i],
+    vp9_inverse_transform_b_4x4(xd, xd->plane[2].eobs[i - 20],
                                 BLOCK_OFFSET(xd->plane[2].dqcoeff, i - 20, 16),
                                 xd->block[i].diff, 16);
   }
@@ -175,7 +176,7 @@ void vp9_inverse_transform_sby_4x4(MACROBLOCKD *xd) {
     const TX_TYPE tx_type = get_tx_type_4x4(xd, y_idx * 8 + x_idx);
 
     if (tx_type == DCT_DCT) {
-      vp9_inverse_transform_b_4x4(xd, xd->eobs[n],
+      vp9_inverse_transform_b_4x4(xd, xd->plane[0].eobs[n],
                                   BLOCK_OFFSET(xd->plane[0].dqcoeff, n, 16),
                                   xd->diff + x_idx * 4 + y_idx * 4 * 32, 64);
     } else {
@@ -213,11 +214,11 @@ void vp9_inverse_transform_sbuv_4x4(MACROBLOCKD *xd) {
   for (n = 0; n < 16; n++) {
     const int x_idx = n & 3, y_idx = n >> 2;
 
-    vp9_inverse_transform_b_4x4(xd, xd->eobs[64 + n],
+    vp9_inverse_transform_b_4x4(xd, xd->plane[1].eobs[n],
                                 BLOCK_OFFSET(xd->plane[1].dqcoeff, n, 16),
                                 xd->diff + 1024 + x_idx * 4 + y_idx * 16 * 4,
                                 32);
-    vp9_inverse_transform_b_4x4(xd, xd->eobs[64 + 16 + n],
+    vp9_inverse_transform_b_4x4(xd, xd->plane[2].eobs[n],
                                 BLOCK_OFFSET(xd->plane[2].dqcoeff, n, 16),
                                 xd->diff + 1280 + x_idx * 4 + y_idx * 16 * 4,
                                 32);
@@ -278,7 +279,7 @@ void vp9_inverse_transform_sb64y_4x4(MACROBLOCKD *xd) {
     const TX_TYPE tx_type = get_tx_type_4x4(xd, y_idx * 16 + x_idx);
 
     if (tx_type == DCT_DCT) {
-      vp9_inverse_transform_b_4x4(xd, xd->eobs[n],
+      vp9_inverse_transform_b_4x4(xd, xd->plane[0].eobs[n],
                                   BLOCK_OFFSET(xd->plane[0].dqcoeff, n, 16),
                                   xd->diff + x_idx * 4 + y_idx * 4 * 64, 128);
     } else {
@@ -327,10 +328,10 @@ void vp9_inverse_transform_sb64uv_4x4(MACROBLOCKD *xd) {
   for (n = 0; n < 64; n++) {
     const int x_idx = n & 7, y_idx = n >> 3, off = x_idx * 4 + y_idx * 32 * 4;
 
-    vp9_inverse_transform_b_4x4(xd, xd->eobs[256 + n],
+    vp9_inverse_transform_b_4x4(xd, xd->plane[1].eobs[n],
                                 BLOCK_OFFSET(xd->plane[1].dqcoeff, n, 16),
                                 xd->diff + 4096 + off, 64);
-    vp9_inverse_transform_b_4x4(xd, xd->eobs[256 + 64 + n],
+    vp9_inverse_transform_b_4x4(xd, xd->plane[2].eobs[n],
                                 BLOCK_OFFSET(xd->plane[2].dqcoeff, n, 16),
                                 xd->diff + 4096 + 1024 + off, 64);
   }

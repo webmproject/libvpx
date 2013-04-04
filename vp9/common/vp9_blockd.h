@@ -298,6 +298,7 @@ enum { MAX_MB_PLANE = 3 };
 struct mb_plane {
   DECLARE_ALIGNED(16, int16_t,  qcoeff[64 * 64]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[64 * 64]);
+  DECLARE_ALIGNED(16, uint16_t, eobs[256]);
 };
 
 #define BLOCK_OFFSET(x, i, n) ((x) + (i) * (n))
@@ -310,7 +311,6 @@ struct mb_plane {
 typedef struct macroblockd {
   DECLARE_ALIGNED(16, int16_t,  diff[64*64+32*32*2]);      /* from idct diff */
   DECLARE_ALIGNED(16, uint8_t,  predictor[384]);  // unused for superblocks
-  DECLARE_ALIGNED(16, uint16_t, eobs[256+64*2]);
 #if CONFIG_CODE_NONZEROCOUNT
   DECLARE_ALIGNED(16, uint16_t, nzcs[256+64*2]);
 #endif
@@ -700,21 +700,19 @@ struct plane_block_idx {
 
 // TODO(jkoleszar): returning a struct so it can be used in a const context,
 // expect to refactor this further later.
-static INLINE struct plane_block_idx plane_block_idx(MACROBLOCKD *xd,
-                                                     int b_idx) {
-  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  const int u_offset = 16 << (sb_type * 2);
-  const int v_offset = 20 << (sb_type * 2);
+static INLINE struct plane_block_idx plane_block_idx(int y_blocks,
+                                                      int b_idx) {
+  const int v_offset = y_blocks * 5 / 4;
   struct plane_block_idx res;
 
-  if (b_idx < u_offset) {
+  if (b_idx < y_blocks) {
     res.plane = 0;
     res.block = b_idx;
   } else if (b_idx < v_offset) {
     res.plane = 1;
-    res.block = b_idx - u_offset;
+    res.block = b_idx - y_blocks;
   } else {
-    assert(b_idx < (24 << (sb_type * 2)));
+    assert(b_idx < y_blocks * 3 / 2);
     res.plane = 2;
     res.block = b_idx - v_offset;
   }

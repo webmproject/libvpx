@@ -21,14 +21,9 @@
 extern int enc_debug;
 #endif
 
-static INLINE int plane_idx(MACROBLOCKD *xd, int b_idx) {
-  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  if (b_idx < (16 << (sb_type * 2)))
-    return 0;  // Y
-  else if (b_idx < (20 << (sb_type * 2)))
-    return 16;  // U
-  assert(b_idx < (24 << (sb_type * 2)));
-  return 20;  // V
+static INLINE int plane_idx(int plane) {
+  return plane == 0 ? 0 :
+         plane == 1 ? 16 : 20;
 }
 
 void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
@@ -54,7 +49,6 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   int nzc = 0;
 #endif
 
-  assert(plane_idx(xd, b_idx) == 0);
   switch (tx_type) {
     case ADST_DCT:
       pt_scan = vp9_row_scan_4x4;
@@ -102,16 +96,16 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
     }
   }
 
-  xd->eobs[b_idx] = eob + 1;
+  xd->plane[0].eobs[b_idx] = eob + 1;
 #if CONFIG_CODE_NONZEROCOUNT
   xd->nzcs[b_idx] = nzc;
 #endif
 }
 
-void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
+void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  const int c_idx = plane_idx(xd, b_idx);
-  const struct plane_block_idx pb_idx = plane_block_idx(xd, b_idx);
+  const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
+  const int c_idx = plane_idx(pb_idx.plane);
   BLOCK *const b = &mb->block[c_idx];
   BLOCKD *const d = &xd->block[c_idx];
   int i, rc, eob;
@@ -133,6 +127,9 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
   int nzc = 0;
 #endif
 
+  if (c_idx == 0) assert(pb_idx.plane == 0);
+  if (c_idx == 16) assert(pb_idx.plane == 1);
+  if (c_idx == 20) assert(pb_idx.plane == 2);
   vpx_memset(qcoeff_ptr, 0, 32);
   vpx_memset(dqcoeff_ptr, 0, 32);
 
@@ -169,7 +166,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx) {
     }
   }
 
-  xd->eobs[b_idx] = eob + 1;
+  xd->plane[pb_idx.plane].eobs[pb_idx.block] = eob + 1;
 #if CONFIG_CODE_NONZEROCOUNT
   xd->nzcs[b_idx] = nzc;
 #endif
@@ -183,7 +180,7 @@ void vp9_quantize_mby_4x4(MACROBLOCK *x) {
     if (tx_type != DCT_DCT) {
       vp9_ht_quantize_b_4x4(x, i, tx_type);
     } else {
-      x->quantize_b_4x4(x, i);
+      x->quantize_b_4x4(x, i, 16);
     }
   }
 }
@@ -195,7 +192,7 @@ void vp9_quantize_mbuv_4x4(MACROBLOCK *x) {
   xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_MB16X16;
 
   for (i = 16; i < 24; i++)
-    x->quantize_b_4x4(x, i);
+    x->quantize_b_4x4(x, i, 16);
   xd->mode_info_context->mbmi.sb_type = real_sb_type;
 }
 
@@ -204,10 +201,11 @@ void vp9_quantize_mb_4x4(MACROBLOCK *x) {
   vp9_quantize_mbuv_4x4(x);
 }
 
-void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
+void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
+                                int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  const struct plane_block_idx pb_idx = plane_block_idx(xd, b_idx);
-  const int c_idx = plane_idx(xd, b_idx);
+  const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
+  const int c_idx = plane_idx(pb_idx.plane);
   int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff,
                                      pb_idx.block, 16);
   int16_t *dqcoeff_ptr = BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff,
@@ -228,6 +226,9 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
       break;
   }
 
+  if (c_idx == 0) assert(pb_idx.plane == 0);
+  if (c_idx == 16) assert(pb_idx.plane == 1);
+  if (c_idx == 20) assert(pb_idx.plane == 2);
   vpx_memset(qcoeff_ptr, 0, 64 * sizeof(int16_t));
   vpx_memset(dqcoeff_ptr, 0, 64 * sizeof(int16_t));
 
@@ -306,12 +307,12 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
         }
       }
     }
-    xd->eobs[b_idx] = eob + 1;
+    xd->plane[pb_idx.plane].eobs[pb_idx.block] = eob + 1;
 #if CONFIG_CODE_NONZEROCOUNT
     xd->nzcs[b_idx] = nzc;
 #endif
   } else {
-    xd->eobs[b_idx] = 0;
+    xd->plane[pb_idx.plane].eobs[pb_idx.block] = 0;
 #if CONFIG_CODE_NONZEROCOUNT
     xd->nzcs[b_idx] = 0;
 #endif
@@ -328,7 +329,7 @@ void vp9_quantize_mby_8x8(MACROBLOCK *x) {
 #endif
   for (i = 0; i < 16; i += 4) {
     TX_TYPE tx_type = get_tx_type_8x8(&x->e_mbd, (i & 8) + ((i & 4) >> 1));
-    x->quantize_b_8x8(x, i, tx_type);
+    x->quantize_b_8x8(x, i, tx_type, 16);
   }
 }
 
@@ -344,7 +345,7 @@ void vp9_quantize_mbuv_8x8(MACROBLOCK *x) {
   }
 #endif
   for (i = 16; i < 24; i += 4)
-    x->quantize_b_8x8(x, i, DCT_DCT);
+    x->quantize_b_8x8(x, i, DCT_DCT, 16);
   xd->mode_info_context->mbmi.sb_type = real_sb_type;
 }
 
@@ -361,7 +362,7 @@ void vp9_quantize_mby_16x16(MACROBLOCK *x) {
     x->e_mbd.nzcs[i] = 0;
   }
 #endif
-  x->quantize_b_16x16(x, 0, tx_type);
+  x->quantize_b_16x16(x, 0, tx_type, 16);
 }
 
 void vp9_quantize_mb_16x16(MACROBLOCK *x) {
@@ -430,10 +431,11 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
 #endif
 }
 
-void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
+void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
+                                  int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  const int c_idx = plane_idx(xd, b_idx);
-  const struct plane_block_idx pb_idx = plane_block_idx(xd, b_idx);
+  const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
+  const int c_idx = plane_idx(pb_idx.plane);
   BLOCK *const b = &mb->block[c_idx];
   BLOCKD *const d = &xd->block[c_idx];
   const int *pt_scan;
@@ -450,6 +452,9 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
       break;
   }
 
+  if (c_idx == 0) assert(pb_idx.plane == 0);
+  if (c_idx == 16) assert(pb_idx.plane == 1);
+  if (c_idx == 20) assert(pb_idx.plane == 2);
   quantize(b->zrun_zbin_boost,
            mb->coeff + 16 * b_idx,
            256, b->skip_block,
@@ -458,20 +463,23 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
            BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block, 16),
            d->dequant,
            b->zbin_extra,
-           &xd->eobs[b_idx],
+           &xd->plane[pb_idx.plane].eobs[pb_idx.block],
 #if CONFIG_CODE_NONZEROCOUNT
            &xd->nzcs[b_idx],
 #endif
            pt_scan, 1);
 }
 
-void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx) {
+void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx, int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  const int c_idx = plane_idx(xd, b_idx);
-  const struct plane_block_idx pb_idx = plane_block_idx(xd, b_idx);
+  const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
+  const int c_idx = plane_idx(pb_idx.plane);
   BLOCK *const b = &mb->block[c_idx];
   BLOCKD *const d = &xd->block[c_idx];
 
+  if (c_idx == 0) assert(pb_idx.plane == 0);
+  if (c_idx == 16) assert(pb_idx.plane == 1);
+  if (c_idx == 20) assert(pb_idx.plane == 2);
   quantize(b->zrun_zbin_boost,
            mb->coeff + b_idx * 16,
            1024, b->skip_block,
@@ -481,7 +489,7 @@ void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx) {
            BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block, 16),
            d->dequant,
            b->zbin_extra,
-           &xd->eobs[b_idx],
+           &xd->plane[pb_idx.plane].eobs[pb_idx.block],
 #if CONFIG_CODE_NONZEROCOUNT
            &xd->nzcs[b_idx],
 #endif
@@ -489,7 +497,7 @@ void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx) {
 }
 
 void vp9_quantize_sby_32x32(MACROBLOCK *x) {
-  vp9_regular_quantize_b_32x32(x, 0);
+  vp9_regular_quantize_b_32x32(x, 0, 64);
 }
 
 void vp9_quantize_sby_16x16(MACROBLOCK *x) {
@@ -498,7 +506,7 @@ void vp9_quantize_sby_16x16(MACROBLOCK *x) {
   for (n = 0; n < 4; n++) {
     TX_TYPE tx_type = get_tx_type_16x16(&x->e_mbd,
                                         (16 * (n & 2)) + ((n & 1) * 4));
-    x->quantize_b_16x16(x, n * 16, tx_type);
+    x->quantize_b_16x16(x, n * 16, tx_type, 64);
   }
 }
 
@@ -508,7 +516,7 @@ void vp9_quantize_sby_8x8(MACROBLOCK *x) {
   for (n = 0; n < 16; n++) {
     TX_TYPE tx_type = get_tx_type_8x8(&x->e_mbd,
                                       (4 * (n & 12)) + ((n & 3) * 2));
-    x->quantize_b_8x8(x, n * 4, tx_type);
+    x->quantize_b_8x8(x, n * 4, tx_type, 64);
   }
 }
 
@@ -521,35 +529,35 @@ void vp9_quantize_sby_4x4(MACROBLOCK *x) {
     if (tx_type != DCT_DCT) {
       vp9_ht_quantize_b_4x4(x, n, tx_type);
     } else {
-      x->quantize_b_4x4(x, n);
+      x->quantize_b_4x4(x, n, 64);
     }
   }
 }
 
 void vp9_quantize_sbuv_16x16(MACROBLOCK *x) {
-  x->quantize_b_16x16(x, 64, DCT_DCT);
-  x->quantize_b_16x16(x, 80, DCT_DCT);
+  x->quantize_b_16x16(x, 64, DCT_DCT, 64);
+  x->quantize_b_16x16(x, 80, DCT_DCT, 64);
 }
 
 void vp9_quantize_sbuv_8x8(MACROBLOCK *x) {
   int i;
 
   for (i = 64; i < 96; i += 4)
-    x->quantize_b_8x8(x, i, DCT_DCT);
+    x->quantize_b_8x8(x, i, DCT_DCT, 64);
 }
 
 void vp9_quantize_sbuv_4x4(MACROBLOCK *x) {
   int i;
 
   for (i = 64; i < 96; i++)
-    x->quantize_b_4x4(x, i);
+    x->quantize_b_4x4(x, i, 64);
 }
 
 void vp9_quantize_sb64y_32x32(MACROBLOCK *x) {
   int n;
 
   for (n = 0; n < 4; n++)
-    vp9_regular_quantize_b_32x32(x, n * 64);
+    vp9_regular_quantize_b_32x32(x, n * 64, 256);
 }
 
 void vp9_quantize_sb64y_16x16(MACROBLOCK *x) {
@@ -558,7 +566,7 @@ void vp9_quantize_sb64y_16x16(MACROBLOCK *x) {
   for (n = 0; n < 16; n++) {
     TX_TYPE tx_type = get_tx_type_16x16(&x->e_mbd,
                                         (16 * (n & 12)) + ((n & 3) * 4));
-    x->quantize_b_16x16(x, n * 16, tx_type);
+    x->quantize_b_16x16(x, n * 16, tx_type, 256);
   }
 }
 
@@ -568,7 +576,7 @@ void vp9_quantize_sb64y_8x8(MACROBLOCK *x) {
   for (n = 0; n < 64; n++) {
     TX_TYPE tx_type = get_tx_type_8x8(&x->e_mbd,
                                       (4 * (n & 56)) + ((n & 7) * 2));
-    x->quantize_b_8x8(x, n * 4, tx_type);
+    x->quantize_b_8x8(x, n * 4, tx_type, 256);
   }
 }
 
@@ -581,44 +589,45 @@ void vp9_quantize_sb64y_4x4(MACROBLOCK *x) {
     if (tx_type != DCT_DCT) {
       vp9_ht_quantize_b_4x4(x, n, tx_type);
     } else {
-      x->quantize_b_4x4(x, n);
+      x->quantize_b_4x4(x, n, 256);
     }
   }
 }
 
 void vp9_quantize_sb64uv_32x32(MACROBLOCK *x) {
-  vp9_regular_quantize_b_32x32(x, 256);
-  vp9_regular_quantize_b_32x32(x, 320);
+  vp9_regular_quantize_b_32x32(x, 256, 256);
+  vp9_regular_quantize_b_32x32(x, 320, 256);
 }
 
 void vp9_quantize_sb64uv_16x16(MACROBLOCK *x) {
   int i;
 
   for (i = 256; i < 384; i += 16)
-    x->quantize_b_16x16(x, i, DCT_DCT);
+    x->quantize_b_16x16(x, i, DCT_DCT, 256);
 }
 
 void vp9_quantize_sb64uv_8x8(MACROBLOCK *x) {
   int i;
 
   for (i = 256; i < 384; i += 4)
-    x->quantize_b_8x8(x, i, DCT_DCT);
+    x->quantize_b_8x8(x, i, DCT_DCT, 256);
 }
 
 void vp9_quantize_sb64uv_4x4(MACROBLOCK *x) {
   int i;
 
   for (i = 256; i < 384; i++)
-    x->quantize_b_4x4(x, i);
+    x->quantize_b_4x4(x, i, 256);
 }
 
 /* quantize_b_pair function pointer in MACROBLOCK structure is set to one of
  * these two C functions if corresponding optimized routine is not available.
  * NEON optimized version implements currently the fast quantization for pair
  * of blocks. */
-void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *x, int b_idx1, int b_idx2) {
-  vp9_regular_quantize_b_4x4(x, b_idx1);
-  vp9_regular_quantize_b_4x4(x, b_idx2);
+void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *x, int b_idx1, int b_idx2,
+                                     int y_blocks) {
+  vp9_regular_quantize_b_4x4(x, b_idx1, y_blocks);
+  vp9_regular_quantize_b_4x4(x, b_idx2, y_blocks);
 }
 
 static void invert_quant(int16_t *quant, uint8_t *shift, int d) {
