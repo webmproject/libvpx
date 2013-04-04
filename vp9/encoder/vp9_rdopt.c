@@ -573,6 +573,10 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
     if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
       seg_eob = 0;
 
+  /* sanity check to ensure that we do not have spurious non-zero q values */
+  if (eob < seg_eob)
+    assert(qcoeff_ptr[scan[eob]] == 0);
+
   {
 #if CONFIG_CODE_NONZEROCOUNT
     int nzc = 0;
@@ -2562,7 +2566,7 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
             BLOCKD *bd = &xd->block[ib + iblock[j]];
             BLOCK *be = &x->block[ib + iblock[j]];
             x->fwd_txm8x4(be->src_diff, be->coeff, 32);
-            x->quantize_b_4x4_pair(x, ib + iblock[j], ib + iblock[j]);
+            x->quantize_b_4x4_pair(x, ib + iblock[j], ib + iblock[j] + 1);
             thisdistortion = vp9_block_error_c(be->coeff, bd->dqcoeff, 32);
             otherdist += thisdistortion;
             xd->mode_info_context->mbmi.txfm_size = TX_4X4;
