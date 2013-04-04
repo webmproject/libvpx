@@ -83,9 +83,13 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
 void vp9_loop_filter_frame_init(VP9_COMMON *cm,
                                 MACROBLOCKD *xd,
                                 int default_filt_lvl) {
-  int seg,  /* segment number */
-      ref,  /* index in ref_lf_deltas */
-      mode; /* index in mode_lf_deltas */
+  int seg,    // segment number
+      ref,    // index in ref_lf_deltas
+      mode;   // index in mode_lf_deltas
+  // n_shift is the a multiplier for lf_deltas
+  // the multiplier is 1 for when filter_lvl is between 0 and 31;
+  // 2 when filter_lvl is between 32 and 63
+  int n_shift = default_filt_lvl >> 5;
 
   loop_filter_info_n *lfi = &cm->lf_info;
 
@@ -128,30 +132,29 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
     ref = INTRA_FRAME;
 
     /* Apply delta for reference frame */
-    lvl_ref += xd->ref_lf_deltas[ref];
+    lvl_ref += xd->ref_lf_deltas[ref] << n_shift;
 
     /* Apply delta for Intra modes */
     mode = 0; /* I4X4_PRED */
     /* Only the split mode I4X4_PRED has a further special case */
-    lvl_mode = clamp(lvl_ref +  xd->mode_lf_deltas[mode], 0, 63);
-
-    lfi->lvl[seg][ref][mode] = lvl_mode;
+    lvl_mode = lvl_ref + (xd->mode_lf_deltas[mode] << n_shift);
+    lfi->lvl[seg][ref][mode] = clamp(lvl_mode, 0, 63);
 
     mode = 1; /* all the rest of Intra modes */
-    lvl_mode = clamp(lvl_ref, 0, 63);
-    lfi->lvl[seg][ref][mode] = lvl_mode;
+    lvl_mode = lvl_ref;
+    lfi->lvl[seg][ref][mode] = clamp(lvl_mode, 0, 63);
 
     /* LAST, GOLDEN, ALT */
     for (ref = 1; ref < MAX_REF_FRAMES; ref++) {
       int lvl_ref = lvl_seg;
 
       /* Apply delta for reference frame */
-      lvl_ref += xd->ref_lf_deltas[ref];
+      lvl_ref += xd->ref_lf_deltas[ref] << n_shift;
 
       /* Apply delta for Inter modes */
       for (mode = 1; mode < 4; mode++) {
-        lvl_mode = clamp(lvl_ref + xd->mode_lf_deltas[mode], 0, 63);
-        lfi->lvl[seg][ref][mode] = lvl_mode;
+        lvl_mode = lvl_ref + (xd->mode_lf_deltas[mode] << n_shift);
+        lfi->lvl[seg][ref][mode] = clamp(lvl_mode, 0, 63);
       }
     }
   }
