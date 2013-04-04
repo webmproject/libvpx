@@ -58,6 +58,13 @@ static int read_is_valid(const unsigned char *start, size_t len,
   return start + len > start && start + len <= end;
 }
 
+static TXFM_MODE read_txfm_mode(vp9_reader *r) {
+  TXFM_MODE mode = vp9_read_literal(r, 2);
+  if (mode == ALLOW_32X32)
+    mode += vp9_read_bit(r);
+  return mode;
+}
+
 static int merge_index(int v, int n, int modulus) {
   int max1 = (n - 1 - modulus / 2) / modulus + 1;
   if (v < max1) v = v * modulus + modulus / 2;
@@ -1341,9 +1348,23 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   }
 }
 
-static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
-  int i;
+static void setup_pred_probs(VP9_COMMON *pc, vp9_reader *r) {
+  // Read common prediction model status flag probability updates for the
+  // reference frame
+  if (pc->frame_type == KEY_FRAME) {
+    // Set the prediction probabilities to defaults
+    pc->ref_pred_probs[0] = 120;
+    pc->ref_pred_probs[1] = 80;
+    pc->ref_pred_probs[2] = 40;
+  } else {
+    int i;
+    for (i = 0; i < PREDICTION_PROBS; ++i)
+      if (vp9_read_bit(r))
+        pc->ref_pred_probs[i] = vp9_read_prob(r);
+  }
+}
 
+static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   pc->filter_type = (LOOPFILTERTYPE) vp9_read_bit(r);
   pc->filter_level = vp9_read_literal(r, 6);
   pc->sharpness_level = vp9_read_literal(r, 3);
@@ -1365,6 +1386,8 @@ static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
     xd->mode_ref_lf_delta_update = vp9_read_bit(r);
 
     if (xd->mode_ref_lf_delta_update) {
+      int i;
+
       // Send update
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
         if (vp9_read_bit(r)) {
@@ -1674,36 +1697,16 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   setup_segmentation(pc, xd, &header_bc);
 
-  // Read common prediction model status flag probability updates for the
-  // reference frame
-  if (pc->frame_type == KEY_FRAME) {
-    // Set the prediction probabilities to defaults
-    pc->ref_pred_probs[0] = 120;
-    pc->ref_pred_probs[1] = 80;
-    pc->ref_pred_probs[2] = 40;
-  } else {
-    for (i = 0; i < PREDICTION_PROBS; i++) {
-      if (vp9_read_bit(&header_bc))
-        pc->ref_pred_probs[i] = vp9_read_prob(&header_bc);
-    }
-  }
+  setup_pred_probs(pc, &header_bc);
 
   pc->prob_sb64_coded = vp9_read_prob(&header_bc);
   pc->prob_sb32_coded = vp9_read_prob(&header_bc);
   xd->lossless = vp9_read_bit(&header_bc);
-  if (xd->lossless) {
-    pc->txfm_mode = ONLY_4X4;
-  } else {
-    // Read the loop filter level and type
-    pc->txfm_mode = vp9_read_literal(&header_bc, 2);
-    if (pc->txfm_mode == ALLOW_32X32)
-      pc->txfm_mode += vp9_read_bit(&header_bc);
-
-    if (pc->txfm_mode == TX_MODE_SELECT) {
-      pc->prob_tx[0] = vp9_read_prob(&header_bc);
-      pc->prob_tx[1] = vp9_read_prob(&header_bc);
-      pc->prob_tx[2] = vp9_read_prob(&header_bc);
-    }
+  pc->txfm_mode = xd->lossless ? ONLY_4X4 : read_txfm_mode(&header_bc);
+  if (pc->txfm_mode == TX_MODE_SELECT) {
+    pc->prob_tx[0] = vp9_read_prob(&header_bc);
+    pc->prob_tx[1] = vp9_read_prob(&header_bc);
+    pc->prob_tx[2] = vp9_read_prob(&header_bc);
   }
 
   setup_loopfilter(pc, xd, &header_bc);
