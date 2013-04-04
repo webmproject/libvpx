@@ -161,6 +161,11 @@ static int calculate_minq_index(double maxq,
   const double minqtarget = MIN(((x3 * maxq + x2) * maxq + x1) * maxq + c,
                                 maxq);
 
+  // Special case handling to deal with the step from q2.0
+  // down to lossless mode represented by q 1.0.
+  if (minqtarget <= 2.0)
+    return 0;
+
   for (i = 0; i < QINDEX_RANGE; i++) {
     if (minqtarget <= vp9_convert_qindex_to_q(i))
       return i;

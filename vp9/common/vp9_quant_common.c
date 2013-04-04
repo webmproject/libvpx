@@ -15,7 +15,7 @@
 static int16_t dc_qlookup[QINDEX_RANGE];
 static int16_t ac_qlookup[QINDEX_RANGE];
 
-#define ACDC_MIN 4
+#define ACDC_MIN 8
 
 // TODO(dkovalev) move to common and reuse
 static double poly3(double a, double b, double c, double d, double x) {
@@ -25,10 +25,19 @@ static double poly3(double a, double b, double c, double d, double x) {
 void vp9_init_quant_tables() {
   int i, val = 4;
 
-  for (i = 0; i < QINDEX_RANGE; i++) {
+  // A "real" q of 1.0 forces lossless mode.
+  // In practice non lossless Q's between 1.0 and 2.0 (represented here by
+  // integer values from 5-7 give poor rd results (lower psnr and often
+  // larger size than the lossless encode. To block out those "not very useful"
+  // values we increment the ac and dc q lookup values by 4 after position 0.
+  ac_qlookup[0] = val;
+  dc_qlookup[0] = val;
+  val += 4;
+
+  for (i = 1; i < QINDEX_RANGE; i++) {
     const int ac_val = val;
 
-    val = (int)(val * 1.02);
+    val = (int)(val * 1.01975);
     if (val == ac_val)
       ++val;
 
