@@ -1057,7 +1057,6 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
             set_refs(pbi, 16, mb_row + y_idx, mb_col + x_idx);
             decode_mb(pbi, xd, mb_row + y_idx, mb_col + x_idx, bc);
 
-            /* check if the boolean decoder has suffered an error */
             xd->corrupted |= bool_error(bc);
           }
         }
@@ -1791,13 +1790,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   // Read inter mode probability context updates
   if (pc->frame_type != KEY_FRAME) {
     int i, j;
-    for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-      for (j = 0; j < 4; j++) {
-        if (vp9_read(&header_bc, 252)) {
+    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+      for (j = 0; j < 4; ++j)
+        if (vp9_read(&header_bc, 252))
           pc->fc.vp9_mode_contexts[i][j] = vp9_read_prob(&header_bc);
-        }
-      }
-    }
   }
 #if CONFIG_MODELCOEFPROB && ADJUST_KF_COEF_PROBS
   if (pc->frame_type == KEY_FRAME)
@@ -1812,16 +1808,13 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
     for (i = 0; i < MAX_REF_FRAMES; ++i) {
       // Skip the dummy entry for intra ref frame.
-      if (i == INTRA_FRAME) {
+      if (i == INTRA_FRAME)
         continue;
-      }
 
       // Read any updates to probabilities
-      for (j = 0; j < MAX_MV_REF_CANDIDATES - 1; ++j) {
-        if (vp9_read(&header_bc, VP9_MVREF_UPDATE_PROB)) {
+      for (j = 0; j < MAX_MV_REF_CANDIDATES - 1; ++j)
+        if (vp9_read(&header_bc, VP9_MVREF_UPDATE_PROB))
           xd->mb_mv_ref_probs[i][j] = vp9_read_prob(&header_bc);
-        }
-      }
     }
   }
 #endif
@@ -1849,18 +1842,17 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     CHECK_MEM_ERROR(pc->last_frame_seg_map,
                     vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
 
-  /* set up frame new frame for intra coded blocks */
+  // set up frame new frame for intra coded blocks
   vp9_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
 
   vp9_setup_block_dptrs(xd);
-
   vp9_build_block_doffsets(xd);
 
-  /* clear out the coeff buffer */
+  // clear out the coeff buffer
   vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
 
-  /* Read the mb_no_coeff_skip flag */
-  pc->mb_no_coeff_skip = (int)vp9_read_bit(&header_bc);
+  // Read the mb_no_coeff_skip flag
+  pc->mb_no_coeff_skip = vp9_read_bit(&header_bc);
 
   vp9_decode_mode_mvs_init(pbi, &header_bc);
 
@@ -1916,7 +1908,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   }
 #endif
 
-  /* Find the end of the coded buffer */
+  // Find the end of the coded buffer
   while (residual_bc.count > CHAR_BIT &&
          residual_bc.count < VP9_BD_VALUE_SIZE) {
     residual_bc.count -= CHAR_BIT;
