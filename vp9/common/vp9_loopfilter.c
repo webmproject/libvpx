@@ -212,25 +212,20 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
   struct loop_filter_info lfi;
   const FRAME_TYPE frame_type = cm->frame_type;
   int mb_row, mb_col;
-  uint8_t *y_ptr, *u_ptr, *v_ptr;
 
-  /* Point at base of Mb MODE_INFO list */
+  // Set up the buffer pointers
+  uint8_t *y_ptr = post->y_buffer;
+  uint8_t *u_ptr = y_only ? 0 : post->u_buffer;
+  uint8_t *v_ptr = y_only ? 0 : post->v_buffer;
+
+  // Point at base of Mb MODE_INFO list
   const MODE_INFO *mode_info_context = cm->mi;
   const int mis = cm->mode_info_stride;
 
-  /* Initialize the loop filter for this frame. */
+  // Initialize the loop filter for this frame.
   vp9_loop_filter_frame_init(cm, xd, frame_filter_level);
-  /* Set up the buffer pointers */
-  y_ptr = post->y_buffer;
-  if (y_only) {
-    u_ptr = 0;
-    v_ptr = 0;
-  } else {
-    u_ptr = post->u_buffer;
-    v_ptr = post->v_buffer;
-  }
 
-  /* vp9_filter each macro block */
+  // vp9_filter each macro block
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
       const MB_PREDICTION_MODE mode = mode_info_context->mbmi.mode;
@@ -382,14 +377,14 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
         u_ptr += 8;
         v_ptr += 8;
       }
-      mode_info_context++;     /* step to next MB */
+      mode_info_context++;  // step to next MB
     }
     y_ptr += post->y_stride  * 16 - post->y_width;
     if (!y_only) {
       u_ptr += post->uv_stride *  8 - post->uv_width;
       v_ptr += post->uv_stride *  8 - post->uv_width;
     }
-    mode_info_context++;         /* Skip border mb */
+    mode_info_context++;  // Skip border mb
   }
 }
 
