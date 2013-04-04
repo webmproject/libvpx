@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH///Ho\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 780,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-04T00:17:46Z",
+      "side": 0,
+      "message": "Looks like a bug in previous code because we only update xd-\u003eblock[16] for both u and v. Now it is xd-\u003eblock[16] for u and xd-\u003eblock[20] for v (see new decode_sb_16x16 function). This is consistent for decode_sb32 and decode_sb64.",
+      "revId": "dcd3a5c0552069ffa728c9fc79abb1dd130551a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
