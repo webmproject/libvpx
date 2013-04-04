@@ -27,5 +27,10 @@ int vp9_decode_sb64_tokens(VP9D_COMP* const pbi,
 
 int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx, MACROBLOCKD* const xd,
                                 BOOL_DECODER* const bc);
+#if CONFIG_NEWBINTRAMODES
+int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
+                         BOOL_DECODER* const bc,
+                         PLANE_TYPE type, int i);
+#endif
 
 #endif  // VP9_DECODER_VP9_DETOKENIZE_H_
