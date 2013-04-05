@@ -192,7 +192,6 @@ typedef enum {
 union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
-    TX_TYPE           tx_type;
 #if CONFIG_NEWBINTRAMODES
     B_PREDICTION_MODE context;
 #endif
