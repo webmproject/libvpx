@@ -257,7 +257,6 @@ typedef enum {
 typedef struct {
   int RD;
   SEARCH_METHODS search_method;
-  int improved_dct;
   int auto_filter;
   int recode_loop;
   int iterative_sub_pixel;
