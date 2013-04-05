@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//88g\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1389,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-05T23:13:45Z",
+      "side": 1,
+      "message": "as part of a separate change: we should have a read_signed() primitive that handles this magnitude,sign encoding consistently. It\u0027d be nicer to just write this xd-\u003eref_lf_deltas[i] \u003d vp9_read_signed(r, 6); or something like that.",
+      "revId": "421baef49ef862cdd09c19cc58d73f62736729e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
