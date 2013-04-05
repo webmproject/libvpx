@@ -732,7 +732,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   // best quality defaults
   sf->RD = 1;
   sf->search_method = NSTEP;
-  sf->improved_dct = 1;
   sf->auto_filter = 1;
   sf->recode_loop = 1;
   sf->quarter_pixel_search = 1;
@@ -791,8 +790,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         cpi->mode_check_freq[THR_COMP_SPLITLG] = 15;
         cpi->mode_check_freq[THR_COMP_SPLITLA] = 7;
 
-        sf->improved_dct = 0;
-
         // Only do recode loop on key frames, golden frames and
         // alt ref frames
         sf->recode_loop = 2;
@@ -809,7 +806,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   // so make sure they are always turned off.
   if (cpi->pass == 1) {
     sf->optimize_coefficients = 0;
-    sf->improved_dct = 0;
   }
 
   cpi->mb.fwd_txm16x16  = vp9_short_fdct16x16;
