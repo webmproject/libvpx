@@ -25,10 +25,6 @@
 
 // #define MODE_STATS
 
-/*#define DCPRED 1*/
-#define DCPREDSIMTHRESH 0
-#define DCPREDCNTTHRESH 3
-
 #define MB_FEATURE_TREE_PROBS   3
 #define PREDICTION_PROBS 3
 
