@@ -70,7 +70,7 @@ static void setup_macroblock(MACROBLOCKD *mb, BLOCKSET bs) {
 }
 
 void vp9_setup_block_dptrs(MACROBLOCKD *mb) {
-  int r, c;
+  int r, c, i;
   BLOCKD *blockd = mb->block;
 
   for (r = 0; r < 4; r++) {
@@ -98,6 +98,12 @@ void vp9_setup_block_dptrs(MACROBLOCKD *mb) {
       blockd[to].diff = &mb->diff[from];
       blockd[to].predictor = &mb->predictor[from];
     }
+  }
+
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    mb->plane[i].plane_type = i ? PLANE_TYPE_UV : PLANE_TYPE_Y_WITH_DC;
+    mb->plane[i].subsampling_x = !!i;
+    mb->plane[i].subsampling_y = !!i;
   }
 }
 

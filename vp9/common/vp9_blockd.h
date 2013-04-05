@@ -215,6 +215,14 @@ typedef enum {
   BLOCK_SIZE_SB64X64 = 2,
 } BLOCK_SIZE_TYPE;
 
+typedef enum {
+  BLOCK_4X4_LG2 = 0,
+  BLOCK_8X8_LG2 = 2,
+  BLOCK_16X16_LG2 = 4,
+  BLOCK_32X32_LG2 = 6,
+  BLOCK_64X64_LG2 = 8
+} BLOCK_SIZE_LG2;
+
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
 #if CONFIG_COMP_INTERINTRA_PRED
@@ -299,6 +307,9 @@ struct mb_plane {
   DECLARE_ALIGNED(16, int16_t,  qcoeff[64 * 64]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[64 * 64]);
   DECLARE_ALIGNED(16, uint16_t, eobs[256]);
+  PLANE_TYPE plane_type;
+  int subsampling_x;
+  int subsampling_y;
 };
 
 #define BLOCK_OFFSET(x, i, n) ((x) + (i) * (n))
