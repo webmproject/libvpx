@@ -1266,8 +1266,8 @@ static void update_frame_size(VP9D_COMP *pbi) {
   const int width = multiple16(cm->width);
   const int height = multiple16(cm->height);
 
-  cm->mb_rows = height >> 4;
-  cm->mb_cols = width >> 4;
+  cm->mb_rows = height / 16;
+  cm->mb_cols = width / 16;
   cm->MBs = cm->mb_rows * cm->mb_cols;
   cm->mode_info_stride = cm->mb_cols + 1;
   memset(cm->mip, 0,
@@ -1288,7 +1288,6 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
     // this frame.
     xd->update_mb_segmentation_map = vp9_read_bit(r);
 
-    // If so what method will be used.
     if (xd->update_mb_segmentation_map) {
       // Which macro block level features are enabled. Read the probs used to
       // decode the segment id for each macro block.
@@ -1297,15 +1296,10 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
 
       // Read the prediction probs needed to decode the segment id
       pc->temporal_update = vp9_read_bit(r);
-      for (i = 0; i < PREDICTION_PROBS; i++) {
-        pc->segment_pred_probs[i] = pc->temporal_update
-            ? (vp9_read_bit(r) ? vp9_read_prob(r) : 255)
-            : 255;
-      }
-
       if (pc->temporal_update) {
         const vp9_prob *p = xd->mb_segment_tree_probs;
         vp9_prob *p_mod = xd->mb_segment_mispred_tree_probs;
+
         const int c0 =        p[0]  *        p[1];
         const int c1 =        p[0]  * (256 - p[1]);
         const int c2 = (256 - p[0]) *        p[2];
@@ -1315,6 +1309,12 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
         p_mod[1] = get_binary_prob(c0, c2 + c3);
         p_mod[2] = get_binary_prob(c0 + c1, c3);
         p_mod[3] = get_binary_prob(c0 + c1, c2);
+
+        for (i = 0; i < PREDICTION_PROBS; i++)
+          pc->segment_pred_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r) : 255;
+      } else {
+        for (i = 0; i < PREDICTION_PROBS; i++)
+          pc->segment_pred_probs[i] = 255;
       }
     }
 
@@ -1324,25 +1324,17 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
 
       vp9_clearall_segfeatures(xd);
 
-      // For each segmentation...
       for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-        // For each of the segments features...
         for (j = 0; j < SEG_LVL_MAX; j++) {
-          int data;
-          // Is the feature enabled
-          if (vp9_read_bit(r)) {
-            // Update the feature data and mask
+          int data = 0;
+          const int feature_enabled = vp9_read_bit(r);
+          if (feature_enabled) {
             vp9_enable_segfeature(xd, i, j);
-
             data = vp9_decode_unsigned_max(r, vp9_seg_feature_data_max(j));
-            // Is the segment data signed.
             if (vp9_is_segfeature_signed(j) && vp9_read_bit(r)) {
               data = -data;
             }
-          } else {
-            data = 0;
           }
-
           vp9_set_segdata(xd, i, j, data);
         }
       }

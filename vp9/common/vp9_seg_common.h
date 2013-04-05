@@ -55,7 +55,5 @@ int vp9_check_segref(const MACROBLOCKD *xd,
                      int segment_id,
                      MV_REFERENCE_FRAME ref_frame);
 
-int vp9_check_segref_inter(MACROBLOCKD *xd, int segment_id);
-
 #endif  // VP9_COMMON_VP9_SEG_COMMON_H_
 
