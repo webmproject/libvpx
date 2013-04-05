@@ -1365,7 +1365,7 @@ static void setup_pred_probs(VP9_COMMON *pc, vp9_reader *r) {
 }
 
 static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
-  pc->filter_type = (LOOPFILTERTYPE) vp9_read_bit(r);
+  pc->filter_type = (LOOPFILTER_TYPE) vp9_read_bit(r);
   pc->filter_level = vp9_read_literal(r, 6);
   pc->sharpness_level = vp9_read_literal(r, 3);
 
@@ -1382,31 +1382,25 @@ static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   xd->mode_ref_lf_delta_enabled = vp9_read_bit(r);
 
   if (xd->mode_ref_lf_delta_enabled) {
-    // Do the deltas need to be updated
     xd->mode_ref_lf_delta_update = vp9_read_bit(r);
-
     if (xd->mode_ref_lf_delta_update) {
       int i;
 
-      // Send update
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
         if (vp9_read_bit(r)) {
-          // sign = vp9_read_bit(r);
-          xd->ref_lf_deltas[i] = vp9_read_literal(r, 6);
-
+          int value = vp9_read_literal(r, 6);
           if (vp9_read_bit(r))
-            xd->ref_lf_deltas[i] = -xd->ref_lf_deltas[i];  // Apply sign
+            value = -value;
+          xd->ref_lf_deltas[i] = value;
         }
       }
 
-      // Send update
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
         if (vp9_read_bit(r)) {
-          // sign = vp9_read_bit(r);
-          xd->mode_lf_deltas[i] = vp9_read_literal(r, 6);
-
+          int value = vp9_read_literal(r, 6);
           if (vp9_read_bit(r))
-            xd->mode_lf_deltas[i] = -xd->mode_lf_deltas[i];  // Apply sign
+            value = -value;
+          xd->mode_lf_deltas[i] = value;
         }
       }
     }
