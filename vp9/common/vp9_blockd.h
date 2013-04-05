@@ -45,10 +45,6 @@
 #define MAX_MV_REFS 9
 #define MAX_MV_REF_CANDIDATES 4
 
-typedef struct {
-  int r, c;
-} POS;
-
 typedef enum {
   PLANE_TYPE_Y_WITH_DC,
   PLANE_TYPE_UV,
