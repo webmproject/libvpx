@@ -16,6 +16,24 @@
       "revId": "f6ee8483da8ab7ca321d5c2a541bbcefc2c0b9ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//+GI\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1559,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-05T00:42:42Z",
+      "side": 1,
+      "message": "We are using unsigned int everywhere for partition size. What\u0027s the reason of using ptrdiff_t only once for declaration?",
+      "parentUuid": "AAAAXH//+HY\u003d",
+      "revId": "f6ee8483da8ab7ca321d5c2a541bbcefc2c0b9ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
