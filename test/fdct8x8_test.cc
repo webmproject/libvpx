@@ -51,11 +51,15 @@ TEST(VP9Fdct8x8Test, SignBiasCheck) {
   }
 
   for (int j = 0; j < 64; ++j) {
-    const bool bias_acceptable = (abs(count_sign_block[j][0] -
-                                      count_sign_block[j][1]) < 1000);
-    EXPECT_TRUE(bias_acceptable)
-        << "Error: 8x8 FDCT has a sign bias > 1%"
-        << " for input range [-255, 255] at index " << j;
+    const int diff = abs(count_sign_block[j][0] - count_sign_block[j][1]);
+    const int max_diff = 1125;
+    EXPECT_LT(diff, max_diff)
+        << "Error: 8x8 FDCT has a sign bias > "
+        << 1. * max_diff / count_test_block * 100 << "%"
+        << " for input range [-255, 255] at index " << j
+        << " count0: " << count_sign_block[j][0]
+        << " count1: " << count_sign_block[j][1]
+        << " diff: " << diff;
   }
 
   memset(count_sign_block, 0, sizeof(count_sign_block));
@@ -76,11 +80,15 @@ TEST(VP9Fdct8x8Test, SignBiasCheck) {
   }
 
   for (int j = 0; j < 64; ++j) {
-    const bool bias_acceptable = (abs(count_sign_block[j][0] -
-                                      count_sign_block[j][1]) < 10000);
-    EXPECT_TRUE(bias_acceptable)
-        << "Error: 8x8 FDCT has a sign bias > 10%"
-        << " for input range [-15, 15] at index " << j;
+    const int diff = abs(count_sign_block[j][0] - count_sign_block[j][1]);
+    const int max_diff = 10000;
+    EXPECT_LT(diff, max_diff)
+        << "Error: 4x4 FDCT has a sign bias > "
+        << 1. * max_diff / count_test_block * 100 << "%"
+        << " for input range [-15, 15] at index " << j
+        << " count0: " << count_sign_block[j][0]
+        << " count1: " << count_sign_block[j][1]
+        << " diff: " << diff;
   }
 };
 

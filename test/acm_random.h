@@ -11,7 +11,7 @@
 #ifndef LIBVPX_TEST_ACM_RANDOM_H_
 #define LIBVPX_TEST_ACM_RANDOM_H_
 
-#include <stdlib.h>
+#include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "vpx/vpx_integer.h"
 
@@ -19,24 +19,23 @@ namespace libvpx_test {
 
 class ACMRandom {
  public:
-  ACMRandom() {
-    Reset(DeterministicSeed());
-  }
+  ACMRandom() : random_(DeterministicSeed()) {}
 
-  explicit ACMRandom(int seed) {
-    Reset(seed);
-  }
+  explicit ACMRandom(int seed) : random_(seed) {}
 
   void Reset(int seed) {
-    srand(seed);
+    random_.Reseed(seed);
   }
 
   uint8_t Rand8(void) {
-    return (rand() >> 8) & 0xff;
+    const uint32_t value =
+        random_.Generate(testing::internal::Random::kMaxRange);
+    // There's a bit more entropy in the upper bits of this implementation.
+    return (value >> 24) & 0xff;
   }
 
   int PseudoUniform(int range) {
-    return (rand() >> 8) % range;
+    return random_.Generate(range);
   }
 
   int operator()(int n) {
@@ -46,6 +45,9 @@ class ACMRandom {
   static int DeterministicSeed(void) {
     return 0xbaba;
   }
+
+ private:
+  testing::internal::Random random_;
 };
 
 }  // namespace libvpx_test
