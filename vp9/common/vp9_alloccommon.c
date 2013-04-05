@@ -157,28 +157,18 @@ void vp9_setup_version(VP9_COMMON *cm) {
       cm->no_lpf = 0;
       cm->filter_type = NORMAL_LOOPFILTER;
       cm->use_bilinear_mc_filter = 0;
-      cm->full_pixel = 0;
       break;
     case 1:
       cm->no_lpf = 0;
       cm->filter_type = SIMPLE_LOOPFILTER;
       cm->use_bilinear_mc_filter = 1;
-      cm->full_pixel = 0;
       break;
     case 2:
     case 3:
       cm->no_lpf = 1;
       cm->filter_type = NORMAL_LOOPFILTER;
       cm->use_bilinear_mc_filter = 1;
-      cm->full_pixel = 0;
       break;
-      // Full pel only code deprecated in experimental code base
-      // case 3:
-      //    cm->no_lpf = 1;
-      //    cm->filter_type = SIMPLE_LOOPFILTER;
-      //    cm->use_bilinear_mc_filter = 1;
-      //    cm->full_pixel = 1;
-      //    break;
   }
 }
 void vp9_create_common(VP9_COMMON *oci) {
@@ -194,7 +184,6 @@ void vp9_create_common(VP9_COMMON *oci) {
   oci->no_lpf = 0;
   oci->filter_type = NORMAL_LOOPFILTER;
   oci->use_bilinear_mc_filter = 0;
-  oci->full_pixel = 0;
   oci->clr_type = REG_YUV;
   oci->clamp_type = RECON_CLAMP_REQUIRED;
 

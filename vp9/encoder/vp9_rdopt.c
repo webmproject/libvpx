@@ -1765,7 +1765,7 @@ static int rd_cost_mbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *mb, int backup) {
 
 
 static int64_t rd_inter16x16_uv_4x4(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
-                                    int *distortion, int fullpixel, int *skip,
+                                    int *distortion, int *skip,
                                     int do_ctx_backup) {
   vp9_transform_mbuv_4x4(x);
   vp9_quantize_mbuv_4x4(x);
@@ -1804,7 +1804,7 @@ static int rd_cost_mbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *mb, int backup) {
 }
 
 static int64_t rd_inter16x16_uv_8x8(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
-                                    int *distortion, int fullpixel, int *skip,
+                                    int *distortion, int *skip,
                                     int do_ctx_backup) {
   vp9_transform_mbuv_8x8(x);
   vp9_quantize_mbuv_8x8(x);
@@ -1857,7 +1857,7 @@ static void rd_inter32x32_uv_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
 }
 
 static int64_t rd_inter32x32_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
-                                int *distortion, int fullpixel, int *skip) {
+                                int *distortion, int *skip) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   const uint8_t *usrc = x->src.u_buffer, *udst = xd->dst.u_buffer;
@@ -1894,9 +1894,9 @@ static int64_t rd_inter32x32_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                             dst_uv_stride);
 
       if (mbmi->txfm_size == TX_4X4) {
-        rd_inter16x16_uv_4x4(cpi, x, &r_tmp, &d_tmp, fullpixel, &s_tmp, 0);
+        rd_inter16x16_uv_4x4(cpi, x, &r_tmp, &d_tmp, &s_tmp, 0);
       } else {
-        rd_inter16x16_uv_8x8(cpi, x, &r_tmp, &d_tmp, fullpixel, &s_tmp, 0);
+        rd_inter16x16_uv_8x8(cpi, x, &r_tmp, &d_tmp, &s_tmp, 0);
       }
 
       r += r_tmp;
@@ -1919,7 +1919,7 @@ static int64_t rd_inter32x32_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
 static void super_block_64_uvrd(VP9_COMMON *const cm, MACROBLOCK *x, int *rate,
                                 int *distortion, int *skip);
 static int64_t rd_inter64x64_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
-                                int *distortion, int fullpixel, int *skip) {
+                                int *distortion, int *skip) {
   super_block_64_uvrd(&cpi->common, x, rate, distortion, skip);
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
@@ -3406,10 +3406,10 @@ static void inter_mode_cost(VP9_COMP *cpi, MACROBLOCK *x,
       x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED &&
       x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
     rd_inter16x16_uv_8x8(cpi, x, rate_uv, distortion_uv,
-                         cpi->common.full_pixel, &uv_skippable, 1);
+                         &uv_skippable, 1);
   else
     rd_inter16x16_uv_4x4(cpi, x, rate_uv, distortion_uv,
-                         cpi->common.full_pixel, &uv_skippable, 1);
+                         &uv_skippable, 1);
 
   *rate2 += *rate_uv;
   *distortion2 += *distortion_uv;
@@ -4067,7 +4067,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *distortion += *distortion_y;
 
       rd_inter64x64_uv(cpi, x, rate_uv, distortion_uv,
-                       cm->full_pixel, &skippable_uv);
+                       &skippable_uv);
 
       *rate2 += *rate_uv;
       *distortion += *distortion_uv;
@@ -4082,7 +4082,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *distortion += *distortion_y;
 
       rd_inter32x32_uv(cpi, x, rate_uv, distortion_uv,
-                       cm->full_pixel, &skippable_uv);
+                       &skippable_uv);
 
       *rate2 += *rate_uv;
       *distortion += *distortion_uv;
@@ -4584,7 +4584,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                           x->e_mbd.predictor, x->src.uv_stride);
         rd_inter16x16_uv_4x4(cpi, x, &rate_uv, &distortion_uv,
-                             cpi->common.full_pixel, &uv_skippable, 1);
+                             &uv_skippable, 1);
         rate2 += rate_uv;
         distortion2 += distortion_uv;
         skippable = skippable && uv_skippable;

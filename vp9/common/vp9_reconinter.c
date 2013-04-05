@@ -974,9 +974,6 @@ static void build_inter16x16_predictors_mbuv_w(MACROBLOCKD *xd,
     _16x16mv.as_mv.row /= 2;
     _16x16mv.as_mv.col /= 2;
 
-    _16x16mv.as_mv.row &= xd->fullpixel_mask;
-    _16x16mv.as_mv.col &= xd->fullpixel_mask;
-
     uptr = (which_mv ? xd->second_pre.u_buffer : xd->pre.u_buffer);
     vptr = (which_mv ? xd->second_pre.v_buffer : xd->pre.v_buffer);
 
@@ -1050,9 +1047,6 @@ void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
 
     _16x16mv.as_mv.row /= 2;
     _16x16mv.as_mv.col /= 2;
-
-    _16x16mv.as_mv.row &= xd->fullpixel_mask;
-    _16x16mv.as_mv.col &= xd->fullpixel_mask;
 
     uptr = (which_mv ? xd->second_pre.u_buffer : xd->pre.u_buffer);
     vptr = (which_mv ? xd->second_pre.v_buffer : xd->pre.v_buffer);
@@ -1617,7 +1611,7 @@ static int mi_mv_pred_row(MACROBLOCKD *mb, int off, int idx) {
                    mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.row +
                    mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.row +
                    mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.row;
-  return round_mv_comp(temp) & mb->fullpixel_mask;
+  return round_mv_comp(temp);
 }
 
 static int mi_mv_pred_col(MACROBLOCKD *mb, int off, int idx) {
@@ -1625,7 +1619,7 @@ static int mi_mv_pred_col(MACROBLOCKD *mb, int off, int idx) {
                    mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.col +
                    mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.col +
                    mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.col;
-  return round_mv_comp(temp) & mb->fullpixel_mask;
+  return round_mv_comp(temp);
 }
 
 static int b_mv_pred_row(MACROBLOCKD *mb, int off, int idx) {
@@ -1634,7 +1628,7 @@ static int b_mv_pred_row(MACROBLOCKD *mb, int off, int idx) {
                    blockd[off + 1].bmi.as_mv[idx].as_mv.row +
                    blockd[off + 4].bmi.as_mv[idx].as_mv.row +
                    blockd[off + 5].bmi.as_mv[idx].as_mv.row;
-  return round_mv_comp(temp) & mb->fullpixel_mask;
+  return round_mv_comp(temp);
 }
 
 static int b_mv_pred_col(MACROBLOCKD *mb, int off, int idx) {
@@ -1643,7 +1637,7 @@ static int b_mv_pred_col(MACROBLOCKD *mb, int off, int idx) {
                    blockd[off + 1].bmi.as_mv[idx].as_mv.col +
                    blockd[off + 4].bmi.as_mv[idx].as_mv.col +
                    blockd[off + 5].bmi.as_mv[idx].as_mv.col;
-  return round_mv_comp(temp) & mb->fullpixel_mask;
+  return round_mv_comp(temp);
 }
 
 

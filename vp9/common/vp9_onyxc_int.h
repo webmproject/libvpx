@@ -215,7 +215,6 @@ typedef struct VP9Common {
   COMPPREDMODE_TYPE comp_pred_mode;
   int no_lpf;
   int use_bilinear_mc_filter;
-  int full_pixel;
 
   int base_qindex;
   int last_kf_gf_q;  /* Q used on the last GF or KF */
