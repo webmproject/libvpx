@@ -12,8 +12,6 @@
 #ifndef VP9_COMMON_VP9_BLOCKD_H_
 #define VP9_COMMON_VP9_BLOCKD_H_
 
-void vpx_log(const char *format, ...);
-
 #include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "vp9/common/vp9_convolve.h"
