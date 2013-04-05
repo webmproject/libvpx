@@ -251,6 +251,7 @@ EXPERIMENT_LIST="
     loop_dering
     implicit_compoundinter_weight
     scatterscan
+    oneshotq
 "
 CONFIG_LIST="
     external_build
