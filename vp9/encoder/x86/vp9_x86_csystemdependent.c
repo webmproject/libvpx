@@ -26,15 +26,8 @@ void vp9_short_fdct8x4_mmx(short *input, short *output, int pitch) {
 int vp9_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr);
 int vp9_mbblock_error_mmx(MACROBLOCK *mb) {
   short *coeff_ptr =  mb->block[0].coeff;
-  short *dcoef_ptr =  mb->e_mbd.block[0].dqcoeff;
+  short *dcoef_ptr =  mb->e_mbd.plane[0].dqcoeff;
   return vp9_mbblock_error_mmx_impl(coeff_ptr, dcoef_ptr);
-}
-
-int vp9_mbuverror_mmx_impl(short *s_ptr, short *d_ptr);
-int vp9_mbuverror_mmx(MACROBLOCK *mb) {
-  short *s_ptr = &mb->coeff[256];
-  short *d_ptr = &mb->e_mbd.dqcoeff[256];
-  return vp9_mbuverror_mmx_impl(s_ptr, d_ptr);
 }
 
 void vp9_subtract_b_mmx_impl(unsigned char *z,  int src_stride,
@@ -54,15 +47,8 @@ void vp9_subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch) {
 int vp9_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr);
 int vp9_mbblock_error_xmm(MACROBLOCK *mb) {
   short *coeff_ptr =  mb->block[0].coeff;
-  short *dcoef_ptr =  mb->e_mbd.block[0].dqcoeff;
+  short *dcoef_ptr =  mb->e_mbd.plane[0].dqcoeff;
   return vp9_mbblock_error_xmm_impl(coeff_ptr, dcoef_ptr);
-}
-
-int vp9_mbuverror_xmm_impl(short *s_ptr, short *d_ptr);
-int vp9_mbuverror_xmm(MACROBLOCK *mb) {
-  short *s_ptr = &mb->coeff[256];
-  short *d_ptr = &mb->e_mbd.dqcoeff[256];
-  return vp9_mbuverror_xmm_impl(s_ptr, d_ptr);
 }
 
 void vp9_subtract_b_sse2_impl(unsigned char *z,  int src_stride,

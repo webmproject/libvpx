@@ -29,9 +29,7 @@ DEFINE(vp9_block_zbin_extra,                    offsetof(BLOCK, zbin_extra));
 DEFINE(vp9_block_zrun_zbin_boost,               offsetof(BLOCK, zrun_zbin_boost));
 DEFINE(vp9_block_quant_shift,                   offsetof(BLOCK, quant_shift));
 
-DEFINE(vp9_blockd_qcoeff,                       offsetof(BLOCKD, qcoeff));
 DEFINE(vp9_blockd_dequant,                      offsetof(BLOCKD, dequant));
-DEFINE(vp9_blockd_dqcoeff,                      offsetof(BLOCKD, dqcoeff));
 
 END
 

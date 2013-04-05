@@ -29,9 +29,6 @@ forward_decls vp9_common_forward_decls
 prototype void vp9_dequant_idct_add_y_block_8x8 "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, struct macroblockd *xd"
 specialize vp9_dequant_idct_add_y_block_8x8
 
-prototype void vp9_dequant_idct_add_uv_block_8x8 "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dstu, uint8_t *dstv, int stride, struct macroblockd *xd"
-specialize vp9_dequant_idct_add_uv_block_8x8
-
 prototype void vp9_dequant_idct_add_16x16 "int16_t *input, const int16_t *dq, uint8_t *pred, uint8_t *dest, int pitch, int stride, int eob"
 specialize vp9_dequant_idct_add_16x16
 
@@ -44,14 +41,11 @@ specialize vp9_dequant_idct_add
 prototype void vp9_dequant_idct_add_y_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, struct macroblockd *xd"
 specialize vp9_dequant_idct_add_y_block
 
-prototype void vp9_dequant_idct_add_uv_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dstu, uint8_t *dstv, int stride, struct macroblockd *xd"
+prototype void vp9_dequant_idct_add_uv_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs"
 specialize vp9_dequant_idct_add_uv_block
 
 prototype void vp9_dequant_idct_add_32x32 "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int pitch, int stride, int eob"
 specialize vp9_dequant_idct_add_32x32
-
-prototype void vp9_dequant_idct_add_uv_block_16x16 "int16_t *q, const int16_t *dq, uint8_t *dstu, uint8_t *dstv, int stride, struct macroblockd *xd"
-specialize vp9_dequant_idct_add_uv_block_16x16
 
 #
 # RECON
@@ -606,8 +600,7 @@ prototype void vp9_subtract_b "struct block *be, struct blockd *bd, int pitch"
 specialize vp9_subtract_b mmx sse2
 
 prototype int vp9_mbuverror "struct macroblock *mb"
-specialize vp9_mbuverror mmx sse2
-vp9_mbuverror_sse2=vp9_mbuverror_xmm
+specialize vp9_mbuverror
 
 prototype void vp9_subtract_b "struct block *be, struct blockd *bd, int pitch"
 specialize vp9_subtract_b mmx sse2
