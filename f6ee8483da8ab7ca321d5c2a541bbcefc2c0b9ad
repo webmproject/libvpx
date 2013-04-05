@@ -34,6 +34,24 @@
       "revId": "f6ee8483da8ab7ca321d5c2a541bbcefc2c0b9ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//+FI\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1559,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-05T00:46:13Z",
+      "side": 1,
+      "message": "Unsigned int is fine with me, but we should not use uint32_t.",
+      "parentUuid": "AAAAXH//+GI\u003d",
+      "revId": "f6ee8483da8ab7ca321d5c2a541bbcefc2c0b9ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
