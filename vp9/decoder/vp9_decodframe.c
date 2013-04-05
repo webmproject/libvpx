@@ -910,22 +910,18 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
 #endif
 }
 
+static int get_delta_q(vp9_reader *r, int *dq) {
+  const int old_value = *dq;
 
-static int get_delta_q(vp9_reader *bc, int prev, int *q_update) {
-  int ret_val = 0;
-
-  if (vp9_read_bit(bc)) {
-    ret_val = vp9_read_literal(bc, 4);
-
-    if (vp9_read_bit(bc))
-      ret_val = -ret_val;
+  if (vp9_read_bit(r)) {  // Update bit
+    int value = vp9_read_literal(r, 4);
+    if (vp9_read_bit(r))  // Sign bit
+      value = -value;
+    *dq = value;
   }
 
   // Trigger a quantizer update if the delta-q value has changed
-  if (ret_val != prev)
-    *q_update = 1;
-
-  return ret_val;
+  return old_value != *dq;
 }
 
 #ifdef PACKET_TESTING
@@ -1725,9 +1721,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     pc->base_qindex = vp9_read_literal(&header_bc, QINDEX_BITS);
 
     // AC 1st order Q = default
-    pc->y1dc_delta_q = get_delta_q(&header_bc, pc->y1dc_delta_q, &q_update);
-    pc->uvdc_delta_q = get_delta_q(&header_bc, pc->uvdc_delta_q, &q_update);
-    pc->uvac_delta_q = get_delta_q(&header_bc, pc->uvac_delta_q, &q_update);
+    q_update = get_delta_q(&header_bc, &pc->y1dc_delta_q) |
+               get_delta_q(&header_bc, &pc->uvdc_delta_q) |
+               get_delta_q(&header_bc, &pc->uvac_delta_q);
 
     if (q_update)
       vp9_init_de_quantizer(pbi);
