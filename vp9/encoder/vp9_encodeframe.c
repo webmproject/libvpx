@@ -1210,8 +1210,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   vpx_memset(cm->above_context, 0,
              sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
-
-  xd->fullpixel_mask = cm->full_pixel ? 0xfffffff8 : 0xffffffff;
 }
 
 static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {

@@ -296,7 +296,6 @@ typedef struct macroblockd {
 
   /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
   BLOCKD block[24];
-  int fullpixel_mask;
 
   YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
   YV12_BUFFER_CONFIG second_pre;

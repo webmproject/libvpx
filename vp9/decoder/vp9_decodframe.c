@@ -1113,7 +1113,6 @@ static void init_frame(VP9D_COMP *pbi) {
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_stride = pc->mode_info_stride;
   xd->corrupted = 0;
-  xd->fullpixel_mask = pc->full_pixel ? 0xfffffff8 : 0xffffffff;
 }
 
 #if CONFIG_CODE_NONZEROCOUNT
