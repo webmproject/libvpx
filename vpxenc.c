@@ -1481,7 +1481,7 @@ static void show_rate_histogram(struct rate_hist          *hist,
 
 #define mmin(a, b)  ((a) < (b) ? (a) : (b))
 static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
-                          int yloc[2], int uloc[2], int vloc[2]) {
+                          int yloc[4], int uloc[4], int vloc[4]) {
   const unsigned int bsize = 64;
   const unsigned int bsize2 = bsize >> 1;
   unsigned int match = 1;
@@ -1510,6 +1510,7 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
         }
     }
   }
+
   uloc[0] = uloc[1] = uloc[2] = uloc[3] = -1;
   for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i += bsize2) {
     for (j = 0; j < match && (img1->d_w + 1) / 2; j += bsize2) {

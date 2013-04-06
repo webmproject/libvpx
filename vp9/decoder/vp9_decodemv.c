@@ -1026,11 +1026,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       case NEWMV:
         process_mv(bc, &mv->as_mv, &best_mv.as_mv, nmvc, &cm->fc.NMVcount,
                    xd->allow_high_precision_mv);
-
-        // Don't need to check this on NEARMV and NEARESTMV modes
-        // since those modes clamp the MV. The NEWMV mode does not,
-        // so signal to the prediction stage whether special
-        // handling may be required.
         mbmi->need_to_clamp_mvs = check_mv_bounds(mv,
                                                   mb_to_left_edge,
                                                   mb_to_right_edge,
@@ -1040,11 +1035,11 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         if (mbmi->second_ref_frame > 0) {
           process_mv(bc, &mbmi->mv[1].as_mv, &best_mv_second.as_mv, nmvc,
                      &cm->fc.NMVcount, xd->allow_high_precision_mv);
-          mbmi->need_to_clamp_secondmv |= check_mv_bounds(&mbmi->mv[1],
-                                                          mb_to_left_edge,
-                                                          mb_to_right_edge,
-                                                          mb_to_top_edge,
-                                                          mb_to_bottom_edge);
+          mbmi->need_to_clamp_secondmv = check_mv_bounds(&mbmi->mv[1],
+                                                         mb_to_left_edge,
+                                                         mb_to_right_edge,
+                                                         mb_to_top_edge,
+                                                         mb_to_bottom_edge);
         }
         break;
       default:
