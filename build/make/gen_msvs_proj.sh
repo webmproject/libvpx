@@ -260,12 +260,15 @@ uses_asm=${uses_asm:-false}
 case "${vs_ver:-8}" in
     7) vs_ver_id="7.10"
        asm_use_custom_step=$uses_asm
+       warn_64bit='Detect64BitPortabilityProblems=true'
     ;;
     8) vs_ver_id="8.00"
        asm_use_custom_step=$uses_asm
+       warn_64bit='Detect64BitPortabilityProblems=true'
     ;;
     9) vs_ver_id="9.00"
        asm_use_custom_step=$uses_asm
+       warn_64bit='Detect64BitPortabilityProblems=false'
     ;;
 esac
 
@@ -362,8 +365,8 @@ generate_vcproj() {
                             PreprocessorDefinitions="WIN32;DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE" \
                             RuntimeLibrary="$debug_runtime" \
                             WarningLevel="3" \
-                            Detect64BitPortabilityProblems="true" \
                             DebugInformationFormat="1" \
+                            $warn_64bit \
                     ;;
                     vpx)
                         tag Tool \
@@ -379,7 +382,7 @@ generate_vcproj() {
                             UsePrecompiledHeader="0" \
                             WarningLevel="3" \
                             DebugInformationFormat="1" \
-                            Detect64BitPortabilityProblems="true" \
+                            $warn_64bit \
 
                         $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs" Debug="true"
                     ;;
@@ -393,7 +396,7 @@ generate_vcproj() {
                             UsePrecompiledHeader="0" \
                             WarningLevel="3" \
                             DebugInformationFormat="1" \
-                            Detect64BitPortabilityProblems="true" \
+                            $warn_64bit \
 
                         $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs" Debug="true"
                     ;;
@@ -470,8 +473,8 @@ generate_vcproj() {
                             RuntimeLibrary="$release_runtime" \
                             UsePrecompiledHeader="0" \
                             WarningLevel="3" \
-                            Detect64BitPortabilityProblems="true" \
                             DebugInformationFormat="0" \
+                            $warn_64bit \
                     ;;
                     vpx)
                         tag Tool \
@@ -488,7 +491,7 @@ generate_vcproj() {
                             UsePrecompiledHeader="0" \
                             WarningLevel="3" \
                             DebugInformationFormat="0" \
-                            Detect64BitPortabilityProblems="true" \
+                            $warn_64bit \
 
                         $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs"
                     ;;
@@ -503,7 +506,7 @@ generate_vcproj() {
                             UsePrecompiledHeader="0" \
                             WarningLevel="3" \
                             DebugInformationFormat="0" \
-                            Detect64BitPortabilityProblems="true" \
+                            $warn_64bit \
 
                         $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs"
                     ;;
