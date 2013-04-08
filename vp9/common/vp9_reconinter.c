@@ -1742,7 +1742,7 @@ void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
         v = &blockd[voffset].bmi.as_mv[1].as_mv;
 
         v->row = u->row = b_mv_pred_row(xd, yoffset, 1);
-        v->row = u->col = b_mv_pred_row(xd, yoffset, 1);
+        v->col = u->col = b_mv_pred_col(xd, yoffset, 1);
       }
     }
   }
