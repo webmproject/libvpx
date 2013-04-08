@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//8OI\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-08T18:52:46Z",
+      "side": 1,
+      "message": "unused",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//8OE\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-08T18:52:46Z",
+      "side": 1,
+      "message": "unused",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//8OM\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-08T18:52:46Z",
+      "side": 1,
+      "message": "can we make a macro to calculate BLOCK_SIZE_LG2 from BLOCK_SIZE_TYPE? Having two things that are the same things is confusing.",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//8No\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-08T18:52:46Z",
+      "side": 1,
+      "message": "This is ... unreadable. It probably needs some commenting all over the place to explain what it\u0027s doing, why it\u0027s doing that and what the output is (e.g. for input block this and transform size that and plane such and mode so, the expected resulting txsize and block numbers used to call decode_coefs() is this and that).\n\nIf this serves as our bitstream documentation (which it will), we\u0027re in trouble.",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//8Nk\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-08T18:52:46Z",
+      "side": 1,
+      "message": "decode_blocks_helper(..., txfm_size \u003d\u003d .. \u0026\u0026 (mode \u003d\u003d .. || mode \u003d\u003d ..)));",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
