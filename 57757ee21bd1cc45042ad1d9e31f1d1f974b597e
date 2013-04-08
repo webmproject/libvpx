@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//8J8\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T20:15:32Z",
+      "side": 1,
+      "message": "used while in the debugger.",
+      "parentUuid": "AAAAXH//8OI\u003d",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//8OE\u003d",
         "filename": "vp9/common/vp9_blockd.h",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2013-04-08T18:52:46Z",
       "side": 1,
       "message": "unused",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//8J4\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T20:15:32Z",
+      "side": 1,
+      "message": "used while in the debugger.",
+      "parentUuid": "AAAAXH//8OE\u003d",
       "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//8Jo\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T20:15:32Z",
+      "side": 1,
+      "message": "a distinct type is preferred for some type safety. Ack that there are a number of these block size types, I\u0027m going to try to clean this up as I go through the code. Most users of BLOCK_SIZE_TYPE do this sort of math, and it may be possible to make that one use the same scale as this one and eliminate this one. But that\u0027s a bigger/different change.",
+      "parentUuid": "AAAAXH//8OM\u003d",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//8No\u003d",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 4
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//8JA\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T20:15:32Z",
+      "side": 1,
+      "message": "You\u0027re going to have to be more specific with the parts that are confusing. All the intermediate calcs have fairly expressive names and only have a couple terms. I\u0027ve added some comments and changed the ordering a bit. The split between block_idx and i is definitely confusing, but I already have a TODO above that the block_idx is going away. ss_tx_size vs ss_txfrm_size also, but TX_SIZE might be another one that\u0027s a candidate to put in the same scale as BLOCK_SIZE_LG2, and that extra variable could probably go away in the future.",
+      "parentUuid": "AAAAXH//8No\u003d",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//8Nk\u003d",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 4
@@ -81,6 +153,24 @@
       "writtenOn": "2013-04-08T18:52:46Z",
       "side": 1,
       "message": "decode_blocks_helper(..., txfm_size \u003d\u003d .. \u0026\u0026 (mode \u003d\u003d .. || mode \u003d\u003d ..)));",
+      "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//8Is\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T20:15:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXH//8Nk\u003d",
       "revId": "57757ee21bd1cc45042ad1d9e31f1d1f974b597e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
