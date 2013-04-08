@@ -1,0 +1,480 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//76Q\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "should this change be related to CONFIG_SBSEGMENT?",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//76I\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 673,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "this switch statement is duplicated, could be expressed like rows \u003d block_size / 2, cols \u003d block_size etc.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//75s\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "delete this line rather than commenting it out. I don\u0027t understand why it\u0027s changing yet, maybe it\u0027ll be clear in later parts of your patch.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//75I\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "does this need to be protected within the experiment?",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//74w\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "this 6 should probably be a constant NUM_INTER_MODES or something",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//74k\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "parens should be unnecessary. Alternatively, use MIN(count, MVREF_COUNT_SAT)",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//74g\u003d",
+        "filename": "vp9/common/vp9_findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "delete code, don\u0027t #if 0",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//74M\u003d",
+        "filename": "vp9/common/vp9_invtrans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "I\u0027d rather see these folded into the regular code, where the regular code is just a segment with w\u003d\u003dh.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//73w\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "this is a little unusual, not sure how you\u0027re using this yet, but I\u0027d have expected it to change MODE_INFO, or maybe be in MACROBLOCKD since I bet it\u0027s sort of like the bmi.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//73s\u003d",
+        "filename": "vp9/common/vp9_recon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "these could be combined with the existing recon_sby, sbuv. The normal case can be treated like 1 square segment.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//73k\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 938,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "these two functions should be combined, they\u0027re almost exact duplicates.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//73c\u003d",
+        "filename": "vp9/common/vp9_reconinter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "these could be generalized into one function, or better yet rolled into the square functions.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//73Y\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 667,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "unneeded?",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//73U\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "magic constant? or maybe mb_mode_context should be a 2D array?",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//73M\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 964,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "do we need both of these functions? They seem almost identical.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//73A\u003d",
+        "filename": "vp9/decoder/vp9_onyxd_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "This is an awfully big structure to be duplicating.. this can\u0027t be right.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//72o\u003d",
+        "filename": "vp9/encoder/vp9_boolhuff.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "all these changes to be VP9_ENTROPY_STATS could have been a different changeset.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//72k\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "another case where the rectangular and square code could be folded together.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//72A\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "combine with set_offsets",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//72Y\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 678,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "the bs\u003d2 and bs\u003d4 cases could be combined, these constants are all easy to calculate",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//7zM\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "thse could be combinded with their square counterparts",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//7y8\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "why are we doing this in firstpass and not somewhere common to both passes?",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//7zE\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "how much of this structure is actually used? Are you looking for the equivalent of BLOCKD\u0027s diff/quant/etc for different segmentation types? We\u0027re trying to get away from that.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//7y4\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "where are these AF/ARF constants coming from?",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//7yg\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 727,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "yes! :)",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//7yY\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 883,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "more duplicate code",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//7x8\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4256,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "prefer not to duplicate whole functions like this when they\u0027re this big, it\u0027s impossible to see what\u0027s different between your version and the existing one.",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//7xs\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5002,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-08T23:39:56Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "f3f966bce6b4961f01a23a1a12a2aee41bda05a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
