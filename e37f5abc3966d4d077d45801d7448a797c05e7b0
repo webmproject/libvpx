@@ -16,6 +16,40 @@
       "revId": "e37f5abc3966d4d077d45801d7448a797c05e7b0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//6ts\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-09T21:35:30Z",
+      "side": 1,
+      "message": "x-\u003efwd_txm8x8(x-\u003esrc_diff + uoff + y_idx * stride * 8 + x_idx * 8,...",
+      "revId": "e37f5abc3966d4d077d45801d7448a797c05e7b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//6tg\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-09T21:35:30Z",
+      "side": 1,
+      "message": "x-\u003efwd_txm8x8(x-\u003esrc_diff + voff + y_idx * stride * 8 + x_idx * 8...",
+      "revId": "e37f5abc3966d4d077d45801d7448a797c05e7b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
