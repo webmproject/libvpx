@@ -53,8 +53,8 @@ static int read_le32(const uint8_t *p) {
 }
 
 // len == 0 is not allowed
-static int read_is_valid(const unsigned char *start, size_t len,
-                         const unsigned char *end) {
+static int read_is_valid(const uint8_t *start, size_t len,
+                         const uint8_t *end) {
   return start + len > start && start + len <= end;
 }
 
@@ -227,23 +227,6 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
 static void decode_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc) {
   const TX_TYPE tx_type = get_tx_type_16x16(xd, 0);
-#if 0  // def DEC_DEBUG
-  if (dec_debug) {
-    int i;
-    printf("\n");
-    printf("qcoeff 16x16\n");
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", xd->qcoeff[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-    printf("\n");
-    printf("predictor\n");
-    for (i = 0; i < 400; i++) {
-      printf("%3d ", xd->predictor[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-  }
-#endif
   if (tx_type != DCT_DCT) {
     vp9_ht_dequant_idct_add_16x16_c(tx_type, xd->plane[0].qcoeff,
                                     xd->block[0].dequant, xd->predictor,
@@ -266,21 +249,11 @@ static void decode_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
 
 static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
                        BOOL_DECODER* const bc) {
-  // First do Y
+  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
+  // luma
   // if the first one is DCT_DCT assume all the rest are as well
   TX_TYPE tx_type = get_tx_type_8x8(xd, 0);
-#if 0  // def DEC_DEBUG
-  if (dec_debug) {
-    int i;
-    printf("\n");
-    printf("qcoeff 8x8\n");
-    for (i = 0; i < 384; i++) {
-      printf("%3d ", xd->qcoeff[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-  }
-#endif
-  if (tx_type != DCT_DCT || xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+  if (tx_type != DCT_DCT || mode == I8X8_PRED) {
     int i;
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
@@ -291,7 +264,7 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
       uint8_t *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
       int stride = xd->dst.y_stride;
       BLOCKD *b = &xd->block[ib];
-      if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+      if (mode == I8X8_PRED) {
         int i8x8mode = b->bmi.as_mode.first;
         vp9_intra8x8_predict(xd, b, i8x8mode, b->predictor);
       }
@@ -313,8 +286,8 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
                                      xd);
   }
 
-  // Now do UV
-  if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+  // chroma
+  if (mode == I8X8_PRED) {
     int i;
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
@@ -335,7 +308,7 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
                    *(b->base_dst) + b->dst, 8, b->dst_stride,
                    xd->plane[2].eobs[i]);
     }
-  } else if (xd->mode_info_context->mbmi.mode == SPLITMV) {
+  } else if (mode == SPLITMV) {
     xd->itxm_add_uv_block(xd->plane[1].qcoeff, xd->block[16].dequant,
          xd->predictor + 16 * 16, xd->dst.u_buffer,
          xd->dst.uv_stride, xd->plane[1].eobs);
@@ -351,35 +324,13 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
                              xd->predictor + 16 * 16 + 64, xd->dst.v_buffer, 8,
                              xd->dst.uv_stride, xd->plane[2].eobs[0]);
   }
-#if 0  // def DEC_DEBUG
-  if (dec_debug) {
-    int i;
-    printf("\n");
-    printf("predictor\n");
-    for (i = 0; i < 384; i++) {
-      printf("%3d ", xd->predictor[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-  }
-#endif
 }
 
 static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
                        BOOL_DECODER* const bc) {
   TX_TYPE tx_type;
   int i = 0;
-  MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
-#if 0  // def DEC_DEBUG
-  if (dec_debug) {
-    int i;
-    printf("\n");
-    printf("predictor\n");
-    for (i = 0; i < 384; i++) {
-      printf("%3d ", xd->predictor[i]);
-      if (i % 16 == 15) printf("\n");
-    }
-  }
-#endif
+  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
   if (mode == I8X8_PRED) {
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
@@ -468,23 +419,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
          xd->predictor + 16 * 16 + 64, xd->dst.v_buffer,
          xd->dst.uv_stride, xd->plane[2].eobs);
   } else {
-#if 0  // def DEC_DEBUG
-    if (dec_debug) {
-      int i;
-      printf("\n");
-      printf("qcoeff 4x4\n");
-      for (i = 0; i < 400; i++) {
-        printf("%3d ", xd->qcoeff[i]);
-        if (i % 16 == 15) printf("\n");
-      }
-      printf("\n");
-      printf("predictor\n");
-      for (i = 0; i < 400; i++) {
-        printf("%3d ", xd->predictor[i]);
-        if (i % 16 == 15) printf("\n");
-      }
-    }
-#endif
     for (i = 0; i < 16; i++) {
       BLOCKD *b = &xd->block[i];
       tx_type = get_tx_type_4x4(xd, i);
@@ -998,9 +932,9 @@ static void set_refs(VP9D_COMP *pbi, int block_size, int mb_row, int mb_col) {
 }
 
 /* Decode a row of Superblocks (2x2 region of MBs) */
-static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
-                          int mb_row, MACROBLOCKD *xd,
-                          BOOL_DECODER* const bc) {
+static void decode_sb_row(VP9D_COMP *pbi, int mb_row, vp9_reader* r) {
+  VP9_COMMON *const pc = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
   int mb_col;
 
   // For a SB there are 2 left contexts, each pertaining to a MB row within
@@ -1008,72 +942,52 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
 
   for (mb_col = pc->cur_tile_mb_col_start;
        mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
-    if (vp9_read(bc, pc->prob_sb64_coded)) {
-#ifdef DEC_DEBUG
-      dec_debug = (pc->current_video_frame == 11 && pc->show_frame &&
-                   mb_row == 8 && mb_col == 0);
-      if (dec_debug)
-        printf("Debug Decode SB64\n");
-#endif
+    if (vp9_read(r, pc->prob_sb64_coded)) {
+      // SB64 decoding
       set_offsets(pbi, 64, mb_row, mb_col);
-      vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, bc);
+      vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, r);
       set_refs(pbi, 64, mb_row, mb_col);
-      decode_sb64(pbi, xd, mb_row, mb_col, bc);
-      xd->corrupted |= bool_error(bc);
+      decode_sb64(pbi, xd, mb_row, mb_col, r);
+      xd->corrupted |= bool_error(r);
     } else {
+      // not SB64
       int j;
-
       for (j = 0; j < 4; j++) {
-        const int x_idx_sb = (j & 1) << 1, y_idx_sb = j & 2;
+        const int x_idx_sb = mb_col + 2 * (j % 2);
+        const int y_idx_sb = mb_row + 2 * (j / 2);
 
-        if (mb_row + y_idx_sb >= pc->mb_rows ||
-            mb_col + x_idx_sb >= pc->mb_cols) {
-          // MB lies outside frame, skip on to next
-          continue;
-        }
+        if (y_idx_sb >= pc->mb_rows || x_idx_sb >= pc->mb_cols)
+          continue;  // MB lies outside frame, skip on to next
 
         xd->sb_index = j;
 
-        if (vp9_read(bc, pc->prob_sb32_coded)) {
-#ifdef DEC_DEBUG
-          dec_debug = (pc->current_video_frame == 11 && pc->show_frame &&
-                       mb_row + y_idx_sb == 8 && mb_col + x_idx_sb == 0);
-          if (dec_debug)
-            printf("Debug Decode SB32\n");
-#endif
-          set_offsets(pbi, 32, mb_row + y_idx_sb, mb_col + x_idx_sb);
-          vp9_decode_mb_mode_mv(pbi,
-                                xd, mb_row + y_idx_sb, mb_col + x_idx_sb, bc);
-          set_refs(pbi, 32, mb_row + y_idx_sb, mb_col + x_idx_sb);
-          decode_sb32(pbi, xd, mb_row + y_idx_sb, mb_col + x_idx_sb, bc);
-          xd->corrupted |= bool_error(bc);
+        if (vp9_read(r, pc->prob_sb32_coded)) {
+          // SB32 decoding
+          set_offsets(pbi, 32, y_idx_sb, x_idx_sb);
+          vp9_decode_mb_mode_mv(pbi, xd, y_idx_sb, x_idx_sb, r);
+          set_refs(pbi, 32, y_idx_sb, x_idx_sb);
+          decode_sb32(pbi, xd, y_idx_sb, x_idx_sb, r);
+          xd->corrupted |= bool_error(r);
         } else {
-          int i;
-
+          // not SB32
           // Process the 4 MBs within the SB in the order:
           // top-left, top-right, bottom-left, bottom-right
+          int i;
           for (i = 0; i < 4; i++) {
-            const int x_idx = x_idx_sb + (i & 1), y_idx = y_idx_sb + (i >> 1);
+            const int x_idx_mb = x_idx_sb + (i % 2);
+            const int y_idx_mb = y_idx_sb + (i / 2);
 
-            if (mb_row + y_idx >= pc->mb_rows ||
-                mb_col + x_idx >= pc->mb_cols) {
-              // MB lies outside frame, skip on to next
-              continue;
-            }
-#ifdef DEC_DEBUG
-            dec_debug = (pc->current_video_frame == 11 && pc->show_frame &&
-                         mb_row + y_idx == 8 && mb_col + x_idx == 0);
-            if (dec_debug)
-              printf("Debug Decode MB\n");
-#endif
+            if (y_idx_mb >= pc->mb_rows || x_idx_mb >= pc->mb_cols)
+              continue;  // MB lies outside frame, skip on to next
 
-            set_offsets(pbi, 16, mb_row + y_idx, mb_col + x_idx);
             xd->mb_index = i;
-            vp9_decode_mb_mode_mv(pbi, xd, mb_row + y_idx, mb_col + x_idx, bc);
-            set_refs(pbi, 16, mb_row + y_idx, mb_col + x_idx);
-            decode_mb(pbi, xd, mb_row + y_idx, mb_col + x_idx, bc);
 
-            xd->corrupted |= bool_error(bc);
+            // MB decoding
+            set_offsets(pbi, 16, y_idx_mb, x_idx_mb);
+            vp9_decode_mb_mode_mv(pbi, xd, y_idx_mb, x_idx_mb, r);
+            set_refs(pbi, 16, y_idx_mb, x_idx_mb);
+            decode_mb(pbi, xd, y_idx_mb, x_idx_mb, r);
+            xd->corrupted |= bool_error(r);
           }
         }
       }
@@ -1083,25 +997,21 @@ static void decode_sb_row(VP9D_COMP *pbi, VP9_COMMON *pc,
 
 
 static void setup_token_decoder(VP9D_COMP *pbi,
-                                const unsigned char *cx_data,
-                                BOOL_DECODER* const bool_decoder) {
+                                const uint8_t *data,
+                                vp9_reader *r) {
   VP9_COMMON *pc = &pbi->common;
-  const uint8_t *user_data_end = pbi->source + pbi->source_sz;
-  const uint8_t *partition = cx_data;
-  ptrdiff_t bytes_left = user_data_end - partition;
-  ptrdiff_t partition_size = bytes_left;
+  const uint8_t *data_end = pbi->source + pbi->source_sz;
+  const size_t partition_size = data_end - data;
 
   // Validate the calculated partition length. If the buffer
   // described by the partition can't be fully read, then restrict
   // it to the portion that can be (for EC mode) or throw an error.
-  if (!read_is_valid(partition, partition_size, user_data_end)) {
+  if (!read_is_valid(data, partition_size, data_end))
     vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt partition "
                        "%d length", 1);
-  }
 
-  if (vp9_start_decode(bool_decoder,
-                       partition, (unsigned int)partition_size))
+  if (vp9_start_decode(r, data, partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder %d", 1);
 }
@@ -1533,7 +1443,6 @@ static void decode_tiles(VP9D_COMP *pbi,
                          const uint8_t *data, int first_partition_size,
                          BOOL_DECODER *header_bc, BOOL_DECODER *residual_bc) {
   VP9_COMMON *const pc = &pbi->common;
-  MACROBLOCKD *const xd  = &pbi->mb;
 
   const uint8_t *data_ptr = data + first_partition_size;
   int tile_row, tile_col, delta_log2_tiles;
@@ -1587,7 +1496,7 @@ static void decode_tiles(VP9D_COMP *pbi,
         // Decode a row of superblocks
         for (mb_row = pc->cur_tile_mb_row_start;
              mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
-          decode_sb_row(pbi, pc, mb_row, xd, residual_bc);
+          decode_sb_row(pbi, mb_row, residual_bc);
         }
 
         if (tile_row == pc->tile_rows - 1 && tile_col == n_cols - 1)
@@ -1612,7 +1521,7 @@ static void decode_tiles(VP9D_COMP *pbi,
         // Decode a row of superblocks
         for (mb_row = pc->cur_tile_mb_row_start;
              mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
-          decode_sb_row(pbi, pc, mb_row, xd, residual_bc);
+          decode_sb_row(pbi, mb_row, residual_bc);
         }
 
         if (has_more) {
@@ -1630,7 +1539,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   MACROBLOCKD *const xd  = &pbi->mb;
   const uint8_t *data = pbi->source;
   const uint8_t *data_end = data + pbi->source_sz;
-  ptrdiff_t first_partition_length_in_bytes = 0;
+  size_t first_partition_size = 0;
   int i, corrupt_tokens = 0;
 
   // printf("Decoding frame %d\n", pc->current_video_frame);
@@ -1647,9 +1556,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     pc->version = (data[0] >> 1) & 7;
     pc->show_frame = (data[0] >> 4) & 1;
     scaling_active = (data[0] >> 5) & 1;
-    first_partition_length_in_bytes = read_le16(data + 1);
+    first_partition_size = read_le16(data + 1);
 
-    if (!read_is_valid(data, first_partition_length_in_bytes, data_end))
+    if (!read_is_valid(data, first_partition_size, data_end))
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt partition 0 length");
 
@@ -1683,8 +1592,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
                                 pc->width, pc->height,
                                 VP9BORDERINPIXELS);
 
-  if (vp9_start_decode(&header_bc, data,
-                       (unsigned int)first_partition_length_in_bytes))
+  if (vp9_start_decode(&header_bc, data, first_partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
 
@@ -1858,8 +1766,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   vp9_decode_mode_mvs_init(pbi, &header_bc);
 
-  decode_tiles(pbi, data, first_partition_length_in_bytes,
-               &header_bc, &residual_bc);
+  decode_tiles(pbi, data, first_partition_size, &header_bc, &residual_bc);
   corrupt_tokens |= xd->corrupted;
 
   // keep track of the last coded dimensions
