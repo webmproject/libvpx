@@ -1049,7 +1049,7 @@ EOF
                 tune_cflags="-march="
                 setup_gnu_toolchain
                 #for 32 bit x86 builds, -O3 did not turn on this flag
-                enabled optimizations && check_add_cflags -fomit-frame-pointer
+                enabled optimizations && disabled gprof && check_add_cflags -fomit-frame-pointer
             ;;
             vs*)
                 # When building with Microsoft Visual Studio the assembler is
