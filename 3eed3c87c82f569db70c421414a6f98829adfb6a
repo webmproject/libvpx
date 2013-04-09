@@ -34,6 +34,24 @@
       "revId": "3eed3c87c82f569db70c421414a6f98829adfb6a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//6ds\u003d",
+        "filename": "vp9/common/vp9_enums.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-09T23:10:56Z",
+      "side": 1,
+      "message": "No it\u0027s a good point - the original plan (I\u0027m hoping that will still work) was to eventually go down to 8x8 and perhaps lower sizes here, that\u0027s just not finished yet. I\u0027m hoping to get to that soon. I\u0027ll remove the sb/mb prefix at that point also (I agree with the point you\u0027re making).",
+      "parentUuid": "AAAAXH//6eE\u003d",
+      "revId": "3eed3c87c82f569db70c421414a6f98829adfb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
