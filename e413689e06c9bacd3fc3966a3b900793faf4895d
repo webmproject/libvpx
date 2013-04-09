@@ -16,6 +16,24 @@
       "revId": "e413689e06c9bacd3fc3966a3b900793faf4895d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//63w\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1052,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-04-09T19:40:11Z",
+      "side": 1,
+      "message": "Sounds better. Thanks.",
+      "parentUuid": "AAAAXH//64g\u003d",
+      "revId": "e413689e06c9bacd3fc3966a3b900793faf4895d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
