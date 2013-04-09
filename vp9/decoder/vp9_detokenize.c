@@ -380,182 +380,122 @@ static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
   return vp9_get_segdata(xd, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
 
-static INLINE int decode_sb(VP9D_COMP* const pbi,
-                            MACROBLOCKD* const xd,
-                            BOOL_DECODER* const bc,
-                            int offset, int count, int inc,
-                            int eob_max, TX_SIZE tx_size) {
-  const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int seg_eob = get_eob(xd, segment_id, eob_max);
+/* TODO(jkoleszar): Probably best to remove instances that require this,
+ * as the data likely becomes per-plane and stored in the per-plane structures.
+ * This is a stub to work with the existing code.
+ */
+static INLINE int block_idx_4x4(MACROBLOCKD* const xd, int block_size_b,
+                                int plane, int i) {
+  const int luma_blocks = 1 << block_size_b;
+  assert(xd->plane[0].subsampling_x == 0);
+  assert(xd->plane[0].subsampling_y == 0);
+  assert(xd->plane[1].subsampling_x == 1);
+  assert(xd->plane[1].subsampling_y == 1);
+  assert(xd->plane[2].subsampling_x == 1);
+  assert(xd->plane[2].subsampling_y == 1);
+  return plane == 0 ? i :
+         plane == 1 ? luma_blocks + i :
+                      luma_blocks * 5 / 4 + i;
+}
+
+static INLINE int decode_block_plane(VP9D_COMP* const pbi,
+                                     MACROBLOCKD* const xd,
+                                     BOOL_DECODER* const bc,
+                                     BLOCK_SIZE_LG2 block_size,
+                                     int segment_id,
+                                     int plane,
+                                     int is_split) {
+  // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
+  // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
+  const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
+  const BLOCK_SIZE_LG2 block_size_b = block_size;
+  const BLOCK_SIZE_LG2 txfrm_size_b = tx_size * 2;
+
+  // subsampled size of the block
+  const int ss_sum = xd->plane[plane].subsampling_x +
+                     xd->plane[plane].subsampling_y;
+  const BLOCK_SIZE_LG2 ss_block_size = block_size_b - ss_sum;
+
+  // size of the transform to use. scale the transform down if it's larger
+  // than the size of the subsampled data, or forced externally by the mb mode.
+  const int ss_max = MAX(xd->plane[plane].subsampling_x,
+                         xd->plane[plane].subsampling_y);
+  const BLOCK_SIZE_LG2 ss_txfrm_size = txfrm_size_b > ss_block_size || is_split
+                                       ? txfrm_size_b - ss_max * 2
+                                       : txfrm_size_b;
+  const TX_SIZE ss_tx_size = ss_txfrm_size / 2;
+
+  // TODO(jkoleszar): 1 may not be correct here with larger chroma planes.
+  const int inc = is_split ? 1 : (1 << ss_txfrm_size);
+
+  // find the maximum eob for this transform size, adjusted by segment
+  const int seg_eob = get_eob(xd, segment_id, 16 << ss_txfrm_size);
+
   int i, eobtotal = 0;
 
-  assert(count == offset * 3 / 2);
+  assert(txfrm_size_b <= block_size_b);
+  assert(ss_txfrm_size <= ss_block_size);
 
-  // luma blocks
-  for (i = 0; i < offset; i += inc) {
-    const int c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_Y_WITH_DC, seg_eob,
-                               BLOCK_OFFSET(xd->plane[0].qcoeff, i, 16),
-                               tx_size);
-    xd->plane[0].eobs[i] = c;
+  // step through the block by the size of the transform in use.
+  for (i = 0; i < (1 << ss_block_size); i += inc) {
+    const int block_idx = block_idx_4x4(xd, block_size_b, plane, i);
+
+    const int c = decode_coefs(pbi, xd, bc, block_idx,
+                               xd->plane[plane].plane_type, seg_eob,
+                               BLOCK_OFFSET(xd->plane[plane].qcoeff, i, 16),
+                               ss_tx_size);
+    xd->plane[plane].eobs[i] = c;
     eobtotal += c;
   }
-
-  // chroma blocks
-  for (i = offset; i < offset * 5 / 4; i += inc) {
-    const int b = i - offset;
-    const int c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV, seg_eob,
-                               BLOCK_OFFSET(xd->plane[1].qcoeff, b, 16),
-                               tx_size);
-    xd->plane[1].eobs[b] = c;
-    eobtotal += c;
-  }
-  for (i = offset * 5 / 4; i < count; i += inc) {
-    const int b = i - offset * 5 / 4;
-    const int c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV, seg_eob,
-                               BLOCK_OFFSET(xd->plane[2].qcoeff, b, 16),
-                               tx_size);
-    xd->plane[2].eobs[b] = c;
-    eobtotal += c;
-  }
-
   return eobtotal;
 }
 
-int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
-                         MACROBLOCKD* const xd,
-                         BOOL_DECODER* const bc) {
-  switch (xd->mode_info_context->mbmi.txfm_size) {
-    case TX_32X32: {
-      // 32x32 luma block
-      const int segment_id = xd->mode_info_context->mbmi.segment_id;
-      int eobtotal = 0, seg_eob;
-      int c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
-                           get_eob(xd, segment_id, 1024),
-                           xd->plane[0].qcoeff, TX_32X32);
-      xd->plane[0].eobs[0] = c;
-      eobtotal += c;
+static INLINE int decode_blocks_helper(VP9D_COMP* const pbi,
+                                       MACROBLOCKD* const xd,
+                                       BOOL_DECODER* const bc,
+                                       int block_size,
+                                       int is_split_chroma) {
+  const int segment_id = xd->mode_info_context->mbmi.segment_id;
+  int plane, eobtotal = 0;
 
-      // 16x16 chroma blocks
-      seg_eob = get_eob(xd, segment_id, 256);
-
-      c = decode_coefs(pbi, xd, bc, 64, PLANE_TYPE_UV, seg_eob,
-                       xd->plane[1].qcoeff, TX_16X16);
-      xd->plane[1].eobs[0] = c;
-      eobtotal += c;
-      c = decode_coefs(pbi, xd, bc, 80, PLANE_TYPE_UV, seg_eob,
-                       xd->plane[2].qcoeff, TX_16X16);
-      xd->plane[2].eobs[0] = c;
-      eobtotal += c;
-      return eobtotal;
-    }
-    case TX_16X16:
-      return decode_sb(pbi, xd, bc, 64, 96, 16, 16 * 16, TX_16X16);
-    case TX_8X8:
-      return decode_sb(pbi, xd, bc, 64, 96, 4, 8 * 8, TX_8X8);
-    case TX_4X4:
-      return decode_sb(pbi, xd, bc, 64, 96, 1, 4 * 4, TX_4X4);
-    default:
-      assert(0);
-      return 0;
+  for (plane = 0; plane < MAX_MB_PLANE; plane++) {
+    const int is_split = is_split_chroma &&
+                         xd->plane[plane].plane_type == PLANE_TYPE_UV;
+    eobtotal += decode_block_plane(pbi, xd, bc, block_size, segment_id,
+                                   plane, is_split);
   }
+  return eobtotal;
+}
+
+static INLINE int decode_blocks(VP9D_COMP* const pbi,
+                                MACROBLOCKD* const xd,
+                                BOOL_DECODER* const bc,
+                                int block_size) {
+  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
+  const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
+  return decode_blocks_helper(pbi, xd, bc, block_size,
+      tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV));
 }
 
 int vp9_decode_sb64_tokens(VP9D_COMP* const pbi,
                            MACROBLOCKD* const xd,
                            BOOL_DECODER* const bc) {
-  switch (xd->mode_info_context->mbmi.txfm_size) {
-    case TX_32X32:
-      return decode_sb(pbi, xd, bc, 256, 384, 64, 32 * 32, TX_32X32);
-    case TX_16X16:
-      return decode_sb(pbi, xd, bc, 256, 384, 16, 16 * 16, TX_16X16);
-    case TX_8X8:
-      return decode_sb(pbi, xd, bc, 256, 384, 4, 8 * 8, TX_8X8);
-    case TX_4X4:
-      return decode_sb(pbi, xd, bc, 256, 384, 1, 4 * 4, TX_4X4);
-    default:
-      assert(0);
-      return 0;
-  }
+  return decode_blocks(pbi, xd, bc, BLOCK_64X64_LG2);
 }
 
-static int vp9_decode_mb_tokens_16x16(VP9D_COMP* const pbi,
-                                      MACROBLOCKD* const xd,
-                                      BOOL_DECODER* const bc) {
-  const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  int eobtotal = 0, seg_eob;
-
-  // Luma block
-  int c = decode_coefs(pbi, xd, bc, 0, PLANE_TYPE_Y_WITH_DC,
-                       get_eob(xd, segment_id, 256),
-                       xd->plane[0].qcoeff, TX_16X16);
-  xd->plane[0].eobs[0] = c;
-  eobtotal += c;
-
-  // 8x8 chroma blocks
-  seg_eob = get_eob(xd, segment_id, 64);
-
-  c = decode_coefs(pbi, xd, bc, 16, PLANE_TYPE_UV,
-                   seg_eob, xd->plane[1].qcoeff, TX_8X8);
-  xd->plane[1].eobs[0] = c;
-  eobtotal += c;
-  c = decode_coefs(pbi, xd, bc, 20, PLANE_TYPE_UV,
-                   seg_eob, xd->plane[2].qcoeff, TX_8X8);
-  xd->plane[2].eobs[0] = c;
-  eobtotal += c;
-  return eobtotal;
+int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
+                         MACROBLOCKD* const xd,
+                         BOOL_DECODER* const bc) {
+  return decode_blocks(pbi, xd, bc, BLOCK_32X32_LG2);
 }
 
-static int vp9_decode_mb_tokens_8x8(VP9D_COMP* const pbi,
-                                    MACROBLOCKD* const xd,
-                                    BOOL_DECODER* const bc) {
-  int i, eobtotal = 0;
-  const int segment_id = xd->mode_info_context->mbmi.segment_id;
-
-  // luma blocks
-  int seg_eob = get_eob(xd, segment_id, 64);
-  for (i = 0; i < 16; i += 4) {
-    const int c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_Y_WITH_DC, seg_eob,
-                               BLOCK_OFFSET(xd->plane[0].qcoeff, i, 16),
-                               TX_8X8);
-    xd->plane[0].eobs[i] = c;
-    eobtotal += c;
-  }
-
-  // chroma blocks
-  if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
-      xd->mode_info_context->mbmi.mode == SPLITMV) {
-    // use 4x4 transform for U, V components in I8X8/splitmv prediction mode
-    seg_eob = get_eob(xd, segment_id, 16);
-    for (i = 16; i < 20; i++) {
-      const int c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV, seg_eob,
-                                 BLOCK_OFFSET(xd->plane[1].qcoeff, i - 16, 16),
-                                 TX_4X4);
-      xd->plane[1].eobs[i - 16] = c;
-      eobtotal += c;
-    }
-    for (i = 20; i < 24; i++) {
-      const int c = decode_coefs(pbi, xd, bc, i, PLANE_TYPE_UV, seg_eob,
-                                 BLOCK_OFFSET(xd->plane[2].qcoeff, i - 20, 16),
-                                 TX_4X4);
-      xd->plane[2].eobs[i - 20] = c;
-      eobtotal += c;
-    }
-  } else {
-    int c;
-
-    c = decode_coefs(pbi, xd, bc, 16, PLANE_TYPE_UV, seg_eob,
-                     xd->plane[1].qcoeff, TX_8X8);
-    xd->plane[1].eobs[0] = c;
-    eobtotal += c;
-    c = decode_coefs(pbi, xd, bc, 20, PLANE_TYPE_UV, seg_eob,
-                     xd->plane[2].qcoeff, TX_8X8);
-    xd->plane[2].eobs[0] = c;
-    eobtotal += c;
-  }
-
-  return eobtotal;
+int vp9_decode_mb_tokens(VP9D_COMP* const pbi,
+                         MACROBLOCKD* const xd,
+                         BOOL_DECODER* const bc) {
+  return decode_blocks(pbi, xd, bc, BLOCK_16X16_LG2);
 }
 
+#if CONFIG_NEWBINTRAMODES
 static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
                             BOOL_DECODER* const bc,
                             PLANE_TYPE type, int i, int seg_eob) {
@@ -588,39 +528,6 @@ int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx,
   return decode_mb_tokens_4x4_uv(dx, xd, bc, seg_eob);
 }
 
-static int vp9_decode_mb_tokens_4x4(VP9D_COMP* const dx,
-                                    MACROBLOCKD* const xd,
-                                    BOOL_DECODER* const bc) {
-  int i, eobtotal = 0;
-  const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int seg_eob = get_eob(xd, segment_id, 16);
-
-  // luma blocks
-  for (i = 0; i < 16; ++i)
-    eobtotal += decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_Y_WITH_DC, i, seg_eob);
-
-  // chroma blocks
-  eobtotal += decode_mb_tokens_4x4_uv(dx, xd, bc, seg_eob);
-
-  return eobtotal;
-}
-
-int vp9_decode_mb_tokens(VP9D_COMP* const dx,
-                         MACROBLOCKD* const xd,
-                         BOOL_DECODER* const bc) {
-  const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
-  switch (tx_size) {
-    case TX_16X16:
-      return vp9_decode_mb_tokens_16x16(dx, xd, bc);
-    case TX_8X8:
-      return vp9_decode_mb_tokens_8x8(dx, xd, bc);
-    default:
-      assert(tx_size == TX_4X4);
-      return vp9_decode_mb_tokens_4x4(dx, xd, bc);
-  }
-}
-
-#if CONFIG_NEWBINTRAMODES
 int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc,
                          PLANE_TYPE type, int i) {
