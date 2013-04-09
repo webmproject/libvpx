@@ -924,6 +924,8 @@ static void set_refs(VP9D_COMP *pbi, int block_size, int mb_row, int mb_col) {
       // Select the appropriate reference frame for this MB
       const int second_fb_idx = cm->active_ref_idx[mbmi->second_ref_frame - 1];
       const YV12_BUFFER_CONFIG *second_cfg = &cm->yv12_fb[second_fb_idx];
+      xd->scale_factor[1]    = cm->active_ref_scale[mbmi->second_ref_frame - 1];
+      xd->scale_factor_uv[1] = cm->active_ref_scale[mbmi->second_ref_frame - 1];
       setup_pred_block(&xd->second_pre, second_cfg, mb_row, mb_col,
                        &xd->scale_factor[1], &xd->scale_factor_uv[1]);
       xd->corrupted |= second_cfg->corrupted;
