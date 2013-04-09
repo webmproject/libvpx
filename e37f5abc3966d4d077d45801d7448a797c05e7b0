@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//6p8\u003d",
+        "filename": "vp9/common/vp9_recon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-09T21:41:36Z",
+      "side": 1,
+      "message": "this function will be called by 32X16 and 16X32 partitions, hence bwl and bhl may reach value 0?\n\nbw \u003d 8 \u003c\u003c bwl, bh \u003d 8 \u003c\u003c bhl;",
+      "revId": "e37f5abc3966d4d077d45801d7448a797c05e7b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//6ts\u003d",
         "filename": "vp9/encoder/vp9_encodemb.c",
         "patchSetId": 6
