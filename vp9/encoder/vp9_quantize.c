@@ -661,14 +661,14 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     invert_quant(cpi->Y1quant[q] + 0, cpi->Y1quant_shift[q] + 0, quant_val);
     cpi->Y1zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
     cpi->Y1round[q][0] = (qrounding_factor * quant_val) >> 7;
-    cpi->common.Y1dequant[q][0] = quant_val;
+    cpi->common.y_dequant[q][0] = quant_val;
     cpi->zrun_zbin_boost_y1[q][0] = (quant_val * zbin_boost[0]) >> 7;
 
     quant_val = vp9_dc_uv_quant(q, cpi->common.uvdc_delta_q);
     invert_quant(cpi->UVquant[q] + 0, cpi->UVquant_shift[q] + 0, quant_val);
     cpi->UVzbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
     cpi->UVround[q][0] = (qrounding_factor * quant_val) >> 7;
-    cpi->common.UVdequant[q][0] = quant_val;
+    cpi->common.uv_dequant[q][0] = quant_val;
     cpi->zrun_zbin_boost_uv[q][0] = (quant_val * zbin_boost[0]) >> 7;
 
     // all the 4x4 ac values =;
@@ -679,7 +679,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       invert_quant(cpi->Y1quant[q] + rc, cpi->Y1quant_shift[q] + rc, quant_val);
       cpi->Y1zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
       cpi->Y1round[q][rc] = (qrounding_factor * quant_val) >> 7;
-      cpi->common.Y1dequant[q][rc] = quant_val;
+      cpi->common.y_dequant[q][rc] = quant_val;
       cpi->zrun_zbin_boost_y1[q][i] =
           ROUND_POWER_OF_TWO(quant_val * zbin_boost[i], 7);
 
@@ -687,7 +687,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       invert_quant(cpi->UVquant[q] + rc, cpi->UVquant_shift[q] + rc, quant_val);
       cpi->UVzbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
       cpi->UVround[q][rc] = (qrounding_factor * quant_val) >> 7;
-      cpi->common.UVdequant[q][rc] = quant_val;
+      cpi->common.uv_dequant[q][rc] = quant_val;
       cpi->zrun_zbin_boost_uv[q][i] =
           ROUND_POWER_OF_TWO(quant_val * zbin_boost[i], 7);
     }
@@ -696,40 +696,39 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
 
 void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   int i;
-  int QIndex;
+  int qindex;
   MACROBLOCKD *xd = &x->e_mbd;
   int zbin_extra;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
   // Select the baseline MB Q index allowing for any segment level change.
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
-    // Abs Value
-    if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
-      QIndex = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
-
-    // Delta Value
-    else {
-      QIndex = cpi->common.base_qindex +
-               vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
+    if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA) {
+      // Abs Value
+      qindex = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
+    } else {
+      // Delta Value
+      qindex = cpi->common.base_qindex +
+                 vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
 
       // Clamp to valid range
-      QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;
+      qindex = clamp(qindex, 0, MAXQ);
     }
-  } else
-    QIndex = cpi->common.base_qindex;
+  } else {
+    qindex = cpi->common.base_qindex;
+  }
 
   // Y
-  zbin_extra = (cpi->common.Y1dequant[QIndex][1] *
-                (cpi->zbin_mode_boost +
-                 x->act_zbin_adj)) >> 7;
+  zbin_extra = (cpi->common.y_dequant[qindex][1] *
+                 (cpi->zbin_mode_boost + x->act_zbin_adj)) >> 7;
 
   for (i = 0; i < 16; i++) {
-    x->block[i].quant = cpi->Y1quant[QIndex];
-    x->block[i].quant_shift = cpi->Y1quant_shift[QIndex];
-    x->block[i].zbin = cpi->Y1zbin[QIndex];
-    x->block[i].round = cpi->Y1round[QIndex];
-    x->e_mbd.block[i].dequant = cpi->common.Y1dequant[QIndex];
-    x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[QIndex];
+    x->block[i].quant = cpi->Y1quant[qindex];
+    x->block[i].quant_shift = cpi->Y1quant_shift[qindex];
+    x->block[i].zbin = cpi->Y1zbin[qindex];
+    x->block[i].round = cpi->Y1round[qindex];
+    x->e_mbd.block[i].dequant = cpi->common.y_dequant[qindex];
+    x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[qindex];
     x->block[i].zbin_extra = (int16_t)zbin_extra;
 
     // Segment skip feature.
@@ -738,49 +737,40 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   }
 
   // UV
-  zbin_extra = (cpi->common.UVdequant[QIndex][1] *
-                (cpi->zbin_mode_boost +
-                 x->act_zbin_adj)) >> 7;
+  zbin_extra = (cpi->common.uv_dequant[qindex][1] *
+                (cpi->zbin_mode_boost + x->act_zbin_adj)) >> 7;
 
   for (i = 16; i < 24; i++) {
-    x->block[i].quant = cpi->UVquant[QIndex];
-    x->block[i].quant_shift = cpi->UVquant_shift[QIndex];
-    x->block[i].zbin = cpi->UVzbin[QIndex];
-    x->block[i].round = cpi->UVround[QIndex];
-    x->e_mbd.block[i].dequant = cpi->common.UVdequant[QIndex];
-    x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[QIndex];
+    x->block[i].quant = cpi->UVquant[qindex];
+    x->block[i].quant_shift = cpi->UVquant_shift[qindex];
+    x->block[i].zbin = cpi->UVzbin[qindex];
+    x->block[i].round = cpi->UVround[qindex];
+    x->e_mbd.block[i].dequant = cpi->common.uv_dequant[qindex];
+    x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[qindex];
     x->block[i].zbin_extra = (int16_t)zbin_extra;
 
     // Segment skip feature.
     x->block[i].skip_block =
-      vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
+        vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
   }
 
   /* save this macroblock QIndex for vp9_update_zbin_extra() */
-  x->e_mbd.q_index = QIndex;
+  x->e_mbd.q_index = qindex;
 }
 
 void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x) {
   int i;
-  int QIndex = x->e_mbd.q_index;
-  int zbin_extra;
+  const int qindex = x->e_mbd.q_index;
+  const int y_zbin_extra = (cpi->common.y_dequant[qindex][1] *
+                (cpi->zbin_mode_boost + x->act_zbin_adj)) >> 7;
+  const int uv_zbin_extra = (cpi->common.uv_dequant[qindex][1] *
+                  (cpi->zbin_mode_boost + x->act_zbin_adj)) >> 7;
 
-  // Y
-  zbin_extra = (cpi->common.Y1dequant[QIndex][1] *
-                (cpi->zbin_mode_boost +
-                 x->act_zbin_adj)) >> 7;
-  for (i = 0; i < 16; i++) {
-    x->block[i].zbin_extra = (int16_t)zbin_extra;
-  }
+  for (i = 0; i < 16; i++)
+    x->block[i].zbin_extra = (int16_t)y_zbin_extra;
 
-  // UV
-  zbin_extra = (cpi->common.UVdequant[QIndex][1] *
-                (cpi->zbin_mode_boost +
-                 x->act_zbin_adj)) >> 7;
-
-  for (i = 16; i < 24; i++) {
-    x->block[i].zbin_extra = (int16_t)zbin_extra;
-  }
+  for (i = 16; i < 24; i++)
+    x->block[i].zbin_extra = (int16_t)uv_zbin_extra;
 }
 
 void vp9_frame_init_quantizer(VP9_COMP *cpi) {
