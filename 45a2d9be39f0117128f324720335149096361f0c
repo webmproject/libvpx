@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//6/8\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-09T19:20:37Z",
+      "side": 1,
+      "message": "it\u0027d be cleaner to make a separate type describing one dimension, and then track the w/h separately:\n\n  enum {\n    BLOCK_4, BLOCK_8, BLOCK_16, BLOCK_32, BLOCK_64\n  }\n\nIf you need a type that has them both, you could combine them in such a way that it\u0027s still easy to pull the w/h out separately:\n\n  enum {\n    BLOCK_16X16 \u003d (BLOCK_16 \u003c\u003c 8) | BLOCK_16,\n    BLOCK_32X16 \u003d (BLOCK_32 \u003c\u003c 8) | BLOCK_16,\n    ...\n  }\n\nStarting the enum at 4 is useful as proved elsewhere, we need to be able to talk about blocks smaller than 16x16, and it\u0027d be nice to be able to use the same type.",
+      "revId": "45a2d9be39f0117128f324720335149096361f0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//65g\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-09T19:20:37Z",
+      "side": 1,
+      "message": "4x4 units are just as easy to use, but if you need the width in 16x16 units, this could easily do the transform (return block_size - 2 or whatever)",
+      "revId": "45a2d9be39f0117128f324720335149096361f0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//6/k\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-09T19:20:37Z",
+      "side": 1,
+      "message": "wb, hb are confusing names since I\u0027d expect *b to be in 4x4 blocks. Getting the w/h in 4x4 units is fine, just need to adjust the calculations below.",
+      "revId": "45a2d9be39f0117128f324720335149096361f0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//68M\u003d",
+        "filename": "vp9/common/vp9_invtrans.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-09T19:20:37Z",
+      "side": 1,
+      "message": "I think it\u0027s not hard to generalize this by transform size as well. I\u0027ve got a patch that\u0027s almost ready to go that add a generalized walker so that you can do X for each transformed block in the SB, that we could probably use here and elsewhere it we extend it as necessary to support rectangular blocks.\n\nIf it too much trouble to add, let\u0027s at least use the subsampling_x,y fields rather than hardcoding \u003e\u003e1, -1, etc, that\u0027s trivial to do at this point.",
+      "revId": "45a2d9be39f0117128f324720335149096361f0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
