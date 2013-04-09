@@ -3706,7 +3706,11 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < num_refs; ++i) {
     cur_mv[i] = frame_mv[this_mode][refs[i]];
     // Clip "next_nearest" so that it does not extend to far out of image
-    clamp_mv2(&cur_mv[i], xd);
+    if (this_mode == NEWMV)
+      assert(!clamp_mv2(&cur_mv[i], xd));
+    else
+      clamp_mv2(&cur_mv[i], xd);
+
     if (mv_check_bounds(x, &cur_mv[i]))
       return INT64_MAX;
     mbmi->mv[i].as_int = cur_mv[i].as_int;
