@@ -944,31 +944,26 @@ static void set_offsets(VP9D_COMP *pbi, int block_size,
                         int mb_row, int mb_col) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  const int mis = cm->mode_info_stride;
-  const int idx = mis * mb_row + mb_col;
-  const int dst_fb_idx = cm->new_fb_idx;
-  const int recon_y_stride = cm->yv12_fb[dst_fb_idx].y_stride;
-  const int recon_uv_stride = cm->yv12_fb[dst_fb_idx].uv_stride;
-  const int recon_yoffset = mb_row * 16 * recon_y_stride + 16 * mb_col;
-  const int recon_uvoffset = mb_row * 8 * recon_uv_stride + 8 * mb_col;
 
-  xd->mode_info_context = cm->mi + idx;
-  xd->mode_info_context->mbmi.sb_type = block_size >> 5;
-  xd->prev_mode_info_context = cm->prev_mi + idx;
+  const int mb_idx = mb_row * cm->mode_info_stride + mb_col;
+  const YV12_BUFFER_CONFIG *dst_fb = &cm->yv12_fb[cm->new_fb_idx];
+  const int recon_yoffset = (16 * mb_row) * dst_fb->y_stride + (16 * mb_col);
+  const int recon_uvoffset = (8 * mb_row) * dst_fb->uv_stride + (8 * mb_col);
+
+  xd->mode_info_context = cm->mi + mb_idx;
+  xd->mode_info_context->mbmi.sb_type = (BLOCK_SIZE_TYPE)(block_size / 32);
+  xd->prev_mode_info_context = cm->prev_mi + mb_idx;
   xd->above_context = cm->above_context + mb_col;
-  xd->left_context = cm->left_context + (mb_row & 3);
+  xd->left_context = cm->left_context + mb_row % 4;
 
-  // Distance of Mb to the various image edges.
-  // These are specified to 8th pel as they are always compared to
-  // values that are in 1/8th pel units
-  block_size >>= 4;  // in mb units
+  // Distance of Mb to the various image edges. These are specified to 8th pel
+  // as they are always compared to values that are in 1/8th pel units
+  set_mb_row(cm, xd, mb_row, block_size / 16);
+  set_mb_col(cm, xd, mb_col, block_size / 16);
 
-  set_mb_row(cm, xd, mb_row, block_size);
-  set_mb_col(cm, xd, mb_col, block_size);
-
-  xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
-  xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
-  xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
+  xd->dst.y_buffer = dst_fb->y_buffer + recon_yoffset;
+  xd->dst.u_buffer = dst_fb->u_buffer + recon_uvoffset;
+  xd->dst.v_buffer = dst_fb->v_buffer + recon_uvoffset;
 }
 
 static void set_refs(VP9D_COMP *pbi, int block_size, int mb_row, int mb_col) {
@@ -1732,15 +1727,14 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   // For all non key frames the GF and ARF refresh flags and sign bias
   // flags must be set explicitly.
   if (pc->frame_type == KEY_FRAME) {
-    pc->active_ref_idx[0] = pc->new_fb_idx;
-    pc->active_ref_idx[1] = pc->new_fb_idx;
-    pc->active_ref_idx[2] = pc->new_fb_idx;
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
+      pc->active_ref_idx[i] = pc->new_fb_idx;
   } else {
     // Should the GF or ARF be updated from the current frame
     pbi->refresh_frame_flags = vp9_read_literal(&header_bc, NUM_REF_FRAMES);
 
     // Select active reference frames
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
       int ref_frame_num = vp9_read_literal(&header_bc, NUM_REF_FRAMES_LG2);
       pc->active_ref_idx[i] = pc->ref_frame_map[ref_frame_num];
     }
@@ -1760,19 +1754,18 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     pc->use_interintra = vp9_read_bit(&header_bc);
 #endif
 
-    /* Calculate scaling factors for each of the 3 available references */
-    for (i = 0; i < 3; ++i) {
-      if (pc->active_ref_idx[i] >= NUM_YV12_BUFFERS) {
-        memset(&pc->active_ref_scale[i], 0, sizeof(pc->active_ref_scale[i]));
-        continue;
-      }
-
-      vp9_setup_scale_factors_for_frame(&pc->active_ref_scale[i],
-                                        &pc->yv12_fb[pc->active_ref_idx[i]],
-                                        pc->width, pc->height);
+    // Calculate scaling factors for each of the 3 available references
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+      const int idx = pc->active_ref_idx[i];
+      struct scale_factors *sf = &pc->active_ref_scale[i];
+      if (idx >= NUM_YV12_BUFFERS)
+        memset(sf, 0, sizeof(*sf));
+      else
+        vp9_setup_scale_factors_for_frame(sf, &pc->yv12_fb[idx],
+                                          pc->width, pc->height);
     }
 
-    // To enable choice of different interploation filters
+    // To enable choice of different interpolation filters
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }
 
