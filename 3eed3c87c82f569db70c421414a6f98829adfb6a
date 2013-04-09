@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//6ew\u003d",
+        "filename": "vp9/common/vp9_enums.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-09T23:03:44Z",
+      "side": 1,
+      "message": "if you\u0027re not going to make this go down to 4x4, we should rename it MB_SIZE_TYPE or something like that, and its members MB_SIZE_32X16 etc. MB vs SB is pretty meaningless, I don\u0027t think it needs to be included. There will be other block sizes smaller than 16x16, it\u0027d be unfortunate and potentially confusing to claim the whole BLOCK_SIZE_ namespace for this use case.",
+      "revId": "3eed3c87c82f569db70c421414a6f98829adfb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
