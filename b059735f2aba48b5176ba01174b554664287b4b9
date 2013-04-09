@@ -16,6 +16,24 @@
       "revId": "b059735f2aba48b5176ba01174b554664287b4b9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//6jI\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-09T22:26:53Z",
+      "side": 1,
+      "message": "vp9_recon_sby_s could easily be simd.",
+      "parentUuid": "AAAAXH//6jc\u003d",
+      "revId": "b059735f2aba48b5176ba01174b554664287b4b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
