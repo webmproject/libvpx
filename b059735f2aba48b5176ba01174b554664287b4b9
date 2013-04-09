@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//6jc\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-09T22:24:11Z",
+      "side": 1,
+      "message": "so this is where it\u0027s getting pulled in to the tests. It\u0027d be better to not declare it here, as this is a compile error in C++ without the definition, and creating a dependency on blockd is awfully heavy. If you must have the include blockd, it would belong in here, but we avoid it and use forward declarations for good reason. \n\nInstead of including blockd randomly in files just to get them to compile, it\u0027d be better to convert those recon functions that use it back to non-rtcd versions and not introduce the dependency at all. Those functions won\u0027t ever be asm functions due to their types anyway, at best they\u0027d be c wrappers, and the right thing to do here can be dealt with later if/when we add asm. Or you can make it \u0027int /* BLOCK_SIZE_TYPE */\u0027 if you want, we do that in a couple places with tx_size iirc.",
+      "revId": "b059735f2aba48b5176ba01174b554664287b4b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
