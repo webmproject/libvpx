@@ -1348,7 +1348,6 @@ static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO *mi,
   MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   if (mbmi->txfm_size > txfm_max) {
-    VP9_COMMON *const cm = &cpi->common;
     MACROBLOCK *const x = &cpi->mb;
     MACROBLOCKD *const xd = &x->e_mbd;
     const int segment_id = mbmi->segment_id;
@@ -1357,8 +1356,8 @@ static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO *mi,
     const int xmbs = MIN(bw, mb_cols_left);
 
     xd->mode_info_context = mi;
-    assert((vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) ||
-           (cm->mb_no_coeff_skip && get_skip_flag(mi, mis, ymbs, xmbs)));
+    assert(vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP) ||
+           get_skip_flag(mi, mis, ymbs, xmbs));
     set_txfm_flag(mi, mis, ymbs, xmbs, txfm_max);
   }
 }
@@ -1961,10 +1960,6 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     if (!x->skip) {
       vp9_encode_inter16x16(cm, x, mb_row, mb_col);
 
-      // Clear mb_skip_coeff if mb_no_coeff_skip is not set
-      if (!cpi->common.mb_no_coeff_skip)
-        mbmi->mb_skip_coeff = 0;
-
     } else {
       vp9_build_inter16x16_predictors_mb(xd,
                                          xd->dst.y_buffer,
@@ -2046,27 +2041,20 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
   } else {
     // FIXME(rbultje): not tile-aware (mi - 1)
-    int mb_skip_context = cpi->common.mb_no_coeff_skip ?
-      (mi - 1)->mbmi.mb_skip_coeff + (mi - mis)->mbmi.mb_skip_coeff : 0;
+    int mb_skip_context =
+      (mi - 1)->mbmi.mb_skip_coeff + (mi - mis)->mbmi.mb_skip_coeff;
 
-    if (cm->mb_no_coeff_skip) {
-      mbmi->mb_skip_coeff = 1;
-      if (output_enabled)
-        cpi->skip_true_count[mb_skip_context]++;
-      vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
-    } else {
-      vp9_stuff_mb(cpi, xd, t, !output_enabled);
-      mbmi->mb_skip_coeff = 0;
-      if (output_enabled)
-        cpi->skip_false_count[mb_skip_context]++;
-    }
+    mbmi->mb_skip_coeff = 1;
+    if (output_enabled)
+      cpi->skip_true_count[mb_skip_context]++;
+    vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
   }
 
   if (output_enabled) {
     int segment_id = mbmi->segment_id;
     if (cpi->common.txfm_mode == TX_MODE_SELECT &&
-        !((cpi->common.mb_no_coeff_skip && mbmi->mb_skip_coeff) ||
-          (vp9_segfeature_active(&x->e_mbd, segment_id, SEG_LVL_SKIP)))) {
+        !(mbmi->mb_skip_coeff ||
+          vp9_segfeature_active(&x->e_mbd, segment_id, SEG_LVL_SKIP))) {
       assert(mbmi->txfm_size <= TX_16X16);
       if (mbmi->mode != I4X4_PRED && mbmi->mode != I8X8_PRED &&
           mbmi->mode != SPLITMV) {
@@ -2279,19 +2267,13 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
     vp9_tokenize_sb(cpi, &x->e_mbd, t, !output_enabled, bsize);
   } else {
     // FIXME(rbultje): not tile-aware (mi - 1)
-    int mb_skip_context = cpi->common.mb_no_coeff_skip ?
-        (mi - 1)->mbmi.mb_skip_coeff + (mi - mis)->mbmi.mb_skip_coeff : 0;
+    int mb_skip_context =
+        (mi - 1)->mbmi.mb_skip_coeff + (mi - mis)->mbmi.mb_skip_coeff;
 
     xd->mode_info_context->mbmi.mb_skip_coeff = 1;
-    if (cm->mb_no_coeff_skip) {
-      if (output_enabled)
-        cpi->skip_true_count[mb_skip_context]++;
-      vp9_reset_sb_tokens_context(xd, bsize);
-    } else {
-      vp9_stuff_sb(cpi, xd, t, !output_enabled, bsize);
-      if (output_enabled)
-        cpi->skip_false_count[mb_skip_context]++;
-    }
+    if (output_enabled)
+      cpi->skip_true_count[mb_skip_context]++;
+    vp9_reset_sb_tokens_context(xd, bsize);
   }
 
   // copy skip flag on all mb_mode_info contexts in this SB
@@ -2304,8 +2286,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
   if (output_enabled) {
     if (cm->txfm_mode == TX_MODE_SELECT &&
-        !((cm->mb_no_coeff_skip && mi->mbmi.mb_skip_coeff) ||
-          (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
+        !(mi->mbmi.mb_skip_coeff ||
+          vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))) {
       if (bsize >= BLOCK_SIZE_SB32X32) {
         cpi->txfm_count_32x32p[mi->mbmi.txfm_size]++;
       } else {

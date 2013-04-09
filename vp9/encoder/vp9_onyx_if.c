@@ -2989,43 +2989,41 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     vp9_set_quantizer(cpi, q);
 
     if (loop_count == 0) {
+      int k;
 
       // setup skip prob for costing in mode/mv decision
-      if (cpi->common.mb_no_coeff_skip) {
-        int k;
-        for (k = 0; k < MBSKIP_CONTEXTS; k++)
-          cm->mbskip_pred_probs[k] = cpi->base_skip_false_prob[q][k];
+      for (k = 0; k < MBSKIP_CONTEXTS; k++)
+        cm->mbskip_pred_probs[k] = cpi->base_skip_false_prob[q][k];
 
-        if (cm->frame_type != KEY_FRAME) {
-          if (cpi->refresh_alt_ref_frame) {
-            for (k = 0; k < MBSKIP_CONTEXTS; k++) {
-              if (cpi->last_skip_false_probs[2][k] != 0)
-                cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[2][k];
-            }
-          } else if (cpi->refresh_golden_frame) {
-            for (k = 0; k < MBSKIP_CONTEXTS; k++) {
-              if (cpi->last_skip_false_probs[1][k] != 0)
-                cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[1][k];
-            }
-          } else {
-            int k;
-            for (k = 0; k < MBSKIP_CONTEXTS; k++) {
-              if (cpi->last_skip_false_probs[0][k] != 0)
-                cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[0][k];
-            }
+      if (cm->frame_type != KEY_FRAME) {
+        if (cpi->refresh_alt_ref_frame) {
+          for (k = 0; k < MBSKIP_CONTEXTS; k++) {
+            if (cpi->last_skip_false_probs[2][k] != 0)
+              cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[2][k];
           }
+        } else if (cpi->refresh_golden_frame) {
+          for (k = 0; k < MBSKIP_CONTEXTS; k++) {
+            if (cpi->last_skip_false_probs[1][k] != 0)
+              cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[1][k];
+          }
+        } else {
+          int k;
+          for (k = 0; k < MBSKIP_CONTEXTS; k++) {
+            if (cpi->last_skip_false_probs[0][k] != 0)
+              cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[0][k];
+          }
+        }
 
-          // as this is for cost estimate, let's make sure it does not
-          // get extreme either way
-          {
-            int k;
-            for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
-              cm->mbskip_pred_probs[k] = clamp(cm->mbskip_pred_probs[k],
-                                               5, 250);
+        // as this is for cost estimate, let's make sure it does not
+        // get extreme either way
+        {
+          int k;
+          for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
+            cm->mbskip_pred_probs[k] = clamp(cm->mbskip_pred_probs[k],
+                                             5, 250);
 
-              if (cpi->is_src_frame_alt_ref)
-                cm->mbskip_pred_probs[k] = 1;
-            }
+            if (cpi->is_src_frame_alt_ref)
+              cm->mbskip_pred_probs[k] = 1;
           }
         }
       }

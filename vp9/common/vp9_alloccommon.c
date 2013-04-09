@@ -179,7 +179,6 @@ void vp9_create_common(VP9_COMMON *oci) {
   vp9_default_bmode_probs(oci->fc.bmode_prob);
 
   oci->txfm_mode = ONLY_4X4;
-  oci->mb_no_coeff_skip = 1;
   oci->comp_pred_mode = HYBRID_PREDICTION;
   oci->no_lpf = 0;
   oci->filter_type = NORMAL_LOOPFILTER;

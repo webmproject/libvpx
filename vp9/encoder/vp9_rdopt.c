@@ -566,10 +566,10 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-  vp9_prob skip_prob = cm->mb_no_coeff_skip ?
-                       vp9_get_pred_prob(cm, xd, PRED_MBSKIP) : 128;
+  vp9_prob skip_prob = vp9_get_pred_prob(cm, xd, PRED_MBSKIP);
   int64_t rd[TX_SIZE_MAX_SB][2];
   int n, m;
+  int s0, s1;
 
   for (n = TX_4X4; n <= max_txfm_size; n++) {
     r[n][1] = r[n][0];
@@ -581,25 +581,16 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  if (cm->mb_no_coeff_skip) {
-    int s0, s1;
+  assert(skip_prob > 0);
+  s0 = vp9_cost_bit(skip_prob, 0);
+  s1 = vp9_cost_bit(skip_prob, 1);
 
-    assert(skip_prob > 0);
-    s0 = vp9_cost_bit(skip_prob, 0);
-    s1 = vp9_cost_bit(skip_prob, 1);
-
-    for (n = TX_4X4; n <= max_txfm_size; n++) {
-      if (s[n]) {
-        rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, d[n]);
-      } else {
-        rd[n][0] = RDCOST(x->rdmult, x->rddiv, r[n][0] + s0, d[n]);
-        rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]);
-      }
-    }
-  } else {
-    for (n = TX_4X4; n <= max_txfm_size; n++) {
-      rd[n][0] = RDCOST(x->rdmult, x->rddiv, r[n][0], d[n]);
-      rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1], d[n]);
+  for (n = TX_4X4; n <= max_txfm_size; n++) {
+    if (s[n]) {
+      rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, d[n]);
+    } else {
+      rd[n][0] = RDCOST(x->rdmult, x->rddiv, r[n][0] + s0, d[n]);
+      rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]);
     }
   }
 
@@ -3862,43 +3853,40 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // because there are no non zero coefficients and make any
       // necessary adjustment for rate. Ignore if skip is coded at
       // segment level as the cost wont have been added in.
-      if (cpi->common.mb_no_coeff_skip) {
-        int mb_skip_allowed;
+      int mb_skip_allowed;
 
-        // Is Mb level skip allowed (i.e. not coded at segment level).
-        mb_skip_allowed = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
+      // Is Mb level skip allowed (i.e. not coded at segment level).
+      mb_skip_allowed = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
 
-        if (skippable) {
-          mbmi->mb_skip_coeff = 1;
+      if (skippable) {
+        mbmi->mb_skip_coeff = 1;
 
-          // Back out the coefficient coding costs
-          rate2 -= (rate_y + rate_uv);
-          // for best_yrd calculation
-          rate_uv = 0;
+        // Back out the coefficient coding costs
+        rate2 -= (rate_y + rate_uv);
+        // for best_yrd calculation
+        rate_uv = 0;
 
-          if (mb_skip_allowed) {
-            int prob_skip_cost;
+        if (mb_skip_allowed) {
+          int prob_skip_cost;
 
-            // Cost the skip mb case
-            vp9_prob skip_prob =
-              vp9_get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP);
+          // Cost the skip mb case
+          vp9_prob skip_prob =
+            vp9_get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP);
 
-            if (skip_prob) {
-              prob_skip_cost = vp9_cost_bit(skip_prob, 1);
-              rate2 += prob_skip_cost;
-              other_cost += prob_skip_cost;
-            }
-          }
-        }
-        // Add in the cost of the no skip flag.
-        else {
-          mbmi->mb_skip_coeff = 0;
-          if (mb_skip_allowed) {
-            int prob_skip_cost = vp9_cost_bit(
-                   vp9_get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP), 0);
+          if (skip_prob) {
+            prob_skip_cost = vp9_cost_bit(skip_prob, 1);
             rate2 += prob_skip_cost;
             other_cost += prob_skip_cost;
           }
+        }
+      } else {
+        // Add in the cost of the no skip flag.
+        mbmi->mb_skip_coeff = 0;
+        if (mb_skip_allowed) {
+          int prob_skip_cost = vp9_cost_bit(
+                 vp9_get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP), 0);
+          rate2 += prob_skip_cost;
+          other_cost += prob_skip_cost;
         }
       }
 
@@ -4089,8 +4077,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->ref_frame = ALTREF_FRAME;
     mbmi->mv[0].as_int = 0;
     mbmi->uv_mode = DC_PRED;
-    mbmi->mb_skip_coeff =
-      (cpi->common.mb_no_coeff_skip) ? 1 : 0;
+    mbmi->mb_skip_coeff = 1;
     mbmi->partitioning = 0;
     set_scale_factors(xd, mbmi->ref_frame, mbmi->second_ref_frame,
                       scale_factor);
@@ -4176,16 +4163,15 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
                           &dist_uv, &uv_skip, bsize);
 
-  if (cpi->common.mb_no_coeff_skip && y_skip && uv_skip) {
+  if (y_skip && uv_skip) {
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
                   vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 1);
     *returndist = dist_y + (dist_uv >> 2);
     memset(ctx->txfm_rd_diff, 0,
            sizeof(x->sb32_context[xd->sb_index].txfm_rd_diff));
   } else {
-    *returnrate = rate_y + rate_uv;
-    if (cpi->common.mb_no_coeff_skip)
-      *returnrate += vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
+    *returnrate = rate_y + rate_uv +
+        vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
     *returndist = dist_y + (dist_uv >> 2);
     for (i = 0; i < NB_TXFM_MODES; i++) {
       ctx->txfm_rd_diff[i] = err - txfm_cache[i];
@@ -4237,7 +4223,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                       BLOCK_SIZE_MB16X16, txfm_cache[1]);
   mode16x16 = mbmi->mode;
   txfm_size_16x16 = mbmi->txfm_size;
-  if (cpi->common.mb_no_coeff_skip && y_intra16x16_skippable &&
+  if (y_intra16x16_skippable &&
       ((cm->txfm_mode == ONLY_4X4 && uv_intra_skippable[TX_4X4]) ||
        (cm->txfm_mode != ONLY_4X4 && uv_intra_skippable[TX_8X8]))) {
     error16x16 -= RDCOST(x->rdmult, x->rddiv, rate16x16_tokenonly, 0);
@@ -4269,7 +4255,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   mbmi->mb_skip_coeff = 0;
-  if (cpi->common.mb_no_coeff_skip && y_intra16x16_skippable &&
+  if (y_intra16x16_skippable &&
       ((cm->txfm_mode == ONLY_4X4 && uv_intra_skippable[TX_4X4]) ||
        (cm->txfm_mode != ONLY_4X4 && uv_intra_skippable[TX_8X8]))) {
     mbmi->mb_skip_coeff = 1;
@@ -4295,8 +4281,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
       dist = dist16x16 + (distuv[mbmi->txfm_size != TX_4X4] >> 2);
       mbmi->uv_mode = modeuv[mbmi->txfm_size != TX_4X4];
     }
-    if (cpi->common.mb_no_coeff_skip)
-      rate += vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
+    rate += vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
   } else {
     if (error4x4 < error8x8) {
       rate = rateuv[TX_4X4] + rate4x4;
@@ -4311,8 +4296,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
       rate = rate8x8 + rateuv[TX_4X4];
       dist = dist8x8 + (distuv[TX_4X4] >> 2);
     }
-    if (cpi->common.mb_no_coeff_skip)
-      rate += vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
+    rate += vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
   }
 
   for (i = 0; i < NB_TXFM_MODES; i++) {
@@ -4595,39 +4579,36 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // because there are no non zero coefficients and make any
       // necessary adjustment for rate. Ignore if skip is coded at
       // segment level as the cost wont have been added in.
-      if (cpi->common.mb_no_coeff_skip) {
-        int mb_skip_allowed;
+      int mb_skip_allowed;
 
-        // Is Mb level skip allowed (i.e. not coded at segment level).
-        mb_skip_allowed = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
+      // Is Mb level skip allowed (i.e. not coded at segment level).
+      mb_skip_allowed = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
 
-        if (skippable) {
-          // Back out the coefficient coding costs
-          rate2 -= (rate_y + rate_uv);
-          // for best_yrd calculation
-          rate_uv = 0;
+      if (skippable) {
+        // Back out the coefficient coding costs
+        rate2 -= (rate_y + rate_uv);
+        // for best_yrd calculation
+        rate_uv = 0;
 
-          if (mb_skip_allowed) {
-            int prob_skip_cost;
+        if (mb_skip_allowed) {
+          int prob_skip_cost;
 
-            // Cost the skip mb case
-            vp9_prob skip_prob =
-              vp9_get_pred_prob(cm, xd, PRED_MBSKIP);
+          // Cost the skip mb case
+          vp9_prob skip_prob =
+            vp9_get_pred_prob(cm, xd, PRED_MBSKIP);
 
-            if (skip_prob) {
-              prob_skip_cost = vp9_cost_bit(skip_prob, 1);
-              rate2 += prob_skip_cost;
-              other_cost += prob_skip_cost;
-            }
+          if (skip_prob) {
+            prob_skip_cost = vp9_cost_bit(skip_prob, 1);
+            rate2 += prob_skip_cost;
+            other_cost += prob_skip_cost;
           }
         }
+      } else if (mb_skip_allowed) {
         // Add in the cost of the no skip flag.
-        else if (mb_skip_allowed) {
-          int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob(cm, xd,
-                                                          PRED_MBSKIP), 0);
-          rate2 += prob_skip_cost;
-          other_cost += prob_skip_cost;
-        }
+        int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob(cm, xd,
+                                                        PRED_MBSKIP), 0);
+        rate2 += prob_skip_cost;
+        other_cost += prob_skip_cost;
       }
 
       // Calculate the final RD estimate for this mode.
@@ -4795,7 +4776,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->second_ref_frame = INTRA_FRAME;
     mbmi->mv[0].as_int = 0;
     mbmi->uv_mode = DC_PRED;
-    mbmi->mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
+    mbmi->mb_skip_coeff = 1;
     mbmi->partitioning = 0;
     mbmi->txfm_size = cm->txfm_mode == TX_MODE_SELECT ?
                       TX_32X32 : cm->txfm_mode;

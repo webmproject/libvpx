@@ -1675,8 +1675,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   vpx_memset(xd->plane[1].qcoeff, 0, sizeof(xd->plane[1].qcoeff));
   vpx_memset(xd->plane[2].qcoeff, 0, sizeof(xd->plane[2].qcoeff));
 
-  // Read the mb_no_coeff_skip flag
-  pc->mb_no_coeff_skip = vp9_read_bit(&header_bc);
+  vp9_read_bit(&header_bc);  // unused
 
   vp9_decode_mode_mvs_init(pbi, &header_bc);
 

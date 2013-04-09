@@ -153,15 +153,11 @@ static void kfread_modes(VP9D_COMP *pbi,
     }
   }
 
-  m->mbmi.mb_skip_coeff = 0;
-  if (pbi->common.mb_no_coeff_skip &&
-      (!vp9_segfeature_active(&pbi->mb, m->mbmi.segment_id, SEG_LVL_SKIP))) {
+  m->mbmi.mb_skip_coeff = vp9_segfeature_active(&pbi->mb, m->mbmi.segment_id,
+                                                SEG_LVL_SKIP);
+  if (!m->mbmi.mb_skip_coeff)
     m->mbmi.mb_skip_coeff = vp9_read(bc, vp9_get_pred_prob(cm, &pbi->mb,
                                                            PRED_MBSKIP));
-  } else {
-    m->mbmi.mb_skip_coeff = vp9_segfeature_active(&pbi->mb, m->mbmi.segment_id,
-                                                  SEG_LVL_SKIP);
-  }
 
   y_mode = m->mbmi.sb_type ?
       read_kf_sb_ymode(bc,
@@ -693,15 +689,10 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   // Read the macroblock segment id.
   read_mb_segment_id(pbi, mb_row, mb_col, bc);
 
-  if (pbi->common.mb_no_coeff_skip &&
-      (!vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP))) {
-    // Read the macroblock coeff skip flag if this feature is in use,
-    // else default to 0
+  mbmi->mb_skip_coeff = vp9_segfeature_active(xd, mbmi->segment_id,
+                                              SEG_LVL_SKIP);
+  if (!mbmi->mb_skip_coeff)
     mbmi->mb_skip_coeff = vp9_read(bc, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
-  } else {
-    mbmi->mb_skip_coeff = vp9_segfeature_active(xd, mbmi->segment_id,
-                                                SEG_LVL_SKIP);
-  }
 
   // Read the reference frame
   mbmi->ref_frame = read_ref_frame(pbi, bc, mbmi->segment_id);
@@ -1119,13 +1110,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
 void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, vp9_reader *r) {
   VP9_COMMON *cm = &pbi->common;
+  int k;
 
+  // TODO(jkoleszar): does this clear more than MBSKIP_CONTEXTS? Maybe remove.
   vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
-  if (pbi->common.mb_no_coeff_skip) {
-    int k;
-    for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-      cm->mbskip_pred_probs[k] = vp9_read_prob(r);
-  }
+  for (k = 0; k < MBSKIP_CONTEXTS; ++k)
+    cm->mbskip_pred_probs[k] = vp9_read_prob(r);
 
   mb_mode_mv_init(pbi, r);
 }

@@ -220,7 +220,6 @@ typedef struct VP9Common {
 
   /* profile settings */
   int experimental;
-  int mb_no_coeff_skip;
   TXFM_MODE txfm_mode;
   COMPPREDMODE_TYPE comp_pred_mode;
   int no_lpf;

@@ -801,9 +801,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     }
   }
 
-  if (!pc->mb_no_coeff_skip) {
-    skip_coeff = 0;
-  } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     skip_coeff = 1;
   } else {
     skip_coeff = m->mbmi.mb_skip_coeff;
@@ -996,8 +994,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
        (rf != INTRA_FRAME && !(mode == SPLITMV &&
                                mi->partitioning == PARTITIONING_4X4))) &&
       pc->txfm_mode == TX_MODE_SELECT &&
-      !((pc->mb_no_coeff_skip && skip_coeff) ||
-        (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
+          !(skip_coeff || vp9_segfeature_active(xd, segment_id,
+                                                SEG_LVL_SKIP))) {
     TX_SIZE sz = mi->txfm_size;
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
@@ -1024,9 +1022,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     write_mb_segid(bc, &m->mbmi, xd);
   }
 
-  if (!c->mb_no_coeff_skip) {
-    skip_coeff = 0;
-  } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     skip_coeff = 1;
   } else {
     skip_coeff = m->mbmi.mb_skip_coeff;
@@ -1074,8 +1070,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 
   if (ym <= I8X8_PRED && c->txfm_mode == TX_MODE_SELECT &&
-      !((c->mb_no_coeff_skip && skip_coeff) ||
-        (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
+      !(skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))) {
     TX_SIZE sz = m->mbmi.txfm_size;
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
@@ -2600,8 +2595,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     }
   }
 
-  // signal here is multi token partition is enabled
-  // vp9_write_literal(&header_bc, pc->multi_token_partition, 2);
+  // TODO(jkoleszar): remove these unused bits
   vp9_write_literal(&header_bc, 0, 2);
 
   // Frame Q baseline quantizer index
@@ -2828,15 +2822,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   active_section = 2;
 #endif
 
-  // Write out the mb_no_coeff_skip flag
-  vp9_write_bit(&header_bc, pc->mb_no_coeff_skip);
-  if (pc->mb_no_coeff_skip) {
-    int k;
+  // TODO(jkoleszar): remove this unused bit
+  vp9_write_bit(&header_bc, 1);
 
-    vp9_update_skip_probs(cpi);
-    for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
-      vp9_write_literal(&header_bc, pc->mbskip_pred_probs[k], 8);
-    }
+  vp9_update_skip_probs(cpi);
+  for (i = 0; i < MBSKIP_CONTEXTS; ++i) {
+    vp9_write_literal(&header_bc, pc->mbskip_pred_probs[i], 8);
   }
 
   if (pc->frame_type == KEY_FRAME) {
