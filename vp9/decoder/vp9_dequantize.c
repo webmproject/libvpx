@@ -79,10 +79,10 @@ void vp9_add_constant_residual_32x32_c(const int16_t diff, const uint8_t *pred,
   add_constant_residual(diff, pred, pitch, dest, stride, 32, 32);
 }
 
-void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
-                               const int16_t *dq,
-                               uint8_t *pred, uint8_t *dest,
-                               int pitch, int stride, int eob) {
+void vp9_dequant_iht_add_c(TX_TYPE tx_type, int16_t *input,
+                           const int16_t *dq,
+                           uint8_t *pred, uint8_t *dest,
+                           int pitch, int stride, int eob) {
   int i;
   DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
 
@@ -94,10 +94,10 @@ void vp9_ht_dequant_idct_add_c(TX_TYPE tx_type, int16_t *input,
   vp9_add_residual_4x4(output, pred, pitch, dest, stride);
 }
 
-void vp9_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, int16_t *input,
-                                   const int16_t *dq,
-                                   uint8_t *pred, uint8_t *dest,
-                                   int pitch, int stride, int eob) {
+void vp9_dequant_iht_add_8x8_c(TX_TYPE tx_type, int16_t *input,
+                               const int16_t *dq,
+                               uint8_t *pred, uint8_t *dest,
+                               int pitch, int stride, int eob) {
   DECLARE_ALIGNED_ARRAY(16, int16_t, output, 64);
 
   if (eob == 0) {
@@ -253,10 +253,10 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
   }
 }
 
-void vp9_ht_dequant_idct_add_16x16_c(TX_TYPE tx_type, int16_t *input,
-                                     const int16_t *dq, uint8_t *pred,
-                                     uint8_t *dest, int pitch, int stride,
-                                     int eob) {
+void vp9_dequant_iht_add_16x16_c(TX_TYPE tx_type, int16_t *input,
+                                 const int16_t *dq, uint8_t *pred,
+                                 uint8_t *dest, int pitch, int stride,
+                                 int eob) {
   DECLARE_ALIGNED_ARRAY(16, int16_t, output, 256);
 
   if (eob == 0) {
