@@ -2415,142 +2415,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   // error resilient mode
   vp9_write_bit(&header_bc, pc->error_resilient_mode);
 
-  // Signal whether or not Segmentation is enabled
-  vp9_write_bit(&header_bc, (xd->segmentation_enabled) ? 1 : 0);
-
-  // Indicate which features are enabled
-  if (xd->segmentation_enabled) {
-    // Indicate whether or not the segmentation map is being updated.
-    vp9_write_bit(&header_bc, (xd->update_mb_segmentation_map) ? 1 : 0);
-
-    // If it is, then indicate the method that will be used.
-    if (xd->update_mb_segmentation_map) {
-      // Select the coding strategy (temporal or spatial)
-      vp9_choose_segmap_coding_method(cpi);
-      // Send the tree probabilities used to decode unpredicted
-      // macro-block segments
-      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
-        const int prob = xd->mb_segment_tree_probs[i];
-        if (prob != 255) {
-          vp9_write_bit(&header_bc, 1);
-          vp9_write_prob(&header_bc, prob);
-        } else {
-          vp9_write_bit(&header_bc, 0);
-        }
-      }
-
-      // Write out the chosen coding method.
-      vp9_write_bit(&header_bc, pc->temporal_update);
-      if (pc->temporal_update) {
-        for (i = 0; i < PREDICTION_PROBS; i++) {
-          const int prob = pc->segment_pred_probs[i];
-          if (prob != 255) {
-            vp9_write_bit(&header_bc, 1);
-            vp9_write_prob(&header_bc, prob);
-          } else {
-            vp9_write_bit(&header_bc, 0);
-          }
-        }
-      }
-    }
-
-    vp9_write_bit(&header_bc, (xd->update_mb_segmentation_data) ? 1 : 0);
-
-    // segment_reference_frames(cpi);
-
-    if (xd->update_mb_segmentation_data) {
-      vp9_write_bit(&header_bc, (xd->mb_segment_abs_delta) ? 1 : 0);
-
-      // For each segments id...
-      for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-        // For each segmentation codable feature...
-        for (j = 0; j < SEG_LVL_MAX; j++) {
-          const int8_t data = vp9_get_segdata(xd, i, j);
-          const int data_max = vp9_seg_feature_data_max(j);
-
-          // If the feature is enabled...
-          if (vp9_segfeature_active(xd, i, j)) {
-            vp9_write_bit(&header_bc, 1);
-
-            // Is the segment data signed..
-            if (vp9_is_segfeature_signed(j)) {
-              // Encode the relevant feature data
-              if (data < 0) {
-                vp9_encode_unsigned_max(&header_bc, -data, data_max);
-                vp9_write_bit(&header_bc, 1);
-              } else {
-                vp9_encode_unsigned_max(&header_bc, data, data_max);
-                vp9_write_bit(&header_bc, 0);
-              }
-            } else {
-              // Unsigned data element so no sign bit needed
-              vp9_encode_unsigned_max(&header_bc, data, data_max);
-            }
-          } else {
-            vp9_write_bit(&header_bc, 0);
-          }
-        }
-      }
-    }
-  }
-
-  // Encode the common prediction model status flag probability updates for
-  // the reference frame
-  update_refpred_stats(cpi);
-  if (pc->frame_type != KEY_FRAME) {
-    for (i = 0; i < PREDICTION_PROBS; i++) {
-      if (cpi->ref_pred_probs_update[i]) {
-        vp9_write_bit(&header_bc, 1);
-        vp9_write_prob(&header_bc, pc->ref_pred_probs[i]);
-      } else {
-        vp9_write_bit(&header_bc, 0);
-      }
-    }
-  }
-
-  vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
-  if (cpi->mb.e_mbd.lossless) {
-    pc->txfm_mode = ONLY_4X4;
-  } else {
-    if (pc->txfm_mode == TX_MODE_SELECT) {
-      pc->prob_tx[0] = get_prob(cpi->txfm_count_32x32p[TX_4X4] +
-                                cpi->txfm_count_16x16p[TX_4X4] +
-                                cpi->txfm_count_8x8p[TX_4X4],
-                                cpi->txfm_count_32x32p[TX_4X4] +
-                                cpi->txfm_count_32x32p[TX_8X8] +
-                                cpi->txfm_count_32x32p[TX_16X16] +
-                                cpi->txfm_count_32x32p[TX_32X32] +
-                                cpi->txfm_count_16x16p[TX_4X4] +
-                                cpi->txfm_count_16x16p[TX_8X8] +
-                                cpi->txfm_count_16x16p[TX_16X16] +
-                                cpi->txfm_count_8x8p[TX_4X4] +
-                                cpi->txfm_count_8x8p[TX_8X8]);
-      pc->prob_tx[1] = get_prob(cpi->txfm_count_32x32p[TX_8X8] +
-                                cpi->txfm_count_16x16p[TX_8X8],
-                                cpi->txfm_count_32x32p[TX_8X8] +
-                                cpi->txfm_count_32x32p[TX_16X16] +
-                                cpi->txfm_count_32x32p[TX_32X32] +
-                                cpi->txfm_count_16x16p[TX_8X8] +
-                                cpi->txfm_count_16x16p[TX_16X16]);
-      pc->prob_tx[2] = get_prob(cpi->txfm_count_32x32p[TX_16X16],
-                                cpi->txfm_count_32x32p[TX_16X16] +
-                                cpi->txfm_count_32x32p[TX_32X32]);
-    } else {
-      pc->prob_tx[0] = 128;
-      pc->prob_tx[1] = 128;
-      pc->prob_tx[2] = 128;
-    }
-    vp9_write_literal(&header_bc, pc->txfm_mode <= 3 ? pc->txfm_mode : 3, 2);
-    if (pc->txfm_mode > ALLOW_16X16) {
-      vp9_write_bit(&header_bc, pc->txfm_mode == TX_MODE_SELECT);
-    }
-    if (pc->txfm_mode == TX_MODE_SELECT) {
-      vp9_write_prob(&header_bc, pc->prob_tx[0]);
-      vp9_write_prob(&header_bc, pc->prob_tx[1]);
-      vp9_write_prob(&header_bc, pc->prob_tx[2]);
-    }
-  }
-
   // Encode the loop filter level and type
   vp9_write_bit(&header_bc, pc->filter_type);
   vp9_write_literal(&header_bc, pc->filter_level, 6);
@@ -2726,6 +2590,142 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   else
     active_section = 7;
 #endif
+
+  // Signal whether or not Segmentation is enabled
+  vp9_write_bit(&header_bc, (xd->segmentation_enabled) ? 1 : 0);
+
+  // Indicate which features are enabled
+  if (xd->segmentation_enabled) {
+    // Indicate whether or not the segmentation map is being updated.
+    vp9_write_bit(&header_bc, (xd->update_mb_segmentation_map) ? 1 : 0);
+
+    // If it is, then indicate the method that will be used.
+    if (xd->update_mb_segmentation_map) {
+      // Select the coding strategy (temporal or spatial)
+      vp9_choose_segmap_coding_method(cpi);
+      // Send the tree probabilities used to decode unpredicted
+      // macro-block segments
+      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
+        const int prob = xd->mb_segment_tree_probs[i];
+        if (prob != 255) {
+          vp9_write_bit(&header_bc, 1);
+          vp9_write_prob(&header_bc, prob);
+        } else {
+          vp9_write_bit(&header_bc, 0);
+        }
+      }
+
+      // Write out the chosen coding method.
+      vp9_write_bit(&header_bc, (pc->temporal_update) ? 1 : 0);
+      if (pc->temporal_update) {
+        for (i = 0; i < PREDICTION_PROBS; i++) {
+          const int prob = pc->segment_pred_probs[i];
+          if (prob != 255) {
+            vp9_write_bit(&header_bc, 1);
+            vp9_write_prob(&header_bc, prob);
+          } else {
+            vp9_write_bit(&header_bc, 0);
+          }
+        }
+      }
+    }
+
+    vp9_write_bit(&header_bc, (xd->update_mb_segmentation_data) ? 1 : 0);
+
+    // segment_reference_frames(cpi);
+
+    if (xd->update_mb_segmentation_data) {
+      vp9_write_bit(&header_bc, (xd->mb_segment_abs_delta) ? 1 : 0);
+
+      // For each segments id...
+      for (i = 0; i < MAX_MB_SEGMENTS; i++) {
+        // For each segmentation codable feature...
+        for (j = 0; j < SEG_LVL_MAX; j++) {
+          const int8_t data = vp9_get_segdata(xd, i, j);
+          const int data_max = vp9_seg_feature_data_max(j);
+
+          // If the feature is enabled...
+          if (vp9_segfeature_active(xd, i, j)) {
+            vp9_write_bit(&header_bc, 1);
+
+            // Is the segment data signed..
+            if (vp9_is_segfeature_signed(j)) {
+              // Encode the relevant feature data
+              if (data < 0) {
+                vp9_encode_unsigned_max(&header_bc, -data, data_max);
+                vp9_write_bit(&header_bc, 1);
+              } else {
+                vp9_encode_unsigned_max(&header_bc, data, data_max);
+                vp9_write_bit(&header_bc, 0);
+              }
+            } else {
+              // Unsigned data element so no sign bit needed
+              vp9_encode_unsigned_max(&header_bc, data, data_max);
+            }
+          } else {
+            vp9_write_bit(&header_bc, 0);
+          }
+        }
+      }
+    }
+  }
+
+  // Encode the common prediction model status flag probability updates for
+  // the reference frame
+  update_refpred_stats(cpi);
+  if (pc->frame_type != KEY_FRAME) {
+    for (i = 0; i < PREDICTION_PROBS; i++) {
+      if (cpi->ref_pred_probs_update[i]) {
+        vp9_write_bit(&header_bc, 1);
+        vp9_write_prob(&header_bc, pc->ref_pred_probs[i]);
+      } else {
+        vp9_write_bit(&header_bc, 0);
+      }
+    }
+  }
+
+  vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
+  if (cpi->mb.e_mbd.lossless) {
+    pc->txfm_mode = ONLY_4X4;
+  } else {
+    if (pc->txfm_mode == TX_MODE_SELECT) {
+      pc->prob_tx[0] = get_prob(cpi->txfm_count_32x32p[TX_4X4] +
+                                cpi->txfm_count_16x16p[TX_4X4] +
+                                cpi->txfm_count_8x8p[TX_4X4],
+                                cpi->txfm_count_32x32p[TX_4X4] +
+                                cpi->txfm_count_32x32p[TX_8X8] +
+                                cpi->txfm_count_32x32p[TX_16X16] +
+                                cpi->txfm_count_32x32p[TX_32X32] +
+                                cpi->txfm_count_16x16p[TX_4X4] +
+                                cpi->txfm_count_16x16p[TX_8X8] +
+                                cpi->txfm_count_16x16p[TX_16X16] +
+                                cpi->txfm_count_8x8p[TX_4X4] +
+                                cpi->txfm_count_8x8p[TX_8X8]);
+      pc->prob_tx[1] = get_prob(cpi->txfm_count_32x32p[TX_8X8] +
+                                cpi->txfm_count_16x16p[TX_8X8],
+                                cpi->txfm_count_32x32p[TX_8X8] +
+                                cpi->txfm_count_32x32p[TX_16X16] +
+                                cpi->txfm_count_32x32p[TX_32X32] +
+                                cpi->txfm_count_16x16p[TX_8X8] +
+                                cpi->txfm_count_16x16p[TX_16X16]);
+      pc->prob_tx[2] = get_prob(cpi->txfm_count_32x32p[TX_16X16],
+                                cpi->txfm_count_32x32p[TX_16X16] +
+                                cpi->txfm_count_32x32p[TX_32X32]);
+    } else {
+      pc->prob_tx[0] = 128;
+      pc->prob_tx[1] = 128;
+      pc->prob_tx[2] = 128;
+    }
+    vp9_write_literal(&header_bc, pc->txfm_mode <= 3 ? pc->txfm_mode : 3, 2);
+    if (pc->txfm_mode > ALLOW_16X16) {
+      vp9_write_bit(&header_bc, pc->txfm_mode == TX_MODE_SELECT);
+    }
+    if (pc->txfm_mode == TX_MODE_SELECT) {
+      vp9_write_prob(&header_bc, pc->prob_tx[0]);
+      vp9_write_prob(&header_bc, pc->prob_tx[1]);
+      vp9_write_prob(&header_bc, pc->prob_tx[2]);
+    }
+  }
 
   // If appropriate update the inter mode probability context and code the
   // changes in the bitstream.
