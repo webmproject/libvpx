@@ -395,120 +395,67 @@ static int mb_is_skippable_16x16(MACROBLOCKD *xd) {
   return (vp9_mby_is_skippable_16x16(xd) & vp9_mbuv_is_skippable_8x8(xd));
 }
 
-int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd) {
-  return (!xd->plane[0].eobs[0]);
-}
-
-int vp9_sbuv_is_skippable_16x16(MACROBLOCKD *xd) {
-  return (!xd->plane[1].eobs[0]) & (!xd->plane[2].eobs[0]);
-}
-
-static int sb_is_skippable_32x32(MACROBLOCKD *xd) {
-  return vp9_sby_is_skippable_32x32(xd) &&
-         vp9_sbuv_is_skippable_16x16(xd);
-}
-
-int vp9_sby_is_skippable_16x16(MACROBLOCKD *xd) {
+int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+                         TX_SIZE sz) {
+  const int inc = 1 << (sz * 2);
+  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
   int skip = 1;
   int i = 0;
 
-  for (i = 0; i < 64; i += 16)
+  for (i = 0; i < (1 << (bwl + bhl)); i += inc)
     skip &= (!xd->plane[0].eobs[i]);
 
   return skip;
 }
 
-static int sb_is_skippable_16x16(MACROBLOCKD *xd) {
-  return vp9_sby_is_skippable_16x16(xd) & vp9_sbuv_is_skippable_16x16(xd);
-}
-
-int vp9_sby_is_skippable_8x8(MACROBLOCKD *xd) {
+int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize, TX_SIZE sz) {
+  const int inc = 1 << (sz * 2);
+  const int bwl = mb_width_log2(bsize) + 1, bhl = mb_height_log2(bsize) + 1;
   int skip = 1;
   int i = 0;
 
-  for (i = 0; i < 64; i += 4)
-    skip &= (!xd->plane[0].eobs[i]);
-
-  return skip;
-}
-
-int vp9_sbuv_is_skippable_8x8(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 16; i += 4)
+  for (i = 0; i < (1 << (bwl + bhl)); i += inc) {
     skip &= (!xd->plane[1].eobs[i]);
-  for (i = 0; i < 16; i += 4)
     skip &= (!xd->plane[2].eobs[i]);
+  }
 
   return skip;
 }
 
-static int sb_is_skippable_8x8(MACROBLOCKD *xd) {
-  return vp9_sby_is_skippable_8x8(xd) & vp9_sbuv_is_skippable_8x8(xd);
-}
-
-int vp9_sby_is_skippable_4x4(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 64; i++)
-    skip &= (!xd->plane[0].eobs[i]);
-
-  return skip;
-}
-
-int vp9_sbuv_is_skippable_4x4(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 16; i++)
-    skip &= (!xd->plane[1].eobs[i]);
-  for (i = 0; i < 16; i++)
-    skip &= (!xd->plane[2].eobs[i]);
-
-  return skip;
-}
-
-static int sb_is_skippable_4x4(MACROBLOCKD *xd) {
-  return vp9_sby_is_skippable_4x4(xd) & vp9_sbuv_is_skippable_4x4(xd);
+static int sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+                           TX_SIZE ysz, TX_SIZE uvsz) {
+  return vp9_sby_is_skippable(xd, bsize, ysz) &
+         vp9_sbuv_is_skippable(xd, bsize, uvsz);
 }
 
 void vp9_tokenize_sb(VP9_COMP *cpi,
                      MACROBLOCKD *xd,
                      TOKENEXTRA **t,
-                     int dry_run) {
+                     int dry_run, BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
   VP9_COMMON * const cm = &cpi->common;
   MB_MODE_INFO * const mbmi = &xd->mode_info_context->mbmi;
   TOKENEXTRA *t_backup = *t;
   const int mb_skip_context = vp9_get_pred_context(cm, xd, PRED_MBSKIP);
   const int segment_id = mbmi->segment_id;
   const int skip_inc = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
+  const TX_SIZE txfm_size = mbmi->txfm_size;
+  const TX_SIZE uv_txfm_size = (bsize < BLOCK_SIZE_SB32X32 &&
+                                txfm_size == TX_16X16) ? TX_8X8 :
+                               (bsize < BLOCK_SIZE_SB64X64 &&
+                                txfm_size == TX_32X32) ? TX_16X16 : txfm_size;
   int b;
+  const int n_y = (1 << (bwl + bhl)), n_uv = (n_y * 3) >> 1;
 
-  switch (mbmi->txfm_size) {
-    case TX_32X32:
-      mbmi->mb_skip_coeff = sb_is_skippable_32x32(xd);
-      break;
-    case TX_16X16:
-      mbmi->mb_skip_coeff = sb_is_skippable_16x16(xd);
-      break;
-    case TX_8X8:
-      mbmi->mb_skip_coeff = sb_is_skippable_8x8(xd);
-      break;
-    case TX_4X4:
-      mbmi->mb_skip_coeff = sb_is_skippable_4x4(xd);
-      break;
-    default: assert(0);
-  }
+  mbmi->mb_skip_coeff = sb_is_skippable(xd, bsize, txfm_size, uv_txfm_size);
 
   if (mbmi->mb_skip_coeff) {
     if (!dry_run)
       cpi->skip_true_count[mb_skip_context] += skip_inc;
     if (!cm->mb_no_coeff_skip) {
-      vp9_stuff_sb(cpi, xd, t, dry_run);
+      vp9_stuff_sb(cpi, xd, t, dry_run, bsize);
     } else {
-      vp9_reset_sb_tokens_context(xd);
+      vp9_reset_sb_tokens_context(xd, bsize);
     }
     if (dry_run)
       *t = t_backup;
@@ -518,217 +465,52 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
   if (!dry_run)
     cpi->skip_false_count[mb_skip_context] += skip_inc;
 
-  switch (mbmi->txfm_size) {
+  switch (txfm_size) {
     case TX_32X32:
-      tokenize_b(cpi, xd, 0, t, PLANE_TYPE_Y_WITH_DC,
-                 TX_32X32, 64, dry_run);
-      for (b = 64; b < 96; b += 16)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
-                   TX_16X16, 64, dry_run);
+      for (b = 0; b < n_y; b += 64)
+        tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC,
+                   TX_32X32, n_y, dry_run);
+      if (uv_txfm_size == TX_32X32) {
+        assert(bsize == BLOCK_SIZE_SB64X64);
+        tokenize_b(cpi, xd, 256, t, PLANE_TYPE_UV,
+                   TX_32X32, n_y, dry_run);
+        tokenize_b(cpi, xd, 320, t, PLANE_TYPE_UV,
+                   TX_32X32, n_y, dry_run);
+      } else {
+        for (; b < n_uv; b += 16)
+          tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
+                     TX_16X16, n_y, dry_run);
+      }
       break;
     case TX_16X16:
-      for (b = 0; b < 64; b += 16)
+      for (b = 0; b < n_y; b += 16)
         tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC,
-                   TX_16X16, 64, dry_run);
-      for (b = 64; b < 96; b += 16)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
-                   TX_16X16, 64, dry_run);
+                   TX_16X16, n_y, dry_run);
+      if (uv_txfm_size == TX_16X16) {
+        for (; b < n_uv; b += 16)
+          tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
+                     TX_16X16, n_y, dry_run);
+      } else {
+        for (; b < n_uv; b += 4)
+          tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
+                     TX_8X8, n_y, dry_run);
+      }
       break;
     case TX_8X8:
-      for (b = 0; b < 64; b += 4)
+      for (b = 0; b < n_y; b += 4)
         tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC,
-                   TX_8X8, 64, dry_run);
-      for (b = 64; b < 96; b += 4)
+                   TX_8X8, n_y, dry_run);
+      for (; b < n_uv; b += 4)
         tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
-                   TX_8X8, 64, dry_run);
+                   TX_8X8, n_y, dry_run);
       break;
     case TX_4X4:
-      for (b = 0; b < 64; b++)
+      for (b = 0; b < n_y; b++)
         tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC,
-                   TX_4X4, 64, dry_run);
-      for (b = 64; b < 96; b++)
+                   TX_4X4, n_y, dry_run);
+      for (; b < n_uv; b++)
         tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
-                   TX_4X4, 64, dry_run);
-      break;
-    default: assert(0);
-  }
-
-  if (dry_run)
-    *t = t_backup;
-}
-
-int vp9_sb64y_is_skippable_32x32(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 256; i += 64)
-    skip &= (!xd->plane[0].eobs[i]);
-
-  return skip;
-}
-
-int vp9_sb64uv_is_skippable_32x32(MACROBLOCKD *xd) {
-  return (!xd->plane[1].eobs[0]) & (!xd->plane[2].eobs[0]);
-}
-
-static int sb64_is_skippable_32x32(MACROBLOCKD *xd) {
-  return vp9_sb64y_is_skippable_32x32(xd) & vp9_sb64uv_is_skippable_32x32(xd);
-}
-
-int vp9_sb64y_is_skippable_16x16(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 256; i += 16)
-    skip &= (!xd->plane[0].eobs[i]);
-
-  return skip;
-}
-
-int vp9_sb64uv_is_skippable_16x16(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 64; i += 16)
-    skip &= (!xd->plane[1].eobs[i]);
-  for (i = 0; i < 64; i += 16)
-    skip &= (!xd->plane[2].eobs[i]);
-
-  return skip;
-}
-
-static int sb64_is_skippable_16x16(MACROBLOCKD *xd) {
-  return vp9_sb64y_is_skippable_16x16(xd) & vp9_sb64uv_is_skippable_16x16(xd);
-}
-
-int vp9_sb64y_is_skippable_8x8(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 256; i += 4)
-    skip &= (!xd->plane[0].eobs[i]);
-
-  return skip;
-}
-
-int vp9_sb64uv_is_skippable_8x8(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 64; i += 4)
-    skip &= (!xd->plane[1].eobs[i]);
-  for (i = 0; i < 64; i += 4)
-    skip &= (!xd->plane[2].eobs[i]);
-
-  return skip;
-}
-
-static int sb64_is_skippable_8x8(MACROBLOCKD *xd) {
-  return vp9_sb64y_is_skippable_8x8(xd) & vp9_sb64uv_is_skippable_8x8(xd);
-}
-
-int vp9_sb64y_is_skippable_4x4(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 256; i++)
-    skip &= (!xd->plane[0].eobs[i]);
-
-  return skip;
-}
-
-int vp9_sb64uv_is_skippable_4x4(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 64; i++)
-    skip &= (!xd->plane[1].eobs[i]);
-  for (i = 0; i < 64; i++)
-    skip &= (!xd->plane[2].eobs[i]);
-
-  return skip;
-}
-
-static int sb64_is_skippable_4x4(MACROBLOCKD *xd) {
-  return vp9_sb64y_is_skippable_4x4(xd) & vp9_sb64uv_is_skippable_4x4(xd);
-}
-
-void vp9_tokenize_sb64(VP9_COMP *cpi,
-                       MACROBLOCKD *xd,
-                       TOKENEXTRA **t,
-                       int dry_run) {
-  VP9_COMMON * const cm = &cpi->common;
-  MB_MODE_INFO * const mbmi = &xd->mode_info_context->mbmi;
-  TOKENEXTRA *t_backup = *t;
-  const int mb_skip_context = vp9_get_pred_context(cm, xd, PRED_MBSKIP);
-  const int segment_id = mbmi->segment_id;
-  const int skip_inc = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
-  int b;
-
-  switch (mbmi->txfm_size) {
-    case TX_32X32:
-      mbmi->mb_skip_coeff = sb64_is_skippable_32x32(xd);
-      break;
-    case TX_16X16:
-      mbmi->mb_skip_coeff = sb64_is_skippable_16x16(xd);
-      break;
-    case TX_8X8:
-      mbmi->mb_skip_coeff = sb64_is_skippable_8x8(xd);
-      break;
-    case TX_4X4:
-      mbmi->mb_skip_coeff = sb64_is_skippable_4x4(xd);
-      break;
-    default: assert(0);
-  }
-
-  if (mbmi->mb_skip_coeff) {
-    if (!dry_run)
-      cpi->skip_true_count[mb_skip_context] += skip_inc;
-    if (!cm->mb_no_coeff_skip) {
-      vp9_stuff_sb64(cpi, xd, t, dry_run);
-    } else {
-      vp9_reset_sb64_tokens_context(xd);
-    }
-    if (dry_run)
-      *t = t_backup;
-    return;
-  }
-
-  if (!dry_run)
-    cpi->skip_false_count[mb_skip_context] += skip_inc;
-
-  switch (mbmi->txfm_size) {
-    case TX_32X32:
-      for (b = 0; b < 256; b += 64)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC,
-                   TX_32X32, 256, dry_run);
-      for (b = 256; b < 384; b += 64)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
-                   TX_32X32, 256, dry_run);
-      break;
-    case TX_16X16:
-      for (b = 0; b < 256; b += 16)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC,
-                   TX_16X16, 256, dry_run);
-      for (b = 256; b < 384; b += 16)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
-                   TX_16X16, 256, dry_run);
-      break;
-    case TX_8X8:
-      for (b = 0; b < 256; b += 4)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC,
-                   TX_8X8, 256, dry_run);
-      for (b = 256; b < 384; b += 4)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
-                   TX_8X8, 256, dry_run);
-      break;
-    case TX_4X4:
-      for (b = 0; b < 256; b++)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC,
-                   TX_4X4, 256, dry_run);
-      for (b = 256; b < 384; b++)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
-                   TX_4X4, 256, dry_run);
+                   TX_4X4, n_y, dry_run);
       break;
     default: assert(0);
   }
@@ -1174,70 +956,53 @@ void vp9_stuff_mb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
   }
 }
 
-void vp9_stuff_sb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run) {
-  TOKENEXTRA * const t_backup = *t;
+void vp9_stuff_sb(VP9_COMP *cpi, MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run,
+                  BLOCK_SIZE_TYPE bsize) {
+  MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
+  const TX_SIZE txfm_size = mbmi->txfm_size;
+  const TX_SIZE uv_txfm_size = (bsize < BLOCK_SIZE_SB32X32 &&
+                                txfm_size == TX_16X16) ? TX_8X8 :
+                               (bsize < BLOCK_SIZE_SB64X64 &&
+                                txfm_size == TX_32X32) ? TX_16X16 : txfm_size;
   int b;
-
-  switch (xd->mode_info_context->mbmi.txfm_size) {
-    case TX_32X32:
-      stuff_b(cpi, xd, 0, t, PLANE_TYPE_Y_WITH_DC, TX_32X32, dry_run);
-      for (b = 64; b < 96; b += 16)
-        stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_16X16, dry_run);
-      break;
-    case TX_16X16:
-      for (b = 0; b < 64; b += 16)
-        stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_16X16, dry_run);
-      for (b = 64; b < 96; b += 16)
-        stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_16X16, dry_run);
-      break;
-    case TX_8X8:
-      for (b = 0; b < 64; b += 4)
-        stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_8X8, dry_run);
-      for (b = 64; b < 96; b += 4)
-        stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_8X8, dry_run);
-      break;
-    case TX_4X4:
-      for (b = 0; b < 64; b++)
-        stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_4X4, dry_run);
-      for (b = 64; b < 96; b++)
-        stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_4X4, dry_run);
-      break;
-    default: assert(0);
-  }
-
-  if (dry_run) {
-    *t = t_backup;
-  }
-}
-
-void vp9_stuff_sb64(VP9_COMP *cpi, MACROBLOCKD *xd,
-                    TOKENEXTRA **t, int dry_run) {
+  const int n_y = (1 << (bwl + bhl)), n_uv = (n_y * 3) >> 1;
   TOKENEXTRA * const t_backup = *t;
-  int b;
 
-  switch (xd->mode_info_context->mbmi.txfm_size) {
+  switch (txfm_size) {
     case TX_32X32:
-      for (b = 0; b < 256; b += 64)
+      for (b = 0; b < n_y; b += 64)
         stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_32X32, dry_run);
-      for (b = 256; b < 384; b += 64)
-        stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_32X32, dry_run);
+      if (uv_txfm_size == TX_32X32) {
+        assert(bsize == BLOCK_SIZE_SB64X64);
+        stuff_b(cpi, xd, 256, t, PLANE_TYPE_UV, TX_32X32, dry_run);
+        stuff_b(cpi, xd, 320, t, PLANE_TYPE_UV, TX_32X32, dry_run);
+      } else {
+        for (; b < n_uv; b += 16)
+          stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_16X16, dry_run);
+      }
       break;
     case TX_16X16:
-      for (b = 0; b < 256; b += 16)
+      for (b = 0; b < n_y; b += 16)
         stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_16X16, dry_run);
-      for (b = 256; b < 384; b += 16)
-        stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_16X16, dry_run);
+      if (uv_txfm_size == TX_16X16) {
+        for (; b < n_uv; b += 16)
+          stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_16X16, dry_run);
+      } else {
+        for (; b < n_uv; b += 4)
+          stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_8X8, dry_run);
+      }
       break;
     case TX_8X8:
-      for (b = 0; b < 256; b += 4)
+      for (b = 0; b < n_y; b += 4)
         stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_8X8, dry_run);
-      for (b = 256; b < 384; b += 4)
+      for (; b < n_uv; b += 4)
         stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_8X8, dry_run);
       break;
     case TX_4X4:
-      for (b = 0; b < 256; b++)
+      for (b = 0; b < n_y; b++)
         stuff_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_4X4, dry_run);
-      for (b = 256; b < 384; b++)
+      for (; b < n_uv; b++)
         stuff_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_4X4, dry_run);
       break;
     default: assert(0);

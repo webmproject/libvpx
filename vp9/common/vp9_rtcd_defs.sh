@@ -5,6 +5,7 @@ cat <<EOF
  */
 
 #include "vpx/vpx_integer.h"
+#include "vp9/common/vp9_enums.h"
 
 struct loop_filter_info;
 struct blockd;
@@ -85,17 +86,11 @@ specialize vp9_recon_mby_s
 prototype void vp9_recon_mbuv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst"
 specialize void vp9_recon_mbuv_s
 
-prototype void vp9_recon_sby_s "struct macroblockd *x, uint8_t *dst"
+prototype void vp9_recon_sby_s "struct macroblockd *x, uint8_t *dst, enum BLOCK_SIZE_TYPE bsize"
 specialize vp9_recon_sby_s
 
-prototype void vp9_recon_sbuv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst"
+prototype void vp9_recon_sbuv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst, enum BLOCK_SIZE_TYPE bsize"
 specialize void vp9_recon_sbuv_s
-
-prototype void vp9_recon_sb64y_s "struct macroblockd *x, uint8_t *dst"
-specialize vp9_recon_sb64y_s
-
-prototype void vp9_recon_sb64uv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst"
-specialize void vp9_recon_sb64uv_s
 
 prototype void vp9_build_intra_predictors_mby_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_mby_s

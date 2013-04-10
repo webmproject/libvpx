@@ -496,128 +496,93 @@ void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx, int y_blocks) {
            vp9_default_zig_zag1d_32x32, 2);
 }
 
-void vp9_quantize_sby_32x32(MACROBLOCK *x) {
-  vp9_regular_quantize_b_32x32(x, 0, 64);
-}
-
-void vp9_quantize_sby_16x16(MACROBLOCK *x) {
+void vp9_quantize_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  const int bw = 1 << (mb_width_log2(bsize) - 1);
+  const int bh = 1 << (mb_height_log2(bsize) - 1);
   int n;
 
-  for (n = 0; n < 4; n++) {
+  for (n = 0; n < bw * bh; n++)
+    vp9_regular_quantize_b_32x32(x, n * 64, bw * bh * 64);
+}
+
+void vp9_quantize_sby_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize), bw = 1 << bwl;
+  const int bh = 1 << mb_height_log2(bsize);
+  const int bstride = 16 << bwl;
+  int n;
+
+  for (n = 0; n < bw * bh; n++) {
+    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
     TX_TYPE tx_type = get_tx_type_16x16(&x->e_mbd,
-                                        (16 * (n & 2)) + ((n & 1) * 4));
-    x->quantize_b_16x16(x, n * 16, tx_type, 64);
+                                        4 * x_idx + y_idx * bstride);
+    x->quantize_b_16x16(x, n * 16, tx_type, 16 * bw * bh);
   }
 }
 
-void vp9_quantize_sby_8x8(MACROBLOCK *x) {
+void vp9_quantize_sby_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize) + 1, bw = 1 << bwl;
+  const int bh = 1 << (mb_height_log2(bsize) + 1);
+  const int bstride = 4 << bwl;
   int n;
 
-  for (n = 0; n < 16; n++) {
+  for (n = 0; n < bw * bh; n++) {
+    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
     TX_TYPE tx_type = get_tx_type_8x8(&x->e_mbd,
-                                      (4 * (n & 12)) + ((n & 3) * 2));
-    x->quantize_b_8x8(x, n * 4, tx_type, 64);
+                                      2 * x_idx + y_idx * bstride);
+    x->quantize_b_8x8(x, n * 4, tx_type, 4 * bw * bh);
   }
 }
 
-void vp9_quantize_sby_4x4(MACROBLOCK *x) {
+void vp9_quantize_sby_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize) + 2, bw = 1 << bwl;
+  const int bh = 1 << (mb_height_log2(bsize) + 2);
   MACROBLOCKD *const xd = &x->e_mbd;
   int n;
 
-  for (n = 0; n < 64; n++) {
+  for (n = 0; n < bw * bh; n++) {
     const TX_TYPE tx_type = get_tx_type_4x4(xd, n);
     if (tx_type != DCT_DCT) {
       vp9_ht_quantize_b_4x4(x, n, tx_type);
     } else {
-      x->quantize_b_4x4(x, n, 64);
+      x->quantize_b_4x4(x, n, bw * bh);
     }
   }
 }
 
-void vp9_quantize_sbuv_16x16(MACROBLOCK *x) {
-  x->quantize_b_16x16(x, 64, DCT_DCT, 64);
-  x->quantize_b_16x16(x, 80, DCT_DCT, 64);
-}
-
-void vp9_quantize_sbuv_8x8(MACROBLOCK *x) {
-  int i;
-
-  for (i = 64; i < 96; i += 4)
-    x->quantize_b_8x8(x, i, DCT_DCT, 64);
-}
-
-void vp9_quantize_sbuv_4x4(MACROBLOCK *x) {
-  int i;
-
-  for (i = 64; i < 96; i++)
-    x->quantize_b_4x4(x, i, 64);
-}
-
-void vp9_quantize_sb64y_32x32(MACROBLOCK *x) {
-  int n;
-
-  for (n = 0; n < 4; n++)
-    vp9_regular_quantize_b_32x32(x, n * 64, 256);
-}
-
-void vp9_quantize_sb64y_16x16(MACROBLOCK *x) {
-  int n;
-
-  for (n = 0; n < 16; n++) {
-    TX_TYPE tx_type = get_tx_type_16x16(&x->e_mbd,
-                                        (16 * (n & 12)) + ((n & 3) * 4));
-    x->quantize_b_16x16(x, n * 16, tx_type, 256);
-  }
-}
-
-void vp9_quantize_sb64y_8x8(MACROBLOCK *x) {
-  int n;
-
-  for (n = 0; n < 64; n++) {
-    TX_TYPE tx_type = get_tx_type_8x8(&x->e_mbd,
-                                      (4 * (n & 56)) + ((n & 7) * 2));
-    x->quantize_b_8x8(x, n * 4, tx_type, 256);
-  }
-}
-
-void vp9_quantize_sb64y_4x4(MACROBLOCK *x) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  int n;
-
-  for (n = 0; n < 256; n++) {
-    const TX_TYPE tx_type = get_tx_type_4x4(xd, n);
-    if (tx_type != DCT_DCT) {
-      vp9_ht_quantize_b_4x4(x, n, tx_type);
-    } else {
-      x->quantize_b_4x4(x, n, 256);
-    }
-  }
-}
-
-void vp9_quantize_sb64uv_32x32(MACROBLOCK *x) {
+void vp9_quantize_sbuv_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  assert(bsize == BLOCK_SIZE_SB64X64);
   vp9_regular_quantize_b_32x32(x, 256, 256);
   vp9_regular_quantize_b_32x32(x, 320, 256);
 }
 
-void vp9_quantize_sb64uv_16x16(MACROBLOCK *x) {
+void vp9_quantize_sbuv_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize);
+  const int bhl = mb_width_log2(bsize);
+  const int uoff = 16 << (bhl + bwl);
   int i;
 
-  for (i = 256; i < 384; i += 16)
-    x->quantize_b_16x16(x, i, DCT_DCT, 256);
+  for (i = uoff; i < ((uoff * 3) >> 1); i += 16)
+    x->quantize_b_16x16(x, i, DCT_DCT, uoff);
 }
 
-void vp9_quantize_sb64uv_8x8(MACROBLOCK *x) {
+void vp9_quantize_sbuv_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize);
+  const int bhl = mb_width_log2(bsize);
+  const int uoff = 16 << (bhl + bwl);
   int i;
 
-  for (i = 256; i < 384; i += 4)
-    x->quantize_b_8x8(x, i, DCT_DCT, 256);
+  for (i = uoff; i < ((uoff * 3) >> 1); i += 4)
+    x->quantize_b_8x8(x, i, DCT_DCT, uoff);
 }
 
-void vp9_quantize_sb64uv_4x4(MACROBLOCK *x) {
+void vp9_quantize_sbuv_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize);
+  const int bhl = mb_width_log2(bsize);
+  const int uoff = 16 << (bhl + bwl);
   int i;
 
-  for (i = 256; i < 384; i++)
-    x->quantize_b_4x4(x, i, 256);
+  for (i = uoff; i < ((uoff * 3) >> 1); i++)
+    x->quantize_b_4x4(x, i, uoff);
 }
 
 /* quantize_b_pair function pointer in MACROBLOCK structure is set to one of

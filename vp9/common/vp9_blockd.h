@@ -19,6 +19,7 @@
 #include "vp9/common/vp9_treecoder.h"
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_enums.h"
 
 #define TRUE    1
 #define FALSE   0
@@ -198,11 +199,43 @@ typedef enum {
   MAX_REF_FRAMES = 4
 } MV_REFERENCE_FRAME;
 
-typedef enum {
-  BLOCK_SIZE_MB16X16 = 0,
-  BLOCK_SIZE_SB32X32 = 1,
-  BLOCK_SIZE_SB64X64 = 2,
-} BLOCK_SIZE_TYPE;
+static INLINE int mb_width_log2(BLOCK_SIZE_TYPE sb_type) {
+  switch (sb_type) {
+#if CONFIG_SBSEGMENT
+    case BLOCK_SIZE_SB16X32:
+#endif
+    case BLOCK_SIZE_MB16X16: return 0;
+#if CONFIG_SBSEGMENT
+    case BLOCK_SIZE_SB32X16:
+    case BLOCK_SIZE_SB32X64:
+#endif
+    case BLOCK_SIZE_SB32X32: return 1;
+#if CONFIG_SBSEGMENT
+    case BLOCK_SIZE_SB64X32:
+#endif
+    case BLOCK_SIZE_SB64X64: return 2;
+    default: assert(0);
+  }
+}
+
+static INLINE int mb_height_log2(BLOCK_SIZE_TYPE sb_type) {
+  switch (sb_type) {
+#if CONFIG_SBSEGMENT
+    case BLOCK_SIZE_SB32X16:
+#endif
+    case BLOCK_SIZE_MB16X16: return 0;
+#if CONFIG_SBSEGMENT
+    case BLOCK_SIZE_SB16X32:
+    case BLOCK_SIZE_SB64X32:
+#endif
+    case BLOCK_SIZE_SB32X32: return 1;
+#if CONFIG_SBSEGMENT
+    case BLOCK_SIZE_SB32X64:
+#endif
+    case BLOCK_SIZE_SB64X64: return 2;
+    default: assert(0);
+  }
+}
 
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
@@ -469,11 +502,12 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
   const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+  const int wb = mb_width_log2(sb_type), hb = mb_height_log2(sb_type);
 #if !USE_ADST_FOR_SB
-  if (sb_type)
+  if (sb_type > BLOCK_SIZE_MB16X16)
     return tx_type;
 #endif
-  if (ib >= (16 << (2 * sb_type)))  // no chroma adst
+  if (ib >= (16 << (wb + hb)))  // no chroma adst
     return tx_type;
   if (xd->lossless)
     return DCT_DCT;
@@ -524,7 +558,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
              xd->q_index < ACTIVE_HT) {
 #if USE_ADST_FOR_I16X16_4X4
 #if USE_ADST_PERIPHERY_ONLY
-    const int hmax = 4 << sb_type;
+    const int hmax = 4 << wb;
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
 #if USE_ADST_FOR_REMOTE_EDGE
     if ((ib & (hmax - 1)) != 0 && ib >= hmax)
@@ -557,11 +591,12 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
   const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+  const int wb = mb_width_log2(sb_type), hb = mb_height_log2(sb_type);
 #if !USE_ADST_FOR_SB
-  if (sb_type)
+  if (sb_type > BLOCK_SIZE_MB16X16)
     return tx_type;
 #endif
-  if (ib >= (16 << (2 * sb_type)))  // no chroma adst
+  if (ib >= (16 << (wb + hb)))  // no chroma adst
     return tx_type;
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
       xd->q_index < ACTIVE_HT8) {
@@ -574,7 +609,7 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
              xd->q_index < ACTIVE_HT8) {
 #if USE_ADST_FOR_I16X16_8X8
 #if USE_ADST_PERIPHERY_ONLY
-    const int hmax = 4 << sb_type;
+    const int hmax = 4 << wb;
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
 #if USE_ADST_FOR_REMOTE_EDGE
     if ((ib & (hmax - 1)) != 0 && ib >= hmax)
@@ -605,18 +640,19 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
 static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type = DCT_DCT;
   const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+  const int wb = mb_width_log2(sb_type), hb = mb_height_log2(sb_type);
 #if !USE_ADST_FOR_SB
-  if (sb_type)
+  if (sb_type > BLOCK_SIZE_MB16X16)
     return tx_type;
 #endif
-  if (ib >= (16 << (2 * sb_type)))
+  if (ib >= (16 << (wb + hb)))
     return tx_type;
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
       xd->q_index < ACTIVE_HT16) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
 #if USE_ADST_PERIPHERY_ONLY
-    if (sb_type) {
-      const int hmax = 4 << sb_type;
+    if (sb_type > BLOCK_SIZE_MB16X16) {
+      const int hmax = 4 << wb;
 #if USE_ADST_FOR_REMOTE_EDGE
       if ((ib & (hmax - 1)) != 0 && ib >= hmax)
         tx_type = DCT_DCT;
@@ -658,6 +694,10 @@ static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
   switch (mbmi->sb_type) {
     case BLOCK_SIZE_SB64X64:
       return size;
+#if CONFIG_SBSEGMENT
+    case BLOCK_SIZE_SB64X32:
+    case BLOCK_SIZE_SB32X64:
+#endif
     case BLOCK_SIZE_SB32X32:
       if (size == TX_32X32)
         return TX_16X16;

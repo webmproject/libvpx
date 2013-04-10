@@ -907,12 +907,12 @@ static void super_block_yrd_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-  vp9_transform_sby_4x4(x);
-  vp9_quantize_sby_4x4(x);
+  vp9_transform_sby_4x4(x, BLOCK_SIZE_SB32X32);
+  vp9_quantize_sby_4x4(x, BLOCK_SIZE_SB32X32);
 
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff, 1024, 2);
   *rate       = rdcost_sby_4x4(cm, x);
-  *skippable  = vp9_sby_is_skippable_4x4(xd);
+  *skippable  = vp9_sby_is_skippable(xd, BLOCK_SIZE_SB32X32, TX_4X4);
 }
 
 static int rdcost_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
@@ -938,12 +938,12 @@ static void super_block_yrd_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_8X8;
-  vp9_transform_sby_8x8(x);
-  vp9_quantize_sby_8x8(x);
+  vp9_transform_sby_8x8(x, BLOCK_SIZE_SB32X32);
+  vp9_quantize_sby_8x8(x, BLOCK_SIZE_SB32X32);
 
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff, 1024, 2);
   *rate       = rdcost_sby_8x8(cm, x);
-  *skippable  = vp9_sby_is_skippable_8x8(xd);
+  *skippable  = vp9_sby_is_skippable(xd, BLOCK_SIZE_SB32X32, TX_8X8);
 }
 
 static int rdcost_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
@@ -969,12 +969,12 @@ static void super_block_yrd_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_16X16;
-  vp9_transform_sby_16x16(x);
-  vp9_quantize_sby_16x16(x);
+  vp9_transform_sby_16x16(x, BLOCK_SIZE_SB32X32);
+  vp9_quantize_sby_16x16(x, BLOCK_SIZE_SB32X32);
 
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff, 1024, 2);
   *rate       = rdcost_sby_16x16(cm, x);
-  *skippable  = vp9_sby_is_skippable_16x16(xd);
+  *skippable  = vp9_sby_is_skippable(xd, BLOCK_SIZE_SB32X32, TX_16X16);
 }
 
 static int rdcost_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x) {
@@ -994,12 +994,12 @@ static void super_block_yrd_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_32X32;
-  vp9_transform_sby_32x32(x);
-  vp9_quantize_sby_32x32(x);
+  vp9_transform_sby_32x32(x, BLOCK_SIZE_SB32X32);
+  vp9_quantize_sby_32x32(x, BLOCK_SIZE_SB32X32);
 
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff, 1024, 0);
   *rate       = rdcost_sby_32x32(cm, x);
-  *skippable  = vp9_sby_is_skippable_32x32(xd);
+  *skippable  = vp9_sby_is_skippable(xd, BLOCK_SIZE_SB32X32, TX_32X32);
 }
 
 static void super_block_yrd(VP9_COMP *cpi,
@@ -1012,7 +1012,8 @@ static void super_block_yrd(VP9_COMP *cpi,
   const uint8_t *src = x->src.y_buffer, *dst = xd->dst.y_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
 
-  vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride);
+  vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride,
+                       BLOCK_SIZE_SB32X32);
   super_block_yrd_32x32(cm, x, &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32]);
   super_block_yrd_16x16(cm, x, &r[TX_16X16][0], &d[TX_16X16], &s[TX_16X16]);
   super_block_yrd_8x8(cm, x,   &r[TX_8X8][0],   &d[TX_8X8],   &s[TX_8X8]);
@@ -1045,12 +1046,12 @@ static void super_block64_yrd_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-  vp9_transform_sb64y_4x4(x);
-  vp9_quantize_sb64y_4x4(x);
+  vp9_transform_sby_4x4(x, BLOCK_SIZE_SB64X64);
+  vp9_quantize_sby_4x4(x, BLOCK_SIZE_SB64X64);
 
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff, 4096, 2);
   *rate       = rdcost_sb64y_4x4(cm, x);
-  *skippable  = vp9_sb64y_is_skippable_4x4(xd);
+  *skippable  = vp9_sby_is_skippable(xd, BLOCK_SIZE_SB64X64, TX_4X4);
 }
 
 static int rdcost_sb64y_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
@@ -1076,12 +1077,12 @@ static void super_block64_yrd_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_8X8;
-  vp9_transform_sb64y_8x8(x);
-  vp9_quantize_sb64y_8x8(x);
+  vp9_transform_sby_8x8(x, BLOCK_SIZE_SB64X64);
+  vp9_quantize_sby_8x8(x, BLOCK_SIZE_SB64X64);
 
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff, 4096, 2);
   *rate       = rdcost_sb64y_8x8(cm, x);
-  *skippable  = vp9_sb64y_is_skippable_8x8(xd);
+  *skippable  = vp9_sby_is_skippable(xd, BLOCK_SIZE_SB64X64, TX_8X8);
 }
 
 static int rdcost_sb64y_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
@@ -1108,12 +1109,12 @@ static void super_block64_yrd_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_16X16;
-  vp9_transform_sb64y_16x16(x);
-  vp9_quantize_sb64y_16x16(x);
+  vp9_transform_sby_16x16(x, BLOCK_SIZE_SB64X64);
+  vp9_quantize_sby_16x16(x, BLOCK_SIZE_SB64X64);
 
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff, 4096, 2);
   *rate       = rdcost_sb64y_16x16(cm, x);
-  *skippable  = vp9_sb64y_is_skippable_16x16(xd);
+  *skippable  = vp9_sby_is_skippable(xd, BLOCK_SIZE_SB64X64, TX_16X16);
 }
 
 static int rdcost_sb64y_32x32(VP9_COMMON *const cm, MACROBLOCK *x) {
@@ -1140,12 +1141,12 @@ static void super_block64_yrd_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_32X32;
-  vp9_transform_sb64y_32x32(x);
-  vp9_quantize_sb64y_32x32(x);
+  vp9_transform_sby_32x32(x, BLOCK_SIZE_SB64X64);
+  vp9_quantize_sby_32x32(x, BLOCK_SIZE_SB64X64);
 
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff, 4096, 0);
   *rate       = rdcost_sb64y_32x32(cm, x);
-  *skippable  = vp9_sb64y_is_skippable_32x32(xd);
+  *skippable  = vp9_sby_is_skippable(xd, BLOCK_SIZE_SB64X64, TX_32X32);
 }
 
 static void super_block_64_yrd(VP9_COMP *cpi,
@@ -1158,7 +1159,8 @@ static void super_block_64_yrd(VP9_COMP *cpi,
   const uint8_t *src = x->src.y_buffer, *dst = xd->dst.y_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
 
-  vp9_subtract_sb64y_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride);
+  vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride,
+                       BLOCK_SIZE_SB64X64);
   super_block64_yrd_32x32(cm, x, &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32]);
   super_block64_yrd_16x16(cm, x, &r[TX_16X16][0], &d[TX_16X16], &s[TX_16X16]);
   super_block64_yrd_8x8(cm, x,   &r[TX_8X8][0],   &d[TX_8X8],   &s[TX_8X8]);
@@ -1883,14 +1885,14 @@ static void rd_inter32x32_uv_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
                                    int backup) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  vp9_transform_sbuv_16x16(x);
-  vp9_quantize_sbuv_16x16(x);
+  vp9_transform_sbuv_16x16(x, BLOCK_SIZE_SB32X32);
+  vp9_quantize_sbuv_16x16(x, BLOCK_SIZE_SB32X32);
 
   *rate       = rd_cost_sbuv_16x16(cm, x, backup);
   *distortion = vp9_sb_uv_block_error_c(x->coeff + 1024,
                                         xd->plane[1].dqcoeff,
                                         xd->plane[2].dqcoeff, 512, 2);
-  *skip       = vp9_sbuv_is_skippable_16x16(xd);
+  *skip       = vp9_sbuv_is_skippable(xd, BLOCK_SIZE_SB32X32, TX_16X16);
 }
 
 static int64_t rd_inter32x32_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
@@ -1904,7 +1906,8 @@ static int64_t rd_inter32x32_uv(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   if (mbmi->txfm_size >= TX_16X16) {
     vp9_subtract_sbuv_s_c(x->src_diff,
                           usrc, vsrc, src_uv_stride,
-                          udst, vdst, dst_uv_stride);
+                          udst, vdst, dst_uv_stride,
+                          BLOCK_SIZE_SB32X32);
     rd_inter32x32_uv_16x16(&cpi->common, x, rate, distortion, skip, 1);
   } else {
     int n, r = 0, d = 0;
@@ -2078,7 +2081,8 @@ static void super_block_uvrd(VP9_COMMON *const cm,
   if (mbmi->txfm_size >= TX_16X16) {
     vp9_subtract_sbuv_s_c(x->src_diff,
                           usrc, vsrc, src_uv_stride,
-                          udst, vdst, dst_uv_stride);
+                          udst, vdst, dst_uv_stride,
+                          BLOCK_SIZE_SB32X32);
     rd_inter32x32_uv_16x16(cm, x, rate, distortion, skippable, 1);
   } else {
     int d = 0, r = 0, n, s = 1;
@@ -2160,14 +2164,14 @@ static void rd_inter64x64_uv_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
                                    int backup) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  vp9_transform_sb64uv_32x32(x);
-  vp9_quantize_sb64uv_32x32(x);
+  vp9_transform_sbuv_32x32(x, BLOCK_SIZE_SB64X64);
+  vp9_quantize_sbuv_32x32(x, BLOCK_SIZE_SB64X64);
 
   *rate       = rd_cost_sb64uv_32x32(cm, x, backup);
   *distortion = vp9_sb_uv_block_error_c(x->coeff + 4096,
                                         xd->plane[1].dqcoeff,
                                         xd->plane[2].dqcoeff, 2048, 0);
-  *skip       = vp9_sb64uv_is_skippable_32x32(xd);
+  *skip       = vp9_sbuv_is_skippable(xd, BLOCK_SIZE_SB64X64, TX_32X32);
 }
 
 static void super_block_64_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -2189,8 +2193,9 @@ static void super_block_64_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
   memcpy(t_left,  xd->left_context,  sizeof(t_left));
 
   if (mbmi->txfm_size == TX_32X32) {
-    vp9_subtract_sb64uv_s_c(x->src_diff, usrc, vsrc, src_uv_stride,
-                            udst, vdst, dst_uv_stride);
+    vp9_subtract_sbuv_s_c(x->src_diff, usrc, vsrc, src_uv_stride,
+                          udst, vdst, dst_uv_stride,
+                          BLOCK_SIZE_SB64X64);
     rd_inter64x64_uv_32x32(cm, x, &r, &d, &s, 1);
   } else if (mbmi->txfm_size == TX_16X16) {
     int n;
@@ -2206,7 +2211,7 @@ static void super_block_64_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
                             src_uv_stride,
                             udst + x_idx * 16 + y_idx * 16 * dst_uv_stride,
                             vdst + x_idx * 16 + y_idx * 16 * dst_uv_stride,
-                            dst_uv_stride);
+                            dst_uv_stride, BLOCK_SIZE_SB32X32);
       xd->above_context = t_above + x_idx * 2;
       xd->left_context = t_left + y_idx * 2;
       rd_inter32x32_uv_16x16(cm, x, &r_tmp, &d_tmp, &s_tmp, 0);

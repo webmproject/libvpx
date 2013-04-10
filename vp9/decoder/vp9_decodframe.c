@@ -675,7 +675,7 @@ static void decode_sb64(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
     mb_init_dequantizer(pbi, xd);
 
   if (mi->mbmi.mb_skip_coeff) {
-    vp9_reset_sb64_tokens_context(xd);
+    vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_SB64X64);
 
     // Special case:  Force the loopfilter to skip when eobtotal and
     // mb_skip_coeff are zero.
@@ -753,7 +753,7 @@ static void decode_sb32(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
     mb_init_dequantizer(pbi, xd);
 
   if (mi->mbmi.mb_skip_coeff) {
-    vp9_reset_sb_tokens_context(xd);
+    vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_SB32X32);
 
     // Special case:  Force the loopfilter to skip when eobtotal and
     // mb_skip_coeff are zero.
