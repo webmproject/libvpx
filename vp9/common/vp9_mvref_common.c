@@ -262,7 +262,7 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   if (mbmi->sb_type == BLOCK_SIZE_SB64X64) {
     mv_ref_search = sb64_mv_ref_search;
     ref_distance_weight = sb64_ref_distance_weight;
-  } else if (mbmi->sb_type == BLOCK_SIZE_SB32X32) {
+  } else if (mbmi->sb_type >= BLOCK_SIZE_SB32X32) {
     mv_ref_search = sb_mv_ref_search;
     ref_distance_weight = sb_ref_distance_weight;
   } else {

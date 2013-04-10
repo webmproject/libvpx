@@ -136,9 +136,10 @@ static void kfread_modes(VP9D_COMP *pbi,
   if (pbi->mb.update_mb_segmentation_map) {
     read_mb_segid(bc, &m->mbmi, &pbi->mb);
     if (m->mbmi.sb_type) {
-      const int nmbs = 1 << m->mbmi.sb_type;
-      const int ymbs = MIN(cm->mb_rows - mb_row, nmbs);
-      const int xmbs = MIN(cm->mb_cols - mb_col, nmbs);
+      const int bw = 1 << mb_width_log2(m->mbmi.sb_type);
+      const int bh = 1 << mb_height_log2(m->mbmi.sb_type);
+      const int ymbs = MIN(cm->mb_rows - mb_row, bh);
+      const int xmbs = MIN(cm->mb_cols - mb_col, bw);
       int x, y;
 
       for (y = 0; y < ymbs; y++) {
@@ -205,10 +206,11 @@ static void kfread_modes(VP9D_COMP *pbi,
     m->mbmi.txfm_size = vp9_read(bc, cm->prob_tx[0]);
     if (m->mbmi.txfm_size != TX_4X4 && m->mbmi.mode != I8X8_PRED) {
       m->mbmi.txfm_size += vp9_read(bc, cm->prob_tx[1]);
-      if (m->mbmi.txfm_size != TX_8X8 && m->mbmi.sb_type)
+      if (m->mbmi.txfm_size != TX_8X8 && m->mbmi.sb_type >= BLOCK_SIZE_SB32X32)
         m->mbmi.txfm_size += vp9_read(bc, cm->prob_tx[2]);
     }
-  } else if (cm->txfm_mode >= ALLOW_32X32 && m->mbmi.sb_type) {
+  } else if (cm->txfm_mode >= ALLOW_32X32 &&
+             m->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
     m->mbmi.txfm_size = TX_32X32;
   } else if (cm->txfm_mode >= ALLOW_16X16 && m->mbmi.mode <= TM_PRED) {
     m->mbmi.txfm_size = TX_16X16;
@@ -589,9 +591,10 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
       }
 
       if (mbmi->sb_type) {
-        const int nmbs = 1 << mbmi->sb_type;
-        const int ymbs = MIN(cm->mb_rows - mb_row, nmbs);
-        const int xmbs = MIN(cm->mb_cols - mb_col, nmbs);
+        const int bw = 1 << mb_width_log2(mbmi->sb_type);
+        const int bh = 1 << mb_height_log2(mbmi->sb_type);
+        const int ymbs = MIN(cm->mb_rows - mb_row, bh);
+        const int xmbs = MIN(cm->mb_cols - mb_col, bw);
         int x, y;
 
         for (y = 0; y < ymbs; y++) {
@@ -605,9 +608,10 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
       }
     } else {
       if (mbmi->sb_type) {
-        const int nmbs = 1 << mbmi->sb_type;
-        const int ymbs = MIN(cm->mb_rows - mb_row, nmbs);
-        const int xmbs = MIN(cm->mb_cols - mb_col, nmbs);
+        const int bw = 1 << mb_width_log2(mbmi->sb_type);
+        const int bh = 1 << mb_height_log2(mbmi->sb_type);
+        const int ymbs = MIN(cm->mb_rows - mb_row, bh);
+        const int xmbs = MIN(cm->mb_cols - mb_col, bw);
         unsigned segment_id = -1;
         int x, y;
 
@@ -669,7 +673,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   MACROBLOCKD *const xd = &pbi->mb;
 
   int_mv *const mv = &mbmi->mv[0];
-  const int mb_size = 1 << mi->mbmi.sb_type;
+  const int bw = 1 << mb_width_log2(mi->mbmi.sb_type);
+  const int bh = 1 << mb_height_log2(mi->mbmi.sb_type);
 
   const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
                                        cm->height == cm->last_height &&
@@ -689,8 +694,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   // Distance of Mb to the various image edges.
   // These specified to 8th pel as they are always compared to MV values
   // that are in 1/8th pel units
-  set_mb_row(cm, xd, mb_row, mb_size);
-  set_mb_col(cm, xd, mb_col, mb_size);
+  set_mb_row(cm, xd, mb_row, bh);
+  set_mb_col(cm, xd, mb_col, bw);
 
   mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
   mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
@@ -1104,10 +1109,11 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     if (mbmi->txfm_size != TX_4X4 && mbmi->mode != I8X8_PRED &&
         mbmi->mode != SPLITMV) {
       mbmi->txfm_size += vp9_read(bc, cm->prob_tx[1]);
-      if (mbmi->sb_type && mbmi->txfm_size != TX_8X8)
+      if (mbmi->sb_type >= BLOCK_SIZE_SB32X32 && mbmi->txfm_size != TX_8X8)
         mbmi->txfm_size += vp9_read(bc, cm->prob_tx[2]);
     }
-  } else if (mbmi->sb_type && cm->txfm_mode >= ALLOW_32X32) {
+  } else if (mbmi->sb_type >= BLOCK_SIZE_SB32X32 &&
+             cm->txfm_mode >= ALLOW_32X32) {
     mbmi->txfm_size = TX_32X32;
   } else if (cm->txfm_mode >= ALLOW_16X16 &&
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= TM_PRED) ||
@@ -1417,9 +1423,10 @@ void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
 #endif  // CONFIG_CODE_NONZEROCOUNT
 
   if (mbmi->sb_type) {
-    const int n_mbs = 1 << mbmi->sb_type;
-    const int y_mbs = MIN(n_mbs, cm->mb_rows - mb_row);
-    const int x_mbs = MIN(n_mbs, cm->mb_cols - mb_col);
+    const int bw = 1 << mb_width_log2(mbmi->sb_type);
+    const int bh = 1 << mb_height_log2(mbmi->sb_type);
+    const int y_mbs = MIN(bh, cm->mb_rows - mb_row);
+    const int x_mbs = MIN(bw, cm->mb_cols - mb_col);
     const int mis = cm->mode_info_stride;
     int x, y;
 

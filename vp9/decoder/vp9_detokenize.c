@@ -157,7 +157,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     }
     case TX_8X8: {
       const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 3 + sb_type, x = block_idx & ((1 << sz) - 1);
+      const int sz = 3 + mb_width_log2(sb_type);
+      const int x = block_idx & ((1 << sz) - 1);
       const int y = block_idx - x;
       const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
                               get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
@@ -181,7 +182,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     }
     case TX_16X16: {
       const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 4 + sb_type, x = block_idx & ((1 << sz) - 1);
+      const int sz = 4 + mb_width_log2(sb_type);
+      const int x = block_idx & ((1 << sz) - 1);
       const int y = block_idx - x;
       const TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
                               get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;

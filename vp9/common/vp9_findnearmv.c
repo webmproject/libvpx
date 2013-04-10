@@ -197,12 +197,13 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
 #else
       if (xd->up_available && xd->left_available) {
 #endif
+        const int bwl = mb_width_log2(xd->mode_info_context->mbmi.sb_type);
         vp9_sub_pixel_variance16x2(above_ref + offset, ref_y_stride,
                                    SP(this_mv.as_mv.col),
                                    SP(this_mv.as_mv.row),
                                    above_src, xd->dst.y_stride, &sse);
         score += sse;
-        if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
+        if (bwl >= 1) {
           vp9_sub_pixel_variance16x2(above_ref + offset + 16,
                                      ref_y_stride,
                                      SP(this_mv.as_mv.col),
@@ -210,7 +211,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                                      above_src + 16, xd->dst.y_stride, &sse);
           score += sse;
         }
-        if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB64X64) {
+        if (bwl >= 2) {
           vp9_sub_pixel_variance16x2(above_ref + offset + 32,
                                      ref_y_stride,
                                      SP(this_mv.as_mv.col),
@@ -227,12 +228,13 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
       }
 #if !CONFIG_ABOVESPREFMV
       if (xd->left_available) {
+        const int bhl = mb_height_log2(xd->mode_info_context->mbmi.sb_type);
         vp9_sub_pixel_variance2x16_c(left_ref + offset, ref_y_stride,
                                      SP(this_mv.as_mv.col),
                                      SP(this_mv.as_mv.row),
                                      left_src, xd->dst.y_stride, &sse);
         score += sse;
-        if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
+        if (bhl >= 1) {
           vp9_sub_pixel_variance2x16_c(left_ref + offset + ref_y_stride * 16,
                                        ref_y_stride,
                                        SP(this_mv.as_mv.col),
@@ -241,7 +243,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                                        xd->dst.y_stride, &sse);
           score += sse;
         }
-        if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB64X64) {
+        if (bhl >= 2) {
           vp9_sub_pixel_variance2x16_c(left_ref + offset + ref_y_stride * 32,
                                      ref_y_stride,
                                        SP(this_mv.as_mv.col),

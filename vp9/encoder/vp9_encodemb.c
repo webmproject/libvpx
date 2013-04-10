@@ -501,7 +501,8 @@ static void optimize_b(VP9_COMMON *const cm,
     }
     case TX_8X8: {
       const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 3 + sb_type, x = ib & ((1 << sz) - 1), y = ib - x;
+      const int sz = 3 + mb_width_log2(sb_type);
+      const int x = ib & ((1 << sz) - 1), y = ib - x;
       const TX_TYPE tx_type = get_tx_type_8x8(xd, y + (x >> 1));
       if (tx_type == DCT_ADST) {
         scan = vp9_col_scan_8x8;
@@ -518,7 +519,8 @@ static void optimize_b(VP9_COMMON *const cm,
     }
     case TX_16X16: {
       const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 4 + sb_type, x = ib & ((1 << sz) - 1), y = ib - x;
+      const int sz = 4 + mb_width_log2(sb_type);
+      const int x = ib & ((1 << sz) - 1), y = ib - x;
       const TX_TYPE tx_type = get_tx_type_16x16(xd, y + (x >> 2));
       if (tx_type == DCT_ADST) {
         scan = vp9_col_scan_16x16;

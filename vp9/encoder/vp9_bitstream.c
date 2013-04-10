@@ -763,7 +763,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   const MV_REFERENCE_FRAME rf = mi->ref_frame;
   const MB_PREDICTION_MODE mode = mi->mode;
   const int segment_id = mi->segment_id;
-  const int mb_size = 1 << mi->sb_type;
+  const int bw = 1 << mb_width_log2(mi->sb_type);
+  const int bh = 1 << mb_height_log2(mi->sb_type);
   int skip_coeff;
 
   int mb_row = pc->mb_rows - mb_rows_left;
@@ -775,8 +776,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   // These specified to 8th pel as they are always compared to MV
   // values that are in 1/8th pel units
 
-  set_mb_row(pc, xd, mb_row, mb_size);
-  set_mb_col(pc, xd, mb_col, mb_size);
+  set_mb_row(pc, xd, mb_row, bh);
+  set_mb_col(pc, xd, mb_col, bw);
 
 #ifdef ENTROPY_STATS
   active_section = 9;
@@ -1002,7 +1003,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
     if (sz != TX_4X4 && mode != I8X8_PRED && mode != SPLITMV) {
       vp9_write(bc, sz != TX_8X8, pc->prob_tx[1]);
-      if (mi->sb_type && sz != TX_8X8)
+      if (mi->sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
         vp9_write(bc, sz != TX_16X16, pc->prob_tx[2]);
     }
   }
@@ -1080,7 +1081,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
     if (sz != TX_4X4 && ym <= TM_PRED) {
       vp9_write(bc, sz != TX_8X8, c->prob_tx[1]);
-      if (m->mbmi.sb_type && sz != TX_8X8)
+      if (m->mbmi.sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
         vp9_write(bc, sz != TX_16X16, c->prob_tx[2]);
     }
   }
@@ -1649,8 +1650,8 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   xd->mode_info_context = m;
-  set_mb_row(&cpi->common, xd, mb_row, (1 << m->mbmi.sb_type));
-  set_mb_col(&cpi->common, xd, mb_col, (1 << m->mbmi.sb_type));
+  set_mb_row(&cpi->common, xd, mb_row, 1 << mb_height_log2(m->mbmi.sb_type));
+  set_mb_col(&cpi->common, xd, mb_col, 1 << mb_width_log2(m->mbmi.sb_type));
   if (cm->frame_type == KEY_FRAME) {
     write_mb_modes_kf(cpi, m, bc,
                       cm->mb_rows - mb_row, cm->mb_cols - mb_col);

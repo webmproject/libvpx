@@ -179,54 +179,37 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
                        PRED_ID pred_id,
                        unsigned char pred_flag) {
   const int mis = xd->mode_info_stride;
+  BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+  const int bh = 1 << mb_height_log2(bsize);
+  const int bw = 1 << mb_width_log2(bsize);
+#define sub(a, b) (b) < 0 ? (a) + (b) : (a)
+  const int x_mbs = sub(bw, xd->mb_to_right_edge >> 7);
+  const int y_mbs = sub(bh, xd->mb_to_bottom_edge >> 7);
+#undef sub
+  int x, y;
 
   switch (pred_id) {
     case PRED_SEG_ID:
-      xd->mode_info_context->mbmi.seg_id_predicted = pred_flag;
-      if (xd->mode_info_context->mbmi.sb_type) {
-#define sub(a, b) (b) < 0 ? (a) + (b) : (a)
-        const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
-        const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
-        const int y_mbs = sub(n_mbs, xd->mb_to_bottom_edge >> 7);
-        int x, y;
-
-        for (y = 0; y < y_mbs; y++) {
-          for (x = !y; x < x_mbs; x++) {
-            xd->mode_info_context[y * mis + x].mbmi.seg_id_predicted =
-                pred_flag;
-          }
+      for (y = 0; y < y_mbs; y++) {
+        for (x = 0; x < x_mbs; x++) {
+          xd->mode_info_context[y * mis + x].mbmi.seg_id_predicted =
+              pred_flag;
         }
       }
       break;
 
     case PRED_REF:
-      xd->mode_info_context->mbmi.ref_predicted = pred_flag;
-      if (xd->mode_info_context->mbmi.sb_type) {
-        const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
-        const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
-        const int y_mbs = sub(n_mbs, xd->mb_to_bottom_edge >> 7);
-        int x, y;
-
-        for (y = 0; y < y_mbs; y++) {
-          for (x = !y; x < x_mbs; x++) {
-            xd->mode_info_context[y * mis + x].mbmi.ref_predicted = pred_flag;
-          }
+      for (y = 0; y < y_mbs; y++) {
+        for (x = 0; x < x_mbs; x++) {
+          xd->mode_info_context[y * mis + x].mbmi.ref_predicted = pred_flag;
         }
       }
       break;
 
     case PRED_MBSKIP:
-      xd->mode_info_context->mbmi.mb_skip_coeff = pred_flag;
-      if (xd->mode_info_context->mbmi.sb_type) {
-        const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
-        const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
-        const int y_mbs = sub(n_mbs, xd->mb_to_bottom_edge >> 7);
-        int x, y;
-
-        for (y = 0; y < y_mbs; y++) {
-          for (x = !y; x < x_mbs; x++) {
-            xd->mode_info_context[y * mis + x].mbmi.mb_skip_coeff = pred_flag;
-          }
+      for (y = 0; y < y_mbs; y++) {
+        for (x = 0; x < x_mbs; x++) {
+          xd->mode_info_context[y * mis + x].mbmi.mb_skip_coeff = pred_flag;
         }
       }
       break;
@@ -249,11 +232,13 @@ unsigned char vp9_get_pred_mb_segid(const VP9_COMMON *const cm,
   if (!xd->mode_info_context->mbmi.sb_type) {
     return cm->last_frame_seg_map[MbIndex];
   } else {
-    const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
+    BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+    const int bh = 1 << mb_height_log2(bsize);
+    const int bw = 1 << mb_width_log2(bsize);
     const int mb_col = MbIndex % cm->mb_cols;
     const int mb_row = MbIndex / cm->mb_cols;
-    const int x_mbs = MIN(n_mbs, cm->mb_cols - mb_col);
-    const int y_mbs = MIN(n_mbs, cm->mb_rows - mb_row);
+    const int x_mbs = MIN(bw, cm->mb_cols - mb_col);
+    const int y_mbs = MIN(bh, cm->mb_rows - mb_row);
     int x, y;
     unsigned seg_id = -1;
 
