@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//5bY\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 724,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-10T22:11:47Z",
+      "side": 1,
+      "message": "if bsize \u003e\u003d BLOCK_SIZE_SB32X32\n  call 16x16uv\nelse\n  call 8x8uv.\n\nSo that it works in the future for hypothetical 16x32 blocks, which only have 8x16 chroma pixels when using 420 downsampling.",
+      "revId": "bec206fb6f1dd6b1d3e312fcf7cbc5a2f456ef89",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
