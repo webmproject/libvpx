@@ -40,6 +40,8 @@ void vp9_initialize_common(void);
 #define NUM_REF_FRAMES 3
 #define NUM_REF_FRAMES_LG2 2
 
+#define ALLOWED_REFS_PER_FRAME 3
+
 // 1 scratch frame for the new frame, 3 for scaled references on the encoder
 // TODO(jkoleszar): These 3 extra references could probably come from the
 // normal reference pool.
