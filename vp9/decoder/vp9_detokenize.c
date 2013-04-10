@@ -401,26 +401,26 @@ static INLINE int block_idx_4x4(MACROBLOCKD* const xd, int block_size_b,
 static INLINE int decode_block_plane(VP9D_COMP* const pbi,
                                      MACROBLOCKD* const xd,
                                      BOOL_DECODER* const bc,
-                                     BLOCK_SIZE_LG2 block_size,
+                                     int block_size,
                                      int segment_id,
                                      int plane,
                                      int is_split) {
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
   const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
-  const BLOCK_SIZE_LG2 block_size_b = block_size;
-  const BLOCK_SIZE_LG2 txfrm_size_b = tx_size * 2;
+  const int block_size_b = block_size;
+  const int txfrm_size_b = tx_size * 2;
 
   // subsampled size of the block
   const int ss_sum = xd->plane[plane].subsampling_x +
                      xd->plane[plane].subsampling_y;
-  const BLOCK_SIZE_LG2 ss_block_size = block_size_b - ss_sum;
+  const int ss_block_size = block_size_b - ss_sum;
 
   // size of the transform to use. scale the transform down if it's larger
   // than the size of the subsampled data, or forced externally by the mb mode.
   const int ss_max = MAX(xd->plane[plane].subsampling_x,
                          xd->plane[plane].subsampling_y);
-  const BLOCK_SIZE_LG2 ss_txfrm_size = txfrm_size_b > ss_block_size || is_split
+  const int ss_txfrm_size = txfrm_size_b > ss_block_size || is_split
                                        ? txfrm_size_b - ss_max * 2
                                        : txfrm_size_b;
   const TX_SIZE ss_tx_size = ss_txfrm_size / 2;
@@ -477,22 +477,12 @@ static INLINE int decode_blocks(VP9D_COMP* const pbi,
       tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV));
 }
 
-int vp9_decode_sb64_tokens(VP9D_COMP* const pbi,
-                           MACROBLOCKD* const xd,
-                           BOOL_DECODER* const bc) {
-  return decode_blocks(pbi, xd, bc, BLOCK_64X64_LG2);
-}
-
-int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
+int vp9_decode_tokens(VP9D_COMP* const pbi,
                          MACROBLOCKD* const xd,
-                         BOOL_DECODER* const bc) {
-  return decode_blocks(pbi, xd, bc, BLOCK_32X32_LG2);
-}
-
-int vp9_decode_mb_tokens(VP9D_COMP* const pbi,
-                         MACROBLOCKD* const xd,
-                         BOOL_DECODER* const bc) {
-  return decode_blocks(pbi, xd, bc, BLOCK_16X16_LG2);
+                         BOOL_DECODER* const bc,
+                         BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
+  return decode_blocks(pbi, xd, bc, bwl + bhl);
 }
 
 #if CONFIG_NEWBINTRAMODES

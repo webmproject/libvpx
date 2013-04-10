@@ -14,16 +14,10 @@
 
 #include "vp9/decoder/vp9_onyxd_int.h"
 
-int vp9_decode_mb_tokens(VP9D_COMP* const, MACROBLOCKD* const,
-                         BOOL_DECODER* const);
-
-int vp9_decode_sb_tokens(VP9D_COMP* const pbi,
-                         MACROBLOCKD* const xd,
-                         BOOL_DECODER* const bc);
-
-int vp9_decode_sb64_tokens(VP9D_COMP* const pbi,
-                           MACROBLOCKD* const xd,
-                           BOOL_DECODER* const bc);
+int vp9_decode_tokens(VP9D_COMP* const pbi,
+                      MACROBLOCKD* const xd,
+                      BOOL_DECODER* const bc,
+                      BLOCK_SIZE_TYPE bsize);
 
 int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx, MACROBLOCKD* const xd,
                                 BOOL_DECODER* const bc);

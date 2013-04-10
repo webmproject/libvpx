@@ -625,7 +625,7 @@ static void decode_sb64(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
   }
 
   // dequantization and idct
-  eobtotal = vp9_decode_sb64_tokens(pbi, xd, bc);
+  eobtotal = vp9_decode_tokens(pbi, xd, bc, BLOCK_SIZE_SB64X64);
   if (eobtotal == 0) {  // skip loopfilter
     for (n = 0; n < 16; n++) {
       const int x_idx = n & 3, y_idx = n >> 2;
@@ -704,7 +704,7 @@ static void decode_sb32(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
   }
 
   // dequantization and idct
-  eobtotal = vp9_decode_sb_tokens(pbi, xd, bc);
+  eobtotal = vp9_decode_tokens(pbi, xd, bc, BLOCK_SIZE_SB32X32);
   if (eobtotal == 0) {  // skip loopfilter
     mi->mbmi.mb_skip_coeff = 1;
     if (mb_col + 1 < pc->mb_cols)
@@ -766,7 +766,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
 #if CONFIG_NEWBINTRAMODES
     if (mode != B_PRED)
 #endif
-      eobtotal = vp9_decode_mb_tokens(pbi, xd, bc);
+      eobtotal = vp9_decode_tokens(pbi, xd, bc, BLOCK_SIZE_MB16X16);
   }
 
   //mode = xd->mode_info_context->mbmi.mode;
