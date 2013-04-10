@@ -16,6 +16,24 @@
       "revId": "fb7e8a3e2ed8f40ee7d9883be55b500ab3aca5f7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//6NY\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-10T04:38:43Z",
+      "side": 1,
+      "message": "Vertical coefficients are more often non-zero than horizontal ones, according to my statistics. (This difference is actually pretty significant, i.e. it\u0027s several percent over a very large data set.) So the idea is that putting Ac-V1 first in some cases allows for not coding the Ac-H1 zero (if it\u0027s zero, but Ac-V1 is not), and thus saving an explicit zero coding.",
+      "parentUuid": "AAAAXH//8bY\u003d",
+      "revId": "fb7e8a3e2ed8f40ee7d9883be55b500ab3aca5f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
