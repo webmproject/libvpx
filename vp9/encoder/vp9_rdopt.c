@@ -916,27 +916,6 @@ static void super_block_yrd(VP9_COMP *cpi,
                            TX_32X32 - (bs < BLOCK_SIZE_SB32X32));
 }
 
-static void copy_predictor_8x8(uint8_t *dst, const uint8_t *predictor) {
-  const unsigned int *p = (const unsigned int *)predictor;
-  unsigned int *d = (unsigned int *)dst;
-  d[0] = p[0];
-  d[1] = p[1];
-  d[4] = p[4];
-  d[5] = p[5];
-  d[8] = p[8];
-  d[9] = p[9];
-  d[12] = p[12];
-  d[13] = p[13];
-  d[16] = p[16];
-  d[17] = p[17];
-  d[20] = p[20];
-  d[21] = p[21];
-  d[24] = p[24];
-  d[25] = p[25];
-  d[28] = p[28];
-  d[29] = p[29];
-}
-
 static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                      B_PREDICTION_MODE *best_mode,
                                      int *bmode_costs,
@@ -1188,14 +1167,6 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   ENTROPY_CONTEXT *ta0, *ta1, besta0 = 0, besta1 = 0;
   ENTROPY_CONTEXT *tl0, *tl1, bestl0 = 0, bestl1 = 0;
 
-  /*
-   * The predictor buffer is a 2d buffer with a stride of 16.  Create
-   * a temp buffer that meets the stride requirements, but we are only
-   * interested in the left 8x8 block
-   * */
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, best_predictor, 16 * 8);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, best_dqcoeff, 16 * 4);
-
   // perform transformation of dimension 8x8
   // note the input and output index mapping
   int idx = (ib & 0x02) ? (ib + 2) : ib;
@@ -1296,11 +1267,6 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       bestl1 = *tl1;
       best_rd = this_rd;
       *best_mode = mode;
-      copy_predictor_8x8(best_predictor, b->predictor);
-      vpx_memcpy(best_dqcoeff,
-                 BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16), 64);
-      vpx_memcpy(best_dqcoeff + 32,
-                 BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16) + 64, 64);
     }
   }
   b->bmi.as_mode.first = (*best_mode);
