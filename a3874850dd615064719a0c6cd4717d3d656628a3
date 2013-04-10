@@ -16,6 +16,24 @@
       "revId": "a3874850dd615064719a0c6cd4717d3d656628a3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//56Y\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-10T15:57:46Z",
+      "side": 1,
+      "message": "Yes. Let\u0027s first try to finish rectangles and smaller blocks in this structure, and then (once the integer values for each block size is known) we can add a lookuptable for speed reasons.",
+      "parentUuid": "AAAAXH//6N8\u003d",
+      "revId": "a3874850dd615064719a0c6cd4717d3d656628a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
