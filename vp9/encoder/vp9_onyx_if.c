@@ -2456,10 +2456,8 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
     vp9_clear_system_state();
 
     vpx_usec_timer_start(&timer);
-    if (cpi->sf.auto_filter == 0)
-      vp9_pick_filter_level_fast(cpi->Source, cpi);
-    else
-      vp9_pick_filter_level(cpi->Source, cpi);
+
+    vp9_pick_filter_level(cpi->Source, cpi);
 
     vpx_usec_timer_mark(&timer);
     cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
