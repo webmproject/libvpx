@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//5Y0\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-10T22:36:28Z",
+      "side": 1,
+      "message": "else {\nassert(bsize \u003d\u003d BLOCK_SIZE_SB32X32);\n..\n}\n\nWe want to catch the cases so we know what to expand in the future. Right now it\u0027ll just not predict, which is slightly harder to track.",
+      "revId": "053bbeff8d86beb9b4968c9c318d2da08b09f343",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
