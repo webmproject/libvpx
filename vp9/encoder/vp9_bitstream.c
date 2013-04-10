@@ -8,6 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
+#include <stdio.h>
+#include <limits.h>
 
 #include "vp9/common/vp9_header.h"
 #include "vp9/encoder/vp9_encodemv.h"
@@ -17,9 +20,6 @@
 #include "vp9/common/vp9_tile_common.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/common/vp9_systemdependent.h"
-#include <assert.h>
-#include <stdio.h>
-#include <limits.h>
 #include "vp9/common/vp9_pragmas.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
@@ -479,7 +479,7 @@ static void pack_mb_tokens(vp9_writer* const bc,
 
     do {
       const int bb = (v >> --n) & 1;
-      encode_bool(bc, bb, pp[i >> 1]);
+      vp9_write(bc, bb, pp[i >> 1]);
       i = vp9_coef_tree[i + bb];
     } while (n);
 
@@ -495,12 +495,12 @@ static void pack_mb_tokens(vp9_writer* const bc,
 
         do {
           const int bb = (v >> --n) & 1;
-          encode_bool(bc, bb, pp[i >> 1]);
+          vp9_write(bc, bb, pp[i >> 1]);
           i = b->tree[i + bb];
         } while (n);
       }
 
-      encode_bool(bc, e & 1, 128);
+      vp9_write_bit(bc, e & 1);
     }
     ++p;
   }
@@ -2262,17 +2262,13 @@ static void put_delta_q(vp9_writer *bc, int delta_q) {
   if (delta_q != 0) {
     vp9_write_bit(bc, 1);
     vp9_write_literal(bc, abs(delta_q), 4);
-
-    if (delta_q < 0)
-      vp9_write_bit(bc, 1);
-    else
-      vp9_write_bit(bc, 0);
-  } else
+    vp9_write_bit(bc, delta_q < 0);
+  } else {
     vp9_write_bit(bc, 0);
+  }
 }
 
 static void decide_kf_ymode_entropy(VP9_COMP *cpi) {
-
   int mode_cost[MB_MODE_COUNT];
   int cost;
   int bestcost = INT_MAX;
@@ -2307,9 +2303,8 @@ static void segment_reference_frames(VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   for (i = 0; i < oci->mb_rows; i++) {
-    for (j = 0; j < oci->mb_cols; j++, mb_index++) {
+    for (j = 0; j < oci->mb_cols; j++, mb_index++)
       ref[mi[mb_index].mbmi.segment_id] |= (1 << mi[mb_index].mbmi.ref_frame);
-    }
     mb_index++;
   }
   for (i = 0; i < MAX_MB_SEGMENTS; i++) {
@@ -2410,11 +2405,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       // Send the tree probabilities used to decode unpredicted
       // macro-block segments
       for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
-        int data = xd->mb_segment_tree_probs[i];
-
-        if (data != 255) {
+        const int prob = xd->mb_segment_tree_probs[i];
+        if (prob != 255) {
           vp9_write_bit(&header_bc, 1);
-          vp9_write_literal(&header_bc, data, 8);
+          vp9_write_literal(&header_bc, prob, 8);
         } else {
           vp9_write_bit(&header_bc, 0);
         }
@@ -2424,11 +2418,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       vp9_write_bit(&header_bc, (pc->temporal_update) ? 1 : 0);
       if (pc->temporal_update) {
         for (i = 0; i < PREDICTION_PROBS; i++) {
-          int data = pc->segment_pred_probs[i];
-
-          if (data != 255) {
+          const int prob = pc->segment_pred_probs[i];
+          if (prob != 255) {
             vp9_write_bit(&header_bc, 1);
-            vp9_write_literal(&header_bc, data, 8);
+            vp9_write_literal(&header_bc, prob, 8);
           } else {
             vp9_write_bit(&header_bc, 0);
           }
@@ -2441,15 +2434,14 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     // segment_reference_frames(cpi);
 
     if (xd->update_mb_segmentation_data) {
-      signed char Data;
-
       vp9_write_bit(&header_bc, (xd->mb_segment_abs_delta) ? 1 : 0);
 
       // For each segments id...
       for (i = 0; i < MAX_MB_SEGMENTS; i++) {
         // For each segmentation codable feature...
         for (j = 0; j < SEG_LVL_MAX; j++) {
-          Data = vp9_get_segdata(xd, i, j);
+          const int8_t data = vp9_get_segdata(xd, i, j);
+          const int data_max = vp9_seg_feature_data_max(j);
 
           // If the feature is enabled...
           if (vp9_segfeature_active(xd, i, j)) {
@@ -2458,23 +2450,20 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
             // Is the segment data signed..
             if (vp9_is_segfeature_signed(j)) {
               // Encode the relevant feature data
-              if (Data < 0) {
-                Data = - Data;
-                vp9_encode_unsigned_max(&header_bc, Data,
-                                        vp9_seg_feature_data_max(j));
+              if (data < 0) {
+                vp9_encode_unsigned_max(&header_bc, -data, data_max);
                 vp9_write_bit(&header_bc, 1);
               } else {
-                vp9_encode_unsigned_max(&header_bc, Data,
-                                        vp9_seg_feature_data_max(j));
+                vp9_encode_unsigned_max(&header_bc, data, data_max);
                 vp9_write_bit(&header_bc, 0);
               }
+            } else {
+              // Unsigned data element so no sign bit needed
+              vp9_encode_unsigned_max(&header_bc, data, data_max);
             }
-            // Unsigned data element so no sign bit needed
-            else
-              vp9_encode_unsigned_max(&header_bc, Data,
-                                      vp9_seg_feature_data_max(j));
-          } else
+          } else {
             vp9_write_bit(&header_bc, 0);
+          }
         }
       }
     }
@@ -2560,28 +2549,24 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
   if (xd->mode_ref_lf_delta_enabled) {
     // Do the deltas need to be updated
-    int send_update = xd->mode_ref_lf_delta_update;
-
-    vp9_write_bit(&header_bc, send_update);
-    if (send_update) {
-      int Data;
-
+    vp9_write_bit(&header_bc, xd->mode_ref_lf_delta_update);
+    if (xd->mode_ref_lf_delta_update) {
       // Send update
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
-        Data = xd->ref_lf_deltas[i];
+        const int delta = xd->ref_lf_deltas[i];
 
         // Frame level data
-        if (xd->ref_lf_deltas[i] != xd->last_ref_lf_deltas[i]) {
-          xd->last_ref_lf_deltas[i] = xd->ref_lf_deltas[i];
+        if (delta != xd->last_ref_lf_deltas[i]) {
+          xd->last_ref_lf_deltas[i] = delta;
           vp9_write_bit(&header_bc, 1);
 
-          if (Data > 0) {
-            vp9_write_literal(&header_bc, (Data & 0x3F), 6);
-            vp9_write_bit(&header_bc, 0);    // sign
+          if (delta > 0) {
+            vp9_write_literal(&header_bc, delta & 0x3F, 6);
+            vp9_write_bit(&header_bc, 0);  // sign
           } else {
-            Data = -Data;
-            vp9_write_literal(&header_bc, (Data & 0x3F), 6);
-            vp9_write_bit(&header_bc, 1);    // sign
+            assert(delta < 0);
+            vp9_write_literal(&header_bc, (-delta) & 0x3F, 6);
+            vp9_write_bit(&header_bc, 1);  // sign
           }
         } else {
           vp9_write_bit(&header_bc, 0);
@@ -2590,19 +2575,19 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
       // Send update
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
-        Data = xd->mode_lf_deltas[i];
+        const int delta = xd->mode_lf_deltas[i];
 
-        if (xd->mode_lf_deltas[i] != xd->last_mode_lf_deltas[i]) {
-          xd->last_mode_lf_deltas[i] = xd->mode_lf_deltas[i];
+        if (delta != xd->last_mode_lf_deltas[i]) {
+          xd->last_mode_lf_deltas[i] = delta;
           vp9_write_bit(&header_bc, 1);
 
-          if (Data > 0) {
-            vp9_write_literal(&header_bc, (Data & 0x3F), 6);
-            vp9_write_bit(&header_bc, 0);    // sign
+          if (delta > 0) {
+            vp9_write_literal(&header_bc, delta & 0x3F, 6);
+            vp9_write_bit(&header_bc, 0);  // sign
           } else {
-            Data = -Data;
-            vp9_write_literal(&header_bc, (Data & 0x3F), 6);
-            vp9_write_bit(&header_bc, 1);    // sign
+            assert(delta < 0);
+            vp9_write_literal(&header_bc, (-delta) & 0x3F, 6);
+            vp9_write_bit(&header_bc, 1);  // sign
           }
         } else {
           vp9_write_bit(&header_bc, 0);
@@ -2867,9 +2852,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       const int use_compound_pred = (comp_pred_mode != SINGLE_PREDICTION_ONLY);
       const int use_hybrid_pred = (comp_pred_mode == HYBRID_PREDICTION);
 
-      vp9_write(&header_bc, use_compound_pred, 128);
+      vp9_write_bit(&header_bc, use_compound_pred);
       if (use_compound_pred) {
-        vp9_write(&header_bc, use_hybrid_pred, 128);
+        vp9_write_bit(&header_bc, use_hybrid_pred);
         if (use_hybrid_pred) {
           for (i = 0; i < COMP_PRED_CONTEXTS; i++) {
             pc->prob_comppred[i] = get_binary_prob(cpi->single_pred_count[i],
