@@ -118,11 +118,10 @@ void vp9_init_de_quantizer(VP9D_COMP *pbi) {
 static int get_qindex(MACROBLOCKD *mb, int segment_id, int base_qindex) {
   // Set the Q baseline allowing for any segment level adjustment
   if (vp9_segfeature_active(mb, segment_id, SEG_LVL_ALT_Q)) {
-    if (mb->mb_segment_abs_delta == SEGMENT_ABSDATA)
-      return vp9_get_segdata(mb, segment_id, SEG_LVL_ALT_Q);  // Abs Value
-    else
-      return clamp(base_qindex + vp9_get_segdata(mb, segment_id, SEG_LVL_ALT_Q),
-                   0, MAXQ);  // Delta Value
+    const int data = vp9_get_segdata(mb, segment_id, SEG_LVL_ALT_Q);
+    return mb->mb_segment_abs_delta == SEGMENT_ABSDATA ?
+               data :  // Abs value
+               clamp(base_qindex + data, 0, MAXQ);  // Delta value
   } else {
     return base_qindex;
   }
@@ -1317,6 +1316,19 @@ static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   }
 }
 
+static void setup_quantization(VP9D_COMP *pbi, vp9_reader *r) {
+  // Read the default quantizers
+  VP9_COMMON *const pc = &pbi->common;
+
+  pc->base_qindex = vp9_read_literal(r, QINDEX_BITS);
+  if (get_delta_q(r, &pc->y1dc_delta_q) |
+      get_delta_q(r, &pc->uvdc_delta_q) |
+      get_delta_q(r, &pc->uvac_delta_q))
+    vp9_init_de_quantizer(pbi);
+
+  mb_init_dequantizer(pbi, &pbi->mb);  // MB level dequantizer setup
+}
+
 static const uint8_t *read_frame_size(VP9_COMMON *const pc, const uint8_t *data,
                                       const uint8_t *data_end,
                                       int *width, int *height) {
@@ -1619,22 +1631,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   // Dummy read for now
   vp9_read_literal(&header_bc, 2);
 
-  // Read the default quantizers.
-  {
-    int q_update = 0;
-    pc->base_qindex = vp9_read_literal(&header_bc, QINDEX_BITS);
-
-    // AC 1st order Q = default
-    q_update = get_delta_q(&header_bc, &pc->y1dc_delta_q) |
-               get_delta_q(&header_bc, &pc->uvdc_delta_q) |
-               get_delta_q(&header_bc, &pc->uvac_delta_q);
-
-    if (q_update)
-      vp9_init_de_quantizer(pbi);
-
-    // MB level dequantizer setup
-    mb_init_dequantizer(pbi, &pbi->mb);
-  }
+  setup_quantization(pbi, &header_bc);
 
   // Determine if the golden frame or ARF buffer should be updated and how.
   // For all non key frames the GF and ARF refresh flags and sign bias
