@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//5/U\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-10T13:45:36Z",
+      "side": 1,
+      "message": "I thought the idea was to combine all the block sizes -- I expected decode_mb_tokens to combined here too.",
+      "revId": "46d98993e58d2bc244f1a18b6f0ea557823328f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//5/Q\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 936,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-10T13:45:36Z",
+      "side": 1,
+      "message": "does this belong in the encoder change instead? or maybe this is obsolete, I see this depends on an older version of that change.",
+      "revId": "46d98993e58d2bc244f1a18b6f0ea557823328f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
