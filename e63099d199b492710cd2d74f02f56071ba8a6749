@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//5jk\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-10T20:57:43Z",
+      "side": 1,
+      "message": "I don\u0027t think this is quite right for other chroma samplings. I\u0027ll revisit this.",
+      "revId": "e63099d199b492710cd2d74f02f56071ba8a6749",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//5jw\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-10T20:57:43Z",
+      "side": 1,
+      "message": "should make another function b_width_log2 that returns the width from the BLOCK_SIZE_TYPE in x4 units, rather than having these magic +2s everywhere.",
+      "revId": "e63099d199b492710cd2d74f02f56071ba8a6749",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
