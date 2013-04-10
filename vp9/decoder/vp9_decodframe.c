@@ -102,15 +102,15 @@ void vp9_init_de_quantizer(VP9D_COMP *pbi) {
   VP9_COMMON *const pc = &pbi->common;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
-    pc->Y1dequant[q][0] = (int16_t)vp9_dc_quant(q, pc->y1dc_delta_q);
-    pc->UVdequant[q][0] = (int16_t)vp9_dc_uv_quant(q, pc->uvdc_delta_q);
+    pc->y_dequant[q][0] = (int16_t)vp9_dc_quant(q, pc->y1dc_delta_q);
+    pc->uv_dequant[q][0] = (int16_t)vp9_dc_uv_quant(q, pc->uvdc_delta_q);
 
     /* all the ac values =; */
     for (i = 1; i < 16; i++) {
       const int rc = vp9_default_zig_zag1d_4x4[i];
 
-      pc->Y1dequant[q][rc] = (int16_t)vp9_ac_yquant(q);
-      pc->UVdequant[q][rc] = (int16_t)vp9_ac_uv_quant(q, pc->uvac_delta_q);
+      pc->y_dequant[q][rc] = (int16_t)vp9_ac_yquant(q);
+      pc->uv_dequant[q][rc] = (int16_t)vp9_ac_uv_quant(q, pc->uvac_delta_q);
     }
   }
 }
@@ -136,10 +136,10 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *mb) {
   mb->q_index = qindex;
 
   for (i = 0; i < 16; i++)
-    mb->block[i].dequant = pc->Y1dequant[qindex];
+    mb->block[i].dequant = pc->y_dequant[qindex];
 
   for (i = 16; i < 24; i++)
-    mb->block[i].dequant = pc->UVdequant[qindex];
+    mb->block[i].dequant = pc->uv_dequant[qindex];
 
   if (mb->lossless) {
     assert(qindex == 0);
@@ -241,7 +241,7 @@ static void decode_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
                            xd->predictor + 16 * 16, xd->dst.u_buffer, 8,
                            xd->dst.uv_stride, xd->plane[1].eobs[0]);
 
-  vp9_dequant_idct_add_8x8(xd->plane[2].qcoeff, xd->block[16].dequant,
+  vp9_dequant_idct_add_8x8(xd->plane[2].qcoeff, xd->block[20].dequant,
                            xd->predictor + 16 * 16 + 64, xd->dst.v_buffer, 8,
                            xd->dst.uv_stride, xd->plane[2].eobs[0]);
 }
