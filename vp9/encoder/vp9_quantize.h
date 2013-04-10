@@ -49,22 +49,14 @@ void vp9_quantize_mbuv_8x8(MACROBLOCK *x);
 void vp9_quantize_mb_16x16(MACROBLOCK *x);
 void vp9_quantize_mby_16x16(MACROBLOCK *x);
 
-void vp9_quantize_sby_32x32(MACROBLOCK *x);
-void vp9_quantize_sby_16x16(MACROBLOCK *x);
-void vp9_quantize_sby_8x8(MACROBLOCK *x);
-void vp9_quantize_sby_4x4(MACROBLOCK *x);
-void vp9_quantize_sbuv_16x16(MACROBLOCK *x);
-void vp9_quantize_sbuv_8x8(MACROBLOCK *x);
-void vp9_quantize_sbuv_4x4(MACROBLOCK *x);
-
-void vp9_quantize_sb64y_32x32(MACROBLOCK *x);
-void vp9_quantize_sb64y_16x16(MACROBLOCK *x);
-void vp9_quantize_sb64y_8x8(MACROBLOCK *x);
-void vp9_quantize_sb64y_4x4(MACROBLOCK *x);
-void vp9_quantize_sb64uv_32x32(MACROBLOCK *x);
-void vp9_quantize_sb64uv_16x16(MACROBLOCK *x);
-void vp9_quantize_sb64uv_8x8(MACROBLOCK *x);
-void vp9_quantize_sb64uv_4x4(MACROBLOCK *x);
+void vp9_quantize_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_quantize_sby_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_quantize_sby_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_quantize_sby_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_quantize_sbuv_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_quantize_sbuv_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_quantize_sbuv_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_quantize_sbuv_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 
 struct VP9_COMP;
 

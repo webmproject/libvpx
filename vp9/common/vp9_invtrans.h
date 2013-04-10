@@ -41,21 +41,13 @@ void vp9_inverse_transform_mb_16x16(MACROBLOCKD *xd);
 
 void vp9_inverse_transform_mby_16x16(MACROBLOCKD *xd);
 
-void vp9_inverse_transform_sby_32x32(MACROBLOCKD *xd);
-void vp9_inverse_transform_sby_16x16(MACROBLOCKD *xd);
-void vp9_inverse_transform_sby_8x8(MACROBLOCKD *xd);
-void vp9_inverse_transform_sby_4x4(MACROBLOCKD *xd);
-void vp9_inverse_transform_sbuv_16x16(MACROBLOCKD *xd);
-void vp9_inverse_transform_sbuv_8x8(MACROBLOCKD *xd);
-void vp9_inverse_transform_sbuv_4x4(MACROBLOCKD *xd);
-
-void vp9_inverse_transform_sb64y_32x32(MACROBLOCKD *xd);
-void vp9_inverse_transform_sb64y_16x16(MACROBLOCKD *xd);
-void vp9_inverse_transform_sb64y_8x8(MACROBLOCKD *xd);
-void vp9_inverse_transform_sb64y_4x4(MACROBLOCKD *xd);
-void vp9_inverse_transform_sb64uv_32x32(MACROBLOCKD *xd);
-void vp9_inverse_transform_sb64uv_16x16(MACROBLOCKD *xd);
-void vp9_inverse_transform_sb64uv_8x8(MACROBLOCKD *xd);
-void vp9_inverse_transform_sb64uv_4x4(MACROBLOCKD *xd);
+void vp9_inverse_transform_sby_32x32(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+void vp9_inverse_transform_sby_16x16(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+void vp9_inverse_transform_sby_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+void vp9_inverse_transform_sby_4x4(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+void vp9_inverse_transform_sbuv_32x32(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+void vp9_inverse_transform_sbuv_16x16(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+void vp9_inverse_transform_sbuv_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+void vp9_inverse_transform_sbuv_4x4(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
 
 #endif  // VP9_COMMON_VP9_INVTRANS_H_

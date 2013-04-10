@@ -122,16 +122,12 @@ static INLINE void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
   vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
 }
 
-static INLINE void vp9_reset_sb_tokens_context(MACROBLOCKD* const xd) {
+static INLINE void vp9_reset_sb_tokens_context(MACROBLOCKD* const xd,
+                                               BLOCK_SIZE_TYPE bsize) {
   /* Clear entropy contexts */
-  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
-  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
-}
-
-static INLINE void vp9_reset_sb64_tokens_context(MACROBLOCKD* const xd) {
-  /* Clear entropy contexts */
-  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 4);
-  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 4);
+  const int bw = 1 << mb_width_log2(bsize), bh = 1 << mb_height_log2(bsize);
+  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * bw);
+  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * bh);
 }
 
 extern const int vp9_coef_bands8x8[64];

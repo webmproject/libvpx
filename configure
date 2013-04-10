@@ -252,6 +252,7 @@ EXPERIMENT_LIST="
     implicit_compoundinter_weight
     scatterscan
     oneshotq
+    sbsegment
 "
 CONFIG_LIST="
     external_build

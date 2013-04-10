@@ -84,54 +84,43 @@ void vp9_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
   }
 }
 
-static INLINE void recon_sby(MACROBLOCKD *mb, uint8_t *dst, int size) {
+void vp9_recon_sby_s_c(MACROBLOCKD *mb, uint8_t *dst,
+                       BLOCK_SIZE_TYPE bsize) {
+  const int bw = 16 << mb_width_log2(bsize), bh = 16 << mb_height_log2(bsize);
   int x, y;
   const int stride = mb->block[0].dst_stride;
   const int16_t *diff = mb->diff;
 
-  for (y = 0; y < size; y++) {
-    for (x = 0; x < size; x++)
+  for (y = 0; y < bh; y++) {
+    for (x = 0; x < bw; x++)
       dst[x] = clip_pixel(dst[x] + diff[x]);
 
     dst += stride;
-    diff += size;
+    diff += bw;
   }
 }
 
-static INLINE void recon_sbuv(MACROBLOCKD *mb, uint8_t *u_dst, uint8_t *v_dst,
-                              int y_offset, int size) {
+void vp9_recon_sbuv_s_c(MACROBLOCKD *mb, uint8_t *u_dst, uint8_t *v_dst,
+                        BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize), bhl = mb_height_log2(bsize);
+  const int uoff = (16 * 16) << (bwl + bhl), voff = (uoff * 5) >> 2;
+  const int bw = 8 << bwl, bh = 8 << bhl;
   int x, y;
   const int stride = mb->block[16].dst_stride;
-  const int16_t *u_diff = mb->diff + y_offset;
-  const int16_t *v_diff = mb->diff + y_offset + size*size;
+  const int16_t *u_diff = mb->diff + uoff;
+  const int16_t *v_diff = mb->diff + voff;
 
-  for (y = 0; y < size; y++) {
-    for (x = 0; x < size; x++) {
+  for (y = 0; y < bh; y++) {
+    for (x = 0; x < bw; x++) {
       u_dst[x] = clip_pixel(u_dst[x] + u_diff[x]);
       v_dst[x] = clip_pixel(v_dst[x] + v_diff[x]);
     }
 
     u_dst += stride;
     v_dst += stride;
-    u_diff += size;
-    v_diff += size;
+    u_diff += bw;
+    v_diff += bw;
   }
-}
-
-void vp9_recon_sby_s_c(MACROBLOCKD *mb, uint8_t *dst) {
-  recon_sby(mb, dst, 32);
-}
-
-void vp9_recon_sbuv_s_c(MACROBLOCKD *mb, uint8_t *u_dst, uint8_t *v_dst) {
-  recon_sbuv(mb, u_dst, v_dst, 1024, 16);
-}
-
-void vp9_recon_sb64y_s_c(MACROBLOCKD *mb, uint8_t *dst) {
-  recon_sby(mb, dst, 64);
-}
-
-void vp9_recon_sb64uv_s_c(MACROBLOCKD *mb, uint8_t *u_dst, uint8_t *v_dst) {
-  recon_sbuv(mb, u_dst, v_dst, 4096, 32);
 }
 
 void vp9_recon_mby_c(MACROBLOCKD *xd) {
