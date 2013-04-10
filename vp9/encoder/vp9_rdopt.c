@@ -970,7 +970,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     rate = bmode_costs[mode];
 #endif
 
-    vp9_intra4x4_predict(xd, b, mode, b->predictor);
+    vp9_intra4x4_predict(xd, b, mode, b->predictor, 16);
     vp9_subtract_b(be, b, 16);
 
     b->bmi.as_mode.first = mode;
@@ -1180,7 +1180,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     rate = mode_costs[mode];
     b->bmi.as_mode.first = mode;
 
-    vp9_intra8x8_predict(xd, b, mode, b->predictor);
+    vp9_intra8x8_predict(xd, b, mode, b->predictor, 16);
 
     vp9_subtract_4b_c(be, b, 16);
 

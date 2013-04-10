@@ -33,13 +33,14 @@ void vp9_dequant_dc_idct_add_y_block_lossless_c(int16_t *q,
                                                 const int16_t *dc);
 
 void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
-                                             unsigned char *pre,
+                                             unsigned char *pre, int pre_stride,
                                              unsigned char *dst,
                                              int stride,
                                              struct macroblockd *xd);
 
 void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *dq,
                                               unsigned char *pre,
+                                              int pre_stride,
                                               unsigned char *dst,
                                               int stride,
                                               uint16_t *eobs);

@@ -52,7 +52,7 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib) {
   b->bmi.as_mode.context = vp9_find_bpred_context(&x->e_mbd, b);
 #endif
 
-  vp9_intra4x4_predict(&x->e_mbd, b, b->bmi.as_mode.first, b->predictor);
+  vp9_intra4x4_predict(&x->e_mbd, b, b->bmi.as_mode.first, b->predictor, 16);
   vp9_subtract_b(be, b, 16);
 
   tx_type = get_tx_type_4x4(&x->e_mbd, ib);
@@ -152,7 +152,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
   int i;
   TX_TYPE tx_type;
 
-  vp9_intra8x8_predict(xd, b, b->bmi.as_mode.first, b->predictor);
+  vp9_intra8x8_predict(xd, b, b->bmi.as_mode.first, b->predictor, 16);
   // generate residual blocks
   vp9_subtract_4b_c(be, b, 16);
 
@@ -227,7 +227,7 @@ static void encode_intra_uv4x4(MACROBLOCK *x, int ib, int mode) {
   const int block = ib < 20 ? ib - 16 : ib - 20;
 
   assert(ib >= 16 && ib < 24);
-  vp9_intra_uv4x4_predict(&x->e_mbd, b, mode, b->predictor);
+  vp9_intra_uv4x4_predict(&x->e_mbd, b, mode, b->predictor, 8);
 
   vp9_subtract_b(be, b, 8);
 

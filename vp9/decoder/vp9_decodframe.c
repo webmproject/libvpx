@@ -226,24 +226,28 @@ static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
 static void decode_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc) {
   const TX_TYPE tx_type = get_tx_type_16x16(xd, 0);
+
   if (tx_type != DCT_DCT) {
     vp9_dequant_iht_add_16x16_c(tx_type, xd->plane[0].qcoeff,
-                                xd->block[0].dequant, xd->predictor,
-                                xd->dst.y_buffer, 16, xd->dst.y_stride,
-                                xd->plane[0].eobs[0]);
+                                xd->block[0].dequant, xd->dst.y_buffer,
+                                xd->dst.y_buffer, xd->dst.y_stride,
+                                xd->dst.y_stride, xd->plane[0].eobs[0]);
   } else {
     vp9_dequant_idct_add_16x16(xd->plane[0].qcoeff, xd->block[0].dequant,
-                               xd->predictor, xd->dst.y_buffer,
-                               16, xd->dst.y_stride, xd->plane[0].eobs[0]);
+                               xd->dst.y_buffer, xd->dst.y_buffer,
+                               xd->dst.y_stride, xd->dst.y_stride,
+                               xd->plane[0].eobs[0]);
   }
 
   vp9_dequant_idct_add_8x8(xd->plane[1].qcoeff, xd->block[16].dequant,
-                           xd->predictor + 16 * 16, xd->dst.u_buffer, 8,
-                           xd->dst.uv_stride, xd->plane[1].eobs[0]);
+                           xd->dst.u_buffer, xd->dst.u_buffer,
+                           xd->dst.uv_stride, xd->dst.uv_stride,
+                           xd->plane[1].eobs[0]);
 
   vp9_dequant_idct_add_8x8(xd->plane[2].qcoeff, xd->block[20].dequant,
-                           xd->predictor + 16 * 16 + 64, xd->dst.v_buffer, 8,
-                           xd->dst.uv_stride, xd->plane[2].eobs[0]);
+                           xd->dst.v_buffer, xd->dst.v_buffer,
+                           xd->dst.uv_stride, xd->dst.uv_stride,
+                           xd->plane[2].eobs[0]);
 }
 
 static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
@@ -259,27 +263,27 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
       int idx = (ib & 0x02) ? (ib + 2) : ib;
       int16_t *q  = BLOCK_OFFSET(xd->plane[0].qcoeff, idx, 16);
       int16_t *dq = xd->block[0].dequant;
-      uint8_t *pre = xd->block[ib].predictor;
       uint8_t *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
       int stride = xd->dst.y_stride;
-      BLOCKD *b = &xd->block[ib];
       if (mode == I8X8_PRED) {
+        BLOCKD *b = &xd->block[ib];
         int i8x8mode = b->bmi.as_mode.first;
-        vp9_intra8x8_predict(xd, b, i8x8mode, b->predictor);
+        vp9_intra8x8_predict(xd, b, i8x8mode, dst, stride);
       }
       tx_type = get_tx_type_8x8(xd, ib);
       if (tx_type != DCT_DCT) {
-        vp9_dequant_iht_add_8x8_c(tx_type, q, dq, pre, dst, 16, stride,
+        vp9_dequant_iht_add_8x8_c(tx_type, q, dq, dst, dst, stride, stride,
                                   xd->plane[0].eobs[idx]);
       } else {
-        vp9_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride,
+        vp9_dequant_idct_add_8x8_c(q, dq, dst, dst, stride, stride,
                                    xd->plane[0].eobs[idx]);
       }
     }
   } else {
     vp9_dequant_idct_add_y_block_8x8(xd->plane[0].qcoeff,
                                      xd->block[0].dequant,
-                                     xd->predictor,
+                                     xd->dst.y_buffer,
+                                     xd->dst.y_stride,
                                      xd->dst.y_buffer,
                                      xd->dst.y_stride,
                                      xd);
@@ -294,34 +298,38 @@ static void decode_8x8(VP9D_COMP *pbi, MACROBLOCKD *xd,
       int i8x8mode = b->bmi.as_mode.first;
 
       b = &xd->block[16 + i];
-      vp9_intra_uv4x4_predict(xd, b, i8x8mode, b->predictor);
+      vp9_intra_uv4x4_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
+                              b->dst_stride);
       xd->itxm_add(BLOCK_OFFSET(xd->plane[1].qcoeff, i, 16),
-                   b->dequant, b->predictor,
-                   *(b->base_dst) + b->dst, 8, b->dst_stride,
+                   b->dequant, *(b->base_dst) + b->dst,
+                   *(b->base_dst) + b->dst, b->dst_stride, b->dst_stride,
                    xd->plane[1].eobs[i]);
 
       b = &xd->block[20 + i];
-      vp9_intra_uv4x4_predict(xd, b, i8x8mode, b->predictor);
+      vp9_intra_uv4x4_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
+                              b->dst_stride);
       xd->itxm_add(BLOCK_OFFSET(xd->plane[2].qcoeff, i, 16),
-                   b->dequant, b->predictor,
-                   *(b->base_dst) + b->dst, 8, b->dst_stride,
+                   b->dequant, *(b->base_dst) + b->dst,
+                   *(b->base_dst) + b->dst, b->dst_stride, b->dst_stride,
                    xd->plane[2].eobs[i]);
     }
   } else if (mode == SPLITMV) {
     xd->itxm_add_uv_block(xd->plane[1].qcoeff, xd->block[16].dequant,
-         xd->predictor + 16 * 16, xd->dst.u_buffer,
+         xd->dst.u_buffer, xd->dst.uv_stride, xd->dst.u_buffer,
          xd->dst.uv_stride, xd->plane[1].eobs);
     xd->itxm_add_uv_block(xd->plane[2].qcoeff, xd->block[16].dequant,
-         xd->predictor + 16 * 16 + 64, xd->dst.v_buffer,
+         xd->dst.v_buffer, xd->dst.uv_stride, xd->dst.v_buffer,
          xd->dst.uv_stride, xd->plane[2].eobs);
   } else {
     vp9_dequant_idct_add_8x8(xd->plane[1].qcoeff, xd->block[16].dequant,
-                             xd->predictor + 16 * 16, xd->dst.u_buffer, 8,
-                             xd->dst.uv_stride, xd->plane[1].eobs[0]);
+                             xd->dst.u_buffer, xd->dst.u_buffer,
+                             xd->dst.uv_stride, xd->dst.uv_stride,
+                             xd->plane[1].eobs[0]);
 
     vp9_dequant_idct_add_8x8(xd->plane[2].qcoeff, xd->block[16].dequant,
-                             xd->predictor + 16 * 16 + 64, xd->dst.v_buffer, 8,
-                             xd->dst.uv_stride, xd->plane[2].eobs[0]);
+                             xd->dst.v_buffer, xd->dst.v_buffer,
+                             xd->dst.uv_stride, xd->dst.uv_stride,
+                             xd->plane[2].eobs[0]);
   }
 }
 
@@ -337,35 +345,38 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       int j;
       BLOCKD *b = &xd->block[ib];
       int i8x8mode = b->bmi.as_mode.first;
-      vp9_intra8x8_predict(xd, b, i8x8mode, b->predictor);
+      vp9_intra8x8_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
+                           b->dst_stride);
       for (j = 0; j < 4; j++) {
         b = &xd->block[ib + iblock[j]];
         tx_type = get_tx_type_4x4(xd, ib + iblock[j]);
         if (tx_type != DCT_DCT) {
           vp9_dequant_iht_add_c(tx_type,
               BLOCK_OFFSET(xd->plane[0].qcoeff, ib + iblock[j], 16),
-                                    b->dequant, b->predictor,
-                                    *(b->base_dst) + b->dst, 16,
+                                    b->dequant, *(b->base_dst) + b->dst,
+                                    *(b->base_dst) + b->dst, b->dst_stride,
                                     b->dst_stride,
                                     xd->plane[0].eobs[ib + iblock[j]]);
         } else {
           xd->itxm_add(BLOCK_OFFSET(xd->plane[0].qcoeff, ib + iblock[j], 16),
-                       b->dequant, b->predictor,
-                       *(b->base_dst) + b->dst, 16, b->dst_stride,
+                       b->dequant, *(b->base_dst) + b->dst,
+                       *(b->base_dst) + b->dst, b->dst_stride, b->dst_stride,
                        xd->plane[0].eobs[ib + iblock[j]]);
         }
       }
       b = &xd->block[16 + i];
-      vp9_intra_uv4x4_predict(xd, b, i8x8mode, b->predictor);
+      vp9_intra_uv4x4_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
+                              b->dst_stride);
       xd->itxm_add(BLOCK_OFFSET(xd->plane[1].qcoeff, i, 16),
-                   b->dequant, b->predictor,
-                   *(b->base_dst) + b->dst, 8, b->dst_stride,
+                   b->dequant, *(b->base_dst) + b->dst,
+                   *(b->base_dst) + b->dst, b->dst_stride, b->dst_stride,
                    xd->plane[1].eobs[i]);
       b = &xd->block[20 + i];
-      vp9_intra_uv4x4_predict(xd, b, i8x8mode, b->predictor);
+      vp9_intra_uv4x4_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
+                              b->dst_stride);
       xd->itxm_add(BLOCK_OFFSET(xd->plane[2].qcoeff, i, 16),
-                   b->dequant, b->predictor,
-                   *(b->base_dst) + b->dst, 8, b->dst_stride,
+                   b->dequant, *(b->base_dst) + b->dst,
+                   *(b->base_dst) + b->dst, b->dst_stride, b->dst_stride,
                    xd->plane[2].eobs[i]);
     }
   } else if (mode == B_PRED) {
@@ -378,18 +389,19 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       if (!xd->mode_info_context->mbmi.mb_skip_coeff)
         vp9_decode_coefs_4x4(pbi, xd, bc, PLANE_TYPE_Y_WITH_DC, i);
 #endif
-      vp9_intra4x4_predict(xd, b, b_mode, b->predictor);
+      vp9_intra4x4_predict(xd, b, b_mode, *(b->base_dst) + b->dst,
+                           b->dst_stride);
       tx_type = get_tx_type_4x4(xd, i);
       if (tx_type != DCT_DCT) {
         vp9_dequant_iht_add_c(tx_type,
                               BLOCK_OFFSET(xd->plane[0].qcoeff, i, 16),
-                              b->dequant, b->predictor,
-                              *(b->base_dst) + b->dst, 16, b->dst_stride,
-                               xd->plane[0].eobs[i]);
+                              b->dequant, *(b->base_dst) + b->dst,
+                              *(b->base_dst) + b->dst, b->dst_stride,
+                              b->dst_stride, xd->plane[0].eobs[i]);
       } else {
         xd->itxm_add(BLOCK_OFFSET(xd->plane[0].qcoeff, i, 16),
-                     b->dequant, b->predictor,
-                     *(b->base_dst) + b->dst, 16, b->dst_stride,
+                     b->dequant, *(b->base_dst) + b->dst,
+                     *(b->base_dst) + b->dst, b->dst_stride, b->dst_stride,
                      xd->plane[0].eobs[i]);
       }
     }
@@ -397,25 +409,25 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
     if (!xd->mode_info_context->mbmi.mb_skip_coeff)
       vp9_decode_mb_tokens_4x4_uv(pbi, xd, bc);
 #endif
-    vp9_build_intra_predictors_mbuv(xd);
+    vp9_build_intra_predictors_mbuv_s(xd);
     xd->itxm_add_uv_block(xd->plane[1].qcoeff, xd->block[16].dequant,
-         xd->predictor + 16 * 16, xd->dst.u_buffer,
+         xd->dst.u_buffer, xd->dst.uv_stride, xd->dst.u_buffer,
          xd->dst.uv_stride, xd->plane[1].eobs);
     xd->itxm_add_uv_block(xd->plane[2].qcoeff, xd->block[16].dequant,
-         xd->predictor + 16 * 16 + 64, xd->dst.v_buffer,
+         xd->dst.v_buffer, xd->dst.uv_stride, xd->dst.v_buffer,
          xd->dst.uv_stride, xd->plane[2].eobs);
   } else if (mode == SPLITMV || get_tx_type_4x4(xd, 0) == DCT_DCT) {
     xd->itxm_add_y_block(xd->plane[0].qcoeff,
                           xd->block[0].dequant,
-                          xd->predictor,
+                          xd->dst.y_buffer, xd->dst.y_stride,
                           xd->dst.y_buffer,
                           xd->dst.y_stride,
                           xd);
     xd->itxm_add_uv_block(xd->plane[1].qcoeff, xd->block[16].dequant,
-         xd->predictor + 16 * 16, xd->dst.u_buffer,
+         xd->dst.u_buffer, xd->dst.uv_stride, xd->dst.u_buffer,
          xd->dst.uv_stride, xd->plane[1].eobs);
     xd->itxm_add_uv_block(xd->plane[2].qcoeff, xd->block[16].dequant,
-         xd->predictor + 16 * 16 + 64, xd->dst.v_buffer,
+         xd->dst.v_buffer, xd->dst.uv_stride, xd->dst.v_buffer,
          xd->dst.uv_stride, xd->plane[2].eobs);
   } else {
     for (i = 0; i < 16; i++) {
@@ -424,21 +436,21 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
       if (tx_type != DCT_DCT) {
         vp9_dequant_iht_add_c(tx_type,
                               BLOCK_OFFSET(xd->plane[0].qcoeff, i, 16),
-                              b->dequant, b->predictor,
-                              *(b->base_dst) + b->dst, 16,
+                              b->dequant, *(b->base_dst) + b->dst,
+                              *(b->base_dst) + b->dst, b->dst_stride,
                               b->dst_stride, xd->plane[0].eobs[i]);
       } else {
         xd->itxm_add(BLOCK_OFFSET(xd->plane[0].qcoeff, i, 16),
-                     b->dequant, b->predictor,
-                     *(b->base_dst) + b->dst, 16, b->dst_stride,
+                     b->dequant, *(b->base_dst) + b->dst,
+                     *(b->base_dst) + b->dst, b->dst_stride, b->dst_stride,
                      xd->plane[0].eobs[i]);
       }
     }
     xd->itxm_add_uv_block(xd->plane[1].qcoeff, xd->block[16].dequant,
-                          xd->predictor + 16 * 16, xd->dst.u_buffer,
+                          xd->dst.u_buffer, xd->dst.uv_stride, xd->dst.u_buffer,
                           xd->dst.uv_stride, xd->plane[1].eobs);
     xd->itxm_add_uv_block(xd->plane[2].qcoeff, xd->block[16].dequant,
-                          xd->predictor + 16 * 16 + 64, xd->dst.v_buffer,
+                          xd->dst.v_buffer, xd->dst.uv_stride, xd->dst.v_buffer,
                           xd->dst.uv_stride, xd->plane[2].eobs);
   }
 }
@@ -807,9 +819,9 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
   // do prediction
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     if (mode != I8X8_PRED) {
-      vp9_build_intra_predictors_mbuv(xd);
+      vp9_build_intra_predictors_mbuv_s(xd);
       if (mode != B_PRED)
-        vp9_build_intra_predictors_mby(xd);
+        vp9_build_intra_predictors_mby_s(xd);
     }
   } else {
 #if 0  // def DEC_DEBUG
@@ -818,7 +830,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
            xd->mode_info_context->mbmi.mode, tx_size,
            xd->mode_info_context->mbmi.interp_filter);
 #endif
-    vp9_build_inter_predictors_mb(xd, mb_row, mb_col);
+    vp9_build_inter_predictors_mb_s(xd, mb_row, mb_col);
   }
 
   if (tx_size == TX_16X16) {

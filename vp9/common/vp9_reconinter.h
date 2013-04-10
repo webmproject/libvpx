@@ -48,6 +48,10 @@ void vp9_build_inter_predictors_mb(MACROBLOCKD *xd,
                                    int mb_row,
                                    int mb_col);
 
+void vp9_build_inter_predictors_mb_s(MACROBLOCKD *xd,
+                                     int mb_row,
+                                     int mb_col);
+
 void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
                                         int mb_row,
                                         int mb_col);
