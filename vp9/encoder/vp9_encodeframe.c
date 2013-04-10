@@ -840,15 +840,15 @@ static void pick_sb_modes(VP9_COMP *cpi,
   /* Find best coding mode & reconstruct the MB so it is available
    * as a predictor for MBs that follow in the SB */
   if (cm->frame_type == KEY_FRAME) {
-    vp9_rd_pick_intra_mode_sb32(cpi, x,
-                                totalrate,
-                                totaldist);
+    vp9_rd_pick_intra_mode_sb(cpi, x, totalrate, totaldist,
+                              BLOCK_SIZE_SB32X32);
 
     /* Save the coding context */
     vpx_memcpy(&x->sb32_context[xd->sb_index].mic, xd->mode_info_context,
                sizeof(MODE_INFO));
   } else {
-    vp9_rd_pick_inter_mode_sb32(cpi, x, mb_row, mb_col, totalrate, totaldist);
+    vp9_rd_pick_inter_mode_sb(cpi, x, mb_row, mb_col, totalrate, totaldist,
+                              BLOCK_SIZE_SB32X32);
   }
 }
 
@@ -870,12 +870,14 @@ static void pick_sb64_modes(VP9_COMP *cpi,
   /* Find best coding mode & reconstruct the MB so it is available
    * as a predictor for MBs that follow in the SB */
   if (cm->frame_type == KEY_FRAME) {
-    vp9_rd_pick_intra_mode_sb64(cpi, x, totalrate, totaldist);
+    vp9_rd_pick_intra_mode_sb(cpi, x, totalrate, totaldist,
+                              BLOCK_SIZE_SB64X64);
 
     /* Save the coding context */
     vpx_memcpy(&x->sb64_context.mic, xd->mode_info_context, sizeof(MODE_INFO));
   } else {
-    vp9_rd_pick_inter_mode_sb64(cpi, x, mb_row, mb_col, totalrate, totaldist);
+    vp9_rd_pick_inter_mode_sb(cpi, x, mb_row, mb_col, totalrate, totaldist,
+                              BLOCK_SIZE_SB64X64);
   }
 }
 

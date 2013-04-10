@@ -583,9 +583,6 @@ specialize vp9_sub_pixel_mse32x32
 prototype unsigned int vp9_get_mb_ss "const int16_t *"
 specialize vp9_get_mb_ss mmx sse2
 # ENCODEMB INVOKE
-prototype int vp9_mbblock_error "struct macroblock *mb"
-specialize vp9_mbblock_error mmx sse2
-vp9_mbblock_error_sse2=vp9_mbblock_error_xmm
 
 prototype int vp9_block_error "int16_t *coeff, int16_t *dqcoeff, int block_size"
 specialize vp9_block_error mmx sse2
@@ -593,9 +590,6 @@ vp9_block_error_sse2=vp9_block_error_xmm
 
 prototype void vp9_subtract_b "struct block *be, struct blockd *bd, int pitch"
 specialize vp9_subtract_b mmx sse2
-
-prototype int vp9_mbuverror "struct macroblock *mb"
-specialize vp9_mbuverror
 
 prototype void vp9_subtract_b "struct block *be, struct blockd *bd, int pitch"
 specialize vp9_subtract_b mmx sse2
