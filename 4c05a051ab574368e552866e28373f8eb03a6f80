@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//5TM\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-10T23:28:41Z",
+      "side": 1,
+      "message": "This looks really weird. Is this still necessary? What happens if you remove this?",
+      "revId": "4c05a051ab574368e552866e28373f8eb03a6f80",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
