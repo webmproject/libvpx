@@ -164,7 +164,8 @@ B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, BLOCKD *x) {
 void vp9_intra4x4_predict(MACROBLOCKD *xd,
                           BLOCKD *x,
                           int b_mode,
-                          uint8_t *predictor) {
+                          uint8_t *predictor,
+                          int ps) {
   int i, r, c;
   const int block_idx = x - xd->block;
   const int have_top = (block_idx >> 2) || xd->up_available;
@@ -276,7 +277,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
           predictor[c] = expected_dc;
         }
 
-        predictor += 16;
+        predictor += ps;
       }
     }
     break;
@@ -287,7 +288,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
           predictor[c] = clip_pixel(above[c] - top_left + left[r]);
         }
 
-        predictor += 16;
+        predictor += ps;
       }
     }
     break;
@@ -305,7 +306,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
           predictor[c] = ap[c];
         }
 
-        predictor += 16;
+        predictor += ps;
       }
     }
     break;
@@ -323,29 +324,29 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
           predictor[c] = lp[r];
         }
 
-        predictor += 16;
+        predictor += ps;
       }
     }
     break;
     case B_LD_PRED: {
       uint8_t *ptr = above;
 
-      predictor[0 * 16 + 0] = (ptr[0] + ptr[1] * 2 + ptr[2] + 2) >> 2;
-      predictor[0 * 16 + 1] =
-        predictor[1 * 16 + 0] = (ptr[1] + ptr[2] * 2 + ptr[3] + 2) >> 2;
-      predictor[0 * 16 + 2] =
-        predictor[1 * 16 + 1] =
-          predictor[2 * 16 + 0] = (ptr[2] + ptr[3] * 2 + ptr[4] + 2) >> 2;
-      predictor[0 * 16 + 3] =
-        predictor[1 * 16 + 2] =
-          predictor[2 * 16 + 1] =
-            predictor[3 * 16 + 0] = (ptr[3] + ptr[4] * 2 + ptr[5] + 2) >> 2;
-      predictor[1 * 16 + 3] =
-        predictor[2 * 16 + 2] =
-          predictor[3 * 16 + 1] = (ptr[4] + ptr[5] * 2 + ptr[6] + 2) >> 2;
-      predictor[2 * 16 + 3] =
-        predictor[3 * 16 + 2] = (ptr[5] + ptr[6] * 2 + ptr[7] + 2) >> 2;
-      predictor[3 * 16 + 3] = (ptr[6] + ptr[7] * 2 + ptr[7] + 2) >> 2;
+      predictor[0 * ps + 0] = (ptr[0] + ptr[1] * 2 + ptr[2] + 2) >> 2;
+      predictor[0 * ps + 1] =
+        predictor[1 * ps + 0] = (ptr[1] + ptr[2] * 2 + ptr[3] + 2) >> 2;
+      predictor[0 * ps + 2] =
+        predictor[1 * ps + 1] =
+          predictor[2 * ps + 0] = (ptr[2] + ptr[3] * 2 + ptr[4] + 2) >> 2;
+      predictor[0 * ps + 3] =
+        predictor[1 * ps + 2] =
+          predictor[2 * ps + 1] =
+            predictor[3 * ps + 0] = (ptr[3] + ptr[4] * 2 + ptr[5] + 2) >> 2;
+      predictor[1 * ps + 3] =
+        predictor[2 * ps + 2] =
+          predictor[3 * ps + 1] = (ptr[4] + ptr[5] * 2 + ptr[6] + 2) >> 2;
+      predictor[2 * ps + 3] =
+        predictor[3 * ps + 2] = (ptr[5] + ptr[6] * 2 + ptr[7] + 2) >> 2;
+      predictor[3 * ps + 3] = (ptr[6] + ptr[7] * 2 + ptr[7] + 2) >> 2;
 
     }
     break;
@@ -362,22 +363,22 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
       pp[7] = above[2];
       pp[8] = above[3];
 
-      predictor[3 * 16 + 0] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
-      predictor[3 * 16 + 1] =
-        predictor[2 * 16 + 0] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
-      predictor[3 * 16 + 2] =
-        predictor[2 * 16 + 1] =
-          predictor[1 * 16 + 0] = (pp[2] + pp[3] * 2 + pp[4] + 2) >> 2;
-      predictor[3 * 16 + 3] =
-        predictor[2 * 16 + 2] =
-          predictor[1 * 16 + 1] =
-            predictor[0 * 16 + 0] = (pp[3] + pp[4] * 2 + pp[5] + 2) >> 2;
-      predictor[2 * 16 + 3] =
-        predictor[1 * 16 + 2] =
-          predictor[0 * 16 + 1] = (pp[4] + pp[5] * 2 + pp[6] + 2) >> 2;
-      predictor[1 * 16 + 3] =
-        predictor[0 * 16 + 2] = (pp[5] + pp[6] * 2 + pp[7] + 2) >> 2;
-      predictor[0 * 16 + 3] = (pp[6] + pp[7] * 2 + pp[8] + 2) >> 2;
+      predictor[3 * ps + 0] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
+      predictor[3 * ps + 1] =
+        predictor[2 * ps + 0] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
+      predictor[3 * ps + 2] =
+        predictor[2 * ps + 1] =
+          predictor[1 * ps + 0] = (pp[2] + pp[3] * 2 + pp[4] + 2) >> 2;
+      predictor[3 * ps + 3] =
+        predictor[2 * ps + 2] =
+          predictor[1 * ps + 1] =
+            predictor[0 * ps + 0] = (pp[3] + pp[4] * 2 + pp[5] + 2) >> 2;
+      predictor[2 * ps + 3] =
+        predictor[1 * ps + 2] =
+          predictor[0 * ps + 1] = (pp[4] + pp[5] * 2 + pp[6] + 2) >> 2;
+      predictor[1 * ps + 3] =
+        predictor[0 * ps + 2] = (pp[5] + pp[6] * 2 + pp[7] + 2) >> 2;
+      predictor[0 * ps + 3] = (pp[6] + pp[7] * 2 + pp[8] + 2) >> 2;
 
     }
     break;
@@ -394,44 +395,44 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
       pp[7] = above[2];
       pp[8] = above[3];
 
-      predictor[3 * 16 + 0] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
-      predictor[2 * 16 + 0] = (pp[2] + pp[3] * 2 + pp[4] + 2) >> 2;
-      predictor[3 * 16 + 1] =
-        predictor[1 * 16 + 0] = (pp[3] + pp[4] * 2 + pp[5] + 2) >> 2;
-      predictor[2 * 16 + 1] =
-        predictor[0 * 16 + 0] = (pp[4] + pp[5] + 1) >> 1;
-      predictor[3 * 16 + 2] =
-        predictor[1 * 16 + 1] = (pp[4] + pp[5] * 2 + pp[6] + 2) >> 2;
-      predictor[2 * 16 + 2] =
-        predictor[0 * 16 + 1] = (pp[5] + pp[6] + 1) >> 1;
-      predictor[3 * 16 + 3] =
-        predictor[1 * 16 + 2] = (pp[5] + pp[6] * 2 + pp[7] + 2) >> 2;
-      predictor[2 * 16 + 3] =
-        predictor[0 * 16 + 2] = (pp[6] + pp[7] + 1) >> 1;
-      predictor[1 * 16 + 3] = (pp[6] + pp[7] * 2 + pp[8] + 2) >> 2;
-      predictor[0 * 16 + 3] = (pp[7] + pp[8] + 1) >> 1;
+      predictor[3 * ps + 0] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
+      predictor[2 * ps + 0] = (pp[2] + pp[3] * 2 + pp[4] + 2) >> 2;
+      predictor[3 * ps + 1] =
+        predictor[1 * ps + 0] = (pp[3] + pp[4] * 2 + pp[5] + 2) >> 2;
+      predictor[2 * ps + 1] =
+        predictor[0 * ps + 0] = (pp[4] + pp[5] + 1) >> 1;
+      predictor[3 * ps + 2] =
+        predictor[1 * ps + 1] = (pp[4] + pp[5] * 2 + pp[6] + 2) >> 2;
+      predictor[2 * ps + 2] =
+        predictor[0 * ps + 1] = (pp[5] + pp[6] + 1) >> 1;
+      predictor[3 * ps + 3] =
+        predictor[1 * ps + 2] = (pp[5] + pp[6] * 2 + pp[7] + 2) >> 2;
+      predictor[2 * ps + 3] =
+        predictor[0 * ps + 2] = (pp[6] + pp[7] + 1) >> 1;
+      predictor[1 * ps + 3] = (pp[6] + pp[7] * 2 + pp[8] + 2) >> 2;
+      predictor[0 * ps + 3] = (pp[7] + pp[8] + 1) >> 1;
 
     }
     break;
     case B_VL_PRED: {
       uint8_t *pp = above;
 
-      predictor[0 * 16 + 0] = (pp[0] + pp[1] + 1) >> 1;
-      predictor[1 * 16 + 0] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
-      predictor[2 * 16 + 0] =
-        predictor[0 * 16 + 1] = (pp[1] + pp[2] + 1) >> 1;
-      predictor[1 * 16 + 1] =
-        predictor[3 * 16 + 0] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
-      predictor[2 * 16 + 1] =
-        predictor[0 * 16 + 2] = (pp[2] + pp[3] + 1) >> 1;
-      predictor[3 * 16 + 1] =
-        predictor[1 * 16 + 2] = (pp[2] + pp[3] * 2 + pp[4] + 2) >> 2;
-      predictor[0 * 16 + 3] =
-        predictor[2 * 16 + 2] = (pp[3] + pp[4] + 1) >> 1;
-      predictor[1 * 16 + 3] =
-        predictor[3 * 16 + 2] = (pp[3] + pp[4] * 2 + pp[5] + 2) >> 2;
-      predictor[2 * 16 + 3] = (pp[4] + pp[5] * 2 + pp[6] + 2) >> 2;
-      predictor[3 * 16 + 3] = (pp[5] + pp[6] * 2 + pp[7] + 2) >> 2;
+      predictor[0 * ps + 0] = (pp[0] + pp[1] + 1) >> 1;
+      predictor[1 * ps + 0] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
+      predictor[2 * ps + 0] =
+        predictor[0 * ps + 1] = (pp[1] + pp[2] + 1) >> 1;
+      predictor[1 * ps + 1] =
+        predictor[3 * ps + 0] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
+      predictor[2 * ps + 1] =
+        predictor[0 * ps + 2] = (pp[2] + pp[3] + 1) >> 1;
+      predictor[3 * ps + 1] =
+        predictor[1 * ps + 2] = (pp[2] + pp[3] * 2 + pp[4] + 2) >> 2;
+      predictor[0 * ps + 3] =
+        predictor[2 * ps + 2] = (pp[3] + pp[4] + 1) >> 1;
+      predictor[1 * ps + 3] =
+        predictor[3 * ps + 2] = (pp[3] + pp[4] * 2 + pp[5] + 2) >> 2;
+      predictor[2 * ps + 3] = (pp[4] + pp[5] * 2 + pp[6] + 2) >> 2;
+      predictor[3 * ps + 3] = (pp[5] + pp[6] * 2 + pp[7] + 2) >> 2;
     }
     break;
 
@@ -449,44 +450,44 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
       pp[8] = above[3];
 
 
-      predictor[3 * 16 + 0] = (pp[0] + pp[1] + 1) >> 1;
-      predictor[3 * 16 + 1] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
-      predictor[2 * 16 + 0] =
-        predictor[3 * 16 + 2] = (pp[1] + pp[2] + 1) >> 1;
-      predictor[2 * 16 + 1] =
-        predictor[3 * 16 + 3] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
-      predictor[2 * 16 + 2] =
-        predictor[1 * 16 + 0] = (pp[2] + pp[3] + 1) >> 1;
-      predictor[2 * 16 + 3] =
-        predictor[1 * 16 + 1] = (pp[2] + pp[3] * 2 + pp[4] + 2) >> 2;
-      predictor[1 * 16 + 2] =
-        predictor[0 * 16 + 0] = (pp[3] + pp[4] + 1) >> 1;
-      predictor[1 * 16 + 3] =
-        predictor[0 * 16 + 1] = (pp[3] + pp[4] * 2 + pp[5] + 2) >> 2;
-      predictor[0 * 16 + 2] = (pp[4] + pp[5] * 2 + pp[6] + 2) >> 2;
-      predictor[0 * 16 + 3] = (pp[5] + pp[6] * 2 + pp[7] + 2) >> 2;
+      predictor[3 * ps + 0] = (pp[0] + pp[1] + 1) >> 1;
+      predictor[3 * ps + 1] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
+      predictor[2 * ps + 0] =
+        predictor[3 * ps + 2] = (pp[1] + pp[2] + 1) >> 1;
+      predictor[2 * ps + 1] =
+        predictor[3 * ps + 3] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
+      predictor[2 * ps + 2] =
+        predictor[1 * ps + 0] = (pp[2] + pp[3] + 1) >> 1;
+      predictor[2 * ps + 3] =
+        predictor[1 * ps + 1] = (pp[2] + pp[3] * 2 + pp[4] + 2) >> 2;
+      predictor[1 * ps + 2] =
+        predictor[0 * ps + 0] = (pp[3] + pp[4] + 1) >> 1;
+      predictor[1 * ps + 3] =
+        predictor[0 * ps + 1] = (pp[3] + pp[4] * 2 + pp[5] + 2) >> 2;
+      predictor[0 * ps + 2] = (pp[4] + pp[5] * 2 + pp[6] + 2) >> 2;
+      predictor[0 * ps + 3] = (pp[5] + pp[6] * 2 + pp[7] + 2) >> 2;
     }
     break;
 
 
     case B_HU_PRED: {
       uint8_t *pp = left;
-      predictor[0 * 16 + 0] = (pp[0] + pp[1] + 1) >> 1;
-      predictor[0 * 16 + 1] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
-      predictor[0 * 16 + 2] =
-        predictor[1 * 16 + 0] = (pp[1] + pp[2] + 1) >> 1;
-      predictor[0 * 16 + 3] =
-        predictor[1 * 16 + 1] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
-      predictor[1 * 16 + 2] =
-        predictor[2 * 16 + 0] = (pp[2] + pp[3] + 1) >> 1;
-      predictor[1 * 16 + 3] =
-        predictor[2 * 16 + 1] = (pp[2] + pp[3] * 2 + pp[3] + 2) >> 2;
-      predictor[2 * 16 + 2] =
-        predictor[2 * 16 + 3] =
-          predictor[3 * 16 + 0] =
-            predictor[3 * 16 + 1] =
-              predictor[3 * 16 + 2] =
-                predictor[3 * 16 + 3] = pp[3];
+      predictor[0 * ps + 0] = (pp[0] + pp[1] + 1) >> 1;
+      predictor[0 * ps + 1] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
+      predictor[0 * ps + 2] =
+        predictor[1 * ps + 0] = (pp[1] + pp[2] + 1) >> 1;
+      predictor[0 * ps + 3] =
+        predictor[1 * ps + 1] = (pp[1] + pp[2] * 2 + pp[3] + 2) >> 2;
+      predictor[1 * ps + 2] =
+        predictor[2 * ps + 0] = (pp[2] + pp[3] + 1) >> 1;
+      predictor[1 * ps + 3] =
+        predictor[2 * ps + 1] = (pp[2] + pp[3] * 2 + pp[3] + 2) >> 2;
+      predictor[2 * ps + 2] =
+        predictor[2 * ps + 3] =
+          predictor[3 * ps + 0] =
+            predictor[3 * ps + 1] =
+              predictor[3 * ps + 2] =
+                predictor[3 * ps + 3] = pp[3];
     }
     break;
 

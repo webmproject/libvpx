@@ -27,7 +27,7 @@ forward_decls vp9_common_forward_decls
 #
 # Dequant
 #
-prototype void vp9_dequant_idct_add_y_block_8x8 "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, struct macroblockd *xd"
+prototype void vp9_dequant_idct_add_y_block_8x8 "int16_t *q, const int16_t *dq, uint8_t *pre, int pre_stride, uint8_t *dst, int stride, struct macroblockd *xd"
 specialize vp9_dequant_idct_add_y_block_8x8
 
 prototype void vp9_dequant_idct_add_16x16 "int16_t *input, const int16_t *dq, uint8_t *pred, uint8_t *dest, int pitch, int stride, int eob"
@@ -39,10 +39,10 @@ specialize vp9_dequant_idct_add_8x8
 prototype void vp9_dequant_idct_add "int16_t *input, const int16_t *dq, uint8_t *pred, uint8_t *dest, int pitch, int stride, int eob"
 specialize vp9_dequant_idct_add
 
-prototype void vp9_dequant_idct_add_y_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, struct macroblockd *xd"
+prototype void vp9_dequant_idct_add_y_block "int16_t *q, const int16_t *dq, uint8_t *pre, int pre_stride, uint8_t *dst, int stride, struct macroblockd *xd"
 specialize vp9_dequant_idct_add_y_block
 
-prototype void vp9_dequant_idct_add_uv_block "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int stride, uint16_t *eobs"
+prototype void vp9_dequant_idct_add_uv_block "int16_t *q, const int16_t *dq, uint8_t *pre, int pre_stride, uint8_t *dst, int stride, uint16_t *eobs"
 specialize vp9_dequant_idct_add_uv_block
 
 prototype void vp9_dequant_idct_add_32x32 "int16_t *q, const int16_t *dq, uint8_t *pre, uint8_t *dst, int pitch, int stride, int eob"
@@ -119,13 +119,13 @@ specialize vp9_build_intra_predictors_sb64y_s;
 prototype void vp9_build_intra_predictors_sb64uv_s "struct macroblockd *x"
 specialize vp9_build_intra_predictors_sb64uv_s;
 
-prototype void vp9_intra4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor"
+prototype void vp9_intra4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra4x4_predict;
 
-prototype void vp9_intra8x8_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor"
+prototype void vp9_intra8x8_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra8x8_predict;
 
-prototype void vp9_intra_uv4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor"
+prototype void vp9_intra_uv4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra_uv4x4_predict;
 
 if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
