@@ -927,8 +927,6 @@ static void encode_sb(VP9_COMP *cpi,
     if (output_enabled) {
       (*tp)->Token = EOSB_TOKEN;
       (*tp)++;
-      if (mb_row < cm->mb_rows)
-        cpi->tplist[mb_row].stop = *tp;
     }
   } else {
     int i;
@@ -958,8 +956,6 @@ static void encode_sb(VP9_COMP *cpi,
       if (output_enabled) {
         (*tp)->Token = EOSB_TOKEN;
        (*tp)++;
-        if (mb_row + y_idx < cm->mb_rows)
-          cpi->tplist[mb_row + y_idx].stop = *tp;
       }
     }
   }
@@ -993,8 +989,6 @@ static void encode_sb64(VP9_COMP *cpi,
 
     (*tp)->Token = EOSB_TOKEN;
     (*tp)++;
-    if (mb_row < cm->mb_rows)
-      cpi->tplist[mb_row].stop = *tp;
   } else {
     int i;
 

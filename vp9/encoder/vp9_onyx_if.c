@@ -300,9 +300,6 @@ static void setup_features(VP9_COMP *cpi) {
 
 
 static void dealloc_compressor_data(VP9_COMP *cpi) {
-  vpx_free(cpi->tplist);
-  cpi->tplist = NULL;
-
   // Delete last frame MV storage buffers
   vpx_free(cpi->lfmv);
   cpi->lfmv = 0;
@@ -934,11 +931,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
       !cpi->twopass.this_frame_stats)
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate firstpass stats");
-
-  vpx_free(cpi->tplist);
-
-  CHECK_MEM_ERROR(cpi->tplist,
-                  vpx_malloc(sizeof(TOKENLIST) * (cpi->common.mb_rows)));
 }
 
 
