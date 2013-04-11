@@ -84,8 +84,8 @@ typedef enum {
   D27_PRED,           /* Directional 22 deg prediction  [anti-clockwise from 0 deg hor] */
   D63_PRED,           /* Directional 67 deg prediction  [anti-clockwise from 0 deg hor] */
   TM_PRED,            /* Truemotion prediction */
-  I8X8_PRED,          /* 8x8 based prediction, each 8x8 has its own prediction mode */
-  B_PRED,             /* block based prediction, each block has its own prediction mode */
+  I8X8_PRED,          /* 8x8 based prediction, each 8x8 has its own mode */
+  I4X4_PRED,          /* 4x4 based prediction, each 4x4 has its own mode */
   NEARESTMV,
   NEARMV,
   ZEROMV,
@@ -120,7 +120,7 @@ typedef enum {
   ADST_ADST = 3                       // ADST in both directions
 } TX_TYPE;
 
-#define VP9_YMODES  (B_PRED + 1)
+#define VP9_YMODES  (I4X4_PRED + 1)
 #define VP9_UV_MODES (TM_PRED + 1)
 #define VP9_I8X8_MODES (TM_PRED + 1)
 #define VP9_I32X32_MODES (TM_PRED + 1)
@@ -159,7 +159,7 @@ typedef enum {
 #define VP9_SUBMVREFS (1 + NEW4X4 - LEFT4X4)
 
 #if CONFIG_NEWBINTRAMODES
-/* The number of B_PRED intra modes that are replaced by B_CONTEXT_PRED */
+/* The number of I4X4_PRED intra modes that are replaced by B_CONTEXT_PRED */
 #define CONTEXT_PRED_REPLACEMENTS  0
 #define VP9_KF_BINTRAMODES (VP9_BINTRAMODES - 1)
 #define VP9_NKF_BINTRAMODES  (VP9_BINTRAMODES - CONTEXT_PRED_REPLACEMENTS)
@@ -413,10 +413,14 @@ typedef struct macroblockd {
   unsigned char mode_ref_lf_delta_update;
 
   /* Delta values have the range +/- MAX_LOOP_FILTER */
-  signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];                /* 0 = Intra, Last, GF, ARF */
-  signed char ref_lf_deltas[MAX_REF_LF_DELTAS];                     /* 0 = Intra, Last, GF, ARF */
-  signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];              /* 0 = BPRED, ZERO_MV, MV, SPLIT */
-  signed char mode_lf_deltas[MAX_MODE_LF_DELTAS];                   /* 0 = BPRED, ZERO_MV, MV, SPLIT */
+  /* 0 = Intra, Last, GF, ARF */
+  signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];
+  /* 0 = Intra, Last, GF, ARF */
+  signed char ref_lf_deltas[MAX_REF_LF_DELTAS];
+  /* 0 = I4X4_PRED, ZERO_MV, MV, SPLIT */
+  signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
+  /* 0 = I4X4_PRED, ZERO_MV, MV, SPLIT */
+  signed char mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
   /* Distance of MB away from frame edges */
   int mb_to_left_edge;
@@ -532,7 +536,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
     return tx_type;
   if (xd->lossless)
     return DCT_DCT;
-  if (xd->mode_info_context->mbmi.mode == B_PRED &&
+  if (xd->mode_info_context->mbmi.mode == I4X4_PRED &&
       xd->q_index < ACTIVE_HT) {
     const BLOCKD *b = &xd->block[ib];
     tx_type = txfm_map(
@@ -700,7 +704,7 @@ void vp9_setup_block_dptrs(MACROBLOCKD *xd);
 static void update_blockd_bmi(MACROBLOCKD *xd) {
   const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
 
-  if (mode == SPLITMV || mode == I8X8_PRED || mode == B_PRED) {
+  if (mode == SPLITMV || mode == I8X8_PRED || mode == I4X4_PRED) {
     int i;
     for (i = 0; i < 16; i++)
       xd->block[i].bmi = xd->mode_info_context->bmi[i];

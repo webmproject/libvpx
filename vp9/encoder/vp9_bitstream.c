@@ -824,7 +824,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     else
       write_ymode(bc, mode, pc->fc.ymode_prob);
 
-    if (mode == B_PRED) {
+    if (mode == I4X4_PRED) {
       int j = 0;
       do {
         write_bmode(bc, m->bmi[j].as_mode.first,
@@ -1042,7 +1042,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
                   c->kf_ymode_prob[c->kf_ymode_probs_index]);
   }
 
-  if (ym == B_PRED) {
+  if (ym == I4X4_PRED) {
     int i = 0;
     do {
       const B_PREDICTION_MODE A = above_block_mode(m, i, mis);

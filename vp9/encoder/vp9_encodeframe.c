@@ -463,7 +463,7 @@ static void update_state(VP9_COMP *cpi,
     ctx->txfm_rd_diff[ALLOW_32X32] = ctx->txfm_rd_diff[ALLOW_16X16];
   }
 
-  if (mb_mode == B_PRED) {
+  if (mb_mode == I4X4_PRED) {
     for (i = 0; i < 16; i++) {
       xd->block[i].bmi.as_mode = xd->mode_info_context->bmi[i].as_mode;
       assert(xd->block[i].bmi.as_mode.first < B_MODE_COUNT);
@@ -495,7 +495,7 @@ static void update_state(VP9_COMP *cpi,
 
   if (cpi->common.frame_type == KEY_FRAME) {
     // Restore the coding modes to that held in the coding context
-    // if (mb_mode == B_PRED)
+    // if (mb_mode == I4X4_PRED)
     //    for (i = 0; i < 16; i++)
     //    {
     //        xd->block[i].bmi.as_mode =
@@ -515,7 +515,7 @@ static void update_state(VP9_COMP *cpi,
       THR_D63_PRED /*D63_PRED*/,
       THR_TM /*TM_PRED*/,
       THR_I8X8_PRED /*I8X8_PRED*/,
-      THR_B_PRED /*B_PRED*/,
+      THR_B_PRED /*I4X4_PRED*/,
     };
     cpi->mode_chosen_counts[kf_mode_index[mb_mode]]++;
 #endif
@@ -1671,7 +1671,7 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
   ++ (is_key ? uv_modes : inter_uv_modes)[uvm];
   ++ uv_modes_y[m][uvm];
 
-  if (m == B_PRED) {
+  if (m == I4X4_PRED) {
     unsigned int *const bct = is_key ? b_modes : inter_b_modes;
 
     int b = 0;
@@ -1702,7 +1702,7 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
     cpi->i8x8_mode_count[xd->block[8].bmi.as_mode.first]++;
     cpi->i8x8_mode_count[xd->block[10].bmi.as_mode.first]++;
   }
-  if (m == B_PRED) {
+  if (m == I4X4_PRED) {
     int b = 0;
     do {
       int m = xd->block[b].bmi.as_mode.first;
@@ -1934,7 +1934,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
              mbmi->txfm_size);
     }
 #endif
-    if (mbmi->mode == B_PRED) {
+    if (mbmi->mode == I4X4_PRED) {
       vp9_encode_intra16x16mbuv(cm, x);
       vp9_encode_intra4x4mby(x);
     } else if (mbmi->mode == I8X8_PRED) {
@@ -2098,7 +2098,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
         !((cpi->common.mb_no_coeff_skip && mbmi->mb_skip_coeff) ||
           (vp9_segfeature_active(&x->e_mbd, segment_id, SEG_LVL_SKIP)))) {
       assert(mbmi->txfm_size <= TX_16X16);
-      if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED &&
+      if (mbmi->mode != I4X4_PRED && mbmi->mode != I8X8_PRED &&
           mbmi->mode != SPLITMV) {
         cpi->txfm_count_16x16p[mbmi->txfm_size]++;
       } else if (mbmi->mode == I8X8_PRED ||
@@ -2106,10 +2106,10 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
                   mbmi->partitioning != PARTITIONING_4X4)) {
         cpi->txfm_count_8x8p[mbmi->txfm_size]++;
       }
-    } else if (mbmi->mode != B_PRED && mbmi->mode != I8X8_PRED &&
+    } else if (mbmi->mode != I4X4_PRED && mbmi->mode != I8X8_PRED &&
         mbmi->mode != SPLITMV && cpi->common.txfm_mode >= ALLOW_16X16) {
       mbmi->txfm_size = TX_16X16;
-    } else if (mbmi->mode != B_PRED &&
+    } else if (mbmi->mode != I4X4_PRED &&
                !(mbmi->mode == SPLITMV &&
                  mbmi->partitioning == PARTITIONING_4X4) &&
                cpi->common.txfm_mode >= ALLOW_8X8) {

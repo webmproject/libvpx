@@ -171,7 +171,7 @@ static void kfread_modes(VP9D_COMP *pbi,
 
   m->mbmi.ref_frame = INTRA_FRAME;
 
-  if ((m->mbmi.mode = y_mode) == B_PRED) {
+  if ((m->mbmi.mode = y_mode) == I4X4_PRED) {
     int i = 0;
     do {
       const B_PREDICTION_MODE a = above_block_mode(m, i, mis);
@@ -214,7 +214,7 @@ static void kfread_modes(VP9D_COMP *pbi,
     m->mbmi.txfm_size = TX_32X32;
   } else if (cm->txfm_mode >= ALLOW_16X16 && m->mbmi.mode <= TM_PRED) {
     m->mbmi.txfm_size = TX_16X16;
-  } else if (cm->txfm_mode >= ALLOW_8X8 && m->mbmi.mode != B_PRED) {
+  } else if (cm->txfm_mode >= ALLOW_8X8 && m->mbmi.mode != I4X4_PRED) {
     m->mbmi.txfm_size = TX_8X8;
   } else {
     m->mbmi.txfm_size = TX_4X4;
@@ -1065,8 +1065,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       pbi->common.fc.ymode_counts[mbmi->mode]++;
     }
 
-    // If MB mode is BPRED read the block modes
-    if (mbmi->mode == B_PRED) {
+    // If MB mode is I4X4_PRED read the block modes
+    if (mbmi->mode == I4X4_PRED) {
       int j = 0;
       do {
         int m = read_bmode(bc, pbi->common.fc.bmode_prob);
@@ -1120,7 +1120,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
        (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {
     mbmi->txfm_size = TX_16X16;
   } else if (cm->txfm_mode >= ALLOW_8X8 &&
-      (!(mbmi->ref_frame == INTRA_FRAME && mbmi->mode == B_PRED) &&
+      (!(mbmi->ref_frame == INTRA_FRAME && mbmi->mode == I4X4_PRED) &&
        !(mbmi->ref_frame != INTRA_FRAME && mbmi->mode == SPLITMV &&
          mbmi->partitioning == PARTITIONING_4X4))) {
     mbmi->txfm_size = TX_8X8;

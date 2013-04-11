@@ -403,7 +403,7 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
       d63_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
       break;
     case I8X8_PRED:
-    case B_PRED:
+    case I4X4_PRED:
     case NEARESTMV:
     case NEARMV:
     case ZEROMV:

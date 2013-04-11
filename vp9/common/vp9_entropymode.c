@@ -16,7 +16,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 static const unsigned int kf_y_mode_cts[8][VP9_YMODES] = {
-  /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 BPRED */
+  /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 i4X4 */
   {12,  6,  5,  5,  5,  5,  5,  5,  5,  2, 22, 200},
   {25, 13, 13,  7,  7,  7,  7,  7,  7,  6, 27, 160},
   {31, 17, 18,  8,  8,  8,  8,  8,  8,  9, 26, 139},
@@ -28,7 +28,7 @@ static const unsigned int kf_y_mode_cts[8][VP9_YMODES] = {
 };
 
 static const unsigned int y_mode_cts  [VP9_YMODES] = {
-  /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 BPRED */
+  /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 i4X4 */
   98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 16, 70
 };
 
@@ -45,11 +45,11 @@ static const unsigned int uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
   { 150, 15, 10, 10, 10, 10, 10, 10, 75,  6}, /* D63 */
   { 160, 30, 30, 10, 10, 10, 10, 10, 10, 16}, /* TM */
   { 132, 46, 40, 10, 10, 10, 10, 10, 10, 18}, /* i8x8 - never used */
-  { 150, 35, 41, 10, 10, 10, 10, 10, 10, 10}, /* BPRED */
+  { 150, 35, 41, 10, 10, 10, 10, 10, 10, 10}, /* i4X4 */
 };
 
 static const unsigned int i8x8_mode_cts  [VP9_I8X8_MODES] = {
-  /* DC V   H D45 135 117 153 D27 D63  TM */
+  /* DC V  H D45 135 117 153 D27 D63  TM */
   73, 49, 61, 30, 30, 30, 30, 30, 30, 13
 };
 
@@ -66,7 +66,7 @@ static const unsigned int kf_uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
   { 102, 33, 20, 20, 20, 20, 20, 20, 64, 14}, /* D63 */
   { 132, 36, 30, 20, 20, 20, 20, 20, 20, 18}, /* TM */
   { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* i8x8 - never used */
-  { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* BPRED */
+  { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* I4X4 */
 };
 
 static const unsigned int bmode_cts[VP9_NKF_BINTRAMODES] = {
@@ -217,7 +217,7 @@ const vp9_tree_index vp9_ymode_tree[VP9_YMODES * 2 - 2] = {
   16, 18,
   -V_PRED, -H_PRED,
   -TM_PRED, 20,
-  -B_PRED, -I8X8_PRED
+  -I4X4_PRED, -I8X8_PRED
 };
 
 const vp9_tree_index vp9_kf_ymode_tree[VP9_YMODES * 2 - 2] = {
@@ -231,7 +231,7 @@ const vp9_tree_index vp9_kf_ymode_tree[VP9_YMODES * 2 - 2] = {
   16, 18,
   -V_PRED, -H_PRED,
   -TM_PRED, 20,
-  -B_PRED, -I8X8_PRED
+  -I4X4_PRED, -I8X8_PRED
 };
 
 const vp9_tree_index vp9_i8x8_mode_tree[VP9_I8X8_MODES * 2 - 2] = {
@@ -642,7 +642,7 @@ static void set_default_lf_deltas(MACROBLOCKD *xd) {
   xd->ref_lf_deltas[GOLDEN_FRAME] = -2;
   xd->ref_lf_deltas[ALTREF_FRAME] = -2;
 
-  xd->mode_lf_deltas[0] = 4;               // BPRED
+  xd->mode_lf_deltas[0] = 4;               // I4X4_PRED
   xd->mode_lf_deltas[1] = -2;              // Zero
   xd->mode_lf_deltas[2] = 2;               // New mv
   xd->mode_lf_deltas[3] = 4;               // Split mv

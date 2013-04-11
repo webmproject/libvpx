@@ -727,7 +727,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
     for (i = 0; i < mb_rows; i++) {
       for (j = 0; j < mb_cols; j++) {
         char zz[4];
-        int dc_diff = !(mi[mb_index].mbmi.mode != B_PRED &&
+        int dc_diff = !(mi[mb_index].mbmi.mode != I4X4_PRED &&
                         mi[mb_index].mbmi.mode != SPLITMV &&
                         mi[mb_index].mbmi.mb_skip_coeff);
 
@@ -913,8 +913,8 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
       for (x = 0; x < width; x += 16) {
         int Y = 0, U = 0, V = 0;
 
-        if (mi->mbmi.mode == B_PRED &&
-            ((ppflags->display_mb_modes_flag & B_PRED) ||
+        if (mi->mbmi.mode == I4X4_PRED &&
+            ((ppflags->display_mb_modes_flag & I4X4_PRED) ||
              ppflags->display_b_modes_flag)) {
           int by, bx;
           uint8_t *yl, *ul, *vl;
@@ -927,7 +927,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
           for (by = 0; by < 16; by += 4) {
             for (bx = 0; bx < 16; bx += 4) {
               if ((ppflags->display_b_modes_flag & (1 << mi->mbmi.mode))
-                  || (ppflags->display_mb_modes_flag & B_PRED)) {
+                  || (ppflags->display_mb_modes_flag & I4X4_PRED)) {
                 Y = B_PREDICTION_MODE_colors[bmi->as_mode.first][0];
                 U = B_PREDICTION_MODE_colors[bmi->as_mode.first][1];
                 V = B_PREDICTION_MODE_colors[bmi->as_mode.first][2];

@@ -85,7 +85,7 @@ void vp9_print_modes_and_motion_vectors(MODE_INFO *mi, int rows, int cols,
         mb_index = (b_row >> 2) * (cols + 1) + (b_col >> 2);
         bindex = (b_row & 3) * 4 + (b_col & 3);
 
-        if (mi[mb_index].mbmi.mode == B_PRED) {
+        if (mi[mb_index].mbmi.mode == I4X4_PRED) {
           fprintf(mvs, "%2d ", mi[mb_index].bmi[bindex].as_mode.first);
         } else
           fprintf(mvs, "xx ");

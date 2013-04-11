@@ -44,7 +44,7 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[V_PRED] = 1;
   lfi->mode_lf_lut[H_PRED] = 1;
   lfi->mode_lf_lut[TM_PRED] = 1;
-  lfi->mode_lf_lut[B_PRED]  = 0;
+  lfi->mode_lf_lut[I4X4_PRED]  = 0;
   lfi->mode_lf_lut[I8X8_PRED] = 0;
   lfi->mode_lf_lut[ZEROMV]  = 1;
   lfi->mode_lf_lut[NEARESTMV] = 2;
@@ -149,8 +149,8 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
     lvl_ref += xd->ref_lf_deltas[ref];
 
     /* Apply delta for Intra modes */
-    mode = 0; /* B_PRED */
-    /* Only the split mode BPRED has a further special case */
+    mode = 0; /* I4X4_PRED */
+    /* Only the split mode I4X4_PRED has a further special case */
     lvl_mode = clamp(lvl_ref +  xd->mode_lf_deltas[mode], 0, 63);
 
     lfi->lvl[seg][ref][mode] = lvl_mode;
@@ -183,7 +183,7 @@ static int mb_lf_skip(const MB_MODE_INFO *const mbmi) {
   const MB_PREDICTION_MODE mode = mbmi->mode;
   const int skip_coef = mbmi->mb_skip_coeff;
   const int tx_size = mbmi->txfm_size;
-  return mode != B_PRED && mode != I8X8_PRED && mode != SPLITMV &&
+  return mode != I4X4_PRED && mode != I8X8_PRED && mode != SPLITMV &&
          (tx_size >= TX_16X16 || skip_coef);
 }
 
