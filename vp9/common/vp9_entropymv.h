@@ -46,7 +46,7 @@ typedef enum {
 } MV_JOINT_TYPE;
 
 extern const vp9_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2];
-extern struct vp9_token_struct vp9_mv_joint_encodings [MV_JOINTS];
+extern struct vp9_token vp9_mv_joint_encodings[MV_JOINTS];
 
 /* Symbols for coding magnitude class of nonzero components */
 #define MV_CLASSES     11
@@ -65,7 +65,7 @@ typedef enum {
 } MV_CLASS_TYPE;
 
 extern const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2];
-extern struct vp9_token_struct vp9_mv_class_encodings [MV_CLASSES];
+extern struct vp9_token vp9_mv_class_encodings[MV_CLASSES];
 
 #define CLASS0_BITS    1  /* bits at integer precision for class 0 */
 #define CLASS0_SIZE    (1 << CLASS0_BITS)
@@ -76,10 +76,10 @@ extern struct vp9_token_struct vp9_mv_class_encodings [MV_CLASSES];
 #define MV_VALS        ((MV_MAX << 1) + 1)
 
 extern const vp9_tree_index vp9_mv_class0_tree[2 * CLASS0_SIZE - 2];
-extern struct vp9_token_struct vp9_mv_class0_encodings[CLASS0_SIZE];
+extern struct vp9_token vp9_mv_class0_encodings[CLASS0_SIZE];
 
 extern const vp9_tree_index vp9_mv_fp_tree[2 * 4 - 2];
-extern struct vp9_token_struct vp9_mv_fp_encodings[4];
+extern struct vp9_token vp9_mv_fp_encodings[4];
 
 typedef struct {
   vp9_prob sign;

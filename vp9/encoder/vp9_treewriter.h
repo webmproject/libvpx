@@ -67,11 +67,9 @@ static INLINE void treed_write(vp9_writer *const w,
   } while (n);
 }
 
-static INLINE void write_token(vp9_writer *const w,
-                               vp9_tree t,
-                               const vp9_prob *const p,
-                               vp9_token *const x) {
-  treed_write(w, t, p, x->value, x->Len);
+static INLINE void write_token(vp9_writer *w, vp9_tree t, const vp9_prob *p,
+                               const struct vp9_token *x) {
+  treed_write(w, t, p, x->value, x->len);
 }
 
 static INLINE int treed_cost(vp9_tree t,
@@ -91,10 +89,9 @@ static INLINE int treed_cost(vp9_tree t,
   return c;
 }
 
-static INLINE int cost_token(vp9_tree t,
-                             const vp9_prob *const p,
-                             vp9_token *const x) {
-  return treed_cost(t, p, x->value, x->Len);
+static INLINE int cost_token(vp9_tree t, const vp9_prob *p,
+                             const struct vp9_token *x) {
+  return treed_cost(t, p, x->value, x->len);
 }
 
 /* Fill array of costs for all possible token values. */
