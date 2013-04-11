@@ -50,6 +50,24 @@
       "revId": "b6a5bf677c457f8d0a2222a36338bf2380c00602",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//5M0\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-11T00:10:34Z",
+      "side": 1,
+      "message": "That actually causes compiler warnings right now, so jenkins will fail - because BLOCK_SIZE_MB16X16 is 0, we\u0027re comparing an unsigned integer to \u003e\u003d 0, which is always true.\n\nI\u0027ll add that condition once we add rect blocks smaller than 16x16.",
+      "parentUuid": "AAAAXH//5NU\u003d",
+      "revId": "b6a5bf677c457f8d0a2222a36338bf2380c00602",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
