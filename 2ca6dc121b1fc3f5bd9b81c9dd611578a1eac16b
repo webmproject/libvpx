@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//4A4\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-11T19:44:28Z",
+      "side": 1,
+      "message": "was thinking to support the future inclusion of 4x8, 8x4, 8x16, 16x8 block sizes defined in BLOCK_SIZE_TYPE. in these case, mb_width_log2() won\u0027t be able to distinguish the difference in resolution.",
+      "parentUuid": "AAAAXH//4Bg\u003d",
+      "revId": "2ca6dc121b1fc3f5bd9b81c9dd611578a1eac16b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//4Bc\u003d",
         "filename": "vp9/common/vp9_blockd.h",
         "patchSetId": 1
