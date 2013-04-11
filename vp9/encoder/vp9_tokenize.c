@@ -339,95 +339,38 @@ static void tokenize_b(VP9_COMP *cpi,
   }
 }
 
-int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 16; i++)
-    skip &= (!xd->plane[0].eobs[i]);
-
-  return skip;
+struct is_skippable_args {
+  MACROBLOCKD *xd;
+  int *skippable;
+};
+static void is_skippable(int plane, int block,
+                         int block_size_b, int ss_txfrm_size, void *argv) {
+  struct is_skippable_args *args = argv;
+  args->skippable[0] &= (!args->xd->plane[plane].eobs[block]);
 }
 
-int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i;
-
-  for (i = 0; i < 4; i++)
-    skip &= (!xd->plane[1].eobs[i]);
-  for (i = 0; i < 4; i++)
-    skip &= (!xd->plane[2].eobs[i]);
-  return skip;
-}
-
-static int mb_is_skippable_4x4(MACROBLOCKD *xd) {
-  return (vp9_mby_is_skippable_4x4(xd) &
-          vp9_mbuv_is_skippable_4x4(xd));
-}
-
-int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd) {
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < 16; i += 4)
-    skip &= (!xd->plane[0].eobs[i]);
-
-  return skip;
-}
-
-int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd) {
-  return (!xd->plane[1].eobs[0]) & (!xd->plane[2].eobs[0]);
-}
-
-static int mb_is_skippable_8x8(MACROBLOCKD *xd) {
-  return (vp9_mby_is_skippable_8x8(xd) &
-          vp9_mbuv_is_skippable_8x8(xd));
-}
-
-static int mb_is_skippable_8x8_4x4uv(MACROBLOCKD *xd) {
-  return (vp9_mby_is_skippable_8x8(xd) &
-          vp9_mbuv_is_skippable_4x4(xd));
-}
-
-int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd) {
-  return (!xd->plane[0].eobs[0]);
-}
-
-static int mb_is_skippable_16x16(MACROBLOCKD *xd) {
-  return (vp9_mby_is_skippable_16x16(xd) & vp9_mbuv_is_skippable_8x8(xd));
-}
-
-int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                         TX_SIZE sz) {
-  const int inc = 1 << (sz * 2);
+int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < (1 << (bwl + bhl)); i += inc)
-    skip &= (!xd->plane[0].eobs[i]);
-
-  return skip;
+  int result = 1;
+  struct is_skippable_args args = {xd, &result};
+  foreach_transformed_block(xd, bwl + bhl, is_skippable, &args);
+  return result;
 }
 
-int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize, TX_SIZE sz) {
-  const int inc = 1 << (sz * 2);
-  const int bwl = mb_width_log2(bsize) + 1, bhl = mb_height_log2(bsize) + 1;
-  int skip = 1;
-  int i = 0;
-
-  for (i = 0; i < (1 << (bwl + bhl)); i += inc) {
-    skip &= (!xd->plane[1].eobs[i]);
-    skip &= (!xd->plane[2].eobs[i]);
-  }
-
-  return skip;
+int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
+  int result = 1;
+  struct is_skippable_args args = {xd, &result};
+  foreach_transformed_block_in_plane(xd, bwl + bhl, 0, 0, is_skippable, &args);
+  return result;
 }
 
-static int sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                           TX_SIZE ysz, TX_SIZE uvsz) {
-  return vp9_sby_is_skippable(xd, bsize, ysz) &
-         vp9_sbuv_is_skippable(xd, bsize, uvsz);
+int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
+  int result = 1;
+  struct is_skippable_args args = {xd, &result};
+  foreach_transformed_block_uv(xd, bwl + bhl, is_skippable, &args);
+  return result;
 }
 
 void vp9_tokenize_sb(VP9_COMP *cpi,
@@ -449,7 +392,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
   int b;
   const int n_y = (1 << (bwl + bhl)), n_uv = (n_y * 3) >> 1;
 
-  mbmi->mb_skip_coeff = sb_is_skippable(xd, bsize, txfm_size, uv_txfm_size);
+  mbmi->mb_skip_coeff = vp9_sb_is_skippable(xd, bsize);
 
   if (mbmi->mb_skip_coeff) {
     if (!dry_run)
@@ -541,26 +484,8 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
   } else
     skip_inc = 0;
 
-  switch (tx_size) {
-    case TX_16X16:
-
-      xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_16x16(xd);
-      break;
-    case TX_8X8:
-      if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
-          xd->mode_info_context->mbmi.mode == SPLITMV)
-        xd->mode_info_context->mbmi.mb_skip_coeff =
-            mb_is_skippable_8x8_4x4uv(xd);
-      else
-        xd->mode_info_context->mbmi.mb_skip_coeff =
-            mb_is_skippable_8x8(xd);
-      break;
-
-    default:
-      xd->mode_info_context->mbmi.mb_skip_coeff =
-          mb_is_skippable_4x4(xd);
-      break;
-  }
+  xd->mode_info_context->mbmi.mb_skip_coeff = vp9_sb_is_skippable(xd,
+                                                  BLOCK_SIZE_MB16X16);
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
     if (!dry_run)

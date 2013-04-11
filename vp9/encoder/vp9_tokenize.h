@@ -31,15 +31,9 @@ typedef struct {
 typedef int64_t vp9_coeff_accum[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                [MAX_ENTROPY_TOKENS + 1];
 
-int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd);
-int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd);
-int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd);
-int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd);
-int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd);
-
-int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize, TX_SIZE sz);
-int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize, TX_SIZE sz);
-
+int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
 struct VP9_COMP;
 
 void vp9_tokenize_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,

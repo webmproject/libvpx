@@ -831,4 +831,19 @@ static INLINE void foreach_transformed_block(
   }
 }
 
+static INLINE void foreach_transformed_block_uv(
+    const MACROBLOCKD* const xd, int block_size,
+    foreach_transformed_block_visitor visit, void *arg) {
+  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
+  const int is_split =
+      xd->mode_info_context->mbmi.txfm_size == TX_8X8 &&
+      (mode == I8X8_PRED || mode == SPLITMV);
+  int plane;
+
+  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
+    foreach_transformed_block_in_plane(xd, block_size, plane, is_split,
+                                       visit, arg);
+  }
+}
+
 #endif  // VP9_COMMON_VP9_BLOCKD_H_
