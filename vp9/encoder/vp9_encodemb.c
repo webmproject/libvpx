@@ -55,56 +55,6 @@ void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
   }
 }
 
-void vp9_subtract_mbuv_s_c(int16_t *diff, const uint8_t *usrc,
-                           const uint8_t *vsrc, int src_stride,
-                           const uint8_t *upred,
-                           const uint8_t *vpred, int dst_stride) {
-  int16_t *udiff = diff + 256;
-  int16_t *vdiff = diff + 320;
-  int r, c;
-
-  for (r = 0; r < 8; r++) {
-    for (c = 0; c < 8; c++)
-      udiff[c] = usrc[c] - upred[c];
-
-    udiff += 8;
-    upred += dst_stride;
-    usrc  += src_stride;
-  }
-
-  for (r = 0; r < 8; r++) {
-    for (c = 0; c < 8; c++) {
-      vdiff[c] = vsrc[c] - vpred[c];
-    }
-
-    vdiff += 8;
-    vpred += dst_stride;
-    vsrc  += src_stride;
-  }
-}
-
-void vp9_subtract_mbuv_c(int16_t *diff, uint8_t *usrc,
-                         uint8_t *vsrc, uint8_t *pred, int stride) {
-  uint8_t *upred = pred + 256;
-  uint8_t *vpred = pred + 320;
-
-  vp9_subtract_mbuv_s_c(diff, usrc, vsrc, stride, upred, vpred, 8);
-}
-
-void vp9_subtract_mby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
-                          const uint8_t *pred, int dst_stride) {
-  int r, c;
-
-  for (r = 0; r < 16; r++) {
-    for (c = 0; c < 16; c++)
-      diff[c] = src[c] - pred[c];
-
-    diff += 16;
-    pred += dst_stride;
-    src  += src_stride;
-  }
-}
-
 void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
                           const uint8_t *pred, int dst_stride,
                           BLOCK_SIZE_TYPE bsize) {
@@ -154,14 +104,21 @@ void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
 
 void vp9_subtract_mby_c(int16_t *diff, uint8_t *src,
                         uint8_t *pred, int stride) {
-  vp9_subtract_mby_s_c(diff, src, stride, pred, 16);
+  vp9_subtract_sby_s_c(diff, src, stride, pred, 16, BLOCK_SIZE_MB16X16);
+}
+
+void vp9_subtract_mbuv_c(int16_t *diff, uint8_t *usrc,
+                         uint8_t *vsrc, uint8_t *pred, int stride) {
+  uint8_t *upred = pred + 256;
+  uint8_t *vpred = pred + 320;
+
+  vp9_subtract_sbuv_s_c(diff, usrc, vsrc, stride, upred, vpred, 8,
+                        BLOCK_SIZE_MB16X16);
 }
 
 static void subtract_mb(MACROBLOCK *x) {
-  BLOCK *b = &x->block[0];
-
-  vp9_subtract_mby(x->src_diff, *(b->base_src), x->e_mbd.predictor,
-                   b->src_stride);
+  vp9_subtract_mby(x->src_diff, x->src.y_buffer, x->e_mbd.predictor,
+                   x->src.y_stride);
   vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                     x->e_mbd.predictor, x->src.uv_stride);
 }
