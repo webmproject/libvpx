@@ -20,95 +20,14 @@ void vp9_inverse_transform_b_4x4(MACROBLOCKD *xd, int eob,
     xd->inv_txm4x4(dqcoeff, diff, pitch);
 }
 
-void vp9_inverse_transform_mby_4x4(MACROBLOCKD *xd) {
-  int i;
-
-  for (i = 0; i < 16; i++) {
-    TX_TYPE tx_type = get_tx_type_4x4(xd, i);
-    const int x = i & 3, y = i >> 2;
-    if (tx_type != DCT_DCT) {
-      vp9_short_iht4x4(BLOCK_OFFSET(xd->plane[0].dqcoeff, i, 16),
-                       xd->diff + 64 * y + 4 * x, 16, tx_type);
-    } else {
-      vp9_inverse_transform_b_4x4(xd,
-                                  xd->plane[0].eobs[i],
-                                  BLOCK_OFFSET(xd->plane[0].dqcoeff, i, 16),
-                                  xd->diff + 64 * y + 4 * x, 32);
-    }
-  }
-}
-
-void vp9_inverse_transform_mbuv_4x4(MACROBLOCKD *xd) {
-  int i;
-
-  for (i = 0; i < 4; i++) {
-    const int y = i >> 1, x = i & 1;
-    vp9_inverse_transform_b_4x4(xd, xd->plane[1].eobs[i],
-                                BLOCK_OFFSET(xd->plane[1].dqcoeff, i, 16),
-                                xd->diff + 256 + y * 32 + x * 4, 16);
-    vp9_inverse_transform_b_4x4(xd, xd->plane[2].eobs[i],
-                                BLOCK_OFFSET(xd->plane[2].dqcoeff, i, 16),
-                                xd->diff + 320 + y * 32 + x * 4, 16);
-  }
-}
-
-void vp9_inverse_transform_mb_4x4(MACROBLOCKD *xd) {
-  vp9_inverse_transform_mby_4x4(xd);
-  vp9_inverse_transform_mbuv_4x4(xd);
-}
-
 void vp9_inverse_transform_b_8x8(int16_t *input_dqcoeff, int16_t *output_coeff,
                                  int pitch) {
   vp9_short_idct8x8(input_dqcoeff, output_coeff, pitch);
 }
 
-void vp9_inverse_transform_mby_8x8(MACROBLOCKD *xd) {
-  int i;
-
-  for (i = 0; i < 4; i++) {
-    const int y = i >> 1, x = i & 1;
-    TX_TYPE tx_type = get_tx_type_8x8(xd, x * 2 + y * 8);
-    if (tx_type != DCT_DCT) {
-      vp9_short_iht8x8(BLOCK_OFFSET(xd->plane[0].dqcoeff, i * 4, 16),
-                       xd->diff + y * 128 + x * 8, 16, tx_type);
-    } else {
-      vp9_inverse_transform_b_8x8(BLOCK_OFFSET(xd->plane[0].dqcoeff, i * 4, 16),
-                                  xd->diff + y * 128 + x * 8, 32);
-    }
-  }
-}
-
-void vp9_inverse_transform_mbuv_8x8(MACROBLOCKD *xd) {
-  vp9_inverse_transform_b_8x8(BLOCK_OFFSET(xd->plane[1].dqcoeff, 0, 16),
-                              xd->diff + 256, 16);
-  vp9_inverse_transform_b_8x8(BLOCK_OFFSET(xd->plane[2].dqcoeff, 0, 16),
-                              xd->diff + 320, 16);
-}
-
-void vp9_inverse_transform_mb_8x8(MACROBLOCKD *xd) {
-  vp9_inverse_transform_mby_8x8(xd);
-  vp9_inverse_transform_mbuv_8x8(xd);
-}
-
 void vp9_inverse_transform_b_16x16(int16_t *input_dqcoeff,
                                    int16_t *output_coeff, int pitch) {
   vp9_short_idct16x16(input_dqcoeff, output_coeff, pitch);
-}
-
-void vp9_inverse_transform_mby_16x16(MACROBLOCKD *xd) {
-  TX_TYPE tx_type = get_tx_type_16x16(xd, 0);
-  if (tx_type != DCT_DCT) {
-    vp9_short_iht16x16(BLOCK_OFFSET(xd->plane[0].dqcoeff, 0, 16),
-                       xd->diff, 16, tx_type);
-  } else {
-    vp9_inverse_transform_b_16x16(BLOCK_OFFSET(xd->plane[0].dqcoeff, 0, 16),
-                                  xd->diff, 32);
-  }
-}
-
-void vp9_inverse_transform_mb_16x16(MACROBLOCKD *xd) {
-  vp9_inverse_transform_mby_16x16(xd);
-  vp9_inverse_transform_mbuv_8x8(xd);
 }
 
 void vp9_inverse_transform_sby_32x32(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {

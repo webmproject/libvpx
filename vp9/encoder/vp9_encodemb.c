@@ -166,90 +166,6 @@ static void subtract_mb(MACROBLOCK *x) {
                     x->e_mbd.predictor, x->src.uv_stride);
 }
 
-void vp9_transform_mby_4x4(MACROBLOCK *x) {
-  int i;
-  MACROBLOCKD *xd = &x->e_mbd;
-
-  for (i = 0; i < 16; i++) {
-    BLOCK *b = &x->block[i];
-    TX_TYPE tx_type = get_tx_type_4x4(xd, i);
-    if (tx_type != DCT_DCT) {
-      vp9_short_fht4x4(b->src_diff, b->coeff, 16, tx_type);
-    } else if (!(i & 1) && get_tx_type_4x4(xd, i + 1) == DCT_DCT) {
-      x->fwd_txm8x4(x->block[i].src_diff, x->block[i].coeff, 32);
-      i++;
-    } else {
-      x->fwd_txm4x4(x->block[i].src_diff, x->block[i].coeff, 32);
-    }
-  }
-}
-
-void vp9_transform_mbuv_4x4(MACROBLOCK *x) {
-  int i;
-
-  for (i = 16; i < 24; i += 2)
-    x->fwd_txm8x4(x->block[i].src_diff, x->block[i].coeff, 16);
-}
-
-static void transform_mb_4x4(MACROBLOCK *x) {
-  vp9_transform_mby_4x4(x);
-  vp9_transform_mbuv_4x4(x);
-}
-
-void vp9_transform_mby_8x8(MACROBLOCK *x) {
-  int i;
-  MACROBLOCKD *xd = &x->e_mbd;
-  TX_TYPE tx_type;
-
-  for (i = 0; i < 9; i += 8) {
-    BLOCK *b = &x->block[i];
-    tx_type = get_tx_type_8x8(xd, i);
-    if (tx_type != DCT_DCT) {
-      vp9_short_fht8x8(b->src_diff, b->coeff, 16, tx_type);
-    } else {
-      x->fwd_txm8x8(x->block[i].src_diff, x->block[i].coeff, 32);
-    }
-  }
-  for (i = 2; i < 11; i += 8) {
-    BLOCK *b = &x->block[i];
-    tx_type = get_tx_type_8x8(xd, i);
-    if (tx_type != DCT_DCT) {
-      vp9_short_fht8x8(b->src_diff, (b + 2)->coeff, 16, tx_type);
-    } else {
-      x->fwd_txm8x8(x->block[i].src_diff, x->block[i + 2].coeff, 32);
-    }
-  }
-}
-
-void vp9_transform_mbuv_8x8(MACROBLOCK *x) {
-  int i;
-
-  for (i = 16; i < 24; i += 4)
-    x->fwd_txm8x8(x->block[i].src_diff, x->block[i].coeff, 16);
-}
-
-void vp9_transform_mb_8x8(MACROBLOCK *x) {
-  vp9_transform_mby_8x8(x);
-  vp9_transform_mbuv_8x8(x);
-}
-
-void vp9_transform_mby_16x16(MACROBLOCK *x) {
-  MACROBLOCKD *xd = &x->e_mbd;
-  BLOCK *b = &x->block[0];
-  TX_TYPE tx_type = get_tx_type_16x16(xd, 0);
-  vp9_clear_system_state();
-  if (tx_type != DCT_DCT) {
-    vp9_short_fht16x16(b->src_diff, b->coeff, 16, tx_type);
-  } else {
-    x->fwd_txm16x16(x->block[0].src_diff, x->block[0].coeff, 32);
-  }
-}
-
-void vp9_transform_mb_16x16(MACROBLOCK *x) {
-  vp9_transform_mby_16x16(x);
-  vp9_transform_mbuv_8x8(x);
-}
-
 void vp9_transform_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize) - 1, bw = 1 << bwl;
   const int bh = 1 << (mb_height_log2(bsize) - 1);
@@ -749,123 +665,6 @@ static void optimize_b(VP9_COMMON *const cm,
 #endif
 }
 
-void vp9_optimize_mby_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
-  int b;
-  ENTROPY_CONTEXT_PLANES t_above, t_left;
-  ENTROPY_CONTEXT *ta;
-  ENTROPY_CONTEXT *tl;
-
-  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
-    return;
-
-  vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
-
-  ta = (ENTROPY_CONTEXT *)&t_above;
-  tl = (ENTROPY_CONTEXT *)&t_left;
-
-  for (b = 0; b < 16; b++) {
-    optimize_b(cm, x, b, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[b].dequant,
-               ta + vp9_block2above[TX_4X4][b],
-               tl + vp9_block2left[TX_4X4][b], TX_4X4, 16);
-  }
-}
-
-void vp9_optimize_mbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
-  int b;
-  ENTROPY_CONTEXT_PLANES t_above, t_left;
-  ENTROPY_CONTEXT *ta;
-  ENTROPY_CONTEXT *tl;
-
-  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
-    return;
-
-  vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
-
-  ta = (ENTROPY_CONTEXT *)&t_above;
-  tl = (ENTROPY_CONTEXT *)&t_left;
-
-  for (b = 16; b < 24; b++) {
-    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[b].dequant,
-               ta + vp9_block2above[TX_4X4][b],
-               tl + vp9_block2left[TX_4X4][b], TX_4X4, 16);
-  }
-}
-
-static void optimize_mb_4x4(VP9_COMMON *const cm, MACROBLOCK *x) {
-  vp9_optimize_mby_4x4(cm, x);
-  vp9_optimize_mbuv_4x4(cm, x);
-}
-
-void vp9_optimize_mby_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
-  int b;
-  ENTROPY_CONTEXT_PLANES t_above, t_left;
-  ENTROPY_CONTEXT *ta;
-  ENTROPY_CONTEXT *tl;
-
-  if (!x->e_mbd.above_context || !x->e_mbd.left_context)
-    return;
-
-  vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
-
-  ta = (ENTROPY_CONTEXT *)&t_above;
-  tl = (ENTROPY_CONTEXT *)&t_left;
-  for (b = 0; b < 16; b += 4) {
-    ENTROPY_CONTEXT *const a = ta + vp9_block2above[TX_8X8][b];
-    ENTROPY_CONTEXT *const l = tl + vp9_block2left[TX_8X8][b];
-    ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
-    ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
-    optimize_b(cm, x, b, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[b].dequant,
-               &above_ec, &left_ec, TX_8X8, 16);
-    a[1] = a[0] = above_ec;
-    l[1] = l[0] = left_ec;
-  }
-}
-
-void vp9_optimize_mbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
-  int b;
-  ENTROPY_CONTEXT *const ta = (ENTROPY_CONTEXT *)x->e_mbd.above_context;
-  ENTROPY_CONTEXT *const tl = (ENTROPY_CONTEXT *)x->e_mbd.left_context;
-
-  if (!ta || !tl)
-    return;
-
-  for (b = 16; b < 24; b += 4) {
-    ENTROPY_CONTEXT *const a = ta + vp9_block2above[TX_8X8][b];
-    ENTROPY_CONTEXT *const l = tl + vp9_block2left[TX_8X8][b];
-    ENTROPY_CONTEXT above_ec = (a[0] + a[1]) != 0;
-    ENTROPY_CONTEXT left_ec = (l[0] + l[1]) != 0;
-    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[b].dequant,
-               &above_ec, &left_ec, TX_8X8, 16);
-  }
-}
-
-static void optimize_mb_8x8(VP9_COMMON *const cm, MACROBLOCK *x) {
-  vp9_optimize_mby_8x8(cm, x);
-  vp9_optimize_mbuv_8x8(cm, x);
-}
-
-void vp9_optimize_mby_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
-  ENTROPY_CONTEXT_PLANES *const t_above = x->e_mbd.above_context;
-  ENTROPY_CONTEXT_PLANES *const t_left = x->e_mbd.left_context;
-  ENTROPY_CONTEXT ta, tl;
-
-  if (!t_above || !t_left)
-    return;
-
-  ta = (t_above->y1[0] + t_above->y1[1] + t_above->y1[2] + t_above->y1[3]) != 0;
-  tl = (t_left->y1[0] + t_left->y1[1] + t_left->y1[2] + t_left->y1[3]) != 0;
-  optimize_b(cm, x, 0, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
-             &ta, &tl, TX_16X16, 16);
-}
-
-static void optimize_mb_16x16(VP9_COMMON *const cm, MACROBLOCK *x) {
-  vp9_optimize_mby_16x16(cm, x);
-  vp9_optimize_mbuv_8x8(cm, x);
-}
-
 void vp9_optimize_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
                             BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize) - 1, bw = 1 << bwl;
@@ -1104,40 +903,50 @@ void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
 
 void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
+  const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
   if (tx_size == TX_16X16) {
-    vp9_transform_mb_16x16(x);
-    vp9_quantize_mb_16x16(x);
-    if (x->optimize)
-      optimize_mb_16x16(cm, x);
-    vp9_inverse_transform_mb_16x16(xd);
+    vp9_transform_sby_16x16(x, BLOCK_SIZE_MB16X16);
+    vp9_transform_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
+    vp9_quantize_sby_16x16(x, BLOCK_SIZE_MB16X16);
+    vp9_quantize_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
+    if (x->optimize) {
+      vp9_optimize_sby_16x16(cm, x, BLOCK_SIZE_MB16X16);
+      vp9_optimize_sbuv_8x8(cm, x, BLOCK_SIZE_MB16X16);
+    }
+    vp9_inverse_transform_sby_16x16(xd, BLOCK_SIZE_MB16X16);
+    vp9_inverse_transform_sbuv_8x8(xd, BLOCK_SIZE_MB16X16);
   } else if (tx_size == TX_8X8) {
+    vp9_transform_sby_8x8(x, BLOCK_SIZE_MB16X16);
+    vp9_quantize_sby_8x8(x, BLOCK_SIZE_MB16X16);
+    if (x->optimize)
+      vp9_optimize_sby_8x8(cm, x, BLOCK_SIZE_MB16X16);
+    vp9_inverse_transform_sby_8x8(xd, BLOCK_SIZE_MB16X16);
     if (xd->mode_info_context->mbmi.mode == SPLITMV) {
       assert(xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4);
-      vp9_transform_mby_8x8(x);
-      vp9_transform_mbuv_4x4(x);
-      vp9_quantize_mby_8x8(x);
-      vp9_quantize_mbuv_4x4(x);
-      if (x->optimize) {
-        vp9_optimize_mby_8x8(cm, x);
-        vp9_optimize_mbuv_4x4(cm, x);
-      }
-      vp9_inverse_transform_mby_8x8(xd);
-      vp9_inverse_transform_mbuv_4x4(xd);
-    } else {
-      vp9_transform_mb_8x8(x);
-      vp9_quantize_mb_8x8(x);
+      vp9_transform_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
+      vp9_quantize_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
       if (x->optimize)
-        optimize_mb_8x8(cm, x);
-      vp9_inverse_transform_mb_8x8(xd);
+        vp9_optimize_sbuv_4x4(cm, x, BLOCK_SIZE_MB16X16);
+      vp9_inverse_transform_sbuv_4x4(xd, BLOCK_SIZE_MB16X16);
+    } else {
+      vp9_transform_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
+      vp9_quantize_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
+      if (x->optimize)
+        vp9_optimize_sbuv_8x8(cm, x, BLOCK_SIZE_MB16X16);
+      vp9_inverse_transform_sbuv_8x8(xd, BLOCK_SIZE_MB16X16);
     }
   } else {
-    transform_mb_4x4(x);
-    vp9_quantize_mb_4x4(x);
-    if (x->optimize)
-      optimize_mb_4x4(cm, x);
-    vp9_inverse_transform_mb_4x4(xd);
+    vp9_transform_sby_4x4(x, BLOCK_SIZE_MB16X16);
+    vp9_transform_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
+    vp9_quantize_sby_4x4(x, BLOCK_SIZE_MB16X16);
+    vp9_quantize_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
+    if (x->optimize) {
+      vp9_optimize_sby_4x4(cm, x, BLOCK_SIZE_MB16X16);
+      vp9_optimize_sbuv_4x4(cm, x, BLOCK_SIZE_MB16X16);
+    }
+    vp9_inverse_transform_sby_4x4(xd, BLOCK_SIZE_MB16X16);
+    vp9_inverse_transform_sbuv_4x4(xd, BLOCK_SIZE_MB16X16);
   }
 }
 
@@ -1160,9 +969,9 @@ void vp9_encode_inter16x16y(MACROBLOCK *x, int mb_row, int mb_col) {
 
   vp9_subtract_mby(x->src_diff, *(b->base_src), xd->predictor, b->src_stride);
 
-  vp9_transform_mby_4x4(x);
-  vp9_quantize_mby_4x4(x);
-  vp9_inverse_transform_mby_4x4(xd);
+  vp9_transform_sby_4x4(x, BLOCK_SIZE_MB16X16);
+  vp9_quantize_sby_4x4(x, BLOCK_SIZE_MB16X16);
+  vp9_inverse_transform_sby_4x4(xd, BLOCK_SIZE_MB16X16);
 
   vp9_recon_mby(xd);
 }
