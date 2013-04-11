@@ -2184,13 +2184,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   }
 
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-    if (bsize == BLOCK_SIZE_SB32X32) {
-      vp9_build_intra_predictors_sby_s(&x->e_mbd);
-      vp9_build_intra_predictors_sbuv_s(&x->e_mbd);
-    } else {
-      vp9_build_intra_predictors_sb64y_s(&x->e_mbd);
-      vp9_build_intra_predictors_sb64uv_s(&x->e_mbd);
-    }
+    vp9_build_intra_predictors_sby_s(&x->e_mbd, bsize);
+    vp9_build_intra_predictors_sbuv_s(&x->e_mbd, bsize);
     if (output_enabled)
       sum_intra_stats(cpi, x);
   } else {

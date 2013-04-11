@@ -237,6 +237,15 @@ static INLINE int mb_height_log2(BLOCK_SIZE_TYPE sb_type) {
   }
 }
 
+// parse block dimension in the unit of 4x4 blocks
+static INLINE int b_width_log2(BLOCK_SIZE_TYPE sb_type) {
+  return mb_width_log2(sb_type) + 2;
+}
+
+static INLINE int b_height_log2(BLOCK_SIZE_TYPE sb_type) {
+  return mb_height_log2(sb_type) + 2;
+}
+
 typedef enum {
   BLOCK_4X4_LG2 = 0,
   BLOCK_8X8_LG2 = 2,

@@ -183,25 +183,15 @@ static void propagate_nzcs(VP9_COMMON *cm, MACROBLOCKD *xd) {
 }
 #endif
 
-/* skip_recon_mb() is Modified: Instead of writing the result to predictor buffer and then copying it
- *  to dst buffer, we can write the result directly to dst buffer. This eliminates unnecessary copy.
- */
-static void skip_recon_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
-                          int mb_row, int mb_col) {
+static void skip_recon_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
+                          int mb_row, int mb_col,
+                          BLOCK_SIZE_TYPE bsize) {
   MODE_INFO *m = xd->mode_info_context;
   BLOCK_SIZE_TYPE sb_type = m->mbmi.sb_type;
 
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-    if (sb_type == BLOCK_SIZE_SB64X64) {
-      vp9_build_intra_predictors_sb64uv_s(xd);
-      vp9_build_intra_predictors_sb64y_s(xd);
-    } else if (sb_type == BLOCK_SIZE_SB32X32) {
-      vp9_build_intra_predictors_sbuv_s(xd);
-      vp9_build_intra_predictors_sby_s(xd);
-    } else {
-      vp9_build_intra_predictors_mbuv_s(xd);
-      vp9_build_intra_predictors_mby_s(xd);
-    }
+    vp9_build_intra_predictors_sbuv_s(xd, bsize);
+    vp9_build_intra_predictors_sby_s(xd, bsize);
   } else {
     if (sb_type == BLOCK_SIZE_SB64X64) {
       vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
@@ -409,7 +399,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd,
     if (!xd->mode_info_context->mbmi.mb_skip_coeff)
       vp9_decode_mb_tokens_4x4_uv(pbi, xd, bc);
 #endif
-    vp9_build_intra_predictors_mbuv_s(xd);
+    vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_MB16X16);
     xd->itxm_add_uv_block(xd->plane[1].qcoeff, xd->block[16].dequant,
          xd->dst.u_buffer, xd->dst.uv_stride, xd->dst.u_buffer,
          xd->dst.uv_stride, xd->plane[1].eobs);
@@ -709,27 +699,21 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
 
     // Special case:  Force the loopfilter to skip when eobtotal and
     // mb_skip_coeff are zero.
-    skip_recon_mb(pbi, xd, mb_row, mb_col);
+    skip_recon_sb(pbi, xd, mb_row, mb_col, bsize);
     return;
   }
 
-  // TODO(jingning): need to combine intra/inter predictor functions and
+  // TODO(jingning): need to combine inter predictor functions and
   // make them block size independent.
   // generate prediction
-  if (bsize == BLOCK_SIZE_SB64X64) {
-    assert(bsize == BLOCK_SIZE_SB64X64);
-    if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-      vp9_build_intra_predictors_sb64y_s(xd);
-      vp9_build_intra_predictors_sb64uv_s(xd);
-    } else {
-      vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
-    }
+  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
+    vp9_build_intra_predictors_sby_s(xd, bsize);
+    vp9_build_intra_predictors_sbuv_s(xd, bsize);
   } else {
-    assert(bsize == BLOCK_SIZE_SB32X32);
-    if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-      vp9_build_intra_predictors_sby_s(xd);
-      vp9_build_intra_predictors_sbuv_s(xd);
+    if (bsize == BLOCK_SIZE_SB64X64) {
+      vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
     } else {
+      assert(bsize == BLOCK_SIZE_SB32X32);
       vp9_build_inter32x32_predictors_sb(xd, mb_row, mb_col);
     }
   }
@@ -804,7 +788,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     // Special case:  Force the loopfilter to skip when eobtotal and
     // mb_skip_coeff are zero.
     xd->mode_info_context->mbmi.mb_skip_coeff = 1;
-    skip_recon_mb(pbi, xd, mb_row, mb_col);
+    skip_recon_sb(pbi, xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
     return;
   }
 #if 0  // def DEC_DEBUG
@@ -819,9 +803,9 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
   // do prediction
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     if (mode != I8X8_PRED) {
-      vp9_build_intra_predictors_mbuv_s(xd);
+      vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_MB16X16);
       if (mode != B_PRED)
-        vp9_build_intra_predictors_mby_s(xd);
+        vp9_build_intra_predictors_sby_s(xd, BLOCK_SIZE_MB16X16);
     }
   } else {
 #if 0  // def DEC_DEBUG

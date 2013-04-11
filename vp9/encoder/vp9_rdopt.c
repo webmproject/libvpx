@@ -1113,11 +1113,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     x->e_mbd.mode_info_context->mbmi.mode = mode;
     if (bsize == BLOCK_SIZE_MB16X16) {
       vp9_build_intra_predictors_mby(&x->e_mbd);
-    } else if (bsize == BLOCK_SIZE_SB32X32) {
-      vp9_build_intra_predictors_sby_s(&x->e_mbd);
     } else {
-      assert(bsize == BLOCK_SIZE_SB64X64);
-      vp9_build_intra_predictors_sb64y_s(&x->e_mbd);
+      vp9_build_intra_predictors_sby_s(&x->e_mbd, bsize);
     }
 
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s,
@@ -1627,14 +1624,10 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
-    if (bsize == BLOCK_SIZE_MB16X16) {
+    if (bsize == BLOCK_SIZE_MB16X16)
       vp9_build_intra_predictors_mbuv(&x->e_mbd);
-    } else if (bsize == BLOCK_SIZE_SB32X32) {
-      vp9_build_intra_predictors_sbuv_s(&x->e_mbd);
-    } else {
-      assert(bsize == BLOCK_SIZE_SB64X64);
-      vp9_build_intra_predictors_sb64uv_s(&x->e_mbd);
-    }
+    else
+      vp9_build_intra_predictors_sbuv_s(&x->e_mbd, bsize);
 
     super_block_uvrd(&cpi->common, x, &this_rate_tokenonly,
                      &this_distortion, &s, bsize);
@@ -4616,13 +4609,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
-
-      if (bsize == BLOCK_SIZE_SB64X64) {
-        vp9_build_intra_predictors_sb64y_s(xd);
-      } else {
-        assert(bsize == BLOCK_SIZE_SB32X32);
-        vp9_build_intra_predictors_sby_s(xd);
-      }
+      vp9_build_intra_predictors_sby_s(xd, bsize);
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
                       bsize, txfm_cache);
 

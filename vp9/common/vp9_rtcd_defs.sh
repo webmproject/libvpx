@@ -86,32 +86,17 @@ specialize vp9_recon_sby_s
 prototype void vp9_recon_sbuv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst, enum BLOCK_SIZE_TYPE bsize"
 specialize void vp9_recon_sbuv_s
 
-prototype void vp9_build_intra_predictors_mby_s "struct macroblockd *x"
-specialize vp9_build_intra_predictors_mby_s
-
-prototype void vp9_build_intra_predictors_sby_s "struct macroblockd *x"
+prototype void vp9_build_intra_predictors_sby_s "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
 specialize vp9_build_intra_predictors_sby_s;
 
-prototype void vp9_build_intra_predictors_sbuv_s "struct macroblockd *x"
+prototype void vp9_build_intra_predictors_sbuv_s "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
 specialize vp9_build_intra_predictors_sbuv_s;
 
 prototype void vp9_build_intra_predictors_mby "struct macroblockd *x"
 specialize vp9_build_intra_predictors_mby;
 
-prototype void vp9_build_intra_predictors_mby_s "struct macroblockd *x"
-specialize vp9_build_intra_predictors_mby_s;
-
 prototype void vp9_build_intra_predictors_mbuv "struct macroblockd *x"
 specialize vp9_build_intra_predictors_mbuv;
-
-prototype void vp9_build_intra_predictors_mbuv_s "struct macroblockd *x"
-specialize vp9_build_intra_predictors_mbuv_s;
-
-prototype void vp9_build_intra_predictors_sb64y_s "struct macroblockd *x"
-specialize vp9_build_intra_predictors_sb64y_s;
-
-prototype void vp9_build_intra_predictors_sb64uv_s "struct macroblockd *x"
-specialize vp9_build_intra_predictors_sb64uv_s;
 
 prototype void vp9_intra4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra4x4_predict;
