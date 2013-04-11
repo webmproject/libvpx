@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//3qo\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-11T22:42:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXH//32o\u003d",
+      "revId": "c4485888ad009594dc5d971db872391294ce72e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//31k\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-04-11T21:20:38Z",
       "side": 1,
       "message": "rename this skip_recon_sb",
+      "revId": "c4485888ad009594dc5d971db872391294ce72e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//3wA\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-11T22:42:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXH//31k\u003d",
       "revId": "c4485888ad009594dc5d971db872391294ce72e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -64,6 +100,24 @@
       "writtenOn": "2013-04-11T22:18:43Z",
       "side": 1,
       "message": "We can\u0027t yet. This is a minor issue in the predictors, but the MB versions predict into xd-\u003epredictor ATM, whereas the SB ones predict in-place into the dst plane.\n\nScott said he\u0027d work on moving prediction into the dst plane for all code, so once that\u0027s done, we can remove the mbuv version.",
+      "parentUuid": "AAAAXH//31U\u003d",
+      "revId": "c4485888ad009594dc5d971db872391294ce72e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//3wc\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1630,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-11T22:42:59Z",
+      "side": 1,
+      "message": "Done",
       "parentUuid": "AAAAXH//31U\u003d",
       "revId": "c4485888ad009594dc5d971db872391294ce72e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
