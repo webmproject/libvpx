@@ -50,40 +50,6 @@ void vp9_recon2b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
   recon(4, 8, pred_ptr, 8, diff_ptr, 8, dst_ptr, stride);
 }
 
-void vp9_recon_mby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
-  int x, y;
-  BLOCKD *const b = &xd->block[0];
-  const int stride = b->dst_stride;
-  const int16_t *diff = b->diff;
-
-  for (y = 0; y < 16; y++) {
-    for (x = 0; x < 16; x++)
-      dst[x] = clip_pixel(dst[x] + diff[x]);
-
-    dst += stride;
-    diff += 16;
-  }
-}
-
-void vp9_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
-  int x, y, i;
-  uint8_t *dst = udst;
-
-  for (i = 0; i < 2; i++, dst = vdst) {
-    BLOCKD *const b = &xd->block[16 + 4 * i];
-    const int stride = b->dst_stride;
-    const int16_t *diff = b->diff;
-
-    for (y = 0; y < 8; y++) {
-      for (x = 0; x < 8; x++)
-        dst[x] = clip_pixel(dst[x] + diff[x]);
-
-      dst += stride;
-      diff += 8;
-    }
-  }
-}
-
 void vp9_recon_sby_s_c(MACROBLOCKD *mb, uint8_t *dst,
                        BLOCK_SIZE_TYPE bsize) {
   const int bw = 16 << mb_width_log2(bsize), bh = 16 << mb_height_log2(bsize);

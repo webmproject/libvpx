@@ -80,12 +80,6 @@ specialize vp9_recon_mb
 prototype void vp9_recon_mby "struct macroblockd *x"
 specialize vp9_recon_mby
 
-prototype void vp9_recon_mby_s "struct macroblockd *x, uint8_t *dst"
-specialize vp9_recon_mby_s
-
-prototype void vp9_recon_mbuv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst"
-specialize void vp9_recon_mbuv_s
-
 prototype void vp9_recon_sby_s "struct macroblockd *x, uint8_t *dst, enum BLOCK_SIZE_TYPE bsize"
 specialize vp9_recon_sby_s
 
