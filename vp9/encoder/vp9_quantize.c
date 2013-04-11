@@ -172,35 +172,6 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks) {
 #endif
 }
 
-void vp9_quantize_mby_4x4(MACROBLOCK *x) {
-  int i;
-
-  for (i = 0; i < 16; i++) {
-    TX_TYPE tx_type = get_tx_type_4x4(&x->e_mbd, i);
-    if (tx_type != DCT_DCT) {
-      vp9_ht_quantize_b_4x4(x, i, tx_type);
-    } else {
-      x->quantize_b_4x4(x, i, 16);
-    }
-  }
-}
-
-void vp9_quantize_mbuv_4x4(MACROBLOCK *x) {
-  int i;
-  const MACROBLOCKD * const xd = &x->e_mbd;
-  const BLOCK_SIZE_TYPE real_sb_type = xd->mode_info_context->mbmi.sb_type;
-  xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_MB16X16;
-
-  for (i = 16; i < 24; i++)
-    x->quantize_b_4x4(x, i, 16);
-  xd->mode_info_context->mbmi.sb_type = real_sb_type;
-}
-
-void vp9_quantize_mb_4x4(MACROBLOCK *x) {
-  vp9_quantize_mby_4x4(x);
-  vp9_quantize_mbuv_4x4(x);
-}
-
 void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                 int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
@@ -317,57 +288,6 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
     xd->nzcs[b_idx] = 0;
 #endif
   }
-}
-
-void vp9_quantize_mby_8x8(MACROBLOCK *x) {
-  int i;
-
-#if CONFIG_CODE_NONZEROCOUNT
-  for (i = 0; i < 16; i ++) {
-    x->e_mbd.nzcs[i] = 0;
-  }
-#endif
-  for (i = 0; i < 16; i += 4) {
-    TX_TYPE tx_type = get_tx_type_8x8(&x->e_mbd, (i & 8) + ((i & 4) >> 1));
-    x->quantize_b_8x8(x, i, tx_type, 16);
-  }
-}
-
-void vp9_quantize_mbuv_8x8(MACROBLOCK *x) {
-  int i;
-  const MACROBLOCKD * const xd = &x->e_mbd;
-  const BLOCK_SIZE_TYPE real_sb_type = xd->mode_info_context->mbmi.sb_type;
-  xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_MB16X16;
-
-#if CONFIG_CODE_NONZEROCOUNT
-  for (i = 16; i < 24; i ++) {
-    x->e_mbd.nzcs[i] = 0;
-  }
-#endif
-  for (i = 16; i < 24; i += 4)
-    x->quantize_b_8x8(x, i, DCT_DCT, 16);
-  xd->mode_info_context->mbmi.sb_type = real_sb_type;
-}
-
-void vp9_quantize_mb_8x8(MACROBLOCK *x) {
-  vp9_quantize_mby_8x8(x);
-  vp9_quantize_mbuv_8x8(x);
-}
-
-void vp9_quantize_mby_16x16(MACROBLOCK *x) {
-  TX_TYPE tx_type = get_tx_type_16x16(&x->e_mbd, 0);
-#if CONFIG_CODE_NONZEROCOUNT
-  int i;
-  for (i = 0; i < 16; i++) {
-    x->e_mbd.nzcs[i] = 0;
-  }
-#endif
-  x->quantize_b_16x16(x, 0, tx_type, 16);
-}
-
-void vp9_quantize_mb_16x16(MACROBLOCK *x) {
-  vp9_quantize_mby_16x16(x);
-  vp9_quantize_mbuv_8x8(x);
 }
 
 static void quantize(int16_t *zbin_boost_orig_ptr,

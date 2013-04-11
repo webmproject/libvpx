@@ -37,18 +37,6 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
 void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx,
                                   int y_blocks);
 
-void vp9_quantize_mb_4x4(MACROBLOCK *x);
-void vp9_quantize_mb_8x8(MACROBLOCK *x);
-
-void vp9_quantize_mbuv_4x4(MACROBLOCK *x);
-void vp9_quantize_mby_4x4(MACROBLOCK *x);
-
-void vp9_quantize_mby_8x8(MACROBLOCK *x);
-void vp9_quantize_mbuv_8x8(MACROBLOCK *x);
-
-void vp9_quantize_mb_16x16(MACROBLOCK *x);
-void vp9_quantize_mby_16x16(MACROBLOCK *x);
-
 void vp9_quantize_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_quantize_sby_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_quantize_sby_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
