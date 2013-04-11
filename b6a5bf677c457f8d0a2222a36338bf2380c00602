@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//5Ng\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-11T00:05:20Z",
+      "side": 1,
+      "message": "this condition might be problematic if rectangular block sizes smaller than 16x16 are enabled?\n\nm-\u003embmi.sb_type \u003e\u003d BLOCK_SIZE_MB16X16",
+      "revId": "b6a5bf677c457f8d0a2222a36338bf2380c00602",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//5Nc\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 593,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-11T00:05:20Z",
+      "side": 1,
+      "message": "mbmi-\u003esb_type \u003e\u003d BLOCK_SIZE_MB16X16",
+      "revId": "b6a5bf677c457f8d0a2222a36338bf2380c00602",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//5NU\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-11T00:05:20Z",
+      "side": 1,
+      "message": "mbmi-\u003esb_type \u003e\u003d BLOCK_SIZE_MB16X16",
+      "revId": "b6a5bf677c457f8d0a2222a36338bf2380c00602",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
