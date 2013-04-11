@@ -766,7 +766,7 @@ static void super_block_yrd_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff,
                                      16 << (bwl + bhl), 2);
   *rate       = rdcost_sby_4x4(cm, x, bsize);
-  *skippable  = vp9_sby_is_skippable(xd, bsize, TX_4X4);
+  *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
 
 static int rdcost_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -806,7 +806,7 @@ static void super_block_yrd_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff,
                                      64 << (bhl + bwl), 2);
   *rate       = rdcost_sby_8x8(cm, x, bsize);
-  *skippable  = vp9_sby_is_skippable(xd, bsize, TX_8X8);
+  *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
 
 static int rdcost_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -844,7 +844,7 @@ static void super_block_yrd_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff,
                                      256 << (bwl + bhl), 2);
   *rate       = rdcost_sby_16x16(cm, x, bsize);
-  *skippable  = vp9_sby_is_skippable(xd, bsize, TX_16X16);
+  *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
 
 static int rdcost_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -884,7 +884,7 @@ static void super_block_yrd_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
   *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff,
                                      1024 << (bwl + bhl), 0);
   *rate       = rdcost_sby_32x32(cm, x, bsize);
-  *skippable  = vp9_sby_is_skippable(xd, bsize, TX_32X32);
+  *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
 
 static void super_block_yrd(VP9_COMP *cpi,
@@ -1446,7 +1446,7 @@ static void super_block_uvrd_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
                                         xd->plane[1].dqcoeff,
                                         xd->plane[2].dqcoeff,
                                         32 << (bwl + bhl - 2), 2);
-  *skip       = vp9_sbuv_is_skippable(xd, bsize, TX_4X4);
+  *skip       = vp9_sbuv_is_skippable(xd, bsize);
 }
 
 static int rd_cost_sbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -1491,7 +1491,7 @@ static void super_block_uvrd_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
                                         xd->plane[1].dqcoeff,
                                         xd->plane[2].dqcoeff,
                                         128 << (bwl + bhl - 2), 2);
-  *skip       = vp9_sbuv_is_skippable(xd, bsize, TX_8X8);
+  *skip       = vp9_sbuv_is_skippable(xd, bsize);
 }
 
 static int rd_cost_sbuv_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -1536,7 +1536,7 @@ static void super_block_uvrd_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
                                         xd->plane[1].dqcoeff,
                                         xd->plane[2].dqcoeff,
                                         512 << (bwl + bhl - 2), 2);
-  *skip       = vp9_sbuv_is_skippable(xd, bsize, TX_16X16);
+  *skip       = vp9_sbuv_is_skippable(xd, bsize);
 }
 
 static int rd_cost_sbuv_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -1582,7 +1582,7 @@ static void super_block_uvrd_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
                                         xd->plane[1].dqcoeff,
                                         xd->plane[2].dqcoeff,
                                         2048 << (bwl + bhl - 2), 0);
-  *skip       = vp9_sbuv_is_skippable(xd, bsize, TX_32X32);
+  *skip       = vp9_sbuv_is_skippable(xd, bsize);
 }
 
 static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -2507,13 +2507,6 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
     x->e_mbd.plane[0].eobs[i] = bsi.eobs[i];
   }
 
-  *returntotrate = bsi.r;
-  *returndistortion = bsi.d;
-  *returnyrate = bsi.segment_yrate;
-  *skippable = bsi.txfm_size == TX_4X4 ?
-                    vp9_mby_is_skippable_4x4(&x->e_mbd) :
-                    vp9_mby_is_skippable_8x8(&x->e_mbd);
-
   /* save partitions */
   mbmi->txfm_size = bsi.txfm_size;
   mbmi->partitioning = bsi.segment_num;
@@ -2535,6 +2528,11 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   x->partition_info->bmi[15].mv.as_int = bsi.mvs[15].as_int;
   if (mbmi->second_ref_frame > 0)
     x->partition_info->bmi[15].second_mv.as_int = bsi.second_mvs[15].as_int;
+
+  *returntotrate = bsi.r;
+  *returndistortion = bsi.d;
+  *returnyrate = bsi.segment_yrate;
+  *skippable = vp9_sby_is_skippable(&x->e_mbd, BLOCK_SIZE_MB16X16);
 
   return (int)(bsi.segment_rd);
 }

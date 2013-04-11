@@ -10,6 +10,7 @@
 
 
 #include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_common.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
@@ -382,101 +383,34 @@ static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
   return vp9_get_segdata(xd, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
 
-/* TODO(jkoleszar): Probably best to remove instances that require this,
- * as the data likely becomes per-plane and stored in the per-plane structures.
- * This is a stub to work with the existing code.
- */
-static INLINE int block_idx_4x4(MACROBLOCKD* const xd, int block_size_b,
-                                int plane, int i) {
-  const int luma_blocks = 1 << block_size_b;
-  assert(xd->plane[0].subsampling_x == 0);
-  assert(xd->plane[0].subsampling_y == 0);
-  assert(xd->plane[1].subsampling_x == 1);
-  assert(xd->plane[1].subsampling_y == 1);
-  assert(xd->plane[2].subsampling_x == 1);
-  assert(xd->plane[2].subsampling_y == 1);
-  return plane == 0 ? i :
-         plane == 1 ? luma_blocks + i :
-                      luma_blocks * 5 / 4 + i;
-}
 
-static INLINE int decode_block_plane(VP9D_COMP* const pbi,
-                                     MACROBLOCKD* const xd,
-                                     BOOL_DECODER* const bc,
-                                     int block_size,
-                                     int segment_id,
-                                     int plane,
-                                     int is_split) {
-  // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
-  // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
-  const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
-  const int block_size_b = block_size;
-  const int txfrm_size_b = tx_size * 2;
-
-  // subsampled size of the block
-  const int ss_sum = xd->plane[plane].subsampling_x +
-                     xd->plane[plane].subsampling_y;
-  const int ss_block_size = block_size_b - ss_sum;
-
-  // size of the transform to use. scale the transform down if it's larger
-  // than the size of the subsampled data, or forced externally by the mb mode.
-  const int ss_max = MAX(xd->plane[plane].subsampling_x,
-                         xd->plane[plane].subsampling_y);
-  const int ss_txfrm_size = txfrm_size_b > ss_block_size || is_split
-                                       ? txfrm_size_b - ss_max * 2
-                                       : txfrm_size_b;
-  const TX_SIZE ss_tx_size = ss_txfrm_size / 2;
-
-  // TODO(jkoleszar): 1 may not be correct here with larger chroma planes.
-  const int inc = is_split ? 1 : (1 << ss_txfrm_size);
+struct decode_block_args {
+  VP9D_COMP *pbi;
+  MACROBLOCKD *xd;
+  BOOL_DECODER *bc;
+  int *eobtotal;
+};
+static void decode_block(int plane, int block,
+                         int block_size_b,
+                         int ss_txfrm_size,
+                         void *argv) {
+  const struct decode_block_args* const arg = argv;
+  const int old_block_idx = old_block_idx_4x4(arg->xd, block_size_b,
+                                              plane, block);
 
   // find the maximum eob for this transform size, adjusted by segment
-  const int seg_eob = get_eob(xd, segment_id, 16 << ss_txfrm_size);
+  const int segment_id = arg->xd->mode_info_context->mbmi.segment_id;
+  const TX_SIZE ss_tx_size = ss_txfrm_size / 2;
+  const int seg_eob = get_eob(arg->xd, segment_id, 16 << ss_txfrm_size);
+  int16_t* const qcoeff_base = arg->xd->plane[plane].qcoeff;
 
-  int i, eobtotal = 0;
-
-  assert(txfrm_size_b <= block_size_b);
-  assert(ss_txfrm_size <= ss_block_size);
-
-  // step through the block by the size of the transform in use.
-  for (i = 0; i < (1 << ss_block_size); i += inc) {
-    const int block_idx = block_idx_4x4(xd, block_size_b, plane, i);
-
-    const int c = decode_coefs(pbi, xd, bc, block_idx,
-                               xd->plane[plane].plane_type, seg_eob,
-                               BLOCK_OFFSET(xd->plane[plane].qcoeff, i, 16),
+  const int eob = decode_coefs(arg->pbi, arg->xd, arg->bc, old_block_idx,
+                               arg->xd->plane[plane].plane_type, seg_eob,
+                               BLOCK_OFFSET(qcoeff_base, block, 16),
                                ss_tx_size);
-    xd->plane[plane].eobs[i] = c;
-    eobtotal += c;
-  }
-  return eobtotal;
-}
 
-static INLINE int decode_blocks_helper(VP9D_COMP* const pbi,
-                                       MACROBLOCKD* const xd,
-                                       BOOL_DECODER* const bc,
-                                       int block_size,
-                                       int is_split_chroma) {
-  const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  int plane, eobtotal = 0;
-
-  for (plane = 0; plane < MAX_MB_PLANE; plane++) {
-    const int is_split = is_split_chroma &&
-                         xd->plane[plane].plane_type == PLANE_TYPE_UV;
-    eobtotal += decode_block_plane(pbi, xd, bc, block_size, segment_id,
-                                   plane, is_split);
-  }
-  return eobtotal;
-}
-
-static INLINE int decode_blocks(VP9D_COMP* const pbi,
-                                MACROBLOCKD* const xd,
-                                BOOL_DECODER* const bc,
-                                int block_size) {
-  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
-  const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
-  return decode_blocks_helper(pbi, xd, bc, block_size,
-      tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV));
+  arg->xd->plane[plane].eobs[block] = eob;
+  arg->eobtotal[0] += eob;
 }
 
 int vp9_decode_tokens(VP9D_COMP* const pbi,
@@ -484,7 +418,10 @@ int vp9_decode_tokens(VP9D_COMP* const pbi,
                          BOOL_DECODER* const bc,
                          BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
-  return decode_blocks(pbi, xd, bc, bwl + bhl);
+  int eobtotal = 0;
+  struct decode_block_args args = {pbi, xd, bc, &eobtotal};
+  foreach_transformed_block(xd, bwl + bhl, decode_block, &args);
+  return eobtotal;
 }
 
 #if CONFIG_NEWBINTRAMODES
