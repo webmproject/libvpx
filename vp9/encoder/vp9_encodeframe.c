@@ -822,62 +822,25 @@ static int pick_mb_modes(VP9_COMP *cpi,
   return splitmodes_used;
 }
 
-static void pick_sb_modes(VP9_COMP *cpi,
-                          int mb_row,
-                          int mb_col,
-                          TOKENEXTRA **tp,
-                          int *totalrate,
-                          int *totaldist) {
+static void pick_sb_modes(VP9_COMP *cpi, int mb_row, int mb_col,
+                          TOKENEXTRA **tp, int *totalrate, int *totaldist,
+                          BLOCK_SIZE_TYPE bsize, PICK_MODE_CONTEXT *ctx) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  set_offsets(cpi, mb_row, mb_col, BLOCK_SIZE_SB32X32);
-  xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB32X32;
+  set_offsets(cpi, mb_row, mb_col, bsize);
+  xd->mode_info_context->mbmi.sb_type = bsize;
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     vp9_activity_masking(cpi, x);
 
   /* Find best coding mode & reconstruct the MB so it is available
    * as a predictor for MBs that follow in the SB */
   if (cm->frame_type == KEY_FRAME) {
-    vp9_rd_pick_intra_mode_sb(cpi, x, totalrate, totaldist,
-                              BLOCK_SIZE_SB32X32);
-
-    /* Save the coding context */
-    vpx_memcpy(&x->sb32_context[xd->sb_index].mic, xd->mode_info_context,
-               sizeof(MODE_INFO));
+    vp9_rd_pick_intra_mode_sb(cpi, x, totalrate, totaldist, bsize, ctx);
   } else {
     vp9_rd_pick_inter_mode_sb(cpi, x, mb_row, mb_col, totalrate, totaldist,
-                              BLOCK_SIZE_SB32X32);
-  }
-}
-
-static void pick_sb64_modes(VP9_COMP *cpi,
-                            int mb_row,
-                            int mb_col,
-                            TOKENEXTRA **tp,
-                            int *totalrate,
-                            int *totaldist) {
-  VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = &cpi->mb;
-  MACROBLOCKD *const xd = &x->e_mbd;
-
-  set_offsets(cpi, mb_row, mb_col, BLOCK_SIZE_SB64X64);
-  xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB64X64;
-  if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
-    vp9_activity_masking(cpi, x);
-
-  /* Find best coding mode & reconstruct the MB so it is available
-   * as a predictor for MBs that follow in the SB */
-  if (cm->frame_type == KEY_FRAME) {
-    vp9_rd_pick_intra_mode_sb(cpi, x, totalrate, totaldist,
-                              BLOCK_SIZE_SB64X64);
-
-    /* Save the coding context */
-    vpx_memcpy(&x->sb64_context.mic, xd->mode_info_context, sizeof(MODE_INFO));
-  } else {
-    vp9_rd_pick_inter_mode_sb(cpi, x, mb_row, mb_col, totalrate, totaldist,
-                              BLOCK_SIZE_SB64X64);
+                              bsize, ctx);
   }
 }
 
@@ -1101,7 +1064,8 @@ static void encode_sb_row(VP9_COMP *cpi,
                           mb_row + y_idx + 1 >= cm->mb_rows)) {
         /* Pick a mode assuming that it applies to all 4 of the MBs in the SB */
         pick_sb_modes(cpi, mb_row + y_idx, mb_col + x_idx,
-                      tp, &sb_rate, &sb_dist);
+                      tp, &sb_rate, &sb_dist, BLOCK_SIZE_SB32X32,
+                      &x->sb32_context[xd->sb_index]);
         sb_rate += vp9_cost_bit(cm->prob_sb32_coded, 1);
       }
 
@@ -1138,7 +1102,8 @@ static void encode_sb_row(VP9_COMP *cpi,
 
     if (!sb64_skip && !(mb_col + 3 >= cm->mb_cols ||
                         mb_row + 3 >= cm->mb_rows)) {
-      pick_sb64_modes(cpi, mb_row, mb_col, tp, &sb64_rate, &sb64_dist);
+      pick_sb_modes(cpi, mb_row, mb_col, tp, &sb64_rate, &sb64_dist,
+                    BLOCK_SIZE_SB64X64, &x->sb64_context);
       sb64_rate += vp9_cost_bit(cm->prob_sb64_coded, 1);
     }
 

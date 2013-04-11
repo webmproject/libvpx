@@ -4259,7 +4259,8 @@ end:
 
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *returnrate, int *returndist,
-                               BLOCK_SIZE_TYPE bsize) {
+                               BLOCK_SIZE_TYPE bsize,
+                               PICK_MODE_CONTEXT *ctx) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   int rate_y = 0, rate_uv;
@@ -4279,26 +4280,19 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
                   vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 1);
     *returndist = dist_y + (dist_uv >> 2);
-    if (bsize == BLOCK_SIZE_SB32X32) {
-      memset(x->sb32_context[xd->sb_index].txfm_rd_diff, 0,
-             sizeof(x->sb32_context[xd->sb_index].txfm_rd_diff));
-    } else {
-      memset(x->sb64_context.txfm_rd_diff, 0,
-             sizeof(x->sb64_context.txfm_rd_diff));
-    }
+    memset(ctx->txfm_rd_diff, 0,
+           sizeof(x->sb32_context[xd->sb_index].txfm_rd_diff));
   } else {
     *returnrate = rate_y + rate_uv;
     if (cpi->common.mb_no_coeff_skip)
       *returnrate += vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
     *returndist = dist_y + (dist_uv >> 2);
     for (i = 0; i < NB_TXFM_MODES; i++) {
-      if (bsize == BLOCK_SIZE_SB32X32) {
-        x->sb32_context[xd->sb_index].txfm_rd_diff[i] = err - txfm_cache[i];
-      } else {
-        x->sb64_context.txfm_rd_diff[i] = err - txfm_cache[i];
-      }
+      ctx->txfm_rd_diff[i] = err - txfm_cache[i];
     }
   }
+
+  vpx_memcpy(&ctx->mic, xd->mode_info_context, sizeof(MODE_INFO));
 }
 
 void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -4433,7 +4427,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   int mb_row, int mb_col,
                                   int *returnrate,
                                   int *returndistortion,
-                                  BLOCK_SIZE_TYPE bsize) {
+                                  BLOCK_SIZE_TYPE bsize,
+                                  PICK_MODE_CONTEXT *ctx) {
   const int block_size = (bsize == BLOCK_SIZE_SB64X64) ?
                           BLOCK_64X64 : BLOCK_32X32;
   VP9_COMMON *cm = &cpi->common;
@@ -4938,16 +4933,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
  end:
   set_scale_factors(xd, mbmi->ref_frame, mbmi->second_ref_frame,
                     scale_factor);
-  {
-    PICK_MODE_CONTEXT *p = (block_size == BLOCK_32X32) ?
-                            &x->sb32_context[xd->sb_index] :
-                            &x->sb64_context;
-    store_coding_context(x, p, best_mode_index, NULL,
-                         &mbmi->ref_mvs[mbmi->ref_frame][0],
-                         &mbmi->ref_mvs[mbmi->second_ref_frame < 0 ? 0 :
-                             mbmi->second_ref_frame][0],
-                         best_pred_diff, best_txfm_diff);
-  }
+  store_coding_context(x, ctx, best_mode_index, NULL,
+                       &mbmi->ref_mvs[mbmi->ref_frame][0],
+                       &mbmi->ref_mvs[mbmi->second_ref_frame < 0 ? 0 :
+                                      mbmi->second_ref_frame][0],
+                       best_pred_diff, best_txfm_diff);
 
   return best_rd;
 }
