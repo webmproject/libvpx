@@ -566,8 +566,6 @@ typedef struct VP9_COMP {
   unsigned char *active_map;
   unsigned int active_map_enabled;
 
-  TOKENLIST *tplist;
-
   fractional_mv_step_fp *find_fractional_mv_step;
   vp9_full_search_fn_t full_search_sad;
   vp9_refining_search_fn_t refining_search_sad;
