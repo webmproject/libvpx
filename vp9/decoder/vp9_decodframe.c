@@ -771,7 +771,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     mb_init_dequantizer(pbi, xd);
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
-    vp9_reset_mb_tokens_context(xd);
+    vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
   } else if (!bool_error(bc)) {
 #if CONFIG_NEWBINTRAMODES
     if (mode != B_PRED)

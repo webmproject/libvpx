@@ -568,7 +568,7 @@ void vp9_tokenize_mb(VP9_COMP *cpi,
     if (!cpi->common.mb_no_coeff_skip) {
       vp9_stuff_mb(cpi, xd, t, dry_run);
     } else {
-      vp9_reset_mb_tokens_context(xd);
+      vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
     }
 
     if (dry_run)

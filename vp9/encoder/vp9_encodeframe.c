@@ -2124,7 +2124,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
       mbmi->mb_skip_coeff = 1;
       if (output_enabled)
         cpi->skip_true_count[mb_skip_context]++;
-      vp9_reset_mb_tokens_context(xd);
+      vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
     } else {
       vp9_stuff_mb(cpi, xd, t, !output_enabled);
       mbmi->mb_skip_coeff = 0;
