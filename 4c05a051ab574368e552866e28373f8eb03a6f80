@@ -16,6 +16,24 @@
       "revId": "4c05a051ab574368e552866e28373f8eb03a6f80",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//4Jc\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-11T19:02:39Z",
+      "side": 1,
+      "message": "Don\u0027t recall for sure whether this was an issue still after I added my own plane_block_idx or this was before when I was trying to make it work with c_idx. You can try removing it, but offhand I think it\u0027s required at the moment. Without this, say you\u0027re doing a 16x16 transform and a 64x64 superblock, plane_idx/c_idx doesn\u0027t do the right thing, it thinks block 16 is part of the y plane.",
+      "parentUuid": "AAAAXH//5TM\u003d",
+      "revId": "4c05a051ab574368e552866e28373f8eb03a6f80",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
