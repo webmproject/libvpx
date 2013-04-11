@@ -50,6 +50,24 @@
       "revId": "c4485888ad009594dc5d971db872391294ce72e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//3r4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1630,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-11T22:18:43Z",
+      "side": 1,
+      "message": "We can\u0027t yet. This is a minor issue in the predictors, but the MB versions predict into xd-\u003epredictor ATM, whereas the SB ones predict in-place into the dst plane.\n\nScott said he\u0027d work on moving prediction into the dst plane for all code, so once that\u0027s done, we can remove the mbuv version.",
+      "parentUuid": "AAAAXH//31U\u003d",
+      "revId": "c4485888ad009594dc5d971db872391294ce72e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
