@@ -883,8 +883,10 @@ static int get_delta_q(vp9_reader *r, int *dq) {
 FILE *vpxlog = 0;
 #endif
 
-static void set_offsets(VP9D_COMP *pbi, int block_size,
+static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
                         int mb_row, int mb_col) {
+  const int bh = 1 << mb_height_log2(bsize);
+  const int bw = 1 << mb_width_log2(bsize);
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
@@ -894,22 +896,22 @@ static void set_offsets(VP9D_COMP *pbi, int block_size,
   const int recon_uvoffset = (8 * mb_row) * dst_fb->uv_stride + (8 * mb_col);
 
   xd->mode_info_context = cm->mi + mb_idx;
-  xd->mode_info_context->mbmi.sb_type = (BLOCK_SIZE_TYPE)(block_size / 32);
+  xd->mode_info_context->mbmi.sb_type = bsize;
   xd->prev_mode_info_context = cm->prev_mi + mb_idx;
   xd->above_context = cm->above_context + mb_col;
   xd->left_context = cm->left_context + mb_row % 4;
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
-  set_mb_row(cm, xd, mb_row, block_size / 16);
-  set_mb_col(cm, xd, mb_col, block_size / 16);
+  set_mb_row(cm, xd, mb_row, bh);
+  set_mb_col(cm, xd, mb_col, bw);
 
   xd->dst.y_buffer = dst_fb->y_buffer + recon_yoffset;
   xd->dst.u_buffer = dst_fb->u_buffer + recon_uvoffset;
   xd->dst.v_buffer = dst_fb->v_buffer + recon_uvoffset;
 }
 
-static void set_refs(VP9D_COMP *pbi, int block_size, int mb_row, int mb_col) {
+static void set_refs(VP9D_COMP *pbi, int mb_row, int mb_col) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
@@ -950,9 +952,9 @@ static void decode_sb_row(VP9D_COMP *pbi, int mb_row, vp9_reader* r) {
        mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
     if (vp9_read(r, pc->prob_sb64_coded)) {
       // SB64 decoding
-      set_offsets(pbi, 64, mb_row, mb_col);
+      set_offsets(pbi, BLOCK_SIZE_SB64X64, mb_row, mb_col);
       vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, r);
-      set_refs(pbi, 64, mb_row, mb_col);
+      set_refs(pbi, mb_row, mb_col);
       decode_sb(pbi, xd, mb_row, mb_col, r, BLOCK_SIZE_SB64X64);
       xd->corrupted |= bool_error(r);
     } else {
@@ -969,9 +971,9 @@ static void decode_sb_row(VP9D_COMP *pbi, int mb_row, vp9_reader* r) {
 
         if (vp9_read(r, pc->prob_sb32_coded)) {
           // SB32 decoding
-          set_offsets(pbi, 32, y_idx_sb, x_idx_sb);
+          set_offsets(pbi, BLOCK_SIZE_SB32X32, y_idx_sb, x_idx_sb);
           vp9_decode_mb_mode_mv(pbi, xd, y_idx_sb, x_idx_sb, r);
-          set_refs(pbi, 32, y_idx_sb, x_idx_sb);
+          set_refs(pbi, y_idx_sb, x_idx_sb);
           decode_sb(pbi, xd, y_idx_sb, x_idx_sb, r, BLOCK_SIZE_SB32X32);
           xd->corrupted |= bool_error(r);
         } else {
@@ -989,9 +991,9 @@ static void decode_sb_row(VP9D_COMP *pbi, int mb_row, vp9_reader* r) {
             xd->mb_index = i;
 
             // MB decoding
-            set_offsets(pbi, 16, y_idx_mb, x_idx_mb);
+            set_offsets(pbi, BLOCK_SIZE_MB16X16, y_idx_mb, x_idx_mb);
             vp9_decode_mb_mode_mv(pbi, xd, y_idx_mb, x_idx_mb, r);
-            set_refs(pbi, 16, y_idx_mb, x_idx_mb);
+            set_refs(pbi, y_idx_mb, x_idx_mb);
             decode_mb(pbi, xd, y_idx_mb, x_idx_mb, r);
             xd->corrupted |= bool_error(r);
           }

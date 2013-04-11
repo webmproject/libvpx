@@ -1705,7 +1705,8 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
               mb_row + y_idx_sb >= c->mb_rows)
             continue;
 
-          vp9_write(bc, sb_m->mbmi.sb_type, c->prob_sb32_coded);
+          vp9_write(bc, sb_m->mbmi.sb_type == BLOCK_SIZE_SB32X32,
+                    c->prob_sb32_coded);
           if (sb_m->mbmi.sb_type) {
             assert(sb_m->mbmi.sb_type == BLOCK_SIZE_SB32X32);
             write_modes_b(cpi, sb_m, bc, tok, tok_end,
