@@ -2943,25 +2943,26 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       // Set up entropy depending on frame type.
       if (cm->frame_type == KEY_FRAME) {
         /* Choose which entropy context to use. When using a forward reference
-	 * frame, it immediately follows the keyframe, and thus benefits from
-	 * using the same entropy context established by the keyframe. Otherwise,
-	 * use the default context 0.
-	 */
+         * frame, it immediately follows the keyframe, and thus benefits from
+         * using the same entropy context established by the keyframe. Otherwise,
+         * use the default context 0.
+         */
         cm->frame_context_idx = cpi->oxcf.play_alternate;
         vp9_setup_key_frame(cpi);
       } else {
-	/* Choose which entropy context to use. Currently there are only two
-	 * contexts used, one for normal frames and one for alt ref frames.
-	 */
+        /* Choose which entropy context to use. Currently there are only two
+         * contexts used, one for normal frames and one for alt ref frames.
+         */
         cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
         vp9_setup_inter_frame(cpi);
       }
     }
 
     // transform / motion compensation build reconstruction frame
-#if CONFIG_MODELCOEFPROB && ADJUST_KF_COEF_PROBS
-    if (cm->frame_type == KEY_FRAME)
-      vp9_adjust_default_coef_probs(cm);
+#if CONFIG_MODELCOEFPROB
+    if (cm->frame_type == KEY_FRAME) {
+      vp9_default_coef_probs(cm);
+    }
 #endif
 
     vp9_encode_frame(cpi);

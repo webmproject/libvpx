@@ -404,7 +404,7 @@ static int prob_diff_update_savings_search_model(const unsigned int *ct,
                                                  const vp9_prob *oldp,
                                                  vp9_prob *bestp,
                                                  const vp9_prob upd,
-                                                 int b, int r) {
+                                                 int b, int r, int q) {
   int i, old_b, new_b, update_b, savings, bestsavings, step;
   int newp;
   vp9_prob bestnewp, newplist[ENTROPY_NODES];
@@ -2068,8 +2068,8 @@ static void update_nzc_probs(VP9_COMP* cpi,
 #endif  // CONFIG_CODE_NONZEROCOUNT
 
 static void update_coef_probs_common(vp9_writer* const bc,
-#ifdef ENTROPY_STATS
                                      VP9_COMP *cpi,
+#ifdef ENTROPY_STATS
                                      vp9_coeff_stats *tree_update_hist,
 #endif
                                      vp9_coeff_probs *new_frame_coef_probs,
@@ -2112,7 +2112,8 @@ static void update_coef_probs_common(vp9_writer* const bc,
             if (t == UNCONSTRAINED_NODES - 1)
               s = prob_diff_update_savings_search_model(
                   frame_branch_ct[i][j][k][l][0],
-                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j,
+                  cpi->common.base_qindex);
             else
 #endif
               s = prob_diff_update_savings_search(
@@ -2166,7 +2167,8 @@ static void update_coef_probs_common(vp9_writer* const bc,
             if (t == UNCONSTRAINED_NODES - 1)
               s = prob_diff_update_savings_search_model(
                   frame_branch_ct[i][j][k][l][0],
-                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j,
+                  cpi->common.base_qindex);
             else
 #endif
               s = prob_diff_update_savings_search(
@@ -2209,8 +2211,8 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
   build_coeff_contexts(cpi);
 
   update_coef_probs_common(bc,
-#ifdef ENTROPY_STATS
                            cpi,
+#ifdef ENTROPY_STATS
                            tree_update_hist_4x4,
 #endif
                            cpi->frame_coef_probs_4x4,
@@ -2221,8 +2223,8 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
   /* do not do this if not even allowed */
   if (cpi->common.txfm_mode != ONLY_4X4) {
     update_coef_probs_common(bc,
-#ifdef ENTROPY_STATS
                              cpi,
+#ifdef ENTROPY_STATS
                              tree_update_hist_8x8,
 #endif
                              cpi->frame_coef_probs_8x8,
@@ -2233,8 +2235,8 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
 
   if (cpi->common.txfm_mode > ALLOW_8X8) {
     update_coef_probs_common(bc,
-#ifdef ENTROPY_STATS
                              cpi,
+#ifdef ENTROPY_STATS
                              tree_update_hist_16x16,
 #endif
                              cpi->frame_coef_probs_16x16,
@@ -2245,8 +2247,8 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
 
   if (cpi->common.txfm_mode > ALLOW_16X16) {
     update_coef_probs_common(bc,
-#ifdef ENTROPY_STATS
                              cpi,
+#ifdef ENTROPY_STATS
                              tree_update_hist_32x32,
 #endif
                              cpi->frame_coef_probs_32x32,
