@@ -131,18 +131,15 @@ typedef enum {
 
 typedef enum {
   B_DC_PRED,          /* average of above and left pixels */
+  B_V_PRED,          /* vertical prediction */
+  B_H_PRED,          /* horizontal prediction */
+  B_D45_PRED,
+  B_D135_PRED,
+  B_D117_PRED,
+  B_D153_PRED,
+  B_D27_PRED,
+  B_D63_PRED,
   B_TM_PRED,
-
-  B_VE_PRED,          /* vertical prediction */
-  B_HE_PRED,          /* horizontal prediction */
-
-  B_LD_PRED,
-  B_RD_PRED,
-
-  B_VR_PRED,
-  B_VL_PRED,
-  B_HD_PRED,
-  B_HU_PRED,
 #if CONFIG_NEWBINTRAMODES
   B_CONTEXT_PRED,
 #endif
@@ -466,15 +463,15 @@ typedef struct macroblockd {
 static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
   switch (mode) {
     case DC_PRED: return B_DC_PRED;
-    case V_PRED: return B_VE_PRED;
-    case H_PRED: return B_HE_PRED;
+    case V_PRED: return B_V_PRED;
+    case H_PRED: return B_H_PRED;
     case TM_PRED: return B_TM_PRED;
-    case D45_PRED: return B_LD_PRED;
-    case D135_PRED: return B_RD_PRED;
-    case D117_PRED: return B_VR_PRED;
-    case D153_PRED: return B_HD_PRED;
-    case D27_PRED: return B_HU_PRED;
-    case D63_PRED: return B_VL_PRED;
+    case D45_PRED: return B_D45_PRED;
+    case D135_PRED: return B_D135_PRED;
+    case D117_PRED: return B_D117_PRED;
+    case D153_PRED: return B_D153_PRED;
+    case D27_PRED: return B_D27_PRED;
+    case D63_PRED: return B_D63_PRED;
     default:
        assert(0);
        return B_MODE_COUNT;  // Dummy value
@@ -485,16 +482,16 @@ static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
 static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
   switch (bmode) {
     case B_TM_PRED :
-    case B_RD_PRED :
+    case B_D135_PRED :
       return ADST_ADST;
 
-    case B_VE_PRED :
-    case B_VR_PRED :
+    case B_V_PRED :
+    case B_D117_PRED :
       return ADST_DCT;
 
-    case B_HE_PRED :
-    case B_HD_PRED :
-    case B_HU_PRED :
+    case B_H_PRED :
+    case B_D153_PRED :
+    case B_D27_PRED :
       return DCT_ADST;
 
 #if CONFIG_NEWBINTRAMODES
