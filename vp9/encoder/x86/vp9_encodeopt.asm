@@ -125,7 +125,7 @@ sym(vp9_block_error_mmx):
     ret
 
 
-;int vp9_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
+;int vp9_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr);
 global sym(vp9_mbblock_error_mmx_impl) PRIVATE
 sym(vp9_mbblock_error_mmx_impl):
     push        rbp
@@ -142,10 +142,6 @@ sym(vp9_mbblock_error_mmx_impl):
         mov         rdi,        arg(1) ;dcoef_ptr
         pxor        mm2,        mm2
 
-        movd        mm1,        dword ptr arg(2) ;dc
-        por         mm1,        mm2
-
-        pcmpeqw     mm1,        mm7
         mov         rcx,        16
 
 .mberror_loop_mmx:
@@ -160,7 +156,6 @@ sym(vp9_mbblock_error_mmx_impl):
         pmaddwd     mm5,        mm5
 
         psubw       mm3,        mm4
-        pand        mm3,        mm1
 
         pmaddwd     mm3,        mm3
         paddd       mm2,        mm5
@@ -202,28 +197,24 @@ sym(vp9_mbblock_error_mmx_impl):
     ret
 
 
-;int vp9_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
+;int vp9_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr);
 global sym(vp9_mbblock_error_xmm_impl) PRIVATE
 sym(vp9_mbblock_error_xmm_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
-    SAVE_XMM 6
+    SAVE_XMM 5
     push rsi
     push rdi
     ; end prolog
 
 
         mov         rsi,        arg(0) ;coeff_ptr
-        pxor        xmm6,       xmm6
+        pxor        xmm5,       xmm5
 
         mov         rdi,        arg(1) ;dcoef_ptr
         pxor        xmm4,       xmm4
 
-        movd        xmm5,       dword ptr arg(2) ;dc
-        por         xmm5,       xmm4
-
-        pcmpeqw     xmm5,       xmm6
         mov         rcx,        16
 
 .mberror_loop:
@@ -238,7 +229,6 @@ sym(vp9_mbblock_error_xmm_impl):
         pmaddwd     xmm2,       xmm2
 
         psubw       xmm0,       xmm1
-        pand        xmm0,       xmm5
 
         pmaddwd     xmm0,       xmm0
         add         rsi,        32
@@ -252,9 +242,9 @@ sym(vp9_mbblock_error_xmm_impl):
         jnz         .mberror_loop
 
         movdqa      xmm0,       xmm4
-        punpckldq   xmm0,       xmm6
+        punpckldq   xmm0,       xmm5
 
-        punpckhdq   xmm4,       xmm6
+        punpckhdq   xmm4,       xmm5
         paddd       xmm0,       xmm4
 
         movdqa      xmm1,       xmm0

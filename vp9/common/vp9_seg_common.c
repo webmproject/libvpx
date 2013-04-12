@@ -12,9 +12,8 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_seg_common.h"
 
-static const int segfeaturedata_signed[SEG_LVL_MAX] = { 1, 1, 0, 0, 0, 0 };
-static const int seg_feature_data_max[SEG_LVL_MAX] =
-                 { MAXQ, 63, 0xf, MB_MODE_COUNT - 1, 255, TX_SIZE_MAX_SB - 1};
+static const int segfeaturedata_signed[SEG_LVL_MAX] = { 1, 1, 0, 0 };
+static const int seg_feature_data_max[SEG_LVL_MAX] = { MAXQ, 63, 0xf, 0xf };
 
 // These functions provide access to new segment level features.
 // Eventually these function may be "optimized out" but for the moment,
@@ -52,7 +51,7 @@ int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id) {
 }
 
 int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id) {
-  return (segfeaturedata_signed[feature_id]);
+  return segfeaturedata_signed[feature_id];
 }
 
 void vp9_clear_segdata(MACROBLOCKD *xd,
@@ -103,10 +102,4 @@ int vp9_check_segref_inter(MACROBLOCKD *xd, int segment_id) {
           ~(1 << INTRA_FRAME)) ? 1 : 0;
 }
 
-int vp9_get_seg_tx_type(MACROBLOCKD *xd, int segment_id) {
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_TRANSFORM))
-    return vp9_get_segdata(xd, segment_id, SEG_LVL_TRANSFORM);
-  else
-    return TX_4X4;
-}
 // TBD? Functions to read and write segment data with range / validity checking

@@ -8,27 +8,22 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <stdio.h>
+#include <limits.h>
+#include <math.h>
 
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vpx_mem/vpx_mem.h"
 #include "./vpx_config.h"
-#include <stdio.h>
-#include <limits.h>
-#include <math.h>
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_common.h"
 
-#ifdef ENTROPY_STATS
-static int mv_ref_ct [31] [4] [2];
-static int mv_mode_cts [4] [2];
-#endif
-
 void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
   int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL +
-      ((ref_mv->as_mv.col & 7) ? 1 : 0);
+                                 ((ref_mv->as_mv.col & 7) ? 1 : 0);
   int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL +
-      ((ref_mv->as_mv.row & 7) ? 1 : 0);
+                                 ((ref_mv->as_mv.row & 7) ? 1 : 0);
   int col_max = (ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
   int row_max = (ref_mv->as_mv.row >> 3) + MAX_FULL_PEL_VAL;
 
@@ -43,36 +38,47 @@ void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
     x->mv_row_max = row_max;
 }
 
+int vp9_init_search_range(int width, int height) {
+  int sr = 0;
+  int frm = MIN(width, height);
+
+  while ((frm << sr) < MAX_FULL_PEL_VAL)
+    sr++;
+
+  if (sr)
+    sr--;
+
+  return sr;
+}
+
 int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
-                    int Weight, int ishp) {
+                    int weight, int ishp) {
   MV v;
-  v.row = (mv->as_mv.row - ref->as_mv.row);
-  v.col = (mv->as_mv.col - ref->as_mv.col);
+  v.row = mv->as_mv.row - ref->as_mv.row;
+  v.col = mv->as_mv.col - ref->as_mv.col;
   return ((mvjcost[vp9_get_mv_joint(v)] +
-           mvcost[0][v.row] + mvcost[1][v.col]) *
-          Weight) >> 7;
+           mvcost[0][v.row] + mvcost[1][v.col]) * weight) >> 7;
 }
 
 static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
                        int error_per_bit, int ishp) {
   if (mvcost) {
     MV v;
-    v.row = (mv->as_mv.row - ref->as_mv.row);
-    v.col = (mv->as_mv.col - ref->as_mv.col);
+    v.row = mv->as_mv.row - ref->as_mv.row;
+    v.col = mv->as_mv.col - ref->as_mv.col;
     return ((mvjcost[vp9_get_mv_joint(v)] +
              mvcost[0][v.row] + mvcost[1][v.col]) *
-            error_per_bit + 128) >> 8;
+            error_per_bit + 4096) >> 13;
   }
   return 0;
 }
 
 static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvjsadcost,
                           int *mvsadcost[2], int error_per_bit) {
-
   if (mvsadcost) {
     MV v;
-    v.row = (mv->as_mv.row - ref->as_mv.row);
-    v.col = (mv->as_mv.col - ref->as_mv.col);
+    v.row = mv->as_mv.row - ref->as_mv.row;
+    v.col = mv->as_mv.col - ref->as_mv.col;
     return ((mvjsadcost[vp9_get_mv_joint(v)] +
              mvsadcost[0][v.row] + mvsadcost[1][v.col]) *
             error_per_bit + 128) >> 8;
@@ -81,45 +87,39 @@ static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvjsadcost,
 }
 
 void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride) {
-  int Len;
+  int len;
   int search_site_count = 0;
 
-
   // Generate offsets for 4 search sites per step.
-  Len = MAX_FIRST_STEP;
   x->ss[search_site_count].mv.col = 0;
   x->ss[search_site_count].mv.row = 0;
   x->ss[search_site_count].offset = 0;
   search_site_count++;
 
-  while (Len > 0) {
+  for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
+    // Compute offsets for search sites.
+    x->ss[search_site_count].mv.col = 0;
+    x->ss[search_site_count].mv.row = -len;
+    x->ss[search_site_count].offset = -len * stride;
+    search_site_count++;
 
     // Compute offsets for search sites.
     x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = -Len;
-    x->ss[search_site_count].offset = -Len * stride;
+    x->ss[search_site_count].mv.row = len;
+    x->ss[search_site_count].offset = len * stride;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = Len;
-    x->ss[search_site_count].offset = Len * stride;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -Len;
+    x->ss[search_site_count].mv.col = -len;
     x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = -Len;
+    x->ss[search_site_count].offset = -len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = Len;
+    x->ss[search_site_count].mv.col = len;
     x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = Len;
+    x->ss[search_site_count].offset = len;
     search_site_count++;
-
-    // Contract.
-    Len /= 2;
   }
 
   x->ss_count = search_site_count;
@@ -127,68 +127,63 @@ void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride) {
 }
 
 void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
-  int Len;
+  int len;
   int search_site_count = 0;
 
   // Generate offsets for 8 search sites per step.
-  Len = MAX_FIRST_STEP;
   x->ss[search_site_count].mv.col = 0;
   x->ss[search_site_count].mv.row = 0;
   x->ss[search_site_count].offset = 0;
   search_site_count++;
 
-  while (Len > 0) {
+  for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
+    // Compute offsets for search sites.
+    x->ss[search_site_count].mv.col = 0;
+    x->ss[search_site_count].mv.row = -len;
+    x->ss[search_site_count].offset = -len * stride;
+    search_site_count++;
 
     // Compute offsets for search sites.
     x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = -Len;
-    x->ss[search_site_count].offset = -Len * stride;
+    x->ss[search_site_count].mv.row = len;
+    x->ss[search_site_count].offset = len * stride;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = Len;
-    x->ss[search_site_count].offset = Len * stride;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -Len;
+    x->ss[search_site_count].mv.col = -len;
     x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = -Len;
+    x->ss[search_site_count].offset = -len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = Len;
+    x->ss[search_site_count].mv.col = len;
     x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = Len;
+    x->ss[search_site_count].offset = len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -Len;
-    x->ss[search_site_count].mv.row = -Len;
-    x->ss[search_site_count].offset = -Len * stride - Len;
+    x->ss[search_site_count].mv.col = -len;
+    x->ss[search_site_count].mv.row = -len;
+    x->ss[search_site_count].offset = -len * stride - len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = Len;
-    x->ss[search_site_count].mv.row = -Len;
-    x->ss[search_site_count].offset = -Len * stride + Len;
+    x->ss[search_site_count].mv.col = len;
+    x->ss[search_site_count].mv.row = -len;
+    x->ss[search_site_count].offset = -len * stride + len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -Len;
-    x->ss[search_site_count].mv.row = Len;
-    x->ss[search_site_count].offset = Len * stride - Len;
+    x->ss[search_site_count].mv.col = -len;
+    x->ss[search_site_count].mv.row = len;
+    x->ss[search_site_count].offset = len * stride - len;
     search_site_count++;
 
     // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = Len;
-    x->ss[search_site_count].mv.row = Len;
-    x->ss[search_site_count].offset = Len * stride + Len;
+    x->ss[search_site_count].mv.col = len;
+    x->ss[search_site_count].mv.row = len;
+    x->ss[search_site_count].offset = len * stride + len;
     search_site_count++;
-
-    // Contract.
-    Len /= 2;
   }
 
   x->ss_count = search_site_count;
@@ -210,7 +205,8 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
     (mvcost ?                                           \
      ((mvjcost[((r) != rr) * 2 + ((c) != rc)] +         \
        mvcost[0][((r) - rr)] + mvcost[1][((c) - rc)]) * \
-      error_per_bit + 128) >> 8 : 0)
+      error_per_bit + 4096) >> 13 : 0)
+
 
 #define SP(x) (((x) & 7) << 1)  // convert motion vector component to offset
                                 // for svf calc
@@ -1546,7 +1542,7 @@ int vp9_full_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int in_what_stride = d->pre_stride;
   int mv_stride = d->pre_stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &d->bmi.as_mv.first;
+  int_mv *best_mv = &d->bmi.as_mv[0];
   int_mv this_mv;
   int bestsad = INT_MAX;
   int r, c;
@@ -1641,7 +1637,7 @@ int vp9_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int in_what_stride = d->pre_stride;
   int mv_stride = d->pre_stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &d->bmi.as_mv.first;
+  int_mv *best_mv = &d->bmi.as_mv[0];
   int_mv this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;
@@ -1770,7 +1766,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int in_what_stride = d->pre_stride;
   int mv_stride = d->pre_stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &d->bmi.as_mv.first;
+  int_mv *best_mv = &d->bmi.as_mv[0];
   int_mv this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;
@@ -1787,7 +1783,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int col_min = ref_col - distance;
   int col_max = ref_col + distance;
 
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, sad_array8, 8);
+  DECLARE_ALIGNED_ARRAY(16, uint32_t, sad_array8, 8);
   unsigned int sad_array[3];
   int_mv fcenter_mv;
 
@@ -2023,12 +2019,10 @@ int vp9_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
   for (i = 0; i < search_range; i++) {
     int best_site = -1;
-    int all_in = 1;
-
-    all_in &= ((ref_mv->as_mv.row - 1) > x->mv_row_min);
-    all_in &= ((ref_mv->as_mv.row + 1) < x->mv_row_max);
-    all_in &= ((ref_mv->as_mv.col - 1) > x->mv_col_min);
-    all_in &= ((ref_mv->as_mv.col + 1) < x->mv_col_max);
+    int all_in = ((ref_mv->as_mv.row - 1) > x->mv_row_min) &
+                 ((ref_mv->as_mv.row + 1) < x->mv_row_max) &
+                 ((ref_mv->as_mv.col - 1) > x->mv_col_min) &
+                 ((ref_mv->as_mv.col + 1) < x->mv_col_max);
 
     if (all_in) {
       unsigned int sad_array[4];
@@ -2103,21 +2097,22 @@ int vp9_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
 
 #ifdef ENTROPY_STATS
-void print_mode_context(void) {
+void print_mode_context(VP9_COMMON *pc) {
   FILE *f = fopen("vp9_modecont.c", "a");
   int i, j;
 
   fprintf(f, "#include \"vp9_entropy.h\"\n");
-  fprintf(f, "const int vp9_mode_contexts[6][4] =");
+  fprintf(f, "const int vp9_mode_contexts[INTER_MODE_CONTEXTS][4] =");
   fprintf(f, "{\n");
-  for (j = 0; j < 6; j++) {
+  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     fprintf(f, "  {/* %d */ ", j);
     fprintf(f, "    ");
     for (i = 0; i < 4; i++) {
       int this_prob;
 
       // context probs
-      this_prob = get_binary_prob(mv_ref_ct[j][i][0], mv_ref_ct[j][i][1]);
+      this_prob = get_binary_prob(pc->fc.mv_ref_ct[j][i][0],
+                                  pc->fc.mv_ref_ct[j][i][1]);
 
       fprintf(f, "%5d, ", this_prob);
     }
@@ -2126,46 +2121,6 @@ void print_mode_context(void) {
 
   fprintf(f, "};\n");
   fclose(f);
-}
-
-/* MV ref count ENTROPY_STATS stats code */
-void init_mv_ref_counts() {
-  vpx_memset(mv_ref_ct, 0, sizeof(mv_ref_ct));
-  vpx_memset(mv_mode_cts, 0, sizeof(mv_mode_cts));
-}
-
-void accum_mv_refs(MB_PREDICTION_MODE m, const int ct[4]) {
-  if (m == ZEROMV) {
-    ++mv_ref_ct [ct[0]] [0] [0];
-    ++mv_mode_cts[0][0];
-  } else {
-    ++mv_ref_ct [ct[0]] [0] [1];
-    ++mv_mode_cts[0][1];
-
-    if (m == NEARESTMV) {
-      ++mv_ref_ct [ct[1]] [1] [0];
-      ++mv_mode_cts[1][0];
-    } else {
-      ++mv_ref_ct [ct[1]] [1] [1];
-      ++mv_mode_cts[1][1];
-
-      if (m == NEARMV) {
-        ++mv_ref_ct [ct[2]] [2] [0];
-        ++mv_mode_cts[2][0];
-      } else {
-        ++mv_ref_ct [ct[2]] [2] [1];
-        ++mv_mode_cts[2][1];
-
-        if (m == NEWMV) {
-          ++mv_ref_ct [ct[3]] [3] [0];
-          ++mv_mode_cts[3][0];
-        } else {
-          ++mv_ref_ct [ct[3]] [3] [1];
-          ++mv_mode_cts[3][1];
-        }
-      }
-    }
-  }
 }
 
 #endif/* END MV ref count ENTROPY_STATS stats code */

@@ -460,6 +460,7 @@ write_common_target_config_h() {
 #ifndef VPX_CONFIG_H
 #define VPX_CONFIG_H
 #define RESTRICT    ${RESTRICT}
+#define INLINE      ${INLINE}
 EOF
     print_config_h ARCH   "${TMP_H}" ${ARCH_LIST}
     print_config_h HAVE   "${TMP_H}" ${HAVE_LIST}
@@ -1005,12 +1006,6 @@ process_common_toolchain() {
 #error "not x32"
 #endif
 EOF
-        soft_enable runtime_cpu_detect
-        soft_enable mmx
-        soft_enable sse
-        soft_enable sse2
-        soft_enable sse3
-        soft_enable ssse3
 
         case  ${tgt_os} in
             win*)
@@ -1064,9 +1059,15 @@ EOF
             ;;
         esac
 
+        soft_enable runtime_cpu_detect
+        soft_enable mmx
+        soft_enable sse
+        soft_enable sse2
+        soft_enable sse3
+        soft_enable ssse3
         # We can't use 'check_cflags' until the compiler is configured and CC is
         # populated.
-        if enabled gcc && ! disabled sse4_1 && ! check_cflags -msse4.1; then
+        if enabled gcc && ! disabled sse4_1 && ! check_cflags -msse4; then
             RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sse4_1 "
         else
             soft_enable sse4_1
@@ -1173,6 +1174,14 @@ EOF
 EOF
     [ -f "${TMP_O}" ] && od -A n -t x1 "${TMP_O}" | tr -d '\n' |
         grep '4f *32 *42 *45' >/dev/null 2>&1 && enable big_endian
+
+    # Try to find which inline keywords are supported
+    check_cc <<EOF && INLINE="inline"
+    static inline function() {}
+EOF
+    check_cc <<EOF && INLINE="__attribute__((always_inline))"
+    static __attribute__((always_inline)) function() {}
+EOF
 
     # Almost every platform uses pthreads.
     if enabled multithread; then

@@ -25,7 +25,7 @@ using libvpx_test::ACMRandom;
 
 namespace {
 
-TEST(Vp9FdctTest, SignBiasCheck) {
+TEST(Vp9Fdct4x4Test, SignBiasCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int16_t test_input_block[16];
   int16_t test_output_block[16];
@@ -88,7 +88,7 @@ TEST(Vp9FdctTest, SignBiasCheck) {
   }
 };
 
-TEST(Vp9FdctTest, RoundTripErrorCheck) {
+TEST(Vp9Fdct4x4Test, RoundTripErrorCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int max_error = 0;
   double total_error = 0;
@@ -120,7 +120,7 @@ TEST(Vp9FdctTest, RoundTripErrorCheck) {
     }
 
     // Because the bitstream is not frozen yet, use the idct in the codebase.
-    vp9_short_idct4x4llm_c(test_temp_block, test_output_block, pitch);
+    vp9_short_idct4x4_c(test_temp_block, test_output_block, pitch);
 
     for (int j = 0; j < 16; ++j) {
       const int diff = test_input_block[j] - test_output_block[j];

@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_quant_common.h"
 
 static int dc_qlookup[QINDEX_RANGE];
@@ -24,7 +24,7 @@ void vp9_init_quant_tables() {
 
   for (i = 0; i < QINDEX_RANGE; i++) {
     ac_qlookup[i] = current_val;
-    current_val = (int)((double)current_val * 1.02);
+    current_val = (int)(current_val * 1.02);
     if (current_val == last_val)
       current_val++;
     last_val = current_val;
@@ -38,88 +38,18 @@ void vp9_init_quant_tables() {
   }
 }
 
-int vp9_dc_quant(int QIndex, int Delta) {
-  int retval;
-
-  QIndex = QIndex + Delta;
-
-  if (QIndex > MAXQ)
-    QIndex = MAXQ;
-  else if (QIndex < 0)
-    QIndex = 0;
-
-  retval = dc_qlookup[ QIndex ];
-  return retval;
+int vp9_dc_quant(int qindex, int delta) {
+  return dc_qlookup[clamp(qindex + delta, 0, MAXQ)];
 }
 
-int vp9_dc2quant(int QIndex, int Delta) {
-  int retval;
-
-  QIndex = QIndex + Delta;
-
-  if (QIndex > MAXQ)
-    QIndex = MAXQ;
-  else if (QIndex < 0)
-    QIndex = 0;
-
-  retval = dc_qlookup[ QIndex ];
-
-  return retval;
-
-}
-int vp9_dc_uv_quant(int QIndex, int Delta) {
-  int retval;
-
-  QIndex = QIndex + Delta;
-
-  if (QIndex > MAXQ)
-    QIndex = MAXQ;
-  else if (QIndex < 0)
-    QIndex = 0;
-
-  retval = dc_qlookup[ QIndex ];
-
-  return retval;
+int vp9_dc_uv_quant(int qindex, int delta) {
+  return dc_qlookup[clamp(qindex + delta, 0, MAXQ)];
 }
 
-int vp9_ac_yquant(int QIndex) {
-  int retval;
-
-  if (QIndex > MAXQ)
-    QIndex = MAXQ;
-  else if (QIndex < 0)
-    QIndex = 0;
-
-  retval = ac_qlookup[ QIndex ];
-  return retval;
+int vp9_ac_yquant(int qindex) {
+  return ac_qlookup[clamp(qindex, 0, MAXQ)];
 }
 
-int vp9_ac2quant(int QIndex, int Delta) {
-  int retval;
-
-  QIndex = QIndex + Delta;
-
-  if (QIndex > MAXQ)
-    QIndex = MAXQ;
-  else if (QIndex < 0)
-    QIndex = 0;
-
-  retval = (ac_qlookup[ QIndex ] * 775) / 1000;
-  if (retval < 4)
-    retval = 4;
-
-  return retval;
-}
-int vp9_ac_uv_quant(int QIndex, int Delta) {
-  int retval;
-
-  QIndex = QIndex + Delta;
-
-  if (QIndex > MAXQ)
-    QIndex = MAXQ;
-  else if (QIndex < 0)
-    QIndex = 0;
-
-  retval = ac_qlookup[ QIndex ];
-  return retval;
+int vp9_ac_uv_quant(int qindex, int delta) {
+  return ac_qlookup[clamp(qindex + delta, 0, MAXQ)];
 }

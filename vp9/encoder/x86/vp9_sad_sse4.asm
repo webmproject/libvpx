@@ -154,6 +154,16 @@
         paddw           xmm1,       xmm5
 %endmacro
 
+%macro WRITE_AS_INTS 0
+    mov             rdi,        arg(4)           ;Results
+    pxor            xmm0, xmm0
+    movdqa          xmm2, xmm1
+    punpcklwd       xmm1, xmm0
+    punpckhwd       xmm2, xmm0
+
+    movdqa          [rdi],    xmm1
+    movdqa          [rdi + 16],    xmm2
+%endmacro
 
 ;void vp9_sad16x16x8_sse4(
 ;    const unsigned char *src_ptr,
@@ -170,23 +180,22 @@ sym(vp9_sad16x16x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_16X2X8 1
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
+    PROCESS_16X2X8 1
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
 
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi
@@ -212,19 +221,18 @@ sym(vp9_sad16x8x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_16X2X8 1
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
+    PROCESS_16X2X8 1
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
 
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi
@@ -250,19 +258,18 @@ sym(vp9_sad8x8x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_8X2X8 1
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
+    PROCESS_8X2X8 1
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
 
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi
@@ -288,22 +295,22 @@ sym(vp9_sad8x16x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_8X2X8 1
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    PROCESS_8X2X8 1
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi
@@ -329,17 +336,16 @@ sym(vp9_sad4x4x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_4X2X8 1
-        PROCESS_4X2X8 0
+    PROCESS_4X2X8 1
+    PROCESS_4X2X8 0
 
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi

@@ -9,12 +9,25 @@
  */
 
 #ifndef VP9_COMMON_VP9_COEFUPDATEPROBS_H_
-#define VP9_COMMON_VP9_COEFUPDATEPROBS_H__
+#define VP9_COMMON_VP9_COEFUPDATEPROBS_H_
 
 /* Update probabilities for the nodes in the token entropy tree.
    Generated file included by vp9_entropy.c */
-#define COEF_UPDATE_PROB 252
-#define COEF_UPDATE_PROB_8X8 252
-#define COEF_UPDATE_PROB_16X16 252
+
+static const vp9_prob vp9_coef_update_prob[ENTROPY_NODES] = {
+  252, 252, 252, 252, 252, 252, 252, 252, 252, 252, 252
+};
+
+#if CONFIG_CODE_NONZEROCOUNT
+#define NZC_UPDATE_PROB_4X4     252
+#define NZC_UPDATE_PROB_8X8     252
+#define NZC_UPDATE_PROB_16X16   252
+#define NZC_UPDATE_PROB_32X32   252
+#define NZC_UPDATE_PROB_PCAT    252
+#endif
+
+#if CONFIG_MODELCOEFPROB
+#define COEF_MODEL_UPDATE_PROB   16
+#endif
 
 #endif  // VP9_COMMON_VP9_COEFUPDATEPROBS_H__

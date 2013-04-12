@@ -38,5 +38,11 @@ VP9_DX_SRCS-yes := $(filter-out $(VP9_DX_SRCS_REMOVE-yes),$(VP9_DX_SRCS-yes))
 
 VP9_DX_SRCS-$(HAVE_SSE2) += decoder/x86/vp9_idct_blk_sse2.c
 
+VP9_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/vp9_dequantize_x86.c
+ifeq ($(HAVE_SSE2),yes)
+vp9/decoder/x86/vp9_dequantize_x86.c.o: CFLAGS += -msse2
+vp9/decoder/x86/vp9_dequantize_x86.c.d: CFLAGS += -msse2
+endif
+
 $(eval $(call asm_offsets_template,\
          vp9_asm_dec_offsets.asm, $(VP9_PREFIX)decoder/vp9_asm_dec_offsets.c))

@@ -49,7 +49,7 @@ extern const vp9_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2];
 extern struct vp9_token_struct vp9_mv_joint_encodings [MV_JOINTS];
 
 /* Symbols for coding magnitude class of nonzero components */
-#define MV_CLASSES     8
+#define MV_CLASSES     11
 typedef enum {
   MV_CLASS_0 = 0,      /* (0, 2]     integer pel */
   MV_CLASS_1 = 1,      /* (2, 4]     integer pel */
@@ -59,6 +59,9 @@ typedef enum {
   MV_CLASS_5 = 5,      /* (32, 64]   integer pel */
   MV_CLASS_6 = 6,      /* (64, 128]  integer pel */
   MV_CLASS_7 = 7,      /* (128, 256] integer pel */
+  MV_CLASS_8 = 8,      /* (256, 512] integer pel */
+  MV_CLASS_9 = 9,      /* (512, 1024] integer pel */
+  MV_CLASS_10 = 10,    /* (1024,2048] integer pel */
 } MV_CLASS_TYPE;
 
 extern const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2];

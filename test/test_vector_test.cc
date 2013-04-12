@@ -12,16 +12,14 @@
 #include <cstdlib>
 #include <string>
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
 #include "test/ivf_video_source.h"
+#include "test/util.h"
+#include "test/md5_helper.h"
 extern "C" {
-#include "./md5_utils.h"
 #include "vpx_mem/vpx_mem.h"
 }
-
-#if defined(_MSC_VER)
-#define snprintf sprintf_s
-#endif
 
 namespace {
 // There are 61 test vectors in total.
@@ -59,10 +57,10 @@ const char *kTestVectors[] = {
   "vp80-05-sharpness-1440.ivf", "vp80-05-sharpness-1443.ivf"
 };
 
-class TestVectorTest : public libvpx_test::DecoderTest,
-    public ::testing::TestWithParam<const char*> {
+class TestVectorTest : public ::libvpx_test::DecoderTest,
+    public ::libvpx_test::CodecTestWithParam<const char*> {
  protected:
-  TestVectorTest() : md5_file_(NULL) {}
+  TestVectorTest() : DecoderTest(GET_PARAM(0)), md5_file_(NULL) {}
 
   virtual ~TestVectorTest() {
     if (md5_file_)
@@ -85,30 +83,9 @@ class TestVectorTest : public libvpx_test::DecoderTest,
     ASSERT_NE(res, EOF) << "Read md5 data failed";
     expected_md5[32] = '\0';
 
-    MD5Context md5;
-    MD5Init(&md5);
-
-    // Compute and update md5 for each raw in decompressed data.
-    for (int plane = 0; plane < 3; ++plane) {
-      uint8_t *buf = img.planes[plane];
-
-      for (unsigned int y = 0; y < (plane ? (img.d_h + 1) >> 1 : img.d_h);
-           ++y) {
-        MD5Update(&md5, buf, (plane ? (img.d_w + 1) >> 1 : img.d_w));
-        buf += img.stride[plane];
-      }
-    }
-
-    uint8_t md5_sum[16];
-    MD5Final(md5_sum, &md5);
-
-    char actual_md5[33];
-    // Convert to get the actual md5.
-    for (int i = 0; i < 16; i++) {
-      snprintf(&actual_md5[i * 2], sizeof(actual_md5) - i * 2, "%02x",
-               md5_sum[i]);
-    }
-    actual_md5[32] = '\0';
+    ::libvpx_test::MD5 md5_res;
+    md5_res.Add(&img);
+    const char *actual_md5 = md5_res.Get();
 
     // Check md5 match.
     ASSERT_STREQ(expected_md5, actual_md5)
@@ -124,7 +101,7 @@ class TestVectorTest : public libvpx_test::DecoderTest,
 // checksums match the correct md5 data, then the test is passed. Otherwise,
 // the test failed.
 TEST_P(TestVectorTest, MD5Match) {
-  const std::string filename = GetParam();
+  const std::string filename = GET_PARAM(1);
   // Open compressed video file.
   libvpx_test::IVFVideoSource video(filename);
 
@@ -138,7 +115,7 @@ TEST_P(TestVectorTest, MD5Match) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-INSTANTIATE_TEST_CASE_P(TestVectorSequence, TestVectorTest,
-                        ::testing::ValuesIn(kTestVectors));
+VP8_INSTANTIATE_TEST_CASE(TestVectorTest,
+                          ::testing::ValuesIn(kTestVectors));
 
 }  // namespace

@@ -13,17 +13,16 @@
 #define VP9_DECODER_VP9_TREEREADER_H_
 
 #include "vp9/common/vp9_treecoder.h"
-
 #include "vp9/decoder/vp9_dboolhuff.h"
 
 typedef BOOL_DECODER vp9_reader;
 
 #define vp9_read decode_bool
 #define vp9_read_literal decode_value
-#define vp9_read_bit(R) vp9_read(R, vp9_prob_half)
+#define vp9_read_bit(r) vp9_read(r, vp9_prob_half)
+#define vp9_read_prob(r) ((vp9_prob)vp9_read_literal(r, 8))
 
-/* Intent of tree data structure is to make decoding trivial. */
-
+// Intent of tree data structure is to make decoding trivial.
 static int treed_read(vp9_reader *const r, /* !!! must return a 0 or 1 !!! */
                       vp9_tree t,
                       const vp9_prob *const p) {

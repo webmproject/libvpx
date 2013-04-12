@@ -336,11 +336,8 @@ void vp9_deblock(YV12_BUFFER_CONFIG         *source,
                                 source->uv_height, source->uv_width, ppl);
 }
 
-void vp9_de_noise(YV12_BUFFER_CONFIG         *src,
-                  YV12_BUFFER_CONFIG         *post,
-                  int                         q,
-                  int                         low_var_thresh,
-                  int                         flag) {
+void vp9_denoise(YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *post,
+                 int q, int low_var_thresh, int flag) {
   double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
   int ppl = (int)(level + .5);
   (void) post;
@@ -424,9 +421,9 @@ static void fillrd(struct postproc_state *state, int q, int a) {
  *
  *  INPUTS        : unsigned char *Start  starting address of buffer to
  *                                        add gaussian noise to
- *                  unsigned int Width    width of plane
- *                  unsigned int Height   height of plane
- *                  int  Pitch    distance between subsequent lines of frame
+ *                  unsigned int width    width of plane
+ *                  unsigned int height   height of plane
+ *                  int  pitch    distance between subsequent lines of frame
  *                  int  q        quantizer used to determine amount of noise
  *                                  to add
  *
@@ -439,25 +436,25 @@ static void fillrd(struct postproc_state *state, int q, int a) {
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp9_plane_add_noise_c(uint8_t *Start, char *noise,
+void vp9_plane_add_noise_c(uint8_t *start, char *noise,
                            char blackclamp[16],
                            char whiteclamp[16],
                            char bothclamp[16],
-                           unsigned int Width, unsigned int Height, int Pitch) {
+                           unsigned int width, unsigned int height, int pitch) {
   unsigned int i, j;
 
-  for (i = 0; i < Height; i++) {
-    uint8_t *Pos = Start + i * Pitch;
-    char  *Ref = (char *)(noise + (rand() & 0xff));
+  for (i = 0; i < height; i++) {
+    uint8_t *pos = start + i * pitch;
+    char  *ref = (char *)(noise + (rand() & 0xff));  // NOLINT
 
-    for (j = 0; j < Width; j++) {
-      if (Pos[j] < blackclamp[0])
-        Pos[j] = blackclamp[0];
+    for (j = 0; j < width; j++) {
+      if (pos[j] < blackclamp[0])
+        pos[j] = blackclamp[0];
 
-      if (Pos[j] > 255 + whiteclamp[0])
-        Pos[j] = 255 + whiteclamp[0];
+      if (pos[j] > 255 + whiteclamp[0])
+        pos[j] = 255 + whiteclamp[0];
 
-      Pos[j] += Ref[j];
+      pos[j] += ref[j];
     }
   }
 }
@@ -636,8 +633,8 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
     *dest = *oci->frame_to_show;
 
     /* handle problem with extending borders */
-    dest->y_width = oci->Width;
-    dest->y_height = oci->Height;
+    dest->y_width = oci->width;
+    dest->y_height = oci->height;
     dest->uv_height = dest->y_height / 2;
     return 0;
 
@@ -1004,8 +1001,8 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
   *dest = oci->post_proc_buffer;
 
   /* handle problem with extending borders */
-  dest->y_width = oci->Width;
-  dest->y_height = oci->Height;
+  dest->y_width = oci->width;
+  dest->y_height = oci->height;
   dest->uv_height = dest->y_height / 2;
 
   return 0;

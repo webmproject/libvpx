@@ -16,6 +16,7 @@ extern "C"
 {
 #endif
 
+#include "./vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vp8cx.h"
 #include "vpx_scale/yv12config.h"
@@ -62,7 +63,7 @@ extern "C"
 
 
 #include <assert.h>
-  static __inline void Scale2Ratio(int mode, int *hr, int *hs) {
+  static INLINE void Scale2Ratio(int mode, int *hr, int *hs) {
     switch (mode) {
       case    NORMAL:
         *hr = 1;
@@ -89,11 +90,13 @@ extern "C"
   }
 
   typedef struct {
-    int Version;            // 4 versions of bitstream defined 0 best quality/slowest decode, 3 lowest quality/fastest decode
-    int Width;              // width of data passed to the compressor
-    int Height;             // height of data passed to the compressor
+    int version;  // 4 versions of bitstream defined:
+                  //   0 - best quality/slowest decode,
+                  //   3 - lowest quality/fastest decode
+    int width;  // width of data passed to the compressor
+    int height;  // height of data passed to the compressor
     double frame_rate;       // set to passed in framerate
-    int target_bandwidth;    // bandwidth to be used in kilobits per second
+    int64_t target_bandwidth;    // bandwidth to be used in kilobits per second
 
     int noise_sensitivity;   // parameter used for applying pre processing blur: recommendation 0
     int Sharpness;          // parameter used for sharpening output: recommendation 0:
@@ -134,9 +137,9 @@ extern "C"
     int over_shoot_pct;
 
     // buffering parameters
-    int starting_buffer_level;  // in seconds
-    int optimal_buffer_level;
-    int maximum_buffer_size;
+    int64_t starting_buffer_level;  // in seconds
+    int64_t optimal_buffer_level;
+    int64_t maximum_buffer_size;
 
     // controlling quality
     int fixed_q;
@@ -159,9 +162,24 @@ extern "C"
 
     int encode_breakout;  // early breakout encode threshold : for video conf recommend 800
 
+    /* Bitfield defining the error resiliency features to enable.
+     * Can provide decodable frames after losses in previous
+     * frames and decodable partitions after losses in the same frame.
+     */
+    unsigned int error_resilient_mode;
+
+    /* Bitfield defining the parallel decoding mode where the
+     * decoding in successive frames may be conducted in parallel
+     * just by decoding the frame headers.
+     */
+    unsigned int frame_parallel_decoding_mode;
+
     int arnr_max_frames;
     int arnr_strength;
     int arnr_type;
+
+    int tile_columns;
+    int tile_rows;
 
     struct vpx_fixed_buf         two_pass_stats_in;
     struct vpx_codec_pkt_list  *output_pkt_list;
@@ -195,8 +213,10 @@ extern "C"
 
   int vp9_update_reference(VP9_PTR comp, int ref_frame_flags);
 
-  int vp9_get_reference_enc(VP9_PTR comp, VP9_REFFRAME ref_frame_flag,
-                            YV12_BUFFER_CONFIG *sd);
+  int vp9_copy_reference_enc(VP9_PTR comp, VP9_REFFRAME ref_frame_flag,
+                             YV12_BUFFER_CONFIG *sd);
+
+  int vp9_get_reference_enc(VP9_PTR ptr, int index, YV12_BUFFER_CONFIG **fb);
 
   int vp9_set_reference_enc(VP9_PTR comp, VP9_REFFRAME ref_frame_flag,
                             YV12_BUFFER_CONFIG *sd);

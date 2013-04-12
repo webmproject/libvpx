@@ -27,6 +27,7 @@ extern "C" {
     int     Version;
     int     postprocess;
     int     max_threads;
+    int     inv_tile_order;
     int     input_partition;
   } VP9D_CONFIG;
   typedef enum {
@@ -45,13 +46,15 @@ extern "C" {
                         int64_t *time_stamp, int64_t *time_end_stamp,
                         vp9_ppflags_t *flags);
 
-  vpx_codec_err_t vp9_get_reference_dec(VP9D_PTR comp,
-                                        VP9_REFFRAME ref_frame_flag,
-                                        YV12_BUFFER_CONFIG *sd);
+  vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR comp,
+                                         VP9_REFFRAME ref_frame_flag,
+                                         YV12_BUFFER_CONFIG *sd);
 
   vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR comp,
                                         VP9_REFFRAME ref_frame_flag,
                                         YV12_BUFFER_CONFIG *sd);
+
+  int vp9_get_reference_dec(VP9D_PTR ptr, int index, YV12_BUFFER_CONFIG **fb);
 
   VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf);
 

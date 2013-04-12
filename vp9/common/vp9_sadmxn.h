@@ -11,14 +11,15 @@
 #ifndef VP9_COMMON_VP9_SADMXN_H_
 #define VP9_COMMON_VP9_SADMXN_H_
 
+#include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 
-static __inline unsigned int sad_mx_n_c(const uint8_t *src_ptr,
-                                        int src_stride,
-                                        const uint8_t *ref_ptr,
-                                        int ref_stride,
-                                        int m,
-                                        int n) {
+static INLINE unsigned int sad_mx_n_c(const uint8_t *src_ptr,
+                                      int src_stride,
+                                      const uint8_t *ref_ptr,
+                                      int ref_stride,
+                                      int m,
+                                      int n) {
   int r, c;
   unsigned int sad = 0;
 

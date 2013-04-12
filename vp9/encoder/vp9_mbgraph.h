@@ -11,6 +11,6 @@
 #ifndef VP9_ENCODER_VP9_MBGRAPH_H_
 #define VP9_ENCODER_VP9_MBGRAPH_H_
 
-extern void vp9_update_mbgraph_stats(VP9_COMP *cpi);
+void vp9_update_mbgraph_stats(VP9_COMP *cpi);
 
 #endif  // VP9_ENCODER_VP9_MBGRAPH_H_

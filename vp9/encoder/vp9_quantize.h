@@ -14,10 +14,10 @@
 #include "vp9/encoder/vp9_block.h"
 
 #define prototype_quantize_block(sym) \
-  void (sym)(BLOCK *b,BLOCKD *d)
+  void (sym)(MACROBLOCK *mb, int b_idx)
 
 #define prototype_quantize_block_pair(sym) \
-  void (sym)(BLOCK *b1, BLOCK *b2, BLOCKD *d1, BLOCKD *d2)
+  void (sym)(MACROBLOCK *mb, int b_idx1, int b_idx2)
 
 #define prototype_quantize_mb(sym) \
   void (sym)(MACROBLOCK *x)
@@ -26,60 +26,41 @@
 #include "x86/vp9_quantize_x86.h"
 #endif
 
-#define prototype_quantize_block_type(sym) \
-  void (sym)(BLOCK *b, BLOCKD *d, TX_TYPE type)
-extern prototype_quantize_block_type(vp9_ht_quantize_b_4x4);
+void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_ix, TX_TYPE type);
+void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx);
+void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *mb, int b_idx1, int b_idx2);
+void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type);
+void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type);
+void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx);
 
-#ifndef vp9_quantize_quantb_4x4
-#define vp9_quantize_quantb_4x4 vp9_regular_quantize_b_4x4
-#endif
-extern prototype_quantize_block(vp9_quantize_quantb_4x4);
-
-#ifndef vp9_quantize_quantb_4x4_pair
-#define vp9_quantize_quantb_4x4_pair vp9_regular_quantize_b_4x4_pair
-#endif
-extern prototype_quantize_block_pair(vp9_quantize_quantb_4x4_pair);
-
-#ifndef vp9_quantize_quantb_8x8
-#define vp9_quantize_quantb_8x8 vp9_regular_quantize_b_8x8
-#endif
-extern prototype_quantize_block(vp9_quantize_quantb_8x8);
-
-#ifndef vp9_quantize_quantb_16x16
-#define vp9_quantize_quantb_16x16 vp9_regular_quantize_b_16x16
-#endif
-extern prototype_quantize_block(vp9_quantize_quantb_16x16);
-
-#ifndef vp9_quantize_quantb_2x2
-#define vp9_quantize_quantb_2x2 vp9_regular_quantize_b_2x2
-#endif
-extern prototype_quantize_block(vp9_quantize_quantb_2x2);
-
-#ifndef vp9_quantize_mb_4x4
-#define vp9_quantize_mb_4x4 vp9_quantize_mb_4x4_c
-#endif
-extern prototype_quantize_mb(vp9_quantize_mb_4x4);
+void vp9_quantize_mb_4x4(MACROBLOCK *x);
 void vp9_quantize_mb_8x8(MACROBLOCK *x);
 
-#ifndef vp9_quantize_mbuv_4x4
-#define vp9_quantize_mbuv_4x4 vp9_quantize_mbuv_4x4_c
-#endif
-extern prototype_quantize_mb(vp9_quantize_mbuv_4x4);
+void vp9_quantize_mbuv_4x4(MACROBLOCK *x);
+void vp9_quantize_mby_4x4(MACROBLOCK *x);
 
-#ifndef vp9_quantize_mby_4x4
-#define vp9_quantize_mby_4x4 vp9_quantize_mby_4x4_c
-#endif
-extern prototype_quantize_mb(vp9_quantize_mby_4x4);
-
-extern prototype_quantize_mb(vp9_quantize_mby_8x8);
-extern prototype_quantize_mb(vp9_quantize_mbuv_8x8);
+void vp9_quantize_mby_8x8(MACROBLOCK *x);
+void vp9_quantize_mbuv_8x8(MACROBLOCK *x);
 
 void vp9_quantize_mb_16x16(MACROBLOCK *x);
-extern prototype_quantize_block(vp9_quantize_quantb_16x16);
-extern prototype_quantize_mb(vp9_quantize_mby_16x16);
+void vp9_quantize_mby_16x16(MACROBLOCK *x);
 
 void vp9_quantize_sby_32x32(MACROBLOCK *x);
+void vp9_quantize_sby_16x16(MACROBLOCK *x);
+void vp9_quantize_sby_8x8(MACROBLOCK *x);
+void vp9_quantize_sby_4x4(MACROBLOCK *x);
 void vp9_quantize_sbuv_16x16(MACROBLOCK *x);
+void vp9_quantize_sbuv_8x8(MACROBLOCK *x);
+void vp9_quantize_sbuv_4x4(MACROBLOCK *x);
+
+void vp9_quantize_sb64y_32x32(MACROBLOCK *x);
+void vp9_quantize_sb64y_16x16(MACROBLOCK *x);
+void vp9_quantize_sb64y_8x8(MACROBLOCK *x);
+void vp9_quantize_sb64y_4x4(MACROBLOCK *x);
+void vp9_quantize_sb64uv_32x32(MACROBLOCK *x);
+void vp9_quantize_sb64uv_16x16(MACROBLOCK *x);
+void vp9_quantize_sb64uv_8x8(MACROBLOCK *x);
+void vp9_quantize_sb64uv_4x4(MACROBLOCK *x);
 
 struct VP9_COMP;
 

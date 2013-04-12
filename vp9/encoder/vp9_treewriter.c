@@ -10,6 +10,7 @@
 
 
 #include "vp9/encoder/vp9_treewriter.h"
+#include "vp9/common/vp9_common.h"
 
 static void cost(
   int *const C,
@@ -35,5 +36,7 @@ void vp9_cost_tokens(int *c, const vp9_prob *p, vp9_tree t) {
 }
 
 void vp9_cost_tokens_skip(int *c, const vp9_prob *p, vp9_tree t) {
+  assert(t[1] > 0 && t[0] <= 0);
+  c[-t[0]] = vp9_cost_bit(p[0], 0);
   cost(c, t, p, 2, 0);
 }

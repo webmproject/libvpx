@@ -20,15 +20,15 @@ static void setup_block(BLOCKD *b,
                         int mv_stride,
                         uint8_t **base,
                         uint8_t **base2,
-                        int Stride,
+                        int stride,
                         int offset,
                         BLOCKSET bs) {
   if (bs == DEST) {
-    b->dst_stride = Stride;
+    b->dst_stride = stride;
     b->dst = offset;
     b->base_dst = base;
   } else {
-    b->pre_stride = Stride;
+    b->pre_stride = stride;
     b->pre = offset;
     b->base_pre = base;
     b->base_second_pre = base2;
@@ -102,9 +102,7 @@ void vp9_setup_block_dptrs(MACROBLOCKD *xd) {
     }
   }
 
-  blockd[24].diff = &xd->diff[384];
-
-  for (r = 0; r < 25; r++) {
+  for (r = 0; r < 24; r++) {
     blockd[r].qcoeff  = xd->qcoeff  + r * 16;
     blockd[r].dqcoeff = xd->dqcoeff + r * 16;
   }

@@ -9,14 +9,16 @@
  */
 #ifndef TEST_ENCODE_TEST_DRIVER_H_
 #define TEST_ENCODE_TEST_DRIVER_H_
+
+#include "./vpx_config.h"
 #include <string>
 #include <vector>
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vpx/vpx_encoder.h"
-#include "vpx/vp8cx.h"
 
 namespace libvpx_test {
 
+class CodecFactory;
 class VideoSource;
 
 enum TestMode {
@@ -35,6 +37,9 @@ enum TestMode {
 #define ONE_PASS_TEST_MODES ::testing::Values(::libvpx_test::kRealTime, \
                                               ::libvpx_test::kOnePassGood, \
                                               ::libvpx_test::kOnePassBest)
+
+#define TWO_PASS_TEST_MODES ::testing::Values(::libvpx_test::kTwoPassGood, \
+                                              ::libvpx_test::kTwoPassBest)
 
 
 // Provides an object to handle the libvpx get_cx_data() iteration pattern
@@ -83,7 +88,7 @@ class Encoder {
  public:
   Encoder(vpx_codec_enc_cfg_t cfg, unsigned long deadline,
           const unsigned long init_flags, TwopassStatsStore *stats)
-    : cfg_(cfg), deadline_(deadline), init_flags_(init_flags), stats_(stats) {
+      : cfg_(cfg), deadline_(deadline), init_flags_(init_flags), stats_(stats) {
     memset(&encoder_, 0, sizeof(encoder_));
   }
 
@@ -112,11 +117,18 @@ class Encoder {
     ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
   }
 
+  void Control(int ctrl_id, struct vpx_scaling_mode *arg) {
+    const vpx_codec_err_t res = vpx_codec_control_(&encoder_, ctrl_id, arg);
+    ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
+  }
+
   void set_deadline(unsigned long deadline) {
     deadline_ = deadline;
   }
 
  protected:
+  virtual const vpx_codec_iface_t* CodecInterface() const = 0;
+
   const char *EncoderError() {
     const char *detail = vpx_codec_error_detail(&encoder_);
     return detail ? detail : vpx_codec_error(&encoder_);
@@ -145,22 +157,19 @@ class Encoder {
 // classes directly, so that tests can be parameterized differently.
 class EncoderTest {
  protected:
-  EncoderTest() : abort_(false), init_flags_(0), frame_flags_(0),
-                  last_pts_(0) {}
+  explicit EncoderTest(const CodecFactory *codec)
+      : codec_(codec), abort_(false), init_flags_(0), frame_flags_(0),
+        last_pts_(0) {}
 
   virtual ~EncoderTest() {}
 
   // Initialize the cfg_ member with the default configuration.
-  void InitializeConfig() {
-    const vpx_codec_err_t res = vpx_codec_enc_config_default(
-                                    &vpx_codec_vp8_cx_algo, &cfg_, 0);
-    ASSERT_EQ(VPX_CODEC_OK, res);
-  }
+  void InitializeConfig();
 
   // Map the TestMode enum to the deadline_ and passes_ variables.
   void SetMode(TestMode mode);
 
-  // Main loop.
+  // Main loop
   virtual void RunLoop(VideoSource *video);
 
   // Hook to be called at the beginning of a pass.
@@ -181,6 +190,24 @@ class EncoderTest {
 
   // Hook to determine whether the encode loop should continue.
   virtual bool Continue() const { return !abort_; }
+
+  const CodecFactory   *codec_;
+  // Hook to determine whether to decode frame after encoding
+  virtual bool DoDecode() const { return 1; }
+
+  // Hook to handle encode/decode mismatch
+  virtual void MismatchHook(const vpx_image_t *img1,
+                            const vpx_image_t *img2);
+
+  // Hook to be called on every decompressed frame.
+  virtual void DecompressedFrameHook(const vpx_image_t& img,
+                                     vpx_codec_pts_t pts) {}
+
+  // Hook that can modify the encoder's output data
+  virtual const vpx_codec_cx_pkt_t * MutateEncoderOutputHook(
+      const vpx_codec_cx_pkt_t *pkt) {
+    return pkt;
+  }
 
   bool                 abort_;
   vpx_codec_enc_cfg_t  cfg_;

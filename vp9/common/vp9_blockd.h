@@ -16,9 +16,9 @@ void vpx_log(const char *format, ...);
 
 #include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
+#include "vp9/common/vp9_convolve.h"
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_treecoder.h"
-#include "vp9/common/vp9_subpixel.h"
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_common.h"
 
@@ -47,27 +47,13 @@ void vpx_log(const char *format, ...);
 #define MAX_MV_REFS 9
 #define MAX_MV_REF_CANDIDATES 4
 
-#if CONFIG_DWTDCTHYBRID
-#define DWT_MAX_LENGTH     64
-#define DWT_TYPE           26    // 26/53/97
-#define DWT_PRECISION_BITS 2
-#define DWT_PRECISION_RND  ((1 << DWT_PRECISION_BITS) / 2)
-
-#define DWTDCT16X16        0
-#define DWTDCT16X16_LEAN   1
-#define DWTDCT8X8          2
-#define DWTDCT_TYPE        DWTDCT16X16_LEAN
-#endif
-
 typedef struct {
   int r, c;
 } POS;
 
-typedef enum PlaneType {
-  PLANE_TYPE_Y_NO_DC = 0,
-  PLANE_TYPE_Y2,
-  PLANE_TYPE_UV,
+typedef enum {
   PLANE_TYPE_Y_WITH_DC,
+  PLANE_TYPE_UV,
 } PLANE_TYPE;
 
 typedef char ENTROPY_CONTEXT;
@@ -75,10 +61,9 @@ typedef struct {
   ENTROPY_CONTEXT y1[4];
   ENTROPY_CONTEXT u[2];
   ENTROPY_CONTEXT v[2];
-  ENTROPY_CONTEXT y2;
 } ENTROPY_CONTEXT_PLANES;
 
-#define VP9_COMBINEENTROPYCONTEXTS( Dest, A, B) \
+#define VP9_COMBINEENTROPYCONTEXTS(Dest, A, B) \
   Dest = ((A)!=0) + ((B)!=0);
 
 typedef enum {
@@ -86,8 +71,7 @@ typedef enum {
   INTER_FRAME = 1
 } FRAME_TYPE;
 
-typedef enum
-{
+typedef enum {
 #if CONFIG_ENABLE_6TAP
   SIXTAP,
 #endif
@@ -98,8 +82,7 @@ typedef enum
   SWITCHABLE  /* should be the last one */
 } INTERPOLATIONFILTERTYPE;
 
-typedef enum
-{
+typedef enum {
   DC_PRED,            /* average of above and left pixels */
   V_PRED,             /* vertical prediction */
   H_PRED,             /* horizontal prediction */
@@ -125,10 +108,8 @@ typedef enum {
   SEG_LVL_ALT_Q = 0,               // Use alternate Quantizer ....
   SEG_LVL_ALT_LF = 1,              // Use alternate loop filter value...
   SEG_LVL_REF_FRAME = 2,           // Optional Segment reference frame
-  SEG_LVL_MODE = 3,                // Optional Segment mode
-  SEG_LVL_EOB = 4,                 // EOB end stop marker.
-  SEG_LVL_TRANSFORM = 5,           // Block transform size.
-  SEG_LVL_MAX = 6                  // Number of MB level features supported
+  SEG_LVL_SKIP = 3,                // Optional Segment (0,0) + skip mode
+  SEG_LVL_MAX = 4                  // Number of MB level features supported
 } SEG_LVL_FEATURES;
 
 // Segment level features.
@@ -155,10 +136,7 @@ typedef enum {
 
 #define VP9_MVREFS (1 + SPLITMV - NEARESTMV)
 
-#if CONFIG_LOSSLESS
-#define WHT_UPSCALE_FACTOR 3
-#define Y2_WHT_UPSCALE_FACTOR 2
-#endif
+#define WHT_UPSCALE_FACTOR 2
 
 typedef enum {
   B_DC_PRED,          /* average of above and left pixels */
@@ -219,10 +197,7 @@ union b_mode_info {
     B_PREDICTION_MODE context;
 #endif
   } as_mode;
-  struct {
-    int_mv first;
-    int_mv second;
-  } as_mv;
+  int_mv as_mv[2];  // first, second inter predictor motion vectors
 };
 
 typedef enum {
@@ -274,6 +249,9 @@ typedef struct {
   INTERPOLATIONFILTERTYPE interp_filter;
 
   BLOCK_SIZE_TYPE sb_type;
+#if CONFIG_CODE_NONZEROCOUNT
+  uint16_t nzcs[256+64*2];
+#endif
 } MB_MODE_INFO;
 
 typedef struct {
@@ -298,36 +276,44 @@ typedef struct blockd {
   int dst;
   int dst_stride;
 
-  int eob;
-
   union b_mode_info bmi;
 } BLOCKD;
 
-typedef struct superblockd {
-  /* 32x32 Y and 16x16 U/V. No 2nd order transform yet. */
-  DECLARE_ALIGNED(16, int16_t, diff[32*32+16*16*2]);
-  DECLARE_ALIGNED(16, int16_t, qcoeff[32*32+16*16*2]);
-  DECLARE_ALIGNED(16, int16_t, dqcoeff[32*32+16*16*2]);
-} SUPERBLOCKD;
+struct scale_factors {
+  int x_num;
+  int x_den;
+  int x_offset_q4;
+  int x_step_q4;
+  int y_num;
+  int y_den;
+  int y_offset_q4;
+  int y_step_q4;
+#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
+  convolve_fn_t predict[2][2][8];  // horiz, vert, weight (0 - 7)
+#else
+  convolve_fn_t predict[2][2][2];  // horiz, vert, avg
+#endif
+};
 
 typedef struct macroblockd {
-  DECLARE_ALIGNED(16, int16_t,  diff[400]);      /* from idct diff */
-  DECLARE_ALIGNED(16, uint8_t,  predictor[384]);
-  DECLARE_ALIGNED(16, int16_t,  qcoeff[400]);
-  DECLARE_ALIGNED(16, int16_t,  dqcoeff[400]);
-  DECLARE_ALIGNED(16, uint16_t, eobs[25]);
+  DECLARE_ALIGNED(16, int16_t,  diff[64*64+32*32*2]);      /* from idct diff */
+  DECLARE_ALIGNED(16, uint8_t,  predictor[384]);  // unused for superblocks
+  DECLARE_ALIGNED(16, int16_t,  qcoeff[64*64+32*32*2]);
+  DECLARE_ALIGNED(16, int16_t,  dqcoeff[64*64+32*32*2]);
+  DECLARE_ALIGNED(16, uint16_t, eobs[256+64*2]);
+#if CONFIG_CODE_NONZEROCOUNT
+  DECLARE_ALIGNED(16, uint16_t, nzcs[256+64*2]);
+#endif
 
-  SUPERBLOCKD sb_coeff_data;
-
-  /* 16 Y blocks, 4 U, 4 V, 1 DC 2nd order block, each with 16 entries. */
-  BLOCKD block[25];
+  /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
+  BLOCKD block[24];
   int fullpixel_mask;
 
   YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
-  struct {
-    uint8_t *y_buffer, *u_buffer, *v_buffer;
-  } second_pre;
+  YV12_BUFFER_CONFIG second_pre;
   YV12_BUFFER_CONFIG dst;
+  struct scale_factors scale_factor[2];
+  struct scale_factors scale_factor_uv[2];
 
   MODE_INFO *prev_mode_info_context;
   MODE_INFO *mode_info_context;
@@ -337,8 +323,9 @@ typedef struct macroblockd {
 
   int up_available;
   int left_available;
+  int right_available;
 
-  /* Y,U,V,Y2 */
+  /* Y,U,V */
   ENTROPY_CONTEXT_PLANES *above_context;
   ENTROPY_CONTEXT_PLANES *left_context;
 
@@ -359,6 +346,7 @@ typedef struct macroblockd {
 
   // Probability Tree used to code Segment number
   vp9_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
+  vp9_prob mb_segment_mispred_tree_probs[MAX_MB_SEGMENTS];
 
 #if CONFIG_NEW_MVREF
   vp9_prob mb_mv_ref_probs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES-1];
@@ -387,21 +375,20 @@ typedef struct macroblockd {
   unsigned int frames_since_golden;
   unsigned int frames_till_alt_ref_frame;
 
+  int lossless;
   /* Inverse transform function pointers. */
-  void (*inv_xform4x4_1_x8)(int16_t *input, int16_t *output, int pitch);
-  void (*inv_xform4x4_x8)(int16_t *input, int16_t *output, int pitch);
-  void (*inv_walsh4x4_1)(int16_t *in, int16_t *out);
-  void (*inv_walsh4x4_lossless)(int16_t *in, int16_t *out);
+  void (*inv_txm4x4_1)(int16_t *input, int16_t *output, int pitch);
+  void (*inv_txm4x4)(int16_t *input, int16_t *output, int pitch);
+  void (*itxm_add)(int16_t *input, const int16_t *dq,
+    uint8_t *pred, uint8_t *output, int pitch, int stride, int eob);
+  void (*itxm_add_y_block)(int16_t *q, const int16_t *dq,
+    uint8_t *pre, uint8_t *dst, int stride, struct macroblockd *xd);
+  void (*itxm_add_uv_block)(int16_t *q, const int16_t *dq,
+    uint8_t *pre, uint8_t *dst_u, uint8_t *dst_v, int stride,
+    struct macroblockd *xd);
 
+  struct subpix_fn_table  subpix;
 
-  vp9_subpix_fn_t  subpixel_predict4x4;
-  vp9_subpix_fn_t  subpixel_predict8x4;
-  vp9_subpix_fn_t  subpixel_predict8x8;
-  vp9_subpix_fn_t  subpixel_predict16x16;
-  vp9_subpix_fn_t  subpixel_predict_avg4x4;
-  vp9_subpix_fn_t  subpixel_predict_avg8x4;
-  vp9_subpix_fn_t  subpixel_predict_avg8x8;
-  vp9_subpix_fn_t  subpixel_predict_avg16x16;
   int allow_high_precision_mv;
 
   int corrupted;
@@ -412,74 +399,46 @@ typedef struct macroblockd {
 
 } MACROBLOCKD;
 
-#define ACTIVE_HT 110                // quantization stepsize threshold
+#define ACTIVE_HT   110                // quantization stepsize threshold
 
-#define ACTIVE_HT8 300
+#define ACTIVE_HT8  300
 
 #define ACTIVE_HT16 300
 
 // convert MB_PREDICTION_MODE to B_PREDICTION_MODE
 static B_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
-  B_PREDICTION_MODE b_mode;
   switch (mode) {
-    case DC_PRED:
-      b_mode = B_DC_PRED;
-      break;
-    case V_PRED:
-      b_mode = B_VE_PRED;
-      break;
-    case H_PRED:
-      b_mode = B_HE_PRED;
-      break;
-    case TM_PRED:
-      b_mode = B_TM_PRED;
-      break;
-    case D45_PRED:
-      b_mode = B_LD_PRED;
-      break;
-    case D135_PRED:
-      b_mode = B_RD_PRED;
-      break;
-    case D117_PRED:
-      b_mode = B_VR_PRED;
-      break;
-    case D153_PRED:
-      b_mode = B_HD_PRED;
-      break;
-    case D27_PRED:
-      b_mode = B_HU_PRED;
-      break;
-    case D63_PRED:
-      b_mode = B_VL_PRED;
-      break;
-    default :
-      // for debug purpose, to be removed after full testing
-      assert(0);
-      break;
+    case DC_PRED: return B_DC_PRED;
+    case V_PRED: return B_VE_PRED;
+    case H_PRED: return B_HE_PRED;
+    case TM_PRED: return B_TM_PRED;
+    case D45_PRED: return B_LD_PRED;
+    case D135_PRED: return B_RD_PRED;
+    case D117_PRED: return B_VR_PRED;
+    case D153_PRED: return B_HD_PRED;
+    case D27_PRED: return B_HU_PRED;
+    case D63_PRED: return B_VL_PRED;
+    default:
+       assert(0);
+       return B_MODE_COUNT;  // Dummy value
   }
-  return b_mode;
 }
 
 // transform mapping
 static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
-  // map transform type
-  TX_TYPE tx_type;
   switch (bmode) {
     case B_TM_PRED :
     case B_RD_PRED :
-      tx_type = ADST_ADST;
-      break;
+      return ADST_ADST;
 
     case B_VE_PRED :
     case B_VR_PRED :
-      tx_type = ADST_DCT;
-      break;
+      return ADST_DCT;
 
     case B_HE_PRED :
     case B_HD_PRED :
     case B_HU_PRED :
-      tx_type = DCT_ADST;
-      break;
+      return DCT_ADST;
 
 #if CONFIG_NEWBINTRAMODES
     case B_CONTEXT_PRED:
@@ -487,33 +446,41 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
       break;
 #endif
 
-    default :
-      tx_type = DCT_DCT;
-      break;
+    default:
+      return DCT_DCT;
   }
-  return tx_type;
 }
 
-extern const uint8_t vp9_block2left[TX_SIZE_MAX_SB][25];
-extern const uint8_t vp9_block2above[TX_SIZE_MAX_SB][25];
+extern const uint8_t vp9_block2left[TX_SIZE_MAX_MB][24];
+extern const uint8_t vp9_block2above[TX_SIZE_MAX_MB][24];
+extern const uint8_t vp9_block2left_sb[TX_SIZE_MAX_SB][96];
+extern const uint8_t vp9_block2above_sb[TX_SIZE_MAX_SB][96];
+extern const uint8_t vp9_block2left_sb64[TX_SIZE_MAX_SB][384];
+extern const uint8_t vp9_block2above_sb64[TX_SIZE_MAX_SB][384];
 
-#define USE_ADST_FOR_I16X16_8X8   0
-#define USE_ADST_FOR_I16X16_4X4   0
+#define USE_ADST_FOR_I16X16_8X8   1
+#define USE_ADST_FOR_I16X16_4X4   1
 #define USE_ADST_FOR_I8X8_4X4     1
 #define USE_ADST_PERIPHERY_ONLY   1
+#define USE_ADST_FOR_SB           1
+#define USE_ADST_FOR_REMOTE_EDGE  0
 
-static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
+static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   // TODO(debargha): explore different patterns for ADST usage when blocksize
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
-  int ib = (int)(b - xd->block);
-  if (ib >= 16)
+  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+#if !USE_ADST_FOR_SB
+  if (sb_type)
     return tx_type;
-  // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.sb_type)
+#endif
+  if (ib >= (16 << (2 * sb_type)))  // no chroma adst
     return tx_type;
+  if (xd->lossless)
+    return DCT_DCT;
   if (xd->mode_info_context->mbmi.mode == B_PRED &&
       xd->q_index < ACTIVE_HT) {
+    const BLOCKD *b = &xd->block[ib];
     tx_type = txfm_map(
 #if CONFIG_NEWBINTRAMODES
         b->bmi.as_mode.first == B_CONTEXT_PRED ? b->bmi.as_mode.context :
@@ -521,16 +488,32 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
         b->bmi.as_mode.first);
   } else if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
              xd->q_index < ACTIVE_HT) {
+    const BLOCKD *b = &xd->block[ib];
+    const int ic = (ib & 10);
 #if USE_ADST_FOR_I8X8_4X4
 #if USE_ADST_PERIPHERY_ONLY
     // Use ADST for periphery blocks only
-    int ic = (ib & 10);
+    const int inner = ib & 5;
     b += ic - ib;
-    tx_type = (ic != 10) ?
-         txfm_map(pred_mode_conv((MB_PREDICTION_MODE)b->bmi.as_mode.first)) :
-         DCT_DCT;
+    tx_type = txfm_map(pred_mode_conv(
+        (MB_PREDICTION_MODE)b->bmi.as_mode.first));
+#if USE_ADST_FOR_REMOTE_EDGE
+    if (inner == 5)
+      tx_type = DCT_DCT;
+#else
+    if (inner == 1) {
+      if (tx_type == ADST_ADST) tx_type = ADST_DCT;
+      else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
+    } else if (inner == 4) {
+      if (tx_type == ADST_ADST) tx_type = DCT_ADST;
+      else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
+    } else if (inner == 5) {
+      tx_type = DCT_DCT;
+    }
+#endif
 #else
     // Use ADST
+    b += ic - ib;
     tx_type = txfm_map(pred_mode_conv(
         (MB_PREDICTION_MODE)b->bmi.as_mode.first));
 #endif
@@ -542,9 +525,22 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
              xd->q_index < ACTIVE_HT) {
 #if USE_ADST_FOR_I16X16_4X4
 #if USE_ADST_PERIPHERY_ONLY
-    // Use ADST for periphery blocks only
-    tx_type = (ib < 4 || ((ib & 3) == 0)) ?
-        txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode)) : DCT_DCT;
+    const int hmax = 4 << sb_type;
+    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+#if USE_ADST_FOR_REMOTE_EDGE
+    if ((ib & (hmax - 1)) != 0 && ib >= hmax)
+      tx_type = DCT_DCT;
+#else
+    if (ib >= 1 && ib < hmax) {
+      if (tx_type == ADST_ADST) tx_type = ADST_DCT;
+      else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
+    } else if (ib >= 1 && (ib & (hmax - 1)) == 0) {
+      if (tx_type == ADST_ADST) tx_type = DCT_ADST;
+      else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
+    } else if (ib != 0) {
+      tx_type = DCT_DCT;
+    }
+#endif
 #else
     // Use ADST
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
@@ -557,29 +553,44 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, const BLOCKD *b) {
   return tx_type;
 }
 
-static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
+static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
   // TODO(debargha): explore different patterns for ADST usage when blocksize
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
-  int ib = (int)(b - xd->block);
-  if (ib >= 16)
+  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+#if !USE_ADST_FOR_SB
+  if (sb_type)
     return tx_type;
-  // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.sb_type)
+#endif
+  if (ib >= (16 << (2 * sb_type)))  // no chroma adst
     return tx_type;
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
       xd->q_index < ACTIVE_HT8) {
+    const BLOCKD *b = &xd->block[ib];
     // TODO(rbultje): MB_PREDICTION_MODE / B_PREDICTION_MODE should be merged
     // or the relationship otherwise modified to address this type conversion.
     tx_type = txfm_map(pred_mode_conv(
            (MB_PREDICTION_MODE)b->bmi.as_mode.first));
   } else if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
              xd->q_index < ACTIVE_HT8) {
-#if USE_ADST_FOR_I8X8_4X4
+#if USE_ADST_FOR_I16X16_8X8
 #if USE_ADST_PERIPHERY_ONLY
-    // Use ADST for periphery blocks only
-    tx_type = (ib != 10) ?
-        txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode)) : DCT_DCT;
+    const int hmax = 4 << sb_type;
+    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+#if USE_ADST_FOR_REMOTE_EDGE
+    if ((ib & (hmax - 1)) != 0 && ib >= hmax)
+      tx_type = DCT_DCT;
+#else
+    if (ib >= 1 && ib < hmax) {
+      if (tx_type == ADST_ADST) tx_type = ADST_DCT;
+      else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
+    } else if (ib >= 1 && (ib & (hmax - 1)) == 0) {
+      if (tx_type == ADST_ADST) tx_type = DCT_ADST;
+      else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
+    } else if (ib != 0) {
+      tx_type = DCT_DCT;
+    }
+#endif
 #else
     // Use ADST
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
@@ -592,63 +603,73 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, const BLOCKD *b) {
   return tx_type;
 }
 
-static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, const BLOCKD *b) {
+static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type = DCT_DCT;
-  int ib = (int)(b - xd->block);
-  if (ib >= 16)
+  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+#if !USE_ADST_FOR_SB
+  if (sb_type)
     return tx_type;
-  // TODO(rbultje, debargha): Explore ADST usage for superblocks
-  if (xd->mode_info_context->mbmi.sb_type)
+#endif
+  if (ib >= (16 << (2 * sb_type)))
     return tx_type;
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
       xd->q_index < ACTIVE_HT16) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+#if USE_ADST_PERIPHERY_ONLY
+    if (sb_type) {
+      const int hmax = 4 << sb_type;
+#if USE_ADST_FOR_REMOTE_EDGE
+      if ((ib & (hmax - 1)) != 0 && ib >= hmax)
+        tx_type = DCT_DCT;
+#else
+      if (ib >= 1 && ib < hmax) {
+        if (tx_type == ADST_ADST) tx_type = ADST_DCT;
+        else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
+      } else if (ib >= 1 && (ib & (hmax - 1)) == 0) {
+        if (tx_type == ADST_ADST) tx_type = DCT_ADST;
+        else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
+      } else if (ib != 0) {
+        tx_type = DCT_DCT;
+      }
+#endif
+    }
+#endif
   }
   return tx_type;
 }
 
-static TX_TYPE get_tx_type(const MACROBLOCKD *xd, const BLOCKD *b) {
-  TX_TYPE tx_type = DCT_DCT;
-  int ib = (int)(b - xd->block);
-  if (ib >= 16)
-    return tx_type;
-  if (xd->mode_info_context->mbmi.txfm_size == TX_16X16) {
-    tx_type = get_tx_type_16x16(xd, b);
-  }
-  if (xd->mode_info_context->mbmi.txfm_size  == TX_8X8) {
-    ib = (ib & 8) + ((ib & 4) >> 1);
-    tx_type = get_tx_type_8x8(xd, &xd->block[ib]);
-  }
-  if (xd->mode_info_context->mbmi.txfm_size  == TX_4X4) {
-    tx_type = get_tx_type_4x4(xd, b);
-  }
-  return tx_type;
-}
-
-static int get_2nd_order_usage(const MACROBLOCKD *xd) {
-  int has_2nd_order = (xd->mode_info_context->mbmi.mode != SPLITMV &&
-                       xd->mode_info_context->mbmi.mode != I8X8_PRED &&
-                       xd->mode_info_context->mbmi.mode != B_PRED &&
-                       xd->mode_info_context->mbmi.txfm_size != TX_16X16);
-  if (has_2nd_order)
-    has_2nd_order = (get_tx_type(xd, xd->block) == DCT_DCT);
-  return has_2nd_order;
-}
-
-extern void vp9_build_block_doffsets(MACROBLOCKD *xd);
-extern void vp9_setup_block_dptrs(MACROBLOCKD *xd);
+void vp9_build_block_doffsets(MACROBLOCKD *xd);
+void vp9_setup_block_dptrs(MACROBLOCKD *xd);
 
 static void update_blockd_bmi(MACROBLOCKD *xd) {
-  int i;
-  int is_4x4;
-  is_4x4 = (xd->mode_info_context->mbmi.mode == SPLITMV) ||
-           (xd->mode_info_context->mbmi.mode == I8X8_PRED) ||
-           (xd->mode_info_context->mbmi.mode == B_PRED);
+  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
 
-  if (is_4x4) {
-    for (i = 0; i < 16; i++) {
+  if (mode == SPLITMV || mode == I8X8_PRED || mode == B_PRED) {
+    int i;
+    for (i = 0; i < 16; i++)
       xd->block[i].bmi = xd->mode_info_context->bmi[i];
-    }
   }
+}
+
+static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
+  TX_SIZE tx_size_uv;
+  if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
+    tx_size_uv = xd->mode_info_context->mbmi.txfm_size;
+  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
+    if (xd->mode_info_context->mbmi.txfm_size == TX_32X32)
+      tx_size_uv = TX_16X16;
+    else
+      tx_size_uv = xd->mode_info_context->mbmi.txfm_size;
+  } else {
+    if (xd->mode_info_context->mbmi.txfm_size == TX_16X16)
+      tx_size_uv = TX_8X8;
+    else if (xd->mode_info_context->mbmi.txfm_size == TX_8X8 &&
+             (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
+              xd->mode_info_context->mbmi.mode == SPLITMV))
+      tx_size_uv = TX_4X4;
+    else
+      tx_size_uv = xd->mode_info_context->mbmi.txfm_size;
+  }
+  return tx_size_uv;
 }
 #endif  // VP9_COMMON_VP9_BLOCKD_H_

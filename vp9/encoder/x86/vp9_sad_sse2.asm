@@ -8,403 +8,175 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-
-%include "vpx_ports/x86_abi_support.asm"
-
-;unsigned int vp9_sad16x16_wmt(
-;    unsigned char *src_ptr,
-;    int  src_stride,
-;    unsigned char *ref_ptr,
-;    int  ref_stride)
-global sym(vp9_sad16x16_wmt) PRIVATE
-sym(vp9_sad16x16_wmt):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 4
-    SAVE_XMM 6
-    push        rsi
-    push        rdi
-    ; end prolog
-
-        mov             rsi,        arg(0) ;src_ptr
-        mov             rdi,        arg(2) ;ref_ptr
-
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
-
-        lea             rcx,        [rsi+rax*8]
-
-        lea             rcx,        [rcx+rax*8]
-        pxor            xmm6,       xmm6
-
-.x16x16sad_wmt_loop:
-
-        movq            xmm0,       QWORD PTR [rsi]
-        movq            xmm2,       QWORD PTR [rsi+8]
-
-        movq            xmm1,       QWORD PTR [rdi]
-        movq            xmm3,       QWORD PTR [rdi+8]
-
-        movq            xmm4,       QWORD PTR [rsi+rax]
-        movq            xmm5,       QWORD PTR [rdi+rdx]
-
-
-        punpcklbw       xmm0,       xmm2
-        punpcklbw       xmm1,       xmm3
-
-        psadbw          xmm0,       xmm1
-        movq            xmm2,       QWORD PTR [rsi+rax+8]
-
-        movq            xmm3,       QWORD PTR [rdi+rdx+8]
-        lea             rsi,        [rsi+rax*2]
-
-        lea             rdi,        [rdi+rdx*2]
-        punpcklbw       xmm4,       xmm2
-
-        punpcklbw       xmm5,       xmm3
-        psadbw          xmm4,       xmm5
-
-        paddw           xmm6,       xmm0
-        paddw           xmm6,       xmm4
-
-        cmp             rsi,        rcx
-        jne             .x16x16sad_wmt_loop
-
-        movq            xmm0,       xmm6
-        psrldq          xmm6,       8
-
-        paddw           xmm0,       xmm6
-        movq            rax,        xmm0
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-;unsigned int vp9_sad8x16_wmt(
-;    unsigned char *src_ptr,
-;    int  src_stride,
-;    unsigned char *ref_ptr,
-;    int  ref_stride,
-;    int  max_err)
-global sym(vp9_sad8x16_wmt) PRIVATE
-sym(vp9_sad8x16_wmt):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 5
-    push        rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-        mov             rsi,        arg(0) ;src_ptr
-        mov             rdi,        arg(2) ;ref_ptr
-
-        movsxd          rbx,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
-
-        lea             rcx,        [rsi+rbx*8]
-
-        lea             rcx,        [rcx+rbx*8]
-        pxor            mm7,        mm7
-
-.x8x16sad_wmt_loop:
-
-        movq            rax,        mm7
-        cmp             eax,        arg(4)
-        jg              .x8x16sad_wmt_early_exit
-
-        movq            mm0,        QWORD PTR [rsi]
-        movq            mm1,        QWORD PTR [rdi]
-
-        movq            mm2,        QWORD PTR [rsi+rbx]
-        movq            mm3,        QWORD PTR [rdi+rdx]
-
-        psadbw          mm0,        mm1
-        psadbw          mm2,        mm3
-
-        lea             rsi,        [rsi+rbx*2]
-        lea             rdi,        [rdi+rdx*2]
-
-        paddw           mm7,        mm0
-        paddw           mm7,        mm2
-
-        cmp             rsi,        rcx
-        jne             .x8x16sad_wmt_loop
-
-        movq            rax,        mm7
-
-.x8x16sad_wmt_early_exit:
-
-    ; begin epilog
-    pop         rdi
-    pop         rsi
-    pop         rbx
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-
-;unsigned int vp9_sad8x8_wmt(
-;    unsigned char *src_ptr,
-;    int  src_stride,
-;    unsigned char *ref_ptr,
-;    int  ref_stride)
-global sym(vp9_sad8x8_wmt) PRIVATE
-sym(vp9_sad8x8_wmt):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 5
-    push        rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-        mov             rsi,        arg(0) ;src_ptr
-        mov             rdi,        arg(2) ;ref_ptr
-
-        movsxd          rbx,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
-
-        lea             rcx,        [rsi+rbx*8]
-        pxor            mm7,        mm7
-
-.x8x8sad_wmt_loop:
-
-        movq            rax,        mm7
-        cmp             eax,        arg(4)
-        jg              .x8x8sad_wmt_early_exit
-
-        movq            mm0,        QWORD PTR [rsi]
-        movq            mm1,        QWORD PTR [rdi]
-
-        psadbw          mm0,        mm1
-        lea             rsi,        [rsi+rbx]
-
-        add             rdi,        rdx
-        paddw           mm7,        mm0
-
-        cmp             rsi,        rcx
-        jne             .x8x8sad_wmt_loop
-
-        movq            rax,        mm7
-.x8x8sad_wmt_early_exit:
-
-    ; begin epilog
-    pop         rdi
-    pop         rsi
-    pop         rbx
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-;unsigned int vp9_sad4x4_wmt(
-;    unsigned char *src_ptr,
-;    int  src_stride,
-;    unsigned char *ref_ptr,
-;    int  ref_stride)
-global sym(vp9_sad4x4_wmt) PRIVATE
-sym(vp9_sad4x4_wmt):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 4
-    push        rsi
-    push        rdi
-    ; end prolog
-
-        mov             rsi,        arg(0) ;src_ptr
-        mov             rdi,        arg(2) ;ref_ptr
-
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
-
-        movd            mm0,        DWORD PTR [rsi]
-        movd            mm1,        DWORD PTR [rdi]
-
-        movd            mm2,        DWORD PTR [rsi+rax]
-        movd            mm3,        DWORD PTR [rdi+rdx]
-
-        punpcklbw       mm0,        mm2
-        punpcklbw       mm1,        mm3
-
-        psadbw          mm0,        mm1
-        lea             rsi,        [rsi+rax*2]
-
-        lea             rdi,        [rdi+rdx*2]
-        movd            mm4,        DWORD PTR [rsi]
-
-        movd            mm5,        DWORD PTR [rdi]
-        movd            mm6,        DWORD PTR [rsi+rax]
-
-        movd            mm7,        DWORD PTR [rdi+rdx]
-        punpcklbw       mm4,        mm6
-
-        punpcklbw       mm5,        mm7
-        psadbw          mm4,        mm5
-
-        paddw           mm0,        mm4
-        movq            rax,        mm0
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-
-;unsigned int vp9_sad16x8_wmt(
-;    unsigned char *src_ptr,
-;    int  src_stride,
-;    unsigned char *ref_ptr,
-;    int  ref_stride)
-global sym(vp9_sad16x8_wmt) PRIVATE
-sym(vp9_sad16x8_wmt):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 5
-    push        rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-
-        mov             rsi,        arg(0) ;src_ptr
-        mov             rdi,        arg(2) ;ref_ptr
-
-        movsxd          rbx,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
-
-        lea             rcx,        [rsi+rbx*8]
-        pxor            mm7,        mm7
-
-.x16x8sad_wmt_loop:
-
-        movq            rax,        mm7
-        cmp             eax,        arg(4)
-        jg              .x16x8sad_wmt_early_exit
-
-        movq            mm0,        QWORD PTR [rsi]
-        movq            mm2,        QWORD PTR [rsi+8]
-
-        movq            mm1,        QWORD PTR [rdi]
-        movq            mm3,        QWORD PTR [rdi+8]
-
-        movq            mm4,        QWORD PTR [rsi+rbx]
-        movq            mm5,        QWORD PTR [rdi+rdx]
-
-        psadbw          mm0,        mm1
-        psadbw          mm2,        mm3
-
-        movq            mm1,        QWORD PTR [rsi+rbx+8]
-        movq            mm3,        QWORD PTR [rdi+rdx+8]
-
-        psadbw          mm4,        mm5
-        psadbw          mm1,        mm3
-
-        lea             rsi,        [rsi+rbx*2]
-        lea             rdi,        [rdi+rdx*2]
-
-        paddw           mm0,        mm2
-        paddw           mm4,        mm1
-
-        paddw           mm7,        mm0
-        paddw           mm7,        mm4
-
-        cmp             rsi,        rcx
-        jne             .x16x8sad_wmt_loop
-
-        movq            rax,        mm7
-
-.x16x8sad_wmt_early_exit:
-
-    ; begin epilog
-    pop         rdi
-    pop         rsi
-    pop         rbx
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-;void vp9_copy32xn_sse2(
-;    unsigned char *src_ptr,
-;    int  src_stride,
-;    unsigned char *dst_ptr,
-;    int  dst_stride,
-;    int height);
-global sym(vp9_copy32xn_sse2) PRIVATE
-sym(vp9_copy32xn_sse2):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 5
-    SAVE_XMM 7
-    push        rsi
-    push        rdi
-    ; end prolog
-
-        mov             rsi,        arg(0) ;src_ptr
-        mov             rdi,        arg(2) ;dst_ptr
-
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;dst_stride
-        movsxd          rcx,        dword ptr arg(4) ;height
-
-.block_copy_sse2_loopx4:
-        movdqu          xmm0,       XMMWORD PTR [rsi]
-        movdqu          xmm1,       XMMWORD PTR [rsi + 16]
-        movdqu          xmm2,       XMMWORD PTR [rsi + rax]
-        movdqu          xmm3,       XMMWORD PTR [rsi + rax + 16]
-
-        lea             rsi,        [rsi+rax*2]
-
-        movdqu          xmm4,       XMMWORD PTR [rsi]
-        movdqu          xmm5,       XMMWORD PTR [rsi + 16]
-        movdqu          xmm6,       XMMWORD PTR [rsi + rax]
-        movdqu          xmm7,       XMMWORD PTR [rsi + rax + 16]
-
-        lea             rsi,    [rsi+rax*2]
-
-        movdqa          XMMWORD PTR [rdi], xmm0
-        movdqa          XMMWORD PTR [rdi + 16], xmm1
-        movdqa          XMMWORD PTR [rdi + rdx], xmm2
-        movdqa          XMMWORD PTR [rdi + rdx + 16], xmm3
-
-        lea             rdi,    [rdi+rdx*2]
-
-        movdqa          XMMWORD PTR [rdi], xmm4
-        movdqa          XMMWORD PTR [rdi + 16], xmm5
-        movdqa          XMMWORD PTR [rdi + rdx], xmm6
-        movdqa          XMMWORD PTR [rdi + rdx + 16], xmm7
-
-        lea             rdi,    [rdi+rdx*2]
-
-        sub             rcx,     4
-        cmp             rcx,     4
-        jge             .block_copy_sse2_loopx4
-
-        cmp             rcx, 0
-        je              .copy_is_done
-
-.block_copy_sse2_loop:
-        movdqu          xmm0,       XMMWORD PTR [rsi]
-        movdqu          xmm1,       XMMWORD PTR [rsi + 16]
-        lea             rsi,    [rsi+rax]
-
-        movdqa          XMMWORD PTR [rdi], xmm0
-        movdqa          XMMWORD PTR [rdi + 16], xmm1
-        lea             rdi,    [rdi+rdx]
-
-        sub             rcx,     1
-        jne             .block_copy_sse2_loop
-
-.copy_is_done:
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
+%include "third_party/x86inc/x86inc.asm"
+
+SECTION .text
+
+; unsigned int vp9_sad64x64_sse2(uint8_t *src, int src_stride,
+;                                uint8_t *ref, int ref_stride);
+INIT_XMM sse2
+cglobal sad64x64, 4, 5, 5, src, src_stride, ref, ref_stride, n_rows
+  movsxdifnidn src_strideq, src_strided
+  movsxdifnidn ref_strideq, ref_strided
+  mov              n_rowsd, 64
+  pxor                  m0, m0
+.loop:
+  movu                  m1, [refq]
+  movu                  m2, [refq+16]
+  movu                  m3, [refq+32]
+  movu                  m4, [refq+48]
+  psadbw                m1, [srcq]
+  psadbw                m2, [srcq+16]
+  psadbw                m3, [srcq+32]
+  psadbw                m4, [srcq+48]
+  paddd                 m1, m2
+  paddd                 m3, m4
+  add                 refq, ref_strideq
+  paddd                 m0, m1
+  add                 srcq, src_strideq
+  paddd                 m0, m3
+  dec              n_rowsd
+  jg .loop
+
+  movhlps               m1, m0
+  paddd                 m0, m1
+  movd                 eax, m0
+  RET
+
+; unsigned int vp9_sad32x32_sse2(uint8_t *src, int src_stride,
+;                                uint8_t *ref, int ref_stride);
+INIT_XMM sse2
+cglobal sad32x32, 4, 5, 5, src, src_stride, ref, ref_stride, n_rows
+  movsxdifnidn src_strideq, src_strided
+  movsxdifnidn ref_strideq, ref_strided
+  mov              n_rowsd, 16
+  pxor                  m0, m0
+
+.loop:
+  movu                  m1, [refq]
+  movu                  m2, [refq+16]
+  movu                  m3, [refq+ref_strideq]
+  movu                  m4, [refq+ref_strideq+16]
+  psadbw                m1, [srcq]
+  psadbw                m2, [srcq+16]
+  psadbw                m3, [srcq+src_strideq]
+  psadbw                m4, [srcq+src_strideq+16]
+  paddd                 m1, m2
+  paddd                 m3, m4
+  lea                 refq, [refq+ref_strideq*2]
+  paddd                 m0, m1
+  lea                 srcq, [srcq+src_strideq*2]
+  paddd                 m0, m3
+  dec              n_rowsd
+  jg .loop
+
+  movhlps               m1, m0
+  paddd                 m0, m1
+  movd                 eax, m0
+  RET
+
+; unsigned int vp9_sad16x{8,16}_sse2(uint8_t *src, int src_stride,
+;                                    uint8_t *ref, int ref_stride);
+%macro SAD16XN 1
+cglobal sad16x%1, 4, 7, 5, src, src_stride, ref, ref_stride, \
+                           src_stride3, ref_stride3, n_rows
+  movsxdifnidn src_strideq, src_strided
+  movsxdifnidn ref_strideq, ref_strided
+  lea         src_stride3q, [src_strideq*3]
+  lea         ref_stride3q, [ref_strideq*3]
+  mov              n_rowsd, %1/4
+  pxor                  m0, m0
+
+.loop:
+  movu                  m1, [refq]
+  movu                  m2, [refq+ref_strideq]
+  movu                  m3, [refq+ref_strideq*2]
+  movu                  m4, [refq+ref_stride3q]
+  psadbw                m1, [srcq]
+  psadbw                m2, [srcq+src_strideq]
+  psadbw                m3, [srcq+src_strideq*2]
+  psadbw                m4, [srcq+src_stride3q]
+  paddd                 m1, m2
+  paddd                 m3, m4
+  lea                 refq, [refq+ref_strideq*4]
+  paddd                 m0, m1
+  lea                 srcq, [srcq+src_strideq*4]
+  paddd                 m0, m3
+  dec              n_rowsd
+  jg .loop
+
+  movhlps               m1, m0
+  paddd                 m0, m1
+  movd                 eax, m0
+  RET
+%endmacro
+
+INIT_XMM sse2
+SAD16XN 16 ; sad16x16_sse2
+SAD16XN  8 ; sad16x8_sse2
+
+; unsigned int vp9_sad8x{8,16}_sse2(uint8_t *src, int src_stride,
+;                                   uint8_t *ref, int ref_stride);
+%macro SAD8XN 1
+cglobal sad8x%1, 4, 7, 5, src, src_stride, ref, ref_stride, \
+                          src_stride3, ref_stride3, n_rows
+  movsxdifnidn src_strideq, src_strided
+  movsxdifnidn ref_strideq, ref_strided
+  lea         src_stride3q, [src_strideq*3]
+  lea         ref_stride3q, [ref_strideq*3]
+  mov              n_rowsd, %1/4
+  pxor                  m0, m0
+
+.loop:
+  movh                  m1, [refq]
+  movhps                m1, [refq+ref_strideq]
+  movh                  m2, [refq+ref_strideq*2]
+  movhps                m2, [refq+ref_stride3q]
+  movh                  m3, [srcq]
+  movhps                m3, [srcq+src_strideq]
+  movh                  m4, [srcq+src_strideq*2]
+  movhps                m4, [srcq+src_stride3q]
+  psadbw                m1, m3
+  psadbw                m2, m4
+  lea                 refq, [refq+ref_strideq*4]
+  paddd                 m0, m1
+  lea                 srcq, [srcq+src_strideq*4]
+  paddd                 m0, m2
+  dec              n_rowsd
+  jg .loop
+
+  movhlps               m1, m0
+  paddd                 m0, m1
+  movd                 eax, m0
+  RET
+%endmacro
+
+INIT_XMM sse2
+SAD8XN 16 ; sad8x16_sse2
+SAD8XN  8 ; sad8x8_sse2
+
+; unsigned int vp9_sad4x4_sse(uint8_t *src, int src_stride,
+;                             uint8_t *ref, int ref_stride);
+INIT_MMX sse
+cglobal sad4x4, 4, 4, 8, src, src_stride, ref, ref_stride
+  movsxdifnidn src_strideq, src_strided
+  movsxdifnidn ref_strideq, ref_strided
+  movd                  m0, [refq]
+  movd                  m1, [refq+ref_strideq]
+  movd                  m2, [srcq]
+  movd                  m3, [srcq+src_strideq]
+  lea                 refq, [refq+ref_strideq*2]
+  lea                 srcq, [srcq+src_strideq*2]
+  movd                  m4, [refq]
+  movd                  m5, [refq+ref_strideq]
+  movd                  m6, [srcq]
+  movd                  m7, [srcq+src_strideq]
+  punpckldq             m0, m1
+  punpckldq             m2, m3
+  punpckldq             m4, m5
+  punpckldq             m6, m7
+  psadbw                m0, m2
+  psadbw                m4, m6
+  paddd                 m0, m4
+  movd                 eax, m0
+  RET

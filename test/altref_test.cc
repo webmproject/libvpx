@@ -8,19 +8,20 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
-
+#include "test/util.h"
 namespace {
 
 // lookahead range: [kLookAheadMin, kLookAheadMax).
 const int kLookAheadMin = 5;
 const int kLookAheadMax = 26;
 
-class AltRefTest : public libvpx_test::EncoderTest,
-    public ::testing::TestWithParam<int> {
+class AltRefTest : public ::libvpx_test::EncoderTest,
+    public ::libvpx_test::CodecTestWithParam<int> {
  protected:
-  AltRefTest() : altref_count_(0) {}
+  AltRefTest() : EncoderTest(GET_PARAM(0)), altref_count_(0) {}
   virtual ~AltRefTest() {}
 
   virtual void SetUp() {
@@ -58,7 +59,7 @@ TEST_P(AltRefTest, MonotonicTimestamps) {
   const vpx_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
   cfg_.rc_target_bitrate = 1000;
-  cfg_.g_lag_in_frames = GetParam();
+  cfg_.g_lag_in_frames = GET_PARAM(1);
 
   libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                      timebase.den, timebase.num, 0, 30);
@@ -66,6 +67,7 @@ TEST_P(AltRefTest, MonotonicTimestamps) {
   EXPECT_GE(altref_count(), 1);
 }
 
-INSTANTIATE_TEST_CASE_P(NonZeroLag, AltRefTest,
-                        ::testing::Range(kLookAheadMin, kLookAheadMax));
+
+VP8_INSTANTIATE_TEST_CASE(AltRefTest,
+                          ::testing::Range(kLookAheadMin, kLookAheadMax));
 }  // namespace

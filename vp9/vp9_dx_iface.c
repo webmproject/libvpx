@@ -17,6 +17,7 @@
 #include "vpx_version.h"
 #include "decoder/vp9_onyxd.h"
 #include "decoder/vp9_onyxd_int.h"
+#include "vp9/vp9_iface_common.h"
 
 #define VP8_CAP_POSTPROC (CONFIG_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
 typedef vpx_codec_stream_info_t  vp8_stream_info_t;
@@ -63,6 +64,7 @@ struct vpx_codec_alg_priv {
   vpx_image_t             img;
   int                     img_setup;
   int                     img_avail;
+  int                     invert_tile_order;
 };
 
 static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si,
@@ -229,8 +231,8 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
       if (c[0] != 0x9d || c[1] != 0x01 || c[2] != 0x2a)
         res = VPX_CODEC_UNSUP_BITSTREAM;
 
-      si->w = (c[3] | (c[4] << 8)) & 0x3fff;
-      si->h = (c[5] | (c[6] << 8)) & 0x3fff;
+      si->w = (c[3] | (c[4] << 8));
+      si->h = (c[5] | (c[6] << 8));
 
       /*printf("w=%d, h=%d\n", si->w, si->h);*/
       if (!(si->h | si->w))
@@ -271,36 +273,6 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
                            : NULL;
 
   return res;
-}
-
-static void yuvconfig2image(vpx_image_t               *img,
-                            const YV12_BUFFER_CONFIG  *yv12,
-                            void                      *user_priv) {
-  /** vpx_img_wrap() doesn't allow specifying independent strides for
-    * the Y, U, and V planes, nor other alignment adjustments that
-    * might be representable by a YV12_BUFFER_CONFIG, so we just
-    * initialize all the fields.*/
-  img->fmt = yv12->clrtype == REG_YUV ?
-             VPX_IMG_FMT_I420 : VPX_IMG_FMT_VPXI420;
-  img->w = yv12->y_stride;
-  img->h = (yv12->y_height + 2 * VP9BORDERINPIXELS + 15) & ~15;
-  img->d_w = yv12->y_width;
-  img->d_h = yv12->y_height;
-  img->x_chroma_shift = 1;
-  img->y_chroma_shift = 1;
-  img->planes[VPX_PLANE_Y] = yv12->y_buffer;
-  img->planes[VPX_PLANE_U] = yv12->u_buffer;
-  img->planes[VPX_PLANE_V] = yv12->v_buffer;
-  img->planes[VPX_PLANE_ALPHA] = NULL;
-  img->stride[VPX_PLANE_Y] = yv12->y_stride;
-  img->stride[VPX_PLANE_U] = yv12->uv_stride;
-  img->stride[VPX_PLANE_V] = yv12->uv_stride;
-  img->stride[VPX_PLANE_ALPHA] = yv12->y_stride;
-  img->bps = 12;
-  img->user_priv = user_priv;
-  img->img_data = yv12->buffer_alloc;
-  img->img_data_owner = 0;
-  img->self_allocd = 0;
 }
 
 static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
@@ -362,6 +334,7 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
       oxcf.Version = 9;
       oxcf.postprocess = 0;
       oxcf.max_threads = ctx->cfg.threads;
+      oxcf.inv_tile_order = ctx->invert_tile_order;
       optr = vp9_create_decompressor(&oxcf);
 
       /* If postprocessing was enabled by the application and a
@@ -424,6 +397,39 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
   return res;
 }
 
+static void parse_superframe_index(const uint8_t *data,
+                                   size_t         data_sz,
+                                   uint32_t       sizes[8],
+                                   int           *count) {
+  uint8_t marker;
+
+  assert(data_sz);
+  marker = data[data_sz - 1];
+  *count = 0;
+
+  if ((marker & 0xe0) == 0xc0) {
+    const int frames = (marker & 0x7) + 1;
+    const int mag = ((marker >> 3) & 3) + 1;
+    const int index_sz = 2 + mag  * frames;
+
+    if (data_sz >= index_sz && data[data_sz - index_sz] == marker) {
+      // found a valid superframe index
+      int i, j;
+      const uint8_t *x = data + data_sz - index_sz + 1;
+
+      for (i = 0; i < frames; i++) {
+        int this_sz = 0;
+
+        for (j = 0; j < mag; j++)
+          this_sz |= (*x++) << (j * 8);
+        sizes[i] = this_sz;
+      }
+
+      *count = frames;
+    }
+  }
+}
+
 static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
                                   const uint8_t         *data,
                                   unsigned int           data_sz,
@@ -431,9 +437,43 @@ static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
                                   long                   deadline) {
   const uint8_t *data_start = data;
   const uint8_t *data_end = data + data_sz;
-  vpx_codec_err_t res;
+  vpx_codec_err_t res = 0;
+  uint32_t sizes[8];
+  int frames_this_pts, frame_count = 0;
+
+  parse_superframe_index(data, data_sz, sizes, &frames_this_pts);
 
   do {
+    // Skip over the superframe index, if present
+    if (data_sz && (*data_start & 0xe0) == 0xc0) {
+      const uint8_t marker = *data_start;
+      const int frames = (marker & 0x7) + 1;
+      const int mag = ((marker >> 3) & 3) + 1;
+      const int index_sz = 2 + mag  * frames;
+
+      if (data_sz >= index_sz && data_start[index_sz - 1] == marker) {
+        data_start += index_sz;
+        data_sz -= index_sz;
+        if (data_start < data_end)
+          continue;
+        else
+          break;
+      }
+    }
+
+    // Use the correct size for this frame, if an index is present.
+    if (frames_this_pts) {
+      uint32_t this_sz = sizes[frame_count];
+
+      if (data_sz < this_sz) {
+        ctx->base.err_detail = "Invalid frame size in index";
+        return VPX_CODEC_CORRUPT_FRAME;
+      }
+
+      data_sz = this_sz;
+      frame_count++;
+    }
+
     res = decode_one(ctx, &data_start, data_sz, user_priv, deadline);
     assert(data_start >= data);
     assert(data_start <= data_end);
@@ -545,6 +585,8 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
   yv12->u_buffer = img->planes[VPX_PLANE_U];
   yv12->v_buffer = img->planes[VPX_PLANE_V];
 
+  yv12->y_crop_width  = img->d_w;
+  yv12->y_crop_height = img->d_h;
   yv12->y_width  = img->d_w;
   yv12->y_height = img->d_h;
   yv12->uv_width = yv12->y_width / 2;
@@ -580,9 +622,9 @@ static vpx_codec_err_t vp9_set_reference(vpx_codec_alg_priv_t *ctx,
 
 }
 
-static vpx_codec_err_t vp9_get_reference(vpx_codec_alg_priv_t *ctx,
-                                         int ctr_id,
-                                         va_list args) {
+static vpx_codec_err_t vp9_copy_reference(vpx_codec_alg_priv_t *ctx,
+                                          int ctr_id,
+                                          va_list args) {
 
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
@@ -592,11 +634,27 @@ static vpx_codec_err_t vp9_get_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
-    return vp9_get_reference_dec(ctx->pbi,
-                                 (VP9_REFFRAME)frame->frame_type, &sd);
+    return vp9_copy_reference_dec(ctx->pbi,
+                                  (VP9_REFFRAME)frame->frame_type, &sd);
   } else
     return VPX_CODEC_INVALID_PARAM;
 
+}
+
+static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx,
+                                     int ctr_id,
+                                     va_list args) {
+  vp9_ref_frame_t *data = va_arg(args, vp9_ref_frame_t *);
+
+  if (data) {
+    YV12_BUFFER_CONFIG* fb;
+
+    vp9_get_reference_dec(ctx->pbi, data->idx, &fb);
+    yuvconfig2image(&data->img, fb, NULL);
+    return VPX_CODEC_OK;
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
 }
 
 static vpx_codec_err_t vp8_set_postproc(vpx_codec_alg_priv_t *ctx,
@@ -645,9 +703,7 @@ static vpx_codec_err_t vp8_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
   VP9D_COMP *pbi = (VP9D_COMP *)ctx->pbi;
 
   if (update_info) {
-    *update_info = pbi->common.refresh_alt_ref_frame * (int) VP8_ALTR_FRAME
-                   + pbi->common.refresh_golden_frame * (int) VP8_GOLD_FRAME
-                   + pbi->common.refresh_last_frame * (int) VP8_LAST_FRAME;
+    *update_info = pbi->refresh_frame_flags;
 
     return VPX_CODEC_OK;
   } else
@@ -671,9 +727,16 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 
 }
 
+static vpx_codec_err_t set_invert_tile_order(vpx_codec_alg_priv_t *ctx,
+                                             int ctr_id,
+                                             va_list args) {
+  ctx->invert_tile_order = va_arg(args, int);
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t ctf_maps[] = {
   {VP8_SET_REFERENCE,             vp9_set_reference},
-  {VP8_COPY_REFERENCE,            vp9_get_reference},
+  {VP8_COPY_REFERENCE,            vp9_copy_reference},
   {VP8_SET_POSTPROC,              vp8_set_postproc},
   {VP8_SET_DBG_COLOR_REF_FRAME,   vp8_set_dbg_options},
   {VP8_SET_DBG_COLOR_MB_MODES,    vp8_set_dbg_options},
@@ -681,6 +744,8 @@ static vpx_codec_ctrl_fn_map_t ctf_maps[] = {
   {VP8_SET_DBG_DISPLAY_MV,        vp8_set_dbg_options},
   {VP8D_GET_LAST_REF_UPDATES,     vp8_get_last_ref_updates},
   {VP8D_GET_FRAME_CORRUPTED,      vp8_get_frame_corrupted},
+  {VP9_GET_REFERENCE,             get_reference},
+  {VP9_INVERT_TILE_DECODE_ORDER,  set_invert_tile_order},
   { -1, NULL},
 };
 

@@ -17,6 +17,9 @@
 #include "vp9/common/vp9_treecoder.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#define LEFT_TOP_MARGIN (16 << 3)
+#define RIGHT_BOTTOM_MARGIN (16 << 3)
+
 /* check a list of motion vectors by sad score using a number rows of pixels
  * above and a number cols of pixels in the left to select the one with best
  * score to use as ref motion vector
@@ -28,9 +31,9 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            int_mv *nearest,
                            int_mv *near);
 
-static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, const int *ref_frame_sign_bias) {
-  MV xmv;
-  xmv = mvp->as_mv;
+static void mv_bias(int refmb_ref_frame_sign_bias, int refframe,
+                    int_mv *mvp, const int *ref_frame_sign_bias) {
+  MV xmv = mvp->as_mv;
 
   if (refmb_ref_frame_sign_bias != ref_frame_sign_bias[refframe]) {
     xmv.row *= -1;
@@ -40,8 +43,6 @@ static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, co
   mvp->as_mv = xmv;
 }
 
-#define LEFT_TOP_MARGIN (16 << 3)
-#define RIGHT_BOTTOM_MARGIN (16 << 3)
 
 static void clamp_mv(int_mv *mv,
                      int mb_to_left_edge,
@@ -71,10 +72,10 @@ static unsigned int check_mv_bounds(int_mv *mv,
                                     int mb_to_right_edge,
                                     int mb_to_top_edge,
                                     int mb_to_bottom_edge) {
-  return (mv->as_mv.col < mb_to_left_edge) ||
-         (mv->as_mv.col > mb_to_right_edge) ||
-         (mv->as_mv.row < mb_to_top_edge) ||
-         (mv->as_mv.row > mb_to_bottom_edge);
+  return mv->as_mv.col < mb_to_left_edge ||
+         mv->as_mv.col > mb_to_right_edge ||
+         mv->as_mv.row < mb_to_top_edge ||
+         mv->as_mv.row > mb_to_bottom_edge;
 }
 
 vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
@@ -83,21 +84,30 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
 
 extern const uint8_t vp9_mbsplit_offset[4][16];
 
-static int left_block_mv(const MODE_INFO *cur_mb, int b) {
+static int left_block_mv(const MACROBLOCKD *xd,
+                         const MODE_INFO *cur_mb, int b) {
   if (!(b & 3)) {
-    /* On L edge, get from MB to left of us */
+    if (!xd->left_available)
+      return 0;
+
+    // On L edge, get from MB to left of us
     --cur_mb;
 
     if (cur_mb->mbmi.mode != SPLITMV)
       return cur_mb->mbmi.mv[0].as_int;
+
     b += 4;
   }
 
-  return (cur_mb->bmi + b - 1)->as_mv.first.as_int;
+  return (cur_mb->bmi + b - 1)->as_mv[0].as_int;
 }
 
-static int left_block_second_mv(const MODE_INFO *cur_mb, int b) {
+static int left_block_second_mv(const MACROBLOCKD *xd,
+                                const MODE_INFO *cur_mb, int b) {
   if (!(b & 3)) {
+    if (!xd->left_available)
+      return 0;
+
     /* On L edge, get from MB to left of us */
     --cur_mb;
 
@@ -108,8 +118,8 @@ static int left_block_second_mv(const MODE_INFO *cur_mb, int b) {
   }
 
   return cur_mb->mbmi.second_ref_frame > 0 ?
-      (cur_mb->bmi + b - 1)->as_mv.second.as_int :
-      (cur_mb->bmi + b - 1)->as_mv.first.as_int;
+      (cur_mb->bmi + b - 1)->as_mv[1].as_int :
+      (cur_mb->bmi + b - 1)->as_mv[0].as_int;
 }
 
 static int above_block_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
@@ -122,7 +132,7 @@ static int above_block_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
     b += 16;
   }
 
-  return (cur_mb->bmi + b - 4)->as_mv.first.as_int;
+  return (cur_mb->bmi + b - 4)->as_mv[0].as_int;
 }
 
 static int above_block_second_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
@@ -137,8 +147,8 @@ static int above_block_second_mv(const MODE_INFO *cur_mb, int b, int mi_stride) 
   }
 
   return cur_mb->mbmi.second_ref_frame > 0 ?
-      (cur_mb->bmi + b - 4)->as_mv.second.as_int :
-      (cur_mb->bmi + b - 4)->as_mv.first.as_int;
+      (cur_mb->bmi + b - 4)->as_mv[1].as_int :
+      (cur_mb->bmi + b - 4)->as_mv[0].as_int;
 }
 
 static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {

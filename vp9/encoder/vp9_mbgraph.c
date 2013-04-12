@@ -20,14 +20,16 @@
 
 static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
                                               int_mv *ref_mv,
-                                              int_mv *dst_mv) {
+                                              int_mv *dst_mv,
+                                              int mb_row,
+                                              int mb_col) {
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   BLOCK *b  = &x->block[0];
   BLOCKD *d = &xd->block[0];
   vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
   unsigned int best_err;
-  int step_param;
+
 
   int tmp_col_min = x->mv_col_min;
   int tmp_col_max = x->mv_col_max;
@@ -36,11 +38,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   int_mv ref_full;
 
   // Further step/diamond searches as necessary
-  if (cpi->Speed < 8) {
-    step_param = cpi->sf.first_step + ((cpi->Speed > 5) ? 1 : 0);
-  } else {
-    step_param = cpi->sf.first_step + 2;
-  }
+  int step_param = cpi->sf.first_step +
+      (cpi->Speed < 8 ? (cpi->Speed > 5 ? 1 : 0) : 2);
 
   vp9_clamp_mv_min_max(x, ref_mv);
 
@@ -72,7 +71,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   }
 
   vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
-  vp9_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
+  vp9_build_inter16x16_predictors_mby(xd, xd->predictor, 16, mb_row, mb_col);
   best_err = vp9_sad16x16(xd->dst.y_buffer, xd->dst.y_stride,
                           xd->predictor, 16, INT_MAX);
 
@@ -93,8 +92,9 @@ static int do_16x16_motion_search
   YV12_BUFFER_CONFIG *buf,
   int buf_mb_y_offset,
   YV12_BUFFER_CONFIG *ref,
-  int mb_y_offset
-) {
+  int mb_y_offset,
+  int mb_row,
+  int mb_col) {
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err, tmp_err;
@@ -124,7 +124,7 @@ static int do_16x16_motion_search
 
   // Test last reference frame using the previous best mv as the
   // starting point (best reference) for the search
-  tmp_err = do_16x16_motion_iteration(cpi, ref_mv, &tmp_mv);
+  tmp_err = do_16x16_motion_iteration(cpi, ref_mv, &tmp_mv, mb_row, mb_col);
   if (tmp_err < err) {
     err            = tmp_err;
     dst_mv->as_int = tmp_mv.as_int;
@@ -136,7 +136,8 @@ static int do_16x16_motion_search
     int_mv zero_ref_mv, tmp_mv;
 
     zero_ref_mv.as_int = 0;
-    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv, &tmp_mv);
+    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv, &tmp_mv,
+                                        mb_row, mb_col);
     if (tmp_err < err) {
       dst_mv->as_int = tmp_mv.as_int;
       err = tmp_err;
@@ -229,7 +230,9 @@ static void update_mbgraph_mb_stats
   int gld_y_offset,
   YV12_BUFFER_CONFIG *alt_ref,
   int_mv *prev_alt_ref_mv,
-  int arf_y_offset
+  int arf_y_offset,
+  int mb_row,
+  int mb_col
 ) {
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -249,7 +252,8 @@ static void update_mbgraph_mb_stats
     int g_motion_error = do_16x16_motion_search(cpi, prev_golden_ref_mv,
                                                 &stats->ref[GOLDEN_FRAME].m.mv,
                                                 buf, mb_y_offset,
-                                                golden_ref, gld_y_offset);
+                                                golden_ref, gld_y_offset,
+                                                mb_row, mb_col);
     stats->ref[GOLDEN_FRAME].err = g_motion_error;
   } else {
     stats->ref[GOLDEN_FRAME].err = INT_MAX;
@@ -292,6 +296,9 @@ static void update_mbgraph_frame_stats
   int_mv arf_top_mv, gld_top_mv;
   MODE_INFO mi_local;
 
+  // Make sure the mi context starts in a consistent state.
+  memset(&mi_local, 0, sizeof(mi_local));
+
   // Set up limit values for motion vectors to prevent them extending outside the UMV borders
   arf_top_mv.as_int = 0;
   gld_top_mv.as_int = 0;
@@ -323,7 +330,8 @@ static void update_mbgraph_frame_stats
 
       update_mbgraph_mb_stats(cpi, mb_stats, buf, mb_y_in_offset,
                               golden_ref, &gld_left_mv, gld_y_in_offset,
-                              alt_ref,    &arf_left_mv, arf_y_in_offset);
+                              alt_ref,    &arf_left_mv, arf_y_in_offset,
+                              mb_row, mb_col);
       arf_left_mv.as_int = mb_stats->ref[ALTREF_FRAME].m.mv.as_int;
       gld_left_mv.as_int = mb_stats->ref[GOLDEN_FRAME].m.mv.as_int;
       if (mb_col == 0) {
@@ -412,7 +420,7 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
       cpi->static_mb_pct = (ncnt[1] * 100) / cm->MBs;
 
     // This error case should not be reachable as this function should
-    // never be called with the common data structure unititialized.
+    // never be called with the common data structure uninitialized.
     else
       cpi->static_mb_pct = 0;
 
@@ -427,13 +435,11 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
   vpx_free(arf_not_zz);
 }
 
-void vp9_update_mbgraph_stats
-(
-  VP9_COMP *cpi
-) {
+void vp9_update_mbgraph_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int i, n_frames = vp9_lookahead_depth(cpi->lookahead);
-  YV12_BUFFER_CONFIG *golden_ref = &cm->yv12_fb[cm->gld_fb_idx];
+  YV12_BUFFER_CONFIG *golden_ref =
+      &cm->yv12_fb[cm->ref_frame_map[cpi->gld_fb_idx]];
 
   // we need to look ahead beyond where the ARF transitions into
   // being a GF - so exit if we don't look ahead beyond that

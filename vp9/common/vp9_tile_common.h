@@ -8,10 +8,16 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VP9_COMMON_VP9_TILE_COMMON_H_
+#define VP9_COMMON_VP9_TILE_COMMON_H_
 
-#ifndef VP9_COMMON_VP9_RECONINTRA4X4_H_
-#define VP9_COMMON_VP9_RECONINTRA4X4_H_
+#include "vp9/common/vp9_onyxc_int.h"
 
-extern void vp9_intra_prediction_down_copy(MACROBLOCKD *xd);
+void vp9_get_tile_col_offsets(VP9_COMMON *cm, int tile_col_idx);
 
-#endif  // VP9_COMMON_VP9_RECONINTRA4X4_H_
+void vp9_get_tile_row_offsets(VP9_COMMON *cm, int tile_row_idx);
+
+void vp9_get_tile_n_bits(VP9_COMMON *cm, int *min_log2_n_tiles,
+                         int *delta_log2_n_tiles);
+
+#endif  // VP9_COMMON_VP9_TILE_COMMON_H_

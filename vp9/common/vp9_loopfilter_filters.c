@@ -13,7 +13,7 @@
 #include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
-static __inline int8_t signed_char_clamp(int t) {
+static INLINE int8_t signed_char_clamp(int t) {
   t = (t < -128 ? -128 : t);
   t = (t > 127 ? 127 : t);
   return (int8_t) t;
@@ -21,11 +21,11 @@ static __inline int8_t signed_char_clamp(int t) {
 
 
 /* should we apply any filter at all ( 11111111 yes, 00000000 no) */
-static __inline int8_t filter_mask(uint8_t limit, uint8_t blimit,
-                                   uint8_t p3, uint8_t p2,
-                                   uint8_t p1, uint8_t p0,
-                                   uint8_t q0, uint8_t q1,
-                                   uint8_t q2, uint8_t q3) {
+static INLINE int8_t filter_mask(uint8_t limit, uint8_t blimit,
+                                 uint8_t p3, uint8_t p2,
+                                 uint8_t p1, uint8_t p0,
+                                 uint8_t q0, uint8_t q1,
+                                 uint8_t q2, uint8_t q3) {
   int8_t mask = 0;
   mask |= (abs(p3 - p2) > limit) * -1;
   mask |= (abs(p2 - p1) > limit) * -1;
@@ -39,57 +39,46 @@ static __inline int8_t filter_mask(uint8_t limit, uint8_t blimit,
 }
 
 /* is there high variance internal edge ( 11111111 yes, 00000000 no) */
-static __inline int8_t hevmask(uint8_t thresh, uint8_t p1, uint8_t p0,
-                               uint8_t q0, uint8_t q1) {
+static INLINE int8_t hevmask(uint8_t thresh, uint8_t p1, uint8_t p0,
+                             uint8_t q0, uint8_t q1) {
   int8_t hev = 0;
   hev  |= (abs(p1 - p0) > thresh) * -1;
   hev  |= (abs(q1 - q0) > thresh) * -1;
   return hev;
 }
 
-static __inline void filter(int8_t mask, uint8_t hev, uint8_t *op1,
-                            uint8_t *op0, uint8_t *oq0, uint8_t *oq1) {
-  int8_t ps0, qs0;
-  int8_t ps1, qs1;
-  int8_t filter, Filter1, Filter2;
-  int8_t u;
+static INLINE void filter(int8_t mask, uint8_t hev, uint8_t *op1,
+                          uint8_t *op0, uint8_t *oq0, uint8_t *oq1) {
+  int8_t filter1, filter2;
 
-  ps1 = (int8_t) *op1 ^ 0x80;
-  ps0 = (int8_t) *op0 ^ 0x80;
-  qs0 = (int8_t) *oq0 ^ 0x80;
-  qs1 = (int8_t) *oq1 ^ 0x80;
+  const int8_t ps1 = (int8_t) *op1 ^ 0x80;
+  const int8_t ps0 = (int8_t) *op0 ^ 0x80;
+  const int8_t qs0 = (int8_t) *oq0 ^ 0x80;
+  const int8_t qs1 = (int8_t) *oq1 ^ 0x80;
 
-  /* add outer taps if we have high edge variance */
-  filter = signed_char_clamp(ps1 - qs1);
-  filter &= hev;
+  // add outer taps if we have high edge variance
+  int8_t filter = signed_char_clamp(ps1 - qs1) & hev;
 
-  /* inner taps */
-  filter = signed_char_clamp(filter + 3 * (qs0 - ps0));
-  filter &= mask;
+  // inner taps
+  filter = signed_char_clamp(filter + 3 * (qs0 - ps0)) & mask;
 
-  /* save bottom 3 bits so that we round one side +4 and the other +3
-   * if it equals 4 we'll set to adjust by -1 to account for the fact
-   * we'd round 3 the other way
-   */
-  Filter1 = signed_char_clamp(filter + 4);
-  Filter2 = signed_char_clamp(filter + 3);
-  Filter1 >>= 3;
-  Filter2 >>= 3;
-  u = signed_char_clamp(qs0 - Filter1);
-  *oq0 = u ^ 0x80;
-  u = signed_char_clamp(ps0 + Filter2);
-  *op0 = u ^ 0x80;
-  filter = Filter1;
+  // save bottom 3 bits so that we round one side +4 and the other +3
+  // if it equals 4 we'll set to adjust by -1 to account for the fact
+  // we'd round 3 the other way
+  filter1 = signed_char_clamp(filter + 4) >> 3;
+  filter2 = signed_char_clamp(filter + 3) >> 3;
 
-  /* outer tap adjustments */
+  *oq0 = signed_char_clamp(qs0 - filter1) ^ 0x80;
+  *op0 = signed_char_clamp(ps0 + filter2) ^ 0x80;
+  filter = filter1;
+
+  // outer tap adjustments
   filter += 1;
   filter >>= 1;
   filter &= ~hev;
 
-  u = signed_char_clamp(qs1 - filter);
-  *oq1 = u ^ 0x80;
-  u = signed_char_clamp(ps1 + filter);
-  *op1 = u ^ 0x80;
+  *oq1 = signed_char_clamp(qs1 - filter) ^ 0x80;
+  *op1 = signed_char_clamp(ps1 + filter) ^ 0x80;
 }
 
 void vp9_loop_filter_horizontal_edge_c(uint8_t *s,
@@ -143,11 +132,11 @@ void vp9_loop_filter_vertical_edge_c(uint8_t *s,
     s += p;
   } while (++i < count * 8);
 }
-static __inline signed char flatmask(uint8_t thresh,
-                                     uint8_t p4, uint8_t p3, uint8_t p2,
-                                     uint8_t p1, uint8_t p0,
-                                     uint8_t q0, uint8_t q1, uint8_t q2,
-                                     uint8_t q3, uint8_t q4) {
+static INLINE signed char flatmask4(uint8_t thresh,
+                                    uint8_t p3, uint8_t p2,
+                                    uint8_t p1, uint8_t p0,
+                                    uint8_t q0, uint8_t q1,
+                                    uint8_t q2, uint8_t q3) {
   int8_t flat = 0;
   flat |= (abs(p1 - p0) > thresh) * -1;
   flat |= (abs(q1 - q0) > thresh) * -1;
@@ -155,81 +144,72 @@ static __inline signed char flatmask(uint8_t thresh,
   flat |= (abs(q0 - q2) > thresh) * -1;
   flat |= (abs(p3 - p0) > thresh) * -1;
   flat |= (abs(q3 - q0) > thresh) * -1;
-  flat |= (abs(p4 - p0) > thresh) * -1;
-  flat |= (abs(q4 - q0) > thresh) * -1;
   flat = ~flat;
   return flat;
 }
+static INLINE signed char flatmask5(uint8_t thresh,
+                                    uint8_t p4, uint8_t p3, uint8_t p2,
+                                    uint8_t p1, uint8_t p0,
+                                    uint8_t q0, uint8_t q1, uint8_t q2,
+                                    uint8_t q3, uint8_t q4) {
+  int8_t flat = 0;
+  flat |= (abs(p4 - p0) > thresh) * -1;
+  flat |= (abs(q4 - q0) > thresh) * -1;
+  flat = ~flat;
+  return flat & flatmask4(thresh, p3, p2, p1, p0, q0, q1, q2, q3);
+}
 
-static __inline void mbfilter(int8_t mask, uint8_t hev, uint8_t flat,
-                              uint8_t *op4, uint8_t *op3, uint8_t *op2,
-                              uint8_t *op1, uint8_t *op0,
-                              uint8_t *oq0, uint8_t *oq1, uint8_t *oq2,
-                              uint8_t *oq3, uint8_t *oq4) {
-  /* use a 7 tap filter [1, 1, 1, 2, 1, 1, 1] for flat line */
+
+static INLINE void mbfilter(int8_t mask, uint8_t hev, uint8_t flat,
+                            uint8_t *op3, uint8_t *op2,
+                            uint8_t *op1, uint8_t *op0,
+                            uint8_t *oq0, uint8_t *oq1,
+                            uint8_t *oq2, uint8_t *oq3) {
+  // use a 7 tap filter [1, 1, 1, 2, 1, 1, 1] for flat line
   if (flat && mask) {
-    uint8_t p0, q0;
-    uint8_t p1, q1;
-    uint8_t p2, q2;
-    uint8_t p3, q3;
-    uint8_t p4, q4;
+    const uint8_t p3 = *op3;
+    const uint8_t p2 = *op2;
+    const uint8_t p1 = *op1;
+    const uint8_t p0 = *op0;
+    const uint8_t q0 = *oq0;
+    const uint8_t q1 = *oq1;
+    const uint8_t q2 = *oq2;
+    const uint8_t q3 = *oq3;
 
-    p4 = *op4;
-    p3 = *op3;
-    p2 = *op2;
-    p1 = *op1;
-    p0 = *op0;
-    q0 = *oq0;
-    q1 = *oq1;
-    q2 = *oq2;
-    q3 = *oq3;
-    q4 = *oq4;
-
-    *op2 = (p4 + p4 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
-    *op1 = (p4 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
+    *op2 = (p3 + p3 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
+    *op1 = (p3 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
     *op0 = (p3 + p2 + p1 + p0 + p0 + q0 + q1 + q2 + 4) >> 3;
     *oq0 = (p2 + p1 + p0 + q0 + q0 + q1 + q2 + q3 + 4) >> 3;
-    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q4 + 4) >> 3;
-    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q4 + q4 + 4) >> 3;
+    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q3 + 4) >> 3;
+    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q3 + q3 + 4) >> 3;
   } else {
-    int8_t ps0, qs0;
-    int8_t ps1, qs1;
-    int8_t filter, Filter1, Filter2;
-    int8_t u;
+    int8_t filter1, filter2;
 
-    ps1 = (int8_t) *op1 ^ 0x80;
-    ps0 = (int8_t) *op0 ^ 0x80;
-    qs0 = (int8_t) *oq0 ^ 0x80;
-    qs1 = (int8_t) *oq1 ^ 0x80;
+    const int8_t ps1 = (int8_t) *op1 ^ 0x80;
+    const int8_t ps0 = (int8_t) *op0 ^ 0x80;
+    const int8_t qs0 = (int8_t) *oq0 ^ 0x80;
+    const int8_t qs1 = (int8_t) *oq1 ^ 0x80;
 
-    /* add outer taps if we have high edge variance */
-    filter = signed_char_clamp(ps1 - qs1);
-    filter &= hev;
+    // add outer taps if we have high edge variance
+    int8_t filter = signed_char_clamp(ps1 - qs1) & hev;
 
-    /* inner taps */
-    filter = signed_char_clamp(filter + 3 * (qs0 - ps0));
-    filter &= mask;
+    // inner taps
+    filter = signed_char_clamp(filter + 3 * (qs0 - ps0)) & mask;
 
-    Filter1 = signed_char_clamp(filter + 4);
-    Filter2 = signed_char_clamp(filter + 3);
-    Filter1 >>= 3;
-    Filter2 >>= 3;
+    filter1 = signed_char_clamp(filter + 4) >> 3;
+    filter2 = signed_char_clamp(filter + 3) >> 3;
 
-    u = signed_char_clamp(qs0 - Filter1);
-    *oq0 = u ^ 0x80;
-    u = signed_char_clamp(ps0 + Filter2);
-    *op0 = u ^ 0x80;
-    filter = Filter1;
+    *oq0 = signed_char_clamp(qs0 - filter1) ^ 0x80;
+    *op0 = signed_char_clamp(ps0 + filter2) ^ 0x80;
+    filter = filter1;
 
-    /* outer tap adjustments */
+    // outer tap adjustments
     filter += 1;
     filter >>= 1;
     filter &= ~hev;
 
-    u = signed_char_clamp(qs1 - filter);
-    *oq1 = u ^ 0x80;
-    u = signed_char_clamp(ps1 + filter);
-    *op1 = u ^ 0x80;
+    *oq1 = signed_char_clamp(qs1 - filter) ^ 0x80;
+    *op1 = signed_char_clamp(ps1 + filter) ^ 0x80;
   }
 }
 
@@ -254,12 +234,11 @@ void vp9_mbloop_filter_horizontal_edge_c(uint8_t *s,
 
     hev = hevmask(thresh[0], s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
 
-    flat = flatmask(1,
-                    s[-5 * p], s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
-                    s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p], s[ 4 * p]);
+    flat = flatmask4(1, s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
+                        s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
     mbfilter(mask, hev, flat,
-             s - 5 * p, s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
-             s,       s + 1 * p, s + 2 * p, s + 3 * p, s + 4 * p);
+             s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
+             s,         s + 1 * p, s + 2 * p, s + 3 * p);
 
     ++s;
   } while (++i < count * 8);
@@ -283,53 +262,43 @@ void vp9_mbloop_filter_vertical_edge_c(uint8_t *s,
                        s[0], s[1], s[2], s[3]);
 
     hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
-    flat = flatmask(1,
-                    s[-5], s[-4], s[-3], s[-2], s[-1],
-                    s[ 0], s[ 1], s[ 2], s[ 3], s[ 4]);
+    flat = flatmask4(1,
+                    s[-4], s[-3], s[-2], s[-1],
+                    s[ 0], s[ 1], s[ 2], s[ 3]);
     mbfilter(mask, hev, flat,
-             s - 5, s - 4, s - 3, s - 2, s - 1,
-             s,     s + 1, s + 2, s + 3, s + 4);
+             s - 4, s - 3, s - 2, s - 1,
+             s,     s + 1, s + 2, s + 3);
     s += p;
   } while (++i < count * 8);
 
 }
 
 /* should we apply any filter at all ( 11111111 yes, 00000000 no) */
-static __inline int8_t simple_filter_mask(uint8_t blimit,
-                                          uint8_t p1, uint8_t p0,
-                                          uint8_t q0, uint8_t q1) {
-  /* Why does this cause problems for win32?
-   * error C2143: syntax error : missing ';' before 'type'
-   *  (void) limit;
-   */
-  int8_t mask = (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  <= blimit) * -1;
-  return mask;
+static INLINE int8_t simple_filter_mask(uint8_t blimit,
+                                        uint8_t p1, uint8_t p0,
+                                        uint8_t q0, uint8_t q1) {
+  return (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  <= blimit) * -1;
 }
 
-static __inline void simple_filter(int8_t mask,
-                                   uint8_t *op1, uint8_t *op0,
-                                   uint8_t *oq0, uint8_t *oq1) {
-  int8_t filter, Filter1, Filter2;
-  int8_t p1 = (int8_t) *op1 ^ 0x80;
-  int8_t p0 = (int8_t) *op0 ^ 0x80;
-  int8_t q0 = (int8_t) *oq0 ^ 0x80;
-  int8_t q1 = (int8_t) *oq1 ^ 0x80;
-  int8_t u;
+static INLINE void simple_filter(int8_t mask,
+                                 uint8_t *op1, uint8_t *op0,
+                                 uint8_t *oq0, uint8_t *oq1) {
+  int8_t filter1, filter2;
+  const int8_t p1 = (int8_t) *op1 ^ 0x80;
+  const int8_t p0 = (int8_t) *op0 ^ 0x80;
+  const int8_t q0 = (int8_t) *oq0 ^ 0x80;
+  const int8_t q1 = (int8_t) *oq1 ^ 0x80;
 
-  filter = signed_char_clamp(p1 - q1);
+  int8_t filter = signed_char_clamp(p1 - q1);
   filter = signed_char_clamp(filter + 3 * (q0 - p0));
   filter &= mask;
 
-  /* save bottom 3 bits so that we round one side +4 and the other +3 */
-  Filter1 = signed_char_clamp(filter + 4);
-  Filter1 >>= 3;
-  u = signed_char_clamp(q0 - Filter1);
-  *oq0  = u ^ 0x80;
+  // save bottom 3 bits so that we round one side +4 and the other +3
+  filter1 = signed_char_clamp(filter + 4) >> 3;
+  *oq0  = signed_char_clamp(q0 - filter1) ^ 0x80;
 
-  Filter2 = signed_char_clamp(filter + 3);
-  Filter2 >>= 3;
-  u = signed_char_clamp(p0 + Filter2);
-  *op0 = u ^ 0x80;
+  filter2 = signed_char_clamp(filter + 3) >> 3;
+  *op0 = signed_char_clamp(p0 + filter2) ^ 0x80;
 }
 
 void vp9_loop_filter_simple_horizontal_edge_c(uint8_t *s,
@@ -481,41 +450,32 @@ void vp9_loop_filter_bvs_c(uint8_t *y_ptr, int y_stride,
   vp9_loop_filter_simple_vertical_edge_c(y_ptr + 12, y_stride, blimit);
 }
 
-static __inline void wide_mbfilter(int8_t mask, uint8_t hev,
-                                   uint8_t flat, uint8_t flat2,
-                                   uint8_t *op7, uint8_t *op6, uint8_t *op5,
-                                   uint8_t *op4, uint8_t *op3, uint8_t *op2,
-                                   uint8_t *op1, uint8_t *op0, uint8_t *oq0,
-                                   uint8_t *oq1, uint8_t *oq2, uint8_t *oq3,
-                                   uint8_t *oq4, uint8_t *oq5, uint8_t *oq6,
-                                   uint8_t *oq7) {
-  /* use a 15 tap filter [1,1,1,1,1,1,1,2,1,1,1,1,1,1,1] for flat line */
+static INLINE void wide_mbfilter(int8_t mask, uint8_t hev,
+                                 uint8_t flat, uint8_t flat2,
+                                 uint8_t *op7, uint8_t *op6, uint8_t *op5,
+                                 uint8_t *op4, uint8_t *op3, uint8_t *op2,
+                                 uint8_t *op1, uint8_t *op0, uint8_t *oq0,
+                                 uint8_t *oq1, uint8_t *oq2, uint8_t *oq3,
+                                 uint8_t *oq4, uint8_t *oq5, uint8_t *oq6,
+                                 uint8_t *oq7) {
+  // use a 15 tap filter [1,1,1,1,1,1,1,2,1,1,1,1,1,1,1] for flat line
   if (flat2 && flat && mask) {
-    uint8_t p0, q0;
-    uint8_t p1, q1;
-    uint8_t p2, q2;
-    uint8_t p3, q3;
-    uint8_t p4, q4;
-    uint8_t p5, q5;
-    uint8_t p6, q6;
-    uint8_t p7, q7;
-
-    p7 = *op7;
-    p6 = *op6;
-    p5 = *op5;
-    p4 = *op4;
-    p3 = *op3;
-    p2 = *op2;
-    p1 = *op1;
-    p0 = *op0;
-    q0 = *oq0;
-    q1 = *oq1;
-    q2 = *oq2;
-    q3 = *oq3;
-    q4 = *oq4;
-    q5 = *oq5;
-    q6 = *oq6;
-    q7 = *oq7;
+    const uint8_t p7 = *op7;
+    const uint8_t p6 = *op6;
+    const uint8_t p5 = *op5;
+    const uint8_t p4 = *op4;
+    const uint8_t p3 = *op3;
+    const uint8_t p2 = *op2;
+    const uint8_t p1 = *op1;
+    const uint8_t p0 = *op0;
+    const uint8_t q0 = *oq0;
+    const uint8_t q1 = *oq1;
+    const uint8_t q2 = *oq2;
+    const uint8_t q3 = *oq3;
+    const uint8_t q4 = *oq4;
+    const uint8_t q5 = *oq5;
+    const uint8_t q6 = *oq6;
+    const uint8_t q7 = *oq7;
 
     *op6 = (p7 * 7 + p6 * 2 +
             p5 + p4 + p3 + p2 + p1 + p0 + q0 + 8) >> 4;
@@ -546,68 +506,48 @@ static __inline void wide_mbfilter(int8_t mask, uint8_t hev,
     *oq6 = (p0 + q0 + q1 + q2 + q3 + q4 + q5 + q6 * 2 +
             q7 * 7 + 8) >> 4;
   } else if (flat && mask) {
-    unsigned char p0, q0;
-    unsigned char p1, q1;
-    unsigned char p2, q2;
-    unsigned char p3, q3;
-    unsigned char p4, q4;
+    const uint8_t p3 = *op3;
+    const uint8_t p2 = *op2;
+    const uint8_t p1 = *op1;
+    const uint8_t p0 = *op0;
+    const uint8_t q0 = *oq0;
+    const uint8_t q1 = *oq1;
+    const uint8_t q2 = *oq2;
+    const uint8_t q3 = *oq3;
 
-    p4 = *op4;
-    p3 = *op3;
-    p2 = *op2;
-    p1 = *op1;
-    p0 = *op0;
-    q0 = *oq0;
-    q1 = *oq1;
-    q2 = *oq2;
-    q3 = *oq3;
-    q4 = *oq4;
-
-    *op2 = (p4 + p4 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
-    *op1 = (p4 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
+    *op2 = (p3 + p3 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
+    *op1 = (p3 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
     *op0 = (p3 + p2 + p1 + p0 + p0 + q0 + q1 + q2 + 4) >> 3;
     *oq0 = (p2 + p1 + p0 + q0 + q0 + q1 + q2 + q3 + 4) >> 3;
-    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q4 + 4) >> 3;
-    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q4 + q4 + 4) >> 3;
+    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q3 + 4) >> 3;
+    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q3 + q3 + 4) >> 3;
   } else {
-    signed char ps0, qs0;
-    signed char ps1, qs1;
-    signed char filter, Filter1, Filter2;
-    signed char u;
+    int8_t filter1, filter2;
 
-    ps1 = (signed char) * op1 ^ 0x80;
-    ps0 = (signed char) * op0 ^ 0x80;
-    qs0 = (signed char) * oq0 ^ 0x80;
-    qs1 = (signed char) * oq1 ^ 0x80;
+    const int8_t ps1 = (int8_t) * op1 ^ 0x80;
+    const int8_t ps0 = (int8_t) * op0 ^ 0x80;
+    const int8_t qs0 = (int8_t) * oq0 ^ 0x80;
+    const int8_t qs1 = (int8_t) * oq1 ^ 0x80;
 
-    /* add outer taps if we have high edge variance */
-    filter = signed_char_clamp(ps1 - qs1);
-    filter &= hev;
+    // add outer taps if we have high edge variance
+    int8_t filter = signed_char_clamp(ps1 - qs1) & hev;
 
-    /* inner taps */
-    filter = signed_char_clamp(filter + 3 * (qs0 - ps0));
-    filter &= mask;
+    // inner taps
+    filter = signed_char_clamp(filter + 3 * (qs0 - ps0)) & mask;
+    filter1 = signed_char_clamp(filter + 4) >> 3;
+    filter2 = signed_char_clamp(filter + 3) >> 3;
 
-    Filter1 = signed_char_clamp(filter + 4);
-    Filter2 = signed_char_clamp(filter + 3);
-    Filter1 >>= 3;
-    Filter2 >>= 3;
+    *oq0 = signed_char_clamp(qs0 - filter1) ^ 0x80;
+    *op0 = signed_char_clamp(ps0 + filter2) ^ 0x80;
+    filter = filter1;
 
-    u = signed_char_clamp(qs0 - Filter1);
-    *oq0 = u ^ 0x80;
-    u = signed_char_clamp(ps0 + Filter2);
-    *op0 = u ^ 0x80;
-    filter = Filter1;
-
-    /* outer tap adjustments */
+    // outer tap adjustments
     filter += 1;
     filter >>= 1;
     filter &= ~hev;
 
-    u = signed_char_clamp(qs1 - filter);
-    *oq1 = u ^ 0x80;
-    u = signed_char_clamp(ps1 + filter);
-    *op1 = u ^ 0x80;
+    *oq1 = signed_char_clamp(qs1 - filter) ^ 0x80;
+    *op1 = signed_char_clamp(ps1 + filter) ^ 0x80;
   }
 }
 
@@ -636,19 +576,19 @@ void vp9_mb_lpf_horizontal_edge_w
 
     hev = hevmask(thresh[0], s[-2 * p], s[-1 * p], s[0 * p], s[1 * p]);
 
-    flat = flatmask(1,
-                    s[-5 * p], s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
-                    s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p], s[ 4 * p]);
+    flat = flatmask4(1,
+                     s[-4 * p], s[-3 * p], s[-2 * p], s[-1 * p],
+                     s[ 0 * p], s[ 1 * p], s[ 2 * p], s[ 3 * p]);
 
-    flat2 = flatmask(1,
-                    s[-8 * p], s[-7 * p], s[-6 * p], s[-5 * p], s[-1 * p],
-                    s[ 0 * p], s[ 4 * p], s[ 5 * p], s[ 6 * p], s[ 7 * p]);
+    flat2 = flatmask5(1,
+                      s[-8 * p], s[-7 * p], s[-6 * p], s[-5 * p], s[-1 * p],
+                      s[ 0 * p], s[ 4 * p], s[ 5 * p], s[ 6 * p], s[ 7 * p]);
 
     wide_mbfilter(mask, hev, flat, flat2,
-             s - 8 * p, s - 7 * p, s - 6 * p, s - 5 * p,
-             s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
-             s,         s + 1 * p, s + 2 * p, s + 3 * p,
-             s + 4 * p, s + 5 * p, s + 6 * p, s + 7 * p);
+                  s - 8 * p, s - 7 * p, s - 6 * p, s - 5 * p,
+                  s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
+                  s,         s + 1 * p, s + 2 * p, s + 3 * p,
+                  s + 4 * p, s + 5 * p, s + 6 * p, s + 7 * p);
 
     ++s;
   } while (++i < count * 8);
@@ -674,18 +614,18 @@ void vp9_mb_lpf_vertical_edge_w
                        s[0], s[1], s[2], s[3]);
 
     hev = hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
-    flat = flatmask(1,
-                    s[-5], s[-4], s[-3], s[-2], s[-1],
-                    s[ 0], s[ 1], s[ 2], s[ 3], s[ 4]);
-    flat2 = flatmask(1,
-                    s[-8], s[-7], s[-6], s[-5], s[-1],
-                    s[ 0], s[ 4], s[ 5], s[ 6], s[ 7]);
+    flat = flatmask4(1,
+                     s[-4], s[-3], s[-2], s[-1],
+                     s[ 0], s[ 1], s[ 2], s[ 3]);
+    flat2 = flatmask5(1,
+                     s[-8], s[-7], s[-6], s[-5], s[-1],
+                     s[ 0], s[ 4], s[ 5], s[ 6], s[ 7]);
 
     wide_mbfilter(mask, hev, flat, flat2,
-             s - 8, s - 7, s - 6, s - 5,
-             s - 4, s - 3, s - 2, s - 1,
-             s,     s + 1, s + 2, s + 3,
-             s + 4, s + 5, s + 6, s + 7);
+                  s - 8, s - 7, s - 6, s - 5,
+                  s - 4, s - 3, s - 2, s - 1,
+                  s,     s + 1, s + 2, s + 3,
+                  s + 4, s + 5, s + 6, s + 7);
     s += p;
   } while (++i < count * 8);
 }

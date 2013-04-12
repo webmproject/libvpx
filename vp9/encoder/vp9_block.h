@@ -50,10 +50,7 @@ typedef struct block {
   int src;
   int src_stride;
 
-  int eob_max_offset;
-  int eob_max_offset_8x8;
-  int eob_max_offset_16x16;
-  int eob_max_offset_32x32;
+  int skip_block;
 } BLOCK;
 
 typedef struct {
@@ -86,19 +83,12 @@ typedef struct {
   int64_t txfm_rd_diff[NB_TXFM_MODES];
 } PICK_MODE_CONTEXT;
 
-typedef struct superblock {
-  DECLARE_ALIGNED(16, int16_t, src_diff[32*32+16*16*2]);
-  DECLARE_ALIGNED(16, int16_t, coeff[32*32+16*16*2]);
-} SUPERBLOCK;
-
-typedef struct macroblock {
-  DECLARE_ALIGNED(16, int16_t, src_diff[400]);  // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
-  DECLARE_ALIGNED(16, int16_t, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
+typedef struct macroblock MACROBLOCK;
+struct macroblock {
+  DECLARE_ALIGNED(16, int16_t, src_diff[64*64+32*32*2]);
+  DECLARE_ALIGNED(16, int16_t, coeff[64*64+32*32*2]);
   // 16 Y blocks, 4 U blocks, 4 V blocks,
-  // 1 DC 2nd order block each with 16 entries
-  BLOCK block[25];
-
-  SUPERBLOCK sb_coeff_data;
+  BLOCK block[24];
 
   YV12_BUFFER_CONFIG src;
 
@@ -160,8 +150,13 @@ typedef struct macroblock {
 
   unsigned char *active_ptr;
 
-  vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES_4X4];
-  vp9_coeff_count hybrid_token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES_4X4];
+  vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES];
+#if CONFIG_CODE_NONZEROCOUNT
+  unsigned int nzc_costs_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][17];
+  unsigned int nzc_costs_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][65];
+  unsigned int nzc_costs_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][257];
+  unsigned int nzc_costs_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][1025];
+#endif
 
   int optimize;
 
@@ -172,17 +167,14 @@ typedef struct macroblock {
   PICK_MODE_CONTEXT sb32_context[4];
   PICK_MODE_CONTEXT sb64_context;
 
-  void (*vp9_short_fdct4x4)(int16_t *input, int16_t *output, int pitch);
-  void (*vp9_short_fdct8x4)(int16_t *input, int16_t *output, int pitch);
-  void (*short_walsh4x4)(int16_t *input, int16_t *output, int pitch);
-  void (*quantize_b_4x4)(BLOCK *b, BLOCKD *d);
-  void (*quantize_b_4x4_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
-  void (*vp9_short_fdct8x8)(int16_t *input, int16_t *output, int pitch);
-  void (*vp9_short_fdct16x16)(int16_t *input, int16_t *output, int pitch);
-  void (*short_fhaar2x2)(int16_t *input, int16_t *output, int pitch);
-  void (*quantize_b_16x16)(BLOCK *b, BLOCKD *d);
-  void (*quantize_b_8x8)(BLOCK *b, BLOCKD *d);
-  void (*quantize_b_2x2)(BLOCK *b, BLOCKD *d);
-} MACROBLOCK;
+  void (*fwd_txm4x4)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_txm8x4)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_txm8x8)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_txm16x16)(int16_t *input, int16_t *output, int pitch);
+  void (*quantize_b_4x4)(MACROBLOCK *x, int b_idx);
+  void (*quantize_b_4x4_pair)(MACROBLOCK *x, int b_idx1, int b_idx2);
+  void (*quantize_b_16x16)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type);
+  void (*quantize_b_8x8)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type);
+};
 
 #endif  // VP9_ENCODER_VP9_BLOCK_H_

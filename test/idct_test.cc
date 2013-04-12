@@ -10,8 +10,8 @@
 
 
 extern "C" {
-#include "vpx_config.h"
-#include "vp8_rtcd.h"
+#include "./vpx_config.h"
+#include "./vp8_rtcd.h"
 }
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
@@ -20,18 +20,16 @@ typedef void (*idct_fn_t)(short *input, unsigned char *pred_ptr,
                           int pred_stride, unsigned char *dst_ptr,
                           int dst_stride);
 namespace {
-class IDCTTest : public ::testing::TestWithParam<idct_fn_t>
-{
+class IDCTTest : public ::testing::TestWithParam<idct_fn_t> {
   protected:
-    virtual void SetUp()
-    {
+    virtual void SetUp() {
         int i;
 
         UUT = GetParam();
         memset(input, 0, sizeof(input));
         /* Set up guard blocks */
-        for(i=0; i<256; i++)
-            output[i] = ((i&0xF)<4&&(i<64))?0:-1;
+        for (i = 0; i < 256; i++)
+            output[i] = ((i & 0xF) < 4 && (i < 64)) ? 0 : -1;
     }
 
     idct_fn_t UUT;
@@ -40,78 +38,72 @@ class IDCTTest : public ::testing::TestWithParam<idct_fn_t>
     unsigned char predict[256];
 };
 
-TEST_P(IDCTTest, TestGuardBlocks)
-{
+TEST_P(IDCTTest, TestGuardBlocks) {
     int i;
 
-    for(i=0; i<256; i++)
-        if((i&0xF) < 4 && i<64)
+    for (i = 0; i < 256; i++)
+        if ((i & 0xF) < 4 && i < 64)
             EXPECT_EQ(0, output[i]) << i;
         else
             EXPECT_EQ(255, output[i]);
 }
 
-TEST_P(IDCTTest, TestAllZeros)
-{
+TEST_P(IDCTTest, TestAllZeros) {
     int i;
 
     REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
 
-    for(i=0; i<256; i++)
-        if((i&0xF) < 4 && i<64)
+    for (i = 0; i < 256; i++)
+        if ((i & 0xF) < 4 && i < 64)
             EXPECT_EQ(0, output[i]) << "i==" << i;
         else
             EXPECT_EQ(255, output[i]) << "i==" << i;
 }
 
-TEST_P(IDCTTest, TestAllOnes)
-{
+TEST_P(IDCTTest, TestAllOnes) {
     int i;
 
     input[0] = 4;
     REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
 
-    for(i=0; i<256; i++)
-        if((i&0xF) < 4 && i<64)
+    for (i = 0; i < 256; i++)
+        if ((i & 0xF) < 4 && i < 64)
             EXPECT_EQ(1, output[i]) << "i==" << i;
         else
             EXPECT_EQ(255, output[i]) << "i==" << i;
 }
 
-TEST_P(IDCTTest, TestAddOne)
-{
+TEST_P(IDCTTest, TestAddOne) {
     int i;
 
-    for(i=0; i<256; i++)
+    for (i = 0; i < 256; i++)
         predict[i] = i;
-
     input[0] = 4;
     REGISTER_STATE_CHECK(UUT(input, predict, 16, output, 16));
 
-    for(i=0; i<256; i++)
-        if((i&0xF) < 4 && i<64)
+    for (i = 0; i < 256; i++)
+        if ((i & 0xF) < 4 && i < 64)
             EXPECT_EQ(i+1, output[i]) << "i==" << i;
         else
             EXPECT_EQ(255, output[i]) << "i==" << i;
 }
 
-TEST_P(IDCTTest, TestWithData)
-{
+TEST_P(IDCTTest, TestWithData) {
     int i;
 
-    for(i=0; i<16; i++)
+    for (i = 0; i < 16; i++)
         input[i] = i;
 
     REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
 
-    for(i=0; i<256; i++)
-        if((i&0xF) > 3 || i>63)
+    for (i = 0; i < 256; i++)
+        if ((i & 0xF) > 3 || i > 63)
             EXPECT_EQ(255, output[i]) << "i==" << i;
-        else if(i == 0)
+        else if (i == 0)
             EXPECT_EQ(11, output[i]) << "i==" << i;
-        else if(i == 34)
+        else if (i == 34)
             EXPECT_EQ(1, output[i]) << "i==" << i;
-        else if(i == 2 || i == 17 || i == 32)
+        else if (i == 2 || i == 17 || i == 32)
             EXPECT_EQ(3, output[i]) << "i==" << i;
         else
             EXPECT_EQ(0, output[i]) << "i==" << i;

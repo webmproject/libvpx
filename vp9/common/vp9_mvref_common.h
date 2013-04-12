@@ -14,7 +14,8 @@
 #ifndef VP9_COMMON_VP9_MVREF_COMMON_H_
 #define VP9_COMMON_VP9_MVREF_COMMON_H_
 
-void vp9_find_mv_refs(MACROBLOCKD *xd,
+void vp9_find_mv_refs(VP9_COMMON *cm,
+                      MACROBLOCKD *xd,
                       MODE_INFO *here,
                       MODE_INFO *lf_here,
                       MV_REFERENCE_FRAME ref_frame,

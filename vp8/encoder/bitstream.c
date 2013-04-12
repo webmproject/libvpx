@@ -50,7 +50,7 @@ const int vp8cx_base_skip_false_prob[128] =
 unsigned __int64 Sectionbits[500];
 #endif
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
 int intra_mode_stats[10][10][10];
 static unsigned int tree_update_hist [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] [2];
 extern unsigned int active_section;
@@ -531,7 +531,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     vp8_convert_rfct_to_prob(cpi);
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
     active_section = 1;
 #endif
 
@@ -580,7 +580,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             xd->mb_to_top_edge = -((mb_row * 16)) << 3;
             xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
             active_section = 9;
 #endif
 
@@ -593,7 +593,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             if (rf == INTRA_FRAME)
             {
                 vp8_write(w, 0, cpi->prob_intra_coded);
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
                 active_section = 6;
 #endif
                 write_ymode(w, mode, pc->fc.ymode_prob);
@@ -633,13 +633,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                     vp8_mv_ref_probs(mv_ref_p, ct);
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
                     accum_mv_refs(mode, ct);
 #endif
 
                 }
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
                 active_section = 3;
 #endif
 
@@ -649,7 +649,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 {
                 case NEWMV:
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
                     active_section = 5;
 #endif
 
@@ -692,7 +692,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                         if (blockmode == NEW4X4)
                         {
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
                             active_section = 11;
 #endif
                             write_mv(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
@@ -769,7 +769,7 @@ static void write_kfmodes(VP8_COMP *cpi)
                     const B_PREDICTION_MODE L = left_block_mode(m, i);
                     const int bm = m->bmi[i].as_mode;
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
                     ++intra_mode_stats [A] [L] [bm];
 #endif
 
@@ -1160,7 +1160,7 @@ void vp8_update_coef_probs(VP8_COMP *cpi)
 #endif
 
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
                     ++ tree_update_hist [i][j][k][t] [u];
 #endif
 
@@ -1181,7 +1181,7 @@ void vp8_update_coef_probs(VP8_COMP *cpi)
                 while (++t < ENTROPY_NODES);
 
                 /* Accum token counts for generation of default statistics */
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
                 t = 0;
 
                 do
@@ -1527,7 +1527,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
     if (pc->frame_type != KEY_FRAME)
         vp8_write_bit(bc, pc->refresh_last_frame);
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
 
     if (pc->frame_type == INTER_FRAME)
         active_section = 0;
@@ -1550,7 +1550,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
     vp8_update_coef_probs(cpi);
 #endif
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
     active_section = 2;
 #endif
 
@@ -1561,7 +1561,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
     {
         write_kfmodes(cpi);
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
         active_section = 8;
 #endif
     }
@@ -1569,7 +1569,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
     {
         pack_inter_mode_mvs(cpi);
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
         active_section = 1;
 #endif
     }
@@ -1687,7 +1687,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
 #endif
 }
 
-#ifdef ENTROPY_STATS
+#ifdef VP8_ENTROPY_STATS
 void print_tree_update_probs()
 {
     int i, j, k, l;

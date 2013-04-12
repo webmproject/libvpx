@@ -9,7 +9,9 @@
  */
 #include <assert.h>
 #include <stdlib.h>
+
 #include "vpx_config.h"
+#include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/common/vp9_extend.h"
 
@@ -25,10 +27,9 @@ struct lookahead_ctx {
 
 
 /* Return the buffer at the given absolute index and increment the index */
-static struct lookahead_entry *
-pop(struct lookahead_ctx *ctx,
-    unsigned int         *idx) {
-  unsigned int            index = *idx;
+static struct lookahead_entry * pop(struct lookahead_ctx *ctx,
+                                    unsigned int *idx) {
+  unsigned int index = *idx;
   struct lookahead_entry *buf = ctx->buf + index;
 
   assert(index < ctx->max_sz);
@@ -39,8 +40,7 @@ pop(struct lookahead_ctx *ctx,
 }
 
 
-void
-vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
+void vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
   if (ctx) {
     if (ctx->buf) {
       unsigned int i;
@@ -54,23 +54,15 @@ vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
 }
 
 
-struct lookahead_ctx *
-vp9_lookahead_init(unsigned int width,
-                   unsigned int height,
-                   unsigned int depth) {
+struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
+                                          unsigned int height,
+                                          unsigned int depth) {
   struct lookahead_ctx *ctx = NULL;
 
-  /* Clamp the lookahead queue depth */
-  if (depth < 1)
-    depth = 1;
-  else if (depth > MAX_LAG_BUFFERS)
-    depth = MAX_LAG_BUFFERS;
+  // Clamp the lookahead queue depth
+  depth = clamp(depth, 1, MAX_LAG_BUFFERS);
 
-  /* Align the buffer dimensions */
-  width = (width + 15) &~15;
-  height = (height + 15) &~15;
-
-  /* Allocate the lookahead structures */
+  // Allocate the lookahead structures
   ctx = calloc(1, sizeof(*ctx));
   if (ctx) {
     unsigned int i;
@@ -90,13 +82,9 @@ bail:
 }
 
 
-int
-vp9_lookahead_push(struct lookahead_ctx *ctx,
-                   YV12_BUFFER_CONFIG   *src,
-                   int64_t               ts_start,
-                   int64_t               ts_end,
-                   unsigned int          flags,
-                   unsigned char        *active_map) {
+int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
+                       int64_t ts_start, int64_t ts_end, unsigned int flags,
+                       unsigned char *active_map) {
   struct lookahead_entry *buf;
   int row, col, active_end;
   int mb_rows = (src->y_height + 15) >> 4;
@@ -156,9 +144,8 @@ vp9_lookahead_push(struct lookahead_ctx *ctx,
 }
 
 
-struct lookahead_entry *
-vp9_lookahead_pop(struct lookahead_ctx *ctx,
-                  int                   drain) {
+struct lookahead_entry * vp9_lookahead_pop(struct lookahead_ctx *ctx,
+                                           int drain) {
   struct lookahead_entry *buf = NULL;
 
   if (ctx->sz && (drain || ctx->sz == ctx->max_sz)) {
@@ -169,9 +156,8 @@ vp9_lookahead_pop(struct lookahead_ctx *ctx,
 }
 
 
-struct lookahead_entry *
-vp9_lookahead_peek(struct lookahead_ctx *ctx,
-                   int                   index) {
+struct lookahead_entry * vp9_lookahead_peek(struct lookahead_ctx *ctx,
+                                            int index) {
   struct lookahead_entry *buf = NULL;
 
   assert(index < (int)ctx->max_sz);
@@ -184,8 +170,6 @@ vp9_lookahead_peek(struct lookahead_ctx *ctx,
   return buf;
 }
 
-
-unsigned int
-vp9_lookahead_depth(struct lookahead_ctx *ctx) {
+unsigned int vp9_lookahead_depth(struct lookahead_ctx *ctx) {
   return ctx->sz;
 }

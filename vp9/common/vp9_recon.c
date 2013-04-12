@@ -117,7 +117,7 @@ void vp9_recon_mbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
 
 void vp9_recon_sby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
   int x, y, stride = xd->block[0].dst_stride;
-  int16_t *diff = xd->sb_coeff_data.diff;
+  int16_t *diff = xd->diff;
 
   for (y = 0; y < 32; y++) {
     for (x = 0; x < 32; x++) {
@@ -130,8 +130,8 @@ void vp9_recon_sby_s_c(MACROBLOCKD *xd, uint8_t *dst) {
 
 void vp9_recon_sbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
   int x, y, stride = xd->block[16].dst_stride;
-  int16_t *udiff = xd->sb_coeff_data.diff + 1024;
-  int16_t *vdiff = xd->sb_coeff_data.diff + 1280;
+  int16_t *udiff = xd->diff + 1024;
+  int16_t *vdiff = xd->diff + 1280;
 
   for (y = 0; y < 16; y++) {
     for (x = 0; x < 16; x++) {
@@ -142,6 +142,36 @@ void vp9_recon_sbuv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
     vdst += stride;
     udiff += 16;
     vdiff += 16;
+  }
+}
+
+void vp9_recon_sb64y_s_c(MACROBLOCKD *xd, uint8_t *dst) {
+  int x, y, stride = xd->block[0].dst_stride;
+  int16_t *diff = xd->diff;
+
+  for (y = 0; y < 64; y++) {
+    for (x = 0; x < 64; x++) {
+      dst[x] = clip_pixel(dst[x] + diff[x]);
+    }
+    dst += stride;
+    diff += 64;
+  }
+}
+
+void vp9_recon_sb64uv_s_c(MACROBLOCKD *xd, uint8_t *udst, uint8_t *vdst) {
+  int x, y, stride = xd->block[16].dst_stride;
+  int16_t *udiff = xd->diff + 4096;
+  int16_t *vdiff = xd->diff + 4096 + 1024;
+
+  for (y = 0; y < 32; y++) {
+    for (x = 0; x < 32; x++) {
+      udst[x] = clip_pixel(udst[x] + udiff[x]);
+      vdst[x] = clip_pixel(vdst[x] + vdiff[x]);
+    }
+    udst += stride;
+    vdst += stride;
+    udiff += 32;
+    vdiff += 32;
   }
 }
 

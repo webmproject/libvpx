@@ -109,6 +109,9 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
   loop_filter_info_n *lfi = &cm->lf_info;
 
   /* update limits if sharpness has changed */
+  // printf("vp9_loop_filter_frame_init %d\n", default_filt_lvl);
+  // printf("sharpness level: %d [%d]\n",
+  //        cm->sharpness_level, cm->last_sharpness_level);
   if (cm->last_sharpness_level != cm->sharpness_level) {
     vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
     cm->last_sharpness_level = cm->sharpness_level;
@@ -126,7 +129,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
         lvl_seg = vp9_get_segdata(xd, seg, SEG_LVL_ALT_LF);
       } else { /* Delta Value */
         lvl_seg += vp9_get_segdata(xd, seg, SEG_LVL_ALT_LF);
-        lvl_seg = (lvl_seg > 0) ? ((lvl_seg > 63) ? 63 : lvl_seg) : 0;
+        lvl_seg = clamp(lvl_seg, 0, 63);
       }
     }
 
@@ -149,13 +152,12 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
     /* Apply delta for Intra modes */
     mode = 0; /* B_PRED */
     /* Only the split mode BPRED has a further special case */
-    lvl_mode = lvl_ref +  xd->mode_lf_deltas[mode];
-    lvl_mode = (lvl_mode > 0) ? (lvl_mode > 63 ? 63 : lvl_mode) : 0; /* clamp */
+    lvl_mode = clamp(lvl_ref +  xd->mode_lf_deltas[mode], 0, 63);
 
     lfi->lvl[seg][ref][mode] = lvl_mode;
 
     mode = 1; /* all the rest of Intra modes */
-    lvl_mode = (lvl_ref > 0) ? (lvl_ref > 63 ? 63 : lvl_ref)  : 0; /* clamp */
+    lvl_mode = clamp(lvl_ref, 0, 63);
     lfi->lvl[seg][ref][mode] = lvl_mode;
 
     /* LAST, GOLDEN, ALT */
@@ -167,9 +169,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
 
       /* Apply delta for Inter modes */
       for (mode = 1; mode < 4; mode++) {
-        lvl_mode = lvl_ref + xd->mode_lf_deltas[mode];
-        lvl_mode = (lvl_mode > 0) ? (lvl_mode > 63 ? 63 : lvl_mode) : 0; /* clamp */
-
+        lvl_mode = clamp(lvl_ref + xd->mode_lf_deltas[mode], 0, 63);
         lfi->lvl[seg][ref][mode] = lvl_mode;
       }
     }
@@ -202,10 +202,12 @@ static int sb_mb_lf_skip(const MODE_INFO *const mip0,
           mbmi1->mv[mbmi1->ref_frame].as_int) &&
          mbmi0->ref_frame != INTRA_FRAME;
 }
+
 void vp9_loop_filter_frame(VP9_COMMON *cm,
                            MACROBLOCKD *xd,
                            int frame_filter_level,
-                           int y_only) {
+                           int y_only,
+                           int dering) {
   YV12_BUFFER_CONFIG *post = cm->frame_to_show;
   loop_filter_info_n *lfi_n = &cm->lf_info;
   struct loop_filter_info lfi;
@@ -271,7 +273,6 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
               vp9_loop_filter_bv(y_ptr, u_ptr, v_ptr, post->y_stride,
                                  post->uv_stride, &lfi);
             }
-
           }
           /* don't apply across umv border */
           if (mb_row > 0 &&
@@ -299,6 +300,62 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
                                  post->uv_stride, &lfi);
             }
           }
+#if CONFIG_LOOP_DERING
+          if (dering) {
+            if (mb_row && mb_row < cm->mb_rows - 1 &&
+                mb_col && mb_col < cm->mb_cols - 1) {
+              vp9_post_proc_down_and_across(y_ptr, y_ptr,
+                                            post->y_stride, post->y_stride,
+                                            16, 16, dering);
+              if (!y_only) {
+                vp9_post_proc_down_and_across(u_ptr, u_ptr,
+                                              post->uv_stride, post->uv_stride,
+                                              8, 8, dering);
+                vp9_post_proc_down_and_across(v_ptr, v_ptr,
+                                              post->uv_stride, post->uv_stride,
+                                              8, 8, dering);
+              }
+            } else {
+              // Adjust the filter so that no out-of-frame data is used.
+              uint8_t *dr_y = y_ptr, *dr_u = u_ptr, *dr_v = v_ptr;
+              int w_adjust = 0;
+              int h_adjust = 0;
+
+              if (mb_col == 0) {
+                dr_y += 2;
+                dr_u += 2;
+                dr_v += 2;
+                w_adjust += 2;
+              }
+              if (mb_col == cm->mb_cols - 1)
+                w_adjust += 2;
+              if (mb_row == 0) {
+                dr_y += 2 * post->y_stride;
+                dr_u += 2 * post->uv_stride;
+                dr_v += 2 * post->uv_stride;
+                h_adjust += 2;
+              }
+              if (mb_row == cm->mb_rows - 1)
+                h_adjust += 2;
+              vp9_post_proc_down_and_across_c(dr_y, dr_y,
+                                              post->y_stride, post->y_stride,
+                                              16 - w_adjust, 16 - h_adjust,
+                                              dering);
+              if (!y_only) {
+                vp9_post_proc_down_and_across_c(dr_u, dr_u,
+                                                post->uv_stride,
+                                                post->uv_stride,
+                                                8 - w_adjust, 8 - h_adjust,
+                                                dering);
+                vp9_post_proc_down_and_across_c(dr_v, dr_v,
+                                                post->uv_stride,
+                                                post->uv_stride,
+                                                8 - w_adjust, 8 - h_adjust,
+                                                dering);
+              }
+            }
+          }
+#endif
         } else {
           // FIXME: Not 8x8 aware
           if (mb_col > 0 &&
@@ -376,16 +433,13 @@ void vp9_loop_filter_partial_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
    */
   if (alt_flt_enabled) {
     for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-      /* Abs value */
       if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA) {
+        // Abs value
         lvl_seg[i] = vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
-      }
-      /* Delta Value */
-      else {
-        lvl_seg[i] = default_filt_lvl +
-                     vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
-        lvl_seg[i] = (lvl_seg[i] > 0) ?
-                     ((lvl_seg[i] > 63) ? 63 : lvl_seg[i]) : 0;
+      } else {
+        // Delta Value
+        lvl_seg[i] = default_filt_lvl + vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
+        lvl_seg[i] = clamp(lvl_seg[i], 0, 63);
       }
     }
   }

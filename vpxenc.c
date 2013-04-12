@@ -1028,7 +1028,8 @@ static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
 
 static const arg_def_t *global_args[] = {
   &use_yv12, &use_i420, &usage, &threads, &profile,
-  &width, &height, &stereo_mode, &timebase, &framerate, &error_resilient,
+  &width, &height, &stereo_mode, &timebase, &framerate,
+  &error_resilient,
   &lag_in_frames, NULL
 };
 
@@ -1103,7 +1104,11 @@ static const arg_def_t static_thresh = ARG_DEF(NULL, "static-thresh", 1,
 static const arg_def_t cpu_used = ARG_DEF(NULL, "cpu-used", 1,
                                           "CPU Used (-16..16)");
 static const arg_def_t token_parts = ARG_DEF(NULL, "token-parts", 1,
-                                             "Number of token partitions to use, log2");
+                                     "Number of token partitions to use, log2");
+static const arg_def_t tile_cols = ARG_DEF(NULL, "tile-columns", 1,
+                                         "Number of tile columns to use, log2");
+static const arg_def_t tile_rows = ARG_DEF(NULL, "tile-rows", 1,
+                                           "Number of tile rows to use, log2");
 static const arg_def_t auto_altref = ARG_DEF(NULL, "auto-alt-ref", 1,
                                              "Enable automatic alt reference frames");
 static const arg_def_t arnr_maxframes = ARG_DEF(NULL, "arnr-maxframes", 1,
@@ -1123,8 +1128,10 @@ static const arg_def_t cq_level = ARG_DEF(NULL, "cq-level", 1,
                                           "Constrained Quality Level");
 static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
                                                     "Max I-frame bitrate (pct)");
-#if CONFIG_LOSSLESS
 static const arg_def_t lossless = ARG_DEF(NULL, "lossless", 1, "Lossless mode");
+#if CONFIG_VP9_ENCODER
+static const arg_def_t frame_parallel_decoding  = ARG_DEF(
+    NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
 #endif
 
 #if CONFIG_VP8_ENCODER
@@ -1147,22 +1154,18 @@ static const int vp8_arg_ctrl_map[] = {
 #if CONFIG_VP9_ENCODER
 static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
-  &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
-  &tune_ssim, &cq_level, &max_intra_rate_pct,
-#if CONFIG_LOSSLESS
-  &lossless,
-#endif
+  &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
+  &tune_ssim, &cq_level, &max_intra_rate_pct, &lossless,
+  &frame_parallel_decoding,
   NULL
 };
 static const int vp9_arg_ctrl_map[] = {
   VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
   VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
-  VP8E_SET_TOKEN_PARTITIONS,
+  VP9E_SET_TILE_COLUMNS, VP9E_SET_TILE_ROWS,
   VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
-#if CONFIG_LOSSLESS
-  VP9E_SET_LOSSLESS,
-#endif
+  VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING,
   0
 };
 #endif
@@ -1479,14 +1482,16 @@ static void show_rate_histogram(struct rate_hist          *hist,
 #define mmin(a, b)  ((a) < (b) ? (a) : (b))
 static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                           int yloc[2], int uloc[2], int vloc[2]) {
-  int match = 1;
-  int i, j;
-  yloc[0] = yloc[1] = -1;
-  for (i = 0, match = 1; match && i < img1->d_h; i+=32) {
-    for (j = 0; match && j < img1->d_w; j+=32) {
+  const unsigned int bsize = 64;
+  const unsigned int bsize2 = bsize >> 1;
+  unsigned int match = 1;
+  unsigned int i, j;
+  yloc[0] = yloc[1] = yloc[2] = yloc[3] = -1;
+  for (i = 0, match = 1; match && i < img1->d_h; i += bsize) {
+    for (j = 0; match && j < img1->d_w; j += bsize) {
       int k, l;
-      int si = mmin(i + 32, img1->d_h) - i;
-      int sj = mmin(j + 32, img1->d_w) - j;
+      int si = mmin(i + bsize, img1->d_h) - i;
+      int sj = mmin(j + bsize, img1->d_w) - j;
       for (k = 0; match && k < si; k++)
         for (l = 0; match && l < sj; l++) {
           if (*(img1->planes[VPX_PLANE_Y] +
@@ -1495,18 +1500,22 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                 (i + k) * img2->stride[VPX_PLANE_Y] + j + l)) {
             yloc[0] = i + k;
             yloc[1] = j + l;
+            yloc[2] = *(img1->planes[VPX_PLANE_Y] +
+                        (i + k) * img1->stride[VPX_PLANE_Y] + j + l);
+            yloc[3] = *(img2->planes[VPX_PLANE_Y] +
+                        (i + k) * img2->stride[VPX_PLANE_Y] + j + l);
             match = 0;
             break;
           }
         }
     }
   }
-  uloc[0] = uloc[1] = -1;
-  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i+=16) {
-    for (j = 0; j < match && (img1->d_w + 1) / 2; j+=16) {
+  uloc[0] = uloc[1] = uloc[2] = uloc[3] = -1;
+  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i += bsize2) {
+    for (j = 0; j < match && (img1->d_w + 1) / 2; j += bsize2) {
       int k, l;
-      int si = mmin(i + 16, (img1->d_h + 1) / 2) - i;
-      int sj = mmin(j + 16, (img1->d_w + 1) / 2) - j;
+      int si = mmin(i + bsize2, (img1->d_h + 1) / 2) - i;
+      int sj = mmin(j + bsize2, (img1->d_w + 1) / 2) - j;
       for (k = 0; match && k < si; k++)
         for (l = 0; match && l < sj; l++) {
           if (*(img1->planes[VPX_PLANE_U] +
@@ -1515,18 +1524,22 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                 (i + k) * img2->stride[VPX_PLANE_U] + j + l)) {
             uloc[0] = i + k;
             uloc[1] = j + l;
+            uloc[2] = *(img1->planes[VPX_PLANE_U] +
+                        (i + k) * img1->stride[VPX_PLANE_U] + j + l);
+            uloc[3] = *(img2->planes[VPX_PLANE_U] +
+                        (i + k) * img2->stride[VPX_PLANE_V] + j + l);
             match = 0;
             break;
           }
         }
     }
   }
-  vloc[0] = vloc[1] = -1;
-  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i+=16) {
-    for (j = 0; j < match && (img1->d_w + 1) / 2; j+=16) {
+  vloc[0] = vloc[1] = vloc[2] = vloc[3] = -1;
+  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i += bsize2) {
+    for (j = 0; j < match && (img1->d_w + 1) / 2; j += bsize2) {
       int k, l;
-      int si = mmin(i + 16, (img1->d_h + 1) / 2) - i;
-      int sj = mmin(j + 16, (img1->d_w + 1) / 2) - j;
+      int si = mmin(i + bsize2, (img1->d_h + 1) / 2) - i;
+      int sj = mmin(j + bsize2, (img1->d_w + 1) / 2) - j;
       for (k = 0; match && k < si; k++)
         for (l = 0; match && l < sj; l++) {
           if (*(img1->planes[VPX_PLANE_V] +
@@ -1535,6 +1548,10 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                 (i + k) * img2->stride[VPX_PLANE_V] + j + l)) {
             vloc[0] = i + k;
             vloc[1] = j + l;
+            vloc[2] = *(img1->planes[VPX_PLANE_V] +
+                        (i + k) * img1->stride[VPX_PLANE_V] + j + l);
+            vloc[3] = *(img2->planes[VPX_PLANE_V] +
+                        (i + k) * img2->stride[VPX_PLANE_V] + j + l);
             match = 0;
             break;
           }
@@ -1546,7 +1563,7 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
 static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
 {
   int match = 1;
-  int i;
+  unsigned int i;
 
   match &= (img1->fmt == img2->fmt);
   match &= (img1->w == img2->w);
@@ -1638,8 +1655,6 @@ struct stream_state {
   stats_io_t                stats;
   struct vpx_image         *img;
   vpx_codec_ctx_t           decoder;
-  vpx_ref_frame_t           ref_enc;
-  vpx_ref_frame_t           ref_dec;
   int                       mismatch_seen;
 };
 
@@ -2221,16 +2236,7 @@ static void initialize_encoder(struct stream_state  *stream,
 
 #if CONFIG_DECODERS
   if (global->test_decode != TEST_DECODE_OFF) {
-    int width, height;
-
     vpx_codec_dec_init(&stream->decoder, global->codec->dx_iface(), NULL, 0);
-
-    width = (stream->config.cfg.g_w + 15) & ~15;
-    height = (stream->config.cfg.g_h + 15) & ~15;
-    vpx_img_alloc(&stream->ref_enc.img, VPX_IMG_FMT_I420, width, height, 1);
-    vpx_img_alloc(&stream->ref_dec.img, VPX_IMG_FMT_I420, width, height, 1);
-    stream->ref_enc.frame_type = VP8_LAST_FRAME;
-    stream->ref_dec.frame_type = VP8_LAST_FRAME;
   }
 #endif
 }
@@ -2311,6 +2317,8 @@ static void get_cx_data(struct stream_state  *stream,
         if (!(pkt->data.frame.flags & VPX_FRAME_IS_FRAGMENT)) {
           stream->frames_out++;
         }
+        if (!global->quiet)
+          fprintf(stderr, " %6luF", (unsigned long)pkt->data.frame.sz);
 
         update_rate_histogram(&stream->rate_hist, cfg, pkt);
         if (stream->config.write_webm) {
@@ -2373,6 +2381,8 @@ static void get_cx_data(struct stream_state  *stream,
           stream->psnr_sse_total += pkt->data.psnr.sse[0];
           stream->psnr_samples_total += pkt->data.psnr.samples[0];
           for (i = 0; i < 4; i++) {
+            if (!global->quiet)
+              fprintf(stderr, "%.3f ", pkt->data.psnr.psnr[i]);
             stream->psnr_totals[i] += pkt->data.psnr.psnr[i];
           }
           stream->psnr_count++;
@@ -2411,26 +2421,59 @@ static float usec_to_fps(uint64_t usec, unsigned int frames) {
 
 
 static void test_decode(struct stream_state  *stream,
-                        enum TestDecodeFatality fatal) {
+                        enum TestDecodeFatality fatal,
+                        const struct codec_item *codec) {
+  vpx_image_t enc_img, dec_img;
+
   if (stream->mismatch_seen)
     return;
 
-  vpx_codec_control(&stream->encoder, VP8_COPY_REFERENCE, &stream->ref_enc);
+  /* Get the internal reference frame */
+  if (codec->fourcc == VP8_FOURCC) {
+    struct vpx_ref_frame ref_enc, ref_dec;
+    int width, height;
+
+    width = (stream->config.cfg.g_w + 15) & ~15;
+    height = (stream->config.cfg.g_h + 15) & ~15;
+    vpx_img_alloc(&ref_enc.img, VPX_IMG_FMT_I420, width, height, 1);
+    enc_img = ref_enc.img;
+    vpx_img_alloc(&ref_dec.img, VPX_IMG_FMT_I420, width, height, 1);
+    dec_img = ref_dec.img;
+
+    ref_enc.frame_type = VP8_LAST_FRAME;
+    ref_dec.frame_type = VP8_LAST_FRAME;
+    vpx_codec_control(&stream->encoder, VP8_COPY_REFERENCE, &ref_enc);
+    vpx_codec_control(&stream->decoder, VP8_COPY_REFERENCE, &ref_dec);
+  } else {
+    struct vp9_ref_frame ref;
+
+    ref.idx = 0;
+    vpx_codec_control(&stream->encoder, VP9_GET_REFERENCE, &ref);
+    enc_img = ref.img;
+    vpx_codec_control(&stream->decoder, VP9_GET_REFERENCE, &ref);
+    dec_img = ref.img;
+  }
   ctx_exit_on_error(&stream->encoder, "Failed to get encoder reference frame");
-  vpx_codec_control(&stream->decoder, VP8_COPY_REFERENCE, &stream->ref_dec);
   ctx_exit_on_error(&stream->decoder, "Failed to get decoder reference frame");
 
-  if (!compare_img(&stream->ref_enc.img, &stream->ref_dec.img)) {
-    int y[2], u[2], v[2];
-    find_mismatch(&stream->ref_enc.img, &stream->ref_dec.img,
-                  y, u, v);
+  if (!compare_img(&enc_img, &dec_img)) {
+    int y[4], u[4], v[4];
+    find_mismatch(&enc_img, &dec_img, y, u, v);
+    stream->decoder.err = 1;
     warn_or_exit_on_error(&stream->decoder, fatal == TEST_DECODE_FATAL,
-                          "Stream %d: Encode/decode mismatch on frame %d"
-                          " at Y[%d, %d], U[%d, %d], V[%d, %d]",
+                          "Stream %d: Encode/decode mismatch on frame %d at"
+                          " Y[%d, %d] {%d/%d},"
+                          " U[%d, %d] {%d/%d},"
+                          " V[%d, %d] {%d/%d}",
                           stream->index, stream->frames_out,
-                          y[0], y[1], u[0], u[1], v[0], v[1]);
+                          y[0], y[1], y[2], y[3],
+                          u[0], u[1], u[2], u[3],
+                          v[0], v[1], v[2], v[3]);
     stream->mismatch_seen = stream->frames_out;
   }
+
+  vpx_img_free(&enc_img);
+  vpx_img_free(&dec_img);
 }
 
 
@@ -2544,7 +2587,6 @@ int main(int argc, const char **argv_) {
         " and --passes=2\n", stream->index, global.pass);
     });
 
-
     /* Use the frame rate from the file only if none was specified
      * on the command-line.
      */
@@ -2656,7 +2698,7 @@ int main(int argc, const char **argv_) {
         }
 
         if (got_data && global.test_decode != TEST_DECODE_OFF)
-          FOREACH_STREAM(test_decode(stream, global.test_decode));
+          FOREACH_STREAM(test_decode(stream, global.test_decode, global.codec));
       }
 
       fflush(stdout);
@@ -2688,8 +2730,6 @@ int main(int argc, const char **argv_) {
 
     if (global.test_decode != TEST_DECODE_OFF) {
       FOREACH_STREAM(vpx_codec_destroy(&stream->decoder));
-      FOREACH_STREAM(vpx_img_free(&stream->ref_enc.img));
-      FOREACH_STREAM(vpx_img_free(&stream->ref_dec.img));
     }
 
     close_input_file(&input);

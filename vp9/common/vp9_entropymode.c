@@ -11,8 +11,9 @@
 
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_modecont.h"
+#include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_alloccommon.h"
 #include "vpx_mem/vpx_mem.h"
-
 
 static const unsigned int kf_y_mode_cts[8][VP9_YMODES] = {
   /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 BPRED */
@@ -113,8 +114,6 @@ int vp9_mv_cont(const int_mv *l, const int_mv *a) {
 
   return SUBMVREF_NORMAL;
 }
-
-const vp9_prob vp9_sub_mv_ref_prob [VP9_SUBMVREFS - 1] = { 180, 162, 25};
 
 const vp9_prob vp9_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP9_SUBMVREFS - 1] = {
   { 147, 136, 18 },
@@ -301,40 +300,32 @@ struct vp9_token_struct vp9_sub_mv_ref_encoding_array[VP9_SUBMVREFS];
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
   unsigned int bct [VP9_YMODES] [2];      /* num Ymodes > num UV modes */
 
-  vp9_tree_probs_from_distribution(VP9_YMODES, vp9_ymode_encodings,
-                                   vp9_ymode_tree, x->fc.ymode_prob,
-                                   bct, y_mode_cts);
-  vp9_tree_probs_from_distribution(VP9_I32X32_MODES, vp9_sb_ymode_encodings,
-                                   vp9_sb_ymode_tree, x->fc.sb_ymode_prob,
-                                   bct, y_mode_cts);
+  vp9_tree_probs_from_distribution(vp9_ymode_tree, x->fc.ymode_prob,
+                                   bct, y_mode_cts, 0);
+  vp9_tree_probs_from_distribution(vp9_sb_ymode_tree, x->fc.sb_ymode_prob,
+                                   bct, y_mode_cts, 0);
   {
     int i;
     for (i = 0; i < 8; i++) {
-      vp9_tree_probs_from_distribution(VP9_YMODES, vp9_kf_ymode_encodings,
-                                       vp9_kf_ymode_tree, x->kf_ymode_prob[i],
-                                       bct, kf_y_mode_cts[i]);
-      vp9_tree_probs_from_distribution(VP9_I32X32_MODES,
-                                       vp9_sb_kf_ymode_encodings,
-                                       vp9_sb_kf_ymode_tree,
+      vp9_tree_probs_from_distribution(vp9_kf_ymode_tree, x->kf_ymode_prob[i],
+                                       bct, kf_y_mode_cts[i], 0);
+      vp9_tree_probs_from_distribution(vp9_sb_kf_ymode_tree,
                                        x->sb_kf_ymode_prob[i], bct,
-                                       kf_y_mode_cts[i]);
+                                       kf_y_mode_cts[i], 0);
     }
   }
   {
     int i;
     for (i = 0; i < VP9_YMODES; i++) {
-      vp9_tree_probs_from_distribution(VP9_UV_MODES, vp9_uv_mode_encodings,
-                                       vp9_uv_mode_tree, x->kf_uv_mode_prob[i],
-                                       bct, kf_uv_mode_cts[i]);
-      vp9_tree_probs_from_distribution(VP9_UV_MODES, vp9_uv_mode_encodings,
-                                       vp9_uv_mode_tree, x->fc.uv_mode_prob[i],
-                                       bct, uv_mode_cts[i]);
+      vp9_tree_probs_from_distribution(vp9_uv_mode_tree, x->kf_uv_mode_prob[i],
+                                       bct, kf_uv_mode_cts[i], 0);
+      vp9_tree_probs_from_distribution(vp9_uv_mode_tree, x->fc.uv_mode_prob[i],
+                                       bct, uv_mode_cts[i], 0);
     }
   }
 
-  vp9_tree_probs_from_distribution(VP9_I8X8_MODES, vp9_i8x8_mode_encodings,
-                                   vp9_i8x8_mode_tree, x->fc.i8x8_mode_prob,
-                                   bct, i8x8_mode_cts);
+  vp9_tree_probs_from_distribution(vp9_i8x8_mode_tree, x->fc.i8x8_mode_prob,
+                                   bct, i8x8_mode_cts, 0);
 
   vpx_memcpy(x->fc.sub_mv_ref_prob, vp9_sub_mv_ref_prob2,
              sizeof(vp9_sub_mv_ref_prob2));
@@ -344,6 +335,9 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
 #if CONFIG_COMP_INTERINTRA_PRED
   x->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
 #endif
+  x->ref_pred_probs[0] = 120;
+  x->ref_pred_probs[1] = 80;
+  x->ref_pred_probs[2] = 40;
 }
 
 
@@ -351,8 +345,7 @@ static void intra_bmode_probs_from_distribution(
   vp9_prob p[VP9_NKF_BINTRAMODES - 1],
   unsigned int branch_ct[VP9_NKF_BINTRAMODES - 1][2],
   const unsigned int events[VP9_NKF_BINTRAMODES]) {
-  vp9_tree_probs_from_distribution(VP9_NKF_BINTRAMODES, vp9_bmode_encodings,
-                                   vp9_bmode_tree, p, branch_ct, events);
+  vp9_tree_probs_from_distribution(vp9_bmode_tree, p, branch_ct, events, 0);
 }
 
 void vp9_default_bmode_probs(vp9_prob p[VP9_NKF_BINTRAMODES - 1]) {
@@ -364,8 +357,7 @@ static void intra_kf_bmode_probs_from_distribution(
   vp9_prob p[VP9_KF_BINTRAMODES - 1],
   unsigned int branch_ct[VP9_KF_BINTRAMODES - 1][2],
   const unsigned int events[VP9_KF_BINTRAMODES]) {
-  vp9_tree_probs_from_distribution(VP9_KF_BINTRAMODES, vp9_kf_bmode_encodings,
-                                   vp9_kf_bmode_tree, p, branch_ct, events);
+  vp9_tree_probs_from_distribution(vp9_kf_bmode_tree, p, branch_ct, events, 0);
 }
 
 void vp9_kf_default_bmode_probs(vp9_prob p[VP9_KF_BINTRAMODES]
@@ -419,6 +411,14 @@ const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, -1, 0, 1, -1, -1};
 #else
 const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, 0, 1, -1, -1};
 #endif
+#endif  // VP9_SWITCHABLE_FILTERS
+
+// Indicates if the filter is interpolating or non-interpolating
+// Note currently only the EIGHTTAP_SMOOTH is non-interpolating
+#if CONFIG_ENABLE_6TAP
+const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {1, 0, 1, 1, 1, -1};
+#else
+const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {0, 1, 1, 1, -1};
 #endif
 
 void vp9_entropy_mode_init() {
@@ -480,7 +480,7 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 
 #define MVREF_COUNT_SAT 20
 #define MVREF_MAX_UPDATE_FACTOR 128
-void vp9_update_mode_context(VP9_COMMON *pc) {
+void vp9_adapt_mode_context(VP9_COMMON *pc) {
   int i, j;
   unsigned int (*mv_ref_ct)[4][2];
   int (*mode_context)[4];
@@ -526,17 +526,17 @@ void print_mode_contexts(VP9_COMMON *pc) {
 
 #define MODE_COUNT_SAT 20
 #define MODE_MAX_UPDATE_FACTOR 144
-static void update_mode_probs(int n_modes, struct vp9_token_struct *encoding,
+static void update_mode_probs(int n_modes,
                               const vp9_tree_index *tree, unsigned int *cnt,
-                              vp9_prob *pre_probs, vp9_prob *dst_probs) {
+                              vp9_prob *pre_probs, vp9_prob *dst_probs,
+                              unsigned int tok0_offset) {
 #define MAX_PROBS 32
   vp9_prob probs[MAX_PROBS];
   unsigned int branch_ct[MAX_PROBS][2];
   int t, count, factor;
 
   assert(n_modes - 1 < MAX_PROBS);
-  vp9_tree_probs_from_distribution(n_modes, encoding, tree, probs,
-                                   branch_ct, cnt);
+  vp9_tree_probs_from_distribution(tree, probs, branch_ct, cnt, tok0_offset);
   for (t = 0; t < n_modes - 1; ++t) {
     count = branch_ct[t][0] + branch_ct[t][1];
     count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
@@ -592,31 +592,32 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 #endif
 #endif
 
-  update_mode_probs(VP9_YMODES, vp9_ymode_encodings, vp9_ymode_tree,
+  update_mode_probs(VP9_YMODES, vp9_ymode_tree,
                     cm->fc.ymode_counts, cm->fc.pre_ymode_prob,
-                    cm->fc.ymode_prob);
-  update_mode_probs(VP9_I32X32_MODES, vp9_sb_ymode_encodings, vp9_sb_ymode_tree,
+                    cm->fc.ymode_prob, 0);
+  update_mode_probs(VP9_I32X32_MODES, vp9_sb_ymode_tree,
                     cm->fc.sb_ymode_counts, cm->fc.pre_sb_ymode_prob,
-                    cm->fc.sb_ymode_prob);
+                    cm->fc.sb_ymode_prob, 0);
   for (i = 0; i < VP9_YMODES; ++i) {
-    update_mode_probs(VP9_UV_MODES, vp9_uv_mode_encodings, vp9_uv_mode_tree,
+    update_mode_probs(VP9_UV_MODES, vp9_uv_mode_tree,
                       cm->fc.uv_mode_counts[i], cm->fc.pre_uv_mode_prob[i],
-                      cm->fc.uv_mode_prob[i]);
+                      cm->fc.uv_mode_prob[i], 0);
   }
-  update_mode_probs(VP9_NKF_BINTRAMODES, vp9_bmode_encodings, vp9_bmode_tree,
+  update_mode_probs(VP9_NKF_BINTRAMODES, vp9_bmode_tree,
                     cm->fc.bmode_counts, cm->fc.pre_bmode_prob,
-                    cm->fc.bmode_prob);
-  update_mode_probs(VP9_I8X8_MODES, vp9_i8x8_mode_encodings,
+                    cm->fc.bmode_prob, 0);
+  update_mode_probs(VP9_I8X8_MODES,
                     vp9_i8x8_mode_tree, cm->fc.i8x8_mode_counts,
-                    cm->fc.pre_i8x8_mode_prob, cm->fc.i8x8_mode_prob);
+                    cm->fc.pre_i8x8_mode_prob, cm->fc.i8x8_mode_prob, 0);
   for (i = 0; i < SUBMVREF_COUNT; ++i) {
-    update_mode_probs(VP9_SUBMVREFS, vp9_sub_mv_ref_encoding_array,
+    update_mode_probs(VP9_SUBMVREFS,
                       vp9_sub_mv_ref_tree, cm->fc.sub_mv_ref_counts[i],
-                      cm->fc.pre_sub_mv_ref_prob[i], cm->fc.sub_mv_ref_prob[i]);
+                      cm->fc.pre_sub_mv_ref_prob[i], cm->fc.sub_mv_ref_prob[i],
+                      LEFT4X4);
   }
-  update_mode_probs(VP9_NUMMBSPLITS, vp9_mbsplit_encodings, vp9_mbsplit_tree,
+  update_mode_probs(VP9_NUMMBSPLITS, vp9_mbsplit_tree,
                     cm->fc.mbsplit_counts, cm->fc.pre_mbsplit_prob,
-                    cm->fc.mbsplit_prob);
+                    cm->fc.mbsplit_prob, 0);
 #if CONFIG_COMP_INTERINTRA_PRED
   if (cm->use_interintra) {
     int factor, interintra_prob, count;
@@ -630,4 +631,66 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                                            interintra_prob, factor);
   }
 #endif
+}
+
+static void set_default_lf_deltas(MACROBLOCKD *xd) {
+  xd->mode_ref_lf_delta_enabled = 1;
+  xd->mode_ref_lf_delta_update = 1;
+
+  xd->ref_lf_deltas[INTRA_FRAME] = 2;
+  xd->ref_lf_deltas[LAST_FRAME] = 0;
+  xd->ref_lf_deltas[GOLDEN_FRAME] = -2;
+  xd->ref_lf_deltas[ALTREF_FRAME] = -2;
+
+  xd->mode_lf_deltas[0] = 4;               // BPRED
+  xd->mode_lf_deltas[1] = -2;              // Zero
+  xd->mode_lf_deltas[2] = 2;               // New mv
+  xd->mode_lf_deltas[3] = 4;               // Split mv
+}
+
+void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
+  // Reset the segment feature data to the default stats:
+  // Features disabled, 0, with delta coding (Default state).
+  int i;
+  vp9_clearall_segfeatures(xd);
+  xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
+  if (cm->last_frame_seg_map)
+    vpx_memset(cm->last_frame_seg_map, 0, (cm->mb_rows * cm->mb_cols));
+
+  /* reset the mode ref deltas for loop filter */
+  vpx_memset(xd->last_ref_lf_deltas, 0, sizeof(xd->last_ref_lf_deltas));
+  vpx_memset(xd->last_mode_lf_deltas, 0, sizeof(xd->last_mode_lf_deltas));
+  set_default_lf_deltas(xd);
+
+  vp9_default_coef_probs(cm);
+  vp9_init_mbmode_probs(cm);
+  vp9_default_bmode_probs(cm->fc.bmode_prob);
+  vp9_kf_default_bmode_probs(cm->kf_bmode_prob);
+  vp9_init_mv_probs(cm);
+  // To force update of the sharpness
+  cm->last_sharpness_level = -1;
+
+  vp9_init_mode_contexts(cm);
+
+  for (i = 0; i < NUM_FRAME_CONTEXTS; i++) {
+    vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
+  }
+
+  vpx_memset(cm->prev_mip, 0,
+             (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+  vpx_memset(cm->mip, 0,
+             (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+
+  vp9_update_mode_info_border(cm, cm->mip);
+  vp9_update_mode_info_in_image(cm, cm->mi);
+
+#if CONFIG_NEW_MVREF
+  // Defaults probabilities for encoding the MV ref id signal
+  vpx_memset(xd->mb_mv_ref_probs, VP9_DEFAULT_MV_REF_PROB,
+             sizeof(xd->mb_mv_ref_probs));
+#endif
+  cm->ref_frame_sign_bias[GOLDEN_FRAME] = 0;
+  cm->ref_frame_sign_bias[ALTREF_FRAME] = 0;
+
+  cm->frame_context_idx = 0;
 }

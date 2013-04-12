@@ -32,7 +32,6 @@ DEFINE(vp9_block_quant_shift,                   offsetof(BLOCK, quant_shift));
 DEFINE(vp9_blockd_qcoeff,                       offsetof(BLOCKD, qcoeff));
 DEFINE(vp9_blockd_dequant,                      offsetof(BLOCKD, dequant));
 DEFINE(vp9_blockd_dqcoeff,                      offsetof(BLOCKD, dqcoeff));
-DEFINE(vp9_blockd_eob,                          offsetof(BLOCKD, eob));
 
 END
 

@@ -29,14 +29,15 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
   // The prediction flags in these dummy entries are initialised to 0.
   switch (pred_id) {
     case PRED_SEG_ID:
-      pred_context = (m - 1)->mbmi.seg_id_predicted +
-                     (m - cm->mode_info_stride)->mbmi.seg_id_predicted;
+      pred_context = (m - cm->mode_info_stride)->mbmi.seg_id_predicted;
+      if (xd->left_available)
+        pred_context += (m - 1)->mbmi.seg_id_predicted;
       break;
 
-
     case PRED_REF:
-      pred_context = (m - 1)->mbmi.ref_predicted +
-                     (m - cm->mode_info_stride)->mbmi.ref_predicted;
+      pred_context = (m - cm->mode_info_stride)->mbmi.ref_predicted;
+      if (xd->left_available)
+        pred_context += (m - 1)->mbmi.ref_predicted;
       break;
 
     case PRED_COMP:
@@ -61,13 +62,14 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
       break;
 
     case PRED_MBSKIP:
-      pred_context = (m - 1)->mbmi.mb_skip_coeff +
-                     (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
+      pred_context = (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
+      if (xd->left_available)
+        pred_context += (m - 1)->mbmi.mb_skip_coeff;
       break;
 
     case PRED_SWITCHABLE_INTERP:
       {
-        int left_in_image = (m - 1)->mbmi.mb_in_image;
+        int left_in_image = xd->left_available && (m - 1)->mbmi.mb_in_image;
         int above_in_image = (m - cm->mode_info_stride)->mbmi.mb_in_image;
         int left_mode = (m - 1)->mbmi.mode;
         int above_mode = (m - cm->mode_info_stride)->mbmi.mode;
@@ -98,8 +100,7 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
       break;
 
     default:
-      // TODO *** add error trap code.
-      pred_context = 0;
+      pred_context = 0;  // *** add error trap code.
       break;
   }
 
@@ -111,39 +112,23 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
 vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
                           const MACROBLOCKD *const xd,
                           PRED_ID pred_id) {
-  vp9_prob pred_probability;
-  int pred_context;
-
-  // Get the appropriate prediction context
-  pred_context = vp9_get_pred_context(cm, xd, pred_id);
+  const int pred_context = vp9_get_pred_context(cm, xd, pred_id);
 
   switch (pred_id) {
     case PRED_SEG_ID:
-      pred_probability = cm->segment_pred_probs[pred_context];
-      break;
-
+      return cm->segment_pred_probs[pred_context];
     case PRED_REF:
-      pred_probability = cm->ref_pred_probs[pred_context];
-      break;
-
+      return cm->ref_pred_probs[pred_context];
     case PRED_COMP:
       // In keeping with convention elsewhre the probability returned is
       // the probability of a "0" outcome which in this case means the
       // probability of comp pred off.
-      pred_probability = cm->prob_comppred[pred_context];
-      break;
-
+      return cm->prob_comppred[pred_context];
     case PRED_MBSKIP:
-      pred_probability = cm->mbskip_pred_probs[pred_context];
-      break;
-
+      return cm->mbskip_pred_probs[pred_context];
     default:
-      // TODO *** add error trap code.
-      pred_probability = 128;
-      break;
+      return 128;  // *** add error trap code.
   }
-
-  return pred_probability;
 }
 
 // This function returns a context probability ptr for coding a given
@@ -151,71 +136,41 @@ vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
 const vp9_prob *vp9_get_pred_probs(const VP9_COMMON *const cm,
                                    const MACROBLOCKD *const xd,
                                    PRED_ID pred_id) {
-  const vp9_prob *pred_probability;
-  int pred_context;
-
-  // Get the appropriate prediction context
-  pred_context = vp9_get_pred_context(cm, xd, pred_id);
+  const int pred_context = vp9_get_pred_context(cm, xd, pred_id);
 
   switch (pred_id) {
     case PRED_SEG_ID:
-      pred_probability = &cm->segment_pred_probs[pred_context];
-      break;
-
+      return &cm->segment_pred_probs[pred_context];
     case PRED_REF:
-      pred_probability = &cm->ref_pred_probs[pred_context];
-      break;
-
+      return &cm->ref_pred_probs[pred_context];
     case PRED_COMP:
       // In keeping with convention elsewhre the probability returned is
       // the probability of a "0" outcome which in this case means the
       // probability of comp pred off.
-      pred_probability = &cm->prob_comppred[pred_context];
-      break;
-
+      return &cm->prob_comppred[pred_context];
     case PRED_MBSKIP:
-      pred_probability = &cm->mbskip_pred_probs[pred_context];
-      break;
-
+      return &cm->mbskip_pred_probs[pred_context];
     case PRED_SWITCHABLE_INTERP:
-      pred_probability = &cm->fc.switchable_interp_prob[pred_context][0];
-      break;
-
+      return &cm->fc.switchable_interp_prob[pred_context][0];
     default:
-      // TODO *** add error trap code.
-      pred_probability = NULL;
-      break;
+      return NULL;  // *** add error trap code.
   }
-
-  return pred_probability;
 }
 
 // This function returns the status of the given prediction signal.
 // I.e. is the predicted value for the given signal correct.
 unsigned char vp9_get_pred_flag(const MACROBLOCKD *const xd,
                                 PRED_ID pred_id) {
-  unsigned char pred_flag = 0;
-
   switch (pred_id) {
     case PRED_SEG_ID:
-      pred_flag = xd->mode_info_context->mbmi.seg_id_predicted;
-      break;
-
+      return xd->mode_info_context->mbmi.seg_id_predicted;
     case PRED_REF:
-      pred_flag = xd->mode_info_context->mbmi.ref_predicted;
-      break;
-
+      return  xd->mode_info_context->mbmi.ref_predicted;
     case PRED_MBSKIP:
-      pred_flag = xd->mode_info_context->mbmi.mb_skip_coeff;
-      break;
-
+      return xd->mode_info_context->mbmi.mb_skip_coeff;
     default:
-      // TODO *** add error trap code.
-      pred_flag = 0;
-      break;
+      return 0;  // *** add error trap code.
   }
-
-  return pred_flag;
 }
 
 // This function sets the status of the given prediction signal.
@@ -277,7 +232,7 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
       break;
 
     default:
-      // TODO *** add error trap code.
+      // *** add error trap code.
       break;
   }
 }
@@ -322,7 +277,6 @@ MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
   MV_REFERENCE_FRAME pred_ref = LAST_FRAME;
 
   int segment_id = xd->mode_info_context->mbmi.segment_id;
-  int seg_ref_active;
   int i;
 
   unsigned char frame_allowed[MAX_REF_FRAMES] = {1, 1, 1, 1};
@@ -333,7 +287,7 @@ MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
   unsigned char above_left_in_image;
 
   // Is segment coding ennabled
-  seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
+  int seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
 
   // Special case treatment if segment coding is enabled.
   // Dont allow prediction of a reference frame that the segment
@@ -355,9 +309,10 @@ MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
   above_left = (m - 1 - cm->mode_info_stride)->mbmi.ref_frame;
 
   // Are neighbours in image
-  left_in_image = (m - 1)->mbmi.mb_in_image;
+  left_in_image = (m - 1)->mbmi.mb_in_image && xd->left_available;
   above_in_image = (m - cm->mode_info_stride)->mbmi.mb_in_image;
-  above_left_in_image = (m - 1 - cm->mode_info_stride)->mbmi.mb_in_image;
+  above_left_in_image = (m - 1 - cm->mode_info_stride)->mbmi.mb_in_image &&
+                        xd->left_available;
 
   // Adjust scores for candidate reference frames based on neigbours
   if (frame_allowed[left] && left_in_image) {
@@ -385,9 +340,7 @@ MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
 // Functions to computes a set of modified reference frame probabilities
 // to use when the prediction of the reference frame value fails
 void vp9_calc_ref_probs(int *count, vp9_prob *probs) {
-  int tot_count;
-
-  tot_count = count[0] + count[1] + count[2] + count[3];
+  int tot_count = count[0] + count[1] + count[2] + count[3];
   probs[0] = get_prob(count[0], tot_count);
 
   tot_count -= count[0];
@@ -403,19 +356,12 @@ void vp9_calc_ref_probs(int *count, vp9_prob *probs) {
 // they are not allowed for a given segment.
 void vp9_compute_mod_refprobs(VP9_COMMON *const cm) {
   int norm_cnt[MAX_REF_FRAMES];
-  int intra_count;
-  int inter_count;
-  int last_count;
-  int gfarf_count;
-  int gf_count;
-  int arf_count;
-
-  intra_count = cm->prob_intra_coded;
-  inter_count = (255 - intra_count);
-  last_count = (inter_count * cm->prob_last_coded) / 255;
-  gfarf_count = inter_count - last_count;
-  gf_count = (gfarf_count * cm->prob_gf_coded) / 255;
-  arf_count = gfarf_count - gf_count;
+  const int intra_count = cm->prob_intra_coded;
+  const int inter_count = (255 - intra_count);
+  const int last_count = (inter_count * cm->prob_last_coded) / 255;
+  const int gfarf_count = inter_count - last_count;
+  const int gf_count = (gfarf_count * cm->prob_gf_coded) / 255;
+  const int arf_count = gfarf_count - gf_count;
 
   // Work out modified reference frame probabilities to use where prediction
   // of the reference frame fails

@@ -120,31 +120,6 @@ TEST(VP9Idct8x8Test, AccuracyCheck) {
       input[j] = rnd.Rand8() - rnd.Rand8();
 
     const int pitch = 16;
-    vp9_short_fdct8x8_c(input, output_c, pitch);
-    reference_dct_2d(input, output_r);
-
-    for (int j = 0; j < 64; ++j) {
-      const double diff = output_c[j] - output_r[j];
-      const double error = diff * diff;
-      // An error in a DCT coefficient isn't that bad.
-      // We care more about the reconstructed pixels.
-      EXPECT_GE(2.0, error)
-          << "Error: 8x8 FDCT/IDCT has error " << error
-          << " at index " << j;
-    }
-
-#if 0
-    // Tests that the reference iDCT and fDCT match.
-    reference_dct_2d(input, output_r);
-    reference_idct_2d(output_r, output_c);
-    for (int j = 0; j < 64; ++j) {
-      const int diff = output_c[j] -input[j];
-      const int error = diff * diff;
-      EXPECT_EQ(0, error)
-          << "Error: 8x8 FDCT/IDCT has error " << error
-          << " at index " << j;
-    }
-#endif
     reference_dct_2d(input, output_r);
     for (int j = 0; j < 64; ++j)
       coeff[j] = round(output_r[j]);

@@ -67,20 +67,16 @@ void vp9_de_alloc_frame_buffers(VP9_COMMON *oci) {
 
 int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   int i;
+  int aligned_width, aligned_height;
 
   vp9_de_alloc_frame_buffers(oci);
 
   /* our internal buffers are always multiples of 16 */
-  if ((width & 0xf) != 0)
-    width += 16 - (width & 0xf);
-
-  if ((height & 0xf) != 0)
-    height += 16 - (height & 0xf);
-
+  aligned_width = (width + 15) & ~15;
+  aligned_height = (height + 15) & ~15;
 
   for (i = 0; i < NUM_YV12_BUFFERS; i++) {
     oci->fb_idx_ref_cnt[i] = 0;
-    oci->yv12_fb[i].flags = 0;
     if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i], width, height,
                                     VP9BORDERINPIXELS) < 0) {
       vp9_de_alloc_frame_buffers(oci);
@@ -88,15 +84,16 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
     }
   }
 
-  oci->new_fb_idx = 0;
-  oci->lst_fb_idx = 1;
-  oci->gld_fb_idx = 2;
-  oci->alt_fb_idx = 3;
+  oci->new_fb_idx = NUM_YV12_BUFFERS - 1;
+  oci->fb_idx_ref_cnt[oci->new_fb_idx] = 1;
 
-  oci->fb_idx_ref_cnt[0] = 1;
-  oci->fb_idx_ref_cnt[1] = 1;
-  oci->fb_idx_ref_cnt[2] = 1;
-  oci->fb_idx_ref_cnt[3] = 1;
+  for (i = 0; i < 3; i++)
+    oci->active_ref_idx[i] = i;
+
+  for (i = 0; i < NUM_REF_FRAMES; i++) {
+    oci->ref_frame_map[i] = i;
+    oci->fb_idx_ref_cnt[i] = 1;
+  }
 
   if (vp8_yv12_alloc_frame_buffer(&oci->temp_scale_frame, width, 16,
                                   VP9BORDERINPIXELS) < 0) {
@@ -110,8 +107,8 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
     return 1;
   }
 
-  oci->mb_rows = height >> 4;
-  oci->mb_cols = width >> 4;
+  oci->mb_rows = aligned_height >> 4;
+  oci->mb_cols = aligned_width >> 4;
   oci->MBs = oci->mb_rows * oci->mb_cols;
   oci->mode_info_stride = oci->mb_cols + 1;
   oci->mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
@@ -134,7 +131,8 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
 
   oci->prev_mi = oci->prev_mip + oci->mode_info_stride + 1;
 
-  oci->above_context = vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * oci->mb_cols, 1);
+  oci->above_context =
+    vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * (3 + oci->mb_cols), 1);
 
   if (!oci->above_context) {
     vp9_de_alloc_frame_buffers(oci);
@@ -146,6 +144,7 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
 
   return 0;
 }
+
 void vp9_setup_version(VP9_COMMON *cm) {
   if (cm->version & 0x4) {
     if (!CONFIG_EXPERIMENTAL)
@@ -204,9 +203,6 @@ void vp9_create_common(VP9_COMMON *oci) {
   /* Initialise reference frame sign bias structure to defaults */
   vpx_memset(oci->ref_frame_sign_bias, 0, sizeof(oci->ref_frame_sign_bias));
 
-  /* Default disable buffer to buffer copying */
-  oci->copy_buffer_to_gf = 0;
-  oci->copy_buffer_to_arf = 0;
   oci->kf_ymode_probs_update = 0;
 }
 
@@ -220,8 +216,4 @@ void vp9_initialize_common() {
   vp9_entropy_mode_init();
 
   vp9_entropy_mv_init();
-
-#if CONFIG_NEWCOEFCONTEXT
-  vp9_init_neighbors();
-#endif
 }

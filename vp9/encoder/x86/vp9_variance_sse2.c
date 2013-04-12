@@ -186,6 +186,7 @@ unsigned int vp9_variance16x16_wmt
   *sse = sse0;
   return (sse0 - (((unsigned int)sum0 * sum0) >> 8));
 }
+
 unsigned int vp9_mse16x16_wmt(
   const unsigned char *src_ptr,
   int  source_stride,
@@ -305,19 +306,15 @@ unsigned int vp9_sub_pixel_variance8x8_wmt
   return (xxsum - (((unsigned int)xsum * xsum) >> 6));
 }
 
-unsigned int vp9_sub_pixel_variance16x16_wmt
-(
-  const unsigned char  *src_ptr,
-  int  src_pixels_per_line,
-  int  xoffset,
-  int  yoffset,
-  const unsigned char *dst_ptr,
-  int dst_pixels_per_line,
-  unsigned int *sse
-) {
+static void sub_pixel_variance16x16_sse2(const uint8_t *src_ptr,
+                                         int src_pixels_per_line,
+                                         int xoffset,
+                                         int yoffset,
+                                         const uint8_t *dst_ptr,
+                                         int dst_pixels_per_line,
+                                         unsigned int *sse, int *avg) {
   int xsum0, xsum1;
   unsigned int xxsum0, xxsum1;
-
 
   // note we could avoid these if statements if the calling function
   // just called the appropriate functions inside.
@@ -355,10 +352,136 @@ unsigned int vp9_sub_pixel_variance16x16_wmt
   }
 
   *sse = xxsum0;
-  return (xxsum0 - (((unsigned int)xsum0 * xsum0) >> 8));
+  *avg = xsum0;
 }
 
-unsigned int vp9_sub_pixel_mse16x16_wmt(
+unsigned int vp9_sub_pixel_variance16x16_sse2(const uint8_t *src_ptr,
+                                              int src_pixels_per_line,
+                                              int xoffset,
+                                              int yoffset,
+                                              const uint8_t *dst_ptr,
+                                              int dst_pixels_per_line,
+                                              unsigned int *sse_ptr) {
+  int avg;
+  unsigned int sse;
+
+  sub_pixel_variance16x16_sse2(src_ptr, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr, dst_pixels_per_line,
+                               &sse, &avg);
+  *sse_ptr = sse;
+
+  return (sse - (((unsigned int) avg * avg) >> 8));
+}
+
+unsigned int vp9_sub_pixel_variance32x32_sse2(const uint8_t *src_ptr,
+                                              int src_pixels_per_line,
+                                              int xoffset,
+                                              int yoffset,
+                                              const uint8_t *dst_ptr,
+                                              int dst_pixels_per_line,
+                                              unsigned int *sse_ptr) {
+  int avg0, avg1, avg2, avg3;
+  unsigned int sse0, sse1, sse2, sse3;
+
+  sub_pixel_variance16x16_sse2(src_ptr, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr, dst_pixels_per_line,
+                               &sse0, &avg0);
+  sub_pixel_variance16x16_sse2(src_ptr + 16, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 16, dst_pixels_per_line,
+                               &sse1, &avg1);
+  src_ptr += 16 * src_pixels_per_line;
+  dst_ptr += 16 * dst_pixels_per_line;
+  sub_pixel_variance16x16_sse2(src_ptr, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr, dst_pixels_per_line,
+                               &sse2, &avg2);
+  sub_pixel_variance16x16_sse2(src_ptr + 16, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 16, dst_pixels_per_line,
+                               &sse3, &avg3);
+  sse0 += sse1 + sse2 + sse3;
+  avg0 += avg1 + avg2 + avg3;
+  *sse_ptr = sse0;
+
+  return (sse0 - (((unsigned int) avg0 * avg0) >> 10));
+}
+
+unsigned int vp9_sub_pixel_variance64x64_sse2(const uint8_t *src_ptr,
+                                              int src_pixels_per_line,
+                                              int xoffset,
+                                              int yoffset,
+                                              const uint8_t *dst_ptr,
+                                              int dst_pixels_per_line,
+                                              unsigned int *sse_ptr) {
+  int avg0, avg1, avg2, avg3, avg4;
+  unsigned int sse0, sse1, sse2, sse3, sse4;
+
+  sub_pixel_variance16x16_sse2(src_ptr, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr, dst_pixels_per_line,
+                               &sse0, &avg0);
+  sub_pixel_variance16x16_sse2(src_ptr + 16, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 16, dst_pixels_per_line,
+                               &sse1, &avg1);
+  sub_pixel_variance16x16_sse2(src_ptr + 32, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 32, dst_pixels_per_line,
+                               &sse2, &avg2);
+  sub_pixel_variance16x16_sse2(src_ptr + 48, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 48, dst_pixels_per_line,
+                               &sse3, &avg3);
+  src_ptr += 16 * src_pixels_per_line;
+  dst_ptr += 16 * dst_pixels_per_line;
+  avg0 += avg1 + avg2 + avg3;
+  sse0 += sse1 + sse2 + sse3;
+  sub_pixel_variance16x16_sse2(src_ptr, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr, dst_pixels_per_line,
+                               &sse1, &avg1);
+  sub_pixel_variance16x16_sse2(src_ptr + 16, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 16, dst_pixels_per_line,
+                               &sse2, &avg2);
+  sub_pixel_variance16x16_sse2(src_ptr + 32, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 32, dst_pixels_per_line,
+                               &sse3, &avg3);
+  sub_pixel_variance16x16_sse2(src_ptr + 48, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 48, dst_pixels_per_line,
+                               &sse4, &avg4);
+  src_ptr += 16 * src_pixels_per_line;
+  dst_ptr += 16 * dst_pixels_per_line;
+  avg0 += avg1 + avg2 + avg3 + avg4;
+  sse0 += sse1 + sse2 + sse3 + sse4;
+  sub_pixel_variance16x16_sse2(src_ptr, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr, dst_pixels_per_line,
+                               &sse1, &avg1);
+  sub_pixel_variance16x16_sse2(src_ptr + 16, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 16, dst_pixels_per_line,
+                               &sse2, &avg2);
+  sub_pixel_variance16x16_sse2(src_ptr + 32, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 32, dst_pixels_per_line,
+                               &sse3, &avg3);
+  sub_pixel_variance16x16_sse2(src_ptr + 48, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 48, dst_pixels_per_line,
+                               &sse4, &avg4);
+  src_ptr += 16 * src_pixels_per_line;
+  dst_ptr += 16 * dst_pixels_per_line;
+  avg0 += avg1 + avg2 + avg3 + avg4;
+  sse0 += sse1 + sse2 + sse3 + sse4;
+  sub_pixel_variance16x16_sse2(src_ptr, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr, dst_pixels_per_line,
+                               &sse1, &avg1);
+  sub_pixel_variance16x16_sse2(src_ptr + 16, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 16, dst_pixels_per_line,
+                               &sse2, &avg2);
+  sub_pixel_variance16x16_sse2(src_ptr + 32, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 32, dst_pixels_per_line,
+                               &sse3, &avg3);
+  sub_pixel_variance16x16_sse2(src_ptr + 48, src_pixels_per_line, xoffset,
+                               yoffset, dst_ptr + 48, dst_pixels_per_line,
+                               &sse4, &avg4);
+  avg0 += avg1 + avg2 + avg3 + avg4;
+  sse0 += sse1 + sse2 + sse3 + sse4;
+  *sse_ptr = sse0;
+
+  return (sse0 - (((unsigned int) avg0 * avg0) >> 12));
+}
+
+unsigned int vp9_sub_pixel_mse16x16_sse2(
   const unsigned char  *src_ptr,
   int  src_pixels_per_line,
   int  xoffset,
@@ -367,7 +490,8 @@ unsigned int vp9_sub_pixel_mse16x16_wmt(
   int dst_pixels_per_line,
   unsigned int *sse
 ) {
-  vp9_sub_pixel_variance16x16_wmt(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
+  vp9_sub_pixel_variance16x16_sse2(src_ptr, src_pixels_per_line, xoffset,
+                                   yoffset, dst_ptr, dst_pixels_per_line, sse);
   return *sse;
 }
 

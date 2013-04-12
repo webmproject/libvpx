@@ -11,6 +11,6 @@
 #ifndef VP9_ENCODER_VP9_TEMPORAL_FILTER_H_
 #define VP9_ENCODER_VP9_TEMPORAL_FILTER_H_
 
-extern void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance);
+void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance);
 
 #endif  // VP9_ENCODER_VP9_TEMPORAL_FILTER_H_

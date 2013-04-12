@@ -8,8 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <math.h>
+#include <limits.h>
 
 #include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_reconinter.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/encoder/vp9_quantize.h"
@@ -26,14 +29,8 @@
 #include "vp9/common/vp9_swapyv12buffer.h"
 #include "vpx_ports/vpx_timer.h"
 
-#include <math.h>
-#include <limits.h>
-
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
 #define ALT_REF_SUBPEL_ENABLED 1 // dis/enable subpel in MC AltRef filtering
-
-#if VP9_TEMPORAL_ALT_REF
-
 
 static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             uint8_t *y_mb_ptr,
@@ -43,39 +40,44 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             int mv_row,
                                             int mv_col,
                                             uint8_t *pred) {
-  int offset;
-  uint8_t *yptr, *uptr, *vptr;
-  int omv_row, omv_col;
+  const int which_mv = 0;
+  int_mv subpel_mv;
+  int_mv fullpel_mv;
 
-  // Y
-  yptr = y_mb_ptr + (mv_row >> 3) * stride + (mv_col >> 3);
+  subpel_mv.as_mv.row = mv_row;
+  subpel_mv.as_mv.col = mv_col;
+  // TODO(jkoleszar): Make this rounding consistent with the rest of the code
+  fullpel_mv.as_mv.row = (mv_row >> 1) & ~7;
+  fullpel_mv.as_mv.col = (mv_col >> 1) & ~7;
 
-  if ((mv_row | mv_col) & 7) {
-    xd->subpixel_predict16x16(yptr, stride,
-                             (mv_col & 7) << 1, (mv_row & 7) << 1, &pred[0], 16);
-  } else {
-    vp9_copy_mem16x16(yptr, stride, &pred[0], 16);
-  }
+  vp9_build_inter_predictor(y_mb_ptr, stride,
+                            &pred[0], 16,
+                            &subpel_mv,
+                            &xd->scale_factor[which_mv],
+                            16, 16,
+                            which_mv <<
+                            (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+                            &xd->subpix);
 
-  // U & V
-  omv_row = mv_row;
-  omv_col = mv_col;
-  mv_row >>= 1;
-  mv_col >>= 1;
   stride = (stride + 1) >> 1;
-  offset = (mv_row >> 3) * stride + (mv_col >> 3);
-  uptr = u_mb_ptr + offset;
-  vptr = v_mb_ptr + offset;
 
-  if ((omv_row | omv_col) & 15) {
-    xd->subpixel_predict8x8(uptr, stride,
-                           (omv_col & 15), (omv_row & 15), &pred[256], 8);
-    xd->subpixel_predict8x8(vptr, stride,
-                           (omv_col & 15), (omv_row & 15), &pred[320], 8);
-  } else {
-    vp9_copy_mem8x8(uptr, stride, &pred[256], 8);
-    vp9_copy_mem8x8(vptr, stride, &pred[320], 8);
-  }
+  vp9_build_inter_predictor_q4(u_mb_ptr, stride,
+                               &pred[256], 8,
+                               &fullpel_mv, &subpel_mv,
+                               &xd->scale_factor_uv[which_mv],
+                               8, 8,
+                               which_mv <<
+                               (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+                               &xd->subpix);
+
+  vp9_build_inter_predictor_q4(v_mb_ptr, stride,
+                               &pred[320], 8,
+                               &fullpel_mv, &subpel_mv,
+                               &xd->scale_factor_uv[which_mv],
+                               8, 8,
+                               which_mv <<
+                               (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+                               &xd->subpix);
 }
 
 void vp9_temporal_filter_apply_c(uint8_t *frame1,
@@ -170,7 +172,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   /*cpi->sf.search_method == HEX*/
   // TODO Check that the 16x16 vf & sdf are selected here
   // Ignore mv costing by sending NULL pointer instead of cost arrays
-  bestsme = vp9_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv.first,
+  bestsme = vp9_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv[0],
                            step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
                            NULL, NULL, NULL, NULL,
                            &best_ref_mv1);
@@ -182,7 +184,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
     int distortion;
     unsigned int sse;
     // Ignore mv costing by sending NULL pointer instead of cost array
-    bestsme = cpi->find_fractional_mv_step(x, b, d, &d->bmi.as_mv.first,
+    bestsme = cpi->find_fractional_mv_step(x, b, d, &d->bmi.as_mv[0],
                                            &best_ref_mv1,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],
@@ -262,8 +264,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
         if (cpi->frames[frame] == NULL)
           continue;
 
-        mbd->block[0].bmi.as_mv.first.as_mv.row = 0;
-        mbd->block[0].bmi.as_mv.first.as_mv.col = 0;
+        mbd->block[0].bmi.as_mv[0].as_mv.row = 0;
+        mbd->block[0].bmi.as_mv[0].as_mv.col = 0;
 
         if (frame == alt_ref_index) {
           filter_weight = 2;
@@ -296,8 +298,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
            cpi->frames[frame]->u_buffer + mb_uv_offset,
            cpi->frames[frame]->v_buffer + mb_uv_offset,
            cpi->frames[frame]->y_stride,
-           mbd->block[0].bmi.as_mv.first.as_mv.row,
-           mbd->block[0].bmi.as_mv.first.as_mv.col,
+           mbd->block[0].bmi.as_mv[0].as_mv.row,
+           mbd->block[0].bmi.as_mv[0].as_mv.col,
            predictor);
 
           // Apply the filter (YUV)
@@ -375,11 +377,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   mbd->pre.v_buffer = v_buffer;
 }
 
-void vp9_temporal_filter_prepare
-(
-  VP9_COMP *cpi,
-  int distance
-) {
+void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   int frame = 0;
 
   int num_frames_backward = 0;
@@ -389,10 +387,8 @@ void vp9_temporal_filter_prepare
   int frames_to_blur = 0;
   int start_frame = 0;
 
-  int strength = cpi->oxcf.arnr_strength;
-
+  int strength = cpi->active_arnr_strength;
   int blur_type = cpi->oxcf.arnr_type;
-
   int max_frames = cpi->active_arnr_frames;
 
   num_frames_backward = distance;
@@ -464,6 +460,13 @@ void vp9_temporal_filter_prepare
 , start_frame);
 #endif
 
+  // Setup scaling factors. Scaling on each of the arnr frames is not supported
+  vp9_setup_scale_factors_for_frame(&cpi->mb.e_mbd.scale_factor[0],
+      &cpi->common.yv12_fb[cpi->common.new_fb_idx],
+      cpi->common.width,
+      cpi->common.height);
+  cpi->mb.e_mbd.scale_factor_uv[0] = cpi->mb.e_mbd.scale_factor[0];
+
   // Setup frame pointers, NULL indicates frame not included in filter
   vpx_memset(cpi->frames, 0, max_frames * sizeof(YV12_BUFFER_CONFIG *));
   for (frame = 0; frame < frames_to_blur; frame++) {
@@ -479,4 +482,3 @@ void vp9_temporal_filter_prepare
     frames_to_blur_backward,
     strength);
 }
-#endif

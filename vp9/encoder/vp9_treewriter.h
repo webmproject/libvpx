@@ -36,30 +36,28 @@ typedef BOOL_CODER vp9_writer;
 
 
 /* Both of these return bits, not scaled bits. */
-
-static __inline unsigned int cost_branch(const unsigned int ct[2],
-                                         vp9_prob p) {
+static INLINE unsigned int cost_branch256(const unsigned int ct[2],
+                                          vp9_prob p) {
   /* Imitate existing calculation */
-  return ((ct[0] * vp9_cost_zero(p))
-          + (ct[1] * vp9_cost_one(p))) >> 8;
+  return ct[0] * vp9_cost_zero(p) + ct[1] * vp9_cost_one(p);
 }
 
-static __inline unsigned int cost_branch256(const unsigned int ct[2],
-                                            vp9_prob p) {
+static INLINE unsigned int cost_branch(const unsigned int ct[2],
+                                       vp9_prob p) {
   /* Imitate existing calculation */
-  return ((ct[0] * vp9_cost_zero(p))
-          + (ct[1] * vp9_cost_one(p)));
+  return cost_branch256(ct, p) >> 8;
 }
+
 
 /* Small functions to write explicit values and tokens, as well as
    estimate their lengths. */
 
-static __inline void treed_write(vp9_writer *const w,
-                                 vp9_tree t,
-                                 const vp9_prob *const p,
-                                 int v,
-                                 /* number of bits in v, assumed nonzero */
-                                 int n) {
+static INLINE void treed_write(vp9_writer *const w,
+                               vp9_tree t,
+                               const vp9_prob *const p,
+                               int v,
+                               /* number of bits in v, assumed nonzero */
+                               int n) {
   vp9_tree_index i = 0;
 
   do {
@@ -69,18 +67,18 @@ static __inline void treed_write(vp9_writer *const w,
   } while (n);
 }
 
-static __inline void write_token(vp9_writer *const w,
-                                 vp9_tree t,
-                                 const vp9_prob *const p,
-                                 vp9_token *const x) {
+static INLINE void write_token(vp9_writer *const w,
+                               vp9_tree t,
+                               const vp9_prob *const p,
+                               vp9_token *const x) {
   treed_write(w, t, p, x->value, x->Len);
 }
 
-static __inline int treed_cost(vp9_tree t,
-                               const vp9_prob *const p,
-                               int v,
-                               /* number of bits in v, assumed nonzero */
-                               int n) {
+static INLINE int treed_cost(vp9_tree t,
+                             const vp9_prob *const p,
+                             int v,
+                             /* number of bits in v, assumed nonzero */
+                             int n) {
   int c = 0;
   vp9_tree_index i = 0;
 
@@ -93,9 +91,9 @@ static __inline int treed_cost(vp9_tree t,
   return c;
 }
 
-static __inline int cost_token(vp9_tree t,
-                               const vp9_prob *const p,
-                               vp9_token *const x) {
+static INLINE int cost_token(vp9_tree t,
+                             const vp9_prob *const p,
+                             vp9_token *const x) {
   return treed_cost(t, p, x->value, x->Len);
 }
 

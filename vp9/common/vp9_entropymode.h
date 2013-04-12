@@ -34,8 +34,6 @@ extern const vp9_prob vp9_mbsplit_probs[VP9_NUMMBSPLITS - 1];
 
 extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
-extern const vp9_prob vp9_sub_mv_ref_prob[VP9_SUBMVREFS - 1];
-
 extern const vp9_prob vp9_sub_mv_ref_prob2[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
 
 extern const unsigned int vp9_kf_default_bmode_counts[VP9_KF_BINTRAMODES]
@@ -76,11 +74,14 @@ void vp9_entropy_mode_init(void);
 
 struct VP9Common;
 
+/* sets up common features to forget past dependence */
+void vp9_setup_past_independence(struct VP9Common *cm, MACROBLOCKD *xd);
+
 void vp9_init_mbmode_probs(struct VP9Common *x);
 
 extern void vp9_init_mode_contexts(struct VP9Common *pc);
 
-extern void vp9_update_mode_context(struct VP9Common *pc);
+extern void vp9_adapt_mode_context(struct VP9Common *pc);
 
 extern void vp9_accum_mv_refs(struct VP9Common *pc,
                               MB_PREDICTION_MODE m,
@@ -100,6 +101,8 @@ extern const  INTERPOLATIONFILTERTYPE vp9_switchable_interp
                   [VP9_SWITCHABLE_FILTERS];
 
 extern const  int vp9_switchable_interp_map[SWITCHABLE + 1];
+
+extern const  int vp9_is_interpolating_filter[SWITCHABLE + 1];
 
 extern const  vp9_tree_index vp9_switchable_interp_tree
                   [2 * (VP9_SWITCHABLE_FILTERS - 1)];
