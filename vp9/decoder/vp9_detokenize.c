@@ -402,11 +402,12 @@ struct decode_block_args {
   int *eobtotal;
 };
 static void decode_block(int plane, int block,
-                         int block_size_b,
+                         BLOCK_SIZE_TYPE bsize,
                          int ss_txfrm_size,
                          void *argv) {
   const struct decode_block_args* const arg = argv;
-  const int old_block_idx = old_block_idx_4x4(arg->xd, block_size_b,
+  const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
+  const int old_block_idx = old_block_idx_4x4(arg->xd, bw + bh,
                                               plane, block);
 
   // find the maximum eob for this transform size, adjusted by segment
@@ -428,10 +429,9 @@ int vp9_decode_tokens(VP9D_COMP* const pbi,
                          MACROBLOCKD* const xd,
                          BOOL_DECODER* const bc,
                          BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
   int eobtotal = 0;
   struct decode_block_args args = {pbi, xd, bc, &eobtotal};
-  foreach_transformed_block(xd, bwl + bhl, decode_block, &args);
+  foreach_transformed_block(xd, bsize, decode_block, &args);
   return eobtotal;
 }
 
