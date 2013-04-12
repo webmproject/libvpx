@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//3cI\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 872,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-12T01:01:29Z",
+      "side": 1,
+      "message": "I\u0027d like to leave it as is just for consistency with all another cases. And eventually we can replace this call with vp9_read_signed as John suggested.",
+      "parentUuid": "AAAAXH//3nU\u003d",
+      "revId": "4fdf8ccca22bc014ef56877bd00f93e3ca6005b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//3ng\u003d",
         "filename": "vp9/decoder/vp9_treereader.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-04-11T22:42:20Z",
       "side": 1,
       "message": "static const int vp9_read_and_apply_sign(vp9_reader bc, int val) {\n ..\n}\n\nThat way, you can use it as follows:",
+      "revId": "4fdf8ccca22bc014ef56877bd00f93e3ca6005b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//3cQ\u003d",
+        "filename": "vp9/decoder/vp9_treereader.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-12T01:01:29Z",
+      "side": 1,
+      "message": "I\u0027m going to replace all these macro definitions with normal functions (i.e. rename decode_bool to vp9_read) in the next CLs. So let it be macro for now.",
+      "parentUuid": "AAAAXH//3ng\u003d",
       "revId": "4fdf8ccca22bc014ef56877bd00f93e3ca6005b1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
