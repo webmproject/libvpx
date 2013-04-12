@@ -100,10 +100,7 @@ void vp9_dequant_iht_add_8x8_c(TX_TYPE tx_type, int16_t *input,
                                int pitch, int stride, int eob) {
   DECLARE_ALIGNED_ARRAY(16, int16_t, output, 64);
 
-  if (eob == 0) {
-    // All 0 DCT coefficients
-    vp9_copy_mem8x8(pred, pitch, dest, stride);
-  } else if (eob > 0) {
+  if (eob > 0) {
     int i;
 
     input[0] *= dq[0];
