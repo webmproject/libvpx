@@ -127,9 +127,7 @@ void vp9_dequant_idct_add_c(int16_t *input, const int16_t *dq, uint8_t *pred,
 
     // the idct halves ( >> 1) the pitch
     vp9_short_idct4x4(input, output, 4 << 1);
-
     vpx_memset(input, 0, 32);
-
     vp9_add_residual_4x4(output, pred, pitch, dest, stride);
   } else {
     vp9_dc_only_idct_add(input[0]*dq[0], pred, dest, pitch, stride);
@@ -164,9 +162,7 @@ void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
       input[i] *= dq[i];
 
     vp9_short_iwalsh4x4_c(input, output, 4 << 1);
-
     vpx_memset(input, 0, 32);
-
     vp9_add_residual_4x4(output, pred, pitch, dest, stride);
   } else {
     vp9_dc_only_inv_walsh_add(input[0]*dq[0], pred, dest, pitch, stride);
@@ -204,52 +200,51 @@ void vp9_dequant_idct_add_8x8_c(int16_t *input, const int16_t *dq,
   // coefficients. Use eobs to decide what to do.
   // TODO(yunqingwang): "eobs = 1" case is also handled in vp9_short_idct8x8_c.
   // Combine that with code here.
-  if (eob == 0) {
-    // All 0 DCT coefficients
-    vp9_copy_mem8x8(pred, pitch, dest, stride);
-  } else if (eob == 1) {
-    // DC only DCT coefficient
-    int16_t in = input[0];
-    int16_t out;
+  if (eob) {
+    if (eob == 1) {
+      // DC only DCT coefficient
+      int16_t in = input[0];
+      int16_t out;
 
-     // Note: the idct1 will need to be modified accordingly whenever
-     // vp9_short_idct8x8_c() is modified.
-    vp9_short_idct1_8x8_c(&in, &out);
-    input[0] = 0;
+      // Note: the idct1 will need to be modified accordingly whenever
+      // vp9_short_idct8x8_c() is modified.
+      vp9_short_idct1_8x8_c(&in, &out);
+      input[0] = 0;
 
-    vp9_add_constant_residual_8x8(out, pred, pitch, dest, stride);
+      vp9_add_constant_residual_8x8(out, pred, pitch, dest, stride);
 #if !CONFIG_SCATTERSCAN
-  } else if (eob <= 10) {
-    input[1] *= dq[1];
-    input[2] *= dq[1];
-    input[3] *= dq[1];
-    input[8] *= dq[1];
-    input[9] *= dq[1];
-    input[10] *= dq[1];
-    input[16] *= dq[1];
-    input[17] *= dq[1];
-    input[24] *= dq[1];
+    } else if (eob <= 10) {
+      input[1] *= dq[1];
+      input[2] *= dq[1];
+      input[3] *= dq[1];
+      input[8] *= dq[1];
+      input[9] *= dq[1];
+      input[10] *= dq[1];
+      input[16] *= dq[1];
+      input[17] *= dq[1];
+      input[24] *= dq[1];
 
-    vp9_short_idct10_8x8(input, output, 16);
+      vp9_short_idct10_8x8(input, output, 16);
 
-    input[0] = input[1] = input[2] = input[3] = 0;
-    input[8] = input[9] = input[10] = 0;
-    input[16] = input[17] = 0;
-    input[24] = 0;
+      input[0] = input[1] = input[2] = input[3] = 0;
+      input[8] = input[9] = input[10] = 0;
+      input[16] = input[17] = 0;
+      input[24] = 0;
 
-    vp9_add_residual_8x8(output, pred, pitch, dest, stride);
+      vp9_add_residual_8x8(output, pred, pitch, dest, stride);
 #endif
-  } else {
-    int i;
+    } else {
+      int i;
 
-    // recover quantizer for 4 4x4 blocks
-    for (i = 1; i < 64; i++)
-      input[i] *= dq[1];
+      // recover quantizer for 4 4x4 blocks
+      for (i = 1; i < 64; i++)
+        input[i] *= dq[1];
 
-    // the idct halves ( >> 1) the pitch
-    vp9_short_idct8x8(input, output, 8 << 1);
-    vpx_memset(input, 0, 128);
-    vp9_add_residual_8x8(output, pred, pitch, dest, stride);
+      // the idct halves ( >> 1) the pitch
+      vp9_short_idct8x8(input, output, 8 << 1);
+      vpx_memset(input, 0, 128);
+      vp9_add_residual_8x8(output, pred, pitch, dest, stride);
+    }
   }
 }
 
@@ -259,10 +254,7 @@ void vp9_dequant_iht_add_16x16_c(TX_TYPE tx_type, int16_t *input,
                                  int eob) {
   DECLARE_ALIGNED_ARRAY(16, int16_t, output, 256);
 
-  if (eob == 0) {
-    // All 0 DCT coefficients
-    vp9_copy_mem16x16(pred, pitch, dest, stride);
-  } else if (eob > 0) {
+  if (eob > 0) {
     int i;
 
     input[0] *= dq[0];
@@ -290,58 +282,55 @@ void vp9_dequant_idct_add_16x16_c(int16_t *input, const int16_t *dq,
 
   /* The calculation can be simplified if there are not many non-zero dct
    * coefficients. Use eobs to separate different cases. */
-  if (eob == 0) {
-    /* All 0 DCT coefficient */
-    vp9_copy_mem16x16(pred, pitch, dest, stride);
-  } else if (eob == 1) {
-    /* DC only DCT coefficient. */
-    int16_t in = input[0] * dq[0];
-    int16_t out;
-    /* Note: the idct1 will need to be modified accordingly whenever
-     * vp9_short_idct16x16() is modified. */
-    vp9_short_idct1_16x16_c(&in, &out);
-    input[0] = 0;
+  if (eob) {
+    if (eob == 1) {
+      /* DC only DCT coefficient. */
+      int16_t in = input[0] * dq[0];
+      int16_t out;
+      /* Note: the idct1 will need to be modified accordingly whenever
+       * vp9_short_idct16x16() is modified. */
+      vp9_short_idct1_16x16_c(&in, &out);
+      input[0] = 0;
 
-    vp9_add_constant_residual_16x16(out, pred, pitch, dest, stride);
+      vp9_add_constant_residual_16x16(out, pred, pitch, dest, stride);
 #if !CONFIG_SCATTERSCAN
-  } else if (eob <= 10) {
-    input[0] *= dq[0];
+    } else if (eob <= 10) {
+      input[0] *= dq[0];
 
-    input[1] *= dq[1];
-    input[2] *= dq[1];
-    input[3] *= dq[1];
-    input[16] *= dq[1];
-    input[17] *= dq[1];
-    input[18] *= dq[1];
-    input[32] *= dq[1];
-    input[33] *= dq[1];
-    input[48] *= dq[1];
+      input[1] *= dq[1];
+      input[2] *= dq[1];
+      input[3] *= dq[1];
+      input[16] *= dq[1];
+      input[17] *= dq[1];
+      input[18] *= dq[1];
+      input[32] *= dq[1];
+      input[33] *= dq[1];
+      input[48] *= dq[1];
 
-    // the idct halves ( >> 1) the pitch
-    vp9_short_idct10_16x16(input, output, 32);
+      // the idct halves ( >> 1) the pitch
+      vp9_short_idct10_16x16(input, output, 32);
 
-    input[0] = input[1] = input[2] = input[3] = 0;
-    input[16] = input[17] = input[18] = 0;
-    input[32] = input[33] = 0;
-    input[48] = 0;
+      input[0] = input[1] = input[2] = input[3] = 0;
+      input[16] = input[17] = input[18] = 0;
+      input[32] = input[33] = 0;
+      input[48] = 0;
 
-    vp9_add_residual_16x16(output, pred, pitch, dest, stride);
+      vp9_add_residual_16x16(output, pred, pitch, dest, stride);
 #endif
-  } else {
-    int i;
+    } else {
+      int i;
 
-    input[0] *= dq[0];
+      input[0] *= dq[0];
 
-    // recover quantizer for 4 4x4 blocks
-    for (i = 1; i < 256; i++)
-      input[i] *= dq[1];
+      // recover quantizer for 4 4x4 blocks
+      for (i = 1; i < 256; i++)
+        input[i] *= dq[1];
 
-    // the idct halves ( >> 1) the pitch
-    vp9_short_idct16x16(input, output, 16 << 1);
-
-    vpx_memset(input, 0, 512);
-
-    vp9_add_residual_16x16(output, pred, pitch, dest, stride);
+      // the idct halves ( >> 1) the pitch
+      vp9_short_idct16x16(input, output, 16 << 1);
+      vpx_memset(input, 0, 512);
+      vp9_add_residual_16x16(output, pred, pitch, dest, stride);
+    }
   }
 }
 
