@@ -2185,11 +2185,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
                        &xd->scale_factor[1], &xd->scale_factor_uv[1]);
     }
 
-    if (bsize == BLOCK_SIZE_SB32X32) {
-      vp9_build_inter32x32_predictors_sb(xd, mb_row, mb_col);
-    } else {
-      vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
-    }
+    vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
   }
 
   if (!x->skip) {

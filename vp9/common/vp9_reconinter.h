@@ -38,11 +38,9 @@ void vp9_build_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                         int mb_row,
                                         int mb_col);
 
-void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *mb,
-                                        int mb_row, int mb_col);
-
-void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *mb,
-                                        int mb_row, int mb_col);
+void vp9_build_inter_predictors_sb(MACROBLOCKD *mb,
+                                   int mb_row, int mb_col,
+                                   BLOCK_SIZE_TYPE bsize);
 
 void vp9_build_inter_predictors_mb(MACROBLOCKD *xd,
                                    int mb_row,

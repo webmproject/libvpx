@@ -187,25 +187,12 @@ static void skip_recon_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
                           int mb_row, int mb_col,
                           BLOCK_SIZE_TYPE bsize) {
   MODE_INFO *m = xd->mode_info_context;
-  BLOCK_SIZE_TYPE sb_type = m->mbmi.sb_type;
 
-  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
+  if (m->mbmi.ref_frame == INTRA_FRAME) {
     vp9_build_intra_predictors_sbuv_s(xd, bsize);
     vp9_build_intra_predictors_sby_s(xd, bsize);
   } else {
-    if (sb_type == BLOCK_SIZE_SB64X64) {
-      vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
-    } else if (sb_type == BLOCK_SIZE_SB32X32) {
-      vp9_build_inter32x32_predictors_sb(xd, mb_row, mb_col);
-    } else {
-      vp9_build_inter16x16_predictors_mb(xd,
-                                         xd->dst.y_buffer,
-                                         xd->dst.u_buffer,
-                                         xd->dst.v_buffer,
-                                         xd->dst.y_stride,
-                                         xd->dst.uv_stride,
-                                         mb_row, mb_col);
-    }
+    vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
   }
 #if CONFIG_CODE_NONZEROCOUNT
   vpx_memset(m->mbmi.nzcs, 0, 384 * sizeof(m->mbmi.nzcs[0]));
@@ -703,19 +690,12 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
     return;
   }
 
-  // TODO(jingning): need to combine inter predictor functions and
-  // make them block size independent.
   // generate prediction
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     vp9_build_intra_predictors_sby_s(xd, bsize);
     vp9_build_intra_predictors_sbuv_s(xd, bsize);
   } else {
-    if (bsize == BLOCK_SIZE_SB64X64) {
-      vp9_build_inter64x64_predictors_sb(xd, mb_row, mb_col);
-    } else {
-      assert(bsize == BLOCK_SIZE_SB32X32);
-      vp9_build_inter32x32_predictors_sb(xd, mb_row, mb_col);
-    }
+    vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
   }
 
   // dequantization and idct

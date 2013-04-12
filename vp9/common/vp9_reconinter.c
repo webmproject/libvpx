@@ -1070,12 +1070,15 @@ void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
 #endif
 
 #if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
-static void build_inter32x32_predictors_sby_w(MACROBLOCKD *x,
-                                              uint8_t *dst_y,
-                                              int dst_ystride,
-                                              int weight,
-                                              int mb_row,
-                                              int mb_col) {
+static void build_inter_predictors_sby_w(MACROBLOCKD *x,
+                                         uint8_t *dst_y,
+                                         int dst_ystride,
+                                         int weight,
+                                         int mb_row,
+                                         int mb_col,
+                                         BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize),  bw = 1 << bwl;
+  const int bhl = mb_height_log2(bsize), bh = 1 << bhl;
   uint8_t *y1 = x->pre.y_buffer;
   uint8_t *y2 = x->second_pre.y_buffer;
   int edge[4], n;
@@ -1085,8 +1088,8 @@ static void build_inter32x32_predictors_sby_w(MACROBLOCKD *x,
   edge[2] = x->mb_to_left_edge;
   edge[3] = x->mb_to_right_edge;
 
-  for (n = 0; n < 4; n++) {
-    const int x_idx = n & 1, y_idx = n >> 1;
+  for (n = 0; n < bw * bh; n++) {
+    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
     x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
     x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
@@ -1119,25 +1122,31 @@ static void build_inter32x32_predictors_sby_w(MACROBLOCKD *x,
   }
 }
 
-void vp9_build_inter32x32_predictors_sby(MACROBLOCKD *x,
+void vp9_build_inter_predictors_sby(MACROBLOCKD *x,
                                          uint8_t *dst_y,
                                          int dst_ystride,
                                          int mb_row,
-                                         int mb_col) {
+                                         int mb_col,
+                                         BLOCK_SIZE_TYPE bsize) {
   int weight = get_implicit_compoundinter_weight(x, mb_row, mb_col);
-  build_inter32x32_predictors_sby_w(x, dst_y, dst_ystride, weight,
-                                    mb_row, mb_col);
+  build_inter_predictors_sby_w(x, dst_y, dst_ystride, weight,
+                                    mb_row, mb_col, bsize);
 }
 
 #else
 
-// TODO(all): Can we use 32x32 specific implementations of this rather than
-// using 16x16 implementations ?
-void vp9_build_inter32x32_predictors_sby(MACROBLOCKD *x,
-                                         uint8_t *dst_y,
-                                         int dst_ystride,
-                                         int mb_row,
-                                         int mb_col) {
+// TODO(jingning): vp9_convolve8_ssse3_ limits the dimension up to 16. Currently
+// handle inter prediction of block sizes above 16x16 separately from those
+// smaller ones. Need to combine them all in to a unified inter prediction
+// function.
+void vp9_build_inter_predictors_sby(MACROBLOCKD *x,
+                                    uint8_t *dst_y,
+                                    int dst_ystride,
+                                    int mb_row,
+                                    int mb_col,
+                                    BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize),  bw = 1 << bwl;
+  const int bhl = mb_height_log2(bsize), bh = 1 << bhl;
   uint8_t *y1 = x->pre.y_buffer;
   uint8_t *y2 = x->second_pre.y_buffer;
   int edge[4], n;
@@ -1147,8 +1156,8 @@ void vp9_build_inter32x32_predictors_sby(MACROBLOCKD *x,
   edge[2] = x->mb_to_left_edge;
   edge[3] = x->mb_to_right_edge;
 
-  for (n = 0; n < 4; n++) {
-    const int x_idx = n & 1, y_idx = n >> 1;
+  for (n = 0; n < bw * bh; n++) {
+    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
     x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
     x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
@@ -1184,13 +1193,16 @@ void vp9_build_inter32x32_predictors_sby(MACROBLOCKD *x,
 #endif
 
 #if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
-static void build_inter32x32_predictors_sbuv_w(MACROBLOCKD *x,
-                                               uint8_t *dst_u,
-                                               uint8_t *dst_v,
-                                               int dst_uvstride,
-                                               int weight,
-                                               int mb_row,
-                                               int mb_col) {
+static void build_inter_predictors_sbuv_w(MACROBLOCKD *x,
+                                          uint8_t *dst_u,
+                                          uint8_t *dst_v,
+                                          int dst_uvstride,
+                                          int weight,
+                                          int mb_row,
+                                          int mb_col,
+                                          BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize),  bw = 1 << bwl;
+  const int bhl = mb_height_log2(bsize), bh = 1 << bhl;
   uint8_t *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
   uint8_t *u2 = x->second_pre.u_buffer, *v2 = x->second_pre.v_buffer;
   int edge[4], n;
@@ -1200,9 +1212,9 @@ static void build_inter32x32_predictors_sbuv_w(MACROBLOCKD *x,
   edge[2] = x->mb_to_left_edge;
   edge[3] = x->mb_to_right_edge;
 
-  for (n = 0; n < 4; n++) {
+  for (n = 0; n < bw * bh; n++) {
     int scaled_uv_offset;
-    const int x_idx = n & 1, y_idx = n >> 1;
+    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
     x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
     x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
@@ -1244,29 +1256,33 @@ static void build_inter32x32_predictors_sbuv_w(MACROBLOCKD *x,
   }
 }
 
-void vp9_build_inter32x32_predictors_sbuv(MACROBLOCKD *xd,
-                                          uint8_t *dst_u,
-                                          uint8_t *dst_v,
-                                          int dst_uvstride,
-                                          int mb_row,
-                                          int mb_col) {
+void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
+                                     uint8_t *dst_u,
+                                     uint8_t *dst_v,
+                                     int dst_uvstride,
+                                     int mb_row,
+                                     int mb_col,
+                                     BLOCK_SIZE_TYPE bsize) {
 #ifdef USE_IMPLICIT_WEIGHT_UV
   int weight = get_implicit_compoundinter_weight(xd, mb_row, mb_col);
 #else
   int weight = AVERAGE_WEIGHT;
 #endif
-  build_inter32x32_predictors_sbuv_w(xd, dst_u, dst_v, dst_uvstride,
-                                     weight, mb_row, mb_col);
+  build_inter_predictors_sbuv_w(xd, dst_u, dst_v, dst_uvstride,
+                                weight, mb_row, mb_col, bsize);
 }
 
 #else
 
-void vp9_build_inter32x32_predictors_sbuv(MACROBLOCKD *x,
-                                          uint8_t *dst_u,
-                                          uint8_t *dst_v,
-                                          int dst_uvstride,
-                                          int mb_row,
-                                          int mb_col) {
+void vp9_build_inter_predictors_sbuv(MACROBLOCKD *x,
+                                     uint8_t *dst_u,
+                                     uint8_t *dst_v,
+                                     int dst_uvstride,
+                                     int mb_row,
+                                     int mb_col,
+                                     BLOCK_SIZE_TYPE bsize) {
+  const int bwl = mb_width_log2(bsize),  bw = 1 << bwl;
+  const int bhl = mb_height_log2(bsize), bh = 1 << bhl;
   uint8_t *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
   uint8_t *u2 = x->second_pre.u_buffer, *v2 = x->second_pre.v_buffer;
   int edge[4], n;
@@ -1276,9 +1292,9 @@ void vp9_build_inter32x32_predictors_sbuv(MACROBLOCKD *x,
   edge[2] = x->mb_to_left_edge;
   edge[3] = x->mb_to_right_edge;
 
-  for (n = 0; n < 4; n++) {
+  for (n = 0; n < bw * bh; n++) {
     int scaled_uv_offset;
-    const int x_idx = n & 1, y_idx = n >> 1;
+    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
     x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
     x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
@@ -1321,215 +1337,25 @@ void vp9_build_inter32x32_predictors_sbuv(MACROBLOCKD *x,
 }
 #endif
 
-void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *mb,
-                                        int mb_row, int mb_col) {
+void vp9_build_inter_predictors_sb(MACROBLOCKD *mb,
+                                   int mb_row, int mb_col,
+                                   BLOCK_SIZE_TYPE bsize) {
   uint8_t *const y = mb->dst.y_buffer;
   uint8_t *const u = mb->dst.u_buffer;
   uint8_t *const v = mb->dst.v_buffer;
   const int y_stride = mb->dst.y_stride;
   const int uv_stride = mb->dst.uv_stride;
 
-  vp9_build_inter32x32_predictors_sby(mb, y, y_stride, mb_row, mb_col);
-  vp9_build_inter32x32_predictors_sbuv(mb, u, v, uv_stride, mb_row, mb_col);
+  vp9_build_inter_predictors_sby(mb, y, y_stride, mb_row, mb_col, bsize);
+  vp9_build_inter_predictors_sbuv(mb, u, v, uv_stride, mb_row, mb_col, bsize);
 #if CONFIG_COMP_INTERINTRA_PRED
   if (mb->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
-    vp9_build_interintra_32x32_predictors_sb(mb, y, u, v, y_stride, uv_stride);
-  }
-#endif
-}
-
-#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
-static void build_inter64x64_predictors_sby_w(MACROBLOCKD *x,
-                                              uint8_t *dst_y,
-                                              int dst_ystride,
-                                              int weight,
-                                              int mb_row,
-                                              int mb_col) {
-  uint8_t *y1 = x->pre.y_buffer;
-  uint8_t *y2 = x->second_pre.y_buffer;
-  int edge[4], n;
-
-  edge[0] = x->mb_to_top_edge;
-  edge[1] = x->mb_to_bottom_edge;
-  edge[2] = x->mb_to_left_edge;
-  edge[3] = x->mb_to_right_edge;
-
-  for (n = 0; n < 4; n++) {
-    const int x_idx = n & 1, y_idx = n >> 1;
-
-    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 32) << 3);
-    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 32) << 3);
-    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 32) << 3);
-    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 32) << 3);
-
-    x->pre.y_buffer = y1 + scaled_buffer_offset(x_idx * 32,
-                                                y_idx * 32,
-                                                x->pre.y_stride,
-                                                &x->scale_factor[0]);
-
-    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-      x->second_pre.y_buffer = y2 +
-          scaled_buffer_offset(x_idx * 32,
-                               y_idx * 32,
-                               x->second_pre.y_stride,
-                               &x->scale_factor[1]);
-    }
-
-    build_inter32x32_predictors_sby_w(x,
-        dst_y + y_idx * 32 * dst_ystride  + x_idx * 32,
-        dst_ystride, weight, mb_row + y_idx * 2, mb_col + x_idx * 2);
-  }
-
-  x->mb_to_top_edge    = edge[0];
-  x->mb_to_bottom_edge = edge[1];
-  x->mb_to_left_edge   = edge[2];
-  x->mb_to_right_edge  = edge[3];
-
-  x->pre.y_buffer = y1;
-
-  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-    x->second_pre.y_buffer = y2;
-  }
-}
-
-void vp9_build_inter64x64_predictors_sby(MACROBLOCKD *x,
-                                         uint8_t *dst_y,
-                                         int dst_ystride,
-                                         int mb_row,
-                                         int mb_col) {
-  int weight = get_implicit_compoundinter_weight(x, mb_row, mb_col);
-  build_inter64x64_predictors_sby_w(x, dst_y, dst_ystride, weight,
-                                    mb_row, mb_col);
-}
-
-#else
-
-void vp9_build_inter64x64_predictors_sby(MACROBLOCKD *x,
-                                         uint8_t *dst_y,
-                                         int dst_ystride,
-                                         int mb_row,
-                                         int mb_col) {
-  uint8_t *y1 = x->pre.y_buffer;
-  uint8_t *y2 = x->second_pre.y_buffer;
-  int edge[4], n;
-
-  edge[0] = x->mb_to_top_edge;
-  edge[1] = x->mb_to_bottom_edge;
-  edge[2] = x->mb_to_left_edge;
-  edge[3] = x->mb_to_right_edge;
-
-  for (n = 0; n < 4; n++) {
-    const int x_idx = n & 1, y_idx = n >> 1;
-
-    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 32) << 3);
-    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 32) << 3);
-    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 32) << 3);
-    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 32) << 3);
-
-    x->pre.y_buffer = y1 + scaled_buffer_offset(x_idx * 32,
-                                                y_idx * 32,
-                                                x->pre.y_stride,
-                                                &x->scale_factor[0]);
-
-    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-      x->second_pre.y_buffer = y2 +
-          scaled_buffer_offset(x_idx * 32,
-                               y_idx * 32,
-                               x->second_pre.y_stride,
-                               &x->scale_factor[1]);
-    }
-
-    vp9_build_inter32x32_predictors_sby(x,
-        dst_y + y_idx * 32 * dst_ystride  + x_idx * 32,
-        dst_ystride, mb_row + y_idx * 2, mb_col + x_idx * 2);
-  }
-
-  x->mb_to_top_edge    = edge[0];
-  x->mb_to_bottom_edge = edge[1];
-  x->mb_to_left_edge   = edge[2];
-  x->mb_to_right_edge  = edge[3];
-
-  x->pre.y_buffer = y1;
-
-  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-    x->second_pre.y_buffer = y2;
-  }
-}
-#endif
-
-void vp9_build_inter64x64_predictors_sbuv(MACROBLOCKD *x,
-                                          uint8_t *dst_u,
-                                          uint8_t *dst_v,
-                                          int dst_uvstride,
-                                          int mb_row,
-                                          int mb_col) {
-  uint8_t *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
-  uint8_t *u2 = x->second_pre.u_buffer, *v2 = x->second_pre.v_buffer;
-  int edge[4], n;
-
-  edge[0] = x->mb_to_top_edge;
-  edge[1] = x->mb_to_bottom_edge;
-  edge[2] = x->mb_to_left_edge;
-  edge[3] = x->mb_to_right_edge;
-
-  for (n = 0; n < 4; n++) {
-    const int x_idx = n & 1, y_idx = n >> 1;
-    int scaled_uv_offset;
-
-    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 32) << 3);
-    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 32) << 3);
-    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 32) << 3);
-    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 32) << 3);
-
-    scaled_uv_offset = scaled_buffer_offset(x_idx * 16,
-                                            y_idx * 16,
-                                            x->pre.uv_stride,
-                                            &x->scale_factor_uv[0]);
-    x->pre.u_buffer = u1 + scaled_uv_offset;
-    x->pre.v_buffer = v1 + scaled_uv_offset;
-
-    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-      scaled_uv_offset = scaled_buffer_offset(x_idx * 16,
-                                              y_idx * 16,
-                                              x->second_pre.uv_stride,
-                                              &x->scale_factor_uv[1]);
-      x->second_pre.u_buffer = u2 + scaled_uv_offset;
-      x->second_pre.v_buffer = v2 + scaled_uv_offset;
-    }
-
-    vp9_build_inter32x32_predictors_sbuv(x,
-        dst_u + y_idx * 16 * dst_uvstride + x_idx * 16,
-        dst_v + y_idx * 16 * dst_uvstride + x_idx * 16,
-        dst_uvstride, mb_row + y_idx * 2, mb_col + x_idx * 2);
-  }
-
-  x->mb_to_top_edge    = edge[0];
-  x->mb_to_bottom_edge = edge[1];
-  x->mb_to_left_edge   = edge[2];
-  x->mb_to_right_edge  = edge[3];
-
-  x->pre.u_buffer = u1;
-  x->pre.v_buffer = v1;
-
-  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-    x->second_pre.u_buffer = u2;
-    x->second_pre.v_buffer = v2;
-  }
-}
-
-void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *mb,
-                                        int mb_row, int mb_col) {
-  uint8_t *const y = mb->dst.y_buffer;
-  uint8_t *const u = mb->dst.u_buffer;
-  uint8_t *const v = mb->dst.v_buffer;
-  const int y_stride = mb->dst.y_stride;
-  const int uv_stride = mb->dst.uv_stride;
-
-  vp9_build_inter64x64_predictors_sby(mb, y, y_stride, mb_row, mb_col);
-  vp9_build_inter64x64_predictors_sbuv(mb, u, v, uv_stride, mb_row, mb_col);
-#if CONFIG_COMP_INTERINTRA_PRED
-  if (mb->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
-    vp9_build_interintra_64x64_predictors_sb(mb, y, u, v, y_stride, uv_stride);
+    if (bsize == BLOCK_SIZE_SB32X32)
+      vp9_build_interintra_32x32_predictors_sb(mb, y, u, v,
+                                               y_stride, uv_stride);
+    else
+      vp9_build_interintra_64x64_predictors_sb(mb, y, u, v,
+                                               y_stride, uv_stride);
   }
 #endif
 }
@@ -1713,6 +1539,8 @@ void vp9_build_inter_predictors_mb(MACROBLOCKD *xd,
                                    int mb_row,
                                    int mb_col) {
   if (xd->mode_info_context->mbmi.mode != SPLITMV) {
+    // TODO(jingning): to be replaced with vp9_build_inter_predictors_sb() when
+    // converting buffers from predictors to dst.
     vp9_build_inter16x16_predictors_mb(xd, xd->predictor,
                                        &xd->predictor[256],
                                        &xd->predictor[320], 16, 8,
