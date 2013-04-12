@@ -594,6 +594,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     unsigned int zero_mv_sse = INT_MAX, best_sse = INT_MAX;
 #endif
 
+    int sf_improved_mv_pred = cpi->sf.improved_mv_pred;
     int_mv mvp;
 
     int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};
@@ -882,7 +883,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                last frame motion info is not stored, then we can not
                use improved_mv_pred. */
             if (cpi->oxcf.mr_encoder_id && !parent_ref_valid)
-                cpi->sf.improved_mv_pred = 0;
+                sf_improved_mv_pred = 0;
 
             if (parent_ref_valid && parent_ref_frame)
             {
@@ -899,7 +900,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             }else
 #endif
             {
-                if(cpi->sf.improved_mv_pred)
+                if(sf_improved_mv_pred)
                 {
                     if(!saddone)
                     {
