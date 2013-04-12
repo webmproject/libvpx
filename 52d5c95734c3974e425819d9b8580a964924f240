@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//3dE\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-12T00:52:19Z",
+      "side": 1,
+      "message": "In general, yes. I\u0027m going to remove itxm_* and inv_* members from MACROBLOCKD structure eventually. I\u0027m not sure that lossless should be handled inside iht function. May be we can just check xd-\u003elossless flag and then call iht or lossless function in some place.",
+      "parentUuid": "AAAAXH//3xA\u003d",
+      "revId": "52d5c95734c3974e425819d9b8580a964924f240",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//3wY\u003d",
         "filename": "vp9/decoder/vp9_dequantize.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-04-11T21:51:19Z",
       "side": 1,
       "message": "delete this comment",
+      "revId": "52d5c95734c3974e425819d9b8580a964924f240",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//3dM\u003d",
+        "filename": "vp9/decoder/vp9_dequantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-12T00:52:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXH//3wY\u003d",
       "revId": "52d5c95734c3974e425819d9b8580a964924f240",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
