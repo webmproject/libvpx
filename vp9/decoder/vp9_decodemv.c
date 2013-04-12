@@ -271,32 +271,26 @@ static int read_nmv_component_fp(vp9_reader *r,
 static void read_nmv(vp9_reader *r, MV *mv, const MV *ref,
                      const nmv_context *mvctx) {
   const MV_JOINT_TYPE j = treed_read(r, vp9_mv_joint_tree, mvctx->joints);
-  mv->row = mv-> col = 0;
-  if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
-    mv->row = read_nmv_component(r, ref->row, &mvctx->comps[0]);
-  }
+  mv->row = mv->col = 0;
 
-  if (j == MV_JOINT_HNZVZ || j == MV_JOINT_HNZVNZ) {
+  if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ)
+    mv->row = read_nmv_component(r, ref->row, &mvctx->comps[0]);
+
+  if (j == MV_JOINT_HNZVZ || j == MV_JOINT_HNZVNZ)
     mv->col = read_nmv_component(r, ref->col, &mvctx->comps[1]);
-  }
 }
 
 static void read_nmv_fp(vp9_reader *r, MV *mv, const MV *ref,
                         const nmv_context *mvctx, int usehp) {
   const MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
   usehp = usehp && vp9_use_nmv_hp(ref);
-  if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
+  if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ)
     mv->row = read_nmv_component_fp(r, mv->row, ref->row, &mvctx->comps[0],
                                     usehp);
-  }
-  if (j == MV_JOINT_HNZVZ || j == MV_JOINT_HNZVNZ) {
+
+  if (j == MV_JOINT_HNZVZ || j == MV_JOINT_HNZVNZ)
     mv->col = read_nmv_component_fp(r, mv->col, ref->col, &mvctx->comps[1],
                                     usehp);
-  }
-  /*
-  printf("MV: %d %d REF: %d %d\n", mv->row + ref->row, mv->col + ref->col,
-	 ref->row, ref->col);
-	 */
 }
 
 static void update_nmv(vp9_reader *bc, vp9_prob *const p,
@@ -359,16 +353,18 @@ static MV_REFERENCE_FRAME read_ref_frame(VP9D_COMP *pbi,
   MACROBLOCKD *const xd = &pbi->mb;
 
   int seg_ref_count = 0;
-  int seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
+  const int seg_ref_active = vp9_segfeature_active(xd, segment_id,
+                                                   SEG_LVL_REF_FRAME);
+
+  const int intra = vp9_check_segref(xd, segment_id, INTRA_FRAME);
+  const int last = vp9_check_segref(xd, segment_id, LAST_FRAME);
+  const int golden = vp9_check_segref(xd, segment_id, GOLDEN_FRAME);
+  const int altref = vp9_check_segref(xd, segment_id, ALTREF_FRAME);
 
   // If segment coding enabled does the segment allow for more than one
   // possible reference frame
-  if (seg_ref_active) {
-    seg_ref_count = vp9_check_segref(xd, segment_id, INTRA_FRAME) +
-                    vp9_check_segref(xd, segment_id, LAST_FRAME) +
-                    vp9_check_segref(xd, segment_id, GOLDEN_FRAME) +
-                    vp9_check_segref(xd, segment_id, ALTREF_FRAME);
-  }
+  if (seg_ref_active)
+    seg_ref_count = intra + last + golden + altref;
 
   // Segment reference frame features not available or allows for
   // multiple reference frame options
@@ -394,19 +390,15 @@ static MV_REFERENCE_FRAME read_ref_frame(VP9D_COMP *pbi,
     } else {
       // decode the explicitly coded value
       vp9_prob mod_refprobs[PREDICTION_PROBS];
-      vpx_memcpy(mod_refprobs,
-                 cm->mod_refprobs[pred_ref], sizeof(mod_refprobs));
+      vpx_memcpy(mod_refprobs, cm->mod_refprobs[pred_ref],
+                 sizeof(mod_refprobs));
 
       // If segment coding enabled blank out options that cant occur by
       // setting the branch probability to 0.
       if (seg_ref_active) {
-        mod_refprobs[INTRA_FRAME] *=
-          vp9_check_segref(xd, segment_id, INTRA_FRAME);
-        mod_refprobs[LAST_FRAME] *=
-          vp9_check_segref(xd, segment_id, LAST_FRAME);
-        mod_refprobs[GOLDEN_FRAME] *=
-          vp9_check_segref(xd, segment_id, GOLDEN_FRAME) *
-          vp9_check_segref(xd, segment_id, ALTREF_FRAME);
+        mod_refprobs[INTRA_FRAME] *= intra;
+        mod_refprobs[LAST_FRAME] *= last;
+        mod_refprobs[GOLDEN_FRAME] *= golden * altref;
       }
 
       // Default to INTRA_FRAME (value 0)
@@ -430,16 +422,12 @@ static MV_REFERENCE_FRAME read_ref_frame(VP9D_COMP *pbi,
           if (mod_refprobs[2]) {
             ref_frame += vp9_read(bc, mod_refprobs[2]);
           } else {
-            if (seg_ref_active) {
-              ref_frame = pred_ref == GOLDEN_FRAME ||
-                          !vp9_check_segref(xd, segment_id, GOLDEN_FRAME)
-                              ? ALTREF_FRAME
-                              : GOLDEN_FRAME;
-            } else {
-              ref_frame = pred_ref == GOLDEN_FRAME
-                              ? ALTREF_FRAME
-                              : GOLDEN_FRAME;
-            }
+            if (seg_ref_active)
+              ref_frame = pred_ref == GOLDEN_FRAME || !golden ? ALTREF_FRAME
+                                                              : GOLDEN_FRAME;
+            else
+              ref_frame = pred_ref == GOLDEN_FRAME ? ALTREF_FRAME
+                                                   : GOLDEN_FRAME;
           }
         }
       }
@@ -499,55 +487,55 @@ static void read_switchable_interp_probs(VP9D_COMP* const pbi,
   //cm->fc.switchable_interp_prob[1]);
 }
 
-static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *bc) {
+static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
+  COMPPREDMODE_TYPE mode = vp9_read_bit(r);
+  if (mode)
+     mode += vp9_read_bit(r);
+  return mode;
+}
+
+static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
-  nmv_context *const nmvc = &pbi->common.fc.nmvc;
-  MACROBLOCKD *const xd = &pbi->mb;
 
   if (cm->frame_type == KEY_FRAME) {
     if (!cm->kf_ymode_probs_update)
-      cm->kf_ymode_probs_index = vp9_read_literal(bc, 3);
+      cm->kf_ymode_probs_index = vp9_read_literal(r, 3);
   } else {
+    int i;
+
     if (cm->mcomp_filter_type == SWITCHABLE)
-      read_switchable_interp_probs(pbi, bc);
+      read_switchable_interp_probs(pbi, r);
 #if CONFIG_COMP_INTERINTRA_PRED
     if (cm->use_interintra) {
-      if (vp9_read(bc, VP9_UPD_INTERINTRA_PROB))
-        cm->fc.interintra_prob = vp9_read_prob(bc);
+      if (vp9_read(r, VP9_UPD_INTERINTRA_PROB))
+        cm->fc.interintra_prob = vp9_read_prob(r);
     }
 #endif
-    // Decode the baseline probabilities for decoding reference frame
-    cm->prob_intra_coded = vp9_read_prob(bc);
-    cm->prob_last_coded  = vp9_read_prob(bc);
-    cm->prob_gf_coded    = vp9_read_prob(bc);
+    // Baseline probabilities for decoding reference frame
+    cm->prob_intra_coded = vp9_read_prob(r);
+    cm->prob_last_coded  = vp9_read_prob(r);
+    cm->prob_gf_coded    = vp9_read_prob(r);
 
     // Computes a modified set of probabilities for use when reference
     // frame prediction fails.
     vp9_compute_mod_refprobs(cm);
 
-    cm->comp_pred_mode = vp9_read_bit(bc);
-    if (cm->comp_pred_mode)
-      cm->comp_pred_mode += vp9_read_bit(bc);
-
-    if (cm->comp_pred_mode == HYBRID_PREDICTION) {
-      int i;
+    cm->comp_pred_mode = read_comp_pred_mode(r);
+    if (cm->comp_pred_mode == HYBRID_PREDICTION)
       for (i = 0; i < COMP_PRED_CONTEXTS; i++)
-        cm->prob_comppred[i] = vp9_read_prob(bc);
-    }
+        cm->prob_comppred[i] = vp9_read_prob(r);
 
-    if (vp9_read_bit(bc)) {
-      int i;
+    // VP9_YMODES
+    if (vp9_read_bit(r))
       for (i = 0; i < VP9_YMODES - 1; ++i)
-        cm->fc.ymode_prob[i] = vp9_read_prob(bc);
-    }
+        cm->fc.ymode_prob[i] = vp9_read_prob(r);
 
-    if (vp9_read_bit(bc)) {
-      int i;
+    // VP9_I32X32_MODES
+    if (vp9_read_bit(r))
       for (i = 0; i < VP9_I32X32_MODES - 1; ++i)
-        cm->fc.sb_ymode_prob[i] = vp9_read_prob(bc);
-    }
+        cm->fc.sb_ymode_prob[i] = vp9_read_prob(r);
 
-    read_nmvprobs(bc, nmvc, xd->allow_high_precision_mv);
+    read_nmvprobs(r, &cm->fc.nmvc, pbi->mb.allow_high_precision_mv);
   }
 }
 
@@ -1129,18 +1117,17 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   }
 }
 
-void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, BOOL_DECODER* const bc) {
+void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, vp9_reader *r) {
   VP9_COMMON *cm = &pbi->common;
 
   vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
   if (pbi->common.mb_no_coeff_skip) {
     int k;
-    for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
-      cm->mbskip_pred_probs[k] = vp9_read_prob(bc);
-    }
+    for (k = 0; k < MBSKIP_CONTEXTS; ++k)
+      cm->mbskip_pred_probs[k] = vp9_read_prob(r);
   }
 
-  mb_mode_mv_init(pbi, bc);
+  mb_mode_mv_init(pbi, r);
 }
 
 #if CONFIG_CODE_NONZEROCOUNT
