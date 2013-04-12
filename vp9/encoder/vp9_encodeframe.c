@@ -431,6 +431,7 @@ static void update_state(VP9_COMP *cpi,
                          BLOCK_SIZE_TYPE bsize,
                          int output_enabled) {
   int i, x_idx, y;
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *mi = &ctx->mic;
@@ -485,11 +486,28 @@ static void update_state(VP9_COMP *cpi,
     return;
 
   {
-    int segment_id = mbmi->segment_id;
+    int segment_id = mbmi->segment_id, ref_pred_flag;
     if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
       for (i = 0; i < NB_TXFM_MODES; i++) {
         cpi->rd_tx_select_diff[i] += ctx->txfm_rd_diff[i];
       }
+    }
+
+    // Did the chosen reference frame match its predicted value.
+    ref_pred_flag = ((xd->mode_info_context->mbmi.ref_frame ==
+                      vp9_get_pred_ref(cm, xd)));
+    vp9_set_pred_flag(xd, PRED_REF, ref_pred_flag);
+    if (!xd->segmentation_enabled ||
+        !vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME) ||
+        vp9_check_segref(xd, segment_id, INTRA_FRAME)  +
+        vp9_check_segref(xd, segment_id, LAST_FRAME)   +
+        vp9_check_segref(xd, segment_id, GOLDEN_FRAME) +
+        vp9_check_segref(xd, segment_id, ALTREF_FRAME) > 1) {
+      // Get the prediction context and status
+      int pred_context = vp9_get_pred_context(cm, xd, PRED_REF);
+
+      // Count prediction success
+      cpi->ref_pred_count[pred_context][ref_pred_flag]++;
     }
   }
 
@@ -709,12 +727,12 @@ static void set_offsets(VP9_COMP *cpi,
   }
 }
 
-static int pick_mb_modes(VP9_COMP *cpi,
-                         int mb_row,
-                         int mb_col,
-                         TOKENEXTRA **tp,
-                         int *totalrate,
-                         int *totaldist) {
+static int pick_mb_mode(VP9_COMP *cpi,
+                        int mb_row,
+                        int mb_col,
+                        TOKENEXTRA **tp,
+                        int *totalrate,
+                        int *totaldist) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -737,35 +755,13 @@ static int pick_mb_modes(VP9_COMP *cpi,
     // Save the coding context
     vpx_memcpy(&x->mb_context[xd->sb_index][xd->mb_index].mic,
                xd->mode_info_context, sizeof(MODE_INFO));
-
-    // Dummy encode, do not do the tokenization
-    encode_macroblock(cpi, tp, 0, mb_row, mb_col);
   } else {
-    int seg_id;
-
     vp9_pick_mode_inter_macroblock(cpi, x, mb_row, mb_col,
                                    totalrate, totaldist);
     splitmodes_used += (mbmi->mode == SPLITMV);
 
-    // Dummy encode, do not do the tokenization
-    encode_macroblock(cpi, tp, 0, mb_row, mb_col);
-
-    seg_id = mbmi->segment_id;
-    if (cpi->mb.e_mbd.segmentation_enabled && seg_id == 0) {
+    if (cpi->mb.e_mbd.segmentation_enabled && mbmi->segment_id == 0) {
       cpi->seg0_idx++;
-    }
-    if (!xd->segmentation_enabled ||
-        !vp9_segfeature_active(xd, seg_id, SEG_LVL_REF_FRAME) ||
-        vp9_check_segref(xd, seg_id, INTRA_FRAME)  +
-        vp9_check_segref(xd, seg_id, LAST_FRAME)   +
-        vp9_check_segref(xd, seg_id, GOLDEN_FRAME) +
-        vp9_check_segref(xd, seg_id, ALTREF_FRAME) > 1) {
-      // Get the prediction context and status
-      int pred_flag = vp9_get_pred_flag(xd, PRED_REF);
-      int pred_context = vp9_get_pred_context(cm, xd, PRED_REF);
-
-      // Count prediction success
-      cpi->ref_pred_count[pred_context][pred_flag]++;
     }
   }
 
@@ -1014,10 +1010,14 @@ static void encode_sb_row(VP9_COMP *cpi,
         // Index of the MB in the SB 0..3
         xd->mb_index = j;
 
-        splitmodes_used += pick_mb_modes(cpi, mb_row + y_idx_m,
-                                         mb_col + x_idx_m, tp, &r, &d);
+        splitmodes_used += pick_mb_mode(cpi, mb_row + y_idx_m,
+                                        mb_col + x_idx_m, tp, &r, &d);
         mb_rate += r;
         mb_dist += d;
+
+        // Dummy encode, do not do the tokenization
+        encode_macroblock(cpi, tp, 0, mb_row + y_idx_m,
+                          mb_col + x_idx_m);
       }
 
       /* Restore L & A coding context to those in place on entry */
@@ -1852,7 +1852,6 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const int mis = cm->mode_info_stride;
-  unsigned char ref_pred_flag;
 
   assert(!xd->mode_info_context->mbmi.sb_type);
 
@@ -1896,12 +1895,6 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     }
 
     vp9_update_zbin_extra(cpi, x);
-
-    // SET VARIOUS PREDICTION FLAGS
-
-    // Did the chosen reference frame match its predicted value.
-    ref_pred_flag = ((mbmi->ref_frame == vp9_get_pred_ref(cm, xd)));
-    vp9_set_pred_flag(xd, PRED_REF, ref_pred_flag);
   }
 
   if (mbmi->ref_frame == INTRA_FRAME) {
@@ -2111,7 +2104,6 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   uint8_t *vdst = xd->dst.v_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
-  unsigned char ref_pred_flag;
   int n;
   MODE_INFO *mi = x->e_mbd.mode_info_context;
   unsigned int segment_id = mi->mbmi.segment_id;
@@ -2153,11 +2145,6 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
     }
 
     vp9_update_zbin_extra(cpi, x);
-
-    // Did the chosen reference frame match its predicted value.
-    ref_pred_flag = ((xd->mode_info_context->mbmi.ref_frame ==
-                      vp9_get_pred_ref(cm, xd)));
-    vp9_set_pred_flag(xd, PRED_REF, ref_pred_flag);
   }
 
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
