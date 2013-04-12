@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//2Ys\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-12T23:25:41Z",
+      "side": 1,
+      "message": "so, I can\u0027t really comment on these specifically, but I honestly don\u0027t see how adding a macro around c\u00261 makes it different? It\u0027s like adding a macro for x++, which we call INC, like #define INC(x) (x)++. It\u0027s silly.\n\nThe source code is intended for people familiar with and comfortable with C. If you\u0027re not comfortable and familiar with C, you shouldn\u0027t start with a technical guts of a video codec. If you are, this hurts.\n\nI\u0027ll leave it to Debargha to say that this is more readable or not.",
+      "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//2Yo\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 732,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-12T23:25:41Z",
+      "side": 1,
+      "message": "\u00261 here isn\u0027t the same as odd. It is in the sense that it\u0027s the same code, but that\u0027s not what we\u0027re testing here. What we\u0027re testing here is whether we\u0027re the left or right 8x8 block in the 16x16 macroblock. Using the ODD macro obfuscates that, and thus shouldn\u0027t be used.",
+      "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//2Yg\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-12T23:25:41Z",
+      "side": 1,
+      "message": "Same here - we\u0027re not testing whether the block index is odd or not; we\u0027re testing whether we\u0027re the left or right 4x4 block in a 8x8 chroma block. The indexing order means that that happens to be testable through using idx\u00261, but that doesn\u0027t mean that the purpose here is to determine whether the block index is odd or not, that\u0027s just a side-effect, and thus distracting.",
+      "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
