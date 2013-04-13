@@ -122,6 +122,24 @@
       "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//2OY\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-13T21:19:52Z",
+      "side": 1,
+      "message": "Well they are functionally equivalent, but some C programmers don\u0027t like using divisions or modulos because in a straight conversion to assembly (i.e. the idiv instruction), they are a lot slower than a binary \u0026 (i.e. the and instruction). However, then again, compilers tend to know that and thus convert x%2 automatically to x\u00261, and x/2 to (x+(x\u003c0))\u003e\u003e1 (check disassembly in a debugger), so it\u0027s not terribly important either way until you have a really bad compiler.\n\nIn short: no there\u0027s no reason to not write it like that, and if people prefer that, that\u0027s fine with me.\n\nFor optimal conveyance of purpose, you possibly want to write:\n\nconst int have_top \u003d (block_idx / 2) \u003e 0 || xd-\u003eup_available;\n(this could also be block_idx \u003e\u003d 2 || xd-\u003eup_available)\nand\nconst int have_left \u003d (block_idx % 2) \u003e 0 || xd-\u003eleft_available;\nand\nconst int have_right \u003d (block_idx % 2) \u003c 1 || xd-\u003eright_available;\n\nso that it\u0027s obvious that if you think about bigger blocks (e.g. a 4x4 block within a 16x16 block), the conversion would be:\n\nconst int have_top \u003d (block_idx / 4) \u003e 0 || xd-\u003eup_available;\n(this could also be block_idx \u003e\u003d 4 || xd-\u003eup_available)\nand\nconst int have_left \u003d (block_idx % 4) \u003e 0 || xd-\u003eleft_available;\nand\nconst int have_right \u003d (block_idx % 4) \u003c 3 || xd-\u003eright_available;",
+      "parentUuid": "AAAAXH//2Rc\u003d",
+      "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
