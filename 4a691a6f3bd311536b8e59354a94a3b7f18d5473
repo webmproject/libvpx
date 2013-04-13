@@ -104,6 +104,24 @@
       "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//2Rc\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-13T00:15:25Z",
+      "side": 1,
+      "message": "Is there any reason not to write like this: \n\nconst int have_top \u003d (block_idx / 2) || xd-\u003eup_available;\n\nconst int have_left \u003d (block_idx % 2) || xd-\u003eleft_available; ?",
+      "parentUuid": "AAAAXH//2TI\u003d",
+      "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
