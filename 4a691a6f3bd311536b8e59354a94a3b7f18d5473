@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//2TY\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-13T00:05:04Z",
+      "side": 1,
+      "message": "No problem, I\u0027m not going to force this change, let\u0027s remove it if you disagree. The source code is intended for *people* and sometimes it is better to distinguish binary \u0026 operation and special test if the number is odd. I still think that expression like !ODD(x) is much better than !(x \u0026 1). It is semantic vs implementation.",
+      "parentUuid": "AAAAXH//2Ys\u003d",
+      "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//2Yo\u003d",
         "filename": "vp9/common/vp9_reconintra.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//2TE\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 732,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-13T00:05:04Z",
+      "side": 1,
+      "message": "I agree with you here.",
+      "parentUuid": "AAAAXH//2Yo\u003d",
+      "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//2Yg\u003d",
         "filename": "vp9/common/vp9_reconintra.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2013-04-12T23:25:41Z",
       "side": 1,
       "message": "Same here - we\u0027re not testing whether the block index is odd or not; we\u0027re testing whether we\u0027re the left or right 4x4 block in a 8x8 chroma block. The indexing order means that that happens to be testable through using idx\u00261, but that doesn\u0027t mean that the purpose here is to determine whether the block index is odd or not, that\u0027s just a side-effect, and thus distracting.",
+      "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//2TI\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-13T00:05:04Z",
+      "side": 1,
+      "message": "I agree with you here.",
+      "parentUuid": "AAAAXH//2Yg\u003d",
       "revId": "4a691a6f3bd311536b8e59354a94a3b7f18d5473",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
