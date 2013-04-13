@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//1/o\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-13T21:18:41Z",
+      "side": 1,
+      "message": "don\u0027t seem to need this -- can get rid of this extra scope and use predictor[c] \u003d above[c];",
+      "revId": "066ac5c00749feba53fee22b5b8b8a069897cd43",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//1/k\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-13T21:18:41Z",
+      "side": 1,
+      "message": "don\u0027t seem to need this -- can get rid of this extra scope and use predictor[c] \u003d left[r];",
+      "revId": "066ac5c00749feba53fee22b5b8b8a069897cd43",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
