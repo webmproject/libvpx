@@ -844,10 +844,8 @@ static int get_delta_q(vp9_reader *r, int *dq) {
   const int old_value = *dq;
 
   if (vp9_read_bit(r)) {  // Update bit
-    int value = vp9_read_literal(r, 4);
-    if (vp9_read_bit(r))  // Sign bit
-      value = -value;
-    *dq = value;
+    const int value = vp9_read_literal(r, 4);
+    *dq = vp9_read_and_apply_sign(r, value);
   }
 
   // Trigger a quantizer update if the delta-q value has changed
@@ -1232,9 +1230,8 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
           if (feature_enabled) {
             vp9_enable_segfeature(xd, i, j);
             data = vp9_decode_unsigned_max(r, vp9_seg_feature_data_max(j));
-            if (vp9_is_segfeature_signed(j) && vp9_read_bit(r)) {
-              data = -data;
-            }
+            if (vp9_is_segfeature_signed(j))
+              data = vp9_read_and_apply_sign(r, data);
           }
           vp9_set_segdata(xd, i, j, data);
         }
@@ -1283,19 +1280,15 @@ static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
 
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
         if (vp9_read_bit(r)) {
-          int value = vp9_read_literal(r, 6);
-          if (vp9_read_bit(r))
-            value = -value;
-          xd->ref_lf_deltas[i] = value;
+          const int value = vp9_read_literal(r, 6);
+          xd->ref_lf_deltas[i] = vp9_read_and_apply_sign(r, value);
         }
       }
 
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
         if (vp9_read_bit(r)) {
-          int value = vp9_read_literal(r, 6);
-          if (vp9_read_bit(r))
-            value = -value;
-          xd->mode_lf_deltas[i] = value;
+          const int value = vp9_read_literal(r, 6);
+          xd->mode_lf_deltas[i] = vp9_read_and_apply_sign(r, value);
         }
       }
     }

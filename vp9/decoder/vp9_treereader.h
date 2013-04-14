@@ -21,6 +21,7 @@ typedef BOOL_DECODER vp9_reader;
 #define vp9_read_literal decode_value
 #define vp9_read_bit(r) vp9_read(r, vp9_prob_half)
 #define vp9_read_prob(r) ((vp9_prob)vp9_read_literal(r, 8))
+#define vp9_read_and_apply_sign(r, value) (vp9_read_bit(r) ? -(value) : (value))
 
 // Intent of tree data structure is to make decoding trivial.
 static int treed_read(vp9_reader *const r, /* !!! must return a 0 or 1 !!! */

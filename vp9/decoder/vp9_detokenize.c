@@ -60,11 +60,6 @@ static const vp9_prob cat6_prob[15] = {
 
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
-static int16_t get_signed(BOOL_DECODER *br, int16_t value_to_sign) {
-  return decode_bool(br, 128) ? -value_to_sign : value_to_sign;
-}
-
-
 #define INCREMENT_COUNT(token)               \
   do {                                       \
     coef_counts[type][ref][get_coef_band(scan, txfm_size, c)] \
@@ -77,7 +72,7 @@ static int16_t get_signed(BOOL_DECODER *br, int16_t value_to_sign) {
 #if CONFIG_CODE_NONZEROCOUNT
 #define WRITE_COEF_CONTINUE(val, token)                       \
   {                                                           \
-    qcoeff_ptr[scan[c]] = get_signed(br, val);                \
+    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(br, val);   \
     INCREMENT_COUNT(token);                                   \
     c++;                                                      \
     nzc++;                                                    \
@@ -86,7 +81,7 @@ static int16_t get_signed(BOOL_DECODER *br, int16_t value_to_sign) {
 #else
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
-    qcoeff_ptr[scan[c]] = get_signed(br, val);           \
+    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(br, val); \
     INCREMENT_COUNT(token);                              \
     c++;                                                 \
     continue;                                            \
