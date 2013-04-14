@@ -603,59 +603,33 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (mbmi->mode == SPLITMV) {
     int i;
-
-    for (i = 0; i < x->partition_info->count; i++) {
-      if (x->partition_info->bmi[i].mode == NEW4X4) {
-        if (x->e_mbd.allow_high_precision_mv) {
-          mv.row = (x->partition_info->bmi[i].mv.as_mv.row
-                    - best_ref_mv->as_mv.row);
-          mv.col = (x->partition_info->bmi[i].mv.as_mv.col
-                    - best_ref_mv->as_mv.col);
-          vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
-          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame > 0) {
-            mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
-                      - second_best_ref_mv->as_mv.row);
-            mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
-                      - second_best_ref_mv->as_mv.col);
-            vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv,
-                              &cpi->NMVcount, 1);
-          }
-        } else {
-          mv.row = (x->partition_info->bmi[i].mv.as_mv.row
-                    - best_ref_mv->as_mv.row);
-          mv.col = (x->partition_info->bmi[i].mv.as_mv.col
-                    - best_ref_mv->as_mv.col);
-          vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
-          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame > 0) {
-            mv.row = (x->partition_info->bmi[i].second_mv.as_mv.row
-                      - second_best_ref_mv->as_mv.row);
-            mv.col = (x->partition_info->bmi[i].second_mv.as_mv.col
-                      - second_best_ref_mv->as_mv.col);
-            vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv,
-                              &cpi->NMVcount, 0);
-          }
+    PARTITION_INFO *pi = x->partition_info;
+    for (i = 0; i < pi->count; i++) {
+      if (pi->bmi[i].mode == NEW4X4) {
+        mv.row = (pi->bmi[i].mv.as_mv.row - best_ref_mv->as_mv.row);
+        mv.col = (pi->bmi[i].mv.as_mv.col - best_ref_mv->as_mv.col);
+        vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount,
+                          x->e_mbd.allow_high_precision_mv);
+        if (x->e_mbd.mode_info_context->mbmi.second_ref_frame > 0) {
+          mv.row = pi->bmi[i].second_mv.as_mv.row -
+                       second_best_ref_mv->as_mv.row;
+          mv.col = pi->bmi[i].second_mv.as_mv.col -
+                       second_best_ref_mv->as_mv.col;
+          vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount,
+                            x->e_mbd.allow_high_precision_mv);
         }
       }
     }
   } else if (mbmi->mode == NEWMV) {
-    if (x->e_mbd.allow_high_precision_mv) {
-      mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
-      mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
-      vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 1);
-      if (mbmi->second_ref_frame > 0) {
-        mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
-        mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
-        vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 1);
-      }
-    } else {
-      mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
-      mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
-      vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount, 0);
-      if (mbmi->second_ref_frame > 0) {
-        mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
-        mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
-        vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount, 0);
-      }
+    mv.row = (mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row);
+    mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
+    vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount,
+                      x->e_mbd.allow_high_precision_mv);
+    if (mbmi->second_ref_frame > 0) {
+      mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
+      mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
+      vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount,
+                        x->e_mbd.allow_high_precision_mv);
     }
   }
 }

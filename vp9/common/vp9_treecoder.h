@@ -13,6 +13,7 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
+#include "vp9/common/vp9_common.h"
 
 typedef uint8_t vp9_prob;
 
@@ -75,7 +76,7 @@ static INLINE vp9_prob get_binary_prob(int n0, int n1) {
 
 /* this function assumes prob1 and prob2 are already within [1,255] range */
 static INLINE vp9_prob weighted_prob(int prob1, int prob2, int factor) {
-  return (prob1 * (256 - factor) + prob2 * factor + 128) >> 8;
+  return ROUND_POWER_OF_TWO(prob1 * (256 - factor) + prob2 * factor, 8);
 }
 
 #endif  // VP9_COMMON_VP9_TREECODER_H_

@@ -79,9 +79,10 @@ static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvjsadcost,
     MV v;
     v.row = mv->as_mv.row - ref->as_mv.row;
     v.col = mv->as_mv.col - ref->as_mv.col;
-    return ((mvjsadcost[vp9_get_mv_joint(v)] +
-             mvsadcost[0][v.row] + mvsadcost[1][v.col]) *
-            error_per_bit + 128) >> 8;
+
+    return ROUND_POWER_OF_TWO((mvjsadcost[vp9_get_mv_joint(v)] +
+                                   mvsadcost[0][v.row] + mvsadcost[1][v.col]) *
+                                       error_per_bit, 8);
   }
   return 0;
 }
