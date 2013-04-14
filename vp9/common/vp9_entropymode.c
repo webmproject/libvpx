@@ -283,19 +283,19 @@ const vp9_tree_index vp9_sub_mv_ref_tree[6] = {
   -ZERO4X4, -NEW4X4
 };
 
-struct vp9_token_struct vp9_bmode_encodings[VP9_NKF_BINTRAMODES];
-struct vp9_token_struct vp9_kf_bmode_encodings[VP9_KF_BINTRAMODES];
-struct vp9_token_struct vp9_ymode_encodings[VP9_YMODES];
-struct vp9_token_struct vp9_sb_ymode_encodings[VP9_I32X32_MODES];
-struct vp9_token_struct vp9_sb_kf_ymode_encodings[VP9_I32X32_MODES];
-struct vp9_token_struct vp9_kf_ymode_encodings[VP9_YMODES];
-struct vp9_token_struct vp9_uv_mode_encodings[VP9_UV_MODES];
-struct vp9_token_struct vp9_i8x8_mode_encodings[VP9_I8X8_MODES];
-struct vp9_token_struct vp9_mbsplit_encodings[VP9_NUMMBSPLITS];
+struct vp9_token vp9_bmode_encodings[VP9_NKF_BINTRAMODES];
+struct vp9_token vp9_kf_bmode_encodings[VP9_KF_BINTRAMODES];
+struct vp9_token vp9_ymode_encodings[VP9_YMODES];
+struct vp9_token vp9_sb_ymode_encodings[VP9_I32X32_MODES];
+struct vp9_token vp9_sb_kf_ymode_encodings[VP9_I32X32_MODES];
+struct vp9_token vp9_kf_ymode_encodings[VP9_YMODES];
+struct vp9_token vp9_uv_mode_encodings[VP9_UV_MODES];
+struct vp9_token vp9_i8x8_mode_encodings[VP9_I8X8_MODES];
+struct vp9_token vp9_mbsplit_encodings[VP9_NUMMBSPLITS];
 
-struct vp9_token_struct vp9_mv_ref_encoding_array[VP9_MVREFS];
-struct vp9_token_struct vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
-struct vp9_token_struct vp9_sub_mv_ref_encoding_array[VP9_SUBMVREFS];
+struct vp9_token vp9_mv_ref_encoding_array[VP9_MVREFS];
+struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
+struct vp9_token vp9_sub_mv_ref_encoding_array[VP9_SUBMVREFS];
 
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
   unsigned int bct [VP9_YMODES] [2];      /* num Ymodes > num UV modes */
@@ -379,7 +379,7 @@ const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
   -0, 2,
   -1, -2
 };
-struct vp9_token_struct vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
+struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
 #if CONFIG_ENABLE_6TAP
 const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
   SIXTAP, EIGHTTAP, EIGHTTAP_SHARP};
@@ -397,7 +397,7 @@ const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
 const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
   -0, -1,
 };
-struct vp9_token_struct vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
+struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
 const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
                                           [VP9_SWITCHABLE_FILTERS-1] = {
   {248},

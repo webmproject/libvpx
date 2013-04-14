@@ -290,7 +290,7 @@ static void tokenize_b(VP9_COMP *cpi,
     else
 #endif
       t->skip_eob_node = (c > 0) && (token_cache[c - 1] == 0);
-    assert(vp9_coef_encodings[t->Token].Len - t->skip_eob_node > 0);
+    assert(vp9_coef_encodings[t->Token].len - t->skip_eob_node > 0);
     if (!dry_run) {
       ++counts[type][ref][band][pt][token];
       if (!t->skip_eob_node)

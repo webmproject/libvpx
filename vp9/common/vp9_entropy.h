@@ -40,7 +40,7 @@ extern const int vp9_i8x8_block[4];
 
 extern const vp9_tree_index vp9_coef_tree[];
 
-extern struct vp9_token_struct vp9_coef_encodings[MAX_ENTROPY_TOKENS];
+extern struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 typedef struct {
   vp9_tree_p tree;
@@ -215,10 +215,10 @@ extern const vp9_tree_index    vp9_nzc16x16_tree[];
 extern const vp9_tree_index    vp9_nzc32x32_tree[];
 
 /* nzc encodings */
-extern struct vp9_token_struct  vp9_nzc4x4_encodings[NZC4X4_TOKENS];
-extern struct vp9_token_struct  vp9_nzc8x8_encodings[NZC8X8_TOKENS];
-extern struct vp9_token_struct  vp9_nzc16x16_encodings[NZC16X16_TOKENS];
-extern struct vp9_token_struct  vp9_nzc32x32_encodings[NZC32X32_TOKENS];
+extern struct vp9_token vp9_nzc4x4_encodings[NZC4X4_TOKENS];
+extern struct vp9_token vp9_nzc8x8_encodings[NZC8X8_TOKENS];
+extern struct vp9_token vp9_nzc16x16_encodings[NZC16X16_TOKENS];
+extern struct vp9_token vp9_nzc32x32_encodings[NZC32X32_TOKENS];
 
 #define codenzc(x) (\
   (x) <= 3 ? (x) : (x) <= 4 ? 3 : (x) <= 8 ? 4 : \

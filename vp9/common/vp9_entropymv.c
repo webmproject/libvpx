@@ -33,7 +33,7 @@ const vp9_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2] = {
   -MV_JOINT_HNZVZ, 4,
   -MV_JOINT_HZVNZ, -MV_JOINT_HNZVNZ
 };
-struct vp9_token_struct vp9_mv_joint_encodings[MV_JOINTS];
+struct vp9_token vp9_mv_joint_encodings[MV_JOINTS];
 
 const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
   -MV_CLASS_0, 2,
@@ -47,19 +47,19 @@ const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
   -MV_CLASS_7, -MV_CLASS_8,
   -MV_CLASS_9, -MV_CLASS_10,
 };
-struct vp9_token_struct vp9_mv_class_encodings[MV_CLASSES];
+struct vp9_token vp9_mv_class_encodings[MV_CLASSES];
 
 const vp9_tree_index vp9_mv_class0_tree [2 * CLASS0_SIZE - 2] = {
   -0, -1,
 };
-struct vp9_token_struct vp9_mv_class0_encodings[CLASS0_SIZE];
+struct vp9_token vp9_mv_class0_encodings[CLASS0_SIZE];
 
 const vp9_tree_index vp9_mv_fp_tree [2 * 4 - 2] = {
   -0, 2,
   -1, 4,
   -2, -3
 };
-struct vp9_token_struct vp9_mv_fp_encodings[4];
+struct vp9_token vp9_mv_fp_encodings[4];
 
 const nmv_context vp9_default_nmv_context = {
   {32, 64, 96},

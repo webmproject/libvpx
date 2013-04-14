@@ -386,7 +386,7 @@ const vp9_tree_index vp9_coef_tree[ 22] =     /* corresponding _CONTEXT_NODEs */
   -DCT_VAL_CATEGORY5, -DCT_VAL_CATEGORY6   /* 10 = CAT_FIVE */
 };
 
-struct vp9_token_struct vp9_coef_encodings[MAX_ENTROPY_TOKENS];
+struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 /* Trees for extra bits.  Probabilities are constant and
    do not depend on previously encoded bits */
@@ -408,7 +408,7 @@ const vp9_tree_index vp9_nzc4x4_tree[2 * NZC4X4_NODES] = {
   -NZC_3TO4, 8,
   -NZC_5TO8, -NZC_9TO16,
 };
-struct vp9_token_struct vp9_nzc4x4_encodings[NZC4X4_TOKENS];
+struct vp9_token vp9_nzc4x4_encodings[NZC4X4_TOKENS];
 
 const vp9_tree_index vp9_nzc8x8_tree[2 * NZC8X8_NODES] = {
   -NZC_0, 2,
@@ -419,7 +419,7 @@ const vp9_tree_index vp9_nzc8x8_tree[2 * NZC8X8_NODES] = {
   -NZC_9TO16, 12,
   -NZC_17TO32, -NZC_33TO64,
 };
-struct vp9_token_struct vp9_nzc8x8_encodings[NZC8X8_TOKENS];
+struct vp9_token vp9_nzc8x8_encodings[NZC8X8_TOKENS];
 
 const vp9_tree_index vp9_nzc16x16_tree[2 * NZC16X16_NODES] = {
   -NZC_0, 2,
@@ -432,7 +432,7 @@ const vp9_tree_index vp9_nzc16x16_tree[2 * NZC16X16_NODES] = {
   -NZC_33TO64, 16,
   -NZC_65TO128, -NZC_129TO256,
 };
-struct vp9_token_struct vp9_nzc16x16_encodings[NZC16X16_TOKENS];
+struct vp9_token vp9_nzc16x16_encodings[NZC16X16_TOKENS];
 
 const vp9_tree_index vp9_nzc32x32_tree[2 * NZC32X32_NODES] = {
   -NZC_0, 2,
@@ -447,7 +447,7 @@ const vp9_tree_index vp9_nzc32x32_tree[2 * NZC32X32_NODES] = {
   -NZC_129TO256, 20,
   -NZC_257TO512, -NZC_513TO1024,
 };
-struct vp9_token_struct vp9_nzc32x32_encodings[NZC32X32_TOKENS];
+struct vp9_token vp9_nzc32x32_encodings[NZC32X32_TOKENS];
 
 const int vp9_extranzcbits[NZC32X32_TOKENS] = {
   0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
