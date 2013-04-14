@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//1/Y\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-14T00:00:44Z",
+      "side": 1,
+      "message": "HZVNZHNZVNZ might be the most unreadable combination of charaters in ASCII there is, after 1l0Ol1. Suggest writing a helper macro/function for this, so you can say \"if mv_joint_vertical\" or mvj_vertical instead, and similarly for horizontal.",
+      "revId": "50a85d14287a31631ab24eaa5fc06ff78ad7ef7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//1/U\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-14T00:00:44Z",
+      "side": 1,
+      "message": "This logic is still pretty confusing. There\u0027s a better comment somewhere that explains this behavior, but I can\u0027t find it at the moment. It probably belongs here anyway. It\u0027s something like:\n\n  //This branch indicates the predicted reference (of either GOLDEN or ALTREF) was not chosen, so we want the other one.\n  ref_frame \u003d pred_ref \u003d\u003d GOLDEN_FRAME ? ALTREF_FRAME : GOLDEN_FRAME\n\n  // If segment level references are active and the golden frame was selected, but golden was disallowed at the segment level, then force it back to altref. TODO: Why doesn\u0027t this happen in the opposite case, for forcing altref back to golden if altref is disabled? Or both of them to last, or intra for that matter?\n  if (seg_ref_active \u0026\u0026 ref_frame \u003d\u003d GOLDEN_FRAME \u0026\u0026 !golden) ref_frame \u003d ALTREF_FRAME;",
+      "revId": "50a85d14287a31631ab24eaa5fc06ff78ad7ef7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//1/Q\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-14T00:00:44Z",
+      "side": 1,
+      "message": "const",
+      "revId": "50a85d14287a31631ab24eaa5fc06ff78ad7ef7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//1/M\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-14T00:00:44Z",
+      "side": 1,
+      "message": "I think there are a few places where this general structure is used, read_bit ? 1 + read_bit : 0, it might be worth trying to turn that into bitstream primitive in a future commit.",
+      "revId": "50a85d14287a31631ab24eaa5fc06ff78ad7ef7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//1/I\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-14T00:00:44Z",
+      "side": 1,
+      "message": "these could be a prob_ref_coded[] array to make them anonymous.",
+      "revId": "50a85d14287a31631ab24eaa5fc06ff78ad7ef7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//1/E\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-14T00:00:44Z",
+      "side": 1,
+      "message": "This type and variables like fc.yomde... should probably be renamed to indicate they\u0027re intra only, similar to VP9_I32X32_MODES below, though sb_ymode_ isn\u0027t a great name either. I guess these are probably only used for keyframes, maybe _kf_ in the name is appropriate.",
+      "revId": "50a85d14287a31631ab24eaa5fc06ff78ad7ef7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
