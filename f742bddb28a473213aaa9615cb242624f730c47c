@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//18o\u003d",
+        "filename": "vp9/encoder/vp9_variance_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-14T17:48:24Z",
+      "side": 1,
+      "message": "Lower-case for local vars: f_data3 or fdata3",
+      "revId": "f742bddb28a473213aaa9615cb242624f730c47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//18k\u003d",
+        "filename": "vp9/encoder/vp9_variance_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-14T17:48:24Z",
+      "side": 1,
+      "message": "Lower-case for local vars + init on the same line:\n\nconst int16_t *h_filter \u003d ...\n\nconst int16_t *v_filter \u003d ...",
+      "revId": "f742bddb28a473213aaa9615cb242624f730c47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//18g\u003d",
+        "filename": "vp9/encoder/vp9_variance_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-14T17:48:24Z",
+      "side": 1,
+      "message": "The same as above.",
+      "revId": "f742bddb28a473213aaa9615cb242624f730c47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//18c\u003d",
+        "filename": "vp9/encoder/vp9_variance_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-14T17:48:24Z",
+      "side": 1,
+      "message": "The same as above.",
+      "revId": "f742bddb28a473213aaa9615cb242624f730c47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//18Y\u003d",
+        "filename": "vp9/encoder/vp9_variance_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-14T17:48:24Z",
+      "side": 1,
+      "message": "The same as above.",
+      "revId": "f742bddb28a473213aaa9615cb242624f730c47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//18U\u003d",
+        "filename": "vp9/encoder/vp9_variance_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-14T17:48:24Z",
+      "side": 1,
+      "message": "The same as above.",
+      "revId": "f742bddb28a473213aaa9615cb242624f730c47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//18Q\u003d",
+        "filename": "vp9/encoder/vp9_variance_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-14T17:48:24Z",
+      "side": 1,
+      "message": "The same as above.",
+      "revId": "f742bddb28a473213aaa9615cb242624f730c47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//18M\u003d",
+        "filename": "vp9/encoder/vp9_variance_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-14T17:48:24Z",
+      "side": 1,
+      "message": "The same as above.",
+      "revId": "f742bddb28a473213aaa9615cb242624f730c47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
