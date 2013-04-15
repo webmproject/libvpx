@@ -31,17 +31,21 @@
 
 // Experimental rate control switches
 #if CONFIG_ONESHOTQ
-#define ONE_SHOT_Q_ESTIMATE 1
-#define STRICT_ONE_SHOT_Q 1
-#define DISABLE_RC_LONG_TERM_MEM 1
+#define ONE_SHOT_Q_ESTIMATE 0
+#define STRICT_ONE_SHOT_Q 0
+#define DISABLE_RC_LONG_TERM_MEM 0
 #endif
+
 // #define SPEEDSTATS 1
+#if CONFIG_MULTIPLE_ARF
+// Set MIN_GF_INTERVAL to 1 for the full decomposition.
+#define MIN_GF_INTERVAL             2
+#else
 #define MIN_GF_INTERVAL             4
+#endif
 #define DEFAULT_GF_INTERVAL         7
 
 #define KEY_FRAME_CONTEXT 5
-
-#define MAX_LAG_BUFFERS 25
 
 #if CONFIG_COMP_INTERINTRA_PRED
 #define MAX_MODES 54
@@ -326,7 +330,11 @@ typedef struct VP9_COMP {
 
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *source;
+#if CONFIG_MULTIPLE_ARF
+  struct lookahead_entry  *alt_ref_source[NUM_REF_FRAMES];
+#else
   struct lookahead_entry  *alt_ref_source;
+#endif
 
   YV12_BUFFER_CONFIG *Source;
   YV12_BUFFER_CONFIG *un_scaled_source;
@@ -345,6 +353,9 @@ typedef struct VP9_COMP {
   int lst_fb_idx;
   int gld_fb_idx;
   int alt_fb_idx;
+#if CONFIG_MULTIPLE_ARF
+  int alt_ref_fb_idx[NUM_REF_FRAMES - 3];
+#endif
   int refresh_last_frame;
   int refresh_golden_frame;
   int refresh_alt_ref_frame;
@@ -358,6 +369,12 @@ typedef struct VP9_COMP {
   unsigned int key_frame_frequency;
   unsigned int this_key_frame_forced;
   unsigned int next_key_frame_forced;
+#if CONFIG_MULTIPLE_ARF
+  // Position within a frame coding order (including any additional ARF frames).
+  unsigned int sequence_number;
+  // Next frame in naturally occurring order that has not yet been coded.
+  int next_frame_in_order;
+#endif
 
   // Ambient reconstruction err target for force key frames
   int ambient_err;
@@ -396,7 +413,6 @@ typedef struct VP9_COMP {
   double gf_rate_correction_factor;
 
   int frames_till_gf_update_due;      // Count down till next GF
-  int current_gf_interval;          // GF interval chosen when we coded the last GF
 
   int gf_overspend_bits;            // Total bits overspent becasue of GF boost (cumulative)
 
@@ -686,6 +702,19 @@ typedef struct VP9_COMP {
 
   int initial_width;
   int initial_height;
+
+#if CONFIG_MULTIPLE_ARF
+  // ARF tracking variables.
+  int multi_arf_enabled;
+  unsigned int frame_coding_order_period;
+  unsigned int new_frame_coding_order_period;
+  int frame_coding_order[MAX_LAG_BUFFERS * 2];
+  int arf_buffer_idx[MAX_LAG_BUFFERS * 3 / 2];
+  int arf_weight[MAX_LAG_BUFFERS];
+  int arf_buffered;
+  int this_frame_weight;
+  int max_arf_level;
+#endif
 } VP9_COMP;
 
 void vp9_encode_frame(VP9_COMP *cpi);

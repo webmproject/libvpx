@@ -2685,7 +2685,7 @@ static void update_alt_ref_frame_stats(VP8_COMP *cpi)
     /* Clear the alternate reference update pending flag. */
     cpi->source_alt_ref_pending = 0;
 
-    /* Set the alternate refernce frame active flag */
+    /* Set the alternate reference frame active flag */
     cpi->source_alt_ref_active = 1;
 
 
@@ -3332,7 +3332,7 @@ static void encode_frame_to_data_rate
     else
         cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = 0;
 
-    /* Check to see if a key frame is signalled
+    /* Check to see if a key frame is signaled
      * For two pass with auto key frame enabled cm->frame_type may already
      * be set, but not for one pass.
      */

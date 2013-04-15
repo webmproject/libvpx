@@ -112,7 +112,7 @@ int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
   const double q = vp9_convert_qindex_to_q(qindex);
   int enumerator = frame_type == KEY_FRAME ? 4000000 : 2500000;
 
-  // q based adjustment to baseline enumberator
+  // q based adjustment to baseline enumerator
   enumerator += (int)(enumerator * q) >> 12;
   return (int)(0.5 + (enumerator * correction_factor / q));
 }
@@ -300,7 +300,7 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
 }
 
 
-//  Do the best we can to define the parameteres for the next GF based
+//  Do the best we can to define the parameters for the next GF based
 //  on what information we have available.
 //
 //  In this experimental code only two pass is supported
@@ -358,16 +358,13 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
           (estimate_bits_at_q(1, q, cpi->common.MBs, 1.0)
            * cpi->last_boost) / 100;
       }
-
     } else {
       // If there is an active ARF at this location use the minimum
-      // bits on this frame even if it is a contructed arf.
+      // bits on this frame even if it is a constructed arf.
       // The active maximum quantizer insures that an appropriate
-      // number of bits will be spent if needed for contstructed ARFs.
+      // number of bits will be spent if needed for constructed ARFs.
       cpi->this_frame_target = 0;
     }
-
-    cpi->current_gf_interval = cpi->frames_till_gf_update_due;
   }
 }
 
