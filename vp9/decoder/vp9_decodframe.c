@@ -1792,12 +1792,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   }
 #endif
 
-  // Find the end of the coded buffer
-  while (residual_bc.count > CHAR_BIT &&
-         residual_bc.count < VP9_BD_VALUE_SIZE) {
-    residual_bc.count -= CHAR_BIT;
-    residual_bc.user_buffer--;
-  }
-  *p_data_end = residual_bc.user_buffer;
+  *p_data_end = vp9_reader_find_end(&residual_bc);
   return 0;
 }
