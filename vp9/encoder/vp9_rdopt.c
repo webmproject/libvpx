@@ -347,50 +347,6 @@ int vp9_block_error_c(int16_t *coeff, int16_t *dqcoeff, int block_size) {
   return error;
 }
 
-int vp9_uvsse(MACROBLOCK *x) {
-  uint8_t *uptr, *vptr;
-  uint8_t *upred_ptr = (*(x->block[16].base_src) + x->block[16].src);
-  uint8_t *vpred_ptr = (*(x->block[20].base_src) + x->block[20].src);
-  int uv_stride = x->block[16].src_stride;
-
-  unsigned int sse1 = 0;
-  unsigned int sse2 = 0;
-  int mv_row = x->e_mbd.mode_info_context->mbmi.mv[0].as_mv.row;
-  int mv_col = x->e_mbd.mode_info_context->mbmi.mv[0].as_mv.col;
-  int offset;
-  int pre_stride = x->e_mbd.block[16].pre_stride;
-
-  if (mv_row < 0)
-    mv_row -= 1;
-  else
-    mv_row += 1;
-
-  if (mv_col < 0)
-    mv_col -= 1;
-  else
-    mv_col += 1;
-
-  mv_row /= 2;
-  mv_col /= 2;
-
-  offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
-  uptr = x->e_mbd.pre.u_buffer + offset;
-  vptr = x->e_mbd.pre.v_buffer + offset;
-
-  if ((mv_row | mv_col) & 7) {
-    vp9_sub_pixel_variance8x8(uptr, pre_stride, (mv_col & 7) << 1,
-                              (mv_row & 7) << 1, upred_ptr, uv_stride, &sse2);
-    vp9_sub_pixel_variance8x8(vptr, pre_stride, (mv_col & 7) << 1,
-                              (mv_row & 7) << 1, vpred_ptr, uv_stride, &sse1);
-    sse2 += sse1;
-  } else {
-    vp9_variance8x8(uptr, pre_stride, upred_ptr, uv_stride, &sse2);
-    vp9_variance8x8(vptr, pre_stride, vpred_ptr, uv_stride, &sse1);
-    sse2 += sse1;
-  }
-  return sse2;
-}
-
 static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
                               int ib, PLANE_TYPE type,
                               ENTROPY_CONTEXT *a,
@@ -2753,7 +2709,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
 
 static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                int idx, MV_REFERENCE_FRAME frame_type,
-                               int block_size,
+                               enum BlockSize block_size,
                                int mb_row, int mb_col,
                                int_mv frame_nearest_mv[MAX_REF_FRAMES],
                                int_mv frame_near_mv[MAX_REF_FRAMES],
@@ -2854,6 +2810,28 @@ static void model_rd_from_var_lapndz(int var, int n, int qstep,
   vp9_clear_system_state();
 }
 
+static enum BlockSize y_to_uv_block_size(enum BlockSize bs) {
+  switch (bs) {
+    case BLOCK_64X64: return BLOCK_32X32;
+    case BLOCK_32X32: return BLOCK_16X16;
+    case BLOCK_16X16: return BLOCK_8X8;
+    default:
+      assert(0);
+      return -1;
+  }
+}
+
+static enum BlockSize y_bsizet_to_block_size(BLOCK_SIZE_TYPE bs) {
+  switch (bs) {
+    case BLOCK_SIZE_SB64X64: return BLOCK_64X64;
+    case BLOCK_SIZE_SB32X32: return BLOCK_32X32;
+    case BLOCK_SIZE_MB16X16: return BLOCK_16X16;
+    default:
+      assert(0);
+      return -1;
+  }
+}
+
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  BLOCK_SIZE_TYPE bsize,
                                  int *saddone, int near_sadidx[],
@@ -2872,9 +2850,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                                 [MAX_REF_FRAMES],
                                  YV12_BUFFER_CONFIG *scaled_ref_frame,
                                  int mb_row, int mb_col) {
-  const enum BlockSize block_size =
-      (bsize == BLOCK_SIZE_MB16X16) ? BLOCK_16X16 :
-      (bsize == BLOCK_SIZE_SB32X32) ? BLOCK_32X32 : BLOCK_64X64;
+  const int bw = 1 << mb_width_log2(bsize), bh = 1 << mb_height_log2(bsize);
+  const enum BlockSize block_size = y_bsizet_to_block_size(bsize);
+  const enum BlockSize uv_block_size = y_to_uv_block_size(block_size);
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
@@ -3044,7 +3022,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                  (mbmi->mv[1].as_mv.col & 15) == 0;
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
-  if (bsize == BLOCK_SIZE_SB64X64) {
+  if (bsize != BLOCK_SIZE_MB16X16) {
     int switchable_filter_index, newbest;
     int tmp_rate_y_i = 0, tmp_rate_u_i = 0, tmp_rate_v_i = 0;
     int tmp_dist_y_i = 0, tmp_dist_u_i = 0, tmp_dist_v_i = 0;
@@ -3070,20 +3048,26 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int tmp_rate_y, tmp_rate_u, tmp_rate_v;
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
         vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
-        var = vp9_variance64x64(*(b->base_src), b->src_stride,
-                                xd->dst.y_buffer, xd->dst.y_stride, &sse);
+        var = cpi->fn_ptr[block_size].vf(*(b->base_src), b->src_stride,
+                                         xd->dst.y_buffer, xd->dst.y_stride,
+                                         &sse);
         // Note our transform coeffs are 8 times an orthogonal transform.
         // Hence quantizer step is also 8 times. To get effective quantizer
         // we need to divide by 8 before sending to modeling function.
-        model_rd_from_var_lapndz(var, 64 * 64, xd->block[0].dequant[1] >> 3,
+        model_rd_from_var_lapndz(var, 16 * bw * 16 * bh,
+                                 xd->block[0].dequant[1] >> 3,
                                  &tmp_rate_y, &tmp_dist_y);
-        var = vp9_variance32x32(x->src.u_buffer, x->src.uv_stride,
-                                xd->dst.u_buffer, xd->dst.uv_stride, &sse);
-        model_rd_from_var_lapndz(var, 32 * 32, xd->block[16].dequant[1] >> 3,
+        var = cpi->fn_ptr[uv_block_size].vf(x->src.u_buffer, x->src.uv_stride,
+                                            xd->dst.u_buffer, xd->dst.uv_stride,
+                                            &sse);
+        model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
+                                 xd->block[16].dequant[1] >> 3,
                                  &tmp_rate_u, &tmp_dist_u);
-        var = vp9_variance32x32(x->src.v_buffer, x->src.uv_stride,
-                                xd->dst.v_buffer, xd->dst.uv_stride, &sse);
-        model_rd_from_var_lapndz(var, 32 * 32, xd->block[20].dequant[1] >> 3,
+        var = cpi->fn_ptr[uv_block_size].vf(x->src.v_buffer, x->src.uv_stride,
+                                            xd->dst.v_buffer, xd->dst.uv_stride,
+                                            &sse);
+        model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
+                                 xd->block[20].dequant[1] >> 3,
                                  &tmp_rate_v, &tmp_dist_v);
         rd = RDCOST(x->rdmult, x->rddiv,
                     rs + tmp_rate_y + tmp_rate_u + tmp_rate_v,
@@ -3107,97 +3091,18 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           (cm->mcomp_filter_type != SWITCHABLE &&
            cm->mcomp_filter_type == mbmi->interp_filter)) {
         int i;
-        for (i = 0; i < 64; ++i)
-          vpx_memcpy(tmp_ybuf + i * 64,
+        for (i = 0; i < 16 * bh; ++i)
+          vpx_memcpy(tmp_ybuf + i * 16 * bw,
                      xd->dst.y_buffer + i * xd->dst.y_stride,
-                     sizeof(unsigned char) * 64);
-        for (i = 0; i < 32; ++i)
-          vpx_memcpy(tmp_ubuf + i * 32,
+                     sizeof(unsigned char) * 16 * bw);
+        for (i = 0; i < 8 * bh; ++i)
+          vpx_memcpy(tmp_ubuf + i * 8 * bw,
                      xd->dst.u_buffer + i * xd->dst.uv_stride,
-                     sizeof(unsigned char) * 32);
-        for (i = 0; i < 32; ++i)
-          vpx_memcpy(tmp_vbuf + i * 32,
+                     sizeof(unsigned char) * 8 * bw);
+        for (i = 0; i < 8 * bh; ++i)
+          vpx_memcpy(tmp_vbuf + i * 8 * bw,
                      xd->dst.v_buffer + i * xd->dst.uv_stride,
-                     sizeof(unsigned char) * 32);
-        pred_exists = 1;
-      }
-      interpolating_intpel_seen |=
-        intpel_mv && vp9_is_interpolating_filter[mbmi->interp_filter];
-    }
-  } else if (bsize == BLOCK_SIZE_SB32X32) {
-    int switchable_filter_index, newbest;
-    int tmp_rate_y_i = 0, tmp_rate_u_i = 0, tmp_rate_v_i = 0;
-    int tmp_dist_y_i = 0, tmp_dist_u_i = 0, tmp_dist_v_i = 0;
-    for (switchable_filter_index = 0;
-       switchable_filter_index < VP9_SWITCHABLE_FILTERS;
-       ++switchable_filter_index) {
-      int rs = 0;
-      mbmi->interp_filter = vp9_switchable_interp[switchable_filter_index];
-      vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
-      if (cpi->common.mcomp_filter_type == SWITCHABLE) {
-        const int c = vp9_get_pred_context(cm, xd, PRED_SWITCHABLE_INTERP);
-        const int m = vp9_switchable_interp_map[mbmi->interp_filter];
-        rs = SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs[c][m];
-      }
-      if (interpolating_intpel_seen && intpel_mv &&
-          vp9_is_interpolating_filter[mbmi->interp_filter]) {
-        rd = RDCOST(x->rdmult, x->rddiv,
-                    rs + tmp_rate_y_i + tmp_rate_u_i + tmp_rate_v_i,
-                    tmp_dist_y_i + tmp_dist_u_i + tmp_dist_v_i);
-      } else {
-        unsigned int sse, var;
-        int tmp_rate_y, tmp_rate_u, tmp_rate_v;
-        int tmp_dist_y, tmp_dist_u, tmp_dist_v;
-        vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
-        var = vp9_variance32x32(*(b->base_src), b->src_stride,
-                                xd->dst.y_buffer, xd->dst.y_stride, &sse);
-        // Note our transform coeffs are 8 times an orthogonal transform.
-        // Hence quantizer step is also 8 times. To get effective quantizer
-        // we need to divide by 8 before sending to modeling function.
-        model_rd_from_var_lapndz(var, 32 * 32, xd->block[0].dequant[1] >> 3,
-                                 &tmp_rate_y, &tmp_dist_y);
-        var = vp9_variance16x16(x->src.u_buffer, x->src.uv_stride,
-                                xd->dst.u_buffer, xd->dst.uv_stride, &sse);
-        model_rd_from_var_lapndz(var, 16 * 16, xd->block[16].dequant[1] >> 3,
-                                 &tmp_rate_u, &tmp_dist_u);
-        var = vp9_variance16x16(x->src.v_buffer, x->src.uv_stride,
-                                xd->dst.v_buffer, xd->dst.uv_stride, &sse);
-        model_rd_from_var_lapndz(var, 16 * 16, xd->block[20].dequant[1] >> 3,
-                                 &tmp_rate_v, &tmp_dist_v);
-        rd = RDCOST(x->rdmult, x->rddiv,
-                    rs + tmp_rate_y + tmp_rate_u + tmp_rate_v,
-                    tmp_dist_y + tmp_dist_u + tmp_dist_v);
-        if (!interpolating_intpel_seen && intpel_mv &&
-            vp9_is_interpolating_filter[mbmi->interp_filter]) {
-          tmp_rate_y_i = tmp_rate_y;
-          tmp_rate_u_i = tmp_rate_u;
-          tmp_rate_v_i = tmp_rate_v;
-          tmp_dist_y_i = tmp_dist_y;
-          tmp_dist_u_i = tmp_dist_u;
-          tmp_dist_v_i = tmp_dist_v;
-        }
-      }
-      newbest = (switchable_filter_index == 0 || rd < best_rd);
-      if (newbest) {
-        best_rd = rd;
-        *best_filter = mbmi->interp_filter;
-      }
-      if ((cm->mcomp_filter_type == SWITCHABLE && newbest) ||
-          (cm->mcomp_filter_type != SWITCHABLE &&
-           cm->mcomp_filter_type == mbmi->interp_filter)) {
-        int i;
-        for (i = 0; i < 32; ++i)
-          vpx_memcpy(tmp_ybuf + i * 64,
-                     xd->dst.y_buffer + i * xd->dst.y_stride,
-                     sizeof(unsigned char) * 32);
-        for (i = 0; i < 16; ++i)
-          vpx_memcpy(tmp_ubuf + i * 32,
-                     xd->dst.u_buffer + i * xd->dst.uv_stride,
-                     sizeof(unsigned char) * 16);
-        for (i = 0; i < 16; ++i)
-          vpx_memcpy(tmp_vbuf + i * 32,
-                     xd->dst.v_buffer + i * xd->dst.uv_stride,
-                     sizeof(unsigned char) * 16);
+                     sizeof(unsigned char) * 8 * bw);
         pred_exists = 1;
       }
       interpolating_intpel_seen |=
@@ -3207,7 +3112,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int switchable_filter_index, newbest;
     int tmp_rate_y_i = 0, tmp_rate_u_i = 0, tmp_rate_v_i = 0;
     int tmp_dist_y_i = 0, tmp_dist_u_i = 0, tmp_dist_v_i = 0;
-    assert(bsize == BLOCK_SIZE_MB16X16);
     for (switchable_filter_index = 0;
        switchable_filter_index < VP9_SWITCHABLE_FILTERS;
        ++switchable_filter_index) {
@@ -3286,26 +3190,17 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
   if (pred_exists) {
-    if (bsize == BLOCK_SIZE_SB64X64) {
-      for (i = 0; i < 64; ++i)
-        vpx_memcpy(xd->dst.y_buffer + i * xd->dst.y_stride,  tmp_ybuf + i * 64,
-                   sizeof(unsigned char) * 64);
-      for (i = 0; i < 32; ++i)
-        vpx_memcpy(xd->dst.u_buffer + i * xd->dst.uv_stride, tmp_ubuf + i * 32,
-                   sizeof(unsigned char) * 32);
-      for (i = 0; i < 32; ++i)
-        vpx_memcpy(xd->dst.v_buffer + i * xd->dst.uv_stride, tmp_vbuf + i * 32,
-                   sizeof(unsigned char) * 32);
-    } else if (bsize == BLOCK_SIZE_SB32X32) {
-      for (i = 0; i < 32; ++i)
-        vpx_memcpy(xd->dst.y_buffer + i * xd->dst.y_stride,  tmp_ybuf + i * 64,
-                   sizeof(unsigned char) * 32);
-      for (i = 0; i < 16; ++i)
-        vpx_memcpy(xd->dst.u_buffer + i * xd->dst.uv_stride, tmp_ubuf + i * 32,
-                   sizeof(unsigned char) * 16);
-      for (i = 0; i < 16; ++i)
-        vpx_memcpy(xd->dst.v_buffer + i * xd->dst.uv_stride, tmp_vbuf + i * 32,
-                   sizeof(unsigned char) * 16);
+    // FIXME(rbultje): mb code still predicts into xd->predictor
+    if (bsize != BLOCK_SIZE_MB16X16) {
+      for (i = 0; i < bh * 16; ++i)
+        vpx_memcpy(xd->dst.y_buffer + i * xd->dst.y_stride,
+                   tmp_ybuf + i * bw * 16, sizeof(unsigned char) * bw * 16);
+      for (i = 0; i < bh * 8; ++i)
+        vpx_memcpy(xd->dst.u_buffer + i * xd->dst.uv_stride,
+                   tmp_ubuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
+      for (i = 0; i < bh * 8; ++i)
+        vpx_memcpy(xd->dst.v_buffer + i * xd->dst.uv_stride,
+                   tmp_vbuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
     } else {
       vpx_memcpy(xd->predictor, tmp_ybuf, sizeof(unsigned char) * 256);
       vpx_memcpy(xd->predictor + 256, tmp_ubuf, sizeof(unsigned char) * 64);
@@ -3340,14 +3235,11 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (threshold < x->encode_breakout)
       threshold = x->encode_breakout;
 
-    if (bsize == BLOCK_SIZE_SB64X64) {
-      var = vp9_variance64x64(*(b->base_src), b->src_stride,
-                              xd->dst.y_buffer, xd->dst.y_stride, &sse);
-    } else if (bsize == BLOCK_SIZE_SB32X32) {
-      var = vp9_variance32x32(*(b->base_src), b->src_stride,
-                              xd->dst.y_buffer, xd->dst.y_stride, &sse);
+    if (bsize != BLOCK_SIZE_MB16X16) {
+      var = cpi->fn_ptr[block_size].vf(*(b->base_src), b->src_stride,
+                                       xd->dst.y_buffer, xd->dst.y_stride,
+                                       &sse);
     } else {
-      assert(bsize == BLOCK_SIZE_MB16X16);
       var = vp9_variance16x16(*(b->base_src), b->src_stride,
                               xd->predictor, 16, &sse);
     }
@@ -3361,23 +3253,23 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // Check u and v to make sure skip is ok
         int sse2;
 
-        if (bsize == BLOCK_SIZE_SB64X64) {
+        if (bsize != BLOCK_SIZE_MB16X16) {
           unsigned int sse2u, sse2v;
-          var = vp9_variance32x32(x->src.u_buffer, x->src.uv_stride,
-                                  xd->dst.u_buffer, xd->dst.uv_stride, &sse2u);
-          var = vp9_variance32x32(x->src.v_buffer, x->src.uv_stride,
-                                  xd->dst.v_buffer, xd->dst.uv_stride, &sse2v);
-          sse2 = sse2u + sse2v;
-        } else if (bsize == BLOCK_SIZE_SB32X32) {
-          unsigned int sse2u, sse2v;
-          var = vp9_variance16x16(x->src.u_buffer, x->src.uv_stride,
-                                  xd->dst.u_buffer, xd->dst.uv_stride, &sse2u);
-          var = vp9_variance16x16(x->src.v_buffer, x->src.uv_stride,
-                                  xd->dst.v_buffer, xd->dst.uv_stride, &sse2v);
+          // FIXME(rbultje): mb predictors predict into xd->predictor
+          var = cpi->fn_ptr[uv_block_size].vf(x->src.u_buffer, x->src.uv_stride,
+                                              xd->dst.u_buffer,
+                                              xd->dst.uv_stride, &sse2u);
+          var = cpi->fn_ptr[uv_block_size].vf(x->src.v_buffer, x->src.uv_stride,
+                                              xd->dst.v_buffer,
+                                              xd->dst.uv_stride, &sse2v);
           sse2 = sse2u + sse2v;
         } else {
-          assert(bsize == BLOCK_SIZE_MB16X16);
-          sse2 = vp9_uvsse(x);
+          unsigned int sse2u, sse2v;
+          var = vp9_variance8x8(x->src.u_buffer, x->src.uv_stride,
+                                xd->predictor + 256, 8, &sse2u);
+          var = vp9_variance8x8(x->src.v_buffer, x->src.uv_stride,
+                                xd->predictor + 320, 8, &sse2v);
+          sse2 = sse2u + sse2v;
         }
 
         if (sse2 * 2 < threshold) {
@@ -4420,8 +4312,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   int *returndistortion,
                                   BLOCK_SIZE_TYPE bsize,
                                   PICK_MODE_CONTEXT *ctx) {
-  const int block_size = (bsize == BLOCK_SIZE_SB64X64) ?
-                          BLOCK_64X64 : BLOCK_32X32;
+  const enum BlockSize block_size = y_bsizet_to_block_size(bsize);
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
