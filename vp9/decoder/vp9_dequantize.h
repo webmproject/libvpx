@@ -16,14 +16,11 @@
 
 
 void vp9_dequant_idct_add_lossless_c(int16_t *input, const int16_t *dq,
-                                     unsigned char *pred,
-                                     unsigned char *output,
-                                     int pitch, int stride, int eob);
+                                     unsigned char *dest, int stride, int eob);
 
 void vp9_dequant_dc_idct_add_lossless_c(int16_t *input, const int16_t *dq,
-                                        unsigned char *pred,
-                                        unsigned char *output,
-                                        int pitch, int stride, int dc);
+                                        unsigned char *output, int stride,
+                                        int dc);
 
 void vp9_dequant_dc_idct_add_y_block_lossless_c(int16_t *q,
                                                 const int16_t *dq,
@@ -33,30 +30,23 @@ void vp9_dequant_dc_idct_add_y_block_lossless_c(int16_t *q,
                                                 const int16_t *dc);
 
 void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
-                                             unsigned char *pre, int pre_stride,
-                                             unsigned char *dst,
-                                             int stride,
+                                             unsigned char *dst, int stride,
                                              struct macroblockd *xd);
 
 void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *dq,
-                                              unsigned char *pre,
-                                              int pre_stride,
                                               unsigned char *dst,
                                               int stride,
                                               uint16_t *eobs);
 
 void vp9_dequant_iht_add_c(TX_TYPE tx_type, int16_t *input, const int16_t *dq,
-                           unsigned char *pred, unsigned char *dest,
-                           int pitch, int stride, int eob);
+                           unsigned char *dest, int stride, int eob);
 
 void vp9_dequant_iht_add_8x8_c(TX_TYPE tx_type, int16_t *input,
-                               const int16_t *dq, unsigned char *pred,
-                               unsigned char *dest, int pitch, int stride,
-                               int eob);
+                               const int16_t *dq,  unsigned char *dest,
+                               int stride, int eob);
 
 void vp9_dequant_iht_add_16x16_c(TX_TYPE tx_type, int16_t *input,
-                                 const int16_t *dq, unsigned char *pred,
-                                 unsigned char *dest,
-                                 int pitch, int stride, int eob);
+                                 const int16_t *dq, unsigned char *dest,
+                                 int stride, int eob);
 
 #endif  // VP9_DECODER_VP9_DEQUANTIZE_H_
