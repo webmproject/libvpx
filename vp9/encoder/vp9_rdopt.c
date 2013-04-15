@@ -4169,6 +4169,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t txfm_cache[NB_TXFM_MODES], err;
   int i;
 
+  ctx->skip = 0;
   xd->mode_info_context->mbmi.mode = DC_PRED;
   err = rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
                                &dist_y, &y_skip, bsize, txfm_cache);
@@ -4218,6 +4219,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
   TX_SIZE txfm_size_16x16, txfm_size_8x8;
   int i;
 
+  x->mb_context[xd->sb_index][xd->mb_index].skip = 0;
   mbmi->ref_frame = INTRA_FRAME;
   mbmi->mode = DC_PRED;
   for (i = 0; i <= TX_8X8; i++) {
