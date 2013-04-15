@@ -104,6 +104,24 @@
       "revId": "c253d31bb49c5431c8ff9502e53b64e6c599267f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//04o\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1209,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-04-15T21:54:04Z",
+      "side": 1,
+      "message": "Ok. I see what you mean. I made the change in patch set 12, which sets scale_value_x \u0026 scale_value_y as function pointers instead of scaled_buffer_offset. Thanks.",
+      "parentUuid": "AAAAXH//1Us\u003d",
+      "revId": "c253d31bb49c5431c8ff9502e53b64e6c599267f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
