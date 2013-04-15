@@ -10,6 +10,7 @@
 
 
 #include "vpx_config.h"
+#include "vp8_rtcd.h"
 #include "encodemb.h"
 #include "encodemv.h"
 #include "vp8/common/common.h"
