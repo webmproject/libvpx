@@ -57,17 +57,17 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
          */
   switch (imin) {
     case 1:
-      return B_HD_PRED;
+      return B_D153_PRED;
     case 2:
-      return B_RD_PRED;
+      return B_D135_PRED;
     case 3:
-      return B_VR_PRED;
+      return B_D117_PRED;
     case 5:
-      return B_VL_PRED;
+      return B_D63_PRED;
     case 6:
-      return B_LD_PRED;
+      return B_D45_PRED;
     case 7:
-      return B_HU_PRED;
+      return B_D27_PRED;
     default:
       assert(0);
   }
@@ -93,13 +93,13 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
          */
   switch (imin) {
     case 1:
-      return B_HD_PRED;
+      return B_D153_PRED;
     case 3:
-      return B_VR_PRED;
+      return B_D117_PRED;
     case 5:
-      return B_VL_PRED;
+      return B_D63_PRED;
     case 7:
-      return B_HU_PRED;
+      return B_D27_PRED;
     default:
       assert(0);
   }
@@ -126,21 +126,21 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
 
   switch (imin) {
     case 0:
-      return B_HE_PRED;
+      return B_H_PRED;
     case 1:
-      return B_HD_PRED;
+      return B_D153_PRED;
     case 2:
-      return B_RD_PRED;
+      return B_D135_PRED;
     case 3:
-      return B_VR_PRED;
+      return B_D117_PRED;
     case 4:
-      return B_VE_PRED;
+      return B_V_PRED;
     case 5:
-      return B_VL_PRED;
+      return B_D63_PRED;
     case 6:
-      return B_LD_PRED;
+      return B_D45_PRED;
     case 7:
-      return B_HU_PRED;
+      return B_D27_PRED;
     default:
       assert(0);
   }
@@ -293,7 +293,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
     }
     break;
 
-    case B_VE_PRED: {
+    case B_V_PRED: {
       unsigned int ap[4];
 
       ap[0] = above[0];
@@ -311,7 +311,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
     }
     break;
 
-    case B_HE_PRED: {
+    case B_H_PRED: {
       unsigned int lp[4];
 
       lp[0] = left[0];
@@ -328,7 +328,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
       }
     }
     break;
-    case B_LD_PRED: {
+    case B_D45_PRED: {
       uint8_t *ptr = above;
 
       predictor[0 * ps + 0] = (ptr[0] + ptr[1] * 2 + ptr[2] + 2) >> 2;
@@ -350,7 +350,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
 
     }
     break;
-    case B_RD_PRED: {
+    case B_D135_PRED: {
       uint8_t pp[9];
 
       pp[0] = left[3];
@@ -382,7 +382,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
 
     }
     break;
-    case B_VR_PRED: {
+    case B_D117_PRED: {
       uint8_t pp[9];
 
       pp[0] = left[3];
@@ -414,7 +414,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
 
     }
     break;
-    case B_VL_PRED: {
+    case B_D63_PRED: {
       uint8_t *pp = above;
 
       predictor[0 * ps + 0] = (pp[0] + pp[1] + 1) >> 1;
@@ -436,7 +436,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
     }
     break;
 
-    case B_HD_PRED: {
+    case B_D153_PRED: {
       uint8_t pp[9];
 
       pp[0] = left[3];
@@ -470,7 +470,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
     break;
 
 
-    case B_HU_PRED: {
+    case B_D27_PRED: {
       uint8_t *pp = left;
       predictor[0 * ps + 0] = (pp[0] + pp[1] + 1) >> 1;
       predictor[0 * ps + 1] = (pp[0] + pp[1] * 2 + pp[2] + 2) >> 2;
