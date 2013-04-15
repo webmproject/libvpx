@@ -1560,6 +1560,27 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
     cpi->fn_ptr[BT].sdx8f          = SDX8F; \
     cpi->fn_ptr[BT].sdx4df         = SDX4DF;
 
+#if CONFIG_SBSEGMENT
+  BFP(BLOCK_32X16, vp9_sad32x16, vp9_variance32x16, vp9_sub_pixel_variance32x16,
+      NULL, NULL,
+      NULL, NULL, NULL,
+      vp9_sad32x16x4d)
+
+  BFP(BLOCK_16X32, vp9_sad16x32, vp9_variance16x32, vp9_sub_pixel_variance16x32,
+      NULL, NULL,
+      NULL, NULL, NULL,
+      vp9_sad16x32x4d)
+
+  BFP(BLOCK_64X32, vp9_sad64x32, vp9_variance64x32, vp9_sub_pixel_variance64x32,
+      NULL, NULL,
+      NULL, NULL, NULL,
+      vp9_sad64x32x4d)
+
+  BFP(BLOCK_32X64, vp9_sad32x64, vp9_variance32x64, vp9_sub_pixel_variance32x64,
+      NULL, NULL,
+      NULL, NULL, NULL,
+      vp9_sad32x64x4d)
+#endif
 
   BFP(BLOCK_32X32, vp9_sad32x32, vp9_variance32x32, vp9_sub_pixel_variance32x32,
       vp9_variance_halfpixvar32x32_h, vp9_variance_halfpixvar32x32_v,
