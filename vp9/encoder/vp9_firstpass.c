@@ -1219,7 +1219,7 @@ static int detect_transition_to_still(
   int still_interval,
   double loop_decay_rate,
   double last_decay_rate) {
-  int trans_to_still = FALSE;
+  int trans_to_still = 0;
 
   // Break clause to detect very still sections after motion
   // For example a static image after a fade or other transition
@@ -1248,7 +1248,7 @@ static int detect_transition_to_still(
 
     // Only if it does do we signal a transition to still
     if (j == still_interval)
-      trans_to_still = TRUE;
+      trans_to_still = 1;
   }
 
   return trans_to_still;
@@ -1260,7 +1260,7 @@ static int detect_transition_to_still(
 static int detect_flash(VP9_COMP *cpi, int offset) {
   FIRSTPASS_STATS next_frame;
 
-  int flash_detected = FALSE;
+  int flash_detected = 0;
 
   // Read the frame data.
   // The return is FALSE (no flash detected) if not a valid frame
@@ -1272,7 +1272,7 @@ static int detect_flash(VP9_COMP *cpi, int offset) {
     // comapred to pcnt_inter.
     if ((next_frame.pcnt_second_ref > next_frame.pcnt_inter) &&
         (next_frame.pcnt_second_ref >= 0.5)) {
-      flash_detected = TRUE;
+      flash_detected = 1;
     }
   }
 
@@ -1372,7 +1372,7 @@ static int calc_arf_boost(
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   int arf_boost;
-  int flash_detected = FALSE;
+  int flash_detected = 0;
 
   // Search forward from the proposed arf/next gf position
   for (i = 0; i < f_frames; i++) {
@@ -1612,12 +1612,12 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
 
   if (cpi->twopass.frames_to_key <= (FIXED_ARF_GROUP_SIZE + 8)) {
     // Setup a GF group close to the keyframe.
-    cpi->source_alt_ref_pending = FALSE;
+    cpi->source_alt_ref_pending = 0;
     cpi->baseline_gf_interval = cpi->twopass.frames_to_key;
     schedule_frames(cpi, 0, (cpi->baseline_gf_interval - 1), 2, 0, 0);
   } else {
     // Setup a fixed period ARF group.
-    cpi->source_alt_ref_pending = TRUE;
+    cpi->source_alt_ref_pending = 1;
     cpi->baseline_gf_interval = FIXED_ARF_GROUP_SIZE;
     schedule_frames(cpi, 0, -(cpi->baseline_gf_interval - 1), 2, 1, 0);
   }
@@ -1762,7 +1762,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // (for example a static image after a fade or other transition).
       if (detect_transition_to_still(cpi, i, 5, loop_decay_rate,
                                      last_loop_decay_rate)) {
-        allow_alt_ref = FALSE;
+        allow_alt_ref = 0;
         break;
       }
     }
@@ -1840,7 +1840,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       (boost_score > 100)) {
     // Alternative boost calculation for alt ref
     cpi->gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost, &b_boost);
-    cpi->source_alt_ref_pending = TRUE;
+    cpi->source_alt_ref_pending = 1;
 
 #if CONFIG_MULTIPLE_ARF
     // Set the ARF schedule.
@@ -1850,7 +1850,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #endif
   } else {
     cpi->gfu_boost = (int)boost_score;
-    cpi->source_alt_ref_pending = FALSE;
+    cpi->source_alt_ref_pending = 0;
 #if CONFIG_MULTIPLE_ARF
     // Set the GF schedule.
     if (cpi->multi_arf_enabled) {
@@ -2333,7 +2333,7 @@ static int test_candidate_kf(VP9_COMP *cpi,
                              FIRSTPASS_STATS *last_frame,
                              FIRSTPASS_STATS *this_frame,
                              FIRSTPASS_STATS *next_frame) {
-  int is_viable_kf = FALSE;
+  int is_viable_kf = 0;
 
   // Does the frame satisfy the primary criteria of a key frame
   //      If so, then examine how well it predicts subsequent frames
@@ -2405,12 +2405,12 @@ static int test_candidate_kf(VP9_COMP *cpi,
     // If there is tolerable prediction for at least the next 3 frames then
     // break out else discard this potential key frame and move on
     if (boost_score > 30.0 && (i > 3))
-      is_viable_kf = TRUE;
+      is_viable_kf = 1;
     else {
       // Reset the file position
       reset_fpf_position(cpi, start_pos);
 
-      is_viable_kf = FALSE;
+      is_viable_kf = 0;
     }
   }
 
@@ -2446,7 +2446,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   cpi->this_key_frame_forced = cpi->next_key_frame_forced;
 
   // Clear the alt ref active flag as this can never be active on a key frame
-  cpi->source_alt_ref_active = FALSE;
+  cpi->source_alt_ref_active = 0;
 
   // Kf is always a gf so clear frames till next gf counter
   cpi->frames_till_gf_update_due = 0;
@@ -2554,9 +2554,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Reset to the start of the group
     reset_fpf_position(cpi, current_pos);
 
-    cpi->next_key_frame_forced = TRUE;
+    cpi->next_key_frame_forced = 1;
   } else
-    cpi->next_key_frame_forced = FALSE;
+    cpi->next_key_frame_forced = 0;
 
   // Special case for the last frame of the file
   if (cpi->twopass.stats_in >= cpi->twopass.stats_in_end) {

@@ -21,9 +21,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_enums.h"
 
-#define TRUE    1
-#define FALSE   0
-
 // #define MODE_STATS
 
 #define MB_FEATURE_TREE_PROBS   3

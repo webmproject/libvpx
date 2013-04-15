@@ -386,7 +386,7 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
   int i;
   int best_index = 0;
   int cost, cost2;
-  int zero_seen = (mv_ref_list[0].as_int) ? FALSE : TRUE;
+  int zero_seen = (mv_ref_list[0].as_int) ? 0 : 1;
   MACROBLOCKD *xd = &x->e_mbd;
   int max_mv = MV_MAX;
 
@@ -401,7 +401,7 @@ static unsigned int pick_best_mv_ref(MACROBLOCK *x,
       if (zero_seen)
         break;
       else
-        zero_seen = TRUE;
+        zero_seen = 1;
     }
 
     // Check for cases where the reference choice would give rise to an
@@ -1158,7 +1158,7 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
     cpi->mb.e_mbd.inv_txm4x4      = vp9_short_iwalsh4x4;
     cpi->mb.optimize              = 0;
     cpi->common.filter_level      = 0;
-    cpi->zbin_mode_boost_enabled  = FALSE;
+    cpi->zbin_mode_boost_enabled  = 0;
     cpi->common.txfm_mode         = ONLY_4X4;
   } else {
     cpi->mb.fwd_txm8x4            = vp9_short_fdct8x4;

@@ -1460,11 +1460,11 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   cpi->frames_since_key = 8;        // Give a sensible default for the first frame.
   cpi->key_frame_frequency = cpi->oxcf.key_freq;
-  cpi->this_key_frame_forced = FALSE;
-  cpi->next_key_frame_forced = FALSE;
+  cpi->this_key_frame_forced = 0;
+  cpi->next_key_frame_forced = 0;
 
-  cpi->source_alt_ref_pending = FALSE;
-  cpi->source_alt_ref_active = FALSE;
+  cpi->source_alt_ref_pending = 0;
+  cpi->source_alt_ref_active = 0;
   cpi->refresh_alt_ref_frame = 0;
 
 #if CONFIG_MULTIPLE_ARF
@@ -2249,10 +2249,10 @@ static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
   if (!cpi->multi_arf_enabled)
 #endif
     // Clear the alternate reference update pending flag.
-    cpi->source_alt_ref_pending = FALSE;
+    cpi->source_alt_ref_pending = 0;
 
   // Set the alternate reference frame active flag
-  cpi->source_alt_ref_active = TRUE;
+  cpi->source_alt_ref_active = 1;
 
 
 }
@@ -2289,12 +2289,12 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
     // If we are going to use the ALT reference for the next group of frames set a flag to say so.
     if (cpi->oxcf.fixed_q >= 0 &&
         cpi->oxcf.play_alternate && !cpi->refresh_alt_ref_frame) {
-      cpi->source_alt_ref_pending = TRUE;
+      cpi->source_alt_ref_pending = 1;
       cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
     }
 
     if (!cpi->source_alt_ref_pending)
-      cpi->source_alt_ref_active = FALSE;
+      cpi->source_alt_ref_active = 0;
 
     // Decrement count down till next gf
     if (cpi->frames_till_gf_update_due > 0)
@@ -2413,7 +2413,7 @@ static double compute_edge_pixel_proportion(YV12_BUFFER_CONFIG *frame) {
 static int recode_loop_test(VP9_COMP *cpi,
                             int high_limit, int low_limit,
                             int q, int maxq, int minq) {
-  int force_recode = FALSE;
+  int force_recode = 0;
   VP9_COMMON *cm = &cpi->common;
 
   // Is frame recode allowed at all
@@ -2427,19 +2427,19 @@ static int recode_loop_test(VP9_COMP *cpi,
     // General over and under shoot tests
     if (((cpi->projected_frame_size > high_limit) && (q < maxq)) ||
         ((cpi->projected_frame_size < low_limit) && (q > minq))) {
-      force_recode = TRUE;
+      force_recode = 1;
     }
     // Special Constrained quality tests
     else if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
       // Undershoot and below auto cq level
       if (q > cpi->cq_target_quality &&
           cpi->projected_frame_size < ((cpi->this_frame_target * 7) >> 3)) {
-        force_recode = TRUE;
+        force_recode = 1;
       } else if (q > cpi->oxcf.cq_level &&
                  cpi->projected_frame_size < cpi->min_frame_bandwidth &&
                  cpi->active_best_quality > cpi->oxcf.cq_level) {
         // Severe undershoot and between auto and user cq level
-        force_recode = TRUE;
+        force_recode = 1;
         cpi->active_best_quality = cpi->oxcf.cq_level;
       }
     }
@@ -2627,7 +2627,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   int frame_over_shoot_limit;
   int frame_under_shoot_limit;
 
-  int loop = FALSE;
+  int loop = 0;
   int loop_count;
 
   int q_low;
@@ -2635,10 +2635,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   int top_index;
   int bottom_index;
-  int active_worst_qchanged = FALSE;
+  int active_worst_qchanged = 0;
 
-  int overshoot_seen = FALSE;
-  int undershoot_seen = FALSE;
+  int overshoot_seen = 0;
+  int undershoot_seen = 0;
 
   SPEED_FEATURES *sf = &cpi->sf;
 #if RESET_FOREACH_FILTER
@@ -2698,9 +2698,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->zbin_mode_boost = 0;
 
   // if (cpi->oxcf.lossless)
-    cpi->zbin_mode_boost_enabled = FALSE;
+    cpi->zbin_mode_boost_enabled = 0;
   // else
-  //   cpi->zbin_mode_boost_enabled = TRUE;
+  //   cpi->zbin_mode_boost_enabled = 1;
 
   // Current default encoder behaviour for the altref sign bias
     cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = cpi->source_alt_ref_active;
@@ -2732,7 +2732,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
 
     // The alternate reference frame cannot be active for a key frame
-    cpi->source_alt_ref_active = FALSE;
+    cpi->source_alt_ref_active = 0;
 
     // Reset the RD threshold multipliers to default of * 1 (128)
     for (i = 0; i < MAX_MODES; i++)
@@ -3074,7 +3074,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
     if (frame_over_shoot_limit == 0)
       frame_over_shoot_limit = 1;
-    active_worst_qchanged = FALSE;
+    active_worst_qchanged = 0;
 
     // Special case handling for forced key frames
     if ((cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced) {
@@ -3153,7 +3153,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
           }
         }
 
-        overshoot_seen = TRUE;
+        overshoot_seen = 1;
       } else {
         // Frame is too small
         q_high = q > q_low ? q - 1 : q_low;
@@ -3186,7 +3186,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
           }
         }
 
-        undershoot_seen = TRUE;
+        undershoot_seen = 1;
       }
 
       // Clamp Q to upper and lower limits:
@@ -3194,11 +3194,11 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
       loop = q != last_q;
     } else {
-      loop = FALSE;
+      loop = 0;
     }
 
     if (cpi->is_src_frame_alt_ref)
-      loop = FALSE;
+      loop = 0;
 
     if (!loop && cm->frame_type != KEY_FRAME && sf->search_best_filter) {
       if (mcomp_filter_index < mcomp_filters) {
@@ -3211,7 +3211,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         if (mcomp_filter_index < mcomp_filters) {
           cm->mcomp_filter_type = mcomp_filters_to_search[mcomp_filter_index];
           loop_count = -1;
-          loop = TRUE;
+          loop = 1;
         } else {
           int f;
           int64_t best_cost = mcomp_filter_cost[0];
@@ -3224,7 +3224,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
           }
           if (mcomp_best_filter != mcomp_filters_to_search[mcomp_filters - 1]) {
             loop_count = -1;
-            loop = TRUE;
+            loop = 1;
             cm->mcomp_filter_type = mcomp_best_filter;
           }
           /*
@@ -3235,8 +3235,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         }
 #if RESET_FOREACH_FILTER
         if (loop) {
-          overshoot_seen = FALSE;
-          undershoot_seen = FALSE;
+          overshoot_seen = 0;
+          undershoot_seen = 0;
           q_low = q_low0;
           q_high = q_high0;
           q = Q0;
@@ -3816,7 +3816,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 #if CONFIG_MULTIPLE_ARF
       if (!cpi->multi_arf_enabled)
 #endif
-        cpi->source_alt_ref_pending = FALSE;   // Clear Pending altf Ref flag.
+        cpi->source_alt_ref_pending = 0;   // Clear Pending altf Ref flag.
     }
   }
 
@@ -3829,11 +3829,11 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
 #if CONFIG_MULTIPLE_ARF
       // Is this frame the ARF overlay.
-      cpi->is_src_frame_alt_ref = FALSE;
+      cpi->is_src_frame_alt_ref = 0;
       for (i = 0; i < cpi->arf_buffered; ++i) {
         if (cpi->source == cpi->alt_ref_source[i]) {
-          cpi->is_src_frame_alt_ref = TRUE;
-          cpi->refresh_golden_frame = TRUE;
+          cpi->is_src_frame_alt_ref = 1;
+          cpi->refresh_golden_frame = 1;
           break;
         }
       }
