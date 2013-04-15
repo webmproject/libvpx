@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//1WU\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 808,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-04-15T18:08:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXH//2AM\u003d",
+      "revId": "c253d31bb49c5431c8ff9502e53b64e6c599267f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//2AI\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXH//1WQ\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-04-15T18:08:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXH//2AI\u003d",
+      "revId": "c253d31bb49c5431c8ff9502e53b64e6c599267f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXH//2AE\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2013-04-13T20:50:11Z",
       "side": 1,
       "message": "it\u0027s not a big problem, but this pattern:\n\n  obj-\u003efunc(obj, ...)\n\nis a littler safer with a wrapper function or macro:\n\n  func(obj, arg1, arg2) {\n    obj-\u003efunc(arg1, arg2);\n  }\n\nTo avoid ever accidentally using obj1 to look up func and calling it with a different obj2.\n\nie, you could keep the existing scaled_buffer_offset function,and make it do the scale-\u003escaled_buffer_offset(x,y,stride,scale) that would dispatch to the scaled or non-scaled version as appropriate. Probably makes this change a little smaller too, since you wouldn\u0027t have to change the uses of these functions, only the functions themselves. Up to you.",
+      "revId": "c253d31bb49c5431c8ff9502e53b64e6c599267f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//1Us\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1209,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-04-15T18:08:27Z",
+      "side": 1,
+      "message": "Use function pointers, then we only need to make size comparison at frame level. If we make changes in the functions, we have to do size comparison every time we call the functions.\n\nDid some changes to make the code clear. Thanks.",
+      "parentUuid": "AAAAXH//2AE\u003d",
       "revId": "c253d31bb49c5431c8ff9502e53b64e6c599267f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
