@@ -561,10 +561,10 @@ void vp9_encode_nmv(vp9_writer* const bc, const MV* const mv,
   MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
   write_token(bc, vp9_mv_joint_tree, mvctx->joints,
               vp9_mv_joint_encodings + j);
-  if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
+  if (mv_joint_vertical(j)) {
     encode_nmv_component(bc, mv->row, ref->col, &mvctx->comps[0]);
   }
-  if (j == MV_JOINT_HNZVZ || j == MV_JOINT_HNZVNZ) {
+  if (mv_joint_horizontal(j)) {
     encode_nmv_component(bc, mv->col, ref->col, &mvctx->comps[1]);
   }
 }
@@ -574,10 +574,10 @@ void vp9_encode_nmv_fp(vp9_writer* const bc, const MV* const mv,
                        int usehp) {
   MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
   usehp = usehp && vp9_use_nmv_hp(ref);
-  if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
+  if (mv_joint_vertical(j)) {
     encode_nmv_component_fp(bc, mv->row, ref->row, &mvctx->comps[0], usehp);
   }
-  if (j == MV_JOINT_HNZVZ || j == MV_JOINT_HNZVNZ) {
+  if (mv_joint_horizontal(j)) {
     encode_nmv_component_fp(bc, mv->col, ref->col, &mvctx->comps[1], usehp);
   }
 }

@@ -212,10 +212,10 @@ void vp9_increment_nmv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
   const MV_JOINT_TYPE type = vp9_get_mv_joint(*mv);
   mvctx->joints[type]++;
   usehp = usehp && vp9_use_nmv_hp(ref);
-  if (type == MV_JOINT_HZVNZ || type == MV_JOINT_HNZVNZ)
+  if (mv_joint_vertical(type))
     increment_nmv_component_count(mv->row, &mvctx->comps[0], 1, usehp);
 
-  if (type == MV_JOINT_HNZVZ || type == MV_JOINT_HNZVNZ)
+  if (mv_joint_horizontal(type))
     increment_nmv_component_count(mv->col, &mvctx->comps[1], 1, usehp);
 }
 
