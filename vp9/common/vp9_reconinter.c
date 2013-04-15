@@ -399,7 +399,7 @@ static void build_2x1_inter_predictor_wh(const BLOCKD *d0, const BLOCKD *d1,
                                          int row, int col) {
   struct scale_factors * scale = &s[which_mv];
 
-  assert(d1->predictor - d0->predictor == block_size);
+  assert(d1->dst - d0->dst == block_size);
   assert(d1->pre == d0->pre + block_size);
 
   scale->set_scaled_offsets(scale, row, col);
@@ -446,11 +446,11 @@ static void build_2x1_inter_predictor(const BLOCKD *d0, const BLOCKD *d1,
                                       int block_size, int stride,
                                       int which_mv, int weight,
                                       const struct subpix_fn_table *subpix,
-                                      int row, int col, int use_dst) {
-  uint8_t *d0_predictor = use_dst ? *(d0->base_dst) + d0->dst : d0->predictor;
-  uint8_t *d1_predictor = use_dst ? *(d1->base_dst) + d1->dst : d1->predictor;
+                                      int row, int col) {
+  uint8_t *d0_predictor = *(d0->base_dst) + d0->dst;
+  uint8_t *d1_predictor = *(d1->base_dst) + d1->dst;
   struct scale_factors * scale = &s[which_mv];
-  stride = use_dst ? d0->dst_stride : stride;
+  stride = d0->dst_stride;
 
   assert(d1_predictor - d0_predictor == block_size);
   assert(d1->pre == d0->pre + block_size);
@@ -1338,8 +1338,7 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *mb,
 }
 
 static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
-                                         int mb_row, int mb_col,
-                                         int use_dst) {
+                                         int mb_row, int mb_col) {
   int i;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
   BLOCKD *blockd = xd->block;
@@ -1368,8 +1367,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
 
         build_2x1_inter_predictor(d0, d1, xd->scale_factor, 8, 16, which_mv,
                                   which_mv ? weight : 0,
-                                  &xd->subpix, mb_row * 16 + y, mb_col * 16,
-                                  use_dst);
+                                  &xd->subpix, mb_row * 16 + y, mb_col * 16);
       }
     }
   } else {
@@ -1386,8 +1384,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
         build_2x1_inter_predictor(d0, d1, xd->scale_factor, 4, 16, which_mv,
                                   which_mv ? weight : 0,
                                   &xd->subpix,
-                                  mb_row * 16 + y, mb_col * 16 + x,
-                                  use_dst);
+                                  mb_row * 16 + y, mb_col * 16 + x);
       }
     }
   }
@@ -1405,8 +1402,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
     for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
       build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
                                 which_mv ? weight : 0, &xd->subpix,
-                                mb_row * 8 + y, mb_col * 8 + x,
-                                use_dst);
+                                mb_row * 8 + y, mb_col * 8 + x);
     }
   }
 }
@@ -1493,58 +1489,17 @@ static void build_4x4uvmvs(MACROBLOCKD *xd) {
   }
 }
 
-void vp9_build_inter16x16_predictors_mb(MACROBLOCKD *xd,
-                                        uint8_t *dst_y,
-                                        uint8_t *dst_u,
-                                        uint8_t *dst_v,
-                                        int dst_ystride,
-                                        int dst_uvstride,
-                                        int mb_row,
-                                        int mb_col) {
-  vp9_build_inter16x16_predictors_mby(xd, dst_y, dst_ystride, mb_row, mb_col);
-  vp9_build_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride,
-                                       mb_row, mb_col);
-#if CONFIG_COMP_INTERINTRA_PRED
-  if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
-    vp9_build_interintra_16x16_predictors_mb(xd, dst_y, dst_u, dst_v,
-                                             dst_ystride, dst_uvstride);
-  }
-#endif
-}
-
 void vp9_build_inter_predictors_mb(MACROBLOCKD *xd,
                                    int mb_row,
                                    int mb_col) {
   if (xd->mode_info_context->mbmi.mode != SPLITMV) {
-    // TODO(jingning): to be replaced with vp9_build_inter_predictors_sb() when
-    // converting buffers from predictors to dst.
-    vp9_build_inter16x16_predictors_mb(xd, xd->predictor,
-                                       &xd->predictor[256],
-                                       &xd->predictor[320], 16, 8,
-                                       mb_row, mb_col);
-
+    vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
   } else {
     build_4x4uvmvs(xd);
-    build_inter4x4_predictors_mb(xd, mb_row, mb_col, 0);
+    build_inter4x4_predictors_mb(xd, mb_row, mb_col);
   }
 }
 
-void vp9_build_inter_predictors_mb_s(MACROBLOCKD *xd,
-                                   int mb_row,
-                                   int mb_col) {
-  if (xd->mode_info_context->mbmi.mode != SPLITMV) {
-    vp9_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
-                                       xd->dst.u_buffer,
-                                       xd->dst.v_buffer,
-                                       xd->dst.y_stride,
-                                       xd->dst.uv_stride,
-                                       mb_row, mb_col);
-
-  } else {
-    build_4x4uvmvs(xd);
-    build_inter4x4_predictors_mb(xd, mb_row, mb_col, 1);
-  }
-}
 /*encoder only*/
 void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
                                         int mb_row, int mb_col) {
@@ -1593,8 +1548,7 @@ void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
     for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
       build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
                                 which_mv ? weight : 0,
-                                &xd->subpix, mb_row * 8 + y, mb_col * 8 + x,
-                                0);
+                                &xd->subpix, mb_row * 8 + y, mb_col * 8 + x);
     }
   }
 }

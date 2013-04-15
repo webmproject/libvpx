@@ -73,15 +73,15 @@ static void build_intra_predictors_mbuv_x86(MACROBLOCKD *xd,
 }
 
 void vp9_build_intra_predictors_mbuv_sse2(MACROBLOCKD *xd) {
-  build_intra_predictors_mbuv_x86(xd, &xd->predictor[256],
-                                  &xd->predictor[320], 8,
+  build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
+                                  xd->dst.v_buffer, xd->dst.uv_stride,
                                   vp9_intra_pred_uv_tm_sse2,
                                   vp9_intra_pred_uv_ho_mmx2);
 }
 
 void vp9_build_intra_predictors_mbuv_ssse3(MACROBLOCKD *xd) {
-  build_intra_predictors_mbuv_x86(xd, &xd->predictor[256],
-                                  &xd->predictor[320], 8,
+  build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
+                                  xd->dst.v_buffer, xd->dst.uv_stride,
                                   vp9_intra_pred_uv_tm_ssse3,
                                   vp9_intra_pred_uv_ho_ssse3);
 }

@@ -78,7 +78,6 @@ void vp9_setup_block_dptrs(MACROBLOCKD *mb) {
       const int to = r * 4 + c;
       const int from = r * 4 * 16 + c * 4;
       blockd[to].diff = &mb->diff[from];
-      blockd[to].predictor = &mb->predictor[from];
     }
   }
 
@@ -87,7 +86,6 @@ void vp9_setup_block_dptrs(MACROBLOCKD *mb) {
       const int to = 16 + r * 2 + c;
       const int from = 256 + r * 4 * 8 + c * 4;
       blockd[to].diff = &mb->diff[from];
-      blockd[to].predictor = &mb->predictor[from];
     }
   }
 
@@ -96,7 +94,6 @@ void vp9_setup_block_dptrs(MACROBLOCKD *mb) {
       const int to = 20 + r * 2 + c;
       const int from = 320 + r * 4 * 8 + c * 4;
       blockd[to].diff = &mb->diff[from];
-      blockd[to].predictor = &mb->predictor[from];
     }
   }
 

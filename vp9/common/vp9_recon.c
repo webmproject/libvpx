@@ -32,22 +32,22 @@ static INLINE void recon(int rows, int cols,
 
 void vp9_recon_b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                    int stride) {
-  recon(4, 4, pred_ptr, 16, diff_ptr, 16, dst_ptr, stride);
+  recon(4, 4, pred_ptr, stride, diff_ptr, 16, dst_ptr, stride);
 }
 
 void vp9_recon_uv_b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                       int stride) {
-  recon(4, 4, pred_ptr, 8, diff_ptr, 8, dst_ptr, stride);
+  recon(4, 4, pred_ptr, stride, diff_ptr, 8, dst_ptr, stride);
 }
 
 void vp9_recon4b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                    int stride) {
-  recon(4, 16, pred_ptr, 16, diff_ptr, 16, dst_ptr, stride);
+  recon(4, 16, pred_ptr, stride, diff_ptr, 16, dst_ptr, stride);
 }
 
 void vp9_recon2b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                    int stride) {
-  recon(4, 8, pred_ptr, 8, diff_ptr, 8, dst_ptr, stride);
+  recon(4, 8, pred_ptr, stride, diff_ptr, 8, dst_ptr, stride);
 }
 
 void vp9_recon_sby_s_c(MACROBLOCKD *mb, uint8_t *dst,
@@ -95,7 +95,8 @@ void vp9_recon_mby_c(MACROBLOCKD *xd) {
   for (i = 0; i < 16; i += 4) {
     BLOCKD *b = &xd->block[i];
 
-    vp9_recon4b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    vp9_recon4b(*(b->base_dst) + b->dst, b->diff,
+                *(b->base_dst) + b->dst, b->dst_stride);
   }
 }
 
@@ -104,13 +105,13 @@ void vp9_recon_mb_c(MACROBLOCKD *xd) {
 
   for (i = 0; i < 16; i += 4) {
     BLOCKD *b = &xd->block[i];
-
-    vp9_recon4b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    vp9_recon4b(*(b->base_dst) + b->dst, b->diff,
+                *(b->base_dst) + b->dst, b->dst_stride);
   }
 
   for (i = 16; i < 24; i += 2) {
     BLOCKD *b = &xd->block[i];
-
-    vp9_recon2b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    vp9_recon2b(*(b->base_dst) + b->dst, b->diff,
+                *(b->base_dst) + b->dst, b->dst_stride);
   }
 }

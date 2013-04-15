@@ -273,7 +273,8 @@ void vp9_recon_intra_mbuv(MACROBLOCKD *xd) {
   int i;
   for (i = 16; i < 24; i += 2) {
     BLOCKD *b = &xd->block[i];
-    vp9_recon2b(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    vp9_recon2b(*(b->base_dst) + b->dst, b->diff,
+                *(b->base_dst) + b->dst, b->dst_stride);
   }
 }
 
@@ -756,40 +757,6 @@ void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd,
                              xd->mode_info_context->mbmi.uv_mode,
                              bw, bh, xd->up_available,
                              xd->left_available, xd->right_available);
-}
-
-// TODO(jingning): merge mby and mbuv into the above sby and sbmu functions
-void vp9_build_intra_predictors_mby(MACROBLOCKD *xd) {
-  vp9_build_intra_predictors(xd->dst.y_buffer, xd->dst.y_stride,
-                             xd->predictor, 16,
-                             xd->mode_info_context->mbmi.mode,
-                             16, 16,
-                             xd->up_available, xd->left_available,
-                             xd->right_available);
-}
-
-void vp9_build_intra_predictors_mbuv_internal(MACROBLOCKD *xd,
-                                              uint8_t *upred_ptr,
-                                              uint8_t *vpred_ptr,
-                                              int uv_stride,
-                                              int mode, int bsize) {
-  vp9_build_intra_predictors(xd->dst.u_buffer, xd->dst.uv_stride,
-                             upred_ptr, uv_stride, mode,
-                             bsize, bsize,
-                             xd->up_available, xd->left_available,
-                             xd->right_available);
-  vp9_build_intra_predictors(xd->dst.v_buffer, xd->dst.uv_stride,
-                             vpred_ptr, uv_stride, mode,
-                             bsize, bsize,
-                             xd->up_available, xd->left_available,
-                             xd->right_available);
-}
-
-void vp9_build_intra_predictors_mbuv(MACROBLOCKD *xd) {
-  vp9_build_intra_predictors_mbuv_internal(xd, &xd->predictor[256],
-                                           &xd->predictor[320], 8,
-                                           xd->mode_info_context->mbmi.uv_mode,
-                                           8);
 }
 
 void vp9_intra8x8_predict(MACROBLOCKD *xd,
