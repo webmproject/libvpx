@@ -277,26 +277,6 @@ typedef struct {
   int static_segmentation;
 } SPEED_FEATURES;
 
-typedef struct {
-  MACROBLOCK  mb;
-  int totalrate;
-} MB_ROW_COMP;
-
-typedef struct {
-  TOKENEXTRA *start;
-  TOKENEXTRA *stop;
-} TOKENLIST;
-
-typedef struct {
-  int ithread;
-  void *ptr1;
-  void *ptr2;
-} ENCODETHREAD_DATA;
-typedef struct {
-  int ithread;
-  void *ptr1;
-} LPFTHREAD_DATA;
-
 enum BlockSize {
   BLOCK_16X8 = PARTITIONING_16X8,
   BLOCK_8X16 = PARTITIONING_8X16,
