@@ -37,30 +37,68 @@ static void fdct4_1d(int16_t *input, int16_t *output) {
 }
 
 void vp9_short_fdct4x4_c(int16_t *input, int16_t *output, int pitch) {
-  int16_t out[4 * 4];
-  int16_t *outptr = &out[0];
-  const int short_pitch = pitch >> 1;
-  int i, j;
-  int16_t temp_in[4], temp_out[4];
-
-  // Columns
-  for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = input[j * short_pitch + i] << 4;
-    if (i == 0 && temp_in[0])
-      temp_in[0] += 1;
-    fdct4_1d(temp_in, temp_out);
-    for (j = 0; j < 4; ++j)
-      outptr[j * 4 + i] = temp_out[j];
+  // The 2D transform is done with two passes which are actually pretty
+  // similar. In the first one, we transform the columns and transpose
+  // the results. In the second one, we transform the rows. To achieve that,
+  // as the first pass results are transposed, we tranpose the columns (that
+  // is the transposed rows) and transpose the results (so that it goes back
+  // in normal/row positions).
+  const int stride = pitch >> 1;
+  int pass;
+  // We need an intermediate buffer between passes.
+  int16_t intermediate[4 * 4];
+  int16_t *in = input;
+  int16_t *out = intermediate;
+  // Do the two transform/transpose passes
+  for (pass = 0; pass < 2; ++pass) {
+    /*canbe16*/ int input[4];
+    /*canbe16*/ int step[4];
+    /*needs32*/ int temp1, temp2;
+    int i;
+    for (i = 0; i < 4; ++i) {
+      // Load inputs.
+      if (0 == pass) {
+        input[0] = in[0 * stride] << 4;
+        input[1] = in[1 * stride] << 4;
+        input[2] = in[2 * stride] << 4;
+        input[3] = in[3 * stride] << 4;
+        if (i == 0 && input[0]) {
+          input[0] += 1;
+        }
+      } else {
+        input[0] = in[0 * 4];
+        input[1] = in[1 * 4];
+        input[2] = in[2 * 4];
+        input[3] = in[3 * 4];
+      }
+      // Transform.
+      step[0] = input[0] + input[3];
+      step[1] = input[1] + input[2];
+      step[2] = input[1] - input[2];
+      step[3] = input[0] - input[3];
+      temp1 = (step[0] + step[1]) * cospi_16_64;
+      temp2 = (step[0] - step[1]) * cospi_16_64;
+      out[0] = dct_const_round_shift(temp1);
+      out[2] = dct_const_round_shift(temp2);
+      temp1 = step[2] * cospi_24_64 + step[3] * cospi_8_64;
+      temp2 = -step[2] * cospi_8_64 + step[3] * cospi_24_64;
+      out[1] = dct_const_round_shift(temp1);
+      out[3] = dct_const_round_shift(temp2);
+      // Do next column (which is a transposed row in second/horizontal pass)
+      in++;
+      out += 4;
+    }
+    // Setup in/out for next pass.
+    in = intermediate;
+    out = output;
   }
 
-  // Rows
-  for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = out[j + i * 4];
-    fdct4_1d(temp_in, temp_out);
-    for (j = 0; j < 4; ++j)
-        output[j + i * 4] = (temp_out[j] + 1) >> 2;
+  {
+    int i, j;
+    for (i = 0; i < 4; ++i) {
+      for (j = 0; j < 4; ++j)
+        output[j + i * 4] = (output[j + i * 4] + 1) >> 2;
+    }
   }
 }
 
