@@ -72,7 +72,7 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 #if CONFIG_CODE_NONZEROCOUNT
 #define WRITE_COEF_CONTINUE(val, token)                       \
   {                                                           \
-    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(br, val);   \
+    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val);    \
     INCREMENT_COUNT(token);                                   \
     c++;                                                      \
     nzc++;                                                    \
@@ -81,7 +81,7 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 #else
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
-    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(br, val); \
+    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val); \
     INCREMENT_COUNT(token);                              \
     c++;                                                 \
     continue;                                            \
@@ -90,12 +90,12 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
 #define ADJUST_COEF(prob, bits_count)  \
   do {                                 \
-    if (vp9_read(br, prob))            \
+    if (vp9_read(r, prob))             \
       val += 1 << bits_count;          \
   } while (0);
 
 static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
-                        BOOL_DECODER* const br, int block_idx,
+                        vp9_reader *r, int block_idx,
                         PLANE_TYPE type, int seg_eob, int16_t *qcoeff_ptr,
                         TX_SIZE txfm_size) {
   ENTROPY_CONTEXT* const A0 = (ENTROPY_CONTEXT *) xd->above_context;
@@ -270,7 +270,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
 #if CONFIG_CODE_NONZEROCOUNT
     if (!nzc_used)
 #endif
-      if (!vp9_read(br, prob[EOB_CONTEXT_NODE]))
+      if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
         break;
 SKIP_START:
     if (c >= seg_eob)
@@ -281,29 +281,29 @@ SKIP_START:
     // decode zero node only if there are zeros left
     if (!nzc_used || seg_eob - nzc_expected - c + nzc > 0)
 #endif
-    if (!vp9_read(br, prob[ZERO_CONTEXT_NODE])) {
+    if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
       prob = coef_probs[type][ref][get_coef_band(scan, txfm_size, c)][pt];
       goto SKIP_START;
     }
     // ONE_CONTEXT_NODE_0_
-    if (!vp9_read(br, prob[ONE_CONTEXT_NODE])) {
+    if (!vp9_read(r, prob[ONE_CONTEXT_NODE])) {
       WRITE_COEF_CONTINUE(1, ONE_TOKEN);
     }
     // LOW_VAL_CONTEXT_NODE_0_
-    if (!vp9_read(br, prob[LOW_VAL_CONTEXT_NODE])) {
-      if (!vp9_read(br, prob[TWO_CONTEXT_NODE])) {
+    if (!vp9_read(r, prob[LOW_VAL_CONTEXT_NODE])) {
+      if (!vp9_read(r, prob[TWO_CONTEXT_NODE])) {
         WRITE_COEF_CONTINUE(2, TWO_TOKEN);
       }
-      if (!vp9_read(br, prob[THREE_CONTEXT_NODE])) {
+      if (!vp9_read(r, prob[THREE_CONTEXT_NODE])) {
         WRITE_COEF_CONTINUE(3, THREE_TOKEN);
       }
       WRITE_COEF_CONTINUE(4, FOUR_TOKEN);
     }
     // HIGH_LOW_CONTEXT_NODE_0_
-    if (!vp9_read(br, prob[HIGH_LOW_CONTEXT_NODE])) {
-      if (!vp9_read(br, prob[CAT_ONE_CONTEXT_NODE])) {
+    if (!vp9_read(r, prob[HIGH_LOW_CONTEXT_NODE])) {
+      if (!vp9_read(r, prob[CAT_ONE_CONTEXT_NODE])) {
         val = CAT1_MIN_VAL;
         ADJUST_COEF(CAT1_PROB0, 0);
         WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY1);
@@ -314,8 +314,8 @@ SKIP_START:
       WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY2);
     }
     // CAT_THREEFOUR_CONTEXT_NODE_0_
-    if (!vp9_read(br, prob[CAT_THREEFOUR_CONTEXT_NODE])) {
-      if (!vp9_read(br, prob[CAT_THREE_CONTEXT_NODE])) {
+    if (!vp9_read(r, prob[CAT_THREEFOUR_CONTEXT_NODE])) {
+      if (!vp9_read(r, prob[CAT_THREE_CONTEXT_NODE])) {
         val = CAT3_MIN_VAL;
         ADJUST_COEF(CAT3_PROB2, 2);
         ADJUST_COEF(CAT3_PROB1, 1);
@@ -330,7 +330,7 @@ SKIP_START:
       WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY4);
     }
     // CAT_FIVE_CONTEXT_NODE_0_:
-    if (!vp9_read(br, prob[CAT_FIVE_CONTEXT_NODE])) {
+    if (!vp9_read(r, prob[CAT_FIVE_CONTEXT_NODE])) {
       val = CAT5_MIN_VAL;
       ADJUST_COEF(CAT5_PROB4, 4);
       ADJUST_COEF(CAT5_PROB3, 3);
@@ -341,7 +341,7 @@ SKIP_START:
     }
     val = 0;
     while (*cat6) {
-      val = (val << 1) | vp9_read(br, *cat6++);
+      val = (val << 1) | vp9_read(r, *cat6++);
     }
     val += CAT6_MIN_VAL;
     WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY6);
@@ -398,7 +398,7 @@ static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
 struct decode_block_args {
   VP9D_COMP *pbi;
   MACROBLOCKD *xd;
-  BOOL_DECODER *bc;
+  vp9_reader *r;
   int *eobtotal;
 };
 static void decode_block(int plane, int block,
@@ -416,7 +416,7 @@ static void decode_block(int plane, int block,
   const int seg_eob = get_eob(arg->xd, segment_id, 16 << ss_txfrm_size);
   int16_t* const qcoeff_base = arg->xd->plane[plane].qcoeff;
 
-  const int eob = decode_coefs(arg->pbi, arg->xd, arg->bc, old_block_idx,
+  const int eob = decode_coefs(arg->pbi, arg->xd, arg->r, old_block_idx,
                                arg->xd->plane[plane].plane_type, seg_eob,
                                BLOCK_OFFSET(qcoeff_base, block, 16),
                                ss_tx_size);
@@ -427,20 +427,20 @@ static void decode_block(int plane, int block,
 
 int vp9_decode_tokens(VP9D_COMP* const pbi,
                          MACROBLOCKD* const xd,
-                         BOOL_DECODER* const bc,
+                         vp9_reader *r,
                          BLOCK_SIZE_TYPE bsize) {
   int eobtotal = 0;
-  struct decode_block_args args = {pbi, xd, bc, &eobtotal};
+  struct decode_block_args args = {pbi, xd, r, &eobtotal};
   foreach_transformed_block(xd, bsize, decode_block, &args);
   return eobtotal;
 }
 
 #if CONFIG_NEWBINTRAMODES
 static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
-                            BOOL_DECODER* const bc,
+                            vp9_reader *r,
                             PLANE_TYPE type, int i, int seg_eob) {
   const struct plane_block_idx pb_idx = plane_block_idx(16, i);
-  const int c = decode_coefs(dx, xd, bc, i, type, seg_eob,
+  const int c = decode_coefs(dx, xd, r, i, type, seg_eob,
       BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16), TX_4X4);
   xd->plane[pb_idx.plane].eobs[pb_idx.block] = c;
   return c;
@@ -448,31 +448,31 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
 
 static int decode_mb_tokens_4x4_uv(VP9D_COMP* const dx,
                                    MACROBLOCKD* const xd,
-                                   BOOL_DECODER* const bc,
+                                   vp9_reader *r,
                                    int seg_eob) {
   int i, eobtotal = 0;
 
   // chroma blocks
   for (i = 16; i < 24; i++)
-    eobtotal += decode_coefs_4x4(dx, xd, bc, PLANE_TYPE_UV, i, seg_eob);
+    eobtotal += decode_coefs_4x4(dx, xd, r, PLANE_TYPE_UV, i, seg_eob);
 
   return eobtotal;
 }
 
 int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx,
                                 MACROBLOCKD* const xd,
-                                BOOL_DECODER* const bc) {
+                                vp9_reader *r) {
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int seg_eob = get_eob(xd, segment_id, 16);
 
-  return decode_mb_tokens_4x4_uv(dx, xd, bc, seg_eob);
+  return decode_mb_tokens_4x4_uv(dx, xd, r, seg_eob);
 }
 
 int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
-                         BOOL_DECODER* const bc,
+                         vp9_reader *r,
                          PLANE_TYPE type, int i) {
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int seg_eob = get_eob(xd, segment_id, 16);
-  return decode_coefs_4x4(dx, xd, bc, type, i, seg_eob);
+  return decode_coefs_4x4(dx, xd, r, type, i, seg_eob);
 }
 #endif
