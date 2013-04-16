@@ -16,6 +16,24 @@
       "revId": "1f8ebbc0d3b62e345946fd090963440d99b024b3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///3I\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-04-16T19:22:37Z",
+      "side": 1,
+      "message": "This memset is only needed for skip_recon_sb(). I will move it. Thanks.",
+      "parentUuid": "AAAAXH//0C0\u003d",
+      "revId": "1f8ebbc0d3b62e345946fd090963440d99b024b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
