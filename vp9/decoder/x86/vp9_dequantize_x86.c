@@ -17,8 +17,7 @@
 
 #if HAVE_SSE2
 
-void vp9_add_residual_4x4_sse2(const int16_t *diff, const uint8_t *pred,
-                               int pitch, uint8_t *dest, int stride) {
+void vp9_add_residual_4x4_sse2(const int16_t *diff, uint8_t *dest, int stride) {
   const int width = 4;
   const __m128i zero = _mm_setzero_si128();
 
@@ -29,10 +28,10 @@ void vp9_add_residual_4x4_sse2(const int16_t *diff, const uint8_t *pred,
   const __m128i d3 = _mm_loadl_epi64((const __m128i *)(diff + 3 * width));
 
   // Prediction data.
-  __m128i p0 = _mm_cvtsi32_si128(*(const int *)(pred + 0 * pitch));
-  __m128i p1 = _mm_cvtsi32_si128(*(const int *)(pred + 1 * pitch));
-  __m128i p2 = _mm_cvtsi32_si128(*(const int *)(pred + 2 * pitch));
-  __m128i p3 = _mm_cvtsi32_si128(*(const int *)(pred + 3 * pitch));
+  __m128i p0 = _mm_cvtsi32_si128(*(const int *)(dest + 0 * stride));
+  __m128i p1 = _mm_cvtsi32_si128(*(const int *)(dest + 1 * stride));
+  __m128i p2 = _mm_cvtsi32_si128(*(const int *)(dest + 2 * stride));
+  __m128i p3 = _mm_cvtsi32_si128(*(const int *)(dest + 3 * stride));
 
   p0 = _mm_unpacklo_epi8(p0, zero);
   p1 = _mm_unpacklo_epi8(p1, zero);
@@ -61,8 +60,7 @@ void vp9_add_residual_4x4_sse2(const int16_t *diff, const uint8_t *pred,
   *(int *)dest = _mm_cvtsi128_si32(p2);
 }
 
-void vp9_add_residual_8x8_sse2(const int16_t *diff, const uint8_t *pred,
-                               int pitch, uint8_t *dest, int stride) {
+void vp9_add_residual_8x8_sse2(const int16_t *diff, uint8_t *dest, int stride) {
   const int width = 8;
   const __m128i zero = _mm_setzero_si128();
 
@@ -77,14 +75,14 @@ void vp9_add_residual_8x8_sse2(const int16_t *diff, const uint8_t *pred,
   const __m128i d7 = _mm_load_si128((const __m128i *)(diff + 7 * width));
 
   // Prediction data.
-  __m128i p0 = _mm_loadl_epi64((const __m128i *)(pred + 0 * pitch));
-  __m128i p1 = _mm_loadl_epi64((const __m128i *)(pred + 1 * pitch));
-  __m128i p2 = _mm_loadl_epi64((const __m128i *)(pred + 2 * pitch));
-  __m128i p3 = _mm_loadl_epi64((const __m128i *)(pred + 3 * pitch));
-  __m128i p4 = _mm_loadl_epi64((const __m128i *)(pred + 4 * pitch));
-  __m128i p5 = _mm_loadl_epi64((const __m128i *)(pred + 5 * pitch));
-  __m128i p6 = _mm_loadl_epi64((const __m128i *)(pred + 6 * pitch));
-  __m128i p7 = _mm_loadl_epi64((const __m128i *)(pred + 7 * pitch));
+  __m128i p0 = _mm_loadl_epi64((const __m128i *)(dest + 0 * stride));
+  __m128i p1 = _mm_loadl_epi64((const __m128i *)(dest + 1 * stride));
+  __m128i p2 = _mm_loadl_epi64((const __m128i *)(dest + 2 * stride));
+  __m128i p3 = _mm_loadl_epi64((const __m128i *)(dest + 3 * stride));
+  __m128i p4 = _mm_loadl_epi64((const __m128i *)(dest + 4 * stride));
+  __m128i p5 = _mm_loadl_epi64((const __m128i *)(dest + 5 * stride));
+  __m128i p6 = _mm_loadl_epi64((const __m128i *)(dest + 6 * stride));
+  __m128i p7 = _mm_loadl_epi64((const __m128i *)(dest + 7 * stride));
 
   p0 = _mm_unpacklo_epi8(p0, zero);
   p1 = _mm_unpacklo_epi8(p1, zero);
@@ -126,8 +124,8 @@ void vp9_add_residual_8x8_sse2(const int16_t *diff, const uint8_t *pred,
   _mm_storel_epi64((__m128i *)(dest + 7 * stride), p6);
 }
 
-void vp9_add_residual_16x16_sse2(const int16_t *diff, const uint8_t *pred,
-                             int pitch, uint8_t *dest, int stride) {
+void vp9_add_residual_16x16_sse2(const int16_t *diff, uint8_t *dest,
+                                 int stride) {
   const int width = 16;
   int i = 4;
   const __m128i zero = _mm_setzero_si128();
@@ -147,10 +145,10 @@ void vp9_add_residual_16x16_sse2(const int16_t *diff, const uint8_t *pred,
     d7 = _mm_load_si128((const __m128i *)(diff + 3 * width + 8));
 
     // Prediction data.
-    p1 = _mm_load_si128((const __m128i *)(pred + 0 * pitch));
-    p3 = _mm_load_si128((const __m128i *)(pred + 1 * pitch));
-    p5 = _mm_load_si128((const __m128i *)(pred + 2 * pitch));
-    p7 = _mm_load_si128((const __m128i *)(pred + 3 * pitch));
+    p1 = _mm_load_si128((const __m128i *)(dest + 0 * stride));
+    p3 = _mm_load_si128((const __m128i *)(dest + 1 * stride));
+    p5 = _mm_load_si128((const __m128i *)(dest + 2 * stride));
+    p7 = _mm_load_si128((const __m128i *)(dest + 3 * stride));
 
     p0 = _mm_unpacklo_epi8(p1, zero);
     p1 = _mm_unpackhi_epi8(p1, zero);
@@ -181,13 +179,12 @@ void vp9_add_residual_16x16_sse2(const int16_t *diff, const uint8_t *pred,
     _mm_store_si128((__m128i *)(dest + 3 * stride), p3);
 
     diff += 4 * width;
-    pred += 4 * pitch;
     dest += 4 * stride;
   } while (--i);
 }
 
-void vp9_add_residual_32x32_sse2(const int16_t *diff, const uint8_t *pred,
-                             int pitch, uint8_t *dest, int stride) {
+void vp9_add_residual_32x32_sse2(const int16_t *diff, uint8_t *dest,
+                                 int stride) {
   const int width = 32;
   int i = 16;
   const __m128i zero = _mm_setzero_si128();
@@ -207,10 +204,10 @@ void vp9_add_residual_32x32_sse2(const int16_t *diff, const uint8_t *pred,
     d7 = _mm_load_si128((const __m128i *)(diff + 1 * width + 24));
 
     // Prediction data.
-    p1 = _mm_load_si128((const __m128i *)(pred + 0 * pitch));
-    p3 = _mm_load_si128((const __m128i *)(pred + 0 * pitch + 16));
-    p5 = _mm_load_si128((const __m128i *)(pred + 1 * pitch));
-    p7 = _mm_load_si128((const __m128i *)(pred + 1 * pitch + 16));
+    p1 = _mm_load_si128((const __m128i *)(dest + 0 * stride));
+    p3 = _mm_load_si128((const __m128i *)(dest + 0 * stride + 16));
+    p5 = _mm_load_si128((const __m128i *)(dest + 1 * stride));
+    p7 = _mm_load_si128((const __m128i *)(dest + 1 * stride + 16));
 
     p0 = _mm_unpacklo_epi8(p1, zero);
     p1 = _mm_unpackhi_epi8(p1, zero);
@@ -241,25 +238,24 @@ void vp9_add_residual_32x32_sse2(const int16_t *diff, const uint8_t *pred,
     _mm_store_si128((__m128i *)(dest + 1 * stride + 16), p3);
 
     diff += 2 * width;
-    pred += 2 * pitch;
     dest += 2 * stride;
   } while (--i);
 }
 
-void vp9_add_constant_residual_8x8_sse2(const int16_t diff, const uint8_t *pred,
-                                        int pitch, uint8_t *dest, int stride) {
+void vp9_add_constant_residual_8x8_sse2(const int16_t diff, uint8_t *dest,
+                                        int stride) {
   uint8_t abs_diff;
   __m128i d;
 
   // Prediction data.
-  __m128i p0 = _mm_loadl_epi64((const __m128i *)(pred + 0 * pitch));
-  __m128i p1 = _mm_loadl_epi64((const __m128i *)(pred + 1 * pitch));
-  __m128i p2 = _mm_loadl_epi64((const __m128i *)(pred + 2 * pitch));
-  __m128i p3 = _mm_loadl_epi64((const __m128i *)(pred + 3 * pitch));
-  __m128i p4 = _mm_loadl_epi64((const __m128i *)(pred + 4 * pitch));
-  __m128i p5 = _mm_loadl_epi64((const __m128i *)(pred + 5 * pitch));
-  __m128i p6 = _mm_loadl_epi64((const __m128i *)(pred + 6 * pitch));
-  __m128i p7 = _mm_loadl_epi64((const __m128i *)(pred + 7 * pitch));
+  __m128i p0 = _mm_loadl_epi64((const __m128i *)(dest + 0 * stride));
+  __m128i p1 = _mm_loadl_epi64((const __m128i *)(dest + 1 * stride));
+  __m128i p2 = _mm_loadl_epi64((const __m128i *)(dest + 2 * stride));
+  __m128i p3 = _mm_loadl_epi64((const __m128i *)(dest + 3 * stride));
+  __m128i p4 = _mm_loadl_epi64((const __m128i *)(dest + 4 * stride));
+  __m128i p5 = _mm_loadl_epi64((const __m128i *)(dest + 5 * stride));
+  __m128i p6 = _mm_loadl_epi64((const __m128i *)(dest + 6 * stride));
+  __m128i p7 = _mm_loadl_epi64((const __m128i *)(dest + 7 * stride));
 
   p0 = _mm_unpacklo_epi64(p0, p1);
   p2 = _mm_unpacklo_epi64(p2, p3);
@@ -303,29 +299,28 @@ void vp9_add_constant_residual_8x8_sse2(const int16_t diff, const uint8_t *pred,
   _mm_storel_epi64((__m128i *)(dest + 7 * stride), p6);
 }
 
-void vp9_add_constant_residual_16x16_sse2(const int16_t diff,
-                                          const uint8_t *pred, int pitch,
-                                          uint8_t *dest, int stride) {
+void vp9_add_constant_residual_16x16_sse2(const int16_t diff, uint8_t *dest,
+                                          int stride) {
   uint8_t abs_diff;
   __m128i d;
 
   // Prediction data.
-  __m128i p0 = _mm_load_si128((const __m128i *)(pred + 0 * pitch));
-  __m128i p1 = _mm_load_si128((const __m128i *)(pred + 1 * pitch));
-  __m128i p2 = _mm_load_si128((const __m128i *)(pred + 2 * pitch));
-  __m128i p3 = _mm_load_si128((const __m128i *)(pred + 3 * pitch));
-  __m128i p4 = _mm_load_si128((const __m128i *)(pred + 4 * pitch));
-  __m128i p5 = _mm_load_si128((const __m128i *)(pred + 5 * pitch));
-  __m128i p6 = _mm_load_si128((const __m128i *)(pred + 6 * pitch));
-  __m128i p7 = _mm_load_si128((const __m128i *)(pred + 7 * pitch));
-  __m128i p8 = _mm_load_si128((const __m128i *)(pred + 8 * pitch));
-  __m128i p9 = _mm_load_si128((const __m128i *)(pred + 9 * pitch));
-  __m128i p10 = _mm_load_si128((const __m128i *)(pred + 10 * pitch));
-  __m128i p11 = _mm_load_si128((const __m128i *)(pred + 11 * pitch));
-  __m128i p12 = _mm_load_si128((const __m128i *)(pred + 12 * pitch));
-  __m128i p13 = _mm_load_si128((const __m128i *)(pred + 13 * pitch));
-  __m128i p14 = _mm_load_si128((const __m128i *)(pred + 14 * pitch));
-  __m128i p15 = _mm_load_si128((const __m128i *)(pred + 15 * pitch));
+  __m128i p0 = _mm_load_si128((const __m128i *)(dest + 0 * stride));
+  __m128i p1 = _mm_load_si128((const __m128i *)(dest + 1 * stride));
+  __m128i p2 = _mm_load_si128((const __m128i *)(dest + 2 * stride));
+  __m128i p3 = _mm_load_si128((const __m128i *)(dest + 3 * stride));
+  __m128i p4 = _mm_load_si128((const __m128i *)(dest + 4 * stride));
+  __m128i p5 = _mm_load_si128((const __m128i *)(dest + 5 * stride));
+  __m128i p6 = _mm_load_si128((const __m128i *)(dest + 6 * stride));
+  __m128i p7 = _mm_load_si128((const __m128i *)(dest + 7 * stride));
+  __m128i p8 = _mm_load_si128((const __m128i *)(dest + 8 * stride));
+  __m128i p9 = _mm_load_si128((const __m128i *)(dest + 9 * stride));
+  __m128i p10 = _mm_load_si128((const __m128i *)(dest + 10 * stride));
+  __m128i p11 = _mm_load_si128((const __m128i *)(dest + 11 * stride));
+  __m128i p12 = _mm_load_si128((const __m128i *)(dest + 12 * stride));
+  __m128i p13 = _mm_load_si128((const __m128i *)(dest + 13 * stride));
+  __m128i p14 = _mm_load_si128((const __m128i *)(dest + 14 * stride));
+  __m128i p15 = _mm_load_si128((const __m128i *)(dest + 15 * stride));
 
   // Clip diff value to [0, 255] range. Then, do addition or subtraction
   // according to its sign.
@@ -390,9 +385,8 @@ void vp9_add_constant_residual_16x16_sse2(const int16_t diff,
   _mm_store_si128((__m128i *)(dest + 15 * stride), p15);
 }
 
-void vp9_add_constant_residual_32x32_sse2(const int16_t diff,
-                                          const uint8_t *pred, int pitch,
-                                          uint8_t *dest, int stride) {
+void vp9_add_constant_residual_32x32_sse2(const int16_t diff, uint8_t *dest,
+                                          int stride) {
   uint8_t abs_diff;
   __m128i d;
   int i = 8;
@@ -407,14 +401,14 @@ void vp9_add_constant_residual_32x32_sse2(const int16_t diff,
 
   do {
     // Prediction data.
-    __m128i p0 = _mm_load_si128((const __m128i *)(pred + 0 * pitch));
-    __m128i p1 = _mm_load_si128((const __m128i *)(pred + 0 * pitch + 16));
-    __m128i p2 = _mm_load_si128((const __m128i *)(pred + 1 * pitch));
-    __m128i p3 = _mm_load_si128((const __m128i *)(pred + 1 * pitch + 16));
-    __m128i p4 = _mm_load_si128((const __m128i *)(pred + 2 * pitch));
-    __m128i p5 = _mm_load_si128((const __m128i *)(pred + 2 * pitch + 16));
-    __m128i p6 = _mm_load_si128((const __m128i *)(pred + 3 * pitch));
-    __m128i p7 = _mm_load_si128((const __m128i *)(pred + 3 * pitch + 16));
+    __m128i p0 = _mm_load_si128((const __m128i *)(dest + 0 * stride));
+    __m128i p1 = _mm_load_si128((const __m128i *)(dest + 0 * stride + 16));
+    __m128i p2 = _mm_load_si128((const __m128i *)(dest + 1 * stride));
+    __m128i p3 = _mm_load_si128((const __m128i *)(dest + 1 * stride + 16));
+    __m128i p4 = _mm_load_si128((const __m128i *)(dest + 2 * stride));
+    __m128i p5 = _mm_load_si128((const __m128i *)(dest + 2 * stride + 16));
+    __m128i p6 = _mm_load_si128((const __m128i *)(dest + 3 * stride));
+    __m128i p7 = _mm_load_si128((const __m128i *)(dest + 3 * stride + 16));
 
     // Clip diff value to [0, 255] range. Then, do addition or subtraction
     // according to its sign.
@@ -448,7 +442,6 @@ void vp9_add_constant_residual_32x32_sse2(const int16_t diff,
     _mm_store_si128((__m128i *)(dest + 3 * stride), p6);
     _mm_store_si128((__m128i *)(dest + 3 * stride + 16), p7);
 
-    pred += 4 * pitch;
     dest += 4 * stride;
   } while (--i);
 }
