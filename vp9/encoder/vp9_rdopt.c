@@ -2493,7 +2493,7 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int_mv this_mv;
   int i;
-  int zero_seen = FALSE;
+  int zero_seen = 0;
   int best_index = 0;
   int best_sad = INT_MAX;
   int this_sad = INT_MAX;

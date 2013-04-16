@@ -158,7 +158,7 @@ static void addmv_and_shuffle(
 
   int i;
   int insert_point;
-  int duplicate_found = FALSE;
+  int duplicate_found = 0;
 
   // Check for duplicates. If there is one increase its score.
   // We only compare vs the current top candidates.
@@ -171,7 +171,7 @@ static void addmv_and_shuffle(
   while (i > 0) {
     i--;
     if (candidate_mv.as_int == mv_list[i].as_int) {
-      duplicate_found = TRUE;
+      duplicate_found = 1;
       mv_scores[i] += weight;
       break;
     }
@@ -251,7 +251,7 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int split_count = 0;
   int (*mv_ref_search)[2];
   int *ref_distance_weight;
-  int zero_seen = FALSE;
+  int zero_seen = 0;
   const int mb_col = (-xd->mb_to_left_edge) >> 7;
 
   // Blank the reference vector lists and other local structures.
@@ -395,7 +395,7 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // Scan for 0,0 case and clamp non zero choices
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
     if (candidate_mvs[i].as_int == 0) {
-      zero_seen = TRUE;
+      zero_seen = 1;
     } else {
       clamp_mv_ref(xd, &candidate_mvs[i]);
     }

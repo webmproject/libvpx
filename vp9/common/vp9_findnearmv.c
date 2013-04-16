@@ -141,7 +141,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   unsigned int sse;
   unsigned int ref_scores[MAX_MV_REF_CANDIDATES] = {0};
   int_mv sorted_mvs[MAX_MV_REF_CANDIDATES];
-  int zero_seen = FALSE;
+  int zero_seen = 0;
 
   if (ref_y_buffer) {
 
