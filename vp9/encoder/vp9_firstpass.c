@@ -505,7 +505,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   // if ( 0 )
   {
     vp9_init_mv_probs(cm);
-    vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
+    vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y_dc_delta_q);
   }
 
   // for each macroblock row in image
