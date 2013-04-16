@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX///7w\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-04-16T18:21:11Z",
+      "side": 0,
+      "message": "remove",
+      "revId": "7f7d1357a2732e0a1c36f3baded7dd14f449e535",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///7o\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-04-16T18:21:11Z",
+      "side": 0,
+      "message": "remove",
+      "revId": "7f7d1357a2732e0a1c36f3baded7dd14f449e535",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
