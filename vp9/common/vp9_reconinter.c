@@ -358,9 +358,6 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
       w, h);
 }
 
-/* Like vp9_build_inter_predictor, but takes the full-pel part of the
- * mv separately, and the fractional part as a q4.
- */
 void vp9_build_inter_predictor_q4(const uint8_t *src, int src_stride,
                                   uint8_t *dst, int dst_stride,
                                   const int_mv *mv_q4,
@@ -527,33 +524,38 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
 #if !CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
 // TODO(jkoleszar): yet another mv clamping function :-(
 MV clamp_mv_to_umv_border_sb(const MV *src_mv,
-    int bwl, int bhl,
+    int bwl, int bhl, int ss_x, int ss_y,
     int mb_to_left_edge, int mb_to_top_edge,
     int mb_to_right_edge, int mb_to_bottom_edge) {
   /* If the MV points so far into the UMV border that no visible pixels
    * are used for reconstruction, the subpel part of the MV can be
    * discarded and the MV limited to 16 pixels with equivalent results.
    */
-  const int epel_left = (VP9_INTERP_EXTEND + (4 << bwl)) << 3;
-  const int epel_right = epel_left - (1 << 3);
-  const int epel_top = (VP9_INTERP_EXTEND + (4 << bhl)) << 3;
-  const int epel_bottom = epel_top - (1 << 3);
+  const int spel_left = (VP9_INTERP_EXTEND + (4 << bwl)) << 4;
+  const int spel_right = spel_left - (1 << 4);
+  const int spel_top = (VP9_INTERP_EXTEND + (4 << bhl)) << 4;
+  const int spel_bottom = spel_top - (1 << 4);
   MV clamped_mv;
-  clamped_mv.col = clamp(src_mv->col,
-                         mb_to_left_edge - epel_left,
-                         mb_to_right_edge + epel_right);
-  clamped_mv.row = clamp(src_mv->row,
-                         mb_to_top_edge - epel_top,
-                         mb_to_bottom_edge + epel_bottom);
+
+  assert(ss_x <= 1);
+  assert(ss_y <= 1);
+  clamped_mv.col = clamp(src_mv->col << (1 - ss_x),
+                         (mb_to_left_edge << (1 - ss_x)) - spel_left,
+                         (mb_to_right_edge << (1 - ss_x)) + spel_right);
+  clamped_mv.row = clamp(src_mv->row << (1 - ss_y),
+                         (mb_to_top_edge << (1 - ss_y)) - spel_top,
+                         (mb_to_bottom_edge << (1 - ss_y)) + spel_bottom);
   return clamped_mv;
 }
 
 struct build_inter_predictors_args {
   MACROBLOCKD *xd;
-  uint8_t* dst[MAX_MB_PLANE];
-  int dst_stride[MAX_MB_PLANE];
   int x;
   int y;
+  uint8_t* dst[MAX_MB_PLANE];
+  int dst_stride[MAX_MB_PLANE];
+  uint8_t* pre[2][MAX_MB_PLANE];
+  int pre_stride[2][MAX_MB_PLANE];
 };
 static void build_inter_predictors(int plane, int block,
                                    BLOCK_SIZE_TYPE bsize,
@@ -572,18 +574,23 @@ static void build_inter_predictors(int plane, int block,
     const MV* const mv = (xd->mode_info_context->mbmi.mode == SPLITMV)
          ? &xd->block[block].bmi.as_mv[which_mv].as_mv
          : &xd->mode_info_context->mbmi.mv[which_mv].as_mv;
-
-    const uint8_t * const base_pre = which_mv ? xd->second_pre.y_buffer
-                                             : xd->pre.y_buffer;
-    const int pre_stride = which_mv ? xd->second_pre.y_stride
-                                    : xd->pre.y_stride;
+    const uint8_t * const base_pre = arg->pre[which_mv][plane];
+    const int pre_stride = arg->pre_stride[which_mv][plane];
     const uint8_t *const pre = base_pre +
         scaled_buffer_offset(x, y, pre_stride, &xd->scale_factor[which_mv]);
     struct scale_factors * const scale =
       plane == 0 ? &xd->scale_factor[which_mv] : &xd->scale_factor_uv[which_mv];
 
     int_mv clamped_mv;
+
+    /* TODO(jkoleszar): This clamping is done in the incorrect place for the
+     * scaling case. It needs to be done on the scaled MV, not the pre-scaling
+     * MV. Note however that it performs the subsampling aware scaling so
+     * that the result is always q4.
+     */
     clamped_mv.as_mv = clamp_mv_to_umv_border_sb(mv, bwl, bhl,
+                                                 xd->plane[plane].subsampling_x,
+                                                 xd->plane[plane].subsampling_y,
                                                  xd->mb_to_left_edge,
                                                  xd->mb_to_top_edge,
                                                  xd->mb_to_right_edge,
@@ -591,10 +598,10 @@ static void build_inter_predictors(int plane, int block,
 
     scale->set_scaled_offsets(scale, arg->y + y, arg->x + x);
 
-    vp9_build_inter_predictor(pre, pre_stride,
-                              arg->dst[plane], arg->dst_stride[plane],
-                              &clamped_mv, &xd->scale_factor[which_mv],
-                              bw, bh, which_mv, &xd->subpix);
+    vp9_build_inter_predictor_q4(pre, pre_stride,
+                                 arg->dst[plane], arg->dst_stride[plane],
+                                 &clamped_mv, &xd->scale_factor[which_mv],
+                                 bw, bh, which_mv, &xd->subpix);
   }
 }
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
@@ -604,9 +611,29 @@ void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
                                     int mb_col,
                                     BLOCK_SIZE_TYPE bsize) {
   struct build_inter_predictors_args args = {
-    xd, {dst_y, NULL, NULL}, {dst_ystride, 0, 0}, mb_col * 16, mb_row * 16
+    xd, mb_col * 16, mb_row * 16,
+    {dst_y, NULL, NULL}, {dst_ystride, 0, 0},
+    {{xd->pre.y_buffer, NULL, NULL}, {xd->second_pre.y_buffer, NULL, NULL}},
+    {{xd->pre.y_stride, 0, 0}, {xd->second_pre.y_stride, 0, 0}},
   };
   foreach_predicted_block_in_plane(xd, bsize, 0, build_inter_predictors, &args);
+}
+void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
+                                     uint8_t *dst_u,
+                                     uint8_t *dst_v,
+                                     int dst_uvstride,
+                                     int mb_row,
+                                     int mb_col,
+                                     BLOCK_SIZE_TYPE bsize) {
+  struct build_inter_predictors_args args = {
+    xd, mb_col * 16, mb_row * 16,
+    {NULL, dst_u, dst_v}, {0, dst_uvstride, dst_uvstride},
+    {{NULL, xd->pre.u_buffer, xd->pre.v_buffer},
+     {NULL, xd->second_pre.u_buffer, xd->second_pre.v_buffer}},
+    {{0, xd->pre.uv_stride, xd->pre.uv_stride},
+     {0, xd->second_pre.uv_stride, xd->second_pre.uv_stride}},
+  };
+  foreach_predicted_block_uv(xd, bsize, build_inter_predictors, &args);
 }
 #endif
 
@@ -993,65 +1020,6 @@ static void build_inter16x16_predictors_mbuv_w(MACROBLOCKD *xd,
         scale, 8, 8, which_mv ? weight : 0, &xd->subpix);
   }
 }
-
-void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                          uint8_t *dst_u,
-                                          uint8_t *dst_v,
-                                          int dst_uvstride,
-                                          int mb_row,
-                                          int mb_col) {
-#ifdef USE_IMPLICIT_WEIGHT_UV
-  int weight = get_implicit_compoundinter_weight(xd, mb_row, mb_col);
-#else
-  int weight = AVERAGE_WEIGHT;
-#endif
-  build_inter16x16_predictors_mbuv_w(xd, dst_u, dst_v, dst_uvstride,
-                                     weight, mb_row, mb_col);
-}
-
-#else
-
-void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                          uint8_t *dst_u,
-                                          uint8_t *dst_v,
-                                          int dst_uvstride,
-                                          int mb_row,
-                                          int mb_col) {
-  const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
-  int which_mv;
-
-  for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-    const int clamp_mvs =
-        which_mv ? xd->mode_info_context->mbmi.need_to_clamp_secondmv
-                 : xd->mode_info_context->mbmi.need_to_clamp_mvs;
-    uint8_t *uptr, *vptr;
-    int pre_stride = which_mv ? xd->second_pre.uv_stride
-                              : xd->pre.uv_stride;
-    int_mv mv;
-
-    struct scale_factors *scale = &xd->scale_factor_uv[which_mv];
-    mv.as_int = xd->mode_info_context->mbmi.mv[which_mv].as_int;
-
-
-    if (clamp_mvs)
-      clamp_mv_to_umv_border(&mv.as_mv, xd);
-
-    uptr = (which_mv ? xd->second_pre.u_buffer : xd->pre.u_buffer);
-    vptr = (which_mv ? xd->second_pre.v_buffer : xd->pre.v_buffer);
-
-    scale->set_scaled_offsets(scale, mb_row * 16, mb_col * 16);
-
-    vp9_build_inter_predictor_q4(
-        uptr, pre_stride, dst_u, dst_uvstride, &mv,
-        scale, 8, 8,
-        which_mv << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT), &xd->subpix);
-
-    vp9_build_inter_predictor_q4(
-        vptr, pre_stride, dst_v, dst_uvstride, &mv,
-        scale, 8, 8,
-        which_mv << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT), &xd->subpix);
-  }
-}
 #endif
 
 #if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
@@ -1197,70 +1165,6 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
 #endif
   build_inter_predictors_sbuv_w(xd, dst_u, dst_v, dst_uvstride,
                                 weight, mb_row, mb_col, bsize);
-}
-
-#else
-
-void vp9_build_inter_predictors_sbuv(MACROBLOCKD *x,
-                                     uint8_t *dst_u,
-                                     uint8_t *dst_v,
-                                     int dst_uvstride,
-                                     int mb_row,
-                                     int mb_col,
-                                     BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize),  bw = 1 << bwl;
-  const int bhl = mb_height_log2(bsize), bh = 1 << bhl;
-  uint8_t *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
-  uint8_t *u2 = x->second_pre.u_buffer, *v2 = x->second_pre.v_buffer;
-  int edge[4], n;
-
-  edge[0] = x->mb_to_top_edge;
-  edge[1] = x->mb_to_bottom_edge;
-  edge[2] = x->mb_to_left_edge;
-  edge[3] = x->mb_to_right_edge;
-
-  for (n = 0; n < bw * bh; n++) {
-    int scaled_uv_offset;
-    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
-
-    x->mb_to_top_edge    = edge[0] -           ((y_idx  * 16) << 3);
-    x->mb_to_bottom_edge = edge[1] + (((bh - 1 - y_idx) * 16) << 3);
-    x->mb_to_left_edge   = edge[2] -           ((x_idx  * 16) << 3);
-    x->mb_to_right_edge  = edge[3] + (((bw - 1 - x_idx) * 16) << 3);
-
-    scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
-                                            y_idx * 8,
-                                            x->pre.uv_stride,
-                                            &x->scale_factor_uv[0]);
-    x->pre.u_buffer = u1 + scaled_uv_offset;
-    x->pre.v_buffer = v1 + scaled_uv_offset;
-
-    if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-      scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
-                                              y_idx * 8,
-                                              x->second_pre.uv_stride,
-                                              &x->scale_factor_uv[1]);
-      x->second_pre.u_buffer = u2 + scaled_uv_offset;
-      x->second_pre.v_buffer = v2 + scaled_uv_offset;
-    }
-
-    vp9_build_inter16x16_predictors_mbuv(x,
-        dst_u + y_idx *  8 * dst_uvstride + x_idx *  8,
-        dst_v + y_idx *  8 * dst_uvstride + x_idx *  8,
-        dst_uvstride, mb_row + y_idx, mb_col + x_idx);
-  }
-  x->mb_to_top_edge    = edge[0];
-  x->mb_to_bottom_edge = edge[1];
-  x->mb_to_left_edge   = edge[2];
-  x->mb_to_right_edge  = edge[3];
-
-  x->pre.u_buffer = u1;
-  x->pre.v_buffer = v1;
-
-  if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-    x->second_pre.u_buffer = u2;
-    x->second_pre.v_buffer = v2;
-  }
 }
 #endif
 
