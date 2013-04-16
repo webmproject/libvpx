@@ -273,10 +273,10 @@ static void read_nmv(vp9_reader *r, MV *mv, const MV *ref,
   const MV_JOINT_TYPE j = treed_read(r, vp9_mv_joint_tree, mvctx->joints);
   mv->row = mv->col = 0;
 
-  if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ)
+  if (mv_joint_vertical(j))
     mv->row = read_nmv_component(r, ref->row, &mvctx->comps[0]);
 
-  if (j == MV_JOINT_HNZVZ || j == MV_JOINT_HNZVNZ)
+  if (mv_joint_horizontal(j))
     mv->col = read_nmv_component(r, ref->col, &mvctx->comps[1]);
 }
 
@@ -284,11 +284,11 @@ static void read_nmv_fp(vp9_reader *r, MV *mv, const MV *ref,
                         const nmv_context *mvctx, int usehp) {
   const MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
   usehp = usehp && vp9_use_nmv_hp(ref);
-  if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ)
+  if (mv_joint_vertical(j))
     mv->row = read_nmv_component_fp(r, mv->row, ref->row, &mvctx->comps[0],
                                     usehp);
 
-  if (j == MV_JOINT_HNZVZ || j == MV_JOINT_HNZVNZ)
+  if (mv_joint_horizontal(j))
     mv->col = read_nmv_component_fp(r, mv->col, ref->col, &mvctx->comps[1],
                                     usehp);
 }
