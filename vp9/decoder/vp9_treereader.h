@@ -17,9 +17,6 @@
 
 typedef BOOL_DECODER vp9_reader;
 
-#define vp9_read decode_bool
-#define vp9_read_literal decode_value
-#define vp9_read_bit(r) vp9_read(r, vp9_prob_half)
 #define vp9_read_prob(r) ((vp9_prob)vp9_read_literal(r, 8))
 #define vp9_read_and_apply_sign(r, value) (vp9_read_bit(r) ? -(value) : (value))
 

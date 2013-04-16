@@ -77,7 +77,7 @@ TEST(VP9, TestBitIO) {
           } else if (bit_method == 3) {
             bit = bit_rnd(2);
           }
-          GTEST_ASSERT_EQ(decode_bool(&br, probas[i]), bit)
+          GTEST_ASSERT_EQ(vp9_read(&br, probas[i]), bit)
               << "pos: " << i << " / " << bits_to_test
               << " bit_method: " << bit_method
               << " method: " << method;
