@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//0LQ\u003d",
+        "filename": "vp9/common/vp9_entropymv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T15:25:49Z",
+      "side": 1,
+      "message": "much better. May want to rename the enum values too, like MV_JOINT_VERT || MV_JOINT_HORIZ_VERT. In principle,  you can pull the value out with a bitmask, eg:\n\n  enum {MV_IS_VERTICAL_MASK \u003d 0x2};\n  int is_vertical(x) {\n    return !!(x \u0026 MV_IS_VERTICAL_MASK);\n  }\n\n(!! is probably optional, if is_vertical is only used in a boolean context)\n\nI\u0027m not sure it\u0027s any more readable, just wanted to point it out as an option.",
+      "revId": "fd61b7ea10f81e990ee9b8c0e06561e49583ffad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
