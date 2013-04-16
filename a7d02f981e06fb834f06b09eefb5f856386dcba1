@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX///eI\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T21:37:59Z",
+      "side": 1,
+      "message": "Can\u0027t you automatically invoke the sse2 version by simply removing the _c suffix here? Or does that prevent inlining and make performance worse?",
+      "revId": "a7d02f981e06fb834f06b09eefb5f856386dcba1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
