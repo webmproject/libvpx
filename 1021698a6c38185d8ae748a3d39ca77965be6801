@@ -36,6 +36,42 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///sc\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///ys\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///jE\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Yes, the probability models for partition information is currently conditioned on the block size. I was thinking to later enable the use of partition information of neighboring blocks to determine the probability model. The term PLANES was coming in that sense.",
+      "parentUuid": "AAAAXX///mg\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///tk\u003d",
         "filename": "vp9/common/vp9_blockd.h",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2013-04-16T21:05:50Z",
       "side": 1,
       "message": "if this (and PARTITION_PLANES) is really an enumerated type (say none/wide/tall/square), then declare the values with an enum here, for documentation if nothing else. This is the first commit in this patch set I\u0027ve reviewed, so I don\u0027t know what a \"PARTITION_TYPE\" is yet. If this is just counting the number of elements in some other enum, then put it as a member in that enum, or at the very least document the relationship with a comment.",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///lA\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///tk\u003d",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///rs\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///yo\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///yc\u003d",
         "filename": "vp9/common/vp9_entropymode.c",
         "patchSetId": 5
@@ -81,6 +153,24 @@
       "writtenOn": "2013-04-16T19:59:48Z",
       "side": 1,
       "message": "vp9_copy(x-\u003efc.partition_prob, vp9_partition_probs);",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///rU\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///yc\u003d",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///o0\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///yY\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///rA\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 5
@@ -115,6 +223,24 @@
       "writtenOn": "2013-04-16T21:05:50Z",
       "side": 1,
       "message": "so that I\u0027m clear, this commit still assumes that both plane types have the same partitioning, correct?",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///iQ\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 886,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Yes",
+      "parentUuid": "AAAAXX///rA\u003d",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///nQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2848,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///yU\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///pM\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -149,6 +293,24 @@
       "writtenOn": "2013-04-16T21:05:50Z",
       "side": 1,
       "message": "what\u0027s the magic value 1 here? Can this be an enum?",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///hA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 870,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "since the probability model is conditioned on the current block size, use a inline function to look up the plane index?",
+      "parentUuid": "AAAAXX///pM\u003d",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -172,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///go\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 902,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///pE\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///ow\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///gg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 940,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///ow\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///yQ\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -200,6 +398,24 @@
       "writtenOn": "2013-04-16T19:59:48Z",
       "side": 1,
       "message": "empty line between variable declarations and statements.",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///nI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 943,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///yQ\u003d",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -240,6 +456,42 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///fQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1031,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "make a TODO here, will fix this together with context model optimization.",
+      "parentUuid": "AAAAXX///yE\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///fw\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1031,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///nw\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///ns\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -251,6 +503,24 @@
       "writtenOn": "2013-04-16T21:05:50Z",
       "side": 1,
       "message": "magic 1",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///f0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1044,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///ns\u003d",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +561,42 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///nA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///yA\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///fs\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///nk\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///ng\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -302,6 +608,24 @@
       "writtenOn": "2013-04-16T21:05:50Z",
       "side": 1,
       "message": "magic 2.",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///fo\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1082,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///ng\u003d",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///mU\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3356,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///x8\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///x4\u003d",
         "filename": "vp9/encoder/vp9_onyx_int.h",
         "patchSetId": 5
@@ -336,6 +678,24 @@
       "writtenOn": "2013-04-16T19:59:48Z",
       "side": 1,
       "message": "unsigned",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///mM\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///x4\u003d",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -359,6 +719,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///mI\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///x0\u003d",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///xs\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 5
@@ -370,6 +748,24 @@
       "writtenOn": "2013-04-16T19:59:48Z",
       "side": 1,
       "message": "vp9_copy(cm-\u003efc.partition_prob, cc-\u003epartition_prob)",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///mE\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-16T21:39:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX///xs\u003d",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
