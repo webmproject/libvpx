@@ -240,6 +240,11 @@ static INLINE int b_height_log2(BLOCK_SIZE_TYPE sb_type) {
   return mb_height_log2(sb_type) + 2;
 }
 
+static INLINE int partition_plane(BLOCK_SIZE_TYPE sb_type) {
+  assert(mb_width_log2(sb_type) == mb_height_log2(sb_type));
+  return (mb_width_log2(sb_type) - 1);
+}
+
 typedef enum {
   BLOCK_4X4_LG2 = 0,
   BLOCK_8X8_LG2 = 2,

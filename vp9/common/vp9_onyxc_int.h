@@ -68,6 +68,7 @@ typedef struct frame_contexts {
   vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob mbsplit_prob[VP9_NUMMBSPLITS - 1];
+  vp9_prob partition_prob[PARTITION_PLANES][PARTITION_TYPES - 1];
 
   vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES];
@@ -95,6 +96,7 @@ typedef struct frame_contexts {
   vp9_prob pre_i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob pre_sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob pre_mbsplit_prob[VP9_NUMMBSPLITS - 1];
+  vp9_prob pre_partition_prob[PARTITION_PLANES][PARTITION_TYPES - 1];
   unsigned int bmode_counts[VP9_NKF_BINTRAMODES];
   unsigned int ymode_counts[VP9_YMODES];   /* interframe intra mode probs */
   unsigned int sb_ymode_counts[VP9_I32X32_MODES];
@@ -102,6 +104,7 @@ typedef struct frame_contexts {
   unsigned int i8x8_mode_counts[VP9_I8X8_MODES];   /* interframe intra probs */
   unsigned int sub_mv_ref_counts[SUBMVREF_COUNT][VP9_SUBMVREFS];
   unsigned int mbsplit_counts[VP9_NUMMBSPLITS];
+  unsigned int partition_counts[PARTITION_PLANES][PARTITION_TYPES];
 
   vp9_coeff_probs pre_coef_probs_4x4[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_8x8[BLOCK_TYPES];
@@ -279,8 +282,6 @@ typedef struct VP9Common {
   vp9_prob prob_intra_coded;
   vp9_prob prob_last_coded;
   vp9_prob prob_gf_coded;
-  vp9_prob prob_sb32_coded;
-  vp9_prob prob_sb64_coded;
 
   // Context probabilities when using predictive coding of segment id
   vp9_prob segment_pred_probs[PREDICTION_PROBS];

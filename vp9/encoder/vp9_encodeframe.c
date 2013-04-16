@@ -857,17 +857,18 @@ static void encode_sb(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
+  BLOCK_SIZE_TYPE bsize = BLOCK_SIZE_SB32X32;
 
-  cpi->sb32_count[is_sb]++;
   if (is_sb) {
-    set_offsets(cpi, mb_row, mb_col, BLOCK_SIZE_SB32X32);
+    set_offsets(cpi, mb_row, mb_col, bsize);
     update_state(cpi, &x->sb32_context[xd->sb_index],
-                 BLOCK_SIZE_SB32X32, output_enabled);
+                 bsize, output_enabled);
 
     encode_superblock(cpi, tp,
-                      output_enabled, mb_row, mb_col, BLOCK_SIZE_SB32X32);
+                      output_enabled, mb_row, mb_col, bsize);
     if (output_enabled) {
       update_stats(cpi, mb_row, mb_col);
+      cpi->partition_count[partition_plane(bsize)][PARTITION_NONE]++;
     }
 
     if (output_enabled) {
@@ -876,6 +877,8 @@ static void encode_sb(VP9_COMP *cpi,
     }
   } else {
     int i;
+    if (output_enabled)
+      cpi->partition_count[partition_plane(bsize)][PARTITION_SPLIT]++;
 
     for (i = 0; i < 4; i++) {
       const int x_idx = i & 1, y_idx = i >> 1;
@@ -924,20 +927,21 @@ static void encode_sb64(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
+  BLOCK_SIZE_TYPE bsize = BLOCK_SIZE_SB64X64;
 
-  cpi->sb64_count[is_sb[0] == 2]++;
   if (is_sb[0] == 2) {
-    set_offsets(cpi, mb_row, mb_col, BLOCK_SIZE_SB64X64);
-    update_state(cpi, &x->sb64_context, BLOCK_SIZE_SB64X64, 1);
+    set_offsets(cpi, mb_row, mb_col, bsize);
+    update_state(cpi, &x->sb64_context, bsize, 1);
     encode_superblock(cpi, tp,
-                      1, mb_row, mb_col, BLOCK_SIZE_SB64X64);
+                      1, mb_row, mb_col, bsize);
     update_stats(cpi, mb_row, mb_col);
 
     (*tp)->Token = EOSB_TOKEN;
     (*tp)++;
+    cpi->partition_count[partition_plane(bsize)][PARTITION_NONE]++;
   } else {
     int i;
-
+    cpi->partition_count[partition_plane(bsize)][PARTITION_SPLIT]++;
     for (i = 0; i < 4; i++) {
       const int x_idx = i & 1, y_idx = i >> 1;
 
@@ -1024,7 +1028,9 @@ static void encode_sb_row(VP9_COMP *cpi,
       vpx_memcpy(cm->left_context + y_idx, l2, sizeof(l2));
       vpx_memcpy(cm->above_context + mb_col + x_idx, a2, sizeof(a2));
 
-      mb_rate += vp9_cost_bit(cm->prob_sb32_coded, 0);
+      // TODO(jingning): pre-calculate the overhead costs
+      mb_rate += vp9_cost_bit(cm->fc.partition_prob
+               [partition_plane(BLOCK_SIZE_SB32X32)][0], 0);
 
       if (cpi->sf.splitmode_breakout) {
         sb32_skip = splitmodes_used;
@@ -1037,7 +1043,8 @@ static void encode_sb_row(VP9_COMP *cpi,
         pick_sb_modes(cpi, mb_row + y_idx, mb_col + x_idx,
                       tp, &sb_rate, &sb_dist, BLOCK_SIZE_SB32X32,
                       &x->sb32_context[xd->sb_index]);
-        sb_rate += vp9_cost_bit(cm->prob_sb32_coded, 1);
+        sb_rate += vp9_cost_bit(cm->fc.partition_prob
+                 [partition_plane(BLOCK_SIZE_SB32X32)][0], 1);
       }
 
       /* Decide whether to encode as a SB or 4xMBs */
@@ -1069,13 +1076,15 @@ static void encode_sb_row(VP9_COMP *cpi,
 
     memcpy(cm->above_context + mb_col, &a, sizeof(a));
     memcpy(cm->left_context, &l, sizeof(l));
-    sb32_rate += vp9_cost_bit(cm->prob_sb64_coded, 0);
+    sb32_rate += vp9_cost_bit(cm->fc.partition_prob
+               [partition_plane(BLOCK_SIZE_SB64X64)][0], 0);
 
     if (!sb64_skip && !(mb_col + 3 >= cm->mb_cols ||
                         mb_row + 3 >= cm->mb_rows)) {
       pick_sb_modes(cpi, mb_row, mb_col, tp, &sb64_rate, &sb64_dist,
                     BLOCK_SIZE_SB64X64, &x->sb64_context);
-      sb64_rate += vp9_cost_bit(cm->prob_sb64_coded, 1);
+      sb64_rate += vp9_cost_bit(cm->fc.partition_prob
+                 [partition_plane(BLOCK_SIZE_SB64X64)][0], 1);
     }
 
     /* Decide whether to encode as a SB or 4xMBs */
@@ -1139,8 +1148,8 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->mbsplit_count)
   vp9_zero(cpi->common.fc.mv_ref_ct)
   vp9_zero(cpi->sb_ymode_count)
-  vp9_zero(cpi->sb32_count);
-  vp9_zero(cpi->sb64_count);
+  vp9_zero(cpi->partition_count);
+
 #if CONFIG_COMP_INTERINTRA_PRED
   vp9_zero(cpi->interintra_count);
   vp9_zero(cpi->interintra_select_count);

@@ -141,6 +141,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->i8x8_mode_prob, cm->fc.i8x8_mode_prob);
   vp9_copy(cc->sub_mv_ref_prob, cm->fc.sub_mv_ref_prob);
   vp9_copy(cc->mbsplit_prob, cm->fc.mbsplit_prob);
+  vp9_copy(cc->partition_prob, cm->fc.partition_prob);
 
   // Stats
 #ifdef MODE_STATS
@@ -202,6 +203,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
   vp9_copy(cm->fc.sub_mv_ref_prob, cc->sub_mv_ref_prob);
   vp9_copy(cm->fc.mbsplit_prob, cc->mbsplit_prob);
+  vp9_copy(cm->fc.partition_prob, cc->partition_prob);
 
   // Stats
 #ifdef MODE_STATS

@@ -1673,63 +1673,103 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   pack_mb_tokens(bc, tok, tok_end);
 }
 
+static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
+                           TOKENEXTRA **tok, TOKENEXTRA *tok_end,
+                           int mb_row, int mb_col,
+                           BLOCK_SIZE_TYPE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int mis = cm->mode_info_stride;
+  int bwl, bhl;
+#if CONFIG_SBSEGMENT
+  int bw, bh;
+#endif
+  int bsl = mb_width_log2(bsize), bs = (1 << bsl) / 2;
+  int n;
+  PARTITION_TYPE partition;
+  BLOCK_SIZE_TYPE subsize;
+
+  if (mb_row >= cm->mb_rows || mb_col >= cm->mb_cols)
+    return;
+
+  bwl = mb_width_log2(m->mbmi.sb_type);
+  bhl = mb_height_log2(m->mbmi.sb_type);
+#if CONFIG_SBSEGMENT
+  bw = 1 << bwl;
+  bh = 1 << bhl;
+#endif
+
+  // parse the partition type
+  if ((bwl == bsl) && (bhl == bsl))
+    partition = PARTITION_NONE;
+#if CONFIG_SBSEGMENT
+  else if ((bwl == bsl) && (bhl < bsl))
+    partition = PARTITION_HORZ;
+  else if ((bwl < bsl) && (bhl == bsl))
+    partition = PARTITION_VERT;
+#endif
+  else if ((bwl < bsl) && (bhl < bsl))
+    partition = PARTITION_SPLIT;
+  else
+    assert(0);
+
+  if (bsize > BLOCK_SIZE_MB16X16)
+    // encode the partition information
+    write_token(bc, vp9_partition_tree, cm->fc.partition_prob[bsl - 1],
+                vp9_partition_encodings + partition);
+
+  switch (partition) {
+    case PARTITION_NONE:
+      write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
+      break;
+#if CONFIG_SBSEGMENT
+    case PARTITION_HORZ:
+      write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
+      if ((mb_row + bh) < cm->mb_rows)
+        write_modes_b(cpi, m + bh * mis, bc, tok, tok_end, mb_row + bh, mb_col);
+      break;
+    case PARTITION_VERT:
+      write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
+      if ((mb_col + bw) < cm->mb_cols)
+        write_modes_b(cpi, m + bw, bc, tok, tok_end, mb_row, mb_col + bw);
+      break;
+#endif
+    case PARTITION_SPLIT:
+      // TODO(jingning): support recursive partitioning down to 16x16 as for
+      // now. need to merge in 16x8, 8x16, 8x8, and smaller partitions.
+      if (bsize == BLOCK_SIZE_SB64X64)
+        subsize = BLOCK_SIZE_SB32X32;
+      else if (bsize == BLOCK_SIZE_SB32X32)
+        subsize = BLOCK_SIZE_MB16X16;
+      else
+        assert(0);
+      for (n = 0; n < 4; n++) {
+        int j = n >> 1, i = n & 0x01;
+        write_modes_sb(cpi, m + j * bs * mis + i * bs, bc, tok, tok_end,
+                       mb_row + j * bs, mb_col + i * bs, subsize);
+      }
+      break;
+    default:
+      assert(0);
+  }
+}
+
 static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
                         TOKENEXTRA **tok, TOKENEXTRA *tok_end) {
   VP9_COMMON *const c = &cpi->common;
   const int mis = c->mode_info_stride;
   MODE_INFO *m, *m_ptr = c->mi;
-  int i, mb_row, mb_col;
+  int mb_row, mb_col;
 
   m_ptr += c->cur_tile_mb_col_start + c->cur_tile_mb_row_start * mis;
   for (mb_row = c->cur_tile_mb_row_start;
        mb_row < c->cur_tile_mb_row_end; mb_row += 4, m_ptr += 4 * mis) {
     m = m_ptr;
     for (mb_col = c->cur_tile_mb_col_start;
-         mb_col < c->cur_tile_mb_col_end; mb_col += 4, m += 4) {
-      vp9_write(bc, m->mbmi.sb_type == BLOCK_SIZE_SB64X64, c->prob_sb64_coded);
-      if (m->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
-        write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
-      } else {
-        int j;
-
-        for (j = 0; j < 4; j++) {
-          const int x_idx_sb = (j & 1) << 1, y_idx_sb = j & 2;
-          MODE_INFO *sb_m = m + y_idx_sb * mis + x_idx_sb;
-
-          if (mb_col + x_idx_sb >= c->mb_cols ||
-              mb_row + y_idx_sb >= c->mb_rows)
-            continue;
-
-          vp9_write(bc, sb_m->mbmi.sb_type == BLOCK_SIZE_SB32X32,
-                    c->prob_sb32_coded);
-          if (sb_m->mbmi.sb_type) {
-            assert(sb_m->mbmi.sb_type == BLOCK_SIZE_SB32X32);
-            write_modes_b(cpi, sb_m, bc, tok, tok_end,
-                          mb_row + y_idx_sb, mb_col + x_idx_sb);
-          } else {
-            // Process the 4 MBs in the order:
-            // top-left, top-right, bottom-left, bottom-right
-            for (i = 0; i < 4; i++) {
-              const int x_idx = x_idx_sb + (i & 1), y_idx = y_idx_sb + (i >> 1);
-              MODE_INFO *mb_m = m + x_idx + y_idx * mis;
-
-              if (mb_row + y_idx >= c->mb_rows ||
-                  mb_col + x_idx >= c->mb_cols) {
-                // MB lies outside frame, move on
-                continue;
-              }
-
-              assert(mb_m->mbmi.sb_type == BLOCK_SIZE_MB16X16);
-              write_modes_b(cpi, mb_m, bc, tok, tok_end,
-                            mb_row + y_idx, mb_col + x_idx);
-            }
-          }
-        }
-      }
-    }
+         mb_col < c->cur_tile_mb_col_end; mb_col += 4, m += 4)
+      write_modes_sb(cpi, m, bc, tok, tok_end, mb_row, mb_col,
+                     BLOCK_SIZE_SB64X64);
   }
 }
-
 
 /* This function is used for debugging probability trees. */
 static void print_prob_tree(vp9_coeff_probs *coef_probs, int block_types) {
@@ -2468,11 +2508,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     }
   }
 
-  pc->prob_sb64_coded = get_binary_prob(cpi->sb64_count[0], cpi->sb64_count[1]);
-  vp9_write_prob(&header_bc, pc->prob_sb64_coded);
-  pc->prob_sb32_coded = get_binary_prob(cpi->sb32_count[0], cpi->sb32_count[1]);
-  vp9_write_prob(&header_bc, pc->prob_sb32_coded);
-
   vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
   if (cpi->mb.e_mbd.lossless) {
     pc->txfm_mode = ONLY_4X4;
@@ -2791,13 +2826,14 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   vp9_copy(cpi->common.fc.pre_sub_mv_ref_prob, cpi->common.fc.sub_mv_ref_prob);
   vp9_copy(cpi->common.fc.pre_mbsplit_prob, cpi->common.fc.mbsplit_prob);
   vp9_copy(cpi->common.fc.pre_i8x8_mode_prob, cpi->common.fc.i8x8_mode_prob);
+  vp9_copy(cpi->common.fc.pre_partition_prob, cpi->common.fc.partition_prob);
   cpi->common.fc.pre_nmvc = cpi->common.fc.nmvc;
 #if CONFIG_COMP_INTERINTRA_PRED
   cpi->common.fc.pre_interintra_prob = cpi->common.fc.interintra_prob;
 #endif
   vp9_zero(cpi->sub_mv_ref_count);
   vp9_zero(cpi->mbsplit_count);
-  vp9_zero(cpi->common.fc.mv_ref_ct)
+  vp9_zero(cpi->common.fc.mv_ref_ct);
 
   update_coef_probs(cpi, &header_bc);
 #if CONFIG_CODE_NONZEROCOUNT
@@ -2862,6 +2898,14 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       }
     }
     update_mbintra_mode_probs(cpi, &header_bc);
+
+    for (i = 0; i < PARTITION_PLANES; i++) {
+      vp9_prob Pnew[PARTITION_TYPES - 1];
+      unsigned int bct[PARTITION_TYPES - 1][2];
+      update_mode(&header_bc, PARTITION_TYPES, vp9_partition_encodings,
+                  vp9_partition_tree, Pnew, pc->fc.partition_prob[i], bct,
+                  (unsigned int *)cpi->partition_count[i]);
+    }
 
     vp9_write_nmv_probs(cpi, xd->allow_high_precision_mv, &header_bc);
   }

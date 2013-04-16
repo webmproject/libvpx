@@ -151,6 +151,17 @@ const int vp9_mbsplit_count [VP9_NUMMBSPLITS] = { 2, 2, 4, 16};
 
 const vp9_prob vp9_mbsplit_probs [VP9_NUMMBSPLITS - 1] = { 110, 111, 150};
 
+#if CONFIG_SBSEGMENT
+const vp9_prob vp9_partition_probs[PARTITION_PLANES][PARTITION_TYPES - 1] = {
+  {110, 111, 150},
+  {110, 111, 150},
+};
+#else
+const vp9_prob vp9_partition_probs[PARTITION_PLANES][PARTITION_TYPES - 1] = {
+  {200}, {200},
+};
+#endif
+
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 
 const vp9_tree_index vp9_kf_bmode_tree[VP9_KF_BINTRAMODES * 2 - 2] = {
@@ -283,6 +294,18 @@ const vp9_tree_index vp9_sub_mv_ref_tree[6] = {
   -ZERO4X4, -NEW4X4
 };
 
+#if CONFIG_SBSEGMENT
+const vp9_tree_index vp9_partition_tree[6] = {
+  -PARTITION_NONE, 2,
+  -PARTITION_HORZ, 4,
+  -PARTITION_VERT, -PARTITION_SPLIT
+};
+#else
+const vp9_tree_index vp9_partition_tree[2] = {
+  -PARTITION_NONE, -PARTITION_SPLIT
+};
+#endif
+
 struct vp9_token vp9_bmode_encodings[VP9_NKF_BINTRAMODES];
 struct vp9_token vp9_kf_bmode_encodings[VP9_KF_BINTRAMODES];
 struct vp9_token vp9_ymode_encodings[VP9_YMODES];
@@ -296,6 +319,8 @@ struct vp9_token vp9_mbsplit_encodings[VP9_NUMMBSPLITS];
 struct vp9_token vp9_mv_ref_encoding_array[VP9_MVREFS];
 struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
 struct vp9_token vp9_sub_mv_ref_encoding_array[VP9_SUBMVREFS];
+
+struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
   unsigned int bct [VP9_YMODES] [2];      /* num Ymodes > num UV modes */
@@ -332,6 +357,10 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
   vpx_memcpy(x->fc.mbsplit_prob, vp9_mbsplit_probs, sizeof(vp9_mbsplit_probs));
   vpx_memcpy(x->fc.switchable_interp_prob, vp9_switchable_interp_prob,
              sizeof(vp9_switchable_interp_prob));
+
+  vpx_memcpy(x->fc.partition_prob, vp9_partition_probs,
+             sizeof(vp9_partition_probs));
+
 #if CONFIG_COMP_INTERINTRA_PRED
   x->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
 #endif
@@ -433,6 +462,7 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_mbsplit_encodings, vp9_mbsplit_tree);
   vp9_tokens_from_tree(vp9_switchable_interp_encodings,
                        vp9_switchable_interp_tree);
+  vp9_tokens_from_tree(vp9_partition_encodings, vp9_partition_tree);
 
   vp9_tokens_from_tree_offset(vp9_mv_ref_encoding_array,
                               vp9_mv_ref_tree, NEARESTMV);
@@ -631,6 +661,10 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                                            interintra_prob, factor);
   }
 #endif
+  for (i = 0; i < PARTITION_PLANES; i++)
+    update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
+                      cm->fc.partition_counts[i], cm->fc.pre_partition_prob[i],
+                      cm->fc.partition_prob[i], 0);
 }
 
 static void set_default_lf_deltas(MACROBLOCKD *xd) {
