@@ -19,6 +19,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///mg\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "PLANES is a funny name for this, it implies that you\u0027re supporting different partitioning per-plane, which I don\u0027t think is the case. Seems like this is really about the block size, 16/32/64, so you get the probabilities of the different partitioning choices (none/h/v/square) given the current block size.",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///tk\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "if this (and PARTITION_PLANES) is really an enumerated type (say none/wide/tall/square), then declare the values with an enum here, for documentation if nothing else. This is the first commit in this patch set I\u0027ve reviewed, so I don\u0027t know what a \"PARTITION_TYPE\" is yet. If this is just counting the number of elements in some other enum, then put it as a member in that enum, or at the very least document the relationship with a comment.",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///yo\u003d",
         "filename": "vp9/common/vp9_entropymode.c",
         "patchSetId": 5
@@ -70,6 +104,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///rA\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 886,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "so that I\u0027m clear, this commit still assumes that both plane types have the same partitioning, correct?",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///yU\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 5
@@ -81,6 +132,57 @@
       "writtenOn": "2013-04-16T19:59:48Z",
       "side": 1,
       "message": "vp9_copy(cpi-\u003ecommon.fc.pre_partition_prob, cpi-\u003ecommon.fc.partition_prob);",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///pM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 870,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "what\u0027s the magic value 1 here? Can this be an enum?",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///pE\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 902,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "magic 0",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///ow\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 940,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "magic 2.",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +223,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX///nw\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1031,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "magic 1",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///ns\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1044,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "magic 1",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX///yA\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -132,6 +268,40 @@
       "writtenOn": "2013-04-16T19:59:48Z",
       "side": 1,
       "message": "prob[0], not prob[2]?",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///nk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "magic 2.",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///ng\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1082,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T21:05:50Z",
+      "side": 1,
+      "message": "magic 2.",
       "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
