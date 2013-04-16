@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX///ys\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "2? (64x64-64x32-32x64-32x32 and 32x32-32x16-16x32-16x16)",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///yo\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "Shouldn\u0027t these be the values of the previous sb64_coded and sb32_coded defaults in vp9_onyx_if.c?",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///yc\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "vp9_copy(x-\u003efc.partition_prob, vp9_partition_probs);",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///yY\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "this can be scoped under the else (10 lines down)",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///yU\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2848,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "vp9_copy(cpi-\u003ecommon.fc.pre_partition_prob, cpi-\u003ecommon.fc.partition_prob);",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///yQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 943,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "empty line between variable declarations and statements.",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///yE\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1031,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "so uhm, we probably want to pre-calculate the costs for each partition at each level? See how we do this for token costing in e.g. vp9_rdopt.c. That way it\u0027s easier to use once the costing is taken into account for rectangles and the tree is larger than one item.",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///yA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "prob[0], not prob[2]?",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///x8\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3356,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "vp9_copy(cpi-\u003ecommon.fc.partition_counts, cpi-\u003epartition_count)",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///x4\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "unsigned",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///x0\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "vp9_copy(cc-\u003epartition_prob, cm-\u003efc.partition_prob)",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///xs\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T19:59:48Z",
+      "side": 1,
+      "message": "vp9_copy(cm-\u003efc.partition_prob, cc-\u003epartition_prob)",
+      "revId": "1021698a6c38185d8ae748a3d39ca77965be6801",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
