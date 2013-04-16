@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXH//0Lo\u003d",
+        "filename": "vp9/common/vp9_reconinter.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T14:06:27Z",
+      "side": 1,
+      "message": "don\u0027t really need 2 different functions for x and y here, you could have both function pointers point to a common scale_value_without_scaling function (or maybe just unscaled_value?)",
+      "revId": "3df38e42a24e45b0d3444ec73e9955fc31c5a7b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXH//0Ls\u003d",
+        "filename": "vp9/common/vp9_reconinter.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-16T14:06:27Z",
+      "side": 1,
+      "message": "right, this was the pattern I had in mind.",
+      "revId": "3df38e42a24e45b0d3444ec73e9955fc31c5a7b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
