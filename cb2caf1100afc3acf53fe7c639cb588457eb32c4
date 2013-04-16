@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX///b4\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T21:55:04Z",
+      "side": 1,
+      "message": "assert(mb_width_log2(..) \u003d\u003d mb_height_log2(..)) to assure people don\u0027t call this with rectangular sizes?",
+      "revId": "cb2caf1100afc3acf53fe7c639cb588457eb32c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///bg\u003d",
+        "filename": "vp9/common/vp9_enums.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T21:55:04Z",
+      "side": 1,
+      "message": "add PARTITION_TYPES at the end here, so you don\u0027t need the #if/#else/#endif below.",
+      "revId": "cb2caf1100afc3acf53fe7c639cb588457eb32c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///cY\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1691,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T21:55:04Z",
+      "side": 1,
+      "message": "bs \u003d 1 \u003c\u003c (bsl - 1);",
+      "revId": "cb2caf1100afc3acf53fe7c639cb588457eb32c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX///aM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1081,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-16T21:55:04Z",
+      "side": 1,
+      "message": "this isn\u0027t really [PARTITION_NONE], rather it\u0027s the first branch on that tree... Just make it [0] for now, I\u0027ll pre-calc the costs in my follow-up patch. Same for the other 3 occurrences.",
+      "revId": "cb2caf1100afc3acf53fe7c639cb588457eb32c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
