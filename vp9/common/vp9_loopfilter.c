@@ -16,24 +16,6 @@
 #include "vp9/common/vp9_seg_common.h"
 
 static void lf_init_lut(loop_filter_info_n *lfi) {
-  int filt_lvl;
-
-  for (filt_lvl = 0; filt_lvl <= MAX_LOOP_FILTER; filt_lvl++) {
-    if (filt_lvl >= 40) {
-      lfi->hev_thr_lut[KEY_FRAME][filt_lvl] = 2;
-      lfi->hev_thr_lut[INTER_FRAME][filt_lvl] = 3;
-    } else if (filt_lvl >= 20) {
-      lfi->hev_thr_lut[KEY_FRAME][filt_lvl] = 1;
-      lfi->hev_thr_lut[INTER_FRAME][filt_lvl] = 2;
-    } else if (filt_lvl >= 15) {
-      lfi->hev_thr_lut[KEY_FRAME][filt_lvl] = 1;
-      lfi->hev_thr_lut[INTER_FRAME][filt_lvl] = 1;
-    } else {
-      lfi->hev_thr_lut[KEY_FRAME][filt_lvl] = 0;
-      lfi->hev_thr_lut[INTER_FRAME][filt_lvl] = 0;
-    }
-  }
-
   lfi->mode_lf_lut[DC_PRED] = 1;
   lfi->mode_lf_lut[D45_PRED] = 1;
   lfi->mode_lf_lut[D135_PRED] = 1;
@@ -207,7 +189,6 @@ static void lpf_mb(VP9_COMMON *cm, const MODE_INFO *mi,
                    int y_stride, int uv_stride, int dering) {
   loop_filter_info_n *lfi_n = &cm->lf_info;
   struct loop_filter_info lfi;
-  const FRAME_TYPE frame_type = cm->frame_type;
   int mode = mi->mbmi.mode;
   int mode_index = lfi_n->mode_lf_lut[mode];
   int seg = mi->mbmi.segment_id;
@@ -218,7 +199,7 @@ static void lpf_mb(VP9_COMMON *cm, const MODE_INFO *mi,
     const int skip_lf = mb_lf_skip(&mi->mbmi);
     const int tx_size = mi->mbmi.txfm_size;
     if (cm->filter_type == NORMAL_LOOPFILTER) {
-      const int hev_index = lfi_n->hev_thr_lut[frame_type][filter_level];
+      const int hev_index = filter_level >> 4;
       lfi.mblim = lfi_n->mblim[filter_level];
       lfi.blim = lfi_n->blim[filter_level];
       lfi.lim = lfi_n->lim[filter_level];
