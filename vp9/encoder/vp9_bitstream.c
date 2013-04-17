@@ -78,6 +78,18 @@ int count_mb_seg[4] = { 0, 0, 0, 0 };
 #define SEARCH_NEWP
 static int update_bits[255];
 
+static INLINE void write_le16(uint8_t *p, int value) {
+  p[0] = value;
+  p[1] = value >> 8;
+}
+
+static INLINE void write_le32(uint8_t *p, int value) {
+  p[0] = value;
+  p[1] = value >> 8;
+  p[2] = value >> 16;
+  p[3] = value >> 24;
+}
+
 static void compute_update_table() {
   int i;
   for (i = 0; i < 255; i++)
@@ -506,18 +518,6 @@ static void pack_mb_tokens(vp9_writer* const bc,
   }
 
   *tp = p;
-}
-
-static void write_partition_size(unsigned char *cx_data, int size) {
-  signed char csize;
-
-  csize = size & 0xff;
-  *cx_data = csize;
-  csize = (size >> 8) & 0xff;
-  *(cx_data + 1) = csize;
-  csize = (size >> 16) & 0xff;
-  *(cx_data + 2) = csize;
-
 }
 
 static void write_mv_ref
@@ -2353,32 +2353,18 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     extra_bytes_packed = 3;
     cx_data += extra_bytes_packed;
   }
-  {
-    int v;
 
-    if (pc->width != pc->display_width || pc->height != pc->display_height) {
-      v = pc->display_width;
-      cx_data[0] = v;
-      cx_data[1] = v >> 8;
-
-      v = pc->display_height;
-      cx_data[2] = v;
-      cx_data[3] = v >> 8;
-      cx_data += 4;
-      extra_bytes_packed += 4;
-    }
-
-    v = pc->width;
-    cx_data[0] = v;
-    cx_data[1] = v >> 8;
-
-    v = pc->height;
-    cx_data[2] = v;
-    cx_data[3] = v >> 8;
-
-    extra_bytes_packed += 4;
+  if (pc->width != pc->display_width || pc->height != pc->display_height) {
+    write_le16(cx_data, pc->display_width);
+    write_le16(cx_data + 2, pc->display_height);
     cx_data += 4;
+    extra_bytes_packed += 4;
   }
+
+  write_le16(cx_data, pc->width);
+  write_le16(cx_data + 2, pc->height);
+  extra_bytes_packed += 4;
+  cx_data += 4;
 
   vp9_start_encode(&header_bc, cx_data);
 
@@ -2414,7 +2400,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       }
 
       // Write out the chosen coding method.
-      vp9_write_bit(&header_bc, (pc->temporal_update) ? 1 : 0);
+      vp9_write_bit(&header_bc, pc->temporal_update);
       if (pc->temporal_update) {
         for (i = 0; i < PREDICTION_PROBS; i++) {
           const int prob = pc->segment_pred_probs[i];
@@ -2952,11 +2938,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
         write_modes(cpi, &residual_bc, &tok[tile_col], tok_end);
         vp9_stop_encode(&residual_bc);
         if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1) {
-          /* size of this tile */
-          data_ptr[total_size + 0] = residual_bc.pos;
-          data_ptr[total_size + 1] = residual_bc.pos >> 8;
-          data_ptr[total_size + 2] = residual_bc.pos >> 16;
-          data_ptr[total_size + 3] = residual_bc.pos >> 24;
+          // size of this tile
+          write_le32(data_ptr + total_size, residual_bc.pos);
           total_size += 4;
         }
 
