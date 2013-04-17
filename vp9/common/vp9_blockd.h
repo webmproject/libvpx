@@ -522,6 +522,16 @@ extern const uint8_t vp9_block2left_sb[TX_SIZE_MAX_SB][96];
 extern const uint8_t vp9_block2above_sb[TX_SIZE_MAX_SB][96];
 extern const uint8_t vp9_block2left_sb64[TX_SIZE_MAX_SB][384];
 extern const uint8_t vp9_block2above_sb64[TX_SIZE_MAX_SB][384];
+#if CONFIG_SBSEGMENT
+extern const uint8_t vp9_block2left_sb16x32[TX_SIZE_MAX_MB][48];
+extern const uint8_t vp9_block2above_sb16x32[TX_SIZE_MAX_MB][48];
+extern const uint8_t vp9_block2left_sb32x16[TX_SIZE_MAX_MB][48];
+extern const uint8_t vp9_block2above_sb32x16[TX_SIZE_MAX_MB][48];
+extern const uint8_t vp9_block2left_sb32x64[TX_SIZE_MAX_SB][192];
+extern const uint8_t vp9_block2above_sb32x64[TX_SIZE_MAX_SB][192];
+extern const uint8_t vp9_block2left_sb64x32[TX_SIZE_MAX_SB][192];
+extern const uint8_t vp9_block2above_sb64x32[TX_SIZE_MAX_SB][192];
+#endif
 
 #define USE_ADST_FOR_I16X16_8X8   1
 #define USE_ADST_FOR_I16X16_4X4   1

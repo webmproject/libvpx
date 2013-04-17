@@ -322,6 +322,11 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   fill_nzc_costs(cpi, TX_32X32);
 #endif
 
+  for (i = 0; i < 2; i++)
+    vp9_cost_tokens(cpi->mb.partition_cost[i],
+                    cpi->common.fc.partition_prob[i],
+                    vp9_partition_tree);
+
   /*rough estimate for costing*/
   cpi->common.kf_ymode_probs_index = cpi->common.base_qindex >> 4;
   vp9_init_mode_costs(cpi);

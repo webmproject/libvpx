@@ -212,15 +212,15 @@ static void count_segs(VP9_COMP *cpi,
                        int *no_pred_segcounts,
                        int (*temporal_predictor_count)[2],
                        int (*t_unpred_seg_counts)[MAX_MB_SEGMENTS],
-                       int mb_size, int mb_row, int mb_col) {
+                       int bw, int bh, int mb_row, int mb_col) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const int segmap_index = mb_row * cm->mb_cols + mb_col;
   const int segment_id = mi->mbmi.segment_id;
 
   xd->mode_info_context = mi;
-  set_mb_row(cm, xd, mb_row, mb_size);
-  set_mb_col(cm, xd, mb_col, mb_size);
+  set_mb_row(cm, xd, mb_row, bh);
+  set_mb_col(cm, xd, mb_col, bw);
 
   // Count the number of hits on each segment with no prediction
   no_pred_segcounts[segment_id]++;
@@ -290,7 +290,22 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
            mb_col < cm->cur_tile_mb_col_end; mb_col += 4, mi += 4) {
         if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
           count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
-                     t_unpred_seg_counts, 4, mb_row, mb_col);
+                     t_unpred_seg_counts, 4, 4, mb_row, mb_col);
+#if CONFIG_SBSEGMENT
+        } else if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X32) {
+          count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
+                     t_unpred_seg_counts, 4, 2, mb_row, mb_col);
+          if (mb_row + 2 != cm->mb_rows)
+            count_segs(cpi, mi + 2 * mis, no_pred_segcounts,
+                       temporal_predictor_count,
+                       t_unpred_seg_counts, 4, 2, mb_row + 2, mb_col);
+        } else if (mi->mbmi.sb_type == BLOCK_SIZE_SB32X64) {
+          count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
+                     t_unpred_seg_counts, 2, 4, mb_row, mb_col);
+          if (mb_col + 2 != cm->mb_cols)
+            count_segs(cpi, mi + 2, no_pred_segcounts, temporal_predictor_count,
+                       t_unpred_seg_counts, 2, 4, mb_row, mb_col + 2);
+#endif
         } else {
           for (i = 0; i < 4; i++) {
             int x_idx = (i & 1) << 1, y_idx = i & 2;
@@ -301,11 +316,32 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
               continue;
             }
 
-            if (sb_mi->mbmi.sb_type) {
-              assert(sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X32);
+            if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
               count_segs(cpi, sb_mi, no_pred_segcounts,
-                         temporal_predictor_count, t_unpred_seg_counts, 2,
+                         temporal_predictor_count, t_unpred_seg_counts, 2, 2,
                          mb_row + y_idx, mb_col + x_idx);
+#if CONFIG_SBSEGMENT
+            } else if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X16) {
+              count_segs(cpi, sb_mi, no_pred_segcounts,
+                         temporal_predictor_count,
+                         t_unpred_seg_counts, 2, 1,
+                         mb_row + y_idx, mb_col + x_idx);
+              if (mb_row + y_idx + 1 != cm->mb_rows)
+                count_segs(cpi, sb_mi + mis, no_pred_segcounts,
+                           temporal_predictor_count,
+                           t_unpred_seg_counts, 2, 1,
+                           mb_row + y_idx + 1, mb_col + x_idx);
+            } else if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB16X32) {
+              count_segs(cpi, sb_mi, no_pred_segcounts,
+                         temporal_predictor_count,
+                         t_unpred_seg_counts, 1, 2,
+                         mb_row + y_idx, mb_col + x_idx);
+              if (mb_col + x_idx + 1 != cm->mb_cols)
+                count_segs(cpi, sb_mi + 1, no_pred_segcounts,
+                           temporal_predictor_count,
+                           t_unpred_seg_counts, 1, 2,
+                           mb_row + y_idx, mb_col + x_idx + 1);
+#endif
             } else {
               int j;
 
@@ -322,7 +358,7 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
                 assert(mb_mi->mbmi.sb_type == BLOCK_SIZE_MB16X16);
                 count_segs(cpi, mb_mi, no_pred_segcounts,
                            temporal_predictor_count, t_unpred_seg_counts,
-                           1, mb_row + y_idx_mb, mb_col + x_idx_mb);
+                           1, 1, mb_row + y_idx_mb, mb_col + x_idx_mb);
               }
             }
           }
