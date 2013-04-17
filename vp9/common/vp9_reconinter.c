@@ -485,6 +485,56 @@ static void build_2x1_inter_predictor(const BLOCKD *d0, const BLOCKD *d1,
   }
 }
 
+static void build_2x1_inter_predictor_q4(const BLOCKD *d0, const BLOCKD *d1,
+                                         struct scale_factors *s,
+                                         int block_size, int stride,
+                                         int which_mv, int weight,
+                                         const struct subpix_fn_table *subpix,
+                                         int row, int col) {
+  uint8_t *d0_predictor = *(d0->base_dst) + d0->dst;
+  uint8_t *d1_predictor = *(d1->base_dst) + d1->dst;
+  struct scale_factors * scale = &s[which_mv];
+  stride = d0->dst_stride;
+
+  assert(d1_predictor - d0_predictor == block_size);
+  assert(d1->pre == d0->pre + block_size);
+
+  scale->set_scaled_offsets(scale, row, col);
+
+  if (d0->bmi.as_mv[which_mv].as_int == d1->bmi.as_mv[which_mv].as_int) {
+    uint8_t **base_pre = which_mv ? d0->base_second_pre : d0->base_pre;
+
+    vp9_build_inter_predictor_q4(*base_pre + d0->pre,
+                                 d0->pre_stride,
+                                 d0_predictor, stride,
+                                 &d0->bmi.as_mv[which_mv],
+                                 scale,
+                                 2 * block_size, block_size,
+                                 weight, subpix);
+  } else {
+    uint8_t **base_pre0 = which_mv ? d0->base_second_pre : d0->base_pre;
+    uint8_t **base_pre1 = which_mv ? d1->base_second_pre : d1->base_pre;
+
+    vp9_build_inter_predictor_q4(*base_pre0 + d0->pre,
+                                 d0->pre_stride,
+                                 d0_predictor, stride,
+                                 &d0->bmi.as_mv[which_mv],
+                                 scale,
+                                 block_size, block_size,
+                                 weight, subpix);
+
+    scale->set_scaled_offsets(scale, row, col + block_size);
+
+    vp9_build_inter_predictor_q4(*base_pre1 + d1->pre,
+                                 d1->pre_stride,
+                                 d1_predictor, stride,
+                                 &d1->bmi.as_mv[which_mv],
+                                 scale,
+                                 block_size, block_size,
+                                 weight, subpix);
+  }
+}
+
 static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
   /* If the MV points so far into the UMV border that no visible pixels
    * are used for reconstruction, the subpel part of the MV can be
@@ -504,21 +554,6 @@ static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
     mv->row = xd->mb_to_top_edge - (16 << 3);
   else if (mv->row > xd->mb_to_bottom_edge + ((15 + VP9_INTERP_EXTEND) << 3))
     mv->row = xd->mb_to_bottom_edge + (16 << 3);
-}
-
-/* A version of the above function for chroma block MVs.*/
-static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
-  const int extend = VP9_INTERP_EXTEND;
-
-  mv->col = (2 * mv->col < (xd->mb_to_left_edge - ((16 + extend) << 3))) ?
-            (xd->mb_to_left_edge - (16 << 3)) >> 1 : mv->col;
-  mv->col = (2 * mv->col > xd->mb_to_right_edge + ((15 + extend) << 3)) ?
-            (xd->mb_to_right_edge + (16 << 3)) >> 1 : mv->col;
-
-  mv->row = (2 * mv->row < (xd->mb_to_top_edge - ((16 + extend) << 3))) ?
-            (xd->mb_to_top_edge - (16 << 3)) >> 1 : mv->row;
-  mv->row = (2 * mv->row > xd->mb_to_bottom_edge + ((15 + extend) << 3)) ?
-            (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
 }
 
 #if !CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
@@ -1254,15 +1289,15 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *xd,
     const int y = ((i - 16) >> 1) * 4;
 
     for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-      build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
-                                which_mv ? weight : 0, &xd->subpix,
-                                mb_row * 8 + y, mb_col * 8 + x);
+      build_2x1_inter_predictor_q4(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
+                                   which_mv ? weight : 0, &xd->subpix,
+                                   mb_row * 8 + y, mb_col * 8 + x);
     }
   }
 }
 
 static INLINE int round_mv_comp(int value) {
-  return (value < 0 ? value - 4 : value + 4) / 8;
+  return (value < 0 ? value - 2 : value + 2) / 4;
 }
 
 static int mi_mv_pred_row(MACROBLOCKD *mb, int off, int idx) {
@@ -1315,11 +1350,7 @@ static void build_4x4uvmvs(MACROBLOCKD *xd) {
       u->row = mi_mv_pred_row(xd, yoffset, 0);
       u->col = mi_mv_pred_col(xd, yoffset, 0);
 
-      // if (x->mode_info_context->mbmi.need_to_clamp_mvs)
-      clamp_uvmv_to_umv_border(u, xd);
-
-      // if (x->mode_info_context->mbmi.need_to_clamp_mvs)
-      clamp_uvmv_to_umv_border(u, xd);
+      clamp_mv_to_umv_border(u, xd);
 
       v->row = u->row;
       v->col = u->col;
@@ -1330,11 +1361,7 @@ static void build_4x4uvmvs(MACROBLOCKD *xd) {
         u->row = mi_mv_pred_row(xd, yoffset, 1);
         u->col = mi_mv_pred_col(xd, yoffset, 1);
 
-        // if (mbmi->need_to_clamp_mvs)
-        clamp_uvmv_to_umv_border(u, xd);
-
-        // if (mbmi->need_to_clamp_mvs)
-        clamp_uvmv_to_umv_border(u, xd);
+        clamp_mv_to_umv_border(u, xd);
 
         v->row = u->row;
         v->col = u->col;
@@ -1400,9 +1427,9 @@ void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
     BLOCKD *d1 = &blockd[i + 1];
 
     for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-      build_2x1_inter_predictor(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
-                                which_mv ? weight : 0,
-                                &xd->subpix, mb_row * 8 + y, mb_col * 8 + x);
+      build_2x1_inter_predictor_q4(d0, d1, xd->scale_factor_uv, 4, 8, which_mv,
+                                   which_mv ? weight : 0,
+                                   &xd->subpix, mb_row * 8 + y, mb_col * 8 + x);
     }
   }
 }
