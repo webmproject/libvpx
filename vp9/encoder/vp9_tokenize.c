@@ -154,13 +154,50 @@ static void tokenize_b(VP9_COMP *cpi,
     l2 = l1 + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
     a3 = a2 + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
     l3 = l2 + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+#if CONFIG_SBSEGMENT
+  } else if (sb_type == BLOCK_SIZE_SB32X64) {
+    a = (ENTROPY_CONTEXT *)xd->above_context +
+                                          vp9_block2above_sb32x64[tx_size][ib];
+    l = (ENTROPY_CONTEXT *)xd->left_context +
+                                          vp9_block2left_sb32x64[tx_size][ib];
+    a1 = a + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+    l1 = l + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+    a2 = a3 = l2 = l3 = NULL;
+  } else if (sb_type == BLOCK_SIZE_SB64X32) {
+    a = (ENTROPY_CONTEXT *)xd->above_context +
+                                          vp9_block2above_sb64x32[tx_size][ib];
+    l = (ENTROPY_CONTEXT *)xd->left_context +
+                                          vp9_block2left_sb64x32[tx_size][ib];
+    a1 = a + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+    l1 = l + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+    a2 = a3 = l2 = l3 = NULL;
+#endif
   } else if (sb_type == BLOCK_SIZE_SB32X32) {
     a = (ENTROPY_CONTEXT *)xd->above_context + vp9_block2above_sb[tx_size][ib];
     l = (ENTROPY_CONTEXT *)xd->left_context + vp9_block2left_sb[tx_size][ib];
     a1 = a + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
     l1 = l + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
     a2 = a3 = l2 = l3 = NULL;
+#if CONFIG_SBSEGMENT
+  } else if (sb_type == BLOCK_SIZE_SB16X32) {
+    a = (ENTROPY_CONTEXT *)xd->above_context +
+                                          vp9_block2above_sb16x32[tx_size][ib];
+    l = (ENTROPY_CONTEXT *)xd->left_context +
+                                          vp9_block2left_sb16x32[tx_size][ib];
+    a1 = a + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+    l1 = l + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+    a1 = l1 = a2 = l2 = a3 = l3 = NULL;
+  } else if (sb_type == BLOCK_SIZE_SB32X16) {
+    a = (ENTROPY_CONTEXT *)xd->above_context +
+                                          vp9_block2above_sb32x16[tx_size][ib];
+    l = (ENTROPY_CONTEXT *)xd->left_context +
+                                          vp9_block2left_sb32x16[tx_size][ib];
+    a1 = a + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+    l1 = l + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
+    a1 = l1 = a2 = l2 = a3 = l3 = NULL;
+#endif
   } else {
+    assert(sb_type == BLOCK_SIZE_MB16X16);
     a = (ENTROPY_CONTEXT *)xd->above_context + vp9_block2above[tx_size][ib];
     l = (ENTROPY_CONTEXT *)xd->left_context + vp9_block2left[tx_size][ib];
     a1 = l1 = a2 = l2 = a3 = l3 = NULL;

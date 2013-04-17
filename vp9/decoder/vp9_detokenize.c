@@ -120,9 +120,25 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
     aidx = vp9_block2above_sb64[txfm_size][block_idx];
     lidx = vp9_block2left_sb64[txfm_size][block_idx];
+#if CONFIG_SBSEGMENT
+  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X32) {
+    aidx = vp9_block2above_sb64x32[txfm_size][block_idx];
+    lidx = vp9_block2left_sb64x32[txfm_size][block_idx];
+  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X64) {
+    aidx = vp9_block2above_sb32x64[txfm_size][block_idx];
+    lidx = vp9_block2left_sb32x64[txfm_size][block_idx];
+#endif
   } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
     aidx = vp9_block2above_sb[txfm_size][block_idx];
     lidx = vp9_block2left_sb[txfm_size][block_idx];
+#if CONFIG_SBSEGMENT
+  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X16) {
+    aidx = vp9_block2above_sb32x16[txfm_size][block_idx];
+    lidx = vp9_block2left_sb32x16[txfm_size][block_idx];
+  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB16X32) {
+    aidx = vp9_block2above_sb16x32[txfm_size][block_idx];
+    lidx = vp9_block2left_sb16x32[txfm_size][block_idx];
+#endif
   } else {
     aidx = vp9_block2above[txfm_size][block_idx];
     lidx = vp9_block2left[txfm_size][block_idx];
