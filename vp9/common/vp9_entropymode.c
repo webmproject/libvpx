@@ -364,9 +364,9 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
 #if CONFIG_COMP_INTERINTRA_PRED
   x->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
 #endif
-  x->ref_pred_probs[0] = 120;
-  x->ref_pred_probs[1] = 80;
-  x->ref_pred_probs[2] = 40;
+  x->ref_pred_probs[0] = DEFAULT_PRED_PROB_0;
+  x->ref_pred_probs[1] = DEFAULT_PRED_PROB_1;
+  x->ref_pred_probs[2] = DEFAULT_PRED_PROB_2;
 }
 
 
