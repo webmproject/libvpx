@@ -890,16 +890,18 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
 }
 
 /* Decode a row of Superblocks (4x4 region of MBs) */
-static void decode_sb_row(VP9D_COMP *pbi, int mb_row, vp9_reader* r) {
+static void decode_tile(VP9D_COMP *pbi, vp9_reader* r) {
   VP9_COMMON *const pc = &pbi->common;
-  int mb_col;
+  int mb_row, mb_col;
 
-  // For a SB there are 2 left contexts, each pertaining to a MB row within
-  vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
-
-  for (mb_col = pc->cur_tile_mb_col_start;
-       mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
-    decode_modes_sb(pbi, mb_row, mb_col, r, BLOCK_SIZE_SB64X64);
+  for (mb_row = pc->cur_tile_mb_row_start;
+       mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
+    // For a SB there are 2 left contexts, each pertaining to a MB row within
+    vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
+    for (mb_col = pc->cur_tile_mb_col_start;
+         mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
+      decode_modes_sb(pbi, mb_row, mb_col, r, BLOCK_SIZE_SB64X64);
+    }
   }
 }
 
@@ -1237,8 +1239,17 @@ static const uint8_t *read_frame_size(VP9_COMMON *const pc, const uint8_t *data,
                                       const uint8_t *data_end,
                                       int *width, int *height) {
   if (data + 4 < data_end) {
-    *width = read_le16(data);
-    *height = read_le16(data + 2);
+    const int w = read_le16(data);
+    const int h = read_le16(data + 2);
+    if (w <= 0)
+      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                         "Invalid frame width");
+
+    if (h <= 0)
+      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                         "Invalid frame height");
+    *width = w;
+    *height = h;
     data += 4;
   } else {
     vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
@@ -1264,14 +1275,6 @@ static const uint8_t *setup_frame_size(VP9D_COMP *pbi, int scaling_active,
   data = read_frame_size(pc, data, data_end, &width, &height);
 
   if (pc->width != width || pc->height != height) {
-    if (width <= 0)
-      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Invalid frame width");
-
-    if (height <= 0)
-      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Invalid frame height");
-
     if (!pbi->initial_width || !pbi->initial_height) {
       if (vp9_alloc_frame_buffers(pc, width, height))
         vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
@@ -1364,7 +1367,6 @@ static void decode_tiles(VP9D_COMP *pbi,
 
   const uint8_t *data_ptr = data + first_partition_size;
   int tile_row, tile_col, delta_log2_tiles;
-  int mb_row;
 
   vp9_get_tile_n_bits(pc, &pc->log2_tile_columns, &delta_log2_tiles);
   while (delta_log2_tiles--) {
@@ -1410,13 +1412,7 @@ static void decode_tiles(VP9D_COMP *pbi,
       for (tile_col = n_cols - 1; tile_col >= 0; tile_col--) {
         vp9_get_tile_col_offsets(pc, tile_col);
         setup_token_decoder(pbi, data_ptr2[tile_row][tile_col], residual_bc);
-
-        // Decode a row of superblocks
-        for (mb_row = pc->cur_tile_mb_row_start;
-             mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
-          decode_sb_row(pbi, mb_row, residual_bc);
-        }
-
+        decode_tile(pbi, residual_bc);
         if (tile_row == pc->tile_rows - 1 && tile_col == n_cols - 1)
           bc_bak = *residual_bc;
       }
@@ -1433,14 +1429,8 @@ static void decode_tiles(VP9D_COMP *pbi,
         has_more = tile_col < pc->tile_columns - 1 ||
                    tile_row < pc->tile_rows - 1;
 
-        // Setup decoder
         setup_token_decoder(pbi, data_ptr + (has_more ? 4 : 0), residual_bc);
-
-        // Decode a row of superblocks
-        for (mb_row = pc->cur_tile_mb_row_start;
-             mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
-          decode_sb_row(pbi, mb_row, residual_bc);
-        }
+        decode_tile(pbi, residual_bc);
 
         if (has_more) {
           const int size = read_le32(data_ptr);
