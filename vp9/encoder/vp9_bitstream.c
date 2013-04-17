@@ -203,7 +203,7 @@ static void update_switchable_interp_probs(VP9_COMP *cpi,
     for (i = 0; i < VP9_SWITCHABLE_FILTERS - 1; ++i) {
       if (pc->fc.switchable_interp_prob[j][i] < 1)
         pc->fc.switchable_interp_prob[j][i] = 1;
-      vp9_write_literal(bc, pc->fc.switchable_interp_prob[j][i], 8);
+      vp9_write_prob(bc, pc->fc.switchable_interp_prob[j][i]);
     }
   }
 }
@@ -456,7 +456,7 @@ static void vp9_cond_prob_update(vp9_writer *bc, vp9_prob *oldp, vp9_prob upd,
   savings = prob_update_savings(ct, *oldp, newp, upd);
   if (savings > 0) {
     vp9_write(bc, 1, upd);
-    vp9_write_literal(bc, newp, 8);
+    vp9_write_prob(bc, newp);
     *oldp = newp;
   } else {
     vp9_write(bc, 0, upd);
@@ -2393,7 +2393,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
         const int prob = xd->mb_segment_tree_probs[i];
         if (prob != 255) {
           vp9_write_bit(&header_bc, 1);
-          vp9_write_literal(&header_bc, prob, 8);
+          vp9_write_prob(&header_bc, prob);
         } else {
           vp9_write_bit(&header_bc, 0);
         }
@@ -2406,7 +2406,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
           const int prob = pc->segment_pred_probs[i];
           if (prob != 255) {
             vp9_write_bit(&header_bc, 1);
-            vp9_write_literal(&header_bc, prob, 8);
+            vp9_write_prob(&header_bc, prob);
           } else {
             vp9_write_bit(&header_bc, 0);
           }
@@ -2461,7 +2461,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     for (i = 0; i < PREDICTION_PROBS; i++) {
       if (cpi->ref_pred_probs_update[i]) {
         vp9_write_bit(&header_bc, 1);
-        vp9_write_literal(&header_bc, pc->ref_pred_probs[i], 8);
+        vp9_write_prob(&header_bc, pc->ref_pred_probs[i]);
       } else {
         vp9_write_bit(&header_bc, 0);
       }
@@ -2469,9 +2469,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   }
 
   pc->prob_sb64_coded = get_binary_prob(cpi->sb64_count[0], cpi->sb64_count[1]);
-  vp9_write_literal(&header_bc, pc->prob_sb64_coded, 8);
+  vp9_write_prob(&header_bc, pc->prob_sb64_coded);
   pc->prob_sb32_coded = get_binary_prob(cpi->sb32_count[0], cpi->sb32_count[1]);
-  vp9_write_literal(&header_bc, pc->prob_sb32_coded, 8);
+  vp9_write_prob(&header_bc, pc->prob_sb32_coded);
 
   vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
   if (cpi->mb.e_mbd.lossless) {
@@ -2510,9 +2510,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       vp9_write_bit(&header_bc, pc->txfm_mode == TX_MODE_SELECT);
     }
     if (pc->txfm_mode == TX_MODE_SELECT) {
-      vp9_write_literal(&header_bc, pc->prob_tx[0], 8);
-      vp9_write_literal(&header_bc, pc->prob_tx[1], 8);
-      vp9_write_literal(&header_bc, pc->prob_tx[2], 8);
+      vp9_write_prob(&header_bc, pc->prob_tx[0]);
+      vp9_write_prob(&header_bc, pc->prob_tx[1]);
+      vp9_write_prob(&header_bc, pc->prob_tx[2]);
     }
   }
 
@@ -2709,7 +2709,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       for (j = 0; j < 4; j++) {
         if (new_context[i][j] != pc->fc.vp9_mode_contexts[i][j]) {
           vp9_write(&header_bc, 1, 252);
-          vp9_write_literal(&header_bc, new_context[i][j], 8);
+          vp9_write_prob(&header_bc, new_context[i][j]);
 
           // Only update the persistent copy if this is the "real pack"
           if (!cpi->dummy_packing) {
@@ -2739,7 +2739,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       for (j = 0; j < MAX_MV_REF_CANDIDATES - 1; ++j) {
         if (new_mvref_probs[i][j] != xd->mb_mv_ref_probs[i][j]) {
           vp9_write(&header_bc, 1, VP9_MVREF_UPDATE_PROB);
-          vp9_write_literal(&header_bc, new_mvref_probs[i][j], 8);
+          vp9_write_prob(&header_bc, new_mvref_probs[i][j]);
 
           // Only update the persistent copy if this is the "real pack"
           if (!cpi->dummy_packing) {
@@ -2813,7 +2813,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
 
   vp9_update_skip_probs(cpi);
   for (i = 0; i < MBSKIP_CONTEXTS; ++i) {
-    vp9_write_literal(&header_bc, pc->mbskip_pred_probs[i], 8);
+    vp9_write_prob(&header_bc, pc->mbskip_pred_probs[i]);
   }
 
   if (pc->frame_type == KEY_FRAME) {
@@ -2840,9 +2840,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     }
 #endif
 
-    vp9_write_literal(&header_bc, pc->prob_intra_coded, 8);
-    vp9_write_literal(&header_bc, pc->prob_last_coded, 8);
-    vp9_write_literal(&header_bc, pc->prob_gf_coded, 8);
+    vp9_write_prob(&header_bc, pc->prob_intra_coded);
+    vp9_write_prob(&header_bc, pc->prob_last_coded);
+    vp9_write_prob(&header_bc, pc->prob_gf_coded);
 
     {
       const int comp_pred_mode = cpi->common.comp_pred_mode;
@@ -2856,7 +2856,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
           for (i = 0; i < COMP_PRED_CONTEXTS; i++) {
             pc->prob_comppred[i] = get_binary_prob(cpi->single_pred_count[i],
                                                    cpi->comp_pred_count[i]);
-            vp9_write_literal(&header_bc, pc->prob_comppred[i], 8);
+            vp9_write_prob(&header_bc, pc->prob_comppred[i]);
           }
         }
       }
