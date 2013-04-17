@@ -48,7 +48,7 @@
 # Running ndk-build will build libvpx and include it in your project.
 #
 
-CONFIG_DIR := $(LOCAL_PATH)
+CONFIG_DIR := $(LOCAL_PATH)/
 LIBVPX_PATH := $(LOCAL_PATH)/libvpx
 ASM_CNV_PATH_LOCAL := $(TARGET_ARCH_ABI)/ads2gas
 ASM_CNV_PATH := $(LOCAL_PATH)/$(ASM_CNV_PATH_LOCAL)
@@ -56,9 +56,9 @@ ASM_CNV_PATH := $(LOCAL_PATH)/$(ASM_CNV_PATH_LOCAL)
 # Makefiles created by the libvpx configure process
 # This will need to be fixed to handle x86.
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
-  include $(CONFIG_DIR)/libs-armv7-android-gcc.mk
+  include $(CONFIG_DIR)libs-armv7-android-gcc.mk
 else
-  include $(CONFIG_DIR)/libs-armv5te-android-gcc.mk
+  include $(CONFIG_DIR)libs-armv5te-android-gcc.mk
 endif
 
 # Rule that is normally in Makefile created by libvpx
@@ -106,26 +106,25 @@ $$(eval $$(call ev-build-file))
 
 $(1) : $$(_OBJ) $(2)
 	@mkdir -p $$(dir $$@)
-	@grep $(OFFSET_PATTERN) $$< | tr -d '\#' | $(CONFIG_DIR)/$(ASM_CONVERSION) > $$@
+	@grep $(OFFSET_PATTERN) $$< | tr -d '\#' | $(CONFIG_DIR)$(ASM_CONVERSION) > $$@
 endef
 
 # Use ads2gas script to convert from RVCT format to GAS format.  This passes
 #  puts the processed file under $(ASM_CNV_PATH).  Local clean rule
 #  to handle removing these
-ASM_CNV_OFFSETS_DEPEND = $(ASM_CNV_PATH)/vp8_asm_com_offsets.asm
-ifeq ($(CONFIG_VP8_DECODER), yes)
-  ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/vp8_asm_dec_offsets.asm
-endif
 ifeq ($(CONFIG_VP8_ENCODER), yes)
   ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/vp8_asm_enc_offsets.asm
+endif
+ifeq ($(HAVE_NEON), yes)
+  ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/vpx_scale_asm_offsets.asm
 endif
 
 .PRECIOUS: %.asm.s
 $(ASM_CNV_PATH)/libvpx/%.asm.s: $(LIBVPX_PATH)/%.asm $(ASM_CNV_OFFSETS_DEPEND)
 	@mkdir -p $(dir $@)
-	@$(CONFIG_DIR)/$(ASM_CONVERSION) <$< > $@
+	@$(CONFIG_DIR)$(ASM_CONVERSION) <$< > $@
 
-# For building vpx_rtcd.h, which has a rule in libs.mk
+# For building *_rtcd.h, which have rules in libs.mk
 TGT_ISA:=$(word 1, $(subst -, ,$(TOOLCHAIN)))
 target := libs
 
@@ -177,7 +176,14 @@ ifeq ($(CONFIG_RUNTIME_CPU_DETECT),yes)
   LOCAL_STATIC_LIBRARIES := cpufeatures
 endif
 
-$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_rtcd.h
+# Add a dependency to force generation of the RTCD files.
+ifeq ($(CONFIG_VP8), yes)
+$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vp8_rtcd.h
+endif
+ifeq ($(CONFIG_VP9), yes)
+$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vp9_rtcd.h
+endif
+$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_scale_rtcd.h
 
 .PHONY: clean
 clean:
@@ -189,14 +195,10 @@ clean:
 
 include $(BUILD_SHARED_LIBRARY)
 
-$(eval $(call asm_offsets_template,\
-    $(ASM_CNV_PATH)/vp8_asm_com_offsets.asm, \
-    $(LIBVPX_PATH)/vp8/common/vp8_asm_com_offsets.c))
-
-ifeq ($(CONFIG_VP8_DECODER), yes)
+ifeq ($(HAVE_NEON), yes)
   $(eval $(call asm_offsets_template,\
-    $(ASM_CNV_PATH)/vp8_asm_dec_offsets.asm, \
-    $(LIBVPX_PATH)/vp8/decoder/vp8_asm_dec_offsets.c))
+    $(ASM_CNV_PATH)/vpx_scale_asm_offsets.asm, \
+    $(LIBVPX_PATH)/vpx_scale/vpx_scale_asm_offsets.c))
 endif
 
 ifeq ($(CONFIG_VP8_ENCODER), yes)

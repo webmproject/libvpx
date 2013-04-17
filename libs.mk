@@ -51,7 +51,7 @@ $$(BUILD_PFX)$(1).h: $$(SRC_PATH_BARE)/$(2)
 	@echo "    [CREATE] $$@"
 	$$(qexec)$$(SRC_PATH_BARE)/build/make/rtcd.sh --arch=$$(TGT_ISA) \
           --sym=$(1) \
-          --config=$$(target)$$(if $$(FAT_ARCHS),,-$$(TOOLCHAIN)).mk \
+          --config=$$(CONFIG_DIR)$$(target)$$(if $$(FAT_ARCHS),,-$$(TOOLCHAIN)).mk \
           $$(RTCD_OPTIONS) $$^ > $$@
 CLEAN-OBJS += $$(BUILD_PFX)$(1).h
 RTCD += $$(BUILD_PFX)$(1).h
