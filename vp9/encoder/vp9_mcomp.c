@@ -56,8 +56,9 @@ int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
   MV v;
   v.row = mv->as_mv.row - ref->as_mv.row;
   v.col = mv->as_mv.col - ref->as_mv.col;
-  return ((mvjcost[vp9_get_mv_joint(v)] +
-           mvcost[0][v.row] + mvcost[1][v.col]) * weight) >> 7;
+  return ((mvjcost[vp9_get_mv_joint(&v)] +
+           mvcost[0][v.row] +
+           mvcost[1][v.col]) * weight) >> 7;
 }
 
 static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
@@ -66,9 +67,9 @@ static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
     MV v;
     v.row = mv->as_mv.row - ref->as_mv.row;
     v.col = mv->as_mv.col - ref->as_mv.col;
-    return ((mvjcost[vp9_get_mv_joint(v)] +
-             mvcost[0][v.row] + mvcost[1][v.col]) *
-            error_per_bit + 4096) >> 13;
+    return ROUND_POWER_OF_TWO((mvjcost[vp9_get_mv_joint(&v)] +
+                               mvcost[0][v.row] +
+                               mvcost[1][v.col]) * error_per_bit, 13);
   }
   return 0;
 }
@@ -79,10 +80,9 @@ static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvjsadcost,
     MV v;
     v.row = mv->as_mv.row - ref->as_mv.row;
     v.col = mv->as_mv.col - ref->as_mv.col;
-
-    return ROUND_POWER_OF_TWO((mvjsadcost[vp9_get_mv_joint(v)] +
-                                   mvsadcost[0][v.row] + mvsadcost[1][v.col]) *
-                                       error_per_bit, 8);
+    return ROUND_POWER_OF_TWO((mvjsadcost[vp9_get_mv_joint(&v)] +
+                               mvsadcost[0][v.row] +
+                               mvsadcost[1][v.col]) * error_per_bit, 8);
   }
   return 0;
 }

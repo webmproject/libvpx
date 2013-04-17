@@ -269,7 +269,7 @@ static void read_nmv(vp9_reader *r, MV *mv, const MV *ref,
 
 static void read_nmv_fp(vp9_reader *r, MV *mv, const MV *ref,
                         const nmv_context *mvctx, int usehp) {
-  const MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
+  const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
   usehp = usehp && vp9_use_nmv_hp(ref);
   if (mv_joint_vertical(j))
     mv->row = read_nmv_component_fp(r, mv->row, ref->row, &mvctx->comps[0],

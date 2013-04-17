@@ -87,12 +87,12 @@ const nmv_context vp9_default_nmv_context = {
   },
 };
 
-MV_JOINT_TYPE vp9_get_mv_joint(MV mv) {
-  if (mv.row == 0 && mv.col == 0)
+MV_JOINT_TYPE vp9_get_mv_joint(const MV *mv) {
+  if (mv->row == 0 && mv->col == 0)
     return MV_JOINT_ZERO;
-  else if (mv.row == 0 && mv.col != 0)
+  else if (mv->row == 0 && mv->col != 0)
     return MV_JOINT_HNZVZ;
-  else if (mv.row != 0 && mv.col == 0)
+  else if (mv->row != 0 && mv->col == 0)
     return MV_JOINT_HZVNZ;
   else
     return MV_JOINT_HNZVNZ;
@@ -209,13 +209,13 @@ static void counts_to_context(nmv_component_counts *mvcomp, int usehp) {
 
 void vp9_increment_nmv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
                        int usehp) {
-  const MV_JOINT_TYPE type = vp9_get_mv_joint(*mv);
-  mvctx->joints[type]++;
+  const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
+  mvctx->joints[j]++;
   usehp = usehp && vp9_use_nmv_hp(ref);
-  if (mv_joint_vertical(type))
+  if (mv_joint_vertical(j))
     increment_nmv_component_count(mv->row, &mvctx->comps[0], 1, usehp);
 
-  if (mv_joint_horizontal(type))
+  if (mv_joint_horizontal(j))
     increment_nmv_component_count(mv->col, &mvctx->comps[1], 1, usehp);
 }
 
