@@ -1963,7 +1963,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         (cpi->baseline_gf_interval * 100) + (boost - 100);
 
     // Prevent overflow
-    if (boost > 1028) {  // TODO(agrange) Should this be 1024?
+    if (boost > 1023) {
       int divisor = boost >> 10;
       boost /= divisor;
       allocation_chunks /= divisor;
