@@ -373,24 +373,95 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
         ypred_ptr += y_stride;
       }
       break;
+#if CONFIG_SBSEGMENT
     case D45_PRED:
-      d45_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
-      break;
     case D135_PRED:
-      d135_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
-      break;
     case D117_PRED:
-      d117_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
-      break;
     case D153_PRED:
-      d153_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
-      break;
     case D27_PRED:
-      d27_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
-      break;
     case D63_PRED:
-      d63_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
+      if (bw == bh) {
+        switch (mode) {
+#endif
+          case D45_PRED:
+            d45_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
+            break;
+          case D135_PRED:
+            d135_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
+            break;
+          case D117_PRED:
+            d117_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
+            break;
+          case D153_PRED:
+            d153_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
+            break;
+          case D27_PRED:
+            d27_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
+            break;
+          case D63_PRED:
+            d63_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
+            break;
+#if CONFIG_SBSEGMENT
+          default:
+            assert(0);
+        }
+      } else if (bw > bh) {
+        uint8_t pred[64*64];
+        memset(yleft_col + bh, yleft_col[bh - 1], bw - bh);
+        switch (mode) {
+          case D45_PRED:
+            d45_predictor(pred, 64, bw, bw,  yabove_row, yleft_col);
+            break;
+          case D135_PRED:
+            d135_predictor(pred, 64, bw, bw,  yabove_row, yleft_col);
+            break;
+          case D117_PRED:
+            d117_predictor(pred, 64, bw, bw,  yabove_row, yleft_col);
+            break;
+          case D153_PRED:
+            d153_predictor(pred, 64, bw, bw,  yabove_row, yleft_col);
+            break;
+          case D27_PRED:
+            d27_predictor(pred, 64, bw, bw,  yabove_row, yleft_col);
+            break;
+          case D63_PRED:
+            d63_predictor(pred, 64, bw, bw,  yabove_row, yleft_col);
+            break;
+          default:
+            assert(0);
+        }
+        for (i = 0; i < bh; i++)
+          memcpy(ypred_ptr + y_stride * i, pred + i * 64, bw);
+      } else {
+        uint8_t pred[64 * 64];
+        memset(yabove_row + bw, yabove_row[bw - 1], bh - bw);
+        switch (mode) {
+          case D45_PRED:
+            d45_predictor(pred, 64, bh, bh,  yabove_row, yleft_col);
+            break;
+          case D135_PRED:
+            d135_predictor(pred, 64, bh, bh,  yabove_row, yleft_col);
+            break;
+          case D117_PRED:
+            d117_predictor(pred, 64, bh, bh,  yabove_row, yleft_col);
+            break;
+          case D153_PRED:
+            d153_predictor(pred, 64, bh, bh,  yabove_row, yleft_col);
+            break;
+          case D27_PRED:
+            d27_predictor(pred, 64, bh, bh,  yabove_row, yleft_col);
+            break;
+          case D63_PRED:
+            d63_predictor(pred, 64, bh, bh,  yabove_row, yleft_col);
+            break;
+          default:
+            assert(0);
+        }
+        for (i = 0; i < bh; i++)
+          memcpy(ypred_ptr + y_stride * i, pred + i * 64, bw);
+      }
       break;
+#endif
     default:
       break;
   }
