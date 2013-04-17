@@ -183,23 +183,6 @@ static void propagate_nzcs(VP9_COMMON *cm, MACROBLOCKD *xd) {
 }
 #endif
 
-static void skip_recon_sb(VP9D_COMP *pbi, MACROBLOCKD *xd,
-                          int mb_row, int mb_col,
-                          BLOCK_SIZE_TYPE bsize) {
-  MODE_INFO *m = xd->mode_info_context;
-
-  if (m->mbmi.ref_frame == INTRA_FRAME) {
-    vp9_build_intra_predictors_sbuv_s(xd, bsize);
-    vp9_build_intra_predictors_sby_s(xd, bsize);
-  } else {
-    vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
-  }
-#if CONFIG_CODE_NONZEROCOUNT
-  vpx_memset(m->mbmi.nzcs, 0, 384 * sizeof(m->mbmi.nzcs[0]));
-  propagate_nzcs(&pbi->common, xd);
-#endif
-}
-
 static void decode_16x16(VP9D_COMP *pbi, MACROBLOCKD *xd,
                          BOOL_DECODER* const bc) {
   const TX_TYPE tx_type = get_tx_type_16x16(xd, 0);
@@ -579,19 +562,6 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
   if (pbi->common.frame_type != KEY_FRAME)
     vp9_setup_interp_filters(xd, mi->mbmi.interp_filter, pc);
 
-  // re-initialize macroblock dequantizer before detokenization
-  if (xd->segmentation_enabled)
-    mb_init_dequantizer(pbi, xd);
-
-  if (mi->mbmi.mb_skip_coeff) {
-    vp9_reset_sb_tokens_context(xd, bsize);
-
-    // Special case:  Force the loopfilter to skip when eobtotal and
-    // mb_skip_coeff are zero.
-    skip_recon_sb(pbi, xd, mb_row, mb_col, bsize);
-    return;
-  }
-
   // generate prediction
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     vp9_build_intra_predictors_sby_s(xd, bsize);
@@ -600,34 +570,46 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
     vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
   }
 
-  // dequantization and idct
-  eobtotal = vp9_decode_tokens(pbi, xd, bc, bsize);
-  if (eobtotal == 0) {  // skip loopfilter
-    for (n = 0; n < bw * bh; n++) {
-      const int x_idx = n & (bw - 1), y_idx = n >> bwl;
-
-      if (mb_col + x_idx < pc->mb_cols && mb_row + y_idx < pc->mb_rows)
-        mi[y_idx * mis + x_idx].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
-    }
+  if (mi->mbmi.mb_skip_coeff) {
+    vp9_reset_sb_tokens_context(xd, bsize);
+#if CONFIG_CODE_NONZEROCOUNT
+    vpx_memset(mi->mbmi.nzcs, 0, 384 * sizeof(mi->mbmi.nzcs[0]));
+#endif
   } else {
-    switch (xd->mode_info_context->mbmi.txfm_size) {
-      case TX_32X32:
-        decode_sb_32x32(xd, bsize);
-        break;
-      case TX_16X16:
-        decode_sb_16x16(xd, bsize);
-        break;
-      case TX_8X8:
-        decode_sby_8x8(xd, bsize);
-        decode_sbuv_8x8(xd, bsize);
-        break;
-      case TX_4X4:
-        decode_sby_4x4(xd, bsize);
-        decode_sbuv_4x4(xd, bsize);
-        break;
-      default: assert(0);
+    // re-initialize macroblock dequantizer before detokenization
+    if (xd->segmentation_enabled)
+      mb_init_dequantizer(pbi, xd);
+
+    // dequantization and idct
+    eobtotal = vp9_decode_tokens(pbi, xd, bc, bsize);
+    if (eobtotal == 0) {  // skip loopfilter
+      for (n = 0; n < bw * bh; n++) {
+        const int x_idx = n & (bw - 1), y_idx = n >> bwl;
+
+        if (mb_col + x_idx < pc->mb_cols && mb_row + y_idx < pc->mb_rows)
+          mi[y_idx * mis + x_idx].mbmi.mb_skip_coeff = 1;
+      }
+    } else {
+      switch (xd->mode_info_context->mbmi.txfm_size) {
+        case TX_32X32:
+          decode_sb_32x32(xd, bsize);
+          break;
+        case TX_16X16:
+          decode_sb_16x16(xd, bsize);
+          break;
+        case TX_8X8:
+          decode_sby_8x8(xd, bsize);
+          decode_sbuv_8x8(xd, bsize);
+          break;
+        case TX_4X4:
+          decode_sby_4x4(xd, bsize);
+          decode_sbuv_4x4(xd, bsize);
+          break;
+        default: assert(0);
+      }
     }
   }
+
 #if CONFIG_CODE_NONZEROCOUNT
   propagate_nzcs(&pbi->common, xd);
 #endif
@@ -644,43 +626,10 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
 
   assert(!xd->mode_info_context->mbmi.sb_type);
 
-  // re-initialize macroblock dequantizer before detokenization
-  if (xd->segmentation_enabled)
-    mb_init_dequantizer(pbi, xd);
-
-  if (xd->mode_info_context->mbmi.mb_skip_coeff) {
-    vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
-  } else if (!bool_error(bc)) {
-#if CONFIG_NEWBINTRAMODES
-    if (mode != I4X4_PRED)
-#endif
-      eobtotal = vp9_decode_tokens(pbi, xd, bc, BLOCK_SIZE_MB16X16);
-  }
-
   //mode = xd->mode_info_context->mbmi.mode;
   if (pbi->common.frame_type != KEY_FRAME)
     vp9_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter,
                              &pbi->common);
-
-  if (eobtotal == 0 &&
-      mode != I4X4_PRED &&
-      mode != SPLITMV &&
-      mode != I8X8_PRED &&
-      !bool_error(bc)) {
-    // Special case:  Force the loopfilter to skip when eobtotal and
-    // mb_skip_coeff are zero.
-    xd->mode_info_context->mbmi.mb_skip_coeff = 1;
-    skip_recon_sb(pbi, xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
-    return;
-  }
-#if 0  // def DEC_DEBUG
-  if (dec_debug)
-    printf("Decoding mb:  %d %d\n", xd->mode_info_context->mbmi.mode, tx_size);
-#endif
-
-  // moved to be performed before detokenization
-  //  if (xd->segmentation_enabled)
-  //    mb_init_dequantizer(pbi, xd);
 
   // do prediction
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
@@ -699,13 +648,42 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     vp9_build_inter_predictors_mb_s(xd, mb_row, mb_col);
   }
 
-  if (tx_size == TX_16X16) {
-    decode_16x16(pbi, xd, bc);
-  } else if (tx_size == TX_8X8) {
-    decode_8x8(pbi, xd, bc);
+  if (xd->mode_info_context->mbmi.mb_skip_coeff) {
+    vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
   } else {
-    decode_4x4(pbi, xd, bc);
+    // re-initialize macroblock dequantizer before detokenization
+    if (xd->segmentation_enabled)
+      mb_init_dequantizer(pbi, xd);
+
+    if (!bool_error(bc)) {
+#if CONFIG_NEWBINTRAMODES
+    if (mode != I4X4_PRED)
+#endif
+      eobtotal = vp9_decode_tokens(pbi, xd, bc, BLOCK_SIZE_MB16X16);
+    }
   }
+
+  if (eobtotal == 0 &&
+      mode != I4X4_PRED &&
+      mode != SPLITMV &&
+      mode != I8X8_PRED &&
+      !bool_error(bc)) {
+    xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+  } else {
+#if 0  // def DEC_DEBUG
+  if (dec_debug)
+    printf("Decoding mb:  %d %d\n", xd->mode_info_context->mbmi.mode, tx_size);
+#endif
+
+    if (tx_size == TX_16X16) {
+      decode_16x16(pbi, xd, bc);
+    } else if (tx_size == TX_8X8) {
+      decode_8x8(pbi, xd, bc);
+    } else {
+      decode_4x4(pbi, xd, bc);
+    }
+  }
+
 #ifdef DEC_DEBUG
   if (dec_debug) {
     int i, j;
