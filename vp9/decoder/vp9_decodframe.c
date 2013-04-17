@@ -65,6 +65,69 @@ static TXFM_MODE read_txfm_mode(vp9_reader *r) {
   return mode;
 }
 
+static int get_unsigned_bits(unsigned int num_values) {
+  int cat = 0;
+  if (num_values <= 1)
+    return 0;
+  num_values--;
+  while (num_values > 0) {
+    cat++;
+    num_values >>= 1;
+  }
+  return cat;
+}
+
+static int inv_recenter_nonneg(int v, int m) {
+  if (v > (m << 1))
+    return v;
+  else if ((v & 1) == 0)
+    return (v >> 1) + m;
+  else
+    return m - ((v + 1) >> 1);
+}
+
+static int decode_uniform(BOOL_DECODER *br, int n) {
+  int v;
+  const int l = get_unsigned_bits(n);
+  const int m = (1 << l) - n;
+  if (!l)
+    return 0;
+
+  v = vp9_read_literal(br, l - 1);
+  return v < m ?  v : (v << 1) - m + vp9_read_bit(br);
+}
+
+static int decode_term_subexp(BOOL_DECODER *br, int k, int num_syms) {
+  int i = 0, mk = 0, word;
+  while (1) {
+    const int b = i ? k + i - 1 : k;
+    const int a = 1 << b;
+    if (num_syms <= mk + 3 * a) {
+      word = decode_uniform(br, num_syms - mk) + mk;
+      break;
+    } else {
+      if (vp9_read_bit(br)) {
+        i++;
+        mk += a;
+      } else {
+        word = vp9_read_literal(br, b) + mk;
+        break;
+      }
+    }
+  }
+  return word;
+}
+
+static int decode_unsigned_max(BOOL_DECODER *br, int max) {
+  int data = 0, bit = 0, lmax = max;
+
+  while (lmax) {
+    data |= vp9_read_bit(br) << bit++;
+    lmax >>= 1;
+  }
+  return data > max ? max : data;
+}
+
 static int merge_index(int v, int n, int modulus) {
   int max1 = (n - 1 - modulus / 2) / modulus + 1;
   if (v < max1) v = v * modulus + modulus / 2;
@@ -85,14 +148,14 @@ static int inv_remap_prob(int v, int m) {
 
   v = merge_index(v, n - 1, modulus);
   if ((m << 1) <= n) {
-    return vp9_inv_recenter_nonneg(v + 1, m);
+    return inv_recenter_nonneg(v + 1, m);
   } else {
-    return n - 1 - vp9_inv_recenter_nonneg(v + 1, n - 1 - m);
+    return n - 1 - inv_recenter_nonneg(v + 1, n - 1 - m);
   }
 }
 
 static vp9_prob read_prob_diff_update(vp9_reader *const bc, int oldp) {
-  int delp = vp9_decode_term_subexp(bc, SUBEXP_PARAM, 255);
+  int delp = decode_term_subexp(bc, SUBEXP_PARAM, 255);
   return (vp9_prob)inv_remap_prob(delp, oldp);
 }
 
@@ -1154,7 +1217,7 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
           const int feature_enabled = vp9_read_bit(r);
           if (feature_enabled) {
             vp9_enable_segfeature(xd, i, j);
-            data = vp9_decode_unsigned_max(r, vp9_seg_feature_data_max(j));
+            data = decode_unsigned_max(r, vp9_seg_feature_data_max(j));
             if (vp9_is_segfeature_signed(j))
               data = vp9_read_and_apply_sign(r, data);
           }
