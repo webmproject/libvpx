@@ -1068,10 +1068,10 @@ static void build_inter_predictors_sby_w(MACROBLOCKD *x,
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
-    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
-    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 16) << 3);
-    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 16) << 3);
+    x->mb_to_top_edge    = edge[0] -           ((y_idx  * 16) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((bh - 1 - y_idx) * 16) << 3);
+    x->mb_to_left_edge   = edge[2] -           ((x_idx  * 16) << 3);
+    x->mb_to_right_edge  = edge[3] + (((bw - 1 - x_idx) * 16) << 3);
 
     x->pre.y_buffer = y1 + scaled_buffer_offset(x_idx * 16,
                                                 y_idx * 16,
@@ -1136,10 +1136,10 @@ void vp9_build_inter_predictors_sby(MACROBLOCKD *x,
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
-    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
-    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 16) << 3);
-    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 16) << 3);
+    x->mb_to_top_edge    = edge[0] -           ((y_idx  * 16) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((bh - 1 - y_idx) * 16) << 3);
+    x->mb_to_left_edge   = edge[2] -           ((x_idx  * 16) << 3);
+    x->mb_to_right_edge  = edge[3] + (((bw - 1 - x_idx) * 16) << 3);
 
     x->pre.y_buffer = y1 + scaled_buffer_offset(x_idx * 16,
                                                 y_idx * 16,
@@ -1193,10 +1193,10 @@ static void build_inter_predictors_sbuv_w(MACROBLOCKD *x,
     int scaled_uv_offset;
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
-    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
-    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 16) << 3);
-    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 16) << 3);
+    x->mb_to_top_edge    = edge[0] -           ((y_idx  * 16) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((bh - 1 - y_idx) * 16) << 3);
+    x->mb_to_left_edge   = edge[2] -           ((x_idx  * 16) << 3);
+    x->mb_to_right_edge  = edge[3] + (((bw - 1 - x_idx) * 16) << 3);
 
     scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
                                             y_idx * 8,
@@ -1273,10 +1273,10 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *x,
     int scaled_uv_offset;
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-    x->mb_to_top_edge    = edge[0] -      ((y_idx  * 16) << 3);
-    x->mb_to_bottom_edge = edge[1] + (((1 - y_idx) * 16) << 3);
-    x->mb_to_left_edge   = edge[2] -      ((x_idx  * 16) << 3);
-    x->mb_to_right_edge  = edge[3] + (((1 - x_idx) * 16) << 3);
+    x->mb_to_top_edge    = edge[0] -           ((y_idx  * 16) << 3);
+    x->mb_to_bottom_edge = edge[1] + (((bh - 1 - y_idx) * 16) << 3);
+    x->mb_to_left_edge   = edge[2] -           ((x_idx  * 16) << 3);
+    x->mb_to_right_edge  = edge[3] + (((bw - 1 - x_idx) * 16) << 3);
 
     scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
                                             y_idx * 8,
