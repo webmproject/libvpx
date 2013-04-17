@@ -1980,27 +1980,22 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // This condition could fail if there are two kfs very close together
     // despite (MIN_GF_INTERVAL) and would cause a divide by 0 in the
-    // calculation of cpi->twopass.alt_extra_bits.
+    // calculation of alt_extra_bits.
     if (cpi->baseline_gf_interval >= 3) {
       int boost = (cpi->source_alt_ref_pending)
                   ? b_boost : cpi->gfu_boost;
 
       if (boost >= 150) {
         int pct_extra;
+        int alt_extra_bits;
 
         pct_extra = (boost - 100) / 50;
         pct_extra = (pct_extra > 20) ? 20 : pct_extra;
 
-        // TODO(agrange) Remove cpi->twopass.alt_extra_bits.
-        cpi->twopass.alt_extra_bits = (int)
-          ((cpi->twopass.gf_group_bits * pct_extra) / 100);
-        cpi->twopass.gf_group_bits -= cpi->twopass.alt_extra_bits;
-        cpi->twopass.alt_extra_bits /=
-          ((cpi->baseline_gf_interval - 1) >> 1);
-      } else
-        cpi->twopass.alt_extra_bits = 0;
-    } else
-      cpi->twopass.alt_extra_bits = 0;
+        alt_extra_bits = (int)((cpi->twopass.gf_group_bits * pct_extra) / 100);
+        cpi->twopass.gf_group_bits -= alt_extra_bits;
+      }
+    }
   }
 
   if (cpi->common.frame_type != KEY_FRAME) {
