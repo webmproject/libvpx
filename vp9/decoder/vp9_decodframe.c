@@ -1550,7 +1550,7 @@ static void decode_tiles(VP9D_COMP *pbi,
   if (pbi->oxcf.inv_tile_order) {
     const int n_cols = pc->tile_columns;
     const uint8_t *data_ptr2[4][1 << 6];
-    BOOL_DECODER UNINITIALIZED_IS_SAFE(bc_bak);
+    BOOL_DECODER bc_bak = {0};
 
     // pre-initialize the offsets, we're going to read in inverse order
     data_ptr2[0][0] = data_ptr;
