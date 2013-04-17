@@ -376,7 +376,8 @@ if [ "$CONFIG_VP9_ENCODER" = "yes" ]; then
 # variance
 [ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2
 
-#if CONFIG_SBSEGMENT
+if [ "$CONFIG_SBSEGMENT" = "yes" ]; then
+
 prototype unsigned int vp9_variance32x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance32x16
 
@@ -388,7 +389,8 @@ specialize vp9_variance64x32
 
 prototype unsigned int vp9_variance32x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance32x64
-#endif
+
+fi
 
 prototype unsigned int vp9_variance32x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance32x32
@@ -424,7 +426,8 @@ vp9_variance4x4_mmx=vp9_variance4x4_mmx
 prototype unsigned int vp9_sub_pixel_variance64x64 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_sub_pixel_variance64x64 sse2
 
-#if CONFIG_SBSEGMENT
+if [ "$CONFIG_SBSEGMENT" = "yes" ]; then
+
 prototype unsigned int vp9_sub_pixel_variance32x64 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_sub_pixel_variance32x64
 
@@ -436,7 +439,8 @@ specialize vp9_sub_pixel_variance32x16
 
 prototype unsigned int vp9_sub_pixel_variance16x32 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_sub_pixel_variance16x32
-#endif
+
+fi
 
 prototype unsigned int vp9_sub_pixel_variance32x32 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_sub_pixel_variance32x32 sse2
@@ -464,19 +468,21 @@ vp9_sub_pixel_variance4x4_sse2=vp9_sub_pixel_variance4x4_wmt
 prototype unsigned int vp9_sad64x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad"
 specialize vp9_sad64x64 sse2
 
-#if CONFIG_SBSEGMENT
+if [ "$CONFIG_SBSEGMENT" = "yes" ]; then
+
 prototype unsigned int vp9_sad32x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad"
-specialize vp9_sad32x64
+specialize vp9_sad32x64 sse2
 
 prototype unsigned int vp9_sad64x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad"
-specialize vp9_sad64x32
+specialize vp9_sad64x32 sse2
 
 prototype unsigned int vp9_sad32x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad"
-specialize vp9_sad32x16
+specialize vp9_sad32x16 sse2
 
 prototype unsigned int vp9_sad16x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad"
-specialize vp9_sad16x32
-#endif
+specialize vp9_sad16x32 sse2
+
+fi
 
 prototype unsigned int vp9_sad32x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad"
 specialize vp9_sad32x32 sse2
@@ -571,19 +577,21 @@ specialize vp9_sad4x4x8 sse4
 prototype void vp9_sad64x64x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad64x64x4d sse2
 
-#if CONFIG_SBSEGMENT
+if [ "$CONFIG_SBSEGMENT" = "yes" ]; then
+
 prototype void vp9_sad32x64x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp9_sad32x64x4d
+specialize vp9_sad32x64x4d sse2
 
 prototype void vp9_sad64x32x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp9_sad64x32x4d
+specialize vp9_sad64x32x4d sse2
 
 prototype void vp9_sad32x16x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp9_sad32x16x4d
+specialize vp9_sad32x16x4d sse2
 
 prototype void vp9_sad16x32x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
-specialize vp9_sad16x32x4d
-#endif
+specialize vp9_sad16x32x4d sse2
+
+fi
 
 prototype void vp9_sad32x32x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad32x32x4d sse2
