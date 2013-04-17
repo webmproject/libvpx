@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//9zM\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-17T22:26:53Z",
+      "side": 1,
+      "message": "Didn\u0027t you say this should be changed to:\n\nmi[y_idx * mis + x_idx].mbmi.mb_skip_coeff \u003d 1;\n\nbecause decode_tokens() doesn\u0027t actually initialize this variable? (This is fine as a separate commit, just want to clear up that this will be done.)",
+      "revId": "ccb4e81cb0708f3874cfcb6f40e78086b1c92bbe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
