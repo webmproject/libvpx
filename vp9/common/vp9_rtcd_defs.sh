@@ -212,18 +212,6 @@ prototype void vp9_blend_b "uint8_t *y, uint8_t *u, uint8_t *v, int y1, int u1, 
 specialize vp9_blend_b
 
 #
-# sad 16x3, 3x16
-#
-prototype unsigned int vp9_sad16x3 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int ref_stride"
-specialize vp9_sad16x3 sse2
-
-prototype unsigned int vp9_sad3x16 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int ref_stride"
-specialize vp9_sad3x16 sse2
-
-prototype unsigned int vp9_sub_pixel_variance16x2 "const uint8_t *src_ptr, const int source_stride, const int xoffset, const int  yoffset, const uint8_t *ref_ptr, const int ref_stride, unsigned int *sse"
-specialize vp9_sub_pixel_variance16x2 sse2
-
-#
 # Sub Pixel Filters
 #
 prototype void vp9_convolve8 "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"

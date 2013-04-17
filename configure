@@ -244,9 +244,7 @@ EXPERIMENT_LIST="
     newbintramodes
     comp_interintra_pred
     enable_6tap
-    abovesprefmv
     code_nonzerocount
-    useselectrefmv
     modelcoefprob
     loop_dering
     implicit_compoundinter_weight
