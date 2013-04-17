@@ -16,21 +16,20 @@
 
 struct subpix_fn_table;
 
-void vp9_build_inter_predictors_sby(MACROBLOCKD *x,
+void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
                                     uint8_t *dst_y,
                                     int dst_ystride,
                                     int mb_row,
                                     int mb_col,
                                     BLOCK_SIZE_TYPE bsize);
 
-void vp9_build_inter_predictors_sbuv(MACROBLOCKD *x,
+void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
                                      uint8_t *dst_u,
                                      uint8_t *dst_v,
                                      int dst_uvstride,
                                      int mb_row,
                                      int mb_col,
                                      BLOCK_SIZE_TYPE bsize);
-
 void vp9_build_inter_predictors_sb(MACROBLOCKD *mb,
                                    int mb_row, int mb_col,
                                    BLOCK_SIZE_TYPE bsize);

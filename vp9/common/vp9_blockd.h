@@ -878,31 +878,40 @@ typedef void (*foreach_predicted_block_visitor)(int plane, int block,
 static INLINE void foreach_predicted_block_in_plane(
     const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
     foreach_predicted_block_visitor visit, void *arg) {
-  const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
+  int i, x, y;
+  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
 
   // block sizes in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
-  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
-  const int block_size_b = bw + bh;
-
   // subsampled size of the block
-  const int ss_sum = xd->plane[plane].subsampling_x +
-                     xd->plane[plane].subsampling_y;
-  const int ss_block_size = block_size_b - ss_sum;
+  const int bw = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+  const int bh = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
 
   // size of the predictor to use.
-  // TODO(jkoleszar): support I8X8, I4X4
-  const int pred_w = bw - xd->plane[plane].subsampling_x;
-  const int pred_h = bh - xd->plane[plane].subsampling_y;
-  const int pred_b = mode == SPLITMV ? 0 : pred_w + pred_h;
-  const int step = 1 << pred_b;
+  int pred_w, pred_h;
 
-  int i;
+  if (mode == SPLITMV) {
+    // 4x4 or 8x8
+    const int is_4x4 =
+        (xd->mode_info_context->mbmi.partitioning == PARTITIONING_4X4);
+    pred_w = is_4x4 ? 0 : 1 >> xd->plane[plane].subsampling_x;
+    pred_h = is_4x4 ? 0 : 1 >> xd->plane[plane].subsampling_y;
+  } else {
+    pred_w = bw;
+    pred_h = bh;
+  }
+  assert(pred_w <= bw);
+  assert(pred_h <= bh);
 
-  assert(pred_b <= block_size_b);
-  assert(pred_b == (mode == SPLITMV ? 0 : ss_block_size));
-  for (i = 0; i < (1 << ss_block_size); i += step) {
-    visit(plane, i, bsize, pred_w, pred_h, arg);
+  // visit each subblock in raster order
+  i = 0;
+  for (y = 0; y < 1 << bh; y += 1 << pred_h) {
+    for (x = 0; x < 1 << bw; x += 1 << pred_w) {
+      visit(plane, i, bsize, pred_w, pred_h, arg);
+      i += 1 << pred_w;
+    }
+    i -= 1 << bw;
+    i += 1 << (bw + pred_h);
   }
 }
 static INLINE void foreach_predicted_block(
