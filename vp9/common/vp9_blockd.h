@@ -245,14 +245,6 @@ static INLINE int partition_plane(BLOCK_SIZE_TYPE sb_type) {
   return (mb_width_log2(sb_type) - 1);
 }
 
-typedef enum {
-  BLOCK_4X4_LG2 = 0,
-  BLOCK_8X8_LG2 = 2,
-  BLOCK_16X16_LG2 = 4,
-  BLOCK_32X32_LG2 = 6,
-  BLOCK_64X64_LG2 = 8
-} BLOCK_SIZE_LG2;
-
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
 #if CONFIG_COMP_INTERINTRA_PRED
