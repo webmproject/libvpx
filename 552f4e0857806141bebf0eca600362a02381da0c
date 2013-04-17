@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//+hY\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 581,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-17T15:56:38Z",
+      "side": 1,
+      "message": "this assumes that mis \u003d mb_width + 1, can we get rid of that assumption (in a separate commit is fine)?",
+      "revId": "552f4e0857806141bebf0eca600362a02381da0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
