@@ -296,7 +296,6 @@ typedef struct {
 } MODE_INFO;
 
 typedef struct blockd {
-  uint8_t *predictor;
   int16_t *diff;
   int16_t *dequant;
 
@@ -360,7 +359,6 @@ struct mb_plane {
 
 typedef struct macroblockd {
   DECLARE_ALIGNED(16, int16_t,  diff[64*64+32*32*2]);      /* from idct diff */
-  DECLARE_ALIGNED(16, uint8_t,  predictor[384]);  // unused for superblocks
 #if CONFIG_CODE_NONZEROCOUNT
   DECLARE_ALIGNED(16, uint16_t, nzcs[256+64*2]);
 #endif

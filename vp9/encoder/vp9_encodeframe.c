@@ -1405,9 +1405,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &x->e_mbd;
   int totalrate;
 
-//   fprintf(stderr, "encode_frame_internal frame %d (%d) type %d\n",
-//            cpi->common.current_video_frame, cpi->common.show_frame,
-//            cm->frame_type);
+//  fprintf(stderr, "encode_frame_internal frame %d (%d) type %d\n",
+//           cpi->common.current_video_frame, cpi->common.show_frame,
+//           cm->frame_type);
 
   // Compute a modified set of reference frame probabilities to use when
   // prediction fails. These are based on the current general estimates for
@@ -2230,15 +2230,8 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
     if (!x->skip) {
       vp9_encode_inter16x16(cm, x, mb_row, mb_col);
-
     } else {
-      vp9_build_inter16x16_predictors_mb(xd,
-                                         xd->dst.y_buffer,
-                                         xd->dst.u_buffer,
-                                         xd->dst.v_buffer,
-                                         xd->dst.y_stride,
-                                         xd->dst.uv_stride,
-                                         mb_row, mb_col);
+      vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
 #if CONFIG_COMP_INTERINTRA_PRED
       if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
         vp9_build_interintra_16x16_predictors_mb(xd,

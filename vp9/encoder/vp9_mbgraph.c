@@ -71,9 +71,10 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   }
 
   vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
-  vp9_build_inter16x16_predictors_mby(xd, xd->predictor, 16, mb_row, mb_col);
-  best_err = vp9_sad16x16(xd->dst.y_buffer, xd->dst.y_stride,
-                          xd->predictor, 16, INT_MAX);
+  vp9_build_inter_predictors_sby(xd, xd->dst.y_buffer, xd->dst.y_stride,
+                                 mb_row, mb_col, BLOCK_SIZE_MB16X16);
+  best_err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
+                          xd->dst.y_buffer, xd->dst.y_stride, INT_MAX);
 
   /* restore UMV window */
   x->mv_col_min = tmp_col_min;
@@ -105,21 +106,19 @@ static int do_16x16_motion_search
     BLOCKD *d = &xd->block[n];
     BLOCK *b  = &x->block[n];
 
-    b->base_src   = &buf->y_buffer;
-    b->src_stride = buf->y_stride;
-    b->src        = buf->y_stride * (n & 12) + (n & 3) * 4 + buf_mb_y_offset;
+    b->base_src   = &x->src.y_buffer;
+    b->src_stride = x->src.y_stride;
+    b->src        = x->src.y_stride * (n & 12) + (n & 3) * 4;
 
-    d->base_pre   = &ref->y_buffer;
-    d->pre_stride = ref->y_stride;
-    d->pre        = ref->y_stride * (n & 12) + (n & 3) * 4 + mb_y_offset;
+    d->base_pre   = &xd->pre.y_buffer;
+    d->pre_stride = xd->pre.y_stride;
+    d->pre        = xd->pre.y_stride * (n & 12) + (n & 3) * 4;
   }
 
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
-  xd->pre.y_buffer = ref->y_buffer + mb_y_offset;
-  xd->pre.y_stride = ref->y_stride;
-  err = vp9_sad16x16(ref->y_buffer + mb_y_offset, ref->y_stride,
-                     xd->dst.y_buffer, xd->dst.y_stride, INT_MAX);
+  err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
+                     xd->pre.y_buffer, xd->pre.y_stride, INT_MAX);
   dst_mv->as_int = 0;
 
   // Test last reference frame using the previous best mv as the
@@ -159,27 +158,11 @@ static int do_16x16_zerozero_search
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err;
-  int n;
-
-  for (n = 0; n < 16; n++) {
-    BLOCKD *d = &xd->block[n];
-    BLOCK *b  = &x->block[n];
-
-    b->base_src   = &buf->y_buffer;
-    b->src_stride = buf->y_stride;
-    b->src        = buf->y_stride * (n & 12) + (n & 3) * 4 + buf_mb_y_offset;
-
-    d->base_pre   = &ref->y_buffer;
-    d->pre_stride = ref->y_stride;
-    d->pre        = ref->y_stride * (n & 12) + (n & 3) * 4 + mb_y_offset;
-  }
 
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
-  xd->pre.y_buffer = ref->y_buffer + mb_y_offset;
-  xd->pre.y_stride = ref->y_stride;
-  err = vp9_sad16x16(ref->y_buffer + mb_y_offset, ref->y_stride,
-                     xd->dst.y_buffer, xd->dst.y_stride, INT_MAX);
+  err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
+                     xd->pre.y_buffer, xd->pre.y_stride, INT_MAX);
 
   dst_mv->as_int = 0;
 
@@ -201,11 +184,19 @@ static int find_best_16x16_intra
   // we're intentionally not doing 4x4, we just want a rough estimate
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     unsigned int err;
+    const int bwl = b_width_log2(BLOCK_SIZE_MB16X16),  bw = 4 << bwl;
+    const int bhl = b_height_log2(BLOCK_SIZE_MB16X16), bh = 4 << bhl;
 
     xd->mode_info_context->mbmi.mode = mode;
-    vp9_build_intra_predictors_mby(xd);
-    err = vp9_sad16x16(xd->predictor, 16, buf->y_buffer + mb_y_offset,
-                       buf->y_stride, best_err);
+    vp9_build_intra_predictors(x->src.y_buffer, x->src.y_stride,
+                               xd->dst.y_buffer, xd->dst.y_stride,
+                               xd->mode_info_context->mbmi.mode,
+                               bw, bh,
+                               xd->up_available, xd->left_available,
+                               xd->right_available);
+    err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
+                       xd->dst.y_buffer, xd->dst.y_stride, best_err);
+
     // find best
     if (err < best_err) {
       best_err  = err;
@@ -237,23 +228,32 @@ static void update_mbgraph_mb_stats
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int intra_error;
+  VP9_COMMON *cm = &cpi->common;
 
   // FIXME in practice we're completely ignoring chroma here
-  xd->dst.y_buffer = buf->y_buffer + mb_y_offset;
+  x->src.y_buffer = buf->y_buffer + mb_y_offset;
+  x->src.y_stride = buf->y_stride;
+
+  xd->dst.y_buffer = cm->yv12_fb[cm->new_fb_idx].y_buffer + mb_y_offset;
+  xd->dst.y_stride = cm->yv12_fb[cm->new_fb_idx].y_stride;
 
   // do intra 16x16 prediction
-  intra_error = find_best_16x16_intra(cpi, buf, mb_y_offset, &stats->ref[INTRA_FRAME].m.mode);
+  intra_error = find_best_16x16_intra(cpi, buf, mb_y_offset,
+                                      &stats->ref[INTRA_FRAME].m.mode);
   if (intra_error <= 0)
     intra_error = 1;
   stats->ref[INTRA_FRAME].err = intra_error;
 
   // Golden frame MV search, if it exists and is different than last frame
   if (golden_ref) {
-    int g_motion_error = do_16x16_motion_search(cpi, prev_golden_ref_mv,
-                                                &stats->ref[GOLDEN_FRAME].m.mv,
-                                                buf, mb_y_offset,
-                                                golden_ref, gld_y_offset,
-                                                mb_row, mb_col);
+    int g_motion_error;
+    xd->pre.y_buffer = golden_ref->y_buffer + mb_y_offset;
+    xd->pre.y_stride = golden_ref->y_stride;
+    g_motion_error = do_16x16_motion_search(cpi, prev_golden_ref_mv,
+                                            &stats->ref[GOLDEN_FRAME].m.mv,
+                                            buf, mb_y_offset,
+                                            golden_ref, gld_y_offset,
+                                            mb_row, mb_col);
     stats->ref[GOLDEN_FRAME].err = g_motion_error;
   } else {
     stats->ref[GOLDEN_FRAME].err = INT_MAX;
@@ -262,16 +262,13 @@ static void update_mbgraph_mb_stats
 
   // Alt-ref frame MV search, if it exists and is different than last/golden frame
   if (alt_ref) {
-    // int a_motion_error = do_16x16_motion_search(cpi, prev_alt_ref_mv,
-    //                                            &stats->ref[ALTREF_FRAME].m.mv,
-    //                                            buf, mb_y_offset,
-    //                                            alt_ref, arf_y_offset);
-
-    int a_motion_error =
-      do_16x16_zerozero_search(cpi,
-                               &stats->ref[ALTREF_FRAME].m.mv,
-                               buf, mb_y_offset,
-                               alt_ref, arf_y_offset);
+    int a_motion_error;
+    xd->pre.y_buffer = alt_ref->y_buffer + mb_y_offset;
+    xd->pre.y_stride = alt_ref->y_stride;
+    a_motion_error = do_16x16_zerozero_search(cpi,
+                                              &stats->ref[ALTREF_FRAME].m.mv,
+                                              buf, mb_y_offset,
+                                              alt_ref, arf_y_offset);
 
     stats->ref[ALTREF_FRAME].err = a_motion_error;
   } else {

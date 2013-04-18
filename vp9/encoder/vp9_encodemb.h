@@ -58,13 +58,6 @@ void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x);
 
 void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
 
-void vp9_subtract_mbuv_s_c(int16_t *diff, const uint8_t *usrc,
-                           const uint8_t *vsrc, int src_stride,
-                           const uint8_t *upred,
-                           const uint8_t *vpred, int dst_stride);
-void vp9_subtract_mby_s_c(int16_t *diff, const uint8_t *src,
-                          int src_stride, const uint8_t *pred,
-                          int dst_stride);
 void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
                           const uint8_t *pred, int dst_stride,
                           BLOCK_SIZE_TYPE bsize);

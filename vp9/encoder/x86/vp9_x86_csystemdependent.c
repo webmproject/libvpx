@@ -30,7 +30,9 @@ void vp9_subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch) {
   unsigned char *z = *(be->base_src) + be->src;
   unsigned int  src_stride = be->src_stride;
   short *diff = &be->src_diff[0];
-  unsigned char *predictor = &bd->predictor[0];
+  unsigned char *predictor = *(bd->base_dst) + bd->dst;
+  // TODO(jingning): The prototype function in c has been changed. Need to
+  // modify the mmx and sse versions.
   vp9_subtract_b_mmx_impl(z, src_stride, diff, predictor, pitch);
 }
 
@@ -44,7 +46,9 @@ void vp9_subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch) {
   unsigned char *z = *(be->base_src) + be->src;
   unsigned int  src_stride = be->src_stride;
   short *diff = &be->src_diff[0];
-  unsigned char *predictor = &bd->predictor[0];
+  unsigned char *predictor = *(bd->base_dst) + bd->dst;
+  // TODO(jingning): The prototype function in c has been changed. Need to
+  // modify the mmx and sse versions.
   vp9_subtract_b_sse2_impl(z, src_stride, diff, predictor, pitch);
 }
 

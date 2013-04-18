@@ -708,7 +708,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
            xd->mode_info_context->mbmi.mode, tx_size,
            xd->mode_info_context->mbmi.interp_filter);
 #endif
-    vp9_build_inter_predictors_mb_s(xd, mb_row, mb_col);
+    vp9_build_inter_predictors_mb(xd, mb_row, mb_col);
   }
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {

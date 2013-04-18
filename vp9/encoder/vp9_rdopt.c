@@ -638,15 +638,6 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                                  rd[TX_4X4][1] : rd[TX_8X8][1];
 }
 
-static void copy_predictor(uint8_t *dst, const uint8_t *predictor) {
-  const unsigned int *p = (const unsigned int *)predictor;
-  unsigned int *d = (unsigned int *)dst;
-  d[0] = p[0];
-  d[4] = p[4];
-  d[8] = p[8];
-  d[12] = p[12];
-}
-
 static int vp9_sb_block_error_c(int16_t *coeff, int16_t *dqcoeff,
                                 int block_size, int shift) {
   int i;
@@ -849,13 +840,7 @@ static void super_block_yrd(VP9_COMP *cpi,
   uint8_t *src = x->src.y_buffer, *dst = xd->dst.y_buffer;
   int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
 
-  // FIXME(rbultje): mb code still predicts into xd->predictor
-  if (bs == BLOCK_SIZE_MB16X16) {
-    vp9_subtract_mby(x->src_diff, src, xd->predictor, src_y_stride);
-  } else {
-    vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride,
-                         bs);
-  }
+  vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride, bs);
 
   if (bs >= BLOCK_SIZE_SB32X32)
     super_block_yrd_32x32(cm, x, &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32],
@@ -892,7 +877,6 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
    * a temp buffer that meets the stride requirements, but we are only
    * interested in the left 4x4 block
    * */
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, best_predictor, 16 * 4);
   DECLARE_ALIGNED_ARRAY(16, int16_t, best_dqcoeff, 16);
 
   assert(ib < 16);
@@ -922,7 +906,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     rate = bmode_costs[mode];
 #endif
 
-    vp9_intra4x4_predict(xd, b, mode, b->predictor, 16);
+    vp9_intra4x4_predict(xd, b, mode, *(b->base_dst) + b->dst, b->dst_stride);
     vp9_subtract_b(be, b, 16);
 
     b->bmi.as_mode.first = mode;
@@ -956,7 +940,6 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       best_tx_type = tx_type;
       *a = tempa;
       *l = templ;
-      copy_predictor(best_predictor, b->predictor);
       vpx_memcpy(best_dqcoeff, BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16), 32);
     }
   }
@@ -968,7 +951,10 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   else
     xd->inv_txm4x4(best_dqcoeff, b->diff, 32);
 
-  vp9_recon_b(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+  vp9_intra4x4_predict(xd, b, *best_mode,
+                       *(b->base_dst) + b->dst, b->dst_stride);
+  vp9_recon_b(*(b->base_dst) + b->dst, b->diff,
+              *(b->base_dst) + b->dst, b->dst_stride);
 
   return best_rd;
 }
@@ -1063,11 +1049,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t local_txfm_cache[NB_TXFM_MODES];
 
     x->e_mbd.mode_info_context->mbmi.mode = mode;
-    if (bsize == BLOCK_SIZE_MB16X16) {
-      vp9_build_intra_predictors_mby(&x->e_mbd);
-    } else {
-      vp9_build_intra_predictors_sby_s(&x->e_mbd, bsize);
-    }
+    vp9_build_intra_predictors_sby_s(&x->e_mbd, bsize);
 
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s,
                     bsize, local_txfm_cache);
@@ -1129,7 +1111,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     rate = mode_costs[mode];
     b->bmi.as_mode.first = mode;
 
-    vp9_intra8x8_predict(xd, b, mode, b->predictor, 16);
+    vp9_intra8x8_predict(xd, b, mode, *(b->base_dst) + b->dst, b->dst_stride);
 
     vp9_subtract_4b_c(be, b, 16);
 
@@ -1543,14 +1525,8 @@ static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
   uint8_t *vsrc = x->src.v_buffer, *vdst = xd->dst.v_buffer;
   int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
 
-  // FIXME(rbultje): mb code still predicts into xd->predictor
-  if (bsize == BLOCK_SIZE_MB16X16) {
-    vp9_subtract_mbuv(x->src_diff, usrc, vsrc, xd->predictor,
-                      x->src.uv_stride);
-  } else {
-    vp9_subtract_sbuv_s_c(x->src_diff, usrc, vsrc, src_uv_stride,
-                          udst, vdst, dst_uv_stride, bsize);
-  }
+  vp9_subtract_sbuv_s_c(x->src_diff, usrc, vsrc, src_uv_stride,
+                        udst, vdst, dst_uv_stride, bsize);
 
   if (mbmi->txfm_size >= TX_32X32 && bsize >= BLOCK_SIZE_SB64X64) {
     super_block_uvrd_32x32(cm, x, rate, distortion, skippable, bsize);
@@ -1576,10 +1552,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
-    if (bsize == BLOCK_SIZE_MB16X16)
-      vp9_build_intra_predictors_mbuv(&x->e_mbd);
-    else
-      vp9_build_intra_predictors_sbuv_s(&x->e_mbd, bsize);
+    vp9_build_intra_predictors_sbuv_s(&x->e_mbd, bsize);
 
     super_block_uvrd(&cpi->common, x, &this_rate_tokenonly,
                      &this_distortion, &s, bsize);
@@ -1759,7 +1732,8 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
 
       vp9_build_inter_predictor(*(bd->base_pre) + bd->pre,
                                 bd->pre_stride,
-                                bd->predictor, 16,
+                                *(bd->base_dst) + bd->dst,
+                                bd->dst_stride,
                                 &bd->bmi.as_mv[0],
                                 &xd->scale_factor[0],
                                 4, 4, 0 /* no avg */, &xd->subpix);
@@ -1769,7 +1743,8 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
       // weighting for splitmv modes is turned on.
       if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
         vp9_build_inter_predictor(
-            *(bd->base_second_pre) + bd->pre, bd->pre_stride, bd->predictor, 16,
+            *(bd->base_second_pre) + bd->pre, bd->pre_stride,
+            *(bd->base_dst) + bd->dst, bd->dst_stride,
             &bd->bmi.as_mv[1], &xd->scale_factor[1], 4, 4,
             1 << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT) /* avg */,
             &xd->subpix);
@@ -1834,7 +1809,8 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
         // implicit-compoundinter-weight experiment when implicit
         // weighting for splitmv modes is turned on.
         vp9_build_inter_predictor(
-            *base_pre + bd->pre, bd->pre_stride, bd->predictor, 16,
+            *base_pre + bd->pre, bd->pre_stride,
+            *(bd->base_dst) + bd->dst, bd->dst_stride,
             &bd->bmi.as_mv[which_mv], &xd->scale_factor[which_mv], 8, 8,
             which_mv << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
             &xd->subpix);
@@ -3144,23 +3120,20 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         unsigned int sse, var;
         int tmp_rate_y, tmp_rate_u, tmp_rate_v;
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
-        vp9_build_inter16x16_predictors_mb(xd, xd->predictor,
-                                           xd->predictor + 256,
-                                           xd->predictor + 320,
-                                           16, 8, mb_row, mb_col);
+        vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
         var = vp9_variance16x16(*(b->base_src), b->src_stride,
-                                xd->predictor, 16, &sse);
+                                xd->dst.y_buffer, xd->dst.y_stride, &sse);
         // Note our transform coeffs are 8 times an orthogonal transform.
         // Hence quantizer step is also 8 times. To get effective quantizer
         // we need to divide by 8 before sending to modeling function.
         model_rd_from_var_lapndz(var, 16 * 16, xd->block[0].dequant[1] >> 3,
                                  &tmp_rate_y, &tmp_dist_y);
         var = vp9_variance8x8(x->src.u_buffer, x->src.uv_stride,
-                              &xd->predictor[256], 8, &sse);
+                              xd->dst.u_buffer, xd->dst.uv_stride, &sse);
         model_rd_from_var_lapndz(var, 8 * 8, xd->block[16].dequant[1] >> 3,
                                  &tmp_rate_u, &tmp_dist_u);
         var = vp9_variance8x8(x->src.v_buffer, x->src.uv_stride,
-                              &xd->predictor[320], 8, &sse);
+                              xd->dst.v_buffer, xd->dst.uv_stride, &sse);
         model_rd_from_var_lapndz(var, 8 * 8, xd->block[20].dequant[1] >> 3,
                                  &tmp_rate_v, &tmp_dist_v);
         rd = RDCOST(x->rdmult, x->rddiv,
@@ -3184,9 +3157,19 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if ((cm->mcomp_filter_type == SWITCHABLE && newbest) ||
           (cm->mcomp_filter_type != SWITCHABLE &&
            cm->mcomp_filter_type == mbmi->interp_filter)) {
-        vpx_memcpy(tmp_ybuf, xd->predictor, sizeof(unsigned char) * 256);
-        vpx_memcpy(tmp_ubuf, xd->predictor + 256, sizeof(unsigned char) * 64);
-        vpx_memcpy(tmp_vbuf, xd->predictor + 320, sizeof(unsigned char) * 64);
+        int i;
+        for (i = 0; i < 16 * bh; ++i)
+          vpx_memcpy(tmp_ybuf + i * 16 * bw,
+                     xd->dst.y_buffer + i * xd->dst.y_stride,
+                     sizeof(unsigned char) * 16 * bw);
+        for (i = 0; i < 8 * bh; ++i)
+          vpx_memcpy(tmp_ubuf + i * 8 * bw,
+                     xd->dst.u_buffer + i * xd->dst.uv_stride,
+                     sizeof(unsigned char) * 8 * bw);
+        for (i = 0; i < 8 * bh; ++i)
+          vpx_memcpy(tmp_vbuf + i * 8 * bw,
+                     xd->dst.v_buffer + i * xd->dst.uv_stride,
+                     sizeof(unsigned char) * 8 * bw);
         pred_exists = 1;
       }
       interpolating_intpel_seen |=
@@ -3203,32 +3186,19 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (pred_exists) {
     // FIXME(rbultje): mb code still predicts into xd->predictor
-    if (bsize != BLOCK_SIZE_MB16X16) {
-      for (i = 0; i < bh * 16; ++i)
-        vpx_memcpy(xd->dst.y_buffer + i * xd->dst.y_stride,
-                   tmp_ybuf + i * bw * 16, sizeof(unsigned char) * bw * 16);
-      for (i = 0; i < bh * 8; ++i)
-        vpx_memcpy(xd->dst.u_buffer + i * xd->dst.uv_stride,
-                   tmp_ubuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
-      for (i = 0; i < bh * 8; ++i)
-        vpx_memcpy(xd->dst.v_buffer + i * xd->dst.uv_stride,
-                   tmp_vbuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
-    } else {
-      vpx_memcpy(xd->predictor, tmp_ybuf, sizeof(unsigned char) * 256);
-      vpx_memcpy(xd->predictor + 256, tmp_ubuf, sizeof(unsigned char) * 64);
-      vpx_memcpy(xd->predictor + 320, tmp_vbuf, sizeof(unsigned char) * 64);
-    }
+    for (i = 0; i < bh * 16; ++i)
+      vpx_memcpy(xd->dst.y_buffer + i * xd->dst.y_stride,
+                 tmp_ybuf + i * bw * 16, sizeof(unsigned char) * bw * 16);
+    for (i = 0; i < bh * 8; ++i)
+      vpx_memcpy(xd->dst.u_buffer + i * xd->dst.uv_stride,
+                 tmp_ubuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
+    for (i = 0; i < bh * 8; ++i)
+      vpx_memcpy(xd->dst.v_buffer + i * xd->dst.uv_stride,
+                 tmp_vbuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
   } else {
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear, 6-tap) is indicated at the frame level
-    if (bsize > BLOCK_SIZE_MB16X16) {
-      vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
-    } else {
-      vp9_build_inter16x16_predictors_mb(xd, xd->predictor,
-                                         xd->predictor + 256,
-                                         xd->predictor + 320,
-                                         16, 8, mb_row, mb_col);
-    }
+    vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
   }
 
   if (cpi->common.mcomp_filter_type == SWITCHABLE) {
@@ -3253,7 +3223,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        &sse);
     } else {
       var = vp9_variance16x16(*(b->base_src), b->src_stride,
-                              xd->predictor, 16, &sse);
+                              xd->dst.y_buffer, xd->dst.y_stride, &sse);
     }
 
     if ((int)sse < threshold) {
@@ -3278,9 +3248,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         } else {
           unsigned int sse2u, sse2v;
           var = vp9_variance8x8(x->src.u_buffer, x->src.uv_stride,
-                                xd->predictor + 256, 8, &sse2u);
+                                xd->dst.u_buffer, xd->dst.uv_stride, &sse2u);
           var = vp9_variance8x8(x->src.v_buffer, x->src.uv_stride,
-                                xd->predictor + 320, 8, &sse2v);
+                                xd->dst.v_buffer, xd->dst.uv_stride, &sse2v);
           sse2 = sse2u + sse2v;
         }
 
@@ -3614,7 +3584,8 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         case TM_PRED:
           mbmi->ref_frame = INTRA_FRAME;
           // FIXME compound intra prediction
-          vp9_build_intra_predictors_mby(&x->e_mbd);
+          vp9_build_intra_predictors_sby_s(&x->e_mbd, BLOCK_SIZE_MB16X16);
+          // vp9_build_intra_predictors_mby(&x->e_mbd);
           super_block_yrd(cpi, x, &rate_y, &distortion, &skippable,
                           BLOCK_SIZE_MB16X16, txfm_cache);
           rate2 += rate_y;
@@ -3790,8 +3761,14 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int uv_skippable;
 
         vp9_build_inter4x4_predictors_mbuv(&x->e_mbd, mb_row, mb_col);
-        vp9_subtract_mbuv(x->src_diff, x->src.u_buffer, x->src.v_buffer,
-                          x->e_mbd.predictor, x->src.uv_stride);
+
+        vp9_subtract_sbuv_s_c(x->src_diff,
+                              x->src.u_buffer,
+                              x->src.v_buffer, x->src.uv_stride,
+                              xd->dst.u_buffer,
+                              xd->dst.v_buffer, xd->dst.uv_stride,
+                              BLOCK_SIZE_MB16X16);
+
         super_block_uvrd_4x4(cm, x, &rate_uv, &distortion_uv,
                              &uv_skippable, BLOCK_SIZE_MB16X16);
         rate2 += rate_uv;
