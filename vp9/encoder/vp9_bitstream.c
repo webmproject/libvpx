@@ -2623,9 +2623,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   vp9_write_literal(&header_bc, pc->base_qindex, QINDEX_BITS);
 
   // Transmit Dc, Second order and Uv quantizer delta information
-  put_delta_q(&header_bc, pc->y1dc_delta_q);
-  put_delta_q(&header_bc, pc->uvdc_delta_q);
-  put_delta_q(&header_bc, pc->uvac_delta_q);
+  put_delta_q(&header_bc, pc->y_dc_delta_q);
+  put_delta_q(&header_bc, pc->uv_dc_delta_q);
+  put_delta_q(&header_bc, pc->uv_ac_delta_q);
 
   // When there is a key frame all reference buffers are updated using the new key frame
   if (pc->frame_type != KEY_FRAME) {

@@ -231,9 +231,9 @@ typedef struct VP9Common {
   int base_qindex;
   int last_kf_gf_q;  /* Q used on the last GF or KF */
 
-  int y1dc_delta_q;
-  int uvdc_delta_q;
-  int uvac_delta_q;
+  int y_dc_delta_q;
+  int uv_dc_delta_q;
+  int uv_ac_delta_q;
 
   unsigned int frames_since_golden;
   unsigned int frames_till_alt_ref_frame;

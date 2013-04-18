@@ -1456,14 +1456,14 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 #endif
 
   cpi->mb.e_mbd.lossless = (cm->base_qindex == 0 &&
-                            cm->y1dc_delta_q == 0 &&
-                            cm->uvdc_delta_q == 0 &&
-                            cm->uvac_delta_q == 0);
+                            cm->y_dc_delta_q == 0 &&
+                            cm->uv_dc_delta_q == 0 &&
+                            cm->uv_ac_delta_q == 0);
   switch_lossless_mode(cpi, cpi->mb.e_mbd.lossless);
 
   vp9_frame_init_quantizer(cpi);
 
-  vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
+  vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y_dc_delta_q);
   vp9_initialize_me_consts(cpi, cm->base_qindex);
 
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {

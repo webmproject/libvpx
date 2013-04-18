@@ -542,14 +542,14 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       qrounding_factor = 64;
     }
     // dc values
-    quant_val = vp9_dc_quant(q, cpi->common.y1dc_delta_q);
+    quant_val = vp9_dc_quant(q, cpi->common.y_dc_delta_q);
     invert_quant(cpi->Y1quant[q] + 0, cpi->Y1quant_shift[q] + 0, quant_val);
     cpi->Y1zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
     cpi->Y1round[q][0] = (qrounding_factor * quant_val) >> 7;
     cpi->common.y_dequant[q][0] = quant_val;
     cpi->zrun_zbin_boost_y1[q][0] = (quant_val * zbin_boost[0]) >> 7;
 
-    quant_val = vp9_dc_uv_quant(q, cpi->common.uvdc_delta_q);
+    quant_val = vp9_dc_uv_quant(q, cpi->common.uv_dc_delta_q);
     invert_quant(cpi->UVquant[q] + 0, cpi->UVquant_shift[q] + 0, quant_val);
     cpi->UVzbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
     cpi->UVround[q][0] = (qrounding_factor * quant_val) >> 7;
@@ -568,7 +568,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       cpi->zrun_zbin_boost_y1[q][i] =
           ROUND_POWER_OF_TWO(quant_val * zbin_boost[i], 7);
 
-      quant_val = vp9_ac_uv_quant(q, cpi->common.uvac_delta_q);
+      quant_val = vp9_ac_uv_quant(q, cpi->common.uv_ac_delta_q);
       invert_quant(cpi->UVquant[q] + rc, cpi->UVquant_shift[q] + rc, quant_val);
       cpi->UVzbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
       cpi->UVround[q][rc] = (qrounding_factor * quant_val) >> 7;
@@ -677,9 +677,9 @@ void vp9_set_quantizer(struct VP9_COMP *cpi, int Q) {
 
   // if any of the delta_q values are changing update flag will
   // have to be set.
-  cm->y1dc_delta_q = 0;
-  cm->uvdc_delta_q = 0;
-  cm->uvac_delta_q = 0;
+  cm->y_dc_delta_q = 0;
+  cm->uv_dc_delta_q = 0;
+  cm->uv_ac_delta_q = 0;
 
   // quantizer has to be reinitialized if any delta_q changes.
   // As there are not any here for now this is inactive code.

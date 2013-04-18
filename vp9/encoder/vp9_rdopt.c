@@ -3388,7 +3388,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv seg_mvs[NB_PARTITIONINGS][16 /* n_blocks */][MAX_REF_FRAMES - 1];
 
   int intra_cost_penalty = 20 * vp9_dc_quant(cpi->common.base_qindex,
-                                             cpi->common.y1dc_delta_q);
+                                             cpi->common.y_dc_delta_q);
 
   struct scale_factors scale_factor[4];
 
