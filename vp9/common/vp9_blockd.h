@@ -801,16 +801,18 @@ static INLINE int old_block_idx_4x4(MACROBLOCKD* const xd, int block_size_b,
 }
 
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
-                                                  int block_size_b,
+                                                  BLOCK_SIZE_TYPE bsize,
                                                   int ss_txfrm_size,
                                                   void *arg);
 static INLINE void foreach_transformed_block_in_plane(
-    const MACROBLOCKD* const xd, int block_size, int plane,
+    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
     int is_split, foreach_transformed_block_visitor visit, void *arg) {
+  const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
+
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
   const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
-  const int block_size_b = block_size;
+  const int block_size_b = bw + bh;
   const int txfrm_size_b = tx_size * 2;
 
   // subsampled size of the block
@@ -825,20 +827,19 @@ static INLINE void foreach_transformed_block_in_plane(
   const int ss_txfrm_size = txfrm_size_b > ss_block_size || is_split
                                 ? txfrm_size_b - ss_max * 2
                                 : txfrm_size_b;
+  const int step = 1 << ss_txfrm_size;
 
-  // TODO(jkoleszar): 1 may not be correct here with larger chroma planes.
-  const int inc = is_split ? 1 : (1 << ss_txfrm_size);
   int i;
 
   assert(txfrm_size_b <= block_size_b);
   assert(ss_txfrm_size <= ss_block_size);
-  for (i = 0; i < (1 << ss_block_size); i += inc) {
-    visit(plane, i, block_size_b, ss_txfrm_size, arg);
+  for (i = 0; i < (1 << ss_block_size); i += step) {
+    visit(plane, i, bsize, ss_txfrm_size, arg);
   }
 }
 
 static INLINE void foreach_transformed_block(
-    const MACROBLOCKD* const xd, int block_size,
+    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
     foreach_transformed_block_visitor visit, void *arg) {
   const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
   const int is_split =
@@ -850,13 +851,13 @@ static INLINE void foreach_transformed_block(
     const int is_split_chroma = is_split &&
          xd->plane[plane].plane_type == PLANE_TYPE_UV;
 
-    foreach_transformed_block_in_plane(xd, block_size, plane, is_split_chroma,
+    foreach_transformed_block_in_plane(xd, bsize, plane, is_split_chroma,
                                        visit, arg);
   }
 }
 
 static INLINE void foreach_transformed_block_uv(
-    const MACROBLOCKD* const xd, int block_size,
+    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
     foreach_transformed_block_visitor visit, void *arg) {
   const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
   const int is_split =
@@ -865,7 +866,7 @@ static INLINE void foreach_transformed_block_uv(
   int plane;
 
   for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    foreach_transformed_block_in_plane(xd, block_size, plane, is_split,
+    foreach_transformed_block_in_plane(xd, bsize, plane, is_split,
                                        visit, arg);
   }
 }

@@ -381,32 +381,29 @@ struct is_skippable_args {
   int *skippable;
 };
 static void is_skippable(int plane, int block,
-                         int block_size_b, int ss_txfrm_size, void *argv) {
+                         BLOCK_SIZE_TYPE bsize, int ss_txfrm_size, void *argv) {
   struct is_skippable_args *args = argv;
   args->skippable[0] &= (!args->xd->plane[plane].eobs[block]);
 }
 
 int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
   int result = 1;
   struct is_skippable_args args = {xd, &result};
-  foreach_transformed_block(xd, bwl + bhl, is_skippable, &args);
+  foreach_transformed_block(xd, bsize, is_skippable, &args);
   return result;
 }
 
 int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
   int result = 1;
   struct is_skippable_args args = {xd, &result};
-  foreach_transformed_block_in_plane(xd, bwl + bhl, 0, 0, is_skippable, &args);
+  foreach_transformed_block_in_plane(xd, bsize, 0, 0, is_skippable, &args);
   return result;
 }
 
 int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
   int result = 1;
   struct is_skippable_args args = {xd, &result};
-  foreach_transformed_block_uv(xd, bwl + bhl, is_skippable, &args);
+  foreach_transformed_block_uv(xd, bsize, is_skippable, &args);
   return result;
 }
 
