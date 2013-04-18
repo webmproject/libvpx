@@ -556,30 +556,27 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
   }
 }
 
-void vp9_encode_nmv(vp9_writer* const bc, const MV* const mv,
+void vp9_encode_nmv(vp9_writer* w, const MV* const mv,
                     const MV* const ref, const nmv_context* const mvctx) {
-  MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
-  write_token(bc, vp9_mv_joint_tree, mvctx->joints,
-              vp9_mv_joint_encodings + j);
-  if (mv_joint_vertical(j)) {
-    encode_nmv_component(bc, mv->row, ref->col, &mvctx->comps[0]);
-  }
-  if (mv_joint_horizontal(j)) {
-    encode_nmv_component(bc, mv->col, ref->col, &mvctx->comps[1]);
-  }
+  const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
+  write_token(w, vp9_mv_joint_tree, mvctx->joints, vp9_mv_joint_encodings + j);
+  if (mv_joint_vertical(j))
+    encode_nmv_component(w, mv->row, ref->col, &mvctx->comps[0]);
+
+  if (mv_joint_horizontal(j))
+    encode_nmv_component(w, mv->col, ref->col, &mvctx->comps[1]);
 }
 
 void vp9_encode_nmv_fp(vp9_writer* const bc, const MV* const mv,
                        const MV* const ref, const nmv_context* const mvctx,
                        int usehp) {
-  MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
+  const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
   usehp = usehp && vp9_use_nmv_hp(ref);
-  if (mv_joint_vertical(j)) {
+  if (mv_joint_vertical(j))
     encode_nmv_component_fp(bc, mv->row, ref->row, &mvctx->comps[0], usehp);
-  }
-  if (mv_joint_horizontal(j)) {
+
+  if (mv_joint_horizontal(j))
     encode_nmv_component_fp(bc, mv->col, ref->col, &mvctx->comps[1], usehp);
-  }
 }
 
 void vp9_build_nmv_cost_table(int *mvjoint,
