@@ -496,7 +496,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   }
   assert(eob <= seg_eob);
 
-  VP9_COMBINEENTROPYCONTEXTS(pt, a_ec, l_ec);
+  pt = combine_entropy_contexts(a_ec, l_ec);
   nb = vp9_get_coef_neighbors_handle(scan, &pad);
   default_eob = seg_eob;
 

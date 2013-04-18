@@ -582,7 +582,7 @@ static void optimize_b(VP9_COMMON *const cm,
 
   /* Now pick the best path through the whole trellis. */
   band = get_coef_band(scan, tx_size, i + 1);
-  VP9_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  pt = combine_entropy_contexts(*a, *l);
   rate0 = tokens[next][0].rate;
   rate1 = tokens[next][1].rate;
   error0 = tokens[next][0].error;

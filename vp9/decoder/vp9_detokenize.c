@@ -251,7 +251,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       break;
   }
 
-  VP9_COMBINEENTROPYCONTEXTS(pt, above_ec, left_ec);
+  pt = combine_entropy_contexts(above_ec, left_ec);
   nb = vp9_get_coef_neighbors_handle(scan, &pad);
 
   while (1) {
