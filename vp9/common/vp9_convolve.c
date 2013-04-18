@@ -331,14 +331,14 @@ static void convolve_c(const uint8_t *src, int src_stride,
                        const int16_t *filter_y, int y_step_q4,
                        int w, int h, int taps) {
   /* Fixed size intermediate buffer places limits on parameters.
-   * Maximum intermediate_height is 39, for y_step_q4 == 32,
-   * h == 16, taps == 8.
+   * Maximum intermediate_height is 135, for y_step_q4 == 32,
+   * h == 64, taps == 8.
    */
-  uint8_t temp[16 * 39];
+  uint8_t temp[64 * 135];
   int intermediate_height = ((h * y_step_q4) >> 4) + taps - 1;
 
-  assert(w <= 16);
-  assert(h <= 16);
+  assert(w <= 64);
+  assert(h <= 64);
   assert(taps <= 8);
   assert(y_step_q4 <= 32);
 
@@ -346,10 +346,10 @@ static void convolve_c(const uint8_t *src, int src_stride,
     intermediate_height = h;
 
   convolve_horiz_c(src - src_stride * (taps / 2 - 1), src_stride,
-                   temp, 16,
+                   temp, 64,
                    filter_x, x_step_q4, filter_y, y_step_q4,
                    w, intermediate_height, taps);
-  convolve_vert_c(temp + 16 * (taps / 2 - 1), 16, dst, dst_stride,
+  convolve_vert_c(temp + 64 * (taps / 2 - 1), 64, dst, dst_stride,
                   filter_x, x_step_q4, filter_y, y_step_q4,
                   w, h, taps);
 }
@@ -360,14 +360,14 @@ static void convolve_avg_c(const uint8_t *src, int src_stride,
                            const int16_t *filter_y, int y_step_q4,
                            int w, int h, int taps) {
   /* Fixed size intermediate buffer places limits on parameters.
-   * Maximum intermediate_height is 39, for y_step_q4 == 32,
-   * h == 16, taps == 8.
+   * Maximum intermediate_height is 135, for y_step_q4 == 32,
+   * h == 64, taps == 8.
    */
-  uint8_t temp[16 * 39];
+  uint8_t temp[64 * 135];
   int intermediate_height = ((h * y_step_q4) >> 4) + taps - 1;
 
-  assert(w <= 16);
-  assert(h <= 16);
+  assert(w <= 64);
+  assert(h <= 64);
   assert(taps <= 8);
   assert(y_step_q4 <= 32);
 
@@ -375,10 +375,10 @@ static void convolve_avg_c(const uint8_t *src, int src_stride,
     intermediate_height = h;
 
   convolve_horiz_c(src - src_stride * (taps / 2 - 1), src_stride,
-                   temp, 16,
+                   temp, 64,
                    filter_x, x_step_q4, filter_y, y_step_q4,
                    w, intermediate_height, taps);
-  convolve_avg_vert_c(temp + 16 * (taps / 2 - 1), 16, dst, dst_stride,
+  convolve_avg_vert_c(temp + 64 * (taps / 2 - 1), 64, dst, dst_stride,
                       filter_x, x_step_q4, filter_y, y_step_q4,
                       w, h, taps);
 }
@@ -563,16 +563,16 @@ void vp9_convolve8_avg_c(const uint8_t *src, int src_stride,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
   /* Fixed size intermediate buffer places limits on parameters. */
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp, 16 * 16);
-  assert(w <= 16);
-  assert(h <= 16);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp, 64 * 64);
+  assert(w <= 64);
+  assert(h <= 64);
 
   vp9_convolve8(src, src_stride,
-                temp, 16,
+                temp, 64,
                 filter_x, x_step_q4,
                 filter_y, y_step_q4,
                 w, h);
-  vp9_convolve_avg(temp, 16,
+  vp9_convolve_avg(temp, 64,
                    dst, dst_stride,
                    NULL, 0, /* These unused parameter should be removed! */
                    NULL, 0, /* These unused parameter should be removed! */
