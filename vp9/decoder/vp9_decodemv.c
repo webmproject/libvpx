@@ -85,19 +85,17 @@ static void read_mb_segid(vp9_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *xd) {
 
 // This function reads the current macro block's segnent id from the bitstream
 // It should only be called if a segment map update is indicated.
-static void read_mb_segid_except(VP9_COMMON *cm,
-                                 vp9_reader *r, MB_MODE_INFO *mi,
-                                 MACROBLOCKD *xd, int mb_row, int mb_col) {
+static int read_mb_segid_except(vp9_reader *r,
+                                VP9_COMMON *cm, MACROBLOCKD *xd,
+                                int mb_row, int mb_col) {
   const int mb_index = mb_row * cm->mb_cols + mb_col;
   const int pred_seg_id = vp9_get_pred_mb_segid(cm, xd, mb_index);
   const vp9_prob *const p = xd->mb_segment_tree_probs;
   const vp9_prob prob = xd->mb_segment_mispred_tree_probs[pred_seg_id];
 
-  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
-    mi->segment_id = vp9_read(r, prob)
-        ? 2 + (pred_seg_id  < 2 ? vp9_read(r, p[2]) : (pred_seg_id == 2))
-        :     (pred_seg_id >= 2 ? vp9_read(r, p[1]) : (pred_seg_id == 0));
-  }
+  return vp9_read(r, prob)
+             ? 2 + (pred_seg_id  < 2 ? vp9_read(r, p[2]) : (pred_seg_id == 2))
+             :     (pred_seg_id >= 2 ? vp9_read(r, p[1]) : (pred_seg_id == 0));
 }
 
 #if CONFIG_NEW_MVREF
@@ -334,7 +332,7 @@ static void read_nmvprobs(vp9_reader *r, nmv_context *mvctx,
 // Read the referncence frame
 static MV_REFERENCE_FRAME read_ref_frame(VP9D_COMP *pbi,
                                          vp9_reader *r,
-                                         unsigned char segment_id) {
+                                         int segment_id) {
   MV_REFERENCE_FRAME ref_frame;
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
@@ -439,7 +437,7 @@ static MB_PREDICTION_MODE read_mv_ref(vp9_reader *r, const vp9_prob *p) {
   return (MB_PREDICTION_MODE) treed_read(r, vp9_mv_ref_tree, p);
 }
 
-static B_PREDICTION_MODE sub_mv_ref(vp9_reader *r, const vp9_prob *p) {
+static B_PREDICTION_MODE read_sub_mv_ref(vp9_reader *r, const vp9_prob *p) {
   return (B_PREDICTION_MODE) treed_read(r, vp9_sub_mv_ref_tree, p);
 }
 
@@ -538,9 +536,9 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
                                vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  MODE_INFO *mi = xd->mode_info_context;
-  MB_MODE_INFO *mbmi = &mi->mbmi;
-  int mb_index = mb_row * cm->mb_cols + mb_col;
+  MODE_INFO *const mi = xd->mode_info_context;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const int mb_index = mb_row * cm->mb_cols + mb_col;
 
   if (xd->segmentation_enabled) {
     if (xd->update_mb_segmentation_map) {
@@ -557,13 +555,10 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
         vp9_set_pred_flag(xd, PRED_SEG_ID, seg_pred_flag);
 
         // If the value is flagged as correctly predicted
-        // then use the predicted value
-        if (seg_pred_flag) {
-          mbmi->segment_id = vp9_get_pred_mb_segid(cm, xd, mb_index);
-        } else {
-          // Decode it explicitly
-          read_mb_segid_except(cm, r, mbmi, xd, mb_row, mb_col);
-        }
+        // then use the predicted value, otherwise decode it explicitly
+        mbmi->segment_id = seg_pred_flag ?
+                               vp9_get_pred_mb_segid(cm, xd, mb_index) :
+                               read_mb_segid_except(r, cm, xd, mb_row, mb_col);
       } else {
         // Normal unpredicted coding mode
         read_mb_segid(r, mbmi, xd);
@@ -623,8 +618,9 @@ static INLINE void assign_and_clamp_mv(int_mv *dst, const int_mv *src,
            mb_to_bottom_edge);
 }
 
-static INLINE void process_mv(vp9_reader *r, MV *mv, MV *ref,
-                              nmv_context *nmvc, nmv_context_counts *mvctx,
+static INLINE void process_mv(vp9_reader *r, MV *mv, const MV *ref,
+                              const nmv_context *nmvc,
+                              nmv_context_counts *mvctx,
                               int usehp) {
   read_nmv(r, mv, ref, nmvc);
   read_nmv_fp(r, mv, ref, nmvc, usehp);
@@ -650,7 +646,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   const int mis = cm->mode_info_stride;
   MACROBLOCKD *const xd = &pbi->mb;
 
-  int_mv *const mv = &mbmi->mv[0];
+  int_mv *const mv0 = &mbmi->mv[0];
+  int_mv *const mv1 = &mbmi->mv[1];
   const int bw = 1 << mb_width_log2(mi->mbmi.sb_type);
   const int bh = 1 << mb_height_log2(mi->mbmi.sb_type);
 
@@ -881,7 +878,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             second_abovemv.as_int = above_block_second_mv(mi, k, mis);
           }
           mv_contz = vp9_mv_cont(&leftmv, &abovemv);
-          blockmode = sub_mv_ref(r, cm->fc.sub_mv_ref_prob[mv_contz]);
+          blockmode = read_sub_mv_ref(r, cm->fc.sub_mv_ref_prob[mv_contz]);
           cm->fc.sub_mv_ref_counts[mv_contz][blockmode - LEFT4X4]++;
 
           switch (blockmode) {
@@ -947,7 +944,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
              Must do it here because ensuing subsets can
              refer back to us via "left" or "above". */
             unsigned int fill_count = mbsplit_fill_count[s];
-            const unsigned char *fill_offset =
+            const uint8_t *fill_offset =
                 &mbsplit_fill_offset[s][j * fill_count];
 
             do {
@@ -961,56 +958,56 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         } while (++j < num_p);
       }
 
-      mv->as_int = mi->bmi[15].as_mv[0].as_int;
-      mbmi->mv[1].as_int = mi->bmi[15].as_mv[1].as_int;
+      mv0->as_int = mi->bmi[15].as_mv[0].as_int;
+      mv1->as_int = mi->bmi[15].as_mv[1].as_int;
 
       break;  /* done with SPLITMV */
 
       case NEARMV:
         // Clip "next_nearest" so that it does not extend to far out of image
-        assign_and_clamp_mv(mv, &nearby, mb_to_left_edge,
-                                         mb_to_right_edge,
-                                         mb_to_top_edge,
-                                         mb_to_bottom_edge);
-        if (mbmi->second_ref_frame > 0)
-          assign_and_clamp_mv(&mbmi->mv[1], &nearby_second, mb_to_left_edge,
-                                                            mb_to_right_edge,
-                                                            mb_to_top_edge,
-                                                            mb_to_bottom_edge);
-        break;
-
-      case NEARESTMV:
-        // Clip "next_nearest" so that it does not extend to far out of image
-        assign_and_clamp_mv(mv, &nearest, mb_to_left_edge,
+        assign_and_clamp_mv(mv0, &nearby, mb_to_left_edge,
                                           mb_to_right_edge,
                                           mb_to_top_edge,
                                           mb_to_bottom_edge);
         if (mbmi->second_ref_frame > 0)
-          assign_and_clamp_mv(&mbmi->mv[1], &nearest_second, mb_to_left_edge,
-                                                             mb_to_right_edge,
-                                                             mb_to_top_edge,
-                                                             mb_to_bottom_edge);
+          assign_and_clamp_mv(mv1, &nearby_second, mb_to_left_edge,
+                                                   mb_to_right_edge,
+                                                   mb_to_top_edge,
+                                                   mb_to_bottom_edge);
+        break;
+
+      case NEARESTMV:
+        // Clip "next_nearest" so that it does not extend to far out of image
+        assign_and_clamp_mv(mv0, &nearest, mb_to_left_edge,
+                                           mb_to_right_edge,
+                                           mb_to_top_edge,
+                                           mb_to_bottom_edge);
+        if (mbmi->second_ref_frame > 0)
+          assign_and_clamp_mv(mv1, &nearest_second, mb_to_left_edge,
+                                                    mb_to_right_edge,
+                                                    mb_to_top_edge,
+                                                    mb_to_bottom_edge);
         break;
 
       case ZEROMV:
-        mv->as_int = 0;
+        mv0->as_int = 0;
         if (mbmi->second_ref_frame > 0)
-          mbmi->mv[1].as_int = 0;
+          mv1->as_int = 0;
         break;
 
       case NEWMV:
-        process_mv(r, &mv->as_mv, &best_mv.as_mv, nmvc, &cm->fc.NMVcount,
+        process_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->fc.NMVcount,
                    xd->allow_high_precision_mv);
-        mbmi->need_to_clamp_mvs = check_mv_bounds(mv,
+        mbmi->need_to_clamp_mvs = check_mv_bounds(mv0,
                                                   mb_to_left_edge,
                                                   mb_to_right_edge,
                                                   mb_to_top_edge,
                                                   mb_to_bottom_edge);
 
         if (mbmi->second_ref_frame > 0) {
-          process_mv(r, &mbmi->mv[1].as_mv, &best_mv_second.as_mv, nmvc,
+          process_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
                      &cm->fc.NMVcount, xd->allow_high_precision_mv);
-          mbmi->need_to_clamp_secondmv = check_mv_bounds(&mbmi->mv[1],
+          mbmi->need_to_clamp_secondmv = check_mv_bounds(mv1,
                                                          mb_to_left_edge,
                                                          mb_to_right_edge,
                                                          mb_to_top_edge,
@@ -1024,8 +1021,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
     }
   } else {
-    /* required for left and above block mv */
-    mbmi->mv[0].as_int = 0;
+    // required for left and above block mv
+    mv0->as_int = 0;
 
     if (mbmi->sb_type) {
       mbmi->mode = read_sb_ymode(r, cm->fc.sb_ymode_prob);
