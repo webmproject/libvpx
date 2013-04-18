@@ -56,9 +56,9 @@ int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
   MV v;
   v.row = mv->as_mv.row - ref->as_mv.row;
   v.col = mv->as_mv.col - ref->as_mv.col;
-  return ((mvjcost[vp9_get_mv_joint(&v)] +
-           mvcost[0][v.row] +
-           mvcost[1][v.col]) * weight) >> 7;
+  return ROUND_POWER_OF_TWO((mvjcost[vp9_get_mv_joint(&v)] +
+                             mvcost[0][v.row] +
+                             mvcost[1][v.col]) * weight, 7);
 }
 
 static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvjcost, int *mvcost[2],
