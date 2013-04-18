@@ -20,10 +20,9 @@
 #define LEFT_TOP_MARGIN     ((VP9BORDERINPIXELS - VP9_INTERP_EXTEND) << 3)
 #define RIGHT_BOTTOM_MARGIN ((VP9BORDERINPIXELS - VP9_INTERP_EXTEND) << 3)
 
-/* check a list of motion vectors by sad score using a number rows of pixels
- * above and a number cols of pixels in the left to select the one with best
- * score to use as ref motion vector
- */
+// check a list of motion vectors by sad score using a number rows of pixels
+// above and a number cols of pixels in the left to select the one with best
+// score to use as ref motion vector
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            uint8_t *ref_y_buffer,
                            int ref_y_stride,
@@ -49,29 +48,19 @@ static void clamp_mv(int_mv *mv,
                      int mb_to_right_edge,
                      int mb_to_top_edge,
                      int mb_to_bottom_edge) {
-  mv->as_mv.col = (mv->as_mv.col < mb_to_left_edge) ?
-                  mb_to_left_edge : mv->as_mv.col;
-  mv->as_mv.col = (mv->as_mv.col > mb_to_right_edge) ?
-                  mb_to_right_edge : mv->as_mv.col;
-  mv->as_mv.row = (mv->as_mv.row < mb_to_top_edge) ?
-                  mb_to_top_edge : mv->as_mv.row;
-  mv->as_mv.row = (mv->as_mv.row > mb_to_bottom_edge) ?
-                  mb_to_bottom_edge : mv->as_mv.row;
+  mv->as_mv.col = clamp(mv->as_mv.col, mb_to_left_edge, mb_to_right_edge);
+  mv->as_mv.row = clamp(mv->as_mv.row, mb_to_top_edge, mb_to_bottom_edge);
 }
 
 static int clamp_mv2(int_mv *mv, const MACROBLOCKD *xd) {
   int_mv tmp_mv;
-  int    mv_clampped = 0;
   tmp_mv.as_int = mv->as_int;
   clamp_mv(mv,
            xd->mb_to_left_edge - LEFT_TOP_MARGIN,
            xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
            xd->mb_to_top_edge - LEFT_TOP_MARGIN,
            xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
-  if (tmp_mv.as_int != mv->as_int)
-    mv_clampped = 1;
-
-  return mv_clampped;
+  return tmp_mv.as_int != mv->as_int;
 }
 
 static int check_mv_bounds(int_mv *mv,

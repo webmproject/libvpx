@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include <limits.h>
 
 #include "vp9/common/vp9_findnearmv.h"
@@ -22,8 +21,7 @@ const uint8_t vp9_mbsplit_offset[4][16] = {
   { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
 };
 
-static void lower_mv_precision(int_mv *mv, int usehp)
-{
+static void lower_mv_precision(int_mv *mv, int usehp) {
   if (!usehp || !vp9_use_nmv_hp(&mv->as_mv)) {
     if (mv->as_mv.row & 1)
       mv->as_mv.row += (mv->as_mv.row > 0 ? -1 : 1);
@@ -32,8 +30,7 @@ static void lower_mv_precision(int_mv *mv, int usehp)
   }
 }
 
-vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
-                           vp9_prob p[4], const int context) {
+vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc, vp9_prob p[4], int context) {
   p[0] = pc->fc.vp9_mode_contexts[context][0];
   p[1] = pc->fc.vp9_mode_contexts[context][1];
   p[2] = pc->fc.vp9_mode_contexts[context][2];
