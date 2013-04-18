@@ -278,11 +278,9 @@ void vp9_convolve8_ssse3(const uint8_t *src, int src_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
-  DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 16*23);
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 16*71);
 
-  // check w/h due to fixed size fdata2 array
-  assert(w <= 16);
-  assert(h <= 16);
+  assert(h <= 64);
 
   if (x_step_q4 == 16 && y_step_q4 == 16 &&
       filter_x[3] != 128 && filter_y[3] != 128) {
@@ -324,11 +322,9 @@ void vp9_convolve8_avg_ssse3(const uint8_t *src, int src_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
-  DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 16*23);
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 16*71);
 
-  // check w/h due to fixed size fdata2 array
-  assert(w <= 16);
-  assert(h <= 16);
+  assert(h <= 64);
 
   if (x_step_q4 == 16 && y_step_q4 == 16 &&
       filter_x[3] != 128 && filter_y[3] != 128) {

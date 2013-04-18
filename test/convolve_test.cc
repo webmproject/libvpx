@@ -66,7 +66,7 @@ static void filter_block2d_8_c(const uint8_t *src_ptr,
   // support.
   const int kInterp_Extend = 4;
   const unsigned int intermediate_height =
-    (kInterp_Extend - 1) +     output_height + kInterp_Extend;
+    (kInterp_Extend - 1) + output_height + kInterp_Extend;
 
   /* Size of intermediate_buffer is max_intermediate_height * filter_max_width,
    * where max_intermediate_height = (kInterp_Extend - 1) + filter_max_height
@@ -75,7 +75,7 @@ static void filter_block2d_8_c(const uint8_t *src_ptr,
    *                               = 23
    * and filter_max_width = 16
    */
-  uint8_t intermediate_buffer[23 * 16];
+  uint8_t intermediate_buffer[71 * 64];
   const int intermediate_next_stride = 1 - intermediate_height * output_width;
 
   // Horizontal pass (src -> transposed intermediate).
@@ -158,13 +158,13 @@ static void filter_average_block2d_8_c(const uint8_t *src_ptr,
                                        unsigned int dst_stride,
                                        unsigned int output_width,
                                        unsigned int output_height) {
-  uint8_t tmp[16*16];
+  uint8_t tmp[64*64];
 
-  assert(output_width <= 16);
-  assert(output_height <= 16);
-  filter_block2d_8_c(src_ptr, src_stride, HFilter, VFilter, tmp, 16,
+  assert(output_width <= 64);
+  assert(output_height <= 64);
+  filter_block2d_8_c(src_ptr, src_stride, HFilter, VFilter, tmp, 64,
                      output_width, output_height);
-  block2d_average_c(tmp, 16, dst_ptr, dst_stride,
+  block2d_average_c(tmp, 64, dst_ptr, dst_stride,
                     output_width, output_height);
 }
 
@@ -188,10 +188,10 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
 
   protected:
     static const int kDataAlignment = 16;
-    static const int kOuterBlockSize = 32;
+    static const int kOuterBlockSize = 128;
     static const int kInputStride = kOuterBlockSize;
     static const int kOutputStride = kOuterBlockSize;
-    static const int kMaxDimension = 16;
+    static const int kMaxDimension = 64;
 
     int Width() const { return GET_PARAM(0); }
     int Height() const { return GET_PARAM(1); }
@@ -221,7 +221,7 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
 
       ::libvpx_test::ACMRandom prng;
       for (int i = 0; i < kOuterBlockSize * kOuterBlockSize; ++i)
-        input_[i] = prng.Rand8();
+        input_[i] = prng.Rand8Extremes();
     }
 
     void CheckGuardBlocks() {
@@ -308,6 +308,29 @@ const int16_t (*kTestFilterList[])[8] = {
   vp9_sub_pel_filters_8s,
   vp9_sub_pel_filters_8lp
 };
+const int kNumFilterBanks = sizeof(kTestFilterList) /
+    sizeof(kTestFilterList[0]);
+const int kNumFilters = 16;
+
+TEST(ConvolveTest, FiltersWontSaturateWhenAddedPairwise) {
+  for (int filter_bank = 0; filter_bank < kNumFilterBanks; ++filter_bank) {
+    const int16_t (*filters)[8] = kTestFilterList[filter_bank];
+    for (int i = 0; i < kNumFilters; i++) {
+      const int p0 = filters[i][0] + filters[i][1];
+      const int p1 = filters[i][2] + filters[i][3];
+      const int p2 = filters[i][4] + filters[i][5];
+      const int p3 = filters[i][6] + filters[i][7];
+      EXPECT_LE(p0, 128);
+      EXPECT_LE(p1, 128);
+      EXPECT_LE(p2, 128);
+      EXPECT_LE(p3, 128);
+      EXPECT_LE(p0 + p3, 128);
+      EXPECT_LE(p0 + p3 + p1, 128);
+      EXPECT_LE(p0 + p3 + p1 + p2, 128);
+      EXPECT_EQ(p0 + p1 + p2 + p3, 128);
+    }
+  }
+}
 
 const int16_t kInvalidFilter[8] = { 0 };
 
@@ -316,12 +339,9 @@ TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
   uint8_t* const out = output();
   uint8_t ref[kOutputStride * kMaxDimension];
 
-  const int kNumFilterBanks = sizeof(kTestFilterList) /
-      sizeof(kTestFilterList[0]);
 
   for (int filter_bank = 0; filter_bank < kNumFilterBanks; ++filter_bank) {
     const int16_t (*filters)[8] = kTestFilterList[filter_bank];
-    const int kNumFilters = 16;
 
     for (int filter_x = 0; filter_x < kNumFilters; ++filter_x) {
       for (int filter_y = 0; filter_y < kNumFilters; ++filter_y) {
@@ -368,7 +388,7 @@ TEST_P(ConvolveTest, MatchesReferenceAveragingSubpixelFilter) {
   ::libvpx_test::ACMRandom prng;
   for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x) {
-      const uint8_t r = prng.Rand8();
+      const uint8_t r = prng.Rand8Extremes();
 
       out[y * kOutputStride + x] = r;
       ref[y * kOutputStride + x] = r;
@@ -440,16 +460,17 @@ DECLARE_ALIGNED(256, const int16_t, kChangeFilters[16][8]) = {
 TEST_P(ConvolveTest, ChangeFilterWorks) {
   uint8_t* const in = input();
   uint8_t* const out = output();
+  const int kPixelSelected = 4;
 
   REGISTER_STATE_CHECK(UUT_->h8_(in, kInputStride, out, kOutputStride,
                                  kChangeFilters[8], 17, kChangeFilters[4], 16,
                                  Width(), Height()));
 
   for (int x = 0; x < Width(); ++x) {
-    if (x < 8)
-      ASSERT_EQ(in[4], out[x]) << "x == " << x;
-    else
-      ASSERT_EQ(in[12], out[x]) << "x == " << x;
+    const int kQ4StepAdjust = x >> 4;
+    const int kFilterPeriodAdjust = (x >> 3) << 3;
+    const int ref_x = kQ4StepAdjust + kFilterPeriodAdjust + kPixelSelected;
+    ASSERT_EQ(in[ref_x], out[x]) << "x == " << x;
   }
 
   REGISTER_STATE_CHECK(UUT_->v8_(in, kInputStride, out, kOutputStride,
@@ -457,10 +478,10 @@ TEST_P(ConvolveTest, ChangeFilterWorks) {
                                  Width(), Height()));
 
   for (int y = 0; y < Height(); ++y) {
-    if (y < 8)
-      ASSERT_EQ(in[4 * kInputStride], out[y * kOutputStride]) << "y == " << y;
-    else
-      ASSERT_EQ(in[12 * kInputStride], out[y * kOutputStride]) << "y == " << y;
+    const int kQ4StepAdjust = y >> 4;
+    const int kFilterPeriodAdjust = (y >> 3) << 3;
+    const int ref_y = kQ4StepAdjust + kFilterPeriodAdjust + kPixelSelected;
+    ASSERT_EQ(in[ref_y * kInputStride], out[y * kInputStride]) << "y == " << y;
   }
 
   REGISTER_STATE_CHECK(UUT_->hv8_(in, kInputStride, out, kOutputStride,
@@ -468,9 +489,13 @@ TEST_P(ConvolveTest, ChangeFilterWorks) {
                                   Width(), Height()));
 
   for (int y = 0; y < Height(); ++y) {
+    const int kQ4StepAdjustY = y >> 4;
+    const int kFilterPeriodAdjustY = (y >> 3) << 3;
+    const int ref_y = kQ4StepAdjustY + kFilterPeriodAdjustY + kPixelSelected;
     for (int x = 0; x < Width(); ++x) {
-      const int ref_x = x < 8 ? 4 : 12;
-      const int ref_y = y < 8 ? 4 : 12;
+      const int kQ4StepAdjustX = x >> 4;
+      const int kFilterPeriodAdjustX = (x >> 3) << 3;
+      const int ref_x = kQ4StepAdjustX + kFilterPeriodAdjustX + kPixelSelected;
 
       ASSERT_EQ(in[ref_y * kInputStride + ref_x], out[y * kOutputStride + x])
           << "x == " << x << ", y == " << y;
@@ -489,9 +514,17 @@ const ConvolveFunctions convolve8_c(
 INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
     make_tuple(4, 4, &convolve8_c),
     make_tuple(8, 4, &convolve8_c),
+    make_tuple(4, 8, &convolve8_c),
     make_tuple(8, 8, &convolve8_c),
     make_tuple(16, 8, &convolve8_c),
-    make_tuple(16, 16, &convolve8_c)));
+    make_tuple(8, 16, &convolve8_c),
+    make_tuple(16, 16, &convolve8_c),
+    make_tuple(32, 16, &convolve8_c),
+    make_tuple(16, 32, &convolve8_c),
+    make_tuple(32, 32, &convolve8_c),
+    make_tuple(64, 32, &convolve8_c),
+    make_tuple(32, 64, &convolve8_c),
+    make_tuple(64, 64, &convolve8_c)));
 }
 
 #if HAVE_SSSE3
@@ -503,7 +536,15 @@ const ConvolveFunctions convolve8_ssse3(
 INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
     make_tuple(4, 4, &convolve8_ssse3),
     make_tuple(8, 4, &convolve8_ssse3),
+    make_tuple(4, 8, &convolve8_ssse3),
     make_tuple(8, 8, &convolve8_ssse3),
     make_tuple(16, 8, &convolve8_ssse3),
-    make_tuple(16, 16, &convolve8_ssse3)));
+    make_tuple(8, 16, &convolve8_ssse3),
+    make_tuple(16, 16, &convolve8_ssse3),
+    make_tuple(32, 16, &convolve8_ssse3),
+    make_tuple(16, 32, &convolve8_ssse3),
+    make_tuple(32, 32, &convolve8_ssse3),
+    make_tuple(64, 32, &convolve8_ssse3),
+    make_tuple(32, 64, &convolve8_ssse3),
+    make_tuple(64, 64, &convolve8_ssse3)));
 #endif
