@@ -41,10 +41,6 @@ int vp9_start_decode(BOOL_DECODER *br, const uint8_t *buffer, size_t size);
 
 void vp9_reader_fill(BOOL_DECODER *br);
 
-int vp9_decode_uniform(BOOL_DECODER *br, int n);
-int vp9_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms);
-int vp9_inv_recenter_nonneg(int v, int m);
-
 static INLINE const uint8_t *vp9_reader_find_end(BOOL_DECODER *br) {
   // Find the end of the coded buffer
   while (br->count > CHAR_BIT && br->count < VP9_BD_VALUE_SIZE) {
@@ -122,7 +118,5 @@ static int bool_error(BOOL_DECODER *br) {
   // 0 No error.
   return br->count > VP9_BD_VALUE_SIZE && br->count < VP9_LOTS_OF_BITS;
 }
-
-int vp9_decode_unsigned_max(BOOL_DECODER *br, int max);
 
 #endif  // VP9_DECODER_VP9_DBOOLHUFF_H_
