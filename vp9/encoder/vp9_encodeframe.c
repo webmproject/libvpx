@@ -870,7 +870,7 @@ static void encode_sb(VP9_COMP *cpi,
       update_stats(cpi, mb_row, mb_col);
       cpi->partition_count[partition_plane(bsize)][PARTITION_NONE]++;
 
-      (*tp)->Token = EOSB_TOKEN;
+      (*tp)->token = EOSB_TOKEN;
       (*tp)++;
     }
 #if CONFIG_SBSEGMENT
@@ -888,7 +888,7 @@ static void encode_sb(VP9_COMP *cpi,
       if (output_enabled) {
         update_stats(cpi, mb_row, mb_col + i);
 
-        (*tp)->Token = EOSB_TOKEN;
+        (*tp)->token = EOSB_TOKEN;
         (*tp)++;
       }
     }
@@ -906,7 +906,7 @@ static void encode_sb(VP9_COMP *cpi,
       if (output_enabled) {
         update_stats(cpi, mb_row + i, mb_col);
 
-        (*tp)->Token = EOSB_TOKEN;
+        (*tp)->token = EOSB_TOKEN;
         (*tp)++;
       }
     }
@@ -937,7 +937,7 @@ static void encode_sb(VP9_COMP *cpi,
       if (output_enabled) {
         update_stats(cpi, mb_row + y_idx, mb_col + x_idx);
 
-        (*tp)->Token = EOSB_TOKEN;
+        (*tp)->token = EOSB_TOKEN;
         (*tp)++;
       }
     }
@@ -970,7 +970,7 @@ static void encode_sb64(VP9_COMP *cpi,
                       1, mb_row, mb_col, bsize);
     update_stats(cpi, mb_row, mb_col);
 
-    (*tp)->Token = EOSB_TOKEN;
+    (*tp)->token = EOSB_TOKEN;
     (*tp)++;
     cpi->partition_count[partition_plane(bsize)][PARTITION_NONE]++;
 #if CONFIG_SBSEGMENT
@@ -985,7 +985,7 @@ static void encode_sb64(VP9_COMP *cpi,
                         1, mb_row, mb_col + i * 2, BLOCK_SIZE_SB32X64);
       update_stats(cpi, mb_row, mb_col + i * 2);
 
-      (*tp)->Token = EOSB_TOKEN;
+      (*tp)->token = EOSB_TOKEN;
       (*tp)++;
     }
   } else if (is_sb[0] == BLOCK_SIZE_SB64X32) {
@@ -999,7 +999,7 @@ static void encode_sb64(VP9_COMP *cpi,
                         1, mb_row + i * 2, mb_col, BLOCK_SIZE_SB64X32);
       update_stats(cpi, mb_row + i * 2, mb_col);
 
-      (*tp)->Token = EOSB_TOKEN;
+      (*tp)->token = EOSB_TOKEN;
       (*tp)++;
     }
 #endif

@@ -429,7 +429,7 @@ static void optimize_b(VP9_COMMON *const cm,
   *(tokens[eob] + 1) = *(tokens[eob] + 0);
   next = eob;
   for (i = 0; i < eob; i++)
-    token_cache[i] = vp9_dct_value_tokens_ptr[qcoeff_ptr[scan[i]]].Token;
+    token_cache[i] = vp9_dct_value_tokens_ptr[qcoeff_ptr[scan[i]]].token;
   nb = vp9_get_coef_neighbors_handle(scan, &pad);
 
   for (i = eob; i-- > i0;) {
@@ -448,7 +448,7 @@ static void optimize_b(VP9_COMMON *const cm,
       /* Evaluate the first possibility for this state. */
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
-      t0 = (vp9_dct_value_tokens_ptr + x)->Token;
+      t0 = (vp9_dct_value_tokens_ptr + x)->token;
       /* Consider both possible successor states. */
       if (next < default_eob) {
         band = get_coef_band(scan, tx_size, i + 1);
@@ -509,7 +509,7 @@ static void optimize_b(VP9_COMMON *const cm,
         }
 #endif
       } else {
-        t0 = t1 = (vp9_dct_value_tokens_ptr + x)->Token;
+        t0 = t1 = (vp9_dct_value_tokens_ptr + x)->token;
       }
       if (next < default_eob) {
         band = get_coef_band(scan, tx_size, i + 1);

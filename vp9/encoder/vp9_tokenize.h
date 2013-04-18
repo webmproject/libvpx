@@ -17,14 +17,14 @@
 void vp9_tokenize_initialize();
 
 typedef struct {
-  int16_t Token;
-  int16_t Extra;
+  int16_t token;
+  int16_t extra;
 } TOKENVALUE;
 
 typedef struct {
   const vp9_prob *context_tree;
-  int16_t         Extra;
-  uint8_t         Token;
+  int16_t         extra;
+  uint8_t         token;
   uint8_t         skip_eob_node;
 } TOKENEXTRA;
 

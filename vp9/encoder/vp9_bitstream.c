@@ -469,7 +469,7 @@ static void pack_mb_tokens(vp9_writer* const bc,
   TOKENEXTRA *p = *tp;
 
   while (p < stop) {
-    const int t = p->Token;
+    const int t = p->token;
     const struct vp9_token *const a = vp9_coef_encodings + t;
     const vp9_extra_bit_struct *const b = vp9_extra_bits + t;
     int i = 0;
@@ -497,7 +497,7 @@ static void pack_mb_tokens(vp9_writer* const bc,
 
 
     if (b->base_val) {
-      const int e = p->Extra, L = b->Len;
+      const int e = p->extra, L = b->Len;
 
       if (L) {
         const unsigned char *pp = b->prob;
