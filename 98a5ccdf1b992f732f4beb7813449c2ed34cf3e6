@@ -16,6 +16,24 @@
       "revId": "98a5ccdf1b992f732f4beb7813449c2ed34cf3e6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//9SY\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 877,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-18T04:18:23Z",
+      "side": 1,
+      "message": "I don\u0027t think so.. At least the intention is that they\u0027re not, and that they could be used any time you need to walk a block in raster order, rather than the packed order used foreach_transformed_block. I suspect this will be useful elsewhere, so I put it here to start with, but if becomes obvious that it\u0027s too specific then I\u0027ll move it as you suggest.",
+      "parentUuid": "AAAAXX//9lE\u003d",
+      "revId": "98a5ccdf1b992f732f4beb7813449c2ed34cf3e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }

@@ -16,6 +16,24 @@
       "revId": "ff3f93639c147fa9b8dcf6d014b3c80bf3b7c8ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//9RQ\u003d",
+        "filename": "vp9/common/x86/vp9_asm_stubs.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-18T04:18:23Z",
+      "side": 0,
+      "message": "these functions do blocks widths larger than 16 via the c fallback so we don\u0027t want to assert on w here. the smaller fdata2 array is only used in the \u003c\u003d 16 wide case. Looks like I need to fix it for rectangular blocks though, since the 16x32 case would go via the optimized path, so fdata2 needs to be enlarged. I\u0027ll restore the assert on h. And update the unit test to handle the future rectangular block sizes.",
+      "parentUuid": "AAAAXX//9lM\u003d",
+      "revId": "ff3f93639c147fa9b8dcf6d014b3c80bf3b7c8ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
