@@ -1213,9 +1213,9 @@ static void setup_pred_probs(VP9_COMMON *pc, vp9_reader *r) {
   // reference frame
   if (pc->frame_type == KEY_FRAME) {
     // Set the prediction probabilities to defaults
-    pc->ref_pred_probs[0] = 120;
-    pc->ref_pred_probs[1] = 80;
-    pc->ref_pred_probs[2] = 40;
+    pc->ref_pred_probs[0] = DEFAULT_PRED_PROB_0;
+    pc->ref_pred_probs[1] = DEFAULT_PRED_PROB_1;
+    pc->ref_pred_probs[2] = DEFAULT_PRED_PROB_2;
   } else {
     int i;
     for (i = 0; i < PREDICTION_PROBS; ++i)

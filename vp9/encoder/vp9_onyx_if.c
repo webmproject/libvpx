@@ -3974,13 +3974,13 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   cm->frame_type = INTER_FRAME;
   cm->frame_flags = *frame_flags;
 
-  /* Reset the frame pointers to the current frame size */
+  // Reset the frame pointers to the current frame size
   vp8_yv12_realloc_frame_buffer(&cm->yv12_fb[cm->new_fb_idx],
                                 cm->width, cm->height,
                                 VP9BORDERINPIXELS);
 
-  /* Calculate scaling factors for each of the 3 available references */
-  for (i = 0; i < 3; ++i) {
+  // Calculate scaling factors for each of the 3 available references
+  for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
     if (cm->active_ref_idx[i] >= NUM_YV12_BUFFERS) {
       memset(&cm->active_ref_scale[i], 0, sizeof(cm->active_ref_scale[i]));
       continue;
