@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//8UA\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-18T21:59:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//8aw\u003d",
+      "revId": "c3916d74f13d740659069e1c6cee1afe4a052be4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//8V8\u003d",
         "filename": "vp9/common/vp9_rtcd_defs.sh",
         "patchSetId": 8
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//8S0\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-18T21:59:26Z",
+      "side": 1,
+      "message": "Yes, these should be combined in many places. Will fix them in a later patch.",
+      "parentUuid": "AAAAXX//8V8\u003d",
+      "revId": "c3916d74f13d740659069e1c6cee1afe4a052be4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//8V4\u003d",
         "filename": "vp9/common/vp9_rtcd_defs.sh",
         "patchSetId": 8
@@ -47,6 +83,24 @@
       "writtenOn": "2013-04-18T21:50:59Z",
       "side": 1,
       "message": "trailing whitespace",
+      "revId": "c3916d74f13d740659069e1c6cee1afe4a052be4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//8Ss\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 624,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-18T21:59:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//8V4\u003d",
       "revId": "c3916d74f13d740659069e1c6cee1afe4a052be4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
