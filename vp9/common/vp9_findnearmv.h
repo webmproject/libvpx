@@ -74,11 +74,9 @@ static int clamp_mv2(int_mv *mv, const MACROBLOCKD *xd) {
   return mv_clampped;
 }
 
-static unsigned int check_mv_bounds(int_mv *mv,
-                                    int mb_to_left_edge,
-                                    int mb_to_right_edge,
-                                    int mb_to_top_edge,
-                                    int mb_to_bottom_edge) {
+static int check_mv_bounds(int_mv *mv,
+                           int mb_to_left_edge, int mb_to_right_edge,
+                           int mb_to_top_edge, int mb_to_bottom_edge) {
   return mv->as_mv.col < mb_to_left_edge ||
          mv->as_mv.col > mb_to_right_edge ||
          mv->as_mv.row < mb_to_top_edge ||
