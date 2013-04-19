@@ -38,7 +38,7 @@
 #define IIFACTOR   12.5
 #define IIKFACTOR1 12.5
 #define IIKFACTOR2 15.0
-#define RMAX       128.0
+#define RMAX       512.0
 #define GF_RMAX    96.0
 #define ERR_DIVISOR   150.0
 #define MIN_DECAY_FACTOR 0.1
@@ -2352,7 +2352,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double decay_accumulator = 1.0;
   double zero_motion_accumulator = 1.0;
   double boost_score = 0;
-  double old_boost_score = 0.0;
   double loop_decay_rate;
 
   double kf_mod_err = 0.0;
@@ -2524,21 +2523,12 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   boost_score = 0.0;
   loop_decay_rate = 1.00;       // Starting decay rate
 
+  // Scan through the kf group collating various stats.
   for (i = 0; i < cpi->twopass.frames_to_key; i++) {
     double r;
 
     if (EOF == input_stats(cpi, &next_frame))
       break;
-
-    if (next_frame.intra_error > cpi->twopass.kf_intra_err_min)
-      r = (IIKFACTOR2 * next_frame.intra_error /
-           DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
-    else
-      r = (IIKFACTOR2 * cpi->twopass.kf_intra_err_min /
-           DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
-
-    if (r > RMAX)
-      r = RMAX;
 
     // Monitor for static sections.
     if ((next_frame.pcnt_inter - next_frame.pcnt_motion) <
@@ -2547,22 +2537,28 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         (next_frame.pcnt_inter - next_frame.pcnt_motion);
     }
 
-    // How fast is prediction quality decaying
-    if (!detect_flash(cpi, 0)) {
-      loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
-      decay_accumulator = decay_accumulator * loop_decay_rate;
-      decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
-                            ? MIN_DECAY_FACTOR : decay_accumulator;
+    // For the first few frames collect data to decide kf boost.
+    if (i <= (cpi->max_gf_interval * 2)) {
+      if (next_frame.intra_error > cpi->twopass.kf_intra_err_min)
+        r = (IIKFACTOR2 * next_frame.intra_error /
+             DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
+      else
+        r = (IIKFACTOR2 * cpi->twopass.kf_intra_err_min /
+             DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
+
+      if (r > RMAX)
+        r = RMAX;
+
+      // How fast is prediction quality decaying
+      if (!detect_flash(cpi, 0)) {
+        loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
+        decay_accumulator = decay_accumulator * loop_decay_rate;
+        decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
+                              ? MIN_DECAY_FACTOR : decay_accumulator;
+      }
+
+      boost_score += (decay_accumulator * r);
     }
-
-    boost_score += (decay_accumulator * r);
-
-    if ((i > MIN_GF_INTERVAL) &&
-        ((boost_score - old_boost_score) < 6.25)) {
-      break;
-    }
-
-    old_boost_score = boost_score;
   }
 
   {
@@ -2592,8 +2588,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int allocation_chunks;
     int alt_kf_bits;
 
-    if (kf_boost < (cpi->twopass.frames_to_key * 5))
-      kf_boost = (cpi->twopass.frames_to_key * 5);
+    if (kf_boost < (cpi->twopass.frames_to_key * 3))
+      kf_boost = (cpi->twopass.frames_to_key * 3);
 
     if (kf_boost < 300) // Min KF boost
       kf_boost = 300;

@@ -177,15 +177,16 @@ static void init_minq_luts(void) {
 
 
     kf_low_motion_minq[i] = calculate_minq_index(maxq,
-                                                 0.0000003,
-                                                 -0.000015,
-                                                 0.074,
+                                                 0.000001,
+                                                 -0.0004,
+                                                 0.15,
                                                  0.0);
     kf_high_motion_minq[i] = calculate_minq_index(maxq,
-                                                  0.0000004,
-                                                  -0.000125,
-                                                  0.14,
+                                                  0.000002,
+                                                  -0.0012,
+                                                  0.5,
                                                   0.0);
+
     gf_low_motion_minq[i] = calculate_minq_index(maxq,
                                                  0.0000015,
                                                  -0.0009,
@@ -2757,31 +2758,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   q = cpi->active_worst_quality;
 
   if (cm->frame_type == KEY_FRAME) {
-#if CONFIG_MULTIPLE_ARF
-    double current_q;
-#endif
-    int high = 2000;
-    int low = 400;
-
-    if (cpi->kf_boost > high) {
-      cpi->active_best_quality = kf_low_motion_minq[q];
-    } else if (cpi->kf_boost < low) {
-      cpi->active_best_quality = kf_high_motion_minq[q];
-    } else {
-      const int gap = high - low;
-      const int offset = high - cpi->kf_boost;
-      const int qdiff = kf_high_motion_minq[q] - kf_low_motion_minq[q];
-      const int adjustment = ((offset * qdiff) + (gap >> 1)) / gap;
-
-      cpi->active_best_quality = kf_low_motion_minq[q] + adjustment;
-    }
-
-    // Make an adjustment based on the % static
-    // The main impact of this is at lower Q to prevent overly large key
-    // frames unless a lot of the image is static.
-    if (cpi->kf_zeromotion_pct < 64)
-      cpi->active_best_quality += 4 - (cpi->kf_zeromotion_pct >> 4);
-
+#if !CONFIG_MULTIPLE_ARF
     // Special case for key frames forced because we have reached
     // the maximum key frame interval. Here force the Q to a range
     // based on the ambient Q to reduce the risk of popping
@@ -2794,8 +2771,43 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                     (last_boosted_q * 0.75));
 
       cpi->active_best_quality = MAX(qindex + delta_qindex, cpi->best_quality);
+    } else {
+      int high = 5000;
+      int low = 400;
+      double q_adj_factor = 1.0;
+      double q_val;
+
+      // Baseline value derived from cpi->active_worst_quality and kf boost
+      if (cpi->kf_boost > high) {
+        cpi->active_best_quality = kf_low_motion_minq[q];
+      } else if (cpi->kf_boost < low) {
+        cpi->active_best_quality = kf_high_motion_minq[q];
+      } else {
+        const int gap = high - low;
+        const int offset = high - cpi->kf_boost;
+        const int qdiff = kf_high_motion_minq[q] - kf_low_motion_minq[q];
+        const int adjustment = ((offset * qdiff) + (gap >> 1)) / gap;
+
+        cpi->active_best_quality = kf_low_motion_minq[q] + adjustment;
+      }
+
+
+      // Allow somewhat lower kf minq with small image formats.
+      if ((cm->width * cm->height) <= (352 * 288)) {
+        q_adj_factor -= 0.25;
+      }
+
+      // Make a further adjustment based on the kf zero motion measure.
+      q_adj_factor += 0.05 - (0.001 * (double)cpi->kf_zeromotion_pct);
+
+      // Convert the adjustment factor to a qindex delta on active_best_quality.
+      q_val = vp9_convert_qindex_to_q(cpi->active_best_quality);
+      cpi->active_best_quality +=
+        compute_qdelta(cpi, q_val, (q_val * q_adj_factor));
     }
-#if CONFIG_MULTIPLE_ARF
+#else
+    double current_q;
+
     // Force the KF quantizer to be 30% of the active_worst_quality.
     current_q = vp9_convert_qindex_to_q(cpi->active_worst_quality);
     cpi->active_best_quality = cpi->active_worst_quality
