@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//67w\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-04-19T23:18:33Z",
+      "side": 1,
+      "message": "to avoid this duplication you could put the tuples in an array with ifdefs then use testing::ValuesIn()",
+      "revId": "7b714bd6d1c839d8bee6615b18d6bd042caa00e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
