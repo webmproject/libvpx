@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//7pI\u003d",
+        "filename": "test/get_set_ref_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-04-19T14:28:05Z",
+      "side": 1,
+      "message": "This is a really basic test a set - get test should make sure that the encoder actually is making some sort of use of the reference that\u0027s set.   \n\nA couple of cases I\u0027d like to see:   \n\n- Encode at extremely low datarate and small keyframe as baseline \n\n- Encode again but this time replace the keyframe with the raw frame ( do this on the decode) \n\n- compare the results \n\n\nfor the decoder try something like this -\u003e  \ndo an encode of a stream  in error resilient mode \n\n1) decode the first n-1 frames and call get reference on all the buffers at frame n.   decode the rest of the frames\n\n2) decode the first frame then skip n-2 frames and call set reference using all the buffers you saved from step 1, and decode the rest of the frames.   \n\nThe decoded rest of the frames should be identical for both streams.",
+      "revId": "dbe0eb97dbff133d82e94aa16bf9afeb4c7d9494",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
