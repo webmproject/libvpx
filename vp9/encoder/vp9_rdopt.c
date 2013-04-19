@@ -290,7 +290,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
       } else {
         cpi->rd_threshes[i] = INT_MAX;
       }
-
       cpi->rd_baseline_thresh[i] = cpi->rd_threshes[i];
     }
   } else {
@@ -302,7 +301,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
       } else {
         cpi->rd_threshes[i] = INT_MAX;
       }
-
       cpi->rd_baseline_thresh[i] = cpi->rd_threshes[i];
     }
   }
@@ -3481,6 +3479,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
            yv12_mb[mbmi->ref_frame].y_height != cm->mb_rows * 16) &&
         this_mode != ZEROMV)
       continue;
+
     if (mbmi->second_ref_frame > 0 &&
           (yv12_mb[mbmi->second_ref_frame].y_width != cm->mb_cols * 16 ||
            yv12_mb[mbmi->second_ref_frame].y_height != cm->mb_rows * 16) &&
@@ -4323,6 +4322,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_pred_diff[NB_PREDICTION_TYPES];
   int64_t best_pred_rd[NB_PREDICTION_TYPES];
   MB_MODE_INFO best_mbmode;
+  int j;
   int mode_index, best_mode_index = 0;
   unsigned int ref_costs[MAX_REF_FRAMES];
 #if CONFIG_COMP_INTERINTRA_PRED
@@ -4340,6 +4340,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int dist_uv[TX_SIZE_MAX_SB], skip_uv[TX_SIZE_MAX_SB];
   MB_PREDICTION_MODE mode_uv[TX_SIZE_MAX_SB];
   struct scale_factors scale_factor[4];
+  unsigned int ref_frame_mask = 0;
+  unsigned int mode_mask = 0;
 
   xd->mode_info_context->mbmi.segment_id = segment_id;
   estimate_ref_frame_costs(cpi, segment_id, ref_costs);
@@ -4350,23 +4352,52 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < NB_TXFM_MODES; i++)
     best_txfm_rd[i] = INT64_MAX;
 
+  // Create a mask set to 1 for each frame used by a smaller resolution.p
+  if (cpi->Speed > 0) {
+    switch (block_size) {
+      case BLOCK_64X64:
+        for (i = 0; i < 4; i++) {
+          for (j = 0; j < 4; j++) {
+            ref_frame_mask |= (1 << x->mb_context[i][j].mic.mbmi.ref_frame);
+            mode_mask |= (1 << x->mb_context[i][j].mic.mbmi.mode);
+          }
+        }
+        for (i = 0; i < 4; i++) {
+          ref_frame_mask |= (1 << x->sb32_context[i].mic.mbmi.ref_frame);
+          mode_mask |= (1 << x->sb32_context[i].mic.mbmi.mode);
+        }
+        break;
+      case BLOCK_32X32:
+        for (i = 0; i < 4; i++) {
+          ref_frame_mask |= (1
+              << x->mb_context[xd->sb_index][i].mic.mbmi.ref_frame);
+          mode_mask |= (1 << x->mb_context[xd->sb_index][i].mic.mbmi.mode);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
       setup_buffer_inter(cpi, x, idx_list[ref_frame], ref_frame, block_size,
-                         mb_row, mb_col, frame_mv[NEARESTMV],
-                         frame_mv[NEARMV], frame_mdcounts,
-                         yv12_mb, scale_factor);
+                         mb_row, mb_col, frame_mv[NEARESTMV], frame_mv[NEARMV],
+                         frame_mdcounts, yv12_mb, scale_factor);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
-
-  mbmi->mode = DC_PRED;
-  for (i = 0; i <= ((bsize < BLOCK_SIZE_SB64X64) ? TX_16X16 : TX_32X32); i++) {
-    mbmi->txfm_size = i;
-    rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[i], &rate_uv_tokenonly[i],
-                            &dist_uv[i], &skip_uv[i], bsize);
-    mode_uv[i] = mbmi->uv_mode;
+  if (cpi->Speed == 0
+      || (cpi->Speed > 0 && (ref_frame_mask & (1 << INTRA_FRAME)))) {
+    mbmi->mode = DC_PRED;
+    for (i = 0; i <= ((bsize < BLOCK_SIZE_SB64X64) ? TX_16X16 : TX_32X32);
+         i++) {
+      mbmi->txfm_size = i;
+      rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[i], &rate_uv_tokenonly[i],
+                              &dist_uv[i], &skip_uv[i], bsize);
+      mode_uv[i] = mbmi->uv_mode;
+    }
   }
 
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
@@ -4392,10 +4423,21 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     x->skip = 0;
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame;
-    if (!(ref_frame == INTRA_FRAME ||
-          (cpi->ref_frame_flags & flag_list[ref_frame]))) {
+    if (!(ref_frame == INTRA_FRAME
+        || (cpi->ref_frame_flags & flag_list[ref_frame]))) {
       continue;
     }
+    if (cpi->Speed > 0) {
+      if (!(ref_frame_mask & (1 << ref_frame))) {
+        continue;
+      }
+      if (vp9_mode_order[mode_index].second_ref_frame != NONE
+          && !(ref_frame_mask
+              & (1 << vp9_mode_order[mode_index].second_ref_frame))) {
+        continue;
+      }
+    }
+
     mbmi->ref_frame = ref_frame;
     mbmi->second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
     set_scale_factors(xd, mbmi->ref_frame, mbmi->second_ref_frame,
