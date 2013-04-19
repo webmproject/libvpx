@@ -73,14 +73,10 @@ static MB_PREDICTION_MODE read_uv_mode(vp9_reader *r, const vp9_prob *p) {
   return (MB_PREDICTION_MODE)treed_read(r, vp9_uv_mode_tree, p);
 }
 
-// This function reads the current macro block's segnent id from the bitstream
-// It should only be called if a segment map update is indicated.
-static void read_mb_segid(vp9_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *xd) {
-  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
-    const vp9_prob *const p = xd->mb_segment_tree_probs;
-    mi->segment_id = vp9_read(r, p[0]) ? 2 + vp9_read(r, p[2])
-                                       : vp9_read(r, p[1]);
-  }
+static int read_mb_segid(vp9_reader *r, MACROBLOCKD *xd) {
+  const vp9_prob *const p = xd->mb_segment_tree_probs;
+  return vp9_read(r, p[0]) ? 2 + vp9_read(r, p[2])
+                           :     vp9_read(r, p[1]);
 }
 
 // This function reads the current macro block's segnent id from the bitstream
@@ -98,6 +94,52 @@ static int read_mb_segid_except(vp9_reader *r,
              :     (pred_seg_id >= 2 ? vp9_read(r, p[1]) : (pred_seg_id == 0));
 }
 
+static void set_segment_id(VP9_COMMON *cm, MB_MODE_INFO *mbmi,
+                           int mb_row, int mb_col, int segment_id) {
+  const int mb_index = mb_row * cm->mb_cols + mb_col;
+  const BLOCK_SIZE_TYPE sb_type = mbmi->sb_type;
+  if (sb_type) {
+    const int bw = 1 << mb_width_log2(sb_type);
+    const int bh = 1 << mb_height_log2(sb_type);
+    const int ymbs = MIN(cm->mb_rows - mb_row, bh);
+    const int xmbs = MIN(cm->mb_cols - mb_col, bw);
+    int x, y;
+
+    for (y = 0; y < ymbs; y++) {
+      for (x = 0; x < xmbs; x++) {
+        const int index = mb_index + (y * cm->mb_cols + x);
+        cm->last_frame_seg_map[index] = segment_id;
+      }
+    }
+  } else {
+    cm->last_frame_seg_map[mb_index] = segment_id;
+  }
+}
+
+static int get_segment_id(VP9_COMMON *cm, MB_MODE_INFO *mbmi,
+                          int mb_row, int mb_col) {
+  const int mb_index = mb_row * cm->mb_cols + mb_col;
+  const BLOCK_SIZE_TYPE sb_type = mbmi->sb_type;
+  if (sb_type) {
+    const int bw = 1 << mb_width_log2(sb_type);
+    const int bh = 1 << mb_height_log2(sb_type);
+    const int ymbs = MIN(cm->mb_rows - mb_row, bh);
+    const int xmbs = MIN(cm->mb_cols - mb_col, bw);
+    int segment_id = INT_MAX;
+    int x, y;
+
+    for (y = 0; y < ymbs; y++) {
+      for (x = 0; x < xmbs; x++) {
+        const int index = mb_index + (y * cm->mb_cols + x);
+        segment_id = MIN(segment_id, cm->last_frame_seg_map[index]);
+      }
+    }
+    return segment_id;
+  } else {
+    return cm->last_frame_seg_map[mb_index];
+  }
+}
+
 extern const int vp9_i8x8_block[4];
 static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
                          int mb_row, int mb_col,
@@ -105,30 +147,14 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   const int mis = cm->mode_info_stride;
-  const int map_index = mb_row * cm->mb_cols + mb_col;
   m->mbmi.ref_frame = INTRA_FRAME;
 
   // Read the Macroblock segmentation map if it is being updated explicitly
   // this frame (reset to 0 by default).
   m->mbmi.segment_id = 0;
-  if (xd->update_mb_segmentation_map) {
-    read_mb_segid(r, &m->mbmi, xd);
-    if (m->mbmi.sb_type) {
-      const int bw = 1 << mb_width_log2(m->mbmi.sb_type);
-      const int bh = 1 << mb_height_log2(m->mbmi.sb_type);
-      const int ymbs = MIN(cm->mb_rows - mb_row, bh);
-      const int xmbs = MIN(cm->mb_cols - mb_col, bw);
-      int x, y;
-
-      for (y = 0; y < ymbs; y++) {
-        for (x = 0; x < xmbs; x++) {
-          const int index = y * cm->mb_cols + x;
-          cm->last_frame_seg_map[map_index + index] =  m->mbmi.segment_id;
-        }
-      }
-    } else {
-      cm->last_frame_seg_map[map_index] = m->mbmi.segment_id;
-    }
+  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
+    m->mbmi.segment_id = read_mb_segid(r, xd);
+    set_segment_id(cm, &m->mbmi, mb_row, mb_col, m->mbmi.segment_id);
   }
 
   m->mbmi.mb_skip_coeff = vp9_segfeature_active(&pbi->mb, m->mbmi.segment_id,
@@ -545,44 +571,12 @@ static void read_mb_segment_id(VP9D_COMP *pbi,
                                read_mb_segid_except(r, cm, xd, mb_row, mb_col);
       } else {
         // Normal unpredicted coding mode
-        read_mb_segid(r, mbmi, xd);
+        mbmi->segment_id = read_mb_segid(r, xd);
       }
 
-      if (mbmi->sb_type) {
-        const int bw = 1 << mb_width_log2(mbmi->sb_type);
-        const int bh = 1 << mb_height_log2(mbmi->sb_type);
-        const int ymbs = MIN(cm->mb_rows - mb_row, bh);
-        const int xmbs = MIN(cm->mb_cols - mb_col, bw);
-        int x, y;
-
-        for (y = 0; y < ymbs; y++) {
-          for (x = 0; x < xmbs; x++) {
-            const int index = y * cm->mb_cols + x;
-            cm->last_frame_seg_map[mb_index + index] = mbmi->segment_id;
-          }
-        }
-      } else {
-        cm->last_frame_seg_map[mb_index] = mbmi->segment_id;
-      }
+      set_segment_id(cm, mbmi, mb_row, mb_col, mbmi->segment_id);
     } else {
-      if (mbmi->sb_type) {
-        const int bw = 1 << mb_width_log2(mbmi->sb_type);
-        const int bh = 1 << mb_height_log2(mbmi->sb_type);
-        const int ymbs = MIN(cm->mb_rows - mb_row, bh);
-        const int xmbs = MIN(cm->mb_cols - mb_col, bw);
-        unsigned segment_id = -1;
-        int x, y;
-
-        for (y = 0; y < ymbs; y++) {
-          for (x = 0; x < xmbs; x++) {
-            segment_id = MIN(segment_id,
-                cm->last_frame_seg_map[mb_index + x + y * cm->mb_cols]);
-          }
-        }
-        mbmi->segment_id = segment_id;
-      } else {
-        mbmi->segment_id = cm->last_frame_seg_map[mb_index];
-      }
+      mbmi->segment_id = get_segment_id(cm, mbmi, mb_row, mb_col);
     }
   } else {
     // The encoder explicitly sets the segment_id to 0

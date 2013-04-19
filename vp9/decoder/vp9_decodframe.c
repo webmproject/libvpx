@@ -1146,42 +1146,43 @@ static void update_frame_size(VP9D_COMP *pbi) {
 static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   int i, j;
 
+  xd->update_mb_segmentation_map = 0;
+  xd->update_mb_segmentation_data = 0;
+
   xd->segmentation_enabled = vp9_read_bit(r);
   if (xd->segmentation_enabled) {
-    // Read whether or not the segmentation map is being explicitly updated
-    // this frame.
+    // Segmentation map update
     xd->update_mb_segmentation_map = vp9_read_bit(r);
-
     if (xd->update_mb_segmentation_map) {
-      // Which macro block level features are enabled. Read the probs used to
-      // decode the segment id for each macro block.
       for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
-        xd->mb_segment_tree_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r) : 255;
+        xd->mb_segment_tree_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
+                                                       : MAX_PROB;
 
-      // Read the prediction probs needed to decode the segment id
       pc->temporal_update = vp9_read_bit(r);
       if (pc->temporal_update) {
         const vp9_prob *p = xd->mb_segment_tree_probs;
-        vp9_prob *p_mod = xd->mb_segment_mispred_tree_probs;
+        vp9_prob *mispred_p = xd->mb_segment_mispred_tree_probs;
 
         const int c0 =        p[0]  *        p[1];
         const int c1 =        p[0]  * (256 - p[1]);
         const int c2 = (256 - p[0]) *        p[2];
         const int c3 = (256 - p[0]) * (256 - p[2]);
 
-        p_mod[0] = get_binary_prob(c1, c2 + c3);
-        p_mod[1] = get_binary_prob(c0, c2 + c3);
-        p_mod[2] = get_binary_prob(c0 + c1, c3);
-        p_mod[3] = get_binary_prob(c0 + c1, c2);
+        mispred_p[0] = get_binary_prob(c1, c2 + c3);
+        mispred_p[1] = get_binary_prob(c0, c2 + c3);
+        mispred_p[2] = get_binary_prob(c0 + c1, c3);
+        mispred_p[3] = get_binary_prob(c0 + c1, c2);
 
         for (i = 0; i < PREDICTION_PROBS; i++)
-          pc->segment_pred_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r) : 255;
+          pc->segment_pred_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
+                                                      : MAX_PROB;
       } else {
         for (i = 0; i < PREDICTION_PROBS; i++)
-          pc->segment_pred_probs[i] = 255;
+          pc->segment_pred_probs[i] = MAX_PROB;
       }
     }
 
+    // Segmentation data update
     xd->update_mb_segmentation_data = vp9_read_bit(r);
     if (xd->update_mb_segmentation_data) {
       xd->mb_segment_abs_delta = vp9_read_bit(r);
