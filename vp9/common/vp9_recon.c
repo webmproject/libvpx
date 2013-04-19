@@ -93,30 +93,3 @@ void vp9_recon_sb_c(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
   vp9_recon_sby(xd, bsize);
   vp9_recon_sbuv(xd, bsize);
 }
-
-void vp9_recon_mby_c(MACROBLOCKD *xd) {
-  int i;
-
-  for (i = 0; i < 16; i += 4) {
-    BLOCKD *b = &xd->block[i];
-
-    vp9_recon4b(*(b->base_dst) + b->dst, b->diff,
-                *(b->base_dst) + b->dst, b->dst_stride);
-  }
-}
-
-void vp9_recon_mb_c(MACROBLOCKD *xd) {
-  int i;
-
-  for (i = 0; i < 16; i += 4) {
-    BLOCKD *b = &xd->block[i];
-    vp9_recon4b(*(b->base_dst) + b->dst, b->diff,
-                *(b->base_dst) + b->dst, b->dst_stride);
-  }
-
-  for (i = 16; i < 24; i += 2) {
-    BLOCKD *b = &xd->block[i];
-    vp9_recon2b(*(b->base_dst) + b->dst, b->diff,
-                *(b->base_dst) + b->dst, b->dst_stride);
-  }
-}
