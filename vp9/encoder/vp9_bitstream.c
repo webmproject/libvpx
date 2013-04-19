@@ -277,55 +277,6 @@ static void update_inter_mode_probs(VP9_COMMON *cm,
   }
 }
 
-#if CONFIG_NEW_MVREF
-static void update_mv_ref_probs(VP9_COMP *cpi,
-                                int mvref_probs[MAX_REF_FRAMES]
-                                               [MAX_MV_REF_CANDIDATES-1]) {
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  int rf;     // Reference frame
-  int ref_c;  // Motion reference candidate
-  int node;   // Probability node index
-
-  for (rf = 0; rf < MAX_REF_FRAMES; ++rf) {
-    int count = 0;
-
-    // Skip the dummy entry for intra ref frame.
-    if (rf == INTRA_FRAME) {
-      continue;
-    }
-
-    // Sum the counts for all candidates
-    for (ref_c = 0; ref_c < MAX_MV_REF_CANDIDATES; ++ref_c) {
-      count += cpi->mb_mv_ref_count[rf][ref_c];
-    }
-
-    // Calculate the tree node probabilities
-    for (node = 0; node < MAX_MV_REF_CANDIDATES-1; ++node) {
-      int new_prob, old_cost, new_cost;
-      unsigned int branch_cnts[2];
-
-      // How many hits on each branch at this node
-      branch_cnts[0] = cpi->mb_mv_ref_count[rf][node];
-      branch_cnts[1] = count - cpi->mb_mv_ref_count[rf][node];
-
-      // Work out cost of coding branches with the old and optimal probability
-      old_cost = cost_branch256(branch_cnts, xd->mb_mv_ref_probs[rf][node]);
-      new_prob = get_prob(branch_cnts[0], count);
-      new_cost = cost_branch256(branch_cnts, new_prob);
-
-      // Take current 0 branch cases out of residual count
-      count -= cpi->mb_mv_ref_count[rf][node];
-
-      if ((new_cost + VP9_MV_REF_UPDATE_COST) <= old_cost) {
-        mvref_probs[rf][node] = new_prob;
-      } else {
-        mvref_probs[rf][node] = xd->mb_mv_ref_probs[rf][node];
-      }
-    }
-  }
-}
-#endif
-
 static void write_ymode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_ymode_tree, p, vp9_ymode_encodings + m);
 }
@@ -561,38 +512,6 @@ static void write_nmv(VP9_COMP *cpi, vp9_writer *bc,
   vp9_encode_nmv(bc, &e, &ref->as_mv, nmvc);
   vp9_encode_nmv_fp(bc, &e, &ref->as_mv, nmvc, usehp);
 }
-
-#if CONFIG_NEW_MVREF
-static void vp9_write_mv_ref_id(vp9_writer *w,
-                                vp9_prob * ref_id_probs,
-                                int mv_ref_id) {
-  // Encode the index for the MV reference.
-  switch (mv_ref_id) {
-    case 0:
-      vp9_write(w, 0, ref_id_probs[0]);
-      break;
-    case 1:
-      vp9_write(w, 1, ref_id_probs[0]);
-      vp9_write(w, 0, ref_id_probs[1]);
-      break;
-    case 2:
-      vp9_write(w, 1, ref_id_probs[0]);
-      vp9_write(w, 1, ref_id_probs[1]);
-      vp9_write(w, 0, ref_id_probs[2]);
-      break;
-    case 3:
-      vp9_write(w, 1, ref_id_probs[0]);
-      vp9_write(w, 1, ref_id_probs[1]);
-      vp9_write(w, 1, ref_id_probs[2]);
-      break;
-
-      // TRAP.. This should not happen
-    default:
-      assert(0);
-      break;
-  }
-}
-#endif
 
 // This function writes the current macro block's segnment id to the bitstream
 // It should only be called if a segment map update is indicated.
@@ -897,22 +816,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
         write_uv_mode(bc, mi->interintra_uv_mode,
                       pc->fc.uv_mode_prob[mi->interintra_mode]);
 #endif
-      }
-    }
-#endif
-
-#if CONFIG_NEW_MVREF
-    // if ((mode == NEWMV) || (mode == SPLITMV)) {
-    if (mode == NEWMV) {
-      // Encode the index of the choice.
-      vp9_write_mv_ref_id(bc,
-                          xd->mb_mv_ref_probs[rf], mi->best_index);
-
-      if (mi->second_ref_frame > 0) {
-        // Encode the index of the choice.
-        vp9_write_mv_ref_id(
-                            bc, xd->mb_mv_ref_probs[mi->second_ref_frame],
-                            mi->best_second_index);
       }
     }
 #endif
@@ -2756,37 +2659,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       }
     }
   }
-
-#if CONFIG_NEW_MVREF
-  if ((pc->frame_type != KEY_FRAME)) {
-    int new_mvref_probs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES-1];
-    int i, j;
-
-    update_mv_ref_probs(cpi, new_mvref_probs);
-
-    for (i = 0; i < MAX_REF_FRAMES; ++i) {
-      // Skip the dummy entry for intra ref frame.
-      if (i == INTRA_FRAME) {
-        continue;
-      }
-
-      // Encode any mandated updates to probabilities
-      for (j = 0; j < MAX_MV_REF_CANDIDATES - 1; ++j) {
-        if (new_mvref_probs[i][j] != xd->mb_mv_ref_probs[i][j]) {
-          vp9_write(&header_bc, 1, VP9_MVREF_UPDATE_PROB);
-          vp9_write_prob(&header_bc, new_mvref_probs[i][j]);
-
-          // Only update the persistent copy if this is the "real pack"
-          if (!cpi->dummy_packing) {
-            xd->mb_mv_ref_probs[i][j] = new_mvref_probs[i][j];
-          }
-        } else {
-          vp9_write(&header_bc, 0, VP9_MVREF_UPDATE_PROB);
-        }
-      }
-    }
-  }
-#endif
 
   vp9_clear_system_state();  // __asm emms;
 

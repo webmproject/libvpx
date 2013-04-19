@@ -98,22 +98,6 @@ static int read_mb_segid_except(vp9_reader *r,
              :     (pred_seg_id >= 2 ? vp9_read(r, p[1]) : (pred_seg_id == 0));
 }
 
-#if CONFIG_NEW_MVREF
-int vp9_read_mv_ref_id(vp9_reader *r, vp9_prob *ref_id_probs) {
-  int ref_index = 0;
-
-  if (vp9_read(r, ref_id_probs[0])) {
-    ref_index++;
-    if (vp9_read(r, ref_id_probs[1])) {
-      ref_index++;
-      if (vp9_read(r, ref_id_probs[2]))
-        ref_index++;
-    }
-  }
-  return ref_index;
-}
-#endif
-
 extern const int vp9_i8x8_block[4];
 static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
                          int mb_row, int mb_col,
@@ -828,29 +812,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       }
 #endif
     }
-
-#if CONFIG_NEW_MVREF
-    // if ((mbmi->mode == NEWMV) || (mbmi->mode == SPLITMV))
-    if (mbmi->mode == NEWMV) {
-      int best_index;
-      MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
-
-      // Encode the index of the choice.
-      best_index =
-        vp9_read_mv_ref_id(r, xd->mb_mv_ref_probs[ref_frame]);
-
-      best_mv.as_int = mbmi->ref_mvs[ref_frame][best_index].as_int;
-
-      if (mbmi->second_ref_frame > 0) {
-        ref_frame = mbmi->second_ref_frame;
-
-        // Encode the index of the choice.
-        best_index =
-          vp9_read_mv_ref_id(r, xd->mb_mv_ref_probs[ref_frame]);
-        best_mv_second.as_int = mbmi->ref_mvs[ref_frame][best_index].as_int;
-      }
-    }
-#endif
 
     mbmi->uv_mode = DC_PRED;
     switch (mbmi->mode) {

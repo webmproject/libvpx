@@ -239,7 +239,6 @@ HAVE_LIST="
 "
 EXPERIMENT_LIST="
     csm
-    new_mvref
     implicit_segmentation
     newbintramodes
     comp_interintra_pred

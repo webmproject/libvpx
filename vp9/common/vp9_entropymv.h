@@ -26,12 +26,6 @@ int vp9_use_nmv_hp(const MV *ref);
 
 #define VP9_NMV_UPDATE_PROB  255
 
-#if CONFIG_NEW_MVREF
-#define VP9_MVREF_UPDATE_PROB 252
-#define VP9_DEFAULT_MV_REF_PROB 192
-#define VP9_MV_REF_UPDATE_COST (14 << 8)
-#endif
-
 //#define MV_GROUP_UPDATE
 
 #define LOW_PRECISION_MV_UPDATE  /* Use 7 bit forward update */

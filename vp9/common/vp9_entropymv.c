@@ -17,13 +17,8 @@
 #define MV_COUNT_SAT 16
 #define MV_MAX_UPDATE_FACTOR 160
 
-#if CONFIG_NEW_MVREF
-/* Integer pel reference mv threshold for use of high-precision 1/8 mv */
-#define COMPANDED_MVREF_THRESH    1000000
-#else
 /* Integer pel reference mv threshold for use of high-precision 1/8 mv */
 #define COMPANDED_MVREF_THRESH    8
-#endif
 
 /* Smooth or bias the mv-counts before prob computation */
 /* #define SMOOTH_MV_COUNTS */

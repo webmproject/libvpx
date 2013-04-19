@@ -1639,25 +1639,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   }
 #endif
 
-#if CONFIG_NEW_MVREF
-  // If Key frame reset mv ref id probabilities to defaults
-  if (pc->frame_type != KEY_FRAME) {
-    // Read any mv_ref index probability updates
-    int i, j;
-
-    for (i = 0; i < MAX_REF_FRAMES; ++i) {
-      // Skip the dummy entry for intra ref frame.
-      if (i == INTRA_FRAME)
-        continue;
-
-      // Read any updates to probabilities
-      for (j = 0; j < MAX_MV_REF_CANDIDATES - 1; ++j)
-        if (vp9_read(&header_bc, VP9_MVREF_UPDATE_PROB))
-          xd->mb_mv_ref_probs[i][j] = vp9_read_prob(&header_bc);
-    }
-  }
-#endif
-
   if (0) {
     FILE *z = fopen("decodestats.stt", "a");
     fprintf(z, "%6d F:%d,R:%d,Q:%d\n",

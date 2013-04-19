@@ -261,9 +261,6 @@ typedef struct {
   int_mv mv[2]; // for each reference frame used
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int_mv best_mv, best_second_mv;
-#if CONFIG_NEW_MVREF
-  int best_index, best_second_index;
-#endif
 
   int mb_mode_context[MAX_REF_FRAMES];
 
@@ -405,10 +402,6 @@ typedef struct macroblockd {
   // Probability Tree used to code Segment number
   vp9_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
   vp9_prob mb_segment_mispred_tree_probs[MAX_MB_SEGMENTS];
-
-#if CONFIG_NEW_MVREF
-  vp9_prob mb_mv_ref_probs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES-1];
-#endif
 
   // Segment features
   signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];

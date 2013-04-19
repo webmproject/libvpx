@@ -682,10 +682,6 @@ typedef struct VP9_COMP {
                                       [VP9_SWITCHABLE_FILTERS];
   unsigned int best_switchable_interp_count[VP9_SWITCHABLE_FILTERS];
 
-#if CONFIG_NEW_MVREF
-  unsigned int mb_mv_ref_count[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
-#endif
-
   int initial_width;
   int initial_height;
 

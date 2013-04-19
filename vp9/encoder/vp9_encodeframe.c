@@ -345,87 +345,6 @@ void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x) {
   adjust_act_zbin(cpi, x);
 }
 
-#if CONFIG_NEW_MVREF
-static int vp9_cost_mv_ref_id(vp9_prob * ref_id_probs, int mv_ref_id) {
-  int cost;
-
-  // Encode the index for the MV reference.
-  switch (mv_ref_id) {
-    case 0:
-      cost = vp9_cost_zero(ref_id_probs[0]);
-      break;
-    case 1:
-      cost = vp9_cost_one(ref_id_probs[0]);
-      cost += vp9_cost_zero(ref_id_probs[1]);
-      break;
-    case 2:
-      cost = vp9_cost_one(ref_id_probs[0]);
-      cost += vp9_cost_one(ref_id_probs[1]);
-      cost += vp9_cost_zero(ref_id_probs[2]);
-      break;
-    case 3:
-      cost = vp9_cost_one(ref_id_probs[0]);
-      cost += vp9_cost_one(ref_id_probs[1]);
-      cost += vp9_cost_one(ref_id_probs[2]);
-      break;
-
-      // TRAP.. This should not happen
-    default:
-      assert(0);
-      break;
-  }
-  return cost;
-}
-
-// Estimate the cost of each coding the vector using each reference candidate
-static unsigned int pick_best_mv_ref(MACROBLOCK *x,
-                                     MV_REFERENCE_FRAME ref_frame,
-                                     int_mv target_mv,
-                                     int_mv * mv_ref_list,
-                                     int_mv * best_ref) {
-  int i;
-  int best_index = 0;
-  int cost, cost2;
-  int zero_seen = (mv_ref_list[0].as_int) ? 0 : 1;
-  MACROBLOCKD *xd = &x->e_mbd;
-  int max_mv = MV_MAX;
-
-  cost = vp9_cost_mv_ref_id(xd->mb_mv_ref_probs[ref_frame], 0) +
-         vp9_mv_bit_cost(&target_mv, &mv_ref_list[0], x->nmvjointcost,
-                         x->mvcost, 96, xd->allow_high_precision_mv);
-
-  for (i = 1; i < MAX_MV_REF_CANDIDATES; ++i) {
-    // If we see a 0,0 reference vector for a second time we have reached
-    // the end of the list of valid candidate vectors.
-    if (!mv_ref_list[i].as_int) {
-      if (zero_seen)
-        break;
-      else
-        zero_seen = 1;
-    }
-
-    // Check for cases where the reference choice would give rise to an
-    // uncodable/out of range residual for row or col.
-    if ((abs(target_mv.as_mv.row - mv_ref_list[i].as_mv.row) > max_mv) ||
-        (abs(target_mv.as_mv.col - mv_ref_list[i].as_mv.col) > max_mv)) {
-      continue;
-    }
-
-    cost2 = vp9_cost_mv_ref_id(xd->mb_mv_ref_probs[ref_frame], i) +
-            vp9_mv_bit_cost(&target_mv, &mv_ref_list[i], x->nmvjointcost,
-                            x->mvcost, 96, xd->allow_high_precision_mv);
-
-    if (cost2 < cost) {
-      cost = cost2;
-      best_index = i;
-    }
-  }
-  best_ref->as_int = mv_ref_list[best_index].as_int;
-
-  return best_index;
-}
-#endif
-
 static void update_state(VP9_COMP *cpi,
                          PICK_MODE_CONTEXT *ctx,
                          BLOCK_SIZE_TYPE bsize,
@@ -561,31 +480,11 @@ static void update_state(VP9_COMP *cpi,
     if (mbmi->mode == SPLITMV || mbmi->mode == NEWMV) {
       int_mv best_mv, best_second_mv;
       MV_REFERENCE_FRAME rf = mbmi->ref_frame;
-#if CONFIG_NEW_MVREF
-      unsigned int best_index;
-      MV_REFERENCE_FRAME sec_ref_frame = mbmi->second_ref_frame;
-#endif
       best_mv.as_int = ctx->best_ref_mv.as_int;
       best_second_mv.as_int = ctx->second_best_ref_mv.as_int;
       if (mbmi->mode == NEWMV) {
         best_mv.as_int = mbmi->ref_mvs[rf][0].as_int;
         best_second_mv.as_int = mbmi->ref_mvs[mbmi->second_ref_frame][0].as_int;
-#if CONFIG_NEW_MVREF
-        best_index = pick_best_mv_ref(x, rf, mbmi->mv[0],
-                                      mbmi->ref_mvs[rf], &best_mv);
-        mbmi->best_index = best_index;
-        ++cpi->mb_mv_ref_count[rf][best_index];
-
-        if (mbmi->second_ref_frame > 0) {
-          unsigned int best_index;
-          best_index =
-              pick_best_mv_ref(x, sec_ref_frame, mbmi->mv[1],
-                               mbmi->ref_mvs[sec_ref_frame],
-                               &best_second_mv);
-          mbmi->best_second_index = best_index;
-          ++cpi->mb_mv_ref_count[sec_ref_frame][best_index];
-        }
-#endif
       }
       mbmi->best_mv.as_int = best_mv.as_int;
       mbmi->best_second_mv.as_int = best_second_mv.as_int;
@@ -1450,9 +1349,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cm->fc.nzc_counts_16x16);
   vp9_zero(cm->fc.nzc_counts_32x32);
   vp9_zero(cm->fc.nzc_pcat_counts);
-#endif
-#if CONFIG_NEW_MVREF
-  vp9_zero(cpi->mb_mv_ref_count);
 #endif
 
   cpi->mb.e_mbd.lossless = (cm->base_qindex == 0 &&
