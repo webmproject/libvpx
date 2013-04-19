@@ -2690,7 +2690,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   YV12_BUFFER_CONFIG *yv12 = &cm->yv12_fb[cpi->common.ref_frame_map[idx]];
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-  int use_prev_in_find_mv_refs, use_prev_in_find_best_ref;
+  int use_prev_in_find_mv_refs;
 
   // set up scaling factors
   scale[frame_type] = cpi->common.active_ref_scale[frame_type - 1];
@@ -2715,15 +2715,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                    cpi->common.ref_frame_sign_bias);
 
   // Candidate refinement carried out at encoder and decoder
-  use_prev_in_find_best_ref =
-      scale[frame_type].x_num == scale[frame_type].x_den &&
-      scale[frame_type].y_num == scale[frame_type].y_den &&
-      !cm->error_resilient_mode &&
-      !cm->frame_parallel_decoding_mode;
   vp9_find_best_ref_mvs(xd,
-                        use_prev_in_find_best_ref ?
-                            yv12_mb[frame_type].y_buffer : NULL,
-                        yv12->y_stride,
                         mbmi->ref_mvs[frame_type],
                         &frame_nearest_mv[frame_type],
                         &frame_near_mv[frame_type]);

@@ -39,8 +39,6 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc, vp9_prob p[4], int context) {
 }
 
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
-                           uint8_t *ref_y_buffer,
-                           int ref_y_stride,
                            int_mv *mvlist,
                            int_mv *nearest,
                            int_mv *near) {
