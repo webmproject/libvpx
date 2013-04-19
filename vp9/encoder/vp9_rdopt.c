@@ -4375,6 +4375,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         }
         break;
       default:
+        // Until we handle all block sizes set it to present;
+        ref_frame_mask = 0xff;
+        mode_mask = 0xff;
         break;
     }
   }
