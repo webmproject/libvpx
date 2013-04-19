@@ -524,15 +524,15 @@ void vp9_first_pass(VP9_COMP *cpi) {
     x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16)
                     + (VP9BORDERINPIXELS - 16);
 
-    set_mb_row(cm, xd, mb_row, 1 << mb_height_log2(BLOCK_SIZE_MB16X16));
-
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
       int this_error;
       int gf_motion_error = INT_MAX;
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
 
-      set_mb_col(cm, xd, mb_col, 1 << mb_height_log2(BLOCK_SIZE_MB16X16));
+      set_mb_row_col(cm, xd,
+                     mb_row, 1 << mb_height_log2(BLOCK_SIZE_MB16X16),
+                     mb_col, 1 << mb_height_log2(BLOCK_SIZE_MB16X16));
       xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
       xd->plane[2].dst.buf = new_yv12->v_buffer + recon_uvoffset;

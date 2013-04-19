@@ -710,8 +710,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   // These specified to 8th pel as they are always compared to MV
   // values that are in 1/8th pel units
 
-  set_mb_row(pc, xd, mb_row, bh);
-  set_mb_col(pc, xd, mb_col, bw);
+  set_mb_row_col(pc, xd, mb_row, bh, mb_col, bw);
 
 #ifdef ENTROPY_STATS
   active_section = 9;
@@ -1151,8 +1150,9 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   xd->mode_info_context = m;
-  set_mb_row(&cpi->common, xd, mb_row, 1 << mb_height_log2(m->mbmi.sb_type));
-  set_mb_col(&cpi->common, xd, mb_col, 1 << mb_width_log2(m->mbmi.sb_type));
+  set_mb_row_col(&cpi->common, xd, mb_row,
+                 1 << mb_height_log2(m->mbmi.sb_type),
+                 mb_col, 1 << mb_width_log2(m->mbmi.sb_type));
   if (cm->frame_type == KEY_FRAME) {
     write_mb_modes_kf(cpi, m, bc,
                       cm->mb_rows - mb_row, cm->mb_cols - mb_col);

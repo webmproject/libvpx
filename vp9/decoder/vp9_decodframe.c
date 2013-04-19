@@ -801,8 +801,7 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
-  set_mb_row(cm, xd, mb_row, bh);
-  set_mb_col(cm, xd, mb_col, bw);
+  set_mb_row_col(cm, xd, mb_row, bh, mb_col, bw);
 
   xd->plane[0].dst.buf = dst_fb->y_buffer + recon_yoffset;
   xd->plane[1].dst.buf = dst_fb->u_buffer + recon_uvoffset;

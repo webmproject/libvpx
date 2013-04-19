@@ -620,8 +620,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   // Distance of Mb to the various image edges.
   // These specified to 8th pel as they are always compared to MV values
   // that are in 1/8th pel units
-  set_mb_row(cm, xd, mb_row, bh);
-  set_mb_col(cm, xd, mb_col, bw);
+  set_mb_row_col(cm, xd, mb_row, bh, mb_col, bw);
 
   mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
   mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;

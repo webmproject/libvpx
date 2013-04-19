@@ -133,8 +133,7 @@ static void count_segs(VP9_COMP *cpi,
   const int segment_id = mi->mbmi.segment_id;
 
   xd->mode_info_context = mi;
-  set_mb_row(cm, xd, mb_row, bh);
-  set_mb_col(cm, xd, mb_col, bw);
+  set_mb_row_col(cm, xd, mb_row, bh, mb_col, bw);
 
   // Count the number of hits on each segment with no prediction
   no_pred_segcounts[segment_id]++;

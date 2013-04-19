@@ -579,8 +579,7 @@ static void set_offsets(VP9_COMP *cpi,
 
   // Set up distance of MB to edge of frame in 1/8th pel units
   assert(!(mb_col & (bw - 1)) && !(mb_row & (bh - 1)));
-  set_mb_row(cm, xd, mb_row, bh);
-  set_mb_col(cm, xd, mb_col, bw);
+  set_mb_row_col(cm, xd, mb_row, bh, mb_col, bw);
 
   /* set up source buffers */
   setup_pred_block(&x->src, cpi->Source, mb_row, mb_col, NULL, NULL);

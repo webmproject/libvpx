@@ -341,24 +341,18 @@ static int mb_cols_aligned_to_sb(VP9_COMMON *cm) {
   return (cm->mb_cols + 3) & ~3;
 }
 
-// TODO(debargha): merge the two functions
-static void set_mb_row(VP9_COMMON *cm, MACROBLOCKD *xd,
-                       int mb_row, int block_size) {
+static void set_mb_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
+                       int mb_row, int bh,
+                       int mb_col, int bw) {
   xd->mb_to_top_edge    = -((mb_row * 16) << 3);
-  xd->mb_to_bottom_edge = ((cm->mb_rows - block_size - mb_row) * 16) << 3;
+  xd->mb_to_bottom_edge = ((cm->mb_rows - bh - mb_row) * 16) << 3;
+  xd->mb_to_left_edge   = -((mb_col * 16) << 3);
+  xd->mb_to_right_edge  = ((cm->mb_cols - bw - mb_col) * 16) << 3;
 
   // Are edges available for intra prediction?
   xd->up_available    = (mb_row != 0);
-}
-
-static void set_mb_col(VP9_COMMON *cm, MACROBLOCKD *xd,
-                       int mb_col, int block_size) {
-  xd->mb_to_left_edge   = -((mb_col * 16) << 3);
-  xd->mb_to_right_edge  = ((cm->mb_cols - block_size - mb_col) * 16) << 3;
-
-  // Are edges available for intra prediction?
   xd->left_available  = (mb_col > cm->cur_tile_mb_col_start);
-  xd->right_available = (mb_col + block_size < cm->cur_tile_mb_col_end);
+  xd->right_available = (mb_col + bw < cm->cur_tile_mb_col_end);
 }
 
 static int get_mb_row(const MACROBLOCKD *xd) {
