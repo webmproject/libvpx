@@ -77,21 +77,21 @@ static void fill_value_tokens() {
 
         while (++j < 11  &&  e[j].base_val <= a) {}
 
-        t[i].Token = --j;
+        t[i].token = --j;
         eb |= (a - e[j].base_val) << 1;
       } else
-        t[i].Token = a;
+        t[i].token = a;
 
-      t[i].Extra = eb;
+      t[i].extra = eb;
     }
 
     // initialize the cost for extra bits for all possible coefficient value.
     {
       int cost = 0;
-      vp9_extra_bit_struct *p = vp9_extra_bits + t[i].Token;
+      vp9_extra_bit_struct *p = vp9_extra_bits + t[i].token;
 
       if (p->base_val) {
-        const int extra = t[i].Extra;
+        const int extra = t[i].extra;
         const int Length = p->Len;
 
         if (Length)
@@ -307,8 +307,8 @@ static void tokenize_b(VP9_COMP *cpi,
       v = qcoeff_ptr[rc];
       assert(-DCT_MAX_VALUE <= v  &&  v < DCT_MAX_VALUE);
 
-      t->Extra = vp9_dct_value_tokens_ptr[v].Extra;
-      token    = vp9_dct_value_tokens_ptr[v].Token;
+      t->extra = vp9_dct_value_tokens_ptr[v].extra;
+      token    = vp9_dct_value_tokens_ptr[v].token;
     } else {
 #if CONFIG_CODE_NONZEROCOUNT
       if (nzc_used)
@@ -318,7 +318,7 @@ static void tokenize_b(VP9_COMP *cpi,
         token = DCT_EOB_TOKEN;
     }
 
-    t->Token = token;
+    t->token = token;
     t->context_tree = probs[type][ref][band][pt];
 #if CONFIG_CODE_NONZEROCOUNT
     // Skip zero node if there are no zeros left
@@ -327,7 +327,7 @@ static void tokenize_b(VP9_COMP *cpi,
     else
 #endif
       t->skip_eob_node = (c > 0) && (token_cache[c - 1] == 0);
-    assert(vp9_coef_encodings[t->Token].len - t->skip_eob_node > 0);
+    assert(vp9_coef_encodings[t->token].len - t->skip_eob_node > 0);
     if (!dry_run) {
       ++counts[type][ref][band][pt][token];
       if (!t->skip_eob_node)
@@ -809,7 +809,7 @@ static void stuff_b(VP9_COMP *cpi,
 #endif
     pt = combine_entropy_contexts(a_ec, l_ec);
     band = 0;
-    t->Token = DCT_EOB_TOKEN;
+    t->token = DCT_EOB_TOKEN;
     t->context_tree = probs[type][ref][band][pt];
     t->skip_eob_node = 0;
     ++t;

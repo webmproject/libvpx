@@ -514,7 +514,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
 #endif
     for (; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
-      int t = vp9_dct_value_tokens_ptr[v].Token;
+      int t = vp9_dct_value_tokens_ptr[v].token;
 #if CONFIG_CODE_NONZEROCOUNT
       nzc += (v != 0);
 #endif
