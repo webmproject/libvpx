@@ -50,11 +50,11 @@ void vp9_recon2b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
   recon(4, 8, pred_ptr, stride, diff_ptr, 8, dst_ptr, stride);
 }
 
-void vp9_recon_sby_s_c(MACROBLOCKD *mb, uint8_t *dst,
-                       BLOCK_SIZE_TYPE bsize) {
+void vp9_recon_sby_c(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
   const int bw = 16 << mb_width_log2(bsize), bh = 16 << mb_height_log2(bsize);
   int x, y;
-  const int stride = mb->block[0].dst_stride;
+  const int stride = mb->dst.y_stride;
+  uint8_t *dst = mb->dst.y_buffer;
   const int16_t *diff = mb->plane[0].diff;
 
   for (y = 0; y < bh; y++) {
@@ -66,12 +66,13 @@ void vp9_recon_sby_s_c(MACROBLOCKD *mb, uint8_t *dst,
   }
 }
 
-void vp9_recon_sbuv_s_c(MACROBLOCKD *mb, uint8_t *u_dst, uint8_t *v_dst,
-                        BLOCK_SIZE_TYPE bsize) {
+void vp9_recon_sbuv_c(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize), bhl = mb_height_log2(bsize);
   const int bw = 8 << bwl, bh = 8 << bhl;
   int x, y;
-  const int stride = mb->block[16].dst_stride;
+  const int stride =  mb->dst.uv_stride;
+  uint8_t *u_dst = mb->dst.u_buffer;
+  uint8_t *v_dst = mb->dst.v_buffer;
   const int16_t *u_diff = mb->plane[1].diff;
   const int16_t *v_diff = mb->plane[2].diff;
 
@@ -86,6 +87,11 @@ void vp9_recon_sbuv_s_c(MACROBLOCKD *mb, uint8_t *u_dst, uint8_t *v_dst,
     u_diff += bw;
     v_diff += bw;
   }
+}
+
+void vp9_recon_sb_c(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
+  vp9_recon_sby(xd, bsize);
+  vp9_recon_sbuv(xd, bsize);
 }
 
 void vp9_recon_mby_c(MACROBLOCKD *xd) {
