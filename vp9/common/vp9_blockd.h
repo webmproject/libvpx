@@ -900,7 +900,7 @@ static INLINE void foreach_predicted_block_in_plane(
   int i;
 
   assert(pred_b <= block_size_b);
-  assert(pred_b == ss_block_size);
+  assert(pred_b == (mode == SPLITMV ? 0 : ss_block_size));
   for (i = 0; i < (1 << ss_block_size); i += step) {
     visit(plane, i, bsize, pred_w, pred_h, arg);
   }
