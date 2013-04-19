@@ -138,102 +138,25 @@ static void scale_mv(MACROBLOCKD *xd, MV_REFERENCE_FRAME this_ref_frame,
   */
 }
 
-/*
-// Adds a new candidate reference vector to the sorted list.
-// If it is a repeat the weight of the existing entry is increased
-// and the order of the list is resorted.
-// This method of add plus sort has been deprecated for now as there is a
-// further sort of the best candidates in vp9_find_best_ref_mvs() and the
-// incremental benefit of both is small. If the decision is made to remove
-// the sort in vp9_find_best_ref_mvs() for performance reasons then it may be
-// worth re-instating some sort of list reordering by weight here.
-//
-static void addmv_and_shuffle(
-  int_mv *mv_list,
-  int *mv_scores,
-  int *refmv_count,
-  int_mv candidate_mv,
-  int weight
-) {
-
-  int i;
-  int insert_point;
-  int duplicate_found = 0;
-
-  // Check for duplicates. If there is one increase its score.
-  // We only compare vs the current top candidates.
-  insert_point = (*refmv_count < (MAX_MV_REF_CANDIDATES - 1))
-                 ? *refmv_count : (MAX_MV_REF_CANDIDATES - 1);
-
-  i = insert_point;
-  if (*refmv_count > i)
-    i++;
-  while (i > 0) {
-    i--;
-    if (candidate_mv.as_int == mv_list[i].as_int) {
-      duplicate_found = 1;
-      mv_scores[i] += weight;
-      break;
-    }
-  }
-
-  // If no duplicate and the new candidate is good enough then add it.
-  if (!duplicate_found ) {
-    if (weight > mv_scores[insert_point]) {
-      mv_list[insert_point].as_int = candidate_mv.as_int;
-      mv_scores[insert_point] = weight;
-      i = insert_point;
-    }
-    (*refmv_count)++;
-  }
-
-  // Reshuffle the list so that highest scoring mvs at the top.
-  while (i > 0) {
-    if (mv_scores[i] > mv_scores[i-1]) {
-      int tmp_score = mv_scores[i-1];
-      int_mv tmp_mv = mv_list[i-1];
-
-      mv_scores[i-1] = mv_scores[i];
-      mv_list[i-1] = mv_list[i];
-      mv_scores[i] = tmp_score;
-      mv_list[i] = tmp_mv;
-      i--;
-    } else
-      break;
-  }
-}
-*/
-
-// Adds a new candidate reference vector to the list.
-// The mv is thrown out if it is already in the list.
-// Unlike the addmv_and_shuffle() this does not reorder the list
-// but assumes that candidates are added in the order most likely to
-// match distance and reference frame bias.
+// Add a candidate mv.
+// Discard if it has already been seen.
 static void add_candidate_mv(int_mv *mv_list,  int *mv_scores,
                              int *candidate_count, int_mv candidate_mv,
                              int weight) {
-  int i;
-
-  // Make sure we dont insert off the end of the list
-  const int insert_point = MIN(*candidate_count, MAX_MV_REF_CANDIDATES - 1);
-
-  // Look for duplicates
-  for (i = 0; i <= insert_point; ++i) {
-    if (candidate_mv.as_int == mv_list[i].as_int)
-      break;
-  }
-
-  // Add the candidate. If the list is already full it is only desirable that
-  // it should overwrite if it has a higher weight than the last entry.
-  if (i >= insert_point && weight > mv_scores[insert_point]) {
-    mv_list[insert_point].as_int = candidate_mv.as_int;
-    mv_scores[insert_point] = weight;
-    *candidate_count += (*candidate_count < MAX_MV_REF_CANDIDATES);
+  if (*candidate_count == 0) {
+    mv_list[0].as_int = candidate_mv.as_int;
+    mv_scores[0] = weight;
+    *candidate_count += 1;
+  } else if ((*candidate_count == 1) &&
+             (candidate_mv.as_int != mv_list[0].as_int)) {
+    mv_list[1].as_int = candidate_mv.as_int;
+    mv_scores[1] = weight;
+    *candidate_count += 1;
   }
 }
 
-// This function searches the neighbourhood of a given MB/SB and populates a
-// list of candidate reference vectors.
+// This function searches the neighbourhood of a given MB/SB
+// to try and find candidate reference vectors.
 //
 void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
                       MODE_INFO *lf_here, MV_REFERENCE_FRAME ref_frame,
@@ -251,7 +174,6 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int split_count = 0;
   int (*mv_ref_search)[2];
   int *ref_distance_weight;
-  int zero_seen = 0;
   const int mb_col = (-xd->mb_to_left_edge) >> 7;
 
   // Blank the reference vector lists and other local structures.
@@ -289,17 +211,10 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
       split_count += (candidate_mi->mbmi.mode == SPLITMV);
     }
   }
-  // Look in the last frame if it exists
-  if (lf_here) {
-    candidate_mi = lf_here;
-    if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv)) {
-      add_candidate_mv(candidate_mvs, candidate_scores,
-                       &refmv_count, c_refmv, 18);
-    }
-  }
+
   // More distant neigbours
   for (i = 2; (i < MVREF_NEIGHBOURS) &&
-              (refmv_count < (MAX_MV_REF_CANDIDATES - 1)); ++i) {
+              (refmv_count < MAX_MV_REF_CANDIDATES); ++i) {
     const int mb_search_col = mb_col + mv_ref_search[i][0];
 
     if ((mb_search_col >= cm->cur_tile_mb_col_start) &&
@@ -315,45 +230,49 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     }
   }
 
+  // Look in the last frame if it exists
+  if (lf_here && (refmv_count < MAX_MV_REF_CANDIDATES)) {
+    candidate_mi = lf_here;
+    if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv)) {
+      add_candidate_mv(candidate_mvs, candidate_scores,
+                       &refmv_count, c_refmv, 17);
+    }
+  }
+
   // If we have not found enough candidates consider ones where the
   // reference frame does not match. Break out when we have
   // MAX_MV_REF_CANDIDATES candidates.
   // Look first at spatial neighbours
-  if (refmv_count < (MAX_MV_REF_CANDIDATES - 1)) {
-    for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
-      const int mb_search_col = mb_col + mv_ref_search[i][0];
+  for (i = 0; (i < MVREF_NEIGHBOURS) &&
+              (refmv_count < MAX_MV_REF_CANDIDATES); ++i) {
+    const int mb_search_col = mb_col + mv_ref_search[i][0];
 
-      if ((mb_search_col >= cm->cur_tile_mb_col_start) &&
-          (mb_search_col < cm->cur_tile_mb_col_end) &&
-          ((mv_ref_search[i][1] << 7) >= xd->mb_to_top_edge)) {
+    if ((mb_search_col >= cm->cur_tile_mb_col_start) &&
+        (mb_search_col < cm->cur_tile_mb_col_end) &&
+        ((mv_ref_search[i][1] << 7) >= xd->mb_to_top_edge)) {
+      candidate_mi = here + mv_ref_search[i][0] +
+                     (mv_ref_search[i][1] * xd->mode_info_stride);
 
-        candidate_mi = here + mv_ref_search[i][0] +
-                       (mv_ref_search[i][1] * xd->mode_info_stride);
+      get_non_matching_candidates(candidate_mi, ref_frame,
+                                  &c_ref_frame, &c_refmv,
+                                  &c2_ref_frame, &c2_refmv);
 
-        get_non_matching_candidates(candidate_mi, ref_frame,
-                                    &c_ref_frame, &c_refmv,
-                                    &c2_ref_frame, &c2_refmv);
-
-        if (c_ref_frame != INTRA_FRAME) {
-          scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias);
-          add_candidate_mv(candidate_mvs, candidate_scores,
-                           &refmv_count, c_refmv, ref_distance_weight[i]);
-        }
-
-        if (c2_ref_frame != INTRA_FRAME) {
-          scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias);
-          add_candidate_mv(candidate_mvs, candidate_scores,
-                           &refmv_count, c2_refmv, ref_distance_weight[i]);
-        }
+      if (c_ref_frame != INTRA_FRAME) {
+        scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias);
+        add_candidate_mv(candidate_mvs, candidate_scores,
+                         &refmv_count, c_refmv, ref_distance_weight[i]);
       }
 
-      if (refmv_count >= (MAX_MV_REF_CANDIDATES - 1)) {
-        break;
+      if (c2_ref_frame != INTRA_FRAME) {
+        scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias);
+        add_candidate_mv(candidate_mvs, candidate_scores,
+                         &refmv_count, c2_refmv, ref_distance_weight[i]);
       }
     }
   }
+
   // Look at the last frame if it exists
-  if (refmv_count < (MAX_MV_REF_CANDIDATES - 1) && lf_here) {
+  if (lf_here && (refmv_count < MAX_MV_REF_CANDIDATES)) {
     candidate_mi = lf_here;
     get_non_matching_candidates(candidate_mi, ref_frame,
                                 &c_ref_frame, &c_refmv,
@@ -362,13 +281,13 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     if (c_ref_frame != INTRA_FRAME) {
       scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias);
       add_candidate_mv(candidate_mvs, candidate_scores,
-                       &refmv_count, c_refmv, 2);
+                       &refmv_count, c_refmv, 1);
     }
 
     if (c2_ref_frame != INTRA_FRAME) {
       scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias);
       add_candidate_mv(candidate_mvs, candidate_scores,
-                       &refmv_count, c2_refmv, 2);
+                       &refmv_count, c2_refmv, 1);
     }
   }
 
@@ -394,15 +313,8 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
 
   // Scan for 0,0 case and clamp non zero choices
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
-    if (candidate_mvs[i].as_int == 0) {
-      zero_seen = 1;
-    } else {
-      clamp_mv_ref(xd, &candidate_mvs[i]);
-    }
+    clamp_mv_ref(xd, &candidate_mvs[i]);
   }
-  // 0,0 is always a valid reference. Add it if not already seen.
-  if (!zero_seen)
-    candidate_mvs[MAX_MV_REF_CANDIDATES-1].as_int = 0;
 
   // Copy over the candidate list.
   vpx_memcpy(mv_ref_list, candidate_mvs, sizeof(candidate_mvs));

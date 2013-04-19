@@ -2476,7 +2476,7 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   int row_offset, col_offset;
 
   // Get the sad for each candidate reference mv
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < MAX_MV_REF_CANDIDATES; i++) {
     this_mv.as_int = mbmi->ref_mvs[ref_frame][i].as_int;
 
     // The list is at an end if we see 0 for a second time.
