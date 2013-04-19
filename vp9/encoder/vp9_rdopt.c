@@ -2812,7 +2812,6 @@ static enum BlockSize y_bsizet_to_block_size(BLOCK_SIZE_TYPE bs) {
 
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  BLOCK_SIZE_TYPE bsize,
-                                 int *saddone, int near_sadidx[],
                                  int mdcounts[4], int64_t txfm_cache[],
                                  int *rate2, int *distortion, int *skippable,
                                  int *compmode_cost,
@@ -3337,9 +3336,6 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int distortion_uv = INT_MAX;
   int64_t best_yrd = INT64_MAX;
 
-  int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-  int saddone = 0;
-
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   int frame_mdcounts[4][4];
   YV12_BUFFER_CONFIG yv12_mb[4];
@@ -3794,7 +3790,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
 #endif
       this_rd = handle_inter_mode(cpi, x, BLOCK_SIZE_MB16X16,
-                                  &saddone, near_sadidx, mdcounts, txfm_cache,
+                                  mdcounts, txfm_cache,
                                   &rate2, &distortion2, &skippable,
                                   &compmode_cost,
 #if CONFIG_COMP_INTERINTRA_PRED
@@ -4306,8 +4302,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                      cpi->gld_fb_idx,
                      cpi->alt_fb_idx};
   int mdcounts[4];
-  int near_sadidx[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-  int saddone = 0;
   int64_t best_rd = INT64_MAX;
   int64_t best_txfm_rd[NB_TXFM_MODES];
   int64_t best_txfm_diff[NB_TXFM_MODES];
@@ -4565,7 +4559,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
 #endif
       this_rd = handle_inter_mode(cpi, x, bsize,
-                                  &saddone, near_sadidx, mdcounts, txfm_cache,
+                                  mdcounts, txfm_cache,
                                   &rate2, &distortion2, &skippable,
                                   &compmode_cost,
 #if CONFIG_COMP_INTERINTRA_PRED
