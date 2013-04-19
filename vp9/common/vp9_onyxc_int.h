@@ -214,6 +214,7 @@ typedef struct VP9Common {
   FRAME_TYPE frame_type;
 
   int show_frame;
+  int last_show_frame;
 
   int frame_flags;
   int MBs;

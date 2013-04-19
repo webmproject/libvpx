@@ -137,9 +137,6 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
     return 1;
   }
 
-  vp9_update_mode_info_border(oci, oci->mip);
-  vp9_update_mode_info_in_image(oci, oci->mi);
-
   return 0;
 }
 

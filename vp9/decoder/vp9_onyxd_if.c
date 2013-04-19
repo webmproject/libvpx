@@ -365,19 +365,22 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
 
   vp9_clear_system_state();
 
+  cm->last_show_frame = cm->show_frame;
   if (cm->show_frame) {
-    vpx_memcpy(cm->prev_mip, cm->mip,
-               (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
-  } else {
-    vpx_memset(cm->prev_mip, 0,
-               (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+    // current mip will be the prev_mip for the next frame
+    MODE_INFO *temp = cm->prev_mip;
+    cm->prev_mip = cm->mip;
+    cm->mip = temp;
+
+    // update the upper left visible macroblock ptrs
+    cm->mi = cm->mip + cm->mode_info_stride + 1;
+    cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
+
+    cm->current_video_frame++;
   }
 
   /*vp9_print_modes_and_motion_vectors(cm->mi, cm->mb_rows,cm->mb_cols,
                                        cm->current_video_frame);*/
-
-  if (cm->show_frame)
-    cm->current_video_frame++;
 
   pbi->ready_for_new_data = 0;
   pbi->last_time_stamp = time_stamp;
