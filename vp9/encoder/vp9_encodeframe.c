@@ -2415,8 +2415,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
         break;
       default: assert(0);
     }
-    vp9_recon_sby_s_c(xd, dst, bsize);
-    vp9_recon_sbuv_s_c(&x->e_mbd, udst, vdst, bsize);
+    vp9_recon_sb_c(xd, bsize);
 #if CONFIG_CODE_NONZEROCOUNT
     if (bsize == BLOCK_SIZE_SB32X32) {
       gather_nzcs_sb32(cm, &x->e_mbd);

@@ -84,11 +84,14 @@ specialize vp9_recon_mb
 prototype void vp9_recon_mby "struct macroblockd *x"
 specialize vp9_recon_mby
 
-prototype void vp9_recon_sby_s "struct macroblockd *x, uint8_t *dst, enum BLOCK_SIZE_TYPE bsize"
-specialize vp9_recon_sby_s
+prototype void vp9_recon_sb "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
+specialize vp9_recon_sb
 
-prototype void vp9_recon_sbuv_s "struct macroblockd *x, uint8_t *udst, uint8_t *vdst, enum BLOCK_SIZE_TYPE bsize"
-specialize void vp9_recon_sbuv_s
+prototype void vp9_recon_sby "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
+specialize vp9_recon_sby
+
+prototype void vp9_recon_sbuv "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
+specialize void vp9_recon_sbuv
 
 prototype void vp9_build_intra_predictors "uint8_t *src, int src_stride, uint8_t *pred, int y_stride, int mode, int bw, int bh, int up_available, int left_available, int right_available"
 specialize void vp9_build_intra_predictors
