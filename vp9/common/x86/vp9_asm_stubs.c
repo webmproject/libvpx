@@ -278,43 +278,20 @@ void vp9_convolve8_ssse3(const uint8_t *src, int src_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
-  DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 16*71);
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 64*71);
 
+  assert(w <= 64);
   assert(h <= 64);
-
-  if (x_step_q4 == 16 && y_step_q4 == 16 &&
-      filter_x[3] != 128 && filter_y[3] != 128) {
-    if (w == 16) {
-      vp9_filter_block1d16_h8_ssse3(src - 3 * src_stride, src_stride,
-                                    fdata2, 16,
-                                    h + 7, filter_x);
-      vp9_filter_block1d16_v8_ssse3(fdata2, 16,
-                                    dst, dst_stride,
-                                    h, filter_y);
-      return;
-    }
-    if (w == 8) {
-      vp9_filter_block1d8_h8_ssse3(src - 3 * src_stride, src_stride,
-                                   fdata2, 16,
-                                   h + 7, filter_x);
-      vp9_filter_block1d8_v8_ssse3(fdata2, 16,
-                                   dst, dst_stride,
-                                   h, filter_y);
-      return;
-    }
-    if (w == 4) {
-      vp9_filter_block1d4_h8_ssse3(src - 3 * src_stride, src_stride,
-                                   fdata2, 16,
-                                   h + 7, filter_x);
-      vp9_filter_block1d4_v8_ssse3(fdata2, 16,
-                                   dst, dst_stride,
-                                   h, filter_y);
-      return;
-    }
+  if (x_step_q4 == 16 && y_step_q4 == 16) {
+    vp9_convolve8_horiz_ssse3(src - 3 * src_stride, src_stride, fdata2, 64,
+                              filter_x, x_step_q4, filter_y, y_step_q4,
+                              w, h + 7);
+    vp9_convolve8_vert_ssse3(fdata2 + 3 * 64, 64, dst, dst_stride,
+                             filter_x, x_step_q4, filter_y, y_step_q4, w, h);
+  } else {
+    vp9_convolve8_c(src, src_stride, dst, dst_stride,
+                    filter_x, x_step_q4, filter_y, y_step_q4, w, h);
   }
-  vp9_convolve8_c(src, src_stride, dst, dst_stride,
-                  filter_x, x_step_q4, filter_y, y_step_q4,
-                  w, h);
 }
 
 void vp9_convolve8_avg_ssse3(const uint8_t *src, int src_stride,
@@ -322,42 +299,20 @@ void vp9_convolve8_avg_ssse3(const uint8_t *src, int src_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
-  DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 16*71);
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 64*71);
 
+  assert(w <= 64);
   assert(h <= 64);
-
-  if (x_step_q4 == 16 && y_step_q4 == 16 &&
-      filter_x[3] != 128 && filter_y[3] != 128) {
-    if (w == 16) {
-      vp9_filter_block1d16_h8_ssse3(src - 3 * src_stride, src_stride,
-                                    fdata2, 16,
-                                    h + 7, filter_x);
-      vp9_filter_block1d16_v8_avg_ssse3(fdata2, 16,
-                                        dst, dst_stride,
-                                        h, filter_y);
-      return;
-    }
-    if (w == 8) {
-      vp9_filter_block1d8_h8_ssse3(src - 3 * src_stride, src_stride,
-                                   fdata2, 16,
-                                   h + 7, filter_x);
-      vp9_filter_block1d8_v8_avg_ssse3(fdata2, 16,
-                                       dst, dst_stride,
-                                       h, filter_y);
-      return;
-    }
-    if (w == 4) {
-      vp9_filter_block1d4_h8_ssse3(src - 3 * src_stride, src_stride,
-                                   fdata2, 16,
-                                   h + 7, filter_x);
-      vp9_filter_block1d4_v8_avg_ssse3(fdata2, 16,
-                                       dst, dst_stride,
-                                       h, filter_y);
-      return;
-    }
+  if (x_step_q4 == 16 && y_step_q4 == 16) {
+    vp9_convolve8_horiz_ssse3(src - 3 * src_stride, src_stride, fdata2, 64,
+                              filter_x, x_step_q4, filter_y, y_step_q4,
+                              w, h + 7);
+    vp9_convolve8_avg_vert_ssse3(fdata2 + 3 * 64, 64, dst, dst_stride,
+                                 filter_x, x_step_q4, filter_y, y_step_q4,
+                                 w, h);
+  } else {
+    vp9_convolve8_avg_c(src, src_stride, dst, dst_stride,
+                        filter_x, x_step_q4, filter_y, y_step_q4, w, h);
   }
-  vp9_convolve8_avg_c(src, src_stride, dst, dst_stride,
-                      filter_x, x_step_q4, filter_y, y_step_q4,
-                      w, h);
 }
 #endif
