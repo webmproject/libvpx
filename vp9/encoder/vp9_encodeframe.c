@@ -278,7 +278,7 @@ static void build_activity_map(VP9_COMP *cpi) {
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
 #if ALT_ACT_MEASURE
-      xd->dst.y_buffer = new_yv12->y_buffer + recon_yoffset;
+      xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
       xd->left_available = (mb_col != 0);
       recon_yoffset += 16;
 #endif
@@ -305,8 +305,8 @@ static void build_activity_map(VP9_COMP *cpi) {
 
 #if ALT_ACT_MEASURE
     // extend the recon for intra prediction
-    vp9_extend_mb_row(new_yv12, xd->dst.y_buffer + 16,
-                      xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
+    vp9_extend_mb_row(new_yv12, xd->plane[0].dst.buf + 16,
+                      xd->plane[1].dst.buf + 8, xd->plane[2].dst.buf + 8);
 #endif
 
   }
@@ -565,9 +565,7 @@ static void set_offsets(VP9_COMP *cpi,
   xd->prev_mode_info_context = cm->prev_mi + idx_str;
 
   // Set up destination pointers
-  setup_pred_block(&xd->dst,
-                   &cm->yv12_fb[dst_fb_idx],
-                   mb_row, mb_col, NULL, NULL);
+  setup_dst_planes(xd, &cm->yv12_fb[dst_fb_idx], mb_row, mb_col);
 
   /* Set up limit values for MV components to prevent them from
    * extending beyond the UMV borders assuming 16x16 block size */
@@ -1244,7 +1242,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   // Copy data over into macro block data structures.
   x->src = *cpi->Source;
   xd->pre = cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]];
-  xd->dst = cm->yv12_fb[cm->new_fb_idx];
+  setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], 0, 0);
 
   // set up frame for intra coded blocks
   vp9_setup_intra_recon(&cm->yv12_fb[cm->new_fb_idx]);
@@ -2131,11 +2129,11 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
 #if CONFIG_COMP_INTERINTRA_PRED
       if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
         vp9_build_interintra_16x16_predictors_mb(xd,
-                                                 xd->dst.y_buffer,
-                                                 xd->dst.u_buffer,
-                                                 xd->dst.v_buffer,
-                                                 xd->dst.y_stride,
-                                                 xd->dst.uv_stride);
+                                                 xd->plane[0].dst.buf,
+                                                 xd->plane[1].dst.buf,
+                                                 xd->plane[2].dst.buf,
+                                                 xd->plane[0].dst.stride,
+                                                 xd->plane[1].dst.stride);
       }
 #endif
     }
@@ -2173,21 +2171,21 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
       printf("final y\n");
       for (i = 0; i < 16; i++) {
         for (j = 0; j < 16; j++)
-          printf("%3d ", xd->dst.y_buffer[i * xd->dst.y_stride + j]);
+          printf("%3d ", xd->plane[0].dst.buf[i * xd->plane[0].dst.stride + j]);
         printf("\n");
       }
       printf("\n");
       printf("final u\n");
       for (i = 0; i < 8; i++) {
         for (j = 0; j < 8; j++)
-          printf("%3d ", xd->dst.u_buffer[i * xd->dst.uv_stride + j]);
+          printf("%3d ", xd->plane[1].dst.buf[i * xd->plane[1].dst.stride + j]);
         printf("\n");
       }
       printf("\n");
       printf("final v\n");
       for (i = 0; i < 8; i++) {
         for (j = 0; j < 8; j++)
-          printf("%3d ", xd->dst.v_buffer[i * xd->dst.uv_stride + j]);
+          printf("%3d ", xd->plane[2].dst.buf[i * xd->plane[1].dst.stride + j]);
         printf("\n");
       }
       fflush(stdout);
@@ -2245,13 +2243,13 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *src = x->src.y_buffer;
-  uint8_t *dst = xd->dst.y_buffer;
+  uint8_t *dst = xd->plane[0].dst.buf;
   const uint8_t *usrc = x->src.u_buffer;
-  uint8_t *udst = xd->dst.u_buffer;
+  uint8_t *udst = xd->plane[1].dst.buf;
   const uint8_t *vsrc = x->src.v_buffer;
-  uint8_t *vdst = xd->dst.v_buffer;
-  int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
-  int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
+  uint8_t *vdst = xd->plane[2].dst.buf;
+  int src_y_stride = x->src.y_stride, dst_y_stride = xd->plane[0].dst.stride;
+  int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->plane[1].dst.stride;
   int n;
   MODE_INFO *mi = x->e_mbd.mode_info_context;
   unsigned int segment_id = mi->mbmi.segment_id;

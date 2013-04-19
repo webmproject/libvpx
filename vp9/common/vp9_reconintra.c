@@ -609,7 +609,7 @@ void vp9_build_interintra_16x16_predictors_mby(MACROBLOCKD *xd,
                                                int ystride) {
   uint8_t intrapredictor[256];
   vp9_build_intra_predictors(
-      xd->dst.y_buffer, xd->dst.y_stride,
+      xd->plane[0].dst.buf, xd->plane[0].dst.stride,
       intrapredictor, 16,
       xd->mode_info_context->mbmi.interintra_mode, 16, 16,
       xd->up_available, xd->left_available, xd->right_available);
@@ -624,12 +624,12 @@ void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
   uint8_t uintrapredictor[64];
   uint8_t vintrapredictor[64];
   vp9_build_intra_predictors(
-      xd->dst.u_buffer, xd->dst.uv_stride,
+      xd->plane[1].dst.buf, xd->plane[1].dst.stride,
       uintrapredictor, 8,
       xd->mode_info_context->mbmi.interintra_uv_mode, 8, 8,
       xd->up_available, xd->left_available, xd->right_available);
   vp9_build_intra_predictors(
-      xd->dst.v_buffer, xd->dst.uv_stride,
+      xd->plane[2].dst.buf, xd->plane[1].dst.stride,
       vintrapredictor, 8,
       xd->mode_info_context->mbmi.interintra_uv_mode, 8, 8,
       xd->up_available, xd->left_available, xd->right_available);
@@ -644,7 +644,7 @@ void vp9_build_interintra_32x32_predictors_sby(MACROBLOCKD *xd,
                                                int ystride) {
   uint8_t intrapredictor[1024];
   vp9_build_intra_predictors(
-      xd->dst.y_buffer, xd->dst.y_stride,
+      xd->plane[0].dst.buf, xd->plane[0].dst.stride,
       intrapredictor, 32,
       xd->mode_info_context->mbmi.interintra_mode, 32, 32,
       xd->up_available, xd->left_available, xd->right_available);
@@ -659,12 +659,12 @@ void vp9_build_interintra_32x32_predictors_sbuv(MACROBLOCKD *xd,
   uint8_t uintrapredictor[256];
   uint8_t vintrapredictor[256];
   vp9_build_intra_predictors(
-      xd->dst.u_buffer, xd->dst.uv_stride,
+      xd->plane[1].dst.buf, xd->plane[1].dst.stride,
       uintrapredictor, 16,
       xd->mode_info_context->mbmi.interintra_uv_mode, 16, 16,
       xd->up_available, xd->left_available, xd->right_available);
   vp9_build_intra_predictors(
-      xd->dst.v_buffer, xd->dst.uv_stride,
+      xd->plane[2].dst.buf, xd->plane[1].dst.stride,
       vintrapredictor, 16,
       xd->mode_info_context->mbmi.interintra_uv_mode, 16, 16,
       xd->up_available, xd->left_available, xd->right_available);
@@ -689,7 +689,7 @@ void vp9_build_interintra_64x64_predictors_sby(MACROBLOCKD *xd,
                                                int ystride) {
   uint8_t intrapredictor[4096];
   const int mode = xd->mode_info_context->mbmi.interintra_mode;
-  vp9_build_intra_predictors(xd->dst.y_buffer, xd->dst.y_stride,
+  vp9_build_intra_predictors(xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                              intrapredictor, 64, mode, 64, 64,
                              xd->up_available, xd->left_available,
                              xd->right_available);
@@ -704,11 +704,11 @@ void vp9_build_interintra_64x64_predictors_sbuv(MACROBLOCKD *xd,
   uint8_t uintrapredictor[1024];
   uint8_t vintrapredictor[1024];
   const int mode = xd->mode_info_context->mbmi.interintra_uv_mode;
-  vp9_build_intra_predictors(xd->dst.u_buffer, xd->dst.uv_stride,
+  vp9_build_intra_predictors(xd->plane[1].dst.buf, xd->plane[1].dst.stride,
                              uintrapredictor, 32, mode, 32, 32,
                              xd->up_available, xd->left_available,
                              xd->right_available);
-  vp9_build_intra_predictors(xd->dst.v_buffer, xd->dst.uv_stride,
+  vp9_build_intra_predictors(xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                              vintrapredictor, 32, mode, 32, 32,
                              xd->up_available, xd->left_available,
                              xd->right_available);
@@ -734,8 +734,8 @@ void vp9_build_intra_predictors_sby_s(MACROBLOCKD *xd,
   const int bwl = b_width_log2(bsize),  bw = 4 << bwl;
   const int bhl = b_height_log2(bsize), bh = 4 << bhl;
 
-  vp9_build_intra_predictors(xd->dst.y_buffer, xd->dst.y_stride,
-                             xd->dst.y_buffer, xd->dst.y_stride,
+  vp9_build_intra_predictors(xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+                             xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                              xd->mode_info_context->mbmi.mode,
                              bw, bh,
                              xd->up_available, xd->left_available,
@@ -747,13 +747,13 @@ void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd,
   const int bwl = b_width_log2(bsize)  - 1, bw = 4 << bwl;
   const int bhl = b_height_log2(bsize) - 1, bh = 4 << bhl;
 
-  vp9_build_intra_predictors(xd->dst.u_buffer, xd->dst.uv_stride,
-                             xd->dst.u_buffer, xd->dst.uv_stride,
+  vp9_build_intra_predictors(xd->plane[1].dst.buf, xd->plane[1].dst.stride,
+                             xd->plane[1].dst.buf, xd->plane[1].dst.stride,
                              xd->mode_info_context->mbmi.uv_mode,
                              bw, bh, xd->up_available,
                              xd->left_available, xd->right_available);
-  vp9_build_intra_predictors(xd->dst.v_buffer, xd->dst.uv_stride,
-                             xd->dst.v_buffer, xd->dst.uv_stride,
+  vp9_build_intra_predictors(xd->plane[2].dst.buf, xd->plane[1].dst.stride,
+                             xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                              xd->mode_info_context->mbmi.uv_mode,
                              bw, bh, xd->up_available,
                              xd->left_available, xd->right_available);

@@ -88,7 +88,7 @@ void vp9_encode_intra16x16mby(VP9_COMMON *const cm, MACROBLOCK *x) {
   vp9_build_intra_predictors_sby_s(xd, BLOCK_SIZE_MB16X16);
   vp9_subtract_sby_s_c(x->src_diff,
                        x->src.y_buffer, x->src.y_stride,
-                       xd->dst.y_buffer, xd->dst.y_stride,
+                       xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                        BLOCK_SIZE_MB16X16);
 
   switch (tx_size) {
@@ -125,7 +125,8 @@ void vp9_encode_intra16x16mbuv(VP9_COMMON *const cm, MACROBLOCK *x) {
   vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_MB16X16);
   vp9_subtract_sbuv_s_c(x->src_diff,
                         x->src.u_buffer, x->src.v_buffer, x->src.uv_stride,
-                        xd->dst.u_buffer, xd->dst.v_buffer, xd->dst.uv_stride,
+                        xd->plane[1].dst.buf, xd->plane[2].dst.buf,
+                        xd->plane[1].dst.stride,
                         BLOCK_SIZE_MB16X16);
 
   switch (tx_size) {

@@ -32,6 +32,8 @@
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/encoder/vp9_encodemv.h"
 #include "./vpx_scale_rtcd.h"
+// TODO(jkoleszar): for setup_dst_planes
+#include "vp9/common/vp9_reconinter.h"
 
 #define OUTPUT_FPF 0
 
@@ -484,7 +486,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   x->src = * cpi->Source;
   xd->pre = *lst_yv12;
-  xd->dst = *new_yv12;
+  setup_dst_planes(xd, new_yv12, 0, 0);
 
   x->partition_info = x->pi;
 
@@ -533,9 +535,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
 
       set_mb_col(cm, xd, mb_col, 1 << mb_height_log2(BLOCK_SIZE_MB16X16));
-      xd->dst.y_buffer = new_yv12->y_buffer + recon_yoffset;
-      xd->dst.u_buffer = new_yv12->u_buffer + recon_uvoffset;
-      xd->dst.v_buffer = new_yv12->v_buffer + recon_uvoffset;
+      xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
+      xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
+      xd->plane[2].dst.buf = new_yv12->v_buffer + recon_uvoffset;
       xd->left_available = (mb_col != 0);
 
       // do intra 16x16 prediction
@@ -700,8 +702,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
     x->src.v_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
 
     // extend the recon for intra prediction
-    vp9_extend_mb_row(new_yv12, xd->dst.y_buffer + 16,
-                      xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
+    vp9_extend_mb_row(new_yv12, xd->plane[0].dst.buf + 16,
+                      xd->plane[1].dst.buf + 8, xd->plane[2].dst.buf + 8);
     vp9_clear_system_state();  // __asm emms;
   }
 

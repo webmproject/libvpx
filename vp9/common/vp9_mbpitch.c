@@ -36,9 +36,9 @@ static void setup_macroblock(MACROBLOCKD *mb, BLOCKSET bs) {
   int i, stride;
 
   if (bs == DEST) {
-    y = &mb->dst.y_buffer;
-    u = &mb->dst.u_buffer;
-    v = &mb->dst.v_buffer;
+    y = &mb->plane[0].dst.buf;
+    u = &mb->plane[1].dst.buf;
+    v = &mb->plane[2].dst.buf;
 
     y2 = NULL;
     u2 = NULL;
@@ -54,14 +54,14 @@ static void setup_macroblock(MACROBLOCKD *mb, BLOCKSET bs) {
   }
 
   // luma
-  stride = mb->dst.y_stride;
+  stride = mb->plane[0].dst.stride;
   for (i = 0; i < 16; ++i) {
     const int offset = (i >> 2) * 4 * stride + (i & 3) * 4;
     setup_block(&blockd[i], y, y2, stride, offset, bs);
   }
 
   // chroma
-  stride = mb->dst.uv_stride;
+  stride = mb->plane[1].dst.stride;
   for (i = 16; i < 20; i++) {
     const int offset = ((i - 16) >> 1) * 4 * stride + (i & 1) * 4;
     setup_block(&blockd[i],     u, u2, stride, offset, bs);

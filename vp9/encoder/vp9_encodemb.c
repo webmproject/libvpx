@@ -107,11 +107,12 @@ void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
 static void subtract_mb(MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   vp9_subtract_sby_s_c(x->src_diff, x->src.y_buffer, x->src.y_stride,
-                       xd->dst.y_buffer, xd->dst.y_stride,
+                       xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                        BLOCK_SIZE_MB16X16);
   vp9_subtract_sbuv_s_c(x->src_diff, x->src.u_buffer, x->src.v_buffer,
                         x->src.uv_stride,
-                        xd->dst.u_buffer, xd->dst.v_buffer, xd->dst.uv_stride,
+                        xd->plane[1].dst.buf, xd->plane[2].dst.buf,
+                        xd->plane[1].dst.stride,
                         BLOCK_SIZE_MB16X16);
 }
 
@@ -913,10 +914,11 @@ void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
 void vp9_encode_inter16x16y(MACROBLOCK *x, int mb_row, int mb_col) {
   MACROBLOCKD *xd = &x->e_mbd;
 
-  vp9_build_inter_predictors_sby(xd, xd->dst.y_buffer, xd->dst.y_stride,
+  vp9_build_inter_predictors_sby(xd, xd->plane[0].dst.buf,
+                                 xd->plane[0].dst.stride,
                                  mb_row, mb_col, BLOCK_SIZE_MB16X16);
   vp9_subtract_sby_s_c(x->src_diff, x->src.y_buffer, x->src.y_stride,
-                       xd->dst.y_buffer, xd->dst.y_stride,
+                       xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                        BLOCK_SIZE_MB16X16);
 
   vp9_transform_sby_4x4(x, BLOCK_SIZE_MB16X16);
