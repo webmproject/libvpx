@@ -2342,8 +2342,6 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
   }
 }
 
-void __attribute__((noinline)) hi(void) { }
-
 static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
                               int output_enabled, int mb_row, int mb_col,
                               BLOCK_SIZE_TYPE bsize) {
