@@ -15,8 +15,6 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 
-void vp9_update_gf_useage_maps(VP9_COMP *cpi, VP9_COMMON *cm, MACROBLOCK *x);
-
 void vp9_enable_segmentation(VP9_PTR ptr);
 void vp9_disable_segmentation(VP9_PTR ptr);
 

@@ -551,9 +551,6 @@ static void set_offsets(VP9_COMP *cpi,
   xd->above_context = cm->above_context + mb_col;
   xd->left_context  = cm->left_context + (mb_row & 3);
 
-  // GF active flags data structure
-  x->gf_active_ptr = (signed char *)&cpi->gf_active_flags[idx_map];
-
   // Activity map pointer
   x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
   x->active_ptr = cpi->active_map + idx_map;

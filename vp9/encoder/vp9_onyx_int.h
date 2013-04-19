@@ -658,12 +658,6 @@ typedef struct VP9_COMP {
   unsigned int activity_avg;
   unsigned int *mb_activity_map;
   int *mb_norm_activity_map;
-
-  // Record of which MBs still refer to last golden frame either
-  // directly or through 0,0
-  unsigned char *gf_active_flags;
-  int gf_active_count;
-
   int output_partition;
 
   // Store last frame's MV info for next frame MV prediction
