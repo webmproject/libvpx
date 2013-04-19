@@ -825,7 +825,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         {
             unsigned int sum = 0;
             unsigned int total_mbs = cm->MBs;
-            int i, thresh;
+            int thresh;
             unsigned int total_skip;
 
             int min = 2000;
