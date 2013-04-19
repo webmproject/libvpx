@@ -332,10 +332,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->tok);
   cpi->tok = 0;
 
-  // Structure used to monitor GF usage
-  vpx_free(cpi->gf_active_flags);
-  cpi->gf_active_flags = 0;
-
   // Activity mask based per mb zbin adjustments
   vpx_free(cpi->mb_activity_map);
   cpi->mb_activity_map = 0;
@@ -908,13 +904,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   cpi->inter_zz_count = 0;
   cpi->gf_bad_count = 0;
   cpi->gf_update_recommended = 0;
-
-
-  // Structures used to minitor GF usage
-  vpx_free(cpi->gf_active_flags);
-  CHECK_MEM_ERROR(cpi->gf_active_flags,
-                  vpx_calloc(1, cm->mb_rows * cm->mb_cols));
-  cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
   vpx_free(cpi->mb_activity_map);
   CHECK_MEM_ERROR(cpi->mb_activity_map,
@@ -2231,12 +2220,6 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
 
 
 static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-
-  // Update data structure that monitors level of reference to last GF
-  vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
-  cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
-
   // this frame refreshes means next frames don't unless specified by user
   cpi->common.frames_since_golden = 0;
 
@@ -2248,18 +2231,10 @@ static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
 
   // Set the alternate reference frame active flag
   cpi->source_alt_ref_active = 1;
-
-
 }
 static void update_golden_frame_stats(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-
   // Update the Golden frame usage counts.
   if (cpi->refresh_golden_frame) {
-    // Update data structure that monitors level of reference to last GF
-    vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
-    cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
-
     // this frame refreshes means next frames don't unless specified by user
     cpi->refresh_golden_frame = 0;
     cpi->common.frames_since_golden = 0;
@@ -3293,27 +3268,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
   }
 
-  // Update the GF usage maps.
-  // This is done after completing the compression of a frame when all modes
-  // etc. are finalized but before loop filter
-  vp9_update_gf_useage_maps(cpi, cm, &cpi->mb);
-
   if (cm->frame_type == KEY_FRAME)
     cpi->refresh_last_frame = 1;
-
-#if 0
-  {
-    FILE *f = fopen("gfactive.stt", "a");
-    fprintf(f, "%8d %8d %8d %8d %8d\n",
-            cm->current_video_frame,
-            (100 * cpi->gf_active_count)
-              / (cpi->common.mb_rows * cpi->common.mb_cols),
-            cpi->this_iiratio,
-            cpi->next_iiratio,
-            cpi->refresh_golden_frame);
-    fclose(f);
-  }
-#endif
 
   cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
