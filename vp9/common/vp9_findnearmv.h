@@ -24,8 +24,6 @@
 // above and a number cols of pixels in the left to select the one with best
 // score to use as ref motion vector
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
-                           uint8_t *ref_y_buffer,
-                           int ref_y_stride,
                            int_mv *mvlist,
                            int_mv *nearest,
                            int_mv *near);

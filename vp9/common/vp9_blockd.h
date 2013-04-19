@@ -41,7 +41,7 @@
 #define SEGMENT_DELTADATA   0
 #define SEGMENT_ABSDATA     1
 #define MAX_MV_REFS 9
-#define MAX_MV_REF_CANDIDATES 4
+#define MAX_MV_REF_CANDIDATES 2
 
 typedef enum {
   PLANE_TYPE_Y_WITH_DC,

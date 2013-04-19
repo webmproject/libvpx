@@ -684,11 +684,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     *sf0 = cm->active_ref_scale[mbmi->ref_frame - 1];
 
     {
-      const int use_prev_in_find_best_ref = sf0->x_num == sf0->x_den &&
-                                            sf0->y_num == sf0->y_den &&
-                                            !cm->error_resilient_mode &&
-                                            !cm->frame_parallel_decoding_mode;
-
       // Select the appropriate reference frame for this MB
       const int ref_fb_idx = cm->active_ref_idx[ref_frame - 1];
 
@@ -717,9 +712,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
       if (mbmi->mode != ZEROMV) {
         vp9_find_best_ref_mvs(xd,
-                              use_prev_in_find_best_ref ? xd->pre.y_buffer
-                                                        : NULL,
-                              xd->pre.y_stride,
                               mbmi->ref_mvs[ref_frame],
                               &nearest, &nearby);
 
@@ -757,10 +749,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         const MV_REFERENCE_FRAME second_ref_frame = mbmi->second_ref_frame;
         struct scale_factors *sf1 = &xd->scale_factor[1];
         struct scale_factors *sf_uv1 = &xd->scale_factor_uv[1];
-        const int use_prev_in_find_best_ref = sf1->x_num == sf1->x_den &&
-                                              sf1->y_num == sf1->y_den &&
-                                              !cm->error_resilient_mode &&
-                                              !cm->frame_parallel_decoding_mode;
         const int second_ref_fb_idx = cm->active_ref_idx[second_ref_frame - 1];
         *sf1 = cm->active_ref_scale[second_ref_frame - 1];
 
@@ -774,9 +762,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
         if (mbmi->mode != ZEROMV) {
           vp9_find_best_ref_mvs(xd,
-                                use_prev_in_find_best_ref ?
-                                    xd->second_pre.y_buffer : NULL,
-                                xd->second_pre.y_stride,
                                 mbmi->ref_mvs[second_ref_frame],
                                 &nearest_second,
                                 &nearby_second);
