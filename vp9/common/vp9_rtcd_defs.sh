@@ -78,12 +78,6 @@ prototype void vp9_recon4b "uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_p
 specialize vp9_recon4b
 # specialize vp9_recon4b sse2
 
-prototype void vp9_recon_mb "struct macroblockd *x"
-specialize vp9_recon_mb
-
-prototype void vp9_recon_mby "struct macroblockd *x"
-specialize vp9_recon_mby
-
 prototype void vp9_recon_sb "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
 specialize vp9_recon_sb
 
