@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//7HM\u003d",
+        "filename": "vp9/common/vp9_reconintra4x4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-04-19T21:30:23Z",
+      "side": 1,
+      "message": "I guess average and count could be declared inside the if (have_top...)\n\nHow does this give 127/129 when there is no above or left..as per the commit comment... looks like it always forces 128.",
+      "revId": "0dda0ccdb93256082c7d9b09935c5e95ab7c23d7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
