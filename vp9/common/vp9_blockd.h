@@ -342,6 +342,7 @@ struct mb_plane {
   DECLARE_ALIGNED(16, int16_t,  qcoeff[64 * 64]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[64 * 64]);
   DECLARE_ALIGNED(16, uint16_t, eobs[256]);
+  DECLARE_ALIGNED(16, int16_t,  diff[64 * 64]);
   PLANE_TYPE plane_type;
   int subsampling_x;
   int subsampling_y;
@@ -355,7 +356,6 @@ struct mb_plane {
   BLOCK_OFFSET((x)->plane[2].field, ((i) - 20), 16))
 
 typedef struct macroblockd {
-  DECLARE_ALIGNED(16, int16_t,  diff[64*64+32*32*2]);      /* from idct diff */
 #if CONFIG_CODE_NONZEROCOUNT
   DECLARE_ALIGNED(16, uint16_t, nzcs[256+64*2]);
 #endif
