@@ -875,4 +875,62 @@ static INLINE void foreach_transformed_block_uv(
   }
 }
 
+// TODO(jkoleszar): In principle, pred_w, pred_h are unnecessary, as we could
+// calculate the subsampled BLOCK_SIZE_TYPE, but that type isn't defined for
+// sizes smaller than 16x16 yet.
+typedef void (*foreach_predicted_block_visitor)(int plane, int block,
+                                                BLOCK_SIZE_TYPE bsize,
+                                                int pred_w, int pred_h,
+                                                void *arg);
+static INLINE void foreach_predicted_block_in_plane(
+    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
+    foreach_predicted_block_visitor visit, void *arg) {
+  const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
+
+  // block sizes in number of 4x4 blocks log 2 ("*_b")
+  // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
+  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
+  const int block_size_b = bw + bh;
+
+  // subsampled size of the block
+  const int ss_sum = xd->plane[plane].subsampling_x +
+                     xd->plane[plane].subsampling_y;
+  const int ss_block_size = block_size_b - ss_sum;
+
+  // size of the predictor to use.
+  // TODO(jkoleszar): support I8X8, I4X4
+  const int pred_w = bw - xd->plane[plane].subsampling_x;
+  const int pred_h = bh - xd->plane[plane].subsampling_y;
+  const int pred_b = mode == SPLITMV ? 0 : pred_w + pred_h;
+  const int step = 1 << pred_b;
+
+  int i;
+
+  assert(pred_b <= block_size_b);
+  assert(pred_b == ss_block_size);
+  for (i = 0; i < (1 << ss_block_size); i += step) {
+    visit(plane, i, bsize, pred_w, pred_h, arg);
+  }
+}
+static INLINE void foreach_predicted_block(
+    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
+    foreach_predicted_block_visitor visit, void *arg) {
+  int plane;
+
+  for (plane = 0; plane < MAX_MB_PLANE; plane++) {
+    foreach_predicted_block_in_plane(xd, bsize, plane, visit, arg);
+  }
+}
+static INLINE void foreach_predicted_block_uv(
+    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
+    foreach_predicted_block_visitor visit, void *arg) {
+  int plane;
+
+  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
+    foreach_predicted_block_in_plane(xd, bsize, plane, visit, arg);
+  }
+}
+
+
+
 #endif  // VP9_COMMON_VP9_BLOCKD_H_

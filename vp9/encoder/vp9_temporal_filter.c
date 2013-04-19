@@ -41,18 +41,14 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             int mv_col,
                                             uint8_t *pred) {
   const int which_mv = 0;
-  int_mv subpel_mv;
-  int_mv fullpel_mv;
+  int_mv mv;
 
-  subpel_mv.as_mv.row = mv_row;
-  subpel_mv.as_mv.col = mv_col;
-  // TODO(jkoleszar): Make this rounding consistent with the rest of the code
-  fullpel_mv.as_mv.row = (mv_row >> 1) & ~7;
-  fullpel_mv.as_mv.col = (mv_col >> 1) & ~7;
+  mv.as_mv.row = mv_row;
+  mv.as_mv.col = mv_col;
 
   vp9_build_inter_predictor(y_mb_ptr, stride,
                             &pred[0], 16,
-                            &subpel_mv,
+                            &mv,
                             &xd->scale_factor[which_mv],
                             16, 16,
                             which_mv <<
@@ -63,7 +59,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
 
   vp9_build_inter_predictor_q4(u_mb_ptr, stride,
                                &pred[256], 8,
-                               &fullpel_mv, &subpel_mv,
+                               &mv,
                                &xd->scale_factor_uv[which_mv],
                                8, 8,
                                which_mv <<
@@ -72,7 +68,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
 
   vp9_build_inter_predictor_q4(v_mb_ptr, stride,
                                &pred[320], 8,
-                               &fullpel_mv, &subpel_mv,
+                               &mv,
                                &xd->scale_factor_uv[which_mv],
                                8, 8,
                                which_mv <<

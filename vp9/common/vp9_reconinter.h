@@ -16,12 +16,6 @@
 
 struct subpix_fn_table;
 
-void vp9_build_inter16x16_predictors_mby(MACROBLOCKD *xd,
-                                         uint8_t *dst_y,
-                                         int dst_ystride,
-                                         int mb_row,
-                                         int mb_col);
-
 void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
                                           uint8_t *dst_u,
                                           uint8_t *dst_v,
@@ -73,8 +67,7 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
 
 void vp9_build_inter_predictor_q4(const uint8_t *src, int src_stride,
                                   uint8_t *dst, int dst_stride,
-                                  const int_mv *fullpel_mv_q3,
-                                  const int_mv *frac_mv_q4,
+                                  const int_mv *mv_q4,
                                   const struct scale_factors *scale,
                                   int w, int h, int do_avg,
                                   const struct subpix_fn_table *subpix);
