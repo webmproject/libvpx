@@ -554,9 +554,9 @@ static void write_mb_segid_except(VP9_COMMON *cm,
                                   const MACROBLOCKD *xd,
                                   int mb_row, int mb_col) {
   // Encode the MB segment id.
-  int seg_id = mi->segment_id;
-  int pred_seg_id = vp9_get_pred_mb_segid(cm, xd,
-                                          mb_row * cm->mb_cols + mb_col);
+  const int seg_id = mi->segment_id;
+  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
+  const int pred_seg_id = vp9_get_pred_mb_segid(cm, sb_type, mb_row, mb_col);
   const vp9_prob *p = xd->mb_segment_tree_probs;
   const vp9_prob p1 = xd->mb_segment_mispred_tree_probs[pred_seg_id];
 
