@@ -715,7 +715,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     if (xd->segmentation_enabled)
       mb_init_dequantizer(pbi, xd);
 
-    if (!bool_error(r)) {
+    if (!vp9_reader_has_error(r)) {
 #if CONFIG_NEWBINTRAMODES
     if (mode != I4X4_PRED)
 #endif
@@ -727,7 +727,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
       mode != I4X4_PRED &&
       mode != SPLITMV &&
       mode != I8X8_PRED &&
-      !bool_error(r)) {
+      !vp9_reader_has_error(r)) {
     xd->mode_info_context->mbmi.mb_skip_coeff = 1;
   } else {
 #if 0  // def DEC_DEBUG
@@ -867,7 +867,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mb_row, int mb_col,
   else
     decode_mb(pbi, xd, mb_row, mb_col, r);
 
-  xd->corrupted |= bool_error(r);
+  xd->corrupted |= vp9_reader_has_error(r);
 }
 
 static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
@@ -958,7 +958,7 @@ static void setup_token_decoder(VP9D_COMP *pbi,
                        "Truncated packet or corrupt partition "
                        "%d length", 1);
 
-  if (vp9_start_decode(r, data, partition_size))
+  if (vp9_reader_init(r, data, partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder %d", 1);
 }
@@ -1533,7 +1533,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
                                 pc->width, pc->height,
                                 VP9BORDERINPIXELS);
 
-  if (vp9_start_decode(&header_bc, data, first_partition_size))
+  if (vp9_reader_init(&header_bc, data, first_partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
 
@@ -1684,7 +1684,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   // Collect information about decoder corruption.
   // 1. Check first boolean decoder for errors.
   // 2. Check the macroblock information
-  pc->yv12_fb[pc->new_fb_idx].corrupted = bool_error(&header_bc) |
+  pc->yv12_fb[pc->new_fb_idx].corrupted = vp9_reader_has_error(&header_bc) |
                                           corrupt_tokens;
 
   if (!pbi->decoded_key_frame) {

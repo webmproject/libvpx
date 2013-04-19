@@ -13,25 +13,25 @@
 
 #include "vp9/decoder/vp9_dboolhuff.h"
 
-int vp9_start_decode(BOOL_DECODER *br, const uint8_t *buffer, size_t size) {
-  br->buffer_end = buffer + size;
-  br->buffer = buffer;
-  br->value = 0;
-  br->count = -8;
-  br->range = 255;
+int vp9_reader_init(vp9_reader *r, const uint8_t *buffer, size_t size) {
+  r->buffer_end = buffer + size;
+  r->buffer = buffer;
+  r->value = 0;
+  r->count = -8;
+  r->range = 255;
 
   if (size && !buffer)
     return 1;
 
-  vp9_reader_fill(br);
+  vp9_reader_fill(r);
   return 0;
 }
 
-void vp9_reader_fill(BOOL_DECODER *br) {
-  const uint8_t *const buffer_end = br->buffer_end;
-  const uint8_t *buffer = br->buffer;
-  VP9_BD_VALUE value = br->value;
-  int count = br->count;
+void vp9_reader_fill(vp9_reader *r) {
+  const uint8_t *const buffer_end = r->buffer_end;
+  const uint8_t *buffer = r->buffer;
+  VP9_BD_VALUE value = r->value;
+  int count = r->count;
   int shift = VP9_BD_VALUE_SIZE - 8 - (count + 8);
   int loop_end = 0;
   const int bits_left = (int)((buffer_end - buffer)*CHAR_BIT);
@@ -50,8 +50,17 @@ void vp9_reader_fill(BOOL_DECODER *br) {
     }
   }
 
-  br->buffer = buffer;
-  br->value = value;
-  br->count = count;
+  r->buffer = buffer;
+  r->value = value;
+  r->count = count;
+}
+
+const uint8_t *vp9_reader_find_end(vp9_reader *r) {
+  // Find the end of the coded buffer
+  while (r->count > CHAR_BIT && r->count < VP9_BD_VALUE_SIZE) {
+    r->count -= CHAR_BIT;
+    r->buffer--;
+  }
+  return r->buffer;
 }
 

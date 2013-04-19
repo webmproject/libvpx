@@ -68,8 +68,8 @@ TEST(VP9, TestBitIO) {
 
         vp9_stop_encode(&bw);
 
-        BOOL_DECODER br;
-        vp9_start_decode(&br, bw_buffer, buffer_size);
+        vp9_reader br;
+        vp9_reader_init(&br, bw_buffer, buffer_size);
         bit_rnd.Reset(random_seed);
         for (int i = 0; i < bits_to_test; ++i) {
           if (bit_method == 2) {
