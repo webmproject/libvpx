@@ -614,11 +614,11 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
 void vp9_build_inter_predictors_sb(MACROBLOCKD *xd,
                                    int mb_row, int mb_col,
                                    BLOCK_SIZE_TYPE bsize) {
-  uint8_t *const y = xd->dst.y_buffer;
-  uint8_t *const u = xd->dst.u_buffer;
-  uint8_t *const v = xd->dst.v_buffer;
-  const int y_stride = xd->dst.y_stride;
-  const int uv_stride = xd->dst.uv_stride;
+  uint8_t *const y = xd->plane[0].dst.buf;
+  uint8_t *const u = xd->plane[1].dst.buf;
+  uint8_t *const v = xd->plane[2].dst.buf;
+  const int y_stride = xd->plane[0].dst.stride;
+  const int uv_stride = xd->plane[1].dst.stride;
 
   vp9_build_inter_predictors_sby(xd, y, y_stride, mb_row, mb_col, bsize);
   vp9_build_inter_predictors_sbuv(xd, u, v, uv_stride, mb_row, mb_col, bsize);
@@ -670,8 +670,8 @@ static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
 static int64_t get_consistency_metric(MACROBLOCKD *xd,
                                       uint8_t *tmp_y, int tmp_ystride) {
   int block_size = 16 <<  xd->mode_info_context->mbmi.sb_type;
-  uint8_t *rec_y = xd->dst.y_buffer;
-  int rec_ystride = xd->dst.y_stride;
+  uint8_t *rec_y = xd->plane[0].dst.buf;
+  int rec_ystride = xd->plane[0].dst.stride;
   int64_t metric = 0;
   int i;
   if (xd->up_available) {
@@ -1182,11 +1182,11 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
 void vp9_build_inter_predictors_sb(MACROBLOCKD *mb,
                                    int mb_row, int mb_col,
                                    BLOCK_SIZE_TYPE bsize) {
-  uint8_t *const y = mb->dst.y_buffer;
-  uint8_t *const u = mb->dst.u_buffer;
-  uint8_t *const v = mb->dst.v_buffer;
-  const int y_stride = mb->dst.y_stride;
-  const int uv_stride = mb->dst.uv_stride;
+  uint8_t *const y = mb->plane[0].dst.buf;
+  uint8_t *const u = mb->plane[1].dst.buf;
+  uint8_t *const v = mb->plane[2].dst.buf;
+  const int y_stride = mb->plane[0].dst.stride;
+  const int uv_stride = mb->plane[1].dst.stride;
 
   vp9_build_inter_predictors_sby(mb, y, y_stride, mb_row, mb_col, bsize);
   vp9_build_inter_predictors_sbuv(mb, u, v, uv_stride, mb_row, mb_col, bsize);
@@ -1233,9 +1233,9 @@ void vp9_build_inter_predictors_mb(MACROBLOCKD *xd,
 /*encoder only*/
 void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
                                         int mb_row, int mb_col) {
-  uint8_t *const u = xd->dst.u_buffer;
-  uint8_t *const v = xd->dst.v_buffer;
-  const int uv_stride = xd->dst.uv_stride;
+  uint8_t *const u = xd->plane[1].dst.buf;
+  uint8_t *const v = xd->plane[2].dst.buf;
+  const int uv_stride = xd->plane[1].dst.stride;
 
   vp9_build_inter_predictors_sbuv(xd, u, v, uv_stride, mb_row, mb_col,
                                   BLOCK_SIZE_MB16X16);

@@ -835,8 +835,8 @@ static void super_block_yrd(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   int r[TX_SIZE_MAX_SB][2], d[TX_SIZE_MAX_SB], s[TX_SIZE_MAX_SB];
-  uint8_t *src = x->src.y_buffer, *dst = xd->dst.y_buffer;
-  int src_y_stride = x->src.y_stride, dst_y_stride = xd->dst.y_stride;
+  uint8_t *src = x->src.y_buffer, *dst = xd->plane[0].dst.buf;
+  int src_y_stride = x->src.y_stride, dst_y_stride = xd->plane[0].dst.stride;
 
   vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride, bs);
 
@@ -1519,9 +1519,9 @@ static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
                              BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-  uint8_t *usrc = x->src.u_buffer, *udst = xd->dst.u_buffer;
-  uint8_t *vsrc = x->src.v_buffer, *vdst = xd->dst.v_buffer;
-  int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->dst.uv_stride;
+  uint8_t *usrc = x->src.u_buffer, *udst = xd->plane[1].dst.buf;
+  uint8_t *vsrc = x->src.v_buffer, *vdst = xd->plane[2].dst.buf;
+  int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->plane[1].dst.stride;
 
   vp9_subtract_sbuv_s_c(x->src_diff, usrc, vsrc, src_uv_stride,
                         udst, vdst, dst_uv_stride, bsize);
@@ -3026,7 +3026,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
         vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
         var = cpi->fn_ptr[block_size].vf(*(b->base_src), b->src_stride,
-                                         xd->dst.y_buffer, xd->dst.y_stride,
+                                         xd->plane[0].dst.buf,
+                                         xd->plane[0].dst.stride,
                                          &sse);
         // Note our transform coeffs are 8 times an orthogonal transform.
         // Hence quantizer step is also 8 times. To get effective quantizer
@@ -3035,13 +3036,15 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  xd->block[0].dequant[1] >> 3,
                                  &tmp_rate_y, &tmp_dist_y);
         var = cpi->fn_ptr[uv_block_size].vf(x->src.u_buffer, x->src.uv_stride,
-                                            xd->dst.u_buffer, xd->dst.uv_stride,
+                                            xd->plane[1].dst.buf,
+                                            xd->plane[1].dst.stride,
                                             &sse);
         model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
                                  xd->block[16].dequant[1] >> 3,
                                  &tmp_rate_u, &tmp_dist_u);
         var = cpi->fn_ptr[uv_block_size].vf(x->src.v_buffer, x->src.uv_stride,
-                                            xd->dst.v_buffer, xd->dst.uv_stride,
+                                            xd->plane[2].dst.buf,
+                                            xd->plane[1].dst.stride,
                                             &sse);
         model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
                                  xd->block[20].dequant[1] >> 3,
@@ -3070,15 +3073,15 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int i;
         for (i = 0; i < 16 * bh; ++i)
           vpx_memcpy(tmp_ybuf + i * 16 * bw,
-                     xd->dst.y_buffer + i * xd->dst.y_stride,
+                     xd->plane[0].dst.buf + i * xd->plane[0].dst.stride,
                      sizeof(unsigned char) * 16 * bw);
         for (i = 0; i < 8 * bh; ++i)
           vpx_memcpy(tmp_ubuf + i * 8 * bw,
-                     xd->dst.u_buffer + i * xd->dst.uv_stride,
+                     xd->plane[1].dst.buf + i * xd->plane[1].dst.stride,
                      sizeof(unsigned char) * 8 * bw);
         for (i = 0; i < 8 * bh; ++i)
           vpx_memcpy(tmp_vbuf + i * 8 * bw,
-                     xd->dst.v_buffer + i * xd->dst.uv_stride,
+                     xd->plane[2].dst.buf + i * xd->plane[1].dst.stride,
                      sizeof(unsigned char) * 8 * bw);
         pred_exists = 1;
       }
@@ -3111,18 +3114,21 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
         vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
         var = vp9_variance16x16(*(b->base_src), b->src_stride,
-                                xd->dst.y_buffer, xd->dst.y_stride, &sse);
+                                xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+                                &sse);
         // Note our transform coeffs are 8 times an orthogonal transform.
         // Hence quantizer step is also 8 times. To get effective quantizer
         // we need to divide by 8 before sending to modeling function.
         model_rd_from_var_lapndz(var, 16 * 16, xd->block[0].dequant[1] >> 3,
                                  &tmp_rate_y, &tmp_dist_y);
         var = vp9_variance8x8(x->src.u_buffer, x->src.uv_stride,
-                              xd->dst.u_buffer, xd->dst.uv_stride, &sse);
+                              xd->plane[1].dst.buf, xd->plane[1].dst.stride,
+                              &sse);
         model_rd_from_var_lapndz(var, 8 * 8, xd->block[16].dequant[1] >> 3,
                                  &tmp_rate_u, &tmp_dist_u);
         var = vp9_variance8x8(x->src.v_buffer, x->src.uv_stride,
-                              xd->dst.v_buffer, xd->dst.uv_stride, &sse);
+                              xd->plane[2].dst.buf, xd->plane[1].dst.stride,
+                              &sse);
         model_rd_from_var_lapndz(var, 8 * 8, xd->block[20].dequant[1] >> 3,
                                  &tmp_rate_v, &tmp_dist_v);
         rd = RDCOST(x->rdmult, x->rddiv,
@@ -3149,15 +3155,15 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int i;
         for (i = 0; i < 16 * bh; ++i)
           vpx_memcpy(tmp_ybuf + i * 16 * bw,
-                     xd->dst.y_buffer + i * xd->dst.y_stride,
+                     xd->plane[0].dst.buf + i * xd->plane[0].dst.stride,
                      sizeof(unsigned char) * 16 * bw);
         for (i = 0; i < 8 * bh; ++i)
           vpx_memcpy(tmp_ubuf + i * 8 * bw,
-                     xd->dst.u_buffer + i * xd->dst.uv_stride,
+                     xd->plane[1].dst.buf + i * xd->plane[1].dst.stride,
                      sizeof(unsigned char) * 8 * bw);
         for (i = 0; i < 8 * bh; ++i)
           vpx_memcpy(tmp_vbuf + i * 8 * bw,
-                     xd->dst.v_buffer + i * xd->dst.uv_stride,
+                     xd->plane[2].dst.buf + i * xd->plane[1].dst.stride,
                      sizeof(unsigned char) * 8 * bw);
         pred_exists = 1;
       }
@@ -3176,13 +3182,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (pred_exists) {
     // FIXME(rbultje): mb code still predicts into xd->predictor
     for (i = 0; i < bh * 16; ++i)
-      vpx_memcpy(xd->dst.y_buffer + i * xd->dst.y_stride,
+      vpx_memcpy(xd->plane[0].dst.buf + i * xd->plane[0].dst.stride,
                  tmp_ybuf + i * bw * 16, sizeof(unsigned char) * bw * 16);
     for (i = 0; i < bh * 8; ++i)
-      vpx_memcpy(xd->dst.u_buffer + i * xd->dst.uv_stride,
+      vpx_memcpy(xd->plane[1].dst.buf + i * xd->plane[1].dst.stride,
                  tmp_ubuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
     for (i = 0; i < bh * 8; ++i)
-      vpx_memcpy(xd->dst.v_buffer + i * xd->dst.uv_stride,
+      vpx_memcpy(xd->plane[2].dst.buf + i * xd->plane[1].dst.stride,
                  tmp_vbuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
   } else {
     // Handles the special case when a filter that is not in the
@@ -3208,11 +3214,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (bsize != BLOCK_SIZE_MB16X16) {
       var = cpi->fn_ptr[block_size].vf(*(b->base_src), b->src_stride,
-                                       xd->dst.y_buffer, xd->dst.y_stride,
+                                       xd->plane[0].dst.buf,
+                                       xd->plane[0].dst.stride,
                                        &sse);
     } else {
       var = vp9_variance16x16(*(b->base_src), b->src_stride,
-                              xd->dst.y_buffer, xd->dst.y_stride, &sse);
+                              xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+                              &sse);
     }
 
     if ((int)sse < threshold) {
@@ -3228,18 +3236,20 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           unsigned int sse2u, sse2v;
           // FIXME(rbultje): mb predictors predict into xd->predictor
           var = cpi->fn_ptr[uv_block_size].vf(x->src.u_buffer, x->src.uv_stride,
-                                              xd->dst.u_buffer,
-                                              xd->dst.uv_stride, &sse2u);
+                                              xd->plane[1].dst.buf,
+                                              xd->plane[1].dst.stride, &sse2u);
           var = cpi->fn_ptr[uv_block_size].vf(x->src.v_buffer, x->src.uv_stride,
-                                              xd->dst.v_buffer,
-                                              xd->dst.uv_stride, &sse2v);
+                                              xd->plane[2].dst.buf,
+                                              xd->plane[1].dst.stride, &sse2v);
           sse2 = sse2u + sse2v;
         } else {
           unsigned int sse2u, sse2v;
           var = vp9_variance8x8(x->src.u_buffer, x->src.uv_stride,
-                                xd->dst.u_buffer, xd->dst.uv_stride, &sse2u);
+                                xd->plane[1].dst.buf, xd->plane[1].dst.stride,
+                                &sse2u);
           var = vp9_variance8x8(x->src.v_buffer, x->src.uv_stride,
-                                xd->dst.v_buffer, xd->dst.uv_stride, &sse2v);
+                                xd->plane[2].dst.buf, xd->plane[1].dst.stride,
+                                &sse2v);
           sse2 = sse2u + sse2v;
         }
 
@@ -3752,8 +3762,8 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_subtract_sbuv_s_c(x->src_diff,
                               x->src.u_buffer,
                               x->src.v_buffer, x->src.uv_stride,
-                              xd->dst.u_buffer,
-                              xd->dst.v_buffer, xd->dst.uv_stride,
+                              xd->plane[1].dst.buf,
+                              xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                               BLOCK_SIZE_MB16X16);
 
         super_block_uvrd_4x4(cm, x, &rate_uv, &distortion_uv,

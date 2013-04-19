@@ -338,6 +338,11 @@ struct scale_factors {
 
 enum { MAX_MB_PLANE = 3 };
 
+struct buf_2d {
+  uint8_t *buf;
+  int stride;
+};
+
 struct mb_plane {
   DECLARE_ALIGNED(16, int16_t,  qcoeff[64 * 64]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[64 * 64]);
@@ -346,6 +351,8 @@ struct mb_plane {
   PLANE_TYPE plane_type;
   int subsampling_x;
   int subsampling_y;
+  struct buf_2d dst;
+  struct buf_2d pre[2];
 };
 
 #define BLOCK_OFFSET(x, i, n) ((x) + (i) * (n))
@@ -366,7 +373,6 @@ typedef struct macroblockd {
 
   YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
   YV12_BUFFER_CONFIG second_pre;
-  YV12_BUFFER_CONFIG dst;
   struct scale_factors scale_factor[2];
   struct scale_factors scale_factor_uv[2];
 

@@ -35,7 +35,7 @@ static void build_intra_predictors_mbuv_x86(MACROBLOCKD *xd,
                                             build_intra_pred_mbuv_fn_t ho_fn) {
   int mode = xd->mode_info_context->mbmi.uv_mode;
   build_intra_pred_mbuv_fn_t fn;
-  int src_stride = xd->dst.uv_stride;
+  int src_stride = xd->plane[1].dst.stride;
 
   switch (mode) {
     case  V_PRED:
@@ -68,34 +68,34 @@ static void build_intra_predictors_mbuv_x86(MACROBLOCKD *xd,
       return;
   }
 
-  fn(dst_u, dst_stride, xd->dst.u_buffer, src_stride);
-  fn(dst_v, dst_stride, xd->dst.v_buffer, src_stride);
+  fn(dst_u, dst_stride, xd->plane[1].dst.buf, src_stride);
+  fn(dst_v, dst_stride, xd->plane[2].dst.buf, src_stride);
 }
 
 void vp9_build_intra_predictors_mbuv_sse2(MACROBLOCKD *xd) {
-  build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
-                                  xd->dst.v_buffer, xd->dst.uv_stride,
+  build_intra_predictors_mbuv_x86(xd, xd->plane[1].dst.buf,
+                                  xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                                   vp9_intra_pred_uv_tm_sse2,
                                   vp9_intra_pred_uv_ho_mmx2);
 }
 
 void vp9_build_intra_predictors_mbuv_ssse3(MACROBLOCKD *xd) {
-  build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
-                                  xd->dst.v_buffer, xd->dst.uv_stride,
+  build_intra_predictors_mbuv_x86(xd, xd->plane[1].dst.buf,
+                                  xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                                   vp9_intra_pred_uv_tm_ssse3,
                                   vp9_intra_pred_uv_ho_ssse3);
 }
 
 void vp9_build_intra_predictors_mbuv_s_sse2(MACROBLOCKD *xd) {
-  build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
-                                  xd->dst.v_buffer, xd->dst.uv_stride,
+  build_intra_predictors_mbuv_x86(xd, xd->plane[1].dst.buf,
+                                  xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                                   vp9_intra_pred_uv_tm_sse2,
                                   vp9_intra_pred_uv_ho_mmx2);
 }
 
 void vp9_build_intra_predictors_mbuv_s_ssse3(MACROBLOCKD *xd) {
-  build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
-                                  xd->dst.v_buffer, xd->dst.uv_stride,
+  build_intra_predictors_mbuv_x86(xd, xd->plane[1].dst.buf,
+                                  xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                                   vp9_intra_pred_uv_tm_ssse3,
                                   vp9_intra_pred_uv_ho_ssse3);
 }

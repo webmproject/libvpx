@@ -71,10 +71,12 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   }
 
   vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
-  vp9_build_inter_predictors_sby(xd, xd->dst.y_buffer, xd->dst.y_stride,
+  vp9_build_inter_predictors_sby(xd, xd->plane[0].dst.buf,
+                                 xd->plane[0].dst.stride,
                                  mb_row, mb_col, BLOCK_SIZE_MB16X16);
   best_err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
-                          xd->dst.y_buffer, xd->dst.y_stride, INT_MAX);
+                          xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+                          INT_MAX);
 
   /* restore UMV window */
   x->mv_col_min = tmp_col_min;
@@ -189,13 +191,13 @@ static int find_best_16x16_intra
 
     xd->mode_info_context->mbmi.mode = mode;
     vp9_build_intra_predictors(x->src.y_buffer, x->src.y_stride,
-                               xd->dst.y_buffer, xd->dst.y_stride,
+                               xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                                xd->mode_info_context->mbmi.mode,
                                bw, bh,
                                xd->up_available, xd->left_available,
                                xd->right_available);
     err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
-                       xd->dst.y_buffer, xd->dst.y_stride, best_err);
+                       xd->plane[0].dst.buf, xd->plane[0].dst.stride, best_err);
 
     // find best
     if (err < best_err) {
@@ -234,8 +236,8 @@ static void update_mbgraph_mb_stats
   x->src.y_buffer = buf->y_buffer + mb_y_offset;
   x->src.y_stride = buf->y_stride;
 
-  xd->dst.y_buffer = cm->yv12_fb[cm->new_fb_idx].y_buffer + mb_y_offset;
-  xd->dst.y_stride = cm->yv12_fb[cm->new_fb_idx].y_stride;
+  xd->plane[0].dst.buf = cm->yv12_fb[cm->new_fb_idx].y_buffer + mb_y_offset;
+  xd->plane[0].dst.stride = cm->yv12_fb[cm->new_fb_idx].y_stride;
 
   // do intra 16x16 prediction
   intra_error = find_best_16x16_intra(cpi, buf, mb_y_offset,
@@ -303,9 +305,9 @@ static void update_mbgraph_frame_stats
   x->mv_row_max     = (cm->mb_rows - 1) * 16 + VP9BORDERINPIXELS
                       - 16 - VP9_INTERP_EXTEND;
   xd->up_available  = 0;
-  xd->dst.y_stride  = buf->y_stride;
+  xd->plane[0].dst.stride  = buf->y_stride;
   xd->pre.y_stride  = buf->y_stride;
-  xd->dst.uv_stride = buf->uv_stride;
+  xd->plane[1].dst.stride = buf->uv_stride;
   xd->mode_info_context = &mi_local;
 
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {

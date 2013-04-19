@@ -83,8 +83,39 @@ static int scaled_buffer_offset(int x_offset,
                                 int y_offset,
                                 int stride,
                                 const struct scale_factors *scale) {
-  return scale->scale_value_y(y_offset, scale) * stride +
-      scale->scale_value_x(x_offset, scale);
+  if (scale)
+    return scale->scale_value_y(y_offset, scale) * stride +
+        scale->scale_value_x(x_offset, scale);
+  return y_offset * stride + x_offset;
+}
+
+static void setup_pred_plane(struct buf_2d *dst,
+                             uint8_t *src, int stride,
+                             int mb_row, int mb_col,
+                             const struct scale_factors *scale,
+                             int subsampling_x, int subsampling_y) {
+  const int x = (16 * mb_col) >> subsampling_x;
+  const int y = (16 * mb_row) >> subsampling_y;
+  dst->buf = src + scaled_buffer_offset(x, y, stride, scale);
+  dst->stride = stride;
+}
+
+// TODO(jkoleszar): audit all uses of this that don't set mb_row, mb_col
+static void setup_dst_planes(MACROBLOCKD *xd,
+                             const YV12_BUFFER_CONFIG *src,
+                             int mb_row, int mb_col) {
+  setup_pred_plane(&xd->plane[0].dst,
+                   src->y_buffer, src->y_stride,
+                   mb_row, mb_col, NULL,
+                   xd->plane[0].subsampling_x, xd->plane[0].subsampling_y);
+  setup_pred_plane(&xd->plane[1].dst,
+                   src->u_buffer, src->uv_stride,
+                   mb_row, mb_col, NULL,
+                   xd->plane[1].subsampling_x, xd->plane[1].subsampling_y);
+  setup_pred_plane(&xd->plane[2].dst,
+                   src->v_buffer, src->uv_stride,
+                   mb_row, mb_col, NULL,
+                   xd->plane[2].subsampling_x, xd->plane[2].subsampling_y);
 }
 
 static void setup_pred_block(YV12_BUFFER_CONFIG *dst,
