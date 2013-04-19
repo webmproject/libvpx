@@ -904,7 +904,7 @@ void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
                            int mb_row, int mb_col) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  vp9_build_inter_predictors_mb(xd, mb_row, mb_col);
+  vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
   subtract_mb(x);
   vp9_fidct_mb(cm, x);
   vp9_recon_sb(xd, BLOCK_SIZE_MB16X16);
@@ -914,9 +914,7 @@ void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
 void vp9_encode_inter16x16y(MACROBLOCK *x, int mb_row, int mb_col) {
   MACROBLOCKD *xd = &x->e_mbd;
 
-  vp9_build_inter_predictors_sby(xd, xd->plane[0].dst.buf,
-                                 xd->plane[0].dst.stride,
-                                 mb_row, mb_col, BLOCK_SIZE_MB16X16);
+  vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
   vp9_subtract_sby_s_c(x->src_diff, x->src.y_buffer, x->src.y_stride,
                        xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                        BLOCK_SIZE_MB16X16);

@@ -3757,7 +3757,8 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (tmp_rd < best_yrd) {
         int uv_skippable;
 
-        vp9_build_inter4x4_predictors_mbuv(&x->e_mbd, mb_row, mb_col);
+        vp9_build_inter_predictors_sbuv(&x->e_mbd, mb_row, mb_col,
+                                        BLOCK_SIZE_MB16X16);
 
         vp9_subtract_sbuv_s_c(x->src_diff,
                               x->src.u_buffer,
