@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//60k\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-20T00:20:38Z",
+      "side": 1,
+      "message": "Can you write a more descriptive commit message please?",
+      "revId": "67730aadd756cb4f25f3c0ccbd4c3320929e2a05",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
