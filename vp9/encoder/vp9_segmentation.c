@@ -171,7 +171,6 @@ static void count_segs(VP9_COMP *cpi,
                        int bw, int bh, int mb_row, int mb_col) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  const int segmap_index = mb_row * cm->mb_cols + mb_col;
   const int segment_id = mi->mbmi.segment_id;
 
   xd->mode_info_context = mi;
@@ -184,7 +183,8 @@ static void count_segs(VP9_COMP *cpi,
   // Temporal prediction not allowed on key frames
   if (cm->frame_type != KEY_FRAME) {
     // Test to see if the segment id matches the predicted value.
-    const int pred_seg_id = vp9_get_pred_mb_segid(cm, xd, segmap_index);
+    const int pred_seg_id = vp9_get_pred_mb_segid(cm, mi->mbmi.sb_type,
+                                                  mb_row, mb_col);
     const int seg_predicted = (segment_id == pred_seg_id);
 
     // Get the segment id prediction context

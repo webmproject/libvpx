@@ -9,6 +9,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <limits.h>
+
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
@@ -225,30 +227,26 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
 // peredict various bitstream signals.
 
 // Macroblock segment id prediction function
-unsigned char vp9_get_pred_mb_segid(const VP9_COMMON *const cm,
-                                    const MACROBLOCKD *const xd, int MbIndex) {
-  // Currently the prediction for the macroblock segment ID is
-  // the value stored for this macroblock in the previous frame.
-  if (!xd->mode_info_context->mbmi.sb_type) {
-    return cm->last_frame_seg_map[MbIndex];
-  } else {
-    BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-    const int bh = 1 << mb_height_log2(bsize);
-    const int bw = 1 << mb_width_log2(bsize);
-    const int mb_col = MbIndex % cm->mb_cols;
-    const int mb_row = MbIndex / cm->mb_cols;
-    const int x_mbs = MIN(bw, cm->mb_cols - mb_col);
-    const int y_mbs = MIN(bh, cm->mb_rows - mb_row);
+int vp9_get_pred_mb_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
+                          int mb_row, int mb_col) {
+  const int mb_index = mb_row * cm->mb_cols + mb_col;
+  if (sb_type) {
+    const int bw = 1 << mb_width_log2(sb_type);
+    const int bh = 1 << mb_height_log2(sb_type);
+    const int ymbs = MIN(cm->mb_rows - mb_row, bh);
+    const int xmbs = MIN(cm->mb_cols - mb_col, bw);
+    int segment_id = INT_MAX;
     int x, y;
-    unsigned seg_id = -1;
 
-    for (y = mb_row; y < mb_row + y_mbs; y++) {
-      for (x = mb_col; x < mb_col + x_mbs; x++) {
-        seg_id = MIN(seg_id, cm->last_frame_seg_map[cm->mb_cols * y + x]);
+    for (y = 0; y < ymbs; y++) {
+      for (x = 0; x < xmbs; x++) {
+        const int index = mb_index + (y * cm->mb_cols + x);
+        segment_id = MIN(segment_id, cm->last_frame_seg_map[index]);
       }
     }
-
-    return seg_id;
+    return segment_id;
+  } else {
+    return cm->last_frame_seg_map[mb_index];
   }
 }
 
