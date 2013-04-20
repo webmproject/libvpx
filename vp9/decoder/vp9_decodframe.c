@@ -815,8 +815,8 @@ static void set_refs(VP9D_COMP *pbi, int mb_row, int mb_col) {
     const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[fb_idx];
     xd->scale_factor[0]    = cm->active_ref_scale[mbmi->ref_frame - 1];
     xd->scale_factor_uv[0] = cm->active_ref_scale[mbmi->ref_frame - 1];
-    setup_pred_block(&xd->pre, cfg, mb_row, mb_col,
-                     &xd->scale_factor[0], &xd->scale_factor_uv[0]);
+    setup_pre_planes(xd, cfg, NULL, mb_row, mb_col,
+                     xd->scale_factor, xd->scale_factor_uv);
     xd->corrupted |= cfg->corrupted;
 
     if (mbmi->second_ref_frame > INTRA_FRAME) {
@@ -825,8 +825,8 @@ static void set_refs(VP9D_COMP *pbi, int mb_row, int mb_col) {
       const YV12_BUFFER_CONFIG *second_cfg = &cm->yv12_fb[second_fb_idx];
       xd->scale_factor[1]    = cm->active_ref_scale[mbmi->second_ref_frame - 1];
       xd->scale_factor_uv[1] = cm->active_ref_scale[mbmi->second_ref_frame - 1];
-      setup_pred_block(&xd->second_pre, second_cfg, mb_row, mb_col,
-                       &xd->scale_factor[1], &xd->scale_factor_uv[1]);
+      setup_pre_planes(xd, NULL, second_cfg, mb_row, mb_col,
+                       xd->scale_factor, xd->scale_factor_uv);
       xd->corrupted |= second_cfg->corrupted;
     }
   }
@@ -1589,8 +1589,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 #endif
 
   // Initialize xd pointers. Any reference should do for xd->pre, so use 0.
-  vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->active_ref_idx[0]],
-             sizeof(YV12_BUFFER_CONFIG));
+  setup_pre_planes(xd, &pc->yv12_fb[pc->active_ref_idx[0]], NULL,
+                   0, 0, NULL, NULL);
   setup_dst_planes(xd, &pc->yv12_fb[pc->new_fb_idx], 0, 0);
 
   // Create the segmentation map structure and set to 0

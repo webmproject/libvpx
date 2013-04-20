@@ -358,7 +358,7 @@ static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *r
   int ref_stride = d->pre_stride;
 
   // Set up pointers for this macro block recon buffer
-  xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
+  xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
 
   ref_ptr = (uint8_t *)(*(d->base_pre) + d->pre);
 
@@ -402,7 +402,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   v_fn_ptr.vf = vp9_mse16x16;
 
   // Set up pointers for this macro block recon buffer
-  xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
+  xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
 
   // Initial step/diamond search centred on best mv
   tmp_mv.as_int = 0;
@@ -485,7 +485,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   vp9_clear_system_state();  // __asm emms;
 
   x->src = * cpi->Source;
-  xd->pre = *lst_yv12;
+  setup_pre_planes(xd, lst_yv12, NULL, 0, 0, NULL, NULL);
   setup_dst_planes(xd, new_yv12, 0, 0);
 
   x->partition_info = x->pi;
@@ -601,9 +601,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
           }
 
           // Reset to last frame as reference buffer
-          xd->pre.y_buffer = lst_yv12->y_buffer + recon_yoffset;
-          xd->pre.u_buffer = lst_yv12->u_buffer + recon_uvoffset;
-          xd->pre.v_buffer = lst_yv12->v_buffer + recon_uvoffset;
+          xd->plane[0].pre[0].buf = lst_yv12->y_buffer + recon_yoffset;
+          xd->plane[1].pre[0].buf = lst_yv12->u_buffer + recon_uvoffset;
+          xd->plane[2].pre[0].buf = lst_yv12->v_buffer + recon_uvoffset;
 
           // In accumulating a score for the older reference frame
           // take the best of the motion predicted score and

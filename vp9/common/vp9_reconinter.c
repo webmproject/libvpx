@@ -581,8 +581,9 @@ void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
   struct build_inter_predictors_args args = {
     xd, mb_col * 16, mb_row * 16,
     {xd->plane[0].dst.buf, NULL, NULL}, {xd->plane[0].dst.stride, 0, 0},
-    {{xd->pre.y_buffer, NULL, NULL}, {xd->second_pre.y_buffer, NULL, NULL}},
-    {{xd->pre.y_stride, 0, 0}, {xd->second_pre.y_stride, 0, 0}},
+    {{xd->plane[0].pre[0].buf, NULL, NULL},
+     {xd->plane[0].pre[1].buf, NULL, NULL}},
+    {{xd->plane[0].pre[0].stride, 0, 0}, {xd->plane[0].pre[1].stride, 0, 0}},
   };
 
   // TODO(jkoleszar): This is a hack no matter where you put it, but does it
@@ -600,10 +601,10 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
     xd, mb_col * 16, mb_row * 16,
     {NULL, xd->plane[1].dst.buf, xd->plane[2].dst.buf},
     {0, xd->plane[1].dst.stride, xd->plane[1].dst.stride},
-    {{NULL, xd->pre.u_buffer, xd->pre.v_buffer},
-     {NULL, xd->second_pre.u_buffer, xd->second_pre.v_buffer}},
-    {{0, xd->pre.uv_stride, xd->pre.uv_stride},
-     {0, xd->second_pre.uv_stride, xd->second_pre.uv_stride}},
+    {{NULL, xd->plane[1].pre[0].buf, xd->plane[2].pre[0].buf},
+     {NULL, xd->plane[1].pre[1].buf, xd->plane[2].pre[1].buf}},
+    {{0, xd->plane[1].pre[0].stride, xd->plane[1].pre[0].stride},
+     {0, xd->plane[1].pre[1].stride, xd->plane[1].pre[1].stride}},
   };
   foreach_predicted_block_uv(xd, bsize, build_inter_predictors, &args);
 }
@@ -889,8 +890,8 @@ static int get_implicit_compoundinter_weight(MACROBLOCKD *xd,
   edge[3] = xd->mb_to_right_edge;
 
   clamp_mvs = xd->mode_info_context->mbmi.need_to_clamp_secondmv;
-  base_pre = xd->second_pre.y_buffer;
-  pre_stride = xd->second_pre.y_stride;
+  base_pre = xd->plane[0].pre[1].buf;
+  pre_stride = xd->plane[0].pre[1].stride;
   ymv.as_int = xd->mode_info_context->mbmi.mv[1].as_int;
   // First generate the second predictor
   scale = &xd->scale_factor[1];
@@ -925,8 +926,8 @@ static int get_implicit_compoundinter_weight(MACROBLOCKD *xd,
   metric_2 = get_consistency_metric(xd, tmp_y, tmp_ystride);
 
   clamp_mvs = xd->mode_info_context->mbmi.need_to_clamp_mvs;
-  base_pre = xd->pre.y_buffer;
-  pre_stride = xd->pre.y_stride;
+  base_pre = xd->plane[0].pre[0].buf;
+  pre_stride = xd->plane[0].pre[0].stride;
   ymv.as_int = xd->mode_info_context->mbmi.mv[0].as_int;
   // Now generate the first predictor
   scale = &xd->scale_factor[0];
@@ -978,8 +979,8 @@ static void build_inter16x16_predictors_mby_w(MACROBLOCKD *xd,
         xd->mode_info_context->mbmi.need_to_clamp_secondmv :
          xd->mode_info_context->mbmi.need_to_clamp_mvs;
 
-    uint8_t *base_pre = which_mv ? xd->second_pre.y_buffer : xd->pre.y_buffer;
-    int pre_stride = which_mv ? xd->second_pre.y_stride : xd->pre.y_stride;
+    uint8_t *base_pre = xd->plane[0].pre[which_mv].buf;
+    int pre_stride = xd->plane[0].pre[which_mv].stride;
     int_mv ymv;
     struct scale_factors *scale = &xd->scale_factor[which_mv];
 
@@ -1011,8 +1012,8 @@ static void build_inter16x16_predictors_mbuv_w(MACROBLOCKD *xd,
         which_mv ? xd->mode_info_context->mbmi.need_to_clamp_secondmv
                  : xd->mode_info_context->mbmi.need_to_clamp_mvs;
     uint8_t *uptr, *vptr;
-    int pre_stride = which_mv ? xd->second_pre.uv_stride
-                              : xd->pre.uv_stride;
+    int pre_stride = which_mv ? xd->plane[1].pre[1].stride
+                              : xd->plane[1].pre[0].stride;
     int_mv mv;
 
     struct scale_factors *scale = &xd->scale_factor_uv[which_mv];
@@ -1022,8 +1023,8 @@ static void build_inter16x16_predictors_mbuv_w(MACROBLOCKD *xd,
     if (clamp_mvs)
       clamp_mv_to_umv_border(&mv.as_mv, xd);
 
-    uptr = (which_mv ? xd->second_pre.u_buffer : xd->pre.u_buffer);
-    vptr = (which_mv ? xd->second_pre.v_buffer : xd->pre.v_buffer);
+    uptr = (which_mv ? xd->plane[1].pre[1].buf : xd->plane[1].pre[0].buf);
+    vptr = (which_mv ? xd->plane[2].pre[1].buf : xd->plane[2].pre[0].buf);
 
     scale->set_scaled_offsets(scale, mb_row * 16, mb_col * 16);
 
@@ -1045,8 +1046,8 @@ static void build_inter_predictors_sby_w(MACROBLOCKD *x,
                                          BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize),  bw = 1 << bwl;
   const int bhl = mb_height_log2(bsize), bh = 1 << bhl;
-  uint8_t *y1 = x->pre.y_buffer;
-  uint8_t *y2 = x->second_pre.y_buffer;
+  uint8_t *y1 = x->plane[0].pre[0].buf;
+  uint8_t *y2 = x->plane[0].pre[1].buf;
   int edge[4], n;
 
   edge[0] = x->mb_to_top_edge;
@@ -1062,15 +1063,15 @@ static void build_inter_predictors_sby_w(MACROBLOCKD *x,
     x->mb_to_left_edge   = edge[2] -           ((x_idx  * 16) << 3);
     x->mb_to_right_edge  = edge[3] + (((bw - 1 - x_idx) * 16) << 3);
 
-    x->pre.y_buffer = y1 + scaled_buffer_offset(x_idx * 16,
+    x->plane[0].pre[0].buf = y1 + scaled_buffer_offset(x_idx * 16,
                                                 y_idx * 16,
-                                                x->pre.y_stride,
+                                                x->plane[0].pre[0].stride,
                                                 &x->scale_factor[0]);
     if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-      x->second_pre.y_buffer = y2 +
+      x->plane[0].pre[1].buf = y2 +
           scaled_buffer_offset(x_idx * 16,
                                y_idx * 16,
-                               x->second_pre.y_stride,
+                               x->plane[0].pre[1].stride,
                                &x->scale_factor[1]);
     }
     build_inter16x16_predictors_mby_w(x,
@@ -1082,9 +1083,9 @@ static void build_inter_predictors_sby_w(MACROBLOCKD *x,
   x->mb_to_left_edge   = edge[2];
   x->mb_to_right_edge  = edge[3];
 
-  x->pre.y_buffer = y1;
+  x->plane[0].pre[0].buf = y1;
   if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-    x->second_pre.y_buffer = y2;
+    x->plane[0].pre[1].buf = y2;
   }
 }
 
@@ -1110,8 +1111,8 @@ static void build_inter_predictors_sbuv_w(MACROBLOCKD *x,
                                           BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize),  bw = 1 << bwl;
   const int bhl = mb_height_log2(bsize), bh = 1 << bhl;
-  uint8_t *u1 = x->pre.u_buffer, *v1 = x->pre.v_buffer;
-  uint8_t *u2 = x->second_pre.u_buffer, *v2 = x->second_pre.v_buffer;
+  uint8_t *u1 = x->plane[1].pre[0].buf, *v1 = x->plane[2].pre[0].buf;
+  uint8_t *u2 = x->plane[1].pre[1].buf, *v2 = x->plane[2].pre[1].buf;
   int edge[4], n;
 
   edge[0] = x->mb_to_top_edge;
@@ -1130,18 +1131,18 @@ static void build_inter_predictors_sbuv_w(MACROBLOCKD *x,
 
     scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
                                             y_idx * 8,
-                                            x->pre.uv_stride,
+                                            x->plane[1].pre[0].stride,
                                             &x->scale_factor_uv[0]);
-    x->pre.u_buffer = u1 + scaled_uv_offset;
-    x->pre.v_buffer = v1 + scaled_uv_offset;
+    x->plane[1].pre[0].buf = u1 + scaled_uv_offset;
+    x->plane[2].pre[0].buf = v1 + scaled_uv_offset;
 
     if (x->mode_info_context->mbmi.second_ref_frame > 0) {
       scaled_uv_offset = scaled_buffer_offset(x_idx * 8,
                                               y_idx * 8,
-                                              x->second_pre.uv_stride,
+                                              x->plane[1].pre[1].stride,
                                               &x->scale_factor_uv[1]);
-      x->second_pre.u_buffer = u2 + scaled_uv_offset;
-      x->second_pre.v_buffer = v2 + scaled_uv_offset;
+      x->plane[1].pre[1].buf = u2 + scaled_uv_offset;
+      x->plane[2].pre[1].buf = v2 + scaled_uv_offset;
     }
 
     build_inter16x16_predictors_mbuv_w(x,
@@ -1154,12 +1155,12 @@ static void build_inter_predictors_sbuv_w(MACROBLOCKD *x,
   x->mb_to_left_edge   = edge[2];
   x->mb_to_right_edge  = edge[3];
 
-  x->pre.u_buffer = u1;
-  x->pre.v_buffer = v1;
+  x->plane[1].pre[0].buf = u1;
+  x->plane[2].pre[0].buf = v1;
 
   if (x->mode_info_context->mbmi.second_ref_frame > 0) {
-    x->second_pre.u_buffer = u2;
-    x->second_pre.v_buffer = v2;
+    x->plane[1].pre[1].buf = u2;
+    x->plane[2].pre[1].buf = v2;
   }
 }
 

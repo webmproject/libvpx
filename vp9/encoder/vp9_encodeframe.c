@@ -1235,7 +1235,10 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   // Copy data over into macro block data structures.
   x->src = *cpi->Source;
-  xd->pre = cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]];
+
+  // TODO(jkoleszar): are these initializations required?
+  setup_pre_planes(xd, &cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]], NULL,
+                   0, 0, NULL, NULL);
   setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], 0, 0);
 
   // set up frame for intra coded blocks
@@ -1946,7 +1949,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     if (output_enabled)
       sum_intra_stats(cpi, x);
   } else {
-    int ref_fb_idx;
+    int ref_fb_idx, second_ref_fb_idx;
 #ifdef ENC_DEBUG
     if (enc_debug)
       printf("Mode %d skip %d tx_size %d ref %d ref2 %d mv %d %d interp %d\n",
@@ -1965,26 +1968,20 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     else
       ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
 
-    setup_pred_block(&xd->pre,
-                     &cpi->common.yv12_fb[ref_fb_idx],
-                     mb_row, mb_col,
-                     &xd->scale_factor[0], &xd->scale_factor_uv[0]);
-
     if (mbmi->second_ref_frame > 0) {
-      int second_ref_fb_idx;
-
       if (mbmi->second_ref_frame == LAST_FRAME)
         second_ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
       else if (mbmi->second_ref_frame == GOLDEN_FRAME)
         second_ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
       else
         second_ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
-
-      setup_pred_block(&xd->second_pre,
-                       &cpi->common.yv12_fb[second_ref_fb_idx],
-                       mb_row, mb_col,
-                       &xd->scale_factor[1], &xd->scale_factor_uv[1]);
     }
+
+    setup_pre_planes(xd,
+        &cpi->common.yv12_fb[ref_fb_idx],
+        mbmi->second_ref_frame > 0 ? &cpi->common.yv12_fb[second_ref_fb_idx]
+                                   : NULL,
+        mb_row, mb_col, xd->scale_factor, xd->scale_factor_uv);
 
     if (!x->skip) {
       vp9_encode_inter16x16(cm, x, mb_row, mb_col);
@@ -2160,7 +2157,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
     if (output_enabled)
       sum_intra_stats(cpi, x);
   } else {
-    int ref_fb_idx;
+    int ref_fb_idx, second_ref_fb_idx;
 
     assert(cm->frame_type != KEY_FRAME);
 
@@ -2171,26 +2168,20 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
     else
       ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
 
-    setup_pred_block(&xd->pre,
-                     &cpi->common.yv12_fb[ref_fb_idx],
-                     mb_row, mb_col,
-                     &xd->scale_factor[0], &xd->scale_factor_uv[0]);
-
     if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-      int second_ref_fb_idx;
-
       if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
         second_ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
       else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
         second_ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
       else
         second_ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
-
-      setup_pred_block(&xd->second_pre,
-                       &cpi->common.yv12_fb[second_ref_fb_idx],
-                       mb_row, mb_col,
-                       &xd->scale_factor[1], &xd->scale_factor_uv[1]);
     }
+
+    setup_pre_planes(xd,
+        &cpi->common.yv12_fb[ref_fb_idx],
+        xd->mode_info_context->mbmi.second_ref_frame > 0
+            ? &cpi->common.yv12_fb[second_ref_fb_idx] : NULL,
+        mb_row, mb_col, xd->scale_factor, xd->scale_factor_uv);
 
     vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
   }

@@ -44,13 +44,13 @@ static void setup_macroblock(MACROBLOCKD *mb, BLOCKSET bs) {
     u2 = NULL;
     v2 = NULL;
   } else {
-    y = &mb->pre.y_buffer;
-    u = &mb->pre.u_buffer;
-    v = &mb->pre.v_buffer;
+    y = &mb->plane[0].pre[0].buf;
+    u = &mb->plane[1].pre[0].buf;
+    v = &mb->plane[2].pre[0].buf;
 
-    y2 = &mb->second_pre.y_buffer;
-    u2 = &mb->second_pre.u_buffer;
-    v2 = &mb->second_pre.v_buffer;
+    y2 = &mb->plane[0].pre[1].buf;
+    u2 = &mb->plane[1].pre[1].buf;
+    v2 = &mb->plane[2].pre[1].buf;
   }
 
   // luma

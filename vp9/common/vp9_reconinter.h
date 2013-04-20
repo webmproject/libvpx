@@ -106,6 +106,35 @@ static void setup_dst_planes(MACROBLOCKD *xd,
                    xd->plane[2].subsampling_x, xd->plane[2].subsampling_y);
 }
 
+static void setup_pre_planes(MACROBLOCKD *xd,
+                             const YV12_BUFFER_CONFIG *src0,
+                             const YV12_BUFFER_CONFIG *src1,
+                             int mb_row, int mb_col,
+                             const struct scale_factors *scale,
+                             const struct scale_factors *scale_uv) {
+  int i;
+
+  for (i = 0; i < 2; i++) {
+    const YV12_BUFFER_CONFIG *src = i ? src1 : src0;
+
+    if (!src)
+      continue;
+
+    setup_pred_plane(&xd->plane[0].pre[i],
+                     src->y_buffer, src->y_stride,
+                     mb_row, mb_col, scale ? scale + i : NULL,
+                     xd->plane[0].subsampling_x, xd->plane[0].subsampling_y);
+    setup_pred_plane(&xd->plane[1].pre[i],
+                     src->u_buffer, src->uv_stride,
+                     mb_row, mb_col, scale_uv ? scale_uv + i : NULL,
+                     xd->plane[1].subsampling_x, xd->plane[1].subsampling_y);
+    setup_pred_plane(&xd->plane[2].pre[i],
+                     src->v_buffer, src->uv_stride,
+                     mb_row, mb_col, scale_uv ? scale_uv + i : NULL,
+                     xd->plane[2].subsampling_x, xd->plane[2].subsampling_y);
+  }
+}
+
 static void setup_pred_block(YV12_BUFFER_CONFIG *dst,
                              const YV12_BUFFER_CONFIG *src,
                              int mb_row, int mb_col,

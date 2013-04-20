@@ -365,8 +365,6 @@ typedef struct macroblockd {
   /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
   BLOCKD block[24];
 
-  YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
-  YV12_BUFFER_CONFIG second_pre;
   struct scale_factors scale_factor[2];
   struct scale_factors scale_factor_uv[2];
 

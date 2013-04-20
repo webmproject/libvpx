@@ -110,15 +110,16 @@ static int do_16x16_motion_search
     b->src_stride = x->src.y_stride;
     b->src        = x->src.y_stride * (n & 12) + (n & 3) * 4;
 
-    d->base_pre   = &xd->pre.y_buffer;
-    d->pre_stride = xd->pre.y_stride;
-    d->pre        = xd->pre.y_stride * (n & 12) + (n & 3) * 4;
+    d->base_pre   = &xd->plane[0].pre[0].buf;
+    d->pre_stride = xd->plane[0].pre[0].stride;
+    d->pre        = xd->plane[0].pre[0].stride * (n & 12) + (n & 3) * 4;
   }
 
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
   err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
-                     xd->pre.y_buffer, xd->pre.y_stride, INT_MAX);
+                     xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
+                     INT_MAX);
   dst_mv->as_int = 0;
 
   // Test last reference frame using the previous best mv as the
@@ -162,7 +163,8 @@ static int do_16x16_zerozero_search
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
   err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
-                     xd->pre.y_buffer, xd->pre.y_stride, INT_MAX);
+                     xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
+                     INT_MAX);
 
   dst_mv->as_int = 0;
 
@@ -247,8 +249,8 @@ static void update_mbgraph_mb_stats
   // Golden frame MV search, if it exists and is different than last frame
   if (golden_ref) {
     int g_motion_error;
-    xd->pre.y_buffer = golden_ref->y_buffer + mb_y_offset;
-    xd->pre.y_stride = golden_ref->y_stride;
+    xd->plane[0].pre[0].buf = golden_ref->y_buffer + mb_y_offset;
+    xd->plane[0].pre[0].stride = golden_ref->y_stride;
     g_motion_error = do_16x16_motion_search(cpi, prev_golden_ref_mv,
                                             &stats->ref[GOLDEN_FRAME].m.mv,
                                             buf, mb_y_offset,
@@ -263,8 +265,8 @@ static void update_mbgraph_mb_stats
   // Alt-ref frame MV search, if it exists and is different than last/golden frame
   if (alt_ref) {
     int a_motion_error;
-    xd->pre.y_buffer = alt_ref->y_buffer + mb_y_offset;
-    xd->pre.y_stride = alt_ref->y_stride;
+    xd->plane[0].pre[0].buf = alt_ref->y_buffer + mb_y_offset;
+    xd->plane[0].pre[0].stride = alt_ref->y_stride;
     a_motion_error = do_16x16_zerozero_search(cpi,
                                               &stats->ref[ALTREF_FRAME].m.mv,
                                               buf, mb_y_offset,
@@ -304,7 +306,7 @@ static void update_mbgraph_frame_stats
                       - 16 - VP9_INTERP_EXTEND;
   xd->up_available  = 0;
   xd->plane[0].dst.stride  = buf->y_stride;
-  xd->pre.y_stride  = buf->y_stride;
+  xd->plane[0].pre[0].stride  = buf->y_stride;
   xd->plane[1].dst.stride = buf->uv_stride;
   xd->mode_info_context = &mi_local;
 
