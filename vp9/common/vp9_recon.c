@@ -14,79 +14,61 @@
 #include "vp9/common/vp9_blockd.h"
 
 static INLINE void recon(int rows, int cols,
-                         const uint8_t *pred_ptr, int pred_stride,
                          const int16_t *diff_ptr, int diff_stride,
                          uint8_t *dst_ptr, int dst_stride) {
   int r, c;
 
   for (r = 0; r < rows; r++) {
     for (c = 0; c < cols; c++)
-      dst_ptr[c] = clip_pixel(diff_ptr[c] + pred_ptr[c]);
+      dst_ptr[c] = clip_pixel(diff_ptr[c] + dst_ptr[c]);
 
     dst_ptr += dst_stride;
     diff_ptr += diff_stride;
-    pred_ptr += pred_stride;
   }
 }
 
 
 void vp9_recon_b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                    int stride) {
-  recon(4, 4, pred_ptr, stride, diff_ptr, 16, dst_ptr, stride);
+  assert(pred_ptr == dst_ptr);
+  recon(4, 4, diff_ptr, 16, dst_ptr, stride);
 }
 
 void vp9_recon_uv_b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                       int stride) {
-  recon(4, 4, pred_ptr, stride, diff_ptr, 8, dst_ptr, stride);
+  assert(pred_ptr == dst_ptr);
+  recon(4, 4, diff_ptr, 8, dst_ptr, stride);
 }
 
 void vp9_recon4b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                    int stride) {
-  recon(4, 16, pred_ptr, stride, diff_ptr, 16, dst_ptr, stride);
+  assert(pred_ptr == dst_ptr);
+  recon(4, 16, diff_ptr, 16, dst_ptr, stride);
 }
 
 void vp9_recon2b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                    int stride) {
-  recon(4, 8, pred_ptr, stride, diff_ptr, 8, dst_ptr, stride);
+  assert(pred_ptr == dst_ptr);
+  recon(4, 8, diff_ptr, 8, dst_ptr, stride);
+}
+
+static void recon_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize, int plane) {
+  const int bw = 4 << (b_width_log2(bsize) - xd->plane[plane].subsampling_x);
+  const int bh = 4 << (b_height_log2(bsize) - xd->plane[plane].subsampling_y);
+  recon(bh, bw,
+        xd->plane[plane].diff, bw,
+        xd->plane[plane].dst.buf, xd->plane[plane].dst.stride);
 }
 
 void vp9_recon_sby_c(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
-  const int bw = 16 << mb_width_log2(bsize), bh = 16 << mb_height_log2(bsize);
-  int x, y;
-  const int stride = mb->plane[0].dst.stride;
-  uint8_t *dst = mb->plane[0].dst.buf;
-  const int16_t *diff = mb->plane[0].diff;
-
-  for (y = 0; y < bh; y++) {
-    for (x = 0; x < bw; x++)
-      dst[x] = clip_pixel(dst[x] + diff[x]);
-
-    dst += stride;
-    diff += bw;
-  }
+  recon_plane(mb, bsize, 0);
 }
 
 void vp9_recon_sbuv_c(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize), bhl = mb_height_log2(bsize);
-  const int bw = 8 << bwl, bh = 8 << bhl;
-  int x, y;
-  const int stride =  mb->plane[1].dst.stride;
-  uint8_t *u_dst = mb->plane[1].dst.buf;
-  uint8_t *v_dst = mb->plane[2].dst.buf;
-  const int16_t *u_diff = mb->plane[1].diff;
-  const int16_t *v_diff = mb->plane[2].diff;
+  int i;
 
-  for (y = 0; y < bh; y++) {
-    for (x = 0; x < bw; x++) {
-      u_dst[x] = clip_pixel(u_dst[x] + u_diff[x]);
-      v_dst[x] = clip_pixel(v_dst[x] + v_diff[x]);
-    }
-
-    u_dst += stride;
-    v_dst += stride;
-    u_diff += bw;
-    v_diff += bw;
-  }
+  for (i = 1; i < MAX_MB_PLANE; i++)
+    recon_plane(mb, bsize, i);
 }
 
 void vp9_recon_sb_c(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
