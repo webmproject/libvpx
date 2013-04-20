@@ -14,8 +14,6 @@
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_blockd.h"
 
-void vp9_recon_intra_mbuv(MACROBLOCKD *xd);
-
 B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
                                               int stride, int n,
                                               int tx, int ty);

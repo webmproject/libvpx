@@ -146,7 +146,7 @@ void vp9_encode_intra16x16mbuv(VP9_COMMON *const cm, MACROBLOCK *x) {
       break;
     }
 
-  vp9_recon_intra_mbuv(xd);
+  vp9_recon_sbuv(xd, BLOCK_SIZE_MB16X16);
 }
 
 void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {

@@ -269,15 +269,6 @@ static void corner_predictor(uint8_t *ypred_ptr, int y_stride, int n,
   }
 }
 
-void vp9_recon_intra_mbuv(MACROBLOCKD *xd) {
-  int i;
-  for (i = 16; i < 24; i += 2) {
-    BLOCKD *b = &xd->block[i];
-    vp9_recon2b(*(b->base_dst) + b->dst, b->diff,
-                *(b->base_dst) + b->dst, b->dst_stride);
-  }
-}
-
 static INLINE int log2_minus_1(int n) {
   switch (n) {
     case 4: return 1;
