@@ -33,24 +33,17 @@ typedef struct {
   VP9_BD_VALUE value;
   int count;
   unsigned int range;
-} BOOL_DECODER;
+} vp9_reader;
 
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
-int vp9_start_decode(BOOL_DECODER *br, const uint8_t *buffer, size_t size);
+int vp9_reader_init(vp9_reader *r, const uint8_t *buffer, size_t size);
 
-void vp9_reader_fill(BOOL_DECODER *br);
+void vp9_reader_fill(vp9_reader *r);
 
-static INLINE const uint8_t *vp9_reader_find_end(BOOL_DECODER *br) {
-  // Find the end of the coded buffer
-  while (br->count > CHAR_BIT && br->count < VP9_BD_VALUE_SIZE) {
-    br->count -= CHAR_BIT;
-    br->buffer--;
-  }
-  return br->buffer;
-}
+const uint8_t *vp9_reader_find_end(vp9_reader *r);
 
-static int vp9_read(BOOL_DECODER *br, int probability) {
+static int vp9_read(vp9_reader *br, int probability) {
   unsigned int bit = 0;
   VP9_BD_VALUE value;
   VP9_BD_VALUE bigsplit;
@@ -87,21 +80,20 @@ static int vp9_read(BOOL_DECODER *br, int probability) {
   return bit;
 }
 
-static int vp9_read_bit(BOOL_DECODER *r) {
+static int vp9_read_bit(vp9_reader *r) {
   return vp9_read(r, 128);  // vp9_prob_half
 }
 
-static int vp9_read_literal(BOOL_DECODER *br, int bits) {
+static int vp9_read_literal(vp9_reader *br, int bits) {
   int z = 0, bit;
 
-  for (bit = bits - 1; bit >= 0; bit--) {
+  for (bit = bits - 1; bit >= 0; bit--)
     z |= vp9_read_bit(br) << bit;
-  }
 
   return z;
 }
 
-static int bool_error(BOOL_DECODER *br) {
+static int vp9_reader_has_error(vp9_reader *r) {
   // Check if we have reached the end of the buffer.
   //
   // Variable 'count' stores the number of bits in the 'value' buffer, minus
@@ -116,7 +108,7 @@ static int bool_error(BOOL_DECODER *br) {
   //
   // 1 if we have tried to decode bits after the end of stream was encountered.
   // 0 No error.
-  return br->count > VP9_BD_VALUE_SIZE && br->count < VP9_LOTS_OF_BITS;
+  return r->count > VP9_BD_VALUE_SIZE && r->count < VP9_LOTS_OF_BITS;
 }
 
 #endif  // VP9_DECODER_VP9_DBOOLHUFF_H_
