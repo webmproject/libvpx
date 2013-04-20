@@ -45,11 +45,11 @@ extern struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 typedef struct {
   vp9_tree_p tree;
   const vp9_prob *prob;
-  int Len;
+  int len;
   int base_val;
-} vp9_extra_bit_struct;
+} vp9_extra_bit;
 
-extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
+extern vp9_extra_bit vp9_extra_bits[12];    /* indexed by token value */
 
 #define PROB_UPDATE_BASELINE_COST   7
 

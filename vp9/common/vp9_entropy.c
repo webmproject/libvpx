@@ -1310,7 +1310,7 @@ static void init_bit_trees() {
   init_bit_tree(cat6, 14);
 }
 
-vp9_extra_bit_struct vp9_extra_bits[12] = {
+vp9_extra_bit vp9_extra_bits[12] = {
   { 0, 0, 0, 0},
   { 0, 0, 0, 1},
   { 0, 0, 0, 2},
