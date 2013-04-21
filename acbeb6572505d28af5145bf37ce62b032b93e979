@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//6ic\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-21T14:57:00Z",
+      "side": 1,
+      "message": "alignement of \u0027}\u0027?\nhow about\n#if CONFIG_COMP_INTERINTRA_PRED\nuint8_t *const y \u003d xd-\u003edst.y_buffer;...\n#endif\n\nvp9_build_inter_predictors_sby();\nvp9_build_inter_predictors_sbuv();\n\n#if CONFIG_COMP_INTERINTRA_PRED\nif (xd-\u003emode_info_context-\u003embmi...)\n..\n#endif",
+      "revId": "acbeb6572505d28af5145bf37ce62b032b93e979",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//6iY\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1204,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-04-21T14:57:00Z",
+      "side": 1,
+      "message": "similar here to avoid unnecessary use of brackets?",
+      "revId": "acbeb6572505d28af5145bf37ce62b032b93e979",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
