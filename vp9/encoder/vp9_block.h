@@ -81,6 +81,12 @@ typedef struct {
   int comp_pred_diff;
   int single_pred_diff;
   int64_t txfm_rd_diff[NB_TXFM_MODES];
+
+  // Bit flag for each mode whether it has high error in comparison to others.
+  unsigned int modes_with_high_error;
+
+  // Bit flag for each ref frame whether it has high error compared to others.
+  unsigned int frames_with_high_error;
 } PICK_MODE_CONTEXT;
 
 typedef struct macroblock MACROBLOCK;
