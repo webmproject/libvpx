@@ -2614,6 +2614,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   // error resilient mode
   vp9_write_bit(&header_bc, pc->error_resilient_mode);
 
+  // lossless mode: note this needs to be before loopfilter
+  vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
+
   // Encode the loop filter level and type
   vp9_write_bit(&header_bc, pc->filter_type);
   vp9_write_literal(&header_bc, pc->filter_level, 6);
@@ -2883,7 +2886,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     }
   }
 
-  vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
   if (cpi->mb.e_mbd.lossless) {
     pc->txfm_mode = ONLY_4X4;
   } else {
