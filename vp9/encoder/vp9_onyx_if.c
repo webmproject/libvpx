@@ -120,6 +120,12 @@ extern void init_nzcstats();
 extern void print_nzcstats();
 #endif
 #endif
+#if CONFIG_CODE_ZEROGROUP
+#ifdef ZPC_STATS
+extern void init_zpcstats();
+extern void print_zpcstats();
+#endif
+#endif
 
 #ifdef SPEEDSTATS
 unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -895,7 +901,7 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->tok);
 
   {
-    unsigned int tokens = cm->mb_rows * cm->mb_cols * (24 * 16 + 1);
+    unsigned int tokens = get_token_alloc(cm->mb_rows, cm->mb_cols);
 
     CHECK_MEM_ERROR(cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
@@ -1438,6 +1444,11 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   init_nzcstats();
 #endif
 #endif
+#if CONFIG_CODE_ZEROGROUP
+#ifdef ZPC_STATS
+  init_zpcstats();
+#endif
+#endif
 
   /*Initialize the feed-forward activity masking.*/
   cpi->activity_avg = 90 << 12;
@@ -1650,6 +1661,12 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   vp9_zero(cm->fc.nzc_counts_32x32);
   vp9_zero(cm->fc.nzc_pcat_counts);
 #endif
+#if CONFIG_CODE_ZEROGROUP
+  vp9_zero(cm->fc.zpc_counts_4x4);
+  vp9_zero(cm->fc.zpc_counts_8x8);
+  vp9_zero(cm->fc.zpc_counts_16x16);
+  vp9_zero(cm->fc.zpc_counts_32x32);
+#endif
 
   return (VP9_PTR) cpi;
 }
@@ -1681,6 +1698,12 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 #ifdef NZC_STATS
     if (cpi->pass != 1)
       print_nzcstats();
+#endif
+#endif
+#if CONFIG_CODE_ZEROGROUP
+#ifdef ZPC_STATS
+    if (cpi->pass != 1)
+      print_zpcstats();
 #endif
 #endif
 
@@ -3303,6 +3326,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     vp9_adapt_coef_probs(&cpi->common);
 #if CONFIG_CODE_NONZEROCOUNT
     vp9_adapt_nzc_probs(&cpi->common);
+#endif
+#if CONFIG_CODE_ZEROGROUP
+    vp9_adapt_zpc_probs(&cpi->common);
 #endif
   }
   if (cpi->common.frame_type != KEY_FRAME) {
