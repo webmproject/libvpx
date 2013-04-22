@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//6EE\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-22T20:49:32Z",
+      "side": 1,
+      "message": "allow_16x16 and allow_32x32",
+      "revId": "922574dcefc208033d53cd7899422c97e2bc1e64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//6D4\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-22T20:49:32Z",
+      "side": 1,
+      "message": "this doesn\u0027t read right. i8x8 implies an 8x8 transform, so if mode \u003d\u003d I8X8 I\u0027d expect an allow_8x8 value to be true. I think if you name this allow_16x16, it makes sense.",
+      "revId": "922574dcefc208033d53cd7899422c97e2bc1e64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//6Dw\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 992,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-22T20:49:32Z",
+      "side": 1,
+      "message": "here also",
+      "revId": "922574dcefc208033d53cd7899422c97e2bc1e64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//6DY\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1053,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-22T20:49:32Z",
+      "side": 1,
+      "message": "I think these would be more readable as (mode \u003e\u003d ALLOW_8X8)",
+      "revId": "922574dcefc208033d53cd7899422c97e2bc1e64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
