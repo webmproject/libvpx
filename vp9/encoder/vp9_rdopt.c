@@ -3373,6 +3373,9 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   int intra_cost_penalty = 20 * vp9_dc_quant(cpi->common.base_qindex,
                                              cpi->common.y_dc_delta_q);
+  int64_t mode_distortions[MB_MODE_COUNT] = {-1};
+  int64_t frame_distortions[MAX_REF_FRAMES] = {-1};
+  int ref_frame;
 
   struct scale_factors scale_factor[4];
 
@@ -3382,6 +3385,9 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
   vpx_memset(&x->mb_context[xd->sb_index][xd->mb_index], 0,
              sizeof(PICK_MODE_CONTEXT));
+
+  x->mb_context[xd->sb_index][xd->mb_index].frames_with_high_error = 0;
+  x->mb_context[xd->sb_index][xd->mb_index].modes_with_high_error = 0;
 
   for (i = 0; i < MAX_REF_FRAMES; i++)
     frame_mv[NEWMV][i].as_int = INVALID_MV;
@@ -3927,6 +3933,17 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
     }
 
+    // Store the respective mode distortions for later use.
+    // Store the respective mode distortions for later use.
+    if (mode_distortions[this_mode] == -1
+        || distortion2 < mode_distortions[this_mode]) {
+      mode_distortions[this_mode] = distortion2;
+    }
+    if (frame_distortions[mbmi->ref_frame] == -1 ||
+        distortion2 < frame_distortions[mbmi->ref_frame]) {
+       frame_distortions[mbmi->ref_frame] = distortion2;
+    }
+
     // Did this mode help.. i.e. is it the new best mode
     if (this_rd < best_rd || x->skip) {
       if (!mode_excluded) {
@@ -4135,6 +4152,29 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
 end:
+
+  // Flag all modes that have a distortion thats > 2x the best we found at
+  // this level.
+  for (mode_index = 0; mode_index < MB_MODE_COUNT; ++mode_index) {
+    if (mode_index == NEARESTMV || mode_index == NEARMV || mode_index == NEWMV
+        || mode_index == SPLITMV)
+      continue;
+
+    if (mode_distortions[mode_index] > 2 * *returndistortion) {
+      x->mb_context[xd->sb_index][xd->mb_index].modes_with_high_error |= (1
+          << mode_index);
+    }
+  }
+
+  // Flag all ref frames that have a distortion thats > 2x the best we found at
+  // this level.
+  for (ref_frame = INTRA_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
+    if (frame_distortions[ref_frame] > 2 * *returndistortion) {
+      x->mb_context[xd->sb_index][xd->mb_index].frames_with_high_error |= (1
+          << ref_frame);
+    }
+  }
+
   set_scale_factors(xd, mbmi->ref_frame, mbmi->second_ref_frame,
                     scale_factor);
   store_coding_context(x, &x->mb_context[xd->sb_index][xd->mb_index],
@@ -4361,6 +4401,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   struct scale_factors scale_factor[4];
   unsigned int ref_frame_mask = 0;
   unsigned int mode_mask = 0;
+  int64_t mode_distortions[MB_MODE_COUNT] = {-1};
+  int64_t frame_distortions[MAX_REF_FRAMES] = {-1};
+
+  // Everywhere the flag is set the error is much higher than its neighbors.
+  ctx->frames_with_high_error = 0;
+  ctx->modes_with_high_error = 0;
 
   xd->mode_info_context->mbmi.segment_id = segment_id;
   estimate_ref_frame_costs(cpi, segment_id, ref_costs);
@@ -4371,34 +4417,36 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < NB_TXFM_MODES; i++)
     best_txfm_rd[i] = INT64_MAX;
 
-  // Create a mask set to 1 for each frame used by a smaller resolution.p
+  // Create a mask set to 1 for each frame used by a smaller resolution.
   if (cpi->Speed > 0) {
     switch (block_size) {
       case BLOCK_64X64:
         for (i = 0; i < 4; i++) {
           for (j = 0; j < 4; j++) {
-            ref_frame_mask |= (1 << x->mb_context[i][j].mic.mbmi.ref_frame);
-            mode_mask |= (1 << x->mb_context[i][j].mic.mbmi.mode);
+            ref_frame_mask |= x->mb_context[i][j].frames_with_high_error;
+            mode_mask |= x->mb_context[i][j].modes_with_high_error;
           }
         }
         for (i = 0; i < 4; i++) {
-          ref_frame_mask |= (1 << x->sb32_context[i].mic.mbmi.ref_frame);
-          mode_mask |= (1 << x->sb32_context[i].mic.mbmi.mode);
+          ref_frame_mask |= x->sb32_context[i].frames_with_high_error;
+          mode_mask |= x->sb32_context[i].modes_with_high_error;
         }
         break;
       case BLOCK_32X32:
         for (i = 0; i < 4; i++) {
-          ref_frame_mask |= (1
-              << x->mb_context[xd->sb_index][i].mic.mbmi.ref_frame);
-          mode_mask |= (1 << x->mb_context[xd->sb_index][i].mic.mbmi.mode);
+          ref_frame_mask |=
+              x->mb_context[xd->sb_index][i].frames_with_high_error;
+          mode_mask |= x->mb_context[xd->sb_index][i].modes_with_high_error;
         }
         break;
       default:
         // Until we handle all block sizes set it to present;
-        ref_frame_mask = 0xff;
-        mode_mask = 0xff;
+        ref_frame_mask = 0;
+        mode_mask = 0;
         break;
     }
+    ref_frame_mask = ~ref_frame_mask;
+    mode_mask = ~mode_mask;
   }
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
@@ -4451,6 +4499,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
     if (cpi->Speed > 0) {
       if (!(ref_frame_mask & (1 << ref_frame))) {
+        continue;
+      }
+      if (!(mode_mask & (1 << this_mode))) {
         continue;
       }
       if (vp9_mode_order[mode_index].second_ref_frame != NONE
@@ -4694,6 +4745,16 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
     }
 
+    // Store the respective mode distortions for later use.
+    if (mode_distortions[this_mode] == -1
+        || distortion2 < mode_distortions[this_mode]) {
+      mode_distortions[this_mode] = distortion2;
+    }
+    if (frame_distortions[mbmi->ref_frame] == -1
+        || distortion2 < frame_distortions[mbmi->ref_frame]) {
+      frame_distortions[mbmi->ref_frame] = distortion2;
+    }
+
     // Did this mode help.. i.e. is it the new best mode
     if (this_rd < best_rd || x->skip) {
       if (!mode_excluded) {
@@ -4779,6 +4840,27 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (x->skip && !mode_excluded)
       break;
   }
+  // Flag all modes that have a distortion thats > 2x the best we found at
+  // this level.
+  for (mode_index = 0; mode_index < MB_MODE_COUNT; ++mode_index) {
+    if (mode_index == NEARESTMV || mode_index == NEARMV || mode_index == NEWMV
+        || mode_index == SPLITMV)
+      continue;
+
+    if (mode_distortions[mode_index] > 2 * *returndistortion) {
+      ctx->modes_with_high_error |= (1 << mode_index);
+    }
+  }
+
+  // Flag all ref frames that have a distortion thats > 2x the best we found at
+  // this level.
+  for (ref_frame = INTRA_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
+    if (frame_distortions[ref_frame] > 2 * *returndistortion) {
+      ctx->frames_with_high_error |= (1 << ref_frame);
+    }
+  }
+
+
 
   assert((cm->mcomp_filter_type == SWITCHABLE) ||
          (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
