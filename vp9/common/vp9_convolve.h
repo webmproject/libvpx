@@ -33,50 +33,6 @@ void vp9_convolve_avg(const uint8_t *src, int src_stride,
                       const int16_t *filter_y, int y_step_q4,
                       int w, int h);
 
-#if CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT
-// Not a convolution, a block wtd (1/8, 7/8) average for (dst, src)
-void vp9_convolve_1by8(const uint8_t *src, int src_stride,
-                       uint8_t *dst, int dst_stride,
-                       const int16_t *filter_x, int x_step_q4,
-                       const int16_t *filter_y, int y_step_q4,
-                       int w, int h);
-
-// Not a convolution, a block wtd (1/4, 3/4) average for (dst, src)
-void vp9_convolve_qtr(const uint8_t *src, int src_stride,
-                      uint8_t *dst, int dst_stride,
-                      const int16_t *filter_x, int x_step_q4,
-                      const int16_t *filter_y, int y_step_q4,
-                      int w, int h);
-
-// Not a convolution, a block wtd (3/8, 5/8) average for (dst, src)
-void vp9_convolve_3by8(const uint8_t *src, int src_stride,
-                       uint8_t *dst, int dst_stride,
-                       const int16_t *filter_x, int x_step_q4,
-                       const int16_t *filter_y, int y_step_q4,
-                       int w, int h);
-
-// Not a convolution, a block wtd (5/8, 3/8) average for (dst, src)
-void vp9_convolve_5by8(const uint8_t *src, int src_stride,
-                       uint8_t *dst, int dst_stride,
-                       const int16_t *filter_x, int x_step_q4,
-                       const int16_t *filter_y, int y_step_q4,
-                       int w, int h);
-
-// Not a convolution, a block wtd (3/4, 1/4) average for (dst, src)
-void vp9_convolve_3qtr(const uint8_t *src, int src_stride,
-                       uint8_t *dst, int dst_stride,
-                       const int16_t *filter_x, int x_step_q4,
-                       const int16_t *filter_y, int y_step_q4,
-                       int w, int h);
-
-// Not a convolution, a block wtd (7/8, 1/8) average for (dst, src)
-void vp9_convolve_7by8(const uint8_t *src, int src_stride,
-                       uint8_t *dst, int dst_stride,
-                       const int16_t *filter_x, int x_step_q4,
-                       const int16_t *filter_y, int y_step_q4,
-                       int w, int h);
-#endif
-
 struct subpix_fn_table {
   const int16_t (*filter_x)[8];
   const int16_t (*filter_y)[8];

@@ -51,8 +51,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                             &mv,
                             &xd->scale_factor[which_mv],
                             16, 16,
-                            which_mv <<
-                            (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+                            which_mv,
                             &xd->subpix);
 
   stride = (stride + 1) >> 1;
@@ -62,8 +61,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                &mv,
                                &xd->scale_factor_uv[which_mv],
                                8, 8,
-                               which_mv <<
-                               (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+                               which_mv,
                                &xd->subpix);
 
   vp9_build_inter_predictor_q4(v_mb_ptr, stride,
@@ -71,8 +69,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                &mv,
                                &xd->scale_factor_uv[which_mv],
                                8, 8,
-                               which_mv <<
-                               (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+                               which_mv,
                                &xd->subpix);
 }
 
