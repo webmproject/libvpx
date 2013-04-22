@@ -151,12 +151,6 @@ struct macroblock {
   unsigned char *active_ptr;
 
   vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES];
-#if CONFIG_CODE_NONZEROCOUNT
-  unsigned int nzc_costs_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][17];
-  unsigned int nzc_costs_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][65];
-  unsigned int nzc_costs_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][257];
-  unsigned int nzc_costs_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][1025];
-#endif
 
   int optimize;
 

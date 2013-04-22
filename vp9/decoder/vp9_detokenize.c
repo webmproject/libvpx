@@ -83,16 +83,6 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
   } while (0)
 #endif
 
-#if CONFIG_CODE_NONZEROCOUNT
-#define WRITE_COEF_CONTINUE(val, token)                       \
-  {                                                           \
-    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val);    \
-    INCREMENT_COUNT(token);                                   \
-    c++;                                                      \
-    nzc++;                                                    \
-    continue;                                                 \
-  }
-#else
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
     qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val); \
@@ -100,7 +90,6 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
     c++;                                                 \
     continue;                                            \
   }
-#endif  // CONFIG_CODE_NONZEROCOUNT
 
 #define WRITE_COEF_ONE()                                 \
 {                                                        \
@@ -137,12 +126,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   vp9_zpc_count *zpc_count;
   vp9_prob *zprobs;
   int eoo = 0, use_eoo;
-#endif
-#if CONFIG_CODE_NONZEROCOUNT
-  const int nzc_used = get_nzc_used(txfm_size);
-  uint16_t nzc = 0;
-  uint16_t nzc_expected =
-      nzc_used ? xd->mode_info_context->mbmi.nzcs[block_idx] : 0;
 #endif
   const int *scan, *nb;
   uint8_t token_cache[1024];
@@ -309,41 +292,27 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     const uint8_t *cat6 = cat6_prob;
     if (c >= seg_eob)
       break;
-#if CONFIG_CODE_NONZEROCOUNT
-    if (nzc_used && nzc == nzc_expected)
-      break;
-#endif
     if (c)
       pt = vp9_get_coef_context(scan, nb, pad, token_cache,
                                 c, default_eob);
     band = get_coef_band(scan, txfm_size, c);
     prob = coef_probs[type][ref][band][pt];
     fc->eob_branch_counts[txfm_size][type][ref][band][pt]++;
-#if CONFIG_CODE_NONZEROCOUNT
-    if (!nzc_used) {
-#endif
-      if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
-        break;
+    if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
+      break;
 #if CONFIG_CODE_ZEROGROUP
-      rc = scan[c];
-      o = vp9_get_orientation(rc, txfm_size);
-      if (token_cache[rc] == ZERO_TOKEN || is_eoo[o]) {
-        coef_counts[type][ref][band][pt][ZERO_TOKEN]++;
-        ZEROGROUP_ADVANCE();
-        goto SKIP_START;
-      }
-#endif
-#if CONFIG_CODE_NONZEROCOUNT
+    rc = scan[c];
+    o = vp9_get_orientation(rc, txfm_size);
+    if (token_cache[rc] == ZERO_TOKEN || is_eoo[o]) {
+      coef_counts[type][ref][band][pt][ZERO_TOKEN]++;
+      ZEROGROUP_ADVANCE();
+      goto SKIP_START;
     }
 #endif
 
 SKIP_START:
     if (c >= seg_eob)
       break;
-#if CONFIG_CODE_NONZEROCOUNT
-    if (nzc_used && nzc == nzc_expected)
-      break;
-#endif
     if (c)
       pt = vp9_get_coef_context(scan, nb, pad, token_cache,
                                 c, default_eob);
@@ -359,10 +328,6 @@ SKIP_START:
     zprobs = (*zpc_probs)[ref]
              [coef_to_zpc_band(band)]
              [coef_to_zpc_ptok(pt)];
-#endif
-#if CONFIG_CODE_NONZEROCOUNT
-    // decode zero node only if there are zeros left
-    if (!nzc_used || seg_eob - nzc_expected - c + nzc > 0)
 #endif
     if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
 #if CONFIG_CODE_ZEROGROUP
@@ -446,18 +411,9 @@ SKIP_START:
     WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY6);
   }
 
-#if CONFIG_CODE_NONZEROCOUNT
-  if (!nzc_used)
-#endif
-    if (c < seg_eob)
-      coef_counts[type][ref][get_coef_band(scan, txfm_size, c)]
-                 [pt][DCT_EOB_TOKEN]++;
-#if CONFIG_CODE_NONZEROCOUNT
-  if (!nzc_used)
-    xd->mode_info_context->mbmi.nzcs[block_idx] = nzc;
-  else
-    assert(nzc == nzc_expected);
-#endif
+  if (c < seg_eob)
+    coef_counts[type][ref][get_coef_band(scan, txfm_size, c)]
+        [pt][DCT_EOB_TOKEN]++;
 
   A0[aidx] = L0[lidx] = c > 0;
   if (txfm_size >= TX_8X8) {

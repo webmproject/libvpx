@@ -74,18 +74,6 @@ typedef struct frame_contexts {
   vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES];
-#if CONFIG_CODE_NONZEROCOUNT
-  vp9_prob nzc_probs_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                        [NZC4X4_NODES];
-  vp9_prob nzc_probs_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                        [NZC8X8_NODES];
-  vp9_prob nzc_probs_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                          [NZC16X16_NODES];
-  vp9_prob nzc_probs_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                          [NZC32X32_NODES];
-  vp9_prob nzc_pcat_probs[MAX_NZC_CONTEXTS]
-                         [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA];
-#endif
 #if CONFIG_CODE_ZEROGROUP
   vp9_zpc_probs zpc_probs_4x4;
   vp9_zpc_probs zpc_probs_8x8;
@@ -116,18 +104,6 @@ typedef struct frame_contexts {
   vp9_coeff_probs pre_coef_probs_8x8[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_16x16[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_32x32[BLOCK_TYPES];
-#if CONFIG_CODE_NONZEROCOUNT
-  vp9_prob pre_nzc_probs_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                            [NZC4X4_NODES];
-  vp9_prob pre_nzc_probs_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                            [NZC8X8_NODES];
-  vp9_prob pre_nzc_probs_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                              [NZC16X16_NODES];
-  vp9_prob pre_nzc_probs_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                              [NZC32X32_NODES];
-  vp9_prob pre_nzc_pcat_probs[MAX_NZC_CONTEXTS]
-                             [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA];
-#endif
 #if CONFIG_CODE_ZEROGROUP
   vp9_zpc_probs pre_zpc_probs_4x4;
   vp9_zpc_probs pre_zpc_probs_8x8;
@@ -142,18 +118,6 @@ typedef struct frame_contexts {
   unsigned int eob_branch_counts[TX_SIZE_MAX_SB][BLOCK_TYPES][REF_TYPES]
                                 [COEF_BANDS][PREV_COEF_CONTEXTS];
 
-#if CONFIG_CODE_NONZEROCOUNT
-  unsigned int nzc_counts_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                             [NZC4X4_TOKENS];
-  unsigned int nzc_counts_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                             [NZC8X8_TOKENS];
-  unsigned int nzc_counts_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                               [NZC16X16_TOKENS];
-  unsigned int nzc_counts_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                               [NZC32X32_TOKENS];
-  unsigned int nzc_pcat_counts[MAX_NZC_CONTEXTS]
-                              [NZC_TOKENS_EXTRA][NZC_BITS_EXTRA][2];
-#endif
 #if CONFIG_CODE_ZEROGROUP
   vp9_zpc_count zpc_counts_4x4;
   vp9_zpc_count zpc_counts_8x8;

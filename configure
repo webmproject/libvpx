@@ -243,7 +243,6 @@ EXPERIMENT_LIST="
     newbintramodes
     comp_interintra_pred
     enable_6tap
-    code_nonzerocount
     modelcoefprob
     loop_dering
     implicit_compoundinter_weight

@@ -738,9 +738,6 @@ static void update_stats(VP9_COMP *cpi, int mb_row, int mb_col) {
     if ((mbmi->mode == ZEROMV) && (mbmi->ref_frame == LAST_FRAME))
       cpi->inter_zz_count++;
   }
-#if CONFIG_CODE_NONZEROCOUNT
-  vp9_update_nzc_counts(&cpi->common, xd, mb_row, mb_col);
-#endif
 }
 
 static void encode_sb(VP9_COMP *cpi,
@@ -1338,13 +1335,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cpi->coef_counts_16x16);
   vp9_zero(cpi->coef_counts_32x32);
   vp9_zero(cm->fc.eob_branch_counts);
-#if CONFIG_CODE_NONZEROCOUNT
-  vp9_zero(cm->fc.nzc_counts_4x4);
-  vp9_zero(cm->fc.nzc_counts_8x8);
-  vp9_zero(cm->fc.nzc_counts_16x16);
-  vp9_zero(cm->fc.nzc_counts_32x32);
-  vp9_zero(cm->fc.nzc_pcat_counts);
-#endif
 #if CONFIG_CODE_ZEROGROUP
   vp9_zero(cm->fc.zpc_counts_4x4);
   vp9_zero(cm->fc.zpc_counts_8x8);
@@ -1881,137 +1871,6 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x) {
 #endif
 }
 
-#if CONFIG_CODE_NONZEROCOUNT
-static void gather_nzcs_mb16(VP9_COMMON *const cm,
-                             MACROBLOCKD *xd) {
-  int i;
-  vpx_memset(xd->mode_info_context->mbmi.nzcs, 0,
-             384 * sizeof(xd->mode_info_context->mbmi.nzcs[0]));
-  switch (xd->mode_info_context->mbmi.txfm_size) {
-    case TX_4X4:
-      for (i = 0; i < 24; ++i) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    case TX_8X8:
-      for (i = 0; i < 16; i += 4) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
-          xd->mode_info_context->mbmi.mode == SPLITMV) {
-        for (i = 16; i < 24; ++i) {
-          xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-        }
-      } else {
-        for (i = 16; i < 24; i += 4) {
-          xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-        }
-      }
-      break;
-
-    case TX_16X16:
-      xd->mode_info_context->mbmi.nzcs[0] = xd->nzcs[0];
-      for (i = 16; i < 24; i += 4) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    default:
-      break;
-  }
-}
-
-static void gather_nzcs_sb32(VP9_COMMON *const cm,
-                             MACROBLOCKD *xd) {
-  MODE_INFO *m = xd->mode_info_context;
-  int mis = cm->mode_info_stride;
-  int i, j;
-
-  vpx_memset(m->mbmi.nzcs, 0,
-             384 * sizeof(xd->mode_info_context->mbmi.nzcs[0]));
-  switch (xd->mode_info_context->mbmi.txfm_size) {
-    case TX_4X4:
-      for (i = 0; i < 96; ++i) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    case TX_8X8:
-      for (i = 0; i < 96; i += 4) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    case TX_16X16:
-      for (i = 0; i < 96; i += 16) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    case TX_32X32:
-      xd->mode_info_context->mbmi.nzcs[0] = xd->nzcs[0];
-      for (i = 64; i < 96; i += 16) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    default:
-      break;
-  }
-  for (i = 0; i < 2; ++i)
-    for (j = 0; j < 2; ++j) {
-      if (i == 0 && j == 0) continue;
-      vpx_memcpy((m + j + mis * i)->mbmi.nzcs, m->mbmi.nzcs,
-                 384 * sizeof(m->mbmi.nzcs[0]));
-    }
-}
-
-static void gather_nzcs_sb64(VP9_COMMON *const cm,
-                             MACROBLOCKD *xd) {
-  MODE_INFO *m = xd->mode_info_context;
-  int mis = cm->mode_info_stride;
-  int i, j;
-
-  vpx_memset(xd->mode_info_context->mbmi.nzcs, 0,
-             384 * sizeof(xd->mode_info_context->mbmi.nzcs[0]));
-  switch (xd->mode_info_context->mbmi.txfm_size) {
-    case TX_4X4:
-      for (i = 0; i < 384; ++i) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    case TX_8X8:
-      for (i = 0; i < 384; i += 4) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    case TX_16X16:
-      for (i = 0; i < 384; i += 16) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    case TX_32X32:
-      for (i = 0; i < 384; i += 64) {
-        xd->mode_info_context->mbmi.nzcs[i] = xd->nzcs[i];
-      }
-      break;
-
-    default:
-      break;
-  }
-  for (i = 0; i < 4; ++i)
-    for (j = 0; j < 4; ++j) {
-      if (i == 0 && j == 0) continue;
-      vpx_memcpy((m + j + mis * i)->mbmi.nzcs, m->mbmi.nzcs,
-                 384 * sizeof(m->mbmi.nzcs[0]));
-    }
-}
-#endif
-
 static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
                               int output_enabled,
                               int mb_row, int mb_col) {
@@ -2197,9 +2056,6 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     }
 #endif
 
-#if CONFIG_CODE_NONZEROCOUNT
-    gather_nzcs_mb16(cm, xd);
-#endif
     vp9_tokenize_mb(cpi, xd, t, !output_enabled);
 
   } else {
@@ -2419,13 +2275,6 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
       default: assert(0);
     }
     vp9_recon_sb_c(xd, bsize);
-#if CONFIG_CODE_NONZEROCOUNT
-    if (bsize == BLOCK_SIZE_SB32X32) {
-      gather_nzcs_sb32(cm, &x->e_mbd);
-    } else {
-      gather_nzcs_sb64(cm, &x->e_mbd);
-    }
-#endif
     vp9_tokenize_sb(cpi, &x->e_mbd, t, !output_enabled, bsize);
   } else {
     // FIXME(rbultje): not tile-aware (mi - 1)

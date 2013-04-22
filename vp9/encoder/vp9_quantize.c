@@ -45,9 +45,6 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   int16_t *dequant_ptr     = d->dequant;
   int zbin_oq_value        = b->zbin_extra;
   const int *pt_scan;
-#if CONFIG_CODE_NONZEROCOUNT
-  int nzc = 0;
-#endif
 
   switch (tx_type) {
     case ADST_DCT:
@@ -87,9 +84,6 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
 
         if (y) {
           eob = i;                                // last nonzero coeffs
-#if CONFIG_CODE_NONZEROCOUNT
-          ++nzc;                                  // number of nonzero coeffs
-#endif
           zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
         }
       }
@@ -97,9 +91,6 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   }
 
   xd->plane[0].eobs[b_idx] = eob + 1;
-#if CONFIG_CODE_NONZEROCOUNT
-  xd->nzcs[b_idx] = nzc;
-#endif
 }
 
 void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks) {
@@ -123,9 +114,6 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks) {
   uint8_t *quant_shift_ptr = b->quant_shift;
   int16_t *dequant_ptr     = d->dequant;
   int zbin_oq_value        = b->zbin_extra;
-#if CONFIG_CODE_NONZEROCOUNT
-  int nzc = 0;
-#endif
 
   if (c_idx == 0) assert(pb_idx.plane == 0);
   if (c_idx == 16) assert(pb_idx.plane == 1);
@@ -157,9 +145,6 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks) {
 
         if (y) {
           eob = i;                                // last nonzero coeffs
-#if CONFIG_CODE_NONZEROCOUNT
-          ++nzc;                                  // number of nonzero coeffs
-#endif
           zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
         }
       }
@@ -167,9 +152,6 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks) {
   }
 
   xd->plane[pb_idx.plane].eobs[pb_idx.block] = eob + 1;
-#if CONFIG_CODE_NONZEROCOUNT
-  xd->nzcs[b_idx] = nzc;
-#endif
 }
 
 void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
@@ -216,9 +198,6 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
     uint8_t *quant_shift_ptr = b->quant_shift;
     int16_t *dequant_ptr = d->dequant;
     int zbin_oq_value = b->zbin_extra;
-#if CONFIG_CODE_NONZEROCOUNT
-    int nzc = 0;
-#endif
 
     eob = -1;
 
@@ -242,9 +221,6 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
 
         if (y) {
           eob = 0;                                   // last nonzero coeffs
-#if CONFIG_CODE_NONZEROCOUNT
-          ++nzc;                                  // number of nonzero coeffs
-#endif
           zero_run = 0;
         }
       }
@@ -271,22 +247,13 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
 
         if (y) {
           eob = i;                                   // last nonzero coeffs
-#if CONFIG_CODE_NONZEROCOUNT
-          ++nzc;                                     // number of nonzero coeffs
-#endif
           zero_run = 0;
         }
       }
     }
     xd->plane[pb_idx.plane].eobs[pb_idx.block] = eob + 1;
-#if CONFIG_CODE_NONZEROCOUNT
-    xd->nzcs[b_idx] = nzc;
-#endif
   } else {
     xd->plane[pb_idx.plane].eobs[pb_idx.block] = 0;
-#if CONFIG_CODE_NONZEROCOUNT
-    xd->nzcs[b_idx] = 0;
-#endif
   }
 }
 
@@ -297,18 +264,12 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
                      int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
                      int16_t *dequant_ptr, int zbin_oq_value,
                      uint16_t *eob_ptr,
-#if CONFIG_CODE_NONZEROCOUNT
-                     uint16_t *nzc_ptr,
-#endif
                      const int *scan, int mul) {
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
   int zero_run = 0;
   int16_t *zbin_boost_ptr = zbin_boost_orig_ptr;
-#if CONFIG_CODE_NONZEROCOUNT
-  int nzc = 0;
-#endif
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
   vpx_memset(dqcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
@@ -337,18 +298,12 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
         if (y) {
           eob = i;                                  // last nonzero coeffs
           zero_run = 0;
-#if CONFIG_CODE_NONZEROCOUNT
-          ++nzc;                                    // number of nonzero coeffs
-#endif
         }
       }
     }
   }
 
   *eob_ptr = eob + 1;
-#if CONFIG_CODE_NONZEROCOUNT
-  *nzc_ptr = nzc;
-#endif
 }
 
 void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
@@ -384,9 +339,6 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
            d->dequant,
            b->zbin_extra,
            &xd->plane[pb_idx.plane].eobs[pb_idx.block],
-#if CONFIG_CODE_NONZEROCOUNT
-           &xd->nzcs[b_idx],
-#endif
            pt_scan, 1);
 }
 
@@ -410,9 +362,6 @@ void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx, int y_blocks) {
            d->dequant,
            b->zbin_extra,
            &xd->plane[pb_idx.plane].eobs[pb_idx.block],
-#if CONFIG_CODE_NONZEROCOUNT
-           &xd->nzcs[b_idx],
-#endif
            vp9_default_zig_zag1d_32x32, 2);
 }
 

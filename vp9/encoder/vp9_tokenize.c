@@ -36,21 +36,6 @@ extern vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES];
 extern vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES];
 #endif  /* ENTROPY_STATS */
 
-#if CONFIG_CODE_NONZEROCOUNT
-#ifdef NZC_STATS
-unsigned int nzc_counts_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                           [NZC4X4_TOKENS];
-unsigned int nzc_counts_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                           [NZC8X8_TOKENS];
-unsigned int nzc_counts_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                             [NZC16X16_TOKENS];
-unsigned int nzc_counts_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES]
-                             [NZC32X32_TOKENS];
-unsigned int nzc_pcat_counts[MAX_NZC_CONTEXTS][NZC_TOKENS_EXTRA]
-                            [NZC_BITS_EXTRA][2];
-#endif
-#endif
-
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp9_dct_value_tokens_ptr;
 static int dct_value_cost[DCT_MAX_VALUE * 2];
@@ -146,12 +131,6 @@ static void tokenize_b(VP9_COMP *cpi,
   vp9_zpc_probs *zpc_probs;
   vp9_zpc_count *zpc_count;
   uint8_t token_cache_full[1024];
-#endif
-#if CONFIG_CODE_NONZEROCOUNT
-  const int nzc_used = get_nzc_used(tx_size);
-  int zerosleft = 0, nzc = 0;
-  if (eob == 0)
-    assert(xd->nzcs[ib] == 0);
 #endif
 #if CONFIG_CODE_ZEROGROUP
   vpx_memset(token_cache, UNKNOWN_TOKEN, sizeof(token_cache));
@@ -343,10 +322,6 @@ static void tokenize_b(VP9_COMP *cpi,
     rc = scan[c];
     if (c)
       pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
-#if CONFIG_CODE_NONZEROCOUNT
-    if (nzc_used)
-      zerosleft = seg_eob - xd->nzcs[ib] - c + nzc;
-#endif
     if (c < eob) {
       v = qcoeff_ptr[rc];
       assert(-DCT_MAX_VALUE <= v  &&  v < DCT_MAX_VALUE);
@@ -354,22 +329,11 @@ static void tokenize_b(VP9_COMP *cpi,
       t->extra = vp9_dct_value_tokens_ptr[v].extra;
       token    = vp9_dct_value_tokens_ptr[v].token;
     } else {
-#if CONFIG_CODE_NONZEROCOUNT
-      if (nzc_used)
-        break;
-      else
-#endif
-        token = DCT_EOB_TOKEN;
+      token = DCT_EOB_TOKEN;
     }
 
     t->token = token;
     t->context_tree = coef_probs[type][ref][band][pt];
-#if CONFIG_CODE_NONZEROCOUNT
-    // Skip zero node if there are no zeros left
-    if (nzc_used)
-      t->skip_eob_node = 1 + (zerosleft == 0);
-    else
-#endif
       t->skip_eob_node = (c > 0) && (token_cache[scan[c - 1]] == 0);
     assert(vp9_coef_encodings[t->token].len - t->skip_eob_node > 0);
 #if CONFIG_CODE_ZEROGROUP
@@ -391,9 +355,6 @@ static void tokenize_b(VP9_COMP *cpi,
       if (!t->skip_eob_node)
         ++cpi->common.fc.eob_branch_counts[tx_size][type][ref][band][pt];
     }
-#if CONFIG_CODE_NONZEROCOUNT
-    nzc += (v != 0);
-#endif
     token_cache[scan[c]] = token;
 #if CONFIG_CODE_ZEROGROUP
     if (token == ZERO_TOKEN && !t->skip_coef_val) {
@@ -464,10 +425,7 @@ static void tokenize_b(VP9_COMP *cpi,
     is_last_zero[o] = (token == ZERO_TOKEN);
 #endif
     ++t;
-} while (c < eob && ++c < seg_eob);
-#if CONFIG_CODE_NONZEROCOUNT
-assert(nzc == xd->nzcs[ib]);
-#endif
+  } while (c < eob && ++c < seg_eob);
 
   *tp = t;
   a_ec = l_ec = (c > 0); /* 0 <-> all coeff data is zero */
@@ -860,9 +818,6 @@ static void stuff_b(VP9_COMP *cpi,
   TOKENEXTRA *t = *tp;
   const int ref = mbmi->ref_frame != INTRA_FRAME;
   ENTROPY_CONTEXT *a, *l, *a1, *l1, *a2, *l2, *a3, *l3, a_ec, l_ec;
-#if CONFIG_CODE_NONZEROCOUNT
-  const int nzc_used = get_nzc_used(tx_size);
-#endif
 
   if (sb_type == BLOCK_SIZE_SB64X64) {
     a = (ENTROPY_CONTEXT *)xd->above_context +
@@ -928,26 +883,20 @@ static void stuff_b(VP9_COMP *cpi,
       break;
   }
 
-#if CONFIG_CODE_NONZEROCOUNT
-  if (!nzc_used) {
-#endif
-    pt = combine_entropy_contexts(a_ec, l_ec);
-    band = 0;
-    t->token = DCT_EOB_TOKEN;
-    t->context_tree = probs[type][ref][band][pt];
-    t->skip_eob_node = 0;
+  pt = combine_entropy_contexts(a_ec, l_ec);
+  band = 0;
+  t->token = DCT_EOB_TOKEN;
+  t->context_tree = probs[type][ref][band][pt];
+  t->skip_eob_node = 0;
 #if CONFIG_CODE_ZEROGROUP
-    t->skip_coef_val = 0;
+  t->skip_coef_val = 0;
 #endif
-    ++t;
-    *tp = t;
-    if (!dry_run) {
-      ++counts[type][ref][band][pt][DCT_EOB_TOKEN];
-    }
-#if CONFIG_CODE_NONZEROCOUNT
+  ++t;
+  *tp = t;
+  if (!dry_run) {
+    ++counts[type][ref][band][pt][DCT_EOB_TOKEN];
   }
-#endif
-    *a = *l = 0;
+  *a = *l = 0;
   if (tx_size == TX_8X8) {
     a[1] = 0;
     l[1] = 0;

@@ -220,32 +220,6 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *mb) {
   }
 }
 
-#if CONFIG_CODE_NONZEROCOUNT
-static void propagate_nzcs(VP9_COMMON *cm, MACROBLOCKD *xd) {
-  MODE_INFO *m = xd->mode_info_context;
-  BLOCK_SIZE_TYPE sb_type = m->mbmi.sb_type;
-  const int mis = cm->mode_info_stride;
-  int n;
-  if (sb_type == BLOCK_SIZE_SB64X64) {
-    for (n = 0; n < 16; ++n) {
-      int i = n >> 2;
-      int j = n & 3;
-      if (i == 0 && j == 0) continue;
-      vpx_memcpy((m + j + mis * i)->mbmi.nzcs, m->mbmi.nzcs,
-                 384 * sizeof(m->mbmi.nzcs[0]));
-    }
-  } else if (sb_type == BLOCK_SIZE_SB32X32) {
-    for (n = 0; n < 4; ++n) {
-      int i = n >> 1;
-      int j = n & 1;
-      if (i == 0 && j == 0) continue;
-      vpx_memcpy((m + j + mis * i)->mbmi.nzcs, m->mbmi.nzcs,
-                 384 * sizeof(m->mbmi.nzcs[0]));
-    }
-  }
-}
-#endif
-
 static void decode_16x16(MACROBLOCKD *xd) {
   const TX_TYPE tx_type = get_tx_type_16x16(xd, 0);
 
@@ -644,9 +618,6 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
 
   if (mi->mbmi.mb_skip_coeff) {
     vp9_reset_sb_tokens_context(xd, bsize);
-#if CONFIG_CODE_NONZEROCOUNT
-    vpx_memset(mi->mbmi.nzcs, 0, 384 * sizeof(mi->mbmi.nzcs[0]));
-#endif
   } else {
     // re-initialize macroblock dequantizer before detokenization
     if (xd->segmentation_enabled)
@@ -681,10 +652,6 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
       }
     }
   }
-
-#if CONFIG_CODE_NONZEROCOUNT
-  propagate_nzcs(&pbi->common, xd);
-#endif
 }
 
 // TODO(jingning): Need to merge SB and MB decoding. The MB decoding currently
@@ -1043,88 +1010,6 @@ static void read_zpc_probs(VP9_COMMON *cm,
 }
 #endif  // CONFIG_CODE_ZEROGROUP
 
-#if CONFIG_CODE_NONZEROCOUNT
-static void read_nzc_probs_common(VP9_COMMON *cm,
-                                  vp9_reader *rd,
-                                  TX_SIZE tx_size) {
-  int c, r, b, t;
-  int tokens, nodes;
-  vp9_prob *nzc_probs;
-  vp9_prob upd;
-
-  if (!get_nzc_used(tx_size)) return;
-  if (!vp9_read_bit(rd)) return;
-
-  if (tx_size == TX_32X32) {
-    tokens = NZC32X32_TOKENS;
-    nzc_probs = cm->fc.nzc_probs_32x32[0][0][0];
-    upd = NZC_UPDATE_PROB_32X32;
-  } else if (tx_size == TX_16X16) {
-    tokens = NZC16X16_TOKENS;
-    nzc_probs = cm->fc.nzc_probs_16x16[0][0][0];
-    upd = NZC_UPDATE_PROB_16X16;
-  } else if (tx_size == TX_8X8) {
-    tokens = NZC8X8_TOKENS;
-    nzc_probs = cm->fc.nzc_probs_8x8[0][0][0];
-    upd = NZC_UPDATE_PROB_8X8;
-  } else {
-    tokens = NZC4X4_TOKENS;
-    nzc_probs = cm->fc.nzc_probs_4x4[0][0][0];
-    upd = NZC_UPDATE_PROB_4X4;
-  }
-  nodes = tokens - 1;
-  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
-    for (r = 0; r < REF_TYPES; ++r) {
-      for (b = 0; b < BLOCK_TYPES; ++b) {
-        int offset = c * REF_TYPES * BLOCK_TYPES + r * BLOCK_TYPES + b;
-        int offset_nodes = offset * nodes;
-        for (t = 0; t < nodes; ++t) {
-          vp9_prob *p = &nzc_probs[offset_nodes + t];
-          if (vp9_read(rd, upd)) {
-            *p = read_prob_diff_update(rd, *p);
-          }
-        }
-      }
-    }
-  }
-}
-
-static void read_nzc_pcat_probs(VP9_COMMON *cm, vp9_reader *r) {
-  int c, t, b;
-  vp9_prob upd = NZC_UPDATE_PROB_PCAT;
-  if (!(get_nzc_used(TX_4X4) || get_nzc_used(TX_8X8) ||
-        get_nzc_used(TX_16X16) || get_nzc_used(TX_32X32)))
-    return;
-  if (!vp9_read_bit(r)) {
-    return;
-  }
-  for (c = 0; c < MAX_NZC_CONTEXTS; ++c) {
-    for (t = 0; t < NZC_TOKENS_EXTRA; ++t) {
-      int bits = vp9_extranzcbits[t + NZC_TOKENS_NOEXTRA];
-      for (b = 0; b < bits; ++b) {
-        vp9_prob *p = &cm->fc.nzc_pcat_probs[c][t][b];
-        if (vp9_read(r, upd)) {
-          *p = read_prob_diff_update(r, *p);
-        }
-      }
-    }
-  }
-}
-
-static void read_nzc_probs(VP9_COMMON *cm, vp9_reader *r) {
-  read_nzc_probs_common(cm, r, TX_4X4);
-  if (cm->txfm_mode != ONLY_4X4)
-    read_nzc_probs_common(cm, r, TX_8X8);
-  if (cm->txfm_mode > ALLOW_8X8)
-    read_nzc_probs_common(cm, r, TX_16X16);
-  if (cm->txfm_mode > ALLOW_16X16)
-    read_nzc_probs_common(cm, r, TX_32X32);
-#ifdef NZC_PCAT_UPDATE
-  read_nzc_pcat_probs(cm, r);
-#endif
-}
-#endif  // CONFIG_CODE_NONZEROCOUNT
-
 static void read_coef_probs_common(VP9D_COMP *pbi,
                                    vp9_reader *r,
                                    vp9_coeff_probs *coef_probs,
@@ -1142,11 +1027,7 @@ static void read_coef_probs_common(VP9D_COMP *pbi,
       for (j = 0; j < REF_TYPES; j++) {
         for (k = 0; k < COEF_BANDS; k++) {
           for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
-#if CONFIG_CODE_NONZEROCOUNT
-            const int mstart = get_nzc_used(tx_size);
-#else
             const int mstart = 0;
-#endif
             if (l >= 3 && k == 0)
               continue;
 
@@ -1439,19 +1320,6 @@ static void update_frame_context(VP9D_COMP *pbi) {
   vp9_zero(fc->interintra_counts);
 #endif
 
-#if CONFIG_CODE_NONZEROCOUNT
-  vp9_copy(fc->pre_nzc_probs_4x4, fc->nzc_probs_4x4);
-  vp9_copy(fc->pre_nzc_probs_8x8, fc->nzc_probs_8x8);
-  vp9_copy(fc->pre_nzc_probs_16x16, fc->nzc_probs_16x16);
-  vp9_copy(fc->pre_nzc_probs_32x32, fc->nzc_probs_32x32);
-  vp9_copy(fc->pre_nzc_pcat_probs, fc->nzc_pcat_probs);
-
-  vp9_zero(fc->nzc_counts_4x4);
-  vp9_zero(fc->nzc_counts_8x8);
-  vp9_zero(fc->nzc_counts_16x16);
-  vp9_zero(fc->nzc_counts_32x32);
-  vp9_zero(fc->nzc_pcat_counts);
-#endif
 #if CONFIG_CODE_ZEROGROUP
   vp9_copy(fc->pre_zpc_probs_4x4, fc->zpc_probs_4x4);
   vp9_copy(fc->pre_zpc_probs_8x8, fc->zpc_probs_8x8);
@@ -1716,9 +1584,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   update_frame_context(pbi);
 
   read_coef_probs(pbi, &header_bc);
-#if CONFIG_CODE_NONZEROCOUNT
-  read_nzc_probs(&pbi->common, &header_bc);
-#endif
 #if CONFIG_CODE_ZEROGROUP
   read_zpc_probs(&pbi->common, &header_bc);
 #endif
@@ -1771,9 +1636,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   if (!pc->error_resilient_mode && !pc->frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(pc);
-#if CONFIG_CODE_NONZEROCOUNT
-    vp9_adapt_nzc_probs(pc);
-#endif
 #if CONFIG_CODE_ZEROGROUP
     vp9_adapt_zpc_probs(pc);
 #endif
