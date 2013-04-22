@@ -258,15 +258,22 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
 
   switch (b_mode) {
     case B_DC_PRED: {
-      int expected_dc = 0;
-
-      for (i = 0; i < 4; i++) {
-        expected_dc += above[i];
-        expected_dc += left[i];
+      int expected_dc = 128;
+      if (have_top || have_left) {
+        int average = 0;
+        int count = 0;
+        if (have_top) {
+          for (i = 0; i < 4; i++)
+            average += above[i];
+          count += 4;
+        }
+        if (have_left) {
+          for (i = 0; i < 4; i++)
+            average += left[i];
+          count += 4;
+        }
+        expected_dc = (average + (count >> 1)) / count;
       }
-
-      expected_dc = ROUND_POWER_OF_TWO(expected_dc, 3);
-
       for (r = 0; r < 4; r++) {
         for (c = 0; c < 4; c++)
           predictor[c] = expected_dc;
