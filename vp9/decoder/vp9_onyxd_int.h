@@ -14,7 +14,7 @@
 #include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_treereader.h"
 #include "vp9/common/vp9_onyxc_int.h"
-#include "vp9/decoder/vp9_dequantize.h"
+#include "vp9/decoder/vp9_idct_blk.h"
 
 // #define DEC_DEBUG
 

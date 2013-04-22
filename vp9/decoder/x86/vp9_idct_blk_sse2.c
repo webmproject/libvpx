@@ -10,7 +10,6 @@
 
 #include "./vpx_config.h"
 #include "vp9/common/vp9_blockd.h"
-#include "vp9/decoder/vp9_dequantize.h"
 
 void vp9_idct_dequant_dc_0_2x_sse2(short *q, const short *dq,
                                    unsigned char *pre, unsigned char *dst,
