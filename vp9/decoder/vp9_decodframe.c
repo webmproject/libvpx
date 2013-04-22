@@ -1481,6 +1481,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   pc->clamp_type = (CLAMP_TYPE)vp9_read_bit(&header_bc);
   pc->error_resilient_mode = vp9_read_bit(&header_bc);
 
+  xd->lossless = vp9_read_bit(&header_bc);
+
   setup_loopfilter(pc, xd, &header_bc);
 
   // Dummy read for now
@@ -1549,7 +1551,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   setup_pred_probs(pc, &header_bc);
 
-  xd->lossless = vp9_read_bit(&header_bc);
   pc->txfm_mode = xd->lossless ? ONLY_4X4 : read_txfm_mode(&header_bc);
   if (pc->txfm_mode == TX_MODE_SELECT) {
     pc->prob_tx[0] = vp9_read_prob(&header_bc);
