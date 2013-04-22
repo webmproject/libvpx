@@ -44,19 +44,7 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   uint8_t *quant_shift_ptr = b->quant_shift;
   int16_t *dequant_ptr     = d->dequant;
   int zbin_oq_value        = b->zbin_extra;
-  const int *pt_scan;
-
-  switch (tx_type) {
-    case ADST_DCT:
-      pt_scan = vp9_row_scan_4x4;
-      break;
-    case DCT_ADST:
-      pt_scan = vp9_col_scan_4x4;
-      break;
-    default:
-      pt_scan = vp9_default_zig_zag1d_4x4;
-      break;
-  }
+  const int *pt_scan = get_scan_4x4(tx_type);
 
   vpx_memset(qcoeff_ptr, 0, 32);
   vpx_memset(dqcoeff_ptr, 0, 32);
@@ -165,19 +153,7 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                       pb_idx.block, 16);
   BLOCK *const b = &mb->block[c_idx];
   BLOCKD *const d = &xd->block[c_idx];
-  const int *pt_scan;
-
-  switch (tx_type) {
-    case ADST_DCT:
-      pt_scan = vp9_row_scan_8x8;
-      break;
-    case DCT_ADST:
-      pt_scan = vp9_col_scan_8x8;
-      break;
-    default:
-      pt_scan = vp9_default_zig_zag1d_8x8;
-      break;
-  }
+  const int *pt_scan = get_scan_8x8(tx_type);
 
   if (c_idx == 0) assert(pb_idx.plane == 0);
   if (c_idx == 16) assert(pb_idx.plane == 1);
@@ -313,19 +289,7 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
   const int c_idx = plane_idx(pb_idx.plane);
   BLOCK *const b = &mb->block[c_idx];
   BLOCKD *const d = &xd->block[c_idx];
-  const int *pt_scan;
-
-  switch (tx_type) {
-    case ADST_DCT:
-      pt_scan = vp9_row_scan_16x16;
-      break;
-    case DCT_ADST:
-      pt_scan = vp9_col_scan_16x16;
-      break;
-    default:
-      pt_scan = vp9_default_zig_zag1d_16x16;
-      break;
-  }
+  const int *pt_scan = get_scan_16x16(tx_type);
 
   if (c_idx == 0) assert(pb_idx.plane == 0);
   if (c_idx == 16) assert(pb_idx.plane == 1);

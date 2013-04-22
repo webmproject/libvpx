@@ -12,7 +12,6 @@
 #include <stdio.h>
 
 #include "vp9/common/vp9_entropy.h"
-#include "string.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_entropymode.h"

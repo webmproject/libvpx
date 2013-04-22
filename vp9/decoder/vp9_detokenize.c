@@ -165,17 +165,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     case TX_4X4: {
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_4x4(xd, block_idx) : DCT_DCT;
-      switch (tx_type) {
-        default:
-          scan = vp9_default_zig_zag1d_4x4;
-          break;
-        case ADST_DCT:
-          scan = vp9_row_scan_4x4;
-          break;
-        case DCT_ADST:
-          scan = vp9_col_scan_4x4;
-          break;
-      }
+      scan = get_scan_4x4(tx_type);
       above_ec = A0[aidx] != 0;
       left_ec = L0[lidx] != 0;
       coef_probs  = fc->coef_probs_4x4;
@@ -194,17 +184,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       const int y = block_idx - x;
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
-      switch (tx_type) {
-        default:
-          scan = vp9_default_zig_zag1d_8x8;
-          break;
-        case ADST_DCT:
-          scan = vp9_row_scan_8x8;
-          break;
-        case DCT_ADST:
-          scan = vp9_col_scan_8x8;
-          break;
-      }
+      scan = get_scan_8x8(tx_type);
       coef_probs  = fc->coef_probs_8x8;
       coef_counts = fc->coef_counts_8x8;
       above_ec = (A0[aidx] + A0[aidx + 1]) != 0;
@@ -223,17 +203,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       const int y = block_idx - x;
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
-      switch (tx_type) {
-        default:
-          scan = vp9_default_zig_zag1d_16x16;
-          break;
-        case ADST_DCT:
-          scan = vp9_row_scan_16x16;
-          break;
-        case DCT_ADST:
-          scan = vp9_col_scan_16x16;
-          break;
-      }
+      scan = get_scan_16x16(tx_type);
       coef_probs  = fc->coef_probs_16x16;
       coef_counts = fc->coef_counts_16x16;
       if (type == PLANE_TYPE_UV) {

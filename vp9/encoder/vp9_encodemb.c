@@ -335,13 +335,7 @@ static void optimize_b(VP9_COMMON *const cm,
     case TX_4X4: {
       const TX_TYPE tx_type = get_tx_type_4x4(xd, ib);
       default_eob = 16;
-      if (tx_type == DCT_ADST) {
-        scan = vp9_col_scan_4x4;
-      } else if (tx_type == ADST_DCT) {
-        scan = vp9_row_scan_4x4;
-      } else {
-        scan = vp9_default_zig_zag1d_4x4;
-      }
+      scan = get_scan_4x4(tx_type);
       break;
     }
     case TX_8X8: {
@@ -349,13 +343,7 @@ static void optimize_b(VP9_COMMON *const cm,
       const int sz = 3 + mb_width_log2(sb_type);
       const int x = ib & ((1 << sz) - 1), y = ib - x;
       const TX_TYPE tx_type = get_tx_type_8x8(xd, y + (x >> 1));
-      if (tx_type == DCT_ADST) {
-        scan = vp9_col_scan_8x8;
-      } else if (tx_type == ADST_DCT) {
-        scan = vp9_row_scan_8x8;
-      } else {
-        scan = vp9_default_zig_zag1d_8x8;
-      }
+      scan = get_scan_8x8(tx_type);
       default_eob = 64;
       break;
     }
@@ -364,13 +352,7 @@ static void optimize_b(VP9_COMMON *const cm,
       const int sz = 4 + mb_width_log2(sb_type);
       const int x = ib & ((1 << sz) - 1), y = ib - x;
       const TX_TYPE tx_type = get_tx_type_16x16(xd, y + (x >> 2));
-      if (tx_type == DCT_ADST) {
-        scan = vp9_col_scan_16x16;
-      } else if (tx_type == ADST_DCT) {
-        scan = vp9_row_scan_16x16;
-      } else {
-        scan = vp9_default_zig_zag1d_16x16;
-      }
+      scan = get_scan_16x16(tx_type);
       default_eob = 256;
       break;
     }

@@ -223,6 +223,39 @@ void vp9_adapt_zpc_probs(struct VP9Common *cm);
 
 #endif  // CONFIG_CODE_ZEROGROUP
 
+static INLINE const int* get_scan_4x4(TX_TYPE tx_type) {
+  switch (tx_type) {
+    case ADST_DCT:
+      return vp9_row_scan_4x4;
+    case DCT_ADST:
+      return vp9_col_scan_4x4;
+    default:
+      return vp9_default_zig_zag1d_4x4;
+  }
+}
+
+static INLINE const int* get_scan_8x8(TX_TYPE tx_type) {
+  switch (tx_type) {
+    case ADST_DCT:
+      return vp9_row_scan_8x8;
+    case DCT_ADST:
+      return vp9_col_scan_8x8;
+    default:
+      return vp9_default_zig_zag1d_8x8;
+  }
+}
+
+static INLINE const int* get_scan_16x16(TX_TYPE tx_type) {
+  switch (tx_type) {
+    case ADST_DCT:
+      return vp9_row_scan_16x16;
+    case DCT_ADST:
+      return vp9_col_scan_16x16;
+    default:
+      return vp9_default_zig_zag1d_16x16;
+  }
+}
+
 #include "vp9/common/vp9_coefupdateprobs.h"
 
 #endif  // VP9_COMMON_VP9_ENTROPY_H_
