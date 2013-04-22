@@ -282,9 +282,6 @@ typedef struct {
   INTERPOLATIONFILTERTYPE interp_filter;
 
   BLOCK_SIZE_TYPE sb_type;
-#if CONFIG_CODE_NONZEROCOUNT
-  uint16_t nzcs[256+64*2];
-#endif
 } MB_MODE_INFO;
 
 typedef struct {
@@ -363,9 +360,6 @@ struct mb_plane {
   BLOCK_OFFSET((x)->plane[2].field, ((i) - 20), 16))
 
 typedef struct macroblockd {
-#if CONFIG_CODE_NONZEROCOUNT
-  DECLARE_ALIGNED(16, uint16_t, nzcs[256+64*2]);
-#endif
   struct mb_plane plane[MAX_MB_PLANE];
 
   /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
@@ -752,12 +746,6 @@ static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
 
   return size;
 }
-
-#if CONFIG_CODE_NONZEROCOUNT
-static int get_nzc_used(TX_SIZE tx_size) {
-  return (tx_size >= TX_16X16);
-}
-#endif
 
 struct plane_block_idx {
   int plane;

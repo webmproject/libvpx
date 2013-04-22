@@ -162,60 +162,6 @@ static void fill_token_costs(vp9_coeff_count *c,
         }
 }
 
-#if CONFIG_CODE_NONZEROCOUNT
-static void fill_nzc_costs(VP9_COMP *cpi, TX_SIZE tx_size) {
-  int nzc_context, r, b, nzc, values;
-  int cost[16];
-  values = (16 << (2 * tx_size)) + 1;
-
-  for (nzc_context = 0; nzc_context < MAX_NZC_CONTEXTS; ++nzc_context) {
-    for (r = 0; r < REF_TYPES; ++r) {
-      for (b = 0; b < BLOCK_TYPES; ++b) {
-        unsigned int *nzc_costs;
-        if (tx_size == TX_4X4) {
-          vp9_cost_tokens(cost,
-                          cpi->common.fc.nzc_probs_4x4[nzc_context][r][b],
-                          vp9_nzc4x4_tree);
-          nzc_costs = cpi->mb.nzc_costs_4x4[nzc_context][r][b];
-        } else if (tx_size == TX_8X8) {
-          vp9_cost_tokens(cost,
-                          cpi->common.fc.nzc_probs_8x8[nzc_context][r][b],
-                          vp9_nzc8x8_tree);
-          nzc_costs = cpi->mb.nzc_costs_8x8[nzc_context][r][b];
-        } else if (tx_size == TX_16X16) {
-          vp9_cost_tokens(cost,
-                          cpi->common.fc.nzc_probs_16x16[nzc_context][r][b],
-                          vp9_nzc16x16_tree);
-          nzc_costs = cpi->mb.nzc_costs_16x16[nzc_context][r][b];
-        } else {
-          vp9_cost_tokens(cost,
-                          cpi->common.fc.nzc_probs_32x32[nzc_context][r][b],
-                          vp9_nzc32x32_tree);
-          nzc_costs = cpi->mb.nzc_costs_32x32[nzc_context][r][b];
-        }
-
-        for (nzc = 0; nzc < values; ++nzc) {
-          int e, c, totalcost = 0;
-          c = codenzc(nzc);
-          totalcost = cost[c];
-          if ((e = vp9_extranzcbits[c])) {
-            int x = nzc - vp9_basenzcvalue[c];
-            while (e--) {
-              totalcost += vp9_cost_bit(
-                  cpi->common.fc.nzc_pcat_probs[nzc_context]
-                                               [c - NZC_TOKENS_NOEXTRA][e],
-                  ((x >> e) & 1));
-            }
-          }
-          nzc_costs[nzc] = totalcost;
-        }
-      }
-    }
-  }
-}
-#endif
-
-
 static int rd_iifactor[32] =  { 4, 4, 3, 2, 1, 0, 0, 0,
                                 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0, 0, 0, 0, 0, 0,
@@ -313,12 +259,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
                    cpi->common.fc.coef_probs_16x16, TX_16X16);
   fill_token_costs(cpi->mb.token_costs[TX_32X32],
                    cpi->common.fc.coef_probs_32x32, TX_32X32);
-#if CONFIG_CODE_NONZEROCOUNT
-  fill_nzc_costs(cpi, TX_4X4);
-  fill_nzc_costs(cpi, TX_8X8);
-  fill_nzc_costs(cpi, TX_16X16);
-  fill_nzc_costs(cpi, TX_32X32);
-#endif
 
   for (i = 0; i < 2; i++)
     vp9_cost_tokens(cpi->mb.partition_cost[i],
@@ -376,11 +316,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       sizeof(ENTROPY_CONTEXT_PLANES)/sizeof(ENTROPY_CONTEXT);
   TX_TYPE tx_type = DCT_DCT;
 
-#if CONFIG_CODE_NONZEROCOUNT
-  const int nzc_used = get_nzc_used(tx_size);
-  int nzc_context = vp9_get_nzc_context(cm, xd, ib);
-  unsigned int *nzc_cost;
-#endif
 #if CONFIG_CODE_ZEROGROUP
   int last_nz_pos[3] = {-1, -1, -1};  // Encoder only
   int is_eoo_list[3] = {0, 0, 0};
@@ -415,9 +350,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
           get_tx_type_4x4(xd, ib) : DCT_DCT;
       a_ec = *a;
       l_ec = *l;
-#if CONFIG_CODE_NONZEROCOUNT
-      nzc_cost = mb->nzc_costs_4x4[nzc_context][ref][type];
-#endif
       coef_probs = cm->fc.coef_probs_4x4;
       seg_eob = 16;
       if (tx_type == ADST_DCT) {
@@ -447,9 +379,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       } else {
         scan = vp9_default_zig_zag1d_8x8;
       }
-#if CONFIG_CODE_NONZEROCOUNT
-      nzc_cost = mb->nzc_costs_8x8[nzc_context][ref][type];
-#endif
       coef_probs = cm->fc.coef_probs_8x8;
       seg_eob = 64;
 #if CONFIG_CODE_ZEROGROUP
@@ -470,9 +399,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       } else {
         scan = vp9_default_zig_zag1d_16x16;
       }
-#if CONFIG_CODE_NONZEROCOUNT
-      nzc_cost = mb->nzc_costs_16x16[nzc_context][ref][type];
-#endif
       coef_probs = cm->fc.coef_probs_16x16;
       seg_eob = 256;
       if (type == PLANE_TYPE_UV) {
@@ -489,9 +415,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
     }
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
-#if CONFIG_CODE_NONZEROCOUNT
-      nzc_cost = mb->nzc_costs_32x32[nzc_context][ref][type];
-#endif
       coef_probs = cm->fc.coef_probs_32x32;
       seg_eob = 1024;
       if (type == PLANE_TYPE_UV) {
@@ -524,11 +447,8 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   nb = vp9_get_coef_neighbors_handle(scan, &pad);
   default_eob = seg_eob;
 
-#if CONFIG_CODE_NONZEROCOUNT
-  if (!nzc_used)
-#endif
-    if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
-      seg_eob = 0;
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
+    seg_eob = 0;
 
   /* sanity check to ensure that we do not have spurious non-zero q values */
   if (eob < seg_eob)
@@ -545,16 +465,10 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   }
 #endif
   {
-#if CONFIG_CODE_NONZEROCOUNT
-    int nzc = 0;
-#endif
     for (c = 0; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].token;
       int band = get_coef_band(scan, tx_size, c);
-#if CONFIG_CODE_NONZEROCOUNT
-      nzc += (v != 0);
-#endif
       if (c)
         pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
 #if CONFIG_CODE_ZEROGROUP
@@ -569,11 +483,8 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
 #else
       cost += token_costs[band][pt][t] + vp9_dct_value_cost_ptr[v];
 #endif
-#if CONFIG_CODE_NONZEROCOUNT
-      if (!nzc_used)
-#endif
-        if (!c || token_cache[scan[c - 1]])
-          cost += vp9_cost_bit(coef_probs[type][ref][band][pt][0], 1);
+      if (!c || token_cache[scan[c - 1]])
+        cost += vp9_cost_bit(coef_probs[type][ref][band][pt][0], 1);
       token_cache[scan[c]] = t;
 #if CONFIG_CODE_ZEROGROUP
       if (t == ZERO_TOKEN && !skip_coef_val) {
@@ -632,22 +543,17 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       is_last_zero[o] = (t == ZERO_TOKEN);
 #endif
     }
-#if CONFIG_CODE_NONZEROCOUNT
-    if (nzc_used)
-      cost += nzc_cost[nzc];
-    else
-#endif
-      if (c < seg_eob) {
-        if (c)
-          pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
-        cost += mb->token_costs[tx_size][type][ref]
-                               [get_coef_band(scan, tx_size, c)]
-                               [pt][DCT_EOB_TOKEN];
-      }
+    if (c < seg_eob) {
+      if (c)
+        pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
+      cost += mb->token_costs[tx_size][type][ref]
+          [get_coef_band(scan, tx_size, c)]
+          [pt][DCT_EOB_TOKEN];
+    }
   }
 
-  // is eob first coefficient;
-  pt = (c > 0);
+    // is eob first coefficient;
+    pt = (c > 0);
   *a = *l = pt;
   if (tx_size >= TX_8X8) {
     a[1] = l[1] = pt;

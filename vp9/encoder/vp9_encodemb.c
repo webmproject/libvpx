@@ -326,24 +326,6 @@ static void optimize_b(VP9_COMMON *const cm,
   int const *scan, *nb;
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
-#if CONFIG_CODE_NONZEROCOUNT
-  // TODO(debargha): the dynamic programming approach used in this function
-  // is not compatible with the true rate cost when nzcs are used. Note
-  // the total rate is the sum of the nzc rate and the indicvidual token
-  // rates. The latter part can be optimized in this function, but because
-  // the nzc rate is a function of all the other tokens without a Markov
-  // relationship this rate cannot be considered correctly.
-  // The current implementation uses a suboptimal approach to account for
-  // the nzc rates somewhat, but in reality the optimization approach needs
-  // to change substantially.
-  const int nzc_used = get_nzc_used(tx_size);
-  uint16_t nzc = xd->nzcs[ib];
-  uint16_t nzc0, nzc1;
-  uint16_t final_nzc = 0, final_nzc_exp;
-  int nzc_context = vp9_get_nzc_context(cm, xd, ib);
-  unsigned int *nzc_cost;
-  nzc0 = nzc1 = nzc;
-#endif
 
   assert((!type && !pb_idx.plane) || (type && pb_idx.plane));
   dqcoeff_ptr = BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block, 16);
@@ -353,9 +335,6 @@ static void optimize_b(VP9_COMMON *const cm,
     case TX_4X4: {
       const TX_TYPE tx_type = get_tx_type_4x4(xd, ib);
       default_eob = 16;
-#if CONFIG_CODE_NONZEROCOUNT
-      nzc_cost = mb->nzc_costs_4x4[nzc_context][ref][type];
-#endif
       if (tx_type == DCT_ADST) {
         scan = vp9_col_scan_4x4;
       } else if (tx_type == ADST_DCT) {
@@ -378,9 +357,6 @@ static void optimize_b(VP9_COMMON *const cm,
         scan = vp9_default_zig_zag1d_8x8;
       }
       default_eob = 64;
-#if CONFIG_CODE_NONZEROCOUNT
-      nzc_cost = mb->nzc_costs_8x8[nzc_context][ref][type];
-#endif
       break;
     }
     case TX_16X16: {
@@ -396,17 +372,11 @@ static void optimize_b(VP9_COMMON *const cm,
         scan = vp9_default_zig_zag1d_16x16;
       }
       default_eob = 256;
-#if CONFIG_CODE_NONZEROCOUNT
-      nzc_cost = mb->nzc_costs_16x16[nzc_context][ref][type];
-#endif
       break;
     }
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
       default_eob = 1024;
-#if CONFIG_CODE_NONZEROCOUNT
-      nzc_cost = mb->nzc_costs_32x32[nzc_context][ref][type];
-#endif
       break;
   }
   assert(eob <= default_eob);
@@ -418,11 +388,7 @@ static void optimize_b(VP9_COMMON *const cm,
   rddiv = mb->rddiv;
   memset(best_index, 0, sizeof(best_index));
   /* Initialize the sentinel node of the trellis. */
-#if CONFIG_CODE_NONZEROCOUNT
-  tokens[eob][0].rate = nzc_used ? nzc_cost[nzc] : 0;
-#else
   tokens[eob][0].rate = 0;
-#endif
   tokens[eob][0].error = 0;
   tokens[eob][0].next = default_eob;
   tokens[eob][0].token = DCT_EOB_TOKEN;
@@ -435,9 +401,6 @@ static void optimize_b(VP9_COMMON *const cm,
 
   for (i = eob; i-- > i0;) {
     int base_bits, d2, dx;
-#if CONFIG_CODE_NONZEROCOUNT
-    int new_nzc0, new_nzc1;
-#endif
 
     rc = scan[i];
     x = qcoeff_ptr[rc];
@@ -472,9 +435,6 @@ static void optimize_b(VP9_COMMON *const cm,
       tokens[i][0].token = t0;
       tokens[i][0].qc = x;
       best_index[i][0] = best;
-#if CONFIG_CODE_NONZEROCOUNT
-      new_nzc0 = (best ? nzc1 : nzc0);
-#endif
 
       /* Evaluate the second possibility for this state. */
       rate0 = tokens[next][0].rate;
@@ -501,14 +461,6 @@ static void optimize_b(VP9_COMMON *const cm,
              DCT_EOB_TOKEN : ZERO_TOKEN;
         t1 = tokens[next][1].token == DCT_EOB_TOKEN ?
              DCT_EOB_TOKEN : ZERO_TOKEN;
-#if CONFIG_CODE_NONZEROCOUNT
-        // Account for rate drop because of the nzc change.
-        // TODO(debargha): Find a better solution
-        if (nzc_used) {
-          rate0 -= nzc_cost[nzc0] - nzc_cost[nzc0 - 1];
-          rate1 -= nzc_cost[nzc1] - nzc_cost[nzc1 - 1];
-        }
-#endif
       } else {
         t0 = t1 = (vp9_dct_value_tokens_ptr + x)->token;
       }
@@ -543,11 +495,6 @@ static void optimize_b(VP9_COMMON *const cm,
       tokens[i][1].token = best ? t1 : t0;
       tokens[i][1].qc = x;
       best_index[i][1] = best;
-#if CONFIG_CODE_NONZEROCOUNT
-      new_nzc1 = (best ? nzc1 : nzc0) - (!x);
-      nzc0 = new_nzc0;
-      nzc1 = new_nzc1;
-#endif
       /* Finally, make this the new head of the trellis. */
       next = i;
     }
@@ -586,9 +533,6 @@ static void optimize_b(VP9_COMMON *const cm,
   rate1 += mb->token_costs[tx_size][type][ref][band][pt][t1];
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
-#if CONFIG_CODE_NONZEROCOUNT
-  final_nzc_exp = (best ? nzc1 : nzc0);
-#endif
   final_eob = i0 - 1;
   vpx_memset(qcoeff_ptr, 0, sizeof(*qcoeff_ptr) * (16 << (tx_size * 2)));
   vpx_memset(dqcoeff_ptr, 0, sizeof(*dqcoeff_ptr) * (16 << (tx_size * 2)));
@@ -596,9 +540,6 @@ static void optimize_b(VP9_COMMON *const cm,
     x = tokens[i][best].qc;
     if (x) {
       final_eob = i;
-#if CONFIG_CODE_NONZEROCOUNT
-      ++final_nzc;
-#endif
     }
     rc = scan[i];
     qcoeff_ptr[rc] = x;
@@ -611,10 +552,6 @@ static void optimize_b(VP9_COMMON *const cm,
 
   xd->plane[pb_idx.plane].eobs[pb_idx.block] = final_eob;
   *a = *l = (final_eob > 0);
-#if CONFIG_CODE_NONZEROCOUNT
-  assert(final_nzc == final_nzc_exp);
-  xd->nzcs[ib] = final_nzc;
-#endif
 }
 
 void vp9_optimize_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x,

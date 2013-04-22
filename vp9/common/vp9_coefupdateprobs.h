@@ -18,14 +18,6 @@ static const vp9_prob vp9_coef_update_prob[ENTROPY_NODES] = {
   252, 252, 252, 252, 252, 252, 252, 252, 252, 252, 252
 };
 
-#if CONFIG_CODE_NONZEROCOUNT
-#define NZC_UPDATE_PROB_4X4     252
-#define NZC_UPDATE_PROB_8X8     252
-#define NZC_UPDATE_PROB_16X16   252
-#define NZC_UPDATE_PROB_32X32   252
-#define NZC_UPDATE_PROB_PCAT    252
-#endif
-
 #if CONFIG_CODE_ZEROGROUP
 #define ZPC_UPDATE_PROB         248
 #endif
