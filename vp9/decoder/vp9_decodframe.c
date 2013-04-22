@@ -1554,18 +1554,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   pc->clamp_type = (CLAMP_TYPE)vp9_read_bit(&header_bc);
   pc->error_resilient_mode = vp9_read_bit(&header_bc);
 
-  setup_segmentation(pc, xd, &header_bc);
-
-  setup_pred_probs(pc, &header_bc);
-
-  xd->lossless = vp9_read_bit(&header_bc);
-  pc->txfm_mode = xd->lossless ? ONLY_4X4 : read_txfm_mode(&header_bc);
-  if (pc->txfm_mode == TX_MODE_SELECT) {
-    pc->prob_tx[0] = vp9_read_prob(&header_bc);
-    pc->prob_tx[1] = vp9_read_prob(&header_bc);
-    pc->prob_tx[2] = vp9_read_prob(&header_bc);
-  }
-
   setup_loopfilter(pc, xd, &header_bc);
 
   // Dummy read for now
@@ -1629,6 +1617,18 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   pc->frame_context_idx = vp9_read_literal(&header_bc, NUM_FRAME_CONTEXTS_LG2);
   vpx_memcpy(&pc->fc, &pc->frame_contexts[pc->frame_context_idx],
              sizeof(pc->fc));
+
+  setup_segmentation(pc, xd, &header_bc);
+
+  setup_pred_probs(pc, &header_bc);
+
+  xd->lossless = vp9_read_bit(&header_bc);
+  pc->txfm_mode = xd->lossless ? ONLY_4X4 : read_txfm_mode(&header_bc);
+  if (pc->txfm_mode == TX_MODE_SELECT) {
+    pc->prob_tx[0] = vp9_read_prob(&header_bc);
+    pc->prob_tx[1] = vp9_read_prob(&header_bc);
+    pc->prob_tx[2] = vp9_read_prob(&header_bc);
+  }
 
   // Read inter mode probability context updates
   if (pc->frame_type != KEY_FRAME) {
