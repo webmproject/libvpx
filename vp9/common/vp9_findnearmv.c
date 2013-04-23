@@ -77,11 +77,11 @@ unsigned int vp9_variance16x2_c(const uint8_t *src_ptr,
 }
 
 unsigned int vp9_sub_pixel_variance16x2_c(const uint8_t *src_ptr,
-                                          int  src_pixels_per_line,
+                                          int  source_stride,
                                           int  xoffset,
                                           int  yoffset,
-                                          const uint8_t *dst_ptr,
-                                          int dst_pixels_per_line,
+                                          const uint8_t *ref_ptr,
+                                          int ref_stride,
                                           unsigned int *sse) {
   uint16_t FData3[16 * 3];  // Temp data buffer used in filtering
   uint8_t temp2[2 * 16];
@@ -91,18 +91,18 @@ unsigned int vp9_sub_pixel_variance16x2_c(const uint8_t *src_ptr,
   VFilter = VP9_BILINEAR_FILTERS_2TAP(yoffset);
 
   var_filter_block2d_bil_first_pass(src_ptr, FData3,
-                                    src_pixels_per_line, 1, 3, 16, HFilter);
+                                    source_stride, 1, 3, 16, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 16, 16, 2, 16, VFilter);
 
-  return vp9_variance16x2_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance16x2_c(temp2, 16, ref_ptr, ref_stride, sse);
 }
 
 unsigned int vp9_sub_pixel_variance2x16_c(const uint8_t *src_ptr,
-                                          int  src_pixels_per_line,
+                                          int  source_stride,
                                           int  xoffset,
                                           int  yoffset,
-                                          const uint8_t *dst_ptr,
-                                          int dst_pixels_per_line,
+                                          const uint8_t *ref_ptr,
+                                          int ref_stride,
                                           unsigned int *sse) {
   uint16_t FData3[2 * 17];  // Temp data buffer used in filtering
   uint8_t temp2[2 * 16];
@@ -112,10 +112,10 @@ unsigned int vp9_sub_pixel_variance2x16_c(const uint8_t *src_ptr,
   VFilter = VP9_BILINEAR_FILTERS_2TAP(yoffset);
 
   var_filter_block2d_bil_first_pass(src_ptr, FData3,
-                                    src_pixels_per_line, 1, 17, 2, HFilter);
+                                    source_stride, 1, 17, 2, HFilter);
   var_filter_block2d_bil_second_pass(FData3, temp2, 2, 2, 16, 2, VFilter);
 
-  return vp9_variance2x16_c(temp2, 2, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance2x16_c(temp2, 2, ref_ptr, ref_stride, sse);
 }
 
 #if CONFIG_USESELECTREFMV
