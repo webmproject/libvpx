@@ -796,6 +796,8 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
   xd->prev_mode_info_context = cm->prev_mi + mb_idx;
   xd->above_context = cm->above_context + mb_col;
   xd->left_context = cm->left_context + mb_row % 4;
+  xd->above_seg_context = cm->above_seg_context + mb_col;
+  xd->left_seg_context  = cm->left_seg_context + (mb_row & 3);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
@@ -865,10 +867,14 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
     return;
 
   if (bsize > BLOCK_SIZE_MB16X16) {
+    int pl;
     // read the partition information
+    xd->left_seg_context = pc->left_seg_context + (mb_row & 3);
+    xd->above_seg_context = pc->above_seg_context + mb_col;
+    pl = partition_plane_context(xd, bsize);
     partition = treed_read(r, vp9_partition_tree,
-                           pc->fc.partition_prob[bsl - 1]);
-    pc->fc.partition_counts[bsl - 1][partition]++;
+                           pc->fc.partition_prob[pl]);
+    pc->fc.partition_counts[pl][partition]++;
   }
 
   switch (partition) {
@@ -907,6 +913,13 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
     default:
       assert(0);
   }
+  // update partition context
+  if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_SB32X32))
+    return;
+
+  xd->left_seg_context = pc->left_seg_context + (mb_row & 3);
+  xd->above_seg_context = pc->above_seg_context + mb_col;
+  update_partition_context(xd, subsize, bsize);
 }
 
 /* Decode a row of Superblocks (4x4 region of MBs) */
@@ -918,6 +931,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader* r) {
        mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
     // For a SB there are 2 left contexts, each pertaining to a MB row within
     vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
+    vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
     for (mb_col = pc->cur_tile_mb_col_start;
          mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
       decode_modes_sb(pbi, mb_row, mb_col, r, BLOCK_SIZE_SB64X64);
@@ -1359,7 +1373,10 @@ static void decode_tiles(VP9D_COMP *pbi,
   pc->tile_rows    = 1 << pc->log2_tile_rows;
 
   vpx_memset(pc->above_context, 0,
-             sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
+             sizeof(ENTROPY_CONTEXT_PLANES) * mb_cols_aligned_to_sb(pc));
+
+  vpx_memset(pc->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
+                                       mb_cols_aligned_to_sb(pc));
 
   if (pbi->oxcf.inv_tile_order) {
     const int n_cols = pc->tile_columns;

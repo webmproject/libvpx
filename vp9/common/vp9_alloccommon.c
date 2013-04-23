@@ -57,11 +57,12 @@ void vp9_free_frame_buffers(VP9_COMMON *oci) {
   vpx_free(oci->above_context);
   vpx_free(oci->mip);
   vpx_free(oci->prev_mip);
+  vpx_free(oci->above_seg_context);
 
   oci->above_context = 0;
   oci->mip = 0;
   oci->prev_mip = 0;
-
+  oci->above_seg_context = 0;
 }
 
 int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
@@ -130,12 +131,23 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   oci->prev_mi = oci->prev_mip + oci->mode_info_stride + 1;
 
   oci->above_context =
-    vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * (3 + oci->mb_cols), 1);
+    vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * mb_cols_aligned_to_sb(oci), 1);
 
   if (!oci->above_context) {
     vp9_free_frame_buffers(oci);
     return 1;
   }
+
+  oci->above_seg_context =
+    vpx_calloc(sizeof(PARTITION_CONTEXT) * mb_cols_aligned_to_sb(oci), 1);
+
+  if (!oci->above_seg_context) {
+    vp9_free_frame_buffers(oci);
+    return 1;
+  }
+
+  vp9_update_mode_info_border(oci, oci->mip);
+  vp9_update_mode_info_in_image(oci, oci->mi);
 
   return 0;
 }

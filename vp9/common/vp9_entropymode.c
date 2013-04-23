@@ -152,13 +152,22 @@ const int vp9_mbsplit_count [VP9_NUMMBSPLITS] = { 2, 2, 4, 16};
 const vp9_prob vp9_mbsplit_probs [VP9_NUMMBSPLITS - 1] = { 110, 111, 150};
 
 #if CONFIG_SBSEGMENT
-const vp9_prob vp9_partition_probs[PARTITION_PLANES][PARTITION_TYPES - 1] = {
-  {110, 111, 150},
-  {110, 111, 150},
+const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
+                                  [PARTITION_TYPES - 1] = {
+  {202, 162, 107},
+  {16,  2,   169},
+  {3,   246,  19},
+  {104, 90,  134},
+  {183, 70,  109},
+  {30,  14,  162},
+  {67,  208,  22},
+  {4,   17,   5},
 };
 #else
-const vp9_prob vp9_partition_probs[PARTITION_PLANES][PARTITION_TYPES - 1] = {
-  {200}, {200},
+const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
+                                  [PARTITION_TYPES - 1] = {
+  {200}, {200}, {200}, {200},
+  {200}, {200}, {200}, {200},
 };
 #endif
 
@@ -660,7 +669,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                                         interintra_prob, factor);
   }
 #endif
-  for (i = 0; i < PARTITION_PLANES; i++)
+  for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
     update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
                       fc->partition_counts[i], fc->pre_partition_prob[i],
                       fc->partition_prob[i], 0);

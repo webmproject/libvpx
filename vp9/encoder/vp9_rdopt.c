@@ -260,7 +260,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   fill_token_costs(cpi->mb.token_costs[TX_32X32],
                    cpi->common.fc.coef_probs_32x32, TX_32X32);
 
-  for (i = 0; i < 2; i++)
+  for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
     vp9_cost_tokens(cpi->mb.partition_cost[i],
                     cpi->common.fc.partition_prob[i],
                     vp9_partition_tree);

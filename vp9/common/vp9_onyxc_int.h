@@ -68,7 +68,7 @@ typedef struct frame_contexts {
   vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob mbsplit_prob[VP9_NUMMBSPLITS - 1];
-  vp9_prob partition_prob[PARTITION_PLANES][PARTITION_TYPES - 1];
+  vp9_prob partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 
   vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES];
@@ -90,7 +90,7 @@ typedef struct frame_contexts {
   vp9_prob pre_i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob pre_sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob pre_mbsplit_prob[VP9_NUMMBSPLITS - 1];
-  vp9_prob pre_partition_prob[PARTITION_PLANES][PARTITION_TYPES - 1];
+  vp9_prob pre_partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
   unsigned int bmode_counts[VP9_NKF_BINTRAMODES];
   unsigned int ymode_counts[VP9_YMODES];   /* interframe intra mode probs */
   unsigned int sb_ymode_counts[VP9_I32X32_MODES];
@@ -98,7 +98,7 @@ typedef struct frame_contexts {
   unsigned int i8x8_mode_counts[VP9_I8X8_MODES];   /* interframe intra probs */
   unsigned int sub_mv_ref_counts[SUBMVREF_COUNT][VP9_SUBMVREFS];
   unsigned int mbsplit_counts[VP9_NUMMBSPLITS];
-  unsigned int partition_counts[PARTITION_PLANES][PARTITION_TYPES];
+  unsigned int partition_counts[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
   vp9_coeff_probs pre_coef_probs_4x4[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_8x8[BLOCK_TYPES];
@@ -251,6 +251,10 @@ typedef struct VP9Common {
   ENTROPY_CONTEXT_PLANES *above_context;   /* row of context for each plane */
   ENTROPY_CONTEXT_PLANES left_context[4];  /* (up to) 4 contexts "" */
 
+  // partition contexts
+  PARTITION_CONTEXT *above_seg_context;
+  PARTITION_CONTEXT left_seg_context[4];
+
   /* keyframe block modes are predicted by their above, left neighbors */
 
   vp9_prob kf_bmode_prob[VP9_KF_BINTRAMODES]
@@ -331,6 +335,10 @@ static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
   *idx = new_idx;
 
   buf[new_idx]++;
+}
+
+static int mb_cols_aligned_to_sb(VP9_COMMON *cm) {
+  return (cm->mb_cols + 3) & ~3;
 }
 
 // TODO(debargha): merge the two functions

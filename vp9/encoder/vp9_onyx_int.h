@@ -103,7 +103,7 @@ typedef struct {
   vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob mbsplit_prob[VP9_NUMMBSPLITS - 1];
-  vp9_prob partition_prob[PARTITION_PLANES][PARTITION_TYPES - 1];
+  vp9_prob partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
@@ -457,7 +457,7 @@ typedef struct VP9_COMP {
   int sub_mv_ref_count[SUBMVREF_COUNT][VP9_SUBMVREFS];
   int mbsplit_count[VP9_NUMMBSPLITS];
   int y_uv_mode_count[VP9_YMODES][VP9_UV_MODES];
-  unsigned int partition_count[PARTITION_PLANES][PARTITION_TYPES];
+  unsigned int partition_count[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 #if CONFIG_COMP_INTERINTRA_PRED
   unsigned int interintra_count[2];
   unsigned int interintra_select_count[2];

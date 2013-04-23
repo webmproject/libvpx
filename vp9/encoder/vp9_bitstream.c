@@ -1176,6 +1176,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
                            int mb_row, int mb_col,
                            BLOCK_SIZE_TYPE bsize) {
   VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *xd = &cpi->mb.e_mbd;
   const int mis = cm->mode_info_stride;
   int bwl, bhl;
 #if CONFIG_SBSEGMENT
@@ -1210,22 +1211,32 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   else
     assert(0);
 
-  if (bsize > BLOCK_SIZE_MB16X16)
+  if (bsize > BLOCK_SIZE_MB16X16) {
+    int pl;
+    xd->left_seg_context = cm->left_seg_context + (mb_row & 3);
+    xd->above_seg_context = cm->above_seg_context + mb_col;
+    pl = partition_plane_context(xd, bsize);
     // encode the partition information
-    write_token(bc, vp9_partition_tree, cm->fc.partition_prob[bsl - 1],
+    write_token(bc, vp9_partition_tree, cm->fc.partition_prob[pl],
                 vp9_partition_encodings + partition);
+  }
 
   switch (partition) {
     case PARTITION_NONE:
+      subsize = bsize;
       write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
       break;
 #if CONFIG_SBSEGMENT
     case PARTITION_HORZ:
+      subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB64X32 :
+                                                BLOCK_SIZE_SB32X16;
       write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
       if ((mb_row + bh) < cm->mb_rows)
         write_modes_b(cpi, m + bh * mis, bc, tok, tok_end, mb_row + bh, mb_col);
       break;
     case PARTITION_VERT:
+      subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB32X64 :
+                                                BLOCK_SIZE_SB16X32;
       write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
       if ((mb_col + bw) < cm->mb_cols)
         write_modes_b(cpi, m + bw, bc, tok, tok_end, mb_row, mb_col + bw);
@@ -1249,6 +1260,14 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
     default:
       assert(0);
   }
+
+  // update partition context
+  if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_SB32X32))
+    return;
+
+  xd->left_seg_context = cm->left_seg_context + (mb_row & 3);
+  xd->above_seg_context = cm->above_seg_context + mb_col;
+  update_partition_context(xd, subsize, bsize);
 }
 
 static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
@@ -1259,9 +1278,13 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
   int mb_row, mb_col;
 
   m_ptr += c->cur_tile_mb_col_start + c->cur_tile_mb_row_start * mis;
+  vpx_memset(c->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
+                                       mb_cols_aligned_to_sb(c));
+
   for (mb_row = c->cur_tile_mb_row_start;
        mb_row < c->cur_tile_mb_row_end; mb_row += 4, m_ptr += 4 * mis) {
     m = m_ptr;
+    vpx_memset(c->left_seg_context, 0, sizeof(c->left_seg_context));
     for (mb_col = c->cur_tile_mb_col_start;
          mb_col < c->cur_tile_mb_col_end; mb_col += 4, m += 4)
       write_modes_sb(cpi, m, bc, tok, tok_end, mb_row, mb_col,
@@ -2252,14 +2275,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       }
     }
     update_mbintra_mode_probs(cpi, &header_bc);
-
-    for (i = 0; i < PARTITION_PLANES; i++) {
-      vp9_prob Pnew[PARTITION_TYPES - 1];
-      unsigned int bct[PARTITION_TYPES - 1][2];
-      update_mode(&header_bc, PARTITION_TYPES, vp9_partition_encodings,
-                  vp9_partition_tree, Pnew, pc->fc.partition_prob[i], bct,
-                  (unsigned int *)cpi->partition_count[i]);
-    }
 
     vp9_write_nmv_probs(cpi, xd->allow_high_precision_mv, &header_bc);
   }
