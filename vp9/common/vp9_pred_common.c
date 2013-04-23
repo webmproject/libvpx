@@ -21,83 +21,72 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
                                    const MACROBLOCKD *const xd,
                                    PRED_ID pred_id) {
   int pred_context;
-  MODE_INFO *m = xd->mode_info_context;
-
+  const MODE_INFO *const mi = xd->mode_info_context;
+  const MODE_INFO *const above_mi = mi - cm->mode_info_stride;
+  const MODE_INFO *const left_mi = mi - 1;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   switch (pred_id) {
     case PRED_SEG_ID:
-      pred_context = (m - cm->mode_info_stride)->mbmi.seg_id_predicted;
+      pred_context = above_mi->mbmi.seg_id_predicted;
       if (xd->left_available)
-        pred_context += (m - 1)->mbmi.seg_id_predicted;
+        pred_context += left_mi->mbmi.seg_id_predicted;
       break;
 
     case PRED_REF:
-      pred_context = (m - cm->mode_info_stride)->mbmi.ref_predicted;
+      pred_context = above_mi->mbmi.ref_predicted;
       if (xd->left_available)
-        pred_context += (m - 1)->mbmi.ref_predicted;
+        pred_context += left_mi->mbmi.ref_predicted;
       break;
 
     case PRED_COMP:
-      // Context based on use of comp pred flag by neighbours
-      // pred_context =
-      //   ((m - 1)->mbmi.second_ref_frame > INTRA_FRAME) +
-      //    ((m - cm->mode_info_stride)->mbmi.second_ref_frame > INTRA_FRAME);
-
-      // Context based on mode and reference frame
-      // if ( m->mbmi.ref_frame == LAST_FRAME )
-      //    pred_context = 0 + (m->mbmi.mode != ZEROMV);
-      // else if ( m->mbmi.ref_frame == GOLDEN_FRAME )
-      //    pred_context = 2 + (m->mbmi.mode != ZEROMV);
-      // else
-      //    pred_context = 4 + (m->mbmi.mode != ZEROMV);
-
-      if (m->mbmi.ref_frame == LAST_FRAME)
+      if (mi->mbmi.ref_frame == LAST_FRAME)
         pred_context = 0;
       else
         pred_context = 1;
-
       break;
 
     case PRED_MBSKIP:
-      pred_context = (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
+      pred_context = above_mi->mbmi.mb_skip_coeff;
       if (xd->left_available)
-        pred_context += (m - 1)->mbmi.mb_skip_coeff;
+        pred_context += left_mi->mbmi.mb_skip_coeff;
       break;
 
-    case PRED_SWITCHABLE_INTERP:
-      {
-        int left_in_image = xd->left_available && (m - 1)->mbmi.mb_in_image;
-        int above_in_image = (m - cm->mode_info_stride)->mbmi.mb_in_image;
-        int left_mode = (m - 1)->mbmi.mode;
-        int above_mode = (m - cm->mode_info_stride)->mbmi.mode;
-        int left_interp, above_interp;
-        if (left_in_image && left_mode >= NEARESTMV && left_mode <= SPLITMV)
-          left_interp = vp9_switchable_interp_map[(m - 1)->mbmi.interp_filter];
-        else
-          left_interp = VP9_SWITCHABLE_FILTERS;
-        assert(left_interp != -1);
-        if (above_in_image && above_mode >= NEARESTMV && above_mode <= SPLITMV)
-          above_interp = vp9_switchable_interp_map[
-              (m - cm->mode_info_stride)->mbmi.interp_filter];
-        else
-          above_interp = VP9_SWITCHABLE_FILTERS;
-        assert(above_interp != -1);
+    case PRED_SWITCHABLE_INTERP: {
+      // left
+      const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
+      const int left_mv_pred = left_mi->mbmi.mode >= NEARESTMV &&
+                               left_mi->mbmi.mode <= SPLITMV;
+      const int left_interp = left_in_image && left_mv_pred ?
+                    vp9_switchable_interp_map[left_mi->mbmi.interp_filter] :
+                    VP9_SWITCHABLE_FILTERS;
 
-        if (left_interp == above_interp)
-          pred_context = left_interp;
-        else if (left_interp == VP9_SWITCHABLE_FILTERS &&
-                 above_interp != VP9_SWITCHABLE_FILTERS)
-          pred_context = above_interp;
-        else if (left_interp != VP9_SWITCHABLE_FILTERS &&
-                 above_interp == VP9_SWITCHABLE_FILTERS)
-          pred_context = left_interp;
-        else
-          pred_context = VP9_SWITCHABLE_FILTERS;
-      }
+      // above
+      const int above_in_image = above_mi->mbmi.mb_in_image;
+      const int above_mv_pred = above_mi->mbmi.mode >= NEARESTMV &&
+                                above_mi->mbmi.mode <= SPLITMV;
+      const int above_interp = above_in_image && above_mv_pred ?
+                    vp9_switchable_interp_map[above_mi->mbmi.interp_filter] :
+                    VP9_SWITCHABLE_FILTERS;
+
+      assert(left_interp != -1);
+      assert(above_interp != -1);
+
+      if (left_interp == above_interp)
+        pred_context = left_interp;
+      else if (left_interp == VP9_SWITCHABLE_FILTERS &&
+               above_interp != VP9_SWITCHABLE_FILTERS)
+         pred_context = above_interp;
+      else if (left_interp != VP9_SWITCHABLE_FILTERS &&
+               above_interp == VP9_SWITCHABLE_FILTERS)
+        pred_context = left_interp;
+      else
+        pred_context = VP9_SWITCHABLE_FILTERS;
+
       break;
+    }
 
     default:
       pred_context = 0;  // *** add error trap code.
