@@ -24,23 +24,6 @@ typedef struct {
 } search_site;
 
 typedef struct block {
-  // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
-  int16_t *quant;
-  int16_t *quant_fast;      // fast quant deprecated for now
-  uint8_t *quant_shift;
-  int16_t *zbin;
-  int16_t *zbin_8x8;
-  int16_t *zbin_16x16;
-  int16_t *zbin_32x32;
-  int16_t *zrun_zbin_boost;
-  int16_t *zrun_zbin_boost_8x8;
-  int16_t *zrun_zbin_boost_16x16;
-  int16_t *zrun_zbin_boost_32x32;
-  int16_t *round;
-
-  // Zbin Over Quant value
-  short zbin_extra;
-
   uint8_t **base_src;
   uint8_t **base_second_src;
   int src;
@@ -88,6 +71,16 @@ typedef struct {
 struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[64*64]);
   DECLARE_ALIGNED(16, int16_t, coeff[64*64]);
+
+  // Quantizer setings
+  int16_t *quant;
+  uint8_t *quant_shift;
+  int16_t *zbin;
+  int16_t *zrun_zbin_boost;
+  int16_t *round;
+
+  // Zbin Over Quant value
+  int16_t zbin_extra;
 };
 
 typedef struct macroblock MACROBLOCK;
