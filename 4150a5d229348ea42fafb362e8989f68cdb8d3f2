@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//4pY\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-23T20:37:30Z",
+      "side": 1,
+      "message": "can you refactor this so that there\u0027s a single return statement? Seems like we\u0027ve got a few paths of execution here.",
+      "revId": "4150a5d229348ea42fafb362e8989f68cdb8d3f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//4pM\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-23T20:37:30Z",
+      "side": 1,
+      "message": "I think inter mode blocks get their transform size coded the same way -- maybe this should be its own function?",
+      "revId": "4150a5d229348ea42fafb362e8989f68cdb8d3f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//4pU\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-23T20:37:30Z",
+      "side": 1,
+      "message": "might use your allow_16x16 convention from another patch here as well.",
+      "revId": "4150a5d229348ea42fafb362e8989f68cdb8d3f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//4oc\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 624,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-23T20:37:30Z",
+      "side": 1,
+      "message": "there\u0027s a frame type enum I think you could use here, INTER_FRAME and KEY_FRAME, which might be more readable than the magic 0.",
+      "revId": "4150a5d229348ea42fafb362e8989f68cdb8d3f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
