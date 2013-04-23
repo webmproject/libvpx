@@ -151,9 +151,6 @@ struct macroblock {
 
   int encode_breakout;
 
-  // char * gf_active_ptr;
-  signed char *gf_active_ptr;
-
   unsigned char *active_ptr;
 
   vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES];
