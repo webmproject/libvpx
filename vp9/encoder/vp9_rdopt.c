@@ -352,13 +352,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       l_ec = *l;
       coef_probs = cm->fc.coef_probs_4x4;
       seg_eob = 16;
-      if (tx_type == ADST_DCT) {
-        scan = vp9_row_scan_4x4;
-      } else if (tx_type == DCT_ADST) {
-        scan = vp9_col_scan_4x4;
-      } else {
-        scan = vp9_default_zig_zag1d_4x4;
-      }
+      scan = get_scan_4x4(tx_type);
 #if CONFIG_CODE_ZEROGROUP
       zpc_probs = &cm->fc.zpc_probs_4x4;
 #endif
@@ -372,13 +366,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
           get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
       a_ec = (a[0] + a[1]) != 0;
       l_ec = (l[0] + l[1]) != 0;
-      if (tx_type == ADST_DCT) {
-        scan = vp9_row_scan_8x8;
-      } else if (tx_type == DCT_ADST) {
-        scan = vp9_col_scan_8x8;
-      } else {
-        scan = vp9_default_zig_zag1d_8x8;
-      }
+      scan = get_scan_8x8(tx_type);
       coef_probs = cm->fc.coef_probs_8x8;
       seg_eob = 64;
 #if CONFIG_CODE_ZEROGROUP
@@ -392,13 +380,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       const int x = ib & ((1 << sz) - 1), y = ib - x;
       TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
-      if (tx_type == ADST_DCT) {
-        scan = vp9_row_scan_16x16;
-      } else if (tx_type == DCT_ADST) {
-        scan = vp9_col_scan_16x16;
-      } else {
-        scan = vp9_default_zig_zag1d_16x16;
-      }
+      scan = get_scan_16x16(tx_type);
       coef_probs = cm->fc.coef_probs_16x16;
       seg_eob = 256;
       if (type == PLANE_TYPE_UV) {

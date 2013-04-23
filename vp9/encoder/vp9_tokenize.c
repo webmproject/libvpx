@@ -204,14 +204,7 @@ static void tokenize_b(VP9_COMP *cpi,
       a_ec = *a;
       l_ec = *l;
       seg_eob = 16;
-      scan = vp9_default_zig_zag1d_4x4;
-      if (tx_type != DCT_DCT) {
-        if (tx_type == ADST_DCT) {
-          scan = vp9_row_scan_4x4;
-        } else if (tx_type == DCT_ADST) {
-          scan = vp9_col_scan_4x4;
-        }
-      }
+      scan = get_scan_4x4(tx_type);
       counts = cpi->coef_counts_4x4;
       coef_probs = cpi->common.fc.coef_probs_4x4;
 #if CONFIG_CODE_ZEROGROUP
@@ -228,14 +221,7 @@ static void tokenize_b(VP9_COMP *cpi,
       a_ec = (a[0] + a[1]) != 0;
       l_ec = (l[0] + l[1]) != 0;
       seg_eob = 64;
-      scan = vp9_default_zig_zag1d_8x8;
-      if (tx_type != DCT_DCT) {
-        if (tx_type == ADST_DCT) {
-          scan = vp9_row_scan_8x8;
-        } else if (tx_type == DCT_ADST) {
-          scan = vp9_col_scan_8x8;
-        }
-      }
+      scan = get_scan_8x8(tx_type);
       counts = cpi->coef_counts_8x8;
       coef_probs = cpi->common.fc.coef_probs_8x8;
 #if CONFIG_CODE_ZEROGROUP
@@ -257,14 +243,7 @@ static void tokenize_b(VP9_COMP *cpi,
         l_ec = (l[0] + l[1] + l1[0] + l1[1]) != 0;
       }
       seg_eob = 256;
-      scan = vp9_default_zig_zag1d_16x16;
-      if (tx_type != DCT_DCT) {
-        if (tx_type == ADST_DCT) {
-          scan = vp9_row_scan_16x16;
-        } else if (tx_type == DCT_ADST) {
-          scan = vp9_col_scan_16x16;
-        }
-      }
+      scan = get_scan_16x16(tx_type);
       counts = cpi->coef_counts_16x16;
       coef_probs = cpi->common.fc.coef_probs_16x16;
 #if CONFIG_CODE_ZEROGROUP
