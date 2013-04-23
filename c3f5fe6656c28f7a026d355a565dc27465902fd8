@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//4Vw\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 677,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-23T22:47:13Z",
+      "side": 1,
+      "message": "May be just int here? error, coeff0 and dqcoeff0 are signed.",
+      "revId": "c3f5fe6656c28f7a026d355a565dc27465902fd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//4Vo\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-23T22:47:13Z",
+      "side": 1,
+      "message": "The same as above.",
+      "revId": "c3f5fe6656c28f7a026d355a565dc27465902fd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
