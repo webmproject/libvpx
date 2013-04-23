@@ -648,13 +648,13 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                                  rd[TX_4X4][1] : rd[TX_8X8][1];
 }
 
-static int vp9_sb_block_error_c(int16_t *coeff, int16_t *dqcoeff,
-                                int block_size, int shift) {
+static int block_error(int16_t *coeff, int16_t *dqcoeff,
+                       int block_size, int shift) {
   int i;
   int64_t error = 0;
 
   for (i = 0; i < block_size; i++) {
-    unsigned int this_diff = coeff[i] - dqcoeff[i];
+    int this_diff = coeff[i] - dqcoeff[i];
     error += this_diff * this_diff;
   }
   error >>= shift;
@@ -662,24 +662,24 @@ static int vp9_sb_block_error_c(int16_t *coeff, int16_t *dqcoeff,
   return error > INT_MAX ? INT_MAX : (int)error;
 }
 
-static int vp9_sb_uv_block_error_c(int16_t *coeff,
-                                   int16_t *dqcoeff0, int16_t *dqcoeff1,
-                                   int block_size, int shift) {
-  int i;
-  int64_t error = 0;
+static int block_error_sby(MACROBLOCK *x, int block_size, int shift) {
+  return block_error(x->plane[0].coeff, x->e_mbd.plane[0].dqcoeff,
+                     block_size, shift);
+}
 
-  for (i = 0; i < block_size / 2; i++) {
-    unsigned int this_diff = coeff[i] - dqcoeff0[i];
-    error += this_diff * this_diff;
-  }
-  coeff += block_size / 2;
-  for (i = 0; i < block_size / 2; i++) {
-    unsigned int this_diff = coeff[i] - dqcoeff1[i];
-    error += this_diff * this_diff;
-  }
-  error >>= shift;
+static int block_error_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize, int shift) {
+  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
+  int64_t sum = 0;
+  int plane;
 
-  return error > INT_MAX ? INT_MAX : (int)error;
+  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
+    const int subsampling = x->e_mbd.plane[plane].subsampling_x +
+                            x->e_mbd.plane[plane].subsampling_y;
+    sum += block_error(x->plane[plane].coeff, x->e_mbd.plane[plane].dqcoeff,
+                       16 << (bwl + bhl - subsampling), 0);
+  }
+  sum >>= shift;
+  return sum > INT_MAX ? INT_MAX : (int)sum;
 }
 
 static int rdcost_sby_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -716,8 +716,7 @@ static void super_block_yrd_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
   vp9_transform_sby_4x4(x, bsize);
   vp9_quantize_sby_4x4(x, bsize);
 
-  *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff,
-                                     16 << (bwl + bhl), 2);
+  *distortion = block_error_sby(x, 16 << (bwl + bhl), 2);
   *rate       = rdcost_sby_4x4(cm, x, bsize);
   *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
@@ -749,15 +748,14 @@ static int rdcost_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
 static void super_block_yrd_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
                                 int *rate, int *distortion, int *skippable,
                                 BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 1, bhl = mb_height_log2(bsize) + 1;
+  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_8X8;
   vp9_transform_sby_8x8(x, bsize);
   vp9_quantize_sby_8x8(x, bsize);
 
-  *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff,
-                                     64 << (bhl + bwl), 2);
+  *distortion = block_error_sby(x, 16 << (bhl + bwl), 2);
   *rate       = rdcost_sby_8x8(cm, x, bsize);
   *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
@@ -787,15 +785,14 @@ static int rdcost_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
 static void super_block_yrd_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
                                   int *rate, int *distortion, int *skippable,
                                   BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize), bhl = mb_height_log2(bsize);
+  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_16X16;
   vp9_transform_sby_16x16(x, bsize);
   vp9_quantize_sby_16x16(x, bsize);
 
-  *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff,
-                                     256 << (bwl + bhl), 2);
+  *distortion = block_error_sby(x, 16 << (bwl + bhl), 2);
   *rate       = rdcost_sby_16x16(cm, x, bsize);
   *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
@@ -827,15 +824,14 @@ static int rdcost_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
 static void super_block_yrd_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
                                   int *rate, int *distortion, int *skippable,
                                   BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) - 1, bhl = mb_height_log2(bsize) - 1;
+  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
   MACROBLOCKD *const xd = &x->e_mbd;
 
   xd->mode_info_context->mbmi.txfm_size = TX_32X32;
   vp9_transform_sby_32x32(x, bsize);
   vp9_quantize_sby_32x32(x, bsize);
 
-  *distortion = vp9_sb_block_error_c(x->coeff, xd->plane[0].dqcoeff,
-                                     1024 << (bwl + bhl), 0);
+  *distortion = block_error_sby(x, 16 << (bwl + bhl), 0);
   *rate       = rdcost_sby_32x32(cm, x, bsize);
   *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
@@ -1385,17 +1381,13 @@ static int rd_cost_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
 static void super_block_uvrd_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
                                  int *rate, int *distortion, int *skip,
                                  BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
   MACROBLOCKD *const xd = &x->e_mbd;
 
   vp9_transform_sbuv_4x4(x, bsize);
   vp9_quantize_sbuv_4x4(x, bsize);
 
   *rate       = rd_cost_sbuv_4x4(cm, x, bsize);
-  *distortion = vp9_sb_uv_block_error_c(x->coeff + (16 << (bwl + bhl)),
-                                        xd->plane[1].dqcoeff,
-                                        xd->plane[2].dqcoeff,
-                                        32 << (bwl + bhl - 2), 2);
+  *distortion = block_error_sbuv(x, bsize, 2);
   *skip       = vp9_sbuv_is_skippable(xd, bsize);
 }
 
@@ -1430,17 +1422,13 @@ static int rd_cost_sbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
 static void super_block_uvrd_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
                                  int *rate, int *distortion, int *skip,
                                  BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 1, bhl = mb_height_log2(bsize) + 1;
   MACROBLOCKD *const xd = &x->e_mbd;
 
   vp9_transform_sbuv_8x8(x, bsize);
   vp9_quantize_sbuv_8x8(x, bsize);
 
   *rate       = rd_cost_sbuv_8x8(cm, x, bsize);
-  *distortion = vp9_sb_uv_block_error_c(x->coeff + (64 << (bwl + bhl)),
-                                        xd->plane[1].dqcoeff,
-                                        xd->plane[2].dqcoeff,
-                                        128 << (bwl + bhl - 2), 2);
+  *distortion = block_error_sbuv(x, bsize, 2);
   *skip       = vp9_sbuv_is_skippable(xd, bsize);
 }
 
@@ -1475,17 +1463,13 @@ static int rd_cost_sbuv_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
 static void super_block_uvrd_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
                                    int *rate, int *distortion, int *skip,
                                    BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize), bhl = mb_height_log2(bsize);
   MACROBLOCKD *const xd = &x->e_mbd;
 
   vp9_transform_sbuv_16x16(x, bsize);
   vp9_quantize_sbuv_16x16(x, bsize);
 
   *rate       = rd_cost_sbuv_16x16(cm, x, bsize);
-  *distortion = vp9_sb_uv_block_error_c(x->coeff + (256 << (bwl + bhl)),
-                                        xd->plane[1].dqcoeff,
-                                        xd->plane[2].dqcoeff,
-                                        512 << (bwl + bhl - 2), 2);
+  *distortion = block_error_sbuv(x, bsize, 2);
   *skip       = vp9_sbuv_is_skippable(xd, bsize);
 }
 
@@ -1521,17 +1505,13 @@ static int rd_cost_sbuv_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
 static void super_block_uvrd_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
                                    int *rate, int *distortion, int *skip,
                                    BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) - 1, bhl = mb_height_log2(bsize) - 1;
   MACROBLOCKD *const xd = &x->e_mbd;
 
   vp9_transform_sbuv_32x32(x, bsize);
   vp9_quantize_sbuv_32x32(x, bsize);
 
   *rate       = rd_cost_sbuv_32x32(cm, x, bsize);
-  *distortion = vp9_sb_uv_block_error_c(x->coeff + (1024 << (bwl + bhl)),
-                                        xd->plane[1].dqcoeff,
-                                        xd->plane[2].dqcoeff,
-                                        2048 << (bwl + bhl - 2), 0);
+  *distortion = block_error_sbuv(x, bsize, 0);
   *skip       = vp9_sbuv_is_skippable(xd, bsize);
 }
 
