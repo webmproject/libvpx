@@ -354,25 +354,26 @@ static void lpf_sb64(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
                      uint8_t *y_ptr, uint8_t *u_ptr, uint8_t *v_ptr,
                      int y_stride, int uv_stride,
                      int y_only, int dering) {
-    lpf_sb32(cm, mode_info_context, mb_row, mb_col,
+  lpf_sb32(cm, mode_info_context, mb_row, mb_col,
       y_ptr, u_ptr, v_ptr,
       y_stride, uv_stride, y_only, dering);
-    lpf_sb32(cm, mode_info_context + 2, mb_row, mb_col + 2,
+  lpf_sb32(cm, mode_info_context + 2, mb_row, mb_col + 2,
       y_ptr + 32, u_ptr + 16, v_ptr + 16,
       y_stride, uv_stride, y_only, dering);
-    lpf_sb32(cm, mode_info_context + cm->mode_info_stride * 2,
+  lpf_sb32(cm, mode_info_context + cm->mode_info_stride * 2,
       mb_row + 2, mb_col,
       y_ptr + 32 * y_stride,
       u_ptr + 16 * uv_stride,
       v_ptr + 16 * uv_stride,
       y_stride, uv_stride, y_only, dering);
-    lpf_sb32(cm, mode_info_context + cm->mode_info_stride * 2 + 2,
+  lpf_sb32(cm, mode_info_context + cm->mode_info_stride * 2 + 2,
       mb_row + 2, mb_col + 2,
       y_ptr + 32 * y_stride + 32,
       u_ptr + 16 * uv_stride + 16,
       v_ptr + 16 * uv_stride + 16,
       y_stride, uv_stride, y_only, dering);
 }
+
 void vp9_loop_filter_frame(VP9_COMMON *cm,
                            MACROBLOCKD *xd,
                            int frame_filter_level,
