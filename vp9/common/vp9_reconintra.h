@@ -21,35 +21,24 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
 B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, BLOCKD *x);
 
 #if CONFIG_COMP_INTERINTRA_PRED
-void vp9_build_interintra_16x16_predictors_mb(MACROBLOCKD *xd,
-                                              uint8_t *ypred,
-                                              uint8_t *upred,
-                                              uint8_t *vpred,
-                                              int ystride,
-                                              int uvstride);
+void vp9_build_interintra_predictors(MACROBLOCKD *xd,
+                                     uint8_t *ypred,
+                                     uint8_t *upred,
+                                     uint8_t *vpred,
+                                     int ystride,
+                                     int uvstride,
+                                     BLOCK_SIZE_TYPE bsize);
 
-void vp9_build_interintra_16x16_predictors_mby(MACROBLOCKD *xd,
-                                               uint8_t *ypred,
-                                               int ystride);
+void vp9_build_interintra_predictors_sby(MACROBLOCKD *xd,
+                                         uint8_t *ypred,
+                                         int ystride,
+                                         BLOCK_SIZE_TYPE bsize);
 
-void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                                uint8_t *upred,
-                                                uint8_t *vpred,
-                                                int uvstride);
+void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
+                                          uint8_t *upred,
+                                          uint8_t *vpred,
+                                          int uvstride,
+                                          BLOCK_SIZE_TYPE bsize);
 #endif  // CONFIG_COMP_INTERINTRA_PRED
-
-void vp9_build_interintra_32x32_predictors_sb(MACROBLOCKD *xd,
-                                              uint8_t *ypred,
-                                              uint8_t *upred,
-                                              uint8_t *vpred,
-                                              int ystride,
-                                              int uvstride);
-
-void vp9_build_interintra_64x64_predictors_sb(MACROBLOCKD *xd,
-                                              uint8_t *ypred,
-                                              uint8_t *upred,
-                                              uint8_t *vpred,
-                                              int ystride,
-                                              int uvstride);
 
 #endif  // VP9_COMMON_VP9_RECONINTRA_H_

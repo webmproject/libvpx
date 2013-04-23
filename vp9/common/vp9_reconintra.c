@@ -465,7 +465,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
                                int interstride,
                                uint8_t *intrapred,
                                int intrastride,
-                               int size) {
+                               int bw, int bh) {
   // TODO(debargha): Explore different ways of combining predictors
   //                 or designing the tables below
   static const int scale_bits = 8;
@@ -483,6 +483,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
      68,  68,  68,  67,  67,  67,  67,  67,
   };
 
+  int size = MAX(bw, bh);
   int size_scale = (size >= 64 ? 1:
                     size == 32 ? 2 :
                     size == 16 ? 4 :
@@ -490,8 +491,8 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
   int i, j;
   switch (mode) {
     case V_PRED:
-      for (i = 0; i < size; ++i) {
-        for (j = 0; j < size; ++j) {
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           int scale = weights1d[i * size_scale];
           interpred[k] =
@@ -503,8 +504,8 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
       break;
 
     case H_PRED:
-      for (i = 0; i < size; ++i) {
-        for (j = 0; j < size; ++j) {
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           int scale = weights1d[j * size_scale];
           interpred[k] =
@@ -517,8 +518,8 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
 
     case D63_PRED:
     case D117_PRED:
-      for (i = 0; i < size; ++i) {
-        for (j = 0; j < size; ++j) {
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           int scale = (weights1d[i * size_scale] * 3 +
                        weights1d[j * size_scale]) >> 2;
@@ -532,8 +533,8 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
 
     case D27_PRED:
     case D153_PRED:
-      for (i = 0; i < size; ++i) {
-        for (j = 0; j < size; ++j) {
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           int scale = (weights1d[j * size_scale] * 3 +
                        weights1d[i * size_scale]) >> 2;
@@ -546,8 +547,8 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
       break;
 
     case D135_PRED:
-      for (i = 0; i < size; ++i) {
-        for (j = 0; j < size; ++j) {
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           int scale = weights1d[(i < j ? i : j) * size_scale];
           interpred[k] =
@@ -559,8 +560,8 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
       break;
 
     case D45_PRED:
-      for (i = 0; i < size; ++i) {
-        for (j = 0; j < size; ++j) {
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           int scale = (weights1d[i * size_scale] +
                        weights1d[j * size_scale]) >> 1;
@@ -576,8 +577,8 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
     case DC_PRED:
     default:
       // simple average
-      for (i = 0; i < size; ++i) {
-        for (j = 0; j < size; ++j) {
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           interpred[k] = (interpred[k] + intrapred[i * intrastride + j]) >> 1;
         }
@@ -586,137 +587,55 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
   }
 }
 
-void vp9_build_interintra_16x16_predictors_mb(MACROBLOCKD *xd,
+void vp9_build_interintra_predictors(MACROBLOCKD *xd,
                                               uint8_t *ypred,
                                               uint8_t *upred,
                                               uint8_t *vpred,
-                                              int ystride, int uvstride) {
-  vp9_build_interintra_16x16_predictors_mby(xd, ypred, ystride);
-  vp9_build_interintra_16x16_predictors_mbuv(xd, upred, vpred, uvstride);
+                                              int ystride, int uvstride,
+                                              BLOCK_SIZE_TYPE bsize) {
+  vp9_build_interintra_predictors_sby(xd, ypred, ystride, bsize);
+  vp9_build_interintra_predictors_sbuv(xd, upred, vpred, uvstride, bsize);
 }
 
-void vp9_build_interintra_16x16_predictors_mby(MACROBLOCKD *xd,
+void vp9_build_interintra_predictors_sby(MACROBLOCKD *xd,
                                                uint8_t *ypred,
-                                               int ystride) {
-  uint8_t intrapredictor[256];
-  vp9_build_intra_predictors(
-      xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-      intrapredictor, 16,
-      xd->mode_info_context->mbmi.interintra_mode, 16, 16,
-      xd->up_available, xd->left_available, xd->right_available);
-  combine_interintra(xd->mode_info_context->mbmi.interintra_mode,
-                     ypred, ystride, intrapredictor, 16, 16);
-}
-
-void vp9_build_interintra_16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                                uint8_t *upred,
-                                                uint8_t *vpred,
-                                                int uvstride) {
-  uint8_t uintrapredictor[64];
-  uint8_t vintrapredictor[64];
-  vp9_build_intra_predictors(
-      xd->plane[1].dst.buf, xd->plane[1].dst.stride,
-      uintrapredictor, 8,
-      xd->mode_info_context->mbmi.interintra_uv_mode, 8, 8,
-      xd->up_available, xd->left_available, xd->right_available);
-  vp9_build_intra_predictors(
-      xd->plane[2].dst.buf, xd->plane[1].dst.stride,
-      vintrapredictor, 8,
-      xd->mode_info_context->mbmi.interintra_uv_mode, 8, 8,
-      xd->up_available, xd->left_available, xd->right_available);
-  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
-                     upred, uvstride, uintrapredictor, 8, 8);
-  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
-                     vpred, uvstride, vintrapredictor, 8, 8);
-}
-
-void vp9_build_interintra_32x32_predictors_sby(MACROBLOCKD *xd,
-                                               uint8_t *ypred,
-                                               int ystride) {
-  uint8_t intrapredictor[1024];
-  vp9_build_intra_predictors(
-      xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-      intrapredictor, 32,
-      xd->mode_info_context->mbmi.interintra_mode, 32, 32,
-      xd->up_available, xd->left_available, xd->right_available);
-  combine_interintra(xd->mode_info_context->mbmi.interintra_mode,
-                     ypred, ystride, intrapredictor, 32, 32);
-}
-
-void vp9_build_interintra_32x32_predictors_sbuv(MACROBLOCKD *xd,
-                                                uint8_t *upred,
-                                                uint8_t *vpred,
-                                                int uvstride) {
-  uint8_t uintrapredictor[256];
-  uint8_t vintrapredictor[256];
-  vp9_build_intra_predictors(
-      xd->plane[1].dst.buf, xd->plane[1].dst.stride,
-      uintrapredictor, 16,
-      xd->mode_info_context->mbmi.interintra_uv_mode, 16, 16,
-      xd->up_available, xd->left_available, xd->right_available);
-  vp9_build_intra_predictors(
-      xd->plane[2].dst.buf, xd->plane[1].dst.stride,
-      vintrapredictor, 16,
-      xd->mode_info_context->mbmi.interintra_uv_mode, 16, 16,
-      xd->up_available, xd->left_available, xd->right_available);
-  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
-                     upred, uvstride, uintrapredictor, 16, 16);
-  combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
-                     vpred, uvstride, vintrapredictor, 16, 16);
-}
-
-void vp9_build_interintra_32x32_predictors_sb(MACROBLOCKD *xd,
-                                              uint8_t *ypred,
-                                              uint8_t *upred,
-                                              uint8_t *vpred,
-                                              int ystride,
-                                              int uvstride) {
-  vp9_build_interintra_32x32_predictors_sby(xd, ypred, ystride);
-  vp9_build_interintra_32x32_predictors_sbuv(xd, upred, vpred, uvstride);
-}
-
-void vp9_build_interintra_64x64_predictors_sby(MACROBLOCKD *xd,
-                                               uint8_t *ypred,
-                                               int ystride) {
+                                               int ystride,
+                                               BLOCK_SIZE_TYPE bsize) {
+  int bwl = mb_width_log2(bsize),  bw = 16 << bwl;
+  int bhl = mb_height_log2(bsize), bh = 16 << bhl;
   uint8_t intrapredictor[4096];
-  const int mode = xd->mode_info_context->mbmi.interintra_mode;
-  vp9_build_intra_predictors(xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-                             intrapredictor, 64, mode, 64, 64,
-                             xd->up_available, xd->left_available,
-                             xd->right_available);
+  vp9_build_intra_predictors(
+      xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+      intrapredictor, bw,
+      xd->mode_info_context->mbmi.interintra_mode, bw, bh,
+      xd->up_available, xd->left_available, xd->right_available);
   combine_interintra(xd->mode_info_context->mbmi.interintra_mode,
-                     ypred, ystride, intrapredictor, 64, 64);
+                     ypred, ystride, intrapredictor, bw, bw, bh);
 }
 
-void vp9_build_interintra_64x64_predictors_sbuv(MACROBLOCKD *xd,
+void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
                                                 uint8_t *upred,
                                                 uint8_t *vpred,
-                                                int uvstride) {
+                                                int uvstride,
+                                                BLOCK_SIZE_TYPE bsize) {
+  int bwl = mb_width_log2(bsize),  bw = 8 << bwl;
+  int bhl = mb_height_log2(bsize), bh = 8 << bhl;
   uint8_t uintrapredictor[1024];
   uint8_t vintrapredictor[1024];
-  const int mode = xd->mode_info_context->mbmi.interintra_uv_mode;
-  vp9_build_intra_predictors(xd->plane[1].dst.buf, xd->plane[1].dst.stride,
-                             uintrapredictor, 32, mode, 32, 32,
-                             xd->up_available, xd->left_available,
-                             xd->right_available);
-  vp9_build_intra_predictors(xd->plane[2].dst.buf, xd->plane[1].dst.stride,
-                             vintrapredictor, 32, mode, 32, 32,
-                             xd->up_available, xd->left_available,
-                             xd->right_available);
+  vp9_build_intra_predictors(
+      xd->plane[1].dst.buf, xd->plane[1].dst.stride,
+      uintrapredictor, bw,
+      xd->mode_info_context->mbmi.interintra_uv_mode, bw, bh,
+      xd->up_available, xd->left_available, xd->right_available);
+  vp9_build_intra_predictors(
+      xd->plane[2].dst.buf, xd->plane[1].dst.stride,
+      vintrapredictor, bw,
+      xd->mode_info_context->mbmi.interintra_uv_mode, bw, bh,
+      xd->up_available, xd->left_available, xd->right_available);
   combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
-                     upred, uvstride, uintrapredictor, 32, 32);
+                     upred, uvstride, uintrapredictor, bw, bw, bh);
   combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
-                     vpred, uvstride, vintrapredictor, 32, 32);
-}
-
-void vp9_build_interintra_64x64_predictors_sb(MACROBLOCKD *xd,
-                                              uint8_t *ypred,
-                                              uint8_t *upred,
-                                              uint8_t *vpred,
-                                              int ystride,
-                                              int uvstride) {
-  vp9_build_interintra_64x64_predictors_sby(xd, ypred, ystride);
-  vp9_build_interintra_64x64_predictors_sbuv(xd, upred, vpred, uvstride);
+                     vpred, uvstride, vintrapredictor, bw, bw, bh);
 }
 #endif  // CONFIG_COMP_INTERINTRA_PRED
 
