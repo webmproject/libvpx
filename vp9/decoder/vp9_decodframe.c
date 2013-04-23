@@ -37,8 +37,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#define COEFCOUNT_TESTING
-
 // #define DEC_DEBUG
 #ifdef DEC_DEBUG
 int dec_debug = 0;
@@ -58,11 +56,20 @@ static int read_is_valid(const uint8_t *start, size_t len,
   return start + len > start && start + len <= end;
 }
 
-static TXFM_MODE read_txfm_mode(vp9_reader *r) {
-  TXFM_MODE mode = vp9_read_literal(r, 2);
-  if (mode == ALLOW_32X32)
-    mode += vp9_read_bit(r);
-  return mode;
+static void setup_txfm_mode(VP9_COMMON *pc, int lossless, vp9_reader *r) {
+  if (lossless) {
+    pc->txfm_mode = ONLY_4X4;
+  } else {
+    pc->txfm_mode = vp9_read_literal(r, 2);
+    if (pc->txfm_mode == ALLOW_32X32)
+      pc->txfm_mode += vp9_read_bit(r);
+
+    if (pc->txfm_mode == TX_MODE_SELECT) {
+      pc->prob_tx[0] = vp9_read_prob(r);
+      pc->prob_tx[1] = vp9_read_prob(r);
+      pc->prob_tx[2] = vp9_read_prob(r);
+    }
+  }
 }
 
 static int get_unsigned_bits(unsigned int num_values) {
@@ -165,10 +172,11 @@ void vp9_init_de_quantizer(VP9D_COMP *pbi) {
   VP9_COMMON *const pc = &pbi->common;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
+    // DC value
     pc->y_dequant[q][0] = (int16_t)vp9_dc_quant(q, pc->y_dc_delta_q);
     pc->uv_dequant[q][0] = (int16_t)vp9_dc_uv_quant(q, pc->uv_dc_delta_q);
 
-    /* all the ac values =; */
+    // AC values
     for (i = 1; i < 16; i++) {
       const int rc = vp9_default_zig_zag1d_4x4[i];
 
@@ -954,7 +962,6 @@ static void init_frame(VP9D_COMP *pbi) {
   xd->frame_type = pc->frame_type;
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_stride = pc->mode_info_stride;
-  xd->corrupted = 0;
 }
 
 #if CONFIG_CODE_ZEROGROUP
@@ -1088,57 +1095,58 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   xd->update_mb_segmentation_data = 0;
 
   xd->segmentation_enabled = vp9_read_bit(r);
-  if (xd->segmentation_enabled) {
-    // Segmentation map update
-    xd->update_mb_segmentation_map = vp9_read_bit(r);
-    if (xd->update_mb_segmentation_map) {
-      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
-        xd->mb_segment_tree_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
-                                                       : MAX_PROB;
+  if (!xd->segmentation_enabled)
+    return;
 
-      pc->temporal_update = vp9_read_bit(r);
-      if (pc->temporal_update) {
-        const vp9_prob *p = xd->mb_segment_tree_probs;
-        vp9_prob *mispred_p = xd->mb_segment_mispred_tree_probs;
+  // Segmentation map update
+  xd->update_mb_segmentation_map = vp9_read_bit(r);
+  if (xd->update_mb_segmentation_map) {
+    for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
+      xd->mb_segment_tree_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
+                                                     : MAX_PROB;
 
-        const int c0 =        p[0]  *        p[1];
-        const int c1 =        p[0]  * (256 - p[1]);
-        const int c2 = (256 - p[0]) *        p[2];
-        const int c3 = (256 - p[0]) * (256 - p[2]);
+    pc->temporal_update = vp9_read_bit(r);
+    if (pc->temporal_update) {
+      const vp9_prob *p = xd->mb_segment_tree_probs;
+      vp9_prob *mispred_p = xd->mb_segment_mispred_tree_probs;
 
-        mispred_p[0] = get_binary_prob(c1, c2 + c3);
-        mispred_p[1] = get_binary_prob(c0, c2 + c3);
-        mispred_p[2] = get_binary_prob(c0 + c1, c3);
-        mispred_p[3] = get_binary_prob(c0 + c1, c2);
+      const int c0 =        p[0]  *        p[1];
+      const int c1 =        p[0]  * (256 - p[1]);
+      const int c2 = (256 - p[0]) *        p[2];
+      const int c3 = (256 - p[0]) * (256 - p[2]);
 
-        for (i = 0; i < PREDICTION_PROBS; i++)
-          pc->segment_pred_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
-                                                      : MAX_PROB;
-      } else {
-        for (i = 0; i < PREDICTION_PROBS; i++)
-          pc->segment_pred_probs[i] = MAX_PROB;
-      }
+      mispred_p[0] = get_binary_prob(c1, c2 + c3);
+      mispred_p[1] = get_binary_prob(c0, c2 + c3);
+      mispred_p[2] = get_binary_prob(c0 + c1, c3);
+      mispred_p[3] = get_binary_prob(c0 + c1, c2);
+
+      for (i = 0; i < PREDICTION_PROBS; i++)
+        pc->segment_pred_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
+                                                    : MAX_PROB;
+    } else {
+      for (i = 0; i < PREDICTION_PROBS; i++)
+        pc->segment_pred_probs[i] = MAX_PROB;
     }
+  }
 
-    // Segmentation data update
-    xd->update_mb_segmentation_data = vp9_read_bit(r);
-    if (xd->update_mb_segmentation_data) {
-      xd->mb_segment_abs_delta = vp9_read_bit(r);
+  // Segmentation data update
+  xd->update_mb_segmentation_data = vp9_read_bit(r);
+  if (xd->update_mb_segmentation_data) {
+    xd->mb_segment_abs_delta = vp9_read_bit(r);
 
-      vp9_clearall_segfeatures(xd);
+    vp9_clearall_segfeatures(xd);
 
-      for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-        for (j = 0; j < SEG_LVL_MAX; j++) {
-          int data = 0;
-          const int feature_enabled = vp9_read_bit(r);
-          if (feature_enabled) {
-            vp9_enable_segfeature(xd, i, j);
-            data = decode_unsigned_max(r, vp9_seg_feature_data_max(j));
-            if (vp9_is_segfeature_signed(j))
-              data = vp9_read_and_apply_sign(r, data);
-          }
-          vp9_set_segdata(xd, i, j, data);
+    for (i = 0; i < MAX_MB_SEGMENTS; i++) {
+      for (j = 0; j < SEG_LVL_MAX; j++) {
+        int data = 0;
+        const int feature_enabled = vp9_read_bit(r);
+        if (feature_enabled) {
+          vp9_enable_segfeature(xd, i, j);
+          data = decode_unsigned_max(r, vp9_seg_feature_data_max(j));
+          if (vp9_is_segfeature_signed(j))
+            data = vp9_read_and_apply_sign(r, data);
         }
+        vp9_set_segdata(xd, i, j, data);
       }
     }
   }
@@ -1175,8 +1183,8 @@ static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   // Read in loop filter deltas applied at the MB level based on mode or ref
   // frame.
   xd->mode_ref_lf_delta_update = 0;
-  xd->mode_ref_lf_delta_enabled = vp9_read_bit(r);
 
+  xd->mode_ref_lf_delta_enabled = vp9_read_bit(r);
   if (xd->mode_ref_lf_delta_enabled) {
     xd->mode_ref_lf_delta_update = vp9_read_bit(r);
     if (xd->mode_ref_lf_delta_update) {
@@ -1210,6 +1218,11 @@ static void setup_quantization(VP9D_COMP *pbi, vp9_reader *r) {
     vp9_init_de_quantizer(pbi);
 
   mb_init_dequantizer(pbi, &pbi->mb);  // MB level dequantizer setup
+}
+
+static INTERPOLATIONFILTERTYPE read_mcomp_filter_type(vp9_reader *r) {
+  return vp9_read_bit(r) ? SWITCHABLE
+                         : vp9_read_literal(r, 2);
 }
 
 static const uint8_t *read_frame_size(VP9_COMMON *const pc, const uint8_t *data,
@@ -1418,12 +1431,11 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   const uint8_t *data = pbi->source;
   const uint8_t *data_end = data + pbi->source_sz;
   size_t first_partition_size = 0;
+  YV12_BUFFER_CONFIG *new_fb = &pc->yv12_fb[pc->new_fb_idx];
   int i;
 
-  // printf("Decoding frame %d\n", pc->current_video_frame);
-
   xd->corrupted = 0;  // start with no corruption of current frame
-  pc->yv12_fb[pc->new_fb_idx].corrupted = 0;
+  new_fb->corrupted = 0;
 
   if (data_end - data < 3) {
     vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
@@ -1466,8 +1478,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   init_frame(pbi);
 
   // Reset the frame pointers to the current frame size
-  vp8_yv12_realloc_frame_buffer(&pc->yv12_fb[pc->new_fb_idx],
-                                pc->width, pc->height,
+  vp8_yv12_realloc_frame_buffer(new_fb, pc->width, pc->height,
                                 VP9BORDERINPIXELS);
 
   if (vp9_reader_init(&header_bc, data, first_partition_size))
@@ -1482,8 +1493,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   setup_loopfilter(pc, xd, &header_bc);
 
-  // Dummy read for now
-  vp9_read_literal(&header_bc, 2);
+  vp9_read_literal(&header_bc, 2);  // unused
 
   setup_quantization(pbi, &header_bc);
 
@@ -1505,14 +1515,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
     pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp9_read_bit(&header_bc);
     pc->ref_frame_sign_bias[ALTREF_FRAME] = vp9_read_bit(&header_bc);
-
-    // Is high precision mv allowed
     xd->allow_high_precision_mv = vp9_read_bit(&header_bc);
-
-    // Read the type of subpel filter to use
-    pc->mcomp_filter_type = vp9_read_bit(&header_bc)
-                                ? SWITCHABLE
-                                : vp9_read_literal(&header_bc, 2);
+    pc->mcomp_filter_type = read_mcomp_filter_type(&header_bc);
 
 #if CONFIG_COMP_INTERINTRA_PRED
     pc->use_interintra = vp9_read_bit(&header_bc);
@@ -1540,6 +1544,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     pc->refresh_entropy_probs = 0;
     pc->frame_parallel_decoding_mode = 1;
   }
+
   pc->frame_context_idx = vp9_read_literal(&header_bc, NUM_FRAME_CONTEXTS_LG2);
   vpx_memcpy(&pc->fc, &pc->frame_contexts[pc->frame_context_idx],
              sizeof(pc->fc));
@@ -1548,12 +1553,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   setup_pred_probs(pc, &header_bc);
 
-  pc->txfm_mode = xd->lossless ? ONLY_4X4 : read_txfm_mode(&header_bc);
-  if (pc->txfm_mode == TX_MODE_SELECT) {
-    pc->prob_tx[0] = vp9_read_prob(&header_bc);
-    pc->prob_tx[1] = vp9_read_prob(&header_bc);
-    pc->prob_tx[2] = vp9_read_prob(&header_bc);
-  }
+  setup_txfm_mode(pc, xd->lossless, &header_bc);
 
   // Read inter mode probability context updates
   if (pc->frame_type != KEY_FRAME) {
@@ -1564,22 +1564,21 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
           pc->fc.vp9_mode_contexts[i][j] = vp9_read_prob(&header_bc);
   }
 #if CONFIG_MODELCOEFPROB
-  if (pc->frame_type == KEY_FRAME) {
+  if (pc->frame_type == KEY_FRAME)
     vp9_default_coef_probs(pc);
-  }
 #endif
 
   update_frame_context(pbi);
 
   read_coef_probs(pbi, &header_bc);
 #if CONFIG_CODE_ZEROGROUP
-  read_zpc_probs(&pbi->common, &header_bc);
+  read_zpc_probs(pc, &header_bc);
 #endif
 
   // Initialize xd pointers. Any reference should do for xd->pre, so use 0.
   setup_pre_planes(xd, &pc->yv12_fb[pc->active_ref_idx[0]], NULL,
                    0, 0, NULL, NULL);
-  setup_dst_planes(xd, &pc->yv12_fb[pc->new_fb_idx], 0, 0);
+  setup_dst_planes(xd, new_fb, 0, 0);
 
   // Create the segmentation map structure and set to 0
   if (!pc->last_frame_seg_map)
@@ -1587,7 +1586,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
                     vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
 
   // set up frame new frame for intra coded blocks
-  vp9_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
+  vp9_setup_intra_recon(new_fb);
 
   vp9_setup_block_dptrs(xd);
   vp9_build_block_doffsets(xd);
@@ -1603,21 +1602,16 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   decode_tiles(pbi, data, first_partition_size, &header_bc, &residual_bc);
 
-  // keep track of the last coded dimensions
   pc->last_width = pc->width;
   pc->last_height = pc->height;
 
-  // Collect information about decoder corruption.
-  // 1. Check first boolean decoder for errors.
-  // 2. Check the macroblock information
-  pc->yv12_fb[pc->new_fb_idx].corrupted = vp9_reader_has_error(&header_bc) |
-                                          xd->corrupted;
+  new_fb->corrupted = vp9_reader_has_error(&header_bc) | xd->corrupted;
 
   if (!pbi->decoded_key_frame) {
-    if (pc->frame_type == KEY_FRAME && !pc->yv12_fb[pc->new_fb_idx].corrupted)
+    if (pc->frame_type == KEY_FRAME && !new_fb->corrupted)
       pbi->decoded_key_frame = 1;
     else
-      vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME,
+      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                          "A stream must start with a complete key frame");
   }
 
@@ -1630,7 +1624,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     if (pc->frame_type != KEY_FRAME) {
       vp9_adapt_mode_probs(pc);
       vp9_adapt_nmv_probs(pc, xd->allow_high_precision_mv);
-      vp9_adapt_mode_context(&pbi->common);
+      vp9_adapt_mode_context(pc);
     }
   }
 
