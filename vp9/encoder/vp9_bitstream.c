@@ -1989,6 +1989,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   if (xd->segmentation_enabled) {
     // Indicate whether or not the segmentation map is being updated.
     vp9_write_bit(&header_bc, (xd->update_mb_segmentation_map) ? 1 : 0);
+#if CONFIG_IMPLICIT_SEGMENTATION
+    vp9_write_bit(&header_bc, (xd->allow_implicit_segment_update) ? 1 : 0);
+#endif
 
     // If it is, then indicate the method that will be used.
     if (xd->update_mb_segmentation_map) {

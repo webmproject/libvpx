@@ -1093,6 +1093,9 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
 
   xd->update_mb_segmentation_map = 0;
   xd->update_mb_segmentation_data = 0;
+#if CONFIG_IMPLICIT_SEGMENTATION
+  xd->allow_implicit_segment_update = 0;
+#endif
 
   xd->segmentation_enabled = vp9_read_bit(r);
   if (!xd->segmentation_enabled)
@@ -1100,6 +1103,9 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
 
   // Segmentation map update
   xd->update_mb_segmentation_map = vp9_read_bit(r);
+#if CONFIG_IMPLICIT_SEGMENTATION
+    xd->allow_implicit_segment_update = vp9_read_bit(r);
+#endif
   if (xd->update_mb_segmentation_map) {
     for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
       xd->mb_segment_tree_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
@@ -1627,6 +1633,13 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
       vp9_adapt_mode_context(pc);
     }
   }
+
+#if CONFIG_IMPLICIT_SEGMENTATION
+  // If signalled at the frame level apply implicit updates to the segment map.
+  if (!pc->error_resilient_mode && xd->allow_implicit_segment_update) {
+    vp9_implicit_segment_map_update(pc);
+  }
+#endif
 
   if (pc->refresh_entropy_probs) {
     vpx_memcpy(&pc->frame_contexts[pc->frame_context_idx], &pc->fc,

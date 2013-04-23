@@ -268,7 +268,7 @@ typedef struct {
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
   unsigned char need_to_clamp_mvs;
   unsigned char need_to_clamp_secondmv;
-  unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
+  unsigned char segment_id;           // Segment id for current frame
 
   // Flags used for prediction status of various bistream signals
   unsigned char seg_id_predicted;
@@ -383,6 +383,10 @@ typedef struct macroblockd {
 
   /* 0 (do not update) 1 (update) the macroblock segmentation map. */
   unsigned char update_mb_segmentation_map;
+
+#if CONFIG_IMPLICIT_SEGMENTATION
+  unsigned char allow_implicit_segment_update;
+#endif
 
   /* 0 (do not update) 1 (update) the macroblock segmentation feature data. */
   unsigned char update_mb_segmentation_data;
