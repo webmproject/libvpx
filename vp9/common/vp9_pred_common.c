@@ -230,7 +230,7 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
 int vp9_get_pred_mb_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
                           int mb_row, int mb_col) {
   const int mb_index = mb_row * cm->mb_cols + mb_col;
-  if (sb_type) {
+  if (sb_type > BLOCK_SIZE_MB16X16) {
     const int bw = 1 << mb_width_log2(sb_type);
     const int bh = 1 << mb_height_log2(sb_type);
     const int ymbs = MIN(cm->mb_rows - mb_row, bh);

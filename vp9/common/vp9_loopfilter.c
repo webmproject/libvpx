@@ -281,66 +281,67 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
                      uint8_t *y_ptr, uint8_t *u_ptr, uint8_t *v_ptr,
                      int y_stride, int uv_stride,
                      int y_only, int dering) {
-    BLOCK_SIZE_TYPE sb_type = mode_info_context->mbmi.sb_type;
-    TX_SIZE tx_size = mode_info_context->mbmi.txfm_size;
-    int do_left_v, do_above_h;
-    int do_left_v_mbuv, do_above_h_mbuv;
-    int mis = cm->mode_info_stride;
-    const MODE_INFO *mi;
+  BLOCK_SIZE_TYPE sb_type = mode_info_context->mbmi.sb_type;
+  const int wbl = b_width_log2(sb_type), hbl = b_height_log2(sb_type);
+  TX_SIZE tx_size = mode_info_context->mbmi.txfm_size;
+  int do_left_v, do_above_h;
+  int do_left_v_mbuv, do_above_h_mbuv;
+  int mis = cm->mode_info_stride;
+  const MODE_INFO *mi;
 
-    // process 1st MB top-left
-    mi = mode_info_context;
-    do_left_v = (mb_col > 0);
-    do_above_h = (mb_row > 0);
-    do_left_v_mbuv = !(sb_type >= BLOCK_SIZE_SB64X64 &&
+  // process 1st MB top-left
+  mi = mode_info_context;
+  do_left_v = (mb_col > 0);
+  do_above_h = (mb_row > 0);
+  do_left_v_mbuv = !(sb_type >= BLOCK_SIZE_SB64X64 &&
       tx_size >= TX_32X32 && (mb_col & 2));
-    do_above_h_mbuv = !(sb_type >= BLOCK_SIZE_SB64X64 &&
+  do_above_h_mbuv = !(sb_type >= BLOCK_SIZE_SB64X64 &&
       tx_size >= TX_32X32 && (mb_row & 2));
-    lpf_mb(cm, mi, do_left_v, do_above_h,
+  lpf_mb(cm, mi, do_left_v, do_above_h,
       do_left_v_mbuv, do_above_h_mbuv,
       y_ptr,
       y_only? 0 : u_ptr,
       y_only? 0 : v_ptr,
       y_stride, uv_stride, dering);
-    // process 2nd MB top-right
-    mi = mode_info_context + 1;
-    do_left_v = !(sb_type && (tx_size >= TX_32X32 ||
+  // process 2nd MB top-right
+  mi = mode_info_context + 1;
+  do_left_v = !(wbl >= 3 /* 32x16 or >=32x32 */ && (tx_size >= TX_32X32 ||
       sb_mb_lf_skip(mode_info_context, mi)));
-    do_above_h = (mb_row > 0);
-    do_left_v_mbuv = do_left_v;
-    do_above_h_mbuv = !(sb_type >= BLOCK_SIZE_SB64X64 &&
+  do_above_h = (mb_row > 0);
+  do_left_v_mbuv = do_left_v;
+  do_above_h_mbuv = !(sb_type >= BLOCK_SIZE_SB64X64 &&
       tx_size >= TX_32X32 && (mb_row & 2));
-    lpf_mb(cm, mi, do_left_v, do_above_h,
+  lpf_mb(cm, mi, do_left_v, do_above_h,
       do_left_v_mbuv, do_above_h_mbuv,
       y_ptr + 16,
       y_only ? 0 : (u_ptr + 8),
       y_only ? 0 : (v_ptr + 8),
       y_stride, uv_stride, dering);
 
-    // process 3rd MB bottom-left
-    mi = mode_info_context + mis;
-    do_left_v = (mb_col > 0);
-    do_above_h =!(sb_type && (tx_size >= TX_32X32 ||
+  // process 3rd MB bottom-left
+  mi = mode_info_context + mis;
+  do_left_v = (mb_col > 0);
+  do_above_h = !(hbl >= 3 /* 16x32 or >=32x32 */ && (tx_size >= TX_32X32 ||
       sb_mb_lf_skip(mode_info_context, mi)));
-    do_left_v_mbuv =  !(sb_type >= BLOCK_SIZE_SB64X64 &&
+  do_left_v_mbuv = !(sb_type >= BLOCK_SIZE_SB64X64 &&
       tx_size >= TX_32X32 && (mb_col & 2));
-    do_above_h_mbuv = do_above_h;
-    lpf_mb(cm, mi, do_left_v, do_above_h,
+  do_above_h_mbuv = do_above_h;
+  lpf_mb(cm, mi, do_left_v, do_above_h,
       do_left_v_mbuv, do_above_h_mbuv,
       y_ptr + 16 * y_stride,
       y_only ? 0 : (u_ptr + 8 * uv_stride),
       y_only ? 0 : (v_ptr + 8 * uv_stride),
       y_stride, uv_stride, dering);
 
-    // process 4th MB bottom right
-    mi = mode_info_context + mis + 1;
-    do_left_v = !(sb_type && (tx_size >= TX_32X32 ||
+  // process 4th MB bottom right
+  mi = mode_info_context + mis + 1;
+  do_left_v = !(wbl >= 3 /* 32x16 or >=32x32 */ && (tx_size >= TX_32X32 ||
       sb_mb_lf_skip(mi - 1, mi)));
-    do_above_h =!(sb_type && (tx_size >= TX_32X32 ||
+  do_above_h = !(hbl >= 3 /* 16x32 or >=32x32 */ && (tx_size >= TX_32X32 ||
       sb_mb_lf_skip(mode_info_context + 1, mi)));
-    do_left_v_mbuv = do_left_v;
-    do_above_h_mbuv = do_above_h;
-    lpf_mb(cm, mi, do_left_v, do_above_h,
+  do_left_v_mbuv = do_left_v;
+  do_above_h_mbuv = do_above_h;
+  lpf_mb(cm, mi, do_left_v, do_above_h,
       do_left_v_mbuv, do_above_h_mbuv,
       y_ptr + 16 * y_stride + 16,
       y_only ? 0 : (u_ptr + 8 * uv_stride + 8),

@@ -663,7 +663,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
   const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
   const int tx_size = xd->mode_info_context->mbmi.txfm_size;
 
-  assert(!xd->mode_info_context->mbmi.sb_type);
+  assert(xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_MB16X16);
 
   //mode = xd->mode_info_context->mbmi.mode;
   if (pbi->common.frame_type != KEY_FRAME)
