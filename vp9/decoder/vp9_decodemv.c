@@ -601,7 +601,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
   const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
                                        cm->height == cm->last_height &&
-                                       !cm->error_resilient_mode;
+                                       !cm->error_resilient_mode &&
+                                       cm->last_show_frame;
 
   int mb_to_left_edge, mb_to_right_edge, mb_to_top_edge, mb_to_bottom_edge;
 
