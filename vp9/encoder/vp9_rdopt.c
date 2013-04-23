@@ -1755,8 +1755,7 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
         vp9_build_inter_predictor(
             *(bd->base_second_pre) + bd->pre, bd->pre_stride,
             *(bd->base_dst) + bd->dst, bd->dst_stride,
-            &bd->bmi.as_mv[1], &xd->scale_factor[1], 4, 4,
-            1 << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT) /* avg */,
+            &bd->bmi.as_mv[1], &xd->scale_factor[1], 4, 4, 1,
             &xd->subpix);
       }
 
@@ -1822,8 +1821,7 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
             *base_pre + bd->pre, bd->pre_stride,
             *(bd->base_dst) + bd->dst, bd->dst_stride,
             &bd->bmi.as_mv[which_mv], &xd->scale_factor[which_mv], 8, 8,
-            which_mv << (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
-            &xd->subpix);
+            which_mv, &xd->subpix);
       }
 
       vp9_subtract_4b_c(be, bd, 16);
