@@ -25,7 +25,6 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
                                               int mb_col) {
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *b  = &x->block[0];
   BLOCKD *d = &xd->block[0];
   vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
   unsigned int best_err;
@@ -48,7 +47,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
 
   /*cpi->sf.search_method == HEX*/
   best_err = vp9_hex_search(
-      x, b, d,
+      x, d,
       &ref_full, dst_mv,
       step_param,
       x->errorperbit,
@@ -63,7 +62,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
     int distortion;
     unsigned int sse;
     best_err = cpi->find_fractional_mv_step(
-        x, b, d,
+        x, d,
         dst_mv, ref_mv,
         x->errorperbit, &v_fn_ptr,
         NULL, NULL,
@@ -72,7 +71,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
 
   vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
   vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
-  best_err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
+  best_err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
                           xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                           INT_MAX);
 
@@ -104,11 +103,6 @@ static int do_16x16_motion_search
 
   for (n = 0; n < 16; n++) {
     BLOCKD *d = &xd->block[n];
-    BLOCK *b  = &x->block[n];
-
-    b->base_src   = &x->src.y_buffer;
-    b->src_stride = x->src.y_stride;
-    b->src        = x->src.y_stride * (n & 12) + (n & 3) * 4;
 
     d->base_pre   = &xd->plane[0].pre[0].buf;
     d->pre_stride = xd->plane[0].pre[0].stride;
@@ -117,7 +111,7 @@ static int do_16x16_motion_search
 
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
-  err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
+  err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
                      xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
                      INT_MAX);
   dst_mv->as_int = 0;
@@ -162,7 +156,7 @@ static int do_16x16_zerozero_search
 
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
-  err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
+  err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
                      xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
                      INT_MAX);
 
@@ -190,13 +184,13 @@ static int find_best_16x16_intra
     const int bhl = b_height_log2(BLOCK_SIZE_MB16X16), bh = 4 << bhl;
 
     xd->mode_info_context->mbmi.mode = mode;
-    vp9_build_intra_predictors(x->src.y_buffer, x->src.y_stride,
+    vp9_build_intra_predictors(x->plane[0].src.buf, x->plane[0].src.stride,
                                xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                                xd->mode_info_context->mbmi.mode,
                                bw, bh,
                                xd->up_available, xd->left_available,
                                xd->right_available);
-    err = vp9_sad16x16(x->src.y_buffer, x->src.y_stride,
+    err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
                        xd->plane[0].dst.buf, xd->plane[0].dst.stride, best_err);
 
     // find best
@@ -233,8 +227,8 @@ static void update_mbgraph_mb_stats
   VP9_COMMON *cm = &cpi->common;
 
   // FIXME in practice we're completely ignoring chroma here
-  x->src.y_buffer = buf->y_buffer + mb_y_offset;
-  x->src.y_stride = buf->y_stride;
+  x->plane[0].src.buf = buf->y_buffer + mb_y_offset;
+  x->plane[0].src.stride = buf->y_stride;
 
   xd->plane[0].dst.buf = cm->yv12_fb[cm->new_fb_idx].y_buffer + mb_y_offset;
   xd->plane[0].dst.stride = cm->yv12_fb[cm->new_fb_idx].y_stride;

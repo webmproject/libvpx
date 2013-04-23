@@ -23,13 +23,6 @@ typedef struct {
   int offset;
 } search_site;
 
-typedef struct block {
-  uint8_t **base_src;
-  uint8_t **base_second_src;
-  int src;
-  int src_stride;
-} BLOCK;
-
 typedef struct {
   int count;
   struct {
@@ -69,6 +62,7 @@ typedef struct {
 struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[64*64]);
   DECLARE_ALIGNED(16, int16_t, coeff[64*64]);
+  struct buf_2d src;
 
   // Quantizer setings
   int16_t *quant;
@@ -84,13 +78,9 @@ struct macroblock_plane {
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
   struct macroblock_plane plane[MAX_MB_PLANE];
-  int skip_block;
-  // 16 Y blocks, 4 U blocks, 4 V blocks,
-  BLOCK block[24];
-
-  YV12_BUFFER_CONFIG src;
 
   MACROBLOCKD e_mbd;
+  int skip_block;
   PARTITION_INFO *partition_info; /* work pointer */
   PARTITION_INFO *pi;   /* Corresponds to upper left visible macroblock */
   PARTITION_INFO *pip;  /* Base of allocated array */

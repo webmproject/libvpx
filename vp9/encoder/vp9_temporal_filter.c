@@ -128,15 +128,12 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   int sadpb = x->sadperbit16;
   int bestsme = INT_MAX;
 
-  BLOCK *b = &x->block[0];
   BLOCKD *d = &x->e_mbd.block[0];
   int_mv best_ref_mv1;
   int_mv best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
 
   // Save input state
-  uint8_t **base_src = b->base_src;
-  int src = b->src;
-  int src_stride = b->src_stride;
+  struct buf_2d src = x->plane[0].src;
   uint8_t **base_pre = d->base_pre;
   int pre = d->pre;
   int pre_stride = d->pre_stride;
@@ -146,9 +143,8 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   best_ref_mv1_full.as_mv.row = best_ref_mv1.as_mv.row >> 3;
 
   // Setup frame pointers
-  b->base_src = &arf_frame->y_buffer;
-  b->src_stride = arf_frame->y_stride;
-  b->src = mb_offset;
+  x->plane[0].src.buf = arf_frame->y_buffer + mb_offset;
+  x->plane[0].src.stride = arf_frame->y_stride;
 
   d->base_pre = &frame_ptr->y_buffer;
   d->pre_stride = frame_ptr->y_stride;
@@ -165,7 +161,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   /*cpi->sf.search_method == HEX*/
   // TODO Check that the 16x16 vf & sdf are selected here
   // Ignore mv costing by sending NULL pointer instead of cost arrays
-  bestsme = vp9_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv[0],
+  bestsme = vp9_hex_search(x, d, &best_ref_mv1_full, &d->bmi.as_mv[0],
                            step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
                            NULL, NULL, NULL, NULL,
                            &best_ref_mv1);
@@ -177,7 +173,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
     int distortion;
     unsigned int sse;
     // Ignore mv costing by sending NULL pointer instead of cost array
-    bestsme = cpi->find_fractional_mv_step(x, b, d, &d->bmi.as_mv[0],
+    bestsme = cpi->find_fractional_mv_step(x, d, &d->bmi.as_mv[0],
                                            &best_ref_mv1,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],
@@ -187,9 +183,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 #endif
 
   // Save input state
-  b->base_src = base_src;
-  b->src = src;
-  b->src_stride = src_stride;
+  x->plane[0].src = src;
   d->base_pre = base_pre;
   d->pre = pre;
   d->pre_stride = pre_stride;

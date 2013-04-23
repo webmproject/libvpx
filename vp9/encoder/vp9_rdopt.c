@@ -850,8 +850,11 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   int rate = 0;
   int distortion;
   VP9_COMMON *const cm = &cpi->common;
-  BLOCK *be = x->block + ib;
   BLOCKD *b = xd->block + ib;
+  const int src_stride = x->plane[0].src.stride;
+  uint8_t* const src =
+      raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                x->plane[0].src.buf, src_stride);
   int16_t* const src_diff =
       raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
                                 x->plane[0].src_diff);
@@ -896,17 +899,17 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
     vp9_intra4x4_predict(xd, b, mode, *(b->base_dst) + b->dst, b->dst_stride);
     vp9_subtract_block(4, 4, src_diff, 16,
-                       *(be->base_src) + be->src, be->src_stride,
+                       src, src_stride,
                        *(b->base_dst) + b->dst, b->dst_stride);
 
     b->bmi.as_mode.first = mode;
-    tx_type = get_tx_type_4x4(xd, be - x->block);
+    tx_type = get_tx_type_4x4(xd, ib);
     if (tx_type != DCT_DCT) {
       vp9_short_fht4x4(src_diff, coeff, 16, tx_type);
-      vp9_ht_quantize_b_4x4(x, be - x->block, tx_type);
+      vp9_ht_quantize_b_4x4(x, ib, tx_type);
     } else {
       x->fwd_txm4x4(src_diff, coeff, 32);
-      x->quantize_b_4x4(x, be - x->block, 16);
+      x->quantize_b_4x4(x, ib, 16);
     }
 
     tempa = ta;
@@ -1082,7 +1085,6 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   MACROBLOCKD *xd = &x->e_mbd;
   int64_t best_rd = INT64_MAX;
   int distortion = 0, rate = 0;
-  BLOCK  *be = x->block + ib;
   BLOCKD *b = xd->block + ib;
   ENTROPY_CONTEXT_PLANES ta, tl;
   ENTROPY_CONTEXT *ta0, *ta1, besta0 = 0, besta1 = 0;
@@ -1090,6 +1092,10 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   // perform transformation of dimension 8x8
   // note the input and output index mapping
   int idx = (ib & 0x02) ? (ib + 2) : ib;
+  const int src_stride = x->plane[0].src.stride;
+  uint8_t* const src =
+      raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                x->plane[0].src.buf, src_stride);
   int16_t* const src_diff =
       raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
                                 x->plane[0].src_diff);
@@ -1107,7 +1113,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     vp9_intra8x8_predict(xd, b, mode, *(b->base_dst) + b->dst, b->dst_stride);
 
     vp9_subtract_block(8, 8, src_diff, 16,
-                       *(be->base_src) + be->src, be->src_stride,
+                       src, src_stride,
                        *(b->base_dst) + b->dst, b->dst_stride);
 
     if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
@@ -1155,7 +1161,6 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                             ib + iblock[i], 16);
         int do_two = 0;
         b = &xd->block[ib + iblock[i]];
-        be = &x->block[ib + iblock[i]];
         tx_type = get_tx_type_4x4(xd, ib + iblock[i]);
         if (tx_type != DCT_DCT) {
           vp9_short_fht4x4(src_diff, coeff, 16, tx_type);
@@ -1183,7 +1188,6 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         }
       }
       b = &xd->block[ib];
-      be = &x->block[ib];
       rate += rate_t;
     }
 
@@ -1708,7 +1712,10 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
   for (i = 0; i < 16; i++) {
     if (labels[i] == which_label) {
       BLOCKD *bd = &x->e_mbd.block[i];
-      BLOCK *be = &x->block[i];
+      const int src_stride = x->plane[0].src.stride;
+      uint8_t* const src =
+          raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, i,
+                                    x->plane[0].src.buf, src_stride);
       int16_t* const src_diff =
           raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, i,
                                     x->plane[0].src_diff);
@@ -1735,7 +1742,7 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
       }
 
       vp9_subtract_block(4, 4, src_diff, 16,
-                         *(be->base_src) + be->src, be->src_stride,
+                         src, src_stride,
                          *(bd->base_dst) + bd->dst, bd->dst_stride);
       x->fwd_txm4x4(src_diff, coeff, 32);
       x->quantize_b_4x4(x, i, 16);
@@ -1784,7 +1791,10 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
       int which_mv;
       const int idx = (ib & 8) + ((ib & 2) << 1);
       BLOCKD *bd = &xd->block[ib];
-      BLOCK *be = &x->block[ib];
+      const int src_stride = x->plane[0].src.stride;
+      uint8_t* const src =
+          raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                    x->plane[0].src.buf, src_stride);
       int16_t* const src_diff =
           raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
                                     x->plane[0].src_diff);
@@ -1806,7 +1816,7 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
       }
 
       vp9_subtract_block(8, 8, src_diff, 16,
-                         *(be->base_src) + be->src, be->src_stride,
+                         src, src_stride,
                          *(bd->base_dst) + bd->dst, bd->dst_stride);
 
       if (xd->mode_info_context->mbmi.txfm_size == TX_4X4) {
@@ -1831,7 +1841,6 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
           int16_t* const coeff = BLOCK_OFFSET(x->plane[0].coeff,
                                               ib + iblock[j], 16);
           bd = &xd->block[ib + iblock[j]];
-          be = &x->block[ib + iblock[j]];
           x->fwd_txm8x4(src_diff, coeff, 32);
           x->quantize_b_4x4_pair(x, ib + iblock[j], ib + iblock[j] + 1, 16);
           thisdistortion = vp9_block_error_c(coeff,
@@ -2016,8 +2025,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         int step_param = 0;
         int further_steps;
         int thissme, bestsme = INT_MAX;
-        BLOCK *c;
         BLOCKD *e;
+        const struct buf_2d orig_src = x->plane[0].src;
 
         /* Is the best so far sufficiently good that we cant justify doing
          * and new motion search. */
@@ -2055,10 +2064,14 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           // find first label
           n = vp9_mbsplit_offset[segmentation][i];
 
-          c = &x->block[n];
+          // adjust src pointer for this segment
+          x->plane[0].src.buf =
+              raster_block_offset_uint8(&x->e_mbd, BLOCK_SIZE_MB16X16, 0, n,
+                                        x->plane[0].src.buf,
+                                        x->plane[0].src.stride);
           e = &x->e_mbd.block[n];
 
-          bestsme = vp9_full_pixel_diamond(cpi, x, c, e, &mvp_full, step_param,
+          bestsme = vp9_full_pixel_diamond(cpi, x, e, &mvp_full, step_param,
                                            sadpb, further_steps, 0, v_fn_ptr,
                                            bsi->ref_mv, &mode_mv[NEW4X4]);
 
@@ -2070,7 +2083,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,
                      x->mv_row_min, x->mv_row_max);
 
-            thissme = cpi->full_search_sad(x, c, e, &mvp_full,
+            thissme = cpi->full_search_sad(x, e, &mvp_full,
                                            sadpb, 16, v_fn_ptr,
                                            x->nmvjointcost, x->mvcost,
                                            bsi->ref_mv);
@@ -2089,7 +2102,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         if (bestsme < INT_MAX) {
           int distortion;
           unsigned int sse;
-          cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
+          cpi->find_fractional_mv_step(x, e, &mode_mv[NEW4X4],
                                        bsi->ref_mv, x->errorperbit, v_fn_ptr,
                                        x->nmvjointcost, x->mvcost,
                                        &distortion, &sse);
@@ -2097,6 +2110,9 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           // safe motion search result for use in compound prediction
           seg_mvs[i][mbmi->ref_frame - 1].as_int = mode_mv[NEW4X4].as_int;
         }
+
+        // restore src pointer
+        x->plane[0].src = orig_src;
       } else if (mbmi->second_ref_frame > 0 && this_mode == NEW4X4) {
         /* NEW4X4 */
         /* motion search not completed? Then skip newmv for this block with
@@ -2472,8 +2488,7 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   int best_sad = INT_MAX;
   int this_sad = INT_MAX;
 
-  BLOCK *b = &x->block[0];
-  uint8_t *src_y_ptr = *(b->base_src);
+  uint8_t *src_y_ptr = x->plane[0].src.buf;
   uint8_t *ref_y_ptr;
   int row_offset, col_offset;
 
@@ -2491,7 +2506,7 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
     ref_y_ptr = ref_y_buffer + (ref_y_stride * row_offset) + col_offset;
 
     // Find sad for current vector.
-    this_sad = cpi->fn_ptr[block_size].sdf(src_y_ptr, b->src_stride,
+    this_sad = cpi->fn_ptr[block_size].sdf(src_y_ptr, x->plane[0].src.stride,
                                            ref_y_ptr, ref_y_stride,
                                            0x7fffffff);
 
@@ -2829,7 +2844,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
-  BLOCK *b = &x->block[0];
   BLOCKD *d = &xd->block[0];
   const int is_comp_pred = (mbmi->second_ref_frame > 0);
 #if CONFIG_COMP_INTERINTRA_PRED
@@ -2911,7 +2925,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // Further step/diamond searches as necessary
         further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
-        bestsme = vp9_full_pixel_diamond(cpi, x, b, d, &mvp_full, step_param,
+        bestsme = vp9_full_pixel_diamond(cpi, x, d, &mvp_full, step_param,
                                          sadpb, further_steps, 1,
                                          &cpi->fn_ptr[block_size],
                                          &ref_mv[0], &tmp_mv);
@@ -2924,7 +2938,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (bestsme < INT_MAX) {
           int dis; /* TODO: use dis in distortion calculation later. */
           unsigned int sse;
-          cpi->find_fractional_mv_step(x, b, d, &tmp_mv,
+          cpi->find_fractional_mv_step(x, d, &tmp_mv,
                                        &ref_mv[0],
                                        x->errorperbit,
                                        &cpi->fn_ptr[block_size],
@@ -3027,7 +3041,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int tmp_rate_y, tmp_rate_u, tmp_rate_v;
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
         vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
-        var = cpi->fn_ptr[block_size].vf(*(b->base_src), b->src_stride,
+        var = cpi->fn_ptr[block_size].vf(x->plane[0].src.buf,
+                                         x->plane[0].src.stride,
                                          xd->plane[0].dst.buf,
                                          xd->plane[0].dst.stride,
                                          &sse);
@@ -3037,14 +3052,16 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         model_rd_from_var_lapndz(var, 16 * bw * 16 * bh,
                                  xd->block[0].dequant[1] >> 3,
                                  &tmp_rate_y, &tmp_dist_y);
-        var = cpi->fn_ptr[uv_block_size].vf(x->src.u_buffer, x->src.uv_stride,
+        var = cpi->fn_ptr[uv_block_size].vf(x->plane[1].src.buf,
+                                            x->plane[1].src.stride,
                                             xd->plane[1].dst.buf,
                                             xd->plane[1].dst.stride,
                                             &sse);
         model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
                                  xd->block[16].dequant[1] >> 3,
                                  &tmp_rate_u, &tmp_dist_u);
-        var = cpi->fn_ptr[uv_block_size].vf(x->src.v_buffer, x->src.uv_stride,
+        var = cpi->fn_ptr[uv_block_size].vf(x->plane[2].src.buf,
+                                            x->plane[1].src.stride,
                                             xd->plane[2].dst.buf,
                                             xd->plane[1].dst.stride,
                                             &sse);
@@ -3115,7 +3132,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int tmp_rate_y, tmp_rate_u, tmp_rate_v;
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
         vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
-        var = vp9_variance16x16(*(b->base_src), b->src_stride,
+        var = vp9_variance16x16(x->plane[0].src.buf, x->plane[0].src.stride,
                                 xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                                 &sse);
         // Note our transform coeffs are 8 times an orthogonal transform.
@@ -3123,12 +3140,12 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // we need to divide by 8 before sending to modeling function.
         model_rd_from_var_lapndz(var, 16 * 16, xd->block[0].dequant[1] >> 3,
                                  &tmp_rate_y, &tmp_dist_y);
-        var = vp9_variance8x8(x->src.u_buffer, x->src.uv_stride,
+        var = vp9_variance8x8(x->plane[1].src.buf, x->plane[1].src.stride,
                               xd->plane[1].dst.buf, xd->plane[1].dst.stride,
                               &sse);
         model_rd_from_var_lapndz(var, 8 * 8, xd->block[16].dequant[1] >> 3,
                                  &tmp_rate_u, &tmp_dist_u);
-        var = vp9_variance8x8(x->src.v_buffer, x->src.uv_stride,
+        var = vp9_variance8x8(x->plane[2].src.buf, x->plane[1].src.stride,
                               xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                               &sse);
         model_rd_from_var_lapndz(var, 8 * 8, xd->block[20].dequant[1] >> 3,
@@ -3215,12 +3232,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       threshold = x->encode_breakout;
 
     if (bsize != BLOCK_SIZE_MB16X16) {
-      var = cpi->fn_ptr[block_size].vf(*(b->base_src), b->src_stride,
+      var = cpi->fn_ptr[block_size].vf(x->plane[0].src.buf,
+                                       x->plane[0].src.stride,
                                        xd->plane[0].dst.buf,
                                        xd->plane[0].dst.stride,
                                        &sse);
     } else {
-      var = vp9_variance16x16(*(b->base_src), b->src_stride,
+      var = vp9_variance16x16(x->plane[0].src.buf, x->plane[0].src.stride,
                               xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                               &sse);
     }
@@ -3237,19 +3255,21 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (bsize != BLOCK_SIZE_MB16X16) {
           unsigned int sse2u, sse2v;
           // FIXME(rbultje): mb predictors predict into xd->predictor
-          var = cpi->fn_ptr[uv_block_size].vf(x->src.u_buffer, x->src.uv_stride,
+          var = cpi->fn_ptr[uv_block_size].vf(x->plane[1].src.buf,
+                                              x->plane[1].src.stride,
                                               xd->plane[1].dst.buf,
                                               xd->plane[1].dst.stride, &sse2u);
-          var = cpi->fn_ptr[uv_block_size].vf(x->src.v_buffer, x->src.uv_stride,
+          var = cpi->fn_ptr[uv_block_size].vf(x->plane[2].src.buf,
+                                              x->plane[1].src.stride,
                                               xd->plane[2].dst.buf,
                                               xd->plane[1].dst.stride, &sse2v);
           sse2 = sse2u + sse2v;
         } else {
           unsigned int sse2u, sse2v;
-          var = vp9_variance8x8(x->src.u_buffer, x->src.uv_stride,
+          var = vp9_variance8x8(x->plane[1].src.buf, x->plane[1].src.stride,
                                 xd->plane[1].dst.buf, xd->plane[1].dst.stride,
                                 &sse2u);
-          var = vp9_variance8x8(x->src.v_buffer, x->src.uv_stride,
+          var = vp9_variance8x8(x->plane[2].src.buf, x->plane[1].src.stride,
                                 xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                                 &sse2v);
           sse2 = sse2u + sse2v;

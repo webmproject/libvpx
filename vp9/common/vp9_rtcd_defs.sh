@@ -13,7 +13,6 @@ struct macroblockd;
 struct loop_filter_info;
 
 /* Encoder forward decls */
-struct block;
 struct macroblock;
 struct vp9_variance_vtable;
 
@@ -592,16 +591,16 @@ specialize vp9_short_walsh8x4
 #
 # Motion search
 #
-prototype int vp9_full_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+prototype int vp9_full_search_sad "struct macroblock *x, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
 specialize vp9_full_search_sad sse3 sse4_1
 vp9_full_search_sad_sse3=vp9_full_search_sadx3
 vp9_full_search_sad_sse4_1=vp9_full_search_sadx8
 
-prototype int vp9_refining_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+prototype int vp9_refining_search_sad "struct macroblock *x, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
 specialize vp9_refining_search_sad sse3
 vp9_refining_search_sad_sse3=vp9_refining_search_sadx4
 
-prototype int vp9_diamond_search_sad "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+prototype int vp9_diamond_search_sad "struct macroblock *x, struct blockd *d, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
 specialize vp9_diamond_search_sad sse3
 vp9_diamond_search_sad_sse3=vp9_diamond_search_sadx4
 

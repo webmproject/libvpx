@@ -973,16 +973,23 @@ static INLINE void foreach_predicted_block_uv(
   }
 }
 static int raster_block_offset(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                               int plane, int block) {
+                               int plane, int block, int stride) {
   const int bw = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int stride = 4 << bw;
   const int y = 4 * (block >> bw), x = 4 * (block & ((1 << bw) - 1));
   return y * stride + x;
 }
 static int16_t* raster_block_offset_int16(MACROBLOCKD *xd,
                                          BLOCK_SIZE_TYPE bsize,
                                          int plane, int block, int16_t *base) {
-  return base + raster_block_offset(xd, bsize, plane, block);
+  const int bw = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+  const int stride = 4 << bw;
+  return base + raster_block_offset(xd, bsize, plane, block, stride);
+}
+static uint8_t* raster_block_offset_uint8(MACROBLOCKD *xd,
+                                         BLOCK_SIZE_TYPE bsize,
+                                         int plane, int block,
+                                         uint8_t *base, int stride) {
+  return base + raster_block_offset(xd, bsize, plane, block, stride);
 }
 
 #if CONFIG_CODE_ZEROGROUP

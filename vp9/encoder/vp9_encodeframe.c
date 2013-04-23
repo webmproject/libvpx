@@ -96,8 +96,8 @@ static unsigned int tt_activity_measure(VP9_COMP *cpi, MACROBLOCK *x) {
    *  lambda using a non-linear combination (e.g., the smallest, or second
    *  smallest, etc.).
    */
-  act = vp9_variance16x16(x->src.y_buffer, x->src.y_stride, VP9_VAR_OFFS, 0,
-                          &sse);
+  act = vp9_variance16x16(x->plane[0].src.buf, x->plane[0].src.stride,
+                          VP9_VAR_OFFS, 0, &sse);
   act <<= 4;
 
   /* If the region is flat, lower the activity some more. */
@@ -296,12 +296,12 @@ static void build_activity_map(VP9_COMP *cpi) {
       x->mb_activity_ptr++;
 
       // adjust to the next column of source macroblocks
-      x->src.y_buffer += 16;
+      x->plane[0].src.buf += 16;
     }
 
 
     // adjust to the next row of mbs
-    x->src.y_buffer += 16 * x->src.y_stride - 16 * cm->mb_cols;
+    x->plane[0].src.buf += 16 * x->plane[0].src.stride - 16 * cm->mb_cols;
 
 #if ALT_ACT_MEASURE
     // extend the recon for intra prediction
@@ -535,6 +535,26 @@ static unsigned find_seg_id(uint8_t *buf, BLOCK_SIZE_TYPE bsize,
   return seg_id;
 }
 
+void vp9_setup_src_planes(MACROBLOCK *x,
+                          const YV12_BUFFER_CONFIG *src,
+                          int mb_row, int mb_col) {
+  setup_pred_plane(&x->plane[0].src,
+                   src->y_buffer, src->y_stride,
+                   mb_row, mb_col, NULL,
+                   x->e_mbd.plane[0].subsampling_x,
+                   x->e_mbd.plane[0].subsampling_y);
+  setup_pred_plane(&x->plane[1].src,
+                   src->u_buffer, src->uv_stride,
+                   mb_row, mb_col, NULL,
+                   x->e_mbd.plane[1].subsampling_x,
+                   x->e_mbd.plane[1].subsampling_y);
+  setup_pred_plane(&x->plane[2].src,
+                   src->v_buffer, src->uv_stride,
+                   mb_row, mb_col, NULL,
+                   x->e_mbd.plane[2].subsampling_x,
+                   x->e_mbd.plane[2].subsampling_y);
+}
+
 static void set_offsets(VP9_COMP *cpi,
                         int mb_row, int mb_col, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCK *const x = &cpi->mb;
@@ -581,7 +601,7 @@ static void set_offsets(VP9_COMP *cpi,
   set_mb_row_col(cm, xd, mb_row, bh, mb_col, bw);
 
   /* set up source buffers */
-  setup_pred_block(&x->src, cpi->Source, mb_row, mb_col, NULL, NULL);
+  vp9_setup_src_planes(x, cpi->Source, mb_row, mb_col);
 
   /* R/D setup */
   x->rddiv = cpi->RDDIV;
@@ -1272,7 +1292,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
     vp9_init_mbmode_probs(cm);
 
   // Copy data over into macro block data structures.
-  x->src = *cpi->Source;
+  vp9_setup_src_planes(x, cpi->Source, 0, 0);
 
   // TODO(jkoleszar): are these initializations required?
   setup_pre_planes(xd, &cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]], NULL,
@@ -1768,45 +1788,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 }
 
 void vp9_build_block_offsets(MACROBLOCK *x) {
-  int block = 0;
-  int br, bc;
-
   vp9_build_block_doffsets(&x->e_mbd);
-
-  for (br = 0; br < 4; br++) {
-    for (bc = 0; bc < 4; bc++) {
-      BLOCK *this_block = &x->block[block];
-      // this_block->base_src = &x->src.y_buffer;
-      // this_block->src_stride = x->src.y_stride;
-      // this_block->src = 4 * br * this_block->src_stride + 4 * bc;
-      this_block->base_src = &x->src.y_buffer;
-      this_block->src_stride = x->src.y_stride;
-      this_block->src = 4 * br * this_block->src_stride + 4 * bc;
-      ++block;
-    }
-  }
-
-  // u blocks
-  for (br = 0; br < 2; br++) {
-    for (bc = 0; bc < 2; bc++) {
-      BLOCK *this_block = &x->block[block];
-      this_block->base_src = &x->src.u_buffer;
-      this_block->src_stride = x->src.uv_stride;
-      this_block->src = 4 * br * this_block->src_stride + 4 * bc;
-      ++block;
-    }
-  }
-
-  // v blocks
-  for (br = 0; br < 2; br++) {
-    for (bc = 0; bc < 2; bc++) {
-      BLOCK *this_block = &x->block[block];
-      this_block->base_src = &x->src.v_buffer;
-      this_block->src_stride = x->src.uv_stride;
-      this_block->src = 4 * br * this_block->src_stride + 4 * bc;
-      ++block;
-    }
-  }
 }
 
 static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {

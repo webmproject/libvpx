@@ -42,9 +42,11 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
 
 static void encode_intra4x4block(MACROBLOCK *x, int ib) {
   BLOCKD *b = &x->e_mbd.block[ib];
-  BLOCK *be = &x->block[ib];
   MACROBLOCKD * const xd = &x->e_mbd;
   TX_TYPE tx_type;
+  uint8_t* const src =
+      raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                x->plane[0].src.buf, x->plane[0].src.stride);
   int16_t* const src_diff =
       raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
                                 x->plane[0].src_diff);
@@ -59,7 +61,7 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib) {
   vp9_intra4x4_predict(&x->e_mbd, b, b->bmi.as_mode.first,
                        *(b->base_dst) + b->dst, b->dst_stride);
   vp9_subtract_block(4, 4, src_diff, 16,
-                     *(be->base_src) + be->src, be->src_stride,
+                     src, x->plane[0].src.stride,
                      *(b->base_dst) + b->dst, b->dst_stride);
 
   tx_type = get_tx_type_4x4(&x->e_mbd, ib);
@@ -151,7 +153,9 @@ void vp9_encode_intra16x16mbuv(VP9_COMMON *const cm, MACROBLOCK *x) {
 void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCKD *b = &xd->block[ib];
-  BLOCK *be = &x->block[ib];
+  uint8_t* const src =
+      raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                x->plane[0].src.buf, x->plane[0].src.stride);
   int16_t* const src_diff =
       raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
                                 x->plane[0].src_diff);
@@ -163,7 +167,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
                        *(b->base_dst) + b->dst, b->dst_stride);
   // generate residual blocks
   vp9_subtract_block(8, 8, src_diff, 16,
-                     *(be->base_src) + be->src, be->src_stride,
+                     src, x->plane[0].src.stride,
                      *(b->base_dst) + b->dst, b->dst_stride);
 
   if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
@@ -194,7 +198,6 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
 
       assert(idx < 16);
       b = &xd->block[ib + iblock[i]];
-      be = &x->block[ib + iblock[i]];
       tx_type = get_tx_type_4x4(xd, ib + iblock[i]);
       if (tx_type != DCT_DCT) {
         vp9_short_fht4x4(src_diff, coeff, 16, tx_type);
@@ -236,11 +239,14 @@ void vp9_encode_intra8x8mby(MACROBLOCK *x) {
 static void encode_intra_uv4x4(MACROBLOCK *x, int ib, int mode) {
   MACROBLOCKD * const xd = &x->e_mbd;
   BLOCKD *b = &x->e_mbd.block[ib];
-  BLOCK *be = &x->block[ib];
   int16_t * const dqcoeff = MB_SUBBLOCK_FIELD(xd, dqcoeff, ib);
   int16_t* const coeff = MB_SUBBLOCK_FIELD(x, coeff, ib);
   const int plane = ib < 20 ? 1 : 2;
   const int block = ib < 20 ? ib - 16 : ib - 20;
+  uint8_t* const src =
+      raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, plane, block,
+                                x->plane[plane].src.buf,
+                                x->plane[plane].src.stride);
   int16_t* const src_diff =
       raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, plane, block,
                                 x->plane[plane].src_diff);
@@ -251,7 +257,7 @@ static void encode_intra_uv4x4(MACROBLOCK *x, int ib, int mode) {
 
   assert(xd->plane[1].subsampling_x == 1);
   vp9_subtract_block(4, 4, src_diff, 8,
-                     *(be->base_src) + be->src, be->src_stride,
+                     src, x->plane[plane].src.stride,
                      *(b->base_dst) + b->dst, b->dst_stride);
 
   x->fwd_txm4x4(src_diff, coeff, 16);

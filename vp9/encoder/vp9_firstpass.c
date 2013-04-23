@@ -349,11 +349,10 @@ void vp9_end_first_pass(VP9_COMP *cpi) {
 
 static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *b = &x->block[0];
   BLOCKD *d = &x->e_mbd.block[0];
 
-  uint8_t *src_ptr = (*(b->base_src) + b->src);
-  int src_stride = b->src_stride;
+  uint8_t *src_ptr = x->plane[0].src.buf;
+  int src_stride = x->plane[0].src.stride;
   uint8_t *ref_ptr;
   int ref_stride = d->pre_stride;
 
@@ -371,7 +370,6 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                      YV12_BUFFER_CONFIG *recon_buffer,
                                      int *best_motion_err, int recon_yoffset) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCK *b = &x->block[0];
   BLOCKD *d = &x->e_mbd.block[0];
   int num00;
 
@@ -408,7 +406,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   tmp_mv.as_int = 0;
   ref_mv_full.as_mv.col = ref_mv->as_mv.col >> 3;
   ref_mv_full.as_mv.row = ref_mv->as_mv.row >> 3;
-  tmp_err = cpi->diamond_search_sad(x, b, d, &ref_mv_full, &tmp_mv, step_param,
+  tmp_err = cpi->diamond_search_sad(x, d, &ref_mv_full, &tmp_mv, step_param,
                                     x->sadperbit16, &num00, &v_fn_ptr,
                                     x->nmvjointcost,
                                     x->mvcost, ref_mv);
@@ -431,7 +429,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     if (num00)
       num00--;
     else {
-      tmp_err = cpi->diamond_search_sad(x, b, d, &ref_mv_full, &tmp_mv,
+      tmp_err = cpi->diamond_search_sad(x, d, &ref_mv_full, &tmp_mv,
                                         step_param + n, x->sadperbit16,
                                         &num00, &v_fn_ptr,
                                         x->nmvjointcost,
@@ -484,7 +482,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   vp9_clear_system_state();  // __asm emms;
 
-  x->src = * cpi->Source;
+  vp9_setup_src_planes(x, cpi->Source, 0, 0);
   setup_pre_planes(xd, lst_yv12, NULL, 0, 0, NULL, NULL);
   setup_dst_planes(xd, new_yv12, 0, 0);
 
@@ -686,18 +684,18 @@ void vp9_first_pass(VP9_COMP *cpi) {
       coded_error += (int64_t)this_error;
 
       // adjust to the next column of macroblocks
-      x->src.y_buffer += 16;
-      x->src.u_buffer += 8;
-      x->src.v_buffer += 8;
+      x->plane[0].src.buf += 16;
+      x->plane[1].src.buf += 8;
+      x->plane[2].src.buf += 8;
 
       recon_yoffset += 16;
       recon_uvoffset += 8;
     }
 
     // adjust to the next row of mbs
-    x->src.y_buffer += 16 * x->src.y_stride - 16 * cm->mb_cols;
-    x->src.u_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
-    x->src.v_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
+    x->plane[0].src.buf += 16 * x->plane[0].src.stride - 16 * cm->mb_cols;
+    x->plane[1].src.buf += 8 * x->plane[1].src.stride - 8 * cm->mb_cols;
+    x->plane[2].src.buf += 8 * x->plane[1].src.stride - 8 * cm->mb_cols;
 
     // extend the recon for intra prediction
     vp9_extend_mb_row(new_yv12, xd->plane[0].dst.buf + 16,

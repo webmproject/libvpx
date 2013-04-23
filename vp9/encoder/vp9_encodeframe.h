@@ -13,7 +13,12 @@
 #define VP9_ENCODER_VP9_ENCODEFRAME_H_
 
 struct macroblock;
+struct yv12_buffer_config;
 
 void vp9_build_block_offsets(struct macroblock *x);
+
+void vp9_setup_src_planes(struct macroblock *x,
+                          const struct yv12_buffer_config *src,
+                          int mb_row, int mb_col);
 
 #endif  // VP9_ENCODER_VP9_ENCODEFRAME_H_
