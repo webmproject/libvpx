@@ -96,9 +96,9 @@ typedef enum {
 } sumvfref_t;
 
 int vp9_mv_cont(const int_mv *l, const int_mv *a) {
-  int lez = (l->as_int == 0);
-  int aez = (a->as_int == 0);
-  int lea = (l->as_int == a->as_int);
+  const int lez = (l->as_int == 0);
+  const int aez = (a->as_int == 0);
+  const int lea = (l->as_int == a->as_int);
 
   if (lea && lez)
     return SUBMVREF_LEFT_ABOVE_ZED;
@@ -323,30 +323,26 @@ struct vp9_token vp9_sub_mv_ref_encoding_array[VP9_SUBMVREFS];
 struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
-  unsigned int bct [VP9_YMODES] [2];      /* num Ymodes > num UV modes */
+  unsigned int bct[VP9_YMODES][2];  // num Ymodes > num UV modes
+  int i;
 
   vp9_tree_probs_from_distribution(vp9_ymode_tree, x->fc.ymode_prob,
                                    bct, y_mode_cts, 0);
   vp9_tree_probs_from_distribution(vp9_sb_ymode_tree, x->fc.sb_ymode_prob,
                                    bct, y_mode_cts, 0);
-  {
-    int i;
-    for (i = 0; i < 8; i++) {
-      vp9_tree_probs_from_distribution(vp9_kf_ymode_tree, x->kf_ymode_prob[i],
-                                       bct, kf_y_mode_cts[i], 0);
-      vp9_tree_probs_from_distribution(vp9_sb_kf_ymode_tree,
-                                       x->sb_kf_ymode_prob[i], bct,
-                                       kf_y_mode_cts[i], 0);
-    }
+  for (i = 0; i < 8; i++) {
+    vp9_tree_probs_from_distribution(vp9_kf_ymode_tree, x->kf_ymode_prob[i],
+                                     bct, kf_y_mode_cts[i], 0);
+    vp9_tree_probs_from_distribution(vp9_sb_kf_ymode_tree,
+                                     x->sb_kf_ymode_prob[i], bct,
+                                     kf_y_mode_cts[i], 0);
   }
-  {
-    int i;
-    for (i = 0; i < VP9_YMODES; i++) {
-      vp9_tree_probs_from_distribution(vp9_uv_mode_tree, x->kf_uv_mode_prob[i],
-                                       bct, kf_uv_mode_cts[i], 0);
-      vp9_tree_probs_from_distribution(vp9_uv_mode_tree, x->fc.uv_mode_prob[i],
-                                       bct, uv_mode_cts[i], 0);
-    }
+
+  for (i = 0; i < VP9_YMODES; i++) {
+    vp9_tree_probs_from_distribution(vp9_uv_mode_tree, x->kf_uv_mode_prob[i],
+                                     bct, kf_uv_mode_cts[i], 0);
+    vp9_tree_probs_from_distribution(vp9_uv_mode_tree, x->fc.uv_mode_prob[i],
+                                     bct, uv_mode_cts[i], 0);
   }
 
   vp9_tree_probs_from_distribution(vp9_i8x8_mode_tree, x->fc.i8x8_mode_prob,
@@ -482,9 +478,7 @@ void vp9_init_mode_contexts(VP9_COMMON *pc) {
 void vp9_accum_mv_refs(VP9_COMMON *pc,
                        MB_PREDICTION_MODE m,
                        const int context) {
-  unsigned int (*mv_ref_ct)[4][2];
-
-  mv_ref_ct = pc->fc.mv_ref_ct;
+  unsigned int (*mv_ref_ct)[4][2] = pc->fc.mv_ref_ct;
 
   if (m == ZEROMV) {
     ++mv_ref_ct[context][0][0];
@@ -512,12 +506,8 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 #define MVREF_MAX_UPDATE_FACTOR 128
 void vp9_adapt_mode_context(VP9_COMMON *pc) {
   int i, j;
-  unsigned int (*mv_ref_ct)[4][2];
-  int (*mode_context)[4];
-
-  mode_context = pc->fc.vp9_mode_contexts;
-
-  mv_ref_ct = pc->fc.mv_ref_ct;
+  unsigned int (*mv_ref_ct)[4][2] = pc->fc.mv_ref_ct;
+  int (*mode_context)[4] = pc->fc.vp9_mode_contexts;
 
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     for (i = 0; i < 4; i++) {
@@ -706,9 +696,8 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
 
   vp9_init_mode_contexts(cm);
 
-  for (i = 0; i < NUM_FRAME_CONTEXTS; i++) {
+  for (i = 0; i < NUM_FRAME_CONTEXTS; i++)
     vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
-  }
 
   vpx_memset(cm->prev_mip, 0,
              (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
