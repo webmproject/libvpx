@@ -227,61 +227,6 @@ static void d153_predictor(uint8_t *ypred_ptr, int y_stride,
   }
 }
 
-static void corner_predictor(uint8_t *ypred_ptr, int y_stride, int n,
-                             uint8_t *yabove_row,
-                             uint8_t *yleft_col) {
-  int mh, mv, maxgradh, maxgradv, x, y, nx, ny;
-  int i, j;
-  int top_left = yabove_row[-1];
-  mh = mv = 0;
-  maxgradh = yabove_row[1] - top_left;
-  maxgradv = yleft_col[1] - top_left;
-  for (i = 2; i < n; ++i) {
-    int gh = yabove_row[i] - yabove_row[i - 2];
-    int gv = yleft_col[i] - yleft_col[i - 2];
-    if (gh > maxgradh) {
-      maxgradh = gh;
-      mh = i - 1;
-    }
-    if (gv > maxgradv) {
-      maxgradv = gv;
-      mv = i - 1;
-    }
-  }
-  nx = mh + mv + 3;
-  ny = 2 * n + 1 - nx;
-
-  x = top_left;
-  for (i = 0; i <= mh; ++i) x += yabove_row[i];
-  for (i = 0; i <= mv; ++i) x += yleft_col[i];
-  x += (nx >> 1);
-  x /= nx;
-  y = 0;
-  for (i = mh + 1; i < n; ++i) y += yabove_row[i];
-  for (i = mv + 1; i < n; ++i) y += yleft_col[i];
-  y += (ny >> 1);
-  y /= ny;
-
-  for (i = 0; i < n; ++i) {
-    for (j = 0; j < n; ++j)
-      ypred_ptr[j] = (i <= mh && j <= mv ? x : y);
-    ypred_ptr += y_stride;
-  }
-}
-
-static INLINE int log2_minus_1(int n) {
-  switch (n) {
-    case 4: return 1;
-    case 8: return 2;
-    case 16: return 3;
-    case 32: return 4;
-    case 64: return 5;
-    default:
-      assert(0);
-      return 0;
-  }
-}
-
 void vp9_build_intra_predictors(uint8_t *src, int src_stride,
                                 uint8_t *ypred_ptr,
                                 int y_stride, int mode,
