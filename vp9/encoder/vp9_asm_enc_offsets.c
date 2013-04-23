@@ -20,7 +20,6 @@
 BEGIN
 
 /* regular quantize */
-DEFINE(vp9_block_coeff,                         offsetof(BLOCK, coeff));
 DEFINE(vp9_block_zbin,                          offsetof(BLOCK, zbin));
 DEFINE(vp9_block_round,                         offsetof(BLOCK, round));
 DEFINE(vp9_block_quant,                         offsetof(BLOCK, quant));

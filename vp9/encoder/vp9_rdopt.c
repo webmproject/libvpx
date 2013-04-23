@@ -845,12 +845,9 @@ static void super_block_yrd(VP9_COMP *cpi,
                             int *skip, BLOCK_SIZE_TYPE bs,
                             int64_t txfm_cache[NB_TXFM_MODES]) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &x->e_mbd;
   int r[TX_SIZE_MAX_SB][2], d[TX_SIZE_MAX_SB], s[TX_SIZE_MAX_SB];
-  uint8_t *src = x->src.y_buffer, *dst = xd->plane[0].dst.buf;
-  int src_y_stride = x->src.y_stride, dst_y_stride = xd->plane[0].dst.stride;
 
-  vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride, bs);
+  vp9_subtract_sby(x, bs);
 
   if (bs >= BLOCK_SIZE_SB32X32)
     super_block_yrd_32x32(cm, x, &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32],
@@ -877,7 +874,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   VP9_COMMON *const cm = &cpi->common;
   BLOCK *be = x->block + ib;
   BLOCKD *b = xd->block + ib;
-
+  int16_t* const src_diff =
+      raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                x->plane[0].src_diff);
   ENTROPY_CONTEXT ta = *a, tempa = *a;
   ENTROPY_CONTEXT tl = *l, templ = *l;
   TX_TYPE tx_type = DCT_DCT;
@@ -917,15 +916,17 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 #endif
 
     vp9_intra4x4_predict(xd, b, mode, *(b->base_dst) + b->dst, b->dst_stride);
-    vp9_subtract_b(be, b, 16);
+    vp9_subtract_block(4, 4, src_diff, 16,
+                       *(be->base_src) + be->src, be->src_stride,
+                       *(b->base_dst) + b->dst, b->dst_stride);
 
     b->bmi.as_mode.first = mode;
     tx_type = get_tx_type_4x4(xd, be - x->block);
     if (tx_type != DCT_DCT) {
-      vp9_short_fht4x4(be->src_diff, be->coeff, 16, tx_type);
+      vp9_short_fht4x4(src_diff, be->coeff, 16, tx_type);
       vp9_ht_quantize_b_4x4(x, be - x->block, tx_type);
     } else {
-      x->fwd_txm4x4(be->src_diff, be->coeff, 32);
+      x->fwd_txm4x4(src_diff, be->coeff, 32);
       x->quantize_b_4x4(x, be - x->block, 16);
     }
 
@@ -1107,10 +1108,12 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   ENTROPY_CONTEXT_PLANES ta, tl;
   ENTROPY_CONTEXT *ta0, *ta1, besta0 = 0, besta1 = 0;
   ENTROPY_CONTEXT *tl0, *tl1, bestl0 = 0, bestl1 = 0;
-
   // perform transformation of dimension 8x8
   // note the input and output index mapping
   int idx = (ib & 0x02) ? (ib + 2) : ib;
+  int16_t* const src_diff =
+      raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                x->plane[0].src_diff);
 
   assert(ib < 16);
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
@@ -1123,14 +1126,16 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
     vp9_intra8x8_predict(xd, b, mode, *(b->base_dst) + b->dst, b->dst_stride);
 
-    vp9_subtract_4b_c(be, b, 16);
+    vp9_subtract_block(8, 8, src_diff, 16,
+                       *(be->base_src) + be->src, be->src_stride,
+                       *(b->base_dst) + b->dst, b->dst_stride);
 
     if (xd->mode_info_context->mbmi.txfm_size == TX_8X8) {
       TX_TYPE tx_type = get_tx_type_8x8(xd, ib);
       if (tx_type != DCT_DCT)
-        vp9_short_fht8x8(be->src_diff, (x->block + idx)->coeff, 16, tx_type);
+        vp9_short_fht8x8(src_diff, (x->block + idx)->coeff, 16, tx_type);
       else
-        x->fwd_txm8x8(be->src_diff, (x->block + idx)->coeff, 32);
+        x->fwd_txm8x8(src_diff, (x->block + idx)->coeff, 32);
       x->quantize_b_8x8(x, idx, tx_type, 16);
 
       // compute quantization mse of 8x8 block
@@ -1162,20 +1167,24 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       distortion = 0;
       rate_t = 0;
       for (i = 0; i < 4; ++i) {
+        int16_t* const src_diff =
+            raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16,
+                                      0, ib + iblock[i],
+                                      x->plane[0].src_diff);
         int do_two = 0;
         b = &xd->block[ib + iblock[i]];
         be = &x->block[ib + iblock[i]];
         tx_type = get_tx_type_4x4(xd, ib + iblock[i]);
         if (tx_type != DCT_DCT) {
-          vp9_short_fht4x4(be->src_diff, be->coeff, 16, tx_type);
+          vp9_short_fht4x4(src_diff, be->coeff, 16, tx_type);
           vp9_ht_quantize_b_4x4(x, ib + iblock[i], tx_type);
         } else if (!(i & 1) &&
                    get_tx_type_4x4(xd, ib + iblock[i] + 1) == DCT_DCT) {
-          x->fwd_txm8x4(be->src_diff, be->coeff, 32);
+          x->fwd_txm8x4(src_diff, be->coeff, 32);
           x->quantize_b_4x4_pair(x, ib + iblock[i], ib + iblock[i] + 1, 16);
           do_two = 1;
         } else {
-          x->fwd_txm4x4(be->src_diff, be->coeff, 32);
+          x->fwd_txm4x4(src_diff, be->coeff, 32);
           x->quantize_b_4x4(x, ib + iblock[i], 16);
         }
         distortion += vp9_block_error_c(be->coeff,
@@ -1531,12 +1540,8 @@ static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
                              BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-  uint8_t *usrc = x->src.u_buffer, *udst = xd->plane[1].dst.buf;
-  uint8_t *vsrc = x->src.v_buffer, *vdst = xd->plane[2].dst.buf;
-  int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->plane[1].dst.stride;
 
-  vp9_subtract_sbuv_s_c(x->src_diff, usrc, vsrc, src_uv_stride,
-                        udst, vdst, dst_uv_stride, bsize);
+  vp9_subtract_sbuv(x, bsize);
 
   if (mbmi->txfm_size >= TX_32X32 && bsize >= BLOCK_SIZE_SB64X64) {
     super_block_uvrd_32x32(cm, x, rate, distortion, skippable, bsize);
@@ -1738,6 +1743,9 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
     if (labels[i] == which_label) {
       BLOCKD *bd = &x->e_mbd.block[i];
       BLOCK *be = &x->block[i];
+      int16_t* const src_diff =
+          raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, i,
+                                    x->plane[0].src_diff);
       int thisdistortion;
 
       vp9_build_inter_predictor(*(bd->base_pre) + bd->pre,
@@ -1760,8 +1768,10 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
             &xd->subpix);
       }
 
-      vp9_subtract_b(be, bd, 16);
-      x->fwd_txm4x4(be->src_diff, be->coeff, 32);
+      vp9_subtract_block(4, 4, src_diff, 16,
+                         *(be->base_src) + be->src, be->src_stride,
+                         *(bd->base_dst) + bd->dst, bd->dst_stride);
+      x->fwd_txm4x4(src_diff, be->coeff, 32);
       x->quantize_b_4x4(x, i, 16);
       thisdistortion = vp9_block_error(be->coeff,
           BLOCK_OFFSET(xd->plane[0].dqcoeff, i, 16), 16);
@@ -1809,6 +1819,9 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
       const int idx = (ib & 8) + ((ib & 2) << 1);
       BLOCKD *bd = &xd->block[ib];
       BLOCK *be = &x->block[ib], *be2 = &x->block[idx];
+      int16_t* const src_diff =
+          raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                    x->plane[0].src_diff);
       int thisdistortion;
 
       assert(idx < 16);
@@ -1826,11 +1839,13 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
             &xd->subpix);
       }
 
-      vp9_subtract_4b_c(be, bd, 16);
+      vp9_subtract_block(8, 8, src_diff, 16,
+                         *(be->base_src) + be->src, be->src_stride,
+                         *(bd->base_dst) + bd->dst, bd->dst_stride);
 
       if (xd->mode_info_context->mbmi.txfm_size == TX_4X4) {
         if (otherrd) {
-          x->fwd_txm8x8(be->src_diff, be2->coeff, 32);
+          x->fwd_txm8x8(src_diff, be2->coeff, 32);
           x->quantize_b_8x8(x, idx, DCT_DCT, 16);
           thisdistortion = vp9_block_error_c(be2->coeff,
               BLOCK_OFFSET(xd->plane[0].dqcoeff, idx, 16), 64);
@@ -1843,9 +1858,13 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
           xd->mode_info_context->mbmi.txfm_size = TX_4X4;
         }
         for (j = 0; j < 4; j += 2) {
+          int16_t* const src_diff =
+              raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16,
+                                        0, ib + iblock[j],
+                                        x->plane[0].src_diff);
           bd = &xd->block[ib + iblock[j]];
           be = &x->block[ib + iblock[j]];
-          x->fwd_txm8x4(be->src_diff, be->coeff, 32);
+          x->fwd_txm8x4(src_diff, be->coeff, 32);
           x->quantize_b_4x4_pair(x, ib + iblock[j], ib + iblock[j] + 1, 16);
           thisdistortion = vp9_block_error_c(be->coeff,
               BLOCK_OFFSET(xd->plane[0].dqcoeff, ib + iblock[j], 16), 32);
@@ -1866,7 +1885,11 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
         if (otherrd) {
           for (j = 0; j < 4; j += 2) {
             BLOCK *be = &x->block[ib + iblock[j]];
-            x->fwd_txm8x4(be->src_diff, be->coeff, 32);
+            int16_t* const src_diff =
+                raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16,
+                                          0, ib + iblock[j],
+                                          x->plane[0].src_diff);
+            x->fwd_txm8x4(src_diff, be->coeff, 32);
             x->quantize_b_4x4_pair(x, ib + iblock[j], ib + iblock[j] + 1, 16);
             thisdistortion = vp9_block_error_c(be->coeff,
                 BLOCK_OFFSET(xd->plane[0].dqcoeff, ib + iblock[j], 16), 32);
@@ -1886,7 +1909,7 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
             xd->mode_info_context->mbmi.txfm_size = TX_8X8;
           }
         }
-        x->fwd_txm8x8(be->src_diff, be2->coeff, 32);
+        x->fwd_txm8x8(src_diff, be2->coeff, 32);
         x->quantize_b_8x8(x, idx, DCT_DCT, 16);
         thisdistortion = vp9_block_error_c(be2->coeff,
             BLOCK_OFFSET(xd->plane[0].dqcoeff, idx, 16), 64);
@@ -3782,12 +3805,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_build_inter_predictors_sbuv(&x->e_mbd, mb_row, mb_col,
                                         BLOCK_SIZE_MB16X16);
 
-        vp9_subtract_sbuv_s_c(x->src_diff,
-                              x->src.u_buffer,
-                              x->src.v_buffer, x->src.uv_stride,
-                              xd->plane[1].dst.buf,
-                              xd->plane[2].dst.buf, xd->plane[1].dst.stride,
-                              BLOCK_SIZE_MB16X16);
+        vp9_subtract_sbuv(x, BLOCK_SIZE_MB16X16);
 
         super_block_uvrd_4x4(cm, x, &rate_uv, &distortion_uv,
                              &uv_skippable, BLOCK_SIZE_MB16X16);

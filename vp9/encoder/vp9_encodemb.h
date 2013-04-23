@@ -56,15 +56,12 @@ void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
 
 void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x);
 
-void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
-
-void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
-                          const uint8_t *pred, int dst_stride,
-                          BLOCK_SIZE_TYPE bsize);
-void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
-                           const uint8_t *vsrc, int src_stride,
-                           const uint8_t *upred,
-                           const uint8_t *vpred, int dst_stride,
-                           BLOCK_SIZE_TYPE bsize);
+void vp9_subtract_block(int rows, int cols,
+                        int16_t *diff_ptr, int diff_stride,
+                        const uint8_t *src_ptr, int src_stride,
+                        const uint8_t *pred_ptr, int pred_stride);
+void vp9_subtract_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_subtract_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_subtract_sb(MACROBLOCK *xd, BLOCK_SIZE_TYPE bsize);
 
 #endif  // VP9_ENCODER_VP9_ENCODEMB_H_

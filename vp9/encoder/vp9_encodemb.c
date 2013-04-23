@@ -20,101 +20,53 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9_rtcd.h"
 
-void vp9_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch) {
-  uint8_t *src_ptr = (*(be->base_src) + be->src);
-  int16_t *diff_ptr = be->src_diff;
-  uint8_t *pred_ptr = *(bd->base_dst) + bd->dst;
-  int src_stride = be->src_stride;
-  int dst_stride = bd->dst_stride;
-
+void vp9_subtract_block(int rows, int cols,
+                        int16_t *diff_ptr, int diff_stride,
+                        const uint8_t *src_ptr, int src_stride,
+                        const uint8_t *pred_ptr, int pred_stride) {
   int r, c;
 
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++)
+  for (r = 0; r < rows; r++) {
+    for (c = 0; c < cols; c++)
       diff_ptr[c] = src_ptr[c] - pred_ptr[c];
 
-    diff_ptr += pitch;
-    pred_ptr += dst_stride;
+    diff_ptr += diff_stride;
+    pred_ptr += pred_stride;
     src_ptr  += src_stride;
   }
 }
 
-void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch) {
-  uint8_t *src_ptr = (*(be->base_src) + be->src);
-  int16_t *diff_ptr = be->src_diff;
-  uint8_t *pred_ptr = *(bd->base_dst) + bd->dst;
-  int src_stride = be->src_stride;
-  int dst_stride = bd->dst_stride;
-  int r, c;
 
-  for (r = 0; r < 8; r++) {
-    for (c = 0; c < 8; c++)
-      diff_ptr[c] = src_ptr[c] - pred_ptr[c];
+static void subtract_plane(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize, int plane) {
+  const MACROBLOCKD * const xd = &x->e_mbd;
+  const int bw = 4 << (b_width_log2(bsize) - xd->plane[plane].subsampling_x);
+  const int bh = 4 << (b_height_log2(bsize) - xd->plane[plane].subsampling_y);
+  const uint8_t *src = plane == 0 ? x->src.y_buffer :
+                       plane == 1 ? x->src.u_buffer : x->src.v_buffer;
+  const int src_stride = plane == 0 ? x->src.y_stride : x->src.uv_stride;
 
-    diff_ptr += pitch;
-    pred_ptr += dst_stride;
-    src_ptr  += src_stride;
-  }
+  assert(plane < 3);
+  vp9_subtract_block(bh, bw,
+                     x->plane[plane].src_diff, bw, src, src_stride,
+                     xd->plane[plane].dst.buf, xd->plane[plane].dst.stride);
 }
 
-void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
-                          const uint8_t *pred, int dst_stride,
-                          BLOCK_SIZE_TYPE bsize) {
-  const int bh = 16 << mb_height_log2(bsize), bw = 16 << mb_width_log2(bsize);
-  int r, c;
-
-  for (r = 0; r < bh; r++) {
-    for (c = 0; c < bw; c++)
-      diff[c] = src[c] - pred[c];
-
-    diff += bw;
-    pred += dst_stride;
-    src  += src_stride;
-  }
+void vp9_subtract_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  subtract_plane(x, bsize, 0);
 }
 
-void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
-                           const uint8_t *vsrc, int src_stride,
-                           const uint8_t *upred,
-                           const uint8_t *vpred, int dst_stride,
-                           BLOCK_SIZE_TYPE bsize) {
-  const int bhl = mb_height_log2(bsize), bwl = mb_width_log2(bsize);
-  const int uoff = (16 * 16) << (bhl + bwl), voff = (uoff * 5) >> 2;
-  const int bw = 8 << bwl, bh = 8 << bhl;
-  int16_t *udiff = diff + uoff;
-  int16_t *vdiff = diff + voff;
-  int r, c;
+void vp9_subtract_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  int i;
 
-  for (r = 0; r < bh; r++) {
-    for (c = 0; c < bw; c++)
-      udiff[c] = usrc[c] - upred[c];
-
-    udiff += bw;
-    upred += dst_stride;
-    usrc  += src_stride;
-  }
-
-  for (r = 0; r < bh; r++) {
-    for (c = 0; c < bw; c++)
-      vdiff[c] = vsrc[c] - vpred[c];
-
-    vdiff += bw;
-    vpred += dst_stride;
-    vsrc  += src_stride;
-  }
+  for (i = 1; i < MAX_MB_PLANE; i++)
+    subtract_plane(x, bsize, i);
 }
 
-static void subtract_mb(MACROBLOCK *x) {
-  MACROBLOCKD *xd = &x->e_mbd;
-  vp9_subtract_sby_s_c(x->src_diff, x->src.y_buffer, x->src.y_stride,
-                       xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-                       BLOCK_SIZE_MB16X16);
-  vp9_subtract_sbuv_s_c(x->src_diff, x->src.u_buffer, x->src.v_buffer,
-                        x->src.uv_stride,
-                        xd->plane[1].dst.buf, xd->plane[2].dst.buf,
-                        xd->plane[1].dst.stride,
-                        BLOCK_SIZE_MB16X16);
+void vp9_subtract_sb(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+  vp9_subtract_sby(x, bsize);
+  vp9_subtract_sbuv(x, bsize);
 }
+
 
 void vp9_transform_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize) - 1, bw = 1 << bwl;
@@ -125,7 +77,7 @@ void vp9_transform_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-    vp9_short_fdct32x32(x->src_diff + y_idx * stride * 32 + x_idx * 32,
+    vp9_short_fdct32x32(x->plane[0].src_diff + y_idx * stride * 32 + x_idx * 32,
                         x->coeff + n * 1024, stride * 2);
   }
 }
@@ -143,10 +95,11 @@ void vp9_transform_sby_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
                                               (y_idx * bstride + x_idx) * 4);
 
     if (tx_type != DCT_DCT) {
-      vp9_short_fht16x16(x->src_diff + y_idx * stride * 16 + x_idx * 16,
+      vp9_short_fht16x16(x->plane[0].src_diff +
+                             y_idx * stride * 16 + x_idx * 16,
                          x->coeff + n * 256, stride, tx_type);
     } else {
-      x->fwd_txm16x16(x->src_diff + y_idx * stride * 16 + x_idx * 16,
+      x->fwd_txm16x16(x->plane[0].src_diff + y_idx * stride * 16 + x_idx * 16,
                       x->coeff + n * 256, stride * 2);
     }
   }
@@ -164,10 +117,10 @@ void vp9_transform_sby_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
     const TX_TYPE tx_type = get_tx_type_8x8(xd, (y_idx * bstride + x_idx) * 2);
 
     if (tx_type != DCT_DCT) {
-      vp9_short_fht8x8(x->src_diff + y_idx * stride * 8 + x_idx * 8,
+      vp9_short_fht8x8(x->plane[0].src_diff + y_idx * stride * 8 + x_idx * 8,
                        x->coeff + n * 64, stride, tx_type);
     } else {
-      x->fwd_txm8x8(x->src_diff + y_idx * stride * 8 + x_idx * 8,
+      x->fwd_txm8x8(x->plane[0].src_diff + y_idx * stride * 8 + x_idx * 8,
                     x->coeff + n * 64, stride * 2);
     }
   }
@@ -185,10 +138,10 @@ void vp9_transform_sby_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
     const TX_TYPE tx_type = get_tx_type_4x4(xd, n);
 
     if (tx_type != DCT_DCT) {
-      vp9_short_fht4x4(x->src_diff + y_idx * stride * 4 + x_idx * 4,
+      vp9_short_fht4x4(x->plane[0].src_diff + y_idx * stride * 4 + x_idx * 4,
                        x->coeff + n * 16, stride, tx_type);
     } else {
-      x->fwd_txm4x4(x->src_diff + y_idx * stride * 4 + x_idx * 4,
+      x->fwd_txm4x4(x->plane[0].src_diff + y_idx * stride * 4 + x_idx * 4,
                     x->coeff + n * 16, stride * 2);
     }
   }
@@ -197,9 +150,9 @@ void vp9_transform_sby_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 void vp9_transform_sbuv_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   assert(bsize == BLOCK_SIZE_SB64X64);
   vp9_clear_system_state();
-  vp9_short_fdct32x32(x->src_diff + 4096,
+  vp9_short_fdct32x32(x->plane[1].src_diff,
                       x->coeff + 4096, 64);
-  vp9_short_fdct32x32(x->src_diff + 4096 + 1024,
+  vp9_short_fdct32x32(x->plane[2].src_diff,
                       x->coeff + 4096 + 1024, 64);
 }
 
@@ -214,9 +167,9 @@ void vp9_transform_sbuv_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
 
-    x->fwd_txm16x16(x->src_diff + uoff + y_idx * stride * 16 + x_idx * 16,
+    x->fwd_txm16x16(x->plane[1].src_diff + y_idx * stride * 16 + x_idx * 16,
                     x->coeff + uoff + n * 256, stride * 2);
-    x->fwd_txm16x16(x->src_diff + voff + y_idx * stride * 16 + x_idx * 16,
+    x->fwd_txm16x16(x->plane[2].src_diff + y_idx * stride * 16 + x_idx * 16,
                     x->coeff + voff + n * 256, stride * 2);
   }
 }
@@ -232,9 +185,9 @@ void vp9_transform_sbuv_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
 
-    x->fwd_txm8x8(x->src_diff + uoff + y_idx * stride * 8 + x_idx * 8,
+    x->fwd_txm8x8(x->plane[1].src_diff + y_idx * stride * 8 + x_idx * 8,
                   x->coeff + uoff + n * 64, stride * 2);
-    x->fwd_txm8x8(x->src_diff + voff + y_idx * stride * 8 + x_idx * 8,
+    x->fwd_txm8x8(x->plane[2].src_diff + y_idx * stride * 8 + x_idx * 8,
                   x->coeff + voff + n * 64, stride * 2);
   }
 }
@@ -250,9 +203,9 @@ void vp9_transform_sbuv_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
 
-    x->fwd_txm4x4(x->src_diff + uoff + y_idx * stride * 4 + x_idx * 4,
+    x->fwd_txm4x4(x->plane[1].src_diff + y_idx * stride * 4 + x_idx * 4,
                   x->coeff + uoff + n * 16, stride * 2);
-    x->fwd_txm4x4(x->src_diff + voff + y_idx * stride * 4 + x_idx * 4,
+    x->fwd_txm4x4(x->plane[2].src_diff + y_idx * stride * 4 + x_idx * 4,
                   x->coeff + voff + n * 16, stride * 2);
   }
 }
@@ -844,7 +797,7 @@ void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
 
   vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
-  subtract_mb(x);
+  vp9_subtract_sb(x, BLOCK_SIZE_MB16X16);
   vp9_fidct_mb(cm, x);
   vp9_recon_sb(xd, BLOCK_SIZE_MB16X16);
 }
@@ -854,9 +807,7 @@ void vp9_encode_inter16x16y(MACROBLOCK *x, int mb_row, int mb_col) {
   MACROBLOCKD *xd = &x->e_mbd;
 
   vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
-  vp9_subtract_sby_s_c(x->src_diff, x->src.y_buffer, x->src.y_stride,
-                       xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-                       BLOCK_SIZE_MB16X16);
+  vp9_subtract_sby(x, BLOCK_SIZE_MB16X16);
 
   vp9_transform_sby_4x4(x, BLOCK_SIZE_MB16X16);
   vp9_quantize_sby_4x4(x, BLOCK_SIZE_MB16X16);
