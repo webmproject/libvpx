@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//4Xw\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-04-23T22:43:03Z",
+      "side": 1,
+      "message": "Since the largest transform used is 32x32, the left vertical edge of a 32x32 block always aligns with the transform block boundary. Should the condition of not doing filtering for this boundary needs to be more more strict? i.e. what if the 32x32 block on the other side of the edge does have coefficients?",
+      "revId": "0a91c06294ea20fc5bcbfceb81ece58c9c466179",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//4Wk\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-04-23T22:43:03Z",
+      "side": 1,
+      "message": "Similar here: 32x32 Block on the above side of the edge may coefficients, then quantization error can cause significant blocking artifact here?",
+      "revId": "0a91c06294ea20fc5bcbfceb81ece58c9c466179",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
