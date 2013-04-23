@@ -16,6 +16,4 @@ struct macroblock;
 
 void vp9_build_block_offsets(struct macroblock *x);
 
-void vp9_setup_block_ptrs(struct macroblock *x);
-
 #endif  // VP9_ENCODER_VP9_ENCODEFRAME_H_

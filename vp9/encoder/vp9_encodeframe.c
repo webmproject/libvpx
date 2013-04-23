@@ -1248,8 +1248,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   vp9_setup_block_dptrs(&x->e_mbd);
 
-  vp9_setup_block_ptrs(x);
-
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_context->mbmi.uv_mode = DC_PRED;
 
@@ -1731,17 +1729,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     encode_frame_internal(cpi);
   }
 
-}
-
-void vp9_setup_block_ptrs(MACROBLOCK *x) {
-  int i;
-
-  for (i = 0; i < 16; i++)
-    x->block[i].coeff = x->plane[0].coeff + i * 16;
-  for (i = 16; i < 20; i++)
-    x->block[i].coeff = x->plane[1].coeff + (i - 16) * 16;
-  for (i = 20; i < 24; i++)
-    x->block[i].coeff = x->plane[2].coeff + (i - 20) * 16;
 }
 
 void vp9_build_block_offsets(MACROBLOCK *x) {
