@@ -245,7 +245,6 @@ EXPERIMENT_LIST="
     enable_6tap
     modelcoefprob
     loop_dering
-    implicit_compoundinter_weight
     scatterscan
     oneshotq
     sbsegment
