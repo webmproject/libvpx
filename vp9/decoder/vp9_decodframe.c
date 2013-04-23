@@ -305,7 +305,7 @@ static void decode_8x8(MACROBLOCKD *xd) {
 
 static INLINE void dequant_add_y(MACROBLOCKD *xd, TX_TYPE tx_type, int idx) {
   BLOCKD *const b = &xd->block[idx];
-  struct mb_plane *const y = &xd->plane[0];
+  struct macroblockd_plane *const y = &xd->plane[0];
   if (tx_type != DCT_DCT) {
     vp9_dequant_iht_add_c(tx_type,
                           BLOCK_OFFSET(y->qcoeff, idx, 16),

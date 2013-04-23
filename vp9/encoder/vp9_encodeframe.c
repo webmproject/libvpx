@@ -1734,24 +1734,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 }
 
 void vp9_setup_block_ptrs(MACROBLOCK *x) {
-  int r, c;
   int i;
-
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++)
-      x->block[r * 4 + c].src_diff = x->src_diff + r * 4 * 16 + c * 4;
-  }
-
-  for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++)
-      x->block[16 + r * 2 + c].src_diff = x->src_diff + 256 + r * 4 * 8 + c * 4;
-  }
-
-
-  for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++)
-      x->block[20 + r * 2 + c].src_diff = x->src_diff + 320 + r * 4 * 8 + c * 4;
-  }
 
   for (i = 0; i < 24; i++)
     x->block[i].coeff = x->coeff + i * 16;
@@ -2100,14 +2083,6 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  const uint8_t *src = x->src.y_buffer;
-  uint8_t *dst = xd->plane[0].dst.buf;
-  const uint8_t *usrc = x->src.u_buffer;
-  uint8_t *udst = xd->plane[1].dst.buf;
-  const uint8_t *vsrc = x->src.v_buffer;
-  uint8_t *vdst = xd->plane[2].dst.buf;
-  int src_y_stride = x->src.y_stride, dst_y_stride = xd->plane[0].dst.stride;
-  int src_uv_stride = x->src.uv_stride, dst_uv_stride = xd->plane[1].dst.stride;
   int n;
   MODE_INFO *mi = x->e_mbd.mode_info_context;
   unsigned int segment_id = mi->mbmi.segment_id;
@@ -2187,10 +2162,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   }
 
   if (!x->skip) {
-    vp9_subtract_sby_s_c(x->src_diff, src, src_y_stride, dst, dst_y_stride,
-                         bsize);
-    vp9_subtract_sbuv_s_c(x->src_diff, usrc, vsrc, src_uv_stride,
-                          udst, vdst, dst_uv_stride, bsize);
+    vp9_subtract_sb(x, bsize);
 
     switch (xd->mode_info_context->mbmi.txfm_size) {
       case TX_32X32:

@@ -17,7 +17,7 @@
 
 // TODO(jimbankoski) Consider rewriting the c to take the same values rather
 // than going through these pointer conversions
-#if HAVE_MMX
+#if 0 && HAVE_MMX
 void vp9_short_fdct8x4_mmx(short *input, short *output, int pitch) {
   vp9_short_fdct4x4_mmx(input,   output,    pitch);
   vp9_short_fdct4x4_mmx(input + 4, output + 16, pitch);
@@ -38,7 +38,7 @@ void vp9_subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch) {
 
 #endif
 
-#if HAVE_SSE2
+#if 0 && HAVE_SSE2
 void vp9_subtract_b_sse2_impl(unsigned char *z,  int src_stride,
                               short *diff, unsigned char *predictor,
                               int pitch);

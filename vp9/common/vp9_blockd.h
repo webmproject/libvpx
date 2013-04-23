@@ -336,7 +336,7 @@ struct buf_2d {
   int stride;
 };
 
-struct mb_plane {
+struct macroblockd_plane {
   DECLARE_ALIGNED(16, int16_t,  qcoeff[64 * 64]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[64 * 64]);
   DECLARE_ALIGNED(16, uint16_t, eobs[256]);
@@ -356,7 +356,7 @@ struct mb_plane {
   BLOCK_OFFSET((x)->plane[2].field, ((i) - 20), 16))
 
 typedef struct macroblockd {
-  struct mb_plane plane[MAX_MB_PLANE];
+  struct macroblockd_plane plane[MAX_MB_PLANE];
 
   /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
   BLOCKD block[24];
@@ -919,6 +919,18 @@ static INLINE void foreach_predicted_block_uv(
   for (plane = 1; plane < MAX_MB_PLANE; plane++) {
     foreach_predicted_block_in_plane(xd, bsize, plane, visit, arg);
   }
+}
+static int raster_block_offset(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+                               int plane, int block) {
+  const int bw = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+  const int stride = 4 << bw;
+  const int y = 4 * (block >> bw), x = 4 * (block & ((1 << bw) - 1));
+  return y * stride + x;
+}
+static int16_t* raster_block_offset_int16(MACROBLOCKD *xd,
+                                         BLOCK_SIZE_TYPE bsize,
+                                         int plane, int block, int16_t *base) {
+  return base + raster_block_offset(xd, bsize, plane, block);
 }
 
 #if CONFIG_CODE_ZEROGROUP
