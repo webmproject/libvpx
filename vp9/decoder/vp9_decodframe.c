@@ -771,11 +771,6 @@ static int get_delta_q(vp9_reader *r, int *dq) {
   return old_value != *dq;
 }
 
-#ifdef PACKET_TESTING
-#include <stdio.h>
-FILE *vpxlog = 0;
-#endif
-
 static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
                         int mb_row, int mb_col) {
   const int bh = 1 << mb_height_log2(bsize);
@@ -1001,7 +996,7 @@ static void read_zpc_probs_common(VP9_COMMON *cm,
 static void read_zpc_probs(VP9_COMMON *cm,
                            vp9_reader* bc) {
   read_zpc_probs_common(cm, bc, TX_4X4);
-  if (cm->txfm_mode != ONLY_4X4)
+  if (cm->txfm_mode > ONLY_4X4)
     read_zpc_probs_common(cm, bc, TX_8X8);
   if (cm->txfm_mode > ALLOW_8X8)
     read_zpc_probs_common(cm, bc, TX_16X16);
@@ -1055,7 +1050,7 @@ static void read_coef_probs(VP9D_COMP *pbi, vp9_reader *r) {
 
   read_coef_probs_common(pbi, r, fc->coef_probs_4x4, TX_4X4);
 
-  if (mode != ONLY_4X4)
+  if (mode > ONLY_4X4)
     read_coef_probs_common(pbi, r, fc->coef_probs_8x8, TX_8X8);
 
   if (mode > ALLOW_8X8)
@@ -1423,7 +1418,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   const uint8_t *data = pbi->source;
   const uint8_t *data_end = data + pbi->source_sz;
   size_t first_partition_size = 0;
-  int i, corrupt_tokens = 0;
+  int i;
 
   // printf("Decoding frame %d\n", pc->current_video_frame);
 
@@ -1574,16 +1569,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   }
 #endif
 
-  if (0) {
-    FILE *z = fopen("decodestats.stt", "a");
-    fprintf(z, "%6d F:%d,R:%d,Q:%d\n",
-            pc->current_video_frame,
-            pc->frame_type,
-            pbi->refresh_frame_flags,
-            pc->base_qindex);
-    fclose(z);
-  }
-
   update_frame_context(pbi);
 
   read_coef_probs(pbi, &header_bc);
@@ -1617,7 +1602,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   vp9_decode_mode_mvs_init(pbi, &header_bc);
 
   decode_tiles(pbi, data, first_partition_size, &header_bc, &residual_bc);
-  corrupt_tokens |= xd->corrupted;
 
   // keep track of the last coded dimensions
   pc->last_width = pc->width;
@@ -1627,7 +1611,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   // 1. Check first boolean decoder for errors.
   // 2. Check the macroblock information
   pc->yv12_fb[pc->new_fb_idx].corrupted = vp9_reader_has_error(&header_bc) |
-                                          corrupt_tokens;
+                                          xd->corrupted;
 
   if (!pbi->decoded_key_frame) {
     if (pc->frame_type == KEY_FRAME && !pc->yv12_fb[pc->new_fb_idx].corrupted)
@@ -1637,15 +1621,13 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
                          "A stream must start with a complete key frame");
   }
 
+  // Adaptation
   if (!pc->error_resilient_mode && !pc->frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(pc);
 #if CONFIG_CODE_ZEROGROUP
     vp9_adapt_zpc_probs(pc);
 #endif
-  }
-
-  if (pc->frame_type != KEY_FRAME) {
-    if (!pc->error_resilient_mode && !pc->frame_parallel_decoding_mode) {
+    if (pc->frame_type != KEY_FRAME) {
       vp9_adapt_mode_probs(pc);
       vp9_adapt_nmv_probs(pc, xd->allow_high_precision_mv);
       vp9_adapt_mode_context(&pbi->common);
@@ -1656,16 +1638,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     vpx_memcpy(&pc->frame_contexts[pc->frame_context_idx], &pc->fc,
                sizeof(pc->fc));
   }
-
-#ifdef PACKET_TESTING
-  {
-    FILE *f = fopen("decompressor.VP8", "ab");
-    unsigned int size = residual_bc.pos + header_bc.pos + 8;
-    fwrite((void *) &size, 4, 1, f);
-    fwrite((void *) pbi->Source, size, 1, f);
-    fclose(f);
-  }
-#endif
 
   *p_data_end = vp9_reader_find_end(&residual_bc);
   return 0;

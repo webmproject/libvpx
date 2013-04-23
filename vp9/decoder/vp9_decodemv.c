@@ -116,6 +116,17 @@ static void set_segment_id(VP9_COMMON *cm, MB_MODE_INFO *mbmi,
   }
 }
 
+static TX_SIZE select_txfm_size(VP9_COMMON *cm, vp9_reader *r,
+                                int allow_16x16, int allow_32x32) {
+  TX_SIZE txfm_size = vp9_read(r, cm->prob_tx[0]);  // TX_4X4 or >TX_4X4
+  if (txfm_size != TX_4X4 && allow_16x16) {
+    txfm_size += vp9_read(r, cm->prob_tx[1]);       // TX_8X8 or >TX_8X8
+    if (txfm_size != TX_8X8 && allow_32x32)
+      txfm_size += vp9_read(r, cm->prob_tx[2]);     // TX_16X16 or >TX_16X16
+  }
+  return txfm_size;
+}
+
 extern const int vp9_i8x8_block[4];
 static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
                          int mb_row, int mb_col,
@@ -174,15 +185,11 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
   }
 
   if (cm->txfm_mode == TX_MODE_SELECT &&
-      m->mbmi.mb_skip_coeff == 0 &&
+      !m->mbmi.mb_skip_coeff &&
       m->mbmi.mode <= I8X8_PRED) {
-    // FIXME(rbultje) code ternary symbol once all experiments are merged
-    m->mbmi.txfm_size = vp9_read(r, cm->prob_tx[0]);
-    if (m->mbmi.txfm_size != TX_4X4 && m->mbmi.mode != I8X8_PRED) {
-      m->mbmi.txfm_size += vp9_read(r, cm->prob_tx[1]);
-      if (m->mbmi.txfm_size != TX_8X8 && m->mbmi.sb_type >= BLOCK_SIZE_SB32X32)
-        m->mbmi.txfm_size += vp9_read(r, cm->prob_tx[2]);
-    }
+    const int allow_16x16 = m->mbmi.mode != I8X8_PRED;
+    const int allow_32x32 = m->mbmi.sb_type >= BLOCK_SIZE_SB32X32;
+    m->mbmi.txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
   } else if (cm->txfm_mode >= ALLOW_32X32 &&
              m->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
     m->mbmi.txfm_size = TX_32X32;
@@ -194,6 +201,7 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
     m->mbmi.txfm_size = TX_4X4;
   }
 }
+
 
 static int read_nmv_component(vp9_reader *r,
                               int rv,
@@ -980,14 +988,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= I8X8_PRED) ||
        (mbmi->ref_frame != INTRA_FRAME && !(mbmi->mode == SPLITMV &&
                            mbmi->partitioning == PARTITIONING_4X4)))) {
-    // FIXME(rbultje) code ternary symbol once all experiments are merged
-    mbmi->txfm_size = vp9_read(r, cm->prob_tx[0]);
-    if (mbmi->txfm_size != TX_4X4 && mbmi->mode != I8X8_PRED &&
-        mbmi->mode != SPLITMV) {
-      mbmi->txfm_size += vp9_read(r, cm->prob_tx[1]);
-      if (mbmi->sb_type >= BLOCK_SIZE_SB32X32 && mbmi->txfm_size != TX_8X8)
-        mbmi->txfm_size += vp9_read(r, cm->prob_tx[2]);
-    }
+    const int allow_16x16 = mbmi->mode != I8X8_PRED && mbmi->mode != SPLITMV;
+    const int allow_32x32 = mbmi->sb_type >= BLOCK_SIZE_SB32X32;
+    mbmi->txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
   } else if (mbmi->sb_type >= BLOCK_SIZE_SB32X32 &&
              cm->txfm_mode >= ALLOW_32X32) {
     mbmi->txfm_size = TX_32X32;
