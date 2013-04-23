@@ -41,7 +41,6 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
 }
 
 static void encode_intra4x4block(MACROBLOCK *x, int ib) {
-  BLOCKD *b = &x->e_mbd.block[ib];
   MACROBLOCKD * const xd = &x->e_mbd;
   TX_TYPE tx_type;
   uint8_t* const src =
@@ -65,7 +64,7 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib) {
     vp9_find_bpred_context(&x->e_mbd, ib, dst, xd->plane[0].dst.stride);
 #endif
 
-  vp9_intra4x4_predict(&x->e_mbd, b,
+  vp9_intra4x4_predict(&x->e_mbd, ib,
                        xd->mode_info_context->bmi[ib].as_mode.first,
                        dst, xd->plane[0].dst.stride);
   vp9_subtract_block(4, 4, src_diff, 16,

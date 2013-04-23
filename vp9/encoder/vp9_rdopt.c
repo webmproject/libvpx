@@ -850,7 +850,6 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   int rate = 0;
   int distortion;
   VP9_COMMON *const cm = &cpi->common;
-  BLOCKD *b = xd->block + ib;
   const int src_stride = x->plane[0].src.stride;
   uint8_t* const src =
       raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
@@ -904,7 +903,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     rate = bmode_costs[mode];
 #endif
 
-    vp9_intra4x4_predict(xd, b, mode, dst, xd->plane[0].dst.stride);
+    vp9_intra4x4_predict(xd, ib, mode, dst, xd->plane[0].dst.stride);
     vp9_subtract_block(4, 4, src_diff, 16,
                        src, src_stride,
                        dst, xd->plane[0].dst.stride);
@@ -922,7 +921,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     tempa = ta;
     templ = tl;
 
-    ratey = cost_coeffs(cm, x, b - xd->block,
+    ratey = cost_coeffs(cm, x, ib,
                         PLANE_TYPE_Y_WITH_DC, &tempa, &templ, TX_4X4, 16);
     rate += ratey;
     distortion = vp9_block_error(coeff,
@@ -952,7 +951,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   else
     xd->inv_txm4x4(best_dqcoeff, diff, 32);
 
-  vp9_intra4x4_predict(xd, b, *best_mode,
+  vp9_intra4x4_predict(xd, ib, *best_mode,
                        dst, xd->plane[0].dst.stride);
   vp9_recon_b(dst, diff,
               dst, xd->plane[0].dst.stride);
@@ -2057,7 +2056,6 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         int step_param = 0;
         int further_steps;
         int thissme, bestsme = INT_MAX;
-        BLOCKD *e;
         const struct buf_2d orig_src = x->plane[0].src;
         const struct buf_2d orig_pre = x->e_mbd.plane[0].pre[0];
 
@@ -2109,9 +2107,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
               raster_block_offset_uint8(&x->e_mbd, BLOCK_SIZE_MB16X16, 0, n,
                                         x->e_mbd.plane[0].pre[0].buf,
                                         x->e_mbd.plane[0].pre[0].stride);
-          e = &x->e_mbd.block[n];
 
-          bestsme = vp9_full_pixel_diamond(cpi, x, e, &mvp_full, step_param,
+          bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                            sadpb, further_steps, 0, v_fn_ptr,
                                            bsi->ref_mv, &mode_mv[NEW4X4]);
 
@@ -2123,7 +2120,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,
                      x->mv_row_min, x->mv_row_max);
 
-            thissme = cpi->full_search_sad(x, e, &mvp_full,
+            thissme = cpi->full_search_sad(x, &mvp_full,
                                            sadpb, 16, v_fn_ptr,
                                            x->nmvjointcost, x->mvcost,
                                            bsi->ref_mv,
@@ -2145,7 +2142,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         if (bestsme < INT_MAX) {
           int distortion;
           unsigned int sse;
-          cpi->find_fractional_mv_step(x, e, &mode_mv[NEW4X4],
+          cpi->find_fractional_mv_step(x, &mode_mv[NEW4X4],
                                        bsi->ref_mv, x->errorperbit, v_fn_ptr,
                                        x->nmvjointcost, x->mvcost,
                                        &distortion, &sse);
@@ -2883,7 +2880,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
-  BLOCKD *d = &xd->block[0];
   const int is_comp_pred = (mbmi->second_ref_frame > 0);
 #if CONFIG_COMP_INTERINTRA_PRED
   const int is_comp_interintra_pred = (mbmi->second_ref_frame == INTRA_FRAME);
@@ -2964,7 +2960,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // Further step/diamond searches as necessary
         further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
-        bestsme = vp9_full_pixel_diamond(cpi, x, d, &mvp_full, step_param,
+        bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                          sadpb, further_steps, 1,
                                          &cpi->fn_ptr[block_size],
                                          &ref_mv[0], &tmp_mv);
@@ -2977,7 +2973,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (bestsme < INT_MAX) {
           int dis; /* TODO: use dis in distortion calculation later. */
           unsigned int sse;
-          cpi->find_fractional_mv_step(x, d, &tmp_mv,
+          cpi->find_fractional_mv_step(x, &tmp_mv,
                                        &ref_mv[0],
                                        x->errorperbit,
                                        &cpi->fn_ptr[block_size],

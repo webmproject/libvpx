@@ -25,10 +25,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
                                               int mb_col) {
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCKD *d = &xd->block[0];
   vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
   unsigned int best_err;
-
 
   int tmp_col_min = x->mv_col_min;
   int tmp_col_max = x->mv_col_max;
@@ -47,7 +45,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
 
   /*cpi->sf.search_method == HEX*/
   best_err = vp9_hex_search(
-      x, d,
+      x,
       &ref_full, dst_mv,
       step_param,
       x->errorperbit,
@@ -62,7 +60,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
     int distortion;
     unsigned int sse;
     best_err = cpi->find_fractional_mv_step(
-        x, d,
+        x,
         dst_mv, ref_mv,
         x->errorperbit, &v_fn_ptr,
         NULL, NULL,

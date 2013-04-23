@@ -160,12 +160,11 @@ B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, int block_idx,
 #endif
 
 void vp9_intra4x4_predict(MACROBLOCKD *xd,
-                          BLOCKD *x,
+                          int block_idx,
                           int b_mode,
                           uint8_t *predictor,
                           int ps) {
   int i, r, c;
-  const int block_idx = x - xd->block;
   const int have_top = (block_idx >> 2) || xd->up_available;
   const int have_left = (block_idx & 3)  || xd->left_available;
   const int have_right = (block_idx & 3) != 3 || xd->right_available;

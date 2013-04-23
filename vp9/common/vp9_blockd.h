@@ -278,10 +278,6 @@ typedef struct {
   union b_mode_info bmi[16];
 } MODE_INFO;
 
-typedef struct blockd {
-  int unused;
-} BLOCKD;
-
 struct scale_factors {
   int x_num;
   int x_den;
@@ -334,9 +330,6 @@ struct macroblockd_plane {
 
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
-
-  /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
-  BLOCKD block[24];
 
   struct scale_factors scale_factor[2];
   struct scale_factors scale_factor_uv[2];

@@ -239,7 +239,7 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
     },                                                                   \
     v = INT_MAX;)
 
-int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCKD *d,
+int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x,
                                              int_mv *bestmv, int_mv *ref_mv,
                                              int error_per_bit,
                                              const vp9_variance_fn_ptr_t *vfp,
@@ -421,7 +421,7 @@ int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCKD *d,
 #undef MIN
 #undef MAX
 
-int vp9_find_best_sub_pixel_step(MACROBLOCK *x, BLOCKD *d,
+int vp9_find_best_sub_pixel_step(MACROBLOCK *x,
                                  int_mv *bestmv, int_mv *ref_mv,
                                  int error_per_bit,
                                  const vp9_variance_fn_ptr_t *vfp,
@@ -924,7 +924,7 @@ int vp9_find_best_sub_pixel_step(MACROBLOCK *x, BLOCKD *d,
 
 #undef SP
 
-int vp9_find_best_half_pixel_step(MACROBLOCK *x, BLOCKD *d,
+int vp9_find_best_half_pixel_step(MACROBLOCK *x,
                                   int_mv *bestmv, int_mv *ref_mv,
                                   int error_per_bit,
                                   const vp9_variance_fn_ptr_t *vfp,
@@ -1096,7 +1096,6 @@ static const MV next_chkpts[6][3] = {
 int vp9_hex_search
 (
   MACROBLOCK *x,
-  BLOCKD *d,
   int_mv *ref_mv,
   int_mv *best_mv,
   int search_param,
@@ -1250,7 +1249,7 @@ cal_neighbors:
 #undef CHECK_POINT
 #undef CHECK_BETTER
 
-int vp9_diamond_search_sad_c(MACROBLOCK *x, BLOCKD *d,
+int vp9_diamond_search_sad_c(MACROBLOCK *x,
                              int_mv *ref_mv, int_mv *best_mv,
                              int search_param, int sad_per_bit, int *num00,
                              vp9_variance_fn_ptr_t *fn_ptr, int *mvjcost,
@@ -1361,7 +1360,7 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x, BLOCKD *d,
                   xd->allow_high_precision_mv);
 }
 
-int vp9_diamond_search_sadx4(MACROBLOCK *x, BLOCKD *d,
+int vp9_diamond_search_sadx4(MACROBLOCK *x,
                              int_mv *ref_mv, int_mv *best_mv, int search_param,
                              int sad_per_bit, int *num00,
                              vp9_variance_fn_ptr_t *fn_ptr,
@@ -1512,13 +1511,13 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x, BLOCKD *d,
               point as the best match, we will do a final 1-away diamond
               refining search  */
 int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
-                           BLOCKD *d, int_mv *mvp_full, int step_param,
+                           int_mv *mvp_full, int step_param,
                            int sadpb, int further_steps,
                            int do_refine, vp9_variance_fn_ptr_t *fn_ptr,
                            int_mv *ref_mv, int_mv *dst_mv) {
   int_mv temp_mv;
   int thissme, n, num00;
-  int bestsme = cpi->diamond_search_sad(x, d, mvp_full, &temp_mv,
+  int bestsme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
                                         step_param, sadpb, &num00,
                                         fn_ptr, x->nmvjointcost,
                                         x->mvcost, ref_mv);
@@ -1537,7 +1536,7 @@ int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
     if (num00)
       num00--;
     else {
-      thissme = cpi->diamond_search_sad(x, d, mvp_full, &temp_mv,
+      thissme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
                                         step_param + n, sadpb, &num00,
                                         fn_ptr, x->nmvjointcost, x->mvcost,
                                         ref_mv);
@@ -1558,7 +1557,7 @@ int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
     int search_range = 8;
     int_mv best_mv;
     best_mv.as_int = dst_mv->as_int;
-    thissme = cpi->refining_search_sad(x, d, &best_mv, sadpb, search_range,
+    thissme = cpi->refining_search_sad(x, &best_mv, sadpb, search_range,
                                        fn_ptr, x->nmvjointcost, x->mvcost,
                                        ref_mv);
 
@@ -1570,7 +1569,7 @@ int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
   return bestsme;
 }
 
-int vp9_full_search_sad_c(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
+int vp9_full_search_sad_c(MACROBLOCK *x, int_mv *ref_mv,
                           int sad_per_bit, int distance,
                           vp9_variance_fn_ptr_t *fn_ptr, int *mvjcost,
                           int *mvcost[2],
@@ -1666,7 +1665,7 @@ int vp9_full_search_sad_c(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
     return INT_MAX;
 }
 
-int vp9_full_search_sadx3(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
+int vp9_full_search_sadx3(MACROBLOCK *x, int_mv *ref_mv,
                           int sad_per_bit, int distance,
                           vp9_variance_fn_ptr_t *fn_ptr, int *mvjcost,
                           int *mvcost[2], int_mv *center_mv, int n) {
@@ -1794,7 +1793,7 @@ int vp9_full_search_sadx3(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
     return INT_MAX;
 }
 
-int vp9_full_search_sadx8(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
+int vp9_full_search_sadx8(MACROBLOCK *x, int_mv *ref_mv,
                           int sad_per_bit, int distance,
                           vp9_variance_fn_ptr_t *fn_ptr,
                           int *mvjcost, int *mvcost[2],
@@ -1948,7 +1947,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
   else
     return INT_MAX;
 }
-int vp9_refining_search_sad_c(MACROBLOCK *x, BLOCKD *d,
+int vp9_refining_search_sad_c(MACROBLOCK *x,
                               int_mv *ref_mv, int error_per_bit,
                               int search_range, vp9_variance_fn_ptr_t *fn_ptr,
                               int *mvjcost, int *mvcost[2], int_mv *center_mv) {
@@ -2026,7 +2025,7 @@ int vp9_refining_search_sad_c(MACROBLOCK *x, BLOCKD *d,
     return INT_MAX;
 }
 
-int vp9_refining_search_sadx4(MACROBLOCK *x, BLOCKD *d,
+int vp9_refining_search_sadx4(MACROBLOCK *x,
                               int_mv *ref_mv, int error_per_bit,
                               int search_range, vp9_variance_fn_ptr_t *fn_ptr,
                               int *mvjcost, int *mvcost[2], int_mv *center_mv) {

@@ -361,7 +361,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
     }
   } else if (mode == I4X4_PRED) {
     for (i = 0; i < 16; i++) {
-      BLOCKD *b = &xd->block[i];
       int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
       uint8_t* dst;
       dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, i,
@@ -373,7 +372,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
       if (!xd->mode_info_context->mbmi.mb_skip_coeff)
         vp9_decode_coefs_4x4(pbi, xd, r, PLANE_TYPE_Y_WITH_DC, i);
 #endif
-      vp9_intra4x4_predict(xd, b, b_mode, dst, xd->plane[0].dst.stride);
+      vp9_intra4x4_predict(xd, i, b_mode, dst, xd->plane[0].dst.stride);
       tx_type = get_tx_type_4x4(xd, i);
       dequant_add_y(xd, tx_type, i);
     }
