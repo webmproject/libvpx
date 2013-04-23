@@ -1828,7 +1828,7 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
   }
 #endif
 
-  if (xd->mode_info_context->mbmi.sb_type) {
+  if (xd->mode_info_context->mbmi.sb_type > BLOCK_SIZE_MB16X16) {
     ++cpi->sb_ymode_count[m];
   } else {
     ++cpi->ymode_count[m];
@@ -1884,7 +1884,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const int mis = cm->mode_info_stride;
 
-  assert(!xd->mode_info_context->mbmi.sb_type);
+  assert(xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_MB16X16);
 
 #ifdef ENC_DEBUG
   enc_debug = (cpi->common.current_video_frame == 11 && cm->show_frame &&

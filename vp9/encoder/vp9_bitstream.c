@@ -748,7 +748,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     active_section = 6;
 #endif
 
-    if (m->mbmi.sb_type)
+    if (m->mbmi.sb_type > BLOCK_SIZE_MB16X16)
       write_sb_ymode(bc, mode, pc->fc.sb_ymode_prob);
     else
       write_ymode(bc, mode, pc->fc.ymode_prob);
@@ -784,7 +784,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-      if (mi->sb_type) {
+      if (mi->sb_type > BLOCK_SIZE_MB16X16) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
       } else {
         write_mv_ref(bc, mode, mv_ref_p);
@@ -945,7 +945,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
               vp9_get_pred_prob(c, xd, PRED_MBSKIP));
   }
 
-  if (m->mbmi.sb_type) {
+  if (m->mbmi.sb_type > BLOCK_SIZE_MB16X16) {
     sb_kfwrite_ymode(bc, ym,
                      c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
   } else {
