@@ -3050,7 +3050,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // Hence quantizer step is also 8 times. To get effective quantizer
         // we need to divide by 8 before sending to modeling function.
         model_rd_from_var_lapndz(var, 16 * bw * 16 * bh,
-                                 xd->block[0].dequant[1] >> 3,
+                                 xd->plane[0].dequant[1] >> 3,
                                  &tmp_rate_y, &tmp_dist_y);
         var = cpi->fn_ptr[uv_block_size].vf(x->plane[1].src.buf,
                                             x->plane[1].src.stride,
@@ -3058,7 +3058,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                             xd->plane[1].dst.stride,
                                             &sse);
         model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
-                                 xd->block[16].dequant[1] >> 3,
+                                 xd->plane[1].dequant[1] >> 3,
                                  &tmp_rate_u, &tmp_dist_u);
         var = cpi->fn_ptr[uv_block_size].vf(x->plane[2].src.buf,
                                             x->plane[1].src.stride,
@@ -3066,7 +3066,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                             xd->plane[1].dst.stride,
                                             &sse);
         model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
-                                 xd->block[20].dequant[1] >> 3,
+                                 xd->plane[2].dequant[1] >> 3,
                                  &tmp_rate_v, &tmp_dist_v);
         rd = RDCOST(x->rdmult, x->rddiv,
                     rs + tmp_rate_y + tmp_rate_u + tmp_rate_v,
@@ -3138,17 +3138,17 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // Note our transform coeffs are 8 times an orthogonal transform.
         // Hence quantizer step is also 8 times. To get effective quantizer
         // we need to divide by 8 before sending to modeling function.
-        model_rd_from_var_lapndz(var, 16 * 16, xd->block[0].dequant[1] >> 3,
+        model_rd_from_var_lapndz(var, 16 * 16, xd->plane[0].dequant[1] >> 3,
                                  &tmp_rate_y, &tmp_dist_y);
         var = vp9_variance8x8(x->plane[1].src.buf, x->plane[1].src.stride,
                               xd->plane[1].dst.buf, xd->plane[1].dst.stride,
                               &sse);
-        model_rd_from_var_lapndz(var, 8 * 8, xd->block[16].dequant[1] >> 3,
+        model_rd_from_var_lapndz(var, 8 * 8, xd->plane[1].dequant[1] >> 3,
                                  &tmp_rate_u, &tmp_dist_u);
         var = vp9_variance8x8(x->plane[2].src.buf, x->plane[1].src.stride,
                               xd->plane[2].dst.buf, xd->plane[1].dst.stride,
                               &sse);
-        model_rd_from_var_lapndz(var, 8 * 8, xd->block[20].dequant[1] >> 3,
+        model_rd_from_var_lapndz(var, 8 * 8, xd->plane[2].dequant[1] >> 3,
                                  &tmp_rate_v, &tmp_dist_v);
         rd = RDCOST(x->rdmult, x->rddiv,
                     rs + tmp_rate_y + tmp_rate_u + tmp_rate_v,
@@ -3225,8 +3225,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     x->skip = 1;
   else if (x->encode_breakout) {
     unsigned int var, sse;
-    int threshold = (xd->block[0].dequant[1]
-                     * xd->block[0].dequant[1] >> 4);
+    int threshold = (xd->plane[0].dequant[1]
+                     * xd->plane[0].dequant[1] >> 4);
 
     if (threshold < x->encode_breakout)
       threshold = x->encode_breakout;
@@ -3244,7 +3244,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if ((int)sse < threshold) {
-      unsigned int q2dc = xd->block[0].dequant[0];
+      unsigned int q2dc = xd->plane[0].dequant[0];
       /* If there is no codeable 2nd order dc
          or a very small uniform pixel change change */
       if ((sse - var < q2dc * q2dc >> 4) ||

@@ -509,7 +509,7 @@ void vp9_optimize_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-    optimize_b(cm, x, n * 64, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n * 64, PLANE_TYPE_Y_WITH_DC, x->e_mbd.plane[0].dequant,
                ta + x_idx, tl + y_idx, TX_32X32, 64 * bw * bh);
   }
 }
@@ -532,7 +532,7 @@ void vp9_optimize_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-    optimize_b(cm, x, n * 16, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n * 16, PLANE_TYPE_Y_WITH_DC, x->e_mbd.plane[0].dequant,
                ta + x_idx, tl + y_idx, TX_16X16, 16 * bw * bh);
   }
 }
@@ -560,7 +560,7 @@ void vp9_optimize_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-    optimize_b(cm, x, n * 4, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n * 4, PLANE_TYPE_Y_WITH_DC, x->e_mbd.plane[0].dequant,
                ta + x_idx, tl + y_idx, TX_8X8, 4 * bw * bh);
   }
 }
@@ -585,7 +585,7 @@ void vp9_optimize_sby_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-    optimize_b(cm, x, n, PLANE_TYPE_Y_WITH_DC, x->e_mbd.block[0].dequant,
+    optimize_b(cm, x, n, PLANE_TYPE_Y_WITH_DC, x->e_mbd.plane[0].dequant,
                ta + x_idx, tl + y_idx, TX_4X4, bh * bw);
   }
 }
@@ -599,7 +599,7 @@ void vp9_optimize_sbuv_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
 
   assert(bsize == BLOCK_SIZE_SB64X64);
   for (b = 256; b < 384; b += 64) {
-    const int cidx = b >= 320 ? 20 : 16;
+    const int plane = 1 + (b >= 320);
     a = ta + vp9_block2above_sb64[TX_32X32][b];
     l = tl + vp9_block2left_sb64[TX_32X32][b];
     a1 = a + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
@@ -610,7 +610,7 @@ void vp9_optimize_sbuv_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
     l3 = l + 3 * sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
     a_ec = (a[0] + a[1] + a1[0] + a1[1] + a2[0] + a2[1] + a3[0] + a3[1]) != 0;
     l_ec = (l[0] + l[1] + l1[0] + l1[1] + l2[0] + l2[1] + l3[0] + l3[1]) != 0;
-    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.block[cidx].dequant,
+    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.plane[plane].dequant,
                &a_ec, &l_ec, TX_32X32, 256);
   }
 }
@@ -638,11 +638,10 @@ void vp9_optimize_sbuv_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
   }
 
   for (plane = 0; plane < 2; plane++) {
-    const int cidx = 16 + plane * 4;
     for (n = 0; n < bw * bh; n++) {
       const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
       optimize_b(cm, x, uvoff + n * 16, PLANE_TYPE_UV,
-                 x->e_mbd.block[cidx].dequant,
+                 x->e_mbd.plane[plane + 1].dequant,
                  &ta[plane][x_idx], &tl[plane][y_idx],
                  TX_16X16, bh * bw * 64);
     }
@@ -671,11 +670,10 @@ void vp9_optimize_sbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
   }
 
   for (plane = 0; plane < 2; plane++) {
-    const int cidx = 16 + plane * 4;
     for (n = 0; n < bw * bh; n++) {
       const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
       optimize_b(cm, x, uvoff + n * 4, PLANE_TYPE_UV,
-                 x->e_mbd.block[cidx].dequant,
+                 x->e_mbd.plane[plane + 1].dequant,
                  &ta[plane][x_idx], &tl[plane][y_idx],
                  TX_8X8, bh * bw * 16);
     }
@@ -708,11 +706,10 @@ void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
   }
 
   for (plane = 0; plane < 2; plane++) {
-    const int cidx = 16 + plane * 4;
     for (n = 0; n < bw * bh; n++) {
       const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
       optimize_b(cm, x, uvoff + n, PLANE_TYPE_UV,
-                 x->e_mbd.block[cidx].dequant,
+                 x->e_mbd.plane[plane + 1].dequant,
                  &ta[plane][x_idx], &tl[plane][y_idx],
                  TX_4X4, bh * bw * 4);
     }

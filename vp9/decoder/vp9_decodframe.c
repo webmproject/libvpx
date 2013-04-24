@@ -206,11 +206,9 @@ static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *mb) {
   const int qindex = get_qindex(mb, segment_id, pc->base_qindex);
   mb->q_index = qindex;
 
-  for (i = 0; i < 16; i++)
-    mb->block[i].dequant = pc->y_dequant[qindex];
-
-  for (i = 16; i < 24; i++)
-    mb->block[i].dequant = pc->uv_dequant[qindex];
+  mb->plane[0].dequant = pc->y_dequant[qindex];
+  for (i = 1; i < MAX_MB_PLANE; i++)
+    mb->plane[i].dequant = pc->uv_dequant[qindex];
 
   if (mb->lossless) {
     assert(qindex == 0);
@@ -354,7 +352,8 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
       xd->mode_info_context->bmi[i].as_mode.context = b->bmi.as_mode.context =
           vp9_find_bpred_context(xd, b);
       if (!xd->mode_info_context->mbmi.mb_skip_coeff)
-        vp9_decode_coefs_4x4(pbi, xd, r, PLANE_TYPE_Y_WITH_DC, i, b->dequant);
+        vp9_decode_coefs_4x4(pbi, xd, r, PLANE_TYPE_Y_WITH_DC, i,
+                             xd->plane[0].dequant);
 #endif
       vp9_intra4x4_predict(xd, b, b_mode, *(b->base_dst) + b->dst,
                            b->dst_stride);
@@ -363,7 +362,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
     }
 #if CONFIG_NEWBINTRAMODES
     if (!xd->mode_info_context->mbmi.mb_skip_coeff)
-      vp9_decode_mb_tokens_4x4_uv(pbi, xd, r, xd->block[16].dequant);
+      vp9_decode_mb_tokens_4x4_uv(pbi, xd, r, xd->plane[1].dequant);
 #endif
     vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_MB16X16);
     xd->itxm_add_uv_block(xd->plane[1].qcoeff, xd->plane[1].dst.buf,
@@ -596,7 +595,7 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
       mb_init_dequantizer(pbi, xd);
 
     // dequantization and idct
-    eobtotal = vp9_decode_tokens(pbi, xd, r, bsize, xd->block[0].dequant);
+    eobtotal = vp9_decode_tokens(pbi, xd, r, bsize, xd->plane[0].dequant);
     if (eobtotal == 0) {  // skip loopfilter
       for (n = 0; n < bw * bh; n++) {
         const int x_idx = n & (bw - 1), y_idx = n >> bwl;
@@ -671,7 +670,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     if (mode != I4X4_PRED)
 #endif
       eobtotal = vp9_decode_tokens(pbi, xd, r, BLOCK_SIZE_MB16X16,
-                                   xd->block[0].dequant);
+                                   xd->plane[0].dequant);
     }
   }
 

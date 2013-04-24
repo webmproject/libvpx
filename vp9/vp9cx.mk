@@ -26,7 +26,6 @@ VP9_CX_SRCS-yes += vp9_cx_iface.c
 #INCLUDES += common
 #INCLUDES += encoder
 
-VP9_CX_SRCS-yes += encoder/vp9_asm_enc_offsets.c
 VP9_CX_SRCS-yes += encoder/vp9_bitstream.c
 VP9_CX_SRCS-yes += encoder/vp9_boolhuff.c
 VP9_CX_SRCS-yes += encoder/vp9_dct.c
@@ -117,6 +116,3 @@ endif
 
 
 VP9_CX_SRCS-yes := $(filter-out $(VP9_CX_SRCS_REMOVE-yes),$(VP9_CX_SRCS-yes))
-
-$(eval $(call asm_offsets_template,\
-         vp9_asm_enc_offsets.asm, $(VP9_PREFIX)encoder/vp9_asm_enc_offsets.c))

@@ -9,7 +9,6 @@
 
 
 %include "vpx_ports/x86_abi_support.asm"
-%include "vp9_asm_enc_offsets.asm"
 
 
 ; void vp9_regular_quantize_b_sse4 | arg

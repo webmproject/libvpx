@@ -28,7 +28,6 @@ static INLINE int plane_idx(int plane) {
 
 void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  BLOCKD *const d = &xd->block[0];
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
@@ -41,7 +40,7 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   int16_t *round_ptr       = mb->plane[0].round;
   int16_t *quant_ptr       = mb->plane[0].quant;
   uint8_t *quant_shift_ptr = mb->plane[0].quant_shift;
-  int16_t *dequant_ptr     = d->dequant;
+  int16_t *dequant_ptr     = xd->plane[0].dequant;
   int zbin_oq_value        = mb->plane[0].zbin_extra;
   const int *pt_scan = get_scan_4x4(tx_type);
 
@@ -84,7 +83,6 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
   const int c_idx = plane_idx(pb_idx.plane);
-  BLOCKD *const d = &xd->block[c_idx];
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
@@ -99,7 +97,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks) {
   int16_t *round_ptr       = mb->plane[pb_idx.plane].round;
   int16_t *quant_ptr       = mb->plane[pb_idx.plane].quant;
   uint8_t *quant_shift_ptr = mb->plane[pb_idx.plane].quant_shift;
-  int16_t *dequant_ptr     = d->dequant;
+  int16_t *dequant_ptr     = xd->plane[0].dequant;
   int zbin_oq_value        = mb->plane[pb_idx.plane].zbin_extra;
 
   if (c_idx == 0) assert(pb_idx.plane == 0);
@@ -152,7 +150,6 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                       pb_idx.block, 16);
   int16_t *coeff_ptr = BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff,
                                     pb_idx.block, 16);
-  BLOCKD *const d = &xd->block[c_idx];
   const int *pt_scan = get_scan_8x8(tx_type);
 
   if (c_idx == 0) assert(pb_idx.plane == 0);
@@ -171,7 +168,7 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
     int16_t *round_ptr  = mb->plane[pb_idx.plane].round;
     int16_t *quant_ptr  = mb->plane[pb_idx.plane].quant;
     uint8_t *quant_shift_ptr = mb->plane[pb_idx.plane].quant_shift;
-    int16_t *dequant_ptr = d->dequant;
+    int16_t *dequant_ptr = xd->plane[pb_idx.plane].dequant;
     int zbin_oq_value = mb->plane[pb_idx.plane].zbin_extra;
 
     eob = -1;
@@ -286,7 +283,6 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
   MACROBLOCKD *const xd = &mb->e_mbd;
   const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
   const int c_idx = plane_idx(pb_idx.plane);
-  BLOCKD *const d = &xd->block[c_idx];
   const int *pt_scan = get_scan_16x16(tx_type);
 
   if (c_idx == 0) assert(pb_idx.plane == 0);
@@ -301,7 +297,7 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
            mb->plane[pb_idx.plane].quant_shift,
            BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16),
            BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block, 16),
-           d->dequant,
+           xd->plane[pb_idx.plane].dequant,
            mb->plane[pb_idx.plane].zbin_extra,
            &xd->plane[pb_idx.plane].eobs[pb_idx.block],
            pt_scan, 1);
@@ -311,7 +307,6 @@ void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx, int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
   const int c_idx = plane_idx(pb_idx.plane);
-  BLOCKD *const d = &xd->block[c_idx];
 
   if (c_idx == 0) assert(pb_idx.plane == 0);
   if (c_idx == 16) assert(pb_idx.plane == 1);
@@ -325,7 +320,7 @@ void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx, int y_blocks) {
            mb->plane[pb_idx.plane].quant_shift,
            BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16),
            BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block, 16),
-           d->dequant,
+           xd->plane[pb_idx.plane].dequant,
            mb->plane[pb_idx.plane].zbin_extra,
            &xd->plane[pb_idx.plane].eobs[pb_idx.block],
            vp9_default_zig_zag1d_32x32, 2);
@@ -528,8 +523,7 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[0].round = cpi->Y1round[qindex];
   x->plane[0].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[qindex];
   x->plane[0].zbin_extra = (int16_t)zbin_extra;
-  for (i = 0; i < 16; i++)
-    x->e_mbd.block[i].dequant = cpi->common.y_dequant[qindex];
+  x->e_mbd.plane[0].dequant = cpi->common.y_dequant[qindex];
 
   // UV
   zbin_extra = (cpi->common.uv_dequant[qindex][1] *
@@ -542,9 +536,8 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
     x->plane[i].round = cpi->UVround[qindex];
     x->plane[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[qindex];
     x->plane[i].zbin_extra = (int16_t)zbin_extra;
+    x->e_mbd.plane[i].dequant = cpi->common.uv_dequant[qindex];
   }
-  for (i = 16; i < 24; i++)
-    x->e_mbd.block[i].dequant = cpi->common.uv_dequant[qindex];
 
   x->skip_block = vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
 
