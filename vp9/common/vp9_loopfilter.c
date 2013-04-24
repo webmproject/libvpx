@@ -308,7 +308,8 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
   do_left_v = !(wbl >= 3 /* 32x16 or >=32x32 */ && (tx_size >= TX_32X32 ||
       sb_mb_lf_skip(mode_info_context, mi)));
   do_above_h = (mb_row > 0);
-  do_left_v_mbuv = do_left_v;
+  do_left_v_mbuv = !(wbl >= 3 /* 32x16 or >=32x32 */ && (tx_size >= TX_16X16 ||
+      sb_mb_lf_skip(mode_info_context, mi)));
   do_above_h_mbuv = !(sb_type >= BLOCK_SIZE_SB64X64 &&
       tx_size >= TX_32X32 && (mb_row & 2));
   lpf_mb(cm, mi, do_left_v, do_above_h,
@@ -325,7 +326,8 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
       sb_mb_lf_skip(mode_info_context, mi)));
   do_left_v_mbuv = !(sb_type >= BLOCK_SIZE_SB64X64 &&
       tx_size >= TX_32X32 && (mb_col & 2));
-  do_above_h_mbuv = do_above_h;
+  do_above_h_mbuv = !(hbl >= 3 /* 16x32 or >=32x32 */ && (tx_size >= TX_16X16 ||
+      sb_mb_lf_skip(mode_info_context, mi)));
   lpf_mb(cm, mi, do_left_v, do_above_h,
       do_left_v_mbuv, do_above_h_mbuv,
       y_ptr + 16 * y_stride,
@@ -339,8 +341,10 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
       sb_mb_lf_skip(mi - 1, mi)));
   do_above_h = !(hbl >= 3 /* 16x32 or >=32x32 */ && (tx_size >= TX_32X32 ||
       sb_mb_lf_skip(mode_info_context + 1, mi)));
-  do_left_v_mbuv = do_left_v;
-  do_above_h_mbuv = do_above_h;
+  do_left_v_mbuv = (wbl >= 3 /* 32x16 or >=32x32 */ && (tx_size >= TX_16X16 ||
+      sb_mb_lf_skip(mi - 1, mi)));
+  do_above_h_mbuv = !(hbl >= 3 /* 16x32 or >=32x32 */ && (tx_size >= TX_16X16 ||
+      sb_mb_lf_skip(mode_info_context + 1, mi)));
   lpf_mb(cm, mi, do_left_v, do_above_h,
       do_left_v_mbuv, do_above_h_mbuv,
       y_ptr + 16 * y_stride + 16,
