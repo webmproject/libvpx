@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAXX//38k\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-24T00:50:20Z",
+      "side": 1,
+      "message": "This doesn\u0027t look proper. If we\u0027re a keyframe and segmentation is enabled, we should assert that update_mb_segmentation_map is set.\n\nLikewise, if we\u0027re a keyframe, we can assert that cm-\u003etemporal_update is not set.\n\nThat way, frame_type is only used in assert calls, and is otherwise unused in this function, which is the intention.",
+      "revId": "f64a0148f9849670f2ae7283ed9315ac770a9c7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//3/c\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 3
