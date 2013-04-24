@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//3m8\u003d",
+        "filename": "vp9/common/vp9_onyx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-04-24T15:27:05Z",
+      "side": 1,
+      "message": "I agree.. I don\u0027t want to the vp9_blockd.h header into scope here but I can create a local named define make sure the meaning is clear.",
+      "parentUuid": "AAAAXX//3o4\u003d",
+      "revId": "2344785c33ec9aa8c259761c41d7d62af327ecb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//3ok\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//3m4\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-04-24T15:27:05Z",
+      "side": 1,
+      "message": "I agree in principle..... For now I just implemented it in the simplest possible way to make it work extending on what was there.",
+      "parentUuid": "AAAAXX//3ok\u003d",
+      "revId": "2344785c33ec9aa8c259761c41d7d62af327ecb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//3og\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2013-04-24T15:11:44Z",
       "side": 1,
       "message": "Seeing this MAX_PROB escape makes me wonder if we should build a tree based on the number of segments in use, or even better, a huffman tree based on the probs/freqs transmitted here. Particularly for 16x16 and smaller blocks.",
+      "revId": "2344785c33ec9aa8c259761c41d7d62af327ecb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//3mk\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1111,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-04-24T15:27:05Z",
+      "side": 1,
+      "message": "This is worth considering.\nIf only 2 of the 8 segments are marked as in use it would be nice to not have a full tree!... on the other hand as with code (removed earlier today) that optimized the top node ... the gain in overall coding efficiency would likely be small.",
+      "parentUuid": "AAAAXX//3og\u003d",
       "revId": "2344785c33ec9aa8c259761c41d7d62af327ecb6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
