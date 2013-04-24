@@ -16,6 +16,125 @@
       "revId": "133c7bf9985aae258a555f362d13334787a37f3b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//37k\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T02:15:30Z",
+      "side": 1,
+      "message": "a comment about how these masks are supposed to work would help, I\u0027m confused. 2 seems like a strange value, in particular.",
+      "revId": "133c7bf9985aae258a555f362d13334787a37f3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//37Q\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T02:15:30Z",
+      "side": 1,
+      "message": "does this work for sb_type \u003d\u003d BLOCK_SIZE_MB16X16? Seems like bsl - 1 would be negative in that case. Maybe not used for 16x16 yet, but you could probably formulate this in terms of b_width_log2() to support 16x16 and smaller. Or also assert() to make it obvious that 16X16 is not a valid input.",
+      "revId": "133c7bf9985aae258a555f362d13334787a37f3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//33U\u003d",
+        "filename": "vp9/common/vp9_enums.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T02:15:30Z",
+      "side": 1,
+      "message": "A comment somewhere about what these 8 contexts are would help. Is this just 4 * 2, 2 from the 2 levels you can split at 64 and 32? If so, write this as (2 * PARTITION_PLOFFSET). I still think PLANES is a weird thing to call this, it doesn\u0027t seem to have anything to do with \"planes\" as in y/u/v like we refer to them elsewhere in the codec. Maybe PARTITION_CONTEXTS, PARTITION_LEVEL_OFFSET?",
+      "revId": "133c7bf9985aae258a555f362d13334787a37f3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//36o\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 914,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T02:15:30Z",
+      "side": 1,
+      "message": "it\u0027s not obvious why this happens for 64x64. The code below looks like it should support it, given mb_row\u00263",
+      "revId": "133c7bf9985aae258a555f362d13334787a37f3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//334\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1375,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T02:15:30Z",
+      "side": 1,
+      "message": "the 3s look slightly magic here. Might want to write this as (mb_cols + 3) \u0026 ~3 to make it obvious this is for SB64 alignment, or better yet make it a function/macro align_to_max_sb_size() to be explicit about what\u0027s going on here.",
+      "revId": "133c7bf9985aae258a555f362d13334787a37f3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//330\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T02:15:30Z",
+      "side": 1,
+      "message": "the trend seems to be away from braces around single line statements.",
+      "revId": "133c7bf9985aae258a555f362d13334787a37f3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//33w\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1323,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T02:15:30Z",
+      "side": 1,
+      "message": "same comment about aligning these values.",
+      "revId": "133c7bf9985aae258a555f362d13334787a37f3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
