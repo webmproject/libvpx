@@ -906,7 +906,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
 static int alloc_partition_data(VP9_COMP *cpi) {
   vpx_free(cpi->mb.pip);
 
-  cpi->mb.pip = vpx_calloc((cpi->common.mb_cols + 1) *
+  cpi->mb.pip = vpx_calloc((cpi->common.mode_info_stride) *
                            (cpi->common.mb_rows + 1),
                            sizeof(PARTITION_INFO));
   if (!cpi->mb.pip)
@@ -991,7 +991,7 @@ static void update_frame_size(VP9_COMP *cpi) {
   cm->MBs = cm->mb_rows * cm->mb_cols;
   cm->mode_info_stride = cm->mb_cols + 1;
   memset(cm->mip, 0,
-        (cm->mb_cols + 1) * (cm->mb_rows + 1) * sizeof(MODE_INFO));
+        cm->mode_info_stride * (cm->mb_rows + 1) * sizeof(MODE_INFO));
   vp9_update_mode_info_border(cm, cm->mip);
 
   cm->mi = cm->mip + cm->mode_info_stride + 1;
@@ -3668,10 +3668,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   if (cm->show_frame) {
     vpx_memcpy(cm->prev_mip, cm->mip,
-               (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+               cm->mode_info_stride * (cm->mb_rows + 1) * sizeof(MODE_INFO));
   } else {
     vpx_memset(cm->prev_mip, 0,
-               (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+               cm->mode_info_stride * (cm->mb_rows + 1) * sizeof(MODE_INFO));
   }
 }
 

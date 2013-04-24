@@ -705,9 +705,9 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
     vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
 
   vpx_memset(cm->prev_mip, 0,
-             (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+             cm->mode_info_stride * (cm->mb_rows + 1)* sizeof(MODE_INFO));
   vpx_memset(cm->mip, 0,
-             (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+             cm->mode_info_stride * (cm->mb_rows + 1)* sizeof(MODE_INFO));
 
   vp9_update_mode_info_border(cm, cm->mip);
   vp9_update_mode_info_in_image(cm, cm->mi);

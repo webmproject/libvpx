@@ -33,15 +33,18 @@ void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi) {
 
 void vp9_update_mode_info_in_image(VP9_COMMON *cpi, MODE_INFO *mi) {
   int i, j;
+  MODE_INFO *ptr;
 
   // For each in image mode_info element set the in image flag to 1
   for (i = 0; i < cpi->mb_rows; i++) {
+    ptr = mi;
     for (j = 0; j < cpi->mb_cols; j++) {
-      mi->mbmi.mb_in_image = 1;
-      mi++;  // Next element in the row
+      ptr->mbmi.mb_in_image = 1;
+      ptr++;  // Next element in the row
     }
 
-    mi++;  // Step over border element at start of next row
+    // Step over border element at start of next row
+    mi += cpi->mode_info_stride;
   }
 }
 
