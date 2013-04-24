@@ -66,7 +66,7 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
                     VP9_SWITCHABLE_FILTERS;
 
       // above
-      const int above_in_image = above_mi->mbmi.mb_in_image;
+      const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
       const int above_mv_pred = above_mi->mbmi.mode >= NEARESTMV &&
                                 above_mi->mbmi.mode <= SPLITMV;
       const int above_interp = above_in_image && above_mv_pred ?
