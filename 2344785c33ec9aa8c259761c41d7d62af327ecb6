@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//3o4\u003d",
+        "filename": "vp9/common/vp9_onyx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T15:11:44Z",
+      "side": 1,
+      "message": "[MAX_MB_SEGMENTS] for these parameters",
+      "revId": "2344785c33ec9aa8c259761c41d7d62af327ecb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//3ok\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T15:11:44Z",
+      "side": 1,
+      "message": "Are there any other syntax elements that are encoded as balanced binary trees? If so, there\u0027s a slightly different ordering of p[] that would let us write a generic function for decoding them non-recursively, but if this is the only one then it probably doesn\u0027t matter. \n\nOTOH, maybe it\u0027s worth doing anyway, the code for writing these out and calculating the probs on the encoder is fairly verbose. Could be easily rewritten recursively at some point, but maybe the iterative traversal is easier? Have to give it some thought.",
+      "revId": "2344785c33ec9aa8c259761c41d7d62af327ecb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//3og\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1111,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-24T15:11:44Z",
+      "side": 1,
+      "message": "Seeing this MAX_PROB escape makes me wonder if we should build a tree based on the number of segments in use, or even better, a huffman tree based on the probs/freqs transmitted here. Particularly for 16x16 and smaller blocks.",
+      "revId": "2344785c33ec9aa8c259761c41d7d62af327ecb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
