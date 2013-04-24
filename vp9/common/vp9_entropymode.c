@@ -568,93 +568,102 @@ static void update_mode_probs(int n_modes,
 // #define MODE_COUNT_TESTING
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   int i;
+  FRAME_CONTEXT *fc = &cm->fc;
 #ifdef MODE_COUNT_TESTING
   int t;
 
   printf("static const unsigned int\nymode_counts"
          "[VP9_YMODES] = {\n");
-  for (t = 0; t < VP9_YMODES; ++t) printf("%d, ", cm->fc.ymode_counts[t]);
+  for (t = 0; t < VP9_YMODES; ++t)
+    printf("%d, ", fc->ymode_counts[t]);
   printf("};\n");
   printf("static const unsigned int\nuv_mode_counts"
          "[VP9_YMODES] [VP9_UV_MODES] = {\n");
   for (i = 0; i < VP9_YMODES; ++i) {
     printf("  {");
-    for (t = 0; t < VP9_UV_MODES; ++t) printf("%d, ", cm->fc.uv_mode_counts[i][t]);
+    for (t = 0; t < VP9_UV_MODES; ++t)
+      printf("%d, ", fc->uv_mode_counts[i][t]);
     printf("},\n");
   }
   printf("};\n");
   printf("static const unsigned int\nbmode_counts"
          "[VP9_NKF_BINTRAMODES] = {\n");
   for (t = 0; t < VP9_NKF_BINTRAMODES; ++t)
-    printf("%d, ", cm->fc.bmode_counts[t]);
+    printf("%d, ", fc->bmode_counts[t]);
   printf("};\n");
   printf("static const unsigned int\ni8x8_mode_counts"
          "[VP9_I8X8_MODES] = {\n");
-  for (t = 0; t < VP9_I8X8_MODES; ++t) printf("%d, ", cm->fc.i8x8_mode_counts[t]);
+  for (t = 0; t < VP9_I8X8_MODES; ++t)
+    printf("%d, ", fc->i8x8_mode_counts[t]);
   printf("};\n");
   printf("static const unsigned int\nsub_mv_ref_counts"
          "[SUBMVREF_COUNT] [VP9_SUBMVREFS] = {\n");
   for (i = 0; i < SUBMVREF_COUNT; ++i) {
     printf("  {");
-    for (t = 0; t < VP9_SUBMVREFS; ++t) printf("%d, ", cm->fc.sub_mv_ref_counts[i][t]);
+    for (t = 0; t < VP9_SUBMVREFS; ++t)
+      printf("%d, ", fc->sub_mv_ref_counts[i][t]);
     printf("},\n");
   }
   printf("};\n");
   printf("static const unsigned int\nmbsplit_counts"
          "[VP9_NUMMBSPLITS] = {\n");
-  for (t = 0; t < VP9_NUMMBSPLITS; ++t) printf("%d, ", cm->fc.mbsplit_counts[t]);
+  for (t = 0; t < VP9_NUMMBSPLITS; ++t)
+    printf("%d, ", fc->mbsplit_counts[t]);
   printf("};\n");
 #if CONFIG_COMP_INTERINTRA_PRED
   printf("static const unsigned int\ninterintra_counts"
          "[2] = {\n");
-  for (t = 0; t < 2; ++t) printf("%d, ", cm->fc.interintra_counts[t]);
+  for (t = 0; t < 2; ++t)
+    printf("%d, ", fc->interintra_counts[t]);
   printf("};\n");
 #endif
 #endif
 
   update_mode_probs(VP9_YMODES, vp9_ymode_tree,
-                    cm->fc.ymode_counts, cm->fc.pre_ymode_prob,
-                    cm->fc.ymode_prob, 0);
+                    fc->ymode_counts, fc->pre_ymode_prob,
+                    fc->ymode_prob, 0);
   update_mode_probs(VP9_I32X32_MODES, vp9_sb_ymode_tree,
-                    cm->fc.sb_ymode_counts, cm->fc.pre_sb_ymode_prob,
-                    cm->fc.sb_ymode_prob, 0);
-  for (i = 0; i < VP9_YMODES; ++i) {
+                    fc->sb_ymode_counts, fc->pre_sb_ymode_prob,
+                    fc->sb_ymode_prob, 0);
+
+  for (i = 0; i < VP9_YMODES; ++i)
     update_mode_probs(VP9_UV_MODES, vp9_uv_mode_tree,
-                      cm->fc.uv_mode_counts[i], cm->fc.pre_uv_mode_prob[i],
-                      cm->fc.uv_mode_prob[i], 0);
-  }
+                      fc->uv_mode_counts[i], fc->pre_uv_mode_prob[i],
+                      fc->uv_mode_prob[i], 0);
+
   update_mode_probs(VP9_NKF_BINTRAMODES, vp9_bmode_tree,
-                    cm->fc.bmode_counts, cm->fc.pre_bmode_prob,
-                    cm->fc.bmode_prob, 0);
+                    fc->bmode_counts, fc->pre_bmode_prob,
+                    fc->bmode_prob, 0);
   update_mode_probs(VP9_I8X8_MODES,
-                    vp9_i8x8_mode_tree, cm->fc.i8x8_mode_counts,
-                    cm->fc.pre_i8x8_mode_prob, cm->fc.i8x8_mode_prob, 0);
-  for (i = 0; i < SUBMVREF_COUNT; ++i) {
+                    vp9_i8x8_mode_tree, fc->i8x8_mode_counts,
+                    fc->pre_i8x8_mode_prob, fc->i8x8_mode_prob, 0);
+
+  for (i = 0; i < SUBMVREF_COUNT; ++i)
     update_mode_probs(VP9_SUBMVREFS,
-                      vp9_sub_mv_ref_tree, cm->fc.sub_mv_ref_counts[i],
-                      cm->fc.pre_sub_mv_ref_prob[i], cm->fc.sub_mv_ref_prob[i],
+                      vp9_sub_mv_ref_tree, fc->sub_mv_ref_counts[i],
+                      fc->pre_sub_mv_ref_prob[i], fc->sub_mv_ref_prob[i],
                       LEFT4X4);
-  }
+
   update_mode_probs(VP9_NUMMBSPLITS, vp9_mbsplit_tree,
-                    cm->fc.mbsplit_counts, cm->fc.pre_mbsplit_prob,
-                    cm->fc.mbsplit_prob, 0);
+                    fc->mbsplit_counts, fc->pre_mbsplit_prob,
+                    fc->mbsplit_prob, 0);
 #if CONFIG_COMP_INTERINTRA_PRED
   if (cm->use_interintra) {
     int factor, interintra_prob, count;
 
-    interintra_prob = get_binary_prob(cm->fc.interintra_counts[0],
-                                      cm->fc.interintra_counts[1]);
-    count = cm->fc.interintra_counts[0] + cm->fc.interintra_counts[1];
+    interintra_prob = get_binary_prob(fc->interintra_counts[0],
+                                      fc->interintra_counts[1]);
+    count = fc->interintra_counts[0] + fc->interintra_counts[1];
     count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
     factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    cm->fc.interintra_prob = weighted_prob(cm->fc.pre_interintra_prob,
-                                           interintra_prob, factor);
+    fc->interintra_prob = weighted_prob(fc->pre_interintra_prob,
+                                        interintra_prob, factor);
   }
 #endif
   for (i = 0; i < PARTITION_PLANES; i++)
     update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
-                      cm->fc.partition_counts[i], cm->fc.pre_partition_prob[i],
-                      cm->fc.partition_prob[i], 0);
+                      fc->partition_counts[i], fc->pre_partition_prob[i],
+                      fc->partition_prob[i], 0);
 }
 
 static void set_default_lf_deltas(MACROBLOCKD *xd) {
@@ -681,7 +690,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   if (cm->last_frame_seg_map)
     vpx_memset(cm->last_frame_seg_map, 0, (cm->mb_rows * cm->mb_cols));
 
-  /* reset the mode ref deltas for loop filter */
+  // Reset the mode ref deltas for loop filter
   vpx_memset(xd->last_ref_lf_deltas, 0, sizeof(xd->last_ref_lf_deltas));
   vpx_memset(xd->last_mode_lf_deltas, 0, sizeof(xd->last_mode_lf_deltas));
   set_default_lf_deltas(xd);
@@ -691,6 +700,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   vp9_default_bmode_probs(cm->fc.bmode_prob);
   vp9_kf_default_bmode_probs(cm->kf_bmode_prob);
   vp9_init_mv_probs(cm);
+
   // To force update of the sharpness
   cm->last_sharpness_level = -1;
 
