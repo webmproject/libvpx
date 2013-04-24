@@ -4042,7 +4042,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Accumulate filter usage stats
   // TODO(agrange): Use RD criteria to select interpolation filter mode.
-  if ((best_mode >= NEARESTMV) && (best_mode <= SPLITMV))
+  if (is_inter_mode(best_mode))
     ++cpi->best_switchable_interp_count[vp9_switchable_interp_map[best_filter]];
 
   // Reduce the activation RD thresholds for the best choice mode
@@ -4852,7 +4852,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Accumulate filter usage stats
   // TODO(agrange): Use RD criteria to select interpolation filter mode.
-  if ((best_mode >= NEARESTMV) && (best_mode <= SPLITMV))
+  if (is_inter_mode(best_mode))
     ++cpi->best_switchable_interp_count[vp9_switchable_interp_map[best_filter]];
 
   // TODO(rbultje) integrate with RD thresholding

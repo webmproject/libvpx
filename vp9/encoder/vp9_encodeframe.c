@@ -505,8 +505,7 @@ static void update_state(VP9_COMP *cpi,
     }
 #endif
     if (cpi->common.mcomp_filter_type == SWITCHABLE &&
-        mbmi->mode >= NEARESTMV &&
-        mbmi->mode <= SPLITMV) {
+        is_inter_mode(mbmi->mode)) {
       ++cpi->switchable_interp_count
           [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
           [vp9_switchable_interp_map[mbmi->interp_filter]];

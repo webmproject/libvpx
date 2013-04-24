@@ -59,16 +59,14 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
     case PRED_SWITCHABLE_INTERP: {
       // left
       const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
-      const int left_mv_pred = left_mi->mbmi.mode >= NEARESTMV &&
-                               left_mi->mbmi.mode <= SPLITMV;
+      const int left_mv_pred = is_inter_mode(left_mi->mbmi.mode);
       const int left_interp = left_in_image && left_mv_pred ?
                     vp9_switchable_interp_map[left_mi->mbmi.interp_filter] :
                     VP9_SWITCHABLE_FILTERS;
 
       // above
       const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
-      const int above_mv_pred = above_mi->mbmi.mode >= NEARESTMV &&
-                                above_mi->mbmi.mode <= SPLITMV;
+      const int above_mv_pred = is_inter_mode(above_mi->mbmi.mode);
       const int above_interp = above_in_image && above_mv_pred ?
                     vp9_switchable_interp_map[above_mi->mbmi.interp_filter] :
                     VP9_SWITCHABLE_FILTERS;

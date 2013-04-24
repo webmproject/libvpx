@@ -98,6 +98,11 @@ typedef enum {
   MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 
+static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
+  return mode >= NEARESTMV && mode <= SPLITMV;
+}
+
+
 // Segment level features.
 typedef enum {
   SEG_LVL_ALT_Q = 0,               // Use alternate Quantizer ....

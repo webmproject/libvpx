@@ -794,7 +794,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
     }
 
-    if (mode >= NEARESTMV && mode <= SPLITMV) {
+    if (is_inter_mode(mode)) {
       if (cpi->common.mcomp_filter_type == SWITCHABLE) {
         write_token(bc, vp9_switchable_interp_tree,
                     vp9_get_pred_probs(&cpi->common, xd,
