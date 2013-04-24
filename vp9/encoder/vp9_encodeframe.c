@@ -1972,12 +1972,13 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
       vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
 #if CONFIG_COMP_INTERINTRA_PRED
       if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
-        vp9_build_interintra_16x16_predictors_mb(xd,
-                                                 xd->plane[0].dst.buf,
-                                                 xd->plane[1].dst.buf,
-                                                 xd->plane[2].dst.buf,
-                                                 xd->plane[0].dst.stride,
-                                                 xd->plane[1].dst.stride);
+        vp9_build_interintra_predictors(xd,
+                                        xd->plane[0].dst.buf,
+                                        xd->plane[1].dst.buf,
+                                        xd->plane[2].dst.buf,
+                                        xd->plane[0].dst.stride,
+                                        xd->plane[1].dst.stride,
+                                        BLOCK_SIZE_MB16X16);
       }
 #endif
     }

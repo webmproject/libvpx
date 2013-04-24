@@ -447,14 +447,10 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd,
   vp9_build_inter_predictors_sbuv(xd, mb_row, mb_col, bsize);
 
 #if CONFIG_COMP_INTERINTRA_PRED
-  if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME) {
-    if (bsize == BLOCK_SIZE_SB32X32)
-      vp9_build_interintra_32x32_predictors_sb(xd, y, u, v,
-                                               y_stride, uv_stride);
-    else
-      vp9_build_interintra_64x64_predictors_sb(xd, y, u, v,
-                                               y_stride, uv_stride);
-  }
+  if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)
+    vp9_build_interintra_predictors(xd, y, u, v,
+                                    y_stride, uv_stride,
+                                    bsize);
 #endif
 }
 
