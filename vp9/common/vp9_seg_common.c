@@ -99,7 +99,7 @@ void vp9_implicit_segment_map_update(VP9_COMMON * cm) {
     mi = mi_ptr;
     // Experimental use of tx size to define implicit segmentation
     for (col = 0; col < cm->mb_cols; ++col, ++mi) {
-      map_ptr[col] = mi->mbmi.txfm_size;
+      map_ptr[col] = 1 + mi->mbmi.txfm_size;
     }
     mi_ptr += cm->mode_info_stride;
     map_ptr += cm->mb_cols;
