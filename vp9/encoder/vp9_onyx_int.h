@@ -633,11 +633,6 @@ typedef struct VP9_COMP {
   int *mb_norm_activity_map;
   int output_partition;
 
-  // Store last frame's MV info for next frame MV prediction
-  int_mv *lfmv;
-  int *lf_ref_frame_sign_bias;
-  int *lf_ref_frame;
-
   /* force next frame to intra when kf_auto says so */
   int force_next_frame_intra;
 

@@ -304,16 +304,6 @@ static void setup_features(VP9_COMP *cpi) {
 
 
 static void dealloc_compressor_data(VP9_COMP *cpi) {
-  // Delete last frame MV storage buffers
-  vpx_free(cpi->lfmv);
-  cpi->lfmv = 0;
-
-  vpx_free(cpi->lf_ref_frame_sign_bias);
-  cpi->lf_ref_frame_sign_bias = 0;
-
-  vpx_free(cpi->lf_ref_frame);
-  cpi->lf_ref_frame = 0;
-
   // Delete sementation map
   vpx_free(cpi->segmentation_map);
   cpi->segmentation_map = 0;
@@ -1442,11 +1432,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->gold_is_last = 0;
   cpi->alt_is_last  = 0;
   cpi->gold_is_alt  = 0;
-
-  // allocate memory for storing last frame's MVs for MV prediction.
-  CHECK_MEM_ERROR(cpi->lfmv, vpx_calloc((cpi->common.mb_rows + 2) * (cpi->common.mb_cols + 2), sizeof(int_mv)));
-  CHECK_MEM_ERROR(cpi->lf_ref_frame_sign_bias, vpx_calloc((cpi->common.mb_rows + 2) * (cpi->common.mb_cols + 2), sizeof(int)));
-  CHECK_MEM_ERROR(cpi->lf_ref_frame, vpx_calloc((cpi->common.mb_rows + 2) * (cpi->common.mb_cols + 2), sizeof(int)));
 
   // Create the encoder segmentation map and set all entries to 0
   CHECK_MEM_ERROR(cpi->segmentation_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
@@ -3303,29 +3288,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (cpi->next_key_frame_forced && (cpi->twopass.frames_to_key == 0)) {
     cpi->ambient_err = vp9_calc_ss_err(cpi->Source,
                                        &cm->yv12_fb[cm->new_fb_idx]);
-  }
-
-  // This frame's MVs are saved and will be used in next frame's MV
-  // prediction. Last frame has one more line(add to bottom) and one
-  // more column(add to right) than cm->mip. The edge elements are
-  // initialized to 0.
-  if (cm->show_frame) { // do not save for altref frame
-    int mb_row;
-    int mb_col;
-    MODE_INFO *tmp = cm->mip;
-
-    if (cm->frame_type != KEY_FRAME) {
-      for (mb_row = 0; mb_row < cm->mb_rows + 1; mb_row ++) {
-        for (mb_col = 0; mb_col < cm->mb_cols + 1; mb_col ++) {
-          if (tmp->mbmi.ref_frame != INTRA_FRAME)
-            cpi->lfmv[mb_col + mb_row * (cm->mode_info_stride + 1)].as_int = tmp->mbmi.mv[0].as_int;
-
-          cpi->lf_ref_frame_sign_bias[mb_col + mb_row * (cm->mode_info_stride + 1)] = cm->ref_frame_sign_bias[tmp->mbmi.ref_frame];
-          cpi->lf_ref_frame[mb_col + mb_row * (cm->mode_info_stride + 1)] = tmp->mbmi.ref_frame;
-          tmp++;
-        }
-      }
-    }
   }
 
   if (cm->frame_type == KEY_FRAME)
