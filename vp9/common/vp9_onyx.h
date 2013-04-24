@@ -21,6 +21,9 @@ extern "C"
 #include "vpx/vp8cx.h"
 #include "vpx_scale/yv12config.h"
 #include "vp9/common/vp9_ppflags.h"
+
+#define MAX_MB_SEGMENTS 8
+
   typedef int *VP9_PTR;
 
   /* Create/destroy static data structures. */
@@ -225,8 +228,9 @@ extern "C"
 
   int vp9_set_roimap(VP9_PTR comp, unsigned char *map,
                      unsigned int rows, unsigned int cols,
-                     int delta_q[4], int delta_lf[4],
-                     unsigned int threshold[4]);
+                     int delta_q[MAX_MB_SEGMENTS],
+                     int delta_lf[MAX_MB_SEGMENTS],
+                     unsigned int threshold[MAX_MB_SEGMENTS]);
 
   int vp9_set_active_map(VP9_PTR comp, unsigned char *map,
                          unsigned int rows, unsigned int cols);

@@ -537,24 +537,49 @@ static void write_mb_segid(vp9_writer *bc,
       case 0:
         vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
         vp9_write(bc, 0, xd->mb_segment_tree_probs[1]);
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[2]);
         break;
       case 1:
         vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[1]);
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[1]);
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[2]);
         break;
       case 2:
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[2]);
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[1]);
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[3]);
         break;
       case 3:
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[1]);
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[3]);
+        break;
+      case 4:
         vp9_write(bc, 1, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[2]);
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[4]);
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[5]);
+        break;
+      case 5:
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[0]);
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[4]);
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[5]);
+        break;
+      case 6:
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[0]);
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[4]);
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[6]);
+        break;
+      case 7:
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[0]);
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[4]);
+        vp9_write(bc, 1, xd->mb_segment_tree_probs[6]);
         break;
 
         // TRAP.. This should not happen
       default:
         vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
         vp9_write(bc, 0, xd->mb_segment_tree_probs[1]);
+        vp9_write(bc, 0, xd->mb_segment_tree_probs[2]);
         break;
     }
   }
@@ -1977,7 +2002,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
       vp9_choose_segmap_coding_method(cpi);
       // Send the tree probabilities used to decode unpredicted
       // macro-block segments
-      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
+      for (i = 0; i < MB_SEG_TREE_PROBS; i++) {
         const int prob = xd->mb_segment_tree_probs[i];
         if (prob != 255) {
           vp9_write_bit(&header_bc, 1);

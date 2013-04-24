@@ -36,7 +36,7 @@ typedef struct {
                   lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
   DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
                   hev_thr[4][SIMD_WIDTH]);
-  unsigned char lvl[4][4][4];
+  unsigned char lvl[MAX_MB_SEGMENTS][4][4];
   unsigned char mode_lf_lut[MB_MODE_COUNT];
 } loop_filter_info_n;
 

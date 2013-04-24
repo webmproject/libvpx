@@ -23,7 +23,8 @@
 
 // #define MODE_STATS
 
-#define MB_FEATURE_TREE_PROBS   3
+#define MAX_MB_SEGMENTS     8
+#define MB_SEG_TREE_PROBS   (MAX_MB_SEGMENTS-1)
 #define PREDICTION_PROBS 3
 
 #define DEFAULT_PRED_PROB_0 120
@@ -31,8 +32,6 @@
 #define DEFAULT_PRED_PROB_2 40
 
 #define MBSKIP_CONTEXTS 3
-
-#define MAX_MB_SEGMENTS         4
 
 #define MAX_REF_LF_DELTAS       4
 #define MAX_MODE_LF_DELTAS      4
@@ -398,7 +397,7 @@ typedef struct macroblockd {
   /* are enabled and when enabled the proabilities used to decode the per MB flags in MB_MODE_INFO */
 
   // Probability Tree used to code Segment number
-  vp9_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
+  vp9_prob mb_segment_tree_probs[MB_SEG_TREE_PROBS];
 
   // Segment features
   signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];

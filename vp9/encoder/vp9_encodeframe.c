@@ -594,7 +594,7 @@ static void set_offsets(VP9_COMP *cpi,
       mbmi->segment_id = find_seg_id(cm->last_frame_seg_map, bsize,
                                      mb_row, cm->mb_rows, mb_col, cm->mb_cols);
     }
-    assert(mbmi->segment_id <= 3);
+    assert(mbmi->segment_id <= (MAX_MB_SEGMENTS-1));
     vp9_mb_init_quantizer(cpi, x);
 
     if (xd->segmentation_enabled && cpi->seg0_cnt > 0 &&
