@@ -89,12 +89,12 @@ VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/subtract_mmx.asm
 VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp8_enc_stubs_mmx.c
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/fwalsh_sse2.asm
-VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/quantize_sse2_intrinsics.c
+VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/quantize_sse2.c
 
 # TODO(johann) make this generic
 ifeq ($(HAVE_SSE2),yes)
-vp8/encoder/x86/quantize_sse2_intrinsics.c.o: CFLAGS += -msse2
-vp8/encoder/x86/quantize_sse2_intrinsics.c.d: CFLAGS += -msse2
+vp8/encoder/x86/quantize_sse2.c.o: CFLAGS += -msse2
+vp8/encoder/x86/quantize_sse2.c.d: CFLAGS += -msse2
 endif
 
 ifeq ($(CONFIG_TEMPORAL_DENOISING),yes)
