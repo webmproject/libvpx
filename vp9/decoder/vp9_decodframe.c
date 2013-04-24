@@ -388,8 +388,8 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
 }
 
 static INLINE void decode_sby_32x32(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) - 1, bw = 1 << bwl;
-  const int bhl = mb_height_log2(bsize) - 1, bh = 1 << bhl;
+  const int bwl = b_width_log2(bsize) - 3, bw = 1 << bwl;
+  const int bhl = b_height_log2(bsize) - 3, bh = 1 << bhl;
   const int y_count = bw * bh;
   int n;
 
@@ -405,8 +405,8 @@ static INLINE void decode_sby_32x32(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
 }
 
 static INLINE void decode_sbuv_32x32(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) - 1, bw = (1 << bwl) / 2;
-  const int bhl = mb_height_log2(bsize) - 1, bh = (1 << bhl) / 2;
+  const int bwl = b_width_log2(bsize) - 3, bw = (1 << bwl) / 2;
+  const int bhl = b_height_log2(bsize) - 3, bh = (1 << bhl) / 2;
   const int uv_count = bw * bh;
   int n;
   for (n = 0; n < uv_count; n++) {
@@ -426,8 +426,8 @@ static INLINE void decode_sbuv_32x32(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
 }
 
 static INLINE void decode_sby_16x16(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize), bw = 1 << bwl;
-  const int bhl = mb_height_log2(bsize), bh = 1 << bhl;
+  const int bwl = b_width_log2(bsize) - 2, bw = 1 << bwl;
+  const int bhl = b_height_log2(bsize) - 2, bh = 1 << bhl;
   const int y_count = bw * bh;
   int n;
 
@@ -444,8 +444,8 @@ static INLINE void decode_sby_16x16(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
 }
 
 static INLINE void decode_sbuv_16x16(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize), bw = (1 << bwl) / 2;
-  const int bhl = mb_height_log2(bsize), bh = (1 << bhl) / 2;
+  const int bwl = b_width_log2(bsize) - 2, bw = (1 << bwl) / 2;
+  const int bhl = b_height_log2(bsize) - 2, bh = (1 << bhl) / 2;
   const int uv_count = bw * bh;
   int n;
 
@@ -465,8 +465,8 @@ static INLINE void decode_sbuv_16x16(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
 }
 
 static INLINE void decode_sby_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize)  + 1, bw = 1 << bwl;
-  const int bhl = mb_height_log2(bsize) + 1, bh = 1 << bhl;
+  const int bwl = b_width_log2(bsize)  - 1, bw = 1 << bwl;
+  const int bhl = b_height_log2(bsize) - 1, bh = 1 << bhl;
   const int y_count = bw * bh;
   int n;
 
@@ -485,8 +485,8 @@ static INLINE void decode_sby_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 }
 
 static INLINE void decode_sbuv_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize)  + 1, bw = 1 << (bwl - 1);
-  const int bhl = mb_height_log2(bsize) + 1, bh = 1 << (bhl - 1);
+  const int bwl = b_width_log2(bsize)  - 1, bw = 1 << (bwl - 1);
+  const int bhl = b_height_log2(bsize) - 1, bh = 1 << (bhl - 1);
   const int uv_count = bw * bh;
   int n;
 
@@ -505,8 +505,8 @@ static INLINE void decode_sbuv_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 }
 
 static INLINE void decode_sby_4x4(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize)  + 2, bw = 1 << bwl;
-  const int bhl = mb_height_log2(bsize) + 2, bh = 1 << bhl;
+  const int bwl = b_width_log2(bsize), bw = 1 << bwl;
+  const int bhl = b_height_log2(bsize), bh = 1 << bhl;
   const int y_count = bw * bh;
   int n;
 
@@ -528,8 +528,8 @@ static INLINE void decode_sby_4x4(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 }
 
 static INLINE void decode_sbuv_4x4(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize)  + 2, bw = 1 << (bwl - 1);
-  const int bhl = mb_height_log2(bsize) + 2, bh = 1 << (bhl - 1);
+  const int bwl = b_width_log2(bsize), bw = 1 << (bwl - 1);
+  const int bhl = b_height_log2(bsize), bh = 1 << (bhl - 1);
   const int uv_count = bw * bh;
   int n;
 

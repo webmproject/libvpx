@@ -574,12 +574,12 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
   const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  const int wb = mb_width_log2(sb_type), hb = mb_height_log2(sb_type);
+  const int wb = b_width_log2(sb_type), hb = b_height_log2(sb_type);
 #if !USE_ADST_FOR_SB
   if (sb_type > BLOCK_SIZE_MB16X16)
     return tx_type;
 #endif
-  if (ib >= (16 << (wb + hb)))  // no chroma adst
+  if (ib >= (1 << (wb + hb)))  // no chroma adst
     return tx_type;
   if (xd->lossless)
     return DCT_DCT;
@@ -630,7 +630,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
              xd->q_index < ACTIVE_HT) {
 #if USE_ADST_FOR_I16X16_4X4
 #if USE_ADST_PERIPHERY_ONLY
-    const int hmax = 4 << wb;
+    const int hmax = 1 << wb;
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
 #if USE_ADST_FOR_REMOTE_EDGE
     if ((ib & (hmax - 1)) != 0 && ib >= hmax)
@@ -663,12 +663,12 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
   // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
   const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  const int wb = mb_width_log2(sb_type), hb = mb_height_log2(sb_type);
+  const int wb = b_width_log2(sb_type), hb = b_height_log2(sb_type);
 #if !USE_ADST_FOR_SB
   if (sb_type > BLOCK_SIZE_MB16X16)
     return tx_type;
 #endif
-  if (ib >= (16 << (wb + hb)))  // no chroma adst
+  if (ib >= (1 << (wb + hb)))  // no chroma adst
     return tx_type;
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
       xd->q_index < ACTIVE_HT8) {
@@ -681,7 +681,7 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
              xd->q_index < ACTIVE_HT8) {
 #if USE_ADST_FOR_I16X16_8X8
 #if USE_ADST_PERIPHERY_ONLY
-    const int hmax = 4 << wb;
+    const int hmax = 1 << wb;
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
 #if USE_ADST_FOR_REMOTE_EDGE
     if ((ib & (hmax - 1)) != 0 && ib >= hmax)
@@ -712,19 +712,19 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
 static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type = DCT_DCT;
   const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  const int wb = mb_width_log2(sb_type), hb = mb_height_log2(sb_type);
+  const int wb = b_width_log2(sb_type), hb = b_height_log2(sb_type);
 #if !USE_ADST_FOR_SB
   if (sb_type > BLOCK_SIZE_MB16X16)
     return tx_type;
 #endif
-  if (ib >= (16 << (wb + hb)))
+  if (ib >= (1 << (wb + hb)))
     return tx_type;
   if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
       xd->q_index < ACTIVE_HT16) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
 #if USE_ADST_PERIPHERY_ONLY
     if (sb_type > BLOCK_SIZE_MB16X16) {
-      const int hmax = 4 << wb;
+      const int hmax = 1 << wb;
 #if USE_ADST_FOR_REMOTE_EDGE
       if ((ib & (hmax - 1)) != 0 && ib >= hmax)
         tx_type = DCT_DCT;

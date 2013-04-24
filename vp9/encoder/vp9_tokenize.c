@@ -210,7 +210,7 @@ static void tokenize_b(VP9_COMP *cpi,
       break;
     }
     case TX_8X8: {
-      const int sz = 3 + mb_width_log2(sb_type);
+      const int sz = 1 + b_width_log2(sb_type);
       const int x = ib & ((1 << sz) - 1), y = ib - x;
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
@@ -227,7 +227,7 @@ static void tokenize_b(VP9_COMP *cpi,
       break;
     }
     case TX_16X16: {
-      const int sz = 4 + mb_width_log2(sb_type);
+      const int sz = 2 + b_width_log2(sb_type);
       const int x = ib & ((1 << sz) - 1), y = ib - x;
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
@@ -468,7 +468,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
                      MACROBLOCKD *xd,
                      TOKENEXTRA **t,
                      int dry_run, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
+  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
   VP9_COMMON * const cm = &cpi->common;
   MB_MODE_INFO * const mbmi = &xd->mode_info_context->mbmi;
   TOKENEXTRA *t_backup = *t;

@@ -327,8 +327,8 @@ void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx, int y_blocks) {
 }
 
 void vp9_quantize_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  const int bw = 1 << (mb_width_log2(bsize) - 1);
-  const int bh = 1 << (mb_height_log2(bsize) - 1);
+  const int bw = 1 << (b_width_log2(bsize) - 3);
+  const int bh = 1 << (b_height_log2(bsize) - 3);
   int n;
 
   for (n = 0; n < bw * bh; n++)
@@ -336,8 +336,8 @@ void vp9_quantize_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_quantize_sby_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize), bw = 1 << bwl;
-  const int bh = 1 << mb_height_log2(bsize);
+  const int bwl = b_width_log2(bsize) - 2, bw = 1 << bwl;
+  const int bh = 1 << (b_height_log2(bsize) - 2);
   const int bstride = 16 << bwl;
   int n;
 
@@ -350,8 +350,8 @@ void vp9_quantize_sby_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_quantize_sby_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 1, bw = 1 << bwl;
-  const int bh = 1 << (mb_height_log2(bsize) + 1);
+  const int bwl = b_width_log2(bsize) - 1, bw = 1 << bwl;
+  const int bh = 1 << (b_height_log2(bsize) - 1);
   const int bstride = 4 << bwl;
   int n;
 
@@ -364,8 +364,8 @@ void vp9_quantize_sby_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_quantize_sby_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 2, bw = 1 << bwl;
-  const int bh = 1 << (mb_height_log2(bsize) + 2);
+  const int bwl = b_width_log2(bsize), bw = 1 << bwl;
+  const int bh = 1 << b_height_log2(bsize);
   MACROBLOCKD *const xd = &x->e_mbd;
   int n;
 
@@ -386,8 +386,8 @@ void vp9_quantize_sbuv_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_quantize_sbuv_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize);
-  const int bhl = mb_height_log2(bsize);
+  const int bwl = b_width_log2(bsize) - 2;
+  const int bhl = b_height_log2(bsize) - 2;
   const int uoff = 16 << (bhl + bwl);
   int i;
 
@@ -396,8 +396,8 @@ void vp9_quantize_sbuv_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_quantize_sbuv_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize);
-  const int bhl = mb_height_log2(bsize);
+  const int bwl = b_width_log2(bsize) - 2;
+  const int bhl = b_height_log2(bsize) - 2;
   const int uoff = 16 << (bhl + bwl);
   int i;
 
@@ -406,8 +406,8 @@ void vp9_quantize_sbuv_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_quantize_sbuv_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize);
-  const int bhl = mb_height_log2(bsize);
+  const int bwl = b_width_log2(bsize) - 2;
+  const int bhl = b_height_log2(bsize) - 2;
   const int uoff = 16 << (bhl + bwl);
   int i;
 

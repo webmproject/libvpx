@@ -31,8 +31,8 @@ void vp9_inverse_transform_b_16x16(int16_t *input_dqcoeff,
 }
 
 void vp9_inverse_transform_sby_32x32(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) - 1, bw = 1 << bwl;
-  const int bh = 1 << (mb_height_log2(bsize) - 1);
+  const int bwl = b_width_log2(bsize) - 3, bw = 1 << bwl;
+  const int bh = 1 << (b_height_log2(bsize) - 3);
   const int stride = 32 << bwl;
   int n;
 
@@ -46,8 +46,8 @@ void vp9_inverse_transform_sby_32x32(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_inverse_transform_sby_16x16(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize), bw = 1 << bwl;
-  const int bh = 1 << mb_height_log2(bsize);
+  const int bwl = b_width_log2(bsize) - 2, bw = 1 << bwl;
+  const int bh = 1 << (b_height_log2(bsize) - 2);
   const int stride = 16 << bwl, bstride = 4 << bwl;
   int n;
 
@@ -68,8 +68,8 @@ void vp9_inverse_transform_sby_16x16(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_inverse_transform_sby_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 1, bw = 1 << bwl;
-  const int bh = 1 << (mb_height_log2(bsize) + 1);
+  const int bwl = b_width_log2(bsize) - 1, bw = 1 << bwl;
+  const int bh = 1 << (b_height_log2(bsize) - 1);
   const int stride = 8 << bwl, bstride = 2 << bwl;
   int n;
 
@@ -89,8 +89,8 @@ void vp9_inverse_transform_sby_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_inverse_transform_sby_4x4(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 2, bw = 1 << bwl;
-  const int bh = 1 << (mb_height_log2(bsize) + 2);
+  const int bwl = b_width_log2(bsize), bw = 1 << bwl;
+  const int bh = 1 << b_height_log2(bsize);
   const int stride = 4 << bwl, bstride = 1 << bwl;
   int n;
 
@@ -118,7 +118,7 @@ void vp9_inverse_transform_sbuv_32x32(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_inverse_transform_sbuv_16x16(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize), bhl = mb_height_log2(bsize);
+  const int bwl = b_width_log2(bsize) - 2, bhl = b_height_log2(bsize) - 2;
   const int bw = 1 << (bwl - 1), bh = 1 << (bhl - 1);
   const int stride = 16 << (bwl - 1);
   int n;
@@ -135,7 +135,7 @@ void vp9_inverse_transform_sbuv_16x16(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_inverse_transform_sbuv_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 1, bhl = mb_height_log2(bsize) + 1;
+  const int bwl = b_width_log2(bsize) - 1, bhl = b_height_log2(bsize) - 1;
   const int bw = 1 << (bwl - 1), bh = 1 << (bhl - 1);
   const int stride = 8 << (bwl - 1);
   int n;
@@ -152,7 +152,7 @@ void vp9_inverse_transform_sbuv_8x8(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 }
 
 void vp9_inverse_transform_sbuv_4x4(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
+  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
   const int bw = 1 << (bwl - 1), bh = 1 << (bhl - 1);
   const int stride = 4 << (bwl - 1);
   int n;
