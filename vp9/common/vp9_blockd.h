@@ -279,8 +279,6 @@ typedef struct {
 } MODE_INFO;
 
 typedef struct blockd {
-  int16_t *diff;
-
   /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
   uint8_t **base_pre;
   uint8_t **base_second_pre;

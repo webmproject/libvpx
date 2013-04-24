@@ -858,6 +858,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   int16_t* const src_diff =
       raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
                                 x->plane[0].src_diff);
+  int16_t* const diff =
+      raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                xd->plane[0].diff);
   int16_t* const coeff = BLOCK_OFFSET(x->plane[0].coeff, ib, 16);
   ENTROPY_CONTEXT ta = *a, tempa = *a;
   ENTROPY_CONTEXT tl = *l, templ = *l;
@@ -940,13 +943,13 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
   // inverse transform
   if (best_tx_type != DCT_DCT)
-    vp9_short_iht4x4(best_dqcoeff, b->diff, 16, best_tx_type);
+    vp9_short_iht4x4(best_dqcoeff, diff, 16, best_tx_type);
   else
-    xd->inv_txm4x4(best_dqcoeff, b->diff, 32);
+    xd->inv_txm4x4(best_dqcoeff, diff, 32);
 
   vp9_intra4x4_predict(xd, b, *best_mode,
                        *(b->base_dst) + b->dst, b->dst_stride);
-  vp9_recon_b(*(b->base_dst) + b->dst, b->diff,
+  vp9_recon_b(*(b->base_dst) + b->dst, diff,
               *(b->base_dst) + b->dst, b->dst_stride);
 
   return best_rd;

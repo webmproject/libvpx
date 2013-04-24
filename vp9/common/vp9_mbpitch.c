@@ -70,32 +70,7 @@ static void setup_macroblock(MACROBLOCKD *mb, BLOCKSET bs) {
 }
 
 void vp9_setup_block_dptrs(MACROBLOCKD *mb) {
-  int r, c, i;
-  BLOCKD *blockd = mb->block;
-
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++) {
-      const int to = r * 4 + c;
-      const int from = r * 4 * 16 + c * 4;
-      blockd[to].diff = &mb->plane[0].diff[from];
-    }
-  }
-
-  for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++) {
-      const int to = 16 + r * 2 + c;
-      const int from = r * 4 * 8 + c * 4;
-      blockd[to].diff = &mb->plane[1].diff[from];
-    }
-  }
-
-  for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++) {
-      const int to = 20 + r * 2 + c;
-      const int from = r * 4 * 8 + c * 4;
-      blockd[to].diff = &mb->plane[2].diff[from];
-    }
-  }
+  int i;
 
   for (i = 0; i < MAX_MB_PLANE; i++) {
     mb->plane[i].plane_type = i ? PLANE_TYPE_UV : PLANE_TYPE_Y_WITH_DC;
