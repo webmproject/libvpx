@@ -1179,9 +1179,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   const int mis = cm->mode_info_stride;
   int bwl, bhl;
-#if CONFIG_SBSEGMENT
   int bw, bh;
-#endif
   int bsl = mb_width_log2(bsize), bs = (1 << bsl) / 2;
   int n;
   PARTITION_TYPE partition;
@@ -1192,20 +1190,16 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
 
   bwl = mb_width_log2(m->mbmi.sb_type);
   bhl = mb_height_log2(m->mbmi.sb_type);
-#if CONFIG_SBSEGMENT
   bw = 1 << bwl;
   bh = 1 << bhl;
-#endif
 
   // parse the partition type
   if ((bwl == bsl) && (bhl == bsl))
     partition = PARTITION_NONE;
-#if CONFIG_SBSEGMENT
   else if ((bwl == bsl) && (bhl < bsl))
     partition = PARTITION_HORZ;
   else if ((bwl < bsl) && (bhl == bsl))
     partition = PARTITION_VERT;
-#endif
   else if ((bwl < bsl) && (bhl < bsl))
     partition = PARTITION_SPLIT;
   else
@@ -1226,7 +1220,6 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
       subsize = bsize;
       write_modes_b(cpi, m, bc, tok, tok_end, mb_row, mb_col);
       break;
-#if CONFIG_SBSEGMENT
     case PARTITION_HORZ:
       subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB64X32 :
                                                 BLOCK_SIZE_SB32X16;
@@ -1241,7 +1234,6 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
       if ((mb_col + bw) < cm->mb_cols)
         write_modes_b(cpi, m + bw, bc, tok, tok_end, mb_row, mb_col + bw);
       break;
-#endif
     case PARTITION_SPLIT:
       // TODO(jingning): support recursive partitioning down to 16x16 as for
       // now. need to merge in 16x8, 8x16, 8x8, and smaller partitions.

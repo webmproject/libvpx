@@ -247,7 +247,6 @@ EXPERIMENT_LIST="
     loop_dering
     scatterscan
     oneshotq
-    sbsegment
     multiple_arf
     code_zerogroup
     sb8x8

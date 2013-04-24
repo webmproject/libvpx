@@ -2779,15 +2779,11 @@ static void model_rd_from_var_lapndz(int var, int n, int qstep,
 static enum BlockSize y_to_uv_block_size(enum BlockSize bs) {
   switch (bs) {
     case BLOCK_64X64: return BLOCK_32X32;
-#if CONFIG_SBSEGMENT
     case BLOCK_64X32: return BLOCK_32X16;
     case BLOCK_32X64: return BLOCK_16X32;
-#endif
     case BLOCK_32X32: return BLOCK_16X16;
-#if CONFIG_SBSEGMENT
     case BLOCK_32X16: return BLOCK_16X8;
     case BLOCK_16X32: return BLOCK_8X16;
-#endif
     case BLOCK_16X16: return BLOCK_8X8;
     default:
       assert(0);
@@ -2798,15 +2794,11 @@ static enum BlockSize y_to_uv_block_size(enum BlockSize bs) {
 static enum BlockSize y_bsizet_to_block_size(BLOCK_SIZE_TYPE bs) {
   switch (bs) {
     case BLOCK_SIZE_SB64X64: return BLOCK_64X64;
-#if CONFIG_SBSEGMENT
     case BLOCK_SIZE_SB64X32: return BLOCK_64X32;
     case BLOCK_SIZE_SB32X64: return BLOCK_32X64;
-#endif
     case BLOCK_SIZE_SB32X32: return BLOCK_32X32;
-#if CONFIG_SBSEGMENT
     case BLOCK_SIZE_SB32X16: return BLOCK_32X16;
     case BLOCK_SIZE_SB16X32: return BLOCK_16X32;
-#endif
     case BLOCK_SIZE_MB16X16: return BLOCK_16X16;
     default:
       assert(0);

@@ -202,18 +202,12 @@ typedef enum {
 
 static INLINE int mb_width_log2(BLOCK_SIZE_TYPE sb_type) {
   switch (sb_type) {
-#if CONFIG_SBSEGMENT
-    case BLOCK_SIZE_SB16X32:
-#endif
-    case BLOCK_SIZE_MB16X16: return 0;
-#if CONFIG_SBSEGMENT
+    case BLOCK_SIZE_MB16X16:
+    case BLOCK_SIZE_SB16X32: return 0;
     case BLOCK_SIZE_SB32X16:
     case BLOCK_SIZE_SB32X64:
-#endif
     case BLOCK_SIZE_SB32X32: return 1;
-#if CONFIG_SBSEGMENT
     case BLOCK_SIZE_SB64X32:
-#endif
     case BLOCK_SIZE_SB64X64: return 2;
     default: assert(0);
   }
@@ -221,18 +215,12 @@ static INLINE int mb_width_log2(BLOCK_SIZE_TYPE sb_type) {
 
 static INLINE int mb_height_log2(BLOCK_SIZE_TYPE sb_type) {
   switch (sb_type) {
-#if CONFIG_SBSEGMENT
-    case BLOCK_SIZE_SB32X16:
-#endif
-    case BLOCK_SIZE_MB16X16: return 0;
-#if CONFIG_SBSEGMENT
+    case BLOCK_SIZE_MB16X16:
+    case BLOCK_SIZE_SB32X16: return 0;
     case BLOCK_SIZE_SB16X32:
     case BLOCK_SIZE_SB64X32:
-#endif
     case BLOCK_SIZE_SB32X32: return 1;
-#if CONFIG_SBSEGMENT
     case BLOCK_SIZE_SB32X64:
-#endif
     case BLOCK_SIZE_SB64X64: return 2;
     default: assert(0);
   }
@@ -470,7 +458,6 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
       xd->left_seg_context[i] = ~(0xf << boffset);
     for (i = 0; i < bs; i++)
       xd->above_seg_context[i] = ~(0xf << boffset);
-#if CONFIG_SBSEGMENT
   } else if ((bwl == bsl) && (bhl < bsl)) {
     for (i = 0; i < bs; i++)
       xd->left_seg_context[i] = ~(0xe << boffset);
@@ -481,7 +468,6 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
       xd->left_seg_context[i] = ~(0xf << boffset);
     for (i = 0; i < bs; i++)
       xd->above_seg_context[i] = ~(0xe << boffset);
-#endif
   } else if ((bwl < bsl) && (bhl < bsl)) {
     for (i = 0; i < bs; i++)
       xd->left_seg_context[i] = ~(0xe << boffset);
@@ -571,7 +557,6 @@ extern const uint8_t vp9_block2left_sb[TX_SIZE_MAX_SB][96];
 extern const uint8_t vp9_block2above_sb[TX_SIZE_MAX_SB][96];
 extern const uint8_t vp9_block2left_sb64[TX_SIZE_MAX_SB][384];
 extern const uint8_t vp9_block2above_sb64[TX_SIZE_MAX_SB][384];
-#if CONFIG_SBSEGMENT
 extern const uint8_t vp9_block2left_sb16x32[TX_SIZE_MAX_MB][48];
 extern const uint8_t vp9_block2above_sb16x32[TX_SIZE_MAX_MB][48];
 extern const uint8_t vp9_block2left_sb32x16[TX_SIZE_MAX_MB][48];
@@ -580,7 +565,6 @@ extern const uint8_t vp9_block2left_sb32x64[TX_SIZE_MAX_SB][192];
 extern const uint8_t vp9_block2above_sb32x64[TX_SIZE_MAX_SB][192];
 extern const uint8_t vp9_block2left_sb64x32[TX_SIZE_MAX_SB][192];
 extern const uint8_t vp9_block2above_sb64x32[TX_SIZE_MAX_SB][192];
-#endif
 
 #define USE_ADST_FOR_I16X16_8X8   1
 #define USE_ADST_FOR_I16X16_4X4   1
@@ -786,10 +770,8 @@ static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
   switch (mbmi->sb_type) {
     case BLOCK_SIZE_SB64X64:
       return size;
-#if CONFIG_SBSEGMENT
     case BLOCK_SIZE_SB64X32:
     case BLOCK_SIZE_SB32X64:
-#endif
     case BLOCK_SIZE_SB32X32:
       if (size == TX_32X32)
         return TX_16X16;

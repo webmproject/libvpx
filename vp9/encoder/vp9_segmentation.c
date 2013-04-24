@@ -205,7 +205,6 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
         if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
           count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
                      t_unpred_seg_counts, 4, 4, mb_row, mb_col);
-#if CONFIG_SBSEGMENT
         } else if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X32) {
           count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
                      t_unpred_seg_counts, 4, 2, mb_row, mb_col);
@@ -219,7 +218,6 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
           if (mb_col + 2 != cm->mb_cols)
             count_segs(cpi, mi + 2, no_pred_segcounts, temporal_predictor_count,
                        t_unpred_seg_counts, 2, 4, mb_row, mb_col + 2);
-#endif
         } else {
           for (i = 0; i < 4; i++) {
             int x_idx = (i & 1) << 1, y_idx = i & 2;
@@ -234,7 +232,6 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
               count_segs(cpi, sb_mi, no_pred_segcounts,
                          temporal_predictor_count, t_unpred_seg_counts, 2, 2,
                          mb_row + y_idx, mb_col + x_idx);
-#if CONFIG_SBSEGMENT
             } else if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X16) {
               count_segs(cpi, sb_mi, no_pred_segcounts,
                          temporal_predictor_count,
@@ -255,7 +252,6 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
                            temporal_predictor_count,
                            t_unpred_seg_counts, 1, 2,
                            mb_row + y_idx, mb_col + x_idx + 1);
-#endif
             } else {
               int j;
 

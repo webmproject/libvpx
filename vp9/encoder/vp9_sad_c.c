@@ -23,7 +23,6 @@ unsigned int vp9_sad64x64_c(const uint8_t *src_ptr,
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 64, 64);
 }
 
-#if CONFIG_SBSEGMENT
 unsigned int vp9_sad64x32_c(const uint8_t *src_ptr,
                             int  src_stride,
                             const uint8_t *ref_ptr,
@@ -69,7 +68,6 @@ void vp9_sad32x64x4d_c(const uint8_t *src_ptr,
   sad_array[3] = vp9_sad32x64(src_ptr, src_stride,
                               ref_ptr[3], ref_stride, 0x7fffffff);
 }
-#endif
 
 unsigned int vp9_sad32x32_c(const uint8_t *src_ptr,
                             int  src_stride,
@@ -79,7 +77,6 @@ unsigned int vp9_sad32x32_c(const uint8_t *src_ptr,
   return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 32, 32);
 }
 
-#if CONFIG_SBSEGMENT
 unsigned int vp9_sad32x16_c(const uint8_t *src_ptr,
                             int   src_stride,
                             const uint8_t *ref_ptr,
@@ -125,7 +122,6 @@ void vp9_sad16x32x4d_c(const uint8_t *src_ptr,
   sad_array[3] = vp9_sad16x32(src_ptr, src_stride,
                               ref_ptr[3], ref_stride, 0x7fffffff);
 }
-#endif
 
 unsigned int vp9_sad16x16_c(const uint8_t *src_ptr,
                             int  src_stride,

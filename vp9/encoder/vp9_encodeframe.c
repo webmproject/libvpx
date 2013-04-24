@@ -773,7 +773,6 @@ static void encode_sb(VP9_COMP *cpi,
       (*tp)->token = EOSB_TOKEN;
       (*tp)++;
     }
-#if CONFIG_SBSEGMENT
   } else if (is_sb == BLOCK_SIZE_SB16X32) {
     int i;
 
@@ -810,7 +809,6 @@ static void encode_sb(VP9_COMP *cpi,
         (*tp)++;
       }
     }
-#endif
   } else {
     int i;
     if (output_enabled)
@@ -881,9 +879,7 @@ static void encode_sb64(VP9_COMP *cpi,
 
     (*tp)->token = EOSB_TOKEN;
     (*tp)++;
-
     cpi->partition_count[pl][PARTITION_NONE]++;
-#if CONFIG_SBSEGMENT
   } else if (is_sb[0] == BLOCK_SIZE_SB32X64) {
     int i;
 
@@ -912,7 +908,6 @@ static void encode_sb64(VP9_COMP *cpi,
       (*tp)->token = EOSB_TOKEN;
       (*tp)++;
     }
-#endif
   } else {
     int i;
     cpi->partition_count[pl][PARTITION_SPLIT]++;
@@ -1021,7 +1016,6 @@ static void encode_sb_row(VP9_COMP *cpi,
         sb64_skip += splitmodes_used;
       }
 
-#if CONFIG_SBSEGMENT
       // check 32x16
       if (mb_col + x_idx + 1 < cm->mb_cols) {
         int r, d;
@@ -1103,7 +1097,6 @@ static void encode_sb_row(VP9_COMP *cpi,
         vpx_memcpy(cm->left_context + y_idx, l2, sizeof(l2));
         vpx_memcpy(cm->above_context + mb_col + x_idx, a2, sizeof(a2));
       }
-#endif
 
       if (!sb32_skip && !(mb_col + x_idx + 1 >= cm->mb_cols ||
                           mb_row + y_idx + 1 >= cm->mb_rows)) {
@@ -1155,7 +1148,6 @@ static void encode_sb_row(VP9_COMP *cpi,
     pl = partition_plane_context(xd, BLOCK_SIZE_SB64X64);
     sb64_rate += x->partition_cost[pl][PARTITION_SPLIT];
 
-#if CONFIG_SBSEGMENT
     // check 64x32
     if (mb_col + 3 < cm->mb_cols && !(cm->mb_rows & 1)) {
       int r, d;
@@ -1235,7 +1227,6 @@ static void encode_sb_row(VP9_COMP *cpi,
       vpx_memcpy(cm->left_context, l, sizeof(l));
       vpx_memcpy(cm->above_context + mb_col, a, sizeof(a));
     }
-#endif
 
     if (!sb64_skip && !(mb_col + 3 >= cm->mb_cols ||
                         mb_row + 3 >= cm->mb_rows)) {
@@ -1545,7 +1536,6 @@ static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
         reset_skip_txfm_size_sb(cpi, mi, mis, txfm_max,
                                 cm->mb_rows - mb_row, cm->mb_cols - mb_col,
                                 BLOCK_SIZE_SB64X64);
-#if CONFIG_SBSEGMENT
       } else if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X32) {
         reset_skip_txfm_size_sb(cpi, mi, mis, txfm_max,
                                 cm->mb_rows - mb_row, cm->mb_cols - mb_col,
@@ -1564,7 +1554,6 @@ static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
                                   cm->mb_rows - mb_row,
                                   cm->mb_cols - mb_col - 2,
                                   BLOCK_SIZE_SB32X64);
-#endif
       } else {
         int i;
 
@@ -1581,7 +1570,6 @@ static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
                                     cm->mb_rows - mb_row - y_idx_sb,
                                     cm->mb_cols - mb_col - x_idx_sb,
                                     BLOCK_SIZE_SB32X32);
-#if CONFIG_SBSEGMENT
           } else if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X16) {
             reset_skip_txfm_size_sb(cpi, sb_mi, mis, txfm_max,
                                     cm->mb_rows - mb_row - y_idx_sb,
@@ -1602,7 +1590,6 @@ static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
                                       cm->mb_rows - mb_row - y_idx_sb,
                                       cm->mb_cols - mb_col - x_idx_sb - 1,
                                       BLOCK_SIZE_SB16X32);
-#endif
           } else {
             int m;
 

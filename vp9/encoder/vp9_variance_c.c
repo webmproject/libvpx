@@ -24,7 +24,6 @@ unsigned int vp9_get_mb_ss_c(const int16_t *src_ptr) {
   return sum;
 }
 
-#if CONFIG_SBSEGMENT
 unsigned int vp9_variance64x32_c(const uint8_t *src_ptr,
                                  int  source_stride,
                                  const uint8_t *ref_ptr,
@@ -160,7 +159,6 @@ unsigned int vp9_sub_pixel_variance16x32_c(const uint8_t *src_ptr,
 
   return vp9_variance16x32_c(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
 }
-#endif
 
 unsigned int vp9_variance64x64_c(const uint8_t *src_ptr,
                                  int  source_stride,
