@@ -20,14 +20,6 @@
 BEGIN
 
 /* regular quantize */
-DEFINE(vp9_block_zbin,                          offsetof(BLOCK, zbin));
-DEFINE(vp9_block_round,                         offsetof(BLOCK, round));
-DEFINE(vp9_block_quant,                         offsetof(BLOCK, quant));
-DEFINE(vp9_block_quant_fast,                    offsetof(BLOCK, quant_fast));
-DEFINE(vp9_block_zbin_extra,                    offsetof(BLOCK, zbin_extra));
-DEFINE(vp9_block_zrun_zbin_boost,               offsetof(BLOCK, zrun_zbin_boost));
-DEFINE(vp9_block_quant_shift,                   offsetof(BLOCK, quant_shift));
-
 DEFINE(vp9_blockd_dequant,                      offsetof(BLOCKD, dequant));
 
 END
