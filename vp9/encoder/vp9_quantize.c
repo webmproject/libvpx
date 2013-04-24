@@ -33,7 +33,7 @@ void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type) {
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
-  int16_t *coeff_ptr       = mb->coeff + b_idx * 16;
+  int16_t *coeff_ptr       = BLOCK_OFFSET(mb->plane[0].coeff, b_idx, 16);
   // ht is luma-only
   int16_t *qcoeff_ptr      = BLOCK_OFFSET(xd->plane[0].qcoeff, b_idx, 16);
   int16_t *dqcoeff_ptr     = BLOCK_OFFSET(xd->plane[0].dqcoeff, b_idx, 16);
@@ -90,7 +90,8 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks) {
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
-  int16_t *coeff_ptr       = mb->coeff + b_idx * 16;
+  int16_t *coeff_ptr       = BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff,
+                                          pb_idx.block, 16);
   int16_t *qcoeff_ptr      = BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff,
                                           pb_idx.block, 16);
   int16_t *dqcoeff_ptr     = BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff,
@@ -151,6 +152,8 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                      pb_idx.block, 16);
   int16_t *dqcoeff_ptr = BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff,
                                       pb_idx.block, 16);
+  int16_t *coeff_ptr = BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff,
+                                    pb_idx.block, 16);
   BLOCK *const b = &mb->block[c_idx];
   BLOCKD *const d = &xd->block[c_idx];
   const int *pt_scan = get_scan_8x8(tx_type);
@@ -167,7 +170,6 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
     int x, y, z, sz;
     int zero_run;
     int16_t *zbin_boost_ptr = b->zrun_zbin_boost;
-    int16_t *coeff_ptr  = mb->coeff + 16 * b_idx;
     int16_t *zbin_ptr   = b->zbin;
     int16_t *round_ptr  = b->round;
     int16_t *quant_ptr  = b->quant;
@@ -295,7 +297,7 @@ void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
   if (c_idx == 16) assert(pb_idx.plane == 1);
   if (c_idx == 20) assert(pb_idx.plane == 2);
   quantize(b->zrun_zbin_boost,
-           mb->coeff + 16 * b_idx,
+           BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff, pb_idx.block, 16),
            256, b->skip_block,
            b->zbin, b->round, b->quant, b->quant_shift,
            BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16),
@@ -317,7 +319,7 @@ void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx, int y_blocks) {
   if (c_idx == 16) assert(pb_idx.plane == 1);
   if (c_idx == 20) assert(pb_idx.plane == 2);
   quantize(b->zrun_zbin_boost,
-           mb->coeff + b_idx * 16,
+           BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff, pb_idx.block, 16),
            1024, b->skip_block,
            b->zbin,
            b->round, b->quant, b->quant_shift,

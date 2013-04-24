@@ -78,7 +78,7 @@ void vp9_transform_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
     vp9_short_fdct32x32(x->plane[0].src_diff + y_idx * stride * 32 + x_idx * 32,
-                        x->coeff + n * 1024, stride * 2);
+                        x->plane[0].coeff + n * 1024, stride * 2);
   }
 }
 
@@ -97,10 +97,10 @@ void vp9_transform_sby_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
     if (tx_type != DCT_DCT) {
       vp9_short_fht16x16(x->plane[0].src_diff +
                              y_idx * stride * 16 + x_idx * 16,
-                         x->coeff + n * 256, stride, tx_type);
+                         x->plane[0].coeff + n * 256, stride, tx_type);
     } else {
       x->fwd_txm16x16(x->plane[0].src_diff + y_idx * stride * 16 + x_idx * 16,
-                      x->coeff + n * 256, stride * 2);
+                      x->plane[0].coeff + n * 256, stride * 2);
     }
   }
 }
@@ -118,10 +118,10 @@ void vp9_transform_sby_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 
     if (tx_type != DCT_DCT) {
       vp9_short_fht8x8(x->plane[0].src_diff + y_idx * stride * 8 + x_idx * 8,
-                       x->coeff + n * 64, stride, tx_type);
+                       x->plane[0].coeff + n * 64, stride, tx_type);
     } else {
       x->fwd_txm8x8(x->plane[0].src_diff + y_idx * stride * 8 + x_idx * 8,
-                    x->coeff + n * 64, stride * 2);
+                    x->plane[0].coeff + n * 64, stride * 2);
     }
   }
 }
@@ -139,10 +139,10 @@ void vp9_transform_sby_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 
     if (tx_type != DCT_DCT) {
       vp9_short_fht4x4(x->plane[0].src_diff + y_idx * stride * 4 + x_idx * 4,
-                       x->coeff + n * 16, stride, tx_type);
+                       x->plane[0].coeff + n * 16, stride, tx_type);
     } else {
       x->fwd_txm4x4(x->plane[0].src_diff + y_idx * stride * 4 + x_idx * 4,
-                    x->coeff + n * 16, stride * 2);
+                    x->plane[0].coeff + n * 16, stride * 2);
     }
   }
 }
@@ -150,15 +150,12 @@ void vp9_transform_sby_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 void vp9_transform_sbuv_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   assert(bsize == BLOCK_SIZE_SB64X64);
   vp9_clear_system_state();
-  vp9_short_fdct32x32(x->plane[1].src_diff,
-                      x->coeff + 4096, 64);
-  vp9_short_fdct32x32(x->plane[2].src_diff,
-                      x->coeff + 4096 + 1024, 64);
+  vp9_short_fdct32x32(x->plane[1].src_diff, x->plane[1].coeff, 64);
+  vp9_short_fdct32x32(x->plane[2].src_diff, x->plane[2].coeff, 64);
 }
 
 void vp9_transform_sbuv_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize), bhl = mb_height_log2(bsize);
-  const int uoff = (16 * 16) << (bwl + bhl), voff = (uoff * 5) >> 2;
   const int bw = 1 << (bwl - 1), bh = 1 << (bhl - 1);
   const int stride = 16 << (bwl - 1);
   int n;
@@ -168,15 +165,14 @@ void vp9_transform_sbuv_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
     const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
 
     x->fwd_txm16x16(x->plane[1].src_diff + y_idx * stride * 16 + x_idx * 16,
-                    x->coeff + uoff + n * 256, stride * 2);
+                    x->plane[1].coeff + n * 256, stride * 2);
     x->fwd_txm16x16(x->plane[2].src_diff + y_idx * stride * 16 + x_idx * 16,
-                    x->coeff + voff + n * 256, stride * 2);
+                    x->plane[2].coeff + n * 256, stride * 2);
   }
 }
 
 void vp9_transform_sbuv_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize) + 1, bhl = mb_height_log2(bsize) + 1;
-  const int uoff = (8 * 8) << (bwl + bhl), voff = (uoff * 5) >> 2;
   const int bw = 1 << (bwl - 1), bh = 1 << (bhl - 1);
   const int stride = 8 << (bwl - 1);
   int n;
@@ -186,15 +182,14 @@ void vp9_transform_sbuv_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
     const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
 
     x->fwd_txm8x8(x->plane[1].src_diff + y_idx * stride * 8 + x_idx * 8,
-                  x->coeff + uoff + n * 64, stride * 2);
+                  x->plane[1].coeff + n * 64, stride * 2);
     x->fwd_txm8x8(x->plane[2].src_diff + y_idx * stride * 8 + x_idx * 8,
-                  x->coeff + voff + n * 64, stride * 2);
+                  x->plane[2].coeff + n * 64, stride * 2);
   }
 }
 
 void vp9_transform_sbuv_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   const int bwl = mb_width_log2(bsize) + 2, bhl = mb_height_log2(bsize) + 2;
-  const int uoff = (4 * 4) << (bwl + bhl), voff = (uoff * 5) >> 2;
   const int bw = 1 << (bwl - 1), bh = 1 << (bhl - 1);
   const int stride = 4 << (bwl - 1);
   int n;
@@ -204,9 +199,9 @@ void vp9_transform_sbuv_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
     const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
 
     x->fwd_txm4x4(x->plane[1].src_diff + y_idx * stride * 4 + x_idx * 4,
-                  x->coeff + uoff + n * 16, stride * 2);
+                  x->plane[1].coeff + n * 16, stride * 2);
     x->fwd_txm4x4(x->plane[2].src_diff + y_idx * stride * 4 + x_idx * 4,
-                  x->coeff + voff + n * 16, stride * 2);
+                  x->plane[2].coeff + n * 16, stride * 2);
   }
 }
 
@@ -265,7 +260,8 @@ static void optimize_b(VP9_COMMON *const cm,
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
   const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, ib);
-  const int16_t *coeff_ptr = mb->coeff + ib * 16;
+  const int16_t *coeff_ptr = BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff,
+                                          pb_idx.block, 16);
   int16_t *qcoeff_ptr;
   int16_t *dqcoeff_ptr;
   int eob = xd->plane[pb_idx.plane].eobs[pb_idx.block], final_eob, sz = 0;

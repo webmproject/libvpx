@@ -90,12 +90,12 @@ typedef struct {
 
 struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[64*64]);
+  DECLARE_ALIGNED(16, int16_t, coeff[64*64]);
 };
 
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
   struct macroblock_plane plane[MAX_MB_PLANE];
-  DECLARE_ALIGNED(16, int16_t, coeff[64*64+32*32*2]);
   // 16 Y blocks, 4 U blocks, 4 V blocks,
   BLOCK block[24];
 
