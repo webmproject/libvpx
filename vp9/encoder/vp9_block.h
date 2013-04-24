@@ -25,9 +25,6 @@ typedef struct {
 
 typedef struct block {
   // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
-  int16_t *coeff;
-
-  // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
   int16_t *quant;
   int16_t *quant_fast;      // fast quant deprecated for now
   uint8_t *quant_shift;

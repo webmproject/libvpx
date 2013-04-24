@@ -496,8 +496,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   vp9_setup_block_dptrs(&x->e_mbd);
 
-  vp9_setup_block_ptrs(x);
-
   // set up frame new frame for intra coded blocks
   vp9_setup_intra_recon(new_yv12);
   vp9_frame_init_quantizer(cpi);
