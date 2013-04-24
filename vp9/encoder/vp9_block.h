@@ -28,8 +28,6 @@ typedef struct block {
   uint8_t **base_second_src;
   int src;
   int src_stride;
-
-  int skip_block;
 } BLOCK;
 
 typedef struct {
@@ -86,6 +84,7 @@ struct macroblock_plane {
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
   struct macroblock_plane plane[MAX_MB_PLANE];
+  int skip_block;
   // 16 Y blocks, 4 U blocks, 4 V blocks,
   BLOCK block[24];
 
