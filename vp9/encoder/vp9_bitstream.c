@@ -560,28 +560,6 @@ static void write_mb_segid(vp9_writer *bc,
   }
 }
 
-static void write_mb_segid_except(VP9_COMMON *cm,
-                                  vp9_writer *bc,
-                                  const MB_MODE_INFO *mi,
-                                  const MACROBLOCKD *xd,
-                                  int mb_row, int mb_col) {
-  // Encode the MB segment id.
-  const int seg_id = mi->segment_id;
-  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  const int pred_seg_id = vp9_get_pred_mb_segid(cm, sb_type, mb_row, mb_col);
-  const vp9_prob *p = xd->mb_segment_tree_probs;
-  const vp9_prob p1 = xd->mb_segment_mispred_tree_probs[pred_seg_id];
-
-  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
-    vp9_write(bc, seg_id >= 2, p1);
-    if (pred_seg_id >= 2 && seg_id < 2) {
-      vp9_write(bc, seg_id == 1, p[1]);
-    } else if (pred_seg_id < 2 && seg_id >= 2) {
-      vp9_write(bc, seg_id == 3, p[2]);
-    }
-  }
-}
-
 // This function encodes the reference frame
 static void encode_ref_frame(vp9_writer *const bc,
                              VP9_COMMON *const cm,
@@ -725,7 +703,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
       // If the mb segment id wasn't predicted code explicitly
       if (!prediction_flag)
-        write_mb_segid_except(pc, bc, mi, &cpi->mb.e_mbd, mb_row, mb_col);
+        write_mb_segid(bc, mi, &cpi->mb.e_mbd);
     } else {
       // Normal unpredicted coding
       write_mb_segid(bc, mi, &cpi->mb.e_mbd);

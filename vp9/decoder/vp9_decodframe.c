@@ -1113,19 +1113,6 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
 
     pc->temporal_update = vp9_read_bit(r);
     if (pc->temporal_update) {
-      const vp9_prob *p = xd->mb_segment_tree_probs;
-      vp9_prob *mispred_p = xd->mb_segment_mispred_tree_probs;
-
-      const int c0 =        p[0]  *        p[1];
-      const int c1 =        p[0]  * (256 - p[1]);
-      const int c2 = (256 - p[0]) *        p[2];
-      const int c3 = (256 - p[0]) * (256 - p[2]);
-
-      mispred_p[0] = get_binary_prob(c1, c2 + c3);
-      mispred_p[1] = get_binary_prob(c0, c2 + c3);
-      mispred_p[2] = get_binary_prob(c0 + c1, c3);
-      mispred_p[3] = get_binary_prob(c0 + c1, c2);
-
       for (i = 0; i < PREDICTION_PROBS; i++)
         pc->segment_pred_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
                                                     : MAX_PROB;
