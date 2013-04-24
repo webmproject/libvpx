@@ -1107,7 +1107,7 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
     xd->allow_implicit_segment_update = vp9_read_bit(r);
 #endif
   if (xd->update_mb_segmentation_map) {
-    for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
+    for (i = 0; i < MB_SEG_TREE_PROBS; i++)
       xd->mb_segment_tree_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
                                                      : MAX_PROB;
 

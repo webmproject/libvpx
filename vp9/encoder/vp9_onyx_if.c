@@ -4204,8 +4204,9 @@ int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
 }
 
 int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
-                   unsigned int cols, int delta_q[4], int delta_lf[4],
-                   unsigned int threshold[4]) {
+                   unsigned int cols, int delta_q[MAX_MB_SEGMENTS],
+                   int delta_lf[MAX_MB_SEGMENTS],
+                   unsigned int threshold[MAX_MB_SEGMENTS]) {
   VP9_COMP *cpi = (VP9_COMP *) comp;
   signed char feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
@@ -4225,25 +4226,15 @@ int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
   // Activate segmentation.
   vp9_enable_segmentation((VP9_PTR)cpi);
 
-  // Set up the quant segment data
-  feature_data[SEG_LVL_ALT_Q][0] = delta_q[0];
-  feature_data[SEG_LVL_ALT_Q][1] = delta_q[1];
-  feature_data[SEG_LVL_ALT_Q][2] = delta_q[2];
-  feature_data[SEG_LVL_ALT_Q][3] = delta_q[3];
-
-  // Set up the loop segment data s
-  feature_data[SEG_LVL_ALT_LF][0] = delta_lf[0];
-  feature_data[SEG_LVL_ALT_LF][1] = delta_lf[1];
-  feature_data[SEG_LVL_ALT_LF][2] = delta_lf[2];
-  feature_data[SEG_LVL_ALT_LF][3] = delta_lf[3];
-
-  cpi->segment_encode_breakout[0] = threshold[0];
-  cpi->segment_encode_breakout[1] = threshold[1];
-  cpi->segment_encode_breakout[2] = threshold[2];
-  cpi->segment_encode_breakout[3] = threshold[3];
+  // Set up the quan, LF and breakout threshold segment data
+  for (i = 0; i < MAX_MB_SEGMENTS; i++) {
+    feature_data[SEG_LVL_ALT_Q][i] = delta_q[i];
+    feature_data[SEG_LVL_ALT_LF][i] = delta_lf[i];
+    cpi->segment_encode_breakout[i] = threshold[i];
+  }
 
   // Enable the loop and quant changes in the feature mask
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < MAX_MB_SEGMENTS; i++) {
     if (delta_q[i])
       vp9_enable_segfeature(xd, i, SEG_LVL_ALT_Q);
     else

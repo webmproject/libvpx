@@ -75,8 +75,22 @@ static MB_PREDICTION_MODE read_uv_mode(vp9_reader *r, const vp9_prob *p) {
 
 static int read_mb_segid(vp9_reader *r, MACROBLOCKD *xd) {
   const vp9_prob *const p = xd->mb_segment_tree_probs;
-  return vp9_read(r, p[0]) ? 2 + vp9_read(r, p[2])
-                           :     vp9_read(r, p[1]);
+  int ret_val;
+
+  if (vp9_read(r, p[0])) {
+    if (vp9_read(r, p[4])) {
+      ret_val = 6 + vp9_read(r, p[6]);
+    } else {
+      ret_val = 4 + vp9_read(r, p[5]);
+    }
+  } else {
+    if (vp9_read(r, p[1])) {
+      ret_val = 2 + vp9_read(r, p[3]);
+    } else {
+      ret_val = vp9_read(r, p[2]);
+    }
+  }
+  return ret_val;
 }
 
 static void set_segment_id(VP9_COMMON *cm, MB_MODE_INFO *mbmi,
