@@ -79,21 +79,6 @@ static int read_mb_segid(vp9_reader *r, MACROBLOCKD *xd) {
                            :     vp9_read(r, p[1]);
 }
 
-// This function reads the current macro block's segnent id from the bitstream
-// It should only be called if a segment map update is indicated.
-static int read_mb_segid_except(vp9_reader *r,
-                                VP9_COMMON *cm, MACROBLOCKD *xd,
-                                int mb_row, int mb_col) {
-  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  const int pred_seg_id = vp9_get_pred_mb_segid(cm, sb_type, mb_row, mb_col);
-  const vp9_prob *const p = xd->mb_segment_tree_probs;
-  const vp9_prob prob = xd->mb_segment_mispred_tree_probs[pred_seg_id];
-
-  return vp9_read(r, prob)
-             ? 2 + (pred_seg_id  < 2 ? vp9_read(r, p[2]) : (pred_seg_id == 2))
-             :     (pred_seg_id >= 2 ? vp9_read(r, p[1]) : (pred_seg_id == 0));
-}
-
 static void set_segment_id(VP9_COMMON *cm, MB_MODE_INFO *mbmi,
                            int mb_row, int mb_col, int segment_id) {
   const int mb_index = mb_row * cm->mb_cols + mb_col;
@@ -551,7 +536,7 @@ static int read_mb_segment_id(VP9D_COMP *pbi, int mb_row, int mb_col,
       // then use the predicted value, otherwise decode it explicitly
       segment_id = pred_flag ? vp9_get_pred_mb_segid(cm, mbmi->sb_type,
                                                      mb_row, mb_col)
-                             : read_mb_segid_except(r, cm, xd, mb_row, mb_col);
+                             : read_mb_segid(r, xd);
     } else {
       segment_id = read_mb_segid(r, xd);  // Normal unpredicted coding mode
     }

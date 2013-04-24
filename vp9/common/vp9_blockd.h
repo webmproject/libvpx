@@ -399,7 +399,6 @@ typedef struct macroblockd {
 
   // Probability Tree used to code Segment number
   vp9_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
-  vp9_prob mb_segment_mispred_tree_probs[MAX_MB_SEGMENTS];
 
   // Segment features
   signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
