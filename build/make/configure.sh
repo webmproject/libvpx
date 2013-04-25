@@ -918,7 +918,7 @@ process_common_toolchain() {
             add_ldflags -arch_only ${tgt_isa}
 
             if [ -z "${alt_libc}" ]; then
-                alt_libc=${SDK_PATH}/SDKs/iPhoneOS5.1.sdk
+                alt_libc=${SDK_PATH}/SDKs/iPhoneOS6.0.sdk
             fi
 
             add_cflags  "-isysroot ${alt_libc}"
