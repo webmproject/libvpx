@@ -431,12 +431,11 @@ typedef struct macroblockd {
   /* Inverse transform function pointers. */
   void (*inv_txm4x4_1)(int16_t *input, int16_t *output, int pitch);
   void (*inv_txm4x4)(int16_t *input, int16_t *output, int pitch);
-  void (*itxm_add)(int16_t *input, const int16_t *dq, uint8_t *dest,
-    int stride, int eob);
-  void (*itxm_add_y_block)(int16_t *q, const int16_t *dq,
-    uint8_t *dst, int stride, struct macroblockd *xd);
-  void (*itxm_add_uv_block)(int16_t *q, const int16_t *dq,
-    uint8_t *dst, int stride, uint16_t *eobs);
+  void (*itxm_add)(int16_t *input, uint8_t *dest, int stride, int eob);
+  void (*itxm_add_y_block)(int16_t *q, uint8_t *dst, int stride,
+    struct macroblockd *xd);
+  void (*itxm_add_uv_block)(int16_t *q, uint8_t *dst, int stride,
+    uint16_t *eobs);
 
   struct subpix_fn_table  subpix;
 

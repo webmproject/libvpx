@@ -27,26 +27,26 @@ forward_decls vp9_common_forward_decls
 #
 # Dequant
 #
-prototype void vp9_dequant_idct_add_y_block_8x8 "int16_t *q, const int16_t *dq, uint8_t *dst, int stride, struct macroblockd *xd"
-specialize vp9_dequant_idct_add_y_block_8x8
+prototype void vp9_idct_add_y_block_8x8 "int16_t *q, uint8_t *dst, int stride, struct macroblockd *xd"
+specialize vp9_idct_add_y_block_8x8
 
-prototype void vp9_dequant_idct_add_16x16 "int16_t *input, const int16_t *dq, uint8_t *dest, int stride, int eob"
-specialize vp9_dequant_idct_add_16x16
+prototype void vp9_idct_add_16x16 "int16_t *input, uint8_t *dest, int stride, int eob"
+specialize vp9_idct_add_16x16
 
-prototype void vp9_dequant_idct_add_8x8 "int16_t *input, const int16_t *dq, uint8_t *dest, int stride, int eob"
-specialize vp9_dequant_idct_add_8x8
+prototype void vp9_idct_add_8x8 "int16_t *input, uint8_t *dest, int stride, int eob"
+specialize vp9_idct_add_8x8
 
-prototype void vp9_dequant_idct_add "int16_t *input, const int16_t *dq, uint8_t *dest, int stride, int eob"
-specialize vp9_dequant_idct_add
+prototype void vp9_idct_add "int16_t *input, uint8_t *dest, int stride, int eob"
+specialize vp9_idct_add
 
-prototype void vp9_dequant_idct_add_y_block "int16_t *q, const int16_t *dq, uint8_t *dst, int stride, struct macroblockd *xd"
-specialize vp9_dequant_idct_add_y_block
+prototype void vp9_idct_add_y_block "int16_t *q, uint8_t *dst, int stride, struct macroblockd *xd"
+specialize vp9_idct_add_y_block
 
-prototype void vp9_dequant_idct_add_uv_block "int16_t *q, const int16_t *dq, uint8_t *dst, int stride, uint16_t *eobs"
-specialize vp9_dequant_idct_add_uv_block
+prototype void vp9_idct_add_uv_block "int16_t *q, uint8_t *dst, int stride, uint16_t *eobs"
+specialize vp9_idct_add_uv_block
 
-prototype void vp9_dequant_idct_add_32x32 "int16_t *q, const int16_t *dq, uint8_t *dst, int stride, int eob"
-specialize vp9_dequant_idct_add_32x32
+prototype void vp9_idct_add_32x32 "int16_t *q, uint8_t *dst, int stride, int eob"
+specialize vp9_idct_add_32x32
 
 #
 # RECON

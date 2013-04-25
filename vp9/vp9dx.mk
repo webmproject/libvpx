@@ -22,17 +22,16 @@ VP9_DX_SRCS-yes += decoder/vp9_dboolhuff.c
 VP9_DX_SRCS-yes += decoder/vp9_decodemv.c
 VP9_DX_SRCS-yes += decoder/vp9_decodframe.c
 VP9_DX_SRCS-yes += decoder/vp9_decodframe.h
-VP9_DX_SRCS-yes += decoder/vp9_dequantize.c
 VP9_DX_SRCS-yes += decoder/vp9_detokenize.c
 VP9_DX_SRCS-yes += decoder/vp9_dboolhuff.h
 VP9_DX_SRCS-yes += decoder/vp9_decodemv.h
-VP9_DX_SRCS-yes += decoder/vp9_dequantize.h
 VP9_DX_SRCS-yes += decoder/vp9_detokenize.h
 VP9_DX_SRCS-yes += decoder/vp9_onyxd.h
 VP9_DX_SRCS-yes += decoder/vp9_onyxd_int.h
 VP9_DX_SRCS-yes += decoder/vp9_treereader.h
 VP9_DX_SRCS-yes += decoder/vp9_onyxd_if.c
 VP9_DX_SRCS-yes += decoder/vp9_idct_blk.c
+VP9_DX_SRCS-yes += decoder/vp9_idct_blk.h
 
 VP9_DX_SRCS-yes := $(filter-out $(VP9_DX_SRCS_REMOVE-yes),$(VP9_DX_SRCS-yes))
 

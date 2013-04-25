@@ -10,15 +10,15 @@
 
 #include "vp9_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
-#include "vp9/decoder/vp9_dequantize.h"
+#include "vp9/decoder/vp9_idct_blk.h"
 
-void vp9_dequant_idct_add_y_block_c(int16_t *q, const int16_t *dq,
-                                    uint8_t *dst, int stride, MACROBLOCKD *xd) {
+void vp9_idct_add_y_block_c(int16_t *q, uint8_t *dst, int stride,
+                            MACROBLOCKD *xd) {
   int i, j;
 
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) {
-      vp9_dequant_idct_add(q, dq, dst, stride, xd->plane[0].eobs[i * 4  + j]);
+      vp9_idct_add(q, dst, stride, xd->plane[0].eobs[i * 4  + j]);
       q   += 16;
       dst += 4;
     }
@@ -27,13 +27,13 @@ void vp9_dequant_idct_add_y_block_c(int16_t *q, const int16_t *dq,
   }
 }
 
-void vp9_dequant_idct_add_uv_block_c(int16_t *q, const int16_t *dq,
-                                     uint8_t *dst, int stride, uint16_t *eobs) {
+void vp9_idct_add_uv_block_c(int16_t *q, uint8_t *dst, int stride,
+                             uint16_t *eobs) {
   int i, j;
 
   for (i = 0; i < 2; i++) {
     for (j = 0; j < 2; j++) {
-      vp9_dequant_idct_add(q, dq, dst, stride, eobs[i * 2 + j]);
+      vp9_idct_add(q, dst, stride, eobs[i * 2 + j]);
       q   += 16;
       dst += 4;
     }
@@ -42,29 +42,25 @@ void vp9_dequant_idct_add_uv_block_c(int16_t *q, const int16_t *dq,
   }
 }
 
-void vp9_dequant_idct_add_y_block_8x8_c(int16_t *q, const int16_t *dq,
-                                        uint8_t *dst, int stride,
-                                        MACROBLOCKD *xd) {
+void vp9_idct_add_y_block_8x8_c(int16_t *q, uint8_t *dst, int stride,
+                                MACROBLOCKD *xd) {
   uint8_t *origdest = dst;
 
-  vp9_dequant_idct_add_8x8_c(q, dq, dst, stride, xd->plane[0].eobs[0]);
-  vp9_dequant_idct_add_8x8_c(&q[64], dq, origdest + 8, stride,
-                             xd->plane[0].eobs[4]);
-  vp9_dequant_idct_add_8x8_c(&q[128], dq, origdest + 8 * stride, stride,
-                             xd->plane[0].eobs[8]);
-  vp9_dequant_idct_add_8x8_c(&q[192], dq, origdest + 8 * stride + 8, stride,
-                             xd->plane[0].eobs[12]);
+  vp9_idct_add_8x8_c(q, dst, stride, xd->plane[0].eobs[0]);
+  vp9_idct_add_8x8_c(&q[64], origdest + 8, stride, xd->plane[0].eobs[4]);
+  vp9_idct_add_8x8_c(&q[128], origdest + 8 * stride, stride,
+                     xd->plane[0].eobs[8]);
+  vp9_idct_add_8x8_c(&q[192], origdest + 8 * stride + 8, stride,
+                     xd->plane[0].eobs[12]);
 }
 
-void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
-                                             uint8_t *dst, int stride,
-                                             MACROBLOCKD *xd) {
+void vp9_idct_add_y_block_lossless_c(int16_t *q, uint8_t *dst, int stride,
+                                     MACROBLOCKD *xd) {
   int i, j;
 
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) {
-      vp9_dequant_idct_add_lossless_c(q, dq, dst, stride,
-                                      xd->plane[0].eobs[i * 4 + j]);
+      vp9_idct_add_lossless_c(q, dst, stride, xd->plane[0].eobs[i * 4 + j]);
       q   += 16;
       dst += 4;
     }
@@ -73,19 +69,288 @@ void vp9_dequant_idct_add_y_block_lossless_c(int16_t *q, const int16_t *dq,
   }
 }
 
-void vp9_dequant_idct_add_uv_block_lossless_c(int16_t *q, const int16_t *dq,
-                                              uint8_t *dst, int stride,
-                                              uint16_t *eobs) {
+void vp9_idct_add_uv_block_lossless_c(int16_t *q, uint8_t *dst, int stride,
+                                      uint16_t *eobs) {
   int i, j;
 
   for (i = 0; i < 2; i++) {
     for (j = 0; j < 2; j++) {
-      vp9_dequant_idct_add_lossless_c(q, dq, dst, stride, eobs[i * 2 + j]);
+      vp9_idct_add_lossless_c(q, dst, stride, eobs[i * 2 + j]);
       q   += 16;
       dst += 4;
     }
 
     dst += 4 * stride - 8;
+  }
+}
+
+static void add_residual(const int16_t *diff, uint8_t *dest, int stride,
+                         int width, int height) {
+  int r, c;
+
+  for (r = 0; r < height; r++) {
+    for (c = 0; c < width; c++)
+      dest[c] = clip_pixel(diff[c] + dest[c]);
+
+    dest += stride;
+    diff += width;
+  }
+}
+
+void vp9_add_residual_4x4_c(const int16_t *diff, uint8_t *dest, int stride) {
+  add_residual(diff, dest, stride, 4, 4);
+}
+
+void vp9_add_residual_8x8_c(const int16_t *diff, uint8_t *dest, int stride) {
+  add_residual(diff, dest, stride, 8, 8);
+}
+
+void vp9_add_residual_16x16_c(const int16_t *diff, uint8_t *dest, int stride) {
+  add_residual(diff, dest, stride, 16, 16);
+}
+
+void vp9_add_residual_32x32_c(const int16_t *diff, uint8_t *dest, int stride) {
+  add_residual(diff, dest, stride, 32, 32);
+}
+
+static void add_constant_residual(const int16_t diff, uint8_t *dest, int stride,
+                                  int width, int height) {
+  int r, c;
+
+  for (r = 0; r < height; r++) {
+    for (c = 0; c < width; c++)
+      dest[c] = clip_pixel(diff + dest[c]);
+
+    dest += stride;
+  }
+}
+
+void vp9_add_constant_residual_8x8_c(const int16_t diff, uint8_t *dest,
+                                     int stride) {
+  add_constant_residual(diff, dest, stride, 8, 8);
+}
+
+void vp9_add_constant_residual_16x16_c(const int16_t diff, uint8_t *dest,
+                                       int stride) {
+  add_constant_residual(diff, dest, stride, 16, 16);
+}
+
+void vp9_add_constant_residual_32x32_c(const int16_t diff,  uint8_t *dest,
+                                       int stride) {
+  add_constant_residual(diff, dest, stride, 32, 32);
+}
+
+void vp9_iht_add_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest, int stride,
+                   int eob) {
+  if (tx_type == DCT_DCT) {
+    vp9_idct_add(input, dest, stride, eob);
+  } else {
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
+
+    vp9_short_iht4x4(input, output, 4, tx_type);
+    vpx_memset(input, 0, 32);
+    vp9_add_residual_4x4(output, dest, stride);
+  }
+}
+
+void vp9_iht_add_8x8_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
+                       int stride, int eob) {
+  if (tx_type == DCT_DCT) {
+    vp9_idct_add_8x8(input, dest, stride, eob);
+  } else {
+    if (eob > 0) {
+      DECLARE_ALIGNED_ARRAY(16, int16_t, output, 64);
+
+      vp9_short_iht8x8(input, output, 8, tx_type);
+      vpx_memset(input, 0, 128);
+      vp9_add_residual_8x8(output, dest, stride);
+    }
+  }
+}
+
+void vp9_idct_add_c(int16_t *input, uint8_t *dest, int stride, int eob) {
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
+
+  if (eob > 1) {
+    // the idct halves ( >> 1) the pitch
+    vp9_short_idct4x4(input, output, 4 << 1);
+    vpx_memset(input, 0, 32);
+    vp9_add_residual_4x4(output, dest, stride);
+  } else {
+    vp9_dc_only_idct_add(input[0], dest, dest, stride, stride);
+    ((int *)input)[0] = 0;
+  }
+}
+
+void vp9_dc_idct_add_c(int16_t *input, uint8_t *dest, int stride, int dc) {
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
+
+  input[0] = dc;
+
+  // the idct halves ( >> 1) the pitch
+  vp9_short_idct4x4(input, output, 4 << 1);
+  vpx_memset(input, 0, 32);
+  vp9_add_residual_4x4(output, dest, stride);
+}
+
+void vp9_idct_add_lossless_c(int16_t *input, uint8_t *dest, int stride,
+                             int eob) {
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
+
+  if (eob > 1) {
+    vp9_short_iwalsh4x4_c(input, output, 4 << 1);
+    vpx_memset(input, 0, 32);
+    vp9_add_residual_4x4(output, dest, stride);
+  } else {
+    vp9_dc_only_inv_walsh_add(input[0], dest, dest, stride, stride);
+    ((int *)input)[0] = 0;
+  }
+}
+
+void vp9_dc_idct_add_lossless_c(int16_t *input, uint8_t *dest,
+                                int stride, int dc) {
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
+
+  input[0] = dc;
+  vp9_short_iwalsh4x4_c(input, output, 4 << 1);
+  vpx_memset(input, 0, 32);
+  vp9_add_residual_4x4(output, dest, stride);
+}
+
+void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 64);
+
+  // If dc is 1, then input[0] is the reconstructed value, do not need
+  // dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
+
+  // The calculation can be simplified if there are not many non-zero dct
+  // coefficients. Use eobs to decide what to do.
+  // TODO(yunqingwang): "eobs = 1" case is also handled in vp9_short_idct8x8_c.
+  // Combine that with code here.
+  if (eob) {
+    if (eob == 1) {
+      // DC only DCT coefficient
+      int16_t in = input[0];
+      int16_t out;
+
+      // Note: the idct1 will need to be modified accordingly whenever
+      // vp9_short_idct8x8_c() is modified.
+      vp9_short_idct1_8x8_c(&in, &out);
+      input[0] = 0;
+
+      vp9_add_constant_residual_8x8(out, dest, stride);
+#if !CONFIG_SCATTERSCAN
+    } else if (eob <= 10) {
+      vp9_short_idct10_8x8(input, output, 16);
+
+      input[0] = input[1] = input[2] = input[3] = 0;
+      input[8] = input[9] = input[10] = 0;
+      input[16] = input[17] = 0;
+      input[24] = 0;
+
+      vp9_add_residual_8x8(output, dest, stride);
+#endif
+    } else {
+      // the idct halves ( >> 1) the pitch
+      vp9_short_idct8x8(input, output, 8 << 1);
+      vpx_memset(input, 0, 128);
+      vp9_add_residual_8x8(output, dest, stride);
+    }
+  }
+}
+
+void vp9_iht_add_16x16_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
+                         int stride, int eob) {
+  if (tx_type == DCT_DCT) {
+    vp9_idct_add_16x16(input, dest, stride, eob);
+  } else {
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output, 256);
+
+    if (eob > 0) {
+      vp9_short_iht16x16(input, output, 16, tx_type);
+      vpx_memset(input, 0, 512);
+      vp9_add_residual_16x16(output, dest, stride);
+    }
+  }
+}
+
+void vp9_idct_add_16x16_c(int16_t *input, uint8_t *dest, int stride, int eob) {
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 256);
+
+  /* The calculation can be simplified if there are not many non-zero dct
+   * coefficients. Use eobs to separate different cases. */
+  if (eob) {
+    if (eob == 1) {
+      /* DC only DCT coefficient. */
+      int16_t in = input[0];
+      int16_t out;
+      /* Note: the idct1 will need to be modified accordingly whenever
+       * vp9_short_idct16x16() is modified. */
+      vp9_short_idct1_16x16_c(&in, &out);
+      input[0] = 0;
+
+      vp9_add_constant_residual_16x16(out, dest, stride);
+#if !CONFIG_SCATTERSCAN
+    } else if (eob <= 10) {
+      // the idct halves ( >> 1) the pitch
+      vp9_short_idct10_16x16(input, output, 32);
+
+      input[0] = input[1] = input[2] = input[3] = 0;
+      input[16] = input[17] = input[18] = 0;
+      input[32] = input[33] = 0;
+      input[48] = 0;
+
+      vp9_add_residual_16x16(output, dest, stride);
+#endif
+    } else {
+      // the idct halves ( >> 1) the pitch
+      vp9_short_idct16x16(input, output, 16 << 1);
+      vpx_memset(input, 0, 512);
+      vp9_add_residual_16x16(output, dest, stride);
+    }
+  }
+}
+
+void vp9_idct_add_32x32_c(int16_t *input, uint8_t *dest, int stride, int eob) {
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 1024);
+
+  if (eob) {
+    input[0] = input[0] / 2;
+    if (eob == 1) {
+      vp9_short_idct1_32x32(input, output);
+      vp9_add_constant_residual_32x32(output[0], dest, stride);
+      input[0] = 0;
+#if !CONFIG_SCATTERSCAN
+    } else if (eob <= 10) {
+      input[1] = input[1] / 2;
+      input[2] = input[2] / 2;
+      input[3] = input[3] / 2;
+      input[32] = input[32] / 2;
+      input[33] = input[33] / 2;
+      input[34] = input[34] / 2;
+      input[64] = input[64] / 2;
+      input[65] = input[65] / 2;
+      input[96] = input[96] / 2;
+
+      // the idct halves ( >> 1) the pitch
+      vp9_short_idct10_32x32(input, output, 64);
+
+      input[0] = input[1] = input[2] = input[3] = 0;
+      input[32] = input[33] = input[34] = 0;
+      input[64] = input[65] = 0;
+      input[96] = 0;
+
+      vp9_add_residual_32x32(output, dest, stride);
+#endif
+    } else {
+      int i;
+      for (i = 1; i < 1024; i++)
+        input[i] = input[i] / 2;
+
+      vp9_short_idct32x32(input, output, 64);
+      vpx_memset(input, 0, 2048);
+      vp9_add_residual_32x32(output, dest, stride);
+    }
   }
 }
 
