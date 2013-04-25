@@ -611,37 +611,31 @@ void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd,
 }
 
 void vp9_intra8x8_predict(MACROBLOCKD *xd,
-                          BLOCKD *b,
+                          int block4x4_idx,
                           int mode,
                           uint8_t *predictor, int pre_stride) {
-  const int block4x4_idx = (b - xd->block);
   const int block_idx = (block4x4_idx >> 2) | !!(block4x4_idx & 2);
   const int have_top = (block_idx >> 1) || xd->up_available;
   const int have_left = (block_idx & 1) || xd->left_available;
   const int have_right = !(block_idx & 1) || xd->right_available;
 
-  vp9_build_intra_predictors(*(b->base_dst) + b->dst,
-                             b->dst_stride, predictor, pre_stride,
+  vp9_build_intra_predictors(predictor, pre_stride,
+                             predictor, pre_stride,
                              mode, 8, 8, have_top, have_left,
                              have_right);
 }
 
 void vp9_intra_uv4x4_predict(MACROBLOCKD *xd,
-                             BLOCKD *b,
+                             int block4x4_idx,
                              int mode,
                              uint8_t *predictor, int pre_stride) {
-  const int block_idx = (b - xd->block) & 3;
+  const int block_idx = block4x4_idx & 3;
   const int have_top = (block_idx >> 1) || xd->up_available;
   const int have_left = (block_idx & 1) || xd->left_available;
   const int have_right = !(block_idx & 1) || xd->right_available;
 
-  vp9_build_intra_predictors(*(b->base_dst) + b->dst,
-                             b->dst_stride, predictor, pre_stride,
+  vp9_build_intra_predictors(predictor, pre_stride,
+                             predictor, pre_stride,
                              mode, 4, 4, have_top, have_left,
                              have_right);
 }
-
-/* TODO: try different ways of use Y-UV mode correlation
-   Current code assumes that a uv 4x4 block use same mode
-   as corresponding Y 8x8 area
-   */

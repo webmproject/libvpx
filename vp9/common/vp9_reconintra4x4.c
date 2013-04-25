@@ -147,12 +147,10 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
 }
 #endif
 
-B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, BLOCKD *x) {
-  const int block_idx = x - xd->block;
+B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, int block_idx,
+                                         uint8_t *ptr, int stride) {
   const int have_top = (block_idx >> 2) || xd->up_available;
   const int have_left = (block_idx & 3)  || xd->left_available;
-  uint8_t *ptr = *(x->base_dst) + x->dst;
-  int stride = x->dst_stride;
   int tx = have_left ? 4 : 0;
   int ty = have_top ? 4 : 0;
   if (!have_left && !have_top)
@@ -182,8 +180,8 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
    */
 
   if (have_left) {
-    uint8_t *left_ptr = *(x->base_dst) + x->dst - 1;
-    const int stride = x->dst_stride;
+    uint8_t *left_ptr = predictor - 1;
+    const int stride = ps;
 
     left[0] = left_ptr[0 * stride];
     left[1] = left_ptr[1 * stride];
@@ -194,7 +192,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
   }
 
   if (have_top) {
-    uint8_t *above_ptr = *(x->base_dst) + x->dst - x->dst_stride;
+    uint8_t *above_ptr = predictor - ps;
     top_left = have_left ? above_ptr[-1] : 127;
 
     above[0] = above_ptr[0];
@@ -213,10 +211,10 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
       uint8_t *above_right = above_ptr + 4;
 
       if (xd->sb_index == 3 && (xd->mb_index & 1))
-        above_right -= 32 * x->dst_stride;
+        above_right -= 32 * ps;
       if (xd->mb_index == 3)
-        above_right -= 16 * x->dst_stride;
-      above_right -= (block_idx & ~3) * x->dst_stride;
+        above_right -= 16 * ps;
+      above_right -= (block_idx & ~3) * ps;
 
       /* use a more distant above-right (from closest available top-right
        * corner), but with a "localized DC" (similar'ish to TM-pred):

@@ -1779,7 +1779,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 }
 
 void vp9_build_block_offsets(MACROBLOCK *x) {
-  vp9_build_block_doffsets(&x->e_mbd);
 }
 
 static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {

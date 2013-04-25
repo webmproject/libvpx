@@ -279,11 +279,7 @@ typedef struct {
 } MODE_INFO;
 
 typedef struct blockd {
-  uint8_t **base_dst;
-  int dst;
-  int dst_stride;
-
-//  union b_mode_info bmi;
+  int unused;
 } BLOCKD;
 
 struct scale_factors {
@@ -743,7 +739,6 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   return tx_type;
 }
 
-void vp9_build_block_doffsets(MACROBLOCKD *xd);
 void vp9_setup_block_dptrs(MACROBLOCKD *xd);
 
 static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
