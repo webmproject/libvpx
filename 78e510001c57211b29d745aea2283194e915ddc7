@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//2YQ\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-25T15:33:21Z",
+      "side": 1,
+      "message": "I can\u0027t think of the reason not to do this on the encoder also at the moment. What happens if you do it unconditionally? Maybe there\u0027s a bug somewhere if we\u0027re relying on this.",
+      "revId": "78e510001c57211b29d745aea2283194e915ddc7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
