@@ -1479,10 +1479,18 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     // Should the GF or ARF be updated from the current frame
     pbi->refresh_frame_flags = vp9_read_literal(&header_bc, NUM_REF_FRAMES);
 
-    // Select active reference frames
+    // Select active reference frames and calculate scaling factors
     for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-      int ref_frame_num = vp9_read_literal(&header_bc, NUM_REF_FRAMES_LG2);
-      pc->active_ref_idx[i] = pc->ref_frame_map[ref_frame_num];
+      const int ref = vp9_read_literal(&header_bc, NUM_REF_FRAMES_LG2);
+      const int mapped_ref = pc->ref_frame_map[ref];
+      YV12_BUFFER_CONFIG *const fb = &pc->yv12_fb[mapped_ref];
+      struct scale_factors *const sf = &pc->active_ref_scale[i];
+
+      pc->active_ref_idx[i] = mapped_ref;
+      if (mapped_ref >= NUM_YV12_BUFFERS)
+        memset(sf, 0, sizeof(*sf));
+      else
+        vp9_setup_scale_factors_for_frame(sf, fb, pc->width, pc->height);
     }
 
     pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp9_read_bit(&header_bc);
@@ -1493,17 +1501,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 #if CONFIG_COMP_INTERINTRA_PRED
     pc->use_interintra = vp9_read_bit(&header_bc);
 #endif
-
-    // Calculate scaling factors for each of the 3 available references
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-      const int idx = pc->active_ref_idx[i];
-      struct scale_factors *sf = &pc->active_ref_scale[i];
-      if (idx >= NUM_YV12_BUFFERS)
-        memset(sf, 0, sizeof(*sf));
-      else
-        vp9_setup_scale_factors_for_frame(sf, &pc->yv12_fb[idx],
-                                          pc->width, pc->height);
-    }
 
     // To enable choice of different interpolation filters
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
@@ -1518,8 +1515,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   }
 
   pc->frame_context_idx = vp9_read_literal(&header_bc, NUM_FRAME_CONTEXTS_LG2);
-  vpx_memcpy(&pc->fc, &pc->frame_contexts[pc->frame_context_idx],
-             sizeof(pc->fc));
+  pc->fc = pc->frame_contexts[pc->frame_context_idx];
 
   setup_segmentation(pc, xd, &header_bc);
 
@@ -1607,10 +1603,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   }
 #endif
 
-  if (pc->refresh_entropy_probs) {
-    vpx_memcpy(&pc->frame_contexts[pc->frame_context_idx], &pc->fc,
-               sizeof(pc->fc));
-  }
+  if (pc->refresh_entropy_probs)
+    pc->frame_contexts[pc->frame_context_idx] = pc->fc;
 
   *p_data_end = vp9_reader_find_end(&residual_bc);
   return 0;

@@ -181,12 +181,14 @@ typedef struct VP9Common {
   int fb_idx_ref_cnt[NUM_YV12_BUFFERS]; /* reference counts */
   int ref_frame_map[NUM_REF_FRAMES]; /* maps fb_idx to reference slot */
 
-  /* TODO(jkoleszar): could expand active_ref_idx to 4, with 0 as intra, and
-   * roll new_fb_idx into it.
-   */
-  int active_ref_idx[3]; /* each frame can reference 3 buffers */
+  // TODO(jkoleszar): could expand active_ref_idx to 4, with 0 as intra, and
+  // roll new_fb_idx into it.
+
+  // Each frame can reference ALLOWED_REFS_PER_FRAME buffers
+  int active_ref_idx[ALLOWED_REFS_PER_FRAME];
+  struct scale_factors active_ref_scale[ALLOWED_REFS_PER_FRAME];
   int new_fb_idx;
-  struct scale_factors active_ref_scale[3];
+
 
   YV12_BUFFER_CONFIG post_proc_buffer;
   YV12_BUFFER_CONFIG temp_scale_frame;
