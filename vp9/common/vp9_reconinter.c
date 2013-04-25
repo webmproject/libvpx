@@ -454,26 +454,6 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd,
 #endif
 }
 
-static INLINE int round_mv_comp(int value) {
-  return (value < 0 ? value - 2 : value + 2) / 4;
-}
-
-static int mi_mv_pred_row(MACROBLOCKD *mb, int off, int idx) {
-  const int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.row +
-                   mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.row +
-                   mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.row +
-                   mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.row;
-  return round_mv_comp(temp);
-}
-
-static int mi_mv_pred_col(MACROBLOCKD *mb, int off, int idx) {
-  const int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.col +
-                   mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.col +
-                   mb->mode_info_context->bmi[off + 4].as_mv[idx].as_mv.col +
-                   mb->mode_info_context->bmi[off + 5].as_mv[idx].as_mv.col;
-  return round_mv_comp(temp);
-}
-
 /*encoder only*/
 void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
                                         int mb_row, int mb_col) {
