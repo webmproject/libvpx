@@ -152,16 +152,12 @@ struct macroblock {
   // Structure to hold context for each of the 4 MBs within a SB:
   // when encoded as 4 independent MBs:
   PICK_MODE_CONTEXT mb_context[4][4];
-#if CONFIG_SBSEGMENT
   PICK_MODE_CONTEXT sb32x16_context[4][2];
   PICK_MODE_CONTEXT sb16x32_context[4][2];
-#endif
   // when 4 MBs share coding parameters:
   PICK_MODE_CONTEXT sb32_context[4];
-#if CONFIG_SBSEGMENT
   PICK_MODE_CONTEXT sb32x64_context[2];
   PICK_MODE_CONTEXT sb64x32_context[2];
-#endif
   PICK_MODE_CONTEXT sb64_context;
   int partition_cost[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 

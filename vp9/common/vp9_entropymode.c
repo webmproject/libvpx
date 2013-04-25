@@ -151,7 +151,6 @@ const int vp9_mbsplit_count [VP9_NUMMBSPLITS] = { 2, 2, 4, 16};
 
 const vp9_prob vp9_mbsplit_probs [VP9_NUMMBSPLITS - 1] = { 110, 111, 150};
 
-#if CONFIG_SBSEGMENT
 const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
                                   [PARTITION_TYPES - 1] = {
   {202, 162, 107},
@@ -163,13 +162,6 @@ const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
   {67,  208,  22},
   {4,   17,   5},
 };
-#else
-const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
-                                  [PARTITION_TYPES - 1] = {
-  {200}, {200}, {200}, {200},
-  {200}, {200}, {200}, {200},
-};
-#endif
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 
@@ -303,17 +295,11 @@ const vp9_tree_index vp9_sub_mv_ref_tree[6] = {
   -ZERO4X4, -NEW4X4
 };
 
-#if CONFIG_SBSEGMENT
 const vp9_tree_index vp9_partition_tree[6] = {
   -PARTITION_NONE, 2,
   -PARTITION_HORZ, 4,
   -PARTITION_VERT, -PARTITION_SPLIT
 };
-#else
-const vp9_tree_index vp9_partition_tree[2] = {
-  -PARTITION_NONE, -PARTITION_SPLIT
-};
-#endif
 
 struct vp9_token vp9_bmode_encodings[VP9_NKF_BINTRAMODES];
 struct vp9_token vp9_kf_bmode_encodings[VP9_KF_BINTRAMODES];

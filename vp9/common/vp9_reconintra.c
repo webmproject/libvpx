@@ -310,7 +310,6 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
         ypred_ptr += y_stride;
       }
       break;
-#if CONFIG_SBSEGMENT
     case D45_PRED:
     case D135_PRED:
     case D117_PRED:
@@ -319,7 +318,6 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
     case D63_PRED:
       if (bw == bh) {
         switch (mode) {
-#endif
           case D45_PRED:
             d45_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
             break;
@@ -338,7 +336,6 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
           case D63_PRED:
             d63_predictor(ypred_ptr, y_stride, bw, bh,  yabove_row, yleft_col);
             break;
-#if CONFIG_SBSEGMENT
           default:
             assert(0);
         }
@@ -398,7 +395,6 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
           memcpy(ypred_ptr + y_stride * i, pred + i * 64, bw);
       }
       break;
-#endif
     default:
       break;
   }

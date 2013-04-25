@@ -846,7 +846,6 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
       subsize = bsize;
       decode_modes_b(pbi, mb_row, mb_col, r, subsize);
       break;
-#if CONFIG_SBSEGMENT
     case PARTITION_HORZ:
       subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB64X32 :
                                                 BLOCK_SIZE_SB32X16;
@@ -861,7 +860,6 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
       if ((mb_col + bs) < pc->mb_cols)
         decode_modes_b(pbi, mb_row, mb_col + bs, r, subsize);
       break;
-#endif
     case PARTITION_SPLIT:
       subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB32X32 :
                                                 BLOCK_SIZE_MB16X16;
