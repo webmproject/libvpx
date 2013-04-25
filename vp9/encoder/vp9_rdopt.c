@@ -909,10 +909,10 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     tx_type = get_tx_type_4x4(xd, ib);
     if (tx_type != DCT_DCT) {
       vp9_short_fht4x4(src_diff, coeff, 16, tx_type);
-      vp9_ht_quantize_b_4x4(x, ib, tx_type);
+      x->quantize_b_4x4(x, ib, tx_type, 16);
     } else {
       x->fwd_txm4x4(src_diff, coeff, 32);
-      x->quantize_b_4x4(x, ib, 16);
+      x->quantize_b_4x4(x, ib, tx_type, 16);
     }
 
     tempa = ta;
@@ -1167,7 +1167,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         tx_type = get_tx_type_4x4(xd, ib + iblock[i]);
         if (tx_type != DCT_DCT) {
           vp9_short_fht4x4(src_diff, coeff, 16, tx_type);
-          vp9_ht_quantize_b_4x4(x, ib + iblock[i], tx_type);
+          x->quantize_b_4x4(x, ib + iblock[i], tx_type, 16);
         } else if (!(i & 1) &&
                    get_tx_type_4x4(xd, ib + iblock[i] + 1) == DCT_DCT) {
           x->fwd_txm8x4(src_diff, coeff, 32);
@@ -1175,7 +1175,7 @@ static int64_t rd_pick_intra8x8block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           do_two = 1;
         } else {
           x->fwd_txm4x4(src_diff, coeff, 32);
-          x->quantize_b_4x4(x, ib + iblock[i], 16);
+          x->quantize_b_4x4(x, ib + iblock[i], tx_type, 16);
         }
         distortion += vp9_block_error_c(coeff,
             BLOCK_OFFSET(xd->plane[0].dqcoeff, ib + iblock[i], 16),
@@ -1756,7 +1756,7 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
                          src, src_stride,
                          *(bd->base_dst) + bd->dst, bd->dst_stride);
       x->fwd_txm4x4(src_diff, coeff, 32);
-      x->quantize_b_4x4(x, i, 16);
+      x->quantize_b_4x4(x, i, DCT_DCT, 16);
       thisdistortion = vp9_block_error(coeff,
           BLOCK_OFFSET(xd->plane[0].dqcoeff, i, 16), 16);
       *distortion += thisdistortion;

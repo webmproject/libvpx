@@ -70,12 +70,12 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib) {
   tx_type = get_tx_type_4x4(&x->e_mbd, ib);
   if (tx_type != DCT_DCT) {
     vp9_short_fht4x4(src_diff, coeff, 16, tx_type);
-    vp9_ht_quantize_b_4x4(x, ib, tx_type);
+    x->quantize_b_4x4(x, ib, tx_type, 16);
     vp9_short_iht4x4(BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
                      diff, 16, tx_type);
   } else {
     x->fwd_txm4x4(src_diff, coeff, 32);
-    x->quantize_b_4x4(x, ib, 16);
+    x->quantize_b_4x4(x, ib, tx_type, 16);
     vp9_inverse_transform_b_4x4(&x->e_mbd, xd->plane[0].eobs[ib],
                                 BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
                                 diff, 32);
@@ -209,7 +209,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
       tx_type = get_tx_type_4x4(xd, ib + iblock[i]);
       if (tx_type != DCT_DCT) {
         vp9_short_fht4x4(src_diff, coeff, 16, tx_type);
-        vp9_ht_quantize_b_4x4(x, ib + iblock[i], tx_type);
+        x->quantize_b_4x4(x, ib + iblock[i], tx_type, 16);
         vp9_short_iht4x4(dqcoeff, diff, 16, tx_type);
       } else if (!(i & 1) &&
                  get_tx_type_4x4(xd, ib + iblock[i] + 1) == DCT_DCT) {
@@ -222,7 +222,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
         i++;
       } else {
         x->fwd_txm4x4(src_diff, coeff, 32);
-        x->quantize_b_4x4(x, ib + iblock[i], 16);
+        x->quantize_b_4x4(x, ib + iblock[i], tx_type, 16);
         vp9_inverse_transform_b_4x4(xd, xd->plane[0].eobs[ib + iblock[i]],
                                     dqcoeff, diff, 32);
       }
@@ -275,7 +275,7 @@ static void encode_intra_uv4x4(MACROBLOCK *x, int ib, int mode) {
                      *(b->base_dst) + b->dst, b->dst_stride);
 
   x->fwd_txm4x4(src_diff, coeff, 16);
-  x->quantize_b_4x4(x, ib, 16);
+  x->quantize_b_4x4(x, ib, DCT_DCT, 16);
   vp9_inverse_transform_b_4x4(&x->e_mbd, xd->plane[plane].eobs[block],
                               dqcoeff, diff, 16);
 

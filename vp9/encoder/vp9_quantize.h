@@ -26,10 +26,10 @@
 #include "x86/vp9_quantize_x86.h"
 #endif
 
-void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_ix, TX_TYPE type);
-void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, int y_blocks);
 void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *mb, int b_idx1, int b_idx2,
                                      int y_blocks);
+void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
+                                int y_blocks);
 void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                 int y_blocks);
 void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
