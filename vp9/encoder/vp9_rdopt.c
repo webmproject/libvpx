@@ -3036,7 +3036,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                  (mbmi->mv[1].as_mv.col & 15) == 0;
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
-  if (bsize != BLOCK_SIZE_MB16X16) {
+  if (1) {
     int switchable_filter_index, newbest;
     int tmp_rate_y_i = 0, tmp_rate_u_i = 0, tmp_rate_v_i = 0;
     int tmp_dist_y_i = 0, tmp_dist_u_i = 0, tmp_dist_v_i = 0;
@@ -3088,88 +3088,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                             &sse);
         model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
                                  xd->plane[2].dequant[1] >> 3,
-                                 &tmp_rate_v, &tmp_dist_v);
-        rd = RDCOST(x->rdmult, x->rddiv,
-                    rs + tmp_rate_y + tmp_rate_u + tmp_rate_v,
-                    tmp_dist_y + tmp_dist_u + tmp_dist_v);
-        if (!interpolating_intpel_seen && intpel_mv &&
-            vp9_is_interpolating_filter[mbmi->interp_filter]) {
-          tmp_rate_y_i = tmp_rate_y;
-          tmp_rate_u_i = tmp_rate_u;
-          tmp_rate_v_i = tmp_rate_v;
-          tmp_dist_y_i = tmp_dist_y;
-          tmp_dist_u_i = tmp_dist_u;
-          tmp_dist_v_i = tmp_dist_v;
-        }
-      }
-      newbest = (switchable_filter_index == 0 || rd < best_rd);
-      if (newbest) {
-        best_rd = rd;
-        *best_filter = mbmi->interp_filter;
-      }
-      if ((cm->mcomp_filter_type == SWITCHABLE && newbest) ||
-          (cm->mcomp_filter_type != SWITCHABLE &&
-           cm->mcomp_filter_type == mbmi->interp_filter)) {
-        int i;
-        for (i = 0; i < 16 * bh; ++i)
-          vpx_memcpy(tmp_ybuf + i * 16 * bw,
-                     xd->plane[0].dst.buf + i * xd->plane[0].dst.stride,
-                     sizeof(unsigned char) * 16 * bw);
-        for (i = 0; i < 8 * bh; ++i)
-          vpx_memcpy(tmp_ubuf + i * 8 * bw,
-                     xd->plane[1].dst.buf + i * xd->plane[1].dst.stride,
-                     sizeof(unsigned char) * 8 * bw);
-        for (i = 0; i < 8 * bh; ++i)
-          vpx_memcpy(tmp_vbuf + i * 8 * bw,
-                     xd->plane[2].dst.buf + i * xd->plane[1].dst.stride,
-                     sizeof(unsigned char) * 8 * bw);
-        pred_exists = 1;
-      }
-      interpolating_intpel_seen |=
-        intpel_mv && vp9_is_interpolating_filter[mbmi->interp_filter];
-    }
-  } else {
-    int switchable_filter_index, newbest;
-    int tmp_rate_y_i = 0, tmp_rate_u_i = 0, tmp_rate_v_i = 0;
-    int tmp_dist_y_i = 0, tmp_dist_u_i = 0, tmp_dist_v_i = 0;
-    for (switchable_filter_index = 0;
-       switchable_filter_index < VP9_SWITCHABLE_FILTERS;
-       ++switchable_filter_index) {
-      int rs = 0;
-      mbmi->interp_filter = vp9_switchable_interp[switchable_filter_index];
-      vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
-      if (cpi->common.mcomp_filter_type == SWITCHABLE) {
-        const int c = vp9_get_pred_context(cm, xd, PRED_SWITCHABLE_INTERP);
-        const int m = vp9_switchable_interp_map[mbmi->interp_filter];
-        rs = SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs[c][m];
-      }
-      if (interpolating_intpel_seen && intpel_mv &&
-          vp9_is_interpolating_filter[mbmi->interp_filter]) {
-        rd = RDCOST(x->rdmult, x->rddiv,
-                    rs + tmp_rate_y_i + tmp_rate_u_i + tmp_rate_v_i,
-                    tmp_dist_y_i + tmp_dist_u_i + tmp_dist_v_i);
-      } else {
-        unsigned int sse, var;
-        int tmp_rate_y, tmp_rate_u, tmp_rate_v;
-        int tmp_dist_y, tmp_dist_u, tmp_dist_v;
-        vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
-        var = vp9_variance16x16(x->plane[0].src.buf, x->plane[0].src.stride,
-                                xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-                                &sse);
-        // Note our transform coeffs are 8 times an orthogonal transform.
-        // Hence quantizer step is also 8 times. To get effective quantizer
-        // we need to divide by 8 before sending to modeling function.
-        model_rd_from_var_lapndz(var, 16 * 16, xd->plane[0].dequant[1] >> 3,
-                                 &tmp_rate_y, &tmp_dist_y);
-        var = vp9_variance8x8(x->plane[1].src.buf, x->plane[1].src.stride,
-                              xd->plane[1].dst.buf, xd->plane[1].dst.stride,
-                              &sse);
-        model_rd_from_var_lapndz(var, 8 * 8, xd->plane[1].dequant[1] >> 3,
-                                 &tmp_rate_u, &tmp_dist_u);
-        var = vp9_variance8x8(x->plane[2].src.buf, x->plane[1].src.stride,
-                              xd->plane[2].dst.buf, xd->plane[1].dst.stride,
-                              &sse);
-        model_rd_from_var_lapndz(var, 8 * 8, xd->plane[2].dequant[1] >> 3,
                                  &tmp_rate_v, &tmp_dist_v);
         rd = RDCOST(x->rdmult, x->rddiv,
                     rs + tmp_rate_y + tmp_rate_u + tmp_rate_v,
