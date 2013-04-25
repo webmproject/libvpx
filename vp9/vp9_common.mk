@@ -82,7 +82,6 @@ VP9_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/vp9_textblit.c
 VP9_COMMON_SRCS-yes += common/vp9_treecoder.c
 VP9_COMMON_SRCS-$(CONFIG_IMPLICIT_SEGMENTATION) += common/vp9_implicit_segmentation.c
 
-VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_idct_x86.h
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_loopfilter_x86.h
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_postproc_x86.h
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_asm_stubs.c
@@ -112,13 +111,13 @@ VP9_COMMON_SRCS-yes += common/vp9_maskingmv.c
 VP9_COMMON_SRCS-$(HAVE_SSE3) += common/x86/vp9_mask_sse3.asm
 endif
 
-VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_idct_x86.c
+VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_intrin_sse2.c
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_sadmxn_sse2.c
 ifeq ($(HAVE_SSE2),yes)
-vp9/common/x86/vp9_idct_x86.c.o: CFLAGS += -msse2
+vp9/common/x86/vp9_idct_intrin_sse2.c.o: CFLAGS += -msse2
 vp9/common/x86/vp9_loopfilter_intrin_sse2.c.o: CFLAGS += -msse2
 vp9/common/x86/vp9_sadmxn_sse2.c.o: CFLAGS += -msse2
-vp9/common/x86/vp9_idct_x86.c.d: CFLAGS += -msse2
+vp9/common/x86/vp9_idct_intrin_sse2.c.d: CFLAGS += -msse2
 vp9/common/x86/vp9_loopfilter_intrin_sse2.c.d: CFLAGS += -msse2
 vp9/common/x86/vp9_sadmxn_sse2.c.d: CFLAGS += -msse2
 endif
