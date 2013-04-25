@@ -17,15 +17,14 @@
 int vp9_decode_tokens(VP9D_COMP* const pbi,
                       MACROBLOCKD* const xd,
                       vp9_reader *r,
-                      BLOCK_SIZE_TYPE bsize,
-                      const int16_t *dq);
+                      BLOCK_SIZE_TYPE bsize);
 
 #if CONFIG_NEWBINTRAMODES
 int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx, MACROBLOCKD* const xd,
-                                vp9_reader *r, const int16_t *dq);
+                                vp9_reader *r);
 int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
                          vp9_reader *r,
-                         PLANE_TYPE type, int i, const int16_t *dq);
+                         PLANE_TYPE type, int i);
 #endif
 
 #endif  // VP9_DECODER_VP9_DETOKENIZE_H_

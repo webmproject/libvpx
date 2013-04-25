@@ -421,7 +421,6 @@ struct decode_block_args {
   MACROBLOCKD *xd;
   vp9_reader *r;
   int *eobtotal;
-  const int16_t *dq;
 };
 static void decode_block(int plane, int block,
                          BLOCK_SIZE_TYPE bsize,
@@ -441,7 +440,7 @@ static void decode_block(int plane, int block,
   const int eob = decode_coefs(arg->pbi, arg->xd, arg->r, old_block_idx,
                                arg->xd->plane[plane].plane_type, seg_eob,
                                BLOCK_OFFSET(qcoeff_base, block, 16),
-                               ss_tx_size, arg->dq);
+                               ss_tx_size, arg->xd->plane[plane].dequant);
 
   arg->xd->plane[plane].eobs[block] = eob;
   arg->eobtotal[0] += eob;
@@ -450,10 +449,9 @@ static void decode_block(int plane, int block,
 int vp9_decode_tokens(VP9D_COMP* const pbi,
                          MACROBLOCKD* const xd,
                          vp9_reader *r,
-                         BLOCK_SIZE_TYPE bsize,
-                         const int16_t *dq) {
+                         BLOCK_SIZE_TYPE bsize) {
   int eobtotal = 0;
-  struct decode_block_args args = {pbi, xd, r, &eobtotal, dq};
+  struct decode_block_args args = {pbi, xd, r, &eobtotal};
   foreach_transformed_block(xd, bsize, decode_block, &args);
   return eobtotal;
 }
@@ -461,12 +459,11 @@ int vp9_decode_tokens(VP9D_COMP* const pbi,
 #if CONFIG_NEWBINTRAMODES
 static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
                             vp9_reader *r,
-                            PLANE_TYPE type, int i, int seg_eob,
-                            const int16_t *dq) {
+                            PLANE_TYPE type, int i, int seg_eob) {
   const struct plane_block_idx pb_idx = plane_block_idx(16, i);
   const int c = decode_coefs(dx, xd, r, i, type, seg_eob,
       BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16), TX_4X4,
-      dq);
+      xd->plane[pb_idx.plane].dequant);
   xd->plane[pb_idx.plane].eobs[pb_idx.block] = c;
   return c;
 }
@@ -474,31 +471,30 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
 static int decode_mb_tokens_4x4_uv(VP9D_COMP* const dx,
                                    MACROBLOCKD* const xd,
                                    vp9_reader *r,
-                                   int seg_eob,
-                                   const int16_t *dq) {
+                                   int seg_eob) {
   int i, eobtotal = 0;
 
   // chroma blocks
   for (i = 16; i < 24; i++)
-    eobtotal += decode_coefs_4x4(dx, xd, r, PLANE_TYPE_UV, i, seg_eob, dq);
+    eobtotal += decode_coefs_4x4(dx, xd, r, PLANE_TYPE_UV, i, seg_eob);
 
   return eobtotal;
 }
 
 int vp9_decode_mb_tokens_4x4_uv(VP9D_COMP* const dx,
                                 MACROBLOCKD* const xd,
-                                vp9_reader *r, const int16_t *dq) {
+                                vp9_reader *r) {
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int seg_eob = get_eob(xd, segment_id, 16);
 
-  return decode_mb_tokens_4x4_uv(dx, xd, r, seg_eob, dq);
+  return decode_mb_tokens_4x4_uv(dx, xd, r, seg_eob);
 }
 
 int vp9_decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
                          vp9_reader *r,
-                         PLANE_TYPE type, int i, const int16_t *dq) {
+                         PLANE_TYPE type, int i) {
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int seg_eob = get_eob(xd, segment_id, 16);
-  return decode_coefs_4x4(dx, xd, r, type, i, seg_eob, dq);
+  return decode_coefs_4x4(dx, xd, r, type, i, seg_eob);
 }
 #endif
