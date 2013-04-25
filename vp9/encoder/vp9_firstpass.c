@@ -130,7 +130,7 @@ static void output_stats(const VP9_COMP            *cpi,
     FILE *fpfile;
     fpfile = fopen("firstpass.stt", "a");
 
-    fprintf(fpfile, "%12.0f %12.0f %12.0f %12.0f %12.0f %12.4f %12.4f"
+    fprintf(stdout, "%12.0f %12.0f %12.0f %12.0f %12.0f %12.4f %12.4f"
             "%12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f"
             "%12.0f %12.0f %12.4f %12.0f %12.0f %12.4f\n",
             stats->frame,
@@ -349,19 +349,12 @@ void vp9_end_first_pass(VP9_COMP *cpi) {
 
 static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCKD *d = &x->e_mbd.block[0];
-
-  uint8_t *src_ptr = x->plane[0].src.buf;
-  int src_stride = x->plane[0].src.stride;
-  uint8_t *ref_ptr;
-  int ref_stride = d->pre_stride;
 
   // Set up pointers for this macro block recon buffer
   xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
 
-  ref_ptr = (uint8_t *)(*(d->base_pre) + d->pre);
-
-  vp9_mse16x16(src_ptr, src_stride, ref_ptr, ref_stride,
+  vp9_mse16x16(x->plane[0].src.buf, x->plane[0].src.stride,
+               xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
                (unsigned int *)(best_motion_err));
 }
 

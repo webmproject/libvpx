@@ -99,15 +99,6 @@ static int do_16x16_motion_search
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err, tmp_err;
   int_mv tmp_mv;
-  int n;
-
-  for (n = 0; n < 16; n++) {
-    BLOCKD *d = &xd->block[n];
-
-    d->base_pre   = &xd->plane[0].pre[0].buf;
-    d->pre_stride = xd->plane[0].pre[0].stride;
-    d->pre        = xd->plane[0].pre[0].stride * (n & 12) + (n & 3) * 4;
-  }
 
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction

@@ -1723,10 +1723,14 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
           raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, i,
                                     x->plane[0].src_diff);
       int16_t* const coeff = BLOCK_OFFSET(x->plane[0].coeff, 16, i);
+      uint8_t* const pre =
+          raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, i,
+                                    xd->plane[0].pre[0].buf,
+                                    xd->plane[0].pre[0].stride);
       int thisdistortion;
 
-      vp9_build_inter_predictor(*(bd->base_pre) + bd->pre,
-                                bd->pre_stride,
+      vp9_build_inter_predictor(pre,
+                                xd->plane[0].pre[0].stride,
                                 *(bd->base_dst) + bd->dst,
                                 bd->dst_stride,
                                 &bd->bmi.as_mv[0],
@@ -1737,8 +1741,12 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
       // implicit-compoundinter-weight experiment when implicit
       // weighting for splitmv modes is turned on.
       if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
+        uint8_t* const second_pre =
+          raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, i,
+                                    xd->plane[0].pre[1].buf,
+                                    xd->plane[0].pre[1].stride);
         vp9_build_inter_predictor(
-            *(bd->base_second_pre) + bd->pre, bd->pre_stride,
+            second_pre, xd->plane[0].pre[1].stride,
             *(bd->base_dst) + bd->dst, bd->dst_stride,
             &bd->bmi.as_mv[1], &xd->scale_factor[1], 4, 4, 1,
             &xd->subpix);
@@ -1806,13 +1814,16 @@ static int64_t encode_inter_mb_segment_8x8(VP9_COMMON *const cm,
 
       assert(idx < 16);
       for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-        uint8_t **base_pre = which_mv ? bd->base_second_pre : bd->base_pre;
+        uint8_t* const pre =
+            raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                      xd->plane[0].pre[which_mv].buf,
+                                      xd->plane[0].pre[which_mv].stride);
 
         // TODO(debargha): Make this work properly with the
         // implicit-compoundinter-weight experiment when implicit
         // weighting for splitmv modes is turned on.
         vp9_build_inter_predictor(
-            *base_pre + bd->pre, bd->pre_stride,
+            pre, xd->plane[0].pre[which_mv].stride,
             *(bd->base_dst) + bd->dst, bd->dst_stride,
             &bd->bmi.as_mv[which_mv], &xd->scale_factor[which_mv], 8, 8,
             which_mv, &xd->subpix);
@@ -2030,6 +2041,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         int thissme, bestsme = INT_MAX;
         BLOCKD *e;
         const struct buf_2d orig_src = x->plane[0].src;
+        const struct buf_2d orig_pre = x->e_mbd.plane[0].pre[0];
 
         /* Is the best so far sufficiently good that we cant justify doing
          * and new motion search. */
@@ -2072,6 +2084,11 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
               raster_block_offset_uint8(&x->e_mbd, BLOCK_SIZE_MB16X16, 0, n,
                                         x->plane[0].src.buf,
                                         x->plane[0].src.stride);
+          assert(((intptr_t)x->e_mbd.plane[0].pre[0].buf & 0xf) == 0);
+          x->e_mbd.plane[0].pre[0].buf =
+              raster_block_offset_uint8(&x->e_mbd, BLOCK_SIZE_MB16X16, 0, n,
+                                        x->e_mbd.plane[0].pre[0].buf,
+                                        x->e_mbd.plane[0].pre[0].stride);
           e = &x->e_mbd.block[n];
 
           bestsme = vp9_full_pixel_diamond(cpi, x, e, &mvp_full, step_param,
@@ -2114,8 +2131,9 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           seg_mvs[i][mbmi->ref_frame - 1].as_int = mode_mv[NEW4X4].as_int;
         }
 
-        // restore src pointer
+        // restore src pointers
         x->plane[0].src = orig_src;
+        x->e_mbd.plane[0].pre[0] = orig_pre;
       } else if (mbmi->second_ref_frame > 0 && this_mode == NEW4X4) {
         /* NEW4X4 */
         /* motion search not completed? Then skip newmv for this block with

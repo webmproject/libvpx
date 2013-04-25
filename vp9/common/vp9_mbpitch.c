@@ -22,11 +22,6 @@ static void setup_block(BLOCKD *b, uint8_t **base, uint8_t **base2,
     b->dst_stride = stride;
     b->dst = offset;
     b->base_dst = base;
-  } else {
-    b->pre_stride = stride;
-    b->pre = offset;
-    b->base_pre = base;
-    b->base_second_pre = base2;
   }
 }
 
@@ -43,14 +38,6 @@ static void setup_macroblock(MACROBLOCKD *mb, BLOCKSET bs) {
     y2 = NULL;
     u2 = NULL;
     v2 = NULL;
-  } else {
-    y = &mb->plane[0].pre[0].buf;
-    u = &mb->plane[1].pre[0].buf;
-    v = &mb->plane[2].pre[0].buf;
-
-    y2 = &mb->plane[0].pre[1].buf;
-    u2 = &mb->plane[1].pre[1].buf;
-    v2 = &mb->plane[2].pre[1].buf;
   }
 
   // luma
@@ -82,5 +69,4 @@ void vp9_setup_block_dptrs(MACROBLOCKD *mb) {
 void vp9_build_block_doffsets(MACROBLOCKD *mb) {
   // handle the destination pitch features
   setup_macroblock(mb, DEST);
-  setup_macroblock(mb, PRED);
 }
