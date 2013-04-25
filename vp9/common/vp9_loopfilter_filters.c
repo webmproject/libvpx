@@ -166,12 +166,12 @@ static INLINE void mbfilter(int8_t mask, uint8_t hev, uint8_t flat,
     const uint8_t q2 = *oq2;
     const uint8_t q3 = *oq3;
 
-    *op2 = (p3 + p3 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
-    *op1 = (p3 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
-    *op0 = (p3 + p2 + p1 + p0 + p0 + q0 + q1 + q2 + 4) >> 3;
-    *oq0 = (p2 + p1 + p0 + q0 + q0 + q1 + q2 + q3 + 4) >> 3;
-    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q3 + 4) >> 3;
-    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q3 + q3 + 4) >> 3;
+    *op2 = ROUND_POWER_OF_TWO(p3 + p3 + p3 + p2 + p2 + p1 + p0 + q0, 3);
+    *op1 = ROUND_POWER_OF_TWO(p3 + p3 + p2 + p1 + p1 + p0 + q0 + q1, 3);
+    *op0 = ROUND_POWER_OF_TWO(p3 + p2 + p1 + p0 + p0 + q0 + q1 + q2, 3);
+    *oq0 = ROUND_POWER_OF_TWO(p2 + p1 + p0 + q0 + q0 + q1 + q2 + q3, 3);
+    *oq1 = ROUND_POWER_OF_TWO(p1 + p0 + q0 + q1 + q1 + q2 + q3 + q3, 3);
+    *oq2 = ROUND_POWER_OF_TWO(p0 + q0 + q1 + q2 + q2 + q3 + q3 + q3, 3);
   } else {
     int8_t filter1, filter2;
 
@@ -446,34 +446,34 @@ static INLINE void wide_mbfilter(int8_t mask, uint8_t hev,
     const uint8_t q6 = *oq6;
     const uint8_t q7 = *oq7;
 
-    *op6 = (p7 * 7 + p6 * 2 +
-            p5 + p4 + p3 + p2 + p1 + p0 + q0 + 8) >> 4;
-    *op5 = (p7 * 6 + p6 + p5 * 2 +
-            p4 + p3 + p2 + p1 + p0 + q0 + q1 + 8) >> 4;
-    *op4 = (p7 * 5 + p6 + p5 + p4 * 2 +
-            p3 + p2 + p1 + p0 + q0 + q1 + q2 + 8) >> 4;
-    *op3 = (p7 * 4 + p6 + p5 + p4 + p3 * 2 +
-            p2 + p1 + p0 + q0 + q1 + q2 + q3 + 8) >> 4;
-    *op2 = (p7 * 3 + p6 + p5 + p4 + p3 + p2 * 2 +
-            p1 + p0 + q0 + q1 + q2 + q3 + q4 + 8) >> 4;
-    *op1 = (p7 * 2 + p6 + p5 + p4 + p3 + p2 + p1 * 2 +
-            p0 + q0 + q1 + q2 + q3 + q4 + q5 + 8) >> 4;
-    *op0 = (p7 + p6 + p5 + p4 + p3 + p2 + p1 + p0 * 2 +
-            q0 + q1 + q2 + q3 + q4 + q5 + q6 + 8) >> 4;
-    *oq0 = (p6 + p5 + p4 + p3 + p2 + p1 + p0 + q0 * 2 +
-            q1 + q2 + q3 + q4 + q5 + q6 + q7 + 8) >> 4;
-    *oq1 = (p5 + p4 + p3 + p2 + p1 + p0 + q0 + q1 * 2 +
-            q2 + q3 + q4 + q5 + q6 + q7 * 2 + 8) >> 4;
-    *oq2 = (p4 + p3 + p2 + p1 + p0 + q0 + q1 + q2 * 2 +
-            q3 + q4 + q5 + q6 + q7 * 3 + 8) >> 4;
-    *oq3 = (p3 + p2 + p1 + p0 + q0 + q1 + q2 + q3 * 2 +
-            q4 + q5 + q6 + q7 * 4 + 8) >> 4;
-    *oq4 = (p2 + p1 + p0 + q0 + q1 + q2 + q3 + q4 * 2 +
-            q5 + q6 + q7 * 5 + 8) >> 4;
-    *oq5 = (p1 + p0 + q0 + q1 + q2 + q3 + q4 + q5 * 2 +
-            q6 + q7 * 6 + 8) >> 4;
-    *oq6 = (p0 + q0 + q1 + q2 + q3 + q4 + q5 + q6 * 2 +
-            q7 * 7 + 8) >> 4;
+    *op6 = ROUND_POWER_OF_TWO(p7 * 7 + p6 * 2 + p5 + p4 + p3 + p2 + p1 + p0 +
+                              q0, 4);
+    *op5 = ROUND_POWER_OF_TWO(p7 * 6 + p6 + p5 * 2 + p4 + p3 + p2 + p1 + p0 +
+                              q0 + q1, 4);
+    *op4 = ROUND_POWER_OF_TWO(p7 * 5 + p6 + p5 + p4 * 2 + p3 + p2 + p1 + p0 +
+                              q0 + q1 + q2, 4);
+    *op3 = ROUND_POWER_OF_TWO(p7 * 4 + p6 + p5 + p4 + p3 * 2 + p2 + p1 + p0 +
+                              q0 + q1 + q2 + q3, 4);
+    *op2 = ROUND_POWER_OF_TWO(p7 * 3 + p6 + p5 + p4 + p3 + p2 * 2 + p1 + p0 +
+                              q0 + q1 + q2 + q3 + q4, 4);
+    *op1 = ROUND_POWER_OF_TWO(p7 * 2 + p6 + p5 + p4 + p3 + p2 + p1 * 2 + p0 +
+                              q0 + q1 + q2 + q3 + q4 + q5, 4);
+    *op0 = ROUND_POWER_OF_TWO(p7 + p6 + p5 + p4 + p3 + p2 + p1 + p0 * 2 +
+                              q0 + q1 + q2 + q3 + q4 + q5 + q6, 4);
+    *oq0 = ROUND_POWER_OF_TWO(p6 + p5 + p4 + p3 + p2 + p1 + p0 +
+                              q0 * 2 + q1 + q2 + q3 + q4 + q5 + q6 + q7, 4);
+    *oq1 = ROUND_POWER_OF_TWO(p5 + p4 + p3 + p2 + p1 + p0 +
+                              q0 + q1 * 2 + q2 + q3 + q4 + q5 + q6 + q7 * 2, 4);
+    *oq2 = ROUND_POWER_OF_TWO(p4 + p3 + p2 + p1 + p0 +
+                              q0 + q1 + q2 * 2 + q3 + q4 + q5 + q6 + q7 * 3, 4);
+    *oq3 = ROUND_POWER_OF_TWO(p3 + p2 + p1 + p0 +
+                              q0 + q1 + q2 + q3 * 2 + q4 + q5 + q6 + q7 * 4, 4);
+    *oq4 = ROUND_POWER_OF_TWO(p2 + p1 + p0 +
+                              q0 + q1 + q2 + q3 + q4 * 2 + q5 + q6 + q7 * 5, 4);
+    *oq5 = ROUND_POWER_OF_TWO(p1 + p0 +
+                              q0 + q1 + q2 + q3 + q4 + q5 * 2 + q6 + q7 * 6, 4);
+    *oq6 = ROUND_POWER_OF_TWO(p0 +
+                              q0 + q1 + q2 + q3 + q4 + q5 + q6 * 2 + q7 * 7, 4);
   } else if (flat && mask) {
     const uint8_t p3 = *op3;
     const uint8_t p2 = *op2;
@@ -484,12 +484,12 @@ static INLINE void wide_mbfilter(int8_t mask, uint8_t hev,
     const uint8_t q2 = *oq2;
     const uint8_t q3 = *oq3;
 
-    *op2 = (p3 + p3 + p3 + p2 + p2 + p1 + p0 + q0 + 4) >> 3;
-    *op1 = (p3 + p3 + p2 + p1 + p1 + p0 + q0 + q1 + 4) >> 3;
-    *op0 = (p3 + p2 + p1 + p0 + p0 + q0 + q1 + q2 + 4) >> 3;
-    *oq0 = (p2 + p1 + p0 + q0 + q0 + q1 + q2 + q3 + 4) >> 3;
-    *oq1 = (p1 + p0 + q0 + q1 + q1 + q2 + q3 + q3 + 4) >> 3;
-    *oq2 = (p0 + q0 + q1 + q2 + q2 + q3 + q3 + q3 + 4) >> 3;
+    *op2 = ROUND_POWER_OF_TWO(p3 + p3 + p3 + p2 + p2 + p1 + p0 + q0, 3);
+    *op1 = ROUND_POWER_OF_TWO(p3 + p3 + p2 + p1 + p1 + p0 + q0 + q1, 3);
+    *op0 = ROUND_POWER_OF_TWO(p3 + p2 + p1 + p0 + p0 + q0 + q1 + q2, 3);
+    *oq0 = ROUND_POWER_OF_TWO(p2 + p1 + p0 + q0 + q0 + q1 + q2 + q3, 3);
+    *oq1 = ROUND_POWER_OF_TWO(p1 + p0 + q0 + q1 + q1 + q2 + q3 + q3, 3);
+    *oq2 = ROUND_POWER_OF_TWO(p0 + q0 + q1 + q2 + q2 + q3 + q3 + q3, 3);
   } else {
     int8_t filter1, filter2;
 
