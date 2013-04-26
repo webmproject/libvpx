@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//1To\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "maybe not done yet -- shouldn\u0027t this shrink to 4 if using 8x8 mi?",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1N0\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "This looks wrong for 8x8 blocks -- b_width would be 1, and this would be negative. If this just isn\u0027t done yet, maybe make this a constant MB_WIDTH_IN_BLOCKS or something rather than the magic 2.",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1Ks\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "\u003e\u003e (3 + LOG2_MI_SIZE)",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1J4\u003d",
+        "filename": "vp9/common/vp9_pred_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "3 + LOG2_MI_SIZE, or maybe make a helper epel_to_mi",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1Ig\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "mi_index",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1Ic\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "ymis, xmis",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1IQ\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1035,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "mis",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1IA\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1045,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "hmm.. I\u0027d expect this would happen only for the smallest block size (eg 8x8 in CONFIG_SB8X8). Maybe moot, I think Scott removed this function.",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1H8\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 751,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "mi_idx",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1HA\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "seems like there should be 8 contexts with CONFIG_SB8X8 instead of 4..should this be mb_row \u0026 ((1 \u003c\u003c LOG2_MI_SIZE) - 1) ? similarly in above_seg_context, I\u0027d expect 1 entry per mi not 1 per 16x16",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1Gk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "3 + LOG2_MI_SIZE",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1Gg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1029,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T04:47:48Z",
+      "side": 1,
+      "message": "Not sure why the \u003e\u003e here -- left_context and above_context should have one entry per 8x8, no?",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
