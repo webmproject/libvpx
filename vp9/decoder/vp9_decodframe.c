@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
+#include <stdio.h>
 
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/common/vp9_common.h"
@@ -33,9 +35,6 @@
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_tile_common.h"
 #include "vp9_rtcd.h"
-
-#include <assert.h>
-#include <stdio.h>
 
 // #define DEC_DEBUG
 #ifdef DEC_DEBUG
@@ -85,12 +84,10 @@ static int get_unsigned_bits(unsigned int num_values) {
 }
 
 static int inv_recenter_nonneg(int v, int m) {
-  if (v > (m << 1))
+  if (v > 2 * m)
     return v;
-  else if ((v & 1) == 0)
-    return (v >> 1) + m;
-  else
-    return m - ((v + 1) >> 1);
+
+  return v % 2 ? m - (v + 1) / 2 : m + v / 2;
 }
 
 static int decode_uniform(vp9_reader *r, int n) {
@@ -137,8 +134,9 @@ static int decode_unsigned_max(vp9_reader *r, int max) {
 
 static int merge_index(int v, int n, int modulus) {
   int max1 = (n - 1 - modulus / 2) / modulus + 1;
-  if (v < max1) v = v * modulus + modulus / 2;
-  else {
+  if (v < max1) {
+    v = v * modulus + modulus / 2;
+  } else {
     int w;
     v -= max1;
     w = v;
@@ -151,9 +149,8 @@ static int merge_index(int v, int n, int modulus) {
 
 static int inv_remap_prob(int v, int m) {
   const int n = 256;
-  const int modulus = MODULUS_PARAM;
 
-  v = merge_index(v, n - 1, modulus);
+  v = merge_index(v, n - 1, MODULUS_PARAM);
   if ((m << 1) <= n) {
     return inv_recenter_nonneg(v + 1, m);
   } else {
@@ -198,32 +195,14 @@ static int get_qindex(MACROBLOCKD *mb, int segment_id, int base_qindex) {
   }
 }
 
-static void mb_init_dequantizer(VP9D_COMP *pbi, MACROBLOCKD *mb) {
+static void mb_init_dequantizer(VP9_COMMON *pc, MACROBLOCKD *xd) {
   int i;
+  const int segment_id = xd->mode_info_context->mbmi.segment_id;
+  xd->q_index = get_qindex(xd, segment_id, pc->base_qindex);
 
-  VP9_COMMON *const pc = &pbi->common;
-  const int segment_id = mb->mode_info_context->mbmi.segment_id;
-  const int qindex = get_qindex(mb, segment_id, pc->base_qindex);
-  mb->q_index = qindex;
-
-  mb->plane[0].dequant = pc->y_dequant[qindex];
+  xd->plane[0].dequant = pc->y_dequant[xd->q_index];
   for (i = 1; i < MAX_MB_PLANE; i++)
-    mb->plane[i].dequant = pc->uv_dequant[qindex];
-
-  if (mb->lossless) {
-    assert(qindex == 0);
-    mb->inv_txm4x4_1      = vp9_short_iwalsh4x4_1;
-    mb->inv_txm4x4        = vp9_short_iwalsh4x4;
-    mb->itxm_add          = vp9_idct_add_lossless_c;
-    mb->itxm_add_y_block  = vp9_idct_add_y_block_lossless_c;
-    mb->itxm_add_uv_block = vp9_idct_add_uv_block_lossless_c;
-  } else {
-    mb->inv_txm4x4_1      = vp9_short_idct4x4_1;
-    mb->inv_txm4x4        = vp9_short_idct4x4;
-    mb->itxm_add          = vp9_idct_add;
-    mb->itxm_add_y_block  = vp9_idct_add_y_block;
-    mb->itxm_add_uv_block = vp9_idct_add_uv_block;
-  }
+    xd->plane[i].dequant = pc->uv_dequant[xd->q_index];
 }
 
 static void decode_16x16(MACROBLOCKD *xd) {
@@ -587,28 +566,29 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
   const int bw = 1 << bwl, bh = 1 << bhl;
   int n, eobtotal;
   VP9_COMMON *const pc = &pbi->common;
-  MODE_INFO *mi = xd->mode_info_context;
+  MODE_INFO *const mi = xd->mode_info_context;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
   const int mis = pc->mode_info_stride;
 
-  assert(mi->mbmi.sb_type == bsize);
+  assert(mbmi->sb_type == bsize);
 
   if (pbi->common.frame_type != KEY_FRAME)
-    vp9_setup_interp_filters(xd, mi->mbmi.interp_filter, pc);
+    vp9_setup_interp_filters(xd, mbmi->interp_filter, pc);
 
   // generate prediction
-  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
+  if (mbmi->ref_frame == INTRA_FRAME) {
     vp9_build_intra_predictors_sby_s(xd, bsize);
     vp9_build_intra_predictors_sbuv_s(xd, bsize);
   } else {
     vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
   }
 
-  if (mi->mbmi.mb_skip_coeff) {
+  if (mbmi->mb_skip_coeff) {
     vp9_reset_sb_tokens_context(xd, bsize);
   } else {
     // re-initialize macroblock dequantizer before detokenization
     if (xd->segmentation_enabled)
-      mb_init_dequantizer(pbi, xd);
+      mb_init_dequantizer(pc, xd);
 
     // dequantization and idct
     eobtotal = vp9_decode_tokens(pbi, xd, r, bsize);
@@ -620,7 +600,7 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
           mi[y_idx * mis + x_idx].mbmi.mb_skip_coeff = 1;
       }
     } else {
-      switch (xd->mode_info_context->mbmi.txfm_size) {
+      switch (mbmi->txfm_size) {
         case TX_32X32:
           decode_sb_32x32(xd, bsize);
           break;
@@ -647,18 +627,18 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
                      int mb_row, int mb_col,
                      vp9_reader *r) {
   int eobtotal = 0;
-  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
-  const int tx_size = xd->mode_info_context->mbmi.txfm_size;
+  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
+  const MB_PREDICTION_MODE mode = mbmi->mode;
+  const int tx_size = mbmi->txfm_size;
 
-  assert(xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_MB16X16);
+  assert(mbmi->sb_type == BLOCK_SIZE_MB16X16);
 
   //mode = xd->mode_info_context->mbmi.mode;
   if (pbi->common.frame_type != KEY_FRAME)
-    vp9_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter,
-                             &pbi->common);
+    vp9_setup_interp_filters(xd, mbmi->interp_filter, &pbi->common);
 
   // do prediction
-  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
+  if (mbmi->ref_frame == INTRA_FRAME) {
     if (mode != I8X8_PRED) {
       vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_MB16X16);
       if (mode != I4X4_PRED)
@@ -674,12 +654,12 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
   }
 
-  if (xd->mode_info_context->mbmi.mb_skip_coeff) {
+  if (mbmi->mb_skip_coeff) {
     vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
   } else {
     // re-initialize macroblock dequantizer before detokenization
     if (xd->segmentation_enabled)
-      mb_init_dequantizer(pbi, xd);
+      mb_init_dequantizer(&pbi->common, xd);
 
     if (!vp9_reader_has_error(r)) {
 #if CONFIG_NEWBINTRAMODES
@@ -690,11 +670,9 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
   }
 
   if (eobtotal == 0 &&
-      mode != I4X4_PRED &&
-      mode != SPLITMV &&
-      mode != I8X8_PRED &&
+      mode != I4X4_PRED && mode != I8X8_PRED && mode != SPLITMV &&
       !vp9_reader_has_error(r)) {
-    xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+    mbmi->mb_skip_coeff = 1;
   } else {
 #if 0  // def DEC_DEBUG
   if (dec_debug)
@@ -898,23 +876,6 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
   update_partition_context(xd, subsize, bsize);
 }
 
-/* Decode a row of Superblocks (4x4 region of MBs) */
-static void decode_tile(VP9D_COMP *pbi, vp9_reader* r) {
-  VP9_COMMON *const pc = &pbi->common;
-  int mb_row, mb_col;
-
-  for (mb_row = pc->cur_tile_mb_row_start;
-       mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
-    // For a SB there are 2 left contexts, each pertaining to a MB row within
-    vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
-    vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
-    for (mb_col = pc->cur_tile_mb_col_start;
-         mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
-      decode_modes_sb(pbi, mb_row, mb_col, r, BLOCK_SIZE_SB64X64);
-    }
-  }
-}
-
 static void setup_token_decoder(VP9D_COMP *pbi,
                                 const uint8_t *data,
                                 vp9_reader *r) {
@@ -1002,10 +963,9 @@ static void read_zpc_probs(VP9_COMMON *cm,
 }
 #endif  // CONFIG_CODE_ZEROGROUP
 
-static void read_coef_probs_common(VP9D_COMP *pbi,
-                                   vp9_reader *r,
-                                   vp9_coeff_probs *coef_probs,
-                                   TX_SIZE tx_size) {
+static void read_coef_probs_common(vp9_coeff_probs *coef_probs,
+                                   TX_SIZE tx_size,
+                                   vp9_reader *r) {
 #if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
   const int entropy_nodes_update = UNCONSTRAINED_UPDATE_NODES;
 #else
@@ -1045,16 +1005,16 @@ static void read_coef_probs(VP9D_COMP *pbi, vp9_reader *r) {
   const TXFM_MODE mode = pbi->common.txfm_mode;
   FRAME_CONTEXT *const fc = &pbi->common.fc;
 
-  read_coef_probs_common(pbi, r, fc->coef_probs_4x4, TX_4X4);
+  read_coef_probs_common(fc->coef_probs_4x4, TX_4X4, r);
 
   if (mode > ONLY_4X4)
-    read_coef_probs_common(pbi, r, fc->coef_probs_8x8, TX_8X8);
+    read_coef_probs_common(fc->coef_probs_8x8, TX_8X8, r);
 
   if (mode > ALLOW_8X8)
-    read_coef_probs_common(pbi, r, fc->coef_probs_16x16, TX_16X16);
+    read_coef_probs_common(fc->coef_probs_16x16, TX_16X16, r);
 
   if (mode > ALLOW_16X16)
-    read_coef_probs_common(pbi, r, fc->coef_probs_32x32, TX_32X32);
+    read_coef_probs_common(fc->coef_probs_32x32, TX_32X32, r);
 }
 
 static void update_frame_size(VP9D_COMP *pbi) {
@@ -1200,7 +1160,7 @@ static void setup_quantization(VP9D_COMP *pbi, vp9_reader *r) {
       get_delta_q(r, &pc->uv_ac_delta_q))
     vp9_init_de_quantizer(pbi);
 
-  mb_init_dequantizer(pbi, &pbi->mb);  // MB level dequantizer setup
+  mb_init_dequantizer(pc, &pbi->mb);  // MB level dequantizer setup
 }
 
 static INTERPOLATIONFILTERTYPE read_mcomp_filter_type(vp9_reader *r) {
@@ -1232,8 +1192,8 @@ static const uint8_t *read_frame_size(VP9_COMMON *const pc, const uint8_t *data,
 }
 
 static const uint8_t *setup_frame_size(VP9D_COMP *pbi, int scaling_active,
-                                      const uint8_t *data,
-                                      const uint8_t *data_end) {
+                                       const uint8_t *data,
+                                       const uint8_t *data_end) {
   // If error concealment is enabled we should only parse the new size
   // if we have enough data. Otherwise we will end up with the wrong size.
   VP9_COMMON *const pc = &pbi->common;
@@ -1275,9 +1235,7 @@ static const uint8_t *setup_frame_size(VP9D_COMP *pbi, int scaling_active,
   return data;
 }
 
-static void update_frame_context(VP9D_COMP *pbi) {
-  FRAME_CONTEXT *const fc = &pbi->common.fc;
-
+static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_copy(fc->pre_coef_probs_4x4, fc->coef_probs_4x4);
   vp9_copy(fc->pre_coef_probs_8x8, fc->coef_probs_8x8);
   vp9_copy(fc->pre_coef_probs_16x16, fc->coef_probs_16x16);
@@ -1324,6 +1282,22 @@ static void update_frame_context(VP9D_COMP *pbi) {
   vp9_zero(fc->zpc_counts_16x16);
   vp9_zero(fc->zpc_counts_32x32);
 #endif
+}
+
+static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
+  VP9_COMMON *const pc = &pbi->common;
+  int mb_row, mb_col;
+
+  for (mb_row = pc->cur_tile_mb_row_start;
+       mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
+    // For a SB there are 2 left contexts, each pertaining to a MB row within
+    vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
+    vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
+    for (mb_col = pc->cur_tile_mb_col_start;
+         mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
+      decode_modes_sb(pbi, mb_row, mb_col, r, BLOCK_SIZE_SB64X64);
+    }
+  }
 }
 
 static void decode_tiles(VP9D_COMP *pbi,
@@ -1476,6 +1450,19 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   pc->error_resilient_mode = vp9_read_bit(&header_bc);
 
   xd->lossless = vp9_read_bit(&header_bc);
+  if (xd->lossless) {
+    xd->inv_txm4x4_1      = vp9_short_iwalsh4x4_1;
+    xd->inv_txm4x4        = vp9_short_iwalsh4x4;
+    xd->itxm_add          = vp9_idct_add_lossless_c;
+    xd->itxm_add_y_block  = vp9_idct_add_y_block_lossless_c;
+    xd->itxm_add_uv_block = vp9_idct_add_uv_block_lossless_c;
+  } else {
+    xd->inv_txm4x4_1      = vp9_short_idct4x4_1;
+    xd->inv_txm4x4        = vp9_short_idct4x4;
+    xd->itxm_add          = vp9_idct_add;
+    xd->itxm_add_y_block  = vp9_idct_add_y_block;
+    xd->itxm_add_uv_block = vp9_idct_add_uv_block;
+  }
 
   setup_loopfilter(pc, xd, &header_bc);
 
@@ -1550,7 +1537,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     vp9_default_coef_probs(pc);
 #endif
 
-  update_frame_context(pbi);
+  update_frame_context(&pc->fc);
 
   read_coef_probs(pbi, &header_bc);
 #if CONFIG_CODE_ZEROGROUP
