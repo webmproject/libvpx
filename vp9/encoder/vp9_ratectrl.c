@@ -262,8 +262,7 @@ void vp9_setup_inter_frame(VP9_COMP *cpi) {
     vp9_setup_past_independence(cm, xd);
 
   assert(cm->frame_context_idx < NUM_FRAME_CONTEXTS);
-  vpx_memcpy(&cm->fc, &cm->frame_contexts[cm->frame_context_idx],
-             sizeof(cm->fc));
+  cm->fc = cm->frame_contexts[cm->frame_context_idx];
 }
 
 static int estimate_bits_at_q(int frame_kind, int q, int mbs,

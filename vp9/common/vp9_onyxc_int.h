@@ -245,7 +245,7 @@ typedef struct VP9Common {
   int sharpness_level;
   int dering_enabled;
 
-  int refresh_entropy_probs;    /* Two state 0 = NO, 1 = YES */
+  int refresh_frame_context;    /* Two state 0 = NO, 1 = YES */
 
   int ref_frame_sign_bias[MAX_REF_FRAMES];    /* Two state 0, 1 */
 

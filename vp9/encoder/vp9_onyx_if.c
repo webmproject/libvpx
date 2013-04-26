@@ -1206,7 +1206,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   // cpi->use_last_frame_only = 0;
   cpi->refresh_golden_frame = 0;
   cpi->refresh_last_frame = 1;
-  cm->refresh_entropy_probs = 1;
+  cm->refresh_frame_context = 1;
 
   setup_features(cpi);
   cpi->mb.e_mbd.allow_high_precision_mv = 0;   // Default mv precision adaptation
@@ -2135,10 +2135,7 @@ int vp9_set_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
   return 0;
 }
 int vp9_update_entropy(VP9_PTR comp, int update) {
-  VP9_COMP *cpi = (VP9_COMP *) comp;
-  VP9_COMMON *cm = &cpi->common;
-  cm->refresh_entropy_probs = update;
-
+  ((VP9_COMP *)comp)->common.refresh_frame_context = update;
   return 0;
 }
 
@@ -2751,7 +2748,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       (cpi->oxcf.frame_parallel_decoding_mode != 0);
     if (cm->error_resilient_mode) {
       cm->frame_parallel_decoding_mode = 1;
-      cm->refresh_entropy_probs = 0;
+      cm->refresh_frame_context = 0;
     }
   }
 
@@ -3730,7 +3727,7 @@ static int frame_is_reference(const VP9_COMP *cpi) {
          cpi->refresh_last_frame ||
          cpi->refresh_golden_frame ||
          cpi->refresh_alt_ref_frame ||
-         cm->refresh_entropy_probs ||
+         cm->refresh_frame_context ||
          mb->mode_ref_lf_delta_update ||
          mb->update_mb_segmentation_map ||
          mb->update_mb_segmentation_data;
@@ -4000,17 +3997,15 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
     encode_frame_to_data_rate(cpi, size, dest, frame_flags);
   }
 
-  if (cm->refresh_entropy_probs) {
-    vpx_memcpy(&cm->frame_contexts[cm->frame_context_idx], &cm->fc,
-               sizeof(cm->fc));
-  }
+  if (cm->refresh_frame_context)
+    cm->frame_contexts[cm->frame_context_idx] = cm->fc;
 
   if (*size > 0) {
     // if its a dropped frame honor the requests on subsequent frames
     cpi->droppable = !frame_is_reference(cpi);
 
     // return to normal state
-    cm->refresh_entropy_probs = 1;
+    cm->refresh_frame_context = 1;
     cpi->refresh_alt_ref_frame = 0;
     cpi->refresh_golden_frame = 0;
     cpi->refresh_last_frame = 1;

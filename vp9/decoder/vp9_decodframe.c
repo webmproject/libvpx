@@ -1508,10 +1508,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   }
 
   if (!pc->error_resilient_mode) {
-    pc->refresh_entropy_probs = vp9_read_bit(&header_bc);
+    pc->refresh_frame_context = vp9_read_bit(&header_bc);
     pc->frame_parallel_decoding_mode = vp9_read_bit(&header_bc);
   } else {
-    pc->refresh_entropy_probs = 0;
+    pc->refresh_frame_context = 0;
     pc->frame_parallel_decoding_mode = 1;
   }
 
@@ -1603,7 +1603,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   }
 #endif
 
-  if (pc->refresh_entropy_probs)
+  if (pc->refresh_frame_context)
     pc->frame_contexts[pc->frame_context_idx] = pc->fc;
 
   *p_data_end = vp9_reader_find_end(&residual_bc);
