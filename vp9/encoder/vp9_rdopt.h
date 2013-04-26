@@ -27,11 +27,11 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                PICK_MODE_CONTEXT *ctx);
 
 void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
-                                    int mb_row, int mb_col,
+                                    int mi_row, int mi_col,
                                     int *r, int *d);
 
 int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
-                                  int mb_row, int mb_col,
+                                  int mi_row, int mi_col,
                                   int *r, int *d, BLOCK_SIZE_TYPE bsize,
                                   PICK_MODE_CONTEXT *ctx);
 

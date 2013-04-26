@@ -17,27 +17,31 @@
 
 static void vp9_get_tile_offsets(VP9_COMMON *cm, int *min_tile_off,
                                  int *max_tile_off, int tile_idx,
-                                 int log2_n_tiles, int n_mbs) {
-  const int n_sbs = (n_mbs + 3) >> 2;
+                                 int log2_n_tiles, int n_mis) {
+#if CONFIG_SB8X8
+  const int n_sbs = (n_mis + 7) >> 3;
+#else
+  const int n_sbs = (n_mis + 3) >> 2;
+#endif
   const int sb_off1 =  (tile_idx      * n_sbs) >> log2_n_tiles;
   const int sb_off2 = ((tile_idx + 1) * n_sbs) >> log2_n_tiles;
 
-  *min_tile_off = MIN(sb_off1 << 2, n_mbs);
-  *max_tile_off = MIN(sb_off2 << 2, n_mbs);
+  *min_tile_off = MIN(sb_off1 << (2 + CONFIG_SB8X8), n_mis);
+  *max_tile_off = MIN(sb_off2 << (2 + CONFIG_SB8X8), n_mis);
 }
 
 void vp9_get_tile_col_offsets(VP9_COMMON *cm, int tile_col_idx) {
   cm->cur_tile_col_idx = tile_col_idx;
-  vp9_get_tile_offsets(cm, &cm->cur_tile_mb_col_start,
-                       &cm->cur_tile_mb_col_end, tile_col_idx,
-                       cm->log2_tile_columns, cm->mb_cols);
+  vp9_get_tile_offsets(cm, &cm->cur_tile_mi_col_start,
+                       &cm->cur_tile_mi_col_end, tile_col_idx,
+                       cm->log2_tile_columns, cm->mi_cols);
 }
 
 void vp9_get_tile_row_offsets(VP9_COMMON *cm, int tile_row_idx) {
   cm->cur_tile_row_idx = tile_row_idx;
-  vp9_get_tile_offsets(cm, &cm->cur_tile_mb_row_start,
-                       &cm->cur_tile_mb_row_end, tile_row_idx,
-                       cm->log2_tile_rows, cm->mb_rows);
+  vp9_get_tile_offsets(cm, &cm->cur_tile_mi_row_start,
+                       &cm->cur_tile_mi_row_end, tile_row_idx,
+                       cm->log2_tile_rows, cm->mi_rows);
 }
 
 

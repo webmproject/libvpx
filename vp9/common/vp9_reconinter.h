@@ -79,11 +79,11 @@ static int scaled_buffer_offset(int x_offset,
 
 static void setup_pred_plane(struct buf_2d *dst,
                              uint8_t *src, int stride,
-                             int mb_row, int mb_col,
+                             int mi_row, int mi_col,
                              const struct scale_factors *scale,
                              int subsampling_x, int subsampling_y) {
-  const int x = (16 * mb_col) >> subsampling_x;
-  const int y = (16 * mb_row) >> subsampling_y;
+  const int x = (MI_SIZE * mi_col) >> subsampling_x;
+  const int y = (MI_SIZE * mi_row) >> subsampling_y;
   dst->buf = src + scaled_buffer_offset(x, y, stride, scale);
   dst->stride = stride;
 }
@@ -91,25 +91,25 @@ static void setup_pred_plane(struct buf_2d *dst,
 // TODO(jkoleszar): audit all uses of this that don't set mb_row, mb_col
 static void setup_dst_planes(MACROBLOCKD *xd,
                              const YV12_BUFFER_CONFIG *src,
-                             int mb_row, int mb_col) {
+                             int mi_row, int mi_col) {
   setup_pred_plane(&xd->plane[0].dst,
                    src->y_buffer, src->y_stride,
-                   mb_row, mb_col, NULL,
+                   mi_row, mi_col, NULL,
                    xd->plane[0].subsampling_x, xd->plane[0].subsampling_y);
   setup_pred_plane(&xd->plane[1].dst,
                    src->u_buffer, src->uv_stride,
-                   mb_row, mb_col, NULL,
+                   mi_row, mi_col, NULL,
                    xd->plane[1].subsampling_x, xd->plane[1].subsampling_y);
   setup_pred_plane(&xd->plane[2].dst,
                    src->v_buffer, src->uv_stride,
-                   mb_row, mb_col, NULL,
+                   mi_row, mi_col, NULL,
                    xd->plane[2].subsampling_x, xd->plane[2].subsampling_y);
 }
 
 static void setup_pre_planes(MACROBLOCKD *xd,
                              const YV12_BUFFER_CONFIG *src0,
                              const YV12_BUFFER_CONFIG *src1,
-                             int mb_row, int mb_col,
+                             int mi_row, int mi_col,
                              const struct scale_factors *scale,
                              const struct scale_factors *scale_uv) {
   int i;
@@ -122,22 +122,22 @@ static void setup_pre_planes(MACROBLOCKD *xd,
 
     setup_pred_plane(&xd->plane[0].pre[i],
                      src->y_buffer, src->y_stride,
-                     mb_row, mb_col, scale ? scale + i : NULL,
+                     mi_row, mi_col, scale ? scale + i : NULL,
                      xd->plane[0].subsampling_x, xd->plane[0].subsampling_y);
     setup_pred_plane(&xd->plane[1].pre[i],
                      src->u_buffer, src->uv_stride,
-                     mb_row, mb_col, scale_uv ? scale_uv + i : NULL,
+                     mi_row, mi_col, scale_uv ? scale_uv + i : NULL,
                      xd->plane[1].subsampling_x, xd->plane[1].subsampling_y);
     setup_pred_plane(&xd->plane[2].pre[i],
                      src->v_buffer, src->uv_stride,
-                     mb_row, mb_col, scale_uv ? scale_uv + i : NULL,
+                     mi_row, mi_col, scale_uv ? scale_uv + i : NULL,
                      xd->plane[2].subsampling_x, xd->plane[2].subsampling_y);
   }
 }
 
 static void setup_pred_block(YV12_BUFFER_CONFIG *dst,
                              const YV12_BUFFER_CONFIG *src,
-                             int mb_row, int mb_col,
+                             int mi_row, int mi_col,
                              const struct scale_factors *scale,
                              const struct scale_factors *scale_uv) {
   const int recon_y_stride = src->y_stride;
@@ -146,13 +146,15 @@ static void setup_pred_block(YV12_BUFFER_CONFIG *dst,
   int recon_uvoffset;
 
   if (scale) {
-    recon_yoffset = scaled_buffer_offset(16 * mb_col, 16 * mb_row,
+    recon_yoffset = scaled_buffer_offset(MI_SIZE * mi_col, MI_SIZE * mi_row,
                                          recon_y_stride, scale);
-    recon_uvoffset = scaled_buffer_offset(8 * mb_col, 8 * mb_row,
+    recon_uvoffset = scaled_buffer_offset(MI_UV_SIZE * mi_col,
+                                          MI_UV_SIZE * mi_row,
                                           recon_uv_stride, scale_uv);
   } else {
-    recon_yoffset = 16 * mb_row * recon_y_stride + 16 * mb_col;
-    recon_uvoffset = 8 * mb_row * recon_uv_stride + 8 * mb_col;
+    recon_yoffset = MI_SIZE * mi_row * recon_y_stride + MI_SIZE * mi_col;
+    recon_uvoffset = MI_UV_SIZE * mi_row * recon_uv_stride +
+                     MI_UV_SIZE * mi_col;
   }
 
   *dst = *src;

@@ -13,6 +13,15 @@
 
 #include "./vpx_config.h"
 
+#if CONFIG_SB8X8
+#define LOG2_MI_SIZE 3
+#else
+#define LOG2_MI_SIZE 4
+#endif
+
+#define MI_SIZE (1 << LOG2_MI_SIZE)
+#define MI_UV_SIZE (1 << (LOG2_MI_SIZE - 1))
+
 typedef enum BLOCK_SIZE_TYPE {
 #if CONFIG_SB8X8
   BLOCK_SIZE_SB8X8,

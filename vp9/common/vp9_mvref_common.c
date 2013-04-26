@@ -12,21 +12,37 @@
 
 #define MVREF_NEIGHBOURS 8
 
+#if CONFIG_SB8X8
 static int mb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
-    {0, -1}, {-1, 0}, {-1, -1}, {0, -2},
-    {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}
+    {0, -1}, {-1, 0}, {-1, -1}, {0, -3},
+    {-3, 0}, {-1, -3}, {-3, -1}, {-3, -3}
 };
 
 static int sb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
-    {0, -1}, {-1, 0}, {1, -1}, {-1, 1},
-    {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}
+    {0, -1}, {-1, 0}, {2, -1}, {-1, 2},
+    {-1, -1}, {0, -3}, {-3, 0}, {-1, -3}
 };
 
 static int sb64_mv_ref_search[MVREF_NEIGHBOURS][2] = {
-    {0, -1}, {-1, 0}, {1, -1}, {-1, 1},
-    {2, -1}, {-1, 2}, {3, -1}, {-1,-1}
+    {0, -1}, {-1, 0}, {2, -1}, {-1,  2},
+    {4, -1}, {-1, 4}, {6, -1}, {-1, -1}
+};
+#else
+static int mb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
+  {0, -1}, {-1, 0}, {-1, -1}, {0, -2},
+  {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}
 };
 
+static int sb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
+  {0, -1}, {-1, 0}, {1, -1}, {-1, 1},
+  {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}
+};
+
+static int sb64_mv_ref_search[MVREF_NEIGHBOURS][2] = {
+  {0, -1}, {-1, 0}, {1, -1}, {-1,  1},
+  {2, -1}, {-1, 2}, {3, -1}, {-1, -1}
+};
+#endif
 
 // clamp_mv_ref
 #define MV_BORDER (16 << 3) // Allow 16 pels in 1/8th pel units
@@ -160,7 +176,7 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int refmv_count = 0;
   int split_count = 0;
   int (*mv_ref_search)[2];
-  const int mb_col = (-xd->mb_to_left_edge) >> 7;
+  const int mi_col = get_mi_col(xd);
   // Blank the reference vector lists and other local structures.
   vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
   vpx_memset(candidate_scores, 0, sizeof(candidate_scores));
@@ -176,11 +192,11 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // We first scan for candidate vectors that match the current reference frame
   // Look at nearest neigbours
   for (i = 0; i < 2; ++i) {
-    const int mb_search_col = mb_col + mv_ref_search[i][0];
+    const int mi_search_col = mi_col + mv_ref_search[i][0];
 
-    if ((mb_search_col >= cm->cur_tile_mb_col_start) &&
-        (mb_search_col < cm->cur_tile_mb_col_end) &&
-        ((mv_ref_search[i][1] << 7) >= xd->mb_to_top_edge)) {
+    if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
+        (mi_search_col < cm->cur_tile_mi_col_end) &&
+        ((mv_ref_search[i][1] << (7 - CONFIG_SB8X8)) >= xd->mb_to_top_edge)) {
 
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
@@ -196,11 +212,11 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // More distant neigbours
   for (i = 2; (i < MVREF_NEIGHBOURS) &&
               (refmv_count < MAX_MV_REF_CANDIDATES); ++i) {
-    const int mb_search_col = mb_col + mv_ref_search[i][0];
+    const int mi_search_col = mi_col + mv_ref_search[i][0];
 
-    if ((mb_search_col >= cm->cur_tile_mb_col_start) &&
-        (mb_search_col < cm->cur_tile_mb_col_end) &&
-        ((mv_ref_search[i][1] << 7) >= xd->mb_to_top_edge)) {
+    if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
+        (mi_search_col < cm->cur_tile_mi_col_end) &&
+        ((mv_ref_search[i][1] << (7 - CONFIG_SB8X8)) >= xd->mb_to_top_edge)) {
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 
@@ -226,11 +242,11 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // Look first at spatial neighbours
   for (i = 0; (i < MVREF_NEIGHBOURS) &&
               (refmv_count < MAX_MV_REF_CANDIDATES); ++i) {
-    const int mb_search_col = mb_col + mv_ref_search[i][0];
+    const int mi_search_col = mi_col + mv_ref_search[i][0];
 
-    if ((mb_search_col >= cm->cur_tile_mb_col_start) &&
-        (mb_search_col < cm->cur_tile_mb_col_end) &&
-        ((mv_ref_search[i][1] << 7) >= xd->mb_to_top_edge)) {
+    if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
+        (mi_search_col < cm->cur_tile_mi_col_end) &&
+        ((mv_ref_search[i][1] << (7 - CONFIG_SB8X8)) >= xd->mb_to_top_edge)) {
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 

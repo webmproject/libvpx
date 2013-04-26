@@ -683,7 +683,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   vp9_clearall_segfeatures(xd);
   xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
   if (cm->last_frame_seg_map)
-    vpx_memset(cm->last_frame_seg_map, 0, (cm->mb_rows * cm->mb_cols));
+    vpx_memset(cm->last_frame_seg_map, 0, (cm->mi_rows * cm->mi_cols));
 
   // Reset the mode ref deltas for loop filter
   vpx_memset(xd->last_ref_lf_deltas, 0, sizeof(xd->last_ref_lf_deltas));
@@ -705,9 +705,9 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
     vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
 
   vpx_memset(cm->prev_mip, 0,
-             cm->mode_info_stride * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+             cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
   vpx_memset(cm->mip, 0,
-             cm->mode_info_stride * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+             cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
 
   vp9_update_mode_info_border(cm, cm->mip);
   vp9_update_mode_info_in_image(cm, cm->mi);

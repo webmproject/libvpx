@@ -205,39 +205,49 @@ typedef enum {
   MAX_REF_FRAMES = 4
 } MV_REFERENCE_FRAME;
 
-static INLINE int mb_width_log2(BLOCK_SIZE_TYPE sb_type) {
+static INLINE int mi_width_log2(BLOCK_SIZE_TYPE sb_type) {
   switch (sb_type) {
+#if CONFIG_SB8X8
+    case BLOCK_SIZE_SB8X16:
+    case BLOCK_SIZE_SB8X8: return 0;
+    case BLOCK_SIZE_SB16X8:
+#endif
     case BLOCK_SIZE_MB16X16:
-    case BLOCK_SIZE_SB16X32: return 0;
+    case BLOCK_SIZE_SB16X32: return 0 + CONFIG_SB8X8;
     case BLOCK_SIZE_SB32X16:
     case BLOCK_SIZE_SB32X64:
-    case BLOCK_SIZE_SB32X32: return 1;
+    case BLOCK_SIZE_SB32X32: return 1 + CONFIG_SB8X8;
     case BLOCK_SIZE_SB64X32:
-    case BLOCK_SIZE_SB64X64: return 2;
+    case BLOCK_SIZE_SB64X64: return 2 + CONFIG_SB8X8;
     default: assert(0);
   }
 }
 
-static INLINE int mb_height_log2(BLOCK_SIZE_TYPE sb_type) {
+static INLINE int mi_height_log2(BLOCK_SIZE_TYPE sb_type) {
   switch (sb_type) {
+#if CONFIG_SB8X8
+    case BLOCK_SIZE_SB16X8:
+    case BLOCK_SIZE_SB8X8: return 0;
+    case BLOCK_SIZE_SB8X16:
+#endif
     case BLOCK_SIZE_MB16X16:
-    case BLOCK_SIZE_SB32X16: return 0;
+    case BLOCK_SIZE_SB32X16: return 0 + CONFIG_SB8X8;
     case BLOCK_SIZE_SB16X32:
     case BLOCK_SIZE_SB64X32:
-    case BLOCK_SIZE_SB32X32: return 1;
+    case BLOCK_SIZE_SB32X32: return 1 + CONFIG_SB8X8;
     case BLOCK_SIZE_SB32X64:
-    case BLOCK_SIZE_SB64X64: return 2;
+    case BLOCK_SIZE_SB64X64: return 2 + CONFIG_SB8X8;
     default: assert(0);
   }
 }
 
 // parse block dimension in the unit of 4x4 blocks
 static INLINE int b_width_log2(BLOCK_SIZE_TYPE sb_type) {
-  return mb_width_log2(sb_type) + 2;
+  return mi_width_log2(sb_type) + 2 - CONFIG_SB8X8;
 }
 
 static INLINE int b_height_log2(BLOCK_SIZE_TYPE sb_type) {
-  return mb_height_log2(sb_type) + 2;
+  return mi_height_log2(sb_type) + 2 - CONFIG_SB8X8;
 }
 
 typedef struct {
@@ -426,10 +436,10 @@ typedef struct macroblockd {
 static INLINE void update_partition_context(MACROBLOCKD *xd,
                                             BLOCK_SIZE_TYPE sb_type,
                                             BLOCK_SIZE_TYPE sb_size) {
-  int bsl = mb_width_log2(sb_size), bs = 1 << bsl;
-  int bwl = mb_width_log2(sb_type);
-  int bhl = mb_height_log2(sb_type);
-  int boffset = mb_width_log2(BLOCK_SIZE_SB64X64) - bsl;
+  int bsl = mi_width_log2(sb_size) - CONFIG_SB8X8, bs = 1 << bsl;
+  int bwl = mi_width_log2(sb_type) - CONFIG_SB8X8;
+  int bhl = mi_height_log2(sb_type) - CONFIG_SB8X8;
+  int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - CONFIG_SB8X8 - bsl;
   int i;
   // skip macroblock partition
   if (bsl == 0)
@@ -465,11 +475,11 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
 
 static INLINE int partition_plane_context(MACROBLOCKD *xd,
                                           BLOCK_SIZE_TYPE sb_type) {
-  int bsl = mb_width_log2(sb_type), bs = 1 << bsl;
+  int bsl = mi_width_log2(sb_type) - CONFIG_SB8X8, bs = 1 << bsl;
   int above = 0, left = 0, i;
-  int boffset = mb_width_log2(BLOCK_SIZE_SB64X64) - bsl;
+  int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - bsl - CONFIG_SB8X8;
 
-  assert(mb_width_log2(sb_type) == mb_height_log2(sb_type));
+  assert(mi_width_log2(sb_type) == mi_height_log2(sb_type));
   assert(bsl >= 0);
   assert(boffset >= 0);
 

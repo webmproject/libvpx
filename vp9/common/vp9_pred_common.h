@@ -43,8 +43,8 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
                        unsigned char pred_flag);
 
 
-int vp9_get_pred_mb_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
-                          int mb_row, int mb_col);
+int vp9_get_pred_mi_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
+                          int mi_row, int mi_col);
 
 MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
                                     const MACROBLOCKD *const xd);
