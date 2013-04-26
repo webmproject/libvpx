@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//07U\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Yes. Right now we\u0027re doing 8x8 mi recursion, but we\u0027re still using split at 16x16 level. That will go away a few commits from now, and then this will become 4 (if CONFIG_SB8X8 is set).",
+      "parentUuid": "AAAAXX//1To\u003d",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//1N0\u003d",
         "filename": "vp9/common/vp9_entropy.h",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2013-04-26T04:47:48Z",
       "side": 1,
       "message": "This looks wrong for 8x8 blocks -- b_width would be 1, and this would be negative. If this just isn\u0027t done yet, maybe make this a constant MB_WIDTH_IN_BLOCKS or something rather than the magic 2.",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//07M\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "As said, above/left will happen in the next patch. I can add an assert if you\u0027d like.",
+      "parentUuid": "AAAAXX//1N0\u003d",
       "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//07I\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//1Ks\u003d",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//1J4\u003d",
         "filename": "vp9/common/vp9_pred_common.c",
         "patchSetId": 10
@@ -64,6 +118,24 @@
       "writtenOn": "2013-04-26T04:47:48Z",
       "side": 1,
       "message": "3 + LOG2_MI_SIZE, or maybe make a helper epel_to_mi",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//068\u003d",
+        "filename": "vp9/common/vp9_pred_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Well, as soon as the experiment is helped, this can be a literal again... So 3+LOG2_MI_SIZE is ok for now.",
+      "parentUuid": "AAAAXX//1J4\u003d",
       "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//06w\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//1Ig\u003d",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//1Ic\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 10
@@ -98,6 +188,24 @@
       "writtenOn": "2013-04-26T04:47:48Z",
       "side": 1,
       "message": "ymis, xmis",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//06s\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//1Ic\u003d",
       "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//06o\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1035,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//1IQ\u003d",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//1IA\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 10
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//06c\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1045,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Maybe that\u0027s not merged yet? Anyway, yes, once actual 8x8 recursion happens, this will happen at the smallest block level again.",
+      "parentUuid": "AAAAXX//1IA\u003d",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//1H8\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 10
@@ -149,6 +293,24 @@
       "writtenOn": "2013-04-26T04:47:48Z",
       "side": 1,
       "message": "mi_idx",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//06Y\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 751,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//1H8\u003d",
       "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +351,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//06U\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//1Gk\u003d",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//1Gg\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 10
@@ -200,6 +380,24 @@
       "writtenOn": "2013-04-26T04:47:48Z",
       "side": 1,
       "message": "Not sure why the \u003e\u003e here -- left_context and above_context should have one entry per 8x8, no?",
+      "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//06Q\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1029,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-26T14:22:37Z",
+      "side": 1,
+      "message": "Yes - next patch :)",
+      "parentUuid": "AAAAXX//1Gg\u003d",
       "revId": "f5a004aafadb8fe536f0b4eebeddad685c5ce0bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
