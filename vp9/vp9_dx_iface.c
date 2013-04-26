@@ -408,9 +408,9 @@ static void parse_superframe_index(const uint8_t *data,
   *count = 0;
 
   if ((marker & 0xe0) == 0xc0) {
-    const int frames = (marker & 0x7) + 1;
-    const int mag = ((marker >> 3) & 3) + 1;
-    const int index_sz = 2 + mag  * frames;
+    const uint32_t frames = (marker & 0x7) + 1;
+    const uint32_t mag = ((marker >> 3) & 0x3) + 1;
+    const size_t index_sz = 2 + mag * frames;
 
     if (data_sz >= index_sz && data[data_sz - index_sz] == marker) {
       // found a valid superframe index
@@ -418,7 +418,7 @@ static void parse_superframe_index(const uint8_t *data,
       const uint8_t *x = data + data_sz - index_sz + 1;
 
       for (i = 0; i < frames; i++) {
-        int this_sz = 0;
+        uint32_t this_sz = 0;
 
         for (j = 0; j < mag; j++)
           this_sz |= (*x++) << (j * 8);
@@ -447,9 +447,9 @@ static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
     // Skip over the superframe index, if present
     if (data_sz && (*data_start & 0xe0) == 0xc0) {
       const uint8_t marker = *data_start;
-      const int frames = (marker & 0x7) + 1;
-      const int mag = ((marker >> 3) & 3) + 1;
-      const int index_sz = 2 + mag  * frames;
+      const uint32_t frames = (marker & 0x7) + 1;
+      const uint32_t mag = ((marker >> 3) & 0x3) + 1;
+      const uint32_t index_sz = 2 + mag * frames;
 
       if (data_sz >= index_sz && data_start[index_sz - 1] == marker) {
         data_start += index_sz;

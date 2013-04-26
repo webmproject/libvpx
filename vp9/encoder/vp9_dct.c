@@ -1286,4 +1286,3 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
       out[j + i * 32] = (temp_out[j] + 1 + (temp_out[j] < 0)) >> 2;
   }
 }
-

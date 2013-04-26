@@ -184,17 +184,17 @@ void vp8_strict_quantize_b_c(BLOCK *b, BLOCKD *d)
     for (i = 0; i < 16; i++)
     {
         int dq;
-        int round;
+        int rounding;
 
         /*TODO: These arrays should be stored in zig-zag order.*/
         rc = vp8_default_zig_zag1d[i];
         z = coeff_ptr[rc];
         dq = dequant_ptr[rc];
-        round = dq >> 1;
+        rounding = dq >> 1;
         /* Sign of z. */
         sz = -(z < 0);
         x = (z + sz) ^ sz;
-        x += round;
+        x += rounding;
         if (x >= dq)
         {
             /* Quantize x. */

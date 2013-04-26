@@ -90,17 +90,17 @@ static void update_mode(
 
     if (new_b + (n << 8) < old_b)
     {
-        int i = 0;
+        int j = 0;
 
         vp8_write_bit(w, 1);
 
         do
         {
-            const vp8_prob p = Pnew[i];
+            const vp8_prob p = Pnew[j];
 
-            vp8_write_literal(w, Pcur[i] = p ? p : 1, 8);
+            vp8_write_literal(w, Pcur[j] = p ? p : 1, 8);
         }
-        while (++i < n);
+        while (++j < n);
     }
     else
         vp8_write_bit(w, 0);
@@ -245,15 +245,15 @@ void vp8_pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
 
             if (L)
             {
-                const unsigned char *pp = b->prob;
-                int v = e >> 1;
-                int n = L;              /* number of bits in v, assumed nonzero */
-                int i = 0;
+                const unsigned char *proba = b->prob;
+                const int v2 = e >> 1;
+                int n2 = L;              /* number of bits in v2, assumed nonzero */
+                i = 0;
 
                 do
                 {
-                    const int bb = (v >> --n) & 1;
-                    split = 1 + (((range - 1) * pp[i>>1]) >> 8);
+                    const int bb = (v2 >> --n2) & 1;
+                    split = 1 + (((range - 1) * proba[i>>1]) >> 8);
                     i = b->tree[i+bb];
 
                     if (bb)
@@ -301,7 +301,7 @@ void vp8_pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
 
                     lowvalue <<= shift;
                 }
-                while (n);
+                while (n2);
             }
 
 

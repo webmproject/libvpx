@@ -918,7 +918,7 @@ process_common_toolchain() {
             add_ldflags -arch_only ${tgt_isa}
 
             if [ -z "${alt_libc}" ]; then
-                alt_libc=${SDK_PATH}/SDKs/iPhoneOS5.1.sdk
+                alt_libc=${SDK_PATH}/SDKs/iPhoneOS6.0.sdk
             fi
 
             add_cflags  "-isysroot ${alt_libc}"
@@ -1088,10 +1088,12 @@ EOF
             win32)
                 add_asflags -f win32
                 enabled debug && add_asflags -g cv8
+                EXE_SFX=.exe
             ;;
             win64)
                 add_asflags -f x64
                 enabled debug && add_asflags -g cv8
+                EXE_SFX=.exe
             ;;
             linux*|solaris*|android*)
                 add_asflags -f elf${bits}
