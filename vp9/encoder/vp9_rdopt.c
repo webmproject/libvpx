@@ -1606,7 +1606,7 @@ static int labels2mode(
   int_mv seg_mvs[MAX_REF_FRAMES - 1],
   int_mv *best_ref_mv,
   int_mv *second_best_ref_mv,
-  int *mvjcost, int *mvcost[2]) {
+  int *mvjcost, int *mvcost[2], VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mode_info_context;
   MB_MODE_INFO * mbmi = &mic->mbmi;
@@ -2167,7 +2167,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       rate = labels2mode(x, labels, i, this_mode, &mode_mv[this_mode],
                          &second_mode_mv[this_mode], seg_mvs[i],
                          bsi->ref_mv, bsi->second_ref_mv, x->nmvjointcost,
-                         x->mvcost);
+                         x->mvcost, cpi);
 
       // Trap vectors that reach beyond the UMV borders
       if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) ||
@@ -2226,7 +2226,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
     labels2mode(x, labels, i, mode_selected, &mode_mv[mode_selected],
                 &second_mode_mv[mode_selected], seg_mvs[i],
-                bsi->ref_mv, bsi->second_ref_mv, x->nmvjointcost, x->mvcost);
+                bsi->ref_mv, bsi->second_ref_mv, x->nmvjointcost,
+                x->mvcost, cpi);
 
     br += sbr;
     bd += sbd;
@@ -2735,7 +2736,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
 static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                int idx, MV_REFERENCE_FRAME frame_type,
                                enum BlockSize block_size,
-                               int mb_row, int mb_col,
+                               int mi_row, int mi_col,
                                int_mv frame_nearest_mv[MAX_REF_FRAMES],
                                int_mv frame_near_mv[MAX_REF_FRAMES],
                                int frame_mdcounts[4][4],
@@ -2750,13 +2751,15 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   // set up scaling factors
   scale[frame_type] = cpi->common.active_ref_scale[frame_type - 1];
   scale[frame_type].x_offset_q4 =
-      (mb_col * 16 * scale[frame_type].x_num / scale[frame_type].x_den) & 0xf;
+      (mi_col * MI_SIZE * scale[frame_type].x_num /
+       scale[frame_type].x_den) & 0xf;
   scale[frame_type].y_offset_q4 =
-      (mb_row * 16 * scale[frame_type].y_num / scale[frame_type].y_den) & 0xf;
+      (mi_row * MI_SIZE * scale[frame_type].y_num /
+       scale[frame_type].y_den) & 0xf;
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
-  setup_pred_block(&yv12_mb[frame_type], yv12, mb_row, mb_col,
+  setup_pred_block(&yv12_mb[frame_type], yv12, mi_row, mi_col,
                    &scale[frame_type], &scale[frame_type]);
 
   // Gets an initial list of candidate vectors from neighbours and orders them
@@ -2873,8 +2876,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int_mv frame_mv[MB_MODE_COUNT]
                                                 [MAX_REF_FRAMES],
                                  YV12_BUFFER_CONFIG *scaled_ref_frame,
-                                 int mb_row, int mb_col) {
-  const int bw = 1 << mb_width_log2(bsize), bh = 1 << mb_height_log2(bsize);
+                                 int mi_row, int mi_col) {
+  const int bw = 1 << mi_width_log2(bsize), bh = 1 << mi_height_log2(bsize);
   const enum BlockSize block_size = y_bsizet_to_block_size(bsize);
   const enum BlockSize uv_block_size = y_to_uv_block_size(block_size);
   VP9_COMMON *cm = &cpi->common;
@@ -2939,7 +2942,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           for (i = 0; i < MAX_MB_PLANE; i++)
             backup_yv12[i] = xd->plane[i].pre[0];
 
-          setup_pre_planes(xd, scaled_ref_frame, NULL, mb_row, mb_col,
+          setup_pre_planes(xd, scaled_ref_frame, NULL, mi_row, mi_col,
                            NULL, NULL);
         }
 
@@ -3075,7 +3078,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         unsigned int sse, var;
         int tmp_rate_y, tmp_rate_u, tmp_rate_v;
         int tmp_dist_y, tmp_dist_u, tmp_dist_v;
-        vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
+        vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
         var = cpi->fn_ptr[block_size].vf(x->plane[0].src.buf,
                                          x->plane[0].src.stride,
                                          xd->plane[0].dst.buf,
@@ -3084,7 +3087,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // Note our transform coeffs are 8 times an orthogonal transform.
         // Hence quantizer step is also 8 times. To get effective quantizer
         // we need to divide by 8 before sending to modeling function.
-        model_rd_from_var_lapndz(var, 16 * bw * 16 * bh,
+        model_rd_from_var_lapndz(var, MI_SIZE * bw * MI_SIZE * bh,
                                  xd->plane[0].dequant[1] >> 3,
                                  &tmp_rate_y, &tmp_dist_y);
         var = cpi->fn_ptr[uv_block_size].vf(x->plane[1].src.buf,
@@ -3092,7 +3095,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                             xd->plane[1].dst.buf,
                                             xd->plane[1].dst.stride,
                                             &sse);
-        model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
+        model_rd_from_var_lapndz(var, MI_UV_SIZE * bw * MI_UV_SIZE * bh,
                                  xd->plane[1].dequant[1] >> 3,
                                  &tmp_rate_u, &tmp_dist_u);
         var = cpi->fn_ptr[uv_block_size].vf(x->plane[2].src.buf,
@@ -3100,7 +3103,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                             xd->plane[2].dst.buf,
                                             xd->plane[1].dst.stride,
                                             &sse);
-        model_rd_from_var_lapndz(var, 8 * bw * 8 * bh,
+        model_rd_from_var_lapndz(var, MI_UV_SIZE * bw * MI_UV_SIZE * bh,
                                  xd->plane[2].dequant[1] >> 3,
                                  &tmp_rate_v, &tmp_dist_v);
         rd = RDCOST(x->rdmult, x->rddiv,
@@ -3125,18 +3128,18 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           (cm->mcomp_filter_type != SWITCHABLE &&
            cm->mcomp_filter_type == mbmi->interp_filter)) {
         int i;
-        for (i = 0; i < 16 * bh; ++i)
-          vpx_memcpy(tmp_ybuf + i * 16 * bw,
+        for (i = 0; i < MI_SIZE * bh; ++i)
+          vpx_memcpy(tmp_ybuf + i * MI_SIZE * bw,
                      xd->plane[0].dst.buf + i * xd->plane[0].dst.stride,
-                     sizeof(unsigned char) * 16 * bw);
-        for (i = 0; i < 8 * bh; ++i)
-          vpx_memcpy(tmp_ubuf + i * 8 * bw,
+                     sizeof(unsigned char) * MI_SIZE * bw);
+        for (i = 0; i < MI_UV_SIZE * bh; ++i)
+          vpx_memcpy(tmp_ubuf + i * MI_UV_SIZE * bw,
                      xd->plane[1].dst.buf + i * xd->plane[1].dst.stride,
-                     sizeof(unsigned char) * 8 * bw);
-        for (i = 0; i < 8 * bh; ++i)
-          vpx_memcpy(tmp_vbuf + i * 8 * bw,
+                     sizeof(unsigned char) * MI_UV_SIZE * bw);
+        for (i = 0; i < MI_UV_SIZE * bh; ++i)
+          vpx_memcpy(tmp_vbuf + i * MI_UV_SIZE * bw,
                      xd->plane[2].dst.buf + i * xd->plane[1].dst.stride,
-                     sizeof(unsigned char) * 8 * bw);
+                     sizeof(unsigned char) * MI_UV_SIZE * bw);
         pred_exists = 1;
       }
       interpolating_intpel_seen |=
@@ -3153,19 +3156,22 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (pred_exists) {
     // FIXME(rbultje): mb code still predicts into xd->predictor
-    for (i = 0; i < bh * 16; ++i)
+    for (i = 0; i < bh * MI_SIZE; ++i)
       vpx_memcpy(xd->plane[0].dst.buf + i * xd->plane[0].dst.stride,
-                 tmp_ybuf + i * bw * 16, sizeof(unsigned char) * bw * 16);
-    for (i = 0; i < bh * 8; ++i)
+                 tmp_ybuf + i * bw * MI_SIZE,
+                 sizeof(unsigned char) * bw * MI_SIZE);
+    for (i = 0; i < bh * MI_UV_SIZE; ++i)
       vpx_memcpy(xd->plane[1].dst.buf + i * xd->plane[1].dst.stride,
-                 tmp_ubuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
-    for (i = 0; i < bh * 8; ++i)
+                 tmp_ubuf + i * bw * MI_UV_SIZE,
+                 sizeof(unsigned char) * bw * MI_UV_SIZE);
+    for (i = 0; i < bh * MI_UV_SIZE; ++i)
       vpx_memcpy(xd->plane[2].dst.buf + i * xd->plane[1].dst.stride,
-                 tmp_vbuf + i * bw * 8, sizeof(unsigned char) * bw * 8);
+                 tmp_vbuf + i * bw * MI_UV_SIZE,
+                 sizeof(unsigned char) * bw * MI_UV_SIZE);
   } else {
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear, 6-tap) is indicated at the frame level
-    vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
+    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
   }
 
   if (cpi->common.mcomp_filter_type == SWITCHABLE) {
@@ -3276,7 +3282,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                               int mb_row, int mb_col,
+                               int mi_row, int mi_col,
                                int *returnrate, int *returndistortion,
                                int64_t *returnintra) {
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
@@ -3363,21 +3369,21 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
     setup_buffer_inter(cpi, x, cpi->lst_fb_idx,
-                       LAST_FRAME, BLOCK_16X16, mb_row, mb_col,
+                       LAST_FRAME, BLOCK_16X16, mi_row, mi_col,
                        frame_mv[NEARESTMV], frame_mv[NEARMV],
                        frame_mdcounts, yv12_mb, scale_factor);
   }
 
   if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
     setup_buffer_inter(cpi, x, cpi->gld_fb_idx,
-                       GOLDEN_FRAME, BLOCK_16X16, mb_row, mb_col,
+                       GOLDEN_FRAME, BLOCK_16X16, mi_row, mi_col,
                        frame_mv[NEARESTMV], frame_mv[NEARMV],
                        frame_mdcounts, yv12_mb, scale_factor);
   }
 
   if (cpi->ref_frame_flags & VP9_ALT_FLAG) {
     setup_buffer_inter(cpi, x, cpi->alt_fb_idx,
-                       ALTREF_FRAME, BLOCK_16X16, mb_row, mb_col,
+                       ALTREF_FRAME, BLOCK_16X16, mi_row, mi_col,
                        frame_mv[NEARESTMV], frame_mv[NEARMV],
                        frame_mdcounts, yv12_mb, scale_factor);
   }
@@ -3742,7 +3748,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (tmp_rd < best_yrd) {
         int uv_skippable;
 
-        vp9_build_inter_predictors_sbuv(&x->e_mbd, mb_row, mb_col,
+        vp9_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
                                         BLOCK_SIZE_MB16X16);
 
         vp9_subtract_sbuv(x, BLOCK_SIZE_MB16X16);
@@ -3791,7 +3797,7 @@ static void rd_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip,
                                   mode_index, &tmp_best_filter, frame_mv,
-                                  scaled_ref_frame, mb_row, mb_col);
+                                  scaled_ref_frame, mi_row, mi_col);
       if (this_rd == INT64_MAX)
         continue;
     }
@@ -4302,7 +4308,7 @@ void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
-                                  int mb_row, int mb_col,
+                                  int mi_row, int mi_col,
                                   int *returnrate,
                                   int *returndistortion,
                                   BLOCK_SIZE_TYPE bsize,
@@ -4403,7 +4409,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
       setup_buffer_inter(cpi, x, idx_list[ref_frame], ref_frame, block_size,
-                         mb_row, mb_col, frame_mv[NEARESTMV], frame_mv[NEARMV],
+                         mi_row, mi_col, frame_mv[NEARESTMV], frame_mv[NEARMV],
                          frame_mdcounts, yv12_mb, scale_factor);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
@@ -4603,7 +4609,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip,
                                   mode_index, &tmp_best_filter, frame_mv,
-                                  scaled_ref_frame, mb_row, mb_col);
+                                  scaled_ref_frame, mi_row, mi_col);
       if (this_rd == INT64_MAX)
         continue;
     }
@@ -4898,7 +4904,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
-                                    int mb_row, int mb_col,
+                                    int mi_row, int mi_col,
                                     int *totalrate, int *totaldist) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
@@ -4916,7 +4922,7 @@ void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
   {
     int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
 
-    rd_pick_inter_mode(cpi, x, mb_row, mb_col, &rate,
+    rd_pick_inter_mode(cpi, x, mi_row, mi_col, &rate,
                        &distortion, &intra_error);
 
     /* restore cpi->zbin_mode_boost_enabled */

@@ -560,9 +560,9 @@ static void decode_sb_16x16(MACROBLOCKD *mb, BLOCK_SIZE_TYPE bsize) {
     decode_sbuv_8x8(mb, bsize);
 }
 
-static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
+static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
                       vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mb_width_log2(bsize), bhl = mb_height_log2(bsize);
+  const int bwl = mi_width_log2(bsize), bhl = mi_height_log2(bsize);
   const int bw = 1 << bwl, bh = 1 << bhl;
   int n, eobtotal;
   VP9_COMMON *const pc = &pbi->common;
@@ -580,7 +580,7 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
     vp9_build_intra_predictors_sby_s(xd, bsize);
     vp9_build_intra_predictors_sbuv_s(xd, bsize);
   } else {
-    vp9_build_inter_predictors_sb(xd, mb_row, mb_col, bsize);
+    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
   }
 
   if (mbmi->mb_skip_coeff) {
@@ -596,7 +596,7 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
       for (n = 0; n < bw * bh; n++) {
         const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
-        if (mb_col + x_idx < pc->mb_cols && mb_row + y_idx < pc->mb_rows)
+        if (mi_col + x_idx < pc->mi_cols && mi_row + y_idx < pc->mi_rows)
           mi[y_idx * mis + x_idx].mbmi.mb_skip_coeff = 1;
       }
     } else {
@@ -624,7 +624,7 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col,
 // TODO(jingning): Need to merge SB and MB decoding. The MB decoding currently
 // couples special handles on I8x8, B_PRED, and splitmv modes.
 static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
-                     int mb_row, int mb_col,
+                     int mi_row, int mi_col,
                      vp9_reader *r) {
   int eobtotal = 0;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
@@ -651,7 +651,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
            xd->mode_info_context->mbmi.mode, tx_size,
            xd->mode_info_context->mbmi.interp_filter);
 #endif
-    vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
+    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_SIZE_MB16X16);
   }
 
   if (mbmi->mb_skip_coeff) {
@@ -737,35 +737,38 @@ static int get_delta_q(vp9_reader *r, int *dq) {
 }
 
 static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
-                        int mb_row, int mb_col) {
-  const int bh = 1 << mb_height_log2(bsize);
-  const int bw = 1 << mb_width_log2(bsize);
+                        int mi_row, int mi_col) {
+  const int bh = 1 << mi_height_log2(bsize);
+  const int bw = 1 << mi_width_log2(bsize);
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
-  const int mb_idx = mb_row * cm->mode_info_stride + mb_col;
+  const int mi_idx = mi_row * cm->mode_info_stride + mi_col;
   const YV12_BUFFER_CONFIG *dst_fb = &cm->yv12_fb[cm->new_fb_idx];
-  const int recon_yoffset = (16 * mb_row) * dst_fb->y_stride + (16 * mb_col);
-  const int recon_uvoffset = (8 * mb_row) * dst_fb->uv_stride + (8 * mb_col);
+  const int recon_yoffset =
+      (MI_SIZE * mi_row) * dst_fb->y_stride + (MI_SIZE * mi_col);
+  const int recon_uvoffset =
+      (MI_UV_SIZE * mi_row) * dst_fb->uv_stride + (MI_UV_SIZE * mi_col);
 
-  xd->mode_info_context = cm->mi + mb_idx;
+  xd->mode_info_context = cm->mi + mi_idx;
   xd->mode_info_context->mbmi.sb_type = bsize;
-  xd->prev_mode_info_context = cm->prev_mi + mb_idx;
-  xd->above_context = cm->above_context + mb_col;
-  xd->left_context = cm->left_context + mb_row % 4;
-  xd->above_seg_context = cm->above_seg_context + mb_col;
-  xd->left_seg_context  = cm->left_seg_context + (mb_row & 3);
+  xd->prev_mode_info_context = cm->prev_mi + mi_idx;
+
+  xd->above_context = cm->above_context + (mi_col >> CONFIG_SB8X8);
+  xd->left_context = cm->left_context + ((mi_row >> CONFIG_SB8X8) & 3);
+  xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+  xd->left_seg_context  = cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
-  set_mb_row_col(cm, xd, mb_row, bh, mb_col, bw);
+  set_mi_row_col(cm, xd, mi_row, bh, mi_col, bw);
 
   xd->plane[0].dst.buf = dst_fb->y_buffer + recon_yoffset;
   xd->plane[1].dst.buf = dst_fb->u_buffer + recon_uvoffset;
   xd->plane[2].dst.buf = dst_fb->v_buffer + recon_uvoffset;
 }
 
-static void set_refs(VP9D_COMP *pbi, int mb_row, int mb_col) {
+static void set_refs(VP9D_COMP *pbi, int mi_row, int mi_col) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
@@ -776,7 +779,7 @@ static void set_refs(VP9D_COMP *pbi, int mb_row, int mb_col) {
     const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[fb_idx];
     xd->scale_factor[0]    = cm->active_ref_scale[mbmi->ref_frame - 1];
     xd->scale_factor_uv[0] = cm->active_ref_scale[mbmi->ref_frame - 1];
-    setup_pre_planes(xd, cfg, NULL, mb_row, mb_col,
+    setup_pre_planes(xd, cfg, NULL, mi_row, mi_col,
                      xd->scale_factor, xd->scale_factor_uv);
     xd->corrupted |= cfg->corrupted;
 
@@ -786,47 +789,48 @@ static void set_refs(VP9D_COMP *pbi, int mb_row, int mb_col) {
       const YV12_BUFFER_CONFIG *second_cfg = &cm->yv12_fb[second_fb_idx];
       xd->scale_factor[1]    = cm->active_ref_scale[mbmi->second_ref_frame - 1];
       xd->scale_factor_uv[1] = cm->active_ref_scale[mbmi->second_ref_frame - 1];
-      setup_pre_planes(xd, NULL, second_cfg, mb_row, mb_col,
+      setup_pre_planes(xd, NULL, second_cfg, mi_row, mi_col,
                        xd->scale_factor, xd->scale_factor_uv);
       xd->corrupted |= second_cfg->corrupted;
     }
   }
 }
 
-static void decode_modes_b(VP9D_COMP *pbi, int mb_row, int mb_col,
+static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
                            vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &pbi->mb;
 
-  set_offsets(pbi, bsize, mb_row, mb_col);
-  vp9_decode_mb_mode_mv(pbi, xd, mb_row, mb_col, r);
-  set_refs(pbi, mb_row, mb_col);
+  set_offsets(pbi, bsize, mi_row, mi_col);
+  vp9_decode_mb_mode_mv(pbi, xd, mi_row, mi_col, r);
+  set_refs(pbi, mi_row, mi_col);
 
   // TODO(jingning): merge decode_sb_ and decode_mb_
   if (bsize > BLOCK_SIZE_MB16X16)
-    decode_sb(pbi, xd, mb_row, mb_col, r, bsize);
+    decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
   else
-    decode_mb(pbi, xd, mb_row, mb_col, r);
+    decode_mb(pbi, xd, mi_row, mi_col, r);
 
   xd->corrupted |= vp9_reader_has_error(r);
 }
 
-static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
+static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
                             vp9_reader* r, BLOCK_SIZE_TYPE bsize) {
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  int bsl = mb_width_log2(bsize), bs = (1 << bsl) / 2;
+  int bsl = mi_width_log2(bsize), bs = (1 << bsl) / 2;
   int n;
   PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE_TYPE subsize;
 
-  if (mb_row >= pc->mb_rows || mb_col >= pc->mb_cols)
+  if (mi_row >= pc->mi_rows || mi_col >= pc->mi_cols)
     return;
 
   if (bsize > BLOCK_SIZE_MB16X16) {
     int pl;
     // read the partition information
-    xd->left_seg_context = pc->left_seg_context + (mb_row & 3);
-    xd->above_seg_context = pc->above_seg_context + mb_col;
+    xd->left_seg_context =
+        pc->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
+    xd->above_seg_context = pc->above_seg_context + (mi_col >> CONFIG_SB8X8);
     pl = partition_plane_context(xd, bsize);
     partition = treed_read(r, vp9_partition_tree,
                            pc->fc.partition_prob[pl]);
@@ -836,21 +840,21 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
   switch (partition) {
     case PARTITION_NONE:
       subsize = bsize;
-      decode_modes_b(pbi, mb_row, mb_col, r, subsize);
+      decode_modes_b(pbi, mi_row, mi_col, r, subsize);
       break;
     case PARTITION_HORZ:
       subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB64X32 :
                                                 BLOCK_SIZE_SB32X16;
-      decode_modes_b(pbi, mb_row, mb_col, r, subsize);
-      if ((mb_row + bs) < pc->mb_rows)
-        decode_modes_b(pbi, mb_row + bs, mb_col, r, subsize);
+      decode_modes_b(pbi, mi_row, mi_col, r, subsize);
+      if ((mi_row + bs) < pc->mi_rows)
+        decode_modes_b(pbi, mi_row + bs, mi_col, r, subsize);
       break;
     case PARTITION_VERT:
       subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB32X64 :
                                                 BLOCK_SIZE_SB16X32;
-      decode_modes_b(pbi, mb_row, mb_col, r, subsize);
-      if ((mb_col + bs) < pc->mb_cols)
-        decode_modes_b(pbi, mb_row, mb_col + bs, r, subsize);
+      decode_modes_b(pbi, mi_row, mi_col, r, subsize);
+      if ((mi_col + bs) < pc->mi_cols)
+        decode_modes_b(pbi, mi_row, mi_col + bs, r, subsize);
       break;
     case PARTITION_SPLIT:
       subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB32X32 :
@@ -861,7 +865,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
           xd->sb_index = n;
         else
           xd->mb_index = n;
-        decode_modes_sb(pbi, mb_row + j * bs, mb_col + i * bs, r, subsize);
+        decode_modes_sb(pbi, mi_row + j * bs, mi_col + i * bs, r, subsize);
       }
       break;
     default:
@@ -871,8 +875,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mb_row, int mb_col,
   if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_SB32X32))
     return;
 
-  xd->left_seg_context = pc->left_seg_context + (mb_row & 3);
-  xd->above_seg_context = pc->above_seg_context + mb_col;
+  xd->left_seg_context = pc->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
+  xd->above_seg_context = pc->above_seg_context + (mi_col >> CONFIG_SB8X8);
   update_partition_context(xd, subsize, bsize);
 }
 
@@ -1024,11 +1028,13 @@ static void update_frame_size(VP9D_COMP *pbi) {
   const int height = multiple16(cm->height);
 
   cm->mb_rows = height / 16;
+  cm->mi_rows = height >> LOG2_MI_SIZE;
   cm->mb_cols = width / 16;
+  cm->mi_cols = width >> LOG2_MI_SIZE;
   cm->MBs = cm->mb_rows * cm->mb_cols;
-  cm->mode_info_stride = cm->mb_cols + 1;
+  cm->mode_info_stride = cm->mi_cols + 1;
   memset(cm->mip, 0,
-         cm->mode_info_stride * (cm->mb_rows + 1) * sizeof(MODE_INFO));
+         cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
   vp9_update_mode_info_border(cm, cm->mip);
   vp9_update_mode_info_border(cm, cm->prev_mip);
 
@@ -1286,16 +1292,16 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
 
 static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   VP9_COMMON *const pc = &pbi->common;
-  int mb_row, mb_col;
+  int mi_row, mi_col;
 
-  for (mb_row = pc->cur_tile_mb_row_start;
-       mb_row < pc->cur_tile_mb_row_end; mb_row += 4) {
+  for (mi_row = pc->cur_tile_mi_row_start;
+       mi_row < pc->cur_tile_mi_row_end; mi_row += (4 << CONFIG_SB8X8)) {
     // For a SB there are 2 left contexts, each pertaining to a MB row within
     vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
     vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
-    for (mb_col = pc->cur_tile_mb_col_start;
-         mb_col < pc->cur_tile_mb_col_end; mb_col += 4) {
-      decode_modes_sb(pbi, mb_row, mb_col, r, BLOCK_SIZE_SB64X64);
+    for (mi_col = pc->cur_tile_mi_col_start;
+         mi_col < pc->cur_tile_mi_col_end; mi_col += (4 << CONFIG_SB8X8)) {
+      decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_SIZE_SB64X64);
     }
   }
 }
@@ -1552,7 +1558,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   // Create the segmentation map structure and set to 0
   if (!pc->last_frame_seg_map)
     CHECK_MEM_ERROR(pc->last_frame_seg_map,
-                    vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
+                    vpx_calloc((pc->mi_rows * pc->mi_cols), 1));
 
   // set up frame new frame for intra coded blocks
   vp9_setup_intra_recon(new_fb);

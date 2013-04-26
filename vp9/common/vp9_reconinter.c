@@ -387,11 +387,11 @@ static void build_inter_predictors(int plane, int block,
   }
 }
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
-                                    int mb_row,
-                                    int mb_col,
+                                    int mi_row,
+                                    int mi_col,
                                     BLOCK_SIZE_TYPE bsize) {
   struct build_inter_predictors_args args = {
-    xd, mb_col * 16, mb_row * 16,
+    xd, mi_col * MI_SIZE, mi_row * MI_SIZE,
     {xd->plane[0].dst.buf, NULL, NULL}, {xd->plane[0].dst.stride, 0, 0},
     {{xd->plane[0].pre[0].buf, NULL, NULL},
      {xd->plane[0].pre[1].buf, NULL, NULL}},
@@ -401,11 +401,11 @@ void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
   foreach_predicted_block_in_plane(xd, bsize, 0, build_inter_predictors, &args);
 }
 void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
-                                     int mb_row,
-                                     int mb_col,
+                                     int mi_row,
+                                     int mi_col,
                                      BLOCK_SIZE_TYPE bsize) {
   struct build_inter_predictors_args args = {
-    xd, mb_col * 16, mb_row * 16,
+    xd, mi_col * MI_SIZE, mi_row * MI_SIZE,
     {NULL, xd->plane[1].dst.buf, xd->plane[2].dst.buf},
     {0, xd->plane[1].dst.stride, xd->plane[1].dst.stride},
     {{NULL, xd->plane[1].pre[0].buf, xd->plane[2].pre[0].buf},
@@ -416,7 +416,7 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
   foreach_predicted_block_uv(xd, bsize, build_inter_predictors, &args);
 }
 void vp9_build_inter_predictors_sb(MACROBLOCKD *xd,
-                                   int mb_row, int mb_col,
+                                   int mi_row, int mi_col,
                                    BLOCK_SIZE_TYPE bsize) {
 #if CONFIG_COMP_INTERINTRA_PRED
   uint8_t *const y = xd->plane[0].dst.buf;
@@ -426,8 +426,8 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd,
   const int uv_stride = xd->plane[1].dst.stride;
 #endif
 
-  vp9_build_inter_predictors_sby(xd, mb_row, mb_col, bsize);
-  vp9_build_inter_predictors_sbuv(xd, mb_row, mb_col, bsize);
+  vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+  vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, bsize);
 
 #if CONFIG_COMP_INTERINTRA_PRED
   if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)

@@ -27,7 +27,7 @@ void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi) {
   vpx_memset(mi, 0, sizeof(MODE_INFO) * stride);
 
   // Clear left border column
-  for (i = 1; i < cpi->mb_rows + 1; i++)
+  for (i = 1; i < cpi->mi_rows + 1; i++)
     vpx_memset(&mi[i * stride], 0, sizeof(MODE_INFO));
 }
 
@@ -36,9 +36,9 @@ void vp9_update_mode_info_in_image(VP9_COMMON *cpi, MODE_INFO *mi) {
   MODE_INFO *ptr;
 
   // For each in image mode_info element set the in image flag to 1
-  for (i = 0; i < cpi->mb_rows; i++) {
+  for (i = 0; i < cpi->mi_rows; i++) {
     ptr = mi;
-    for (j = 0; j < cpi->mb_cols; j++) {
+    for (j = 0; j < cpi->mi_cols; j++) {
       ptr->mbmi.mb_in_image = 1;
       ptr++;  // Next element in the row
     }
@@ -110,10 +110,13 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   }
 
   oci->mb_rows = aligned_height >> 4;
+  oci->mi_rows = aligned_height >> LOG2_MI_SIZE;
   oci->mb_cols = aligned_width >> 4;
+  oci->mi_cols = aligned_width >> LOG2_MI_SIZE;
   oci->MBs = oci->mb_rows * oci->mb_cols;
-  oci->mode_info_stride = oci->mb_cols + 1;
-  oci->mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
+  oci->mode_info_stride = oci->mi_cols + 1;
+  oci->mip = vpx_calloc(oci->mode_info_stride * (oci->mi_rows + 1),
+                        sizeof(MODE_INFO));
 
   if (!oci->mip) {
     vp9_free_frame_buffers(oci);
@@ -124,7 +127,8 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
 
   /* allocate memory for last frame MODE_INFO array */
 
-  oci->prev_mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
+  oci->prev_mip = vpx_calloc(oci->mode_info_stride * (oci->mi_rows + 1),
+                             sizeof(MODE_INFO));
 
   if (!oci->prev_mip) {
     vp9_free_frame_buffers(oci);

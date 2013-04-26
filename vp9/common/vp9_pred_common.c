@@ -169,35 +169,34 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
                        unsigned char pred_flag) {
   const int mis = xd->mode_info_stride;
   BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-  const int bh = 1 << mb_height_log2(bsize);
-  const int bw = 1 << mb_width_log2(bsize);
+  const int bh = 1 << mi_height_log2(bsize);
+  const int bw = 1 << mi_width_log2(bsize);
 #define sub(a, b) (b) < 0 ? (a) + (b) : (a)
-  const int x_mbs = sub(bw, xd->mb_to_right_edge >> 7);
-  const int y_mbs = sub(bh, xd->mb_to_bottom_edge >> 7);
+  const int x_mis = sub(bw, xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE));
+  const int y_mis = sub(bh, xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE));
 #undef sub
   int x, y;
 
   switch (pred_id) {
     case PRED_SEG_ID:
-      for (y = 0; y < y_mbs; y++) {
-        for (x = 0; x < x_mbs; x++) {
-          xd->mode_info_context[y * mis + x].mbmi.seg_id_predicted =
-              pred_flag;
+      for (y = 0; y < y_mis; y++) {
+        for (x = 0; x < x_mis; x++) {
+          xd->mode_info_context[y * mis + x].mbmi.seg_id_predicted = pred_flag;
         }
       }
       break;
 
     case PRED_REF:
-      for (y = 0; y < y_mbs; y++) {
-        for (x = 0; x < x_mbs; x++) {
+      for (y = 0; y < y_mis; y++) {
+        for (x = 0; x < x_mis; x++) {
           xd->mode_info_context[y * mis + x].mbmi.ref_predicted = pred_flag;
         }
       }
       break;
 
     case PRED_MBSKIP:
-      for (y = 0; y < y_mbs; y++) {
-        for (x = 0; x < x_mbs; x++) {
+      for (y = 0; y < y_mis; y++) {
+        for (x = 0; x < x_mis; x++) {
           xd->mode_info_context[y * mis + x].mbmi.mb_skip_coeff = pred_flag;
         }
       }
@@ -214,27 +213,23 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
 // peredict various bitstream signals.
 
 // Macroblock segment id prediction function
-int vp9_get_pred_mb_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
-                          int mb_row, int mb_col) {
-  const int mb_index = mb_row * cm->mb_cols + mb_col;
-  if (sb_type > BLOCK_SIZE_MB16X16) {
-    const int bw = 1 << mb_width_log2(sb_type);
-    const int bh = 1 << mb_height_log2(sb_type);
-    const int ymbs = MIN(cm->mb_rows - mb_row, bh);
-    const int xmbs = MIN(cm->mb_cols - mb_col, bw);
-    int segment_id = INT_MAX;
-    int x, y;
+int vp9_get_pred_mi_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
+                          int mi_row, int mi_col) {
+  const int mi_index = mi_row * cm->mi_cols + mi_col;
+  const int bw = 1 << mi_width_log2(sb_type);
+  const int bh = 1 << mi_height_log2(sb_type);
+  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+  const int xmis = MIN(cm->mi_cols - mi_col, bw);
+  int segment_id = INT_MAX;
+  int x, y;
 
-    for (y = 0; y < ymbs; y++) {
-      for (x = 0; x < xmbs; x++) {
-        const int index = mb_index + (y * cm->mb_cols + x);
-        segment_id = MIN(segment_id, cm->last_frame_seg_map[index]);
-      }
+  for (y = 0; y < ymis; y++) {
+    for (x = 0; x < xmis; x++) {
+      const int index = mi_index + (y * cm->mi_cols + x);
+      segment_id = MIN(segment_id, cm->last_frame_seg_map[index]);
     }
-    return segment_id;
-  } else {
-    return cm->last_frame_seg_map[mb_index];
   }
+  return segment_id;
 }
 
 MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,

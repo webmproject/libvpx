@@ -764,20 +764,20 @@ void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x) {
 }
 
 void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
-                           int mb_row, int mb_col) {
+                           int mi_row, int mi_col) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  vp9_build_inter_predictors_sb(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
+  vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_SIZE_MB16X16);
   vp9_subtract_sb(x, BLOCK_SIZE_MB16X16);
   vp9_fidct_mb(cm, x);
   vp9_recon_sb(xd, BLOCK_SIZE_MB16X16);
 }
 
 /* this function is used by first pass only */
-void vp9_encode_inter16x16y(MACROBLOCK *x, int mb_row, int mb_col) {
+void vp9_encode_inter16x16y(MACROBLOCK *x, int mi_row, int mi_col) {
   MACROBLOCKD *xd = &x->e_mbd;
 
-  vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
+  vp9_build_inter_predictors_sby(xd, mi_row, mi_col, BLOCK_SIZE_MB16X16);
   vp9_subtract_sby(x, BLOCK_SIZE_MB16X16);
 
   vp9_transform_sby_4x4(x, BLOCK_SIZE_MB16X16);

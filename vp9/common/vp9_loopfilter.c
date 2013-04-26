@@ -304,7 +304,7 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
       y_only? 0 : v_ptr,
       y_stride, uv_stride, dering);
   // process 2nd MB top-right
-  mi = mode_info_context + 1;
+  mi = mode_info_context + (1 << CONFIG_SB8X8);
   do_left_v = !(wbl >= 3 /* 32x16 or >=32x32 */ && (tx_size >= TX_32X32 ||
       sb_mb_lf_skip(mode_info_context, mi)));
   do_above_h = (mb_row > 0);
@@ -320,7 +320,7 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
       y_stride, uv_stride, dering);
 
   // process 3rd MB bottom-left
-  mi = mode_info_context + mis;
+  mi = mode_info_context + (mis << CONFIG_SB8X8);
   do_left_v = (mb_col > 0);
   do_above_h = !(hbl >= 3 /* 16x32 or >=32x32 */ && (tx_size >= TX_32X32 ||
       sb_mb_lf_skip(mode_info_context, mi)));
@@ -336,15 +336,15 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
       y_stride, uv_stride, dering);
 
   // process 4th MB bottom right
-  mi = mode_info_context + mis + 1;
+  mi = mode_info_context + ((mis + 1) << CONFIG_SB8X8);
   do_left_v = !(wbl >= 3 /* 32x16 or >=32x32 */ && (tx_size >= TX_32X32 ||
-      sb_mb_lf_skip(mi - 1, mi)));
+      sb_mb_lf_skip(mi - (1 << CONFIG_SB8X8), mi)));
   do_above_h = !(hbl >= 3 /* 16x32 or >=32x32 */ && (tx_size >= TX_32X32 ||
-      sb_mb_lf_skip(mode_info_context + 1, mi)));
+      sb_mb_lf_skip(mode_info_context + (1 << CONFIG_SB8X8), mi)));
   do_left_v_mbuv = (wbl >= 3 /* 32x16 or >=32x32 */ && (tx_size >= TX_16X16 ||
-      sb_mb_lf_skip(mi - 1, mi)));
+      sb_mb_lf_skip(mi - (1 << CONFIG_SB8X8), mi)));
   do_above_h_mbuv = !(hbl >= 3 /* 16x32 or >=32x32 */ && (tx_size >= TX_16X16 ||
-      sb_mb_lf_skip(mode_info_context + 1, mi)));
+      sb_mb_lf_skip(mode_info_context + (1 << CONFIG_SB8X8), mi)));
   lpf_mb(cm, mi, do_left_v, do_above_h,
       do_left_v_mbuv, do_above_h_mbuv,
       y_ptr + 16 * y_stride + 16,
@@ -361,16 +361,17 @@ static void lpf_sb64(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
   lpf_sb32(cm, mode_info_context, mb_row, mb_col,
       y_ptr, u_ptr, v_ptr,
       y_stride, uv_stride, y_only, dering);
-  lpf_sb32(cm, mode_info_context + 2, mb_row, mb_col + 2,
+  lpf_sb32(cm, mode_info_context + (2 << CONFIG_SB8X8), mb_row, mb_col + 2,
       y_ptr + 32, u_ptr + 16, v_ptr + 16,
       y_stride, uv_stride, y_only, dering);
-  lpf_sb32(cm, mode_info_context + cm->mode_info_stride * 2,
+  lpf_sb32(cm, mode_info_context + cm->mode_info_stride * (2 << CONFIG_SB8X8),
       mb_row + 2, mb_col,
       y_ptr + 32 * y_stride,
       u_ptr + 16 * uv_stride,
       v_ptr + 16 * uv_stride,
       y_stride, uv_stride, y_only, dering);
-  lpf_sb32(cm, mode_info_context + cm->mode_info_stride * 2 + 2,
+  lpf_sb32(cm, mode_info_context + cm->mode_info_stride *
+      (2 << CONFIG_SB8X8) + (2 << CONFIG_SB8X8),
       mb_row + 2, mb_col + 2,
       y_ptr + 32 * y_stride + 32,
       u_ptr + 16 * uv_stride + 16,
@@ -440,14 +441,14 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
       y_ptr += 64;
       u_ptr = y_only? 0 : u_ptr + 32;
       v_ptr = y_only? 0 : v_ptr + 32;
-      mode_info_context += 4;       // step to next SB64
+      mode_info_context += 4 << CONFIG_SB8X8;       // step to next SB64
     }
     if (extra_sb32_col) {
       // process 2 SB32s in the extra SB32 col
       lpf_sb32(cm, mode_info_context, mb_row, mb_col,
                y_ptr, u_ptr, v_ptr,
                y_stride, uv_stride, y_only, dering);
-      lpf_sb32(cm, mode_info_context + mis * 2,
+      lpf_sb32(cm, mode_info_context + mis * (2 << CONFIG_SB8X8),
                mb_row + 2, mb_col,
                y_ptr + 32 * y_stride,
                u_ptr + 16 * uv_stride,
@@ -456,7 +457,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
       y_ptr += 32;
       u_ptr = y_only? 0 : u_ptr + 16;
       v_ptr = y_only? 0 : v_ptr + 16;
-      mode_info_context += 2;       // step to next SB32
+      mode_info_context += 2 << CONFIG_SB8X8;       // step to next SB32
       mb_col += 2;
     }
     if (extra_mb_col) {
@@ -474,7 +475,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
              y_only? 0 : v_ptr,
              y_stride, uv_stride, dering);
       // process 2nd MB
-      mi = mode_info_context + mis;
+      mi = mode_info_context + (mis << CONFIG_SB8X8);
       do_left_v = (mb_col > 0);
       do_above_h = 1;
       do_left_v_mbuv =  1;
@@ -486,7 +487,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
              y_only ? 0 : (v_ptr + 8 * uv_stride),
              y_stride, uv_stride, dering);
       // process 3nd MB
-      mi = mode_info_context + mis * 2;
+      mi = mode_info_context + (mis << CONFIG_SB8X8) * 2;
       do_left_v = (mb_col > 0);
       do_above_h = 1;
       do_left_v_mbuv =  1;
@@ -498,7 +499,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
              y_only ? 0 : (v_ptr + 16 * uv_stride),
              y_stride, uv_stride, dering);
       // process 4th MB
-      mi = mode_info_context + mis * 3;
+      mi = mode_info_context + (mis << CONFIG_SB8X8) * 3;
       do_left_v = (mb_col > 0);
       do_above_h = 1;
       do_left_v_mbuv =  1;
@@ -512,7 +513,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
       y_ptr += 16;
       u_ptr = y_only? 0 : u_ptr + 8;
       v_ptr = y_only? 0 : v_ptr + 8;
-      mode_info_context++;       // step to next MB
+      mode_info_context += 1 << CONFIG_SB8X8;       // step to next MB
     }
     // move pointers to the begining of next sb64 row
     y_ptr += y_stride  * 64 - post->y_width;
@@ -521,7 +522,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
       v_ptr += uv_stride *  32 - post->uv_width;
     }
     /* skip to next SB64 row */
-    mode_info_context += mis * 4 - cm->mb_cols;
+    mode_info_context += mis * (4 << CONFIG_SB8X8) - cm->mi_cols;
   }
   if (extra_sb32_row) {
     const int sb32_cols = sb64_cols * 2 + extra_sb32_col;
@@ -532,7 +533,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
       y_ptr += 32;
       u_ptr = y_only? 0 : u_ptr + 16;
       v_ptr = y_only? 0 : v_ptr + 16;
-      mode_info_context += 2;       // step to next SB32
+      mode_info_context += 2 << CONFIG_SB8X8;       // step to next SB32
     }
     if (extra_mb_col) {
       // process 1st MB
@@ -548,7 +549,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
              y_only? NULL : v_ptr,
              y_stride, uv_stride, dering);
       // process 2nd MB
-      mi = mode_info_context + mis;
+      mi = mode_info_context + (mis << CONFIG_SB8X8);
       do_left_v = (mb_col > 0);
       do_above_h = 1;
       do_left_v_mbuv =  1;
@@ -562,14 +563,14 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
       y_ptr += 16;
       u_ptr = y_only? 0 : u_ptr + 8;
       v_ptr = y_only? 0 : v_ptr + 8;
-      mode_info_context++;       /* step to next MB */
+      mode_info_context += 1 << CONFIG_SB8X8;       /* step to next MB */
     }
     // move pointers to the beginning of next sb64 row
     y_ptr += y_stride * 32 - post->y_width;
     u_ptr += y_only? 0 : uv_stride *  16 - post->uv_width;
     v_ptr += y_only? 0 : uv_stride *  16 - post->uv_width;
     // skip to next MB row if exist
-    mode_info_context += mis * 2 - cm->mb_cols;
+    mode_info_context += mis * (2 << CONFIG_SB8X8) - cm->mi_cols;
     mb_row += 2;
   }
   if (extra_mb_row) {
@@ -588,7 +589,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
       y_ptr += 16;
       u_ptr = y_only? 0 : u_ptr + 8;
       v_ptr = y_only? 0 : v_ptr + 8;
-      mode_info_context++;     // step to next MB
+      mode_info_context += 1 << CONFIG_SB8X8;     // step to next MB
     }
   }
 }

@@ -159,7 +159,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->prob_comppred, cm->prob_comppred);
 
   vpx_memcpy(cpi->coding_context.last_frame_seg_map_copy,
-             cm->last_frame_seg_map, (cm->mb_rows * cm->mb_cols));
+             cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
 
   vp9_copy(cc->last_ref_lf_deltas, xd->last_ref_lf_deltas);
   vp9_copy(cc->last_mode_lf_deltas, xd->last_mode_lf_deltas);
@@ -221,7 +221,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
 
   vpx_memcpy(cm->last_frame_seg_map,
              cpi->coding_context.last_frame_seg_map_copy,
-             (cm->mb_rows * cm->mb_cols));
+             (cm->mi_rows * cm->mi_cols));
 
   vp9_copy(xd->last_ref_lf_deltas, cc->last_ref_lf_deltas);
   vp9_copy(xd->last_mode_lf_deltas, cc->last_mode_lf_deltas);

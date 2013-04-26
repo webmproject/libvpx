@@ -201,9 +201,12 @@ typedef struct VP9Common {
   int last_show_frame;
 
   int frame_flags;
+  // MBs, mb_rows/cols is in 16-pixel units; mi_rows/cols is in
+  // MODE_INFO units (depending on CONFIG_SB8X8, that is either
+  // 16-pixel or 8-pixel)
   int MBs;
-  int mb_rows;
-  int mb_cols;
+  int mb_rows, mi_rows;
+  int mb_cols, mi_cols;
   int mode_info_stride;
 
   /* profile settings */
@@ -314,9 +317,9 @@ typedef struct VP9Common {
   int frame_parallel_decoding_mode;
 
   int tile_columns, log2_tile_columns;
-  int cur_tile_mb_col_start, cur_tile_mb_col_end, cur_tile_col_idx;
+  int cur_tile_mi_col_start, cur_tile_mi_col_end, cur_tile_col_idx;
   int tile_rows, log2_tile_rows;
-  int cur_tile_mb_row_start, cur_tile_mb_row_end, cur_tile_row_idx;
+  int cur_tile_mi_row_start, cur_tile_mi_row_end, cur_tile_row_idx;
 } VP9_COMMON;
 
 static int get_free_fb(VP9_COMMON *cm) {
@@ -343,26 +346,26 @@ static int mb_cols_aligned_to_sb(VP9_COMMON *cm) {
   return (cm->mb_cols + 3) & ~3;
 }
 
-static void set_mb_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
-                       int mb_row, int bh,
-                       int mb_col, int bw) {
-  xd->mb_to_top_edge    = -((mb_row * 16) << 3);
-  xd->mb_to_bottom_edge = ((cm->mb_rows - bh - mb_row) * 16) << 3;
-  xd->mb_to_left_edge   = -((mb_col * 16) << 3);
-  xd->mb_to_right_edge  = ((cm->mb_cols - bw - mb_col) * 16) << 3;
+static void set_mi_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
+                       int mi_row, int bh,
+                       int mi_col, int bw) {
+  xd->mb_to_top_edge    = -((mi_row * MI_SIZE) << 3);
+  xd->mb_to_bottom_edge = ((cm->mi_rows - bh - mi_row) * MI_SIZE) << 3;
+  xd->mb_to_left_edge   = -((mi_col * MI_SIZE) << 3);
+  xd->mb_to_right_edge  = ((cm->mi_cols - bw - mi_col) * MI_SIZE) << 3;
 
   // Are edges available for intra prediction?
-  xd->up_available    = (mb_row != 0);
-  xd->left_available  = (mb_col > cm->cur_tile_mb_col_start);
-  xd->right_available = (mb_col + bw < cm->cur_tile_mb_col_end);
+  xd->up_available    = (mi_row != 0);
+  xd->left_available  = (mi_col > cm->cur_tile_mi_col_start);
+  xd->right_available = (mi_col + bw < cm->cur_tile_mi_col_end);
 }
 
-static int get_mb_row(const MACROBLOCKD *xd) {
-  return ((-xd->mb_to_top_edge) >> 7);
+static int get_mi_row(const MACROBLOCKD *xd) {
+  return ((-xd->mb_to_top_edge) >> (3 + LOG2_MI_SIZE));
 }
 
-static int get_mb_col(const MACROBLOCKD *xd) {
-  return ((-xd->mb_to_left_edge) >> 7);
+static int get_mi_col(const MACROBLOCKD *xd) {
+  return ((-xd->mb_to_left_edge) >> (3 + LOG2_MI_SIZE));
 }
 
 static int get_token_alloc(int mb_rows, int mb_cols) {
