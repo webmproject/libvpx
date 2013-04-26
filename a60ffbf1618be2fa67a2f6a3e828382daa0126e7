@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//0yc\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-04-26T16:43:54Z",
+      "side": 1,
+      "message": "What\u0027s the current behavior with android? Is this code here not working? Does Android define __GNUC__? If not, try changing to\n if (defined(__GNUC__) \u0026\u0026 __GNUC__) || defined (__ANDROID__)\n\nThis code should be generic enough to run everywhere unless the cpuid instruction is restricted for some reason.",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//0yY\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-04-26T16:43:54Z",
+      "side": 1,
+      "message": "Whitespace.",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//0yk\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-04-26T16:43:54Z",
+      "side": 1,
+      "message": "If we don\u0027t have RTCD then the functions are declared statically at configure time. Instead of using function pointers, the calls are #defined to the highest opt level we have. So in the case of !RTCD, this function is a no-op",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//0xs\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-04-26T16:43:54Z",
+      "side": 1,
+      "message": "static function, unsigned vars",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//0yA\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-04-26T16:43:54Z",
+      "side": 1,
+      "message": "Spelling",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//0x4\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-04-26T16:43:54Z",
+      "side": 1,
+      "message": "unsigned",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
