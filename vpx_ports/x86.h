@@ -33,7 +33,7 @@ typedef enum {
   VPX_CPU_LAST
 }  vpx_cpu_t;
 
-#if defined(__GNUC__) && __GNUC__
+#if defined(__GNUC__) && __GNUC__ || defined(__ANDROID__)
 #if ARCH_X86_64
 #define cpuid(func,ax,bx,cx,dx)\
   __asm__ __volatile__ (\
@@ -49,7 +49,7 @@ typedef enum {
                         : "=a" (ax), "=D" (bx), "=c" (cx), "=d" (dx) \
                         : "a" (func));
 #endif
-#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC) /* end __GNUC__ or __ANDROID__*/
 #if ARCH_X86_64
 #define cpuid(func,ax,bx,cx,dx)\
   asm volatile (\
@@ -69,7 +69,7 @@ typedef enum {
                 : "=a" (ax), "=D" (bx), "=c" (cx), "=d" (dx) \
                 : "a" (func));
 #endif
-#else
+#else /* end __SUNPRO__ */
 #if ARCH_X86_64
 void __cpuid(int CPUInfo[4], int info_type);
 #pragma intrinsic(__cpuid)
@@ -86,7 +86,7 @@ void __cpuid(int CPUInfo[4], int info_type);
   __asm mov c, ecx\
   __asm mov d, edx
 #endif
-#endif
+#endif /* end others */
 
 #define HAS_MMX   0x01
 #define HAS_SSE   0x02
