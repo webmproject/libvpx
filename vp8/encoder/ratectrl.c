@@ -614,7 +614,6 @@ static void calc_gf_params(VP8_COMP *cpi)
 static void calc_pframe_target_size(VP8_COMP *cpi)
 {
     int min_frame_target;
-    int Adjustment;
     int old_per_frame_bandwidth = cpi->per_frame_bandwidth;
 
     if ( cpi->current_layer > 0)
@@ -658,6 +657,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
         /* 1 pass */
         else
         {
+            int Adjustment;
             /* Make rate adjustment to recover bits spent in key frame
              * Test to see if the key frame inter data rate correction
              * should still be in force
@@ -688,7 +688,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
              */
             if ((cpi->gf_overspend_bits > 0) && (cpi->this_frame_target > min_frame_target))
             {
-                int Adjustment = (cpi->non_gf_bitrate_adjustment <= cpi->gf_overspend_bits) ? cpi->non_gf_bitrate_adjustment : cpi->gf_overspend_bits;
+                Adjustment = (cpi->non_gf_bitrate_adjustment <= cpi->gf_overspend_bits) ? cpi->non_gf_bitrate_adjustment : cpi->gf_overspend_bits;
 
                 if (Adjustment > (cpi->this_frame_target - min_frame_target))
                     Adjustment = (cpi->this_frame_target - min_frame_target);

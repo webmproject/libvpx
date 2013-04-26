@@ -206,8 +206,6 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         MB_MODE_INFO saved_mbmi;
         MACROBLOCKD *filter_xd = &x->e_mbd;
         MB_MODE_INFO *mbmi = &filter_xd->mode_info_context->mbmi;
-        int mv_col;
-        int mv_row;
         int sse_diff = zero_mv_sse - best_sse;
 
         saved_mbmi = *mbmi;

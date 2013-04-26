@@ -15,7 +15,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-#if HAVE_SSE2
 // In order to improve performance, clip absolute diff values to [0, 255],
 // which allows to keep the additions/subtractions in 8 bits.
 void vp9_dc_only_idct_add_sse2(int input_dc, uint8_t *pred_ptr,
@@ -1972,4 +1971,3 @@ void vp9_short_idct32x32_sse2(int16_t *input, int16_t *output, int pitch) {
     }
   }
 }
-#endif

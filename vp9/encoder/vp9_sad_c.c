@@ -577,4 +577,3 @@ void vp9_sad4x4x4d_c(const uint8_t *src_ptr,
   sad_array[3] = vp9_sad4x4(src_ptr, src_stride,
                             ref_ptr[3], ref_stride, 0x7fffffff);
 }
-

@@ -10,6 +10,7 @@
 
 
 #include "vpx_config.h"
+#include "vp8_rtcd.h"
 #include "encodemb.h"
 #include "encodemv.h"
 #include "vp8/common/common.h"
@@ -852,11 +853,10 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
             if (xd->segmentation_enabled)
             {
-                int i, j;
+                int j;
 
                 if (xd->segmentation_enabled)
                 {
-
                     for (i = 0; i < cpi->encoding_thread_count; i++)
                     {
                         for (j = 0; j < 4; j++)

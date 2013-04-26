@@ -51,7 +51,7 @@ $$(BUILD_PFX)$(1).h: $$(SRC_PATH_BARE)/$(2)
 	@echo "    [CREATE] $$@"
 	$$(qexec)$$(SRC_PATH_BARE)/build/make/rtcd.sh --arch=$$(TGT_ISA) \
           --sym=$(1) \
-          --config=$$(target)$$(if $$(FAT_ARCHS),,-$$(TOOLCHAIN)).mk \
+          --config=$$(CONFIG_DIR)$$(target)$$(if $$(FAT_ARCHS),,-$$(TOOLCHAIN)).mk \
           $$(RTCD_OPTIONS) $$^ > $$@
 CLEAN-OBJS += $$(BUILD_PFX)$(1).h
 RTCD += $$(BUILD_PFX)$(1).h
@@ -436,7 +436,7 @@ test_libvpx.vcproj: $(LIBVPX_TEST_SRCS)
 PROJECTS-$(CONFIG_MSVS) += test_libvpx.vcproj
 
 test:: testdata
-	@set -e; for t in $(addprefix Win32/Release/,$(notdir $(LIBVPX_TEST_BINS:.cc=.exe))); do $$t; done
+	@set -e; for t in $(addprefix $(TGT_OS:win64=x64)/Release/,$(notdir $(LIBVPX_TEST_BINS:.cc=.exe))); do $$t; done
 endif
 else
 
