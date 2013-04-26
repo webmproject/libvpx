@@ -1555,6 +1555,7 @@ static void adapt_coef_probs(vp9_coeff_probs *dst_coef_probs,
 }
 
 void vp9_adapt_coef_probs(VP9_COMMON *cm) {
+#ifndef DISABLE_COEF_ADAPT
   int count_sat;
   int update_factor; /* denominator 256 */
 
@@ -1585,6 +1586,7 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
                    cm->base_qindex, cm->fc.coef_counts_32x32,
                    cm->fc.eob_branch_counts[TX_32X32],
                    count_sat, update_factor);
+#endif
 }
 
 #if CONFIG_CODE_ZEROGROUP
