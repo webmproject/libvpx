@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//0os\u003d",
+        "filename": "vp9/common/vp9_quant_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T17:58:59Z",
+      "side": 1,
+      "message": "these functions are the same. we should combine them into a common vp9_dc_quant(). Also make the return values int16_t to get rid of some of the casts, and probably change the type to int16_t in the lookup tables too.",
+      "revId": "e54f7501130529dc7f06cd7d769a7b45578cb44e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
