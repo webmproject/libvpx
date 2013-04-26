@@ -16,6 +16,24 @@
       "revId": "78e510001c57211b29d745aea2283194e915ddc7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//0h8\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-04-26T18:37:38Z",
+      "side": 1,
+      "message": "I removed this check. All unit tests are passing, vpxenc with --test-decode\u003dfatal works on test video sequences.",
+      "parentUuid": "AAAAXX//2YQ\u003d",
+      "revId": "78e510001c57211b29d745aea2283194e915ddc7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
