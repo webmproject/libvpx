@@ -15,8 +15,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-#if HAVE_SSE2
-
 void vp9_add_residual_4x4_sse2(const int16_t *diff, const uint8_t *pred,
                                int pitch, uint8_t *dest, int stride) {
   const int width = 4;
@@ -452,4 +450,3 @@ void vp9_add_constant_residual_32x32_sse2(const int16_t diff,
     dest += 4 * stride;
   } while (--i);
 }
-#endif
