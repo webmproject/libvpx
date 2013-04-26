@@ -307,18 +307,6 @@ MV clamp_mv_to_umv_border_sb(const MV *src_mv,
   return clamped_mv;
 }
 
-// TODO(jkoleszar): In principle, nothing has to depend on this, but it's
-// currently required. Some users look at the mi->bmi, some look at the
-// xd->bmi.
-static void duplicate_splitmv_bmi(MACROBLOCKD *xd) {
-  int i;
-
-  for (i = 0; i < 16; i += 2) {
-    xd->block[i + 0].bmi = xd->mode_info_context->bmi[i + 0];
-    xd->block[i + 1].bmi = xd->mode_info_context->bmi[i + 1];
-  }
-}
-
 struct build_inter_predictors_args {
   MACROBLOCKD *xd;
   int x;
@@ -366,7 +354,7 @@ static void build_inter_predictors(int plane, int block,
 
     if (xd->mode_info_context->mbmi.mode == SPLITMV) {
       if (plane == 0) {
-        mv = &xd->block[block].bmi.as_mv[which_mv].as_mv;
+        mv = &xd->mode_info_context->bmi[block].as_mv[which_mv].as_mv;
       } else {
         const int y_block = (block & 2) * 4 + (block & 1) * 2;
         split_chroma_mv.row = mi_mv_pred_row_q4(xd, y_block, which_mv);
@@ -409,11 +397,6 @@ void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
      {xd->plane[0].pre[1].buf, NULL, NULL}},
     {{xd->plane[0].pre[0].stride, 0, 0}, {xd->plane[0].pre[1].stride, 0, 0}},
   };
-
-  // TODO(jkoleszar): This is a hack no matter where you put it, but does it
-  // belong here?
-  if (xd->mode_info_context->mbmi.mode == SPLITMV)
-    duplicate_splitmv_bmi(xd);
 
   foreach_predicted_block_in_plane(xd, bsize, 0, build_inter_predictors, &args);
 }

@@ -283,7 +283,7 @@ typedef struct blockd {
   int dst;
   int dst_stride;
 
-  union b_mode_info bmi;
+//  union b_mode_info bmi;
 } BLOCKD;
 
 struct scale_factors {
@@ -585,23 +585,22 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
     return DCT_DCT;
   if (xd->mode_info_context->mbmi.mode == I4X4_PRED &&
       xd->q_index < ACTIVE_HT) {
-    const BLOCKD *b = &xd->block[ib];
     tx_type = txfm_map(
 #if CONFIG_NEWBINTRAMODES
-        b->bmi.as_mode.first == B_CONTEXT_PRED ? b->bmi.as_mode.context :
+        xd->mode_info_context->bmi[ib].as_mode.first == B_CONTEXT_PRED ?
+          xd->mode_info_context->bmi[ib].as_mode.context :
 #endif
-        b->bmi.as_mode.first);
+        xd->mode_info_context->bmi[ib].as_mode.first);
   } else if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
              xd->q_index < ACTIVE_HT) {
-    const BLOCKD *b = &xd->block[ib];
     const int ic = (ib & 10);
 #if USE_ADST_FOR_I8X8_4X4
 #if USE_ADST_PERIPHERY_ONLY
     // Use ADST for periphery blocks only
     const int inner = ib & 5;
-    b += ic - ib;
     tx_type = txfm_map(pred_mode_conv(
-        (MB_PREDICTION_MODE)b->bmi.as_mode.first));
+        (MB_PREDICTION_MODE)xd->mode_info_context->bmi[ic].as_mode.first));
+
 #if USE_ADST_FOR_REMOTE_EDGE
     if (inner == 5)
       tx_type = DCT_DCT;
@@ -672,11 +671,10 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
     return tx_type;
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
       xd->q_index < ACTIVE_HT8) {
-    const BLOCKD *b = &xd->block[ib];
     // TODO(rbultje): MB_PREDICTION_MODE / B_PREDICTION_MODE should be merged
     // or the relationship otherwise modified to address this type conversion.
     tx_type = txfm_map(pred_mode_conv(
-           (MB_PREDICTION_MODE)b->bmi.as_mode.first));
+           (MB_PREDICTION_MODE)xd->mode_info_context->bmi[ib].as_mode.first));
   } else if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
              xd->q_index < ACTIVE_HT8) {
 #if USE_ADST_FOR_I16X16_8X8
@@ -747,16 +745,6 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
 
 void vp9_build_block_doffsets(MACROBLOCKD *xd);
 void vp9_setup_block_dptrs(MACROBLOCKD *xd);
-
-static void update_blockd_bmi(MACROBLOCKD *xd) {
-  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
-
-  if (mode == SPLITMV || mode == I8X8_PRED || mode == I4X4_PRED) {
-    int i;
-    for (i = 0; i < 16; i++)
-      xd->block[i].bmi = xd->mode_info_context->bmi[i];
-  }
-}
 
 static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;

@@ -1044,7 +1044,5 @@ void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
     for (y = 0; y < y_mbs; y++)
       for (x = !y; x < x_mbs; x++)
         mi[y * mis + x] = *mi;
-  } else {
-    update_blockd_bmi(xd);
   }
 }

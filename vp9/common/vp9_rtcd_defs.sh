@@ -591,7 +591,7 @@ specialize vp9_short_walsh8x4
 #
 # Motion search
 #
-prototype int vp9_full_search_sad "struct macroblock *x, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+prototype int vp9_full_search_sad "struct macroblock *x, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv, int n"
 specialize vp9_full_search_sad sse3 sse4_1
 vp9_full_search_sad_sse3=vp9_full_search_sadx3
 vp9_full_search_sad_sse4_1=vp9_full_search_sadx8

@@ -254,7 +254,7 @@ static void decode_8x8(MACROBLOCKD *xd) {
       int stride = xd->plane[0].dst.stride;
       if (mode == I8X8_PRED) {
         BLOCKD *b = &xd->block[ib];
-        int i8x8mode = b->bmi.as_mode.first;
+        int i8x8mode = xd->mode_info_context->bmi[ib].as_mode.first;
         vp9_intra8x8_predict(xd, b, i8x8mode, dst, stride);
       }
       tx_type = get_tx_type_8x8(xd, ib);
@@ -271,7 +271,7 @@ static void decode_8x8(MACROBLOCKD *xd) {
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
       BLOCKD *b = &xd->block[ib];
-      int i8x8mode = b->bmi.as_mode.first;
+      int i8x8mode = xd->mode_info_context->bmi[ib].as_mode.first;
 
       b = &xd->block[16 + i];
       vp9_intra_uv4x4_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
@@ -324,7 +324,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
       const int iblock[4] = {0, 1, 4, 5};
       int j;
       BLOCKD *b = &xd->block[ib];
-      int i8x8mode = b->bmi.as_mode.first;
+      int i8x8mode = xd->mode_info_context->bmi[ib].as_mode.first;
       vp9_intra8x8_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
                            b->dst_stride);
       for (j = 0; j < 4; j++) {
@@ -349,7 +349,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
       BLOCKD *b = &xd->block[i];
       int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
 #if CONFIG_NEWBINTRAMODES
-      xd->mode_info_context->bmi[i].as_mode.context = b->bmi.as_mode.context =
+      xd->mode_info_context->bmi[i].as_mode.context =
           vp9_find_bpred_context(xd, b);
       if (!xd->mode_info_context->mbmi.mb_skip_coeff)
         vp9_decode_coefs_4x4(pbi, xd, r, PLANE_TYPE_Y_WITH_DC, i);

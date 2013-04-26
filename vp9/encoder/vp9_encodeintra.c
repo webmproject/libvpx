@@ -32,7 +32,7 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
     int i;
 
     for (i = 0; i < 16; i++) {
-      x->e_mbd.block[i].bmi.as_mode.first = B_DC_PRED;
+      x->e_mbd.mode_info_context->bmi[i].as_mode.first = B_DC_PRED;
       encode_intra4x4block(x, i);
     }
   }
@@ -58,10 +58,12 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib) {
   assert(ib < 16);
 
 #if CONFIG_NEWBINTRAMODES
-  b->bmi.as_mode.context = vp9_find_bpred_context(&x->e_mbd, b);
+  xd->mode_info_context->bmi[ib].as_mode.context =
+    vp9_find_bpred_context(&x->e_mbd, b);
 #endif
 
-  vp9_intra4x4_predict(&x->e_mbd, b, b->bmi.as_mode.first,
+  vp9_intra4x4_predict(&x->e_mbd, b,
+                       xd->mode_info_context->bmi[ib].as_mode.first,
                        *(b->base_dst) + b->dst, b->dst_stride);
   vp9_subtract_block(4, 4, src_diff, 16,
                      src, x->plane[0].src.stride,
@@ -169,7 +171,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
   int i;
   TX_TYPE tx_type;
 
-  vp9_intra8x8_predict(xd, b, b->bmi.as_mode.first,
+  vp9_intra8x8_predict(xd, b, xd->mode_info_context->bmi[ib].as_mode.first,
                        *(b->base_dst) + b->dst, b->dst_stride);
   // generate residual blocks
   vp9_subtract_block(8, 8, src_diff, 16,
@@ -287,8 +289,7 @@ void vp9_encode_intra8x8mbuv(MACROBLOCK *x) {
   int i;
 
   for (i = 0; i < 4; i++) {
-    BLOCKD *b = &x->e_mbd.block[vp9_i8x8_block[i]];
-    int mode = b->bmi.as_mode.first;
+    int mode = x->e_mbd.mode_info_context->bmi[vp9_i8x8_block[i]].as_mode.first;
 
     encode_intra_uv4x4(x, i + 16, mode);  // u
     encode_intra_uv4x4(x, i + 20, mode);  // v

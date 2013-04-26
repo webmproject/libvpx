@@ -1574,7 +1574,7 @@ int vp9_full_search_sad_c(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
                           int sad_per_bit, int distance,
                           vp9_variance_fn_ptr_t *fn_ptr, int *mvjcost,
                           int *mvcost[2],
-                          int_mv *center_mv) {
+                          int_mv *center_mv, int n) {
   const MACROBLOCKD* const xd = &x->e_mbd;
   uint8_t *what = x->plane[0].src.buf;
   int what_stride = x->plane[0].src.stride;
@@ -1582,7 +1582,7 @@ int vp9_full_search_sad_c(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
   int in_what_stride = xd->plane[0].pre[0].stride;
   int mv_stride = xd->plane[0].pre[0].stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &d->bmi.as_mv[0];
+  int_mv *best_mv = &x->e_mbd.mode_info_context->bmi[n].as_mv[0];
   int_mv this_mv;
   int bestsad = INT_MAX;
   int r, c;
@@ -1669,7 +1669,7 @@ int vp9_full_search_sad_c(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
 int vp9_full_search_sadx3(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
                           int sad_per_bit, int distance,
                           vp9_variance_fn_ptr_t *fn_ptr, int *mvjcost,
-                          int *mvcost[2], int_mv *center_mv) {
+                          int *mvcost[2], int_mv *center_mv, int n) {
   const MACROBLOCKD* const xd = &x->e_mbd;
   uint8_t *what = x->plane[0].src.buf;
   int what_stride = x->plane[0].src.stride;
@@ -1677,7 +1677,7 @@ int vp9_full_search_sadx3(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
   int in_what_stride = xd->plane[0].pre[0].stride;
   int mv_stride = xd->plane[0].pre[0].stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &d->bmi.as_mv[0];
+  int_mv *best_mv = &x->e_mbd.mode_info_context->bmi[n].as_mv[0];
   int_mv this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;
@@ -1798,7 +1798,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
                           int sad_per_bit, int distance,
                           vp9_variance_fn_ptr_t *fn_ptr,
                           int *mvjcost, int *mvcost[2],
-                          int_mv *center_mv) {
+                          int_mv *center_mv, int n) {
   const MACROBLOCKD* const xd = &x->e_mbd;
   uint8_t *what = x->plane[0].src.buf;
   int what_stride = x->plane[0].src.stride;
@@ -1806,7 +1806,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, BLOCKD *d, int_mv *ref_mv,
   int in_what_stride = xd->plane[0].pre[0].stride;
   int mv_stride = xd->plane[0].pre[0].stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &d->bmi.as_mv[0];
+  int_mv *best_mv = &x->e_mbd.mode_info_context->bmi[n].as_mv[0];
   int_mv this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;

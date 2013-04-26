@@ -383,16 +383,7 @@ static void update_state(VP9_COMP *cpi,
     ctx->txfm_rd_diff[ALLOW_32X32] = ctx->txfm_rd_diff[ALLOW_16X16];
   }
 
-  if (mb_mode == I4X4_PRED) {
-    for (i = 0; i < 16; i++) {
-      xd->block[i].bmi.as_mode = xd->mode_info_context->bmi[i].as_mode;
-      assert(xd->block[i].bmi.as_mode.first < B_MODE_COUNT);
-    }
-  } else if (mb_mode == I8X8_PRED) {
-    for (i = 0; i < 16; i++) {
-      xd->block[i].bmi = xd->mode_info_context->bmi[i];
-    }
-  } else if (mb_mode == SPLITMV) {
+  if (mb_mode == SPLITMV) {
     vpx_memcpy(x->partition_info, &ctx->partition_info,
                sizeof(PARTITION_INFO));
 
@@ -1828,15 +1819,15 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
   if (m != I8X8_PRED)
     ++cpi->y_uv_mode_count[m][uvm];
   else {
-    cpi->i8x8_mode_count[xd->block[0].bmi.as_mode.first]++;
-    cpi->i8x8_mode_count[xd->block[2].bmi.as_mode.first]++;
-    cpi->i8x8_mode_count[xd->block[8].bmi.as_mode.first]++;
-    cpi->i8x8_mode_count[xd->block[10].bmi.as_mode.first]++;
+    cpi->i8x8_mode_count[xd->mode_info_context->bmi[0].as_mode.first]++;
+    cpi->i8x8_mode_count[xd->mode_info_context->bmi[2].as_mode.first]++;
+    cpi->i8x8_mode_count[xd->mode_info_context->bmi[8].as_mode.first]++;
+    cpi->i8x8_mode_count[xd->mode_info_context->bmi[10].as_mode.first]++;
   }
   if (m == I4X4_PRED) {
     int b = 0;
     do {
-      int m = xd->block[b].bmi.as_mode.first;
+      int m = xd->mode_info_context->bmi[b].as_mode.first;
 #if CONFIG_NEWBINTRAMODES
       if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
 #endif

@@ -253,7 +253,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
 
 #if CONFIG_NEWBINTRAMODES
   if (b_mode == B_CONTEXT_PRED)
-    b_mode = x->bmi.as_mode.context;
+    b_mode = xd->mode_info_context->bmi[block_idx].as_mode.context;
 #endif
 
   switch (b_mode) {
