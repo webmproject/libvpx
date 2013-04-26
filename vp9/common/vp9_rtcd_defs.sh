@@ -8,7 +8,6 @@ cat <<EOF
 #include "vp9/common/vp9_enums.h"
 
 struct loop_filter_info;
-struct blockd;
 struct macroblockd;
 struct loop_filter_info;
 
@@ -95,13 +94,13 @@ specialize vp9_build_intra_predictors_sby_s
 prototype void vp9_build_intra_predictors_sbuv_s "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
 specialize vp9_build_intra_predictors_sbuv_s
 
-prototype void vp9_intra4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor, int pre_stride"
+prototype void vp9_intra4x4_predict "struct macroblockd *xd, int block, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra4x4_predict;
 
-prototype void vp9_intra8x8_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor, int pre_stride"
+prototype void vp9_intra8x8_predict "struct macroblockd *xd, int block, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra8x8_predict;
 
-prototype void vp9_intra_uv4x4_predict "struct macroblockd *xd, struct blockd *x, int b_mode, uint8_t *predictor, int pre_stride"
+prototype void vp9_intra_uv4x4_predict "struct macroblockd *xd, int block, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra_uv4x4_predict;
 
 if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
@@ -591,16 +590,16 @@ specialize vp9_short_walsh8x4
 #
 # Motion search
 #
-prototype int vp9_full_search_sad "struct macroblock *x, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv, int n"
+prototype int vp9_full_search_sad "struct macroblock *x, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv, int n"
 specialize vp9_full_search_sad sse3 sse4_1
 vp9_full_search_sad_sse3=vp9_full_search_sadx3
 vp9_full_search_sad_sse4_1=vp9_full_search_sadx8
 
-prototype int vp9_refining_search_sad "struct macroblock *x, struct blockd *d, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+prototype int vp9_refining_search_sad "struct macroblock *x, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
 specialize vp9_refining_search_sad sse3
 vp9_refining_search_sad_sse3=vp9_refining_search_sadx4
 
-prototype int vp9_diamond_search_sad "struct macroblock *x, struct blockd *d, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+prototype int vp9_diamond_search_sad "struct macroblock *x, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
 specialize vp9_diamond_search_sad sse3
 vp9_diamond_search_sad_sse3=vp9_diamond_search_sadx4
 

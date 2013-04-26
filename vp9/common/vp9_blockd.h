@@ -278,14 +278,6 @@ typedef struct {
   union b_mode_info bmi[16];
 } MODE_INFO;
 
-typedef struct blockd {
-  uint8_t **base_dst;
-  int dst;
-  int dst_stride;
-
-//  union b_mode_info bmi;
-} BLOCKD;
-
 struct scale_factors {
   int x_num;
   int x_den;
@@ -338,9 +330,6 @@ struct macroblockd_plane {
 
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
-
-  /* 16 Y blocks, 4 U, 4 V, each with 16 entries. */
-  BLOCKD block[24];
 
   struct scale_factors scale_factor[2];
   struct scale_factors scale_factor_uv[2];
@@ -743,7 +732,6 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   return tx_type;
 }
 
-void vp9_build_block_doffsets(MACROBLOCKD *xd);
 void vp9_setup_block_dptrs(MACROBLOCKD *xd);
 
 static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {

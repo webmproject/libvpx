@@ -250,12 +250,14 @@ static void decode_8x8(MACROBLOCKD *xd) {
       int ib = vp9_i8x8_block[i];
       int idx = (ib & 0x02) ? (ib + 2) : ib;
       int16_t *q  = BLOCK_OFFSET(xd->plane[0].qcoeff, idx, 16);
-      uint8_t *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
+      uint8_t* const dst =
+          raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                    xd->plane[0].dst.buf,
+                                    xd->plane[0].dst.stride);
       int stride = xd->plane[0].dst.stride;
       if (mode == I8X8_PRED) {
-        BLOCKD *b = &xd->block[ib];
         int i8x8mode = xd->mode_info_context->bmi[ib].as_mode.first;
-        vp9_intra8x8_predict(xd, b, i8x8mode, dst, stride);
+        vp9_intra8x8_predict(xd, ib, i8x8mode, dst, stride);
       }
       tx_type = get_tx_type_8x8(xd, ib);
       vp9_iht_add_8x8_c(tx_type, q, dst, stride, xd->plane[0].eobs[idx]);
@@ -270,21 +272,25 @@ static void decode_8x8(MACROBLOCKD *xd) {
     int i;
     for (i = 0; i < 4; i++) {
       int ib = vp9_i8x8_block[i];
-      BLOCKD *b = &xd->block[ib];
       int i8x8mode = xd->mode_info_context->bmi[ib].as_mode.first;
+      uint8_t* dst;
 
-      b = &xd->block[16 + i];
-      vp9_intra_uv4x4_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
-                              b->dst_stride);
+      dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 1, i,
+                                      xd->plane[1].dst.buf,
+                                      xd->plane[1].dst.stride);
+      vp9_intra_uv4x4_predict(xd, 16 + i, i8x8mode,
+                              dst, xd->plane[1].dst.stride);
       xd->itxm_add(BLOCK_OFFSET(xd->plane[1].qcoeff, i, 16),
-                   *(b->base_dst) + b->dst, b->dst_stride,
+                   dst, xd->plane[1].dst.stride,
                    xd->plane[1].eobs[i]);
 
-      b = &xd->block[20 + i];
-      vp9_intra_uv4x4_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
-                              b->dst_stride);
+      dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 2, i,
+                                      xd->plane[2].dst.buf,
+                                      xd->plane[1].dst.stride);
+      vp9_intra_uv4x4_predict(xd, 20 + i, i8x8mode,
+                              dst, xd->plane[1].dst.stride);
       xd->itxm_add(BLOCK_OFFSET(xd->plane[2].qcoeff, i, 16),
-                   *(b->base_dst) + b->dst, b->dst_stride,
+                   dst, xd->plane[1].dst.stride,
                    xd->plane[2].eobs[i]);
     }
   } else if (mode == SPLITMV) {
@@ -302,14 +308,16 @@ static void decode_8x8(MACROBLOCKD *xd) {
 }
 
 static INLINE void dequant_add_y(MACROBLOCKD *xd, TX_TYPE tx_type, int idx) {
-  BLOCKD *const b = &xd->block[idx];
   struct macroblockd_plane *const y = &xd->plane[0];
+  uint8_t* const dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, idx,
+                                                 xd->plane[0].dst.buf,
+                                                 xd->plane[0].dst.stride);
   if (tx_type != DCT_DCT) {
     vp9_iht_add_c(tx_type, BLOCK_OFFSET(y->qcoeff, idx, 16),
-                  *(b->base_dst) + b->dst, b->dst_stride, y->eobs[idx]);
+                  dst, xd->plane[0].dst.stride, y->eobs[idx]);
   } else {
-    xd->itxm_add(BLOCK_OFFSET(y->qcoeff, idx, 16), *(b->base_dst) + b->dst,
-                 b->dst_stride, y->eobs[idx]);
+    xd->itxm_add(BLOCK_OFFSET(y->qcoeff, idx, 16),
+                 dst, xd->plane[0].dst.stride, y->eobs[idx]);
   }
 }
 
@@ -323,39 +331,48 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
       int ib = vp9_i8x8_block[i];
       const int iblock[4] = {0, 1, 4, 5};
       int j;
-      BLOCKD *b = &xd->block[ib];
+      uint8_t* dst;
       int i8x8mode = xd->mode_info_context->bmi[ib].as_mode.first;
-      vp9_intra8x8_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
-                           b->dst_stride);
+
+      dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+                                      xd->plane[0].dst.buf,
+                                      xd->plane[0].dst.stride);
+      vp9_intra8x8_predict(xd, ib, i8x8mode, dst, xd->plane[0].dst.stride);
       for (j = 0; j < 4; j++) {
         tx_type = get_tx_type_4x4(xd, ib + iblock[j]);
         dequant_add_y(xd, tx_type, ib + iblock[j]);
       }
-      b = &xd->block[16 + i];
-      vp9_intra_uv4x4_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
-                              b->dst_stride);
+      dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 1, i,
+                                      xd->plane[1].dst.buf,
+                                      xd->plane[1].dst.stride);
+      vp9_intra_uv4x4_predict(xd, 16 + i, i8x8mode,
+                              dst, xd->plane[1].dst.stride);
       xd->itxm_add(BLOCK_OFFSET(xd->plane[1].qcoeff, i, 16),
-                   *(b->base_dst) + b->dst, b->dst_stride,
+                   dst, xd->plane[1].dst.stride,
                    xd->plane[1].eobs[i]);
-      b = &xd->block[20 + i];
-      vp9_intra_uv4x4_predict(xd, b, i8x8mode, *(b->base_dst) + b->dst,
-                              b->dst_stride);
+      dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 2, i,
+                                      xd->plane[2].dst.buf,
+                                      xd->plane[2].dst.stride);
+      vp9_intra_uv4x4_predict(xd, 20 + i, i8x8mode,
+                              dst, xd->plane[1].dst.stride);
       xd->itxm_add(BLOCK_OFFSET(xd->plane[2].qcoeff, i, 16),
-                   *(b->base_dst) + b->dst, b->dst_stride,
+                   dst, xd->plane[1].dst.stride,
                    xd->plane[2].eobs[i]);
     }
   } else if (mode == I4X4_PRED) {
     for (i = 0; i < 16; i++) {
-      BLOCKD *b = &xd->block[i];
       int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
+      uint8_t* dst;
+      dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, i,
+                                      xd->plane[0].dst.buf,
+                                      xd->plane[0].dst.stride);
 #if CONFIG_NEWBINTRAMODES
       xd->mode_info_context->bmi[i].as_mode.context =
-          vp9_find_bpred_context(xd, b);
+          vp9_find_bpred_context(xd, i, dst, xd->plane[0].dst.stride);
       if (!xd->mode_info_context->mbmi.mb_skip_coeff)
         vp9_decode_coefs_4x4(pbi, xd, r, PLANE_TYPE_Y_WITH_DC, i);
 #endif
-      vp9_intra4x4_predict(xd, b, b_mode, *(b->base_dst) + b->dst,
-                           b->dst_stride);
+      vp9_intra4x4_predict(xd, i, b_mode, dst, xd->plane[0].dst.stride);
       tx_type = get_tx_type_4x4(xd, i);
       dequant_add_y(xd, tx_type, i);
     }
@@ -1554,7 +1571,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   vp9_setup_intra_recon(new_fb);
 
   vp9_setup_block_dptrs(xd);
-  vp9_build_block_doffsets(xd);
 
   // clear out the coeff buffer
   vpx_memset(xd->plane[0].qcoeff, 0, sizeof(xd->plane[0].qcoeff));

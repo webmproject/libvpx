@@ -129,7 +129,6 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   int sadpb = x->sadperbit16;
   int bestsme = INT_MAX;
 
-  BLOCKD *d = &x->e_mbd.block[0];
   int_mv best_ref_mv1;
   int_mv best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
   int_mv *ref_mv;
@@ -160,7 +159,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   // TODO Check that the 16x16 vf & sdf are selected here
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   ref_mv = &x->e_mbd.mode_info_context->bmi[0].as_mv[0];
-  bestsme = vp9_hex_search(x, d, &best_ref_mv1_full, ref_mv,
+  bestsme = vp9_hex_search(x, &best_ref_mv1_full, ref_mv,
                            step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
                            NULL, NULL, NULL, NULL,
                            &best_ref_mv1);
@@ -172,7 +171,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
     int distortion;
     unsigned int sse;
     // Ignore mv costing by sending NULL pointer instead of cost array
-    bestsme = cpi->find_fractional_mv_step(x, d, ref_mv,
+    bestsme = cpi->find_fractional_mv_step(x, ref_mv,
                                            &best_ref_mv1,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],

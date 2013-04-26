@@ -363,7 +363,6 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                      YV12_BUFFER_CONFIG *recon_buffer,
                                      int *best_motion_err, int recon_yoffset) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  BLOCKD *d = &x->e_mbd.block[0];
   int num00;
 
   int_mv tmp_mv;
@@ -399,7 +398,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   tmp_mv.as_int = 0;
   ref_mv_full.as_mv.col = ref_mv->as_mv.col >> 3;
   ref_mv_full.as_mv.row = ref_mv->as_mv.row >> 3;
-  tmp_err = cpi->diamond_search_sad(x, d, &ref_mv_full, &tmp_mv, step_param,
+  tmp_err = cpi->diamond_search_sad(x, &ref_mv_full, &tmp_mv, step_param,
                                     x->sadperbit16, &num00, &v_fn_ptr,
                                     x->nmvjointcost,
                                     x->mvcost, ref_mv);
@@ -422,7 +421,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     if (num00)
       num00--;
     else {
-      tmp_err = cpi->diamond_search_sad(x, d, &ref_mv_full, &tmp_mv,
+      tmp_err = cpi->diamond_search_sad(x, &ref_mv_full, &tmp_mv,
                                         step_param + n, x->sadperbit16,
                                         &num00, &v_fn_ptr,
                                         x->nmvjointcost,

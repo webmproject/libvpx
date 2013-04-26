@@ -18,7 +18,8 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
                                               int stride, int n,
                                               int tx, int ty);
 
-B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, BLOCKD *x);
+B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, int block,
+                                         uint8_t *ptr, int stride);
 
 #if CONFIG_COMP_INTERINTRA_PRED
 void vp9_build_interintra_predictors(MACROBLOCKD *xd,
