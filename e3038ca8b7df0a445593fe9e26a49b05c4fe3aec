@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//1Bg\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1115898
+      },
+      "writtenOn": "2013-04-26T08:08:46Z",
+      "side": 1,
+      "message": "copyright style is wrong eh\nNo (c)\nUppercase copyright owner - The WebM Project Authors.\nLowercase  All rights reserved.",
+      "revId": "e3038ca8b7df0a445593fe9e26a49b05c4fe3aec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//1Bk\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1115898
+      },
+      "writtenOn": "2013-04-26T08:08:46Z",
+      "side": 1,
+      "message": "suggest updating you code style to match chromium with reguards to pointers",
+      "revId": "e3038ca8b7df0a445593fe9e26a49b05c4fe3aec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
