@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//0Ys\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-26T19:54:10Z",
+      "side": 1,
+      "message": "Generally have been dropping the \u0027remote-tracking\u0027 and \u0027origin/\u0027 parts of this generated message for the merge. See 42db454 or 7f7d135 for examples.",
+      "revId": "2671367d477cef423d3c21d02aaf11d77c530180",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
