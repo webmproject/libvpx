@@ -11,45 +11,36 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_quant_common.h"
 
-static int dc_qlookup[QINDEX_RANGE];
-static int ac_qlookup[QINDEX_RANGE];
+static int16_t dc_qlookup[QINDEX_RANGE];
+static int16_t ac_qlookup[QINDEX_RANGE];
 
 #define ACDC_MIN 4
 
+// TODO(dkovalev) move to common and reuse
+static double poly3(double a, double b, double c, double d, double x) {
+  return a*x*x*x + b*x*x + c*x + d;
+}
+
 void vp9_init_quant_tables() {
-  int i;
-  int current_val = 4;
-  int last_val = 4;
-  int ac_val;
+  int i, val = 4;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    ac_qlookup[i] = current_val;
-    current_val = (int)(current_val * 1.02);
-    if (current_val == last_val)
-      current_val++;
-    last_val = current_val;
+    const int ac_val = val;
 
-    ac_val = ac_qlookup[i];
-    dc_qlookup[i] = (int)((0.000000305 * ac_val * ac_val * ac_val) +
-                          (-0.00065 * ac_val * ac_val) +
-                          (0.9 * ac_val) + 0.5);
-    if (dc_qlookup[i] < ACDC_MIN)
-      dc_qlookup[i] = ACDC_MIN;
+    val = (int)(val * 1.02);
+    if (val == ac_val)
+      ++val;
+
+    ac_qlookup[i] = (int16_t)ac_val;
+    dc_qlookup[i] = (int16_t)MAX(ACDC_MIN, poly3(0.000000305, -0.00065, 0.9,
+                                                 0.5, ac_val));
   }
 }
 
-int vp9_dc_quant(int qindex, int delta) {
+int16_t vp9_dc_quant(int qindex, int delta) {
   return dc_qlookup[clamp(qindex + delta, 0, MAXQ)];
 }
 
-int vp9_dc_uv_quant(int qindex, int delta) {
-  return dc_qlookup[clamp(qindex + delta, 0, MAXQ)];
-}
-
-int vp9_ac_yquant(int qindex) {
-  return ac_qlookup[clamp(qindex, 0, MAXQ)];
-}
-
-int vp9_ac_uv_quant(int qindex, int delta) {
+int16_t vp9_ac_quant(int qindex, int delta) {
   return ac_qlookup[clamp(qindex + delta, 0, MAXQ)];
 }

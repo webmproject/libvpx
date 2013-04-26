@@ -15,11 +15,8 @@
 #include "vp9/common/vp9_onyxc_int.h"
 
 void vp9_init_quant_tables();
-int vp9_ac_yquant(int qindex);
-int vp9_dc_quant(int qindex, int delta);
-int vp9_dc2quant(int qindex, int delta);
-int vp9_ac2quant(int qindex, int delta);
-int vp9_dc_uv_quant(int qindex, int delta);
-int vp9_ac_uv_quant(int qindex, int delta);
+
+int16_t vp9_dc_quant(int qindex, int delta);
+int16_t vp9_ac_quant(int qindex, int delta);
 
 #endif  // VP9_COMMON_VP9_QUANT_COMMON_H_

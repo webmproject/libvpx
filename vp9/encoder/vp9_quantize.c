@@ -286,7 +286,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     cpi->common.y_dequant[q][0] = quant_val;
     cpi->zrun_zbin_boost_y1[q][0] = (quant_val * zbin_boost[0]) >> 7;
 
-    quant_val = vp9_dc_uv_quant(q, cpi->common.uv_dc_delta_q);
+    quant_val = vp9_dc_quant(q, cpi->common.uv_dc_delta_q);
     invert_quant(cpi->UVquant[q] + 0, cpi->UVquant_shift[q] + 0, quant_val);
     cpi->UVzbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
     cpi->UVround[q][0] = (qrounding_factor * quant_val) >> 7;
@@ -297,7 +297,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     for (i = 1; i < 16; i++) {
       int rc = vp9_default_zig_zag1d_4x4[i];
 
-      quant_val = vp9_ac_yquant(q);
+      quant_val = vp9_ac_quant(q, 0);
       invert_quant(cpi->Y1quant[q] + rc, cpi->Y1quant_shift[q] + rc, quant_val);
       cpi->Y1zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
       cpi->Y1round[q][rc] = (qrounding_factor * quant_val) >> 7;
@@ -305,7 +305,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       cpi->zrun_zbin_boost_y1[q][i] =
           ROUND_POWER_OF_TWO(quant_val * zbin_boost[i], 7);
 
-      quant_val = vp9_ac_uv_quant(q, cpi->common.uv_ac_delta_q);
+      quant_val = vp9_ac_quant(q, cpi->common.uv_ac_delta_q);
       invert_quant(cpi->UVquant[q] + rc, cpi->UVquant_shift[q] + rc, quant_val);
       cpi->UVzbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
       cpi->UVround[q][rc] = (qrounding_factor * quant_val) >> 7;

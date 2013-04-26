@@ -163,22 +163,20 @@ static vp9_prob read_prob_diff_update(vp9_reader *r, int oldp) {
   return (vp9_prob)inv_remap_prob(delp, oldp);
 }
 
-void vp9_init_de_quantizer(VP9D_COMP *pbi) {
-  int i;
-  int q;
-  VP9_COMMON *const pc = &pbi->common;
+void vp9_init_dequantizer(VP9_COMMON *pc) {
+  int q, i;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
     // DC value
-    pc->y_dequant[q][0] = (int16_t)vp9_dc_quant(q, pc->y_dc_delta_q);
-    pc->uv_dequant[q][0] = (int16_t)vp9_dc_uv_quant(q, pc->uv_dc_delta_q);
+    pc->y_dequant[q][0] = vp9_dc_quant(q, pc->y_dc_delta_q);
+    pc->uv_dequant[q][0] = vp9_dc_quant(q, pc->uv_dc_delta_q);
 
     // AC values
     for (i = 1; i < 16; i++) {
       const int rc = vp9_default_zig_zag1d_4x4[i];
 
-      pc->y_dequant[q][rc] = (int16_t)vp9_ac_yquant(q);
-      pc->uv_dequant[q][rc] = (int16_t)vp9_ac_uv_quant(q, pc->uv_ac_delta_q);
+      pc->y_dequant[q][rc] = vp9_ac_quant(q, 0);
+      pc->uv_dequant[q][rc] = vp9_ac_quant(q, pc->uv_ac_delta_q);
     }
   }
 }
@@ -1158,7 +1156,7 @@ static void setup_quantization(VP9D_COMP *pbi, vp9_reader *r) {
   if (get_delta_q(r, &pc->y_dc_delta_q) |
       get_delta_q(r, &pc->uv_dc_delta_q) |
       get_delta_q(r, &pc->uv_ac_delta_q))
-    vp9_init_de_quantizer(pbi);
+    vp9_init_dequantizer(pc);
 
   mb_init_dequantizer(pc, &pbi->mb);  // MB level dequantizer setup
 }
