@@ -162,16 +162,17 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     }
     // dc values
     quant_val = vp9_dc_quant(q, cpi->common.y_dc_delta_q);
-    invert_quant(cpi->Y1quant[q] + 0, cpi->Y1quant_shift[q] + 0, quant_val);
-    cpi->Y1zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
-    cpi->Y1round[q][0] = (qrounding_factor * quant_val) >> 7;
+    invert_quant(cpi->y_quant[q] + 0, cpi->y_quant_shift[q] + 0, quant_val);
+    cpi->y_zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
+    cpi->y_round[q][0] = (qrounding_factor * quant_val) >> 7;
     cpi->common.y_dequant[q][0] = quant_val;
-    cpi->zrun_zbin_boost_y1[q][0] = (quant_val * zbin_boost[0]) >> 7;
+    cpi->zrun_zbin_boost_y[q][0] = (quant_val * zbin_boost[0]) >> 7;
+
 
     quant_val = vp9_dc_quant(q, cpi->common.uv_dc_delta_q);
-    invert_quant(cpi->UVquant[q] + 0, cpi->UVquant_shift[q] + 0, quant_val);
-    cpi->UVzbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
-    cpi->UVround[q][0] = (qrounding_factor * quant_val) >> 7;
+    invert_quant(cpi->uv_quant[q] + 0, cpi->uv_quant_shift[q] + 0, quant_val);
+    cpi->uv_zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
+    cpi->uv_round[q][0] = (qrounding_factor * quant_val) >> 7;
     cpi->common.uv_dequant[q][0] = quant_val;
     cpi->zrun_zbin_boost_uv[q][0] = (quant_val * zbin_boost[0]) >> 7;
 
@@ -183,16 +184,16 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     for (i = 1; i < 16; i++) {
       int rc = vp9_default_zig_zag1d_4x4[i];
 
-      invert_quant(cpi->Y1quant[q] + rc, cpi->Y1quant_shift[q] + rc, quant_val);
-      cpi->Y1zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
-      cpi->Y1round[q][rc] = (qrounding_factor * quant_val) >> 7;
-      cpi->zrun_zbin_boost_y1[q][i] =
+      invert_quant(cpi->y_quant[q] + rc, cpi->y_quant_shift[q] + rc, quant_val);
+      cpi->y_zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
+      cpi->y_round[q][rc] = (qrounding_factor * quant_val) >> 7;
+      cpi->zrun_zbin_boost_y[q][i] =
           ROUND_POWER_OF_TWO(quant_val * zbin_boost[i], 7);
 
-      invert_quant(cpi->UVquant[q] + rc, cpi->UVquant_shift[q] + rc,
+      invert_quant(cpi->uv_quant[q] + rc, cpi->uv_quant_shift[q] + rc,
         quant_uv_val);
-      cpi->UVzbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_uv_val, 7);
-      cpi->UVround[q][rc] = (qrounding_factor * quant_uv_val) >> 7;
+      cpi->uv_zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_uv_val, 7);
+      cpi->uv_round[q][rc] = (qrounding_factor * quant_uv_val) >> 7;
       cpi->zrun_zbin_boost_uv[q][i] =
           ROUND_POWER_OF_TWO(quant_uv_val * zbin_boost[i], 7);
     }
@@ -210,11 +211,11 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   zbin_extra = (cpi->common.y_dequant[qindex][1] *
                  (cpi->zbin_mode_boost + x->act_zbin_adj)) >> 7;
 
-  x->plane[0].quant = cpi->Y1quant[qindex];
-  x->plane[0].quant_shift = cpi->Y1quant_shift[qindex];
-  x->plane[0].zbin = cpi->Y1zbin[qindex];
-  x->plane[0].round = cpi->Y1round[qindex];
-  x->plane[0].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[qindex];
+  x->plane[0].quant = cpi->y_quant[qindex];
+  x->plane[0].quant_shift = cpi->y_quant_shift[qindex];
+  x->plane[0].zbin = cpi->y_zbin[qindex];
+  x->plane[0].round = cpi->y_round[qindex];
+  x->plane[0].zrun_zbin_boost = cpi->zrun_zbin_boost_y[qindex];
   x->plane[0].zbin_extra = (int16_t)zbin_extra;
   x->e_mbd.plane[0].dequant = cpi->common.y_dequant[qindex];
 
@@ -223,10 +224,10 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
                 (cpi->zbin_mode_boost + x->act_zbin_adj)) >> 7;
 
   for (i = 1; i < 3; i++) {
-    x->plane[i].quant = cpi->UVquant[qindex];
-    x->plane[i].quant_shift = cpi->UVquant_shift[qindex];
-    x->plane[i].zbin = cpi->UVzbin[qindex];
-    x->plane[i].round = cpi->UVround[qindex];
+    x->plane[i].quant = cpi->uv_quant[qindex];
+    x->plane[i].quant_shift = cpi->uv_quant_shift[qindex];
+    x->plane[i].zbin = cpi->uv_zbin[qindex];
+    x->plane[i].round = cpi->uv_round[qindex];
     x->plane[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[qindex];
     x->plane[i].zbin_extra = (int16_t)zbin_extra;
     x->e_mbd.plane[i].dequant = cpi->common.uv_dequant[qindex];
