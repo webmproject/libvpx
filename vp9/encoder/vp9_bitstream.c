@@ -2257,6 +2257,14 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     }
     update_mbintra_mode_probs(cpi, &header_bc);
 
+    for (i = 0; i < NUM_PARTITION_CONTEXTS; ++i) {
+      vp9_prob Pnew[PARTITION_TYPES - 1];
+      unsigned int bct[PARTITION_TYPES - 1][2];
+      update_mode(&header_bc, PARTITION_TYPES, vp9_partition_encodings,
+                  vp9_partition_tree, Pnew, pc->fc.partition_prob[i], bct,
+                  (unsigned int *)cpi->partition_count[i]);
+    }
+
     vp9_write_nmv_probs(cpi, xd->allow_high_precision_mv, &header_bc);
   }
 

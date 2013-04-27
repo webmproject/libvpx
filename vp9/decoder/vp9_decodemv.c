@@ -475,7 +475,7 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
   } else {
     nmv_context *const nmvc = &pbi->common.fc.nmvc;
     MACROBLOCKD *const xd = &pbi->mb;
-    int i;
+    int i, j;
 
     if (cm->mcomp_filter_type == SWITCHABLE)
       read_switchable_interp_probs(pbi, r);
@@ -508,6 +508,11 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
     if (vp9_read_bit(r))
       for (i = 0; i < VP9_I32X32_MODES - 1; ++i)
         cm->fc.sb_ymode_prob[i] = vp9_read_prob(r);
+
+    for (j = 0; j < NUM_PARTITION_CONTEXTS; ++j)
+      if (vp9_read_bit(r))
+        for (i = 0; i < PARTITION_TYPES - 1; ++i)
+          cm->fc.partition_prob[j][i] = vp9_read_prob(r);
 
     read_nmvprobs(r, nmvc, xd->allow_high_precision_mv);
   }
