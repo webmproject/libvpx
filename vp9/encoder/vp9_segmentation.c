@@ -132,6 +132,9 @@ static void count_segs(VP9_COMP *cpi,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const int segment_id = mi->mbmi.segment_id;
 
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
+
   xd->mode_info_context = mi;
   set_mi_row_col(cm, xd, mi_row, bh, mi_col, bw);
 
@@ -156,6 +159,59 @@ static void count_segs(VP9_COMP *cpi,
     if (!seg_predicted)
       // Update the "unpredicted" segment count
       t_unpred_seg_counts[segment_id]++;
+  }
+}
+
+static void count_segs_sb(VP9_COMP *cpi, MODE_INFO *mi,
+                          int *no_pred_segcounts,
+                          int (*temporal_predictor_count)[2],
+                          int *t_unpred_seg_counts,
+                          int mi_row, int mi_col,
+                          BLOCK_SIZE_TYPE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int mis = cm->mode_info_stride;
+  int bwl, bhl;
+  const int bsl = mi_width_log2(bsize), bs = 1 << (bsl - 1);
+
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
+
+  bwl = mi_width_log2(mi->mbmi.sb_type);
+  bhl = mi_height_log2(mi->mbmi.sb_type);
+
+  if (bwl == bsl && bhl == bsl) {
+    count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
+               t_unpred_seg_counts, 1 << bsl, 1 << bsl, mi_row, mi_col);
+  } else if (bwl == bsl && bhl < bsl) {
+    count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
+               t_unpred_seg_counts, 1 << bsl, bs, mi_row, mi_col);
+    count_segs(cpi, mi + bs * mis, no_pred_segcounts, temporal_predictor_count,
+               t_unpred_seg_counts, 1 << bsl, bs, mi_row + bs, mi_col);
+  } else if (bwl < bsl && bhl == bsl) {
+    count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
+               t_unpred_seg_counts, bs, 1 << bsl, mi_row, mi_col);
+    count_segs(cpi, mi + bs, no_pred_segcounts, temporal_predictor_count,
+               t_unpred_seg_counts, bs, 1 << bsl, mi_row, mi_col + bs);
+  } else {
+    BLOCK_SIZE_TYPE subsize;
+    int n;
+
+    assert(bwl < bsl && bhl < bsl);
+    if (bsize == BLOCK_SIZE_SB64X64) {
+      subsize = BLOCK_SIZE_SB32X32;
+    } else {
+      assert(bsize == BLOCK_SIZE_SB32X32);
+      subsize = BLOCK_SIZE_MB16X16;
+    }
+
+    for (n = 0; n < 4; n++) {
+      const int y_idx = n >> 1, x_idx = n & 0x01;
+
+      count_segs_sb(cpi, mi + y_idx * bs * mis + x_idx * bs,
+                    no_pred_segcounts, temporal_predictor_count,
+                    t_unpred_seg_counts,
+                    mi_row + y_idx * bs, mi_col + x_idx * bs, subsize);
+    }
   }
 }
 
@@ -203,92 +259,8 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
       for (mi_col = cm->cur_tile_mi_col_start;
            mi_col < cm->cur_tile_mi_col_end;
            mi_col += (4 << CONFIG_SB8X8), mi += (4 << CONFIG_SB8X8)) {
-        if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
-          count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
-                     t_unpred_seg_counts, 4 << CONFIG_SB8X8,
-                     4 << CONFIG_SB8X8, mi_row, mi_col);
-        } else if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X32) {
-          count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
-                     t_unpred_seg_counts, 4 << CONFIG_SB8X8,
-                     2 << CONFIG_SB8X8, mi_row, mi_col);
-          if (mi_row + (2 << CONFIG_SB8X8) != cm->mi_rows)
-            count_segs(cpi, mi + (2 << CONFIG_SB8X8) * mis, no_pred_segcounts,
-                       temporal_predictor_count,
-                       t_unpred_seg_counts, 4 << CONFIG_SB8X8,
-                       2 << CONFIG_SB8X8, mi_row + (2 << CONFIG_SB8X8), mi_col);
-        } else if (mi->mbmi.sb_type == BLOCK_SIZE_SB32X64) {
-          count_segs(cpi, mi, no_pred_segcounts, temporal_predictor_count,
-                     t_unpred_seg_counts, 2 << CONFIG_SB8X8,
-                     4 << CONFIG_SB8X8, mi_row, mi_col);
-          if (mi_col + (2 << CONFIG_SB8X8) != cm->mi_cols)
-            count_segs(cpi, mi + (2 << CONFIG_SB8X8), no_pred_segcounts,
-                       temporal_predictor_count,
-                       t_unpred_seg_counts, 2 << CONFIG_SB8X8,
-                       4 << CONFIG_SB8X8, mi_row, mi_col + (2 << CONFIG_SB8X8));
-        } else {
-          for (i = 0; i < 4; i++) {
-            const int x_idx = (i & 1) << (1 + CONFIG_SB8X8);
-            const int y_idx = (i & 2) << CONFIG_SB8X8;
-            MODE_INFO *sb_mi = mi + y_idx * mis + x_idx;
-
-            if (mi_col + x_idx >= cm->mi_cols ||
-                mi_row + y_idx >= cm->mi_rows) {
-              continue;
-            }
-
-            if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
-              count_segs(cpi, sb_mi, no_pred_segcounts,
-                         temporal_predictor_count, t_unpred_seg_counts,
-                         2 << CONFIG_SB8X8, 2 << CONFIG_SB8X8,
-                         mi_row + y_idx, mi_col + x_idx);
-            } else if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X16) {
-              count_segs(cpi, sb_mi, no_pred_segcounts,
-                         temporal_predictor_count,
-                         t_unpred_seg_counts, 2 << CONFIG_SB8X8,
-                         1 << CONFIG_SB8X8,
-                         mi_row + y_idx, mi_col + x_idx);
-              if (mi_row + y_idx + (1 << CONFIG_SB8X8) != cm->mi_rows)
-                count_segs(cpi, sb_mi + (mis << CONFIG_SB8X8),
-                           no_pred_segcounts, temporal_predictor_count,
-                           t_unpred_seg_counts, 2 << CONFIG_SB8X8,
-                           1 << CONFIG_SB8X8,
-                           mi_row + y_idx + (1 << CONFIG_SB8X8),
-                           mi_col + x_idx);
-            } else if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB16X32) {
-              count_segs(cpi, sb_mi, no_pred_segcounts,
-                         temporal_predictor_count,
-                         t_unpred_seg_counts, 1 << CONFIG_SB8X8,
-                         2 << CONFIG_SB8X8,
-                         mi_row + y_idx, mi_col + x_idx);
-              if (mi_col + x_idx + (1 << CONFIG_SB8X8) != cm->mi_cols)
-                count_segs(cpi, sb_mi + (1 << CONFIG_SB8X8), no_pred_segcounts,
-                           temporal_predictor_count,
-                           t_unpred_seg_counts, 1 << CONFIG_SB8X8,
-                           2 << CONFIG_SB8X8,
-                           mi_row + y_idx,
-                           mi_col + x_idx + (1 << CONFIG_SB8X8));
-            } else {
-              int j;
-
-              for (j = 0; j < 4; j++) {
-                const int x_idx_mb = x_idx + ((j & 1) << CONFIG_SB8X8);
-                const int y_idx_mb = y_idx + ((j >> 1) << CONFIG_SB8X8);
-                MODE_INFO *mb_mi = mi + x_idx_mb + y_idx_mb * mis;
-
-                if (mi_col + x_idx_mb >= cm->mi_cols ||
-                    mi_row + y_idx_mb >= cm->mi_rows) {
-                  continue;
-                }
-
-                assert(mb_mi->mbmi.sb_type == BLOCK_SIZE_MB16X16);
-                count_segs(cpi, mb_mi, no_pred_segcounts,
-                           temporal_predictor_count, t_unpred_seg_counts,
-                           1 << CONFIG_SB8X8, 1 << CONFIG_SB8X8,
-                           mi_row + y_idx_mb, mi_col + x_idx_mb);
-              }
-            }
-          }
-        }
+        count_segs_sb(cpi, mi, no_pred_segcounts, temporal_predictor_count,
+                      t_unpred_seg_counts, mi_row, mi_col, BLOCK_SIZE_SB64X64);
       }
     }
   }
