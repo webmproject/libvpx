@@ -523,8 +523,8 @@ static void configure_implicit_segmentation(VP9_COMP *cpi) {
 
     xd->update_mb_segmentation_data = 1;
 
-    // Enable use of q deltas on segments
-    for (i = 0; i < MAX_MB_SEGMENTS; ++i) {
+    // Enable use of q deltas on segments 1 and up
+    for (i = 1; i < MAX_MB_SEGMENTS; ++i) {
       qi_delta = compute_qdelta(cpi, cpi->active_worst_quality, q_target);
       vp9_set_segdata(xd, i, SEG_LVL_ALT_Q, qi_delta);
       q_target *= 0.95;
