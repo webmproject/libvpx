@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//z0s\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002834
+      },
+      "writtenOn": "2013-04-27T08:26:39Z",
+      "side": 1,
+      "message": "I did some investigation and looks the code could be generic for android, so the android code branch could be saved.",
+      "parentUuid": "AAAAXX//0yc\u003d",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//0yY\u003d",
         "filename": "vpx_ports/x86.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-04-26T16:43:54Z",
       "side": 1,
       "message": "Whitespace.",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//z0o\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1002834
+      },
+      "writtenOn": "2013-04-27T08:26:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//0yY\u003d",
       "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//z0k\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1002834
+      },
+      "writtenOn": "2013-04-27T08:26:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//0yk\u003d",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//0xs\u003d",
         "filename": "vpx_ports/x86.h",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2013-04-26T16:43:54Z",
       "side": 1,
       "message": "static function, unsigned vars",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//z0g\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1002834
+      },
+      "writtenOn": "2013-04-27T08:26:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//0xs\u003d",
       "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//z0c\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1002834
+      },
+      "writtenOn": "2013-04-27T08:26:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//0yA\u003d",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//0x4\u003d",
         "filename": "vpx_ports/x86.h",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2013-04-26T16:43:54Z",
       "side": 1,
       "message": "unsigned",
+      "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//z0Y\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1002834
+      },
+      "writtenOn": "2013-04-27T08:26:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//0x4\u003d",
       "revId": "a60ffbf1618be2fa67a2f6a3e828382daa0126e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
