@@ -828,7 +828,7 @@ static void encode_sb(VP9_COMP *cpi,
                         output_enabled, mi_row, mi_col + (i << CONFIG_SB8X8),
                         BLOCK_SIZE_SB16X32);
       if (output_enabled) {
-        update_stats(cpi, mi_row, mi_col + i);
+        update_stats(cpi, mi_row, mi_col + (i << CONFIG_SB8X8));
 
         (*tp)->token = EOSB_TOKEN;
         (*tp)++;
