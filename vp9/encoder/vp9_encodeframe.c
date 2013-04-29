@@ -574,10 +574,15 @@ static void set_offsets(VP9_COMP *cpi,
   const int mb_row = mi_row >> CONFIG_SB8X8;
   const int mb_col = mi_col >> CONFIG_SB8X8;
   const int idx_map = mb_row * cm->mb_cols + mb_col;
+  int i;
 
   // entropy context structures
-  xd->above_context = cm->above_context + mb_col;
-  xd->left_context  = cm->left_context + (mb_row & 3);
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    xd->plane[i].above_context = cm->above_context[i] +
+        (mi_col * 4 >> (CONFIG_SB8X8 + xd->plane[i].subsampling_x));
+    xd->plane[i].left_context = cm->left_context[i] +
+        (((mi_row * 4 >> CONFIG_SB8X8) & 15) >> xd->plane[i].subsampling_y);
+  }
 
   // partition contexts
   xd->above_seg_context = cm->above_seg_context + mb_col;
@@ -983,22 +988,27 @@ static void encode_sb_row(VP9_COMP *cpi,
   int mi_col, pl;
 
   // Initialize the left context for the new SB row
-  vpx_memset(cm->left_context, 0, sizeof(cm->left_context));
+  vpx_memset(&cm->left_context, 0, sizeof(cm->left_context));
   vpx_memset(cm->left_seg_context, 0, sizeof(cm->left_seg_context));
 
   // Code each SB in the row
   for (mi_col = cm->cur_tile_mi_col_start;
        mi_col < cm->cur_tile_mi_col_end; mi_col += (4 << CONFIG_SB8X8)) {
-    int i;
+    int i, p;
     BLOCK_SIZE_TYPE sb_partitioning[4];
     int sb64_rate = 0, sb64_dist = 0;
     int sb64_skip = 0;
-    ENTROPY_CONTEXT_PLANES l[4], a[4];
+    ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
     PARTITION_CONTEXT seg_l[4], seg_a[4];
     TOKENEXTRA *tp_orig = *tp;
 
-    memcpy(&a, cm->above_context + (mi_col >> CONFIG_SB8X8), sizeof(a));
-    memcpy(&l, cm->left_context, sizeof(l));
+    for (p = 0; p < MAX_MB_PLANE; p++) {
+      memcpy(a + 16 * p, cm->above_context[p] +
+                 (mi_col * 4 >> (CONFIG_SB8X8 + xd->plane[p].subsampling_x)),
+             sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_x);
+      memcpy(l + 16 * p, cm->left_context[p],
+             sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_y);
+    }
     memcpy(&seg_a, cm->above_seg_context + (mi_col >> CONFIG_SB8X8),
            sizeof(seg_a));
     memcpy(&seg_l, cm->left_seg_context, sizeof(seg_l));
@@ -1009,7 +1019,7 @@ static void encode_sb_row(VP9_COMP *cpi,
       int splitmodes_used = 0;
       int sb32_skip = 0;
       int j;
-      ENTROPY_CONTEXT_PLANES l2[2], a2[2];
+      ENTROPY_CONTEXT l2[8 * MAX_MB_PLANE], a2[8 * MAX_MB_PLANE];
 
       if (mi_row + y_idx >= cm->mi_rows || mi_col + x_idx >= cm->mi_cols)
         continue;
@@ -1017,9 +1027,18 @@ static void encode_sb_row(VP9_COMP *cpi,
       xd->sb_index = i;
 
       /* Function should not modify L & A contexts; save and restore on exit */
-      vpx_memcpy(l2, cm->left_context + (y_idx >> CONFIG_SB8X8), sizeof(l2));
-      vpx_memcpy(a2, cm->above_context + ((mi_col + x_idx) >> CONFIG_SB8X8),
-                 sizeof(a2));
+      for (p = 0; p < MAX_MB_PLANE; p++) {
+        vpx_memcpy(l2 + 8 * p,
+                   cm->left_context[p] +
+                       (y_idx * 4 >> (CONFIG_SB8X8 +
+                                      xd->plane[p].subsampling_y)),
+                   sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_y);
+        vpx_memcpy(a2 + 8 * p,
+                   cm->above_context[p] +
+                       ((mi_col + x_idx) * 4 >> (CONFIG_SB8X8 +
+                                                 xd->plane[p].subsampling_x)),
+                   sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_x);
+      }
 
       /* Encode MBs in raster order within the SB */
       sb_partitioning[i] = BLOCK_SIZE_MB16X16;
@@ -1052,9 +1071,18 @@ static void encode_sb_row(VP9_COMP *cpi,
       }
 
       /* Restore L & A coding context to those in place on entry */
-      vpx_memcpy(cm->left_context + (y_idx >> CONFIG_SB8X8), l2, sizeof(l2));
-      vpx_memcpy(cm->above_context + ((mi_col + x_idx) >> CONFIG_SB8X8), a2,
-                 sizeof(a2));
+      for (p = 0; p < MAX_MB_PLANE; p++) {
+        vpx_memcpy(cm->left_context[p] +
+                       (y_idx * 4 >> (CONFIG_SB8X8 +
+                                      xd->plane[p].subsampling_y)),
+                   l2 + 8 * p,
+                   sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_y);
+        vpx_memcpy(cm->above_context[p] +
+                       ((mi_col + x_idx) * 4 >> (CONFIG_SB8X8 +
+                                                 xd->plane[p].subsampling_x)),
+                   a2 + 8 * p,
+                   sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_x);
+      }
 
       xd->left_seg_context  = cm->left_seg_context + (y_idx >> CONFIG_SB8X8);
       xd->above_seg_context =
@@ -1105,9 +1133,18 @@ static void encode_sb_row(VP9_COMP *cpi,
           sb_partitioning[i] = BLOCK_SIZE_SB32X16;
         }
 
-        vpx_memcpy(cm->left_context + (y_idx >> CONFIG_SB8X8), l2, sizeof(l2));
-        vpx_memcpy(cm->above_context + ((mi_col + x_idx) >> CONFIG_SB8X8), a2,
-                   sizeof(a2));
+        for (p = 0; p < MAX_MB_PLANE; p++) {
+          vpx_memcpy(cm->left_context[p] +
+                         (y_idx * 4 >> (CONFIG_SB8X8 +
+                                        xd->plane[p].subsampling_y)),
+                     l2 + 8 * p,
+                     sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_y);
+          vpx_memcpy(cm->above_context[p] +
+                         ((mi_col + x_idx) * 4 >> (CONFIG_SB8X8 +
+                                                   xd->plane[p].subsampling_x)),
+                     a2 + 8 * p,
+                     sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_x);
+        }
       }
 
       // check 16x32
@@ -1150,9 +1187,18 @@ static void encode_sb_row(VP9_COMP *cpi,
           sb_partitioning[i] = BLOCK_SIZE_SB16X32;
         }
 
-        vpx_memcpy(cm->left_context + (y_idx >> CONFIG_SB8X8), l2, sizeof(l2));
-        vpx_memcpy(cm->above_context + ((mi_col + x_idx) >> CONFIG_SB8X8), a2,
-                   sizeof(a2));
+        for (p = 0; p < MAX_MB_PLANE; p++) {
+          vpx_memcpy(cm->left_context[p] +
+                         (y_idx * 4 >> (CONFIG_SB8X8 +
+                                        xd->plane[p].subsampling_y)),
+                     l2 + 8 * p,
+                     sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_y);
+          vpx_memcpy(cm->above_context[p] +
+                         ((mi_col + x_idx) * 4 >> (CONFIG_SB8X8 +
+                                                   xd->plane[p].subsampling_x)),
+                     a2 + 8 * p,
+                     sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_x);
+        }
       }
 
       if (!sb32_skip &&
@@ -1197,8 +1243,14 @@ static void encode_sb_row(VP9_COMP *cpi,
                 sb_partitioning[i]);
     }
 
-    memcpy(cm->above_context + (mi_col >> CONFIG_SB8X8), &a, sizeof(a));
-    memcpy(cm->left_context, &l, sizeof(l));
+    for (p = 0; p < MAX_MB_PLANE; p++) {
+      memcpy(cm->above_context[p] +
+                 (mi_col * 4 >> (CONFIG_SB8X8 + xd->plane[p].subsampling_x)),
+             a + 16 * p,
+             sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_x);
+      memcpy(cm->left_context[p], l + 16 * p,
+             sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_y);
+    }
     memcpy(cm->above_seg_context + (mi_col >> CONFIG_SB8X8), &seg_a,
            sizeof(seg_a));
     memcpy(cm->left_seg_context, &seg_l, sizeof(seg_l));
@@ -1244,8 +1296,14 @@ static void encode_sb_row(VP9_COMP *cpi,
         sb_partitioning[0] = BLOCK_SIZE_SB64X32;
       }
 
-      vpx_memcpy(cm->left_context, l, sizeof(l));
-      vpx_memcpy(cm->above_context + (mi_col >> CONFIG_SB8X8), a, sizeof(a));
+      for (p = 0; p < MAX_MB_PLANE; p++) {
+        memcpy(cm->above_context[p] +
+                   (mi_col * 4 >> (CONFIG_SB8X8 + xd->plane[p].subsampling_x)),
+               a + 16 * p,
+               sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_x);
+        memcpy(cm->left_context[p], l + 16 * p,
+               sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_y);
+      }
     }
 
     // check 32x64
@@ -1284,8 +1342,14 @@ static void encode_sb_row(VP9_COMP *cpi,
         sb_partitioning[0] = BLOCK_SIZE_SB32X64;
       }
 
-      vpx_memcpy(cm->left_context, l, sizeof(l));
-      vpx_memcpy(cm->above_context + (mi_col >> CONFIG_SB8X8), a, sizeof(a));
+      for (p = 0; p < MAX_MB_PLANE; p++) {
+        memcpy(cm->above_context[p] +
+                   (mi_col * 4 >> (CONFIG_SB8X8 + xd->plane[p].subsampling_x)),
+               a + 16 * p,
+               sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_x);
+        memcpy(cm->left_context[p], l + 16 * p,
+               sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_y);
+      }
     }
 
     if (!sb64_skip &&
@@ -1368,8 +1432,10 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->interintra_select_count);
 #endif
 
-  vpx_memset(cm->above_context, 0,
-             sizeof(ENTROPY_CONTEXT_PLANES) * mb_cols_aligned_to_sb(cm));
+  // Note: this memset assumes above_context[0], [1] and [2]
+  // are allocated as part of the same buffer.
+  vpx_memset(cm->above_context[0], 0, sizeof(ENTROPY_CONTEXT) * 4 *
+                                      MAX_MB_PLANE * mb_cols_aligned_to_sb(cm));
   vpx_memset(cm->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
                                        mb_cols_aligned_to_sb(cm));
 }

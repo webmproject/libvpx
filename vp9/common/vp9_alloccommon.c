@@ -57,19 +57,20 @@ void vp9_free_frame_buffers(VP9_COMMON *oci) {
   vp8_yv12_de_alloc_frame_buffer(&oci->temp_scale_frame);
   vp8_yv12_de_alloc_frame_buffer(&oci->post_proc_buffer);
 
-  vpx_free(oci->above_context);
   vpx_free(oci->mip);
   vpx_free(oci->prev_mip);
   vpx_free(oci->above_seg_context);
 
-  oci->above_context = 0;
+  vpx_free(oci->above_context[0]);
+  for (i = 0; i < MAX_MB_PLANE; i++)
+    oci->above_context[i] = 0;
   oci->mip = 0;
   oci->prev_mip = 0;
   oci->above_seg_context = 0;
 }
 
 int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
-  int i;
+  int i, mb_cols;
 
   // Our internal buffers are always multiples of 16
   const int aligned_width = multiple16(width);
@@ -137,13 +138,18 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
 
   oci->prev_mi = oci->prev_mip + oci->mode_info_stride + 1;
 
-  oci->above_context =
-    vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * mb_cols_aligned_to_sb(oci), 1);
-
-  if (!oci->above_context) {
+  // FIXME(jkoleszar): allocate subsampled arrays for U/V once subsampling
+  // information is exposed at this level
+  mb_cols = mb_cols_aligned_to_sb(oci);
+  oci->above_context[0] = vpx_calloc(sizeof(ENTROPY_CONTEXT) * 12 * mb_cols, 1);
+  if (!oci->above_context[0]) {
     vp9_free_frame_buffers(oci);
     return 1;
   }
+  oci->above_context[1] =
+    oci->above_context[0] + sizeof(ENTROPY_CONTEXT) * 4 * mb_cols;
+  oci->above_context[2] =
+    oci->above_context[1] + sizeof(ENTROPY_CONTEXT) * 4 * mb_cols;
 
   oci->above_seg_context =
     vpx_calloc(sizeof(PARTITION_CONTEXT) * mb_cols_aligned_to_sb(oci), 1);

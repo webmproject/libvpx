@@ -603,6 +603,7 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
   const int bw = 1 << mi_width_log2(bsize);
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  int i;
 
   const int mi_idx = mi_row * cm->mode_info_stride + mi_col;
   const YV12_BUFFER_CONFIG *dst_fb = &cm->yv12_fb[cm->new_fb_idx];
@@ -615,8 +616,12 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
   xd->mode_info_context->mbmi.sb_type = bsize;
   xd->prev_mode_info_context = cm->prev_mi + mi_idx;
 
-  xd->above_context = cm->above_context + (mi_col >> CONFIG_SB8X8);
-  xd->left_context = cm->left_context + ((mi_row >> CONFIG_SB8X8) & 3);
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    xd->plane[i].above_context = cm->above_context[i] +
+        (mi_col * 4 >> (xd->plane[i].subsampling_x + CONFIG_SB8X8));
+    xd->plane[i].left_context = cm->left_context[i] +
+        (((mi_row * 4 >> CONFIG_SB8X8) & 15) >> xd->plane[i].subsampling_y);
+  }
   xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
   xd->left_seg_context  = cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
 
@@ -1158,7 +1163,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   for (mi_row = pc->cur_tile_mi_row_start;
        mi_row < pc->cur_tile_mi_row_end; mi_row += (4 << CONFIG_SB8X8)) {
     // For a SB there are 2 left contexts, each pertaining to a MB row within
-    vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
+    vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
     vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
     for (mi_col = pc->cur_tile_mi_col_start;
          mi_col < pc->cur_tile_mi_col_end; mi_col += (4 << CONFIG_SB8X8)) {
@@ -1189,8 +1194,10 @@ static void decode_tiles(VP9D_COMP *pbi,
   pc->tile_columns = 1 << pc->log2_tile_columns;
   pc->tile_rows    = 1 << pc->log2_tile_rows;
 
-  vpx_memset(pc->above_context, 0,
-             sizeof(ENTROPY_CONTEXT_PLANES) * mb_cols_aligned_to_sb(pc));
+  // Note: this memset assumes above_context[0], [1] and [2]
+  // are allocated as part of the same buffer.
+  vpx_memset(pc->above_context[0], 0, sizeof(ENTROPY_CONTEXT) * 4 *
+                                      MAX_MB_PLANE * mb_cols_aligned_to_sb(pc));
 
   vpx_memset(pc->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
                                        mb_cols_aligned_to_sb(pc));

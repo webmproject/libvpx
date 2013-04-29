@@ -486,25 +486,18 @@ static void optimize_b(VP9_COMMON *const cm,
 
 void vp9_optimize_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
                             BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  ENTROPY_CONTEXT *a = xd->plane[0].above_context;
+  ENTROPY_CONTEXT *l = xd->plane[0].left_context;
   const int bwl = b_width_log2(bsize) - 3, bw = 1 << bwl;
   const int bh = 1 << (b_height_log2(bsize) - 3);
   ENTROPY_CONTEXT ta[2], tl[2];
   int n;
 
-  for (n = 0; n < bw; n++) {
-    ENTROPY_CONTEXT *a =
-        (ENTROPY_CONTEXT *) (x->e_mbd.above_context + n * 2 + 0);
-    ENTROPY_CONTEXT *a1 =
-        (ENTROPY_CONTEXT *) (x->e_mbd.above_context + n * 2 + 1);
-    ta[n] = (a[0] + a[1] + a[2] + a[3] + a1[0] + a1[1] + a1[2] + a1[3]) != 0;
-  }
-  for (n = 0; n < bh; n++) {
-    ENTROPY_CONTEXT *l =
-        (ENTROPY_CONTEXT *) (x->e_mbd.left_context + n * 2);
-    ENTROPY_CONTEXT *l1 =
-        (ENTROPY_CONTEXT *) (x->e_mbd.left_context + n * 2 + 1);
-    tl[n] = (l[0] + l[1] + l[2] + l[3] + l1[0] + l1[1] + l1[2] + l1[3]) != 0;
-  }
+  for (n = 0; n < bw; n++, a += 8)
+    ta[n] = (a[0] + a[1] + a[2] + a[3] + a[4] + a[5] + a[6] + a[7]) != 0;
+  for (n = 0; n < bh; n++, l += 8)
+    tl[n] = (l[0] + l[1] + l[2] + l[3] + l[4] + l[5] + l[6] + l[7]) != 0;
 
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
@@ -516,19 +509,19 @@ void vp9_optimize_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
 
 void vp9_optimize_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
                             BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  ENTROPY_CONTEXT *a = xd->plane[0].above_context;
+  ENTROPY_CONTEXT *l = xd->plane[0].left_context;
   const int bwl = b_width_log2(bsize) - 2, bw = 1 << bwl;
   const int bh = 1 << (b_height_log2(bsize) - 2);
   ENTROPY_CONTEXT ta[4], tl[4];
   int n;
 
-  for (n = 0; n < bw; n++) {
-    ENTROPY_CONTEXT *a = (ENTROPY_CONTEXT *) (x->e_mbd.above_context + n);
+  for (n = 0; n < bw; n++, a += 4)
     ta[n] = (a[0] + a[1] + a[2] + a[3]) != 0;
-  }
-  for (n = 0; n < bh; n++) {
-    ENTROPY_CONTEXT *l = (ENTROPY_CONTEXT *) (x->e_mbd.left_context + n);
+  for (n = 0; n < bh; n++, l += 4)
     tl[n] = (l[0] + l[1] + l[2] + l[3]) != 0;
-  }
+
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
 
@@ -539,23 +532,18 @@ void vp9_optimize_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
 
 void vp9_optimize_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
                           BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  ENTROPY_CONTEXT *a = xd->plane[0].above_context;
+  ENTROPY_CONTEXT *l = xd->plane[0].left_context;
   const int bwl = b_width_log2(bsize) - 1, bw = 1 << bwl;
   const int bh = 1 << (b_height_log2(bsize) - 1);
   ENTROPY_CONTEXT ta[8], tl[8];
   int n;
 
-  for (n = 0; n < bw; n += 2) {
-    ENTROPY_CONTEXT *a =
-        (ENTROPY_CONTEXT *) (x->e_mbd.above_context + (n >> 1));
-    ta[n + 0] = (a[0] + a[1]) != 0;
-    ta[n + 1] = (a[2] + a[3]) != 0;
-  }
-  for (n = 0; n < bh; n += 2) {
-    ENTROPY_CONTEXT *l =
-        (ENTROPY_CONTEXT *) (x->e_mbd.left_context + (n >> 1));
-    tl[n + 0] = (l[0] + l[1]) != 0;
-    tl[n + 1] = (l[2] + l[3]) != 0;
-  }
+  for (n = 0; n < bw; n++, a += 2)
+    ta[n] = (a[0] + a[1]) != 0;
+  for (n = 0; n < bh; n++, l += 2)
+    tl[n] = (l[0] + l[1]) != 0;
 
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
@@ -567,17 +555,14 @@ void vp9_optimize_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
 
 void vp9_optimize_sby_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
                           BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   int bwl = b_width_log2(bsize), bw = 1 << bwl;
   int bh = 1 << b_height_log2(bsize);
   ENTROPY_CONTEXT ta[16], tl[16];
   int n;
 
-  for (n = 0; n < bw; n += 4)
-    vpx_memcpy(&ta[n], x->e_mbd.above_context + (n >> 2),
-               sizeof(ENTROPY_CONTEXT) * 4);
-  for (n = 0; n < bh; n += 4)
-    vpx_memcpy(&tl[n], x->e_mbd.left_context + (n >> 2),
-               sizeof(ENTROPY_CONTEXT) * 4);
+  vpx_memcpy(ta, xd->plane[0].above_context, sizeof(ENTROPY_CONTEXT) * bw);
+  vpx_memcpy(tl, xd->plane[0].left_context, sizeof(ENTROPY_CONTEXT) * bh);
 
   for (n = 0; n < bw * bh; n++) {
     const int x_idx = n & (bw - 1), y_idx = n >> bwl;
@@ -589,24 +574,18 @@ void vp9_optimize_sby_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
 
 void vp9_optimize_sbuv_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
                              BLOCK_SIZE_TYPE bsize) {
-  ENTROPY_CONTEXT *ta = (ENTROPY_CONTEXT *) x->e_mbd.above_context;
-  ENTROPY_CONTEXT *tl = (ENTROPY_CONTEXT *) x->e_mbd.left_context;
-  ENTROPY_CONTEXT *a, *l, *a1, *l1, *a2, *l2, *a3, *l3, a_ec, l_ec;
+  MACROBLOCKD *const xd = &x->e_mbd;
   int b;
 
   assert(bsize == BLOCK_SIZE_SB64X64);
   for (b = 256; b < 384; b += 64) {
     const int plane = 1 + (b >= 320);
-    a = ta + vp9_block2above_sb64[TX_32X32][b];
-    l = tl + vp9_block2left_sb64[TX_32X32][b];
-    a1 = a + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
-    l1 = l + sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
-    a2 = a + 2 * sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
-    l2 = l + 2 * sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
-    a3 = a + 3 * sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
-    l3 = l + 3 * sizeof(ENTROPY_CONTEXT_PLANES) / sizeof(ENTROPY_CONTEXT);
-    a_ec = (a[0] + a[1] + a1[0] + a1[1] + a2[0] + a2[1] + a3[0] + a3[1]) != 0;
-    l_ec = (l[0] + l[1] + l1[0] + l1[1] + l2[0] + l2[1] + l3[0] + l3[1]) != 0;
+    ENTROPY_CONTEXT *a = xd->plane[plane].above_context;
+    ENTROPY_CONTEXT *l = xd->plane[plane].left_context;
+    ENTROPY_CONTEXT a_ec, l_ec;
+
+    a_ec = (a[0] + a[1] + a[2] + a[3] + a[4] + a[5] + a[6] + a[7]) != 0;
+    l_ec = (l[0] + l[1] + l[2] + l[3] + l[4] + l[5] + l[6] + l[7]) != 0;
     optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.plane[plane].dequant,
                &a_ec, &l_ec, TX_32X32, 256);
   }
@@ -614,32 +593,27 @@ void vp9_optimize_sbuv_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
 
 void vp9_optimize_sbuv_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
                              BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   const int bwl = b_width_log2(bsize) - 2, bhl = b_height_log2(bsize) - 2;
   const int bw = 1 << (bwl - 1);
   const int bh = 1 << (bhl - 1);
   int uvoff = 16 << (bwl + bhl);
-  ENTROPY_CONTEXT ta[2][2], tl[2][2];
   int plane, n;
 
-  for (n = 0; n < bw; n++) {
-    ENTROPY_CONTEXT_PLANES *a = x->e_mbd.above_context + n * 2;
-    ENTROPY_CONTEXT_PLANES *a1 = x->e_mbd.above_context + n * 2 + 1;
-    ta[0][n] = (a->u[0] + a->u[1] + a1->u[0] + a1->u[1]) != 0;
-    ta[1][n] = (a->v[0] + a->v[1] + a1->v[0] + a1->v[1]) != 0;
-  }
-  for (n = 0; n < bh; n++) {
-    ENTROPY_CONTEXT_PLANES *l = (x->e_mbd.left_context + n * 2);
-    ENTROPY_CONTEXT_PLANES *l1 = (x->e_mbd.left_context + n * 2 + 1);
-    tl[0][n] = (l->u[0] + l->u[1] + l1->u[0] + l1->u[1]) != 0;
-    tl[1][n] = (l->v[0] + l->v[1] + l1->v[0] + l1->v[1]) != 0;
-  }
+  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
+    ENTROPY_CONTEXT ta[2], *a = xd->plane[plane].above_context;
+    ENTROPY_CONTEXT tl[2], *l = xd->plane[plane].left_context;
 
-  for (plane = 0; plane < 2; plane++) {
+    for (n = 0; n < bw; n++, a += 4)
+      ta[n] = (a[0] + a[1] + a[2] + a[3]) != 0;
+    for (n = 0; n < bh; n++, l += 4)
+      tl[n] = (l[0] + l[1] + l[2] + l[3]) != 0;
+
     for (n = 0; n < bw * bh; n++) {
       const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
       optimize_b(cm, x, uvoff + n * 16, PLANE_TYPE_UV,
-                 x->e_mbd.plane[plane + 1].dequant,
-                 &ta[plane][x_idx], &tl[plane][y_idx],
+                 x->e_mbd.plane[plane].dequant,
+                 &ta[x_idx], &tl[y_idx],
                  TX_16X16, bh * bw * 64);
     }
     uvoff = (uvoff * 5) >> 2;  // switch u -> v
@@ -648,30 +622,27 @@ void vp9_optimize_sbuv_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
 
 void vp9_optimize_sbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
                            BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   const int bwl = b_width_log2(bsize) - 1, bhl = b_height_log2(bsize) - 1;
   const int bw = 1 << (bwl - 1);
   const int bh = 1 << (bhl - 1);
   int uvoff = 4 << (bwl + bhl);
-  ENTROPY_CONTEXT ta[2][4], tl[2][4];
   int plane, n;
 
-  for (n = 0; n < bw; n++) {
-    ENTROPY_CONTEXT_PLANES *a = x->e_mbd.above_context + n;
-    ta[0][n] = (a->u[0] + a->u[1]) != 0;
-    ta[1][n] = (a->v[0] + a->v[1]) != 0;
-  }
-  for (n = 0; n < bh; n++) {
-    ENTROPY_CONTEXT_PLANES *l = x->e_mbd.left_context + n;
-    tl[0][n] = (l->u[0] + l->u[1]) != 0;
-    tl[1][n] = (l->v[0] + l->v[1]) != 0;
-  }
+  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
+    ENTROPY_CONTEXT ta[4], *a = xd->plane[plane].above_context;
+    ENTROPY_CONTEXT tl[4], *l = xd->plane[plane].left_context;
 
-  for (plane = 0; plane < 2; plane++) {
+    for (n = 0; n < bw; n++, a += 2)
+      ta[n] = (a[0] + a[1]) != 0;
+    for (n = 0; n < bh; n++, l += 2)
+      tl[n] = (l[0] + l[1]) != 0;
+
     for (n = 0; n < bw * bh; n++) {
       const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
       optimize_b(cm, x, uvoff + n * 4, PLANE_TYPE_UV,
-                 x->e_mbd.plane[plane + 1].dequant,
-                 &ta[plane][x_idx], &tl[plane][y_idx],
+                 x->e_mbd.plane[plane].dequant,
+                 &ta[x_idx], &tl[y_idx],
                  TX_8X8, bh * bw * 16);
     }
     uvoff = (uvoff * 5) >> 2;  // switch u -> v
@@ -680,34 +651,26 @@ void vp9_optimize_sbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
 
 void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
                            BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
   const int bw = 1 << (bwl - 1);
   const int bh = 1 << (bhl - 1);
   int uvoff = 1 << (bwl + bhl);
-  ENTROPY_CONTEXT ta[2][8], tl[2][8];
   int plane, n;
 
-  for (n = 0; n < bw; n += 2) {
-    ENTROPY_CONTEXT_PLANES *a = x->e_mbd.above_context + (n >> 1);
-    ta[0][n + 0] = (a->u[0]) != 0;
-    ta[0][n + 1] = (a->u[1]) != 0;
-    ta[1][n + 0] = (a->v[0]) != 0;
-    ta[1][n + 1] = (a->v[1]) != 0;
-  }
-  for (n = 0; n < bh; n += 2) {
-    ENTROPY_CONTEXT_PLANES *l = x->e_mbd.left_context + (n >> 1);
-    tl[0][n + 0] = (l->u[0]) != 0;
-    tl[0][n + 1] = (l->u[1]) != 0;
-    tl[1][n + 0] = (l->v[0]) != 0;
-    tl[1][n + 1] = (l->v[1]) != 0;
-  }
+  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
+    ENTROPY_CONTEXT ta[8], tl[8];
 
-  for (plane = 0; plane < 2; plane++) {
+    vpx_memcpy(ta, xd->plane[plane].above_context,
+               sizeof(ENTROPY_CONTEXT) * bw);
+    vpx_memcpy(tl, xd->plane[plane].left_context,
+               sizeof(ENTROPY_CONTEXT) * bh);
+
     for (n = 0; n < bw * bh; n++) {
       const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
       optimize_b(cm, x, uvoff + n, PLANE_TYPE_UV,
-                 x->e_mbd.plane[plane + 1].dequant,
-                 &ta[plane][x_idx], &tl[plane][y_idx],
+                 x->e_mbd.plane[plane].dequant,
+                 &ta[x_idx], &tl[y_idx],
                  TX_4X4, bh * bw * 4);
     }
     uvoff = (uvoff * 5) >> 2;  // switch u -> v
