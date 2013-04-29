@@ -1630,24 +1630,77 @@ static void set_txfm_flag(MODE_INFO *mi, int mis, int ymbs, int xmbs,
   }
 }
 
-static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO *mi,
-                                    int mis, TX_SIZE txfm_max,
-                                    int mi_rows_left, int mi_cols_left,
-                                    BLOCK_SIZE_TYPE bsize) {
+static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO *mi,
+                                   int mis, TX_SIZE txfm_max,
+                                   int bw, int bh, int mi_row, int mi_col,
+                                   BLOCK_SIZE_TYPE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
+
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
 
   if (mbmi->txfm_size > txfm_max) {
     MACROBLOCK *const x = &cpi->mb;
     MACROBLOCKD *const xd = &x->e_mbd;
     const int segment_id = mbmi->segment_id;
-    const int bh = 1 << mi_height_log2(bsize), bw = 1 << mi_width_log2(bsize);
-    const int ymbs = MIN(bh, mi_rows_left);
-    const int xmbs = MIN(bw, mi_cols_left);
+    const int ymbs = MIN(bh, cm->mi_rows - mi_row);
+    const int xmbs = MIN(bw, cm->mi_cols - mi_col);
 
     xd->mode_info_context = mi;
     assert(vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP) ||
            get_skip_flag(mi, mis, ymbs, xmbs));
     set_txfm_flag(mi, mis, ymbs, xmbs, txfm_max);
+  }
+}
+
+static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO *mi,
+                                    TX_SIZE txfm_max,
+                                    int mi_row, int mi_col,
+                                    BLOCK_SIZE_TYPE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int mis = cm->mode_info_stride;
+  int bwl, bhl;
+  const int bsl = mi_width_log2(bsize), bs = 1 << (bsl - 1);
+
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
+
+  bwl = mi_width_log2(mi->mbmi.sb_type);
+  bhl = mi_height_log2(mi->mbmi.sb_type);
+
+  if (bwl == bsl && bhl == bsl) {
+    reset_skip_txfm_size_b(cpi, mi, mis, txfm_max, 1 << bsl, 1 << bsl,
+                           mi_row, mi_col, bsize);
+  } else if (bwl == bsl && bhl < bsl) {
+    reset_skip_txfm_size_b(cpi, mi, mis, txfm_max, 1 << bsl, bs,
+                           mi_row, mi_col, bsize);
+    reset_skip_txfm_size_b(cpi, mi + bs * mis, mis, txfm_max, 1 << bsl, bs,
+                           mi_row + bs, mi_col, bsize);
+  } else if (bwl < bsl && bhl == bsl) {
+    reset_skip_txfm_size_b(cpi, mi, mis, txfm_max, bs, 1 << bsl,
+                           mi_row, mi_col, bsize);
+    reset_skip_txfm_size_b(cpi, mi + bs, mis, txfm_max, bs, 1 << bsl,
+                           mi_row, mi_col + bs, bsize);
+  } else {
+    BLOCK_SIZE_TYPE subsize;
+    int n;
+
+    assert(bwl < bsl && bhl < bsl);
+    if (bsize == BLOCK_SIZE_SB64X64) {
+      subsize = BLOCK_SIZE_SB32X32;
+    } else {
+      assert(bsize == BLOCK_SIZE_SB32X32);
+      subsize = BLOCK_SIZE_MB16X16;
+    }
+
+    for (n = 0; n < 4; n++) {
+      const int y_idx = n >> 1, x_idx = n & 0x01;
+
+      reset_skip_txfm_size_sb(cpi, mi + y_idx * bs * mis + x_idx * bs,
+                              txfm_max, mi_row + y_idx * bs,
+                              mi_col + x_idx * bs, subsize);
+    }
   }
 }
 
@@ -1662,92 +1715,8 @@ static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
     mi = mi_ptr;
     for (mi_col = 0; mi_col < cm->mi_cols;
          mi_col += (4 << CONFIG_SB8X8), mi += (4 << CONFIG_SB8X8)) {
-      if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
-        reset_skip_txfm_size_sb(cpi, mi, mis, txfm_max,
-                                cm->mi_rows - mi_row, cm->mi_cols - mi_col,
-                                BLOCK_SIZE_SB64X64);
-      } else if (mi->mbmi.sb_type == BLOCK_SIZE_SB64X32) {
-        reset_skip_txfm_size_sb(cpi, mi, mis, txfm_max,
-                                cm->mi_rows - mi_row, cm->mi_cols - mi_col,
-                                BLOCK_SIZE_SB64X32);
-        if (mi_row + (2 << CONFIG_SB8X8) != cm->mi_rows)
-          reset_skip_txfm_size_sb(cpi, mi + (2 << CONFIG_SB8X8) * mis, mis,
-                                  txfm_max,
-                                  cm->mi_rows - mi_row - (2 << CONFIG_SB8X8),
-                                  cm->mi_cols - mi_col,
-                                  BLOCK_SIZE_SB64X32);
-      } else if (mi->mbmi.sb_type == BLOCK_SIZE_SB32X64) {
-        reset_skip_txfm_size_sb(cpi, mi, mis, txfm_max,
-                                cm->mi_rows - mi_row, cm->mi_cols - mi_col,
-                                BLOCK_SIZE_SB32X64);
-        if (mi_col + (2 << CONFIG_SB8X8) != cm->mi_cols)
-          reset_skip_txfm_size_sb(cpi, mi + (2 << CONFIG_SB8X8), mis, txfm_max,
-                                  cm->mi_rows - mi_row,
-                                  cm->mi_cols - mi_col - (2 << CONFIG_SB8X8),
-                                  BLOCK_SIZE_SB32X64);
-      } else {
-        int i;
-
-        for (i = 0; i < 4; i++) {
-          const int x_idx_sb = (i & 1) << (1 + CONFIG_SB8X8);
-          const int y_idx_sb = (i & 2) << CONFIG_SB8X8;
-          MODE_INFO *sb_mi = mi + y_idx_sb * mis + x_idx_sb;
-
-          if (mi_row + y_idx_sb >= cm->mi_rows ||
-              mi_col + x_idx_sb >= cm->mi_cols)
-            continue;
-
-          if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
-            reset_skip_txfm_size_sb(cpi, sb_mi, mis, txfm_max,
-                                    cm->mi_rows - mi_row - y_idx_sb,
-                                    cm->mi_cols - mi_col - x_idx_sb,
-                                    BLOCK_SIZE_SB32X32);
-          } else if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB32X16) {
-            reset_skip_txfm_size_sb(cpi, sb_mi, mis, txfm_max,
-                                    cm->mi_rows - mi_row - y_idx_sb,
-                                    cm->mi_cols - mi_col - x_idx_sb,
-                                    BLOCK_SIZE_SB32X16);
-            if (mi_row + y_idx_sb + (1 << CONFIG_SB8X8) != cm->mi_rows)
-              reset_skip_txfm_size_sb(cpi, sb_mi + (mis << CONFIG_SB8X8), mis,
-                                      txfm_max,
-                                      cm->mi_rows - mi_row - y_idx_sb -
-                                          (1 << CONFIG_SB8X8),
-                                      cm->mi_cols - mi_col - x_idx_sb,
-                                      BLOCK_SIZE_SB32X16);
-          } else if (sb_mi->mbmi.sb_type == BLOCK_SIZE_SB16X32) {
-            reset_skip_txfm_size_sb(cpi, sb_mi, mis, txfm_max,
-                                    cm->mi_rows - mi_row - y_idx_sb,
-                                    cm->mi_cols - mi_col - x_idx_sb,
-                                    BLOCK_SIZE_SB16X32);
-            if (mi_col + x_idx_sb + (1 << CONFIG_SB8X8) != cm->mi_cols)
-              reset_skip_txfm_size_sb(cpi, sb_mi + (1 << CONFIG_SB8X8), mis,
-                                      txfm_max,
-                                      cm->mi_rows - mi_row - y_idx_sb,
-                                      cm->mi_cols - mi_col - x_idx_sb -
-                                          (1 << CONFIG_SB8X8),
-                                      BLOCK_SIZE_SB16X32);
-          } else {
-            int m;
-
-            for (m = 0; m < 4; m++) {
-              const int x_idx = x_idx_sb + ((m & 1) << CONFIG_SB8X8);
-              const int y_idx = y_idx_sb + ((m >> 1) << CONFIG_SB8X8);
-              MODE_INFO *mb_mi;
-
-              if (mi_col + x_idx >= cm->mi_cols ||
-                  mi_row + y_idx >= cm->mi_rows)
-                continue;
-
-              mb_mi = mi + y_idx * mis + x_idx;
-              assert(mb_mi->mbmi.sb_type == BLOCK_SIZE_MB16X16);
-              reset_skip_txfm_size_sb(cpi, mb_mi, mis, txfm_max,
-                                      cm->mi_rows - mi_row - y_idx,
-                                      cm->mi_cols - mi_col - x_idx,
-                                      BLOCK_SIZE_MB16X16);
-            }
-          }
-        }
-      }
+      reset_skip_txfm_size_sb(cpi, mi, txfm_max,
+                              mi_row, mi_col, BLOCK_SIZE_SB64X64);
     }
   }
 }
