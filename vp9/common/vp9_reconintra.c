@@ -99,7 +99,7 @@ static void d45_predictor(uint8_t *ypred_ptr, int y_stride,
                                           yabove_row[r + c + 1] * 2 +
                                           yabove_row[r + c + 2], 2);
       else
-        ypred_ptr[c] = yabove_row[bw];
+        ypred_ptr[c] = yabove_row[bw * 2 - 1];
     }
     ypred_ptr += y_stride;
   }
@@ -240,7 +240,7 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
       vpx_memcpy(yabove_row + bw, yabove_ptr + bw, bw);
     else
       vpx_memset(yabove_row + bw, yabove_row[bw -1], bw);
-    ytop_left = left_available ? yabove_ptr[-1] : 127;
+    ytop_left = left_available ? yabove_ptr[-1] : 129;
   } else {
     vpx_memset(yabove_row, 127, bw * 2);
     ytop_left = 127;
@@ -275,7 +275,7 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
     break;
     case V_PRED:
       for (r = 0; r < bh; r++) {
-        memcpy(ypred_ptr, yabove_row, bw);
+        vpx_memcpy(ypred_ptr, yabove_row, bw);
         ypred_ptr += y_stride;
       }
       break;
@@ -323,7 +323,7 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
         }
       } else if (bw > bh) {
         uint8_t pred[64*64];
-        memset(yleft_col + bh, yleft_col[bh - 1], bw - bh);
+        vpx_memset(yleft_col + bh, yleft_col[bh - 1], bw - bh);
         switch (mode) {
           case D45_PRED:
             d45_predictor(pred, 64, bw, bw,  yabove_row, yleft_col);
@@ -347,10 +347,10 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
             assert(0);
         }
         for (i = 0; i < bh; i++)
-          memcpy(ypred_ptr + y_stride * i, pred + i * 64, bw);
+          vpx_memcpy(ypred_ptr + y_stride * i, pred + i * 64, bw);
       } else {
         uint8_t pred[64 * 64];
-        memset(yabove_row + bw, yabove_row[bw - 1], bh - bw);
+        vpx_memset(yabove_row + bw * 2, yabove_row[bw * 2 - 1], (bh - bw) * 2);
         switch (mode) {
           case D45_PRED:
             d45_predictor(pred, 64, bh, bh,  yabove_row, yleft_col);
@@ -374,7 +374,7 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
             assert(0);
         }
         for (i = 0; i < bh; i++)
-          memcpy(ypred_ptr + y_stride * i, pred + i * 64, bw);
+          vpx_memcpy(ypred_ptr + y_stride * i, pred + i * 64, bw);
       }
       break;
     default:
