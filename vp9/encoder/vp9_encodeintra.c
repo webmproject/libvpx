@@ -16,7 +16,7 @@
 #include "vp9/common/vp9_invtrans.h"
 #include "vp9/encoder/vp9_encodeintra.h"
 
-static void encode_intra4x4block(MACROBLOCK *x, int ib);
+static void encode_intra4x4block(MACROBLOCK *x, int ib, BLOCK_SIZE_TYPE bs);
 
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
@@ -33,27 +33,28 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
 
     for (i = 0; i < 16; i++) {
       x->e_mbd.mode_info_context->bmi[i].as_mode.first = B_DC_PRED;
-      encode_intra4x4block(x, i);
+      encode_intra4x4block(x, i, BLOCK_SIZE_MB16X16);
     }
   }
 
   return vp9_get_mb_ss(x->plane[0].src_diff);
 }
 
-static void encode_intra4x4block(MACROBLOCK *x, int ib) {
+static void encode_intra4x4block(MACROBLOCK *x, int ib,
+                                 BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD * const xd = &x->e_mbd;
   TX_TYPE tx_type;
   uint8_t* const src =
-      raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+      raster_block_offset_uint8(xd, bsize, 0, ib,
                                 x->plane[0].src.buf, x->plane[0].src.stride);
   uint8_t* const dst =
-      raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
+      raster_block_offset_uint8(xd, bsize, 0, ib,
                                 xd->plane[0].dst.buf, xd->plane[0].dst.stride);
   int16_t* const src_diff =
-      raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
+      raster_block_offset_int16(xd, bsize, 0, ib,
                                 x->plane[0].src_diff);
   int16_t* const diff =
-      raster_block_offset_int16(xd, BLOCK_SIZE_MB16X16, 0, ib,
+      raster_block_offset_int16(xd, bsize, 0, ib,
                                 xd->plane[0].diff);
   int16_t* const coeff = BLOCK_OFFSET(x->plane[0].coeff, ib, 16);
 
@@ -88,11 +89,13 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib) {
   vp9_recon_b(dst, diff, dst, xd->plane[0].dst.stride);
 }
 
-void vp9_encode_intra4x4mby(MACROBLOCK *mb) {
+void vp9_encode_intra4x4mby(MACROBLOCK *mb, BLOCK_SIZE_TYPE bsize) {
   int i;
+  int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
+  int bc = 1 << (bwl + bhl);
 
-  for (i = 0; i < 16; i++)
-    encode_intra4x4block(mb, i);
+  for (i = 0; i < bc; i++)
+    encode_intra4x4block(mb, i, bsize);
 }
 
 void vp9_encode_intra16x16mby(VP9_COMMON *const cm, MACROBLOCK *x) {

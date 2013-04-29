@@ -16,7 +16,7 @@
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred);
 void vp9_encode_intra16x16mby(VP9_COMMON *const cm, MACROBLOCK *x);
 void vp9_encode_intra16x16mbuv(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_encode_intra4x4mby(MACROBLOCK *mb);
+void vp9_encode_intra4x4mby(MACROBLOCK *mb, BLOCK_SIZE_TYPE bs);
 void vp9_encode_intra8x8mby(MACROBLOCK *x);
 void vp9_encode_intra8x8mbuv(MACROBLOCK *x);
 void vp9_encode_intra8x8(MACROBLOCK *x, int ib);
