@@ -106,10 +106,8 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
                         vp9_reader *r, int block_idx,
                         PLANE_TYPE type, int seg_eob, int16_t *qcoeff_ptr,
-                        TX_SIZE txfm_size, const int16_t *dq) {
-  ENTROPY_CONTEXT* const A0 = (ENTROPY_CONTEXT *) xd->above_context;
-  ENTROPY_CONTEXT* const L0 = (ENTROPY_CONTEXT *) xd->left_context;
-  int aidx, lidx;
+                        TX_SIZE txfm_size, const int16_t *dq,
+                        ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
   ENTROPY_CONTEXT above_ec, left_ec;
   FRAME_CONTEXT *const fc = &dx->common.fc;
   int pt, c = 0, pad, default_eob;
@@ -133,37 +131,14 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   vpx_memset(token_cache, UNKNOWN_TOKEN, sizeof(token_cache));
 #endif
 
-  if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X64) {
-    aidx = vp9_block2above_sb64[txfm_size][block_idx];
-    lidx = vp9_block2left_sb64[txfm_size][block_idx];
-  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB64X32) {
-    aidx = vp9_block2above_sb64x32[txfm_size][block_idx];
-    lidx = vp9_block2left_sb64x32[txfm_size][block_idx];
-  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X64) {
-    aidx = vp9_block2above_sb32x64[txfm_size][block_idx];
-    lidx = vp9_block2left_sb32x64[txfm_size][block_idx];
-  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X32) {
-    aidx = vp9_block2above_sb[txfm_size][block_idx];
-    lidx = vp9_block2left_sb[txfm_size][block_idx];
-  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB32X16) {
-    aidx = vp9_block2above_sb32x16[txfm_size][block_idx];
-    lidx = vp9_block2left_sb32x16[txfm_size][block_idx];
-  } else if (xd->mode_info_context->mbmi.sb_type == BLOCK_SIZE_SB16X32) {
-    aidx = vp9_block2above_sb16x32[txfm_size][block_idx];
-    lidx = vp9_block2left_sb16x32[txfm_size][block_idx];
-  } else {
-    aidx = vp9_block2above[txfm_size][block_idx];
-    lidx = vp9_block2left[txfm_size][block_idx];
-  }
-
   switch (txfm_size) {
     default:
     case TX_4X4: {
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_4x4(xd, block_idx) : DCT_DCT;
       scan = get_scan_4x4(tx_type);
-      above_ec = A0[aidx] != 0;
-      left_ec = L0[lidx] != 0;
+      above_ec = A[0] != 0;
+      left_ec = L[0] != 0;
       coef_probs  = fc->coef_probs_4x4;
       coef_counts = fc->coef_counts_4x4;
       default_eob = 16;
@@ -183,8 +158,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       scan = get_scan_8x8(tx_type);
       coef_probs  = fc->coef_probs_8x8;
       coef_counts = fc->coef_counts_8x8;
-      above_ec = (A0[aidx] + A0[aidx + 1]) != 0;
-      left_ec  = (L0[lidx] + L0[lidx + 1]) != 0;
+      above_ec = (A[0] + A[1]) != 0;
+      left_ec = (L[0] + L[1]) != 0;
       default_eob = 64;
 #if CONFIG_CODE_ZEROGROUP
       zpc_probs = &(fc->zpc_probs_8x8);
@@ -202,15 +177,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       scan = get_scan_16x16(tx_type);
       coef_probs  = fc->coef_probs_16x16;
       coef_counts = fc->coef_counts_16x16;
-      if (type == PLANE_TYPE_UV) {
-        ENTROPY_CONTEXT *A1 = (ENTROPY_CONTEXT *) (xd->above_context + 1);
-        ENTROPY_CONTEXT *L1 = (ENTROPY_CONTEXT *) (xd->left_context + 1);
-        above_ec = (A0[aidx] + A0[aidx + 1] + A1[aidx] + A1[aidx + 1]) != 0;
-        left_ec  = (L0[lidx] + L0[lidx + 1] + L1[lidx] + L1[lidx + 1]) != 0;
-      } else {
-        above_ec = (A0[aidx] + A0[aidx + 1] + A0[aidx + 2] + A0[aidx + 3]) != 0;
-        left_ec  = (L0[lidx] + L0[lidx + 1] + L0[lidx + 2] + L0[lidx + 3]) != 0;
-      }
+      above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
+      left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
       default_eob = 256;
 #if CONFIG_CODE_ZEROGROUP
       zpc_probs = &(fc->zpc_probs_16x16);
@@ -222,25 +190,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       scan = vp9_default_zig_zag1d_32x32;
       coef_probs = fc->coef_probs_32x32;
       coef_counts = fc->coef_counts_32x32;
-      if (type == PLANE_TYPE_UV) {
-        ENTROPY_CONTEXT *A1 = (ENTROPY_CONTEXT *) (xd->above_context + 1);
-        ENTROPY_CONTEXT *L1 = (ENTROPY_CONTEXT *) (xd->left_context + 1);
-        ENTROPY_CONTEXT *A2 = (ENTROPY_CONTEXT *) (xd->above_context + 2);
-        ENTROPY_CONTEXT *L2 = (ENTROPY_CONTEXT *) (xd->left_context + 2);
-        ENTROPY_CONTEXT *A3 = (ENTROPY_CONTEXT *) (xd->above_context + 3);
-        ENTROPY_CONTEXT *L3 = (ENTROPY_CONTEXT *) (xd->left_context + 3);
-        above_ec = (A0[aidx] + A0[aidx + 1] + A1[aidx] + A1[aidx + 1] +
-                    A2[aidx] + A2[aidx + 1] + A3[aidx] + A3[aidx + 1]) != 0;
-        left_ec  = (L0[lidx] + L0[lidx + 1] + L1[lidx] + L1[lidx + 1] +
-                    L2[lidx] + L2[lidx + 1] + L3[lidx] + L3[lidx + 1]) != 0;
-      } else {
-        ENTROPY_CONTEXT *A1 = (ENTROPY_CONTEXT *) (xd->above_context + 1);
-        ENTROPY_CONTEXT *L1 = (ENTROPY_CONTEXT *) (xd->left_context + 1);
-        above_ec = (A0[aidx] + A0[aidx + 1] + A0[aidx + 2] + A0[aidx + 3] +
-                    A1[aidx] + A1[aidx + 1] + A1[aidx + 2] + A1[aidx + 3]) != 0;
-        left_ec  = (L0[lidx] + L0[lidx + 1] + L0[lidx + 2] + L0[lidx + 3] +
-                    L1[lidx] + L1[lidx + 1] + L1[lidx + 2] + L1[lidx + 3]) != 0;
-      }
+      above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
+      left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
       default_eob = 1024;
 #if CONFIG_CODE_ZEROGROUP
       zpc_probs = &fc->zpc_probs_32x32;
@@ -381,33 +332,10 @@ SKIP_START:
     coef_counts[type][ref][get_coef_band(scan, txfm_size, c)]
         [pt][DCT_EOB_TOKEN]++;
 
-  A0[aidx] = L0[lidx] = c > 0;
-  if (txfm_size >= TX_8X8) {
-    A0[aidx + 1] = L0[lidx + 1] = A0[aidx];
-    if (txfm_size >= TX_16X16) {
-      if (type == PLANE_TYPE_UV) {
-        ENTROPY_CONTEXT *A1 = (ENTROPY_CONTEXT *) (xd->above_context + 1);
-        ENTROPY_CONTEXT *L1 = (ENTROPY_CONTEXT *) (xd->left_context + 1);
-        A1[aidx] = A1[aidx + 1] = L1[lidx] = L1[lidx + 1] = A0[aidx];
-        if (txfm_size >= TX_32X32) {
-          ENTROPY_CONTEXT *A2 = (ENTROPY_CONTEXT *) (xd->above_context + 2);
-          ENTROPY_CONTEXT *L2 = (ENTROPY_CONTEXT *) (xd->left_context + 2);
-          ENTROPY_CONTEXT *A3 = (ENTROPY_CONTEXT *) (xd->above_context + 3);
-          ENTROPY_CONTEXT *L3 = (ENTROPY_CONTEXT *) (xd->left_context + 3);
-          A2[aidx] = A2[aidx + 1] = A3[aidx] = A3[aidx + 1] = A0[aidx];
-          L2[lidx] = L2[lidx + 1] = L3[lidx] = L3[lidx + 1] = A0[aidx];
-        }
-      } else {
-        A0[aidx + 2] = A0[aidx + 3] = L0[lidx + 2] = L0[lidx + 3] = A0[aidx];
-        if (txfm_size >= TX_32X32) {
-          ENTROPY_CONTEXT *A1 = (ENTROPY_CONTEXT *) (xd->above_context + 1);
-          ENTROPY_CONTEXT *L1 = (ENTROPY_CONTEXT *) (xd->left_context + 1);
-          A1[aidx] = A1[aidx + 1] = A1[aidx + 2] = A1[aidx + 3] = A0[aidx];
-          L1[lidx] = L1[lidx + 1] = L1[lidx + 2] = L1[lidx + 3] = A0[aidx];
-        }
-      }
-    }
+  for (pt = 0; pt < (1 << txfm_size); pt++) {
+    A[pt] = L[pt] = c > 0;
   }
+
   return c;
 }
 
@@ -436,11 +364,17 @@ static void decode_block(int plane, int block,
   const TX_SIZE ss_tx_size = ss_txfrm_size / 2;
   const int seg_eob = get_eob(arg->xd, segment_id, 16 << ss_txfrm_size);
   int16_t* const qcoeff_base = arg->xd->plane[plane].qcoeff;
+  const int off = block >> ss_txfrm_size;
+  const int mod = bw - ss_tx_size - arg->xd->plane[plane].subsampling_x;
+  const int aoff = (off & ((1 << mod) - 1)) << ss_tx_size;
+  const int loff = (off >> mod) << ss_tx_size;
 
   const int eob = decode_coefs(arg->pbi, arg->xd, arg->r, old_block_idx,
                                arg->xd->plane[plane].plane_type, seg_eob,
                                BLOCK_OFFSET(qcoeff_base, block, 16),
-                               ss_tx_size, arg->xd->plane[plane].dequant);
+                               ss_tx_size, arg->xd->plane[plane].dequant,
+                               arg->xd->plane[plane].above_context + aoff,
+                               arg->xd->plane[plane].left_context + loff);
 
   arg->xd->plane[plane].eobs[block] = eob;
   arg->eobtotal[0] += eob;
@@ -461,9 +395,14 @@ static int decode_coefs_4x4(VP9D_COMP *dx, MACROBLOCKD *xd,
                             vp9_reader *r,
                             PLANE_TYPE type, int i, int seg_eob) {
   const struct plane_block_idx pb_idx = plane_block_idx(16, i);
+  const int mod = 2 - xd->plane[pb_idx.plane].subsampling_x;
+  const int aoff = pb_idx.block & ((1 << mod) - 1);
+  const int loff = pb_idx.block >> mod;
+  ENTROPY_CONTEXT *A = xd->plane[pb_idx.plane].above_context;
+  ENTROPY_CONTEXT *L = xd->plane[pb_idx.plane].left_context;
   const int c = decode_coefs(dx, xd, r, i, type, seg_eob,
       BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16), TX_4X4,
-      xd->plane[pb_idx.plane].dequant);
+      xd->plane[pb_idx.plane].dequant, A + aoff, L + loff);
   xd->plane[pb_idx.plane].eobs[pb_idx.block] = c;
   return c;
 }

@@ -253,8 +253,8 @@ typedef struct VP9Common {
   int ref_frame_sign_bias[MAX_REF_FRAMES];    /* Two state 0, 1 */
 
   /* Y,U,V */
-  ENTROPY_CONTEXT_PLANES *above_context;   /* row of context for each plane */
-  ENTROPY_CONTEXT_PLANES left_context[4];  /* (up to) 4 contexts "" */
+  ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
+  ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];
 
   // partition contexts
   PARTITION_CONTEXT *above_seg_context;
