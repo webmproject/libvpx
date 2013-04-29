@@ -157,7 +157,6 @@ B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, int block_idx,
     return B_DC_PRED;
   return vp9_find_dominant_direction(ptr, stride, 4, tx, ty);
 }
-#endif
 
 void vp9_intra4x4_predict(MACROBLOCKD *xd,
                           int block_idx,
@@ -449,3 +448,4 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
 #endif
   }
 }
+#endif

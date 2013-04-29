@@ -38,50 +38,33 @@ static void d27_predictor(uint8_t *ypred_ptr, int y_stride,
                           int bw, int bh,
                           uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
+  // first column
+  for (r = 0; r < bh - 1; ++r) {
+      ypred_ptr[r * y_stride] = ROUND_POWER_OF_TWO(yleft_col[r] +
+                                                   yleft_col[r + 1], 1);
+  }
+  ypred_ptr[(bh - 1) * y_stride] = yleft_col[bh-1];
+  ypred_ptr++;
+  // second column
+  for (r = 0; r < bh - 2; ++r) {
+      ypred_ptr[r * y_stride] = ROUND_POWER_OF_TWO(yleft_col[r] +
+                                                   yleft_col[r + 1] * 2 +
+                                                   yleft_col[r + 2], 2);
+  }
+  ypred_ptr[(bh - 2) * y_stride] = ROUND_POWER_OF_TWO(yleft_col[bh - 2] +
+                                                      yleft_col[bh - 1] * 3,
+                                                      2);
+  ypred_ptr[(bh - 1) * y_stride] = yleft_col[bh-1];
+  ypred_ptr++;
 
-  r = 0;
-  for (c = 0; c < bw - 2; c++) {
-    int a = c & 1 ? yleft_col[r + 1]
-                  : ROUND_POWER_OF_TWO(yleft_col[r] + yleft_col[r + 1], 1);
-    int b = yabove_row[c + 2];
-    ypred_ptr[c] = iscale_round(2 * a + (c + 1) * b, 1 + c);
+  // rest of last row
+  for (c = 0; c < bw - 2; ++c) {
+    ypred_ptr[(bh - 1) * y_stride + c] = yleft_col[bh-1];
   }
 
-  for (r = 1; r < bh / 2 - 1; r++) {
-    for (c = 0; c < bw - 2 - 2 * r; c++) {
-      int a = c & 1 ? yleft_col[r + 1]
-                    : ROUND_POWER_OF_TWO(yleft_col[r] + yleft_col[r + 1], 1);
-      int b = ypred_ptr[(r - 1) * y_stride + c + 2];
-      ypred_ptr[r * y_stride + c] = iscale_round(2 * a + (c + 1) * b, 1 + c);
-    }
-  }
-
-  for (; r < bh - 1; r++) {
-    for (c = 0; c < bw; c++) {
-      int v = c & 1 ? yleft_col[r + 1]
-                    : ROUND_POWER_OF_TWO(yleft_col[r] + yleft_col[r + 1], 1);
-      int h = r - c / 2;
-      ypred_ptr[h * y_stride + c] = v;
-    }
-  }
-
-  c = 0;
-  r = bh - 1;
-  ypred_ptr[r * y_stride] = ROUND_POWER_OF_TWO(ypred_ptr[(r - 1) * y_stride] +
-                                               yleft_col[r], 1);
-  for (r = bh - 2; r >= bh / 2; --r) {
-    const int w = c + (bh - 1 - r) * 2;
-    ypred_ptr[r * y_stride + w] =
-        ROUND_POWER_OF_TWO(ypred_ptr[(r - 1) * y_stride + w] +
-                           ypred_ptr[r * y_stride + w - 1], 1);
-  }
-
-  for (c = 1; c < bw; c++) {
-    for (r = bh - 1; r >= bh / 2 + c / 2; --r) {
-      const int w = c + (bh - 1 - r) * 2;
-      ypred_ptr[r * y_stride + w] =
-          ROUND_POWER_OF_TWO(ypred_ptr[(r - 1) * y_stride + w] +
-                             ypred_ptr[r * y_stride + w - 1], 1);
+  for (r = bh - 2; r >= 0; --r) {
+    for (c = 0; c < bw - 2; ++c) {
+      ypred_ptr[r * y_stride + c] = ypred_ptr[(r + 1) * y_stride + c - 2];
     }
   }
 }
@@ -90,50 +73,18 @@ static void d63_predictor(uint8_t *ypred_ptr, int y_stride,
                           int bw, int bh,
                           uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
-
-  c = 0;
-  for (r = 0; r < bh - 2; r++) {
-    int a = r & 1 ? yabove_row[c + 1]
-                  : ROUND_POWER_OF_TWO(yabove_row[c] + yabove_row[c + 1], 1);
-    int b = yleft_col[r + 2];
-    ypred_ptr[r * y_stride] = iscale_round(2 * a + (r + 1) * b, 1 + r);
-  }
-
-  for (c = 1; c < bw / 2 - 1; c++) {
-    for (r = 0; r < bh - 2 - 2 * c; r++) {
-      int a = r & 1 ? yabove_row[c + 1]
-                    : ROUND_POWER_OF_TWO(yabove_row[c] + yabove_row[c + 1], 1);
-      int b = ypred_ptr[(r + 2) * y_stride + c - 1];
-      ypred_ptr[r * y_stride + c] = iscale_round(2 * a + (c + 1) * b, 1 + c);
+  for (r = 0; r < bh; ++r) {
+    for (c = 0; c < bw; ++c) {
+      if (r & 1) {
+        ypred_ptr[c] = ROUND_POWER_OF_TWO(yabove_row[r/2 + c] +
+                                          yabove_row[r/2 + c + 1] * 2 +
+                                          yabove_row[r/2 + c + 2], 2);
+      } else {
+        ypred_ptr[c] =ROUND_POWER_OF_TWO(yabove_row[r/2 + c] +
+                                         yabove_row[r/2+ c + 1], 1);
+      }
     }
-  }
-
-  for (; c < bw - 1; ++c) {
-    for (r = 0; r < bh; r++) {
-      int v = r & 1 ? yabove_row[c + 1]
-                    : ROUND_POWER_OF_TWO(yabove_row[c] + yabove_row[c + 1], 1);
-      int w = c - r / 2;
-      ypred_ptr[r * y_stride + w] = v;
-    }
-  }
-
-  r = 0;
-  c = bw - 1;
-  ypred_ptr[c] = ROUND_POWER_OF_TWO(ypred_ptr[(c - 1)] + yabove_row[c], 1);
-  for (c = bw - 2; c >= bw / 2; --c) {
-    const int h = r + (bw - 1 - c) * 2;
-    ypred_ptr[h * y_stride + c] =
-         ROUND_POWER_OF_TWO(ypred_ptr[h * y_stride + c - 1] +
-                            ypred_ptr[(h - 1) * y_stride + c], 1);
-  }
-
-  for (r = 1; r < bh; r++) {
-    for (c = bw - 1; c >= bw / 2 + r / 2; --c) {
-      const int h = r + (bw - 1 - c) * 2;
-      ypred_ptr[h * y_stride + c] =
-          ROUND_POWER_OF_TWO(ypred_ptr[h * y_stride + c - 1] +
-                             ypred_ptr[(h - 1) * y_stride + c], 1);
-    }
+    ypred_ptr += y_stride;
   }
 }
 
@@ -141,29 +92,16 @@ static void d45_predictor(uint8_t *ypred_ptr, int y_stride,
                           int bw, int bh,
                           uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
-
-  for (r = 0; r < bh - 1; ++r) {
-    for (c = 0; c <= r; ++c) {
-      ypred_ptr[(r - c) * y_stride + c] = iscale_round(
-          yabove_row[r + 1] * (c + 1) + yleft_col[r + 1] * (r - c + 1), r);
+  for (r = 0; r < bh; ++r) {
+    for (c = 0; c < bw; ++c) {
+      if (r + c + 2 < bw * 2)
+        ypred_ptr[c] = ROUND_POWER_OF_TWO(yabove_row[r + c] +
+                                          yabove_row[r + c + 1] * 2 +
+                                          yabove_row[r + c + 2], 2);
+      else
+        ypred_ptr[c] = yabove_row[bw];
     }
-  }
-
-  for (c = 0; c <= r; ++c) {
-    int yabove_ext = yabove_row[r];  // clip_pixel(2 * yabove_row[r] -
-                                     //            yabove_row[r - 1]);
-    int yleft_ext = yleft_col[r];  // clip_pixel(2 * yleft_col[r] -
-                                   //            yleft_col[r-1]);
-    ypred_ptr[(r - c) * y_stride + c] =
-         iscale_round(yabove_ext * (c + 1) + yleft_ext * (r - c + 1), r);
-  }
-  for (r = 1; r < bh; ++r) {
-    for (c = bw - r; c < bw; ++c) {
-      const int yabove_ext = ypred_ptr[(r - 1) * y_stride + c];
-      const int yleft_ext = ypred_ptr[r * y_stride + c - 1];
-      ypred_ptr[r * y_stride + c] =
-          ROUND_POWER_OF_TWO(yabove_ext + yleft_ext, 1);
-    }
+    ypred_ptr += y_stride;
   }
 }
 
@@ -171,29 +109,61 @@ static void d117_predictor(uint8_t *ypred_ptr, int y_stride,
                            int bw, int bh,
                            uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
+  // first row
   for (c = 0; c < bw; c++)
     ypred_ptr[c] = ROUND_POWER_OF_TWO(yabove_row[c - 1] + yabove_row[c], 1);
   ypred_ptr += y_stride;
-  for (c = 0; c < bw; c++)
-    ypred_ptr[c] = yabove_row[c - 1];
+
+  // second row
+  ypred_ptr[0] = ROUND_POWER_OF_TWO(yleft_col[0] +
+                                    yabove_row[-1] * 2 +
+                                    yabove_row[0], 2);
+  for (c = 1; c < bw; c++)
+    ypred_ptr[c] = ROUND_POWER_OF_TWO(yabove_row[c - 2] +
+                                      yabove_row[c - 1] * 2 +
+                                      yabove_row[c], 2);
   ypred_ptr += y_stride;
+
+  // the rest of first col
+  ypred_ptr[0] = ROUND_POWER_OF_TWO(yabove_row[-1] +
+                                    yleft_col[0] * 2 +
+                                    yleft_col[1], 2);
+  for (r = 3; r < bh; ++r)
+    ypred_ptr[(r-2) * y_stride] = ROUND_POWER_OF_TWO(yleft_col[r - 3] +
+                                                     yleft_col[r - 2] * 2 +
+                                                     yleft_col[r - 1], 2);
+  // the rest of the block
   for (r = 2; r < bh; ++r) {
-    ypred_ptr[0] = yleft_col[r - 2];
     for (c = 1; c < bw; c++)
       ypred_ptr[c] = ypred_ptr[-2 * y_stride + c - 1];
     ypred_ptr += y_stride;
   }
 }
 
+
 static void d135_predictor(uint8_t *ypred_ptr, int y_stride,
                            int bw, int bh,
                            uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
-  ypred_ptr[0] = yabove_row[-1];
+  ypred_ptr[0] = ROUND_POWER_OF_TWO(yleft_col[0] +
+                                    yabove_row[-1] * 2 +
+                                    yabove_row[0], 2);
   for (c = 1; c < bw; c++)
-    ypred_ptr[c] = yabove_row[c - 1];
-  for (r = 1; r < bh; ++r)
-    ypred_ptr[r * y_stride] = yleft_col[r - 1];
+    ypred_ptr[c] = ROUND_POWER_OF_TWO(yabove_row[c - 2] +
+                                      yabove_row[c - 1] * 2 +
+                                      yabove_row[c], 2);
+
+  ypred_ptr[y_stride] = ROUND_POWER_OF_TWO(yabove_row[-1] +
+                                           yleft_col[0] * 2 +
+                                           yleft_col[1], 2);
+  for (r = 2; r < bh - 1; ++r)
+    ypred_ptr[r * y_stride] = ROUND_POWER_OF_TWO(yleft_col[r - 2] +
+                                                 yleft_col[r - 1] * 2 +
+                                                 yleft_col[r + 1], 2);
+
+  ypred_ptr[(bh - 1) * y_stride] = ROUND_POWER_OF_TWO(yleft_col[bh - 2] +
+                                                      yleft_col[bh - 1] * 3,
+                                                      2);
 
   ypred_ptr += y_stride;
   for (r = 1; r < bh; ++r) {
@@ -203,22 +173,34 @@ static void d135_predictor(uint8_t *ypred_ptr, int y_stride,
   }
 }
 
-static void d153_predictor(uint8_t *ypred_ptr, int y_stride,
+static void d153_predictor(uint8_t *ypred_ptr,
+                           int y_stride,
                            int bw, int bh,
-                           uint8_t *yabove_row, uint8_t *yleft_col) {
+                           uint8_t *yabove_row,
+                           uint8_t *yleft_col) {
   int r, c;
   ypred_ptr[0] = ROUND_POWER_OF_TWO(yabove_row[-1] + yleft_col[0], 1);
   for (r = 1; r < bh; r++)
     ypred_ptr[r * y_stride] =
         ROUND_POWER_OF_TWO(yleft_col[r - 1] + yleft_col[r], 1);
   ypred_ptr++;
-  ypred_ptr[0] = yabove_row[-1];
-  for (r = 1; r < bh; r++)
-    ypred_ptr[r * y_stride] = yleft_col[r - 1];
+
+  ypred_ptr[0] = ROUND_POWER_OF_TWO(yleft_col[0] +
+                                    yabove_row[-1] * 2 +
+                                    yabove_row[0], 2);
+  ypred_ptr[y_stride] = ROUND_POWER_OF_TWO(yabove_row[-1] +
+                                           yleft_col[0] * 2 +
+                                           yleft_col[1], 2);
+  for (r = 2; r < bh; r++)
+    ypred_ptr[r * y_stride] = ROUND_POWER_OF_TWO(yleft_col[r - 2] +
+                                                 yleft_col[r - 1] * 2 +
+                                                 yleft_col[r], 2);
   ypred_ptr++;
 
   for (c = 0; c < bw - 2; c++)
-    ypred_ptr[c] = yabove_row[c];
+    ypred_ptr[c] = ROUND_POWER_OF_TWO(yabove_row[c - 1] +
+                                      yabove_row[c] * 2 +
+                                      yabove_row[c + 1], 2);
   ypred_ptr += y_stride;
   for (r = 1; r < bh; ++r) {
     for (c = 0; c < bw - 2; c++)
@@ -234,7 +216,7 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
                                 int up_available, int left_available,
                                 int right_available) {
   int r, c, i;
-  uint8_t yleft_col[64], yabove_data[65], ytop_left;
+  uint8_t yleft_col[64], yabove_data[129], ytop_left;
   uint8_t *yabove_row = yabove_data + 1;
 
   // 127 127 127 .. 127 127 127 127 127 127
@@ -254,13 +236,13 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
   if (up_available) {
     uint8_t *yabove_ptr = src - src_stride;
     vpx_memcpy(yabove_row, yabove_ptr, bw);
+    vpx_memset(yabove_row + bw, yabove_row[bw -1], bw);
     ytop_left = left_available ? yabove_ptr[-1] : 127;
   } else {
-    vpx_memset(yabove_row, 127, bw);
+    vpx_memset(yabove_row, 127, bw * 2);
     ytop_left = 127;
   }
   yabove_row[-1] = ytop_left;
-
 
   switch (mode) {
     case DC_PRED: {
@@ -275,7 +257,6 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
             average += yabove_row[i];
           count += bw;
         }
-
         if (left_available) {
           for (i = 0; i < bh; i++)
             average += yleft_col[i];
@@ -283,7 +264,6 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
         }
         expected_dc = (average + (count >> 1)) / count;
       }
-
       for (r = 0; r < bh; r++) {
         vpx_memset(ypred_ptr, expected_dc, bw);
         ypred_ptr += y_stride;
@@ -306,7 +286,6 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
       for (r = 0; r < bh; r++) {
         for (c = 0; c < bw; c++)
           ypred_ptr[c] = clip_pixel(yleft_col[r] + yabove_row[c] - ytop_left);
-
         ypred_ptr += y_stride;
       }
       break;
@@ -624,7 +603,21 @@ void vp9_intra8x8_predict(MACROBLOCKD *xd,
                              mode, 8, 8, have_top, have_left,
                              have_right);
 }
+#if !CONFIG_NEWBINTRAMODES
+void vp9_intra4x4_predict(MACROBLOCKD *xd,
+                          int block_idx,
+                          int mode,
+                          uint8_t *predictor, int pre_stride) {
+  const int have_top = (block_idx >> 2) || xd->up_available;
+  const int have_left = (block_idx & 3) || xd->left_available;
+  const int have_right = ((block_idx & 3) != 3) || xd->right_available;
 
+  vp9_build_intra_predictors(predictor, pre_stride,
+                             predictor, pre_stride,
+                             mode, 4, 4, have_top, have_left,
+                             have_right);
+}
+#endif
 void vp9_intra_uv4x4_predict(MACROBLOCKD *xd,
                              int block4x4_idx,
                              int mode,
