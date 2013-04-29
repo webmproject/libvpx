@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//y+E\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-04-29T18:34:16Z",
+      "side": 1,
+      "message": "Drop the void for new functions. Just:\nstatic int x86_cpu_env_mask() {",
+      "revId": "1be8d29b995ecf3fb3f6b3149192fcfd4001f10e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//y+M\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-04-29T18:34:16Z",
+      "side": 1,
+      "message": "This is still unnecessary. When built without RTCD it uses #defines at compile time instead of tables at run time. This function can not do anything.",
+      "revId": "1be8d29b995ecf3fb3f6b3149192fcfd4001f10e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
