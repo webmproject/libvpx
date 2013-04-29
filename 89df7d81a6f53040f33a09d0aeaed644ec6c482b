@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//zQY\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zVQ\u003d",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//zVA\u003d",
         "filename": "vp9/common/vp9_alloccommon.c",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2013-04-29T16:06:52Z",
       "side": 1,
       "message": "just use 8 for all planes in the allocation, or mark this as a todo for me to fix when the subsampling mode is known in oci.",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//zQI\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zVA\u003d",
       "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//zQA\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zU8\u003d",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//zU0\u003d",
         "filename": "vp9/common/vp9_entropy.h",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2013-04-29T16:06:52Z",
       "side": 1,
       "message": "assumes 420, use the subsampling data from xd to calculate these sizes, or just use the same size for all planes.",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//zPQ\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "You can\u0027t use the same size for all planes, you\u0027ll overwrite the data of the right or bottom neighbours for 420. Used plane-\u003esubsampling_x/y instead.",
+      "parentUuid": "AAAAXX//zU0\u003d",
       "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//zPA\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zUg\u003d",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//zps\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 7
@@ -98,6 +188,24 @@
       "writtenOn": "2013-04-29T00:01:12Z",
       "side": 1,
       "message": "Not sure I like this use of a config flag... though it will disappear when the experiment is merged I guess.",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//zO4\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 757,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Right, this is temporary.",
+      "parentUuid": "AAAAXX//zps\u003d",
       "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//zOI\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zUU\u003d",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//zUA\u003d",
         "filename": "vp9/decoder/vp9_decodframe.c",
         "patchSetId": 7
@@ -132,6 +258,24 @@
       "writtenOn": "2013-04-29T16:06:52Z",
       "side": 1,
       "message": "calculate the correct length of the buffer here based on MAX_MB_PLANE planes. Probably easiest if all planes are made the same size, at least for now.",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//zOA\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1337,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zUA\u003d",
       "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//zN8\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "I don\u0027t see this repeated anywhere? Anyway, let\u0027s leave refactoring out of the patch for now.",
+      "parentUuid": "AAAAXX//zT0\u003d",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//zTo\u003d",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 7
@@ -166,6 +328,24 @@
       "writtenOn": "2013-04-29T16:06:52Z",
       "side": 1,
       "message": "hmm, I just noticed that these were available from xd. I see -- we\u0027re allocating the base pointers in common, then storing pointers to them in xd. That\u0027s fine -- in this case, we should move xd-\u003eabove_context to xd-\u003eplane[].above_context, so that per-plane data in xd can be referenced consistently, rather than having two or more per-plane arrays.",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//zN4\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zTo\u003d",
       "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//zNk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 580,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zTg\u003d",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//zTY\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 7
@@ -200,6 +398,24 @@
       "writtenOn": "2013-04-29T16:06:52Z",
       "side": 1,
       "message": "should be a loop over planes, and either all planes made the same size of the sizes calculated based on the subsampling in effect.",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//zNg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1005,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zTY\u003d",
       "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//zNc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1032,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zTU\u003d",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//zS8\u003d",
         "filename": "vp9/encoder/vp9_encodemb.c",
         "patchSetId": 7
@@ -234,6 +468,24 @@
       "writtenOn": "2013-04-29T16:06:52Z",
       "side": 1,
       "message": "max_mb_plane",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//zNQ\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zS8\u003d",
       "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//zNM\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 657,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zTA\u003d",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//zS0\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 7
@@ -274,6 +544,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//zM4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1363,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zS0\u003d",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//zSw\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 7
@@ -285,6 +573,24 @@
       "writtenOn": "2013-04-29T16:06:52Z",
       "side": 1,
       "message": "assumes 420",
+      "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//zMw\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1366,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-29T17:13:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//zSw\u003d",
       "revId": "89df7d81a6f53040f33a09d0aeaed644ec6c482b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
