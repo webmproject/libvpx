@@ -562,6 +562,15 @@ void vp9_setup_src_planes(MACROBLOCK *x,
                    x->e_mbd.plane[2].subsampling_y);
 }
 
+static INLINE void set_partition_seg_context(VP9_COMP *cpi,
+                                             int mi_row, int mi_col) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+
+  xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+  xd->left_seg_context  = cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
+}
+
 static void set_offsets(VP9_COMP *cpi,
                         int mi_row, int mi_col, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCK *const x = &cpi->mb;
@@ -585,8 +594,7 @@ static void set_offsets(VP9_COMP *cpi,
   }
 
   // partition contexts
-  xd->above_seg_context = cm->above_seg_context + mb_col;
-  xd->left_seg_context  = cm->left_seg_context + (mb_row & 3);
+  set_partition_seg_context(cpi, mi_row, mi_col);
 
   // Activity map pointer
   x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
@@ -789,10 +797,7 @@ static void encode_sb(VP9_COMP *cpi,
   BLOCK_SIZE_TYPE bsize = BLOCK_SIZE_SB32X32;
   int pl;
 
-  xd->left_seg_context  =
-      cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 0x03);
-  xd->above_seg_context =
-      cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+  set_partition_seg_context(cpi, mi_row, mi_col);
   pl = partition_plane_context(xd, bsize);
 
   if (is_sb == BLOCK_SIZE_SB32X32) {
@@ -882,8 +887,7 @@ static void encode_sb(VP9_COMP *cpi,
     }
   }
 
-  xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
-  xd->left_seg_context  = cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
+  set_partition_seg_context(cpi, mi_row, mi_col);
   update_partition_context(xd, is_sb, BLOCK_SIZE_SB32X32);
 
   // debug output
@@ -907,8 +911,7 @@ static void encode_sb64(VP9_COMP *cpi,
   BLOCK_SIZE_TYPE bsize = BLOCK_SIZE_SB64X64;
   int pl;
 
-  xd->left_seg_context  = cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
-  xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+  set_partition_seg_context(cpi, mi_row, mi_col);
   pl = partition_plane_context(xd, bsize);
 
   if (is_sb[0] == BLOCK_SIZE_SB64X64) {
@@ -971,9 +974,7 @@ static void encode_sb64(VP9_COMP *cpi,
   }
 
   if (is_sb[0] > BLOCK_SIZE_SB32X32) {
-    xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
-    xd->left_seg_context  =
-        cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
+    set_partition_seg_context(cpi, mi_row, mi_col);
     update_partition_context(xd, is_sb[0], BLOCK_SIZE_SB64X64);
   }
 }
@@ -1084,9 +1085,7 @@ static void encode_sb_row(VP9_COMP *cpi,
                    sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_x);
       }
 
-      xd->left_seg_context  = cm->left_seg_context + (y_idx >> CONFIG_SB8X8);
-      xd->above_seg_context =
-          cm->above_seg_context + ((mi_col + x_idx) >> CONFIG_SB8X8);
+      set_partition_seg_context(cpi, mi_row + y_idx, mi_col + x_idx);
       pl = partition_plane_context(xd, BLOCK_SIZE_SB32X32);
       sb32_rate += x->partition_cost[pl][PARTITION_SPLIT];
 
@@ -1119,9 +1118,7 @@ static void encode_sb_row(VP9_COMP *cpi,
           d += d2;
         }
 
-        xd->left_seg_context  = cm->left_seg_context + (y_idx >> CONFIG_SB8X8);
-        xd->above_seg_context =
-            cm->above_seg_context + ((mi_col + x_idx) >> CONFIG_SB8X8);
+        set_partition_seg_context(cpi, mi_row + y_idx, mi_col + x_idx);
         pl = partition_plane_context(xd, BLOCK_SIZE_SB32X32);
         r += x->partition_cost[pl][PARTITION_HORZ];
 
@@ -1172,10 +1169,7 @@ static void encode_sb_row(VP9_COMP *cpi,
           d += d2;
         }
 
-        xd->left_seg_context  =
-            cm->left_seg_context + (y_idx >> CONFIG_SB8X8);
-        xd->above_seg_context =
-            cm->above_seg_context + ((mi_col + x_idx) >> CONFIG_SB8X8);
+        set_partition_seg_context(cpi, mi_row + y_idx, mi_col + x_idx);
         pl = partition_plane_context(xd, BLOCK_SIZE_SB32X32);
         r += x->partition_cost[pl][PARTITION_VERT];
 
@@ -1211,9 +1205,7 @@ static void encode_sb_row(VP9_COMP *cpi,
                       tp, &r, &d, BLOCK_SIZE_SB32X32,
                       &x->sb32_context[xd->sb_index]);
 
-        xd->left_seg_context  = cm->left_seg_context + (y_idx >> CONFIG_SB8X8);
-        xd->above_seg_context =
-            cm->above_seg_context + ((mi_col + x_idx) >> CONFIG_SB8X8);
+        set_partition_seg_context(cpi, mi_row + y_idx, mi_col + x_idx);
         pl = partition_plane_context(xd, BLOCK_SIZE_SB32X32);
         r += x->partition_cost[pl][PARTITION_NONE];
 
@@ -1255,8 +1247,7 @@ static void encode_sb_row(VP9_COMP *cpi,
            sizeof(seg_a));
     memcpy(cm->left_seg_context, &seg_l, sizeof(seg_l));
 
-    xd->left_seg_context  = cm->left_seg_context;
-    xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+    set_partition_seg_context(cpi, mi_row, mi_col);
     pl = partition_plane_context(xd, BLOCK_SIZE_SB64X64);
     sb64_rate += x->partition_cost[pl][PARTITION_SPLIT];
 
@@ -1283,8 +1274,7 @@ static void encode_sb_row(VP9_COMP *cpi,
         d += d2;
       }
 
-      xd->left_seg_context  = cm->left_seg_context;
-      xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+      set_partition_seg_context(cpi, mi_row, mi_col);
       pl = partition_plane_context(xd, BLOCK_SIZE_SB64X64);
       r += x->partition_cost[pl][PARTITION_HORZ];
 
@@ -1329,8 +1319,7 @@ static void encode_sb_row(VP9_COMP *cpi,
         d += d2;
       }
 
-      xd->left_seg_context  = cm->left_seg_context;
-      xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+      set_partition_seg_context(cpi, mi_row, mi_col);
       pl = partition_plane_context(xd, BLOCK_SIZE_SB64X64);
       r += x->partition_cost[pl][PARTITION_VERT];
 
@@ -1360,8 +1349,7 @@ static void encode_sb_row(VP9_COMP *cpi,
       pick_sb_modes(cpi, mi_row, mi_col, tp, &r, &d,
                     BLOCK_SIZE_SB64X64, &x->sb64_context);
 
-      xd->left_seg_context  = cm->left_seg_context;
-      xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+      set_partition_seg_context(cpi, mi_row, mi_col);
       pl = partition_plane_context(xd, BLOCK_SIZE_SB64X64);
       r += x->partition_cost[pl][PARTITION_NONE];
 
