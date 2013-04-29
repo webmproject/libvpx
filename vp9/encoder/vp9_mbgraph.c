@@ -419,10 +419,10 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
       cpi->static_mb_pct = 0;
 
     cpi->seg0_cnt = ncnt[0];
-    vp9_enable_segmentation((VP9_PTR) cpi);
+    vp9_enable_segmentation((VP9_PTR)cpi);
   } else {
     cpi->static_mb_pct = 0;
-    vp9_disable_segmentation((VP9_PTR) cpi);
+    vp9_disable_segmentation((VP9_PTR)cpi);
   }
 
   // Free localy allocated storage

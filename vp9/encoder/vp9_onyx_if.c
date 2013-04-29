@@ -280,8 +280,7 @@ static void setup_features(VP9_COMP *cpi) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   // Set up default state for MB feature flags
-
-  xd->segmentation_enabled = 0;   // Default segmentation disabled
+  xd->segmentation_enabled = 0;
 
   xd->update_mb_segmentation_map = 0;
   xd->update_mb_segmentation_data = 0;
@@ -383,7 +382,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     xd->update_mb_segmentation_map = 0;
     xd->update_mb_segmentation_data = 0;
 #if CONFIG_IMPLICIT_SEGMENTATION
-  xd->allow_implicit_segment_update = 0;
+    xd->allow_implicit_segment_update = 0;
 #endif
     cpi->static_mb_pct = 0;
 
@@ -399,7 +398,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     xd->update_mb_segmentation_map = 0;
     xd->update_mb_segmentation_data = 0;
 #if CONFIG_IMPLICIT_SEGMENTATION
-  xd->allow_implicit_segment_update = 0;
+    xd->allow_implicit_segment_update = 0;
 #endif
     cpi->static_mb_pct = 0;
 
@@ -428,9 +427,9 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
       xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
 
     }
-  }
-  // All other frames if segmentation has been enabled
-  else if (xd->segmentation_enabled) {
+  } else if (xd->segmentation_enabled) {
+    // All other frames if segmentation has been enabled
+
     // First normal frame in a valid gf or alt ref group
     if (cpi->common.frames_since_golden == 0) {
       // Set up segment features for normal frames in an arf group
@@ -454,10 +453,10 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
           vp9_enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
           vp9_enable_segfeature(xd, 1, SEG_LVL_SKIP);
         }
-      }
-      // Disable segmentation and clear down features if alt ref
-      // is not active for this group
-      else {
+      } else {
+        // Disable segmentation and clear down features if alt ref
+        // is not active for this group
+
         vp9_disable_segmentation((VP9_PTR)cpi);
 
         vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
@@ -467,12 +466,11 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
         vp9_clearall_segfeatures(xd);
       }
-    }
+    } else if (cpi->is_src_frame_alt_ref) {
+      // Special case where we are coding over the top of a previous
+      // alt ref frame.
+      // Segment coding disabled for compred testing
 
-    // Special case where we are coding over the top of a previous
-    // alt ref frame.
-    // Segment coding disabled for compred testing
-    else if (cpi->is_src_frame_alt_ref) {
       // Enable ref frame features for segment 0 as well
       vp9_enable_segfeature(xd, 0, SEG_LVL_REF_FRAME);
       vp9_enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
@@ -490,9 +488,9 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
       }
       // Enable data udpate
       xd->update_mb_segmentation_data = 1;
-    }
-    // All other frames.
-    else {
+    } else {
+      // All other frames.
+
       // No updates.. leave things as they are.
       xd->update_mb_segmentation_map = 0;
       xd->update_mb_segmentation_data = 0;

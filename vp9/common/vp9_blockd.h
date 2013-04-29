@@ -355,7 +355,7 @@ typedef struct macroblockd {
   PARTITION_CONTEXT *above_seg_context;
   PARTITION_CONTEXT *left_seg_context;
 
-  /* 0 indicates segmentation at MB level is not enabled. Otherwise the individual bits indicate which features are active. */
+  /* 0 (disable) 1 (enable) segmentation */
   unsigned char segmentation_enabled;
 
   /* 0 (do not update) 1 (update) the macroblock segmentation map. */
