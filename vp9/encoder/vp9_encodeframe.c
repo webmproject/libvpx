@@ -2101,8 +2101,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
     }
 #endif
 
-    vp9_tokenize_mb(cpi, xd, t, !output_enabled);
-
+    vp9_tokenize_sb(cpi, xd, t, !output_enabled, BLOCK_SIZE_MB16X16);
   } else {
     // FIXME(rbultje): not tile-aware (mi - 1)
     int mb_skip_context =

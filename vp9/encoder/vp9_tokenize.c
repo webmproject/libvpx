@@ -476,10 +476,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
   const int segment_id = mbmi->segment_id;
   const int skip_inc = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
   const TX_SIZE txfm_size = mbmi->txfm_size;
-  const TX_SIZE uv_txfm_size = (bsize < BLOCK_SIZE_SB32X32 &&
-                                txfm_size == TX_16X16) ? TX_8X8 :
-                               (bsize < BLOCK_SIZE_SB64X64 &&
-                                txfm_size == TX_32X32) ? TX_16X16 : txfm_size;
+  TX_SIZE uv_txfm_size = get_uv_tx_size(xd);
   int b;
   const int n_y = (1 << (bwl + bhl)), n_uv = (n_y * 3) >> 1;
 
@@ -532,9 +529,15 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
       for (b = 0; b < n_y; b += 4)
         tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC,
                    TX_8X8, n_y, dry_run);
-      for (; b < n_uv; b += 4)
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
-                   TX_8X8, n_y, dry_run);
+      if (uv_txfm_size == TX_8X8) {
+        for (; b < n_uv; b += 4)
+          tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
+                     TX_8X8, n_y, dry_run);
+      } else {
+        for (; b < n_uv; ++b)
+          tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV,
+                     TX_4X4, n_y, dry_run);
+      }
       break;
     case TX_4X4:
       for (b = 0; b < n_y; b++)
@@ -547,71 +550,6 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
     default: assert(0);
   }
 
-  if (dry_run)
-    *t = t_backup;
-}
-
-void vp9_tokenize_mb(VP9_COMP *cpi,
-                     MACROBLOCKD *xd,
-                     TOKENEXTRA **t,
-                     int dry_run) {
-  int b;
-  int tx_size = xd->mode_info_context->mbmi.txfm_size;
-  int mb_skip_context = vp9_get_pred_context(&cpi->common, xd, PRED_MBSKIP);
-  TOKENEXTRA *t_backup = *t;
-
-  // If the MB is going to be skipped because of a segment level flag
-  // exclude this from the skip count stats used to calculate the
-  // transmitted skip probability;
-  int skip_inc;
-  int segment_id = xd->mode_info_context->mbmi.segment_id;
-
-  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-    skip_inc = 1;
-  } else
-    skip_inc = 0;
-
-  xd->mode_info_context->mbmi.mb_skip_coeff = vp9_sb_is_skippable(xd,
-                                                  BLOCK_SIZE_MB16X16);
-
-  if (xd->mode_info_context->mbmi.mb_skip_coeff) {
-    if (!dry_run)
-      cpi->skip_true_count[mb_skip_context] += skip_inc;
-    vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
-
-    if (dry_run)
-      *t = t_backup;
-    return;
-  }
-
-  if (!dry_run)
-    cpi->skip_false_count[mb_skip_context] += skip_inc;
-
-  if (tx_size == TX_16X16) {
-    tokenize_b(cpi, xd, 0, t, PLANE_TYPE_Y_WITH_DC, TX_16X16, 16, dry_run);
-    for (b = 16; b < 24; b += 4) {
-      tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_8X8, 16, dry_run);
-    }
-  } else if (tx_size == TX_8X8) {
-    for (b = 0; b < 16; b += 4) {
-      tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_8X8, 16, dry_run);
-    }
-    if (xd->mode_info_context->mbmi.mode == I8X8_PRED ||
-        xd->mode_info_context->mbmi.mode == SPLITMV) {
-      for (b = 16; b < 24; b++) {
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_4X4, 16, dry_run);
-      }
-    } else {
-      for (b = 16; b < 24; b += 4) {
-        tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_8X8, 16, dry_run);
-      }
-    }
-  } else {
-    for (b = 0; b < 16; b++)
-      tokenize_b(cpi, xd, b, t, PLANE_TYPE_Y_WITH_DC, TX_4X4, 16, dry_run);
-    for (b = 16; b < 24; b++)
-      tokenize_b(cpi, xd, b, t, PLANE_TYPE_UV, TX_4X4, 16, dry_run);
-  }
   if (dry_run)
     *t = t_backup;
 }

@@ -39,8 +39,6 @@ int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
 int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
 struct VP9_COMP;
 
-void vp9_tokenize_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                     TOKENEXTRA **t, int dry_run);
 void vp9_tokenize_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
                      TOKENEXTRA **t, int dry_run, BLOCK_SIZE_TYPE bsize);
 
