@@ -414,7 +414,7 @@ static void parse_superframe_index(const uint8_t *data,
 
     if (data_sz >= index_sz && data[data_sz - index_sz] == marker) {
       // found a valid superframe index
-      int i, j;
+      uint32_t i, j;
       const uint8_t *x = data + data_sz - index_sz + 1;
 
       for (i = 0; i < frames; i++) {
