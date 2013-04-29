@@ -84,6 +84,9 @@ extern vp9_extra_bit vp9_extra_bits[12];    /* indexed by token value */
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
 #define PREV_COEF_CONTEXTS          6
 
+// Disables backward coef probs adaption
+// #define DISABLE_COEF_ADAPT
+
 typedef unsigned int vp9_coeff_count[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                     [MAX_ENTROPY_TOKENS];
 typedef unsigned int vp9_coeff_stats[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
@@ -158,7 +161,7 @@ const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 // if model-based how many nodes are unconstrained
 #define UNCONSTRAINED_UPDATE_NODES  3
 // whether backward updates are model-based
-#define MODEL_BASED_ADAPT           0
+#define MODEL_BASED_ADAPT           1
 #define UNCONSTRAINED_ADAPT_NODES   3
 
 typedef vp9_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]
