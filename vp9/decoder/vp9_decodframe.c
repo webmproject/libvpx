@@ -896,29 +896,6 @@ static void read_coef_probs(VP9D_COMP *pbi, vp9_reader *r) {
     read_coef_probs_common(fc->coef_probs_32x32, TX_32X32, r);
 }
 
-static void update_frame_size(VP9D_COMP *pbi) {
-  VP9_COMMON *cm = &pbi->common;
-
-  const int width = multiple16(cm->width);
-  const int height = multiple16(cm->height);
-
-  cm->mb_rows = height / 16;
-  cm->mi_rows = height >> LOG2_MI_SIZE;
-  cm->mb_cols = width / 16;
-  cm->mi_cols = width >> LOG2_MI_SIZE;
-  cm->MBs = cm->mb_rows * cm->mb_cols;
-  cm->mode_info_stride = cm->mi_cols + 1;
-  memset(cm->mip, 0,
-         cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
-  vp9_update_mode_info_border(cm, cm->mip);
-  vp9_update_mode_info_border(cm, cm->prev_mip);
-
-  cm->mi = cm->mip + cm->mode_info_stride + 1;
-  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
-  vp9_update_mode_info_in_image(cm, cm->mi);
-  vp9_update_mode_info_in_image(cm, cm->prev_mi);
-}
-
 static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   int i, j;
 
@@ -1110,7 +1087,7 @@ static const uint8_t *setup_frame_size(VP9D_COMP *pbi, int scaling_active,
     pc->display_width = scaling_active ? display_width : width;
     pc->display_height = scaling_active ? display_height : height;
 
-    update_frame_size(pbi);
+    vp9_update_frame_size(pc);
   }
 
   return data;
