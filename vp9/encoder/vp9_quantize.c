@@ -318,27 +318,10 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
 
 void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   int i;
-  int qindex;
   MACROBLOCKD *xd = &x->e_mbd;
   int zbin_extra;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
-
-  // Select the baseline MB Q index allowing for any segment level change.
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
-    if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA) {
-      // Abs Value
-      qindex = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
-    } else {
-      // Delta Value
-      qindex = cpi->common.base_qindex +
-                 vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
-
-      // Clamp to valid range
-      qindex = clamp(qindex, 0, MAXQ);
-    }
-  } else {
-    qindex = cpi->common.base_qindex;
-  }
+  const int qindex = vp9_get_qindex(xd, segment_id, cpi->common.base_qindex);
 
   // Y
   zbin_extra = (cpi->common.y_dequant[qindex][1] *
