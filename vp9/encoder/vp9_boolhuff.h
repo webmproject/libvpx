@@ -27,30 +27,34 @@ typedef struct {
   unsigned int value;
   int count;
   unsigned int pos;
-  unsigned char *buffer;
+  uint8_t *buffer;
 
   // Variables used to track bit costs without outputing to the bitstream
   unsigned int  measure_cost;
   unsigned long bit_counter;
 } BOOL_CODER;
 
-extern void vp9_start_encode(BOOL_CODER *bc, unsigned char *buffer);
+typedef BOOL_CODER vp9_writer;
 
-extern void vp9_encode_value(BOOL_CODER *br, int data, int bits);
-extern void vp9_encode_unsigned_max(BOOL_CODER *br, int data, int max);
-extern void vp9_stop_encode(BOOL_CODER *bc);
 extern const unsigned int vp9_prob_cost[256];
 
-extern void vp9_encode_uniform(BOOL_CODER *bc, int v, int n);
-extern void vp9_encode_term_subexp(BOOL_CODER *bc, int v, int k, int n);
-extern int vp9_count_uniform(int v, int n);
-extern int vp9_count_term_subexp(int v, int k, int n);
-extern int vp9_recenter_nonneg(int v, int m);
+void vp9_start_encode(vp9_writer *bc, uint8_t *buffer);
+
+void vp9_encode_value(vp9_writer *br, int data, int bits);
+void vp9_encode_unsigned_max(vp9_writer *br, int data, int max);
+void vp9_stop_encode(vp9_writer *bc);
+
+
+void vp9_encode_uniform(vp9_writer *bc, int v, int n);
+void vp9_encode_term_subexp(vp9_writer *bc, int v, int k, int n);
+int vp9_count_uniform(int v, int n);
+int vp9_count_term_subexp(int v, int k, int n);
+int vp9_recenter_nonneg(int v, int m);
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
 
 
-static void encode_bool(BOOL_CODER *br, int bit, int probability) {
+static void encode_bool(vp9_writer *br, int bit, int probability) {
   unsigned int split;
   int count = br->count;
   unsigned int range = br->range;
@@ -89,7 +93,7 @@ static void encode_bool(BOOL_CODER *br, int bit, int probability) {
       int x = br->pos - 1;
 
       while (x >= 0 && br->buffer[x] == 0xff) {
-        br->buffer[x] = (unsigned char)0;
+        br->buffer[x] = 0;
         x--;
       }
 
