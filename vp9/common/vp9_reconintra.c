@@ -15,25 +15,6 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vpx_mem/vpx_mem.h"
 
-// Using multiplication and shifting instead of division in diagonal prediction.
-// iscale table is calculated from ((1 << 16) + (i + 2) / 2) / (i+2) and used as
-// ((A + B) * iscale[i] + (1 << 15)) >> 16;
-// where A and B are weighted pixel values.
-static const unsigned int iscale[64] = {
-  32768, 21845, 16384, 13107, 10923,  9362,  8192,  7282,
-   6554,  5958,  5461,  5041,  4681,  4369,  4096,  3855,
-   3641,  3449,  3277,  3121,  2979,  2849,  2731,  2621,
-   2521,  2427,  2341,  2260,  2185,  2114,  2048,  1986,
-   1928,  1872,  1820,  1771,  1725,  1680,  1638,  1598,
-   1560,  1524,  1489,  1456,  1425,  1394,  1365,  1337,
-   1311,  1285,  1260,  1237,  1214,  1192,  1170,  1150,
-   1130,  1111,  1092,  1074,  1057,  1040,  1024,  1008,
-};
-
-static INLINE int iscale_round(int value, int i) {
-  return ROUND_POWER_OF_TWO(value * iscale[i], 16);
-}
-
 static void d27_predictor(uint8_t *ypred_ptr, int y_stride,
                           int bw, int bh,
                           uint8_t *yabove_row, uint8_t *yleft_col) {
