@@ -315,23 +315,12 @@ void vp9_idct_add_32x32_c(int16_t *input, uint8_t *dest, int stride, int eob) {
   DECLARE_ALIGNED_ARRAY(16, int16_t, output, 1024);
 
   if (eob) {
-    input[0] = input[0] / 2;
     if (eob == 1) {
       vp9_short_idct1_32x32(input, output);
       vp9_add_constant_residual_32x32(output[0], dest, stride);
       input[0] = 0;
 #if !CONFIG_SCATTERSCAN
     } else if (eob <= 10) {
-      input[1] = input[1] / 2;
-      input[2] = input[2] / 2;
-      input[3] = input[3] / 2;
-      input[32] = input[32] / 2;
-      input[33] = input[33] / 2;
-      input[34] = input[34] / 2;
-      input[64] = input[64] / 2;
-      input[65] = input[65] / 2;
-      input[96] = input[96] / 2;
-
       // the idct halves ( >> 1) the pitch
       vp9_short_idct10_32x32(input, output, 64);
 
@@ -343,10 +332,6 @@ void vp9_idct_add_32x32_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       vp9_add_residual_32x32(output, dest, stride);
 #endif
     } else {
-      int i;
-      for (i = 1; i < 1024; i++)
-        input[i] = input[i] / 2;
-
       vp9_short_idct32x32(input, output, 64);
       vpx_memset(input, 0, 2048);
       vp9_add_residual_32x32(output, dest, stride);

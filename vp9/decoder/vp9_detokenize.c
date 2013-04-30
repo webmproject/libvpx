@@ -85,7 +85,8 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
-    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val) * dq[c > 0]; \
+    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val) * \
+                            dq[c > 0] / (1 + (txfm_size == TX_32X32)); \
     INCREMENT_COUNT(token);                              \
     c++;                                                 \
     continue;                                            \
