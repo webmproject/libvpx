@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//xyg\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 930,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-30T15:41:46Z",
+      "side": 1,
+      "message": "is skip_coeff used other than the call to vp9_write a couple lines down? May be able to remove this and eliminate the variable or reduce its scope.",
+      "revId": "ee97da2c0317275e12eae68437a5cf212323c4fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
