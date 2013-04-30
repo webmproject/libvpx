@@ -1975,7 +1975,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
   }
 
   if (!pc->error_resilient_mode) {
-    vp9_write_bit(&header_bc, pc->refresh_entropy_probs);
+    vp9_write_bit(&header_bc, pc->refresh_frame_context);
     vp9_write_bit(&header_bc, pc->frame_parallel_decoding_mode);
   }
 
