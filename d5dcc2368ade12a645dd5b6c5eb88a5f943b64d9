@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//yOM\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-30T00:32:13Z",
+      "side": 1,
+      "message": "Should probably change the dequant vector instead (later). Might want to note with a todo.",
+      "revId": "d5dcc2368ade12a645dd5b6c5eb88a5f943b64d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//yOI\u003d",
+        "filename": "vp9/decoder/vp9_idct_blk.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-30T00:32:13Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "d5dcc2368ade12a645dd5b6c5eb88a5f943b64d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//yOE\u003d",
+        "filename": "vp9/decoder/vp9_idct_blk.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-30T00:32:13Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "d5dcc2368ade12a645dd5b6c5eb88a5f943b64d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//yOA\u003d",
+        "filename": "vp9/decoder/vp9_idct_blk.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-04-30T00:32:13Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "d5dcc2368ade12a645dd5b6c5eb88a5f943b64d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
