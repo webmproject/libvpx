@@ -22,6 +22,9 @@
 #define prototype_quantize_mb(sym) \
   void (sym)(MACROBLOCK *x)
 
+void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coefs,
+                  TX_TYPE tx_type);
+
 void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *mb, int b_idx1, int b_idx2,
                                      int y_blocks);
 void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,

@@ -2242,7 +2242,8 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
         mi_row, mi_col, xd->scale_factor, xd->scale_factor_uv);
 
     if (!x->skip) {
-      vp9_encode_inter16x16(cm, x, mi_row, mi_col);
+      vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_SIZE_MB16X16);
+      vp9_encode_sb(cm, x, BLOCK_SIZE_MB16X16);
     } else {
       vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_SIZE_MB16X16);
 #if CONFIG_COMP_INTERINTRA_PRED
@@ -2488,90 +2489,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   } else
 #endif
   if (!x->skip) {
-    vp9_subtract_sb(x, bsize);
-
-    switch (xd->mode_info_context->mbmi.txfm_size) {
-      case TX_32X32:
-        vp9_transform_sby_32x32(x, bsize);
-        vp9_quantize_sby_32x32(x, bsize);
-        if (bsize == BLOCK_SIZE_SB64X64) {
-          vp9_transform_sbuv_32x32(x, bsize);
-          vp9_quantize_sbuv_32x32(x, bsize);
-        } else {
-          vp9_transform_sbuv_16x16(x, bsize);
-          vp9_quantize_sbuv_16x16(x, bsize);
-        }
-        if (x->optimize) {
-          vp9_optimize_sby(cm, x, bsize);
-          if (bsize == BLOCK_SIZE_SB64X64)
-            vp9_optimize_sbuv(cm, x, bsize);
-          else
-            vp9_optimize_sbuv(cm, x, bsize);
-        }
-        vp9_inverse_transform_sby_32x32(xd, bsize);
-        if (bsize == BLOCK_SIZE_SB64X64)
-          vp9_inverse_transform_sbuv_32x32(xd, bsize);
-        else
-          vp9_inverse_transform_sbuv_16x16(xd, bsize);
-        break;
-      case TX_16X16:
-        vp9_transform_sby_16x16(x, bsize);
-        vp9_quantize_sby_16x16(x, bsize);
-        if (bsize >= BLOCK_SIZE_SB32X32) {
-          vp9_transform_sbuv_16x16(x, bsize);
-          vp9_quantize_sbuv_16x16(x, bsize);
-        } else {
-          vp9_transform_sbuv_8x8(x, bsize);
-          vp9_quantize_sbuv_8x8(x, bsize);
-        }
-        if (x->optimize) {
-          vp9_optimize_sby(cm, x, bsize);
-          if (bsize >= BLOCK_SIZE_SB32X32)
-            vp9_optimize_sbuv(cm, x, bsize);
-          else
-            vp9_optimize_sbuv(cm, x, bsize);
-        }
-        vp9_inverse_transform_sby_16x16(xd, bsize);
-        if (bsize >= BLOCK_SIZE_SB32X32)
-          vp9_inverse_transform_sbuv_16x16(xd, bsize);
-        else
-          vp9_inverse_transform_sbuv_8x8(xd, bsize);
-        break;
-      case TX_8X8:
-        vp9_transform_sby_8x8(x, bsize);
-        vp9_quantize_sby_8x8(x, bsize);
-        if (x->optimize)
-          vp9_optimize_sby(cm, x, bsize);
-        vp9_inverse_transform_sby_8x8(xd, bsize);
-        if (bsize >= BLOCK_SIZE_MB16X16) {
-          vp9_transform_sbuv_8x8(x, bsize);
-          vp9_quantize_sbuv_8x8(x, bsize);
-          if (x->optimize)
-            vp9_optimize_sbuv(cm, x, bsize);
-          vp9_inverse_transform_sbuv_8x8(xd, bsize);
-        } else {
-          vp9_transform_sbuv_4x4(x, bsize);
-          vp9_quantize_sbuv_4x4(x, bsize);
-          if (x->optimize)
-            vp9_optimize_sbuv(cm, x, bsize);
-          vp9_inverse_transform_sbuv_4x4(xd, bsize);
-        }
-        break;
-      case TX_4X4:
-        vp9_transform_sby_4x4(x, bsize);
-        vp9_transform_sbuv_4x4(x, bsize);
-        vp9_quantize_sby_4x4(x, bsize);
-        vp9_quantize_sbuv_4x4(x, bsize);
-        if (x->optimize) {
-          vp9_optimize_sby(cm, x, bsize);
-          vp9_optimize_sbuv(cm, x, bsize);
-        }
-        vp9_inverse_transform_sby_4x4(xd, bsize);
-        vp9_inverse_transform_sbuv_4x4(xd, bsize);
-        break;
-      default: assert(0);
-    }
-    vp9_recon_sb_c(xd, bsize);
+    vp9_encode_sb(cm, x, bsize);
     vp9_tokenize_sb(cpi, &x->e_mbd, t, !output_enabled, bsize);
   } else {
     // FIXME(rbultje): not tile-aware (mi - 1)
