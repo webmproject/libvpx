@@ -114,21 +114,21 @@ void vp9_encode_intra16x16mby(VP9_COMMON *const cm, MACROBLOCK *x) {
       vp9_transform_sby_16x16(x, BLOCK_SIZE_MB16X16);
       vp9_quantize_sby_16x16(x, BLOCK_SIZE_MB16X16);
       if (x->optimize)
-        vp9_optimize_sby_16x16(cm, x, BLOCK_SIZE_MB16X16);
+        vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
       vp9_inverse_transform_sby_16x16(xd, BLOCK_SIZE_MB16X16);
       break;
     case TX_8X8:
       vp9_transform_sby_8x8(x, BLOCK_SIZE_MB16X16);
       vp9_quantize_sby_8x8(x, BLOCK_SIZE_MB16X16);
       if (x->optimize)
-        vp9_optimize_sby_8x8(cm, x, BLOCK_SIZE_MB16X16);
+        vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
       vp9_inverse_transform_sby_8x8(xd, BLOCK_SIZE_MB16X16);
       break;
     default:
       vp9_transform_sby_4x4(x, BLOCK_SIZE_MB16X16);
       vp9_quantize_sby_4x4(x, BLOCK_SIZE_MB16X16);
       if (x->optimize)
-        vp9_optimize_sby_4x4(cm, x, BLOCK_SIZE_MB16X16);
+        vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
       vp9_inverse_transform_sby_4x4(xd, BLOCK_SIZE_MB16X16);
       break;
   }
@@ -148,14 +148,14 @@ void vp9_encode_intra16x16mbuv(VP9_COMMON *const cm, MACROBLOCK *x) {
       vp9_transform_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
       vp9_quantize_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
       if (x->optimize)
-        vp9_optimize_sbuv_4x4(cm, x, BLOCK_SIZE_MB16X16);
+        vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
       vp9_inverse_transform_sbuv_4x4(xd, BLOCK_SIZE_MB16X16);
       break;
     default:  // 16x16 or 8x8
       vp9_transform_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
       vp9_quantize_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
       if (x->optimize)
-        vp9_optimize_sbuv_8x8(cm, x, BLOCK_SIZE_MB16X16);
+        vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
       vp9_inverse_transform_sbuv_8x8(xd, BLOCK_SIZE_MB16X16);
       break;
     }

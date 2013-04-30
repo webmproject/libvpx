@@ -1014,6 +1014,74 @@ static uint8_t* raster_block_offset_uint8(MACROBLOCKD *xd,
   return base + raster_block_offset(xd, bsize, plane, block, stride);
 }
 
+static int txfrm_block_to_raster_block(MACROBLOCKD *xd,
+                                       BLOCK_SIZE_TYPE bsize,
+                                       int plane, int block,
+                                       int ss_txfrm_size) {
+  const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+  const int txwl = ss_txfrm_size / 2;
+  const int tx_cols_lg2 = bwl - txwl;
+  const int tx_cols = 1 << tx_cols_lg2;
+  const int raster_mb = block >> ss_txfrm_size;
+  const int x = (raster_mb & (tx_cols - 1)) << (txwl);
+  const int y = raster_mb >> tx_cols_lg2 << (txwl);
+  return x + (y << bwl);
+}
+
+static void txfrm_block_to_raster_xy(MACROBLOCKD *xd,
+                                     BLOCK_SIZE_TYPE bsize,
+                                     int plane, int block,
+                                     int ss_txfrm_size,
+                                     int *x, int *y) {
+  const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+  const int txwl = ss_txfrm_size / 2;
+  const int tx_cols_lg2 = bwl - txwl;
+  const int tx_cols = 1 << tx_cols_lg2;
+  const int raster_mb = block >> ss_txfrm_size;
+  *x = (raster_mb & (tx_cols - 1)) << (txwl);
+  *y = raster_mb >> tx_cols_lg2 << (txwl);
+}
+
+static TX_SIZE tx_size_for_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+                                 int plane) {
+  // TODO(jkoleszar): This duplicates a ton of code, but we're going to be
+  // moving this to a per-plane lookup shortly, and this will go away then.
+  if (!plane) {
+    return xd->mode_info_context->mbmi.txfm_size;
+  } else {
+    const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
+#if !CONFIG_SB8X8
+    const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
+    const int is_split =
+        xd->mode_info_context->mbmi.txfm_size == TX_8X8 &&
+        (mode == I8X8_PRED || mode == SPLITMV);
+#endif
+
+    // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
+    // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
+    const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
+    const int block_size_b = bw + bh;
+    const int txfrm_size_b = tx_size * 2;
+
+    // subsampled size of the block
+    const int ss_sum = xd->plane[plane].subsampling_x +
+                       xd->plane[plane].subsampling_y;
+    const int ss_block_size = block_size_b - ss_sum;
+
+    // size of the transform to use. scale the transform down if it's larger
+    // than the size of the subsampled data, or forced externally by the mb mode
+    const int ss_max = MAX(xd->plane[plane].subsampling_x,
+                           xd->plane[plane].subsampling_y);
+    const int ss_txfrm_size = txfrm_size_b > ss_block_size
+#if !CONFIG_SB8X8
+                            || is_split
+#endif  // !CONFIG_SB8X8
+                                  ? txfrm_size_b - ss_max * 2
+                                  : txfrm_size_b;
+    return (TX_SIZE)(ss_txfrm_size / 2);
+  }
+}
+
 #if CONFIG_CODE_ZEROGROUP
 static int get_zpc_used(TX_SIZE tx_size) {
   return (tx_size >= TX_16X16);

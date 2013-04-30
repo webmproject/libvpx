@@ -32,29 +32,18 @@ void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
 void vp9_encode_inter16x16y(MACROBLOCK *x, int mb_row, int mb_col);
 
 void vp9_transform_sby_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_optimize_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
-                            BLOCK_SIZE_TYPE bsize);
 void vp9_transform_sby_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_optimize_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
-                            BLOCK_SIZE_TYPE bsize);
 void vp9_transform_sby_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_optimize_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
-                          BLOCK_SIZE_TYPE bsize);
 void vp9_transform_sby_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_optimize_sby_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
-                          BLOCK_SIZE_TYPE bsize);
 void vp9_transform_sbuv_32x32(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_optimize_sbuv_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
-                             BLOCK_SIZE_TYPE bsize);
 void vp9_transform_sbuv_16x16(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_optimize_sbuv_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
-                             BLOCK_SIZE_TYPE bsize);
 void vp9_transform_sbuv_8x8(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_optimize_sbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
-                           BLOCK_SIZE_TYPE bsize);
 void vp9_transform_sbuv_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
-                           BLOCK_SIZE_TYPE bsize);
+
+void vp9_optimize_sby(VP9_COMMON *const cm, MACROBLOCK *x,
+                      BLOCK_SIZE_TYPE bsize);
+void vp9_optimize_sbuv(VP9_COMMON *const cm, MACROBLOCK *x,
+                       BLOCK_SIZE_TYPE bsize);
 
 #if !CONFIG_SB8X8
 void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x);

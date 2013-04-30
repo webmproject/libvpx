@@ -249,57 +249,53 @@ static int trellis_get_coeff_context(const int *scan,
   return pt;
 }
 
-static void optimize_b(VP9_COMMON *const cm,
-                       MACROBLOCK *mb, int ib, PLANE_TYPE type,
-                       const int16_t *dequant_ptr,
+static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
+                       int plane, int block, BLOCK_SIZE_TYPE bsize,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                       int tx_size, int y_blocks) {
+                       TX_SIZE tx_size) {
   const int ref = mb->e_mbd.mode_info_context->mbmi.ref_frame != INTRA_FRAME;
   MACROBLOCKD *const xd = &mb->e_mbd;
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
-  const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, ib);
-  const int16_t *coeff_ptr = BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff,
-                                          pb_idx.block, 16);
+  const int16_t *coeff_ptr = BLOCK_OFFSET(mb->plane[plane].coeff,
+                                          block, 16);
   int16_t *qcoeff_ptr;
   int16_t *dqcoeff_ptr;
-  int eob = xd->plane[pb_idx.plane].eobs[pb_idx.block], final_eob, sz = 0;
+  int eob = xd->plane[plane].eobs[block], final_eob, sz = 0;
   const int i0 = 0;
   int rc, x, next, i;
   int64_t rdmult, rddiv, rd_cost0, rd_cost1;
   int rate0, rate1, error0, error1, t0, t1;
   int best, band, pt;
+  PLANE_TYPE type = xd->plane[plane].plane_type;
   int err_mult = plane_rd_mult[type];
   int default_eob, pad;
   int const *scan, *nb;
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
+  const int ib = txfrm_block_to_raster_block(xd, bsize, plane,
+                                             block, 2 * tx_size);
+  const int16_t *dequant_ptr = xd->plane[plane].dequant;
 
-  assert((!type && !pb_idx.plane) || (type && pb_idx.plane));
-  dqcoeff_ptr = BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block, 16);
-  qcoeff_ptr = BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16);
+  assert((!type && !plane) || (type && plane));
+  dqcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16);
+  qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
   switch (tx_size) {
     default:
     case TX_4X4: {
-      const TX_TYPE tx_type = get_tx_type_4x4(xd, ib);
+      const TX_TYPE tx_type = plane == 0 ? get_tx_type_4x4(xd, ib) : DCT_DCT;
       default_eob = 16;
       scan = get_scan_4x4(tx_type);
       break;
     }
     case TX_8X8: {
-      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 1 + b_width_log2(sb_type);
-      const int x = ib & ((1 << sz) - 1), y = ib - x;
-      const TX_TYPE tx_type = get_tx_type_8x8(xd, y + (x >> 1));
+      const TX_TYPE tx_type = plane == 0 ? get_tx_type_8x8(xd, ib) : DCT_DCT;
       scan = get_scan_8x8(tx_type);
       default_eob = 64;
       break;
     }
     case TX_16X16: {
-      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 2 + b_width_log2(sb_type);
-      const int x = ib & ((1 << sz) - 1), y = ib - x;
-      const TX_TYPE tx_type = get_tx_type_16x16(xd, y + (x >> 2));
+      const TX_TYPE tx_type = plane == 0 ? get_tx_type_16x16(xd, ib) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
       default_eob = 256;
       break;
@@ -480,201 +476,81 @@ static void optimize_b(VP9_COMMON *const cm,
   }
   final_eob++;
 
-  xd->plane[pb_idx.plane].eobs[pb_idx.block] = final_eob;
+  xd->plane[plane].eobs[block] = final_eob;
   *a = *l = (final_eob > 0);
 }
 
-void vp9_optimize_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
-                            BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  ENTROPY_CONTEXT *a = xd->plane[0].above_context;
-  ENTROPY_CONTEXT *l = xd->plane[0].left_context;
-  const int bwl = b_width_log2(bsize) - 3, bw = 1 << bwl;
-  const int bh = 1 << (b_height_log2(bsize) - 3);
-  ENTROPY_CONTEXT ta[2], tl[2];
-  int n;
+struct optimize_ctx {
+  ENTROPY_CONTEXT ta[MAX_MB_PLANE][16];
+  ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
+};
 
-  for (n = 0; n < bw; n++, a += 8)
-    ta[n] = (a[0] + a[1] + a[2] + a[3] + a[4] + a[5] + a[6] + a[7]) != 0;
-  for (n = 0; n < bh; n++, l += 8)
-    tl[n] = (l[0] + l[1] + l[2] + l[3] + l[4] + l[5] + l[6] + l[7]) != 0;
+struct optimize_block_args {
+  VP9_COMMON *cm;
+  MACROBLOCK *x;
+  struct optimize_ctx *ctx;
+};
 
-  for (n = 0; n < bw * bh; n++) {
-    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
+static void optimize_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                           int ss_txfrm_size, void *arg) {
+  const struct optimize_block_args* const args = arg;
+  MACROBLOCKD* const xd = &args->x->e_mbd;
+  int x, y;
 
-    optimize_b(cm, x, n * 64, PLANE_TYPE_Y_WITH_DC, x->e_mbd.plane[0].dequant,
-               ta + x_idx, tl + y_idx, TX_32X32, 64 * bw * bh);
-  }
+  // find current entropy context
+  txfrm_block_to_raster_xy(xd, bsize, plane, block, ss_txfrm_size, &x, &y);
+
+  optimize_b(args->cm, args->x, plane, block, bsize,
+             &args->ctx->ta[plane][x], &args->ctx->tl[plane][y],
+             ss_txfrm_size / 2);
 }
 
-void vp9_optimize_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
-                            BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  ENTROPY_CONTEXT *a = xd->plane[0].above_context;
-  ENTROPY_CONTEXT *l = xd->plane[0].left_context;
-  const int bwl = b_width_log2(bsize) - 2, bw = 1 << bwl;
-  const int bh = 1 << (b_height_log2(bsize) - 2);
-  ENTROPY_CONTEXT ta[4], tl[4];
-  int n;
+void vp9_optimize_init(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+                       struct optimize_ctx *ctx) {
+  int p;
 
-  for (n = 0; n < bw; n++, a += 4)
-    ta[n] = (a[0] + a[1] + a[2] + a[3]) != 0;
-  for (n = 0; n < bh; n++, l += 4)
-    tl[n] = (l[0] + l[1] + l[2] + l[3]) != 0;
+  for (p = 0; p < MAX_MB_PLANE; p++) {
+    const struct macroblockd_plane* const plane = &xd->plane[p];
+    const int bwl = b_width_log2(bsize) - plane->subsampling_x;
+    const int bhl = b_height_log2(bsize) - plane->subsampling_y;
+    const TX_SIZE tx_size = tx_size_for_plane(xd, bsize, p);
+    int i, j;
 
-  for (n = 0; n < bw * bh; n++) {
-    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
-
-    optimize_b(cm, x, n * 16, PLANE_TYPE_Y_WITH_DC, x->e_mbd.plane[0].dequant,
-               ta + x_idx, tl + y_idx, TX_16X16, 16 * bw * bh);
-  }
-}
-
-void vp9_optimize_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
-                          BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  ENTROPY_CONTEXT *a = xd->plane[0].above_context;
-  ENTROPY_CONTEXT *l = xd->plane[0].left_context;
-  const int bwl = b_width_log2(bsize) - 1, bw = 1 << bwl;
-  const int bh = 1 << (b_height_log2(bsize) - 1);
-  ENTROPY_CONTEXT ta[8], tl[8];
-  int n;
-
-  for (n = 0; n < bw; n++, a += 2)
-    ta[n] = (a[0] + a[1]) != 0;
-  for (n = 0; n < bh; n++, l += 2)
-    tl[n] = (l[0] + l[1]) != 0;
-
-  for (n = 0; n < bw * bh; n++) {
-    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
-
-    optimize_b(cm, x, n * 4, PLANE_TYPE_Y_WITH_DC, x->e_mbd.plane[0].dequant,
-               ta + x_idx, tl + y_idx, TX_8X8, 4 * bw * bh);
-  }
-}
-
-void vp9_optimize_sby_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
-                          BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  int bwl = b_width_log2(bsize), bw = 1 << bwl;
-  int bh = 1 << b_height_log2(bsize);
-  ENTROPY_CONTEXT ta[16], tl[16];
-  int n;
-
-  vpx_memcpy(ta, xd->plane[0].above_context, sizeof(ENTROPY_CONTEXT) * bw);
-  vpx_memcpy(tl, xd->plane[0].left_context, sizeof(ENTROPY_CONTEXT) * bh);
-
-  for (n = 0; n < bw * bh; n++) {
-    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
-
-    optimize_b(cm, x, n, PLANE_TYPE_Y_WITH_DC, x->e_mbd.plane[0].dequant,
-               ta + x_idx, tl + y_idx, TX_4X4, bh * bw);
-  }
-}
-
-void vp9_optimize_sbuv_32x32(VP9_COMMON *const cm, MACROBLOCK *x,
-                             BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  int b;
-
-  assert(bsize == BLOCK_SIZE_SB64X64);
-  for (b = 256; b < 384; b += 64) {
-    const int plane = 1 + (b >= 320);
-    ENTROPY_CONTEXT *a = xd->plane[plane].above_context;
-    ENTROPY_CONTEXT *l = xd->plane[plane].left_context;
-    ENTROPY_CONTEXT a_ec, l_ec;
-
-    a_ec = (a[0] + a[1] + a[2] + a[3] + a[4] + a[5] + a[6] + a[7]) != 0;
-    l_ec = (l[0] + l[1] + l[2] + l[3] + l[4] + l[5] + l[6] + l[7]) != 0;
-    optimize_b(cm, x, b, PLANE_TYPE_UV, x->e_mbd.plane[plane].dequant,
-               &a_ec, &l_ec, TX_32X32, 256);
-  }
-}
-
-void vp9_optimize_sbuv_16x16(VP9_COMMON *const cm, MACROBLOCK *x,
-                             BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  const int bwl = b_width_log2(bsize) - 2, bhl = b_height_log2(bsize) - 2;
-  const int bw = 1 << (bwl - 1);
-  const int bh = 1 << (bhl - 1);
-  int uvoff = 16 << (bwl + bhl);
-  int plane, n;
-
-  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    ENTROPY_CONTEXT ta[2], *a = xd->plane[plane].above_context;
-    ENTROPY_CONTEXT tl[2], *l = xd->plane[plane].left_context;
-
-    for (n = 0; n < bw; n++, a += 4)
-      ta[n] = (a[0] + a[1] + a[2] + a[3]) != 0;
-    for (n = 0; n < bh; n++, l += 4)
-      tl[n] = (l[0] + l[1] + l[2] + l[3]) != 0;
-
-    for (n = 0; n < bw * bh; n++) {
-      const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
-      optimize_b(cm, x, uvoff + n * 16, PLANE_TYPE_UV,
-                 x->e_mbd.plane[plane].dequant,
-                 &ta[x_idx], &tl[y_idx],
-                 TX_16X16, bh * bw * 64);
+    for (i = 0; i < 1 << bwl; i += 1 << tx_size) {
+      int c = 0;
+      ctx->ta[p][i] = 0;
+      for (j = 0; j < 1 << tx_size && !c; j++) {
+        c = ctx->ta[p][i] |= plane->above_context[i + j];
+      }
     }
-    uvoff = (uvoff * 5) >> 2;  // switch u -> v
+    for (i = 0; i < 1 << bhl; i += 1 << tx_size) {
+      int c = 0;
+      ctx->tl[p][i] = 0;
+      for (j = 0; j < 1 << tx_size && !c; j++) {
+        c = ctx->tl[p][i] |= plane->left_context[i + j];
+      }
+    }
   }
 }
 
-void vp9_optimize_sbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x,
-                           BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  const int bwl = b_width_log2(bsize) - 1, bhl = b_height_log2(bsize) - 1;
-  const int bw = 1 << (bwl - 1);
-  const int bh = 1 << (bhl - 1);
-  int uvoff = 4 << (bwl + bhl);
-  int plane, n;
-
-  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    ENTROPY_CONTEXT ta[4], *a = xd->plane[plane].above_context;
-    ENTROPY_CONTEXT tl[4], *l = xd->plane[plane].left_context;
-
-    for (n = 0; n < bw; n++, a += 2)
-      ta[n] = (a[0] + a[1]) != 0;
-    for (n = 0; n < bh; n++, l += 2)
-      tl[n] = (l[0] + l[1]) != 0;
-
-    for (n = 0; n < bw * bh; n++) {
-      const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
-      optimize_b(cm, x, uvoff + n * 4, PLANE_TYPE_UV,
-                 x->e_mbd.plane[plane].dequant,
-                 &ta[x_idx], &tl[y_idx],
-                 TX_8X8, bh * bw * 16);
-    }
-    uvoff = (uvoff * 5) >> 2;  // switch u -> v
-  }
+void vp9_optimize_sby(VP9_COMMON *const cm, MACROBLOCK *x,
+                      BLOCK_SIZE_TYPE bsize) {
+  struct optimize_ctx ctx;
+  struct optimize_block_args arg = {cm, x, &ctx};
+  vp9_optimize_init(&x->e_mbd, bsize, &ctx);
+  foreach_transformed_block_in_plane(&x->e_mbd, bsize, 0,
+#if !CONFIG_SB8X8
+  0,
+#endif
+                                     optimize_block, &arg);
 }
 
-void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
-                           BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
-  const int bw = 1 << (bwl - 1);
-  const int bh = 1 << (bhl - 1);
-  int uvoff = 1 << (bwl + bhl);
-  int plane, n;
-
-  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    ENTROPY_CONTEXT ta[8], tl[8];
-
-    vpx_memcpy(ta, xd->plane[plane].above_context,
-               sizeof(ENTROPY_CONTEXT) * bw);
-    vpx_memcpy(tl, xd->plane[plane].left_context,
-               sizeof(ENTROPY_CONTEXT) * bh);
-
-    for (n = 0; n < bw * bh; n++) {
-      const int x_idx = n & (bw - 1), y_idx = n >> (bwl - 1);
-      optimize_b(cm, x, uvoff + n, PLANE_TYPE_UV,
-                 x->e_mbd.plane[plane].dequant,
-                 &ta[x_idx], &tl[y_idx],
-                 TX_4X4, bh * bw * 4);
-    }
-    uvoff = (uvoff * 5) >> 2;  // switch u -> v
-  }
+void vp9_optimize_sbuv(VP9_COMMON *const cm, MACROBLOCK *x,
+                       BLOCK_SIZE_TYPE bsize) {
+  struct optimize_ctx ctx;
+  struct optimize_block_args arg = {cm, x, &ctx};
+  vp9_optimize_init(&x->e_mbd, bsize, &ctx);
+  foreach_transformed_block_uv(&x->e_mbd, bsize, optimize_block, &arg);
 }
 
 #if !CONFIG_SB8X8
@@ -688,8 +564,8 @@ void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x) {
     vp9_quantize_sby_16x16(x, BLOCK_SIZE_MB16X16);
     vp9_quantize_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
     if (x->optimize) {
-      vp9_optimize_sby_16x16(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_optimize_sbuv_8x8(cm, x, BLOCK_SIZE_MB16X16);
+      vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
+      vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
     }
     vp9_inverse_transform_sby_16x16(xd, BLOCK_SIZE_MB16X16);
     vp9_inverse_transform_sbuv_8x8(xd, BLOCK_SIZE_MB16X16);
@@ -697,20 +573,20 @@ void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x) {
     vp9_transform_sby_8x8(x, BLOCK_SIZE_MB16X16);
     vp9_quantize_sby_8x8(x, BLOCK_SIZE_MB16X16);
     if (x->optimize)
-      vp9_optimize_sby_8x8(cm, x, BLOCK_SIZE_MB16X16);
+      vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
     vp9_inverse_transform_sby_8x8(xd, BLOCK_SIZE_MB16X16);
     if (xd->mode_info_context->mbmi.mode == SPLITMV) {
       assert(xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4);
       vp9_transform_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
       vp9_quantize_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
       if (x->optimize)
-        vp9_optimize_sbuv_4x4(cm, x, BLOCK_SIZE_MB16X16);
+        vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
       vp9_inverse_transform_sbuv_4x4(xd, BLOCK_SIZE_MB16X16);
     } else {
       vp9_transform_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
       vp9_quantize_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
       if (x->optimize)
-        vp9_optimize_sbuv_8x8(cm, x, BLOCK_SIZE_MB16X16);
+        vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
       vp9_inverse_transform_sbuv_8x8(xd, BLOCK_SIZE_MB16X16);
     }
   } else {
@@ -719,8 +595,8 @@ void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x) {
     vp9_quantize_sby_4x4(x, BLOCK_SIZE_MB16X16);
     vp9_quantize_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
     if (x->optimize) {
-      vp9_optimize_sby_4x4(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_optimize_sbuv_4x4(cm, x, BLOCK_SIZE_MB16X16);
+      vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
+      vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
     }
     vp9_inverse_transform_sby_4x4(xd, BLOCK_SIZE_MB16X16);
     vp9_inverse_transform_sbuv_4x4(xd, BLOCK_SIZE_MB16X16);

@@ -2443,7 +2443,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
     vp9_subtract_sbuv(x, bsize);
     vp9_transform_sbuv_4x4(x, bsize);
     vp9_quantize_sbuv_4x4(x, bsize);
-    vp9_optimize_sbuv_4x4(cm, x, bsize);
+    vp9_optimize_sbuv(cm, x, bsize);
     vp9_inverse_transform_sbuv_4x4(xd, bsize);
     vp9_recon_sbuv(xd, bsize);
 
@@ -2507,11 +2507,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
           vp9_quantize_sbuv_16x16(x, bsize);
         }
         if (x->optimize) {
-          vp9_optimize_sby_32x32(cm, x, bsize);
+          vp9_optimize_sby(cm, x, bsize);
           if (bsize == BLOCK_SIZE_SB64X64)
-            vp9_optimize_sbuv_32x32(cm, x, bsize);
+            vp9_optimize_sbuv(cm, x, bsize);
           else
-            vp9_optimize_sbuv_16x16(cm, x, bsize);
+            vp9_optimize_sbuv(cm, x, bsize);
         }
         vp9_inverse_transform_sby_32x32(xd, bsize);
         if (bsize == BLOCK_SIZE_SB64X64)
@@ -2530,11 +2530,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
           vp9_quantize_sbuv_8x8(x, bsize);
         }
         if (x->optimize) {
-          vp9_optimize_sby_16x16(cm, x, bsize);
+          vp9_optimize_sby(cm, x, bsize);
           if (bsize >= BLOCK_SIZE_SB32X32)
-            vp9_optimize_sbuv_16x16(cm, x, bsize);
+            vp9_optimize_sbuv(cm, x, bsize);
           else
-            vp9_optimize_sbuv_8x8(cm, x, bsize);
+            vp9_optimize_sbuv(cm, x, bsize);
         }
         vp9_inverse_transform_sby_16x16(xd, bsize);
         if (bsize >= BLOCK_SIZE_SB32X32)
@@ -2546,19 +2546,19 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
         vp9_transform_sby_8x8(x, bsize);
         vp9_quantize_sby_8x8(x, bsize);
         if (x->optimize)
-          vp9_optimize_sby_8x8(cm, x, bsize);
+          vp9_optimize_sby(cm, x, bsize);
         vp9_inverse_transform_sby_8x8(xd, bsize);
         if (bsize >= BLOCK_SIZE_MB16X16) {
           vp9_transform_sbuv_8x8(x, bsize);
           vp9_quantize_sbuv_8x8(x, bsize);
           if (x->optimize)
-            vp9_optimize_sbuv_8x8(cm, x, bsize);
+            vp9_optimize_sbuv(cm, x, bsize);
           vp9_inverse_transform_sbuv_8x8(xd, bsize);
         } else {
           vp9_transform_sbuv_4x4(x, bsize);
           vp9_quantize_sbuv_4x4(x, bsize);
           if (x->optimize)
-            vp9_optimize_sbuv_4x4(cm, x, bsize);
+            vp9_optimize_sbuv(cm, x, bsize);
           vp9_inverse_transform_sbuv_4x4(xd, bsize);
         }
         break;
@@ -2568,8 +2568,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
         vp9_quantize_sby_4x4(x, bsize);
         vp9_quantize_sbuv_4x4(x, bsize);
         if (x->optimize) {
-          vp9_optimize_sby_4x4(cm, x, bsize);
-          vp9_optimize_sbuv_4x4(cm, x, bsize);
+          vp9_optimize_sby(cm, x, bsize);
+          vp9_optimize_sbuv(cm, x, bsize);
         }
         vp9_inverse_transform_sby_4x4(xd, bsize);
         vp9_inverse_transform_sbuv_4x4(xd, bsize);
