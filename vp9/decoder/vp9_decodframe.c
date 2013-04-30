@@ -442,6 +442,41 @@ static void decode_atom_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
   foreach_transformed_block_uv(xd, bsize, decode_block, xd);
 }
 
+static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
+                        int mi_row, int mi_col,
+                        vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
+  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
+
+  if (pbi->common.frame_type != KEY_FRAME)
+    vp9_setup_interp_filters(xd, mbmi->interp_filter, &pbi->common);
+
+  // prediction
+  if (mbmi->ref_frame == INTRA_FRAME)
+    vp9_build_intra_predictors_sbuv_s(xd, bsize);
+  else
+    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+
+  if (mbmi->mb_skip_coeff) {
+    vp9_reset_sb_tokens_context(xd, bsize);
+  } else {
+    // re-initialize macroblock dequantizer before detokenization
+    if (xd->segmentation_enabled)
+      mb_init_dequantizer(&pbi->common, xd);
+
+    if (!vp9_reader_has_error(r)) {
+#if CONFIG_NEWBINTRAMODES
+    if (mbmi->mode != I4X4_PRED)
+#endif
+      vp9_decode_tokens(pbi, xd, r, bsize);
+    }
+  }
+
+  if (mbmi->ref_frame == INTRA_FRAME)
+    decode_atom_intra(pbi, xd, r, bsize);
+  else
+    foreach_transformed_block(xd, bsize, decode_block, xd);
+}
+
 static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
                       vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
   const int bwl = mi_width_log2(bsize), bhl = mi_height_log2(bsize);
@@ -550,12 +585,7 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     } else if (tx_size == TX_8X8) {
       decode_8x8(xd);
     } else {
-      if (mbmi->mode == I4X4_PRED)
-        // TODO(jingning): we need to move this to decode_atom later and
-        // deprecate decode_mb, when SB8X8 is on.
-        decode_atom_intra(pbi, xd, r, BLOCK_SIZE_MB16X16);
-      else
-        decode_4x4(pbi, xd, r);
+      decode_4x4(pbi, xd, r);
     }
   }
 
@@ -684,7 +714,17 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (bsize > BLOCK_SIZE_MB16X16) {
     decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
   } else {
-    decode_mb(pbi, xd, mi_row, mi_col, r);
+    // TODO(jingning): In transition of separating functionalities of decode_mb
+    // into decode_sb and decode_atom. Will remove decode_mb and clean this up
+    // when SB8X8 is on.
+    if (xd->mode_info_context->mbmi.mode == I4X4_PRED ||
+        (xd->mode_info_context->mbmi.mode == SPLITMV &&
+         xd->mode_info_context->mbmi.partitioning == PARTITIONING_4X4))
+      decode_atom(pbi, xd, mi_row, mi_col, r, bsize);
+    else
+      // TODO(jingning): decode_mb still carries deocding process of I8X8_PRED
+      // and SPLITMV of 8x8, 16x8, and 8x16. To be migrated into decode_sb.
+      decode_mb(pbi, xd, mi_row, mi_col, r);
   }
 
   xd->corrupted |= vp9_reader_has_error(r);
