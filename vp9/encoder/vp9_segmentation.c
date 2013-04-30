@@ -60,61 +60,57 @@ void vp9_set_segment_data(VP9_PTR ptr,
 }
 
 // Based on set of segment counts calculate a probability tree
-static void calc_segtree_probs(MACROBLOCKD *xd,
-                               int *segcounts,
+static void calc_segtree_probs(MACROBLOCKD *xd, int *segcounts,
                                vp9_prob *segment_tree_probs) {
   // Work out probabilities of each segment
-  segment_tree_probs[0] =
-    get_binary_prob(segcounts[0] + segcounts[1] + segcounts[2] + segcounts[3],
-                    segcounts[4] + segcounts[5] + segcounts[6] + segcounts[7]);
-  segment_tree_probs[1] =
-    get_binary_prob(segcounts[0] + segcounts[1], segcounts[2] + segcounts[3]);
-  segment_tree_probs[2] = get_binary_prob(segcounts[0], segcounts[1]);
-  segment_tree_probs[3] = get_binary_prob(segcounts[2], segcounts[3]);
-  segment_tree_probs[4] =
-    get_binary_prob(segcounts[4] + segcounts[5], segcounts[6] + segcounts[7]);
+  const int c01 = segcounts[0] + segcounts[1];
+  const int c23 = segcounts[2] + segcounts[3];
+  const int c45 = segcounts[4] + segcounts[5];
+  const int c67 = segcounts[6] + segcounts[7];
+
+  segment_tree_probs[0] = get_binary_prob(c01 + c23, c45 + c67);
+  segment_tree_probs[1] = get_binary_prob(c01, c23);
+  segment_tree_probs[2] = get_binary_prob(c45, c67);
+  segment_tree_probs[3] = get_binary_prob(segcounts[0], segcounts[1]);
+  segment_tree_probs[4] = get_binary_prob(segcounts[2], segcounts[3]);
   segment_tree_probs[5] = get_binary_prob(segcounts[4], segcounts[5]);
   segment_tree_probs[6] = get_binary_prob(segcounts[6], segcounts[7]);
 }
 
 // Based on set of segment counts and probabilities calculate a cost estimate
-static int cost_segmap(MACROBLOCKD *xd,
-                       int *segcounts,
-                       vp9_prob *probs) {
-  int cost;
-  int count1, count2;
+static int cost_segmap(MACROBLOCKD *xd, int *segcounts, vp9_prob *probs) {
+  const int c01 = segcounts[0] + segcounts[1];
+  const int c23 = segcounts[2] + segcounts[3];
+  const int c45 = segcounts[4] + segcounts[5];
+  const int c67 = segcounts[6] + segcounts[7];
+  const int c0123 = c01 + c23;
+  const int c4567 = c45 + c67;
 
   // Cost the top node of the tree
-  count1 = segcounts[0] + segcounts[1] + segcounts[2] + segcounts[3];
-  count2 = segcounts[3] + segcounts[4] + segcounts[5] + segcounts[6];
-  cost = count1 * vp9_cost_zero(probs[0]) +
-         count2 * vp9_cost_one(probs[0]);
+  int cost = c0123 * vp9_cost_zero(probs[0]) +
+             c4567 * vp9_cost_one(probs[0]);
 
   // Cost subsequent levels
-  if (count1 > 0) {
-    count1 = segcounts[0] + segcounts[1];
-    count2 = segcounts[2] + segcounts[3];
-    cost += count1 * vp9_cost_zero(probs[1]) +
-            count2 * vp9_cost_one(probs[1]);
+  if (c0123 > 0) {
+    cost += c01 * vp9_cost_zero(probs[1]) +
+            c23 * vp9_cost_one(probs[1]);
 
-    if (count1 > 0)
-      cost += segcounts[0] * vp9_cost_zero(probs[2]) +
-              segcounts[1] * vp9_cost_one(probs[2]);
-    if (count2 > 0)
-      cost += segcounts[2] * vp9_cost_zero(probs[3]) +
-              segcounts[3] * vp9_cost_one(probs[3]);
+    if (c01 > 0)
+      cost += segcounts[0] * vp9_cost_zero(probs[3]) +
+              segcounts[1] * vp9_cost_one(probs[3]);
+    if (c23 > 0)
+      cost += segcounts[2] * vp9_cost_zero(probs[4]) +
+              segcounts[3] * vp9_cost_one(probs[4]);
   }
 
-  if (count2 > 0) {
-    count1 = segcounts[4] + segcounts[5];
-    count2 = segcounts[6] + segcounts[7];
-    cost += count1 * vp9_cost_zero(probs[4]) +
-            count2 * vp9_cost_one(probs[4]);
+  if (c4567 > 0) {
+    cost += c45 * vp9_cost_zero(probs[2]) +
+            c67 * vp9_cost_one(probs[2]);
 
-    if (count1 > 0)
+    if (c45 > 0)
       cost += segcounts[4] * vp9_cost_zero(probs[5]) +
               segcounts[5] * vp9_cost_one(probs[5]);
-    if (count2 > 0)
+    if (c67 > 0)
       cost += segcounts[6] * vp9_cost_zero(probs[6]) +
               segcounts[7] * vp9_cost_one(probs[6]);
   }
