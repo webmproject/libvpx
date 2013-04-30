@@ -87,9 +87,9 @@ unsigned int vp9_sub_pixel_variance32x64_c(const uint8_t *src_ptr,
 
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 65, 32, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 64, 64, 64, 32, vfilter);
+  var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 64, 32, vfilter);
 
-  return vp9_variance32x64_c(temp2, 64, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance32x64_c(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
 }
 
 unsigned int vp9_variance32x16_c(const uint8_t *src_ptr,
@@ -155,9 +155,9 @@ unsigned int vp9_sub_pixel_variance16x32_c(const uint8_t *src_ptr,
 
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 33, 16, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 32, 16, vfilter);
+  var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 32, 16, vfilter);
 
-  return vp9_variance16x32_c(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
+  return vp9_variance16x32_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
 unsigned int vp9_variance64x64_c(const uint8_t *src_ptr,
