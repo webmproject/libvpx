@@ -117,7 +117,9 @@ struct macroblock {
   int mbmode_cost[2][MB_MODE_COUNT];
   int intra_uv_mode_cost[2][MB_MODE_COUNT];
   int bmode_costs[VP9_KF_BINTRAMODES][VP9_KF_BINTRAMODES][VP9_KF_BINTRAMODES];
+#if !CONFIG_SB8X8
   int i8x8_mode_costs[MB_MODE_COUNT];
+#endif
   int inter_bmode_costs[B_MODE_COUNT];
   int switchable_interp_costs[VP9_SWITCHABLE_FILTERS + 1]
                              [VP9_SWITCHABLE_FILTERS];
@@ -141,6 +143,11 @@ struct macroblock {
 
   // Structure to hold context for each of the 4 MBs within a SB:
   // when encoded as 4 independent MBs:
+#if CONFIG_SB8X8
+  PICK_MODE_CONTEXT sb8_context[4][4][4];
+  PICK_MODE_CONTEXT sb8x16_context[4][4][2];
+  PICK_MODE_CONTEXT sb16x8_context[4][4][2];
+#endif
   PICK_MODE_CONTEXT mb_context[4][4];
   PICK_MODE_CONTEXT sb32x16_context[4][2];
   PICK_MODE_CONTEXT sb16x32_context[4][2];

@@ -628,7 +628,9 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_D63_PRED ] += speed_multiplier * 1500;
 
   sf->thresh_mult[THR_B_PRED   ] += speed_multiplier * 2500;
+#if !CONFIG_SB8X8
   sf->thresh_mult[THR_I8X8_PRED] += speed_multiplier * 2500;
+#endif
 
   sf->thresh_mult[THR_NEWMV    ] += speed_multiplier * 1000;
   sf->thresh_mult[THR_NEWG     ] += speed_multiplier * 1000;
@@ -3326,9 +3328,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     vp9_copy(cpi->common.fc.ymode_counts, cpi->ymode_count);
     vp9_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
     vp9_copy(cpi->common.fc.bmode_counts, cpi->bmode_count);
+#if !CONFIG_SB8X8
     vp9_copy(cpi->common.fc.i8x8_mode_counts, cpi->i8x8_mode_count);
+#endif
     vp9_copy(cpi->common.fc.sub_mv_ref_counts, cpi->sub_mv_ref_count);
+#if !CONFIG_SB8X8
     vp9_copy(cpi->common.fc.mbsplit_counts, cpi->mbsplit_count);
+#endif
     vp9_copy(cpi->common.fc.partition_counts, cpi->partition_count);
 #if CONFIG_COMP_INTERINTRA_PRED
     vp9_copy(cpi->common.fc.interintra_counts, cpi->interintra_count);

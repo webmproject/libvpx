@@ -677,6 +677,7 @@ void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
   }
 }
 
+#if !CONFIG_SB8X8
 void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x) {
   MACROBLOCKD *const xd = &x->e_mbd;
   const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
@@ -735,6 +736,7 @@ void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
   vp9_fidct_mb(cm, x);
   vp9_recon_sb(xd, BLOCK_SIZE_MB16X16);
 }
+#endif
 
 /* this function is used by first pass only */
 void vp9_encode_inter16x16y(MACROBLOCK *x, int mi_row, int mi_col) {

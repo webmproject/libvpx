@@ -19,16 +19,20 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex);
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex);
 
+#if !CONFIG_SB8X8
 void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             int *r, int *d);
+#endif
 
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *r, int *d, BLOCK_SIZE_TYPE bsize,
                                PICK_MODE_CONTEXT *ctx);
 
+#if !CONFIG_SB8X8
 void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
                                     int mi_row, int mi_col,
                                     int *r, int *d);
+#endif
 
 int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   int mi_row, int mi_col,

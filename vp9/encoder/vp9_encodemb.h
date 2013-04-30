@@ -24,8 +24,10 @@ typedef struct {
 
 
 struct VP9_ENCODER_RTCD;
+#if !CONFIG_SB8X8
 void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
                            int mb_row, int mb_col);
+#endif
 
 void vp9_encode_inter16x16y(MACROBLOCK *x, int mb_row, int mb_col);
 
@@ -54,7 +56,9 @@ void vp9_transform_sbuv_4x4(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x,
                            BLOCK_SIZE_TYPE bsize);
 
+#if !CONFIG_SB8X8
 void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x);
+#endif
 
 void vp9_subtract_block(int rows, int cols,
                         int16_t *diff_ptr, int diff_stride,

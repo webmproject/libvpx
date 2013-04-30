@@ -27,7 +27,9 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[H_PRED] = 1;
   lfi->mode_lf_lut[TM_PRED] = 1;
   lfi->mode_lf_lut[I4X4_PRED]  = 0;
+#if !CONFIG_SB8X8
   lfi->mode_lf_lut[I8X8_PRED] = 0;
+#endif
   lfi->mode_lf_lut[ZEROMV]  = 1;
   lfi->mode_lf_lut[NEARESTMV] = 2;
   lfi->mode_lf_lut[NEARMV] = 2;
@@ -165,10 +167,14 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
 // the MB uses a prediction size of 16x16 and either 16x16 transform
 // is used or there is no residue at all.
 static int mb_lf_skip(const MB_MODE_INFO *const mbmi) {
-  const MB_PREDICTION_MODE mode = mbmi->mode;
   const int skip_coef = mbmi->mb_skip_coeff;
   const int tx_size = mbmi->txfm_size;
+#if CONFIG_SB8X8
+  return mbmi->sb_type >= BLOCK_SIZE_MB16X16 &&
+#else
+  const MB_PREDICTION_MODE mode = mbmi->mode;
   return mode != I4X4_PRED && mode != I8X8_PRED && mode != SPLITMV &&
+#endif
          (tx_size >= TX_16X16 || skip_coef);
 }
 
@@ -220,7 +226,13 @@ static void lpf_mb(VP9_COMMON *cm, const MODE_INFO *mi,
 
       if (!skip_lf) {
         if (tx_size >= TX_8X8) {
-          if (tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV))
+          if (tx_size == TX_8X8 &&
+#if CONFIG_SB8X8
+              (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
+#else
+              (mode == I8X8_PRED || mode == SPLITMV)
+#endif
+              )
             vp9_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr,
                                   y_stride, uv_stride, &lfi);
           else
@@ -244,7 +256,13 @@ static void lpf_mb(VP9_COMMON *cm, const MODE_INFO *mi,
 
       if (!skip_lf) {
         if (tx_size >= TX_8X8) {
-          if (tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV))
+          if (tx_size == TX_8X8 &&
+#if CONFIG_SB8X8
+              (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
+#else
+              (mode == I8X8_PRED || mode == SPLITMV)
+#endif
+              )
             vp9_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr,
                                   y_stride, uv_stride, &lfi);
           else

@@ -16,6 +16,17 @@
 #include "vpx_mem/vpx_mem.h"
 
 static const unsigned int kf_y_mode_cts[8][VP9_YMODES] = {
+#if CONFIG_SB8X8
+  /* DC V   H  D45 135 117 153 D27 D63 TM i4X4 */
+  {12,  6,  5,  5,  5,  5,  5,  5,  5,  2, 200},
+  {25, 13, 13,  7,  7,  7,  7,  7,  7,  6, 160},
+  {31, 17, 18,  8,  8,  8,  8,  8,  8,  9, 139},
+  {40, 22, 23,  8,  8,  8,  8,  8,  8, 12, 116},
+  {53, 26, 28,  8,  8,  8,  8,  8,  8, 13,  94},
+  {68, 33, 35,  8,  8,  8,  8,  8,  8, 17,  68},
+  {78, 38, 38,  8,  8,  8,  8,  8,  8, 19,  52},
+  {89, 42, 42,  8,  8,  8,  8,  8,  8, 21,  34},
+#else
   /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 i4X4 */
   {12,  6,  5,  5,  5,  5,  5,  5,  5,  2, 22, 200},
   {25, 13, 13,  7,  7,  7,  7,  7,  7,  6, 27, 160},
@@ -25,11 +36,17 @@ static const unsigned int kf_y_mode_cts[8][VP9_YMODES] = {
   {68, 33, 35,  8,  8,  8,  8,  8,  8, 17, 20,  68},
   {78, 38, 38,  8,  8,  8,  8,  8,  8, 19, 16,  52},
   {89, 42, 42,  8,  8,  8,  8,  8,  8, 21, 12,  34},
+#endif
 };
 
 static const unsigned int y_mode_cts  [VP9_YMODES] = {
+#if CONFIG_SB8X8
+  /* DC V   H  D45 135 117 153 D27 D63 TM i4X4 */
+  98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 70
+#else
   /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 i4X4 */
   98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 16, 70
+#endif
 };
 
 static const unsigned int uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
@@ -44,14 +61,18 @@ static const unsigned int uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
   { 150, 15, 10, 10, 10, 10, 10, 75, 10,  6}, /* D27 */
   { 150, 15, 10, 10, 10, 10, 10, 10, 75,  6}, /* D63 */
   { 160, 30, 30, 10, 10, 10, 10, 10, 10, 16}, /* TM */
+#if !CONFIG_SB8X8
   { 132, 46, 40, 10, 10, 10, 10, 10, 10, 18}, /* i8x8 - never used */
+#endif
   { 150, 35, 41, 10, 10, 10, 10, 10, 10, 10}, /* i4X4 */
 };
 
+#if !CONFIG_SB8X8
 static const unsigned int i8x8_mode_cts  [VP9_I8X8_MODES] = {
   /* DC V  H D45 135 117 153 D27 D63  TM */
   73, 49, 61, 30, 30, 30, 30, 30, 30, 13
 };
+#endif
 
 static const unsigned int kf_uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
   // DC   V   H  D45 135 117 153 D27 D63 TM
@@ -65,7 +86,9 @@ static const unsigned int kf_uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
   { 102, 33, 20, 20, 20, 20, 20, 64, 20, 14}, /* D27 */
   { 102, 33, 20, 20, 20, 20, 20, 20, 64, 14}, /* D63 */
   { 132, 36, 30, 20, 20, 20, 20, 20, 20, 18}, /* TM */
+#if !CONFIG_SB8X8
   { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* i8x8 - never used */
+#endif
   { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* I4X4 */
 };
 
@@ -123,6 +146,7 @@ const vp9_prob vp9_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP9_SUBMVREFS - 1] = {
   { 208, 1, 1  }
 };
 
+#if !CONFIG_SB8X8
 vp9_mbsplit vp9_mbsplits [VP9_NUMMBSPLITS] = {
   {
     0,  0,  0,  0,
@@ -150,9 +174,17 @@ vp9_mbsplit vp9_mbsplits [VP9_NUMMBSPLITS] = {
 const int vp9_mbsplit_count [VP9_NUMMBSPLITS] = { 2, 2, 4, 16};
 
 const vp9_prob vp9_mbsplit_probs [VP9_NUMMBSPLITS - 1] = { 110, 111, 150};
+#endif
 
 const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
                                   [PARTITION_TYPES - 1] = {
+#if CONFIG_SB8X8
+  // FIXME(jingning,rbultje) put real probabilities here
+  {202, 162, 107},
+  {16,  2,   169},
+  {3,   246,  19},
+  {104, 90,  134},
+#endif
   {202, 162, 107},
   {16,  2,   169},
   {3,   246,  19},
@@ -228,8 +260,12 @@ const vp9_tree_index vp9_ymode_tree[VP9_YMODES * 2 - 2] = {
   -D27_PRED, -D63_PRED,
   16, 18,
   -V_PRED, -H_PRED,
+#if CONFIG_SB8X8
+  -TM_PRED, -I4X4_PRED
+#else
   -TM_PRED, 20,
   -I4X4_PRED, -I8X8_PRED
+#endif
 };
 
 const vp9_tree_index vp9_kf_ymode_tree[VP9_YMODES * 2 - 2] = {
@@ -242,10 +278,15 @@ const vp9_tree_index vp9_kf_ymode_tree[VP9_YMODES * 2 - 2] = {
   -D27_PRED, -D63_PRED,
   16, 18,
   -V_PRED, -H_PRED,
+#if CONFIG_SB8X8
+  -TM_PRED, -I4X4_PRED
+#else
   -TM_PRED, 20,
   -I4X4_PRED, -I8X8_PRED
+#endif
 };
 
+#if !CONFIG_SB8X8
 const vp9_tree_index vp9_i8x8_mode_tree[VP9_I8X8_MODES * 2 - 2] = {
   2, 14,
   -DC_PRED, 4,
@@ -257,6 +298,7 @@ const vp9_tree_index vp9_i8x8_mode_tree[VP9_I8X8_MODES * 2 - 2] = {
   -V_PRED, 16,
   -H_PRED, -TM_PRED
 };
+#endif
 
 const vp9_tree_index vp9_uv_mode_tree[VP9_UV_MODES * 2 - 2] = {
   2, 14,
@@ -270,11 +312,13 @@ const vp9_tree_index vp9_uv_mode_tree[VP9_UV_MODES * 2 - 2] = {
   -H_PRED, -TM_PRED
 };
 
+#if !CONFIG_SB8X8
 const vp9_tree_index vp9_mbsplit_tree[6] = {
   -PARTITIONING_4X4,   2,
   -PARTITIONING_8X8,   4,
   -PARTITIONING_16X8, -PARTITIONING_8X16,
 };
+#endif
 
 const vp9_tree_index vp9_mv_ref_tree[8] = {
   -ZEROMV, 2,
@@ -308,8 +352,10 @@ struct vp9_token vp9_sb_ymode_encodings[VP9_I32X32_MODES];
 struct vp9_token vp9_sb_kf_ymode_encodings[VP9_I32X32_MODES];
 struct vp9_token vp9_kf_ymode_encodings[VP9_YMODES];
 struct vp9_token vp9_uv_mode_encodings[VP9_UV_MODES];
+#if !CONFIG_SB8X8
 struct vp9_token vp9_i8x8_mode_encodings[VP9_I8X8_MODES];
 struct vp9_token vp9_mbsplit_encodings[VP9_NUMMBSPLITS];
+#endif
 
 struct vp9_token vp9_mv_ref_encoding_array[VP9_MVREFS];
 struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
@@ -340,12 +386,16 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
                                      bct, uv_mode_cts[i], 0);
   }
 
+#if !CONFIG_SB8X8
   vp9_tree_probs_from_distribution(vp9_i8x8_mode_tree, x->fc.i8x8_mode_prob,
                                    bct, i8x8_mode_cts, 0);
+#endif
 
   vpx_memcpy(x->fc.sub_mv_ref_prob, vp9_sub_mv_ref_prob2,
              sizeof(vp9_sub_mv_ref_prob2));
+#if !CONFIG_SB8X8
   vpx_memcpy(x->fc.mbsplit_prob, vp9_mbsplit_probs, sizeof(vp9_mbsplit_probs));
+#endif
   vpx_memcpy(x->fc.switchable_interp_prob, vp9_switchable_interp_prob,
              sizeof(vp9_switchable_interp_prob));
 
@@ -449,8 +499,10 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_sb_ymode_encodings, vp9_sb_ymode_tree);
   vp9_tokens_from_tree(vp9_sb_kf_ymode_encodings, vp9_sb_kf_ymode_tree);
   vp9_tokens_from_tree(vp9_uv_mode_encodings,  vp9_uv_mode_tree);
+#if !CONFIG_SB8X8
   vp9_tokens_from_tree(vp9_i8x8_mode_encodings,  vp9_i8x8_mode_tree);
   vp9_tokens_from_tree(vp9_mbsplit_encodings, vp9_mbsplit_tree);
+#endif
   vp9_tokens_from_tree(vp9_switchable_interp_encodings,
                        vp9_switchable_interp_tree);
   vp9_tokens_from_tree(vp9_partition_encodings, vp9_partition_tree);
@@ -629,9 +681,11 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   update_mode_probs(VP9_NKF_BINTRAMODES, vp9_bmode_tree,
                     fc->bmode_counts, fc->pre_bmode_prob,
                     fc->bmode_prob, 0);
+#if !CONFIG_SB8X8
   update_mode_probs(VP9_I8X8_MODES,
                     vp9_i8x8_mode_tree, fc->i8x8_mode_counts,
                     fc->pre_i8x8_mode_prob, fc->i8x8_mode_prob, 0);
+#endif
 
   for (i = 0; i < SUBMVREF_COUNT; ++i)
     update_mode_probs(VP9_SUBMVREFS,
@@ -639,9 +693,11 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                       fc->pre_sub_mv_ref_prob[i], fc->sub_mv_ref_prob[i],
                       LEFT4X4);
 
+#if !CONFIG_SB8X8
   update_mode_probs(VP9_NUMMBSPLITS, vp9_mbsplit_tree,
                     fc->mbsplit_counts, fc->pre_mbsplit_prob,
                     fc->mbsplit_prob, 0);
+#endif
 #if CONFIG_COMP_INTERINTRA_PRED
   if (cm->use_interintra) {
     int factor, interintra_prob, count;
