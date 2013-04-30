@@ -18,7 +18,7 @@ extern "C" {
 #include "vpx/vpx_integer.h"
 
 #define VP8BORDERINPIXELS       32
-#define VP9BORDERINPIXELS       64
+#define VP9BORDERINPIXELS       96
 #define VP9_INTERP_EXTEND        4
 
   /*************************************
