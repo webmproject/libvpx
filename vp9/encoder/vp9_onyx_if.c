@@ -982,22 +982,7 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 static void update_frame_size(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
 
-  const int aligned_width = multiple16(cm->width);
-  const int aligned_height = multiple16(cm->height);
-
-  cm->mb_rows = aligned_height >> 4;
-  cm->mi_rows = aligned_height >> LOG2_MI_SIZE;
-  cm->mb_cols = aligned_width >> 4;
-  cm->mi_cols = aligned_width >> LOG2_MI_SIZE;
-  cm->MBs = cm->mb_rows * cm->mb_cols;
-  cm->mode_info_stride = cm->mi_cols + 1;
-  memset(cm->mip, 0,
-        cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
-  vp9_update_mode_info_border(cm, cm->mip);
-
-  cm->mi = cm->mip + cm->mode_info_stride + 1;
-  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
-  vp9_update_mode_info_in_image(cm, cm->mi);
+  vp9_update_frame_size(cm);
 
   // Update size of buffers local to this frame
   if (vp8_yv12_realloc_frame_buffer(&cpi->last_frame_uf,

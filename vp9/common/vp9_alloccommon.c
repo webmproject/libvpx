@@ -223,3 +223,28 @@ void vp9_initialize_common() {
   vp9_entropy_mode_init();
   vp9_entropy_mv_init();
 }
+
+
+void vp9_update_frame_size(VP9_COMMON *cm) {
+  const int aligned_width = multiple16(cm->width);
+  const int aligned_height = multiple16(cm->height);
+
+  cm->mb_rows = aligned_height >> 4;
+  cm->mb_cols = aligned_width >> 4;
+
+  cm->mi_rows = aligned_height >> LOG2_MI_SIZE;
+  cm->mi_cols = aligned_width >> LOG2_MI_SIZE;
+
+  cm->MBs = cm->mb_rows * cm->mb_cols;
+  cm->mode_info_stride = cm->mi_cols + 1;
+  cm->mi = cm->mip + cm->mode_info_stride + 1;
+  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
+
+  memset(cm->mip, 0,
+         cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
+  vp9_update_mode_info_border(cm, cm->mip);
+  vp9_update_mode_info_in_image(cm, cm->mi);
+
+  vp9_update_mode_info_border(cm, cm->prev_mip);
+  vp9_update_mode_info_in_image(cm, cm->prev_mi);
+}
