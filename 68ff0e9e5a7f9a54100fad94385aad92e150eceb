@@ -16,6 +16,24 @@
       "revId": "68ff0e9e5a7f9a54100fad94385aad92e150eceb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//w3E\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-04-30T22:43:18Z",
+      "side": 1,
+      "message": "Uh yeah you\u0027re actually right, that\u0027s kind of weird.",
+      "parentUuid": "AAAAXX//w40\u003d",
+      "revId": "68ff0e9e5a7f9a54100fad94385aad92e150eceb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
