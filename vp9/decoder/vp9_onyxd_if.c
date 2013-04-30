@@ -133,10 +133,10 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   pbi->common.current_video_frame = 0;
   pbi->ready_for_new_data = 1;
 
-  // vp9_init_de_quantizer() is first called here. Add check in
+  // vp9_init_dequantizer() is first called here. Add check in
   // frame_init_dequantizer() to avoid unnecessary calling of
-  // vp9_init_de_quantizer() for every frame.
-  vp9_init_de_quantizer(pbi);
+  // vp9_init_dequantizer() for every frame.
+  vp9_init_dequantizer(&pbi->common);
 
   vp9_loop_filter_init(&pbi->common);
 

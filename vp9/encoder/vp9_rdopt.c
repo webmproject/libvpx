@@ -187,7 +187,7 @@ void vp9_init_me_luts() {
 }
 
 static int compute_rd_mult(int qindex) {
-  int q = vp9_dc_quant(qindex, 0);
+  const int q = vp9_dc_quant(qindex, 0);
   return (11 * q * q) >> 2;
 }
 

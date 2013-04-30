@@ -89,7 +89,7 @@ static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] = { 1, 2, 3,
 // tables if and when things settle down in the experimental bitstream
 double vp9_convert_qindex_to_q(int qindex) {
   // Convert the index to a real Q value (scaled down to match old Q values)
-  return vp9_ac_yquant(qindex) / 4.0;
+  return vp9_ac_quant(qindex, 0) / 4.0;
 }
 
 int vp9_gfboost_qadjust(int qindex) {
