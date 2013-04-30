@@ -2103,7 +2103,6 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
 #if CONFIG_SB8X8
       int y, x;
 #endif
-
       if (mbmi->mode != I4X4_PRED && mbmi->mode != I8X8_PRED &&
           mbmi->mode != SPLITMV && cpi->common.txfm_mode >= ALLOW_16X16) {
         mbmi->txfm_size = TX_16X16;
