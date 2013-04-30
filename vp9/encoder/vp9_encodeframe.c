@@ -1946,7 +1946,7 @@ static void encode_macroblock(VP9_COMP *cpi, TOKENEXTRA **t,
 #endif
     if (mbmi->mode == I4X4_PRED) {
       vp9_encode_intra16x16mbuv(cm, x);
-      vp9_encode_intra4x4mby(x);
+      vp9_encode_intra4x4mby(x, BLOCK_SIZE_MB16X16);
     } else if (mbmi->mode == I8X8_PRED) {
       vp9_encode_intra8x8mby(x);
       vp9_encode_intra8x8mbuv(x);

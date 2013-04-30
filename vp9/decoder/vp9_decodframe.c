@@ -300,7 +300,6 @@ static INLINE void dequant_add_y(MACROBLOCKD *xd, TX_TYPE tx_type, int idx) {
   }
 }
 
-
 static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
   TX_TYPE tx_type;
   int i = 0;
@@ -338,32 +337,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
                    dst, xd->plane[1].dst.stride,
                    xd->plane[2].eobs[i]);
     }
-  } else if (mode == I4X4_PRED) {
-    for (i = 0; i < 16; i++) {
-      int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
-      uint8_t* dst;
-      dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, i,
-                                      xd->plane[0].dst.buf,
-                                      xd->plane[0].dst.stride);
-#if CONFIG_NEWBINTRAMODES
-      xd->mode_info_context->bmi[i].as_mode.context =
-          vp9_find_bpred_context(xd, i, dst, xd->plane[0].dst.stride);
-      if (!xd->mode_info_context->mbmi.mb_skip_coeff)
-        vp9_decode_coefs_4x4(pbi, xd, r, PLANE_TYPE_Y_WITH_DC, i);
-#endif
-      vp9_intra4x4_predict(xd, i, b_mode, dst, xd->plane[0].dst.stride);
-      tx_type = get_tx_type_4x4(xd, i);
-      dequant_add_y(xd, tx_type, i);
-    }
-#if CONFIG_NEWBINTRAMODES
-    if (!xd->mode_info_context->mbmi.mb_skip_coeff)
-      vp9_decode_mb_tokens_4x4_uv(pbi, xd, r);
-#endif
-    vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_MB16X16);
-    xd->itxm_add_uv_block(xd->plane[1].qcoeff, xd->plane[1].dst.buf,
-        xd->plane[1].dst.stride, xd->plane[1].eobs);
-    xd->itxm_add_uv_block(xd->plane[2].qcoeff, xd->plane[2].dst.buf,
-        xd->plane[1].dst.stride, xd->plane[2].eobs);
   } else if (mode == SPLITMV || get_tx_type_4x4(xd, 0) == DCT_DCT) {
     xd->itxm_add_y_block(xd->plane[0].qcoeff, xd->plane[0].dst.buf,
         xd->plane[0].dst.stride, xd);
@@ -435,6 +408,38 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_idct_add_32x32(qcoeff, dst, stride, xd->plane[plane].eobs[block]);
       break;
   }
+}
+
+static void decode_atom_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
+                              vp9_reader *r,
+                              BLOCK_SIZE_TYPE bsize) {
+  int i = 0;
+  int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
+  int bc = 1 << (bwl + bhl);
+  int tx_type;
+
+  for (i = 0; i < bc; i++) {
+    int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
+    uint8_t* dst;
+    dst = raster_block_offset_uint8(xd, bsize, 0, i,
+                                    xd->plane[0].dst.buf,
+                                    xd->plane[0].dst.stride);
+#if CONFIG_NEWBINTRAMODES
+    xd->mode_info_context->bmi[i].as_mode.context =
+        vp9_find_bpred_context(xd, i, dst, xd->plane[0].dst.stride);
+    if (!xd->mode_info_context->mbmi.mb_skip_coeff)
+      vp9_decode_coefs_4x4(pbi, xd, r, PLANE_TYPE_Y_WITH_DC, i);
+#endif
+    vp9_intra4x4_predict(xd, i, b_mode, dst, xd->plane[0].dst.stride);
+    // TODO(jingning): refactor to use foreach_transformed_block_in_plane_
+    tx_type = get_tx_type_4x4(xd, i);
+    dequant_add_y(xd, tx_type, i);
+  }
+#if CONFIG_NEWBINTRAMODES
+  if (!xd->mode_info_context->mbmi.mb_skip_coeff)
+    vp9_decode_mb_tokens_4x4_uv(pbi, xd, r);
+#endif
+  foreach_transformed_block_uv(xd, bsize, decode_block, xd);
 }
 
 static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
@@ -545,7 +550,12 @@ static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
     } else if (tx_size == TX_8X8) {
       decode_8x8(xd);
     } else {
-      decode_4x4(pbi, xd, r);
+      if (mbmi->mode == I4X4_PRED)
+        // TODO(jingning): we need to move this to decode_atom later and
+        // deprecate decode_mb, when SB8X8 is on.
+        decode_atom_intra(pbi, xd, r, BLOCK_SIZE_MB16X16);
+      else
+        decode_4x4(pbi, xd, r);
     }
   }
 
@@ -671,10 +681,11 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   set_refs(pbi, mi_row, mi_col);
 
   // TODO(jingning): merge decode_sb_ and decode_mb_
-  if (bsize > BLOCK_SIZE_MB16X16)
+  if (bsize > BLOCK_SIZE_MB16X16) {
     decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
-  else
+  } else {
     decode_mb(pbi, xd, mi_row, mi_col, r);
+  }
 
   xd->corrupted |= vp9_reader_has_error(r);
 }
