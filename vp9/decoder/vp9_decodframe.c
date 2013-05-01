@@ -181,22 +181,10 @@ void vp9_init_dequantizer(VP9_COMMON *pc) {
   }
 }
 
-static int get_qindex(MACROBLOCKD *mb, int segment_id, int base_qindex) {
-  // Set the Q baseline allowing for any segment level adjustment
-  if (vp9_segfeature_active(mb, segment_id, SEG_LVL_ALT_Q)) {
-    const int data = vp9_get_segdata(mb, segment_id, SEG_LVL_ALT_Q);
-    return mb->mb_segment_abs_delta == SEGMENT_ABSDATA ?
-               data :  // Abs value
-               clamp(base_qindex + data, 0, MAXQ);  // Delta value
-  } else {
-    return base_qindex;
-  }
-}
-
 static void mb_init_dequantizer(VP9_COMMON *pc, MACROBLOCKD *xd) {
   int i;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  xd->q_index = get_qindex(xd, segment_id, pc->base_qindex);
+  xd->q_index = vp9_get_qindex(xd, segment_id, pc->base_qindex);
 
   xd->plane[0].dequant = pc->y_dequant[xd->q_index];
   for (i = 1; i < MAX_MB_PLANE; i++)

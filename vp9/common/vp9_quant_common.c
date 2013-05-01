@@ -10,6 +10,7 @@
 
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_quant_common.h"
+#include "vp9/common/vp9_seg_common.h"
 
 static int16_t dc_qlookup[QINDEX_RANGE];
 static int16_t ac_qlookup[QINDEX_RANGE];
@@ -44,3 +45,16 @@ int16_t vp9_dc_quant(int qindex, int delta) {
 int16_t vp9_ac_quant(int qindex, int delta) {
   return ac_qlookup[clamp(qindex + delta, 0, MAXQ)];
 }
+
+
+int vp9_get_qindex(MACROBLOCKD *xd, int segment_id, int base_qindex) {
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
+    const int data = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
+    return xd->mb_segment_abs_delta == SEGMENT_ABSDATA ?
+               data :  // Abs value
+               clamp(base_qindex + data, 0, MAXQ);  // Delta value
+  } else {
+    return base_qindex;
+  }
+}
+

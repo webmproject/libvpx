@@ -18,6 +18,7 @@
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
+#include "vp9/common/vp9_quant_common.h"
 
 #if CONFIG_POSTPROC
 #include "vp9/common/vp9_postproc.h"
@@ -30,13 +31,6 @@
 /* Create/destroy static data structures. */
 
 void vp9_initialize_common(void);
-
-#define MINQ 0
-
-#define MAXQ 255
-#define QINDEX_BITS 8
-
-#define QINDEX_RANGE (MAXQ + 1)
 
 #if CONFIG_MULTIPLE_ARF
 #define NUM_REF_FRAMES 8
