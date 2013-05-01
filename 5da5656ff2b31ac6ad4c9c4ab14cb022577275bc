@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//wPc\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002834
+      },
+      "writtenOn": "2013-05-01T13:49:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAXX//xhY\u003d",
+      "revId": "5da5656ff2b31ac6ad4c9c4ab14cb022577275bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//xhg\u003d",
         "filename": "vpx_ports/x86.h",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2013-04-30T18:05:00Z",
       "side": 1,
       "message": "The build fails with --disable-runtime-cpu-detect\n\nIs it necessary to have the else/if? It should be safe to run x86_simd_caps even if the results are discarded.",
+      "revId": "5da5656ff2b31ac6ad4c9c4ab14cb022577275bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//wPY\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002834
+      },
+      "writtenOn": "2013-05-01T13:49:28Z",
+      "side": 1,
+      "message": "Agree with you and should be safe, thanks.",
+      "parentUuid": "AAAAXX//xhg\u003d",
       "revId": "5da5656ff2b31ac6ad4c9c4ab14cb022577275bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
