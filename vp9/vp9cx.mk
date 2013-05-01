@@ -17,15 +17,6 @@ VP9_CX_SRCS_REMOVE-no  += $(VP9_COMMON_SRCS_REMOVE-no)
 
 VP9_CX_SRCS-yes += vp9_cx_iface.c
 
-# encoder
-#INCLUDES += algo/vpx_common/vpx_mem/include
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += common
-#INCLUDES += algo/vpx_ref/cpu_id/include
-#INCLUDES += common
-#INCLUDES += encoder
-
 VP9_CX_SRCS-yes += encoder/vp9_bitstream.c
 VP9_CX_SRCS-yes += encoder/vp9_boolhuff.c
 VP9_CX_SRCS-yes += encoder/vp9_dct.c
@@ -81,7 +72,6 @@ VP9_CX_SRCS-yes += encoder/vp9_mbgraph.h
 
 
 VP9_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/vp9_mcomp_x86.h
-VP9_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/vp9_quantize_x86.h
 VP9_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/vp9_x86_csystemdependent.c
 VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_variance_mmx.c
 VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_variance_impl_mmx.asm
@@ -94,17 +84,13 @@ VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_variance_impl_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_sad_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_sad4d_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_fwalsh_sse2.asm
-#VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_quantize_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_subtract_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_temporal_filter_apply_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE3) += encoder/x86/vp9_sad_sse3.asm
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_sad_ssse3.asm
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_variance_ssse3.c
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_variance_impl_ssse3.asm
-#VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_quantize_ssse3.asm
 VP9_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/vp9_sad_sse4.asm
-#VP9_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/vp9_quantize_sse4.asm
-VP9_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/vp9_quantize_mmx.asm
 VP9_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/vp9_encodeopt.asm
 VP9_CX_SRCS-$(ARCH_X86_64) += encoder/x86/vp9_ssim_opt.asm
 
