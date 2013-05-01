@@ -310,21 +310,6 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
 }
 #endif
 
-static int txfrm_block_to_raster_block(MACROBLOCKD *xd,
-                                       BLOCK_SIZE_TYPE bsize,
-                                       int plane, int block,
-                                       int ss_txfrm_size) {
-  const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int txwl = ss_txfrm_size / 2;
-  const int tx_cols_lg2 = bwl - txwl;
-  const int tx_cols = 1 << tx_cols_lg2;
-  const int raster_mb = block >> ss_txfrm_size;
-  const int x = (raster_mb & (tx_cols - 1)) << (txwl);
-  const int y = raster_mb >> tx_cols_lg2 << (txwl);
-  return x + (y << bwl);
-}
-
-
 static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
                          int ss_txfrm_size, void *arg) {
   MACROBLOCKD* const xd = arg;
