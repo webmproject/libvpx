@@ -793,7 +793,13 @@ process_common_toolchain() {
             check_add_asflags --defsym ARCHITECTURE=${arch_int}
             tune_cflags="-mtune="
             if [ ${tgt_isa} == "armv7" ]; then
-                [ -z "${float_abi}" ] && float_abi=softfp
+                if [ -z "${float_abi}" ]; then
+                    check_cpp <<EOF && float_abi=hard || float_abi=softfp
+#ifndef __ARM_PCS_VFP
+#error "not hardfp"
+#endif
+EOF
+                fi
                 check_add_cflags  -march=armv7-a -mfloat-abi=${float_abi}
                 check_add_asflags -march=armv7-a -mfloat-abi=${float_abi}
 
