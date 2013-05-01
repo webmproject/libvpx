@@ -564,10 +564,12 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   set_refs(pbi, mi_row, mi_col);
 
 #if CONFIG_SB8X8
-  if (bsize >= BLOCK_SIZE_SB8X8)
-    decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
+  if (bsize == BLOCK_SIZE_SB8X8 &&
+      (xd->mode_info_context->mbmi.mode == SPLITMV ||
+       xd->mode_info_context->mbmi.mode == I4X4_PRED))
+    decode_atom(pbi, xd, mi_row, mi_col, r, bsize);
   else
-    decode_atom(pbi, xd, mi_row, mi_col, r, BLOCK_SIZE_SB8X8);
+    decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
 #else
   // TODO(jingning): merge decode_sb_ and decode_mb_
   if (bsize > BLOCK_SIZE_MB16X16) {
@@ -604,7 +606,11 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (mi_row >= pc->mi_rows || mi_col >= pc->mi_cols)
     return;
 
+#if CONFIG_SB8X8
+  if (bsize > BLOCK_SIZE_SB8X8) {
+#else
   if (bsize > BLOCK_SIZE_MB16X16) {
+#endif
     int pl;
     // read the partition information
     xd->left_seg_context =
@@ -616,34 +622,35 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
     pc->fc.partition_counts[pl][partition]++;
   }
 
+  subsize = get_subsize(bsize, partition);
   switch (partition) {
     case PARTITION_NONE:
-      subsize = bsize;
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
       break;
     case PARTITION_HORZ:
-      subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB64X32 :
-                                                BLOCK_SIZE_SB32X16;
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
       if ((mi_row + bs) < pc->mi_rows)
         decode_modes_b(pbi, mi_row + bs, mi_col, r, subsize);
       break;
     case PARTITION_VERT:
-      subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB32X64 :
-                                                BLOCK_SIZE_SB16X32;
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
       if ((mi_col + bs) < pc->mi_cols)
         decode_modes_b(pbi, mi_row, mi_col + bs, r, subsize);
       break;
     case PARTITION_SPLIT:
-      subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB32X32 :
-                                                BLOCK_SIZE_MB16X16;
       for (n = 0; n < 4; n++) {
         int j = n >> 1, i = n & 0x01;
         if (subsize == BLOCK_SIZE_SB32X32)
           xd->sb_index = n;
+#if CONFIG_SB8X8
+        else if (subsize == BLOCK_SIZE_MB16X16)
+          xd->mb_index = n;
+        else
+          xd->b_index = n;
+#else
         else
           xd->mb_index = n;
+#endif
         decode_modes_sb(pbi, mi_row + j * bs, mi_col + i * bs, r, subsize);
       }
       break;
@@ -651,7 +658,11 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       assert(0);
   }
   // update partition context
+#if CONFIG_SB8X8
+  if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_MB16X16))
+#else
   if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_SB32X32))
+#endif
     return;
 
   xd->left_seg_context = pc->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
