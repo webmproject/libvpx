@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXX//we0\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-01T03:07:05Z",
+      "side": 1,
+      "message": "I think it\u0027s ok to keep subtract/recon separate, they benefit most from bigger blocksizes since they are relatively simple operations that are largely i/o-constrained, so benefit more from acting on aligned boundaries with aligned sizes, particularly multiples of 16 per line.",
+      "revId": "a3eed421d4230cdc4491c7d3c21cb8c60a2f89a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//we4\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 680,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-01T03:07:05Z",
+      "side": 1,
+      "message": "so, the slight problem of this approach is that we can\u0027t do a double 4x4 fdct/quant anymore. not a big problem at this moment (we have very little simd anyway), but something to keep in mind for later for optimization purposes... For haswell (avx2), it\u0027s not unlikely that doing 4 4x4s (or 2 8x8s) at a time is beneficial also.",
+      "revId": "a3eed421d4230cdc4491c7d3c21cb8c60a2f89a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//weM\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-01T03:07:05Z",
+      "side": 1,
+      "message": "is this still simd\u0027able? or do you intend to have simd implementations switch around the txfm_size (n_coeffs) and call the c as a fallback? In that case, maybe add this to vp9_rtcd_defs.sh and give it a _c suffix?\n\nI also wonder if mul should be part of the function signature, it\u0027s more a minor implementation issue, no?",
+      "revId": "a3eed421d4230cdc4491c7d3c21cb8c60a2f89a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
