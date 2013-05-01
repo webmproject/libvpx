@@ -13,6 +13,11 @@
 #define MVREF_NEIGHBOURS 8
 
 #if CONFIG_SB8X8
+static int b_mv_ref_search[MVREF_NEIGHBOURS][2] = {
+  {0, -1}, {-1, 0}, {-1, -1}, {0, -2},
+  {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}
+};
+
 static int mb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
     {0, -1}, {-1, 0}, {-1, -1}, {0, -3},
     {-3, 0}, {-1, -3}, {-3, -1}, {-3, -3}
@@ -185,8 +190,15 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     mv_ref_search = sb64_mv_ref_search;
   } else if (mbmi->sb_type >= BLOCK_SIZE_SB32X32) {
     mv_ref_search = sb_mv_ref_search;
+#if CONFIG_SB8X8
+  } else if (mbmi->sb_type >= BLOCK_SIZE_MB16X16) {
+    mv_ref_search = mb_mv_ref_search;
+  } else {
+    mv_ref_search = b_mv_ref_search;
+#else
   } else {
     mv_ref_search = mb_mv_ref_search;
+#endif
   }
 
   // We first scan for candidate vectors that match the current reference frame
