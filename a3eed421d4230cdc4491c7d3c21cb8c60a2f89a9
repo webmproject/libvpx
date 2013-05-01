@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAXX//wPo\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-01T13:42:03Z",
+      "side": 1,
+      "message": "btw, I also don\u0027t quite understand why we need a generic quantize function if there is a speed impact - the part where we already do the switch statement above, doesn\u0027t it just mean we can call x-\u003equantize${size} within the switch and be no worse off code-wise, but be much better off speed-wise? That seems much more managable to me, also in terms of making future extensions to the quantize function set (like per-band Q), which can then be handled purely inside quantize.c, instead of needing changes in the callers.",
+      "revId": "a3eed421d4230cdc4491c7d3c21cb8c60a2f89a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//we0\u003d",
         "filename": "vp9/encoder/vp9_encodemb.c",
         "patchSetId": 1
