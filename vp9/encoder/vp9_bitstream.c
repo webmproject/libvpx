@@ -944,7 +944,11 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     vp9_write(bc, skip_coeff, vp9_get_pred_prob(c, xd, PRED_MBSKIP));
   }
 
+#if CONFIG_SB8X8
+  if (m->mbmi.sb_type > BLOCK_SIZE_SB8X8)
+#else
   if (m->mbmi.sb_type > BLOCK_SIZE_MB16X16)
+#endif
     sb_kfwrite_ymode(bc, ym, c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
   else
     kfwrite_ymode(bc, ym, c->kf_ymode_prob[c->kf_ymode_probs_index]);
@@ -960,7 +964,6 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
 #ifdef ENTROPY_STATS
       ++intra_mode_stats [A] [L] [bm];
 #endif
-
       write_kf_bmode(bc, bm, c->kf_bmode_prob[a][l]);
     } while (++i < (16 >> (CONFIG_SB8X8 * 2)));
   }
@@ -1210,7 +1213,11 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   else
     assert(0);
 
+#if CONFIG_SB8X8
+  if (bsize > BLOCK_SIZE_SB8X8) {
+#else
   if (bsize > BLOCK_SIZE_MB16X16) {
+#endif
     int pl;
     xd->left_seg_context =
         cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
@@ -1221,34 +1228,23 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
                 vp9_partition_encodings + partition);
   }
 
+  subsize = get_subsize(bsize, partition);
+
   switch (partition) {
     case PARTITION_NONE:
-      subsize = bsize;
       write_modes_b(cpi, m, bc, tok, tok_end, mi_row, mi_col);
       break;
     case PARTITION_HORZ:
-      subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB64X32 :
-                                                BLOCK_SIZE_SB32X16;
       write_modes_b(cpi, m, bc, tok, tok_end, mi_row, mi_col);
       if ((mi_row + bh) < cm->mi_rows)
         write_modes_b(cpi, m + bh * mis, bc, tok, tok_end, mi_row + bh, mi_col);
       break;
     case PARTITION_VERT:
-      subsize = (bsize == BLOCK_SIZE_SB64X64) ? BLOCK_SIZE_SB32X64 :
-                                                BLOCK_SIZE_SB16X32;
       write_modes_b(cpi, m, bc, tok, tok_end, mi_row, mi_col);
       if ((mi_col + bw) < cm->mi_cols)
         write_modes_b(cpi, m + bw, bc, tok, tok_end, mi_row, mi_col + bw);
       break;
     case PARTITION_SPLIT:
-      // TODO(jingning): support recursive partitioning down to 16x16 as for
-      // now. need to merge in 16x8, 8x16, 8x8, and smaller partitions.
-      if (bsize == BLOCK_SIZE_SB64X64)
-        subsize = BLOCK_SIZE_SB32X32;
-      else if (bsize == BLOCK_SIZE_SB32X32)
-        subsize = BLOCK_SIZE_MB16X16;
-      else
-        assert(0);
       for (n = 0; n < 4; n++) {
         int j = n >> 1, i = n & 0x01;
         write_modes_sb(cpi, m + j * bs * mis + i * bs, bc, tok, tok_end,
@@ -1260,7 +1256,11 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   }
 
   // update partition context
+#if CONFIG_SB8X8
+  if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_MB16X16))
+#else
   if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_SB32X32))
+#endif
     return;
 
   xd->left_seg_context = cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);

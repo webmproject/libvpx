@@ -511,6 +511,55 @@ static INLINE int partition_plane_context(MACROBLOCKD *xd,
   return (left * 2 + above) + (bsl - 1) * PARTITION_PLOFFSET;
 }
 
+static BLOCK_SIZE_TYPE get_subsize(BLOCK_SIZE_TYPE bsize,
+                                   PARTITION_TYPE partition) {
+  BLOCK_SIZE_TYPE subsize;
+  switch (partition) {
+    case PARTITION_NONE:
+      subsize = bsize;
+      break;
+    case PARTITION_HORZ:
+      if (bsize == BLOCK_SIZE_SB64X64)
+        subsize = BLOCK_SIZE_SB64X32;
+      else if (bsize == BLOCK_SIZE_SB32X32)
+        subsize = BLOCK_SIZE_SB32X16;
+#if CONFIG_SB8X8
+      else if (bsize == BLOCK_SIZE_MB16X16)
+        subsize = BLOCK_SIZE_SB16X8;
+#endif
+      else
+        assert(0);
+      break;
+    case PARTITION_VERT:
+      if (bsize == BLOCK_SIZE_SB64X64)
+        subsize = BLOCK_SIZE_SB32X64;
+      else if (bsize == BLOCK_SIZE_SB32X32)
+        subsize = BLOCK_SIZE_SB16X32;
+#if CONFIG_SB8X8
+      else if (bsize == BLOCK_SIZE_MB16X16)
+        subsize = BLOCK_SIZE_SB8X16;
+#endif
+      else
+        assert(0);
+      break;
+    case PARTITION_SPLIT:
+      if (bsize == BLOCK_SIZE_SB64X64)
+        subsize = BLOCK_SIZE_SB32X32;
+      else if (bsize == BLOCK_SIZE_SB32X32)
+        subsize = BLOCK_SIZE_MB16X16;
+#if CONFIG_SB8X8
+      else if (bsize == BLOCK_SIZE_MB16X16)
+        subsize = BLOCK_SIZE_SB8X8;
+#endif
+      else
+        assert(0);
+      break;
+    default:
+      assert(0);
+  }
+  return subsize;
+}
+
 #define ACTIVE_HT   110                // quantization stepsize threshold
 
 #define ACTIVE_HT8  300

@@ -146,7 +146,11 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
     m->mbmi.mb_skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
 
   // luma mode
+#if CONFIG_SB8X8
+  m->mbmi.mode = m->mbmi.sb_type > BLOCK_SIZE_SB8X8 ?
+#else
   m->mbmi.mode = m->mbmi.sb_type > BLOCK_SIZE_MB16X16 ?
+#endif
       read_kf_sb_ymode(r, cm->sb_kf_ymode_prob[cm->kf_ymode_probs_index]):
       read_kf_mb_ymode(r, cm->kf_ymode_prob[cm->kf_ymode_probs_index]);
 
@@ -154,11 +158,10 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
 
   if (m->mbmi.mode == I4X4_PRED) {
     int i;
-    for (i = 0; i < 16; ++i) {
+    for (i = 0; i < (16 >> (2 * CONFIG_SB8X8)); ++i) {
       const B_PREDICTION_MODE a = above_block_mode(m, i, mis);
       const B_PREDICTION_MODE l = xd->left_available || (i & 3) ?
                                   left_block_mode(m, i) : B_DC_PRED;
-
       m->bmi[i].as_mode.first = read_kf_bmode(r, cm->kf_bmode_prob[a][l]);
     }
   }
