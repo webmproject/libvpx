@@ -239,6 +239,32 @@ unsigned int vp9_variance8x8_c(const uint8_t *src_ptr,
   return (var - (((unsigned int)avg * avg) >> 6));
 }
 
+unsigned int vp9_variance8x4_c(const uint8_t *src_ptr,
+                               int  source_stride,
+                               const uint8_t *ref_ptr,
+                               int  recon_stride,
+                               unsigned int *sse) {
+  unsigned int var;
+  int avg;
+
+  variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 4, &var, &avg);
+  *sse = var;
+  return (var - (((unsigned int)avg * avg) >> 5));
+}
+
+unsigned int vp9_variance4x8_c(const uint8_t *src_ptr,
+                               int  source_stride,
+                               const uint8_t *ref_ptr,
+                               int  recon_stride,
+                               unsigned int *sse) {
+  unsigned int var;
+  int avg;
+
+  variance(src_ptr, source_stride, ref_ptr, recon_stride, 4, 8, &var, &avg);
+  *sse = var;
+  return (var - (((unsigned int)avg * avg) >> 5));
+}
+
 unsigned int vp9_variance4x4_c(const uint8_t *src_ptr,
                                int  source_stride,
                                const uint8_t *ref_ptr,

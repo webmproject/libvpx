@@ -1874,7 +1874,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           raster_block_offset_uint8(&x->e_mbd, BLOCK_SIZE_SB8X8, 0, n,
                                     x->plane[0].src.buf,
                                     x->plane[0].src.stride);
-          assert(((intptr_t)x->e_mbd.plane[0].pre[0].buf & 0xf) == 0);
+          assert(((intptr_t)x->e_mbd.plane[0].pre[0].buf & 0x7) == 0);
           x->e_mbd.plane[0].pre[0].buf =
           raster_block_offset_uint8(&x->e_mbd, BLOCK_SIZE_SB8X8, 0, n,
                                     x->e_mbd.plane[0].pre[0].buf,
@@ -3295,6 +3295,11 @@ static enum BlockSize y_to_uv_block_size(enum BlockSize bs) {
     case BLOCK_32X16: return BLOCK_16X8;
     case BLOCK_16X32: return BLOCK_8X16;
     case BLOCK_16X16: return BLOCK_8X8;
+#if CONFIG_SB8X8
+    case BLOCK_16X8:  return BLOCK_8X4;
+    case BLOCK_8X16:  return BLOCK_4X8;
+    case BLOCK_8X8:   return BLOCK_4X4;
+#endif
     default:
       assert(0);
       return -1;
@@ -3310,6 +3315,11 @@ static enum BlockSize y_bsizet_to_block_size(BLOCK_SIZE_TYPE bs) {
     case BLOCK_SIZE_SB32X16: return BLOCK_32X16;
     case BLOCK_SIZE_SB16X32: return BLOCK_16X32;
     case BLOCK_SIZE_MB16X16: return BLOCK_16X16;
+#if CONFIG_SB8X8
+    case BLOCK_SIZE_SB16X8:  return BLOCK_16X8;
+    case BLOCK_SIZE_SB8X16:  return BLOCK_8X16;
+    case BLOCK_SIZE_SB8X8:   return BLOCK_8X8;
+#endif
     default:
       assert(0);
       return -1;
@@ -4927,7 +4937,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->Speed == 0
       || (cpi->Speed > 0 && (ref_frame_mask & (1 << INTRA_FRAME)))) {
     mbmi->mode = DC_PRED;
-    for (i = 0; i <= ((bsize < BLOCK_SIZE_SB64X64) ? TX_16X16 : TX_32X32);
+    for (i = 0; i <= (bsize < BLOCK_SIZE_MB16X16 ? TX_4X4 :
+                      (bsize < BLOCK_SIZE_SB32X32 ? TX_8X8 :
+                       (bsize < BLOCK_SIZE_SB64X64 ? TX_16X16 : TX_32X32)));
          i++) {
       mbmi->txfm_size = i;
       rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[i], &rate_uv_tokenonly[i],
@@ -5097,6 +5109,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                       bsize, txfm_cache);
 
       uv_tx = mbmi->txfm_size;
+      if (bsize < BLOCK_SIZE_MB16X16 && uv_tx == TX_8X8)
+        uv_tx = TX_4X4;
       if (bsize < BLOCK_SIZE_SB32X32 && uv_tx == TX_16X16)
         uv_tx = TX_8X8;
       else if (bsize < BLOCK_SIZE_SB64X64 && uv_tx == TX_32X32)

@@ -283,6 +283,8 @@ typedef struct {
 enum BlockSize {
 #if CONFIG_SB8X8
   BLOCK_4X4,
+  BLOCK_4X8,
+  BLOCK_8X4,
   BLOCK_8X8,
   BLOCK_8X16,
   BLOCK_16X8,

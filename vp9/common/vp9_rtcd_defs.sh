@@ -342,6 +342,12 @@ specialize vp9_variance8x8 mmx sse2
 vp9_variance8x8_sse2=vp9_variance8x8_wmt
 vp9_variance8x8_mmx=vp9_variance8x8_mmx
 
+prototype unsigned int vp9_variance8x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance8x4
+
+prototype unsigned int vp9_variance4x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_variance4x8
+
 prototype unsigned int vp9_variance4x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance4x4 mmx sse2
 vp9_variance4x4_sse2=vp9_variance4x4_wmt
