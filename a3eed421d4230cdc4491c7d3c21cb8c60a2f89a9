@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//wMA\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-01T15:46:26Z",
+      "side": 1,
+      "message": "So, look at the code above here: you have to lookup scan and - at this point - also mul, although you\u0027ll remove that. In my opinion, you already have that information by just calling a sized function, for which the switch already exists - in fact you require the switch to set up the proper information to call with correct function arguments. These are implementation details that should be left in the caller.\n\nSo my suggestion is that instead of scan\u003dget_scan_${size}(), just replace each of these lines with a direct call to x-\u003equantize${size}(), and remove the generic vp9_quantize(). That way, implementation details are left inside quantize.c and development/maintainability will be easier.",
+      "parentUuid": "AAAAXX//wOA\u003d",
+      "revId": "a3eed421d4230cdc4491c7d3c21cb8c60a2f89a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//we0\u003d",
         "filename": "vp9/encoder/vp9_encodemb.c",
         "patchSetId": 1
