@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//waE\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-01T05:19:21Z",
+      "side": 1,
+      "message": "Agree. I have a later commit that splits the forward transform and quant off so it can be called independently, so probably better not to pack too much into this. Though if we consider transforms larger than 32x32, and maybe even at that size, there might be cache considerations that make it advantageous to do as much work on a single block as you can at a time. Too early to tell (and probably doesn\u0027t apply to x86)",
+      "parentUuid": "AAAAXX//we0\u003d",
+      "revId": "a3eed421d4230cdc4491c7d3c21cb8c60a2f89a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//we4\u003d",
         "filename": "vp9/encoder/vp9_encodemb.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAXX//wZo\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 680,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-01T05:19:21Z",
+      "side": 1,
+      "message": "I agree. As we start getting into special casing things for speed, these generic versions could become the reference implementation, and we could write tests that prove that the optimized version matches the reference. I\u0027ve given the 8x4 code this replaces a little bit of thought, but at keeping the complexity out (especially out of the spec) is worthwhile at this point.\n\nWe\u0027ll need to see where this falls on the profile too, may not be as important as in VP8 given the larger transforms available.",
+      "parentUuid": "AAAAXX//we4\u003d",
+      "revId": "a3eed421d4230cdc4491c7d3c21cb8c60a2f89a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAXX//weM\u003d",
         "filename": "vp9/encoder/vp9_quantize.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2013-05-01T03:07:05Z",
       "side": 1,
       "message": "is this still simd\u0027able? or do you intend to have simd implementations switch around the txfm_size (n_coeffs) and call the c as a fallback? In that case, maybe add this to vp9_rtcd_defs.sh and give it a _c suffix?\n\nI also wonder if mul should be part of the function signature, it\u0027s more a minor implementation issue, no?",
+      "revId": "a3eed421d4230cdc4491c7d3c21cb8c60a2f89a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXX//wZA\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-01T05:19:21Z",
+      "side": 1,
+      "message": "I think the optimized function should have the prototype of the static quantize() rather than this function, since that doesn\u0027t use any structs as parameters. Could either put the switch in this function or do it in asm. I leave it to whomever writes the first asm version to make that call. This is the hot spot on the profile right now at over 30%, fyi.",
+      "parentUuid": "AAAAXX//weM\u003d",
       "revId": "a3eed421d4230cdc4491c7d3c21cb8c60a2f89a9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
