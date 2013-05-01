@@ -29,7 +29,7 @@ typedef struct {
     B_PREDICTION_MODE mode;
     int_mv mv;
     int_mv second_mv;
-  } bmi[16];
+  } bmi[16 >> (2 * CONFIG_SB8X8)];
 } PARTITION_INFO;
 
 // Structure to hold snapshot of coding context during the mode picking process
