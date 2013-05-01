@@ -83,7 +83,9 @@ typedef enum {
   D27_PRED,           /* Directional 22 deg prediction  [anti-clockwise from 0 deg hor] */
   D63_PRED,           /* Directional 67 deg prediction  [anti-clockwise from 0 deg hor] */
   TM_PRED,            /* Truemotion prediction */
+#if !CONFIG_SB8X8
   I8X8_PRED,          /* 8x8 based prediction, each 8x8 has its own mode */
+#endif
   I4X4_PRED,          /* 4x4 based prediction, each 4x4 has its own mode */
   NEARESTMV,
   NEARMV,
@@ -126,7 +128,9 @@ typedef enum {
 
 #define VP9_YMODES  (I4X4_PRED + 1)
 #define VP9_UV_MODES (TM_PRED + 1)
+#if !CONFIG_SB8X8
 #define VP9_I8X8_MODES (TM_PRED + 1)
+#endif
 #define VP9_I32X32_MODES (TM_PRED + 1)
 
 #define VP9_MVREFS (1 + SPLITMV - NEARESTMV)
@@ -169,6 +173,7 @@ typedef enum {
 #define VP9_NKF_BINTRAMODES (VP9_BINTRAMODES)  /* 10 */
 #endif
 
+#if !CONFIG_SB8X8
 typedef enum {
   PARTITIONING_16X8 = 0,
   PARTITIONING_8X16,
@@ -176,6 +181,7 @@ typedef enum {
   PARTITIONING_4X4,
   NB_PARTITIONINGS,
 } SPLITMV_PARTITIONING_TYPE;
+#endif
 
 /* For keyframes, intra block modes are predicted by the (already decoded)
    modes for the Y blocks to the left and above us; for interframes, there
@@ -271,7 +277,9 @@ typedef struct {
 
   int mb_mode_context[MAX_REF_FRAMES];
 
+#if !CONFIG_SB8X8
   SPLITMV_PARTITIONING_TYPE partitioning;
+#endif
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
   unsigned char need_to_clamp_mvs;
   unsigned char need_to_clamp_secondmv;
@@ -293,7 +301,7 @@ typedef struct {
 
 typedef struct {
   MB_MODE_INFO mbmi;
-  union b_mode_info bmi[16];
+  union b_mode_info bmi[16 >> (CONFIG_SB8X8 * 2)];
 } MODE_INFO;
 
 struct scale_factors {
@@ -433,8 +441,11 @@ typedef struct macroblockd {
 
   int corrupted;
 
-  int sb_index;
-  int mb_index;   // Index of the MB in the SB (0..3)
+  int sb_index;   // index of 32x32 block inside the 64x64 block
+  int mb_index;   // index of 16x16 block inside the 32x32 block
+#if CONFIG_SB8X8
+  int b_index;    // index of 8x8 block inside the 16x16 block
+#endif
   int q_index;
 
 } MACROBLOCKD;
@@ -442,10 +453,10 @@ typedef struct macroblockd {
 static INLINE void update_partition_context(MACROBLOCKD *xd,
                                             BLOCK_SIZE_TYPE sb_type,
                                             BLOCK_SIZE_TYPE sb_size) {
-  int bsl = mi_width_log2(sb_size) - CONFIG_SB8X8, bs = 1 << bsl;
-  int bwl = mi_width_log2(sb_type) - CONFIG_SB8X8;
-  int bhl = mi_height_log2(sb_type) - CONFIG_SB8X8;
-  int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - CONFIG_SB8X8 - bsl;
+  int bsl = mi_width_log2(sb_size), bs = 1 << bsl;
+  int bwl = mi_width_log2(sb_type);
+  int bhl = mi_height_log2(sb_type);
+  int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - bsl;
   int i;
   // skip macroblock partition
   if (bsl == 0)
@@ -481,9 +492,9 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
 
 static INLINE int partition_plane_context(MACROBLOCKD *xd,
                                           BLOCK_SIZE_TYPE sb_type) {
-  int bsl = mi_width_log2(sb_type) - CONFIG_SB8X8, bs = 1 << bsl;
+  int bsl = mi_width_log2(sb_type), bs = 1 << bsl;
   int above = 0, left = 0, i;
-  int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - bsl - CONFIG_SB8X8;
+  int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - bsl;
 
   assert(mi_width_log2(sb_type) == mi_height_log2(sb_type));
   assert(bsl >= 0);
@@ -581,6 +592,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
           xd->mode_info_context->bmi[ib].as_mode.context :
 #endif
         xd->mode_info_context->bmi[ib].as_mode.first);
+#if !CONFIG_SB8X8
   } else if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
              xd->q_index < ACTIVE_HT) {
     const int ic = (ib & 10);
@@ -615,7 +627,8 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
     // Use 2D DCT
     tx_type = DCT_DCT;
 #endif
-  } else if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
+#endif  // !CONFIG_SB8X8
+  } else if (xd->mode_info_context->mbmi.mode <= TM_PRED &&
              xd->q_index < ACTIVE_HT) {
 #if USE_ADST_FOR_I16X16_4X4
 #if USE_ADST_PERIPHERY_ONLY
@@ -659,14 +672,17 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
 #endif
   if (ib >= (1 << (wb + hb)))  // no chroma adst
     return tx_type;
+#if !CONFIG_SB8X8
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED &&
       xd->q_index < ACTIVE_HT8) {
     // TODO(rbultje): MB_PREDICTION_MODE / B_PREDICTION_MODE should be merged
     // or the relationship otherwise modified to address this type conversion.
     tx_type = txfm_map(pred_mode_conv(
            (MB_PREDICTION_MODE)xd->mode_info_context->bmi[ib].as_mode.first));
-  } else if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
-             xd->q_index < ACTIVE_HT8) {
+  } else
+#endif  // CONFIG_SB8X8
+  if (xd->mode_info_context->mbmi.mode <= TM_PRED &&
+      xd->q_index < ACTIVE_HT8) {
 #if USE_ADST_FOR_I16X16_8X8
 #if USE_ADST_PERIPHERY_ONLY
     const int hmax = 1 << wb;
@@ -707,7 +723,7 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
 #endif
   if (ib >= (1 << (wb + hb)))
     return tx_type;
-  if (xd->mode_info_context->mbmi.mode < I8X8_PRED &&
+  if (xd->mode_info_context->mbmi.mode <= TM_PRED &&
       xd->q_index < ACTIVE_HT16) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
 #if USE_ADST_PERIPHERY_ONLY
@@ -738,7 +754,9 @@ void vp9_setup_block_dptrs(MACROBLOCKD *xd);
 static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   const TX_SIZE size = mbmi->txfm_size;
+#if !CONFIG_SB8X8
   const MB_PREDICTION_MODE mode = mbmi->mode;
+#endif  // !CONFIG_SB8X8
 
   switch (mbmi->sb_type) {
     case BLOCK_SIZE_SB64X64:
@@ -750,6 +768,17 @@ static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
         return TX_16X16;
       else
         return size;
+#if CONFIG_SB8X8
+    case BLOCK_SIZE_SB32X16:
+    case BLOCK_SIZE_SB16X32:
+    case BLOCK_SIZE_MB16X16:
+      if (size == TX_16X16)
+        return TX_8X8;
+      else
+        return size;
+    default:
+      return TX_4X4;
+#else  // CONFIG_SB8X8
     default:
       if (size == TX_16X16)
         return TX_8X8;
@@ -757,6 +786,7 @@ static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
         return TX_4X4;
       else
         return size;
+#endif  // CONFIG_SB8X8
   }
 
   return size;
@@ -812,7 +842,10 @@ typedef void (*foreach_transformed_block_visitor)(int plane, int block,
                                                   void *arg);
 static INLINE void foreach_transformed_block_in_plane(
     const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
-    int is_split, foreach_transformed_block_visitor visit, void *arg) {
+#if !CONFIG_SB8X8
+    int is_split,
+#endif  // !CONFIG_SB8X8
+    foreach_transformed_block_visitor visit, void *arg) {
   const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
 
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
@@ -830,7 +863,10 @@ static INLINE void foreach_transformed_block_in_plane(
   // than the size of the subsampled data, or forced externally by the mb mode.
   const int ss_max = MAX(xd->plane[plane].subsampling_x,
                          xd->plane[plane].subsampling_y);
-  const int ss_txfrm_size = txfrm_size_b > ss_block_size || is_split
+  const int ss_txfrm_size = txfrm_size_b > ss_block_size
+#if !CONFIG_SB8X8
+                            || is_split
+#endif  // !CONFIG_SB8X8
                                 ? txfrm_size_b - ss_max * 2
                                 : txfrm_size_b;
   const int step = 1 << ss_txfrm_size;
@@ -847,17 +883,24 @@ static INLINE void foreach_transformed_block_in_plane(
 static INLINE void foreach_transformed_block(
     const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
     foreach_transformed_block_visitor visit, void *arg) {
+#if !CONFIG_SB8X8
   const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
   const int is_split =
       xd->mode_info_context->mbmi.txfm_size == TX_8X8 &&
       (mode == I8X8_PRED || mode == SPLITMV);
+#endif  // !CONFIG_SB8X8
   int plane;
 
   for (plane = 0; plane < MAX_MB_PLANE; plane++) {
+#if !CONFIG_SB8X8
     const int is_split_chroma = is_split &&
          xd->plane[plane].plane_type == PLANE_TYPE_UV;
+#endif  // !CONFIG_SB8X8
 
-    foreach_transformed_block_in_plane(xd, bsize, plane, is_split_chroma,
+    foreach_transformed_block_in_plane(xd, bsize, plane,
+#if !CONFIG_SB8X8
+                                       is_split_chroma,
+#endif  // !CONFIG_SB8X8
                                        visit, arg);
   }
 }
@@ -865,14 +908,19 @@ static INLINE void foreach_transformed_block(
 static INLINE void foreach_transformed_block_uv(
     const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
     foreach_transformed_block_visitor visit, void *arg) {
+#if !CONFIG_SB8X8
   const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
   const int is_split =
       xd->mode_info_context->mbmi.txfm_size == TX_8X8 &&
       (mode == I8X8_PRED || mode == SPLITMV);
+#endif  // !CONFIG_SB8X8
   int plane;
 
   for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    foreach_transformed_block_in_plane(xd, bsize, plane, is_split,
+    foreach_transformed_block_in_plane(xd, bsize, plane,
+#if !CONFIG_SB8X8
+                                       is_split,
+#endif  // !CONFIG_SB8X8
                                        visit, arg);
   }
 }
@@ -900,11 +948,16 @@ static INLINE void foreach_predicted_block_in_plane(
   int pred_w, pred_h;
 
   if (mode == SPLITMV) {
+#if CONFIG_SB8X8
+    pred_w = 0;
+    pred_h = 0;
+#else
     // 4x4 or 8x8
     const int is_4x4 =
         (xd->mode_info_context->mbmi.partitioning == PARTITIONING_4X4);
     pred_w = is_4x4 ? 0 : 1 >> xd->plane[plane].subsampling_x;
     pred_h = is_4x4 ? 0 : 1 >> xd->plane[plane].subsampling_y;
+#endif
   } else {
     pred_w = bw;
     pred_h = bh;

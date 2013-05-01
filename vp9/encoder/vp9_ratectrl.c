@@ -138,9 +138,13 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->sb_ymode_prob, cm->fc.sb_ymode_prob);
   vp9_copy(cc->bmode_prob, cm->fc.bmode_prob);
   vp9_copy(cc->uv_mode_prob, cm->fc.uv_mode_prob);
+#if !CONFIG_SB8X8
   vp9_copy(cc->i8x8_mode_prob, cm->fc.i8x8_mode_prob);
+#endif
   vp9_copy(cc->sub_mv_ref_prob, cm->fc.sub_mv_ref_prob);
+#if !CONFIG_SB8X8
   vp9_copy(cc->mbsplit_prob, cm->fc.mbsplit_prob);
+#endif
   vp9_copy(cc->partition_prob, cm->fc.partition_prob);
 
   // Stats
@@ -198,10 +202,14 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.ymode_prob, cc->ymode_prob);
   vp9_copy(cm->fc.sb_ymode_prob, cc->sb_ymode_prob);
   vp9_copy(cm->fc.bmode_prob, cc->bmode_prob);
+#if !CONFIG_SB8X8
   vp9_copy(cm->fc.i8x8_mode_prob, cc->i8x8_mode_prob);
+#endif
   vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
   vp9_copy(cm->fc.sub_mv_ref_prob, cc->sub_mv_ref_prob);
+#if !CONFIG_SB8X8
   vp9_copy(cm->fc.mbsplit_prob, cc->mbsplit_prob);
+#endif
   vp9_copy(cm->fc.partition_prob, cc->partition_prob);
 
   // Stats

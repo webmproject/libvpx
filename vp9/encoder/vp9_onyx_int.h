@@ -48,9 +48,9 @@
 #define KEY_FRAME_CONTEXT 5
 
 #if CONFIG_COMP_INTERINTRA_PRED
-#define MAX_MODES 54
+#define MAX_MODES 54 - CONFIG_SB8X8
 #else
-#define MAX_MODES 42
+#define MAX_MODES 42 - CONFIG_SB8X8
 #endif
 
 #define MIN_THRESHMULT  32
@@ -72,7 +72,9 @@ typedef struct {
   // Stats
   int y_modes[VP9_YMODES];
   int uv_modes[VP9_UV_MODES];
+#if !CONFIG_SB8X8
   int i8x8_modes[VP9_I8X8_MODES];
+#endif
   int b_modes[B_MODE_COUNT];
   int inter_y_modes[MB_MODE_COUNT];
   int inter_uv_modes[VP9_UV_MODES];
@@ -100,9 +102,13 @@ typedef struct {
   vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
   vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
   vp9_prob bmode_prob[VP9_NKF_BINTRAMODES - 1];
+#if !CONFIG_SB8X8
   vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
+#endif
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
+#if !CONFIG_SB8X8
   vp9_prob mbsplit_prob[VP9_NUMMBSPLITS - 1];
+#endif
   vp9_prob partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
@@ -207,7 +213,9 @@ typedef enum {
   THR_SPLITA,
 
   THR_B_PRED,
+#if !CONFIG_SB8X8
   THR_I8X8_PRED,
+#endif
 
   THR_COMP_ZEROLG,
   THR_COMP_NEARESTLG,
@@ -273,10 +281,17 @@ typedef struct {
 } SPEED_FEATURES;
 
 enum BlockSize {
+#if CONFIG_SB8X8
+  BLOCK_4X4,
+  BLOCK_8X8,
+  BLOCK_8X16,
+  BLOCK_16X8,
+#else
   BLOCK_16X8 = PARTITIONING_16X8,
   BLOCK_8X16 = PARTITIONING_8X16,
   BLOCK_8X8 = PARTITIONING_8X8,
   BLOCK_4X4 = PARTITIONING_4X4,
+#endif
   BLOCK_16X16,
   BLOCK_MAX_SEGMENTS,
   BLOCK_32X32 = BLOCK_MAX_SEGMENTS,
@@ -451,9 +466,13 @@ typedef struct VP9_COMP {
   int sb_ymode_count [VP9_I32X32_MODES];
   int ymode_count[VP9_YMODES];        /* intra MB type cts this frame */
   int bmode_count[VP9_NKF_BINTRAMODES];
+#if !CONFIG_SB8X8
   int i8x8_mode_count[VP9_I8X8_MODES];
+#endif
   int sub_mv_ref_count[SUBMVREF_COUNT][VP9_SUBMVREFS];
+#if !CONFIG_SB8X8
   int mbsplit_count[VP9_NUMMBSPLITS];
+#endif
   int y_uv_mode_count[VP9_YMODES][VP9_UV_MODES];
   unsigned int partition_count[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 #if CONFIG_COMP_INTERINTRA_PRED
