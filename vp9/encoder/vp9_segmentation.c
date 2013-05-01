@@ -16,18 +16,15 @@
 #include "vp9/common/vp9_tile_common.h"
 
 void vp9_enable_segmentation(VP9_PTR ptr) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+  VP9_COMP *cpi = (VP9_COMP *)ptr;
 
-  // Set the appropriate feature bit
   cpi->mb.e_mbd.segmentation_enabled = 1;
   cpi->mb.e_mbd.update_mb_segmentation_map = 1;
   cpi->mb.e_mbd.update_mb_segmentation_data = 1;
 }
 
 void vp9_disable_segmentation(VP9_PTR ptr) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
-
-  // Clear the appropriate feature bit
+  VP9_COMP *cpi = (VP9_COMP *)ptr;
   cpi->mb.e_mbd.segmentation_enabled = 0;
 }
 
@@ -246,10 +243,8 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities
-  vpx_memset(xd->mb_segment_tree_probs, 255,
-             sizeof(xd->mb_segment_tree_probs));
-  vpx_memset(cm->segment_pred_probs, 255,
-             sizeof(cm->segment_pred_probs));
+  vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
+  vpx_memset(cm->segment_pred_probs, 255, sizeof(cm->segment_pred_probs));
 
   vpx_memset(no_pred_segcounts, 0, sizeof(no_pred_segcounts));
   vpx_memset(t_unpred_seg_counts, 0, sizeof(t_unpred_seg_counts));
@@ -257,7 +252,6 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   // First of all generate stats regarding how well the last segment map
   // predicts this one
-
   for (tile_col = 0; tile_col < cm->tile_columns; tile_col++) {
     vp9_get_tile_col_offsets(cm, tile_col);
     mi_ptr = cm->mi + cm->cur_tile_mi_col_start;
@@ -287,27 +281,24 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
     // Add in the cost of the signalling for each prediction context
     for (i = 0; i < PREDICTION_PROBS; i++) {
-      t_nopred_prob[i] = get_binary_prob(temporal_predictor_count[i][0],
-                                         temporal_predictor_count[i][1]);
+      const int count0 = temporal_predictor_count[i][0];
+      const int count1 = temporal_predictor_count[i][1];
+
+      t_nopred_prob[i] = get_binary_prob(count0, count1);
 
       // Add in the predictor signaling cost
-      t_pred_cost += (temporal_predictor_count[i][0] *
-                      vp9_cost_zero(t_nopred_prob[i])) +
-                     (temporal_predictor_count[i][1] *
-                      vp9_cost_one(t_nopred_prob[i]));
+      t_pred_cost += count0 * vp9_cost_zero(t_nopred_prob[i]) +
+                     count1 * vp9_cost_one(t_nopred_prob[i]);
     }
   }
 
   // Now choose which coding method to use.
   if (t_pred_cost < no_pred_cost) {
     cm->temporal_update = 1;
-    vpx_memcpy(xd->mb_segment_tree_probs,
-               t_pred_tree, sizeof(t_pred_tree));
-    vpx_memcpy(&cm->segment_pred_probs,
-               t_nopred_prob, sizeof(t_nopred_prob));
+    vpx_memcpy(xd->mb_segment_tree_probs, t_pred_tree, sizeof(t_pred_tree));
+    vpx_memcpy(cm->segment_pred_probs, t_nopred_prob, sizeof(t_nopred_prob));
   } else {
     cm->temporal_update = 0;
-    vpx_memcpy(xd->mb_segment_tree_probs,
-               no_pred_tree, sizeof(no_pred_tree));
+    vpx_memcpy(xd->mb_segment_tree_probs, no_pred_tree, sizeof(no_pred_tree));
   }
 }

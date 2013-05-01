@@ -5604,10 +5604,9 @@ void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t intra_error = 0;
   unsigned char *segment_id = &mbmi->segment_id;
 
-  if (xd->segmentation_enabled)
-    x->encode_breakout = cpi->segment_encode_breakout[*segment_id];
-  else
-    x->encode_breakout = cpi->oxcf.encode_breakout;
+  x->encode_breakout = xd->segmentation_enabled ?
+                         cpi->segment_encode_breakout[*segment_id] :
+                         cpi->oxcf.encode_breakout;
 
   // if (cpi->sf.RD)
   // For now this codebase is limited to a single rd encode path

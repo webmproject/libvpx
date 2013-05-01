@@ -1767,16 +1767,91 @@ static void segment_reference_frames(VP9_COMP *cpi) {
   }
 }
 
-void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
-                        unsigned long *size) {
+static void encode_segmentation(VP9_COMP *cpi, vp9_writer *w) {
   int i, j;
+  VP9_COMMON *const pc = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+
+  vp9_write_bit(w, xd->segmentation_enabled);
+  if (!xd->segmentation_enabled)
+    return;
+
+  // Segmentation map
+  vp9_write_bit(w, xd->update_mb_segmentation_map);
+#if CONFIG_IMPLICIT_SEGMENTATION
+  vp9_write_bit(w, xd->allow_implicit_segment_update);
+#endif
+  if (xd->update_mb_segmentation_map) {
+    // Select the coding strategy (temporal or spatial)
+    vp9_choose_segmap_coding_method(cpi);
+    // Write out probabilities used to decode unpredicted  macro-block segments
+    for (i = 0; i < MB_SEG_TREE_PROBS; i++) {
+      const int prob = xd->mb_segment_tree_probs[i];
+      if (prob != MAX_PROB) {
+        vp9_write_bit(w, 1);
+        vp9_write_prob(w, prob);
+      } else {
+        vp9_write_bit(w, 0);
+      }
+    }
+
+    // Write out the chosen coding method.
+    vp9_write_bit(w, pc->temporal_update);
+    if (pc->temporal_update) {
+      for (i = 0; i < PREDICTION_PROBS; i++) {
+        const int prob = pc->segment_pred_probs[i];
+        if (prob != MAX_PROB) {
+          vp9_write_bit(w, 1);
+          vp9_write_prob(w, prob);
+        } else {
+          vp9_write_bit(w, 0);
+        }
+      }
+    }
+  }
+
+  // Segmentation data
+  vp9_write_bit(w, xd->update_mb_segmentation_data);
+  // segment_reference_frames(cpi);
+  if (xd->update_mb_segmentation_data) {
+    vp9_write_bit(w, xd->mb_segment_abs_delta);
+
+    for (i = 0; i < MAX_MB_SEGMENTS; i++) {
+      for (j = 0; j < SEG_LVL_MAX; j++) {
+        const int data = vp9_get_segdata(xd, i, j);
+        const int data_max = vp9_seg_feature_data_max(j);
+
+        if (vp9_segfeature_active(xd, i, j)) {
+          vp9_write_bit(w, 1);
+
+          if (vp9_is_segfeature_signed(j)) {
+            if (data < 0) {
+              vp9_encode_unsigned_max(w, -data, data_max);
+              vp9_write_bit(w, 1);
+            } else {
+              vp9_encode_unsigned_max(w, data, data_max);
+              vp9_write_bit(w, 0);
+            }
+          } else {
+            vp9_encode_unsigned_max(w, data, data_max);
+          }
+        } else {
+          vp9_write_bit(w, 0);
+        }
+      }
+    }
+  }
+}
+
+void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
+  int i;
   VP9_HEADER oh;
   VP9_COMMON *const pc = &cpi->common;
   vp9_writer header_bc, residual_bc;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   int extra_bytes_packed = 0;
 
-  unsigned char *cx_data = dest;
+  uint8_t *cx_data = dest;
 
   oh.show_frame = (int) pc->show_frame;
   oh.type = (int)pc->frame_type;
@@ -2008,87 +2083,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
     active_section = 7;
 #endif
 
-  // Signal whether or not Segmentation is enabled
-  vp9_write_bit(&header_bc, (xd->segmentation_enabled) ? 1 : 0);
-
-  // Indicate which features are enabled
-  if (xd->segmentation_enabled) {
-    // Indicate whether or not the segmentation map is being updated.
-    vp9_write_bit(&header_bc, (xd->update_mb_segmentation_map) ? 1 : 0);
-#if CONFIG_IMPLICIT_SEGMENTATION
-    vp9_write_bit(&header_bc, (xd->allow_implicit_segment_update) ? 1 : 0);
-#endif
-
-    // If it is, then indicate the method that will be used.
-    if (xd->update_mb_segmentation_map) {
-      // Select the coding strategy (temporal or spatial)
-      vp9_choose_segmap_coding_method(cpi);
-      // Send the tree probabilities used to decode unpredicted
-      // macro-block segments
-      for (i = 0; i < MB_SEG_TREE_PROBS; i++) {
-        const int prob = xd->mb_segment_tree_probs[i];
-        if (prob != 255) {
-          vp9_write_bit(&header_bc, 1);
-          vp9_write_prob(&header_bc, prob);
-        } else {
-          vp9_write_bit(&header_bc, 0);
-        }
-      }
-
-      // Write out the chosen coding method.
-      vp9_write_bit(&header_bc, (pc->temporal_update) ? 1 : 0);
-      if (pc->temporal_update) {
-        for (i = 0; i < PREDICTION_PROBS; i++) {
-          const int prob = pc->segment_pred_probs[i];
-          if (prob != 255) {
-            vp9_write_bit(&header_bc, 1);
-            vp9_write_prob(&header_bc, prob);
-          } else {
-            vp9_write_bit(&header_bc, 0);
-          }
-        }
-      }
-    }
-
-    vp9_write_bit(&header_bc, (xd->update_mb_segmentation_data) ? 1 : 0);
-
-    // segment_reference_frames(cpi);
-
-    if (xd->update_mb_segmentation_data) {
-      vp9_write_bit(&header_bc, (xd->mb_segment_abs_delta) ? 1 : 0);
-
-      // For each segments id...
-      for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-        // For each segmentation codable feature...
-        for (j = 0; j < SEG_LVL_MAX; j++) {
-          const int8_t data = vp9_get_segdata(xd, i, j);
-          const int data_max = vp9_seg_feature_data_max(j);
-
-          // If the feature is enabled...
-          if (vp9_segfeature_active(xd, i, j)) {
-            vp9_write_bit(&header_bc, 1);
-
-            // Is the segment data signed..
-            if (vp9_is_segfeature_signed(j)) {
-              // Encode the relevant feature data
-              if (data < 0) {
-                vp9_encode_unsigned_max(&header_bc, -data, data_max);
-                vp9_write_bit(&header_bc, 1);
-              } else {
-                vp9_encode_unsigned_max(&header_bc, data, data_max);
-                vp9_write_bit(&header_bc, 0);
-              }
-            } else {
-              // Unsigned data element so no sign bit needed
-              vp9_encode_unsigned_max(&header_bc, data, data_max);
-            }
-          } else {
-            vp9_write_bit(&header_bc, 0);
-          }
-        }
-      }
-    }
-  }
+  encode_segmentation(cpi, &header_bc);
 
   // Encode the common prediction model status flag probability updates for
   // the reference frame
