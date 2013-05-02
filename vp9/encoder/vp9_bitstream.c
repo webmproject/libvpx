@@ -714,7 +714,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-      if (mi->sb_type > BLOCK_SIZE_MB16X16) {
+#if CONFIG_SB8X8
+      if (mi->sb_type > BLOCK_SIZE_SB8X8)
+#else
+      if (mi->sb_type > BLOCK_SIZE_MB16X16)
+#endif
+      {
         write_sb_mv_ref(bc, mode, mv_ref_p);
       } else {
         write_mv_ref(bc, mode, mv_ref_p);

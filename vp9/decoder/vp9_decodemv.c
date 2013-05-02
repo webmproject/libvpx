@@ -676,7 +676,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
         mbmi->mode = ZEROMV;
       } else {
-        mbmi->mode = mbmi->sb_type > BLOCK_SIZE_MB16X16 ?
+        mbmi->mode =
+#if CONFIG_SB8X8
+                     mbmi->sb_type > BLOCK_SIZE_SB8X8 ?
+#else
+                     mbmi->sb_type > BLOCK_SIZE_MB16X16 ?
+#endif
                                      read_sb_mv_ref(r, mv_ref_p)
                                    : read_mv_ref(r, mv_ref_p);
         vp9_accum_mv_refs(cm, mbmi->mode, mbmi->mb_mode_context[ref_frame]);
@@ -866,7 +871,11 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           }
           */
 
-#if !CONFIG_SB8X8
+#if CONFIG_SB8X8
+          mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
+          if (mbmi->second_ref_frame > 0)
+            mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
+#else
           {
             /* Fill (uniform) modes, mvs of jth subset.
              Must do it here because ensuing subsets can
