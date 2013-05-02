@@ -173,10 +173,9 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
   static void SetUpTestCase() {
     // Force input_ to be unaligned, output to be 16 byte aligned.
     input_ = reinterpret_cast<uint8_t*>(
-        vpx_memalign(kDataAlignment, kOuterBlockSize * kOuterBlockSize + 1))
-        + 1;
+        vpx_memalign(kDataAlignment, kInputBufferSize + 1)) + 1;
     output_ = reinterpret_cast<uint8_t*>(
-        vpx_memalign(kDataAlignment, kOuterBlockSize * kOuterBlockSize));
+        vpx_memalign(kDataAlignment, kOutputBufferSize));
   }
 
   static void TearDownTestCase() {
@@ -192,6 +191,8 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
     static const int kInputStride = kOuterBlockSize;
     static const int kOutputStride = kOuterBlockSize;
     static const int kMaxDimension = 64;
+    static const int kInputBufferSize = kOuterBlockSize * kOuterBlockSize;
+    static const int kOutputBufferSize = kOuterBlockSize * kOuterBlockSize;
 
     int Width() const { return GET_PARAM(0); }
     int Height() const { return GET_PARAM(1); }
@@ -210,9 +211,8 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
 
     virtual void SetUp() {
       UUT_ = GET_PARAM(2);
-      memset(input_, 0, sizeof(input_));
       /* Set up guard blocks for an inner block cetered in the outer block */
-      for (int i = 0; i < kOuterBlockSize * kOuterBlockSize; ++i) {
+      for (int i = 0; i < kOutputBufferSize; ++i) {
         if (IsIndexInBorder(i))
           output_[i] = 255;
         else
@@ -220,12 +220,12 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
       }
 
       ::libvpx_test::ACMRandom prng;
-      for (int i = 0; i < kOuterBlockSize * kOuterBlockSize; ++i)
+      for (int i = 0; i < kInputBufferSize; ++i)
         input_[i] = prng.Rand8Extremes();
     }
 
     void CheckGuardBlocks() {
-      for (int i = 0; i < kOuterBlockSize * kOuterBlockSize; ++i) {
+      for (int i = 0; i < kOutputBufferSize; ++i) {
         if (IsIndexInBorder(i))
           EXPECT_EQ(255, output_[i]);
       }
