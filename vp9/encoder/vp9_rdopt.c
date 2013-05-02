@@ -13,8 +13,8 @@
 #include <math.h>
 #include <limits.h>
 #include <assert.h>
-#include "vp9/common/vp9_pragmas.h"
 
+#include "vp9/common/vp9_pragmas.h"
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_treewriter.h"
 #include "vp9/encoder/vp9_onyx_int.h"
@@ -34,15 +34,12 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/encoder/vp9_encodemv.h"
-
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9_rtcd.h"
 #include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_common.h"
-
-#define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
 
 #define INVALID_MV 0x80008000
 
@@ -157,11 +154,9 @@ static void fill_token_costs(vp9_coeff_count *c,
   for (i = 0; i < BLOCK_TYPES; i++)
     for (j = 0; j < REF_TYPES; j++)
       for (k = 0; k < COEF_BANDS; k++)
-        for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
-          vp9_cost_tokens_skip((int *)(c[i][j][k][l]),
-                               p[i][j][k][l],
+        for (l = 0; l < PREV_COEF_CONTEXTS; l++)
+          vp9_cost_tokens_skip((int *)c[i][j][k][l], p[i][j][k][l],
                                vp9_coef_tree);
-        }
 }
 
 static int rd_iifactor[32] =  { 4, 4, 3, 2, 1, 0, 0, 0,
@@ -184,7 +179,7 @@ void vp9_init_me_luts() {
   for (i = 0; i < QINDEX_RANGE; i++) {
     sad_per_bit16lut[i] =
       (int)((0.0418 * vp9_convert_qindex_to_q(i)) + 2.4107);
-    sad_per_bit4lut[i] = (int)((0.063 * vp9_convert_qindex_to_q(i)) + 2.742);
+    sad_per_bit4lut[i] = (int)(0.063 * vp9_convert_qindex_to_q(i) + 2.742);
   }
 }
 
@@ -208,7 +203,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   // for key frames, golden frames and arf frames.
   // if (cpi->common.refresh_golden_frame ||
   //     cpi->common.refresh_alt_ref_frame)
-  qindex = (qindex < 0) ? 0 : ((qindex > MAXQ) ? MAXQ : qindex);
+  qindex = clamp(qindex, 0, MAXQ);
 
   cpi->RDMULT = compute_rd_mult(qindex);
   if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
@@ -2890,24 +2885,24 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
       /* Use 8x8 result as 16x8/8x16's predictor MV. Adjust search range
        * according to the closeness of 2 MV. */
       /* block 8X16 */
-      sr = MAXF((abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[2].as_mv.row)) >> 3,
-                (abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[2].as_mv.col)) >> 3);
+      sr = MAX(abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[2].as_mv.row) >> 3,
+               abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[2].as_mv.col) >> 3);
       cal_step_param(sr, &bsi.sv_istep[0]);
 
-      sr = MAXF((abs(bsi.sv_mvp[1].as_mv.row - bsi.sv_mvp[3].as_mv.row)) >> 3,
-                (abs(bsi.sv_mvp[1].as_mv.col - bsi.sv_mvp[3].as_mv.col)) >> 3);
+      sr = MAX(abs(bsi.sv_mvp[1].as_mv.row - bsi.sv_mvp[3].as_mv.row) >> 3,
+               abs(bsi.sv_mvp[1].as_mv.col - bsi.sv_mvp[3].as_mv.col) >> 3);
       cal_step_param(sr, &bsi.sv_istep[1]);
 
       rd_check_segment(cpi, x, &bsi, PARTITIONING_8X16,
                        seg_mvs[PARTITIONING_8X16], txfm_cache);
 
       /* block 16X8 */
-      sr = MAXF((abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[1].as_mv.row)) >> 3,
-                (abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[1].as_mv.col)) >> 3);
+      sr = MAX(abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[1].as_mv.row) >> 3,
+               abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[1].as_mv.col) >> 3);
       cal_step_param(sr, &bsi.sv_istep[0]);
 
-      sr = MAXF((abs(bsi.sv_mvp[2].as_mv.row - bsi.sv_mvp[3].as_mv.row)) >> 3,
-                (abs(bsi.sv_mvp[2].as_mv.col - bsi.sv_mvp[3].as_mv.col)) >> 3);
+      sr = MAX(abs(bsi.sv_mvp[2].as_mv.row - bsi.sv_mvp[3].as_mv.row) >> 3,
+               abs(bsi.sv_mvp[2].as_mv.col - bsi.sv_mvp[3].as_mv.col) >> 3);
       cal_step_param(sr, &bsi.sv_istep[1]);
 
       rd_check_segment(cpi, x, &bsi, PARTITIONING_16X8,
