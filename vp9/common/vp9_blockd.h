@@ -498,13 +498,19 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
 
 static INLINE int partition_plane_context(MACROBLOCKD *xd,
                                           BLOCK_SIZE_TYPE sb_type) {
-  int bsl = mi_width_log2(sb_type), bs = 1 << bsl;
+  int bsl = mi_width_log2(sb_type), bs;
   int above = 0, left = 0, i;
   int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - bsl;
 
   assert(mi_width_log2(sb_type) == mi_height_log2(sb_type));
   assert(bsl >= 0);
   assert(boffset >= 0);
+
+#if CONFIG_SB8X8
+  bs = 1 << (bsl - 1);
+#else
+  bs = 1 << bsl;
+#endif
 
   for (i = 0; i < bs; i++)
     above |= (xd->above_seg_context[i] & (1 << boffset));
