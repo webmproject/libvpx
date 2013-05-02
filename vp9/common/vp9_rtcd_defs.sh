@@ -63,6 +63,8 @@ specialize vp9_copy_mem8x4 mmx
 prototype void vp9_recon_b "uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr, int stride"
 specialize vp9_recon_b
 
+if [ "$CONFIG_SB8X8" != "yes" ]; then
+
 prototype void vp9_recon_uv_b "uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr, int stride"
 specialize vp9_recon_uv_b
 
@@ -75,6 +77,8 @@ specialize vp9_recon2b
 prototype void vp9_recon4b "uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr, int stride"
 specialize vp9_recon4b
 # specialize vp9_recon4b sse2
+
+fi
 
 prototype void vp9_recon_sb "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
 specialize vp9_recon_sb
