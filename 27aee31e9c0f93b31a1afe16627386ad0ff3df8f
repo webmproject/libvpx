@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXn//+w8\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-02T05:43:17Z",
+      "side": 1,
+      "message": "it seems this will cause partition context below zero, when sb8x8 is on. fixed it in a separate patch.\n\nperhaps rebase and use the new vp9_blockd.h, other parts of this patch look good to me.",
+      "revId": "27aee31e9c0f93b31a1afe16627386ad0ff3df8f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
