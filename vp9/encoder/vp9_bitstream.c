@@ -1716,6 +1716,62 @@ static void segment_reference_frames(VP9_COMP *cpi) {
   }
 }
 
+static void encode_loopfilter(MACROBLOCKD *xd, vp9_writer *w) {
+  int i;
+
+  // Write out loop filter deltas applied at the MB level based on mode or
+  // ref frame (if they are enabled).
+  vp9_write_bit(w, xd->mode_ref_lf_delta_enabled);
+
+  if (xd->mode_ref_lf_delta_enabled) {
+    // Do the deltas need to be updated
+    vp9_write_bit(w, xd->mode_ref_lf_delta_update);
+    if (xd->mode_ref_lf_delta_update) {
+      // Send update
+      for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
+        const int delta = xd->ref_lf_deltas[i];
+
+        // Frame level data
+        if (delta != xd->last_ref_lf_deltas[i]) {
+          xd->last_ref_lf_deltas[i] = delta;
+          vp9_write_bit(w, 1);
+
+          if (delta > 0) {
+            vp9_write_literal(w, delta & 0x3F, 6);
+            vp9_write_bit(w, 0);  // sign
+          } else {
+            assert(delta < 0);
+            vp9_write_literal(w, (-delta) & 0x3F, 6);
+            vp9_write_bit(w, 1);  // sign
+          }
+        } else {
+          vp9_write_bit(w, 0);
+        }
+      }
+
+      // Send update
+      for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
+        const int delta = xd->mode_lf_deltas[i];
+        if (delta != xd->last_mode_lf_deltas[i]) {
+          xd->last_mode_lf_deltas[i] = delta;
+          vp9_write_bit(w, 1);
+
+          if (delta > 0) {
+            vp9_write_literal(w, delta & 0x3F, 6);
+            vp9_write_bit(w, 0);  // sign
+          } else {
+            assert(delta < 0);
+            vp9_write_literal(w, (-delta) & 0x3F, 6);
+            vp9_write_bit(w, 1);  // sign
+          }
+        } else {
+          vp9_write_bit(w, 0);
+        }
+      }
+    }
+  }
+}
+
 static void encode_segmentation(VP9_COMP *cpi, vp9_writer *w) {
   int i, j;
   VP9_COMMON *const pc = &cpi->common;
@@ -1870,57 +1926,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   }
 #endif
 
-  // Write out loop filter deltas applied at the MB level based on mode or ref frame (if they are enabled).
-  vp9_write_bit(&header_bc, (xd->mode_ref_lf_delta_enabled) ? 1 : 0);
-
-  if (xd->mode_ref_lf_delta_enabled) {
-    // Do the deltas need to be updated
-    vp9_write_bit(&header_bc, xd->mode_ref_lf_delta_update);
-    if (xd->mode_ref_lf_delta_update) {
-      // Send update
-      for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
-        const int delta = xd->ref_lf_deltas[i];
-
-        // Frame level data
-        if (delta != xd->last_ref_lf_deltas[i]) {
-          xd->last_ref_lf_deltas[i] = delta;
-          vp9_write_bit(&header_bc, 1);
-
-          if (delta > 0) {
-            vp9_write_literal(&header_bc, delta & 0x3F, 6);
-            vp9_write_bit(&header_bc, 0);  // sign
-          } else {
-            assert(delta < 0);
-            vp9_write_literal(&header_bc, (-delta) & 0x3F, 6);
-            vp9_write_bit(&header_bc, 1);  // sign
-          }
-        } else {
-          vp9_write_bit(&header_bc, 0);
-        }
-      }
-
-      // Send update
-      for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
-        const int delta = xd->mode_lf_deltas[i];
-
-        if (delta != xd->last_mode_lf_deltas[i]) {
-          xd->last_mode_lf_deltas[i] = delta;
-          vp9_write_bit(&header_bc, 1);
-
-          if (delta > 0) {
-            vp9_write_literal(&header_bc, delta & 0x3F, 6);
-            vp9_write_bit(&header_bc, 0);  // sign
-          } else {
-            assert(delta < 0);
-            vp9_write_literal(&header_bc, (-delta) & 0x3F, 6);
-            vp9_write_bit(&header_bc, 1);  // sign
-          }
-        } else {
-          vp9_write_bit(&header_bc, 0);
-        }
-      }
-    }
-  }
+  encode_loopfilter(xd, &header_bc);
 
   // TODO(jkoleszar): remove these unused bits
   vp9_write_literal(&header_bc, 0, 2);
