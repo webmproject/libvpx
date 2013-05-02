@@ -671,7 +671,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     active_section = 6;
 #endif
 
+#if CONFIG_SB8X8
+    if (m->mbmi.sb_type > BLOCK_SIZE_SB8X8)
+#else
     if (m->mbmi.sb_type > BLOCK_SIZE_MB16X16)
+#endif
       write_sb_ymode(bc, mode, pc->fc.sb_ymode_prob);
     else
       write_ymode(bc, mode, pc->fc.ymode_prob);

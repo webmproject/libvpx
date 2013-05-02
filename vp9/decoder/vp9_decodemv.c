@@ -952,7 +952,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     // required for left and above block mv
     mv0->as_int = 0;
 
-    if (mbmi->sb_type > BLOCK_SIZE_MB16X16) {
+#if CONFIG_SB8X8
+    if (mbmi->sb_type > BLOCK_SIZE_SB8X8)
+#else
+    if (mbmi->sb_type > BLOCK_SIZE_MB16X16)
+#endif
+    {
       mbmi->mode = read_sb_ymode(r, cm->fc.sb_ymode_prob);
       cm->fc.sb_ymode_counts[mbmi->mode]++;
     } else {
@@ -970,7 +975,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
 #endif
         cm->fc.bmode_counts[m]++;
-      } while (++j < 16);
+      } while (++j < (16 >> (2 * CONFIG_SB8X8)));
     }
 
 #if !CONFIG_SB8X8

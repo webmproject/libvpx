@@ -2073,7 +2073,12 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
 #endif
 #endif
 
-  if (xd->mode_info_context->mbmi.sb_type > BLOCK_SIZE_MB16X16) {
+#if CONFIG_SB8X8
+  if (xd->mode_info_context->mbmi.sb_type > BLOCK_SIZE_SB8X8)
+#else
+  if (xd->mode_info_context->mbmi.sb_type > BLOCK_SIZE_MB16X16)
+#endif
+  {
     ++cpi->sb_ymode_count[m];
   } else {
     ++cpi->ymode_count[m];
