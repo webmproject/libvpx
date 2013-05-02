@@ -2606,6 +2606,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
         sz = TX_16X16;
       if (sz == TX_16X16 && bsize < BLOCK_SIZE_MB16X16)
         sz = TX_8X8;
+      if (sz == TX_8X8 && (xd->mode_info_context->mbmi.mode == SPLITMV ||
+                           xd->mode_info_context->mbmi.mode == I4X4_PRED))
+        sz = TX_4X4;
 
       for (y = 0; y < bh; y++) {
         for (x = 0; x < bw; x++) {
