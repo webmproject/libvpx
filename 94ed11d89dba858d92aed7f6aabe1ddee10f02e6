@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXn//+dA\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-02T15:56:14Z",
+      "side": 1,
+      "message": "Looks like this doesn\u0027t need to be done in zig zag order.",
+      "revId": "94ed11d89dba858d92aed7f6aabe1ddee10f02e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//+cw\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-02T15:56:14Z",
+      "side": 1,
+      "message": "this is the only one (and the uv) that seems to depend on i. Interesting that it only goes to 16, not sure what the quantizer does for larger blocks. The other members being set here could probably be reduced from [16] to [2] also.",
+      "revId": "94ed11d89dba858d92aed7f6aabe1ddee10f02e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
