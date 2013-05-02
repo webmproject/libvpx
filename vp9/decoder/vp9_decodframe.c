@@ -243,9 +243,10 @@ static void decode_8x8(MACROBLOCKD *xd) {
 }
 #endif
 
-static INLINE void dequant_add_y(MACROBLOCKD *xd, TX_TYPE tx_type, int idx) {
+static INLINE void dequant_add_y(MACROBLOCKD *xd, TX_TYPE tx_type, int idx,
+                                 BLOCK_SIZE_TYPE bsize) {
   struct macroblockd_plane *const y = &xd->plane[0];
-  uint8_t* const dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, idx,
+  uint8_t* const dst = raster_block_offset_uint8(xd, bsize, 0, idx,
                                                  xd->plane[0].dst.buf,
                                                  xd->plane[0].dst.stride);
   if (tx_type != DCT_DCT) {
@@ -276,7 +277,7 @@ static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
     vp9_intra8x8_predict(xd, ib, i8x8mode, dst, xd->plane[0].dst.stride);
     for (j = 0; j < 4; j++) {
       tx_type = get_tx_type_4x4(xd, ib + iblock[j]);
-      dequant_add_y(xd, tx_type, ib + iblock[j]);
+      dequant_add_y(xd, tx_type, ib + iblock[j], BLOCK_SIZE_MB16X16);
     }
     dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 1, i,
                                     xd->plane[1].dst.buf,
@@ -360,7 +361,7 @@ static void decode_atom_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
     vp9_intra4x4_predict(xd, i, b_mode, dst, xd->plane[0].dst.stride);
     // TODO(jingning): refactor to use foreach_transformed_block_in_plane_
     tx_type = get_tx_type_4x4(xd, i);
-    dequant_add_y(xd, tx_type, i);
+    dequant_add_y(xd, tx_type, i, bsize);
   }
 #if CONFIG_NEWBINTRAMODES
   if (!xd->mode_info_context->mbmi.mb_skip_coeff)
