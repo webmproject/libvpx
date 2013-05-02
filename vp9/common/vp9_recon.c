@@ -31,9 +31,10 @@ static INLINE void recon(int rows, int cols,
 void vp9_recon_b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                    int stride) {
   assert(pred_ptr == dst_ptr);
-  recon(4, 4, diff_ptr, 16, dst_ptr, stride);
+  recon(4, 4, diff_ptr, 16 >> CONFIG_SB8X8, dst_ptr, stride);
 }
 
+#if !CONFIG_SB8X8
 void vp9_recon_uv_b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
                       int stride) {
   assert(pred_ptr == dst_ptr);
@@ -51,6 +52,7 @@ void vp9_recon2b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
   assert(pred_ptr == dst_ptr);
   recon(4, 8, diff_ptr, 8, dst_ptr, stride);
 }
+#endif
 
 static void recon_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize, int plane) {
   const int bw = 4 << (b_width_log2(bsize) - xd->plane[plane].subsampling_x);
