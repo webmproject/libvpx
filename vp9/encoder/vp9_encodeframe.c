@@ -1013,6 +1013,7 @@ static void encode_sb_row(VP9_COMP *cpi,
       int j;
       ENTROPY_CONTEXT l2[8 * MAX_MB_PLANE], a2[8 * MAX_MB_PLANE];
 
+      sb_partitioning[i] = BLOCK_SIZE_MB16X16;
       if (mi_row + y_idx >= cm->mi_rows || mi_col + x_idx >= cm->mi_cols)
         continue;
 
@@ -1033,7 +1034,6 @@ static void encode_sb_row(VP9_COMP *cpi,
       }
 
       /* Encode MBs in raster order within the SB */
-      sb_partitioning[i] = BLOCK_SIZE_MB16X16;
       for (j = 0; j < 4; j++) {
         const int x_idx_m = x_idx + ((j & 1) << CONFIG_SB8X8);
         const int y_idx_m = y_idx + ((j >> 1) << CONFIG_SB8X8);
@@ -1041,6 +1041,8 @@ static void encode_sb_row(VP9_COMP *cpi,
 #if CONFIG_SB8X8
         int r2, d2, mb16_rate = 0, mb16_dist = 0, k;
         ENTROPY_CONTEXT l3[4 * MAX_MB_PLANE], a3[4 * MAX_MB_PLANE];
+
+        mb_partitioning[i][j] = BLOCK_SIZE_SB8X8;
 #endif
 
         if (mi_row + y_idx_m >= cm->mi_rows ||
@@ -1066,7 +1068,6 @@ static void encode_sb_row(VP9_COMP *cpi,
                      sizeof(ENTROPY_CONTEXT) * 4 >> xd->plane[p].subsampling_x);
         }
 
-        mb_partitioning[i][j] = BLOCK_SIZE_SB8X8;
         for (k = 0; k < 4; k++) {
           xd->b_index = k;
 
