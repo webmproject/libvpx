@@ -205,7 +205,11 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
   } else if (cm->txfm_mode >= ALLOW_32X32 &&
              m->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
     m->mbmi.txfm_size = TX_32X32;
-  } else if (cm->txfm_mode >= ALLOW_16X16 && m->mbmi.mode <= TM_PRED) {
+  } else if (cm->txfm_mode >= ALLOW_16X16 &&
+#if CONFIG_SB8X8
+             m->mbmi.sb_type >= BLOCK_SIZE_MB16X16 &&
+#endif
+             m->mbmi.mode <= TM_PRED) {
     m->mbmi.txfm_size = TX_16X16;
   } else if (cm->txfm_mode >= ALLOW_8X8 && m->mbmi.mode != I4X4_PRED) {
     m->mbmi.txfm_size = TX_8X8;
