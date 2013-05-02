@@ -107,4 +107,10 @@ void vp9_implicit_segment_map_update(VP9_COMMON * cm) {
 }
 #endif
 
+const vp9_tree_index vp9_segment_tree[14] = {
+  2,  4,  6,  8, 10, 12,
+  0, -1, -2, -3, -4, -5, -6, -7
+};
+
+
 // TBD? Functions to read and write segment data with range / validity checking

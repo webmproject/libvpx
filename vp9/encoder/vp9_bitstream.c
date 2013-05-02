@@ -512,60 +512,9 @@ static void write_nmv(VP9_COMP *cpi, vp9_writer *bc,
 // It should only be called if a segment map update is indicated.
 static void write_mb_segid(vp9_writer *bc,
                            const MB_MODE_INFO *mi, const MACROBLOCKD *xd) {
-  // Encode the MB segment id.
-  int seg_id = mi->segment_id;
-
-  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
-    switch (seg_id) {
-      case 0:
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[1]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[2]);
-        break;
-      case 1:
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[1]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[2]);
-        break;
-      case 2:
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[1]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[3]);
-        break;
-      case 3:
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[1]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[3]);
-        break;
-      case 4:
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[4]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[5]);
-        break;
-      case 5:
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[4]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[5]);
-        break;
-      case 6:
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[4]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[6]);
-        break;
-      case 7:
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[4]);
-        vp9_write(bc, 1, xd->mb_segment_tree_probs[6]);
-        break;
-
-        // TRAP.. This should not happen
-      default:
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[0]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[1]);
-        vp9_write(bc, 0, xd->mb_segment_tree_probs[2]);
-        break;
-    }
-  }
+  if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
+    treed_write(bc, vp9_segment_tree, xd->mb_segment_tree_probs,
+                mi->segment_id, 3);
 }
 
 // This function encodes the reference frame
