@@ -1220,7 +1220,7 @@ static void encode_sb_row(VP9_COMP *cpi,
 
         // Dummy encode, do not do the tokenization
 #if CONFIG_SB8X8
-        encode_sb(cpi, tp, mi_row + y_idx, mi_col + x_idx, 0,
+        encode_sb(cpi, tp, mi_row + y_idx_m, mi_col + x_idx_m, 0,
                   BLOCK_SIZE_MB16X16, mb_partitioning[i][j], NULL, NULL);
 #else
         encode_macroblock(cpi, tp, 0, mi_row + y_idx_m,
