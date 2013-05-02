@@ -488,12 +488,15 @@ static void update_state(VP9_COMP *cpi,
       mbmi->best_mv.as_int = best_mv.as_int;
       mbmi->best_second_mv.as_int = best_second_mv.as_int;
       vp9_update_nmv_count(cpi, x, &best_mv, &best_second_mv);
-#if CONFIG_SB8X8
-      xd->mode_info_context[1].mbmi =
-      xd->mode_info_context[mis].mbmi =
-      xd->mode_info_context[1 + mis].mbmi = *mbmi;
-#endif
     }
+#if CONFIG_SB8X8
+    if (bsize > BLOCK_SIZE_SB8X8 && mbmi->mode == NEWMV) {
+      int i, j;
+      for (j = 0; j < bh; ++j)
+        for (i = 0; i < bw; ++i)
+          xd->mode_info_context[mis * j + i].mbmi = *mbmi;
+    }
+#endif
 #if CONFIG_COMP_INTERINTRA_PRED
     if (mbmi->mode >= NEARESTMV && mbmi->mode < SPLITMV &&
         mbmi->second_ref_frame <= INTRA_FRAME) {
