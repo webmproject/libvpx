@@ -101,11 +101,15 @@ specialize vp9_build_intra_predictors_sbuv_s
 prototype void vp9_intra4x4_predict "struct macroblockd *xd, int block, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra4x4_predict;
 
+if [ "$CONFIG_SB8X8" != "yes" ]; then
+
 prototype void vp9_intra8x8_predict "struct macroblockd *xd, int block, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra8x8_predict;
 
 prototype void vp9_intra_uv4x4_predict "struct macroblockd *xd, int block, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra_uv4x4_predict;
+
+fi
 
 if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
 prototype void vp9_add_residual_4x4 "const int16_t *diff, uint8_t *dest, int stride"
