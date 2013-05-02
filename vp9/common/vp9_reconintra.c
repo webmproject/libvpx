@@ -545,8 +545,8 @@ void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
 
 void vp9_build_intra_predictors_sby_s(MACROBLOCKD *xd,
                                       BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mi_width_log2(bsize),  bw = MI_SIZE << bwl;
-  const int bhl = mi_height_log2(bsize), bh = MI_SIZE << bhl;
+  const int bwl = b_width_log2(bsize),  bw = 4 << bwl;
+  const int bhl = b_height_log2(bsize), bh = 4 << bhl;
 
   vp9_build_intra_predictors(xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                              xd->plane[0].dst.buf, xd->plane[0].dst.stride,
@@ -558,8 +558,8 @@ void vp9_build_intra_predictors_sby_s(MACROBLOCKD *xd,
 
 void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd,
                                        BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mi_width_log2(bsize), bw = MI_UV_SIZE << bwl;
-  const int bhl = mi_height_log2(bsize), bh = MI_UV_SIZE << bhl;
+  const int bwl = b_width_log2(bsize), bw = 2 << bwl;
+  const int bhl = b_height_log2(bsize), bh = 2 << bhl;
 
   vp9_build_intra_predictors(xd->plane[1].dst.buf, xd->plane[1].dst.stride,
                              xd->plane[1].dst.buf, xd->plane[1].dst.stride,

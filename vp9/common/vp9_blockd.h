@@ -502,6 +502,12 @@ static INLINE int partition_plane_context(MACROBLOCKD *xd,
   int above = 0, left = 0, i;
   int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - bsl;
 
+#if CONFIG_SB8X8
+  bs = 1 << (bsl - 1);
+#else
+  bs = 1 << bsl;
+#endif
+
   assert(mi_width_log2(sb_type) == mi_height_log2(sb_type));
   assert(bsl >= 0);
   assert(boffset >= 0);

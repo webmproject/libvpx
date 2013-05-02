@@ -1071,8 +1071,8 @@ static void encode_sb_row(VP9_COMP *cpi,
           xd->b_index = k;
 
           // try 8x8 coding
-          pick_sb_modes(cpi, mi_row + y_idx_m + (k & 1),
-                        mi_col + x_idx_m + (k >> 1),
+          pick_sb_modes(cpi, mi_row + y_idx_m + (k >> 1),
+                        mi_col + x_idx_m + (k & 1),
                         tp, &r, &d, BLOCK_SIZE_SB8X8,
                         &x->sb8_context[xd->sb_index][xd->mb_index]
                                        [xd->b_index]);
@@ -1082,7 +1082,8 @@ static void encode_sb_row(VP9_COMP *cpi,
                                            [xd->b_index],
                        BLOCK_SIZE_SB8X8, 0);
           encode_superblock(cpi, tp,
-                            0, mi_row + y_idx_m, mi_col + x_idx_m,
+                            0, mi_row + y_idx_m + (k >> 1),
+                            mi_col + x_idx_m + (k & 1),
                             BLOCK_SIZE_SB8X8);
         }
         set_partition_seg_context(cpi, mi_row + y_idx_m, mi_col + x_idx_m);
@@ -2430,7 +2431,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
     vp9_subtract_sbuv(x, bsize);
     vp9_transform_sbuv_4x4(x, bsize);
     vp9_quantize_sbuv_4x4(x, bsize);
-    vp9_optimize_sbuv(cm, x, bsize);
+    if (x->optimize)
+      vp9_optimize_sbuv(cm, x, bsize);
     vp9_inverse_transform_sbuv_4x4(xd, bsize);
     vp9_recon_sbuv(xd, bsize);
 
