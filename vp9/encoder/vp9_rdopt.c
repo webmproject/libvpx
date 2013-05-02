@@ -4870,6 +4870,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                              cpi->common.y_dc_delta_q);
 #if CONFIG_SB8X8
   int_mv seg_mvs[4][MAX_REF_FRAMES - 1];
+  union b_mode_info best_bmodes[4];
+  PARTITION_INFO best_partition;
 #endif
 
 #if CONFIG_SB8X8
@@ -5411,6 +5413,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         *returndistortion = distortion2;
         best_rd = this_rd;
         vpx_memcpy(&best_mbmode, mbmi, sizeof(MB_MODE_INFO));
+#if CONFIG_SB8X8
+        vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
+
+        if (this_mode == I4X4_PRED || this_mode == SPLITMV) {
+          for (i = 0; i < 4; i++) {
+            best_bmodes[i] = xd->mode_info_context->bmi[i];
+          }
+        }
+#endif
       }
 #if 0
       // Testing this mode gave rise to an improvement in best error score.
@@ -5577,7 +5588,28 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   // macroblock modes
   vpx_memcpy(mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+#if CONFIG_SB8X8
+  if (best_mbmode.mode == I4X4_PRED) {
+    for (i = 0; i < 4; i++) {
+      xd->mode_info_context->bmi[i].as_mode = best_bmodes[i].as_mode;
+    }
+  }
 
+  if (best_mbmode.mode == SPLITMV) {
+    for (i = 0; i < 4; i++)
+      xd->mode_info_context->bmi[i].as_mv[0].as_int =
+          best_bmodes[i].as_mv[0].as_int;
+    if (mbmi->second_ref_frame > 0)
+      for (i = 0; i < 4; i++)
+        xd->mode_info_context->bmi[i].as_mv[1].as_int =
+            best_bmodes[i].as_mv[1].as_int;
+
+    vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
+
+    mbmi->mv[0].as_int = x->partition_info->bmi[3].mv.as_int;
+    mbmi->mv[1].as_int = x->partition_info->bmi[3].second_mv.as_int;
+  }
+#endif
   for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
     if (best_pred_rd[i] == INT64_MAX)
       best_pred_diff[i] = INT_MIN;
@@ -5599,7 +5631,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
  end:
   set_scale_factors(xd, mbmi->ref_frame, mbmi->second_ref_frame,
                     scale_factor);
-  store_coding_context(x, ctx, best_mode_index, NULL,
+  store_coding_context(x, ctx, best_mode_index,
+#if CONFIG_SB8X8
+                       &best_partition,
+#else
+                       NULL,
+#endif
                        &mbmi->ref_mvs[mbmi->ref_frame][0],
                        &mbmi->ref_mvs[mbmi->second_ref_frame < 0 ? 0 :
                                       mbmi->second_ref_frame][0],

@@ -395,17 +395,6 @@ static void update_state(VP9_COMP *cpi,
         x->partition_info->bmi[15 >> (CONFIG_SB8X8 * 2)].mv.as_int;
     mbmi->mv[1].as_int =
         x->partition_info->bmi[15 >> (CONFIG_SB8X8 * 2)].second_mv.as_int;
-#if CONFIG_SB8X8
-    vpx_memcpy(x->partition_info + mis, &ctx->partition_info,
-               sizeof(PARTITION_INFO));
-    vpx_memcpy(x->partition_info + 1, &ctx->partition_info,
-               sizeof(PARTITION_INFO));
-    vpx_memcpy(x->partition_info + mis + 1, &ctx->partition_info,
-               sizeof(PARTITION_INFO));
-    xd->mode_info_context[1].mbmi =
-    xd->mode_info_context[mis].mbmi =
-    xd->mode_info_context[1 + mis].mbmi = *mbmi;
-#endif
   }
 
   x->skip = ctx->skip;
