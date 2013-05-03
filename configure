@@ -601,7 +601,10 @@ process_toolchain() {
         check_add_cflags -Wimplicit-function-declaration
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunused-variable
-        check_add_cflags -Wunused-but-set-variable
+        case ${CC} in
+          *clang*) ;;
+          *) check_add_cflags -Wunused-but-set-variable ;;
+        esac
         enabled extra_warnings || check_add_cflags -Wno-unused-function
     fi
 
