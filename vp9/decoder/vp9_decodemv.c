@@ -703,11 +703,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
     }
 
-    if (is_inter_mode(mbmi->mode)) {
-      mbmi->interp_filter = cm->mcomp_filter_type == SWITCHABLE
-                                ? read_switchable_filter_type(pbi, r)
-                                : cm->mcomp_filter_type;
-    }
+    mbmi->interp_filter = cm->mcomp_filter_type == SWITCHABLE
+                              ? read_switchable_filter_type(pbi, r)
+                              : cm->mcomp_filter_type;
 
     if (cm->comp_pred_mode == COMP_PREDICTION_ONLY ||
         (cm->comp_pred_mode == HYBRID_PREDICTION &&
