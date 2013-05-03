@@ -867,9 +867,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   }
 
   cpi->mb.quantize_b_4x4      = vp9_regular_quantize_b_4x4;
+#if !CONFIG_SB8X8
   cpi->mb.quantize_b_4x4_pair = vp9_regular_quantize_b_4x4_pair;
   cpi->mb.quantize_b_8x8      = vp9_regular_quantize_b_8x8;
-  cpi->mb.quantize_b_16x16    = vp9_regular_quantize_b_16x16;
+#endif
 
   vp9_init_quantizer(cpi);
 

@@ -104,63 +104,16 @@ void vp9_encode_intra4x4mby(MACROBLOCK *mb, BLOCK_SIZE_TYPE bsize) {
 
 void vp9_encode_intra16x16mby(VP9_COMMON *const cm, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
-  TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
   vp9_build_intra_predictors_sby_s(xd, BLOCK_SIZE_MB16X16);
-  vp9_subtract_sby(x, BLOCK_SIZE_MB16X16);
-
-  switch (tx_size) {
-    case TX_16X16:
-      vp9_transform_sby_16x16(x, BLOCK_SIZE_MB16X16);
-      vp9_quantize_sby_16x16(x, BLOCK_SIZE_MB16X16);
-      if (x->optimize)
-        vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_inverse_transform_sby_16x16(xd, BLOCK_SIZE_MB16X16);
-      break;
-    case TX_8X8:
-      vp9_transform_sby_8x8(x, BLOCK_SIZE_MB16X16);
-      vp9_quantize_sby_8x8(x, BLOCK_SIZE_MB16X16);
-      if (x->optimize)
-        vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_inverse_transform_sby_8x8(xd, BLOCK_SIZE_MB16X16);
-      break;
-    default:
-      vp9_transform_sby_4x4(x, BLOCK_SIZE_MB16X16);
-      vp9_quantize_sby_4x4(x, BLOCK_SIZE_MB16X16);
-      if (x->optimize)
-        vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_inverse_transform_sby_4x4(xd, BLOCK_SIZE_MB16X16);
-      break;
-  }
-
-  vp9_recon_sby(xd, BLOCK_SIZE_MB16X16);
+  vp9_encode_sby(cm, x, BLOCK_SIZE_MB16X16);
 }
 
 void vp9_encode_intra16x16mbuv(VP9_COMMON *const cm, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
-  TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
 
   vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_MB16X16);
-  vp9_subtract_sbuv(x, BLOCK_SIZE_MB16X16);
-
-  switch (tx_size) {
-    case TX_4X4:
-      vp9_transform_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
-      vp9_quantize_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
-      if (x->optimize)
-        vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_inverse_transform_sbuv_4x4(xd, BLOCK_SIZE_MB16X16);
-      break;
-    default:  // 16x16 or 8x8
-      vp9_transform_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
-      vp9_quantize_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
-      if (x->optimize)
-        vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_inverse_transform_sbuv_8x8(xd, BLOCK_SIZE_MB16X16);
-      break;
-    }
-
-  vp9_recon_sbuv(xd, BLOCK_SIZE_MB16X16);
+  vp9_encode_sbuv(cm, x, BLOCK_SIZE_MB16X16);
 }
 
 #if !CONFIG_SB8X8
