@@ -164,7 +164,7 @@ static vp9_prob read_prob_diff_update(vp9_reader *r, int oldp) {
 }
 
 void vp9_init_dequantizer(VP9_COMMON *pc) {
-  int q, i;
+  int q;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
     // DC value
@@ -172,12 +172,8 @@ void vp9_init_dequantizer(VP9_COMMON *pc) {
     pc->uv_dequant[q][0] = vp9_dc_quant(q, pc->uv_dc_delta_q);
 
     // AC values
-    for (i = 1; i < 16; i++) {
-      const int rc = vp9_default_zig_zag1d_4x4[i];
-
-      pc->y_dequant[q][rc] = vp9_ac_quant(q, 0);
-      pc->uv_dequant[q][rc] = vp9_ac_quant(q, pc->uv_ac_delta_q);
-    }
+    pc->y_dequant[q][1] = vp9_ac_quant(q, 0);
+    pc->uv_dequant[q][1] = vp9_ac_quant(q, pc->uv_ac_delta_q);
   }
 }
 

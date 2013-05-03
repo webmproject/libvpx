@@ -168,8 +168,8 @@ typedef enum {
 typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
-  DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][2]);
+  DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][2]);
 
   int width;
   int height;
