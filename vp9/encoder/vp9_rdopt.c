@@ -603,7 +603,7 @@ static int block_error(int16_t *coeff, int16_t *dqcoeff,
 
   for (i = 0; i < block_size; i++) {
     int this_diff = coeff[i] - dqcoeff[i];
-    error += this_diff * this_diff;
+    error += (unsigned)this_diff * this_diff;
   }
   error >>= shift;
 
