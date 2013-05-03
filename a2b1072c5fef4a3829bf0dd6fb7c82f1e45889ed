@@ -16,6 +16,24 @@
       "revId": "a2b1072c5fef4a3829bf0dd6fb7c82f1e45889ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//9Zo\u003d",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-05-03T02:28:30Z",
+      "side": 1,
+      "message": "agree. wasn\u0027t thinking while I was in cosmetic mode...",
+      "parentUuid": "AAAAXn//9lo\u003d",
+      "revId": "a2b1072c5fef4a3829bf0dd6fb7c82f1e45889ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
