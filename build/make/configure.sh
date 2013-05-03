@@ -1185,7 +1185,7 @@ EOF
     check_cc <<EOF && INLINE="inline"
     static inline function() {}
 EOF
-    check_cc <<EOF && INLINE="__attribute__((always_inline))"
+    check_cc <<EOF && INLINE="__inline__ __attribute__((always_inline))"
     static __attribute__((always_inline)) function() {}
 EOF
 
