@@ -30,7 +30,7 @@ class SuperframeTest : public ::libvpx_test::EncoderTest,
   }
 
   virtual void TearDown() {
-    delete modified_buf_;
+    delete[] modified_buf_;
   }
 
   virtual bool Continue() const {
@@ -59,7 +59,7 @@ class SuperframeTest : public ::libvpx_test::EncoderTest,
         buffer[pkt->data.frame.sz - index_sz] == marker) {
       // frame is a superframe. strip off the index.
       if (modified_buf_)
-        delete modified_buf_;
+        delete[] modified_buf_;
       modified_buf_ = new uint8_t[pkt->data.frame.sz - index_sz];
       memcpy(modified_buf_, pkt->data.frame.buf,
              pkt->data.frame.sz - index_sz);
