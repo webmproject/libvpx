@@ -1134,8 +1134,8 @@ static void encode_sb_row(VP9_COMP *cpi,
         r2 += x->partition_cost[pl][PARTITION_VERT];
         if (RDCOST(x->rdmult, x->rddiv, r2, d2) <
                 RDCOST(x->rdmult, x->rddiv, mb16_rate, mb16_dist)) {
-          mb16_rate = r;
-          mb16_dist = d;
+          mb16_rate = r2;
+          mb16_dist = d2;
           mb_partitioning[i][j] = BLOCK_SIZE_SB8X16;
         }
         for (p = 0; p < MAX_MB_PLANE; p++) {
@@ -1179,8 +1179,8 @@ static void encode_sb_row(VP9_COMP *cpi,
         r2 += x->partition_cost[pl][PARTITION_HORZ];
         if (RDCOST(x->rdmult, x->rddiv, r2, d2) <
                 RDCOST(x->rdmult, x->rddiv, mb16_rate, mb16_dist)) {
-          mb16_rate = r;
-          mb16_dist = d;
+          mb16_rate = r2;
+          mb16_dist = d2;
           mb_partitioning[i][j] = BLOCK_SIZE_SB16X8;
         }
         for (p = 0; p < MAX_MB_PLANE; p++) {
