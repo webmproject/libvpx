@@ -32,13 +32,9 @@
 
 void vp9_initialize_common(void);
 
-#if CONFIG_MULTIPLE_ARF
+// Define the number of candidate reference buffers.
 #define NUM_REF_FRAMES 8
 #define NUM_REF_FRAMES_LG2 3
-#else
-#define NUM_REF_FRAMES 3
-#define NUM_REF_FRAMES_LG2 2
-#endif
 
 #define ALLOWED_REFS_PER_FRAME 3
 

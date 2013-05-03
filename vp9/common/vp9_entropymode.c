@@ -771,8 +771,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   vp9_update_mode_info_border(cm, cm->prev_mip);
   vp9_update_mode_info_in_image(cm, cm->prev_mi);
 
-  cm->ref_frame_sign_bias[GOLDEN_FRAME] = 0;
-  cm->ref_frame_sign_bias[ALTREF_FRAME] = 0;
+  vpx_memset(cm->ref_frame_sign_bias, 0, sizeof(cm->ref_frame_sign_bias));
 
   cm->frame_context_idx = 0;
 }

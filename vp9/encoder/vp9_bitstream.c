@@ -1984,9 +1984,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     vp9_write_literal(&header_bc, cpi->gld_fb_idx, NUM_REF_FRAMES_LG2);
     vp9_write_literal(&header_bc, cpi->alt_fb_idx, NUM_REF_FRAMES_LG2);
 
-    // Indicate reference frame sign bias for Golden and ARF frames (always 0 for last frame buffer)
-    vp9_write_bit(&header_bc, pc->ref_frame_sign_bias[GOLDEN_FRAME]);
-    vp9_write_bit(&header_bc, pc->ref_frame_sign_bias[ALTREF_FRAME]);
+    // Indicate the sign bias for each reference frame buffer.
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+      vp9_write_bit(&header_bc, pc->ref_frame_sign_bias[LAST_FRAME + i]);
+    }
 
     // Signal whether to allow high MV precision
     vp9_write_bit(&header_bc, (xd->allow_high_precision_mv) ? 1 : 0);
