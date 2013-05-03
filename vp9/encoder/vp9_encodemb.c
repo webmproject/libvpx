@@ -480,29 +480,31 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   *a = *l = (final_eob > 0);
 }
 
-struct optimize_ctx {
-  ENTROPY_CONTEXT ta[MAX_MB_PLANE][16];
-  ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
-};
-
 struct optimize_block_args {
   VP9_COMMON *cm;
   MACROBLOCK *x;
   struct optimize_ctx *ctx;
 };
 
-static void optimize_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                           int ss_txfrm_size, void *arg) {
-  const struct optimize_block_args* const args = arg;
-  MACROBLOCKD* const xd = &args->x->e_mbd;
+void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                    int ss_txfrm_size, VP9_COMMON *cm, MACROBLOCK *mb,
+                    struct optimize_ctx *ctx) {
+  MACROBLOCKD* const xd = &mb->e_mbd;
   int x, y;
 
   // find current entropy context
   txfrm_block_to_raster_xy(xd, bsize, plane, block, ss_txfrm_size, &x, &y);
 
-  optimize_b(args->cm, args->x, plane, block, bsize,
-             &args->ctx->ta[plane][x], &args->ctx->tl[plane][y],
+  optimize_b(cm, mb, plane, block, bsize,
+             &ctx->ta[plane][x], &ctx->tl[plane][y],
              ss_txfrm_size / 2);
+}
+
+static void optimize_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                           int ss_txfrm_size, void *arg) {
+  const struct optimize_block_args* const args = arg;
+  vp9_optimize_b(plane, block, bsize, ss_txfrm_size, args->cm, args->x,
+                 args->ctx);
 }
 
 void vp9_optimize_init(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
@@ -553,77 +555,127 @@ void vp9_optimize_sbuv(VP9_COMMON *const cm, MACROBLOCK *x,
   foreach_transformed_block_uv(&x->e_mbd, bsize, optimize_block, &arg);
 }
 
-#if !CONFIG_SB8X8
-void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
+struct encode_b_args {
+  VP9_COMMON *cm;
+  MACROBLOCK *x;
+  struct optimize_ctx *ctx;
+};
 
-  if (tx_size == TX_16X16) {
-    vp9_transform_sby_16x16(x, BLOCK_SIZE_MB16X16);
-    vp9_transform_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
-    vp9_quantize_sby_16x16(x, BLOCK_SIZE_MB16X16);
-    vp9_quantize_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
-    if (x->optimize) {
-      vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
-    }
-    vp9_inverse_transform_sby_16x16(xd, BLOCK_SIZE_MB16X16);
-    vp9_inverse_transform_sbuv_8x8(xd, BLOCK_SIZE_MB16X16);
-  } else if (tx_size == TX_8X8) {
-    vp9_transform_sby_8x8(x, BLOCK_SIZE_MB16X16);
-    vp9_quantize_sby_8x8(x, BLOCK_SIZE_MB16X16);
-    if (x->optimize)
-      vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
-    vp9_inverse_transform_sby_8x8(xd, BLOCK_SIZE_MB16X16);
-    if (xd->mode_info_context->mbmi.mode == SPLITMV) {
-      assert(xd->mode_info_context->mbmi.partitioning != PARTITIONING_4X4);
-      vp9_transform_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
-      vp9_quantize_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
-      if (x->optimize)
-        vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_inverse_transform_sbuv_4x4(xd, BLOCK_SIZE_MB16X16);
-    } else {
-      vp9_transform_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
-      vp9_quantize_sbuv_8x8(x, BLOCK_SIZE_MB16X16);
-      if (x->optimize)
-        vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_inverse_transform_sbuv_8x8(xd, BLOCK_SIZE_MB16X16);
-    }
-  } else {
-    vp9_transform_sby_4x4(x, BLOCK_SIZE_MB16X16);
-    vp9_transform_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
-    vp9_quantize_sby_4x4(x, BLOCK_SIZE_MB16X16);
-    vp9_quantize_sbuv_4x4(x, BLOCK_SIZE_MB16X16);
-    if (x->optimize) {
-      vp9_optimize_sby(cm, x, BLOCK_SIZE_MB16X16);
-      vp9_optimize_sbuv(cm, x, BLOCK_SIZE_MB16X16);
-    }
-    vp9_inverse_transform_sby_4x4(xd, BLOCK_SIZE_MB16X16);
-    vp9_inverse_transform_sbuv_4x4(xd, BLOCK_SIZE_MB16X16);
+static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                         int ss_txfrm_size, void *arg) {
+  struct encode_b_args* const args = arg;
+  MACROBLOCK* const x = args->x;
+  MACROBLOCKD* const xd = &x->e_mbd;
+  const int bw = 4 << (b_width_log2(bsize) - xd->plane[plane].subsampling_x);
+  const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
+                                                       block, ss_txfrm_size);
+  int16_t* const src_diff = raster_block_offset_int16(xd, bsize, plane,
+                                                      raster_block,
+                                                      x->plane[plane].src_diff);
+  int16_t* const diff = raster_block_offset_int16(xd, bsize, plane,
+                                                  raster_block,
+                                                  xd->plane[plane].diff);
+  TX_TYPE tx_type = DCT_DCT;
+
+  switch (ss_txfrm_size / 2) {
+    case TX_32X32:
+      vp9_short_fdct32x32(src_diff,
+                          BLOCK_OFFSET(x->plane[plane].coeff, block, 16),
+                          bw * 2);
+      break;
+    case TX_16X16:
+      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      if (tx_type != DCT_DCT) {
+        vp9_short_fht16x16(src_diff,
+                           BLOCK_OFFSET(x->plane[plane].coeff, block, 16),
+                           bw, tx_type);
+      } else {
+        x->fwd_txm16x16(src_diff,
+                        BLOCK_OFFSET(x->plane[plane].coeff, block, 16),
+                        bw * 2);
+      }
+      break;
+    case TX_8X8:
+      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      if (tx_type != DCT_DCT) {
+        vp9_short_fht8x8(src_diff,
+                           BLOCK_OFFSET(x->plane[plane].coeff, block, 16),
+                           bw, tx_type);
+      } else {
+        x->fwd_txm8x8(src_diff,
+                      BLOCK_OFFSET(x->plane[plane].coeff, block, 16),
+                      bw * 2);
+      }
+      break;
+    case TX_4X4:
+      tx_type = plane == 0 ? get_tx_type_4x4(xd, raster_block) : DCT_DCT;
+      if (tx_type != DCT_DCT) {
+        vp9_short_fht4x4(src_diff,
+                           BLOCK_OFFSET(x->plane[plane].coeff, block, 16),
+                           bw, tx_type);
+      } else {
+        x->fwd_txm4x4(src_diff,
+                      BLOCK_OFFSET(x->plane[plane].coeff, block, 16),
+                      bw * 2);
+      }
+      break;
+    default:
+      assert(0);
+  }
+
+  vp9_quantize(x, plane, block, 16 << ss_txfrm_size, tx_type);
+  if (x->optimize)
+    vp9_optimize_b(plane, block, bsize, ss_txfrm_size, args->cm, x, args->ctx);
+
+  switch (ss_txfrm_size / 2) {
+    case TX_32X32:
+      vp9_short_idct32x32(BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                          diff, bw * 2);
+      break;
+    case TX_16X16:
+      if (tx_type == DCT_DCT) {
+        vp9_short_idct16x16(BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                            diff, bw * 2);
+      } else {
+        vp9_short_iht16x16(BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                           diff, bw, tx_type);
+      }
+      break;
+    case TX_8X8:
+      if (tx_type == DCT_DCT) {
+        vp9_short_idct8x8(BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                          diff, bw * 2);
+      } else {
+        vp9_short_iht8x8(BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                         diff, bw, tx_type);
+      }
+      break;
+    case TX_4X4:
+      if (tx_type == DCT_DCT) {
+        // this is like vp9_short_idct4x4 but has a special case around eob<=1
+        // which is significant (not just an optimization) for the lossless
+        // case.
+        vp9_inverse_transform_b_4x4(xd, xd->plane[plane].eobs[block],
+            BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16), diff, bw * 2);
+      } else {
+        vp9_short_iht4x4(BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                         diff, bw, tx_type);
+      }
+      break;
   }
 }
 
-void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
-                           int mi_row, int mi_col) {
-  MACROBLOCKD *const xd = &x->e_mbd;
+void vp9_encode_sb(VP9_COMMON *const cm, MACROBLOCK *x,
+                   BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD* const xd = &x->e_mbd;
+  struct optimize_ctx ctx;
+  struct encode_b_args arg = {cm, x, &ctx};
 
-  vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_SIZE_MB16X16);
-  vp9_subtract_sb(x, BLOCK_SIZE_MB16X16);
-  vp9_fidct_mb(cm, x);
-  vp9_recon_sb(xd, BLOCK_SIZE_MB16X16);
-}
-#endif
+  vp9_subtract_sb(x, bsize);
+  if (x->optimize)
+    vp9_optimize_init(xd, bsize, &ctx);
 
-/* this function is used by first pass only */
-void vp9_encode_inter16x16y(MACROBLOCK *x, int mi_row, int mi_col) {
-  MACROBLOCKD *xd = &x->e_mbd;
+  foreach_transformed_block(xd, bsize, encode_block, &arg);
 
-  vp9_build_inter_predictors_sby(xd, mi_row, mi_col, BLOCK_SIZE_MB16X16);
-  vp9_subtract_sby(x, BLOCK_SIZE_MB16X16);
-
-  vp9_transform_sby_4x4(x, BLOCK_SIZE_MB16X16);
-  vp9_quantize_sby_4x4(x, BLOCK_SIZE_MB16X16);
-  vp9_inverse_transform_sby_4x4(xd, BLOCK_SIZE_MB16X16);
-
-  vp9_recon_sby(xd, BLOCK_SIZE_MB16X16);
+  vp9_recon_sb(xd, bsize);
 }

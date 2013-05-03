@@ -75,6 +75,43 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
   *eob_ptr = eob + 1;
 }
 
+void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
+                  TX_TYPE tx_type) {
+  MACROBLOCKD *const xd = &mb->e_mbd;
+  const int mul = n_coeffs == 1024 ? 2 : 1;
+  const int *scan;
+
+  // These contexts may be available in the caller
+  switch (n_coeffs) {
+    case 4 * 4:
+      scan = get_scan_4x4(tx_type);
+      break;
+    case 8 * 8:
+      scan = get_scan_8x8(tx_type);
+      break;
+    case 16 * 16:
+      scan = get_scan_16x16(tx_type);
+      break;
+    default:
+      scan = vp9_default_zig_zag1d_32x32;
+      break;
+  }
+
+  quantize(mb->plane[plane].zrun_zbin_boost,
+           BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
+           n_coeffs, mb->skip_block,
+           mb->plane[plane].zbin,
+           mb->plane[plane].round,
+           mb->plane[plane].quant,
+           mb->plane[plane].quant_shift,
+           BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
+           BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+           xd->plane[plane].dequant,
+           mb->plane[plane].zbin_extra,
+           &xd->plane[plane].eobs[block],
+           scan, mul);
+}
+
 void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                 int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
