@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXn//9lo\u003d",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-03T00:21:51Z",
+      "side": 1,
+      "message": "these casts should be unnecessary, the short will be promoted to int before any arithmetic.",
+      "revId": "a2b1072c5fef4a3829bf0dd6fb7c82f1e45889ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
