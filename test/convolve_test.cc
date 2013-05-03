@@ -8,6 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "test/acm_random.h"
+#include "test/register_state_check.h"
+#include "test/util.h"
+#include "third_party/googletest/src/include/gtest/gtest.h"
 
 extern "C" {
 #include "./vpx_config.h"
@@ -16,10 +20,6 @@ extern "C" {
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 }
-#include "third_party/googletest/src/include/gtest/gtest.h"
-#include "test/acm_random.h"
-#include "test/register_state_check.h"
-#include "test/util.h"
 
 namespace {
 typedef void (*convolve_fn_t)(const uint8_t *src, int src_stride,
@@ -46,27 +46,27 @@ struct ConvolveFunctions {
 // Reference 8-tap subpixel filter, slightly modified to fit into this test.
 #define VP9_FILTER_WEIGHT 128
 #define VP9_FILTER_SHIFT 7
-static uint8_t clip_pixel(int x) {
+uint8_t clip_pixel(int x) {
   return x < 0 ? 0 :
          x > 255 ? 255 :
          x;
 }
 
-static void filter_block2d_8_c(const uint8_t *src_ptr,
-                               const unsigned int src_stride,
-                               const int16_t *HFilter,
-                               const int16_t *VFilter,
-                               uint8_t *dst_ptr,
-                               unsigned int dst_stride,
-                               unsigned int output_width,
-                               unsigned int output_height) {
+void filter_block2d_8_c(const uint8_t *src_ptr,
+                        const unsigned int src_stride,
+                        const int16_t *HFilter,
+                        const int16_t *VFilter,
+                        uint8_t *dst_ptr,
+                        unsigned int dst_stride,
+                        unsigned int output_width,
+                        unsigned int output_height) {
   // Between passes, we use an intermediate buffer whose height is extended to
   // have enough horizontally filtered values as input for the vertical pass.
   // This buffer is allocated to be big enough for the largest block type we
   // support.
   const int kInterp_Extend = 4;
   const unsigned int intermediate_height =
-    (kInterp_Extend - 1) + output_height + kInterp_Extend;
+      (kInterp_Extend - 1) + output_height + kInterp_Extend;
 
   /* Size of intermediate_buffer is max_intermediate_height * filter_max_width,
    * where max_intermediate_height = (kInterp_Extend - 1) + filter_max_height
@@ -87,15 +87,15 @@ static void filter_block2d_8_c(const uint8_t *src_ptr,
     for (i = 0; i < intermediate_height; ++i) {
       for (j = 0; j < output_width; ++j) {
         // Apply filter...
-        int temp = ((int)src_ptr[0] * HFilter[0]) +
-                   ((int)src_ptr[1] * HFilter[1]) +
-                   ((int)src_ptr[2] * HFilter[2]) +
-                   ((int)src_ptr[3] * HFilter[3]) +
-                   ((int)src_ptr[4] * HFilter[4]) +
-                   ((int)src_ptr[5] * HFilter[5]) +
-                   ((int)src_ptr[6] * HFilter[6]) +
-                   ((int)src_ptr[7] * HFilter[7]) +
-                   (VP9_FILTER_WEIGHT >> 1);  // Rounding
+        const int temp = (src_ptr[0] * HFilter[0]) +
+                         (src_ptr[1] * HFilter[1]) +
+                         (src_ptr[2] * HFilter[2]) +
+                         (src_ptr[3] * HFilter[3]) +
+                         (src_ptr[4] * HFilter[4]) +
+                         (src_ptr[5] * HFilter[5]) +
+                         (src_ptr[6] * HFilter[6]) +
+                         (src_ptr[7] * HFilter[7]) +
+                         (VP9_FILTER_WEIGHT >> 1);  // Rounding
 
         // Normalize back to 0-255...
         *output_ptr = clip_pixel(temp >> VP9_FILTER_SHIFT);
@@ -115,15 +115,15 @@ static void filter_block2d_8_c(const uint8_t *src_ptr,
     for (i = 0; i < output_height; ++i) {
       for (j = 0; j < output_width; ++j) {
         // Apply filter...
-        int temp = ((int)src_ptr[0] * VFilter[0]) +
-                   ((int)src_ptr[1] * VFilter[1]) +
-                   ((int)src_ptr[2] * VFilter[2]) +
-                   ((int)src_ptr[3] * VFilter[3]) +
-                   ((int)src_ptr[4] * VFilter[4]) +
-                   ((int)src_ptr[5] * VFilter[5]) +
-                   ((int)src_ptr[6] * VFilter[6]) +
-                   ((int)src_ptr[7] * VFilter[7]) +
-                   (VP9_FILTER_WEIGHT >> 1);  // Rounding
+        const int temp = (src_ptr[0] * VFilter[0]) +
+                         (src_ptr[1] * VFilter[1]) +
+                         (src_ptr[2] * VFilter[2]) +
+                         (src_ptr[3] * VFilter[3]) +
+                         (src_ptr[4] * VFilter[4]) +
+                         (src_ptr[5] * VFilter[5]) +
+                         (src_ptr[6] * VFilter[6]) +
+                         (src_ptr[7] * VFilter[7]) +
+                         (VP9_FILTER_WEIGHT >> 1);  // Rounding
 
         // Normalize back to 0-255...
         *dst_ptr++ = clip_pixel(temp >> VP9_FILTER_SHIFT);
@@ -135,12 +135,12 @@ static void filter_block2d_8_c(const uint8_t *src_ptr,
   }
 }
 
-static void block2d_average_c(uint8_t *src,
-                              unsigned int src_stride,
-                              uint8_t *output_ptr,
-                              unsigned int output_stride,
-                              unsigned int output_width,
-                              unsigned int output_height) {
+void block2d_average_c(uint8_t *src,
+                       unsigned int src_stride,
+                       uint8_t *output_ptr,
+                       unsigned int output_stride,
+                       unsigned int output_width,
+                       unsigned int output_height) {
   unsigned int i, j;
   for (i = 0; i < output_height; ++i) {
     for (j = 0; j < output_width; ++j) {
@@ -150,15 +150,15 @@ static void block2d_average_c(uint8_t *src,
   }
 }
 
-static void filter_average_block2d_8_c(const uint8_t *src_ptr,
-                                       const unsigned int src_stride,
-                                       const int16_t *HFilter,
-                                       const int16_t *VFilter,
-                                       uint8_t *dst_ptr,
-                                       unsigned int dst_stride,
-                                       unsigned int output_width,
-                                       unsigned int output_height) {
-  uint8_t tmp[64*64];
+void filter_average_block2d_8_c(const uint8_t *src_ptr,
+                                const unsigned int src_stride,
+                                const int16_t *HFilter,
+                                const int16_t *VFilter,
+                                uint8_t *dst_ptr,
+                                unsigned int dst_stride,
+                                unsigned int output_width,
+                                unsigned int output_height) {
+  uint8_t tmp[64 * 64];
 
   assert(output_width <= 64);
   assert(output_height <= 64);
@@ -173,10 +173,9 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
   static void SetUpTestCase() {
     // Force input_ to be unaligned, output to be 16 byte aligned.
     input_ = reinterpret_cast<uint8_t*>(
-        vpx_memalign(kDataAlignment, kOuterBlockSize * kOuterBlockSize + 1))
-        + 1;
+        vpx_memalign(kDataAlignment, kInputBufferSize + 1)) + 1;
     output_ = reinterpret_cast<uint8_t*>(
-        vpx_memalign(kDataAlignment, kOuterBlockSize * kOuterBlockSize));
+        vpx_memalign(kDataAlignment, kOutputBufferSize));
   }
 
   static void TearDownTestCase() {
@@ -186,62 +185,63 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
     output_ = NULL;
   }
 
-  protected:
-    static const int kDataAlignment = 16;
-    static const int kOuterBlockSize = 128;
-    static const int kInputStride = kOuterBlockSize;
-    static const int kOutputStride = kOuterBlockSize;
-    static const int kMaxDimension = 64;
+ protected:
+  static const int kDataAlignment = 16;
+  static const int kOuterBlockSize = 128;
+  static const int kInputStride = kOuterBlockSize;
+  static const int kOutputStride = kOuterBlockSize;
+  static const int kMaxDimension = 64;
+  static const int kInputBufferSize = kOuterBlockSize * kOuterBlockSize;
+  static const int kOutputBufferSize = kOuterBlockSize * kOuterBlockSize;
 
-    int Width() const { return GET_PARAM(0); }
-    int Height() const { return GET_PARAM(1); }
-    int BorderLeft() const {
-      const int center = (kOuterBlockSize - Width()) / 2;
-      return (center + (kDataAlignment - 1)) & ~(kDataAlignment - 1);
-    }
-    int BorderTop() const { return (kOuterBlockSize - Height()) / 2; }
+  int Width() const { return GET_PARAM(0); }
+  int Height() const { return GET_PARAM(1); }
+  int BorderLeft() const {
+    const int center = (kOuterBlockSize - Width()) / 2;
+    return (center + (kDataAlignment - 1)) & ~(kDataAlignment - 1);
+  }
+  int BorderTop() const { return (kOuterBlockSize - Height()) / 2; }
 
-    bool IsIndexInBorder(int i) {
-      return (i < BorderTop() * kOuterBlockSize ||
-              i >= (BorderTop() + Height()) * kOuterBlockSize ||
-              i % kOuterBlockSize < BorderLeft() ||
-              i % kOuterBlockSize >= (BorderLeft() + Width()));
-    }
+  bool IsIndexInBorder(int i) {
+    return (i < BorderTop() * kOuterBlockSize ||
+            i >= (BorderTop() + Height()) * kOuterBlockSize ||
+            i % kOuterBlockSize < BorderLeft() ||
+            i % kOuterBlockSize >= (BorderLeft() + Width()));
+  }
 
-    virtual void SetUp() {
-      UUT_ = GET_PARAM(2);
-      memset(input_, 0, sizeof(input_));
-      /* Set up guard blocks for an inner block cetered in the outer block */
-      for (int i = 0; i < kOuterBlockSize * kOuterBlockSize; ++i) {
-        if (IsIndexInBorder(i))
-          output_[i] = 255;
-        else
-          output_[i] = 0;
-      }
-
-      ::libvpx_test::ACMRandom prng;
-      for (int i = 0; i < kOuterBlockSize * kOuterBlockSize; ++i)
-        input_[i] = prng.Rand8Extremes();
+  virtual void SetUp() {
+    UUT_ = GET_PARAM(2);
+    /* Set up guard blocks for an inner block cetered in the outer block */
+    for (int i = 0; i < kOutputBufferSize; ++i) {
+      if (IsIndexInBorder(i))
+        output_[i] = 255;
+      else
+        output_[i] = 0;
     }
 
-    void CheckGuardBlocks() {
-      for (int i = 0; i < kOuterBlockSize * kOuterBlockSize; ++i) {
-        if (IsIndexInBorder(i))
-          EXPECT_EQ(255, output_[i]);
-      }
-    }
+    ::libvpx_test::ACMRandom prng;
+    for (int i = 0; i < kInputBufferSize; ++i)
+      input_[i] = prng.Rand8Extremes();
+  }
 
-    uint8_t* input() {
-      return input_ + BorderTop() * kOuterBlockSize + BorderLeft();
+  void CheckGuardBlocks() {
+    for (int i = 0; i < kOutputBufferSize; ++i) {
+      if (IsIndexInBorder(i))
+        EXPECT_EQ(255, output_[i]);
     }
+  }
 
-    uint8_t* output() {
-      return output_ + BorderTop() * kOuterBlockSize + BorderLeft();
-    }
+  uint8_t* input() const {
+    return input_ + BorderTop() * kOuterBlockSize + BorderLeft();
+  }
 
-    const ConvolveFunctions* UUT_;
-    static uint8_t* input_;
-    static uint8_t* output_;
+  uint8_t* output() const {
+    return output_ + BorderTop() * kOuterBlockSize + BorderLeft();
+  }
+
+  const ConvolveFunctions* UUT_;
+  static uint8_t* input_;
+  static uint8_t* output_;
 };
 uint8_t* ConvolveTest::input_ = NULL;
 uint8_t* ConvolveTest::output_ = NULL;
@@ -309,7 +309,7 @@ const int16_t (*kTestFilterList[])[8] = {
   vp9_sub_pel_filters_8lp
 };
 const int kNumFilterBanks = sizeof(kTestFilterList) /
-    sizeof(kTestFilterList[0]);
+                            sizeof(kTestFilterList[0]);
 const int kNumFilters = 16;
 
 TEST(ConvolveTest, FiltersWontSaturateWhenAddedPairwise) {
@@ -525,7 +525,6 @@ INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
     make_tuple(64, 32, &convolve8_c),
     make_tuple(32, 64, &convolve8_c),
     make_tuple(64, 64, &convolve8_c)));
-}
 
 #if HAVE_SSSE3
 const ConvolveFunctions convolve8_ssse3(
@@ -548,3 +547,4 @@ INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
     make_tuple(32, 64, &convolve8_ssse3),
     make_tuple(64, 64, &convolve8_ssse3)));
 #endif
+}  // namespace
