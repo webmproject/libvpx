@@ -123,11 +123,12 @@ static void count_segs(VP9_COMP *cpi,
                        int bw, int bh, int mi_row, int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  const int segment_id = mi->mbmi.segment_id;
+  int segment_id;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
+  segment_id = mi->mbmi.segment_id;
   xd->mode_info_context = mi;
   set_mi_row_col(cm, xd, mi_row, bh, mi_col, bw);
 
