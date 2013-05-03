@@ -265,12 +265,13 @@ else
 fi
 TMP_H="${TMPDIRx}/vpx-conf-$$-${RANDOM}.h"
 TMP_C="${TMPDIRx}/vpx-conf-$$-${RANDOM}.c"
+TMP_CC="${TMPDIRx}/vpx-conf-$$-${RANDOM}.cc"
 TMP_O="${TMPDIRx}/vpx-conf-$$-${RANDOM}.o"
 TMP_X="${TMPDIRx}/vpx-conf-$$-${RANDOM}.x"
 TMP_ASM="${TMPDIRx}/vpx-conf-$$-${RANDOM}.asm"
 
 clean_temp_files() {
-    rm -f ${TMP_C} ${TMP_H} ${TMP_O} ${TMP_X} ${TMP_ASM}
+    rm -f ${TMP_C} ${TMP_CC} ${TMP_H} ${TMP_O} ${TMP_X} ${TMP_ASM}
 }
 
 #
@@ -291,9 +292,9 @@ check_cc() {
 
 check_cxx() {
     log check_cxx "$@"
-    cat >${TMP_C}
-    log_file ${TMP_C}
-    check_cmd ${CXX} ${CXXFLAGS} "$@" -c -o ${TMP_O} ${TMP_C}
+    cat >${TMP_CC}
+    log_file ${TMP_CC}
+    check_cmd ${CXX} ${CXXFLAGS} "$@" -c -o ${TMP_O} ${TMP_CC}
 }
 
 check_cpp() {
