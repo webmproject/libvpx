@@ -60,7 +60,7 @@ vp9_copy_mem8x8_dspr2=vp9_copy_mem8x8_dspr2
 prototype void vp9_copy_mem8x4 "const uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
 specialize vp9_copy_mem8x4 mmx
 
-prototype void vp9_recon_b "uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr, int stride"
+prototype void vp9_recon_b "uint8_t *pred_ptr, int16_t *diff_ptr, int diff_stride, uint8_t *dst_ptr, int stride"
 specialize vp9_recon_b
 
 if [ "$CONFIG_SB8X8" != "yes" ]; then
@@ -98,7 +98,7 @@ specialize vp9_build_intra_predictors_sby_s
 prototype void vp9_build_intra_predictors_sbuv_s "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
 specialize vp9_build_intra_predictors_sbuv_s
 
-prototype void vp9_intra4x4_predict "struct macroblockd *xd, int block, int b_mode, uint8_t *predictor, int pre_stride"
+prototype void vp9_intra4x4_predict "struct macroblockd *xd, int block, enum BLOCK_SIZE_TYPE bsize, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra4x4_predict;
 
 if [ "$CONFIG_SB8X8" != "yes" ]; then

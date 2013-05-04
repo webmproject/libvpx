@@ -160,13 +160,16 @@ B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, int block_idx,
 
 void vp9_intra4x4_predict(MACROBLOCKD *xd,
                           int block_idx,
+                          BLOCK_SIZE_TYPE bsize,
                           int b_mode,
                           uint8_t *predictor,
                           int ps) {
+  const int bwl = b_width_log2(bsize);
+  const int wmask = (1 << bwl) - 1;
   int i, r, c;
-  const int have_top = (block_idx >> 2) || xd->up_available;
-  const int have_left = (block_idx & 3)  || xd->left_available;
-  const int have_right = (block_idx & 3) != 3 || xd->right_available;
+  const int have_top = (block_idx >> bwl) || xd->up_available;
+  const int have_left = (block_idx & wmask)  || xd->left_available;
+  const int have_right = (block_idx & wmask) != wmask || xd->right_available;
   uint8_t left[4], above[8], top_left;
   /*
    * 127 127 127 .. 127 127 127 127 127 127
@@ -197,8 +200,8 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
     above[1] = above_ptr[1];
     above[2] = above_ptr[2];
     above[3] = above_ptr[3];
-    if (((block_idx & 3) != 3) ||
-        (have_right && block_idx == 3 &&
+    if (((block_idx & wmask) != wmask) ||
+        (have_right && block_idx == wmask &&
          ((xd->mb_index != 3 && xd->sb_index != 3) ||
           ((xd->mb_index & 1) == 0 && xd->sb_index == 3)))) {
       above[4] = above_ptr[4];
@@ -212,7 +215,7 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
         above_right -= 32 * ps;
       if (xd->mb_index == 3)
         above_right -= 16 * ps;
-      above_right -= (block_idx & ~3) * ps;
+      above_right -= 4 * (block_idx >> bwl) * ps;
 
       /* use a more distant above-right (from closest available top-right
        * corner), but with a "localized DC" (similar'ish to TM-pred):

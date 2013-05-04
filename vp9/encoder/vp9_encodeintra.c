@@ -22,15 +22,12 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   (void) cpi;
 
-#if !CONFIG_SB8X8
   if (use_16x16_pred) {
-#endif
     mbmi->mode = DC_PRED;
     mbmi->uv_mode = DC_PRED;
     mbmi->ref_frame = INTRA_FRAME;
 
     vp9_encode_intra16x16mby(&cpi->common, x);
-#if !CONFIG_SB8X8
   } else {
     int i;
 
@@ -39,7 +36,6 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
       encode_intra4x4block(x, i, BLOCK_SIZE_MB16X16);
     }
   }
-#endif
 
   return vp9_get_mb_ss(x->plane[0].src_diff);
 }
@@ -61,36 +57,37 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib,
       raster_block_offset_int16(xd, bsize, 0, ib,
                                 xd->plane[0].diff);
   int16_t* const coeff = BLOCK_OFFSET(x->plane[0].coeff, ib, 16);
+  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
 
-  assert(ib < (16 >> (2 * CONFIG_SB8X8)));
+  assert(ib < (1 << (bwl + bhl)));
 
 #if CONFIG_NEWBINTRAMODES
   xd->mode_info_context->bmi[ib].as_mode.context =
     vp9_find_bpred_context(&x->e_mbd, ib, dst, xd->plane[0].dst.stride);
 #endif
 
-  vp9_intra4x4_predict(&x->e_mbd, ib,
+  vp9_intra4x4_predict(&x->e_mbd, ib, bsize,
                        xd->mode_info_context->bmi[ib].as_mode.first,
                        dst, xd->plane[0].dst.stride);
-  vp9_subtract_block(4, 4, src_diff, 16 >> CONFIG_SB8X8,
+  vp9_subtract_block(4, 4, src_diff, 4 << bwl,
                      src, x->plane[0].src.stride,
                      dst, xd->plane[0].dst.stride);
 
   tx_type = get_tx_type_4x4(&x->e_mbd, ib);
   if (tx_type != DCT_DCT) {
-    vp9_short_fht4x4(src_diff, coeff, 16 >> CONFIG_SB8X8, tx_type);
+    vp9_short_fht4x4(src_diff, coeff, 4 << bwl, tx_type);
     x->quantize_b_4x4(x, ib, tx_type, 16);
     vp9_short_iht4x4(BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
-                     diff, 16 >> CONFIG_SB8X8, tx_type);
+                     diff, 4 << bwl, tx_type);
   } else {
-    x->fwd_txm4x4(src_diff, coeff, 32 >> CONFIG_SB8X8);
+    x->fwd_txm4x4(src_diff, coeff, 8 << bwl);
     x->quantize_b_4x4(x, ib, tx_type, 16);
     vp9_inverse_transform_b_4x4(&x->e_mbd, xd->plane[0].eobs[ib],
                                 BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
-                                diff, 32 >> CONFIG_SB8X8);
+                                diff, 8 << bwl);
   }
 
-  vp9_recon_b(dst, diff, dst, xd->plane[0].dst.stride);
+  vp9_recon_b(dst, diff, 4 << bwl, dst, xd->plane[0].dst.stride);
 }
 
 void vp9_encode_intra4x4mby(MACROBLOCK *mb, BLOCK_SIZE_TYPE bsize) {
@@ -203,7 +200,7 @@ void vp9_encode_intra8x8(MACROBLOCK *x, int ib) {
         raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib + iblock[i],
                                   xd->plane[0].dst.buf,
                                   xd->plane[0].dst.stride);
-    vp9_recon_b_c(dst, diff, dst, xd->plane[0].dst.stride);
+    vp9_recon_b_c(dst, diff, 16, dst, xd->plane[0].dst.stride);
   }
 }
 

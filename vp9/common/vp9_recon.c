@@ -28,10 +28,10 @@ static INLINE void recon(int rows, int cols,
 }
 
 
-void vp9_recon_b_c(uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr,
-                   int stride) {
+void vp9_recon_b_c(uint8_t *pred_ptr, int16_t *diff_ptr, int diff_stride,
+                   uint8_t *dst_ptr, int stride) {
   assert(pred_ptr == dst_ptr);
-  recon(4, 4, diff_ptr, 16 >> CONFIG_SB8X8, dst_ptr, stride);
+  recon(4, 4, diff_ptr, diff_stride, dst_ptr, stride);
 }
 
 #if !CONFIG_SB8X8
