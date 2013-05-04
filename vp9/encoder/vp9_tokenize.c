@@ -112,8 +112,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   PLANE_TYPE type = plane ? PLANE_TYPE_UV : PLANE_TYPE_Y_WITH_DC;
   TX_SIZE tx_size = ss_txfrm_size / 2;
   int dry_run = args->dry_run;
-  int ib = old_block_idx_4x4(xd, b_width_log2(bsize) + b_height_log2(bsize),
-                             plane, block);
 
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int pt; /* near block/prev token context index */
@@ -158,7 +156,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
     default:
     case TX_4X4: {
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-          get_tx_type_4x4(xd, ib) : DCT_DCT;
+          get_tx_type_4x4(xd, block) : DCT_DCT;
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
       seg_eob = 16;
@@ -173,7 +171,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
     }
     case TX_8X8: {
       const int sz = 1 + b_width_log2(sb_type);
-      const int x = ib & ((1 << sz) - 1), y = ib - x;
+      const int x = block & ((1 << sz) - 1), y = block - x;
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
       above_ec = (A[0] + A[1]) != 0;
@@ -190,7 +188,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
     }
     case TX_16X16: {
       const int sz = 2 + b_width_log2(sb_type);
-      const int x = ib & ((1 << sz) - 1), y = ib - x;
+      const int x = block & ((1 << sz) - 1), y = block - x;
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;

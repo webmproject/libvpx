@@ -356,9 +356,7 @@ static void decode_block(int plane, int block,
                          int ss_txfrm_size,
                          void *argv) {
   const struct decode_block_args* const arg = argv;
-  const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
-  const int old_block_idx = old_block_idx_4x4(arg->xd, bw + bh,
-                                              plane, block);
+  const int bw = b_width_log2(bsize);
 
   // find the maximum eob for this transform size, adjusted by segment
   const int segment_id = arg->xd->mode_info_context->mbmi.segment_id;
@@ -370,7 +368,7 @@ static void decode_block(int plane, int block,
   const int aoff = (off & ((1 << mod) - 1)) << ss_tx_size;
   const int loff = (off >> mod) << ss_tx_size;
 
-  const int eob = decode_coefs(arg->pbi, arg->xd, arg->r, old_block_idx,
+  const int eob = decode_coefs(arg->pbi, arg->xd, arg->r, block,
                                arg->xd->plane[plane].plane_type, seg_eob,
                                BLOCK_OFFSET(qcoeff_base, block, 16),
                                ss_tx_size, arg->xd->plane[plane].dequant,

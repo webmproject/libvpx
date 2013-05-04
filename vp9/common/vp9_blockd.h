@@ -885,24 +885,6 @@ static INLINE struct plane_block_idx plane_block_idx(int y_blocks,
   return res;
 }
 
-/* TODO(jkoleszar): Probably best to remove instances that require this,
- * as the data likely becomes per-plane and stored in the per-plane structures.
- * This is a stub to work with the existing code.
- */
-static INLINE int old_block_idx_4x4(MACROBLOCKD* const xd, int block_size_b,
-                                    int plane, int i) {
-  const int luma_blocks = 1 << block_size_b;
-  assert(xd->plane[0].subsampling_x == 0);
-  assert(xd->plane[0].subsampling_y == 0);
-  assert(xd->plane[1].subsampling_x == 1);
-  assert(xd->plane[1].subsampling_y == 1);
-  assert(xd->plane[2].subsampling_x == 1);
-  assert(xd->plane[2].subsampling_y == 1);
-  return plane == 0 ? i :
-         plane == 1 ? luma_blocks + i :
-                      luma_blocks * 5 / 4 + i;
-}
-
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
                                                   BLOCK_SIZE_TYPE bsize,
                                                   int ss_txfrm_size,
