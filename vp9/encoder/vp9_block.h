@@ -164,12 +164,12 @@ struct macroblock {
   void (*fwd_txm16x16)(int16_t *input, int16_t *output, int pitch);
   void (*quantize_b_4x4)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type,
                          int y_blocks);
+#if !CONFIG_SB8X8
   void (*quantize_b_4x4_pair)(MACROBLOCK *x, int b_idx1, int b_idx2,
                               int y_blocks);
-  void (*quantize_b_16x16)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type,
-                           int y_blocks);
   void (*quantize_b_8x8)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type,
                          int y_blocks);
+#endif
 };
 
 #endif  // VP9_ENCODER_VP9_BLOCK_H_

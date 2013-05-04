@@ -2438,13 +2438,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
     vp9_encode_intra4x4mby(x, bsize);
     vp9_build_intra_predictors_sbuv_s(&x->e_mbd, bsize);
-    vp9_subtract_sbuv(x, bsize);
-    vp9_transform_sbuv_4x4(x, bsize);
-    vp9_quantize_sbuv_4x4(x, bsize);
-    if (x->optimize)
-      vp9_optimize_sbuv(cm, x, bsize);
-    vp9_inverse_transform_sbuv_4x4(xd, bsize);
-    vp9_recon_sbuv(xd, bsize);
+    vp9_encode_sbuv(cm, x, bsize);
 
     if (output_enabled)
       sum_intra_stats(cpi, x);
