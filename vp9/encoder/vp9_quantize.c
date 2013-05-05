@@ -133,39 +133,6 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
            pt_scan, 1);
 }
 
-#if !CONFIG_SB8X8
-void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
-                                int y_blocks) {
-  MACROBLOCKD *const xd = &mb->e_mbd;
-  const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
-  const int *pt_scan = get_scan_8x8(tx_type);
-
-  quantize(mb->plane[pb_idx.plane].zrun_zbin_boost,
-           BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff, pb_idx.block, 16),
-           64, mb->skip_block,
-           mb->plane[pb_idx.plane].zbin,
-           mb->plane[pb_idx.plane].round,
-           mb->plane[pb_idx.plane].quant,
-           mb->plane[pb_idx.plane].quant_shift,
-           BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16),
-           BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block, 16),
-           xd->plane[pb_idx.plane].dequant,
-           mb->plane[pb_idx.plane].zbin_extra,
-           &xd->plane[pb_idx.plane].eobs[pb_idx.block],
-           pt_scan, 1);
-}
-
-/* quantize_b_pair function pointer in MACROBLOCK structure is set to one of
- * these two C functions if corresponding optimized routine is not available.
- * NEON optimized version implements currently the fast quantization for pair
- * of blocks. */
-void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *x, int b_idx1, int b_idx2,
-                                     int y_blocks) {
-  vp9_regular_quantize_b_4x4(x, b_idx1, DCT_DCT, y_blocks);
-  vp9_regular_quantize_b_4x4(x, b_idx2, DCT_DCT, y_blocks);
-}
-#endif
-
 static void invert_quant(int16_t *quant, uint8_t *shift, int d) {
   unsigned t;
   int l;

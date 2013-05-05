@@ -521,9 +521,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
 
       set_mi_row_col(cm, xd,
-                     mb_row << CONFIG_SB8X8,
+                     mb_row << 1,
                      1 << mi_height_log2(BLOCK_SIZE_MB16X16),
-                     mb_col << CONFIG_SB8X8,
+                     mb_col << 1,
                      1 << mi_height_log2(BLOCK_SIZE_MB16X16));
 
       xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
@@ -626,8 +626,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
           this_error = motion_error;
           vp9_set_mbmode_and_mvs(x, NEWMV, &mv);
           xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-          vp9_build_inter_predictors_sby(xd, mb_row << CONFIG_SB8X8,
-                                         mb_col << CONFIG_SB8X8,
+          vp9_build_inter_predictors_sby(xd, mb_row << 1,
+                                         mb_col << 1,
                                          BLOCK_SIZE_MB16X16);
           vp9_encode_sb(cm, x, BLOCK_SIZE_MB16X16);
           sum_mvr += mv.as_mv.row;

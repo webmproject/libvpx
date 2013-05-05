@@ -187,58 +187,6 @@ static void mb_init_dequantizer(VP9_COMMON *pc, MACROBLOCKD *xd) {
     xd->plane[i].dequant = pc->uv_dequant[xd->q_index];
 }
 
-#if !CONFIG_SB8X8
-static void decode_8x8(MACROBLOCKD *xd) {
-  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
-  // luma
-  // if the first one is DCT_DCT assume all the rest are as well
-  TX_TYPE tx_type = get_tx_type_8x8(xd, 0);
-  int i;
-  assert(mode == I8X8_PRED);
-  for (i = 0; i < 4; i++) {
-    int ib = vp9_i8x8_block[i];
-    int idx = (ib & 0x02) ? (ib + 2) : ib;
-    int16_t *q  = BLOCK_OFFSET(xd->plane[0].qcoeff, idx, 16);
-    uint8_t* const dst =
-          raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
-                                    xd->plane[0].dst.buf,
-                                    xd->plane[0].dst.stride);
-    int stride = xd->plane[0].dst.stride;
-    if (mode == I8X8_PRED) {
-      int i8x8mode = xd->mode_info_context->bmi[ib].as_mode.first;
-      vp9_intra8x8_predict(xd, ib, i8x8mode, dst, stride);
-    }
-    tx_type = get_tx_type_8x8(xd, ib);
-    vp9_iht_add_8x8_c(tx_type, q, dst, stride, xd->plane[0].eobs[idx]);
-  }
-
-  // chroma
-  for (i = 0; i < 4; i++) {
-    int ib = vp9_i8x8_block[i];
-    int i8x8mode = xd->mode_info_context->bmi[ib].as_mode.first;
-    uint8_t* dst;
-
-    dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 1, i,
-                                    xd->plane[1].dst.buf,
-                                    xd->plane[1].dst.stride);
-    vp9_intra_uv4x4_predict(xd, 16 + i, i8x8mode,
-                            dst, xd->plane[1].dst.stride);
-    xd->itxm_add(BLOCK_OFFSET(xd->plane[1].qcoeff, i, 16),
-                 dst, xd->plane[1].dst.stride,
-                 xd->plane[1].eobs[i]);
-
-    dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 2, i,
-                                    xd->plane[2].dst.buf,
-                                    xd->plane[1].dst.stride);
-    vp9_intra_uv4x4_predict(xd, 20 + i, i8x8mode,
-                            dst, xd->plane[1].dst.stride);
-    xd->itxm_add(BLOCK_OFFSET(xd->plane[2].qcoeff, i, 16),
-                 dst, xd->plane[1].dst.stride,
-                 xd->plane[2].eobs[i]);
-  }
-}
-#endif
-
 static INLINE void dequant_add_y(MACROBLOCKD *xd, TX_TYPE tx_type, int idx,
                                  BLOCK_SIZE_TYPE bsize) {
   struct macroblockd_plane *const y = &xd->plane[0];
@@ -253,47 +201,6 @@ static INLINE void dequant_add_y(MACROBLOCKD *xd, TX_TYPE tx_type, int idx,
                  dst, xd->plane[0].dst.stride, y->eobs[idx]);
   }
 }
-
-#if !CONFIG_SB8X8
-static void decode_4x4(VP9D_COMP *pbi, MACROBLOCKD *xd, vp9_reader *r) {
-  TX_TYPE tx_type;
-  int i = 0;
-  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
-  assert(mode == I8X8_PRED);
-  for (i = 0; i < 4; i++) {
-    int ib = vp9_i8x8_block[i];
-    const int iblock[4] = {0, 1, 4, 5};
-    int j;
-    uint8_t* dst;
-    int i8x8mode = xd->mode_info_context->bmi[ib].as_mode.first;
-
-    dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 0, ib,
-                                    xd->plane[0].dst.buf,
-                                    xd->plane[0].dst.stride);
-    vp9_intra8x8_predict(xd, ib, i8x8mode, dst, xd->plane[0].dst.stride);
-    for (j = 0; j < 4; j++) {
-      tx_type = get_tx_type_4x4(xd, ib + iblock[j]);
-      dequant_add_y(xd, tx_type, ib + iblock[j], BLOCK_SIZE_MB16X16);
-    }
-    dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 1, i,
-                                    xd->plane[1].dst.buf,
-                                    xd->plane[1].dst.stride);
-    vp9_intra_uv4x4_predict(xd, 16 + i, i8x8mode,
-                            dst, xd->plane[1].dst.stride);
-    xd->itxm_add(BLOCK_OFFSET(xd->plane[1].qcoeff, i, 16),
-                 dst, xd->plane[1].dst.stride,
-                 xd->plane[1].eobs[i]);
-    dst = raster_block_offset_uint8(xd, BLOCK_SIZE_MB16X16, 2, i,
-                                    xd->plane[2].dst.buf,
-                                    xd->plane[2].dst.stride);
-    vp9_intra_uv4x4_predict(xd, 20 + i, i8x8mode,
-                            dst, xd->plane[1].dst.stride);
-    xd->itxm_add(BLOCK_OFFSET(xd->plane[2].qcoeff, i, 16),
-                 dst, xd->plane[1].dst.stride,
-                 xd->plane[2].eobs[i]);
-  }
-}
-#endif
 
 static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
                          int ss_txfrm_size, void *arg) {
@@ -446,35 +353,6 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
   }
 }
 
-#if !CONFIG_SB8X8
-// TODO(jingning): This only performs I8X8_PRED decoding process, which will be
-// automatically covered by decode_sb, when SB8X8 is on.
-static void decode_mb(VP9D_COMP *pbi, MACROBLOCKD *xd,
-                     int mi_row, int mi_col,
-                     vp9_reader *r) {
-  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-  const int tx_size = mbmi->txfm_size;
-
-  assert(mbmi->sb_type == BLOCK_SIZE_MB16X16);
-
-  if (mbmi->mb_skip_coeff) {
-    vp9_reset_sb_tokens_context(xd, BLOCK_SIZE_MB16X16);
-  } else {
-    // re-initialize macroblock dequantizer before detokenization
-    if (xd->segmentation_enabled)
-      mb_init_dequantizer(&pbi->common, xd);
-
-    if (!vp9_reader_has_error(r))
-      vp9_decode_tokens(pbi, xd, r, BLOCK_SIZE_MB16X16);
-  }
-
-  if (tx_size == TX_8X8)
-    decode_8x8(xd);
-  else
-    decode_4x4(pbi, xd, r);
-}
-#endif
-
 static int get_delta_q(vp9_reader *r, int *dq) {
   const int old_value = *dq;
 
@@ -508,12 +386,12 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
 
   for (i = 0; i < MAX_MB_PLANE; i++) {
     xd->plane[i].above_context = cm->above_context[i] +
-        (mi_col * 4 >> (xd->plane[i].subsampling_x + CONFIG_SB8X8));
+        (mi_col * 2 >> xd->plane[i].subsampling_x);
     xd->plane[i].left_context = cm->left_context[i] +
-        (((mi_row * 4 >> CONFIG_SB8X8) & 15) >> xd->plane[i].subsampling_y);
+        (((mi_row * 2) & 15) >> xd->plane[i].subsampling_y);
   }
-  xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
-  xd->left_seg_context  = cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
+  xd->above_seg_context = cm->above_seg_context + (mi_col >> 1);
+  xd->left_seg_context  = cm->left_seg_context + ((mi_row >> 1) & 3);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
@@ -560,33 +438,12 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   vp9_decode_mb_mode_mv(pbi, xd, mi_row, mi_col, r);
   set_refs(pbi, mi_row, mi_col);
 
-#if CONFIG_SB8X8
   if (bsize == BLOCK_SIZE_SB8X8 &&
       (xd->mode_info_context->mbmi.mode == SPLITMV ||
        xd->mode_info_context->mbmi.mode == I4X4_PRED))
     decode_atom(pbi, xd, mi_row, mi_col, r, bsize);
   else
     decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
-#else
-  // TODO(jingning): merge decode_sb_ and decode_mb_
-  if (bsize > BLOCK_SIZE_MB16X16) {
-    decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
-  } else {
-    // TODO(jingning): In transition of separating functionalities of decode_mb
-    // into decode_sb and decode_atom. Will remove decode_mb and clean this up
-    // when SB8X8 is on.
-    if (xd->mode_info_context->mbmi.mode == I4X4_PRED ||
-        (xd->mode_info_context->mbmi.mode == SPLITMV &&
-         xd->mode_info_context->mbmi.partitioning == PARTITIONING_4X4))
-      decode_atom(pbi, xd, mi_row, mi_col, r, bsize);
-    else if (xd->mode_info_context->mbmi.mode != I8X8_PRED)
-      decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
-    else
-      // TODO(jingning): decode_mb still carries deocding process of I8X8_PRED.
-      // This will be covered by decode_sb when SB8X8 is on.
-      decode_mb(pbi, xd, mi_row, mi_col, r);
-  }
-#endif
 
   xd->corrupted |= vp9_reader_has_error(r);
 }
@@ -603,16 +460,12 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (mi_row >= pc->mi_rows || mi_col >= pc->mi_cols)
     return;
 
-#if CONFIG_SB8X8
   if (bsize > BLOCK_SIZE_SB8X8) {
-#else
-  if (bsize > BLOCK_SIZE_MB16X16) {
-#endif
     int pl;
     // read the partition information
     xd->left_seg_context =
-        pc->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
-    xd->above_seg_context = pc->above_seg_context + (mi_col >> CONFIG_SB8X8);
+        pc->left_seg_context + ((mi_row >> 1) & 3);
+    xd->above_seg_context = pc->above_seg_context + (mi_col >> 1);
     pl = partition_plane_context(xd, bsize);
     partition = treed_read(r, vp9_partition_tree,
                            pc->fc.partition_prob[pl]);
@@ -639,15 +492,10 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
         int j = n >> 1, i = n & 0x01;
         if (subsize == BLOCK_SIZE_SB32X32)
           xd->sb_index = n;
-#if CONFIG_SB8X8
         else if (subsize == BLOCK_SIZE_MB16X16)
           xd->mb_index = n;
         else
           xd->b_index = n;
-#else
-        else
-          xd->mb_index = n;
-#endif
         decode_modes_sb(pbi, mi_row + j * bs, mi_col + i * bs, r, subsize);
       }
       break;
@@ -655,15 +503,11 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       assert(0);
   }
   // update partition context
-#if CONFIG_SB8X8
   if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_MB16X16))
-#else
-  if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_SB32X32))
-#endif
     return;
 
-  xd->left_seg_context = pc->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
-  xd->above_seg_context = pc->above_seg_context + (mi_col >> CONFIG_SB8X8);
+  xd->left_seg_context = pc->left_seg_context + ((mi_row >> 1) & 3);
+  xd->above_seg_context = pc->above_seg_context + (mi_col >> 1);
   update_partition_context(xd, subsize, bsize);
 }
 
@@ -1014,13 +858,7 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_copy(fc->pre_sb_ymode_prob, fc->sb_ymode_prob);
   vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
   vp9_copy(fc->pre_bmode_prob, fc->bmode_prob);
-#if !CONFIG_SB8X8
-  vp9_copy(fc->pre_i8x8_mode_prob, fc->i8x8_mode_prob);
-#endif
   vp9_copy(fc->pre_sub_mv_ref_prob, fc->sub_mv_ref_prob);
-#if !CONFIG_SB8X8
-  vp9_copy(fc->pre_mbsplit_prob, fc->mbsplit_prob);
-#endif
   vp9_copy(fc->pre_partition_prob, fc->partition_prob);
   fc->pre_nmvc = fc->nmvc;
 
@@ -1033,13 +871,7 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_zero(fc->sb_ymode_counts);
   vp9_zero(fc->uv_mode_counts);
   vp9_zero(fc->bmode_counts);
-#if !CONFIG_SB8X8
-  vp9_zero(fc->i8x8_mode_counts);
-#endif
   vp9_zero(fc->sub_mv_ref_counts);
-#if !CONFIG_SB8X8
-  vp9_zero(fc->mbsplit_counts);
-#endif
   vp9_zero(fc->NMVcount);
   vp9_zero(fc->mv_ref_ct);
   vp9_zero(fc->partition_counts);
@@ -1067,12 +899,12 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   int mi_row, mi_col;
 
   for (mi_row = pc->cur_tile_mi_row_start;
-       mi_row < pc->cur_tile_mi_row_end; mi_row += (4 << CONFIG_SB8X8)) {
+       mi_row < pc->cur_tile_mi_row_end; mi_row += 8) {
     // For a SB there are 2 left contexts, each pertaining to a MB row within
     vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
     vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
     for (mi_col = pc->cur_tile_mi_col_start;
-         mi_col < pc->cur_tile_mi_col_end; mi_col += (4 << CONFIG_SB8X8)) {
+         mi_col < pc->cur_tile_mi_col_end; mi_col += 8) {
       decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_SIZE_SB64X64);
     }
   }

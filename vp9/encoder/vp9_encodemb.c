@@ -404,9 +404,6 @@ void vp9_optimize_sby(VP9_COMMON *const cm, MACROBLOCK *x,
   struct optimize_block_args arg = {cm, x, &ctx};
   vp9_optimize_init(&x->e_mbd, bsize, &ctx);
   foreach_transformed_block_in_plane(&x->e_mbd, bsize, 0,
-#if !CONFIG_SB8X8
-  0,
-#endif
                                      optimize_block, &arg);
 }
 
@@ -551,9 +548,6 @@ void vp9_xform_quant_sby(VP9_COMMON *const cm, MACROBLOCK *x,
   struct encode_b_args arg = {cm, x, NULL};
 
   foreach_transformed_block_in_plane(xd, bsize, 0,
-#if !CONFIG_SB8X8
-                                     0,
-#endif
                                      xform_quant, &arg);
 }
 
@@ -576,9 +570,6 @@ void vp9_encode_sby(VP9_COMMON *const cm, MACROBLOCK *x,
     vp9_optimize_init(xd, bsize, &ctx);
 
   foreach_transformed_block_in_plane(xd, bsize, 0,
-#if !CONFIG_SB8X8
-                                     0,
-#endif
                                      encode_block, &arg);
 
   vp9_recon_sby(xd, bsize);

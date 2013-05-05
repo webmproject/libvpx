@@ -13,22 +13,16 @@
 
 #include "./vpx_config.h"
 
-#if CONFIG_SB8X8
 #define LOG2_MI_SIZE 3
-#else
-#define LOG2_MI_SIZE 4
-#endif
 
 #define MI_SIZE (1 << LOG2_MI_SIZE)
 #define MI_UV_SIZE (1 << (LOG2_MI_SIZE - 1))
 
 typedef enum BLOCK_SIZE_TYPE {
   BLOCK_SIZE_AB4X4,
-#if CONFIG_SB8X8
   BLOCK_SIZE_SB8X8,
   BLOCK_SIZE_SB8X16,
   BLOCK_SIZE_SB16X8,
-#endif
   BLOCK_SIZE_MB16X16,
   BLOCK_SIZE_SB16X32,
   BLOCK_SIZE_SB32X16,
@@ -47,6 +41,6 @@ typedef enum PARTITION_TYPE {
 } PARTITION_TYPE;
 
 #define PARTITION_PLOFFSET   4  // number of probability models per block size
-#define NUM_PARTITION_CONTEXTS ((2 + CONFIG_SB8X8) * PARTITION_PLOFFSET)
+#define NUM_PARTITION_CONTEXTS (3 * PARTITION_PLOFFSET)
 
 #endif  // VP9_COMMON_VP9_ENUMS_H_

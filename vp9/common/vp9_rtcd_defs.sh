@@ -63,23 +63,6 @@ specialize vp9_copy_mem8x4 mmx
 prototype void vp9_recon_b "uint8_t *pred_ptr, int16_t *diff_ptr, int diff_stride, uint8_t *dst_ptr, int stride"
 specialize vp9_recon_b
 
-if [ "$CONFIG_SB8X8" != "yes" ]; then
-
-prototype void vp9_recon_uv_b "uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr, int stride"
-specialize vp9_recon_uv_b
-
-# TODO(jingning): The prototype functions in c are modified to enable block-size configurable
-# operations. Need to change the sse2 accrodingly.
-prototype void vp9_recon2b "uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr, int stride"
-specialize vp9_recon2b
-# specialize vp9_recon2b sse2
-
-prototype void vp9_recon4b "uint8_t *pred_ptr, int16_t *diff_ptr, uint8_t *dst_ptr, int stride"
-specialize vp9_recon4b
-# specialize vp9_recon4b sse2
-
-fi
-
 prototype void vp9_recon_sb "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
 specialize vp9_recon_sb
 
@@ -100,16 +83,6 @@ specialize vp9_build_intra_predictors_sbuv_s
 
 prototype void vp9_intra4x4_predict "struct macroblockd *xd, int block, enum BLOCK_SIZE_TYPE bsize, int b_mode, uint8_t *predictor, int pre_stride"
 specialize vp9_intra4x4_predict;
-
-if [ "$CONFIG_SB8X8" != "yes" ]; then
-
-prototype void vp9_intra8x8_predict "struct macroblockd *xd, int block, int b_mode, uint8_t *predictor, int pre_stride"
-specialize vp9_intra8x8_predict;
-
-prototype void vp9_intra_uv4x4_predict "struct macroblockd *xd, int block, int b_mode, uint8_t *predictor, int pre_stride"
-specialize vp9_intra_uv4x4_predict;
-
-fi
 
 if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
 prototype void vp9_add_residual_4x4 "const int16_t *diff, uint8_t *dest, int stride"

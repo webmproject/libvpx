@@ -573,22 +573,6 @@ void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd,
                              xd->left_available, 0 /*xd->right_available*/);
 }
 
-#if !CONFIG_SB8X8
-void vp9_intra8x8_predict(MACROBLOCKD *xd,
-                          int block4x4_idx,
-                          int mode,
-                          uint8_t *predictor, int pre_stride) {
-  const int block_idx = (block4x4_idx >> 2) | !!(block4x4_idx & 2);
-  const int have_top = (block_idx >> 1) || xd->up_available;
-  const int have_left = (block_idx & 1) || xd->left_available;
-  const int have_right = !(block_idx & 1) || xd->right_available;
-
-  vp9_build_intra_predictors(predictor, pre_stride,
-                             predictor, pre_stride,
-                             mode, 8, 8, have_top, have_left,
-                             have_right);
-}
-#endif
 #if !CONFIG_NEWBINTRAMODES
 void vp9_intra4x4_predict(MACROBLOCKD *xd,
                           int block_idx,
@@ -602,22 +586,6 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
   const int have_left =
       (block_idx & wmask) || xd->left_available;
   const int have_right = ((block_idx & wmask) != wmask);
-
-  vp9_build_intra_predictors(predictor, pre_stride,
-                             predictor, pre_stride,
-                             mode, 4, 4, have_top, have_left,
-                             have_right);
-}
-#endif
-#if !CONFIG_SB8X8
-void vp9_intra_uv4x4_predict(MACROBLOCKD *xd,
-                             int block4x4_idx,
-                             int mode,
-                             uint8_t *predictor, int pre_stride) {
-  const int block_idx = block4x4_idx & 3;
-  const int have_top = (block_idx >> 1) || xd->up_available;
-  const int have_left = (block_idx & 1) || xd->left_available;
-  const int have_right = !(block_idx & 1);
 
   vp9_build_intra_predictors(predictor, pre_stride,
                              predictor, pre_stride,
