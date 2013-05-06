@@ -4756,6 +4756,21 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     mbmi->ref_frame = ref_frame;
     mbmi->second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
+
+    // TODO(jingning): scaling not supported in SPLITMV mode.
+    if (mbmi->ref_frame > 0 &&
+          (yv12_mb[mbmi->ref_frame].y_width != cm->mb_cols * 16 ||
+           yv12_mb[mbmi->ref_frame].y_height != cm->mb_rows * 16) &&
+        this_mode == SPLITMV)
+      continue;
+
+    if (mbmi->second_ref_frame > 0 &&
+          (yv12_mb[mbmi->second_ref_frame].y_width != cm->mb_cols * 16 ||
+           yv12_mb[mbmi->second_ref_frame].y_height != cm->mb_rows * 16) &&
+        this_mode == SPLITMV)
+      continue;
+
+
     set_scale_factors(xd, mbmi->ref_frame, mbmi->second_ref_frame,
                       scale_factor);
     comp_pred = mbmi->second_ref_frame > INTRA_FRAME;
