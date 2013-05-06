@@ -1246,8 +1246,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   setup_loopfilter(pc, xd, &header_bc);
 
-  vp9_read_literal(&header_bc, 2);  // unused
-
   setup_quantization(pbi, &header_bc);
 
   // Determine if the golden frame or ARF buffer should be updated and how.
@@ -1343,11 +1341,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   vp9_setup_block_dptrs(xd);
 
   // clear out the coeff buffer
-  vpx_memset(xd->plane[0].qcoeff, 0, sizeof(xd->plane[0].qcoeff));
-  vpx_memset(xd->plane[1].qcoeff, 0, sizeof(xd->plane[1].qcoeff));
-  vpx_memset(xd->plane[2].qcoeff, 0, sizeof(xd->plane[2].qcoeff));
-
-  vp9_read_bit(&header_bc);  // unused
+  for (i = 0; i < MAX_MB_PLANE; ++i)
+    vp9_zero(xd->plane[i].qcoeff);
 
   vp9_decode_mode_mvs_init(pbi, &header_bc);
 
