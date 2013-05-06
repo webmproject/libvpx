@@ -11,12 +11,13 @@
 
 #include "vp9/common/vp9_blockd.h"
 
-void vp9_setup_block_dptrs(MACROBLOCKD *mb) {
+void vp9_setup_block_dptrs(MACROBLOCKD *mb,
+                           int subsampling_x, int subsampling_y) {
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; i++) {
     mb->plane[i].plane_type = i ? PLANE_TYPE_UV : PLANE_TYPE_Y_WITH_DC;
-    mb->plane[i].subsampling_x = !!i;
-    mb->plane[i].subsampling_y = !!i;
+    mb->plane[i].subsampling_x = i ? subsampling_x : 0;
+    mb->plane[i].subsampling_y = i ? subsampling_y : 0;
   }
 }

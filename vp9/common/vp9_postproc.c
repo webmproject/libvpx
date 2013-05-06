@@ -631,13 +631,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
 
   if (!flags) {
     *dest = *oci->frame_to_show;
-
-    /* handle problem with extending borders */
-    dest->y_width = oci->width;
-    dest->y_height = oci->height;
-    dest->uv_height = dest->y_height / 2;
     return 0;
-
   }
 
 #if ARCH_X86||ARCH_X86_64

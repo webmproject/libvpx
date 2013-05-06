@@ -31,6 +31,8 @@ struct lookahead_ctx;
  */
 struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
                                          unsigned int height,
+                                         unsigned int subsampling_x,
+                                         unsigned int subsampling_y,
                                          unsigned int depth);
 
 

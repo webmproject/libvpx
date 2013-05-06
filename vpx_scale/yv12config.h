@@ -72,6 +72,14 @@ extern "C" {
                                     int width, int height, int border);
   int vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf);
 
+  int vp9_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+                             int width, int height, int ss_x, int ss_y,
+                             int border);
+  int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+                               int width, int height, int ss_x, int ss_y,
+                               int border);
+  int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf);
+
 #ifdef __cplusplus
 }
 #endif

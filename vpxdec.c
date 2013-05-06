@@ -12,6 +12,7 @@
 /* This is a simple program that reads ivf files and decodes them
  * using the new interface. Decoded frames are output as YV12 raw.
  */
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -890,6 +891,7 @@ int main(int argc, const char **argv_) {
 
   if (use_y4m && !noblit) {
     char buffer[128];
+
     if (!single_file) {
       fprintf(stderr, "YUV4MPEG2 not supported with output patterns,"
               " try --i420 or --yv12.\n");
@@ -907,8 +909,8 @@ int main(int argc, const char **argv_) {
     /*Note: We can't output an aspect ratio here because IVF doesn't
        store one, and neither does VP8.
       That will have to wait until these tools support WebM natively.*/
-    sprintf(buffer, "YUV4MPEG2 C%s W%u H%u F%u:%u I%c\n",
-            "420jpeg", width, height, fps_num, fps_den, 'p');
+    snprintf(buffer, sizeof(buffer), "YUV4MPEG2 W%u H%u F%u:%u I%c ",
+             width, height, fps_num, fps_den, 'p');
     out_put(out, (unsigned char *)buffer,
             (unsigned int)strlen(buffer), do_md5);
   }
@@ -1023,6 +1025,17 @@ int main(int argc, const char **argv_) {
       show_progress(frame_in, frame_out, dx_time);
 
     if (!noblit) {
+      if (frame_out == 1 && use_y4m) {
+        /* Write out the color format to terminate the header line */
+        const char *color =
+            img->fmt == VPX_IMG_FMT_444A ? "C444alpha\n" :
+            img->fmt == VPX_IMG_FMT_I444 ? "C444\n" :
+            img->fmt == VPX_IMG_FMT_I422 ? "C422\n" :
+            "C420jpeg\n";
+
+        out_put(out, (const unsigned char*)color, strlen(color), do_md5);
+      }
+
       if (do_scale) {
         if (img && frame_out == 1) {
           stream_w = img->d_w;
@@ -1031,6 +1044,7 @@ int main(int argc, const char **argv_) {
                                      stream_w, stream_h, 16);
         }
         if (img && (img->d_w != stream_w || img->d_h != stream_h)) {
+          assert(img->fmt == VPX_IMG_FMT_I420);
           I420Scale(img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y],
                     img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U],
                     img->planes[VPX_PLANE_V], img->stride[VPX_PLANE_V],
@@ -1051,6 +1065,12 @@ int main(int argc, const char **argv_) {
         unsigned int y;
         char out_fn[PATH_MAX];
         uint8_t *buf;
+        unsigned int c_w =
+            img->x_chroma_shift ? (1 + img->d_w) >> img->x_chroma_shift
+                                : img->d_w;
+        unsigned int c_h =
+            img->y_chroma_shift ? (1 + img->d_h) >> img->y_chroma_shift
+                                : img->d_h;
 
         if (!single_file) {
           size_t len = sizeof(out_fn) - 1;
@@ -1071,15 +1091,15 @@ int main(int argc, const char **argv_) {
 
         buf = img->planes[flipuv ? VPX_PLANE_V : VPX_PLANE_U];
 
-        for (y = 0; y < (1 + img->d_h) / 2; y++) {
-          out_put(out, buf, (1 + img->d_w) / 2, do_md5);
+        for (y = 0; y < c_h; y++) {
+          out_put(out, buf, c_w, do_md5);
           buf += img->stride[VPX_PLANE_U];
         }
 
         buf = img->planes[flipuv ? VPX_PLANE_U : VPX_PLANE_V];
 
-        for (y = 0; y < (1 + img->d_h) / 2; y++) {
-          out_put(out, buf, (1 + img->d_w) / 2, do_md5);
+        for (y = 0; y < c_h; y++) {
+          out_put(out, buf, c_w, do_md5);
           buf += img->stride[VPX_PLANE_V];
         }
 

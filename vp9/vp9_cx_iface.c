@@ -211,11 +211,12 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
   switch (img->fmt) {
     case VPX_IMG_FMT_YV12:
     case VPX_IMG_FMT_I420:
-    case VPX_IMG_FMT_VPXI420:
-    case VPX_IMG_FMT_VPXYV12:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
       break;
     default:
-      ERROR("Invalid image format. Only YV12 and I420 images are supported");
+      ERROR("Invalid image format. Only YV12, I420, I422, I444 images are "
+            "supported.");
   }
 
   if ((img->d_w != ctx->cfg.g_w) || (img->d_h != ctx->cfg.g_h))
@@ -553,14 +554,17 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
   yv12->y_crop_height = img->d_h;
   yv12->y_width  = img->d_w;
   yv12->y_height = img->d_h;
-  yv12->uv_width = (1 + yv12->y_width) / 2;
-  yv12->uv_height = (1 + yv12->y_height) / 2;
+
+  yv12->uv_width = img->x_chroma_shift == 1 ? (1 + yv12->y_width) / 2
+                                            : yv12->y_width;
+  yv12->uv_height = img->y_chroma_shift == 1 ? (1 + yv12->y_height) / 2
+                                             : yv12->y_height;
 
   yv12->y_stride = img->stride[VPX_PLANE_Y];
   yv12->uv_stride = img->stride[VPX_PLANE_U];
 
   yv12->border  = (img->stride[VPX_PLANE_Y] - img->w) / 2;
-  yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 || img->fmt == VPX_IMG_FMT_VPXYV12); // REG_YUV = 0
+  yv12->clrtype = REG_YUV;
   return res;
 }
 
@@ -940,39 +944,7 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx) {
   }
 
   if (0 == vp9_get_preview_raw_frame(ctx->cpi, &sd, &flags)) {
-
-    /*
-    vpx_img_wrap(&ctx->preview_img, VPX_IMG_FMT_YV12,
-        sd.y_width + 2*VP9BORDERINPIXELS,
-        sd.y_height + 2*VP9BORDERINPIXELS,
-        1,
-        sd.buffer_alloc);
-    vpx_img_set_rect(&ctx->preview_img,
-        VP9BORDERINPIXELS, VP9BORDERINPIXELS,
-        sd.y_width, sd.y_height);
-        */
-
-    ctx->preview_img.bps = 12;
-    ctx->preview_img.planes[VPX_PLANE_Y] = sd.y_buffer;
-    ctx->preview_img.planes[VPX_PLANE_U] = sd.u_buffer;
-    ctx->preview_img.planes[VPX_PLANE_V] = sd.v_buffer;
-
-    if (sd.clrtype == REG_YUV)
-      ctx->preview_img.fmt = VPX_IMG_FMT_I420;
-    else
-      ctx->preview_img.fmt = VPX_IMG_FMT_VPXI420;
-
-    ctx->preview_img.x_chroma_shift = 1;
-    ctx->preview_img.y_chroma_shift = 1;
-
-    ctx->preview_img.d_w = sd.y_width;
-    ctx->preview_img.d_h = sd.y_height;
-    ctx->preview_img.stride[VPX_PLANE_Y] = sd.y_stride;
-    ctx->preview_img.stride[VPX_PLANE_U] = sd.uv_stride;
-    ctx->preview_img.stride[VPX_PLANE_V] = sd.uv_stride;
-    ctx->preview_img.w   = sd.y_width;
-    ctx->preview_img.h   = sd.y_height;
-
+    yuvconfig2image(&ctx->preview_img, &sd, NULL);
     return &ctx->preview_img;
   } else
     return NULL;

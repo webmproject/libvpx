@@ -313,9 +313,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vp9_free_frame_buffers(&cpi->common);
 
-  vp8_yv12_de_alloc_frame_buffer(&cpi->last_frame_uf);
-  vp8_yv12_de_alloc_frame_buffer(&cpi->scaled_source);
-  vp8_yv12_de_alloc_frame_buffer(&cpi->alt_ref_buffer);
+  vp9_free_frame_buffer(&cpi->last_frame_uf);
+  vp9_free_frame_buffer(&cpi->scaled_source);
+  vp9_free_frame_buffer(&cpi->alt_ref_buffer);
   vp9_lookahead_destroy(cpi->lookahead);
 
   vpx_free(cpi->tok);
@@ -835,15 +835,19 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 }
 
 static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+
   cpi->lookahead = vp9_lookahead_init(cpi->oxcf.width, cpi->oxcf.height,
+                                      cm->subsampling_x, cm->subsampling_y,
                                       cpi->oxcf.lag_in_frames);
   if (!cpi->lookahead)
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate lag buffers");
 
-  if (vp8_yv12_alloc_frame_buffer(&cpi->alt_ref_buffer,
-                                  cpi->oxcf.width, cpi->oxcf.height,
-                                  VP9BORDERINPIXELS))
+  if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
+                               cpi->oxcf.width, cpi->oxcf.height,
+                               cm->subsampling_x, cm->subsampling_y,
+                               VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
 }
@@ -873,13 +877,17 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate partition data");
 
-  if (vp8_yv12_alloc_frame_buffer(&cpi->last_frame_uf,
-                                  cm->width, cm->height, VP9BORDERINPIXELS))
+  if (vp9_alloc_frame_buffer(&cpi->last_frame_uf,
+                             cm->width, cm->height,
+                             cm->subsampling_x, cm->subsampling_y,
+                             VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
 
-  if (vp8_yv12_alloc_frame_buffer(&cpi->scaled_source,
-                                  cm->width, cm->height, VP9BORDERINPIXELS))
+  if (vp9_alloc_frame_buffer(&cpi->scaled_source,
+                             cm->width, cm->height,
+                             cm->subsampling_x, cm->subsampling_y,
+                             VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
@@ -914,13 +922,17 @@ static void update_frame_size(VP9_COMP *cpi) {
   vp9_update_frame_size(cm);
 
   // Update size of buffers local to this frame
-  if (vp8_yv12_realloc_frame_buffer(&cpi->last_frame_uf,
-                                    cm->width, cm->height, VP9BORDERINPIXELS))
+  if (vp9_realloc_frame_buffer(&cpi->last_frame_uf,
+                               cm->width, cm->height,
+                               cm->subsampling_x, cm->subsampling_y,
+                               VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate last frame buffer");
 
-  if (vp8_yv12_realloc_frame_buffer(&cpi->scaled_source,
-                                    cm->width, cm->height, VP9BORDERINPIXELS))
+  if (vp9_realloc_frame_buffer(&cpi->scaled_source,
+                               cm->width, cm->height,
+                               cm->subsampling_x, cm->subsampling_y,
+                               VP9BORDERINPIXELS))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate scaled source buffer");
 
@@ -1032,6 +1044,9 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cm->width = oxcf->width;
   cm->height = oxcf->height;
+  cm->subsampling_x = 0;
+  cm->subsampling_y = 0;
+  vp9_alloc_compressor_data(cpi);
 
   // change includes all joint functionality
   vp9_change_config(ptr, oxcf);
@@ -1196,17 +1211,13 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cm->sharpness_level = cpi->oxcf.Sharpness;
 
-  // Increasing the size of the frame beyond the first seen frame, or some
-  // otherwise signalled maximum size, is not supported.
-  // TODO(jkoleszar): exit gracefully.
-  if (!cpi->initial_width) {
-    alloc_raw_frame_buffers(cpi);
-    vp9_alloc_compressor_data(cpi);
-    cpi->initial_width = cm->width;
-    cpi->initial_height = cm->height;
+  if (cpi->initial_width) {
+    // Increasing the size of the frame beyond the first seen frame, or some
+    // otherwise signalled maximum size, is not supported.
+    // TODO(jkoleszar): exit gracefully.
+    assert(cm->width <= cpi->initial_width);
+    assert(cm->height <= cpi->initial_height);
   }
-  assert(cm->width <= cpi->initial_width);
-  assert(cm->height <= cpi->initial_height);
   update_frame_size(cpi);
 
   if (cpi->oxcf.fixed_q >= 0) {
@@ -2492,9 +2503,10 @@ static void scale_references(VP9_COMP *cpi) {
         ref->y_crop_height != cm->height) {
       int new_fb = get_free_fb(cm);
 
-      vp8_yv12_realloc_frame_buffer(&cm->yv12_fb[new_fb],
-                                    cm->width, cm->height,
-                                    VP9BORDERINPIXELS);
+      vp9_realloc_frame_buffer(&cm->yv12_fb[new_fb],
+                               cm->width, cm->height,
+                               cm->subsampling_x, cm->subsampling_y,
+                               VP9BORDERINPIXELS);
       scale_and_extend_frame(ref, &cm->yv12_fb[new_fb]);
       cpi->scaled_ref_idx[i] = new_fb;
     } else {
@@ -3579,6 +3591,15 @@ int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
   struct vpx_usec_timer  timer;
   int                    res = 0;
 
+  if (!cpi->initial_width) {
+    // TODO(jkoleszar): Support 1/4 subsampling?
+    cm->subsampling_x = sd->uv_width < sd->y_width;
+    cm->subsampling_y = sd->uv_height < sd->y_height;
+    alloc_raw_frame_buffers(cpi);
+
+    cpi->initial_width = cm->width;
+    cpi->initial_height = cm->height;
+  }
   vpx_usec_timer_start(&timer);
   if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time, frame_flags,
                          cpi->active_map_enabled ? cpi->active_map : NULL))
@@ -3843,9 +3864,10 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   cm->frame_flags = *frame_flags;
 
   // Reset the frame pointers to the current frame size
-  vp8_yv12_realloc_frame_buffer(&cm->yv12_fb[cm->new_fb_idx],
-                                cm->width, cm->height,
-                                VP9BORDERINPIXELS);
+  vp9_realloc_frame_buffer(&cm->yv12_fb[cm->new_fb_idx],
+                           cm->width, cm->height,
+                           cm->subsampling_x, cm->subsampling_y,
+                           VP9BORDERINPIXELS);
 
   // Calculate scaling factors for each of the 3 available references
   for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {

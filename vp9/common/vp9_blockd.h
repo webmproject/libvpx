@@ -692,7 +692,8 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   return tx_type;
 }
 
-void vp9_setup_block_dptrs(MACROBLOCKD *xd);
+void vp9_setup_block_dptrs(MACROBLOCKD *xd,
+                           int subsampling_x, int subsampling_y);
 
 static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;

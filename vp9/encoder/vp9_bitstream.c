@@ -1805,6 +1805,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     int scaling = (pc->width != pc->display_width ||
                    pc->height != pc->display_height);
     int v = (oh.first_partition_length_in_bytes << 8) |
+            (pc->subsampling_y << 7) |
+            (pc->subsampling_x << 6) |
             (scaling << 5) |
             (oh.show_frame << 4) |
             (oh.version << 1) |
