@@ -326,6 +326,7 @@ struct input_state {
   unsigned int          h;
   struct vpx_rational   framerate;
   int                   use_i420;
+  int                   only_i420;
 };
 
 
@@ -1793,7 +1794,8 @@ void open_input_file(struct input_state *input) {
 
   if (input->detect.buf_read == 4
       && file_is_y4m(input->file, &input->y4m, input->detect.buf)) {
-    if (y4m_input_open(&input->y4m, input->file, input->detect.buf, 4) >= 0) {
+    if (y4m_input_open(&input->y4m, input->file, input->detect.buf, 4,
+                       input->only_i420) >= 0) {
       input->file_type = FILE_TYPE_Y4M;
       input->w = input->y4m.pic_w;
       input->h = input->y4m.pic_h;
@@ -2517,6 +2519,7 @@ int main(int argc, const char **argv_) {
   input.framerate.num = 30;
   input.framerate.den = 1;
   input.use_i420 = 1;
+  input.only_i420 = 1;
 
   /* First parse the global configuration values, because we want to apply
    * other parameters on top of the default configuration provided by the
@@ -2550,6 +2553,12 @@ int main(int argc, const char **argv_) {
 
   if (!input.fn)
     usage_exit();
+
+#if CONFIG_NON420
+  /* Decide if other chroma subsamplings than 4:2:0 are supported */
+  if (global.codec->fourcc == VP9_FOURCC)
+    input.only_i420 = 0;
+#endif
 
   for (pass = global.pass ? global.pass - 1 : 0; pass < global.passes; pass++) {
     int frames_in = 0, seen_frames = 0;
