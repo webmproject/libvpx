@@ -481,7 +481,7 @@ void configure_arnr_filter(VP9_COMP *cpi, const unsigned int this_frame,
   // Note: this_frame->frame has been updated in the loop
   // so it now points at the ARF frame.
   half_gf_int = cpi->baseline_gf_interval >> 1;
-  frames_after_arf = (int)(cpi->twopass.total_stats->count - this_frame - 1);
+  frames_after_arf = (int)(cpi->twopass.total_stats.count - this_frame - 1);
 
   switch (cpi->oxcf.arnr_type) {
     case 1:  // Backward filter
