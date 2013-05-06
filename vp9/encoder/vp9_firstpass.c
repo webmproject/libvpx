@@ -14,7 +14,6 @@
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_variance.h"
 #include "vp9/encoder/vp9_encodeintra.h"
-#include "vp9/common/vp9_setupintrarecon.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vpx_scale/vpx_scale.h"
@@ -486,8 +485,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   vp9_setup_block_dptrs(&x->e_mbd);
 
-  // set up frame new frame for intra coded blocks
-  vp9_setup_intra_recon(new_yv12);
   vp9_frame_init_quantizer(cpi);
 
   // Initialise the MV cost table to the defaults

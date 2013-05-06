@@ -20,7 +20,6 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/encoder/vp9_segmentation.h"
-#include "vp9/common/vp9_setupintrarecon.h"
 #include "vp9/encoder/vp9_encodeintra.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_invtrans.h"
@@ -1560,9 +1559,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   setup_pre_planes(xd, &cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]], NULL,
                    0, 0, NULL, NULL);
   setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], 0, 0);
-
-  // set up frame for intra coded blocks
-  vp9_setup_intra_recon(&cm->yv12_fb[cm->new_fb_idx]);
 
   vp9_build_block_offsets(x);
 
