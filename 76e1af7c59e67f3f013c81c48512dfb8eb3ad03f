@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXn//650\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2868,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-06T23:28:55Z",
+      "side": 1,
+      "message": "if (bsize \u003d\u003d BLOCK_SIZE_MB16X16), else this will break once sb8x8 merges.",
+      "revId": "76e1af7c59e67f3f013c81c48512dfb8eb3ad03f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
