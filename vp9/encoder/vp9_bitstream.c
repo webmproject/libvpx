@@ -1930,9 +1930,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     }
   }
 
-  // TODO(jkoleszar): remove these unused bits
-  vp9_write_literal(&header_bc, 0, 2);
-
   // Frame Q baseline quantizer index
   vp9_write_literal(&header_bc, pc->base_qindex, QINDEX_BITS);
 
@@ -2177,9 +2174,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
 #ifdef ENTROPY_STATS
   active_section = 2;
 #endif
-
-  // TODO(jkoleszar): remove this unused bit
-  vp9_write_bit(&header_bc, 1);
 
   vp9_update_skip_probs(cpi);
   for (i = 0; i < MBSKIP_CONTEXTS; ++i) {
