@@ -914,7 +914,8 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     int i = 0;
     do {
       const B_PREDICTION_MODE a = above_block_mode(m, i, mis);
-      const B_PREDICTION_MODE l = (xd->left_available || (i & 3)) ?
+      const B_PREDICTION_MODE l = (xd->left_available ||
+                                  (i & (3 >> CONFIG_SB8X8))) ?
                                   left_block_mode(m, i) : B_DC_PRED;
       const int bm = m->bmi[i].as_mode.first;
 
