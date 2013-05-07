@@ -247,6 +247,7 @@ EXPERIMENT_LIST="
     multiple_arf
     non420
     ab4x4
+    comp_inter_joint_search
 "
 CONFIG_LIST="
     external_build

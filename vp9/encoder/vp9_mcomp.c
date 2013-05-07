@@ -413,6 +413,201 @@ int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x,
 
   return besterr;
 }
+
+#if CONFIG_COMP_INTER_JOINT_SEARCH
+#undef DIST
+/* returns subpixel variance error function */
+#define DIST(r, c) \
+    vfp->svaf(PRE(r, c), y_stride, SP(c), SP(r), \
+              z, src_stride, &sse, second_pred)
+
+int vp9_find_best_sub_pixel_comp(MACROBLOCK *x,
+                                 int_mv *bestmv, int_mv *ref_mv,
+                                 int error_per_bit,
+                                 const vp9_variance_fn_ptr_t *vfp,
+                                 int *mvjcost, int *mvcost[2],
+                                 int *distortion,
+                                 unsigned int *sse1,
+                                 const uint8_t *second_pred, int w, int h) {
+  uint8_t *z = x->plane[0].src.buf;
+  int src_stride = x->plane[0].src.stride;
+  MACROBLOCKD *xd = &x->e_mbd;
+
+  int rr, rc, br, bc, hstep;
+  int tr, tc;
+  unsigned int besterr = INT_MAX;
+  unsigned int left, right, up, down, diag;
+  unsigned int sse;
+  unsigned int whichdir;
+  unsigned int halfiters = 4;
+  unsigned int quarteriters = 4;
+  unsigned int eighthiters = 4;
+  int thismse;
+  int maxc, minc, maxr, minr;
+  int y_stride;
+  int offset;
+  int usehp = xd->allow_high_precision_mv;
+
+  uint8_t *comp_pred = vpx_memalign(16, w * h * sizeof(uint8_t));
+  uint8_t *y = xd->plane[0].pre[0].buf +
+               (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
+               bestmv->as_mv.col;
+
+  y_stride = xd->plane[0].pre[0].stride;
+
+  rr = ref_mv->as_mv.row;
+  rc = ref_mv->as_mv.col;
+  br = bestmv->as_mv.row << 3;
+  bc = bestmv->as_mv.col << 3;
+  hstep = 4;
+  minc = MAX(x->mv_col_min << 3, (ref_mv->as_mv.col) -
+             ((1 << MV_MAX_BITS) - 1));
+  maxc = MIN(x->mv_col_max << 3, (ref_mv->as_mv.col) +
+             ((1 << MV_MAX_BITS) - 1));
+  minr = MAX(x->mv_row_min << 3, (ref_mv->as_mv.row) -
+             ((1 << MV_MAX_BITS) - 1));
+  maxr = MIN(x->mv_row_max << 3, (ref_mv->as_mv.row) +
+             ((1 << MV_MAX_BITS) - 1));
+
+  tr = br;
+  tc = bc;
+
+
+  offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+
+  // central mv
+  bestmv->as_mv.row <<= 3;
+  bestmv->as_mv.col <<= 3;
+
+  // calculate central point error
+  // TODO(yunqingwang): central pointer error was already calculated in full-
+  // pixel search, and can be passed in this function.
+  comp_avg_pred(comp_pred, second_pred, w, h, y, y_stride);
+  besterr = vfp->vf(comp_pred, w, z, src_stride, sse1);
+  *distortion = besterr;
+  besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost,
+                         error_per_bit, xd->allow_high_precision_mv);
+
+  // Each subsequent iteration checks at least one point in
+  // common with the last iteration could be 2 ( if diag selected)
+  while (--halfiters) {
+    // 1/2 pel
+    CHECK_BETTER(left, tr, tc - hstep);
+    CHECK_BETTER(right, tr, tc + hstep);
+    CHECK_BETTER(up, tr - hstep, tc);
+    CHECK_BETTER(down, tr + hstep, tc);
+
+    whichdir = (left < right ? 0 : 1) + (up < down ? 0 : 2);
+
+    switch (whichdir) {
+      case 0:
+        CHECK_BETTER(diag, tr - hstep, tc - hstep);
+        break;
+      case 1:
+        CHECK_BETTER(diag, tr - hstep, tc + hstep);
+        break;
+      case 2:
+        CHECK_BETTER(diag, tr + hstep, tc - hstep);
+        break;
+      case 3:
+        CHECK_BETTER(diag, tr + hstep, tc + hstep);
+        break;
+    }
+
+    // no reason to check the same one again.
+    if (tr == br && tc == bc)
+      break;
+
+    tr = br;
+    tc = bc;
+  }
+
+  // Each subsequent iteration checks at least one point in common with
+  // the last iteration could be 2 ( if diag selected) 1/4 pel
+  hstep >>= 1;
+  while (--quarteriters) {
+    CHECK_BETTER(left, tr, tc - hstep);
+    CHECK_BETTER(right, tr, tc + hstep);
+    CHECK_BETTER(up, tr - hstep, tc);
+    CHECK_BETTER(down, tr + hstep, tc);
+
+    whichdir = (left < right ? 0 : 1) + (up < down ? 0 : 2);
+
+    switch (whichdir) {
+      case 0:
+        CHECK_BETTER(diag, tr - hstep, tc - hstep);
+        break;
+      case 1:
+        CHECK_BETTER(diag, tr - hstep, tc + hstep);
+        break;
+      case 2:
+        CHECK_BETTER(diag, tr + hstep, tc - hstep);
+        break;
+      case 3:
+        CHECK_BETTER(diag, tr + hstep, tc + hstep);
+        break;
+    }
+
+    // no reason to check the same one again.
+    if (tr == br && tc == bc)
+      break;
+
+    tr = br;
+    tc = bc;
+  }
+
+  if (xd->allow_high_precision_mv) {
+    usehp = vp9_use_nmv_hp(&ref_mv->as_mv);
+  } else {
+    usehp = 0;
+  }
+
+  if (usehp) {
+    hstep >>= 1;
+    while (--eighthiters) {
+      CHECK_BETTER(left, tr, tc - hstep);
+      CHECK_BETTER(right, tr, tc + hstep);
+      CHECK_BETTER(up, tr - hstep, tc);
+      CHECK_BETTER(down, tr + hstep, tc);
+
+      whichdir = (left < right ? 0 : 1) + (up < down ? 0 : 2);
+
+      switch (whichdir) {
+        case 0:
+          CHECK_BETTER(diag, tr - hstep, tc - hstep);
+          break;
+        case 1:
+          CHECK_BETTER(diag, tr - hstep, tc + hstep);
+          break;
+        case 2:
+          CHECK_BETTER(diag, tr + hstep, tc - hstep);
+          break;
+        case 3:
+          CHECK_BETTER(diag, tr + hstep, tc + hstep);
+          break;
+      }
+
+      // no reason to check the same one again.
+      if (tr == br && tc == bc)
+        break;
+
+      tr = br;
+      tc = bc;
+    }
+  }
+  bestmv->as_mv.row = br;
+  bestmv->as_mv.col = bc;
+
+  vpx_free(comp_pred);
+
+  if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > (MAX_FULL_PEL_VAL << 3)) ||
+      (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL << 3)))
+    return INT_MAX;
+
+  return besterr;
+}
+#endif  // CONFIG_COMP_INTER_JOINT_SEARCH
+
 #undef MVC
 #undef PRE
 #undef DIST
@@ -2132,7 +2327,109 @@ int vp9_refining_search_sadx4(MACROBLOCK *x,
     return INT_MAX;
 }
 
+#if CONFIG_COMP_INTER_JOINT_SEARCH
+/* This function is called when we do joint motion search in comp_inter_inter
+ * mode.
+ */
+int vp9_refining_search_8p_c(MACROBLOCK *x,
+                             int_mv *ref_mv, int error_per_bit,
+                             int search_range, vp9_variance_fn_ptr_t *fn_ptr,
+                             int *mvjcost, int *mvcost[2], int_mv *center_mv,
+                             const uint8_t *second_pred, int w, int h) {
+  const MACROBLOCKD* const xd = &x->e_mbd;
+  MV neighbors[8] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0},
+      {-1, -1}, {1, -1}, {-1, 1}, {1, 1}};
+  int i, j;
+  int this_row_offset, this_col_offset;
 
+  int what_stride = x->plane[0].src.stride;
+  int in_what_stride = xd->plane[0].pre[0].stride;
+  uint8_t *what = x->plane[0].src.buf;
+  uint8_t *best_address = xd->plane[0].pre[0].buf +
+                          (ref_mv->as_mv.row * xd->plane[0].pre[0].stride) +
+                          ref_mv->as_mv.col;
+  uint8_t *check_here;
+  unsigned int thissad;
+  int_mv this_mv;
+  unsigned int bestsad = INT_MAX;
+  int_mv fcenter_mv;
+
+  int *mvjsadcost = x->nmvjointsadcost;
+  int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
+
+  /* Compound pred buffer */
+  uint8_t *comp_pred = vpx_memalign(16, w * h * sizeof(uint8_t));
+
+  fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
+  fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
+
+  /* Get compound pred by averaging two pred blocks. */
+  comp_avg_pred(comp_pred, second_pred, w, h, best_address, in_what_stride);
+
+  bestsad = fn_ptr->sdf(what, what_stride, comp_pred, w, 0x7fffffff) +
+      mvsad_err_cost(ref_mv, &fcenter_mv, mvjsadcost, mvsadcost, error_per_bit);
+
+  for (i = 0; i < search_range; i++) {
+    int best_site = -1;
+
+    for (j = 0; j < 8; j++) {
+      this_row_offset = ref_mv->as_mv.row + neighbors[j].row;
+      this_col_offset = ref_mv->as_mv.col + neighbors[j].col;
+
+      if ((this_col_offset > x->mv_col_min) &&
+          (this_col_offset < x->mv_col_max) &&
+          (this_row_offset > x->mv_row_min) &&
+          (this_row_offset < x->mv_row_max)) {
+        check_here = (neighbors[j].row) * in_what_stride + neighbors[j].col +
+            best_address;
+
+        /* Get compound block and use it to calculate SAD. */
+        comp_avg_pred(comp_pred, second_pred, w, h, check_here,
+                      in_what_stride);
+        thissad = fn_ptr->sdf(what, what_stride, comp_pred, w, bestsad);
+
+        if (thissad < bestsad) {
+          this_mv.as_mv.row = this_row_offset;
+          this_mv.as_mv.col = this_col_offset;
+          thissad += mvsad_err_cost(&this_mv, &fcenter_mv, mvjsadcost,
+                                    mvsadcost, error_per_bit);
+
+          if (thissad < bestsad) {
+            bestsad = thissad;
+            best_site = j;
+          }
+        }
+      }
+    }
+
+    if (best_site == -1) {
+      break;
+    } else {
+      ref_mv->as_mv.row += neighbors[best_site].row;
+      ref_mv->as_mv.col += neighbors[best_site].col;
+      best_address += (neighbors[best_site].row) * in_what_stride +
+          neighbors[best_site].col;
+    }
+  }
+
+  this_mv.as_mv.row = ref_mv->as_mv.row << 3;
+  this_mv.as_mv.col = ref_mv->as_mv.col << 3;
+
+  if (bestsad < INT_MAX) {
+    int besterr;
+    comp_avg_pred(comp_pred, second_pred, w, h, best_address, in_what_stride);
+    besterr = fn_ptr->vf(what, what_stride, comp_pred, w,
+        (unsigned int *)(&thissad)) +
+        mv_err_cost(&this_mv, center_mv, mvjcost, mvcost, x->errorperbit,
+                    xd->allow_high_precision_mv);
+    vpx_free(comp_pred);
+    return besterr;
+  } else {
+    vpx_free(comp_pred);
+    return INT_MAX;
+  }
+}
+#endif  // CONFIG_COMP_INTER_JOINT_SEARCH
 
 #ifdef ENTROPY_STATS
 void print_mode_context(VP9_COMMON *pc) {

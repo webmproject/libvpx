@@ -12,6 +12,7 @@
 #define VP9_ENCODER_VP9_VARIANCE_H_
 
 #include "vpx/vpx_integer.h"
+// #include "./vpx_config.h"
 
 typedef unsigned int(*vp9_sad_fn_t)(const uint8_t *src_ptr,
                                     int source_stride,
@@ -50,6 +51,15 @@ typedef unsigned int (*vp9_subpixvariance_fn_t)(const uint8_t *src_ptr,
                                                 int Refstride,
                                                 unsigned int *sse);
 
+typedef unsigned int (*vp9_subp_avg_variance_fn_t)(const uint8_t *src_ptr,
+                                                   int source_stride,
+                                                   int xoffset,
+                                                   int yoffset,
+                                                   const uint8_t *ref_ptr,
+                                                   int Refstride,
+                                                   unsigned int *sse,
+                                                   const uint8_t *second_pred);
+
 typedef void (*vp9_ssimpf_fn_t)(uint8_t *s, int sp, uint8_t *r,
                                 int rp, unsigned long *sum_s,
                                 unsigned long *sum_r, unsigned long *sum_sq_s,
@@ -64,15 +74,33 @@ typedef unsigned int (*vp9_get16x16prederror_fn_t)(const uint8_t *src_ptr,
                                                    int  ref_stride);
 
 typedef struct vp9_variance_vtable {
-    vp9_sad_fn_t            sdf;
-    vp9_variance_fn_t       vf;
-    vp9_subpixvariance_fn_t svf;
-    vp9_variance_fn_t       svf_halfpix_h;
-    vp9_variance_fn_t       svf_halfpix_v;
-    vp9_variance_fn_t       svf_halfpix_hv;
-    vp9_sad_multi_fn_t      sdx3f;
-    vp9_sad_multi1_fn_t     sdx8f;
-    vp9_sad_multi_d_fn_t    sdx4df;
+    vp9_sad_fn_t               sdf;
+    vp9_variance_fn_t          vf;
+    vp9_subpixvariance_fn_t    svf;
+    vp9_subp_avg_variance_fn_t svaf;
+    vp9_variance_fn_t          svf_halfpix_h;
+    vp9_variance_fn_t          svf_halfpix_v;
+    vp9_variance_fn_t          svf_halfpix_hv;
+    vp9_sad_multi_fn_t         sdx3f;
+    vp9_sad_multi1_fn_t        sdx8f;
+    vp9_sad_multi_d_fn_t       sdx4df;
 } vp9_variance_fn_ptr_t;
 
+// #if CONFIG_COMP_INTER_JOINT_SEARCH
+static void comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int weight,
+                          int height, uint8_t *ref, int ref_stride) {
+  int i, j;
+
+  for (i = 0; i < height; i++) {
+    for (j = 0; j < weight; j++) {
+      int tmp;
+      tmp = pred[j] + ref[j];
+      comp_pred[j] = (tmp + 1) >> 1;
+    }
+    comp_pred += weight;
+    pred += weight;
+    ref += ref_stride;
+  }
+}
+// #endif  // CONFIG_COMP_INTER_JOINT_SEARCH
 #endif  // VP9_ENCODER_VP9_VARIANCE_H_
