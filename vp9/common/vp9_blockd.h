@@ -62,9 +62,6 @@ typedef enum {
 } FRAME_TYPE;
 
 typedef enum {
-#if CONFIG_ENABLE_6TAP
-  SIXTAP,
-#endif
   EIGHTTAP_SMOOTH,
   EIGHTTAP,
   EIGHTTAP_SHARP,

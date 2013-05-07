@@ -304,15 +304,9 @@ const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
   -1, -2
 };
 struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
-#if CONFIG_ENABLE_6TAP
-const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
-  SIXTAP, EIGHTTAP, EIGHTTAP_SHARP};
-const int vp9_switchable_interp_map[SWITCHABLE+1] = {0, -1, 1, 2, -1, -1};
-#else
 const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
   EIGHTTAP, EIGHTTAP_SMOOTH, EIGHTTAP_SHARP};
 const int vp9_switchable_interp_map[SWITCHABLE+1] = {1, 0, 2, -1, -1};
-#endif
 const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
                                           [VP9_SWITCHABLE_FILTERS-1] = {
   {248, 192}, { 32, 248}, { 32,  32}, {192, 160}
@@ -330,20 +324,12 @@ const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
 };
 const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
   EIGHTTAP, EIGHTTAP_SHARP};
-#if CONFIG_ENABLE_6TAP
-const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, -1, 0, 1, -1, -1};
-#else
 const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, 0, 1, -1, -1};
-#endif
 #endif  // VP9_SWITCHABLE_FILTERS
 
 // Indicates if the filter is interpolating or non-interpolating
 // Note currently only the EIGHTTAP_SMOOTH is non-interpolating
-#if CONFIG_ENABLE_6TAP
-const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {1, 0, 1, 1, 1, -1};
-#else
 const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {0, 1, 1, 1, -1};
-#endif
 
 void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_kf_bmode_encodings,   vp9_kf_bmode_tree);

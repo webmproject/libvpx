@@ -241,7 +241,6 @@ EXPERIMENT_LIST="
     csm
     implicit_segmentation
     comp_interintra_pred
-    enable_6tap
     modelcoefprob
     loop_dering
     scatterscan

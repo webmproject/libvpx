@@ -125,11 +125,6 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
     case BILINEAR:
       xd->subpix.filter_x = xd->subpix.filter_y = vp9_bilinear_filters;
       break;
-#if CONFIG_ENABLE_6TAP
-    case SIXTAP:
-      xd->subpix.filter_x = xd->subpix.filter_y = vp9_sub_pel_filters_6;
-      break;
-#endif
   }
   assert(((intptr_t)xd->subpix.filter_x & 0xff) == 0);
 }

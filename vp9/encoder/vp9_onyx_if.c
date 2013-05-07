@@ -2624,11 +2624,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   /* list of filters to search over */
   int mcomp_filters_to_search[] = {
-#if CONFIG_ENABLE_6TAP
-      EIGHTTAP, EIGHTTAP_SHARP, SIXTAP, SWITCHABLE
-#else
-      EIGHTTAP, EIGHTTAP_SHARP, EIGHTTAP_SMOOTH, SWITCHABLE
-#endif
+    EIGHTTAP, EIGHTTAP_SHARP, EIGHTTAP_SMOOTH, SWITCHABLE
   };
   int mcomp_filters = sizeof(mcomp_filters_to_search) /
       sizeof(*mcomp_filters_to_search);
