@@ -19,8 +19,6 @@
 
 #include "vp9/encoder/vp9_boolhuff.h"       /* for now */
 
-typedef BOOL_CODER vp9_writer;
-
 #define vp9_write encode_bool
 #define vp9_write_literal vp9_encode_value
 #define vp9_write_bit(w, v) vp9_write((w), (v), vp9_prob_half)
@@ -39,66 +37,53 @@ typedef BOOL_CODER vp9_writer;
 /* Both of these return bits, not scaled bits. */
 static INLINE unsigned int cost_branch256(const unsigned int ct[2],
                                           vp9_prob p) {
-  /* Imitate existing calculation */
   return ct[0] * vp9_cost_zero(p) + ct[1] * vp9_cost_one(p);
 }
 
 static INLINE unsigned int cost_branch(const unsigned int ct[2],
                                        vp9_prob p) {
-  /* Imitate existing calculation */
   return cost_branch256(ct, p) >> 8;
 }
 
 
-/* Small functions to write explicit values and tokens, as well as
-   estimate their lengths. */
-
-static INLINE void treed_write(vp9_writer *const w,
-                               vp9_tree t,
-                               const vp9_prob *const p,
-                               int v,
-                               /* number of bits in v, assumed nonzero */
-                               int n) {
+static INLINE void treed_write(vp9_writer *w,
+                               vp9_tree tree, const vp9_prob *probs,
+                               int bits, int len) {
   vp9_tree_index i = 0;
 
   do {
-    const int b = (v >> --n) & 1;
-    vp9_write(w, b, p[i >> 1]);
-    i = t[i + b];
-  } while (n);
+    const int bit = (bits >> --len) & 1;
+    vp9_write(w, bit, probs[i >> 1]);
+    i = tree[i + bit];
+  } while (len);
 }
 
-static INLINE void write_token(vp9_writer *w, vp9_tree t, const vp9_prob *p,
-                               const struct vp9_token *x) {
-  treed_write(w, t, p, x->value, x->len);
+static INLINE void write_token(vp9_writer *w, vp9_tree tree,
+                               const vp9_prob *probs,
+                               const struct vp9_token *token) {
+  treed_write(w, tree, probs, token->value, token->len);
 }
 
-static INLINE int treed_cost(vp9_tree t,
-                             const vp9_prob *const p,
-                             int v,
-                             /* number of bits in v, assumed nonzero */
-                             int n) {
-  int c = 0;
+static INLINE int treed_cost(vp9_tree tree, const vp9_prob *probs,
+                             int bits, int len) {
+  int cost = 0;
   vp9_tree_index i = 0;
 
   do {
-    const int b = (v >> --n) & 1;
-    c += vp9_cost_bit(p[i >> 1], b);
-    i = t[i + b];
-  } while (n);
+    const int bit = (bits >> --len) & 1;
+    cost += vp9_cost_bit(probs[i >> 1], bit);
+    i = tree[i + bit];
+  } while (len);
 
-  return c;
+  return cost;
 }
 
-static INLINE int cost_token(vp9_tree t, const vp9_prob *p,
-                             const struct vp9_token *x) {
-  return treed_cost(t, p, x->value, x->len);
+static INLINE int cost_token(vp9_tree tree, const vp9_prob *probs,
+                             const struct vp9_token *token) {
+  return treed_cost(tree, probs, token->value, token->len);
 }
 
-/* Fill array of costs for all possible token values. */
-
-void vp9_cost_tokens(int *Costs, const vp9_prob *, vp9_tree);
-
-void vp9_cost_tokens_skip(int *c, const vp9_prob *p, vp9_tree t);
+void vp9_cost_tokens(int *costs, const vp9_prob *probs, vp9_tree tree);
+void vp9_cost_tokens_skip(int *costs, const vp9_prob *probs, vp9_tree tree);
 
 #endif  // VP9_ENCODER_VP9_TREEWRITER_H_

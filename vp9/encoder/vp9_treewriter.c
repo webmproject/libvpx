@@ -8,35 +8,31 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "vp9/encoder/vp9_treewriter.h"
-#include "vp9/common/vp9_common.h"
 
-static void cost(
-  int *const C,
-  vp9_tree T,
-  const vp9_prob *const P,
-  int i,
-  int c
-) {
-  const vp9_prob p = P [i >> 1];
+static void cost(int *costs, vp9_tree tree, const vp9_prob *probs,
+                 int i, int c) {
+  const vp9_prob prob = probs[i / 2];
+  int b;
 
-  do {
-    const vp9_tree_index j = T[i];
-    const int d = c + vp9_cost_bit(p, i & 1);
+  for (b = 0; b <= 1; ++b) {
+    const int cc = c + vp9_cost_bit(prob, b);
+    const vp9_tree_index ii = tree[i + b];
 
-    if (j <= 0)
-      C[-j] = d;
+    if (ii <= 0)
+      costs[-ii] = cc;
     else
-      cost(C, T, P, j, d);
-  } while (++i & 1);
-}
-void vp9_cost_tokens(int *c, const vp9_prob *p, vp9_tree t) {
-  cost(c, t, p, 0, 0);
+      cost(costs, tree, probs, ii, cc);
+  }
 }
 
-void vp9_cost_tokens_skip(int *c, const vp9_prob *p, vp9_tree t) {
-  assert(t[1] > 0 && t[0] <= 0);
-  c[-t[0]] = vp9_cost_bit(p[0], 0);
-  cost(c, t, p, 2, 0);
+void vp9_cost_tokens(int *costs, const vp9_prob *probs, vp9_tree tree) {
+  cost(costs, tree, probs, 0, 0);
+}
+
+void vp9_cost_tokens_skip(int *costs, const vp9_prob *probs, vp9_tree tree) {
+  assert(tree[0] <= 0 && tree[1] > 0);
+
+  costs[-tree[0]] = vp9_cost_bit(probs[0], 0);
+  cost(costs, tree, probs, 2, 0);
 }

@@ -14,7 +14,6 @@
 #if defined(CONFIG_DEBUG) && CONFIG_DEBUG
 #include <assert.h>
 #endif
-#include <stdio.h>
 
 #include "vp9/common/vp9_treecoder.h"
 
@@ -57,12 +56,12 @@ static unsigned int convert_distribution(unsigned int i,
     left = convert_distribution(tree[i], tree, probs, branch_ct,
                                 num_events, tok0_offset);
   }
-  if (tree[i + 1] <= 0) {
+  if (tree[i + 1] <= 0)
     right = num_events[-tree[i + 1] - tok0_offset];
-  } else {
+  else
     right = convert_distribution(tree[i + 1], tree, probs, branch_ct,
-                                num_events, tok0_offset);
-  }
+                                 num_events, tok0_offset);
+
   probs[i>>1] = get_binary_prob(left, right);
   branch_ct[i>>1][0] = left;
   branch_ct[i>>1][1] = right;

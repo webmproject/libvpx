@@ -39,7 +39,7 @@ const unsigned int vp9_prob_cost[256] = {
   22,   21,   19,   18,   16,   15,   13,   12,   10,    9,    7,    6,    4,    3,    1,   1
 };
 
-void vp9_start_encode(BOOL_CODER *br, unsigned char *source) {
+void vp9_start_encode(vp9_writer *br, uint8_t *source) {
   br->lowvalue = 0;
   br->range    = 255;
   br->value    = 0;
@@ -48,7 +48,7 @@ void vp9_start_encode(BOOL_CODER *br, unsigned char *source) {
   br->pos      = 0;
 }
 
-void vp9_stop_encode(BOOL_CODER *br) {
+void vp9_stop_encode(vp9_writer *br) {
   int i;
 
   for (i = 0; i < 32; i++)
@@ -60,14 +60,14 @@ void vp9_stop_encode(BOOL_CODER *br) {
 }
 
 
-void vp9_encode_value(BOOL_CODER *br, int data, int bits) {
+void vp9_encode_value(vp9_writer *br, int data, int bits) {
   int bit;
 
   for (bit = bits - 1; bit >= 0; bit--)
     encode_bool(br, (1 & (data >> bit)), 0x80);
 }
 
-void vp9_encode_unsigned_max(BOOL_CODER *br, int data, int max) {
+void vp9_encode_unsigned_max(vp9_writer *br, int data, int max) {
   assert(data <= max);
   while (max) {
     encode_bool(br, data & 1, 128);
@@ -92,7 +92,7 @@ static int get_unsigned_bits(unsigned num_values) {
   return cat;
 }
 
-void vp9_encode_uniform(BOOL_CODER *br, int v, int n) {
+void vp9_encode_uniform(vp9_writer *br, int v, int n) {
   int l = get_unsigned_bits(n);
   int m;
   if (l == 0) return;
@@ -116,7 +116,7 @@ int vp9_count_uniform(int v, int n) {
     return l;
 }
 
-void vp9_encode_term_subexp(BOOL_CODER *br, int word, int k, int num_syms) {
+void vp9_encode_term_subexp(vp9_writer *br, int word, int k, int num_syms) {
   int i = 0;
   int mk = 0;
   while (1) {
