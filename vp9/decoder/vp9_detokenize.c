@@ -60,28 +60,12 @@ static const vp9_prob cat6_prob[15] = {
 
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
-#if CONFIG_CODE_ZEROGROUP
-#define ZEROGROUP_ADVANCE()                \
-  do {                                     \
-    token_cache[scan[c]] = ZERO_TOKEN;     \
-    is_last_zero[o] = 1;                   \
-    c++;                                   \
-  } while (0)
-#define INCREMENT_COUNT(token)             \
-  do {                                     \
-    coef_counts[type][ref][get_coef_band(scan, txfm_size, c)] \
-               [pt][token]++;     \
-    token_cache[scan[c]] = token; \
-    is_last_zero[o] = (token == ZERO_TOKEN);    \
-  } while (0)
-#else
 #define INCREMENT_COUNT(token)               \
   do {                                       \
     coef_counts[type][ref][get_coef_band(scan, txfm_size, c)] \
                [pt][token]++;     \
     token_cache[scan[c]] = token; \
   } while (0)
-#endif
 
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
@@ -117,20 +101,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   vp9_coeff_count *coef_counts;
   const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
   TX_TYPE tx_type = DCT_DCT;
-#if CONFIG_CODE_ZEROGROUP
-  int is_eoo[3] = {0, 0, 0};
-  int is_last_zero[3] = {0, 0, 0};
-  int o, rc;
-  vp9_zpc_probs *zpc_probs;
-  vp9_zpc_count *zpc_count;
-  vp9_prob *zprobs;
-  int eoo = 0, use_eoo;
-#endif
   const int *scan, *nb;
   uint8_t token_cache[1024];
-#if CONFIG_CODE_ZEROGROUP
-  vpx_memset(token_cache, UNKNOWN_TOKEN, sizeof(token_cache));
-#endif
 
   switch (txfm_size) {
     default:
@@ -143,10 +115,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       coef_probs  = fc->coef_probs_4x4;
       coef_counts = fc->coef_counts_4x4;
       default_eob = 16;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_probs = &(fc->zpc_probs_4x4);
-      zpc_count = &(fc->zpc_counts_4x4);
-#endif
       break;
     }
     case TX_8X8: {
@@ -162,10 +130,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
       default_eob = 64;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_probs = &(fc->zpc_probs_8x8);
-      zpc_count = &(fc->zpc_counts_8x8);
-#endif
       break;
     }
     case TX_16X16: {
@@ -181,10 +145,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
       default_eob = 256;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_probs = &(fc->zpc_probs_16x16);
-      zpc_count = &(fc->zpc_counts_16x16);
-#endif
       break;
     }
     case TX_32X32:
@@ -194,10 +154,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
       default_eob = 1024;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_probs = &fc->zpc_probs_32x32;
-      zpc_count = &fc->zpc_counts_32x32;
-#endif
       break;
   }
 
@@ -218,15 +174,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     fc->eob_branch_counts[txfm_size][type][ref][band][pt]++;
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
       break;
-#if CONFIG_CODE_ZEROGROUP
-    rc = scan[c];
-    o = vp9_get_orientation(rc, txfm_size);
-    if (token_cache[rc] == ZERO_TOKEN || is_eoo[o]) {
-      coef_counts[type][ref][band][pt][ZERO_TOKEN]++;
-      ZEROGROUP_ADVANCE();
-      goto SKIP_START;
-    }
-#endif
 
 SKIP_START:
     if (c >= seg_eob)
@@ -236,35 +183,7 @@ SKIP_START:
                                 c, default_eob);
     band = get_coef_band(scan, txfm_size, c);
     prob = coef_probs[type][ref][band][pt];
-#if CONFIG_CODE_ZEROGROUP
-    rc = scan[c];
-    o = vp9_get_orientation(rc, txfm_size);
-    if (token_cache[rc] == ZERO_TOKEN || is_eoo[o]) {
-      ZEROGROUP_ADVANCE();
-      goto SKIP_START;
-    }
-    zprobs = (*zpc_probs)[ref]
-             [coef_to_zpc_band(band)]
-             [coef_to_zpc_ptok(pt)];
-#endif
     if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
-#if CONFIG_CODE_ZEROGROUP
-      eoo = 0;
-#if USE_ZPC_EOORIENT == 1
-      use_eoo = vp9_use_eoo(c, seg_eob, scan, txfm_size, is_last_zero, is_eoo);
-#else
-      use_eoo = 0;
-#endif
-      if (use_eoo) {
-        eoo = !vp9_read(r, zprobs[0]);
-        ++(*zpc_count)[ref]
-                      [coef_to_zpc_band(band)]
-                      [coef_to_zpc_ptok(pt)][0][!eoo];
-        if (eoo) {
-          is_eoo[o] = 1;
-        }
-      }
-#endif
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
       goto SKIP_START;

@@ -167,13 +167,6 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->coef_probs_16x16, cm->fc.coef_probs_16x16);
   vp9_copy(cc->coef_probs_32x32, cm->fc.coef_probs_32x32);
   vp9_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
-
-#if CONFIG_CODE_ZEROGROUP
-  vp9_copy(cc->zpc_probs_4x4, cm->fc.zpc_probs_4x4);
-  vp9_copy(cc->zpc_probs_8x8, cm->fc.zpc_probs_8x8);
-  vp9_copy(cc->zpc_probs_16x16, cm->fc.zpc_probs_16x16);
-  vp9_copy(cc->zpc_probs_32x32, cm->fc.zpc_probs_32x32);
-#endif
 }
 
 void vp9_restore_coding_context(VP9_COMP *cpi) {
@@ -225,13 +218,6 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.coef_probs_16x16, cc->coef_probs_16x16);
   vp9_copy(cm->fc.coef_probs_32x32, cc->coef_probs_32x32);
   vp9_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
-
-#if CONFIG_CODE_ZEROGROUP
-  vp9_copy(cm->fc.zpc_probs_4x4, cc->zpc_probs_4x4);
-  vp9_copy(cm->fc.zpc_probs_8x8, cc->zpc_probs_8x8);
-  vp9_copy(cm->fc.zpc_probs_16x16, cc->zpc_probs_16x16);
-  vp9_copy(cm->fc.zpc_probs_32x32, cc->zpc_probs_32x32);
-#endif
 }
 
 void vp9_setup_key_frame(VP9_COMP *cpi) {
