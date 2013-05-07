@@ -659,7 +659,8 @@ static void y4m_convert_null(y4m_input *_y4m, unsigned char *_dst,
                              unsigned char *_aux) {
 }
 
-int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip) {
+int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip,
+                   int only_420) {
   char buffer[80];
   int  ret;
   int  i;
@@ -701,6 +702,8 @@ int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip) {
             "Only progressive scan handled.\n");
     return -1;
   }
+  _y4m->vpx_fmt = VPX_IMG_FMT_I420;
+  _y4m->vpx_bps = 12;
   if (strcmp(_y4m->chroma_type, "420") == 0 ||
       strcmp(_y4m->chroma_type, "420jpeg") == 0) {
     _y4m->src_c_dec_h = _y4m->dst_c_dec_h = _y4m->src_c_dec_v = _y4m->dst_c_dec_v = 2;
@@ -734,16 +737,30 @@ int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip) {
     _y4m->aux_buf_sz = _y4m->aux_buf_read_sz = 2 * ((_y4m->pic_w + 1) / 2) * _y4m->pic_h;
     _y4m->convert = y4m_convert_422jpeg_420jpeg;
   } else if (strcmp(_y4m->chroma_type, "422") == 0) {
-    _y4m->src_c_dec_h = _y4m->dst_c_dec_h = 2;
+    _y4m->src_c_dec_h = 2;
     _y4m->src_c_dec_v = 1;
-    _y4m->dst_c_dec_v = 2;
-    _y4m->dst_buf_read_sz = _y4m->pic_w * _y4m->pic_h;
-    /*Chroma filter required: read into the aux buf first.
-      We need to make two filter passes, so we need some extra space in the
-       aux buffer.*/
-    _y4m->aux_buf_read_sz = 2 * ((_y4m->pic_w + 1) / 2) * _y4m->pic_h;
-    _y4m->aux_buf_sz = _y4m->aux_buf_read_sz + ((_y4m->pic_w + 1) / 2) * _y4m->pic_h;
-    _y4m->convert = y4m_convert_422_420jpeg;
+    if (only_420) {
+      _y4m->dst_c_dec_h = 2;
+      _y4m->dst_c_dec_v = 2;
+      _y4m->dst_buf_read_sz = _y4m->pic_w * _y4m->pic_h;
+      /*Chroma filter required: read into the aux buf first.
+        We need to make two filter passes, so we need some extra space in the
+         aux buffer.*/
+      _y4m->aux_buf_read_sz = 2 * ((_y4m->pic_w + 1) / 2) * _y4m->pic_h;
+      _y4m->aux_buf_sz = _y4m->aux_buf_read_sz +
+          ((_y4m->pic_w + 1) / 2) * _y4m->pic_h;
+      _y4m->convert = y4m_convert_422_420jpeg;
+    } else {
+      _y4m->vpx_fmt = VPX_IMG_FMT_I422;
+      _y4m->vpx_bps = 16;
+      _y4m->dst_c_dec_h = _y4m->src_c_dec_h;
+      _y4m->dst_c_dec_v = _y4m->src_c_dec_v;
+      _y4m->dst_buf_read_sz = _y4m->pic_w * _y4m->pic_h
+                              + 2 * ((_y4m->pic_w + 1) / 2) * _y4m->pic_h;
+      /*Natively supported: no conversion required.*/
+      _y4m->aux_buf_sz = _y4m->aux_buf_read_sz = 0;
+      _y4m->convert = y4m_convert_null;
+      }
   } else if (strcmp(_y4m->chroma_type, "411") == 0) {
     _y4m->src_c_dec_h = 4;
     _y4m->dst_c_dec_h = 2;
@@ -758,29 +775,52 @@ int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip) {
     _y4m->convert = y4m_convert_411_420jpeg;
   } else if (strcmp(_y4m->chroma_type, "444") == 0) {
     _y4m->src_c_dec_h = 1;
-    _y4m->dst_c_dec_h = 2;
     _y4m->src_c_dec_v = 1;
-    _y4m->dst_c_dec_v = 2;
-    _y4m->dst_buf_read_sz = _y4m->pic_w * _y4m->pic_h;
-    /*Chroma filter required: read into the aux buf first.
-      We need to make two filter passes, so we need some extra space in the
-       aux buffer.*/
-    _y4m->aux_buf_read_sz = 2 * _y4m->pic_w * _y4m->pic_h;
-    _y4m->aux_buf_sz = _y4m->aux_buf_read_sz + ((_y4m->pic_w + 1) / 2) * _y4m->pic_h;
-    _y4m->convert = y4m_convert_444_420jpeg;
+    if (only_420) {
+      _y4m->dst_c_dec_h = 2;
+      _y4m->dst_c_dec_v = 2;
+      _y4m->dst_buf_read_sz = _y4m->pic_w * _y4m->pic_h;
+      /*Chroma filter required: read into the aux buf first.
+        We need to make two filter passes, so we need some extra space in the
+         aux buffer.*/
+      _y4m->aux_buf_read_sz = 2 * _y4m->pic_w * _y4m->pic_h;
+      _y4m->aux_buf_sz = _y4m->aux_buf_read_sz +
+          ((_y4m->pic_w + 1) / 2) * _y4m->pic_h;
+      _y4m->convert = y4m_convert_444_420jpeg;
+    } else {
+      _y4m->vpx_fmt = VPX_IMG_FMT_I444;
+      _y4m->vpx_bps = 24;
+      _y4m->dst_c_dec_h = _y4m->src_c_dec_h;
+      _y4m->dst_c_dec_v = _y4m->src_c_dec_v;
+      _y4m->dst_buf_read_sz = 3 * _y4m->pic_w * _y4m->pic_h;
+      /*Natively supported: no conversion required.*/
+      _y4m->aux_buf_sz = _y4m->aux_buf_read_sz = 0;
+      _y4m->convert = y4m_convert_null;
+    }
   } else if (strcmp(_y4m->chroma_type, "444alpha") == 0) {
     _y4m->src_c_dec_h = 1;
-    _y4m->dst_c_dec_h = 2;
     _y4m->src_c_dec_v = 1;
-    _y4m->dst_c_dec_v = 2;
-    _y4m->dst_buf_read_sz = _y4m->pic_w * _y4m->pic_h;
-    /*Chroma filter required: read into the aux buf first.
-      We need to make two filter passes, so we need some extra space in the
-       aux buffer.
-      The extra plane also gets read into the aux buf.
-      It will be discarded.*/
-    _y4m->aux_buf_sz = _y4m->aux_buf_read_sz = 3 * _y4m->pic_w * _y4m->pic_h;
-    _y4m->convert = y4m_convert_444_420jpeg;
+    if (only_420) {
+      _y4m->dst_c_dec_h = 2;
+      _y4m->dst_c_dec_v = 2;
+      _y4m->dst_buf_read_sz = _y4m->pic_w * _y4m->pic_h;
+      /*Chroma filter required: read into the aux buf first.
+        We need to make two filter passes, so we need some extra space in the
+         aux buffer.
+        The extra plane also gets read into the aux buf.
+        It will be discarded.*/
+      _y4m->aux_buf_sz = _y4m->aux_buf_read_sz = 3 * _y4m->pic_w * _y4m->pic_h;
+      _y4m->convert = y4m_convert_444_420jpeg;
+    } else {
+      _y4m->vpx_fmt = VPX_IMG_FMT_444A;
+      _y4m->vpx_bps = 32;
+      _y4m->dst_c_dec_h = _y4m->src_c_dec_h;
+      _y4m->dst_c_dec_v = _y4m->src_c_dec_v;
+      _y4m->dst_buf_read_sz = 4 * _y4m->pic_w * _y4m->pic_h;
+      /*Natively supported: no conversion required.*/
+      _y4m->aux_buf_sz = _y4m->aux_buf_read_sz = 0;
+      _y4m->convert = y4m_convert_null;
+    }
   } else if (strcmp(_y4m->chroma_type, "mono") == 0) {
     _y4m->src_c_dec_h = _y4m->src_c_dec_v = 0;
     _y4m->dst_c_dec_h = _y4m->dst_c_dec_v = 2;
@@ -847,22 +887,23 @@ int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, vpx_image_t *_img) {
      sizes, which would require a separate fread call for every row.*/
   memset(_img, 0, sizeof(*_img));
   /*Y4M has the planes in Y'CbCr order, which libvpx calls Y, U, and V.*/
-  _img->fmt = IMG_FMT_I420;
+  _img->fmt = _y4m->vpx_fmt;
   _img->w = _img->d_w = _y4m->pic_w;
   _img->h = _img->d_h = _y4m->pic_h;
-  /*This is hard-coded to 4:2:0 for now, as that's all VP8 supports.*/
-  _img->x_chroma_shift = 1;
-  _img->y_chroma_shift = 1;
-  _img->bps = 12;
+  _img->x_chroma_shift = _y4m->dst_c_dec_h >> 1;
+  _img->y_chroma_shift = _y4m->dst_c_dec_v >> 1;
+  _img->bps = _y4m->vpx_bps;
+
   /*Set up the buffer pointers.*/
   pic_sz = _y4m->pic_w * _y4m->pic_h;
   c_w = (_y4m->pic_w + _y4m->dst_c_dec_h - 1) / _y4m->dst_c_dec_h;
   c_h = (_y4m->pic_h + _y4m->dst_c_dec_v - 1) / _y4m->dst_c_dec_v;
   c_sz = c_w * c_h;
-  _img->stride[PLANE_Y] = _y4m->pic_w;
+  _img->stride[PLANE_Y] = _img->stride[PLANE_ALPHA] = _y4m->pic_w;
   _img->stride[PLANE_U] = _img->stride[PLANE_V] = c_w;
   _img->planes[PLANE_Y] = _y4m->dst_buf;
   _img->planes[PLANE_U] = _y4m->dst_buf + pic_sz;
   _img->planes[PLANE_V] = _y4m->dst_buf + pic_sz + c_sz;
+  _img->planes[PLANE_ALPHA] = _y4m->dst_buf + pic_sz + 2 * c_sz;
   return 1;
 }
