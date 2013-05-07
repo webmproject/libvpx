@@ -11,7 +11,6 @@
 #include <limits.h>
 #include <vp9/encoder/vp9_encodeintra.h>
 #include <vp9/encoder/vp9_rdopt.h>
-#include <vp9/common/vp9_setupintrarecon.h>
 #include <vp9/common/vp9_blockd.h>
 #include <vp9/common/vp9_reconinter.h>
 #include <vp9/common/vp9_systemdependent.h>

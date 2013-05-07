@@ -24,7 +24,6 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vpx_scale/vpx_scale.h"
-#include "vp9/common/vp9_setupintrarecon.h"
 
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/common/vp9_extend.h"
@@ -1334,9 +1333,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   if (!pc->last_frame_seg_map)
     CHECK_MEM_ERROR(pc->last_frame_seg_map,
                     vpx_calloc((pc->mi_rows * pc->mi_cols), 1));
-
-  // set up frame new frame for intra coded blocks
-  vp9_setup_intra_recon(new_fb);
 
   vp9_setup_block_dptrs(xd);
 
