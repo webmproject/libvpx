@@ -332,15 +332,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vpx_free(cpi->mb.pip);
   cpi->mb.pip = 0;
-
-  vpx_free(cpi->twopass.total_stats);
-  cpi->twopass.total_stats = 0;
-
-  vpx_free(cpi->twopass.total_left_stats);
-  cpi->twopass.total_left_stats = 0;
-
-  vpx_free(cpi->twopass.this_frame_stats);
-  cpi->twopass.this_frame_stats = 0;
 }
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
@@ -960,23 +951,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   CHECK_MEM_ERROR(cpi->mb_norm_activity_map,
                   vpx_calloc(sizeof(unsigned int),
                              cm->mb_rows * cm->mb_cols));
-
-  vpx_free(cpi->twopass.total_stats);
-
-  cpi->twopass.total_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
-
-  vpx_free(cpi->twopass.total_left_stats);
-  cpi->twopass.total_left_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
-
-  vpx_free(cpi->twopass.this_frame_stats);
-
-  cpi->twopass.this_frame_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
-
-  if (!cpi->twopass.total_stats ||
-      !cpi->twopass.total_left_stats ||
-      !cpi->twopass.this_frame_stats)
-    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
-                       "Failed to allocate firstpass stats");
 }
 
 
