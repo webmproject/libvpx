@@ -2229,7 +2229,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 
   if (pred_exists) {
-    // FIXME(rbultje): mb code still predicts into xd->predictor
     for (i = 0; i < bh * MI_SIZE; ++i)
       vpx_memcpy(xd->plane[0].dst.buf + i * xd->plane[0].dst.stride,
                  tmp_ybuf + i * bw * MI_SIZE,
@@ -2264,17 +2263,11 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (threshold < x->encode_breakout)
       threshold = x->encode_breakout;
 
-    if (bsize != BLOCK_SIZE_MB16X16) {
-      var = cpi->fn_ptr[block_size].vf(x->plane[0].src.buf,
-                                       x->plane[0].src.stride,
-                                       xd->plane[0].dst.buf,
-                                       xd->plane[0].dst.stride,
-                                       &sse);
-    } else {
-      var = vp9_variance16x16(x->plane[0].src.buf, x->plane[0].src.stride,
-                              xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-                              &sse);
-    }
+    var = cpi->fn_ptr[block_size].vf(x->plane[0].src.buf,
+                                     x->plane[0].src.stride,
+                                     xd->plane[0].dst.buf,
+                                     xd->plane[0].dst.stride,
+                                     &sse);
 
     if ((int)sse < threshold) {
       unsigned int q2dc = xd->plane[0].dequant[0];
@@ -2284,29 +2277,16 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           (sse / 2 > var && sse - var < 64)) {
         // Check u and v to make sure skip is ok
         int sse2;
-
-        if (bsize != BLOCK_SIZE_MB16X16) {
-          unsigned int sse2u, sse2v;
-          // FIXME(rbultje): mb predictors predict into xd->predictor
-          var = cpi->fn_ptr[uv_block_size].vf(x->plane[1].src.buf,
-                                              x->plane[1].src.stride,
-                                              xd->plane[1].dst.buf,
-                                              xd->plane[1].dst.stride, &sse2u);
-          var = cpi->fn_ptr[uv_block_size].vf(x->plane[2].src.buf,
-                                              x->plane[1].src.stride,
-                                              xd->plane[2].dst.buf,
-                                              xd->plane[1].dst.stride, &sse2v);
-          sse2 = sse2u + sse2v;
-        } else {
-          unsigned int sse2u, sse2v;
-          var = vp9_variance8x8(x->plane[1].src.buf, x->plane[1].src.stride,
-                                xd->plane[1].dst.buf, xd->plane[1].dst.stride,
-                                &sse2u);
-          var = vp9_variance8x8(x->plane[2].src.buf, x->plane[1].src.stride,
-                                xd->plane[2].dst.buf, xd->plane[1].dst.stride,
-                                &sse2v);
-          sse2 = sse2u + sse2v;
-        }
+        unsigned int sse2u, sse2v;
+        var = cpi->fn_ptr[uv_block_size].vf(x->plane[1].src.buf,
+                                            x->plane[1].src.stride,
+                                            xd->plane[1].dst.buf,
+                                            xd->plane[1].dst.stride, &sse2u);
+        var = cpi->fn_ptr[uv_block_size].vf(x->plane[2].src.buf,
+                                            x->plane[1].src.stride,
+                                            xd->plane[2].dst.buf,
+                                            xd->plane[1].dst.stride, &sse2v);
+        sse2 = sse2u + sse2v;
 
         if (sse2 * 2 < threshold) {
           x->skip = 1;
