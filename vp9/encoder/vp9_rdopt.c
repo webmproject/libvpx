@@ -2602,14 +2602,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->interp_filter = cm->mcomp_filter_type;
     vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
-    // if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
-    //  continue;
-
     if (bsize != BLOCK_SIZE_SB8X8 &&
         (this_mode == I4X4_PRED || this_mode == SPLITMV))
       continue;
-    //  if (vp9_mode_order[mode_index].second_ref_frame == INTRA_FRAME)
-    //  continue;
+
 
     if (comp_pred) {
       if (ref_frame == ALTREF_FRAME) {
