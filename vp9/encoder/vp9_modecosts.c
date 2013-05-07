@@ -41,10 +41,6 @@ void vp9_init_mode_costs(VP9_COMP *c) {
                   x->fc.uv_mode_prob[VP9_YMODES - 1], vp9_uv_mode_tree);
   vp9_cost_tokens(c->mb.intra_uv_mode_cost[0],
                   x->kf_uv_mode_prob[VP9_YMODES - 1], vp9_uv_mode_tree);
-#if !CONFIG_SB8X8
-  vp9_cost_tokens(c->mb.i8x8_mode_costs,
-                  x->fc.i8x8_mode_prob, vp9_i8x8_mode_tree);
-#endif
 
   for (i = 0; i <= VP9_SWITCHABLE_FILTERS; ++i)
     vp9_cost_tokens((int *)c->mb.switchable_interp_costs[i],

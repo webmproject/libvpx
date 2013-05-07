@@ -617,9 +617,6 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_D63_PRED ] += speed_multiplier * 1500;
 
   sf->thresh_mult[THR_B_PRED   ] += speed_multiplier * 2500;
-#if !CONFIG_SB8X8
-  sf->thresh_mult[THR_I8X8_PRED] += speed_multiplier * 2500;
-#endif
 
   sf->thresh_mult[THR_NEWMV    ] += speed_multiplier * 1000;
   sf->thresh_mult[THR_NEWG     ] += speed_multiplier * 1000;
@@ -858,10 +855,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   }
 
   cpi->mb.quantize_b_4x4      = vp9_regular_quantize_b_4x4;
-#if !CONFIG_SB8X8
-  cpi->mb.quantize_b_4x4_pair = vp9_regular_quantize_b_4x4_pair;
-  cpi->mb.quantize_b_8x8      = vp9_regular_quantize_b_8x8;
-#endif
 
   vp9_init_quantizer(cpi);
 
@@ -1622,12 +1615,12 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   BFP(BLOCK_8X8, vp9_sad8x8, vp9_variance8x8, vp9_sub_pixel_variance8x8,
       NULL, NULL, NULL, vp9_sad8x8x3, vp9_sad8x8x8, vp9_sad8x8x4d)
 
-#if CONFIG_SB8X8
   BFP(BLOCK_4X8, NULL, vp9_variance4x8, NULL,
       NULL, NULL, NULL, NULL, NULL, NULL)
+
   BFP(BLOCK_8X4, NULL, vp9_variance8x4, NULL,
       NULL, NULL, NULL, NULL, NULL, NULL)
-#endif
+
   BFP(BLOCK_4X4, vp9_sad4x4, vp9_variance4x4, vp9_sub_pixel_variance4x4,
       NULL, NULL, NULL, vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
@@ -3307,13 +3300,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     vp9_copy(cpi->common.fc.ymode_counts, cpi->ymode_count);
     vp9_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
     vp9_copy(cpi->common.fc.bmode_counts, cpi->bmode_count);
-#if !CONFIG_SB8X8
-    vp9_copy(cpi->common.fc.i8x8_mode_counts, cpi->i8x8_mode_count);
-#endif
     vp9_copy(cpi->common.fc.sub_mv_ref_counts, cpi->sub_mv_ref_count);
-#if !CONFIG_SB8X8
-    vp9_copy(cpi->common.fc.mbsplit_counts, cpi->mbsplit_count);
-#endif
     vp9_copy(cpi->common.fc.partition_counts, cpi->partition_count);
 #if CONFIG_COMP_INTERINTRA_PRED
     vp9_copy(cpi->common.fc.interintra_counts, cpi->interintra_count);

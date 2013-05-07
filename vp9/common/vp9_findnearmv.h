@@ -74,13 +74,9 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
                            vp9_prob p[VP9_MVREFS - 1],
                            const int context);
 
-#if !CONFIG_SB8X8
-extern const uint8_t vp9_mbsplit_offset[4][16];
-#endif
-
 static int left_block_mv(const MACROBLOCKD *xd,
                          const MODE_INFO *cur_mb, int b) {
-  if (!(b & (3 >> CONFIG_SB8X8))) {
+  if (!(b & 1)) {
     if (!xd->left_available)
       return 0;
 
@@ -90,7 +86,7 @@ static int left_block_mv(const MACROBLOCKD *xd,
     if (cur_mb->mbmi.mode != SPLITMV)
       return cur_mb->mbmi.mv[0].as_int;
 
-    b += 4 >> CONFIG_SB8X8;
+    b += 2;
   }
 
   return (cur_mb->bmi + b - 1)->as_mv[0].as_int;
@@ -98,7 +94,7 @@ static int left_block_mv(const MACROBLOCKD *xd,
 
 static int left_block_second_mv(const MACROBLOCKD *xd,
                                 const MODE_INFO *cur_mb, int b) {
-  if (!(b & (3 >> CONFIG_SB8X8))) {
+  if (!(b & 1)) {
     if (!xd->left_available)
       return 0;
 
@@ -108,7 +104,7 @@ static int left_block_second_mv(const MACROBLOCKD *xd,
     if (cur_mb->mbmi.mode != SPLITMV)
       return cur_mb->mbmi.second_ref_frame > 0 ?
           cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
-    b += 4 >> CONFIG_SB8X8;
+    b += 2;
   }
 
   return cur_mb->mbmi.second_ref_frame > 0 ?
@@ -117,85 +113,69 @@ static int left_block_second_mv(const MACROBLOCKD *xd,
 }
 
 static int above_block_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
-  if (!(b >> (2 >> CONFIG_SB8X8))) {
+  if (!(b >> 1)) {
     /* On top edge, get from MB above us */
     cur_mb -= mi_stride;
 
     if (cur_mb->mbmi.mode != SPLITMV)
       return cur_mb->mbmi.mv[0].as_int;
-    b += 16 >> (2 * CONFIG_SB8X8);
+    b += 4;
   }
 
-  return (cur_mb->bmi + b - (4 >> CONFIG_SB8X8))->as_mv[0].as_int;
+  return (cur_mb->bmi + b - 2)->as_mv[0].as_int;
 }
 
 static int above_block_second_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
-  if (!(b >> (2 >> CONFIG_SB8X8))) {
+  if (!(b >> 1)) {
     /* On top edge, get from MB above us */
     cur_mb -= mi_stride;
 
     if (cur_mb->mbmi.mode != SPLITMV)
       return cur_mb->mbmi.second_ref_frame > 0 ?
           cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
-    b += 16 >> (2 * CONFIG_SB8X8);
+    b += 4;
   }
 
   return cur_mb->mbmi.second_ref_frame > 0 ?
-      (cur_mb->bmi + b - (4 >> CONFIG_SB8X8))->as_mv[1].as_int :
-      (cur_mb->bmi + b - (4 >> CONFIG_SB8X8))->as_mv[0].as_int;
+      (cur_mb->bmi + b - 2)->as_mv[1].as_int :
+      (cur_mb->bmi + b - 2)->as_mv[0].as_int;
 }
 
 static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
-#if CONFIG_SB8X8
   // FIXME(rbultje, jingning): temporary hack because jenkins doesn't
   // understand this condition. This will go away soon.
   if (b == 0 || b == 2) {
-#else
-  if (!(b & (3 >> CONFIG_SB8X8))) {
-#endif
     /* On L edge, get from MB to left of us */
     --cur_mb;
 
     if (cur_mb->mbmi.mode <= TM_PRED) {
       return pred_mode_conv(cur_mb->mbmi.mode);
-#if !CONFIG_SB8X8
-    } else if (cur_mb->mbmi.mode == I8X8_PRED) {
-      return pred_mode_conv(
-          (MB_PREDICTION_MODE)(cur_mb->bmi + 3 + b)->as_mode.first);
-#endif  // !CONFIG_SB8X8
     } else if (cur_mb->mbmi.mode == I4X4_PRED) {
-      return ((cur_mb->bmi + (3 >> CONFIG_SB8X8) + b)->as_mode.first);
+      return ((cur_mb->bmi + 1 + b)->as_mode.first);
     } else {
       return B_DC_PRED;
     }
   }
-#if CONFIG_SB8X8
   assert(b == 1 || b == 3);
-#endif
   return (cur_mb->bmi + b - 1)->as_mode.first;
 }
 
 static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
                                           int b, int mi_stride) {
-  if (!(b >> (2 >> CONFIG_SB8X8))) {
+  if (!(b >> 1)) {
     /* On top edge, get from MB above us */
     cur_mb -= mi_stride;
 
     if (cur_mb->mbmi.mode <= TM_PRED) {
       return pred_mode_conv(cur_mb->mbmi.mode);
-#if !CONFIG_SB8X8
-    } else if (cur_mb->mbmi.mode == I8X8_PRED) {
-      return pred_mode_conv(
-          (MB_PREDICTION_MODE)(cur_mb->bmi + 12 + b)->as_mode.first);
-#endif
     } else if (cur_mb->mbmi.mode == I4X4_PRED) {
-      return ((cur_mb->bmi + (CONFIG_SB8X8 ? 2 : 12) + b)->as_mode.first);
+      return ((cur_mb->bmi + 2 + b)->as_mode.first);
     } else {
       return B_DC_PRED;
     }
   }
 
-  return (cur_mb->bmi + b - (4 >> CONFIG_SB8X8))->as_mode.first;
+  return (cur_mb->bmi + b - 2)->as_mode.first;
 }
 
 #endif  // VP9_COMMON_VP9_FINDNEARMV_H_

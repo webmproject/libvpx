@@ -193,17 +193,11 @@ static void count_segs_sb(VP9_COMP *cpi, MODE_INFO *mi,
     assert(bwl < bsl && bhl < bsl);
     if (bsize == BLOCK_SIZE_SB64X64) {
       subsize = BLOCK_SIZE_SB32X32;
-#if CONFIG_SB8X8
     } else if (bsize == BLOCK_SIZE_SB32X32) {
       subsize = BLOCK_SIZE_MB16X16;
     } else {
       assert(bsize == BLOCK_SIZE_MB16X16);
       subsize = BLOCK_SIZE_SB8X8;
-#else
-    } else {
-      assert(bsize == BLOCK_SIZE_SB32X32);
-      subsize = BLOCK_SIZE_MB16X16;
-#endif
     }
 
     for (n = 0; n < 4; n++) {
@@ -253,11 +247,11 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
     vp9_get_tile_col_offsets(cm, tile_col);
     mi_ptr = cm->mi + cm->cur_tile_mi_col_start;
     for (mi_row = 0; mi_row < cm->mi_rows;
-         mi_row += (4 << CONFIG_SB8X8), mi_ptr += (4 << CONFIG_SB8X8) * mis) {
+         mi_row += 8, mi_ptr += 8 * mis) {
       mi = mi_ptr;
       for (mi_col = cm->cur_tile_mi_col_start;
            mi_col < cm->cur_tile_mi_col_end;
-           mi_col += (4 << CONFIG_SB8X8), mi += (4 << CONFIG_SB8X8)) {
+           mi_col += 8, mi += 8) {
         count_segs_sb(cpi, mi, no_pred_segcounts, temporal_predictor_count,
                       t_unpred_seg_counts, mi_row, mi_col, BLOCK_SIZE_SB64X64);
       }

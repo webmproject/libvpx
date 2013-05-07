@@ -385,7 +385,6 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
       // goes in segment 0
       if (arf_not_zz[offset + mb_col]) {
         ncnt[0]++;
-#if CONFIG_SB8X8
         cpi->segmentation_map[offset * 4 + 2 * mb_col] = 0;
         cpi->segmentation_map[offset * 4 + 2 * mb_col + 1] = 0;
         cpi->segmentation_map[offset * 4 + 2 * mb_col + cm->mi_cols] = 0;
@@ -395,11 +394,6 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
         cpi->segmentation_map[offset * 4 + 2 * mb_col + 1] = 1;
         cpi->segmentation_map[offset * 4 + 2 * mb_col + cm->mi_cols] = 1;
         cpi->segmentation_map[offset * 4 + 2 * mb_col + cm->mi_cols + 1] = 1;
-#else
-        cpi->segmentation_map[offset + mb_col] = 0;
-      } else {
-        cpi->segmentation_map[offset + mb_col] = 1;
-#endif
         ncnt[1]++;
       }
     }

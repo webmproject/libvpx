@@ -375,9 +375,6 @@ int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
   int result = 1;
   struct is_skippable_args args = {xd, &result};
   foreach_transformed_block_in_plane(xd, bsize, 0,
-#if !CONFIG_SB8X8
-                                     0,
-#endif
                                      is_skippable, &args);
   return result;
 }

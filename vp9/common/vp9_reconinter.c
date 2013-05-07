@@ -265,13 +265,8 @@ static INLINE int round_mv_comp_q4(int value) {
   return (value < 0 ? value - 2 : value + 2) / 4;
 }
 
-#if CONFIG_SB8X8
 #define IDX1 2
 #define IDX2 3
-#else
-#define IDX1 4
-#define IDX2 5
-#endif
 
 static int mi_mv_pred_row_q4(MACROBLOCKD *mb, int off, int idx) {
   const int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.row +

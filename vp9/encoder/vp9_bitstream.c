@@ -281,12 +281,6 @@ static void sb_kfwrite_ymode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_uv_mode_tree, p, vp9_sb_kf_ymode_encodings + m);
 }
 
-#if !CONFIG_SB8X8
-static void write_i8x8_mode(vp9_writer *bc, int m, const vp9_prob *p) {
-  write_token(bc, vp9_i8x8_mode_tree, p, vp9_i8x8_mode_encodings + m);
-}
-#endif
-
 static void write_uv_mode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_uv_mode_tree, p, vp9_uv_mode_encodings + m);
 }
@@ -303,12 +297,6 @@ static void write_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
 static void write_kf_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_kf_bmode_tree, p, vp9_kf_bmode_encodings + m);
 }
-
-#if !CONFIG_SB8X8
-static void write_split(vp9_writer *bc, int x, const vp9_prob *p) {
-  write_token(bc, vp9_mbsplit_tree, p, vp9_mbsplit_encodings + x);
-}
-#endif
 
 static int prob_update_savings(const unsigned int *ct,
                                const vp9_prob oldp, const vp9_prob newp,
@@ -671,11 +659,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     active_section = 6;
 #endif
 
-#if CONFIG_SB8X8
     if (m->mbmi.sb_type > BLOCK_SIZE_SB8X8)
-#else
-    if (m->mbmi.sb_type > BLOCK_SIZE_MB16X16)
-#endif
       write_sb_ymode(bc, mode, pc->fc.sb_ymode_prob);
     else
       write_ymode(bc, mode, pc->fc.ymode_prob);
@@ -685,24 +669,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       do {
         write_bmode(bc, m->bmi[j].as_mode.first,
                     pc->fc.bmode_prob);
-      } while (++j < (16 >> (CONFIG_SB8X8 * 2)));
+      } while (++j < 4);
     }
-#if !CONFIG_SB8X8
-    if (mode == I8X8_PRED) {
-      write_i8x8_mode(bc, m->bmi[0].as_mode.first,
-                      pc->fc.i8x8_mode_prob);
-      write_i8x8_mode(bc, m->bmi[2].as_mode.first,
-                      pc->fc.i8x8_mode_prob);
-      write_i8x8_mode(bc, m->bmi[8].as_mode.first,
-                      pc->fc.i8x8_mode_prob);
-      write_i8x8_mode(bc, m->bmi[10].as_mode.first,
-                      pc->fc.i8x8_mode_prob);
-    } else
-#endif
-    {
-      write_uv_mode(bc, mi->uv_mode,
-                    pc->fc.uv_mode_prob[mode]);
-    }
+    write_uv_mode(bc, mi->uv_mode,
+                  pc->fc.uv_mode_prob[mode]);
   } else {
     vp9_prob mv_ref_p[VP9_MVREFS - 1];
 
@@ -714,11 +684,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-#if CONFIG_SB8X8
       if (mi->sb_type > BLOCK_SIZE_SB8X8) {
-#else
-      if (mi->sb_type > BLOCK_SIZE_MB16X16) {
-#endif
         write_sb_mv_ref(bc, mode, mv_ref_p);
       } else {
         write_mv_ref(bc, mode, mv_ref_p);
@@ -788,34 +754,16 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
         ++count_mb_seg[mi->partitioning];
 #endif
 
-#if !CONFIG_SB8X8
-        write_split(bc, mi->partitioning, cpi->common.fc.mbsplit_prob);
-        cpi->mbsplit_count[mi->partitioning]++;
-#endif
-
         do {
           B_PREDICTION_MODE blockmode;
           int_mv blockmv;
-#if !CONFIG_SB8X8
-          const int *const  L = vp9_mbsplits[mi->partitioning];
-#endif
           int k = -1;  /* first block in subset j */
           int mv_contz;
           int_mv leftmv, abovemv;
 
           blockmode = cpi->mb.partition_info->bmi[j].mode;
           blockmv = cpi->mb.partition_info->bmi[j].mv;
-#if CONFIG_SB8X8
           k = j;
-#else
-#if CONFIG_DEBUG
-          while (j != L[++k])
-            if (k >= 16)
-              assert(0);
-#else
-          while (j != L[++k]);
-#endif
-#endif
           leftmv.as_int = left_block_mv(xd, m, k);
           abovemv.as_int = above_block_mv(m, k, mis);
           mv_contz = vp9_mv_cont(&leftmv, &abovemv);
@@ -847,7 +795,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     }
   }
 
-#if CONFIG_SB8X8
   if (((rf == INTRA_FRAME && mode != I4X4_PRED) ||
        (rf != INTRA_FRAME && mode != SPLITMV)) &&
       pc->txfm_mode == TX_MODE_SELECT &&
@@ -862,23 +809,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
         vp9_write(bc, sz != TX_16X16, pc->prob_tx[2]);
     }
   }
-#else
-  if (((rf == INTRA_FRAME && mode <= I8X8_PRED) ||
-       (rf != INTRA_FRAME && !(mode == SPLITMV &&
-                               mi->partitioning == PARTITIONING_4X4))) &&
-      pc->txfm_mode == TX_MODE_SELECT &&
-          !(skip_coeff || vp9_segfeature_active(xd, segment_id,
-                                                SEG_LVL_SKIP))) {
-    TX_SIZE sz = mi->txfm_size;
-    // FIXME(rbultje) code ternary symbol once all experiments are merged
-    vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
-    if (sz != TX_4X4 && mode != I8X8_PRED && mode != SPLITMV) {
-      vp9_write(bc, sz != TX_8X8, pc->prob_tx[1]);
-      if (mi->sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
-        vp9_write(bc, sz != TX_16X16, pc->prob_tx[2]);
-    }
-  }
-#endif
 }
 
 static void write_mb_modes_kf(const VP9_COMP *cpi,
@@ -901,11 +831,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     vp9_write(bc, skip_coeff, vp9_get_pred_prob(c, xd, PRED_MBSKIP));
   }
 
-#if CONFIG_SB8X8
   if (m->mbmi.sb_type > BLOCK_SIZE_SB8X8)
-#else
-  if (m->mbmi.sb_type > BLOCK_SIZE_MB16X16)
-#endif
     sb_kfwrite_ymode(bc, ym, c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
   else
     kfwrite_ymode(bc, ym, c->kf_ymode_prob[c->kf_ymode_probs_index]);
@@ -915,7 +841,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     do {
       const B_PREDICTION_MODE a = above_block_mode(m, i, mis);
       const B_PREDICTION_MODE l = (xd->left_available ||
-                                  (i & (3 >> CONFIG_SB8X8))) ?
+                                  (i & 1)) ?
                                   left_block_mode(m, i) : B_DC_PRED;
       const int bm = m->bmi[i].as_mode.first;
 
@@ -923,23 +849,11 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
       ++intra_mode_stats [A] [L] [bm];
 #endif
       write_kf_bmode(bc, bm, c->kf_bmode_prob[a][l]);
-    } while (++i < (16 >> (CONFIG_SB8X8 * 2)));
+    } while (++i < 4);
   }
-#if !CONFIG_SB8X8
-  if (ym == I8X8_PRED) {
-    write_i8x8_mode(bc, m->bmi[0].as_mode.first, c->fc.i8x8_mode_prob);
-    // printf("    mode: %d\n", m->bmi[0].as_mode.first); fflush(stdout);
-    write_i8x8_mode(bc, m->bmi[2].as_mode.first, c->fc.i8x8_mode_prob);
-    // printf("    mode: %d\n", m->bmi[2].as_mode.first); fflush(stdout);
-    write_i8x8_mode(bc, m->bmi[8].as_mode.first, c->fc.i8x8_mode_prob);
-    // printf("    mode: %d\n", m->bmi[8].as_mode.first); fflush(stdout);
-    write_i8x8_mode(bc, m->bmi[10].as_mode.first, c->fc.i8x8_mode_prob);
-    // printf("    mode: %d\n", m->bmi[10].as_mode.first); fflush(stdout);
-  } else
-#endif
-    write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 
-#if CONFIG_SB8X8
+  write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
+
   if (ym != I4X4_PRED && c->txfm_mode == TX_MODE_SELECT &&
       !(skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))) {
     TX_SIZE sz = m->mbmi.txfm_size;
@@ -951,19 +865,6 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
         vp9_write(bc, sz != TX_16X16, c->prob_tx[2]);
     }
   }
-#else
-  if (ym <= I8X8_PRED && c->txfm_mode == TX_MODE_SELECT &&
-      !(skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))) {
-    TX_SIZE sz = m->mbmi.txfm_size;
-    // FIXME(rbultje) code ternary symbol once all experiments are merged
-    vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
-    if (sz != TX_4X4 && ym <= TM_PRED) {
-      vp9_write(bc, sz != TX_8X8, c->prob_tx[1]);
-      if (m->mbmi.sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
-        vp9_write(bc, sz != TX_16X16, c->prob_tx[2]);
-    }
-  }
-#endif
 }
 
 
@@ -1171,15 +1072,11 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   else
     assert(0);
 
-#if CONFIG_SB8X8
   if (bsize > BLOCK_SIZE_SB8X8) {
-#else
-  if (bsize > BLOCK_SIZE_MB16X16) {
-#endif
     int pl;
     xd->left_seg_context =
-        cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
-    xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+        cm->left_seg_context + ((mi_row >> 1) & 3);
+    xd->above_seg_context = cm->above_seg_context + (mi_col >> 1);
     pl = partition_plane_context(xd, bsize);
     // encode the partition information
     write_token(bc, vp9_partition_tree, cm->fc.partition_prob[pl],
@@ -1214,15 +1111,11 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   }
 
   // update partition context
-#if CONFIG_SB8X8
   if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_MB16X16))
-#else
-  if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_SB32X32))
-#endif
     return;
 
-  xd->left_seg_context = cm->left_seg_context + ((mi_row >> CONFIG_SB8X8) & 3);
-  xd->above_seg_context = cm->above_seg_context + (mi_col >> CONFIG_SB8X8);
+  xd->left_seg_context = cm->left_seg_context + ((mi_row >> 1) & 3);
+  xd->above_seg_context = cm->above_seg_context + (mi_col >> 1);
   update_partition_context(xd, subsize, bsize);
 }
 
@@ -1239,12 +1132,12 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
 
   for (mi_row = c->cur_tile_mi_row_start;
        mi_row < c->cur_tile_mi_row_end;
-       mi_row += (4 << CONFIG_SB8X8), m_ptr += (4 << CONFIG_SB8X8) * mis) {
+       mi_row += 8, m_ptr += 8 * mis) {
     m = m_ptr;
     vpx_memset(c->left_seg_context, 0, sizeof(c->left_seg_context));
     for (mi_col = c->cur_tile_mi_col_start;
          mi_col < c->cur_tile_mi_col_end;
-         mi_col += (4 << CONFIG_SB8X8), m += (4 << CONFIG_SB8X8))
+         mi_col += 8, m += 8)
       write_modes_sb(cpi, m, bc, tok, tok_end, mi_row, mi_col,
                      BLOCK_SIZE_SB64X64);
   }
@@ -2152,19 +2045,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
   vp9_copy(cpi->common.fc.pre_bmode_prob, cpi->common.fc.bmode_prob);
   vp9_copy(cpi->common.fc.pre_sub_mv_ref_prob, cpi->common.fc.sub_mv_ref_prob);
-#if !CONFIG_SB8X8
-  vp9_copy(cpi->common.fc.pre_mbsplit_prob, cpi->common.fc.mbsplit_prob);
-  vp9_copy(cpi->common.fc.pre_i8x8_mode_prob, cpi->common.fc.i8x8_mode_prob);
-#endif
   vp9_copy(cpi->common.fc.pre_partition_prob, cpi->common.fc.partition_prob);
   cpi->common.fc.pre_nmvc = cpi->common.fc.nmvc;
 #if CONFIG_COMP_INTERINTRA_PRED
   cpi->common.fc.pre_interintra_prob = cpi->common.fc.interintra_prob;
 #endif
   vp9_zero(cpi->sub_mv_ref_count);
-#if !CONFIG_SB8X8
-  vp9_zero(cpi->mbsplit_count);
-#endif
   vp9_zero(cpi->common.fc.mv_ref_ct);
 
   update_coef_probs(cpi, &header_bc);

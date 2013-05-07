@@ -55,13 +55,7 @@ typedef struct frame_contexts {
   vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
   vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
   vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
-#if !CONFIG_SB8X8
-  vp9_prob i8x8_mode_prob[VP9_I8X8_MODES - 1];
-#endif
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
-#if !CONFIG_SB8X8
-  vp9_prob mbsplit_prob[VP9_NUMMBSPLITS - 1];
-#endif
   vp9_prob partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 
   vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES];
@@ -81,25 +75,13 @@ typedef struct frame_contexts {
   vp9_prob pre_ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
   vp9_prob pre_sb_ymode_prob[VP9_I32X32_MODES - 1];
   vp9_prob pre_uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
-#if !CONFIG_SB8X8
-  vp9_prob pre_i8x8_mode_prob[VP9_I8X8_MODES - 1];
-#endif
   vp9_prob pre_sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
-#if !CONFIG_SB8X8
-  vp9_prob pre_mbsplit_prob[VP9_NUMMBSPLITS - 1];
-#endif
   vp9_prob pre_partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
   unsigned int bmode_counts[VP9_NKF_BINTRAMODES];
   unsigned int ymode_counts[VP9_YMODES];   /* interframe intra mode probs */
   unsigned int sb_ymode_counts[VP9_I32X32_MODES];
   unsigned int uv_mode_counts[VP9_YMODES][VP9_UV_MODES];
-#if !CONFIG_SB8X8
-  unsigned int i8x8_mode_counts[VP9_I8X8_MODES];   /* interframe intra probs */
-#endif
   unsigned int sub_mv_ref_counts[SUBMVREF_COUNT][VP9_SUBMVREFS];
-#if !CONFIG_SB8X8
-  unsigned int mbsplit_counts[VP9_NUMMBSPLITS];
-#endif
   unsigned int partition_counts[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
   vp9_coeff_probs pre_coef_probs_4x4[BLOCK_TYPES];
@@ -204,8 +186,7 @@ typedef struct VP9Common {
 
   int frame_flags;
   // MBs, mb_rows/cols is in 16-pixel units; mi_rows/cols is in
-  // MODE_INFO units (depending on CONFIG_SB8X8, that is either
-  // 16-pixel or 8-pixel)
+  // MODE_INFO (8-pixel) units.
   int MBs;
   int mb_rows, mi_rows;
   int mb_cols, mi_cols;

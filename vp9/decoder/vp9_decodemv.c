@@ -65,12 +65,6 @@ static MB_PREDICTION_MODE read_kf_mb_ymode(vp9_reader *r, const vp9_prob *p) {
   return (MB_PREDICTION_MODE)treed_read(r, vp9_kf_ymode_tree, p);
 }
 
-#if !CONFIG_SB8X8
-static int read_i8x8_mode(vp9_reader *r, const vp9_prob *p) {
-  return treed_read(r, vp9_i8x8_mode_tree, p);
-}
-#endif
-
 static MB_PREDICTION_MODE read_uv_mode(vp9_reader *r, const vp9_prob *p) {
   return (MB_PREDICTION_MODE)treed_read(r, vp9_uv_mode_tree, p);
 }
@@ -130,11 +124,7 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
     m->mbmi.mb_skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
 
   // luma mode
-#if CONFIG_SB8X8
   m->mbmi.mode = m->mbmi.sb_type > BLOCK_SIZE_SB8X8 ?
-#else
-  m->mbmi.mode = m->mbmi.sb_type > BLOCK_SIZE_MB16X16 ?
-#endif
       read_kf_sb_ymode(r, cm->sb_kf_ymode_prob[cm->kf_ymode_probs_index]):
       read_kf_mb_ymode(r, cm->kf_ymode_prob[cm->kf_ymode_probs_index]);
 
@@ -142,58 +132,27 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
 
   if (m->mbmi.mode == I4X4_PRED) {
     int i;
-    for (i = 0; i < (16 >> (2 * CONFIG_SB8X8)); ++i) {
+    for (i = 0; i < 4; ++i) {
       const B_PREDICTION_MODE a = above_block_mode(m, i, mis);
       const B_PREDICTION_MODE l = xd->left_available ||
-                                  (i & (3 >> CONFIG_SB8X8)) ?
+                                  (i & 1) ?
                                   left_block_mode(m, i) : B_DC_PRED;
       m->bmi[i].as_mode.first = read_kf_bmode(r, cm->kf_bmode_prob[a][l]);
     }
   }
 
-#if !CONFIG_SB8X8
-  if (m->mbmi.mode == I8X8_PRED) {
-    int i;
-    for (i = 0; i < 4; ++i) {
-      const int ib = vp9_i8x8_block[i];
-      const int mode8x8 = read_i8x8_mode(r, cm->fc.i8x8_mode_prob);
-
-      m->bmi[ib + 0].as_mode.first = mode8x8;
-      m->bmi[ib + 1].as_mode.first = mode8x8;
-      m->bmi[ib + 4].as_mode.first = mode8x8;
-      m->bmi[ib + 5].as_mode.first = mode8x8;
-    }
-  }
-
-  // chroma mode
-  if (m->mbmi.mode != I8X8_PRED)
-#endif
-  {
-    m->mbmi.uv_mode = read_uv_mode(r, cm->kf_uv_mode_prob[m->mbmi.mode]);
-  }
+  m->mbmi.uv_mode = read_uv_mode(r, cm->kf_uv_mode_prob[m->mbmi.mode]);
 
   if (cm->txfm_mode == TX_MODE_SELECT &&
-      !m->mbmi.mb_skip_coeff &&
-#if CONFIG_SB8X8
-      m->mbmi.mode != I4X4_PRED
-#else
-      m->mbmi.mode <= I8X8_PRED
-#endif
-      ) {
-#if CONFIG_SB8X8
+      !m->mbmi.mb_skip_coeff && m->mbmi.mode != I4X4_PRED) {
     const int allow_16x16 = m->mbmi.sb_type >= BLOCK_SIZE_MB16X16;
-#else
-    const int allow_16x16 = m->mbmi.mode != I8X8_PRED;
-#endif
     const int allow_32x32 = m->mbmi.sb_type >= BLOCK_SIZE_SB32X32;
     m->mbmi.txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
   } else if (cm->txfm_mode >= ALLOW_32X32 &&
              m->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
     m->mbmi.txfm_size = TX_32X32;
   } else if (cm->txfm_mode >= ALLOW_16X16 &&
-#if CONFIG_SB8X8
              m->mbmi.sb_type >= BLOCK_SIZE_MB16X16 &&
-#endif
              m->mbmi.mode <= TM_PRED) {
     m->mbmi.txfm_size = TX_16X16;
   } else if (cm->txfm_mode >= ALLOW_8X8 && m->mbmi.mode != I4X4_PRED) {
@@ -677,12 +636,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
         mbmi->mode = ZEROMV;
       } else {
-        mbmi->mode =
-#if CONFIG_SB8X8
-                     mbmi->sb_type > BLOCK_SIZE_SB8X8 ?
-#else
-                     mbmi->sb_type > BLOCK_SIZE_MB16X16 ?
-#endif
+        mbmi->mode = mbmi->sb_type > BLOCK_SIZE_SB8X8 ?
                                      read_sb_mv_ref(r, mv_ref_p)
                                    : read_mv_ref(r, mv_ref_p);
         vp9_accum_mv_refs(cm, mbmi->mode, mbmi->mb_mode_context[ref_frame]);
@@ -776,29 +730,16 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mbmi->uv_mode = DC_PRED;
     switch (mbmi->mode) {
       case SPLITMV: {
-#if CONFIG_SB8X8
         const int num_p = 4;
-#else
-        const int s = treed_read(r, vp9_mbsplit_tree, cm->fc.mbsplit_prob);
-        const int num_p = vp9_mbsplit_count[s];
-#endif
         int j = 0;
 
-#if !CONFIG_SB8X8
-        cm->fc.mbsplit_counts[s]++;
-        mbmi->partitioning = s;
-#endif
         mbmi->need_to_clamp_mvs = 0;
         do {  // for each subset j
           int_mv leftmv, abovemv, second_leftmv, second_abovemv;
           int_mv blockmv, secondmv;
           int mv_contz;
           int blockmode;
-#if CONFIG_SB8X8
           int k = j;
-#else
-          int k = vp9_mbsplit_offset[s][j];  // first block in subset j
-#endif
 
           leftmv.as_int = left_block_mv(xd, mi, k);
           abovemv.as_int = above_block_mv(mi, k, mis);
@@ -852,50 +793,14 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             default:
               break;
           }
-
-          /*  Commenting this section out, not sure why this was needed, and
-           *  there are mismatches with this section in rare cases since it is
-           *  not done in the encoder at all.
-          mbmi->need_to_clamp_mvs |= check_mv_bounds(&blockmv,
-                                                     mb_to_left_edge,
-                                                     mb_to_right_edge,
-                                                     mb_to_top_edge,
-                                                     mb_to_bottom_edge);
-          if (mbmi->second_ref_frame > 0) {
-            mbmi->need_to_clamp_mvs |= check_mv_bounds(&secondmv,
-                                                       mb_to_left_edge,
-                                                       mb_to_right_edge,
-                                                       mb_to_top_edge,
-                                                       mb_to_bottom_edge);
-          }
-          */
-
-#if CONFIG_SB8X8
           mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
           if (mbmi->second_ref_frame > 0)
             mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
-#else
-          {
-            /* Fill (uniform) modes, mvs of jth subset.
-             Must do it here because ensuing subsets can
-             refer back to us via "left" or "above". */
-            unsigned int fill_count = mbsplit_fill_count[s];
-            const uint8_t *fill_offset =
-                &mbsplit_fill_offset[s][j * fill_count];
-
-            do {
-              mi->bmi[*fill_offset].as_mv[0].as_int = blockmv.as_int;
-              if (mbmi->second_ref_frame > 0)
-                mi->bmi[*fill_offset].as_mv[1].as_int = secondmv.as_int;
-              fill_offset++;
-            } while (--fill_count);
-          }
-#endif
         } while (++j < num_p);
       }
 
-      mv0->as_int = mi->bmi[15 >> (2 * CONFIG_SB8X8)].as_mv[0].as_int;
-      mv1->as_int = mi->bmi[15 >> (2 * CONFIG_SB8X8)].as_mv[1].as_int;
+      mv0->as_int = mi->bmi[3].as_mv[0].as_int;
+      mv1->as_int = mi->bmi[3].as_mv[1].as_int;
 
       break;  /* done with SPLITMV */
 
@@ -960,12 +865,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     // required for left and above block mv
     mv0->as_int = 0;
 
-#if CONFIG_SB8X8
-    if (mbmi->sb_type > BLOCK_SIZE_SB8X8)
-#else
-    if (mbmi->sb_type > BLOCK_SIZE_MB16X16)
-#endif
-    {
+    if (mbmi->sb_type > BLOCK_SIZE_SB8X8) {
       mbmi->mode = read_sb_ymode(r, cm->fc.sb_ymode_prob);
       cm->fc.sb_ymode_counts[mbmi->mode]++;
     } else {
@@ -983,28 +883,11 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
 #endif
         cm->fc.bmode_counts[m]++;
-      } while (++j < (16 >> (2 * CONFIG_SB8X8)));
+      } while (++j < 4);
     }
 
-#if !CONFIG_SB8X8
-    if (mbmi->mode == I8X8_PRED) {
-      int i;
-      for (i = 0; i < 4; i++) {
-        const int ib = vp9_i8x8_block[i];
-        const int mode8x8 = read_i8x8_mode(r, cm->fc.i8x8_mode_prob);
-
-        mi->bmi[ib + 0].as_mode.first = mode8x8;
-        mi->bmi[ib + 1].as_mode.first = mode8x8;
-        mi->bmi[ib + 4].as_mode.first = mode8x8;
-        mi->bmi[ib + 5].as_mode.first = mode8x8;
-        cm->fc.i8x8_mode_counts[mode8x8]++;
-      }
-    } else
-#endif
-    {
-      mbmi->uv_mode = read_uv_mode(r, cm->fc.uv_mode_prob[mbmi->mode]);
-      cm->fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
-    }
+    mbmi->uv_mode = read_uv_mode(r, cm->fc.uv_mode_prob[mbmi->mode]);
+    cm->fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
   }
   /*
   if (cm->current_video_frame == 1)
@@ -1012,44 +895,22 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     */
 
   if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
-      ((mbmi->ref_frame == INTRA_FRAME &&
-#if CONFIG_SB8X8
-        mbmi->mode != I4X4_PRED
-#else
-        mbmi->mode <= I8X8_PRED
-#endif
-        ) ||
-       (mbmi->ref_frame != INTRA_FRAME &&
-#if CONFIG_SB8X8
-        mbmi->mode != SPLITMV
-#else
-        !(mbmi->mode == SPLITMV && mbmi->partitioning == PARTITIONING_4X4)
-#endif
-        ))) {
-#if CONFIG_SB8X8
+      ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode != I4X4_PRED) ||
+       (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {
     const int allow_16x16 = mbmi->sb_type >= BLOCK_SIZE_MB16X16;
-#else
-    const int allow_16x16 = mbmi->mode != I8X8_PRED && mbmi->mode != SPLITMV;
-#endif
     const int allow_32x32 = mbmi->sb_type >= BLOCK_SIZE_SB32X32;
     mbmi->txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
   } else if (mbmi->sb_type >= BLOCK_SIZE_SB32X32 &&
              cm->txfm_mode >= ALLOW_32X32) {
     mbmi->txfm_size = TX_32X32;
   } else if (cm->txfm_mode >= ALLOW_16X16 &&
-#if CONFIG_SB8X8
              mbmi->sb_type >= BLOCK_SIZE_MB16X16 &&
-#endif
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= TM_PRED) ||
        (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {
     mbmi->txfm_size = TX_16X16;
   } else if (cm->txfm_mode >= ALLOW_8X8 &&
       (!(mbmi->ref_frame == INTRA_FRAME && mbmi->mode == I4X4_PRED) &&
-       !(mbmi->ref_frame != INTRA_FRAME && mbmi->mode == SPLITMV
-#if !CONFIG_SB8X8
-         && mbmi->partitioning == PARTITIONING_4X4
-#endif
-         ))) {
+       !(mbmi->ref_frame != INTRA_FRAME && mbmi->mode == SPLITMV))) {
     mbmi->txfm_size = TX_8X8;
   } else {
     mbmi->txfm_size = TX_4X4;
