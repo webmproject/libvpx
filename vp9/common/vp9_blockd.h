@@ -759,7 +759,9 @@ static INLINE void foreach_transformed_block_in_plane(
 
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
-  const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
+  // transform size varies per plane, look it up in a common way.
+  const TX_SIZE tx_size = plane ? get_uv_tx_size(xd)
+                                : xd->mode_info_context->mbmi.txfm_size;
   const int block_size_b = bw + bh;
   const int txfrm_size_b = tx_size * 2;
 
@@ -768,21 +770,14 @@ static INLINE void foreach_transformed_block_in_plane(
                      xd->plane[plane].subsampling_y;
   const int ss_block_size = block_size_b - ss_sum;
 
-  // size of the transform to use. scale the transform down if it's larger
-  // than the size of the subsampled data, or forced externally by the mb mode.
-  const int ss_max = MAX(xd->plane[plane].subsampling_x,
-                         xd->plane[plane].subsampling_y);
-  const int ss_txfrm_size = txfrm_size_b > ss_block_size
-                                ? txfrm_size_b - ss_max * 2
-                                : txfrm_size_b;
-  const int step = 1 << ss_txfrm_size;
+  const int step = 1 << txfrm_size_b;
 
   int i;
 
   assert(txfrm_size_b <= block_size_b);
-  assert(ss_txfrm_size <= ss_block_size);
+  assert(txfrm_size_b <= ss_block_size);
   for (i = 0; i < (1 << ss_block_size); i += step) {
-    visit(plane, i, bsize, ss_txfrm_size, arg);
+    visit(plane, i, bsize, txfrm_size_b, arg);
   }
 }
 
@@ -915,36 +910,6 @@ static void txfrm_block_to_raster_xy(MACROBLOCKD *xd,
   const int raster_mb = block >> ss_txfrm_size;
   *x = (raster_mb & (tx_cols - 1)) << (txwl);
   *y = raster_mb >> tx_cols_lg2 << (txwl);
-}
-
-static TX_SIZE tx_size_for_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                                 int plane) {
-  // TODO(jkoleszar): This duplicates a ton of code, but we're going to be
-  // moving this to a per-plane lookup shortly, and this will go away then.
-  if (!plane) {
-    return xd->mode_info_context->mbmi.txfm_size;
-  } else {
-    const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
-    // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
-    // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
-    const TX_SIZE tx_size = xd->mode_info_context->mbmi.txfm_size;
-    const int block_size_b = bw + bh;
-    const int txfrm_size_b = tx_size * 2;
-
-    // subsampled size of the block
-    const int ss_sum = xd->plane[plane].subsampling_x +
-                       xd->plane[plane].subsampling_y;
-    const int ss_block_size = block_size_b - ss_sum;
-
-    // size of the transform to use. scale the transform down if it's larger
-    // than the size of the subsampled data, or forced externally by the mb mode
-    const int ss_max = MAX(xd->plane[plane].subsampling_x,
-                           xd->plane[plane].subsampling_y);
-    const int ss_txfrm_size = txfrm_size_b > ss_block_size
-                                  ? txfrm_size_b - ss_max * 2
-                                  : txfrm_size_b;
-    return (TX_SIZE)(ss_txfrm_size / 2);
-  }
 }
 
 #endif  // VP9_COMMON_VP9_BLOCKD_H_
