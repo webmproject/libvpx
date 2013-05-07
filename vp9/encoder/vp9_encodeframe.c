@@ -544,8 +544,8 @@ static INLINE void set_partition_seg_context(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
-  xd->above_seg_context = cm->above_seg_context + (mi_col >> 1);
-  xd->left_seg_context  = cm->left_seg_context + ((mi_row >> 1) & 3);
+  xd->above_seg_context = cm->above_seg_context + mi_col;
+  xd->left_seg_context  = cm->left_seg_context + (mi_row & MI_MASK);
 }
 
 static void set_offsets(VP9_COMP *cpi,
@@ -878,7 +878,7 @@ static void encode_sb_row(VP9_COMP *cpi,
     int sb64_rate = 0, sb64_dist = 0;
     int sb64_skip = 0;
     ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
-    PARTITION_CONTEXT seg_l[4], seg_a[4];
+    PARTITION_CONTEXT seg_l[64 / MI_SIZE], seg_a[64 / MI_SIZE];
     TOKENEXTRA *tp_orig = *tp;
 
     for (p = 0; p < MAX_MB_PLANE; p++) {
@@ -888,9 +888,8 @@ static void encode_sb_row(VP9_COMP *cpi,
       memcpy(l + 16 * p, cm->left_context[p],
              sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_y);
     }
-    memcpy(&seg_a, cm->above_seg_context + (mi_col >> 1),
-           sizeof(seg_a));
-    memcpy(&seg_l, cm->left_seg_context, sizeof(seg_l));
+    vpx_memcpy(&seg_a, cm->above_seg_context + mi_col, sizeof(seg_a));
+    vpx_memcpy(&seg_l, cm->left_seg_context, sizeof(seg_l));
 
     // FIXME(rbultje): this function should probably be rewritten to be
     // recursive at some point in the future.
@@ -902,6 +901,7 @@ static void encode_sb_row(VP9_COMP *cpi,
       int sb32_skip = 0;
       int j;
       ENTROPY_CONTEXT l2[8 * MAX_MB_PLANE], a2[8 * MAX_MB_PLANE];
+      PARTITION_CONTEXT sl32[32 / MI_SIZE], sa32[32 / MI_SIZE];
 
       sb_partitioning[i] = BLOCK_SIZE_MB16X16;
       if (mi_row + y_idx >= cm->mi_rows || mi_col + x_idx >= cm->mi_cols)
@@ -920,6 +920,8 @@ static void encode_sb_row(VP9_COMP *cpi,
                        ((mi_col + x_idx) * 2 >> xd->plane[p].subsampling_x),
                    sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_x);
       }
+      vpx_memcpy(&sa32, cm->above_seg_context + mi_col + x_idx, sizeof(sa32));
+      vpx_memcpy(&sl32, cm->left_seg_context + y_idx, sizeof(sl32));
 
       /* Encode MBs in raster order within the SB */
       for (j = 0; j < 4; j++) {
@@ -928,6 +930,7 @@ static void encode_sb_row(VP9_COMP *cpi,
         int r, d;
         int r2, d2, mb16_rate = 0, mb16_dist = 0, k;
         ENTROPY_CONTEXT l3[4 * MAX_MB_PLANE], a3[4 * MAX_MB_PLANE];
+        PARTITION_CONTEXT sl16[16 / MI_SIZE], sa16[16 / MI_SIZE];
 
         mb_partitioning[i][j] = BLOCK_SIZE_SB8X8;
 
@@ -950,6 +953,9 @@ static void encode_sb_row(VP9_COMP *cpi,
                          ((mi_col + x_idx_m) * 2 >> xd->plane[p].subsampling_x),
                      sizeof(ENTROPY_CONTEXT) * 4 >> xd->plane[p].subsampling_x);
         }
+        vpx_memcpy(&sa16, cm->above_seg_context + mi_col + x_idx_m,
+                   sizeof(sa16));
+        vpx_memcpy(&sl16, cm->left_seg_context + y_idx_m, sizeof(sl16));
 
         for (k = 0; k < 4; k++) {
           xd->b_index = k;
@@ -983,6 +989,9 @@ static void encode_sb_row(VP9_COMP *cpi,
                      a3 + 4 * p,
                      sizeof(ENTROPY_CONTEXT) * 4 >> xd->plane[p].subsampling_x);
         }
+        vpx_memcpy(cm->above_seg_context + mi_col + x_idx_m,
+                   sa16, sizeof(sa16));
+        vpx_memcpy(cm->left_seg_context + y_idx_m, sl16, sizeof(sl16));
 
         // try 8x16 coding
         r2 = 0;
@@ -1102,6 +1111,9 @@ static void encode_sb_row(VP9_COMP *cpi,
                    a2 + 8 * p,
                    sizeof(ENTROPY_CONTEXT) * 8 >> xd->plane[p].subsampling_x);
       }
+      // restore partition information context
+      vpx_memcpy(cm->above_seg_context + mi_col + x_idx, sa32, sizeof(sa32));
+      vpx_memcpy(cm->left_seg_context + y_idx, sl32, sizeof(sl32));
 
       set_partition_seg_context(cpi, mi_row + y_idx, mi_col + x_idx);
       pl = partition_plane_context(xd, BLOCK_SIZE_SB32X32);
@@ -1258,8 +1270,7 @@ static void encode_sb_row(VP9_COMP *cpi,
       memcpy(cm->left_context[p], l + 16 * p,
              sizeof(ENTROPY_CONTEXT) * 16 >> xd->plane[p].subsampling_y);
     }
-    memcpy(cm->above_seg_context + (mi_col >> 1), &seg_a,
-           sizeof(seg_a));
+    memcpy(cm->above_seg_context + mi_col, &seg_a, sizeof(seg_a));
     memcpy(cm->left_seg_context, &seg_l, sizeof(seg_l));
 
     set_partition_seg_context(cpi, mi_row, mi_col);
@@ -1428,10 +1439,10 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(cm->above_context[0], 0, sizeof(ENTROPY_CONTEXT) * 4 *
-                                      MAX_MB_PLANE * mb_cols_aligned_to_sb(cm));
+  vpx_memset(cm->above_context[0], 0, sizeof(ENTROPY_CONTEXT) * 2 *
+                                      MAX_MB_PLANE * mi_cols_aligned_to_sb(cm));
   vpx_memset(cm->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
-                                       mb_cols_aligned_to_sb(cm));
+                                       mi_cols_aligned_to_sb(cm));
 }
 
 static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {

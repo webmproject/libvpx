@@ -372,8 +372,8 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
     xd->plane[i].left_context = cm->left_context[i] +
         (((mi_row * 2) & 15) >> xd->plane[i].subsampling_y);
   }
-  xd->above_seg_context = cm->above_seg_context + (mi_col >> 1);
-  xd->left_seg_context  = cm->left_seg_context + ((mi_row >> 1) & 3);
+  xd->above_seg_context = cm->above_seg_context + mi_col;
+  xd->left_seg_context  = cm->left_seg_context + (mi_row & MI_MASK);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
@@ -443,9 +443,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (bsize > BLOCK_SIZE_SB8X8) {
     int pl;
     // read the partition information
-    xd->left_seg_context =
-        pc->left_seg_context + ((mi_row >> 1) & 3);
-    xd->above_seg_context = pc->above_seg_context + (mi_col >> 1);
+    xd->left_seg_context = pc->left_seg_context + (mi_row & MI_MASK);
+    xd->above_seg_context = pc->above_seg_context + mi_col;
     pl = partition_plane_context(xd, bsize);
     partition = treed_read(r, vp9_partition_tree,
                            pc->fc.partition_prob[pl]);
@@ -486,8 +485,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_MB16X16))
     return;
 
-  xd->left_seg_context = pc->left_seg_context + ((mi_row >> 1) & 3);
-  xd->above_seg_context = pc->above_seg_context + (mi_col >> 1);
+  xd->left_seg_context = pc->left_seg_context + (mi_row & MI_MASK);
+  xd->above_seg_context = pc->above_seg_context + mi_col;
   update_partition_context(xd, subsize, bsize);
 }
 
@@ -849,11 +848,11 @@ static void decode_tiles(VP9D_COMP *pbi,
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(pc->above_context[0], 0, sizeof(ENTROPY_CONTEXT) * 4 *
-                                      MAX_MB_PLANE * mb_cols_aligned_to_sb(pc));
+  vpx_memset(pc->above_context[0], 0, sizeof(ENTROPY_CONTEXT) * 2 *
+                                      MAX_MB_PLANE * mi_cols_aligned_to_sb(pc));
 
   vpx_memset(pc->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
-                                       mb_cols_aligned_to_sb(pc));
+                                       mi_cols_aligned_to_sb(pc));
 
   if (pbi->oxcf.inv_tile_order) {
     const int n_cols = pc->tile_columns;
