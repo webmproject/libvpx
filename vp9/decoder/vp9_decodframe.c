@@ -370,14 +370,8 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
   const int bw = 1 << mi_width_log2(bsize);
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  int i;
-
   const int mi_idx = mi_row * cm->mode_info_stride + mi_col;
-  const YV12_BUFFER_CONFIG *dst_fb = &cm->yv12_fb[cm->new_fb_idx];
-  const int recon_yoffset =
-      (MI_SIZE * mi_row) * dst_fb->y_stride + (MI_SIZE * mi_col);
-  const int recon_uvoffset =
-      (MI_UV_SIZE * mi_row) * dst_fb->uv_stride + (MI_UV_SIZE * mi_col);
+  int i;
 
   xd->mode_info_context = cm->mi + mi_idx;
   xd->mode_info_context->mbmi.sb_type = bsize;
@@ -396,9 +390,7 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
   // as they are always compared to values that are in 1/8th pel units
   set_mi_row_col(cm, xd, mi_row, bh, mi_col, bw);
 
-  xd->plane[0].dst.buf = dst_fb->y_buffer + recon_yoffset;
-  xd->plane[1].dst.buf = dst_fb->u_buffer + recon_uvoffset;
-  xd->plane[2].dst.buf = dst_fb->v_buffer + recon_uvoffset;
+  setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], mi_row, mi_col);
 }
 
 static void set_refs(VP9D_COMP *pbi, int mi_row, int mi_col) {
