@@ -22,7 +22,7 @@
 #include "vp9/common/vp9_extend.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9/common/vp9_swapyv12buffer.h"
+#include "vpx_scale/yv12config.h"
 #include <stdio.h>
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_rdopt.h"
@@ -51,6 +51,12 @@
 
 #define POW1 (double)cpi->oxcf.two_pass_vbrbias/100.0
 #define POW2 (double)cpi->oxcf.two_pass_vbrbias/100.0
+
+static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
+  YV12_BUFFER_CONFIG temp = *a;
+  *a = *b;
+  *b = temp;
+}
 
 static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame);
 
@@ -444,13 +450,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
   int recon_yoffset, recon_uvoffset;
-  YV12_BUFFER_CONFIG *lst_yv12 =
-      &cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]];
-  YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
-  YV12_BUFFER_CONFIG *gld_yv12 =
-      &cm->yv12_fb[cm->ref_frame_map[cpi->gld_fb_idx]];
-  int recon_y_stride = lst_yv12->y_stride;
-  int recon_uv_stride = lst_yv12->uv_stride;
+  const int lst_yv12_idx = cm->ref_frame_map[cpi->lst_fb_idx];
+  const int gld_yv12_idx = cm->ref_frame_map[cpi->gld_fb_idx];
+  YV12_BUFFER_CONFIG *const lst_yv12 = &cm->yv12_fb[lst_yv12_idx];
+  YV12_BUFFER_CONFIG *const new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
+  YV12_BUFFER_CONFIG *const gld_yv12 = &cm->yv12_fb[gld_yv12_idx];
+  const int recon_y_stride = lst_yv12->y_stride;
+  const int recon_uv_stride = lst_yv12->uv_stride;
   int64_t intra_error = 0;
   int64_t coded_error = 0;
   int64_t sr_coded_error = 0;
@@ -772,14 +778,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
     cpi->twopass.sr_update_lag++;
 
   // swap frame pointers so last frame refers to the frame we just compressed
-  vp9_swap_yv12_buffer(lst_yv12, new_yv12);
+  swap_yv12(lst_yv12, new_yv12);
+
   vp8_yv12_extend_frame_borders(lst_yv12);
 
   // Special case for the first frame. Copy into the GF buffer as a second reference.
-  if (cm->current_video_frame == 0) {
+  if (cm->current_video_frame == 0)
     vp8_yv12_copy_frame(lst_yv12, gld_yv12);
-  }
-
 
   // use this to see what the first pass reconstruction looks like
   if (0) {

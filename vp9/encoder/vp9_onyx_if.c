@@ -32,7 +32,6 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 #include "vpx_mem/vpx_mem.h"
-#include "vp9/common/vp9_swapyv12buffer.h"
 #include "vpx_ports/vpx_timer.h"
 
 #include "vp9/common/vp9_seg_common.h"
