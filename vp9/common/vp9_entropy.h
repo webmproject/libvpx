@@ -16,8 +16,6 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
 
-extern const int vp9_i8x8_block[4];
-
 /* Coefficient token alphabet */
 
 #define ZERO_TOKEN              0       /* 0         Extra Bits 0+0 */
