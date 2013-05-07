@@ -37,11 +37,6 @@ extern int dec_debug;
 
 static B_PREDICTION_MODE read_bmode(vp9_reader *r, const vp9_prob *p) {
   B_PREDICTION_MODE m = treed_read(r, vp9_bmode_tree, p);
-#if CONFIG_NEWBINTRAMODES
-  if (m == B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS)
-    m = B_CONTEXT_PRED;
-  assert(m < B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS || m == B_CONTEXT_PRED);
-#endif
   return m;
 }
 
@@ -879,9 +874,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       do {
         int m = read_bmode(r, cm->fc.bmode_prob);
         mi->bmi[j].as_mode.first = m;
-#if CONFIG_NEWBINTRAMODES
-        if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
-#endif
         cm->fc.bmode_counts[m]++;
       } while (++j < 4);
     }

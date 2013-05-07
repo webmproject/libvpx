@@ -61,11 +61,6 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib,
 
   assert(ib < (1 << (bwl + bhl)));
 
-#if CONFIG_NEWBINTRAMODES
-  xd->mode_info_context->bmi[ib].as_mode.context =
-    vp9_find_bpred_context(&x->e_mbd, ib, dst, xd->plane[0].dst.stride);
-#endif
-
   vp9_intra4x4_predict(&x->e_mbd, ib, bsize,
                        xd->mode_info_context->bmi[ib].as_mode.first,
                        dst, xd->plane[0].dst.stride);

@@ -240,7 +240,6 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     csm
     implicit_segmentation
-    newbintramodes
     comp_interintra_pred
     enable_6tap
     modelcoefprob

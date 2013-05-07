@@ -749,32 +749,14 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   DECLARE_ALIGNED_ARRAY(16, int16_t, best_dqcoeff, 16);
 
   assert(ib < 4);
-#if CONFIG_NEWBINTRAMODES
-  xd->mode_info_context->bmi[ib].as_mode.context =
-    vp9_find_bpred_context(xd, ib, dst, xd->plane[0].dst.stride);
-#endif
+
   xd->mode_info_context->mbmi.txfm_size = TX_4X4;
   for (mode = B_DC_PRED; mode < LEFT4X4; mode++) {
     int64_t this_rd;
     int ratey;
 
-#if CONFIG_NEWBINTRAMODES
-    if (xd->frame_type == KEY_FRAME) {
-      if (mode == B_CONTEXT_PRED) continue;
-    } else {
-      if (mode >= B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS &&
-          mode < B_CONTEXT_PRED)
-        continue;
-    }
-#endif
-
     xd->mode_info_context->bmi[ib].as_mode.first = mode;
-#if CONFIG_NEWBINTRAMODES
-    rate = bmode_costs[
-        mode == B_CONTEXT_PRED ? mode - CONTEXT_PRED_REPLACEMENTS : mode];
-#else
     rate = bmode_costs[mode];
-#endif
 
     vp9_intra4x4_predict(xd, ib,
                          BLOCK_SIZE_SB8X8,
@@ -860,14 +842,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
     const int mis = xd->mode_info_stride;
     B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
     int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry), UNINITIALIZED_IS_SAFE(d);
-#if CONFIG_NEWBINTRAMODES
-    uint8_t* const dst =
-        raster_block_offset_uint8(xd,
-                                  BLOCK_SIZE_SB8X8,
-                                  0, i,
-                                  xd->plane[0].dst.buf,
-                                  xd->plane[0].dst.stride);
-#endif
 
     if (xd->frame_type == KEY_FRAME) {
       const B_PREDICTION_MODE A = above_block_mode(mic, i, mis);
@@ -875,10 +849,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
 
       bmode_costs  = mb->bmode_costs[A][L];
     }
-#if CONFIG_NEWBINTRAMODES
-    mic->bmi[i].as_mode.context = vp9_find_bpred_context(xd, i, dst,
-        xd->plane[0].dst.stride);
-#endif
 
     total_rd += rd_pick_intra4x4block(cpi, mb, i, &best_mode, bmode_costs,
                                       t_above + x_idx, t_left + y_idx,
@@ -889,10 +859,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
     tot_rate_y += ry;
 
     mic->bmi[i].as_mode.first = best_mode;
-
-#if 0  // CONFIG_NEWBINTRAMODES
-    printf("%d %d\n", mic->bmi[i].as_mode.first, mic->bmi[i].as_mode.context);
-#endif
 
     if (total_rd >= best_rd)
       break;
@@ -1140,13 +1106,7 @@ static int labels2mode(MACROBLOCK *x,
              left_second_mv.as_int == this_second_mv->as_int))
           m = LEFT4X4;
       }
-
-#if CONFIG_NEWBINTRAMODES
-      cost = x->inter_bmode_costs[m == B_CONTEXT_PRED ?
-                                  m - CONTEXT_PRED_REPLACEMENTS : m];
-#else
       cost = x->inter_bmode_costs[m];
-#endif
     }
 
     mic->bmi[i].as_mv[0].as_int = this_mv->as_int;

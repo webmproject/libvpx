@@ -254,21 +254,13 @@ static void decode_atom_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
     dst = raster_block_offset_uint8(xd, bsize, 0, i,
                                     xd->plane[0].dst.buf,
                                     xd->plane[0].dst.stride);
-#if CONFIG_NEWBINTRAMODES
-    xd->mode_info_context->bmi[i].as_mode.context =
-        vp9_find_bpred_context(xd, i, dst, xd->plane[0].dst.stride);
-    if (!xd->mode_info_context->mbmi.mb_skip_coeff)
-      vp9_decode_coefs_4x4(pbi, xd, r, PLANE_TYPE_Y_WITH_DC, i);
-#endif
+
     vp9_intra4x4_predict(xd, i, bsize, b_mode, dst, xd->plane[0].dst.stride);
     // TODO(jingning): refactor to use foreach_transformed_block_in_plane_
     tx_type = get_tx_type_4x4(xd, i);
     dequant_add_y(xd, tx_type, i, bsize);
   }
-#if CONFIG_NEWBINTRAMODES
-  if (!xd->mode_info_context->mbmi.mb_skip_coeff)
-    vp9_decode_mb_tokens_4x4_uv(pbi, xd, r);
-#endif
+
   foreach_transformed_block_uv(xd, bsize, decode_block, xd);
 }
 
@@ -294,9 +286,6 @@ static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
       mb_init_dequantizer(&pbi->common, xd);
 
     if (!vp9_reader_has_error(r)) {
-#if CONFIG_NEWBINTRAMODES
-    if (mbmi->mode != I4X4_PRED)
-#endif
       vp9_decode_tokens(pbi, xd, r, bsize);
     }
   }

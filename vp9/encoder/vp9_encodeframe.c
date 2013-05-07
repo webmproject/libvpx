@@ -1924,9 +1924,6 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
     int b = 0;
     do {
       int m = xd->mode_info_context->bmi[b].as_mode.first;
-#if CONFIG_NEWBINTRAMODES
-      if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
-#endif
       ++cpi->bmode_count[m];
     } while (++b < 4);
   }

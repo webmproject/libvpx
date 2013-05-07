@@ -142,9 +142,6 @@ typedef enum {
   B_D27_PRED,
   B_D63_PRED,
   B_TM_PRED,
-#if CONFIG_NEWBINTRAMODES
-  B_CONTEXT_PRED,
-#endif
 
   LEFT4X4,
   ABOVE4X4,
@@ -157,15 +154,8 @@ typedef enum {
 #define VP9_BINTRAMODES (LEFT4X4)
 #define VP9_SUBMVREFS (1 + NEW4X4 - LEFT4X4)
 
-#if CONFIG_NEWBINTRAMODES
-/* The number of I4X4_PRED intra modes that are replaced by B_CONTEXT_PRED */
-#define CONTEXT_PRED_REPLACEMENTS  0
-#define VP9_KF_BINTRAMODES (VP9_BINTRAMODES - 1)
-#define VP9_NKF_BINTRAMODES  (VP9_BINTRAMODES - CONTEXT_PRED_REPLACEMENTS)
-#else
 #define VP9_KF_BINTRAMODES (VP9_BINTRAMODES)   /* 10 */
 #define VP9_NKF_BINTRAMODES (VP9_BINTRAMODES)  /* 10 */
-#endif
 
 /* For keyframes, intra block modes are predicted by the (already decoded)
    modes for the Y blocks to the left and above us; for interframes, there
@@ -174,9 +164,6 @@ typedef enum {
 union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
-#if CONFIG_NEWBINTRAMODES
-    B_PREDICTION_MODE context;
-#endif
   } as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
 };
@@ -580,12 +567,6 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
     case B_D27_PRED :
       return DCT_ADST;
 
-#if CONFIG_NEWBINTRAMODES
-    case B_CONTEXT_PRED:
-      assert(0);
-      break;
-#endif
-
     default:
       return DCT_DCT;
   }
@@ -615,10 +596,6 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   if (xd->mode_info_context->mbmi.mode == I4X4_PRED &&
       xd->q_index < ACTIVE_HT) {
     tx_type = txfm_map(
-#if CONFIG_NEWBINTRAMODES
-        xd->mode_info_context->bmi[ib].as_mode.first == B_CONTEXT_PRED ?
-          xd->mode_info_context->bmi[ib].as_mode.context :
-#endif
         xd->mode_info_context->bmi[ib].as_mode.first);
   } else if (xd->mode_info_context->mbmi.mode <= TM_PRED &&
              xd->q_index < ACTIVE_HT) {

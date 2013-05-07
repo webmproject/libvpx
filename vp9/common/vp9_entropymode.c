@@ -63,21 +63,8 @@ static const unsigned int kf_uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
 };
 
 static const unsigned int bmode_cts[VP9_NKF_BINTRAMODES] = {
-#if CONFIG_NEWBINTRAMODES
-#if CONTEXT_PRED_REPLACEMENTS == 6
-  /* DC    TM     V      H   CONTEXT */
-  43891, 17694, 10036, 3920, 20000
-#elif CONTEXT_PRED_REPLACEMENTS == 4
-  /* DC    TM     V      H   D45   D135   CONTEXT */
-  43891, 17694, 10036, 3920, 3363, 2546, 14000
-#elif CONTEXT_PRED_REPLACEMENTS == 0
-  /* DC    V     H    D45   D135  D117  D153   D27   D63   TM    CONTEXT */
-  43891, 10036, 3920, 3363, 2546, 5119, 2471, 1723, 3221, 17694, 50000
-#endif
-#else
   /* DC    V     H    D45   D135  D117  D153   D27   D63   TM  */
   43891, 10036, 3920, 3363, 2546, 5119, 2471, 1723, 3221, 17694
-#endif
 };
 
 typedef enum {
@@ -148,32 +135,6 @@ const vp9_tree_index vp9_kf_bmode_tree[VP9_KF_BINTRAMODES * 2 - 2] = {
 };
 
 const vp9_tree_index vp9_bmode_tree[VP9_NKF_BINTRAMODES * 2 - 2] = {
-#if CONFIG_NEWBINTRAMODES
-#if CONTEXT_PRED_REPLACEMENTS == 6
-  -B_DC_PRED, 2,
-  -B_TM_PRED, 4,
-  6, -(B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS),
-  -B_V_PRED, -B_H_PRED
-#elif CONTEXT_PRED_REPLACEMENTS == 4
-  -B_DC_PRED, 2,
-  -B_TM_PRED, 4,
-  6, 8,
-  -B_V_PRED, -B_H_PRED,
-  10, -(B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS),
-  -B_D135_PRED, -B_D45_PRED,
-#elif CONTEXT_PRED_REPLACEMENTS == 0
-  -B_DC_PRED, 2,                      /* 0 = DC_NODE */
-  -B_TM_PRED, 4,                      /* 1 = TM_NODE */
-  -B_V_PRED, 6,                       /* 2 = V_NODE */
-  8, 12,                              /* 3 = COM_NODE */
-  -B_H_PRED, 10,                      /* 4 = H_NODE */
-  -B_D135_PRED, -B_D117_PRED,         /* 5 = D135_NODE */
-  -B_D45_PRED, 14,                    /* 6 = D45_NODE */
-  -B_D63_PRED, 16,                    /* 7 = D63_NODE */
-  -B_D153_PRED, 18,                   /* 8 = D153_NODE */
-  -B_D27_PRED, -B_CONTEXT_PRED        /* 9 = D27_NODE */
-#endif
-#else
   -B_DC_PRED, 2,                      /* 0 = DC_NODE */
   -B_TM_PRED, 4,                      /* 1 = TM_NODE */
   -B_V_PRED, 6,                       /* 2 = V_NODE */
@@ -183,7 +144,6 @@ const vp9_tree_index vp9_bmode_tree[VP9_NKF_BINTRAMODES * 2 - 2] = {
   -B_D45_PRED, 14,                    /* 6 = D45_NODE */
   -B_D63_PRED, 16,                    /* 7 = D63_NODE */
   -B_D153_PRED, -B_D27_PRED           /* 8 = D153_NODE */
-#endif
 };
 
 /* Again, these trees use the same probability indices as their

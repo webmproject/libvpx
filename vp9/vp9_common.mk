@@ -74,7 +74,6 @@ VP9_COMMON_SRCS-yes += common/vp9_quant_common.c
 VP9_COMMON_SRCS-yes += common/vp9_recon.c
 VP9_COMMON_SRCS-yes += common/vp9_reconinter.c
 VP9_COMMON_SRCS-yes += common/vp9_reconintra.c
-VP9_COMMON_SRCS-yes += common/vp9_reconintra4x4.c
 VP9_COMMON_SRCS-yes += common/vp9_swapyv12buffer.c
 VP9_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/vp9_textblit.c
 VP9_COMMON_SRCS-yes += common/vp9_treecoder.c

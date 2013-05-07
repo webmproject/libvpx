@@ -287,10 +287,6 @@ static void write_uv_mode(vp9_writer *bc, int m, const vp9_prob *p) {
 
 
 static void write_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
-#if CONFIG_NEWBINTRAMODES
-  assert(m < B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS || m == B_CONTEXT_PRED);
-  if (m == B_CONTEXT_PRED) m -= CONTEXT_PRED_REPLACEMENTS;
-#endif
   write_token(bc, vp9_bmode_tree, p, vp9_bmode_encodings + m);
 }
 
