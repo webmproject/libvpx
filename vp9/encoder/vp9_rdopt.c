@@ -1852,9 +1852,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv cur_mv[2];
   int_mv ref_mv[2];
   int64_t this_rd = 0;
-  unsigned char tmp_ybuf[64 * 64];
-  unsigned char tmp_ubuf[32 * 32];
-  unsigned char tmp_vbuf[32 * 32];
+  unsigned char tmp_buf[MAX_MB_PLANE][64 * 64];
   int pred_exists = 0;
   int interpolating_intpel_seen = 0;
   int intpel_mv;
@@ -2032,19 +2030,17 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if ((cm->mcomp_filter_type == SWITCHABLE && newbest) ||
           (cm->mcomp_filter_type != SWITCHABLE &&
            cm->mcomp_filter_type == mbmi->interp_filter)) {
-        int i;
-        for (i = 0; i < MI_SIZE * bh; ++i)
-          vpx_memcpy(tmp_ybuf + i * MI_SIZE * bw,
-                     xd->plane[0].dst.buf + i * xd->plane[0].dst.stride,
-                     sizeof(unsigned char) * MI_SIZE * bw);
-        for (i = 0; i < MI_UV_SIZE * bh; ++i)
-          vpx_memcpy(tmp_ubuf + i * MI_UV_SIZE * bw,
-                     xd->plane[1].dst.buf + i * xd->plane[1].dst.stride,
-                     sizeof(unsigned char) * MI_UV_SIZE * bw);
-        for (i = 0; i < MI_UV_SIZE * bh; ++i)
-          vpx_memcpy(tmp_vbuf + i * MI_UV_SIZE * bw,
-                     xd->plane[2].dst.buf + i * xd->plane[2].dst.stride,
-                     sizeof(unsigned char) * MI_UV_SIZE * bw);
+        int p;
+
+        for (p = 0; p < MAX_MB_PLANE; p++) {
+          const int y = (MI_SIZE * bh) >> xd->plane[p].subsampling_y;
+          const int x = (MI_SIZE * bw) >> xd->plane[p].subsampling_x;
+          int i;
+
+          for (i = 0; i < y; i++)
+            vpx_memcpy(&tmp_buf[p][64 * i],
+                       xd->plane[p].dst.buf + i * xd->plane[p].dst.stride, x);
+        }
         pred_exists = 1;
       }
       interpolating_intpel_seen |= is_intpel_interp;
@@ -2058,18 +2054,17 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 
   if (pred_exists) {
-    for (i = 0; i < bh * MI_SIZE; ++i)
-      vpx_memcpy(xd->plane[0].dst.buf + i * xd->plane[0].dst.stride,
-                 tmp_ybuf + i * bw * MI_SIZE,
-                 sizeof(unsigned char) * bw * MI_SIZE);
-    for (i = 0; i < bh * MI_UV_SIZE; ++i)
-      vpx_memcpy(xd->plane[1].dst.buf + i * xd->plane[1].dst.stride,
-                 tmp_ubuf + i * bw * MI_UV_SIZE,
-                 sizeof(unsigned char) * bw * MI_UV_SIZE);
-    for (i = 0; i < bh * MI_UV_SIZE; ++i)
-      vpx_memcpy(xd->plane[2].dst.buf + i * xd->plane[2].dst.stride,
-                 tmp_vbuf + i * bw * MI_UV_SIZE,
-                 sizeof(unsigned char) * bw * MI_UV_SIZE);
+    int p;
+
+    for (p = 0; p < MAX_MB_PLANE; p++) {
+      const int y = (MI_SIZE * bh) >> xd->plane[p].subsampling_y;
+      const int x = (MI_SIZE * bw) >> xd->plane[p].subsampling_x;
+      int i;
+
+      for (i = 0; i < y; i++)
+        vpx_memcpy(xd->plane[p].dst.buf + i * xd->plane[p].dst.stride,
+                   &tmp_buf[p][64 * i], x);
+    }
   } else {
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear, 6-tap) is indicated at the frame level
