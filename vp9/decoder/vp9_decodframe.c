@@ -856,11 +856,6 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_zero(fc->mv_ref_ct);
   vp9_zero(fc->partition_counts);
 
-#if CONFIG_COMP_INTERINTRA_PRED
-  fc->pre_interintra_prob = fc->interintra_prob;
-  vp9_zero(fc->interintra_counts);
-#endif
-
 #if CONFIG_CODE_ZEROGROUP
   vp9_copy(fc->pre_zpc_probs_4x4, fc->zpc_probs_4x4);
   vp9_copy(fc->pre_zpc_probs_8x8, fc->zpc_probs_8x8);
@@ -1091,10 +1086,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
     xd->allow_high_precision_mv = vp9_read_bit(&header_bc);
     pc->mcomp_filter_type = read_mcomp_filter_type(&header_bc);
-
-#if CONFIG_COMP_INTERINTRA_PRED
-    pc->use_interintra = vp9_read_bit(&header_bc);
-#endif
 
     // To enable choice of different interpolation filters
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);

@@ -439,12 +439,7 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
 
     if (cm->mcomp_filter_type == SWITCHABLE)
       read_switchable_interp_probs(pbi, r);
-#if CONFIG_COMP_INTERINTRA_PRED
-    if (cm->use_interintra) {
-      if (vp9_read(r, VP9_UPD_INTERINTRA_PROB))
-        cm->fc.interintra_prob = vp9_read_prob(r);
-    }
-#endif
+
     // Baseline probabilities for decoding reference frame
     cm->prob_intra_coded = vp9_read_prob(r);
     cm->prob_last_coded  = vp9_read_prob(r);
@@ -693,33 +688,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         }
       }
 
-    } else {
-#if CONFIG_COMP_INTERINTRA_PRED
-      if (pbi->common.use_interintra &&
-          mbmi->mode >= NEARESTMV && mbmi->mode < SPLITMV &&
-          mbmi->second_ref_frame == NONE) {
-        mbmi->second_ref_frame = (vp9_read(r, pbi->common.fc.interintra_prob) ?
-                                  INTRA_FRAME : NONE);
-        // printf("-- %d (%d)\n", mbmi->second_ref_frame == INTRA_FRAME,
-        //        pbi->common.fc.interintra_prob);
-        pbi->common.fc.interintra_counts[
-            mbmi->second_ref_frame == INTRA_FRAME]++;
-        if (mbmi->second_ref_frame == INTRA_FRAME) {
-          mbmi->interintra_mode = read_ymode(r, pbi->common.fc.ymode_prob);
-          pbi->common.fc.ymode_counts[mbmi->interintra_mode]++;
-#if SEPARATE_INTERINTRA_UV
-          mbmi->interintra_uv_mode = read_uv_mode(r,
-              pbi->common.fc.uv_mode_prob[mbmi->interintra_mode]);
-          pbi->common.fc.uv_mode_counts[mbmi->interintra_mode]
-                                       [mbmi->interintra_uv_mode]++;
-#else
-          mbmi->interintra_uv_mode = mbmi->interintra_mode;
-#endif
-          // printf("** %d %d\n",
-          //        mbmi->interintra_mode, mbmi->interintra_uv_mode);
-        }
-      }
-#endif
     }
 
     mbmi->uv_mode = DC_PRED;

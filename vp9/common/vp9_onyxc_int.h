@@ -112,11 +112,6 @@ typedef struct frame_contexts {
   nmv_context_counts NMVcount;
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
-#if CONFIG_COMP_INTERINTRA_PRED
-  unsigned int interintra_counts[2];
-  vp9_prob interintra_prob;
-  vp9_prob pre_interintra_prob;
-#endif
 
   int vp9_mode_contexts[INTER_MODE_CONTEXTS][4];
   unsigned int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
@@ -290,10 +285,6 @@ typedef struct VP9Common {
 
 #if CONFIG_POSTPROC
   struct postproc_state  postproc_state;
-#endif
-
-#if CONFIG_COMP_INTERINTRA_PRED
-  int use_interintra;
 #endif
 
   int error_resilient_mode;

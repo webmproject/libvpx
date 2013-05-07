@@ -706,27 +706,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       vp9_write(bc, mi->second_ref_frame > INTRA_FRAME,
                 vp9_get_pred_prob(pc, xd, PRED_COMP));
     }
-#if CONFIG_COMP_INTERINTRA_PRED
-    if (cpi->common.use_interintra &&
-        mode >= NEARESTMV && mode < SPLITMV &&
-        mi->second_ref_frame <= INTRA_FRAME) {
-      vp9_write(bc, mi->second_ref_frame == INTRA_FRAME,
-                pc->fc.interintra_prob);
-      // if (!cpi->dummy_packing)
-      //   printf("-- %d (%d)\n", mi->second_ref_frame == INTRA_FRAME,
-      //          pc->fc.interintra_prob);
-      if (mi->second_ref_frame == INTRA_FRAME) {
-        // if (!cpi->dummy_packing)
-        //   printf("** %d %d\n", mi->interintra_mode,
-        // mi->interintra_uv_mode);
-        write_ymode(bc, mi->interintra_mode, pc->fc.ymode_prob);
-#if SEPARATE_INTERINTRA_UV
-        write_uv_mode(bc, mi->interintra_uv_mode,
-                      pc->fc.uv_mode_prob[mi->interintra_mode]);
-#endif
-      }
-    }
-#endif
 
     switch (mode) { /* new, split require MVs */
       case NEWMV:
@@ -1908,15 +1887,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     vp9_write_bit(&header_bc, (pc->mcomp_filter_type == SWITCHABLE));
     if (pc->mcomp_filter_type != SWITCHABLE)
       vp9_write_literal(&header_bc, (pc->mcomp_filter_type), 2);
-#if CONFIG_COMP_INTERINTRA_PRED
-    //  printf("Counts: %d %d\n", cpi->interintra_count[0],
-    //         cpi->interintra_count[1]);
-    if (!cpi->dummy_packing && pc->use_interintra)
-      pc->use_interintra = (cpi->interintra_count[1] > 0);
-    vp9_write_bit(&header_bc, pc->use_interintra);
-    if (!pc->use_interintra)
-      vp9_zero(cpi->interintra_count);
-#endif
   }
 
   if (!pc->error_resilient_mode) {
@@ -2049,9 +2019,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_copy(cpi->common.fc.pre_sub_mv_ref_prob, cpi->common.fc.sub_mv_ref_prob);
   vp9_copy(cpi->common.fc.pre_partition_prob, cpi->common.fc.partition_prob);
   cpi->common.fc.pre_nmvc = cpi->common.fc.nmvc;
-#if CONFIG_COMP_INTERINTRA_PRED
-  cpi->common.fc.pre_interintra_prob = cpi->common.fc.interintra_prob;
-#endif
   vp9_zero(cpi->sub_mv_ref_count);
   vp9_zero(cpi->common.fc.mv_ref_ct);
 
@@ -2083,15 +2050,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
 
     if (pc->mcomp_filter_type == SWITCHABLE)
       update_switchable_interp_probs(cpi, &header_bc);
-
-#if CONFIG_COMP_INTERINTRA_PRED
-    if (pc->use_interintra) {
-      vp9_cond_prob_update(&header_bc,
-                           &pc->fc.interintra_prob,
-                           VP9_UPD_INTERINTRA_PROB,
-                           cpi->interintra_count);
-    }
-#endif
 
     vp9_write_prob(&header_bc, pc->prob_intra_coded);
     vp9_write_prob(&header_bc, pc->prob_last_coded);

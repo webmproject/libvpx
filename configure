@@ -240,7 +240,6 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     csm
     implicit_segmentation
-    comp_interintra_pred
     modelcoefprob
     loop_dering
     scatterscan

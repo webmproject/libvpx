@@ -256,9 +256,6 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
   vpx_memcpy(x->fc.partition_prob, vp9_partition_probs,
              sizeof(vp9_partition_probs));
 
-#if CONFIG_COMP_INTERINTRA_PRED
-  x->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
-#endif
   x->ref_pred_probs[0] = DEFAULT_PRED_PROB_0;
   x->ref_pred_probs[1] = DEFAULT_PRED_PROB_1;
   x->ref_pred_probs[2] = DEFAULT_PRED_PROB_2;
@@ -493,13 +490,6 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   for (t = 0; t < VP9_NUMMBSPLITS; ++t)
     printf("%d, ", fc->mbsplit_counts[t]);
   printf("};\n");
-#if CONFIG_COMP_INTERINTRA_PRED
-  printf("static const unsigned int\ninterintra_counts"
-         "[2] = {\n");
-  for (t = 0; t < 2; ++t)
-    printf("%d, ", fc->interintra_counts[t]);
-  printf("};\n");
-#endif
 #endif
 
   update_mode_probs(VP9_YMODES, vp9_ymode_tree,
@@ -523,20 +513,6 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                       vp9_sub_mv_ref_tree, fc->sub_mv_ref_counts[i],
                       fc->pre_sub_mv_ref_prob[i], fc->sub_mv_ref_prob[i],
                       LEFT4X4);
-
-#if CONFIG_COMP_INTERINTRA_PRED
-  if (cm->use_interintra) {
-    int factor, interintra_prob, count;
-
-    interintra_prob = get_binary_prob(fc->interintra_counts[0],
-                                      fc->interintra_counts[1]);
-    count = fc->interintra_counts[0] + fc->interintra_counts[1];
-    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    fc->interintra_prob = weighted_prob(fc->pre_interintra_prob,
-                                        interintra_prob, factor);
-  }
-#endif
   for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
     update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
                       fc->partition_counts[i], fc->pre_partition_prob[i],

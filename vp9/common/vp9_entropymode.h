@@ -16,13 +16,6 @@
 
 #define SUBMVREF_COUNT 5
 
-#if CONFIG_COMP_INTERINTRA_PRED
-#define VP9_DEF_INTERINTRA_PROB 248
-#define VP9_UPD_INTERINTRA_PROB 192
-// whether to use a separate uv mode (1) or use the same as the y mode (0)
-#define SEPARATE_INTERINTRA_UV  0
-#endif
-
 extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
 extern const vp9_prob vp9_sub_mv_ref_prob2[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];

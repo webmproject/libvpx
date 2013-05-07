@@ -21,25 +21,4 @@ B_PREDICTION_MODE vp9_find_dominant_direction(uint8_t *ptr,
 B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, int block,
                                          uint8_t *ptr, int stride);
 
-#if CONFIG_COMP_INTERINTRA_PRED
-void vp9_build_interintra_predictors(MACROBLOCKD *xd,
-                                     uint8_t *ypred,
-                                     uint8_t *upred,
-                                     uint8_t *vpred,
-                                     int ystride,
-                                     int uvstride,
-                                     BLOCK_SIZE_TYPE bsize);
-
-void vp9_build_interintra_predictors_sby(MACROBLOCKD *xd,
-                                         uint8_t *ypred,
-                                         int ystride,
-                                         BLOCK_SIZE_TYPE bsize);
-
-void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
-                                          uint8_t *upred,
-                                          uint8_t *vpred,
-                                          int uvstride,
-                                          BLOCK_SIZE_TYPE bsize);
-#endif  // CONFIG_COMP_INTERINTRA_PRED
-
 #endif  // VP9_COMMON_VP9_RECONINTRA_H_

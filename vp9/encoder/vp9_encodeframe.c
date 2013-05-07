@@ -487,20 +487,7 @@ static void update_state(VP9_COMP *cpi,
         for (i = 0; i < bw; ++i)
           xd->mode_info_context[mis * j + i].mbmi = *mbmi;
     }
-#if CONFIG_COMP_INTERINTRA_PRED
-    if (mbmi->mode >= NEARESTMV && mbmi->mode < SPLITMV &&
-        mbmi->second_ref_frame <= INTRA_FRAME) {
-      if (mbmi->second_ref_frame == INTRA_FRAME) {
-        ++cpi->interintra_count[1];
-        ++cpi->ymode_count[mbmi->interintra_mode];
-#if SEPARATE_INTERINTRA_UV
-        ++cpi->y_uv_mode_count[mbmi->interintra_mode][mbmi->interintra_uv_mode];
-#endif
-      } else {
-        ++cpi->interintra_count[0];
-      }
-    }
-#endif
+
     if (cpi->common.mcomp_filter_type == SWITCHABLE &&
         is_inter_mode(mbmi->mode)) {
       ++cpi->switchable_interp_count
@@ -1438,11 +1425,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->common.fc.mv_ref_ct)
   vp9_zero(cpi->sb_ymode_count)
   vp9_zero(cpi->partition_count);
-
-#if CONFIG_COMP_INTERINTRA_PRED
-  vp9_zero(cpi->interintra_count);
-  vp9_zero(cpi->interintra_select_count);
-#endif
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.

@@ -416,23 +416,9 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
 void vp9_build_inter_predictors_sb(MACROBLOCKD *xd,
                                    int mi_row, int mi_col,
                                    BLOCK_SIZE_TYPE bsize) {
-#if CONFIG_COMP_INTERINTRA_PRED
-  uint8_t *const y = xd->plane[0].dst.buf;
-  uint8_t *const u = xd->plane[1].dst.buf;
-  uint8_t *const v = xd->plane[2].dst.buf;
-  const int y_stride = xd->plane[0].dst.stride;
-  const int uv_stride = xd->plane[1].dst.stride;
-#endif
 
   vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
   vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, bsize);
-
-#if CONFIG_COMP_INTERINTRA_PRED
-  if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)
-    vp9_build_interintra_predictors(xd, y, u, v,
-                                    y_stride, uv_stride,
-                                    bsize);
-#endif
 }
 
 /*encoder only*/
