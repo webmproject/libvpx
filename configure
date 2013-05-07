@@ -250,6 +250,7 @@ EXPERIMENT_LIST="
     multiple_arf
     code_zerogroup
     non420
+    ab4x4
 "
 CONFIG_LIST="
     external_build

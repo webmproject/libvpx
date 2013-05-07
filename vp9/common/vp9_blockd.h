@@ -192,7 +192,13 @@ typedef enum {
 
 static INLINE int b_width_log2(BLOCK_SIZE_TYPE sb_type) {
   switch (sb_type) {
+#if CONFIG_AB4X4
+    case BLOCK_SIZE_SB4X8:
+#endif
     case BLOCK_SIZE_AB4X4: return 0;
+#if CONFIG_AB4X4
+    case BLOCK_SIZE_SB8X4:
+#endif
     case BLOCK_SIZE_SB8X8:
     case BLOCK_SIZE_SB8X16: return 1;
     case BLOCK_SIZE_SB16X8:
@@ -209,7 +215,13 @@ static INLINE int b_width_log2(BLOCK_SIZE_TYPE sb_type) {
 
 static INLINE int b_height_log2(BLOCK_SIZE_TYPE sb_type) {
   switch (sb_type) {
+#if CONFIG_AB4X4
+    case BLOCK_SIZE_SB8X4:
+#endif
     case BLOCK_SIZE_AB4X4: return 0;
+#if CONFIG_AB4X4
+    case BLOCK_SIZE_SB4X8:
+#endif
     case BLOCK_SIZE_SB8X8:
     case BLOCK_SIZE_SB16X8: return 1;
     case BLOCK_SIZE_SB8X16:
