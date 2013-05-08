@@ -259,17 +259,17 @@ enum BlockSize {
 
 typedef struct VP9_COMP {
 
-  DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, unsigned char, Y1quant_shift[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, Y1zbin[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, Y1round[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, short, y_quant[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, unsigned char, y_quant_shift[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, short, y_zbin[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, short, y_round[QINDEX_RANGE][16]);
 
-  DECLARE_ALIGNED(16, short, UVquant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, unsigned char, UVquant_shift[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, UVzbin[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, UVround[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, short, uv_quant[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, unsigned char, uv_quant_shift[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, short, uv_zbin[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, short, uv_round[QINDEX_RANGE][16]);
 
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y[QINDEX_RANGE][16]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv[QINDEX_RANGE][16]);
 
   MACROBLOCK mb;
