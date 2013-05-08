@@ -135,34 +135,6 @@ static void setup_pre_planes(MACROBLOCKD *xd,
   }
 }
 
-static void setup_pred_block(YV12_BUFFER_CONFIG *dst,
-                             const YV12_BUFFER_CONFIG *src,
-                             int mi_row, int mi_col,
-                             const struct scale_factors *scale,
-                             const struct scale_factors *scale_uv) {
-  const int recon_y_stride = src->y_stride;
-  const int recon_uv_stride = src->uv_stride;
-  int recon_yoffset;
-  int recon_uvoffset;
-
-  if (scale) {
-    recon_yoffset = scaled_buffer_offset(MI_SIZE * mi_col, MI_SIZE * mi_row,
-                                         recon_y_stride, scale);
-    recon_uvoffset = scaled_buffer_offset(MI_UV_SIZE * mi_col,
-                                          MI_UV_SIZE * mi_row,
-                                          recon_uv_stride, scale_uv);
-  } else {
-    recon_yoffset = MI_SIZE * mi_row * recon_y_stride + MI_SIZE * mi_col;
-    recon_uvoffset = MI_UV_SIZE * mi_row * recon_uv_stride +
-                     MI_UV_SIZE * mi_col;
-  }
-
-  *dst = *src;
-  dst->y_buffer += recon_yoffset;
-  dst->u_buffer += recon_uvoffset;
-  dst->v_buffer += recon_uvoffset;
-}
-
 static void set_scale_factors(MACROBLOCKD *xd,
     int ref0, int ref1,
     struct scale_factors scale_factor[MAX_REF_FRAMES]) {

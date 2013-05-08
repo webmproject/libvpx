@@ -1584,6 +1584,28 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   memcpy(ctx->txfm_rd_diff, txfm_size_diff, sizeof(ctx->txfm_rd_diff));
 }
 
+static void setup_pred_block(const MACROBLOCKD *xd,
+                             struct buf_2d dst[MAX_MB_PLANE],
+                             const YV12_BUFFER_CONFIG *src,
+                             int mi_row, int mi_col,
+                             const struct scale_factors *scale,
+                             const struct scale_factors *scale_uv) {
+  int i;
+
+  dst[0].buf = src->y_buffer;
+  dst[0].stride = src->y_stride;
+  dst[1].buf = src->u_buffer;
+  dst[2].buf = src->v_buffer;
+  dst[1].stride = dst[2].stride = src->uv_stride;
+
+  // TODO(jkoleszar): Make scale factors per-plane data
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    setup_pred_plane(dst + i, dst[i].buf, dst[i].stride, mi_row, mi_col,
+                     i ? scale_uv : scale,
+                     xd->plane[i].subsampling_x, xd->plane[i].subsampling_y);
+  }
+}
+
 static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                int idx, MV_REFERENCE_FRAME frame_type,
                                enum BlockSize block_size,
@@ -1591,7 +1613,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                int_mv frame_nearest_mv[MAX_REF_FRAMES],
                                int_mv frame_near_mv[MAX_REF_FRAMES],
                                int frame_mdcounts[4][4],
-                               YV12_BUFFER_CONFIG yv12_mb[4],
+                               struct buf_2d yv12_mb[4][MAX_MB_PLANE],
                                struct scale_factors scale[MAX_REF_FRAMES]) {
   VP9_COMMON *cm = &cpi->common;
   YV12_BUFFER_CONFIG *yv12 = &cm->yv12_fb[cpi->common.ref_frame_map[idx]];
@@ -1610,7 +1632,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
-  setup_pred_block(&yv12_mb[frame_type], yv12, mi_row, mi_col,
+  setup_pred_block(xd, yv12_mb[frame_type], yv12, mi_row, mi_col,
                    &scale[frame_type], &scale[frame_type]);
 
   // Gets an initial list of candidate vectors from neighbours and orders them
@@ -1634,7 +1656,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   // The current implementation doesn't support scaling.
   if (scale[frame_type].x_num == scale[frame_type].x_den &&
       scale[frame_type].y_num == scale[frame_type].y_den)
-    mv_pred(cpi, x, yv12_mb[frame_type].y_buffer, yv12->y_stride,
+    mv_pred(cpi, x, yv12_mb[frame_type][0].buf, yv12->y_stride,
             frame_type, block_size);
 }
 
@@ -2208,12 +2230,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   MB_PREDICTION_MODE this_mode;
   MB_PREDICTION_MODE best_mode = DC_PRED;
-  MV_REFERENCE_FRAME ref_frame, second_ref;
+  MV_REFERENCE_FRAME ref_frame, second_ref = INTRA_FRAME;
   unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
   int comp_pred, i;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   int frame_mdcounts[4][4];
-  YV12_BUFFER_CONFIG yv12_mb[4];
+  struct buf_2d yv12_mb[4][MAX_MB_PLANE];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
   int idx_list[4] = {0,
@@ -2366,14 +2388,18 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // SPLITMV.
     if (mbmi->ref_frame > 0 &&
-          (yv12_mb[mbmi->ref_frame].y_width != cm->mb_cols * 16 ||
-           yv12_mb[mbmi->ref_frame].y_height != cm->mb_rows * 16) &&
+          (scale_factor[mbmi->ref_frame].x_num !=
+           scale_factor[mbmi->ref_frame].x_den ||
+           scale_factor[mbmi->ref_frame].y_num !=
+           scale_factor[mbmi->ref_frame].y_den) &&
         this_mode == SPLITMV)
       continue;
 
     if (mbmi->second_ref_frame > 0 &&
-          (yv12_mb[mbmi->second_ref_frame].y_width != cm->mb_cols * 16 ||
-           yv12_mb[mbmi->second_ref_frame].y_height != cm->mb_rows * 16) &&
+          (scale_factor[mbmi->second_ref_frame].x_num !=
+           scale_factor[mbmi->second_ref_frame].x_den ||
+           scale_factor[mbmi->second_ref_frame].y_num !=
+           scale_factor[mbmi->second_ref_frame].y_den) &&
         this_mode == SPLITMV)
       continue;
 
@@ -2418,8 +2444,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    setup_pre_planes(xd, &yv12_mb[ref_frame],
-        comp_pred ? &yv12_mb[second_ref] : NULL, 0, 0, NULL, NULL);
+    // Select predictors
+    for (i = 0; i < MAX_MB_PLANE; i++) {
+      xd->plane[i].pre[0] = yv12_mb[ref_frame][i];
+      if (comp_pred)
+        xd->plane[i].pre[1] = yv12_mb[second_ref][i];
+    }
 
     vpx_memcpy(mdcounts, frame_mdcounts[ref_frame], sizeof(mdcounts));
 
