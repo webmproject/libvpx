@@ -466,7 +466,7 @@ typedef struct VP9_COMP {
   // for real time encoding
   int avg_encode_time;              // microsecond
   int avg_pick_mode_time;            // microsecond
-  int Speed;
+  int speed;
   unsigned int cpu_freq;           // Mhz
   int compressor_speed;
 
