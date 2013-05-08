@@ -3851,12 +3851,12 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
     if (cm->active_ref_idx[i] >= NUM_YV12_BUFFERS) {
       memset(&cm->active_ref_scale[i], 0, sizeof(cm->active_ref_scale[i]));
-      continue;
+    } else {
+      YV12_BUFFER_CONFIG *fb = &cm->yv12_fb[cm->active_ref_idx[i]];
+      vp9_setup_scale_factors_for_frame(&cm->active_ref_scale[i],
+                                        fb->y_crop_width, fb->y_crop_height,
+                                        cm->width, cm->height);
     }
-
-    vp9_setup_scale_factors_for_frame(&cm->active_ref_scale[i],
-                                      &cm->yv12_fb[cm->active_ref_idx[i]],
-                                      cm->width, cm->height);
   }
 
   vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);

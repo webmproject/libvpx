@@ -18,11 +18,8 @@
 #include "vp9/common/vp9_reconintra.h"
 
 void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
-                                       YV12_BUFFER_CONFIG *other,
+                                       int other_w, int other_h,
                                        int this_w, int this_h) {
-  int other_h = other->y_crop_height;
-  int other_w = other->y_crop_width;
-
   scale->x_num = other_w;
   scale->x_den = this_w;
   scale->x_offset_q4 = 0;  // calculated per-mb
