@@ -35,7 +35,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
 
   // Further step/diamond searches as necessary
   int step_param = cpi->sf.first_step +
-      (cpi->Speed < 8 ? (cpi->Speed > 5 ? 1 : 0) : 2);
+      (cpi->speed < 8 ? (cpi->speed > 5 ? 1 : 0) : 2);
 
   vp9_clamp_mv_min_max(x, ref_mv);
 

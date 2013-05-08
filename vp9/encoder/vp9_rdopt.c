@@ -2284,7 +2284,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     best_txfm_rd[i] = INT64_MAX;
 
   // Create a mask set to 1 for each frame used by a smaller resolution.
-  if (cpi->Speed > 0) {
+  if (cpi->speed > 0) {
     switch (block_size) {
       case BLOCK_64X64:
         for (i = 0; i < 4; i++) {
@@ -2324,8 +2324,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
-  if (cpi->Speed == 0
-      || (cpi->Speed > 0 && (ref_frame_mask & (1 << INTRA_FRAME)))) {
+  if (cpi->speed == 0
+      || (cpi->speed > 0 && (ref_frame_mask & (1 << INTRA_FRAME)))) {
     mbmi->mode = DC_PRED;
     for (i = 0; i <= (bsize < BLOCK_SIZE_MB16X16 ? TX_4X4 :
                       (bsize < BLOCK_SIZE_SB32X32 ? TX_8X8 :
@@ -2363,7 +2363,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         || (cpi->ref_frame_flags & flag_list[ref_frame]))) {
       continue;
     }
-    if (cpi->Speed > 0) {
+    if (cpi->speed > 0) {
       if (!(ref_frame_mask & (1 << ref_frame))) {
         continue;
       }

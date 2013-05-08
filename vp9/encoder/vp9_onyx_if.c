@@ -695,7 +695,7 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
 void vp9_set_speed_features(VP9_COMP *cpi) {
   SPEED_FEATURES *sf = &cpi->sf;
   int mode = cpi->compressor_speed;
-  int speed = cpi->Speed;
+  int speed = cpi->speed;
   int i;
 
   // Only modes 0 and 1 supported for now in experimental code basae
@@ -830,7 +830,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   cpi->mb.optimize = cpi->sf.optimize_coefficients == 1 && cpi->pass != 1;
 
 #ifdef SPEEDSTATS
-  frames_at_speed[cpi->Speed]++;
+  frames_at_speed[cpi->speed]++;
 #endif
 }
 
@@ -1215,7 +1215,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
     cpi->last_boosted_qindex = cpi->oxcf.fixed_q;
   }
 
-  cpi->Speed = cpi->oxcf.cpu_used;
+  cpi->speed = cpi->oxcf.cpu_used;
 
   if (cpi->oxcf.lag_in_frames == 0) {
     // force to allowlag to 0 if lag_in_frames is 0;

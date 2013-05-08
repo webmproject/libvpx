@@ -147,12 +147,10 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   xd->plane[0].pre[0].stride = arf_frame->y_stride;
 
   // Further step/diamond searches as necessary
-  if (cpi->Speed < 8) {
-    step_param = cpi->sf.first_step +
-                 ((cpi->Speed > 5) ? 1 : 0);
-  } else {
+  if (cpi->speed < 8)
+    step_param = cpi->sf.first_step + ((cpi->speed > 5) ? 1 : 0);
+  else
     step_param = cpi->sf.first_step + 2;
-  }
 
   /*cpi->sf.search_method == HEX*/
   // TODO Check that the 16x16 vf & sdf are selected here
