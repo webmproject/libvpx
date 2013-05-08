@@ -462,54 +462,21 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
     }
     if (extra_mb_col) {
       // process 4 MB in the extra MB col
-      // process 1st MB
-      mi = mode_info_context;
-      do_left_v = (mb_col > 0);
-      do_above_h = (mb_row > 0);
-      do_left_v_mbuv =  1;
-      do_above_h_mbuv = 1;
-      lpf_mb(cm, mi, do_left_v, do_above_h,
-             do_left_v_mbuv, do_above_h_mbuv,
-             y_ptr,
-             y_only? 0 : u_ptr,
-             y_only? 0 : v_ptr,
-             y_stride, uv_stride, dering);
-      // process 2nd MB
-      mi = mode_info_context + (mis << 1);
-      do_left_v = (mb_col > 0);
-      do_above_h = 1;
-      do_left_v_mbuv =  1;
-      do_above_h_mbuv = 1;
-      lpf_mb(cm, mi, do_left_v, do_above_h,
-             do_left_v_mbuv, do_above_h_mbuv,
-             y_ptr + 16 * y_stride,
-             y_only ? 0 : (u_ptr + 8 * uv_stride),
-             y_only ? 0 : (v_ptr + 8 * uv_stride),
-             y_stride, uv_stride, dering);
-      // process 3nd MB
-      mi = mode_info_context + (mis << 1) * 2;
-      do_left_v = (mb_col > 0);
-      do_above_h = 1;
-      do_left_v_mbuv =  1;
-      do_above_h_mbuv = 1;
-      lpf_mb(cm, mi, do_left_v, do_above_h,
-             do_left_v_mbuv, do_above_h_mbuv,
-             y_ptr + 32 * y_stride,
-             y_only ? 0 : (u_ptr + 16 * uv_stride),
-             y_only ? 0 : (v_ptr + 16 * uv_stride),
-             y_stride, uv_stride, dering);
-      // process 4th MB
-      mi = mode_info_context + (mis << 1) * 3;
-      do_left_v = (mb_col > 0);
-      do_above_h = 1;
-      do_left_v_mbuv =  1;
-      do_above_h_mbuv = 1;
-      lpf_mb(cm, mi, do_left_v, do_above_h,
-             do_left_v_mbuv, do_above_h_mbuv,
-             y_ptr + 48 * y_stride,
-             y_only ? 0 : (u_ptr + 24 * uv_stride),
-             y_only ? 0 : (v_ptr + 24 * uv_stride),
-             y_stride, uv_stride, dering);
+      int k;
+      for (k = 0; k < 4; ++k) {
+        mi = mode_info_context + (mis << 1) * k;
+        do_left_v = (mb_col > 0);
+        do_above_h = k == 0 ? mb_row > 0 : 1;
+        do_left_v_mbuv =  1;
+        do_above_h_mbuv = 1;
+        lpf_mb(cm, mi, do_left_v, do_above_h,
+               do_left_v_mbuv, do_above_h_mbuv,
+               y_ptr + (k * 16) * y_stride,
+               y_only ? 0 : (u_ptr + (k * 8) * uv_stride),
+               y_only ? 0 : (v_ptr + (k * 8) * uv_stride),
+               y_stride, uv_stride, dering);
+      }
+
       y_ptr += 16;
       u_ptr = y_only? 0 : u_ptr + 8;
       v_ptr = y_only? 0 : v_ptr + 8;
