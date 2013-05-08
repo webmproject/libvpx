@@ -9,7 +9,6 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
 
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/common/vp9_common.h"
@@ -250,10 +249,10 @@ static void decode_atom_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
 
   for (i = 0; i < bc; i++) {
     int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
-    uint8_t* dst;
-    dst = raster_block_offset_uint8(xd, bsize, 0, i,
-                                    xd->plane[0].dst.buf,
-                                    xd->plane[0].dst.stride);
+
+    uint8_t* dst = raster_block_offset_uint8(xd, bsize, 0, i,
+                                             xd->plane[0].dst.buf,
+                                             xd->plane[0].dst.stride);
 
     vp9_intra4x4_predict(xd, i, bsize, b_mode, dst, xd->plane[0].dst.stride);
     // TODO(jingning): refactor to use foreach_transformed_block_in_plane_
@@ -459,12 +458,12 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       break;
     case PARTITION_HORZ:
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
-      if ((mi_row + bs) < pc->mi_rows)
+      if (mi_row + bs < pc->mi_rows)
         decode_modes_b(pbi, mi_row + bs, mi_col, r, subsize);
       break;
     case PARTITION_VERT:
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
-      if ((mi_col + bs) < pc->mi_cols)
+      if (mi_col + bs < pc->mi_cols)
         decode_modes_b(pbi, mi_row, mi_col + bs, r, subsize);
       break;
     case PARTITION_SPLIT:
@@ -819,9 +818,8 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
     vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
     vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
     for (mi_col = pc->cur_tile_mi_col_start;
-         mi_col < pc->cur_tile_mi_col_end; mi_col += 8) {
+         mi_col < pc->cur_tile_mi_col_end; mi_col += 8)
       decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_SIZE_SB64X64);
-    }
   }
 }
 

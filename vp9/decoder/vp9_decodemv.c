@@ -97,7 +97,7 @@ static TX_SIZE select_txfm_size(VP9_COMMON *cm, vp9_reader *r,
   return txfm_size;
 }
 
-extern const int vp9_i8x8_block[4];
+
 static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
                          int mi_row, int mi_col,
                          vp9_reader *r) {
@@ -402,14 +402,6 @@ unsigned int vp9_mv_cont_count[5][4] = {
   { 0, 0, 0, 0 }
 };
 #endif
-
-static const unsigned char mbsplit_fill_count[4] = { 8, 8, 4, 1 };
-static const unsigned char mbsplit_fill_offset[4][16] = {
-  { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15 },
-  { 0,  1,  4,  5,  8,  9, 12, 13,  2,  3,   6,  7, 10, 11, 14, 15 },
-  { 0,  1,  4,  5,  2,  3,  6,  7,  8,  9,  12, 13, 10, 11, 14, 15 },
-  { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15 }
-};
 
 static void read_switchable_interp_probs(VP9D_COMP* const pbi, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
@@ -849,10 +841,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mbmi->uv_mode = read_uv_mode(r, cm->fc.uv_mode_prob[mbmi->mode]);
     cm->fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
   }
-  /*
-  if (cm->current_video_frame == 1)
-    printf("mode: %d skip: %d\n", mbmi->mode, mbmi->mb_skip_coeff);
-    */
 
   if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode != I4X4_PRED) ||

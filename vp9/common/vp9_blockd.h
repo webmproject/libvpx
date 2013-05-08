@@ -313,11 +313,6 @@ struct macroblockd_plane {
 
 #define BLOCK_OFFSET(x, i, n) ((x) + (i) * (n))
 
-#define MB_SUBBLOCK_FIELD(x, field, i) (\
-  ((i) < 16) ? BLOCK_OFFSET((x)->plane[0].field, (i), 16) : \
-  ((i) < 20) ? BLOCK_OFFSET((x)->plane[1].field, ((i) - 16), 16) : \
-  BLOCK_OFFSET((x)->plane[2].field, ((i) - 20), 16))
-
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
 

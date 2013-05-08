@@ -8,9 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-#include <stdio.h>
-
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_onyxc_int.h"
@@ -18,8 +15,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_coefupdateprobs.h"
-
-const int vp9_i8x8_block[4] = {0, 2, 8, 10};
 
 DECLARE_ALIGNED(16, const uint8_t, vp9_norm[256]) = {
   0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
