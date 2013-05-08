@@ -257,22 +257,19 @@ static INLINE int round_mv_comp_q4(int value) {
   return (value < 0 ? value - 2 : value + 2) / 4;
 }
 
-#define IDX1 2
-#define IDX2 3
-
-static int mi_mv_pred_row_q4(MACROBLOCKD *mb, int off, int idx) {
-  const int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.row +
-                   mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.row +
-                   mb->mode_info_context->bmi[off + IDX1].as_mv[idx].as_mv.row +
-                   mb->mode_info_context->bmi[off + IDX2].as_mv[idx].as_mv.row;
+static int mi_mv_pred_row_q4(MACROBLOCKD *mb, int idx) {
+  const int temp = mb->mode_info_context->bmi[0].as_mv[idx].as_mv.row +
+                   mb->mode_info_context->bmi[1].as_mv[idx].as_mv.row +
+                   mb->mode_info_context->bmi[2].as_mv[idx].as_mv.row +
+                   mb->mode_info_context->bmi[3].as_mv[idx].as_mv.row;
   return round_mv_comp_q4(temp);
 }
 
-static int mi_mv_pred_col_q4(MACROBLOCKD *mb, int off, int idx) {
-  const int temp = mb->mode_info_context->bmi[off + 0].as_mv[idx].as_mv.col +
-                   mb->mode_info_context->bmi[off + 1].as_mv[idx].as_mv.col +
-                   mb->mode_info_context->bmi[off + IDX1].as_mv[idx].as_mv.col +
-                   mb->mode_info_context->bmi[off + IDX2].as_mv[idx].as_mv.col;
+static int mi_mv_pred_col_q4(MACROBLOCKD *mb, int idx) {
+  const int temp = mb->mode_info_context->bmi[0].as_mv[idx].as_mv.col +
+                   mb->mode_info_context->bmi[1].as_mv[idx].as_mv.col +
+                   mb->mode_info_context->bmi[2].as_mv[idx].as_mv.col +
+                   mb->mode_info_context->bmi[3].as_mv[idx].as_mv.col;
   return round_mv_comp_q4(temp);
 }
 
@@ -351,9 +348,12 @@ static void build_inter_predictors(int plane, int block,
       if (plane == 0) {
         mv = &xd->mode_info_context->bmi[block].as_mv[which_mv].as_mv;
       } else {
-        const int y_block = (block & 2) * 4 + (block & 1) * 2;
-        split_chroma_mv.row = mi_mv_pred_row_q4(xd, y_block, which_mv);
-        split_chroma_mv.col = mi_mv_pred_col_q4(xd, y_block, which_mv);
+        // TODO(jkoleszar): All chroma MVs in SPLITMV mode are taken as the
+        // same MV (the average of the 4 luma MVs) but we could do something
+        // smarter for non-4:2:0. Just punt for now, pending the changes to get
+        // rid of SPLITMV mode entirely.
+        split_chroma_mv.row = mi_mv_pred_row_q4(xd, which_mv);
+        split_chroma_mv.col = mi_mv_pred_col_q4(xd, which_mv);
         mv = &split_chroma_mv;
       }
     } else {
