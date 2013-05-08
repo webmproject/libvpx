@@ -287,24 +287,11 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   ENTROPY_CONTEXT above_ec, left_ec;
   TX_TYPE tx_type = DCT_DCT;
 
-#if CONFIG_CODE_ZEROGROUP
-  int last_nz_pos[3] = {-1, -1, -1};  // Encoder only
-  int is_eoo_list[3] = {0, 0, 0};
-  int is_eoo_negative[3] = {0, 0, 0};
-  int is_last_zero[3] = {0, 0, 0};
-  int o, rc, skip_coef_val;
-  vp9_zpc_probs *zpc_probs;
-  uint8_t token_cache_full[1024];
-#endif
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   vp9_prob (*coef_probs)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                         [ENTROPY_NODES];
   int seg_eob, default_eob;
   uint8_t token_cache[1024];
-
-#if CONFIG_CODE_ZEROGROUP
-  vpx_memset(token_cache, UNKNOWN_TOKEN, sizeof(token_cache));
-#endif
 
   // Check for consistency of tx_size with mode info
   assert((!type && !plane) || (type && plane));
@@ -324,9 +311,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       coef_probs = cm->fc.coef_probs_4x4;
       seg_eob = 16;
       scan = get_scan_4x4(tx_type);
-#if CONFIG_CODE_ZEROGROUP
-      zpc_probs = &cm->fc.zpc_probs_4x4;
-#endif
       break;
     }
     case TX_8X8: {
@@ -340,9 +324,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       scan = get_scan_8x8(tx_type);
       coef_probs = cm->fc.coef_probs_8x8;
       seg_eob = 64;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_probs = &cm->fc.zpc_probs_8x8;
-#endif
       break;
     }
     case TX_16X16: {
@@ -356,9 +337,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       seg_eob = 256;
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_probs = &cm->fc.zpc_probs_16x16;
-#endif
       break;
     }
     case TX_32X32:
@@ -367,10 +345,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       seg_eob = 1024;
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
-
-#if CONFIG_CODE_ZEROGROUP
-      zpc_probs = &cm->fc.zpc_probs_32x32;
-#endif
       break;
     default:
       abort();
@@ -389,16 +363,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   if (eob < seg_eob)
     assert(qcoeff_ptr[scan[eob]] == 0);
 
-#if CONFIG_CODE_ZEROGROUP
-  vpx_memset(token_cache_full, ZERO_TOKEN, sizeof(token_cache_full));
-  for (c = 0; c < eob; ++c) {
-    rc = scan[c];
-    token_cache_full[rc] = vp9_dct_value_tokens_ptr[qcoeff_ptr[rc]].token;
-    o = vp9_get_orientation(rc, tx_size);
-    if (qcoeff_ptr[rc] != 0)
-      last_nz_pos[o] = c;
-  }
-#endif
   {
     for (c = 0; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
@@ -406,77 +370,12 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       int band = get_coef_band(scan, tx_size, c);
       if (c)
         pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
-#if CONFIG_CODE_ZEROGROUP
-      rc = scan[c];
-      o = vp9_get_orientation(rc, tx_size);
-      skip_coef_val = (token_cache[rc] == ZERO_TOKEN || is_eoo_list[o]);
-      if (!skip_coef_val) {
-        cost += token_costs[band][pt][t] + vp9_dct_value_cost_ptr[v];
-      } else {
-        assert(v == 0);
-      }
-#else
+
       cost += token_costs[band][pt][t] + vp9_dct_value_cost_ptr[v];
-#endif
+
       if (!c || token_cache[scan[c - 1]])
         cost += vp9_cost_bit(coef_probs[type][ref][band][pt][0], 1);
       token_cache[scan[c]] = t;
-#if CONFIG_CODE_ZEROGROUP
-      if (t == ZERO_TOKEN && !skip_coef_val) {
-        int eoo = 0, use_eoo;
-#if USE_ZPC_EOORIENT == 1
-        use_eoo = vp9_use_eoo(c, seg_eob, scan, tx_size,
-                              is_last_zero, is_eoo_list);
-#else
-        use_eoo = 0;
-#endif
-        if (use_eoo) {
-          eoo = vp9_is_eoo(c, eob, scan, tx_size, qcoeff_ptr, last_nz_pos);
-          if (eoo && is_eoo_negative[o]) eoo = 0;
-          if (eoo) {
-            int c_;
-            int savings = 0;
-            int zsaved = 0;
-            savings = vp9_cost_bit((*zpc_probs)[ref]
-                                   [coef_to_zpc_band(band)]
-                                   [coef_to_zpc_ptok(pt)][0], 1) -
-                      vp9_cost_bit((*zpc_probs)[ref]
-                                   [coef_to_zpc_band(band)]
-                                   [coef_to_zpc_ptok(pt)][0], 0);
-            for (c_ = c + 1; c_ < eob; ++c_) {
-              if (o == vp9_get_orientation(scan[c_], tx_size)) {
-                int pt_ = vp9_get_coef_context(scan, nb, pad,
-                                               token_cache_full, c_,
-                                               default_eob);
-                int band_ = get_coef_band(scan, tx_size, c_);
-                assert(token_cache_full[scan[c_]] == ZERO_TOKEN);
-                if (!c_ || token_cache_full[scan[c_ - 1]])
-                  savings += vp9_cost_bit(
-                      coef_probs[type][ref][band_][pt_][0], 1);
-                savings += vp9_cost_bit(
-                    coef_probs[type][ref][band_][pt_][1], 0);
-                zsaved++;
-              }
-            }
-            if (savings < 0) {
-            // if (zsaved < ZPC_ZEROSSAVED_EOO) {
-              eoo = 0;
-              is_eoo_negative[o] = 1;
-            }
-          }
-        }
-        if (use_eoo) {
-          cost += vp9_cost_bit((*zpc_probs)[ref]
-                                           [coef_to_zpc_band(band)]
-                                           [coef_to_zpc_ptok(pt)][0], !eoo);
-          if (eoo) {
-            assert(is_eoo_list[o] == 0);
-            is_eoo_list[o] = 1;
-          }
-        }
-      }
-      is_last_zero[o] = (t == ZERO_TOKEN);
-#endif
     }
     if (c < seg_eob) {
       if (c)

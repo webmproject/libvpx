@@ -113,13 +113,6 @@ extern void init_nmvstats();
 extern void print_nmvstats();
 #endif
 
-#if CONFIG_CODE_ZEROGROUP
-#ifdef ZPC_STATS
-extern void init_zpcstats();
-extern void print_zpcstats();
-#endif
-#endif
-
 #ifdef SPEEDSTATS
 unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
@@ -1397,11 +1390,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 #ifdef NMV_STATS
   init_nmvstats();
 #endif
-#if CONFIG_CODE_ZEROGROUP
-#ifdef ZPC_STATS
-  init_zpcstats();
-#endif
-#endif
 
   /*Initialize the feed-forward activity masking.*/
   cpi->activity_avg = 90 << 12;
@@ -1611,12 +1599,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->common.error.setjmp = 0;
 
   vp9_zero(cpi->y_uv_mode_count)
-#if CONFIG_CODE_ZEROGROUP
-  vp9_zero(cm->fc.zpc_counts_4x4);
-  vp9_zero(cm->fc.zpc_counts_8x8);
-  vp9_zero(cm->fc.zpc_counts_16x16);
-  vp9_zero(cm->fc.zpc_counts_32x32);
-#endif
 
   return (VP9_PTR) cpi;
 }
@@ -1643,12 +1625,6 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 #ifdef NMV_STATS
     if (cpi->pass != 1)
       print_nmvstats();
-#endif
-#if CONFIG_CODE_ZEROGROUP
-#ifdef ZPC_STATS
-    if (cpi->pass != 1)
-      print_zpcstats();
-#endif
 #endif
 
 #if CONFIG_INTERNAL_STATS
@@ -3234,9 +3210,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (!cpi->common.error_resilient_mode &&
       !cpi->common.frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(&cpi->common);
-#if CONFIG_CODE_ZEROGROUP
-    vp9_adapt_zpc_probs(&cpi->common);
-#endif
   }
 
   if (cpi->common.frame_type != KEY_FRAME) {

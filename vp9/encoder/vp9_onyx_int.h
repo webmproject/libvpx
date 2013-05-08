@@ -104,12 +104,6 @@ typedef struct {
   int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
   int vp9_mode_contexts[INTER_MODE_CONTEXTS][4];
 
-#if CONFIG_CODE_ZEROGROUP
-  vp9_zpc_probs zpc_probs_4x4;
-  vp9_zpc_probs zpc_probs_8x8;
-  vp9_zpc_probs zpc_probs_16x16;
-  vp9_zpc_probs zpc_probs_32x32;
-#endif
 } CODING_CONTEXT;
 
 typedef struct {

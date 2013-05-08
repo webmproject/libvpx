@@ -136,20 +136,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   ENTROPY_CONTEXT above_ec, left_ec;
   uint8_t token_cache[1024];
   TX_TYPE tx_type = DCT_DCT;
-#if CONFIG_CODE_ZEROGROUP
-  int last_nz_pos[3] = {-1, -1, -1};  // Encoder only
-  int is_eoo_list[3] = {0, 0, 0};
-  int is_last_zero[3] = {0, 0, 0};
-  int is_eoo_negative[3] = {0, 0, 0};
-  int o;
-  vp9_zpc_probs *zpc_probs;
-  vp9_zpc_count *zpc_count;
-  uint8_t token_cache_full[1024];
-#endif
-#if CONFIG_CODE_ZEROGROUP
-  vpx_memset(token_cache, UNKNOWN_TOKEN, sizeof(token_cache));
-#endif
-
   assert((!type && !plane) || (type && plane));
 
   switch (tx_size) {
@@ -163,10 +149,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = get_scan_4x4(tx_type);
       counts = cpi->coef_counts_4x4;
       coef_probs = cpi->common.fc.coef_probs_4x4;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_count = &cpi->common.fc.zpc_counts_4x4;
-      zpc_probs = &cpi->common.fc.zpc_probs_4x4;
-#endif
       break;
     }
     case TX_8X8: {
@@ -180,10 +162,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = get_scan_8x8(tx_type);
       counts = cpi->coef_counts_8x8;
       coef_probs = cpi->common.fc.coef_probs_8x8;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_count = &cpi->common.fc.zpc_counts_8x8;
-      zpc_probs = &cpi->common.fc.zpc_probs_8x8;
-#endif
       break;
     }
     case TX_16X16: {
@@ -197,10 +175,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = get_scan_16x16(tx_type);
       counts = cpi->coef_counts_16x16;
       coef_probs = cpi->common.fc.coef_probs_16x16;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_count = &cpi->common.fc.zpc_counts_16x16;
-      zpc_probs = &cpi->common.fc.zpc_probs_16x16;
-#endif
       break;
     }
     case TX_32X32:
@@ -210,10 +184,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = vp9_default_zig_zag1d_32x32;
       counts = cpi->coef_counts_32x32;
       coef_probs = cpi->common.fc.coef_probs_32x32;
-#if CONFIG_CODE_ZEROGROUP
-      zpc_count = &cpi->common.fc.zpc_counts_32x32;
-      zpc_probs = &cpi->common.fc.zpc_probs_32x32;
-#endif
       break;
   }
 
@@ -224,17 +194,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
     seg_eob = 0;
 
-#if CONFIG_CODE_ZEROGROUP
-  vpx_memset(token_cache_full, ZERO_TOKEN, sizeof(token_cache_full));
-  for (c = 0; c < eob; ++c) {
-    rc = scan[c];
-    token_cache_full[rc] = vp9_dct_value_tokens_ptr[qcoeff_ptr[rc]].token;
-    o = vp9_get_orientation(rc, tx_size);
-    if (qcoeff_ptr[rc] != 0) {
-      last_nz_pos[o] = c;
-    }
-  }
-#endif
   c = 0;
   do {
     const int band = get_coef_band(scan, tx_size, c);
@@ -257,94 +216,13 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
     t->context_tree = coef_probs[type][ref][band][pt];
       t->skip_eob_node = (c > 0) && (token_cache[scan[c - 1]] == 0);
     assert(vp9_coef_encodings[t->token].len - t->skip_eob_node > 0);
-#if CONFIG_CODE_ZEROGROUP
-    o = vp9_get_orientation(rc, tx_size);
-    t->skip_coef_val = (token_cache[rc] == ZERO_TOKEN || is_eoo_list[o]);
-    if (t->skip_coef_val) {
-      assert(v == 0);
-    }
-    // No need to transmit any token
-    if (t->skip_eob_node && t->skip_coef_val) {
-      assert(token == ZERO_TOKEN);
-      is_last_zero[o] = 1;
-      token_cache[scan[c]] = ZERO_TOKEN;
-      continue;
-    }
-#endif
+
     if (!dry_run) {
       ++counts[type][ref][band][pt][token];
       if (!t->skip_eob_node)
         ++cpi->common.fc.eob_branch_counts[tx_size][type][ref][band][pt];
     }
     token_cache[scan[c]] = token;
-#if CONFIG_CODE_ZEROGROUP
-    if (token == ZERO_TOKEN && !t->skip_coef_val) {
-      int eoo = 0, use_eoo;
-#if USE_ZPC_EOORIENT == 1
-      use_eoo = vp9_use_eoo(c, seg_eob, scan, tx_size,
-                            is_last_zero, is_eoo_list);
-#else
-      use_eoo = 0;
-#endif
-      if (use_eoo) {
-        eoo = vp9_is_eoo(c, eob, scan, tx_size, qcoeff_ptr, last_nz_pos);
-        if (eoo && is_eoo_negative[o]) eoo = 0;
-        if (eoo) {
-          int c_;
-          int savings = 0;
-          int zsaved = 0;
-          savings =
-              vp9_cost_bit((*zpc_probs)[ref]
-                           [coef_to_zpc_band(band)]
-                           [coef_to_zpc_ptok(pt)][0], 1) -
-              vp9_cost_bit((*zpc_probs)[ref]
-                           [coef_to_zpc_band(band)]
-                           [coef_to_zpc_ptok(pt)][0], 0);
-          for (c_ = c + 1; c_ < eob; ++c_) {
-            if (o == vp9_get_orientation(scan[c_], tx_size)) {
-              int pt_ = vp9_get_coef_context(scan, nb, pad, token_cache_full,
-                                             c_, default_eob);
-              int band_ = get_coef_band(scan, tx_size, c_);
-              assert(token_cache_full[scan[c_]] == ZERO_TOKEN);
-              if (!c_ || token_cache_full[scan[c_ - 1]])
-                savings +=
-                    vp9_cost_bit(coef_probs[type][ref][band_][pt_][0], 1);
-              savings += vp9_cost_bit(coef_probs[type][ref][band_][pt_][1], 0);
-              zsaved++;
-            }
-          }
-          /*
-          if (!dry_run)
-            if (savings > 0)
-              printf("savings %d zsaved %d (%d, %d)\n",
-                     savings, zsaved, tx_size, band);
-                     */
-          if (savings < 0) {
-            eoo = 0;
-            is_eoo_negative[o] = 1;
-          }
-        }
-      }
-      if (use_eoo) {
-        t++;
-        t->skip_eob_node = t->skip_coef_val = 0;
-        // transmit the eoo symbol
-        t->token = !eoo ? ZPC_ISOLATED : ZPC_EOORIENT;
-        t->context_tree = &((*zpc_probs)[ref]
-                            [coef_to_zpc_band(band)]
-                            [coef_to_zpc_ptok(pt)][0]);
-        if (!dry_run)
-          (*zpc_count)[ref]
-              [coef_to_zpc_band(band)]
-              [coef_to_zpc_ptok(pt)][0][!eoo]++;
-        if (eoo) {
-          assert(is_eoo_list[o] == 0);
-          is_eoo_list[o] = 1;
-        }
-      }
-    }
-    is_last_zero[o] = (token == ZERO_TOKEN);
-#endif
     ++t;
   } while (c < eob && ++c < seg_eob);
 

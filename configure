@@ -245,7 +245,6 @@ EXPERIMENT_LIST="
     scatterscan
     oneshotq
     multiple_arf
-    code_zerogroup
     non420
     ab4x4
 "

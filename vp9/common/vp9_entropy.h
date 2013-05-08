@@ -176,62 +176,6 @@ void vp9_get_model_distribution(vp9_prob model, vp9_prob *tree_probs,
                                 int b, int r);
 #endif  // CONFIG_MODELCOEFPROB
 
-#if CONFIG_CODE_ZEROGROUP
-
-#define ZPC_STATS
-
-typedef enum {
-  HORIZONTAL = 0,
-  DIAGONAL,
-  VERTICAL,
-} OrientationType;
-
-/* Note EOB should become part of this symbol eventually,
- * but holding off on this for now because that is a major
- * change in the rest of the codebase */
-
-#define ZPC_ISOLATED     (MAX_ENTROPY_TOKENS + 0)    /* Isolated zero */
-
-/* ZPC_EOORIENT: All remaining coefficients in the same orientation are 0.
- * In other words all remaining coeffs in the current subband, and all
- * children of the current subband are zero. Subbands are defined by
- * dyadic partitioning in the coeff domain */
-#define ZPC_EOORIENT     (MAX_ENTROPY_TOKENS + 1)    /* End of Orientation */
-
-/* Band limits over which the eoo bit is sent */
-#define ZPC_EOO_BAND_LOWER       0
-#define ZPC_EOO_BAND_UPPER       5
-
-#define USE_ZPC_EOORIENT         1       /* 0: not used */
-                                         /* 1: used */
-#define ZPC_NODES                1
-
-#define UNKNOWN_TOKEN          255       /* Not signalled, encoder only */
-
-#define ZPC_BANDS                3       /* context bands for izr */
-#define ZPC_PTOKS                3       /* context pt for zpcs */
-
-#define coef_to_zpc_band(b)      ((b) >> 1)
-#define coef_to_zpc_ptok(p)      ((p) > 2 ? 2 : (p))
-
-typedef vp9_prob vp9_zpc_probs[REF_TYPES][ZPC_BANDS]
-                              [ZPC_PTOKS][ZPC_NODES];
-typedef unsigned int vp9_zpc_count[REF_TYPES][ZPC_BANDS]
-                                  [ZPC_PTOKS][ZPC_NODES][2];
-
-OrientationType vp9_get_orientation(int rc, TX_SIZE tx_size);
-int vp9_use_eoo(int c, int eob, const int *scan, TX_SIZE tx_size,
-                int *is_last_zero, int *is_eoo);
-int vp9_is_eoo(int c, int eob, const int *scan, TX_SIZE tx_size,
-               const int16_t *qcoeff_ptr, int *last_nz_pos);
-
-#define ZPC_USEEOO_THRESH        4
-#define ZPC_ZEROSSAVED_EOO       7   /* encoder only */
-
-void vp9_adapt_zpc_probs(struct VP9Common *cm);
-
-#endif  // CONFIG_CODE_ZEROGROUP
-
 static INLINE const int* get_scan_4x4(TX_TYPE tx_type) {
   switch (tx_type) {
     case ADST_DCT:
