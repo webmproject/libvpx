@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAXn//4Go\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "is there a way to get rid of this magic 2? Maybe this function could be renamed mi_cols_aligned_to_sb and the 2 moved inside there?",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4Gc\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "Maybe this 7 should be a constant MI_SIZE_MASK, so that it\u0027s easy to change if you go to a 4x4 MI unit.",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4GY\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "MI_SIZE_MASK?",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4GU\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "MI_SIZE_MASK?",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4Gk\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 854,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4GQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 881,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "MI_SIZE_MASK?",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4GM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 920,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "MI_SIZE_MASK?",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4Gg\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4GI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "MI_SIZE_MASK",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4GE\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 881,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "Maybe 64/MI_SIZE?",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4GA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 904,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "32/MI_SIZE",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4F8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "16 / MI_SIZE",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAXn//4F4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1444,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-08T15:40:46Z",
+      "side": 1,
+      "message": "remove magic 2? Note that here\u0027s a case for the above_context where you\u0027d have to change the 4 to a 2 in the line above if you make mi_cols include the *2, there may be more. What\u0027s this constant 4 anyway? It\u0027s escaping me at the moment.",
+      "revId": "3477a64dd8f15afd8da2eb7aff9bf3beccefc9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
