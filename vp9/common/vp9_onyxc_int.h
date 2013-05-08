@@ -329,6 +329,6 @@ static int get_mi_col(const MACROBLOCKD *xd) {
 }
 
 static int get_token_alloc(int mb_rows, int mb_cols) {
-  return mb_rows * mb_cols * (24 * 16 + 4);
+  return mb_rows * mb_cols * (48 * 16 + 4);
 }
 #endif  // VP9_COMMON_VP9_ONYXC_INT_H_
