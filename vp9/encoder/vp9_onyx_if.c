@@ -2439,7 +2439,8 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
                           cm->dering_enabled);
   }
 
-  vp8_yv12_extend_frame_borders(cm->frame_to_show);
+  vp9_extend_frame_borders(cm->frame_to_show,
+                           cm->subsampling_x, cm->subsampling_y);
 
 }
 

@@ -352,7 +352,8 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
       vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0,
                             cm->dering_enabled);
     }
-    vp8_yv12_extend_frame_borders(cm->frame_to_show);
+    vp9_extend_frame_borders(cm->frame_to_show,
+                             cm->subsampling_x, cm->subsampling_y);
   }
 
 #if WRITE_RECON_BUFFER == 1

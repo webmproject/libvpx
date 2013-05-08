@@ -9,6 +9,7 @@
  */
 
 #include <assert.h>
+#include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/vpx_scale.h"
@@ -94,6 +95,36 @@ vp8_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
                (ybf->border + ybf->y_width - ybf->y_crop_width + 1) / 2);
 }
 
+#if CONFIG_VP9
+void vp9_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf,
+                                int subsampling_x, int subsampling_y) {
+  const int c_w = (ybf->y_crop_width + subsampling_x) >> subsampling_x;
+  const int c_h = (ybf->y_crop_height + subsampling_y) >> subsampling_y;
+  const int c_et = ybf->border >> subsampling_y;
+  const int c_el = ybf->border >> subsampling_x;
+  const int c_eb = (ybf->border + ybf->y_height - ybf->y_crop_height +
+                    subsampling_y) >> subsampling_y;
+  const int c_er = (ybf->border + ybf->y_width - ybf->y_crop_width +
+                    subsampling_x) >> subsampling_x;
+
+  assert(ybf->y_height - ybf->y_crop_height < 16);
+  assert(ybf->y_width - ybf->y_crop_width < 16);
+  assert(ybf->y_height - ybf->y_crop_height >= 0);
+  assert(ybf->y_width - ybf->y_crop_width >= 0);
+
+  extend_plane(ybf->y_buffer, ybf->y_stride,
+               ybf->y_crop_width, ybf->y_crop_height,
+               ybf->border, ybf->border,
+               ybf->border + ybf->y_height - ybf->y_crop_height,
+               ybf->border + ybf->y_width - ybf->y_crop_width);
+
+  extend_plane(ybf->u_buffer, ybf->uv_stride,
+               c_w, c_h, c_et, c_el, c_eb, c_er);
+
+  extend_plane(ybf->v_buffer, ybf->uv_stride,
+               c_w, c_h, c_et, c_el, c_eb, c_er);
+}
+#endif
 
 /****************************************************************************
  *
