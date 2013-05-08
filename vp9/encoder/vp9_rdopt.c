@@ -1069,9 +1069,7 @@ typedef struct {
   B_PREDICTION_MODE modes[4];
   int_mv mvs[4], second_mvs[4];
   int eobs[4];
-
   int mvthresh;
-  int *mdcounts;
 } BEST_SEG_INFO;
 
 static INLINE int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
@@ -1322,7 +1320,6 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
                                        int_mv *best_ref_mv,
                                        int_mv *second_best_ref_mv,
                                        int64_t best_rd,
-                                       int *mdcounts,
                                        int *returntotrate,
                                        int *returnyrate,
                                        int *returndistortion,
@@ -1339,7 +1336,6 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   bsi.second_ref_mv = second_best_ref_mv;
   bsi.mvp.as_int = best_ref_mv->as_int;
   bsi.mvthresh = mvthresh;
-  bsi.mdcounts = mdcounts;
 
   for (i = 0; i < 4; i++)
     bsi.modes[i] = ZERO4X4;
@@ -1612,7 +1608,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                int mi_row, int mi_col,
                                int_mv frame_nearest_mv[MAX_REF_FRAMES],
                                int_mv frame_near_mv[MAX_REF_FRAMES],
-                               int frame_mdcounts[4][4],
                                struct buf_2d yv12_mb[4][MAX_MB_PLANE],
                                struct scale_factors scale[MAX_REF_FRAMES]) {
   VP9_COMMON *cm = &cpi->common;
@@ -1797,7 +1792,7 @@ static INLINE int get_switchable_rate(VP9_COMMON *cm, MACROBLOCK *x) {
 
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  BLOCK_SIZE_TYPE bsize,
-                                 int mdcounts[4], int64_t txfm_cache[],
+                                 int64_t txfm_cache[],
                                  int *rate2, int *distortion, int *skippable,
                                  int *compmode_cost,
                                  int *rate_y, int *distortion_y,
@@ -2351,7 +2346,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
   int comp_pred, i;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
-  int frame_mdcounts[4][4];
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
   int_mv single_newmv[MAX_REF_FRAMES];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
@@ -2360,7 +2354,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                      cpi->lst_fb_idx,
                      cpi->gld_fb_idx,
                      cpi->alt_fb_idx};
-  int mdcounts[4];
   int64_t best_rd = INT64_MAX;
   int64_t best_txfm_rd[NB_TXFM_MODES];
   int64_t best_txfm_diff[NB_TXFM_MODES];
@@ -2443,7 +2436,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
       setup_buffer_inter(cpi, x, idx_list[ref_frame], ref_frame, block_size,
                          mi_row, mi_col, frame_mv[NEARESTMV], frame_mv[NEARMV],
-                         frame_mdcounts, yv12_mb, scale_factor);
+                         yv12_mb, scale_factor);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
@@ -2570,8 +2563,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         xd->plane[i].pre[1] = yv12_mb[second_ref][i];
     }
 
-    vpx_memcpy(mdcounts, frame_mdcounts[ref_frame], sizeof(mdcounts));
-
     // If the segment reference frame feature is enabled....
     // then do nothing if the current ref frame is not allowed..
     if (vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME) &&
@@ -2669,7 +2660,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
         tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
                                              &mbmi->ref_mvs[mbmi->ref_frame][0],
-                                             second_ref, INT64_MAX, mdcounts,
+                                             second_ref, INT64_MAX,
                                              &rate, &rate_y, &distortion,
                                              &skippable,
                                              (int)this_rd_thresh, seg_mvs);
@@ -2708,7 +2699,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         // switchable list (bilinear, 6-tap) is indicated at the frame level
         tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
                                              &mbmi->ref_mvs[mbmi->ref_frame][0],
-                                             second_ref, INT64_MAX, mdcounts,
+                                             second_ref, INT64_MAX,
                                              &rate, &rate_y, &distortion,
                                              &skippable,
                                              (int)this_rd_thresh, seg_mvs);
@@ -2786,7 +2777,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
 
       this_rd = handle_inter_mode(cpi, x, bsize,
-                                  mdcounts, txfm_cache,
+                                  txfm_cache,
                                   &rate2, &distortion2, &skippable,
                                   &compmode_cost,
                                   &rate_y, &distortion_y,
