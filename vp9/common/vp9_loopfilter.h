@@ -16,12 +16,6 @@
 #include "vp9/common/vp9_blockd.h"
 
 #define MAX_LOOP_FILTER 63
-
-typedef enum {
-  NORMAL_LOOPFILTER = 0,
-  SIMPLE_LOOPFILTER = 1
-} LOOPFILTER_TYPE;
-
 #define SIMD_WIDTH 16
 
 /* Need to align this structure so when it is declared and

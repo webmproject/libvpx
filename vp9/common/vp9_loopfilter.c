@@ -199,80 +199,75 @@ static void lpf_mb(VP9_COMMON *cm, const MODE_INFO *mi,
   if (filter_level) {
     const int skip_lf = mb_lf_skip(&mi->mbmi);
     const int tx_size = mi->mbmi.txfm_size;
-    if (cm->filter_type == NORMAL_LOOPFILTER) {
-      const int hev_index = filter_level >> 4;
-      lfi.mblim = lfi_n->mblim[filter_level];
-      lfi.blim = lfi_n->blim[filter_level];
-      lfi.lim = lfi_n->lim[filter_level];
-      lfi.hev_thr = lfi_n->hev_thr[hev_index];
+    const int hev_index = filter_level >> 4;
+    lfi.mblim = lfi_n->mblim[filter_level];
+    lfi.blim = lfi_n->blim[filter_level];
+    lfi.lim = lfi_n->lim[filter_level];
+    lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
-      if (do_above_mb_h) {
-        if (tx_size >= TX_16X16)
-          vp9_lpf_mbh_w(y_ptr,
-                        do_above_mbuv_h ? u_ptr : NULL,
-                        do_above_mbuv_h ? v_ptr : NULL,
-                        y_stride, uv_stride, &lfi);
+    if (do_above_mb_h) {
+      if (tx_size >= TX_16X16)
+        vp9_lpf_mbh_w(y_ptr,
+                      do_above_mbuv_h ? u_ptr : NULL,
+                      do_above_mbuv_h ? v_ptr : NULL,
+                      y_stride, uv_stride, &lfi);
+      else
+        vp9_loop_filter_mbh(y_ptr, u_ptr, v_ptr, y_stride, uv_stride, &lfi);
+    }
+
+    if (!skip_lf) {
+      if (tx_size >= TX_8X8) {
+        if (tx_size == TX_8X8 &&
+            mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
+          vp9_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr,
+                                y_stride, uv_stride, &lfi);
         else
-          vp9_loop_filter_mbh(y_ptr, u_ptr, v_ptr, y_stride, uv_stride, &lfi);
+          vp9_loop_filter_bh8x8(y_ptr, NULL, NULL,
+                                y_stride, uv_stride, &lfi);
+      } else {
+        vp9_loop_filter_bh(y_ptr, u_ptr, v_ptr,
+                           y_stride, uv_stride, &lfi);
       }
+    }
 
-      if (!skip_lf) {
-        if (tx_size >= TX_8X8) {
-          if (tx_size == TX_8X8 &&
-              (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
-              )
-            vp9_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr,
-                                  y_stride, uv_stride, &lfi);
-          else
-            vp9_loop_filter_bh8x8(y_ptr, NULL, NULL,
-                                  y_stride, uv_stride, &lfi);
-        } else {
-          vp9_loop_filter_bh(y_ptr, u_ptr, v_ptr,
-                             y_stride, uv_stride, &lfi);
-        }
-      }
+    if (do_left_mb_v) {
+      if (tx_size >= TX_16X16)
+        vp9_lpf_mbv_w(y_ptr,
+                      do_left_mbuv_v ? u_ptr : NULL,
+                      do_left_mbuv_v ? v_ptr : NULL,
+                      y_stride, uv_stride, &lfi);
+      else
+        vp9_loop_filter_mbv(y_ptr, u_ptr, v_ptr, y_stride, uv_stride, &lfi);
+    }
 
-      if (do_left_mb_v) {
-        if (tx_size >= TX_16X16)
-          vp9_lpf_mbv_w(y_ptr,
-                        do_left_mbuv_v ? u_ptr : NULL,
-                        do_left_mbuv_v ? v_ptr : NULL,
-                        y_stride, uv_stride, &lfi);
+    if (!skip_lf) {
+      if (tx_size >= TX_8X8) {
+        if (tx_size == TX_8X8 &&
+            mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
+          vp9_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr,
+                                y_stride, uv_stride, &lfi);
         else
-          vp9_loop_filter_mbv(y_ptr, u_ptr, v_ptr, y_stride, uv_stride, &lfi);
+          vp9_loop_filter_bv8x8(y_ptr, NULL, NULL,
+                                y_stride, uv_stride, &lfi);
+      } else {
+        vp9_loop_filter_bv(y_ptr, u_ptr, v_ptr,
+                           y_stride, uv_stride, &lfi);
       }
-
-      if (!skip_lf) {
-        if (tx_size >= TX_8X8) {
-          if (tx_size == TX_8X8 &&
-              (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16))
-            vp9_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr,
-                                  y_stride, uv_stride, &lfi);
-          else
-            vp9_loop_filter_bv8x8(y_ptr, NULL, NULL,
-                                  y_stride, uv_stride, &lfi);
-        } else {
-          vp9_loop_filter_bv(y_ptr, u_ptr, v_ptr,
-                             y_stride, uv_stride, &lfi);
-        }
-      }
-      if (dering) {
+    }
+    if (dering) {
 #if CONFIG_LOOP_DERING
-        vp9_post_proc_down_and_across(y_ptr, y_ptr,
-          y_stride, y_stride,
-          16, 16, dering);
-        if (u_ptr && v_ptr) {
-          vp9_post_proc_down_and_across(u_ptr, u_ptr,
-            uv_stride, uv_stride,
-            8, 8, dering);
-          vp9_post_proc_down_and_across(v_ptr, v_ptr,
-            uv_stride, uv_stride,
-            8, 8, dering);
-        }
-#endif
+      vp9_post_proc_down_and_across(y_ptr, y_ptr,
+        y_stride, y_stride,
+        16, 16, dering);
+      if (u_ptr && v_ptr) {
+        vp9_post_proc_down_and_across(u_ptr, u_ptr,
+          uv_stride, uv_stride,
+          8, 8, dering);
+        vp9_post_proc_down_and_across(v_ptr, v_ptr,
+          uv_stride, uv_stride,
+          8, 8, dering);
       }
-    } else {
-      // TODO(yaowu): simple loop filter
+#endif
     }
   }
 }

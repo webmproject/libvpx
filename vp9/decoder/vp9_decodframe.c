@@ -656,7 +656,6 @@ static void setup_pred_probs(VP9_COMMON *pc, vp9_reader *r) {
 }
 
 static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
-  pc->filter_type = (LOOPFILTER_TYPE) vp9_read_bit(r);
   pc->filter_level = vp9_read_literal(r, 6);
   pc->sharpness_level = vp9_read_literal(r, 3);
 

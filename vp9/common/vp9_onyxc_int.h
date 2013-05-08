@@ -198,7 +198,6 @@ typedef struct VP9Common {
   unsigned char *last_frame_seg_map;
 
   INTERPOLATIONFILTERTYPE mcomp_filter_type;
-  LOOPFILTER_TYPE filter_type;
 
   loop_filter_info_n lf_info;
 

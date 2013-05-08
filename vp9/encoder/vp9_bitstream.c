@@ -1496,7 +1496,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
 
   // Encode the loop filter level and type
-  vp9_write_bit(&header_bc, pc->filter_type);
   vp9_write_literal(&header_bc, pc->filter_level, 6);
   vp9_write_literal(&header_bc, pc->sharpness_level, 3);
 #if CONFIG_LOOP_DERING
