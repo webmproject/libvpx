@@ -138,8 +138,8 @@ struct macroblock {
 
   int optimize;
 
-  // Structure to hold context for each of the 4 MBs within a SB:
-  // when encoded as 4 independent MBs:
+  // TODO(jingning): Need to refactor the structure arrays that buffers the
+  // coding mode decisions of each partition type.
   PICK_MODE_CONTEXT sb8_context[4][4][4];
   PICK_MODE_CONTEXT sb8x16_context[4][4][2];
   PICK_MODE_CONTEXT sb16x8_context[4][4][2];
@@ -152,6 +152,10 @@ struct macroblock {
   PICK_MODE_CONTEXT sb64x32_context[2];
   PICK_MODE_CONTEXT sb64_context;
   int partition_cost[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
+
+  BLOCK_SIZE_TYPE mb_partitioning[4][4];
+  BLOCK_SIZE_TYPE sb_partitioning[4];
+  BLOCK_SIZE_TYPE sb64_partitioning;
 
   void (*fwd_txm4x4)(int16_t *input, int16_t *output, int pitch);
   void (*fwd_txm8x4)(int16_t *input, int16_t *output, int pitch);
