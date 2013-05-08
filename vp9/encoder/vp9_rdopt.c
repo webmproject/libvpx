@@ -46,26 +46,6 @@
 /* Factor to weigh the rate for switchable interp filters */
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
 
-static const int auto_speed_thresh[17] = {
-  1000,
-  200,
-  150,
-  130,
-  150,
-  125,
-  120,
-  115,
-  115,
-  115,
-  115,
-  115,
-  115,
-  115,
-  115,
-  115,
-  105
-};
-
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {ZEROMV,    LAST_FRAME,   NONE},
   {DC_PRED,   INTRA_FRAME,  NONE},
@@ -1812,6 +1792,15 @@ static enum BlockSize y_bsizet_to_block_size(BLOCK_SIZE_TYPE bs) {
   }
 }
 
+static INLINE int get_switchable_rate(VP9_COMMON *cm, MACROBLOCK *x) {
+  MACROBLOCKD *xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
+
+  const int c = vp9_get_pred_context(cm, xd, PRED_SWITCHABLE_INTERP);
+  const int m = vp9_switchable_interp_map[mbmi->interp_filter];
+  return SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs[c][m];
+}
+
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  BLOCK_SIZE_TYPE bsize,
                                  int mdcounts[4], int64_t txfm_cache[],
@@ -1996,11 +1985,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       mbmi->interp_filter = filter;
       vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
 
-      if (cm->mcomp_filter_type == SWITCHABLE) {
-        const int c = vp9_get_pred_context(cm, xd, PRED_SWITCHABLE_INTERP);
-        const int m = vp9_switchable_interp_map[mbmi->interp_filter];
-        rs = SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs[c][m];
-      }
+      if (cm->mcomp_filter_type == SWITCHABLE)
+        rs = get_switchable_rate(cm, x);
 
       if (interpolating_intpel_seen && is_intpel_interp) {
         rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate_sum, tmp_dist_sum);
@@ -2068,11 +2054,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
   }
 
-  if (cpi->common.mcomp_filter_type == SWITCHABLE) {
-    const int c = vp9_get_pred_context(cm, xd, PRED_SWITCHABLE_INTERP);
-    const int m = vp9_switchable_interp_map[mbmi->interp_filter];
-    *rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs[c][m];
-  }
+  if (cpi->common.mcomp_filter_type == SWITCHABLE)
+    *rate2 += get_switchable_rate(cm, x);
 
   if (cpi->active_map_enabled && x->active_ptr[0] == 0)
     x->skip = 1;
@@ -2542,10 +2525,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                              &skippable,
                                              (int)this_rd_thresh, seg_mvs);
         if (cpi->common.mcomp_filter_type == SWITCHABLE) {
-          int rs = SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
-          [vp9_get_pred_context(&cpi->common, xd,
-                                PRED_SWITCHABLE_INTERP)]
-          [vp9_switchable_interp_map[mbmi->interp_filter]];
+          const int rs = get_switchable_rate(cm, x);
           tmp_rd += RDCOST(x->rdmult, x->rddiv, rs, 0);
         }
         newbest = (tmp_rd < tmp_best_rd);
@@ -2585,10 +2565,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                              (int)this_rd_thresh, seg_mvs);
       } else {
         if (cpi->common.mcomp_filter_type == SWITCHABLE) {
-          int rs = SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
-              [vp9_get_pred_context(&cpi->common, xd,
-                                    PRED_SWITCHABLE_INTERP)]
-              [vp9_switchable_interp_map[mbmi->interp_filter]];
+          int rs = get_switchable_rate(cm, x);
           tmp_best_rdu -= RDCOST(x->rdmult, x->rddiv, rs, 0);
         }
         tmp_rd = tmp_best_rdu;
@@ -2608,9 +2585,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       distortion2 += distortion;
 
       if (cpi->common.mcomp_filter_type == SWITCHABLE)
-        rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
-            [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
-            [vp9_switchable_interp_map[mbmi->interp_filter]];
+        rate2 += get_switchable_rate(cm, x);
 
       // If even the 'Y' rd value of split is higher than best so far
       // then dont bother looking at UV
