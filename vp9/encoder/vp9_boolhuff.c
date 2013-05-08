@@ -52,7 +52,7 @@ void vp9_stop_encode(vp9_writer *br) {
   int i;
 
   for (i = 0; i < 32; i++)
-    encode_bool(br, 0, 128);
+    vp9_write_bit(br, 0);
 
   // Ensure there's no ambigous collision with any index marker bytes
   if ((br->buffer[br->pos - 1] & 0xe0) == 0xc0)
@@ -60,17 +60,10 @@ void vp9_stop_encode(vp9_writer *br) {
 }
 
 
-void vp9_encode_value(vp9_writer *br, int data, int bits) {
-  int bit;
-
-  for (bit = bits - 1; bit >= 0; bit--)
-    encode_bool(br, (1 & (data >> bit)), 0x80);
-}
-
 void vp9_encode_unsigned_max(vp9_writer *br, int data, int max) {
   assert(data <= max);
   while (max) {
-    encode_bool(br, data & 1, 128);
+    vp9_write_bit(br, data & 1);
     data >>= 1;
     max >>= 1;
   }
@@ -98,10 +91,10 @@ void vp9_encode_uniform(vp9_writer *br, int v, int n) {
   if (l == 0) return;
   m = (1 << l) - n;
   if (v < m)
-    vp9_encode_value(br, v, l - 1);
+    vp9_write_literal(br, v, l - 1);
   else {
-    vp9_encode_value(br, m + ((v - m) >> 1), l - 1);
-    vp9_encode_value(br, (v - m) & 1, 1);
+    vp9_write_literal(br, m + ((v - m) >> 1), l - 1);
+    vp9_write_literal(br, (v - m) & 1, 1);
   }
 }
 
@@ -127,12 +120,12 @@ void vp9_encode_term_subexp(vp9_writer *br, int word, int k, int num_syms) {
       break;
     } else {
       int t = (word >= mk + a);
-      vp9_encode_value(br, t, 1);
+      vp9_write_literal(br, t, 1);
       if (t) {
         i = i + 1;
         mk += a;
       } else {
-        vp9_encode_value(br, word - mk, b);
+        vp9_write_literal(br, word - mk, b);
         break;
       }
     }

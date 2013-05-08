@@ -52,7 +52,7 @@ TEST(VP9, TestBitIO) {
         const int random_seed = 6432;
         const int buffer_size = 10000;
         ACMRandom bit_rnd(random_seed);
-        BOOL_CODER bw;
+        vp9_writer bw;
         uint8_t bw_buffer[buffer_size];
         vp9_start_encode(&bw, bw_buffer);
 
@@ -63,7 +63,7 @@ TEST(VP9, TestBitIO) {
           } else if (bit_method == 3) {
             bit = bit_rnd(2);
           }
-          encode_bool(&bw, bit, static_cast<int>(probas[i]));
+          vp9_write(&bw, bit, static_cast<int>(probas[i]));
         }
 
         vp9_stop_encode(&bw);
