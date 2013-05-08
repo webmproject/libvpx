@@ -878,9 +878,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
 
   if (bsize > BLOCK_SIZE_SB8X8) {
     int pl;
-    xd->left_seg_context =
-        cm->left_seg_context + ((mi_row >> 1) & 3);
-    xd->above_seg_context = cm->above_seg_context + (mi_col >> 1);
+    xd->left_seg_context = cm->left_seg_context + (mi_row & MI_MASK);
+    xd->above_seg_context = cm->above_seg_context + mi_col;
     pl = partition_plane_context(xd, bsize);
     // encode the partition information
     write_token(bc, vp9_partition_tree, cm->fc.partition_prob[pl],
@@ -918,8 +917,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_MB16X16))
     return;
 
-  xd->left_seg_context = cm->left_seg_context + ((mi_row >> 1) & 3);
-  xd->above_seg_context = cm->above_seg_context + (mi_col >> 1);
+  xd->left_seg_context = cm->left_seg_context + (mi_row & MI_MASK);
+  xd->above_seg_context = cm->above_seg_context + mi_col;
   update_partition_context(xd, subsize, bsize);
 }
 
@@ -932,7 +931,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
 
   m_ptr += c->cur_tile_mi_col_start + c->cur_tile_mi_row_start * mis;
   vpx_memset(c->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
-             mb_cols_aligned_to_sb(c));
+             mi_cols_aligned_to_sb(c));
 
   for (mi_row = c->cur_tile_mi_row_start;
        mi_row < c->cur_tile_mi_row_end;

@@ -217,7 +217,7 @@ typedef struct VP9Common {
 
   // partition contexts
   PARTITION_CONTEXT *above_seg_context;
-  PARTITION_CONTEXT left_seg_context[4];
+  PARTITION_CONTEXT left_seg_context[8];
 
   /* keyframe block modes are predicted by their above, left neighbors */
 
@@ -297,8 +297,8 @@ static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
   buf[new_idx]++;
 }
 
-static int mb_cols_aligned_to_sb(VP9_COMMON *cm) {
-  return (cm->mb_cols + 3) & ~3;
+static int mi_cols_aligned_to_sb(VP9_COMMON *cm) {
+  return 2 * ((cm->mb_cols + 3) & ~3);
 }
 
 static void set_mi_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
