@@ -1748,6 +1748,13 @@ static void model_rd_from_var_lapndz(int var, int n, int qstep,
   vp9_clear_system_state();
 }
 
+static enum BlockSize get_plane_block_size(BLOCK_SIZE_TYPE bsize,
+                                           struct macroblockd_plane *pd) {
+  const int bwl = b_width_log2(bsize) - pd->subsampling_x;
+  const int bhl = b_height_log2(bsize) - pd->subsampling_y;
+  return get_block_size(4 << bwl, 4 << bhl);
+}
+
 static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
                             MACROBLOCK *x, MACROBLOCKD *xd,
                             int *out_rate_sum, int *out_dist_sum) {
@@ -1761,6 +1768,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
     struct macroblock_plane *const p = &x->plane[i];
     struct macroblockd_plane *const pd = &xd->plane[i];
 
+    // TODO(dkovalev) the same code in get_plane_block_size
     const int bwl = b_width_log2(bsize) - pd->subsampling_x;
     const int bhl = b_height_log2(bsize) - pd->subsampling_y;
     const enum BlockSize bs = get_block_size(4 << bwl, 4 << bhl);
@@ -1776,42 +1784,6 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
 
   *out_rate_sum = rate_sum;
   *out_dist_sum = dist_sum;
-}
-
-static enum BlockSize y_to_uv_block_size(enum BlockSize bs) {
-  switch (bs) {
-    case BLOCK_64X64: return BLOCK_32X32;
-    case BLOCK_64X32: return BLOCK_32X16;
-    case BLOCK_32X64: return BLOCK_16X32;
-    case BLOCK_32X32: return BLOCK_16X16;
-    case BLOCK_32X16: return BLOCK_16X8;
-    case BLOCK_16X32: return BLOCK_8X16;
-    case BLOCK_16X16: return BLOCK_8X8;
-    case BLOCK_16X8:  return BLOCK_8X4;
-    case BLOCK_8X16:  return BLOCK_4X8;
-    case BLOCK_8X8:   return BLOCK_4X4;
-    default:
-      assert(0);
-      return -1;
-  }
-}
-
-static enum BlockSize y_bsizet_to_block_size(BLOCK_SIZE_TYPE bs) {
-  switch (bs) {
-    case BLOCK_SIZE_SB64X64: return BLOCK_64X64;
-    case BLOCK_SIZE_SB64X32: return BLOCK_64X32;
-    case BLOCK_SIZE_SB32X64: return BLOCK_32X64;
-    case BLOCK_SIZE_SB32X32: return BLOCK_32X32;
-    case BLOCK_SIZE_SB32X16: return BLOCK_32X16;
-    case BLOCK_SIZE_SB16X32: return BLOCK_16X32;
-    case BLOCK_SIZE_MB16X16: return BLOCK_16X16;
-    case BLOCK_SIZE_SB16X8:  return BLOCK_16X8;
-    case BLOCK_SIZE_SB8X16:  return BLOCK_8X16;
-    case BLOCK_SIZE_SB8X8:   return BLOCK_8X8;
-    default:
-      assert(0);
-      return -1;
-  }
 }
 
 static INLINE int get_switchable_rate(VP9_COMMON *cm, MACROBLOCK *x) {
@@ -1838,10 +1810,12 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  YV12_BUFFER_CONFIG *scaled_ref_frame,
                                  int mi_row, int mi_col) {
   const int bw = 1 << mi_width_log2(bsize), bh = 1 << mi_height_log2(bsize);
-  const enum BlockSize block_size = y_bsizet_to_block_size(bsize);
-  const enum BlockSize uv_block_size = y_to_uv_block_size(block_size);
+
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
+  const enum BlockSize block_size = get_plane_block_size(bsize, &xd->plane[0]);
+  const enum BlockSize uv_block_size = get_plane_block_size(bsize,
+                                                            &xd->plane[1]);
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   const int is_comp_pred = (mbmi->second_ref_frame > 0);
   const int num_refs = is_comp_pred ? 2 : 1;
@@ -2219,10 +2193,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   int *returndistortion,
                                   BLOCK_SIZE_TYPE bsize,
                                   PICK_MODE_CONTEXT *ctx) {
-  const enum BlockSize block_size = y_bsizet_to_block_size(bsize);
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  const enum BlockSize block_size = get_plane_block_size(bsize, &xd->plane[0]);
   MB_PREDICTION_MODE this_mode;
   MB_PREDICTION_MODE best_mode = DC_PRED;
   MV_REFERENCE_FRAME ref_frame, second_ref = INTRA_FRAME;
