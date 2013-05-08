@@ -1013,7 +1013,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
       if (mapped_ref >= NUM_YV12_BUFFERS)
         memset(sf, 0, sizeof(*sf));
       else
-        vp9_setup_scale_factors_for_frame(sf, fb, pc->width, pc->height);
+        vp9_setup_scale_factors_for_frame(sf,
+                                          fb->y_crop_width, fb->y_crop_height,
+                                          pc->width, pc->height);
     }
 
     // Read the sign bias for each reference frame buffer.

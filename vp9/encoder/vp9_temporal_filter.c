@@ -118,9 +118,9 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1,
 #if ALT_REF_MC_ENABLED
 
 static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
-                                              YV12_BUFFER_CONFIG *arf_frame,
-                                              YV12_BUFFER_CONFIG *frame_ptr,
-                                              int mb_offset,
+                                              uint8_t *arf_frame_buf,
+                                              uint8_t *frame_ptr_buf,
+                                              int stride,
                                               int error_thresh) {
   MACROBLOCK *x = &cpi->mb;
   MACROBLOCKD* const xd = &x->e_mbd;
@@ -141,10 +141,10 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   best_ref_mv1_full.as_mv.row = best_ref_mv1.as_mv.row >> 3;
 
   // Setup frame pointers
-  x->plane[0].src.buf = arf_frame->y_buffer + mb_offset;
-  x->plane[0].src.stride = arf_frame->y_stride;
-  xd->plane[0].pre[0].buf = frame_ptr->y_buffer + mb_offset;
-  xd->plane[0].pre[0].stride = arf_frame->y_stride;
+  x->plane[0].src.buf = arf_frame_buf;
+  x->plane[0].src.stride = stride;
+  xd->plane[0].pre[0].buf = frame_ptr_buf;
+  xd->plane[0].pre[0].stride = stride;
 
   // Further step/diamond searches as necessary
   if (cpi->speed < 8)
@@ -258,9 +258,9 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
           // Find best match in this frame by MC
           err = temporal_filter_find_matching_mb_c
                 (cpi,
-                 cpi->frames[alt_ref_index],
-                 cpi->frames[frame],
-                 mb_y_offset,
+                 cpi->frames[alt_ref_index]->y_buffer + mb_y_offset,
+                 cpi->frames[frame]->y_buffer + mb_y_offset,
+                 cpi->frames[frame]->y_stride,
                  THRESH_LOW);
 #endif
           // Assign higher weight to matching MB if it's error
@@ -358,10 +358,10 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
 }
 
 void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
+  VP9_COMMON *const cm = &cpi->common;
+
   int frame = 0;
 
-  int num_frames_backward = 0;
-  int num_frames_forward = 0;
   int frames_to_blur_backward = 0;
   int frames_to_blur_forward = 0;
   int frames_to_blur = 0;
@@ -371,15 +371,13 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   int blur_type = cpi->oxcf.arnr_type;
   int max_frames = cpi->active_arnr_frames;
 
-  num_frames_backward = distance;
-  num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
-                       - (num_frames_backward + 1);
+  const int num_frames_backward = distance;
+  const int num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
+                               - (num_frames_backward + 1);
 
   switch (blur_type) {
     case 1:
-      /////////////////////////////////////////
       // Backward Blur
-
       frames_to_blur_backward = num_frames_backward;
 
       if (frames_to_blur_backward >= max_frames)
@@ -389,7 +387,6 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
       break;
 
     case 2:
-      /////////////////////////////////////////
       // Forward Blur
 
       frames_to_blur_forward = num_frames_forward;
@@ -402,7 +399,6 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 
     case 3:
     default:
-      /////////////////////////////////////////
       // Center Blur
       frames_to_blur_forward = num_frames_forward;
       frames_to_blur_backward = num_frames_backward;
@@ -442,25 +438,22 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 
   // Setup scaling factors. Scaling on each of the arnr frames is not supported
   vp9_setup_scale_factors_for_frame(&cpi->mb.e_mbd.scale_factor[0],
-      &cpi->common.yv12_fb[cpi->common.new_fb_idx],
-      cpi->common.width,
-      cpi->common.height);
+      cm->yv12_fb[cm->new_fb_idx].y_crop_width,
+      cm->yv12_fb[cm->new_fb_idx].y_crop_height,
+      cm->width, cm->height);
   cpi->mb.e_mbd.scale_factor_uv[0] = cpi->mb.e_mbd.scale_factor[0];
 
   // Setup frame pointers, NULL indicates frame not included in filter
   vpx_memset(cpi->frames, 0, max_frames * sizeof(YV12_BUFFER_CONFIG *));
   for (frame = 0; frame < frames_to_blur; frame++) {
-    int which_buffer =  start_frame - frame;
+    int which_buffer = start_frame - frame;
     struct lookahead_entry *buf = vp9_lookahead_peek(cpi->lookahead,
                                                      which_buffer);
     cpi->frames[frames_to_blur - 1 - frame] = &buf->img;
   }
 
-  temporal_filter_iterate_c(
-    cpi,
-    frames_to_blur,
-    frames_to_blur_backward,
-    strength);
+  temporal_filter_iterate_c(cpi, frames_to_blur, frames_to_blur_backward,
+                            strength);
 }
 
 void configure_arnr_filter(VP9_COMP *cpi, const unsigned int this_frame,

@@ -35,7 +35,7 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               VP9_COMMON *cm);
 
 void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
-                                       YV12_BUFFER_CONFIG *other,
+                                       int other_w, int other_h,
                                        int this_w, int this_h);
 
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
@@ -67,14 +67,11 @@ static int unscaled_value(int val, const struct scale_factors *scale) {
   return val;
 }
 
-static int scaled_buffer_offset(int x_offset,
-                                int y_offset,
-                                int stride,
+static int scaled_buffer_offset(int x_offset, int y_offset, int stride,
                                 const struct scale_factors *scale) {
-  if (scale)
-    return scale->scale_value_y(y_offset, scale) * stride +
-        scale->scale_value_x(x_offset, scale);
-  return y_offset * stride + x_offset;
+  const int x = scale ? scale->scale_value_x(x_offset, scale) : x_offset;
+  const int y = scale ? scale->scale_value_y(y_offset, scale) : y_offset;
+  return y * stride + x;
 }
 
 static void setup_pred_plane(struct buf_2d *dst,
