@@ -19,9 +19,7 @@
 
 #include "vp9/encoder/vp9_boolhuff.h"       /* for now */
 
-#define vp9_write encode_bool
-#define vp9_write_literal vp9_encode_value
-#define vp9_write_bit(w, v) vp9_write((w), (v), vp9_prob_half)
+
 #define vp9_write_prob(w, v) vp9_write_literal((w), (v), 8)
 
 /* Approximate length of an encoded bool in 256ths of a bit at given prob */
