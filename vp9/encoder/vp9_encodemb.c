@@ -215,10 +215,21 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
         band = get_coef_band(band_translate, i + 1);
         pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
                                        pad, default_eob);
+#if CONFIG_BALANCED_COEFTREE
         rate0 +=
-          mb->token_costs[tx_size][type][ref][band][pt][tokens[next][0].token];
+          mb->token_costs_noskip[tx_size][type][ref][band][pt]
+                                [tokens[next][0].token];
         rate1 +=
-          mb->token_costs[tx_size][type][ref][band][pt][tokens[next][1].token];
+          mb->token_costs_noskip[tx_size][type][ref][band][pt]
+                                [tokens[next][1].token];
+#else
+        rate0 +=
+          mb->token_costs[tx_size][type][ref][band][pt]
+                         [tokens[next][0].token];
+        rate1 +=
+          mb->token_costs[tx_size][type][ref][band][pt]
+                         [tokens[next][1].token];
+#endif
       }
       UPDATE_RD_COST();
       /* And pick the best. */
@@ -266,14 +277,32 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
         if (t0 != DCT_EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
                                          pad, default_eob);
+#if CONFIG_BALANCED_COEFTREE
+          if (!x)
+            rate0 += mb->token_costs[tx_size][type][ref][band][pt][
+                tokens[next][0].token];
+          else
+            rate0 += mb->token_costs_noskip[tx_size][type][ref][band][pt][
+                tokens[next][0].token];
+#else
           rate0 += mb->token_costs[tx_size][type][ref][band][pt][
               tokens[next][0].token];
+#endif
         }
         if (t1 != DCT_EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache,
                                          pad, default_eob);
+#if CONFIG_BALANCED_COEFTREE
+          if (!x)
+            rate1 += mb->token_costs[tx_size][type][ref][band][pt][
+                tokens[next][1].token];
+          else
+            rate1 += mb->token_costs_noskip[tx_size][type][ref][band][pt][
+                tokens[next][1].token];
+#else
           rate1 += mb->token_costs[tx_size][type][ref][band][pt][
               tokens[next][1].token];
+#endif
         }
       }
 
@@ -326,8 +355,13 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   error1 = tokens[next][1].error;
   t0 = tokens[next][0].token;
   t1 = tokens[next][1].token;
+#if CONFIG_BALANCED_COEFTREE
+  rate0 += mb->token_costs_noskip[tx_size][type][ref][band][pt][t0];
+  rate1 += mb->token_costs_noskip[tx_size][type][ref][band][pt][t1];
+#else
   rate0 += mb->token_costs[tx_size][type][ref][band][pt][t0];
   rate1 += mb->token_costs[tx_size][type][ref][band][pt][t1];
+#endif
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = i0 - 1;

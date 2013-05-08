@@ -1073,9 +1073,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
         if (vp9_read(&header_bc, 252))
           pc->fc.vp9_mode_contexts[i][j] = vp9_read_prob(&header_bc);
   }
-  // Is this needed ?
-  if (keyframe)
-    vp9_default_coef_probs(pc);
 
   update_frame_context(&pc->fc);
 

@@ -17,8 +17,13 @@
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#if CONFIG_BALANCED_COEFTREE
+#define ZERO_CONTEXT_NODE           0
+#define EOB_CONTEXT_NODE            1
+#else
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1
+#endif
 #define ONE_CONTEXT_NODE            2
 #define LOW_VAL_CONTEXT_NODE        3
 #define TWO_CONTEXT_NODE            4
@@ -111,6 +116,9 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   const int *scan, *nb;
   uint8_t token_cache[1024];
   const uint8_t * band_translate;
+#if CONFIG_BALANCED_COEFTREE
+  int skip_eob_node = 0;
+#endif
 
   switch (txfm_size) {
     default:
@@ -182,11 +190,13 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
                                 c, default_eob);
     band = get_coef_band(band_translate, c);
     prob = coef_probs[band][pt];
+#if !CONFIG_BALANCED_COEFTREE
     fc->eob_branch_counts[txfm_size][type][ref][band][pt]++;
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
       break;
 
 SKIP_START:
+#endif
     if (c >= seg_eob)
       break;
     if (c)
@@ -198,8 +208,22 @@ SKIP_START:
     if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;
+#if CONFIG_BALANCED_COEFTREE
+      skip_eob_node = 1;
+      continue;
+#else
       goto SKIP_START;
+#endif
     }
+#if CONFIG_BALANCED_COEFTREE
+    if (!skip_eob_node) {
+      fc->eob_branch_counts[txfm_size][type][ref][band][pt]++;
+      if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
+        break;
+    }
+    skip_eob_node = 0;
+#endif
+
     // ONE_CONTEXT_NODE_0_
     if (!vp9_read(r, prob[ONE_CONTEXT_NODE])) {
       WRITE_COEF_CONTINUE(1, ONE_TOKEN);

@@ -284,7 +284,6 @@ static void setup_features(VP9_COMP *cpi) {
   set_default_lf_deltas(cpi);
 }
 
-
 static void dealloc_compressor_data(VP9_COMP *cpi) {
   // Delete sementation map
   vpx_free(cpi->segmentation_map);
@@ -2935,9 +2934,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #endif
 
     // transform / motion compensation build reconstruction frame
-    if (cm->frame_type == KEY_FRAME) {
-      vp9_default_coef_probs(cm);
-    }
 
     vp9_encode_frame(cpi);
 

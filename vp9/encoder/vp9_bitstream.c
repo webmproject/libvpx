@@ -473,7 +473,6 @@ static void pack_mb_tokens(vp9_writer* const bc,
     const vp9_prob *pp;
     int v = a->value;
     int n = a->len;
-    int ncount = n;
     vp9_prob probs[ENTROPY_NODES];
 
     if (t == EOSB_TOKEN) {
@@ -489,18 +488,25 @@ static void pack_mb_tokens(vp9_writer* const bc,
     assert(pp != 0);
 
     /* skip one or two nodes */
+#if !CONFIG_BALANCED_COEFTREE
     if (p->skip_eob_node) {
       n -= p->skip_eob_node;
       i = 2 * p->skip_eob_node;
-      ncount -= p->skip_eob_node;
     }
+#endif
 
     do {
       const int bb = (v >> --n) & 1;
+#if CONFIG_BALANCED_COEFTREE
+      if (i == 2 && p->skip_eob_node) {
+        i += 2;
+        assert(bb == 1);
+        continue;
+      }
+#endif
       vp9_write(bc, bb, pp[i >> 1]);
       i = vp9_coef_tree[i + bb];
-      ncount--;
-    } while (n && ncount);
+    } while (n);
 
     if (b->base_val) {
       const int e = p->extra, l = b->len;
@@ -871,8 +877,11 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
         const MB_PREDICTION_MODE A = above_block_mode(m, i, mis);
         const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
                                      left_block_mode(m, i) : DC_PRED;
-        write_kf_bmode(bc, m->bmi[i].as_mode.first,
-                       c->kf_bmode_prob[A][L]);
+        const int bm = m->bmi[i].as_mode.first;
+#ifdef ENTROPY_STATS
+        ++intra_mode_stats[A][L][bm];
+#endif
+        write_kf_bmode(bc, bm, c->kf_bmode_prob[A][L]);
       }
     }
   }
@@ -1075,11 +1084,19 @@ static void build_tree_distribution(vp9_coeff_probs_model *coef_probs,
                                            coef_probs[i][j][k][l],
                                            coef_branch_ct[i][j][k][l],
                                            model_counts, 0);
+#if CONFIG_BALANCED_COEFTREE
+          coef_branch_ct[i][j][k][l][1][1] = eob_branch_ct[i][j][k][l] -
+                                             coef_branch_ct[i][j][k][l][1][0];
+          coef_probs[i][j][k][l][1] =
+              get_binary_prob(coef_branch_ct[i][j][k][l][1][0],
+                              coef_branch_ct[i][j][k][l][1][1]);
+#else
           coef_branch_ct[i][j][k][l][0][1] = eob_branch_ct[i][j][k][l] -
                                              coef_branch_ct[i][j][k][l][0][0];
           coef_probs[i][j][k][l][0] =
               get_binary_prob(coef_branch_ct[i][j][k][l][0][0],
                               coef_branch_ct[i][j][k][l][0][1]);
+#endif
 #ifdef ENTROPY_STATS
           if (!cpi->dummy_packing) {
             for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)

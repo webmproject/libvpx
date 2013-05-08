@@ -85,8 +85,7 @@ extern vp9_extra_bit vp9_extra_bits[12];    /* indexed by token value */
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
 #define PREV_COEF_CONTEXTS          6
 
-// Disables backward coef probs adaption
-// #define DISABLE_COEF_ADAPT
+// #define ENTROPY_STATS
 
 typedef unsigned int vp9_coeff_count[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                     [MAX_ENTROPY_TOKENS];
@@ -162,6 +161,7 @@ const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 
 #define UNCONSTRAINED_NODES         3
 #define MODEL_NODES                 (ENTROPY_NODES - UNCONSTRAINED_NODES)
+
 #define PIVOT_NODE                  2   // which node is pivot
 
 typedef vp9_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]

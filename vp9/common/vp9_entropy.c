@@ -201,11 +201,16 @@ DECLARE_ALIGNED(16, const int, vp9_default_scan_32x32[1024]) = {
 
 const vp9_tree_index vp9_coef_tree[ 22] =     /* corresponding _CONTEXT_NODEs */
 {
-  -DCT_EOB_TOKEN, 2,                        /* 0 = EOB */
-  -ZERO_TOKEN, 4,                           /* 1 = ZERO */
-  -ONE_TOKEN, 6,                            /* 2 = ONE */
-  8, 12,                                    /* 3 = LOW_VAL */
-  -TWO_TOKEN, 10,                           /* 4 = TWO */
+#if CONFIG_BALANCED_COEFTREE
+  -ZERO_TOKEN, 2,                             /* 0 = ZERO */
+  -DCT_EOB_TOKEN, 4,                          /* 1 = EOB  */
+#else
+  -DCT_EOB_TOKEN, 2,                          /* 0 = EOB */
+  -ZERO_TOKEN, 4,                             /* 1 = ZERO */
+#endif
+  -ONE_TOKEN, 6,                              /* 2 = ONE */
+  8, 12,                                      /* 3 = LOW_VAL */
+  -TWO_TOKEN, 10,                            /* 4 = TWO */
   -THREE_TOKEN, -FOUR_TOKEN,                /* 5 = THREE */
   14, 16,                                   /* 6 = HIGH_LOW */
   -DCT_VAL_CATEGORY1, -DCT_VAL_CATEGORY2,   /* 7 = CAT_ONE */
@@ -229,9 +234,14 @@ static const vp9_prob Pcat6[] = {
 };
 
 const vp9_tree_index vp9_coefmodel_tree[6] = {
+#if CONFIG_BALANCED_COEFTREE
+  -ZERO_TOKEN, 2,
+  -DCT_EOB_MODEL_TOKEN, 4,
+#else
   -DCT_EOB_MODEL_TOKEN, 2,                      /* 0 = EOB */
   -ZERO_TOKEN, 4,                               /* 1 = ZERO */
-  -ONE_TOKEN, -TWO_TOKEN,                       /* 2 = ONE */
+#endif
+  -ONE_TOKEN, -TWO_TOKEN,
 };
 
 // Model obtained from a 2-sided zero-centerd distribuition derived
@@ -690,8 +700,13 @@ static void adapt_coef_probs(
               vp9_coefmodel_tree,
               coef_probs, branch_ct,
               coef_counts[i][j][k][l], 0);
+#if CONFIG_BALANCED_COEFTREE
+          branch_ct[1][1] = eob_branch_count[i][j][k][l] - branch_ct[1][0];
+          coef_probs[1] = get_binary_prob(branch_ct[1][0], branch_ct[1][1]);
+#else
           branch_ct[0][1] = eob_branch_count[i][j][k][l] - branch_ct[0][0];
           coef_probs[0] = get_binary_prob(branch_ct[0][0], branch_ct[0][1]);
+#endif
           for (t = 0; t < entropy_nodes_adapt; ++t) {
             count = branch_ct[t][0] + branch_ct[t][1];
             count = count > count_sat ? count_sat : count;
