@@ -26,7 +26,6 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9/common/vp9_swapyv12buffer.h"
 #include "vpx_ports/vpx_timer.h"
 
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering

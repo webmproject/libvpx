@@ -21,8 +21,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"
-#include "vp9/common/vp9_swapyv12buffer.h"
-
 #include "vp9/common/vp9_quant_common.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_systemdependent.h"
