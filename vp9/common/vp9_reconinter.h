@@ -92,18 +92,15 @@ static void setup_pred_plane(struct buf_2d *dst,
 static void setup_dst_planes(MACROBLOCKD *xd,
                              const YV12_BUFFER_CONFIG *src,
                              int mi_row, int mi_col) {
-  setup_pred_plane(&xd->plane[0].dst,
-                   src->y_buffer, src->y_stride,
-                   mi_row, mi_col, NULL,
-                   xd->plane[0].subsampling_x, xd->plane[0].subsampling_y);
-  setup_pred_plane(&xd->plane[1].dst,
-                   src->u_buffer, src->uv_stride,
-                   mi_row, mi_col, NULL,
-                   xd->plane[1].subsampling_x, xd->plane[1].subsampling_y);
-  setup_pred_plane(&xd->plane[2].dst,
-                   src->v_buffer, src->uv_stride,
-                   mi_row, mi_col, NULL,
-                   xd->plane[2].subsampling_x, xd->plane[2].subsampling_y);
+  uint8_t *buffers[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
+  int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
+  int i;
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    struct macroblockd_plane *pd = &xd->plane[i];
+    setup_pred_plane(&pd->dst, buffers[i], strides[i], mi_row, mi_col, NULL,
+                     pd->subsampling_x, pd->subsampling_y);
+  }
 }
 
 static void setup_pre_planes(MACROBLOCKD *xd,
@@ -112,26 +109,24 @@ static void setup_pre_planes(MACROBLOCKD *xd,
                              int mi_row, int mi_col,
                              const struct scale_factors *scale,
                              const struct scale_factors *scale_uv) {
-  int i;
+  const YV12_BUFFER_CONFIG *srcs[2] = {src0, src1};
+  int i, j;
 
-  for (i = 0; i < 2; i++) {
-    const YV12_BUFFER_CONFIG *src = i ? src1 : src0;
+  for (i = 0; i < 2; ++i) {
+    const YV12_BUFFER_CONFIG *src = srcs[i];
+    if (src) {
+      uint8_t* buffers[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
+      int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
 
-    if (!src)
-      continue;
-
-    setup_pred_plane(&xd->plane[0].pre[i],
-                     src->y_buffer, src->y_stride,
-                     mi_row, mi_col, scale ? scale + i : NULL,
-                     xd->plane[0].subsampling_x, xd->plane[0].subsampling_y);
-    setup_pred_plane(&xd->plane[1].pre[i],
-                     src->u_buffer, src->uv_stride,
-                     mi_row, mi_col, scale_uv ? scale_uv + i : NULL,
-                     xd->plane[1].subsampling_x, xd->plane[1].subsampling_y);
-    setup_pred_plane(&xd->plane[2].pre[i],
-                     src->v_buffer, src->uv_stride,
-                     mi_row, mi_col, scale_uv ? scale_uv + i : NULL,
-                     xd->plane[2].subsampling_x, xd->plane[2].subsampling_y);
+      for (j = 0; j < MAX_MB_PLANE; ++j) {
+        struct macroblockd_plane *pd = &xd->plane[j];
+        const struct scale_factors *sf = j ? scale_uv : scale;
+        setup_pred_plane(&pd->pre[i],
+                         buffers[j], strides[j],
+                         mi_row, mi_col, sf ? &sf[i] : NULL,
+                         pd->subsampling_x, pd->subsampling_y);
+      }
+    }
   }
 }
 
