@@ -632,7 +632,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           vp9_build_inter_predictors_sby(xd, mb_row << 1,
                                          mb_col << 1,
                                          BLOCK_SIZE_MB16X16);
-          vp9_encode_sb(cm, x, BLOCK_SIZE_MB16X16);
+          vp9_encode_sby(cm, x, BLOCK_SIZE_MB16X16);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);
           sum_mvc += mv.as_mv.col;
