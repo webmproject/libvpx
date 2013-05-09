@@ -378,7 +378,8 @@ void vp9_optimize_init(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
     const struct macroblockd_plane* const plane = &xd->plane[p];
     const int bwl = b_width_log2(bsize) - plane->subsampling_x;
     const int bhl = b_height_log2(bsize) - plane->subsampling_y;
-    const TX_SIZE tx_size = tx_size_for_plane(xd, bsize, p);
+    const TX_SIZE tx_size = p ? get_uv_tx_size(xd)
+                              : xd->mode_info_context->mbmi.txfm_size;
     int i, j;
 
     for (i = 0; i < 1 << bwl; i += 1 << tx_size) {
