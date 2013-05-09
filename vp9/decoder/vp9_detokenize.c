@@ -62,7 +62,7 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
 #define INCREMENT_COUNT(token)               \
   do {                                       \
-    coef_counts[type][ref][get_coef_band(scan, txfm_size, c)] \
+    coef_counts[type][ref][band] \
                [pt][token]++;     \
     token_cache[scan[c]] = token; \
   } while (0)
@@ -96,6 +96,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   ENTROPY_CONTEXT above_ec, left_ec;
   FRAME_CONTEXT *const fc = &dx->common.fc;
   int pt, c = 0, pad, default_eob;
+  int band;
   vp9_coeff_probs *coef_probs;
   vp9_prob *prob;
   vp9_coeff_count *coef_counts;
@@ -162,7 +163,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
 
   while (1) {
     int val;
-    int band;
     const uint8_t *cat6 = cat6_prob;
     if (c >= seg_eob)
       break;
@@ -249,8 +249,7 @@ SKIP_START:
   }
 
   if (c < seg_eob)
-    coef_counts[type][ref][get_coef_band(scan, txfm_size, c)]
-        [pt][DCT_EOB_TOKEN]++;
+    coef_counts[type][ref][band][pt][DCT_EOB_TOKEN]++;
 
   for (pt = 0; pt < (1 << txfm_size); pt++) {
     A[pt] = L[pt] = c > 0;
