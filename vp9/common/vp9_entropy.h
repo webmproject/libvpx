@@ -133,20 +133,20 @@ static INLINE void vp9_reset_sb_tokens_context(MACROBLOCKD* const xd,
 
 extern const int vp9_coef_bands8x8[64];
 extern const int vp9_coef_bands4x4[16];
+extern const uint8_t vp9_coefband_trans_8x8plus[22];
+extern const uint8_t vp9_coefband_trans_4x4[22];
 
-static int get_coef_band(const int *scan, TX_SIZE tx_size, int coef_index) {
-  if (tx_size == TX_4X4) {
-    return vp9_coef_bands4x4[scan[coef_index]];
-  } else {
-    const int pos = scan[coef_index];
-    const int sz = 1 << (2 + tx_size);
-    const int x = pos & (sz - 1), y = pos >> (2 + tx_size);
-    if (x >= 8 || y >= 8)
-      return 5;
-    else
-      return vp9_coef_bands8x8[y * 8 + x];
-  }
+// This is the index in the scan order beyond which all coefficients for
+// 8x8 transform and above are in the top band.
+// For 4x4 blocks the index is less but to keep things common the lookup
+// table for 4x4 is padded out to this index.
+#define MAXBAND_INDEX 21
+
+static int get_coef_band(const uint8_t * band_translate, int coef_index) {
+  return (coef_index > MAXBAND_INDEX)
+    ? (COEF_BANDS-1) : band_translate[coef_index];
 }
+
 extern int vp9_get_coef_context(const int *scan, const int *neighbors,
                                 int nb_pad, uint8_t *token_cache, int c, int l);
 const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);

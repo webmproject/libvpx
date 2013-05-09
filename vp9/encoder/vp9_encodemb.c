@@ -139,6 +139,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   const int ib = txfrm_block_to_raster_block(xd, bsize, plane,
                                              block, 2 * tx_size);
   const int16_t *dequant_ptr = xd->plane[plane].dequant;
+  const uint8_t * band_translate;
 
   assert((!type && !plane) || (type && plane));
   dqcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16);
@@ -149,23 +150,27 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       const TX_TYPE tx_type = plane == 0 ? get_tx_type_4x4(xd, ib) : DCT_DCT;
       default_eob = 16;
       scan = get_scan_4x4(tx_type);
+      band_translate = vp9_coefband_trans_4x4;
       break;
     }
     case TX_8X8: {
       const TX_TYPE tx_type = plane == 0 ? get_tx_type_8x8(xd, ib) : DCT_DCT;
       scan = get_scan_8x8(tx_type);
       default_eob = 64;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_16X16: {
       const TX_TYPE tx_type = plane == 0 ? get_tx_type_16x16(xd, ib) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
       default_eob = 256;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
       default_eob = 1024;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
   }
   assert(eob <= default_eob);
@@ -204,7 +209,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       t0 = (vp9_dct_value_tokens_ptr + x)->token;
       /* Consider both possible successor states. */
       if (next < default_eob) {
-        band = get_coef_band(scan, tx_size, i + 1);
+        band = get_coef_band(band_translate, i + 1);
         pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
                                        pad, default_eob);
         rate0 +=
@@ -254,7 +259,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
         t0 = t1 = (vp9_dct_value_tokens_ptr + x)->token;
       }
       if (next < default_eob) {
-        band = get_coef_band(scan, tx_size, i + 1);
+        band = get_coef_band(band_translate, i + 1);
         if (t0 != DCT_EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
                                          pad, default_eob);
@@ -291,7 +296,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
      *  add a new trellis node, but we do need to update the costs.
      */
     else {
-      band = get_coef_band(scan, tx_size, i + 1);
+      band = get_coef_band(band_translate, i + 1);
       t0 = tokens[next][0].token;
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
@@ -310,7 +315,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   }
 
   /* Now pick the best path through the whole trellis. */
-  band = get_coef_band(scan, tx_size, i + 1);
+  band = get_coef_band(band_translate, i + 1);
   pt = combine_entropy_contexts(*a, *l);
   rate0 = tokens[next][0].rate;
   rate1 = tokens[next][1].rate;

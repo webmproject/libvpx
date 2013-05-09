@@ -1105,8 +1105,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
     if (pc->frame_type != KEY_FRAME) {
       vp9_adapt_mode_probs(pc);
-      vp9_adapt_nmv_probs(pc, xd->allow_high_precision_mv);
       vp9_adapt_mode_context(pc);
+      vp9_adapt_nmv_probs(pc, xd->allow_high_precision_mv);
     }
   }
 

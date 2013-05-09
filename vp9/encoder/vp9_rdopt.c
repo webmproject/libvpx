@@ -272,6 +272,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
                         [ENTROPY_NODES];
   int seg_eob, default_eob;
   uint8_t token_cache[1024];
+  const uint8_t * band_translate;
 
   // Check for consistency of tx_size with mode info
   assert((!type && !plane) || (type && plane));
@@ -291,6 +292,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       coef_probs = cm->fc.coef_probs_4x4;
       seg_eob = 16;
       scan = get_scan_4x4(tx_type);
+      band_translate = vp9_coefband_trans_4x4;
       break;
     }
     case TX_8X8: {
@@ -304,6 +306,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       scan = get_scan_8x8(tx_type);
       coef_probs = cm->fc.coef_probs_8x8;
       seg_eob = 64;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_16X16: {
@@ -317,6 +320,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       seg_eob = 256;
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_32X32:
@@ -325,6 +329,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       seg_eob = 1024;
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
     default:
       abort();
@@ -347,7 +352,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
     for (c = 0; c < eob; c++) {
       int v = qcoeff_ptr[scan[c]];
       int t = vp9_dct_value_tokens_ptr[v].token;
-      int band = get_coef_band(scan, tx_size, c);
+      int band = get_coef_band(band_translate, c);
       if (c)
         pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
 
@@ -361,7 +366,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       if (c)
         pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
       cost += mb->token_costs[tx_size][type][ref]
-          [get_coef_band(scan, tx_size, c)]
+          [get_coef_band(band_translate, c)]
           [pt][DCT_EOB_TOKEN];
     }
   }

@@ -76,12 +76,6 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
     continue;                                            \
   }
 
-#define WRITE_COEF_ONE()                                 \
-{                                                        \
-  qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(br, 1);  \
-  INCREMENT_COUNT(ONE_TOKEN);                            \
-}
-
 #define ADJUST_COEF(prob, bits_count)  \
   do {                                 \
     if (vp9_read(r, prob))             \
@@ -104,6 +98,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   TX_TYPE tx_type = DCT_DCT;
   const int *scan, *nb;
   uint8_t token_cache[1024];
+  const uint8_t * band_translate;
 
   switch (txfm_size) {
     default:
@@ -116,6 +111,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       coef_probs  = fc->coef_probs_4x4;
       coef_counts = fc->coef_counts_4x4;
       default_eob = 16;
+      band_translate = vp9_coefband_trans_4x4;
       break;
     }
     case TX_8X8: {
@@ -131,6 +127,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
       default_eob = 64;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_16X16: {
@@ -146,6 +143,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
       default_eob = 256;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_32X32:
@@ -155,6 +153,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
       default_eob = 1024;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
   }
 
@@ -169,7 +168,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     if (c)
       pt = vp9_get_coef_context(scan, nb, pad, token_cache,
                                 c, default_eob);
-    band = get_coef_band(scan, txfm_size, c);
+    band = get_coef_band(band_translate, c);
     prob = coef_probs[type][ref][band][pt];
     fc->eob_branch_counts[txfm_size][type][ref][band][pt]++;
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
@@ -181,8 +180,9 @@ SKIP_START:
     if (c)
       pt = vp9_get_coef_context(scan, nb, pad, token_cache,
                                 c, default_eob);
-    band = get_coef_band(scan, txfm_size, c);
+    band = get_coef_band(band_translate, c);
     prob = coef_probs[type][ref][band][pt];
+
     if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       ++c;

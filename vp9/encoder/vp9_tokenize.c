@@ -136,6 +136,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   ENTROPY_CONTEXT above_ec, left_ec;
   uint8_t token_cache[1024];
   TX_TYPE tx_type = DCT_DCT;
+  const uint8_t * band_translate;
   assert((!type && !plane) || (type && plane));
 
   switch (tx_size) {
@@ -149,6 +150,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = get_scan_4x4(tx_type);
       counts = cpi->coef_counts_4x4;
       coef_probs = cpi->common.fc.coef_probs_4x4;
+      band_translate = vp9_coefband_trans_4x4;
       break;
     }
     case TX_8X8: {
@@ -162,6 +164,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = get_scan_8x8(tx_type);
       counts = cpi->coef_counts_8x8;
       coef_probs = cpi->common.fc.coef_probs_8x8;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_16X16: {
@@ -175,6 +178,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = get_scan_16x16(tx_type);
       counts = cpi->coef_counts_16x16;
       coef_probs = cpi->common.fc.coef_probs_16x16;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_32X32:
@@ -184,6 +188,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = vp9_default_zig_zag1d_32x32;
       counts = cpi->coef_counts_32x32;
       coef_probs = cpi->common.fc.coef_probs_32x32;
+      band_translate = vp9_coefband_trans_8x8plus;
       break;
   }
 
@@ -196,7 +201,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   c = 0;
   do {
-    const int band = get_coef_band(scan, tx_size, c);
+    const int band = get_coef_band(band_translate, c);
     int token;
     int v = 0;
     rc = scan[c];
