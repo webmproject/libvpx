@@ -103,7 +103,7 @@ class DummyVideoSource : public VideoSource {
     if (width != width_ || height != height_) {
       vpx_img_free(img_);
       raw_sz_ = ((width + 31)&~31) * height * 3 / 2;
-      img_ = vpx_img_alloc(NULL, VPX_IMG_FMT_VPXI420, width, height, 32);
+      img_ = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, width, height, 32);
       width_ = width;
       height_ = height;
     }
