@@ -70,17 +70,17 @@ typedef enum {
 } INTERPOLATIONFILTERTYPE;
 
 typedef enum {
-  DC_PRED,            /* average of above and left pixels */
-  V_PRED,             /* vertical prediction */
-  H_PRED,             /* horizontal prediction */
-  D45_PRED,           /* Directional 45 deg prediction  [anti-clockwise from 0 deg hor] */
-  D135_PRED,          /* Directional 135 deg prediction [anti-clockwise from 0 deg hor] */
-  D117_PRED,          /* Directional 112 deg prediction [anti-clockwise from 0 deg hor] */
-  D153_PRED,          /* Directional 157 deg prediction [anti-clockwise from 0 deg hor] */
-  D27_PRED,           /* Directional 22 deg prediction  [anti-clockwise from 0 deg hor] */
-  D63_PRED,           /* Directional 67 deg prediction  [anti-clockwise from 0 deg hor] */
-  TM_PRED,            /* Truemotion prediction */
-  I4X4_PRED,          /* 4x4 based prediction, each 4x4 has its own mode */
+  DC_PRED,         // Average of above and left pixels
+  V_PRED,          // Vertical
+  H_PRED,          // Horizontal
+  D45_PRED,        // Directional 45  deg = round(arctan(1/1) * 180/pi)
+  D135_PRED,       // Directional 135 deg = 180 - 45
+  D117_PRED,       // Directional 117 deg = 180 - 63
+  D153_PRED,       // Directional 153 deg = 180 - 27
+  D27_PRED,        // Directional 27  deg = round(arctan(1/2) * 180/pi)
+  D63_PRED,        // Directional 63  deg = round(arctan(2/1) * 180/pi)
+  TM_PRED,         // True-motion
+  I4X4_PRED,       // Each 4x4 subblock has its own mode
   NEARESTMV,
   NEARMV,
   ZEROMV,
