@@ -47,7 +47,7 @@
 #define KF_MB_INTRA_MIN 150
 #define GF_MB_INTRA_MIN 100
 
-#define DOUBLE_DIVIDE_CHECK(X) ((X)<0?(X)-.000001:(X)+.000001)
+#define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
 #define POW1 (double)cpi->oxcf.two_pass_vbrbias/100.0
 #define POW2 (double)cpi->oxcf.two_pass_vbrbias/100.0
@@ -78,8 +78,8 @@ static int select_cq_level(int qindex) {
 
 
 // Resets the first pass file to the given position using a relative seek from the current position
-static void reset_fpf_position(VP9_COMP *cpi, FIRSTPASS_STATS *Position) {
-  cpi->twopass.stats_in = Position;
+static void reset_fpf_position(VP9_COMP *cpi, FIRSTPASS_STATS *position) {
+  cpi->twopass.stats_in = position;
 }
 
 static int lookup_next_frame_stats(VP9_COMP *cpi, FIRSTPASS_STATS *next_frame) {
@@ -252,17 +252,11 @@ static void avg_stats(FIRSTPASS_STATS *section) {
 
 // Calculate a modified Error used in distributing bits between easier and harder frames
 static double calculate_modified_err(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
-  double av_err = (cpi->twopass.total_stats.ssim_weighted_pred_err /
-                   cpi->twopass.total_stats.count);
-  double this_err = this_frame->ssim_weighted_pred_err;
-  double modified_err;
-
-  if (this_err > av_err)
-    modified_err = av_err * pow((this_err / DOUBLE_DIVIDE_CHECK(av_err)), POW1);
-  else
-    modified_err = av_err * pow((this_err / DOUBLE_DIVIDE_CHECK(av_err)), POW2);
-
-  return modified_err;
+  const FIRSTPASS_STATS *const stats = &cpi->twopass.total_stats;
+  const double av_err = stats->ssim_weighted_pred_err / stats->count;
+  const double this_err = this_frame->ssim_weighted_pred_err;
+  return av_err * pow(this_err / DOUBLE_DIVIDE_CHECK(av_err),
+                      this_err > av_err ? POW1 : POW2);
 }
 
 static const double weight_table[256] = {
@@ -328,20 +322,14 @@ static double simple_weight(YV12_BUFFER_CONFIG *source) {
 static int frame_max_bits(VP9_COMP *cpi) {
   // Max allocation for a single frame based on the max section guidelines
   // passed in and how many bits are left.
-  int max_bits;
-
   // For VBR base this on the bits and frames left plus the
   // two_pass_vbrmax_section rate passed in by the user.
-  max_bits = (int) (((double) cpi->twopass.bits_left
-      / (cpi->twopass.total_stats.count - (double) cpi->common
-             .current_video_frame))
-                    * ((double) cpi->oxcf.two_pass_vbrmax_section / 100.0));
+  const double max_bits = (1.0 * cpi->twopass.bits_left /
+      (cpi->twopass.total_stats.count - cpi->common.current_video_frame)) *
+      (cpi->oxcf.two_pass_vbrmax_section / 100.0);
 
   // Trap case where we are out of bits.
-  if (max_bits < 0)
-    max_bits = 0;
-
-  return max_bits;
+  return MAX((int)max_bits, 0);
 }
 
 void vp9_init_first_pass(VP9_COMP *cpi) {
@@ -854,26 +842,18 @@ static double calc_correction_factor(double err_per_mb,
                                      double err_divisor,
                                      double pt_low,
                                      double pt_high,
-                                     int Q) {
-  double power_term;
-  double error_term = err_per_mb / err_divisor;
-  double correction_factor;
+                                     int q) {
+  const double error_term = err_per_mb / err_divisor;
 
   // Adjustment based on actual quantizer to power term.
-  power_term = (vp9_convert_qindex_to_q(Q) * 0.01) + pt_low;
-  power_term = (power_term > pt_high) ? pt_high : power_term;
+  const double power_term = MIN(vp9_convert_qindex_to_q(q) * 0.01 + pt_low,
+                                pt_high);
 
   // Calculate correction factor
   if (power_term < 1.0)
     assert(error_term >= 0.0);
-  correction_factor = pow(error_term, power_term);
 
-  // Clip range
-  correction_factor =
-    (correction_factor < 0.05)
-    ? 0.05 : (correction_factor > 5.0) ? 5.0 : correction_factor;
-
-  return correction_factor;
+  return fclamp(pow(error_term, power_term), 0.05, 5.0);
 }
 
 // Given a current maxQ value sets a range for future values.
@@ -882,10 +862,8 @@ static double calc_correction_factor(double err_per_mb,
 // (now uses the actual quantizer) but has not been tuned.
 static void adjust_maxq_qrange(VP9_COMP *cpi) {
   int i;
-  double q;
-
   // Set the max corresponding to cpi->avg_q * 2.0
-  q = cpi->avg_q * 2.0;
+  double q = cpi->avg_q * 2.0;
   cpi->twopass.maxq_max_limit = cpi->worst_quality;
   for (i = cpi->best_quality; i <= cpi->worst_quality; i++) {
     cpi->twopass.maxq_max_limit = i;
@@ -906,12 +884,11 @@ static void adjust_maxq_qrange(VP9_COMP *cpi) {
 static int estimate_max_q(VP9_COMP *cpi,
                           FIRSTPASS_STATS *fpstats,
                           int section_target_bandwitdh) {
-  int Q;
+  int q;
   int num_mbs = cpi->common.MBs;
   int target_norm_bits_per_mb;
 
-  double section_err = (fpstats->coded_error / fpstats->count);
-  double sr_err_diff;
+  double section_err = fpstats->coded_error / fpstats->count;
   double sr_correction;
   double err_per_mb = section_err / num_mbs;
   double err_correction_factor;
@@ -920,92 +897,74 @@ static int estimate_max_q(VP9_COMP *cpi,
   if (section_target_bandwitdh <= 0)
     return cpi->twopass.maxq_max_limit;          // Highest value allowed
 
-  target_norm_bits_per_mb =
-    (section_target_bandwitdh < (1 << 20))
-    ? (512 * section_target_bandwitdh) / num_mbs
-    : 512 * (section_target_bandwitdh / num_mbs);
+  target_norm_bits_per_mb = section_target_bandwitdh < (1 << 20)
+                              ? (512 * section_target_bandwitdh) / num_mbs
+                              : 512 * (section_target_bandwitdh / num_mbs);
 
   // Look at the drop in prediction quality between the last frame
   // and the GF buffer (which contained an older frame).
   if (fpstats->sr_coded_error > fpstats->coded_error) {
-    sr_err_diff =
-      (fpstats->sr_coded_error - fpstats->coded_error) /
-      (fpstats->count * cpi->common.MBs);
-    sr_correction = (sr_err_diff / 32.0);
-    sr_correction = pow(sr_correction, 0.25);
-    if (sr_correction < 0.75)
-      sr_correction = 0.75;
-    else if (sr_correction > 1.25)
-      sr_correction = 1.25;
+    double sr_err_diff = (fpstats->sr_coded_error - fpstats->coded_error) /
+                             (fpstats->count * cpi->common.MBs);
+    sr_correction = fclamp(pow(sr_err_diff / 32.0, 0.25), 0.75, 1.25);
   } else {
     sr_correction = 0.75;
   }
 
   // Calculate a corrective factor based on a rolling ratio of bits spent
   // vs target bits
-  if ((cpi->rolling_target_bits > 0) &&
-      (cpi->active_worst_quality < cpi->worst_quality)) {
-    double rolling_ratio;
-
-    rolling_ratio = (double)cpi->rolling_actual_bits /
-                    (double)cpi->rolling_target_bits;
+  if (cpi->rolling_target_bits > 0 &&
+      cpi->active_worst_quality < cpi->worst_quality) {
+    double rolling_ratio = (double)cpi->rolling_actual_bits /
+                               (double)cpi->rolling_target_bits;
 
     if (rolling_ratio < 0.95)
       cpi->twopass.est_max_qcorrection_factor -= 0.005;
     else if (rolling_ratio > 1.05)
       cpi->twopass.est_max_qcorrection_factor += 0.005;
 
-    cpi->twopass.est_max_qcorrection_factor =
-      (cpi->twopass.est_max_qcorrection_factor < 0.1)
-      ? 0.1
-      : (cpi->twopass.est_max_qcorrection_factor > 10.0)
-      ? 10.0 : cpi->twopass.est_max_qcorrection_factor;
+    cpi->twopass.est_max_qcorrection_factor = fclamp(
+        cpi->twopass.est_max_qcorrection_factor, 0.1, 10.0);
   }
 
   // Corrections for higher compression speed settings
   // (reduced compression expected)
-  if (cpi->compressor_speed == 1) {
-    if (cpi->oxcf.cpu_used <= 5)
-      speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
-    else
-      speed_correction = 1.25;
-  }
+  if (cpi->compressor_speed == 1)
+    speed_correction = cpi->oxcf.cpu_used <= 5 ?
+                          1.04 + (cpi->oxcf.cpu_used * 0.04) :
+                          1.25;
 
   // Try and pick a max Q that will be high enough to encode the
   // content at the given rate.
-  for (Q = cpi->twopass.maxq_min_limit; Q < cpi->twopass.maxq_max_limit; Q++) {
+  for (q = cpi->twopass.maxq_min_limit; q < cpi->twopass.maxq_max_limit; q++) {
     int bits_per_mb_at_this_q;
 
-    err_correction_factor =
-      calc_correction_factor(err_per_mb, ERR_DIVISOR, 0.4, 0.90, Q) *
-      sr_correction * speed_correction *
-      cpi->twopass.est_max_qcorrection_factor;
+    err_correction_factor = calc_correction_factor(err_per_mb,
+                                                   ERR_DIVISOR, 0.4, 0.90, q) *
+                                sr_correction * speed_correction *
+                                cpi->twopass.est_max_qcorrection_factor;
 
-
-    bits_per_mb_at_this_q =
-      vp9_bits_per_mb(INTER_FRAME, Q, err_correction_factor);
+    bits_per_mb_at_this_q = vp9_bits_per_mb(INTER_FRAME, q,
+                                            err_correction_factor);
 
     if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
       break;
   }
 
   // Restriction on active max q for constrained quality mode.
-  if ((cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
-      (Q < cpi->cq_target_quality)) {
-    Q = cpi->cq_target_quality;
-  }
+  if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY &&
+      q < cpi->cq_target_quality)
+    q = cpi->cq_target_quality;
 
   // Adjust maxq_min_limit and maxq_max_limit limits based on
   // average q observed in clip for non kf/gf/arf frames
   // Give average a chance to settle though.
   // PGW TODO.. This code is broken for the extended Q range
-  if ((cpi->ni_frames >
-       ((int)cpi->twopass.total_stats.count >> 8)) &&
-      (cpi->ni_frames > 25)) {
+  if (cpi->ni_frames > ((int)cpi->twopass.total_stats.count >> 8) &&
+      cpi->ni_frames > 25)
     adjust_maxq_qrange(cpi);
-  }
 
-  return Q;
+  return q;
 }
 
 // For cq mode estimate a cq level that matches the observed
@@ -1013,7 +972,7 @@ static int estimate_max_q(VP9_COMP *cpi,
 static int estimate_cq(VP9_COMP *cpi,
                        FIRSTPASS_STATS *fpstats,
                        int section_target_bandwitdh) {
-  int Q;
+  int q;
   int num_mbs = cpi->common.MBs;
   int target_norm_bits_per_mb;
 
@@ -1064,29 +1023,29 @@ static int estimate_cq(VP9_COMP *cpi,
     clip_iifactor = 0.80;
 
   // Try and pick a Q that can encode the content at the given rate.
-  for (Q = 0; Q < MAXQ; Q++) {
+  for (q = 0; q < MAXQ; q++) {
     int bits_per_mb_at_this_q;
 
     // Error per MB based correction factor
     err_correction_factor =
-      calc_correction_factor(err_per_mb, 100.0, 0.4, 0.90, Q) *
+      calc_correction_factor(err_per_mb, 100.0, 0.4, 0.90, q) *
       sr_correction * speed_correction * clip_iifactor;
 
     bits_per_mb_at_this_q =
-      vp9_bits_per_mb(INTER_FRAME, Q, err_correction_factor);
+      vp9_bits_per_mb(INTER_FRAME, q, err_correction_factor);
 
     if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
       break;
   }
 
   // Clip value to range "best allowed to (worst allowed - 1)"
-  Q = select_cq_level(Q);
-  if (Q >= cpi->worst_quality)
-    Q = cpi->worst_quality - 1;
-  if (Q < cpi->best_quality)
-    Q = cpi->best_quality;
+  q = select_cq_level(q);
+  if (q >= cpi->worst_quality)
+    q = cpi->worst_quality - 1;
+  if (q < cpi->best_quality)
+    q = cpi->best_quality;
 
-  return Q;
+  return q;
 }
 
 
@@ -1117,9 +1076,8 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // encoded in the second pass is a guess.  However the sum duration is not.
   // Its calculated based on the actual durations of all frames from the first
   // pass.
-  vp9_new_frame_rate(cpi,
-                     10000000.0 * cpi->twopass.total_stats.count /
-                     cpi->twopass.total_stats.duration);
+  vp9_new_frame_rate(cpi, 10000000.0 * cpi->twopass.total_stats.count /
+                       cpi->twopass.total_stats.duration);
 
   cpi->output_frame_rate = cpi->oxcf.frame_rate;
   cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats.duration *
@@ -1191,9 +1149,8 @@ static double get_prediction_decay_rate(VP9_COMP *cpi,
 
   // Look at the observed drop in prediction quality between the last frame
   // and the GF buffer (which contains an older frame).
-  mb_sr_err_diff =
-    (next_frame->sr_coded_error - next_frame->coded_error) /
-    (cpi->common.MBs);
+  mb_sr_err_diff = (next_frame->sr_coded_error - next_frame->coded_error) /
+                   cpi->common.MBs;
   if (mb_sr_err_diff <= 512.0) {
     second_ref_decay = 1.0 - (mb_sr_err_diff / 512.0);
     second_ref_decay = pow(second_ref_decay, 0.5);
@@ -1225,9 +1182,9 @@ static int detect_transition_to_still(
   // Break clause to detect very still sections after motion
   // For example a static image after a fade or other transition
   // instead of a clean scene cut.
-  if ((frame_interval > MIN_GF_INTERVAL) &&
-      (loop_decay_rate >= 0.999) &&
-      (last_decay_rate < 0.9)) {
+  if (frame_interval > MIN_GF_INTERVAL &&
+      loop_decay_rate >= 0.999 &&
+      last_decay_rate < 0.9) {
     int j;
     FIRSTPASS_STATS *position = cpi->twopass.stats_in;
     FIRSTPASS_STATS tmp_next_frame;
@@ -1271,10 +1228,9 @@ static int detect_flash(VP9_COMP *cpi, int offset) {
     // are reasonably well predicted by an earlier (pre flash) frame.
     // The recovery after a flash is indicated by a high pcnt_second_ref
     // comapred to pcnt_inter.
-    if ((next_frame.pcnt_second_ref > next_frame.pcnt_inter) &&
-        (next_frame.pcnt_second_ref >= 0.5)) {
+    if (next_frame.pcnt_second_ref > next_frame.pcnt_inter &&
+        next_frame.pcnt_second_ref >= 0.5)
       flash_detected = 1;
-    }
   }
 
   return flash_detected;
@@ -1356,13 +1312,9 @@ static double calc_frame_boost(
   return frame_boost;
 }
 
-static int calc_arf_boost(
-  VP9_COMP *cpi,
-  int offset,
-  int f_frames,
-  int b_frames,
-  int *f_boost,
-  int *b_boost) {
+static int calc_arf_boost(VP9_COMP *cpi, int offset,
+                          int f_frames, int b_frames,
+                          int *f_boost, int *b_boost) {
   FIRSTPASS_STATS this_frame;
 
   int i;
@@ -1392,8 +1344,7 @@ static int calc_arf_boost(
 
     // Cumulative effect of prediction quality decay
     if (!flash_detected) {
-      decay_accumulator =
-        decay_accumulator * get_prediction_decay_rate(cpi, &this_frame);
+      decay_accumulator *= get_prediction_decay_rate(cpi, &this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                           ? MIN_DECAY_FACTOR : decay_accumulator;
     }
@@ -1429,10 +1380,9 @@ static int calc_arf_boost(
 
     // Cumulative effect of prediction quality decay
     if (!flash_detected) {
-      decay_accumulator =
-        decay_accumulator * get_prediction_decay_rate(cpi, &this_frame);
+      decay_accumulator *= get_prediction_decay_rate(cpi, &this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
-                          ? MIN_DECAY_FACTOR : decay_accumulator;
+                              ? MIN_DECAY_FACTOR : decay_accumulator;
     }
 
     boost_score += (decay_accumulator *
@@ -1871,26 +1821,20 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   for (i = 0;
       i <= (cpi->source_alt_ref_pending && cpi->common.frame_type != KEY_FRAME);
       ++i) {
-    int boost;
     int allocation_chunks;
-    int Q =
-        (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
+    int q = cpi->oxcf.fixed_q < 0 ? cpi->last_q[INTER_FRAME]
+                                  : cpi->oxcf.fixed_q;
     int gf_bits;
 
-    boost = (cpi->gfu_boost * vp9_gfboost_qadjust(Q)) / 100;
+    int boost = (cpi->gfu_boost * vp9_gfboost_qadjust(q)) / 100;
 
     // Set max and minimum boost and hence minimum allocation
-    if (boost > ((cpi->baseline_gf_interval + 1) * 200))
-      boost = ((cpi->baseline_gf_interval + 1) * 200);
-    else if (boost < 125)
-      boost = 125;
+    boost = clamp(boost, 125, (cpi->baseline_gf_interval + 1) * 200);
 
     if (cpi->source_alt_ref_pending && i == 0)
-      allocation_chunks =
-        ((cpi->baseline_gf_interval + 1) * 100) + boost;
+      allocation_chunks = ((cpi->baseline_gf_interval + 1) * 100) + boost;
     else
-      allocation_chunks =
-        (cpi->baseline_gf_interval * 100) + (boost - 100);
+      allocation_chunks = (cpi->baseline_gf_interval * 100) + (boost - 100);
 
     // Prevent overflow
     if (boost > 1023) {
@@ -1901,41 +1845,34 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Calculate the number of bits to be spent on the gf or arf based on
     // the boost number
-    gf_bits = (int)((double)boost *
-                    (cpi->twopass.gf_group_bits /
-                     (double)allocation_chunks));
+    gf_bits = (int)((double)boost * (cpi->twopass.gf_group_bits /
+                                       (double)allocation_chunks));
 
     // If the frame that is to be boosted is simpler than the average for
     // the gf/arf group then use an alternative calculation
     // based on the error score of the frame itself
     if (mod_frame_err < gf_group_err / (double)cpi->baseline_gf_interval) {
-      double  alt_gf_grp_bits;
-      int     alt_gf_bits;
-
-      alt_gf_grp_bits =
+      double alt_gf_grp_bits =
         (double)cpi->twopass.kf_group_bits  *
         (mod_frame_err * (double)cpi->baseline_gf_interval) /
         DOUBLE_DIVIDE_CHECK(cpi->twopass.kf_group_error_left);
 
-      alt_gf_bits = (int)((double)boost * (alt_gf_grp_bits /
+      int alt_gf_bits = (int)((double)boost * (alt_gf_grp_bits /
                                            (double)allocation_chunks));
 
-      if (gf_bits > alt_gf_bits) {
+      if (gf_bits > alt_gf_bits)
         gf_bits = alt_gf_bits;
-      }
     }
     // Else if it is harder than other frames in the group make sure it at
     // least receives an allocation in keeping with its relative error
     // score, otherwise it may be worse off than an "un-boosted" frame
     else {
-      int alt_gf_bits =
-        (int)((double)cpi->twopass.kf_group_bits *
-              mod_frame_err /
-              DOUBLE_DIVIDE_CHECK(cpi->twopass.kf_group_error_left));
+      int alt_gf_bits = (int)((double)cpi->twopass.kf_group_bits *
+                        mod_frame_err /
+                        DOUBLE_DIVIDE_CHECK(cpi->twopass.kf_group_error_left));
 
-      if (alt_gf_bits > gf_bits) {
+      if (alt_gf_bits > gf_bits)
         gf_bits = alt_gf_bits;
-      }
     }
 
     // Dont allow a negative value for gf_bits
@@ -1983,14 +1920,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // despite (MIN_GF_INTERVAL) and would cause a divide by 0 in the
     // calculation of alt_extra_bits.
     if (cpi->baseline_gf_interval >= 3) {
-      int boost = (cpi->source_alt_ref_pending)
-                  ? b_boost : cpi->gfu_boost;
+      const int boost = cpi->source_alt_ref_pending ? b_boost : cpi->gfu_boost;
 
       if (boost >= 150) {
-        int pct_extra;
         int alt_extra_bits;
-
-        pct_extra = (boost - 100) / 50;
+        int pct_extra = (boost - 100) / 50;
         pct_extra = (pct_extra > 20) ? 20 : pct_extra;
 
         alt_extra_bits = (int)((cpi->twopass.gf_group_bits * pct_extra) / 100);
@@ -2071,33 +2005,21 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 // Make a damped adjustment to the active max q.
 static int adjust_active_maxq(int old_maxqi, int new_maxqi) {
   int i;
-  int ret_val = new_maxqi;
-  double old_q;
-  double new_q;
-  double target_q;
-
-  old_q = vp9_convert_qindex_to_q(old_maxqi);
-  new_q = vp9_convert_qindex_to_q(new_maxqi);
-
-  target_q = ((old_q * 7.0) + new_q) / 8.0;
+  const double old_q = vp9_convert_qindex_to_q(old_maxqi);
+  const double new_q = vp9_convert_qindex_to_q(new_maxqi);
+  const double target_q = ((old_q * 7.0) + new_q) / 8.0;
 
   if (target_q > old_q) {
-    for (i = old_maxqi; i <= new_maxqi; i++) {
-      if (vp9_convert_qindex_to_q(i) >= target_q) {
-        ret_val = i;
-        break;
-      }
-    }
+    for (i = old_maxqi; i <= new_maxqi; i++)
+      if (vp9_convert_qindex_to_q(i) >= target_q)
+        return i;
   } else {
-    for (i = old_maxqi; i >= new_maxqi; i--) {
-      if (vp9_convert_qindex_to_q(i) <= target_q) {
-        ret_val = i;
-        break;
-      }
-    }
+    for (i = old_maxqi; i >= new_maxqi; i--)
+      if (vp9_convert_qindex_to_q(i) <= target_q)
+        return i;
   }
 
-  return ret_val;
+  return new_maxqi;
 }
 
 void vp9_second_pass(VP9_COMP *cpi) {
@@ -2111,9 +2033,8 @@ void vp9_second_pass(VP9_COMP *cpi) {
   double this_frame_intra_error;
   double this_frame_coded_error;
 
-  if (!cpi->twopass.stats_in) {
+  if (!cpi->twopass.stats_in)
     return;
-  }
 
   vp9_clear_system_state();
 
@@ -2123,12 +2044,8 @@ void vp9_second_pass(VP9_COMP *cpi) {
 
     // Set a cq_level in constrained quality mode.
     if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
-      int est_cq;
-
-      est_cq =
-        estimate_cq(cpi,
-                    &cpi->twopass.total_left_stats,
-                    (int)(cpi->twopass.bits_left / frames_left));
+      int est_cq = estimate_cq(cpi, &cpi->twopass.total_left_stats,
+                               (int)(cpi->twopass.bits_left / frames_left));
 
       cpi->cq_target_quality = cpi->oxcf.cq_level;
       if (est_cq > cpi->cq_target_quality)
@@ -2139,14 +2056,12 @@ void vp9_second_pass(VP9_COMP *cpi) {
     cpi->twopass.maxq_max_limit = cpi->worst_quality;
     cpi->twopass.maxq_min_limit = cpi->best_quality;
 
-    tmp_q = estimate_max_q(
-              cpi,
-              &cpi->twopass.total_left_stats,
-              (int)(cpi->twopass.bits_left / frames_left));
+    tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
+                           (int)(cpi->twopass.bits_left / frames_left));
 
-    cpi->active_worst_quality         = tmp_q;
-    cpi->ni_av_qi                     = tmp_q;
-    cpi->avg_q                        = vp9_convert_qindex_to_q(tmp_q);
+    cpi->active_worst_quality = tmp_q;
+    cpi->ni_av_qi = tmp_q;
+    cpi->avg_q = vp9_convert_qindex_to_q(tmp_q);
 
 #ifndef ONE_SHOT_Q_ESTIMATE
     // Limit the maxq value returned subsequently.
@@ -2404,9 +2319,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if (cpi->oxcf.auto_key
         && lookup_next_frame_stats(cpi, &next_frame) != EOF) {
       // Normal scene cut check
-      if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame)) {
+      if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame))
         break;
-      }
+
 
       // How fast is prediction quality decaying
       loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
@@ -2416,19 +2331,14 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // quality since the last GF or KF.
       recent_loop_decay[i % 8] = loop_decay_rate;
       decay_accumulator = 1.0;
-      for (j = 0; j < 8; j++) {
-        decay_accumulator = decay_accumulator * recent_loop_decay[j];
-      }
+      for (j = 0; j < 8; j++)
+        decay_accumulator *= recent_loop_decay[j];
 
       // Special check for transition or high motion followed by a
       // to a static scene.
-      if (detect_transition_to_still(cpi, i,
-                                     (cpi->key_frame_frequency - i),
-                                     loop_decay_rate,
-                                     decay_accumulator)) {
+      if (detect_transition_to_still(cpi, i, cpi->key_frame_frequency - i,
+                                     loop_decay_rate, decay_accumulator))
         break;
-      }
-
 
       // Step on to the next frame
       cpi->twopass.frames_to_key++;
