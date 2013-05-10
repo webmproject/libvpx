@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAX3//9gE\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-05-10T18:12:52Z",
+      "side": 1,
+      "message": "It can be a separate variable pd for xd-\u003eplane[p].",
+      "revId": "01fc13134f99ed399a41cb8477fbc0ffb874c32f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
