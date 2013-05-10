@@ -509,6 +509,10 @@ typedef struct VP8_COMP
     int cyclic_refresh_q;
     signed char *cyclic_refresh_map;
 
+    // Frame counter for the temporal pattern. Counter is rest when the temporal
+    // layers are changed dynamically (run-time change).
+    unsigned int temporal_pattern_counter;
+
 #if CONFIG_MULTITHREAD
     /* multithread data */
     int * mt_current_mb_col;
