@@ -132,6 +132,12 @@ typedef struct VP9Common {
   int last_width;
   int last_height;
 
+  // TODO(jkoleszar): this implies chroma ss right now, but could vary per
+  // plane. Revisit as part of the future change to YV12_BUFFER_CONFIG to
+  // support additional planes.
+  int subsampling_x;
+  int subsampling_y;
+
   YUV_TYPE clr_type;
   CLAMP_TYPE  clamp_type;
 

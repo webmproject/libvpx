@@ -46,7 +46,7 @@ void vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
       unsigned int i;
 
       for (i = 0; i < ctx->max_sz; i++)
-        vp8_yv12_de_alloc_frame_buffer(&ctx->buf[i].img);
+        vp9_free_frame_buffer(&ctx->buf[i].img);
       free(ctx->buf);
     }
     free(ctx);
@@ -56,6 +56,8 @@ void vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
 
 struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
                                           unsigned int height,
+                                          unsigned int subsampling_x,
+                                          unsigned int subsampling_y,
                                           unsigned int depth) {
   struct lookahead_ctx *ctx = NULL;
 
@@ -71,8 +73,9 @@ struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
     if (!ctx->buf)
       goto bail;
     for (i = 0; i < depth; i++)
-      if (vp8_yv12_alloc_frame_buffer(&ctx->buf[i].img,
-                                      width, height, VP9BORDERINPIXELS))
+      if (vp9_alloc_frame_buffer(&ctx->buf[i].img,
+                                 width, height, subsampling_x, subsampling_y,
+                                 VP9BORDERINPIXELS))
         goto bail;
   }
   return ctx;

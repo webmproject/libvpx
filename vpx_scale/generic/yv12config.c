@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "vpx_mem/vpx_mem.h"
 
@@ -97,3 +97,89 @@ int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
   }
   return -2;
 }
+
+#if CONFIG_VP9
+// TODO(jkoleszar): Maybe replace this with struct vpx_image
+
+int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
+  if (ybf) {
+    vpx_free(ybf->buffer_alloc);
+
+    /* buffer_alloc isn't accessed by most functions.  Rather y_buffer,
+      u_buffer and v_buffer point to buffer_alloc and are used.  Clear out
+      all of this so that a freed pointer isn't inadvertently used */
+    vpx_memset(ybf, 0, sizeof(YV12_BUFFER_CONFIG));
+  } else {
+    return -1;
+  }
+
+  return 0;
+}
+
+int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+                             int width, int height,
+                             int ss_x, int ss_y, int border) {
+  if (ybf) {
+    const int aligned_width = (width + 15) & ~15;
+    const int aligned_height = (height + 15) & ~15;
+    const int y_stride = ((aligned_width + 2 * border) + 31) & ~31;
+    const int yplane_size = (aligned_height + 2 * border) * y_stride;
+    const int uv_width = aligned_width >> ss_x;
+    const int uv_height = aligned_height >> ss_y;
+    const int uv_stride = y_stride >> ss_x;
+    const int uv_border_w = border >> ss_x;
+    const int uv_border_h = border >> ss_y;
+    const int uvplane_size = (uv_height + 2 * uv_border_h) * uv_stride;
+    const int frame_size = yplane_size + 2 * uvplane_size;
+
+    if (!ybf->buffer_alloc) {
+      ybf->buffer_alloc = vpx_memalign(32, frame_size);
+      ybf->buffer_alloc_sz = frame_size;
+    }
+
+    if (!ybf->buffer_alloc || ybf->buffer_alloc_sz < frame_size)
+      return -1;
+
+    /* Only support allocating buffers that have a border that's a multiple
+     * of 32. The border restriction is required to get 16-byte alignment of
+     * the start of the chroma rows without intoducing an arbitrary gap
+     * between planes, which would break the semantics of things like
+     * vpx_img_set_rect(). */
+    if (border & 0x1f)
+      return -3;
+
+    ybf->y_crop_width = width;
+    ybf->y_crop_height = height;
+    ybf->y_width  = aligned_width;
+    ybf->y_height = aligned_height;
+    ybf->y_stride = y_stride;
+
+    ybf->uv_width = uv_width;
+    ybf->uv_height = uv_height;
+    ybf->uv_stride = uv_stride;
+
+    ybf->border = border;
+    ybf->frame_size = frame_size;
+
+    ybf->y_buffer = ybf->buffer_alloc + (border * y_stride) + border;
+    ybf->u_buffer = ybf->buffer_alloc + yplane_size +
+                    (uv_border_h * uv_stride) + uv_border_w;
+    ybf->v_buffer = ybf->buffer_alloc + yplane_size + uvplane_size +
+                    (uv_border_h * uv_stride) + uv_border_w;
+
+    ybf->corrupted = 0; /* assume not currupted by errors */
+    return 0;
+  }
+  return -2;
+}
+
+int vp9_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+                           int width, int height,
+                           int ss_x, int ss_y, int border) {
+  if (ybf) {
+    vp9_free_frame_buffer(ybf);
+    return vp9_realloc_frame_buffer(ybf, width, height, ss_x, ss_y, border);
+  }
+  return -2;
+}
+#endif

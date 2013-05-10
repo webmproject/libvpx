@@ -1139,7 +1139,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   vp9_build_block_offsets(x);
 
-  vp9_setup_block_dptrs(&x->e_mbd);
+  vp9_setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_context->mbmi.uv_mode = DC_PRED;

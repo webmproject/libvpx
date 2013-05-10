@@ -16,13 +16,24 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
     * the Y, U, and V planes, nor other alignment adjustments that
     * might be representable by a YV12_BUFFER_CONFIG, so we just
     * initialize all the fields.*/
-  img->fmt = yv12->clrtype == REG_YUV ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_VPXI420;
+  int bps = 12;
+  if (yv12->uv_height == yv12->y_height) {
+    if (yv12->uv_width == yv12->y_width) {
+      img->fmt = VPX_IMG_FMT_I444;
+      bps = 24;
+    } else {
+      img->fmt = VPX_IMG_FMT_I422;
+      bps = 16;
+    }
+  } else {
+    img->fmt = VPX_IMG_FMT_I420;
+  }
   img->w = yv12->y_stride;
   img->h = multiple16(yv12->y_height + 2 * VP9BORDERINPIXELS);
-  img->d_w = yv12->y_width;
-  img->d_h = yv12->y_height;
-  img->x_chroma_shift = 1;
-  img->y_chroma_shift = 1;
+  img->d_w = yv12->y_crop_width;
+  img->d_h = yv12->y_crop_height;
+  img->x_chroma_shift = yv12->uv_width < yv12->y_width;
+  img->y_chroma_shift = yv12->uv_height < yv12->y_height;
   img->planes[VPX_PLANE_Y] = yv12->y_buffer;
   img->planes[VPX_PLANE_U] = yv12->u_buffer;
   img->planes[VPX_PLANE_V] = yv12->v_buffer;
@@ -31,7 +42,7 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
   img->stride[VPX_PLANE_U] = yv12->uv_stride;
   img->stride[VPX_PLANE_V] = yv12->uv_stride;
   img->stride[VPX_PLANE_ALPHA] = yv12->y_stride;
-  img->bps = 12;
+  img->bps = bps;
   img->user_priv = user_priv;
   img->img_data = yv12->buffer_alloc;
   img->img_data_owner = 0;

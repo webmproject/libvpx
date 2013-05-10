@@ -929,6 +929,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     pc->version = (data[0] >> 1) & 7;
     pc->show_frame = (data[0] >> 4) & 1;
     scaling_active = (data[0] >> 5) & 1;
+    pc->subsampling_x = (data[0] >> 6) & 1;
+    pc->subsampling_y = (data[0] >> 7) & 1;
     first_partition_size = read_le16(data + 1);
 
     if (!read_is_valid(data, first_partition_size, data_end))
@@ -961,8 +963,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   init_frame(pbi);
 
   // Reset the frame pointers to the current frame size
-  vp8_yv12_realloc_frame_buffer(new_fb, pc->width, pc->height,
-                                VP9BORDERINPIXELS);
+  vp9_realloc_frame_buffer(new_fb, pc->width, pc->height,
+                           pc->subsampling_x, pc->subsampling_y,
+                           VP9BORDERINPIXELS);
 
   if (vp9_reader_init(&header_bc, data, first_partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
@@ -1073,7 +1076,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     CHECK_MEM_ERROR(pc->last_frame_seg_map,
                     vpx_calloc((pc->mi_rows * pc->mi_cols), 1));
 
-  vp9_setup_block_dptrs(xd);
+  vp9_setup_block_dptrs(xd, pc->subsampling_x, pc->subsampling_y);
 
   // clear out the coeff buffer
   for (i = 0; i < MAX_MB_PLANE; ++i)

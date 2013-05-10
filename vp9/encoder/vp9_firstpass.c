@@ -489,7 +489,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   vp9_build_block_offsets(x);
 
-  vp9_setup_block_dptrs(&x->e_mbd);
+  vp9_setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   vp9_frame_init_quantizer(cpi);
 
