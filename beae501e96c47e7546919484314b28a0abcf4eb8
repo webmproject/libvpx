@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAX3//9eE\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1489,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-05-10T18:22:08Z",
+      "side": 1,
+      "message": "May be we can define a function like vpx_image_chroma_width(const vpx_image_t*) and reuse in everywhere. And the same for width.",
+      "revId": "beae501e96c47e7546919484314b28a0abcf4eb8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
