@@ -811,12 +811,12 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   int mi_row, mi_col;
 
   for (mi_row = pc->cur_tile_mi_row_start;
-       mi_row < pc->cur_tile_mi_row_end; mi_row += 8) {
+       mi_row < pc->cur_tile_mi_row_end; mi_row += 64 / MI_SIZE) {
     // For a SB there are 2 left contexts, each pertaining to a MB row within
     vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
     vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
     for (mi_col = pc->cur_tile_mi_col_start;
-         mi_col < pc->cur_tile_mi_col_end; mi_col += 8)
+         mi_col < pc->cur_tile_mi_col_end; mi_col += 64 / MI_SIZE)
       decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_SIZE_SB64X64);
   }
 }
