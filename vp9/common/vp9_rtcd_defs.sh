@@ -128,30 +128,6 @@ specialize vp9_loop_filter_bh sse2
 prototype void vp9_loop_filter_bh8x8 "uint8_t *y, uint8_t *u, uint8_t *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
 specialize vp9_loop_filter_bh8x8 sse2
 
-prototype void vp9_loop_filter_simple_mbv "uint8_t *y, int ystride, const uint8_t *blimit"
-specialize vp9_loop_filter_simple_mbv mmx sse2
-vp9_loop_filter_simple_mbv_c=vp9_loop_filter_simple_vertical_edge_c
-vp9_loop_filter_simple_mbv_mmx=vp9_loop_filter_simple_vertical_edge_mmx
-vp9_loop_filter_simple_mbv_sse2=vp9_loop_filter_simple_vertical_edge_sse2
-
-prototype void vp9_loop_filter_simple_mbh "uint8_t *y, int ystride, const uint8_t *blimit"
-specialize vp9_loop_filter_simple_mbh mmx sse2
-vp9_loop_filter_simple_mbh_c=vp9_loop_filter_simple_horizontal_edge_c
-vp9_loop_filter_simple_mbh_mmx=vp9_loop_filter_simple_horizontal_edge_mmx
-vp9_loop_filter_simple_mbh_sse2=vp9_loop_filter_simple_horizontal_edge_sse2
-
-prototype void vp9_loop_filter_simple_bv "uint8_t *y, int ystride, const uint8_t *blimit"
-specialize vp9_loop_filter_simple_bv mmx sse2
-vp9_loop_filter_simple_bv_c=vp9_loop_filter_bvs_c
-vp9_loop_filter_simple_bv_mmx=vp9_loop_filter_bvs_mmx
-vp9_loop_filter_simple_bv_sse2=vp9_loop_filter_bvs_sse2
-
-prototype void vp9_loop_filter_simple_bh "uint8_t *y, int ystride, const uint8_t *blimit"
-specialize vp9_loop_filter_simple_bh mmx sse2
-vp9_loop_filter_simple_bh_c=vp9_loop_filter_bhs_c
-vp9_loop_filter_simple_bh_mmx=vp9_loop_filter_bhs_mmx
-vp9_loop_filter_simple_bh_sse2=vp9_loop_filter_bhs_sse2
-
 prototype void vp9_lpf_mbh_w "unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr, int y_stride, int uv_stride, struct loop_filter_info *lfi"
 specialize vp9_lpf_mbh_w sse2
 

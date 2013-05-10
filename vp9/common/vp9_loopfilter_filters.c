@@ -282,29 +282,6 @@ static INLINE void simple_filter(int8_t mask,
   *op0 = signed_char_clamp(p0 + filter2) ^ 0x80;
 }
 
-void vp9_loop_filter_simple_horizontal_edge_c(uint8_t *s, int p,
-                                              const uint8_t *blimit) {
-  int i = 0;
-
-  do {
-    const int8_t mask = simple_filter_mask(blimit[0], s[-2 * p], s[-1 * p],
-                                                      s[0 * p],  s[1 * p]);
-    simple_filter(mask, s - 2 * p, s - 1 * p, s, s + 1 * p);
-    ++s;
-  } while (++i < 16);
-}
-
-void vp9_loop_filter_simple_vertical_edge_c(uint8_t *s, int p,
-                                            const uint8_t *blimit) {
-  int i = 0;
-
-  do {
-    const int8_t mask = simple_filter_mask(blimit[0], s[-2], s[-1], s[0], s[1]);
-    simple_filter(mask, s - 2, s - 1, s, s + 1);
-    s += p;
-  } while (++i < 16);
-}
-
 /* Vertical MB Filtering */
 void vp9_loop_filter_mbv_c(uint8_t *y_ptr, uint8_t *u_ptr,
                            uint8_t *v_ptr, int y_stride, int uv_stride,
@@ -392,11 +369,6 @@ void vp9_loop_filter_bh8x8_c(uint8_t *y, uint8_t *u, uint8_t *v,
                                       lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
-void vp9_loop_filter_bhs_c(uint8_t *y, int y_stride, const uint8_t *blimit) {
-  vp9_loop_filter_simple_horizontal_edge_c(y + 4 * y_stride, y_stride, blimit);
-  vp9_loop_filter_simple_horizontal_edge_c(y + 8 * y_stride, y_stride, blimit);
-  vp9_loop_filter_simple_horizontal_edge_c(y + 12 * y_stride, y_stride, blimit);
-}
 
 void vp9_loop_filter_bv8x8_c(uint8_t *y, uint8_t *u, uint8_t *v,
                              int y_stride, int uv_stride,
@@ -411,12 +383,6 @@ void vp9_loop_filter_bv8x8_c(uint8_t *y, uint8_t *u, uint8_t *v,
   if (v)
     vp9_loop_filter_vertical_edge_c(v + 4, uv_stride,
                                     lfi->blim, lfi->lim, lfi->hev_thr, 1);
-}
-
-void vp9_loop_filter_bvs_c(uint8_t *y, int y_stride, const uint8_t *blimit) {
-  vp9_loop_filter_simple_vertical_edge_c(y + 4, y_stride, blimit);
-  vp9_loop_filter_simple_vertical_edge_c(y + 8, y_stride, blimit);
-  vp9_loop_filter_simple_vertical_edge_c(y + 12, y_stride, blimit);
 }
 
 static INLINE void wide_mbfilter(int8_t mask, uint8_t hev,

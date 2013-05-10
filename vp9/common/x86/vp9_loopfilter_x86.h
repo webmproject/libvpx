@@ -23,10 +23,6 @@ extern prototype_loopfilter_block(vp9_loop_filter_mbv_mmx);
 extern prototype_loopfilter_block(vp9_loop_filter_bv_mmx);
 extern prototype_loopfilter_block(vp9_loop_filter_mbh_mmx);
 extern prototype_loopfilter_block(vp9_loop_filter_bh_mmx);
-extern prototype_simple_loopfilter(vp9_loop_filter_simple_vertical_edge_mmx);
-extern prototype_simple_loopfilter(vp9_loop_filter_bvs_mmx);
-extern prototype_simple_loopfilter(vp9_loop_filter_simple_horizontal_edge_mmx);
-extern prototype_simple_loopfilter(vp9_loop_filter_bhs_mmx);
 #endif
 
 #if HAVE_SSE2
@@ -34,10 +30,6 @@ extern prototype_loopfilter_block(vp9_loop_filter_mbv_sse2);
 extern prototype_loopfilter_block(vp9_loop_filter_bv_sse2);
 extern prototype_loopfilter_block(vp9_loop_filter_mbh_sse2);
 extern prototype_loopfilter_block(vp9_loop_filter_bh_sse2);
-extern prototype_simple_loopfilter(vp9_loop_filter_simple_vertical_edge_sse2);
-extern prototype_simple_loopfilter(vp9_loop_filter_bvs_sse2);
-extern prototype_simple_loopfilter(vp9_loop_filter_simple_horizontal_edge_sse2);
-extern prototype_simple_loopfilter(vp9_loop_filter_bhs_sse2);
 #endif
 
 #endif  // LOOPFILTER_X86_H
