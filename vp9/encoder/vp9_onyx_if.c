@@ -1949,8 +1949,8 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
   pkt.data.psnr.samples[0] = width * height;
   pkt.data.psnr.samples[1] = width * height;
 
-  width = (width + 1) / 2;
-  height = (height + 1) / 2;
+  width = orig->uv_width;
+  height = orig->uv_height;
 
   sse = calc_plane_error(orig->u_buffer, orig->uv_stride,
                          recon->u_buffer, recon->uv_stride,
@@ -2104,7 +2104,7 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
   } while (--h);
 
   src = s->u_buffer;
-  h = (cm->height + 1) / 2;
+  h = s->uv_height;
 
   do {
     fwrite(src, s->uv_width, 1,  yuv_rec_file);
@@ -2112,7 +2112,7 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
   } while (--h);
 
   src = s->v_buffer;
-  h = (cm->height + 1) / 2;
+  h = s->uv_height;
 
   do {
     fwrite(src, s->uv_width, 1, yuv_rec_file);
