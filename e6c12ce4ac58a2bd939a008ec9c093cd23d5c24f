@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAX3//9ws\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-10T15:59:51Z",
+      "side": 1,
+      "message": "why do log at all?",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9wg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-10T15:59:51Z",
+      "side": 1,
+      "message": "sometimes we call it a block_size and other times a level.   To me block size is more descriptive",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9xI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-10T15:59:51Z",
+      "side": 1,
+      "message": "bsl?   block_width?",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9xE\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 876,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-10T15:59:51Z",
+      "side": 1,
+      "message": "do we really need the log of the width and height somewhere?  Does this buy us something?  Why not just block width and block height in this function?",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9w8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 936,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-10T15:59:51Z",
+      "side": 1,
+      "message": "again not sure why we need the log of the block width or log of block height and variable bsl is kind of confusing.   Why not be consistent   block_width_log  and block_width ..",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9wY\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 947,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-10T15:59:51Z",
+      "side": 1,
+      "message": "add comment / save context or maybe move to another function to match restore context you have",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9vc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1025,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-10T15:59:51Z",
+      "side": 1,
+      "message": "Seems to be a lot of duplicate code",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
