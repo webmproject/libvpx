@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAX3//9us\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAX3//+SM\u003d",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAX3//9u8\u003d",
         "filename": "vp9/encoder/vp9_block.h",
         "patchSetId": 3
@@ -54,6 +72,42 @@
     },
     {
       "key": {
+        "uuid": "AAAAX3//9nI\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAX3//9u8\u003d",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9ug\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "Done.\n\nPut a TODO here.",
+      "parentUuid": "AAAAX3//9u8\u003d",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAX3//+RU\u003d",
         "filename": "vp9/encoder/vp9_block.h",
         "patchSetId": 3
@@ -65,6 +119,24 @@
       "writtenOn": "2013-05-10T16:00:03Z",
       "side": 1,
       "message": "this is a little strange that it\u0027s 2d at the 16x16 level, rather than extending this pattern down to 8x8.\n\nFor these new arrays, I wonder if you could make this more generic, like just m{b|i}_partitioning[5][4], where you have the 4 sub-block partitions at each of the 5 levels, 4x4,8x8,16x16,32x32,64x64. Or maybe it\u0027s only 4 levels, I suppose the 4x4 case isn\u0027t needed. Or the 64x case. Depends on how you think about it. Combining them makes it easier to manipulate later, since you don\u0027t need to figure out which array symbol to use. The outer index is probably something like MIN(bwl, bhl) (or MAX, depending)",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9uE\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAX3//+RU\u003d",
       "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -88,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAX3//9so\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "this is just following the \u0027conventional way\u0027 where the block size is first parsed in log, then depending on the use of it, scaled in the units of pixel, 4x4 block, mode_info (8x8).",
+      "parentUuid": "AAAAX3//9ws\u003d",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAX3//+RI\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 3
@@ -99,6 +189,24 @@
       "writtenOn": "2013-05-10T16:00:03Z",
       "side": 1,
       "message": "I can\u0027t figure out this /2. I think you should be doing the width of the block in mi units, but bw is in pixels here. Maybe this only works because it\u0027s only called in the 16x16 case? (haven\u0027t checked).",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9sA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 827,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "Done.\n\nbw is in the units of 4x4 block. yes, using mi units makes it easier to read.",
+      "parentUuid": "AAAAX3//+RI\u003d",
       "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -122,6 +230,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAX3//9rM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAX3//9wg\u003d",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAX3//9xI\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 3
@@ -133,6 +259,24 @@
       "writtenOn": "2013-05-10T15:59:51Z",
       "side": 1,
       "message": "bsl?   block_width?",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9qs\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "the naming conventions we are following here:\n\nbsl: block size in log\n\nbs says the dimension of the current (square) block.\n\nbw and bh indicate the height and width of the partition size inside this square block.",
+      "parentUuid": "AAAAX3//9xI\u003d",
       "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -156,6 +300,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAX3//9q0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 876,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "we probably need these logs, at this point. some other loops need these indexes.",
+      "parentUuid": "AAAAX3//9xE\u003d",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAX3//9w8\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 3
@@ -173,6 +335,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAX3//9qI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 936,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "parsing of the block size starts from log in 4x4(or mi), wil revisit this later.",
+      "parentUuid": "AAAAX3//9w8\u003d",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAX3//9wY\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 3
@@ -184,6 +364,24 @@
       "writtenOn": "2013-05-10T15:59:51Z",
       "side": 1,
       "message": "add comment / save context or maybe move to another function to match restore context you have",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9qA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 947,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "Done.\n\nAdded a comment, since this is only called once, maybe ok to keep it inline?",
+      "parentUuid": "AAAAX3//9wY\u003d",
       "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -218,6 +416,42 @@
       "writtenOn": "2013-05-10T16:00:03Z",
       "side": 1,
       "message": "this is fairly long and practically identical to the PARTITION_HORIZ case. Can they be combined into a common function?",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9po\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1025,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "Tried to combine these two into one function. It seems there are many parameters dependent on the partition type, and switching/specifying them all in the unified function essentially makes the overall code length similar to the current version..\n\nkind of lean towards to keep them separate as for now, which makes the debugging little plain(?)",
+      "parentUuid": "AAAAX3//9xA\u003d",
+      "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAX3//9pk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1025,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-10T17:12:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAX3//9vc\u003d",
       "revId": "e6c12ce4ac58a2bd939a008ec9c093cd23d5c24f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
