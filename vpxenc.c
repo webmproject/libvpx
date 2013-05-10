@@ -1484,7 +1484,10 @@ static void show_rate_histogram(struct rate_hist          *hist,
 static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                           int yloc[4], int uloc[4], int vloc[4]) {
   const unsigned int bsize = 64;
-  const unsigned int bsize2 = bsize >> 1;
+  const unsigned int bsizey = bsize >> img1->y_chroma_shift;
+  const unsigned int bsizex = bsize >> img1->x_chroma_shift;
+  const int c_w = (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
+  const int c_h = (img1->d_h + img1->y_chroma_shift) >> img1->y_chroma_shift;
   unsigned int match = 1;
   unsigned int i, j;
   yloc[0] = yloc[1] = yloc[2] = yloc[3] = -1;
@@ -1513,11 +1516,11 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
   }
 
   uloc[0] = uloc[1] = uloc[2] = uloc[3] = -1;
-  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i += bsize2) {
-    for (j = 0; j < match && (img1->d_w + 1) / 2; j += bsize2) {
+  for (i = 0, match = 1; match && i < c_h; i += bsizey) {
+    for (j = 0; j < match && c_w; j += bsizex) {
       int k, l;
-      int si = mmin(i + bsize2, (img1->d_h + 1) / 2) - i;
-      int sj = mmin(j + bsize2, (img1->d_w + 1) / 2) - j;
+      int si = mmin(i + bsizey, c_h - i);
+      int sj = mmin(j + bsizex, c_w - j);
       for (k = 0; match && k < si; k++)
         for (l = 0; match && l < sj; l++) {
           if (*(img1->planes[VPX_PLANE_U] +
@@ -1537,11 +1540,11 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
     }
   }
   vloc[0] = vloc[1] = vloc[2] = vloc[3] = -1;
-  for (i = 0, match = 1; match && i < (img1->d_h + 1) / 2; i += bsize2) {
-    for (j = 0; j < match && (img1->d_w + 1) / 2; j += bsize2) {
+  for (i = 0, match = 1; match && i < c_h; i += bsizey) {
+    for (j = 0; j < match && c_w; j += bsizex) {
       int k, l;
-      int si = mmin(i + bsize2, (img1->d_h + 1) / 2) - i;
-      int sj = mmin(j + bsize2, (img1->d_w + 1) / 2) - j;
+      int si = mmin(i + bsizey, c_h - i);
+      int sj = mmin(j + bsizex, c_w - j);
       for (k = 0; match && k < si; k++)
         for (l = 0; match && l < sj; l++) {
           if (*(img1->planes[VPX_PLANE_V] +
@@ -1564,6 +1567,8 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
 
 static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
 {
+  const int c_w = (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
+  const int c_h = (img1->d_h + img1->y_chroma_shift) >> img1->y_chroma_shift;
   int match = 1;
   unsigned int i;
 
@@ -1576,15 +1581,15 @@ static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
                      img2->planes[VPX_PLANE_Y]+i*img2->stride[VPX_PLANE_Y],
                      img1->d_w) == 0);
 
-  for (i = 0; i < img1->d_h/2; i++)
+  for (i = 0; i < c_h; i++)
     match &= (memcmp(img1->planes[VPX_PLANE_U]+i*img1->stride[VPX_PLANE_U],
                      img2->planes[VPX_PLANE_U]+i*img2->stride[VPX_PLANE_U],
-                     (img1->d_w + 1) / 2) == 0);
+                     c_w) == 0);
 
-  for (i = 0; i < img1->d_h/2; i++)
+  for (i = 0; i < c_h; i++)
     match &= (memcmp(img1->planes[VPX_PLANE_V]+i*img1->stride[VPX_PLANE_U],
                      img2->planes[VPX_PLANE_V]+i*img2->stride[VPX_PLANE_U],
-                     (img1->d_w + 1) / 2) == 0);
+                     c_w) == 0);
 
   return match;
 }
