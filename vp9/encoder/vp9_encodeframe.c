@@ -539,15 +539,6 @@ void vp9_setup_src_planes(MACROBLOCK *x,
                    x->e_mbd.plane[2].subsampling_y);
 }
 
-static INLINE void set_partition_seg_context(VP9_COMP *cpi,
-                                             int mi_row, int mi_col) {
-  VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-
-  xd->above_seg_context = cm->above_seg_context + mi_col;
-  xd->left_seg_context  = cm->left_seg_context + (mi_row & MI_MASK);
-}
-
 static void set_offsets(VP9_COMP *cpi,
                         int mi_row, int mi_col, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCK *const x = &cpi->mb;
@@ -571,7 +562,7 @@ static void set_offsets(VP9_COMP *cpi,
   }
 
   // partition contexts
-  set_partition_seg_context(cpi, mi_row, mi_col);
+  set_partition_seg_context(cm, xd, mi_row, mi_col);
 
   // Activity map pointer
   x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
@@ -850,7 +841,7 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp,
     return;
 
   if (bsize > BLOCK_SIZE_SB8X8) {
-    set_partition_seg_context(cpi, mi_row, mi_col);
+    set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
     c1 = *(get_sb_partitioning(x, bsize));
   }
@@ -899,7 +890,7 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp,
 
   if (bsize > BLOCK_SIZE_SB8X8 &&
       (bsize == BLOCK_SIZE_MB16X16 || bsl == bwl || bsl == bhl)) {
-    set_partition_seg_context(cpi, mi_row, mi_col);
+    set_partition_seg_context(cm, xd, mi_row, mi_col);
     update_partition_context(xd, c1, bsize);
   }
 }
@@ -960,7 +951,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
       r4 += r;
       d4 += d;
     }
-    set_partition_seg_context(cpi, mi_row, mi_col);
+    set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
     r4 += x->partition_cost[pl][PARTITION_SPLIT];
 
@@ -992,7 +983,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
       if (mi_row + (ms >> 1) != cm->mi_rows)
         mb_skip = 1;
     }
-    set_partition_seg_context(cpi, mi_row, mi_col);
+    set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
     r2 += x->partition_cost[pl][PARTITION_HORZ];
 
@@ -1027,7 +1018,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
       if (mi_col + (ms >> 1) != cm->mi_cols)
         mb_skip = 1;
     }
-    set_partition_seg_context(cpi, mi_row, mi_col);
+    set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
     r2 += x->partition_cost[pl][PARTITION_VERT];
 
@@ -1046,7 +1037,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     pick_sb_modes(cpi, mi_row, mi_col, tp, &r, &d, bsize,
                   get_block_context(x, bsize));
     if (bsize >= BLOCK_SIZE_MB16X16) {
-      set_partition_seg_context(cpi, mi_row, mi_col);
+      set_partition_seg_context(cm, xd, mi_row, mi_col);
       pl = partition_plane_context(xd, bsize);
       r += x->partition_cost[pl][PARTITION_NONE];
     }

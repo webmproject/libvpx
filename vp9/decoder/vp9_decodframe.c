@@ -476,12 +476,11 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       assert(0);
   }
   // update partition context
-  if ((partition == PARTITION_SPLIT) && (bsize > BLOCK_SIZE_MB16X16))
-    return;
-
-  xd->left_seg_context = pc->left_seg_context + (mi_row & MI_MASK);
-  xd->above_seg_context = pc->above_seg_context + mi_col;
-  update_partition_context(xd, subsize, bsize);
+  if (bsize > BLOCK_SIZE_SB8X8 &&
+      (bsize == BLOCK_SIZE_MB16X16 || partition != PARTITION_SPLIT)) {
+    set_partition_seg_context(pc, xd, mi_row, mi_col);
+    update_partition_context(xd, subsize, bsize);
+  }
 }
 
 static void setup_token_decoder(VP9D_COMP *pbi,
