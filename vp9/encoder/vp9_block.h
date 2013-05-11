@@ -140,7 +140,12 @@ struct macroblock {
 
   // TODO(jingning): Need to refactor the structure arrays that buffers the
   // coding mode decisions of each partition type.
-  PICK_MODE_CONTEXT sb8_context[4][4][4];
+#if CONFIG_AB4X4
+  PICK_MODE_CONTEXT ab4x4_context[4][4][4];
+  PICK_MODE_CONTEXT sb8x4_context[4][4][4];
+  PICK_MODE_CONTEXT sb4x8_context[4][4][4];
+#endif
+  PICK_MODE_CONTEXT sb8x8_context[4][4][4];
   PICK_MODE_CONTEXT sb8x16_context[4][4][2];
   PICK_MODE_CONTEXT sb16x8_context[4][4][2];
   PICK_MODE_CONTEXT mb_context[4][4];
@@ -153,6 +158,9 @@ struct macroblock {
   PICK_MODE_CONTEXT sb64_context;
   int partition_cost[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
+#if CONFIG_AB4X4
+  BLOCK_SIZE_TYPE b_partitioning[4][4][4];
+#endif
   BLOCK_SIZE_TYPE mb_partitioning[4][4];
   BLOCK_SIZE_TYPE sb_partitioning[4];
   BLOCK_SIZE_TYPE sb64_partitioning;

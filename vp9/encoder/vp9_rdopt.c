@@ -689,7 +689,11 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
                                          int *Distortion, int64_t best_rd) {
   int i;
   MACROBLOCKD *const xd = &mb->e_mbd;
+#if CONFIG_AB4X4
+  int cost = 0;
+#else
   int cost = mb->mbmode_cost[xd->frame_type][I4X4_PRED];
+#endif
   int distortion = 0;
   int tot_rate_y = 0;
   int64_t total_rd = 0;
@@ -719,7 +723,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
     total_rd += rd_pick_intra4x4block(cpi, mb, i, &best_mode, bmode_costs,
                                       t_above + x_idx, t_left + y_idx,
                                       &r, &ry, &d);
-
     cost += r;
     distortion += d;
     tot_rate_y += ry;
@@ -752,6 +755,13 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_rd = INT64_MAX, this_rd;
   TX_SIZE UNINITIALIZED_IS_SAFE(best_tx);
   int i;
+
+#if CONFIG_AB4X4
+  if (bsize < BLOCK_SIZE_SB8X8) {
+    x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
+    return best_rd;
+  }
+#endif
 
   for (i = 0; i < NB_TXFM_MODES; i++)
     txfm_cache[i] = INT64_MAX;
@@ -2308,7 +2318,11 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                           &dist_uv, &uv_skip,
                           (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
                                                        bsize);
+#if CONFIG_AB4X4
+  if (bsize < BLOCK_SIZE_SB8X8)
+#else
   if (bsize == BLOCK_SIZE_SB8X8)
+#endif
     err4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4_y,
                                        &rate4x4_y_tokenonly,
                                        &dist4x4_y, err);
@@ -2321,7 +2335,11 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
            sizeof(x->sb32_context[xd->sb_index].txfm_rd_diff));
     xd->mode_info_context->mbmi.mode = mode;
     xd->mode_info_context->mbmi.txfm_size = txfm_size;
+#if CONFIG_AB4X4
+  } else if (bsize < BLOCK_SIZE_SB8X8 && err4x4 < err) {
+#else
   } else if (bsize == BLOCK_SIZE_SB8X8 && err4x4 < err) {
+#endif
     *returnrate = rate4x4_y + rate_uv +
         vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
     *returndist = dist4x4_y + (dist_uv >> 2);
@@ -2463,7 +2481,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
          i++) {
       mbmi->txfm_size = i;
       rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[i], &rate_uv_tokenonly[i],
-                              &dist_uv[i], &skip_uv[i], bsize);
+                              &dist_uv[i], &skip_uv[i],
+                              (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
+                                                           bsize);
       mode_uv[i] = mbmi->uv_mode;
     }
   }
@@ -2493,6 +2513,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         || (cpi->ref_frame_flags & flag_list[ref_frame]))) {
       continue;
     }
+
     if (cpi->speed > 0) {
       if (!(ref_frame_mask & (1 << ref_frame))) {
         continue;
@@ -2539,10 +2560,18 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->interp_filter = cm->mcomp_filter_type;
     vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
+#if CONFIG_AB4X4
+    if (bsize >= BLOCK_SIZE_SB8X8 &&
+        (this_mode == I4X4_PRED || this_mode == SPLITMV))
+      continue;
+    if (bsize < BLOCK_SIZE_SB8X8 &&
+        !(this_mode == I4X4_PRED || this_mode == SPLITMV))
+      continue;
+#else
     if (bsize != BLOCK_SIZE_SB8X8 &&
         (this_mode == I4X4_PRED || this_mode == SPLITMV))
       continue;
-
+#endif
 
     if (comp_pred) {
       if (ref_frame == ALTREF_FRAME) {
@@ -2605,7 +2634,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
       // Note the rate value returned here includes the cost of coding
       // the I4X4_PRED mode : x->mbmode_cost[xd->frame_type][I4X4_PRED];
-      assert(bsize == BLOCK_SIZE_SB8X8);
       mbmi->txfm_size = TX_4X4;
       rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y,
                                 &distortion_y, INT64_MAX);
@@ -3001,7 +3029,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-
+#if CONFIG_AB4X4
+  if (best_rd == INT64_MAX && bsize < BLOCK_SIZE_SB8X8) {
+    *returnrate = INT_MAX;
+    *returndistortion = INT_MAX;
+    return best_rd;
+  }
+#endif
 
   assert((cm->mcomp_filter_type == SWITCHABLE) ||
          (cm->mcomp_filter_type == best_mbmode.interp_filter) ||

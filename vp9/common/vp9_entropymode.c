@@ -106,6 +106,12 @@ const vp9_prob vp9_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP9_SUBMVREFS - 1] = {
 const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
                                   [PARTITION_TYPES - 1] = {
   // FIXME(jingning,rbultje) put real probabilities here
+#if CONFIG_AB4X4
+  {202, 162, 107},
+  {16,  2,   169},
+  {3,   246,  19},
+  {104, 90,  134},
+#endif
   {202, 162, 107},
   {16,  2,   169},
   {3,   246,  19},
@@ -513,6 +519,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                       vp9_sub_mv_ref_tree, fc->sub_mv_ref_counts[i],
                       fc->pre_sub_mv_ref_prob[i], fc->sub_mv_ref_prob[i],
                       LEFT4X4);
+
   for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
     update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
                       fc->partition_counts[i], fc->pre_partition_prob[i],

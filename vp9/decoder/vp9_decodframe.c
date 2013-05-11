@@ -417,10 +417,14 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   vp9_decode_mb_mode_mv(pbi, xd, mi_row, mi_col, r);
   set_refs(pbi, mi_row, mi_col);
 
+#if CONFIG_AB4X4
+  if (bsize < BLOCK_SIZE_SB8X8)
+#else
   if (bsize == BLOCK_SIZE_SB8X8 &&
       (xd->mode_info_context->mbmi.mode == SPLITMV ||
        xd->mode_info_context->mbmi.mode == I4X4_PRED))
-    decode_atom(pbi, xd, mi_row, mi_col, r, bsize);
+#endif
+    decode_atom(pbi, xd, mi_row, mi_col, r, BLOCK_SIZE_SB8X8);
   else
     decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
 
@@ -439,7 +443,17 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (mi_row >= pc->mi_rows || mi_col >= pc->mi_cols)
     return;
 
+#if CONFIG_AB4X4
+  if (bsize < BLOCK_SIZE_SB8X8)
+    if (xd->ab_index != 0)
+      return;
+#endif
+
+#if CONFIG_AB4X4
+  if (bsize >= BLOCK_SIZE_SB8X8) {
+#else
   if (bsize > BLOCK_SIZE_SB8X8) {
+#endif
     int pl;
     // read the partition information
     xd->left_seg_context = pc->left_seg_context + (mi_row & MI_MASK);
@@ -451,6 +465,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   }
 
   subsize = get_subsize(bsize, partition);
+
   switch (partition) {
     case PARTITION_NONE:
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
@@ -476,8 +491,13 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       assert(0);
   }
   // update partition context
+#if CONFIG_AB4X4
+  if (bsize >= BLOCK_SIZE_SB8X8 &&
+      (bsize == BLOCK_SIZE_SB8X8 || partition != PARTITION_SPLIT)) {
+#else
   if (bsize > BLOCK_SIZE_SB8X8 &&
       (bsize == BLOCK_SIZE_MB16X16 || partition != PARTITION_SPLIT)) {
+#endif
     set_partition_seg_context(pc, xd, mi_row, mi_col);
     update_partition_context(xd, subsize, bsize);
   }
