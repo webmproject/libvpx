@@ -905,6 +905,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
     case PARTITION_SPLIT:
       for (n = 0; n < 4; n++) {
         int j = n >> 1, i = n & 0x01;
+        *(get_sb_index(xd, subsize)) = n;
         write_modes_sb(cpi, m + j * bs * mis + i * bs, bc, tok, tok_end,
                        mi_row + j * bs, mi_col + i * bs, subsize);
       }

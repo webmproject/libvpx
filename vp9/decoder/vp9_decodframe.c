@@ -468,12 +468,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
     case PARTITION_SPLIT:
       for (n = 0; n < 4; n++) {
         int j = n >> 1, i = n & 0x01;
-        if (subsize == BLOCK_SIZE_SB32X32)
-          xd->sb_index = n;
-        else if (subsize == BLOCK_SIZE_MB16X16)
-          xd->mb_index = n;
-        else
-          xd->b_index = n;
+        *(get_sb_index(xd, subsize)) = n;
         decode_modes_sb(pbi, mi_row + j * bs, mi_col + i * bs, r, subsize);
       }
       break;
