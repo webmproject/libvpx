@@ -17,9 +17,20 @@
 #
 # Usage: cat inputfile | perl ads2gas.pl > outputfile
 #
+
+my $thumb = 0;
+
+foreach my $arg (@ARGV) {
+    $thumb = 1 if ($arg == "-thumb");
+}
+
 print "@ This file was created from a .asm file\n";
 print "@  using the ads2gas.pl script.\n";
 print "\t.equ DO1STROUNDING, 0\n";
+if ($thumb) {
+    print "\t.syntax unified\n";
+    print "\t.thumb\n";
+}
 
 # Stack of procedure names.
 @proc_stack = ();
@@ -151,8 +162,13 @@ while (<STDIN>)
     # ALIGN directive
     s/\bALIGN\b/.balign/g;
 
-    # ARM code
-    s/\sARM/.arm/g;
+    if ($thumb) {
+        # ARM code - we force everything to thumb with the declaration in the header
+        s/\sARM//g;
+    } else {
+        # ARM code
+        s/\sARM/.arm/g;
+    }
 
     # push/pop
     s/(push\s+)(r\d+)/stmdb sp\!, \{$2\}/g;
@@ -161,6 +177,57 @@ while (<STDIN>)
     # NEON code
     s/(vld1.\d+\s+)(q\d+)/$1\{$2\}/g;
     s/(vtbl.\d+\s+[^,]+),([^,]+)/$1,\{$2\}/g;
+
+    if ($thumb) {
+        # Write additions with shifts, such as "add r10, r11, lsl #8",
+        # in three operand form, "add r10, r10, r11, lsl #8".
+        s/(add\s+)(r\d+),\s*(r\d+),\s*(lsl #\d+)/$1$2, $2, $3, $4/g;
+
+        # Convert additions with a non-constant shift into a sequence
+        # with left shift, addition and a right shift (to restore the
+        # register to the original value). Currently the right shift
+        # isn't necessary in the code base since the values in these
+        # registers aren't used, but doing the shift for consitency.
+        # This converts instructions such as "add r12, r12, r5, lsl r4"
+        # into the sequence "lsl r5, r4", "add r12, r12, r5", "lsr r5, r4".
+        s/^(\s*)(add)(\s+)(r\d+),\s*(r\d+),\s*(r\d+),\s*lsl (r\d+)/$1lsl$3$6, $7\n$1$2$3$4, $5, $6\n$1lsr$3$6, $7/g;
+
+        # Convert loads with right shifts in the indexing into a
+        # sequence of an add, load and sub. This converts
+        # "ldrb r4, [r9, lr, asr #1]" into "add r9, r9, lr, asr #1",
+        # "ldrb r9, [r9]", "sub r9, r9, lr, asr #1".
+        s/^(\s*)(ldrb)(\s+)(r\d+),\s*\[(\w+),\s*(\w+),\s*(asr #\d+)\]/$1add $3$5, $5, $6, $7\n$1$2$3$4, [$5]\n$1sub $3$5, $5, $6, $7/g;
+
+        # Convert register indexing with writeback into a separate add
+        # instruction. This converts "ldrb r12, [r1, r2]!" into
+        # "ldrb r12, [r1, r2]", "add r1, r1, r2".
+        s/^(\s*)(ldrb)(\s+)(r\d+),\s*\[(\w+),\s*(\w+)\]!/$1$2$3$4, [$5, $6]\n$1add $3$5, $6/g;
+
+        # Convert negative register indexing into separate sub/add instructions.
+        # This converts "ldrne r4, [src, -pstep, lsl #1]" into
+        # "subne src, src, pstep, lsl #1", "ldrne r4, [src]",
+        # "addne src, src, pstep, lsl #1". In a couple of cases where
+        # this is used, it's used for two subsequent load instructions,
+        # where a hand-written version of it could merge two subsequent
+        # add and sub instructions.
+        s/^(\s*)((ldr|str)(ne)?)(\s+)(r\d+),\s*\[(\w+), -([^\]]+)\]/$1sub$4$5$7, $7, $8\n$1$2$5$6, [$7]\n$1add$4$5$7, $7, $8/g;
+
+        # Convert register post indexing to a separate add instruction.
+        # This converts "ldrneb r9, [r0], r2" into "ldrneb r9, [r0]",
+        # "add r0, r2".
+        s/^(\s*)((ldr|str)(ne)?[bhd]?)(\s+)(\w+),(\s*\w+,)?\s*\[(\w+)\],\s*(\w+)/$1$2$5$6,$7 [$8]\n$1add$4$5$8, $8, $9/g;
+
+        # Convert a conditional addition to the pc register into a series of
+        # instructions. This converts "addlt pc, pc, r3, lsl #2" into
+        # "ittt lt", "addlt.w r12, pc, #10", "addlt.w r12, r12, r3, lsl #2",
+        # "movlt.n pc, r12". This assumes that r12 is free at this point.
+        s/^(\s*)addlt(\s+)pc,\s*pc,\s*(\w+),\s*lsl\s*#(\d+)/$1ittt$2lt\n$1addlt.w$2r12, pc, #10\n$1addlt.w$2r12, r12, $3, lsl #$4\n$1movlt.n$2pc, r12/g;
+
+        # Convert "mov pc, lr" into "bx lr", since the former only works
+        # for switching from arm to thumb (and only in armv7), but not
+        # from thumb to arm.
+        s/mov(\s*)pc\s*,\s*lr/bx$1lr/g;
+    }
 
     # eabi_attributes numerical equivalents can be found in the
     # "ARM IHI 0045C" document.
