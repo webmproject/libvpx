@@ -2294,7 +2294,9 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   mode = xd->mode_info_context->mbmi.mode;
   txfm_size = xd->mode_info_context->mbmi.txfm_size;
   rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
-                          &dist_uv, &uv_skip, bsize);
+                          &dist_uv, &uv_skip,
+                          (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
+                                                       bsize);
   if (bsize == BLOCK_SIZE_SB8X8)
     err4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4_y,
                                        &rate4x4_y_tokenonly,
@@ -2730,10 +2732,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // If even the 'Y' rd value of split is higher than best so far
       // then dont bother looking at UV
       vp9_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
-                                      bsize);
-      vp9_subtract_sbuv(x, bsize);
+                                      BLOCK_SIZE_SB8X8);
+      vp9_subtract_sbuv(x, BLOCK_SIZE_SB8X8);
       super_block_uvrd_for_txfm(cm, x, &rate_uv, &distortion_uv,
-                                &uv_skippable, bsize, TX_4X4);
+                                &uv_skippable, BLOCK_SIZE_SB8X8, TX_4X4);
       rate2 += rate_uv;
       distortion2 += distortion_uv;
       skippable = skippable && uv_skippable;
