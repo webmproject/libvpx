@@ -88,6 +88,7 @@ Build options:
   ${toggle_debug}             enable/disable debug mode
   ${toggle_gprof}             enable/disable gprof profiling instrumentation
   ${toggle_gcov}              enable/disable gcov coverage instrumentation
+  ${toggle_thumb}             enable/disable building arm assembly in thumb mode
 
 Install options:
   ${toggle_install_docs}      control whether docs are installed
@@ -819,6 +820,11 @@ EOF
 
             enabled debug && add_asflags -g
             asm_conversion_cmd="${source_path}/build/make/ads2gas.pl"
+            if enabled thumb; then
+                asm_conversion_cmd="$asm_conversion_cmd -thumb"
+                check_add_cflags -mthumb
+                check_add_asflags -mthumb -mimplicit-it=always
+            fi
             ;;
         rvct)
             CC=armcc

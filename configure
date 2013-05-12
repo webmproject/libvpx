@@ -317,6 +317,7 @@ CMDLINE_SELECT="
     optimizations
     ccache
     runtime_cpu_detect
+    thumb
 
     libs
     examples
