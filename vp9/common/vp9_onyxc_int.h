@@ -306,6 +306,13 @@ static int mi_cols_aligned_to_sb(VP9_COMMON *cm) {
   return 2 * ((cm->mb_cols + 3) & ~3);
 }
 
+static INLINE void set_partition_seg_context(VP9_COMMON *cm,
+                                             MACROBLOCKD *xd,
+                                             int mi_row, int mi_col) {
+  xd->above_seg_context = cm->above_seg_context + mi_col;
+  xd->left_seg_context  = cm->left_seg_context + (mi_row & MI_MASK);
+}
+
 static void set_mi_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
                        int mi_row, int bh,
                        int mi_col, int bw) {
