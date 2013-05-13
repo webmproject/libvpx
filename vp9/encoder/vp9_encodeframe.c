@@ -765,26 +765,6 @@ static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x,
   }
 }
 
-static int *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
-  switch (subsize) {
-    case BLOCK_SIZE_SB64X32:
-    case BLOCK_SIZE_SB32X64:
-    case BLOCK_SIZE_SB32X32:
-      return &xd->sb_index;
-    case BLOCK_SIZE_SB32X16:
-    case BLOCK_SIZE_SB16X32:
-    case BLOCK_SIZE_MB16X16:
-      return &xd->mb_index;
-    case BLOCK_SIZE_SB16X8:
-    case BLOCK_SIZE_SB8X16:
-    case BLOCK_SIZE_SB8X8:
-      return &xd->b_index;
-    default:
-      assert(0);
-      return NULL;
-  }
-}
-
 static BLOCK_SIZE_TYPE *get_sb_partitioning(MACROBLOCK *x,
                                             BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *xd = &x->e_mbd;
