@@ -41,8 +41,6 @@ typedef struct VP9Decompressor {
   int initial_height;
 } VP9D_COMP;
 
-int vp9_decode_frame(VP9D_COMP *cpi, const uint8_t **p_data_end);
-
 
 #if CONFIG_DEBUG
 #define CHECK_MEM_ERROR(lval,expr) do {\
