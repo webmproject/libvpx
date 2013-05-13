@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAX3//7cw\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-13T22:28:47Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "revId": "dfee8763c8b0257ceaa4c8b9cf389137f869ade3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
