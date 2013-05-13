@@ -2128,49 +2128,31 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
   const int in_h = src_fb->y_crop_height;
   const int out_w = dst_fb->y_crop_width;
   const int out_h = dst_fb->y_crop_height;
-  int x, y;
+  int x, y, i;
+
+  uint8_t *srcs[3] = {src_fb->y_buffer, src_fb->u_buffer, src_fb->v_buffer};
+  int src_strides[3] = {src_fb->y_stride, src_fb->uv_stride, src_fb->uv_stride};
+
+  uint8_t *dsts[3] = {dst_fb->y_buffer, dst_fb->u_buffer, dst_fb->v_buffer};
+  int dst_strides[3] = {dst_fb->y_stride, dst_fb->uv_stride, dst_fb->uv_stride};
 
   for (y = 0; y < out_h; y += 16) {
     for (x = 0; x < out_w; x += 16) {
-      int x_q4 = x * 16 * in_w / out_w;
-      int y_q4 = y * 16 * in_h / out_h;
-      uint8_t *src = src_fb->y_buffer + y * in_h / out_h * src_fb->y_stride +
-                     x * in_w / out_w;
-      uint8_t *dst = dst_fb->y_buffer + y * dst_fb->y_stride + x;
-      int src_stride = src_fb->y_stride;
-      int dst_stride = dst_fb->y_stride;
+      for (i = 0; i < MAX_MB_PLANE; ++i) {
+        const int factor = i == 0 ? 1 : 2;
+        const int x_q4 = x * (16 / factor) * in_w / out_w;
+        const int y_q4 = y * (16 / factor) * in_h / out_h;
+        const int src_stride = src_strides[i];
+        const int dst_stride = dst_strides[i];
+        uint8_t *src = srcs[i] + y / factor * in_h / out_h * src_stride +
+                                 x / factor * in_w / out_w;
+        uint8_t *dst = dsts[i] + y * dst_stride + x;
 
-      vp9_convolve8(src, src_stride, dst, dst_stride,
-                    vp9_sub_pel_filters_8[x_q4 & 0xf], 16 * in_w / out_w,
-                    vp9_sub_pel_filters_8[y_q4 & 0xf], 16 * in_h / out_h,
-                    16, 16);
-
-      x_q4 >>= 1;
-      y_q4 >>= 1;
-      src_stride = src_fb->uv_stride;
-      dst_stride = dst_fb->uv_stride;
-
-      src = src_fb->u_buffer +
-          y / 2 * in_h / out_h * src_fb->uv_stride +
-          x / 2 * in_w / out_w;
-      dst = dst_fb->u_buffer +
-          y / 2 * dst_fb->uv_stride +
-          x / 2;
-      vp9_convolve8(src, src_stride, dst, dst_stride,
-                    vp9_sub_pel_filters_8[x_q4 & 0xf], 16 * in_w / out_w,
-                    vp9_sub_pel_filters_8[y_q4 & 0xf], 16 * in_h / out_h,
-                    8, 8);
-
-      src = src_fb->v_buffer +
-          y / 2 * in_h / out_h * src_fb->uv_stride +
-          x / 2 * in_w / out_w;
-      dst = dst_fb->v_buffer +
-          y / 2 * dst_fb->uv_stride +
-          x / 2;
-      vp9_convolve8(src, src_stride, dst, dst_stride,
-                    vp9_sub_pel_filters_8[x_q4 & 0xf], 16 * in_w / out_w,
-                    vp9_sub_pel_filters_8[y_q4 & 0xf], 16 * in_h / out_h,
-                    8, 8);
+        vp9_convolve8(src, src_stride, dst, dst_stride,
+                      vp9_sub_pel_filters_8[x_q4 & 0xf], 16 * in_w / out_w,
+                      vp9_sub_pel_filters_8[y_q4 & 0xf], 16 * in_h / out_h,
+                      16 / factor, 16 / factor);
+      }
     }
   }
 
