@@ -2881,7 +2881,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         break;
     }
 
-    vp9_denoise(cpi->Source, cpi->Source, l);
+    vp9_denoise(cpi->Source, cpi->Source, l, 1, 0);
   }
 
 #endif
@@ -3966,7 +3966,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
           double weight = 0;
 #if CONFIG_POSTPROC
           vp9_deblock(cm->frame_to_show, &cm->post_proc_buffer,
-                      cm->filter_level * 10 / 6);
+                      cm->filter_level * 10 / 6, 1, 0);
 #endif
           vp9_clear_system_state();
 
