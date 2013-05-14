@@ -146,7 +146,7 @@ prototype void vp9_mbpost_proc_across_ip "uint8_t *src, int pitch, int rows, int
 specialize vp9_mbpost_proc_across_ip sse2
 vp9_mbpost_proc_across_ip_sse2=vp9_mbpost_proc_across_ip_xmm
 
-prototype void vp9_post_proc_down_and_across "const uint8_t *src_ptr, uint8_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit"
+prototype void vp9_post_proc_down_and_across "uint8_t *src_ptr, uint8_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit"
 specialize vp9_post_proc_down_and_across mmx sse2
 vp9_post_proc_down_and_across_sse2=vp9_post_proc_down_and_across_xmm
 
