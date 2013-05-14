@@ -1863,6 +1863,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
         struct buf_2d backup_second_yv12[MAX_MB_PLANE] = {{0}};
         struct buf_2d scaled_first_yv12;
+        int last_besterr[2] = {INT_MAX, INT_MAX};
 
         if (scaled_ref_frame[0]) {
           int i;
@@ -1897,11 +1898,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         frame_mv[NEWMV][refs[0]].as_int = single_newmv[refs[0]].as_int;
         frame_mv[NEWMV][refs[1]].as_int = single_newmv[refs[1]].as_int;
 
-        // Iteration: joint search is done once for each ref frame.
-        // Tried allowing search multiple times iteratively, and break out if
-        // it couldn't find better mv. But tests didn't show noticeable
-        // improvement.
-        for (ite = 0; ite < 2; ite++) {
+        // Allow joint search multiple times iteratively for each ref frame, and
+        // break out the search loop if it couldn't find better mv.
+        for (ite = 0; ite < 4; ite++) {
           struct buf_2d ref_yv12[2] = {xd->plane[0].pre[0],
                                        xd->plane[0].pre[1]};
           int bestsme = INT_MAX;
@@ -1952,19 +1951,26 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             int dis; /* TODO: use dis in distortion calculation later. */
             unsigned int sse;
 
-            vp9_find_best_sub_pixel_comp(x, &tmp_mv,
-                                         &ref_mv[id],
-                                         x->errorperbit,
-                                         &cpi->fn_ptr[block_size],
-                                         x->nmvjointcost, x->mvcost,
-                                         &dis, &sse, second_pred,
-                                         b_sz[bsize][0], b_sz[bsize][1]);
+            bestsme = vp9_find_best_sub_pixel_comp(x, &tmp_mv,
+                                                   &ref_mv[id],
+                                                   x->errorperbit,
+                                                   &cpi->fn_ptr[block_size],
+                                                   x->nmvjointcost, x->mvcost,
+                                                   &dis, &sse, second_pred,
+                                                   b_sz[bsize][0],
+                                                   b_sz[bsize][1]);
           }
 
-          frame_mv[NEWMV][refs[id]].as_int =
-              xd->mode_info_context->bmi[0].as_mv[1].as_int = tmp_mv.as_int;
           if (id)
             xd->plane[0].pre[0] = scaled_first_yv12;
+
+          if (bestsme < last_besterr[id]) {
+            frame_mv[NEWMV][refs[id]].as_int =
+                xd->mode_info_context->bmi[0].as_mv[1].as_int = tmp_mv.as_int;
+            last_besterr[id] = bestsme;
+          } else {
+            break;
+          }
         }
 
         // restore the predictor
