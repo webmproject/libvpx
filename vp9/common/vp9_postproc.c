@@ -132,14 +132,15 @@ const short vp9_rv[] = {
 
 /****************************************************************************
  */
-void vp9_post_proc_down_and_across_c(uint8_t *src_ptr,
+void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
                                      uint8_t *dst_ptr,
                                      int src_pixels_per_line,
                                      int dst_pixels_per_line,
                                      int rows,
                                      int cols,
                                      int flimit) {
-  uint8_t *p_src, *p_dst;
+  uint8_t const *p_src;
+  uint8_t *p_dst;
   int row;
   int col;
   int i;
@@ -313,51 +314,44 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
                                 source->uv_height, source->uv_width, ppl);
 }
 
-void vp9_deblock(YV12_BUFFER_CONFIG         *source,
-                 YV12_BUFFER_CONFIG         *post,
-                 int                         q,
-                 int                         low_var_thresh,
-                 int                         flag) {
-  double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
-  int ppl = (int)(level + .5);
-  (void) low_var_thresh;
-  (void) flag;
+void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
+                 int q) {
+  const int ppl = (int)(6.0e-05 * q * q * q - 0.0067 * q * q + 0.306 * q
+                        + 0.0065 + 0.5);
+  int i;
 
-  vp9_post_proc_down_and_across(source->y_buffer, post->y_buffer,
-                                source->y_stride, post->y_stride,
-                                source->y_height, source->y_width, ppl);
+  const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
+  uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
+  const int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
+  const int widths[3] = {src->y_width, src->uv_width, src->uv_width};
+  const int heights[3] = {src->y_height, src->uv_height, src->uv_height};
 
-  vp9_post_proc_down_and_across(source->u_buffer, post->u_buffer,
-                                source->uv_stride, post->uv_stride,
-                                source->uv_height, source->uv_width, ppl);
-
-  vp9_post_proc_down_and_across(source->v_buffer, post->v_buffer,
-                                source->uv_stride, post->uv_stride,
-                                source->uv_height, source->uv_width, ppl);
+  for (i = 0; i < MAX_MB_PLANE; ++i)
+    vp9_post_proc_down_and_across(srcs[i], dsts[i], strides[i], strides[i],
+                                  heights[i], widths[i], ppl);
 }
 
-void vp9_denoise(YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *post,
-                 int q, int low_var_thresh, int flag) {
-  double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
-  int ppl = (int)(level + .5);
-  (void) post;
-  (void) low_var_thresh;
-  (void) flag;
+void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
+                 int q) {
+  const int ppl = (int)(6.0e-05 * q * q * q - 0.0067 * q * q + 0.306 * q
+                        + 0.0065 + 0.5);
+  int i;
 
-  vp9_post_proc_down_and_across(src->y_buffer + 2 * src->y_stride + 2,
-                                src->y_buffer + 2 * src->y_stride + 2,
-                                src->y_stride, src->y_stride, src->y_height - 4,
-                                src->y_width - 4, ppl);
+  const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
+  uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
+  const int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
+  const int widths[3] = {src->y_width, src->uv_width, src->uv_width};
+  const int heights[3] = {src->y_height, src->uv_height, src->uv_height};
 
-  vp9_post_proc_down_and_across(src->u_buffer + 2 * src->uv_stride + 2,
-                                src->u_buffer + 2 * src->uv_stride + 2,
-                                src->uv_stride, src->uv_stride,
-                                src->uv_height - 4, src->uv_width - 4, ppl);
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    const int stride = strides[i];
+    const int width = widths[i] - 4;
+    const int height = heights[i] - 4;
+    const uint8_t *const src = srcs[i] + 2 * stride + 2;
+    uint8_t *const dst = dsts[i] + 2 * stride + 2;
 
-  vp9_post_proc_down_and_across(src->v_buffer + 2 * src->uv_stride + 2,
-                                src->v_buffer + 2 * src->uv_stride + 2,
-                                src->uv_stride, src->uv_stride,
-                                src->uv_height - 4, src->uv_width - 4, ppl);
+    vp9_post_proc_down_and_across(src, dst, stride, stride, height, width, ppl);
+  }
 }
 
 double vp9_gaussian(double sigma, double mu, double x) {
@@ -642,7 +636,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
     deblock_and_de_macro_block(oci->frame_to_show, &oci->post_proc_buffer,
                                q + (deblock_level - 5) * 10, 1, 0);
   } else if (flags & VP9D_DEBLOCK) {
-    vp9_deblock(oci->frame_to_show, &oci->post_proc_buffer, q, 1, 0);
+    vp9_deblock(oci->frame_to_show, &oci->post_proc_buffer, q);
   } else {
     vp8_yv12_copy_frame(oci->frame_to_show, &oci->post_proc_buffer);
   }
