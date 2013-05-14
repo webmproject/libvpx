@@ -49,9 +49,6 @@ struct loop_filter_info {
   void sym(uint8_t *y, uint8_t *u, uint8_t *v, \
            int ystride, int uv_stride, struct loop_filter_info *lfi)
 
-#define prototype_simple_loopfilter(sym) \
-  void sym(uint8_t *y, int ystride, const unsigned char *blimit)
-
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/vp9_loopfilter_x86.h"
 #endif
