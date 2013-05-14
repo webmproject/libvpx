@@ -181,65 +181,6 @@ void vp9_add_residual_16x16_sse2(const int16_t *diff, uint8_t *dest,
   } while (--i);
 }
 
-void vp9_add_residual_32x32_sse2(const int16_t *diff, uint8_t *dest,
-                                 int stride) {
-  const int width = 32;
-  int i = 16;
-  const __m128i zero = _mm_setzero_si128();
-
-  // Diff data
-  __m128i d0, d1, d2, d3, d4, d5, d6, d7;
-  __m128i p0, p1, p2, p3, p4, p5, p6, p7;
-
-  do {
-    d0 = _mm_load_si128((const __m128i *)(diff + 0 * width));
-    d1 = _mm_load_si128((const __m128i *)(diff + 0 * width + 8));
-    d2 = _mm_load_si128((const __m128i *)(diff + 0 * width + 16));
-    d3 = _mm_load_si128((const __m128i *)(diff + 0 * width + 24));
-    d4 = _mm_load_si128((const __m128i *)(diff + 1 * width));
-    d5 = _mm_load_si128((const __m128i *)(diff + 1 * width + 8));
-    d6 = _mm_load_si128((const __m128i *)(diff + 1 * width + 16));
-    d7 = _mm_load_si128((const __m128i *)(diff + 1 * width + 24));
-
-    // Prediction data.
-    p1 = _mm_load_si128((const __m128i *)(dest + 0 * stride));
-    p3 = _mm_load_si128((const __m128i *)(dest + 0 * stride + 16));
-    p5 = _mm_load_si128((const __m128i *)(dest + 1 * stride));
-    p7 = _mm_load_si128((const __m128i *)(dest + 1 * stride + 16));
-
-    p0 = _mm_unpacklo_epi8(p1, zero);
-    p1 = _mm_unpackhi_epi8(p1, zero);
-    p2 = _mm_unpacklo_epi8(p3, zero);
-    p3 = _mm_unpackhi_epi8(p3, zero);
-    p4 = _mm_unpacklo_epi8(p5, zero);
-    p5 = _mm_unpackhi_epi8(p5, zero);
-    p6 = _mm_unpacklo_epi8(p7, zero);
-    p7 = _mm_unpackhi_epi8(p7, zero);
-
-    p0 = _mm_add_epi16(p0, d0);
-    p1 = _mm_add_epi16(p1, d1);
-    p2 = _mm_add_epi16(p2, d2);
-    p3 = _mm_add_epi16(p3, d3);
-    p4 = _mm_add_epi16(p4, d4);
-    p5 = _mm_add_epi16(p5, d5);
-    p6 = _mm_add_epi16(p6, d6);
-    p7 = _mm_add_epi16(p7, d7);
-
-    p0 = _mm_packus_epi16(p0, p1);
-    p1 = _mm_packus_epi16(p2, p3);
-    p2 = _mm_packus_epi16(p4, p5);
-    p3 = _mm_packus_epi16(p6, p7);
-
-    _mm_store_si128((__m128i *)(dest + 0 * stride), p0);
-    _mm_store_si128((__m128i *)(dest + 0 * stride + 16), p1);
-    _mm_store_si128((__m128i *)(dest + 1 * stride), p2);
-    _mm_store_si128((__m128i *)(dest + 1 * stride + 16), p3);
-
-    diff += 2 * width;
-    dest += 2 * stride;
-  } while (--i);
-}
-
 void vp9_add_constant_residual_8x8_sse2(const int16_t diff, uint8_t *dest,
                                         int stride) {
   uint8_t abs_diff;

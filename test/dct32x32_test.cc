@@ -18,7 +18,7 @@ extern "C" {
 #include "vp9/common/vp9_entropy.h"
 #include "./vp9_rtcd.h"
   void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch);
-  void vp9_short_idct32x32_c(short *input, short *output, int pitch);
+  void vp9_short_idct32x32_add_c(short *input, uint8_t *output, int pitch);
 }
 
 #include "test/acm_random.h"
@@ -91,28 +91,31 @@ static void reference_32x32_dct_2d(int16_t input[32*32], double output[32*32]) {
   }
 }
 
-
 TEST(VP9Idct32x32Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 1000;
   for (int i = 0; i < count_test_block; ++i) {
     int16_t in[1024], coeff[1024];
-    int16_t out_c[1024];
+    uint8_t dst[1024], src[1024];
     double out_r[1024];
 
+    for (int j = 0; j < 1024; ++j) {
+      src[j] = rnd.Rand8();
+      dst[j] = rnd.Rand8();
+    }
     // Initialize a test block with input range [-255, 255].
     for (int j = 0; j < 1024; ++j)
-      in[j] = rnd.Rand8() - rnd.Rand8();
+      in[j] = src[j] - dst[j];
 
     reference_32x32_dct_2d(in, out_r);
     for (int j = 0; j < 1024; j++)
       coeff[j] = round(out_r[j]);
-    vp9_short_idct32x32_c(coeff, out_c, 64);
+    vp9_short_idct32x32_add_c(coeff, dst, 32);
     for (int j = 0; j < 1024; ++j) {
-      const int diff = out_c[j] - in[j];
+      const int diff = dst[j] - src[j];
       const int error = diff * diff;
       EXPECT_GE(1, error)
-          << "Error: 3x32 IDCT has error " << error
+          << "Error: 32x32 IDCT has error " << error
           << " at index " << j;
     }
   }
@@ -126,18 +129,22 @@ TEST(VP9Fdct32x32Test, AccuracyCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     int16_t test_input_block[1024];
     int16_t test_temp_block[1024];
-    int16_t test_output_block[1024];
+    uint8_t dst[1024], src[1024];
 
+    for (int j = 0; j < 1024; ++j) {
+      src[j] = rnd.Rand8();
+      dst[j] = rnd.Rand8();
+    }
     // Initialize a test block with input range [-255, 255].
     for (int j = 0; j < 1024; ++j)
-      test_input_block[j] = rnd.Rand8() - rnd.Rand8();
+      test_input_block[j] = src[j] - dst[j];
 
     const int pitch = 64;
     vp9_short_fdct32x32_c(test_input_block, test_temp_block, pitch);
-    vp9_short_idct32x32_c(test_temp_block, test_output_block, pitch);
+    vp9_short_idct32x32_add_c(test_temp_block, dst, 32);
 
     for (int j = 0; j < 1024; ++j) {
-      const unsigned diff = test_input_block[j] - test_output_block[j];
+      const unsigned diff = dst[j] - src[j];
       const unsigned error = diff * diff;
       if (max_error < error)
         max_error = error;

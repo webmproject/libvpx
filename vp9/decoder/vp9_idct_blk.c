@@ -109,10 +109,6 @@ void vp9_add_residual_16x16_c(const int16_t *diff, uint8_t *dest, int stride) {
   add_residual(diff, dest, stride, 16, 16);
 }
 
-void vp9_add_residual_32x32_c(const int16_t *diff, uint8_t *dest, int stride) {
-  add_residual(diff, dest, stride, 32, 32);
-}
-
 static void add_constant_residual(const int16_t diff, uint8_t *dest, int stride,
                                   int width, int height) {
   int r, c;
@@ -321,20 +317,16 @@ void vp9_idct_add_32x32_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       input[0] = 0;
 #if !CONFIG_SCATTERSCAN
     } else if (eob <= 10) {
-      // the idct halves ( >> 1) the pitch
-      vp9_short_idct10_32x32(input, output, 64);
-
+      vp9_short_idct10_32x32_add_c(input, dest, stride);
       input[0] = input[1] = input[2] = input[3] = 0;
       input[32] = input[33] = input[34] = 0;
       input[64] = input[65] = 0;
       input[96] = 0;
 
-      vp9_add_residual_32x32(output, dest, stride);
 #endif
     } else {
-      vp9_short_idct32x32(input, output, 64);
+      vp9_short_idct32x32_add(input, dest, stride);
       vpx_memset(input, 0, 2048);
-      vp9_add_residual_32x32(output, dest, stride);
     }
   }
 }

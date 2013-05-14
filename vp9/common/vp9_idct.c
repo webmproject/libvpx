@@ -1249,10 +1249,9 @@ static void idct32_1d(int16_t *input, int16_t *output) {
   output[31] = step1[0] - step1[31];
 }
 
-void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_idct32x32_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int16_t out[32 * 32];
   int16_t *outptr = out;
-  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[32], temp_out[32];
 
@@ -1269,7 +1268,8 @@ void vp9_short_idct32x32_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 32 + i];
     idct32_1d(temp_in, temp_out);
     for (j = 0; j < 32; ++j)
-      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+      dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
+                                  + dest[j * dest_stride + i]);
   }
 }
 
@@ -1279,10 +1279,10 @@ void vp9_short_idct1_32x32_c(int16_t *input, int16_t *output) {
   output[0] = ROUND_POWER_OF_TWO(out, 6);
 }
 
-void vp9_short_idct10_32x32_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_idct10_32x32_add_c(int16_t *input, uint8_t *dest,
+                                  int dest_stride) {
   int16_t out[32 * 32];
   int16_t *outptr = out;
-  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[32], temp_out[32];
 
@@ -1302,6 +1302,7 @@ void vp9_short_idct10_32x32_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 32 + i];
     idct32_1d(temp_in, temp_out);
     for (j = 0; j < 32; ++j)
-      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+      dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
+                                  + dest[j * dest_stride + i]);
   }
 }
