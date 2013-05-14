@@ -572,6 +572,7 @@ static TX_TYPE txfm_map(B_PREDICTION_MODE bmode) {
 
     case B_V_PRED :
     case B_D117_PRED :
+    case B_D63_PRED:
       return ADST_DCT;
 
     case B_H_PRED :
