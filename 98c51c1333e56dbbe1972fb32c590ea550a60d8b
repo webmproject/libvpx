@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAX3//7HQ\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-05-14T00:45:50Z",
+      "side": 1,
+      "message": "not to say that we should not rename the variables, but I think the *s# means signed version of pixel values. i.e the unsigned values are noted as *# and the isgned ones (off by 128) is *s#.",
+      "revId": "98c51c1333e56dbbe1972fb32c590ea550a60d8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
