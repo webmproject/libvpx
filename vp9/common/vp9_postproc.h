@@ -29,10 +29,8 @@ struct postproc_state {
 int vp9_post_proc_frame(struct VP9Common *oci, YV12_BUFFER_CONFIG *dest,
                         vp9_ppflags_t *flags);
 
-void vp9_denoise(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *post,
-                 int q, int low_var_thresh, int flag);
+void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst, int q);
 
-void vp9_deblock(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *post,
-                 int q, int low_var_thresh, int flag);
+void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst, int q);
 
 #endif  // VP9_COMMON_VP9_POSTPROC_H_
