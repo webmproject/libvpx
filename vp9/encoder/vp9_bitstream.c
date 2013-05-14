@@ -1242,16 +1242,6 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
 FILE *vpxlogc = 0;
 #endif
 
-static void put_delta_q(vp9_writer *bc, int delta_q) {
-  if (delta_q != 0) {
-    vp9_write_bit(bc, 1);
-    vp9_write_literal(bc, abs(delta_q), 4);
-    vp9_write_bit(bc, delta_q < 0);
-  } else {
-    vp9_write_bit(bc, 0);
-  }
-}
-
 static void decide_kf_ymode_entropy(VP9_COMP *cpi) {
   int mode_cost[MB_MODE_COUNT];
   int bestcost = INT_MAX;
@@ -1298,8 +1288,20 @@ static void segment_reference_frames(VP9_COMP *cpi) {
   }
 }
 
-static void encode_loopfilter(MACROBLOCKD *xd, vp9_writer *w) {
+static void encode_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_writer *w) {
   int i;
+
+  // Encode the loop filter level and type
+  vp9_write_literal(w, pc->filter_level, 6);
+  vp9_write_literal(w, pc->sharpness_level, 3);
+#if CONFIG_LOOP_DERING
+  if (pc->dering_enabled) {
+    vp9_write_bit(w, 1);
+    vp9_write_literal(w, pc->dering_enabled - 1, 4);
+  } else {
+    vp9_write_bit(w, 0);
+  }
+#endif
 
   // Write out loop filter deltas applied at the MB level based on mode or
   // ref frame (if they are enabled).
@@ -1353,6 +1355,24 @@ static void encode_loopfilter(MACROBLOCKD *xd, vp9_writer *w) {
     }
   }
 }
+
+static void put_delta_q(vp9_writer *bc, int delta_q) {
+  if (delta_q != 0) {
+    vp9_write_bit(bc, 1);
+    vp9_write_literal(bc, abs(delta_q), 4);
+    vp9_write_bit(bc, delta_q < 0);
+  } else {
+    vp9_write_bit(bc, 0);
+  }
+}
+
+static void encode_quantization(VP9_COMMON *pc, vp9_writer *w) {
+  vp9_write_literal(w, pc->base_qindex, QINDEX_BITS);
+  put_delta_q(w, pc->y_dc_delta_q);
+  put_delta_q(w, pc->uv_dc_delta_q);
+  put_delta_q(w, pc->uv_ac_delta_q);
+}
+
 
 static void encode_segmentation(VP9_COMP *cpi, vp9_writer *w) {
   int i, j;
@@ -1495,27 +1515,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   // lossless mode: note this needs to be before loopfilter
   vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
 
-  // Encode the loop filter level and type
-  vp9_write_literal(&header_bc, pc->filter_level, 6);
-  vp9_write_literal(&header_bc, pc->sharpness_level, 3);
-#if CONFIG_LOOP_DERING
-  if (pc->dering_enabled) {
-    vp9_write_bit(&header_bc, 1);
-    vp9_write_literal(&header_bc, pc->dering_enabled - 1, 4);
-  } else {
-    vp9_write_bit(&header_bc, 0);
-  }
-#endif
+  encode_loopfilter(pc, xd, &header_bc);
 
-  encode_loopfilter(xd, &header_bc);
-
-  // Frame Q baseline quantizer index
-  vp9_write_literal(&header_bc, pc->base_qindex, QINDEX_BITS);
-
-  // Transmit Dc, Second order and Uv quantizer delta information
-  put_delta_q(&header_bc, pc->y_dc_delta_q);
-  put_delta_q(&header_bc, pc->uv_dc_delta_q);
-  put_delta_q(&header_bc, pc->uv_ac_delta_q);
+  encode_quantization(pc, &header_bc);
 
   // When there is a key frame all reference buffers are updated using the new key frame
   if (pc->frame_type != KEY_FRAME) {
