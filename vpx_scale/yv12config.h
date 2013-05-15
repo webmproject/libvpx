@@ -52,9 +52,14 @@ extern "C" {
     int   uv_stride;
     /*    int   uvinternal_width; */
 
+    int   alpha_width;
+    int   alpha_height;
+    int   alpha_stride;
+
     uint8_t *y_buffer;
     uint8_t *u_buffer;
     uint8_t *v_buffer;
+    uint8_t *alpha_buffer;
 
     uint8_t *buffer_alloc;
     int buffer_alloc_sz;

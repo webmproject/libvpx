@@ -578,30 +578,6 @@ static vpx_codec_err_t vp8_xma_set_mmap(vpx_codec_ctx_t         *ctx,
   return res;
 }
 
-static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
-                                       YV12_BUFFER_CONFIG  *yv12) {
-  vpx_codec_err_t        res = VPX_CODEC_OK;
-  yv12->y_buffer = img->planes[VPX_PLANE_Y];
-  yv12->u_buffer = img->planes[VPX_PLANE_U];
-  yv12->v_buffer = img->planes[VPX_PLANE_V];
-
-  yv12->y_crop_width  = img->d_w;
-  yv12->y_crop_height = img->d_h;
-  yv12->y_width  = img->d_w;
-  yv12->y_height = img->d_h;
-  yv12->uv_width = yv12->y_width / 2;
-  yv12->uv_height = yv12->y_height / 2;
-
-  yv12->y_stride = img->stride[VPX_PLANE_Y];
-  yv12->uv_stride = img->stride[VPX_PLANE_U];
-
-  yv12->border  = (img->stride[VPX_PLANE_Y] - img->d_w) / 2;
-  yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 ||
-                   img->fmt == VPX_IMG_FMT_VPXYV12);
-
-  return res;
-}
-
 
 static vpx_codec_err_t vp9_set_reference(vpx_codec_alg_priv_t *ctx,
                                          int ctr_id,
