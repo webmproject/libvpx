@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYH//+Us\u003d",
+        "filename": "vp9/vp9_iface_common.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-15T22:27:43Z",
+      "side": 1,
+      "message": "looks like you accidentally dropped your changes that set alpha_{buffer,width,height,stride} from this function.",
+      "revId": "f6aa72dbaecfacb2b4f888cef31c73bbd0fcff41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
