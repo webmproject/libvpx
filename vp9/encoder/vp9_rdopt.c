@@ -2331,8 +2331,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
                   vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 1);
     *returndist = dist_y + (dist_uv >> 2);
-    memset(ctx->txfm_rd_diff, 0,
-           sizeof(x->sb32_context[xd->sb_index].txfm_rd_diff));
+    memset(ctx->txfm_rd_diff, 0, sizeof(ctx->txfm_rd_diff));
     xd->mode_info_context->mbmi.mode = mode;
     xd->mode_info_context->mbmi.txfm_size = txfm_size;
 #if CONFIG_AB4X4
