@@ -1096,6 +1096,50 @@ static INLINE int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
   return r;
 }
 
+static enum BlockSize get_block_size(int bw, int bh) {
+  if (bw == 4 && bh == 4)
+    return BLOCK_4X4;
+
+  if (bw == 4 && bh == 8)
+    return BLOCK_4X8;
+
+  if (bw == 8 && bh == 4)
+    return BLOCK_8X4;
+
+  if (bw == 8 && bh == 8)
+    return BLOCK_8X8;
+
+  if (bw == 8 && bh == 16)
+    return BLOCK_8X16;
+
+  if (bw == 16 && bh == 8)
+    return BLOCK_16X8;
+
+  if (bw == 16 && bh == 16)
+    return BLOCK_16X16;
+
+  if (bw == 32 && bh == 32)
+    return BLOCK_32X32;
+
+  if (bw == 32 && bh == 16)
+    return BLOCK_32X16;
+
+  if (bw == 16 && bh == 32)
+    return BLOCK_16X32;
+
+  if (bw == 64 && bh == 32)
+    return BLOCK_64X32;
+
+  if (bw == 32 && bh == 64)
+    return BLOCK_32X64;
+
+  if (bw == 64 && bh == 64)
+    return BLOCK_64X64;
+
+  assert(0);
+  return -1;
+}
+
 static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                     BEST_SEG_INFO *bsi,
                                     int_mv seg_mvs[4][MAX_REF_FRAMES - 1]) {
@@ -1111,6 +1155,10 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   int sbr = 0, sbd = 0;
   int segmentyrate = 0;
   int best_eobs[4] = { 0 };
+#if CONFIG_AB4X4
+  BLOCK_SIZE_TYPE bsize = mbmi->sb_type;
+  int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
+#endif
 
   vp9_variance_fn_ptr_t *v_fn_ptr;
 
@@ -1120,7 +1168,11 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   vpx_memcpy(t_above, x->e_mbd.plane[0].above_context, sizeof(t_above));
   vpx_memcpy(t_left, x->e_mbd.plane[0].left_context, sizeof(t_left));
 
+#if CONFIG_AB4X4
+  v_fn_ptr = &cpi->fn_ptr[get_block_size(4 << bwl, 4 << bhl)];
+#else
   v_fn_ptr = &cpi->fn_ptr[BLOCK_4X4];
+#endif
 
   // 64 makes this threshold really big effectively
   // making it so that we very rarely check mvs on
@@ -1668,51 +1720,6 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
       scale[frame_type].y_num == scale[frame_type].y_den)
     mv_pred(cpi, x, yv12_mb[frame_type][0].buf, yv12->y_stride,
             frame_type, block_size);
-}
-
-
-static enum BlockSize get_block_size(int bw, int bh) {
-  if (bw == 4 && bh == 4)
-    return BLOCK_4X4;
-
-  if (bw == 4 && bh == 8)
-    return BLOCK_4X8;
-
-  if (bw == 8 && bh == 4)
-    return BLOCK_8X4;
-
-  if (bw == 8 && bh == 8)
-    return BLOCK_8X8;
-
-  if (bw == 8 && bh == 16)
-    return BLOCK_8X16;
-
-  if (bw == 16 && bh == 8)
-    return BLOCK_16X8;
-
-  if (bw == 16 && bh == 16)
-    return BLOCK_16X16;
-
-  if (bw == 32 && bh == 32)
-    return BLOCK_32X32;
-
-  if (bw == 32 && bh == 16)
-    return BLOCK_32X16;
-
-  if (bw == 16 && bh == 32)
-    return BLOCK_16X32;
-
-  if (bw == 64 && bh == 32)
-    return BLOCK_64X32;
-
-  if (bw == 32 && bh == 64)
-    return BLOCK_32X64;
-
-  if (bw == 64 && bh == 64)
-    return BLOCK_64X64;
-
-  assert(0);
-  return -1;
 }
 
 static void model_rd_from_var_lapndz(int var, int n, int qstep,

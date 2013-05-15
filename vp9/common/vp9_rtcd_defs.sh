@@ -367,6 +367,19 @@ vp9_sub_pixel_variance8x8_sse2=vp9_sub_pixel_variance8x8_wmt
 prototype unsigned int vp9_sub_pixel_avg_variance8x8 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred"
 specialize vp9_sub_pixel_avg_variance8x8
 
+# TODO(jingning): need to convert 8x4/4x8 functions into mmx/sse form
+prototype unsigned int vp9_sub_pixel_variance8x4 "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_sub_pixel_variance8x4
+
+prototype unsigned int vp9_sub_pixel_avg_variance8x4 "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred"
+specialize vp9_sub_pixel_avg_variance8x4
+
+prototype unsigned int vp9_sub_pixel_variance4x8 "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
+specialize vp9_sub_pixel_variance4x8
+
+prototype unsigned int vp9_sub_pixel_avg_variance4x8 "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred"
+specialize vp9_sub_pixel_avg_variance4x8
+
 prototype unsigned int vp9_sub_pixel_variance4x4 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_sub_pixel_variance4x4 sse2 mmx
 vp9_sub_pixel_variance4x4_sse2=vp9_sub_pixel_variance4x4_wmt
@@ -403,6 +416,13 @@ specialize vp9_sad8x16 mmx sse2
 
 prototype unsigned int vp9_sad8x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad"
 specialize vp9_sad8x8 mmx sse2
+
+# TODO(jingning): need to covert these functions into mmx/sse2 form
+prototype unsigned int vp9_sad8x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad"
+specialize vp9_sad8x4
+
+prototype unsigned int vp9_sad4x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad"
+specialize vp9_sad4x8
 
 prototype unsigned int vp9_sad4x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad"
 specialize vp9_sad4x4 mmx sse
@@ -508,6 +528,13 @@ specialize vp9_sad8x16x4d sse2
 
 prototype void vp9_sad8x8x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad8x8x4d sse2
+
+# TODO(jingning): need to convert these 4x8/8x4 functions into sse2 form
+prototype void vp9_sad8x4x4d "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_ptr[], int ref_stride, unsigned int *sad_array"
+specialize vp9_sad8x4x4d
+
+prototype void vp9_sad4x8x4d "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_ptr[], int ref_stride, unsigned int *sad_array"
+specialize vp9_sad4x8x4d
 
 prototype void vp9_sad4x4x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad4x4x4d sse
