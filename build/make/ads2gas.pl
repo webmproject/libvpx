@@ -21,7 +21,7 @@
 my $thumb = 0;
 
 foreach my $arg (@ARGV) {
-    $thumb = 1 if ($arg == "-thumb");
+    $thumb = 1 if ($arg eq "-thumb");
 }
 
 print "@ This file was created from a .asm file\n";
