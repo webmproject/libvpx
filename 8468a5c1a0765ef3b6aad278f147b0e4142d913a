@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYH//+HI\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-15T23:53:06Z",
+      "side": 1,
+      "message": "This seems like some assumptions are going wrong in the 4x4 code - e.g. we may be adding a ib\u003d0,1,2,3 even though they should be 0 for all (if BLOCK_SIZE_AB4X4), and xd-\u003eab_index should probably be 0-3 instead, right?\n\nHaving ib and wb/wh be inconsistent means that further down, the code that checks which blocks to apply adst/dct to, will fail to do the intended thing, and instead do something essentially at random, I think.",
+      "revId": "8468a5c1a0765ef3b6aad278f147b0e4142d913a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
