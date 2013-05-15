@@ -76,12 +76,17 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     ybf->uv_height = uv_height;
     ybf->uv_stride = uv_stride;
 
+    ybf->alpha_width = 0;
+    ybf->alpha_height = 0;
+    ybf->alpha_stride = 0;
+
     ybf->border = border;
     ybf->frame_size = frame_size;
 
     ybf->y_buffer = ybf->buffer_alloc + (border * y_stride) + border;
     ybf->u_buffer = ybf->buffer_alloc + yplane_size + (border / 2  * uv_stride) + border / 2;
     ybf->v_buffer = ybf->buffer_alloc + yplane_size + uvplane_size + (border / 2  * uv_stride) + border / 2;
+    ybf->alpha_buffer = NULL;
 
     ybf->corrupted = 0; /* assume not currupted by errors */
     return 0;
