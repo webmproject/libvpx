@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYH//+RU\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-15T22:46:33Z",
+      "side": 1,
+      "message": "as a temporary solution to handle 4x4 block intra coding, we need to align sb_type to 8x8 block. when sb_type \u003d BLOCK_SIZE_AB4X4, mi_width_log2() will return value 0, hence wb \u003d 1. similarly, hb \u003d 1 in this case.",
+      "parentUuid": "AAAAYH//+TE\u003d",
+      "revId": "eb26dc22677734ee21a9c44188efb54f0845a1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYH//+TA\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-05-15T22:33:57Z",
       "side": 1,
       "message": "delete, or protect with a debugging ifdef.",
+      "revId": "eb26dc22677734ee21a9c44188efb54f0845a1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//+SM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-15T22:46:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAYH//+TA\u003d",
       "revId": "eb26dc22677734ee21a9c44188efb54f0845a1e2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
