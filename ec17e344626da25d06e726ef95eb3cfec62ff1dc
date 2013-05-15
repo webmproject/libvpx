@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYH//+IY\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-15T23:49:29Z",
+      "side": 1,
+      "message": "missing macro conditionals:\n\nif [ \"$CONFIG_AB4X4\" \u003d \"yes\" ]; then\n..\nfi\n\n(you can probably do without if you prefer, so ignore at your own choice.)",
+      "revId": "ec17e344626da25d06e726ef95eb3cfec62ff1dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//+Ho\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1147,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-15T23:49:29Z",
+      "side": 1,
+      "message": "this isn\u0027t right for 4x8/8x4, is it? I.e. the code will still search 4 blocks, even if each block size is 4x8/8x4 instead of 4x4, it seems to me.",
+      "revId": "ec17e344626da25d06e726ef95eb3cfec62ff1dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//+H4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1160,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-15T23:49:29Z",
+      "side": 1,
+      "message": "so uhm - I\u0027m not sure this is a great idea. The problem is that we\u0027re adding code here that makes the existing splitmv infrastructure more complex. I\u0027d prefer if we\u0027d completely get rid of splitmv first, moving everything to non-splitmv code instead, and then add 8x4/4x8 to that code. The disadvantage here is that we\u0027re working with code this is ... well ... crappy, and intended to be deprecated.",
+      "revId": "ec17e344626da25d06e726ef95eb3cfec62ff1dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
