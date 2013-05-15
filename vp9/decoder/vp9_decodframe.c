@@ -1021,23 +1021,13 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     // Select active reference frames and calculate scaling factors
     for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
       const int ref = vp9_read_literal(&header_bc, NUM_REF_FRAMES_LG2);
-      const int mapped_ref = pc->ref_frame_map[ref];
-      YV12_BUFFER_CONFIG *const fb = &pc->yv12_fb[mapped_ref];
-      struct scale_factors *const sf = &pc->active_ref_scale[i];
-
-      pc->active_ref_idx[i] = mapped_ref;
-      if (mapped_ref >= NUM_YV12_BUFFERS)
-        memset(sf, 0, sizeof(*sf));
-      else
-        vp9_setup_scale_factors_for_frame(sf,
-                                          fb->y_crop_width, fb->y_crop_height,
-                                          pc->width, pc->height);
+      pc->active_ref_idx[i] = pc->ref_frame_map[ref];
+      vp9_setup_scale_factors(pc, i);
     }
 
     // Read the sign bias for each reference frame buffer.
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
       pc->ref_frame_sign_bias[i + 1] = vp9_read_bit(&header_bc);
-    }
 
     xd->allow_high_precision_mv = vp9_read_bit(&header_bc);
     pc->mcomp_filter_type = read_mcomp_filter_type(&header_bc);
