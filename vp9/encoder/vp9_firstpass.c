@@ -522,6 +522,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
       xd->plane[2].dst.buf = new_yv12->v_buffer + recon_uvoffset;
       xd->left_available = (mb_col != 0);
 
+      xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_MB16X16;
+
       // do intra 16x16 prediction
       this_error = vp9_encode_intra(cpi, x, use_dc_pred);
 
