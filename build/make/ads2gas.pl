@@ -183,7 +183,7 @@ while (<STDIN>)
     s/(vtbl.\d+\s+[^,]+),([^,]+)/$1,\{$2\}/g;
 
     if ($thumb) {
-        thumb::FixThumbInstructions($_);
+        thumb::FixThumbInstructions($_, 0);
     }
 
     # eabi_attributes numerical equivalents can be found in the

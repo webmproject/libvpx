@@ -11,8 +11,11 @@
 
 package thumb;
 
-sub FixThumbInstructions($)
+sub FixThumbInstructions($$)
 {
+    my $short_branches = $_[1];
+    my $branch_shift_offset = $short_branches ? 1 : 0;
+
     # Write additions with shifts, such as "add r10, r11, lsl #8",
     # in three operand form, "add r10, r10, r11, lsl #8".
     s/(add\s+)(r\d+),\s*(r\d+),\s*(lsl #\d+)/$1$2, $2, $3, $4/g;
@@ -56,7 +59,7 @@ sub FixThumbInstructions($)
     # "itttt lt", "movlt.n r12, pc", "addlt.w r12, #12",
     # "addlt.w r12, r12, r3, lsl #2", "movlt.n pc, r12".
     # This assumes that r12 is free at this point.
-    s/^(\s*)addlt(\s+)pc,\s*pc,\s*(\w+),\s*lsl\s*#(\d+)/$1itttt$2lt\n$1movlt.n$2r12, pc\n$1addlt.w$2r12, #12\n$1addlt.w$2r12, r12, $3, lsl #$4\n$1movlt.n$2pc, r12/g;
+    s/^(\s*)addlt(\s+)pc,\s*pc,\s*(\w+),\s*lsl\s*#(\d+)/$1itttt$2lt\n$1movlt.n$2r12, pc\n$1addlt.w$2r12, #12\n$1addlt.w$2r12, r12, $3, lsl #($4-$branch_shift_offset)\n$1movlt.n$2pc, r12/g;
 
     # Convert "mov pc, lr" into "bx lr", since the former only works
     # for switching from arm to thumb (and only in armv7), but not
