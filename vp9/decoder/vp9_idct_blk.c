@@ -105,10 +105,6 @@ void vp9_add_residual_8x8_c(const int16_t *diff, uint8_t *dest, int stride) {
   add_residual(diff, dest, stride, 8, 8);
 }
 
-void vp9_add_residual_16x16_c(const int16_t *diff, uint8_t *dest, int stride) {
-  add_residual(diff, dest, stride, 16, 16);
-}
-
 static void add_constant_residual(const int16_t diff, uint8_t *dest, int stride,
                                   int width, int height) {
   int r, c;
@@ -260,19 +256,14 @@ void vp9_iht_add_16x16_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
   if (tx_type == DCT_DCT) {
     vp9_idct_add_16x16(input, dest, stride, eob);
   } else {
-    DECLARE_ALIGNED_ARRAY(16, int16_t, output, 256);
-
     if (eob > 0) {
-      vp9_short_iht16x16(input, output, 16, tx_type);
+      vp9_short_iht16x16_add(input, dest, stride, tx_type);
       vpx_memset(input, 0, 512);
-      vp9_add_residual_16x16(output, dest, stride);
     }
   }
 }
 
 void vp9_idct_add_16x16_c(int16_t *input, uint8_t *dest, int stride, int eob) {
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 256);
-
   /* The calculation can be simplified if there are not many non-zero dct
    * coefficients. Use eobs to separate different cases. */
   if (eob) {
@@ -288,21 +279,15 @@ void vp9_idct_add_16x16_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       vp9_add_constant_residual_16x16(out, dest, stride);
 #if !CONFIG_SCATTERSCAN
     } else if (eob <= 10) {
-      // the idct halves ( >> 1) the pitch
-      vp9_short_idct10_16x16(input, output, 32);
-
+      vp9_short_idct10_16x16_add(input, dest, stride);
       input[0] = input[1] = input[2] = input[3] = 0;
       input[16] = input[17] = input[18] = 0;
       input[32] = input[33] = 0;
       input[48] = 0;
-
-      vp9_add_residual_16x16(output, dest, stride);
 #endif
     } else {
-      // the idct halves ( >> 1) the pitch
-      vp9_short_idct16x16(input, output, 16 << 1);
+      vp9_short_idct16x16_add(input, dest, stride);
       vpx_memset(input, 0, 512);
-      vp9_add_residual_16x16(output, dest, stride);
     }
   }
 }

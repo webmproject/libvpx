@@ -752,8 +752,17 @@ void vp9_short_idct10_8x8_sse2(int16_t *input, int16_t *output, int pitch) {
                            stp2_10, stp2_13, stp2_11, stp2_12) \
   }
 
-void vp9_short_idct16x16_sse2(int16_t *input, int16_t *output, int pitch) {
-  const int half_pitch = pitch >> 1;
+#define RECON_AND_STORE(dest, in_x) \
+  {                                                     \
+     __m128i d0 = _mm_loadl_epi64((__m128i *)(dest)); \
+      d0 = _mm_unpacklo_epi8(d0, zero); \
+      in_x = _mm_add_epi16(in_x, d0); \
+      in_x = _mm_packus_epi16(in_x, in_x); \
+      _mm_storel_epi64((__m128i *)(dest), in_x); \
+      dest += stride; \
+  }
+
+void vp9_short_idct16x16_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<5);
   const __m128i zero = _mm_setzero_si128();
@@ -938,31 +947,30 @@ void vp9_short_idct16x16_sse2(int16_t *input, int16_t *output, int pitch) {
       in14 = _mm_srai_epi16(in14, 6);
       in15 = _mm_srai_epi16(in15, 6);
 
-      // Store results
-      _mm_store_si128((__m128i *)output, in0);
-      _mm_store_si128((__m128i *)(output + half_pitch * 1), in1);
-      _mm_store_si128((__m128i *)(output + half_pitch * 2), in2);
-      _mm_store_si128((__m128i *)(output + half_pitch * 3), in3);
-      _mm_store_si128((__m128i *)(output + half_pitch * 4), in4);
-      _mm_store_si128((__m128i *)(output + half_pitch * 5), in5);
-      _mm_store_si128((__m128i *)(output + half_pitch * 6), in6);
-      _mm_store_si128((__m128i *)(output + half_pitch * 7), in7);
-      _mm_store_si128((__m128i *)(output + half_pitch * 8), in8);
-      _mm_store_si128((__m128i *)(output + half_pitch * 9), in9);
-      _mm_store_si128((__m128i *)(output + half_pitch * 10), in10);
-      _mm_store_si128((__m128i *)(output + half_pitch * 11), in11);
-      _mm_store_si128((__m128i *)(output + half_pitch * 12), in12);
-      _mm_store_si128((__m128i *)(output + half_pitch * 13), in13);
-      _mm_store_si128((__m128i *)(output + half_pitch * 14), in14);
-      _mm_store_si128((__m128i *)(output + half_pitch * 15), in15);
+      RECON_AND_STORE(dest, in0);
+      RECON_AND_STORE(dest, in1);
+      RECON_AND_STORE(dest, in2);
+      RECON_AND_STORE(dest, in3);
+      RECON_AND_STORE(dest, in4);
+      RECON_AND_STORE(dest, in5);
+      RECON_AND_STORE(dest, in6);
+      RECON_AND_STORE(dest, in7);
+      RECON_AND_STORE(dest, in8);
+      RECON_AND_STORE(dest, in9);
+      RECON_AND_STORE(dest, in10);
+      RECON_AND_STORE(dest, in11);
+      RECON_AND_STORE(dest, in12);
+      RECON_AND_STORE(dest, in13);
+      RECON_AND_STORE(dest, in14);
+      RECON_AND_STORE(dest, in15);
 
-      output += 8;
+      dest += 8 - (stride * 16);
     }
   }
 }
 
-void vp9_short_idct10_16x16_sse2(int16_t *input, int16_t *output, int pitch) {
-  const int half_pitch = pitch >> 1;
+void vp9_short_idct10_16x16_add_sse2(int16_t *input, uint8_t *dest,
+                                     int stride) {
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<5);
   const __m128i zero = _mm_setzero_si128();
@@ -1007,7 +1015,6 @@ void vp9_short_idct10_16x16_sse2(int16_t *input, int16_t *output, int pitch) {
           stp2_8, stp2_9, stp2_10, stp2_11, stp2_12, stp2_13, stp2_14, stp2_15;
   __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   int i;
-
   // 1-D idct. Load input data.
   in0 = _mm_load_si128((__m128i *)input);
   in8 = _mm_load_si128((__m128i *)(input + 8 * 1));
@@ -1298,24 +1305,24 @@ void vp9_short_idct10_16x16_sse2(int16_t *input, int16_t *output, int pitch) {
     in14 = _mm_srai_epi16(in14, 6);
     in15 = _mm_srai_epi16(in15, 6);
 
-    // Store results
-    _mm_store_si128((__m128i *)output, in0);
-    _mm_store_si128((__m128i *)(output + half_pitch * 1), in1);
-    _mm_store_si128((__m128i *)(output + half_pitch * 2), in2);
-    _mm_store_si128((__m128i *)(output + half_pitch * 3), in3);
-    _mm_store_si128((__m128i *)(output + half_pitch * 4), in4);
-    _mm_store_si128((__m128i *)(output + half_pitch * 5), in5);
-    _mm_store_si128((__m128i *)(output + half_pitch * 6), in6);
-    _mm_store_si128((__m128i *)(output + half_pitch * 7), in7);
-    _mm_store_si128((__m128i *)(output + half_pitch * 8), in8);
-    _mm_store_si128((__m128i *)(output + half_pitch * 9), in9);
-    _mm_store_si128((__m128i *)(output + half_pitch * 10), in10);
-    _mm_store_si128((__m128i *)(output + half_pitch * 11), in11);
-    _mm_store_si128((__m128i *)(output + half_pitch * 12), in12);
-    _mm_store_si128((__m128i *)(output + half_pitch * 13), in13);
-    _mm_store_si128((__m128i *)(output + half_pitch * 14), in14);
-    _mm_store_si128((__m128i *)(output + half_pitch * 15), in15);
-    output += 8;
+    RECON_AND_STORE(dest, in0);
+    RECON_AND_STORE(dest, in1);
+    RECON_AND_STORE(dest, in2);
+    RECON_AND_STORE(dest, in3);
+    RECON_AND_STORE(dest, in4);
+    RECON_AND_STORE(dest, in5);
+    RECON_AND_STORE(dest, in6);
+    RECON_AND_STORE(dest, in7);
+    RECON_AND_STORE(dest, in8);
+    RECON_AND_STORE(dest, in9);
+    RECON_AND_STORE(dest, in10);
+    RECON_AND_STORE(dest, in11);
+    RECON_AND_STORE(dest, in12);
+    RECON_AND_STORE(dest, in13);
+    RECON_AND_STORE(dest, in14);
+    RECON_AND_STORE(dest, in15);
+
+    dest += 8 - (stride * 16);
   }
 }
 
@@ -1933,16 +1940,6 @@ void vp9_short_idct32x32_add_sse2(int16_t *input, uint8_t *dest, int stride) {
       in29 = _mm_srai_epi16(in29, 6);
       in30 = _mm_srai_epi16(in30, 6);
       in31 = _mm_srai_epi16(in31, 6);
-
-#define RECON_AND_STORE(dest, in_x) \
-  {                                                     \
-     __m128i d0 = _mm_loadl_epi64((__m128i *)(dest)); \
-      d0 = _mm_unpacklo_epi8(d0, zero); \
-      in_x = _mm_add_epi16(in_x, d0); \
-      in_x = _mm_packus_epi16(in_x, in_x); \
-      _mm_storel_epi64((__m128i *)(dest), in_x); \
-      dest += stride; \
-  }
 
       RECON_AND_STORE(dest, in0);
       RECON_AND_STORE(dest, in1);

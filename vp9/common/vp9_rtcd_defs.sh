@@ -91,9 +91,6 @@ specialize vp9_add_residual_4x4 sse2
 prototype void vp9_add_residual_8x8 "const int16_t *diff, uint8_t *dest, int stride"
 specialize vp9_add_residual_8x8 sse2
 
-prototype void vp9_add_residual_16x16 "const int16_t *diff, uint8_t *dest, int stride"
-specialize vp9_add_residual_16x16 sse2
-
 prototype void vp9_add_constant_residual_8x8 "const int16_t diff, uint8_t *dest, int stride"
 specialize vp9_add_constant_residual_8x8 sse2
 
@@ -200,11 +197,11 @@ specialize vp9_short_idct10_8x8 sse2
 prototype void vp9_short_idct1_8x8 "int16_t *input, int16_t *output"
 specialize vp9_short_idct1_8x8
 
-prototype void vp9_short_idct16x16 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct16x16 sse2
+prototype void vp9_short_idct16x16_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_short_idct16x16_add sse2
 
-prototype void vp9_short_idct10_16x16 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct10_16x16 sse2
+prototype void vp9_short_idct10_16x16_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_short_idct10_16x16_add sse2
 
 prototype void vp9_short_idct1_16x16 "int16_t *input, int16_t *output"
 specialize vp9_short_idct1_16x16
@@ -224,8 +221,8 @@ specialize vp9_short_iht8x8
 prototype void vp9_short_iht4x4 "int16_t *input, int16_t *output, int pitch, int tx_type"
 specialize vp9_short_iht4x4
 
-prototype void vp9_short_iht16x16 "int16_t *input, int16_t *output, int pitch, int tx_type"
-specialize vp9_short_iht16x16
+prototype void vp9_short_iht16x16_add "int16_t *input, uint8_t *output, int pitch, int tx_type"
+specialize vp9_short_iht16x16_add
 
 prototype void vp9_idct4_1d "int16_t *input, int16_t *output"
 specialize vp9_idct4_1d sse2
