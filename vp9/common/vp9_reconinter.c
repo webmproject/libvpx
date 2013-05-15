@@ -492,3 +492,18 @@ void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
   vp9_build_inter_predictors_sbuv(xd, mb_row, mb_col,
                                   BLOCK_SIZE_MB16X16);
 }
+
+// TODO(dkovalev: find better place for this function)
+void vp9_setup_scale_factors(VP9_COMMON *cm, int i) {
+  const int ref = cm->active_ref_idx[i];
+  struct scale_factors *const sf = &cm->active_ref_scale[i];
+  if (ref >= NUM_YV12_BUFFERS) {
+    memset(sf, 0, sizeof(*sf));
+  } else {
+    YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[ref];
+    vp9_setup_scale_factors_for_frame(sf,
+                                      fb->y_crop_width, fb->y_crop_height,
+                                      cm->width, cm->height);
+  }
+}
+
