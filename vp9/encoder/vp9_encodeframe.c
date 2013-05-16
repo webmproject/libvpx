@@ -1269,10 +1269,10 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cpi->coef_counts_32x32);
   vp9_zero(cm->fc.eob_branch_counts);
 
-  cpi->mb.e_mbd.lossless = (cm->base_qindex == 0 &&
-                            cm->y_dc_delta_q == 0 &&
-                            cm->uv_dc_delta_q == 0 &&
-                            cm->uv_ac_delta_q == 0);
+  cpi->mb.e_mbd.lossless = cm->base_qindex == 0 &&
+                           cm->y_dc_delta_q == 0 &&
+                           cm->uv_dc_delta_q == 0 &&
+                           cm->uv_ac_delta_q == 0;
   switch_lossless_mode(cpi, cpi->mb.e_mbd.lossless);
 
   vp9_frame_init_quantizer(cpi);

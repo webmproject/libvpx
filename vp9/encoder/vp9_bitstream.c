@@ -1566,9 +1566,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   // error resilient mode
   vp9_write_bit(&header_bc, pc->error_resilient_mode);
 
-  // lossless mode: note this needs to be before loopfilter
-  vp9_write_bit(&header_bc, cpi->mb.e_mbd.lossless);
-
   encode_loopfilter(pc, xd, &header_bc);
 
   encode_quantization(pc, &header_bc);

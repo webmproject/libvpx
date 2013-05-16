@@ -989,7 +989,14 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   pc->clamp_type = (CLAMP_TYPE)vp9_read_bit(&header_bc);
   pc->error_resilient_mode = vp9_read_bit(&header_bc);
 
-  xd->lossless = vp9_read_bit(&header_bc);
+  setup_loopfilter(pc, xd, &header_bc);
+
+  setup_quantization(pbi, &header_bc);
+
+  xd->lossless = pc->base_qindex == 0 &&
+                 pc->y_dc_delta_q == 0 &&
+                 pc->uv_dc_delta_q == 0 &&
+                 pc->uv_ac_delta_q == 0;
   if (xd->lossless) {
     xd->inv_txm4x4_1      = vp9_short_iwalsh4x4_1;
     xd->inv_txm4x4        = vp9_short_iwalsh4x4;
@@ -1003,10 +1010,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     xd->itxm_add_y_block  = vp9_idct_add_y_block;
     xd->itxm_add_uv_block = vp9_idct_add_uv_block;
   }
-
-  setup_loopfilter(pc, xd, &header_bc);
-
-  setup_quantization(pbi, &header_bc);
 
   // Determine if the golden frame or ARF buffer should be updated and how.
   // For all non key frames the GF and ARF refresh flags and sign bias
