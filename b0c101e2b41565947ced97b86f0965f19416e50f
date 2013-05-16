@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYH//98k\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 999,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-05-16T01:32:10Z",
+      "side": 1,
+      "message": "Maybe we can just check base_qindex \u003d\u003d 0 and the same in the encoder? If yes, we can also modify setup_quantization function and don\u0027t read y_dc_delta_q, uv_dc_delta_q, uv_ac_delta_q from the bitstream if base_qindex \u003d\u003d 0 (all delta values will be zeros).",
+      "revId": "b0c101e2b41565947ced97b86f0965f19416e50f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
