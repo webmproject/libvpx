@@ -84,19 +84,26 @@ bail:
   return NULL;
 }
 
+#define USE_PARTIAL_COPY 0
 
 int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
                        int64_t ts_start, int64_t ts_end, unsigned int flags,
                        unsigned char *active_map) {
   struct lookahead_entry *buf;
+#if USE_PARTIAL_COPY
   int row, col, active_end;
   int mb_rows = (src->y_height + 15) >> 4;
   int mb_cols = (src->y_width + 15) >> 4;
+#endif
 
   if (ctx->sz + 1 > ctx->max_sz)
     return 1;
   ctx->sz++;
   buf = pop(ctx, &ctx->write_idx);
+
+#if USE_PARTIAL_COPY
+  // TODO(jkoleszar): This is disabled for now, as
+  // vp9_copy_and_extend_frame_with_rect is not subsampling/alpha aware.
 
   // Only do this partial copy if the following conditions are all met:
   // 1. Lookahead queue has has size of 1.
@@ -140,6 +147,11 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
   } else {
     vp9_copy_and_extend_frame(src, &buf->img);
   }
+#else
+  // Partial copy not implemented yet
+  vp9_copy_and_extend_frame(src, &buf->img);
+#endif
+
   buf->ts_start = ts_start;
   buf->ts_end = ts_end;
   buf->flags = flags;

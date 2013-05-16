@@ -298,7 +298,11 @@ struct scale_factors {
   convolve_fn_t predict[2][2][2];  // horiz, vert, avg
 };
 
+#if CONFIG_ALPHA
+enum { MAX_MB_PLANE = 4 };
+#else
 enum { MAX_MB_PLANE = 3 };
+#endif
 
 struct buf_2d {
   uint8_t *buf;

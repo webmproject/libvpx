@@ -20,4 +20,9 @@ void vp9_setup_block_dptrs(MACROBLOCKD *mb,
     mb->plane[i].subsampling_x = i ? subsampling_x : 0;
     mb->plane[i].subsampling_y = i ? subsampling_y : 0;
   }
+#if CONFIG_ALPHA
+  // TODO(jkoleszar): Using the Y w/h for now
+  mb->plane[3].subsampling_x = 0;
+  mb->plane[3].subsampling_y = 0;
+#endif
 }

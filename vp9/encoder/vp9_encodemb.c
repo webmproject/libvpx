@@ -44,7 +44,6 @@ static void subtract_plane(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize, int plane) {
   const uint8_t *src = x->plane[plane].src.buf;
   const int src_stride = x->plane[plane].src.stride;
 
-  assert(plane < 3);
   vp9_subtract_block(bh, bw,
                      x->plane[plane].src_diff, bw, src, src_stride,
                      xd->plane[plane].dst.buf, xd->plane[plane].dst.stride);

@@ -2118,6 +2118,18 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
     fwrite(src, s->uv_width, 1, yuv_rec_file);
     src += s->uv_stride;
   } while (--h);
+
+#if CONFIG_ALPHA
+  if (s->alpha_buffer) {
+    src = s->alpha_buffer;
+    h = s->alpha_height;
+    do {
+      fwrite(src, s->alpha_width, 1,  yuv_rec_file);
+      src += s->alpha_stride;
+    } while (--h);
+  }
+#endif
+
   fflush(yuv_rec_file);
 }
 #endif
@@ -2130,11 +2142,15 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
   const int out_h = dst_fb->y_crop_height;
   int x, y, i;
 
-  uint8_t *srcs[3] = {src_fb->y_buffer, src_fb->u_buffer, src_fb->v_buffer};
-  int src_strides[3] = {src_fb->y_stride, src_fb->uv_stride, src_fb->uv_stride};
+  uint8_t *srcs[4] = {src_fb->y_buffer, src_fb->u_buffer, src_fb->v_buffer,
+                      src_fb->alpha_buffer};
+  int src_strides[4] = {src_fb->y_stride, src_fb->uv_stride, src_fb->uv_stride,
+                        src_fb->alpha_stride};
 
-  uint8_t *dsts[3] = {dst_fb->y_buffer, dst_fb->u_buffer, dst_fb->v_buffer};
-  int dst_strides[3] = {dst_fb->y_stride, dst_fb->uv_stride, dst_fb->uv_stride};
+  uint8_t *dsts[4] = {dst_fb->y_buffer, dst_fb->u_buffer, dst_fb->v_buffer,
+                      dst_fb->alpha_buffer};
+  int dst_strides[4] = {dst_fb->y_stride, dst_fb->uv_stride, dst_fb->uv_stride,
+                        dst_fb->alpha_stride};
 
   for (y = 0; y < out_h; y += 16) {
     for (x = 0; x < out_w; x += 16) {

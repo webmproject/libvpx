@@ -124,6 +124,9 @@ typedef struct VP9Common {
 
   DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][2]);
   DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][2]);
+#if CONFIG_ALPHA
+  DECLARE_ALIGNED(16, int16_t, a_dequant[QINDEX_RANGE][2]);
+#endif
 
   int width;
   int height;
@@ -187,6 +190,10 @@ typedef struct VP9Common {
   int y_dc_delta_q;
   int uv_dc_delta_q;
   int uv_ac_delta_q;
+#if CONFIG_ALPHA
+  int a_dc_delta_q;
+  int a_ac_delta_q;
+#endif
 
   unsigned int frames_since_golden;
   unsigned int frames_till_alt_ref_frame;
