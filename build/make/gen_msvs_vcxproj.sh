@@ -358,7 +358,9 @@ generate_vcxproj() {
             else
                 tag_content ConfigurationType StaticLibrary
             fi
-            tag_content PlatformToolset v110 # v110_wp80, omit for v10
+            if [ "$vs_ver" = "11" ]; then
+                tag_content PlatformToolset v110
+            fi
             tag_content CharacterSet Unicode
             if [ "$config" = "Release" ]; then
                 tag_content WholeProgramOptimization true
