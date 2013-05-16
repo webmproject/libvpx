@@ -887,8 +887,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   const int mis = cm->mode_info_stride;
   int bwl, bhl;
-  int bw, bh;
-  int bsl = mi_width_log2(bsize), bs = (1 << bsl) / 2;
+  int bsl = b_width_log2(bsize);
+  int bs = (1 << bsl) / 4;  // mode_info step for subsize
   int n;
   PARTITION_TYPE partition;
   BLOCK_SIZE_TYPE subsize;
@@ -896,10 +896,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  bwl = mi_width_log2(m->mbmi.sb_type);
-  bhl = mi_height_log2(m->mbmi.sb_type);
-  bw = 1 << bwl;
-  bh = 1 << bhl;
+  bwl = b_width_log2(m->mbmi.sb_type);
+  bhl = b_height_log2(m->mbmi.sb_type);
 
   // parse the partition type
   if ((bwl == bsl) && (bhl == bsl))
@@ -914,8 +912,6 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
     assert(0);
 
 #if CONFIG_AB4X4
-  if (bsize == BLOCK_SIZE_SB8X8 && m->mbmi.sb_type < BLOCK_SIZE_SB8X8)
-    partition = PARTITION_SPLIT;
   if (bsize < BLOCK_SIZE_SB8X8)
     if (xd->ab_index != 0)
       return;
@@ -943,13 +939,13 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
       break;
     case PARTITION_HORZ:
       write_modes_b(cpi, m, bc, tok, tok_end, mi_row, mi_col);
-      if ((mi_row + bh) < cm->mi_rows)
-        write_modes_b(cpi, m + bh * mis, bc, tok, tok_end, mi_row + bh, mi_col);
+      if ((mi_row + bs) < cm->mi_rows)
+        write_modes_b(cpi, m + bs * mis, bc, tok, tok_end, mi_row + bs, mi_col);
       break;
     case PARTITION_VERT:
       write_modes_b(cpi, m, bc, tok, tok_end, mi_row, mi_col);
-      if ((mi_col + bw) < cm->mi_cols)
-        write_modes_b(cpi, m + bw, bc, tok, tok_end, mi_row, mi_col + bw);
+      if ((mi_col + bs) < cm->mi_cols)
+        write_modes_b(cpi, m + bs, bc, tok, tok_end, mi_row, mi_col + bs);
       break;
     case PARTITION_SPLIT:
       for (n = 0; n < 4; n++) {
