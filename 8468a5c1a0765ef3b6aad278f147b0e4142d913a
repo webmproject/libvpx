@@ -16,6 +16,24 @@
       "revId": "8468a5c1a0765ef3b6aad278f147b0e4142d913a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//+BM\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-16T00:39:59Z",
+      "side": 1,
+      "message": "Yes, xd-\u003eab_index goes from 0 to 3. the intra4x4 coding is still handled in as a special case. We probably should combine this with other superblock intra coding later(?) at that time, we need to convert this use of ib into xd-\u003eab_index. Before we get to this point, ib still goes from 0 to 3.",
+      "parentUuid": "AAAAYH//+HI\u003d",
+      "revId": "8468a5c1a0765ef3b6aad278f147b0e4142d913a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
