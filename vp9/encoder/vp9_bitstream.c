@@ -50,10 +50,6 @@ vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES];
 extern unsigned int active_section;
 #endif
 
-#ifdef MODE_STATS
-int count_mb_seg[4] = { 0, 0, 0, 0 };
-#endif
-
 #define vp9_cost_upd  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)) >> 8)
 #define vp9_cost_upd256  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)))
 
@@ -701,10 +697,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
         break;
       case SPLITMV: {
         int j = 0;
-
-#ifdef MODE_STATS
-        ++count_mb_seg[mi->partitioning];
-#endif
 
         do {
           B_PREDICTION_MODE blockmode;

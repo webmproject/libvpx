@@ -30,16 +30,6 @@
 #define MIN_BPB_FACTOR 0.005
 #define MAX_BPB_FACTOR 50
 
-#ifdef MODE_STATS
-extern unsigned int y_modes[VP9_YMODES];
-extern unsigned int uv_modes[VP9_UV_MODES];
-extern unsigned int b_modes[B_MODE_COUNT];
-
-extern unsigned int inter_y_modes[MB_MODE_COUNT];
-extern unsigned int inter_uv_modes[VP9_UV_MODES];
-extern unsigned int inter_b_modes[B_MODE_COUNT];
-#endif
-
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS    9
 
@@ -141,16 +131,6 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->sub_mv_ref_prob, cm->fc.sub_mv_ref_prob);
   vp9_copy(cc->partition_prob, cm->fc.partition_prob);
 
-  // Stats
-#ifdef MODE_STATS
-  vp9_copy(cc->y_modes,       y_modes);
-  vp9_copy(cc->uv_modes,      uv_modes);
-  vp9_copy(cc->b_modes,       b_modes);
-  vp9_copy(cc->inter_y_modes,  inter_y_modes);
-  vp9_copy(cc->inter_uv_modes, inter_uv_modes);
-  vp9_copy(cc->inter_b_modes,  inter_b_modes);
-#endif
-
   vp9_copy(cc->segment_pred_probs, cm->segment_pred_probs);
   vp9_copy(cc->ref_pred_probs_update, cpi->ref_pred_probs_update);
   vp9_copy(cc->ref_pred_probs, cm->ref_pred_probs);
@@ -190,16 +170,6 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
   vp9_copy(cm->fc.sub_mv_ref_prob, cc->sub_mv_ref_prob);
   vp9_copy(cm->fc.partition_prob, cc->partition_prob);
-
-  // Stats
-#ifdef MODE_STATS
-  vp9_copy(y_modes, cc->y_modes);
-  vp9_copy(uv_modes, cc->uv_modes);
-  vp9_copy(b_modes, cc->b_modes);
-  vp9_copy(inter_y_modes, cc->inter_y_modes);
-  vp9_copy(inter_uv_modes, cc->inter_uv_modes);
-  vp9_copy(inter_b_modes, cc->inter_b_modes);
-#endif
 
   vp9_copy(cm->segment_pred_probs, cc->segment_pred_probs);
   vp9_copy(cpi->ref_pred_probs_update, cc->ref_pred_probs_update);

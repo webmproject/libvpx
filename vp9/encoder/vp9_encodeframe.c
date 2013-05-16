@@ -52,18 +52,6 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
 static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
 
-#ifdef MODE_STATS
-unsigned int inter_y_modes[MB_MODE_COUNT];
-unsigned int inter_uv_modes[VP9_UV_MODES];
-unsigned int inter_b_modes[B_MODE_COUNT];
-unsigned int y_modes[VP9_YMODES];
-unsigned int i8x8_modes[VP9_I8X8_MODES];
-unsigned int uv_modes[VP9_UV_MODES];
-unsigned int uv_modes_y[VP9_YMODES][VP9_UV_MODES];
-unsigned int b_modes[B_MODE_COUNT];
-#endif
-
-
 /* activity_avg must be positive, or flat regions could get a zero weight
  *  (infinite lambda), which confounds analysis.
  * This also avoids the need for divide by zero checks in
@@ -661,11 +649,7 @@ static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
 
-  if (cm->frame_type == KEY_FRAME) {
-#ifdef MODE_STATS
-    y_modes[mbmi->mode]++;
-#endif
-  } else {
+  if (cm->frame_type != KEY_FRAME) {
     int segment_id, seg_ref_active;
 
     if (mbmi->ref_frame) {
@@ -676,18 +660,6 @@ static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
       else
         cpi->comp_pred_count[pred_context]++;
     }
-
-#ifdef MODE_STATS
-    inter_y_modes[mbmi->mode]++;
-
-    if (mbmi->mode == SPLITMV) {
-      int b;
-
-      for (b = 0; b < x->partition_info->count; b++) {
-        inter_b_modes[x->partition_info->bmi[b].mode]++;
-      }
-    }
-#endif
 
     // If we have just a single reference frame coded for a segment then
     // exclude from the reference frame counts used to work out
@@ -1633,23 +1605,6 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
   const MACROBLOCKD *xd = &x->e_mbd;
   const MB_PREDICTION_MODE m = xd->mode_info_context->mbmi.mode;
   const MB_PREDICTION_MODE uvm = xd->mode_info_context->mbmi.uv_mode;
-
-#ifdef MODE_STATS
-  const int is_key = cpi->common.frame_type == KEY_FRAME;
-
-  ++ (is_key ? uv_modes : inter_uv_modes)[uvm];
-  ++ uv_modes_y[m][uvm];
-
-  if (m == I4X4_PRED) {
-    unsigned int *const bct = is_key ? b_modes : inter_b_modes;
-
-    int b = 0;
-
-    do {
-      ++ bct[xd->block[b].bmi.as_mode.first];
-    } while (++b < 4);
-  }
-#endif
 
 #if CONFIG_AB4X4
   if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {

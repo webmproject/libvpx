@@ -21,8 +21,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_enums.h"
 
-// #define MODE_STATS
-
 #define MAX_MB_SEGMENTS     8
 #define MB_SEG_TREE_PROBS   (MAX_MB_SEGMENTS-1)
 #define PREDICTION_PROBS 3

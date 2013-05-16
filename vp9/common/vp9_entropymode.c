@@ -409,27 +409,6 @@ void vp9_adapt_mode_context(VP9_COMMON *pc) {
   }
 }
 
-#ifdef MODE_STATS
-#include "vp9/common/vp9_modecont.h"
-void print_mode_contexts(VP9_COMMON *pc) {
-  int j, i;
-  printf("\n====================\n");
-  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    for (i = 0; i < 4; i++) {
-      printf("%4d ", pc->fc.mode_context[j][i]);
-    }
-    printf("\n");
-  }
-  printf("====================\n");
-  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    for (i = 0; i < 4; i++) {
-      printf("%4d ", pc->fc.mode_context_a[j][i]);
-    }
-    printf("\n");
-  }
-}
-#endif
-
 #define MODE_COUNT_SAT 20
 #define MODE_MAX_UPDATE_FACTOR 144
 static void update_mode_probs(int n_modes,

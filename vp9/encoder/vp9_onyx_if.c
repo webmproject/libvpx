@@ -120,17 +120,6 @@ unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #if defined(SECTIONBITS_OUTPUT)
 extern unsigned __int64 Sectionbits[500];
 #endif
-#ifdef MODE_STATS
-extern int64_t Sectionbits[500];
-extern unsigned int y_modes[VP9_YMODES];
-extern unsigned int i8x8_modes[VP9_I8X8_MODES];
-extern unsigned int uv_modes[VP9_UV_MODES];
-extern unsigned int uv_modes_y[VP9_YMODES][VP9_UV_MODES];
-extern unsigned int b_modes[B_MODE_COUNT];
-extern unsigned int inter_y_modes[MB_MODE_COUNT];
-extern unsigned int inter_uv_modes[VP9_UV_MODES];
-extern unsigned int inter_b_modes[B_MODE_COUNT];
-#endif
 
 extern void vp9_init_quantizer(VP9_COMP *cpi);
 
@@ -1396,16 +1385,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   if (cpi->pass != 1)
     init_context_counters();
 #endif
-#ifdef MODE_STATS
-  vp9_zero(y_modes);
-  vp9_zero(i8x8_modes);
-  vp9_zero(uv_modes);
-  vp9_zero(uv_modes_y);
-  vp9_zero(b_modes);
-  vp9_zero(inter_y_modes);
-  vp9_zero(inter_uv_modes);
-  vp9_zero(inter_b_modes);
-#endif
+
 #ifdef NMV_STATS
   init_nmvstats();
 #endif
@@ -1669,9 +1649,7 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
                              - cpi->first_time_stamp_ever) / 10000000.000;
       double total_encode_time = (cpi->time_receive_data + cpi->time_compress_data)   / 1000.000;
       double dr = (double)cpi->bytes * (double) 8 / (double)1000  / time_encoded;
-#if defined(MODE_STATS)
-      print_mode_contexts(&cpi->common);
-#endif
+
       if (cpi->b_calculate_psnr) {
         YV12_BUFFER_CONFIG *lst_yv12 =
             &cpi->common.yv12_fb[cpi->common.ref_frame_map[cpi->lst_fb_idx]];
@@ -1709,88 +1687,6 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
       fclose(f);
     }
 
-#endif
-
-
-#ifdef MODE_STATS
-    {
-      extern int count_mb_seg[4];
-      char modes_stats_file[250];
-      FILE *f;
-      double dr = (double)cpi->oxcf.frame_rate * (double)cpi->bytes * (double)8 / (double)cpi->count / (double)1000;
-      sprintf(modes_stats_file, "modes_q%03d.stt", cpi->common.base_qindex);
-      f = fopen(modes_stats_file, "w");
-      fprintf(f, "intra_mode in Intra Frames:\n");
-      {
-        int i;
-        fprintf(f, "Y: ");
-        for (i = 0; i < VP9_YMODES; i++) fprintf(f, " %8d,", y_modes[i]);
-        fprintf(f, "\n");
-      }
-      {
-        int i;
-        fprintf(f, "I8: ");
-        for (i = 0; i < VP9_I8X8_MODES; i++) fprintf(f, " %8d,", i8x8_modes[i]);
-        fprintf(f, "\n");
-      }
-      {
-        int i;
-        fprintf(f, "UV: ");
-        for (i = 0; i < VP9_UV_MODES; i++) fprintf(f, " %8d,", uv_modes[i]);
-        fprintf(f, "\n");
-      }
-      {
-        int i, j;
-        fprintf(f, "KeyFrame Y-UV:\n");
-        for (i = 0; i < VP9_YMODES; i++) {
-          fprintf(f, "%2d:", i);
-          for (j = 0; j < VP9_UV_MODES; j++) fprintf(f, "%8d, ", uv_modes_y[i][j]);
-          fprintf(f, "\n");
-        }
-      }
-      {
-        int i, j;
-        fprintf(f, "Inter Y-UV:\n");
-        for (i = 0; i < VP9_YMODES; i++) {
-          fprintf(f, "%2d:", i);
-          for (j = 0; j < VP9_UV_MODES; j++) fprintf(f, "%8d, ", cpi->y_uv_mode_count[i][j]);
-          fprintf(f, "\n");
-        }
-      }
-      {
-        int i;
-
-        fprintf(f, "B: ");
-        for (i = 0; i < VP9_NKF_BINTRAMODES; i++)
-          fprintf(f, "%8d, ", b_modes[i]);
-
-        fprintf(f, "\n");
-
-      }
-
-      fprintf(f, "Modes in Inter Frames:\n");
-      {
-        int i;
-        fprintf(f, "Y: ");
-        for (i = 0; i < MB_MODE_COUNT; i++) fprintf(f, " %8d,", inter_y_modes[i]);
-        fprintf(f, "\n");
-      }
-      {
-        int i;
-        fprintf(f, "UV: ");
-        for (i = 0; i < VP9_UV_MODES; i++) fprintf(f, " %8d,", inter_uv_modes[i]);
-        fprintf(f, "\n");
-      }
-      {
-        int i;
-        fprintf(f, "B: ");
-        for (i = 0; i < B_MODE_COUNT; i++) fprintf(f, "%8d, ", inter_b_modes[i]);
-        fprintf(f, "\n");
-      }
-      fprintf(f, "P:%8d, %8d, %8d, %8d\n", count_mb_seg[0], count_mb_seg[1], count_mb_seg[2], count_mb_seg[3]);
-      fprintf(f, "PB:%8d, %8d, %8d, %8d\n", inter_b_modes[LEFT4X4], inter_b_modes[ABOVE4X4], inter_b_modes[ZERO4X4], inter_b_modes[NEW4X4]);
-      fclose(f);
-    }
 #endif
 
 #ifdef ENTROPY_STATS

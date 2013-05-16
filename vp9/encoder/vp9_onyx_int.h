@@ -64,16 +64,6 @@ typedef struct {
   int nmvcosts[2][MV_VALS];
   int nmvcosts_hp[2][MV_VALS];
 
-#ifdef MODE_STATS
-  // Stats
-  int y_modes[VP9_YMODES];
-  int uv_modes[VP9_UV_MODES];
-  int b_modes[B_MODE_COUNT];
-  int inter_y_modes[MB_MODE_COUNT];
-  int inter_uv_modes[VP9_UV_MODES];
-  int inter_b_modes[B_MODE_COUNT];
-#endif
-
   vp9_prob segment_pred_probs[PREDICTION_PROBS];
   unsigned char ref_pred_probs_update[PREDICTION_PROBS];
   vp9_prob ref_pred_probs[PREDICTION_PROBS];
