@@ -24,67 +24,47 @@ extern unsigned int active_section;
 nmv_context_counts tnmvcounts;
 #endif
 
-static void encode_nmv_component(vp9_writer* const bc,
-                                 int v,
-                                 int r,
-                                 const nmv_component* const mvcomp) {
-  int s, z, c, o, d;
-  assert (v != 0);            /* should not be zero */
-  s = v < 0;
-  vp9_write(bc, s, mvcomp->sign);
-  z = (s ? -v : v) - 1;       /* magnitude - 1 */
+static void encode_mv_component(vp9_writer* w, int comp,
+                                const nmv_component* mvcomp, int usehp) {
+  int offset;
+  const int sign = comp < 0;
+  const int mag = sign ? -comp : comp;
+  const int mv_class = vp9_get_mv_class(mag - 1, &offset);
+  const int d = offset >> 3;                // int mv data
+  const int fr = (offset >> 1) & 3;         // fractional mv data
+  const int hp = offset & 1;                // high precision mv data
 
-  c = vp9_get_mv_class(z, &o);
+  assert(comp != 0);
 
-  write_token(bc, vp9_mv_class_tree, mvcomp->classes,
-              vp9_mv_class_encodings + c);
+  // Sign
+  vp9_write(w, sign, mvcomp->sign);
 
-  d = (o >> 3);               /* int mv data */
+  // Class
+  write_token(w, vp9_mv_class_tree, mvcomp->classes,
+              &vp9_mv_class_encodings[mv_class]);
 
-  if (c == MV_CLASS_0) {
-    write_token(bc, vp9_mv_class0_tree, mvcomp->class0,
-                vp9_mv_class0_encodings + d);
+  // Integer bits
+  if (mv_class == MV_CLASS_0) {
+    write_token(w, vp9_mv_class0_tree, mvcomp->class0,
+                &vp9_mv_class0_encodings[d]);
   } else {
-    int i, b;
-    b = c + CLASS0_BITS - 1;  /* number of bits */
-    for (i = 0; i < b; ++i)
-      vp9_write(bc, ((d >> i) & 1), mvcomp->bits[i]);
+    int i;
+    const int n = mv_class + CLASS0_BITS - 1;  // number of bits
+    for (i = 0; i < n; ++i)
+      vp9_write(w, (d >> i) & 1, mvcomp->bits[i]);
   }
+
+  // Fractional bits
+  write_token(w, vp9_mv_fp_tree,
+              mv_class == MV_CLASS_0 ?  mvcomp->class0_fp[d] : mvcomp->fp,
+              &vp9_mv_fp_encodings[fr]);
+
+  // High precision bit
+  if (usehp)
+    vp9_write(w, hp,
+              mv_class == MV_CLASS_0 ? mvcomp->class0_hp : mvcomp->hp);
 }
 
-static void encode_nmv_component_fp(vp9_writer *bc,
-                                    int v,
-                                    int r,
-                                    const nmv_component* const mvcomp,
-                                    int usehp) {
-  int s, z, c, o, d, f, e;
-  assert (v != 0);            /* should not be zero */
-  s = v < 0;
-  z = (s ? -v : v) - 1;       /* magnitude - 1 */
-
-  c = vp9_get_mv_class(z, &o);
-
-  d = (o >> 3);               /* int mv data */
-  f = (o >> 1) & 3;           /* fractional pel mv data */
-  e = (o & 1);                /* high precision mv data */
-
-  /* Code the fractional pel bits */
-  if (c == MV_CLASS_0) {
-    write_token(bc, vp9_mv_fp_tree, mvcomp->class0_fp[d],
-                vp9_mv_fp_encodings + f);
-  } else {
-    write_token(bc, vp9_mv_fp_tree, mvcomp->fp,
-                vp9_mv_fp_encodings + f);
-  }
-  /* Code the high precision bit */
-  if (usehp) {
-    if (c == MV_CLASS_0) {
-      vp9_write(bc, e, mvcomp->class0_hp);
-    } else {
-      vp9_write(bc, e, mvcomp->hp);
-    }
-  }
-}
 
 static void build_nmv_component_cost_table(int *mvcost,
                                            const nmv_component* const mvcomp,
@@ -556,27 +536,19 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
   }
 }
 
-void vp9_encode_nmv(vp9_writer* w, const MV* const mv,
-                    const MV* const ref, const nmv_context* const mvctx) {
-  const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
-  write_token(w, vp9_mv_joint_tree, mvctx->joints, vp9_mv_joint_encodings + j);
-  if (mv_joint_vertical(j))
-    encode_nmv_component(w, mv->row, ref->col, &mvctx->comps[0]);
-
-  if (mv_joint_horizontal(j))
-    encode_nmv_component(w, mv->col, ref->col, &mvctx->comps[1]);
-}
-
-void vp9_encode_nmv_fp(vp9_writer* const bc, const MV* const mv,
-                       const MV* const ref, const nmv_context* const mvctx,
-                       int usehp) {
-  const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
+void vp9_encode_mv(vp9_writer* w, const MV* mv, const MV* ref,
+                   const nmv_context* mvctx, int usehp) {
+  const MV diff = {mv->row - ref->row,
+                   mv->col - ref->col};
+  const MV_JOINT_TYPE j = vp9_get_mv_joint(&diff);
   usehp = usehp && vp9_use_nmv_hp(ref);
+
+  write_token(w, vp9_mv_joint_tree, mvctx->joints, &vp9_mv_joint_encodings[j]);
   if (mv_joint_vertical(j))
-    encode_nmv_component_fp(bc, mv->row, ref->row, &mvctx->comps[0], usehp);
+    encode_mv_component(w, diff.row, &mvctx->comps[0], usehp);
 
   if (mv_joint_horizontal(j))
-    encode_nmv_component_fp(bc, mv->col, ref->col, &mvctx->comps[1], usehp);
+    encode_mv_component(w, diff.col, &mvctx->comps[1], usehp);
 }
 
 void vp9_build_nmv_cost_table(int *mvjoint,

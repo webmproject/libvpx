@@ -455,16 +455,6 @@ static void write_sub_mv_ref(vp9_writer *bc, B_PREDICTION_MODE m,
               vp9_sub_mv_ref_encoding_array - LEFT4X4 + m);
 }
 
-static void write_nmv(VP9_COMP *cpi, vp9_writer *bc,
-                      const MV *mv, const int_mv *ref,
-                      const nmv_context *nmvc, int usehp) {
-  MV e;
-  e.row = mv->row - ref->as_mv.row;
-  e.col = mv->col - ref->as_mv.col;
-
-  vp9_encode_nmv(bc, &e, &ref->as_mv, nmvc);
-  vp9_encode_nmv_fp(bc, &e, &ref->as_mv, nmvc, usehp);
-}
 
 // This function writes the current macro block's segnment id to the bitstream
 // It should only be called if a segment map update is indicated.
@@ -700,15 +690,14 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #ifdef ENTROPY_STATS
         active_section = 5;
 #endif
-        write_nmv(cpi, bc, &mi->mv[0].as_mv, &mi->best_mv,
-                  (const nmv_context*) nmvc,
-                  xd->allow_high_precision_mv);
+        vp9_encode_mv(bc,
+                      &mi->mv[0].as_mv, &mi->best_mv.as_mv,
+                      nmvc, xd->allow_high_precision_mv);
 
-        if (mi->second_ref_frame > 0) {
-          write_nmv(cpi, bc, &mi->mv[1].as_mv, &mi->best_second_mv,
-                    (const nmv_context*) nmvc,
-                    xd->allow_high_precision_mv);
-        }
+        if (mi->second_ref_frame > 0)
+          vp9_encode_mv(bc,
+                        &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
+                        nmvc, xd->allow_high_precision_mv);
         break;
       case SPLITMV: {
         int j = 0;
@@ -738,17 +727,14 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #ifdef ENTROPY_STATS
             active_section = 11;
 #endif
-            write_nmv(cpi, bc, &blockmv.as_mv, &mi->best_mv,
-                      (const nmv_context*) nmvc,
-                      xd->allow_high_precision_mv);
+            vp9_encode_mv(bc, &blockmv.as_mv, &mi->best_mv.as_mv,
+                          nmvc, xd->allow_high_precision_mv);
 
-            if (mi->second_ref_frame > 0) {
-              write_nmv(cpi, bc,
-                        &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
-                        &mi->best_second_mv,
-                        (const nmv_context*) nmvc,
-                        xd->allow_high_precision_mv);
-            }
+            if (mi->second_ref_frame > 0)
+              vp9_encode_mv(bc,
+                            &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
+                            &mi->best_second_mv.as_mv,
+                            nmvc, xd->allow_high_precision_mv);
           }
         } while (++j < cpi->mb.partition_info->count);
         break;
