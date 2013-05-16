@@ -533,6 +533,66 @@ static void configure_implicit_segmentation(VP9_COMP *cpi, int frame_qindex) {
 }
 #endif
 
+#ifdef ENTROPY_STATS
+void vp9_update_mode_context_stats(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+  int i, j;
+  unsigned int (*mv_ref_ct)[4][2] = cm->fc.mv_ref_ct;
+  int64_t (*mv_ref_stats)[4][2] = cpi->mv_ref_stats;
+  FILE *f;
+
+  // Read the past stats counters
+  f = fopen("mode_context.bin",  "rb");
+  if (!f) {
+    vpx_memset(cpi->mv_ref_stats, 0, sizeof(cpi->mv_ref_stats));
+  } else {
+    fread(cpi->mv_ref_stats, sizeof(cpi->mv_ref_stats), 1, f);
+    fclose(f);
+  }
+
+  // Add in the values for this frame
+  for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
+    for (j = 0; j < 4; j++) {
+      mv_ref_stats[i][j][0] += (int64_t)mv_ref_ct[i][j][0];
+      mv_ref_stats[i][j][1] += (int64_t)mv_ref_ct[i][j][1];
+    }
+  }
+
+  // Write back the accumulated stats
+  f = fopen("mode_context.bin",  "wb");
+  fwrite(cpi->mv_ref_stats, sizeof(cpi->mv_ref_stats), 1, f);
+  fclose(f);
+}
+
+void print_mode_context(VP9_COMP *cpi) {
+  FILE *f = fopen("vp9_modecont.c", "a");
+  int i, j;
+
+  fprintf(f, "#include \"vp9_entropy.h\"\n");
+  fprintf(f, "const int vp9_mode_contexts[INTER_MODE_CONTEXTS][4] =");
+  fprintf(f, "{\n");
+  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
+    fprintf(f, "  {/* %d */ ", j);
+    fprintf(f, "    ");
+    for (i = 0; i < 4; i++) {
+      int this_prob;
+      int64_t count = cpi->mv_ref_stats[j][i][0] + cpi->mv_ref_stats[j][i][1];
+      if (count)
+        this_prob = ((cpi->mv_ref_stats[j][i][0] * 256) + (count >> 1)) / count;
+      else
+        this_prob = 128;
+
+      // context probs
+      fprintf(f, "%5d, ", this_prob);
+    }
+    fprintf(f, "  },\n");
+  }
+
+  fprintf(f, "};\n");
+  fclose(f);
+}
+#endif  // ENTROPY_STATS
+
 // DEBUG: Print out the segment id of each MB in the current frame.
 static void print_seg_map(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
@@ -1646,7 +1706,7 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
     if (cpi->pass != 1) {
       print_context_counters();
       print_tree_update_probs();
-      print_mode_context(&cpi->common);
+      print_mode_context(cpi);
     }
 #endif
 #ifdef NMV_STATS
@@ -3238,6 +3298,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       vp9_adapt_nmv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
     }
   }
+
+#ifdef ENTROPY_STATS
+  vp9_update_mode_context_stats(cpi);
+#endif
 
   /* Move storing frame_type out of the above loop since it is also
    * needed in motion search besides loopfilter */

@@ -2430,32 +2430,3 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
   }
 }
 #endif  // CONFIG_COMP_INTER_JOINT_SEARCH
-
-#ifdef ENTROPY_STATS
-void print_mode_context(VP9_COMMON *pc) {
-  FILE *f = fopen("vp9_modecont.c", "a");
-  int i, j;
-
-  fprintf(f, "#include \"vp9_entropy.h\"\n");
-  fprintf(f, "const int vp9_mode_contexts[INTER_MODE_CONTEXTS][4] =");
-  fprintf(f, "{\n");
-  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    fprintf(f, "  {/* %d */ ", j);
-    fprintf(f, "    ");
-    for (i = 0; i < 4; i++) {
-      int this_prob;
-
-      // context probs
-      this_prob = get_binary_prob(pc->fc.mv_ref_ct[j][i][0],
-                                  pc->fc.mv_ref_ct[j][i][1]);
-
-      fprintf(f, "%5d, ", this_prob);
-    }
-    fprintf(f, "  },\n");
-  }
-
-  fprintf(f, "};\n");
-  fclose(f);
-}
-
-#endif/* END MV ref count ENTROPY_STATS stats code */

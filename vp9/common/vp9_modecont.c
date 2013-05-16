@@ -12,11 +12,11 @@
 #include "vp9/common/vp9_entropy.h"
 
 const int vp9_default_mode_contexts[INTER_MODE_CONTEXTS][4] = {
-  {1,       223,   1,    237},  // 0,0 best: Only candidate
-  {87,      166,   26,   219},  // 0,0 best: non zero candidates
-  {89,      67,    18,   125},  // 0,0 best: non zero candidates, split
-  {16,      141,   69,   226},  // strong nz candidate(s), no split
-  {35,      122,   14,   227},  // weak nz candidate(s), no split
-  {14,      122,   22,   164},  // strong nz candidate(s), split
-  {16,      70,    9,    183},  // weak nz candidate(s), split
+  {2,       173,   34,   229},  // 0 = both zero mv
+  {7,       145,   85,   225},  // 1 = one zero mv + one a predicted mv
+  {7,       166,   63,   231},  // 2 = two predicted mvs
+  {7,       94,    66,   219},  // 3 = one predicted/zero and one new mv
+  {8,       64,    46,   213},  // 4 = two new mvs
+  {17,      81,    31,   231},  // 5 = one intra neighbour + x
+  {25,      29,    30,   246},  // 6 = two intra neighbours
 };
