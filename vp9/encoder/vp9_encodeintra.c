@@ -80,15 +80,6 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib,
   }
 }
 
-void vp9_encode_intra4x4mby(MACROBLOCK *mb, BLOCK_SIZE_TYPE bsize) {
-  int i;
-  int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
-  int bc = 1 << (bwl + bhl);
-
-  for (i = 0; i < bc; i++)
-    encode_intra4x4block(mb, i, bsize);
-}
-
 void vp9_encode_intra16x16mby(VP9_COMMON *const cm, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
 
@@ -102,3 +93,5 @@ void vp9_encode_intra16x16mbuv(VP9_COMMON *const cm, MACROBLOCK *x) {
   vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_MB16X16);
   vp9_encode_sbuv(cm, x, BLOCK_SIZE_MB16X16);
 }
+
+

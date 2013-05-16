@@ -604,3 +604,104 @@ void vp9_encode_sb(VP9_COMMON *const cm, MACROBLOCK *x,
 
   foreach_transformed_block(xd, bsize, encode_block, &arg);
 }
+
+static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                               int ss_txfrm_size, void *arg) {
+  struct encode_b_args* const args = arg;
+  MACROBLOCK* const x = args->x;
+  MACROBLOCKD* const xd = &x->e_mbd;
+  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
+  const int bw = 4 << (b_width_log2(bsize) - xd->plane[plane].subsampling_x);
+  const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
+                                                       block, ss_txfrm_size);
+  uint8_t* const src =
+      raster_block_offset_uint8(xd, bsize, plane, raster_block,
+                                x->plane[plane].src.buf,
+                                x->plane[plane].src.stride);
+  uint8_t* const dst =
+      raster_block_offset_uint8(xd, bsize, plane, raster_block,
+                                xd->plane[plane].dst.buf,
+                                xd->plane[plane].dst.stride);
+  int16_t* const src_diff =
+      raster_block_offset_int16(xd, bsize, plane,
+                                raster_block, x->plane[plane].src_diff);
+
+  const int txfm_b_size = 4 << tx_size;
+  int ib = raster_block;
+
+  TX_TYPE tx_type;
+
+  if (tx_size <= TX_16X16)
+    tx_type = txfm_map(xd->mode_info_context->bmi[ib].as_mode.first);
+  else
+    tx_type = DCT_DCT;
+
+  vp9_predict_intra_block(&x->e_mbd, ib, bsize, tx_size,
+                          xd->mode_info_context->bmi[ib].as_mode.first,
+                          dst, xd->plane[plane].dst.stride);
+  vp9_subtract_block(txfm_b_size, txfm_b_size,
+                     src_diff, bw,
+                     src, x->plane[plane].src.stride,
+                     dst, xd->plane[plane].dst.stride);
+
+  xform_quant(plane, block, bsize, ss_txfrm_size, arg);
+
+  /*
+  if (x->optimize)
+    vp9_optimize_b(plane, block, bsize, ss_txfrm_size, args->cm, x, args->ctx);
+    */
+
+  switch (ss_txfrm_size / 2) {
+    case TX_32X32:
+        vp9_short_idct32x32_add(BLOCK_OFFSET(xd->plane[plane].dqcoeff,
+                                block, 16), dst, xd->plane[plane].dst.stride);
+      break;
+    case TX_16X16:
+      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      if (tx_type == DCT_DCT) {
+        vp9_short_idct16x16_add(BLOCK_OFFSET(xd->plane[plane].dqcoeff,
+                                block, 16), dst, xd->plane[plane].dst.stride);
+      } else {
+        vp9_short_iht16x16_add(BLOCK_OFFSET(xd->plane[plane].dqcoeff,
+                               block, 16), dst, xd->plane[plane].dst.stride,
+                               tx_type);
+      }
+      break;
+    case TX_8X8:
+      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      if (tx_type == DCT_DCT) {
+        vp9_short_idct8x8_add(BLOCK_OFFSET(xd->plane[plane].dqcoeff,
+                              block, 16), dst, xd->plane[plane].dst.stride);
+      } else {
+        vp9_short_iht8x8_add(BLOCK_OFFSET(xd->plane[plane].dqcoeff,
+                             block, 16), dst, xd->plane[plane].dst.stride,
+                             tx_type);
+      }
+      break;
+    case TX_4X4:
+      tx_type = plane == 0 ? get_tx_type_4x4(xd, raster_block) : DCT_DCT;
+      if (tx_type == DCT_DCT) {
+        // this is like vp9_short_idct4x4 but has a special case around eob<=1
+        // which is significant (not just an optimization) for the lossless
+        // case.
+        vp9_inverse_transform_b_4x4_add(xd, xd->plane[plane].eobs[block],
+            BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16), dst,
+            xd->plane[plane].dst.stride);
+      } else {
+        vp9_short_iht4x4_add(BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                             dst, xd->plane[plane].dst.stride, tx_type);
+      }
+      break;
+  }
+}
+
+void vp9_encode_intra4x4mby(VP9_COMMON *const cm, MACROBLOCK *x,
+                            BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD* const xd = &x->e_mbd;
+  struct optimize_ctx ctx;
+  struct encode_b_args arg = {cm, x, &ctx};
+
+  foreach_transformed_block_in_plane(xd, bsize, 0,
+                                     encode_block_intra, &arg);
+}
+
