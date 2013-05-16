@@ -231,19 +231,19 @@ endif
 # even though there is no real dependency there (the dependency is on
 # the makefiles). We may want to revisit this.
 define vcproj_template
-$(1): $($(1:.vcproj=).SRCS)
+$(1): $($(1:.$(VCPROJ_SFX)=).SRCS)
 	@echo "    [vcproj] $$@"
-	$$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh\
+	$$(GEN_VCPROJ)\
             --exe\
             --target=$$(TOOLCHAIN)\
-            --name=$$(@:.vcproj=)\
+            --name=$$(@:.$(VCPROJ_SFX)=)\
             --ver=$$(CONFIG_VS_VERSION)\
-            --proj-guid=$$($$(@:.vcproj=).GUID)\
+            --proj-guid=$$($$(@:.$(VCPROJ_SFX)=).GUID)\
             $$(if $$(CONFIG_STATIC_MSVCRT),--static-crt) \
             --out=$$@ $$(INTERNAL_CFLAGS) $$(CFLAGS) \
             $$(INTERNAL_LDFLAGS) $$(LDFLAGS) -l$$(CODEC_LIB) -lwinmm $$^
 endef
-PROJECTS-$(CONFIG_MSVS) += $(ALL_EXAMPLES:.c=.vcproj)
+PROJECTS-$(CONFIG_MSVS) += $(ALL_EXAMPLES:.c=.$(VCPROJ_SFX))
 INSTALL-BINS-$(CONFIG_MSVS) += $(foreach p,$(VS_PLATFORMS),\
                                $(addprefix bin/$(p)/,$(ALL_EXAMPLES:.c=.exe)))
 $(foreach proj,$(call enabled,PROJECTS),\

@@ -207,10 +207,10 @@ libvpx_srcs.txt:
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
 
-obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
+obj_int_extract.$(VCPROJ_SFX): $(SRC_PATH_BARE)/build/make/obj_int_extract.c
 	@cp $(SRC_PATH_BARE)/build/x86-msvs/obj_int_extract.bat .
 	@echo "    [CREATE] $@"
-	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+	$(qexec)$(GEN_VCPROJ) \
     --exe \
     --target=$(TOOLCHAIN) \
     --name=obj_int_extract \
@@ -221,7 +221,7 @@ obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
     -I. \
     -I"$(SRC_PATH_BARE)" \
 
-PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.vcproj
+PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.$(VCPROJ_SFX)
 
 vpx.def: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
@@ -230,9 +230,9 @@ vpx.def: $(call enabled,CODEC_EXPORTS)
             --out=$@ $^
 CLEAN-OBJS += vpx.def
 
-vpx.vcproj: $(CODEC_SRCS) vpx.def
+vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def
 	@echo "    [CREATE] $@"
-	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+	$(qexec)$(GEN_VCPROJ) \
             $(if $(CONFIG_SHARED),--dll,--lib) \
             --target=$(TOOLCHAIN) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
@@ -243,10 +243,10 @@ vpx.vcproj: $(CODEC_SRCS) vpx.def
             --out=$@ $(CFLAGS) $^ \
             --src-path-bare="$(SRC_PATH_BARE)" \
 
-PROJECTS-$(BUILD_LIBVPX) += vpx.vcproj
+PROJECTS-$(BUILD_LIBVPX) += vpx.$(VCPROJ_SFX)
 
-vpx.vcproj: vpx_config.asm
-vpx.vcproj: $(RTCD)
+vpx.$(VCPROJ_SFX): vpx_config.asm
+vpx.$(VCPROJ_SFX): $(RTCD)
 
 endif
 else
@@ -403,9 +403,9 @@ testdata:: $(LIBVPX_TEST_DATA)
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
 
-gtest.vcproj: $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
+gtest.$(VCPROJ_SFX): $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
 	@echo "    [CREATE] $@"
-	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+	$(qexec)$(GEN_VCPROJ) \
             --lib \
             --target=$(TOOLCHAIN) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
@@ -414,14 +414,14 @@ gtest.vcproj: $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
             --ver=$(CONFIG_VS_VERSION) \
             --src-path-bare="$(SRC_PATH_BARE)" \
             -D_VARIADIC_MAX=10 \
-            --out=gtest.vcproj $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc \
+            --out=gtest.$(VCPROJ_SFX) $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" -I"$(SRC_PATH_BARE)/third_party/googletest/src"
 
-PROJECTS-$(CONFIG_MSVS) += gtest.vcproj
+PROJECTS-$(CONFIG_MSVS) += gtest.$(VCPROJ_SFX)
 
-test_libvpx.vcproj: $(LIBVPX_TEST_SRCS)
+test_libvpx.$(VCPROJ_SFX): $(LIBVPX_TEST_SRCS)
 	@echo "    [CREATE] $@"
-	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+	$(qexec)$(GEN_VCPROJ) \
             --exe \
             --target=$(TOOLCHAIN) \
             --name=test_libvpx \
@@ -433,7 +433,7 @@ test_libvpx.vcproj: $(LIBVPX_TEST_SRCS)
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
             -L. -l$(CODEC_LIB) -lwinmm -l$(GTEST_LIB) $^
 
-PROJECTS-$(CONFIG_MSVS) += test_libvpx.vcproj
+PROJECTS-$(CONFIG_MSVS) += test_libvpx.$(VCPROJ_SFX)
 
 test:: testdata
 	@set -e; for t in $(addprefix $(TGT_OS:win64=x64)/Release/,$(notdir $(LIBVPX_TEST_BINS:.cc=.exe))); do $$t; done
