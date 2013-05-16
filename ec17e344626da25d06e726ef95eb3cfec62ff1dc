@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYH//+Ac\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-16T00:48:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAYH//+IY\u003d",
+      "revId": "ec17e344626da25d06e726ef95eb3cfec62ff1dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYH//+Ho\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYH//+BA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1147,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-16T00:48:13Z",
+      "side": 1,
+      "message": "will touch this in the next patch still working on here.",
+      "parentUuid": "AAAAYH//+Ho\u003d",
+      "revId": "ec17e344626da25d06e726ef95eb3cfec62ff1dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYH//+H4\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2013-05-15T23:49:29Z",
       "side": 1,
       "message": "so uhm - I\u0027m not sure this is a great idea. The problem is that we\u0027re adding code here that makes the existing splitmv infrastructure more complex. I\u0027d prefer if we\u0027d completely get rid of splitmv first, moving everything to non-splitmv code instead, and then add 8x4/4x8 to that code. The disadvantage here is that we\u0027re working with code this is ... well ... crappy, and intended to be deprecated.",
+      "revId": "ec17e344626da25d06e726ef95eb3cfec62ff1dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//+Ag\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1160,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-16T00:48:13Z",
+      "side": 1,
+      "message": "Yes, I agree this chunk of code should be rewritten for 4x4 block level coding (probably we could consider to replace it with handle_inter_mode?)\n\nThe intention at this point was to reuse these existing codes (with minimum change) to get rate-distortion search for 4x4, 4x8, and 8x4 up running. So that we can get the bit-stream writing/reading, and decoding synchronization, and refining the rate-distortion optimization for 4x4 level block coding done in parallel tomorrow.",
+      "parentUuid": "AAAAYH//+H4\u003d",
       "revId": "ec17e344626da25d06e726ef95eb3cfec62ff1dc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
