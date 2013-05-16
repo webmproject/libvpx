@@ -16,6 +16,24 @@
       "revId": "b0c101e2b41565947ced97b86f0965f19416e50f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//9Bc\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 999,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-05-16T19:03:09Z",
+      "side": 1,
+      "message": "I understand the intent to save a few more bits. But given at Q0 the number of bits for coding deltas are very very small comparing to size of the compressed data, I would rather keep the possibility of using different Q for DC and UV plane.",
+      "parentUuid": "AAAAYH//98k\u003d",
+      "revId": "b0c101e2b41565947ced97b86f0965f19416e50f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
