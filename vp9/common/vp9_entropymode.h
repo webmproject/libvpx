@@ -20,9 +20,9 @@ extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
 extern const vp9_prob vp9_sub_mv_ref_prob2[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
 
-extern const unsigned int vp9_kf_default_bmode_counts[VP9_KF_BINTRAMODES]
-                                                     [VP9_KF_BINTRAMODES]
-                                                     [VP9_KF_BINTRAMODES];
+extern const vp9_prob vp9_kf_default_bmode_probs[VP9_KF_BINTRAMODES]
+                                                [VP9_KF_BINTRAMODES]
+                                                [VP9_KF_BINTRAMODES -1 ];
 
 extern const vp9_tree_index vp9_bmode_tree[];
 extern const vp9_tree_index vp9_kf_bmode_tree[];
@@ -72,10 +72,6 @@ extern void vp9_accum_mv_refs(struct VP9Common *pc,
                               const int context);
 
 void vp9_default_bmode_probs(vp9_prob dest[VP9_NKF_BINTRAMODES - 1]);
-
-void vp9_kf_default_bmode_probs(vp9_prob dest[VP9_KF_BINTRAMODES]
-                                             [VP9_KF_BINTRAMODES]
-                                             [VP9_KF_BINTRAMODES - 1]);
 
 void vp9_adapt_mode_probs(struct VP9Common *);
 

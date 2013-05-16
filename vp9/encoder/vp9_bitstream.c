@@ -1501,12 +1501,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
 
   compute_update_table();
 
-  /* vp9_kf_default_bmode_probs() is called in vp9_setup_key_frame() once
-   * for each K frame before encode frame. pc->kf_bmode_prob doesn't get
-   * changed anywhere else. No need to call it again here. --yw
-   * vp9_kf_default_bmode_probs( pc->kf_bmode_prob);
-   */
-
   /* every keyframe send startcode, width, height, scale factor, clamp
    * and color type.
    */
