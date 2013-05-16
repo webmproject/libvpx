@@ -573,7 +573,11 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
   int bhl = b_height_log2(mbmi->sb_type), bh = 1 << bhl;
   int idx, idy;
 
+#if CONFIG_AB4X4
+  if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+#else
   if (mbmi->mode == SPLITMV) {
+#endif
     int i;
     PARTITION_INFO *pi = x->partition_info;
 #if !CONFIG_AB4X4

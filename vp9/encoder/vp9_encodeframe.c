@@ -786,6 +786,12 @@ static void encode_b(VP9_COMP *cpi, TOKENEXTRA **tp,
 
   if (sub_index != -1)
     *(get_sb_index(xd, bsize)) = sub_index;
+
+#if CONFIG_AB4X4
+  if (bsize < BLOCK_SIZE_SB8X8)
+    if (xd->ab_index > 0)
+      return;
+#endif
   set_offsets(cpi, mi_row, mi_col, bsize);
   update_state(cpi, get_block_context(x, bsize), bsize, output_enabled);
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize);
@@ -828,13 +834,8 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp,
 
   if (bsl == bwl && bsl == bhl) {
 #if CONFIG_AB4X4
-    if (output_enabled && bsize >= BLOCK_SIZE_SB8X8) {
-      if (bsize > BLOCK_SIZE_SB8X8 ||
-          (bsize == BLOCK_SIZE_SB8X8 && c1 == bsize))
+    if (output_enabled && bsize >= BLOCK_SIZE_SB8X8)
         cpi->partition_count[pl][PARTITION_NONE]++;
-      else
-        cpi->partition_count[pl][PARTITION_SPLIT]++;
-    }
 #else
     if (output_enabled && bsize > BLOCK_SIZE_SB8X8)
       cpi->partition_count[pl][PARTITION_NONE]++;
@@ -909,7 +910,6 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
       return;
     }
 #endif
-
   assert(mi_height_log2(bsize) == mi_width_log2(bsize));
 
   // buffer the above/left context information of the block in search.
@@ -939,7 +939,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     for (i = 0; i < 4; ++i) {
       int x_idx = (i & 1) * (ms >> 1);
       int y_idx = (i >> 1) * (ms >> 1);
-      int r, d;
+      int r = 0, d = 0;
 
       if ((mi_row + y_idx >= cm->mi_rows) || (mi_col + x_idx >= cm->mi_cols))
         continue;
@@ -966,10 +966,13 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   }
 
-  // TODO(jingning): need to enable 4x8 and 8x4 partition coding
   // PARTITION_HORZ
   if ((mi_col + ms <= cm->mi_cols) && (mi_row + (ms >> 1) <= cm->mi_rows) &&
+#if CONFIG_AB4X4
+      (bsize >= BLOCK_SIZE_SB8X8)) {
+#else
       (bsize >= BLOCK_SIZE_MB16X16)) {
+#endif
     int r2, d2;
     int mb_skip = 0;
     subsize = get_subsize(bsize, PARTITION_HORZ);
@@ -978,7 +981,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
                   get_block_context(x, subsize));
 
     if (mi_row + ms <= cm->mi_rows) {
-      int r, d;
+      int r = 0, d = 0;
       update_state(cpi, get_block_context(x, subsize), subsize, 0);
       encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
       *(get_sb_index(xd, subsize)) = 1;
@@ -992,8 +995,12 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     }
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
+#if CONFIG_AB4X4
+    if (r2 < INT_MAX)
+      r2 += x->partition_cost[pl][PARTITION_HORZ];
+#else
     r2 += x->partition_cost[pl][PARTITION_HORZ];
-
+#endif
     if ((RDCOST(x->rdmult, x->rddiv, r2, d2) <
          RDCOST(x->rdmult, x->rddiv, srate, sdist)) && !mb_skip) {
       srate = r2;
@@ -1005,7 +1012,11 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
 
   // PARTITION_VERT
   if ((mi_row + ms <= cm->mi_rows) && (mi_col + (ms >> 1) <= cm->mi_cols) &&
+#if CONFIG_AB4X4
+      (bsize >= BLOCK_SIZE_SB8X8)) {
+#else
       (bsize >= BLOCK_SIZE_MB16X16)) {
+#endif
     int r2, d2;
     int mb_skip = 0;
     subsize = get_subsize(bsize, PARTITION_VERT);
@@ -1013,7 +1024,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     pick_sb_modes(cpi, mi_row, mi_col, tp, &r2, &d2, subsize,
                   get_block_context(x, subsize));
     if (mi_col + ms <= cm->mi_cols) {
-      int r, d;
+      int r = 0, d = 0;
       update_state(cpi, get_block_context(x, subsize), subsize, 0);
       encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
       *(get_sb_index(xd, subsize)) = 1;
@@ -1027,8 +1038,12 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     }
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
+#if CONFIG_AB4X4
+    if (r2 < INT_MAX)
+      r2 += x->partition_cost[pl][PARTITION_VERT];
+#else
     r2 += x->partition_cost[pl][PARTITION_VERT];
-
+#endif
     if ((RDCOST(x->rdmult, x->rddiv, r2, d2) <
          RDCOST(x->rdmult, x->rddiv, srate, sdist)) && !mb_skip) {
       srate = r2;

@@ -34,7 +34,7 @@
 static void recon_write_yuv_frame(const char *name,
                                   const YV12_BUFFER_CONFIG *s,
                                   int w, int _h) {
-  FILE *yuv_file = fopen((char *)name, "ab");
+  FILE *yuv_file = fopen(name, "ab");
   const uint8_t *src = s->y_buffer;
   int h = _h;
 
