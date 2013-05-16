@@ -403,8 +403,18 @@ void vp9_idct4_1d_sse2(int16_t *input, int16_t *output) {
   in6 = _mm_subs_epi16(stp1_1, stp1_6); \
   in7 = _mm_subs_epi16(stp1_0, stp2_7);
 
-void vp9_short_idct8x8_sse2(int16_t *input, int16_t *output, int pitch) {
-  const int half_pitch = pitch >> 1;
+#define RECON_AND_STORE(dest, in_x) \
+  {                                                     \
+     __m128i d0 = _mm_loadl_epi64((__m128i *)(dest)); \
+      d0 = _mm_unpacklo_epi8(d0, zero); \
+      in_x = _mm_add_epi16(in_x, d0); \
+      in_x = _mm_packus_epi16(in_x, in_x); \
+      _mm_storel_epi64((__m128i *)(dest), in_x); \
+      dest += stride; \
+  }
+
+void vp9_short_idct8x8_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+  const __m128i zero = _mm_setzero_si128();
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<4);
   const __m128i stg1_0 = pair_set_epi16(cospi_28_64, -cospi_4_64);
@@ -461,19 +471,17 @@ void vp9_short_idct8x8_sse2(int16_t *input, int16_t *output, int pitch) {
   in6 = _mm_srai_epi16(in6, 5);
   in7 = _mm_srai_epi16(in7, 5);
 
-  // Store results
-  _mm_store_si128((__m128i *)output, in0);
-  _mm_store_si128((__m128i *)(output + half_pitch * 1), in1);
-  _mm_store_si128((__m128i *)(output + half_pitch * 2), in2);
-  _mm_store_si128((__m128i *)(output + half_pitch * 3), in3);
-  _mm_store_si128((__m128i *)(output + half_pitch * 4), in4);
-  _mm_store_si128((__m128i *)(output + half_pitch * 5), in5);
-  _mm_store_si128((__m128i *)(output + half_pitch * 6), in6);
-  _mm_store_si128((__m128i *)(output + half_pitch * 7), in7);
+  RECON_AND_STORE(dest, in0);
+  RECON_AND_STORE(dest, in1);
+  RECON_AND_STORE(dest, in2);
+  RECON_AND_STORE(dest, in3);
+  RECON_AND_STORE(dest, in4);
+  RECON_AND_STORE(dest, in5);
+  RECON_AND_STORE(dest, in6);
+  RECON_AND_STORE(dest, in7);
 }
 
-void vp9_short_idct10_8x8_sse2(int16_t *input, int16_t *output, int pitch) {
-  const int half_pitch = pitch >> 1;
+void vp9_short_idct10_8x8_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<4);
@@ -612,15 +620,14 @@ void vp9_short_idct10_8x8_sse2(int16_t *input, int16_t *output, int pitch) {
   in6 = _mm_srai_epi16(in6, 5);
   in7 = _mm_srai_epi16(in7, 5);
 
-  // Store results
-  _mm_store_si128((__m128i *)output, in0);
-  _mm_store_si128((__m128i *)(output + half_pitch * 1), in1);
-  _mm_store_si128((__m128i *)(output + half_pitch * 2), in2);
-  _mm_store_si128((__m128i *)(output + half_pitch * 3), in3);
-  _mm_store_si128((__m128i *)(output + half_pitch * 4), in4);
-  _mm_store_si128((__m128i *)(output + half_pitch * 5), in5);
-  _mm_store_si128((__m128i *)(output + half_pitch * 6), in6);
-  _mm_store_si128((__m128i *)(output + half_pitch * 7), in7);
+  RECON_AND_STORE(dest, in0);
+  RECON_AND_STORE(dest, in1);
+  RECON_AND_STORE(dest, in2);
+  RECON_AND_STORE(dest, in3);
+  RECON_AND_STORE(dest, in4);
+  RECON_AND_STORE(dest, in5);
+  RECON_AND_STORE(dest, in6);
+  RECON_AND_STORE(dest, in7);
 }
 
 #define IDCT16x16_1D \
@@ -750,16 +757,6 @@ void vp9_short_idct10_8x8_sse2(int16_t *input, int16_t *output, int pitch) {
     MULTIPLICATION_AND_ADD(lo_10_13, hi_10_13, lo_11_12, hi_11_12, \
                            stg6_0, stg4_0, stg6_0, stg4_0, \
                            stp2_10, stp2_13, stp2_11, stp2_12) \
-  }
-
-#define RECON_AND_STORE(dest, in_x) \
-  {                                                     \
-     __m128i d0 = _mm_loadl_epi64((__m128i *)(dest)); \
-      d0 = _mm_unpacklo_epi8(d0, zero); \
-      in_x = _mm_add_epi16(in_x, d0); \
-      in_x = _mm_packus_epi16(in_x, in_x); \
-      _mm_storel_epi64((__m128i *)(dest), in_x); \
-      dest += stride; \
   }
 
 void vp9_short_idct16x16_add_sse2(int16_t *input, uint8_t *dest, int stride) {

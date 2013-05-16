@@ -534,11 +534,12 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
     case TX_8X8:
       tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
       if (tx_type == DCT_DCT) {
-        vp9_short_idct8x8(BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
-                          diff, bw * 2);
+        vp9_short_idct8x8_add(BLOCK_OFFSET(xd->plane[plane].dqcoeff,
+                              block, 16), dst, xd->plane[plane].dst.stride);
       } else {
-        vp9_short_iht8x8(BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
-                         diff, bw, tx_type);
+        vp9_short_iht8x8_add(BLOCK_OFFSET(xd->plane[plane].dqcoeff,
+                             block, 16), dst, xd->plane[plane].dst.stride,
+                             tx_type);
       }
       *wip_txfrm_size = 8;
       break;
@@ -589,7 +590,7 @@ void vp9_encode_sby(VP9_COMMON *const cm, MACROBLOCK *x,
 
   foreach_transformed_block_in_plane(xd, bsize, 0,
                                      encode_block, &arg);
-  if (wip_txfrm_size < 32)
+  if (wip_txfrm_size < 8)
     vp9_recon_sby(xd, bsize);
 }
 
@@ -606,7 +607,7 @@ void vp9_encode_sbuv(VP9_COMMON *const cm, MACROBLOCK *x,
 
   foreach_transformed_block_uv(xd, bsize, encode_block, &arg);
 
-  if (wip_txfrm_size < 16)
+  if (wip_txfrm_size < 8)
     vp9_recon_sbuv(xd, bsize);
 }
 
@@ -628,13 +629,13 @@ void vp9_encode_sb(VP9_COMMON *const cm, MACROBLOCK *x,
   // wip version... will use foreach_transformed_block when done
   foreach_transformed_block_in_plane(xd, bsize, 0,
                                      encode_block, &arg);
-  if (wip_txfrm_size < 16)
+  if (wip_txfrm_size < 8)
     vp9_recon_sby(xd, bsize);
   wip_txfrm_size = 0;
 
   foreach_transformed_block_uv(xd, bsize, encode_block, &arg);
 
-  if (wip_txfrm_size < 16)
+  if (wip_txfrm_size < 8)
     vp9_recon_sbuv(xd, bsize);
 #endif
 }

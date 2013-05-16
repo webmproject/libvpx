@@ -101,10 +101,6 @@ void vp9_add_residual_4x4_c(const int16_t *diff, uint8_t *dest, int stride) {
   add_residual(diff, dest, stride, 4, 4);
 }
 
-void vp9_add_residual_8x8_c(const int16_t *diff, uint8_t *dest, int stride) {
-  add_residual(diff, dest, stride, 8, 8);
-}
-
 static void add_constant_residual(const int16_t diff, uint8_t *dest, int stride,
                                   int width, int height) {
   int r, c;
@@ -151,11 +147,8 @@ void vp9_iht_add_8x8_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
     vp9_idct_add_8x8(input, dest, stride, eob);
   } else {
     if (eob > 0) {
-      DECLARE_ALIGNED_ARRAY(16, int16_t, output, 64);
-
-      vp9_short_iht8x8(input, output, 8, tx_type);
+      vp9_short_iht8x8_add(input, dest, stride, tx_type);
       vpx_memset(input, 0, 128);
-      vp9_add_residual_8x8(output, dest, stride);
     }
   }
 }
@@ -210,8 +203,6 @@ void vp9_dc_idct_add_lossless_c(int16_t *input, uint8_t *dest,
 }
 
 void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 64);
-
   // If dc is 1, then input[0] is the reconstructed value, do not need
   // dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
 
@@ -233,20 +224,15 @@ void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       vp9_add_constant_residual_8x8(out, dest, stride);
 #if !CONFIG_SCATTERSCAN
     } else if (eob <= 10) {
-      vp9_short_idct10_8x8(input, output, 16);
-
+      vp9_short_idct10_8x8_add(input, dest, stride);
       input[0] = input[1] = input[2] = input[3] = 0;
       input[8] = input[9] = input[10] = 0;
       input[16] = input[17] = 0;
       input[24] = 0;
-
-      vp9_add_residual_8x8(output, dest, stride);
 #endif
     } else {
-      // the idct halves ( >> 1) the pitch
-      vp9_short_idct8x8(input, output, 8 << 1);
+      vp9_short_idct8x8_add(input, dest, stride);
       vpx_memset(input, 0, 128);
-      vp9_add_residual_8x8(output, dest, stride);
     }
   }
 }
